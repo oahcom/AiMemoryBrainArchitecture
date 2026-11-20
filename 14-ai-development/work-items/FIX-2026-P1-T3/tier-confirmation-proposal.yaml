@@ -1,0 +1,2452 @@
+# Tier classification PROPOSAL - evidence-based suggestions for human confirmation
+# Generated 2026-11-20 by generate-tier-proposal.py from the origin/main tree at the commit
+# named in baseline_commit below. No other revision was scanned for this file.
+# STATUS: PENDING_HUMAN_CONFIRMATION - this file does NOT classify anything.
+# Policy constraint honoured: no automatic promotion of UNKNOWN; every row requires a human confirmation record.
+status: PROPOSAL_PENDING_HUMAN_CONFIRMATION
+baseline_commit: 9546f78d364b5a1dd1fa2206b34255be9c7fb1a7
+scope: docs/ + prompts/ + 14-ai-development/ + 13-engineering-decisions/ (the four UNKNOWN/TIER1_CANDIDATE buckets in AI-DOC-BILINGUAL-TIERING v1.0 section 1 table)
+evidence_method: content-marker scan of first 4000 chars per file; exact inputs listed under marker_families below so a third party can reproduce or reject any row
+explicitly_not: a classification registry; a governance approval; a claim that any UNKNOWN has been confirmed
+scan_window_chars: 4000
+file_enumeration: git ls-tree -r --name-only origin/main, filtered to paths ending .md and starting with one of the four scope prefixes, then sorted with Python sorted() (byte-wise ASC on the full path). No glob, no .gitignore, no filesystem walk - the tree object is the only source.
+path_exclusions: none beyond the scope prefixes and the .md filter; the proposal files themselves are not excluded, so they appear as UNKNOWN-bucket rows like any other new document
+read_failure_handling: strict UTF-8 decode (UnicodeDecodeError is the failure signal; errors=replace is rejected because a legitimate U+FFFD would be indistinguishable from a decode artefact) plus a non-zero git show exit; either condition prefixes the row evidence with READ-<FAILURE> and forces LOW confidence; such a row is never equivalent to a genuine negative
+write_order: all assertions (pairing reciprocity, row counts, no stale baseline text, no tabs) run against the in-memory text before any byte reaches disk; the text is then written to a .tmp in the same directory through a context manager, so the handle is closed before os.replace promotes it; any exception removes the .tmp and re-raises, so a failing run leaves no partial proposal
+run_environment: python 3.13, git 2.x, no network access, no third-party packages; output is LF-terminated UTF-8
+marker_matching: case-insensitive substring match within the scan window; counts are distinct-marker counts, not occurrence counts; a marker counted once regardless of repetitions
+pairing_detection: computed once, globally, as a set of mutual claims, so reciprocity holds by construction. Claim order: (1) x.zh-CN.md <-> x.en.md; (2) x.en.md <-> x.md; (3) docs/en/P <-> docs/zh-CN/P. A file already paired is never claimed again, so a plain x.md whose x.en.md is already taken by a x.zh-CN.md is left unpaired rather than forced into a non-reciprocal link. A claim whose counterparty is absent from the baseline tree is dropped.
+generator: 14-ai-development/work-items/FIX-2026-P1-T3/generate-tier-proposal.py
+marker_families:
+  normative: ["MUST", "MUST NOT", "SHALL", "REQUIRED", "SHOULD", "禁止", "必须", "不得", "强制性"]
+  architecture_contract: ["interface contract", "wire contract", "protocol", "schema", "state machine", "lifecycle", "security", "permission boundary", "architecture decision", "ADR", "接口契约", "协议", "状态机", "生命周期", "安全", "权限边界", "架构决策"]
+  ephemeral_record: ["meeting", "minutes", "review record", "acceptance record", "会议", "纪要", "验收记录", "评审记录"]
+  document_header: regex (?im)^\s*[-*]?\s*\**\s*(\u6587\u6863\s*ID|Document ID|\u72b6\u6001|Status|\u7248\u672c|Version)\s*[:\uff1a]
+rule_order: index/readme -> prompts/ -> ephemeral>=2 -> (arch>=3 and norm>=3) -> (header and norm>=1) -> norm>=2 -> default; first match wins
+files:
+  - path: "13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/README.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "index/readme navigation file; no standalone contract"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/baseline-currentness-and-owner-source-audit.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/baseline-owner-branch-snapshot-errata.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/bilingual-parity-audit.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-entity-inventory.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-glossary.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-invariants.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-model.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-relationships.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-identity-semantics.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-state-semantics.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-temporal-evidence-semantics.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/cross-owner-canonical-semantics-matrix.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-model-complexity-assessment.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-model-decision-record.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-semantics-conflict-register.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/evidence/README.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "index/readme navigation file; no standalone contract"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/evidence/official-reference-validation.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/existing-domain-model-baseline.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/latest-cross-owner-source-reconciliation.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/mature-domain-model-research.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/post-merge-currentness-and-governance-reconciliation.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/validation/README.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "index/readme navigation file; no standalone contract"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-architecture-blueprint.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-A/README.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "index/readme navigation file; no standalone contract"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-A/architecture-complexity-audit.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-A/baseline/architecture-baseline.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-A/deployment-topology-comparison.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-A/independent-review-handoff.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-A/mature-project-research.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-A/open-questions.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-dependency-register.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-remediation/CGH-APPLIED-REVIEW-001.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-remediation/OWNER-REMEDIATION-001.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-technology-review-synthesis.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-A/research-evidence-register.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-A/rust-ecosystem-assessment.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-A/technology-capability-matrix.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-A/technology-recommendation.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-A/workload-model.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-C/README.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "index/readme navigation file; no standalone contract"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-boundary.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-canonical-contract.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-conflict-register.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-cross-owner-contract-matrix.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-decision-record.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-failure-semantics.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-technology-assessment.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-telemetry.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-validation-plan.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-C/evidence/README.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "index/readme navigation file; no standalone contract"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-C/existing-integration-baseline.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-C/inference-boundary-and-trust-model.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-C/provider-integration-research.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-C/provider-outcome-and-execution-evidence.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-C/tool-execution-boundary.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "13-engineering-decisions/technology-research/TECH-REALITY-001-C/validation/README.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "index/readme navigation file; no standalone contract"
+    confirmation_record: PENDING
+  - path: "14-ai-development/AI-EXEC-001.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/AI-EXEC-002.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/AI-EXEC-INDEPENDENCE-RULING-001.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/AI-EXEC-ROLLOUT-001.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "14-ai-development/AI-EXEC-UNIFICATION-RULING-001.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/PR-GOVERNANCE-001.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/PR-MERGE-EVIDENCE-SUMMARY-001.en.md"
+    paired: true
+    partner: "14-ai-development/PR-MERGE-EVIDENCE-SUMMARY-001.zh-CN.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "14-ai-development/PR-MERGE-EVIDENCE-SUMMARY-001.zh-CN.md"
+    paired: true
+    partner: "14-ai-development/PR-MERGE-EVIDENCE-SUMMARY-001.en.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "14-ai-development/README.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "index/readme navigation file; no standalone contract"
+    confirmation_record: PENDING
+  - path: "14-ai-development/adr/ADR-RUN-001-durable-store-and-transaction-boundaries.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "14-ai-development/adr/ADR-RUN-002-github-app-webhook-security-and-secrets.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "14-ai-development/adr/ADR-RUN-003-owner-worker-isolation-and-execution-boundary.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "14-ai-development/ai-development-standard.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "14-ai-development/ai-run-003-event-driven-owner-worker-runtime.en.md"
+    paired: true
+    partner: "14-ai-development/ai-run-003-event-driven-owner-worker-runtime.zh-CN.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "14-ai-development/ai-run-003-event-driven-owner-worker-runtime.zh-CN.md"
+    paired: true
+    partner: "14-ai-development/ai-run-003-event-driven-owner-worker-runtime.en.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "14-ai-development/bilingual-tiering-policy.en.md"
+    paired: true
+    partner: "14-ai-development/bilingual-tiering-policy.md"
+    suggested_tier: TIER3_SUGGESTED
+    confidence: HIGH
+    evidence: "ephemeral record markers (review/meeting/acceptance)"
+    confirmation_record: PENDING
+  - path: "14-ai-development/bilingual-tiering-policy.md"
+    paired: true
+    partner: "14-ai-development/bilingual-tiering-policy.en.md"
+    suggested_tier: TIER3_SUGGESTED
+    confidence: HIGH
+    evidence: "ephemeral record markers (review/meeting/acceptance)"
+    confirmation_record: PENDING
+  - path: "14-ai-development/chatgpt-native-execution-model.en.md"
+    paired: true
+    partner: "14-ai-development/chatgpt-native-execution-model.zh-CN.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/chatgpt-native-execution-model.zh-CN.md"
+    paired: true
+    partner: "14-ai-development/chatgpt-native-execution-model.en.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "14-ai-development/continuous-owner-runtime-architecture.en.md"
+    paired: true
+    partner: "14-ai-development/continuous-owner-runtime-architecture.zh-CN.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/continuous-owner-runtime-architecture.zh-CN.md"
+    paired: true
+    partner: "14-ai-development/continuous-owner-runtime-architecture.en.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "14-ai-development/evidence-tiering-policy.en.md"
+    paired: true
+    partner: "14-ai-development/evidence-tiering-policy.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "14-ai-development/evidence-tiering-policy.md"
+    paired: true
+    partner: "14-ai-development/evidence-tiering-policy.en.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "14-ai-development/iteration-lifecycle.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/owner-automation-operating-model.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/prompt-and-evidence-template.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "14-ai-development/prompt-authoring-standard.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "14-ai-development/prompts/global/chatgpt-session-contract-v1.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/prompts/global/independent-reviewer-session-v1.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "14-ai-development/prompts/owners/A/owner-session-v1.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/prompts/owners/B/owner-session-v1.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "14-ai-development/prompts/owners/B/owner-session-v2.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "14-ai-development/prompts/owners/C/owner-session-v1.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "14-ai-development/prompts/owners/D/owner-session-v1.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "14-ai-development/prompts/owners/D/owner-session-v2.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "14-ai-development/prompts/owners/E/owner-session-v1.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/prompts/owners/F/owner-session-v1.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/prompts/owners/G/owner-session-v1.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/prompts/owners/H/owner-session-v1.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "14-ai-development/prompts/owners/I/owner-session-v1.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/prompts/owners/I/owner-session-v2.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "14-ai-development/prompts/owners/README.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "index/readme navigation file; no standalone contract"
+    confirmation_record: PENDING
+  - path: "14-ai-development/research/phase-0/SESSION-1-GITHUB-WORKFLOW-REPORT.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/research/phase-0/SESSION-2-PROMPT-RUN-PROVENANCE-REPORT.md"
+    paired: false
+    suggested_tier: TIER3_SUGGESTED
+    confidence: HIGH
+    evidence: "ephemeral record markers (review/meeting/acceptance)"
+    confirmation_record: PENDING
+  - path: "14-ai-development/research/phase-0/SESSION-3-QUALITY-REVIEW-DEFECT-REPORT.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/research/phase-0/SESSION-4-ADOPTION-ISOLATION-REPORT.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "14-ai-development/status-migration-map.en.md"
+    paired: true
+    partner: "14-ai-development/status-migration-map.zh-CN.md"
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner '14-ai-development/status-migration-map.zh-CN.md' scanned as TIER1_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
+    confirmation_record: PENDING
+  - path: "14-ai-development/status-migration-map.zh-CN.md"
+    paired: true
+    partner: "14-ai-development/status-migration-map.en.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence; PAIR-DIVERGENT: partner '14-ai-development/status-migration-map.en.md' scanned as TIER3_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
+    confirmation_record: PENDING
+  - path: "14-ai-development/ubuntu-self-hosted-runner-bootstrap.en.md"
+    paired: true
+    partner: "14-ai-development/ubuntu-self-hosted-runner-bootstrap.zh-CN.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/ubuntu-self-hosted-runner-bootstrap.zh-CN.md"
+    paired: true
+    partner: "14-ai-development/ubuntu-self-hosted-runner-bootstrap.en.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/A-integration-decision.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/execution-record-001.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/forget-lifecycle-joined-contract-proposal-v1.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/governance-decision-NR-001.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/i-pre-002-identity-binding-audit.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/integration-review-prompt.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/owner-d-i-forget-authority-matrix.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/owner-execution-boundary-contracts-v1.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/owner-review-prompts.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/preliminary-cross-owner-assessment.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/prompt-v1.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/prompt-v2.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/r3-contract-test-matrix.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/r3-evidence/erratum-003.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/r3-evidence/erratum-004.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/r3-evidence/execution-record-001.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/r3-evidence/execution-record-002.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/r3-evidence/execution-record-003.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/r3-evidence/execution-record-004.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/r3-evidence/execution-record-005.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/r3-evidence/execution-record-006.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/r3-evidence/execution-record-007.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/r3-evidence/execution-record-008.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/r3-evidence/execution-record-009.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/r3-evidence/execution-record-010.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/r3-evidence/execution-record-011.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/r3-evidence/execution-record-012.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/r3-evidence/execution-record-013.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/r3-evidence/execution-record-014.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/r3-evidence/execution-record-015.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/r3-evidence/execution-record-016.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/r3-evidence/execution-record-017.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/r3-evidence/execution-record-018.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/r3-specialist-review-owner-d-prompt.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/r3-specialist-review-owner-i-prompt.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/reference-model/EXECUTION-RECORD.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/reference-model/R3-RUNBOOK.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/reference-model/README.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "index/readme navigation file; no standalone contract"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-001/self-review-v1.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-002/prompt-v1.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-003/prompt-v1-errata.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-003/prompt-v1.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-003/t2-dispatch-anchors.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-003/t2-snapshot-fix-prompt.authored-prompt.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-003/t2-snapshot-fix-prompt.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-009/test-design/DIRECT-PUSH-RATIFICATION-ffc44c31.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-009/test-design/NESTED-CLAIM-MULTI-SCOPE-DISCLOSURE.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/AID-2026-009/test-design/NESTED-CLAIM-MULTI-SCOPE-WRITE.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/FIX-2026-P1-GATE-ROOTS-001/audit-record.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/FIX-2026-P1-MANIFEST-YAML-001/audit-record.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/FIX-2026-P1-MANIFEST-YAML-001/registration-record.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/FIX-2026-P1-T4-FU1/audit-record.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/FIX-2026-P1-T4-FU3/registration-record.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/FIX-2026-P1-T4/evidence-tiering-design.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/INDEX.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "index/readme navigation file; no standalone contract"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/P2-T2-MEMORY-SCHEMA/DEC-P2-T2-Q1-001.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "14-ai-development/work-items/P2-T2-MEMORY-SCHEMA/design-proposal.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/README.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "index/readme navigation file; no standalone contract"
+    confirmation_record: PENDING
+  - path: "docs/architecture-convergence/ARCH-CONVERGENCE-001-ADVERSARIAL-TEST-MATRIX.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/architecture-convergence/ARCH-CONVERGENCE-001-CANONICAL-TRANSACTION.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "docs/architecture-convergence/ARCH-CONVERGENCE-001-CONFLICT-REGISTER.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/architecture-convergence/ARCH-CONVERGENCE-001-CONTEXT-APPLIED-RUNTIME.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/architecture-convergence/ARCH-CONVERGENCE-001-CONTRACT-DEPENDENCY-MAP.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/architecture-convergence/ARCH-CONVERGENCE-001-CURRENTNESS-ADDENDUM-2026-11-18.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/architecture-convergence/ARCH-CONVERGENCE-001-FORGET-AUTHORIZATION-RECOVERY.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/architecture-convergence/ARCH-CONVERGENCE-001-IMPLEMENTATION-ROADMAP.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/architecture-convergence/ARCH-CONVERGENCE-001-INTEGRATION-REVIEW.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/architecture-convergence/ARCH-CONVERGENCE-001-MINIMUM-RUNNABLE-ARCHITECTURE.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "docs/architecture-convergence/ARCH-CONVERGENCE-001-SOURCE-OF-TRUTH.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/documentation-style-guide.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "docs/en/00-governance/architecture-invariants.md"
+    paired: true
+    partner: "docs/zh-CN/00-governance/architecture-invariants.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/00-governance/design-principles.md"
+    paired: true
+    partner: "docs/zh-CN/00-governance/design-principles.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/00-governance/terminology.md"
+    paired: true
+    partner: "docs/zh-CN/00-governance/terminology.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/01-system-architecture/component-interactions.md"
+    paired: true
+    partner: "docs/zh-CN/01-system-architecture/component-interactions.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/01-system-architecture/component-map.md"
+    paired: true
+    partner: "docs/zh-CN/01-system-architecture/component-map.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/01-system-architecture/data-flows.md"
+    paired: true
+    partner: "docs/zh-CN/01-system-architecture/data-flows.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/01-system-architecture/integration-governance-guide.md"
+    paired: true
+    partner: "docs/zh-CN/01-system-architecture/integration-governance-guide.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/01-system-architecture/responsibility-matrix.md"
+    paired: true
+    partner: "docs/zh-CN/01-system-architecture/responsibility-matrix.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/01-system-architecture/system-architecture-specification.md"
+    paired: true
+    partner: "docs/zh-CN/01-system-architecture/system-architecture-specification.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/01-system-architecture/system-boundaries.md"
+    paired: true
+    partner: "docs/zh-CN/01-system-architecture/system-boundaries.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/01-system-architecture/system-design-guide.md"
+    paired: true
+    partner: "docs/zh-CN/01-system-architecture/system-design-guide.md"
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner 'docs/zh-CN/01-system-architecture/system-design-guide.md' scanned as TIER1_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
+    confirmation_record: PENDING
+  - path: "docs/en/01-system-architecture/system-overview.md"
+    paired: true
+    partner: "docs/zh-CN/01-system-architecture/system-overview.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/01-system-architecture/system-quality-attributes.md"
+    paired: true
+    partner: "docs/zh-CN/01-system-architecture/system-quality-attributes.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/02-domain-model/core-entities.md"
+    paired: true
+    partner: "docs/zh-CN/02-domain-model/core-entities.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/02-domain-model/domain-model-guide.md"
+    paired: true
+    partner: "docs/zh-CN/02-domain-model/domain-model-guide.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/02-domain-model/domain-model-overview.md"
+    paired: true
+    partner: "docs/zh-CN/02-domain-model/domain-model-overview.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/02-domain-model/epistemic-and-temporal-semantics.md"
+    paired: true
+    partner: "docs/zh-CN/02-domain-model/epistemic-and-temporal-semantics.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/02-domain-model/lifecycle-model.md"
+    paired: true
+    partner: "docs/zh-CN/02-domain-model/lifecycle-model.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/02-domain-model/phase-1-domain-model-freeze.md"
+    paired: true
+    partner: "docs/zh-CN/02-domain-model/phase-1-domain-model-freeze.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/02-domain-model/phase-1-memory-store.md"
+    paired: true
+    partner: "docs/zh-CN/02-domain-model/phase-1-memory-store.md"
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner 'docs/zh-CN/02-domain-model/phase-1-memory-store.md' scanned as TIER1_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
+    confirmation_record: PENDING
+  - path: "docs/en/02-domain-model/phase-1-sqlite-adapter-contract.md"
+    paired: true
+    partner: "docs/zh-CN/02-domain-model/phase-1-sqlite-adapter-contract.md"
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner 'docs/zh-CN/02-domain-model/phase-1-sqlite-adapter-contract.md' scanned as TIER1_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
+    confirmation_record: PENDING
+  - path: "docs/en/02-domain-model/phase-1-storage-trait-contract.md"
+    paired: true
+    partner: "docs/zh-CN/02-domain-model/phase-1-storage-trait-contract.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/02-domain-model/principal-actor-binding-mapping.md"
+    paired: true
+    partner: "docs/zh-CN/02-domain-model/principal-actor-binding-mapping.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/02-domain-model/relationships-and-provenance.md"
+    paired: true
+    partner: "docs/zh-CN/02-domain-model/relationships-and-provenance.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/02-domain-model/scope-and-permission-model.md"
+    paired: true
+    partner: "docs/zh-CN/02-domain-model/scope-and-permission-model.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/02-domain-model/typed-reference-and-scope-semantics.md"
+    paired: true
+    partner: "docs/zh-CN/02-domain-model/typed-reference-and-scope-semantics.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/03-memory-brain/README.md"
+    paired: true
+    partner: "docs/zh-CN/03-memory-brain/README.md"
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "index/readme navigation file; no standalone contract"
+    confirmation_record: PENDING
+  - path: "docs/en/03-memory-brain/canonical-memory-store.md"
+    paired: true
+    partner: "docs/zh-CN/03-memory-brain/canonical-memory-store.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/03-memory-brain/commit-cursor-semantics.md"
+    paired: true
+    partner: "docs/zh-CN/03-memory-brain/commit-cursor-semantics.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/03-memory-brain/entity-and-relationship-manager.md"
+    paired: true
+    partner: "docs/zh-CN/03-memory-brain/entity-and-relationship-manager.md"
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner 'docs/zh-CN/03-memory-brain/entity-and-relationship-manager.md' scanned as TIER1_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
+    confirmation_record: PENDING
+  - path: "docs/en/03-memory-brain/forget-fence-and-completion-contract.md"
+    paired: true
+    partner: "docs/zh-CN/03-memory-brain/forget-fence-and-completion-contract.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/03-memory-brain/forget-fence-operation-and-publication-gate-part1.md"
+    paired: true
+    partner: "docs/zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate-part1.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/03-memory-brain/forget-fence-operation-and-publication-gate-part2.md"
+    paired: true
+    partner: "docs/zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate-part2.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/03-memory-brain/forget-fence-operation-and-publication-gate-part3.md"
+    paired: true
+    partner: "docs/zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate-part3.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/03-memory-brain/forget-fence-operation-and-publication-gate-part4.md"
+    paired: true
+    partner: "docs/zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate-part4.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md"
+    paired: true
+    partner: "docs/zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate.md"
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "docs/en/03-memory-brain/memory-brain-guide.md"
+    paired: true
+    partner: "docs/zh-CN/03-memory-brain/memory-brain-guide.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "docs/en/03-memory-brain/memory-brain-overview.md"
+    paired: true
+    partner: "docs/zh-CN/03-memory-brain/memory-brain-overview.md"
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner 'docs/zh-CN/03-memory-brain/memory-brain-overview.md' scanned as TIER1_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
+    confirmation_record: PENDING
+  - path: "docs/en/03-memory-brain/memory-lifecycle-manager.md"
+    paired: true
+    partner: "docs/zh-CN/03-memory-brain/memory-lifecycle-manager.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/03-memory-brain/memory-versioning.md"
+    paired: true
+    partner: "docs/zh-CN/03-memory-brain/memory-versioning.md"
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner 'docs/zh-CN/03-memory-brain/memory-versioning.md' scanned as TIER1_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
+    confirmation_record: PENDING
+  - path: "docs/en/04-memory-compiler/README.md"
+    paired: true
+    partner: "docs/zh-CN/04-memory-compiler/README.md"
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "index/readme navigation file; no standalone contract"
+    confirmation_record: PENDING
+  - path: "docs/en/04-memory-compiler/accepted-receipt-and-idempotency-contract.md"
+    paired: true
+    partner: "docs/zh-CN/04-memory-compiler/accepted-receipt-and-idempotency-contract.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/04-memory-compiler/compiler-overview.md"
+    paired: true
+    partner: "docs/zh-CN/04-memory-compiler/compiler-overview.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/04-memory-compiler/compiler-state-and-producer-admission.md"
+    paired: true
+    partner: "docs/zh-CN/04-memory-compiler/compiler-state-and-producer-admission.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/04-memory-compiler/consolidation-and-conflict-resolution.md"
+    paired: true
+    partner: "docs/zh-CN/04-memory-compiler/consolidation-and-conflict-resolution.md"
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner 'docs/zh-CN/04-memory-compiler/consolidation-and-conflict-resolution.md' scanned as TIER1_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
+    confirmation_record: PENDING
+  - path: "docs/en/04-memory-compiler/event-ingestion-engine.md"
+    paired: true
+    partner: "docs/zh-CN/04-memory-compiler/event-ingestion-engine.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/04-memory-compiler/evidence-and-provenance.md"
+    paired: true
+    partner: "docs/zh-CN/04-memory-compiler/evidence-and-provenance.md"
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "docs/en/04-memory-compiler/extraction-and-normalization.md"
+    paired: true
+    partner: "docs/zh-CN/04-memory-compiler/extraction-and-normalization.md"
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner 'docs/zh-CN/04-memory-compiler/extraction-and-normalization.md' scanned as TIER1_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
+    confirmation_record: PENDING
+  - path: "docs/en/04-memory-compiler/forget-fence-and-derived-registration-part1.md"
+    paired: true
+    partner: "docs/zh-CN/04-memory-compiler/forget-fence-and-derived-registration-part1.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/04-memory-compiler/memory-compiler-guide.md"
+    paired: true
+    partner: "docs/zh-CN/04-memory-compiler/memory-compiler-guide.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/04-memory-compiler/phase-1-event-store-contract-zh-CN.md"
+    paired: true
+    partner: "docs/zh-CN/04-memory-compiler/phase-1-event-store-contract-zh-CN.md"
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner 'docs/zh-CN/04-memory-compiler/phase-1-event-store-contract-zh-CN.md' scanned as TIER1_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
+    confirmation_record: PENDING
+  - path: "docs/en/04-memory-compiler/phase-1-event-store-contract.md"
+    paired: true
+    partner: "docs/zh-CN/04-memory-compiler/phase-1-event-store-contract.md"
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner 'docs/zh-CN/04-memory-compiler/phase-1-event-store-contract.md' scanned as TIER1_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
+    confirmation_record: PENDING
+  - path: "docs/en/05-memory-runtime/activation-policy-engine.md"
+    paired: true
+    partner: "docs/zh-CN/05-memory-runtime/activation-policy-engine.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner 'docs/zh-CN/05-memory-runtime/activation-policy-engine.md' scanned as TIER3_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
+    confirmation_record: PENDING
+  - path: "docs/en/05-memory-runtime/memory-runtime-guide.md"
+    paired: true
+    partner: "docs/zh-CN/05-memory-runtime/memory-runtime-guide.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/05-memory-runtime/retrieval-engine.md"
+    paired: true
+    partner: "docs/zh-CN/05-memory-runtime/retrieval-engine.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/05-memory-runtime/runtime-overview.md"
+    paired: true
+    partner: "docs/zh-CN/05-memory-runtime/runtime-overview.md"
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "docs/en/05-memory-runtime/runtime-scheduling.md"
+    paired: true
+    partner: "docs/zh-CN/05-memory-runtime/runtime-scheduling.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/05-memory-runtime/working-set-and-cache.md"
+    paired: true
+    partner: "docs/zh-CN/05-memory-runtime/working-set-and-cache.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/06-memory-context/memory-context-guide.md"
+    paired: true
+    partner: "docs/zh-CN/06-memory-context/memory-context-guide.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md"
+    paired: true
+    partner: "docs/zh-CN/06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/06-memory-context/phase-3.8.18-g-exact-review-h-unified-1.2.14-csubmitoutcome-1.0.1-fullpath.md"
+    paired: true
+    partner: "docs/zh-CN/06-memory-context/phase-3.8.18-g-exact-review-h-unified-1.2.14-csubmitoutcome-1.0.1-fullpath.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "docs/en/06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.md"
+    paired: true
+    partner: "docs/zh-CN/06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.zh-CN.md"
+    paired: true
+    partner: "docs/zh-CN/06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.zh-CN.md"
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "docs/en/07-agent-integration/agent-integration-guide.md"
+    paired: true
+    partner: "docs/zh-CN/07-agent-integration/agent-integration-guide.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md"
+    paired: true
+    partner: "docs/zh-CN/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/07-agent-integration/phase-3.6-final-request-evidence-contract.md"
+    paired: true
+    partner: "docs/zh-CN/07-agent-integration/phase-3.6-final-request-evidence-contract.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/07-agent-integration/phase-3.8.19-c-exact-review-h-fullpath-38-test-current-head.md"
+    paired: true
+    partner: "docs/zh-CN/07-agent-integration/phase-3.8.19-c-exact-review-h-fullpath-38-test-current-head.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "docs/en/08-bmcp-protocol/adapter-capability-and-applied-attestation.md"
+    paired: true
+    partner: "docs/zh-CN/08-bmcp-protocol/adapter-capability-and-applied-attestation.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "docs/en/08-bmcp-protocol/bmcp-guide.md"
+    paired: true
+    partner: "docs/zh-CN/08-bmcp-protocol/bmcp-guide.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/08-bmcp-protocol/phase-3.6-identity-binding-consumer-conformance-status.md"
+    paired: true
+    partner: "docs/zh-CN/08-bmcp-protocol/phase-3.6-identity-binding-consumer-conformance-status.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/09-security-governance/security-governance-guide.md"
+    paired: true
+    partner: "docs/zh-CN/09-security-governance/security-governance-guide.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "docs/en/12-testing-and-acceptance/cross-module-conformance-guide.md"
+    paired: true
+    partner: "docs/zh-CN/12-testing-and-acceptance/cross-module-conformance-guide.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/13-engineering-decisions/technology-architecture-overview.md"
+    paired: true
+    partner: "docs/zh-CN/13-engineering-decisions/technology-architecture-overview.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/14-ai-development/AI-EXEC-001.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/14-ai-development/AI-EXEC-002.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/en/14-ai-development/AI-EXEC-ROLLOUT-001.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "docs/en/14-ai-development/PR-GOVERNANCE-001-ENFORCEMENT.md"
+    paired: true
+    partner: "docs/zh-CN/14-ai-development/PR-GOVERNANCE-001-ENFORCEMENT.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/glossary/architecture-glossary.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/owner-branch-translation-inventory.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/research/product-first/PRODUCT-FIRST-001-INTEGRATION-REVIEW.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/research/product-first/PRODUCT-FIRST-001-SESSION-01-MEMORY-PRODUCTS.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "docs/research/product-first/PRODUCT-FIRST-001-SESSION-02-DURABLE-EXECUTION.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/research/product-first/PRODUCT-FIRST-001-SESSION-03-STORAGE-SEARCH.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/research/product-first/PRODUCT-FIRST-001-SESSION-04-SECURITY-GOVERNANCE.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "docs/research/product-first/PRODUCT-FIRST-001-SESSION-05-AGENT-RUNTIME.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/research/product-first/PRODUCT-FIRST-001-SESSION-06-SIMPLIFICATION.md"
+    paired: false
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/translation-status.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/00-governance/architecture-invariants.md"
+    paired: true
+    partner: "docs/en/00-governance/architecture-invariants.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/00-governance/design-principles.md"
+    paired: true
+    partner: "docs/en/00-governance/design-principles.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/00-governance/terminology.md"
+    paired: true
+    partner: "docs/en/00-governance/terminology.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/01-system-architecture/component-interactions.md"
+    paired: true
+    partner: "docs/en/01-system-architecture/component-interactions.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/01-system-architecture/component-map.md"
+    paired: true
+    partner: "docs/en/01-system-architecture/component-map.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/01-system-architecture/data-flows.md"
+    paired: true
+    partner: "docs/en/01-system-architecture/data-flows.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/01-system-architecture/integration-governance-guide.md"
+    paired: true
+    partner: "docs/en/01-system-architecture/integration-governance-guide.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/01-system-architecture/responsibility-matrix.md"
+    paired: true
+    partner: "docs/en/01-system-architecture/responsibility-matrix.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/01-system-architecture/system-architecture-specification.md"
+    paired: true
+    partner: "docs/en/01-system-architecture/system-architecture-specification.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/01-system-architecture/system-boundaries.md"
+    paired: true
+    partner: "docs/en/01-system-architecture/system-boundaries.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/01-system-architecture/system-design-guide.md"
+    paired: true
+    partner: "docs/en/01-system-architecture/system-design-guide.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner 'docs/en/01-system-architecture/system-design-guide.md' scanned as TIER3_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/01-system-architecture/system-overview.md"
+    paired: true
+    partner: "docs/en/01-system-architecture/system-overview.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/01-system-architecture/system-quality-attributes.md"
+    paired: true
+    partner: "docs/en/01-system-architecture/system-quality-attributes.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/02-domain-model/core-entities.md"
+    paired: true
+    partner: "docs/en/02-domain-model/core-entities.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/02-domain-model/domain-model-guide.md"
+    paired: true
+    partner: "docs/en/02-domain-model/domain-model-guide.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/02-domain-model/domain-model-overview.md"
+    paired: true
+    partner: "docs/en/02-domain-model/domain-model-overview.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/02-domain-model/epistemic-and-temporal-semantics.md"
+    paired: true
+    partner: "docs/en/02-domain-model/epistemic-and-temporal-semantics.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/02-domain-model/lifecycle-model.md"
+    paired: true
+    partner: "docs/en/02-domain-model/lifecycle-model.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/02-domain-model/phase-1-domain-model-freeze.md"
+    paired: true
+    partner: "docs/en/02-domain-model/phase-1-domain-model-freeze.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/02-domain-model/phase-1-memory-store.md"
+    paired: true
+    partner: "docs/en/02-domain-model/phase-1-memory-store.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner 'docs/en/02-domain-model/phase-1-memory-store.md' scanned as TIER3_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/02-domain-model/phase-1-sqlite-adapter-contract.md"
+    paired: true
+    partner: "docs/en/02-domain-model/phase-1-sqlite-adapter-contract.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner 'docs/en/02-domain-model/phase-1-sqlite-adapter-contract.md' scanned as TIER3_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/02-domain-model/phase-1-storage-trait-contract.md"
+    paired: true
+    partner: "docs/en/02-domain-model/phase-1-storage-trait-contract.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/02-domain-model/principal-actor-binding-mapping.md"
+    paired: true
+    partner: "docs/en/02-domain-model/principal-actor-binding-mapping.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/02-domain-model/relationships-and-provenance.md"
+    paired: true
+    partner: "docs/en/02-domain-model/relationships-and-provenance.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/02-domain-model/scope-and-permission-model.md"
+    paired: true
+    partner: "docs/en/02-domain-model/scope-and-permission-model.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/02-domain-model/typed-reference-and-scope-semantics.md"
+    paired: true
+    partner: "docs/en/02-domain-model/typed-reference-and-scope-semantics.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/03-memory-brain/README.md"
+    paired: true
+    partner: "docs/en/03-memory-brain/README.md"
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "index/readme navigation file; no standalone contract"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/03-memory-brain/canonical-memory-store.md"
+    paired: true
+    partner: "docs/en/03-memory-brain/canonical-memory-store.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/03-memory-brain/commit-cursor-semantics.md"
+    paired: true
+    partner: "docs/en/03-memory-brain/commit-cursor-semantics.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/03-memory-brain/entity-and-relationship-manager.md"
+    paired: true
+    partner: "docs/en/03-memory-brain/entity-and-relationship-manager.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner 'docs/en/03-memory-brain/entity-and-relationship-manager.md' scanned as TIER3_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/03-memory-brain/forget-fence-and-completion-contract.md"
+    paired: true
+    partner: "docs/en/03-memory-brain/forget-fence-and-completion-contract.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate-part1.md"
+    paired: true
+    partner: "docs/en/03-memory-brain/forget-fence-operation-and-publication-gate-part1.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate-part2.md"
+    paired: true
+    partner: "docs/en/03-memory-brain/forget-fence-operation-and-publication-gate-part2.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate-part3.md"
+    paired: true
+    partner: "docs/en/03-memory-brain/forget-fence-operation-and-publication-gate-part3.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate-part4.md"
+    paired: true
+    partner: "docs/en/03-memory-brain/forget-fence-operation-and-publication-gate-part4.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate.md"
+    paired: true
+    partner: "docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md"
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/03-memory-brain/memory-brain-guide.md"
+    paired: true
+    partner: "docs/en/03-memory-brain/memory-brain-guide.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/03-memory-brain/memory-brain-overview.md"
+    paired: true
+    partner: "docs/en/03-memory-brain/memory-brain-overview.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner 'docs/en/03-memory-brain/memory-brain-overview.md' scanned as TIER3_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/03-memory-brain/memory-lifecycle-manager.md"
+    paired: true
+    partner: "docs/en/03-memory-brain/memory-lifecycle-manager.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/03-memory-brain/memory-versioning.md"
+    paired: true
+    partner: "docs/en/03-memory-brain/memory-versioning.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner 'docs/en/03-memory-brain/memory-versioning.md' scanned as TIER3_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/04-memory-compiler/README.md"
+    paired: true
+    partner: "docs/en/04-memory-compiler/README.md"
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "index/readme navigation file; no standalone contract"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/04-memory-compiler/accepted-receipt-and-idempotency-contract.md"
+    paired: true
+    partner: "docs/en/04-memory-compiler/accepted-receipt-and-idempotency-contract.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/04-memory-compiler/compiler-overview.md"
+    paired: true
+    partner: "docs/en/04-memory-compiler/compiler-overview.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/04-memory-compiler/compiler-state-and-producer-admission.md"
+    paired: true
+    partner: "docs/en/04-memory-compiler/compiler-state-and-producer-admission.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/04-memory-compiler/consolidation-and-conflict-resolution.md"
+    paired: true
+    partner: "docs/en/04-memory-compiler/consolidation-and-conflict-resolution.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner 'docs/en/04-memory-compiler/consolidation-and-conflict-resolution.md' scanned as TIER3_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/04-memory-compiler/event-ingestion-engine.md"
+    paired: true
+    partner: "docs/en/04-memory-compiler/event-ingestion-engine.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/04-memory-compiler/evidence-and-provenance.md"
+    paired: true
+    partner: "docs/en/04-memory-compiler/evidence-and-provenance.md"
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/04-memory-compiler/extraction-and-normalization.md"
+    paired: true
+    partner: "docs/en/04-memory-compiler/extraction-and-normalization.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner 'docs/en/04-memory-compiler/extraction-and-normalization.md' scanned as TIER3_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/04-memory-compiler/forget-fence-and-derived-registration-part1.md"
+    paired: true
+    partner: "docs/en/04-memory-compiler/forget-fence-and-derived-registration-part1.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/04-memory-compiler/memory-compiler-guide.md"
+    paired: true
+    partner: "docs/en/04-memory-compiler/memory-compiler-guide.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/04-memory-compiler/phase-1-event-store-contract-zh-CN.md"
+    paired: true
+    partner: "docs/en/04-memory-compiler/phase-1-event-store-contract-zh-CN.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner 'docs/en/04-memory-compiler/phase-1-event-store-contract-zh-CN.md' scanned as TIER3_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/04-memory-compiler/phase-1-event-store-contract.md"
+    paired: true
+    partner: "docs/en/04-memory-compiler/phase-1-event-store-contract.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner 'docs/en/04-memory-compiler/phase-1-event-store-contract.md' scanned as TIER3_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/05-memory-runtime/activation-policy-engine.md"
+    paired: true
+    partner: "docs/en/05-memory-runtime/activation-policy-engine.md"
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner 'docs/en/05-memory-runtime/activation-policy-engine.md' scanned as TIER1_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/05-memory-runtime/memory-runtime-guide.md"
+    paired: true
+    partner: "docs/en/05-memory-runtime/memory-runtime-guide.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/05-memory-runtime/retrieval-engine.md"
+    paired: true
+    partner: "docs/en/05-memory-runtime/retrieval-engine.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/05-memory-runtime/runtime-overview.md"
+    paired: true
+    partner: "docs/en/05-memory-runtime/runtime-overview.md"
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/05-memory-runtime/runtime-scheduling.md"
+    paired: true
+    partner: "docs/en/05-memory-runtime/runtime-scheduling.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/05-memory-runtime/working-set-and-cache.md"
+    paired: true
+    partner: "docs/en/05-memory-runtime/working-set-and-cache.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/06-memory-context/memory-context-guide.md"
+    paired: true
+    partner: "docs/en/06-memory-context/memory-context-guide.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md"
+    paired: true
+    partner: "docs/en/06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/06-memory-context/phase-3.8.18-g-exact-review-h-unified-1.2.14-csubmitoutcome-1.0.1-fullpath.md"
+    paired: true
+    partner: "docs/en/06-memory-context/phase-3.8.18-g-exact-review-h-unified-1.2.14-csubmitoutcome-1.0.1-fullpath.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.md"
+    paired: true
+    partner: "docs/en/06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.zh-CN.md"
+    paired: true
+    partner: "docs/en/06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.zh-CN.md"
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/07-agent-integration/agent-integration-guide.md"
+    paired: true
+    partner: "docs/en/07-agent-integration/agent-integration-guide.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md"
+    paired: true
+    partner: "docs/en/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/07-agent-integration/phase-3.6-final-request-evidence-contract.md"
+    paired: true
+    partner: "docs/en/07-agent-integration/phase-3.6-final-request-evidence-contract.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/07-agent-integration/phase-3.8.19-c-exact-review-h-fullpath-38-test-current-head.md"
+    paired: true
+    partner: "docs/en/07-agent-integration/phase-3.8.19-c-exact-review-h-fullpath-38-test-current-head.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: LOW
+    evidence: "normative constraint markers without ephemeral signals; no header evidence"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/08-bmcp-protocol/adapter-capability-and-applied-attestation.md"
+    paired: true
+    partner: "docs/en/08-bmcp-protocol/adapter-capability-and-applied-attestation.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/08-bmcp-protocol/bmcp-guide.md"
+    paired: true
+    partner: "docs/en/08-bmcp-protocol/bmcp-guide.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: HIGH
+    evidence: "architecture-contract + normative markers present"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/08-bmcp-protocol/phase-3.6-identity-binding-consumer-conformance-status.md"
+    paired: true
+    partner: "docs/en/08-bmcp-protocol/phase-3.6-identity-binding-consumer-conformance-status.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/09-security-governance/security-governance-guide.md"
+    paired: true
+    partner: "docs/en/09-security-governance/security-governance-guide.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/12-testing-and-acceptance/cross-module-conformance-guide.md"
+    paired: true
+    partner: "docs/en/12-testing-and-acceptance/cross-module-conformance-guide.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/13-engineering-decisions/technology-architecture-overview.md"
+    paired: true
+    partner: "docs/en/13-engineering-decisions/technology-architecture-overview.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "docs/zh-CN/14-ai-development/PR-GOVERNANCE-001-ENFORCEMENT.md"
+    paired: true
+    partner: "docs/en/14-ai-development/PR-GOVERNANCE-001-ENFORCEMENT.md"
+    suggested_tier: TIER1_CANDIDATE
+    confidence: MEDIUM
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
+    confirmation_record: PENDING
+  - path: "prompts/00-setup/MIGRATION-GUIDE.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/00-setup/MIGRATION-GUIDE.zh-CN.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/00-setup/TEMPLATE-v2.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/00-setup/TEMPLATE-v2.zh-CN.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/00-setup/work-item-003-v2-migration-example.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/67-t4b-proceed.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/67-t4b-proceed.provenance.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/A/owner-charter.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/A/phase-3-remediation.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/A/technology-review.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/B/owner-charter.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/B/phase-3-remediation.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/B/technology-review.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/C/owner-charter.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/C/phase-3-remediation.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/C/technology-review.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/D/owner-charter.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/D/phase-3-remediation.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/D/technology-review.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/E/owner-charter.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/E/phase-3-remediation.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/E/technology-review.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/F/owner-charter.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/F/phase-3-remediation.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/F/technology-review.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/G/owner-charter.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/G/phase-3-remediation.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/G/technology-review.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/H/owner-charter.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/H/phase-3-remediation.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/H/technology-review.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/I/owner-charter.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/I/phase-3-remediation.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/I/technology-review.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/README.md"
+    paired: false
+    suggested_tier: TIER3_CANDIDATE
+    confidence: LOW
+    evidence: "index/readme navigation file; no standalone contract"
+    confirmation_record: PENDING
+  - path: "prompts/global-architecture-reviewer.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/global-bilingual-documentation.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING
+  - path: "prompts/global-project-developer.md"
+    paired: false
+    suggested_tier: TIER2_OR_TIER3_SUGGESTED
+    confidence: MEDIUM
+    evidence: "prompt library asset; 27-file whitelist enumerated in 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml (inventory.expected_a_i_prompt_blobs)"
+    confirmation_record: PENDING

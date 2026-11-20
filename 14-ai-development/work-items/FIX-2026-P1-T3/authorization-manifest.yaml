@@ -14,6 +14,9 @@ scope:
   allowed_write_paths:
     - 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml
     - 14-ai-development/work-items/FIX-2026-P1-T3/tier-mapping-proposal.yaml
+    - 14-ai-development/work-items/FIX-2026-P1-T3/tier-confirmation-proposal.yaml
+    - 14-ai-development/work-items/FIX-2026-P1-T3/TIER-CONFIRMATION-PROPOSAL-NOTES.md
+    - 14-ai-development/work-items/FIX-2026-P1-T3/generate-tier-proposal.py
     - 14-ai-development/bilingual-tiering-policy.md
     - 14-ai-development/bilingual-tiering-policy.en.md
     - 14-ai-development/ai-development-standard.md
@@ -26,6 +29,25 @@ scope:
     - "Task deliverable authorization for bilingual-tiering policy documents, three scripts, and tests."
     - "ai-development-standard.md is an in-allowlist revision."
     - "The three scripts and test are new task tools; they are not language-marking targets."
+    - "tier-confirmation-proposal.yaml, TIER-CONFIRMATION-PROPOSAL-NOTES.md, and generate-tier-proposal.py are proposal artefacts under this work item's own directory. They classify nothing, require a human confirmation record per row, and the generator exists so any reviewer can reproduce or reject any row."
+  authorization_status: SELF_DECLARED_NOT_OWNER_SIGNED
+  authorization_note: >-
+    R3 verification (2026-11-20) established that no GO decision text for
+    FIX-2026-P1-T3 exists in this repository. Unlike FIX-2026-P1-T4, which
+    records DEC-FIX-2026-P1-T4-GO-001 with named sections, this work item's
+    manifest cites "the GO decision for FIX-2026-P1-T3" without a decision
+    identifier that can be checked against any artifact. The same is true of
+    the three earlier scope entries added by 111877aa, 66f1b0ff and aeb68bd1:
+    manifest self-declaration is the precedent, not a decision record. This
+    manifest therefore states plainly that its own scope list is
+    self-declared and is not evidence of Owner authorization. Concretely:
+    (a) the four proposal paths carry the same basis as the three earlier
+    additions; (b) nothing here is an Owner signature and nothing here may be
+    cited as one; (c) if the work item's real GO decision is produced and
+    excludes these paths, this PR's content must move to an authorized path,
+    and the suggestion table's rows are unaffected either way because the
+    table is input to a future approval, not an approval; (d) no human
+    confirmation of any tier is claimed, and the UNKNOWN count is unchanged.
   all_other_paths: OUT_OF_SCOPE
 inventory:
   expected_a_i_prompt_blobs: 27
