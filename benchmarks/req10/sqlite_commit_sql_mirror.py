@@ -54,9 +54,11 @@ def run(path, samples, warmup):
         conn.execute("COMMIT")
     for n in range(1,warmup+1): commit(n)
     latencies, started = [], time.perf_counter()
+    cpu_started = time.process_time()
     for n in range(warmup+1,warmup+samples+1):
         one = time.perf_counter_ns(); commit(n); latencies.append(time.perf_counter_ns()-one)
     elapsed = time.perf_counter()-started
+    cpu_elapsed = time.process_time()-cpu_started
     latencies.sort()
     sizes = {}
     for suffix in ("","-wal","-shm"):
@@ -66,6 +68,7 @@ def run(path, samples, warmup):
     print(f"sqlite_version={sqlite3.sqlite_version} journal_mode=WAL synchronous=FULL")
     print(f"samples={samples} warmup={warmup} concurrency=1 dataset=one_memory_empty_claims")
     print(f"elapsed_ms={elapsed*1000:.3f} throughput_ops_per_sec={samples/elapsed:.2f}")
+    print(f"process_cpu_seconds={cpu_elapsed:.6f} process_cpu_ms_per_op={cpu_elapsed*1000/samples:.3f}")
     print("latency_us p50={:.1f} p95={:.1f} p99={:.1f} mean={:.1f}".format(
         percentile(latencies,.50)/1000,percentile(latencies,.95)/1000,percentile(latencies,.99)/1000,statistics.mean(latencies)/1000))
     peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
