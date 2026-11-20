@@ -40,6 +40,9 @@ EXEMPT_SUFFIXES = {".png", ".jpg", ".jpeg", ".svg", ".drawio"}
 # These governance sources intentionally contain both languages in one source file.
 EMBEDDED_BILINGUAL_SOURCES = {
     "00-governance/bilingual-documentation-policy.md",
+    "14-ai-development/ai-development-standard.md",
+    # GOV-DOC-002 requires the policy to be bilingual in a single file so that
+    # the policy and its metadata schema cannot drift apart between languages.
     "00-governance/architecture-document-management-policy.md",
     "00-governance/architecture-document-metadata.schema.yaml",
     "00-governance/drafts/GOV-DOC-001-v1.2-DRAFT.md",
