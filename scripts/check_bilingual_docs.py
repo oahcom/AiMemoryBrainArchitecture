@@ -15,11 +15,8 @@ from pathlib import Path
 
 NORMATIVE_ROOTS = {
     "00-governance", "01-system-architecture", "02-domain-model",
-    "03-memory-brain", "04-memory-compiler", "05-memory-runtime",
-    "06-memory-context", "07-agent-integration", "08-protocols",
-    "09-storage-and-index", "10-security-and-governance",
-    "11-consistency-and-recovery", "12-testing-and-acceptance",
-    "13-engineering-decisions", "14-ai-development",
+    "04-memory-compiler", "06-memory-context", "07-agent-integration",
+    "08-bmcp-protocol", "13-engineering-decisions", "14-ai-development",
 }
 # 14-ai-development subtrees holding operational records or prompt templates,
 # not bilingual specifications. The PR-body declaration requirement still
@@ -56,6 +53,7 @@ EMBEDDED_BILINGUAL_SOURCES = {
     "14-ai-development/owner-automation-operating-model.md",
     "14-ai-development/README.md",
 }
+REPO_ROOT = Path(__file__).resolve().parent.parent
 ROOT = Path.cwd()
 
 
@@ -427,6 +425,14 @@ def check_normative_pairing(normative_changes, changed, complete, exception):
 
 
 def main() -> int:
+    missing_roots = sorted(r for r in NORMATIVE_ROOTS if not (REPO_ROOT / r).is_dir())
+    if missing_roots:
+        sys.stderr.write(
+            "NORMATIVE_ROOTS references non-existent directories: %s\n"
+            % ", ".join(missing_roots)
+        )
+        return 2
+
     try:
         changed = changed_paths()
     except Exception as exc:
@@ -461,8 +467,11 @@ def main() -> int:
     # A normative source-spec change requires paired reader/spec documents
     # or a formally approved, time-bounded exception.
     normative_changes = []
+    skipped_markdown = []
     for path in sorted(changed):
         parts = Path(path).parts
+        if len(parts) >= 2 and Path(path).suffix.lower() == ".md" and parts[0] not in NORMATIVE_ROOTS:
+            skipped_markdown.append(path)
         if len(parts) >= 2 and parts[0] in NORMATIVE_ROOTS:
             if Path(path).suffix.lower() in EXEMPT_SUFFIXES:
                 continue
@@ -477,6 +486,13 @@ def main() -> int:
         )
 
     errors.extend(check_normative_pairing(normative_changes, changed, complete, exception))
+
+    if skipped_markdown:
+        sys.stderr.write(
+            "Bilingual gate: %d changed .md path(s) outside NORMATIVE_ROOTS were not "
+            "checked as normative sources: %s\n"
+            % (len(skipped_markdown), ", ".join(skipped_markdown))
+        )
 
     if exception:
         print("Approved bilingual exception declaration detected; human governance approval remains mandatory.")
