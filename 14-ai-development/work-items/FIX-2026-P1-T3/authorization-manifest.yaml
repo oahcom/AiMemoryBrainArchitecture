@@ -14,6 +14,9 @@ scope:
   allowed_write_paths:
     - 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml
     - 14-ai-development/work-items/FIX-2026-P1-T3/tier-mapping-proposal.yaml
+    - 14-ai-development/work-items/FIX-2026-P1-T3/tier-confirmation-proposal.yaml
+    - 14-ai-development/work-items/FIX-2026-P1-T3/TIER-CONFIRMATION-PROPOSAL-NOTES.md
+    - 14-ai-development/work-items/FIX-2026-P1-T3/generate-tier-proposal.py
     - 14-ai-development/bilingual-tiering-policy.md
     - 14-ai-development/bilingual-tiering-policy.en.md
     - 14-ai-development/ai-development-standard.md
@@ -26,6 +29,7 @@ scope:
     - "Task deliverable authorization for bilingual-tiering policy documents, three scripts, and tests."
     - "ai-development-standard.md is an in-allowlist revision."
     - "The three scripts and test are new task tools; they are not language-marking targets."
+    - "tier-confirmation-proposal.yaml, TIER-CONFIRMATION-PROPOSAL-NOTES.md, and generate-tier-proposal.py are proposal artefacts under this work item's own directory. They classify nothing, require a human confirmation record per row, and the generator exists so any reviewer can reproduce or reject any row."
   all_other_paths: OUT_OF_SCOPE
 inventory:
   expected_a_i_prompt_blobs: 27
