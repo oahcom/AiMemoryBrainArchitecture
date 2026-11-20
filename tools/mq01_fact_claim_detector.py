@@ -18,16 +18,16 @@ TYPE_DECL = re.compile(r"\bpub\s+(?:struct|enum|type|trait)\s+(Fact|Claim)\b")
 
 
 def strip_rust_comments(source: str) -> str:
-    """Remove // and nested /* */ comments while preserving line structure."""
+    """Remove comments and string literals while preserving line structure."""
     out: list[str] = []
     i = 0
     depth = 0
     line_comment = False
     while i < len(source):
         if line_comment:
-            if source[i] == "\n":
+            if source[i] == "\\n":
                 line_comment = False
-                out.append("\n")
+                out.append("\\n")
             else:
                 out.append(" ")
             i += 1
@@ -42,20 +42,55 @@ def strip_rust_comments(source: str) -> str:
                 out.extend("  ")
                 i += 2
             else:
-                out.append("\n" if source[i] == "\n" else " ")
+                out.append("\\n" if source[i] == "\\n" else " ")
                 i += 1
             continue
         if source.startswith("//", i):
             line_comment = True
             out.extend("  ")
             i += 2
-        elif source.startswith("/*", i):
+            continue
+        if source.startswith("/*", i):
             depth = 1
             out.extend("  ")
             i += 2
-        else:
-            out.append(source[i])
-            i += 1
+            continue
+
+        # Rust raw strings (including byte raw strings) may contain comment
+        # markers or fake declarations; skip through the matching delimiter.
+        raw = re.match(r'(?:br|r)(?P<hashes>#+)?"', source[i:])
+        if raw:
+            hashes = raw.group("hashes") or ""
+            closing = '"' + hashes
+            content_start = i + raw.end()
+            closing_at = source.find(closing, content_start)
+            if closing_at < 0:
+                out.extend(" " * (len(source) - i))
+                break
+            literal = source[i:closing_at + len(closing)]
+            out.extend("\\n" if ch == "\\n" else " " for ch in literal)
+            i = closing_at + len(closing)
+            continue
+
+        # Ordinary and byte strings.
+        quote_at = i + 1 if source.startswith("b\"", i) else i
+        if quote_at < len(source) and source[quote_at] == '"':
+            j = quote_at + 1
+            while j < len(source):
+                if source[j] == "\\\\":
+                    j += 2
+                elif source[j] == '"':
+                    j += 1
+                    break
+                else:
+                    j += 1
+            literal = source[i:j]
+            out.extend("\\n" if ch == "\\n" else " " for ch in literal)
+            i = j
+            continue
+
+        out.append(source[i])
+        i += 1
     return "".join(out)
 
 
@@ -95,6 +130,13 @@ class DetectorTests(unittest.TestCase):
         result = inspect_source(
             "/* outer /* pub struct Fact {} */ still comment */\n"
             "pub struct Claim { id: String }"
+        )
+        self.assertFalse(result["fact_declared"])
+        self.assertTrue(result["mq01_detected"])
+
+    def test_fake_declaration_inside_string_does_not_count(self) -> None:
+        result = inspect_source(
+            'let doc = "pub struct Fact {}";\\npub struct Claim { id: String }'
         )
         self.assertFalse(result["fact_declared"])
         self.assertTrue(result["mq01_detected"])
