@@ -295,3 +295,12 @@ R45（A-OWNER-INTEGRATION-R45-2026-11-20）：A 完成 F-43-07 四方最终集�
 - No direct `main` write, merge, deployment, production activation, or other-Owner signature was performed or inferred.
 - Ledger-only/documentation reconciliation: tests NOT RUN; the two PR #322 workflow reruns above are FAILURE with unavailable job logs, not PASS.
 - Prompt provenance: current user-supplied D-2026-1120-01 continuation instruction (T2 chat); no repository prompt file used; immutable platform message bytes/session UUID unavailable to this execution, SHA-256 NOT_VERIFIED.
+
+## 2026-11-20 PR #322 final-head correction — superseding prior F3 H-validator pins
+
+- PR #322 current exact HEAD is `0ce618ac503f641cf31e66092ae823c14bf8af7b` (the earlier `593b78e3...` pin above is superseded). Exact changed files remain:
+  - `08-bmcp-protocol/runtime_reference/owner_snapshot_semantics_1_2_17.py`, Blob `49644a181c578fecb312218c08ce23caa62f603b`;
+  - `08-bmcp-protocol/tests/conformance/recovery_cutoff/test_owner_snapshot_semantics_1_2_17.py`, Blob `e66264ad30df6594e00836524accfdeb54160cee`.
+- Current exact-head workflow runs: `44681841687` (job `136108099194`) and `44681841601` (job `136108110590`), both FAILURE with `steps=null`. Explicit job reruns were accepted; rerun jobs `136109249771` and `136109260361` again completed FAILURE with `steps=null`. Log retrieval for the rerun jobs returned HTTP 404 `BlobNotFound` (RequestIds `f780ccdd-901e-00df-3cb1-78e52e000000` and `7c5c38f0-e01e-00ae-0eb1-78e88c000000`). No test-level failure cause or CI PASS is established.
+- The current manifest records a focused local module result of 13/13 PASS on Python 3.13.5 for this validator/test revision; this is a prior recorded local result, not a full repository suite and not a substitute for the failed exact-head CI.
+- **F3 disposition unchanged:** D/H same-Blob role-labelled ACCEPT WITH EXPLICIT LIMITATIONS records are present; independent human signer identity remains NOT VERIFIED; callable D query, durable Receipt/currentness and operational C1–C6 evidence remain NOT VERIFIED; F3 stays P1 / OPEN.
