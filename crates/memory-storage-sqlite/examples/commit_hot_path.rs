@@ -44,7 +44,7 @@ fn process_cpu_ticks() -> Option<u64> {
 fn file_size(path: impl AsRef<std::path::Path>) -> u64 {
     fs::metadata(path).map(|m| m.len()).unwrap_or(0)
 }
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() -> Result<(), String> {
     let args: Vec<String> = env::args().collect();
     let samples: usize = args.get(1).and_then(|v| v.parse().ok()).unwrap_or(1_000);
     let warmup: usize = args.get(2).and_then(|v| v.parse().ok()).unwrap_or(100);
@@ -54,9 +54,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let _ = fs::remove_file(format!("{}{}", db.display(), suffix));
     }
 
-    let mut store = SqliteMemoryStorage::open(&db)?;
+    let mut store = SqliteMemoryStorage::open(&db).map_err(|e| format!("{e:?}"))?;
     let visible_scope = scope();
-    store.create_memory(memory(), &[visible_scope.clone()])?;
+    store.create_memory(memory(), &[visible_scope.clone()]).map_err(|e| format!("{e:?}"))?;
 
     for n in 1..=warmup {
         let parent = if n == 1 { None } else { Some(id(format!("bench-v{}", n - 1))) };
@@ -66,14 +66,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             new_version: version(n as u64, parent),
             idempotency_key: format!("bench-op-{n}"),
             request_digest: format!("bench-digest-{n}"),
-        }, &[visible_scope.clone()])?;
+        }, &[visible_scope.clone()]).map_err(|e| format!("{e:?}"))?;
     }
 
     let cpu_start = process_cpu_ticks();
     let started = Instant::now();
     let mut latencies = Vec::with_capacity(samples);
     for n in (warmup + 1)..=(warmup + samples) {
-        let parent = Some(id(format!("bench-v{}", n - 1)));
+        let parent = if n == 1 { None } else { Some(id(format!("bench-v{}", n - 1))) };
         let request = CommitRequest {
             memory_id: id("bench-memory"),
             expected_current_version: parent.clone(),
@@ -82,7 +82,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             request_digest: format!("bench-digest-{n}"),
         };
         let one = Instant::now();
-        store.commit_version(request, &[visible_scope.clone()])?;
+        store.commit_version(request, &[visible_scope.clone()]).map_err(|e| format!("{e:?}"))?;
         latencies.push(one.elapsed().as_nanos());
     }
     let elapsed = started.elapsed();
