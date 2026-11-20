@@ -91,24 +91,56 @@ review:
     architecture_decision below, not by this field. The absence of an accountable human
     authority is a limit on the decision's capacity, recorded in
     architecture_decision.capacity_excludes; it is NOT equivalent to Q1 remaining
-    undecided. The remaining open questions are Q11 (authorisation to extend a Phase 1
-    table's schema), Q12 (schema-execution authority), Q13 (completed tool call requires
-    a result), Q14 (recompute single input), Q8 (transcript retention classes) and Q9
-    (impact_level typing). A ruling was requested on these and is recorded in
-    design-proposal.md section 2f; none of the six was closed. Q11 in particular was
-    RE-POSED, not resolved: the ruling answered a boundary-interpretation question whose
-    premise was not located in any inspected repository document, so the strict reading is NOT
-    adopted and section 8.4 was not rewritten to remove the index.
+    undecided.
+
+    Five of the six remaining questions received dispositions in design-proposal.md
+    section 2i. Their scope differs and the manifest does not flatten them:
+
+      Q13 (completed tool call requires a result) -- DECIDED: table-level CHECK,
+          DDL amended. Separate from NF-R3-02, whose closure this is not.
+      Q11 (authorisation to extend a Phase 1 table's schema) -- PARTLY DECIDED.
+          Technical admissibility is settled: the index is data-neutral with respect
+          to versions' admissible rows and is necessary for the composite foreign key
+          to be expressible. The authorisation half is NOT decided and remains with
+          the Phase 1 contract's owner, who is NOT_ASSIGNED. No rule exempts a
+          data-neutral modification from Phase 1 approval, and this manifest claims
+          none. The index stays declared as a Layer 1 modification.
+      Q12 (schema-execution authority) -- prospective interpretation issued; the
+          R2 event is NOT reclassified and later probes are not covered by it
+          retrospectively.
+      Q15 (INDEX.md authority conflict) -- only this work item's write scope is
+          decided (no write). The AI-STD-001 conflict itself is untouched.
+      Q9 (impact_level) -- DECIDED: retained untyped, neither typed nor dropped.
+
+    Two were HELD, deliberately: Q8 (transcript retention classes) and Q14 (recompute
+    single input). Both ask for facts about the world that no reading of this repository
+    supplies, and deciding them would be invention rather than decision.
+
+    Q11 being PARTLY DECIDED is not a rounding of a completed ruling. It is the
+    difference between a technical finding and a governance exemption, and the manifest
+    records the two separately so a later reader cannot read the first as the second.
+
+    Capacity: dev-baseline convergence path (Issue #264 comment 7000428916),
+    session-held. human_signature NOT_CLAIMED; acceptance_authority remains
+    NOT_ASSIGNED; implementation_authorization remains NOT_GRANTED. These rulings settle
+    design questions the document itself poses. They do not accept the design.
+
+    The earlier R1-Q14 ruling request (section 2f) returned PARTIAL and closed nothing;
+    that record is preserved. Section 2i supersedes its dispositions for Q13, Q11, Q12,
+    Q9 and Q15 and leaves Q8 and Q14 as 2f left them.
     Implementation and verification obligations are separately unresolved:
-    DDL NOT APPROVED, executability UNVERIFIED, 21 section 13 tests NOT WRITTEN OR RUN,
-    P2-T1 NOT AUTHORIZED.
+    DDL NOT APPROVED, executability UNVERIFIED (the section 2i probes exercised the
+    design's own DDL in memory and found it applies; that is not a migration test and not
+    an approval), 21 section 13 tests NOT WRITTEN OR RUN, P2-T1 NOT AUTHORIZED.
 
 status: BLOCKED
 status_reason: >
   Q1 is decided: OPTION_C adopted under the dev-baseline Architecture Owner role,
   ACCEPT-WITH-CONDITIONS, recorded in DEC-P2-T2-Q1-001.md. That closes one item and closes
-  nothing else. Q11, Q12, Q13, Q14, Q8 and Q9 remain OPEN and each now carries a named
-  dependency in design-proposal.md section 14 rather than an unexplained OPEN. The DDL
+  nothing else. Q13, Q11, Q12, Q15 and Q9 were DECIDED in design-proposal.md section 2i;
+  Q8 and Q14 remain OPEN and each carries a named dependency in section 14 rather than an
+  unexplained OPEN. Those five rulings are design decisions, not acceptance: they change
+  what this document specifies and change no governance state. The DDL
   remains NOT APPROVED;
   DDL executability and regression behavior remain UNVERIFIED; none of the 21 section 13
   tests exist; implementation_authorization remains NOT_GRANTED. P2-T1 remains blocked for
@@ -147,6 +179,11 @@ architecture_decision:
     C3: "SATISFIED — unresolved questions and restrictions preserved with unchanged status"
   closes_only: "Q1"
   does_not_close: [Q8, Q9, Q11, Q12, Q13, Q14]
+  note_on_later_rulings: >
+    Q9, Q11, Q12, Q13 and Q15 were subsequently decided in design-proposal.md section 2i
+    under the same dev-baseline capacity form recorded above, with the same exclusions.
+    That does not retroactively widen this decision record: DEC-P2-T2-Q1-001 closes Q1 and
+    only Q1, and the 2i rulings are carried by section 2i, not by this record.
   adopted_direction_not_approved_artefact: >
     Adopting a direction is not approving the DDL. The merged proposal remains a proposal
     with an adopted architectural direction. Its unresolved implementation and
@@ -409,7 +446,13 @@ claims_forbidden:
   - "that the R4 DDL was executed or verified to apply"
   - "that NF-R3-01 or NF-R3-02 is verified fixed"
   - "that the NF-R3-02 residual is verified fixed"
-  - "that Q13 is closed"
+  - "that deciding Q13 constitutes closure of NF-R3-02"
+  - "that a section 2i ruling constitutes design acceptance, implementation authorization, or a human signature"
+  - "that section 2i's prospective Q12 interpretation covers the Q13 or Q11 probes retrospectively"
+  - "that deciding Q11 authorizes the index -- the index is admissible, not authorized"
+  - "that Q11 is fully decided -- only technical admissibility is settled; the authorisation half is open"
+  - "that deciding Q15 resolves the AI-STD-001 conflict -- only this work item's write scope was decided"
+  - "that holding Q8 or Q14 is a deferral rather than a decision not to invent"
   - "that Q14 is a confirmed business requirement"
   - "that BLOCKED means approved, accepted, or free of defects"
   - "that the Layer 1 additive index is not a Layer 1 modification"
