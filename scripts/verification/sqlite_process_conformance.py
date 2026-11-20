@@ -55,7 +55,7 @@ def cas_worker(path: str, version_id: str, start: mp.synchronize.Event, out: mp.
         conn.execute("INSERT INTO idempotency(idempotency_key, memory_id, receipt) VALUES (?, 'm1', ?)", (f'key-{version_id}', version_id))
         conn.commit()
         out.put((version_id, "COMMITTED", version_id))
-    except Exception as exc:
+    except Exception as exc:  # surfaced to parent as a failed outcome
         try:
             conn.rollback()
         except sqlite3.Error:
@@ -73,7 +73,7 @@ def abrupt_exit_worker(path: str, ready_path: str) -> None:
     conn.execute("INSERT INTO commit_log(commit_sequence, memory_id, version_id) VALUES (2, 'm1', 'v-crash')")
     conn.execute("INSERT INTO idempotency(idempotency_key, memory_id, receipt) VALUES ('key-crash', 'm1', 'v-crash')")
     Path(ready_path).write_text("transaction writes issued; COMMIT not issued\n", encoding="utf-8")
-    os._exit(23)
+    os._exit(23)  # deliberately bypass connection close / Python cleanup
 
 
 def run() -> None:
@@ -81,6 +81,7 @@ def run() -> None:
         db = str(Path(tmp) / "conformance.sqlite")
         initialize(db)
 
+        # Two distinct OS processes, each opening its own SQLite connection.
         ctx = mp.get_context("spawn")
         start = ctx.Event()
         out = ctx.Queue()
@@ -107,6 +108,7 @@ def run() -> None:
         print("PROCESS_CAS: PASS (2 OS processes; 1 COMMITTED, 1 STALE)")
         print(f"PROCESS_CAS_STATE: current={current} versions={version_count} commit_rows={commit_count} idempotency_rows={idem_count}")
 
+        # Separate process writes the whole logical set but exits before COMMIT.
         ready = str(Path(tmp) / "crash-ready")
         crash = ctx.Process(target=abrupt_exit_worker, args=(db, ready))
         crash.start()
@@ -126,6 +128,7 @@ def run() -> None:
         print("PRE_COMMIT_PROCESS_EXIT: PASS (worker exit=23; reopened DB exposes no partial write set)")
         print(f"PRE_COMMIT_RECOVERY: current_unchanged={current_after == current} version_rows={version_after} commit_rows={commit_after} idempotency_rows={idem_after}")
 
+        # A committed write set must remain visible after connection close/reopen.
         with connect(db) as conn:
             conn.execute("BEGIN IMMEDIATE")
             conn.execute("INSERT INTO versions(version_id, memory_id) VALUES ('v-durable', 'm1')")
