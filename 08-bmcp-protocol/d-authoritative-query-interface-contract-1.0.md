@@ -55,7 +55,7 @@ The following nominal types are high-waters/generations and MUST each be validat
 For each type, the mathematical domain is the integer range `0..2^63-1`. The wire representation is a JSON string containing ASCII decimal digits only.
 
 - Canonical output grammar: `0` or `[1-9][0-9]*`.
-- Input parsing MAY accept leading zeroes as specified by D contract 1.3.1 §5.1, but canonicalization MUST occur within that one nominal type before the value is emitted in a signed response or included in a digest projection.
+- Input parsing MUST accept leading zeroes as required by D contract 1.3.1 §5.1. Leading zeroes MUST be canonicalized within that one nominal type before the value is emitted in a signed response or included in a digest projection.
 - Negative sign, plus sign, whitespace, separators, exponent, fraction, Unicode digits, empty string, and values greater than `2^63-1` are invalid.
 - The type tag and namespace identity are mandatory alongside the decimal string in the receipt binding. A bare decimal string is never a typed value.
 - No conversion to a shared integer domain for cross-field comparison is permitted. No cross-type equality, ordering, subtraction, range comparison, aliasing, or derivation is permitted.
