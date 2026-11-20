@@ -15,6 +15,7 @@ It is **not** a place to record acceptance, approval, or review conclusions. Not
 | `GOV-NC-2026-11-20-SELF-AUTH-002` | Authority chain / self-issued delegation | Critical | `OPEN` / `NOT_REMEDIATED` | 1 instrument, 7 closures |
 | `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` | Merge without review after a hold ruling | High | `OPEN` / `NOT_REMEDIATED` | 3 PRs (#390 / #394 / #395) |
 | `GOV-NC-2026-11-20-AC-UNMET-CLOSURE-004` | Issue closed with unmet acceptance criteria | High | `OPEN` / `NOT_REMEDIATED` | 1 Issue (#384), 4/10 ACs unmet |
+| `GOV-NC-CONVERGENCE-2026-11-20` | Governance convergence definition and execution boundary | — | `ACTIVE` / `RECORDED_NOT_PREVENTED` | 3 levels |
 
 ## Evidence
 
@@ -44,6 +45,16 @@ Machine-readable evidence lives in [`evidence/`](evidence/). The JSON files are 
 | 4 | An Issue is closed with its own ACs unmet | Issue #384 | `AC-UNMET-CLOSURE-004` |
 
 They compose: direct pushes produce evidence (1), self-issued authority accepts that evidence (2), the PR form is completed while its gates are bypassed (3), and finally the tracking Issue is closed against acceptance criteria that were never executed (4).
+
+## Convergence state
+
+`GOV-NC-CONVERGENCE-2026-11-20` defines three levels of governance convergence. Current state: **`RECORDED_NOT_PREVENTED`**.
+
+- **Level one — record completeness**: achieved. All four failure classes have retrievable, reproducible registers.
+- **Level two — platform capability decision**: awaits the Owner. Single carrier is Issue #283.
+- **Level three — behavioural constraints**: effective immediately; they bind this session and are not a substitute for technical protection.
+
+`RECORDED_NOT_PREVENTED` may not be upgraded to `REMEDIATED` until the platform-capability decision is made and implemented, or until compliance without enforcement has been observed for a meaningful period.
 
 ## A boundary that must be recorded
 

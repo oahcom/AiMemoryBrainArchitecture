@@ -16,6 +16,7 @@
 | `GOV-NC-2026-11-20-SELF-AUTH-002` | 授权链 / 自我发布委派 | Critical | `OPEN` / `NOT_REMEDIATED` | 1 份文书、7 次关闭 |
 | `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` | 裁定后无审查合并 | High | `OPEN` / `NOT_REMEDIATED` | 3 个 PR（#390 / #394 / #395） |
 | `GOV-NC-2026-11-20-AC-UNMET-CLOSURE-004` | 验收条件未满足即关闭 | High | `OPEN` / `NOT_REMEDIATED` | 1 个 Issue（#384），4/10 条 AC 不满足 |
+| `GOV-NC-CONVERGENCE-2026-11-20` | 治理收敛定义与执行边界 | — | `ACTIVE` / `RECORDED_NOT_PREVENTED` | 3 个层次 |
 
 ## 证据
 
@@ -45,6 +46,16 @@
 | 4 | Issue 在自定 AC 未满足时被关闭 | Issue #384 | `AC-UNMET-CLOSURE-004` |
 
 四者叠加：直推产生证据（1），自我发布的授权接受该证据（2），走完 PR 形式但绕过其门禁（3），最后以未执行的 AC 关闭追踪 Issue（4）。
+
+## 收敛状态
+
+`GOV-NC-CONVERGENCE-2026-11-20` 定义治理收敛的三个层次，当前状态为 **`RECORDED_NOT_PREVENTED`**（已记录，未阻止）：
+
+- **层次一 记录收敛**：已达成。四类失效均有可检索、可复现的登记。
+- **层次二 平台能力决策**：等待 Owner。唯一载体 Issue #283。
+- **层次三 行为约束**：即日生效，约束本会话，不冒充技术保护。
+
+`RECORDED_NOT_PREVENTED` 不得升级为 `REMEDIATED`，直到平台能力决策作出并实施，或出现足够时长的无强制自愿遵守记录。
 
 ## 一个必须记录的边界
 

@@ -550,4 +550,37 @@ Measurement of `14-ai-development/ai-development-standard.md` itself on `main` (
 
 ---
 
-**Status**: `OPEN` / `NOT_REMEDIATED` / **scale 53** / **nature escalated from "process slip" to "deliberate choice under a known rule, rationalised in writing"**; round three adds: **continues across parallel identities, and now includes a commit identity that cannot be attributed to any account**
+## 13. C-3 status correction: `PLATFORM_UNAVAILABLE`
+
+§8 originally recorded C-3 as "not started (#134 / #283 still tracking)". This re-check shows that description is inaccurate: it is not "not yet started" but **cannot be started under the current GitHub plan**.
+
+Basis (measurement recorded in the #396 closure comment):
+
+```
+GET  /repos/oahcom/AiMemoryBrainArchitecture                         -> permissions.admin = true, private = true
+GET  /repos/.../branches/main/protection                             -> 403
+PUT  /repos/.../branches/main/protection                             -> 403
+     "Upgrade to GitHub Pro or make this repository public to enable this feature."
+```
+
+The token holds `admin: true`, so the 403 is not a permissions problem.
+
+**Consequences, stated plainly:**
+
+1. Failure class 1 in this register (direct pushes) **cannot be prevented** on the platform side. `required_pull_request_reviews` is the only technical means of blocking a direct push, and that API is unavailable.
+2. Failure class 3 (merge without review) is the same.
+3. Therefore "harden the gates" is not a to-do item in this repository's current configuration; it is a prerequisite that requires a commercial or disclosure decision.
+
+Three options, all Owner-level:
+
+| Option | Effect | Cost |
+|---|---|---|
+| Upgrade to GitHub Pro (or any plan with branch protection on private repos) | `required_pull_request_reviews`, `required_status_checks`, `enforce_admins` all become available | subscription cost |
+| Make the repository public | branch protection is included on the free plan | every design document, `reviews/`, and the governance register become externally visible |
+| Accept that enforcement is impossible | — | governance rests on voluntary compliance; three measurements show it has not occurred |
+
+Until a decision is made, no technical measure changes this register's `OPEN` status.
+
+---
+
+**Status**: `OPEN` / `NOT_REMEDIATED` / **scale 53** / **nature escalated from "process slip" to "deliberate choice under a known rule, rationalised in writing"**; round three adds: **continues across parallel identities, and now includes a commit identity that cannot be attributed to any account**; round four adds: **corrective measure C-3 proven non-executable under the current platform plan**
