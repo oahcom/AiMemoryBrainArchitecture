@@ -222,9 +222,12 @@ Two further checks:
 | `grep -rn -i "must not be modified\|not be modified\|modifying layer 1\|layer 1 modification\|additive"` across the tree, excluding this work item | no prohibition found |
 | `grep -rn -i "layer 1\|layer1"` across the tree, excluding this work item and the `docs/` and `reviews/` trees | **zero hits** |
 
-"Layer 1" and "Layer 2" are terminology introduced by this proposal. No
-governance document defines the boundary, so no governance document could have
-prohibited crossing it.
+"Layer 1" and "Layer 2" are terminology introduced by this proposal. **No
+governance document located in the stated searches defines this boundary or
+establishes the asserted prohibition.** That is the finding, and it is bounded by
+the searches recorded above — not finding the term does not prove that no
+document imposes an equivalent restriction under other wording. The claim is
+about what was searched, and it is written as such.
 
 The word *boundary* in the contract denotes **the scope of what has been
 decided** — the persistence behaviours enumerated above — not **a line that must
@@ -916,9 +919,10 @@ The correct framing is an authorisation question, and it is carried as **Q11**:
 
 Three things follow, and they are stated rather than inferred:
 
-1. **No prohibition exists.** `phase-1-sqlite-adapter-contract.md` constrains
-   persistence behaviour and row immutability; it does not constrain schema
-   objects. Verified in §2f with the exact clauses and two searches.
+1. **No prohibition was located.** `phase-1-sqlite-adapter-contract.md`
+   constrains persistence behaviour and row immutability; it does not constrain
+   schema objects. Verified in §2f with the exact clauses and two bounded
+   searches. Stated as a bounded negative, not as a universal one.
 2. **The index is therefore not forbidden, and not authorised either.** Absence
    of a prohibition is not permission when the thing being extended belongs to a
    contract whose owning capacity is `NOT_ASSIGNED`.
@@ -1059,7 +1063,7 @@ Required before implementation authorization is granted. These are specified, no
 5. **Rebuild — unreconstructable tier** — delete `score_input` rows for a version (simulating an under-recorded history), run rebuild, assert `rebuild_state='unreconstructable'` with the missing dependency named, and assert no `value_score` was written.
 6. **Rebuild — partial tier on migration** — pre-migration versions rebuild to `partial`, never `exact`, and never silently to `exact`.
 7. **Method immutability** — `UPDATE` and `DELETE` on `scoring_method` both abort.
-8. **Composite integrity** — insert a `context_assembly_entry` with a `version_id` belonging to a different `memory_id`; assert refused. **Conditional on Q11**: with `versions_memory_version_uq` present the refusal comes from the composite foreign key and holds for any writer; without it the refusal must come from the adapter inside the insert transaction and holds only for adapter writers. The test asserts the refusal, and separately asserts which mechanism produced it, so the weaker configuration cannot pass as the stronger one.
+8. **Composite integrity** — insert a `context_assembly_entry` with a `version_id` belonging to a different `memory_id`; assert refused. **Conditional on Q11**: with `versions_memory_version_uq` present the refusal comes from the composite foreign key and holds for any writer; without it the refusal must come from the adapter inside the insert transaction and holds only for adapter writers. The test asserts the refusal, and separately asserts which mechanism produced it, so the weaker configuration cannot pass as the stronger one. In the database-enforced branch the insert must be issued by a **direct SQL writer that bypasses the adapter** — asserting through the adapter would only show that the adapter refuses, which is the weaker claim the branch is supposed to distinguish itself from.
 9. **No cascade destruction** — delete a `transcript_session` that has messages; assert refused. Then delete a `transcript_message` that has a `memory_source_link`; assert refused.
 10. **Canonical row counts** — closing and retiring sessions leaves `memories` and `versions` row counts unchanged.
 11. **Transcript ordering** — insert messages out of `created_at` order with valid `seq_no`; assert `read_session` returns `seq_no` order.
