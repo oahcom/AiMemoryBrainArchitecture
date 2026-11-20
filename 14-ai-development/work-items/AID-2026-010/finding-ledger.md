@@ -814,3 +814,40 @@ This entry corrects any earlier status-axis wording in this ledger that labelled
 
 ### Provenance
 The applicable instruction is the user-supplied Owner ruling `D-2026-1120-01` in the current ChatGPT continuation. The connector does not expose a stable platform message permalink or immutable raw payload; prompt SHA-256 remains `NOT_VERIFIED`. No repository prompt file or synthetic hash is claimed.
+
+
+## Current-turn exact-ref supersession — D-2026-1120-01 (2026-11-20)
+
+This append-only entry supersedes earlier F1 handoff Head/Blob references and records the current-turn exact source refresh. It does not change domain-owner decisions or close either finding.
+
+### F1 — handoff delivery verified; Runtime implementation remains OPEN
+
+- Existing PR #327 branch: `docs/f43-01-f1-engineering-entry-handoff`.
+- Exact current PR Head: `1a19bc034af8620e19380a61eb185f4a52b56879`.
+- Handoff path: `14-ai-development/work-items/AID-2026-010/F1-engineering-landing-handoff.md`.
+- Exact handoff Blob: `0603bf2e18681dc29eeb403befa3c947f965143c`.
+- The handoff includes E1–E8 entry facts, five callable D-operation requirements, durable Producer Registration Ledger / operation-bound Receipt, equality/linearization proof, fail-closed UNKNOWN and S1–S7 evidence obligations.
+- Five callable D operations remain NOT IMPLEMENTED; durable authoritative Ledger/Receipt and runtime equality/linearization remain NOT ESTABLISHED; S1–S7 remain NOT RUN.
+- Issue #7 comment #7021990583 continues to record `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE` / NOT AUTHORIZED. The carrier-quota release does not designate a canonical Runtime target or grant implementation-entry authority.
+- Disposition: handoff delivery VERIFIED; F1 remains P1/OPEN for actual implementation and operational evidence. No Runtime implementation or production PASS is claimed.
+
+### F3 — mapping artifacts verified; independent-human attribution remains OPEN
+
+- H role-labelled decision: Issue #43 comment #7021638212 (`H-OWNER-2026-11-19-003`).
+- D role-labelled decision: Issue #43 comment #7021655866 (`D-OWNER-2026-11-19-005`).
+- Both decisions identify mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`; both visible GitHub identities resolve to `oahcom`. Distinct human signers are NOT independently verified. Role-labelled records are present; independent-human acceptance remains OPEN / NOT VERIFIED.
+- D query-contract carrier: PR #321 Head `35668e63a98cbd0f9ea73573ab9251ac5c2bb881`; file Blob `099f4948b550919084b0d73094692b590b0be0a9`; accepted mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49` is the active pin.
+- H TEST-profile candidate: PR #322 Head `a336c85763df0135aa64ecec3cfdac8acd08a8eb`; validator Blob `49644a181c578fecb312218c08ce23caa62f603b`; test Blob `6685226143f28a5b8764067bb205080b531132e3`; 15 test methods.
+- Exact-head Runs #44684299500 / #44684299439 failed before test execution; jobs #136136525120 / #136136582468 have runner_id=0 and empty steps. Test source execution is NOT RUN; no CI PASS or assertion failure is claimed.
+- Callable D query/Receipt/currentness/revocation, accepted H consumer implementation and C1–C6 operational proof remain NOT ESTABLISHED.
+- Disposition: same-Blob role-labelled records and source pins VERIFIED; independent-human attribution and operational consumer proof remain OPEN. F3 remains P1/OPEN.
+
+### Current-turn evidence comments
+
+- PR #327 F1 exact handoff: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/327#issuecomment-7034928726
+- PR #321 D mapping pin / signer attribution: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/321#issuecomment-7034930281
+- PR #322 H TEST candidate / no test execution: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/322#issuecomment-7034931340
+- PR #323 ledger reconciliation: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/323#issuecomment-7034932609
+- Issue #43 consolidated finding disposition: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/43#issuecomment-7034933758
+
+No new PR, Issue or branch was created. No merge or main write occurred.
