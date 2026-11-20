@@ -12,10 +12,10 @@ scan_window_chars: 4000
 file_enumeration: git ls-tree -r --name-only origin/main, filtered to paths ending .md and starting with one of the four scope prefixes, then sorted with Python sorted() (byte-wise ASC on the full path). No glob, no .gitignore, no filesystem walk - the tree object is the only source.
 path_exclusions: none beyond the scope prefixes and the .md filter; the proposal files themselves are not excluded, so they appear as UNKNOWN-bucket rows like any other new document
 read_failure_handling: strict UTF-8 decode (UnicodeDecodeError is the failure signal; errors=replace is rejected because a legitimate U+FFFD would be indistinguishable from a decode artefact) plus a non-zero git show exit; either condition prefixes the row evidence with READ-<FAILURE> and forces LOW confidence; such a row is never equivalent to a genuine negative
-write_order: all assertions (pairing reciprocity, row counts, no stale baseline text, no tabs) run against the in-memory text before any byte reaches disk; the file is then written to a .tmp in the same directory and moved with os.replace, so a failing run leaves no partial proposal
+write_order: all assertions (pairing reciprocity, row counts, no stale baseline text, no tabs) run against the in-memory text before any byte reaches disk; the text is then written to a .tmp in the same directory through a context manager, so the handle is closed before os.replace promotes it; any exception removes the .tmp and re-raises, so a failing run leaves no partial proposal
 run_environment: python 3.13, git 2.x, no network access, no third-party packages; output is LF-terminated UTF-8
 marker_matching: case-insensitive substring match within the scan window; counts are distinct-marker counts, not occurrence counts; a marker counted once regardless of repetitions
-pairing_detection: (a) same-directory suffix swap .en.md <-> .zh-CN.md <-> .md; (b) docs/en/ <-> docs/zh-CN/ path mirror. Tie-break when an .en.md has both a .zh-CN.md and a plain .md sibling: .zh-CN.md wins, because the bilingual policy pairs on the explicit language suffix first; the plain .md is then treated as an unrelated file and may pair separately
+pairing_detection: computed once, globally, as a set of mutual claims, so reciprocity holds by construction. Claim order: (1) x.zh-CN.md <-> x.en.md; (2) x.en.md <-> x.md; (3) docs/en/P <-> docs/zh-CN/P. A file already paired is never claimed again, so a plain x.md whose x.en.md is already taken by a x.zh-CN.md is left unpaired rather than forced into a non-reciprocal link. A claim whose counterparty is absent from the baseline tree is dropped.
 generator: 14-ai-development/work-items/FIX-2026-P1-T3/generate-tier-proposal.py
 marker_families:
   normative: ["MUST", "MUST NOT", "SHALL", "REQUIRED", "SHOULD", "禁止", "必须", "不得", "强制性"]
@@ -1543,7 +1543,8 @@ files:
     evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
     confirmation_record: PENDING
   - path: "docs/en/06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.zh-CN.md"
-    paired: false
+    paired: true
+    partner: "docs/zh-CN/06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.zh-CN.md"
     suggested_tier: TIER3_CANDIDATE
     confidence: LOW
     evidence: "no architecture-contract or normative markers in head; descriptive/operational"
@@ -2138,7 +2139,8 @@ files:
     evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming"
     confirmation_record: PENDING
   - path: "docs/zh-CN/06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.zh-CN.md"
-    paired: false
+    paired: true
+    partner: "docs/en/06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.zh-CN.md"
     suggested_tier: TIER3_CANDIDATE
     confidence: LOW
     evidence: "no architecture-contract or normative markers in head; descriptive/operational"

@@ -41,9 +41,9 @@ Generator: `14-ai-development/work-items/FIX-2026-P1-T3/generate-tier-proposal.p
 
 **Rule order.** index/README navigation → Tier 3 candidate (LOW); `prompts/` → Tier 2-or-3 (MEDIUM); ≥2 ephemeral → Tier 3 (HIGH); arch ≥3 **and** norm ≥3 → Tier 1 candidate (HIGH); header **and** norm ≥1 → Tier 1 candidate (MEDIUM); norm ≥2 → Tier 1 candidate (LOW); otherwise Tier 3 candidate (LOW).
 
-**Pairing detection.** (a) same-directory suffix swap `.en.md` ↔ `.zh-CN.md` ↔ `.md`; (b) `docs/en/` ↔ `docs/zh-CN/` path mirror. Pairing is verified reciprocal by a generator assertion — every partner points back to its originator and exists in the baseline tree, or the generator refuses to write. A pair whose two sides scan to different tiers is marked `PAIR-DIVERGENT` on both rows and forced to LOW confidence.
+**Pairing detection.** Computed once, globally, as a set of **mutual claims**, so reciprocity holds by construction rather than by after-the-fact checking. Claim order: (1) `x.zh-CN.md` ↔ `x.en.md`; (2) `x.en.md` ↔ `x.md`; (3) `docs/en/P` ↔ `docs/zh-CN/P`. A file already paired is never claimed again — so a plain `x.md` whose `x.en.md` is already taken by a `x.zh-CN.md` is left **unpaired** rather than forced into a non-reciprocal link. A claim whose counterparty is absent from the baseline tree is dropped. Audited after generation: 164 paired rows, 0 non-reciprocal. A pair whose two sides scan to different tiers is marked `PAIR-DIVERGENT` on both rows and forced to LOW confidence.
 
-## Distribution (377 files in scope, 162 paired)
+## Distribution (377 files in scope, 164 paired)
 
 | Suggestion | Confidence | Count |
 |---|---:|---:|

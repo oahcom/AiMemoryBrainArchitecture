@@ -26,26 +26,44 @@ all_md = set(p for p in tree.splitlines() if p.endswith('.md'))
 BASE = subprocess.run(['git', '-C', REPO, 'rev-parse', 'origin/main'],
                       capture_output=True, text=True).stdout.strip()
 
+def build_pairs():
+    """Return {path: partner}. Pairing is computed once, globally, so the
+    result is reciprocal by construction.
+
+    Order of claims (a file already paired is not claimed again):
+      1. x.zh-CN.md <-> x.en.md
+      2. x.en.md <-> x.md            (only if that .en.md is still free)
+      3. docs/en/P <-> docs/zh-CN/P
+    A plain x.md whose x.en.md is already taken by a x.zh-CN.md is left
+    unpaired rather than forced into a non-reciprocal link.
+    """
+    pairs = {}
+
+    def claim(a, b):
+        if a not in all_md or b not in all_md:
+            return False
+        if a in pairs or b in pairs:
+            return False
+        pairs[a] = b
+        pairs[b] = a
+        return True
+
+    for p in sorted(all_md):
+        if p.endswith('.zh-CN.md'):
+            claim(p, p[:-len('.zh-CN.md')] + '.en.md')
+    for p in sorted(all_md):
+        if p.endswith('.en.md'):
+            claim(p, p[:-len('.en.md')] + '.md')
+    for p in sorted(all_md):
+        for a, b in (('docs/en/', 'docs/zh-CN/'), ('docs/zh-CN/', 'docs/en/')):
+            if p.startswith(a):
+                claim(p, b + p[len(a):])
+    return pairs
+
+PAIRS = build_pairs()
+
 def partner(p):
-    # 1) same-directory suffix pairs
-    if p.endswith('.zh-CN.md'):
-        c = p[:-len('.zh-CN.md')] + '.en.md'
-        return c if c in all_md else None
-    if p.endswith('.en.md'):
-        base = p[:-len('.en.md')]
-        for suf in ('.zh-CN.md', '.md'):
-            if base + suf in all_md:
-                return base + suf
-        return None
-    base = p[:-len('.md')]
-    if base + '.en.md' in all_md:
-        return base + '.en.md'
-    # 2) docs/en/ <-> docs/zh-CN/ mirror (R1 P2 finding)
-    for a, b in (('docs/en/', 'docs/zh-CN/'), ('docs/zh-CN/', 'docs/en/')):
-        if p.startswith(a):
-            c = b + p[len(a):]
-            return c if c in all_md else None
-    return None
+    return PAIRS.get(p)
 
 scope_dirs = ('docs/', 'prompts/', '14-ai-development/', '13-engineering-decisions/')
 candidates = sorted(p for p in all_md if p.startswith(scope_dirs))
@@ -147,10 +165,10 @@ out = [
  'file_enumeration: git ls-tree -r --name-only origin/main, filtered to paths ending .md and starting with one of the four scope prefixes, then sorted with Python sorted() (byte-wise ASC on the full path). No glob, no .gitignore, no filesystem walk - the tree object is the only source.',
  'path_exclusions: none beyond the scope prefixes and the .md filter; the proposal files themselves are not excluded, so they appear as UNKNOWN-bucket rows like any other new document',
  'read_failure_handling: strict UTF-8 decode (UnicodeDecodeError is the failure signal; errors=replace is rejected because a legitimate U+FFFD would be indistinguishable from a decode artefact) plus a non-zero git show exit; either condition prefixes the row evidence with READ-<FAILURE> and forces LOW confidence; such a row is never equivalent to a genuine negative',
- 'write_order: all assertions (pairing reciprocity, row counts, no stale baseline text, no tabs) run against the in-memory text before any byte reaches disk; the file is then written to a .tmp in the same directory and moved with os.replace, so a failing run leaves no partial proposal',
+ 'write_order: all assertions (pairing reciprocity, row counts, no stale baseline text, no tabs) run against the in-memory text before any byte reaches disk; the text is then written to a .tmp in the same directory through a context manager, so the handle is closed before os.replace promotes it; any exception removes the .tmp and re-raises, so a failing run leaves no partial proposal',
  'run_environment: python 3.13, git 2.x, no network access, no third-party packages; output is LF-terminated UTF-8',
  'marker_matching: case-insensitive substring match within the scan window; counts are distinct-marker counts, not occurrence counts; a marker counted once regardless of repetitions',
- 'pairing_detection: (a) same-directory suffix swap .en.md <-> .zh-CN.md <-> .md; (b) docs/en/ <-> docs/zh-CN/ path mirror. Tie-break when an .en.md has both a .zh-CN.md and a plain .md sibling: .zh-CN.md wins, because the bilingual policy pairs on the explicit language suffix first; the plain .md is then treated as an unrelated file and may pair separately',
+ 'pairing_detection: computed once, globally, as a set of mutual claims, so reciprocity holds by construction. Claim order: (1) x.zh-CN.md <-> x.en.md; (2) x.en.md <-> x.md; (3) docs/en/P <-> docs/zh-CN/P. A file already paired is never claimed again, so a plain x.md whose x.en.md is already taken by a x.zh-CN.md is left unpaired rather than forced into a non-reciprocal link. A claim whose counterparty is absent from the baseline tree is dropped.',
  'generator: 14-ai-development/work-items/FIX-2026-P1-T3/generate-tier-proposal.py',
  'marker_families:',
  '  normative: [' + ', '.join('"%s"' % m for m in NORMATIVE) + ']',
@@ -180,10 +198,19 @@ assert text.count('PAIR-DIVERGENT') == len(divergent)
 assert text.count('\t') == 0, 'tab character in output'
 
 # ---- atomic write: temp file in the same directory, then os.replace ----
+# The handle is closed by the `with` block before os.replace runs, so a
+# successful replace is a complete file; any exception before the replace
+# removes the temp file and leaves the previous proposal (or none) in place.
 path = os.path.join(REPO, '14-ai-development/work-items/FIX-2026-P1-T3/tier-confirmation-proposal.yaml')
 tmp = path + '.tmp'
-io.open(tmp, 'w', encoding='utf-8', newline='\n').write(text)
-os.replace(tmp, path)
+try:
+    with io.open(tmp, 'w', encoding='utf-8', newline='\n') as f:
+        f.write(text)
+    os.replace(tmp, path)
+except BaseException:
+    if os.path.exists(tmp):
+        os.remove(tmp)
+    raise
 
 c = Counter((r[3], r[4]) for r in rows)
 print('files:', len(rows), 'paired:', sum(1 for r in rows if r[1]), 'baseline:', BASE[:8])
