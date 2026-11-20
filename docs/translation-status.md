@@ -354,5 +354,5 @@ The earlier OPEN entry is superseded. C's separate cross-authority causal-order 
 - AI-EXEC-003 source: `14-ai-development/AI-EXEC-003.md`; English counterpart: `docs/en/14-ai-development/AI-EXEC-003.md`.
 - GLB-DEV-001 v1.1 prompt pair: `prompts/global-project-developer.md` ↔ `prompts/global-project-developer.zh-CN.md`.
 - Both pairs are introduced together under AID-2026-011 / Issue #329 / branch `ai/AID-2026-011/IO-execution-first-baseline`.
-- Status: PROPOSED; exact-head readback and structural self-check pending; independent semantic-parity review pending; no Owner adoption or upstream-standard amendment implied.
+- Status: PROPOSED; exact-head readback and structural self-check completed by the author (8/8 deliverable paths); independent semantic-parity review pending; no Owner adoption or upstream-standard amendment implied.
 - Normative parity dimensions: execution default, blocker taxonomy, blocker scope, Owner authority, mandatory R2/R3 reviews, independent-slice continuation, two-iteration anti-stagnation trigger, lifecycle status/evidence integrity, and adoption boundary.
