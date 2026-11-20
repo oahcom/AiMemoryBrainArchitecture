@@ -6,11 +6,11 @@
 - 源版本：81c48c928cb5f9c76ca29d493fbd9479079e62f7
 - 对应英文：[Memory Lifecycle Model](../../en/02-domain-model/lifecycle-model.md)
 - 状态：状态词汇及其区分为 DECIDED；策略阈值和部分转换为 OPEN
-- Owner：Domain Model 定义语义；Memory Lifecycle Manager 执行 Canonical 状态转换
+- Owner：Domain Model 定义生命周期语义；D 负责 Canonical Memory/Forget 语义及 Fence 顺序；I 负责授权与跨系统治理策略；Memory Lifecycle Manager 仅执行已获授权的 Canonical 状态转换
 
 ## 1. 目的与边界
 
-本文定义 Canonical Memory 资产的生命周期语义，以及它与 Claim Epistemic Status、Memory Version 历史、Entity/Relation 状态和 Forget Governance 的关系。Domain Model 定义有效状态；Lifecycle Manager 拥有策略、执行、授权和审计；Canonical Store 拥有持久化/版本机制；Compiler 负责提出 Candidate，但不能绕过 Lifecycle Policy。
+本文定义 Canonical Memory 资产的生命周期语义，以及它与 Claim Epistemic Status、Memory Version 历史、Entity/Relation 状态和 Forget Governance 的关系。Domain Model 定义有效状态；D 负责 Canonical Memory/Forget 语义及 Fence 顺序；I 负责授权、保留/法律保全策略、跨系统 Inventory/Evidence 接受策略及跨系统治理评估；Lifecycle Manager 仅执行已获授权的状态转换并记录本地执行/审计证据；Canonical Store 负责持久化/版本机制；Compiler 负责提出 Candidate，但不能绕过 Lifecycle Policy。
 
 ## 2. Lifecycle 不等于 Epistemic Status
 
@@ -156,3 +156,19 @@ Lifecycle Command 在 Actor + Operation + Target + Key 范围内必须幂等。�
 - Store 确认 Lifecycle/Version/Current Pointer 的原子语义。
 - Governance 确认 Forget 工作流和完成证明。
 - Runtime/MCM 确认 Superseded、Archived、Forgotten 引用的处理行为。
+
+
+## 13. Forget 合同对齐提案——待 D/I 批准
+
+双语联合合同提案已记录于 `14-ai-development/work-items/AID-2026-001/forget-lifecycle-joined-contract-proposal-v1.md`。该引用属于提案；只有 D 与 I 对完全相同的版本/SHA 作出批准后，方可成为规范性修订。
+
+拟澄清事项：
+
+- `Forgotten` 对 Canonical Memory 身份而言是终态，表示持久化 Suppression/Fence 决策已经线性化。
+- `Forgotten` 不代表物理擦除、备份到期、外部接收方合规或 Global Forget 已完成。
+- Forget Operation 是独立状态机。Memory 可以已经处于 `Forgotten`，而其操作仍处于 `InventorySealed` 或 `CleanupInProgress`。
+- `SuppressionCommitted` 是规范线性化事件：Tombstone、ForgetFence Generation 与 Operation/Outbox 记录必须一并持久化提交。此后不得通过取消或回滚移除 Fence 或恢复普通访问。
+- D 负责 Canonical Memory/Forget 语义、Fence 顺序及 D 域完成谓词。I 负责授权、保留/法律保全策略、跨系统 Inventory/Evidence 接受策略及跨系统治理评估；I 不得改写 D 的状态或谓词。执行方仅负责其本地动作与证据。
+- 清理失败或未完成时，Suppression 必须持续生效并可恢复；不得重新开放该 Memory 身份。
+
+**状态：** PROPOSED / D-I APPROVAL PENDING / R3 TESTS NOT RUN。
