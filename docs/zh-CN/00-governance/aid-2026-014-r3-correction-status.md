@@ -194,3 +194,50 @@ AID-2026-014-PROMPT v1 钉定。在该分支上应用是正确处置；将 ADR �
 具权威性，且不得镜像。
 
 R3 复审处置、正式验收、Schema 冻结与实现一致性均不因本注改变。七行独立复审状态仍全部为 `PENDING`。
+
+### 9.1 R1 与 R4 修正轮的钉定回读
+
+回读基线 HEAD：`dd4ecf167c4af4ccb911f18dcfca2ca849f0b650`。下表所有 Blob 均读自该确切提交，而非漂移中的分支头。此举是有意的：
+在撰写本注期间，`main` 已从 `92459e0f` 经 `1733c3bf` 推进到 `dd4ecf16`，其中
+`memory-versioning.md` 在该窗口内被改动了两次。不指明基线的回读不构成证据，故此处以钉定提交
+满足第 4 节要求。
+
+| 组 | 本轮改动内容 |
+|---|---|
+| R1/R4 | 确认 Canonical Claim identity 语义为 DECIDED；从领域模型 Overview 与 phase-1 Freeze 中删除过期的 `OPEN` 条款（6 条，EN/ZH/根级）。 |
+| R1 消费者 | 下游文本对齐至已决的 Claim identity 语义。 |
+| R4/R5 消费者 | Extraction 区分 Claim identity、Fact 专属建模与物理 Schema 三者。 |
+| G | 确立第 13.3 节为根级规范来源；第 14.5 节作为其从属约束对齐。 |
+
+| 目标 | 组 | 本轮回读所取代的值 | 基线 HEAD 处 Blob | 产生该 Blob 的提交 |
+|---|---|---|---|---|
+| docs/en/02-domain-model/domain-model-overview.md | R1/R4 | 46fbdcacbe8a | 5b86fe23ab7c670b4ae13331b56572aee35f5d00 | bc114263 |
+| docs/zh-CN/02-domain-model/domain-model-overview.md | R1/R4 | d80d0515f9e0 | 03129ded6e9532048240aea3a18414370cbcb73d | bc114263 |
+| 02-domain-model/domain-model-overview.md | R1/R4 | 46fbdcacbe8a | 5b86fe23ab7c670b4ae13331b56572aee35f5d00 | 778d1bee |
+| docs/en/02-domain-model/phase-1-domain-model-freeze.md | R4 | 80a159515717 | 1a18c6b8424c939dd90986527a24807c8f74d552 | bc114263 |
+| docs/zh-CN/02-domain-model/phase-1-domain-model-freeze.md | R4 | acf12e265b52 | 408a606c44fcf271f265508bc9d3029f8fc889cb | bc114263 |
+| 02-domain-model/phase-1-domain-model-freeze.md | R4 | 第 8 节未登记 | d1102a0adf32e3f7b3eb9091758823f990a2a37c | ae5a886f |
+| docs/en/03-memory-brain/memory-versioning.md | R1 消费者 | d6694ba1409b | 7e63b9b397c3bdff1567dab421f658af86ee1a48 | 5ed9669d |
+| docs/zh-CN/03-memory-brain/memory-versioning.md | R1 消费者 | dc652751d8c0 | 89d9eb4786615cc43f7098b206c1ccd446536fa2 | 9c94b3c4 |
+| docs/en/04-memory-compiler/extraction-and-normalization.md | R4/R5 消费者 | 8d408328ed0d | 10c46fd79c53c54a77f8bd2c91107a4b2aeaabda | 39553c25 |
+| docs/zh-CN/04-memory-compiler/extraction-and-normalization.md | R4/R5 消费者 | 6d67d73c5cca | cec9cf3185659b8d9ba1dd916674f71dd4fce808 | 39553c25 |
+| docs/en/06-memory-context/phase-3.8.27-g-claim-fact-visibility-addendum.md | G | 28ab2832d5f2 | 190bd11d8226d6e6e3c97ad37b700d43b8b70720 | ae5a886f |
+| docs/zh-CN/06-memory-context/phase-3.8.27-g-claim-fact-visibility-addendum.md | G | d651005e5a87 | 47d9fe9b7387c843f09f519519b14e998a1a65c7 | ae5a886f |
+| 06-memory-context/context-versioning.md | G 根级 | 05c0739d0c22 (§8 bullet) | 847c9578b4404c1a034fe62ee9bbffa598f7ab2e | ae5a886f |
+
+有两行需说明。根级 `02-domain-model/phase-1-domain-model-freeze.md` 在第 8 节中并无登记，
+故无可援引的被取代值；`第 8 节未登记` 为字面陈述，非占位符。根级
+`06-memory-context/context-versioning.md` 在第 8 节中不是表格行，而出现在「本轮未应用」条目
+之内，故其被取代值附 `（§8 条目）` 限定。
+
+R4 的闭合是实质性的，非文字性的。`10c46fd7` 拆开了此前被混为一谈的三个问题：canonical
+Claim identity 语义为 `DECIDED FOR CONVERGENCE` 且由 D 治理；Fact 专属建模与 Fact 批准在
+INT-P0-01 下仍为 `OPEN`；物理 Schema 与 DDL 仍为 `NOT APPROVED`。`ADR-BLOCKED` 已不再描述
+Claim identity mapping。此前独立复审在此点上的结论读自 `2717fadb`，该版本已被取代。
+
+第 3 节出现两个状态值：`FIX_APPLIED_AWAITING_REREVIEW` 与
+`APPLIED_PENDING_INDEPENDENT_REVIEW`。二者为同一确定性等级，并非两个档次。两者均表示应用已
+发生、独立复审未完成，区别仅在产生该应用的是哪一轮次。此处登记以免被读作等级排序。
+
+上表不含两个状态文件自身，因为本小节即随它们一同提交：其提交前 Blob 为 `db3e9f394c61c247ae9dde51c92d190f194ee11a`（EN）与
+`87c00ade741ebc0837c2f6903b820741f2887e4a`（ZH），由新增本小节的提交取代。

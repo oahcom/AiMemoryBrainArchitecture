@@ -196,3 +196,52 @@ Until one exists, the ADR is authoritative on its own branch and MUST NOT be mir
 
 R3 review disposition, formal acceptance, schema freeze, and implementation conformance are
 unchanged by this note. All seven rows still carry `PENDING` for independent review.
+
+### 9.1 Pinned read-back of the R1 and R4 correction round
+
+Read-back baseline HEAD: `dd4ecf167c4af4ccb911f18dcfca2ca849f0b650`. Every Blob below was read at that exact commit, not at a moving
+branch head. That is deliberate: `main` advanced from `92459e0f` through `1733c3bf` to `dd4ecf16`
+while this note was being written, and `memory-versioning.md` changed twice inside that window. A
+read-back that names no baseline is not evidence, so §4 is satisfied here by pinning.
+
+| Group | What the round changed |
+|---|---|
+| R1/R4 | Canonical Claim identity semantics confirmed DECIDED; stale `OPEN` clauses removed from the domain-model Overview and the phase-1 Freeze (6 clauses, EN/ZH/root). |
+| R1 consumer | Downstream text aligned to the decided Claim identity semantics. |
+| R4/R5 consumer | Extraction separates Claim identity, Fact-specific modeling, and physical Schema. |
+| G | §13.3 established as canonical root source; §14.5 aligned to it as subordinate. |
+
+| Target | Group | Value this round supersedes | Blob at baseline HEAD | Producing commit |
+|---|---|---|---|---|
+| docs/en/02-domain-model/domain-model-overview.md | R1/R4 | 46fbdcacbe8a | 5b86fe23ab7c670b4ae13331b56572aee35f5d00 | bc114263 |
+| docs/zh-CN/02-domain-model/domain-model-overview.md | R1/R4 | d80d0515f9e0 | 03129ded6e9532048240aea3a18414370cbcb73d | bc114263 |
+| 02-domain-model/domain-model-overview.md | R1/R4 | 46fbdcacbe8a | 5b86fe23ab7c670b4ae13331b56572aee35f5d00 | 778d1bee |
+| docs/en/02-domain-model/phase-1-domain-model-freeze.md | R4 | 80a159515717 | 1a18c6b8424c939dd90986527a24807c8f74d552 | bc114263 |
+| docs/zh-CN/02-domain-model/phase-1-domain-model-freeze.md | R4 | acf12e265b52 | 408a606c44fcf271f265508bc9d3029f8fc889cb | bc114263 |
+| 02-domain-model/phase-1-domain-model-freeze.md | R4 | not in §8 | d1102a0adf32e3f7b3eb9091758823f990a2a37c | ae5a886f |
+| docs/en/03-memory-brain/memory-versioning.md | R1 consumer | d6694ba1409b | 7e63b9b397c3bdff1567dab421f658af86ee1a48 | 5ed9669d |
+| docs/zh-CN/03-memory-brain/memory-versioning.md | R1 consumer | dc652751d8c0 | 89d9eb4786615cc43f7098b206c1ccd446536fa2 | 9c94b3c4 |
+| docs/en/04-memory-compiler/extraction-and-normalization.md | R4/R5 consumer | 8d408328ed0d | 10c46fd79c53c54a77f8bd2c91107a4b2aeaabda | 39553c25 |
+| docs/zh-CN/04-memory-compiler/extraction-and-normalization.md | R4/R5 consumer | 6d67d73c5cca | cec9cf3185659b8d9ba1dd916674f71dd4fce808 | 39553c25 |
+| docs/en/06-memory-context/phase-3.8.27-g-claim-fact-visibility-addendum.md | G | 28ab2832d5f2 | 190bd11d8226d6e6e3c97ad37b700d43b8b70720 | ae5a886f |
+| docs/zh-CN/06-memory-context/phase-3.8.27-g-claim-fact-visibility-addendum.md | G | d651005e5a87 | 47d9fe9b7387c843f09f519519b14e998a1a65c7 | ae5a886f |
+| 06-memory-context/context-versioning.md | G root | 05c0739d0c22 (§8 bullet) | 847c9578b4404c1a034fe62ee9bbffa598f7ab2e | ae5a886f |
+
+Two rows need a word of caution. The root-level `02-domain-model/phase-1-domain-model-freeze.md`
+has no row in §8 at all, so there is no superseded value to cite; `not in §8` is literal, not a
+placeholder. The root-level `06-memory-context/context-versioning.md` appears in §8 not as a table
+row but inside the "Not applied in this round" bullet, hence the `(§8 bullet)` qualifier.
+
+The R4 closure is substantive, not clerical. `10c46fd7` splits three questions that the earlier
+text ran together: canonical Claim identity semantics are `DECIDED FOR CONVERGENCE` and governed
+by D; Fact-specific modeling and Fact approval remain `OPEN` under INT-P0-01; physical Schema and
+DDL remain `NOT APPROVED`. `ADR-BLOCKED` no longer describes Claim identity mapping. The
+independent-review finding on this point was read from `2717fadb`, which is superseded.
+
+Two status values appear in §3: `FIX_APPLIED_AWAITING_REREVIEW` and
+`APPLIED_PENDING_INDEPENDENT_REVIEW`. They are one certainty level, not two grades. Both mean the
+application happened and independent review has not; they differ only in which round produced the
+application. Recorded here so the difference is not read as a ranking.
+
+The two status files carry no row above, because this section ships inside them: their pre-commit
+Blobs were `db3e9f394c61c247ae9dde51c92d190f194ee11a` (EN) and `87c00ade741ebc0837c2f6903b820741f2887e4a` (ZH), superseded by the commit that adds this section.
