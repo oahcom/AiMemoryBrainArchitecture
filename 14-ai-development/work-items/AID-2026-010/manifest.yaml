@@ -760,9 +760,9 @@ current_session_owner_ruling_2026_11_20:
 final_current_ledger_pin_d2026_1120_01:
   date: "2026-11-20"
   finding_ledger_path: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
-  finding_ledger_commit: "66f6e3d728f64037dc129a78fb4b2f413c5564e2"
-  finding_ledger_blob: "f0121a1b216bcb15f50f9747c49d7c37c21e6dce"
-  reason: "The ledger commit `66f6e3d728f64037dc129a78fb4b2f413c5564e2` is the exact append-only live-ref reconciliation commit; its ledger Blob is `f0121a1b216bcb15f50f9747c49d7c37c21e6dce`. This terminal pin supersedes earlier historical pins in this manifest."
+  finding_ledger_commit: "a8d99a2090112002f47641e8c595d46c61c6ddb6"
+  finding_ledger_blob: "867d7b2dc9476b0cf5a38d1ec9dbb98308a26017"
+  reason: "The ledger commit `a8d99a2090112002f47641e8c595d46c61c6ddb6` is the exact current append-only F1/F3 ledger commit; its ledger Blob is `867d7b2dc9476b0cf5a38d1ec9dbb98308a26017`. This terminal pin supersedes earlier historical pins in this manifest."
   findings:
     F-43-01/F1: "P1_OPEN_RUNTIME_IMPLEMENTATION_EVIDENCE"
     F-43-01/F3: "P1_OPEN_INDEPENDENT_HUMAN_AND_OPERATIONAL_EVIDENCE"
@@ -778,8 +778,8 @@ live_exact_ref_reconciliation_2026_11_20:
     pr: 323
     branch: "fix/f43-01-f3-ledger-reconcile"
     prior_head: "32a081fa22e01570e96464c440495609f01edec4"
-    ledger_commit: "66f6e3d728f64037dc129a78fb4b2f413c5564e2"
-    ledger_blob: "f0121a1b216bcb15f50f9747c49d7c37c21e6dce"
+    ledger_commit: "a8d99a2090112002f47641e8c595d46c61c6ddb6"
+    ledger_blob: "867d7b2dc9476b0cf5a38d1ec9dbb98308a26017"
   F1:
     pr: 327
     head: "2858c8798deaf30fb12709e8226f880534c963f1"
