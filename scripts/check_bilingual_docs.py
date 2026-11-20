@@ -64,8 +64,12 @@ def changed_paths() -> set[str]:
     head = os.environ.get("HEAD_SHA", "")
     if not base or not head:
         raise RuntimeError("BASE_SHA and HEAD_SHA are required")
+    # --no-renames is deliberate: with rename detection a `git mv` reports only
+    # the destination, so the deleted side of a moved bilingual pair drops out
+    # of this set and the pairing check silently passes. Reporting the move as
+    # add+delete keeps both paths visible to every downstream check.
     raw = subprocess.check_output(
-        ["git", "diff", "--name-only", f"{base}...{head}"],
+        ["git", "diff", "--name-only", "--no-renames", f"{base}...{head}"],
         text=True,
     )
     return {line.strip() for line in raw.splitlines() if line.strip()}
@@ -365,13 +369,16 @@ def check_mirror_pairing(changed, exception):
             counterpart = "docs/zh-CN/" + path[len("docs/en/"):]
             if counterpart not in changed and not exception:
                 errors.append(f"{path} changed without paired change {counterpart}")
-            if not (ROOT / counterpart).is_file() and not exception:
+            # Only require the counterpart to exist while this side still exists.
+            # A moved-away path is deleted here; demanding its partner still sit
+            # at the old location would reject legitimate paired moves.
+            if (ROOT / path).is_file() and not (ROOT / counterpart).is_file() and not exception:
                 errors.append(f"Chinese counterpart does not exist: {counterpart}")
         elif path.startswith("docs/zh-CN/"):
             counterpart = "docs/en/" + path[len("docs/zh-CN/"):]
             if counterpart not in changed and not exception:
                 errors.append(f"{path} changed without paired change {counterpart}")
-            if not (ROOT / counterpart).is_file() and not exception:
+            if (ROOT / path).is_file() and not (ROOT / counterpart).is_file() and not exception:
                 errors.append(f"English counterpart does not exist: {counterpart}")
     return errors
 

@@ -149,6 +149,77 @@ class GateRootsTest(unittest.TestCase):
         errors = self.gate.check_mirror_pairing(changed, False)
         self.assertTrue(any("without paired change" in e for e in errors), errors)
 
+    # --- regression: a moved-away side must not demand a partner at the old path ---
+
+    def test_moved_away_side_does_not_require_old_counterpart(self):
+        """Both sides moved together: old paths are gone, new ones exist.
+
+        changed_paths() reports moves as add+delete, so the deleted old path is
+        inspected. It must not be failed for lacking a counterpart at the old
+        location, or every legitimate paired move would be rejected.
+        """
+        self.write("docs/en/00-governance/sub/policy.md")
+        self.write("docs/zh-CN/00-governance/sub/policy.md")
+        changed = {"docs/en/00-governance/policy.md", "docs/zh-CN/00-governance/policy.md"}
+        self.assertEqual(self.gate.check_mirror_pairing(changed, False), [])
+
+    def test_moved_away_side_still_requires_paired_change(self):
+        """A one-sided move remains an error: the pair was split."""
+        self.write("docs/en/00-governance/sub/policy.md")
+        self.write("docs/zh-CN/00-governance/policy.md")
+        changed = {
+            "docs/en/00-governance/policy.md",
+            "docs/en/00-governance/sub/policy.md",
+        }
+        errors = self.gate.check_mirror_pairing(changed, False)
+        self.assertTrue(any("without paired change" in e for e in errors), errors)
+
+    # --- root cause: a move must expose its deleted side to changed_paths() ---
+
+    def test_changed_paths_reports_both_sides_of_a_move(self):
+        """Rename detection would hide the deleted side; --no-renames must not.
+
+        This is the root cause of the split-pair blind spot: with rename
+        detection a `git mv docs/zh-CN/x.md docs/governance/x.md` yields only
+        the destination, so the pairing check never sees the removal.
+        """
+        import os
+        import subprocess
+
+        repo = Path(self._tmp.name) / "repo"
+        repo.mkdir()
+        run = lambda *a: subprocess.run(a, cwd=repo, check=True,
+                                        capture_output=True, text=True)
+        run("git", "init", "-q")
+        run("git", "config", "user.email", "t@example.invalid")
+        run("git", "config", "user.name", "t")
+        src = Path("docs/zh-CN/00-governance/policy.md")
+        (repo / src).parent.mkdir(parents=True)
+        (repo / src).write_text("x\n", encoding="utf-8")
+        run("git", "add", "-A")
+        run("git", "commit", "-qm", "a")
+        base = run("git", "rev-parse", "HEAD").stdout.strip()
+        (repo / "docs/governance").mkdir(parents=True)
+        run("git", "mv", str(src), "docs/governance/policy.md")
+        run("git", "commit", "-qm", "move")
+        head = run("git", "rev-parse", "HEAD").stdout.strip()
+
+        os.environ["BASE_SHA"], os.environ["HEAD_SHA"] = base, head
+        prev = os.getcwd()
+        try:
+            os.chdir(repo)
+            mod = load_gate(repo)
+            mod.ROOT = repo
+            seen = mod.changed_paths()
+        finally:
+            os.chdir(prev)
+            os.environ.pop("BASE_SHA", None)
+            os.environ.pop("HEAD_SHA", None)
+
+        self.assertIn("docs/zh-CN/00-governance/policy.md", seen,
+                      "--no-renames must report the moved-away side")
+        self.assertIn("docs/governance/policy.md", seen)
+
 
 if __name__ == "__main__":
     unittest.main()
