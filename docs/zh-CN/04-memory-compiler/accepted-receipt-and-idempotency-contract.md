@@ -3,8 +3,8 @@
 - 文档 ID：E-RECEIPT-001
 - 版本：1.0
 - 源分支：session-e-memory-compiler-2026-11-16
-- 源文件版本：5ca77a5b48e69afb3bc81429baf538be7dce4d46
-- 源规范：[E Owner 规范](../../../04-memory-compiler/accepted-receipt-and-idempotency-contract.md)
+- 源文件版本：DEREFERENCED — 保留历史源 Blob `5ca77a5b48e69afb3bc81429baf538be7dce4d46`；当前仓库不存在可解析的规范性源文件。
+- 源规范：DEREFERENCED — 原规范源路径 `04-memory-compiler/accepted-receipt-and-idempotency-contract.md` 在当前 main tree 中不存在；替代物：[英文对照版](../../en/04-memory-compiler/accepted-receipt-and-idempotency-contract.md)（Blob `f2a4007f4b17e33de9bcd183c57ee504cfeef6cd`；仅为对照文本，不是规范性替代源）。
 - 对应英文：[Accepted Receipt, Compiler Completion and Idempotency Contract](../../en/04-memory-compiler/accepted-receipt-and-idempotency-contract.md)
 - 状态：E 的 CANDIDATE 契约；Storage 实现、D Producer API、H Envelope 和 I Policy 批准仍为 OPEN
 

@@ -3,9 +3,9 @@
 - 文档 ID：D-LIFECYCLE-001
 - 版本：1.0
 - 源分支：session-d-memory-brain-2026-11-16
-- 源文件版本：8b972035b449e1eab546aedc9cc5b30581600c65
+- 源文件版本：DEREFERENCED — 保留历史源 Blob `8b972035b449e1eab546aedc9cc5b30581600c65`；当前仓库不存在可解析的规范性源文件。
 - 审查时源分支 HEAD：6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
-- 源规范：[D Owner 规范](../../../03-memory-brain/memory-lifecycle-manager.md)
+- 源规范：DEREFERENCED — 原规范源路径 `03-memory-brain/memory-lifecycle-manager.md` 在当前 main tree 中不存在；替代物：[英文对照版](../../en/03-memory-brain/memory-lifecycle-manager.md)（Blob `856d7847261bc625cc089fb0bfa25096c28b4ff4`；仅为对照文本，不是规范性替代源）。
 - 对应英文：[Memory Lifecycle Manager](../../en/03-memory-brain/memory-lifecycle-manager.md)
 - 状态：状态区分和 Canonical Authority 为 DECIDED；详细策略阈值和部分转换为 OPEN
 - 相关问题：INT-P0-02/03/04、INT-P1-02/06；DM-004/007/008/011

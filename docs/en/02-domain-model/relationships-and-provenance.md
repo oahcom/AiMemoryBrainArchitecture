@@ -3,7 +3,7 @@
 - Document ID: DOMAIN-REL-PROV-001
 - Version: 1.0
 - Source: [Normative source specification](../../../02-domain-model/relationships-and-provenance.md)
-- Source revision: e762f84c59f69de7a44baad2123aed46e1ffea16
+- Source revision: a674e21756cdbf8c07683083bfdcb58a33f48a20
 - Chinese counterpart: [关系与来源链模型](../../zh-CN/02-domain-model/relationships-and-provenance.md)
 - Status: Core semantics DECIDED; graph representation and lineage compaction CANDIDATE/OPEN
 - Owner: Memory Domain Model, with Evidence & Provenance and Entity/Relationship Managers executing the contracts

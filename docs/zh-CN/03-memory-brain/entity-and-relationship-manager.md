@@ -3,9 +3,9 @@
 - 文档 ID：D-ENTITY-RELATION-001
 - 版本：1.0
 - 源分支：session-d-memory-brain-2026-11-16
-- 源文件版本：14697658d4d873381ca8d4e3bed7c1170368ec29
+- 源文件版本：DEREFERENCED — 保留历史源 Blob `14697658d4d873381ca8d4e3bed7c1170368ec29`；当前仓库不存在可解析的规范性源文件。
 - 审查时源分支 HEAD：6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
-- 源规范：[D Owner 规范](../../../03-memory-brain/entity-and-relationship-manager.md)
+- 源规范：DEREFERENCED — 原规范源路径 `03-memory-brain/entity-and-relationship-manager.md` 在当前 main tree 中不存在；替代物：[英文对照版](../../en/03-memory-brain/entity-and-relationship-manager.md)（Blob `c5a545e985c7a46b09c68205ea1b0bde3b985327`；仅为对照文本，不是规范性替代源）。
 - 对应英文：[Entity and Relationship Manager](../../en/03-memory-brain/entity-and-relationship-manager.md)
 - 状态：身份和类型化时间关系原则为 DECIDED；Merge/Split 和词汇细节为 CANDIDATE/OPEN
 - 相关问题：INT-P0-02/03、INT-P1-02/03/06；DM-005/006/007/009/010/013

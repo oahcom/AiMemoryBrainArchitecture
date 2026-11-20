@@ -3,8 +3,8 @@
 - Document ID: E-PRODUCER-ADMISSION-001
 - Version: 1.0
 - Source branch: session-e-memory-compiler-2026-11-16
-- Source revision: e59f517fff161ab882aa0ddc4a5bda513964ae1a
-- Source: [E Owner specification](../../../04-memory-compiler/compiler-state-and-producer-admission.md)
+- Source revision: DEREFERENCED — historical source blob `e59f517fff161ab882aa0ddc4a5bda513964ae1a` retained; no current normative source path exists.
+- Source: DEREFERENCED — original normative path `04-memory-compiler/compiler-state-and-producer-admission.md` is absent from the current main tree; alternative: [surviving Chinese counterpart](../../zh-CN/04-memory-compiler/compiler-state-and-producer-admission.md) (blob `ac26ce694021aeefd1dbf0db0099903b98387be9`; translation only, not an authoritative substitute).
 - Chinese counterpart: [Compiler 状态机与 D Producer Admission 接口](../../zh-CN/04-memory-compiler/compiler-state-and-producer-admission.md)
 - Status: E lifecycle semantics CANDIDATE; D semantic operations DECIDED; callable API/transport and Storage atomicity OPEN
 

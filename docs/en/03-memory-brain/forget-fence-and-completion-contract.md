@@ -3,9 +3,9 @@
 - Document ID: D-FORGET-CONTRACT-001
 - Version: 1.0
 - Source branch: session-d-memory-brain-2026-11-16
-- Source revision: 1f0391bc49d007c44ec74165bd33d37412cc7990
+- Source revision: DEREFERENCED — historical source blob `1f0391bc49d007c44ec74165bd33d37412cc7990` retained; no current normative source path exists.
 - Source branch head audited: 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
-- Source: [D Owner specification](../../../03-memory-brain/forget-fence-and-completion-contract.md)
+- Source: DEREFERENCED — original normative path `03-memory-brain/forget-fence-and-completion-contract.md` is absent from the current main tree; alternative: [surviving Chinese counterpart](../../zh-CN/03-memory-brain/forget-fence-and-completion-contract.md) (blob `38b7d0f4399f782611d9ab50f9ecdf21aa2c4f6c`; translation only, not an authoritative substitute).
 - Chinese counterpart: [Canonical Forget Fence 与完成契约](../../zh-CN/03-memory-brain/forget-fence-and-completion-contract.md)
 - Owner: Session D — Memory Brain Principal Architect
 - Status: D canonical-domain semantics DECIDED; cross-module execution and global completion policy OPEN / I-owned

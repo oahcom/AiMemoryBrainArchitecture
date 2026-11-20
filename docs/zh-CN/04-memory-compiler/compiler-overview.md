@@ -3,9 +3,9 @@
 - 文档 ID：E-COMPILER-001
 - 版本：1.0
 - 源分支：session-e-memory-compiler-2026-11-16
-- 源文件版本：35a766fae29c0b8ddf692a6ec062762f0fca29d2
+- 源文件版本：DEREFERENCED — 保留历史源 Blob `35a766fae29c0b8ddf692a6ec062762f0fca29d2`；当前仓库不存在可解析的规范性源文件。
 - 审查时源分支 HEAD：a1b8ba129ef7d5f4463bd4229667f0b2bf6d9886
-- 源规范：[E Owner 规范](../../../04-memory-compiler/compiler-overview.md)
+- 源规范：DEREFERENCED — 原规范源路径 `04-memory-compiler/compiler-overview.md` 在当前 main tree 中不存在；替代物：[英文对照版](../../en/04-memory-compiler/compiler-overview.md)（Blob `9f6471b40fbede87c746204221a877806e688520`；仅为对照文本，不是规范性替代源）。
 - 对应英文：[Memory Compiler Overview](../../en/04-memory-compiler/compiler-overview.md)
 - 状态：所有权/安全不变量为 DECIDED；阶段拓扑/编排为 CANDIDATE；模型路由/吞吐/资源预算为 TO_VALIDATE
 - Owner：Session E — Memory Compiler

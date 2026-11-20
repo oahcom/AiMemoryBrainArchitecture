@@ -3,9 +3,9 @@
 - 文档 ID：D-VERSIONING-001
 - 版本：1.0
 - 源分支：session-d-memory-brain-2026-11-16
-- 源文件版本：af747f339d03bdd4684b6ed60fca05957dc8e1fb
+- 源文件版本：DEREFERENCED — 保留历史源 Blob `af747f339d03bdd4684b6ed60fca05957dc8e1fb`；原规范源路径在当前 main tree 中不存在。
 - 审查时源分支 HEAD：6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
-- 源规范：[D Owner 规范](../../../03-memory-brain/memory-versioning.md)
+- 源规范：DEREFERENCED — 原规范源路径 `03-memory-brain/memory-versioning.md` 在当前 main tree 中不存在；替代物：[现存英文对照文本](../../en/03-memory-brain/memory-versioning.md)（仅供阅读，不是规范性替代源）。
 - 对应英文：[Memory Versioning and Historical Semantics](../../en/03-memory-brain/memory-versioning.md)
 - 状态：不可变版本原则为 DECIDED；Claim Revision 和精确事务/时间语义为 CANDIDATE/OPEN
 - 相关问题：INT-P0-01/03、INT-P1-01/02/06；DM-002/003/006/008/009/013

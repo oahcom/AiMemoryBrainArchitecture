@@ -2,7 +2,8 @@
 
 - Document ID: D-FORGET-GATE-001-P2
 - Source branch: session-d-memory-brain-2026-11-16
-- Source revision: 4da0b61ba3656a768ea56b4a2a24e09da4e21cd5
+- Source revision: DEREFERENCED — historical source blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5` retained; no current normative source path exists.
+- Source: DEREFERENCED — original normative path `03-memory-brain/forget-fence-operation-and-publication-gate.md` is absent from the current main tree; alternative: [surviving Chinese counterpart](../../zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate-part2.md) (blob `516d0071ceecadc75a972166efd3f17d814611d6`; translation only, not an authoritative substitute).
 - Chinese counterpart: [Part 2 — 可见性边界、证据、故障矩阵与裁决](../../zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate-part2.md)
 - Source sections: 6–11
 

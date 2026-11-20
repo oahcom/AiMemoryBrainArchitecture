@@ -1,0 +1,136 @@
+work_item_id: AID-2026-029
+title: REQ-03 source revision pointer repair and bilingual dereference audit
+owner: Integration Owner (implementation role only)
+accountable_owner: NOT_ASSIGNED
+acceptance_authority: NOT_ASSIGNED
+issue: 264
+related_issues: [264]
+related_prs: []
+task_class: DOC
+risk: R1
+risk_rationale: >-
+  This work changes provenance metadata and adds a read-only source-pointer
+  checker. It does not alter architecture semantics, implementation behavior,
+  schemas, authorization, Forget semantics, or production configuration.
+status: IMPLEMENTED
+
+registration:
+  status: REGISTERED_IN_THIS_CHANGESET
+  allocated_id: AID-2026-029
+  allocation_basis: >-
+    Checked main INDEX.md, branch search, issue search and PR search; no
+    AID-2026-029 registration was found. AID-2026-027 and AID-2026-028 were
+    already allocated and were not reused.
+  owning_issue: 264
+  registration_owner_role: Integration Owner (implementation only)
+
+prompt:
+  id: REQ03-SOURCE-POINTER-REPAIR-PROMPT
+  version: v1
+  provenance: T2_CHAT_INSTRUCTION
+  source: >-
+    User task instruction in the current ChatGPT conversation on 2026-11-20.
+  conversation_session_id: NOT_EXPOSED_BY_INTERFACE
+  stable_permalink: NOT_EXPOSED_BY_INTERFACE
+  raw_platform_message_bytes: NOT_AVAILABLE
+  snapshot_file: prompt-v1.md
+  snapshot_kind: VISIBLE_TEXT_TRANSCRIPTION
+  snapshot_capture_timing: POST_HOC_AFTER_IMPLEMENTATION_STARTED
+  snapshot_sha256: 0a2b379718bd28a7fdeaba4ff69f5f24d8b98dee46981b4cab0935af080389da
+  snapshot_git_blob_sha: abe53c8101cd7bd8d6104fd6f9d357ceb424d390
+  note: >-
+    The SHA-256 is for the archived visible-text transcription, not the
+    original platform message bytes. The current interface does not expose
+    the conversation ID, permalink or original raw message bytes. The
+    snapshot was captured after implementation began and is not represented
+    as a pre-execution prompt gate.
+
+baseline:
+  repository: oahcom/AiMemoryBrainArchitecture
+  target_branch: main
+  base_sha: 8215ec57260b5841df1b9f9aad5a7f26d3073bac
+  base_tree_sha: dd2089f0e818c2d246c5b26f497abd9dfef65ddc
+
+implementation:
+  branch: fix/issue-264-source-pointer-repair
+  initial_commit: 72a778a88f6fbe3a45226aaa00301fc9a32a54fa
+  scope:
+    stale_pointer_pairs_corrected: 6
+    dereferenced_missing_source_pairs: 16
+    bilingual_metadata_files_changed: 44
+    scanner_added: scripts/check_source_revision_pointers.py
+    translation_status_updated: docs/translation-status.md
+  rules:
+    - Update live source SHA only when the exact current source blob exists.
+    - Preserve historical source blob SHA for every dereferenced target.
+    - Mark missing source targets DEREFERENCED and link the surviving opposite-language counterpart.
+    - Explicitly state that a surviving translation is not a normative replacement.
+    - Do not reconstruct deleted source artifacts or infer Owner acceptance.
+    - Do not change normative architecture text.
+
+verification:
+  status: VERIFIED_BY_REMOTE_TREE_SCAN_AND_LOCAL_FIXTURE
+  pointer_scan:
+    scope: docs/en and docs/zh-CN source revision declarations
+    pointers: 56
+    accurate: 24
+    dereferenced: 32
+    stale: 0
+    unresolved: 0
+    bad_dereference: 0
+    non_blob_reference: 1
+    bad_total: 0
+    exit_code: 0
+  baseline_pointer_scan:
+    pointers: 56
+    accurate: 12
+    stale: 12
+    unresolved: 32
+    bad_total: 44
+  commands:
+    - "python -m py_compile scripts/check_source_revision_pointers.py — PASS in isolated fixture workspace"
+    - "python scripts/check_source_revision_pointers.py — PASS in isolated fixture workspace (exit 0)"
+    - "GitHub API recursive tree/blob scan of exact branch — PASS, 56 declarations, 0 bad"
+    - "GitHub compare commits base..head — 46 files, +236/-70 before registration artifacts"
+  not_run:
+    - "Literal git diff --stat against a local clone: container could not resolve github.com; GitHub compare API supplied exact changed-file statistics instead."
+    - "Repository CI: no workflow run was returned for the pre-PR commit."
+    - "Production readiness, Owner acceptance, semantic architecture acceptance: OUT-OF-SCOPE(dev-baseline)."
+
+review:
+  status: SELF_AUDIT_PASS
+  independent_review: NOT_CLAIMED
+  review_note: >-
+    The change is limited to source-provenance metadata and a read-only
+    checker. The implementation session performed exact-blob and reciprocal
+    link checks; this is not an independent review by another identity.
+
+acceptance:
+  implementation_acceptance: SELF_AUDIT_PASS
+  owner_acceptance: NOT_CLAIMED
+  production_gate: OUT-OF-SCOPE(dev-baseline)
+
+merge:
+  target_branch: main
+  status: PENDING
+  merge_commit_sha: NOT_YET_AVAILABLE
+  post_merge_readback: REQUIRED
+
+findings:
+  - id: F-SOURCE-POINTER-STALE-20261120-01
+    severity: P2
+    destination: Issue #264
+    status: READY_TO_CLOSE_ON_MERGE
+    summary: Six stale source blob references corrected in both language pairs.
+  - id: F-SOURCE-POINTER-DEREF-20261120-02
+    severity: P2
+    destination: Issue #264
+    status: READY_TO_CLOSE_ON_MERGE
+    summary: Sixteen absent normative source targets explicitly dereferenced in both language pairs with historical blob and counterpart evidence.
+
+production_scope:
+  status: OUT-OF-SCOPE(dev-baseline)
+  note: >-
+    Production activation, physical Storage/COC proof, global Forget completion,
+    architecture acceptance and domain Owner approval are not claimed by this
+    provenance-only remediation.

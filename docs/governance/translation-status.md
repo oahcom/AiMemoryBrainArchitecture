@@ -348,3 +348,17 @@ The earlier OPEN entry is superseded. C's separate cross-authority causal-order 
 - Structural parity self-check: 7/7 numbered core sections in both template versions; 6/6 top-level numbered sections in both migration-guide versions; matching IDs/version/status and reciprocal links. This is implementer self-check only, NOT independent semantic-parity approval.
 - Exact-head semantic parity review: PENDING independent reviewer. GOV-DOC-001 structural/link checker and repository automated tests: NOT RUN in this remediation commit.
 - The prompt-authoring standard §4 was also reconciled bilingually in its existing bilingual source artifact; its twelve mandatory content requirements are mapped into the seven structural sections. No governance adoption or Owner acceptance is implied.
+
+## 19. Source revision pointer remediation / 来源版本指针修复
+
+This record tracks provenance metadata only; it does not change normative content or assert semantic-parity approval.
+
+- Six stale source-blob references were refreshed in both English and Chinese counterparts to the exact current source blobs.
+- Sixteen missing normative source targets (twelve under the removed `03-memory-brain/` root and four missing files under `04-memory-compiler/`) are explicitly marked `DEREFERENCED` in both language counterparts.
+- Each dereferenced record preserves the historical source Blob identifier and identifies a surviving opposite-language reading counterpart; no translation is represented as a normative replacement.
+- The change covers 44 bilingual metadata documents and adds the read-only checker `scripts/check_source_revision_pointers.py`.
+- No deleted source artifact is reconstructed, no domain decision is inferred, and no production-readiness or semantic acceptance is claimed.
+
+- 六处陈旧源 Blob 引用已在中英文对照文件中更新为准确的当前源 Blob。
+- 十六处缺失的规范源目标已在中英文对照文件中标记为 `DEREFERENCED`，并保留历史 Blob 与替代阅读路径。
+- 本次变更覆盖 44 份双语元数据文档，并新增只读检查脚本；不重建已删除源文件，不推断领域决策或生产就绪状态。

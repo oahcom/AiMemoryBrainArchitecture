@@ -3,7 +3,7 @@
 - 文档 ID：SYS-DATA-FLOWS-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../01-system-architecture/data-flows.md)
-- 源版本：fcec7c598816d439ec4c89694210ccc220aeeccf
+- 源版本：24bc5867749d234238e6d75aadd4119f359de9f8
 - 对应英文：[System Data Flows](../../en/01-system-architecture/data-flows.md)
 - 状态：所有权和语义边界为 DECIDED；调度/传输选择为 CANDIDATE；量化目标为 TO_VALIDATE
 

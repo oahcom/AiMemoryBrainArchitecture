@@ -3,9 +3,9 @@
 - Document ID: E-COMPILER-001
 - Version: 1.0
 - Source branch: session-e-memory-compiler-2026-11-16
-- Source revision: 35a766fae29c0b8ddf692a6ec062762f0fca29d2
+- Source revision: DEREFERENCED — historical source blob `35a766fae29c0b8ddf692a6ec062762f0fca29d2` retained; no current normative source path exists.
 - Source branch head audited: a1b8ba129ef7d5f4463bd4229667f0b2bf6d9886
-- Source: [E Owner specification](../../../04-memory-compiler/compiler-overview.md)
+- Source: DEREFERENCED — original normative path `04-memory-compiler/compiler-overview.md` is absent from the current main tree; alternative: [surviving Chinese counterpart](../../zh-CN/04-memory-compiler/compiler-overview.md) (blob `7aced742e4b1130a857399ccb96c836273c9694e`; translation only, not an authoritative substitute).
 - Chinese counterpart: [Memory Compiler 总览](../../zh-CN/04-memory-compiler/compiler-overview.md)
 - Status: Ownership/safety invariants DECIDED; stage topology/orchestration CANDIDATE; model routing/throughput/resource budgets TO_VALIDATE
 - Owner: Session E — Memory Compiler

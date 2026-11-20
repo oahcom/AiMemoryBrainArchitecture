@@ -3,9 +3,9 @@
 - Document ID: D-MEMORY-BRAIN-001
 - Version: 1.0
 - Source branch: session-d-memory-brain-2026-11-16
-- Source revision: b4ed712ac0626ab127cccfd205c50a9013df01fb
+- Source revision: DEREFERENCED — historical source blob `b4ed712ac0626ab127cccfd205c50a9013df01fb` retained; no current normative source path exists.
 - Source branch head audited: 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
-- Source: [D Owner specification](../../../03-memory-brain/memory-brain-overview.md)
+- Source: DEREFERENCED — original normative path `03-memory-brain/memory-brain-overview.md` is absent from the current main tree; alternative: [surviving Chinese counterpart](../../zh-CN/03-memory-brain/memory-brain-overview.md) (blob `b832d2493b7a6b2b372d324f903710417b7bbce2`; translation only, not an authoritative substitute).
 - Chinese counterpart: [Memory Brain 子系统架构](../../zh-CN/03-memory-brain/memory-brain-overview.md)
 - Status: DECIDED for authority boundaries and invariants; CANDIDATE for detailed object/operation contracts; OPEN items remain non-normative
 - Owner: Session D — Memory Brain Principal Architecture

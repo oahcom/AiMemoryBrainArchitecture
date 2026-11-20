@@ -3,8 +3,8 @@
 - Document ID: E-RECEIPT-001
 - Version: 1.0
 - Source branch: session-e-memory-compiler-2026-11-16
-- Source revision: 5ca77a5b48e69afb3bc81429baf538be7dce4d46
-- Source: [E Owner specification](../../../04-memory-compiler/accepted-receipt-and-idempotency-contract.md)
+- Source revision: DEREFERENCED — historical source blob `5ca77a5b48e69afb3bc81429baf538be7dce4d46` retained; no current normative source path exists.
+- Source: DEREFERENCED — original normative path `04-memory-compiler/accepted-receipt-and-idempotency-contract.md` is absent from the current main tree; alternative: [surviving Chinese counterpart](../../zh-CN/04-memory-compiler/accepted-receipt-and-idempotency-contract.md) (blob `fa8c005a6b8c599c10e71150fb2056d5685e76fd`; translation only, not an authoritative substitute).
 - Chinese counterpart: [Accepted Receipt、Compiler 完成与幂等契约](../../zh-CN/04-memory-compiler/accepted-receipt-and-idempotency-contract.md)
 - Status: CANDIDATE E contract; Storage realization, D producer APIs, H envelope and I policy approval remain OPEN
 

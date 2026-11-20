@@ -3,9 +3,9 @@
 - Document ID: D-ENTITY-RELATION-001
 - Version: 1.0
 - Source branch: session-d-memory-brain-2026-11-16
-- Source revision: 14697658d4d873381ca8d4e3bed7c1170368ec29
+- Source revision: DEREFERENCED — historical source blob `14697658d4d873381ca8d4e3bed7c1170368ec29` retained; no current normative source path exists.
 - Source branch head audited: 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
-- Source: [D Owner specification](../../../03-memory-brain/entity-and-relationship-manager.md)
+- Source: DEREFERENCED — original normative path `03-memory-brain/entity-and-relationship-manager.md` is absent from the current main tree; alternative: [surviving Chinese counterpart](../../zh-CN/03-memory-brain/entity-and-relationship-manager.md) (blob `3bb770efe2decf1b7178281ef8a63c584e3a0d7f`; translation only, not an authoritative substitute).
 - Chinese counterpart: [Entity 与 Relationship Manager](../../zh-CN/03-memory-brain/entity-and-relationship-manager.md)
 - Status: Identity and typed temporal relationship principles DECIDED; merge/split and vocabulary details CANDIDATE/OPEN
 - Related: INT-P0-02/03, INT-P1-02/03/06; DM-005/006/007/009/010/013

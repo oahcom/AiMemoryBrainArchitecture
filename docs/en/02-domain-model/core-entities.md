@@ -3,7 +3,7 @@
 - Document ID: DOMAIN-ENTITIES-001
 - Version: 1.0
 - Source: [Normative source specification](../../../02-domain-model/core-entities.md)
-- Source revision: 8cb5a674eec8eac1f3c4d83c400dc08d00166f23
+- Source revision: 06a914699813e36d8bfd69e96c46debb3c3e0cf3
 - Chinese counterpart: [核心领域实体](../../zh-CN/02-domain-model/core-entities.md)
 - Status: DECIDED semantics unless explicitly marked otherwise
 - Owner: Memory Domain Model (MB-01)

@@ -3,9 +3,9 @@
 - Document ID: D-LIFECYCLE-001
 - Version: 1.0
 - Source branch: session-d-memory-brain-2026-11-16
-- Source revision: 8b972035b449e1eab546aedc9cc5b30581600c65
+- Source revision: DEREFERENCED — historical source blob `8b972035b449e1eab546aedc9cc5b30581600c65` retained; no current normative source path exists.
 - Source branch head audited: 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
-- Source: [D Owner specification](../../../03-memory-brain/memory-lifecycle-manager.md)
+- Source: DEREFERENCED — original normative path `03-memory-brain/memory-lifecycle-manager.md` is absent from the current main tree; alternative: [surviving Chinese counterpart](../../zh-CN/03-memory-brain/memory-lifecycle-manager.md) (blob `6710e51561da3a7d10b7937fbdd461f95d9869de`; translation only, not an authoritative substitute).
 - Chinese counterpart: [Memory Lifecycle Manager](../../zh-CN/03-memory-brain/memory-lifecycle-manager.md)
 - Status: State separation and canonical authority DECIDED; detailed policy thresholds and some transitions OPEN
 - Related: INT-P0-02/03/04, INT-P1-02/06; DM-004/007/008/011
