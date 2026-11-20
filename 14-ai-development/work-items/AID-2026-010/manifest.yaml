@@ -669,8 +669,9 @@ bounded_logical_unit_closeout:
       status: "NOT_VERIFIED"
       reason: "D/H role-labelled records both expose GitHub login oahcom; distinct authenticated humans not established"
       unsigned_attestation_comment: 7031665905
-  ledger_commit: "0aec53cb748443020eedd348127dd74ae4467cd7"
-  ledger_blob: "239a2e68d1781a78980f0d4d12ca10eb0b6b165b"
+  ledger_commit: "5a7da537a5bb86ed29f5150d7fc9e3dd85c098ed"
+  ledger_blob: "0f26c02df7bfc54f86c39ee24c2082158a36fb9f"
+  closeout_comment: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/323#issuecomment-7032347434"
   prompt_provenance:
     source_type: "T2_CHAT_INSTRUCTION"
     source_thread_id: "6afad9b6-35c8-83ec-9013-08aebd75d535"
