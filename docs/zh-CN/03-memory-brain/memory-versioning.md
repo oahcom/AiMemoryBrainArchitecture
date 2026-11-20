@@ -29,7 +29,7 @@ D 定义不可变修订语义和 Parent 关系；Canonical Store 持久化 Revis
 ## 4. 领域对象
 
 - **MemoryVersion：** 单个 Memory 的不可变 Snapshot；Per-Memory 单调 Sequence、Parent Version、Canonical Commit Sequence、Digest、Actor、Reason、Schema Version、Recorded Time、引用和内容快照。
-- **ClaimRevision（CANDIDATE；INT-P0-01 ADR 阻塞）：** 稳定 Claim Identity 的不可变修订；包含 Revision ID、Claim ID、Sequence、Parent Revision、命题、Epistemic Status、Valid Time、来源/Evidence 引用、Provenance 引用、ScopeRefs、Actor、Recorded Time、Method 和 Digest。
+- **ClaimRevision（身份/修订语义：DECIDED FOR CONVERGENCE — Option A；具体 Schema 表示：CANDIDATE）：** 稳定 Claim Identity 的不可变修订语义；以下字段仅为候选表示：Revision ID、Claim ID、Sequence、Parent Revision、命题、Epistemic Status、Valid Time、来源/Evidence 引用、Provenance 引用、ScopeRefs、Actor、Recorded Time、Method 和 Digest。Fact 专属建模和 Fact 批准继续保持 OPEN。
 - **EntityVersion：** 稳定 Entity ID 的不可变属性/别名档案修订。
 - **RelationRevision：** 稳定 Relation ID 的不可变 Predicate/Endpoint/Validity/Evidence/Lifecycle 修订。
 - **LifecycleEvent：** 权威的追加式状态转换记录，具有 Per-Aggregate Sequence；当前状态通过 Fold/Projection 得出。
@@ -155,6 +155,93 @@ H. 只有在必需规范记录和依赖登记得到确认后，才能推进 Stor
 I. G 必须在同一受保护可见性边界内提交 ContextVersion，并引用精确的规范 Revision。
 
 J. 只有全部必需可见性条件满足后，才能将逻辑操作标记为完成。
+
+#### 端到端事务顺序图
+
+以下图是上述规范 A-J 顺序的独立执行视图。
+箭头表示必需的推进顺序，不表示各步骤可以独立提交事务。
+
+```
+[1] Authorization / Scope（授权与 Scope）
+      |
+      v
+[2] D Fence
+      |
+      v
+    Admission（Producer Admission）
+      |
+      v
+[3] Dependency Registration（依赖登记）
+      |
+      v
+[4] E Staging（私有、不可变）
+      |
+      v
+[5] D Canonical Commit（D 规范提交）
+      |
+      v
+[6] Association（关联）
+    （规范 Revision + 依赖 Receipt
+     + Publication Intent）
+      |
+      v
+[7] E Publication（E 发布）
+      |
+      v
+[8] Storage Visibility（Storage 可见性）
+      |
+      v
+[9] G Context Commit（G Context 提交）
+      |
+      v
+[10] Logical Completion（逻辑完成）
+```
+
+Fence-first 分支（T17）：
+
+```
+D Fence 先于 Admission 线性化
+      |
+      +--> Admission MUST 拒绝
+      +--> 步骤 3-10 MUST NOT 执行
+```
+
+Participant-first 分支（T18）：
+
+```
+Admission 成功
+      |
+      +--> 准确的 Participant 记录 MUST 作为一个
+           不可分割操作完成持久化
+      |
+      +--> 后续 Fence MUST 等待该记录对其
+           Participant Barrier 持久可见
+```
+
+组件职责边界：
+
+- D Fence：权威 Forget Fence 顺序及线性化。
+- Admission：串行化 Producer Admission，并原子持久化
+  准确 Participant 记录。
+- D Canonical Commit：不可变规范 Revision 提交、
+  准确 Parent/Reference 绑定和持久 Receipt。
+- E Publication：对已准入、已提交的规范对象进行幂等发布。
+- Storage Visibility：所有必需规范记录及依赖记录确认后，
+  才能推进 Storage 可见性。
+- G Context Commit：使用准确规范 Revision 引用，
+  提交不可变 ContextVersion。
+
+恢复边界（规范故障矩阵：§16.1）：
+
+- UNKNOWN：保持非最终状态，不得推断成功。
+- Crash：使用原始逻辑 Operation Identity 恢复。
+- Lost ACK：查询原始操作和 Receipt，不得创建第二次逻辑提交。
+- Retry：复用原始 Idempotency Identity，
+  协调已有 Participant/Publication 状态。
+
+任何恢复路径都不得绕过必需顺序、T17、T18
+或权威六组件故障矩阵。
+
 
 ### 2.1 T17 — Fence-first（Fence 优先）
 

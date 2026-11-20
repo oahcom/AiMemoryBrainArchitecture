@@ -17,7 +17,7 @@ Convert heterogeneous accepted source material into a normalized, typed, uncerta
 
 Includes parsing text, structured events, documents and environment observations; modality classification; entity/time/relation mention extraction; candidate proposition formation; normalization; confidence/uncertainty recording; deterministic validation; model-assisted extraction orchestration; and source-span alignment.
 
-Excludes canonical Fact/Claim identity (blocked by INT-P0-01 and D ADR), canonical entity merge decisions, lifecycle decisions, source authorization policy, external tool execution and final truth adjudication.
+Excludes Fact-specific modeling, Fact Schema and Fact approval (OPEN under INT-P0-01); canonical Claim identity semantics are DECIDED FOR CONVERGENCE under D's Option A and are governed by D, not defined by E; canonical entity merge decisions, lifecycle decisions, source authorization policy, external tool execution and final truth adjudication.
 
 ## 3. Responsibilities
 
@@ -90,7 +90,7 @@ CandidateProposition {
 }
 ~~~
 
-This is not a Claim schema. It is compiler IR that can map to the approved D semantic choice after INT-P0-01 ADR. If Fact and Claim become separate objects, an explicit mapping stage may emit both or neither; if unified, mapping emits the corresponding Claim qualification. No field name in this IR freezes public schema semantics.
+This is not a Claim schema. It is compiler IR whose Claim identity mapping follows D's DECIDED FOR CONVERGENCE — Option A semantics (stable Claim identity plus immutable ClaimRevision). CandidateProposition remains neutral and does not instantiate or freeze the canonical identity or any public schema. Fact-specific modeling, including whether and how a separate Fact object is represented, and Fact approval remain OPEN. No field name in this IR freezes public schema semantics.
 
 ### 6.3 EntityMention / TimeMention
 
@@ -167,7 +167,7 @@ Record source/event ref, digest, schema/policy/model version, modality, extracti
 - **Extraction → Evidence:** source spans and exact locators; Evidence Manager validates and persists source reference.
 - **Extraction → Entity Manager:** scoped EntityMention and identity evidence; Entity Manager returns provisional/resolved refs and ambiguity.
 - **Extraction → Consolidation:** candidate propositions, modality, time, scope, qualifiers and method receipts.
-- **D:** receives only mapped candidate objects after D's Fact/Claim ADR; candidate IR is not a public schema.
+- **D:** receives candidate propositions for mapping under D's DECIDED FOR CONVERGENCE Option A Claim identity semantics; Fact-specific modeling and approval remain OPEN; candidate IR is not a public schema.
 - **H/C:** source classifications and telemetry semantics must align; observation/outcome distinctions are preserved.
 - **I:** data classification, permitted processing, source access and Forget Fence govern extraction.
 
@@ -183,7 +183,7 @@ D domain types and Fact/Claim ADR; B epistemic/temporal/scope semantics; C/H sou
 
 ## 18. Open questions
 
-- OPEN: INT-P0-01 Fact/Claim ADR; CandidateProposition remains deliberately neutral.
+- OPEN: INT-P0-01 Fact-specific modeling and Fact approval items not settled by D's DECIDED FOR CONVERGENCE Option A Claim identity semantics; CandidateProposition remains deliberately neutral.
 - OPEN: C's final Observation versus Outcome mapping and Task/Plan revision semantics.
 - CANDIDATE: extraction IR and deterministic-first routing.
 - TO_VALIDATE: modality classifier quality, entity/time extraction accuracy, multilingual prompt-injection detection and local model resource use.
@@ -196,12 +196,14 @@ D domain types and Fact/Claim ADR; B epistemic/temporal/scope semantics; C/H sou
 - Persist a stage result and next-stage outbox/journal intent atomically or through an equivalent recoverable journal. A worker crash must not lose a completed stage or duplicate its externally visible effect.
 - Before payload dereference, source-span resolution, model prompt construction, stage-result publication or retry, re-check current permission and D Forget Fence. Unknown fence/policy state fails closed.
 - ExtractionIR, CandidateProposition, spans, embeddings and normalized values are derived objects: lineage and dependency registration must be durable before visibility under [Forget Fence and Derived Registration](forget-fence-and-derived-registration-part1.md).
-- CandidateProposition remains neutral pre-canonical IR. Mapping to Fact/Claim is ADR-BLOCKED until B/Governance approval; E must not infer the approved model.
+- CandidateProposition remains neutral pre-canonical IR. Claim identity mapping follows D's DECIDED FOR CONVERGENCE Option A semantics and is not ADR-BLOCKED. Fact-specific modeling and Fact approval remain OPEN; E must not infer or approve a Fact Schema, DDL, API or Wire contract.
 
 ### 19.1 Claim/Fact canonical publication order
 
 E's ExtractionIR and CandidateProposition MUST
 remain private staging artifacts.
+
+This publication ordering does not defer or reopen Claim identity semantics, which D has already DECIDED FOR CONVERGENCE under Option A. Fact-specific modeling and approval remain OPEN and are not approved by this publication protocol.
 
 The normative order is:
 

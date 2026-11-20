@@ -17,7 +17,7 @@
 
 包括文本、结构化 Event、Document 和 Environment Observation 的解析；Modality Classification；Entity/Time/Relation Mention Extraction；Candidate Proposition 形成；Normalization；Confidence/Uncertainty 记录；确定性校验；模型辅助 Extraction 编排；Source Span 对齐。
 
-不包括 Canonical Fact/Claim Identity（受 INT-P0-01 和 D ADR 阻塞）、Canonical Entity Merge Decision、Lifecycle Decision、Source Authorization Policy、外部 Tool Execution 和最终 Truth Adjudication。
+不包括 Fact 专属建模、Fact Schema 和 Fact 批准事项（INT-P0-01 下仍为 OPEN）；Canonical Claim Identity 语义已依据 D 的 Option A 决定为 DECIDED FOR CONVERGENCE，其权威定义由 D 负责而非 E；Canonical Entity Merge Decision、Lifecycle Decision、Source Authorization Policy、外部 Tool Execution 和最终 Truth Adjudication。
 
 ## 3. 职责
 
@@ -90,7 +90,7 @@ CandidateProposition {
 }
 ~~~
 
-这不是 Claim Schema，而是 Compiler IR；在 INT-P0-01 ADR 决议后，才能映射到 D 批准的语义模型。如果 Fact 和 Claim 成为独立对象，必须通过显式 Mapping Stage 决定生成两者或都不生成；如果二者统一，则 Mapping 输出对应的 Claim Qualification。IR 中任何字段名都不能冻结公共 Schema 语义。
+这不是 Claim Schema，而是 Compiler IR；其 Claim Identity Mapping 遵循 D 已 DECIDED FOR CONVERGENCE 的 Option A 语义（稳定 Claim Identity 加不可变 ClaimRevision）。CandidateProposition 继续保持中立，不实例化或冻结 Canonical Identity，也不冻结任何公共 Schema。Fact 专属建模（包括是否以及如何表示独立 Fact Object）和 Fact 批准继续保持 OPEN。IR 中任何字段名都不能冻结公共 Schema 语义。
 
 ### 6.3 EntityMention / TimeMention
 
@@ -167,7 +167,7 @@ Prompt Injection 控制措施：维护 Source Type/Trust Label；启发式识别
 - **Extraction → Evidence：** Source Span 和准确 Locator；Evidence Manager 校验并持久化 Source Ref。
 - **Extraction → Entity Manager：** 带 Scope 的 EntityMention 和 Identity Evidence；Entity Manager 返回 Provisional/Resolved Ref 及 Ambiguity。
 - **Extraction → Consolidation：** Candidate Proposition、Modality、Time、Scope、Qualifier 和 Method Receipt。
-- **D：** 只有在 D 的 Fact/Claim ADR 决议后才接收映射后的 Candidate Object；Candidate IR 不是公共 Schema。
+- **D：** 接收 Candidate Proposition，并依据 D 已 DECIDED FOR CONVERGENCE 的 Option A Claim Identity 语义进行映射；Fact 专属建模和批准继续保持 OPEN；Candidate IR 不是公共 Schema。
 - **H/C：** Source Classification 和 Telemetry Semantics 必须一致；保留 Observation/Outcome 区别。
 - **I：** Data Classification、允许的处理方式、Source Access 和 Forget Fence 共同约束 Extraction。
 
@@ -183,7 +183,7 @@ D Domain Type 和 Fact/Claim ADR；B Epistemic/Temporal/Scope Semantics；C/H So
 
 ## 18. 开放问题
 
-- OPEN：INT-P0-01 Fact/Claim ADR；CandidateProposition 刻意保持中立。
+- OPEN：INT-P0-01 中尚未由 D 已 DECIDED FOR CONVERGENCE 的 Option A Claim Identity 语义解决的 Fact 专属建模和 Fact 批准事项；CandidateProposition 刻意保持中立。
 - OPEN：C 最终 Observation/Outcome Mapping 和 Task/Plan Revision Semantics。
 - CANDIDATE：Extraction IR 和 Deterministic-first Routing。
 - TO_VALIDATE：Modality Classifier 质量、Entity/Time Extraction Accuracy、多语言 Prompt Injection Detection 和本地 Model Resource Use。
@@ -196,12 +196,14 @@ D Domain Type 和 Fact/Claim ADR；B Epistemic/Temporal/Scope Semantics；C/H So
 - Stage Result 与下一阶段 Outbox/Journal Intent 必须原子持久化，或通过等价可恢复 Journal 持久化。Worker 崩溃不得丢失已完成 Stage，也不得重复产生外部可见效果。
 - 在 Payload Dereference、Source Span Resolution、Model Prompt Construction、Stage Result Publication 或 Retry 前，重新检查当前 Permission 和 D Forget Fence。Fence/Policy 状态未知时 Fail-closed。
 - ExtractionIR、CandidateProposition、Span、Embedding 和 Normalized Value 都是派生对象：根据 [Forget Fence and Derived Registration](forget-fence-and-derived-registration-part1.md)，必须在可见前持久化 Lineage 和 Dependency Registration。
-- CandidateProposition 保持中立的 Pre-canonical IR。映射到 Fact/Claim 在 B/Governance 批准前仍为 **ADR-BLOCKED**；E 不得自行推断批准的模型。
+- CandidateProposition 保持中立的 Pre-canonical IR。Claim Identity Mapping 遵循 D 已 DECIDED FOR CONVERGENCE 的 Option A 语义，不再属于 ADR-BLOCKED。Fact 专属建模和 Fact 批准继续保持 OPEN；E 不得自行推断或批准 Fact Schema、DDL、API 或 Wire Contract。
 
 ### 19.1 Claim/Fact 规范发布顺序
 
 E 的 ExtractionIR 和 CandidateProposition MUST
 保持为私有 Staging 产物。
+
+本发布顺序不会推迟或重新开放 Claim Identity 语义；D 已依据 Option A 将其决定为 DECIDED FOR CONVERGENCE。Fact 专属建模和批准仍为 OPEN，本发布协议不构成对这些事项的批准。
 
 唯一规范顺序如下：
 

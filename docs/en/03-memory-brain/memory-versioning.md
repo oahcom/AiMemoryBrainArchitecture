@@ -29,7 +29,7 @@ Not responsible for ContextVersion state, delivery/Applied, Event ingestion sequ
 ## 4. Domain objects
 
 - **MemoryVersion:** immutable snapshot for one Memory; per-Memory monotonic sequence, parent version, canonical commit sequence, digest, actor, reason, schema version, recorded time, references and content snapshot.
-- **ClaimRevision (CANDIDATE; INT-P0-01 ADR-blocked):** immutable revision of stable Claim identity; revision ID, claim ID, sequence, parent revision, proposition, epistemic status, valid time, source/Evidence refs, Provenance refs, ScopeRefs, actor, recorded time, method and digest.
+- **ClaimRevision (identity/revision semantics: DECIDED FOR CONVERGENCE — Option A; concrete Schema representation: CANDIDATE):** immutable revision semantics for a stable Claim identity; the listed fields are a candidate representation only: revision ID, claim ID, sequence, parent revision, proposition, epistemic status, valid time, source/Evidence refs, Provenance refs, ScopeRefs, actor, recorded time, method and digest. Fact-specific modeling and Fact approval remain OPEN.
 - **EntityVersion:** immutable attribute/alias profile revision for stable Entity ID.
 - **RelationRevision:** immutable predicate/endpoints/validity/evidence/lifecycle revision for stable Relation ID.
 - **LifecycleEvent:** authoritative append-only transition with per-aggregate sequence; current state is a fold/projection.
@@ -155,6 +155,96 @@ H. Advance Storage visibility only after the required canonical records and depe
 I. Commit G ContextVersion using the same protected visibility boundary and exact canonical revision references.
 
 J. Mark the logical operation complete only after all required visibility conditions are satisfied.
+
+#### End-to-end transaction sequence diagram
+
+The following diagram is an independent execution view of the
+normative A-J ordering above. Arrows indicate required progression;
+they do not imply independent transaction commits.
+
+```
+[1] Authorization / Scope
+      |
+      v
+[2] D Fence
+      |
+      v
+    Admission
+      |
+      v
+[3] Dependency Registration
+      |
+      v
+[4] E Staging (private, immutable)
+      |
+      v
+[5] D Canonical Commit
+      |
+      v
+[6] Association
+    (canonical revisions + dependency receipt
+     + publication intent)
+      |
+      v
+[7] E Publication
+      |
+      v
+[8] Storage Visibility
+      |
+      v
+[9] G Context Commit
+      |
+      v
+[10] Logical Completion
+```
+
+Fence-first branch (T17):
+
+```
+D Fence linearizes before Admission
+      |
+      +--> Admission MUST reject
+      +--> Steps 3-10 MUST NOT execute
+```
+
+Participant-first branch (T18):
+
+```
+Admission success
+      |
+      +--> Exact Participant record MUST be durably
+           persisted as one indivisible operation
+      |
+      +--> A later Fence MUST wait until that record
+           is durably visible to its Participant Barrier
+```
+
+Component responsibility boundaries:
+
+- D Fence: authoritative Forget Fence ordering and linearization.
+- Admission: serialized Producer Admission and atomic durable
+  Participant recording.
+- D Canonical Commit: immutable canonical revision commit,
+  exact parent/reference binding and durable receipt.
+- E Publication: idempotent publication of admitted,
+  committed canonical objects.
+- Storage Visibility: controlled advancement after all
+  required canonical and dependency records are confirmed.
+- G Context Commit: immutable ContextVersion commit using
+  exact canonical revision references.
+
+Recovery boundaries (normative failure matrix: §16.1):
+
+- UNKNOWN: remain non-final; do not infer success.
+- Crash: recover the original logical Operation identity.
+- Lost ACK: resolve the original operation and receipt;
+  do not create a second logical commit.
+- Retry: reuse the original idempotency identity and
+  reconcile the existing participant/publication state.
+
+No recovery path may bypass the required ordering,
+T17, T18 or the authoritative six-component failure matrix.
+
 
 ### 2.1 T17 — Fence-first
 
