@@ -48,7 +48,7 @@ baseline:
   target_branch: main
   base_sha: 9546f78d364b5a1dd1fa2206b34255be9c7fb1a7
   base_sha_source: GitHub API read of refs/heads/main at Issue #329 creation
-  working_branch: ai/AID-2026-015/IO-execution-first-baseline
+  working_branch: ai/AID-2026-011/IO-execution-first-baseline
   pull_request: 330
   pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/330
 
