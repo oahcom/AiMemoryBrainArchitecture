@@ -1,0 +1,97 @@
+aid: AID-2026-014
+title: REQ-04 G03 — B/D ADR Independent R3 Review and Conformance Tests
+
+class: ARCH/R3
+risk: R3
+risk_rationale: >-
+  Independent security/domain review of the B Fact/Claim and D Claim identity
+  convergence decisions, followed by conformance tests. R3-class work item.
+
+security_scope: NOT_ASSIGNED
+
+status: REGISTERED
+
+sponsor: USER-PRINCIPAL-DELEGATED (human principal via D-2026-1120-02)
+accountable_owner: USER-PRINCIPAL-DELEGATED (session-eligible per D-2026-1120-02)
+implementing_ai_session: NOT_DISPATCHED (R3 review session to be dispatched per #265 7034222133 item 4)
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+
+tracking_issue: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/265
+adr_carrier_issue: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/43
+
+created_at: 2026-11-20T08:26:00Z
+updated_at: 2026-11-20T08:26:00Z
+
+number_allocation:
+  requested: AID-2026-012 (per #265 7034222133 item 3)
+  assigned: AID-2026-014
+  reason: >-
+    Cross-tree dual scan (D-2026-1120-03 rule, applied per F-L0-AID011-COLLISION-002
+    lesson) found AID-2026-012 and AID-2026-013 already occupied on branch
+    docs/aid-2026-010-finding-ledger-index-sync-2026-11-20 (H Owner / COC Owner
+    F-43-07 work items, COMPLETED). AID-2026-014 is free across main and all
+    active branches (verified 2026-11-20T08:26Z, recursive tree scan).
+  scan_rule: cross-tree dual scan (main + all active branch work-items namespaces)
+
+decision_under_review:
+  status: DECIDED FOR CONVERGENCE / R3 ACCEPTANCE PENDING
+  b_fact_claim: Option A (Claim thread separated from Fact Attestation object)
+  d_claim_identity: Option A (stable Claim identity + immutable ClaimRevision)
+  ruling_source: REQ-04 managing session 6afdd2a9-b390-83ee-8a14-ca6fe48286e7 (#265 7034222133)
+  adr_registration: #43 comment 7034237663
+
+prompt_id: AID-2026-014-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-014/prompt-v1.md
+prompt_status: FROZEN
+prompt_sha256: a212497f149e6a620c5f83c2a3f0acbfde2f808db9f45a77caa5082494eacd32
+prompt_bytes: 5077
+prompt_provenance_tier: T1
+prompt_provenance_note: >-
+  Task prompt for the independent R3 review session. Review requirements text
+  is authored by the REQ-04 managing session (#265 7034222133 item 4); file
+  assembly and routing metadata by L0-MAIN-WRITER-01. This is not evidence of
+  any historical T1.
+
+historical_t1_status: NOT_FOUND
+
+scope:
+  - Independent R3 Security/Domain Specialist review of B Option A and D Claim identity Option A
+  - Challenge: Option A boundaries, Claim identity semantics, Fact Attestation authorization, Forget semantics, Storage atomicity
+  - Verdict: PASS / REQUEST CHANGES / ABSTAIN with reviewable basis
+  - If review passes: conformance tests (Claim/Fact revision, Evidence binding, identity change, Forget, concurrency, historical immutability) bound to exact Head
+
+out_of_scope:
+  - Modifying repository files (review session is read-only)
+  - Claiming independent GitHub identity (P-independence platform limit, disclosed per D-2026-1120-02)
+  - Schema freeze, DDL approval, production key/Trust Root approval
+  - Production implementation or runtime conformance
+
+prerequisites:
+  - D-2026-1120-02 authorization (t4b_dispatch GRANTED for session dispatch)
+  - ADR decision registered at #43 (7034237663)
+
+gates:
+  number_uniqueness:
+    status: SATISFIED (cross-tree scanned 2026-11-20T08:26Z)
+  registration:
+    status: SATISFIED (manifest, INDEX row and Issue association persisted and read back)
+  t4b_dispatch:
+    status: NOT_DISPATCHED
+  r3_review:
+    status: NOT_STARTED
+  conformance_tests:
+    status: NOT_STARTED
+
+authorization:
+  registration_write: GRANTED (D-2026-1120-02)
+  t4b_dispatch: GRANTED (D-2026-1120-02, session dispatch only)
+  implementation: NOT_GRANTED (engineering code must be session-authored; L0 never hand-writes code)
+
+owner_acceptance:
+  status: PENDING
+  note: >-
+    Registration does not imply ADR acceptance or REQ-04 acceptance.
+    R3 review verdict and conformance test results are separate evidence.
