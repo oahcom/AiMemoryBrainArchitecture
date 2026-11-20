@@ -8,8 +8,8 @@
 - Repository: oahcom/AiMemoryBrainArchitecture
 - Target Branch: remediation/gov-doc-001-v1.2-bilingual-baseline
 - Pull Request: #271
-- Report Version: v2.2 / 文档版本：v2.2
-- Revision Date: 2026-11-19 / 修订日期：2026-11-19
+- Report Version: v2.9 / 文档版本：v2.9
+- Revision Date: 2026-11-20 / 修订日期：2026-11-20
 
 ## 0. Record boundary and snapshot policy / 记录边界与快照口径
 
@@ -656,6 +656,32 @@ The branch-protection and ruleset API requests returned HTTP 403 with the GitHub
 
 分支保护及 ruleset API 请求返回 §6.4 所记录的 GitHub 计划限制 HTTP 403。因此平台强制状态仍为 `NOT_VERIFIED`，并构成平台限制阻塞。不得将 F-02 标记为 COMPLETE。
 
+### 7.2.1 Live platform recheck / 平台实时复核 (2026-11-20)
+
+**EN**
+
+The current-main branch object was read at `main@9546f78d364b5a1dd1fa2206b34255be9c7fb1a7`:
+
+- `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main` returned `protected=false`; embedded `protection.enabled=false`; `required_status_checks.enforcement_level=off`; `contexts=[]`; `checks=[]`.
+- `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection` returned HTTP 403 with the raw message: `Resource not accessible by integration`.
+- `GET /repos/oahcom/AiMemoryBrainArchitecture/rulesets?per_page=100` returned HTTP 403 with the raw message: `Upgrade to GitHub Pro or make this repository public to enable this feature.`
+
+The branch object is direct evidence that branch-protection required checks are not enabled on this readback. The rulesets endpoint is unavailable, so ruleset-based enforcement cannot be ruled in or out. **F-02 Requirement 2 therefore remains NOT_VERIFIED; F-02 overall remains PARTIAL.** No deliberately failing required-check experiment or platform merge-rejection evidence was run. Do not treat successful workflow runs as proof of platform enforcement.
+
+**External dependency and verification path:** a repository administrator / plan owner must make branch-protection and ruleset state inspectable (integration permission for the branch-protection endpoint and an eligible GitHub plan/visibility for rulesets). Verify by successfully reading both endpoints, confirming the exact required check context is configured, then running a deliberately failing check and observing GitHub reject the merge. This paragraph records a limitation; it does not claim enforcement is enabled.
+
+**中文**
+
+当前 main 分支对象读取基线为 `main@9546f78d364b5a1dd1fa2206b34255be9c7fb1a7`：
+
+- `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main` 返回 `protected=false`；嵌入的 `protection.enabled=false`；`required_status_checks.enforcement_level=off`；`contexts=[]`；`checks=[]`。
+- `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection` 返回 HTTP 403，原始消息：`Resource not accessible by integration`。
+- `GET /repos/oahcom/AiMemoryBrainArchitecture/rulesets?per_page=100` 返回 HTTP 403，原始消息：`Upgrade to GitHub Pro or make this repository public to enable this feature.`。
+
+分支对象直接证明本次读取时 branch-protection required checks 未启用。rulesets 端点不可读取，因此无法排除或确认 ruleset 强制规则。**F-02 要求 2 仍为 NOT_VERIFIED；F-02 总体仍为 PARTIAL。**本次未运行故意失败的 required-check 实验，也没有平台拒绝合并证据。不得把 workflow 成功运行当作平台强制的证明。
+
+**外部依赖与验证路径：**仓库管理员 / 计划负责人需使 branch-protection 与 rulesets 状态可读取（branch-protection 端点需具备集成读取权限，rulesets 需符合 GitHub 计划/可见性要求）。验证时先成功读取两个端点、确认精确 required-check context 已配置，再运行故意失败的 check 并观察 GitHub 拒绝合并。本段仅记录限制，不声称强制规则已经启用。
+
 ### 7.3 Recommended remediation / 建议修复
 
 **EN**
@@ -816,7 +842,7 @@ Every finding raised against this deliverable appears here with a state and a ba
 | F-03 | — | `CLOSED (method-bound)` | The finding stated that partial remediation does not establish complete closure. That is a rule about method, not a defect with a patch. §0 and §9 now implement the distinction: remediation is recorded separately from state, and closure requires re-derivable evidence. **Basis proposed in this revision; requires this PR’s review to confirm.** Reopens if any revision records a `CLOSED` state whose basis is only a remediation artifact — check c9 below is the detector. / 该 finding 是方法性规则而非可补丁缺陷；依据本修订提出，待本 PR 审查确认；若任一修订将「仅以修复产物为依据」的状态记为 `CLOSED`，即重新开启（核对 c9 为检测器）。 |
 | F-04 | — | `CLOSED (method-bound)` | Same basis and same reopen condition as F-03, recorded separately because R6 listed it as a separate row. / 与 F-03 同依据、同重开条件；R6 列为独立行，故分列。 |
 | F-05 | — | `LIMITATION` | "Historical migration cannot be inferred" meets all three §0 conditions and the exclusion is enumerated rather than asserted. Paths examined: (1) infer migration from the 313-commit inventory — excluded, the inventory records message language, not whether content was migrated; (2) infer it from the 39-issue inventory — excluded, same reason; (3) re-run the historical sessions that produced the content — excluded, no such record carrier is available in this repository. No fourth path was identified. Confirming review: this PR. Recorded per §0 so it is neither closed silently nor left `OPEN` forever; re-evaluates if any condition fails or a fourth path is found. / 满足 §0 三条件，且排除是穷举而非声称：已排查①由 313 条 Commit 清单推得迁移（排除：清单只记录消息语种）、②由 39 条 Issue 清单推得（同因排除）、③重跑历史会话记录（排除：本仓库无此载体），未发现第四条路径；确认审查：本 PR。 |
-| F-06 | P2 | `CLOSED` (2026-11-20) | Object reconciliation in `00-governance/reports/f06-object-reconciliation.md`; the "14 unassigned PRs" conclusion is retracted. Maintained in §9 P2 and §10. / 对象级对账完成，原结论已撤回。 |
+| F-06 | P2 | `CLOSED` (2026-11-20) | Object reconciliation in `00-governance/reports/f06-object-reconciliation.md`; the 12 later PR groupings were confirmed by A Integration and registered in migration register §8.4.2 (commit `d344f43ce0d4b8eb9bab19da8ca30e4a518f1117`, Blob `46cabb97f63597eb3e8623c60305ed58980355f7`). The earlier "14 unassigned PRs" conclusion remains retracted. Historical migration debt is unchanged. / 对象级对账已完成；A Integration 已确认后续 12 个 PR 归组并登记于迁移登记册 §8.4.2；此前「14 个未归组 PR」结论仍为撤回。历史迁移欠账不变。 |
 | F-07 | P2 | `CLOSED` | Correction recorded in PR comment `7006445553`; authoritative D1 blob `66517d39`. / 更正已登记。 |
 | F-08 | P1 | `CLOSED` (2026-11-20) | §0 record boundary, §2.2 post-merge snapshot, §3.2 post-merge manifest; closure basis in §9 P1. / 关闭依据见 §9。 |
 | F-09 | P1 | `CLOSED` (2026-11-20) | §6.4/§7.1/§7.2/§9/§10 separation of integration from enforcement; re-opened and re-closed on 2026-11-20 after the §11 contradiction. / 因 §11 矛盾曾重开，同日重新关闭。 |
@@ -1048,7 +1074,7 @@ The original 15-row governance stage ledger is retained. Only affected evidence/
 | Seven files read back / 七文件读回 | VERIFIED | R6 OBJ-07 pre-v2.2 manifest read-back: 7/7; D7 manifest entry is the v2.1 blob snapshot. / R6 对 v2.2 前 OBJ-07 manifest 读回 7/7；D7 条目为 v2.1 blob 快照。 |
 | Five Issues updated / 五个 Issue 更新 | SUBMITTED | Issues #262–#266; all remain OPEN and Requirement Status RECORDED. / Issues #262–#266；均保持 OPEN，Requirement Status 为 RECORDED。 |
 | Five Issues read back / 五个 Issue 读回 | VERIFIED | Five GitHub API read-backs; no Issue closure or label change inferred. / 五个 GitHub API 读回；不推定 Issue 已关闭或标签已变更。 |
-| Historical inventory / 历史清单 | PARTIAL | 39 Issues and 313 Commits registered; F-06 object-level reconciliation CLOSED (2026-11-20); twelve PRs carry PROPOSED grouping pending accountable-owner confirmation; migration debt unchanged. / 已登记 39 条 Issue、313 条 Commit；F-06 对象级对账已 CLOSED（2026-11-20）；12 个 PR 为 PROPOSED 归组，待责任方确认；迁移欠账不变。 |
+| Historical inventory / 历史清单 | PARTIAL | 39 Issues and 313 Commits registered/reconciled; 242/242 PR objects at the `f86fddc0` reconciliation baseline are grouped after A Integration confirmed the 12 later mappings in register §8.4.2; F-06 object-level reconciliation CLOSED. Historical bilingual migration debt remains unchanged; #254 remains HOLD. / 已登记并对账 39 条 Issue、313 条 Commit；A Integration 确认登记册 §8.4.2 中后续 12 个归组后，对账基线 `f86fddc0` 的 242/242 个 PR 对象均已归组；F-06 对象级对账已 CLOSED。历史双语迁移欠账不变；#254 仍为 HOLD。 |
 | Independent review / 独立复审 | REVIEW CHAIN RECORDED | R6 `NEEDS-REVISION` on D7 v2.1 (`6aff0b47-3988-83ec-b666-976e39dfe840`) → R7 `NEEDS-REVISION` on head `04d35f90` → R8 `PASS` on head `1eefa22e`; v2.5 closes the F-08/F-09 re-review that the earlier chain did not cover. Identity axis remains P-independent-unreachable. / R6 对 D7 v2.1 给 NEEDS-REVISION → R7 对 head `04d35f90` 给 NEEDS-REVISION → R8 对 head `1eefa22e` 给 PASS；v2.5 补齐前序链未覆盖的 F-08/F-09 复审。身份轴仍为 P-独立不可达。 |
 | F-02 | PARTIAL | Requirement 1 CI integration COMPLETE/VERIFIED; Requirement 2 required-check enforcement NOT_VERIFIED due GitHub plan-limit HTTP 403. / 要求 1 CI 接入 COMPLETE/VERIFIED；要求 2 因 GitHub 计划限制 HTTP 403 而 NOT_VERIFIED。 |
 | F-06 | CLOSED (2026-11-20) | Object-level reconciliation recorded in `00-governance/reports/f06-object-reconciliation.md`: 313/313 commit anchors matched, 38/39 issue anchors with #266 drift registered; the earlier "14 unassigned PRs" conclusion is retracted. #254 remains HOLD; migration debt unchanged. / 对象级对账已记录于上述报告：313/313 Commit 锚点命中，39 条 Issue 锚点命中 38 条并登记 #266 漂移；此前「14 个未归组 PR」结论已撤回。#254 保持 HOLD；迁移欠账不变。 |
@@ -1301,3 +1327,28 @@ This revision is the first full run of the c1–c9 cross-check against the merge
 - **c4 实际触发于 AC-01**：它仍写「F-03/F-04 require further closure」，而登记表已将二者记为 `CLOSED (method-bound)`。已修正，且在行内点名原表述，而非静默替换。
 - **七项清**，且每项附依据而非空写「清」。
 - 不改变任何政策文本、规范状态、批准状态、采纳状态；v1.1 仍为唯一 NORMATIVE；F-02 仅因要求 2 而为 PARTIAL。
+
+
+## D7 v2.9 Revision Note
+
+This revision records A Integration's confirmation of the twelve later PR groupings identified by the F-06 object-level reconciliation. It changes the maintained inventory/group-registration assertion only; it does not complete historical bilingual migration or change any policy/adoption status.
+
+- **The twelve proposals are now registered.** PRs #48 and #271–#281 were individually read back by exact PR number, including title, body, state, merged flag and exact Head. A Integration confirmed their existing proposed groups (P-01/P-02/P-04/P-05) and registered each object in `00-governance/bilingual-governance-migration-register.md` §8.4.2.
+- **Coverage at the dated reconciliation baseline is 242/242.** The original 232-object inventory snapshot is preserved as historical; the 242-object count is bound to reconciliation baseline `f86fddc0fa0291ea8a5e080e741f083ce179a0a2`. This is not a live count of PRs created after that baseline.
+- **Authority is bounded.** A Integration confirms group classification only. All group `Accountable_Owner` values remain `NOT_ASSIGNED`; no target-group Owner or Project Owner approval is inferred.
+- **Migration debt is unchanged.** P-01..P-06 remain `MIGRATION_DEBT`; no historical PR body is translated or reclassified by this grouping update. PR #48 remains CLOSED / not merged. Issue #254 remains HOLD.
+- **F-06 remains CLOSED at object-reconciliation scope.** This does not mean historical bilingual migration is complete, and it does not create an exemption.
+
+Register evidence: commit `d344f43ce0d4b8eb9bab19da8ca30e4a518f1117`, Blob `46cabb97f63597eb3e8623c60305ed58980355f7`.
+
+## D7 v2.9 修订说明
+
+本修订记录 A Integration 对 F-06 对象级对账中识别的后续 12 个 PR 归组提案作出确认。只更新受维护的清点/归组登记断言；不代表历史双语迁移完成，也不改变任何政策或采纳状态。
+
+- **12 个提案现已登记。**逐一按 PR 编号读取 #48、#271–#281 的标题、正文、状态、合并标志及精确 Head；A Integration 按既有提案确认其 P-01/P-02/P-04/P-05 归组，并登记于迁移登记册 §8.4.2。
+- **带时点对账基线覆盖 242/242。**原始 232 个对象清点快照作为历史保留；242 个对象的数字绑定于对账基线 `f86fddc0fa0291ea8a5e080e741f083ce179a0a2`，不代表该基线之后创建的 PR 实时总数。
+- **权责边界不变。**A Integration 只确认集成单元归组；各组 `Accountable_Owner` 仍为 `NOT_ASSIGNED`，不推定目标组 Owner 或 Project Owner 批准。
+- **迁移欠账不变。**P-01 至 P-06 继续为 `MIGRATION_DEBT`；本次归组不翻译或重新分类任何历史 PR 正文。PR #48 仍为 CLOSED / not merged；Issue #254 仍为 HOLD。
+- **F-06 在对象级对账范围内保持 CLOSED。**不代表历史双语迁移已完成，也不产生豁免。
+
+登记册证据：commit `d344f43ce0d4b8eb9bab19da8ca30e4a518f1117`，Blob `46cabb97f63597eb3e8623c60305ed58980355f7`。
