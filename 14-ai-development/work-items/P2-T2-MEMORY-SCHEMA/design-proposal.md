@@ -328,6 +328,13 @@ authorize the writing.
 breach is recorded where a reader of this document will find it, and that no
 authorization was inferred from the absence of objection across three rounds.
 
+**Who has not acted:** this section is a record by the party that committed the
+breach. It is not an adjudication. The authority that issued the manifest has not
+been asked to accept, waive or dispose of the breach, and this document does not
+attribute any such disposition to it. Recording a violation accurately and having
+that violation formally disposed of are different acts, and only the first has
+happened.
+
 ---
 
 ## 3. What Phase 1 froze, and what it did not
@@ -1316,13 +1323,17 @@ No engineering act closes any of these. Issue #305 records the root cause: no go
 
 Phase 1 already carries executable tests for several of these criteria. They are **not** Phase 2 tests and were not written against the Layer 2 or Layer 3 schema, but they establish that the underlying store behaves correctly under exactly the conditions this gate names. Counting them as absent would have been wrong; counting them as satisfying the gate would also be wrong.
 
+The gate names eight criteria; the table below has ten rows. The gate's single criterion "concurrent updates" is decomposed into three, because the Phase 1 evidence supports two narrower guarantees and not the one the gate names. Splitting it is what keeps the positive findings from being withdrawn along with the overstated one.
+
 | criterion | Phase 1 evidence (exists, executable) | Phase 2 status |
 |---|---|---|
 | duplicate event delivery | `memory-event-store-sqlite/src/payload.rs:285` — `duplicate_payload_append_returns_original_receipt_without_dup`; `lib.rs:324` — `same_producer_key_and_digest_replay_original_receipt`; `lib.rs:339` — `same_producer_key_with_different_digest_conflicts` | `PROVEN — PHASE 1 STORE LAYER`; `UNPROVEN — PHASE 2 INTEGRATION` |
 | out-of-order delivery | **none** — the change-page test at `memory-storage-sqlite/src/lib.rs:1511` asserts ordered *retrieval* with limit and scope filtering, which is not delivery order | retrieval ordering specified (test 11); out-of-order **arrival** handling `UNVERIFIED ABSENCE` |
 | partial failure | **none** | `UNVERIFIED ABSENCE` |
 | restart/recovery | `resilience.rs:139` — `restart_preserves_receipt_and_idempotent_payload_replay`; `resilience.rs:204` — `committed_payload_survives_process_crash_and_wal_recovery`; `memory-storage-sqlite/src/lib.rs:496` — `sqlite_committed_state_survives_close_and_reopen`; `:554` — `abrupt_process_exit_rolls_back_entire_uncommitted_commit` | `PROVEN — PHASE 1 STORE LAYER`; `UNPROVEN — PHASE 2 INTEGRATION` |
-| concurrent updates | `resilience.rs:162` — `concurrent_appends_preserve_unique_order_and_payload_custody` (6 writers, barrier-synchronised); `memory-storage-sqlite/src/lib.rs:579` — `independent_connections_serialize_competing_compare_and_swap_writers` | `PROVEN — PHASE 1 STORE LAYER`; `UNPROVEN — PHASE 2 INTEGRATION` |
+| concurrent **append** safety | `resilience.rs:162` — `concurrent_appends_preserve_unique_order_and_payload_custody` (6 writers, barrier-synchronised) | `PROVEN — PHASE 1 STORE LAYER`; `UNPROVEN — PHASE 2 INTEGRATION` |
+| competing **CAS** serialisation | `memory-storage-sqlite/src/lib.rs:579` — `independent_connections_serialize_competing_compare_and_swap_writers` | `PROVEN — PHASE 1 STORE LAYER`; `UNPROVEN — PHASE 2 INTEGRATION` |
+| semantic winner selection under contention | **none** — neither test asserts which writer should win, only that sequence numbers are unique and increasing and that exactly one CAS succeeds | `UNVERIFIED ABSENCE` |
 | projection rebuilding | **none** | specified, not implemented or run |
 | provenance integrity | **none** | specified, not implemented or run |
 | context-injection correctness | **none** | `UNVERIFIED ABSENCE`; intended-context semantics undefined |
@@ -1345,9 +1356,9 @@ So the honest classification has three tiers, not two:
 
 Applying it:
 
-- **Tier 1 + 2 together** — duplicate delivery, restart/recovery, concurrent updates. The Phase 1 tests exist and run and prove the tested store operation. None of them involves a transcript write accompanying a canonical commit, so none establishes the Phase 2 path that did not exist when they were written.
+- **Tier 1 + 2 together** — duplicate delivery, restart/recovery, concurrent append safety, competing CAS serialisation. The Phase 1 tests exist and run and prove the tested store operation. None of them involves a transcript write accompanying a canonical commit, so none establishes the Phase 2 path that did not exist when they were written.
 - **Specified, not implemented, not run** — projection rebuilding, provenance integrity, retrieval ordering.
-- **Tier 3** — partial failure, out-of-order *arrival*, context-injection correctness. No test evidence was located. That is not the same as saying those behaviours are untested; it says their coverage status has not been established.
+- **Tier 3** — partial failure, out-of-order *arrival*, context-injection correctness, semantic winner selection. No test evidence was located. That is not the same as saying those behaviours are untested; it says their coverage status has not been established.
 
 The substantive work is tier 1+2's open question: what happens when `commit_version` succeeds and the `transcript_message` insert citing it does not. That is a design question, and per §10 it is not one engineering may settle unilaterally.
 
@@ -1357,7 +1368,9 @@ The substantive work is tier 1+2's open question: what happens when `commit_vers
 
 The citation check that produced §18.6 verified that ten named tests exist at ten named lines. A review correctly distinguished that from a stronger claim: traceability is not conformance, and a test whose name promises a behaviour may assert something narrower.
 
-This audit reads each test body and records what it actually asserts. Nine tests were read; the tenth citation group is the three duplicate-delivery tests, of which two were read.
+This audit reads each test body and records what it actually asserts.
+
+The accounting, stated so it can be checked: §18.6 carries **ten citations**. Nine cite evidence for a criterion and all nine bodies were read in full; the table below has one row per body. The tenth, `memory-storage-sqlite/src/lib.rs:1511`, is cited as evidence that does **not** exist — it is examined in §18.6's second correction and is not an evidence citation. Ten citations, nine inspected evidence bodies, one examined counter-example.
 
 | test | asserts | verdict |
 |---|---|---|
@@ -1377,7 +1390,7 @@ This audit reads each test body and records what it actually asserts. Nine tests
 
 2. `abrupt_process_exit_rolls_back_entire_uncommitted_commit` proves rollback of a commit that never completed. It says nothing about a commit that completed while a related write did not. That is the same gap §18.6 records as tier 3 for partial failure, and the audit confirms the two are genuinely different — the crash test is not a partial-failure test wearing a different name.
 
-**What the audit changes:** nothing in the tier assignment. All nine tests assert what their names promise, with the one narrowing noted above. What it changes is the basis: §18.6's `PROVEN — PHASE 1 STORE LAYER` now rests on read assertions rather than on test names.
+**What the audit changes:** nothing in the tier assignment. The inspected test bodies support the specific assertions recorded in the table above. One previously broader classification — "concurrent updates" — has been narrowed to two separate guarantees. Beyond the assertions listed, the tests establish nothing. What the audit changes is the basis: §18.6's `PROVEN — PHASE 1 STORE LAYER` now rests on read assertions rather than on test names.
 
 **What the audit does not establish:** that these are the only relevant tests, or that Phase 2 conformance follows. Both limits are already recorded in §18.6 and §18.11.
 
@@ -1401,11 +1414,11 @@ Partially available. Implementation, verification, review and merge are executab
 | 2 transcript capture | substantial; state vocabulary exists, transition and ownership semantics undefined | Q8 for retention; transitions need adoption (§10) |
 | 3 derived projection | substantial; failure recovery and interruption semantics missing | nothing for structural tier; exact tier `NOT VERIFIED` |
 | 4 outstanding decisions | **none** | authority — Issue #305 |
-| 5 acceptance criteria and tests | 3 `PROVEN — PHASE 1 STORE LAYER` / `UNPROVEN — PHASE 2 INTEGRATION`; 3 specified but unrun; 3 `UNVERIFIED ABSENCE` | work not done; adoption authority for the atomicity contract |
+| 5 acceptance criteria and tests | 4 `PROVEN — PHASE 1 STORE LAYER` / `UNPROVEN — PHASE 2 INTEGRATION`; 2 specified but unrun; 4 `UNVERIFIED ABSENCE` | work not done; adoption authority for the atomicity contract |
 | 6 implementation authorisation | none | authority — Issue #305 |
 | 7 convergence chain | partial | Owner acceptance unavailable |
 
-The gates that can be advanced by engineering are 1, 2, 3 and 5 — the Q1 ruling's direction, which `DEC-P2-T2-Q1-001` records as decided and which no accountable authority has accepted, since none is assigned. Of those, the substantive gap is the interaction between gates 1 and 5: three gate-5 criteria are proven at the store layer and unproven once a transcript write must accompany a canonical commit.
+The gates that can be advanced by engineering are 1, 2, 3 and 5 — the Q1 ruling's direction, which `DEC-P2-T2-Q1-001` records as decided and which no accountable authority has accepted, since none is assigned. Of those, the substantive gap is the interaction between gates 1 and 5: four gate-5 criteria are proven at the store layer and unproven once a transcript write must accompany a canonical commit.
 
 Second substantive gap, gate 2: session lifecycle transitions. The state vocabulary exists; the transition and ownership semantics do not.
 
