@@ -1,0 +1,41 @@
+work_item_id: AID-2026-030
+title: F-REQ01-09 SQLite process-level crash-recovery conformance probe
+class: TEST
+risk: R1
+risk_rationale: >-
+  Test-only standalone Python probe. It does not change runtime code,
+  Rust adapter code, production configuration, or persisted project data.
+status: IMPLEMENTED
+sponsor: USER-PRINCIPAL-DELEGATED (current user delivery instruction)
+accountable_owner: USER-PRINCIPAL-DELEGATED (Owner instrument, Issue #305 comment 7042461592)
+implementing_ai_session: NOT_EXPOSED
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 0cc5ad5b752fe62e06d129a65323d8480e7985d3
+tracking_issue: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/366
+prompt_provenance:
+  source: current user-provided delivery instruction in ChatGPT continuation
+  prompt_id: NOT_FILE_BACKED
+  version: T2
+  session_id: NOT_EXPOSED
+  sha256: NOT_VERIFIED
+deliverables:
+  - scripts/verification/sqlite_process_conformance.py
+implementation:
+  branch: ai/AID-2026-030/req01-f09-sqlite-process-probe
+  pull_request: 372 (open; exact Head in PR metadata)
+  head_sha: PENDING
+verification:
+  command: python3 scripts/verification/sqlite_process_conformance.py
+  exit_code: 0
+  result: 3/3 checks passed on Python stdlib SQLite SQL path
+  rust_adapter_execution: NOT_RUN
+review:
+  status: AUTHOR_SELF_CHECK_ONLY
+  independent_review: NOT_CLAIMED
+acceptance:
+  status: PENDING
+  acceptance_authority: USER-PRINCIPAL-DELEGATED (Issue #305 comment 7042461592)
+limits:
+  - Does not execute SqliteMemoryStorage Rust adapter.
+  - Does not prove power-loss, kernel-crash, media-corruption, backup/restore, multi-host linearizability, or production readiness.
