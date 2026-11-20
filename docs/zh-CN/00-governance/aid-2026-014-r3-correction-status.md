@@ -10,7 +10,7 @@ ADR 载体：#43，comment 7034237663
 
 处置：CORR-APPLY-DISP-01
 
-修正状态：PROPOSED_FOR_APPLICATION
+修正状态：APPLIED_PENDING_INDEPENDENT_REVIEW
 
 ## 2. 决策状态
 
@@ -48,13 +48,13 @@ TEST EXECUTION = SUSPENDED
 
 | 要求 | 应用状态 | 独立复审 |
 |---|---|---|
-| R1 Claim 身份 | PROPOSED_FOR_APPLICATION | PENDING |
-| R2 Attestor 授权 | PROPOSED_FOR_APPLICATION | PENDING |
-| R3 共享 Fact Forget | PROPOSED_FOR_APPLICATION | PENDING |
-| R4 Fact/Claim 同步 | PROPOSED_FOR_APPLICATION | PENDING |
-| R5 端到端发布 | PROPOSED_FOR_APPLICATION | PENDING |
+| R1 Claim 身份 | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
+| R2 Attestor 授权 | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
+| R3 共享 Fact Forget | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
+| R4 Fact/Claim 同步 | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
+| R5 端到端发布 | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
 | R5 Storage §8.8 | NOT_APPLIED_PENDING_LOCATE | PENDING |
-| PASS 治理同步 | PROPOSED_FOR_APPLICATION | PENDING |
+| PASS 治理同步 | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
 
 ## 4. 应用证据要求
 
@@ -116,3 +116,56 @@ Schema Freeze 继续保持 NOT APPROVED。
 Implementation Conformance 继续保持 NOT ESTABLISHED。
 
 本修正状态记录不授予任何生产授权。
+
+## 8. 应用证据
+
+应用基线 HEAD：94cbb4dbffae9935373935f699ea74a7daee983b
+
+应用执行：L0 登记通道（CORR-APPLY-DISP-01，finalize 6b002288），落点为 43 服务器 main 树。
+
+下表所有 HEAD 与 Blob 均来自实际应用与回读过程返回值；不使用源会话自报 HEAD 作为应用证据。
+
+| 文件 | 组 | Commit SHA | Blob SHA | UTC |
+|---|---|---|---|---|
+| docs/en/02-domain-model/domain-model-overview.md | R1 §2.4 | d575ebc254ac | 47327d8a0f26 | 2026-11-20T19:53:40+08:00 |
+| docs/zh-CN/02-domain-model/domain-model-overview.md | R1 §2.4 | d575ebc254ac | 03843f8e1d98 | 2026-11-20T19:53:40+08:00 |
+| 02-domain-model/domain-model-overview.md | R1 §2.4 | d575ebc254ac | 47327d8a0f26 | 2026-11-20T19:53:40+08:00 |
+| docs/en/09-security-governance/security-governance-guide.md | R2 §12 | 9420435f8eb7 | 60b2283fdf44 | 2026-11-20T19:53:40+08:00 |
+| docs/zh-CN/09-security-governance/security-governance-guide.md | R2 §12 | 9420435f8eb7 | 9fee318f2def | 2026-11-20T19:53:40+08:00 |
+| docs/en/02-domain-model/domain-model-overview.md | R2/R4 §3.15 | 74a531814cb2 | ec4a27099b29 | 2026-11-20T19:53:40+08:00 |
+| docs/zh-CN/02-domain-model/domain-model-overview.md | R2/R4 §3.15 | 74a531814cb2 | 0b2aa1c35553 | 2026-11-20T19:53:40+08:00 |
+| 02-domain-model/domain-model-overview.md | R2/R4 §3.15 | 74a531814cb2 | ec4a27099b29 | 2026-11-20T19:53:40+08:00 |
+| docs/en/02-domain-model/domain-model-overview.md | R3 §8.1 | 0e8ce367de8d | 364ce11587bc | 2026-11-20T19:53:40+08:00 |
+| docs/zh-CN/02-domain-model/domain-model-overview.md | R3 §8.1 | 0e8ce367de8d | 28695a53a26a | 2026-11-20T19:53:40+08:00 |
+| 02-domain-model/domain-model-overview.md | R3 §8.1 | 0e8ce367de8d | 364ce11587bc | 2026-11-20T19:53:40+08:00 |
+| docs/en/02-domain-model/domain-model-overview.md | R4 §1/§4/§11/§12 | 1cd36650f1d3 | 46fbdcacbe8a | 2026-11-20T19:53:40+08:00 |
+| docs/zh-CN/02-domain-model/domain-model-overview.md | R4 §1/§4/§11/§12 | 1cd36650f1d3 | d80d0515f9e0 | 2026-11-20T19:53:40+08:00 |
+| 02-domain-model/domain-model-overview.md | R4 §1/§4/§11/§12 | 1cd36650f1d3 | 46fbdcacbe8a | 2026-11-20T19:53:40+08:00 |
+| docs/en/02-domain-model/phase-1-domain-model-freeze.md | R4 phase-1-freeze | 5429eff46d76 | 80a159515717 | 2026-11-20T19:53:40+08:00 |
+| docs/zh-CN/02-domain-model/phase-1-domain-model-freeze.md | R4 phase-1-freeze | 5429eff46d76 | acf12e265b52 | 2026-11-20T19:53:40+08:00 |
+| docs/en/00-governance/architecture-invariants.md | R4 arch-invariants | 088de92867fc | 4213ab67dc8a | 2026-11-20T19:53:40+08:00 |
+| docs/zh-CN/00-governance/architecture-invariants.md | R4 arch-invariants | 088de92867fc | 909be080e7f5 | 2026-11-20T19:53:40+08:00 |
+| docs/en/02-domain-model/core-entities.md | R4 core-entities | 08630cf875d6 | 58fd178a7b46 | 2026-11-20T19:53:40+08:00 |
+| docs/zh-CN/02-domain-model/core-entities.md | R4 core-entities | 08630cf875d6 | 998213221432 | 2026-11-20T19:53:40+08:00 |
+| 02-domain-model/core-entities.md | R4 core-entities | 08630cf875d6 | 06a914699813 | 2026-11-20T19:53:40+08:00 |
+| docs/en/02-domain-model/relationships-and-provenance.md | R4 relationships | 7873b5768f65 | cbacc2344310 | 2026-11-20T19:53:40+08:00 |
+| docs/zh-CN/02-domain-model/relationships-and-provenance.md | R4 relationships | 7873b5768f65 | 684cb6b15242 | 2026-11-20T19:53:40+08:00 |
+| 02-domain-model/relationships-and-provenance.md | R4 relationships | 7873b5768f65 | a674e21756cd | 2026-11-20T19:53:40+08:00 |
+| docs/en/03-memory-brain/memory-versioning.md | R5 memory-versioning | e8078af592ea | d6694ba1409b | 2026-11-20T19:53:40+08:00 |
+| docs/zh-CN/03-memory-brain/memory-versioning.md | R5 memory-versioning | e8078af592ea | dc652751d8c0 | 2026-11-20T19:53:40+08:00 |
+| docs/en/04-memory-compiler/extraction-and-normalization.md | R5 extraction §19.1 | 5bf757863cd0 | 8d408328ed0d | 2026-11-20T19:53:41+08:00 |
+| docs/zh-CN/04-memory-compiler/extraction-and-normalization.md | R5 extraction §19.1 | 5bf757863cd0 | 6d67d73c5cca | 2026-11-20T19:53:41+08:00 |
+| docs/en/06-memory-context/phase-3.8.27-g-claim-fact-visibility-addendum.md | R5 G addendum | bcf127f07078 | 28ab2832d5f2 | 2026-11-20T19:53:41+08:00 |
+| docs/zh-CN/06-memory-context/phase-3.8.27-g-claim-fact-visibility-addendum.md | R5 G addendum | bcf127f07078 | d651005e5a87 | 2026-11-20T19:53:41+08:00 |
+| docs/en/02-domain-model/domain-model-overview.md | PASS §13+CH | 961d2191bba6 | 443b35b288fc | 2026-11-20T19:53:41+08:00 |
+| docs/zh-CN/02-domain-model/domain-model-overview.md | PASS §13+CH | 961d2191bba6 | 736fc5865c54 | 2026-11-20T19:53:41+08:00 |
+| 02-domain-model/domain-model-overview.md | PASS §13+CH | 961d2191bba6 | 443b35b288fc | 2026-11-20T19:53:41+08:00 |
+| docs/en/00-governance/aid-2026-014-r3-correction-status.md | PASS status files | 1d9e2bd18771 | 8ad07e794f05 | 2026-11-20T19:53:41+08:00 |
+| docs/zh-CN/00-governance/aid-2026-014-r3-correction-status.md | PASS status files | 1d9e2bd18771 | d6d7e00e03f9 | 2026-11-20T19:53:41+08:00 |
+
+本轮未应用项（已隔离，无仓库写入）：
+
+- G 根级 §13.3 直接整合：ANCHOR_MISMATCH（定稿第七节 6. G 载体状态；同步债务 SD-06）。根级文件 06-memory-context/context-versioning.md，Blob 05c0739d0c22576a1fd5affc7d73c078c89049b1，保持不变。新建 EN/ZH 配对补充文件不宣称根级 §13.3 已完成替换。
+- Storage ADR §8.8：NOT_APPLIED_PENDING_LOCATE（定稿第八节；同步债务 SD-08）。真实可写 ADR 载体未定位；未创建替代 ADR，未向无关文档插入。
+
+本应用证据段由应用证据提交本身加入；该提交 SHA 与状态文件终态 Blob 由 L0 应用报告及 raw 回读登记。
