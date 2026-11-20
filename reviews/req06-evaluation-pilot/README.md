@@ -8,7 +8,7 @@ This experiment asks whether a small, provenance-backed corpus can distinguish u
 
 ## Corpus provenance and coverage
 
-corpus.jsonl contains 8 source records excerpted from repository documents at baseline main@bc114263d700692d32b20a099f3db9be9338d490; every record pins the source path and Git blob SHA. Two additional synthetic adversarial controls model a forgotten record and a record from another project scope. They are marked synthetic_control, have no repository provenance, and must never be treated as evidence about the product.
+corpus.jsonl contains 8 curated, source-grounded paraphrase records derived from repository documents at baseline main@bc114263d700692d32b20a099f3db9be9338d490; every record pins the source path, Git blob SHA, and section. Two additional synthetic adversarial controls model a forgotten record and a record from another project scope. They are marked synthetic_control, have no repository provenance, and must never be treated as evidence about the product.
 
 Seven fixed tasks are hand-authored from the source material: long-horizon continuity, factual recall (three tasks), planning/routing, correction/forget, and one negative abstention task. Preference-retention and multi-session handoff tasks are not represented. Labels are document-level relevance labels authored for this pilot, not user judgments.
 
