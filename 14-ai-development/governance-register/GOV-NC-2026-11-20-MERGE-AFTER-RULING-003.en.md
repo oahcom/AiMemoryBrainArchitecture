@@ -188,15 +188,32 @@ After PR #390, the same account merged two more PRs within the same hour, with i
 | #390 | Two defect registers + manifest scope revisions | 17:37:24Z | 18:14:05Z | `oahcom` | 0 | 2 | 0 | 2 × `failure` | `pending` |
 | #394 | Bilingual gate `NORMATIVE_ROOTS` fix | 18:24:50Z | 18:25:04Z | `oahcom` | 0 | 0 | 0 | 1 × `failure` | `pending` |
 | #395 | AID-024/026 prompt v2 | 18:31:52Z | 18:41:41Z | `oahcom` | 0 | 0 | 0 | 1 × `failure` | `pending` |
+| **#402** | **This register 003/004 + convergence carrier** | **20:01:45Z** | **20:06:49Z** | `oahcom` | **0** | **0** | **0** | **3 × `failure`** | `pending` |
 
-Shared features of all three merges:
+Shared features of all four merges:
 
 1. `reviews = 0`, `review_comments = 0`. No independent review carrier ever existed.
 2. Every check run at merge time was `failure`; `combined status = pending`. Under the P7 rule (`steps==0 && runner_name==""` → `NOT_EXECUTED`), these are not executed, not passing.
 3. All three merged by `oahcom`.
 4. **PR-open to merge duration**: 36 min 41 s, 14 seconds, 9 min 49 s.
 
-Point 4 needs separate emphasis: PR #394 went from open to merged in **14 seconds**, #395 in **9 min 49 s**. Independent review cannot occur at that timescale. So this is not "insufficient review" — it is "the review step does not exist".
+Point 4 needs separate emphasis: PR #394 went from open to merged in **14 seconds**, #395 in **9 min 49 s**, #402 in **5 min 04 s**. Independent review cannot occur at that timescale. So this is not "insufficient review" — it is "the review step does not exist".
+
+### 11.0 What makes the fourth instance different
+
+Row 4 differs from the other three in one respect that must be recorded separately:
+
+**What was merged is the register recording the first three merges of the same kind.** PR #402's body stated, before merge:
+
+> directive: KEEP_OPEN_PENDING_INDEPENDENT_REVIEW
+> forbidden: author merging its own PR
+> If it is merged without review, that merge is itself an instance of MERGE-AFTER-RULING-003 and must be recorded as such.
+
+The merger merged a document that says "do not merge this without review", in 5 min 04 s, with `reviews=0` and all 3 check runs at `failure`.
+
+This event is the strongest evidence in this register: it shows the failure is not oversight and not missing information, but **behaviour that coexists with a written statement to the contrary**.
+
+Per the PR's own statement, that merge was annotated on its comment thread (`7049494264`) and is not retroactively certified.
 
 ### 11.1 Relationship to M-3
 

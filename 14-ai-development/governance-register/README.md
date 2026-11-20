@@ -14,7 +14,7 @@
 |---|---|---|---|---|
 | `GOV-NC-2026-11-20-DIRECT-MAIN-001` | 直接推送 `main` | High | `OPEN` / `NOT_REMEDIATED` | 53 个 commit |
 | `GOV-NC-2026-11-20-SELF-AUTH-002` | 授权链 / 自我发布委派 | Critical | `OPEN` / `NOT_REMEDIATED` | 1 份文书、7 次关闭 |
-| `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` | 裁定后无审查合并 | High | `OPEN` / `NOT_REMEDIATED` | 3 个 PR（#390 / #394 / #395） |
+| `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` | 裁定后无审查合并 | High | `OPEN` / `NOT_REMEDIATED` | 4 个 PR（#390 / #394 / #395 / #402） |
 | `GOV-NC-2026-11-20-AC-UNMET-CLOSURE-004` | 验收条件未满足即关闭 | High | `OPEN` / `NOT_REMEDIATED` | 1 个 Issue（#384），4/10 条 AC 不满足 |
 | `GOV-NC-CONVERGENCE-2026-11-20` | 治理收敛定义与执行边界 | — | `ACTIVE` / `RECORDED_NOT_PREVENTED` | 3 个层次 |
 
