@@ -354,3 +354,25 @@ This addendum refreshes only the F1/F3 source pins and verification state. Earli
 - Carrier reused: existing PR #323 branch `fix/f43-01-f3-ledger-reconcile`; no new PR, Issue, or branch.
 - This is an evidence-ledger/manifest reconciliation only. Tests for the documentation update are NOT RUN. No direct main write, merge, deployment, production activation, or other-Owner signature is performed or inferred.
 - Prompt provenance: user-supplied Owner ruling D-2026-1120-01 and continuation instruction; parent source conversation `6afae42c-65d8-83ee-853c-a7537b0e273b`; current platform conversation UUID/raw message bytes unavailable; SHA-256 NOT_VERIFIED. No synthetic ID/hash is asserted.
+
+
+## 2026-11-20 D-2026-1120-01 latest exact-head correction (supersedes all earlier F1/F3 carrier pins)
+
+This final reconciliation is based on fresh live reads of the four existing PR heads and the corresponding source files. Earlier historical records above are retained as history; this section is the latest exact-ref authority for this reconciliation.
+
+### F-43-01/F1 — P1 — OPEN (runtime implementation evidence)
+- Existing PR #327, branch `docs/f43-01-f1-engineering-entry-handoff`, OPEN/DRAFT; current HEAD `4905a2d604b38bbe2d836617b11bed0c97709658`; base `f3bc21405aa6ad5a3ec271c04f7f4d8567d8bf33`.
+- Handoff path `14-ai-development/work-items/AID-2026-010/F1-engineering-landing-handoff.md`; current Blob `ae4ab29c7e7fd14c84b8605f5f5fe10b27477d51`. Live file readback confirms E1–E8 gates and that implementation entry is NOT AUTHORIZED / NOT READY; no canonical runtime repo/branch, engineering maintainers, callable D operations, durable ledger/receipt, or S1–S7 execution evidence is established.
+- Current PR #327 exact-head check-runs endpoint returned `total_count=0`; no CI run exists for this head. This is not a test PASS.
+- Controlling Issue #7 disposition remains `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`. F1 handoff is delivered and verifiable; actual runtime implementation remains OPEN / NOT IMPLEMENTED. Do not add placeholder runtime to this architecture-definition repository.
+
+### F-43-01/F3 — P1 — OPEN (independent-human acceptance / consumer / operational evidence)
+- Existing PR #321, branch `fix/f43-01-f3-d-query-mapping-pin`, OPEN/DRAFT; current HEAD `35668e63a98cbd0f9ea73573ab9251ac5c2bb881`; D query contract path `08-bmcp-protocol/d-authoritative-query-interface-contract-1.0.md`, current Blob `099f4948b550919084b0d73094692b590b0be0a9`. Live readback pins accepted mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49` in the authoritative header and request schema; a historical superseded mapping SHA appears only in the historical §11.1 narrative as an explicitly superseded reference. The contract still states `ResolveForgetFenceSnapshotProof` is NOT ESTABLISHED AS CALLABLE. Exact-head check-runs endpoint returned `total_count=0`; tests NOT RUN.
+- Existing PR #322, branch `fix/f43-01-f3-h-five-d-highwater-bounds`, OPEN/DRAFT; current HEAD `a336c85763df0135aa64ecec3cfdac8acd08a8eb`; validator Blob `49644a181c578fecb312218c08ce23caa62f603b`; test Blob `6685226143f28a5b8764067bb205080b531132e3`; current test source contains 15 test methods. The latest exact-head checks are Runs `44684299439` / Job `136118060059` and `44684299500` / Job `136118042894`; both FAILURE. Job annotations/step logs were not retrievable in this session; no test step result or CI PASS is claimed. Earlier 13/13 local evidence applies to a prior test Blob only, not this 15-method current Blob.
+- D/H role-labelled decisions #7021655866 and #7021638212 accept the same mapping Blob, but both visible GitHub identities are `oahcom`; independent human signer identity remains NOT VERIFIED. H Owner acceptance of current TEST-profile code is not recorded. Callable D query, operation-bound durable Receipt, currentness/revocation/anti-rollback, and C1–C6 operational evidence remain NOT ESTABLISHED.
+- Disposition: exact normative mapping pin is verifiable; independent-human acceptance and end-to-end consumer/operational acceptance remain OPEN. Return: PRs #321/#322, Issue #25 and Issue #43.
+
+### Evidence boundary
+- No new PR, Issue, branch, merge, direct main write, deployment, or production activation.
+- No test PASS or Owner signature is inferred. Documentation-only ledger change tests are NOT RUN.
+- Prompt provenance: user-provided Owner ruling D-2026-1120-01 and continuation instruction in this conversation; originating conversation ID supplied by user: `6afaf6ae-6e8c-83ec-8aaa-24d5341b9577`. This is chat instruction provenance, not a repository prompt file. Raw message bytes and current platform session UUID are unavailable; SHA-256 `NOT_VERIFIED`.
