@@ -75,48 +75,61 @@ number_allocation:
     performed and must not be claimed.
   allocation_conclusion: VERIFIED_UNIQUE_325_BRANCH_DUAL_DOMAIN_SCAN
 prompt_id: AID-2026-026-PROMPT
-prompt_version: v1
+prompt_version: v2
 prompt_lifecycle:
-  current_version: null
+  current_version: v2
   note: >-
-    current_version is null because no prompt currently matches the revised
-    scope. Prompt v1 remains frozen and historically valid; it is no longer an
-    execution basis for this Work Item.
+    v2 was frozen and hash-verified on 2026-11-20. v1 remains preserved as
+    history. Freezing v2 does not authorise R2 and does not fill any ownership
+    field.
   historical_versions:
     - version: v1
       status: FROZEN
       superseded_by: scope_revision_v2
       superseded_reason: v1 scopes Fact/Claim semantic adjudication, which is owned by AID-2026-014
       delivery_integrity: NOT_VERIFIED
-      evidence: prompt_sha256 and prompt_bytes below are unchanged from registration
-  next_version:
+      evidence: prompt_sha256_v1 and prompt_bytes_v1 below are unchanged from registration
+  current:
     version: v2
-    status: PENDING
-    required_before: R2
-    required_content:
-      - Inference/Hypothesis boundary and identity rule
-      - Forget interaction for Inference/Hypothesis
+    status: FROZEN
+    supersedes: v1
+    file: 14-ai-development/work-items/AID-2026-026/prompt-v2.md
+    sha256: f8758829215fcc6cdb5be19030a532949dba131939d519a487867069a29fbf6f
+    bytes: 9279
+    frozen_at: 2026-11-20
+    verification: >-
+      Recomputed sha256 over the exact file bytes equals the value above;
+      asserted by reqs/_freeze_v2.py, exit 0. v1 sha256 and byte count
+      re-verified as unchanged in the same run.
+    covered_by_scope_revision: v2
+    covers:
+      - Inference/Hypothesis semantic boundary and identity rule
+      - Forget interaction for Inference/Hypothesis, including partial-support loss
       - AID-2026-023 interface contract
       - AID-2026-014 citation discipline (cite, do not re-adjudicate)
-    constraint: >-
-      v2 must not reintroduce Fact/Claim semantic adjudication. v1 must not be
-      rewritten in place; its SHA-256 and byte count stay as registered.
-prompt_file: 14-ai-development/work-items/AID-2026-026/prompt-v1.md
+    delivery_integrity: NOT_VERIFIED
+  next_version: null
+  constraint: >-
+    v1 must not be rewritten in place. R2 remains NOT_AUTHORISED and is not
+    implied by v2 existing.
+prompt_file: 14-ai-development/work-items/AID-2026-026/prompt-v2.md
+prompt_sha256: f8758829215fcc6cdb5be19030a532949dba131939d519a487867069a29fbf6f
+prompt_bytes: 9279
+prompt_sha256_v1: 4d52da1e3a3fa5334f51bf75201cd3b3d51f95ca170353873a754393c201150c
+prompt_bytes_v1: 4267
 prompt_status: FROZEN
-prompt_sha256: 4d52da1e3a3fa5334f51bf75201cd3b3d51f95ca170353873a754393c201150c
-prompt_bytes: 4267
 prompt_provenance_tier: T1
 prompt_provenance_note: >-
-  The prompt snapshot is mechanically copied byte-for-byte by the coordination
-  layer from the actual dispatch source file
-  prompts/326-aid-2026-026-fact-claim-adr.md. The repository prompt-v1.md is
-  intended to preserve that source artifact exactly. The source-file SHA-256 is
-  4d52da1e3a3fa5334f51bf75201cd3b3d51f95ca170353873a754393c201150c and its
-  exact byte count is 4267. Equality between the source artifact and the
-  content ultimately rendered to and received by the session is NOT_VERIFIED
-  because the message channel was observed to strip or alter Markdown
-  structural markers. This provenance claim establishes the source artifact
-  identity, not byte-equivalence of the rendered delivery.
+  The v1 snapshot was mechanically copied byte-for-byte by the coordination
+  layer from the dispatch source file
+  prompts/326-aid-2026-026-fact-claim-adr.md; that provenance note is retained
+  as v1 history. v2 was authored directly for the revised scope and has no
+  separate dispatch source artifact; its identity is the file bytes pinned by
+  prompt_sha256 above. In both cases, equality between the repository artifact
+  and the content ultimately rendered to and received by a session is
+  NOT_VERIFIED, because the message channel was observed to strip or alter
+  Markdown structural markers. These provenance claims establish artifact
+  identity, not byte-equivalence of any rendered delivery.
 prompt_delivery_integrity: NOT_VERIFIED
 prompt_original_payload_sha256: 4d52da1e3a3fa5334f51bf75201cd3b3d51f95ca170353873a754393c201150c
 prompt_original_payload_bytes: 4267
