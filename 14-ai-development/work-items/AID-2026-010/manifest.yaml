@@ -220,8 +220,8 @@ latest_exact_head_refresh:
   ruling: "D-2026-1120-01"
   finding_ledger:
     path: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
-    commit: "9453e8a789f979e575c73f734c13ef1f7a6d95e0"
-    blob: "fa07d14329e7872fa2789fc000a97287442bdf78"
+    commit: "442e1c8c576661ee309d0c0b4641907f76b9a8d0"
+    blob: "a5d681f27d761302bb8171d1fcc8edc8782f549c"
   carriers:
     F1_PR_327:
       head: "934a76e18ba020d01c520a8484ed7fc37f96cff1"
@@ -248,7 +248,6 @@ latest_exact_head_refresh:
     raw_message_sha256: "NOT_VERIFIED"
     note: "Owner ruling and continuation instructions were supplied in chat; no prompt file or synthetic hash is claimed."
 
-    - "2026-11-20 live-ref refresh: ledger commit 1e017d11781aa0a1168ec5c177cfc63d458afed0 / Blob 7218715c607554b88d5be2b1acaf5c76634e0250; F1 PR #327 Head 4905a2d604b38bbe2d836617b11bed0c97709658 / handoff Blob ae4ab29c7e7fd14c84b8605f5f5fe10b27477d51; F3 PR #321 Head 35668e63a98cbd0f9ea73573ab9251ac5c2bb881 / contract Blob 099f4948b550919084b0d73094692b590b0be0a9; PR #322 Head a336c85763df0135aa64ecec3cfdac8acd08a8eb / validator Blob 49644a181c578fecb312218c08ce23caa62f603b / test Blob 6685226143f28a5b8764067bb205080b531132e3; Runs 44684299500 and 44684299439 failed before test steps (steps=null); F1/F3 remain OPEN; 10 CLOSED / 2 OPEN / 1 BLOCKED."
 
 latest_concurrent_ref_correction:
   finding_ledger:
