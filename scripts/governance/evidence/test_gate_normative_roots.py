@@ -198,10 +198,12 @@ class GateRootsTest(unittest.TestCase):
         (repo / src).parent.mkdir(parents=True)
         (repo / src).write_text("x\n", encoding="utf-8")
         run("git", "add", "-A")
+        self.assertTrue(run("git", "status", "--porcelain").stdout.strip())
         run("git", "commit", "-qm", "a")
         base = run("git", "rev-parse", "HEAD").stdout.strip()
         (repo / "docs/governance").mkdir(parents=True)
         run("git", "mv", str(src), "docs/governance/policy.md")
+        self.assertTrue(run("git", "status", "--porcelain").stdout.strip())
         run("git", "commit", "-qm", "move")
         head = run("git", "rev-parse", "HEAD").stdout.strip()
 
