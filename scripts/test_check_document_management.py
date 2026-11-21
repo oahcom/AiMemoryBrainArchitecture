@@ -36,6 +36,7 @@ from check_document_management import (  # noqa: E402
 
 FILE = Path("synthetic.md")
 RESULTS: list[bool] = []
+RESULTS_BY_NAME: dict[str, bool] = {}
 SKIPPED: list[str] = []
 UNEXPECTED_SKIPS: list[str] = []
 
@@ -46,7 +47,7 @@ UNEXPECTED_SKIPS: list[str] = []
 # when nothing executed.
 ALLOWED_SKIPS = {
     "T68c a real 0o000 directory is reported by path (integration)":
-        "running as root",
+        "running as root: mode bits cannot deny access",
 }
 
 
@@ -117,6 +118,10 @@ CANONICAL = """
 def record(name: str, ok: bool, detail: str = "") -> None:
     print(f"  [{'ok  ' if ok else 'FAIL'}] {name}{detail if not ok else ''}")
     RESULTS.append(ok)
+    # Execution is recorded here, at the only place a result exists. AST can
+    # prove a `record()` call is *written*; only this can prove it *ran*. A call
+    # inside `if False:` is present in the tree and absent here.
+    RESULTS_BY_NAME[name] = ok
 
 
 def skip(name: str, why: str) -> None:
@@ -135,7 +140,7 @@ def skip(name: str, why: str) -> None:
     SKIPPED.append(name)
     if name not in ALLOWED_SKIPS:
         UNEXPECTED_SKIPS.append(f"{name} ({why})")
-    elif ALLOWED_SKIPS[name] not in why:
+    elif why.strip() != ALLOWED_SKIPS[name]:
         UNEXPECTED_SKIPS.append(f"{name}: skip reason {why!r} is not the registered one")
 
 
@@ -2372,6 +2377,14 @@ def run_manual_controls() -> None:
            and lines[begin_at].strip().endswith("-->"))
     record("T69 the END marker is a line of its own",
            lines[end_at].strip() == end.strip())
+    # Uniqueness stated directly, not inferred from a downstream failure: two
+    # markers would make `line_index` pick the first and the block look fine.
+    record("T69 exactly one BEGIN marker exists document-wide",
+           sum(1 for l in lines if l.strip().startswith(begin)) == 1,
+           f"  found {sum(1 for l in lines if l.strip().startswith(begin))}")
+    record("T69 exactly one END marker exists document-wide",
+           sum(1 for l in lines if l.strip() == end.strip()) == 1,
+           f"  found {sum(1 for l in lines if l.strip() == end.strip())}")
     record("T69 the block sits inside section 9.2",
            sec_start < begin_at < end_at < sec_end)
 
@@ -2446,11 +2459,14 @@ POLICY_ASSERTIONS = (
     ("backlog-count-is-stated-once", "9.1",
      ("T70 every declared phrasing is caught",
       "T66 a reason restating the backlog count is an error")),
-    ("skips-are-registered-and-bounded", "test-suite",
-     # Not T68c: that case is *allowed* to skip, so binding the claim to it would
-     # mean the claim rests on a test that did not run. T68a is the wiring
-     # evidence and always executes.
+    # T68a proves unreadable directories are reported; it does not prove the
+    # skip registry works. The seventeenth review was right to reject that
+    # binding. These are the two claims, each with evidence of its own.
+    ("unreadable-directories-are-reported", "test-suite",
      ("T68a an unreadable directory is reported, not silently skipped",)),
+    ("skips-are-registered-and-bounded", "test-suite",
+     ("T72 an unregistered skip is refused",
+      "T72 a skip whose reason does not match the registry is refused")),
 )
 
 
@@ -2509,19 +2525,88 @@ def run_policy_assertions() -> None:
     record("T71 every registered claim names a policy section that exists",
            not missing_section, "  " + "; ".join(missing_section))
 
-    # The claim is only as good as the test having run. A registered test that
-    # was skipped leaves the claim standing on nothing.
-    executed = [n for n in SKIPPED]
+    # Presence in the AST is not execution. A `record()` call inside `if False:`
+    # is in the tree and never runs, so the claim would stand on a test that
+    # proves nothing. `RESULTS_BY_NAME` is written by `record()` itself, which is
+    # the only place a result exists -- this is the difference the seventeenth
+    # review asked for, and the reason the earlier version's `name in source`
+    # was worthless.
+    not_run: list[str] = []
+    failed: list[str] = []
+    for claim, _, tests in POLICY_ASSERTIONS:
+        for name in tests:
+            if name not in RESULTS_BY_NAME:
+                not_run.append(f"{claim}: {name!r} did not run")
+            elif not RESULTS_BY_NAME[name]:
+                failed.append(f"{claim}: {name!r} failed")
+    record("T71 every registered claim rests on a test that executed",
+           not not_run, "  " + "; ".join(not_run))
+    record("T71 every registered claim rests on a test that passed",
+           not failed, "  " + "; ".join(failed))
+
+    # A claim resting on a skipped test is the same hole by another route: the
+    # skip is deliberate, so the test never produced a result to rest on.
     skipped_claims = [
         claim for claim, _, tests in POLICY_ASSERTIONS
-        if any(t in name for name in executed for t in tests)
+        if any(t in name for name in SKIPPED for t in tests)
     ]
     record("T71 no registered claim rests on a skipped test",
            not skipped_claims, f"  {skipped_claims}")
 
-    # And the registry must not be empty: an empty registry proves nothing while
-    # looking like a satisfied check.
-    record("T71 the registry is not empty", len(POLICY_ASSERTIONS) >= 3)
+    # Structure of the registry itself. The earlier `len(...) >= 3` made three
+    # a minimum contract, which would fail if two claims were legitimately
+    # merged while the traceability stayed intact.
+    record("T71 the registry is not empty", bool(POLICY_ASSERTIONS))
+    claim_ids = [claim for claim, _, _ in POLICY_ASSERTIONS]
+    record("T71 claim identifiers are unique",
+           len(claim_ids) == len(set(claim_ids)),
+           f"  duplicates {[c for c in claim_ids if claim_ids.count(c) > 1]}")
+
+def run_skip_boundary() -> None:
+    """T72: the skip registry refuses what it was written to refuse.
+
+    Three properties, each tested by driving `skip()` directly rather than by
+    describing it:
+      - an unregistered name is refused;
+      - a registered name with an appended reason is refused (exact match, not
+        substring: "running as root; also whatever" is a different claim);
+      - a registered name with its registered reason is accepted.
+
+    The third matters as much as the first two: a check that refuses everything
+    would pass the first two and make the registry useless.
+    """
+    print("skip boundary")
+
+    probe = "T72 probe case"
+    before_unexpected = len(UNEXPECTED_SKIPS)
+    before_skipped = len(SKIPPED)
+
+    # 1. Unregistered name.
+    skip(probe, "no reason that matters")
+    record("T72 an unregistered skip is refused",
+           len(UNEXPECTED_SKIPS) > before_unexpected,
+           f"  unexpected {UNEXPECTED_SKIPS[before_unexpected:]}")
+
+    # 2. Registered name, appended reason -- the substring hole.
+    name, reason = next(iter(ALLOWED_SKIPS.items()))
+    mid_unexpected = len(UNEXPECTED_SKIPS)
+    skip(name, reason + "; and another unrelated reason")
+    record("T72 a skip whose reason does not match the registry is refused",
+           len(UNEXPECTED_SKIPS) > mid_unexpected,
+           f"  unexpected {UNEXPECTED_SKIPS[mid_unexpected:]}")
+
+    # 3. Registered name with the exact registered reason is accepted.
+    ok_unexpected = len(UNEXPECTED_SKIPS)
+    skip(name, reason)
+    record("T72 a registered skip with its exact reason is accepted",
+           len(UNEXPECTED_SKIPS) == ok_unexpected,
+           f"  unexpected {UNEXPECTED_SKIPS[ok_unexpected:]}")
+
+    # The probes above deliberately polluted the skip lists. Put them back, or
+    # the run's own summary would report skips that were test fixtures.
+    del SKIPPED[before_skipped:]
+    del UNEXPECTED_SKIPS[before_unexpected:]
+
 
 def run_single_entry_callers() -> None:
     """T67: governed_files() is diagnostics only, and that is checked.
@@ -2611,6 +2696,7 @@ def main() -> int:
     run_unreadable_walk()
     run_manual_controls()
     run_count_vocabulary()
+    run_skip_boundary()
     run_policy_assertions()
     run_single_entry_callers()
     run_schema_agreement()

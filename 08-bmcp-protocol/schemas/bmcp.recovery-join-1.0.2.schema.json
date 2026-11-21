@@ -236,10 +236,10 @@
         },
         "request_highwaters": {
           "type": "object",
-          "minProperties": 1,
           "additionalProperties": {
             "$ref": "#/$defs/counter"
-          }
+          },
+          "description": "May be empty when the corresponding owner ledger has no high-water entries. Do not synthesize an entry merely to make an empty ledger schema-valid."
         },
         "admission_count": {
           "type": "integer",
@@ -250,10 +250,10 @@
         },
         "admission_highwaters": {
           "type": "object",
-          "minProperties": 1,
           "additionalProperties": {
             "$ref": "#/$defs/counter"
-          }
+          },
+          "description": "May be empty when the corresponding owner ledger has no high-water entries. Do not synthesize an entry merely to make an empty ledger schema-valid."
         },
         "gate_ref": {
           "$ref": "#/$defs/ref"

@@ -25,6 +25,10 @@ SCHEMA_PATH = (
 )
 SCHEMA = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
 
+class DuplicateJSONMemberError(ValueError):
+    """Raised when a JSON object repeats a member name."""
+
+
 Verifier = Callable[[dict[str, Any]], bool | None]
 
 
@@ -33,7 +37,7 @@ def _reject_duplicate_object_pairs(pairs: list[tuple[str, Any]]) -> dict[str, An
     result: dict[str, Any] = {}
     for key, value in pairs:
         if key in result:
-            raise ValueError(f"duplicate JSON object member: {key}")
+            raise DuplicateJSONMemberError(f"duplicate JSON object member: {key}")
         result[key] = value
     return result
 
@@ -60,6 +64,8 @@ def validate_recovery_join(raw_envelope: bytes | str) -> dict[str, Any]:
     try:
         raw = raw_envelope.decode("utf-8") if isinstance(raw_envelope, bytes) else raw_envelope
         envelope = json.loads(raw, object_pairs_hook=_reject_duplicate_object_pairs)
+    except DuplicateJSONMemberError as exc:
+        return {"status": "INVALID", "errors": [str(exc)]}
     except Exception as exc:
         return {"status": "INVALID", "errors": [f"invalid JSON: {type(exc).__name__}"]}
     if not isinstance(envelope, dict):
