@@ -1,6 +1,6 @@
 # BMCP Architecture Completion — Semantic Contract & Engineering Handoff
 
-- Work Item: BMCP-ARCH-FOLLOWUP-001; Document: BMCP-ARCH-001; Version: 0.2.0
+- Work Item: BMCP-ARCH-FOLLOWUP-001; Document: BMCP-ARCH-001; Version: 0.2.1
 - Status: CANDIDATE / ARCHITECTURE_PARTIAL — not a frozen protocol specification
 - Main baseline: 477a55e624bcc244dfb65c435bc8d03f718b1e2a
 - H source snapshot: session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74
@@ -52,6 +52,7 @@ Main pins are from fetched origin/main at 477a55e624bcc244dfb65c435bc8d03f718b1e
 | 07-agent-integration/telemetry-model.md | main | 9bb4a77e4bd79caaf3e1faeaf77c6b42858998f0 | C telemetry |
 | 14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md | main | d59756a8eb454480804c482ca03c68345ab5abf2 | Approved semantic decision; Option A + I1 |
 | PR #436 protocol index/provider_outcome tests | PR head 1ffed9ed127df98b2f823a66ec80ea43d08cb9dc | open, not merged | structural-only provider outcome evidence |
+| C family boundary decision | PR #430 comment 7060351480; Issue #449 comment 7060126722 | Owner-delegate decision; no independent human C signature claimed | Family direction decided; exact H operation registry/C-H mapping remains OPEN |
 | B domain-model-overview.md | B branch session-b-domain-model-phase3 @ 840202a98cf40a0b3f194afb84bed4d5f3326658 | Blob 4d1debc0ec19b3917f9e76d04bb66da4df4cd346 | B accepts Option A + I1; source reconciliation pending |
 | D memory-versioning.md | D branch session-d-memory-brain-2026-11-16 @ b525e1f8fee2471a131e4a38efda99804045e424 | Blob af747f339d03bdd4684b6ed60fca05957dc8e1fb | D identity/revision/ConflictSet boundary; schema/currentness gate open |
 | D forget-fence-and-completion-contract.md | same D ref | Blob 1f0391bc49d007c44ec74165bd33d37412cc7990 | D ForgetOperation/Fence authority |
@@ -59,7 +60,7 @@ Main pins are from fetched origin/main at 477a55e624bcc244dfb65c435bc8d03f718b1e
 | I scope-and-revocation-policy.md | same I ref | Blob 71df6aaf21bb1767cd9fe5c947581b871325e023 | I PermissionEpoch/revocation |
 | I global-forget-target-inventory-and-completion-evidence.md | same I ref | Blob 9100061fa986fb6676656169de3fcf9fc1c72664 | I retention/global Forget evaluation |
 
-This is a bounded source ledger, not a claim that every H artifact or consumer was independently reviewed.
+The seven H Blob pins above were re-fetched from the live `session-h-bmcp-protocol` branch for this update; all seven resolve to the listed Blob SHAs at branch HEAD `3e8b33df18b9e6fc757ca84ff07a12faebc78e74`. This is a bounded source ledger, not a claim that every H artifact or consumer was independently reviewed.
 
 ### 2.3 B/D/I Owner decision pins
 
@@ -231,9 +232,24 @@ The merged Owner decision selects Option A + I1 for Fact/Claim semantics. This d
 
 ### 6.2 Agent Integration / MCP
 
-C owns Agent/Adapter semantics; H owns BMCP wire/transport. Agent, Agent Runtime, Model, Provider, Tool, Session and Principal remain distinct. An MCP Server may expose Agent-facing tool/resource/prompt interfaces; it is not BMCP, does not define BMCP wire compatibility and does not replace D/I/G/E authority checks.
+C owns Agent/Adapter semantics; H owns BMCP wire/transport. MCP is the Agent Host ↔ C northbound tool/resource interface. BMCP is the C Agent Adapter ↔ Memory Brain protocol boundary via H. MCP methods are not BMCP messages; an MCP Server is a C-owned Agent Adapter/Gateway, not BMCP and not a parallel canonical Brain API. A C MCP Server may cross into BMCP only through a registered H family/operation whose exact versioned contract is pinned and accepted. Agent, Agent Runtime, Model, Provider, Tool, Session and Principal remain distinct.
 
-If used as an adapter/gateway, MCP Server maps authenticated Agent action to a registered BMCP operation; preserves message/request/correlation/idempotency identities; forwards protected principal context, not payload identity claims; uses BMCP/H transport rather than a parallel wire protocol; cannot write canonical Memory or mint PermissionEpoch/ForgetFence; and returns the owner result. MCP tool success is not canonical commit, E acceptance or Applied. Exact MCP-to-BMCP mapping is a C/H decision, not frozen here.
+| Logical BMCP family | Direction relative to C Adapter | C disposition for MCP mapping |
+|---|---|---|
+| Telemetry | Agent/Adapter → Brain | Agent-facing tool only after H registers the exact operation and I/C identity/authorization binding is accepted |
+| Event Ingress | Producer/Agent → Brain | Only through H's registered ingress operation and E durable receipt/idempotency contract; MCP result is not E acceptance unless the E receipt is returned |
+| Context Snapshot | Brain → Adapter | Inbound delivery to C; not a generic MCP request/response operation |
+| Context Delta | Brain → Adapter | Inbound delivery to C; G owns version/base/ChangeSet semantics; not a generic MCP request/response operation |
+| Delivery | Brain → Adapter | Inbound H/G delivery lifecycle; C applies only the managed region at the declared inference boundary |
+| Acknowledgement | Adapter → Brain | C emits H-defined evidence; not MCP success and not a substitute for G Applied |
+| Forget / Revocation | Brain/I → Adapter, with authorized control requests | C consumes D/I owner-issued controls; Agent-facing requests route only to I/D-authorized operations, never a C-local Forget implementation |
+| Administrative Governance | I/control plane → Adapter/Gateway | Control-plane only; no ordinary Agent tool exposure absent explicit I policy and H operation registration |
+
+F-owned Retrieval/Recall is not a BMCP message family in the current H family inventory. C MUST NOT invent a BMCP Search operation. Any future MCP memory-search tool requires a separately pinned F-owned query API and I/D authorization path; until then it is unavailable / dependency-not-ready.
+
+Identity mapping is logical only: C retains AgentRequestId, AgentAttemptId, AgentTurnId and AgentSessionId as C-owned identities. H `message_id` identifies each BMCP message; H `correlation_id` groups the workflow; H `causation_id` identifies the immediate parent BMCP message/event. AgentRequestId may be a local workflow-correlation input, but MUST NOT be serialized as a newly invented H `request_id`; each H message has its own H `message_id`. AgentAttemptId is not a transport attempt ID or operation idempotency key. State-changing operations use the operation owner's idempotency identity plus canonical payload digest; same identity/digest replays, while same identity/different digest conflicts.
+
+C may provide final-request-boundary evidence only at the declared capability tier; H transports it and G owns Applied acceptance. MCP tool success, HTTP 2xx, H transport ACK, E AcceptedReceipt and G Applied are distinct outcomes. This is a family-level routing decision only: MCP tool/resource names, schemas, H operation IDs/registry, exact wire fields, ACK schema, transport and consumer acceptance remain OPEN under Issue #449.
 
 ### 6.3 D/I
 
@@ -331,7 +347,7 @@ H-owned questions go to H first; they are not disguised as Owner decisions.
 - Phase 3.7 lifecycle handoff Blob: `b2a2648d5576511f68fdb9d87ce4388a1fedd5e9`
 - Protocol conformance matrix Blob: `075b2ac6ebe9bda4ec83de04fad07e8027e6a440`
 
-#### H-CONFIRM-001 — Message/request identity: PARTIALLY DECIDED
+#### H-CONFIRM-001 — Message/request identity: PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN
 
 - `message_id` is the unique immutable identity of one BMCP message.
 - `correlation_id` groups one workflow/turn/delivery; `causation_id` identifies the immediate parent message/event.
@@ -339,14 +355,14 @@ H-owned questions go to H first; they are not disguised as Owner decisions.
 - There is **no separate core envelope `request_id`** in the current H candidate. C retains AgentRequestId and AgentAttemptId as C-owned identities. C maps one Agent request to one or more BMCP messages using correlation/causation without collapsing Agent request, Agent attempt, BMCP message, transport attempt or idempotency identity.
 - This accepts logical identity separation only; field encoding, namespace syntax and wire schema are not frozen.
 
-#### H-CONFIRM-002 — Raw Wire Decode vs semantic Parse: PARTIALLY DECIDED
+#### H-CONFIRM-002 — Raw Wire Decode vs semantic Parse: PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN
 
 - H owns authenticated transport binding, framing/raw-byte intake, strict UTF-8/JSON decoding, duplicate-key/non-finite/depth/size rejection, envelope structural validation, protocol version/capability and integrity checks.
 - BMCP semantic Parse begins only after successful decode and envelope validation. It resolves registered family/operation and dispatches to the owning domain authority.
 - Semantic Parse MUST NOT re-parse raw bytes or bypass H's strict decoder. H decode MUST NOT infer B/D/E/F/G/I business semantics.
 - The strict parser Blob is a non-production reference model, not a Runtime parser or implementation PASS.
 
-#### H-CONFIRM-003 — ACK family/evidence/retry: PARTIALLY DECIDED
+#### H-CONFIRM-003 — ACK family/evidence/retry: PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN
 
 - Delivery lifecycle remains Prepared / Delivered / Applied / Rejected / Expired / Superseded / Unknown. Timeout or missing evidence is Unknown, never inferred success.
 - Delivered proves transport endpoint receipt only. Applied is accepted only with G-owned context/application semantics and required C inference-boundary evidence; H transports/verifies evidence but does not mint G Applied.
@@ -354,7 +370,7 @@ H-owned questions go to H first; they are not disguised as Owner decisions.
 - ACK identity/evidence digest is stable for one completed action; retransmission reuses it. Transport attempt identity may change. Same operation key + same target digest is idempotent; same key + different digest is conflict. Missing ACK after local success remains Unknown until query/reconciliation.
 - No ACK implies model attention, comprehension, provider deletion, physical erasure or global Forget completion.
 
-#### H-CONFIRM-004 — Validator layers/error mapping: PARTIALLY DECIDED
+#### H-CONFIRM-004 — Validator layers/error mapping: PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN
 
 1. Transport/security integration authenticates peer/workload Principal; I owns Principal and authorization policy. Payload identity fields are assertions only.
 2. H validates raw syntax, envelope requiredness/unknown-critical behavior, protocol version/capability, integrity, replay and idempotency.
@@ -362,7 +378,7 @@ H-owned questions go to H first; they are not disguised as Owner decisions.
 4. C owns final inference-request boundary evidence; H cannot infer Applied from a transport ACK.
 5. Error classes preserve Authentication, Authorization, Validation, Unsupported, Conflict, Expired, RateLimited/ResourceExhausted, Internal and Unknown. Existing code labels remain Candidate until H's separate versioned wire contract is reviewed; no error enum is frozen.
 
-**Disposition for all four confirmations:** `ACCEPTED_SEMANTICALLY_BY_OWNER_DELEGATE`; `NOT_WIRE_FROZEN`. Do not mark H's seven normative core specifications complete, do not claim cross-owner consumer acceptance, and do not close H implementation/conformance work. H must refresh its source branch against current main and submit normative bilingual spec/registry changes under H ownership.
+**Current status for each of H-CONFIRM-001..004:** `PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN`, with `INDEPENDENCE_UNVERIFIABLE`. The logical decisions recorded in PR #428 comments 7060190878 and 7060264372 are accepted only within their stated scope; exact registry/schema/requiredness/crypto/persistence/error/consumer artifacts remain open. Do not mark H's seven normative core specifications complete or claim independent H signature, cross-owner consumer acceptance, or H implementation/conformance closure.
 
 ### 7.1.2 H scope correction — logical decision vs exact artifact status
 
@@ -416,19 +432,19 @@ The earlier broad acceptance wording is superseded by this scope correction. H r
 - MODULE: BMCP
 - ISSUE_OR_ADR: C Agent Integration canonical contract / guide
 - DECISION_REQUIRED: confirm Agent/MCP-to-BMCP operation mapping, Request/Attempt/Message identity, authenticated Principal handoff and final inference boundary.
-- CURRENT_FACTS: C owns Agent/Adapter semantics; H owns BMCP wire/transport; C guide assigns wire schema/message semantics to H and Agent-side requirements to C.
-- H_OWNED_CONTRACTS: H confirms transport/envelope/ACK mapping first.
-- CROSS_MODULE_CONFLICT: MCP tool success, Agent request completion, BMCP business completion and domain receipt are distinct.
-- OPTIONS: (A) MCP Server is C-owned adapter mapping to BMCP operations; (B) MCP Server exposes a parallel canonical Brain API.
-- RECOMMENDED_OPTION: A; reject B as bypass/duplicate-authority risk.
+- CURRENT_FACTS: C Owner comment PR #430 comment 7060351480 decides family-level routing. MCP is Agent Host ↔ C northbound; BMCP is C Agent Adapter ↔ Brain via H. The logical family matrix and identity mapping are recorded in §6.2. Issue #449 comment 7060126722 supplies the binding semantic direction.
+- H_OWNED_CONTRACTS: H owns exact operation IDs/registry, versioned schemas, wire fields, ACK encoding and transport. C cannot invent H fields or operation IDs.
+- CROSS_MODULE_CONFLICT: Family direction is decided, but exact H operation registry, schemas, C tool/resource names and C/H consumer acceptance remain OPEN under Issue #449. MCP tool success, BMCP business outcome, transport ACK, E receipt and G Applied remain distinct.
+- OPTIONS: (A) C-owned MCP Agent Adapter/Gateway maps to registered H BMCP families/operations; (B) MCP exposes a parallel canonical Brain API.
+- RECOMMENDED_OPTION: A is DECIDED at family-routing level; reject B. Keep exact C/H operation mapping OPEN until pinned H contracts and consumer acceptance exist.
 - MEMORY_COMPILER_IMPACT: MCP ingress still uses E AcceptedReceipt and D admission.
-- AGENT_INTEGRATION_IMPACT: C defines adapter mapping and preserves Agent/Runtime/Model/Provider/Tool/Session/Principal distinctions.
+- AGENT_INTEGRATION_IMPACT: C retains AgentRequestId/AgentAttemptId/AgentTurnId/AgentSessionId; maps workflow correlation to H correlation_id without adding request_id; exact C tool/resource and H operation bindings remain open.
 - D_I_IMPACT: canonical identity/lifecycle and authorization remain D/I-owned.
 - RUNTIME_IMPLEMENTATION_IMPACT: gateway waits for H mapping and C acceptance.
 - REQUIRED_AUTHORITY: C + H; D/I review authority-bearing identity mapping.
 - OWNER_DECISION: PARTIALLY_DECIDED; MCP_SERVER_IS_C_OWNED_AGENT_FACING_ADAPTER_ONLY; EXACT_MAPPING_OPEN_ISSUE_449
 - EVIDENCE: C guide Blob c4e076887634a9e8e46df076efb0f4b70d816e0a; `07-agent-integration/agent-integration-overview.md` and `08-bmcp-protocol` ownership boundary.
-- FOLLOW_UP_ACTIONS: C publishes exact Agent/MCP-to-BMCP mapping under Issue #449; H reviews only its Wire/Transport mapping; no parallel API.
+- FOLLOW_UP_ACTIONS: C reconciles the family matrix and logical identity mapping into its canonical source/mirrors; C/H publish and accept exact versioned operation mapping under Issue #449; H reviews only H-owned Wire/Transport artifacts; no parallel API.
 
 
 
@@ -450,7 +466,7 @@ The earlier broad acceptance wording is superseded by this scope correction. H r
 - These sources define domain semantics and operation names, not a complete callable API/IDL or frozen wire representation. D names RegisterProducerWork, InstallForgetFence, PublishDerivedIfFenceCurrent, CompleteProducerWork, ResolveProducerWork and ReconcileForgetBarrier. I defines PermissionEpoch, AuthorizationDecisionRef, revocation/currentness and evidence acceptance; no frozen public authorize() endpoint/schema exists.
 - Ruling: D/I Owner comments 7060243632 and 7060259541 DECIDE this authority boundary. D remains sole authority for canonical ID/revision/currentness, lifecycle, ConflictSet, ForgetOperation/Fence and producer-barrier semantics; I remains sole authority for Principal/Actor/attestor authorization, PermissionEpoch, revocation, retention/legal-hold/backup and global Forget policy/evaluation. BMCP carries opaque owner-issued refs/epochs and calls only the owning authority's validation/currentness operation after publication. PermissionEpoch and ForgetFence are distinct nominal types. Missing/stale/unavailable/indeterminate evidence fails closed. Exact callable APIs/IDL/schema remain open and must be published by D/I.
 
-**C mapping boundary:** Issue #449 is open and records that MCP Server, if selected, is C's northbound Agent-facing Adapter/Gateway, not BMCP and not a parallel Brain API. C must map Agent request/attempt identities to H message_id/correlation_id/causation_id, preserve Principal provenance and I authorization, and distinguish tool result, BMCP business response, transport ACK, E receipt and G Applied. No C response or acceptance is recorded yet.
+**C mapping boundary:** PR #430 comment 7060351480 decides family-level routing; Issue #449 remains OPEN for exact H operation IDs/schemas, C tool/resource names and consumer acceptance. MCP is Agent Host ↔ C northbound; BMCP is C Agent Adapter ↔ Brain via H. AgentRequestId may be a local workflow-correlation input but MUST NOT become a newly invented H `request_id`; H assigns each message its own `message_id`, with `correlation_id` for workflow and `causation_id` for the immediate parent. Event Ingress/Telemetry/Forget/Admin require registered H operations and owner authorization; Context Snapshot/Delta/Delivery are inbound; Acknowledgement is Adapter evidence, not MCP success or G Applied. Recall/Search is F-owned and is not a current BMCP family; do not invent Search.
 
 ### 7.4 B/D/I Owner decisions (delegated roles; no independent human signatures claimed)
 
@@ -508,7 +524,7 @@ Issue #7 is currently CLOSED / not_planned under the Owner phase-closure ruling;
 - Issue #7: CLOSED / not_planned; body retains `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`. Not edited.
 - Issue #3: CLOSED / not_planned as superseded. Its historical body says Applied Contract Frozen = NO and Test Executed / Passed = NO / NO; closure does not prove a new BMCP core freeze.
 - Issue #43: closed as superseded by Owner phase-closure ruling. This work is an architecture handoff, not Runtime implementation.
-- Main baseline at this refresh: `477a55e624bcc244dfb65c435bc8d03f718b1e2a`; H source snapshot: `session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74`.
+- Main baseline at this refresh: `477a55e624bcc244dfb65c435bc8d03f718b1e2a`; H source branch re-read at `session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74`; seven H Blob pins were re-fetched and are unchanged.
 - PR #443 is CLOSED / unmerged; PR #445 is merged. Main bilingual structural gate has 89 frozen / 0 new gaps at the fc1717 baseline; this is not semantic parity or whole-tree document-adoption PASS.
 - PR #425 is CLOSED WITHOUT MERGE. Its 10/10 Python result is historical reference evidence only; E's five-stage Rust pipeline is the sole reference implementation. PR #427 merged the local SQLite Admission reference layer; at merge `8c58d4c679cdddfb30c4d9cae4d71302e95fb1a5`, `cargo test --offline -p memory-compiler` measured 19 passed / 0 failed. This is reference-crate evidence, not production Runtime conformance.
 - Owner decisions: PR #446 merged (Option A + I1); B/D/I role decisions are PR #429 comments 7060251435 / 7060243632 / 7060259541; H scope correction is PR #428 comment 7060264372. All are consolidated-delegate decisions; independence is not claimed.
@@ -516,7 +532,7 @@ Issue #7 is currently CLOSED / not_planned under the Owner phase-closure ruling;
 - Runtime acceptance tests: NOT RUN — no Runtime authorization/repository.
 - Owner-delegate semantic review is bounded; `INDEPENDENCE_UNVERIFIABLE`. A separate independent bilingual semantic review is not claimed.
 - GitHub Actions on the previous exact PR #453 head completed with FAILURE for GOV-DOC-002, Runner Admission and Bilingual Gate; job logs returned 404. No CI PASS is claimed. Exact-head checks must be rerun after this source update.
-- GOV-DOC-002 incremental PASS is not whole-tree PASS; the whole-tree adoption backlog remains.
+- GOV-DOC-002 incremental PASS is not whole-tree PASS; the whole-tree adoption backlog remains INCOMPLETE. Structural pairing is not semantic bilingual parity.
 
 
 ## 11. Bilingual change manifest

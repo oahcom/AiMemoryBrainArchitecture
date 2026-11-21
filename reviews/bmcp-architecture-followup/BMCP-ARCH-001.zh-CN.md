@@ -1,8 +1,8 @@
 # BMCP 架构完成——语义契约与工程交接
 
-- 工作项：BMCP-ARCH-FOLLOWUP-001；文档：BMCP-ARCH-001；版本：0.2.0
+- 工作项：BMCP-ARCH-FOLLOWUP-001；文档：BMCP-ARCH-001；版本：0.2.1
 - 状态：CANDIDATE / ARCHITECTURE_PARTIAL——不是已冻结协议规范
-- Main 基线：c138654c942dc93b5a36eccb2ff0e41452156429
+- Main 基线：477a55e624bcc244dfb65c435bc8d03f718b1e2a
 - H 源快照：session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74
 - 对应版本：[English](BMCP-ARCH-001.en.md) | [中文版本](BMCP-ARCH-001.zh-CN.md)
 - 范围：架构语义、阶段边界、依赖映射、验收计划和工程交接
@@ -18,11 +18,11 @@ Owner 已合并批准 Fact/Claim 语义决策（Option A + I1）；精确 Compil
 
 Issue #7 的记录保持 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE。根据 Owner 阶段关闭裁决，GitHub 当前报告 Issue #7 为 CLOSED / not_planned；本工作不重开或修改它。延期不等于 Runtime 授权。
 
-**规范名称：** 仓库规范术语表 `00-governance/terminology.md` 将 BMCP 定义为 **Brain Memory Context Protocol**（main `c138654c942dc93b5a36eccb2ff0e41452156429`，术语表 Blob `b8770fbb58e4fac087698043c40a57531b1d244d`）。初始派发文本中的 “Brain Memory Control Protocol” 在本仓库中不是规范名称，予以纠正。H 的协议文档必须保留 “Context”；名称问题不再是未决项。
+**规范名称：** 仓库规范术语表 `00-governance/terminology.md` 将 BMCP 定义为 **Brain Memory Context Protocol**（main `477a55e624bcc244dfb65c435bc8d03f718b1e2a`，术语表 Blob `b8770fbb58e4fac087698043c40a57531b1d244d`）。初始派发文本中的 “Brain Memory Control Protocol” 在本仓库中不是规范名称，予以纠正。H 的协议文档必须保留 “Context”；名称问题不再是未决项。
 
 ## 2. 精确来源登记
 
-Main Pin 来自 origin/main @ c138654c942dc93b5a36eccb2ff0e41452156429；H Pin 来自 session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74。
+Main Pin 来自 origin/main @ 477a55e624bcc244dfb65c435bc8d03f718b1e2a；H Pin 来自 session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74。
 
 | 来源 | Ref | Blob SHA | 状态 / 用途 |
 |---|---|---|---|
@@ -41,8 +41,9 @@ Main Pin 来自 origin/main @ c138654c942dc93b5a36eccb2ff0e41452156429；H Pin �
 | docs/en/03-memory-brain/forget-fence-and-completion-contract.md | main | c791895333ab6140f035f4f622d5dee9325d422d | D/I Forget 边界 |
 | docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md | main | 9c054932994bb078e2834df8bd66f73895aa04f5 | D Lifecycle/Fence |
 | 13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md | main | 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593 | 历史 ADR；语义决策已被取代；消费者映射仍为 Candidate |
+| C Family Boundary 决策 | PR #430 comment 7060351480；Issue #449 comment 7060126722 | Owner-delegate 决议；不声称独立人工 C 签名 | Family 方向已决定；精确 H Operation Registry / C-H Mapping 仍 OPEN |
 
-这是有界来源登记，不代表所有 H 工件或消费者均已独立审查。
+本次更新已从实时 `session-h-bmcp-protocol` 分支重新读取上述七个 H Blob Pin；它们在当前分支 HEAD `3e8b33df18b9e6fc757ca84ff07a12faebc78e74` 均解析为表中 Blob SHA。此处是有界来源登记，不代表所有 H 工件或消费者均已独立审查。
 
 ## 3. 文件所有权矩阵与修改范围
 
@@ -208,9 +209,24 @@ BMCP 不是 Memory Compiler。E 拥有 Candidate IR 和 Compiler Pipeline。BMCP
 
 ### 6.2 Agent Integration / MCP
 
-C 拥有 Agent/Adapter 语义；H 拥有 BMCP Wire/Transport。Agent、Agent Runtime、Model、Provider、Tool、Session 和 Principal 保持不同。MCP Server 可以暴露 Agent 侧 Tool/Resource/Prompt 接口；它不是 BMCP，不定义 BMCP Wire 兼容性，也不替代 D/I/G/E 权威校验。
+C 拥有 Agent/Adapter 语义；H 拥有 BMCP Wire/Transport。MCP 是 Agent Host ↔ C 的北向 Tool/Resource 接口；BMCP 是 C Agent Adapter ↔ Memory Brain 经 H 的协议边界。MCP Method 不是 BMCP Message。MCP Server 是 C 所有的 Agent Adapter/Gateway，不是 BMCP，也不得形成平行 Canonical Brain API。只有在 H 注册了精确 Family/Operation、且对应版本化契约已 Pin 并获接受时，C MCP Server 才能跨入 BMCP。Agent、Agent Runtime、Model、Provider、Tool、Session 和 Principal 保持不同。
 
-若 MCP Server 作为 Adapter/Gateway，必须将认证 Agent Action 映射为注册 BMCP Operation；保留 Message/Request/Correlation/Idempotency 身份；传递受保护 Principal Context，不信任 Payload Identity；使用 BMCP/H Transport，不另创 Wire Protocol；不得写 Canonical Memory 或签发 PermissionEpoch/ForgetFence；返回 Owner Result。MCP Tool 成功不等于 Canonical Commit、E Acceptance 或 Applied。精确 MCP-to-BMCP 映射由 C/H 决定，本文不冻结。
+| 逻辑 BMCP Family | 相对 C Adapter 的方向 | C 对 MCP Mapping 的处置 |
+|---|---|---|
+| Telemetry | Agent/Adapter → Brain | 只有 H 注册精确 Operation 且 I/C Identity/Authorization Binding 获接受后，才可由 Agent-facing Tool 发起 |
+| Event Ingress | Producer/Agent → Brain | 只能经 H 注册 Ingress Operation 和 E Durable Receipt/Idempotency 契约；除非返回 E Receipt，否则 MCP Result 不等于 E Acceptance |
+| Context Snapshot | Brain → Adapter | 向 C 的入站 Delivery；不是通用 MCP Request/Response Operation |
+| Context Delta | Brain → Adapter | 向 C 的入站 Delivery；G 拥有 Version/Base/ChangeSet 语义；不是通用 MCP Request/Response Operation |
+| Delivery | Brain → Adapter | 入站 H/G Delivery Lifecycle；C 仅在声明的 Inference Boundary 应用 Brain-managed Region |
+| Acknowledgement | Adapter → Brain | C Adapter 发出 H 定义的 Evidence；不是 MCP Success，也不能替代 G Applied |
+| Forget / Revocation | Brain/I → Adapter，并带授权控制请求 | C 消费 D/I Owner-issued Control；Agent-facing Request 只能路由到 I/D 授权 Operation，绝不实现 C-local Forget |
+| Administrative Governance | I/Control Plane → Adapter/Gateway | 仅控制面；除非有显式 I Policy 和 H Operation Registration，否则不得暴露为普通 Agent Tool |
+
+F 所有的 Retrieval/Recall 在当前 H Family Inventory 中不是 BMCP Message Family。C MUST NOT 发明 BMCP Search Operation。未来任何 MCP Memory-search Tool 都必须依赖单独 Pin 的 F-owned Query API 和 I/D Authorization Path；在此之前状态为 unavailable / dependency-not-ready。
+
+身份映射仅为逻辑层：C 保留 AgentRequestId、AgentAttemptId、AgentTurnId、AgentSessionId 作为 C-owned Identity。H `message_id` 标识每条 BMCP Message；H `correlation_id` 关联 Workflow；H `causation_id` 标识直接父 Message/Event。AgentRequestId 可以作为本地 Workflow Correlation 输入，但 MUST NOT 被序列化为新造的 H `request_id`；每条 H Message 都有自己的 H `message_id`。AgentAttemptId 不是 Transport Attempt ID，也不是 Operation Idempotency Key。状态变更 Operation 使用所属 Owner 的 Idempotency Identity + Canonical Payload Digest；相同 Identity/Digest 重放，Identity 相同但 Digest 不同则 Conflict。
+
+C 只能在声明的 Capability Tier 提供 Final-request-boundary Evidence；H 负责传输，G 拥有 Applied Acceptance。MCP Tool Success、HTTP 2xx、H Transport ACK、E AcceptedReceipt 和 G Applied 是不同结果。本决议只决定 Family-level Routing；MCP Tool/Resource Name、Schema、H Operation ID/Registry、精确 Wire Field、ACK Schema、Transport 和 Consumer Acceptance 仍由 Issue #449 跟踪且 OPEN。
 
 ### 6.3 D/I
 
@@ -236,7 +252,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - D_I_IMPACT：权威不变；Identity Claims 仍由 D/I 校验。
 - RUNTIME_IMPLEMENTATION_IMPACT：Request/Response Correlation 等待 H 映射。
 - REQUIRED_AUTHORITY：H，C/E/G 消费者复审。
-- OWNER_DECISION：ACCEPTED_SEMANTICALLY_BY_OWNER_DELEGATE / NOT_WIRE_FROZEN
+- OWNER_DECISION：PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN；INDEPENDENCE_UNVERIFIABLE；NOT_WIRE_FROZEN
 - EVIDENCE：`00-governance/terminology.md` Blob b8770fbb58e4fac087698043c40a57531b1d244d；H Envelope Blob 5547ecd78d118bd63e571e5daad87194d9b694e4。
 - FOLLOW_UP_ACTIONS：H 发布版本化映射；消费者复审。
 
@@ -254,7 +270,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - D_I_IMPACT：权威不变。
 - RUNTIME_IMPLEMENTATION_IMPACT：原始字节不得进入 Semantic Parser。
 - REQUIRED_AUTHORITY：H。
-- OWNER_DECISION：ACCEPTED_SEMANTICALLY_BY_OWNER_DELEGATE; NOT_WIRE_FROZEN
+- OWNER_DECISION：PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN；INDEPENDENCE_UNVERIFIABLE；NOT_WIRE_FROZEN
 - EVIDENCE：Strict Parser Blob 3b9b3da645448c773c95a9dcd3c57c8c109bb2da。
 - FOLLOW_UP_ACTIONS：H 发布阶段契约和测试向量。
 
@@ -272,7 +288,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - D_I_IMPACT：D/I 独立判断 Fence/Target 满足情况。
 - RUNTIME_IMPLEMENTATION_IMPACT：ACK 实现等待 H 和消费者验收。
 - REQUIRED_AUTHORITY：H；D/I/G/E 复审各自消费语义。
-- OWNER_DECISION：ACCEPTED_SEMANTICALLY_BY_OWNER_DELEGATE; NOT_WIRE_FROZEN
+- OWNER_DECISION：PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN；INDEPENDENCE_UNVERIFIABLE；NOT_WIRE_FROZEN
 - EVIDENCE：H ACK Blob 5e2b33898cbc6a9c95e271ecd1d8a092d04c67f8。
 - FOLLOW_UP_ACTIONS：H 发布 ACK-to-consumer 矩阵。
 
@@ -290,9 +306,19 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - D_I_IMPACT：D/I 决策仍具权威性。
 - RUNTIME_IMPLEMENTATION_IMPACT：H 契约前 Error Mapping 阻塞。
 - REQUIRED_AUTHORITY：H；领域 Owner 批准各自结果。
-- OWNER_DECISION：ACCEPTED_SEMANTICALLY_BY_OWNER_DELEGATE; NOT_WIRE_FROZEN
+- OWNER_DECISION：PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN；INDEPENDENCE_UNVERIFIABLE；NOT_WIRE_FROZEN
 - EVIDENCE：H Envelope Blob 5547ecd78d118bd63e571e5daad87194d9b694e4。
 - FOLLOW_UP_ACTIONS：H 发布 Taxonomy 和测试向量。
+
+### 7.1.2 H 范围澄清——逻辑决议与精确工件状态
+
+H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体标记为关闭；当前每项状态统一为 `PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN`，并保留 `INDEPENDENCE_UNVERIFIABLE`：
+- H-CONFIRM-001：逻辑 Message Identity、Workflow Correlation、Immediate Causation 和 Operation Idempotency 的区分已决定；Operation Family Registry、各 Family 字段必填性、精确 Request/Response Schema、Wire Name/Type 仍 OPEN。
+- H-CONFIRM-002：RFC 8785 JCS 已选为逻辑 Canonicalization 基础；Signed-object Bytes、Digest Exclusion、Signature Suite、Key Lifecycle 和 I Crypto-profile Acceptance 仍 OPEN。
+- H-CONFIRM-003：ACK Evidence 必须先持久记录再发送，并支持幂等重放；缺失 ACK 保持 UNKNOWN；物理持久化拓扑/Adapter 和 Storage Acceptance 仍 OPEN。
+- H-CONFIRM-004：Fail-closed Validation Order 和不同逻辑 Error Class 已决定；精确 Enum 拼写、Wire Schema、Retry Profile 和 Owner-specific Mapping 仍 OPEN。
+
+这些逻辑决议不冻结 Schema、Crypto Profile、Persistence Topology、Error Enum，也不证明 H 七份规范核心文件完成、跨 Owner Consumer Acceptance 或 Runtime/Conformance 闭合。
 
 ### 7.2 Owner 决议请求
 
@@ -328,27 +354,27 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - D_I_IMPACT：不改变权威；仅请求精确接口发布和消费者审查。
 - RUNTIME_IMPLEMENTATION_IMPACT：接口/Currentness 证据前受保护 Handler 阻塞。
 - REQUIRED_AUTHORITY：D、I；之后 H 确认 Wire Mapping。
-- OWNER_DECISION：DEFERRED_TO_D_I_OWNER_CONTRACT_PUBLICATION；H MUST NOT INVENT AUTHORITY API OR CURRENTNESS SEMANTICS
-- EVIDENCE：H Overview Blob b88ef3a6fd3be293e7c2e77d9652f386b169bc47；D Forget Blob c791895333ab6140f035f4f622d5dee9325d422d。
+- OWNER_DECISION：DECIDED_AT_AUTHORITY_BOUNDARY；EXACT_CALLABLE_API_IDL_SCHEMA_DEFERRED_TO_D_I_VERSIONED_CONTRACTS；H/BMCP/C MUST NOT INVENT AUTHORITY API OR CURRENTNESS SEMANTICS
+- EVIDENCE：D/I authority boundary is decided by PR #429 comments 7060243632 and 7060259541; D owns canonical identity/revision/currentness/lifecycle/ConflictSet/ForgetOperation/ForgetFence; I owns Principal/Actor and attestor authorization, PermissionEpoch, revocation, retention and global Forget policy/evaluation. Exact callable API/IDL/schema/crypto/storage/wire mapping remain OPEN. H Overview Blob b88ef3a6fd3be293e7c2e77d9652f386b169bc47；D Forget Blob c791895333ab6140f035f4f622d5dee9325d422d。
 - FOLLOW_UP_ACTIONS：D/I 发布接口/向量；H 映射；BMCP 更新对照表。
 
 **DECISION_REQUEST_ID: BMCP-DR-003**
 - MODULE：BMCP
 - ISSUE_OR_ADR：C Agent Integration Canonical Contract / Guide
 - DECISION_REQUIRED：确认 Agent/MCP-to-BMCP Operation Mapping、Request/Attempt/Message Identity、认证 Principal 交接和 Final Inference Boundary。
-- CURRENT_FACTS：C 拥有 Agent/Adapter 语义；H 拥有 BMCP Wire/Transport；C 指南将 Wire Schema/Message Semantics 归 H，Agent 侧要求归 C。
-- H_OWNED_CONTRACTS：H 先确认 Transport/Envelope/ACK Mapping。
-- CROSS_MODULE_CONFLICT：MCP Tool 成功、Agent Request 完成、BMCP 业务完成和领域 Receipt 不同。
-- OPTIONS：(A) MCP Server 是 C 所有的 Adapter，映射 BMCP Operation；(B) MCP Server 暴露平行 Canonical Brain API。
-- RECOMMENDED_OPTION：A；拒绝 B，避免绕过/重复创建权威。
+- CURRENT_FACTS：C Owner 决议 PR #430 comment 7060351480 已决定 Family-level Routing。MCP 是 Agent Host ↔ C 北向接口；BMCP 是 C Agent Adapter ↔ Brain 经 H 的协议边界。逻辑 Family Matrix 和 Identity Mapping 已记录于 §6.2。Issue #449 comment 7060126722 提供绑定语义方向。
+- H_OWNED_CONTRACTS：精确 Operation ID/Registry、版本化 Schema、Wire Field、ACK Encoding 和 Transport 归 H 所有；C 不得发明 H Field 或 Operation ID。
+- CROSS_MODULE_CONFLICT：Family 方向已决定，但精确 H Operation Registry、Schema、C Tool/Resource Name 和 C/H Consumer Acceptance 仍由 Issue #449 跟踪且 OPEN。MCP Tool Success、BMCP Business Outcome、Transport ACK、E Receipt 和 G Applied 仍须区分。
+- OPTIONS：(A) C-owned MCP Agent Adapter/Gateway 映射到已注册 H BMCP Family/Operation；(B) MCP 暴露平行 Canonical Brain API。
+- RECOMMENDED_OPTION：A 已在 Family-routing 层面 DECIDED；拒绝 B。精确 C/H Operation Mapping 在 H 契约 Pin 和 Consumer Acceptance 前继续 OPEN。
 - MEMORY_COMPILER_IMPACT：MCP Ingress 仍使用 E AcceptedReceipt 和 D Admission。
-- AGENT_INTEGRATION_IMPACT：C 定义 Adapter Mapping，保留 Agent/Runtime/Model/Provider/Tool/Session/Principal 区分。
+- AGENT_INTEGRATION_IMPACT：C 保留 AgentRequestId/AgentAttemptId/AgentTurnId/AgentSessionId；Workflow Correlation 映射到 H correlation_id，不新增 request_id；精确 C Tool/Resource 与 H Operation Binding 仍 OPEN。
 - D_I_IMPACT：Canonical Identity/Lifecycle 和 Authorization 仍归 D/I。
 - RUNTIME_IMPLEMENTATION_IMPACT：Gateway 等待 H Mapping 和 C 验收。
 - REQUIRED_AUTHORITY：C + H；D/I 审查涉及权威身份的映射。
-- OWNER_DECISION：OPEN_C_MAPPING_TRACKED_ISSUE_449；MCP_SERVER_IS_AGENT_FACING_ADAPTER_ONLY
+- OWNER_DECISION：PARTIALLY_DECIDED；MCP_IS_AGENT_HOST_TO_C_NORTHBOUND；BMCP_IS_C_ADAPTER_TO_BRAIN_VIA_H；FAMILY_DIRECTION_DECIDED_PER_PR_430_COMMENT_7060351480；EXACT_H_OPERATION_IDS_SCHEMAS_C_TOOL_RESOURCE_NAMES_AND_CONSUMER_ACCEPTANCE_OPEN_UNDER_ISSUE_449
 - EVIDENCE：C Guide Blob c4e076887634a9e8e46df076efb0f4b70d816e0a；`07-agent-integration/agent-integration-overview.md` 与 `08-bmcp-protocol` 权属边界。
-- FOLLOW_UP_ACTIONS：C/H 发布映射和符合性用例；不建平行 API。
+- FOLLOW_UP_ACTIONS：C 将 Family Matrix 和逻辑 Identity Mapping 对齐到其 Canonical Source/Mirrors；C/H 在 Issue #449 下发布并接受精确版本化 Operation Mapping；H 只审查 H-owned Wire/Transport 工件；不建平行 API。
 
 
 
@@ -359,9 +385,9 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 | BMCP 规范名称 | 已解决——Brain Memory Context Protocol | Main terminology Blob `b8770fbb58e4fac087698043c40a57531b1d244d`；“Brain Memory Control Protocol”不是规范名称 |
 | Fact/Claim 语义 | 已解决——Option A + I1 | 已合并 Owner 决策 PR #446；Blob `d59756a8eb454480804c482ca03c68345ab5abf2` |
 | Fact/Claim 字段/Wire Schema | CANDIDATE / NOT FROZEN | B/D/E/F/G/H/I 消费者工件须完成版本 Pin 和审查；未批准任何 Payload 字段 |
-| H-CONFIRM-001..004 | ACCEPTED_SEMANTICALLY_BY_OWNER_DELEGATE / NOT_WIRE_FROZEN | H 负责规范 Wire/Spec 更新；不声称存在独立 H 签名 |
-| BMCP-DR-002 | DEFERRED_TO_D_I_OWNER_CONTRACT_PUBLICATION | D/I 发布精确可调用接口/IDL/Currentness 词汇；H 不得发明权威 API |
-| BMCP-DR-003 / MCP Mapping | OPEN——Issue #449 | C 发布精确 Agent/MCP-to-BMCP Mapping；H 只审查 Wire/Transport 范围 |
+| H-CONFIRM-001..004 | PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN | 逻辑层选择按 PR #428 comments 7060190878 / 7060264372；INDEPENDENCE_UNVERIFIABLE；精确 Registry/Schema/Crypto/Persistence/Error/Consumer Artifact 仍 OPEN |
+| BMCP-DR-002 | DECIDED_AT_AUTHORITY_BOUNDARY / CALLABLE_API_IDL_SCHEMA_DEFERRED | D/I 权威边界已决定；精确 Callable API/IDL/Schema/Crypto/Storage/Wire Mapping 仍由 D/I/H 发布并保持 OPEN |
+| BMCP-DR-003 / MCP Mapping | PARTIALLY_DECIDED——Issue #449 | MCP 为 C 北向 Agent Adapter/Gateway；BMCP 为 C Adapter 经 H 到 Brain；Family Routing 已由 PR #430 comment 7060351480 决定；精确 C/H Operation Mapping 仍 OPEN |
 | BMCP Runtime / AT-01..AT-20 | NOT AUTHORIZED / NOT RUN | Issue #7 实施绑定继续延期 |
 
 **BMCP-DR-002 的 D/I 证据（权属证据，不是可调用 API 发布）：**
@@ -370,7 +396,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - 这些来源定义领域语义和操作名称，不是完整可调用 API/IDL，也没有冻结 Wire 表示。D 定义 RegisterProducerWork、InstallForgetFence、PublishDerivedIfFenceCurrent、CompleteProducerWork、ResolveProducerWork、ReconcileForgetBarrier 等操作。I 定义 PermissionEpoch、AuthorizationDecisionRef、撤销/Currentness 和证据接受语义；没有冻结的公共 authorize() Endpoint/Schema。
 - 裁决：D 仍是 Canonical ForgetOperation/Fence 和 Producer-barrier 语义的唯一权威；I 仍是 Principal Authorization、PermissionEpoch、撤销和 Global Forget Policy 的唯一权威。BMCP 只携带 Owner 签发的不透明 Ref/Epoch，并在接口发布后调用对应权威的 Validation/Currentness 操作。PermissionEpoch 与 ForgetFence 是不同名义类型。缺失/过期/不可用/不确定证据必须 Fail-closed。
 
-**C Mapping 边界：**Issue #449 仍 OPEN，规定 MCP Server（若选用）是 C 的北向 Agent-facing Adapter/Gateway，不是 BMCP，也不得形成平行 Brain API。C 必须将 Agent Request/Attempt Identity 映射到 H 的 message_id/correlation_id/causation_id，保留 Principal 来源与 I Authorization，并区分 Tool Result、BMCP Business Response、Transport ACK、E Receipt 和 G Applied。目前没有 C 的答复或验收记录。
+**C Mapping 边界：**PR #430 comment 7060351480 已决定 Family-level Routing；Issue #449 仍 OPEN，跟踪精确 H Operation ID/Schema、C Tool/Resource Name、C-H Consumer Acceptance。MCP 是 Agent Host ↔ C 北向接口；BMCP 是 C Adapter ↔ Brain 经 H 的协议边界。C 的 AgentRequestId 仅可作为本地 Workflow Correlation 输入，不得新增 H request_id；H 每条 Message 有独立 message_id，correlation_id/causation_id 分别表示 Workflow/直接父事件。Event Ingress/Telemetry/Forget/Admin 必须经过注册 H Operation 和 Owner Authorization；Context Snapshot/Delta/Delivery 为入站；Acknowledgement 仅是 Adapter Evidence，不是 MCP Success 或 G Applied。Recall/Search 归 F，当前不是 BMCP Family，不得发明 Search。
 
 ## 8. Runtime 验收计划——NOT RUN
 
@@ -378,7 +404,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 
 ### 8.1 现有符合性证据——范围受限，不代表完整协议 PASS
 
-- Main `c138654c942dc93b5a36eccb2ff0e41452156429`：`python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v`——**30 passed，0 failed**，退出码 0。该结果只覆盖 Applied Delivery Evidence 符合性套件。
+- Main `477a55e624bcc244dfb65c435bc8d03f718b1e2a`：`python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v`——**30 passed，0 failed**，退出码 0。该结果只覆盖 Applied Delivery Evidence 符合性套件。
 - Open PR #436 精确 Head `1ffed9ed127df98b2f823a66ec80ea43d08cb9dc`：`python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/provider_outcome -p 'test_*.py' -v`——**运行 10 项；5 passed；5 skipped；0 failed**，退出码 0。跳过的 CPO-02/04/05/09/10 明确需要 Owner C 权威语义 Validator。该结果仅验证 Schema 结构，不验证 C 语义或密码学签名。
 - PR #436 的双语协议索引和 provider_outcome 测试仍在 Open PR 中，尚未合入 Main。其索引将 RecoveryJoin 1.0.2 的 Schema/Validator/Test 标记为未交付。
 - 这些结果不构成完整 BMCP 符合性。Strict JSON Parser 是参考模型，不是生产 Transport。当前不存在 `tests/protocol_test.rs` 和 `crates/bmcp`。
@@ -446,7 +472,7 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 - Issue #7：CLOSED / not_planned；正文保留 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE。未修改。
 - Issue #3：CLOSED / not_planned，作为 superseded 处理。历史正文写明 Applied Contract Frozen = NO、Test Executed / Passed = NO / NO；关闭不证明新的 BMCP 核心契约已冻结。
 - Issue #43：根据 Owner 阶段关闭裁决关闭为 superseded。本 FollowUp 是候选架构交接，不是 Runtime 实施。
-- Main Fetch SHA：c138654c942dc93b5a36eccb2ff0e41452156429；H 来源快照：session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74。
+- Main Fetch SHA：477a55e624bcc244dfb65c435bc8d03f718b1e2a；H 来源分支已重新读取：session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74；七个 H Blob Pin 已重新获取且 SHA 未变化。
 - 未修改 Runtime 代码或 H 所有源文件。
 - Runtime 验收测试：NOT RUN——无 Runtime 授权/仓库。
 - 独立语义一致性审查：PENDING。H/Owner 回复：PENDING。
@@ -455,9 +481,9 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 
 | 文档 / 版本 | 英文路径 | 中文路径 | 来源版本 | 一致性 |
 |---|---|---|---|---|
-| BMCP-ARCH-001 / 0.2.0 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main c138654c942dc93b5a36eccb2ff0e41452156429；H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74 | 作者准备双语 Pair；独立一致性审查 PENDING |
+| BMCP-ARCH-001 / 0.2.1 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main 477a55e624bcc244dfb65c435bc8d03f718b1e2a；H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74 | 作者准备双语 Pair；独立一致性审查 PENDING |
 
-Coverage Register 仅将此登记为 Review/Handoff Pair，不改变 “BMCP Protocol detailed contracts (7 core specifications)” 条目；双语规范核心文档覆盖仍为 NOT STARTED。
+Coverage Register 仅将此登记为 Review/Handoff Pair，不改变 “BMCP Protocol detailed contracts (7 core specifications)” 条目；双语规范核心文档覆盖仍为 NOT STARTED。结构配对不等于语义双语一致性审查。
 
 ## 12. 最终状态
 
@@ -465,9 +491,9 @@ Coverage Register 仅将此登记为 Review/Handoff Pair，不改变 “BMCP Pro
 - PARSE_CONTRACT_STATUS：候选语义边界已说明；H Wire/Decode Mapping 待定
 - EXECUTE_CONTRACT_STATUS：CANDIDATE；D/I 可调用接口和 C/H Mapping 待定；Fact/Claim 语义已批准
 - RESPOND_CONTRACT_STATUS：CANDIDATE；H Response Envelope/Correlation Mapping 待定
-- H_DEPENDENCY_STATUS：**BLOCKED_BY_H_CONTRACT**
+- H_DEPENDENCY_STATUS：**PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN**；INDEPENDENCE_UNVERIFIABLE
 - CROSS_MODULE_DEPENDENCIES：H、B、C、D、E、G、I
-- OWNER_DECISIONS_REQUIRED：BMCP-DR-001 语义已批准；BMCP-DR-002 DEFERRED_TO_D_I_OWNER_CONTRACT_PUBLICATION；BMCP-DR-003 由 Issue #449 跟踪且仍 OPEN
+- OWNER_DECISIONS_REQUIRED：BMCP-DR-001 语义已批准 / Consumer-Schema Gate OPEN；BMCP-DR-002 Authority Boundary DECIDED / Callable API-IDL-Schema-Crypto-Storage-Wire Mapping OPEN；BMCP-DR-003 Family Routing PARTIALLY DECIDED / Exact C-H Mapping OPEN under Issue #449
 - ISSUE_7_STATUS：IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE；GitHub CLOSED / not_planned；未改变
 - RUNTIME_IMPLEMENTATION_STATUS：NOT AUTHORIZED / NOT STARTED
 - PR / Commit：仅在 Push 和 PR 成功后填写；不授权 Merge
