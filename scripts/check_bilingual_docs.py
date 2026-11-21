@@ -225,7 +225,7 @@ def check_counterpart_requirement(
     source: str, counterparts: list[str], changed: set[str],
     statuses: dict[str, str], exception: bool,
 ) -> list[str]:
-    """Shared existence/pairing rule for normative and mirror counterparts."""
+    """Require paired edits; allow complete removals and let root policy judge sources."""
     if exception:
         return []
     required = [source, *counterparts]
@@ -235,45 +235,60 @@ def check_counterpart_requirement(
             + ", ".join(required)
         ]
     deleted = [path for path in required if statuses.get(path) == "D"]
-    if deleted:
-        if len(deleted) != len(required):
-            return [f"{source} has an unpaired deletion; all related paths must move together or remain present"]
-
-        added = {path for path, status in statuses.items() if status == "A"}
-        root_deletions = [
-            path for path in deleted
-            if len(Path(path).parts) >= 2 and Path(path).parts[0] in NORMATIVE_ROOTS
+    if deleted and len(deleted) != len(required):
+        return [
+            f"{source} has an unpaired deletion; all related paths must move together or remain present"
         ]
-        en_deletions = [path for path in deleted if path.startswith("docs/en/")]
-        zh_deletions = [path for path in deleted if path.startswith("docs/zh-CN/")]
-
-        # A move is balanced by destination tier, not by basename: names may
-        # change, but every moved English mirror must have a newly added
-        # Chinese mirror at the same destination-relative path.
-        added_roots = [
-            path for path in added
-            if len(Path(path).parts) >= 2 and Path(path).parts[0] in NORMATIVE_ROOTS
-        ]
-        added_en = {path for path in added if path.startswith("docs/en/")}
-        added_zh = {path for path in added if path.startswith("docs/zh-CN/")}
-
-        if root_deletions and len(added_roots) < len(root_deletions):
-            return [f"{source} was deleted without a replacement normative source; all related destination files must be added in this PR"]
-        if en_deletions and len(added_en) < len(en_deletions):
-            return [f"{source} was deleted without a replacement docs/en mirror; all related destination files must be added in this PR"]
-        if zh_deletions and len(added_zh) < len(zh_deletions):
-            return [f"{source} was deleted without a replacement docs/zh-CN mirror; all related destination files must be added in this PR"]
-        if en_deletions or zh_deletions:
-            for en_path in sorted(added_en):
-                zh_path = "docs/zh-CN/" + en_path[len("docs/en/"):]
-                if zh_path not in added_zh:
-                    return [f"{en_path} was added without its matching new Chinese mirror {zh_path}"]
+    # Complete removals are not balanced by counting unrelated additions.
+    # The independent root-departure check rejects normative-source deletion
+    # and renames leaving NORMATIVE_ROOTS; mirror-only pairs remain unaffected.
+    if len(deleted) == len(required):
         return []
     return [
         f"Counterpart file must exist for {source}: {path}"
         for path in required if not (ROOT / path).is_file()
     ]
 
+
+def _is_normative_root_path(path: str) -> bool:
+    parts = Path(path).parts
+    return len(parts) >= 2 and parts[0] in NORMATIVE_ROOTS
+
+
+def check_normative_root_departures(exception: bool) -> list[str]:
+    """Reject normative-source deletions and renames leaving NORMATIVE_ROOTS."""
+    if exception:
+        return []
+    base = os.environ.get("BASE_SHA", "")
+    head = os.environ.get("HEAD_SHA", "")
+    if not base or not head:
+        raise RuntimeError("BASE_SHA and HEAD_SHA are required")
+    raw = subprocess.check_output(
+        ["git", "diff", "--name-status", "-M", f"{base}...{head}"],
+        cwd=ROOT,
+        text=True,
+    )
+    errors: list[str] = []
+    for line in raw.splitlines():
+        fields = line.split("\t")
+        if len(fields) == 2 and fields[0] == "D":
+            old_path = fields[1]
+            if _is_normative_root_path(old_path):
+                errors.append(
+                    f"Normative source left NORMATIVE_ROOTS by deletion: {old_path}; "
+                    "use BILINGUAL-EXCEPTION: APPROVED"
+                )
+        elif len(fields) == 3 and fields[0].startswith("R"):
+            old_path, new_path = fields[1], fields[2]
+            if _is_normative_root_path(old_path) and not _is_normative_root_path(new_path):
+                errors.append(
+                    f"Normative source moved outside NORMATIVE_ROOTS: "
+                    f"{old_path} -> {new_path}; use BILINGUAL-EXCEPTION: APPROVED"
+                )
+        elif len(fields) != 2 or fields[0] not in {"A", "M"}:
+            if not (len(fields) == 3 and fields[0].startswith("R")):
+                raise RuntimeError(f"Unexpected name-status record: {line!r}")
+    return errors
 
 def approved_exception(body: str) -> bool:
     if "BILINGUAL-EXCEPTION: APPROVED" not in body:
@@ -689,6 +704,7 @@ def main() -> int:
         )
 
     errors.extend(check_normative_pairing(normative_changes, changed, statuses, complete, exception))
+    errors.extend(check_normative_root_departures(exception))
 
     skipped = [p for p in changed if Path(p).parts and Path(p).parts[0] not in NORMATIVE_ROOTS
                and Path(p).suffix.lower() == ".md"]
