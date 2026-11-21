@@ -1,7 +1,7 @@
 # GOV-NC-2026-11-21-SELF-REVIEW-007 — The "fix" for zero-review merges is one account reviewing itself
 
 - Register ID: GOV-NC-2026-11-21-SELF-REVIEW-007
-- Status: `OPEN` / `ACTIVE`
+- Status: `ACCEPTED` / `SELF_REVIEW_IDENTIFIED` / S-2 `APPROVED_IN_PRINCIPLE / IDENTITY_NOT_ASSIGNED`
 - Defect class: Governance Conformance — Independence of Review
 - Severity: High
 - Found at: 2026-11-21T05:50Z
@@ -117,10 +117,30 @@ Inference (**not made**):
 | # | Approach | Cost | Note |
 |---|---|---|---|
 | S-1 | State in PR-GOVERNANCE-001 section 5 that a review where `reviewer == author` **does not count** toward section 5 | one paragraph | cheapest, but still a self-discipline clause with no platform enforcement |
-| S-2 | Introduce a second account able to submit reviews (a person or an independent session), requiring section 5 reviews to come from a non-author identity | needs a second identity | the only structural option while M-3 is unavailable |
+| S-2 | Introduce a second account able to submit reviews (a person or an independent session), requiring section 5 reviews to come from a non-author identity | needs a second identity | **approved in principle by the Owner**; the only structural option while M-3 is unavailable |
 | S-3 | Change the section 5 test from "does a review exist" to "does a review exist whose author is not the PR author and whose commit_id == head" | one script | automatable, can be wired into the gate |
 
 None of the three is executed by this register. S-1/S-3 are normative and script changes that, by section 5's own requirement, need independent review; S-2 is an Owner-level decision.
+
+### 7.1 S-2's status
+
+In the ruling of 2026-11-21 the Owner approved S-2 in principle and set five minimum requirements:
+
+1. the PR author and the independent reviewer are different identities;
+2. the reviewer is not the PR's sole author identity;
+3. the merger may not substitute their own review for independent review;
+4. the reviewer must leave a traceable, substantive review conclusion;
+5. `COMMENTED`, `APPROVED` and similar states cannot by themselves establish independence — the identity relationship must be checked too.
+
+**But no second identity is appointed this round.** Sponsor and accountable_owner are still `NOT_ASSIGNED`; a GitHub account cannot be designated out of thin air, and the existence of another account cannot be presumed to carry authority, accountability and sustained participation.
+
+So S-2's actual state is:
+
+```
+APPROVED_IN_PRINCIPLE / IDENTITY_NOT_ASSIGNED / NOT_YET_OPERATIONAL
+```
+
+Until a second identity is formally designated and its accountability boundary established, **it must not be claimed that structural independent review exists**. The S-1/S-3 self-discipline clauses remain in force, but must not be described as a platform-enforced defence.
 
 ---
 
@@ -141,3 +161,7 @@ Test: if `author == merger` and the only `user.login` among reviews is also `aut
 ---
 
 **Register conclusion**: the failure mode recorded in `MERGE-AFTER-RULING-003` (zero review) has been replaced by a shape that conforms on the count and is equivalent on independence. Six measured instances all satisfy `author == sole reviewer == merger`, at intervals of 13–74 seconds. Review quality is high — `#414` even rejected itself — and that is precisely the point: the defence rests on voluntary restraint, not on structure. This register changes no existing count; it records that the feature that count depends on has lapsed.
+
+**Owner ruling (2026-11-21)**: this register is accepted as a new failure mode, retained alongside 003, without rewriting 003's historical definition. Three prohibitions are stated: `reviews >= 1` must not be treated as sufficient for independent review; `COMMENTED` must not be treated as approval; M-3 is not a fix for this problem. S-2 is approved in principle, status `IDENTITY_NOT_ASSIGNED`.
+
+The Owner also requires that two judgements be kept and neither used to cancel the other: **review content quality: high**; **independence of the reviewing subject: not established**.

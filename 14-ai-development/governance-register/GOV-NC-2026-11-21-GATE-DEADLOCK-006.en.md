@@ -1,7 +1,7 @@
 # GOV-NC-2026-11-21-GATE-DEADLOCK-006 — The gate deadlocks itself on main: no PR can pass
 
 - Register ID: GOV-NC-2026-11-21-GATE-DEADLOCK-006
-- Status: `OPEN` / `ACTIVE` / blocks every PR
+- Status: `ACCEPTED` / `F-2_APPROVED` / the empty diff is still `EXIT=2`
 - Found at: 2026-11-21T05:05Z (last verified 2026-11-21T05:40Z @ `7d2233a5be`)
 - Introducing commit: `ae37a41900f1` (2026-11-21T04:50:35Z, **pushed straight to main, no PR**)
 - Prior register: GOV-NC-2026-11-20-CI-NOT-EXECUTED-005 (36 hours of zero gate executions)
@@ -157,10 +157,21 @@ This register **changes no code**. Options, in increasing cost:
 | # | Approach | Cost | Risk | Measured |
 |---|---|---|---|---|
 | F-1 | Add the template to `EMBEDDED_BILINGUAL_SOURCES` (it genuinely is a single-file bilingual template, which is what that list means) | 1 line + 1 reason comment | lowest; same pattern #404 used to add reasons elsewhere | trial B: `NEW=0` |
-| F-2 | Give the template `docs/en` + `docs/zh-CN` counterparts | 2 new files | medium; one "template" becomes three files that must stay in sync | trial A: `NEW=0`, and **requires no normative change at all** |
+| F-2 | Give the template `docs/en` + `docs/zh-CN` counterparts | 2 new files | low; the mirrors are **not** new prose, they are copies of the same source | trial A: `NEW=0`, and **requires no normative change at all** |
 | F-3 | Add the template to `bilingual-baseline.txt` | 1 line | **highest**: directly violates "the baseline may only shrink, never grow", turning the ratchet into a freely extensible list | trial C: `NEW=0`, but it destroys the ratchet's meaning |
 
-**F-2 is the recommendation** (the first draft recommended F-1). F-2 changes no normative text and no script — it is pure documentation, so it **does not trigger section 5's independent-review requirement**. It is the only path that can be executed without a governance judgement. F-1 works equally well but is a normative change: it decides whether a single-file bilingual template belongs in the exemption class, which section 5 requires independent review for, and the author cannot supply it.
+**F-2 has to be stated precisely, or it reads as "split one template into three":**
+
+a mirror means a **verbatim copy of the same source file**, not three documents that each evolve on their own. `00-governance/templates/document-metadata-template.md` stays where it is and remains the single authoritative source; `docs/en/...` and `docs/zh-CN/...` merely satisfy the existence check. Any change to the template's content still edits the source only, and the mirrors follow.
+
+This is not this register's inference. The Owner's ruling of 2026-11-21 states the boundary:
+
+> **On `document-metadata-template.md`: splitting it into three is not approved.**
+> The template should remain in its existing location under `00-governance/templates/` as the single template source. If the file falls within the scope the gate requires mirrors for, supply both sides as mirrors of the same source; do not produce three independently evolving copies of the template body in order to satisfy a scanner.
+
+So the correct execution of F-2 is "one source plus two copies", not "three bodies".
+
+**F-2 is the recommendation** (approved by the Owner; F-1 is not this round's preferred fix and F-3 is not approved). F-2 changes no normative text and no script — pure documentation. F-1 works equally well (trial B: `NEW=0`) but is a normative change: it decides whether a single-file bilingual template belongs in the exemption class, which section 5 requires independent review for, and the author cannot supply it. The Owner also limits it: **`EMBEDDED_BILINGUAL_SOURCES` must not become the default channel for new registers**.
 
 F-3 works mechanically (trial C: `NEW=0`) but **must not be used**: it converts a shrink-only ratchet into an appendable list, which abolishes the mechanism itself.
 
@@ -222,4 +233,12 @@ PY
 # after adding docs/en/<path> + docs/zh-CN/<path>, NEW goes to zero
 ```
 
-**Register status**: `OPEN` / `ACTIVE` / empty diff on main is permanently `EXIT=2` / the dividing line is "did the PR supply two-sided mirrors", not "which file did it touch" (§2.1) / introduced by direct push with no PR / recommended fix F-2 is a pure documentation change, not executed
+**Register status**: `ACCEPTED` / `F-2_APPROVED` / empty diff on main is permanently `EXIT=2` / the dividing line is "did the PR supply two-sided mirrors", not "which file did it touch" (§2.1) / introduced by direct push with no PR / recommended fix F-2 approved by the Owner, not executed
+
+Owner ruling (2026-11-21), summarised:
+
+- Section 2.1's boundary correction is adopted; the first draft's "any PR gets `EXIT=2`" is withdrawn as too broad.
+- **F-2 is approved** (supply the two-sided mirrors); F-1 is not this round's preferred fix; F-3 is not approved.
+- F-2's constraints: mirrors must correspond to the correct source path and must not be satisfied by unrelated or placeholder files; `NORMATIVE_ROOTS`, the gate script, the exemption list and the baseline must not be modified; `EMBEDDED_BILINGUAL_SOURCES` must not become the default channel for new registers.
+- **Splitting `document-metadata-template.md` into three is not approved**: the template stays under `00-governance/templates/` as the single source, and the mirrors are copies of that one source.
+- Mirror copying under F-2 may be treated as a mechanical documentation operation and does not require separate word-by-word authorisation; but if a PR also carries a governance judgement, a normative content change, a template-semantics change or an exemption grant, the corresponding review requirements still apply.

@@ -1,7 +1,7 @@
 # GOV-NC-2026-11-20-CI-NOT-EXECUTED-005 — Register of 36 consecutive hours with zero gate executions
 
 - Register ID: GOV-NC-2026-11-20-CI-NOT-EXECUTED-005
-- Status: `OPEN` / `NOT_REMEDIATED` / execution side entirely absent
+- Status: `ACCEPTED` / `CI_NOT_EXECUTED` / execution side entirely absent (Owner ruling, 2026-11-21)
 - Observed at: 2026-11-21T04:10Z (last data pull)
 - Subject: repository `oahcom/AiMemoryBrainArchitecture`, `main` and every PR on it
 - Related: #352 (temporary quota rule), #281 / PR-GOVERNANCE-001-ENFORCEMENT v1.2 (compensating-evidence rule for platform check unavailability), #405 (self-hosted alternative attempt), #403 / #402 (merge instances in this round)
@@ -25,6 +25,22 @@ For any run, read `/repos/{repo}/actions/runs/{id}/jobs`:
 | Project steps executed and returned a `conclusion` | `EXECUTED` |
 
 `conclusion: failure` is not by itself evidence of `EXECUTED`. There is no entailment from `failure` to "the tests failed".
+
+### 2.1 Five layers that must stay separate
+
+The Owner's ruling of 2026-11-21 requires this register to distinguish five things explicitly:
+
+| Layer | What it is | What the facts say for this window |
+|---|---|---|
+| 1 | the CI platform produced a run | yes, 362 |
+| 2 | the run was assigned a `conclusion` | yes: 348 `failure`, 13 `skipped`, 1 `success` |
+| 3 | whether a runner started | 345 never started; 3 started and failed at `Set up runner` |
+| 4 | **whether the gate logic actually executed** | **0 times** |
+| 5 | the gate's result after execution | does not exist (layer 4 is 0) |
+
+Layer 2 contains one `success`, but a `conclusion` alone **cannot establish that the gate logic ran**; and the 3 self-hosted runs in layer 3 must not be read as "self-hosting rescues CI", because every project step was `skipped`.
+
+**This register's conclusion supports one governance fact only — layer 4 is zero.** It must not be used to claim the repository's gate itself passes or fails. Any exact-head local execution (such as #419's compensating evidence) is a manual substitute at layer 5, not CI execution evidence.
 
 ## 3. Boundary: the last real execution and the first empty one
 
@@ -161,4 +177,6 @@ BASE_SHA=<base> HEAD_SHA=<head> PR_BODY="$(cat pr_body.txt)" \
 - **GOV-NC-2026-11-20-DIRECT-MAIN-001**: the 62 direct pushes also fall inside the zero-execution window. That register's conclusion (direct push bypasses the PR channel) is unchanged, but its implicit premise that push-triggered workflows still check does not hold.
 - **GOV-NC-2026-11-20-AC-UNMET-CLOSURE-004**: the AC-5 correction rests on three local re-measurements and is independent of CI; this register does not affect it.
 
-**Register status**: `OPEN` / `NOT_REMEDIATED` / gate verdicts in 36 hours: **0** / merges in the same window: **85** / of which `APPROVED`: **0**
+**Register status**: `ACCEPTED` / `CI_NOT_EXECUTED` / gate logic actually executed in 36 hours: **0** / merges in the same window: **85** / of which `APPROVED`: **0**
+
+Owner ruling (2026-11-21): the statistics, the boundary and the `NOT_EXECUTED` classification are accepted. It also states explicitly that **this register may stand as a governance fact but must not be used to claim the repository's gate itself passes or fails**; #419's local exact-head run is compensating evidence, not CI execution evidence.
