@@ -146,7 +146,7 @@ Rust crate 刻意停留在 private/staged 阶段：不做持久化、传输、�
 现有工作流 `.github/workflows/g-applied-reference-model.yml` 会发现参考模型目录下所有 `test_*.py`，因此现有测试命令会包含新增 14 个测试：
 `python -m unittest discover -s 06-memory-context/reference-model -p "test_*.py" -v`。
 
-**报告编写时测试状态：NOT RUN。** 本会话尚未取得 CI 成功证据，不声称测试通过。原有 7 个 Rust 测试未修改，但仍须由 CI 确认通过。新增后 Python 测试为 22 个（原有 8 + 新增 14）；Rust + Python 合计 29 个。
+**测试状态：** 已触发 CI，但没有任何测试 PASS 证据。PR #433 的工作流运行 44880950482（Python Applied 参考模型）、44880950477（Rust Workspace）、44880950493（Runner Admission）、44880950443（双语文档）和 44880950465（文档管理）全部返回 FAILURE。GitHub Job 记录暴露的字段为 `logs_url: null`、`steps: null`；读取 Job Log 返回 BlobNotFound。因此无法确定测试命令是否启动，也无法区分 Runner/Admission 故障与测试失败。不得将 29 个测试中的任何一个报告为通过。原有 7 个 Rust 测试未修改。新增后 Python 测试为 22 个（原有 8 + 新增 14）；Rust + Python 合计 29 个。
 
 ## 6. 跨 Owner 阻塞（不由 G 裁定）
 
