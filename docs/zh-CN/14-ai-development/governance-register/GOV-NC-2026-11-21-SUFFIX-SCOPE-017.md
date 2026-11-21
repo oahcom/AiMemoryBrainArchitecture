@@ -76,7 +76,7 @@ All nine open PRs, each overlaid on `main = d647e7d5ef` at its exact head, `PR_B
 | #471 | `d33ee2bb` | FAIL | 1 -> **0** after manifest | manifest only | yes |
 | #433 | `81558c89` | **PASS** | 0 | — | yes |
 
-5 pass, 4 fail. After supplying the missing manifest: **6 pass, 3 fail** — and all 3 remaining failures are gate defects (011 or 017), not author defects.
+5 pass, 4 fail. After supplying the missing manifest: **6 pass, 3 fail** — of which **2 are gate defects** (`#500`, `#505`, both 017) and **1 is a legitimate author omission** (`#507`, mirrors not updated).
 
 ### 2.1 The manifest error is only the first error, not the only error
 
@@ -103,7 +103,29 @@ So of the three, **only `#471` is a pure manifest failure.** The other two have 
 |---|---|---|
 | `#500` | 41 × `08-bmcp-protocol/schemas/*.schema.json` | **017** — `.json` subject to pairing |
 | `#505` | 2 × `08-bmcp-protocol/schemas/*.schema.json` | **017** — same |
-| `#507` | `02-domain-model/domain-model-overview.md` | **011** — `.md` without mirrors in a non-14 root |
+| `#507` | `02-domain-model/domain-model-overview.md` | **NOT a defect** — see §2.2a |
+
+### 2.2a #507's error is legitimate, and I got it wrong first
+
+`#507` fails after the manifest with:
+
+```
+02-domain-model/domain-model-overview.md requires all counterparts changed in this PR
+```
+
+I first attributed this to register 011. **That was wrong.** On main, `domain-model-overview.md` **already has both mirrors**:
+
+```
+02-domain-model/domain-model-overview.md          27542 bytes
+docs/en/02-domain-model/domain-model-overview.md  29109 bytes
+docs/zh-CN/02-domain-model/domain-model-overview.md 26231 bytes
+```
+
+So the file is a full mirror triple, the diff domain's requirement is satisfiable, and `#507` simply edited the source without updating the two mirrors. **That is a real pairing omission by the author, and the gate is right to reject it.**
+
+The distinction matters: register 011's claim is that a correct side-by-side pair is rejected. `#507` is the opposite case — a file that has mirrors, edited without them. Conflating the two would have inflated 011's evidence with a case that does not support it.
+
+`#507`'s other file, `phase-2-domain-extension.md`, genuinely has no mirrors and is a genuine 011 case. But the PR fails on `domain-model-overview.md` regardless, so `#507` cannot serve as 011's witness. Register 011's witness remains the five pairs measured directly in 013 §2.1.
 
 `#507`'s file list is instructive:
 
