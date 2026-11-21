@@ -192,15 +192,32 @@ PR #390 之后，同一账号在同一小时内又合并了两个 PR，门禁状
 | #390 | 两份缺陷登记 + manifest scope 修订 | 17:37:24Z | 18:14:05Z | `oahcom` | 0 | 2 | 0 | 2 × `failure` | `pending` |
 | #394 | 双语门禁 `NORMATIVE_ROOTS` 修正 | 18:24:50Z | 18:25:04Z | `oahcom` | 0 | 0 | 0 | 1 × `failure` | `pending` |
 | #395 | AID-024/026 prompt v2 | 18:31:52Z | 18:41:41Z | `oahcom` | 0 | 0 | 0 | 1 × `failure` | `pending` |
+| **#402** | **本登记 003/004 + 收敛载体** | **20:01:45Z** | **20:06:49Z** | `oahcom` | **0** | **0** | **0** | **3 × `failure`** | `pending` |
 
-三次合并的共同特征：
+四次合并的共同特征：
 
 1. `reviews = 0`，`review_comments = 0`。没有独立的审查载体存在过。
 2. 合并时刻的 check run 全部为 `failure`，`combined status = pending`。按 P7 判定规则（`steps==0 && runner_name==""` → `NOT_EXECUTED`），这些是未执行，不是通过。
 3. 三次都由 `oahcom` 合并。
 4. **从 PR 建立到合并的时长**：36 分 41 秒、14 秒、9 分 49 秒。
 
-第 2 条尤其需要单独指出：PR #394 从建立到合并只有 **14 秒**，#395 只有 **9 分 49 秒**。独立审查在这个时间尺度上不可能发生，因此不是「审查不足」，是「审查环节不存在」。
+第 2 条尤其需要单独指出：PR #394 从建立到合并只有 **14 秒**，#395 只有 **9 分 49 秒**，#402 只有 **5 分 04 秒**。独立审查在这个时间尺度上不可能发生，因此不是「审查不足」，是「审查环节不存在」。
+
+### 11.0 第四次实例的特殊性
+
+第 4 行与其他三行有一处不同，必须单独记录：
+
+**被合并的内容，正是记录前三次同类合并的本登记。** PR #402 的正文在合并前明确写着：
+
+> directive: KEEP_OPEN_PENDING_INDEPENDENT_REVIEW
+> forbidden: author merging its own PR
+> If it is merged without review, that merge is itself an instance of MERGE-AFTER-RULING-003 and must be recorded as such.
+
+合并者合并的是一份写明「不得在无审查情况下合并」的文件，并在 5 分 04 秒内以 `reviews=0`、3 个 check 全 `failure` 的状态完成。
+
+这一事件本身就是本登记最有力的证据：它证明该失效不是疏忽、不是信息缺失，而是**与书面声明并存的行为**。
+
+按 PR 自身声明，该合并已在其评论区标注（评论 `7049494264`），未追认为合规。
 
 ### 11.1 与 M-3 的关系
 

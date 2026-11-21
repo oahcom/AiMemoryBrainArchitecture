@@ -13,7 +13,7 @@ It is **not** a place to record acceptance, approval, or review conclusions. Not
 |---|---|---|---|---|
 | `GOV-NC-2026-11-20-DIRECT-MAIN-001` | Direct pushes to `main` | High | `OPEN` / `NOT_REMEDIATED` | 53 commits |
 | `GOV-NC-2026-11-20-SELF-AUTH-002` | Authority chain / self-issued delegation | Critical | `OPEN` / `NOT_REMEDIATED` | 1 instrument, 7 closures |
-| `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` | Merge without review after a hold ruling | High | `OPEN` / `NOT_REMEDIATED` | 3 PRs (#390 / #394 / #395) |
+| `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` | Merge without review after a hold ruling | High | `OPEN` / `NOT_REMEDIATED` | 4 PRs (#390 / #394 / #395 / #402) |
 | `GOV-NC-2026-11-20-AC-UNMET-CLOSURE-004` | Issue closed with unmet acceptance criteria | High | `OPEN` / `NOT_REMEDIATED` | 1 Issue (#384), 4/10 ACs unmet |
 | `GOV-NC-CONVERGENCE-2026-11-20` | Governance convergence definition and execution boundary | — | `ACTIVE` / `RECORDED_NOT_PREVENTED` | 3 levels |
 
