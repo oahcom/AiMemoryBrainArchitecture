@@ -6,6 +6,7 @@ claim semantic translation parity; that remains a reviewer responsibility.
 """
 from __future__ import annotations
 
+import ast
 import os
 from datetime import date
 import subprocess
@@ -38,9 +39,23 @@ PAIR_EXEMPT_PREFIXES = (
 # For 14-ai-development, counterpart pairing applies to prose documents only.
 PAIR_ENFORCED_SUFFIXES = {".md"}
 EXEMPT_SUFFIXES = {".png", ".jpg", ".jpeg", ".svg", ".drawio"}
-# Each entry is a reviewed single-file bilingual source. The reason states
-# which shared contract, machine interface, or audit record would drift if
-# the languages were split into independently edited mirror files.
+# Each entry is a reviewed single-file bilingual source. The reason must add
+# information about the file's external contract, consumer, or governance role
+# that the file does not already state about itself. This is a reviewer
+# obligation, not a regex/checker rule: reviewers must reject self-describing
+# reasons that merely repeat the document's own subject or contents.
+#
+# Three legacy registrations were made by the same author in the commit that
+# created each file. They remain exempt only as explicitly named findings, not
+# as precedent for future registrations. Owner measurement found bilingual
+# headings and both scripts interleaved across 15–19% of lines (above the 9%
+# control-template density), confirming that their content is genuinely
+# embedded-bilingual; the defect was the missing second-party registration.
+SELF_REGISTERED_AT_CREATION: dict[str, str] = {
+    "00-governance/architecture-document-management-policy.md": "0c73f639bf7392a5381d0cc0d9cafd53017bfe05",
+    "00-governance/drafts/GOV-DOC-001-v1.2-DRAFT.md": "04d35f90d6f1389ee17dc8fba1a32600bd7ac8ec",
+    "00-governance/reports/f06-object-reconciliation.md": "9990b645555aef83714ff92c97255110b1fa0960",
+}
 EMBEDDED_BILINGUAL_SOURCES: dict[str, str] = {
     "00-governance/bilingual-documentation-policy.md": (
         "Defines one repository-wide bilingual obligation, parity rules, "
@@ -147,6 +162,97 @@ for _source, _reason in EMBEDDED_BILINGUAL_SOURCES.items():
         sys.exit(2)
 ROOT = Path.cwd()
 BASELINE_PATH = REPO_ROOT / "scripts" / "bilingual-baseline.txt"
+
+
+def _git_log_output(*args: str) -> str:
+    """Read repository history for registration provenance checks."""
+    result = subprocess.run(
+        ["git", *args], cwd=ROOT, check=True, capture_output=True, text=True
+    )
+    return result.stdout.strip()
+
+
+def _file_add_commit(source: str) -> str | None:
+    """Return the newest commit that added this path to the repository."""
+    commits = _git_log_output(
+        "log", "--diff-filter=A", "--format=%H", "-1", "HEAD", "--", source
+    )
+    return commits or None
+
+
+def _embedded_sources_in_revision(revision: str, gate_path: str) -> set[str]:
+    """Return keys in EMBEDDED_BILINGUAL_SOURCES at one Git revision."""
+    content = _git_log_output("show", f"{revision}:{gate_path}")
+    tree = ast.parse(content)
+    for node in tree.body:
+        target = None
+        value = None
+        if isinstance(node, ast.AnnAssign):
+            target, value = node.target, node.value
+        elif isinstance(node, ast.Assign) and len(node.targets) == 1:
+            target, value = node.targets[0], node.value
+        if isinstance(target, ast.Name) and target.id == "EMBEDDED_BILINGUAL_SOURCES":
+            literal = ast.literal_eval(value)
+            return set(literal)
+    return set()
+
+
+def _registration_add_commit(source: str) -> str | None:
+    """Return the commit that added this source to the exemption dictionary."""
+    gate_path = "scripts/check_bilingual_docs.py"
+    commits = _git_log_output(
+        "log", "--format=%H", "-S", f'"{source}"', "HEAD", "--", gate_path
+    )
+    for commit in commits.splitlines():
+        try:
+            current_sources = _embedded_sources_in_revision(commit, gate_path)
+            parent = _git_log_output("rev-parse", f"{commit}^")
+            previous_sources = _embedded_sources_in_revision(parent, gate_path)
+        except subprocess.CalledProcessError:
+            previous_sources = set()
+            current_sources = _embedded_sources_in_revision(commit, gate_path)
+        if source in current_sources and source not in previous_sources:
+            return commit
+    return None
+
+
+def check_embedded_registration_history() -> list[str]:
+    """Require exemption registration to post-date file creation.
+
+    The only same-commit cases accepted are the three explicitly identified
+    legacy self-registrations above, pinned to their measured creation SHAs.
+    """
+    errors: list[str] = []
+    for source in sorted(EMBEDDED_BILINGUAL_SOURCES):
+        try:
+            file_commit = _file_add_commit(source)
+            registration_commit = _registration_add_commit(source)
+        except (OSError, subprocess.CalledProcessError) as exc:
+            errors.append(
+                f"Unable to verify embedded bilingual registration history for "
+                f"{source}: {exc}"
+            )
+            continue
+        if not file_commit or not registration_commit:
+            errors.append(
+                f"Unable to identify both file-creation and exemption-registration "
+                f"commits for {source}; full Git history is required."
+            )
+            continue
+        if file_commit == registration_commit:
+            if SELF_REGISTERED_AT_CREATION.get(source) != file_commit:
+                errors.append(
+                    f"Embedded bilingual source {source} was registered in the "
+                    f"same commit that added the file ({file_commit[:8]}). "
+                    "Register it in a later commit with independent review."
+                )
+        elif source in SELF_REGISTERED_AT_CREATION:
+            errors.append(
+                f"SELF_REGISTERED_AT_CREATION record for {source} does not match "
+                f"its actual same-commit creation/registration SHA ({file_commit}, "
+                f"{registration_commit})."
+            )
+    return errors
 
 
 def current_bilingual_gaps() -> set[str]:
@@ -662,6 +768,7 @@ def main() -> int:
 
     body = os.environ.get("PR_BODY", "")
     errors: list[str] = check_prompt_library()
+    errors.extend(check_embedded_registration_history())
     # ADVISORY ONLY: the inheritance requirement originates from the unadopted
     # GOV-DOC-001 v1.2 draft. Reporting it as a blocking error would impose an
     # unapproved normative obligation through tooling, so it is emitted as a
