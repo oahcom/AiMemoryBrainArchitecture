@@ -146,7 +146,7 @@ Remaining G-local opportunities such as vector sufficiency evaluation, determini
 The existing workflow `.github/workflows/g-applied-reference-model.yml` discovers `test_*.py` in the reference-model directory, so the new 14 tests are included by its current test command:
 `python -m unittest discover -s 06-memory-context/reference-model -p "test_*.py" -v`.
 
-**Test status at report authoring:** NOT RUN in this conversation. No CI success is claimed. The 7 Rust tests were not changed, but passing status requires the CI run to confirm them. The Python count is 22 after addition (8 existing + 14 added); the combined Rust + Python count is 29.
+**Test status:** CI was triggered, but no test PASS is established. On PR #433, workflow runs 44880950482 (Python Applied reference model), 44880950477 (Rust workspace), 44880950493 (runner admission), 44880950443 (bilingual docs), and 44880950465 (document management) all concluded FAILURE. GitHub's job records exposed `logs_url: null` and `steps: null`; job-log retrieval returned BlobNotFound. Therefore it is not possible to establish whether test commands started or whether the failures were runner/admission failures versus test failures. Do not report any of the 29 tests as passed. The 7 Rust tests were not changed. Python count is 22 after addition (8 existing + 14 added); combined Rust + Python count is 29.
 
 ## 6. Cross-owner blockers (not G decisions)
 
