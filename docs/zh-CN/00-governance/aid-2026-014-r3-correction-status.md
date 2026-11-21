@@ -10,7 +10,7 @@ ADR 载体：#43，comment 7034237663
 
 处置：CORR-APPLY-DISP-01
 
-修正状态：APPLIED_PENDING_INDEPENDENT_REVIEW
+修正状态：APPLIED
 
 ## 2. 决策状态
 
@@ -43,19 +43,20 @@ TRUST ROOT = NOT APPROVED
 STORAGE L4 = OPEN / NOT APPROVED
 
 TEST EXECUTION = SUSPENDED
+TEST EXECUTION 派发门禁 = UNLOCKED-WITH-CONDITIONS（仅限 REQ-04 第⑤步派发规格）
 
 ## 3. 各项修正状态
 
 | 要求 | 应用状态 | 独立复审 |
 |---|---|---|
-| R1 Claim 身份 | APPLIED_PENDING_INDEPENDENT_REVIEW | REQUEST CHANGES |
-| R2 Attestor 授权 | APPLIED_PENDING_INDEPENDENT_REVIEW | PASS |
-| R3 共享 Fact Forget | APPLIED_PENDING_INDEPENDENT_REVIEW | PASS |
-| R4 Fact/Claim 同步 | FIX_APPLIED_AWAITING_REREVIEW | PASS |
-| R5 端到端发布 | APPLIED_PENDING_INDEPENDENT_REVIEW | PASS |
-| R5 Storage §8.8 | APPLIED_PENDING_INDEPENDENT_REVIEW | PASS |
-| R5 Admission 阶段关系 | APPLIED_PENDING_INDEPENDENT_REVIEW | PASS |
-| PASS 治理同步 | FIX_APPLIED_AWAITING_REREVIEW | PASS |
+| R1 Claim 身份 | APPLIED | REQUEST CHANGES（R1-01、R1-02；§9.9） |
+| R2 Attestor 授权 | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
+| R3 共享 Fact Forget | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
+| R4 Fact/Claim 同步 | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
+| R5 端到端发布 | APPLIED | PASS (M19: 7050001430; M20: 7050002020; M27: 7057332489; M28: 7057332846) |
+| R5 Storage §8.8 | APPLIED | PASS (M22: 7056912025; M27: 7057332489; M28: 7057332846) |
+| R5 Admission 阶段关系 | APPLIED | PASS (M25: 7057203158; M26: 7057203517; M27: 7057332489; M28: 7057332846) |
+| PASS 治理同步 | APPLIED | PASS (M19: 7050001430; M20: 7050002020; M27: 7057332489; M28: 7057332846) |
 
 ## 4. 应用证据要求
 
@@ -236,9 +237,10 @@ Claim identity 语义为 `DECIDED FOR CONVERGENCE` 且由 D 治理；Fact 专属
 INT-P0-01 下仍为 `OPEN`；物理 Schema 与 DDL 仍为 `NOT APPROVED`。`ADR-BLOCKED` 已不再描述
 Claim identity mapping。此前独立复审在此点上的结论读自 `2717fadb`，该版本已被取代。
 
-第 3 节出现两个状态值：`FIX_APPLIED_AWAITING_REREVIEW` 与
-`APPLIED_PENDING_INDEPENDENT_REVIEW`。二者为同一确定性等级，并非两个档次。两者均表示应用已
-发生、独立复审未完成，区别仅在产生该应用的是哪一轮次。此处登记以免被读作等级排序。
+此前版本的 §3 曾使用两个状态值：`FIX_APPLIED_AWAITING_REREVIEW` 与
+`APPLIED_PENDING_INDEPENDENT_REVIEW`。在当时，二者表示同一确定性等级，并非两个档次：应用已完成、
+独立复审尚未完成，仅产生该应用的轮次不同。二者属于历史状态值，不再描述当前 §3。
+当前 §3 各行记录为 `APPLIED`，并同时记录独立复审结果。
 
 上表不含两个状态文件自身，因为本小节即随它们一同提交：其提交前 Blob 为 `db3e9f394c61c247ae9dde51c92d190f194ee11a`（EN）与
 `87c00ade741ebc0837c2f6903b820741f2887e4a`（ZH），由新增本小节的提交取代。
@@ -668,3 +670,103 @@ docs/zh-CN/04-memory-compiler/extraction-and-normalization.md  8dd0b5b29ecd37cea
 
 R1 因此从 `FIX_APPLIED_AWAITING_REREVIEW` 转为 `APPLIED_PENDING_INDEPENDENT_REVIEW`，独立复审列
 仍为 `REQUEST CHANGES`，直至两项发现得到复审。`§2` 未变。
+
+### 9.10 谓词等价修正轮的合并后回读
+
+本节记录 REREVIEW-8 所审查的第七轮谓词等价修正完成合并后的回读结果。
+
+本节仅记录仓库状态及内容身份。REREVIEW-8 = PASS 不构成 FORMAL ACCEPTANCE，也不建立实现符合性。
+
+#### 9.10.1 精确修正提交 HEAD
+
+| 目标 | 已复审的修正 HEAD | 修正内容 |
+|---|---|---|
+| PR #410 — Extraction EN | `a685aa9d868b56afb0a335a691d1e758d1fff05a` | `TRUE if and only if` |
+| PR #411 — Storage ADR EN | `79a4d7df475c03ccb318712ccef6e6d78fedebba` | `TRUE if and only if` |
+
+两个修正提交均只替换原有英文定义中的谓词连接词。中文定义此前已经使用「当且仅当」。
+
+#### 9.10.2 精确合并目标
+
+| 目标分支 | 合并提交 |
+|---|---|
+| `main` — PR #410 | `f1a6028d8192` |
+| Storage 独立载体分支 — PR #411 | `356e2f051def` |
+
+这两个目标属于不同 Git 历史，不得将其表述为一个共同的原子 Git 快照。
+
+Extraction 文件从指定的 `main` 合并结果读取。Storage ADR 从其独立载体分支的合并结果读取。
+
+#### 9.10.3 合并后 Blob 回读
+
+下表 Blob 值钉定于 R7 合并结果（`main` `f1a6028d`）。它们是历史回读值，
+不描述当前 `main` HEAD——该分支此后已被后续治理轮次推进。
+
+| 规范载体 | 路径 | Blob SHA | 大小 |
+|---|---|---|---:|
+| Extraction EN | `docs/en/04-memory-compiler/extraction-and-normalization.md` | `c87860706313` | 22,484 bytes |
+| Extraction ZH | `docs/zh-CN/04-memory-compiler/extraction-and-normalization.md` | `9657949af482` | 21,781 bytes |
+| Storage ADR（EN/ZH） | `reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md` | `62ae6e878657` | 35,544 bytes |
+
+合并后回读确认的完整 Blob 标识如下：
+
+- Extraction EN：`c87860706313`
+- Extraction ZH：`9657949af482`
+- Storage ADR：`62ae6e878657`
+
+#### 9.10.4 谓词等价回读
+
+四处规范定义分别为：
+
+1. Extraction EN §19.2。
+2. Extraction ZH §19.2。
+3. Storage ADR EN §8.8。
+4. Storage ADR ZH §8.8。
+
+回读确认以下要素对应一致：
+
+| 谓词要素 | 英文 | 中文 |
+|---|---|---|
+| 谓词身份 | `DependencyClosurePersisted(P)` | `DependencyClosurePersisted(P)` |
+| 逻辑连接词 | `if and only if` | `当且仅当` |
+| 依赖集合 | 完整直接及传递依赖集合 | 完整 direct 和 transitive 集合 |
+| 完整性 | `COMPLETE` | `COMPLETE` |
+| Digest | 与准确依赖集合匹配 | 与准确依赖集合匹配 |
+| 确认方式 | Authoritative read-after-commit | 权威 read-after-commit |
+
+英文和中文定义表达相同的必要且充分条件。
+
+Participant barrier 只有在该谓词为 TRUE 时才 MUST 被判定为 resolved 或完成。
+
+#### 9.10.5 复审及治理处置
+
+```text
+REREVIEW-8 = PASS
+
+FOUR-WAY PREDICATE CONSISTENCY = PASS
+LOGICAL EQUIVALENCE = PASS
+SCOPE VIOLATION = NONE
+REGRESSION = NONE
+RESIDUAL REVIEW BLOCKER = NONE
+
+R1-R5 = PASS / NOT REOPENED
+
+FORMAL ACCEPTANCE = PENDING
+IMPLEMENTATION CONFORMANCE = NOT ESTABLISHED
+
+TEST EXECUTION = SUSPENDED
+TEST EXECUTION DISPATCH GATE = UNLOCKED-WITH-CONDITIONS
+UNLOCKED SCOPE = REQ-04 STEP 5 DISPATCH SPEC ONLY
+```
+
+上文 `R1-R5 = PASS / NOT REOPENED` 是 M27 在 REREVIEW-8 时点的判定。
+R1 此后在 `§9.9` 单独接受复审并得出 `REQUEST CHANGES`（R1-01、R1-02）。
+就 R1 而言，以 `§9.9` 为准。
+
+PASS 是独立复审判定，不是正式接受决定。
+
+本次回读不证明底层存储实现已经提供原子性、事务隔离、依赖登记持久化或任何其他实现属性。
+
+本节不批准 Schema、DDL、公共 API、H Wire、生产密钥、Trust Root、Crypto Profile 或 Storage L4。
+
+本节记录的是规范回读完成，不是实现测试完成。
