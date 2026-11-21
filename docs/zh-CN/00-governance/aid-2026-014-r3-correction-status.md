@@ -49,10 +49,10 @@ TEST EXECUTION = SUSPENDED
 | 要求 | 应用状态 | 独立复审 |
 |---|---|---|
 | R1 Claim 身份 | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
-| R2 Attestor 授权 | FIX_APPLIED_AWAITING_REREVIEW | REQUEST CHANGES |
-| R3 共享 Fact Forget | FIX_APPLIED_AWAITING_REREVIEW | REQUEST CHANGES |
+| R2 Attestor 授权 | APPLIED_PENDING_INDEPENDENT_REVIEW | REQUEST CHANGES |
+| R3 共享 Fact Forget | APPLIED_PENDING_INDEPENDENT_REVIEW | REQUEST CHANGES |
 | R4 Fact/Claim 同步 | FIX_APPLIED_AWAITING_REREVIEW | PASS |
-| R5 端到端发布 | FIX_APPLIED_AWAITING_REREVIEW | REQUEST CHANGES |
+| R5 端到端发布 | APPLIED_PENDING_INDEPENDENT_REVIEW | REQUEST CHANGES |
 | R5 Storage §8.8 | APPLIED_PENDING_INDEPENDENT_REVIEW | PASS |
 | R5 Admission 阶段关系 | APPLIED_PENDING_INDEPENDENT_REVIEW | PASS |
 | PASS 治理同步 | FIX_APPLIED_AWAITING_REREVIEW | PASS |
@@ -423,3 +423,80 @@ PublicationParticipant Admission 成功之后线性化，三者留下的持久�
 
 §3 的「应用状态」列保持原样：上一轮的应用仍在树中。变化的是「独立复审」列，这也是四行变更、验收
 门禁一行未动的原因。
+
+### 9.5 七项 SYNC 事项的应用
+
+回读基线 HEAD：`836dc1055547f1dd9fba2081a5280ef22cbb94c5`。下表所有 Blob 均读自该确切提交。
+
+七项事项分三次提交应用，随后发现一处缺陷并在第四次提交中移除。下表记录的是仓库当前持有的值，
+不是某次更早提交持有的值。
+
+| 目标 | 事项 | 变更前 Blob | 变更后 Blob | 大小 | 提交 |
+|---|---|---|---|---|---|
+| `docs/en/09-security-governance/security-governance-guide.md` | R2 / SYNC-01+02 | `60b2283fdf44` | `061c5847b3df` | 15171 -> 20714 B | `782c4c8d` |
+| `docs/zh-CN/09-security-governance/security-governance-guide.md` | R2 / SYNC-01+02 | `9fee318f2def` | `372d27c79dc7` | 13359 -> 18224 B | `782c4c8d` |
+| `docs/en/03-memory-brain/memory-versioning.md` | R3+R5 / SYNC-04+06 | `7e63b9b397c3` | `84aabc25bb07` | 33424 -> 48474 B | `9eca5eda` |
+| `docs/zh-CN/03-memory-brain/memory-versioning.md` | R3+R5 / SYNC-04+06 | `89d9eb478661` | `aa2fc775c786` | 31768 -> 44569 B | `9eca5eda` |
+| `docs/en/02-domain-model/domain-model-overview.md` | R3 / SYNC-03 | `5b86fe23ab7c` | `1a1a10b24d68` | 26974 -> 28507 B | `9eca5eda` |
+| `docs/zh-CN/02-domain-model/domain-model-overview.md` | R3 / SYNC-03 | `03129ded6e95` | `8ef976789af6` | 24417 -> 25636 B | `9eca5eda` |
+| `docs/en/04-memory-compiler/extraction-and-normalization.md` | R5 / SYNC-05 | `c87860706313` | `e6aad4b7504f` | 22484 -> 26256 B | `d36c27c9` |
+| `docs/zh-CN/04-memory-compiler/extraction-and-normalization.md` | R5 / SYNC-05 | `9657949af482` | `8dd0b5b29ecd` | 21781 -> 25185 B | `d36c27c9` |
+| `06-memory-context/context-versioning.md` | R5 / SYNC-07 | `847c9578b440` | `ce952ba3eca3` | 32435 -> 34566 B | `d36c27c9` |
+
+**SYNC-01 与 SYNC-02 —— 授权决定现为单次使用。** `§12.3` 在原有七项之后新增三个编号字段：
+绑定唯一 `AttestationOperationRef` 并指明该操作所针对的确切 `FactRef`/`FactRevisionRef`；
+绑定确切的 `ClaimRevisionRef`、`EvidenceRef` 集合，以及在 Provenance 构成被证明输入时绑定确切的
+`ProvenanceRef` 集合，并明确禁止未指定、事后扩张、替换或隐式解析的集合；以及一次性消费与防重放
+状态，用于区分未使用与已被其唯一绑定操作消费的决定，一旦消费，该决定 MUST NOT 再授权另一操作、
+FactRevision、目标、ClaimRevision 集合或 Evidence 集合。`§12.6` 新增对应的 D 验证职责：验证
+`AuthorizationDecisionRef` 绑定于当前唯一操作、验证确切目标与确切输入集合、验证消费状态。结尾段
+明确整组要求是语义契约与实现一致性边界，不是 Schema、DDL 或 Public API 的批准。
+
+**SYNC-03 —— 闭包规则现与终态对接。** `§8.1` 原有闭包规则全部未改，新增其与 Forget 终态的对应
+关系：依赖闭包不完整时不得声明任何终态；`Failed` 与 `Cancelled` 必须处置每一个已登记依赖，而不只
+是发起对象。共享 Fact、整体抑制受影响 FactRevision、闭包未知即阻断这三条规则未动。
+
+**SYNC-04 与 SYNC-06 —— 矩阵现命名两个准入并映射四种终态。** `§16.1` 不再写 `Admission`。七个
+逻辑分量为 `D Fence`、`Producer Admission`、`D Canonical Commit`、`E Publication`、
+`PublicationParticipant Admission`、`Storage Visibility`、`G Context Commit`，并明确两个准入
+MUST 保持区分，MUST NOT 互为别名或可互换操作。九步执行顺序将 Producer Admission 置于第 2 步、
+PublicationParticipant Admission 置于第 7 步，即第 6 步 `PREPARED_HIDDEN` 持久化之后。新增的
+`Forget 终态 × 分量处置` 矩阵为七个分量在 `Completed`、`CompletedWithPolicyException`、
+`Failed`、`Cancelled` 四种终态下分别给出处置，并给出每种终态最后允许可见的分量、已提交规范
+Revision 的处置、已存在 E Artifact 的处置、`PREPARED_HIDDEN` tuple 的处置、所需审计证据以及
+UNKNOWN 禁令。四条分类规则使四种终态互斥，其中包括：存在权威取消结果时 MUST NOT 声明 `Failed`；
+执行失败 MUST NOT 被改写为 `Cancelled`。
+
+**既有场景矩阵保留原有行。** 仅其 `Admission` 列名改为 `Producer Admission`。
+`Fence before Admission (T17)`、`Fence after Admission (T18)`、崩溃、Lost ACK、重试与可见性后
+崩溃各行含义未变。另设 `Second-stage Admission race matrix`，新增 `T17-P`、`T18-P`、`T17-PUB`
+与 `T18-PUB`，并明确其不重新解释、也不替换第一阶段场景。
+
+**SYNC-05 —— 第二阶段被拒绝现有终态处置。** Extraction `§19.2` 在现有正文与 `#### Storage
+boundary` 之间新增 `T17-PUB`/`T18-PUB` 块，该边界的原两句声明未改动。该块逐条闭合五个开放问题：
+已提交规范 Revision 保持已提交但永久不可公开，对同一被拒绝操作的重试不构成独立授权；已存在的
+E Publication 撤销公开可见性或被隔离，且不得作为成功可见效果重放；`PREPARED_HIDDEN` tuple 取消
+或隔离并具可审计终态结果，未解决的 tuple 不得视为已取消或可发布；第一阶段 Producer participant
+获得可审计的抑制处置，且必须绑定确切的被拒绝 `PublicationParticipant` identity、其
+`StorageVisibilityParticipantRef` 与确切 tuple identity，泛化的操作级抑制明确不满足要求；
+恢复、重试与替代发布路径在作任何可见性推进前都必须验证已证明的第二阶段准入与独立授权的可见性
+结果，证据缺失、冲突或 UNKNOWN 一律失效关闭。该块明确不改变 `§19.1` 的十步顺序，也不改变
+`§19.2` 的六步顺序。
+
+**SYNC-07 —— G 在第二阶段缺失时拒绝。** `06-memory-context/context-versioning.md` `§13.3` 在
+`#### 4. T18 — Participant-first` 末尾新增一块：第二阶段准入未成功时 MUST NOT 提交或发布对应
+`ContextVersion`；第一阶段成功不构成第二阶段成功的证据；已提交且引用了未获第二阶段准入的发布
+对象的 `ContextVersion` 按 `§16.1` 终态处置；恢复与重放在每次读取时重新评估，历史提交不赋予
+永久可见性；发布 identity、各参与方、闭包与终态 Forget 处置必须全程保留。
+`#### 5. G protected commit requirements` 与 `#### 6. Historical visibility` 未改动。
+
+**一处引入后又移除的缺陷。** R2 交付中每语言夹带了三行 HTML 注释，那是作者写给自己的落文指令，
+不是规范正文：`§12.3` 与 `§12.6` 内各有一行 `insert after`，`§12.6` 末尾另有一行 `append`。它们
+随 `782c4c8d` 一同进入仓库。提交 `836dc105` 移除这三行注释及其后随的空行，段落间距因此不变；
+编号、D 的十二项验证职责与语义契约段逐字节相同。之所以记录，是因为只显示最终 Blob 的应用记录会
+掩盖仓库曾短暂携带非规范标记这一事实。
+
+清理完成后，九个目标全部在 `836dc1055547f1dd9fba2081a5280ef22cbb94c5` 处重新回读，均不含 HTML 注释。
+
+R3 复审处置仍为 `REQUEST CHANGES`：三个阻断项已应用但尚未复审。`TEST EXECUTION = SUSPENDED`
+维持。验收门禁未变：`§2` 在四次提交之间逐字节相同。
