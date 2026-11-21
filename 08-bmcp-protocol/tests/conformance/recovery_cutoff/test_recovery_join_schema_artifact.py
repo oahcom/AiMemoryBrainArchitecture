@@ -31,11 +31,12 @@ def fragment_validator(name: str) -> Draft202012Validator:
 
 class RecoveryJoinSchemaArtifactTests(unittest.TestCase):
     def test_01_schema_identity_and_index_are_consistent(self):
+        Draft202012Validator.check_schema(SCHEMA)
         self.assertEqual(SCHEMA_PATH.name, "bmcp.recovery-join-1.0.2.schema.json")
-        match = re.search(r"-(\\d+\\.\\d+\\.\\d+)\\.schema\\.json$", SCHEMA_PATH.name)
+        match = re.search(r"-(\d+\\.\d+\\.\d+)\\.schema\\.json$", SCHEMA_PATH.name)
         self.assertIsNotNone(match, "schema filename must end in a semantic version")
         filename_version = match.group(1)
-        id_match = re.search(r"/(\\d+\\.\\d+\\.\\d+)$", SCHEMA["$id"])
+        id_match = re.search(r"/(\d+\\.\d+\\.\d+)$", SCHEMA["$id"])
         self.assertIsNotNone(id_match, "$id must end in a semantic version")
         self.assertEqual(id_match.group(1), filename_version)
         self.assertEqual(SCHEMA["properties"]["schema_version"]["const"], filename_version)
@@ -51,7 +52,7 @@ class RecoveryJoinSchemaArtifactTests(unittest.TestCase):
     def test_02_valid_full_message_fixture_is_accepted(self):
         instance = json.loads((FIXTURES / "valid_recovery_join_1_0_2.json").read_text(encoding="utf-8"))
         errors = list(VALIDATOR.iter_errors(instance))
-        self.assertEqual(errors, [], "\\n".join(error.message for error in errors))
+        self.assertEqual(errors, [], "\n".join(error.message for error in errors))
 
     def test_03_invalid_forget_fence_generation_fixture_is_rejected(self):
         instance = json.loads((FIXTURES / "invalid_forget_fence_generation.json").read_text(encoding="utf-8"))
