@@ -1012,15 +1012,9 @@ mod tests {
         let mut other_kind = canonical.clone();
         other_kind.scope_kind = ScopeKind::Project;
 
-        assert!(scopes_intersect(
-            std::slice::from_ref(&canonical),
-            std::slice::from_ref(&canonical),
-        ));
-        assert!(!scopes_intersect(
-            std::slice::from_ref(&canonical),
-            &[other_namespace],
-        ));
-        assert!(!scopes_intersect(&[canonical], &[other_kind]));
+        assert!(scopes_intersect(std::slice::from_ref(&canonical), std::slice::from_ref(&canonical)));
+        assert!(!scopes_intersect(std::slice::from_ref(&canonical), std::slice::from_ref(&other_namespace)));
+        assert!(!scopes_intersect(std::slice::from_ref(&canonical), std::slice::from_ref(&other_kind)));
     }
 
 }
