@@ -51,10 +51,10 @@ TEST EXECUTION = SUSPENDED
 | R1 Claim identity | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
 | R2 Attestor authorization | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
 | R3 Shared Fact Forget | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
-| R4 Fact/Claim synchronization | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
+| R4 Fact/Claim synchronization | FIX_APPLIED_AWAITING_REREVIEW | PASS |
 | R5 End-to-end publication | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
-| R5 Storage §8.8 | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
-| R5 Admission stage relation | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
+| R5 Storage §8.8 | APPLIED_PENDING_INDEPENDENT_REVIEW | PASS |
+| R5 Admission stage relation | APPLIED_PENDING_INDEPENDENT_REVIEW | PASS |
 | PASS governance synchronization | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
 
 ## 4. Application evidence requirements
@@ -284,3 +284,44 @@ Both insertions state this is an implementation-conformance gate, not an unresol
 ordering choice, so the fix reopens nothing that is already DECIDED FOR CONVERGENCE.
 
 R3 disposition, formal acceptance, schema freeze and implementation conformance are unchanged.
+
+### 9.3 Independent review disposition of the correction round
+
+Reviewer: independent session `6b00a00c-3ad0-83ee-bda0-f6dcdef2fbd9` (read-only, no repository
+write, no comment posted by the reviewer). Verdict returned 2026-11-21: `PASS` on the three items
+that were still blocked, superseding the earlier `REQUEST CHANGES` on those three.
+
+The reviewer read the files themselves, not the L0 summary. Blobs it cites, verified against the
+repository after the fact:
+
+```
+docs/en/04-memory-compiler/extraction-and-normalization.md   03c8a6f32113d54cac097c792b896a4ec3f873b1
+docs/zh-CN/04-memory-compiler/extraction-and-normalization.md   ac484c860b9b8eb9da19801acd9a985f2a8b4b3a
+reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md (carrier branch)   8d4ac845f409c2cb64831c850219fdb84a113cf0   32954 B
+```
+
+| Item reviewed | Earlier | Now | What the reviewer says it checked |
+|---|---|---|---|
+| R5 Admission stage relation | REQUEST CHANGES | PASS | Two distinct ordered stages; `MUST NOT be treated as aliases`; success in stage 1 explicitly not success in stage 2; both on one ordering anchor; dependency closure created at Producer Admission and not narrowable at publication. |
+| R4 Claim identity / Fact modeling | REQUEST CHANGES | PASS | Re-read the current Blobs instead of carrying over the old `2717fadb` finding. `OPEN` now bounds only Fact-specific modeling and Fact approval. No unresolved item is repackaged as closed. |
+| Application evidence §9.1 + §9.2 | REQUEST CHANGES | PASS | Continuous correction record: targets, Blobs before and after, commits, sizes, reasons. All review states still `PENDING` at the time of review, so no review outcome was claimed in advance. |
+| Storage §8.8 alignment | PASS | PASS | Seven-step order not rewritten; §8.8 clarification only states that a distinct Producer Admission precedes it. |
+| Bilingual synchronization | PASS | PASS | EN/ZH carry the same normative content. |
+
+What `PASS` does not mean, stated by the reviewer and preserved here:
+
+- Not formal acceptance. `FORMAL ACCEPTANCE = PENDING` is unchanged.
+- Not schema freeze. `SCHEMA FREEZE = NOT APPROVED` is unchanged.
+- Not implementation conformance. `IMPLEMENTATION CONFORMANCE = NOT ESTABLISHED` is unchanged,
+  and `DDL`, `PUBLIC API`, `H WIRE`, `PRODUCTION ATTESTATION KEYS`, `TRUST ROOT`,
+  `CRYPTOGRAPHIC PROFILE` all remain `NOT APPROVED`. `STORAGE L4` remains `OPEN`.
+- Not a reopening of anything `DECIDED FOR CONVERGENCE`.
+
+One implementation gate the reviewer keeps open, on its own initiative: a concurrent-interleaving
+test MUST demonstrate that a Forget Fence does not complete disposition while the dependency
+closure has not fully entered the participant barrier. This is implementation conformance, not an
+unresolved ordering choice, and it is not satisfied by the existence of the text.
+
+`R1`, `R2`, `R3`, `R5 End-to-end publication` and `PASS governance synchronization` were not
+re-adjudicated in this round and keep `PENDING`. The overall disposition is therefore narrower than
+the round's `PASS`: three rows moved, five did not, and the acceptance gates did not move at all.

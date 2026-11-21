@@ -51,10 +51,10 @@ TEST EXECUTION = SUSPENDED
 | R1 Claim 身份 | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
 | R2 Attestor 授权 | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
 | R3 共享 Fact Forget | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
-| R4 Fact/Claim 同步 | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
+| R4 Fact/Claim 同步 | FIX_APPLIED_AWAITING_REREVIEW | PASS |
 | R5 端到端发布 | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
-| R5 Storage §8.8 | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
-| R5 Admission 阶段关系 | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
+| R5 Storage §8.8 | APPLIED_PENDING_INDEPENDENT_REVIEW | PASS |
+| R5 Admission 阶段关系 | APPLIED_PENDING_INDEPENDENT_REVIEW | PASS |
 | PASS 治理同步 | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
 
 ## 4. 应用证据要求
@@ -274,3 +274,40 @@ per-BrainAuthorityRef 序列化锚点声明之前。七步顺序、锚点、L1 �
 重新打开任何已 DECIDED FOR CONVERGENCE 的内容。
 
 R3 处置、正式验收、Schema 冻结与实现一致性均不变。
+
+### 9.3 修正轮的独立复审处置
+
+复审方：独立会话 `6b00a00c-3ad0-83ee-bda0-f6dcdef2fbd9`（只读，未写仓库，未由复审方发布评论）。
+2026-11-21 返回裁决：对仍被阻断的三项判 `PASS`，取代此前就该三项作出的 `REQUEST CHANGES`。
+
+复审方读取的是文件本身，而非 L0 摘要。其所引 Blob 经事后核对与仓库一致：
+
+```
+docs/en/04-memory-compiler/extraction-and-normalization.md   03c8a6f32113d54cac097c792b896a4ec3f873b1
+docs/zh-CN/04-memory-compiler/extraction-and-normalization.md   ac484c860b9b8eb9da19801acd9a985f2a8b4b3a
+reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md（载体分支）   8d4ac845f409c2cb64831c850219fdb84a113cf0   32954 B
+```
+
+| 受审项 | 此前 | 现 | 复审方自述的核查内容 |
+|---|---|---|---|
+| R5 Admission 阶段关系 | REQUEST CHANGES | PASS | 两个不同的有序阶段；`MUST NOT be treated as aliases`；第一阶段成功明确不等于第二阶段成功；两者同处一个排序锚点；依赖闭包在 Producer Admission 建立，发布时不得缩减。 |
+| R4 Claim identity / Fact modeling | REQUEST CHANGES | PASS | 重读了当前 Blob，而非沿用旧的 `2717fadb` 结论。`OPEN` 现仅界定 Fact 专属建模与 Fact 批准。未发现把未决项重新包装为已闭合。 |
+| Application evidence §9.1 + §9.2 | REQUEST CHANGES | PASS | 修正记录连续：目标、修改前后 Blob、提交、大小、原因齐备。复审时全部复审状态仍为 `PENDING`，未预支复审结论。 |
+| Storage §8.8 对齐 | PASS | PASS | 七步顺序未被改写；§8.8 澄清仅声明其之前存在独立的 Producer Admission。 |
+| 双语同步 | PASS | PASS | EN/ZH 承载相同规范内容。 |
+
+`PASS` 不代表什么，由复审方明示并在此保留：
+
+- 不代表正式验收。`FORMAL ACCEPTANCE = PENDING` 不变。
+- 不代表 Schema 冻结。`SCHEMA FREEZE = NOT APPROVED` 不变。
+- 不代表实现一致性。`IMPLEMENTATION CONFORMANCE = NOT ESTABLISHED` 不变，且 `DDL`、
+  `PUBLIC API`、`H WIRE`、`PRODUCTION ATTESTATION KEYS`、`TRUST ROOT`、
+  `CRYPTOGRAPHIC PROFILE` 均仍为 `NOT APPROVED`，`STORAGE L4` 仍为 `OPEN`。
+- 不重新打开任何 `DECIDED FOR CONVERGENCE`。
+
+复审方主动保留一项实现门禁：必须由并发交错测试证明，在依赖闭包尚未完整进入 participant
+barrier 时，Forget Fence 不得完成处置。这属于实现一致性验证，不是尚未解决的排序选择，且不能
+由文本存在本身满足。
+
+`R1`、`R2`、`R3`、`R5 端到端发布`、`PASS 治理同步` 本轮未被重新裁定，仍保持 `PENDING`。故整体
+处置范围窄于本轮的 `PASS`：三行发生变更，五行未变，验收门禁完全未动。
