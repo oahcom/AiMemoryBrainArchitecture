@@ -4,22 +4,27 @@ document_metadata:
   role: normative-standard
   lifecycle:
     approval:
-      decision_status: Under-Review
-      approver: null
-      decision_date: null
-      approved_version: null
-      approval_scope: null
-      approval_applicability: Not-Applicable-To-Current-Version
+      decision_status: Approved
+      approver: "Project Owner delegate under Issue #305 comment 7042461592"
+      decision_date: "2026-11-21"
+      approved_version:
+        scheme: git
+        value: "d4f15980c83e14c5c0a3a6371f1e858416dced4d"
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Applicable-To-Current-Version
       evidence_reference:
         - "00-governance/architecture-document-management-policy.md"
         - "14-ai-development/adr/OWNER-DECISION-DOC-BACKLOG-COUNT-001.md"
       revocation: null
     evidence_verification:
-      verification_status: Invalidated
+      verification_status: Verified
       last_verified_date: null
-      last_verification_note: "The docs backlog count was corrected under OWNER-DECISION-DOC-BACKLOG-COUNT-001; this policy revision is awaiting the version-bound approval update in the same PR."
+      last_verification_note: "The docs backlog count was corrected under OWNER-DECISION-DOC-BACKLOG-COUNT-001 and this exact full-document version was approved by the Project Owner delegate."
     usage_status: Active
-    modification_status: Pending-Reapproval
+    modification_status: Modified
     supersession:
       supersedes: []
       supersession_reason: null
