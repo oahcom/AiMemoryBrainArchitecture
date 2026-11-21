@@ -1076,10 +1076,12 @@ def changed_paths(root: Path, ref: str) -> set[str]:
     symlink with a regular file, changes what the gate reads without changing
     the path. `--diff-filter=AMR` skipped exactly that, so the increment could
     report PASS while a governed path had become a link to somewhere else.
-    Deletions stay excluded: a removed file has nothing to classify.
+    Deletions stay excluded: a removed file has nothing to classify. Copies are
+    included: with `diff.renames=copies` a new path can arrive as C, and a
+    copied governed document is still a governed document.
     """
     names: set[str] = set()
-    filter_arg = "--diff-filter=AMRT"
+    filter_arg = "--diff-filter=AMRTC"
     diff = git(root, "diff", "--name-only", "-z", filter_arg, f"{ref}...HEAD", nul=True)
     if diff is None:
         diff = git(root, "diff", "--name-only", "-z", filter_arg, ref, nul=True)
@@ -1182,6 +1184,15 @@ def main() -> int:
         f"GOV-DOC-002: {total} governed documents, {len(docs)} classified, "
         f"{len(unclassified)} unclassified"
     )
+    # Accounting identity: every governed file is either classified or listed
+    # as backlog. Printed so "403 unclassified" is a number you can check
+    # against the file system, not a claim. If this ever fails to balance, the
+    # classification loop dropped a file silently.
+    if len(docs) + len(unclassified) != total:
+        errors.append(
+            f"DM-01 accounting: {len(docs)} classified + {len(unclassified)} "
+            f"unclassified != {total} governed files"
+        )
     for name in sorted(per_root):
         done, seen = per_root[name]
         print(f"  {name}: {done}/{seen} classified")

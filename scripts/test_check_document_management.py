@@ -21,6 +21,7 @@ from check_document_management import (  # noqa: E402
     ParseError,
     body_hash,
     check_document,
+    governed_files,
     main as gate_main,
     parse_yaml_subset,
     read_metadata,
@@ -342,6 +343,14 @@ def run_repository_rules() -> None:
             "unclassified is INCOMPLETE, never PASS", root, 2
         )
         expect_gate("--strict rejects unclassified", root, 1, "--strict")
+        # The count must balance: every governed file is either classified or
+        # backlog. A silent drop in the loop would otherwise only show up as a
+        # smaller total that nobody questions.
+        record(
+            "T21 governed count equals classified plus unclassified",
+            len(governed_files(root)) == 2,
+            f"  governed {len(governed_files(root))}, expected 2",
+        )
 
     # T06 / T07: a Resolved record must select the unique Canonical document.
     resolution = (
@@ -661,6 +670,9 @@ def run_schema_agreement() -> None:
         "bilingual_counterpart": gate.BILINGUAL_KEYS,
     }
     constraint_keys = {"kind", "required", "enum", "items", "pattern", "when", "fields"}
+    # The closed set of value kinds. Without this, `kind: completely-unknown-kind`
+    # would pass a check that only asks whether `kind` is present.
+    KINDS = {"string", "nullable-string", "mapping", "nullable-mapping", "sequence", "boolean"}
 
     declared: set[str] = set()
     problems: list[str] = []
@@ -684,7 +696,18 @@ def run_schema_agreement() -> None:
             if unknown:
                 problems.append(f"{full}: unknown constraint keys {sorted(unknown)}")
             if "kind" not in value:
-                problems.append(f"{full}: no type declared")
+                problems.append(f"{full}: no kind declared")
+            elif value["kind"] not in KINDS:
+                problems.append(f"{full}: kind {value['kind']!r} is not one of {sorted(KINDS)}")
+            if value.get("kind") == "sequence":
+                if "items" not in value:
+                    problems.append(f"{full}: sequence without items")
+                elif value["items"] not in KINDS:
+                    problems.append(f"{full}: items {value['items']!r} is not a kind")
+            if "required" in value and not isinstance(value["required"], bool):
+                problems.append(f"{full}: required is not a boolean")
+            if "enum" in value and value.get("kind") != "string":
+                problems.append(f"{full}: enum on a non-string kind")
             nested = value.get("fields")
             if nested is not None:
                 walk(nested, full)
