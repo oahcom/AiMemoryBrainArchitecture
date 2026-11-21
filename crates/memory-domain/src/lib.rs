@@ -438,6 +438,7 @@ impl ClaimRevision {
     pub fn provenance_refs(&self)->&[ProvenanceRef] { &self.provenance_refs }
 }
 
+#[doc="Confidence or Verified status alone cannot create a Fact; an attested initial revision is required.\n```compile_fail\nuse memory_domain::{Fact, FactRef, EpistemicStatus};\nlet _ = Fact::new(FactRef::new(\"f\").unwrap(), EpistemicStatus::Verified);\n```"]
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct Fact { fact_ref: FactRef, initial_revision: Box<FactRevision> }
 impl Fact {
