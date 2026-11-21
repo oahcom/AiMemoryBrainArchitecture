@@ -103,7 +103,7 @@ Parse 失败：已解码 Envelope 格式错误；缺少必填字段；不支持�
 
 H 候选协商禁止静默主版本降级。精确 major/minor/patch 和 Payload Schema 协商归 H 所有。
 
-**H 的 Request ID 问题：** 当前 Envelope 定义 message_id，没有独立 request_id。H 必须决定 message_id 是否就是响应 causation_id 引用的 Request Identity，或是否需要独立稳定 Command Identity。BMCP MUST NOT 单方面增加 Wire request_id。
+**Owner Delegate 对 H-CONFIRM-001 的语义裁决：** message_id 是每条 BMCP Message 的唯一身份；correlation_id 关联 Agent Request/Workflow；causation_id 标识直接父 BMCP Message/Event。不新增核心 request_id。C 保留 AgentRequestId/AgentAttemptId。H 未来的版本化 Wire 规范可以编码此映射，但不得重新打开语义区分，也不意味着字段编码已冻结。
 
 ### 4.3 Execute
 
@@ -128,7 +128,7 @@ Execute 仅在 Parse 成功后开始。这是语义分派契约，不是 Runtime
 
 逻辑响应：已协商 Protocol Version；新的不可变 Response Message Identity；Request 关联；Operation 标识；互斥的 Success/Result 或 Failure/Error；Owner 签发的 Result/Receipt/Evidence Ref；以及 H 批准的安全重试元数据。
 
-**候选关联：** Response causation_id 引用 Request message_id；Response correlation_id 保留 Workflow Correlation；Response 有自己的 message_id。必须由 H 确认，不是冻结 Wire 规则。
+**Owner Delegate 已接受的语义关联：** Response causation_id 引用 Request message_id；Response correlation_id 保留 Workflow Correlation；Response 有自己的 message_id。H 必须在未来版本化 Wire 契约中编码该映射；这不是冻结的 Wire 规则。
 
 只有 Operation Owner 返回其定义的成功终态/Receipt 才算成功。Transport 发送成功、HTTP 2xx、Queue 接受或收到 ACK 不等于业务成功。失败保留 Owner 结果，并区分执行前拒绝、领域冲突、授权拒绝、Timeout/Unknown 和内部失败。UNKNOWN 不得变成确定成功/失败。
 
@@ -150,7 +150,7 @@ H 候选设计区分 Prepared/Delivered/Applied/Rejected/Expired/Superseded/Unkn
 | 重复 ACK | 相同稳定 ACK ID+Digest 幂等；相同 ID 不同 Digest 冲突 | H 候选；消费者管理状态 |
 | 关联 | 精确 Operation/Delivery/Attempt/Session/Target/Evidence Tuple | H Wire 映射；D/G/I 消费 |
 
-H 必须确认 ACK Family、证据边界、持久化点、Correlation Tuple、重试期限、Replay/Retention 和 Consumer Mapping。本文不设计 ACK。
+Owner Delegate 已接受 ACK Family 的语义分离、有限证据范围、歧义时 UNKNOWN、稳定 ACK Identity/Digest 以及 Retry/Idempotency 区分。H 仍须发布精确版本化 Wire 编码、持久化/Replay Profile 和 Consumer Mapping。本文不冻结 ACK Schema。
 
 ### 5.2 Validator 分层
 
@@ -416,14 +416,14 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 | 工作流 | 下一项工件 | 责任权威 | 进入状态 |
 |---|---|---|---|
 | H | 冻结 Envelope/Version、Wire Decode、ACK、Validator、Error/Conformance | H | BLOCKED_BY_H_CONTRACT |
-| B / Governance | 正式 Fact/Claim ADR 和 Schema 影响 | B + 有权治理机构 | BLOCKED_BY_OWNER_DECISION |
-| D | Canonical Identity/Lifecycle/Fence API 和 Receipt | D | BLOCKED_BY_OWNER_DECISION |
-| I | Authorization/PermissionEpoch/Revocation API | I | BLOCKED_BY_OWNER_DECISION |
+| B / Governance | 消费者映射、兼容/迁移和 Schema 影响验收 | B/D/E/F/G/H/I + 有权治理机构 | BLOCKED_BY_CONSUMER_ACCEPTANCE |
+| D | Canonical Identity/Lifecycle/Fence API 和 Receipt | D | DEFERRED_TO_D_I_OWNER_CONTRACT_PUBLICATION |
+| I | Authorization/PermissionEpoch/Revocation API | I | DEFERRED_TO_D_I_OWNER_CONTRACT_PUBLICATION |
 | E | Candidate IR、AcceptedReceipt、Service 边界 | E | BLOCKED_BY_OWNER_DECISION |
-| C | Agent/MCP Adapter-to-BMCP Mapping | C + H | BLOCKED_BY_OWNER_DECISION |
+| C | 精确 Agent/MCP Adapter-to-BMCP Mapping | C + H | PENDING_C_MAPPING_ISSUE_449 |
 | G | ContextVersion/Delivery/Applied/ACK Mapping | G + H | BLOCKED_BY_OWNER_DECISION |
 | Engineering Leadership | Canonical Runtime Repo/Team/CI/Deployment 权限 | Engineering Leadership | DEFERRED_TO_ENGINEERING_PHASE |
-| BMCP 架构集成 | Owner 回复后刷新来源 Pin | BMCP 架构负责人 | NOT STARTED |
+| BMCP 架构集成 | 刷新来源 Pin 并纳入 H 决议/C 映射 | BMCP 架构负责人 | IN_PROGRESS |
 
 ## 10. 治理与验证
 
