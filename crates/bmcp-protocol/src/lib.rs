@@ -221,8 +221,7 @@ pub mod strict_json {
             }
 
             let bytes = &self.input[start..self.pos];
-            let text = std::str::from_utf8(bytes)
-                .map_err(|_| StrictJsonError::InvalidUtf8)?;
+            let text = std::str::from_utf8(bytes).map_err(|_| StrictJsonError::InvalidUtf8)?;
             let number = text
                 .parse::<Number>()
                 .map_err(|_| StrictJsonError::InvalidNumber)?;
@@ -231,7 +230,9 @@ pub mod strict_json {
 
         fn literal(&mut self, expected: &[u8], value: Value) -> Result<Value, StrictJsonError> {
             let end = self.pos.saturating_add(expected.len());
-            let actual = self.input.get(self.pos..end)
+            let actual = self
+                .input
+                .get(self.pos..end)
                 .ok_or(StrictJsonError::UnexpectedEof)?;
             if actual != expected {
                 return Err(StrictJsonError::InvalidLiteral);
@@ -401,40 +402,104 @@ pub mod validate {
     }
 
     const REQUIRED: &[&str] = &[
-        "schema_artifact_revision", "message_type", "issuer_ref",
-        "sender_authority_ref", "sender_subject_ref", "audience", "message_id",
-        "message_nonce", "signing_sequence_namespace_ref", "signing_record_sequence",
-        "signature_profile_id", "key_id_ref", "key_version", "adapter_instance_ref",
-        "runtime_session_ref", "delivery_id", "delivery_attempt_id",
-        "inference_request_id", "final_request_boundary_id", "adapter_capability_epoch",
-        "evidence_kind", "evidence_tier", "adapter_ref", "runtime_instance_ref",
-        "context_id", "context_version", "materialized_context_version",
-        "final_request_boundary_type", "managed_region_id", "managed_region_revision",
-        "managed_region_inventory_digest", "managed_region_coverage",
-        "managed_region_digest", "digest_profile", "evidence_issuer_ref",
-        "evidence_schema_version", "submission_observed_at", "correlation_ref",
-        "causation_ref", "audit_ref", "c_submit_outcome_ref", "c_outcome_record_ref",
-        "c_outcome_record_sequence", "c_outcome_payload_digest", "payload_digest",
-        "signature", "integrity_proof_ref",
+        "schema_artifact_revision",
+        "message_type",
+        "issuer_ref",
+        "sender_authority_ref",
+        "sender_subject_ref",
+        "audience",
+        "message_id",
+        "message_nonce",
+        "signing_sequence_namespace_ref",
+        "signing_record_sequence",
+        "signature_profile_id",
+        "key_id_ref",
+        "key_version",
+        "adapter_instance_ref",
+        "runtime_session_ref",
+        "delivery_id",
+        "delivery_attempt_id",
+        "inference_request_id",
+        "final_request_boundary_id",
+        "adapter_capability_epoch",
+        "evidence_kind",
+        "evidence_tier",
+        "adapter_ref",
+        "runtime_instance_ref",
+        "context_id",
+        "context_version",
+        "materialized_context_version",
+        "final_request_boundary_type",
+        "managed_region_id",
+        "managed_region_revision",
+        "managed_region_inventory_digest",
+        "managed_region_coverage",
+        "managed_region_digest",
+        "digest_profile",
+        "evidence_issuer_ref",
+        "evidence_schema_version",
+        "submission_observed_at",
+        "correlation_ref",
+        "causation_ref",
+        "audit_ref",
+        "c_submit_outcome_ref",
+        "c_outcome_record_ref",
+        "c_outcome_record_sequence",
+        "c_outcome_payload_digest",
+        "payload_digest",
+        "signature",
+        "integrity_proof_ref",
     ];
 
     pub(crate) const ALL_FIELDS: &[&str] = &[
-        "schema_artifact_revision", "message_type", "issuer_ref",
-        "sender_authority_ref", "sender_subject_ref", "audience", "message_id",
-        "message_nonce", "signing_sequence_namespace_ref", "signing_record_sequence",
-        "signature_profile_id", "key_id_ref", "key_version", "adapter_instance_ref",
-        "runtime_session_ref", "delivery_id", "delivery_attempt_id",
-        "inference_request_id", "final_request_boundary_id", "adapter_capability_epoch",
-        "evidence_kind", "evidence_tier", "adapter_ref", "runtime_instance_ref",
-        "context_id", "context_version", "materialized_context_version",
-        "final_request_boundary_type", "managed_region_id", "managed_region_revision",
-        "managed_region_inventory_digest", "managed_region_coverage",
-        "managed_region_digest", "digest_profile", "evidence_issuer_ref",
-        "evidence_schema_version", "submission_observed_at",
-        "submission_monotonic_sequence", "correlation_ref", "causation_ref",
-        "audit_ref", "c_submit_outcome_ref", "c_outcome_record_ref",
-        "c_outcome_record_sequence", "c_outcome_payload_digest", "payload_digest",
-        "signature", "integrity_proof_ref",
+        "schema_artifact_revision",
+        "message_type",
+        "issuer_ref",
+        "sender_authority_ref",
+        "sender_subject_ref",
+        "audience",
+        "message_id",
+        "message_nonce",
+        "signing_sequence_namespace_ref",
+        "signing_record_sequence",
+        "signature_profile_id",
+        "key_id_ref",
+        "key_version",
+        "adapter_instance_ref",
+        "runtime_session_ref",
+        "delivery_id",
+        "delivery_attempt_id",
+        "inference_request_id",
+        "final_request_boundary_id",
+        "adapter_capability_epoch",
+        "evidence_kind",
+        "evidence_tier",
+        "adapter_ref",
+        "runtime_instance_ref",
+        "context_id",
+        "context_version",
+        "materialized_context_version",
+        "final_request_boundary_type",
+        "managed_region_id",
+        "managed_region_revision",
+        "managed_region_inventory_digest",
+        "managed_region_coverage",
+        "managed_region_digest",
+        "digest_profile",
+        "evidence_issuer_ref",
+        "evidence_schema_version",
+        "submission_observed_at",
+        "submission_monotonic_sequence",
+        "correlation_ref",
+        "causation_ref",
+        "audit_ref",
+        "c_submit_outcome_ref",
+        "c_outcome_record_ref",
+        "c_outcome_record_sequence",
+        "c_outcome_payload_digest",
+        "payload_digest",
+        "signature",
+        "integrity_proof_ref",
     ];
 
     fn decimal(value: &str) -> bool {
@@ -445,11 +510,13 @@ pub mod validate {
 
     fn hex64(value: &str) -> bool {
         value.len() == 64
-            && value.bytes().all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+            && value
+                .bytes()
+                .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
     }
 
     fn leap_year(year: u32) -> bool {
-        year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)
+        year.is_multiple_of(4) && (!year.is_multiple_of(100) || year.is_multiple_of(400))
     }
 
     fn datetime(value: &str) -> bool {
@@ -459,7 +526,7 @@ pub mod validate {
         }
         if bytes.get(4) != Some(&b'-')
             || bytes.get(7) != Some(&b'-')
-            || bytes.get(10) != Some(&b'T')
+            || !matches!(bytes.get(10), Some(b'T' | b't'))
             || bytes.get(13) != Some(&b':')
             || bytes.get(16) != Some(&b':')
         {
@@ -471,9 +538,7 @@ pub mod validate {
             }
         }
 
-        let number = |a: usize, b: usize| -> u32 {
-            value[a..b].parse::<u32>().unwrap_or(0)
-        };
+        let number = |a: usize, b: usize| -> u32 { value[a..b].parse::<u32>().unwrap_or(0) };
         let year = number(0, 4);
         let month = number(5, 7);
         let day = number(8, 10);
@@ -481,11 +546,7 @@ pub mod validate {
         let minute = number(14, 16);
         let second = number(17, 19);
 
-        if !(1..=12).contains(&month)
-            || !(0..=23).contains(&hour)
-            || minute > 59
-            || second > 59
-        {
+        if !(1..=12).contains(&month) || !(0..=23).contains(&hour) || minute > 59 || second > 60 {
             return false;
         }
 
@@ -513,7 +574,7 @@ pub mod validate {
         }
 
         match bytes.get(index) {
-            Some(b'Z') => index += 1,
+            Some(b'Z' | b'z') => index += 1,
             Some(b'+' | b'-') => {
                 if bytes.len() < index + 6
                     || !bytes[index + 1..index + 3].iter().all(u8::is_ascii_digit)
@@ -534,10 +595,7 @@ pub mod validate {
         index == bytes.len()
     }
 
-    fn string_field<'a>(
-        value: &'a Value,
-        field: &'static str,
-    ) -> Result<&'a str, EvidenceError> {
+    fn string_field<'a>(value: &'a Value, field: &'static str) -> Result<&'a str, EvidenceError> {
         value
             .get(field)
             .and_then(Value::as_str)
@@ -546,7 +604,9 @@ pub mod validate {
     }
 
     pub fn from_strict_value(value: &Value) -> Result<AppliedDeliveryEvidence, EvidenceError> {
-        let object = value.as_object().ok_or(EvidenceError::MissingField("object"))?;
+        let object = value
+            .as_object()
+            .ok_or(EvidenceError::MissingField("object"))?;
 
         for key in object.keys() {
             if !ALL_FIELDS.contains(&key.as_str()) {
@@ -565,20 +625,24 @@ pub mod validate {
             "APPLIED_CONTEXT_OBSERVED" => EvidenceKind::AppliedContextObserved,
             "EXECUTION_STARTED" => EvidenceKind::ExecutionStarted,
             "RECONCILIATION_OBSERVED" => EvidenceKind::ReconciliationObserved,
-            other => return Err(EvidenceError::InvalidEnum {
-                field: "evidence_kind",
-                value: other.to_owned(),
-            }),
+            other => {
+                return Err(EvidenceError::InvalidEnum {
+                    field: "evidence_kind",
+                    value: other.to_owned(),
+                })
+            }
         };
 
         let evidence_tier = match string_field(value, "evidence_tier")? {
             "TIER_1" => EvidenceTier::Tier1,
             "TIER_2" => EvidenceTier::Tier2,
             "TIER_3" => EvidenceTier::Tier3,
-            other => return Err(EvidenceError::InvalidEnum {
-                field: "evidence_tier",
-                value: other.to_owned(),
-            }),
+            other => {
+                return Err(EvidenceError::InvalidEnum {
+                    field: "evidence_tier",
+                    value: other.to_owned(),
+                })
+            }
         };
 
         let managed_region_coverage = match string_field(value, "managed_region_coverage")? {
@@ -586,10 +650,12 @@ pub mod validate {
             "PARTIAL" => ManagedRegionCoverage::Partial,
             "BYPASSED" => ManagedRegionCoverage::Bypassed,
             "UNKNOWN" => ManagedRegionCoverage::Unknown,
-            other => return Err(EvidenceError::InvalidEnum {
-                field: "managed_region_coverage",
-                value: other.to_owned(),
-            }),
+            other => {
+                return Err(EvidenceError::InvalidEnum {
+                    field: "managed_region_coverage",
+                    value: other.to_owned(),
+                })
+            }
         };
 
         let evidence = AppliedDeliveryEvidence {
@@ -658,7 +724,9 @@ pub mod validate {
     pub fn validate_evidence(evidence: &AppliedDeliveryEvidence) -> Result<(), EvidenceError> {
         let value = serde_json::to_value(evidence)
             .map_err(|_| EvidenceError::MissingField("serialization"))?;
-        let object = value.as_object().ok_or(EvidenceError::MissingField("object"))?;
+        let object = value
+            .as_object()
+            .ok_or(EvidenceError::MissingField("object"))?;
 
         for field in REQUIRED {
             string_field(&value, field)?;
@@ -679,10 +747,7 @@ pub mod validate {
             }
         }
 
-        for field in [
-            "signing_record_sequence",
-            "c_outcome_record_sequence",
-        ] {
+        for field in ["signing_record_sequence", "c_outcome_record_sequence"] {
             let actual = string_field(&value, field)?;
             if !decimal(actual) {
                 return Err(EvidenceError::InvalidDecimal {
@@ -762,16 +827,12 @@ pub mod validate {
 }
 
 pub mod digest {
-    use crate::validate::EvidenceError;
     use crate::evidence::AppliedDeliveryEvidence;
+    use crate::validate::EvidenceError;
     use serde_json::Value;
     use sha2::{Digest, Sha256};
 
-    const EXCLUDED: &[&str] = &[
-        "payload_digest",
-        "signature",
-        "integrity_proof_ref",
-    ];
+    const EXCLUDED: &[&str] = &["payload_digest", "signature", "integrity_proof_ref"];
 
     pub fn p0_digest(evidence: &AppliedDeliveryEvidence) -> Result<String, EvidenceError> {
         let value = serde_json::to_value(evidence)
@@ -946,10 +1007,7 @@ mod tests {
 
     #[test]
     fn strict_rejects_invalid_literal() {
-        assert_eq!(
-            parse_strict(b"tru"),
-            Err(StrictJsonError::UnexpectedEof)
-        );
+        assert_eq!(parse_strict(b"tru"), Err(StrictJsonError::UnexpectedEof));
     }
 
     #[test]
@@ -976,10 +1034,7 @@ mod tests {
 
     #[test]
     fn strict_accepts_nested_arrays() {
-        assert_eq!(
-            parse_strict(br#"[1,[2,[3]]]"#),
-            Ok(json!([1, [2, [3]]]))
-        );
+        assert_eq!(parse_strict(br#"[1,[2,[3]]]"#), Ok(json!([1, [2, [3]]])));
     }
 
     #[test]
@@ -1008,7 +1063,10 @@ mod tests {
     #[test]
     fn semantic_rejects_missing_decimal_field() {
         let mut value = valid_value();
-        value.as_object_mut().unwrap().remove("signing_record_sequence");
+        value
+            .as_object_mut()
+            .unwrap()
+            .remove("signing_record_sequence");
         assert_eq!(
             from_strict_value(&value),
             Err(EvidenceError::MissingField("signing_record_sequence"))
@@ -1018,7 +1076,10 @@ mod tests {
     #[test]
     fn semantic_rejects_missing_hex_field() {
         let mut value = valid_value();
-        value.as_object_mut().unwrap().remove("managed_region_digest");
+        value
+            .as_object_mut()
+            .unwrap()
+            .remove("managed_region_digest");
         assert_eq!(
             from_strict_value(&value),
             Err(EvidenceError::MissingField("managed_region_digest"))
@@ -1028,7 +1089,10 @@ mod tests {
     #[test]
     fn semantic_rejects_missing_datetime_field() {
         let mut value = valid_value();
-        value.as_object_mut().unwrap().remove("submission_observed_at");
+        value
+            .as_object_mut()
+            .unwrap()
+            .remove("submission_observed_at");
         assert_eq!(
             from_strict_value(&value),
             Err(EvidenceError::MissingField("submission_observed_at"))
@@ -1051,7 +1115,10 @@ mod tests {
         value["message_type"] = json!("OTHER");
         assert!(matches!(
             from_strict_value(&value),
-            Err(EvidenceError::WrongConst { field: "message_type", .. })
+            Err(EvidenceError::WrongConst {
+                field: "message_type",
+                ..
+            })
         ));
     }
 
@@ -1061,7 +1128,10 @@ mod tests {
         value["evidence_tier"] = json!("TIER_4");
         assert!(matches!(
             from_strict_value(&value),
-            Err(EvidenceError::InvalidEnum { field: "evidence_tier", .. })
+            Err(EvidenceError::InvalidEnum {
+                field: "evidence_tier",
+                ..
+            })
         ));
     }
 
@@ -1071,7 +1141,10 @@ mod tests {
         value["signing_record_sequence"] = json!("01");
         assert!(matches!(
             from_strict_value(&value),
-            Err(EvidenceError::InvalidDecimal { field: "signing_record_sequence", .. })
+            Err(EvidenceError::InvalidDecimal {
+                field: "signing_record_sequence",
+                ..
+            })
         ));
     }
 
@@ -1081,7 +1154,10 @@ mod tests {
         value["managed_region_digest"] = json!("abc");
         assert!(matches!(
             from_strict_value(&value),
-            Err(EvidenceError::InvalidHex64 { field: "managed_region_digest", .. })
+            Err(EvidenceError::InvalidHex64 {
+                field: "managed_region_digest",
+                ..
+            })
         ));
     }
 
@@ -1091,7 +1167,10 @@ mod tests {
         value["managed_region_digest"] = json!("A".repeat(64));
         assert!(matches!(
             from_strict_value(&value),
-            Err(EvidenceError::InvalidHex64 { field: "managed_region_digest", .. })
+            Err(EvidenceError::InvalidHex64 {
+                field: "managed_region_digest",
+                ..
+            })
         ));
     }
 
@@ -1103,6 +1182,17 @@ mod tests {
             from_strict_value(&value),
             Err(EvidenceError::InvalidDateTime { .. })
         ));
+    }
+
+    #[test]
+    fn semantic_accepts_rfc3339_lowercase_and_leap_second_forms() {
+        for observed_at in ["2024-01-01t00:00:00z", "2016-12-31T23:59:60Z"] {
+            let mut value = valid_value();
+            value["submission_observed_at"] = json!(observed_at);
+            let digest = p0_digest_of_value(&value).unwrap();
+            value["payload_digest"] = json!(digest);
+            assert!(from_strict_value(&value).is_ok(), "{observed_at}");
+        }
     }
 
     #[test]
@@ -1140,7 +1230,7 @@ mod tests {
 
     #[test]
     fn semantic_accepts_valid_evidence() {
-        assert!(matches!(from_strict_value(&valid_value()), Ok(_)));
+        assert!(from_strict_value(&valid_value()).is_ok());
     }
 
     #[test]
@@ -1180,8 +1270,14 @@ mod tests {
         let value = valid_value();
         let digest = p0_digest_of_value(&value).unwrap();
         let mut without_excluded = value.clone();
-        without_excluded.as_object_mut().unwrap().remove("signature");
-        without_excluded.as_object_mut().unwrap().remove("integrity_proof_ref");
+        without_excluded
+            .as_object_mut()
+            .unwrap()
+            .remove("signature");
+        without_excluded
+            .as_object_mut()
+            .unwrap()
+            .remove("integrity_proof_ref");
         assert_eq!(digest, p0_digest_of_value(&without_excluded).unwrap());
     }
 
