@@ -81,22 +81,47 @@ REGISTRY_VERSION = "2"
 STRUCTURAL_EXCEPTIONS = {".git", "target"}
 SCOPE_REGISTRY = "00-governance/document-scope-registry.yaml"
 
-# The controls a machine cannot perform, one entry per identifier in policy
-# section 9.2. This list is printed on every run, so the boundary between what
-# was verified and what was assumed travels with the verdict instead of living
-# only in prose. It is a tuple of ids, not a sentence: a sentence gets reworded
-# until it no longer says the same thing, and nothing would notice.
+# The controls a machine cannot perform. **This tuple is the authority**: policy
+# section 9.2 is generated from it and T69 fails when the table and the
+# derivation differ, so the table is a rendering, not a second opinion.
+#
+# The distinction matters. An earlier version kept the list here and a hand-kept
+# table in the policy, then checked that the two agreed -- which is two
+# authorities and a synchronisation test. Two representations derived from one
+# authority is fine; two independently maintained authorities is the defect.
+#
+# Fields: id, control, why a machine cannot do it, who is accountable.
 MANUAL_CONTROLS = (
-    ("M-01", "canonical scope overlap"),
-    ("M-02", "truth of an approval decision"),
-    ("M-03", "whether evidence supports the decision"),
-    ("M-04", "chosen Selected-sections"),
-    ("M-05", "semantic parity of bilingual mirrors"),
-    ("M-06", "honesty of an exclusion reason"),
-    ("M-07", "acceptability of a declared backlog"),
-    ("M-08", "external consumers obeying resolve_canonical()"),
-    ("M-09", "body-hash equivalence suiting a document"),
-    ("M-10", "_unclassified citation ban being respected"),
+    ("M-01", "Whether two `Canonical` scopes genuinely overlap",
+     "Overlap is a claim about meaning. The gate proves the ids are unique and only one document per group is `Canonical`; whether two *different* ids cover the same subject is not derivable from metadata",
+     "Reviewer"),
+    ("M-02", "Whether an `Approved` decision is real",
+     "The gate proves a decision record exists, names an approver and binds to a commit. It cannot prove a person with that authority actually decided",
+     "Approver, then reviewer"),
+    ("M-03", "Whether `evidence_verification` evidence supports the decision",
+     "The gate proves a verification status and a reference exist. Whether the reference supports the claim is an argument, not a field",
+     "Reviewer"),
+    ("M-04", "Whether the `Selected-sections` chosen are substantively sufficient",
+     "The gate proves the declared sections exist, that the identifiers resolve and that the scope is non-empty. Whether that selection is *adequate* for the document is a judgement",
+     "Approver"),
+    ("M-05", "Semantic parity of a bilingual mirror",
+     "GOV-DOC-001 requires that the two versions say the same thing. The gate proves both exist, point at each other, and agree on metadata — not that the prose agrees",
+     "Reviewer"),
+    ("M-06", "Whether an exclusion reason is honest",
+     "DM-14 proves a reason exists and is bilingual. `kind: not-documentation` is an assertion by the author; no file content can refute it",
+     "Reviewer"),
+    ("M-07", "Whether a declared backlog is acceptable to ship",
+     "The count is checked against the disk, which proves the number is true, not that the remainder is tolerable",
+     "Governance authority"),
+    ("M-08", "Whether external consumers obey `resolve_canonical()`",
+     "The gate can see this repository. Readers outside it (agents, tools, downstream systems) are not observable here, so their discipline is a contract, not a check",
+     "Consumer owners"),
+    ("M-09", "Whether the normalisation equivalence is appropriate for a document's semantics",
+     "§9.1 fixes three equivalences (CRLF/CR → LF, trailing whitespace, blank-line edges) and the gate applies them exactly. Whether that equivalence is right for one document's meaning is not a property of the bytes",
+     "Reviewer"),
+    ("M-10", "Whether the `_unclassified` citation ban is respected",
+     "The ban is on how a document is *used*. Nothing in the repository records who cited what",
+     "Reader / agent operators"),
 )
 
 DOMAINS = {
@@ -1518,7 +1543,19 @@ def backlog_roots(root: Path) -> tuple[str, ...]:
 # "26 architecture documents" in the English reason -- a number stated twice
 # and true once. Checking that two statements agree is weaker than not having
 # two statements, so the registry prose is now forbidden from stating a count.
-COUNT_CLAIM_RE = re.compile(r"\d+\s*(?:architecture\s+)?(?:documents|Markdown|份|个)")
+#
+# Coverage is deliberately a word list, not a parser: English `documents`,
+# `docs`, `files`, `Markdown`, and Chinese `份`, `个`, `篇`, `文档`, `文件`.
+# What this does NOT catch is named rather than implied -- spelled-out numbers
+# ("twenty-seven documents"), a noun this list omits, and a number separated
+# from its noun by more than whitespace. The rule is a redundancy check on
+# prose, not the count's security boundary: the count's truth is still the
+# `documents:` versus disk comparison, which no phrasing can bypass. A miss
+# here costs a redundant sentence, not a wrong number.
+COUNT_CLAIM_RE = re.compile(
+    r"\d+\s*(?:architecture\s+)?(?:documents?|docs?|files?|Markdown"
+    r"|份|个|篇|文档|文件)"
+)
 
 
 def _count(value) -> int | None:
@@ -2095,7 +2132,7 @@ def main() -> int:
 
     print(
         "  manual controls (not machine-verified, policy 9.2): "
-        + "; ".join(f"{cid} {label}" for cid, label in MANUAL_CONTROLS)
+        + "; ".join(f"{cid} {control}" for cid, control, _, _ in MANUAL_CONTROLS)
     )
     for note in notes:
         print(f"  note: {note}")

@@ -36,6 +36,7 @@ from check_document_management import (  # noqa: E402
 
 FILE = Path("synthetic.md")
 RESULTS: list[bool] = []
+SKIPPED: list[str] = []
 
 
 def doc(body: str) -> str:
@@ -105,6 +106,19 @@ CANONICAL = """
 def record(name: str, ok: bool, detail: str = "") -> None:
     print(f"  [{'ok  ' if ok else 'FAIL'}] {name}{detail if not ok else ''}")
     RESULTS.append(ok)
+
+
+def skip(name: str, why: str) -> None:
+    """A case that could not run. Not a pass, and not a failure.
+
+    Recording a skipped case as `True` inflates the pass count with a test that
+    proved nothing: running as root, for instance, means mode bits cannot deny
+    access, so a permission case silently became "ok" without executing. A skip
+    is its own outcome, reported separately so the total never implies coverage
+    the run did not have.
+    """
+    print(f"  [skip] {name}  ({why})")
+    SKIPPED.append(name)
 
 
 def expect(name: str, text: str, needle: str = "", expect_clean: bool = False) -> None:
@@ -2135,6 +2149,46 @@ def run_bilingual_count() -> None:
                any("restates a document count" in e for e in errors),
                f"  got {[e for e in errors if 'restates' in e]}")
 
+    # T70 lives in run_count_vocabulary(): the vocabulary is a separate claim
+    # from the registry being clean, and mixing them would let one failure hide
+    # the other.
+
+
+def run_count_vocabulary() -> None:
+    """T70: the vocabulary the count rule covers, stated as cases.
+
+    A regex nobody tested is a regex whose coverage is whatever its author
+    imagined. Both directions matter: a phrasing that must be caught, and a
+    phrasing that must not be (an unrelated number is not a count claim). The
+    `missed` list is the coverage gap the comment in the gate names -- pinning
+    it here means that comment cannot quietly become false in either direction.
+    """
+    print("count vocabulary")
+    import check_document_management as gate
+
+    caught = [
+        "27 documents", "27 architecture documents", "27 docs", "27 files",
+        "27 Markdown", "27 份", "27 个", "27 篇文档", "27 文档", "27 文件",
+        "1 document", "3 doc",
+    ]
+    missed = [
+        # Named, not hidden: spelled-out numbers and nouns outside the list.
+        "twenty-seven documents", "27 artefacts", "27 records",
+    ]
+    not_a_claim = [
+        "Backlog with a known count under `documents:`.",
+        "See section 9 for the rule.",
+        "The gate implements version 2.",
+    ]
+    bad = [s for s in caught if not gate.COUNT_CLAIM_RE.search(s)]
+    record("T70 every declared phrasing is caught", not bad, f"  missed {bad}")
+    wrong = [s for s in missed if gate.COUNT_CLAIM_RE.search(s)]
+    record("T70 the documented coverage gap is the real one", not wrong,
+           f"  unexpectedly caught {wrong} (the comment now understates coverage)")
+    noise = [s for s in not_a_claim if gate.COUNT_CLAIM_RE.search(s)]
+    record("T70 prose without a document noun is not a claim", not noise,
+           f"  false positives {noise}")
+
 
 def run_unreadable_walk() -> None:
     """T68: a directory the walk cannot read is a problem, not a shorter list.
@@ -2142,9 +2196,13 @@ def run_unreadable_walk() -> None:
     `os.walk` swallows errors by default: an unreadable directory is skipped and
     the walk continues. The scanned set then shrinks with no diagnostic, which
     is the tenth review's `0 governed documents, exit 0` arriving by another
-    route. `scan_root()` passes `onerror`, and this case proves the callback is
-    actually wired: if the argument were dropped, the injected error would never
-    reach `problems`.
+    route. `scan_root()` passes `onerror`.
+
+    Three cases, and each is named for the proposition it actually proves:
+    T68a/T68b prove the callback is *wired* (they fail when the argument is
+    dropped); T68c proves a real permission error is reported, which is a
+    different claim and does NOT fail without `onerror` -- it is kept as an
+    integration case, not offered as wiring evidence.
     """
     print("unreadable walk")
     import check_document_management as gate
@@ -2157,6 +2215,7 @@ def run_unreadable_walk() -> None:
             onerror(OSError(13, "Permission denied", str(top)))
         return iter(())
 
+    # T68a: wiring. Fails if `onerror=on_error` is removed.
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
         gate.os.walk = fake_walk
@@ -2164,12 +2223,11 @@ def run_unreadable_walk() -> None:
             files, problems = gate.scan_root(root, "00-governance")
         finally:
             gate.os.walk = real_walk
-        record("T68 an unreadable directory is reported, not silently skipped",
+        record("T68a an unreadable directory is reported, not silently skipped",
                any("DM-14 cannot read" in p for p in problems),
                f"  files {len(files)}, problems {problems}")
 
-    # And it must reach the verdict, not stop at the helper: a walk that lost a
-    # subtree cannot produce a pass.
+    # T68b: wiring, one layer up. A walk that lost a subtree cannot pass.
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
         gate.os.walk = fake_walk
@@ -2177,13 +2235,35 @@ def run_unreadable_walk() -> None:
             errors = gate.check_scope_registry(root)
         finally:
             gate.os.walk = real_walk
-        record("T68 the unreadable-walk problem reaches the gate verdict",
+        record("T68b the unreadable-walk problem reaches the gate verdict",
                any("cannot read" in e for e in errors),
                f"  got {[e for e in errors if 'cannot read' in e][:2]}")
 
-    # A real permission failure, when the platform and user can produce one.
-    # Running as root bypasses mode bits, so the case is skipped there rather
-    # than reported as passing.
+    # T68b2: the diagnostic names the directory that failed, not the root it
+    # started from. A message saying "cannot read 00-governance" when the real
+    # failure was `00-governance/locked` sends the reader to the wrong place.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        failed = str(root / "00-governance" / "locked")
+
+        def failing_child(top, followlinks=False, onerror=None):
+            if onerror is not None:
+                onerror(OSError(13, "Permission denied", failed))
+            return iter(())
+
+        gate.os.walk = failing_child
+        try:
+            _, problems = gate.scan_root(root, "00-governance")
+        finally:
+            gate.os.walk = real_walk
+        record("T68b2 the diagnostic names the failing subdirectory",
+               any("locked" in p for p in problems), f"  problems {problems}")
+
+    # T68c: integration. A real permission denial is reported by path. This does
+    # NOT prove the wiring -- remove `onerror` and it still passes, because
+    # CPython's walk reports the failure through a different path -- so it is
+    # not counted as wiring evidence. Skipped, not passed, when mode bits cannot
+    # deny access (running as root).
     if hasattr(os, "geteuid") and os.geteuid() != 0:
         with tempfile.TemporaryDirectory() as tmp:
             root = _repo(tmp)
@@ -2195,37 +2275,62 @@ def run_unreadable_walk() -> None:
                 _, problems = gate.scan_root(root, "00-governance")
             finally:
                 locked.chmod(0o755)
-            record("T68 a real 0o000 directory is reported by path",
+            record("T68c a real 0o000 directory is reported by path (integration)",
                    any("cannot read" in p and "locked" in p for p in problems),
                    f"  problems {problems}")
     else:
-        record("T68 a real 0o000 directory is reported by path", True,
-               "  (running as root; mode bits cannot deny access)")
+        skip("T68c a real 0o000 directory is reported by path (integration)",
+             "running as root: mode bits cannot deny access")
 
 
 def run_manual_controls() -> None:
-    """T69: the manual-control list is one list, printed and documented.
+    """T69: section 9.2 is *generated* from MANUAL_CONTROLS, not kept beside it.
 
-    A boundary stated in prose and a boundary stated at runtime are two
-    statements, and two statements drift. The policy table (section 9.2) and the
-    run output must name the same identifiers: if the gate prints a control the
-    policy does not list, the policy is incomplete; if the policy lists one the
-    gate does not print, the run understates what it did not check.
+    An earlier version kept the list in the gate and a hand-kept table in the
+    policy, then asserted the two agreed. That is two authorities plus a
+    synchronisation test, which is the same shape as the duplicate backlog count
+    the thirteenth review found -- and the same shape N13-01 removed. Two
+    representations derived from one authority is fine; two independently
+    maintained authorities is the defect.
+
+    So the table now lives between generated-block markers and is rendered from
+    `MANUAL_CONTROLS`. This case re-renders it and compares byte for byte, which
+    means a hand edit inside the block fails here instead of drifting. The parse
+    is scoped to section 9.2: scanning the whole policy would pick up an `M-11`
+    mentioned in a change-log row and call it a missing control.
     """
     print("manual controls")
     import check_document_management as gate
 
     policy = (Path(__file__).resolve().parents[1] / "00-governance"
               / "architecture-document-management-policy.md").read_text(encoding="utf-8")
-    in_policy = set(re.findall(r"^\|\s*(M-\d\d)\s*\|", policy, re.M))
-    in_gate = {cid for cid, _ in gate.MANUAL_CONTROLS}
 
-    record("T69 policy section 9.2 lists manual controls", bool(in_policy),
-           f"  found {sorted(in_policy)}")
-    record("T69 every control the gate prints is documented",
-           in_gate <= in_policy, f"  undocumented {sorted(in_gate - in_policy)}")
-    record("T69 every documented control is printed by the gate",
-           in_policy <= in_gate, f"  unprinted {sorted(in_policy - in_gate)}")
+    # Scope: section 9.2 only, from its heading to the next `## ` heading.
+    start = policy.index("### 9.2 Manual controls")
+    nxt = policy.index("\n## ", start) if "\n## " in policy[start:] else len(policy)
+    section = policy[start:nxt]
+
+    begin = "<!-- BEGIN MANUAL-CONTROLS"
+    end = "<!-- END MANUAL-CONTROLS -->"
+    record("T69 section 9.2 is a generated block", begin in section and end in section,
+           "  missing generated-block markers")
+
+    expected = "\n".join(
+        f"| {cid} | {control} | {why} | {who} |"
+        for cid, control, why, who in gate.MANUAL_CONTROLS
+    )
+    if begin in section and end in section:
+        block = section[section.index(begin):section.index(end)]
+        rows = [l for l in block.split("\n") if l.startswith("| M-")]
+        record("T69 every control renders exactly one row",
+               len(rows) == len(gate.MANUAL_CONTROLS),
+               f"  {len(rows)} rows for {len(gate.MANUAL_CONTROLS)} controls")
+        record("T69 the table is byte-identical to the rendered constant",
+               "\n".join(rows) == expected,
+               f"  expected {expected[:120]!r}\n  got      {chr(10).join(rows)[:120]!r}")
+        # A hand edit inside the block is the failure mode; make sure the block
+        # is actually what is being compared, not an empty region.
+        record("T69 the generated block is not empty", bool(rows))
 
     # And it must reach the output, not just the constant: a list nothing prints
     # is a comment with a data type.
@@ -2238,7 +2343,7 @@ def run_manual_controls() -> None:
             capture_output=True, text=True,
         )
         out = proc.stdout + proc.stderr
-        missing = sorted(cid for cid in in_gate if cid not in out)
+        missing = sorted(cid for cid, *_ in gate.MANUAL_CONTROLS if cid not in out)
         record("T69 the manual-control boundary is printed on every run",
                not missing, f"  missing from output: {missing}")
 
@@ -2248,8 +2353,15 @@ def run_single_entry_callers() -> None:
 
     A comment promising good behaviour is not evidence. The tenth review's
     blocker was a scan that reported `0 governed documents` and exit 0; the
-    shape that produced it was an entry point that dropped diagnostics. This
-    test greps the production scripts for callers.
+    shape that produced it was an entry point that dropped diagnostics.
+
+    What this proves, precisely: no `.py` file inside the declared scan boundary
+    calls `governed_files()`, and `main()` consumes the problems returned
+    alongside the files. What it does not prove: that future production code
+    will live inside that boundary, or that a non-Python entry point would be
+    caught. The boundary is a directory set (`skipped_dirs`), so it is a rule
+    about this repository's layout, and the case below asserts the boundary
+    rather than describing it.
     """
     print("single entry point")
     import check_document_management as gate
@@ -2322,10 +2434,17 @@ def main() -> int:
     run_bilingual_count()
     run_unreadable_walk()
     run_manual_controls()
+    run_count_vocabulary()
     run_single_entry_callers()
     run_schema_agreement()
     passed, total = sum(RESULTS), len(RESULTS)
     print(f"{passed}/{total} passed")
+    if SKIPPED:
+        # Printed separately, and deliberately not folded into the total: a
+        # skipped case is coverage the run did not have, and `n/n passed` would
+        # read as if it did.
+        print(f"{len(SKIPPED)} skipped (not counted as passing): "
+              + "; ".join(SKIPPED))
     return 0 if passed == total else 1
 
 
