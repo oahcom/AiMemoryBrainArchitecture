@@ -34,7 +34,7 @@ grep -RIn 'restore_backup' crates
 
 Rust 生产代码的命中集中在 `crates/memory-event-store-sqlite/src/forget_fence.rs`：
 
-- `record_forget` 负责写入 fence 行。
+- `record_forget` 会先执行 `SELECT fence_seq FROM forget_fence WHERE namespace_key=?1`，使重复写入具备幂等性；不存在时才插入记录。这是写入路径上的去重读取，不是 Memory 读取门禁。
 - `open_existing` 调用 `load_fences` 检查现有 fence 数据库；它会读取并校验记录，但不会对 live Memory 读取实施门禁。
 - `restore_backup` 调用 `load_fences`；后者执行 `SELECT namespace_key,fence_seq,reason_digest FROM forget_fence`。得到的 namespace 集合用于扫描备份中的 `accepted_events.scope_json`，并在激活恢复文件前，从 `accepted_events`、`event_payloads` 和 `compile_outbox` 清除匹配事件。
 
