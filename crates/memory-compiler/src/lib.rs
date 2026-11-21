@@ -1022,12 +1022,12 @@ mod tests {
         assert!(!ExecutionState::Blocked.is_terminal());
         assert!(ExecutionState::Suppressed.is_terminal());
 
-        let mut blocked = execution();
+        let mut blocked = StageExecution::new(id("blocked-operation"), StageName::PublicationGate);
         blocked.state = ExecutionState::Blocked;
         assert!(blocked.retry().is_ok());
         assert_eq!(blocked.state, ExecutionState::Pending);
 
-        let mut suppressed = execution();
+        let mut suppressed = StageExecution::new(id("suppressed-operation"), StageName::PublicationGate);
         suppressed.state = ExecutionState::Suppressed;
         assert!(suppressed.state.is_terminal());
         assert_eq!(
