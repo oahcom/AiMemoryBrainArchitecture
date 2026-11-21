@@ -99,11 +99,24 @@ pub enum AdapterError {
         expected: u64,
         received: u64,
     },
+    EmptyIdentity {
+        field: &'static str,
+    },
+    ProtectedRegionLeak {
+        marker: &'static str,
+    },
+    BudgetExceeded {
+        limit: usize,
+        actual: usize,
+    },
+    NotFrozen,
+    InvalidRegionDigest,
 }
 
 /// Check whether an adapter tier is sufficient for an operation.
 pub fn authorize(actual: CapabilityTier, operation: AdapterOperation) -> Result<(), AdapterError> {
     let required = operation.required_tier();
+    // Tier1 is strongest: the derived ordering is Tier1 < Tier2 < Tier3.
     if actual <= required {
         Ok(())
     } else {
@@ -111,34 +124,269 @@ pub fn authorize(actual: CapabilityTier, operation: AdapterOperation) -> Result<
     }
 }
 
+macro_rules! identity_type {
+    ($name:ident, $field:literal) => {
+        #[derive(Clone, Debug, Eq, PartialEq, Hash)]
+        pub struct $name(String);
+
+        impl $name {
+            pub fn new(value: impl Into<String>) -> Result<Self, AdapterError> {
+                let value = value.into();
+                if value.trim().is_empty() {
+                    return Err(AdapterError::EmptyIdentity { field: $field });
+                }
+                Ok(Self(value))
+            }
+
+            pub fn as_str(&self) -> &str {
+                &self.0
+            }
+        }
+    };
+}
+
+identity_type!(ContextId, "context_id");
+identity_type!(ContextSessionId, "context_session_id");
+identity_type!(AdapterId, "adapter_id");
+identity_type!(AdapterInstanceId, "adapter_instance_id");
+identity_type!(AgentInstanceId, "agent_instance_id");
+identity_type!(BoundaryId, "boundary_id");
+identity_type!(InferenceRequestId, "inference_request_id");
+identity_type!(DeliveryId, "delivery_id");
+identity_type!(RegionDigest, "region_digest");
+
+/// Evidence stages are intentionally nominally separate observations.
+///
+/// No conversion is provided between stages: Received does not imply Accepted,
+/// and Accepted does not imply Applied. A later protocol layer must establish
+/// each stage with its own evidence.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum EvidenceStage {
+    Received,
+    Accepted,
+    Applied,
+}
+
+/// The request assembly state is either mutable or backed by frozen evidence.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum AssemblyState {
+    Open { staged_version: u64 },
+    Frozen(FrozenRequest),
+}
+
+/// Immutable evidence produced when a request is frozen.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct FrozenRequest {
+    pub request_id: InferenceRequestId,
+    pub boundary_id: BoundaryId,
+    pub region_version: u64,
+    pub region_digest: RegionDigest,
+}
+
+/// Single-use request assembler. Its mutable state is private.
+#[derive(Clone, Debug)]
+pub struct RequestAssembler {
+    boundary_id: BoundaryId,
+    request_id: InferenceRequestId,
+    state: AssemblyState,
+    staged_region: Option<ManagedRegion>,
+}
+
+impl RequestAssembler {
+    pub fn new(boundary_id: BoundaryId, request_id: InferenceRequestId) -> Self {
+        Self {
+            boundary_id,
+            request_id,
+            state: AssemblyState::Open { staged_version: 0 },
+            staged_region: None,
+        }
+    }
+
+    /// Stage a materialized region. A frozen assembler rejects further writes.
+    pub fn stage(&mut self, region: &ManagedRegion) -> Result<(), AdapterError> {
+        if matches!(self.state, AssemblyState::Frozen(_)) {
+            return Err(AdapterError::RequestAlreadyFrozen);
+        }
+        validate_region_digest(&region.digest)?;
+        self.staged_region = Some(region.clone());
+        self.state = AssemblyState::Open {
+            staged_version: region.context_version,
+        };
+        Ok(())
+    }
+
+    /// Consume this assembler and produce its single frozen request.
+    pub fn freeze(self) -> Result<FrozenRequest, AdapterError> {
+        match self.state {
+            AssemblyState::Frozen(frozen) => Ok(frozen),
+            AssemblyState::Open { .. } => {
+                let region = self.staged_region.ok_or(AdapterError::NotFrozen)?;
+                validate_region_digest(&region.digest)?;
+                Ok(FrozenRequest {
+                    request_id: self.request_id,
+                    boundary_id: self.boundary_id,
+                    region_version: region.context_version,
+                    region_digest: region.digest,
+                })
+            }
+        }
+    }
+
+    pub fn state(&self) -> &AssemblyState {
+        &self.state
+    }
+}
+
+/// Materialization limits. Neither limit permits truncation.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Budget {
+    pub max_rendered_bytes: usize,
+    pub max_entries: usize,
+}
+
+/// A Brain-managed context region materialized from a context snapshot.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ManagedRegion {
+    pub context_id: ContextId,
+    pub context_version: u64,
+    pub rendered_bytes: usize,
+    pub entry_count: usize,
+    pub digest: RegionDigest,
+}
+
+fn validate_region_digest(digest: &RegionDigest) -> Result<(), AdapterError> {
+    let value = digest.as_str();
+    if value.len() != 16
+        || !value
+            .bytes()
+            .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+    {
+        return Err(AdapterError::InvalidRegionDigest);
+    }
+    Ok(())
+}
+
+/// Materialize a complete managed region from a snapshot.
+///
+/// The region digest is an internal FNV-1a fingerprint. It is independent of
+/// memory-context's content_hash algorithm and is not a cross-authority proof.
+pub fn materialize_managed_region(
+    snapshot: &ContextSnapshot,
+    budget: &Budget,
+) -> Result<ManagedRegion, AdapterError> {
+    let rendered_bytes = snapshot.rendered_bytes;
+    let entry_count = snapshot.entries.len();
+
+    if rendered_bytes > budget.max_rendered_bytes {
+        return Err(AdapterError::BudgetExceeded {
+            limit: budget.max_rendered_bytes,
+            actual: rendered_bytes,
+        });
+    }
+    if entry_count > budget.max_entries {
+        return Err(AdapterError::BudgetExceeded {
+            limit: budget.max_entries,
+            actual: entry_count,
+        });
+    }
+
+    // ContextIdentity exposes its stable context identifier as an OpaqueId.
+    let context_id = ContextId::new(snapshot.identity.context_id.as_str())?;
+    let digest = calculate_region_digest(snapshot, context_id.as_str());
+
+    Ok(ManagedRegion {
+        context_id,
+        context_version: snapshot.context_version,
+        rendered_bytes,
+        entry_count,
+        digest: RegionDigest::new(digest)?,
+    })
+}
+
+fn calculate_region_digest(snapshot: &ContextSnapshot, context_id: &str) -> String {
+    let mut canonical = format!(
+        "{}\u{1f}{}\u{1f}{}\u{1f}{}",
+        context_id,
+        snapshot.context_version,
+        snapshot.rendered_bytes,
+        snapshot.entries.len()
+    );
+
+    canonical.push('\u{1e}');
+    for (index, entry) in snapshot.entries.iter().enumerate() {
+        if index > 0 {
+            canonical.push('\u{1e}');
+        }
+        canonical.push_str(entry.entry_id.as_str());
+        canonical.push('\u{1f}');
+        canonical.push_str(entry.memory_id.as_str());
+        canonical.push('\u{1f}');
+        canonical.push_str(entry.memory_version_id.as_str());
+        canonical.push('\u{1f}');
+        canonical.push_str(&entry.content_hash);
+        canonical.push('\u{1f}');
+        canonical.push_str(&entry.rendered_bytes.to_string());
+    }
+
+    let mut hash = 0xcbf29ce484222325u64;
+    for byte in canonical.as_bytes() {
+        hash ^= u64::from(*byte);
+        hash = hash.wrapping_mul(0x100000001b3);
+    }
+    format!("{:016x}", hash)
+}
+
+/// Assert that content intended for the managed-memory region contains no
+/// markers belonging to protected request regions.
+pub fn assert_region_isolation(region: ContextRegion, content: &str) -> Result<(), AdapterError> {
+    if region != ContextRegion::BrainManagedMemory {
+        return Err(AdapterError::ProtectedRegionMutation(region));
+    }
+
+    const PROTECTED_MARKERS: [&str; 6] = [
+        "<|system|>",
+        "<|developer|>",
+        "<|safety|>",
+        "<|tools|>",
+        "<|user|>",
+        "<|working_state|>",
+    ];
+
+    for marker in PROTECTED_MARKERS {
+        if content.contains(marker) {
+            return Err(AdapterError::ProtectedRegionLeak { marker });
+        }
+    }
+    Ok(())
+}
+
 /// Validate a proposed write to the inference request's context.
 ///
-/// Only the Brain-managed memory region is writable. Once the request is
-/// frozen for submission, even that region is immutable.
+/// Only the Brain-managed memory region is writable. Once the request has
+/// frozen evidence, even that region is immutable.
 pub fn validate_context_write(
     region: ContextRegion,
-    request_frozen: bool,
+    state: &AssemblyState,
 ) -> Result<(), AdapterError> {
     if region != ContextRegion::BrainManagedMemory {
         return Err(AdapterError::ProtectedRegionMutation(region));
     }
-    if request_frozen {
+    if matches!(state, AssemblyState::Frozen(_)) {
         return Err(AdapterError::RequestAlreadyFrozen);
     }
     Ok(())
 }
 
-/// Apply the deterministic checks required before a full-boundary memory write.
-///
-/// This validates permission and boundary conditions only; it does not mutate
-/// a real Agent request or invoke an inference runtime.
+/// Apply deterministic permission and boundary checks before a full-boundary
+/// memory write. This does not mutate a real Agent request or runtime.
 pub fn validate_full_boundary_apply(
     tier: CapabilityTier,
     region: ContextRegion,
-    request_frozen: bool,
+    state: &AssemblyState,
 ) -> Result<(), AdapterError> {
     authorize(tier, AdapterOperation::ApplyFullBoundaryMemory)?;
-    validate_context_write(region, request_frozen)
+
+    validate_context_write(region, state)
 }
 
 /// An immutable, versioned payload delivered to one Agent session.
@@ -436,6 +684,84 @@ impl ContextDeliveryAdapter for InMemoryContextDeliveryAdapter {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use memory_context::{ContextEntry, ContextIdentity};
+    use memory_domain::{OpaqueId, ScopeKind, ScopeRef};
+
+    fn opaque(value: &str) -> OpaqueId {
+        OpaqueId::new(value).expect("fixture id is nonempty")
+    }
+
+    fn snapshot_with_entries(contents: &[(&str, &str, &str, &str, usize)]) -> ContextSnapshot {
+        let entries = contents
+            .iter()
+            .map(
+                |(entry_id, memory_id, version_id, content_hash, rendered_bytes)| ContextEntry {
+                    entry_id: opaque(entry_id),
+                    memory_id: opaque(memory_id),
+                    memory_version_id: opaque(version_id),
+                    tier: memory_context::ContextTier::P1,
+                    priority: 1,
+                    activation_reason: "test".into(),
+                    rendered_content: "x".into(),
+                    source_refs: vec![opaque("source")],
+                    evidence_refs: vec![],
+                    epistemic_qualifiers: vec![],
+                    content_hash: (*content_hash).into(),
+                    rendered_bytes: *rendered_bytes,
+                },
+            )
+            .collect::<Vec<_>>();
+
+        let rendered_bytes = entries.iter().map(|entry| entry.rendered_bytes).sum();
+        ContextSnapshot {
+            identity: ContextIdentity {
+                context_id: opaque("context-1"),
+                scope_refs: vec![ScopeRef {
+                    scope_id: opaque("scope-1"),
+                    scope_kind: ScopeKind::User,
+                    namespace_key: "user:scope-1".into(),
+                }],
+                agent_id: opaque("agent-1"),
+                agent_instance_id: opaque("agent-instance-1"),
+                session_id: opaque("session-1"),
+                task_id: None,
+                environment_id: None,
+                purpose: "agent-integration-test".into(),
+                schema_version: "1".into(),
+            },
+            context_version: 7,
+            entries,
+            tombstones: vec![],
+            operation_records: vec![],
+            rendered_bytes,
+        }
+    }
+
+    fn one_entry_snapshot() -> ContextSnapshot {
+        snapshot_with_entries(&[("entry-1", "memory-1", "version-1", "hash-a", 1)])
+    }
+
+    fn budget() -> Budget {
+        Budget {
+            max_rendered_bytes: 1024,
+            max_entries: 16,
+        }
+    }
+
+    fn open_state() -> AssemblyState {
+        AssemblyState::Open { staged_version: 0 }
+    }
+
+    fn frozen_state() -> AssemblyState {
+        let mut assembler = RequestAssembler::new(
+            BoundaryId::new("boundary-1").expect("valid fixture id"),
+            InferenceRequestId::new("request-1").expect("valid fixture id"),
+        );
+        let region = materialize_managed_region(&one_entry_snapshot(), &budget())
+            .expect("fixture fits budget");
+        assembler.stage(&region).expect("stage succeeds");
+        AssemblyState::Frozen(assembler.freeze().expect("staged request freezes"))
+    }
 
     fn test_snapshot(version: u64, content: &str) -> ContextSnapshot {
         use memory_context::{
@@ -589,7 +915,7 @@ mod tests {
             validate_full_boundary_apply(
                 CapabilityTier::Tier1,
                 ContextRegion::DeveloperInstructions,
-                false,
+                &open_state(),
             ),
             Err(AdapterError::ProtectedRegionMutation(
                 ContextRegion::DeveloperInstructions
@@ -603,9 +929,386 @@ mod tests {
             validate_full_boundary_apply(
                 CapabilityTier::Tier1,
                 ContextRegion::BrainManagedMemory,
-                true,
+                &frozen_state(),
             ),
             Err(AdapterError::RequestAlreadyFrozen)
+        );
+    }
+
+    #[test]
+    fn authorize_complete_three_tier_by_eight_operation_matrix() {
+        let operations = [
+            AdapterOperation::SubmitScopedTelemetry,
+            AdapterOperation::RequestActiveRecall,
+            AdapterOperation::InsertMiddlewareMemorySlot,
+            AdapterOperation::AttestMiddlewareApplication,
+            AdapterOperation::ObserveFullInferenceBoundary,
+            AdapterOperation::ApplyFullBoundaryMemory,
+            AdapterOperation::AttestFullBoundaryApplication,
+            AdapterOperation::ReconcileSnapshotAndDelta,
+        ];
+        let tiers = [
+            CapabilityTier::Tier1,
+            CapabilityTier::Tier2,
+            CapabilityTier::Tier3,
+        ];
+        for operation in operations {
+            for actual in tiers {
+                let expected = if actual <= operation.required_tier() {
+                    Ok(())
+                } else {
+                    Err(AdapterError::TierInsufficient {
+                        required: operation.required_tier(),
+                        actual,
+                    })
+                };
+                assert_eq!(authorize(actual, operation), expected);
+            }
+        }
+    }
+
+    #[test]
+    fn open_state_allows_managed_memory_write() {
+        assert_eq!(
+            validate_context_write(ContextRegion::BrainManagedMemory, &open_state()),
+            Ok(())
+        );
+    }
+
+    #[test]
+    fn frozen_state_rejects_managed_memory_write() {
+        assert_eq!(
+            validate_context_write(ContextRegion::BrainManagedMemory, &frozen_state()),
+            Err(AdapterError::RequestAlreadyFrozen)
+        );
+    }
+
+    #[test]
+    fn assembler_stage_rejects_frozen_state() {
+        let mut assembler = RequestAssembler::new(
+            BoundaryId::new("boundary").expect("valid id"),
+            InferenceRequestId::new("request").expect("valid id"),
+        );
+        let region =
+            materialize_managed_region(&one_entry_snapshot(), &budget()).expect("fixture fits");
+        assembler.stage(&region).expect("first stage succeeds");
+        let frozen = assembler.clone().freeze().expect("clone freezes");
+        assembler.state = AssemblyState::Frozen(frozen);
+        assert_eq!(
+            assembler.stage(&region),
+            Err(AdapterError::RequestAlreadyFrozen)
+        );
+    }
+
+    #[test]
+    fn assembler_cannot_freeze_without_a_staged_region() {
+        let assembler = RequestAssembler::new(
+            BoundaryId::new("boundary").expect("valid id"),
+            InferenceRequestId::new("request").expect("valid id"),
+        );
+        assert_eq!(assembler.freeze(), Err(AdapterError::NotFrozen));
+    }
+
+    #[test]
+    fn assembler_freeze_preserves_request_and_region_evidence() {
+        let mut assembler = RequestAssembler::new(
+            BoundaryId::new("boundary").expect("valid id"),
+            InferenceRequestId::new("request").expect("valid id"),
+        );
+        let region =
+            materialize_managed_region(&one_entry_snapshot(), &budget()).expect("fixture fits");
+        assembler.stage(&region).expect("stage succeeds");
+        let frozen = assembler.freeze().expect("freeze succeeds");
+        assert_eq!(frozen.request_id.as_str(), "request");
+        assert_eq!(frozen.boundary_id.as_str(), "boundary");
+        assert_eq!(frozen.region_version, region.context_version);
+        assert_eq!(frozen.region_digest, region.digest);
+    }
+
+    #[test]
+    fn all_nine_identity_types_reject_empty_and_whitespace_values() {
+        macro_rules! rejects {
+            ($type:ident, $field:literal) => {
+                assert_eq!(
+                    $type::new(""),
+                    Err(AdapterError::EmptyIdentity { field: $field })
+                );
+                assert_eq!(
+                    $type::new(" \t\n "),
+                    Err(AdapterError::EmptyIdentity { field: $field })
+                );
+            };
+        }
+        rejects!(ContextId, "context_id");
+        rejects!(ContextSessionId, "context_session_id");
+        rejects!(AdapterId, "adapter_id");
+        rejects!(AdapterInstanceId, "adapter_instance_id");
+        rejects!(AgentInstanceId, "agent_instance_id");
+        rejects!(BoundaryId, "boundary_id");
+        rejects!(InferenceRequestId, "inference_request_id");
+        rejects!(DeliveryId, "delivery_id");
+        rejects!(RegionDigest, "region_digest");
+    }
+
+    #[test]
+    fn all_nine_identity_types_preserve_nonempty_values() {
+        assert_eq!(ContextId::new("ctx").expect("valid").as_str(), "ctx");
+        assert_eq!(
+            ContextSessionId::new("session").expect("valid").as_str(),
+            "session"
+        );
+        assert_eq!(
+            AdapterId::new("adapter").expect("valid").as_str(),
+            "adapter"
+        );
+        assert_eq!(
+            AdapterInstanceId::new("adapter-instance")
+                .expect("valid")
+                .as_str(),
+            "adapter-instance"
+        );
+        assert_eq!(
+            AgentInstanceId::new("agent-instance")
+                .expect("valid")
+                .as_str(),
+            "agent-instance"
+        );
+        assert_eq!(
+            BoundaryId::new("boundary").expect("valid").as_str(),
+            "boundary"
+        );
+        assert_eq!(
+            InferenceRequestId::new("request").expect("valid").as_str(),
+            "request"
+        );
+        assert_eq!(
+            DeliveryId::new("delivery").expect("valid").as_str(),
+            "delivery"
+        );
+        assert_eq!(
+            RegionDigest::new("digest").expect("valid").as_str(),
+            "digest"
+        );
+    }
+
+    #[test]
+    fn materialization_aligns_snapshot_version_bytes_entries_and_digest() {
+        let snapshot = one_entry_snapshot();
+        let region = materialize_managed_region(&snapshot, &budget()).expect("fits");
+        assert_eq!(region.context_id.as_str(), "context-1");
+        assert_eq!(region.context_version, snapshot.context_version);
+        assert_eq!(region.rendered_bytes, snapshot.rendered_bytes);
+        assert_eq!(region.entry_count, snapshot.entries.len());
+        assert_eq!(region.digest.as_str().len(), 16);
+        assert!(region
+            .digest
+            .as_str()
+            .bytes()
+            .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte)));
+    }
+
+    #[test]
+    fn materialization_rejects_byte_budget_without_truncating_actual() {
+        let snapshot = one_entry_snapshot();
+        let actual = snapshot.rendered_bytes;
+        let too_small = Budget {
+            max_rendered_bytes: actual.saturating_sub(1),
+            max_entries: 10,
+        };
+        assert_eq!(
+            materialize_managed_region(&snapshot, &too_small),
+            Err(AdapterError::BudgetExceeded {
+                limit: actual.saturating_sub(1),
+                actual,
+            })
+        );
+    }
+
+    #[test]
+    fn materialization_rejects_entry_budget() {
+        let snapshot = one_entry_snapshot();
+        assert_eq!(
+            materialize_managed_region(
+                &snapshot,
+                &Budget {
+                    max_rendered_bytes: 1024,
+                    max_entries: 0,
+                }
+            ),
+            Err(AdapterError::BudgetExceeded {
+                limit: 0,
+                actual: 1,
+            })
+        );
+    }
+
+    #[test]
+    fn materialization_accepts_empty_snapshot() {
+        let snapshot = snapshot_with_entries(&[]);
+        let region = materialize_managed_region(&snapshot, &budget()).expect("empty fits");
+        assert_eq!(region.rendered_bytes, 0);
+        assert_eq!(region.entry_count, 0);
+        assert_eq!(region.context_version, snapshot.context_version);
+    }
+
+    #[test]
+    fn managed_region_accepts_clean_content() {
+        assert_eq!(
+            assert_region_isolation(ContextRegion::BrainManagedMemory, "remembered facts"),
+            Ok(())
+        );
+    }
+
+    #[test]
+    fn managed_region_rejects_system_marker_leak() {
+        assert_eq!(
+            assert_region_isolation(
+                ContextRegion::BrainManagedMemory,
+                "text <|system|> protected"
+            ),
+            Err(AdapterError::ProtectedRegionLeak {
+                marker: "<|system|>",
+            })
+        );
+    }
+
+    #[test]
+    fn all_six_protected_regions_reject_writes() {
+        let protected = [
+            ContextRegion::SystemInstructions,
+            ContextRegion::DeveloperInstructions,
+            ContextRegion::AgentSafetyPolicy,
+            ContextRegion::ToolSchemasAndAuthorization,
+            ContextRegion::UserInput,
+            ContextRegion::AgentWorkingState,
+        ];
+        for region in protected {
+            assert_eq!(
+                assert_region_isolation(region, "content"),
+                Err(AdapterError::ProtectedRegionMutation(region))
+            );
+        }
+    }
+
+    #[test]
+    fn repeated_materialization_has_deterministic_digest() {
+        let snapshot = one_entry_snapshot();
+        let first = materialize_managed_region(&snapshot, &budget()).expect("first");
+        let second = materialize_managed_region(&snapshot, &budget()).expect("second");
+        assert_eq!(first.digest, second.digest);
+    }
+
+    #[test]
+    fn changing_entry_content_hash_changes_digest() {
+        let first_snapshot = one_entry_snapshot();
+        let mut second_snapshot = first_snapshot.clone();
+        second_snapshot.entries[0].content_hash = "hash-b".into();
+
+        let first = materialize_managed_region(&first_snapshot, &budget()).expect("first");
+        let second = materialize_managed_region(&second_snapshot, &budget()).expect("second");
+        assert_ne!(first.digest, second.digest);
+    }
+
+    #[test]
+    fn metadata_equal_but_content_hash_different_changes_digest() {
+        let first_snapshot = one_entry_snapshot();
+        let mut second_snapshot = first_snapshot.clone();
+        second_snapshot.entries[0].content_hash = "different-content-hash".into();
+
+        assert_eq!(
+            first_snapshot.context_version,
+            second_snapshot.context_version
+        );
+        assert_eq!(
+            first_snapshot.rendered_bytes,
+            second_snapshot.rendered_bytes
+        );
+        assert_eq!(first_snapshot.entries.len(), second_snapshot.entries.len());
+        assert_eq!(
+            first_snapshot.entries[0].entry_id,
+            second_snapshot.entries[0].entry_id
+        );
+
+        let first = materialize_managed_region(&first_snapshot, &budget()).expect("first");
+        let second = materialize_managed_region(&second_snapshot, &budget()).expect("second");
+        assert_ne!(first.digest, second.digest);
+    }
+
+    #[test]
+    fn digest_is_order_sensitive_for_identical_entries_in_different_order() {
+        // Entry order is deliberately significant: the digest commits to the
+        // exact snapshot sequence, not merely to an unordered set of entries.
+        let first_snapshot = snapshot_with_entries(&[
+            ("entry-a", "memory-a", "version-a", "hash-a", 1),
+            ("entry-b", "memory-b", "version-b", "hash-b", 1),
+        ]);
+        let second_snapshot = snapshot_with_entries(&[
+            ("entry-b", "memory-b", "version-b", "hash-b", 1),
+            ("entry-a", "memory-a", "version-a", "hash-a", 1),
+        ]);
+        let first = materialize_managed_region(&first_snapshot, &budget()).expect("first");
+        let second = materialize_managed_region(&second_snapshot, &budget()).expect("second");
+        assert_ne!(first.digest, second.digest);
+    }
+
+    #[test]
+    fn evidence_stages_are_distinct_observations() {
+        assert_ne!(EvidenceStage::Received, EvidenceStage::Accepted);
+        assert_ne!(EvidenceStage::Accepted, EvidenceStage::Applied);
+        assert_ne!(EvidenceStage::Received, EvidenceStage::Applied);
+        // No From conversion exists: stages cannot be promoted by conversion.
+    }
+
+    #[test]
+    fn full_boundary_apply_accepts_open_managed_region_at_tier_one() {
+        assert_eq!(
+            validate_full_boundary_apply(
+                CapabilityTier::Tier1,
+                ContextRegion::BrainManagedMemory,
+                &open_state(),
+            ),
+            Ok(())
+        );
+    }
+
+    #[test]
+    fn full_boundary_apply_rejects_frozen_managed_region_at_tier_one() {
+        assert_eq!(
+            validate_full_boundary_apply(
+                CapabilityTier::Tier1,
+                ContextRegion::BrainManagedMemory,
+                &frozen_state(),
+            ),
+            Err(AdapterError::RequestAlreadyFrozen)
+        );
+    }
+
+    #[test]
+    fn full_boundary_apply_rejects_developer_region_when_open() {
+        assert_eq!(
+            validate_full_boundary_apply(
+                CapabilityTier::Tier1,
+                ContextRegion::DeveloperInstructions,
+                &open_state(),
+            ),
+            Err(AdapterError::ProtectedRegionMutation(
+                ContextRegion::DeveloperInstructions
+            ))
+        );
+    }
+
+    #[test]
+    fn malformed_region_digest_is_rejected_during_staging() {
+        let mut assembler = RequestAssembler::new(
+            BoundaryId::new("boundary").expect("valid"),
+            InferenceRequestId::new("request").expect("valid"),
+        );
+        let mut region =
+            materialize_managed_region(&one_entry_snapshot(), &budget()).expect("fits");
+        region.digest = RegionDigest::new("NOT-A-VALID-DIGEST").expect("nonempty identity");
+        assert_eq!(
+            assembler.stage(&region),
+            Err(AdapterError::InvalidRegionDigest)
         );
     }
 
