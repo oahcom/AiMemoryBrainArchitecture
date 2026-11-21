@@ -52,7 +52,14 @@ GOVERNED_FILES = ("docs/governance/documentation-gaps.md",)
 # Two exclusion kinds, never blurred (policy section 2). "not documentation"
 # makes no architecture claim; "not yet migrated" IS documentation and is
 # backlog, so it is a gap the policy names rather than an exclusion it grants.
-EXCLUSION_KINDS = {"not-documentation", "not-yet-migrated"}
+# There is exactly one kind of exclusion. `not-yet-migrated` used to be a second
+# one, which contradicted the policy: section 2 calls it backlog that "is a gap
+# the policy must name rather than an exclusion it may grant itself". Allowing it
+# here let 27 architecture documents under docs/ be excluded from the gate while
+# still being described as governed-in-spirit -- the exact blur the registry
+# exists to prevent. Such directories now go in `backlog:`, are scanned, and
+# count as unclassified, so the number is real and can go down.
+EXCLUSION_KINDS = {"not-documentation"}
 # No path exemptions. A bilingual *pairing* exemption is not a *governance*
 # exemption: `PAIR_EXEMPT_PREFIXES` in check_bilingual_docs.py means "this file
 # need not have a translated twin", which says nothing about whether it is a
@@ -288,7 +295,15 @@ def _parse_map(tokens, pos: int, indent: int):
                 f"line {lineno}: mapping ':' must be followed by a space: {text!r}"
             )
         key, rest = key.strip(), rest.strip()
-        if not KEY_RE.match(key):
+        if key[:1] in ('"', "'"):
+            # A quoted key, so a real name the bare form cannot spell -- a
+            # top-level directory like `.github` -- is still expressible. The
+            # registry has to name what is on disk; renaming the directory to
+            # fit the parser would be the tail wagging the dog.
+            key = _scalar(key, lineno)
+            if not isinstance(key, str) or not key:
+                raise ParseError(f"line {lineno}: quoted key is not a string")
+        elif not KEY_RE.match(key):
             raise ParseError(f"line {lineno}: invalid key {key!r}")
         if key in mapping:
             raise ParseError(f"line {lineno}: duplicate key {key!r}")
@@ -573,13 +588,23 @@ def schema(root: Path | None = None) -> dict:
     quietly pass. A schema that declares nothing must not read as "no rules".
     """
     global _SCHEMA
-    key = str(root) if root is not None else ""
+    base = root if root is not None else Path(__file__).resolve().parents[1]
+    path = base / SCHEMA_FILE
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise SystemExit(f"cannot load {SCHEMA_FILE}: {exc}")
+    # Keyed on content, not on path. A path key meant the first parse of a root
+    # won for the whole process: rewrite that root's schema and every later call
+    # still validated against the old contract, so a run could report PASS while
+    # proving the previous schema. Content keying also makes the cache correct
+    # rather than merely harmless -- the same bytes reuse one parse, changed
+    # bytes always reparse.
+    key = hashlib.sha256(text.encode("utf-8")).hexdigest()
     if key not in _SCHEMA:
-        base = root if root is not None else Path(__file__).resolve().parents[1]
-        path = base / SCHEMA_FILE
         try:
-            loaded = parse_yaml_subset(path.read_text(encoding="utf-8"))
-        except (OSError, ParseError) as exc:
+            loaded = parse_yaml_subset(text)
+        except ParseError as exc:
             raise SystemExit(f"cannot load {SCHEMA_FILE}: {exc}")
         if not isinstance(loaded, dict):
             raise SystemExit(f"{SCHEMA_FILE} is not a mapping")
@@ -1209,9 +1234,118 @@ def check_scope_and_relations(root: Path, docs: dict[str, dict]) -> list[str]:
 # Entry point
 # --------------------------------------------------------------------------
 
+def inside_repo(root: Path, rel: str) -> bool:
+    """True when rel resolves to a regular file that is physically in root.
+
+    `Path.is_symlink()` only inspects the final component: a file at
+    `docs/governance/x.md` whose *parent* is a link to /outside still reads
+    /outside/x.md, and nothing about `x.md` says so. Proving containment means
+    resolving the whole path and comparing it to the resolved root, which also
+    catches `..` and link chains in any component.
+    """
+    try:
+        real = (root / rel).resolve(strict=True)
+        real_root = root.resolve(strict=True)
+    except (OSError, RuntimeError):
+        return False
+    if real_root not in real.parents:
+        return False
+    return real.is_file()
+
+
+_REGISTRY: dict[str, dict] = {}
+
+def registry(root: Path) -> dict:
+    """The scope registry, parsed once per content. Fail-closed on absence.
+
+    Governed roots come from NORMATIVE_ROOTS; *backlog* roots come from here.
+    A backlog directory is scanned and counted as unclassified, so "27 documents
+    are not yet migrated" is a number the gate produces rather than a claim the
+    registry makes. It is keyed on content for the same reason schema() is.
+    """
+    path = root / SCOPE_REGISTRY
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise SystemExit(f"cannot read scope registry {SCOPE_REGISTRY}: {exc}")
+    key = hashlib.sha256(text.encode("utf-8")).hexdigest()
+    if key not in _REGISTRY:
+        try:
+            loaded = parse_yaml_subset(text)
+        except ParseError as exc:
+            raise SystemExit(f"cannot read scope registry {SCOPE_REGISTRY}: {exc}")
+        if not isinstance(loaded, dict):
+            raise SystemExit(f"{SCOPE_REGISTRY} is not a mapping")
+        _REGISTRY[key] = loaded
+    return _REGISTRY[key]
+
+def backlog_roots(root: Path) -> tuple[str, ...]:
+    """Directories declared as backlog: scanned, counted, expected to shrink.
+
+    A malformed registry yields no backlog roots instead of stopping the run.
+    `governed_files()` is called before `check_scope_registry()` and has no
+    error channel; raising here would replace DM-14's diagnostic with a
+    traceback-free exit that names no rule. The registry check runs next and
+    reports the parse failure properly, so nothing is silently tolerated.
+    """
+    try:
+        node = registry(root).get("backlog")
+    except SystemExit:
+        return ()
+    if not isinstance(node, dict):
+        return ()
+    return tuple(sorted(str(name).strip("/") for name in node))
+
+def _count(value) -> int | None:
+    """A non-negative integer declared as a YAML scalar.
+
+    The subset reader has no numeric type: `documents: 27` arrives as "27".
+    Accepting a digit string keeps the reader honest about what it can prove --
+    it does not pretend to parse numbers -- while still rejecting `documents:
+    many` or `documents: -1` as the registry errors they are.
+    """
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value if value >= 0 else None
+    if isinstance(value, str) and value.isdigit():
+        return int(value)
+    return None
+
+
+def backlog_counts(root: Path) -> dict[str, int]:
+    """Actual Markdown count per backlog root, excluding governed subpaths.
+
+    A backlog root can contain a governed subtree: docs/ holds docs/en,
+    docs/zh-CN and the individually governed gap record. Counting those as
+    backlog would inflate the number the registry promises, so they are
+    subtracted -- the two sets are disjoint by construction.
+    """
+    governed_prefixes = tuple(NORMATIVE_ROOTS) + GOVERNED_FILES
+    counts: dict[str, int] = {}
+    for name in backlog_roots(root):
+        base = root / name
+        if not base.is_dir() or base.is_symlink():
+            continue
+        n = 0
+        for path in base.rglob("*.md"):
+            if path.is_symlink():
+                continue
+            rel = path.relative_to(root).as_posix()
+            if any(rel == g or rel.startswith(g + "/") for g in governed_prefixes):
+                continue
+            n += 1
+        counts[name] = n
+    return counts
+
+
 def governed_files(root: Path) -> list[Path]:
     files: list[Path] = []
-    for name in NORMATIVE_ROOTS:
+    backlog = set(backlog_roots(root))
+    # Backlog roots are scanned, but the governed subtrees inside them are not
+    # scanned twice: docs/ contains docs/en, docs/zh-CN and the gap record.
+    governed_prefixes = tuple(NORMATIVE_ROOTS) + GOVERNED_FILES
+    for name in NORMATIVE_ROOTS + tuple(sorted(backlog)):
         base = root / name
         if not base.is_dir():
             continue
@@ -1223,11 +1357,17 @@ def governed_files(root: Path) -> list[Path]:
         for path in sorted(base.rglob("*.md")):
             if path.is_symlink():
                 continue
+            if name in backlog:
+                rel = path.relative_to(root).as_posix()
+                if any(rel == g or rel.startswith(g + "/") for g in governed_prefixes):
+                    continue
             files.append(path)
+    # GOVERNED_FILES uses the same containment test as the registry check, so
+    # the declared set and the scanned set cannot disagree: a path the registry
+    # accepts is a path this loop includes, and vice versa.
     for rel in GOVERNED_FILES:
-        path = root / rel
-        if path.is_file() and not path.is_symlink():
-            files.append(path)
+        if inside_repo(root, rel):
+            files.append(root / rel)
     return files
 
 def check_scope_registry(root: Path) -> list[str]:
@@ -1269,6 +1409,28 @@ def check_scope_registry(root: Path) -> list[str]:
         errors.append(f"DM-14 {SCOPE_REGISTRY} excluded must be a mapping")
         excluded = {}
 
+    backlog = registry.get("backlog")
+    if backlog is None:
+        backlog = {}
+    if not isinstance(backlog, dict):
+        errors.append(f"DM-14 {SCOPE_REGISTRY} backlog must be a mapping")
+        backlog = {}
+
+    for name, node in backlog.items():
+        if not isinstance(node, dict):
+            errors.append(f"DM-14 backlog {name!r} must be a mapping with a count")
+            continue
+        declared_count = _count(node.get("documents"))
+        if declared_count is None:
+            errors.append(
+                f"DM-14 backlog {name!r} must declare `documents` as a "
+                f"non-negative integer, got {node.get('documents')!r}"
+            )
+        if not str(node.get("reason") or "").strip():
+            errors.append(f"DM-14 backlog {name!r} has no reason")
+        if not str(node.get("reason_zh") or "").strip():
+            errors.append(f"DM-14 backlog {name!r} has no reason_zh (GOV-DOC-001)")
+
     for name, node in excluded.items():
         if not isinstance(node, dict):
             errors.append(f"DM-14 excluded {name!r} must be a mapping with a reason")
@@ -1284,9 +1446,12 @@ def check_scope_registry(root: Path) -> list[str]:
         if not str(node.get("reason_zh") or "").strip():
             errors.append(f"DM-14 excluded {name!r} has no reason_zh (GOV-DOC-001)")
 
-    overlap = sorted(set(declared) & set(excluded))
+    overlap = sorted((set(declared) | set(backlog)) & set(excluded))
     if overlap:
-        errors.append(f"DM-14 {overlap} are both governed and excluded")
+        errors.append(f"DM-14 {overlap} are both governed-or-backlog and excluded")
+    both = sorted(set(declared) & set(backlog))
+    if both:
+        errors.append(f"DM-14 {both} are both governed and backlog; pick one")
 
     # (1) declared == enforced
     enforced = set(NORMATIVE_ROOTS) - {"docs/en", "docs/zh-CN"}
@@ -1299,18 +1464,21 @@ def check_scope_registry(root: Path) -> list[str]:
         )
 
     # (2) every top-level directory is accounted for
-    accounted = set(declared) | set(excluded) | {"docs/en", "docs/zh-CN"}
-    on_disk = {
-        p.name for p in root.iterdir()
-        if p.is_dir() and not p.name.startswith(".")
-    }
+    #
+    # Hidden directories are included. Excluding them meant `.new-architecture/`
+    # was not on disk as far as this check was concerned: not governed, not
+    # excluded, not reported, not scanned. A dot is not an exemption.
+    #
+    # `.git` is the one structural exception, and it is structural rather than
+    # declared: it is the version-control store, present in every clone, absent
+    # in every export. Requiring it in a tracked file would make the registry
+    # describe the working copy instead of the repository.
+    accounted = set(declared) | set(backlog) | set(excluded) | {"docs/en", "docs/zh-CN"}
+    on_disk = {p.name for p in root.iterdir() if p.is_dir()} - {".git"}
     # A symlinked directory is not part of this repository's content. Listing it
     # in the registry would require the gate to scan through the link, so it is
     # refused outright instead of being declared.
-    links = sorted(
-        p.name for p in root.iterdir()
-        if p.is_symlink() and not p.name.startswith(".")
-    )
+    links = sorted(p.name for p in root.iterdir() if p.is_symlink())
     if links:
         errors.append(
             f"DM-14 symbolic links at the repository root are not governed roots: {links}. "
@@ -1322,7 +1490,7 @@ def check_scope_registry(root: Path) -> list[str]:
             f"DM-14 top-level directories not accounted for: {unknown}. "
             f"Add each to {SCOPE_REGISTRY} as governed or excluded-with-reason"
         )
-    missing = sorted((set(declared) | set(excluded)) - on_disk)
+    missing = sorted((set(declared) | set(backlog) | set(excluded)) - on_disk)
     if missing:
         errors.append(
             f"DM-14 {SCOPE_REGISTRY} names directories that do not exist: {missing}"
@@ -1349,9 +1517,34 @@ def check_scope_registry(root: Path) -> list[str]:
             f"gate-only {sorted(set(GOVERNED_FILES) - set(registry_files))}"
         )
 
+    # (5) a declared backlog count must equal the count on disk. Without this,
+    # `documents: 27` is a sentence rather than a claim: the number could drift
+    # as files are added or migrated and nobody would notice. With it, the
+    # registry either states the truth or the gate fails.
+    actual = backlog_counts(root)
+    for name, node in backlog.items():
+        if not isinstance(node, dict):
+            continue
+        declared_count = _count(node.get("documents"))
+        if declared_count is None or name not in actual:
+            continue
+        if declared_count != actual[name]:
+            errors.append(
+                f"DM-14 backlog {name!r} declares {declared_count} documents "
+                f"but {actual[name]} are on disk; update the registry"
+            )
+
     for rel in GOVERNED_FILES:
-        if not (root / rel).is_file():
-            errors.append(f"DM-14 governed file {rel} does not exist")
+        # The same containment test the scanner uses. `is_file()` follows
+        # symlinks, so a symlinked entry passed the registry while the scanner
+        # skipped it: the declared set and the scanned set disagreed, which is
+        # exactly what this function exists to prevent. A parent-directory link
+        # is caught too, because containment is proven on the resolved path.
+        if not inside_repo(root, rel):
+            errors.append(
+                f"DM-14 governed file {rel} is not a regular file inside the "
+                f"repository (missing, a symlink, or reached through one)"
+            )
             continue
         top = rel.split("/")[0]
         if top in declared:
@@ -1359,10 +1552,10 @@ def check_scope_registry(root: Path) -> list[str]:
                 f"DM-14 governed file {rel} is already covered by root {top}; "
                 f"drop the individual entry"
             )
-        elif top not in excluded:
+        elif top not in excluded and top not in backlog:
             errors.append(
                 f"DM-14 governed file {rel} sits in {top}, which is neither "
-                f"governed nor excluded: declare the directory's status first"
+                f"governed, backlog nor excluded: declare the directory's status first"
             )
 
     return errors

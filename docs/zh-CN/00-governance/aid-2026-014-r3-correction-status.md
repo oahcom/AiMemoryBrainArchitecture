@@ -20,7 +20,7 @@ B OPTION A = DECIDED FOR CONVERGENCE
 
 D OPTION A = DECIDED FOR CONVERGENCE
 
-R3 审查处置 = REQUEST CHANGES（最严格原则优先）
+R3 审查处置 = PASS（八行全部 PASS；最严格原则已无阻断行）
 
 FORMAL ACCEPTANCE = PENDING
 
@@ -49,7 +49,7 @@ TEST EXECUTION 派发门禁 = UNLOCKED-WITH-CONDITIONS（仅限 REQ-04 第⑤步
 
 | 要求 | 应用状态 | 独立复审 |
 |---|---|---|
-| R1 Claim 身份 | APPLIED | REQUEST CHANGES（R1-01、R1-02；§9.9） |
+| R1 Claim 身份 | APPLIED | PASS（R1-01：§9.9；R1-02：§9.11；R1-02-REVIEW-01：§9.12） |
 | R2 Attestor 授权 | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
 | R3 共享 Fact Forget | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
 | R4 Fact/Claim 同步 | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
@@ -819,3 +819,36 @@ PASS 是独立复审判定，不是正式接受决定。
 规范正文未改。本节只纠正证据登记；第 3 节八行未动：七行 `PASS`，R1 在修正后的列获得复审前
 仍为 `REQUEST CHANGES`。
 
+### 9.12 第七轮独立复审：R1 闭合，处置随之变更
+
+复审方：独立会话 `6b0141f0-9484-83e8-a07a-c22fb6d3c828`（只读，未写仓库，未由复审方发布评论）。
+回读钉定：`a8fd2b75eedc50f4fca6aa0e0ef7b74285bb14d1`。裁决：`PASS`，无阻断项。
+
+| 审查项 | 裁定 |
+|---|---|
+| 第 9.11 节三组统计（11 / 1 / 1 = 13） | PASS |
+| 两类例外分别描述 | PASS |
+| 三行被取代值按父提交复核 | PASS |
+| 改动范围限于第 9.11 节 | PASS |
+| 统计的双语等价性 | PASS |
+
+复审方自行重算了统计，而不是照抄：第 9.1 节十三行，十一行与第 8 节中同路径最后一次表格写入
+相符，一行在第 8 节完全无记录，一行仅见于第 8 节条目。它还逐个读取了各 producing commit 的
+父提交，得到两条 Overview 共用的 `443b35b288fc` 与 ZH 路径的 `736fc5865c54`——与第 9.11 节的
+陈述无关地得到同一结果。
+
+这里闭合了两轮阻断，且二者性质不同。R1-01 是真实的规范残留：语义已决定之后，根级 freeze
+仍把 Claim identity 列入未验证项。R1-02 及其后续则是证据登记错误——一次是把另一条路径的值
+抄成被取代值，一次是把两类不同的第 8 节记录缺失合并计数。两者都未触及规范正文，也都不应被
+读作重新打开某项决定。
+
+**本次变更了什么、没有变更什么。** 第 3 节 R1 一行转为 `PASS`。八行全部 `PASS` 后，第 2 节的
+`STRICTEST WINS` 规则已无可保留的阻断行，故 `R3 REVIEW DISPOSITION` 按该规则机械转为 `PASS`
+——这是规则的推论，不是本轮新作的决定。第 2 节其余各行不动：`FORMAL ACCEPTANCE` 仍为
+`PENDING`，`SCHEMA FREEZE` 仍为 `NOT APPROVED`，`IMPLEMENTATION CONFORMANCE` 仍为
+`NOT ESTABLISHED`，`TEST EXECUTION` 仍为 `SUSPENDED`，REQ-04 第⑤步派发范围之外的既有限制
+不变。
+
+第七轮复审以其自身措辞给出了同一边界：独立复审处置不是验收决定，也不证明任何实现提供了
+原子性、隔离性或依赖的持久登记。此处的 `PASS` 只意味着规范文本经受住了独立阅读，不意味着
+系统已按其建成。

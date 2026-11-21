@@ -20,7 +20,7 @@ B OPTION A = DECIDED FOR CONVERGENCE
 
 D OPTION A = DECIDED FOR CONVERGENCE
 
-R3 REVIEW DISPOSITION = REQUEST CHANGES (STRICTEST WINS)
+R3 REVIEW DISPOSITION = PASS (all eight rows PASS; STRICTEST WINS has no blocking row)
 
 FORMAL ACCEPTANCE = PENDING
 
@@ -49,7 +49,7 @@ TEST EXECUTION DISPATCH GATE = UNLOCKED-WITH-CONDITIONS (REQ-04 STEP 5 DISPATCH 
 
 | Requirement | Application status | Independent review |
 |---|---|---|
-| R1 Claim identity | APPLIED | REQUEST CHANGES (R1-01, R1-02; §9.9) |
+| R1 Claim identity | APPLIED | PASS (R1-01: §9.9; R1-02: §9.11; R1-02-REVIEW-01: §9.12) |
 | R2 Attestor authorization | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
 | R3 Shared Fact Forget | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
 | R4 Fact/Claim synchronization | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
@@ -918,3 +918,42 @@ actually supports.
 No normative text changed. This section corrects evidence registration only, and the eight rows of
 §3 are untouched: seven `PASS`, R1 still `REQUEST CHANGES` until the corrected column is reviewed.
 
+### 9.12 Seventh independent review: R1 closes, and the disposition follows
+
+Reviewer: independent session `6b0141f0-9484-83e8-a07a-c22fb6d3c828` (read-only, no repository
+write, no comment posted by the reviewer). Read-back pin: `a8fd2b75eedc50f4fca6aa0e0ef7b74285bb14d1`.
+Verdict: `PASS`, no blocking findings.
+
+| Item reviewed | Verdict |
+|---|---|
+| `§9.11` three-group tally (11 / 1 / 1 = 13) | PASS |
+| The two exception groups described separately | PASS |
+| Three superseded values, re-verified against parent commits | PASS |
+| Change scope limited to `§9.11` | PASS |
+| EN/ZH equivalence of the tally | PASS |
+
+The reviewer re-derived the tally itself rather than reading it: thirteen §9.1 rows, eleven matching
+the last §8 table write for the same path, one with no §8 record at all, one recorded only in the
+§8 bullet. It also re-read the parent of each producing commit and got `443b35b288fc` for both
+Overview paths that share that value and `736fc5865c54` for the ZH path — independently of what
+`§9.11` claims.
+
+Two rounds of blocking findings closed here, and they were different in kind. R1-01 was a real
+normative residue: the root-level freeze still listed Claim identity among unverified items after
+the semantics had been decided. R1-02 and its follow-up were evidence-registration errors — a
+superseded value copied from the wrong path, then a tally that merged two kinds of missing §8
+record into one. Neither touched normative text, and neither should be read as re-opening a
+decision.
+
+**What this does and does not change.** §3's R1 row moves to `PASS`. With eight of eight rows
+`PASS`, the `STRICTEST WINS` rule in §2 no longer has a blocking row to preserve, so
+`R3 REVIEW DISPOSITION` moves to `PASS` as a mechanical consequence of that rule — not as a new
+decision taken in this round. Everything else in §2 stands unchanged: `FORMAL ACCEPTANCE` remains
+`PENDING`, `SCHEMA FREEZE` remains `NOT APPROVED`, `IMPLEMENTATION CONFORMANCE` remains
+`NOT ESTABLISHED`, and `TEST EXECUTION` remains `SUSPENDED` outside the REQ-04 step 5 dispatch
+scope already recorded.
+
+The seventh review stated the same boundary in its own words: an independent review disposition is
+not an acceptance decision, and it does not establish that any implementation provides atomicity,
+isolation, or durable dependency registration. A `PASS` here means the specification text survived
+independent reading. It does not mean the system was built to it.
