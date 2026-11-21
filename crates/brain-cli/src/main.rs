@@ -55,10 +55,7 @@ struct TemporaryDatabase(PathBuf);
 
 impl TemporaryDatabase {
     fn new() -> Self {
-        Self(std::env::temp_dir().join(format!(
-            "brain-cli-{}.sqlite",
-            std::process::id()
-        )))
+        Self(std::env::temp_dir().join(format!("brain-cli-{}.sqlite", std::process::id())))
     }
 
     fn path(&self) -> &Path {
@@ -110,8 +107,14 @@ fn run() -> Result<(), String> {
     let input: Input = serde_json::from_slice(&input_bytes)
         .map_err(|error| format!("invalid input JSON: {error}"))?;
 
-    input.event.validate().map_err(|error| format!("invalid event: {error:?}"))?;
-    input.claim.validate().map_err(|error| format!("invalid claim: {error:?}"))?;
+    input
+        .event
+        .validate()
+        .map_err(|error| format!("invalid event: {error:?}"))?;
+    input
+        .claim
+        .validate()
+        .map_err(|error| format!("invalid claim: {error:?}"))?;
 
     let idempotency_key = input
         .event
@@ -133,7 +136,9 @@ fn run() -> Result<(), String> {
         created_at: input.memory.created_at,
         updated_at: input.memory.updated_at,
     };
-    memory.validate().map_err(|error| format!("invalid memory: {error:?}"))?;
+    memory
+        .validate()
+        .map_err(|error| format!("invalid memory: {error:?}"))?;
 
     let revision = MemoryVersion {
         memory_version_id: input.memory.memory_version_id,
@@ -250,7 +255,10 @@ fn run() -> Result<(), String> {
         eprintln!("memory-domain: Event, Memory, Claim and MemoryVersion validated");
         eprintln!("memory-storage-sqlite: persisted revision to a temporary SQLite database");
         eprintln!("memory-store: create_memory -> write_revision -> read_current succeeded");
-        eprintln!("memory-context: build_context produced {} entr(y/ies)", snapshot.total_entries());
+        eprintln!(
+            "memory-context: build_context produced {} entr(y/ies)",
+            snapshot.total_entries()
+        );
         eprintln!("memory-compiler reference version: {COMPILER_VERSION}");
         eprintln!("output: {} ({} bytes)", output_path, output.len());
     }
