@@ -525,7 +525,7 @@ mod tests {
             .apply("session-a", DeliveryPayload::new_for_test(1, "first"))
             .unwrap();
         adapter
-            .apply("session-a", DeliveryPayload::new(2, "second"))
+            .apply("session-a", DeliveryPayload::new_for_test(2, "second"))
             .unwrap();
 
         let applied = adapter.applied_snapshot("session-a").unwrap();
@@ -537,18 +537,18 @@ mod tests {
     fn stale_or_skipped_versions_return_typed_error_without_mutation() {
         let mut adapter = InMemoryContextDeliveryAdapter::default();
         adapter
-            .apply("session-a", DeliveryPayload::new(1, "accepted"))
+            .apply("session-a", DeliveryPayload::new_for_test(1, "accepted"))
             .unwrap();
 
         assert_eq!(
-            adapter.apply("session-a", DeliveryPayload::new(1, "stale")),
+            adapter.apply("session-a", DeliveryPayload::new_for_test(1, "stale")),
             Err(AdapterError::VersionMismatch {
                 expected: 2,
                 received: 1
             })
         );
         assert_eq!(
-            adapter.apply("session-a", DeliveryPayload::new(3, "skipped")),
+            adapter.apply("session-a", DeliveryPayload::new_for_test(3, "skipped")),
             Err(AdapterError::VersionGap { current: 1, received: 3 })
         );
         assert_eq!(adapter.applied_snapshot("session-a").unwrap().version, 1);
@@ -562,17 +562,17 @@ mod tests {
     fn clear_resets_the_session_so_apply_starts_from_empty() {
         let mut adapter = InMemoryContextDeliveryAdapter::default();
         adapter
-            .apply("session-a", DeliveryPayload::new(1, "old-1"))
+            .apply("session-a", DeliveryPayload::new_for_test(1, "old-1"))
             .unwrap();
         adapter
-            .apply("session-a", DeliveryPayload::new(2, "old-2"))
+            .apply("session-a", DeliveryPayload::new_for_test(2, "old-2"))
             .unwrap();
 
         adapter.clear("session-a").unwrap();
         assert!(adapter.applied_snapshot("session-a").is_none());
 
         adapter
-            .apply("session-a", DeliveryPayload::new(1, "fresh"))
+            .apply("session-a", DeliveryPayload::new_for_test(1, "fresh"))
             .unwrap();
         let applied = adapter.applied_snapshot("session-a").unwrap();
         assert_eq!(applied.version, 1);
@@ -583,12 +583,12 @@ mod tests {
     fn reconnect_reports_last_applied_version_not_a_rejected_attempt() {
         let mut adapter = InMemoryContextDeliveryAdapter::default();
         adapter
-            .apply("session-a", DeliveryPayload::new(1, "committed"))
+            .apply("session-a", DeliveryPayload::new_for_test(1, "committed"))
             .unwrap();
         adapter.disconnect("session-a").unwrap();
 
         assert_eq!(
-            adapter.apply("session-a", DeliveryPayload::new(2, "not-delivered")),
+            adapter.apply("session-a", DeliveryPayload::new_for_test(2, "not-delivered")),
             Err(AdapterError::SessionDisconnected {
                 session_id: "session-a".into()
             })
