@@ -281,3 +281,164 @@ them pass against a local reimplementation would have been a false green.
   revisions and invariants it defines exist in no Rust type.
 - No gap is closed. Every number above is a measurement of presence, not a quality
   judgement, and none of it is acceptance.
+
+## Independent reviews and the CI outage
+
+This section records two things the earlier sections could not: the first independent
+reviews required by dispatch rule 3, and the fact that no CI job in this repository has
+executed since billing broke. Both change what "measured" can mean here.
+
+### The CI outage invalidates every check status in this repository
+
+Every check run I sampled — on `main` HEAD and on five PR heads — reports
+`completed / failure` with exactly one annotation:
+
+> The job was not started because recent account payments have failed or your spending
+> limit needs to be increased.
+
+No job executed. There is no log, because there is no run.
+
+| ref | check runs | all failures are billing |
+|---|---|---|
+| `main` HEAD `477a55e6` | 2 | yes |
+| PR #451 `1f139cea` | 3 | yes |
+| PR #444 `d84ea5c5` | 5 | yes |
+| PR #433 `2d291569` | 6 | yes |
+| PR #436 `1ffed9ed` | 5 | yes |
+| PR #425 `8142b1ca` | 5 | yes |
+
+Consequence, stated plainly because it was being misused: **"CI is red" is not evidence
+against a PR in this repository right now.** A correct PR and a broken one carry the same
+red X. `mergeable` is still computed by git and is still reliable; check runs are not.
+
+This is a repo-level blocker. Nothing in any GAP delivery can fix it. Every measurement
+in this document therefore comes from local execution, and is labelled as such.
+
+### A gate defect found while measuring: `ROOT` is `Path.cwd()`
+
+`scripts/check_bilingual_docs.py` sets `ROOT = Path.cwd()` at import time. Pairing
+resolution (`side_by_side_partner`, `mirror_partner`) reads files through `ROOT`, while
+the baseline is read through `REPO_ROOT`. Running the script from any directory other
+than the repository root silently produces a different answer.
+
+I hit this: measuring from the parent directory reported **32 new gaps on `main`**, which
+would mean `main` itself was broken. Running from the repository root reported
+**86 frozen, 0 new gaps**. The 32 were an artefact of my own invocation, not a repo state.
+
+Anyone reproducing these numbers must `cd` to the tree root first. I record this because
+I nearly filed the artefact as a finding.
+
+### Two independent reviews, both FAIL, both finding something I missed
+
+Dispatch rule 3 says test execution is not approval. Two review sessions were dispatched
+with frozen inputs (branch head, my raw outputs, and an explicit prohibition on reusing my
+conclusions). Both re-derived the measurements rather than trusting them.
+
+| PR | GAP | reviewer verdict | found independently |
+|---|---|---|---|
+| #433 | 02 | `FAIL` / `FINAL: BLOCKED` | coverage doc miscounts its own tests: says 14, actual 15 |
+| #436 | 04 | `FAIL` / `FINAL: BLOCKED` | index declares baseline `1ad6c2cf` but lists a file created by the PR |
+
+Both findings are real and both are mine to record as misses:
+
+**#433.** `context-implementation-coverage.md:131` and `:143` say the reference model has
+14 tests. `grep -c "    def test_"` gives 15. Verified by me after the reviewer reported it:
+
+```
+$ python3 -m unittest test_g_context_model.py -v   ->  Ran 15 tests ... OK
+$ python3 -m unittest test_g_applied_ledger.py -v  ->  Ran 8 tests ... OK
+$ python3 -m unittest discover -s . -p 'test_*.py' ->  Ran 23 tests ... OK
+```
+
+The document's stated total of 29 is wrong under either basis: 30 if counting only
+`test_g_context_model.py` against the pre-existing 15, 23 if counting the whole directory.
+**The document never says which basis it uses**, which is the deeper defect.
+
+**#436.** `protocol-index.md` states `Baseline: 1ad6c2cf...` and its evidence-boundary
+section says it records presence "at the indexed repository baseline". It then lists
+`tests/conformance/provider_outcome/test_provider_outcome.py`, which this PR creates.
+I confirmed the contradiction:
+
+```
+GET /contents/08-bmcp-protocol/tests/conformance/provider_outcome/test_provider_outcome.py?ref=1ad6c2cf...
+-> 404
+```
+
+The same class of defect as #433: a document whose declared basis does not match its
+contents.
+
+### What the reviews confirmed rather than refuted
+
+Not everything failed. These hold up under independent re-derivation:
+
+- **#436's pin is genuine.** Blob `a631bc7a...` resolves to `$id:
+  urn:aimba:schema:c-submit-outcome:1.0.1`, `title: CSubmitOutcome`, `schema_version:
+  1.0.1`, with `$defs` and `allOf` present. The index's claim about an external C-owned
+  schema is accurate, and it correctly declines to reclassify it as BMCP-local.
+- **#436's assertions are real schema assertions.** `Draft202012Validator` and
+  `validator.validate(record)`, not attribute checks.
+- **#433's 19-row mapping is correct** against source SHA `1ad6c2cf`: 0 missing, 0
+  nonexistent, 0 blob-SHA mismatches.
+- **#433's bilingual pair is a translation**, per 8 line-by-line spot checks.
+
+### GAP-04's merged-tree result
+
+Re-measured on a real merge of `main` (`00e3d2ea`) with the branch, in a real git clone:
+
+```
+$ python3 -m unittest discover -p 'test_*.py' -v
+Ran 10 tests ... OK (skipped=5)
+```
+
+5 pass, 5 skip, 0 fail. The five skips name their own blocker (`requires Owner C
+authoritative validator`). That matches what this document already recorded above and is
+unchanged.
+
+### GAP-06 re-verified after 58 commits of main drift
+
+The earlier entry measured PR #444 on its own head. That was the weaker claim. Re-measured
+on the merged tree (`main` + branch, no conflicts), in WSL2 because the Windows host cannot
+compile `libsqlite3-sys`:
+
+```
+$ cargo test -p memory-context                    ->  20 passed; 0 failed
+$ ./target/debug/deps/e2e_store_to_context-...    ->  1 passed; 0 failed
+```
+
+The bilingual gate on that same merged tree: `rc=0`, `86 frozen, 0 new gaps`, `PASS`.
+That last line matters because two other GAP PRs fail the identical command.
+
+### Corrected gate results, using `main`'s gate against each PR tree
+
+Measured on real merges, `PR_BODY` empty:
+
+| PR | GAP | merged gate `rc` | new bilingual gaps |
+|---|---|---|---|
+| #444 | 06 | 0 | 0 |
+| #433 | 02 | 2 | 2 |
+| #436 | 04 | 2 | 2 |
+| #425 | 01 | 2 | 3 (closed before this re-measurement) |
+
+Root cause is one rule, not four mistakes: `.zh-CN.md` side-by-side pairing is only
+understood inside `14-ai-development`. For every other normative root the requirement is
+`docs/en/<path>` **and** `docs/zh-CN/<path>`, both present. Four PRs placed translated
+pairs at the root of a non-`14` directory and assumed they paired. They do not.
+
+### Two PRs closed during this period, not by me
+
+- **#425** closed without merge at `2026-11-21T09:03:37Z`. Reason recorded by the Project
+  Owner: superseded by the five-stage Rust direction in `a730880e`, not a rejection of its
+  10/10 Python tests.
+- **#451** closed without merge at `2026-11-21T09:13:52Z`. Its intent landed via #455,
+  which fixed a one-sided-mirror hole that #450 had introduced.
+
+I record both because #425 was the subject of the Owner E adjudication in the section
+above, and that adjudication now has an executed disposition rather than a pending one.
+
+### What still has not changed
+
+- GAP-03 remains 0% code. GAP-05 remains unimplemented.
+- No gap is closed by this document. Every number here measures presence and execution,
+  not quality, and none of it is acceptance.
+- Four PRs still have zero approvals. Two now have zero-approval reviews that returned
+  `FAIL`. A review is not an approval either.
