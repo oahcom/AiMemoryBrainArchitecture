@@ -22,6 +22,27 @@ The event-store fence is a separate mechanism: `ForgetFence::record_forget(names
 
 The current negative-path suite therefore keeps the desired end-to-end forget test ignored, while a separate reverse test fixes the present observable behavior: a recorded fence does not stop a MemoryStore read.
 
+## 2. Current readers of the fence
+
+The repository search commands run for this round were:
+
+```sh
+grep -RIn 'load_fences' crates/memory-event-store-sqlite crates/memory-store crates/memory-storage crates/memory-storage-sqlite
+grep -RInE 'FROM[[:space:]]+forget_fence|INTO[[:space:]]+forget_fence|UPDATE[[:space:]]+forget_fence' crates/memory-event-store-sqlite crates/memory-store crates/memory-storage crates/memory-storage-sqlite
+grep -RIn 'restore_backup' crates
+```
+
+The Rust production matches are confined to `crates/memory-event-store-sqlite/src/forget_fence.rs`:
+
+- `record_forget` writes the row.
+- `open_existing` calls `load_fences` to validate the existing fence database; this reads and validates the rows but does not enforce them against live Memory reads.
+- `restore_backup` calls `load_fences`; `load_fences` executes `SELECT namespace_key,fence_seq,reason_digest FROM forget_fence`. The resulting namespace set is used while scanning the backup's `accepted_events.scope_json`, and matching event rows are purged from `accepted_events`, `event_payloads`, and `compile_outbox` before activation.
+
+**Conclusion: the fence has a real enforcement reader, but only in the event-store backup-restore path.** No normal `MemoryStore` or `MemoryStorage` read path reads the fence table. The gap is therefore larger than a missing call from one Store method: the fence is not part of the Memory read boundary at all. The five `tests/forget_fence.rs` integration tests exercise restore behavior, validation/fail-closed behavior, malformed scopes, retry after fence commit, and concurrent recording; they do not establish Memory read enforcement.
+
+The Round 8 behavior probe is named `forget_api_absence_is_detectable`. It deliberately asserts that a Memory revision remains readable after recording a fence. It is green under today's split architecture and must become red when Memory read enforcement is added; at that point remove the characterization test and enable `forgotten_memory_is_excluded_from_context`.
+
+
 ## Candidate implementation directions
 
 ### (a) Add `MemoryStore::forget(namespace_key, reason)` and delegate to `ForgetFence`
@@ -47,7 +68,7 @@ Close this item only when all of the following are true:
 1. A public, documented contract connects the durable namespace fence to MemoryStorage reads, including failure behavior if fence state is missing, corrupt, or unavailable.
 2. Every public read path that can return a Memory revision enforces that contract; a fenced namespace returns no readable revision (or a typed refusal), never the pre-fence revision.
 3. The implementation has an atomicity/visibility story for fence recording versus concurrent reads and is covered by tests across the relevant storage adapter boundary.
-4. The reverse test `forget_fence_is_not_yet_enforced_by_memory_store_reads` is changed to assert the enforced behavior or removed with an explicit replacement regression test, and the ignored desired E2E `forgotten_memory_is_excluded_from_context` is enabled and passes.
+4. The reverse test `forget_api_absence_is_detectable` is changed to assert the enforced behavior or removed with an explicit replacement regression test, and the ignored desired E2E `forgotten_memory_is_excluded_from_context` is enabled and passes.
 5. The relevant crate tests and workspace validation pass on the merged implementation.
 
 Until these conditions are met, keep this work item open and retain both tests as executable documentation of the current and desired contracts.
