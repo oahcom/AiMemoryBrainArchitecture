@@ -1,3 +1,46 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope: null
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "Frozen baseline measured at a8fd2b7; file introduced by 1ad6c2c"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Historical frozen measurements; this bilingual remediation does not remeasure implementation state."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: "docs/en/14-ai-development/work-items/GAP-BASELINE-001.md"
+    zh-CN: "docs/zh-CN/14-ai-development/work-items/GAP-BASELINE-001.md"
+---
+
 # GAP-BASELINE-001 — Key Missing Workload Baseline
 
 - Repository: `oahcom/AiMemoryBrainArchitecture`
