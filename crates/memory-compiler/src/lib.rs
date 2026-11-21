@@ -1267,14 +1267,6 @@ mod scenario_tests {
         }
     }
 
-    fn scenario_lease(generation: u64) -> WorkerLease {
-        WorkerLease {
-            operation_id: id("scenario-operation"),
-            worker_id: id("scenario-worker"),
-            generation,
-        }
-    }
-
     #[test]
     fn llm_outage_before_accepted_leaves_stage_pending() {
         let mut execution =
@@ -1476,7 +1468,6 @@ mod scenario_tests {
     fn forget_while_leased_prevents_publication() {
         #[derive(Clone, Copy, Debug, Eq, PartialEq)]
         enum ForgetCheck {
-            Clear,
             Tombstoned,
         }
 
@@ -1517,6 +1508,12 @@ mod scenario_tests {
         );
         assert!(!fixture.lease_valid);
         assert!(fixture.checked_low_watermark);
+
+        // 租约有效且墓碑晚于低水位时，授权必须放行：这是 Clear 曾被用来表达的
+        // 成功路径，语义上由 Ok(()) 承载，不应再占用一个错误变体。
+        fixture.lease_valid = true;
+        fixture.tombstone_epoch = 13;
+        assert_eq!(fixture.authorize_publication(12), Ok(()));
     }
 
     #[test]
