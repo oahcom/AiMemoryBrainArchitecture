@@ -261,12 +261,28 @@ ScopeRef 仍是领域适用范围/命名空间引用，不是授权 Grant。OPEN
 
 ## 9. Phase 边界与状态
 
-- Phase 1：有界核心已实现；本文不重新开启其已接受不变量。
-- Phase 2：本文规格状态为 PROPOSED；未来实现须先解决所列跨 Owner 决策并获得单独授权。
+本分支的 Phase 2 实现状态：
+
+| 规格条目 | 状态 | 可执行证明 |
+|---|---|---|
+| ClaimRef / ClaimRevisionRef / ClaimRevision | TYPED | `dm2_01_claim_revision_parent_must_belong_to_same_claim`、`dm2_02_claim_revision_is_append_only_and_immutable`；compile-fail doctest 证明不同引用类型混用及修改操作会被拒绝 |
+| FactRef / FactRevisionRef / Fact / FactRevision | TYPED | `dm2_03_fact_refs_are_distinct_and_fact_pins_exact_claim_revision`、`dm2_04_fact_cannot_be_constructed_without_claim_evidence_provenance`；compile-fail doctest 证明仅凭 confidence/Verified 无法构造 Fact |
+| Entity 身份扩展 | TYPED | `dm2_05_entity_merge_requires_successor_lineage_but_alias_does_not` |
+| Relation 类型化端点及有效时间区分 | TYPED | `dm2_06_relation_endpoint_kind_is_checked_against_definition`、`dm2_08_unknown_valid_time_is_not_timeless` |
+| Evidence 扩展 | TYPED | `dm2_07_evidence_extension_requires_integrity_and_scope` |
+| Provenance 图扩展 | NOT TYPED | 仅新增 `ProvenanceRef` newtype；尚无扩展后的 Provenance 记录或 DAG 校验 |
+| MemorySource 扩展 | NOT TYPED | 本轮明确排除 |
+| 时间精度/时区/确定性扩展 | NOT TYPED | 仅类型化并测试了 Relation 的 Unknown 与 AllTime 有效时间区别 |
+| I 授权与 Attestor 语义 | PLACEHOLDER ONLY | 必需的 `AttestorRef` 和 `AuthorizationDecisionRef` 占位类型明确标注 `NOT DEFINED: awaiting I` |
+| D 规范提交语义 | PLACEHOLDER ONLY | 必需的 `CanonicalCommitRef` 占位类型明确标注 `NOT DEFINED: awaiting D` |
+
+Entity、Relation 和 Evidence 的 Phase 1 结构体保持源码兼容；Phase 2 语义通过新增扩展记录表达。Claim 保持不变，ClaimRevision 为新增类型。Fact 构造必须提供完整的初始 FactRevision 及其必需的 I/D 占位字段。
+
+- Phase 1：有界核心已实现；本次实现不重新开启其已接受不变量。
+- Phase 2：上述条目仅在表中注明的范围内达到 TYPED；NOT TYPED 条目仍未完成。实现尚未接受，必须经过独立复审。
 - Phase 3：未评估，且不声称完成。
 
-没有修改代码。本规格任务未运行测试。不声称自我批准或验收。
-
+代码和测试已提交到本分支。测试执行情况另行报告；不声称自我批准或验收。
 ## 10. 参考资料
 
 以下仓库资料均在基线 `1ad6c2cf67a228f597fcbe1c7149c328ecbf38e9` 回读：
