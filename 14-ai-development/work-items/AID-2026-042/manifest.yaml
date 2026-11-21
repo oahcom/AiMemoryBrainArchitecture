@@ -1,0 +1,107 @@
+work_item_id: AID-2026-042
+title: Patch sys.argv in the real-git gate regression helper
+
+class: TEST
+risk: R1
+risk_rationale: >-
+  A narrowly scoped test-harness isolation fix. It prevents unittest runner
+  arguments from leaking into a production CLI entry point during a test.
+  No production gate behavior, runtime data, persistence, or protocol contract
+  is changed.
+
+security_scope: Test-process argv isolation in the bilingual documentation gate regression suite only.
+
+status: VERIFIED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+implementing_ai_session: Current ChatGPT delivery session; platform session identifier NOT_EXPOSED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: d9c29a1c16b81f32eba82cd0e59a7e7b13de05a8
+
+tracking_issue: "NONE — task is tracked by this AID manifest and its delivery PR; no new Issue requested"
+
+created_at: 2026-11-21
+updated_at: 2026-11-21
+
+prompt_id: AID-2026-042-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-042/prompt-v1.md
+prompt_status: FROZEN
+prompt_sha256: 2264a492b417dde29aa51b23d5f0988a5873bf97797b1c789cb49ff1d894df45
+prompt_bytes: 1888
+prompt_file_blob_sha: PENDING_GIT_OBJECT
+prompt_file_commit_sha: PENDING_REGISTRATION_COMMIT
+
+prompt_provenance_tier: T1
+prompt_provenance_note: >-
+  Frozen from the user-provided task dispatch in this ChatGPT conversation.
+  Raw platform payload bytes and session identifier are not exposed; the
+  SHA-256 records the committed prompt-v1.md bytes only.
+
+dependency_refs:
+  - scripts/governance/evidence/test_gate_normative_roots.py
+  - scripts/check_bilingual_docs.py
+  - 14-ai-development/work-items/INDEX.md
+
+deliverables:
+  - Isolate sys.argv in GateRootsTest._run_real_git_gate_for_change() using the existing ExitStack and patch import.
+  - Preserve production CLI argument handling, the three exit-code assertions, and the JSON non-bilingual-document policy.
+  - Register the work item and preserve exact verification evidence in the delivery PR.
+
+independent_reviewer: NOT_ASSIGNED
+integration_reviewer: NOT_ASSIGNED
+
+review:
+  status: NOT_ASSIGNED
+  report_ref: ""
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)
+
+implementation:
+  status: PR_OPEN
+  branch: fix/AID-2026-042/sys-argv-gate-tests
+  pull_request: PENDING
+  pull_request_url: PENDING
+  implementation_commit_sha: 0a5070b94b72dbc2ca1aba3a2285642cd3699363
+  merge_commit_sha: NOT_MERGED
+
+authorization:
+  registration_write: USER-PRINCIPAL-DELEGATED (limited to this AID registration package)
+  implementation_write: USER-PRINCIPAL-DELEGATED (limited to scripts/governance/evidence/test_gate_normative_roots.py)
+  index_update: USER-PRINCIPAL-DELEGATED (limited to the single AID-2026-042 row)
+  runtime_implementation: NOT_GRANTED
+  architecture_acceptance: NOT_GRANTED
+  production_authorization: NOT_GRANTED
+
+governance:
+  aid_assignment: REGISTERED
+  aid_status: REGISTERED
+  registration_authorization: USER-PRINCIPAL-DELEGATED (limited to this work item)
+  development_start_authorization: USER-PRINCIPAL-DELEGATED (limited to this implementation scope)
+  architecture_status: NOT_APPLICABLE
+  g8_status: NOT_APPLICABLE
+  quota_change: NONE
+
+verification:
+  status: PASS
+  commands:
+    - "python3 -m unittest discover -s scripts/governance/evidence -p 'test_gate*.py' — 52 tests, OK, EXIT 0"
+    - "BASE_SHA=$(git rev-parse HEAD) HEAD_SHA=$(git rev-parse HEAD) python3 scripts/check_bilingual_docs.py — PASS, EXIT 0"
+    - "git diff -w --stat HEAD^ HEAD — scripts/governance/evidence/test_gate_normative_roots.py | 2 ++; 1 file changed"
+    - "git diff --check — EXIT 0"
+    - "python3 scripts/precheck_delivery.py — OK (26 Rust files scanned), EXIT 0"
+  evidence_refs:
+    - "Test output: Ran 52 tests in 1.421s; OK"
+    - "Gate output: bilingual baseline 77 frozen, 0 new gaps; exemptions 21; structural gate PASS (0 changed paths inspected)"
+    - "Delivery precheck: precheck_delivery: OK (26 Rust files scanned)"
+
+findings:
+  - id: F-GATE-SYS-ARGV-001
+    severity: P2
+    feedback_destination: "Delivery PR conversation; record finding and close when the 52-test suite and gate exit code 0 are verified on the PR head"
