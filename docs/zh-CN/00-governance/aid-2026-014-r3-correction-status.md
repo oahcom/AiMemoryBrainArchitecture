@@ -49,13 +49,13 @@ TEST EXECUTION = SUSPENDED
 | 要求 | 应用状态 | 独立复审 |
 |---|---|---|
 | R1 Claim 身份 | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
-| R2 Attestor 授权 | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
-| R3 共享 Fact Forget | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
+| R2 Attestor 授权 | FIX_APPLIED_AWAITING_REREVIEW | REQUEST CHANGES |
+| R3 共享 Fact Forget | FIX_APPLIED_AWAITING_REREVIEW | REQUEST CHANGES |
 | R4 Fact/Claim 同步 | FIX_APPLIED_AWAITING_REREVIEW | PASS |
-| R5 端到端发布 | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
+| R5 端到端发布 | FIX_APPLIED_AWAITING_REREVIEW | REQUEST CHANGES |
 | R5 Storage §8.8 | APPLIED_PENDING_INDEPENDENT_REVIEW | PASS |
 | R5 Admission 阶段关系 | APPLIED_PENDING_INDEPENDENT_REVIEW | PASS |
-| PASS 治理同步 | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
+| PASS 治理同步 | FIX_APPLIED_AWAITING_REREVIEW | PASS |
 
 ## 4. 应用证据要求
 
@@ -311,3 +311,115 @@ barrier 时，Forget Fence 不得完成处置。这属于实现一致性验证�
 
 `R1`、`R2`、`R3`、`R5 端到端发布`、`PASS 治理同步` 本轮未被重新裁定，仍保持 `PENDING`。故整体
 处置范围窄于本轮的 `PASS`：三行发生变更，五行未变，验收门禁完全未动。
+### 9.4 第二轮独立复审 —— 要求修改
+
+复审方：独立会话 `6b0112a2-7b64-83ee-a29b-da285ff8d589`（只读，未写仓库，未由复审方发布评论）。
+2026-11-21 返回裁决。回读钉定：`8dc92c3debde36929d34808bead0a62ffc4f64fa`。十二个 Blob 均读自该确切提交。
+
+这不是 §9.3 的重跑。§9.3 覆盖当时被阻断的三项；本轮覆盖 §9.3 留在 `PENDING` 的四项。本节取代
+§9.3 末段以及 §9 中「七行仍全部为 PENDING」一句：二者描述的是本裁决之前的状态，当前状态以 §3
+为准。
+
+复审方核对过的 Blob 身份，全部 MATCH：
+```
+docs/en/09-security-governance/security-governance-guide.md        60b2283fdf44d116fa59fe84eaab217b435fbe70  15171 B
+docs/zh-CN/09-security-governance/security-governance-guide.md     9fee318f2def690b3db9386d938df790292fb05f  13359 B
+docs/en/03-memory-brain/memory-versioning.md                       7e63b9b397c3bdff1567dab421f658af86ee1a48  33424 B
+docs/zh-CN/03-memory-brain/memory-versioning.md                    89d9eb4786615cc43f7098b206c1ccd446536fa2  31768 B
+docs/en/02-domain-model/domain-model-overview.md                   5b86fe23ab7c670b4ae13331b56572aee35f5d00  26974 B
+docs/en/04-memory-compiler/extraction-and-normalization.md         03c8a6f32113d54cac097c792b896a4ec3f873b1  20841 B
+docs/zh-CN/04-memory-compiler/extraction-and-normalization.md      ac484c860b9b8eb9da19801acd9a985f2a8b4b3a  20233 B
+docs/en/06-memory-context/phase-3.8.27-g-claim-fact-visibility-addendum.md   190bd11d8226d6e6e3c97ad37b700d43b8b70720  2822 B
+docs/zh-CN/06-memory-context/phase-3.8.27-g-claim-fact-visibility-addendum.md   47d9fe9b7387c843f09f519519b14e998a1a65c7  2626 B
+06-memory-context/context-versioning.md                            847c9578b4404c1a034fe62ee9bbffa598f7ab2e  32435 B
+docs/en/00-governance/aid-2026-014-r3-correction-status.md         0047e6fc83b50eb561ebfc5f7b5440448435d79a  22544 B
+docs/zh-CN/00-governance/aid-2026-014-r3-correction-status.md      4b41c177f1707be1b24334df60ca85c95974c612  21054 B
+```
+
+| 项目 | 裁决 | 阻断编号 |
+|---|---|---|
+| R2 Attestor 授权 | REQUEST CHANGES | R2-01 |
+| R3 共享 Fact Forget | REQUEST CHANGES | R3-01 |
+| R5 端到端发布 | REQUEST CHANGES | R5-01、R5-02 |
+| PASS 治理同步 | PASS | — |
+| R4 Fact/Claim 同步 | PASS，继承 | 未重新裁定 |
+| R5 Storage §8.8 | PASS，继承 | 未重新裁定 |
+| R5 Admission 阶段关系 | PASS，继承 | 未重新裁定 |
+
+**R2-01 —— 授权决定未绑定唯一 Attestation 操作。** I/D 分工本身通过：§1 将全局身份与授权策略、
+Delegation、Revocation 归 I；§12.1 明确 I 是 Attestor 授权的唯一治理决策权威，禁止 D 自行判断授权
+资格或重新解释决定，D 只做验证。撤销侧也是充分的：§12.3 要求 PrincipalRef、精确 ScopeRef、
+Method 与不可变 Version、有效期与授权 Epoch、撤销身份与 currentness、Delegation 的显式
+`ALLOWED`/`PROHIBITED`、不可变 `AuthorizationDecisionRef` 以及策略 Provenance；§12.4 缺失即 fail
+closed；§12.5 禁止静默改写历史。缺口在单次用途绑定。§12.2 在 FactRevision 上保存授权决定引用，但
+§12.3 的字段清单未要求绑定唯一的 `AttestationOperationRef`、精确目标 `FactRef`/`FactRevisionRef`、
+该次操作的精确 `ClaimRevisionRef` 集合、精确 `EvidenceRef` 集合，也未要求一次性消费或防重放状态。
+§12.6 的 D 验证清单同样从不要求验证「该决定绑定于当前唯一 Attestation 操作」。由此产生的重放解读是
+具体的：一个决定被第二个 FactRevision 引用时，满足现有全部显式 Scope、Method 与有效期检查，当前
+文本没有任何一句禁止；而且两个 FactRevision 各自持有引用，并不能证明该决定只用过一次。修正只要求
+语义契约，不要求批准 Schema、DDL 或 Public API。
+
+**R3-01 —— 六分量矩阵缺少 Forget 终态映射。** 共享闭包规则通过。`§8.1` 要求 Forget 作用于完整依赖
+闭包：精确 Claim/Fact Revision 引用、Evidence 及其独立治理与来源 Payload、可重构 Provenance、派生
+MemoryVersion 与 ContextVersion、Index 与 Cache 的清理及读路径抑制、Snapshot/Staging 纳入依赖清单、
+Replay/Retry/Recovery 的历史读取检查、Export 的授权与 Forget 检查、Backup 保留副本、Restore 在查询
+或投递前重新检查。其三条约束是实质部分：共享 Fact 不得让多个 ClaimRevision 共享同一 Forget 处置；
+剩余合法内容无法安全隔离时必须抑制整个受影响 FactRevision；依赖集合未知或不完整时不得宣告 Forget
+完成。§19.1 也未留下合法的「先发布、后登记」路径：第 3 步先持久化完整直接与传递依赖集合，第 5 步
+才允许规范提交，第 7 步才允许 E 发布。缺的是另一件产物：I Security Guide §7 定义了四种操作终态
+——`Completed`、`CompletedWithPolicyException`、`Failed`、`Cancelled`——而 §16.1 没有把四种终态映射
+到六个分量上。复审方点出四个当前矩阵答不出的问题：`Cancelled` 是否允许已提交的 Canonical Revision
+保留；`Failed` 在 E 发布已发生而 Storage Visibility 未发生时如何终结；`CompletedWithPolicyException`
+是否允许 G ContextVersion 提交，还是只允许隐藏态；哪些终态必须完成全部六个分量，哪些可以以抑制
+处置结束。当前行为只能从「已声明的完成/抑制策略」推断，无法由矩阵逐项核验。这只要求一张终态 ×
+分量处置表，不要求为每种故障复制一份矩阵。
+
+**R5-01 —— 第二阶段 Fence-first 的结果未定义。** 一个原有 T17 未覆盖的竞争窗口：Producer Admission
+成功且 participant 记录已持久化；依赖登记与规范提交成功；E 发布已产生对象，Storage 已将准确 tuple
+持久化为 `PREPARED_HIDDEN`；随后 Forget Fence 与 PublicationParticipant Admission 竞争，Fence 先
+线性化，第二阶段准入无法成功。§19.2 已确定排序锚点、第二阶段成功与 participant 记录的不可分性、
+不得越过未解决已准入 participant barrier、不得替换 participant 身份。但它没有说明已经存在的对象
+如何终结，留了五个问题：已提交的 Canonical Revision 是否永久不可公开；已存在的 E Publication 如何
+处理；`PREPARED_HIDDEN` tuple 必须取消、隔离，还是保留为待处置态；第一阶段的 participant 处置如何
+关联到一个从未成功准入的 PublicationParticipant；以及如何证明该隐藏 tuple 不会经恢复、重试或另一条
+发布路径重新可见。
+
+**R5-02 —— 六分量矩阵仍只有一个 `Admission` 列。** §16.1 仍写作
+`D Fence → Admission → D Canonical Commit → E Publication → Storage Visibility → G Context Commit`，
+而 §19.2 现已定义两个准入。Fence 在 Producer Admission 之前、两个准入之间、或在
+PublicationParticipant Admission 成功之后线性化，三者留下的持久记录、可见性状态与最终处置各不相同，
+而 T17/T18 只命名了第一种时序。
+
+本裁决不做什么，由复审方明示并在此保留：
+
+- 不重新打开 `DECIDED FOR CONVERGENCE` 的发布顺序、两准入区分、R4 三层拆分，或已应用的 Storage
+  §8.8 位置。
+- 不指控生产数据泄漏。R3 的发现针对规范可核验性；复审方明确记录目前没有已知的「已发布但未登记
+  依赖」生产实例。
+- 不改变任何验收门禁。§2 逐行未变。
+- 不授权测试。`TEST EXECUTION = SUSPENDED` 维持，复审方给出的是前置条件而非执行许可。
+
+复审方还回读了载体分支上的 Storage ADR §8.8 Blob（`8d4ac845f409c2cb64831c850219fdb84a113cf0`），
+陈述其七步顺序与两个 Admission 定义和 Extraction §19.2 一致，但未重新裁定 ADR 正文。
+
+交给本轮修正的 SYNC 事项（EN 与 ZH 同步，不只改英文）：
+
+| 编号 | 目标 | 改动 |
+|---|---|---|
+| SYNC-01 | Security Guide §12.3 | 绑定唯一 Attestation 操作及其目标；禁止跨操作重放 |
+| SYNC-02 | Security Guide §12.6 | 要求 D 验证操作身份、目标集合与消费状态 |
+| SYNC-03 | Domain Model §8.1 | 保留闭包规则；增加其与 Forget 终态的对应关系 |
+| SYNC-04 | Memory Versioning §16.1 | 增加 Forget 终态 × 六分量处置矩阵 |
+| SYNC-05 | Extraction §19.1 / §19.2 | 补全第二阶段 Fence-first 与 Participant-first 处置 |
+| SYNC-06 | Memory Versioning §16.1 | 区分 Producer Admission 与 PublicationParticipant Admission |
+| SYNC-07 | G §13.3 | 明确第二阶段被拒绝时的不发布与恢复约束 |
+
+复审方给出的测试前置条件，须先满足后才谈是否解除挂起：R2 的唯一操作绑定与跨 FactRevision 复用拒绝
+测试；R3 的多 ClaimRevision 共享 Fact Forget、Evidence 与 Provenance 独立依赖、Export/Backup/Restore
+路径、四种终态在六分量上的处置、依赖登记不完整时阻断提交；R5 的 `T17-P`、`T18-P`、`T17-PUB`、
+`T18-PUB`、两准入并发交错、Fence 与 `PREPARED_HIDDEN` 竞争、崩溃、Lost ACK、重试与恢复、不得出现
+重复可见的 Revision/Publication/ContextVersion、Fence 不得在 participant barrier 未解决时完成。准入
+成功与 participant 持久记录必须在两个阶段分别成立，不能只验证第一阶段。
+
+§3 的「应用状态」列保持原样：上一轮的应用仍在树中。变化的是「独立复审」列，这也是四行变更、验收
+门禁一行未动的原因。

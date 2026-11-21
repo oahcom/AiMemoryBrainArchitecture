@@ -49,13 +49,13 @@ TEST EXECUTION = SUSPENDED
 | Requirement | Application status | Independent review |
 |---|---|---|
 | R1 Claim identity | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
-| R2 Attestor authorization | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
-| R3 Shared Fact Forget | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
+| R2 Attestor authorization | FIX_APPLIED_AWAITING_REREVIEW | REQUEST CHANGES |
+| R3 Shared Fact Forget | FIX_APPLIED_AWAITING_REREVIEW | REQUEST CHANGES |
 | R4 Fact/Claim synchronization | FIX_APPLIED_AWAITING_REREVIEW | PASS |
-| R5 End-to-end publication | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
+| R5 End-to-end publication | FIX_APPLIED_AWAITING_REREVIEW | REQUEST CHANGES |
 | R5 Storage §8.8 | APPLIED_PENDING_INDEPENDENT_REVIEW | PASS |
 | R5 Admission stage relation | APPLIED_PENDING_INDEPENDENT_REVIEW | PASS |
-| PASS governance synchronization | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
+| PASS governance synchronization | FIX_APPLIED_AWAITING_REREVIEW | PASS |
 
 ## 4. Application evidence requirements
 
@@ -325,3 +325,139 @@ unresolved ordering choice, and it is not satisfied by the existence of the text
 `R1`, `R2`, `R3`, `R5 End-to-end publication` and `PASS governance synchronization` were not
 re-adjudicated in this round and keep `PENDING`. The overall disposition is therefore narrower than
 the round's `PASS`: three rows moved, five did not, and the acceptance gates did not move at all.
+### 9.4 Second independent review — changes required
+
+Reviewer: independent session `6b0112a2-7b64-83ee-a29b-da285ff8d589` (read-only, no repository
+write, no comment posted by the reviewer). Verdict returned 2026-11-21. Read-back pin:
+`8dc92c3debde36929d34808bead0a62ffc4f64fa`. Twelve Blobs were read at that exact commit.
+
+This is not a re-run of §9.3. §9.3 covered the three items that were blocked then; this review
+covers the four that §9.3 left `PENDING`. It supersedes the closing paragraph of §9.3 and the
+sentence in §9 that all rows still carry `PENDING`: both described the state before this verdict,
+and §3 carries the current state.
+
+Blob identities the reviewer verified, all MATCH against the pin:
+```
+docs/en/09-security-governance/security-governance-guide.md        60b2283fdf44d116fa59fe84eaab217b435fbe70  15171 B
+docs/zh-CN/09-security-governance/security-governance-guide.md     9fee318f2def690b3db9386d938df790292fb05f  13359 B
+docs/en/03-memory-brain/memory-versioning.md                       7e63b9b397c3bdff1567dab421f658af86ee1a48  33424 B
+docs/zh-CN/03-memory-brain/memory-versioning.md                    89d9eb4786615cc43f7098b206c1ccd446536fa2  31768 B
+docs/en/02-domain-model/domain-model-overview.md                   5b86fe23ab7c670b4ae13331b56572aee35f5d00  26974 B
+docs/en/04-memory-compiler/extraction-and-normalization.md         03c8a6f32113d54cac097c792b896a4ec3f873b1  20841 B
+docs/zh-CN/04-memory-compiler/extraction-and-normalization.md      ac484c860b9b8eb9da19801acd9a985f2a8b4b3a  20233 B
+docs/en/06-memory-context/phase-3.8.27-g-claim-fact-visibility-addendum.md   190bd11d8226d6e6e3c97ad37b700d43b8b70720  2822 B
+docs/zh-CN/06-memory-context/phase-3.8.27-g-claim-fact-visibility-addendum.md   47d9fe9b7387c843f09f519519b14e998a1a65c7  2626 B
+06-memory-context/context-versioning.md                            847c9578b4404c1a034fe62ee9bbffa598f7ab2e  32435 B
+docs/en/00-governance/aid-2026-014-r3-correction-status.md         0047e6fc83b50eb561ebfc5f7b5440448435d79a  22544 B
+docs/zh-CN/00-governance/aid-2026-014-r3-correction-status.md      4b41c177f1707be1b24334df60ca85c95974c612  21054 B
+```
+
+| Item | Verdict | Blocking finding |
+|---|---|---|
+| R2 Attestor authorization | REQUEST CHANGES | R2-01 |
+| R3 Shared Fact Forget | REQUEST CHANGES | R3-01 |
+| R5 End-to-end publication | REQUEST CHANGES | R5-01, R5-02 |
+| PASS governance synchronization | PASS | — |
+| R4 Fact/Claim synchronization | PASS, inherited | not re-adjudicated |
+| R5 Storage §8.8 | PASS, inherited | not re-adjudicated |
+| R5 Admission stage relation | PASS, inherited | not re-adjudicated |
+
+**R2-01 — the authorization decision is not bound to a single attestation operation.** The I/D
+split itself passes: §1 gives I the global identity and authorization policy, Delegation and
+Revocation; §12.1 makes I the sole governance decision authority for Attestor authorization and
+forbids D from judging eligibility or reinterpreting the decision; D only verifies. Revocation is
+also adequate: §12.3 requires PrincipalRef, exact ScopeRef, Method and immutable Version, validity
+window and authorization epoch, revocation identity and currentness, explicit Delegation
+`ALLOWED`/`PROHIBITED`, an immutable `AuthorizationDecisionRef`, and policy provenance; §12.4 fails
+closed; §12.5 forbids silently rewriting history. The gap is single-use binding. §12.2 stores an
+authorization decision reference on the FactRevision, but the §12.3 field list does not require
+binding it to a unique `AttestationOperationRef`, to the exact target `FactRef`/`FactRevisionRef`,
+to the exact `ClaimRevisionRef` set of that operation, to the exact `EvidenceRef` set, or to a
+one-time-consumption or anti-replay state. §12.6's D verification list likewise never requires
+checking that the decision is bound to the current unique attestation operation. The concrete
+replay reading: one decision, cited by a second FactRevision, satisfies every explicitly listed
+Scope, Method and validity check; nothing in the current text forbids it, and two FactRevisions
+each holding a reference does not prove the decision was used once. The fix is asked for as a
+semantic contract only — no Schema, DDL or Public API approval is requested.
+
+**R3-01 — the six-component matrix has no Forget terminal-state mapping.** The shared-closure rules
+pass. `§8.1` requires Forget to act on the complete dependency closure: exact Claim/Fact revision
+references, Evidence with its own governance and source payload, reconstructable Provenance,
+derived MemoryVersion and ContextVersion, Index and Cache clearing plus read-path suppression,
+Snapshot/Staging in the dependency list, Replay/Retry/Recovery history checks, Export under
+authorization and Forget checks, Backup retention, and Restore re-checks before query or delivery.
+Its three constraints are the substantive part: a shared Fact does not give multiple ClaimRevisions
+one shared disposition; if the remaining lawful content cannot be safely isolated the whole
+affected FactRevision must be suppressed; and an unknown or incomplete dependency set forbids
+declaring Forget complete. §19.1 also leaves no lawful publish-then-register path, since step 3
+persists the full direct and transitive dependency set before step 5 permits canonical commit and
+step 7 permits E publication. What is missing is a different artefact: I Security Guide §7 defines
+four operation terminal states — `Completed`, `CompletedWithPolicyException`, `Failed`,
+`Cancelled` — and §16.1 builds no disposition mapping from those states onto its six components.
+The reviewer names four questions the matrix cannot answer today: whether `Cancelled` permits a
+committed canonical revision to remain; how `Failed` terminates when E publication happened but
+Storage visibility did not; whether `CompletedWithPolicyException` permits a G ContextVersion commit
+or only a hidden state; and which terminal states must complete all six components versus end on a
+suppression disposition. Behaviour is currently inferable only from the declared
+completion/suppression policy, not checkable against the matrix. This is a request for one
+terminal-state × component disposition table, not for a duplicated failure matrix per fault.
+
+**R5-01 — the second-stage Fence-first outcome is undefined.** A race window that the original
+T17 does not cover: Producer Admission succeeds and the participant record is durable; dependency
+registration and canonical commit succeed; E publication produces the object and Storage persists
+the exact tuple as `PREPARED_HIDDEN`; then the Forget Fence and PublicationParticipant Admission
+race and the Fence linearizes first, so the second admission cannot succeed. §19.2 settles the
+ordering anchor, the inseparability of second-stage success from its participant record, the bar on
+crossing an unresolved admitted-participant barrier, and the bar on replacing participant identity.
+It does not say what happens to objects that already exist. Five questions are left open: whether
+the committed canonical revision stays permanently unpublishable; what happens to an E publication
+that already exists; whether the `PREPARED_HIDDEN` tuple must be cancelled, quarantined, or held in
+a pending-disposition state; how the first-stage participant disposition reaches a
+PublicationParticipant that never successfully admitted; and how it is proven that the hidden tuple
+cannot become visible through recovery, retry, or another publication path.
+
+**R5-02 — the six-component matrix still has one `Admission` column.** §16.1 still reads
+`D Fence → Admission → D Canonical Commit → E Publication → Storage Visibility → G Context Commit`,
+while §19.2 now defines two admissions. A Fence that linearizes before Producer Admission, between
+the two admissions, or after PublicationParticipant Admission succeeds leaves different durable
+records, different visibility states and different final dispositions, and only the first of the
+three timings is named by T17/T18.
+
+What this verdict does not do, stated by the reviewer and preserved here:
+
+- It does not reopen the `DECIDED FOR CONVERGENCE` publication order, the two-admission
+  distinction, the R4 three-layer split, or the applied Storage §8.8 position.
+- It does not allege production data leakage. R3's finding is about normative checkability; the
+  reviewer records that no published-but-unregistered production instance is known.
+- It does not change any acceptance gate. §2 is unchanged in every line.
+- It does not authorize testing. `TEST EXECUTION = SUSPENDED` stands, and the reviewer lists
+  preconditions rather than execution.
+
+The reviewer also re-read the Storage ADR §8.8 Blob on its carrier branch
+(`8d4ac845f409c2cb64831c850219fdb84a113cf0`) and states its seven-step order and two admission
+definitions agree with Extraction §19.2, without re-adjudicating the ADR body.
+
+SYNC items handed to the correction round (EN and ZH both, not English alone):
+
+| Id | Target | Change |
+|---|---|---|
+| SYNC-01 | Security Guide §12.3 | Bind the decision to a unique attestation operation and its targets; forbid cross-operation replay |
+| SYNC-02 | Security Guide §12.6 | Require D to verify operation identity, target set and consumption state |
+| SYNC-03 | Domain Model §8.1 | Keep the closure rules; add their correspondence to Forget terminal states |
+| SYNC-04 | Memory Versioning §16.1 | Add the Forget terminal-state × six-component disposition matrix |
+| SYNC-05 | Extraction §19.1 / §19.2 | Complete the second-stage Fence-first and Participant-first dispositions |
+| SYNC-06 | Memory Versioning §16.1 | Separate Producer Admission from PublicationParticipant Admission |
+| SYNC-07 | G §13.3 | State the no-publish and recovery constraints when the second stage is refused |
+
+Test preconditions named by the reviewer, to be satisfied before execution is reconsidered: unique
+attestation-operation binding and a cross-FactRevision reuse rejection test (R2); multi-ClaimRevision
+shared-Fact Forget, Evidence and Provenance dependencies, Export/Backup/Restore paths, the four
+terminal states across six components, and commit blocked on incomplete dependency registration
+(R3); `T17-P`, `T18-P`, `T17-PUB`, `T18-PUB`, two-admission concurrent interleaving, Fence versus
+`PREPARED_HIDDEN`, crash, lost ACK, retry and recovery, no duplicate visible revision, publication or
+ContextVersion, and no Fence completing over an unresolved participant barrier (R5). Admission
+success plus durable participant record must hold in both stages, not only the first.
+
+The Application status column in §3 is left as it stands: the previous application is still in the
+tree. The Independent review column now carries this verdict, which is why four rows changed and
+none of the acceptance gates did.
