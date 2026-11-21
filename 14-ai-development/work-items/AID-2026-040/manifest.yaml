@@ -23,7 +23,7 @@ base_commit_sha: bb49dc121c195d7fb2ffa0ffbb9d376186b802fc
 tracking_issue: "NONE — Issue #7 and #43 both closed 2026-11-20T16:20Z; this work item carries its own record"
 
 created_at: 2026-11-21
-updated_at: 2026-11-21T08:05:00Z
+updated_at: 2026-11-21T09:55:00Z
 
 prompt_id: AID-2026-040-PROMPT
 prompt_version: v1
@@ -66,9 +66,9 @@ acceptance:
 
 implementation:
   status: NOT_STARTED
-  branch: NOT_ASSIGNED
-  pull_request: NOT_ASSIGNED
-  merge_commit_sha: NOT_ASSIGNED
+  branch: docs/aid-2026-040-e1-e8-measurement
+  pull_request: 437
+  merge_commit_sha: 776f04fb694140f8663a87d593be1da2957673a4
 
 authorization:
   registration_write: USER-PRINCIPAL-DELEGATED (limited to this registration package)
@@ -104,3 +104,82 @@ registration_boundary: >-
   evidence. It does not establish that E1–E8 are satisfied, does not grant
   development-start authority, does not change G8 NOT READY, does not change
   architecture NOT ACCEPTED, and does not constitute production authorization.
+
+revision_history:
+  - revision_id: REV-002
+    date: 2026-11-21
+    type: POST_HOC_METADATA_CORRECTION
+    authorization:
+      - gap-owner-w1w3-decision.md, 2026-11-21, section "manifest 元数据纠正：可以先行"
+      - gap-owner-v1v4-decision.md, U2
+    reason: >-
+      Correct the implementation metadata retrospectively to reflect the
+      already completed and merged AID-2026-040 delivery. PR #437 was merged
+      into main at commit 776f04fb694140f8663a87d593be1da2957673a4 on
+      2026-11-21T07:58:58Z. The previous implementation metadata did not
+      reflect this historical fact.
+    field_corrections:
+      - field: implementation.branch
+        previous_value: NOT_ASSIGNED
+        corrected_value: docs/aid-2026-040-e1-e8-measurement
+        basis: >-
+          The branch associated with the already merged AID-2026-040
+          implementation.
+      - field: implementation.pull_request
+        previous_value: NOT_ASSIGNED
+        corrected_value: 437
+        basis: >-
+          PR #437 is the pull request through which the AID-2026-040
+          delivery was merged.
+      - field: implementation.merge_commit_sha
+        previous_value: NOT_ASSIGNED
+        corrected_value: 776f04fb694140f8663a87d593be1da2957673a4
+        basis: >-
+          The recorded merge commit of PR #437, merged into main at
+          2026-11-21T07:58:58Z.
+      - field: updated_at
+        previous_value: 2026-11-21T08:05:00Z
+        corrected_value: 2026-11-21T09:55:00Z
+        basis: >-
+          Updated to reflect the time of this retrospective metadata
+          correction.
+    unchanged_fields:
+      - field: implementation.status
+        value: NOT_STARTED
+        reason: >-
+          Intentionally not normalized. No authoritative schema, enum
+          definition, or explicit Owner ruling establishing a replacement
+          value for this subfield has been identified. The top-level
+          status: MERGED precedent must not be transferred to
+          implementation.status.
+      - field: prompt_status
+        value: FROZEN
+        reason: >-
+          The frozen prompt carrier is outside the correction scope.
+          No prompt content or prompt identity metadata is modified.
+      - field: review
+        reason: >-
+          No independent review is established by the fact of merging PR #437.
+      - field: acceptance
+        reason: >-
+          This correction does not constitute an acceptance decision or
+          establish acceptance authority having exercised an acceptance.
+      - field: governance
+        reason: >-
+          All governance states remain unchanged, including
+          architecture_status: NOT_ACCEPTED,
+          g8_status: NOT_READY, and
+          e1_e8_status: NOT_SATISFIED.
+      - field: status
+        value: REGISTERED
+        reason: >-
+          The top-level registration status has separate semantics and
+          is not changed by this implementation metadata correction.
+    boundary: >-
+      This revision is exclusively a post-hoc metadata correction recording
+      an already completed merge. It does not represent independent review,
+      acceptance approval, architecture acceptance, E1-E8 satisfaction,
+      G8 readiness, development-start authorization, or production
+      authorization. No prompt_* fields, review fields, acceptance fields,
+      governance fields, top-level status, base_commit_sha, INDEX.md,
+      or other files are changed.
