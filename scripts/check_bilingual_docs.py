@@ -66,6 +66,12 @@ EMBEDDED_BILINGUAL_SOURCES: dict[str, str] = {
         "Tracks bilingual migration classifications, source versions, and "
         "pending governance decisions as one auditable register."
     ),
+    "00-governance/templates/document-metadata-template.md": (
+        "Is the copy-paste block every governed document is built from; the "
+        "block itself is YAML whose keys must stay identical in both languages, "
+        "and the file is checked against the gate, so a translated twin could "
+        "drift from the schema it is meant to satisfy."
+    ),
     "00-governance/templates/bilingual-issue-template.md": (
         "Provides one shared Issue field layout and bilingual prompts so copied "
         "records retain identical identifiers and acceptance fields."

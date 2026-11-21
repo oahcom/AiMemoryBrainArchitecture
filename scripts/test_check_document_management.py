@@ -291,9 +291,44 @@ def run_resolver() -> None:
 # 4. Repository-wide rules
 # --------------------------------------------------------------------------
 
+def registry_text(governed, excluded=("tools",)) -> str:
+    """A scope registry matching the gate's own enforced roots.
+
+    Built from NORMATIVE_ROOTS rather than hard-coded, so the fixture stays
+    valid when the real roots change; the tests that matter pass an explicit
+    governed list instead.
+    """
+    lines = ['registry_version: "1"', "", "governed:"]
+    lines += [f"  - {name}" for name in governed]
+    lines += ["", "excluded:", ""]
+    for name in excluded:
+        lines.append(f"  {name}:")
+        lines.append('    reason: "not documentation"')
+        lines.append('    reason_zh: "非文档"')
+        lines.append("")
+    lines.append("  docs:")
+    lines.append('    reason: "mirrors only"')
+    lines.append('    reason_zh: "仅镜像"')
+    return "\n".join(lines) + "\n"
+
+def gate_roots():
+    import check_document_management as gate
+    return list(gate.NORMATIVE_ROOTS)
+
+ENFORCED_ROOTS = [r for r in gate_roots() if r not in ("docs/en", "docs/zh-CN")]
+
+def gate_roots():
+    import check_document_management as gate
+    return list(gate.NORMATIVE_ROOTS)
+
 def _repo(tmp: str) -> Path:
     root = Path(tmp)
-    (root / "00-governance").mkdir(parents=True)
+    for name in gate_roots():
+        (root / name).mkdir(parents=True, exist_ok=True)
+    (root / "tools").mkdir(parents=True, exist_ok=True)
+    (root / "00-governance" / "document-scope-registry.yaml").write_text(
+        registry_text(ENFORCED_ROOTS), encoding="utf-8"
+    )
     return root
 
 
@@ -800,6 +835,410 @@ def run_schema_agreement() -> None:
         record("T19 template satisfies the gate", not template_errors,
                f"  {template_errors}")
 
+def run_scope_registry() -> None:
+    """DM-14: the scan set is the declared set, and nothing is left out.
+
+    The accounting identity proves no file was dropped inside the scan. It is
+    silent about a directory the scan never entered, which is the reviewer's
+    `15-new-architecture/` counterexample. These cases pin the fix.
+    """
+    print("DM-14 scope registry")
+    governed = ENFORCED_ROOTS
+
+    # A new top-level directory with a governed-looking document must fail:
+    # this is the exact counterexample, and the old gate passed it.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "15-new-architecture").mkdir()
+        (root / "15-new-architecture" / "critical-policy.md").write_text(
+            doc(BASE), encoding="utf-8"
+        )
+        expect_gate(
+            "T22 unregistered top-level directory fails even when it is empty of rules",
+            root, 1,
+        )
+
+    # Excluded without a reason is not an exclusion.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "00-governance" / "document-scope-registry.yaml").write_text(
+            registry_text(governed, excluded=()) .replace(
+                "  docs:", "  tools:\n    reason_zh: \"非文档\"\n\n  docs:"
+            ),
+            encoding="utf-8",
+        )
+        expect_gate("T23 exclusion without a reason is an error", root, 1)
+
+    # Declared scope must equal enforced scope, in both directions.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "00-governance" / "document-scope-registry.yaml").write_text(
+            registry_text(governed + ["16-phantom"]), encoding="utf-8"
+        )
+        (root / "16-phantom").mkdir()
+        expect_gate("T24 registry naming a root the gate does not scan fails", root, 1)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "00-governance" / "document-scope-registry.yaml").write_text(
+            registry_text(governed[1:]), encoding="utf-8"
+        )
+        expect_gate("T25 registry omitting a scanned root fails", root, 1)
+
+    # A directory cannot be both governed and excluded.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "00-governance" / "document-scope-registry.yaml").write_text(
+            registry_text(governed, excluded=("tools", "00-governance")),
+            encoding="utf-8",
+        )
+        expect_gate("T26 governed and excluded at once is an error", root, 1)
+
+def run_kind_contract() -> None:
+    """P0-01: the schema's declared kind must be enforced, not merely published.
+
+    Each case below was a reviewer counterexample: the document parsed, no rule
+    fired, and the gate reported success while the value's type contradicted
+    the schema.
+    """
+    print("schema kind enforcement")
+    import check_document_management as gate
+
+    # null where `mapping` is declared
+    null_mapping = doc(
+        "  domain: architecture\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Draft\n"
+        "      approval_scope: null\n"
+        "    evidence_verification:\n"
+        "      verification_status: Unverified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Non-Canonical\n"
+        "    canonical_conflict_status: None\n"
+        "    normative_status: Informative\n"
+    )
+    errs, _ = check_document(FILE, null_mapping)
+    record(
+        "T27 null where the schema declares mapping is a type error",
+        any("approval_scope must be mapping" in e for e in errs),
+        f"  got {errs}",
+    )
+
+    # bool inside a sequence of strings
+    bool_in_seq = doc(
+        "  domain: architecture\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Draft\n"
+        "      evidence_reference:\n"
+        "        - true\n"
+        "    evidence_verification:\n"
+        "      verification_status: Unverified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Non-Canonical\n"
+        "    canonical_conflict_status: None\n"
+        "    normative_status: Informative\n"
+    )
+    errs, _ = check_document(FILE, bool_in_seq)
+    record(
+        "T28 non-string element in a sequence of strings is a type error",
+        any("evidence_reference[0] must be string" in e for e in errs),
+        f"  got {errs}",
+    )
+
+    # null where `string` is declared, on an optional block
+    null_string = doc(
+        "  domain: architecture\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Draft\n"
+        "      revocation:\n"
+        "        revocation_decision_id: null\n"
+        "    evidence_verification:\n"
+        "      verification_status: Unverified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Non-Canonical\n"
+        "    canonical_conflict_status: None\n"
+        "    normative_status: Informative\n"
+    )
+    errs, _ = check_document(FILE, null_string)
+    record(
+        "T29 null where the schema declares string is a type error",
+        any("revocation_decision_id must be string" in e for e in errs),
+        f"  got {errs}",
+    )
+
+    # The nullable variants must still accept null: closing the hole must not
+    # break the documents that legitimately omit an approval version.
+    nullable_ok = doc(
+        "  domain: architecture\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Draft\n"
+        "      approved_version: null\n"
+        "      revocation: null\n"
+        "    evidence_verification:\n"
+        "      verification_status: Unverified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Non-Canonical\n"
+        "    canonical_conflict_status: None\n"
+        "    normative_status: Informative\n"
+    )
+    errs, _ = check_document(FILE, nullable_ok)
+    record(
+        "T30 nullable kinds still accept null",
+        not errs,
+        f"  got {errs}",
+    )
+
+    # A broken schema must stop the gate, not silently disable type checks.
+    record(
+        "T31 schema is loaded from the published file",
+        gate.schema().get("fields", {}).get("domain", {}).get("kind") == "string",
+    )
+
+# --------------------------------------------------------------------------
+# Golden corpus: hand-written inputs with hand-written expected verdicts.
+#
+# This is the independent oracle T19 cannot be. T19 compares the schema against
+# the gate's own constants, so if both are wrong in the same way it passes.
+# Here the expectation is written by hand from the policy text, before looking
+# at the implementation, and is deliberately not derived from any gate
+# constant. If the gate and this table disagree, one of them is wrong and a
+# human has to decide which -- that is the point.
+#
+# Each entry: (label, metadata body, should_pass, expected error fragment)
+# `expected` is empty when should_pass is True.
+# --------------------------------------------------------------------------
+GOLDEN = [
+    (
+        "minimal Draft document is valid",
+        "  domain: architecture\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Draft\n"
+        "    evidence_verification:\n"
+        "      verification_status: Unverified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Non-Canonical\n"
+        "    normative_status: Informative\n"
+        "    canonical_conflict_status: None\n",
+        True,
+        "",
+    ),
+    (
+        "unknown domain is rejected",
+        "  domain: made-up-domain\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Draft\n"
+        "    evidence_verification:\n"
+        "      verification_status: Unverified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Non-Canonical\n"
+        "    normative_status: Informative\n"
+        "    canonical_conflict_status: None\n",
+        False,
+        "not in enumeration",
+    ),
+    (
+        "Approved without a version is rejected",
+        "  domain: architecture\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Approved\n"
+        "    evidence_verification:\n"
+        "      verification_status: Verified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Non-Canonical\n"
+        "    normative_status: Informative\n"
+        "    canonical_conflict_status: None\n",
+        False,
+        "approved_version",
+    ),
+    (
+        "Revoked without a revocation block is rejected",
+        "  domain: architecture\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Revoked\n"
+        "    evidence_verification:\n"
+        "      verification_status: Unverified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Non-Canonical\n"
+        "    normative_status: Informative\n"
+        "    canonical_conflict_status: None\n",
+        False,
+        "revocation",
+    ),
+    (
+        "Archived without a date is rejected",
+        "  domain: architecture\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Draft\n"
+        "    evidence_verification:\n"
+        "      verification_status: Unverified\n"
+        "    usage_status: Archived\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Non-Canonical\n"
+        "    normative_status: Informative\n"
+        "    canonical_conflict_status: None\n",
+        False,
+        "archived_date",
+    ),
+    (
+        "Canonical without a scope id is rejected",
+        "  domain: architecture\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Draft\n"
+        "    evidence_verification:\n"
+        "      verification_status: Unverified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Canonical\n"
+        "    normative_status: Normative\n"
+        "    canonical_conflict_status: None\n",
+        False,
+        "canonical_scope_id",
+    ),
+    (
+        "Canonical while under conflict is rejected",
+        "  domain: architecture\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Draft\n"
+        "    evidence_verification:\n"
+        "      verification_status: Unverified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Canonical\n"
+        "    canonical_scope: \"Architecture: x\"\n"
+        "    canonical_scope_id: \"architecture/x\"\n"
+        "    canonical_scope_keywords:\n"
+        "      - x\n"
+        "    normative_status: Normative\n"
+        "    canonical_conflict_status: Under-Review\n",
+        False,
+        "MUST NOT be Canonical",
+    ),
+    (
+        "hand-written superseded_by is rejected",
+        "  domain: architecture\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Draft\n"
+        "    evidence_verification:\n"
+        "      verification_status: Unverified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "    supersession:\n"
+        "      superseded_by: \"00-governance/other.md\"\n"
+        "  authority:\n"
+        "    canonical_status: Non-Canonical\n"
+        "    normative_status: Informative\n"
+        "    canonical_conflict_status: None\n",
+        False,
+        "CI-derived",
+    ),
+    (
+        "scope id whose prefix contradicts the domain is rejected",
+        "  domain: protocol\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Draft\n"
+        "    evidence_verification:\n"
+        "      verification_status: Unverified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Canonical\n"
+        "    canonical_scope: \"Architecture: x\"\n"
+        "    canonical_scope_id: \"architecture/x\"\n"
+        "    canonical_scope_keywords:\n"
+        "      - x\n"
+        "    normative_status: Normative\n"
+        "    canonical_conflict_status: None\n",
+        False,
+        "must equal the declared domain",
+    ),
+    (
+        "selected-sections scope without sections is rejected",
+        "  domain: architecture\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Approved\n"
+        "      approved_version:\n"
+        "        scheme: git\n"
+        "        value: \"0000000000000000000000000000000000000000\"\n"
+        "      approval_scope:\n"
+        "        type: Selected-sections\n"
+        "      approval_applicability: Applicable-To-Current-Version\n"
+        "    evidence_verification:\n"
+        "      verification_status: Verified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Non-Canonical\n"
+        "    normative_status: Informative\n"
+        "    canonical_conflict_status: None\n",
+        False,
+        "included_sections",
+    ),
+]
+
+def run_golden_corpus() -> None:
+    """T32: hand-written expectations, independent of the gate's constants."""
+    print("golden corpus")
+    for label, body, should_pass, fragment in GOLDEN:
+        errs, meta = check_document(FILE, doc(body))
+        if meta is None:
+            record(f"T32 {label}", False, "  metadata did not parse")
+            continue
+        if should_pass:
+            record(f"T32 {label}", not errs, f"  got {errs}")
+        else:
+            record(
+                f"T32 {label}",
+                any(fragment in e for e in errs),
+                f"  wanted {fragment!r}, got {errs}",
+            )
+
 def main() -> int:
     print("check_document_management self-check")
     run_parser()
@@ -811,6 +1250,9 @@ def main() -> int:
     run_path_safety()
     run_body_hash_equivalence()
     run_bilingual_closure()
+    run_scope_registry()
+    run_kind_contract()
+    run_golden_corpus()
     run_schema_agreement()
     passed, total = sum(RESULTS), len(RESULTS)
     print(f"{passed}/{total} passed")

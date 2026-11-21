@@ -76,7 +76,7 @@ fields:
           decision_date:
             kind: nullable-string
           approved_version:
-            kind: mapping
+            kind: nullable-mapping
             fields:
               scheme:
                 kind: string
