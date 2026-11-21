@@ -9,7 +9,7 @@ use memory_domain::{
     TemporalRef, TimeValue,
 };
 use serde::{Deserialize, Serialize};
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ContextBudget {
@@ -177,6 +177,49 @@ pub struct ContextSnapshot {
     pub rendered_bytes: usize,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct ChangeSetDelta {
+    pub from_version: u64,
+    pub to_version: u64,
+    pub added: Vec<OpaqueId>,
+    pub removed: Vec<OpaqueId>,
+    pub updated: Vec<OpaqueId>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct EntryExpiry {
+    pub entry_id: OpaqueId,
+    pub expires_at_unix: i64,
+}
+
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+pub struct ExpiryPolicy {
+    pub entries: Vec<EntryExpiry>,
+}
+
+/// Kept outside ContextSnapshot so existing snapshot literals and wire shape stay stable.
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+pub struct ContextAcknowledgements {
+    pub acknowledged_versions: Vec<u64>,
+}
+
+impl ContextAcknowledgements {
+    /// Records a consumed version; repeating the same acknowledgement is idempotent.
+    pub fn ack(&mut self, version: u64, current_context_version: u64) -> Result<(), ContextError> {
+        if version == 0 || version > current_context_version {
+            return Err(ContextError::AcknowledgementVersionOutOfRange {
+                version,
+                current: current_context_version,
+            });
+        }
+        if !self.acknowledged_versions.contains(&version) {
+            self.acknowledged_versions.push(version);
+            self.acknowledged_versions.sort_unstable();
+        }
+        Ok(())
+    }
+}
+
 impl ContextSnapshot {
     pub fn total_entries(&self) -> usize {
         self.entries.len()
@@ -189,6 +232,261 @@ impl ContextSnapshot {
     pub fn serialize(&self) -> Result<String, ContextError> {
         serde_json::to_string(self).map_err(|error| ContextError::Serialization(error.to_string()))
     }
+
+    /// Removes exactly one entry and advances the snapshot version once.
+    pub fn remove_entry(&mut self, entry_id: &OpaqueId) -> Result<(), ContextError> {
+        validate_snapshot(self)?;
+        let index = self
+            .entries
+            .iter()
+            .position(|entry| &entry.entry_id == entry_id)
+            .ok_or(ContextError::EntryNotFound)?;
+        let next_version = next_context_version(self.context_version)?;
+        let mut next = self.clone();
+        next.entries.remove(index);
+        next.context_version = next_version;
+        recalculate_rendered_bytes(&mut next)?;
+        validate_snapshot(&next)?;
+        *self = next;
+        Ok(())
+    }
+
+    /// Replaces rendered content and priority, recalculating byte length and SHA-256.
+    pub fn update_entry(
+        &mut self,
+        entry_id: &OpaqueId,
+        rendered_content: String,
+        priority: i32,
+    ) -> Result<(), ContextError> {
+        validate_snapshot(self)?;
+        if rendered_content.trim().is_empty() {
+            return Err(ContextError::EmptyField("rendered_content"));
+        }
+        let index = self
+            .entries
+            .iter()
+            .position(|entry| &entry.entry_id == entry_id)
+            .ok_or(ContextError::EntryNotFound)?;
+        let next_version = next_context_version(self.context_version)?;
+        let rendered_bytes = rendered_content.len();
+        let content_hash = format!("sha256:{}", sha256_hex(rendered_content.as_bytes()));
+        let mut next = self.clone();
+        let entry = &mut next.entries[index];
+        entry.rendered_content = rendered_content;
+        entry.priority = priority;
+        entry.rendered_bytes = rendered_bytes;
+        entry.content_hash = content_hash;
+        next.context_version = next_version;
+        recalculate_rendered_bytes(&mut next)?;
+        validate_snapshot(&next)?;
+        *self = next;
+        Ok(())
+    }
+
+    /// Removes entries whose explicit expiry timestamp is <= now_unix.
+    /// The clock is always supplied by the caller; one batch advances once.
+    pub fn expire(
+        &mut self,
+        now_unix: i64,
+        policy: &ExpiryPolicy,
+    ) -> Result<Vec<OpaqueId>, ContextError> {
+        validate_snapshot(self)?;
+        let mut expiries = BTreeMap::new();
+        for condition in &policy.entries {
+            if !self
+                .entries
+                .iter()
+                .any(|entry| entry.entry_id == condition.entry_id)
+            {
+                return Err(ContextError::ExpiryEntryNotFound);
+            }
+            if expiries
+                .insert(condition.entry_id.clone(), condition.expires_at_unix)
+                .is_some()
+            {
+                return Err(ContextError::DuplicateExpiryPolicyEntry);
+            }
+        }
+        let removed: Vec<OpaqueId> = self
+            .entries
+            .iter()
+            .filter(|entry| {
+                expiries
+                    .get(&entry.entry_id)
+                    .is_some_and(|expiry| *expiry <= now_unix)
+            })
+            .map(|entry| entry.entry_id.clone())
+            .collect();
+        if removed.is_empty() {
+            return Ok(removed);
+        }
+
+        let next_version = next_context_version(self.context_version)?;
+        let expired_ids: HashSet<OpaqueId> = removed.iter().cloned().collect();
+        let mut next = self.clone();
+        next.entries
+            .retain(|entry| !expired_ids.contains(&entry.entry_id));
+        next.context_version = next_version;
+        recalculate_rendered_bytes(&mut next)?;
+        validate_snapshot(&next)?;
+        *self = next;
+        Ok(removed)
+    }
+}
+
+/// Computes a pure entry-level delta between two valid snapshots of one context.
+pub fn delta(old: &ContextSnapshot, new: &ContextSnapshot) -> Result<ChangeSetDelta, ContextError> {
+    validate_snapshot(old)?;
+    validate_snapshot(new)?;
+    if old.identity != new.identity {
+        return Err(ContextError::ContextIdentityMismatch);
+    }
+    if new.context_version < old.context_version {
+        return Err(ContextError::ContextVersionRegression {
+            from: old.context_version,
+            to: new.context_version,
+        });
+    }
+    if new.context_version == old.context_version && old.entries != new.entries {
+        return Err(ContextError::VersionDidNotAdvance(old.context_version));
+    }
+    let old_entries = entries_by_id(old)?;
+    let new_entries = entries_by_id(new)?;
+    let added = new_entries
+        .iter()
+        .filter(|(id, _)| !old_entries.contains_key(*id))
+        .map(|(id, _)| id.clone())
+        .collect();
+    let removed = old_entries
+        .iter()
+        .filter(|(id, _)| !new_entries.contains_key(*id))
+        .map(|(id, _)| id.clone())
+        .collect();
+    let updated = new_entries
+        .iter()
+        .filter_map(|(id, new_entry)| match old_entries.get(id) {
+            Some(old_entry) if *old_entry != *new_entry => Some(id.clone()),
+            _ => None,
+        })
+        .collect();
+    Ok(ChangeSetDelta {
+        from_version: old.context_version,
+        to_version: new.context_version,
+        added,
+        removed,
+        updated,
+    })
+}
+
+fn entries_by_id(
+    snapshot: &ContextSnapshot,
+) -> Result<BTreeMap<OpaqueId, &ContextEntry>, ContextError> {
+    let mut entries = BTreeMap::new();
+    for entry in &snapshot.entries {
+        if entries.insert(entry.entry_id.clone(), entry).is_some() {
+            return Err(ContextError::DuplicateEntry);
+        }
+    }
+    Ok(entries)
+}
+
+fn next_context_version(version: u64) -> Result<u64, ContextError> {
+    version
+        .checked_add(1)
+        .ok_or(ContextError::ContextVersionOverflow)
+}
+
+fn recalculate_rendered_bytes(snapshot: &mut ContextSnapshot) -> Result<(), ContextError> {
+    snapshot.rendered_bytes = snapshot
+        .entries
+        .iter()
+        .try_fold(0usize, |sum, entry| sum.checked_add(entry.rendered_bytes))
+        .ok_or(ContextError::RenderedByteCountOverflow)?;
+    Ok(())
+}
+
+/// Dependency-free SHA-256 used to refresh the digest of edited rendered content.
+fn sha256_hex(input: &[u8]) -> String {
+    const K: [u32; 64] = [
+        0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4,
+        0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe,
+        0x9bdc06a7, 0xc19bf174, 0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f,
+        0x4a7484aa, 0x5cb0a9dc, 0x76f988da, 0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7,
+        0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967, 0x27b70a85, 0x2e1b2138, 0x4d2c6dfc,
+        0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85, 0xa2bfe8a1, 0xa81a664b,
+        0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070, 0x19a4c116,
+        0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+        0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7,
+        0xc67178f2,
+    ];
+    let mut msg = input.to_vec();
+    let bit_len = (input.len() as u64).wrapping_mul(8);
+    msg.push(0x80);
+    while msg.len() % 64 != 56 {
+        msg.push(0);
+    }
+    msg.extend_from_slice(&bit_len.to_be_bytes());
+    let mut h = [
+        0x6a09e667u32,
+        0xbb67ae85,
+        0x3c6ef372,
+        0xa54ff53a,
+        0x510e527f,
+        0x9b05688c,
+        0x1f83d9ab,
+        0x5be0cd19,
+    ];
+    for chunk in msg.as_chunks::<64>().0 {
+        let mut w = [0u32; 64];
+        for (i, word) in w.iter_mut().take(16).enumerate() {
+            let j = i * 4;
+            *word = u32::from_be_bytes([chunk[j], chunk[j + 1], chunk[j + 2], chunk[j + 3]]);
+        }
+        for i in 16..64 {
+            let x = w[i - 15];
+            let y = w[i - 2];
+            let s0 = x.rotate_right(7) ^ x.rotate_right(18) ^ (x >> 3);
+            let s1 = y.rotate_right(17) ^ y.rotate_right(19) ^ (y >> 10);
+            w[i] = w[i - 16]
+                .wrapping_add(s0)
+                .wrapping_add(w[i - 7])
+                .wrapping_add(s1);
+        }
+        let [mut a, mut b, mut c, mut d, mut e, mut f, mut g, mut hh] = h;
+        for i in 0..64 {
+            let s1 = e.rotate_right(6) ^ e.rotate_right(11) ^ e.rotate_right(25);
+            let ch = (e & f) ^ (!e & g);
+            let t1 = hh
+                .wrapping_add(s1)
+                .wrapping_add(ch)
+                .wrapping_add(K[i])
+                .wrapping_add(w[i]);
+            let s0 = a.rotate_right(2) ^ a.rotate_right(13) ^ a.rotate_right(22);
+            let maj = (a & b) ^ (a & c) ^ (b & c);
+            let t2 = s0.wrapping_add(maj);
+            hh = g;
+            g = f;
+            f = e;
+            e = d.wrapping_add(t1);
+            d = c;
+            c = b;
+            b = a;
+            a = t1.wrapping_add(t2);
+        }
+        h[0] = h[0].wrapping_add(a);
+        h[1] = h[1].wrapping_add(b);
+        h[2] = h[2].wrapping_add(c);
+        h[3] = h[3].wrapping_add(d);
+        h[4] = h[4].wrapping_add(e);
+        h[5] = h[5].wrapping_add(f);
+        h[6] = h[6].wrapping_add(g);
+        h[7] = h[7].wrapping_add(hh);
+    }
+    let mut out = String::with_capacity(64);
+    for word in h {
+        out.push_str(&format!("{word:08x}"));
+    }
+    out
 }
 
 /// A task-specific information dimension whose evidence may be assessed from a ContextSnapshot.
@@ -1074,6 +1372,21 @@ pub enum ContextError {
     PayloadHashMismatch {
         declared: String,
         actual: String,
+    },
+    EntryNotFound,
+    ContextVersionOverflow,
+    RenderedByteCountOverflow,
+    DuplicateExpiryPolicyEntry,
+    ExpiryEntryNotFound,
+    ContextIdentityMismatch,
+    ContextVersionRegression {
+        from: u64,
+        to: u64,
+    },
+    VersionDidNotAdvance(u64),
+    AcknowledgementVersionOutOfRange {
+        version: u64,
+        current: u64,
     },
 }
 
@@ -3463,5 +3776,352 @@ mod sufficiency_tests {
             seen[index] = true;
         }
         assert!(seen.into_iter().all(|value| value));
+    }
+}
+
+#[cfg(test)]
+mod pr433_tests {
+    use super::*;
+    use memory_domain::ScopeKind;
+
+    fn id(value: &str) -> OpaqueId {
+        OpaqueId::new(value).unwrap()
+    }
+
+    fn scope() -> ScopeRef {
+        ScopeRef {
+            scope_id: id("scope-user-1"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:1".into(),
+        }
+    }
+
+    fn identity() -> ContextIdentity {
+        ContextIdentity {
+            context_id: id("ctx-1"),
+            scope_refs: vec![scope()],
+            agent_id: id("agent-1"),
+            agent_instance_id: id("agent-instance-1"),
+            session_id: id("session-1"),
+            task_id: Some(id("task-1")),
+            environment_id: None,
+            purpose: "task-working-context".into(),
+            schema_version: "1".into(),
+        }
+    }
+
+    fn candidate(entry: &str, tier: ContextTier, priority: i32, content: &str) -> ContextCandidate {
+        ContextCandidate {
+            entry_id: id(entry),
+            memory_id: id(&format!("memory-{entry}")),
+            memory_version_id: id(&format!("version-{entry}")),
+            memory_lifecycle: MemoryLifecycle::Active,
+            scope_refs: vec![scope()],
+            tier,
+            priority,
+            activation_reason: "direct task relevance".into(),
+            rendered_content: content.into(),
+            source_refs: vec![id(&format!("source-{entry}"))],
+            evidence_refs: vec![],
+            epistemic_qualifiers: vec!["reported".into()],
+            content_hash: format!("sha256:{entry}"),
+        }
+    }
+
+    fn budget() -> ContextBudget {
+        ContextBudget {
+            max_entries: 8,
+            max_rendered_bytes: 1024,
+        }
+    }
+
+    #[test]
+    fn remove_entry_removes_and_advances_context_version() {
+        let mut s = build_context(
+            identity(),
+            4,
+            budget(),
+            vec![
+                candidate("remove-me", ContextTier::P0, 1, "four"),
+                candidate("keep-me", ContextTier::P1, 1, "xyz"),
+            ],
+        )
+        .unwrap();
+        s.remove_entry(&id("remove-me")).unwrap();
+        assert_eq!(s.context_version, 5);
+        assert_eq!(s.total_entries(), 1);
+        assert_eq!(s.entries[0].entry_id, id("keep-me"));
+        assert_eq!(s.rendered_bytes, 3);
+        validate_snapshot(&s).unwrap();
+    }
+
+    #[test]
+    fn remove_entry_rejects_missing_id_without_mutation() {
+        let mut s = build_context(
+            identity(),
+            4,
+            budget(),
+            vec![candidate("present", ContextTier::P0, 1, "text")],
+        )
+        .unwrap();
+        let before = s.clone();
+        assert_eq!(
+            s.remove_entry(&id("absent")),
+            Err(ContextError::EntryNotFound)
+        );
+        assert_eq!(s, before);
+    }
+
+    #[test]
+    fn update_entry_recomputes_rendered_bytes_and_content_hash() {
+        let mut s = build_context(
+            identity(),
+            8,
+            budget(),
+            vec![candidate("update-me", ContextTier::P0, 1, "old")],
+        )
+        .unwrap();
+        s.update_entry(&id("update-me"), "abc".into(), 17).unwrap();
+        let e = &s.entries[0];
+        assert_eq!(s.context_version, 9);
+        assert_eq!(e.priority, 17);
+        assert_eq!(e.rendered_content, "abc");
+        assert_eq!(e.rendered_bytes, 3);
+        assert_eq!(
+            e.content_hash,
+            "sha256:ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        );
+        assert_eq!(s.rendered_bytes, 3);
+        validate_snapshot(&s).unwrap();
+    }
+
+    #[test]
+    fn update_entry_rejects_empty_content_and_missing_id() {
+        let mut s = build_context(
+            identity(),
+            8,
+            budget(),
+            vec![candidate("present", ContextTier::P0, 1, "text")],
+        )
+        .unwrap();
+        let before = s.clone();
+        assert_eq!(
+            s.update_entry(&id("present"), "  \n ".into(), 2),
+            Err(ContextError::EmptyField("rendered_content"))
+        );
+        assert_eq!(
+            s.update_entry(&id("absent"), "replacement".into(), 2),
+            Err(ContextError::EntryNotFound)
+        );
+        assert_eq!(s, before);
+    }
+
+    #[test]
+    fn change_set_serialization_round_trips_all_fields() {
+        let cs = ChangeSetDelta {
+            from_version: 2,
+            to_version: 5,
+            added: vec![id("added")],
+            removed: vec![id("removed")],
+            updated: vec![id("updated")],
+        };
+        let json = serde_json::to_string(&cs).unwrap();
+        let decoded: ChangeSetDelta = serde_json::from_str(&json).unwrap();
+        assert_eq!(decoded, cs);
+    }
+
+    #[test]
+    fn change_set_for_identical_snapshot_is_empty() {
+        let s = build_context(identity(), 3, budget(), vec![]).unwrap();
+        let cs = delta(&s, &s).unwrap();
+        assert_eq!(cs.from_version, 3);
+        assert_eq!(cs.to_version, 3);
+        assert!(cs.added.is_empty() && cs.removed.is_empty() && cs.updated.is_empty());
+    }
+
+    #[test]
+    fn delta_reports_added_removed_and_updated_entries() {
+        let old = build_context(
+            identity(),
+            10,
+            budget(),
+            vec![
+                candidate("update", ContextTier::P0, 1, "before"),
+                candidate("remove", ContextTier::P1, 1, "gone"),
+            ],
+        )
+        .unwrap();
+        let new = build_context(
+            identity(),
+            12,
+            budget(),
+            vec![
+                candidate("update", ContextTier::P0, 9, "after"),
+                candidate("add", ContextTier::P2, 1, "new"),
+            ],
+        )
+        .unwrap();
+        let cs = delta(&old, &new).unwrap();
+        assert_eq!(cs.from_version, 10);
+        assert_eq!(cs.to_version, 12);
+        assert_eq!(cs.added, vec![id("add")]);
+        assert_eq!(cs.removed, vec![id("remove")]);
+        assert_eq!(cs.updated, vec![id("update")]);
+    }
+
+    #[test]
+    fn delta_rejects_mismatched_identity_and_non_monotonic_versions() {
+        let old = build_context(
+            identity(),
+            10,
+            budget(),
+            vec![candidate("a", ContextTier::P0, 1, "before")],
+        )
+        .unwrap();
+        let mut other = old.clone();
+        other.identity.context_id = id("other-context");
+        other.context_version = 11;
+        assert_eq!(
+            delta(&old, &other),
+            Err(ContextError::ContextIdentityMismatch)
+        );
+        let mut regressed = old.clone();
+        regressed.context_version = 9;
+        assert_eq!(
+            delta(&old, &regressed),
+            Err(ContextError::ContextVersionRegression { from: 10, to: 9 })
+        );
+        let mut reused = old.clone();
+        reused.entries[0].rendered_content = "changed".into();
+        reused.entries[0].rendered_bytes = 7;
+        reused.rendered_bytes = 7;
+        assert_eq!(
+            delta(&old, &reused),
+            Err(ContextError::VersionDidNotAdvance(10))
+        );
+    }
+
+    #[test]
+    fn acknowledgement_is_idempotent_for_the_same_version() {
+        let mut a = ContextAcknowledgements::default();
+        a.ack(2, 4).unwrap();
+        a.ack(2, 4).unwrap();
+        a.ack(4, 4).unwrap();
+        assert_eq!(a.acknowledged_versions, vec![2, 4]);
+    }
+
+    #[test]
+    fn acknowledgement_rejects_out_of_range_versions() {
+        let mut a = ContextAcknowledgements::default();
+        assert_eq!(
+            a.ack(0, 4),
+            Err(ContextError::AcknowledgementVersionOutOfRange {
+                version: 0,
+                current: 4
+            })
+        );
+        assert_eq!(
+            a.ack(5, 4),
+            Err(ContextError::AcknowledgementVersionOutOfRange {
+                version: 5,
+                current: 4
+            })
+        );
+        assert!(a.acknowledged_versions.is_empty());
+    }
+
+    #[test]
+    fn expire_removes_entries_at_expiry_boundary_and_advances_once() {
+        let mut s = build_context(
+            identity(),
+            20,
+            budget(),
+            vec![
+                candidate("first", ContextTier::P0, 1, "one"),
+                candidate("second", ContextTier::P1, 1, "two"),
+                candidate("keep", ContextTier::P2, 1, "keep"),
+            ],
+        )
+        .unwrap();
+        let policy = ExpiryPolicy {
+            entries: vec![
+                EntryExpiry {
+                    entry_id: id("first"),
+                    expires_at_unix: 100,
+                },
+                EntryExpiry {
+                    entry_id: id("second"),
+                    expires_at_unix: 101,
+                },
+            ],
+        };
+        let removed = s.expire(101, &policy).unwrap();
+        assert_eq!(removed, vec![id("first"), id("second")]);
+        assert_eq!(s.context_version, 21);
+        assert_eq!(s.total_entries(), 1);
+        assert_eq!(s.entries[0].entry_id, id("keep"));
+        assert_eq!(s.rendered_bytes, 4);
+        validate_snapshot(&s).unwrap();
+    }
+
+    #[test]
+    fn expire_rejects_unknown_policy_entry_without_mutation() {
+        let mut s = build_context(
+            identity(),
+            20,
+            budget(),
+            vec![candidate("present", ContextTier::P0, 1, "text")],
+        )
+        .unwrap();
+        let before = s.clone();
+        let p = ExpiryPolicy {
+            entries: vec![EntryExpiry {
+                entry_id: id("absent"),
+                expires_at_unix: 1,
+            }],
+        };
+        assert_eq!(s.expire(100, &p), Err(ContextError::ExpiryEntryNotFound));
+        assert_eq!(s, before);
+    }
+
+    #[test]
+    fn mutation_rejects_preexisting_snapshot_invariant_violation() {
+        let mut s = build_context(
+            identity(),
+            1,
+            budget(),
+            vec![candidate("a", ContextTier::P0, 1, "text")],
+        )
+        .unwrap();
+        s.rendered_bytes += 1;
+        let before = s.clone();
+        assert_eq!(
+            s.remove_entry(&id("a")),
+            Err(ContextError::SnapshotByteCountMismatch {
+                actual: 4,
+                recorded: 5
+            })
+        );
+        assert_eq!(s, before);
+    }
+
+    #[test]
+    fn expire_with_no_due_entries_does_not_advance_version() {
+        let mut s = build_context(
+            identity(),
+            20,
+            budget(),
+            vec![candidate("keep", ContextTier::P0, 1, "text")],
+        )
+        .unwrap();
+        let p = ExpiryPolicy {
+            entries: vec![EntryExpiry {
+                entry_id: id("keep"),
+                expires_at_unix: 200,
+            }],
+        };
+        assert!(s.expire(100, &p).unwrap().is_empty());
+        assert_eq!(s.context_version, 20);
+        assert_eq!(s.rendered_bytes, 4);
     }
 }
