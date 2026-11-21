@@ -334,6 +334,8 @@ impl AdmissionStore {
                 | (Validating, Accepted)
                 | (Validating, Rejected)
                 | (Accepted, DRegistrationPending)
+                | (Accepted, Cancelled)
+                | (Accepted, SuppressedQuarantined)
                 | (DRegistrationPending, Registered)
                 | (DRegistrationPending, UnknownReconciliation)
                 | (UnknownReconciliation, Registered)
@@ -351,6 +353,7 @@ impl AdmissionStore {
                 | (StagedPrivate, RetryQueued)
                 | (StagedPrivate, SuppressedQuarantined)
                 | (DependencyRegistrationPending, DependencyRegistered)
+                | (DependencyRegistrationPending, RetryQueued)
                 | (DependencyRegistrationPending, UnknownReconciliation)
                 | (DependencyRegistered, PreparedHidden)
                 | (PreparedHidden, PublicationGatePending)
@@ -364,7 +367,9 @@ impl AdmissionStore {
                 | (Rejected, Terminal)
                 | (Cancelled, Terminal)
                 | (Leased, Cancelled)
+                | (Leased, SuppressedQuarantined)
                 | (Queued, Cancelled)
+                | (Queued, SuppressedQuarantined)
                 | (Running, Cancelled)
                 | (StagedPrivate, Cancelled)
         )
@@ -1029,6 +1034,84 @@ mod tests {
                 to: WorkState::Published
             })
         ));
+    }
+
+    #[test]
+    fn alternative_exit_transitions_are_accepted_and_persisted() {
+        // Each case starts from a fresh registered work item, follows the legal
+        // path to the source state, then verifies both acceptance and durable state.
+        let cases: [(&[WorkState], WorkState, WorkState); 5] = [
+            (&[], WorkState::Accepted, WorkState::Cancelled),
+            (&[], WorkState::Accepted, WorkState::SuppressedQuarantined),
+            (
+                &[
+                    WorkState::DRegistrationPending,
+                    WorkState::Registered,
+                    WorkState::Queued,
+                ],
+                WorkState::Queued,
+                WorkState::SuppressedQuarantined,
+            ),
+            (
+                &[
+                    WorkState::DRegistrationPending,
+                    WorkState::Registered,
+                    WorkState::Queued,
+                    WorkState::Leased,
+                ],
+                WorkState::Leased,
+                WorkState::SuppressedQuarantined,
+            ),
+            (
+                &[
+                    WorkState::DRegistrationPending,
+                    WorkState::Registered,
+                    WorkState::Queued,
+                    WorkState::Leased,
+                    WorkState::Running,
+                    WorkState::CandidatePrivate,
+                    WorkState::StagedPrivate,
+                    WorkState::DependencyRegistrationPending,
+                ],
+                WorkState::DependencyRegistrationPending,
+                WorkState::RetryQueued,
+            ),
+        ];
+
+        for (index, (path, expected_from, target)) in cases.into_iter().enumerate() {
+            let mut db = AdmissionStore::in_memory().unwrap();
+            let mut request = producer();
+            request.producer_work_item_id = id(&format!("work-alt-exit-{index}"));
+            request.request_digest = format!("request-alt-exit-{index}");
+            db.register_producer_work(request).unwrap();
+
+            for state in path {
+                db.transition_work_state(&id(&format!("work-alt-exit-{index}")), *state)
+                    .unwrap();
+            }
+            let work_item_id = id(&format!("work-alt-exit-{index}"));
+            let before_json: String = db
+                .connection
+                .query_row(
+                    "SELECT state_json FROM producer_work WHERE work_item_id=?1",
+                    [work_item_id.as_str()],
+                    |row| row.get(0),
+                )
+                .unwrap();
+            assert_eq!(decode::<WorkState>(&before_json).unwrap(), expected_from);
+
+            db.transition_work_state(&work_item_id, target).unwrap();
+
+            let after_json: String = db
+                .connection
+                .query_row(
+                    "SELECT state_json FROM producer_work WHERE work_item_id=?1",
+                    [work_item_id.as_str()],
+                    |row| row.get(0),
+                )
+                .unwrap();
+            assert_eq!(decode::<WorkState>(&after_json).unwrap(), target);
+        }
     }
 
     #[test]
