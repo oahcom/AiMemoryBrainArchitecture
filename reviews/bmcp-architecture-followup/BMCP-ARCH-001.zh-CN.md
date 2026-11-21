@@ -18,7 +18,7 @@ Compiler Fact/Claim 映射仍为 ADR-BLOCKED。BMCP MUST NOT 冻结规范 Fact/C
 
 Issue #7 的记录保持 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE。根据 Owner 阶段关闭裁决，GitHub 当前报告 Issue #7 为 CLOSED / not_planned；本工作不重开或修改它。延期不等于 Runtime 授权。
 
-**规范名称：** 仓库规范术语表 `00-governance/terminology.md` 将 BMCP 定义为 **Brain Memory Context Protocol**（main `f23906dc75256a6ffb90051a6c0888d0dd247e62`，术语表 Blob `c7e0ca36fcff7cdc8fdd1367dbaa77e494bd1eef`）。初始派发文本中的 “Brain Memory Control Protocol” 在本仓库中不是规范名称，予以纠正。H 的协议文档必须保留 “Context”；名称问题不再是未决项。
+**规范名称：** 仓库规范术语表 `00-governance/terminology.md` 将 BMCP 定义为 **Brain Memory Context Protocol**（main `c138654c942dc93b5a36eccb2ff0e41452156429`，术语表 Blob `b8770fbb58e4fac087698043c40a57531b1d244d`）。初始派发文本中的 “Brain Memory Control Protocol” 在本仓库中不是规范名称，予以纠正。H 的协议文档必须保留 “Context”；名称问题不再是未决项。
 
 ## 2. 精确来源登记
 
@@ -237,7 +237,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - RUNTIME_IMPLEMENTATION_IMPACT：Request/Response Correlation 等待 H 映射。
 - REQUIRED_AUTHORITY：H，C/E/G 消费者复审。
 - OWNER_DECISION：NAME_RESOLVED_BY_CANONICAL_TERMINOLOGY；REQUEST_IDENTITY_PENDING_H_CONFIRMATION
-- EVIDENCE：`00-governance/terminology.md` Blob c7e0ca36fcff7cdc8fdd1367dbaa77e494bd1eef；H Envelope Blob 5547ecd78d118bd63e571e5daad87194d9b694e4。
+- EVIDENCE：`00-governance/terminology.md` Blob b8770fbb58e4fac087698043c40a57531b1d244d；H Envelope Blob 5547ecd78d118bd63e571e5daad87194d9b694e4。
 - FOLLOW_UP_ACTIONS：H 发布版本化映射；消费者复审。
 
 **H-CONFIRM-002 — Wire Decode / Parse 边界**
@@ -300,18 +300,18 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - MODULE：BMCP
 - ISSUE_OR_ADR：B-ADR-FACT-CLAIM-001（13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md）
 - DECISION_REQUIRED：使 B-ADR-FACT-CLAIM-001 与 Owner 语义选择对齐，并完成消费者映射/验收；在此之前不得冻结 Canonical Schema 或 Wire 字段。
-- CURRENT_FACTS：PR #447 Head `e22d7a058079288a6bbd209118577f5a34a0241c` 中的 `OWNER-DECISION-FACT-CLAIM-001` 选择 Option A（Fact 独立 Attestation、Claim 表示命题）及 I1（稳定 Claim Identity + 不可变 ClaimRevision）。PR #447 仍为 Draft/未合并。B-ADR-FACT-CLAIM-001 对 Canonical Schema 冻结和实现映射仍保持 ADR-BLOCKED，直至其 §8 消费者、迁移/兼容和符合性条件均有证据。
+- CURRENT_FACTS：PR #446 (merged) Head `ad5ca81a32b413aef3f9b5bccd06030aabde8275` 中的 `OWNER-DECISION-FACT-CLAIM-001` 选择 Option A（Fact 独立 Attestation、Claim 表示命题）及 I1（稳定 Claim Identity + 不可变 ClaimRevision）。PR #446 (merged) 仍为 Draft/未合并。B-ADR-FACT-CLAIM-001 对 Canonical Schema 冻结和实现映射仍保持 ADR-BLOCKED，直至其 §8 消费者、迁移/兼容和符合性条件均有证据。
 - H_OWNED_CONTRACTS：未来 Wire 字段/Schema Mapping 归 H 所有且未冻结；本语义选择不批准任何 Wire 字段。
 - CROSS_MODULE_CONFLICT：语义方向已选择，但 E Candidate IR、D Identity/Lifecycle、I Authorization/Attestor Policy 和 H Payload Mapping 仍需精确消费者验收和来源 Pin，之后才能冻结共享 Schema。
-- OPTIONS：(A) 保留已选 Option A + I1 语义方向，在 B ADR §8 门禁完成前继续保持 Payload 字段不透明；(B) 只有通过后续替代 Owner 决策才重新打开语义选择。
+- OPTIONS：(A) 保留已选 Option A + I1 语义方向，在 消费者契约验收 门禁完成前继续保持 Payload 字段不透明；(B) 只有通过后续替代 Owner 决策才重新打开语义选择。
 - RECOMMENDED_OPTION：A；不得把语义选择当作 Schema 批准。
 - MEMORY_COMPILER_IMPACT：E 保持 Candidate-neutral；不冻结规范 Fact/Claim 输出 Schema。
 - AGENT_INTEGRATION_IMPACT：C 只携带不透明的已批准 Ref。
 - D_I_IMPACT：D/I 语义不变；B 决议后审查消费者。
 - RUNTIME_IMPLEMENTATION_IMPACT：决议前不能实现最终 Fact/Claim Payload/Schema/Migration。
-- REQUIRED_AUTHORITY：Owner 语义选择记录于 PR #447；Schema 冻结仍需 B/D/E/F/G/H/I 消费者映射和验收。
+- REQUIRED_AUTHORITY：Owner 语义选择记录于 PR #446 (merged)；Schema 冻结仍需 B/D/E/F/G/H/I 消费者映射和验收。
 - OWNER_DECISION：SEMANTIC_DIRECTION_SELECTED_OPTION_A_I1；ADR_SCHEMA_FREEZE_STILL_BLOCKED
-- EVIDENCE：`OWNER-DECISION-FACT-CLAIM-001` PR #447 @ `e22d7a058079288a6bbd209118577f5a34a0241c`；B ADR Blob 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593。
+- EVIDENCE：`OWNER-DECISION-FACT-CLAIM-001` PR #446 (merged) @ `ad5ca81a32b413aef3f9b5bccd06030aabde8275`；B ADR Blob 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593。
 - FOLLOW_UP_ACTIONS：B 更新 ADR 状态/来源 Pin；D/E/F/G/H/I 记录精确消费者映射和验收；补齐迁移/兼容计划及符合性场景；所有 §8 条件满足前 Payload 保持不透明。
 
 **DECISION_REQUEST_ID: BMCP-DR-002**
@@ -440,4 +440,4 @@ Coverage Register 仅将此登记为 Review/Handoff Pair，不改变 “BMCP Pro
 - RUNTIME_IMPLEMENTATION_STATUS：NOT AUTHORIZED / NOT STARTED
 - PR / Commit：仅在 Push 和 PR 成功后填写；不授权 Merge
 
-**下一步：** H 处理 H-CONFIRM-001..004（规范名称已确定；Request Identity、Decode Boundary、ACK 和 Validator 细节仍开放）。B/D/E/F/G/H/I 完成消费者映射和 B ADR §8 证据；D/I 发布精确权威接口；C/H 完成 MCP-to-BMCP 映射。随后 BMCP 架构集成刷新精确 Pin。所有工程进入前置条件均有证据前，Runtime 继续延期。
+**下一步：** H 处理 H-CONFIRM-001..004（规范名称已确定；Request Identity、Decode Boundary、ACK 和 Validator 细节仍开放）。B/D/E/F/G/H/I 完成精确消费者工件版本 Pin 与审查；D/I 发布精确权威接口；C/H 完成 MCP-to-BMCP 映射。随后 BMCP 架构集成刷新精确 Pin。所有工程进入前置条件均有证据前，Runtime 继续延期。
