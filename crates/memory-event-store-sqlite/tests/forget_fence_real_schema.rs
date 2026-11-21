@@ -9,7 +9,9 @@
 
 use memory_domain::{OpaqueId, ScopeKind, ScopeRef};
 use memory_event_store::{EventClassification, EventEnvelope};
-use memory_event_store_sqlite::forget_fence::{ForgetFence, ForgetFenceError};
+use memory_event_store_sqlite::forget_fence::ForgetFence;
+#[cfg(unix)]
+use memory_event_store_sqlite::forget_fence::ForgetFenceError;
 use memory_event_store_sqlite::{PayloadEventStoreExt, SqliteEventStore};
 use rusqlite::Connection;
 use sha2::{Digest, Sha256};
@@ -258,13 +260,19 @@ fn live_wal_copy_fails_closed_until_checkpointed() {
         )
         .unwrap();
     // The store is deliberately NOT dropped: committed rows are still in -wal.
+    // That premise is POSIX-only. Windows refuses to replace a database file while
+    // a store still holds it open (Os error 32 on activation), so the active-WAL
+    // half below is gated to unix and Windows releases the handle instead.
+    #[cfg(unix)]
     let wal_sidecar = PathBuf::from(format!("{}-wal", live.display()));
+    #[cfg(unix)]
     assert!(
         wal_sidecar.is_file(),
         "expected a -wal sidecar while the store is open"
     );
 
     // Copy only the main database file, exactly as restore_backup's staging step would.
+    #[cfg(unix)]
     fs::copy(&live, &backup).unwrap();
 
     let fence = ForgetFence::open(&fence_path).unwrap();
@@ -273,17 +281,25 @@ fn live_wal_copy_fails_closed_until_checkpointed() {
         .unwrap();
 
     // Fail closed on the un-checkpointed copy, with the typed schema error.
+    #[cfg(unix)]
     let error = fence.restore_backup(&backup, &live).unwrap_err();
+    #[cfg(unix)]
     assert!(
         matches!(error, ForgetFenceError::MissingSchema("accepted_events")),
         "expected MissingSchema(accepted_events), got {error:?}"
     );
     // A refused activation must leave the live database untouched.
+    #[cfg(unix)]
     assert_eq!(
         rows(&live, "accepted_events"),
         2,
         "failed restore must not modify live data"
     );
+
+    // Windows releases the handle here so the checkpoint copy and the activation
+    // that follows can proceed; the un-checkpointed-copy half stays POSIX-only.
+    #[cfg(windows)]
+    drop(store);
 
     // Checkpointing first makes the single-file copy a complete database.
     let busy: i64 = Connection::open(&live)
@@ -299,6 +315,7 @@ fn live_wal_copy_fails_closed_until_checkpointed() {
     assert_eq!(fence.restore_backup(&checkpointed, &live).unwrap(), 1);
     assert_eq!(namespaces(&live), vec!["user:bob".to_string()]);
 
+    #[cfg(unix)]
     drop(store);
     for path in [&live, &backup, &checkpointed, &fence_path] {
         cleanup(path);
