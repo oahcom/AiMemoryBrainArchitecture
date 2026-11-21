@@ -66,6 +66,7 @@ Schema 和测试覆盖 H-RJ-HW-01 §§5–7 中明确规定的结构字段及必
 - 固定源 Schema Blob `4b664e3bce465499bcdfd93796349a4ba7074002` 声明 envelope `schema_version = 1.0.0`，而 schema `$id` 和契约工件文件名标识 1.0.2。H-RJ-HW-01 没有明确解决此差异；保留现有 envelope const，并在 schema `$comment` 中标记。
 - §5.4 将 currentness-proof generation 字段命名为 `forget_fence_generation`；§5.9 伪代码却引用 `proof.fence_generation`。Schema 遵循 §5.4 明确的对象定义，不臆造别名。
 - §5.8 将 `lineage_manifest_digest` 命名为 currentness-proof 字段，但 §5.4 未将其列入对象属性和 required 列表。Schema 允许该字段但不要求；当 evidence 需要比较而 proof 未提供该字段时，Validator 返回 `UNKNOWN`。
+- §§3.5/4.2 引用 `snapshot.owner_specific_high_waters.producer_registration_high_water`，而 §§5.5/7.1 规定顶层 `ownerSnapshot.producer_registration_high_water`。Schema 和 Validator 遵循 §§5.5/7.1 的明确 schema-addition 片段；在语义采纳前，契约应统一该载体路径差异。
 - §5.7 规定 D LINEAGE/BARRIER_MEMBERSHIP evidence 的 `target_set_digest` 和 `forget_fence_namespace_ref` SHOULD 条件必填，而非 MUST。Schema 定义这两个属性但不强制；语义 helper 在缺失时返回 `UNKNOWN`。
 - D 实际 namespace identifier 编码、权威 proof 签发、签名验证和 currentness 查询接口仍未由契约提供。Schema 只验证结构；依赖权威的检查需要注入 D callbacks。
 
