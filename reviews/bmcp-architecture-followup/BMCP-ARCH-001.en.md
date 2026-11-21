@@ -41,7 +41,7 @@ Main pins are from fetched origin/main at the baseline above. H pins are from th
 | docs/en/03-memory-brain/forget-fence-and-completion-contract.md | main | c791895333ab6140f035f4f622d5dee9325d422d | D/I Forget boundary |
 | docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md | main | 9c054932994bb078e2834df8bd66f73895aa04f5 | D lifecycle/Fence |
 | 13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md | main | 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593 | ADR-BLOCKED for schema freeze |
-| 14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md | PR #438 @ `60fb3a6a36bcd2ebe9197e4a1c8d24302b34f168` | pending merge | Owner semantic selection: Option A + I1; explicitly does not unfreeze schema |
+| 14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md | PR #447 @ `e22d7a058079288a6bbd209118577f5a34a0241c` | pending merge | Owner semantic selection: Option A + I1; explicitly does not unfreeze schema |
 
 This is a bounded source ledger, not a claim that every H artifact or consumer was independently reviewed.
 
@@ -301,7 +301,7 @@ H-owned questions go to H first; they are not disguised as Owner decisions.
 - MODULE: BMCP
 - ISSUE_OR_ADR: B-ADR-FACT-CLAIM-001 (13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md)
 - DECISION_REQUIRED: reconcile B-ADR-FACT-CLAIM-001 with the Owner semantic selection, then complete the required consumer mapping and acceptance before any canonical schema or wire-field freeze.
-- CURRENT_FACTS: Owner semantic decision record `OWNER-DECISION-FACT-CLAIM-001` in PR #438 head `60fb3a6a36bcd2ebe9197e4a1c8d24302b34f168` selects Option A (separate Fact attestation and Claim proposition) with I1 (stable Claim identity plus immutable ClaimRevision). PR #438 is still Draft/unmerged. B-ADR-FACT-CLAIM-001 remains ADR-BLOCKED for canonical schema freeze and implementation mapping until its §8 consumer, migration/compatibility and conformance conditions are evidenced.
+- CURRENT_FACTS: Owner semantic decision record `OWNER-DECISION-FACT-CLAIM-001` in PR #447 head `e22d7a058079288a6bbd209118577f5a34a0241c` selects Option A (separate Fact attestation and Claim proposition) with I1 (stable Claim identity plus immutable ClaimRevision). PR #447 is still Draft/unmerged. B-ADR-FACT-CLAIM-001 remains ADR-BLOCKED for canonical schema freeze and implementation mapping until its §8 consumer, migration/compatibility and conformance conditions are evidenced.
 - H_OWNED_CONTRACTS: future wire field/schema mapping remains H-owned and unfrozen; this semantic selection approves no wire field.
 - CROSS_MODULE_CONFLICT: semantic direction is selected, but E Candidate IR, D identity/lifecycle, I authorization/attestor policy, and H payload mapping still require exact consumer acceptance and source pins before a shared schema can be frozen.
 - OPTIONS: (A) preserve the selected Option A + I1 semantic direction while keeping payload fields opaque until the B ADR §8 gate is complete; (B) reopen the semantic choice only through a superseding Owner decision.
@@ -310,9 +310,9 @@ H-owned questions go to H first; they are not disguised as Owner decisions.
 - AGENT_INTEGRATION_IMPACT: C carries only opaque approved refs.
 - D_I_IMPACT: D/I semantics unchanged; review consumers after B decision.
 - RUNTIME_IMPLEMENTATION_IMPACT: no final Fact/Claim payload/schema/migration until decision.
-- REQUIRED_AUTHORITY: Owner semantic selection is recorded in PR #438 under the standing Owner instruction; B/D/E/F/G/H/I consumer mapping and acceptance remain required for schema freeze.
+- REQUIRED_AUTHORITY: Owner semantic selection is recorded in PR #447 under the standing Owner instruction; B/D/E/F/G/H/I consumer mapping and acceptance remain required for schema freeze.
 - OWNER_DECISION: SEMANTIC_DIRECTION_SELECTED_OPTION_A_I1; ADR_SCHEMA_FREEZE_STILL_BLOCKED
-- EVIDENCE: `OWNER-DECISION-FACT-CLAIM-001` PR #438 @ `60fb3a6a36bcd2ebe9197e4a1c8d24302b34f168`; B ADR Blob 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593.
+- EVIDENCE: `OWNER-DECISION-FACT-CLAIM-001` PR #447 @ `e22d7a058079288a6bbd209118577f5a34a0241c`; B ADR Blob 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593.
 - FOLLOW_UP_ACTIONS: B updates ADR status/source pins; D/E/F/G/H/I record exact consumer mappings and acceptance; publish migration/compatibility plan and conformance scenarios; keep payload opaque until all §8 conditions are met.
 
 **DECISION_REQUEST_ID: BMCP-DR-002**

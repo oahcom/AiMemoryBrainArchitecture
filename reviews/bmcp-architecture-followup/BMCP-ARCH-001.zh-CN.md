@@ -300,7 +300,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - MODULE：BMCP
 - ISSUE_OR_ADR：B-ADR-FACT-CLAIM-001（13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md）
 - DECISION_REQUIRED：使 B-ADR-FACT-CLAIM-001 与 Owner 语义选择对齐，并完成消费者映射/验收；在此之前不得冻结 Canonical Schema 或 Wire 字段。
-- CURRENT_FACTS：PR #438 Head `60fb3a6a36bcd2ebe9197e4a1c8d24302b34f168` 中的 `OWNER-DECISION-FACT-CLAIM-001` 选择 Option A（Fact 独立 Attestation、Claim 表示命题）及 I1（稳定 Claim Identity + 不可变 ClaimRevision）。PR #438 仍为 Draft/未合并。B-ADR-FACT-CLAIM-001 对 Canonical Schema 冻结和实现映射仍保持 ADR-BLOCKED，直至其 §8 消费者、迁移/兼容和符合性条件均有证据。
+- CURRENT_FACTS：PR #447 Head `e22d7a058079288a6bbd209118577f5a34a0241c` 中的 `OWNER-DECISION-FACT-CLAIM-001` 选择 Option A（Fact 独立 Attestation、Claim 表示命题）及 I1（稳定 Claim Identity + 不可变 ClaimRevision）。PR #447 仍为 Draft/未合并。B-ADR-FACT-CLAIM-001 对 Canonical Schema 冻结和实现映射仍保持 ADR-BLOCKED，直至其 §8 消费者、迁移/兼容和符合性条件均有证据。
 - H_OWNED_CONTRACTS：未来 Wire 字段/Schema Mapping 归 H 所有且未冻结；本语义选择不批准任何 Wire 字段。
 - CROSS_MODULE_CONFLICT：语义方向已选择，但 E Candidate IR、D Identity/Lifecycle、I Authorization/Attestor Policy 和 H Payload Mapping 仍需精确消费者验收和来源 Pin，之后才能冻结共享 Schema。
 - OPTIONS：(A) 保留已选 Option A + I1 语义方向，在 B ADR §8 门禁完成前继续保持 Payload 字段不透明；(B) 只有通过后续替代 Owner 决策才重新打开语义选择。
@@ -309,9 +309,9 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - AGENT_INTEGRATION_IMPACT：C 只携带不透明的已批准 Ref。
 - D_I_IMPACT：D/I 语义不变；B 决议后审查消费者。
 - RUNTIME_IMPLEMENTATION_IMPACT：决议前不能实现最终 Fact/Claim Payload/Schema/Migration。
-- REQUIRED_AUTHORITY：Owner 语义选择记录于 PR #438；Schema 冻结仍需 B/D/E/F/G/H/I 消费者映射和验收。
+- REQUIRED_AUTHORITY：Owner 语义选择记录于 PR #447；Schema 冻结仍需 B/D/E/F/G/H/I 消费者映射和验收。
 - OWNER_DECISION：SEMANTIC_DIRECTION_SELECTED_OPTION_A_I1；ADR_SCHEMA_FREEZE_STILL_BLOCKED
-- EVIDENCE：`OWNER-DECISION-FACT-CLAIM-001` PR #438 @ `60fb3a6a36bcd2ebe9197e4a1c8d24302b34f168`；B ADR Blob 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593。
+- EVIDENCE：`OWNER-DECISION-FACT-CLAIM-001` PR #447 @ `e22d7a058079288a6bbd209118577f5a34a0241c`；B ADR Blob 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593。
 - FOLLOW_UP_ACTIONS：B 更新 ADR 状态/来源 Pin；D/E/F/G/H/I 记录精确消费者映射和验收；补齐迁移/兼容计划及符合性场景；所有 §8 条件满足前 Payload 保持不透明。
 
 **DECISION_REQUEST_ID: BMCP-DR-002**
