@@ -276,88 +276,6 @@ per-BrainAuthorityRef 序列化锚点声明之前。七步顺序、锚点、L1 �
 
 R3 处置、正式验收、Schema 冻结与实现一致性均不变。
 
-### 9.3 REREVIEW-8 合并后回读
-
-本节记录 REREVIEW-8 所审查的第七轮谓词等价修正完成合并后的回读结果。
-
-本节仅记录仓库状态及内容身份。REREVIEW-8 = PASS 不构成 FORMAL ACCEPTANCE，也不建立实现符合性。
-
-| 目标 | 已复审的修正 HEAD | 修正内容 |
-|---|---|---|
-| PR #410 — Extraction EN | `a685aa9d868b56afb0a335a691d1e758d1fff05a` | `TRUE if and only if` |
-| PR #411 — Storage ADR EN | `79a4d7df475c03ccb318712ccef6e6d78fedebba` | `TRUE if and only if` |
-
-两个修正提交均只替换原有英文定义中的谓词连接词。中文定义此前已经使用「当且仅当」。
-
-| 目标分支 | 合并提交 |
-|---|---|
-| `main` — PR #410 | `f1a6028d8192` |
-| Storage 独立载体分支 — PR #411 | `356e2f051def` |
-
-这两个目标属于不同 Git 历史，不得将其表述为一个共同的原子 Git 快照。
-
-Extraction 文件从指定的 `main` 合并结果读取。Storage ADR 从其独立载体分支的合并结果读取。
-
-| 规范载体 | 路径 | Blob SHA | 大小 |
-|---|---|---|---:|
-| Extraction EN | `docs/en/04-memory-compiler/extraction-and-normalization.md` | `c87860706313` | 22,484 bytes |
-| Extraction ZH | `docs/zh-CN/04-memory-compiler/extraction-and-normalization.md` | `9657949af482` | 21,781 bytes |
-| Storage ADR（EN/ZH） | `reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md` | `62ae6e878657` | 35,544 bytes |
-
-合并后回读确认的完整 Blob 标识如下：
-
-- Extraction EN：`c87860706313`
-- Extraction ZH：`9657949af482`
-- Storage ADR：`62ae6e878657`
-
-四处规范定义分别为：
-
-1. Extraction EN §19.2。
-2. Extraction ZH §19.2。
-3. Storage ADR EN §8.8。
-4. Storage ADR ZH §8.8。
-
-回读确认以下要素对应一致：
-
-| 谓词要素 | 英文 | 中文 |
-|---|---|---|
-| 谓词身份 | `DependencyClosurePersisted(P)` | `DependencyClosurePersisted(P)` |
-| 逻辑连接词 | `if and only if` | `当且仅当` |
-| 依赖集合 | 完整直接及传递依赖集合 | 完整 direct 和 transitive 集合 |
-| 完整性 | `COMPLETE` | `COMPLETE` |
-| Digest | 与准确依赖集合匹配 | 与准确依赖集合匹配 |
-| 确认方式 | Authoritative read-after-commit | 权威 read-after-commit |
-
-英文和中文定义表达相同的必要且充分条件。
-
-Participant barrier 只有在该谓词为 TRUE 时才 MUST 被判定为 resolved 或完成。
-
-```text
-REREVIEW-8 = PASS
-
-FOUR-WAY PREDICATE CONSISTENCY = PASS
-LOGICAL EQUIVALENCE = PASS
-SCOPE VIOLATION = NONE
-REGRESSION = NONE
-RESIDUAL REVIEW BLOCKER = NONE
-
-R1-R5 = PASS / NOT REOPENED
-
-FORMAL ACCEPTANCE = PENDING
-IMPLEMENTATION CONFORMANCE = NOT ESTABLISHED
-
-TEST EXECUTION GATE = UNLOCKED-WITH-CONDITIONS
-UNLOCKED SCOPE = REQ-04 STEP 5 DISPATCH ONLY
-```
-
-PASS 是独立复审判定，不是正式接受决定。
-
-本次回读不证明底层存储实现已经提供原子性、事务隔离、依赖登记持久化或任何其他实现属性。
-
-本节不批准 Schema、DDL、公共 API、H Wire、生产密钥、Trust Root、Crypto Profile 或 Storage L4。
-
-本节记录的是规范回读完成，不是实现测试完成。
-
 ### 9.3 修正轮的独立复审处置
 
 复审方：独立会话 `6b00a00c-3ad0-83ee-bda0-f6dcdef2fbd9`（只读，未写仓库，未由复审方发布评论）。
@@ -506,3 +424,95 @@ PublicationParticipant Admission 成功之后线性化，三者留下的持久�
 
 §3 的「应用状态」列保持原样：上一轮的应用仍在树中。变化的是「独立复审」列，这也是四行变更、验收
 门禁一行未动的原因。
+
+### 9.5 谓词等价修正轮的合并后回读
+
+本节记录 REREVIEW-8 所审查的第七轮谓词等价修正完成合并后的回读结果。
+
+本节仅记录仓库状态及内容身份。REREVIEW-8 = PASS 不构成 FORMAL ACCEPTANCE，也不建立实现符合性。
+
+#### 9.5.1 精确修正提交 HEAD
+
+| 目标 | 已复审的修正 HEAD | 修正内容 |
+|---|---|---|
+| PR #410 — Extraction EN | `a685aa9d868b56afb0a335a691d1e758d1fff05a` | `TRUE if and only if` |
+| PR #411 — Storage ADR EN | `79a4d7df475c03ccb318712ccef6e6d78fedebba` | `TRUE if and only if` |
+
+两个修正提交均只替换原有英文定义中的谓词连接词。中文定义此前已经使用「当且仅当」。
+
+#### 9.5.2 精确合并目标
+
+| 目标分支 | 合并提交 |
+|---|---|
+| `main` — PR #410 | `f1a6028d8192` |
+| Storage 独立载体分支 — PR #411 | `356e2f051def` |
+
+这两个目标属于不同 Git 历史，不得将其表述为一个共同的原子 Git 快照。
+
+Extraction 文件从指定的 `main` 合并结果读取。Storage ADR 从其独立载体分支的合并结果读取。
+
+#### 9.5.3 合并后 Blob 回读
+
+| 规范载体 | 路径 | Blob SHA | 大小 |
+|---|---|---|---:|
+| Extraction EN | `docs/en/04-memory-compiler/extraction-and-normalization.md` | `c87860706313` | 22,484 bytes |
+| Extraction ZH | `docs/zh-CN/04-memory-compiler/extraction-and-normalization.md` | `9657949af482` | 21,781 bytes |
+| Storage ADR（EN/ZH） | `reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md` | `62ae6e878657` | 35,544 bytes |
+
+合并后回读确认的完整 Blob 标识如下：
+
+- Extraction EN：`c87860706313`
+- Extraction ZH：`9657949af482`
+- Storage ADR：`62ae6e878657`
+
+#### 9.5.4 谓词等价回读
+
+四处规范定义分别为：
+
+1. Extraction EN §19.2。
+2. Extraction ZH §19.2。
+3. Storage ADR EN §8.8。
+4. Storage ADR ZH §8.8。
+
+回读确认以下要素对应一致：
+
+| 谓词要素 | 英文 | 中文 |
+|---|---|---|
+| 谓词身份 | `DependencyClosurePersisted(P)` | `DependencyClosurePersisted(P)` |
+| 逻辑连接词 | `if and only if` | `当且仅当` |
+| 依赖集合 | 完整直接及传递依赖集合 | 完整 direct 和 transitive 集合 |
+| 完整性 | `COMPLETE` | `COMPLETE` |
+| Digest | 与准确依赖集合匹配 | 与准确依赖集合匹配 |
+| 确认方式 | Authoritative read-after-commit | 权威 read-after-commit |
+
+英文和中文定义表达相同的必要且充分条件。
+
+Participant barrier 只有在该谓词为 TRUE 时才 MUST 被判定为 resolved 或完成。
+
+#### 9.5.5 复审及治理处置
+
+```text
+REREVIEW-8 = PASS
+
+FOUR-WAY PREDICATE CONSISTENCY = PASS
+LOGICAL EQUIVALENCE = PASS
+SCOPE VIOLATION = NONE
+REGRESSION = NONE
+RESIDUAL REVIEW BLOCKER = NONE
+
+R1-R5 = PASS / NOT REOPENED
+
+FORMAL ACCEPTANCE = PENDING
+IMPLEMENTATION CONFORMANCE = NOT ESTABLISHED
+
+TEST EXECUTION GATE = UNLOCKED-WITH-CONDITIONS
+UNLOCKED SCOPE = REQ-04 STEP 5 DISPATCH ONLY
+```
+
+PASS 是独立复审判定，不是正式接受决定。
+
+本次回读不证明底层存储实现已经提供原子性、事务隔离、依赖登记持久化或任何其他实现属性。
+
+本节不批准 Schema、DDL、公共 API、H Wire、生产密钥、Trust Root、Crypto Profile 或 Storage L4。
+
+本节记录的是规范回读完成，不是实现测试完成。
