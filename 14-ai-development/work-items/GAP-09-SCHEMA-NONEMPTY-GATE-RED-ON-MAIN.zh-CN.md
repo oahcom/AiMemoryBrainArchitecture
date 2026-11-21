@@ -62,6 +62,32 @@ in `08-bmcp-protocol/schemas/`; 2 files were present.
 
 而 schema 目录现在有 32 个 `*.json` 文件。
 
+**5. 同一区域的姊妹闸门是绿的。**
+
+`#535` 新增了 `08-bmcp-protocol/scripts/check_protocol_index.py` 与
+`tests/test_protocol_index_consistency.py`。两者在同一提交上都通过：
+
+```
+indexed_unique=22
+missing=0
+extra=0
+duplicate_types=0
+invalid_rows=0
+PASS
+```
+
+```
+8 passed in 0.14s
+```
+
+这一点很重要，因为它排除了"仓库正处于过渡状态、闸门本来就不可能通过"这一
+借口。有人正在往这同一个目录里加守卫并让它们变绿。非空审计是被跳过了，不是
+被阻断了。
+
+这也意味着红色审计并不是唯一未自动化的闸门：`check_protocol_index.py` 和
+`test_protocol_index_consistency.py` 同样不出现在任何工作流里。PR 上真正跑
+测试的只有 `rust-phase1.yml`。
+
 ## 为什么最显然的修法是错的
 
 诱人的修法是用脚本重新生成那 5506 行，让闸门变绿。那会摧毁这个产物的意义。

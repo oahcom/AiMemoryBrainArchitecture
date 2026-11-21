@@ -65,6 +65,33 @@ in `08-bmcp-protocol/schemas/`; 2 files were present.
 
 The schema directory now holds 32 `*.json` files.
 
+**5. The sibling gate in the same area is green.**
+
+`#535` added `08-bmcp-protocol/scripts/check_protocol_index.py` and
+`tests/test_protocol_index_consistency.py`. Both pass on the same commit:
+
+```
+indexed_unique=22
+missing=0
+extra=0
+duplicate_types=0
+invalid_rows=0
+PASS
+```
+
+```
+8 passed in 0.14s
+```
+
+This matters because it rules out the excuse that the repository is simply in
+a transitional state where gates cannot pass. Someone is actively adding
+guards to this exact directory and getting them green. The non-empty audit was
+skipped, not blocked.
+
+It also means the red audit is not the only unautomated gate: neither
+`check_protocol_index.py` nor `test_protocol_index_consistency.py` appears in
+any workflow either. Only `rust-phase1.yml` runs tests on PRs.
+
 ## Why the obvious fix is wrong
 
 The tempting fix is to regenerate the 5506 rows programmatically so the gate
