@@ -263,12 +263,17 @@ def current_bilingual_gaps() -> set[str]:
                 continue
             english = REPO_ROOT / "docs" / "en" / source
             chinese = REPO_ROOT / "docs" / "zh-CN" / source
-            mirrored = english.is_file() and chinese.is_file()
-            if root_name == "14-ai-development":
-                paired = mirrored or counterpart_14(source) is not None
-            else:
-                paired = mirrored
-            if not paired:
+            # A side-by-side pair (.en.md + .zh-CN.md in the same directory) is a
+            # complete bilingual unit on its own: it carries both languages, so it
+            # must not additionally be required to grow docs/en + docs/zh-CN
+            # mirrors. Only mirror-shaped counterparts need the mirror check.
+            paired_side_by_side = (
+                root_name == "14-ai-development"
+                and side_by_side_partner(source) is not None
+            )
+            if paired_side_by_side:
+                continue
+            if not english.is_file() or not chinese.is_file():
                 gaps.add(source)
     return gaps
 

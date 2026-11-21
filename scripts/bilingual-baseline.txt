@@ -83,6 +83,9 @@
 13-engineering-decisions/technology-research/TECH-REALITY-001-C/provider-outcome-and-execution-evidence.md
 13-engineering-decisions/technology-research/TECH-REALITY-001-C/tool-execution-boundary.md
 13-engineering-decisions/technology-research/TECH-REALITY-001-C/validation/README.md
+14-ai-development/AI-EXEC-001.md
+14-ai-development/AI-EXEC-002.md
+14-ai-development/AI-EXEC-ROLLOUT-001.md
 14-ai-development/research/phase-0/SESSION-1-GITHUB-WORKFLOW-REPORT.md
 14-ai-development/research/phase-0/SESSION-2-PROMPT-RUN-PROVENANCE-REPORT.md
 14-ai-development/research/phase-0/SESSION-3-QUALITY-REVIEW-DEFECT-REPORT.md
