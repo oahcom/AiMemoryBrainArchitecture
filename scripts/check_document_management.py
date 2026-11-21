@@ -26,6 +26,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -68,6 +69,10 @@ EXCLUSION_KINDS = {"not-documentation"}
 # in policy section 2 with a reason, not by borrowing another gate's constant.
 GOVERNED_ENTRY = "document_metadata"
 SCHEMA_FILE = "00-governance/architecture-document-metadata.schema.yaml"
+SCHEMA_VERSION = "2"
+# Build and VCS state: present in some working copies, absent in others.
+# Declaring them would make the registry describe a machine, not the repo.
+STRUCTURAL_EXCEPTIONS = {".git", "target"}
 SCOPE_REGISTRY = "00-governance/document-scope-registry.yaml"
 
 DOMAINS = {
@@ -608,6 +613,15 @@ def schema(root: Path | None = None) -> dict:
             raise SystemExit(f"cannot load {SCHEMA_FILE}: {exc}")
         if not isinstance(loaded, dict):
             raise SystemExit(f"{SCHEMA_FILE} is not a mapping")
+        # The version is the only statement that gate and contract are the same
+        # generation. It was published and never compared, so a schema written
+        # for a different rule set loaded silently.
+        declared_version = loaded.get("schema_version")
+        if str(declared_version) != SCHEMA_VERSION:
+            raise SystemExit(
+                f"{SCHEMA_FILE} declares schema_version {declared_version!r} "
+                f"but this gate implements {SCHEMA_VERSION!r}"
+            )
         fields = loaded.get("fields")
         if not isinstance(fields, dict) or not fields:
             raise SystemExit(f"{SCHEMA_FILE} declares no fields mapping")
@@ -617,6 +631,9 @@ def schema(root: Path | None = None) -> dict:
                 f"{SCHEMA_FILE} no longer declares {sorted(missing)}; a schema "
                 f"without the four dimensions cannot describe a classification"
             )
+        unread = check_schema_keys(loaded)
+        if unread:
+            raise SystemExit(f"{SCHEMA_FILE}: " + "; ".join(unread))
         if len(_required_in(loaded)) < 5:
             raise SystemExit(
                 f"{SCHEMA_FILE} marks fewer than 5 leaves required; "
@@ -624,6 +641,37 @@ def schema(root: Path | None = None) -> dict:
             )
         _SCHEMA[key] = loaded
     return _SCHEMA[key]
+
+def check_schema_keys(loaded: dict) -> list[str]:
+    """Reject constraint keys the gate does not read.
+
+    A key that is published but never executed is prose wearing a constraint's
+    clothes, and it is the defect class the reviewer kept finding: `required`
+    was published and not enforced, then `when` was published and only its rule
+    id checked. Rather than fix these one at a time, the vocabulary is closed:
+    a key outside this set means the schema promises something no code checks,
+    so the contract is refused at load time instead of at review time.
+    """
+    allowed = {"kind", "required", "enum", "items", "fields"}
+    problems: list[str] = []
+
+    def walk(node, prefix: str) -> None:
+        for name, sub in (node or {}).items():
+            if not isinstance(sub, dict):
+                problems.append(f"schema field {prefix}{name} is not a mapping")
+                continue
+            unknown = set(sub) - allowed
+            if unknown:
+                problems.append(
+                    f"schema field {prefix}{name} declares key(s) the gate does "
+                    f"not read: {sorted(unknown)}; remove them or implement them"
+                )
+            nested = sub.get("fields")
+            if nested is not None:
+                walk(nested, f"{prefix}{name}.")
+
+    walk(loaded.get("fields"), "")
+    return problems
 
 def check_kinds(node, spec: dict, errors: list[str], where: str = "") -> None:
     """Enforce the schema's declared kind for every present field.
@@ -845,8 +893,19 @@ def check_document(path: Path, text: str, root: Path | None = None) -> tuple[lis
             errors.append("DM-06 canonical_scope_keywords entries must be non-empty strings")
 
     # DM-08 Reverse relation is CI-derived, never hand-written (anywhere).
-    for where in walk_keys(meta, "superseded_by"):
-        errors.append(f"DM-08 {where} is CI-derived and MUST NOT be hand-written")
+    # The list comes from the schema's `forbidden:`, which the gate reads. A
+    # second hard-coded key here would be a rule declared twice and enforced
+    # once: the schema would name one forbidden path and DM-08 would check a
+    # different one, and neither would notice.
+    for forbidden_path in schema(root).get("forbidden") or []:
+        if not isinstance(forbidden_path, str):
+            continue
+        leaf = forbidden_path.rsplit(".", 1)[-1]
+        for where in walk_keys(meta, leaf):
+            errors.append(
+                f"DM-08 {where} is {forbidden_path}: CI-derived, MUST NOT be "
+                f"hand-written"
+            )
 
     # DM-11 Conflict state must not double as authority.
     if canonical == "Canonical" and conflict in ("Under-Review",):
@@ -1322,55 +1381,106 @@ def _count(value) -> int | None:
     return None
 
 
-def backlog_counts(root: Path) -> dict[str, int]:
-    """Actual Markdown count per backlog root, excluding governed subpaths.
+def governed_prefixes() -> tuple[str, ...]:
+    """Paths that are governed regardless of which root they sit under.
 
-    A backlog root can contain a governed subtree: docs/ holds docs/en,
-    docs/zh-CN and the individually governed gap record. Counting those as
-    backlog would inflate the number the registry promises, so they are
-    subtracted -- the two sets are disjoint by construction.
+    docs/ is backlog, but docs/en, docs/zh-CN and the gap record inside it are
+    governed. The same list has to be used by the counter and the scanner, or
+    they disagree about what they are counting -- which is exactly the defect
+    the tenth review found.
     """
-    governed_prefixes = tuple(NORMATIVE_ROOTS) + GOVERNED_FILES
-    counts: dict[str, int] = {}
-    for name in backlog_roots(root):
-        base = root / name
-        if not base.is_dir() or base.is_symlink():
-            continue
-        n = 0
-        for path in base.rglob("*.md"):
-            if path.is_symlink():
-                continue
-            rel = path.relative_to(root).as_posix()
-            if any(rel == g or rel.startswith(g + "/") for g in governed_prefixes):
-                continue
-            n += 1
-        counts[name] = n
-    return counts
+    return tuple(NORMATIVE_ROOTS) + GOVERNED_FILES
 
+def scan_root(root: Path, name: str, skip: tuple[str, ...] = ()) -> tuple[list[Path], list[str]]:
+    """Walk one root, returning (markdown files, problems).
+
+    There is deliberately one walk, not two. `backlog_counts()` and
+    `governed_files()` used to traverse the tree separately with different skip
+    rules, and the tenth review showed what that costs: a symlinked `docs/` was
+    skipped by the counter (so the declared count was compared to nothing) and
+    skipped by the scanner (so the run reported `0 governed documents` and exit
+    0). Two traversals can disagree; one cannot.
+
+    `skip` holds prefixes this root must not descend into, because they are
+    governed by another root.
+
+    A symlink is *reported*, never silently dropped. Dropping it is what made
+    the failure silent: a link is either a mistake or content the gate cannot
+    verify, and both deserve a diagnostic rather than a shorter file list.
+    """
+    files: list[Path] = []
+    problems: list[str] = []
+    base = root / name
+    if base.is_symlink():
+        problems.append(
+            f"DM-14 {name} is a symbolic link; a governed or backlog root must be "
+            f"a real directory inside the repository, not a pointer to one"
+        )
+        return files, problems
+    if not base.is_dir():
+        return files, problems
+    for dirpath, dirnames, filenames in os.walk(base, followlinks=False):
+        here = Path(dirpath)
+        rel_dir = here.relative_to(root).as_posix()
+        # Prune symlinked directories and governed subtrees before descending,
+        # so a link cannot pull files from outside into the count.
+        kept = []
+        for d in sorted(dirnames):
+            child = here / d
+            rel_child = (rel_dir + "/" + d) if rel_dir != "." else d
+            if child.is_symlink():
+                problems.append(
+                    f"DM-14 {rel_child} is a symbolic link; the gate does not "
+                    f"follow links, and a linked directory would make the scanned "
+                    f"set depend on a target outside the repository"
+                )
+                continue
+            if any(rel_child == s or rel_child.startswith(s + "/") for s in skip):
+                continue
+            kept.append(d)
+        dirnames[:] = kept
+        for f in sorted(filenames):
+            if not f.endswith(".md"):
+                continue
+            path = here / f
+            rel = path.relative_to(root).as_posix()
+            if any(rel == s or rel.startswith(s + "/") for s in skip):
+                continue
+            if path.is_symlink():
+                problems.append(
+                    f"DM-14 {rel} is a symbolic link; a governed document must be "
+                    f"a regular file inside the repository"
+                )
+                continue
+            files.append(path)
+    return files, problems
+
+def backlog_counts(root: Path) -> tuple[dict[str, int], list[str]]:
+    """Actual Markdown count per backlog root, and anything the walk refused.
+
+    Returns problems as well as counts: a root that could not be walked has no
+    trustworthy count, and reporting zero for it would be a lie the registry
+    comparison would then accept.
+    """
+    skip = governed_prefixes()
+    counts: dict[str, int] = {}
+    problems: list[str] = []
+    for name in backlog_roots(root):
+        found, issues = scan_root(root, name, skip)
+        problems += issues
+        if not issues:
+            counts[name] = len(found)
+    return counts, problems
 
 def governed_files(root: Path) -> list[Path]:
+    """Every file the gate is responsible for: governed roots plus backlog."""
     files: list[Path] = []
     backlog = set(backlog_roots(root))
-    # Backlog roots are scanned, but the governed subtrees inside them are not
-    # scanned twice: docs/ contains docs/en, docs/zh-CN and the gap record.
-    governed_prefixes = tuple(NORMATIVE_ROOTS) + GOVERNED_FILES
+    skip = governed_prefixes()
     for name in NORMATIVE_ROOTS + tuple(sorted(backlog)):
-        base = root / name
-        if not base.is_dir():
-            continue
-        # A symlinked root would make the governed set depend on something
-        # outside the repository: `Path.is_dir()` follows links, and rglob then
-        # reads through them. Refusing is cheaper than proving containment.
-        if base.is_symlink():
-            continue
-        for path in sorted(base.rglob("*.md")):
-            if path.is_symlink():
-                continue
-            if name in backlog:
-                rel = path.relative_to(root).as_posix()
-                if any(rel == g or rel.startswith(g + "/") for g in governed_prefixes):
-                    continue
-            files.append(path)
+        # A backlog root must not re-scan a governed subtree inside it.
+        found, _ = scan_root(root, name, skip if name in backlog else ())
+        files.extend(found)
     # GOVERNED_FILES uses the same containment test as the registry check, so
     # the declared set and the scanned set cannot disagree: a path the registry
     # accepts is a path this loop includes, and vice versa.
@@ -1478,12 +1588,13 @@ def check_scope_registry(root: Path) -> list[str]:
     # was not on disk as far as this check was concerned: not governed, not
     # excluded, not reported, not scanned. A dot is not an exemption.
     #
-    # `.git` is the one structural exception, and it is structural rather than
-    # declared: it is the version-control store, present in every clone, absent
-    # in every export. Requiring it in a tracked file would make the registry
-    # describe the working copy instead of the repository.
+    # Two structural exceptions, and they are structural rather than declared:
+    # `.git` is the version-control store and `target/` is Rust build output.
+    # Both exist in some working copies and not others, so a registry entry
+    # would assert something about a machine instead of about the repository --
+    # a fresh clone would then fail for naming a directory it does not have.
     accounted = set(declared) | set(backlog) | set(excluded) | {"docs/en", "docs/zh-CN"}
-    on_disk = {p.name for p in root.iterdir() if p.is_dir()} - {".git"}
+    on_disk = {p.name for p in root.iterdir() if p.is_dir()} - STRUCTURAL_EXCEPTIONS
     # A symlinked directory is not part of this repository's content. Listing it
     # in the registry would require the gate to scan through the link, so it is
     # refused outright instead of being declared.
@@ -1530,7 +1641,8 @@ def check_scope_registry(root: Path) -> list[str]:
     # `documents: 27` is a sentence rather than a claim: the number could drift
     # as files are added or migrated and nobody would notice. With it, the
     # registry either states the truth or the gate fails.
-    actual = backlog_counts(root)
+    actual, walk_problems = backlog_counts(root)
+    errors += walk_problems
     for name, node in backlog.items():
         if not isinstance(node, dict):
             continue

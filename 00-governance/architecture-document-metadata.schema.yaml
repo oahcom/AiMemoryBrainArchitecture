@@ -10,8 +10,10 @@
 # To fill in a document, copy 00-governance/templates/document-metadata-template.md.
 # 填写文档时复制 00-governance/templates/document-metadata-template.md。
 #
-# Per-field keys: kind / required / enum / items / when / fields.
-# 每字段可用键：kind / required / enum / items / when / fields。
+# Per-field keys: kind / required / enum / items / fields. Every one of them is
+# read by the gate; a key the gate does not read is refused at load time.
+# 每字段可用键：kind / required / enum / items / fields。它们全部被门禁读取；
+# 门禁不读取的键会在加载阶段被拒绝。
 # `kind` is the value type; it is not called `type` because `approval_scope.type` is a field name.
 # `fields` nests one level, so the shape here is the shape of the metadata block.
 # `kind` 表示值类型；不叫 `type` 是因为 `approval_scope.type` 本身是字段名。
@@ -102,11 +104,20 @@ fields:
             # Not unconditionally required: DM-03 requires it when the decision
             # is Approved. Declaring `required: true` here contradicted every
             # Draft document, including the policy itself.
-            # The leading DM-id is mandatory: it names the rule that owns this
-            # requirement, and T19 fails if that id is not a rule in the policy.
-            # 前导 DM 编号是强制的：它指明哪条规则拥有该必填要求；若该编号不在条例
-            # 规则表中，T19 失败。
-            when: DM-03 decision_status == Approved
+            #
+            # This used to carry `when: DM-03 decision_status == Approved`. The
+            # key was removed, not because the sentence is wrong but because it
+            # was published in a machine-readable contract while no machine read
+            # it: T19 could only confirm that "DM-03" was a real rule id, so
+            # `when: DM-03 decision_status == Draft` -- the exact opposite claim
+            # -- passed. A condition a checker cannot evaluate is prose, and
+            # prose belongs in a comment. DM-03 is the executable form of this
+            # sentence; it is the only thing that enforces it.
+            # 此处原有一行 `when: DM-03 decision_status == Approved`。该键已被删除
+            # ——不是因为这句话错了，而是因为它被发布在机器可读契约里，却没有机器
+            # 读取它：T19 只能检查 "DM-03" 是否为真实规则编号，因此把条件改成
+            # `decision_status == Draft`（正好相反的主张）仍会通过。检查器无法求值
+            # 的条件就是散文，散文应写在注释里。这句话的可执行形式是 DM-03。
             fields:
               type:
                 kind: string

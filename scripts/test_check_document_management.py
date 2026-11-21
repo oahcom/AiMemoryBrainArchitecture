@@ -10,6 +10,7 @@ root, so every input outside the declared subset must fail, not degrade.
 from __future__ import annotations
 
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -1674,6 +1675,176 @@ def run_symlink_boundary() -> None:
         record("T47 backlog documents are actually scanned",
                "backlog.md" in scanned, f"  scanned {sorted(scanned)}")
 
+
+def run_scan_boundary() -> None:
+    """T49-T53: the scan and the count must be one walk with one rule.
+
+    The tenth review found that they were two walks. A symlinked backlog root
+    was skipped by the counter, so the declared count was compared to nothing,
+    and skipped by the scanner too, so the run reported zero governed documents
+    and exit 0. Both symptoms came from one cause: two traversals that were
+    allowed to disagree. These cases pin the single-walk contract.
+
+    Each asserts the *diagnostic*, not merely the exit code. A gate that fails
+    for an unrelated reason satisfies "exit 1" while proving nothing.
+    """
+    print("scan boundary")
+    import check_document_management as gate
+
+    def run(root):
+        proc = subprocess.run(
+            [sys.executable, str(Path(__file__).resolve().parent
+                                 / "check_document_management.py"),
+             "--root", str(root)],
+            capture_output=True, text=True,
+        )
+        return proc.returncode, proc.stdout + proc.stderr
+
+    # T49: a backlog root that is itself a symlink is refused by name.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        outside = Path(tmp).parent / "outside-docs-t49"
+        outside.mkdir(exist_ok=True)
+        for i in range(3):
+            (outside / f"f{i}.md").write_text("# x\n", encoding="utf-8")
+        shutil.rmtree(root / "docs")
+        (root / "docs").symlink_to(outside, target_is_directory=True)
+        try:
+            code, out = run(root)
+            record("T49 symlinked backlog root is named in the diagnostic",
+                   code != 0 and "docs is a symbolic link" in out,
+                   f"  exit {code}, output {out[:200]}")
+        finally:
+            shutil.rmtree(outside, ignore_errors=True)
+
+    # T50: a symlinked directory inside a backlog root is reported by path.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        outside = Path(tmp).parent / "outside-sub-t50"
+        outside.mkdir(exist_ok=True)
+        (outside / "external.md").write_text("# ext\n", encoding="utf-8")
+        (root / "docs" / "linked").symlink_to(outside, target_is_directory=True)
+        try:
+            code, out = run(root)
+            record("T50 symlinked directory inside a backlog root is reported",
+                   code != 0 and "docs/linked is a symbolic link" in out,
+                   f"  exit {code}, output {out[:200]}")
+        finally:
+            shutil.rmtree(outside, ignore_errors=True)
+
+    # T51: a symlinked .md inside a backlog root is reported by path.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        outside = Path(tmp).parent / "outside-file-t51.md"
+        outside.write_text("# ext\n", encoding="utf-8")
+        (root / "docs" / "linked.md").symlink_to(outside)
+        try:
+            code, out = run(root)
+            record("T51 symlinked markdown file inside a backlog root is reported",
+                   code != 0 and "docs/linked.md is a symbolic link" in out,
+                   f"  exit {code}, output {out[:200]}")
+        finally:
+            outside.unlink(missing_ok=True)
+
+    # T52: the counter and the scanner see the same files.
+    #
+    # This is the property the two-walk version violated, stated as an equality
+    # so a future split fails here rather than in production.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        for i in range(4):
+            (root / "docs" / f"extra{i}.md").write_text("# x\n", encoding="utf-8")
+        counts, problems = gate.backlog_counts(root)
+        skip = gate.governed_prefixes()
+        scanned, _ = gate.scan_root(root, "docs", skip)
+        record("T52 backlog count equals the number of files the scan returns",
+               counts.get("docs") == len(scanned) and not problems,
+               f"  count {counts.get('docs')} vs scanned {len(scanned)}, "
+               f"problems {problems}")
+
+    # T53: a stale count is an error, not a sentence.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        reg = root / "00-governance" / "document-scope-registry.yaml"
+        text = reg.read_text(encoding="utf-8")
+        reg.write_text(text.replace("    documents: 1", "    documents: 9"), encoding="utf-8")
+        code, out = run(root)
+        record("T53 a declared backlog count that disagrees with disk fails",
+               code != 0 and "declares 9 documents" in out,
+               f"  exit {code}, output {out[:200]}")
+
+
+def run_declared_but_unread() -> None:
+    """T54-T56: every published key must be read by something.
+
+    The reviewer asked twice what else is published and not executed. These
+    three were found by asking that question of the schema itself.
+    """
+    print("declared-but-unread keys")
+    import check_document_management as gate
+
+    real = Path(__file__).resolve().parents[1] / gate.SCHEMA_FILE
+    src = real.read_text(encoding="utf-8")
+
+    # T54: schema_version is compared, not decorative.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "00-governance").mkdir()
+        (root / gate.SCHEMA_FILE).write_text(
+            src.replace('schema_version: "2"', 'schema_version: "3"'), encoding="utf-8"
+        )
+        try:
+            gate.schema(root)
+            record("T54 schema_version mismatch stops the run", False, "  no error raised")
+        except SystemExit as exc:
+            record("T54 schema_version mismatch stops the run",
+                   "schema_version" in str(exc), f"  {exc}")
+
+    # T55: DM-08 is driven by the schema's forbidden list, not a hard-coded key.
+    body = (
+        "  domain: architecture\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Draft\n"
+        "    supersession:\n"
+        "      superseded_by: 00-governance/x.md\n"
+        "    evidence_verification:\n"
+        "      verification_status: Unverified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Non-Canonical\n"
+        "    normative_status: Informative\n"
+        "    canonical_conflict_status: None\n"
+    )
+    errs, _ = check_document(FILE, doc(body))
+    record("T55 forbidden path from the schema is rejected by DM-08",
+           any("DM-08" in e and "superseded_by" in e for e in errs),
+           f"  got {errs}")
+
+    # T56: a `when` condition is refused outright. It cannot be evaluated, so
+    # publishing it in the contract is a claim with no checker behind it.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "00-governance").mkdir()
+        injected = src.replace(
+            "          approval_scope:\n            kind: mapping\n",
+            "          approval_scope:\n            kind: mapping\n"
+            "            when: DM-03 decision_status == Draft\n",
+            1,
+        )
+        record("T56 fixture actually injects a when key", "when: DM-03" in injected)
+        (root / gate.SCHEMA_FILE).write_text(injected, encoding="utf-8")
+        try:
+            gate.schema(root)
+            record("T56 an unevaluable `when` key is refused at load", False,
+                   "  schema loaded")
+        except SystemExit as exc:
+            record("T56 an unevaluable `when` key is refused at load",
+                   "when" in str(exc), f"  {exc}")
+
+
 def main() -> int:
     print("check_document_management self-check")
     run_parser()
@@ -1690,6 +1861,8 @@ def main() -> int:
     run_golden_corpus()
     run_schema_fail_closed()
     run_symlink_boundary()
+    run_scan_boundary()
+    run_declared_but_unread()
     run_schema_agreement()
     passed, total = sum(RESULTS), len(RESULTS)
     print(f"{passed}/{total} passed")
