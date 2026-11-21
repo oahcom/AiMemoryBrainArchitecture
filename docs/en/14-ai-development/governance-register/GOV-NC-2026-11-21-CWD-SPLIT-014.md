@@ -26,7 +26,9 @@ When `cwd != repo root`, the two disagree. The consequences are measurable and, 
 | repo root (CI condition) | yes | **77** entries (correct) |
 | any other directory | **no — every pair fails** | **117** entries (+41, all real pairs frozen as gaps) |
 
-**In CI this never fires.** `.github/workflows/bilingual-docs.yml` runs `python3 scripts/check_bilingual_docs.py` with the default working directory, which is the checkout root. The defect is a *local measurement* hazard and a *baseline-regeneration* hazard, not a CI-runtime hazard. That distinction is the whole reason this register exists: it explains a wrong public claim without implying the gate is broken in production.
+**In CI this never fires.** `.github/workflows/bilingual-docs.yml` runs `python3 scripts/check_bilingual_docs.py` with the default working directory, which is the checkout root. The defect is a *local measurement* hazard and a *baseline-regeneration* hazard, not a CI-runtime hazard.
+
+**Correction to this register's first version:** I originally claimed this split explains the wrong measurements in commit `67074d2`. §3 now shows that the real cause there was that the probe file was English, not that `cwd` was wrong. The split is real and the hazard is real; the attribution was not.
 
 ---
 
@@ -124,40 +126,57 @@ I found no commit in main that contains a 117-entry baseline. The current file i
 
 ---
 
-## 3. The public claim this explains
+## 3. The public claim this explains — corrected
 
 Commit `67074d2` ("withdraw the zero-byte gate exploit — it is closed on main") added a section to `14-ai-development/work-items/GAP-BASELINE-001.md` asserting, at `f687346c`:
 
 ```
 === zero-byte .zh-CN.md ===
-  zz-empty-probe.md          in_gaps=True
-  zz-empty-probe.zh-CN.md    in_gaps=True
-=== all-English .zh-CN.md ===
-  zz-eng-probe.md            in_gaps=True
-  zz-eng-probe.zh-CN.md      in_gaps=True
+  zz-empty-probe.md          exists=True  size=805  in_gaps=True
+  zz-empty-probe.zh-CN.md    exists=True  size=0    in_gaps=True
+=== all-English .zh-CN.md (byte-identical copy of the .md) ===
+  zz-eng-probe.md            exists=True  size=805  in_gaps=True
+  zz-eng-probe.zh-CN.md      exists=True  size=805  in_gaps=True
 ```
 
 and concluding "The exploit does not reproduce."
 
-**Measured at both `f687346` and `67074d2`, in the repo root, the opposite holds:**
+**I first attributed this to the `cwd` split. That was the wrong cause, and the discriminating experiment below settles it.**
+
+### 3.1 The discriminating experiment
+
+Two probes, identical in byte size (805), identical in shape (`.zh-CN.md` is a byte-for-byte copy of `.md`), identical `cwd` (repo root). **The only variable is whether the bytes are CJK:**
 
 ```
-zero-byte probe
-  .md        {'in_gaps': False, 'sbs': True, 'partner': '02-domain-model/zz-empty-probe.zh-CN.md'}
-  .zh-CN.md  {'in_gaps': False, 'sbs': True, 'partner': '02-domain-model/zz-empty-probe.md'}
+zz-pure-en   size=805  CJK=False
+   .md       in_gaps=True   sbs=False
+   .zh-CN.md in_gaps=True   sbs=False
 
-byte-identical probe
-  .md        {'in_gaps': False, 'sbs': True}
-  .zh-CN.md  {'in_gaps': False, 'sbs': True}
+zz-has-cjk   size=805  CJK=True
+   .md       in_gaps=False  sbs=True
+   .zh-CN.md in_gaps=False  sbs=True
 ```
 
-Both files of both pairs are **accepted**. The zero-byte exploit is **open**, not closed.
+The English probe is reported as a gap. The Chinese probe is accepted. `cwd` never changed. **CJK presence is the discriminator, not `cwd`.**
 
-The `cwd` split is the mechanism that produces `in_gaps=True` for every file at once: a probe run from outside the repository reports all four files as gaps, which reads exactly like "the exploit is closed."
+### 3.2 So the two variants must be separated
 
-I cannot prove that is what the author did — I only have their printed output, not their command. What I can state is that the printed output is the signature of the `cwd` split, and that the same probe run correctly contradicts it. A third party reproducing from the repo root will get my result.
+| Probe | Source language | Result | Meaning |
+|---|---|---|---|
+| zero-byte `.zh-CN.md` + **Chinese** `.md` | Chinese | **accepted** | **exploit is OPEN** |
+| all-English `.md` + all-English `.zh-CN.md` | English | **both gaps** | correct behaviour, not the exploit |
 
-**Therefore the withdrawal section in `GAP-BASELINE-001.md` is itself unreliable and should be withdrawn**, and the zero-byte case should be re-opened until someone reproduces it from a clean clone at the repo root.
+`67074d2` printed `in_gaps=True` for **both** pairs. The second pair being a gap is correct. The first pair being a gap is what its probe reported — and with a Chinese source it does not reproduce.
+
+The printed output is therefore consistent with the probe having used an **English** `zz-empty-probe.md`. `_has_any_chinese(source)` returns `False`, `_has_any_chinese(partner)` returns `False`, `_side_by_side_bilingual()` returns `False`, and the pair is a gap — for the correct reason, having nothing to do with zero bytes.
+
+**I cannot prove the source was English** — I have the output, not the command. But I can state that the output is fully explained by that hypothesis, and that the same probe with a Chinese source produces the opposite result.
+
+### 3.3 Verdict
+
+- The **zero-byte exploit is open** on `f687346` and on current main: a Chinese `X.md` with a 0-byte `X.zh-CN.md` is accepted as a bilingual pair.
+- The **`cwd` split is real** (§1, §2) and is a genuine hazard for baseline regeneration, but it is **not** what produced `67074d2`'s numbers.
+- The withdrawal section in `GAP-BASELINE-001.md` should be withdrawn: it withdrew a true finding on the strength of a probe that measured a different case.
 
 ---
 
