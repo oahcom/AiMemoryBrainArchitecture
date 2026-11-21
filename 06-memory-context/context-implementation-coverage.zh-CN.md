@@ -4,7 +4,7 @@
 - Owner：G — Memory Context Architect
 - 提示词：CHATGPT-OWNER-G-001 v1.0
 - 源树：`1ad6c2cf67a228f597fcbe1c7149c328ecbf38e9`
-- 交付分支：`gap-02-context-coverage-reference-model`
+- 评估引用：`main`（只读源码核验）
 - 状态：实现映射；不自我批准
 - 范围：指定 SHA 下 `06-memory-context/` 的 19 个 Markdown 文件（README、17 份不同的英文设计/评审文档，以及 Phase 3.8.22 合同的中文对应文件）。Phase 3.8.22 中英文文件属于同一语义合同，不重复计算独立要求。
 
@@ -13,9 +13,8 @@
 - **IMPLEMENTED**：指出可执行函数/类型，并列出已有或新增测试名。仅表示所指参考模型行为可执行。
 - **PARTIAL**：已有可执行行为，但文档中的某个维度、状态或证据边界尚未覆盖。
 - **NOT IMPLEMENTED**：尚无可执行模型覆盖该关注点。第四列说明是 G 本线程可做，还是依赖外部权威/实现。
-- **PENDING CROSS-OWNER DECISION**：必须由 G 以外的 Owner 裁定；本交付不修改其他 Owner 的合同。
 
-Rust crate 刻意停留在 private/staged 阶段：不做持久化、传输、授权、D/I 查询或发布。Python Applied Ledger 是单节点 SQLite 符合性原型，Gate 由调用方提供。新增 Context 模型是内存模型，不是持久化事务实现。三者均不构成生产级并发或端到端交付。
+Rust crate 刻意停留在 private/staged 阶段：不做持久化、传输、授权、D/I 查询或发布。Python Applied Ledger 是单节点 SQLite 参考原型，Gate 由调用方提供。本次 mainline 评估不包含 Context ChangeSet 参考模型。这些均不构成生产级并发或端到端交付。
 
 ## 2. 源文件清单
 
