@@ -1,0 +1,74 @@
+IMPL-002 verification
+timestamp: 2026-11-21T15:41:38+08:00
+rustc: rustc 1.100.0 (0ef1bc386 2026-11-09)
+cargo: cargo 1.100.0 (3acc79c0c 2026-11-05)
+
+$ cargo build -p memory-context 2>&1 | tee /tmp/build.log
+    Updating crates.io index
+     Locking 39 packages to highest compatible versions
+      Adding generic-array v0.14.7 (available: v0.14.9)
+      Adding sha2 v0.10.9 (available: v0.11.1)
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling serde_core v1.0.229
+   Compiling serde v1.0.229
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.154
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.19
+   Compiling syn v3.0.10
+   Compiling serde_derive v1.0.229
+   Compiling memory-domain v0.1.0 (/home/ubuntu/ai-projects/AiMemoryBrainArchitecture/crates/memory-domain)
+   Compiling memory-context v0.1.0 (/home/ubuntu/ai-projects/AiMemoryBrainArchitecture/crates/memory-context)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 8.66s
+0
+
+$ cargo test -p memory-context 2>&1 | tee /tmp/test.log
+   Compiling memory-context v0.1.0 (/home/ubuntu/ai-projects/AiMemoryBrainArchitecture/crates/memory-context)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.76s
+     Running unittests src/lib.rs (target/debug/build/memory-context/9eb1da5b0b5338e9/out/memory_context-9eb1da5b0b5338e9)
+
+running 18 tests
+test tests::candidate_scope_must_be_contained_by_identity_scope ... ok
+test tests::build_context_order_is_deterministic_across_repeated_calls ... ok
+test tests::byte_budget_error_reports_accumulated_rendered_bytes ... ok
+test tests::build_context_rendered_byte_total_matches_entry_sum ... ok
+test tests::delivery_intent_targets_snapshot_context_version ... ok
+test tests::delivery_intent_snapshot_json_round_trips_to_equivalent_snapshot ... ok
+test tests::delivery_intent_visibility_is_always_private_pending_gate ... ok
+test tests::duplicate_entry_ids_are_rejected ... ok
+test tests::empty_identity_scope_purpose_and_schema_version_are_rejected ... ok
+test tests::duplicate_memory_version_membership_is_rejected ... ok
+test tests::entry_budget_error_reports_actual_candidate_count ... ok
+test tests::non_active_non_consolidated_lifecycles_are_rejected ... ok
+test tests::exact_entry_and_byte_budget_boundaries_succeed ... ok
+test tests::sorting_uses_tier_then_descending_priority_then_entry_id ... ok
+test tests::validate_snapshot_rejects_inconsistent_bytes_and_empty_entry_content ... ok
+test tests::zero_context_version_is_rejected ... ok
+test tests::zero_entry_or_byte_budget_is_rejected ... ok
+test tests::snapshot_accessors_report_entry_count_and_emptiness ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests memory_context
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+0
+
+$ cargo clippy -p memory-context -- -D warnings 2>&1 | tee /tmp/clippy.log
+    Checking serde_core v1.0.229
+    Checking zmij v1.0.23
+    Checking itoa v1.0.19
+    Checking memchr v2.8.3
+    Checking serde v1.0.229
+    Checking serde_json v1.0.154
+    Checking memory-domain v0.1.0 (/home/ubuntu/ai-projects/AiMemoryBrainArchitecture/crates/memory-domain)
+    Checking memory-context v0.1.0 (/home/ubuntu/ai-projects/AiMemoryBrainArchitecture/crates/memory-context)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.23s
+0
+
+[executed on device: VM-0-9-ubuntu (d03d92fd-4b5d-4bc1-a701-985eb5de69cc)]
