@@ -18,9 +18,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from check_document_management import (  # noqa: E402
     NO_AUTHORITATIVE_SOURCE,
+    ParseError,
     body_hash,
     check_document,
     main as gate_main,
+    parse_yaml_subset,
     read_metadata,
     rel_path,
     resolve_canonical,
@@ -615,13 +617,14 @@ def run_bilingual_closure() -> None:
         expect_gate("T20 mirror with no declared source is an error", root, 1)
 
 def run_schema_agreement() -> None:
-    """T19: the published schema file and the gate must accept the same shape.
+    """T19: the published schema and the gate must accept the same shape.
 
-    A schema that only *looks* like the code proves nothing. This walks the
-    template tree and compares it against the gate's own key sets, required
-    leaves and enumerations, in both directions: a key the schema shows but the
-    gate rejects is a documentation lie, and an enum value the gate accepts but
-    the schema never mentions is an undocumented state.
+    The schema file is machine-readable content, parsed with the gate's own
+    parser and compared field by field. Both directions matter: a field the
+    schema declares but the gate rejects is a documentation lie, and a field or
+    enum value the gate accepts but the schema omits is an undocumented state.
+    Substring matching would let a value mentioned only in a comment count as
+    documented, which is what the previous version of this test did.
     """
     print("schema/gate agreement")
     import check_document_management as gate
@@ -631,14 +634,19 @@ def run_schema_agreement() -> None:
     if not path.is_file():
         return
     text = path.read_text(encoding="utf-8")
-    # The schema file is a template, not a governed document: it has no
-    # frontmatter delimiter of its own. Wrap it the way the gate would see it.
-    meta = read_metadata("---\n" + text + "\n---\n")
-    record("T19 schema template parses under the gate's own subset", meta is not None)
-    if meta is None:
+    try:
+        schema = parse_yaml_subset(text)
+    except ParseError as exc:
+        record("T19 schema parses under the gate's own subset", False, f"  {exc}")
+        return
+    record("T19 schema parses under the gate's own subset", isinstance(schema, dict))
+
+    fields = schema.get("fields")
+    record("T19 schema declares a fields mapping", isinstance(fields, dict))
+    if not isinstance(fields, dict):
         return
 
-    keysets = {
+    gate_shape = {
         "": gate.TOP_KEYS,
         "lifecycle": gate.LIFECYCLE_KEYS,
         "lifecycle.approval": gate.APPROVAL_KEYS,
@@ -652,57 +660,122 @@ def run_schema_agreement() -> None:
         "authority.canonical_conflict_resolution": gate.RESOLUTION_KEYS,
         "bilingual_counterpart": gate.BILINGUAL_KEYS,
     }
+    constraint_keys = {"kind", "required", "enum", "items", "pattern", "when", "fields"}
+
+    declared: set[str] = set()
+    problems: list[str] = []
 
     def walk(node, prefix: str) -> None:
         if not isinstance(node, dict):
-            return
-        allowed = keysets.get(prefix)
-        if allowed is None:
-            record(f"T19 schema documents unknown subtree {prefix!r}", False)
+            problems.append(f"{prefix or '<root>'} is not a mapping")
             return
         for key, value in node.items():
-            child = f"{prefix}.{key}" if prefix else key
-            if key not in allowed:
-                record(f"T19 schema shows key the gate rejects: {child}", False)
-            walk(value, child)
+            full = f"{prefix}.{key}" if prefix else key
+            declared.add(full)
+            allowed = gate_shape.get(prefix)
+            if allowed is None:
+                problems.append(f"{full}: parent {prefix!r} is not a gate node")
+            elif key not in allowed:
+                problems.append(f"{full}: key not accepted by the gate")
+            if not isinstance(value, dict):
+                problems.append(f"{full}: constraint is not a mapping")
+                continue
+            unknown = set(value) - constraint_keys
+            if unknown:
+                problems.append(f"{full}: unknown constraint keys {sorted(unknown)}")
+            if "kind" not in value:
+                problems.append(f"{full}: no type declared")
+            nested = value.get("fields")
+            if nested is not None:
+                walk(nested, full)
 
-    walk(meta, "")
+    walk(fields, "")
+    record("T19 every declared field is a field the gate accepts", not problems,
+           "  " + "; ".join(problems[:8]))
 
-    for leaf in gate.REQUIRED_FIELDS:
-        node = meta
-        for part in leaf.split("."):
-            node = node.get(part) if isinstance(node, dict) else None
-        record(f"T19 required field shown in schema: {leaf}", node is not None)
+    missing: list[str] = []
+    for prefix, keys in gate_shape.items():
+        for key in keys:
+            full = f"{prefix}.{key}" if prefix else key
+            if full not in declared:
+                missing.append(full)
+    record("T19 every gate-accepted field is declared in the schema", not missing,
+           "  undeclared: " + ", ".join(sorted(missing)[:12]))
 
     enums = {
-        "domain": gate.DOMAINS, "role": gate.ROLES,
+        "domain": gate.DOMAINS,
+        "role": gate.ROLES,
         "lifecycle.approval.decision_status": gate.DECISION_STATUSES,
+        "lifecycle.approval.approved_version.scheme": gate.VERSION_SCHEMES,
+        "lifecycle.approval.approval_scope.type": gate.SCOPE_TYPES,
+        "lifecycle.approval.approval_applicability": gate.APPLICABILITY,
+        "lifecycle.evidence_verification.verification_status": gate.VERIFICATION_STATUSES,
         "lifecycle.usage_status": gate.USAGE_STATUSES,
         "lifecycle.modification_status": gate.MODIFICATION_STATUSES,
-        "lifecycle.evidence_verification.verification_status": gate.VERIFICATION_STATUSES,
-        "lifecycle.approval.approval_scope.type": gate.SCOPE_TYPES,
-        "lifecycle.approval.approved_version.scheme": gate.VERSION_SCHEMES,
-        "lifecycle.approval.approval_applicability": gate.APPLICABILITY,
         "authority.canonical_status": gate.CANONICAL_STATUSES,
-        "authority.normative_status": gate.NORMATIVE_STATUSES,
         "authority.canonical_conflict_status": gate.CONFLICT_STATUSES,
+        "authority.normative_status": gate.NORMATIVE_STATUSES,
     }
+
+    def node_at(dotted: str):
+        """Descend a dotted metadata path through the schema's nested `fields`."""
+        node = fields
+        for part in dotted.split("."):
+            if not isinstance(node, dict):
+                return None
+            if part in node:
+                node = node[part]
+            elif isinstance(node.get("fields"), dict) and part in node["fields"]:
+                node = node["fields"][part]
+            else:
+                return None
+        return node
+
     for where, allowed in enums.items():
-        node = meta
-        for part in where.split("."):
-            node = node.get(part) if isinstance(node, dict) else None
-        if node is not None:
-            record(
-                f"T19 schema example value for {where} is legal",
-                str(node) in allowed,
-                f"  {node!r} not in {sorted(allowed)}",
-            )
-        missing = sorted(v for v in allowed if v not in text)
-        record(
-            f"T19 every {where} value is documented in the schema",
-            not missing,
-            f"  undocumented: {missing}",
-        )
+        node = node_at(where)
+        if not isinstance(node, dict):
+            record(f"T19 enum field declared: {where}", False)
+            continue
+        declared_values = node.get("enum")
+        if not isinstance(declared_values, list):
+            record(f"T19 enum field has an enum list: {where}", False,
+                   f"  got {type(declared_values).__name__}")
+            continue
+        got = {str(v) for v in declared_values}
+        record(f"T19 {where} enum matches the gate exactly", got == set(allowed),
+               f"  schema {sorted(got)} vs gate {sorted(allowed)}")
+
+    for leaf in gate.REQUIRED_FIELDS:
+        node = node_at(leaf)
+        record(f"T19 required leaf declared and marked required: {leaf}",
+               isinstance(node, dict) and node.get("required") is True)
+
+    structural = {
+        "lifecycle", "lifecycle.approval", "lifecycle.approval.approval_scope",
+        "lifecycle.evidence_verification", "authority",
+    }
+    declared_required = {
+        name for name in declared
+        if isinstance(node_at(name), dict) and node_at(name).get("required") is True
+    }
+    record("T19 no field claims required that the gate does not require",
+           declared_required <= set(gate.REQUIRED_FIELDS) | structural,
+           f"  unexpected: {sorted(declared_required - set(gate.REQUIRED_FIELDS) - structural)}")
+
+    forbidden = schema.get("forbidden")
+    record("T19 forbidden list names superseded_by",
+           isinstance(forbidden, list)
+           and "lifecycle.supersession.superseded_by" in forbidden)
+
+    tpl = (Path(__file__).resolve().parents[1]
+           / "00-governance/templates/document-metadata-template.md")
+    record("T19 copy-paste template exists", tpl.is_file())
+    if tpl.is_file():
+        tpl_text = tpl.read_text(encoding="utf-8")
+        record("T19 template carries metadata", isinstance(read_metadata(tpl_text), dict))
+        template_errors, _ = check_document(tpl, tpl_text)
+        record("T19 template satisfies the gate", not template_errors,
+               f"  {template_errors}")
 
 def main() -> int:
     print("check_document_management self-check")

@@ -315,6 +315,26 @@ def _parse_block(tokens, pos: int, indent: int):
     return _parse_map(tokens, pos, indent)
 
 
+def parse_yaml_subset(text: str) -> dict:
+    """Parse a whole file as a mapping in the declared YAML subset.
+
+    Used by the schema file, which is a contract rather than a governed
+    document: same tokeniser, same parser, same rejection rules as the
+    frontmatter path, so the schema cannot be written in syntax the gate
+    itself would refuse.
+    """
+    tokens = _tokens(_lf(text).split("\n"), offset=1)
+    if not tokens:
+        raise ParseError("empty mapping")
+    if tokens[0][1] != 0:
+        raise ParseError(f"line {tokens[0][0]}: top-level key must not be indented")
+    value, pos = _parse_block(tokens, 0, 0)
+    if pos != len(tokens):
+        raise ParseError(f"line {tokens[pos][0]}: unparsed input remains")
+    if not isinstance(value, dict):
+        raise ParseError("top level must be a mapping")
+    return value
+
 def read_metadata(text: str) -> dict | None:
     """Return the parsed document_metadata mapping, or None when absent.
 
@@ -403,7 +423,12 @@ def rel_path(value, where: str, errors: list[str]) -> str | None:
     Anything that leaves the repository, is absolute, or carries a traversal
     segment is a DM-01 error rather than a silently rewritten string.
     """
-    raw = str(value)
+    if not isinstance(value, str):
+        errors.append(
+            f"DM-01 {where} must be a string path, got {type(value).__name__}"
+        )
+        return None
+    raw = value
     if "\x00" in raw:
         errors.append(f"DM-01 {where} contains a NUL byte")
         return None
@@ -1042,15 +1067,22 @@ def governed_files(root: Path) -> list[Path]:
 
 
 def changed_paths(root: Path, ref: str) -> set[str]:
-    """Repository-relative paths added or modified since ref.
+    """Repository-relative paths added, modified, renamed or type-changed.
 
     NUL-separated, so a filename containing spaces stays one path. Splitting on
     whitespace would let `00-governance/new policy.md` dodge the requirement.
+
+    T (type change) is included: replacing a regular file with a symlink, or a
+    symlink with a regular file, changes what the gate reads without changing
+    the path. `--diff-filter=AMR` skipped exactly that, so the increment could
+    report PASS while a governed path had become a link to somewhere else.
+    Deletions stay excluded: a removed file has nothing to classify.
     """
     names: set[str] = set()
-    diff = git(root, "diff", "--name-only", "-z", "--diff-filter=AMR", f"{ref}...HEAD", nul=True)
+    filter_arg = "--diff-filter=AMRT"
+    diff = git(root, "diff", "--name-only", "-z", filter_arg, f"{ref}...HEAD", nul=True)
     if diff is None:
-        diff = git(root, "diff", "--name-only", "-z", "--diff-filter=AMR", ref, nul=True)
+        diff = git(root, "diff", "--name-only", "-z", filter_arg, ref, nul=True)
     if diff is None:
         raise SystemExit(f"cannot diff against {ref!r}; is this a git work tree?")
     names.update(p for p in diff.split("\0") if p)
@@ -1086,12 +1118,14 @@ def main() -> int:
     # DM-12, DM-13) are only sound over the whole tree. A partial set would let
     # one file hide another's duplicate Canonical claim and still print PASS.
     root = Path(args.root).resolve()
-    targets = governed_files(root)
-    required = changed_paths(root, args.require_changed) if args.require_changed else set()
-    is_git = git(root, "rev-parse", "--git-dir") is not None
+    # Checked before any work: with an unusable REF the diff would fail first
+    # and mask the real problem (two contradictory verdicts were requested).
     incremental = args.require_changed is not None
     if incremental and args.strict:
         parser.error("--require-changed and --strict are different verdicts; pick one")
+    targets = governed_files(root)
+    required = changed_paths(root, args.require_changed) if args.require_changed else set()
+    is_git = git(root, "rev-parse", "--git-dir") is not None
 
     errors: list[str] = []
     notes: list[str] = []
