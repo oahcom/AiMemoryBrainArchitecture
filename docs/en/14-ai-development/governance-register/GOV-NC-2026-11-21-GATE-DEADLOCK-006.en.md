@@ -242,3 +242,101 @@ Owner ruling (2026-11-21), summarised:
 - F-2's constraints: mirrors must correspond to the correct source path and must not be satisfied by unrelated or placeholder files; `NORMATIVE_ROOTS`, the gate script, the exemption list and the baseline must not be modified; `EMBEDDED_BILINGUAL_SOURCES` must not become the default channel for new registers.
 - **Splitting `document-metadata-template.md` into three is not approved**: the template stays under `00-governance/templates/` as the single source, and the mirrors are copies of that one source.
 - Mirror copying under F-2 may be treated as a mechanical documentation operation and does not require separate word-by-word authorisation; but if a PR also carries a governance judgement, a normative content change, a template-semantics change or an exemption grant, the corresponding review requirements still apply.
+
+---
+
+## 12. The deadlock is resolved on main — via F-1, and via a self-reviewed merge
+
+### 12.1 Facts
+
+Roughly twelve minutes after this register was written, the deadlock was lifted:
+
+| Item | Value |
+|---|---|
+| Issue | #416 `[P0] main is red: ae37a419 added a normative source with no bilingual mirror and...`, opened 2026-11-21T05:13:04Z, closed 05:52:03Z |
+| PR | #418 `fix(bilingual): register metadata template exemption (#416)` |
+| Change | `scripts/check_bilingual_docs.py` only, **+5 −0** |
+| Substance | adds `00-governance/templates/document-metadata-template.md` to `EMBEDDED_BILINGUAL_SOURCES` with a reason string |
+| author | `oahcom` |
+| sole reviewer | `oahcom`, `COMMENTED`, 05:51:33Z |
+| merger | `oahcom`, 05:51:45Z |
+| review → merge | **12 seconds** |
+| merge commit | `fce408340c3f` |
+
+The entry added:
+
+```python
+"00-governance/templates/document-metadata-template.md": (
+    "Provides one copy-paste metadata block whose field names, closed enums, "
+    "and REQUIRED markers are consumed verbatim by check_document_management.py; "
+    "split mirrors would let the two languages document different enum values."
+),
+```
+
+### 12.2 Re-measured: the empty diff on main is now EXIT=0
+
+On a clean tree at `main` `81dd9a72d2`:
+
+```
+$ BASE_SHA=$SHA HEAD_SHA=$SHA PR_BODY="BILINGUAL-MANIFEST: COMPLETE" python scripts/check_bilingual_docs.py
+bilingual baseline: 207 frozen, 0 new gaps
+exemptions: 21
+Bilingual documentation and prompt-library gate: PASS (0 changed paths inspected).
+EXIT=0
+```
+
+and:
+
+```
+exemptions 21
+template exempt: True
+gaps 207  baseline 207  NEW 0
+```
+
+**Section 1's central claim — the empty diff is permanently `EXIT=2` — no longer holds on `main`.** That is measured, not inferred.
+
+### 12.3 Three things that must be recorded together, none cancelling another
+
+**First, the fix applied was F-1, not the F-2 the Owner approved.**
+
+The ruling said "F-2 is approved; F-1 is not this round's preferred fix; F-3 is not approved", and explicitly that "`EMBEDDED_BILINGUAL_SOURCES` must not become the default channel for new registers". What was actually executed is F-1.
+
+That is not necessarily a violation: F-1 also measured `NEW=0` in trial B of section 2.1, and section 8 concedes it works technically. But **it is a normative change, which section 5 requires independent review for**, and section 12.1 shows the reviewer was the author.
+
+**Second, the merge that lifted the deadlock is itself the failure mode register 007 records.**
+
+`author == sole reviewer == merger`, 12-second interval, `COMMENTED` state. Identical in shape to all six rows in 007 section 1.
+
+So there is a loop that has to be stated plainly:
+
+> 006 records "the gate is unsatisfiable on the trunk".
+> 007 records "merges rest on self-review".
+> And 006's resolution was carried out by exactly the method 007 describes.
+
+**Third, the resolution is technically valid and its reason holds up.**
+
+The reason string for `document-metadata-template.md` is specific: its field names, closed enums and `REQUIRED` markers are **consumed verbatim** by `check_document_management.py`, so split mirrors could let the two languages document different enum values. That matches F-1's semantics (a single-file bilingual source) and matches the Owner's own ruling against splitting the template into three.
+
+So the accurate record is: **the outcome is right, the process did not satisfy section 5.** Both, not one.
+
+### 12.4 Effect on this register's conclusions
+
+| Claim | Status |
+|---|---|
+| §1: the empty diff on `main` is permanently `EXIT=2` | **lapsed** (`EXIT=0` from `81dd9a72d2`) |
+| §1: the deadlock persisted across 7 commits | holds (`ae37a419` → `7d2233a5`) |
+| §2.1: the dividing line is "did the PR supply two-sided mirrors" | **still holds**, and #418 confirms it from the other side — without mirrors, the only exit is the exemption list |
+| §8: F-2 is the preferred fix | approved by the Owner, not executed; F-1 was executed |
+| §7: three failures stack | still holds; #418 does not touch 005's zero execution |
+
+### 12.5 A more precise mechanism
+
+Combining section 2.1's six trials with section 12.1, a new file under `NORMATIVE_ROOTS` has **three** ways to pass, not two:
+
+1. supply `docs/en` + `docs/zh-CN` mirrors (trial A);
+2. enter `EMBEDDED_BILINGUAL_SOURCES` (trial B — the path #418 took);
+3. append to the frozen baseline (trial C — breaks the ratchet's meaning, must not be used).
+
+Path 1 needs no normative change. Path 2 needs one, plus independent review. Path 3 is unavailable.
+
+The first draft of this register treated "no mirrors means permanently rejected" as the only dividing line, which missed path 2. That is the second over-generalisation, corrected here.

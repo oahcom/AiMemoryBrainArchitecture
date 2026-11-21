@@ -1,7 +1,7 @@
 # GOV-NC-2026-11-21-GATE-DEADLOCK-006 — 门禁在 main 上自我死锁：任何 PR 都无法通过
 
 - 登记编号：GOV-NC-2026-11-21-GATE-DEADLOCK-006
-- 状态：`ACCEPTED` / `F-2_APPROVED` / 空 diff 仍恒为 `EXIT=2`
+- 状态：`RESOLVED_ON_MAIN` / `F-1_APPLIED`（非本登记推荐的 F-2）/ 解除方式为自我审查合并，见 §12
 - 发现时间：2026-11-21T05:05Z（last verified 2026-11-21T05:40Z @ `7d2233a5be`）
 - 引入提交：`ae37a41900f1`（2026-11-21T04:50:35Z，**直推 main，无 PR**）
 - 前置登记：GOV-NC-2026-11-20-CI-NOT-EXECUTED-005（门禁连续 36 小时零执行）
@@ -244,3 +244,101 @@ Owner 裁定（2026-11-21）摘要：
 - F-2 的执行约束：镜像须对应正确源路径，不得用无关文件或占位文件满足存在性检查；不改 `NORMATIVE_ROOTS`、门禁脚本、豁免白名单或基线；不得把 `EMBEDDED_BILINGUAL_SOURCES` 当作新增登记的默认通道。
 - **不批准把 `document-metadata-template.md` 拆成三份**：模板留在 `00-governance/templates/` 作为单一来源，镜像只是同一源文件的副本。
 - F-2 的镜像补齐可作为机械文档操作，不要求逐字另行授权；但若 PR 同时含治理判断、规范内容变化、模板语义变化或豁免授权，仍按相应审查要求处理。
+
+---
+
+## 12. 死锁已在 main 上解除 —— 用 F-1，且通过自我审查合并
+
+### 12.1 事实
+
+本登记写完之后约 12 分钟，死锁被解除。解除过程如下：
+
+| 项 | 值 |
+|---|---|
+| Issue | #416 `[P0] main is red: ae37a419 added a normative source with no bilingual mirror and...`，创建 2026-11-21T05:13:04Z，关闭 05:52:03Z |
+| PR | #418 `fix(bilingual): register metadata template exemption (#416)` |
+| 改动 | 仅 `scripts/check_bilingual_docs.py`，**+5 −0** |
+| 实质 | 把 `00-governance/templates/document-metadata-template.md` 加入 `EMBEDDED_BILINGUAL_SOURCES`，附一段 reason |
+| author | `oahcom` |
+| 唯一 reviewer | `oahcom`，`COMMENTED`，05:51:33Z |
+| merger | `oahcom`，05:51:45Z |
+| review → merge | **12 秒** |
+| merge commit | `fce408340c3f` |
+
+加入的条目原文：
+
+```python
+"00-governance/templates/document-metadata-template.md": (
+    "Provides one copy-paste metadata block whose field names, closed enums, "
+    "and REQUIRED markers are consumed verbatim by check_document_management.py; "
+    "split mirrors would let the two languages document different enum values."
+),
+```
+
+### 12.2 复验：main 上空 diff 已为 EXIT=0
+
+在 `main` `81dd9a72d2` 的干净树上：
+
+```
+$ BASE_SHA=$SHA HEAD_SHA=$SHA PR_BODY="BILINGUAL-MANIFEST: COMPLETE" python scripts/check_bilingual_docs.py
+bilingual baseline: 207 frozen, 0 new gaps
+exemptions: 21
+Bilingual documentation and prompt-library gate: PASS (0 changed paths inspected).
+EXIT=0
+```
+
+且：
+
+```
+exemptions 21
+template exempt: True
+gaps 207  baseline 207  NEW 0
+```
+
+**本登记 §1 的核心断言（空 diff 恒为 `EXIT=2`）在 `main` 上已不再成立。** 这不是推断，是实测。
+
+### 12.3 三点必须同时记录，不得互相抵销
+
+**第一，修法用的是 F-1，不是 Owner 批准的 F-2。**
+
+Owner 裁定「批准 F-2；F-1 不列为本轮首选；F-3 不批准」，并明确「不得把 `EMBEDDED_BILINGUAL_SOURCES` 当作新增登记的默认通道」。而实际执行的是 F-1。
+
+这不必然是违规：F-1 在本登记 §2.1 的 B 组实测中同样 `NEW=0`，且 §8 承认它技术有效。但**它是一次规范变更，按 §5 需独立审查**，而 §12.1 显示审查者是作者本人。
+
+**第二，解除死锁的那次合并，本身就是 007 记录的失效模式。**
+
+`author == sole reviewer == merger`，间隔 12 秒，`COMMENTED` 状态。这与 007 §1 表中六例完全同形。
+
+因此出现一个必须直说的循环：
+
+> 006 记录的是「门禁在主干上不可满足」。
+> 007 记录的是「合并靠自我审查」。
+> 而 006 的解除，是通过 007 描述的方式完成的。
+
+**第三，解除本身在技术上是有效的，且理由站得住。**
+
+`document-metadata-template.md` 的 reason 写得很具体：它的字段名、闭合枚举与 `REQUIRED` 标记被 `check_document_management.py` **逐字消费**，如果拆成双语镜像，两侧可能记录不同的枚举值。这个理由与 F-1 的语义（单文件双语源）吻合，也与 Owner「不批准拆成三份」的裁定方向一致。
+
+所以准确的记录是：**结果正确，程序未满足 §5。** 两者都要写，不能只写一个。
+
+### 12.4 对本登记结论的影响
+
+| 断言 | 状态 |
+|---|---|
+| §1 空 diff 在 `main` 上恒为 `EXIT=2` | **已失效**（`81dd9a72d2` 起 `EXIT=0`） |
+| §1 死锁跨 7 个提交持续存在 | 成立（`ae37a419` → `7d2233a5`） |
+| §2.1 判定分界是「是否补双侧镜像」 | **仍成立**，且被 #418 从反面确认：不补镜像时，唯一出路是进豁免清单 |
+| §8 F-2 为首选修法 | Owner 批准，但未被执行；实际执行 F-1 |
+| §7 三失效叠加 | 仍成立；#418 未触及 005 的零执行 |
+
+### 12.5 一个更精确的机制结论
+
+把 §2.1 的六组与 §12.1 合起来看，`NORMATIVE_ROOTS` 下新增文件的通过条件实际有**三条**，不是两条：
+
+1. 补 `docs/en` + `docs/zh-CN` 双侧镜像（A 组）；
+2. 进入 `EMBEDDED_BILINGUAL_SOURCES` 豁免清单（B 组，即 #418 走的路）；
+3. 追加进 frozen baseline（C 组，会破坏棘轮语义，不应使用）。
+
+第 1 条不需要规范变更；第 2 条需要一次规范变更并经独立审查；第 3 条不可用。
+
+本登记初稿把「不补镜像就恒拒绝」当成唯一分界，遗漏了第 2 条。这是第二处过度概括，此处一并更正。
