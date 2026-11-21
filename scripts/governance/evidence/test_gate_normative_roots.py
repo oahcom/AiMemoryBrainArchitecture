@@ -16,9 +16,11 @@ it evidences.
 from __future__ import annotations
 
 import importlib.util
+import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 GATE = Path(__file__).resolve().parents[2] / "check_bilingual_docs.py"
 
@@ -532,6 +534,190 @@ class GateRootsTest(unittest.TestCase):
         self.assertIn("02-domain-model/zz-probe-fake.md", gaps)
         self.assertIn("02-domain-model/zz-probe-fake.zh-CN.md", gaps)
 
+
+    # --- regression: exact partial side-by-side pairs fail closed ---
+
+    def test_partial_side_by_side_pair_rejects_both_sides(self):
+        english = "02-domain-model/zz-partial-probe.md"
+        chinese = "02-domain-model/zz-partial-probe.zh-CN.md"
+        self.write(english, "Complete English specification.\n")
+        self.write(chinese, "这是局部中文翻译内容。" * 20 + "\n")
+
+        # Reproduce the former false-positive condition: Chinese content
+        # exceeds the existing CJK character threshold but covers only part.
+        self.assertTrue(self.gate._carries_chinese(chinese))
+        self.gate.PARTIAL_SIDE_BY_SIDE_PAIRS.add(
+            frozenset((english, chinese))
+        )
+
+        gaps = self.inventory_02()
+        self.assertIn(english, gaps)
+        self.assertIn(chinese, gaps)
+
+    def test_partial_side_by_side_registration_does_not_block_mirrors(self):
+        english = "02-domain-model/zz-partial-mirror-probe.md"
+        chinese = "02-domain-model/zz-partial-mirror-probe.zh-CN.md"
+        self.write(english, "Complete English specification.\n")
+        self.write(chinese, "这是局部中文翻译内容。" * 20 + "\n")
+        self.gate.PARTIAL_SIDE_BY_SIDE_PAIRS.add(
+            frozenset((english, chinese))
+        )
+
+        # A complete docs/en + docs/zh-CN mirror shape remains independently
+        # acceptable, even while the side-by-side relationship is rejected.
+        for source in (english, chinese):
+            self.write(f"docs/en/{source}", "English mirror.\n")
+            self.write(f"docs/zh-CN/{source}", "中文镜像内容。\n")
+
+        gaps = self.inventory_02()
+        self.assertNotIn(english, gaps)
+        self.assertNotIn(chinese, gaps)
+
+    def test_partial_side_by_side_production_registry_is_empty(self):
+        self.assertEqual(self.gate.PARTIAL_SIDE_BY_SIDE_PAIRS, set())
+
+    # --- regression: one-sided translation catch-up is explicit and verifiable ---
+
+    def test_catch_up_declaration_parses(self):
+        body = (
+            "BILINGUAL-MANIFEST: COMPLETE\n"
+            "BILINGUAL-CATCH-UP: "
+            "source=02-domain-model/probe.zh-CN.md "
+            "counterpart=02-domain-model/probe.md "
+            "base-blob=" + "a" * 40 + "\n"
+        )
+        declarations, errors = self.gate.parse_catch_up_declarations(body)
+        self.assertEqual(errors, [])
+        self.assertEqual(
+            declarations,
+            {"02-domain-model/probe.zh-CN.md": ("02-domain-model/probe.md", "a" * 40)},
+        )
+
+    def test_catch_up_declaration_rejects_duplicate_source(self):
+        line = (
+            "BILINGUAL-CATCH-UP: "
+            "source=02-domain-model/probe.zh-CN.md "
+            "counterpart=02-domain-model/probe.md "
+            "base-blob=" + "a" * 40
+        )
+        declarations, errors = self.gate.parse_catch_up_declarations(
+            line + "\n" + line + "\n"
+        )
+        self.assertEqual(len(errors), 1)
+        self.assertIn("Duplicate", errors[0])
+
+    def test_catch_up_declaration_rejects_malformed_blob(self):
+        for bad in (
+            "BILINGUAL-CATCH-UP: source=02-domain-model/probe.zh-CN.md "
+            "counterpart=02-domain-model/probe.md base-blob=abc\n",
+            "BILINGUAL-CATCH-UP: source=02-domain-model/probe.zh-CN.md "
+            "base-blob=" + "a" * 40 + "\n",
+            "BILINGUAL-CATCH-UP: source=02-domain-model/probe.zh-CN.md "
+            "counterpart=02-domain-model/probe.md base-blob=" + "A" * 40 + "\n",
+        ):
+            _, errors = self.gate.parse_catch_up_declarations(bad)
+            self.assertEqual(len(errors), 1, bad)
+            self.assertIn("Malformed", errors[0])
+
+    def test_catch_up_passes_with_verified_unchanged_partner(self):
+        source = "02-domain-model/zz-catchup-probe.zh-CN.md"
+        counterpart = "02-domain-model/zz-catchup-probe.md"
+        blob = "a" * 40
+        self.write(source, "\u4e2d\u6587\u7ffb\u8bd1\n")
+        self.write(counterpart, "English source\n")
+
+        with patch.dict(os.environ, {"BASE_SHA": "base", "HEAD_SHA": "head"}):
+            with patch.object(
+                self.gate.subprocess,
+                "check_output",
+                side_effect=[blob + "\n", blob + "\n"],
+            ):
+                errors = self.gate.check_counterpart_requirement(
+                    source,
+                    [counterpart],
+                    {source},
+                    {source: "M"},
+                    False,
+                    catch_up_declaration=(counterpart, blob),
+                )
+
+        self.assertEqual(errors, [])
+
+    def test_catch_up_without_declaration_still_fails(self):
+        source = "02-domain-model/zz-catchup-probe.zh-CN.md"
+        counterpart = "02-domain-model/zz-catchup-probe.md"
+        self.write(source, "\u4e2d\u6587\n")
+        self.write(counterpart, "English\n")
+
+        errors = self.gate.check_counterpart_requirement(
+            source, [counterpart], {source}, {source: "M"}, False
+        )
+        self.assertTrue(
+            any("requires all counterparts changed in this PR" in e for e in errors),
+            errors,
+        )
+
+    def test_catch_up_rejects_wrong_base_blob(self):
+        source = "02-domain-model/zz-catchup-probe.zh-CN.md"
+        counterpart = "02-domain-model/zz-catchup-probe.md"
+        self.write(source, "\u4e2d\u6587\n")
+        self.write(counterpart, "English\n")
+
+        with patch.dict(os.environ, {"BASE_SHA": "base", "HEAD_SHA": "head"}):
+            with patch.object(
+                self.gate.subprocess,
+                "check_output",
+                side_effect=["b" * 40 + "\n", "b" * 40 + "\n"],
+            ):
+                errors = self.gate.check_counterpart_requirement(
+                    source,
+                    [counterpart],
+                    {source},
+                    {source: "M"},
+                    False,
+                    catch_up_declaration=(counterpart, "a" * 40),
+                )
+
+        self.assertTrue(
+            any("requires all counterparts changed in this PR" in e for e in errors),
+            errors,
+        )
+
+    def test_catch_up_rejects_partner_that_changed_in_pr(self):
+        source = "02-domain-model/zz-catchup-probe.zh-CN.md"
+        counterpart = "02-domain-model/zz-catchup-probe.md"
+        self.write(source, "\u4e2d\u6587\n")
+        self.write(counterpart, "English\n")
+
+        errors = self.gate.check_counterpart_requirement(
+            source,
+            [counterpart],
+            {source, counterpart},
+            {source: "M", counterpart: "M"},
+            False,
+            catch_up_declaration=(counterpart, "a" * 40),
+        )
+        self.assertEqual(errors, [])
+
+    def test_catch_up_rejects_non_side_by_side_source(self):
+        source = "02-domain-model/zz-catchup-probe.md"
+        counterpart = "02-domain-model/zz-catchup-probe.zh-CN.md"
+        self.write(source, "English\n")
+        self.write(counterpart, "\u4e2d\u6587\n")
+
+        with patch.dict(os.environ, {"BASE_SHA": "base", "HEAD_SHA": "head"}):
+            with patch.object(
+                self.gate.subprocess,
+                "check_output",
+                side_effect=["a" * 40 + "\n", "a" * 40 + "\n"],
+            ):
+                # The English side is the source: a one-sided catch-up is only
+                # allowed for a translation file (.zh-CN.md / .en.md).
+                self.assertFalse(
+                    self.gate.valid_side_by_side_catch_up(
+                        source, counterpart, "a" * 40, {source}, {source: "M"}
+                    )
+                )
 
 if __name__ == "__main__":
     unittest.main()
