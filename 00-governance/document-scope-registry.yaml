@@ -77,7 +77,7 @@ governed_files:
 backlog:
   docs:
     documents: 27
-    # This is backlog, not an exemption. 27 Markdown files under docs/ (outside
+    # This is backlog, not an exemption. The Markdown files under docs/ (outside
     # the bilingual mirrors) are architecture documents: MINIMUM-RUNNABLE-
     # ARCHITECTURE, CANONICAL-TRANSACTION, SOURCE-OF-TRUTH, CONFLICT-REGISTER,
     # the CONTEXT-APPLIED and FORGET-AUTHORIZATION contracts, the convergence
@@ -93,14 +93,21 @@ backlog:
     #   docs/governance/documentation-gaps.md   governed individually below
     # Everything else under docs/ is backlog with a known count, which is a
     # number that can go down. `kind: not-yet-migrated` requires exactly that.
-    # 这是积压，不是豁免。docs/ 下（双语镜像之外）的 27 个 Markdown 是架构文档：
+    #
+    # The number appears once, in `documents:` above. Not in this comment, not
+    # in the reasons: the gate rejects a reason that restates a count, because
+    # two copies of a fact are two things that can disagree.
+    # 这是积压，不是豁免。docs/ 下（双语镜像之外）的 Markdown 是架构文档：
     # 最小可运行架构、规范事务、事实源清单、冲突登记、上下文应用与遗忘授权契约、
     # 收敛与产品优先研究。它们大多在自身头部写着 `DRAFT / NON-NORMATIVE`，而这正是
     # 它们该在此处的原因：`Draft` 是 `lifecycle.approval.decision_status` 的取值，
     # 不是免于分类的理由。把它们排除，会使"我们还没分类这些"与"这些不是架构"变得
     # 无法区分，而后者是本登记表绝不能允许的事。
-    reason: "Backlog with a known count: 27 architecture documents under docs/ outside the mirrors and the gap record, all unclassified. Not an exemption -- DM-14 reports this kind separately so the number is visible and can decrease."
-    reason_zh: "有明确数量的积压：docs/ 下镜像与缺口记录之外的 27 份架构文档，均未分类。这不是豁免——DM-14 单独报告该类别，使这个数字可见且可下降。"
+    #
+    # 数量只出现一次，即上面的 `documents:`。不在本注释里，也不在理由里：
+    # 门禁会拒绝复述数量的理由，因为事实的两份副本就是两个可能互相矛盾的东西。
+    reason: "Backlog with a known count under `documents:`. These are architecture documents under docs/ outside the mirrors and the gap record, all unclassified. Not an exemption -- DM-14 reports this kind separately so the count is visible and can decrease. The prose deliberately does not restate the number: `documents:` is the only place a count may appear, so the two cannot drift."
+    reason_zh: "有明确数量的积压，数量见 `documents:`。这些是 docs/ 下镜像与缺口记录之外、均未分类的架构文档。这不是豁免——DM-14 单独报告该类别，使数量可见且可下降。此处刻意不复述数字：`documents:` 是唯一允许出现数量的位置，两者因而无法漂移。"
 
 excluded:
 

@@ -3,16 +3,18 @@
 
 Validates the four-dimension metadata block declared at the top of governed
 Markdown files. Rules are listed in
-00-governance/architecture-document-management-policy.md 9 (DM-01 .. DM-13).
+00-governance/architecture-document-management-policy.md 9 (DM-01 .. DM-14).
 
 Trust boundary: the metadata parser is fail-closed. Any input that is not in
 the documented YAML subset is an error, never a silently skipped line. If the
 parse result cannot be trusted, no downstream rule result can be either.
 
-Checked mechanically (DM-01 .. DM-13). NOT checked mechanically, and reported
-as manual controls on every run: whether a scope is genuinely non-overlapping,
-whether evidence supports a decision, whether selected sections are the right
-ones, and whether the document body and its mirror say the same thing.
+Checked mechanically (DM-01 .. DM-14). NOT checked mechanically, and printed on
+every run as `manual controls (policy 9.2)`: the ten items M-01 .. M-10, from
+whether a scope is genuinely non-overlapping to whether an exclusion reason is
+honest. `MANUAL_CONTROLS` below is the single list; T69 compares it to the
+policy table in both directions, because a boundary stated twice is a boundary
+that can be stated differently twice.
 
 No third-party dependency: PyYAML is unavailable in this environment, so the
 supported subset is declared in _SUBSET below and everything else is rejected.
@@ -78,6 +80,24 @@ REGISTRY_VERSION = "2"
 # Declaring them would make the registry describe a machine, not the repo.
 STRUCTURAL_EXCEPTIONS = {".git", "target"}
 SCOPE_REGISTRY = "00-governance/document-scope-registry.yaml"
+
+# The controls a machine cannot perform, one entry per identifier in policy
+# section 9.2. This list is printed on every run, so the boundary between what
+# was verified and what was assumed travels with the verdict instead of living
+# only in prose. It is a tuple of ids, not a sentence: a sentence gets reworded
+# until it no longer says the same thing, and nothing would notice.
+MANUAL_CONTROLS = (
+    ("M-01", "canonical scope overlap"),
+    ("M-02", "truth of an approval decision"),
+    ("M-03", "whether evidence supports the decision"),
+    ("M-04", "chosen Selected-sections"),
+    ("M-05", "semantic parity of bilingual mirrors"),
+    ("M-06", "honesty of an exclusion reason"),
+    ("M-07", "acceptability of a declared backlog"),
+    ("M-08", "external consumers obeying resolve_canonical()"),
+    ("M-09", "body-hash equivalence suiting a document"),
+    ("M-10", "_unclassified citation ban being respected"),
+)
 
 DOMAINS = {
     "architecture", "domain-model", "memory-brain", "memory-compiler",
@@ -1491,6 +1511,16 @@ def backlog_roots(root: Path) -> tuple[str, ...]:
         return ()
     return tuple(sorted(str(name).strip("/") for name in node))
 
+# A number immediately followed by a document noun is a claim about how many
+# documents there are. Only `documents:` is allowed to make that claim: prose
+# that repeats the number is a second copy of a fact, and a second copy is a
+# copy that can disagree. The twelfth review found `documents: 27` beside
+# "26 architecture documents" in the English reason -- a number stated twice
+# and true once. Checking that two statements agree is weaker than not having
+# two statements, so the registry prose is now forbidden from stating a count.
+COUNT_CLAIM_RE = re.compile(r"\d+\s*(?:architecture\s+)?(?:documents|Markdown|份|个)")
+
+
 def _count(value) -> int | None:
     """A non-negative integer declared as a YAML scalar.
 
@@ -1546,7 +1576,18 @@ def scan_root(root: Path, name: str, skip: tuple[str, ...] = ()) -> tuple[list[P
         return files, problems
     if not base.is_dir():
         return files, problems
-    for dirpath, dirnames, filenames in os.walk(base, followlinks=False):
+
+    # `os.walk` swallows errors by default: an unreadable directory is skipped
+    # and the walk continues, so a permission problem would shrink the scanned
+    # set with no diagnostic -- the same silent-shortening failure the tenth
+    # review found in the two-walk version, arriving by a different route.
+    def on_error(exc: OSError) -> None:
+        where = getattr(exc, "filename", None) or name
+        problems.append(f"DM-14 cannot read {where}: {exc.strerror or exc}")
+
+    for dirpath, dirnames, filenames in os.walk(
+        base, followlinks=False, onerror=on_error,
+    ):
         here = Path(dirpath)
         rel_dir = here.relative_to(root).as_posix()
         # Prune symlinked directories and governed subtrees before descending,
@@ -1744,6 +1785,17 @@ def check_scope_registry(root: Path) -> list[str]:
             errors.append(f"DM-14 backlog {name!r} has no reason")
         if not str(node.get("reason_zh") or "").strip():
             errors.append(f"DM-14 backlog {name!r} has no reason_zh (GOV-DOC-001)")
+        # The count is a machine field; the prose explains, it does not count.
+        # Requiring the two to agree would still leave two numbers to keep in
+        # step, so the prose is simply not allowed to state one.
+        for field in ("reason", "reason_zh"):
+            said = COUNT_CLAIM_RE.findall(str(node.get(field) or ""))
+            if said:
+                errors.append(
+                    f"DM-14 backlog {name!r} {field} restates a document count "
+                    f"{said}; `documents:` is the only place a count may be "
+                    f"stated, so the prose cannot drift from it"
+                )
 
     for name, node in excluded.items():
         if not isinstance(node, dict):
@@ -2042,10 +2094,8 @@ def main() -> int:
         print(f"  authority: {scope_id} -> {resolve_canonical(docs, scope_id)}")
 
     print(
-        "  manual controls (not machine-verified): canonical scope overlap; "
-        "truth of an approval or evidence claim; chosen Selected-sections; "
-        "semantic parity of bilingual mirrors; consumption discipline of "
-        "external readers (use resolve_canonical, never ad-hoc logic)"
+        "  manual controls (not machine-verified, policy 9.2): "
+        + "; ".join(f"{cid} {label}" for cid, label in MANUAL_CONTROLS)
     )
     for note in notes:
         print(f"  note: {note}")

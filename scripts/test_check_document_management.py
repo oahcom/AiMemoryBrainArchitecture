@@ -10,6 +10,7 @@ root, so every input outside the declared subset must fail, not degrade.
 from __future__ import annotations
 
 import ast
+import os
 import re
 import shutil
 import subprocess
@@ -2091,39 +2092,155 @@ def run_registry_version() -> None:
 
 
 def run_bilingual_count() -> None:
-    """T66: the machine count, the English reason and the Chinese reason agree.
+    """T66: only `documents:` may state a document count.
 
     The twelfth review found `documents: 27` next to "26 architecture documents"
-    in the English reason. A number stated three ways and agreeing twice is the
-    same defect as a rule declared twice and enforced once.
+    in the English reason. The twelfth-review fix was to check that the two
+    agree, which was the wrong shape: it left two numbers to keep in step and
+    only noticed after they diverged. A count stated once cannot disagree with
+    itself, so the gate now refuses a reason that restates one.
     """
     print("bilingual count agreement")
-    import re
     import check_document_management as gate
 
     reg = Path(__file__).resolve().parents[1] / "00-governance" / "document-scope-registry.yaml"
     parsed = gate.parse_yaml_subset(reg.read_text(encoding="utf-8"))
-    backlog = parsed.get("backlog") or {}
     problems: list[str] = []
-    for name, node in backlog.items():
+    for name, node in (parsed.get("backlog") or {}).items():
         if not isinstance(node, dict):
             continue
-        count = node.get("documents")
         for field in ("reason", "reason_zh"):
-            text = str(node.get(field) or "")
-            # Only a number immediately followed by a document noun is a claim
-            # about the backlog size. A bare `\b\d+\b` sweep also matched
-            # unrelated numerals in the prose and reported them as conflicts.
-            claims = {
-                int(n) for n in re.findall(
-                    r"(\d+)\s*(?:architecture\s+)?(?:documents|Markdown|份|个)",
-                    text,
-                )
-            }
-            if claims and str(count) not in {str(n) for n in claims}:
-                problems.append(f"{name}.{field} states {sorted(claims)}, documents says {count}")
-    record("T66 every stated backlog count equals the machine count",
+            said = gate.COUNT_CLAIM_RE.findall(str(node.get(field) or ""))
+            if said:
+                problems.append(f"{name}.{field} restates {said}")
+    record("T66 the shipped registry states its backlog count exactly once",
            not problems, f"  {problems}")
+
+    # And the rule is executed, not merely described: a reason that restates the
+    # count must be refused by the gate, and the diagnostic must say which field.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        reg_path = root / "00-governance" / "document-scope-registry.yaml"
+        text = reg_path.read_text(encoding="utf-8")
+        # Inject a count claim into the English reason only.
+        mutated = text.replace(
+            '    reason: "architecture documents not yet classified"',
+            '    reason: "27 architecture documents not yet classified"',
+            1,
+        )
+        record("T66 mutation applied to the fixture reason", mutated != text)
+        reg_path.write_text(mutated, encoding="utf-8")
+        errors = gate.check_scope_registry(root)
+        record("T66 a reason restating the backlog count is an error",
+               any("restates a document count" in e for e in errors),
+               f"  got {[e for e in errors if 'restates' in e]}")
+
+
+def run_unreadable_walk() -> None:
+    """T68: a directory the walk cannot read is a problem, not a shorter list.
+
+    `os.walk` swallows errors by default: an unreadable directory is skipped and
+    the walk continues. The scanned set then shrinks with no diagnostic, which
+    is the tenth review's `0 governed documents, exit 0` arriving by another
+    route. `scan_root()` passes `onerror`, and this case proves the callback is
+    actually wired: if the argument were dropped, the injected error would never
+    reach `problems`.
+    """
+    print("unreadable walk")
+    import check_document_management as gate
+
+    real_walk = gate.os.walk
+
+    def fake_walk(top, followlinks=False, onerror=None):
+        # Raise the same way the real walk would on an unreadable directory.
+        if onerror is not None:
+            onerror(OSError(13, "Permission denied", str(top)))
+        return iter(())
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        gate.os.walk = fake_walk
+        try:
+            files, problems = gate.scan_root(root, "00-governance")
+        finally:
+            gate.os.walk = real_walk
+        record("T68 an unreadable directory is reported, not silently skipped",
+               any("DM-14 cannot read" in p for p in problems),
+               f"  files {len(files)}, problems {problems}")
+
+    # And it must reach the verdict, not stop at the helper: a walk that lost a
+    # subtree cannot produce a pass.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        gate.os.walk = fake_walk
+        try:
+            errors = gate.check_scope_registry(root)
+        finally:
+            gate.os.walk = real_walk
+        record("T68 the unreadable-walk problem reaches the gate verdict",
+               any("cannot read" in e for e in errors),
+               f"  got {[e for e in errors if 'cannot read' in e][:2]}")
+
+    # A real permission failure, when the platform and user can produce one.
+    # Running as root bypasses mode bits, so the case is skipped there rather
+    # than reported as passing.
+    if hasattr(os, "geteuid") and os.geteuid() != 0:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = _repo(tmp)
+            locked = root / "00-governance" / "locked"
+            locked.mkdir()
+            (locked / "x.md").write_text("# x\n", encoding="utf-8")
+            locked.chmod(0o000)
+            try:
+                _, problems = gate.scan_root(root, "00-governance")
+            finally:
+                locked.chmod(0o755)
+            record("T68 a real 0o000 directory is reported by path",
+                   any("cannot read" in p and "locked" in p for p in problems),
+                   f"  problems {problems}")
+    else:
+        record("T68 a real 0o000 directory is reported by path", True,
+               "  (running as root; mode bits cannot deny access)")
+
+
+def run_manual_controls() -> None:
+    """T69: the manual-control list is one list, printed and documented.
+
+    A boundary stated in prose and a boundary stated at runtime are two
+    statements, and two statements drift. The policy table (section 9.2) and the
+    run output must name the same identifiers: if the gate prints a control the
+    policy does not list, the policy is incomplete; if the policy lists one the
+    gate does not print, the run understates what it did not check.
+    """
+    print("manual controls")
+    import check_document_management as gate
+
+    policy = (Path(__file__).resolve().parents[1] / "00-governance"
+              / "architecture-document-management-policy.md").read_text(encoding="utf-8")
+    in_policy = set(re.findall(r"^\|\s*(M-\d\d)\s*\|", policy, re.M))
+    in_gate = {cid for cid, _ in gate.MANUAL_CONTROLS}
+
+    record("T69 policy section 9.2 lists manual controls", bool(in_policy),
+           f"  found {sorted(in_policy)}")
+    record("T69 every control the gate prints is documented",
+           in_gate <= in_policy, f"  undocumented {sorted(in_gate - in_policy)}")
+    record("T69 every documented control is printed by the gate",
+           in_policy <= in_gate, f"  unprinted {sorted(in_policy - in_gate)}")
+
+    # And it must reach the output, not just the constant: a list nothing prints
+    # is a comment with a data type.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        proc = subprocess.run(
+            [sys.executable, str(Path(__file__).resolve().parent
+                                 / "check_document_management.py"),
+             "--root", str(root)],
+            capture_output=True, text=True,
+        )
+        out = proc.stdout + proc.stderr
+        missing = sorted(cid for cid in in_gate if cid not in out)
+        record("T69 the manual-control boundary is printed on every run",
+               not missing, f"  missing from output: {missing}")
 
 
 def run_single_entry_callers() -> None:
@@ -2138,14 +2255,30 @@ def run_single_entry_callers() -> None:
     import check_document_management as gate
 
     scripts_dir = Path(__file__).resolve().parent
+    repo_root = scripts_dir.parent
     offenders: list[str] = []
     # Only an actual call is an offence. A docstring, a comment or the `def`
     # line mentioning the name is not, so the check runs on the module's AST
     # rather than on text: `governed_files()` appearing in prose is exactly the
     # kind of false positive that makes a rule get ignored.
-    for path in sorted(scripts_dir.glob("*.py")):
-        if path.name.startswith("test_"):
-            continue
+    #
+    # Scope: every `.py` file the repository ships, excluding test files and the
+    # build directory. Scanning only `scripts/*.py` would have been a rule about
+    # a directory, not about the gate: moving the entry point to `tools/` would
+    # have silently retired it. The limit is named here and asserted below, so
+    # a future move shows up as a failing case rather than as a comment that
+    # stopped being true.
+    skipped_dirs = {"target", ".git", "tests", "__pycache__"}
+    scanned = [
+        path for path in sorted(repo_root.rglob("*.py"))
+        if not (set(path.relative_to(repo_root).parts) & skipped_dirs)
+        and not path.name.startswith("test_")
+    ]
+    gate_path = scripts_dir / "check_document_management.py"
+    record("T67 the scan covers the gate itself, not just scripts/*.py",
+           gate_path in scanned and any(p.parent != scripts_dir for p in scanned),
+           f"  scanned {[p.relative_to(repo_root).as_posix() for p in scanned]}")
+    for path in scanned:
         tree = ast.parse(path.read_text(encoding="utf-8"))
         for node in ast.walk(tree):
             if not isinstance(node, ast.Call):
@@ -2153,7 +2286,7 @@ def run_single_entry_callers() -> None:
             func = node.func
             name = getattr(func, "id", None) or getattr(func, "attr", None)
             if name == "governed_files":
-                offenders.append(f"{path.name}:{node.lineno}: governed_files() call")
+                offenders.append(f"{path.relative_to(repo_root).as_posix()}:{node.lineno}")
     record("T67 no production script decides a verdict from governed_files()",
            not offenders, "  " + "; ".join(offenders[:4]))
 
@@ -2187,6 +2320,8 @@ def main() -> int:
     run_structural_schema()
     run_registry_version()
     run_bilingual_count()
+    run_unreadable_walk()
+    run_manual_controls()
     run_single_entry_callers()
     run_schema_agreement()
     passed, total = sum(RESULTS), len(RESULTS)
