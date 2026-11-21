@@ -76,8 +76,8 @@ governed_files:
 # 并且门禁运行会把它报为未分类，而不是用一句理由把它藏起来。
 backlog:
   docs:
-    documents: 26
-    # This is backlog, not an exemption. 26 Markdown files under docs/ (outside
+    documents: 27
+    # This is backlog, not an exemption. 27 Markdown files under docs/ (outside
     # the bilingual mirrors) are architecture documents: MINIMUM-RUNNABLE-
     # ARCHITECTURE, CANONICAL-TRANSACTION, SOURCE-OF-TRUTH, CONFLICT-REGISTER,
     # the CONTEXT-APPLIED and FORGET-AUTHORIZATION contracts, the convergence
@@ -93,14 +93,14 @@ backlog:
     #   docs/governance/documentation-gaps.md   governed individually below
     # Everything else under docs/ is backlog with a known count, which is a
     # number that can go down. `kind: not-yet-migrated` requires exactly that.
-    # 这是积压，不是豁免。docs/ 下（双语镜像之外）的 26 个 Markdown 是架构文档：
+    # 这是积压，不是豁免。docs/ 下（双语镜像之外）的 27 个 Markdown 是架构文档：
     # 最小可运行架构、规范事务、事实源清单、冲突登记、上下文应用与遗忘授权契约、
     # 收敛与产品优先研究。它们大多在自身头部写着 `DRAFT / NON-NORMATIVE`，而这正是
     # 它们该在此处的原因：`Draft` 是 `lifecycle.approval.decision_status` 的取值，
     # 不是免于分类的理由。把它们排除，会使"我们还没分类这些"与"这些不是架构"变得
     # 无法区分，而后者是本登记表绝不能允许的事。
     reason: "Backlog with a known count: 26 architecture documents under docs/ outside the mirrors and the gap record, all unclassified. Not an exemption -- DM-14 reports this kind separately so the number is visible and can decrease."
-    reason_zh: "有明确数量的积压：docs/ 下镜像与缺口记录之外的 26 份架构文档，均未分类。这不是豁免——DM-14 单独报告该类别，使这个数字可见且可下降。"
+    reason_zh: "有明确数量的积压：docs/ 下镜像与缺口记录之外的 27 份架构文档，均未分类。这不是豁免——DM-14 单独报告该类别，使这个数字可见且可下降。"
 
 excluded:
 
