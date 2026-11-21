@@ -12,9 +12,6 @@
 06-memory-context/phase-3.8.4-g-c-provider-outcome-consumer-review.md
 06-memory-context/phase-3.8.5-g-storage-logical-serialization-topology-impact-review.md
 06-memory-context/phase-3.8.6-g-review-storage-serialization-anchor.md
-07-agent-integration/agent-integration-overview.md
-07-agent-integration/inference-boundary-model.md
-07-agent-integration/telemetry-model.md
 08-bmcp-protocol/owner-snapshot-namespace-and-fence-currentness-contract.md
 08-bmcp-protocol/phase-3.8-h-rj-hw-01-typed-watermark-and-fence-binding-contract.md
 08-bmcp-protocol/phase-3.8.25-h-applied-delivery-evidence-hardening-addendum.md
