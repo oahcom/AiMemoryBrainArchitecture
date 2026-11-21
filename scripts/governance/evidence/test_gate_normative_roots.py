@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import importlib.util
 import os
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -101,6 +102,7 @@ class GateRootsTest(unittest.TestCase):
             ):
                 self.assertIn(rel, self.gate.changed_paths())
                 with contextlib.ExitStack() as stack:
+                    stack.enter_context(patch.object(sys, "argv", ["scripts/check_bilingual_docs.py"]))
                     stack.enter_context(patch.object(self.gate, "read_baseline", return_value=set()))
                     stack.enter_context(patch.object(self.gate, "current_bilingual_gaps", return_value=set()))
                     stack.enter_context(patch.object(self.gate, "check_prompt_library", return_value=[]))
