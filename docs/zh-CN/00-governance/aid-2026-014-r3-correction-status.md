@@ -48,7 +48,7 @@ TEST EXECUTION = SUSPENDED
 
 | 要求 | 应用状态 | 独立复审 |
 |---|---|---|
-| R1 Claim 身份 | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
+| R1 Claim 身份 | APPLIED_PENDING_INDEPENDENT_REVIEW | REQUEST CHANGES |
 | R2 Attestor 授权 | APPLIED_PENDING_INDEPENDENT_REVIEW | PASS |
 | R3 共享 Fact Forget | APPLIED_PENDING_INDEPENDENT_REVIEW | PASS |
 | R4 Fact/Claim 同步 | FIX_APPLIED_AWAITING_REREVIEW | PASS |
@@ -613,3 +613,58 @@ docs/zh-CN/04-memory-compiler/extraction-and-normalization.md  8dd0b5b29ecd37cea
 根级副本究竟是合法的第三份权威副本、镜像，还是冗余，仍是 `§9.1` 记录但未裁定的问题：该节已
 指出根级 freeze 文件在 `§8` 中根本没有行，根级 `context-versioning.md` 仅以「本轮未应用」
 条目出现。这是关于哪些副本具有权威性的治理问题，应用轮次不得自行裁定。
+
+### 9.9 R1 首次独立复审，以及本轮自身的一处事实错误
+
+复审方：独立会话 `6b01353c-6468-83e8-8158-9aa8750e05c2`（只读，未写仓库，未由复审方发布评论）。
+2026-11-21 返回裁决。回读钉定：`b752aad0fc0f5cd1525c35515b01d2acd990c438`。裁决：`REQUEST CHANGES`，
+两项发现。
+
+| 审查项 | 裁定 | 阻断编号 |
+|---|---|---|
+| R1 OPEN 条款删除完整性 | REQUEST CHANGES | R1-01 |
+| 是否越权删除仍应 OPEN 的项 | PASS | — |
+| 三份副本一致性 | Claim identity 层面 PASS | — |
+| Claim identity 语义自洽性 | PASS | — |
+| 双语一致性 | PASS | — |
+| `§9.1` R1 行真实性 | REQUEST CHANGES | R1-02 |
+
+**R1-01 —— 根级 freeze 仍把 Claim identity 当作未验证。** 在
+`02-domain-model/phase-1-domain-model-freeze.md` 中，`§2.6` 已写明 Claim identity 语义分类为
+`DECIDED FOR CONVERGENCE`、仅 ID 生成算法仍为 `CANDIDATE`；`§7` 列出 `ID generation: CANDIDATE`
+及其余六项未决事项。但 `§6` 的 DM-10 验收行原文为
+`未验证的 ID/Claim identity 等不被实现偷偷冻结`——把已决定的 Claim identity 与未决定的 ID 生成
+重新并列进未验证集合。只读验收表的实施者无法判断 Claim identity 是否仍需保持开放。此问题仅在
+根级 freeze；EN 与 ZH 副本不以该形式承载此行。
+
+修正把未验证集合限定为仍未决定的事项，并写明已 `DECIDED FOR CONVERGENCE` 的稳定 Claim identity
+与 ClaimRevision 语义不得再作为未验证项。`§2.6` 与 `§7` 未改动，该文件三处表述现已一致。
+
+**R1-02 —— `§9.8` 对根级 Overview Blob 的描述错误，而这个错误是本轮自身造成的。** `§9.8` 曾写
+根级 `02-domain-model/domain-model-overview.md`「其 Blob 仍为 `5b86fe23ab7c`——即 R1 修正前的值」。
+这是错的。`§9.1` 登记 `5b86fe23ab7c` 为该路径 R1 修正的**结果**，由 `778d1bee` 产生，而被取代值
+是 `46fbdcacbe8a`。复审方读取 `778d1bee` 的 diff 予以确认：该提交把旧句
+`ClaimId identity policy across Memory versions remains OPEN` 替换为已决的
+`ClaimRef is stable across Memory versions` 表述。
+
+副本之间真正的差别是：根级副本自那次修正后未再推进，而 `docs/en` 在后续轮次推进到
+`1a1a10b24d68`。本轮 L0 把「Blob 不同」读成「尚未修正」，写下了 `§9.1` 在往前两节就已否定的
+断言。`§9.8` 现改为正确的产生关系，并把「哪些副本具有权威性」这一治理问题保持为未决。
+
+复审方另在 `§9.1` 的基线 `dd4ecf16` 处独立核对，确认 `§9.1` 登记的十一个 Blob 全部一致，且其
+列出的六个 producing commit 确实改动了它声称改动的文件。它同时认定 `§9.1` 使用的两处限定
+（根级 freeze 的 `not in §8`、根级 context-versioning 的 `(§8 bullet)`）是对登记位置的事实描述，
+不是掩盖遗漏。
+
+本轮特别追问的那个问题，复审方的回答是：根级副本在 Claim identity 上并未过期，故三份副本在该
+内容上一致；而根级副本是否具有独立规范权威性，仍属 Owner 裁定。R1-01 是另一回事——它是另一个
+根级文件中的真实残留，因此构成 R1 的真实阻断。
+
+| 目标 | 变更前 Blob | 变更后 Blob | 大小 |
+|---|---|---|---|
+| `02-domain-model/phase-1-domain-model-freeze.md` | `d1102a0adf32` | `5e30c5b6c68f` | 10457 -> 10595 B |
+| `docs/en/00-governance/aid-2026-014-r3-correction-status.md` | `f2ef0f80b707` | `9a757ffc14e7` | 50375 -> 50493 B |
+| `docs/zh-CN/00-governance/aid-2026-014-r3-correction-status.md` | `319409a40cf3` | `5fcac6d7c60f` | 45786 -> 45878 B |
+
+R1 因此从 `FIX_APPLIED_AWAITING_REREVIEW` 转为 `APPLIED_PENDING_INDEPENDENT_REVIEW`，独立复审列
+仍为 `REQUEST CHANGES`，直至两项发现得到复审。`§2` 未变。
