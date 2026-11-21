@@ -76,7 +76,7 @@ Current main source pins are from fetched origin/main at c58878fce24528a0842b4f8
 | I scope-and-revocation-policy.md | same I ref | Blob 71df6aaf21bb1767cd9fe5c947581b871325e023 | I PermissionEpoch/revocation |
 | I global-forget-target-inventory-and-completion-evidence.md | same I ref | Blob 9100061fa986fb6676656169de3fcf9fc1c72664 | I retention/global Forget evaluation |
 
-The seven H Blob pins above were re-fetched from the live `session-h-bmcp-protocol` branch for this update; all seven resolve to the listed Blob SHAs at branch HEAD `3e8b33df18b9e6fc757ca84ff07a12faebc78e74`. This is a bounded source ledger, not a claim that every H artifact or consumer was independently reviewed.
+The eight H Blob pins above were re-fetched from the live `session-h-bmcp-protocol` branch for this update; all eight resolve to the listed Blob SHAs at branch HEAD `3e8b33df18b9e6fc757ca84ff07a12faebc78e74`. This is a bounded source ledger, not a claim that every H artifact or consumer was independently reviewed.
 
 ### 2.3 B/D/I Owner decision pins
 
@@ -537,108 +537,141 @@ Issue #7 is currently CLOSED / not_planned under the Owner phase-closure ruling;
 
 ## 10. Governance and verification
 
-- Validation snapshot: exact base / merge-base `c58878fce24528a0842b4f8887c93ddbf465b566`; exact candidate head is recorded in the PR delivery report. The PR base ref is `bmcp-validation-base-c588`, pinned to `c58878fce24528a0842b4f8887c93ddbf465b566`. Live `main` was observed at `be77ef7e64b9102a03a7c65a223798fa2003e88b` and is deliberately not this batch base because it no longer shares ancestry with the Owner-designated `c58878f` snapshot. This preserves a reproducible three-file diff without mixing divergent history. The previous `713774c` batch is historical only.
-- Main source ledger §2 was refreshed from `c58878fce24528a0842b4f8887c93ddbf465b566`; all listed Main Blob pins were resolved against that exact commit. H source branch was re-read at `session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74`; all seven H Blob pins were re-fetched and match. EN/ZH source-ledger SHA sets are identical.
+- Validation snapshot: exact base / merge-base `c58878fce24528a0842b4f8887c93ddbf465b566`; exact candidate head is recorded in the PR delivery report. The PR base ref is `bmcp-validation-base-c588`, pinned to `c58878fce24528a0842b4f8887c93ddbf465b566`. Owner GitHub Compare verification records `c58878fce24528a0842b4f8887c93ddbf465b566` as an ancestor of the then-observed live `main` `2998f6321b90888d65ac9d972a169f86482e08b`: `ahead_by=16`, `behind_by=0`, and `merge_base_commit=c58878f`. An empty local `git merge-base` result from a shallow clone is not evidence of unrelated histories. This round intentionally does not chase live main; the controlled base remains fixed at C588. The previous `713774c` batch is historical only.
+- Main source ledger §2 was refreshed from `c58878fce24528a0842b4f8887c93ddbf465b566`; all listed Main Blob pins were resolved against that exact commit. H source branch was re-read at `session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74`; all eight H Blob pins were re-fetched and match. EN/ZH source-ledger SHA sets are identical.
 - Main changes incorporated into the dependency review: #472 G ContextVersion/ChangeSet/CAS documentation and implementation; `crates/memory-context/tests/e2e_negative_paths.rs` (SQLite Store→Context negative-path coverage); canonical Claim/Fact revision types; BMCP RecoveryJoin 1.0.2 schema, index, structural validator and conformance fixtures/tests. RecoveryJoin validator returns `STRUCTURALLY_VALID` for schema-only success and requires injected D-authoritative callbacks for proof/currentness; without callbacks the result is `UNKNOWN`, not VALID. It does not freeze H wire/transport or substitute for D authority. The G E2E tests cover foreign-scope denial, Candidate lifecycle rejection, stale revision rejection, budget overflow and file-backed SQLite restart; they do not provide Forget/tombstone public-operation coverage, H ACK binding or C final-request Applied evidence.
 - BMCP-DR-002 remains DECIDED at D/I authority-boundary level only. BMCP-DR-003 remains PARTIALLY_DECIDED; exact C-H operation registry/mapping remains OPEN. H-CONFIRM-001..004 remain PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN; `INDEPENDENCE_UNVERIFIABLE` remains. AT-01..AT-20 remain **PLANNED_NOT_RUN**; Provider Outcome's five C semantic skips remain unresolved.
 - Issue #7 remains CLOSED / not_planned with `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`. No wire/schema/API freeze, Runtime, transport implementation, deployment, production activation or Issue #7 change.
-- `git diff --check origin/main...HEAD`: PASS, exit 0 (rerun after final commit).
-- `python3 scripts/check_document_management.py --require-changed origin/main`: FAIL, exit 1; two baseline DM-06 errors in `08-bmcp-protocol/protocol-index.md` and `.zh-CN.md` (`Canonical` requires `authority.canonical_scope_id`). The PR changes neither index file. Reported inventory: 501 governed documents, 18 classified / 483 unclassified. No out-of-scope metadata changes were made.
+- `git diff --check c58878fce24528a0842b4f8887c93ddbf465b566...HEAD`: PASS, exit 0 (rerun after final commit).
+- `python3 scripts/check_document_management.py --require-changed c58878fce24528a0842b4f8887c93ddbf465b566`: FAIL, exit 1; two baseline DM-06 errors in `08-bmcp-protocol/protocol-index.md` and `.zh-CN.md` (`Canonical` requires `authority.canonical_scope_id`). The PR changes neither index file. Reported inventory: 501 governed documents, 18 classified / 483 unclassified. No out-of-scope metadata changes were made.
+
+
+**Separate baseline finding — explicitly outside #453:** Owner independently verified `08-bmcp-protocol/protocol-index.md` (Blob `a5b64941cdc783b385348de1b22e0eaace2c003d`) and `08-bmcp-protocol/protocol-index.zh-CN.md` (Blob `2fe06d9424821eb96eb006dbb391914c1375afae`) at the Owner-checked main snapshot. Both contain `authority.canonical_status`, `authority.normative_status`, and `authority.canonical_conflict_status`, but omit `authority.canonical_scope_id` (DM-06). The Chinese path is the repository-root `08-bmcp-protocol/protocol-index.zh-CN.md`, not `docs/zh-CN/`. These two files are not among #453's three changed paths. Owner authorized a separate H-owned bilingual repair carrier in principle, but it is not opened while the repository exceeds its open-PR quota. Do not guess the scope ID or weaken DM-06; this is not a #453 repair.
 - `python3 scripts/ci/audit_runner_admission.py`: PASS; 1 self-hosted job audited / 0 violations; exit 0.
-- `BASE_SHA=$(git merge-base HEAD origin/main) HEAD_SHA=$(git rev-parse HEAD) PR_BODY='BILINGUAL-MANIFEST: COMPLETE' python3 scripts/check_bilingual_docs.py`: PASS; 77 frozen / 0 new gaps / 21 exemptions; exit 0. Three changed Markdown paths outside `NORMATIVE_ROOTS` are explicitly noted as not pairing-checked. The gate's same-commit registration-history rule remains present; the old 21 errors were not reproduced on this snapshot.
+- `BASE_SHA=c58878fce24528a0842b4f8887c93ddbf465b566 HEAD_SHA=$(git rev-parse HEAD) PR_BODY='BILINGUAL-MANIFEST: COMPLETE' python3 scripts/check_bilingual_docs.py`: PASS; 77 frozen / 0 new gaps / 21 exemptions; exit 0. Registration history: 21 sources re-enumerated (18 later registrations, 3 exact legacy allowlist matches), 0 errors. Three changed Markdown paths outside `NORMATIVE_ROOTS` are explicitly noted as not pairing-checked. The gate's same-commit registration-history rule remains present; the old 21 errors were not reproduced on this snapshot.
 - `python3 scripts/check_bilingual_docs_full.py --source-revision c58878fce24528a0842b4f8887c93ddbf465b566`: FAIL; 467 in-scope Markdown / 112 exempt / 81 violations; exit 1. Full path-by-path classification follows.
 
 ### GOV-DOC-001 full-tree inventory at the c58878f snapshot
 
 The exact command `python3 scripts/check_bilingual_docs_full.py --source-revision c58878fce24528a0842b4f8887c93ddbf465b566` returned **467 in-scope Markdown / 112 exempt / 81 violations / exit 1**. This is a path-counterpart inventory, not semantic translation review. The 81 findings classify as follows:
 
-- **77 normative-root sources with both language mirror paths missing** (the scanner's expected counterparts are `docs/en/<source>` AND `docs/zh-CN/<source>`):
-  - `00-governance/architecture-document-management-policy.md`
-  - `00-governance/reports/gov-doc-001-full-scan-2026-11-20.md`
-  - `00-governance/templates/document-metadata-template.md`
-  - `02-domain-model/phase-2-domain-extension.md`
-  - `02-domain-model/phase-2-domain-extension.zh-CN.md`
-  - `06-memory-context/context-architecture.md`
-  - `06-memory-context/context-budget-and-sufficiency.md`
-  - `06-memory-context/context-edit-operations.md`
-  - `06-memory-context/context-implementation-coverage.md`
-  - `06-memory-context/context-implementation-coverage.zh-CN.md`
-  - `06-memory-context/context-manager.md`
-  - `06-memory-context/context-reconciliation.md`
-  - `06-memory-context/context-versioning.md`
-  - `06-memory-context/phase-3.7-g-local-lifecycle-producer-derivative-queue-recall-context-restore.md`
-  - `06-memory-context/phase-3.8.4-g-c-provider-outcome-consumer-review.md`
-  - `06-memory-context/phase-3.8.5-g-storage-logical-serialization-topology-impact-review.md`
-  - `06-memory-context/phase-3.8.6-g-review-storage-serialization-anchor.md`
-  - `07-agent-integration/adapter-capability-tiers.md`
-  - `07-agent-integration/adapter-capability-tiers.zh-CN.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/README.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/baseline-currentness-and-owner-source-audit.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/baseline-owner-branch-snapshot-errata.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/bilingual-parity-audit.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-entity-inventory.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-glossary.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-invariants.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-model.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-relationships.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-identity-semantics.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-state-semantics.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-temporal-evidence-semantics.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/cross-owner-canonical-semantics-matrix.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-model-complexity-assessment.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-model-decision-record.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-semantics-conflict-register.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/evidence/README.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/evidence/official-reference-validation.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/existing-domain-model-baseline.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/latest-cross-owner-source-reconciliation.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/mature-domain-model-research.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/post-merge-currentness-and-governance-reconciliation.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/validation/README.md`
-  - `13-engineering-decisions/technology-architecture-blueprint.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/README.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/architecture-complexity-audit.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/baseline/architecture-baseline.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/deployment-topology-comparison.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/independent-review-handoff.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/mature-project-research.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/open-questions.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-dependency-register.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-remediation/CGH-APPLIED-REVIEW-001.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-remediation/OWNER-REMEDIATION-001.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-technology-review-synthesis.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/research-evidence-register.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/rust-ecosystem-assessment.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/technology-capability-matrix.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/technology-recommendation.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/workload-model.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/README.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-boundary.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-canonical-contract.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-conflict-register.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-cross-owner-contract-matrix.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-decision-record.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-failure-semantics.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-technology-assessment.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-telemetry.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-validation-plan.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/evidence/README.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/existing-integration-baseline.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/inference-boundary-and-trust-model.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/provider-integration-research.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/provider-outcome-and-execution-evidence.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/tool-execution-boundary.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/validation/README.md`
+### Path-by-path classification of the 81 frozen GOV-DOC-001 findings
 
-- **4 Phase-0 operational research reports without a side-by-side `.en.md`/`.zh-CN.md` pair or `docs/en/14-ai-development` mirror**:
-  - `14-ai-development/research/phase-0/SESSION-1-GITHUB-WORKFLOW-REPORT.md`
-  - `14-ai-development/research/phase-0/SESSION-2-PROMPT-RUN-PROVENANCE-REPORT.md`
-  - `14-ai-development/research/phase-0/SESSION-3-QUALITY-REVIEW-DEFECT-REPORT.md`
-  - `14-ai-development/research/phase-0/SESSION-4-ADOPTION-ISOLATION-REPORT.md`
+Every listed source exists at frozen base `c58878fce24528a0842b4f8887c93ddbf465b566`; all 81 findings are therefore pre-existing at Stage A base. The first 77 are NORMATIVE_ROOTS mirror-pair failures (both expected `docs/en/<source>` and `docs/zh-CN/<source>` paths are absent). The final four are Phase-0 report pairing failures (no side-by-side `.en.md`/`.zh-CN.md` pair or required `docs/en/14-ai-development` mirror). Owner labels below are routing classifications from path/domain, not a new assignment of canonical ownership. All are excluded from #453; disposition is owner-scoped backlog triage, no bulk cleanup.
 
+| # | Exact source path | Owner / routing | Rule | At c588 | Disposition |
+|---:|---|---|---|---|---|
+| 01 | `00-governance/architecture-document-management-policy.md` | Repository Governance | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 02 | `00-governance/reports/gov-doc-001-full-scan-2026-11-20.md` | Repository Governance | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 03 | `00-governance/templates/document-metadata-template.md` | Repository Governance | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 04 | `02-domain-model/phase-2-domain-extension.md` | B — Domain Model | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 05 | `02-domain-model/phase-2-domain-extension.zh-CN.md` | B — Domain Model | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 06 | `06-memory-context/context-architecture.md` | G — Memory Context | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 07 | `06-memory-context/context-budget-and-sufficiency.md` | G — Memory Context | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 08 | `06-memory-context/context-edit-operations.md` | G — Memory Context | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 09 | `06-memory-context/context-implementation-coverage.md` | G — Memory Context | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 10 | `06-memory-context/context-implementation-coverage.zh-CN.md` | G — Memory Context | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 11 | `06-memory-context/context-manager.md` | G — Memory Context | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 12 | `06-memory-context/context-reconciliation.md` | G — Memory Context | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 13 | `06-memory-context/context-versioning.md` | G — Memory Context | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 14 | `06-memory-context/phase-3.7-g-local-lifecycle-producer-derivative-queue-recall-context-restore.md` | G — Memory Context | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 15 | `06-memory-context/phase-3.8.4-g-c-provider-outcome-consumer-review.md` | G — Memory Context | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 16 | `06-memory-context/phase-3.8.5-g-storage-logical-serialization-topology-impact-review.md` | G — Memory Context | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 17 | `06-memory-context/phase-3.8.6-g-review-storage-serialization-anchor.md` | G — Memory Context | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 18 | `07-agent-integration/adapter-capability-tiers.md` | C — Agent Integration | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 19 | `07-agent-integration/adapter-capability-tiers.zh-CN.md` | C — Agent Integration | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 20 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/README.md` | B — Domain Model research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 21 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/baseline-currentness-and-owner-source-audit.md` | B — Domain Model research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 22 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/baseline-owner-branch-snapshot-errata.md` | B — Domain Model research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 23 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/bilingual-parity-audit.md` | B — Domain Model research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 24 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-entity-inventory.md` | B — Domain Model research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 25 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-glossary.md` | B — Domain Model research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 26 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-invariants.md` | B — Domain Model research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 27 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-model.md` | B — Domain Model research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 28 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-relationships.md` | B — Domain Model research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 29 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-identity-semantics.md` | B — Domain Model research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 30 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-state-semantics.md` | B — Domain Model research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 31 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-temporal-evidence-semantics.md` | B — Domain Model research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 32 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/cross-owner-canonical-semantics-matrix.md` | B — Domain Model research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 33 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-model-complexity-assessment.md` | B — Domain Model research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 34 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-model-decision-record.md` | B — Domain Model research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 35 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-semantics-conflict-register.md` | B — Domain Model research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 36 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/evidence/README.md` | B — Domain Model research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 37 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/evidence/official-reference-validation.md` | B — Domain Model research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 38 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/existing-domain-model-baseline.md` | B — Domain Model research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 39 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md` | B — Domain Model research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 40 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/latest-cross-owner-source-reconciliation.md` | B — Domain Model research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 41 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/mature-domain-model-research.md` | B — Domain Model research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 42 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/post-merge-currentness-and-governance-reconciliation.md` | B — Domain Model research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 43 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/validation/README.md` | B — Domain Model research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 44 | `13-engineering-decisions/technology-architecture-blueprint.md` | Architecture / Engineering Leadership (owner not resolved by this scan) | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 45 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/README.md` | Architecture / Technology research (owner not resolved by this scan) | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 46 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/architecture-complexity-audit.md` | Architecture / Technology research (owner not resolved by this scan) | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 47 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/baseline/architecture-baseline.md` | Architecture / Technology research (owner not resolved by this scan) | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 48 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/deployment-topology-comparison.md` | Architecture / Technology research (owner not resolved by this scan) | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 49 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/independent-review-handoff.md` | Architecture / Technology research (owner not resolved by this scan) | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 50 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/mature-project-research.md` | Architecture / Technology research (owner not resolved by this scan) | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 51 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/open-questions.md` | Architecture / Technology research (owner not resolved by this scan) | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 52 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-dependency-register.md` | Architecture / Technology research (owner not resolved by this scan) | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 53 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-remediation/CGH-APPLIED-REVIEW-001.md` | Architecture / Technology research (owner not resolved by this scan) | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 54 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-remediation/OWNER-REMEDIATION-001.md` | Architecture / Technology research (owner not resolved by this scan) | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 55 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-technology-review-synthesis.md` | Architecture / Technology research (owner not resolved by this scan) | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 56 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/research-evidence-register.md` | Architecture / Technology research (owner not resolved by this scan) | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 57 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/rust-ecosystem-assessment.md` | Architecture / Technology research (owner not resolved by this scan) | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 58 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/technology-capability-matrix.md` | Architecture / Technology research (owner not resolved by this scan) | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 59 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/technology-recommendation.md` | Architecture / Technology research (owner not resolved by this scan) | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 60 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/workload-model.md` | Architecture / Technology research (owner not resolved by this scan) | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 61 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/README.md` | C — Agent Integration research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 62 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-boundary.md` | C — Agent Integration research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 63 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-canonical-contract.md` | C — Agent Integration research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 64 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-conflict-register.md` | C — Agent Integration research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 65 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-cross-owner-contract-matrix.md` | C — Agent Integration research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 66 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-decision-record.md` | C — Agent Integration research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 67 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-failure-semantics.md` | C — Agent Integration research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 68 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-technology-assessment.md` | C — Agent Integration research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 69 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-telemetry.md` | C — Agent Integration research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 70 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-validation-plan.md` | C — Agent Integration research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 71 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/evidence/README.md` | C — Agent Integration research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 72 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/existing-integration-baseline.md` | C — Agent Integration research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 73 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/inference-boundary-and-trust-model.md` | C — Agent Integration research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 74 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/provider-integration-research.md` | C — Agent Integration research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 75 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/provider-outcome-and-execution-evidence.md` | C — Agent Integration research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 76 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/tool-execution-boundary.md` | C — Agent Integration research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 77 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/validation/README.md` | C — Agent Integration research | GOV-DOC-001 NORMATIVE_ROOTS: both language mirrors absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 78 | `14-ai-development/research/phase-0/SESSION-1-GITHUB-WORKFLOW-REPORT.md` | Engineering Governance / Phase-0 operations | GOV-DOC-001 Phase-0 report: side-by-side pair / docs/en mirror absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 79 | `14-ai-development/research/phase-0/SESSION-2-PROMPT-RUN-PROVENANCE-REPORT.md` | Engineering Governance / Phase-0 operations | GOV-DOC-001 Phase-0 report: side-by-side pair / docs/en mirror absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 80 | `14-ai-development/research/phase-0/SESSION-3-QUALITY-REVIEW-DEFECT-REPORT.md` | Engineering Governance / Phase-0 operations | GOV-DOC-001 Phase-0 report: side-by-side pair / docs/en mirror absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
+| 81 | `14-ai-development/research/phase-0/SESSION-4-ADOPTION-ISOLATION-REPORT.md` | Engineering Governance / Phase-0 operations | GOV-DOC-001 Phase-0 report: side-by-side pair / docs/en mirror absent | Pre-existing | Exclude #453; owner-scoped backlog, no bulk cleanup |
 
-The 81 are independent of the 21 same-commit registration errors previously reported on the `713774c` historical batch. At this `c58878f` snapshot, the structural gate still contains the post-creation registration-history check and reports 77 frozen / 0 new gaps / 21 exemptions, with **no same-commit registration errors**. No history rule was weakened or bypassed. The historical count of 21 is not the current count.
+### Frozen-snapshot embedded-bilingual registration re-enumeration
+
+The gate registry contains 21 embedded-bilingual source records at C588: 18 were registered in commits later than their source-file creation commits; three are the explicitly named legacy same-commit exceptions, each with an exact creation/allowlist SHA match. `check_embedded_registration_history()` returned an empty error list. The gate's `exemptions: 21` line counts registered embedded-bilingual sources; it is not 21 violations. Thus the 21 same-commit errors reported against the historical `713774c` batch are **not reproduced** at C588. The history rule is unchanged.
+
+| # | Registered source path | Source-add commit | Registration-add commit | C588 result |
+|---:|---|---|---|---|
+| 01 | `00-governance/bilingual-documentation-policy.md` | `cd1ab0fb346c770d779b1d8d24297f6811a1a74f` | `32a35f422ba6442d1f700cfb327f348c0740a7f2` | Registered after source creation |
+| 02 | `14-ai-development/ai-development-standard.md` | `55d44b9276456f88bd2193de8b06aff146c228a4` | `e949d82b6cc3681a04631aa429e1bc2ab815305b` | Registered after source creation |
+| 03 | `00-governance/architecture-document-management-policy.md` | `0c73f639bf7392a5381d0cc0d9cafd53017bfe05` | `0c73f639bf7392a5381d0cc0d9cafd53017bfe05` | Legacy same-commit exception; exact allowlist SHA match |
+| 04 | `00-governance/architecture-document-metadata.schema.yaml` | `0c73f639bf7392a5381d0cc0d9cafd53017bfe05` | `965a66b9a92cd4c2b20f4b6100721c779be7f784` | Registered after source creation |
+| 05 | `00-governance/drafts/GOV-DOC-001-v1.2-DRAFT.md` | `04d35f90d6f1389ee17dc8fba1a32600bd7ac8ec` | `04d35f90d6f1389ee17dc8fba1a32600bd7ac8ec` | Legacy same-commit exception; exact allowlist SHA match |
+| 06 | `00-governance/bilingual-governance-migration-register.md` | `a77219fa2834af0c4535e6692029adaec2e62638` | `88c251178d510d247f28137c3821cee982cedd5e` | Registered after source creation |
+| 07 | `00-governance/templates/bilingual-issue-template.md` | `a77219fa2834af0c4535e6692029adaec2e62638` | `88c251178d510d247f28137c3821cee982cedd5e` | Registered after source creation |
+| 08 | `00-governance/templates/bilingual-umbrella-requirement-template.md` | `a77219fa2834af0c4535e6692029adaec2e62638` | `88c251178d510d247f28137c3821cee982cedd5e` | Registered after source creation |
+| 09 | `00-governance/templates/bilingual-commit-message.md` | `a77219fa2834af0c4535e6692029adaec2e62638` | `88c251178d510d247f28137c3821cee982cedd5e` | Registered after source creation |
+| 10 | `00-governance/templates/repository-policy-inheritance.md` | `a77219fa2834af0c4535e6692029adaec2e62638` | `88c251178d510d247f28137c3821cee982cedd5e` | Registered after source creation |
+| 11 | `00-governance/templates/document-metadata-template.md` | `ae37a41900f1950a8d78d4be9e1f6a27b2edb1bb` | `b45430428c1e65cae36a9f7d63a11a78008a8f8a` | Registered after source creation |
+| 12 | `00-governance/reports/bilingual-baseline-remediation-report.md` | `a77219fa2834af0c4535e6692029adaec2e62638` | `88c251178d510d247f28137c3821cee982cedd5e` | Registered after source creation |
+| 13 | `00-governance/reports/f06-object-reconciliation.md` | `9990b645555aef83714ff92c97255110b1fa0960` | `9990b645555aef83714ff92c97255110b1fa0960` | Legacy same-commit exception; exact allowlist SHA match |
+| 14 | `14-ai-development/AI-EXEC-UNIFICATION-RULING-001.md` | `1f97c3fae65828266a0c3cb1d1e8d4e6cb330856` | `e949d82b6cc3681a04631aa429e1bc2ab815305b` | Registered after source creation |
+| 15 | `14-ai-development/AI-EXEC-INDEPENDENCE-RULING-001.md` | `1957faa6349613280576bfa5f2a3a7107f6cb719` | `e949d82b6cc3681a04631aa429e1bc2ab815305b` | Registered after source creation |
+| 16 | `14-ai-development/PR-GOVERNANCE-001.md` | `3754d049db840b049728afd814faac968bf10749` | `e949d82b6cc3681a04631aa429e1bc2ab815305b` | Registered after source creation |
+| 17 | `14-ai-development/prompt-and-evidence-template.md` | `55d44b9276456f88bd2193de8b06aff146c228a4` | `e949d82b6cc3681a04631aa429e1bc2ab815305b` | Registered after source creation |
+| 18 | `14-ai-development/prompt-authoring-standard.md` | `6faa3b038c02bce27b3b4443d6f1be95cf5c5beb` | `e949d82b6cc3681a04631aa429e1bc2ab815305b` | Registered after source creation |
+| 19 | `14-ai-development/iteration-lifecycle.md` | `55d44b9276456f88bd2193de8b06aff146c228a4` | `e949d82b6cc3681a04631aa429e1bc2ab815305b` | Registered after source creation |
+| 20 | `14-ai-development/owner-automation-operating-model.md` | `6faa3b038c02bce27b3b4443d6f1be95cf5c5beb` | `e949d82b6cc3681a04631aa429e1bc2ab815305b` | Registered after source creation |
+| 21 | `14-ai-development/README.md` | `55d44b9276456f88bd2193de8b06aff146c228a4` | `e949d82b6cc3681a04631aa429e1bc2ab815305b` | Registered after source creation |
+
+The 81 mirror findings and registration-history results are separate dimensions. The C588 re-enumeration above shows 21 registered embedded-bilingual source records, 18 later registrations and three exact legacy allowlist matches, with zero history errors. No history rule was weakened or bypassed.
 
 - `python3 scripts/governance/bilingual/test_bilingual_scripts.py`: PASS, 13/13; exit 0.
 - `python3 scripts/test_check_document_management.py`: PASS, 214/214; exit 0. Expected negative-fixture diagnostics are emitted during the test run.

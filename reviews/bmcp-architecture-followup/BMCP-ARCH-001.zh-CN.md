@@ -76,7 +76,7 @@ Issue #7 的记录保持 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE。
 | I global-forget-target-inventory-and-completion-evidence.md | 同一 I ref | Blob `9100061fa986fb6676656169de3fcf9fc1c72664` | I Retention/Global Forget Evaluation |
 | PR #436 协议索引/provider_outcome 测试 | PR Head 1ffed9ed127df98b2f823a66ec80ea43d08cb9dc；Merge Commit 02f61194fd4e12993b4c83f7fac8382eee20f5d8 | 已合入 Main | 结构性 Provider Outcome 证据；5 passed / 5 semantic skips |
 
-本次更新已从实时 `session-h-bmcp-protocol` 分支重新读取上述七个 H Blob Pin；它们在当前分支 HEAD `3e8b33df18b9e6fc757ca84ff07a12faebc78e74` 均解析为表中 Blob SHA。此处是有界来源登记，不代表所有 H 工件或消费者均已独立审查。
+本次更新已从实时 `session-h-bmcp-protocol` 分支重新读取上述八个 H Blob Pin；它们在当前分支 HEAD `3e8b33df18b9e6fc757ca84ff07a12faebc78e74` 均解析为表中 Blob SHA。此处是有界来源登记，不代表所有 H 工件或消费者均已独立审查。
 
 ### 2.3 B/D/I Owner 决议 Pin
 
@@ -508,108 +508,141 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 
 ## 10. 治理与验证
 
-- 验证快照：精确 Base / merge-base `c58878fce24528a0842b4f8887c93ddbf465b566`；精确候选 Head 记录在 PR 交付报告中。PR Base Ref 为 `bmcp-validation-base-c588`，固定指向 `c58878fce24528a0842b4f8887c93ddbf465b566`。Live `main` 当时实测为 `be77ef7e64b9102a03a7c65a223798fa2003e88b`，且已与 Owner 指定的 `c58878f` 快照分叉，因此本批次不以它作为 Base。此处理保持三文件 Diff 可复现，避免混入分叉历史。此前 `713774c` 批次仅作历史证据。
-- §2 Main 来源登记已从 `c58878fce24528a0842b4f8887c93ddbf465b566` 刷新；所有 Main Blob Pin 均针对该精确 Commit 解析。H 来源分支已重新读取：`session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74`；七个 H Blob Pin 已重新获取且匹配。EN/ZH 来源登记 SHA 集合一致。
+- 验证快照：精确 Base / merge-base `c58878fce24528a0842b4f8887c93ddbf465b566`；精确候选 Head 记录在 PR 交付报告中。PR Base Ref 为 `bmcp-validation-base-c588`，固定指向 `c58878fce24528a0842b4f8887c93ddbf465b566`。Owner 通过 GitHub Compare 核验：`c58878fce24528a0842b4f8887c93ddbf465b566` 是当时观察到的 live `main` `2998f6321b90888d65ac9d972a169f86482e08b` 的祖先，`ahead_by=16`、`behind_by=0`、`merge_base_commit=c58878f`。浅克隆本地 `git merge-base` 为空不能证明提交图无共同祖先。本轮不追逐 live main；受控基线固定为 C588。此前 `713774c` 批次仅作历史证据。
+- §2 Main 来源登记已从 `c58878fce24528a0842b4f8887c93ddbf465b566` 刷新；所有 Main Blob Pin 均针对该精确 Commit 解析。H 来源分支已重新读取：`session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74`；八个 H Blob Pin 已重新获取且匹配。EN/ZH 来源登记 SHA 集合一致。
 - 已纳入依赖核验的 Main 变更：#472 G ContextVersion/ChangeSet/CAS 文档和实现；`crates/memory-context/tests/e2e_negative_paths.rs`（SQLite Store→Context 负向路径覆盖）；规范 Claim/Fact Revision 类型；BMCP RecoveryJoin 1.0.2 Schema、索引、结构 Validator 和符合性 Fixture/Tests。RecoveryJoin Validator 的 Schema-only 成功状态为 `STRUCTURALLY_VALID`，Proof/Currentness 需注入 D 权威回调；缺少回调时结果为 `UNKNOWN`，不是 VALID。它不冻结 H Wire/Transport，也不替代 D 权威。G E2E 测试覆盖跨 Scope 拒绝、Candidate Lifecycle 拒绝、过期 Revision 拒绝、Budget 溢出和文件型 SQLite 重启；未覆盖 Forget/Tombstone 公共操作、H ACK 绑定或 C Final-request Applied 证据。
 - BMCP-DR-002 仍仅在 D/I 权威边界层面 DECIDED。BMCP-DR-003 仍为 PARTIALLY_DECIDED；精确 C-H Operation Registry/Mapping 仍 OPEN。H-CONFIRM-001..004 仍为 PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN；保留 `INDEPENDENCE_UNVERIFIABLE`。AT-01..AT-20 仍为 **PLANNED_NOT_RUN**；Provider Outcome 的五项 C 语义跳过仍未解决。
 - Issue #7 仍为 CLOSED / not_planned，正文保留 `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`。未冻结 Wire/Schema/API，未授权 Runtime、Transport 实施、部署、生产激活或修改 Issue #7。
-- `git diff --check origin/main...HEAD`：PASS，退出码 0（最终 Commit 后重跑）。
-- `python3 scripts/check_document_management.py --require-changed origin/main`：FAIL，退出码 1；两个基线 DM-06 错误位于 `08-bmcp-protocol/protocol-index.md` 和 `.zh-CN.md`（`Canonical` 缺少 `authority.canonical_scope_id`）。PR 未修改两个索引文件。报告清点：501 governed documents，18 classified / 483 unclassified。未进行范围外元数据修改。
+- `git diff --check c58878fce24528a0842b4f8887c93ddbf465b566...HEAD`：PASS，退出码 0（最终 Commit 后重跑）。
+- `python3 scripts/check_document_management.py --require-changed c58878fce24528a0842b4f8887c93ddbf465b566`：FAIL，退出码 1；两个基线 DM-06 错误位于 `08-bmcp-protocol/protocol-index.md` 和 `.zh-CN.md`（`Canonical` 缺少 `authority.canonical_scope_id`）。PR 未修改两个索引文件。报告清点：501 governed documents，18 classified / 483 unclassified。未进行范围外元数据修改。
+
+
+**独立基线缺项——明确排除在 #453 之外：** Owner 独立核验 `08-bmcp-protocol/protocol-index.md`（Blob `a5b64941cdc783b385348de1b22e0eaace2c003d`）和 `08-bmcp-protocol/protocol-index.zh-CN.md`（Blob `2fe06d9424821eb96eb006dbb391914c1375afae`）。两个 Front Matter 均包含 `authority.canonical_status`、`authority.normative_status`、`authority.canonical_conflict_status`，但缺少 `authority.canonical_scope_id`（DM-06）。中文文件实际路径是仓库根目录下的 `08-bmcp-protocol/protocol-index.zh-CN.md`，不是 `docs/zh-CN/`。两个文件均不属于 #453 三个修改路径。Owner 原则上授权独立 H-owned 双语修复载体，但仓库开放 PR 数超过配额，暂不创建。不得猜测 Scope ID 或弱化 DM-06；这不是 #453 的修复范围。
 - `python3 scripts/ci/audit_runner_admission.py`：PASS；审计 1 个 self-hosted job / 0 violations；退出码 0。
-- `BASE_SHA=$(git merge-base HEAD origin/main) HEAD_SHA=$(git rev-parse HEAD) PR_BODY='BILINGUAL-MANIFEST: COMPLETE' python3 scripts/check_bilingual_docs.py`：PASS；77 frozen / 0 new gaps / 21 exemptions；退出码 0。三个变更 Markdown 路径位于 `NORMATIVE_ROOTS` 外，门禁明确未执行配对检查。门禁仍保留 same-commit registration-history 规则；旧的 21 条错误未在本快照重现。
+- `BASE_SHA=c58878fce24528a0842b4f8887c93ddbf465b566 HEAD_SHA=$(git rev-parse HEAD) PR_BODY='BILINGUAL-MANIFEST: COMPLETE' python3 scripts/check_bilingual_docs.py`：PASS；77 frozen / 0 new gaps / 21 exemptions；注册历史重新枚举：21 条注册源（18 条晚于创建、3 条精确历史 allowlist），0 个错误；退出码 0。三个变更 Markdown 路径位于 `NORMATIVE_ROOTS` 外，门禁明确未执行配对检查。门禁仍保留 same-commit registration-history 规则；旧的 21 条错误未在本快照重现。
 - `python3 scripts/check_bilingual_docs_full.py --source-revision c58878fce24528a0842b4f8887c93ddbf465b566`：FAIL；467 个范围内 Markdown / 112 exempt / 81 violations；退出码 1。逐路径分类如下。
 
 ### c58878f 快照的 GOV-DOC-001 全树清点
 
 精确命令 `python3 scripts/check_bilingual_docs_full.py --source-revision c58878fce24528a0842b4f8887c93ddbf465b566` 返回 **467 个范围内 Markdown / 112 个豁免 / 81 条 violations / 退出码 1**。这是路径对应关系清点，不是语义翻译审查。81 条按如下类别划分：
 
-- **77 个规范根目录源文件缺少两种语言镜像**（扫描器要求的对应路径为 `docs/en/<source>` 与 `docs/zh-CN/<source>` 两者）：
-  - `00-governance/architecture-document-management-policy.md`
-  - `00-governance/reports/gov-doc-001-full-scan-2026-11-20.md`
-  - `00-governance/templates/document-metadata-template.md`
-  - `02-domain-model/phase-2-domain-extension.md`
-  - `02-domain-model/phase-2-domain-extension.zh-CN.md`
-  - `06-memory-context/context-architecture.md`
-  - `06-memory-context/context-budget-and-sufficiency.md`
-  - `06-memory-context/context-edit-operations.md`
-  - `06-memory-context/context-implementation-coverage.md`
-  - `06-memory-context/context-implementation-coverage.zh-CN.md`
-  - `06-memory-context/context-manager.md`
-  - `06-memory-context/context-reconciliation.md`
-  - `06-memory-context/context-versioning.md`
-  - `06-memory-context/phase-3.7-g-local-lifecycle-producer-derivative-queue-recall-context-restore.md`
-  - `06-memory-context/phase-3.8.4-g-c-provider-outcome-consumer-review.md`
-  - `06-memory-context/phase-3.8.5-g-storage-logical-serialization-topology-impact-review.md`
-  - `06-memory-context/phase-3.8.6-g-review-storage-serialization-anchor.md`
-  - `07-agent-integration/adapter-capability-tiers.md`
-  - `07-agent-integration/adapter-capability-tiers.zh-CN.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/README.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/baseline-currentness-and-owner-source-audit.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/baseline-owner-branch-snapshot-errata.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/bilingual-parity-audit.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-entity-inventory.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-glossary.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-invariants.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-model.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-relationships.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-identity-semantics.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-state-semantics.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-temporal-evidence-semantics.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/cross-owner-canonical-semantics-matrix.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-model-complexity-assessment.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-model-decision-record.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-semantics-conflict-register.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/evidence/README.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/evidence/official-reference-validation.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/existing-domain-model-baseline.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/latest-cross-owner-source-reconciliation.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/mature-domain-model-research.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/post-merge-currentness-and-governance-reconciliation.md`
-  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/validation/README.md`
-  - `13-engineering-decisions/technology-architecture-blueprint.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/README.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/architecture-complexity-audit.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/baseline/architecture-baseline.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/deployment-topology-comparison.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/independent-review-handoff.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/mature-project-research.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/open-questions.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-dependency-register.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-remediation/CGH-APPLIED-REVIEW-001.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-remediation/OWNER-REMEDIATION-001.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-technology-review-synthesis.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/research-evidence-register.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/rust-ecosystem-assessment.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/technology-capability-matrix.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/technology-recommendation.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/workload-model.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/README.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-boundary.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-canonical-contract.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-conflict-register.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-cross-owner-contract-matrix.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-decision-record.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-failure-semantics.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-technology-assessment.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-telemetry.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-validation-plan.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/evidence/README.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/existing-integration-baseline.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/inference-boundary-and-trust-model.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/provider-integration-research.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/provider-outcome-and-execution-evidence.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/tool-execution-boundary.md`
-  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/validation/README.md`
+### 81 条 GOV-DOC-001 冻结快照逐路径分类
 
-- **4 个 Phase-0 运维研究报告缺少 side-by-side `.en.md`/`.zh-CN.md` Pair 或 `docs/en/14-ai-development` 镜像**：
-  - `14-ai-development/research/phase-0/SESSION-1-GITHUB-WORKFLOW-REPORT.md`
-  - `14-ai-development/research/phase-0/SESSION-2-PROMPT-RUN-PROVENANCE-REPORT.md`
-  - `14-ai-development/research/phase-0/SESSION-3-QUALITY-REVIEW-DEFECT-REPORT.md`
-  - `14-ai-development/research/phase-0/SESSION-4-ADOPTION-ISOLATION-REPORT.md`
+以下每个源文件均存在于冻结基线 `c58878fce24528a0842b4f8887c93ddbf465b566`，因此 81 条均为 Stage A 基线既有项。前 77 条属于 NORMATIVE_ROOTS 镜像缺项（预期的 `docs/en/<source>` 与 `docs/zh-CN/<source>` 两个路径均缺失）；最后 4 条属于 Phase-0 报告配对缺项（缺少 side-by-side `.en.md`/`.zh-CN.md` Pair 或所需的 `docs/en/14-ai-development` 镜像）。Owner 标签是按路径/领域作的路由分类，不构成新的 Canonical Owner 指派。全部排除在 #453 范围之外；处置为各 Owner 分别登记，不进行整体清扫。
 
+| # | 精确源路径 | Owner / 路由 | 规则 | C588 基线 | 处置 |
+|---:|---|---|---|---|---|
+| 01 | `00-governance/architecture-document-management-policy.md` | Repository Governance（仓库治理） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 02 | `00-governance/reports/gov-doc-001-full-scan-2026-11-20.md` | Repository Governance（仓库治理） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 03 | `00-governance/templates/document-metadata-template.md` | Repository Governance（仓库治理） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 04 | `02-domain-model/phase-2-domain-extension.md` | B — Domain Model（领域模型） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 05 | `02-domain-model/phase-2-domain-extension.zh-CN.md` | B — Domain Model（领域模型） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 06 | `06-memory-context/context-architecture.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 07 | `06-memory-context/context-budget-and-sufficiency.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 08 | `06-memory-context/context-edit-operations.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 09 | `06-memory-context/context-implementation-coverage.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 10 | `06-memory-context/context-implementation-coverage.zh-CN.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 11 | `06-memory-context/context-manager.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 12 | `06-memory-context/context-reconciliation.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 13 | `06-memory-context/context-versioning.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 14 | `06-memory-context/phase-3.7-g-local-lifecycle-producer-derivative-queue-recall-context-restore.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 15 | `06-memory-context/phase-3.8.4-g-c-provider-outcome-consumer-review.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 16 | `06-memory-context/phase-3.8.5-g-storage-logical-serialization-topology-impact-review.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 17 | `06-memory-context/phase-3.8.6-g-review-storage-serialization-anchor.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 18 | `07-agent-integration/adapter-capability-tiers.md` | C — Agent Integration（Agent 集成） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 19 | `07-agent-integration/adapter-capability-tiers.zh-CN.md` | C — Agent Integration（Agent 集成） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 20 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/README.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 21 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/baseline-currentness-and-owner-source-audit.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 22 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/baseline-owner-branch-snapshot-errata.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 23 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/bilingual-parity-audit.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 24 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-entity-inventory.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 25 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-glossary.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 26 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-invariants.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 27 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-model.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 28 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-relationships.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 29 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-identity-semantics.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 30 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-state-semantics.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 31 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-temporal-evidence-semantics.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 32 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/cross-owner-canonical-semantics-matrix.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 33 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-model-complexity-assessment.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 34 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-model-decision-record.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 35 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-semantics-conflict-register.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 36 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/evidence/README.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 37 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/evidence/official-reference-validation.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 38 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/existing-domain-model-baseline.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 39 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 40 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/latest-cross-owner-source-reconciliation.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 41 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/mature-domain-model-research.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 42 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/post-merge-currentness-and-governance-reconciliation.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 43 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/validation/README.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 44 | `13-engineering-decisions/technology-architecture-blueprint.md` | Architecture / Engineering Leadership（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 45 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/README.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 46 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/architecture-complexity-audit.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 47 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/baseline/architecture-baseline.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 48 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/deployment-topology-comparison.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 49 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/independent-review-handoff.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 50 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/mature-project-research.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 51 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/open-questions.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 52 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-dependency-register.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 53 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-remediation/CGH-APPLIED-REVIEW-001.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 54 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-remediation/OWNER-REMEDIATION-001.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 55 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-technology-review-synthesis.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 56 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/research-evidence-register.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 57 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/rust-ecosystem-assessment.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 58 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/technology-capability-matrix.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 59 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/technology-recommendation.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 60 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/workload-model.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 61 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/README.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 62 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-boundary.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 63 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-canonical-contract.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 64 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-conflict-register.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 65 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-cross-owner-contract-matrix.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 66 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-decision-record.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 67 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-failure-semantics.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 68 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-technology-assessment.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 69 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-telemetry.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 70 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-validation-plan.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 71 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/evidence/README.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 72 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/existing-integration-baseline.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 73 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/inference-boundary-and-trust-model.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 74 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/provider-integration-research.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 75 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/provider-outcome-and-execution-evidence.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 76 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/tool-execution-boundary.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 77 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/validation/README.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 78 | `14-ai-development/research/phase-0/SESSION-1-GITHUB-WORKFLOW-REPORT.md` | Engineering Governance / Phase-0 operations（工程治理 / Phase-0 运维） | GOV-DOC-001 Phase-0 报告：side-by-side Pair / docs/en 镜像缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 79 | `14-ai-development/research/phase-0/SESSION-2-PROMPT-RUN-PROVENANCE-REPORT.md` | Engineering Governance / Phase-0 operations（工程治理 / Phase-0 运维） | GOV-DOC-001 Phase-0 报告：side-by-side Pair / docs/en 镜像缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 80 | `14-ai-development/research/phase-0/SESSION-3-QUALITY-REVIEW-DEFECT-REPORT.md` | Engineering Governance / Phase-0 operations（工程治理 / Phase-0 运维） | GOV-DOC-001 Phase-0 报告：side-by-side Pair / docs/en 镜像缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 81 | `14-ai-development/research/phase-0/SESSION-4-ADOPTION-ISOLATION-REPORT.md` | Engineering Governance / Phase-0 operations（工程治理 / Phase-0 运维） | GOV-DOC-001 Phase-0 报告：side-by-side Pair / docs/en 镜像缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
 
-这 81 条与 `713774c` 历史批次此前报告的 21 条 same-commit registration errors 是独立问题。在 `c58878f` 快照上，结构门禁仍保留“注册必须晚于文件创建”的历史检查，结果为 77 frozen / 0 new gaps / 21 exemptions，**没有 same-commit registration errors**。没有削弱或绕过历史校验。历史 21 条不是当前计数。
+### 冻结快照的 embedded-bilingual 注册历史重新枚举
+
+C588 快照的门禁注册表包含 21 条 embedded-bilingual 源记录：18 条注册提交晚于源文件创建提交；3 条属于显式列出的历史同提交例外，且创建提交 SHA 与 allowlist SHA 精确匹配。`check_embedded_registration_history()` 返回空错误列表。门禁输出的 `exemptions: 21` 统计的是已登记的 embedded-bilingual 源，不是 21 条违规。因此，`713774c` 历史批次报告的 21 条 same-commit 错误**未在 C588 重现**。历史规则未改变。
+
+| # | 已注册源路径 | 源文件创建提交 | 注册提交 | C588 结果 |
+|---:|---|---|---|---|
+| 01 | `00-governance/bilingual-documentation-policy.md` | `cd1ab0fb346c770d779b1d8d24297f6811a1a74f` | `32a35f422ba6442d1f700cfb327f348c0740a7f2` | 注册晚于源文件创建 |
+| 02 | `14-ai-development/ai-development-standard.md` | `55d44b9276456f88bd2193de8b06aff146c228a4` | `e949d82b6cc3681a04631aa429e1bc2ab815305b` | 注册晚于源文件创建 |
+| 03 | `00-governance/architecture-document-management-policy.md` | `0c73f639bf7392a5381d0cc0d9cafd53017bfe05` | `0c73f639bf7392a5381d0cc0d9cafd53017bfe05` | 历史同提交例外；allowlist SHA 精确匹配 |
+| 04 | `00-governance/architecture-document-metadata.schema.yaml` | `0c73f639bf7392a5381d0cc0d9cafd53017bfe05` | `965a66b9a92cd4c2b20f4b6100721c779be7f784` | 注册晚于源文件创建 |
+| 05 | `00-governance/drafts/GOV-DOC-001-v1.2-DRAFT.md` | `04d35f90d6f1389ee17dc8fba1a32600bd7ac8ec` | `04d35f90d6f1389ee17dc8fba1a32600bd7ac8ec` | 历史同提交例外；allowlist SHA 精确匹配 |
+| 06 | `00-governance/bilingual-governance-migration-register.md` | `a77219fa2834af0c4535e6692029adaec2e62638` | `88c251178d510d247f28137c3821cee982cedd5e` | 注册晚于源文件创建 |
+| 07 | `00-governance/templates/bilingual-issue-template.md` | `a77219fa2834af0c4535e6692029adaec2e62638` | `88c251178d510d247f28137c3821cee982cedd5e` | 注册晚于源文件创建 |
+| 08 | `00-governance/templates/bilingual-umbrella-requirement-template.md` | `a77219fa2834af0c4535e6692029adaec2e62638` | `88c251178d510d247f28137c3821cee982cedd5e` | 注册晚于源文件创建 |
+| 09 | `00-governance/templates/bilingual-commit-message.md` | `a77219fa2834af0c4535e6692029adaec2e62638` | `88c251178d510d247f28137c3821cee982cedd5e` | 注册晚于源文件创建 |
+| 10 | `00-governance/templates/repository-policy-inheritance.md` | `a77219fa2834af0c4535e6692029adaec2e62638` | `88c251178d510d247f28137c3821cee982cedd5e` | 注册晚于源文件创建 |
+| 11 | `00-governance/templates/document-metadata-template.md` | `ae37a41900f1950a8d78d4be9e1f6a27b2edb1bb` | `b45430428c1e65cae36a9f7d63a11a78008a8f8a` | 注册晚于源文件创建 |
+| 12 | `00-governance/reports/bilingual-baseline-remediation-report.md` | `a77219fa2834af0c4535e6692029adaec2e62638` | `88c251178d510d247f28137c3821cee982cedd5e` | 注册晚于源文件创建 |
+| 13 | `00-governance/reports/f06-object-reconciliation.md` | `9990b645555aef83714ff92c97255110b1fa0960` | `9990b645555aef83714ff92c97255110b1fa0960` | 历史同提交例外；allowlist SHA 精确匹配 |
+| 14 | `14-ai-development/AI-EXEC-UNIFICATION-RULING-001.md` | `1f97c3fae65828266a0c3cb1d1e8d4e6cb330856` | `e949d82b6cc3681a04631aa429e1bc2ab815305b` | 注册晚于源文件创建 |
+| 15 | `14-ai-development/AI-EXEC-INDEPENDENCE-RULING-001.md` | `1957faa6349613280576bfa5f2a3a7107f6cb719` | `e949d82b6cc3681a04631aa429e1bc2ab815305b` | 注册晚于源文件创建 |
+| 16 | `14-ai-development/PR-GOVERNANCE-001.md` | `3754d049db840b049728afd814faac968bf10749` | `e949d82b6cc3681a04631aa429e1bc2ab815305b` | 注册晚于源文件创建 |
+| 17 | `14-ai-development/prompt-and-evidence-template.md` | `55d44b9276456f88bd2193de8b06aff146c228a4` | `e949d82b6cc3681a04631aa429e1bc2ab815305b` | 注册晚于源文件创建 |
+| 18 | `14-ai-development/prompt-authoring-standard.md` | `6faa3b038c02bce27b3b4443d6f1be95cf5c5beb` | `e949d82b6cc3681a04631aa429e1bc2ab815305b` | 注册晚于源文件创建 |
+| 19 | `14-ai-development/iteration-lifecycle.md` | `55d44b9276456f88bd2193de8b06aff146c228a4` | `e949d82b6cc3681a04631aa429e1bc2ab815305b` | 注册晚于源文件创建 |
+| 20 | `14-ai-development/owner-automation-operating-model.md` | `6faa3b038c02bce27b3b4443d6f1be95cf5c5beb` | `e949d82b6cc3681a04631aa429e1bc2ab815305b` | 注册晚于源文件创建 |
+| 21 | `14-ai-development/README.md` | `55d44b9276456f88bd2193de8b06aff146c228a4` | `e949d82b6cc3681a04631aa429e1bc2ab815305b` | 注册晚于源文件创建 |
+
+81 条镜像缺项与注册历史检查是两个独立维度。上面的 C588 重新枚举得到 21 条 embedded-bilingual 注册源，其中 18 条晚于源文件创建，3 条精确匹配历史 allowlist，历史检查错误为 0。未削弱或绕过任何历史规则。
 
 - `python3 scripts/governance/bilingual/test_bilingual_scripts.py`：PASS，13/13；退出码 0。
 - `python3 scripts/test_check_document_management.py`：PASS，214/214；退出码 0。测试运行中的负向 Fixture diagnostics 属于预期输出。
@@ -625,7 +658,7 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 
 | 文档 / 版本 | 英文路径 | 中文路径 | 来源版本 | 一致性 |
 |---|---|---|---|---|
-| BMCP-ARCH-001 / 0.2.2 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main 713774c381effbbe9e70693f88a7fa99a33a040d；H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74 | 作者准备双语 Pair；独立一致性审查 PENDING |
+| BMCP-ARCH-001 / 0.2.2 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main c58878fce24528a0842b4f8887c93ddbf465b566；H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74 | 作者准备双语 Pair；独立一致性审查 PENDING |
 
 Coverage Register 仅将此登记为 Review/Handoff Pair，不改变 “BMCP Protocol detailed contracts (7 core specifications)” 条目；双语规范核心文档覆盖仍为 NOT STARTED。结构配对不等于语义双语一致性审查。
 
