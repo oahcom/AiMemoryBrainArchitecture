@@ -9,6 +9,7 @@ root, so every input outside the declared subset must fail, not degrade.
 
 from __future__ import annotations
 
+import ast
 import re
 import shutil
 import subprocess
@@ -2020,6 +2021,149 @@ def run_schema_of_schema() -> None:
                 record(f"T63 {label} is refused", True, f"  {str(exc)[:90]}")
 
 
+
+def run_structural_schema() -> None:
+    """T64: a node cannot claim a scalar kind and children at once.
+
+    The twelfth review's counterexample: `kind: string` next to `fields:` was
+    accepted, so one node stated two contradictory things and the gate honoured
+    whichever it looked at first. `kind: mapping` + `fields:` is fine -- that is
+    the same statement twice.
+    """
+    print("structural schema nodes")
+    import check_document_management as gate
+
+    real = Path(__file__).resolve().parents[1] / gate.SCHEMA_FILE
+    src = real.read_text(encoding="utf-8")
+    anchor = "  lifecycle:\n    kind: mapping\n"
+    record("T64 fixture anchor is present", anchor in src)
+
+    cases = {
+        "fields with a scalar kind": src.replace(anchor, "  lifecycle:\n    kind: string\n", 1),
+        "fields with a sequence kind": src.replace(anchor, "  lifecycle:\n    kind: sequence\n", 1),
+    }
+    for label, mutated in cases.items():
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "00-governance").mkdir()
+            (root / gate.SCHEMA_FILE).write_text(mutated, encoding="utf-8")
+            try:
+                gate.schema(root)
+                record(f"T64 {label} is refused", False, "  schema loaded")
+            except SystemExit as exc:
+                record(f"T64 {label} is refused", "mapping" in str(exc),
+                       f"  {str(exc)[:90]}")
+
+    # And the honest form still loads: the rule must not forbid the real schema.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "00-governance").mkdir()
+        (root / gate.SCHEMA_FILE).write_text(src, encoding="utf-8")
+        try:
+            gate.schema(root)
+            record("T64 kind: mapping with fields still loads", True)
+        except SystemExit as exc:
+            record("T64 kind: mapping with fields still loads", False, f"  {exc}")
+
+
+def run_registry_version() -> None:
+    """T65: registry_version is executed, not published.
+
+    A version field nothing compares is decoration. If the registry is written
+    for another generation, its backlog/excluded semantics may differ, and
+    reading it as current would be a silent misreading.
+    """
+    print("registry version")
+    import check_document_management as gate
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        reg = root / "00-governance" / "document-scope-registry.yaml"
+        text = reg.read_text(encoding="utf-8")
+        record("T65 fixture registry declares a version",
+               'registry_version: "2"' in text)
+        reg.write_text(text.replace('registry_version: "2"',
+                                    'registry_version: "1"', 1), encoding="utf-8")
+        errors = gate.check_scope_registry(root)
+        record("T65 a registry version the gate does not implement is an error",
+               any("registry_version" in e for e in errors),
+               f"  got {errors[:3]}")
+
+
+def run_bilingual_count() -> None:
+    """T66: the machine count, the English reason and the Chinese reason agree.
+
+    The twelfth review found `documents: 27` next to "26 architecture documents"
+    in the English reason. A number stated three ways and agreeing twice is the
+    same defect as a rule declared twice and enforced once.
+    """
+    print("bilingual count agreement")
+    import re
+    import check_document_management as gate
+
+    reg = Path(__file__).resolve().parents[1] / "00-governance" / "document-scope-registry.yaml"
+    parsed = gate.parse_yaml_subset(reg.read_text(encoding="utf-8"))
+    backlog = parsed.get("backlog") or {}
+    problems: list[str] = []
+    for name, node in backlog.items():
+        if not isinstance(node, dict):
+            continue
+        count = node.get("documents")
+        for field in ("reason", "reason_zh"):
+            text = str(node.get(field) or "")
+            # Only a number immediately followed by a document noun is a claim
+            # about the backlog size. A bare `\b\d+\b` sweep also matched
+            # unrelated numerals in the prose and reported them as conflicts.
+            claims = {
+                int(n) for n in re.findall(
+                    r"(\d+)\s*(?:architecture\s+)?(?:documents|Markdown|份|个)",
+                    text,
+                )
+            }
+            if claims and str(count) not in {str(n) for n in claims}:
+                problems.append(f"{name}.{field} states {sorted(claims)}, documents says {count}")
+    record("T66 every stated backlog count equals the machine count",
+           not problems, f"  {problems}")
+
+
+def run_single_entry_callers() -> None:
+    """T67: governed_files() is diagnostics only, and that is checked.
+
+    A comment promising good behaviour is not evidence. The tenth review's
+    blocker was a scan that reported `0 governed documents` and exit 0; the
+    shape that produced it was an entry point that dropped diagnostics. This
+    test greps the production scripts for callers.
+    """
+    print("single entry point")
+    import check_document_management as gate
+
+    scripts_dir = Path(__file__).resolve().parent
+    offenders: list[str] = []
+    # Only an actual call is an offence. A docstring, a comment or the `def`
+    # line mentioning the name is not, so the check runs on the module's AST
+    # rather than on text: `governed_files()` appearing in prose is exactly the
+    # kind of false positive that makes a rule get ignored.
+    for path in sorted(scripts_dir.glob("*.py")):
+        if path.name.startswith("test_"):
+            continue
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            func = node.func
+            name = getattr(func, "id", None) or getattr(func, "attr", None)
+            if name == "governed_files":
+                offenders.append(f"{path.name}:{node.lineno}: governed_files() call")
+    record("T67 no production script decides a verdict from governed_files()",
+           not offenders, "  " + "; ".join(offenders[:4]))
+
+    # And main() must consume the problems, not just the files.
+    gate_src = (scripts_dir / "check_document_management.py").read_text(encoding="utf-8")
+    record("T67 main() takes problems from the same call as the files",
+           "targets, walk_problems = collect_governed(root)" in gate_src
+           and "errors: list[str] = list(walk_problems)" in gate_src)
+
+
 def main() -> int:
     print("check_document_management self-check")
     run_parser()
@@ -2040,6 +2184,10 @@ def main() -> int:
     run_declared_but_unread()
     run_unified_scan()
     run_schema_of_schema()
+    run_structural_schema()
+    run_registry_version()
+    run_bilingual_count()
+    run_single_entry_callers()
     run_schema_agreement()
     passed, total = sum(RESULTS), len(RESULTS)
     print(f"{passed}/{total} passed")

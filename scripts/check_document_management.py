@@ -70,6 +70,10 @@ EXCLUSION_KINDS = {"not-documentation"}
 GOVERNED_ENTRY = "document_metadata"
 SCHEMA_FILE = "00-governance/architecture-document-metadata.schema.yaml"
 SCHEMA_VERSION = "2"
+# The scope registry publishes a version; publishing one and never reading
+# it is the defect this gate keeps finding. A registry written for a
+# different shape must not be interpreted as if it were current.
+REGISTRY_VERSION = "2"
 # Build and VCS state: present in some working copies, absent in others.
 # Declaring them would make the registry describe a machine, not the repo.
 STRUCTURAL_EXCEPTIONS = {".git", "target"}
@@ -699,10 +703,32 @@ def check_schema_keys(loaded: dict) -> list[str]:
                 )
                 continue
             nested = sub.get("fields")
-            if nested is not None:
-                walk(nested, f"{here}.")
-
             kind = sub.get("kind")
+
+            # A node with children is a mapping, and saying so is consistent:
+            # `kind: mapping` + `fields:` states the same thing twice, which is
+            # harmless. `kind: string` + `fields:` is a contradiction -- the
+            # node claims to be a scalar while the walk descends into its
+            # children -- and the twelfth review's counterexample passed the
+            # previous version unchanged because only key names were checked.
+            if nested is not None and kind is not None and kind not in (
+                "mapping", "nullable-mapping",
+            ):
+                problems.append(
+                    f"schema field {here} declares fields but kind {kind!r}; a "
+                    f"node with children can only be a mapping"
+                )
+                continue
+
+            if nested is not None:
+                if not isinstance(nested, dict) or not nested:
+                    problems.append(
+                        f"schema field {here} declares an empty or non-mapping "
+                        f"fields node; a structure must declare its children"
+                    )
+                else:
+                    walk(nested, f"{here}.")
+
             if kind is not None and kind not in KINDS:
                 problems.append(
                     f"schema field {here} declares unknown kind {kind!r}; "
@@ -1603,8 +1629,12 @@ def collect_governed(root: Path) -> tuple[list[Path], list[str]]:
         # this cannot silently collapse a link into its target.
         try:
             key = path.resolve(strict=True).as_posix()
-        except (OSError, RuntimeError):
-            key = path.as_posix()
+        except (OSError, RuntimeError) as exc:
+            # Falling back to the unresolved spelling would let one file enter
+            # the set twice under two names -- the duplication this function
+            # exists to prevent. An unresolvable path is a problem, not a key.
+            problems.append(f"DM-01 cannot resolve {path}: {exc}")
+            return
         seen.setdefault(key, path)
 
     for name in NORMATIVE_ROOTS + tuple(sorted(backlog)):
@@ -1629,12 +1659,16 @@ def collect_governed(root: Path) -> tuple[list[Path], list[str]]:
     return list(seen.values()), problems
 
 def governed_files(root: Path) -> list[Path]:
-    """The governed set alone, for callers that only need the files.
+    """The governed set alone. **Diagnostics only -- never a verdict.**
 
-    Problems are *not* silently dropped here: they are reported by the one
-    caller that can fail (`main()`), through `collect_governed()`. This wrapper
-    exists because tests and diagnostics want the list without the error
-    channel; it must never be the only thing a verdict is built from.
+    This function discards the walk's problems, so a caller that decides
+    pass/fail from it is deciding on a possibly-truncated list. That is not a
+    style preference: the tenth review's blocker was exactly this shape, a scan
+    that reported `0 governed documents` and exit 0.
+
+    `main()` therefore uses `collect_governed()`, and T67 asserts that
+    `governed_files()` has no other production caller -- a grep over the
+    scripts, not a comment promising good behaviour.
     """
     files, _ = collect_governed(root)
     return files
@@ -1664,6 +1698,17 @@ def check_scope_registry(root: Path) -> list[str]:
 
     if not isinstance(registry, dict):
         return [f"DM-14 {SCOPE_REGISTRY} must be a mapping"]
+
+    # A published version that nothing compares is decoration. If the registry
+    # is written for another generation, its `backlog:`/`excluded:` semantics
+    # may differ, and reading it as current would be a silent misreading.
+    declared_registry_version = registry.get("registry_version")
+    if str(declared_registry_version) != REGISTRY_VERSION:
+        errors.append(
+            f"DM-14 {SCOPE_REGISTRY} declares registry_version "
+            f"{declared_registry_version!r} but this gate implements "
+            f"{REGISTRY_VERSION!r}"
+        )
 
     declared = registry.get("governed")
     if not isinstance(declared, list) or not declared:
@@ -1775,7 +1820,16 @@ def check_scope_registry(root: Path) -> list[str]:
 
     # (3) the bilingual mirrors are always governed
     for mirror in ("docs/en", "docs/zh-CN"):
-        if not (root / mirror).is_dir():
+        # `is_dir()` follows links, so a symlinked mirror looked present while
+        # the scanner refused to descend into it: the registry would assert the
+        # mirror exists and the run would classify nothing from it.
+        target = root / mirror
+        if target.is_symlink():
+            errors.append(
+                f"DM-14 bilingual mirror directory {mirror} is a symbolic link; "
+                f"a mirror must be real content of this repository"
+            )
+        elif not target.is_dir():
             errors.append(f"DM-14 bilingual mirror directory {mirror} is missing")
 
     # (4) individually governed files must exist and sit in an excluded dir:

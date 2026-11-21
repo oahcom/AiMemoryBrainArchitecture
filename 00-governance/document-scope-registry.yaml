@@ -99,7 +99,7 @@ backlog:
     # 它们该在此处的原因：`Draft` 是 `lifecycle.approval.decision_status` 的取值，
     # 不是免于分类的理由。把它们排除，会使"我们还没分类这些"与"这些不是架构"变得
     # 无法区分，而后者是本登记表绝不能允许的事。
-    reason: "Backlog with a known count: 26 architecture documents under docs/ outside the mirrors and the gap record, all unclassified. Not an exemption -- DM-14 reports this kind separately so the number is visible and can decrease."
+    reason: "Backlog with a known count: 27 architecture documents under docs/ outside the mirrors and the gap record, all unclassified. Not an exemption -- DM-14 reports this kind separately so the number is visible and can decrease."
     reason_zh: "有明确数量的积压：docs/ 下镜像与缺口记录之外的 27 份架构文档，均未分类。这不是豁免——DM-14 单独报告该类别，使这个数字可见且可下降。"
 
 excluded:
