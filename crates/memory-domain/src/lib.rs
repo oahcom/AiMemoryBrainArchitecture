@@ -31,7 +31,7 @@ pub enum DomainError {
     MissingOutcomeEvidence,
     ConflictingIdempotencyPayload,
     MissingClaimRevision, MissingFactEvidence, MissingFactProvenance, MissingRevisionReason,
-    MissingIdentityLineage, InvalidRelationEndpoint,
+    MissingIdentityLineage, InvalidRelationEndpoint, InvalidMergeState,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -577,6 +577,28 @@ impl EntityIdentityExtension {
   Ok(())
  }
  pub fn add_alias(&mut self,a:EntityAlias)->Result<(),DomainError>{if a.value.is_empty(){return Err(DomainError::EmptyRequiredField("alias"))}self.aliases.push(a);Ok(())}
+ /// Merge this predecessor identity into a distinct resolved successor.
+ /// Historical identity remains intact; aliases and scoped external identifiers
+ /// are copied to the successor before this identity records its redirect.
+ pub fn merge_into(&mut self, successor:&mut EntityIdentityExtension, reason:&str)->Result<(),DomainError>{
+  if self.entity_ref==successor.entity_ref || self.status!=EntityIdentityStatus::Resolved
+      || successor.status!=EntityIdentityStatus::Resolved || reason.is_empty()
+      || self.merge_lineage.is_some() || successor.merge_lineage.is_some() {
+   return Err(DomainError::InvalidMergeState)
+  }
+  self.validate()?; successor.validate()?;
+  for alias in &self.aliases { if !successor.aliases.contains(alias) { successor.aliases.push(alias.clone()); } }
+  for identifier in &self.external_identifiers {
+   if !successor.external_identifiers.contains(identifier) { successor.external_identifiers.push(identifier.clone()); }
+  }
+  self.status=EntityIdentityStatus::Merged;
+  self.merge_lineage=Some(EntityMergeLineage{
+   predecessor_refs:vec![self.entity_ref.clone()],
+   successor_ref:successor.entity_ref.clone(),
+   reason:reason.to_owned()
+  });
+  self.validate()?; successor.validate()
+ }
 }
 #[derive(serde::Serialize,serde::Deserialize,Clone,Debug,Eq,PartialEq)]
 pub enum RelationEndpoint { Entity(EntityRef), Claim(ClaimRef), Fact(FactRef) }
@@ -646,8 +668,11 @@ mod tests {
     #[test]
     fn dm2_02_claim_revision_is_append_only_and_immutable() {
         let first=ClaimRevision::initial(ClaimRevisionRef::new("r1").unwrap(),ClaimRef::new("c").unwrap(),"s".into(),"p".into(),"old".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t1".into(),"initial".into()).unwrap();
+        let parent_bytes=serde_json::to_vec(&first).unwrap();
         let next=ClaimRevision::successor(ClaimRevisionRef::new("r2").unwrap(),first.claim_ref().clone(),&first,"s".into(),"p".into(),"new".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t2".into(),"correction".into()).unwrap();
-        assert_eq!(first.predicate(),"p"); assert_eq!(next.parent_revision_ref(),Some(first.revision_ref()));
+        assert_eq!(next.parent_revision_ref(),Some(first.revision_ref()));
+        assert_eq!(serde_json::to_vec(&first).unwrap(),parent_bytes,
+            "appending a correction must leave every serialized parent field byte-identical");
     }
     #[test]
     fn dm2_03_fact_refs_are_distinct_and_fact_pins_exact_claim_revision() {
@@ -658,6 +683,36 @@ mod tests {
         assert_eq!(fact.initial_revision().evidence_refs(),&[evidence]);
         assert_eq!(fact.initial_revision().provenance_refs(),&[provenance]);
     }
+    #[test]
+    fn dm2_09_fact_pinning_does_not_follow_claim_head_after_append() {
+        let claim_ref=ClaimRef::new("claim").unwrap();
+        let first=ClaimRevision::initial(ClaimRevisionRef::new("claim-r1").unwrap(),claim_ref.clone(),
+            "subject".into(),"has_value".into(),"v1".into(),"+".into(),vec![],
+            EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t1".into(),"initial".into()).unwrap();
+        let first_bytes=serde_json::to_vec(&first).unwrap();
+        let fact_ref=FactRef::new("fact").unwrap();
+        let fact_revision=FactRevision::initial(fact_ref.clone(),FactRevisionRef::new("fact-r1").unwrap(),
+            vec![first.revision_ref().clone()],vec![EvidenceRef::new("evidence").unwrap()],
+            vec![ProvenanceRef::new("provenance").unwrap()],scope("s"),AttestorRef::pending_i(),
+            AuthorizationDecisionRef::pending_i(),"review".into(),"1".into(),FactOutcome::Attested,
+            "attested against claim-r1".into(),CanonicalCommitRef::pending_d(),None).unwrap();
+        let fact=Fact::new(fact_ref,fact_revision).unwrap();
+
+        let second=ClaimRevision::successor(ClaimRevisionRef::new("claim-r2").unwrap(),claim_ref,&first,
+            "subject".into(),"has_value".into(),"v2".into(),"+".into(),vec![],
+            EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t2".into(),"correction".into()).unwrap();
+        let mut history=vec![first.clone()];
+        history.push(second.clone());
+
+        let pinned_ref=&fact.initial_revision().claim_revision_refs()[0];
+        assert_eq!(pinned_ref,first.revision_ref());
+        assert_eq!(second.parent_revision_ref(),Some(first.revision_ref()));
+        let resolved=history.iter().find(|revision|revision.revision_ref()==pinned_ref).unwrap();
+        assert_eq!(serde_json::to_vec(resolved).unwrap(),first_bytes,
+            "Fact must resolve its exact pinned ClaimRevision, not the Claim head");
+        assert_ne!(history.last().unwrap().revision_ref(),pinned_ref);
+    }
+
     #[test]
     fn dm2_04_fact_cannot_be_constructed_without_claim_evidence_provenance() {
         let r=FactRevision::initial(FactRef::new("f").unwrap(),FactRevisionRef::new("fr").unwrap(),vec![],vec![],vec![],scope("s"),AttestorRef::pending_i(),AuthorizationDecisionRef::pending_i(),"m".into(),"v1".into(),FactOutcome::Attested,"why".into(),CanonicalCommitRef::pending_d(),None);
@@ -675,13 +730,36 @@ mod tests {
     }
     #[test]
     fn dm2_05_entity_merge_requires_successor_lineage_but_alias_does_not() {
-        let mut e=EntityIdentityExtension{entity_ref:EntityRef::new("e1").unwrap(),status:EntityIdentityStatus::Resolved,aliases:vec![],external_identifiers:vec![],merge_lineage:None,split_successor_refs:vec![]};
-        e.add_alias(EntityAlias{value:"label".into(),language:None}).unwrap(); assert!(e.validate().is_ok());
-        e.status=EntityIdentityStatus::Merged; assert_eq!(e.validate(),Err(DomainError::MissingIdentityLineage));
-        e.merge_lineage=Some(EntityMergeLineage{predecessor_refs:vec![EntityRef::new("e0").unwrap(),EntityRef::new("e1").unwrap()],successor_ref:EntityRef::new("e2").unwrap(),reason:"resolved".into()}); assert!(e.validate().is_ok());
-        let mut split=e.clone(); split.status=EntityIdentityStatus::Split;
+        let scope_ref=scope("s");
+        let alias=EntityAlias{value:"legacy label".into(),language:Some("en".into())};
+        let external=ScopedExternalIdentifier{namespace:"registry".into(),value:"A-17".into(),scope_ref:scope_ref.clone()};
+        let mut a=EntityIdentityExtension{entity_ref:EntityRef::new("entity-a").unwrap(),
+            status:EntityIdentityStatus::Resolved,aliases:vec![alias.clone()],
+            external_identifiers:vec![external.clone()],merge_lineage:None,split_successor_refs:vec![]};
+        let mut b=EntityIdentityExtension{entity_ref:EntityRef::new("entity-b").unwrap(),
+            status:EntityIdentityStatus::Resolved,aliases:vec![EntityAlias{value:"canonical B".into(),language:None}],
+            external_identifiers:vec![],merge_lineage:None,split_successor_refs:vec![]};
+
+        // A label-only alias addition is not an identity merge.
+        a.add_alias(EntityAlias{value:"another alias".into(),language:None}).unwrap();
+        assert_eq!(a.status,EntityIdentityStatus::Resolved);
+        a.aliases.push(alias.clone());
+
+        a.merge_into(&mut b,"duplicate identity resolved").unwrap();
+        assert_eq!(a.status,EntityIdentityStatus::Merged);
+        let lineage=a.merge_lineage.as_ref().unwrap();
+        assert_eq!(lineage.successor_ref,b.entity_ref);
+        assert!(lineage.predecessor_refs.contains(&a.entity_ref));
+        assert!(b.merge_lineage.is_none(),"successor B must not point back to A as its successor");
+        assert!(b.aliases.contains(&alias),"source aliases must remain reachable from merged identity B");
+        assert!(b.external_identifiers.contains(&external),"source external identifiers must be migrated to B");
+        assert!(a.validate().is_ok());
+        assert!(b.validate().is_ok());
+
+        let mut split=a.clone(); split.status=EntityIdentityStatus::Split;
+        split.merge_lineage=None;
         assert_eq!(split.validate(),Err(DomainError::MissingIdentityLineage));
-        split.split_successor_refs=vec![EntityRef::new("e3").unwrap()];
+        split.split_successor_refs=vec![EntityRef::new("entity-c").unwrap()];
         assert!(split.validate().is_ok());
     }
     #[test]
