@@ -261,12 +261,28 @@ All five rows are **PENDING CROSS-OWNER DECISION**. No security, canonical persi
 
 ## 9. Phase boundary and status
 
-- Phase 1: implemented bounded core; this document does not reopen its accepted invariants.
-- Phase 2: this specification is PROPOSED; future implementation requires cross-owner decisions where listed and separate authorization.
+Phase 2 implementation status at this branch:
+
+| Specification row | Status | Executable proof |
+|---|---|---|
+| ClaimRef / ClaimRevisionRef / ClaimRevision | TYPED | `dm2_01_claim_revision_parent_must_belong_to_same_claim`, `dm2_02_claim_revision_is_append_only_and_immutable`; compile-fail doctests prove cross-ref mixing and mutation are rejected |
+| FactRef / FactRevisionRef / Fact / FactRevision | TYPED | `dm2_03_fact_refs_are_distinct_and_fact_pins_exact_claim_revision`, `dm2_04_fact_cannot_be_constructed_without_claim_evidence_provenance`; compile-fail doctest proves confidence/Verified alone cannot construct Fact |
+| Entity identity extension | TYPED | `dm2_05_entity_merge_requires_successor_lineage_but_alias_does_not` |
+| Relation typed endpoints and valid-time distinction | TYPED | `dm2_06_relation_endpoint_kind_is_checked_against_definition`, `dm2_08_unknown_valid_time_is_not_timeless` |
+| Evidence extension | TYPED | `dm2_07_evidence_extension_requires_integrity_and_scope` |
+| Provenance graph expansion | NOT TYPED | Only the `ProvenanceRef` newtype exists; no expanded Provenance record or DAG validation |
+| MemorySource expansion | NOT TYPED | Explicitly out of scope for this implementation round |
+| Temporal precision/timezone/certainty expansion | NOT TYPED | Only Relation's Unknown-versus-AllTime valid-time distinction is typed/tested |
+| I authorization and Attestor semantics | PLACEHOLDER ONLY | Required `AttestorRef` and `AuthorizationDecisionRef` placeholders are marked `NOT DEFINED: awaiting I` |
+| D canonical commit semantics | PLACEHOLDER ONLY | Required `CanonicalCommitRef` placeholder is marked `NOT DEFINED: awaiting D` |
+
+The Entity, Relation and Evidence Phase 1 structs remain source-compatible; their Phase 2 semantics are represented by additive extension records. Claim remains unchanged; ClaimRevision is additive. Fact construction requires a complete initial FactRevision and its required I/D placeholders.
+
+- Phase 1: implemented bounded core; this implementation does not reopen its accepted invariants.
+- Phase 2: the listed rows are TYPED only to the extent shown above; NOT TYPED rows remain open. The implementation is not accepted and requires independent review.
 - Phase 3: NOT ASSESSED and NOT CLAIMED COMPLETE.
 
-No code has been changed. No tests have been run by this specification task. No self-approval or acceptance is claimed.
-
+The code and tests are present on this branch. Test execution is reported separately; no self-approval or acceptance is claimed.
 ## 10. References
 
 All repository sources below were read at baseline `1ad6c2cf67a228f597fcbe1c7149c328ecbf38e9`:
