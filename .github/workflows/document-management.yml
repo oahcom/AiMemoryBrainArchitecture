@@ -24,17 +24,25 @@ jobs:
       - name: Self-check the gate
         run: python3 scripts/test_check_document_management.py
 
-      # Pull requests: every governed file added or modified here must carry
-      # metadata. The 300-document backlog may stay unclassified; it may not grow.
+      # Every governed file added or modified here must carry metadata. The
+      # backlog stays unclassified; it may not grow. Both event kinds are
+      # covered: a pull request diffs against its base commit, a direct push
+      # diffs against github.event.before (GAP-02).
       - name: Validate document metadata (changed files must be classified)
-        if: github.event_name == 'pull_request'
+        env:
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
         run: |
-          python3 scripts/check_document_management.py \
-            --require-changed "${{ github.event.pull_request.base.sha }}"
-
-      # Direct pushes are not gated by --require-changed: this repository still
-      # accepts direct pushes, so a whole-tree requirement would turn main red
-      # on the existing backlog. Policy §8 records this as an open gap.
-      - name: Validate document metadata
-        if: github.event_name != 'pull_request'
-        run: python3 scripts/check_document_management.py
+          REF=""
+          if [ -n "$PR_BASE" ] && [ "$PR_BASE" != "0000000000000000000000000000000000000000" ]; then
+            REF="$PR_BASE"
+          elif [ -n "$PUSH_BEFORE" ] && [ "$PUSH_BEFORE" != "0000000000000000000000000000000000000000" ]; then
+            REF="$PUSH_BEFORE"
+          fi
+          if [ -n "$REF" ]; then
+            python3 scripts/check_document_management.py --require-changed "$REF"
+          else
+            # No base to diff against (first push of a branch). Whole-tree scan:
+            # it cannot prove new files are classified, so the gap stays recorded.
+            python3 scripts/check_document_management.py
+          fi

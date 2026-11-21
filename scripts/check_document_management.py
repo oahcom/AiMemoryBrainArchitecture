@@ -111,10 +111,12 @@ RESOLUTION_KEYS = {
     "resolution_decision_id", "resolved_date", "selected_document",
     "resolution_evidence",
 }
-BILINGUAL_KEYS = {"en", "zh-CN"}
+BILINGUAL_KEYS = {"source", "en", "zh-CN"}
 
 SCOPE_ID_RE = re.compile(r"^[a-z][a-z0-9-]*/[a-z0-9]+(-[a-z0-9]+)*$")
 KEY_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]*$")
+SEQ_MAPPING_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]*:(\s|$)")
+COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 
 class ParseError(Exception):
     pass
@@ -193,7 +195,19 @@ def _scalar(text: str, lineno: int):
     if first == "'":
         if len(text) < 2 or text[-1] != "'":
             raise ParseError(f"line {lineno}: unterminated single-quoted scalar")
-        return text[1:-1].replace("''", "'")
+        inner = text[1:-1]
+        i = 0
+        while i < len(inner):
+            if inner[i] == "'":
+                if i + 1 < len(inner) and inner[i + 1] == "'":
+                    i += 2
+                    continue
+                raise ParseError(
+                    f"line {lineno}: unescaped ' inside single-quoted scalar; "
+                    f"write '' for a literal quote: {text!r}"
+                )
+            i += 1
+        return inner.replace("''", "'")
     return text
 
 
@@ -231,6 +245,10 @@ def _parse_map(tokens, pos: int, indent: int):
                 f"line {lineno}: neither 'key: value' nor '- item': {text!r}"
             )
         key, _, rest = text.partition(":")
+        if rest and not rest.startswith(" "):
+            raise ParseError(
+                f"line {lineno}: mapping ':' must be followed by a space: {text!r}"
+            )
         key, rest = key.strip(), rest.strip()
         if not KEY_RE.match(key):
             raise ParseError(f"line {lineno}: invalid key {key!r}")
@@ -265,7 +283,7 @@ def _parse_seq(tokens, pos: int, indent: int):
             raise ParseError(f"line {lineno}: empty sequence item")
         if body.startswith("- "):
             raise ParseError(f"line {lineno}: nested sequences are not supported")
-        if ": " in body or body.endswith(":"):
+        if not body.startswith(("'", '"')) and SEQ_MAPPING_RE.match(body):
             raise ParseError(
                 f"line {lineno}: sequence item looks like a mapping "
                 f"({body!r}); mappings inside sequences are not supported"
@@ -343,9 +361,9 @@ def dig(data, *path, default=None):
 
 def unknown_keys(node, allowed: set[str], where: str) -> list[str]:
     if not isinstance(node, dict):
-        return [f"{where} must be a mapping, got {type(node).__name__}"]
+        return [f"DM-01 {where} must be a mapping, got {type(node).__name__}"]
     return [
-        f"{where}.{key}: unknown key (allowed: {', '.join(sorted(allowed))})"
+        f"DM-02 {where}.{key}: unknown key (allowed: {', '.join(sorted(allowed))})"
         for key in node
         if key not in allowed
     ]
@@ -386,6 +404,22 @@ def _enum(errors, value, allowed, label, rule="DM-02"):
         errors.append(f"{rule} {label} not in enumeration: {value!r}")
 
 
+def as_map(node, where: str, errors: list[str]) -> dict:
+    """Return node as a mapping, or record a DM-01 type error and return {}.
+
+    Every nested read goes through here so a wrong node type is a diagnosable
+    gate error rather than an AttributeError traceback.
+    """
+    if node is None:
+        return {}
+    if not isinstance(node, dict):
+        errors.append(
+            f"DM-01 {where} must be a mapping, got {type(node).__name__}"
+        )
+        return {}
+    return node
+
+
 def check_document(path: Path, text: str) -> tuple[list[str], dict | None]:
     """Return (errors, metadata). Empty errors means the file conforms."""
     try:
@@ -405,22 +439,22 @@ def check_document(path: Path, text: str) -> tuple[list[str], dict | None]:
     for field in ("domain", "role", "lifecycle", "authority"):
         if meta.get(field) is None:
             errors.append(f"DM-01 missing required dimension: {field}")
-    lifecycle = meta.get("lifecycle") or {}
-    authority = meta.get("authority") or {}
-    errors += unknown_keys(lifecycle, LIFECYCLE_KEYS, "lifecycle") if lifecycle else []
-    errors += unknown_keys(authority, AUTHORITY_KEYS, "authority") if authority else []
+    lifecycle = as_map(meta.get("lifecycle"), "lifecycle", errors)
+    authority = as_map(meta.get("authority"), "authority", errors)
+    errors += unknown_keys(lifecycle, LIFECYCLE_KEYS, "lifecycle")
+    errors += unknown_keys(authority, AUTHORITY_KEYS, "authority")
     if "bilingual_counterpart" in meta and meta["bilingual_counterpart"] is not None:
-        errors += unknown_keys(
-            meta["bilingual_counterpart"], BILINGUAL_KEYS, "bilingual_counterpart"
+        counterpart_node = as_map(
+            meta["bilingual_counterpart"], "bilingual_counterpart", errors
         )
+        errors += unknown_keys(counterpart_node, BILINGUAL_KEYS, "bilingual_counterpart")
 
     # DM-02 closed enumerations.
     domain, role = meta.get("domain"), meta.get("role")
     _enum(errors, domain, DOMAINS, "domain")
     _enum(errors, role, ROLES, "role")
-    approval = lifecycle.get("approval") or {}
-    if approval:
-        errors += unknown_keys(approval, APPROVAL_KEYS, "lifecycle.approval")
+    approval = as_map(lifecycle.get("approval"), "lifecycle.approval", errors)
+    errors += unknown_keys(approval, APPROVAL_KEYS, "lifecycle.approval")
     decision = approval.get("decision_status")
     _enum(errors, decision, DECISION_STATUSES, "decision_status")
     usage = lifecycle.get("usage_status")
@@ -429,11 +463,12 @@ def check_document(path: Path, text: str) -> tuple[list[str], dict | None]:
     _enum(errors, modification, MODIFICATION_STATUSES, "modification_status")
     applicability = approval.get("approval_applicability")
     _enum(errors, applicability, APPLICABILITY, "approval_applicability")
-    verification_block = lifecycle.get("evidence_verification") or {}
-    if verification_block:
-        errors += unknown_keys(
-            verification_block, EVIDENCE_KEYS, "lifecycle.evidence_verification"
-        )
+    verification_block = as_map(
+        lifecycle.get("evidence_verification"), "lifecycle.evidence_verification", errors
+    )
+    errors += unknown_keys(
+        verification_block, EVIDENCE_KEYS, "lifecycle.evidence_verification"
+    )
     verification = verification_block.get("verification_status")
     _enum(errors, verification, VERIFICATION_STATUSES, "verification_status")
     canonical = authority.get("canonical_status")
@@ -442,25 +477,27 @@ def check_document(path: Path, text: str) -> tuple[list[str], dict | None]:
     _enum(errors, normative, NORMATIVE_STATUSES, "normative_status")
     conflict = authority.get("canonical_conflict_status")
     _enum(errors, conflict, CONFLICT_STATUSES, "canonical_conflict_status")
+    supersession_block = as_map(
+        lifecycle.get("supersession"), "lifecycle.supersession", errors
+    )
+    errors += unknown_keys(supersession_block, SUPERSESSION_KEYS, "lifecycle.supersession")
 
     # DM-03 Approved must bind a version and a scope.
-    version = approval.get("approved_version")
-    scope = approval.get("approval_scope")
-    if version is not None:
-        errors += unknown_keys(version, VERSION_KEYS, "approved_version")
-        _enum(errors, version.get("scheme"), VERSION_SCHEMES, "approved_version.scheme")
-    if scope is not None:
-        errors += unknown_keys(scope, SCOPE_KEYS, "approval_scope")
-        _enum(errors, scope.get("type"), SCOPE_TYPES, "approval_scope.type")
+    version = as_map(approval.get("approved_version"), "approved_version", errors)
+    scope = as_map(approval.get("approval_scope"), "approval_scope", errors)
+    errors += unknown_keys(version, VERSION_KEYS, "approved_version")
+    _enum(errors, version.get("scheme"), VERSION_SCHEMES, "approved_version.scheme")
+    errors += unknown_keys(scope, SCOPE_KEYS, "approval_scope")
+    _enum(errors, scope.get("type"), SCOPE_TYPES, "approval_scope.type")
     if decision == "Approved":
-        if not dig(approval, "approved_version", "value"):
+        if not version.get("value"):
             errors.append("DM-03 Approved requires approval.approved_version.value")
-        if not dig(approval, "approval_scope", "type"):
+        if not scope.get("type"):
             errors.append("DM-03 Approved requires approval.approval_scope.type")
         if not applicability:
             errors.append("DM-03 Approved requires approval.approval_applicability")
-    if dig(approval, "approval_scope", "type") == "Selected-sections":
-        sections = dig(approval, "approval_scope", "included_sections")
+    if scope.get("type") == "Selected-sections":
+        sections = scope.get("included_sections")
         if not sections or not isinstance(sections, list):
             errors.append(
                 "DM-03 Selected-sections requires a non-empty included_sections list"
@@ -469,9 +506,10 @@ def check_document(path: Path, text: str) -> tuple[list[str], dict | None]:
     # DM-04 Revoked must carry a unique revocation decision id.
     revocation = approval.get("revocation")
     if revocation is not None:
+        revocation = as_map(revocation, "revocation", errors)
         errors += unknown_keys(revocation, REVOCATION_KEYS, "revocation")
     if decision == "Revoked":
-        if not isinstance(revocation, dict):
+        if not revocation:
             errors.append("DM-04 Revoked requires a revocation block")
         else:
             if not revocation.get("revocation_decision_id"):
@@ -484,13 +522,12 @@ def check_document(path: Path, text: str) -> tuple[list[str], dict | None]:
                 errors.append("DM-04 Revoked requires revocation.revocation_reason")
 
     # DM-05 Archived must record when and why.
-    archival = lifecycle.get("archival")
-    if archival is not None:
-        errors += unknown_keys(archival, ARCHIVAL_KEYS, "archival")
+    archival = as_map(lifecycle.get("archival"), "archival", errors)
+    errors += unknown_keys(archival, ARCHIVAL_KEYS, "archival")
     if usage == "Archived":
-        if not dig(lifecycle, "archival", "archived_date"):
+        if not archival.get("archived_date"):
             errors.append("DM-05 Archived requires archival.archived_date")
-        if not dig(lifecycle, "archival", "archival_reason"):
+        if not archival.get("archival_reason"):
             errors.append("DM-05 Archived requires archival.archival_reason")
 
     # DM-06 Canonical must declare a normalised scope consistent with domain.
@@ -539,8 +576,9 @@ def check_document(path: Path, text: str) -> tuple[list[str], dict | None]:
     if conflict == "Resolved" and not isinstance(resolution, dict):
         errors.append("DM-11 canonical_conflict_status: Resolved requires a resolution block")
 
-    # DM-09 Generated artifacts must not claim authority.
-    if first_body_lines(text) and GENERATED_MARKER.search(first_body_lines(text)):
+    # DM-09 Generated artifacts must not claim authority. Scan the whole body:
+    # a marker on line 9 is still a marker.
+    if GENERATED_MARKER.search(body_text(text)):
         if normative == "Normative" or canonical == "Canonical":
             errors.append(
                 "DM-09 a generated artifact MUST NOT be Normative or Canonical; "
@@ -550,11 +588,13 @@ def check_document(path: Path, text: str) -> tuple[list[str], dict | None]:
     return errors, meta
 
 
-GENERATED_MARKER = re.compile(r"GENERATED[ -](FILE|ARTIFACT)|DO NOT EDIT", re.I)
-
-
-def first_body_lines(text: str, count: int = 8) -> str:
-    return "\n".join(body_text(text).splitlines()[:count])
+# A generated artifact MUST carry this HTML comment anywhere in its body. The
+# comment form is the protocol: prose that merely says "generated artifacts"
+# does not mark a file, so a policy document can discuss the rule without
+# tripping it. See policy 9 (DM-09).
+GENERATED_MARKER = re.compile(
+    r"<!--[^>]*\b(GENERATED[ -](FILE|ARTIFACT)|DO NOT EDIT)\b[^>]*-->", re.I
+)
 
 
 # --------------------------------------------------------------------------
@@ -590,8 +630,12 @@ def resolve_canonical(docs: dict[str, dict], scope_id: str) -> str:
     return canonical[0] if len(canonical) == 1 else NO_AUTHORITATIVE_SOURCE
 
 
-def git(root: Path, *args: str) -> str | None:
-    """Run git, returning stdout or None when unavailable/failing."""
+def git(root: Path, *args: str, nul: bool = False) -> str | None:
+    """Run git, returning stdout or None when unavailable/failing.
+
+    nul=True reads a NUL-separated path list, so filenames containing spaces
+    are not split into fragments.
+    """
     try:
         out = subprocess.run(
             ["git", "-C", str(root), *args],
@@ -599,7 +643,9 @@ def git(root: Path, *args: str) -> str | None:
         )
     except OSError:
         return None
-    return out.stdout.strip() if out.returncode == 0 else None
+    if out.returncode != 0:
+        return None
+    return out.stdout if nul else out.stdout.strip()
 
 
 def check_approval_binding(root: Path, rel: str, text: str, meta: dict,
@@ -624,6 +670,14 @@ def check_approval_binding(root: Path, rel: str, text: str, meta: dict,
             notes.append(
                 f"DM-10 {rel}: approval binding NOT VERIFIED (no git work tree); "
                 "run the gate inside the repository"
+            )
+            return errors, notes
+        # Pin to an immutable commit id. A branch or tag name can move, which
+        # would silently re-point the approval at different content.
+        if not COMMIT_RE.match(str(value).strip()):
+            errors.append(
+                f"DM-10 approved_version {value!r} must be a full 40-hex commit id, "
+                "not a branch, tag or abbreviated reference"
             )
             return errors, notes
         commit = git(root, "rev-parse", "--verify", "--quiet", f"{value}^{{commit}}")
@@ -693,16 +747,19 @@ def check_scope_and_relations(root: Path, docs: dict[str, dict]) -> list[str]:
                     "records: " + ", ".join(sorted(rel for rel, _ in resolutions))
                 )
             selected = dig(resolutions[0][1], "selected_document")
-            if selected and selected not in owners:
-                errors.append(
-                    f"DM-11 scope {scope_id!r} resolution selects {selected!r}, "
-                    "which does not declare this scope"
-                )
-            elif selected and canonical and canonical != [selected]:
-                errors.append(
-                    f"DM-11 scope {scope_id!r} resolution selects {selected!r} "
-                    f"but Canonical is {canonical[0]!r}"
-                )
+            if selected:
+                selected = str(selected).lstrip("./")
+                if selected not in owners:
+                    errors.append(
+                        f"DM-11 scope {scope_id!r} resolution selects {selected!r}, "
+                        "which does not declare this scope"
+                    )
+                elif canonical != [selected]:
+                    errors.append(
+                        f"DM-11 scope {scope_id!r} resolution selects {selected!r}, "
+                        f"which is not the unique Canonical document "
+                        f"({canonical or 'none holds Canonical'})"
+                    )
 
         # DM-10 conflict visibility: an unresolved conflict must not resolve.
         if resolve_canonical(docs, scope_id) == NO_AUTHORITATIVE_SOURCE:
@@ -714,7 +771,8 @@ def check_scope_and_relations(root: Path, docs: dict[str, dict]) -> list[str]:
             if conflicted:
                 print(f"  conflict: scope {scope_id!r} has no authoritative source")
 
-    # DM-12 bilingual counterpart.
+    # DM-12 bilingual counterpart: exists, symmetric, classified, agrees.
+    declared: dict[str, set[str]] = {}
     for rel, meta in docs.items():
         counterpart = meta.get("bilingual_counterpart")
         if not isinstance(counterpart, dict):
@@ -732,9 +790,24 @@ def check_scope_and_relations(root: Path, docs: dict[str, dict]) -> list[str]:
                     f"{target_rel}"
                 )
                 continue
+            declared.setdefault(rel, set()).add(target_rel)
             other = docs.get(target_rel)
             if other is None:
+                errors.append(
+                    f"DM-12 {rel}: counterpart {target_rel} exists but carries no "
+                    "document_metadata, so parity cannot be verified"
+                )
                 continue
+            # Symmetry: the counterpart must point back at this document.
+            back = other.get("bilingual_counterpart")
+            back_targets = {
+                str(v).lstrip("./") for v in back.values() if v
+            } if isinstance(back, dict) else set()
+            if rel not in back_targets:
+                errors.append(
+                    f"DM-12 {rel} <-> {target_rel}: counterpart relation is not "
+                    "symmetric (the mirror does not declare this document)"
+                )
             for field in (("domain",), ("role",), ("authority", "normative_status")):
                 mine, theirs = dig(meta, *field), dig(other, *field)
                 if mine != theirs:
@@ -808,15 +881,20 @@ def governed_files(root: Path) -> list[Path]:
 
 
 def changed_paths(root: Path, ref: str) -> set[str]:
+    """Repository-relative paths added or modified since ref.
+
+    NUL-separated, so a filename containing spaces stays one path. Splitting on
+    whitespace would let `00-governance/new policy.md` dodge the requirement.
+    """
     names: set[str] = set()
-    diff = git(root, "diff", "--name-only", "--diff-filter=AMR", f"{ref}...HEAD")
+    diff = git(root, "diff", "--name-only", "-z", "--diff-filter=AMR", f"{ref}...HEAD", nul=True)
     if diff is None:
-        diff = git(root, "diff", "--name-only", "--diff-filter=AMR", ref)
+        diff = git(root, "diff", "--name-only", "-z", "--diff-filter=AMR", ref, nul=True)
     if diff is None:
         raise SystemExit(f"cannot diff against {ref!r}; is this a git work tree?")
-    names.update(diff.split())
-    untracked = git(root, "ls-files", "--others", "--exclude-standard") or ""
-    names.update(untracked.split())
+    names.update(p for p in diff.split("\0") if p)
+    untracked = git(root, "ls-files", "-z", "--others", "--exclude-standard", nul=True) or ""
+    names.update(p for p in untracked.split("\0") if p)
     return names
 
 

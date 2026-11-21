@@ -46,6 +46,7 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Normative
   bilingual_counterpart:
+    source: "00-governance/design-principles.md"
     en: "docs/en/00-governance/design-principles.md"
 ---
 

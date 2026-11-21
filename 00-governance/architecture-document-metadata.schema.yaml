@@ -119,7 +119,11 @@ document_metadata:
   # ---- BILINGUAL PAIRING (REQUIRED under GOV-DOC-001) ----
   # The counterpart of this document. Only the authoritative source declares
   # authority; translations MUST NOT each claim the same canonical_scope_id.
+  # The relation MUST be symmetric: a declared counterpart must declare this
+  # document back, and must itself carry metadata (DM-12).
   # 双语配对：仅权威源声明权威性；各语言译本不得重复声明同一 canonical_scope_id。
+  # 关系必须对称：被声明方必须反向声明本文件，且自身必须带元数据（DM-12）。
   bilingual_counterpart:
+    source: null   # mirrors name their authoritative source here
     en: null
     zh-CN: null

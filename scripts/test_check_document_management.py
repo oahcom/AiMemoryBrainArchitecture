@@ -145,6 +145,22 @@ PARSER_REJECTS = {
     "metadata as scalar": "---\ndocument_metadata: nope\n---\n\n# T\n",
     "empty block": "---\ndocument_metadata:\n---\n\n# T\n",
     "unclosed frontmatter": "---\ndocument_metadata:\n" + BASE + "\n# T\n",
+    "unescaped single quote": BASE.replace(
+        "role: design-specification", "role: 'Architecture's governance'"
+    ),
+    "no space after colon": BASE.replace(
+        "role: design-specification", "role:design-specification"
+    ),
+    "unknown key under supersession": BASE.replace(
+        "    approval:\n      decision_status: Draft",
+        "    supersession:\n      supersedes: []\n      unauthorized_field: true\n"
+        "    approval:\n      decision_status: Draft",
+    ),
+    "lifecycle is a string": BASE.replace(
+        "  lifecycle:\n    approval:\n      decision_status: Draft\n"
+        "    usage_status: Active\n    modification_status: Unchanged",
+        "  lifecycle: unexpected-string",
+    ),
 }
 
 
@@ -152,7 +168,8 @@ def run_parser() -> None:
     print("parser (fail-closed)")
     for name, text in PARSER_REJECTS.items():
         expect(f"rejects {name}",
-               text if text.startswith("---") else doc(text), "DM-01")
+               text if text.startswith("---") else doc(text),
+               "DM-02" if "unknown key" in name else "DM-01")
     quoted = BASE.replace(
         "role: design-specification",
         'role: design-specification\n  evidence: "a \\"quoted\\" # not a comment"',
@@ -299,6 +316,68 @@ def run_repository_rules() -> None:
         expect_gate("unclassified is only a gap by default", root, 0)
         expect_gate("--strict rejects unclassified", root, 1, "--strict")
 
+    # T06 / T07: a Resolved record must select the unique Canonical document.
+    resolution = (
+        "    canonical_conflict_status: Resolved\n"
+        "    canonical_conflict_resolution:\n"
+        '      resolution_decision_id: "GOV-CONF-001"\n'
+        '      resolved_date: "2026-11-20"\n'
+        '      selected_document: "00-governance/a.md"\n'
+        "      resolution_evidence: []"
+    )
+    candidate = BASE.replace(
+        "canonical_status: Non-Canonical",
+        'canonical_status: Candidate\n'
+        '    canonical_scope_id: "architecture/data-model-design"\n'
+        + resolution,
+    )
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "00-governance" / "a.md").write_text(doc(candidate), encoding="utf-8")
+        expect_gate("T06 Resolved without any Canonical fails", root, 1)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "00-governance" / "a.md").write_text(doc(candidate), encoding="utf-8")
+        (root / "00-governance" / "b.md").write_text(doc(CANONICAL), encoding="utf-8")
+        expect_gate("T07 Resolved selecting a non-Canonical document fails", root, 1)
+
+    # T09 / T10: mirror parity needs a classified, symmetric counterpart.
+    def with_mirror(target: str) -> str:
+        return BASE + f'\n  bilingual_counterpart:\n    en: "{target}"'
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "00-governance" / "a.md").write_text(
+            doc(with_mirror("00-governance/b.md")), encoding="utf-8")
+        (root / "00-governance" / "b.md").write_text("# no metadata\n", encoding="utf-8")
+        expect_gate("T09 counterpart without metadata fails", root, 1)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "00-governance" / "a.md").write_text(
+            doc(with_mirror("00-governance/b.md")), encoding="utf-8")
+        (root / "00-governance" / "b.md").write_text(doc(BASE), encoding="utf-8")
+        expect_gate("T10 asymmetric counterpart relation fails", root, 1)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        for name, other in (("a", "b"), ("b", "a")):
+            (root / "00-governance" / f"{name}.md").write_text(
+                doc(with_mirror(f"00-governance/{other}.md")), encoding="utf-8")
+        expect_gate("symmetric counterparts conform", root, 0)
+
+    # T08: the generated marker counts anywhere in the body, not just line 1-8.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        padding = "\n".join(f"line {i}" for i in range(9))
+        (root / "00-governance" / "a.md").write_text(
+            "---\ndocument_metadata:" + CANONICAL + "---\n\n" + padding
+            + "\n<!-- GENERATED FILE - DO NOT EDIT -->\n",
+            encoding="utf-8",
+        )
+        expect_gate("T08 generated marker after line 8 fails", root, 1)
+
 
 # --------------------------------------------------------------------------
 # 5. DM-10: approval is bound to a version (P0-2)
@@ -355,6 +434,30 @@ def run_approval_binding() -> None:
         target.write_text(unknown, encoding="utf-8")
         expect_gate("unresolvable approved_version fails", root, 1)
 
+        # T11: a branch name is not a commit id; it can move.
+        moving = honest.replace(f'"{sha}"', '"main"')
+        target.write_text(moving, encoding="utf-8")
+        expect_gate("T11 mutable ref as approved_version fails", root, 1)
+
+
+def run_changed_paths() -> None:
+    """T01: a filename with a space must not dodge --require-changed."""
+    print("changed-path parsing")
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        (root / "00-governance" / "seed.md").write_text(doc(BASE), encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "seed")
+        base = _git(root, "rev-parse", "HEAD")
+        (root / "00-governance" / "new policy.md").write_text("# no metadata\n", encoding="utf-8")
+        expect_gate(
+            "T01 spaced filename without metadata fails",
+            root, 1, "--require-changed", base,
+        )
+
 
 def main() -> int:
     print("check_document_management self-check")
@@ -363,6 +466,7 @@ def main() -> int:
     run_resolver()
     run_repository_rules()
     run_approval_binding()
+    run_changed_paths()
     passed, total = sum(RESULTS), len(RESULTS)
     print(f"{passed}/{total} passed")
     return 0 if passed == total else 1
