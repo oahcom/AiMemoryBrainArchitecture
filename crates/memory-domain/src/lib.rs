@@ -342,7 +342,7 @@ pub struct Event {
     pub retention_class: String,
 }
 
-/// ponytail: superseded by ClaimRef + ClaimRevision; kept until call sites migrate.
+/// Legacy flat Claim representation; superseded by ClaimRef + ClaimRevision and retained until consumers migrate.
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct Claim {
     pub claim_id: OpaqueId,
