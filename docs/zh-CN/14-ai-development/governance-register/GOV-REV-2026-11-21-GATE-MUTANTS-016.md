@@ -2,9 +2,20 @@
 
 **Status:** OPEN — MEASUREMENT ONLY
 **Nature:** `REGISTER_ONLY / NO_IMPLEMENTATION / NO_GATE_CHANGE / REQUIRES_INDEPENDENT_REVIEW`
-**Measured at:** `main = 1d0ecb975c`
+**Measured at:** `main = 1d0ecb975c`; re-verified at `fa9c32a` and `8a2ce1b` (47 tests, same verdicts)
 **Extends:** `GOV-REV-2026-11-21-PR425-001.md` (which found mutant M3 surviving in the digest path)
 **Register author:** strategic requirement orchestrator session. **Not** an independent reviewer, **not** the accountable owner.
+
+---
+
+## 0.1 修订记录
+
+| 版本 | 日期 | 变更 |
+|---|---|---|
+| v1 | 2026-11-21 | 初版。四个变异体，M5/M6 存活，并声称 M5 存活意味着「产生 75% 基线的守卫没有测试」 |
+| **v2** | 2026-11-21 | **更正 M5 的解释**。实测删掉该守卫后缺口数**完全不变**（77→77），因为 Shape 3 需要 `docs/en` 镜像而这 77 条一条都没有。M5 是**空载变异体**，存活不等于测试有洞。真正的空洞在 §2.3 |
+
+**M5 的「存活」是事实，v1 对它的解释是错的。** 一个删掉后不改变任何输出的变异体，其存活不能作为测试质量的证据。
 
 ---
 
@@ -47,27 +58,59 @@ Verbatim result for M5 and M6: `Ran 47 tests in ... OK`.
 
 ## 2. What the two survivors mean
 
-### 2.1 M5: the root guard that produces 75% of the baseline is untested
+### 2.1 M5: the guard survives because the branch it guards never fires
 
-Register 015 measured that **58 of 77 frozen baseline entries are the entire `13-engineering-decisions` root**, and that the mechanism excluding them is:
+**本登记的 v1 说「M5 存活意味着产生 75% 基线的那个守卫没有测试覆盖」。这句话的后半句要改。**
+
+实测：把 `root_name == "14-ai-development"` 删掉后，`current_bilingual_gaps()` 的返回值**完全不变**：
+
+```
+BEFORE  gaps=77 baseline=77 new=0 resolved=0
+AFTER   gaps=77 baseline=77 new=0 resolved=0
+```
+
+一个缺口都没动。原因在登记 015 v2 §3.1：Shape 3 的前置条件是 `docs/en/X` 必须存在，而 77 条缺口里**没有一条**有这个镜像。
 
 ```python
 if not paired and root_name == "14-ai-development":
-    paired = english.is_file() and _carries_chinese(source)
+    paired = english.is_file() and _carries_chinese(source)   # english must exist
 ```
 
-Deleting `root_name == "14-ai-development"` — making embedded-bilingual recognition root-agnostic — breaks **nothing** in the test suite. All 47 tests still pass.
+所以 M5 存活**不是**「测试漏了一个重要守卫」，而是「**这个守卫对全部 77 条基线零载荷，删不删都一样**」。测试没杀它，是因为它今天不改变任何行为——不是因为测试写得差。
 
-So the test suite cannot tell the difference between:
+Shape 3 的实际作用域实测只有 3 个文件，全在 14 根：
 
-- the current policy: embedded bilingual counts **only** in `14-ai-development`
-- the alternative policy: embedded bilingual counts **everywhere**
+```
+14-ai-development/AI-EXEC-001.md
+14-ai-development/AI-EXEC-002.md
+14-ai-development/AI-EXEC-ROLLOUT-001.md
+```
 
-A 58-entry policy consequence rests on a line no test constrains. Whether the guard is correct is a policy question (register 015 §6 lists three readings I cannot distinguish). That it is **unprotected** is not a policy question.
+把守卫删掉后，其他八根里同时满足「无 `docs/zh-CN`、无并排配对、有 `docs/en`、含中文」的文件数是 **0**。
+
+**所以 M5 是一个「空载变异体」**：它存活是真的，但它证明的东西比 v1 声称的弱。它证明的是「这个分支今天无载荷」，不是「测试有洞」。真正的洞在别处——见 §2.3。
+
+### 2.3 更正后的判断：真正的测试空洞是「内嵌双语没有形态」
+
+登记 015 v2 §3.2 实测：77 条缺口的机制分类只有一类——**完全没有对应文件，77/77**。
+
+而门禁的三种形态**全部要求存在第二个文件**：
+
+| 形态 | 需要 |
+|---|---|
+| mirror | `docs/en/X` + `docs/zh-CN/X` |
+| side-by-side | `X.zh-CN.md` 或 `X.en.md` 兄弟文件 |
+| embedded (Shape 3) | `docs/en/X` **且** `_carries_chinese(X)` |
+
+**没有任何形态承认「一个文件内部同时承载两种语言」。** 13 根的 57 个内嵌双语文件之所以是缺口，是因为它们**连第二个文件都没有**——不是被根名挡住。
+
+这意味着：`EMBEDDED_BILINGUAL_SOURCES` 那 21 条不是「豁免」，而是**唯一能让内嵌双语通过的机制**，且必须逐个文件登记。00-governance 登记了 12 个，14 根 9 个，13 根 0 个——而 13 根是内嵌双语最集中的地方。
+
+**真正的测试空洞因此是**：没有任何测试断言「单文件内嵌双语应当如何被处理」。M5 存活只是这个空洞的一个症状。
 
 ### 2.2 M6: the `cwd` split from register 014 is untested
 
-Replacing `ROOT = Path.cwd()` with `ROOT = REPO_ROOT` — the one-line unification described in register 014 — also breaks nothing. All 43 tests pass.
+Replacing `ROOT = Path.cwd()` with `ROOT = REPO_ROOT` — the one-line unification described in register 014 — also breaks nothing. All 47 tests pass.
 
 That means every test in `test_gate_normative_roots.py` runs with `cwd == REPO_ROOT`, so the two anchors are indistinguishable to the suite. The defect is invisible precisely because the tests never leave the repository root — the same reason it is invisible in CI.
 
