@@ -278,9 +278,11 @@ class RecoveryJoin102ConformanceTests(unittest.TestCase):
 
     def test_20_fence_binding_rejects_generation_above_its_own_highwater(self):
         proof = currentness_proof()
+        evidence = forget_evidence()
         proof["forget_fence_generation"] = "5"
+        evidence["fence_generation"] = "5"
         result = validate_d_fence_evidence_binding(
-            forget_evidence(), proof, owner_snapshot(), lambda _: True
+            evidence, proof, owner_snapshot(), lambda _: True
         )
         self.assertEqual(result["status"], "INVALID")
 
