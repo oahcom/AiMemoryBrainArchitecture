@@ -1,14 +1,63 @@
+---
+document_metadata:
+  domain: memory-compiler
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope: null
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "04-memory-compiler/compiler-state-and-producer-admission.md @ bc36ad36895496f0f7707fcecb12d156c6be97c3"
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-21"
+      last_verification_note: "Canonical source and bilingual mirror path verified; design status remains as stated in the document."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Memory Compiler design specification: compiler-state-producer-admission"
+    canonical_scope_id: "memory-compiler/compiler-state-producer-admission"
+    canonical_scope_keywords:
+      - state-machine
+      - producer-admission
+      - lease
+      - barrier
+      - terminal-disposition
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "04-memory-compiler/compiler-state-and-producer-admission.md"
+    en: "docs/en/04-memory-compiler/compiler-state-and-producer-admission.md"
+    zh-CN: "docs/zh-CN/04-memory-compiler/compiler-state-and-producer-admission.md"
+---
+
+
 # Compiler State Machine and D Producer Admission Interface
 
 - Document ID: E-PRODUCER-ADMISSION-001
 - Version: 1.0
-- Source branch: session-e-memory-compiler-2026-11-16
-- Source revision: DEREFERENCED — historical source blob `e59f517fff161ab882aa0ddc4a5bda513964ae1a` retained; no current normative source path exists.
-- Source: DEREFERENCED — original normative path `04-memory-compiler/compiler-state-and-producer-admission.md` is absent from the current main tree; alternative: [surviving Chinese counterpart](../../zh-CN/04-memory-compiler/compiler-state-and-producer-admission.md) (blob `ac26ce694021aeefd1dbf0db0099903b98387be9`; translation only, not an authoritative substitute).
-- Chinese counterpart: [Compiler 状态机与 D Producer Admission 接口](../../zh-CN/04-memory-compiler/compiler-state-and-producer-admission.md)
-- Status: E lifecycle semantics CANDIDATE; D semantic operations DECIDED; callable API/transport and Storage atomicity OPEN
+- Canonical source: [compiler-state-and-producer-admission.md](../../../04-memory-compiler/compiler-state-and-producer-admission.md)
+- Source blob: bc36ad36895496f0f7707fcecb12d156c6be97c3
 
-# Compiler State Machine and D Producer Admission Interface
+- Restored source lineage: session-e-memory-compiler-2026-11-16
+- Historical source blob: e59f517fff161ab882aa0ddc4a5bda513964ae1a
+- Owner decision dependency: OWNER-DECISION-FACT-CLAIM-001 applies to Fact/Claim semantics only; this document's concrete schemas remain at the status stated below.
+
 
 **Status:** CANDIDATE E lifecycle/adapter contract; D semantic operation contracts and linearization are DECIDED; callable transport/API binding and Storage atomic realization remain OPEN.
 **Owner:** Session E — Memory Compiler.
