@@ -43,19 +43,20 @@ CRYPTOGRAPHIC PROFILE = NOT APPROVED
 STORAGE L4 = OPEN / NOT APPROVED
 
 TEST EXECUTION = SUSPENDED
+TEST EXECUTION DISPATCH GATE = UNLOCKED-WITH-CONDITIONS (REQ-04 STEP 5 DISPATCH SPEC ONLY)
 
 ## 3. Correction status by requirement
 
 | Requirement | Application status | Independent review |
 |---|---|---|
-| R1 Claim identity | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
-| R2 Attestor authorization | FIX_APPLIED_AWAITING_REREVIEW | REQUEST CHANGES |
-| R3 Shared Fact Forget | FIX_APPLIED_AWAITING_REREVIEW | REQUEST CHANGES |
-| R4 Fact/Claim synchronization | FIX_APPLIED_AWAITING_REREVIEW | PASS |
-| R5 End-to-end publication | FIX_APPLIED_AWAITING_REREVIEW | REQUEST CHANGES |
-| R5 Storage §8.8 | APPLIED_PENDING_INDEPENDENT_REVIEW | PASS |
-| R5 Admission stage relation | APPLIED_PENDING_INDEPENDENT_REVIEW | PASS |
-| PASS governance synchronization | FIX_APPLIED_AWAITING_REREVIEW | PASS |
+| R1 Claim identity | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
+| R2 Attestor authorization | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
+| R3 Shared Fact Forget | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
+| R4 Fact/Claim synchronization | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
+| R5 End-to-end publication | APPLIED | PASS (M19: 7050001430; M20: 7050002020; M27: 7057332489; M28: 7057332846) |
+| R5 Storage §8.8 | APPLIED | PASS (M22: 7056912025; M27: 7057332489; M28: 7057332846) |
+| R5 Admission stage relation | APPLIED | PASS (M22: 7056912025; M27: 7057332489; M28: 7057332846) |
+| PASS governance synchronization | APPLIED | PASS (M19: 7050001430; M20: 7050002020; M27: 7057332489; M28: 7057332846) |
 
 ## 4. Application evidence requirements
 
@@ -284,6 +285,88 @@ Both insertions state this is an implementation-conformance gate, not an unresol
 ordering choice, so the fix reopens nothing that is already DECIDED FOR CONVERGENCE.
 
 R3 disposition, formal acceptance, schema freeze and implementation conformance are unchanged.
+
+### 9.3 REREVIEW-8 post-merge read-back
+
+This section records the post-merge read-back for the R7 predicate-equivalence correction reviewed in REREVIEW-8.
+
+It records repository state and content identity only. REREVIEW-8 = PASS is not FORMAL ACCEPTANCE and does not establish implementation conformance.
+
+| Target | Reviewed correction HEAD | Correction |
+|---|---|---|
+| PR #410 — Extraction EN | `a685aa9d868b56afb0a335a691d1e758d1fff05a` | `TRUE if and only if` |
+| PR #411 — Storage ADR EN | `79a4d7df475c03ccb318712ccef6e6d78fedebba` | `TRUE if and only if` |
+
+The two correction commits each replace the predicate connector in one existing English definition. The Chinese definitions already use `当且仅当`.
+
+| Target branch | Merge commit |
+|---|---|
+| `main` — PR #410 | `f1a6028d8192` |
+| Storage carrier branch — PR #411 | `356e2f051def` |
+
+These are separate Git histories and must not be represented as one common atomic Git snapshot.
+
+The Extraction files are read from the specified `main` merge result. The Storage ADR is read from its separate carrier branch merge result.
+
+| Normative carrier | Path | Blob SHA | Size |
+|---|---|---|---:|
+| Extraction EN | `docs/en/04-memory-compiler/extraction-and-normalization.md` | `c87860706313` | 22,484 bytes |
+| Extraction ZH | `docs/zh-CN/04-memory-compiler/extraction-and-normalization.md` | `9657949af482` | 21,781 bytes |
+| Storage ADR (EN/ZH) | `reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md` | `62ae6e878657` | 35,544 bytes |
+
+The complete Blob identifiers are recorded by the post-merge read-back:
+
+- Extraction EN: `c87860706313`
+- Extraction ZH: `9657949af482`
+- Storage ADR: `62ae6e878657`
+
+The four normative definitions are:
+
+1. Extraction EN §19.2.
+2. Extraction ZH §19.2.
+3. Storage ADR EN §8.8.
+4. Storage ADR ZH §8.8.
+
+The read-back confirms the following correspondence:
+
+| Predicate element | English | Chinese |
+|---|---|---|
+| Predicate identity | `DependencyClosurePersisted(P)` | `DependencyClosurePersisted(P)` |
+| Logical connector | `if and only if` | `当且仅当` |
+| Dependency set | Complete direct and transitive set | 完整 direct 和 transitive 集合 |
+| Completeness | `COMPLETE` | `COMPLETE` |
+| Digest | Matches the exact dependency set | 与准确依赖集合匹配 |
+| Confirmation | Authoritative read-after-commit | 权威 read-after-commit |
+
+The English and Chinese definitions express the same necessary-and-sufficient conditions.
+
+The participant barrier MUST be resolved or completed only when the predicate is TRUE.
+
+```text
+REREVIEW-8 = PASS
+
+FOUR-WAY PREDICATE CONSISTENCY = PASS
+LOGICAL EQUIVALENCE = PASS
+SCOPE VIOLATION = NONE
+REGRESSION = NONE
+RESIDUAL REVIEW BLOCKER = NONE
+
+R1-R5 = PASS / NOT REOPENED
+
+FORMAL ACCEPTANCE = PENDING
+IMPLEMENTATION CONFORMANCE = NOT ESTABLISHED
+
+TEST EXECUTION GATE = UNLOCKED-WITH-CONDITIONS
+UNLOCKED SCOPE = REQ-04 STEP 5 DISPATCH ONLY
+```
+
+The PASS decision is an independent review disposition. It is not an acceptance decision.
+
+The read-back does not demonstrate that the underlying storage implementation provides atomicity, transaction isolation, durable dependency registration, or any other implementation property.
+
+No Schema, DDL, public API, H Wire, production key, Trust Root, Crypto Profile, or Storage L4 approval is granted by this section.
+
+This section records a completed normative read-back, not a completed implementation test.
 
 ### 9.3 Independent review disposition of the correction round
 
