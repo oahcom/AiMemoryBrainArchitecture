@@ -8,6 +8,7 @@ pub enum StorageError {
     NotFoundOrNotVisible, StaleVersion, IdempotencyConflict, InvalidReference,
     ScopeMismatch, PermissionDenied, InvalidSchema, ProvenanceIncomplete,
     ContentDigestMismatch, HistoryUnavailable, TransactionUnavailable,
+    PublicationStateConflict,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -24,6 +25,26 @@ pub struct CommitReceipt {
     pub memory_id: OpaqueId,
     pub resulting_version_id: OpaqueId,
     pub commit_sequence: CommitSequence,
+    pub idempotency_key: String,
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct PrepareRequest {
+    pub memory_id: OpaqueId,
+    pub expected_current_version: Option<OpaqueId>,
+    pub new_version: MemoryVersion,
+    pub idempotency_key: String,
+    pub request_digest: String,
+    pub publication_id: String,
+    pub generation: u64,
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct PreparedCommitReceipt {
+    pub memory_id: OpaqueId,
+    pub prepared_version_id: OpaqueId,
+    pub publication_id: String,
+    pub generation: u64,
     pub idempotency_key: String,
 }
 
@@ -48,6 +69,12 @@ pub trait MemoryStorage {
     fn read_current(&self, memory_id: &OpaqueId, scope: &[ScopeRef]) -> Result<Option<MemoryVersion>, StorageError>;
     fn read_version(&self, memory_id: &OpaqueId, version_id: &OpaqueId, scope: &[ScopeRef]) -> Result<Option<MemoryVersion>, StorageError>;
     fn commit_version(&mut self, request: CommitRequest, scope: &[ScopeRef]) -> Result<CommitReceipt, StorageError>;
+    /// Stage a version as hidden: it must not become current and must not be
+    /// readable through `read_version` until `publish_prepared` authorizes it.
+    fn prepare_version(&mut self, request: PrepareRequest, scope: &[ScopeRef]) -> Result<PreparedCommitReceipt, StorageError>;
+    /// Authorize a prepared version: allocate the canonical sequence, advance the
+    /// current pointer and append the change record, all in one transaction.
+    fn publish_prepared(&mut self, publication_id: &str, expected_current_version: Option<OpaqueId>, scope: &[ScopeRef]) -> Result<CommitReceipt, StorageError>;
     fn list_changes(&self, after: Option<CommitSequence>, scope: &[ScopeRef], limit: usize) -> Result<ChangePage, StorageError>;
     fn resolve_idempotency(&self, idempotency_key: &str, request_digest: &str, scope: &[ScopeRef]) -> Result<Option<CommitReceipt>, StorageError>;
 }
