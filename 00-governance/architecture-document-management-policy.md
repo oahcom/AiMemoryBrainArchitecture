@@ -5,23 +5,21 @@ document_metadata:
   lifecycle:
     approval:
       decision_status: Under-Review
-      approver: NOT_RECORDED
-      decision_date: NOT_RECORDED
+      approver: null
+      decision_date: null
       approved_version: null
-      approval_scope:
-        type: Full-document
-        included_sections: []
-        included_assets: []
+      approval_scope: null
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "00-governance/architecture-document-management-policy.md"
+        - "14-ai-development/adr/OWNER-DECISION-DOC-BACKLOG-COUNT-001.md"
       revocation: null
     evidence_verification:
-      verification_status: Unverified
+      verification_status: Invalidated
       last_verified_date: null
-      last_verification_note: "No formal approval record, approver identity or decision date exists in this repository; recorded as NOT_RECORDED rather than inferred."
+      last_verification_note: "The docs backlog count was corrected under OWNER-DECISION-DOC-BACKLOG-COUNT-001; this policy revision is awaiting the version-bound approval update in the same PR."
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Pending-Reapproval
     supersession:
       supersedes: []
       supersession_reason: null
@@ -46,7 +44,7 @@ document_metadata:
 # Architecture Document Management Policy / 架构文档管理条例
 
 - Policy ID: GOV-DOC-002
-- Version: 1.10
+- Version: 1.11
 - Status: **NORMATIVE — PARTIALLY MACHINE-CHECKED** (see §9.1 for exactly which rules a machine can prove)
 - Owner: A — Principal Integration / Architecture Governance
 - Relation to GOV-DOC-001: **SUPPLEMENTARY — does not weaken, replace or waive GOV-DOC-001**
@@ -82,11 +80,11 @@ The scope above is declared **and checked**. `00-governance/document-scope-regis
 
 上述范围是**声明出来并被检查的**。`00-governance/document-scope-registry.yaml` 必须覆盖仓库每个顶层目录——要么是受治理根目录，要么带理由排除；当某目录缺失、登记表声明的根目录与 `NORMATIVE_ROOTS` 任一方多出或少出、某目录同时受治理又被排除、或登记了不存在的目录时，DM-14 使门禁失败。因此新增顶层目录是一次必须写下来的治理决定，而不是治理空白面的静默扩大。登记表是门禁无法自行推导的独立依据：会计恒等式只能证明扫描集**内部**没有文件被丢弃，扫描集本身是否正确只有登记表能说。
 
-Every directory has exactly one of three states, and only the first is an exemption. **Governed**: scanned, must carry metadata. **Backlog**: scanned, counted, may lack metadata. **Excluded**: not scanned, and only when no architecture claim is made — source code, review transcripts, benchmark logs, prompt text. A directory whose documents *are* architecture documentation goes in `backlog:` with a document count, never in `excluded:` with a reason: backlog is the opposite of an exemption, and treating it as one made "we have not classified these" indistinguishable from "these are not architecture". The count is not decoration — DM-14 compares it to the disk, so "26 documents remain" is a claim that fails the gate when it stops being true.
+Every directory has exactly one of three states, and only the first is an exemption. **Governed**: scanned, must carry metadata. **Backlog**: scanned, counted, may lack metadata. **Excluded**: not scanned, and only when no architecture claim is made — source code, review transcripts, benchmark logs, prompt text. A directory whose documents *are* architecture documentation goes in `backlog:` with a document count, never in `excluded:` with a reason: backlog is the opposite of an exemption, and treating it as one made "we have not classified these" indistinguishable from "these are not architecture". The count is not decoration — DM-14 compares it to the disk, so "27 documents remain" is a claim that fails the gate when it stops being true.
 
 `docs/` is the one directory that is partly governed and partly backlog. `docs/en` and `docs/zh-CN` are governed mirrors; `docs/governance/documentation-gaps.md` is governed individually because this policy cites it as the record of what remains unclosed, and a governance record that could drift outside governance would defeat its own purpose; the remaining 26 pages under `docs/` are architecture documents — the convergence programme, the minimum-runnable architecture, the canonical transaction, the source-of-truth inventory, the product-first research — and they are backlog. Most of them say `DRAFT / NON-NORMATIVE` in their own header, and that is precisely why they are backlog rather than excluded: `Draft` is a value of `lifecycle.approval.decision_status`, not a reason to be outside the classification system.
 
-每个目录恰有三种状态之一，且只有第一种是豁免。**受治理**：被扫描，必须带元数据。**积压**：被扫描、被计数，可缺元数据。**排除**：不被扫描，且仅当不作出架构主张——源代码、审查记录、基准日志、提示词文本。文档**属于**架构的目录应进入 `backlog:` 并给出文档数，绝不进入 `excluded:` 给一个理由：积压是豁免的反面，把它当作豁免会使"我们还没分类这些"与"这些不是架构"变得无法区分。计数不是装饰——DM-14 会与磁盘核对，因此"还剩 26 份"是一句会在不再为真时使门禁失败的声明。
+每个目录恰有三种状态之一，且只有第一种是豁免。**受治理**：被扫描，必须带元数据。**积压**：被扫描、被计数，可缺元数据。**排除**：不被扫描，且仅当不作出架构主张——源代码、审查记录、基准日志、提示词文本。文档**属于**架构的目录应进入 `backlog:` 并给出文档数，绝不进入 `excluded:` 给一个理由：积压是豁免的反面，把它当作豁免会使"我们还没分类这些"与"这些不是架构"变得无法区分。计数不是装饰——DM-14 会与磁盘核对，因此"还剩 27 份"是一句会在不再为真时使门禁失败的声明。
 
 `docs/` 是唯一部分受治理、部分积压的目录：`docs/en` 与 `docs/zh-CN` 是受治理镜像；`docs/governance/documentation-gaps.md` 按单文件受治理，因为本条例引用它作为"尚未闭合事项"的记录，而一份能漂移到治理之外的治理记录会自毁其目的；`docs/` 下其余 26 份是架构文档——收敛计划、最小可运行架构、规范事务、事实源清单、产品优先研究——它们是积压。它们大多在自身头部写着 `DRAFT / NON-NORMATIVE`，而这正是它们属于积压而非被排除的原因：`Draft` 是 `lifecycle.approval.decision_status` 的取值，不是置身分类体系之外的理由。
 
@@ -149,7 +147,7 @@ Approval MUST bind to a version, not to the document in general / 审批 MUST �
 
 ```yaml
 approval:
-  decision_status: Approved
+  decision_status: Under-Review
   approver: Architecture Board
   decision_date: "2026-03-15"
   approved_version:
@@ -407,3 +405,4 @@ Amendments require a `decision-record` role document, bilingual, approved by the
 | 1.8 | 2026-11-21 | Eighth review, five blockers. P0-01: `required: true` was published and never executed — `approval_scope` was required by the schema, omitted from the hard-coded `REQUIRED_FIELDS`, and absent from every fixture, so the schema and the gate disagreed while the tests endorsed the schema-violating input. `check_kinds()` now enforces `required` too, `required_fields()` is derived from the schema, and the second list is deleted (T19 fails if one reappears). The same review found `approval_scope` should not be unconditionally required — DM-03 covers it for `Approved` — so the schema says `when: decision_status == Approved` rather than a flat `required: true`. P1-04: `fields: {}` parsed, was a dict, and left `check_kinds()` with nothing to check; `schema()` now refuses a schema that has lost a dimension or marks fewer than 5 leaves required, and loads from `--root` so the contract travels with the repository. P1-01: `docs/governance/documentation-gaps.md` was cited by this policy three times as the gap record while sitting outside governance — a governance record that can drift outside governance defeats its purpose; it is now governed individually via `GOVERNED_FILES`, and §2 distinguishes "not documentation" from "not yet migrated" so an exclusion cannot be used to hide backlog. P1-02: `Path.is_dir()` follows symlinks, so a symlinked top-level directory looked like a root to declare; symlinked roots and files are now skipped and a root-level symlink is an error. P1-03: the corpus claimed 11 cases and had 10, and no case covered DM-09; it now has 13 metadata cases plus 3 body-level generated-artifact cases. |
 | 1.9 | 2026-11-21 | Pre-review self-audit. The schema declared `when: decision_status == Approved` and the gate never read it: the same class of defect as `required: true` used to be, one level quieter. Two keys were affected. `pattern` is removed from the vocabulary entirely -- the gate has no evaluator for it, so allowing it would let the schema publish a constraint nothing enforces; T19 now rejects any constraint key the gate does not read. `when` is kept but must name the rule that owns the requirement (`when: DM-03 ...`), and T19 fails if that id is not a row in this policy's rule table, so a `when` can no longer point at a rule that does not exist. |
 | 1.10 | 2026-11-21 | Ninth review, three blockers plus one gap of my own. R1-01: the registry check used `is_file()` (which follows symlinks) while the scanner skipped symlinks, so a symlinked `governed_files` entry passed the registry and was never scanned -- in the reproduction the gate reported **zero governed documents** and exit 0. Containment is now proven on the resolved path, which also catches a file reached through a symlinked *parent*, a case `is_symlink()` cannot see. R1-02: `on_disk` skipped dot-directories, so `.new-architecture/` was neither governed, excluded, reported nor scanned; hidden directories now count, with `.git` as the one structural exception. R1-03: the `docs/` exclusion was not honest -- 26 files there include the minimum-runnable architecture, the canonical transaction and the source-of-truth inventory, and their own `DRAFT / NON-NORMATIVE` header is a value of `lifecycle.approval.decision_status`, not a reason to be outside classification. `not-yet-migrated` is no longer an exclusion kind: such directories go in a new `backlog:` section, are scanned, and carry a document count DM-14 compares to the disk. S1-02: the schema cache is keyed on content instead of path, so rewriting a root's schema no longer leaves the process validating the previous contract. S1-03 was reported as missing material; the increment already failed such a commit, and T48 now proves it: deleting metadata from a classified file fails `--require-changed`. |
+| 1.11 | 2026-11-21 | Corrected the docs backlog inventory from 26 to 27 following the #407 disposition rehome in PR #426; no rule or scope change. / 更正 #407 处置材料在 PR #426 迁移后的 docs 积压数量，由 26 改为 27；不改变规则或范围。 |
