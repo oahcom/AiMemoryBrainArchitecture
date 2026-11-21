@@ -442,3 +442,81 @@ above, and that adjudication now has an executed disposition rather than a pendi
   not quality, and none of it is acceptance.
 - Four PRs still have zero approvals. Two now have zero-approval reviews that returned
   `FAIL`. A review is not an approval either.
+
+## Correction: PR #461 invalidated the gate results above
+
+The section "Corrected gate results" and two rows of "Two independent reviews" were
+accurate when written and are no longer true. PR #461 merged while I was writing them.
+
+### What #461 changed
+
+`7de3111d` and `0d0c1c62` widened `side_by_side_partner()` from `14-ai-development` only
+to **every** normative root:
+
+```python
+def side_by_side_partner(source: str) -> str | None:
+    """Conventional side-by-side counterpart, accepted in every normative root."""
+    ...
+    elif source.endswith(".zh-CN.md"):
+        stem = source[: -len(".zh-CN.md")]
+        for cand in (stem + ".en.md", stem + ".md"):
+            if cand != source and (ROOT / cand).is_file():
+                return cand
+```
+
+Before #461, `06-memory-context/context-implementation-coverage.md` +
+`.zh-CN.md` did not pair and both were gaps. After #461 they pair.
+
+### What this does to the numbers
+
+| claim above | status after #461 |
+|---|---|
+| #433 merged gate `rc=2`, 2 new gaps | **no longer true** — the pair resolves |
+| #436 merged gate `rc=2`, 2 new gaps | **no longer true** — the pair resolves |
+| "Root cause is one rule, not four mistakes" | still the right diagnosis of the *old* gate; the rule was changed rather than the files |
+
+I re-measured on the current `main` (`c3713452`, tree `_gm4`):
+
+```
+gaps=85  baseline=85  new=0  resolved=0   ->  PASS
+```
+
+Both #433 and #436 have since been merged (`2026-11-21T09:33:25Z` and later), and `main`
+carries no new gap. So the gate failure I reported was real at the time, was fixed by
+changing the gate, and the deliveries landed.
+
+### The honest reading
+
+I reported a gate failure. It was a genuine measurement of the gate as it stood. Then the
+gate changed, which is a legitimate way to resolve it and also the way that makes my
+measurement stale within the hour.
+
+I am not withdrawing the finding — the files genuinely did not pair under the rule that was
+in force, and three PRs were blocked by it. I am withdrawing the implication that the
+deliveries were defective. They were not; the rule was too narrow for where they put their
+translations.
+
+### The open question this creates
+
+Widening `side_by_side_partner()` to every root accepts `X.md` + `X.zh-CN.md` as a pair
+**without checking that the second file contains Chinese**. An English file named
+`X.zh-CN.md` now satisfies the gate. `_carries_chinese()` exists in the script but applies
+only to the `mirrored` branch, not to the side-by-side branch.
+
+That is a testable weakening and I have flagged it for measurement rather than asserting it
+here. If it holds, the correct fix is to apply `_carries_chinese()` to the side-by-side
+branch too — a two-line change — not to revert #461.
+
+### Also corrected: "GAP-03 remains 0% code"
+
+No longer accurate. PR #465 (`GAP-03: implement in-memory ContextDeliveryAdapter
+lifecycle`) exists as a draft. "0% code" was true at the baseline and at the time of
+writing; it is now a statement about a moving target, which is exactly what this section
+exists to prevent.
+
+### Still true
+
+- No CI job in this repository has started since billing broke.
+- No gap is closed by this document, and none of this is acceptance.
+- The two review findings (#433's test miscount, #436's baseline/file mismatch) are
+  independent of the gate question and remain unaddressed by #461.
