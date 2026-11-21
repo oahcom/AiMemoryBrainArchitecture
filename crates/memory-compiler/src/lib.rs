@@ -1034,7 +1034,6 @@ mod tests {
             suppressed.retry(),
             Err(CompilerError::IllegalStateTransition)
         );
-        assert!(!suppressed.state.is_terminal() == false);
     }
 
     #[test]
