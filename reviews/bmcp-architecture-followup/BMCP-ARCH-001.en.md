@@ -14,7 +14,7 @@
 
 H's live branch contains candidate Envelope, versioning, canonicalization, error taxonomy, Delivery/ACK, Forget/reconnect, strict JSON parser reference and conformance material. These files remain H-owned; their existence is not approval or freeze. H's lifecycle handoff says Wire Schema NOT FROZEN; its conformance matrix is a candidate test specification, not Runtime evidence.
 
-The Compiler Fact/Claim mapping remains ADR-BLOCKED. BMCP MUST NOT freeze canonical Fact/Claim payload fields. D owns Canonical Identity/Lifecycle and D Forget Fence; I owns authorization and PermissionEpoch. BMCP consumes those authorities and MUST NOT create substitutes.
+The Owner semantic decision for Fact/Claim is approved (Option A + I1); exact compiler/domain consumer mapping remains Candidate. BMCP MUST NOT freeze canonical Fact/Claim wire payload fields. D owns Canonical Identity/Lifecycle and D Forget Fence; I owns authorization and PermissionEpoch. BMCP consumes those authorities and MUST NOT create substitutes.
 
 Issue #7's recorded binding remains IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE. GitHub currently reports Issue #7 CLOSED / not_planned under the Owner phase-closure ruling; this work does not reopen or alter it. Deferral is not Runtime authorization.
 
@@ -40,7 +40,7 @@ Main pins are from fetched origin/main at the baseline above. H pins are from th
 | docs/en/07-agent-integration/agent-integration-guide.md | main | c4e076887634a9e8e46df076efb0f4b70d816e0a | C-owned Agent boundary |
 | docs/en/03-memory-brain/forget-fence-and-completion-contract.md | main | c791895333ab6140f035f4f622d5dee9325d422d | D/I Forget boundary |
 | docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md | main | 9c054932994bb078e2834df8bd66f73895aa04f5 | D lifecycle/Fence |
-| 13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md | main | 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593 | ADR-BLOCKED for schema freeze |
+| 13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md | main | 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593 | historical ADR; semantic decision superseded; consumer mapping Candidate |
 | 14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md | main @ `c138654c942dc93b5a36eccb2ff0e41452156429` | Blob `d59756a8eb454480804c482ca03c68345ab5abf2` | Approved Owner semantic selection: Option A + I1; does not freeze schema |
 
 This is a bounded source ledger, not a claim that every H artifact or consumer was independently reviewed.
@@ -194,7 +194,7 @@ Conceptual error response: stable code, retryable flag, optional safe retry-afte
 |---|---|---|---|
 | H | wire envelope/version, transport, ACK encoding, Validator, protocol conformance | authenticated decoded envelope; family registry; response/ACK serialization | exact Wire/Transport/ACK/Validator remains CANDIDATE / NOT FROZEN |
 | E | ingress acceptance, Candidate IR, compiler stages/lineage, AcceptedReceipt | typed ingress operation; return E receipt/result unchanged | callable API and wire mapping; AcceptedReceipt is not canonical commit |
-| B | Fact/Claim meaning and canonical domain decisions | only owner-approved typed refs/payloads | B-ADR-FACT-CLAIM-001 ADR-BLOCKED |
+| B | Fact/Claim meaning and canonical domain decisions | only owner-approved typed refs/payloads | Owner decision Option A + I1 approved; exact consumer mapping Candidate |
 | D | canonical identity, lifecycle, canonical commit/revision, Forget Fence | pass typed refs to D and consume D receipts/currentness | exact Runtime API binding |
 | I | Principal trust, authorization, PermissionEpoch, revocation, global Forget policy | protected principal context and current authorization decision | exact approved interface/profile |
 | C | Agent/Adapter boundary, telemetry, final inference request | C adapter maps Agent request to registered BMCP operation | MCP/Adapter mapping and request identity |
@@ -205,7 +205,7 @@ Conceptual error response: stable code, retryable flag, optional safe retry-afte
 
 BMCP is not the Memory Compiler. E owns Candidate IR and the compiler pipeline. BMCP may carry an E-owned ingress/candidate object only under E's current schema/receipt contract. Preserve the distinctions: transport receipt/delivery; E durable AcceptedReceipt; compiler execution/candidate; D producer admission/canonical commit; dependency registration/final publication; F indexing/G Context activation.
 
-B's current preferred Fact/Claim Option A (separate Fact attestation and Claim proposition) remains ADR-BLOCKED / NOT APPROVED. BMCP MUST NOT freeze a Fact/Claim discriminator, canonical identity, schema, DDL or wire payload from that recommendation. Until formal decision and consumer acceptance, keep dependent payload opaque or use only approved candidate-neutral refs.
+The merged Owner decision selects Option A + I1 for Fact/Claim semantics. This does not approve a Fact/Claim discriminator, canonical wire identity, schema, DDL or payload fields. Exact consumer mappings remain Candidate until responsible artifacts are version-pinned and reviewed; keep dependent payload opaque or use only approved candidate-neutral refs.
 
 ### 6.2 Agent Integration / MCP
 
