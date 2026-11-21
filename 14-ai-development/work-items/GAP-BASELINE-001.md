@@ -787,3 +787,151 @@ had not landed, so checking `main` guaranteed the answer I then misattributed.
 
 Recorded because a wrong finding published on a PR is worse than no finding: someone acts on
 it. The corrected comment is on #433 at `7061701355`.
+
+## Round four: what actually landed, verified against `main` at `b9ddd241`
+
+The merge timestamps, checked one PR at a time rather than in a batch:
+
+| PR | state | merged_at |
+|---|---|---|
+| #433 | **open** | — |
+| #436 | merged | 09:33:25Z |
+| #444 | merged | 09:33:26Z |
+| #463 | merged | 10:09:56Z |
+| #464 | merged | 10:52:58Z |
+| #465 | **open** (draft) | — |
+| #466 | merged | 10:53:05Z |
+
+Five merged, two open. What that means for each finding, checked against the tree rather
+than assumed from the merge:
+
+### #436's review finding survived the merge
+
+```
+main b9ddd241, 08-bmcp-protocol/protocol-index.md
+  cites baseline 1ad6c2cf:                  True
+  cites test_provider_outcome.py:           True
+```
+
+The independent review returned `FAIL` on exactly this: the document declares a baseline and
+then lists a file created by the PR, which the baseline does not contain. Both statements are
+still in the file on `main`. The finding had no effect on the merge decision, and the defect
+is now in `main`.
+
+This is worth stating plainly because the PR merged at `09:33:25Z` with **zero approvals and
+an open `FAIL` review**, and no CI job has run since billing broke. The merge had neither
+human sign-off nor automated verification.
+
+### #433 has not merged, and it is the delivery, not the defect
+
+`main` carries the coverage document by direct commit:
+
+```
+5cc54a54  08:54:37Z  docs(memory-context): add implementation coverage map
+b68b96bb  08:55:09Z  docs(memory-context): qualify design source filenames
+9c92fefd  08:55:45Z  docs(memory-context): correct assessment scope and status legend
+3fef2d7f  09:06:39Z  docs(memory-context): record applied ledger test result
+351f4a4c  09:22:41Z  docs(GAP-02): refresh Memory Context coverage map to current main
+```
+
+But `main`'s `06-memory-context/reference-model/` contains only `g_applied_ledger.py` and
+`test_g_applied_ledger.py`. No `g_context_model.py`, no `test_g_context_model.py`.
+
+And `main`'s copy of the document cites both `current_use_allowed` and
+`test_current_use_requires_every_currentness_gate`:
+
+```
+main doc cites current_use_allowed:                              True
+main doc cites test_current_use_requires_every_currentness_gate: True
+main doc cites g_context_model:                                  False
+```
+
+On #433's head `2d291569` both artifacts exist (`g_context_model.py` contains
+`current_use_allowed`; `test_g_context_model.py` defines that test, 15 test functions).
+
+**So `main` currently documents a reference model it does not contain, and #433 is the PR that
+supplies it.** The document is ahead of the code on `main`, and merging #433 closes the gap.
+
+### #466 merged with the two missing fields
+
+```
+main b9ddd241, crates/memory-domain/src/lib.rs
+  pub struct ClaimRevision present:   True
+  #[test] count:                      25
+  epistemic_status inside struct:     False
+  confidence inside struct:           False
+```
+
+The type is on `main` and the design question I raised is unresolved on `main`: the doc
+comment says CI-09–CI-13 classify as `NEW_REVISION` under a stable `ClaimRef`, and the struct
+that implements `NEW_REVISION` has neither field. Migrating a consumer from the legacy `Claim`
+would lose `epistemic_status` and `confidence`.
+
+### #463 merged cleanly
+
+```
+main b9ddd241, crates/memory-store/tests/cross_crate_contract.rs   6 #[test]
+```
+
+Six contract tests, asserting that rejections leave no row behind and that stale/replayed
+writes do not mutate the current revision. This is the one GAP PR of the round that landed
+without an open defect.
+
+### #464 merged with its unverifiable authority
+
+```
+main b9ddd241, 14-ai-development/work-items/AID-2026-040/manifest.yaml
+  branch docs/aid-2026-040-e1-e8-measurement:  True
+  pull_request 437:                            True
+  merge_commit_sha 776f04fb:                   True
+  cites gap-owner-w1w3:                        True
+```
+
+The four corrections are accurate and now on `main`. The authority they cite
+(`gap-owner-w1w3-decision.md`, `gap-owner-v1v4-decision.md`) still does not exist in the tree.
+Third consecutive PR whose stated authority cannot be read.
+
+### #465 has not merged and its content is not in `main`
+
+```
+main b9ddd241, crates/agent-integration/src/lib.rs
+  DeliveryPayload:            False
+  ContextDeliveryAdapter:     False
+  #[test]:                    4
+  executed-on-device marker:  False
+```
+
+So the three stray marker lines are contained to the branch. `main` is clean: scanning every
+tracked file for `executed on device` gives **0 hits** outside my own document, which
+contains the string only because it quotes it.
+
+### The pattern across five merges
+
+Four of the five merged PRs carried a defect that was known before the merge and is still
+present after it:
+
+| PR | known defect before merge | present on `main` now |
+|---|---|---|
+| #436 | baseline row lists a file the baseline lacks | yes |
+| #466 | revision type lacks the fields its comment says it carries | yes |
+| #464 | cited authority files do not exist | yes |
+| #444 | (clean — 20 unit + 1 integration passing) | — |
+| #463 | (clean — 6 contract tests) | — |
+
+That is not a claim that the merges were wrong. #466 and #464 are net improvements, and #433
+not merging is worse for `main` than #433 merging. It is a claim about the review mechanism:
+an independent `FAIL` review, a wrong test count, and a missing authority file all had zero
+effect on whether a PR merged, because nothing in this repository currently gates on any of
+them.
+
+### Correction to my own round-three text
+
+Two statements in the round-three section above are wrong and are superseded here:
+
+1. "**#433 merged at `09:33:25Z`**" — it did not merge. That timestamp is #436.
+2. "**a row cites a guard and a test that do not exist in `main`**" — the row is accurate and
+   the artifacts exist, in #433. The absence is on `main`, because the document landed there
+   by direct commit before the code did.
+
+Both errors are the same error: I checked a convenient source (`main`) for a claim about a
+branch. The corrected comment is on #433 at `7061701355`.
