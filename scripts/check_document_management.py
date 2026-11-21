@@ -3,16 +3,18 @@
 
 Validates the four-dimension metadata block declared at the top of governed
 Markdown files. Rules are listed in
-00-governance/architecture-document-management-policy.md 9 (DM-01 .. DM-13).
+00-governance/architecture-document-management-policy.md 9 (DM-01 .. DM-14).
 
 Trust boundary: the metadata parser is fail-closed. Any input that is not in
 the documented YAML subset is an error, never a silently skipped line. If the
 parse result cannot be trusted, no downstream rule result can be either.
 
-Checked mechanically (DM-01 .. DM-13). NOT checked mechanically, and reported
-as manual controls on every run: whether a scope is genuinely non-overlapping,
-whether evidence supports a decision, whether selected sections are the right
-ones, and whether the document body and its mirror say the same thing.
+Checked mechanically (DM-01 .. DM-14). NOT checked mechanically, and printed on
+every run as `manual controls (policy 9.2)`: the ten items M-01 .. M-10, from
+whether a scope is genuinely non-overlapping to whether an exclusion reason is
+honest. `MANUAL_CONTROLS` below is the single list; T69 compares it to the
+policy table in both directions, because a boundary stated twice is a boundary
+that can be stated differently twice.
 
 No third-party dependency: PyYAML is unavailable in this environment, so the
 supported subset is declared in _SUBSET below and everything else is rejected.
@@ -26,6 +28,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -68,7 +71,33 @@ EXCLUSION_KINDS = {"not-documentation"}
 # in policy section 2 with a reason, not by borrowing another gate's constant.
 GOVERNED_ENTRY = "document_metadata"
 SCHEMA_FILE = "00-governance/architecture-document-metadata.schema.yaml"
+SCHEMA_VERSION = "2"
+# The scope registry publishes a version; publishing one and never reading
+# it is the defect this gate keeps finding. A registry written for a
+# different shape must not be interpreted as if it were current.
+REGISTRY_VERSION = "2"
+# Build and VCS state: present in some working copies, absent in others.
+# Declaring them would make the registry describe a machine, not the repo.
+STRUCTURAL_EXCEPTIONS = {".git", "target"}
 SCOPE_REGISTRY = "00-governance/document-scope-registry.yaml"
+
+# The controls a machine cannot perform, one entry per identifier in policy
+# section 9.2. This list is printed on every run, so the boundary between what
+# was verified and what was assumed travels with the verdict instead of living
+# only in prose. It is a tuple of ids, not a sentence: a sentence gets reworded
+# until it no longer says the same thing, and nothing would notice.
+MANUAL_CONTROLS = (
+    ("M-01", "canonical scope overlap"),
+    ("M-02", "truth of an approval decision"),
+    ("M-03", "whether evidence supports the decision"),
+    ("M-04", "chosen Selected-sections"),
+    ("M-05", "semantic parity of bilingual mirrors"),
+    ("M-06", "honesty of an exclusion reason"),
+    ("M-07", "acceptability of a declared backlog"),
+    ("M-08", "external consumers obeying resolve_canonical()"),
+    ("M-09", "body-hash equivalence suiting a document"),
+    ("M-10", "_unclassified citation ban being respected"),
+)
 
 DOMAINS = {
     "architecture", "domain-model", "memory-brain", "memory-compiler",
@@ -442,6 +471,29 @@ def unknown_keys(node, allowed: set[str], where: str) -> list[str]:
     ]
 
 
+def walk_paths(node, segments: list[str], path: str = ""):
+    """Yield the dotted path of every occurrence of a full key path.
+
+    `walk_keys()` matches one segment anywhere in the tree, which is right for
+    "this key must not appear at all" and wrong for "this *path* must not
+    appear". DM-08 states paths, so it needs this.
+    """
+    if not segments:
+        return
+    head, rest = segments[0], segments[1:]
+    if isinstance(node, dict):
+        for key, value in node.items():
+            here = f"{path}.{key}" if path else key
+            if key == head:
+                if not rest:
+                    yield here
+                else:
+                    yield from walk_paths(value, rest, here)
+    elif isinstance(node, list):
+        for index, value in enumerate(node):
+            yield from walk_paths(value, segments, f"{path}[{index}]")
+
+
 def walk_keys(node, name: str, path: str = ""):
     if isinstance(node, dict):
         for key, value in node.items():
@@ -608,6 +660,15 @@ def schema(root: Path | None = None) -> dict:
             raise SystemExit(f"cannot load {SCHEMA_FILE}: {exc}")
         if not isinstance(loaded, dict):
             raise SystemExit(f"{SCHEMA_FILE} is not a mapping")
+        # The version is the only statement that gate and contract are the same
+        # generation. It was published and never compared, so a schema written
+        # for a different rule set loaded silently.
+        declared_version = loaded.get("schema_version")
+        if str(declared_version) != SCHEMA_VERSION:
+            raise SystemExit(
+                f"{SCHEMA_FILE} declares schema_version {declared_version!r} "
+                f"but this gate implements {SCHEMA_VERSION!r}"
+            )
         fields = loaded.get("fields")
         if not isinstance(fields, dict) or not fields:
             raise SystemExit(f"{SCHEMA_FILE} declares no fields mapping")
@@ -617,6 +678,9 @@ def schema(root: Path | None = None) -> dict:
                 f"{SCHEMA_FILE} no longer declares {sorted(missing)}; a schema "
                 f"without the four dimensions cannot describe a classification"
             )
+        unread = check_schema_keys(loaded)
+        if unread:
+            raise SystemExit(f"{SCHEMA_FILE}: " + "; ".join(unread))
         if len(_required_in(loaded)) < 5:
             raise SystemExit(
                 f"{SCHEMA_FILE} marks fewer than 5 leaves required; "
@@ -624,6 +688,132 @@ def schema(root: Path | None = None) -> dict:
             )
         _SCHEMA[key] = loaded
     return _SCHEMA[key]
+
+def check_schema_keys(loaded: dict) -> list[str]:
+    """Validate the schema against itself: keys, types, and combinations.
+
+    The eleventh review was right that rejecting unknown key *names* is not the
+    same as enforcing the contract. `required: "false"` is a string, and
+    `is True` is False for it, so the field was silently optional; `enum:
+    architecture` is a string, and iterating it yields characters, so the
+    enumeration check compared against letters; `items` on a non-sequence
+    describes a constraint nothing applies. All of these use only known keys.
+
+    So every key is typed here, and combinations that cannot mean anything are
+    refused. This is the schema-of-schema: the contract has to satisfy its own
+    kind of rigour before it can impose any.
+    """
+    allowed = {"kind", "required", "enum", "items", "fields"}
+    problems: list[str] = []
+
+    def walk(node, prefix: str) -> None:
+        if not isinstance(node, dict):
+            problems.append(f"schema node {prefix or '<root>'} is not a mapping")
+            return
+        for name, sub in node.items():
+            here = f"{prefix}{name}"
+            if not isinstance(sub, dict):
+                problems.append(f"schema field {here} is not a mapping")
+                continue
+            unknown = set(sub) - allowed
+            if unknown:
+                problems.append(
+                    f"schema field {here} declares key(s) the gate does not "
+                    f"read: {sorted(unknown)}; remove them or implement them"
+                )
+                continue
+            nested = sub.get("fields")
+            kind = sub.get("kind")
+
+            # A node with children is a mapping, and saying so is consistent:
+            # `kind: mapping` + `fields:` states the same thing twice, which is
+            # harmless. `kind: string` + `fields:` is a contradiction -- the
+            # node claims to be a scalar while the walk descends into its
+            # children -- and the twelfth review's counterexample passed the
+            # previous version unchanged because only key names were checked.
+            if nested is not None and kind is not None and kind not in (
+                "mapping", "nullable-mapping",
+            ):
+                problems.append(
+                    f"schema field {here} declares fields but kind {kind!r}; a "
+                    f"node with children can only be a mapping"
+                )
+                continue
+
+            if nested is not None:
+                if not isinstance(nested, dict) or not nested:
+                    problems.append(
+                        f"schema field {here} declares an empty or non-mapping "
+                        f"fields node; a structure must declare its children"
+                    )
+                else:
+                    walk(nested, f"{here}.")
+
+            if kind is not None and kind not in KINDS:
+                problems.append(
+                    f"schema field {here} declares unknown kind {kind!r}; "
+                    f"legal kinds are {sorted(KINDS)}"
+                )
+                continue
+
+            # `required` must be a real boolean. `required: "false"` is a string,
+            # `is True` is False, and the field silently became optional -- the
+            # exact class of defect this function exists to stop.
+            if "required" in sub and not isinstance(sub["required"], bool):
+                problems.append(
+                    f"schema field {here} declares required: {sub['required']!r}, "
+                    f"which is {type(sub['required']).__name__}, not a boolean"
+                )
+
+            # `enum` must be a list of scalars. A bare string iterates as
+            # characters, so every value would fail -- loudly but for the wrong
+            # reason -- and a mapping is not an enumeration at all.
+            if "enum" in sub:
+                values = sub["enum"]
+                if not isinstance(values, list) or not values:
+                    problems.append(
+                        f"schema field {here} declares enum as "
+                        f"{type(values).__name__}; it must be a non-empty sequence"
+                    )
+                elif any(isinstance(v, (dict, list)) for v in values):
+                    problems.append(
+                        f"schema field {here} declares a non-scalar enum value"
+                    )
+                if kind not in ("string", "nullable-string", "sequence"):
+                    problems.append(
+                        f"schema field {here} declares enum on kind {kind!r}, "
+                        f"which cannot hold an enumerated value"
+                    )
+
+            # `items` only means something for a sequence.
+            if "items" in sub:
+                if kind != "sequence":
+                    problems.append(
+                        f"schema field {here} declares items on kind {kind!r}; "
+                        f"only a sequence has items"
+                    )
+                elif not isinstance(sub["items"], str):
+                    problems.append(
+                        f"schema field {here} declares items as "
+                        f"{type(sub['items']).__name__}, not a kind name"
+                    )
+                elif sub["items"] not in KINDS:
+                    problems.append(
+                        f"schema field {here} declares items: {sub['items']!r}, "
+                        f"which is not a kind"
+                    )
+
+            # A leaf must say what it is. A node with `fields` is structural and
+            # needs no kind; a node without one must have a kind, or the gate
+            # has nothing to type-check it against.
+            if nested is None and kind is None:
+                problems.append(
+                    f"schema field {here} declares no kind and no fields; the "
+                    f"gate cannot type-check it"
+                )
+
+    walk(loaded.get("fields"), "")
+    return problems
 
 def check_kinds(node, spec: dict, errors: list[str], where: str = "") -> None:
     """Enforce the schema's declared kind for every present field.
@@ -783,6 +973,15 @@ def check_document(path: Path, text: str, root: Path | None = None) -> tuple[lis
             errors.append(
                 "DM-03 Selected-sections requires a non-empty included_sections list"
             )
+    if scope.get("type") == "Selected-assets":
+        # Symmetric with Selected-sections. The scope type existed in the
+        # enumeration and required nothing: declaring it and listing no asset
+        # was accepted, which made the type a label rather than a scope.
+        assets = scope.get("included_assets")
+        if not assets or not isinstance(assets, list):
+            errors.append(
+                "DM-03 Selected-assets requires a non-empty included_assets list"
+            )
 
     # DM-04 Revoked must carry a unique revocation decision id.
     revocation = approval.get("revocation")
@@ -836,8 +1035,24 @@ def check_document(path: Path, text: str, root: Path | None = None) -> tuple[lis
             errors.append("DM-06 canonical_scope_keywords entries must be non-empty strings")
 
     # DM-08 Reverse relation is CI-derived, never hand-written (anywhere).
-    for where in walk_keys(meta, "superseded_by"):
-        errors.append(f"DM-08 {where} is CI-derived and MUST NOT be hand-written")
+    # The list comes from the schema's `forbidden:`, which the gate reads. A
+    # second hard-coded key here would be a rule declared twice and enforced
+    # once: the schema would name one forbidden path and DM-08 would check a
+    # different one, and neither would notice.
+    for forbidden_path in schema(root).get("forbidden") or []:
+        if not isinstance(forbidden_path, str):
+            continue
+        # The whole path, not its last segment. Matching on the leaf name was a
+        # real misreport: `authority.superseded_by` was flagged as
+        # `lifecycle.supersession.superseded_by`, so the gate named a location
+        # the author had not written. It also merged two declarations that
+        # happened to share a leaf, turning a path rule into a global name rule
+        # -- a different contract from the one the schema states.
+        for where in walk_paths(meta, forbidden_path.split(".")):
+            errors.append(
+                f"DM-08 {where} is {forbidden_path}: CI-derived, MUST NOT be "
+                f"hand-written"
+            )
 
     # DM-11 Conflict state must not double as authority.
     if canonical == "Canonical" and conflict in ("Under-Review",):
@@ -1296,6 +1511,16 @@ def backlog_roots(root: Path) -> tuple[str, ...]:
         return ()
     return tuple(sorted(str(name).strip("/") for name in node))
 
+# A number immediately followed by a document noun is a claim about how many
+# documents there are. Only `documents:` is allowed to make that claim: prose
+# that repeats the number is a second copy of a fact, and a second copy is a
+# copy that can disagree. The twelfth review found `documents: 27` beside
+# "26 architecture documents" in the English reason -- a number stated twice
+# and true once. Checking that two statements agree is weaker than not having
+# two statements, so the registry prose is now forbidden from stating a count.
+COUNT_CLAIM_RE = re.compile(r"\d+\s*(?:architecture\s+)?(?:documents|Markdown|份|个)")
+
+
 def _count(value) -> int | None:
     """A non-negative integer declared as a YAML scalar.
 
@@ -1313,61 +1538,180 @@ def _count(value) -> int | None:
     return None
 
 
-def backlog_counts(root: Path) -> dict[str, int]:
-    """Actual Markdown count per backlog root, excluding governed subpaths.
+def governed_prefixes() -> tuple[str, ...]:
+    """Paths that are governed regardless of which root they sit under.
 
-    A backlog root can contain a governed subtree: docs/ holds docs/en,
-    docs/zh-CN and the individually governed gap record. Counting those as
-    backlog would inflate the number the registry promises, so they are
-    subtracted -- the two sets are disjoint by construction.
+    docs/ is backlog, but docs/en, docs/zh-CN and the gap record inside it are
+    governed. The same list has to be used by the counter and the scanner, or
+    they disagree about what they are counting -- which is exactly the defect
+    the tenth review found.
     """
-    governed_prefixes = tuple(NORMATIVE_ROOTS) + GOVERNED_FILES
-    counts: dict[str, int] = {}
-    for name in backlog_roots(root):
-        base = root / name
-        if not base.is_dir() or base.is_symlink():
-            continue
-        n = 0
-        for path in base.rglob("*.md"):
-            if path.is_symlink():
-                continue
-            rel = path.relative_to(root).as_posix()
-            if any(rel == g or rel.startswith(g + "/") for g in governed_prefixes):
-                continue
-            n += 1
-        counts[name] = n
-    return counts
+    return tuple(NORMATIVE_ROOTS) + GOVERNED_FILES
 
+def scan_root(root: Path, name: str, skip: tuple[str, ...] = ()) -> tuple[list[Path], list[str]]:
+    """Walk one root, returning (markdown files, problems).
 
-def governed_files(root: Path) -> list[Path]:
+    There is deliberately one walk, not two. `backlog_counts()` and
+    `governed_files()` used to traverse the tree separately with different skip
+    rules, and the tenth review showed what that costs: a symlinked `docs/` was
+    skipped by the counter (so the declared count was compared to nothing) and
+    skipped by the scanner (so the run reported `0 governed documents` and exit
+    0). Two traversals can disagree; one cannot.
+
+    `skip` holds prefixes this root must not descend into, because they are
+    governed by another root.
+
+    A symlink is *reported*, never silently dropped. Dropping it is what made
+    the failure silent: a link is either a mistake or content the gate cannot
+    verify, and both deserve a diagnostic rather than a shorter file list.
+    """
     files: list[Path] = []
-    backlog = set(backlog_roots(root))
-    # Backlog roots are scanned, but the governed subtrees inside them are not
-    # scanned twice: docs/ contains docs/en, docs/zh-CN and the gap record.
-    governed_prefixes = tuple(NORMATIVE_ROOTS) + GOVERNED_FILES
-    for name in NORMATIVE_ROOTS + tuple(sorted(backlog)):
-        base = root / name
-        if not base.is_dir():
-            continue
-        # A symlinked root would make the governed set depend on something
-        # outside the repository: `Path.is_dir()` follows links, and rglob then
-        # reads through them. Refusing is cheaper than proving containment.
-        if base.is_symlink():
-            continue
-        for path in sorted(base.rglob("*.md")):
-            if path.is_symlink():
+    problems: list[str] = []
+    base = root / name
+    if base.is_symlink():
+        problems.append(
+            f"DM-14 {name} is a symbolic link; a governed or backlog root must be "
+            f"a real directory inside the repository, not a pointer to one"
+        )
+        return files, problems
+    if not base.is_dir():
+        return files, problems
+
+    # `os.walk` swallows errors by default: an unreadable directory is skipped
+    # and the walk continues, so a permission problem would shrink the scanned
+    # set with no diagnostic -- the same silent-shortening failure the tenth
+    # review found in the two-walk version, arriving by a different route.
+    def on_error(exc: OSError) -> None:
+        where = getattr(exc, "filename", None) or name
+        problems.append(f"DM-14 cannot read {where}: {exc.strerror or exc}")
+
+    for dirpath, dirnames, filenames in os.walk(
+        base, followlinks=False, onerror=on_error,
+    ):
+        here = Path(dirpath)
+        rel_dir = here.relative_to(root).as_posix()
+        # Prune symlinked directories and governed subtrees before descending,
+        # so a link cannot pull files from outside into the count.
+        kept = []
+        for d in sorted(dirnames):
+            child = here / d
+            rel_child = (rel_dir + "/" + d) if rel_dir != "." else d
+            if child.is_symlink():
+                problems.append(
+                    f"DM-14 {rel_child} is a symbolic link; the gate does not "
+                    f"follow links, and a linked directory would make the scanned "
+                    f"set depend on a target outside the repository"
+                )
                 continue
-            if name in backlog:
-                rel = path.relative_to(root).as_posix()
-                if any(rel == g or rel.startswith(g + "/") for g in governed_prefixes):
-                    continue
+            if any(rel_child == s or rel_child.startswith(s + "/") for s in skip):
+                continue
+            kept.append(d)
+        dirnames[:] = kept
+        for f in sorted(filenames):
+            if not f.endswith(".md"):
+                continue
+            path = here / f
+            rel = path.relative_to(root).as_posix()
+            if any(rel == s or rel.startswith(s + "/") for s in skip):
+                continue
+            if path.is_symlink():
+                problems.append(
+                    f"DM-14 {rel} is a symbolic link; a governed document must be "
+                    f"a regular file inside the repository"
+                )
+                continue
             files.append(path)
-    # GOVERNED_FILES uses the same containment test as the registry check, so
-    # the declared set and the scanned set cannot disagree: a path the registry
-    # accepts is a path this loop includes, and vice versa.
+    return files, problems
+
+def backlog_counts(root: Path) -> tuple[dict[str, int], list[str]]:
+    """Actual Markdown count per backlog root, and anything the walk refused.
+
+    Returns problems as well as counts: a root that could not be walked has no
+    trustworthy count, and reporting zero for it would be a lie the registry
+    comparison would then accept.
+    """
+    skip = governed_prefixes()
+    counts: dict[str, int] = {}
+    problems: list[str] = []
+    for name in backlog_roots(root):
+        found, issues = scan_root(root, name, skip)
+        problems += issues
+        if not issues:
+            counts[name] = len(found)
+    return counts, problems
+
+def collect_governed(root: Path) -> tuple[list[Path], list[str]]:
+    """The governed set, built once, with every problem the walk found.
+
+    Three sources feed this set -- normative roots, backlog roots, and
+    individually governed files -- and the eleventh review was right that
+    concatenating them at the call site was not a unified scan. Two defects
+    followed from that shape and both are fixed here:
+
+      * the problems from `scan_root()` were discarded (`found, _ = ...`), so a
+        symlinked subdirectory inside a *normative* root produced no diagnostic
+        at all -- only backlog problems reached DM-14 (R11-05);
+      * nothing enforced uniqueness, so a path reachable both as a governed
+        file and through a root could be classified twice, inflating the counts
+        that DM-14's accounting identity is supposed to make trustworthy
+        (R11-01).
+
+    The set is therefore returned as a set-like list: one entry per resolved
+    path, and the problems travel with it instead of being dropped.
+    """
+    problems: list[str] = []
+    backlog = set(backlog_roots(root))
+    skip = governed_prefixes()
+    seen: dict[str, Path] = {}
+
+    def add(path: Path) -> None:
+        # Keyed on the resolved path: two spellings of one file are one file.
+        # A symlink never reaches here -- scan_root() reports it instead -- so
+        # this cannot silently collapse a link into its target.
+        try:
+            key = path.resolve(strict=True).as_posix()
+        except (OSError, RuntimeError) as exc:
+            # Falling back to the unresolved spelling would let one file enter
+            # the set twice under two names -- the duplication this function
+            # exists to prevent. An unresolvable path is a problem, not a key.
+            problems.append(f"DM-01 cannot resolve {path}: {exc}")
+            return
+        seen.setdefault(key, path)
+
+    for name in NORMATIVE_ROOTS + tuple(sorted(backlog)):
+        # A backlog root must not re-scan a governed subtree inside it.
+        found, issues = scan_root(root, name, skip if name in backlog else ())
+        problems += issues
+        for path in found:
+            add(path)
+
+    # Individually governed files. They are checked with inside_repo() -- the
+    # same containment proof the registry uses -- and then enter the same set,
+    # so the declared set and the scanned set cannot diverge.
     for rel in GOVERNED_FILES:
         if inside_repo(root, rel):
-            files.append(root / rel)
+            add(root / rel)
+        else:
+            problems.append(
+                f"DM-14 governed file {rel} is not a regular file inside the "
+                f"repository (missing, a symlink, or reached through one)"
+            )
+
+    return list(seen.values()), problems
+
+def governed_files(root: Path) -> list[Path]:
+    """The governed set alone. **Diagnostics only -- never a verdict.**
+
+    This function discards the walk's problems, so a caller that decides
+    pass/fail from it is deciding on a possibly-truncated list. That is not a
+    style preference: the tenth review's blocker was exactly this shape, a scan
+    that reported `0 governed documents` and exit 0.
+
+    `main()` therefore uses `collect_governed()`, and T67 asserts that
+    `governed_files()` has no other production caller -- a grep over the
+    scripts, not a comment promising good behaviour.
+    """
+    files, _ = collect_governed(root)
     return files
 
 def check_scope_registry(root: Path) -> list[str]:
@@ -1395,6 +1739,17 @@ def check_scope_registry(root: Path) -> list[str]:
 
     if not isinstance(registry, dict):
         return [f"DM-14 {SCOPE_REGISTRY} must be a mapping"]
+
+    # A published version that nothing compares is decoration. If the registry
+    # is written for another generation, its `backlog:`/`excluded:` semantics
+    # may differ, and reading it as current would be a silent misreading.
+    declared_registry_version = registry.get("registry_version")
+    if str(declared_registry_version) != REGISTRY_VERSION:
+        errors.append(
+            f"DM-14 {SCOPE_REGISTRY} declares registry_version "
+            f"{declared_registry_version!r} but this gate implements "
+            f"{REGISTRY_VERSION!r}"
+        )
 
     declared = registry.get("governed")
     if not isinstance(declared, list) or not declared:
@@ -1430,6 +1785,17 @@ def check_scope_registry(root: Path) -> list[str]:
             errors.append(f"DM-14 backlog {name!r} has no reason")
         if not str(node.get("reason_zh") or "").strip():
             errors.append(f"DM-14 backlog {name!r} has no reason_zh (GOV-DOC-001)")
+        # The count is a machine field; the prose explains, it does not count.
+        # Requiring the two to agree would still leave two numbers to keep in
+        # step, so the prose is simply not allowed to state one.
+        for field in ("reason", "reason_zh"):
+            said = COUNT_CLAIM_RE.findall(str(node.get(field) or ""))
+            if said:
+                errors.append(
+                    f"DM-14 backlog {name!r} {field} restates a document count "
+                    f"{said}; `documents:` is the only place a count may be "
+                    f"stated, so the prose cannot drift from it"
+                )
 
     for name, node in excluded.items():
         if not isinstance(node, dict):
@@ -1469,22 +1835,30 @@ def check_scope_registry(root: Path) -> list[str]:
     # was not on disk as far as this check was concerned: not governed, not
     # excluded, not reported, not scanned. A dot is not an exemption.
     #
-    # `.git` is the one structural exception, and it is structural rather than
-    # declared: it is the version-control store, present in every clone, absent
-    # in every export. Requiring it in a tracked file would make the registry
-    # describe the working copy instead of the repository.
+    # Two structural exceptions, and they are structural rather than declared:
+    # `.git` is the version-control store and `target/` is Rust build output.
+    # Both exist in some working copies and not others, so a registry entry
+    # would assert something about a machine instead of about the repository --
+    # a fresh clone would then fail for naming a directory it does not have.
     accounted = set(declared) | set(backlog) | set(excluded) | {"docs/en", "docs/zh-CN"}
-    on_disk = {p.name for p in root.iterdir() if p.is_dir()} - {".git"}
-    # A symlinked directory is not part of this repository's content. Listing it
-    # in the registry would require the gate to scan through the link, so it is
-    # refused outright instead of being declared.
+    # `Path.is_dir()` follows links, so a symlink to a directory satisfied both
+    # "is a directory" and "is a symlink" and was subtracted from the unknown
+    # list twice: once as accounted, once as a link. It then also satisfied the
+    # `missing` check below, which asks whether every *declared* directory
+    # exists -- so pointing `docs` at /tmp/elsewhere made a registry entry true
+    # that was false. Enumeration is by `is_dir() and not is_symlink()`: a link
+    # is never a directory, for either purpose.
     links = sorted(p.name for p in root.iterdir() if p.is_symlink())
     if links:
         errors.append(
             f"DM-14 symbolic links at the repository root are not governed roots: {links}. "
             f"A symlink makes the governed set depend on a target outside the repository"
         )
-    unknown = sorted(on_disk - accounted - set(links))
+    on_disk = {
+        p.name for p in root.iterdir()
+        if p.is_dir() and not p.is_symlink()
+    } - STRUCTURAL_EXCEPTIONS
+    unknown = sorted(on_disk - accounted)
     if unknown:
         errors.append(
             f"DM-14 top-level directories not accounted for: {unknown}. "
@@ -1498,7 +1872,16 @@ def check_scope_registry(root: Path) -> list[str]:
 
     # (3) the bilingual mirrors are always governed
     for mirror in ("docs/en", "docs/zh-CN"):
-        if not (root / mirror).is_dir():
+        # `is_dir()` follows links, so a symlinked mirror looked present while
+        # the scanner refused to descend into it: the registry would assert the
+        # mirror exists and the run would classify nothing from it.
+        target = root / mirror
+        if target.is_symlink():
+            errors.append(
+                f"DM-14 bilingual mirror directory {mirror} is a symbolic link; "
+                f"a mirror must be real content of this repository"
+            )
+        elif not target.is_dir():
             errors.append(f"DM-14 bilingual mirror directory {mirror} is missing")
 
     # (4) individually governed files must exist and sit in an excluded dir:
@@ -1521,7 +1904,8 @@ def check_scope_registry(root: Path) -> list[str]:
     # `documents: 27` is a sentence rather than a claim: the number could drift
     # as files are added or migrated and nobody would notice. With it, the
     # registry either states the truth or the gate fails.
-    actual = backlog_counts(root)
+    actual, walk_problems = backlog_counts(root)
+    errors += walk_problems
     for name, node in backlog.items():
         if not isinstance(node, dict):
             continue
@@ -1620,11 +2004,14 @@ def main() -> int:
     incremental = args.require_changed is not None
     if incremental and args.strict:
         parser.error("--require-changed and --strict are different verdicts; pick one")
-    targets = governed_files(root)
+    targets, walk_problems = collect_governed(root)
     required = changed_paths(root, args.require_changed) if args.require_changed else set()
     is_git = git(root, "rev-parse", "--git-dir") is not None
 
-    errors: list[str] = []
+    # Problems the walk itself found -- symlinks, unreadable roots -- are
+    # errors of the run, not warnings. They arrive with the file list so that
+    # no path can produce a shorter list without a diagnostic.
+    errors: list[str] = list(walk_problems)
     notes: list[str] = []
     docs: dict[str, dict] = {}
     unclassified: list[str] = []
@@ -1707,10 +2094,8 @@ def main() -> int:
         print(f"  authority: {scope_id} -> {resolve_canonical(docs, scope_id)}")
 
     print(
-        "  manual controls (not machine-verified): canonical scope overlap; "
-        "truth of an approval or evidence claim; chosen Selected-sections; "
-        "semantic parity of bilingual mirrors; consumption discipline of "
-        "external readers (use resolve_canonical, never ad-hoc logic)"
+        "  manual controls (not machine-verified, policy 9.2): "
+        + "; ".join(f"{cid} {label}" for cid, label in MANUAL_CONTROLS)
     )
     for note in notes:
         print(f"  note: {note}")

@@ -3,7 +3,7 @@
 //! The fence database MUST live outside the event-store backup/restore set.
 //! Restore holds an IMMEDIATE transaction on that database from preflight
 //! through atomic activation, serializing concurrent Forget operations.
-use rusqlite::{params, Connection, OptionalExtension, TransactionBehavior};
+use rusqlite::{params, Connection, OptionalExtension, Transaction, TransactionBehavior};
 use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -96,7 +96,7 @@ impl ForgetFence {
             return Err(ForgetFenceError::InvalidFence("namespace and reason digest are required"));
         }
         let db = Self::connect(&self.path)?;
-        let tx = db.unchecked_transaction_with_behavior(TransactionBehavior::Immediate)?;
+        let tx = Transaction::new_unchecked(&db, TransactionBehavior::Immediate)?;
         let existing: Option<i64> = tx.query_row(
             "SELECT fence_seq FROM forget_fence WHERE namespace_key=?1",
             [namespace_key], |r| r.get(0)
@@ -134,14 +134,14 @@ impl ForgetFence {
             fs::copy(backup, &stage)?;
             let staged_db = Self::connect(&stage)?;
             validate_schema(&staged_db)?;
-            let tx = staged_db.unchecked_transaction_with_behavior(TransactionBehavior::Immediate)?;
+            let tx = Transaction::new_unchecked(&staged_db, TransactionBehavior::Immediate)?;
             let mut stmt = tx.prepare("SELECT event_row,scope_json FROM accepted_events")?;
             let rows = stmt.query_map([], |r| Ok((r.get::<_, i64>(0)?, r.get::<_, String>(1)?)))?;
             let mut doomed = Vec::new();
             for row in rows {
                 let (id, scope_json) = row?;
                 let keys = parse_scope_keys(id, &scope_json)?;
-                if keys.iter().any(|key| fences.contains(key)) { doomed.push(id); }
+                if keys.iter().any(|key| fences.contains(key.as_str())) { doomed.push(id); }
             }
             drop(stmt);
             for id in &doomed {

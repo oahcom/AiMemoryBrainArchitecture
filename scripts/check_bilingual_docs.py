@@ -81,12 +81,6 @@ EMBEDDED_BILINGUAL_SOURCES: dict[str, str] = {
         "Tracks bilingual migration classifications, source versions, and "
         "pending governance decisions as one auditable register."
     ),
-    "00-governance/templates/document-metadata-template.md": (
-        "Is the copy-paste block every governed document is built from; the "
-        "block itself is YAML whose keys must stay identical in both languages, "
-        "and the file is checked against the gate, so a translated twin could "
-        "drift from the schema it is meant to satisfy."
-    ),
     "00-governance/templates/bilingual-issue-template.md": (
         "Provides one shared Issue field layout and bilingual prompts so copied "
         "records retain identical identifiers and acceptance fields."
@@ -255,6 +249,15 @@ def check_embedded_registration_history() -> list[str]:
     return errors
 
 
+def _carries_chinese(source: str) -> bool:
+    """Return True when a source contains at least 100 CJK Unified Ideographs."""
+    path = ROOT / source
+    if not path.is_file():
+        return False
+    text = path.read_text(encoding="utf-8", errors="replace")
+    return sum(1 for ch in text if "\u4e00" <= ch <= "\u9fff") >= 100
+
+
 def current_bilingual_gaps() -> set[str]:
     """Return non-exempt normative Markdown sources missing either language mirror."""
     gaps: set[str] = set()
@@ -264,18 +267,19 @@ def current_bilingual_gaps() -> set[str]:
             source = path.relative_to(REPO_ROOT).as_posix()
             if source in EMBEDDED_BILINGUAL_SOURCES:
                 continue
+            # Inventory and changed-path gates must share prefixes or pair-exempt paths become permanent gaps.
+            if source.startswith(PAIR_EXEMPT_PREFIXES):
+                continue
             english = REPO_ROOT / "docs" / "en" / source
             chinese = REPO_ROOT / "docs" / "zh-CN" / source
-            # Keep 14-ai-development resolution aligned with the existing
-            # side-by-side/mirror parser used by the changed-path gate.
-            resolved_14 = (
-                counterpart_14(source) if root_name == "14-ai-development" else True
+            mirrored = english.is_file() and chinese.is_file()
+            # ponytail: structural pairing only; semantic translation parity remains a human-review responsibility.
+            paired = (
+                mirrored
+                or side_by_side_partner(source) is not None
+                or (english.is_file() and _carries_chinese(source))
             )
-            if (
-                not english.is_file()
-                or not chinese.is_file()
-                or resolved_14 is None
-            ):
+            if not paired:
                 gaps.add(source)
     return gaps
 
@@ -610,7 +614,7 @@ def check_prompt_library() -> list[str]:
 
 
 def side_by_side_partner(source: str) -> str | None:
-    """Conventional side-by-side counterpart for a 14-ai-development path."""
+    """Conventional side-by-side counterpart, accepted in every normative root."""
     if source.endswith(".en.md"):
         stem = source[: -len(".en.md")]
         for cand in (stem + ".zh-CN.md", stem + ".md"):
@@ -618,14 +622,14 @@ def side_by_side_partner(source: str) -> str | None:
                 return cand
     elif source.endswith(".zh-CN.md"):
         stem = source[: -len(".zh-CN.md")]
-        cand = stem + ".en.md"
-        if (ROOT / cand).is_file():
-            return cand
+        for cand in (stem + ".en.md", stem + ".md"):
+            if cand != source and (ROOT / cand).is_file():
+                return cand
     elif source.endswith(".md"):
         stem = source[: -len(".md")]
-        cand = stem + ".en.md"
-        if (ROOT / cand).is_file():
-            return cand
+        for cand in (stem + ".en.md", stem + ".zh-CN.md"):
+            if cand != source and (ROOT / cand).is_file():
+                return cand
     return None
 
 

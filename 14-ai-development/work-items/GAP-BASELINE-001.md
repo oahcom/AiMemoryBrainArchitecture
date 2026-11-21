@@ -165,3 +165,280 @@ observable contract outcome, runnable by a single documented command.
   finding in the R3 defect register.
 - The corrected verdicts above are measurements of *presence in the tree*, not quality
   judgements of the code that exists.
+
+## Post-baseline measurements
+
+Everything above is a measurement at `a8fd2b7` and is left unedited, per dispatch
+rule 4. This section records what changed afterwards, so a reader can tell a frozen
+baseline from a moving target.
+
+### GAP-01 — the compiler now has an executing admission layer
+
+`GAP-01` above says "0% code". That is no longer true, and the change came from two
+commits that were not part of the original dispatch:
+
+| Commit | Content |
+|---|---|
+| `a730880e` | `crates/memory-compiler` — five typed stages, structured provenance, two distinct admissions, `PREPARED_HIDDEN`, pure Rust, zero dependencies |
+| `8c58d4c6` (PR #427) | `src/admission.rs` +1217 lines — producer admission, fence/gate contention, protocol-sequence receipts; crate gains `rusqlite`, `sha2`, `serde` |
+
+Measured on `main` at `8c58d4c6`, tree read back from the API and built in a clean
+directory:
+
+```
+$ cargo test --offline -p memory-compiler
+running 19 tests
+test admission::tests::alternative_exit_transitions_are_accepted_and_persisted ... ok
+test admission::tests::fence_and_gate_compete_on_one_protocol_sequence_exactly_one_wins ... ok
+test admission::tests::final_gate_receipt_binds_observed_fence_and_permission_epoch ... ok
+test admission::tests::gate_reports_stale_protocol_when_fence_generation_matches ... ok
+test admission::tests::illegal_transition_accept_to_published_is_rejected ... ok
+test admission::tests::partial_dependencies_remain_hidden_until_all_edges_are_registered ... ok
+test admission::tests::producer_receipt_lookup_and_not_found_are_distinct ... ok
+test admission::tests::producer_registration_is_idempotent_and_conflicting_digest_does_not_add_rows ... ok
+test tests::extraction_is_deterministic_and_lineaged ... ok
+test tests::ingestion_preserves_original_receipt ... ok
+test tests::ingestion_requires_durable_receipt_and_intent ... ok
+test tests::late_worker_cannot_publish ... ok
+test tests::normalization_preserves_upstream_identity ... ok
+test tests::publication_requires_second_admission ... ok
+test tests::publication_requires_visibility_authorization ... ok
+test tests::staged_derivative_is_hidden ... ok
+test tests::staging_requires_complete_dependency_closure ... ok
+test tests::staging_requires_producer_admission ... ok
+test tests::successful_publication_requires_both_admissions ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.29s
+```
+
+Nineteen tests, not eleven. The eight new ones are all admission-layer behaviour.
+
+**Environment note, because it changes how this must be reproduced:** the crate now
+depends on `rusqlite`, which needs a C compiler. On the Windows host `gcc` cannot
+execute `cc1`, so `libsqlite3-sys` cannot build there at all — this is a host
+environment defect, not a crate defect. The run above was executed in WSL2 Ubuntu
+with `cargo 1.95.0` / `gcc 13.3.0` and `CARGO_BUILD_JOBS=1` (parallel codegen on the
+`/mnt/c` mount exhausts memory). Any future claim about this crate must state which
+toolchain produced it.
+
+### GAP-01 — one architecture, not two: Owner E ruling recorded
+
+A second GAP-01 delivery existed as PR #425 (root `04-memory-compiler/`, six stages,
+Python reference model, 10 tests). Owner E was asked to adjudicate and returned
+`FINAL: DECIDED`:
+
+| Question | Ruling |
+|---|---|
+| Path convention | `docs/en/` + `docs/zh-CN/` mirrors. Root `.zh-CN.md` suffix is **not** the pattern for new normative documents. |
+| Stage inventory | **Five** stages. `Provenance` is a cross-cutting field on every stage output, **not** a sixth stage. |
+| Reference implementation | `crates/memory-compiler` (Rust) only. The Python model does not survive as a second executable authority. |
+
+The ruling is `DECIDED FOR CONVERGENCE`, explicitly not `ACCEPTED`, and it does not
+grant Owner E any authority over D, I or Storage admission — `PublicationAuthority`
+stays an injection boundary, and the seven `PublicationProof` booleans are evidence
+inputs E may verify but may not issue.
+
+This ruling was not accepted on assertion. Reproducing `current_bilingual_gaps()` from
+`scripts/check_bilingual_docs.py` against both trees showed PR #425 would add **three**
+new bilingual gaps (its two contract files plus `reference-model/README.md`, none with
+`docs/en` or `docs/zh-CN` counterparts), and `main()` returns 2 on any new gap. `main`
+itself has **zero** gaps in that directory. One of the two placements could not
+survive the gate; the ruling chose the one that can.
+
+### GAP-06 — first cross-module test exists and executes
+
+PR #444 adds `crates/memory-context/tests/e2e_store_to_context.rs`, spanning
+`memory-storage-sqlite` → `memory-store` → `memory-context`. Measured:
+
+```
+$ cargo test -p memory-context --test e2e_store_to_context
+running 1 test
+test sqlite_store_read_current_builds_context_from_persisted_revision ... ok
+test result: ok. 1 passed; 0 failed; 0 ignored
+```
+
+One test is not an E2E suite, and `benchmarks/req10_e2e/README.md` still says
+`NOT_MEASURED` — correctly, because this exercises modules, not the product runtime.
+The GAP-06 acceptance condition ("a path spanning two or more modules, single
+documented command") is met for the first time.
+
+### GAP-02, GAP-04 — suites now execute
+
+| Gap | Suite | Measured |
+|---|---|---|
+| 02 | `06-memory-context/reference-model/test_g_context_model.py` (PR #433) | `Ran 15 tests ... OK` |
+| 04 | `08-bmcp-protocol/tests/conformance/provider_outcome/test_provider_outcome.py` (PR #436) | `Ran 10 tests ... OK (skipped=5)` |
+
+The five skips in GAP-04 name their own blocker (`requires Owner C authoritative
+validator`). Recording a skip with a named dependency is the correct outcome; making
+them pass against a local reimplementation would have been a false green.
+
+### What has not changed
+
+- GAP-03 remains 0% code. PR #430 is a candidate specification, `DRAFT`, `approver:
+  null`, `normative_status: Informative`.
+- GAP-05 remains unimplemented. PR #435 is a specification; the Phase 2 entities,
+  revisions and invariants it defines exist in no Rust type.
+- No gap is closed. Every number above is a measurement of presence, not a quality
+  judgement, and none of it is acceptance.
+
+## Independent reviews and the CI outage
+
+This section records two things the earlier sections could not: the first independent
+reviews required by dispatch rule 3, and the fact that no CI job in this repository has
+executed since billing broke. Both change what "measured" can mean here.
+
+### The CI outage invalidates every check status in this repository
+
+Every check run I sampled — on `main` HEAD and on five PR heads — reports
+`completed / failure` with exactly one annotation:
+
+> The job was not started because recent account payments have failed or your spending
+> limit needs to be increased.
+
+No job executed. There is no log, because there is no run.
+
+| ref | check runs | all failures are billing |
+|---|---|---|
+| `main` HEAD `477a55e6` | 2 | yes |
+| PR #451 `1f139cea` | 3 | yes |
+| PR #444 `d84ea5c5` | 5 | yes |
+| PR #433 `2d291569` | 6 | yes |
+| PR #436 `1ffed9ed` | 5 | yes |
+| PR #425 `8142b1ca` | 5 | yes |
+
+Consequence, stated plainly because it was being misused: **"CI is red" is not evidence
+against a PR in this repository right now.** A correct PR and a broken one carry the same
+red X. `mergeable` is still computed by git and is still reliable; check runs are not.
+
+This is a repo-level blocker. Nothing in any GAP delivery can fix it. Every measurement
+in this document therefore comes from local execution, and is labelled as such.
+
+### A gate defect found while measuring: `ROOT` is `Path.cwd()`
+
+`scripts/check_bilingual_docs.py` sets `ROOT = Path.cwd()` at import time. Pairing
+resolution (`side_by_side_partner`, `mirror_partner`) reads files through `ROOT`, while
+the baseline is read through `REPO_ROOT`. Running the script from any directory other
+than the repository root silently produces a different answer.
+
+I hit this: measuring from the parent directory reported **32 new gaps on `main`**, which
+would mean `main` itself was broken. Running from the repository root reported
+**86 frozen, 0 new gaps**. The 32 were an artefact of my own invocation, not a repo state.
+
+Anyone reproducing these numbers must `cd` to the tree root first. I record this because
+I nearly filed the artefact as a finding.
+
+### Two independent reviews, both FAIL, both finding something I missed
+
+Dispatch rule 3 says test execution is not approval. Two review sessions were dispatched
+with frozen inputs (branch head, my raw outputs, and an explicit prohibition on reusing my
+conclusions). Both re-derived the measurements rather than trusting them.
+
+| PR | GAP | reviewer verdict | found independently |
+|---|---|---|---|
+| #433 | 02 | `FAIL` / `FINAL: BLOCKED` | coverage doc miscounts its own tests: says 14, actual 15 |
+| #436 | 04 | `FAIL` / `FINAL: BLOCKED` | index declares baseline `1ad6c2cf` but lists a file created by the PR |
+
+Both findings are real and both are mine to record as misses:
+
+**#433.** `context-implementation-coverage.md:131` and `:143` say the reference model has
+14 tests. `grep -c "    def test_"` gives 15. Verified by me after the reviewer reported it:
+
+```
+$ python3 -m unittest test_g_context_model.py -v   ->  Ran 15 tests ... OK
+$ python3 -m unittest test_g_applied_ledger.py -v  ->  Ran 8 tests ... OK
+$ python3 -m unittest discover -s . -p 'test_*.py' ->  Ran 23 tests ... OK
+```
+
+The document's stated total of 29 is wrong under either basis: 30 if counting only
+`test_g_context_model.py` against the pre-existing 15, 23 if counting the whole directory.
+**The document never says which basis it uses**, which is the deeper defect.
+
+**#436.** `protocol-index.md` states `Baseline: 1ad6c2cf...` and its evidence-boundary
+section says it records presence "at the indexed repository baseline". It then lists
+`tests/conformance/provider_outcome/test_provider_outcome.py`, which this PR creates.
+I confirmed the contradiction:
+
+```
+GET /contents/08-bmcp-protocol/tests/conformance/provider_outcome/test_provider_outcome.py?ref=1ad6c2cf...
+-> 404
+```
+
+The same class of defect as #433: a document whose declared basis does not match its
+contents.
+
+### What the reviews confirmed rather than refuted
+
+Not everything failed. These hold up under independent re-derivation:
+
+- **#436's pin is genuine.** Blob `a631bc7a...` resolves to `$id:
+  urn:aimba:schema:c-submit-outcome:1.0.1`, `title: CSubmitOutcome`, `schema_version:
+  1.0.1`, with `$defs` and `allOf` present. The index's claim about an external C-owned
+  schema is accurate, and it correctly declines to reclassify it as BMCP-local.
+- **#436's assertions are real schema assertions.** `Draft202012Validator` and
+  `validator.validate(record)`, not attribute checks.
+- **#433's 19-row mapping is correct** against source SHA `1ad6c2cf`: 0 missing, 0
+  nonexistent, 0 blob-SHA mismatches.
+- **#433's bilingual pair is a translation**, per 8 line-by-line spot checks.
+
+### GAP-04's merged-tree result
+
+Re-measured on a real merge of `main` (`00e3d2ea`) with the branch, in a real git clone:
+
+```
+$ python3 -m unittest discover -p 'test_*.py' -v
+Ran 10 tests ... OK (skipped=5)
+```
+
+5 pass, 5 skip, 0 fail. The five skips name their own blocker (`requires Owner C
+authoritative validator`). That matches what this document already recorded above and is
+unchanged.
+
+### GAP-06 re-verified after 58 commits of main drift
+
+The earlier entry measured PR #444 on its own head. That was the weaker claim. Re-measured
+on the merged tree (`main` + branch, no conflicts), in WSL2 because the Windows host cannot
+compile `libsqlite3-sys`:
+
+```
+$ cargo test -p memory-context                    ->  20 passed; 0 failed
+$ ./target/debug/deps/e2e_store_to_context-...    ->  1 passed; 0 failed
+```
+
+The bilingual gate on that same merged tree: `rc=0`, `86 frozen, 0 new gaps`, `PASS`.
+That last line matters because two other GAP PRs fail the identical command.
+
+### Corrected gate results, using `main`'s gate against each PR tree
+
+Measured on real merges, `PR_BODY` empty:
+
+| PR | GAP | merged gate `rc` | new bilingual gaps |
+|---|---|---|---|
+| #444 | 06 | 0 | 0 |
+| #433 | 02 | 2 | 2 |
+| #436 | 04 | 2 | 2 |
+| #425 | 01 | 2 | 3 (closed before this re-measurement) |
+
+Root cause is one rule, not four mistakes: `.zh-CN.md` side-by-side pairing is only
+understood inside `14-ai-development`. For every other normative root the requirement is
+`docs/en/<path>` **and** `docs/zh-CN/<path>`, both present. Four PRs placed translated
+pairs at the root of a non-`14` directory and assumed they paired. They do not.
+
+### Two PRs closed during this period, not by me
+
+- **#425** closed without merge at `2026-11-21T09:03:37Z`. Reason recorded by the Project
+  Owner: superseded by the five-stage Rust direction in `a730880e`, not a rejection of its
+  10/10 Python tests.
+- **#451** closed without merge at `2026-11-21T09:13:52Z`. Its intent landed via #455,
+  which fixed a one-sided-mirror hole that #450 had introduced.
+
+I record both because #425 was the subject of the Owner E adjudication in the section
+above, and that adjudication now has an executed disposition rather than a pending one.
+
+### What still has not changed
+
+- GAP-03 remains 0% code. GAP-05 remains unimplemented.
+- No gap is closed by this document. Every number here measures presence and execution,
+  not quality, and none of it is acceptance.
+- Four PRs still have zero approvals. Two now have zero-approval reviews that returned
+  `FAIL`. A review is not an approval either.

@@ -9,7 +9,10 @@ root, so every input outside the declared subset must fail, not degrade.
 
 from __future__ import annotations
 
+import ast
+import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -1321,6 +1324,30 @@ GOLDEN = [
         "must equal the declared domain",
     ),
     (
+        "selected-assets scope without assets is rejected",
+        "  domain: architecture\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Approved\n"
+        "      approved_version:\n"
+        "        scheme: git\n"
+        "        value: \"0000000000000000000000000000000000000000\"\n"
+        "      approval_scope:\n"
+        "        type: Selected-assets\n"
+        "      approval_applicability: Applicable-To-Current-Version\n"
+        "    evidence_verification:\n"
+        "      verification_status: Verified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Non-Canonical\n"
+        "    normative_status: Informative\n"
+        "    canonical_conflict_status: None\n",
+        False,
+        "included_assets",
+    ),
+    (
         "selected-sections scope without sections is rejected",
         "  domain: architecture\n"
         "  role: reference\n"
@@ -1650,6 +1677,626 @@ def run_symlink_boundary() -> None:
         record("T47 backlog documents are actually scanned",
                "backlog.md" in scanned, f"  scanned {sorted(scanned)}")
 
+
+def run_scan_boundary() -> None:
+    """T49-T53: the scan and the count must be one walk with one rule.
+
+    The tenth review found that they were two walks. A symlinked backlog root
+    was skipped by the counter, so the declared count was compared to nothing,
+    and skipped by the scanner too, so the run reported zero governed documents
+    and exit 0. Both symptoms came from one cause: two traversals that were
+    allowed to disagree. These cases pin the single-walk contract.
+
+    Each asserts the *diagnostic*, not merely the exit code. A gate that fails
+    for an unrelated reason satisfies "exit 1" while proving nothing.
+    """
+    print("scan boundary")
+    import check_document_management as gate
+
+    def run(root):
+        proc = subprocess.run(
+            [sys.executable, str(Path(__file__).resolve().parent
+                                 / "check_document_management.py"),
+             "--root", str(root)],
+            capture_output=True, text=True,
+        )
+        return proc.returncode, proc.stdout + proc.stderr
+
+    # T49: a backlog root that is itself a symlink is refused by name.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        outside = Path(tmp).parent / "outside-docs-t49"
+        outside.mkdir(exist_ok=True)
+        for i in range(3):
+            (outside / f"f{i}.md").write_text("# x\n", encoding="utf-8")
+        shutil.rmtree(root / "docs")
+        (root / "docs").symlink_to(outside, target_is_directory=True)
+        try:
+            code, out = run(root)
+            record("T49 symlinked backlog root is named in the diagnostic",
+                   code != 0 and "docs is a symbolic link" in out,
+                   f"  exit {code}, output {out[:200]}")
+        finally:
+            shutil.rmtree(outside, ignore_errors=True)
+
+    # T50: a symlinked directory inside a backlog root is reported by path.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        outside = Path(tmp).parent / "outside-sub-t50"
+        outside.mkdir(exist_ok=True)
+        (outside / "external.md").write_text("# ext\n", encoding="utf-8")
+        (root / "docs" / "linked").symlink_to(outside, target_is_directory=True)
+        try:
+            code, out = run(root)
+            record("T50 symlinked directory inside a backlog root is reported",
+                   code != 0 and "docs/linked is a symbolic link" in out,
+                   f"  exit {code}, output {out[:200]}")
+        finally:
+            shutil.rmtree(outside, ignore_errors=True)
+
+    # T51: a symlinked .md inside a backlog root is reported by path.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        outside = Path(tmp).parent / "outside-file-t51.md"
+        outside.write_text("# ext\n", encoding="utf-8")
+        (root / "docs" / "linked.md").symlink_to(outside)
+        try:
+            code, out = run(root)
+            record("T51 symlinked markdown file inside a backlog root is reported",
+                   code != 0 and "docs/linked.md is a symbolic link" in out,
+                   f"  exit {code}, output {out[:200]}")
+        finally:
+            outside.unlink(missing_ok=True)
+
+    # T52: the counter and the scanner see the same files.
+    #
+    # This is the property the two-walk version violated, stated as an equality
+    # so a future split fails here rather than in production.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        for i in range(4):
+            (root / "docs" / f"extra{i}.md").write_text("# x\n", encoding="utf-8")
+        counts, problems = gate.backlog_counts(root)
+        skip = gate.governed_prefixes()
+        scanned, _ = gate.scan_root(root, "docs", skip)
+        record("T52 backlog count equals the number of files the scan returns",
+               counts.get("docs") == len(scanned) and not problems,
+               f"  count {counts.get('docs')} vs scanned {len(scanned)}, "
+               f"problems {problems}")
+
+    # T53: a stale count is an error, not a sentence.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        reg = root / "00-governance" / "document-scope-registry.yaml"
+        text = reg.read_text(encoding="utf-8")
+        reg.write_text(text.replace("    documents: 1", "    documents: 9"), encoding="utf-8")
+        code, out = run(root)
+        record("T53 a declared backlog count that disagrees with disk fails",
+               code != 0 and "declares 9 documents" in out,
+               f"  exit {code}, output {out[:200]}")
+
+
+def run_declared_but_unread() -> None:
+    """T54-T56: every published key must be read by something.
+
+    The reviewer asked twice what else is published and not executed. These
+    three were found by asking that question of the schema itself.
+    """
+    print("declared-but-unread keys")
+    import check_document_management as gate
+
+    real = Path(__file__).resolve().parents[1] / gate.SCHEMA_FILE
+    src = real.read_text(encoding="utf-8")
+
+    # T54: schema_version is compared, not decorative.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "00-governance").mkdir()
+        (root / gate.SCHEMA_FILE).write_text(
+            src.replace('schema_version: "2"', 'schema_version: "3"'), encoding="utf-8"
+        )
+        try:
+            gate.schema(root)
+            record("T54 schema_version mismatch stops the run", False, "  no error raised")
+        except SystemExit as exc:
+            record("T54 schema_version mismatch stops the run",
+                   "schema_version" in str(exc), f"  {exc}")
+
+    # T55: DM-08 is driven by the schema's forbidden list, not a hard-coded key.
+    body = (
+        "  domain: architecture\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Draft\n"
+        "    supersession:\n"
+        "      superseded_by: 00-governance/x.md\n"
+        "    evidence_verification:\n"
+        "      verification_status: Unverified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Non-Canonical\n"
+        "    normative_status: Informative\n"
+        "    canonical_conflict_status: None\n"
+    )
+    errs, _ = check_document(FILE, doc(body))
+    record("T55 forbidden path from the schema is rejected by DM-08",
+           any("DM-08" in e and "superseded_by" in e for e in errs),
+           f"  got {errs}")
+
+    # T56: a `when` condition is refused outright. It cannot be evaluated, so
+    # publishing it in the contract is a claim with no checker behind it.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "00-governance").mkdir()
+        injected = src.replace(
+            "          approval_scope:\n            kind: mapping\n",
+            "          approval_scope:\n            kind: mapping\n"
+            "            when: DM-03 decision_status == Draft\n",
+            1,
+        )
+        record("T56 fixture actually injects a when key", "when: DM-03" in injected)
+        (root / gate.SCHEMA_FILE).write_text(injected, encoding="utf-8")
+        try:
+            gate.schema(root)
+            record("T56 an unevaluable `when` key is refused at load", False,
+                   "  schema loaded")
+        except SystemExit as exc:
+            record("T56 an unevaluable `when` key is refused at load",
+                   "when" in str(exc), f"  {exc}")
+
+
+
+def run_unified_scan() -> None:
+    """T57-T61: one governed set, no duplicates, no dropped diagnostics.
+
+    The eleventh review found that fixing "two walks with two skip rules" was
+    not the same as "one governed set". Three sources still fed the list at the
+    call site, the problems from the normative-root walk were discarded, and
+    nothing enforced uniqueness. `collect_governed()` is now the single entry
+    point and these cases pin its three properties.
+    """
+    print("unified governed set")
+    import check_document_management as gate
+
+    def run(root):
+        proc = subprocess.run(
+            [sys.executable, str(Path(__file__).resolve().parent
+                                 / "check_document_management.py"),
+             "--root", str(root)],
+            capture_output=True, text=True,
+        )
+        return proc.returncode, proc.stdout + proc.stderr
+
+    # T57: no file appears twice, however it is reached.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        original = gate.GOVERNED_FILES
+        # A governed file that a governed root already covers: the naive
+        # concatenation would list it twice and inflate every count derived
+        # from the list.
+        (root / "00-governance" / "dupe.md").write_text(doc(BASE), encoding="utf-8")
+        gate.GOVERNED_FILES = original + ("00-governance/dupe.md",)
+        try:
+            files, _ = gate.collect_governed(root)
+            names = [p.as_posix() for p in files]
+            record("T57 governed set contains each file exactly once",
+                   len(names) == len(set(names)),
+                   f"  {len(names)} entries, {len(set(names))} unique")
+        finally:
+            gate.GOVERNED_FILES = original
+
+    # T58: a symlinked subdirectory inside a *normative* root is reported.
+    #
+    # This is R11-05. Only backlog problems reached DM-14, because
+    # governed_files() discarded what scan_root() returned for normative roots.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        outside = Path(tmp).parent / "outside-norm-t58"
+        outside.mkdir(exist_ok=True)
+        (outside / "leak.md").write_text("# leak\n", encoding="utf-8")
+        (root / "00-governance" / "linked").symlink_to(outside, target_is_directory=True)
+        try:
+            code, out = run(root)
+            record("T58 symlinked subdirectory in a normative root is reported",
+                   code != 0 and "00-governance/linked is a symbolic link" in out,
+                   f"  exit {code}, output {out[:200]}")
+        finally:
+            shutil.rmtree(outside, ignore_errors=True)
+
+    # T59: a top-level symlink to a directory is not an accounted directory.
+    #
+    # R11-02. is_dir() follows links, so a link satisfied both "on disk" and
+    # "declared" -- making a registry entry true that pointed outside the repo.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        outside = Path(tmp).parent / "outside-top-t59"
+        outside.mkdir(exist_ok=True)
+        (root / "ghost").symlink_to(outside, target_is_directory=True)
+        try:
+            code, out = run(root)
+            record("T59 top-level symlink is reported and does not satisfy the registry",
+                   code != 0 and "symbolic links at the repository root" in out,
+                   f"  exit {code}, output {out[:200]}")
+        finally:
+            shutil.rmtree(outside, ignore_errors=True)
+
+    # T60: a declared directory that is only a symlink counts as missing.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        outside = Path(tmp).parent / "outside-decl-t60"
+        outside.mkdir(exist_ok=True)
+        # `tools` is declared as excluded by the fixture registry.
+        shutil.rmtree(root / "tools")
+        (root / "tools").symlink_to(outside, target_is_directory=True)
+        try:
+            code, out = run(root)
+            record("T60 declared directory that is only a symlink is reported",
+                   code != 0 and ("do not exist" in out or "symbolic links" in out),
+                   f"  exit {code}, output {out[:200]}")
+        finally:
+            shutil.rmtree(outside, ignore_errors=True)
+
+    # T61: DM-08 names the path it was given, not a same-named key elsewhere.
+    body = (
+        "  domain: architecture\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Draft\n"
+        "    evidence_verification:\n"
+        "      verification_status: Unverified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Non-Canonical\n"
+        "    normative_status: Informative\n"
+        "    canonical_conflict_status: None\n"
+        "    superseded_by: 00-governance/x.md\n"
+    )
+    errs, _ = check_document(FILE, doc(body))
+    dm08 = [e for e in errs if "DM-08" in e]
+    # The declared forbidden path is lifecycle.supersession.superseded_by, so a
+    # key of the same name under `authority` is NOT a DM-08 violation. Matching
+    # on the leaf name flagged it and named a location the author never wrote.
+    record("T61 a same-named key elsewhere is not reported as the forbidden path",
+           not dm08, f"  got {dm08}")
+
+    # T62: the declared forbidden path is the one that fires.
+    body2 = (
+        "  domain: architecture\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Draft\n"
+        "    supersession:\n"
+        "      superseded_by: 00-governance/x.md\n"
+        "    evidence_verification:\n"
+        "      verification_status: Unverified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Non-Canonical\n"
+        "    normative_status: Informative\n"
+        "    canonical_conflict_status: None\n"
+    )
+    errs2, _ = check_document(FILE, doc(body2))
+    record("T62 the declared forbidden path is matched in full",
+           any("lifecycle.supersession.superseded_by" in e for e in errs2 if "DM-08" in e),
+           f"  got {[e for e in errs2 if 'DM-08' in e]}")
+
+
+def run_schema_of_schema() -> None:
+    """T63: known keys with illegal values must be refused.
+
+    The eleventh review: rejecting unknown key *names* is not enforcement.
+    `required: "false"` is a string, `is True` is False for it, and the field
+    silently became optional. Every key is typed now.
+    """
+    print("schema-of-schema typing")
+    import check_document_management as gate
+
+    real = Path(__file__).resolve().parents[1] / gate.SCHEMA_FILE
+    src = real.read_text(encoding="utf-8")
+    base = "  domain:\n    kind: string\n    required: true\n"
+    record("T63 fixture anchor is present", base in src)
+
+    mutations = {
+        "required is a string": "  domain:\n    kind: string\n    required: \"false\"\n",
+        "items on a string kind": "  domain:\n    kind: string\n    items: string\n",
+        "unknown kind": "  domain:\n    kind: strng\n",
+        "enum on a boolean kind": "  domain:\n    kind: boolean\n    enum:\n      - x\n",
+        "neither kind nor fields": "  domain:\n    required: true\n",
+    }
+    for label, replacement in mutations.items():
+        mutated = src.replace(base, replacement, 1)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "00-governance").mkdir()
+            (root / gate.SCHEMA_FILE).write_text(mutated, encoding="utf-8")
+            try:
+                gate.schema(root)
+                record(f"T63 {label} is refused", False, "  schema loaded")
+            except SystemExit as exc:
+                record(f"T63 {label} is refused", True, f"  {str(exc)[:90]}")
+
+
+
+def run_structural_schema() -> None:
+    """T64: a node cannot claim a scalar kind and children at once.
+
+    The twelfth review's counterexample: `kind: string` next to `fields:` was
+    accepted, so one node stated two contradictory things and the gate honoured
+    whichever it looked at first. `kind: mapping` + `fields:` is fine -- that is
+    the same statement twice.
+    """
+    print("structural schema nodes")
+    import check_document_management as gate
+
+    real = Path(__file__).resolve().parents[1] / gate.SCHEMA_FILE
+    src = real.read_text(encoding="utf-8")
+    anchor = "  lifecycle:\n    kind: mapping\n"
+    record("T64 fixture anchor is present", anchor in src)
+
+    cases = {
+        "fields with a scalar kind": src.replace(anchor, "  lifecycle:\n    kind: string\n", 1),
+        "fields with a sequence kind": src.replace(anchor, "  lifecycle:\n    kind: sequence\n", 1),
+    }
+    for label, mutated in cases.items():
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "00-governance").mkdir()
+            (root / gate.SCHEMA_FILE).write_text(mutated, encoding="utf-8")
+            try:
+                gate.schema(root)
+                record(f"T64 {label} is refused", False, "  schema loaded")
+            except SystemExit as exc:
+                record(f"T64 {label} is refused", "mapping" in str(exc),
+                       f"  {str(exc)[:90]}")
+
+    # And the honest form still loads: the rule must not forbid the real schema.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "00-governance").mkdir()
+        (root / gate.SCHEMA_FILE).write_text(src, encoding="utf-8")
+        try:
+            gate.schema(root)
+            record("T64 kind: mapping with fields still loads", True)
+        except SystemExit as exc:
+            record("T64 kind: mapping with fields still loads", False, f"  {exc}")
+
+
+def run_registry_version() -> None:
+    """T65: registry_version is executed, not published.
+
+    A version field nothing compares is decoration. If the registry is written
+    for another generation, its backlog/excluded semantics may differ, and
+    reading it as current would be a silent misreading.
+    """
+    print("registry version")
+    import check_document_management as gate
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        reg = root / "00-governance" / "document-scope-registry.yaml"
+        text = reg.read_text(encoding="utf-8")
+        record("T65 fixture registry declares a version",
+               'registry_version: "2"' in text)
+        reg.write_text(text.replace('registry_version: "2"',
+                                    'registry_version: "1"', 1), encoding="utf-8")
+        errors = gate.check_scope_registry(root)
+        record("T65 a registry version the gate does not implement is an error",
+               any("registry_version" in e for e in errors),
+               f"  got {errors[:3]}")
+
+
+def run_bilingual_count() -> None:
+    """T66: only `documents:` may state a document count.
+
+    The twelfth review found `documents: 27` next to "26 architecture documents"
+    in the English reason. The twelfth-review fix was to check that the two
+    agree, which was the wrong shape: it left two numbers to keep in step and
+    only noticed after they diverged. A count stated once cannot disagree with
+    itself, so the gate now refuses a reason that restates one.
+    """
+    print("bilingual count agreement")
+    import check_document_management as gate
+
+    reg = Path(__file__).resolve().parents[1] / "00-governance" / "document-scope-registry.yaml"
+    parsed = gate.parse_yaml_subset(reg.read_text(encoding="utf-8"))
+    problems: list[str] = []
+    for name, node in (parsed.get("backlog") or {}).items():
+        if not isinstance(node, dict):
+            continue
+        for field in ("reason", "reason_zh"):
+            said = gate.COUNT_CLAIM_RE.findall(str(node.get(field) or ""))
+            if said:
+                problems.append(f"{name}.{field} restates {said}")
+    record("T66 the shipped registry states its backlog count exactly once",
+           not problems, f"  {problems}")
+
+    # And the rule is executed, not merely described: a reason that restates the
+    # count must be refused by the gate, and the diagnostic must say which field.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        reg_path = root / "00-governance" / "document-scope-registry.yaml"
+        text = reg_path.read_text(encoding="utf-8")
+        # Inject a count claim into the English reason only.
+        mutated = text.replace(
+            '    reason: "architecture documents not yet classified"',
+            '    reason: "27 architecture documents not yet classified"',
+            1,
+        )
+        record("T66 mutation applied to the fixture reason", mutated != text)
+        reg_path.write_text(mutated, encoding="utf-8")
+        errors = gate.check_scope_registry(root)
+        record("T66 a reason restating the backlog count is an error",
+               any("restates a document count" in e for e in errors),
+               f"  got {[e for e in errors if 'restates' in e]}")
+
+
+def run_unreadable_walk() -> None:
+    """T68: a directory the walk cannot read is a problem, not a shorter list.
+
+    `os.walk` swallows errors by default: an unreadable directory is skipped and
+    the walk continues. The scanned set then shrinks with no diagnostic, which
+    is the tenth review's `0 governed documents, exit 0` arriving by another
+    route. `scan_root()` passes `onerror`, and this case proves the callback is
+    actually wired: if the argument were dropped, the injected error would never
+    reach `problems`.
+    """
+    print("unreadable walk")
+    import check_document_management as gate
+
+    real_walk = gate.os.walk
+
+    def fake_walk(top, followlinks=False, onerror=None):
+        # Raise the same way the real walk would on an unreadable directory.
+        if onerror is not None:
+            onerror(OSError(13, "Permission denied", str(top)))
+        return iter(())
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        gate.os.walk = fake_walk
+        try:
+            files, problems = gate.scan_root(root, "00-governance")
+        finally:
+            gate.os.walk = real_walk
+        record("T68 an unreadable directory is reported, not silently skipped",
+               any("DM-14 cannot read" in p for p in problems),
+               f"  files {len(files)}, problems {problems}")
+
+    # And it must reach the verdict, not stop at the helper: a walk that lost a
+    # subtree cannot produce a pass.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        gate.os.walk = fake_walk
+        try:
+            errors = gate.check_scope_registry(root)
+        finally:
+            gate.os.walk = real_walk
+        record("T68 the unreadable-walk problem reaches the gate verdict",
+               any("cannot read" in e for e in errors),
+               f"  got {[e for e in errors if 'cannot read' in e][:2]}")
+
+    # A real permission failure, when the platform and user can produce one.
+    # Running as root bypasses mode bits, so the case is skipped there rather
+    # than reported as passing.
+    if hasattr(os, "geteuid") and os.geteuid() != 0:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = _repo(tmp)
+            locked = root / "00-governance" / "locked"
+            locked.mkdir()
+            (locked / "x.md").write_text("# x\n", encoding="utf-8")
+            locked.chmod(0o000)
+            try:
+                _, problems = gate.scan_root(root, "00-governance")
+            finally:
+                locked.chmod(0o755)
+            record("T68 a real 0o000 directory is reported by path",
+                   any("cannot read" in p and "locked" in p for p in problems),
+                   f"  problems {problems}")
+    else:
+        record("T68 a real 0o000 directory is reported by path", True,
+               "  (running as root; mode bits cannot deny access)")
+
+
+def run_manual_controls() -> None:
+    """T69: the manual-control list is one list, printed and documented.
+
+    A boundary stated in prose and a boundary stated at runtime are two
+    statements, and two statements drift. The policy table (section 9.2) and the
+    run output must name the same identifiers: if the gate prints a control the
+    policy does not list, the policy is incomplete; if the policy lists one the
+    gate does not print, the run understates what it did not check.
+    """
+    print("manual controls")
+    import check_document_management as gate
+
+    policy = (Path(__file__).resolve().parents[1] / "00-governance"
+              / "architecture-document-management-policy.md").read_text(encoding="utf-8")
+    in_policy = set(re.findall(r"^\|\s*(M-\d\d)\s*\|", policy, re.M))
+    in_gate = {cid for cid, _ in gate.MANUAL_CONTROLS}
+
+    record("T69 policy section 9.2 lists manual controls", bool(in_policy),
+           f"  found {sorted(in_policy)}")
+    record("T69 every control the gate prints is documented",
+           in_gate <= in_policy, f"  undocumented {sorted(in_gate - in_policy)}")
+    record("T69 every documented control is printed by the gate",
+           in_policy <= in_gate, f"  unprinted {sorted(in_policy - in_gate)}")
+
+    # And it must reach the output, not just the constant: a list nothing prints
+    # is a comment with a data type.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        proc = subprocess.run(
+            [sys.executable, str(Path(__file__).resolve().parent
+                                 / "check_document_management.py"),
+             "--root", str(root)],
+            capture_output=True, text=True,
+        )
+        out = proc.stdout + proc.stderr
+        missing = sorted(cid for cid in in_gate if cid not in out)
+        record("T69 the manual-control boundary is printed on every run",
+               not missing, f"  missing from output: {missing}")
+
+
+def run_single_entry_callers() -> None:
+    """T67: governed_files() is diagnostics only, and that is checked.
+
+    A comment promising good behaviour is not evidence. The tenth review's
+    blocker was a scan that reported `0 governed documents` and exit 0; the
+    shape that produced it was an entry point that dropped diagnostics. This
+    test greps the production scripts for callers.
+    """
+    print("single entry point")
+    import check_document_management as gate
+
+    scripts_dir = Path(__file__).resolve().parent
+    repo_root = scripts_dir.parent
+    offenders: list[str] = []
+    # Only an actual call is an offence. A docstring, a comment or the `def`
+    # line mentioning the name is not, so the check runs on the module's AST
+    # rather than on text: `governed_files()` appearing in prose is exactly the
+    # kind of false positive that makes a rule get ignored.
+    #
+    # Scope: every `.py` file the repository ships, excluding test files and the
+    # build directory. Scanning only `scripts/*.py` would have been a rule about
+    # a directory, not about the gate: moving the entry point to `tools/` would
+    # have silently retired it. The limit is named here and asserted below, so
+    # a future move shows up as a failing case rather than as a comment that
+    # stopped being true.
+    skipped_dirs = {"target", ".git", "tests", "__pycache__"}
+    scanned = [
+        path for path in sorted(repo_root.rglob("*.py"))
+        if not (set(path.relative_to(repo_root).parts) & skipped_dirs)
+        and not path.name.startswith("test_")
+    ]
+    gate_path = scripts_dir / "check_document_management.py"
+    record("T67 the scan covers the gate itself, not just scripts/*.py",
+           gate_path in scanned and any(p.parent != scripts_dir for p in scanned),
+           f"  scanned {[p.relative_to(repo_root).as_posix() for p in scanned]}")
+    for path in scanned:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            func = node.func
+            name = getattr(func, "id", None) or getattr(func, "attr", None)
+            if name == "governed_files":
+                offenders.append(f"{path.relative_to(repo_root).as_posix()}:{node.lineno}")
+    record("T67 no production script decides a verdict from governed_files()",
+           not offenders, "  " + "; ".join(offenders[:4]))
+
+    # And main() must consume the problems, not just the files.
+    gate_src = (scripts_dir / "check_document_management.py").read_text(encoding="utf-8")
+    record("T67 main() takes problems from the same call as the files",
+           "targets, walk_problems = collect_governed(root)" in gate_src
+           and "errors: list[str] = list(walk_problems)" in gate_src)
+
+
 def main() -> int:
     print("check_document_management self-check")
     run_parser()
@@ -1666,6 +2313,16 @@ def main() -> int:
     run_golden_corpus()
     run_schema_fail_closed()
     run_symlink_boundary()
+    run_scan_boundary()
+    run_declared_but_unread()
+    run_unified_scan()
+    run_schema_of_schema()
+    run_structural_schema()
+    run_registry_version()
+    run_bilingual_count()
+    run_unreadable_walk()
+    run_manual_controls()
+    run_single_entry_callers()
     run_schema_agreement()
     passed, total = sum(RESULTS), len(RESULTS)
     print(f"{passed}/{total} passed")

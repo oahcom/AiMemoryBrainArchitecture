@@ -98,11 +98,33 @@ class GateRootsTest(unittest.TestCase):
     # --- convention: docs/en mirror ---
 
     def test_docs_en_mirror_pair_passes(self):
-        self.write("14-ai-development/AI-EXEC-002.md")
-        self.write("docs/en/14-ai-development/AI-EXEC-002.md")
+        # Shape 3 is valid only when the root source is genuinely Chinese.
+        chinese = "这是中文原文。" * 20
+        self.write("14-ai-development/AI-EXEC-002.md", chinese)
+        self.write("docs/en/14-ai-development/AI-EXEC-002.md", "English translation.\n")
         changed = {"14-ai-development/AI-EXEC-002.md", "docs/en/14-ai-development/AI-EXEC-002.md"}
         self.assertEqual(self.normative(changed), [])
+        self.assertTrue(self.gate._carries_chinese("14-ai-development/AI-EXEC-002.md"))
         self.assertEqual(self.gate.check_mirror_pairing(changed, {p: "M" for p in changed}, False), [])
+
+        # A pair of English-only files must not satisfy the root-Chinese shape.
+        self.write("14-ai-development/english-only-probe.md", "English only.\n")
+        self.write("docs/en/14-ai-development/english-only-probe.md", "English only.\n")
+        self.gate.REPO_ROOT = self.root
+        self.assertIn("14-ai-development/english-only-probe.md", self.gate.current_bilingual_gaps())
+
+        # The two other legal shapes remain accepted by the structural inventory.
+        self.write("14-ai-development/side-by-side.en.md", "English only.\n")
+        self.write("14-ai-development/side-by-side.zh-CN.md", chinese)
+        self.write("14-ai-development/triple.md", chinese)
+        self.write("docs/en/14-ai-development/triple.md", "English translation.\n")
+        self.write("docs/zh-CN/14-ai-development/triple.md", chinese)
+        self.write("14-ai-development/no-pair.md", "English only.\n")
+        gaps = self.gate.current_bilingual_gaps()
+        self.assertNotIn("14-ai-development/side-by-side.en.md", gaps)
+        self.assertNotIn("14-ai-development/side-by-side.zh-CN.md", gaps)
+        self.assertNotIn("14-ai-development/triple.md", gaps)
+        self.assertIn("14-ai-development/no-pair.md", gaps)
 
     def test_docs_en_mirror_change_alone_fails(self):
         self.write("14-ai-development/AI-EXEC-002.md")
@@ -454,6 +476,47 @@ class GateRootsTest(unittest.TestCase):
             self.git_move(repo, src, dst)
         self.commit_tree(repo, "move triple across normative roots")
         self.assertEqual(self.root_departures(repo, base), [])
+
+
+    # --- Issue #461: X.md <-> X.zh-CN.md pairs in every normative root ---
+
+    def inventory_02(self):
+        self.gate.ROOT = self.root
+        self.gate.REPO_ROOT = self.root
+        self.gate.NORMATIVE_ROOTS = {"02-domain-model"}
+        (self.root / "02-domain-model").mkdir(parents=True, exist_ok=True)
+        return self.gate.current_bilingual_gaps()
+
+    def test_issue_461_n1_md_without_zh_cn_is_rejected(self):
+        self.write("02-domain-model/zz-probe-alone.md", "English only.\\n")
+        self.assertIn("02-domain-model/zz-probe-alone.md", self.inventory_02())
+
+    def test_issue_461_n2_zh_cn_without_md_is_rejected(self):
+        self.write("02-domain-model/zz-probe-alone.zh-CN.md", "中文内容。\\n")
+        self.assertIn("02-domain-model/zz-probe-alone.zh-CN.md", self.inventory_02())
+
+    def test_issue_461_n3_md_and_zh_cn_pair_is_accepted(self):
+        self.write("02-domain-model/zz-probe-pair.md", "English source.\\n")
+        self.write("02-domain-model/zz-probe-pair.zh-CN.md", "中文翻译。\\n")
+        gaps = self.inventory_02()
+        self.assertNotIn("02-domain-model/zz-probe-pair.md", gaps)
+        self.assertNotIn("02-domain-model/zz-probe-pair.zh-CN.md", gaps)
+
+    def test_issue_461_n4_en_and_zh_cn_pair_is_accepted(self):
+        self.write("02-domain-model/zz-probe-en.en.md", "English source.\\n")
+        self.write("02-domain-model/zz-probe-en.zh-CN.md", "中文翻译。\\n")
+        gaps = self.inventory_02()
+        self.assertNotIn("02-domain-model/zz-probe-en.en.md", gaps)
+        self.assertNotIn("02-domain-model/zz-probe-en.zh-CN.md", gaps)
+
+    def test_issue_461_n5_deleting_zh_cn_side_rejects_pair(self):
+        english = "02-domain-model/phase-2-domain-extension.md"
+        chinese = "02-domain-model/phase-2-domain-extension.zh-CN.md"
+        self.write(english, "English source.\\n")
+        self.write(chinese, "中文翻译。\\n")
+        self.assertNotIn(english, self.inventory_02())
+        (self.root / chinese).unlink()
+        self.assertIn(english, self.inventory_02())
 
 
 if __name__ == "__main__":
