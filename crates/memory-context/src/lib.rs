@@ -16,6 +16,7 @@ pub struct ContextBudget {
 }
 
 impl ContextBudget {
+    /// Validates that both configured limits are non-zero.
     pub fn validate(&self) -> Result<(), ContextError> {
         if self.max_entries == 0 || self.max_rendered_bytes == 0 {
             return Err(ContextError::InvalidBudget);
@@ -38,6 +39,7 @@ pub struct ContextIdentity {
 }
 
 impl ContextIdentity {
+    /// Validates required identity fields and scope references.
     pub fn validate(&self) -> Result<(), ContextError> {
         if self.scope_refs.is_empty() {
             return Err(ContextError::Domain(DomainError::EmptyRequiredField(
@@ -615,21 +617,54 @@ mod tests {
         }
     }
 
-    // A13 — delivery intent visibility is private and has no sendable variant.
+    // A13 — delivery intent visibility remains private across distinct inputs.
     #[test]
     fn delivery_intent_visibility_is_always_private_pending_gate() {
-        let snapshot = build_context(
-            identity(),
-            3,
-            budget(),
-            vec![candidate("a", ContextTier::P0, 1, "memory text")],
-        )
-        .unwrap();
-        let intent = prepare_delivery_intent(id("delivery-1"), &snapshot).unwrap();
-        assert_eq!(
-            intent.visibility,
-            DeliveryVisibility::PrivatePendingPublicationGate
-        );
+        let configurations = vec![
+            (
+                3,
+                ContextBudget {
+                    max_entries: 1,
+                    max_rendered_bytes: 32,
+                },
+                vec![candidate("a", ContextTier::P0, 1, "memory text")],
+            ),
+            (
+                17,
+                ContextBudget {
+                    max_entries: 2,
+                    max_rendered_bytes: 128,
+                },
+                vec![
+                    candidate("b", ContextTier::P2, 3, "second"),
+                    candidate("c", ContextTier::P1, 8, "third"),
+                ],
+            ),
+            (
+                99,
+                ContextBudget {
+                    max_entries: 4,
+                    max_rendered_bytes: 512,
+                },
+                vec![
+                    candidate("d", ContextTier::P3, 1, "fourth"),
+                    candidate("e", ContextTier::P0, 9, "fifth"),
+                    candidate("f", ContextTier::P2, 4, "sixth"),
+                ],
+            ),
+        ];
+
+        for (context_version, context_budget, candidates) in configurations {
+            let snapshot =
+                build_context(identity(), context_version, context_budget, candidates).unwrap();
+            let intent =
+                prepare_delivery_intent(id(&format!("delivery-{context_version}")), &snapshot)
+                    .unwrap();
+            assert_eq!(
+                intent.visibility,
+                DeliveryVisibility::PrivatePendingPublicationGate
+            );
+        }
     }
 
     // A14 — delivery intent targets exactly the snapshot context version.
@@ -653,6 +688,29 @@ mod tests {
         let intent = prepare_delivery_intent(id("delivery-1"), &snapshot).unwrap();
         let decoded: ContextSnapshot = serde_json::from_str(&intent.snapshot_json).unwrap();
         assert_eq!(decoded, snapshot);
+    }
+
+    // Restores the original build_context input-lineage rejection assertion.
+    #[test]
+    fn build_context_rejects_candidates_without_lineage() {
+        let mut item = candidate("missing-lineage", ContextTier::P0, 1, "valid content");
+        item.source_refs.clear();
+
+        assert_eq!(
+            build_context(identity(), 1, budget(), vec![item]).unwrap_err(),
+            ContextError::MissingLineage
+        );
+    }
+
+    // Restores the original build_context input-content rejection assertion.
+    #[test]
+    fn build_context_rejects_whitespace_only_rendered_content() {
+        let item = candidate("empty-content", ContextTier::P0, 1, "   \n\t ");
+
+        assert_eq!(
+            build_context(identity(), 1, budget(), vec![item]).unwrap_err(),
+            ContextError::EmptyField("rendered_content")
+        );
     }
 
     // B1 — snapshot entry-count and emptiness accessors reflect the entries.
@@ -726,4 +784,3 @@ mod tests {
     }
 }
 
-[executed on device: VM-0-9-ubuntu (d03d92fd-4b5d-4bc1-a701-985eb5de69cc)]
