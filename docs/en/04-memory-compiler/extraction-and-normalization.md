@@ -347,7 +347,7 @@ resolved or complete while any member of that complete
 dependency closure remains unpersisted.
 
 The observable completion predicate is:
-DependencyClosurePersisted(P) = TRUE only when the
+DependencyClosurePersisted(P) = TRUE if and only if the
 authoritative durable dependency-registration record for
 P identifies the complete direct and transitive dependency
 set, its completeness state is COMPLETE, its persisted
