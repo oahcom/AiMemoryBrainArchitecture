@@ -3,8 +3,9 @@
 
 use memory_domain::{scope_set_contains_all, scopes_intersect, Memory, MemoryVersion, OpaqueId, ScopeRef};
 use memory_storage::{
-    ChangePage, ChangeRecord, CommitReceipt, CommitRequest, CommitSequence, MemoryStorage,
-    PrepareRequest, PreparedCommitReceipt, StorageError,
+    ChangePage, ChangeRecord, CommitReceipt, CommitRequest, CommitSequence, FenceGeneration,
+    ForgetReceipt, ForgetRequest, MemoryStorage, PrepareRequest, PreparedCommitReceipt,
+    StorageError,
 };
 use rusqlite::{params, Connection, OptionalExtension, TransactionBehavior};
 use std::time::Duration;
@@ -110,7 +111,25 @@ impl SqliteMemoryStorage {
                    commit_sequence INTEGER
                  );
                  CREATE INDEX IF NOT EXISTS publication_preparations_memory_idx
-                   ON publication_preparations(memory_id, state);",
+                   ON publication_preparations(memory_id, state);
+                 -- Memory-granularity Forget fence. Deliberately keyed by
+                 -- memory_id, not namespace_key: a namespace fence would forget
+                 -- every Memory belonging to that scope.
+                 CREATE TABLE IF NOT EXISTS forget_fence (
+                   memory_id TEXT PRIMARY KEY REFERENCES memories(memory_id),
+                   fence_generation INTEGER NOT NULL UNIQUE,
+                   reason TEXT NOT NULL,
+                   recorded_at TEXT NOT NULL
+                 );
+                 -- Separate from `idempotency` because that table's receipt_json
+                 -- is decoded as CommitReceipt in two places; mixing types would
+                 -- fail at decode.
+                 CREATE TABLE IF NOT EXISTS forget_idempotency (
+                   idempotency_key TEXT PRIMARY KEY,
+                   memory_id TEXT NOT NULL REFERENCES memories(memory_id),
+                   request_digest TEXT NOT NULL,
+                   receipt_json TEXT NOT NULL
+                 );",
             )
             .map_err(|_| StorageError::TransactionUnavailable)
     }
@@ -142,12 +161,31 @@ impl SqliteMemoryStorage {
         }
     }
 
+    /// Fail-closed fence probe. A forgotten Memory is indistinguishable from a
+    /// missing one at this boundary, so callers see `Ok(None)` /
+    /// `NotFoundOrNotVisible` rather than a third, existence-revealing response.
+    fn is_fenced(&self, memory_id: &OpaqueId) -> Result<bool, StorageError> {
+        let fenced: Option<i64> = self
+            .connection
+            .query_row(
+                "SELECT 1 FROM forget_fence WHERE memory_id = ?1",
+                params![memory_id.as_str()],
+                |row| row.get(0),
+            )
+            .optional()
+            .map_err(|_| StorageError::TransactionUnavailable)?;
+        Ok(fenced.is_some())
+    }
+
     fn read_version_row(
         &self,
         memory_id: &OpaqueId,
         version_id: &OpaqueId,
         scope: &[ScopeRef],
     ) -> Result<Option<MemoryVersion>, StorageError> {
+        if self.is_fenced(memory_id)? {
+            return Ok(None);
+        }
         let row = self
             .connection
             .query_row(
@@ -225,6 +263,9 @@ impl MemoryStorage for SqliteMemoryStorage {
             .map_err(|_| StorageError::TransactionUnavailable)?;
         let Some((scope_json, current)) = row else { return Ok(None) };
         Self::scope_allowed(&scope_json, scope)?;
+        if self.is_fenced(memory_id)? {
+            return Ok(None);
+        }
         let Some(current) = current else { return Ok(None) };
         let version_id = OpaqueId::new(current).map_err(|_| StorageError::InvalidSchema)?;
         self.read_version_row(memory_id, &version_id, scope)
@@ -270,6 +311,21 @@ impl MemoryStorage for SqliteMemoryStorage {
             .ok_or(StorageError::NotFoundOrNotVisible)?;
 
         Self::scope_allowed(&memory_row.0, scope)?;
+
+        // A fenced Memory must not accept new publications. Fail closed with the
+        // same error a missing Memory produces, so the fence stays unobservable.
+        let fenced: Option<i64> = tx
+            .query_row(
+                "SELECT 1 FROM forget_fence WHERE memory_id = ?1",
+                params![request.memory_id.as_str()],
+                |row| row.get(0),
+            )
+            .optional()
+            .map_err(|_| StorageError::TransactionUnavailable)?;
+        if fenced.is_some() {
+            return Err(StorageError::NotFoundOrNotVisible);
+        }
+
         let memory_scopes: Vec<ScopeRef> = Self::decode(&memory_row.0)?;
         if request.new_version.claims.iter().any(|claim| {
             !scope_set_contains_all(&memory_scopes, &claim.scope_refs)
@@ -848,6 +904,136 @@ impl MemoryStorage for SqliteMemoryStorage {
                 }
             }
         }
+    }
+
+    fn forget_memory(
+        &mut self,
+        request: ForgetRequest,
+        scope: &[ScopeRef],
+    ) -> Result<ForgetReceipt, StorageError> {
+        Self::validate_scope_set(scope)?;
+        if request.idempotency_key.is_empty() || request.request_digest.is_empty() {
+            return Err(StorageError::InvalidSchema);
+        }
+        if request.reason.as_str().trim().is_empty() {
+            return Err(StorageError::InvalidSchema);
+        }
+
+        // IMMEDIATE so the generation read and the fence insert cannot interleave:
+        // two concurrent forgets would otherwise both read the same MAX and
+        // collide on the UNIQUE constraint, surfacing as a storage error rather
+        // than a clean idempotent replay.
+        let tx = self
+            .connection
+            .transaction_with_behavior(TransactionBehavior::Immediate)
+            .map_err(|_| StorageError::TransactionUnavailable)?;
+
+        let scope_json: String = tx
+            .query_row(
+                "SELECT scope_json FROM memories WHERE memory_id = ?1",
+                params![request.memory_id.as_str()],
+                |row| row.get(0),
+            )
+            .optional()
+            .map_err(|_| StorageError::TransactionUnavailable)?
+            .ok_or(StorageError::NotFoundOrNotVisible)?;
+        Self::scope_allowed(&scope_json, scope)?;
+
+        if let Some((stored_memory_id, stored_digest, receipt_json)) = tx
+            .query_row(
+                "SELECT memory_id, request_digest, receipt_json FROM forget_idempotency WHERE idempotency_key = ?1",
+                params![request.idempotency_key.as_str()],
+                |row| Ok((
+                    row.get::<_, String>(0)?,
+                    row.get::<_, String>(1)?,
+                    row.get::<_, String>(2)?,
+                )),
+            )
+            .optional()
+            .map_err(|_| StorageError::TransactionUnavailable)?
+        {
+            if stored_memory_id == request.memory_id.as_str() && stored_digest == request.request_digest {
+                let receipt: ForgetReceipt = Self::decode(&receipt_json)?;
+                tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+                return Ok(receipt);
+            }
+            return Err(StorageError::IdempotencyConflict);
+        }
+
+        // Repeated Forget under a fresh key is idempotent: replay the existing
+        // generation instead of allocating another one.
+        if let Some(existing) = tx
+            .query_row(
+                "SELECT fence_generation FROM forget_fence WHERE memory_id = ?1",
+                params![request.memory_id.as_str()],
+                |row| row.get::<_, i64>(0),
+            )
+            .optional()
+            .map_err(|_| StorageError::TransactionUnavailable)?
+        {
+            let receipt = ForgetReceipt {
+                memory_id: request.memory_id.clone(),
+                fence_generation: FenceGeneration(existing as u64),
+                idempotency_key: request.idempotency_key.clone(),
+            };
+            tx.execute(
+                "INSERT INTO forget_idempotency(idempotency_key, memory_id, request_digest, receipt_json)
+                 VALUES (?1, ?2, ?3, ?4)",
+                params![
+                    request.idempotency_key.as_str(),
+                    request.memory_id.as_str(),
+                    request.request_digest.as_str(),
+                    Self::encode(&receipt)?
+                ],
+            )
+            .map_err(|_| StorageError::IdempotencyConflict)?;
+            tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+            return Ok(receipt);
+        }
+
+        let next: i64 = tx
+            .query_row(
+                "SELECT COALESCE(MAX(fence_generation), 0) + 1 FROM forget_fence",
+                [],
+                |row| row.get(0),
+            )
+            .map_err(|_| StorageError::TransactionUnavailable)?;
+        let recorded_at = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_nanos()
+            .to_string();
+        tx.execute(
+            "INSERT INTO forget_fence(memory_id, fence_generation, reason, recorded_at)
+             VALUES (?1, ?2, ?3, ?4)",
+            params![
+                request.memory_id.as_str(),
+                next,
+                request.reason.as_str(),
+                recorded_at
+            ],
+        )
+        .map_err(|_| StorageError::TransactionUnavailable)?;
+
+        let receipt = ForgetReceipt {
+            memory_id: request.memory_id.clone(),
+            fence_generation: FenceGeneration(next as u64),
+            idempotency_key: request.idempotency_key.clone(),
+        };
+        tx.execute(
+            "INSERT INTO forget_idempotency(idempotency_key, memory_id, request_digest, receipt_json)
+             VALUES (?1, ?2, ?3, ?4)",
+            params![
+                request.idempotency_key.as_str(),
+                request.memory_id.as_str(),
+                request.request_digest.as_str(),
+                Self::encode(&receipt)?
+            ],
+        )
+        .map_err(|_| StorageError::IdempotencyConflict)?;
+
+        tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+        Ok(receipt)
     }
 }
 

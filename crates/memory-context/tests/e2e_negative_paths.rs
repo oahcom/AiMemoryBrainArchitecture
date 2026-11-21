@@ -13,13 +13,12 @@
 use memory_context::{
     build_context, ContextBudget, ContextCandidate, ContextError, ContextIdentity, ContextTier,
 };
-use memory_event_store_sqlite::forget_fence::ForgetFence;
 use memory_domain::{
     Claim, EpistemicStatus, Memory, MemoryLifecycle, MemoryVersion, OpaqueId, ScopeKind, ScopeRef,
 };
 use memory_storage::StorageError;
 use memory_storage_sqlite::SqliteMemoryStorage;
-use memory_store::{MemoryStore, MemoryStoreError, RevisionWrite};
+use memory_store::{ForgetWrite, MemoryStore, MemoryStoreError, RevisionWrite};
 use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -193,70 +192,97 @@ fn foreign_scope_cannot_read_or_populate_context() {
     assert!(snapshot.is_empty());
 }
 
-/// Desired Store-level forget E2E. This remains ignored until the memory-store
-/// contract can durably transition a Memory to a forgotten/tombstoned state and
-/// ensure reads cannot return it as a context candidate.
+/// Store-level Forget E2E. A forgotten Memory must stop being a context
+/// candidate, and the exclusion must come from the Store read gate rather than
+/// from editing `ContextCandidate.lifecycle`.
 #[test]
-#[ignore = "unreachable: no public forget API; see GAP-06-FORGET-PATH-UNREACHABLE"]
 fn forgotten_memory_is_excluded_from_context() {
-    // Intended public flow once the boundary exists:
-    // create + write -> MemoryStore::forget_memory(memory_id, scope)
-    // -> read_current returns no eligible revision -> build_context is empty.
-    // Do not emulate this by editing ContextCandidate.lifecycle.
-}
-
-/// Pins the CURRENT (defective) behaviour: a ForgetFence record does not
-/// suppress reads through MemoryStore. This test is expected to FAIL the
-/// moment forget is wired into the read gate. When it does, delete it and
-/// un-ignore `forgotten_memory_is_excluded_from_context`.
-#[test]
-fn forget_api_absence_is_detectable() {
-    let visible_scope = scope("fence-not-wired");
-    let temp_db = TempDatabase::new();
-    let sqlite = SqliteMemoryStorage::open(temp_db.path()).unwrap();
-    let mut store = MemoryStore::new(sqlite);
-
+    let s = scope("forgotten");
+    let mut store = MemoryStore::new(SqliteMemoryStorage::in_memory().unwrap());
     store
         .create_memory(
-            memory("memory-fence-not-wired", &visible_scope, MemoryLifecycle::Active),
-            std::slice::from_ref(&visible_scope),
+            memory("memory-forgotten", &s, MemoryLifecycle::Active),
+            std::slice::from_ref(&s),
         )
         .unwrap();
-    write(
-        &mut store,
-        "memory-fence-not-wired",
-        "version-fence-not-wired",
-        1,
-        None,
-        None,
-        &visible_scope,
-    );
+    write(&mut store, "memory-forgotten", "version-forgotten", 1, None, None, &s);
 
-    // Use the same physical SQLite database: the fence is present and durable,
-    // but today's MemoryStorage read implementation does not consult it.
-    let fence = ForgetFence::open(temp_db.path()).unwrap();
-    assert_eq!(
-        fence
-            .record_forget(&visible_scope.namespace_key, "sha256:round7-forget")
-            .unwrap(),
-        1
-    );
-
-    let still_readable = store
-        .read_current(
-            &id("memory-fence-not-wired"),
-            std::slice::from_ref(&visible_scope),
-        )
+    // Prove the Memory is visible first, otherwise the test asserts nothing.
+    let visible = store
+        .read_current(&id("memory-forgotten"), std::slice::from_ref(&s))
         .unwrap()
-        .expect("current behavior: the unconnected fence does not block reads");
+        .expect("the Memory must be readable before it is forgotten");
+    assert_eq!(visible.memory_version_id, id("version-forgotten"));
+
+    let receipt = store
+        .forget_memory(
+            ForgetWrite {
+                memory_id: id("memory-forgotten"),
+                reason: "e2e: user requested erasure".into(),
+                idempotency_key: "forget-op-1".into(),
+                request_digest: "forget-digest-1".into(),
+            },
+            std::slice::from_ref(&s),
+        )
+        .unwrap();
+
+    // Fail-closed: forgotten is indistinguishable from never-existed, so both
+    // reads return None rather than an existence-revealing error.
     assert_eq!(
-        still_readable.memory_version_id,
-        id("version-fence-not-wired")
+        store.read_current(&id("memory-forgotten"), std::slice::from_ref(&s)),
+        Ok(None)
+    );
+    assert_eq!(
+        store.read_revision(
+            &id("memory-forgotten"),
+            &id("version-forgotten"),
+            std::slice::from_ref(&s)
+        ),
+        Ok(None)
     );
 
-    drop(store.into_storage());
-    drop(fence);
-    drop(temp_db);
+    // A fenced Memory must not accept new publications.
+    assert_eq!(
+        store.write_revision(
+            RevisionWrite {
+                memory_id: id("memory-forgotten"),
+                expected_current_version: None,
+                revision: revision(
+                    "memory-forgotten",
+                    "version-after-forget",
+                    2,
+                    Some("version-forgotten"),
+                    &s,
+                ),
+                idempotency_key: "op-version-after-forget".into(),
+                request_digest: "request-version-after-forget".into(),
+            },
+            std::slice::from_ref(&s),
+        ),
+        Err(MemoryStoreError::Storage(
+            StorageError::NotFoundOrNotVisible
+        ))
+    );
+
+    // Repeated Forget under a fresh key is idempotent: same generation, no new one.
+    let replay = store
+        .forget_memory(
+            ForgetWrite {
+                memory_id: id("memory-forgotten"),
+                reason: "e2e: retry".into(),
+                idempotency_key: "forget-op-2".into(),
+                request_digest: "forget-digest-2".into(),
+            },
+            std::slice::from_ref(&s),
+        )
+        .unwrap();
+    assert_eq!(replay.fence_generation, receipt.fence_generation);
+
+    // The candidate list is empty *because* the read was denied, not because it
+    // was hand-written: this is what makes the Context assertion meaningful.
+    let snapshot = build_context(identity(s, "forgotten"), 1, default_budget(4), vec![])
+        .expect("a forgotten Memory yields no candidates");
+    assert!(snapshot.is_empty());
 }
 
 #[test]

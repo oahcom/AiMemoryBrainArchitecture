@@ -2,7 +2,7 @@
 //! 仅负责领域校验、Scope 边界与 Storage Port 编排；不拥有持久化实现。
 
 use memory_domain::{Memory, MemoryVersion, OpaqueId, ScopeRef};
-use memory_storage::{CommitReceipt, CommitRequest, MemoryStorage, StorageError};
+use memory_storage::{CommitReceipt, CommitRequest, ForgetReceipt, ForgetRequest, MemoryStorage, StorageError};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MemoryStoreError {
@@ -21,6 +21,13 @@ pub struct RevisionWrite {
     pub memory_id: OpaqueId,
     pub expected_current_version: Option<OpaqueId>,
     pub revision: MemoryRevision,
+    pub idempotency_key: String,
+    pub request_digest: String,
+}
+
+pub struct ForgetWrite {
+    pub memory_id: OpaqueId,
+    pub reason: String,
     pub idempotency_key: String,
     pub request_digest: String,
 }
@@ -95,6 +102,34 @@ impl<S: MemoryStorage> MemoryStore<S> {
         validate_scope(scope)?;
         Ok(self.storage.resolve_idempotency(key, request_digest, scope)?)
     }
+
+    /// Suppress one Memory for all future reads and publications.
+    ///
+    /// Afterwards `read_current`/`read_revision` return `Ok(None)` and
+    /// `write_revision` fails with `NotFoundOrNotVisible`. The Memory's
+    /// `lifecycle_state` is intentionally left untouched: a fence is a storage
+    /// suppression, not a lifecycle transition, and the two are separate layers.
+    ///
+    /// Note this makes Forget unobservable — "forgotten" and "never existed" look
+    /// identical to callers. That is deliberate fail-closed behaviour; the
+    /// identity-bearing read API is where an explicit result belongs.
+    pub fn forget_memory(
+        &mut self,
+        write: ForgetWrite,
+        scope: &[ScopeRef],
+    ) -> Result<ForgetReceipt, MemoryStoreError> {
+        validate_scope(scope)?;
+        let reason = memory_storage::ForgetReason::new(write.reason)?;
+        Ok(self.storage.forget_memory(
+            ForgetRequest {
+                memory_id: write.memory_id,
+                reason,
+                idempotency_key: write.idempotency_key,
+                request_digest: write.request_digest,
+            },
+            scope,
+        )?)
+    }
 }
 
 fn validate_scope(scope: &[ScopeRef]) -> Result<(), MemoryStoreError> {
@@ -136,6 +171,7 @@ mod tests {
         versions: BTreeMap<String, MemoryVersion>,
         receipts: BTreeMap<String, FakeReceiptRecord>,
         prepared: BTreeMap<String, FakePreparedRecord>,
+        fences: BTreeMap<String, u64>,
     }
 
     impl MemoryStorage for FakeStorage {
@@ -152,6 +188,7 @@ mod tests {
             if !scopes_intersect(&memory.scope_refs, scope) {
                 return Err(StorageError::ScopeMismatch);
             }
+            if self.fences.contains_key(memory_id.as_str()) { return Ok(None); }
             Ok(memory.current_version_id.as_ref().and_then(|id| self.versions.get(id.as_str()).cloned()))
         }
 
@@ -167,6 +204,7 @@ mod tests {
             if hidden {
                 return Ok(None);
             }
+            if self.fences.contains_key(memory_id.as_str()) { return Ok(None); }
             Ok(self.versions.get(version_id.as_str()).filter(|v| &v.memory_id == memory_id).cloned())
         }
 
@@ -174,6 +212,9 @@ mod tests {
             let memory = self.memories.get_mut(request.memory_id.as_str()).ok_or(StorageError::NotFoundOrNotVisible)?;
             if !scopes_intersect(&memory.scope_refs, scope) {
                 return Err(StorageError::ScopeMismatch);
+            }
+            if self.fences.contains_key(request.memory_id.as_str()) {
+                return Err(StorageError::NotFoundOrNotVisible);
             }
             if request.memory_id != request.new_version.memory_id {
                 return Err(StorageError::InvalidReference);
@@ -356,6 +397,26 @@ mod tests {
                 return Err(StorageError::IdempotencyConflict);
             }
             Ok(Some(record.receipt.clone()))
+        }
+
+        fn forget_memory(&mut self, request: memory_storage::ForgetRequest, scope: &[ScopeRef]) -> Result<memory_storage::ForgetReceipt, StorageError> {
+            let memory = self.memories.get(request.memory_id.as_str()).ok_or(StorageError::NotFoundOrNotVisible)?;
+            if !scopes_intersect(&memory.scope_refs, scope) {
+                return Err(StorageError::ScopeMismatch);
+            }
+            let generation = match self.fences.get(request.memory_id.as_str()) {
+                Some(existing) => *existing,
+                None => {
+                    let next = self.fences.values().copied().max().unwrap_or(0) + 1;
+                    self.fences.insert(request.memory_id.as_str().into(), next);
+                    next
+                }
+            };
+            Ok(memory_storage::ForgetReceipt {
+                memory_id: request.memory_id,
+                fence_generation: memory_storage::FenceGeneration(generation),
+                idempotency_key: request.idempotency_key,
+            })
         }
     }
 
