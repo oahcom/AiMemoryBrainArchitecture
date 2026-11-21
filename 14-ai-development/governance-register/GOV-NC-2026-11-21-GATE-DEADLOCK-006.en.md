@@ -19,7 +19,7 @@ $ BASE_SHA=$HEAD_SHA=$(git rev-parse HEAD) PR_BODY="BILINGUAL-MANIFEST: COMPLETE
 EXIT=2
 ```
 
-This is not "some PR is written wrong". It is **the gate itself sitting in an unsatisfiable state on the trunk**. Any PR based on the current `main` — whatever it changes, whatever the PR body says, with or without `BILINGUAL-MANIFEST: COMPLETE`, with or without a documented exception — gets the same `EXIT=2`.
+This is not "some PR is written wrong". It is **the gate itself sitting in an unsatisfiable state on the trunk**. An empty diff cannot pass, so no PR that omits the two-sided mirrors can pass either — the dividing line is "did it supply `docs/en` + `docs/zh-CN` mirrors", not "which file did it touch". See the six isolation trials in section 2.1.
 
 **Re-verified at 2026-11-21T05:40Z**: `main` has advanced 7 commits from `ae37a41900f1` to `7d2233a5be`. Re-running the same command on a **clean tree at the newest head**:
 
@@ -51,6 +51,29 @@ Because CI has executed zero times since 2026-11-19T16:12:11Z (see 005), **no au
 The new file lives under `00-governance/` (inside `NORMATIVE_ROOTS`), is `.md`, is neither in `EMBEDDED_BILINGUAL_SOURCES` nor under `PAIR_EXEMPT_PREFIXES`, and has no `docs/en` / `docs/zh-CN` counterpart → it is **a new gap outside the baseline** → the gate rejects it by design.
 
 **Both mechanisms are individually correct; together they deadlock.** The baseline (#401/#408) and "new normative documents must be paired" are each reasonable. `ae37a419` introduced the baseline and an unpaired normative document in the same tree, so its own output cannot pass its own check.
+
+### 2.1 Correction of scope: it is not "no PR can pass"
+
+The first draft of this register said "any PR based on the current `main` gets the same `EXIT=2`". Measured, that is **too broad** and must be narrowed.
+
+Six isolation trials on `14-ai-development/governance-register/`, all on the same clean `main` tree:
+
+| Trial | What was done | gaps | baseline | NEW | EXIT |
+|---|---|---|---|---|---|
+| A | three register pairs, each given real `docs/en` + `docs/zh-CN` mirrors | 207 | 207 | **0** | **0** |
+| B | three register pairs written into `EMBEDDED_BILINGUAL_SOURCES` | 207 | 207 | **0** | **0** |
+| C | three register pairs appended to the baseline | 213 | 213 | **0** | **0** |
+| D | three register pairs all deleted | 207 | 207 | **0** | **0** |
+| E | a brand-new side-by-side `.md` + `.en.md` pair, no mirrors | 215 | 207 | **8** | **2** |
+| F | a brand-new file elsewhere, **with** real mirrors | 213 | 207 | 6 (all of them 005/006/007) | **2** |
+
+A, B, C and D are all `EXIT=0`. So **the directory is not closed**. What is closed is "adding a file to it without mirrors".
+
+The mechanism, more precisely: `current_bilingual_gaps()` requires `docs/en/<path>` and `docs/zh-CN/<path>` to **both** exist for every `.md` under `NORMATIVE_ROOTS`. `14-ai-development/` routes through `counterpart_14()`, but that only affects the `resolved_14` test — it does **not** affect the `english.is_file()` / `chinese.is_file()` tests. A side-by-side `.en.md` pair therefore does not by itself move a file out of the gap set. That is exactly why all 18 existing files in `governance-register/` (including `README.md`) sit in the baseline — both language sides are there.
+
+Re-checked on a real PR (`main` → the three register pairs + all mirrors): `207 frozen, 0 new gaps`; adding `BILINGUAL-MANIFEST: COMPLETE` to the body gives `PASS (18 changed paths inspected)`, `EXIT=0`.
+
+**So the correct conclusion is**: the unpaired template on `main` makes the **empty diff** permanently `EXIT=2`; any PR that **adds normative documents without two-sided mirrors** is likewise permanently `EXIT=2`; and a PR that supplies the mirrors passes. The first draft generalised "PRs without mirrors" into "any PR". Corrected here.
 
 ## 3. Stepwise isolation (recomputable)
 
@@ -131,33 +154,36 @@ Actual state:
 
 This register **changes no code**. Options, in increasing cost:
 
-| # | Approach | Cost | Risk |
-|---|---|---|---|
-| F-1 | Add the template to `EMBEDDED_BILINGUAL_SOURCES` (it genuinely is a single-file bilingual template, which is what that list means) | 1 line + 1 reason comment | lowest; same pattern #404 used to add reasons elsewhere |
-| F-2 | Give the template `docs/en` + `docs/zh-CN` counterparts | 2 new files | medium; one "template" becomes three files that must stay in sync |
-| F-3 | Add the template to `bilingual-baseline.txt` | 1 line | **highest**: directly violates "the baseline may only shrink, never grow", turning the ratchet into a freely extensible list |
+| # | Approach | Cost | Risk | Measured |
+|---|---|---|---|---|
+| F-1 | Add the template to `EMBEDDED_BILINGUAL_SOURCES` (it genuinely is a single-file bilingual template, which is what that list means) | 1 line + 1 reason comment | lowest; same pattern #404 used to add reasons elsewhere | trial B: `NEW=0` |
+| F-2 | Give the template `docs/en` + `docs/zh-CN` counterparts | 2 new files | medium; one "template" becomes three files that must stay in sync | trial A: `NEW=0`, and **requires no normative change at all** |
+| F-3 | Add the template to `bilingual-baseline.txt` | 1 line | **highest**: directly violates "the baseline may only shrink, never grow", turning the ratchet into a freely extensible list | trial C: `NEW=0`, but it destroys the ratchet's meaning |
 
-F-1 is the recommendation, but it is **a governance judgement, not a mechanical fix**: it decides whether a single-file bilingual template belongs in the exemption class. Under PR-GOVERNANCE-001 §5 that judgement needs independent review, and the author cannot supply it.
+**F-2 is the recommendation** (the first draft recommended F-1). F-2 changes no normative text and no script — it is pure documentation, so it **does not trigger section 5's independent-review requirement**. It is the only path that can be executed without a governance judgement. F-1 works equally well but is a normative change: it decides whether a single-file bilingual template belongs in the exemption class, which section 5 requires independent review for, and the author cannot supply it.
+
+F-3 works mechanically (trial C: `NEW=0`) but **must not be used**: it converts a shrink-only ratchet into an appendable list, which abolishes the mechanism itself.
 
 ## 9. Relation to the rest of this round
 
 - **005 (zero execution)**: this register is 005's first concrete consequence. 005 says "no verdict exists"; this says "even if one existed, it is 2".
 - **#409**: merged at 04:20:40Z (head `ccd19ecd`, base `423fb4b7`). At merge time the baseline did not yet contain 005's two files, so it is unrelated to this deadlock; but main advanced 26 commits after it to reach `ae37a419`. **005's two files are still not on main** (`GET /contents/...CI-NOT-EXECUTED-005.md` → 404).
-- **#407**: the Owner's comment there reports 83 (full scanner) vs 88 (gate basis). This register is a more severe instance of the same family: not "two scanners disagree" but "the only gate is permanently 2 on the trunk".
-- **#414**: `ddd4150bf4` fixed "a paired-file move misread as a deletion" (`scripts/check_bilingual_docs.py` +36/−8). That is a **real improvement** to the gate's implementation, but it does not touch this deadlock — this deadlock is not a misjudgement, it is a correct rejection by design. The two do not cancel out: the gate now judges more accurately, and it still returns 2 for every PR.
+- **#407**: the Owner's comment there reports 83 (full scanner) vs 88 (gate basis). This register is two faces of the same mechanism: `current_bilingual_gaps()` requires both `docs/en` and `docs/zh-CN`, so **a side-by-side `.en.md` pair does not count as paired** — all 18 existing files in `governance-register/` (including `README.md`) sitting in the baseline is the direct consequence of that rule.
+- **#414**: `ddd4150bf4` fixed "a paired-file move misread as a deletion" (`scripts/check_bilingual_docs.py` +36/−8). That is a **real improvement** to the gate's implementation, but it does not touch this deadlock — this deadlock is not a misjudgement, it is a correct rejection by design.
 - **DIRECT-MAIN-001**: the introducing commit is direct push #63, and continues the escalation that register already recorded (the gate implementation rewritten by direct push) — this time the *content the gate governs* was also written by direct push.
 
 ## 10. Boundary between fact and inference
 
 Facts:
-- Every command, input, output and exit code in §1, §3, §4.
+- Every command, input, output and exit code in §1, §2.1, §3, §4.
 - §5's commit metadata, the PR-association query result, the line counts.
 - §7's identity census over 300 commits.
 
 Inferences (**not** made):
 - This register does not rule that `ae37a419`'s author "deliberately" bypassed the gate. The evidence shows only that no PR was used and the bilingual gate was not run.
-- It does not rule which of F-1/F-2/F-3 is the correct governance choice. §8 gives cost and risk, not a verdict.
+- It does not rule whether F-1 or F-3 should be adopted. §8 gives cost, risk and measured exit codes, not a verdict.
 - It does not read this deadlock as "#401/#408's ratchet design is defective". The ratchet works as designed; the defect is that adding an unpaired normative document and adding the baseline happened in one direct push, with no channel ever running the gate once.
+- It does not read §2.1's four `EXIT=0` trials as "the deadlock does not exist". They read as: **the dividing line is the mirrors, not the file's content**. The empty diff is still `EXIT=2`, and that has not changed.
 
 ## 11. How to recount
 
@@ -182,6 +208,18 @@ BASE_SHA=$SHA HEAD_SHA=$SHA PR_BODY="BILINGUAL-MANIFEST: COMPLETE" \
 
 # 4) repeat 1-2 on the parent commit
 #    (substitute 9eca5eda84ce for ae37a41900f1)             # -> 0
+
+# 5) section 2.1's boundary: give a new file real mirrors and see it leave the gap set
+#    call the gate's own functions directly, so the diff basis cannot interfere:
+python - <<'PY'
+import importlib.util, os, sys
+os.chdir(".")
+spec = importlib.util.spec_from_file_location("g", "scripts/check_bilingual_docs.py")
+g = importlib.util.module_from_spec(spec); sys.argv = ["x"]; spec.loader.exec_module(g)
+gaps, base = g.current_bilingual_gaps(), g.read_baseline()
+print("gaps", len(gaps), "baseline", len(base), "NEW", len(sorted(gaps - base)))
+PY
+# after adding docs/en/<path> + docs/zh-CN/<path>, NEW goes to zero
 ```
 
-**Register status**: `OPEN` / `ACTIVE` / gate is permanently `EXIT=2` on main `ae37a41900f1` / introduced by direct push with no PR / fix requires a governance judgement, not executed
+**Register status**: `OPEN` / `ACTIVE` / empty diff on main is permanently `EXIT=2` / the dividing line is "did the PR supply two-sided mirrors", not "which file did it touch" (§2.1) / introduced by direct push with no PR / recommended fix F-2 is a pure documentation change, not executed
