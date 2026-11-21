@@ -2,7 +2,7 @@
 
 - Work Item: BMCP-ARCH-FOLLOWUP-001; Document: BMCP-ARCH-001; Version: 0.2.2
 - Status: CANDIDATE / ARCHITECTURE_PARTIAL — not a frozen protocol specification
-- Main baseline: 713774c381effbbe9e70693f88a7fa99a33a040d
+- Main baseline: c58878fce24528a0842b4f8887c93ddbf465b566
 - H source snapshot: session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74
 - Peers: [中文版本](BMCP-ARCH-001.zh-CN.md) | [English](BMCP-ARCH-001.en.md)
 - Scope: architecture semantics, phase boundaries, dependency map, acceptance plan and engineering handoff.
@@ -18,15 +18,16 @@ The merged Owner semantic decision approves Fact/Claim Option A + I1; exact comp
 
 Issue #7's recorded binding remains IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE. GitHub currently reports Issue #7 CLOSED / not_planned under the Owner phase-closure ruling; this work does not reopen or alter it. Deferral is not Runtime authorization.
 
-**Canonical name:** the repository canonical terminology at `00-governance/terminology.md` defines BMCP as **Brain Memory Context Protocol** (main `713774c381effbbe9e70693f88a7fa99a33a040d`, terminology Blob `b8770fbb58e4fac087698043c40a57531b1d244d`). The initial dispatch phrase “Brain Memory Control Protocol” is non-canonical for this repository and is rejected. H must retain “Context” in protocol documentation; no naming decision remains open.
+**Canonical name:** the repository canonical terminology at `00-governance/terminology.md` defines BMCP as **Brain Memory Context Protocol** (main `c58878fce24528a0842b4f8887c93ddbf465b566`, terminology Blob `b8770fbb58e4fac087698043c40a57531b1d244d`). The initial dispatch phrase “Brain Memory Control Protocol” is non-canonical for this repository and is rejected. H must retain “Context” in protocol documentation; no naming decision remains open.
 
 ## 2. Exact source ledger
 
-Current main source pins are from fetched origin/main at 713774c381effbbe9e70693f88a7fa99a33a040d. Historical decision/test evidence is separately labeled with its original commit where applicable. H pins are from H branch session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74.
+Current main source pins are from fetched origin/main at c58878fce24528a0842b4f8887c93ddbf465b566. Historical decision/test evidence is separately labeled with its original commit where applicable. H pins are from H branch session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74.
 
 | Source | Ref | Blob SHA | Status / use |
 |---|---|---|---|
-| docs/en/08-bmcp-protocol/bmcp-guide.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 228d28671955c977f653bef5b537554e431f9137 | CANDIDATE overview / H ownership |
+| 00-governance/terminology.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | b8770fbb58e4fac087698043c40a57531b1d244d | Canonical BMCP name / terminology authority |
+| docs/en/08-bmcp-protocol/bmcp-guide.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 228d28671955c977f653bef5b537554e431f9137 | CANDIDATE overview / H ownership |
 | 08-bmcp-protocol/protocol-overview.md | H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74 | b88ef3a6fd3be293e7c2e77d9652f386b169bc47 | CANDIDATE |
 | 08-bmcp-protocol/message-envelope-and-versioning.md | same H ref | 5547ecd78d118bd63e571e5daad87194d9b694e4 | CANDIDATE; H-owned |
 | 08-bmcp-protocol/context-delivery-and-acknowledgement.md | same H ref | bf9732cc39d156853b507c3a3a4e573159978f49 | CANDIDATE; G semantics / H wire |
@@ -34,27 +35,37 @@ Current main source pins are from fetched origin/main at 713774c381effbbe9e70693
 | 08-bmcp-protocol/phase-3.7-h-lifecycle-handoff-envelope-semantics-not-frozen.md | same H ref | b2a2648d5576511f68fdb9d87ce4388a1fedd5e9 | NOT FROZEN |
 | 08-bmcp-protocol/protocol-conformance-matrix.md | same H ref | 075b2ac6ebe9bda4ec83de04fad07e8027e6a440 | CANDIDATE tests; no Runtime PASS |
 | 08-bmcp-protocol/runtime_reference/strict_json_parser.py | same H ref | 3b9b3da645448c773c95a9dcd3c57c8c109bb2da | Reference model, not production transport |
-| docs/en/04-memory-compiler/README.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 5f50d470bf26d46dfffad48ad23059fc7a36c489 | E/D/I ownership |
-| 06-memory-context/README.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 684490d1c4e2c3aeb0236a9083abf9a144f2744c | G Context subsystem overview |
-| 06-memory-context/context-architecture.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 56fcc0ea112d423ef69a3f00e9d626bf4230ca0e | G Context architecture / ownership |
-| 06-memory-context/context-versioning.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 1bfe7f1891e1f9da1ff7508f4e25a11bbf7f649b | G ContextVersion / ChangeSet / CAS semantics |
-| 06-memory-context/context-reconciliation.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 87063aceebed1c30b7840045ada8e3f348732688 | G reconciliation semantics |
-| 06-memory-context/context-manager.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | ecc0549137a1738c197d02d12d94a1eb971ed6b5 | G Context Manager boundary |
-| docs/en/04-memory-compiler/compiler-overview.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | c89a256afda105ceac3db75d743ab58d177ef586 | E pipeline |
-| docs/en/04-memory-compiler/accepted-receipt-and-idempotency-contract.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | f2a4007f4b17e33de9bcd183c57ee504cfeef6cd | CANDIDATE E receipt |
-| docs/en/07-agent-integration/agent-integration-guide.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | c4e076887634a9e8e46df076efb0f4b70d816e0a | C-owned Agent boundary |
-| docs/en/03-memory-brain/forget-fence-and-completion-contract.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | c791895333ab6140f035f4f622d5dee9325d422d | D/I Forget boundary |
-| docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 9c054932994bb078e2834df8bd66f73895aa04f5 | D lifecycle/Fence |
-| 13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593 | historical ADR; semantic decision superseded; consumer mapping Candidate |
-| 14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` (approval origin `c138654c942dc93b5a36eccb2ff0e41452156429`) | Blob `d59756a8eb454480804c482ca03c68345ab5abf2` | Current source pin; Owner semantic approval is historical evidence (Option A + I1), not schema freeze |
-| docs/en/03-memory-brain/memory-versioning.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 4efbd26db9586f6fcf1897f42ffba287d625b903 | D revision/consumer freeze boundary |
-| docs/en/03-memory-brain/commit-cursor-semantics.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 2de7fe35229372ae5b06093e5e031c2c243fbd7c | D cursor semantics |
-| docs/en/09-security-governance/security-governance-guide.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 061c5847b3df879eeaf3c71e5eae0bfa162b276a | I Principal/authorization/PermissionEpoch |
-| docs/zh-CN/09-security-governance/security-governance-guide.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 372d27c79dc79d09bcdb0f142c979efdba1c2b6e | I bilingual peer |
-| 07-agent-integration/agent-integration-overview.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 073ff4ddf71fbcaf959107bb06ab724bfa48e63b | C canonical Agent boundary |
-| 07-agent-integration/adapter-capability-tiers.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | ca422000ec98cca543fd96b59710346949f7d82e | C capability tiers |
-| 07-agent-integration/inference-boundary-model.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | e2d5cb6abd9ec40da6e3680531de5944fc8b14df | C inference boundary |
-| 07-agent-integration/telemetry-model.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 9bb4a77e4bd79caaf3e1faeaf77c6b42858998f0 | C telemetry |
+| 08-bmcp-protocol/schemas/bmcp.recovery-join-1.0.2.schema.json | H @ `3e8b33df18b9e6fc757ca84ff07a12faebc78e74` | 4b664e3bce465499bcdfd93796349a4ba7074002 | H source schema; filename/$id is 1.0.2 but Envelope schema_version const is 1.0.0 |
+| docs/en/04-memory-compiler/README.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 5f50d470bf26d46dfffad48ad23059fc7a36c489 | E/D/I ownership |
+| 06-memory-context/README.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 684490d1c4e2c3aeb0236a9083abf9a144f2744c | G Context subsystem overview |
+| 06-memory-context/context-architecture.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 56fcc0ea112d423ef69a3f00e9d626bf4230ca0e | G Context architecture / ownership |
+| 06-memory-context/context-versioning.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 1bfe7f1891e1f9da1ff7508f4e25a11bbf7f649b | G ContextVersion / ChangeSet / CAS semantics |
+| 06-memory-context/context-reconciliation.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 87063aceebed1c30b7840045ada8e3f348732688 | G reconciliation semantics |
+| 06-memory-context/context-manager.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | ecc0549137a1738c197d02d12d94a1eb971ed6b5 | G Context Manager boundary |
+| docs/en/04-memory-compiler/compiler-overview.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | c89a256afda105ceac3db75d743ab58d177ef586 | E pipeline |
+| docs/en/04-memory-compiler/accepted-receipt-and-idempotency-contract.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | f2a4007f4b17e33de9bcd183c57ee504cfeef6cd | CANDIDATE E receipt |
+| docs/en/07-agent-integration/agent-integration-guide.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | c4e076887634a9e8e46df076efb0f4b70d816e0a | C-owned Agent boundary |
+| docs/en/03-memory-brain/forget-fence-and-completion-contract.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | c791895333ab6140f035f4f622d5dee9325d422d | D/I Forget boundary |
+| docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 9c054932994bb078e2834df8bd66f73895aa04f5 | D lifecycle/Fence |
+| 13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593 | historical ADR; semantic decision superseded; consumer mapping Candidate |
+| 14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` (approval origin `c138654c942dc93b5a36eccb2ff0e41452156429`) | Blob `d59756a8eb454480804c482ca03c68345ab5abf2` | Current source pin; Owner semantic approval is historical evidence (Option A + I1), not schema freeze |
+| docs/en/03-memory-brain/memory-versioning.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 4efbd26db9586f6fcf1897f42ffba287d625b903 | D revision/consumer freeze boundary |
+| docs/en/03-memory-brain/commit-cursor-semantics.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 2de7fe35229372ae5b06093e5e031c2c243fbd7c | D cursor semantics |
+| docs/en/09-security-governance/security-governance-guide.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 061c5847b3df879eeaf3c71e5eae0bfa162b276a | I Principal/authorization/PermissionEpoch |
+| docs/zh-CN/09-security-governance/security-governance-guide.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 372d27c79dc79d09bcdb0f142c979efdba1c2b6e | I bilingual peer |
+| 07-agent-integration/agent-integration-overview.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 073ff4ddf71fbcaf959107bb06ab724bfa48e63b | C canonical Agent boundary |
+| 07-agent-integration/adapter-capability-tiers.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | ca422000ec98cca543fd96b59710346949f7d82e | C capability tiers |
+| 07-agent-integration/inference-boundary-model.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | e2d5cb6abd9ec40da6e3680531de5944fc8b14df | C inference boundary |
+| 07-agent-integration/telemetry-model.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 9bb4a77e4bd79caaf3e1faeaf77c6b42858998f0 | C telemetry |
+| 08-bmcp-protocol/protocol-index.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | a5b64941cdc783b385348de1b22e0eaace2c003d | Main BMCP protocol artifact index; RecoveryJoin 1.0.2 entry |
+| 08-bmcp-protocol/protocol-index.zh-CN.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 2fe06d9424821eb96eb006dbb391914c1375afae | BMCP 协议工件索引；RecoveryJoin 1.0.2 条目 |
+| 08-bmcp-protocol/schemas/bmcp.recovery-join-1.0.2.schema.json | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | bbac8742401249230c629e858d033a09cd8f3acb | RecoveryJoin 1.0.2 structural JSON Schema; not H wire freeze |
+| 08-bmcp-protocol/validators/recovery_join_validator.py | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | fe62c77e1db5ba28704267ac9dd80a2d396d1499 | Structural validation + injected D authority callbacks; candidate reference |
+| 08-bmcp-protocol/tests/conformance/recovery_cutoff/test_recovery_join_1_0_2.py | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 7ae54e0f7777ea2f41b7870e331aa8f388338a6c | RecoveryJoin 1.0.2 typed binding / unknown-state tests |
+| 08-bmcp-protocol/tests/conformance/recovery_cutoff/test_recovery_join_schema_artifact.py | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 3af71ec41cb3be968ebedd5d26a12291f1969b2e | RecoveryJoin schema/index/fixture tests |
+| crates/memory-context/tests/e2e_negative_paths.rs | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 8db9a6f573e3ce91136c2f2378ce50e902a0d079 | G cross-crate SQLite Store→Context negative E2E tests |
+| crates/memory-store/src/lib.rs | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 6059b3f088922c87f49993a6cbd80c49a884a1c8 | G MemoryStore implementation source |
+| crates/memory-domain/src/lib.rs | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | b96cb2f74c56ab8a28da7e3ceffcf4adcb1b98d4 | Canonical Claim/Fact revision domain types |
 | PR #436 protocol index/provider_outcome tests | PR head 1ffed9ed127df98b2f823a66ec80ea43d08cb9dc; merge commit 02f61194fd4e12993b4c83f7fac8382eee20f5d8 | merged into main | structural-only provider outcome evidence; 5 pass / 5 semantic skips |
 | C family boundary decision | PR #430 comment 7060351480; Issue #449 comment 7060126722 | Owner-delegate decision; no independent human C signature claimed | Family direction decided; exact H operation registry/C-H mapping remains OPEN |
 | H confirmation scope correction | PR #428 comment 7060351041; H scope correction comment 7060264372 | Owner-delegate logical choices only; INDEPENDENCE_UNVERIFIABLE | H-CONFIRM-001..004 each PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN |
@@ -526,27 +537,118 @@ Issue #7 is currently CLOSED / not_planned under the Owner phase-closure ruling;
 
 ## 10. Governance and verification
 
-- Issue #7: CLOSED / not_planned; body retains `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`. Not edited.
-- Issue #3: CLOSED / not_planned as superseded. Its historical body says Applied Contract Frozen = NO and Test Executed / Passed = NO / NO; closure does not prove a new BMCP core freeze.
-- Issue #43: closed as superseded by Owner phase-closure ruling. This work is an architecture handoff, not Runtime implementation.
-- Current main baseline: `713774c381effbbe9e70693f88a7fa99a33a040d` (the Owner-designated controlling main `0d0c1c6238e4e70a93609070b97fef596873916e` is an ancestor; current main additionally contains PR #463 and PR #472 plus subsequent governance/documentation corrections); H source branch re-read at `session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74`; seven H Blob pins were re-fetched and are unchanged.
-- PR #443 is CLOSED / unmerged; PR #445 is merged. Main bilingual structural gate has 89 frozen / 0 new gaps at the fc1717 baseline; this is not semantic parity or whole-tree document-adoption PASS.
-- PR #425 is CLOSED WITHOUT MERGE. Its 10/10 Python result is historical reference evidence only; E's five-stage Rust pipeline is the sole reference implementation. PR #427 merged the local SQLite Admission reference layer; at merge `8c58d4c679cdddfb30c4d9cae4d71302e95fb1a5`, `cargo test --offline -p memory-compiler` measured 19 passed / 0 failed. This is reference-crate evidence, not production Runtime conformance.
-- Owner decisions: PR #446 merged (Option A + I1); B/D/I role decisions are PR #429 comments 7060251435 / 7060243632 / 7060259541; H scope correction is PR #428 comment 7060264372. All are consolidated-delegate decisions; independence is not claimed.
-- No Runtime code or H-owned source file modified.
-- Runtime acceptance tests: NOT RUN — no Runtime authorization/repository.
-- Owner-delegate semantic review is bounded; `INDEPENDENCE_UNVERIFIABLE`. A separate independent bilingual semantic review is not claimed.
-- Exact local gate commands and results at the refreshed current-main baseline `713774c381effbbe9e70693f88a7fa99a33a040d`: `git diff --check origin/main...HEAD` PASS (exit 0); `python3 scripts/check_document_management.py --require-changed origin/main` PASS, incremental only (468 governed documents; 16 classified / 452 unclassified; exit 0); `python3 scripts/ci/audit_runner_admission.py` PASS (1 self-hosted job audited / 0 violations; exit 0).
-- `BASE_SHA=$(git merge-base HEAD origin/main) HEAD_SHA=$(git rev-parse HEAD) PR_BODY='BILINGUAL-MANIFEST: COMPLETE' python3 scripts/check_bilingual_docs.py` FAIL (80 frozen / 0 new gaps; 3 changed Markdown paths outside NORMATIVE_ROOTS not pairing-checked; 21 `Embedded bilingual source ... was registered in the same commit that added the file (713774c3)` errors from current main PR #472 baseline registration; exit 1). These are outside the three changed paths; no governance/baseline repair is in scope.
-- `python3 scripts/check_bilingual_docs_full.py --source-revision <measured-head>` FAIL (434 in-scope Markdown; 112 exempt; 84 structural counterpart violations; exit 1). This full-tree inventory is broader than the incremental PR gate and is not repaired by this scoped PR.
-- `python3 scripts/governance/bilingual/test_bilingual_scripts.py` PASS (13/13; exit 0); `python3 scripts/test_check_document_management.py` PASS (207/207; exit 0).
-- Applied Delivery Evidence suite: `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v` — 30 passed / 0 failed (exit 0). Provider Outcome suite: `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/provider_outcome -p 'test_*.py' -v` — 10 run / 5 passed / 5 skipped / 0 failed (exit 0); CPO-02/04/05/09/10 remain skipped for the Owner C authoritative semantic validator.
-- EN/ZH source-ledger and decision-state assertions: 8/8 PASS (DR-002, DR-003, H-CONFIRM-001..004, `INDEPENDENCE_UNVERIFIABLE`, AT-01..AT-20 `PLANNED_NOT_RUN`, and three-file scope). These are structural/status assertions, not semantic bilingual review. Independent semantic/bilingual review remains PENDING.
-- Known bilingual asymmetry: the detailed 20-row AT-01..AT-20 acceptance matrix is currently enumerated in the ZH mirror; the EN mirror records the aggregate `PLANNED_NOT_RUN` status but not the individual rows. This is not represented as semantic parity and remains for independent bilingual review. All 20 cases remain PLANNED_NOT_RUN.
-- Comment 7060675803 gate-regression allegation was checked against current main: `check_schema_keys()` is present and active; allowed keys are `kind/required/enum/items/fields`; no active schema `when:` field is present. The alleged regression is not evidenced on current main or in this PR diff. No governance gate/schema change was added.
-- Owner comment 7061006814's prior-head workflow failures are historical: 44891409843 / 44891373089 (Bilingual), 44891373074 (Architecture document management), 44891373084 (Runner admission). Current final-head workflow IDs and outcomes are recorded in the PR delivery record; no pass is inferred from missing logs or step summaries.
-- GOV-DOC-002 incremental PASS is not whole-tree PASS; 442 documents remain unclassified. Structural pairing is not semantic bilingual parity.
+- Validation snapshot: exact base / merge-base `c58878fce24528a0842b4f8887c93ddbf465b566`; exact candidate head is recorded in the PR delivery report. The PR base ref is `bmcp-validation-base-c588`, pinned to `c58878fce24528a0842b4f8887c93ddbf465b566`. Live `main` was observed at `be77ef7e64b9102a03a7c65a223798fa2003e88b` and is deliberately not this batch base because it no longer shares ancestry with the Owner-designated `c58878f` snapshot. This preserves a reproducible three-file diff without mixing divergent history. The previous `713774c` batch is historical only.
+- Main source ledger §2 was refreshed from `c58878fce24528a0842b4f8887c93ddbf465b566`; all listed Main Blob pins were resolved against that exact commit. H source branch was re-read at `session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74`; all seven H Blob pins were re-fetched and match. EN/ZH source-ledger SHA sets are identical.
+- Main changes incorporated into the dependency review: #472 G ContextVersion/ChangeSet/CAS documentation and implementation; `crates/memory-context/tests/e2e_negative_paths.rs` (SQLite Store→Context negative-path coverage); canonical Claim/Fact revision types; BMCP RecoveryJoin 1.0.2 schema, index, structural validator and conformance fixtures/tests. RecoveryJoin validator returns `STRUCTURALLY_VALID` for schema-only success and requires injected D-authoritative callbacks for proof/currentness; without callbacks the result is `UNKNOWN`, not VALID. It does not freeze H wire/transport or substitute for D authority. The G E2E tests cover foreign-scope denial, Candidate lifecycle rejection, stale revision rejection, budget overflow and file-backed SQLite restart; they do not provide Forget/tombstone public-operation coverage, H ACK binding or C final-request Applied evidence.
+- BMCP-DR-002 remains DECIDED at D/I authority-boundary level only. BMCP-DR-003 remains PARTIALLY_DECIDED; exact C-H operation registry/mapping remains OPEN. H-CONFIRM-001..004 remain PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN; `INDEPENDENCE_UNVERIFIABLE` remains. AT-01..AT-20 remain **PLANNED_NOT_RUN**; Provider Outcome's five C semantic skips remain unresolved.
+- Issue #7 remains CLOSED / not_planned with `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`. No wire/schema/API freeze, Runtime, transport implementation, deployment, production activation or Issue #7 change.
+- `git diff --check origin/main...HEAD`: PASS, exit 0 (rerun after final commit).
+- `python3 scripts/check_document_management.py --require-changed origin/main`: FAIL, exit 1; two baseline DM-06 errors in `08-bmcp-protocol/protocol-index.md` and `.zh-CN.md` (`Canonical` requires `authority.canonical_scope_id`). The PR changes neither index file. Reported inventory: 501 governed documents, 18 classified / 483 unclassified. No out-of-scope metadata changes were made.
+- `python3 scripts/ci/audit_runner_admission.py`: PASS; 1 self-hosted job audited / 0 violations; exit 0.
+- `BASE_SHA=$(git merge-base HEAD origin/main) HEAD_SHA=$(git rev-parse HEAD) PR_BODY='BILINGUAL-MANIFEST: COMPLETE' python3 scripts/check_bilingual_docs.py`: PASS; 77 frozen / 0 new gaps / 21 exemptions; exit 0. Three changed Markdown paths outside `NORMATIVE_ROOTS` are explicitly noted as not pairing-checked. The gate's same-commit registration-history rule remains present; the old 21 errors were not reproduced on this snapshot.
+- `python3 scripts/check_bilingual_docs_full.py --source-revision c58878fce24528a0842b4f8887c93ddbf465b566`: FAIL; 467 in-scope Markdown / 112 exempt / 81 violations; exit 1. Full path-by-path classification follows.
 
+### GOV-DOC-001 full-tree inventory at the c58878f snapshot
+
+The exact command `python3 scripts/check_bilingual_docs_full.py --source-revision c58878fce24528a0842b4f8887c93ddbf465b566` returned **467 in-scope Markdown / 112 exempt / 81 violations / exit 1**. This is a path-counterpart inventory, not semantic translation review. The 81 findings classify as follows:
+
+- **77 normative-root sources with both language mirror paths missing** (the scanner's expected counterparts are `docs/en/<source>` AND `docs/zh-CN/<source>`):
+  - `00-governance/architecture-document-management-policy.md`
+  - `00-governance/reports/gov-doc-001-full-scan-2026-11-20.md`
+  - `00-governance/templates/document-metadata-template.md`
+  - `02-domain-model/phase-2-domain-extension.md`
+  - `02-domain-model/phase-2-domain-extension.zh-CN.md`
+  - `06-memory-context/context-architecture.md`
+  - `06-memory-context/context-budget-and-sufficiency.md`
+  - `06-memory-context/context-edit-operations.md`
+  - `06-memory-context/context-implementation-coverage.md`
+  - `06-memory-context/context-implementation-coverage.zh-CN.md`
+  - `06-memory-context/context-manager.md`
+  - `06-memory-context/context-reconciliation.md`
+  - `06-memory-context/context-versioning.md`
+  - `06-memory-context/phase-3.7-g-local-lifecycle-producer-derivative-queue-recall-context-restore.md`
+  - `06-memory-context/phase-3.8.4-g-c-provider-outcome-consumer-review.md`
+  - `06-memory-context/phase-3.8.5-g-storage-logical-serialization-topology-impact-review.md`
+  - `06-memory-context/phase-3.8.6-g-review-storage-serialization-anchor.md`
+  - `07-agent-integration/adapter-capability-tiers.md`
+  - `07-agent-integration/adapter-capability-tiers.zh-CN.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/README.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/baseline-currentness-and-owner-source-audit.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/baseline-owner-branch-snapshot-errata.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/bilingual-parity-audit.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-entity-inventory.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-glossary.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-invariants.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-model.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-relationships.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-identity-semantics.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-state-semantics.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-temporal-evidence-semantics.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/cross-owner-canonical-semantics-matrix.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-model-complexity-assessment.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-model-decision-record.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-semantics-conflict-register.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/evidence/README.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/evidence/official-reference-validation.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/existing-domain-model-baseline.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/latest-cross-owner-source-reconciliation.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/mature-domain-model-research.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/post-merge-currentness-and-governance-reconciliation.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/validation/README.md`
+  - `13-engineering-decisions/technology-architecture-blueprint.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/README.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/architecture-complexity-audit.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/baseline/architecture-baseline.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/deployment-topology-comparison.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/independent-review-handoff.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/mature-project-research.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/open-questions.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-dependency-register.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-remediation/CGH-APPLIED-REVIEW-001.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-remediation/OWNER-REMEDIATION-001.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-technology-review-synthesis.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/research-evidence-register.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/rust-ecosystem-assessment.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/technology-capability-matrix.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/technology-recommendation.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/workload-model.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/README.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-boundary.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-canonical-contract.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-conflict-register.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-cross-owner-contract-matrix.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-decision-record.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-failure-semantics.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-technology-assessment.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-telemetry.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-validation-plan.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/evidence/README.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/existing-integration-baseline.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/inference-boundary-and-trust-model.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/provider-integration-research.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/provider-outcome-and-execution-evidence.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/tool-execution-boundary.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/validation/README.md`
+
+- **4 Phase-0 operational research reports without a side-by-side `.en.md`/`.zh-CN.md` pair or `docs/en/14-ai-development` mirror**:
+  - `14-ai-development/research/phase-0/SESSION-1-GITHUB-WORKFLOW-REPORT.md`
+  - `14-ai-development/research/phase-0/SESSION-2-PROMPT-RUN-PROVENANCE-REPORT.md`
+  - `14-ai-development/research/phase-0/SESSION-3-QUALITY-REVIEW-DEFECT-REPORT.md`
+  - `14-ai-development/research/phase-0/SESSION-4-ADOPTION-ISOLATION-REPORT.md`
+
+
+The 81 are independent of the 21 same-commit registration errors previously reported on the `713774c` historical batch. At this `c58878f` snapshot, the structural gate still contains the post-creation registration-history check and reports 77 frozen / 0 new gaps / 21 exemptions, with **no same-commit registration errors**. No history rule was weakened or bypassed. The historical count of 21 is not the current count.
+
+- `python3 scripts/governance/bilingual/test_bilingual_scripts.py`: PASS, 13/13; exit 0.
+- `python3 scripts/test_check_document_management.py`: PASS, 214/214; exit 0. Expected negative-fixture diagnostics are emitted during the test run.
+- `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v`: PASS, 30/30; exit 0.
+- `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/provider_outcome -p 'test_*.py' -v`: 10 run / 5 passed / 5 skipped / 0 failed; exit 0. CPO-02/04/05/09/10 remain skipped pending Owner C's authoritative semantic validator.
+- `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/recovery_cutoff -p 'test_*.py' -v`: FAIL, 31 run / 28 passed / 3 failed; exit 1. Failures: duplicate-member parser test expects the specific duplicate-key detail but validator returns generic `invalid JSON: ValueError`; schema/index test cannot find the exact `message_type` entry in protocol-index; valid full-message fixture fails six non-empty object constraints. These are current-main RecoveryJoin artifacts, not modified by this PR.
+- `python3 -m unittest discover -s 06-memory-context/reference-model -p 'test_g_applied_ledger.py' -v`: PASS, 8/8; exit 0.
+- `cargo test --offline -p memory-context --test e2e_negative_paths`: NOT COMPLETED; compilation failed with `Disk quota exceeded` / LLVM output-stream I/O errors; exit 101. No Rust G E2E PASS is claimed.
+- Independent semantic/bilingual review remains PENDING. The 20-row AT matrix is still itemized only in ZH; EN records aggregate `PLANNED_NOT_RUN`. This asymmetry is explicitly disclosed, not represented as parity.
+- No H-owned normative file, G implementation, C/D/I authority file, governance gate, schema or baseline registry was modified. PR scope remains exactly three files.
 
 ## 11. Bilingual change manifest
 

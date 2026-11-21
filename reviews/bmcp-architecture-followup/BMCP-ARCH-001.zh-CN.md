@@ -2,7 +2,7 @@
 
 - 工作项：BMCP-ARCH-FOLLOWUP-001；文档：BMCP-ARCH-001；版本：0.2.2
 - 状态：CANDIDATE / ARCHITECTURE_PARTIAL——不是已冻结协议规范
-- Main 基线：713774c381effbbe9e70693f88a7fa99a33a040d
+- Main 基线：c58878fce24528a0842b4f8887c93ddbf465b566
 - H 源快照：session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74
 - 对应版本：[English](BMCP-ARCH-001.en.md) | [中文版本](BMCP-ARCH-001.zh-CN.md)
 - 范围：架构语义、阶段边界、依赖映射、验收计划和工程交接
@@ -18,15 +18,15 @@ Owner 已合并批准 Fact/Claim 语义决策（Option A + I1）；精确 Compil
 
 Issue #7 的记录保持 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE。根据 Owner 阶段关闭裁决，GitHub 当前报告 Issue #7 为 CLOSED / not_planned；本工作不重开或修改它。延期不等于 Runtime 授权。
 
-**规范名称：** 仓库规范术语表 `00-governance/terminology.md` 将 BMCP 定义为 **Brain Memory Context Protocol**（main `713774c381effbbe9e70693f88a7fa99a33a040d`，术语表 Blob `b8770fbb58e4fac087698043c40a57531b1d244d`）。初始派发文本中的 “Brain Memory Control Protocol” 在本仓库中不是规范名称，予以纠正。H 的协议文档必须保留 “Context”；名称问题不再是未决项。
+**规范名称：** 仓库规范术语表 `00-governance/terminology.md` 将 BMCP 定义为 **Brain Memory Context Protocol**（main `c58878fce24528a0842b4f8887c93ddbf465b566`，术语表 Blob `b8770fbb58e4fac087698043c40a57531b1d244d`）。初始派发文本中的 “Brain Memory Control Protocol” 在本仓库中不是规范名称，予以纠正。H 的协议文档必须保留 “Context”；名称问题不再是未决项。
 
 ## 2. 精确来源登记
 
-当前 Main 来源 Pin 来自 origin/main @ 713774c381effbbe9e70693f88a7fa99a33a040d；历史决议/测试证据另按其原始 Commit 标注。H Pin 来自 session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74。
+当前 Main 来源 Pin 来自 origin/main @ c58878fce24528a0842b4f8887c93ddbf465b566；历史决议/测试证据另按其原始 Commit 标注。H Pin 来自 session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74。
 
 | 来源 | Ref | Blob SHA | 状态 / 用途 |
 |---|---|---|---|
-| docs/en/08-bmcp-protocol/bmcp-guide.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 228d28671955c977f653bef5b537554e431f9137 | CANDIDATE 概览 / H 权属 |
+| docs/en/08-bmcp-protocol/bmcp-guide.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 228d28671955c977f653bef5b537554e431f9137 | CANDIDATE 概览 / H 权属 |
 | 08-bmcp-protocol/protocol-overview.md | H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74 | b88ef3a6fd3be293e7c2e77d9652f386b169bc47 | CANDIDATE |
 | 08-bmcp-protocol/message-envelope-and-versioning.md | 同一 H ref | 5547ecd78d118bd63e571e5daad87194d9b694e4 | CANDIDATE；H 所有 |
 | 08-bmcp-protocol/context-delivery-and-acknowledgement.md | 同一 H ref | bf9732cc39d156853b507c3a3a4e573159978f49 | CANDIDATE；G 语义 / H Wire |
@@ -34,27 +34,38 @@ Issue #7 的记录保持 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE。
 | 08-bmcp-protocol/phase-3.7-h-lifecycle-handoff-envelope-semantics-not-frozen.md | 同一 H ref | b2a2648d5576511f68fdb9d87ce4388a1fedd5e9 | NOT FROZEN |
 | 08-bmcp-protocol/protocol-conformance-matrix.md | 同一 H ref | 075b2ac6ebe9bda4ec83de04fad07e8027e6a440 | CANDIDATE 测试；无 Runtime PASS |
 | 08-bmcp-protocol/runtime_reference/strict_json_parser.py | 同一 H ref | 3b9b3da645448c773c95a9dcd3c57c8c109bb2da | 参考模型，不是生产 Transport |
-| docs/en/04-memory-compiler/README.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 5f50d470bf26d46dfffad48ad23059fc7a36c489 | E/D/I 权属 |
-| 06-memory-context/README.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 684490d1c4e2c3aeb0236a9083abf9a144f2744c | G Context 子系统概览 |
-| 06-memory-context/context-architecture.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 56fcc0ea112d423ef69a3f00e9d626bf4230ca0e | G Context 架构与权属 |
-| 06-memory-context/context-versioning.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 1bfe7f1891e1f9da1ff7508f4e25a11bbf7f649b | G ContextVersion / ChangeSet / CAS 语义 |
-| 06-memory-context/context-reconciliation.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 87063aceebed1c30b7840045ada8e3f348732688 | G Reconciliation 语义 |
-| 06-memory-context/context-manager.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | ecc0549137a1738c197d02d12d94a1eb971ed6b5 | G Context Manager 边界 |
-| docs/en/04-memory-compiler/compiler-overview.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | c89a256afda105ceac3db75d743ab58d177ef586 | E 流水线 |
-| docs/en/04-memory-compiler/accepted-receipt-and-idempotency-contract.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | f2a4007f4b17e33de9bcd183c57ee504cfeef6cd | CANDIDATE E Receipt |
-| docs/en/07-agent-integration/agent-integration-guide.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | c4e076887634a9e8e46df076efb0f4b70d816e0a | C 所有 Agent 边界 |
-| docs/en/03-memory-brain/forget-fence-and-completion-contract.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | c791895333ab6140f035f4f622d5dee9325d422d | D/I Forget 边界 |
-| docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 9c054932994bb078e2834df8bd66f73895aa04f5 | D Lifecycle/Fence |
-| 13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593 | 历史 ADR；语义决策已被取代；消费者映射仍为 Candidate |
-| 14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d`（批准来源 `c138654c942dc93b5a36eccb2ff0e41452156429`） | d59756a8eb454480804c482ca03c68345ab5abf2 | 当前来源 Pin；Owner 语义批准是历史证据（Option A + I1），不冻结 Schema |
-| docs/en/03-memory-brain/memory-versioning.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 4efbd26db9586f6fcf1897f42ffba287d625b903 | D Revision / Consumer Freeze 边界 |
-| docs/en/03-memory-brain/commit-cursor-semantics.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 2de7fe35229372ae5b06093e5e031c2c243fbd7c | D Cursor 语义 |
-| docs/en/09-security-governance/security-governance-guide.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 061c5847b3df879eeaf3c71e5eae0bfa162b276a | I Principal / Authorization / PermissionEpoch |
-| docs/zh-CN/09-security-governance/security-governance-guide.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 372d27c79dc79d09bcdb0f142c979efdba1c2b6e | I 双语对应文档 |
-| 07-agent-integration/agent-integration-overview.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 073ff4ddf71fbcaf959107bb06ab724bfa48e63b | C 规范 Agent 边界 |
-| 07-agent-integration/adapter-capability-tiers.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | ca422000ec98cca543fd96b59710346949f7d82e | C Capability Tiers |
-| 07-agent-integration/inference-boundary-model.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | e2d5cb6abd9ec40da6e3680531de5944fc8b14df | C Inference Boundary |
-| 07-agent-integration/telemetry-model.md | main @ `713774c381effbbe9e70693f88a7fa99a33a040d` | 9bb4a77e4bd79caaf3e1faeaf77c6b42858998f0 | C Telemetry |
+| 08-bmcp-protocol/schemas/bmcp.recovery-join-1.0.2.schema.json | H @ `3e8b33df18b9e6fc757ca84ff07a12faebc78e74` | 4b664e3bce465499bcdfd93796349a4ba7074002 | H 来源 Schema；文件名/$id 为 1.0.2，但 Envelope schema_version const 为 1.0.0 |
+| docs/en/04-memory-compiler/README.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 5f50d470bf26d46dfffad48ad23059fc7a36c489 | E/D/I 权属 |
+| 06-memory-context/README.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 684490d1c4e2c3aeb0236a9083abf9a144f2744c | G Context 子系统概览 |
+| 06-memory-context/context-architecture.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 56fcc0ea112d423ef69a3f00e9d626bf4230ca0e | G Context 架构与权属 |
+| 06-memory-context/context-versioning.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 1bfe7f1891e1f9da1ff7508f4e25a11bbf7f649b | G ContextVersion / ChangeSet / CAS 语义 |
+| 06-memory-context/context-reconciliation.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 87063aceebed1c30b7840045ada8e3f348732688 | G Reconciliation 语义 |
+| 06-memory-context/context-manager.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | ecc0549137a1738c197d02d12d94a1eb971ed6b5 | G Context Manager 边界 |
+| docs/en/04-memory-compiler/compiler-overview.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | c89a256afda105ceac3db75d743ab58d177ef586 | E 流水线 |
+| docs/en/04-memory-compiler/accepted-receipt-and-idempotency-contract.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | f2a4007f4b17e33de9bcd183c57ee504cfeef6cd | CANDIDATE E Receipt |
+| docs/en/07-agent-integration/agent-integration-guide.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | c4e076887634a9e8e46df076efb0f4b70d816e0a | C 所有 Agent 边界 |
+| docs/en/03-memory-brain/forget-fence-and-completion-contract.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | c791895333ab6140f035f4f622d5dee9325d422d | D/I Forget 边界 |
+| docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 9c054932994bb078e2834df8bd66f73895aa04f5 | D Lifecycle/Fence |
+| 13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593 | 历史 ADR；语义决策已被取代；消费者映射仍为 Candidate |
+| 14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566`（批准来源 `c138654c942dc93b5a36eccb2ff0e41452156429`） | d59756a8eb454480804c482ca03c68345ab5abf2 | 当前来源 Pin；Owner 语义批准是历史证据（Option A + I1），不冻结 Schema |
+| docs/en/03-memory-brain/memory-versioning.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 4efbd26db9586f6fcf1897f42ffba287d625b903 | D Revision / Consumer Freeze 边界 |
+| docs/en/03-memory-brain/commit-cursor-semantics.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 2de7fe35229372ae5b06093e5e031c2c243fbd7c | D Cursor 语义 |
+| docs/en/09-security-governance/security-governance-guide.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 061c5847b3df879eeaf3c71e5eae0bfa162b276a | I Principal / Authorization / PermissionEpoch |
+| docs/zh-CN/09-security-governance/security-governance-guide.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 372d27c79dc79d09bcdb0f142c979efdba1c2b6e | I 双语对应文档 |
+| 07-agent-integration/agent-integration-overview.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 073ff4ddf71fbcaf959107bb06ab724bfa48e63b | C 规范 Agent 边界 |
+| 07-agent-integration/adapter-capability-tiers.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | ca422000ec98cca543fd96b59710346949f7d82e | C Capability Tiers |
+| 07-agent-integration/inference-boundary-model.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | e2d5cb6abd9ec40da6e3680531de5944fc8b14df | C Inference Boundary |
+| 07-agent-integration/telemetry-model.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 9bb4a77e4bd79caaf3e1faeaf77c6b42858998f0 | C Telemetry |
+| 08-bmcp-protocol/protocol-index.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | a5b64941cdc783b385348de1b22e0eaace2c003d | Main BMCP 协议工件索引；RecoveryJoin 1.0.2 条目 |
+| 08-bmcp-protocol/protocol-index.zh-CN.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 2fe06d9424821eb96eb006dbb391914c1375afae | BMCP 协议工件索引；RecoveryJoin 1.0.2 条目 |
+| 08-bmcp-protocol/schemas/bmcp.recovery-join-1.0.2.schema.json | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | bbac8742401249230c629e858d033a09cd8f3acb | RecoveryJoin 1.0.2 结构 JSON Schema；不构成 H Wire 冻结 |
+| 08-bmcp-protocol/validators/recovery_join_validator.py | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | fe62c77e1db5ba28704267ac9dd80a2d396d1499 | 结构验证 + 注入式 D 权威回调；候选参考实现 |
+| 08-bmcp-protocol/tests/conformance/recovery_cutoff/test_recovery_join_1_0_2.py | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 7ae54e0f7777ea2f41b7870e331aa8f388338a6c | RecoveryJoin 1.0.2 类型绑定 / UNKNOWN 状态测试 |
+| 08-bmcp-protocol/tests/conformance/recovery_cutoff/test_recovery_join_schema_artifact.py | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 3af71ec41cb3be968ebedd5d26a12291f1969b2e | RecoveryJoin Schema / 索引 / Fixture 测试 |
+| crates/memory-context/tests/e2e_negative_paths.rs | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 8db9a6f573e3ce91136c2f2378ce50e902a0d079 | G 跨 Crate SQLite Store→Context 负向 E2E 测试 |
+| crates/memory-store/src/lib.rs | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 6059b3f088922c87f49993a6cbd80c49a884a1c8 | G MemoryStore 实现源码 |
+| crates/memory-domain/src/lib.rs | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | b96cb2f74c56ab8a28da7e3ceffcf4adcb1b98d4 | 规范 Claim/Fact Revision 领域类型 |
+| 00-governance/terminology.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | b8770fbb58e4fac087698043c40a57531b1d244d | BMCP 规范名称 / 术语权威 |
 | C Family Boundary 决策 | PR #430 comment 7060351480；Issue #449 comment 7060126722 | Owner-delegate 决议；不声称独立人工 C 签名 | Family 方向已决定；精确 H Operation Registry / C-H Mapping 仍 OPEN |
 | H Confirmation 范围澄清 | PR #428 comment 7060351041；H Scope Correction comment 7060264372 | 仅接受 Owner-delegate 逻辑选择；INDEPENDENCE_UNVERIFIABLE | H-CONFIRM-001..004 各自均为 PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN |
 | B domain-model-overview.md | B 分支 `session-b-domain-model-phase3 @ 840202a98cf40a0b3f194afb84bed4d5f3326658` | Blob `4d1debc0ec19b3917f9e76d04bb66da4df4cd346` | B 接受 Option A + I1；来源对齐仍待完成 |
@@ -497,23 +508,118 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 
 ## 10. 治理与验证
 
-- Issue #7：CLOSED / not_planned；正文保留 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE。未修改。
-- Issue #3：CLOSED / not_planned，作为 superseded 处理。历史正文写明 Applied Contract Frozen = NO、Test Executed / Passed = NO / NO；关闭不证明新的 BMCP 核心契约已冻结。
-- Issue #43：根据 Owner 阶段关闭裁决关闭为 superseded。本 FollowUp 是候选架构交接，不是 Runtime 实施。
-- 当前 Main 基线：713774c381effbbe9e70693f88a7fa99a33a040d（Owner 指定的控制基线 `0d0c1c6238e4e70a93609070b97fef596873916e` 已是祖先；当前 Main 还包含 PR #463、PR #472 及后续治理/文档更正）；H 来源分支已重新读取：session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74；七个 H Blob Pin 已重新获取且 SHA 未变化。
-- 未修改 Runtime 代码或 H 所有源文件。
-- 当前 Main 基线 `713774c381effbbe9e70693f88a7fa99a33a040d` 上的本地门禁：`git diff --check origin/main...HEAD` PASS（退出码 0）；`python3 scripts/check_document_management.py --require-changed origin/main` PASS，仅增量（468 governed documents；16 classified / 452 unclassified；退出码 0）；`python3 scripts/ci/audit_runner_admission.py` PASS（审计 1 个 self-hosted job / 0 violations；退出码 0）。
-- `BASE_SHA=$(git merge-base HEAD origin/main) HEAD_SHA=$(git rev-parse HEAD) PR_BODY='BILINGUAL-MANIFEST: COMPLETE' python3 scripts/check_bilingual_docs.py` FAIL（80 frozen / 0 new gaps；3 个变更 Markdown 路径位于 NORMATIVE_ROOTS 之外，未执行配对检查；当前 Main 的 PR #472 基线登记产生 21 条 `Embedded bilingual source ... was registered in the same commit that added the file (713774c3)` 错误；退出码 1）。这些路径不在本 PR 三个修改文件中；本 PR 不修改治理门禁或基线。）
-- `python3 scripts/check_bilingual_docs_full.py --source-revision <实测 Head>` FAIL（434 个范围内 Markdown；112 exempt；84 个结构配对缺口；退出码 1）。这是比 PR 增量门禁更广的全树清点，本 PR 不越界修复。
-- `python3 scripts/governance/bilingual/test_bilingual_scripts.py` PASS（13/13；退出码 0）；`python3 scripts/test_check_document_management.py` PASS（207/207；退出码 0）。
-- Applied Delivery Evidence：`python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v`——30 passed / 0 failed（退出码 0）。Provider Outcome：`python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/provider_outcome -p 'test_*.py' -v`——10 run / 5 passed / 5 skipped / 0 failed（退出码 0）；CPO-02/04/05/09/10 仍等待 Owner C 权威 Semantic Validator。
-- EN/ZH 来源登记和决议状态断言：8/8 PASS（DR-002、DR-003、H-CONFIRM-001..004、`INDEPENDENCE_UNVERIFIABLE`、AT-01..AT-20 `PLANNED_NOT_RUN`、以及仅三个授权修改路径）。这些是结构/状态断言，不是语义双语审查。独立语义/双语审查仍 PENDING。
-- 已知双语内容不对称：AT-01..AT-20 的 20 行详细验收矩阵目前只在中文镜像中逐项列出；英文镜像仅记录汇总状态 `PLANNED_NOT_RUN`，未列出逐项行。本文不将其表述为语义双语一致，待独立双语复审处理。全部 20 项仍为 PLANNED_NOT_RUN。
-- 已按当前 Main 核验 comment 7060675803 的门禁回退指控：`check_schema_keys()` 存在且实际调用；允许键仅为 `kind/required/enum/items/fields`；当前 Schema 没有活动的 `when:` 字段。现有证据不能证明当前 Main 存在该回退，且它不在本 PR diff 中。本 PR 未加入治理门禁/Schema 改动。
-- Owner comment 7061006814 所列前一 Head workflow 失败属于历史记录：44891409843 / 44891373089（Bilingual）、44891373074（Architecture document management）、44891373084（Runner admission）。当前最终 Head 的 workflow IDs 和结果记在 PR delivery record；缺失日志或 step summary 不得推断 PASS。
-- GOV-DOC-002 增量 PASS 不等于全树 PASS；仍有 452 个文档未分类。结构配对不等于语义双语一致性。
-- Runtime 验收测试：NOT RUN——无 Runtime 授权/仓库。
-- 独立语义一致性审查：PENDING。H/Owner 回复：PENDING。
+- 验证快照：精确 Base / merge-base `c58878fce24528a0842b4f8887c93ddbf465b566`；精确候选 Head 记录在 PR 交付报告中。PR Base Ref 为 `bmcp-validation-base-c588`，固定指向 `c58878fce24528a0842b4f8887c93ddbf465b566`。Live `main` 当时实测为 `be77ef7e64b9102a03a7c65a223798fa2003e88b`，且已与 Owner 指定的 `c58878f` 快照分叉，因此本批次不以它作为 Base。此处理保持三文件 Diff 可复现，避免混入分叉历史。此前 `713774c` 批次仅作历史证据。
+- §2 Main 来源登记已从 `c58878fce24528a0842b4f8887c93ddbf465b566` 刷新；所有 Main Blob Pin 均针对该精确 Commit 解析。H 来源分支已重新读取：`session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74`；七个 H Blob Pin 已重新获取且匹配。EN/ZH 来源登记 SHA 集合一致。
+- 已纳入依赖核验的 Main 变更：#472 G ContextVersion/ChangeSet/CAS 文档和实现；`crates/memory-context/tests/e2e_negative_paths.rs`（SQLite Store→Context 负向路径覆盖）；规范 Claim/Fact Revision 类型；BMCP RecoveryJoin 1.0.2 Schema、索引、结构 Validator 和符合性 Fixture/Tests。RecoveryJoin Validator 的 Schema-only 成功状态为 `STRUCTURALLY_VALID`，Proof/Currentness 需注入 D 权威回调；缺少回调时结果为 `UNKNOWN`，不是 VALID。它不冻结 H Wire/Transport，也不替代 D 权威。G E2E 测试覆盖跨 Scope 拒绝、Candidate Lifecycle 拒绝、过期 Revision 拒绝、Budget 溢出和文件型 SQLite 重启；未覆盖 Forget/Tombstone 公共操作、H ACK 绑定或 C Final-request Applied 证据。
+- BMCP-DR-002 仍仅在 D/I 权威边界层面 DECIDED。BMCP-DR-003 仍为 PARTIALLY_DECIDED；精确 C-H Operation Registry/Mapping 仍 OPEN。H-CONFIRM-001..004 仍为 PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN；保留 `INDEPENDENCE_UNVERIFIABLE`。AT-01..AT-20 仍为 **PLANNED_NOT_RUN**；Provider Outcome 的五项 C 语义跳过仍未解决。
+- Issue #7 仍为 CLOSED / not_planned，正文保留 `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`。未冻结 Wire/Schema/API，未授权 Runtime、Transport 实施、部署、生产激活或修改 Issue #7。
+- `git diff --check origin/main...HEAD`：PASS，退出码 0（最终 Commit 后重跑）。
+- `python3 scripts/check_document_management.py --require-changed origin/main`：FAIL，退出码 1；两个基线 DM-06 错误位于 `08-bmcp-protocol/protocol-index.md` 和 `.zh-CN.md`（`Canonical` 缺少 `authority.canonical_scope_id`）。PR 未修改两个索引文件。报告清点：501 governed documents，18 classified / 483 unclassified。未进行范围外元数据修改。
+- `python3 scripts/ci/audit_runner_admission.py`：PASS；审计 1 个 self-hosted job / 0 violations；退出码 0。
+- `BASE_SHA=$(git merge-base HEAD origin/main) HEAD_SHA=$(git rev-parse HEAD) PR_BODY='BILINGUAL-MANIFEST: COMPLETE' python3 scripts/check_bilingual_docs.py`：PASS；77 frozen / 0 new gaps / 21 exemptions；退出码 0。三个变更 Markdown 路径位于 `NORMATIVE_ROOTS` 外，门禁明确未执行配对检查。门禁仍保留 same-commit registration-history 规则；旧的 21 条错误未在本快照重现。
+- `python3 scripts/check_bilingual_docs_full.py --source-revision c58878fce24528a0842b4f8887c93ddbf465b566`：FAIL；467 个范围内 Markdown / 112 exempt / 81 violations；退出码 1。逐路径分类如下。
+
+### c58878f 快照的 GOV-DOC-001 全树清点
+
+精确命令 `python3 scripts/check_bilingual_docs_full.py --source-revision c58878fce24528a0842b4f8887c93ddbf465b566` 返回 **467 个范围内 Markdown / 112 个豁免 / 81 条 violations / 退出码 1**。这是路径对应关系清点，不是语义翻译审查。81 条按如下类别划分：
+
+- **77 个规范根目录源文件缺少两种语言镜像**（扫描器要求的对应路径为 `docs/en/<source>` 与 `docs/zh-CN/<source>` 两者）：
+  - `00-governance/architecture-document-management-policy.md`
+  - `00-governance/reports/gov-doc-001-full-scan-2026-11-20.md`
+  - `00-governance/templates/document-metadata-template.md`
+  - `02-domain-model/phase-2-domain-extension.md`
+  - `02-domain-model/phase-2-domain-extension.zh-CN.md`
+  - `06-memory-context/context-architecture.md`
+  - `06-memory-context/context-budget-and-sufficiency.md`
+  - `06-memory-context/context-edit-operations.md`
+  - `06-memory-context/context-implementation-coverage.md`
+  - `06-memory-context/context-implementation-coverage.zh-CN.md`
+  - `06-memory-context/context-manager.md`
+  - `06-memory-context/context-reconciliation.md`
+  - `06-memory-context/context-versioning.md`
+  - `06-memory-context/phase-3.7-g-local-lifecycle-producer-derivative-queue-recall-context-restore.md`
+  - `06-memory-context/phase-3.8.4-g-c-provider-outcome-consumer-review.md`
+  - `06-memory-context/phase-3.8.5-g-storage-logical-serialization-topology-impact-review.md`
+  - `06-memory-context/phase-3.8.6-g-review-storage-serialization-anchor.md`
+  - `07-agent-integration/adapter-capability-tiers.md`
+  - `07-agent-integration/adapter-capability-tiers.zh-CN.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/README.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/baseline-currentness-and-owner-source-audit.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/baseline-owner-branch-snapshot-errata.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/bilingual-parity-audit.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-entity-inventory.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-glossary.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-invariants.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-model.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-relationships.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-identity-semantics.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-state-semantics.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-temporal-evidence-semantics.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/cross-owner-canonical-semantics-matrix.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-model-complexity-assessment.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-model-decision-record.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-semantics-conflict-register.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/evidence/README.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/evidence/official-reference-validation.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/existing-domain-model-baseline.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/latest-cross-owner-source-reconciliation.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/mature-domain-model-research.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/post-merge-currentness-and-governance-reconciliation.md`
+  - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/validation/README.md`
+  - `13-engineering-decisions/technology-architecture-blueprint.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/README.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/architecture-complexity-audit.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/baseline/architecture-baseline.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/deployment-topology-comparison.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/independent-review-handoff.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/mature-project-research.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/open-questions.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-dependency-register.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-remediation/CGH-APPLIED-REVIEW-001.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-remediation/OWNER-REMEDIATION-001.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-technology-review-synthesis.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/research-evidence-register.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/rust-ecosystem-assessment.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/technology-capability-matrix.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/technology-recommendation.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/workload-model.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/README.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-boundary.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-canonical-contract.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-conflict-register.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-cross-owner-contract-matrix.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-decision-record.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-failure-semantics.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-technology-assessment.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-telemetry.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-validation-plan.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/evidence/README.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/existing-integration-baseline.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/inference-boundary-and-trust-model.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/provider-integration-research.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/provider-outcome-and-execution-evidence.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/tool-execution-boundary.md`
+  - `13-engineering-decisions/technology-research/TECH-REALITY-001-C/validation/README.md`
+
+- **4 个 Phase-0 运维研究报告缺少 side-by-side `.en.md`/`.zh-CN.md` Pair 或 `docs/en/14-ai-development` 镜像**：
+  - `14-ai-development/research/phase-0/SESSION-1-GITHUB-WORKFLOW-REPORT.md`
+  - `14-ai-development/research/phase-0/SESSION-2-PROMPT-RUN-PROVENANCE-REPORT.md`
+  - `14-ai-development/research/phase-0/SESSION-3-QUALITY-REVIEW-DEFECT-REPORT.md`
+  - `14-ai-development/research/phase-0/SESSION-4-ADOPTION-ISOLATION-REPORT.md`
+
+
+这 81 条与 `713774c` 历史批次此前报告的 21 条 same-commit registration errors 是独立问题。在 `c58878f` 快照上，结构门禁仍保留“注册必须晚于文件创建”的历史检查，结果为 77 frozen / 0 new gaps / 21 exemptions，**没有 same-commit registration errors**。没有削弱或绕过历史校验。历史 21 条不是当前计数。
+
+- `python3 scripts/governance/bilingual/test_bilingual_scripts.py`：PASS，13/13；退出码 0。
+- `python3 scripts/test_check_document_management.py`：PASS，214/214；退出码 0。测试运行中的负向 Fixture diagnostics 属于预期输出。
+- `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v`：PASS，30/30；退出码 0。
+- `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/provider_outcome -p 'test_*.py' -v`：10 run / 5 passed / 5 skipped / 0 failed；退出码 0。CPO-02/04/05/09/10 仍等待 Owner C 权威 Semantic Validator。
+- `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/recovery_cutoff -p 'test_*.py' -v`：FAIL，31 run / 28 passed / 3 failed；退出码 1。失败项：重复 JSON Member 测试要求具体重复键错误详情，但 Validator 返回通用 `invalid JSON: ValueError`；Schema/Index 测试找不到 protocol-index 中精确 `message_type` 条目；合法完整消息 Fixture 有六个对象违反 non-empty 约束。这些是当前 Main RecoveryJoin 工件问题，本 PR 未修改相关文件。
+- `python3 -m unittest discover -s 06-memory-context/reference-model -p 'test_g_applied_ledger.py' -v`：PASS，8/8；退出码 0。
+- `cargo test --offline -p memory-context --test e2e_negative_paths`：未完成；编译因 `Disk quota exceeded` / LLVM 输出流 I/O 错误失败；退出码 101。不声称 Rust G E2E PASS。
+- 独立语义/双语复审仍 PENDING。20 行 AT 矩阵仍仅在 ZH 逐项列出；EN 仅记录汇总 `PLANNED_NOT_RUN`。已披露此不对称，不表述为双语一致。
+- 未修改 H 所有规范文件、G 实现、C/D/I 权威文件、治理门禁、Schema 或 Baseline Registry。PR 范围仍严格为三个文件。
 
 ## 11. 双语变更清单
 
