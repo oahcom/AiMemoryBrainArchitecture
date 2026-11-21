@@ -22,6 +22,26 @@ Event-store fence 是一套独立机制：`ForgetFence::record_forget(namespace_
 
 因此，当前负向路径测试保留一个被 ignore 的目标 forget E2E；另有一条反向测试固定当前可观察行为：即使记录了 fence，MemoryStore 仍然可以读取该 Memory。
 
+## 2. fence 的当前读者
+
+本轮执行的仓库搜索命令：
+
+```sh
+grep -RIn 'load_fences' crates/memory-event-store-sqlite crates/memory-store crates/memory-storage crates/memory-storage-sqlite
+grep -RInE 'FROM[[:space:]]+forget_fence|INTO[[:space:]]+forget_fence|UPDATE[[:space:]]+forget_fence' crates/memory-event-store-sqlite crates/memory-store crates/memory-storage crates/memory-storage-sqlite
+grep -RIn 'restore_backup' crates
+```
+
+Rust 生产代码的命中集中在 `crates/memory-event-store-sqlite/src/forget_fence.rs`：
+
+- `record_forget` 负责写入 fence 行。
+- `open_existing` 调用 `load_fences` 检查现有 fence 数据库；它会读取并校验记录，但不会对 live Memory 读取实施门禁。
+- `restore_backup` 调用 `load_fences`；后者执行 `SELECT namespace_key,fence_seq,reason_digest FROM forget_fence`。得到的 namespace 集合用于扫描备份中的 `accepted_events.scope_json`，并在激活恢复文件前，从 `accepted_events`、`event_payloads` 和 `compile_outbox` 清除匹配事件。
+
+**结论：fence 有真实的执行读取者，但仅限 event-store 备份恢复路径。** `MemoryStore` 或 `MemoryStorage` 的正常读取路径没有读取 fence 表。因此缺口不只是某个 Store 方法少了一次调用：fence 根本尚未进入 Memory 读取边界。`tests/forget_fence.rs` 的五条集成测试覆盖恢复行为、校验/失败关闭、非法 scope、fence 提交后的重试和并发记录；它们并未证明 Memory 读取受 fence 约束。
+
+Round 8 的行为探测器命名为 `forget_api_absence_is_detectable`。它故意断言记录 fence 后 Memory revision 仍可读取。按当前分离架构，该测试应保持绿色；Memory 读取门禁接入 fence 后，它必须转红。届时删除这条当前行为固定测试，并启用 `forgotten_memory_is_excluded_from_context`。
+
 ## 三个候选实现方向
 
 ### (a) 在 `MemoryStore` 增加 `forget(namespace_key, reason)`，内部转调 `ForgetFence`
@@ -47,7 +67,7 @@ Event-store fence 是一套独立机制：`ForgetFence::record_forget(namespace_
 1. 存在公开且有文档的契约，将持久化 namespace fence 与 MemoryStorage 读取连接起来，并定义 fence 状态缺失、损坏或不可用时的行为。
 2. 所有可能返回 Memory revision 的公开读取路径都执行该契约；被 fence 的 namespace 不再返回可读 revision（或返回有类型的拒绝），绝不返回 fence 前的 revision。
 3. 对 fence 记录与并发读取之间的原子性/可见性有明确设计，并在相关 storage adapter 边界具备测试。
-4. 反向测试 `forget_fence_is_not_yet_enforced_by_memory_store_reads` 改为断言已强制执行的行为，或由明确的替代回归测试取代；目标 E2E `forgotten_memory_is_excluded_from_context` 取消 ignore 并通过。
+4. 反向测试 `forget_api_absence_is_detectable` 改为断言已强制执行的行为，或由明确的替代回归测试取代；目标 E2E `forgotten_memory_is_excluded_from_context` 取消 ignore 并通过。
 5. 相关 crate 测试和 workspace 验证在合并后的实现上通过。
 
 在上述条件全部满足前，保持本 work item 开放，并保留两条测试作为当前契约与目标契约的可执行文档。
