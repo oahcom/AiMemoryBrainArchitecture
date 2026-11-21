@@ -47,6 +47,51 @@ class GateRootsTest(unittest.TestCase):
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(text, encoding="utf-8")
 
+    def _run_real_git_gate_for_change(self, rel: str):
+        """Run main's production normative-file selection against a real git diff."""
+        import contextlib
+        import io
+        import subprocess
+
+        run = lambda *args: subprocess.run(
+            args, cwd=self.root, check=True, capture_output=True, text=True
+        )
+        run("git", "init", "-q")
+        run("git", "config", "user.email", "tests@example.invalid")
+        run("git", "config", "user.name", "Bilingual gate regression")
+        run("git", "commit", "--allow-empty", "-qm", "baseline")
+        base = run("git", "rev-parse", "HEAD").stdout.strip()
+        self.write(rel, "single-sided change\n")
+        run("git", "add", "--", rel)
+        run("git", "commit", "-qm", "single-sided change")
+        head = run("git", "rev-parse", "HEAD").stdout.strip()
+
+        previous_cwd = os.getcwd()
+        output = io.StringIO()
+        try:
+            os.chdir(self.root)
+            with patch.dict(
+                os.environ,
+                {"BASE_SHA": base, "HEAD_SHA": head, "PR_BODY": "BILINGUAL-MANIFEST: COMPLETE"},
+            ):
+                self.assertIn(rel, self.gate.changed_paths())
+                with contextlib.ExitStack() as stack:
+                    stack.enter_context(patch.object(self.gate, "read_baseline", return_value=set()))
+                    stack.enter_context(patch.object(self.gate, "current_bilingual_gaps", return_value=set()))
+                    stack.enter_context(patch.object(self.gate, "check_prompt_library", return_value=[]))
+                    stack.enter_context(patch.object(self.gate, "check_embedded_registration_history", return_value=[]))
+                    stack.enter_context(patch.object(self.gate, "parse_catch_up_declarations", return_value=({}, [])))
+                    stack.enter_context(patch.object(self.gate, "check_policy_inheritance", return_value=[]))
+                    stack.enter_context(patch.object(self.gate, "approved_exception", return_value=False))
+                    stack.enter_context(patch.object(self.gate, "check_mirror_pairing", return_value=[]))
+                    stack.enter_context(patch.object(self.gate, "check_normative_root_departures", return_value=[]))
+                    stack.enter_context(contextlib.redirect_stdout(output))
+                    stack.enter_context(contextlib.redirect_stderr(output))
+                    exit_code = self.gate.main()
+            return exit_code, output.getvalue()
+        finally:
+            os.chdir(previous_cwd)
+
     def normative(self, changed: set[str], complete: bool = True, exception: bool = False):
         changes = sorted(
             p for p in changed
@@ -787,6 +832,30 @@ class GateRootsTest(unittest.TestCase):
         errors = self.gate.check_mirror_pairing({mirror}, {mirror: "M"}, False)
         self.assertTrue(errors, "mirror pairing must still require both sides")
         self.assertIn("requires all counterparts changed", errors[0])
+
+    # --- Issue #522: data formats are not bilingual document roots ---
+
+    def test_schema_json_change_does_not_require_counterpart(self):
+        exit_code, output = self._run_real_git_gate_for_change(
+            "08-bmcp-protocol/schemas/bmcp.applied-delivery-evidence-1.0.0.schema.json"
+        )
+        self.assertEqual(exit_code, 0, output)
+        self.assertIn("Bilingual documentation and prompt-library gate: PASS", output)
+
+    def test_markdown_still_requires_counterpart(self):
+        exit_code, output = self._run_real_git_gate_for_change(
+            "08-bmcp-protocol/gate-single-sided-probe.md"
+        )
+        self.assertEqual(exit_code, 1, output)
+        self.assertIn("requires all counterparts changed in this PR", output)
+
+    def test_governance_markdown_still_requires_counterpart(self):
+        exit_code, output = self._run_real_git_gate_for_change(
+            "00-governance/gate-single-sided-probe.md"
+        )
+        self.assertEqual(exit_code, 1, output)
+        self.assertIn("requires all counterparts changed in this PR", output)
+
 
 if __name__ == "__main__":
     unittest.main()

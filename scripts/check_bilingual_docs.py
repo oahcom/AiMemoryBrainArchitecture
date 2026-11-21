@@ -996,7 +996,7 @@ def main() -> int:
         if len(parts) >= 2 and parts[0] in NORMATIVE_ROOTS:
             if Path(path).suffix.lower() in EXEMPT_SUFFIXES:
                 continue
-            if Path(path).suffix.lower() in {".md", ".yaml", ".yml", ".json", ".toml", ".proto"}:
+            if Path(path).suffix.lower() == ".md":
                 normative_changes.append(path)
 
     if normative_changes and not complete and not exception:
