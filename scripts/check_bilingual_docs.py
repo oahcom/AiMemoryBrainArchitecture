@@ -258,17 +258,26 @@ def _carries_chinese(source: str) -> bool:
     return sum(1 for ch in text if "\u4e00" <= ch <= "\u9fff") >= 100
 
 
+def _has_any_chinese(source: str) -> bool:
+    """Return True when a source contains at least one CJK Unified Ideograph."""
+    path = ROOT / source
+    if not path.is_file():
+        return False
+    text = path.read_text(encoding="utf-8", errors="replace")
+    return any("\u4e00" <= ch <= "\u9fff" for ch in text)
+
+
 def _side_by_side_bilingual(source: str) -> bool:
     """True when `source` has a side-by-side partner and the pair carries Chinese.
 
-    A pair only counts when at least one side actually contains Chinese text.
-    Two English files next to each other are not a bilingual pair, and an empty
-    `.zh-CN.md` placeholder is not a translation.
+    One CJK character anywhere in either file is enough: a short but genuine
+    translation must not be rejected for being brief.  The >=100 threshold in
+    _carries_chinese() stays for the embedded-bilingual shape only.
     """
     partner = side_by_side_partner(source)
     if partner is None:
         return False
-    return _carries_chinese(source) or _carries_chinese(partner)
+    return _has_any_chinese(source) or _has_any_chinese(partner)
 
 
 def current_bilingual_gaps() -> set[str]:
