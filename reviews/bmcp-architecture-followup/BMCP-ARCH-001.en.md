@@ -18,7 +18,7 @@ The Owner semantic decision for Fact/Claim is approved (Option A + I1); exact co
 
 Issue #7's recorded binding remains IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE. GitHub currently reports Issue #7 CLOSED / not_planned under the Owner phase-closure ruling; this work does not reopen or alter it. Deferral is not Runtime authorization.
 
-**Canonical name:** the repository canonical terminology at `00-governance/terminology.md` defines BMCP as **Brain Memory Context Protocol** (main `c138654c942dc93b5a36eccb2ff0e41452156429`, terminology Blob `b8770fbb58e4fac087698043c40a57531b1d244d`). The initial dispatch phrase “Brain Memory Control Protocol” is non-canonical for this repository and is rejected. H must retain “Context” in protocol documentation; no naming decision remains open.
+**Canonical name:** the repository canonical terminology at `00-governance/terminology.md` defines BMCP as **Brain Memory Context Protocol** (main `fc171705c8098422c02bcc443f9d7680b0302b57`, terminology Blob `b8770fbb58e4fac087698043c40a57531b1d244d`). The initial dispatch phrase “Brain Memory Control Protocol” is non-canonical for this repository and is rejected. H must retain “Context” in protocol documentation; no naming decision remains open.
 
 ## 2. Exact source ledger
 
@@ -41,7 +41,7 @@ Main pins are from fetched origin/main at the baseline above. H pins are from th
 | docs/en/03-memory-brain/forget-fence-and-completion-contract.md | main | c791895333ab6140f035f4f622d5dee9325d422d | D/I Forget boundary |
 | docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md | main | 9c054932994bb078e2834df8bd66f73895aa04f5 | D lifecycle/Fence |
 | 13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md | main | 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593 | historical ADR; semantic decision superseded; consumer mapping Candidate |
-| 14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md | main @ `c138654c942dc93b5a36eccb2ff0e41452156429` | Blob `d59756a8eb454480804c482ca03c68345ab5abf2` | Approved Owner semantic selection: Option A + I1; does not freeze schema |
+| 14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md | main @ `fc171705c8098422c02bcc443f9d7680b0302b57` | Blob `d59756a8eb454480804c482ca03c68345ab5abf2` | Approved Owner semantic selection: Option A + I1; does not freeze schema |
 
 This is a bounded source ledger, not a claim that every H artifact or consumer was independently reviewed.
 
@@ -255,7 +255,7 @@ H-owned questions go to H first; they are not disguised as Owner decisions.
 - D_I_IMPACT: no authority change.
 - RUNTIME_IMPLEMENTATION_IMPACT: raw bytes must not enter semantic parser.
 - REQUIRED_AUTHORITY: H.
-- OWNER_DECISION: PENDING_H_CONFIRMATION
+- OWNER_DECISION: ACCEPTED_SEMANTICALLY_BY_OWNER_DELEGATE; NOT_WIRE_FROZEN
 - EVIDENCE: strict parser Blob 3b9b3da645448c773c95a9dcd3c57c8c109bb2da.
 - FOLLOW_UP_ACTIONS: H publishes stage contract and vectors.
 
@@ -313,7 +313,7 @@ H-owned questions go to H first; they are not disguised as Owner decisions.
 - REQUIRED_AUTHORITY: Owner semantic selection is recorded in PR #446 (merged) under the standing Owner instruction; B/D/E/F/G/H/I consumer mapping and acceptance remain required for schema freeze.
 - OWNER_DECISION: SEMANTIC_DIRECTION_APPROVED_OPTION_A_I1; WIRE_SCHEMA_MAPPING_CANDIDATE
 - EVIDENCE: `OWNER-DECISION-FACT-CLAIM-001` PR #446 (merged) @ `ad5ca81a32b413aef3f9b5bccd06030aabde8275`; B ADR Blob 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593.
-- FOLLOW_UP_ACTIONS: B updates ADR status/source pins; D/E/F/G/H/I record exact consumer mappings and acceptance; publish migration/compatibility plan and conformance scenarios; keep payload opaque until all §8 conditions are met.
+- FOLLOW_UP_ACTIONS: retain the B ADR as historical evidence; the merged Owner decision is the live semantic authority and no separate B Owner sign-off is claimed. D/E/F/G/H/I record exact consumer mappings and acceptance; publish migration/compatibility plan and conformance scenarios; keep payload opaque until all §8 conditions are met.
 
 **DECISION_REQUEST_ID: BMCP-DR-002**
 - MODULE: BMCP
@@ -329,7 +329,7 @@ H-owned questions go to H first; they are not disguised as Owner decisions.
 - D_I_IMPACT: no authority change; exact interface publication and consumer review only.
 - RUNTIME_IMPLEMENTATION_IMPACT: protected handlers blocked until API/currentness evidence exists.
 - REQUIRED_AUTHORITY: D and I; H confirms wire mapping afterwards.
-- OWNER_DECISION: DEFERRED_TO_D_I_INTERFACE_PUBLICATION; H MUST NOT INVENT AUTHORITY API OR CURRENTNESS SEMANTICS
+- OWNER_DECISION: DEFERRED_TO_D_I_OWNER_CONTRACT_PUBLICATION; H MUST NOT INVENT AUTHORITY API OR CURRENTNESS SEMANTICS
 - EVIDENCE: H overview Blob b88ef3a6fd3be293e7c2e77d9652f386b169bc47; D Forget Blob c791895333ab6140f035f4f622d5dee9325d422d.
 - FOLLOW_UP_ACTIONS: D/I publish interfaces/vectors; H maps; BMCP updates crosswalk.
 
@@ -349,7 +349,22 @@ H-owned questions go to H first; they are not disguised as Owner decisions.
 - REQUIRED_AUTHORITY: C + H; D/I review authority-bearing identity mapping.
 - OWNER_DECISION: ARCHITECTURE_BASELINE_CONFIRMS_OPTION_A_MCP_AS_AGENT_FACING_ADAPTER_TO_BMCP; EXACT_MAPPING_PENDING_C_H_CONTRACT
 - EVIDENCE: C guide Blob c4e076887634a9e8e46df076efb0f4b70d816e0a; `07-agent-integration/agent-integration-overview.md` and `08-bmcp-protocol` ownership boundary.
-- FOLLOW_UP_ACTIONS: C/H publish mapping and conformance cases; no parallel API.
+- FOLLOW_UP_ACTIONS: C publishes the exact MCP-to-BMCP mapping under Issue #449; H reviews only its wire/transport boundary; no parallel API.
+
+### 7.3 Owner-delegate H semantic disposition (2026-11-21)
+
+**Authority:** Project Owner delegate acting in the H protocol-owner role under Issue #305 comment 7042461592. This is not an independent human H signature. Independence status: `INDEPENDENCE_UNVERIFIABLE`.
+
+| Request | Disposition | Binding semantic ruling |
+|---|---|---|
+| H-CONFIRM-001 | ACCEPTED_SEMANTICALLY_BY_OWNER_DELEGATE | `message_id` is unique per BMCP message; `correlation_id` groups the Agent request/workflow; `causation_id` identifies the immediate parent BMCP message/event. State-changing/retryable operations additionally use owner-scoped idempotency identity + canonical payload digest. No separate core `request_id` is introduced. C retains AgentRequestId and AgentAttemptId as C-owned identities. |
+| H-CONFIRM-002 | ACCEPTED_SEMANTICALLY_BY_OWNER_DELEGATE | H owns authenticated transport/framing, raw-byte intake, strict UTF-8/JSON decode, envelope structural validation, version/capability and integrity checks. BMCP semantic Parse starts only after successful decode/envelope validation and must not re-parse raw bytes. |
+| H-CONFIRM-003 | ACCEPTED_SEMANTICALLY_BY_OWNER_DELEGATE | Transport/Delivery ACK, G Applied evidence, and Adapter-local Forget ACK are separate families and predicates. Delivered is not Applied; Forget ACK is not global Forget completion. Lost/ambiguous ACK remains UNKNOWN until reconciliation. ACK identity/evidence digest is stable; transport attempt may change. |
+| H-CONFIRM-004 | ACCEPTED_SEMANTICALLY_BY_OWNER_DELEGATE | H validates wire syntax/envelope/version/capability/integrity/replay/idempotency. I owns Principal authorization/PermissionEpoch; B/D/E/F/G own their domain validators; C owns final inference-boundary evidence; G accepts Applied. Error classes must remain distinct, but this ruling freezes no error enum. |
+
+Evidence pins: H branch `session-h-bmcp-protocol` at `3e8b33df18b9e6fc757ca84ff07a12faebc78e74`; protocol overview Blob `b88ef3a6fd3be293e7c2e77d9652f386b169bc47`; envelope Blob `5547ecd78d118bd63e571e5daad87194d9b694e4`; delivery/ACK Blob `bf9732cc39d156853b507c3a3a4e573159978f49`; Forget ACK Blob `5e2b33898cbc6a9c95e271ecd1d8a092d04c67f8`; strict parser reference Blob `3b9b3da645448c773c95a9dcd3c57c8c109bb2da`; lifecycle handoff Blob `b2a2648d5576511f68fdb9d87ce4388a1fedd5e9`; conformance matrix Blob `075b2ac6ebe9bda4ec83de04fad07e8027e6a440`.
+
+These are semantic ownership confirmations only. They do **not** freeze a Wire Schema, field encoding, Validator implementation, transport, public API or Runtime. H must still publish its versioned normative contract and cross-module consumers must review their own evidence.
 
 ## 8. Runtime acceptance plan — NOT RUN
 
@@ -390,7 +405,7 @@ Issue #7 is currently CLOSED / not_planned under the Owner phase-closure ruling;
 1. BMCP semantic contract accepted by accountable architecture authority; unresolved semantics enumerated.
 2. H freezes versioned Wire, Transport, ACK and Validator contracts, including error/conformance mappings.
 3. H/C/E/D/I/G accept cross-module Request/Response/Receipt/ACK mappings as applicable.
-4. Fact/Claim ADR formally decided, or dependent operations explicitly excluded/opaque; E Candidate IR and receipt APIs pinned.
+4. Owner semantic selection is recorded in merged PR #446; dependent operations remain excluded/opaque until B/D/E/F/G/H/I consumer mapping, compatibility and conformance evidence are accepted; E Candidate IR and receipt APIs are pinned.
 5. C/H accept Agent Integration / MCP-to-BMCP adapter boundary; MCP is not a substitute protocol.
 6. D/I publish exact callable interfaces for identity/lifecycle, Forget Fence, authorization and PermissionEpoch currentness.
 7. Canonical Runtime repository/branch (or authorized new repo), accountable engineering owner/maintainers, build, CI, test commands and artifact provenance designated.
@@ -415,10 +430,12 @@ Issue #7 is currently CLOSED / not_planned under the Owner phase-closure ruling;
 - Issue #7: CLOSED / not_planned; body retains IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE. No status edit.
 - Issue #3: CLOSED / not_planned as superseded. Its historical body says Applied Contract Frozen = NO and Test Executed / Passed = NO / NO; closure does not prove a new BMCP core freeze.
 - Issue #43: closed as superseded by Owner phase-closure ruling. This is a candidate architecture handoff, not Runtime implementation.
-- Main fetched SHA: 47b8600e7509ef4349c996dce15bd3146b155f75; H branch HEAD: 3e8b33df18b9e6fc757ca84ff07a12faebc78e74.
+- Main fetched SHA: fc171705c8098422c02bcc443f9d7680b0302b57; H branch HEAD: 3e8b33df18b9e6fc757ca84ff07a12faebc78e74.
+- PR #443 is CLOSED / unmerged; PR #445 is merged and the current mainline bilingual structural gate passes. This is not a semantic parity or whole-tree document-adoption PASS.
 - No Runtime code or H-owned source file modified.
 - Runtime acceptance tests: NOT RUN — no Runtime authorization/repository.
-- Independent semantic parity review: PENDING. H/Owner responses: PENDING.
+- Owner-delegate semantic spot-check of sections 1, 2, 7, 8, 9, 10 and 12: COMPLETED; independence remains INDEPENDENCE_UNVERIFIABLE. A separate independent semantic parity review is not claimed.
+- H-CONFIRM-001..004: ACCEPTED_SEMANTICALLY_BY_OWNER_DELEGATE; NOT_WIRE_FROZEN. BMCP-DR-002: DEFERRED_TO_D_I_OWNER_CONTRACT_PUBLICATION. C mapping: OPEN under Issue #449.
 
 ## 11. Bilingual change manifest
 
@@ -434,11 +451,11 @@ The coverage register records this as a review/handoff pair only. It does not ch
 - PARSE_CONTRACT_STATUS: candidate semantic boundary specified; H wire/decode mapping pending
 - EXECUTE_CONTRACT_STATUS: CANDIDATE; D/I/E/G APIs and Fact/Claim decision pending
 - RESPOND_CONTRACT_STATUS: CANDIDATE; H response envelope/correlation mapping pending
-- H_DEPENDENCY_STATUS: **BLOCKED_BY_H_CONTRACT**
+- H_DEPENDENCY_STATUS: **SEMANTIC_CONFIRMATIONS_ACCEPTED / WIRE_CONTRACT_NOT_FROZEN**
 - CROSS_MODULE_DEPENDENCIES: H, B, C, D, E, G, I
-- OWNER_DECISIONS_REQUIRED: BMCP-DR-001..003
+- OWNER_DECISIONS_REQUIRED: BMCP-DR-001 RESOLVED (Option A + I1); BMCP-DR-002 DEFERRED; BMCP-DR-003 ADAPTER BOUNDARY ACCEPTED / EXACT C MAPPING OPEN
 - ISSUE_7_STATUS: IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE; GitHub CLOSED / not_planned; unchanged
 - RUNTIME_IMPLEMENTATION_STATUS: NOT AUTHORIZED / NOT STARTED
 - PR / Commit: populate only after successful push and PR creation; no merge authorized
 
-**Next action:** H answers H-CONFIRM-001..004 first; B/Architecture Governance, D, I and C resolve their requests; BMCP architecture integration refreshes exact pins and publishes a successor. Runtime remains deferred until all engineering-entry conditions are evidenced.
+**Next action:** H publishes its versioned Wire/Transport/ACK/Validator contract; C publishes the exact adapter mapping under Issue #449; D/I callable interfaces remain deferred to their own Owner contracts; BMCP refreshes pins and updates the bilingual handoff. Runtime remains deferred until all engineering-entry conditions are evidenced.
