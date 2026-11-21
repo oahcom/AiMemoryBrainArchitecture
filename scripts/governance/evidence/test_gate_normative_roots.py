@@ -293,7 +293,7 @@ class GateRootsTest(unittest.TestCase):
         self.commit_tree(repo, "move mirror-only pair to archive")
         self.assertEqual(self.root_departures(repo, base), [])
         raw = self.git(repo, "diff", "--name-status", "--no-renames", f"{base}...HEAD")
-        statuses = {line.split("\\t", 1)[1]: line.split("\\t", 1)[0]
+        statuses = {line.split("\t", 1)[1]: line.split("\t", 1)[0]
                     for line in raw.splitlines()}
         changed = set(statuses)
         self.assertEqual(
@@ -312,7 +312,7 @@ class GateRootsTest(unittest.TestCase):
         self.commit_tree(repo, "delete mirror-only pair")
         self.assertEqual(self.root_departures(repo, base), [])
         raw = self.git(repo, "diff", "--name-status", "--no-renames", f"{base}...HEAD")
-        statuses = {line.split("\\t", 1)[1]: line.split("\\t", 1)[0]
+        statuses = {line.split("\t", 1)[1]: line.split("\t", 1)[0]
                     for line in raw.splitlines()}
         self.assertEqual(
             self.gate.check_counterpart_requirement(
