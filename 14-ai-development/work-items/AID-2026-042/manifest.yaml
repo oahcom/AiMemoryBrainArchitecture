@@ -32,8 +32,8 @@ prompt_file: 14-ai-development/work-items/AID-2026-042/prompt-v1.md
 prompt_status: FROZEN
 prompt_sha256: 2264a492b417dde29aa51b23d5f0988a5873bf97797b1c789cb49ff1d894df45
 prompt_bytes: 1888
-prompt_file_blob_sha: PENDING_GIT_OBJECT
-prompt_file_commit_sha: PENDING_REGISTRATION_COMMIT
+prompt_file_blob_sha: 1048da63cf32524cf21218a4ead28bd3d909db0c
+prompt_file_commit_sha: 8c3c44b68128e20fed19417946083084e4a78829
 
 prompt_provenance_tier: T1
 prompt_provenance_note: >-
@@ -66,8 +66,8 @@ acceptance:
 implementation:
   status: PR_OPEN
   branch: fix/AID-2026-042/sys-argv-gate-tests
-  pull_request: PENDING
-  pull_request_url: PENDING
+  pull_request: 534
+  pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/534
   implementation_commit_sha: 0a5070b94b72dbc2ca1aba3a2285642cd3699363
   merge_commit_sha: NOT_MERGED
 
