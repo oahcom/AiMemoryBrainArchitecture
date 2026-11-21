@@ -337,7 +337,7 @@ constraint specified in Extraction §19.2, not a second
 independent mechanism.
 
 The observable completion predicate is:
-DependencyClosurePersisted(P) = TRUE only when the
+DependencyClosurePersisted(P) = TRUE if and only if the
 authoritative durable dependency-registration record for
 Producer participant P identifies the complete direct and
 transitive dependency set, records completeness as COMPLETE,
