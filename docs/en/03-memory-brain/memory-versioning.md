@@ -280,6 +280,81 @@ The operation MUST be reconciled under the serialized Fence/Admission ordering.
 
 Its completion or suppression MUST follow the declared Forget policy and preserve the exact participant identity, dependency closure and auditable outcome.
 
+#### Second-stage Admission race matrix
+
+The following four timing cases are normative.
+They distinguish Producer Admission races from
+PublicationParticipant Admission races.
+
+T17-P and T18-P refine the existing T17 and T18
+scenarios respectively. They MUST preserve the
+existing meanings of Fence before Admission and
+Fence after Admission.
+
+T17-PUB and T18-PUB describe the independent
+PublicationParticipant Admission race. They MUST NOT
+reinterpret or replace the first-stage scenarios.
+
+| Scenario | D Fence ordering | Producer Admission and dependency closure | Canonical Revision visibility | Existing E Publication | PREPARED_HIDDEN tuple | PublicationParticipant disposition | Recovery and retry invariant |
+|---|---|---|---|---|---|---|---|
+| T17-P | Fence linearizes before Producer Admission | Producer Admission MUST reject; dependency registration MUST NOT authorize subsequent components | No new canonical commit; any pre-existing revision MUST remain non-public | No new publication | MUST NOT be created by the rejected operation | No Producer participant is admitted | Original rejection MUST be authoritative; retry MUST NOT create a new admission |
+| T18-P | Producer Admission linearizes before Fence | Exact Producer participant MUST be durably recorded; complete dependency closure MUST be registered or remain explicitly incomplete and blocked | MAY be committed only under the original admitted operation; MUST remain non-public until independently authorized | MAY exist only under the original operation and MUST remain non-public until second-stage admission and visibility authorization | MAY be durably prepared and MUST remain hidden | First-stage participant MUST remain identifiable; subsequent disposition MUST be associated with that exact participant | Fence MUST account for the original participant; recovery MUST NOT substitute a new Operation identity or omit its dependencies |
+| T17-PUB | Fence linearizes before PublicationParticipant Admission | Earlier Producer Admission and dependency registration MUST remain recorded and MUST NOT be erased or narrowed | Already committed revision MAY remain committed but MUST stay non-public | Existing E Publication MUST be withdrawn from public visibility or quarantined | MUST be cancelled or quarantined; MUST remain non-visible | PublicationParticipant Admission MUST reject; the first-stage Producer participant MUST receive an auditable suppression disposition covering the rejected publication | Recovery MUST preserve rejection and quarantine; no replay, retry, or alternate publication path may expose the tuple |
+| T18-PUB | PublicationParticipant Admission linearizes before Fence | Original Producer participant and complete registered dependency closure MUST remain identifiable | Already committed revision MAY remain committed; visibility MUST follow the exact authorized terminal disposition | Existing E Publication MUST remain bound to the original publication identity; it MUST NOT independently become visible | MUST remain durably identifiable; MAY be retained hidden for authorized disposition or recovery | Successful PublicationParticipant MUST be included in the Fence barrier and receive an auditable completion or suppression disposition | Recovery MUST resolve the original publication identity and Fence disposition; no duplicate admission or visibility advancement is permitted |
+
+**T17-P and T18-P correspondence**
+
+- T17-P is the existing Fence before Admission (T17).
+  The word Admission in that original scenario means
+  Producer Admission. A Fence that linearizes first
+  MUST reject Producer Admission.
+- T18-P is the existing Fence after Admission (T18).
+  The word Admission in that original scenario means
+  Producer Admission. The Fence MUST observe the
+  durable Producer participant record and MUST NOT
+  omit that participant from its barrier.
+
+**T17-PUB and T18-PUB correspondence**
+
+- T17-PUB means Fence-first relative to the second
+  admission. It does not undo the earlier successful
+  Producer Admission, canonical commit, E Publication,
+  or PREPARED_HIDDEN persistence. It prevents the
+  subsequent PublicationParticipant Admission and
+  visibility advancement.
+- T18-PUB means PublicationParticipant Admission-first
+  relative to the second Fence. The Fence MUST observe
+  the exact admitted PublicationParticipant and MUST
+  include it in its barrier.
+
+The following anti-resurrection requirements apply
+to all four scenarios:
+
+1. Every PREPARED_HIDDEN tuple MUST bind to its exact
+   publication identity, original Operation identity,
+   Producer participant, registered dependency closure,
+   and authoritative ForgetFence disposition.
+2. A rejected PublicationParticipant Admission MUST
+   produce an auditable suppression disposition linked
+   to the original Producer participant. The absence
+   of a second-stage admission MUST NOT erase or
+   bypass the first-stage participant obligation.
+3. Recovery MUST verify the authoritative admission,
+   Fence, and suppression or completion records before
+   any visibility advancement.
+4. Retry MUST reuse the original Operation identity and
+   publication identity. It MUST NOT create another
+   participant or reinterpret a rejected admission
+   as successful.
+5. An alternate publication path MUST enforce the same
+   ForgetFence and PublicationParticipant authorization
+   boundary. It MUST NOT bypass the rejected or
+   unresolved second-stage admission.
+6. A tuple without a proven successful second-stage
+   admission and authorized visibility outcome MUST
+   remain non-visible. Missing, conflicting, or UNKNOWN
+   evidence MUST fail closed.
+
 UNKNOWN MUST remain non-final until the authoritative operation outcome is resolved.
 
 Recovery MUST use the original operation identity and MUST reconcile Fence, Admission, dependency registration, canonical commit, E publication, Storage visibility and G ContextVersion state.
@@ -441,25 +516,217 @@ Record aggregate ID, version/revision ID, parent ID, commit sequence, actor/scop
 The following matrix is normative for the logical
 Claim/Fact publication operation.
 
-The six components are ordered as follows:
+The seven logical components are defined as follows:
 
 1. D Fence
-2. Admission
+2. Producer Admission
 3. D Canonical Commit
 4. E Publication
-5. Storage Visibility
-6. G Context Commit
+5. PublicationParticipant Admission
+6. Storage Visibility
+7. G Context Commit
 
-Successful Producer Admission and durable recording
-of the exact admitted participant MUST form one
-indivisible operation under the authoritative
-serialized Fence/Admission boundary.
+The two Admission stages MUST remain distinct and MUST NOT be
+treated as aliases or interchangeable operations.
 
-A subsequent Forget Fence MUST NOT linearize or
-complete its participant-barrier evaluation until
-the admitted participant record is durably visible.
+The normative execution order is:
 
-| Scenario | D Fence | Admission | D Canonical Commit | E Publication | Storage Visibility | G Context Commit | Forbidden partial-publication or duplicate-visible effect |
+1. D Fence establishes the authoritative ordering boundary.
+2. Producer Admission durably records the exact admitted
+   Producer participant.
+3. The complete direct and transitive dependency set is
+   durably registered.
+4. D Canonical Commit commits the exact canonical revision
+   and required canonical references.
+5. E Publication produces the exact publication artifact.
+6. Storage Visibility first durably persists the exact
+   publication tuple as PREPARED_HIDDEN.
+7. PublicationParticipant Admission evaluates the exact
+   committed publication identity against the current
+   ForgetFence.
+8. Storage Visibility performs only the authorized
+   subsequent visibility processing.
+9. G Context Commit commits or recovers the exact
+   authorized ContextVersion.
+
+PREPARED_HIDDEN is the mandatory entry state of the
+Storage Visibility component. Its durable persistence
+MUST precede PublicationParticipant Admission, while
+visibility advancement MUST follow successful
+PublicationParticipant Admission.
+
+Successful Producer Admission and durable recording of
+the exact admitted Producer participant MUST form one
+indivisible operation under the authoritative serialized
+Fence/Admission boundary.
+
+Successful PublicationParticipant Admission MUST bind
+to the exact committed publication identity and the
+dependency closure registered by the original Producer.
+It MUST NOT create, replace, narrow, or independently
+redefine that dependency closure.
+
+A subsequent Forget Fence MUST NOT linearize or complete
+its participant-barrier evaluation until every successful
+Producer Admission has its exact participant record
+durably visible.
+
+PublicationParticipant Admission MUST independently
+serialize against the authoritative ForgetFence ordering
+boundary. Successful Producer Admission MUST NOT be
+interpreted as successful PublicationParticipant Admission.
+
+#### Forget terminal-state × component disposition
+
+This matrix is an implementation-conformance gate.
+It defines the mandatory disposition of every logical
+component for each Forget terminal state.
+
+The four terminal states are mutually exclusive and
+collectively exhaustive. Exactly one terminal state
+MUST be declared for a terminal Forget operation.
+
+| Forget terminal state | D Fence | Producer Admission | D Canonical Commit | E Publication | PublicationParticipant Admission | Storage Visibility | G Context Commit |
+|---|---|---|---|---|---|---|---|
+| Completed | MUST complete | MUST complete | MUST complete | MUST complete | MUST complete | MUST complete | MUST complete |
+| CompletedWithPolicyException | MUST complete | MUST complete or have an auditable suppression disposition | MUST complete or remain committed but MUST stay non-public | MUST complete or remain non-public | MUST complete or have an auditable suppression disposition | MUST complete or remain non-visible under an approved residual exception | MAY commit only after all publication prerequisites and exception evidence are complete |
+| Failed | MUST complete or preserve its authoritative outcome | MUST have an auditable completion or suppression disposition | MAY remain committed but MUST stay non-public | MAY remain published but MUST be withdrawn or quarantined from public visibility | MUST NOT be newly admitted after the terminating Fence; existing admission MUST have an auditable disposition | MUST remain non-visible or be cancelled or quarantined | MUST NOT commit |
+| Cancelled | MUST complete or preserve its authoritative outcome | MUST have an auditable completion or suppression disposition | MAY remain committed but MUST stay non-public | MAY remain published but MUST be withdrawn or quarantined from public visibility | MUST NOT be newly admitted after the terminating Fence; existing admission MUST have an auditable disposition | MUST remain non-visible or be cancelled or quarantined | MUST NOT commit |
+
+The following rules are normative for interpreting
+the matrix.
+
+**1. Completed**
+
+- The last permitted visible component is G Context Commit.
+- The exact canonical revision MUST remain consistent
+  with the completed Forget outcome.
+- Every E Artifact MUST have its authorized terminal
+  publication disposition.
+- Every PREPARED_HIDDEN tuple MUST have completed
+  its authorized visibility processing.
+- Every admitted participant and every registered
+  dependency MUST have an auditable completion or
+  suppression disposition.
+- Audit evidence MUST establish the exact Forget
+  operation identity, ForgetFence outcome, complete
+  dependency closure, both Admission outcomes,
+  canonical commit receipt, publication identity,
+  Storage Visibility outcome, and ContextVersion.
+- No unresolved UNKNOWN is permitted.
+
+**2. CompletedWithPolicyException**
+
+- The last permitted visible component is G Context Commit,
+  subject to the restrictions in this section.
+- The canonical revision MAY remain committed only if
+  its public visibility is consistent with the approved
+  Forget outcome. An unauthorized canonical revision
+  MUST remain non-public.
+- An existing E Artifact MAY remain durably stored only
+  if it is withdrawn from public visibility or remains
+  quarantined.
+- A PREPARED_HIDDEN tuple MUST remain non-visible unless
+  its exact visibility advancement is independently
+  authorized.
+- G Context Commit MAY occur only when every prerequisite
+  for that exact ContextVersion is satisfied. A policy
+  exception MUST NOT authorize an otherwise forbidden
+  visibility advancement.
+- The exception MUST identify each affected component,
+  each residual target, the approved residual state,
+  the approving authority, and the applicable evidence.
+- The approving I governance authority MUST explicitly
+  authorize the residual exception before terminal
+  declaration.
+- Audit evidence MUST include all Completed evidence
+  applicable to completed components and the explicit
+  approval and residual inventory.
+- No unresolved UNKNOWN is permitted. An UNKNOWN target
+  MUST NOT be represented as an approved residual without
+  an authoritative resolved disposition.
+
+**3. Failed**
+
+- The last permitted externally visible component is
+  the authoritative D Fence and operation-state record.
+  Previously committed canonical state MUST NOT thereby
+  become publicly visible.
+- An already committed Canonical Revision MAY remain
+  durably committed, but MUST stay non-public.
+- An already published E Artifact MUST be withdrawn
+  from public visibility or quarantined. Publication
+  MUST NOT be replayed as a successful visible effect.
+- Every PREPARED_HIDDEN tuple MUST be cancelled or
+  quarantined and MUST remain non-visible.
+- An existing PublicationParticipant MUST receive an
+  auditable suppression or quarantine disposition.
+  A participant that has not successfully passed
+  PublicationParticipant Admission MUST NOT be treated
+  as admitted.
+- G Context Commit MUST NOT occur.
+- Audit evidence MUST identify the failure, the exact
+  last authoritative component outcome, all admitted
+  participants, all registered dependencies, canonical
+  receipts, existing publication identities, tuple
+  dispositions, and suppression or quarantine evidence.
+- No unresolved UNKNOWN is permitted. Failure to resolve
+  an authoritative outcome MUST keep the operation
+  non-terminal rather than silently converting it
+  into Failed.
+
+**4. Cancelled**
+
+- The last permitted externally visible component is
+  the authoritative D Fence and operation-state record.
+  Previously committed canonical state MUST NOT thereby
+  become publicly visible.
+- An already committed Canonical Revision MAY remain
+  durably committed, but MUST stay non-public.
+- An already published E Artifact MUST be withdrawn
+  from public visibility or quarantined.
+- Every PREPARED_HIDDEN tuple MUST be cancelled or
+  quarantined and MUST remain non-visible.
+- Every previously admitted participant MUST receive
+  an auditable cancellation or suppression disposition.
+  A participant that has not successfully passed
+  PublicationParticipant Admission MUST NOT be treated
+  as admitted.
+- G Context Commit MUST NOT occur.
+- Cancellation MUST have an explicit authoritative
+  cancellation outcome. An execution failure MUST NOT
+  be relabelled Cancelled.
+- Audit evidence MUST identify the cancellation authority,
+  cancellation outcome, exact last authoritative component,
+  all admitted participants, all registered dependencies,
+  canonical receipts, publication identities, tuple
+  dispositions, and cancellation or suppression evidence.
+- No unresolved UNKNOWN is permitted. An unresolved
+  cancellation outcome MUST NOT be declared Cancelled.
+
+The following classification rules make the four
+terminal states mutually exclusive:
+
+- Completed MUST be declared only when every component
+  and every registered dependency satisfies the complete
+  terminal requirements without an approved residual
+  exception.
+- CompletedWithPolicyException MUST be declared only
+  when an explicit I governance approval authorizes
+  identified residual exceptions and all remaining
+  terminal requirements are satisfied.
+- Failed MUST be declared when an authoritative execution
+  failure prevents successful completion and no
+  authoritative cancellation outcome supersedes it.
+- Cancelled MUST be declared only when an authoritative
+  cancellation outcome exists and the operation is
+  terminated under that outcome.
+
+A terminal state MUST NOT be declared while any component
+outcome, participant disposition, dependency disposition,
+publication identity, or required evidence remains UNKNOWN.
+
+| Scenario | D Fence | Producer Admission | D Canonical Commit | E Publication | Storage Visibility | G Context Commit | Forbidden partial-publication or duplicate-visible effect |
 |---|---|---|---|---|---|---|---|
 | Fence before Admission (T17) | Fence linearizes first | MUST reject admission | MUST NOT commit | MUST NOT publish | MUST NOT advance | MUST NOT commit | No canonical revision, artifact, serving reference or ContextVersion may become visible |
 | Fence after Admission (T18) | Fence observes durable participant | Original admitted operation remains identifiable | Apply declared completion/suppression policy | Only authorized terminal outcome may publish | Only authorized terminal outcome may advance | Only exact authorized outcome may commit | Fence MUST NOT complete its barrier while omitting the admitted participant |

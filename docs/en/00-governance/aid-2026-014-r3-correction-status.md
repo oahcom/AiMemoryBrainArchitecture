@@ -464,13 +464,113 @@ The Application status column in §3 is left as it stands: the previous applicat
 tree. The Independent review column now carries this verdict, which is why four rows changed and
 none of the acceptance gates did.
 
-### 9.5 Read-back of the predicate-equivalence round
+### 9.5 Application of the seven SYNC items
+
+Read-back baseline HEAD: `836dc1055547f1dd9fba2081a5280ef22cbb94c5`. Every Blob below was read at that exact commit.
+
+Seven items were applied in three commits, then one defect was found and removed in a fourth.
+The table records what the tree holds now, not what an earlier commit held.
+
+| Target | Item | Blob before | Blob after | Size | Commit |
+|---|---|---|---|---|---|
+| `docs/en/09-security-governance/security-governance-guide.md` | R2 / SYNC-01+02 | `60b2283fdf44` | `061c5847b3df` | 15171 -> 20714 B | `782c4c8d` |
+| `docs/zh-CN/09-security-governance/security-governance-guide.md` | R2 / SYNC-01+02 | `9fee318f2def` | `372d27c79dc7` | 13359 -> 18224 B | `782c4c8d` |
+| `docs/en/03-memory-brain/memory-versioning.md` | R3+R5 / SYNC-04+06 | `7e63b9b397c3` | `84aabc25bb07` | 33424 -> 48474 B | `9eca5eda` |
+| `docs/zh-CN/03-memory-brain/memory-versioning.md` | R3+R5 / SYNC-04+06 | `89d9eb478661` | `aa2fc775c786` | 31768 -> 44569 B | `9eca5eda` |
+| `docs/en/02-domain-model/domain-model-overview.md` | R3 / SYNC-03 | `5b86fe23ab7c` | `1a1a10b24d68` | 26974 -> 28507 B | `9eca5eda` |
+| `docs/zh-CN/02-domain-model/domain-model-overview.md` | R3 / SYNC-03 | `03129ded6e95` | `8ef976789af6` | 24417 -> 25636 B | `9eca5eda` |
+| `docs/en/04-memory-compiler/extraction-and-normalization.md` | R5 / SYNC-05 | `c87860706313` | `e6aad4b7504f` | 22484 -> 26256 B | `d36c27c9` |
+| `docs/zh-CN/04-memory-compiler/extraction-and-normalization.md` | R5 / SYNC-05 | `9657949af482` | `8dd0b5b29ecd` | 21781 -> 25185 B | `d36c27c9` |
+| `06-memory-context/context-versioning.md` | R5 / SYNC-07 | `847c9578b440` | `ce952ba3eca3` | 32435 -> 34566 B | `d36c27c9` |
+
+**SYNC-01 and SYNC-02 — the authorization decision is now single-use.** `§12.3` gains three
+numbered fields after the original seven: a unique `AttestationOperationRef` binding that names
+the exact `FactRef`/`FactRevisionRef` targeted by that operation; exact `ClaimRevisionRef`,
+`EvidenceRef` and, where provenance is attested input, `ProvenanceRef` set binding, with an
+explicit bar on an unspecified, subsequently expanded, substituted or implicitly resolved set; and
+a single-use consumption and replay-protection state that separates an unused decision from one
+consumed by its uniquely bound operation, after which the decision MUST NOT authorize another
+operation, FactRevision, target, claim set or evidence set. `§12.6` gains the matching D duties:
+verify that the `AuthorizationDecisionRef` is bound to the current unique operation, verify the
+exact target and exact input sets, and verify consumption state. The closing paragraph states the
+whole thing is a semantic contract and an implementation-conformance boundary, not a Schema, DDL
+or Public API approval.
+
+**SYNC-03 — closure rules now meet terminal states.** `§8.1` keeps every closure rule unchanged and
+adds their correspondence to the Forget terminal states: no terminal state may be declared on an
+incomplete closure, and `Failed`/`Cancelled` must dispose of every registered dependency rather
+than only the initiating object. The shared-Fact, whole-FactRevision-suppression and
+unknown-closure-blocks rules are untouched.
+
+**SYNC-04 and SYNC-06 — the matrix now names two admissions and maps four terminal states.**
+`§16.1` no longer says `Admission`. The seven logical components are `D Fence`, `Producer
+Admission`, `D Canonical Commit`, `E Publication`, `PublicationParticipant Admission`, `Storage
+Visibility`, `G Context Commit`, with an explicit statement that the two admissions MUST remain
+distinct and MUST NOT be treated as aliases or interchangeable operations. The nine-step
+execution order places Producer Admission at step 2 and PublicationParticipant Admission at step 7,
+after the `PREPARED_HIDDEN` persistence at step 6. A new `Forget terminal-state × component
+disposition` matrix gives all seven components a disposition for each of `Completed`,
+`CompletedWithPolicyException`, `Failed` and `Cancelled`, plus a last-permitted-visible-component
+rule, the disposition of an already committed canonical revision, of an existing E Artifact, of a
+`PREPARED_HIDDEN` tuple, the required audit evidence, and the UNKNOWN bar per state. Four
+classification rules make the states mutually exclusive, including that `Failed` MUST NOT be
+declared where an authoritative cancellation outcome supersedes it and that an execution failure
+MUST NOT be relabelled `Cancelled`.
+
+**The existing scenario table keeps its rows.** Only its `Admission` column is renamed to
+`Producer Admission`. `Fence before Admission (T17)`, `Fence after Admission (T18)`, the crash,
+lost-ACK, retry and post-visibility rows keep their meanings. A separate
+`Second-stage Admission race matrix` adds `T17-P`, `T18-P`, `T17-PUB` and `T18-PUB`, which are
+explicitly stated not to reinterpret or replace the first-stage scenarios.
+
+**SYNC-05 — the second-stage rejection now has terminal dispositions.** Extraction `§19.2` gains a
+`T17-PUB`/`T18-PUB` block between the existing body and `#### Storage boundary`, whose two
+boundary sentences are unchanged. It closes the five open questions one by one: the committed
+canonical revision stays committed but permanently non-public and a retry of the same rejected
+operation does not constitute independent authorization; an existing E Publication has its public
+visibility revoked or is isolated and cannot be replayed as a successful visible effect; the
+`PREPARED_HIDDEN` tuple is cancelled or isolated with an auditable terminal outcome and an
+unresolved tuple is not treated as cancelled or publishable; the first-stage Producer participant
+gets an auditable suppression disposition that must bind the exact rejected
+`PublicationParticipant` identity, its `StorageVisibilityParticipantRef` and the exact tuple
+identity, with a generic operation-level suppression explicitly insufficient; and recovery, retry
+and alternative publication paths must all verify proven second-stage admission and an
+independently authorized visibility outcome before any advancement, failing closed on missing,
+conflicting or UNKNOWN evidence. The block states it changes neither the ten-step `§19.1` order nor
+the six-step `§19.2` order.
+
+**SYNC-07 — G now refuses without the second stage.** `06-memory-context/context-versioning.md`
+`§13.3` gains a block at the end of `#### 4. T18 — Participant-first`: no `ContextVersion` commit or
+publication without successful second-stage admission; first-stage success is not evidence of
+second-stage success; an already committed `ContextVersion` that references a publication object
+without successful second-stage admission takes the `§16.1` terminal disposition; recovery and
+replay re-evaluate at every read so a historical commit confers no permanent visibility; and the
+publication identity, participants, closure and terminal Forget disposition must be preserved
+throughout. `#### 5. G protected commit requirements` and `#### 6. Historical visibility` are
+unchanged.
+
+**A defect that was introduced and then removed.** The R2 delivery carried three HTML comments per
+language that were drafting instructions to the author rather than normative text: two
+`insert after` markers inside `§12.3` and `§12.6` and one `append to the end of §12.6` marker. They
+shipped in `782c4c8d`. Commit `836dc105` removes the three comment lines and the blank line that
+followed each, so paragraph spacing is unchanged; item numbering, the twelve D verification duties
+and the semantic-contract paragraph are byte-identical. This is recorded because an application
+record that shows only the final Blob would hide that the tree briefly carried non-normative
+markup.
+
+All nine targets were re-read at `836dc1055547f1dd9fba2081a5280ef22cbb94c5` after the cleanup, and none contains an HTML comment.
+
+R3 review disposition remains `REQUEST CHANGES`; the three blocking items are applied but not
+re-reviewed. `TEST EXECUTION = SUSPENDED` stands. No acceptance gate changed: `§2` is
+byte-identical across all four commits.
+
+### 9.6 Read-back of the predicate-equivalence round
 
 This section records the post-merge read-back for the R7 predicate-equivalence correction reviewed in REREVIEW-8.
 
 It records repository state and content identity only. REREVIEW-8 = PASS is not FORMAL ACCEPTANCE and does not establish implementation conformance.
 
-#### 9.5.1 Exact correction heads
+#### 9.6.1 Exact correction heads
 
 | Target | Reviewed correction HEAD | Correction |
 |---|---|---|
@@ -479,7 +579,7 @@ It records repository state and content identity only. REREVIEW-8 = PASS is not 
 
 The two correction commits each replace the predicate connector in one existing English definition. The Chinese definitions already use `当且仅当`.
 
-#### 9.5.2 Exact merge targets
+#### 9.6.2 Exact merge targets
 
 | Target branch | Merge commit |
 |---|---|
@@ -490,7 +590,11 @@ These are separate Git histories and must not be represented as one common atomi
 
 The Extraction files are read from the specified `main` merge result. The Storage ADR is read from its separate carrier branch merge result.
 
-#### 9.5.3 Post-merge Blob read-back
+#### 9.6.3 Post-merge Blob read-back
+
+The Blob values below are pinned to the R7 merge result (`main` `f1a6028d`).
+They are historical read-back values and do not describe the current `main` HEAD,
+which has since been advanced by later governance rounds.
 
 | Normative carrier | Path | Blob SHA | Size |
 |---|---|---|---:|
@@ -504,7 +608,7 @@ The complete Blob identifiers are recorded by the post-merge read-back:
 - Extraction ZH: `9657949af482`
 - Storage ADR: `62ae6e878657`
 
-#### 9.5.4 Predicate-equivalence read-back
+#### 9.6.4 Predicate-equivalence read-back
 
 The four normative definitions are:
 
@@ -528,7 +632,7 @@ The English and Chinese definitions express the same necessary-and-sufficient co
 
 The participant barrier MUST be resolved or completed only when the predicate is TRUE.
 
-#### 9.5.5 Review and governance disposition
+#### 9.6.5 Review and governance disposition
 
 ```text
 REREVIEW-8 = PASS

@@ -1,0 +1,81 @@
+# Document scope registry (GOV-DOC-002 section 2)
+# 文档治理范围登记表（GOV-DOC-002 第 2 节）
+#
+# Every top-level directory of the repository MUST appear here, either as a
+# governed root or as an explicit exclusion with a reason. The gate fails when
+# a directory is missing: adding a new top-level directory is therefore a
+# governance decision, not a silent expansion of the ungoverned surface.
+# 仓库的每个顶层目录都必须出现在本表中：要么是受治理根目录，要么带理由明确排除。
+# 目录缺失时门禁失败——因此新增顶层目录是一次治理决定，而不是治理空白面的静默扩大。
+#
+# This file is the independent basis the gate cannot derive from itself. The
+# accounting identity (classified + unclassified = governed) proves no file was
+# dropped *within* the scan set; it says nothing about whether the scan set is
+# right. This registry is what makes an omission visible.
+# 本文件是门禁无法自行推导的独立依据。会计恒等式只能证明扫描集内部没有文件被丢弃，
+# 不能证明扫描集本身正确；遗漏只能靠本表暴露。
+
+registry_version: "1"
+
+# Governed roots are also declared in scripts/check_bilingual_docs.py
+# (NORMATIVE_ROOTS). The gate fails if the two disagree, so the declared scope
+# and the enforced scope cannot drift.
+# 受治理根目录同时声明于 scripts/check_bilingual_docs.py（NORMATIVE_ROOTS）。
+# 两者不一致时门禁失败，因此"声明范围"与"执行范围"不可能漂移。
+governed:
+  - 00-governance
+  - 01-system-architecture
+  - 02-domain-model
+  - 04-memory-compiler
+  - 06-memory-context
+  - 07-agent-integration
+  - 08-bmcp-protocol
+  - 13-engineering-decisions
+  - 14-ai-development
+
+# Directories whose Markdown is not architecture documentation. Each needs a
+# reason: "not documentation" and "not yet migrated" are different states, and
+# the second one is a gap that must be named, not quietly excluded.
+# 非架构文档的目录。每个都必须给理由："不是文档"与"尚未迁移"是两种不同状态，
+# 后者是必须点名的缺口，不能悄悄排除。
+excluded:
+
+  docs:
+    reason: "Only the bilingual mirrors docs/en and docs/zh-CN are governed; the gate appends them to NORMATIVE_ROOTS. docs/research, docs/glossary, docs/architecture-convergence and the loose pages are not architecture documents and carry no normative claims."
+    reason_zh: "仅双语镜像 docs/en 与 docs/zh-CN 受治理（门禁将其追加进 NORMATIVE_ROOTS）。docs/research、docs/glossary、docs/architecture-convergence 及散页不是架构文档，不承载规范性主张。"
+
+  reviews:
+    reason: "Review transcripts of external tools. They record what a reviewer said, not what the architecture is; treating them as governed documents would let a review comment acquire normative standing."
+    reason_zh: "外部工具的审查记录。它记录的是审查方说了什么，不是架构本身是什么；若视为受治理文档，会使审查意见获得规范效力。"
+
+  benchmarks:
+    reason: "Benchmark harness notes and result logs; measurements, not decisions."
+    reason_zh: "基准测试框架说明与结果日志；属于测量数据，不是决策。"
+
+  crates:
+    reason: "Rust source, including inline doc comments. Code is not a Markdown document."
+    reason_zh: "Rust 源码，含内联文档注释。代码不是 Markdown 文档。"
+
+  experiments:
+    reason: "Throwaway experiments; explicitly non-normative by construction."
+    reason_zh: "一次性实验；按其定义即非规范性。"
+
+  prompts:
+    reason: "Prompt text consumed by tools at runtime. Changing it changes behaviour, not architecture; version control is the right record for it."
+    reason_zh: "运行时被工具消费的提示词文本。修改它改变的是行为而非架构；版本控制才是它应当的记录方式。"
+
+  recovery:
+    reason: "Operational recovery runbooks; procedures, not architecture decisions."
+    reason_zh: "运维恢复手册；属于操作流程，不是架构决策。"
+
+  scripts:
+    reason: "Gate and tooling source. The governance rules themselves are in 00-governance."
+    reason_zh: "门禁与工具源码。治理规则本身位于 00-governance。"
+
+  tests:
+    reason: "Test code and fixtures; fixtures deliberately contain invalid documents."
+    reason_zh: "测试代码与夹具；夹具中有意包含非法文档。"
+
+  tools:
+    reason: "Developer tooling source, same as scripts."
+    reason_zh: "开发者工具源码，同 scripts。"

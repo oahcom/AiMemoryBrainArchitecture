@@ -347,6 +347,40 @@ Dependency enumeration MUST be complete before declaring the relevant Forget ope
 
 Unknown or incomplete dependency sets remain blocked.
 
+**SYNC-03 — Dependency closure and Forget terminal states**
+
+Dependency closure completeness is a mandatory
+precondition for every Forget terminal state.
+
+- An incomplete, unknown, or unverified dependency
+  closure MUST prevent declaration of every terminal
+  state, including Failed and Cancelled. The operation
+  MUST remain non-terminal until the authoritative
+  dependency inventory and required dispositions
+  are resolved.
+- Completed MUST be declared only when the complete
+  direct and transitive dependency closure is established
+  and every registered dependency and every applicable
+  logical component satisfies its Completed disposition.
+- CompletedWithPolicyException MUST identify every
+  component and dependency covered by an exception,
+  every approved residual state, the approving I
+  governance authority, and the supporting evidence.
+  An exception MUST NOT substitute for dependency
+  enumeration or authorize an otherwise forbidden
+  visibility transition.
+- Failed and Cancelled MUST provide an auditable
+  completion, suppression, cancellation, or quarantine
+  disposition for every dependency in the registered
+  closure. Disposition of the initiating object alone
+  MUST NOT establish either terminal state.
+- Every terminal declaration MUST be supported by
+  authoritative evidence sufficient to reconcile the
+  complete dependency closure with the corresponding
+  terminal-state component dispositions.
+- UNKNOWN MUST remain non-final. Missing or conflicting
+  dependency evidence MUST fail closed.
+
 #### 3. Shared Fact visibility
 
 A FactRevision linked to multiple ClaimRevisions may remain visible only if every disclosed dependency is independently authorized and not suppressed by an applicable Forget decision.

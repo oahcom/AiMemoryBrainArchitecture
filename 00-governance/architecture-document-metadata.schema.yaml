@@ -1,144 +1,236 @@
 # Architecture document metadata schema (GOV-DOC-002)
 # 架构文档元数据 Schema
 #
-# Copy the block below into the top of a governed Markdown file.
-# 将下面的块复制到受治理 Markdown 文件的顶部。
+# This file is the machine-readable contract. The gate must accept exactly what
+# this file declares; T19 in scripts/test_check_document_management.py parses it
+# with the gate's own parser and compares fields and enum values both ways.
+# 本文件是机器可读契约。门禁必须只接受本文件声明的形状；自检 T19 用门禁自身
+# 的解析器解析本文件，并双向比对字段与枚举值。
 #
-# Rules: see 00-governance/architecture-document-management-policy.md
-# Fields marked REQUIRED must always be present. Fields marked CONDITIONAL
-# must be present when their condition holds (enforced by DM-03..DM-11).
-# 必填字段始终存在；条件字段在其条件成立时必须存在。
+# To fill in a document, copy 00-governance/templates/document-metadata-template.md.
+# 填写文档时复制 00-governance/templates/document-metadata-template.md。
 #
-# Parsed by scripts/check_document_management.py, which accepts only a strict
-# YAML subset: nested block mappings, flat block sequences of scalars, quoted
-# scalars, true/false, null, [], {}. Block scalars (| >), non-empty flow
-# collections, anchors and tabs are rejected, not skipped. Keep this file
-# inside that subset.
-# 由门禁脚本以严格 YAML 子集解析。块标量、非空流式集合、锚点与制表符会被
-# 直接拒绝而非跳过，请保持在本子集内。
+# Per-field keys: kind / required / enum / items / pattern / when / fields.
+# 每字段可用键：kind / required / enum / items / pattern / when / fields。
+# `kind` is the value type; it is not called `type` because `approval_scope.type` is a field name.
+# `fields` nests one level, so the shape here is the shape of the metadata block.
+# `kind` 表示值类型；不叫 `type` 是因为 `approval_scope.type` 本身是字段名。
+# `fields` 表示下一层，因此本文件的结构即元数据块的结构。
 
-document_metadata:
+schema_version: "2"
 
-  # ---- DIMENSION 1: DOMAIN (REQUIRED) ----
-  # Closed enumeration, see policy §3.1. Every value is listed here so the
-  # self-check can prove the schema and the gate accept the same set.
-  # architecture | domain-model | memory-brain | memory-compiler |
-  # memory-runtime | memory-context | agent-integration | protocol |
-  # security-governance | storage-index | consistency-recovery |
-  # testing-acceptance | ai-development
-  domain: architecture
+fields:
 
-  # ---- DIMENSION 2: ROLE (REQUIRED) ----
-  # design-specification | decision-record | normative-standard | research |
-  # review-report | work-record | guide | reference | index
-  role: design-specification
+  domain:
+    kind: string
+    required: true
+    enum:
+      - agent-integration
+      - ai-development
+      - architecture
+      - consistency-recovery
+      - domain-model
+      - memory-brain
+      - memory-compiler
+      - memory-context
+      - memory-runtime
+      - protocol
+      - security-governance
+      - storage-index
+      - testing-acceptance
 
-  # ---- DIMENSION 3: LIFECYCLE ----
+  role:
+    kind: string
+    required: true
+    enum:
+      - decision-record
+      - design-specification
+      - guide
+      - index
+      - normative-standard
+      - reference
+      - research
+      - review-report
+      - work-record
+
   lifecycle:
+    kind: mapping
+    required: true
+    fields:
+      approval:
+        kind: mapping
+        required: true
+        fields:
+          decision_status:
+            kind: string
+            required: true
+            enum:
+              - Approved
+              - Draft
+              - Rejected
+              - Revoked
+              - Under-Review
+              - Withdrawn
+          approver:
+            kind: nullable-string
+          decision_date:
+            kind: nullable-string
+          approved_version:
+            kind: nullable-mapping
+            fields:
+              scheme:
+                kind: string
+                enum:
+                  - content-hash
+                  - git
+              value:
+                kind: nullable-string
+          approval_scope:
+            kind: mapping
+            required: true
+            fields:
+              type:
+                kind: string
+                enum:
+                  - Full-document
+                  - Selected-assets
+                  - Selected-sections
+              included_sections:
+                kind: sequence
+                items: string
+              included_assets:
+                kind: sequence
+                items: string
+          approval_applicability:
+            kind: string
+            enum:
+              - Applicable-To-Current-Version
+              - Not-Applicable-To-Current-Version
+          evidence_reference:
+            kind: sequence
+            items: string
+          revocation:
+            kind: nullable-mapping
+            fields:
+              revocation_decision_id:
+                kind: string
+              revoked_date:
+                kind: nullable-string
+              revoker:
+                kind: nullable-string
+              revocation_reason:
+                kind: nullable-string
+              revocation_evidence:
+                kind: sequence
+                items: string
+              superseding_document:
+                kind: nullable-string
+      evidence_verification:
+        kind: mapping
+        required: true
+        fields:
+          verification_status:
+            kind: string
+            required: true
+            enum:
+              - Invalidated
+              - Unverified
+              - Verified
+          last_verified_date:
+            kind: nullable-string
+          last_verification_note:
+            kind: nullable-string
+      usage_status:
+        kind: string
+        required: true
+        enum:
+          - Active
+          - Archived
+          - Deprecated
+          - Superseded
+      modification_status:
+        kind: string
+        required: true
+        enum:
+          - Active-Modified
+          - Modified
+          - Pending-Reapproval
+          - Unchanged
+      supersession:
+        kind: mapping
+        fields:
+          supersedes:
+            kind: sequence
+            items: string
+          supersession_reason:
+            kind: nullable-string
+          effective_date:
+            kind: nullable-string
+      archival:
+        kind: mapping
+        fields:
+          archived_date:
+            kind: nullable-string
+          archival_reason:
+            kind: nullable-string
+          archival_reference:
+            kind: nullable-string
 
-    approval:
-      # Draft | Under-Review | Approved | Rejected | Withdrawn | Revoked
-      decision_status: Draft
-      approver: null
-      decision_date: null
-
-      # CONDITIONAL: REQUIRED when decision_status == Approved (DM-03)
-      approved_version:
-        scheme: git          # git | content-hash
-        value: null
-      approval_scope:
-        type: Full-document  # Full-document | Selected-sections | Selected-assets
-        included_sections: []
-        included_assets: []
-
-      # Applicability of the historical approval to the CURRENT content.
-      # Applicable-To-Current-Version | Not-Applicable-To-Current-Version
-      approval_applicability: Applicable-To-Current-Version
-
-      evidence_reference: []
-
-      # CONDITIONAL: REQUIRED and non-null when decision_status == Revoked (DM-04)
-      revocation: null
-      # revocation:
-      #   revocation_decision_id: "GOV-REV-YYYY-NNN"
-      #   revoked_date: "YYYY-MM-DD"
-      #   revoker: null
-      #   revocation_reason: null
-      #   revocation_evidence: []
-      #   superseding_document: null
-
-    evidence_verification:
-      # Unverified | Verified | Invalidated
-      # CI-maintained. Humans supply references only.
-      verification_status: Unverified
-      last_verified_date: null
-      last_verification_note: null
-
-    # Active | Deprecated | Archived | Superseded
-    usage_status: Active
-
-    # Unchanged | Modified | Active-Modified | Pending-Reapproval
-    modification_status: Unchanged
-
-    supersession:
-      # Human-declared, one direction only.
-      supersedes: []
-      supersession_reason: null
-      effective_date: null
-      # CI-derived. MUST NOT appear in Markdown frontmatter (DM-08).
-      # superseded_by: []
-
-    archival:
-      # CONDITIONAL: REQUIRED when usage_status == Archived (DM-05)
-      archived_date: null
-      archival_reason: null
-      archival_reference: null
-
-  # ---- DIMENSION 4: AUTHORITY ----
   authority:
+    kind: mapping
+    required: true
+    fields:
+      canonical_status:
+        kind: string
+        required: true
+        enum:
+          - Candidate
+          - Canonical
+          - Non-Canonical
+      canonical_scope:
+        kind: nullable-string
+      canonical_scope_id:
+        kind: nullable-string
+      canonical_scope_keywords:
+        kind: sequence
+        items: string
+      canonical_conflict_status:
+        kind: string
+        required: true
+        enum:
+          - None
+          - Resolved
+          - Under-Review
+      canonical_conflict_resolution:
+        kind: nullable-mapping
+        fields:
+          resolution_decision_id:
+            kind: string
+          resolved_date:
+            kind: string
+          selected_document:
+            kind: string
+          resolution_evidence:
+            kind: sequence
+            items: string
+      normative_status:
+        kind: string
+        required: true
+        enum:
+          - Informative
+          - Normative
 
-    # Canonical | Non-Canonical | Candidate
-    canonical_status: Non-Canonical
-
-    # CONDITIONAL: REQUIRED and non-empty when canonical_status == Canonical (DM-06)
-    canonical_scope: null
-    canonical_scope_id: null        # lowercase kebab-case, prefixed by domain
-    canonical_scope_keywords: []
-
-    # None | Under-Review | Resolved
-    # Under-Review REQUIRES canonical_status: Candidate (DM-11). Conflict
-    # state never doubles as authority.
-    canonical_conflict_status: None
-
-    # REQUIRED when canonical_conflict_status == Resolved (DM-11).
-    canonical_conflict_resolution: null
-    # canonical_conflict_resolution:
-    #   resolution_decision_id: "GOV-CONF-YYYY-NNN"   # unique, never reused
-    #   resolved_date: "YYYY-MM-DD"
-    #   selected_document: "docs/en/<domain>/<file>.md"
-    #   resolution_evidence: []
-
-    # Normative | Informative
-    normative_status: Informative
-
-  # ---- BILINGUAL PAIRING (REQUIRED under GOV-DOC-001) ----
-  # The counterpart of this document. Only the authoritative source declares
-  # authority; translations MUST NOT each claim the same canonical_scope_id.
-  # The relation MUST be symmetric: a declared counterpart must declare this
-  # document back, and must itself carry metadata (DM-12).
-  # A document under docs/en/ or docs/zh-CN/ MUST declare `source`: being in a
-  # mirror root puts it in scope, and one that names no source belongs to no
-  # group and could never be found by the closure check.
-  # Every value here is a normalised repository-relative path: no absolute
-  # paths, no `..`, no backslashes, no repeated `./`, no empty segments.
-  # A value that violates that is an error, never silently rewritten.
-  # 双语配对：仅权威源声明权威性；各语言译本不得重复声明同一 canonical_scope_id。
-  # 关系必须对称：被声明方必须反向声明本文件，且自身必须带元数据（DM-12）。
-  # 位于 docs/en/ 或 docs/zh-CN/ 下的文档必须声明 `source`：处在镜像根目录内
-  # 即已纳入范围；不声明 source 的镜像不属于任何组，闭包检查永远找不到它。
-  # 此处所有值均为规范化的仓库相对路径：禁止绝对路径、`..`、反斜杠、
-  # 重复的 `./` 与空段。违规即报错，绝不静默改写。
   bilingual_counterpart:
-    source: null   # mirrors name their authoritative source here
-    en: null
-    zh-CN: null
+    kind: mapping
+    fields:
+      source:
+        kind: nullable-string
+      en:
+        kind: nullable-string
+      zh-CN:
+        kind: nullable-string
+
+# Derived fields: a hand-written value is a claim the gate cannot verify (DM-08).
+# 派生字段：手写即无法验证的声明（DM-08）。
+forbidden:
+  - lifecycle.supersession.superseded_by

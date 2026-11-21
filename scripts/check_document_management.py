@@ -51,6 +51,7 @@ NORMATIVE_ROOTS = tuple(sorted(_BILINGUAL_ROOTS)) + (
 # in policy section 2 with a reason, not by borrowing another gate's constant.
 GOVERNED_ENTRY = "document_metadata"
 SCHEMA_FILE = "00-governance/architecture-document-metadata.schema.yaml"
+SCOPE_REGISTRY = "00-governance/document-scope-registry.yaml"
 
 DOMAINS = {
     "architecture", "domain-model", "memory-brain", "memory-compiler",
@@ -315,6 +316,26 @@ def _parse_block(tokens, pos: int, indent: int):
     return _parse_map(tokens, pos, indent)
 
 
+def parse_yaml_subset(text: str) -> dict:
+    """Parse a whole file as a mapping in the declared YAML subset.
+
+    Used by the schema file, which is a contract rather than a governed
+    document: same tokeniser, same parser, same rejection rules as the
+    frontmatter path, so the schema cannot be written in syntax the gate
+    itself would refuse.
+    """
+    tokens = _tokens(_lf(text).split("\n"), offset=1)
+    if not tokens:
+        raise ParseError("empty mapping")
+    if tokens[0][1] != 0:
+        raise ParseError(f"line {tokens[0][0]}: top-level key must not be indented")
+    value, pos = _parse_block(tokens, 0, 0)
+    if pos != len(tokens):
+        raise ParseError(f"line {tokens[pos][0]}: unparsed input remains")
+    if not isinstance(value, dict):
+        raise ParseError("top level must be a mapping")
+    return value
+
 def read_metadata(text: str) -> dict | None:
     """Return the parsed document_metadata mapping, or None when absent.
 
@@ -403,7 +424,12 @@ def rel_path(value, where: str, errors: list[str]) -> str | None:
     Anything that leaves the repository, is absolute, or carries a traversal
     segment is a DM-01 error rather than a silently rewritten string.
     """
-    raw = str(value)
+    if not isinstance(value, str):
+        errors.append(
+            f"DM-01 {where} must be a string path, got {type(value).__name__}"
+        )
+        return None
+    raw = value
     if "\x00" in raw:
         errors.append(f"DM-01 {where} contains a NUL byte")
         return None
@@ -479,6 +505,93 @@ def _enum(errors, value, allowed, label, rule="DM-02"):
         errors.append(f"{rule} {label} not in enumeration: {value!r}")
 
 
+KINDS = {
+    "string", "nullable-string", "mapping", "nullable-mapping",
+    "sequence", "boolean",
+}
+
+def _kind_ok(value, kind: str) -> bool:
+    if kind == "string":
+        # bool is not a string here: YAML `true` parses to bool, and accepting
+        # it as a string is how `evidence_reference: [true]` slipped through.
+        return isinstance(value, str)
+    if kind == "nullable-string":
+        return value is None or isinstance(value, str)
+    if kind == "mapping":
+        return isinstance(value, dict)
+    if kind == "nullable-mapping":
+        return value is None or isinstance(value, dict)
+    if kind == "sequence":
+        return isinstance(value, list)
+    if kind == "boolean":
+        return isinstance(value, bool)
+    raise AssertionError(f"unreachable kind {kind!r}")
+
+_SCHEMA: dict | None = None
+
+def schema() -> dict:
+    """The published metadata contract, parsed by this gate's own reader.
+
+    Fail-closed: a missing or unparseable schema stops the run. Falling back to
+    "no schema" would turn every type rule below into a silent no-op, which is
+    the failure mode this function exists to prevent.
+    """
+    global _SCHEMA
+    if _SCHEMA is None:
+        path = Path(__file__).resolve().parents[1] / SCHEMA_FILE
+        try:
+            _SCHEMA = parse_yaml_subset(path.read_text(encoding="utf-8"))
+        except (OSError, ParseError) as exc:
+            raise SystemExit(f"cannot load {SCHEMA_FILE}: {exc}")
+        if not isinstance(_SCHEMA.get("fields"), dict):
+            raise SystemExit(f"{SCHEMA_FILE} declares no fields mapping")
+    return _SCHEMA
+
+def check_kinds(node, spec: dict, errors: list[str], where: str = "") -> None:
+    """Enforce the schema's declared kind for every present field.
+
+    Without this, the schema is a description of the gate rather than a
+    constraint on it: two files can agree with each other while the gate
+    accepts a type the schema forbids (a null where `mapping` is declared, a
+    bool inside a `sequence` of strings). Presence is DM-01's job and enum
+    membership is DM-02's; this function only checks types.
+    """
+    if not isinstance(node, dict):
+        return
+    for name, sub in (spec.get("fields") or {}).items():
+        if not isinstance(sub, dict):
+            errors.append(f"DM-01 schema field {where}{name} is not a mapping")
+            continue
+        kind = sub.get("kind")
+        if kind not in KINDS:
+            errors.append(f"DM-01 schema field {where}{name} declares unknown kind {kind!r}")
+            continue
+        if name not in node:
+            continue
+        path = f"{where}{name}"
+        value = node[name]
+        if not _kind_ok(value, kind):
+            errors.append(
+                f"DM-01 {path} must be {kind}, got {type(value).__name__}"
+            )
+            continue
+        if isinstance(value, dict):
+            check_kinds(value, sub, errors, path + ".")
+        elif isinstance(value, list):
+            item_kind = sub.get("items")
+            if item_kind is not None:
+                if item_kind not in KINDS:
+                    errors.append(
+                        f"DM-01 schema field {path} declares unknown items kind {item_kind!r}"
+                    )
+                    continue
+                for index, item in enumerate(value):
+                    if not _kind_ok(item, item_kind):
+                        errors.append(
+                            f"DM-01 {path}[{index}] must be {item_kind}, "
+                            f"got {type(item).__name__}"
+                        )
+
 def as_map(node, where: str, errors: list[str]) -> dict:
     """Return node as a mapping, or record a DM-01 type error and return {}.
 
@@ -513,6 +626,9 @@ def check_document(path: Path, text: str) -> tuple[list[str], dict | None]:
     # {}}` would otherwise satisfy "the dimension exists" while declaring no
     # lifecycle state at all.
     errors += unknown_keys(meta, TOP_KEYS, GOVERNED_ENTRY)
+    # Type contract first: a null where the schema declares `mapping` must be a
+    # type error, not merely a missing leaf that DM-03 happens to tolerate.
+    check_kinds(meta, schema(), errors)
     for leaf in REQUIRED_FIELDS:
         if dig(meta, *leaf.split(".")) is None:
             errors.append(f"DM-01 missing required field: {leaf}")
@@ -1040,17 +1156,113 @@ def governed_files(root: Path) -> list[Path]:
             files.append(path)
     return files
 
+def check_scope_registry(root: Path) -> list[str]:
+    """Prove the scan set is the declared set, and that nothing was left out.
+
+    The accounting identity in main() only proves no file was dropped *inside*
+    the scan. It is silent about a top-level directory the scan never entered:
+    add `15-new-architecture/` with a policy document in it, and
+    classified + unclassified == governed still holds while the gate reports a
+    clean tree. This function closes that hole by requiring every top-level
+    directory to be either governed or excluded with a reason, and by requiring
+    the declared governed list to equal the enforced one.
+
+    Three independent comparisons, so no single edit can satisfy it by accident:
+      registry.governed  ==  NORMATIVE_ROOTS   (declared == enforced)
+      on-disk dirs       ==  governed + excluded (nothing unaccounted for)
+      docs/en, docs/zh-CN  governed            (mirrors are always in scope)
+    """
+    errors: list[str] = []
+    path = root / SCOPE_REGISTRY
+    try:
+        registry = parse_yaml_subset(path.read_text(encoding="utf-8"))
+    except (OSError, ParseError) as exc:
+        return [f"DM-14 cannot read scope registry {SCOPE_REGISTRY}: {exc}"]
+
+    if not isinstance(registry, dict):
+        return [f"DM-14 {SCOPE_REGISTRY} must be a mapping"]
+
+    declared = registry.get("governed")
+    if not isinstance(declared, list) or not declared:
+        errors.append(f"DM-14 {SCOPE_REGISTRY} must declare a non-empty governed list")
+        declared = []
+    declared = [str(x).strip("/") for x in declared]
+
+    excluded = registry.get("excluded")
+    if excluded is None:
+        excluded = {}
+    if not isinstance(excluded, dict):
+        errors.append(f"DM-14 {SCOPE_REGISTRY} excluded must be a mapping")
+        excluded = {}
+
+    for name, node in excluded.items():
+        if not isinstance(node, dict):
+            errors.append(f"DM-14 excluded {name!r} must be a mapping with a reason")
+            continue
+        if not str(node.get("reason") or "").strip():
+            errors.append(f"DM-14 excluded {name!r} has no reason")
+        if not str(node.get("reason_zh") or "").strip():
+            errors.append(f"DM-14 excluded {name!r} has no reason_zh (GOV-DOC-001)")
+
+    overlap = sorted(set(declared) & set(excluded))
+    if overlap:
+        errors.append(f"DM-14 {overlap} are both governed and excluded")
+
+    # (1) declared == enforced
+    enforced = set(NORMATIVE_ROOTS) - {"docs/en", "docs/zh-CN"}
+    if set(declared) != enforced:
+        only_declared = sorted(set(declared) - enforced)
+        only_enforced = sorted(enforced - set(declared))
+        errors.append(
+            f"DM-14 scope registry and NORMATIVE_ROOTS disagree; "
+            f"declared-only {only_declared}, enforced-only {only_enforced}"
+        )
+
+    # (2) every top-level directory is accounted for
+    accounted = set(declared) | set(excluded) | {"docs/en", "docs/zh-CN"}
+    on_disk = {
+        p.name for p in root.iterdir()
+        if p.is_dir() and not p.name.startswith(".")
+    }
+    unknown = sorted(on_disk - accounted)
+    if unknown:
+        errors.append(
+            f"DM-14 top-level directories not accounted for: {unknown}. "
+            f"Add each to {SCOPE_REGISTRY} as governed or excluded-with-reason"
+        )
+    missing = sorted((set(declared) | set(excluded)) - on_disk)
+    if missing:
+        errors.append(
+            f"DM-14 {SCOPE_REGISTRY} names directories that do not exist: {missing}"
+        )
+
+    # (3) the bilingual mirrors are always governed
+    for mirror in ("docs/en", "docs/zh-CN"):
+        if not (root / mirror).is_dir():
+            errors.append(f"DM-14 bilingual mirror directory {mirror} is missing")
+
+    return errors
+
 
 def changed_paths(root: Path, ref: str) -> set[str]:
-    """Repository-relative paths added or modified since ref.
+    """Repository-relative paths added, modified, renamed or type-changed.
 
     NUL-separated, so a filename containing spaces stays one path. Splitting on
     whitespace would let `00-governance/new policy.md` dodge the requirement.
+
+    T (type change) is included: replacing a regular file with a symlink, or a
+    symlink with a regular file, changes what the gate reads without changing
+    the path. `--diff-filter=AMR` skipped exactly that, so the increment could
+    report PASS while a governed path had become a link to somewhere else.
+    Deletions stay excluded: a removed file has nothing to classify. Copies are
+    included: with `diff.renames=copies` a new path can arrive as C, and a
+    copied governed document is still a governed document.
     """
     names: set[str] = set()
-    diff = git(root, "diff", "--name-only", "-z", "--diff-filter=AMR", f"{ref}...HEAD", nul=True)
+    filter_arg = "--diff-filter=AMRTC"
+    diff = git(root, "diff", "--name-only", "-z", filter_arg, f"{ref}...HEAD", nul=True)
     if diff is None:
-        diff = git(root, "diff", "--name-only", "-z", "--diff-filter=AMR", ref, nul=True)
+        diff = git(root, "diff", "--name-only", "-z", filter_arg, ref, nul=True)
     if diff is None:
         raise SystemExit(f"cannot diff against {ref!r}; is this a git work tree?")
     names.update(p for p in diff.split("\0") if p)
@@ -1086,12 +1298,14 @@ def main() -> int:
     # DM-12, DM-13) are only sound over the whole tree. A partial set would let
     # one file hide another's duplicate Canonical claim and still print PASS.
     root = Path(args.root).resolve()
-    targets = governed_files(root)
-    required = changed_paths(root, args.require_changed) if args.require_changed else set()
-    is_git = git(root, "rev-parse", "--git-dir") is not None
+    # Checked before any work: with an unusable REF the diff would fail first
+    # and mask the real problem (two contradictory verdicts were requested).
     incremental = args.require_changed is not None
     if incremental and args.strict:
         parser.error("--require-changed and --strict are different verdicts; pick one")
+    targets = governed_files(root)
+    required = changed_paths(root, args.require_changed) if args.require_changed else set()
+    is_git = git(root, "rev-parse", "--git-dir") is not None
 
     errors: list[str] = []
     notes: list[str] = []
@@ -1130,6 +1344,7 @@ def main() -> int:
         notes.extend(bound_notes)
 
     errors.extend(check_scope_and_relations(root, docs))
+    errors.extend(check_scope_registry(root))
 
     # DM-04 uniqueness of revocation decision ids across the repository.
     revocations: dict[str, str] = {}
@@ -1148,6 +1363,15 @@ def main() -> int:
         f"GOV-DOC-002: {total} governed documents, {len(docs)} classified, "
         f"{len(unclassified)} unclassified"
     )
+    # Accounting identity: every governed file is either classified or listed
+    # as backlog. Printed so "403 unclassified" is a number you can check
+    # against the file system, not a claim. If this ever fails to balance, the
+    # classification loop dropped a file silently.
+    if len(docs) + len(unclassified) != total:
+        errors.append(
+            f"DM-01 accounting: {len(docs)} classified + {len(unclassified)} "
+            f"unclassified != {total} governed files"
+        )
     for name in sorted(per_root):
         done, seen = per_root[name]
         print(f"  {name}: {done}/{seen} classified")

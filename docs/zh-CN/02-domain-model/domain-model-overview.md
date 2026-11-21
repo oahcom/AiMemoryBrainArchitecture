@@ -361,6 +361,17 @@ Forget 目标 MUST 标识准确的受治理主体/内容及适用 Scope。
 
 依赖集合未知或不完整时必须保持阻断。
 
+**SYNC-03 — 依赖闭包与 Forget 终态**
+
+依赖闭包完整性是声明任何 Forget 终态的强制前置条件。
+
+- 依赖闭包不完整、未知或未经核验时，MUST 阻止声明任何终态，包括 Failed 和 Cancelled。操作 MUST 保持非终态，直到权威依赖清单及必需处置均得到解决。
+- 仅当完整的直接及传递依赖闭包已经确立，且每个已登记依赖和每个适用逻辑分量均满足 Completed 处置要求时，MUST 声明 Completed。
+- CompletedWithPolicyException MUST 明确列出每个被例外覆盖的分量和依赖、每个获批准的残余状态、批准该例外的 I 治理授权主体，以及支持证据。例外 MUST NOT 替代依赖枚举，亦 MUST NOT 授权原本被禁止的可见性推进。
+- Failed 和 Cancelled MUST 为登记依赖闭包中的每个依赖提供可审计的完成、抑制、取消或隔离处置。仅处置发起对象 MUST NOT 构成声明任一终态的充分依据。
+- 每项终态声明 MUST 具有权威证据，足以将完整依赖闭包与相应终态的分量处置逐项核对。
+- 未决（UNKNOWN）MUST 保持非最终状态。依赖证据缺失或冲突时 MUST 失效关闭（fail closed）。
+
 #### 3. 共享 Fact 可见性
 
 FactRevision 关联多个 ClaimRevision 时，只有在所有被披露依赖均独立获得授权，且未被适用 Forget 决定抑制的情况下，才允许继续可见。

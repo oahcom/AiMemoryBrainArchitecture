@@ -153,8 +153,6 @@ FactRevision MUST NOT 自动跟随 Claim 的最新 Revision。
 6. Delegation：明确的 ALLOWED 或 PROHIBITED 决定。
 7. 决策身份：不可变 AuthorizationDecisionRef 及对应 Policy/Version 引用。
 
-<!--插入于§12.3 第 7 项之后、"The decision MUST also retain its issuing authority and decision provenance."之前-->
-
 8. **唯一证明操作绑定：**每个授权决定 MUST 绑定且仅绑定一个不可变的 `AttestationOperationRef`。该绑定 MUST 标识该操作所针对的精确 `FactRef` 和 `FactRevisionRef`。
 
 9. **精确声明与证据绑定：**每个授权决定 MUST 绑定本次获准操作所使用的完整且精确的 `ClaimRevisionRef` 值集合和 `EvidenceRef` 值集合。对于该操作，这些集合 MUST 明确且不可变。授权决定 MUST NOT 授权未明确指定、事后扩展、替换或隐式解析的声明或证据集合。当来源引用构成本次证明操作的输入部分时，授权决定 MUST 同时绑定精确的 `ProvenanceRef` 值集合。
@@ -214,8 +212,6 @@ Attestor 授权被撤销或发生实质变化后，后续 Attestation 必须使�
 9. 将精确授权决定引用绑定至 FactRevision。
 10. 在可审计提交记录中持久化决定引用和验证结果。
 
-<!--插入于§12.6 第 10 项之后-->
-
 11. **唯一操作绑定验证：**D MUST 验证 `AuthorizationDecisionRef` 恰好绑定一个 `AttestationOperationRef`，且当前证明提交所提供的操作引用与该绑定完全一致。
 
 12. **精确目标验证：**D MUST 验证授权决定绑定的 `FactRef` 和 `FactRevisionRef` 与当前提交的目标完全一致。任何缺失、含糊、替换或不匹配的目标引用 MUST 失效关闭（fail closed）。
@@ -233,8 +229,6 @@ D MUST 保存精确 AuthorizationDecisionRef、Attestor Principal 引用、Metho
 授权证据缺失，或授权引用无法解析、验证时，D MUST 拒绝该 Attestation。
 
 D 负责验证契约符合性和引用完整性，不替代 I 作出治理资格判断。
-
-<!--追加于§12.6 末尾-->
 
 **语义契约与实现一致性边界**
 
