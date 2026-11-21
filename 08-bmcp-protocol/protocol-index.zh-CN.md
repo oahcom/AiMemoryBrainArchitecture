@@ -27,7 +27,7 @@ document_metadata:
 |---|---|---|---|---|---|
 | `APPLIED_DELIVERY_EVIDENCE_RECORDED` | Phase 3.8.25 加固补充；Phase 3.8.26 CSubmitOutcome 关联补充 | `schemas/bmcp.applied-delivery-evidence-1.0.0.schema.json`（1.0.0） | `validators/applied_delivery_evidence_validator.py` | `tests/conformance/applied_delivery_evidence/test_applied_delivery_evidence.py` | **IMPLEMENTED** — schema、validator、测试文件均存在。测试执行证据：由外部验证方提供，见 PR 描述。 |
 | `C_PROVIDER_OUTCOME_RECORDED` | C 所有的 CSubmitOutcome 1.0.1 来源 schema；Phase 3.8.26 引用 | C 所有外部 Schema Blob：`a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`；BMCP 内无 schema | **BMCP 内缺失** | `tests/conformance/provider_outcome/test_provider_outcome.py` — 仅结构验证，不含 C 语义一致性 | **PARTIAL** — BMCP 本地 validator 和 C 语义一致性验证仍缺失。本 PR 新增测试仅验证 schema 结构，不是 C 语义 Validator。 |
-| `RECOVERY_JOIN_PROOF`（RecoveryJoin 1.0.2） | Phase 3.8 H-RJ-HW-01 §§5–7 | `schemas/bmcp.recovery-join-1.0.2.schema.json` | `validators/recovery_join_validator.py` — 结构验证及 D 本地绑定 helper；D 权威能力通过回调注入 | `tests/conformance/recovery_cutoff/test_recovery_join_1_0_2.py` | **IMPLEMENTED（工件存在性）** — 三个文件均已存在。这不表示 D 已采纳 proof 格式、生产一致性已成立或权威 currentness 已验证；缺少 D callbacks 时结果保持 `UNKNOWN`。 |
+| `RECOVERY_JOIN_PROOF`（RecoveryJoin 1.0.2） | Phase 3.8 H-RJ-HW-01 §§5–7 | `schemas/bmcp.recovery-join-1.0.2.schema.json` | `validators/recovery_join_validator.py` — 结构验证及 D 本地绑定 helper；D 权威能力通过回调注入 | `tests/conformance/recovery_cutoff/test_recovery_join_schema_artifact.py`（schema identity + valid/invalid fixtures）；`tests/conformance/recovery_cutoff/test_recovery_join_1_0_2.py`（D 绑定 helper） | **IMPLEMENTED（工件存在性）** — 三个文件均已存在。这不表示 D 已采纳 proof 格式、生产一致性已成立或权威 currentness 已验证；缺少 D callbacks 时结果保持 `UNKNOWN`。 |
 
 ## 类型定义（非消息类型）
 
