@@ -36,8 +36,15 @@ class GateRootsTest(unittest.TestCase):
         self._tmp = tempfile.TemporaryDirectory()
         self.root = Path(self._tmp.name)
         self.gate = load_gate(self.root)
+        self._original_partial_side_by_side_pairs = set(
+            self.gate.PARTIAL_SIDE_BY_SIDE_PAIRS
+        )
 
     def tearDown(self):
+        self.gate.PARTIAL_SIDE_BY_SIDE_PAIRS.clear()
+        self.gate.PARTIAL_SIDE_BY_SIDE_PAIRS.update(
+            self._original_partial_side_by_side_pairs
+        )
         self._tmp.cleanup()
 
     def write(self, rel: str, text: str = "x\n"):
@@ -532,6 +539,47 @@ class GateRootsTest(unittest.TestCase):
         self.assertIn("02-domain-model/zz-probe-fake.md", gaps)
         self.assertIn("02-domain-model/zz-probe-fake.zh-CN.md", gaps)
 
+
+    # --- regression: exact partial side-by-side pairs fail closed ---
+
+    def test_partial_side_by_side_pair_rejects_both_sides(self):
+        english = "02-domain-model/zz-partial-probe.md"
+        chinese = "02-domain-model/zz-partial-probe.zh-CN.md"
+        self.write(english, "Complete English specification.\n")
+        self.write(chinese, "这是局部中文翻译内容。" * 20 + "\n")
+
+        # Reproduce the former false-positive condition: Chinese content
+        # exceeds the existing CJK character threshold but covers only part.
+        self.assertTrue(self.gate._carries_chinese(chinese))
+        self.gate.PARTIAL_SIDE_BY_SIDE_PAIRS.add(
+            frozenset((english, chinese))
+        )
+
+        gaps = self.inventory_02()
+        self.assertIn(english, gaps)
+        self.assertIn(chinese, gaps)
+
+    def test_partial_side_by_side_registration_does_not_block_mirrors(self):
+        english = "02-domain-model/zz-partial-mirror-probe.md"
+        chinese = "02-domain-model/zz-partial-mirror-probe.zh-CN.md"
+        self.write(english, "Complete English specification.\n")
+        self.write(chinese, "这是局部中文翻译内容。" * 20 + "\n")
+        self.gate.PARTIAL_SIDE_BY_SIDE_PAIRS.add(
+            frozenset((english, chinese))
+        )
+
+        # A complete docs/en + docs/zh-CN mirror shape remains independently
+        # acceptable, even while the side-by-side relationship is rejected.
+        for source in (english, chinese):
+            self.write(f"docs/en/{source}", "English mirror.\n")
+            self.write(f"docs/zh-CN/{source}", "中文镜像内容。\n")
+
+        gaps = self.inventory_02()
+        self.assertNotIn(english, gaps)
+        self.assertNotIn(chinese, gaps)
+
+    def test_partial_side_by_side_production_registry_is_empty(self):
+        self.assertEqual(self.gate.PARTIAL_SIDE_BY_SIDE_PAIRS, set())
 
 if __name__ == "__main__":
     unittest.main()
