@@ -23,16 +23,16 @@ base_commit_sha: bb49dc121c195d7fb2ffa0ffbb9d376186b802fc
 tracking_issue: "NONE — Issue #7 and #43 both closed 2026-11-20T16:20Z; this work item carries its own record"
 
 created_at: 2026-11-21
-updated_at: 2026-11-21
+updated_at: 2026-11-21T08:05:00Z
 
 prompt_id: AID-2026-040-PROMPT
 prompt_version: v1
 prompt_file: 14-ai-development/work-items/AID-2026-040/prompt-v1.md
 prompt_status: FROZEN
-prompt_sha256: PENDING_L0_MEASUREMENT
-prompt_bytes: PENDING_L0_MEASUREMENT
-prompt_file_blob_sha: PENDING_L0_MEASUREMENT
-prompt_file_commit_sha: PENDING_L0_MEASUREMENT
+prompt_sha256: 9d7adbecf8013fc1c2028acd3079fa324bfc9cfd89b35309213a5795f2340060
+prompt_bytes: 9933
+prompt_file_blob_sha: 6eb1a1fd0e1325891a0c6763ebb7d42d94bd3d96
+prompt_file_commit_sha: 1570a7591ceaf9758c9393114fb460ed7c388ca0
 
 prompt_provenance_tier: T1
 prompt_provenance_note: >-
