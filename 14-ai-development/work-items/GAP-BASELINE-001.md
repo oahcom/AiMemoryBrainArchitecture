@@ -2,7 +2,14 @@
 
 - Repository: `oahcom/AiMemoryBrainArchitecture`
 - Frozen at: **2026-11-21 15:00 +08:00**
-- Base commit: `360d88c99a47018ce78b870379be3ee43841a837` (main, after `git pull --ff-only`)
+- Measured at commit: `a8fd2b7` (main, after `git pull --ff-only` from a stale `67ab237`)
+- This file committed as: `1ad6c2c` (the commit that introduces this document; tree content
+  of all measured paths is identical to `a8fd2b7` because this commit adds only this file)
+
+**Baseline authority rule:** when this document and a dispatch prompt name different SHAs,
+the dispatch prompt's SHA is authoritative for *which tree to read*. `1ad6c2c` and
+`a8fd2b7` differ by exactly one file — this one. All measurements below were taken at
+`a8fd2b7` and remain valid at `1ad6c2c`.
 - Status: **FROZEN BASELINE — not an acceptance decision**
 - Authority: Owner-level dispatch baseline; each Owner retains normative authority in its own scope.
 
@@ -16,7 +23,7 @@ the current base commit so dispatch rests on the tree, not on remembered numbers
 **All prior percentages are superseded by the measurements below.** Where a measurement
 contradicts the prior claim, the measurement governs and the contradiction is stated.
 
-## Measured state at base commit `360d88c`
+## Measured state at commit `a8fd2b7` (= tree of `1ad6c2c`)
 
 ### GAP-01 — Memory Compiler core logic
 
@@ -149,7 +156,7 @@ observable contract outcome, runnable by a single documented command.
    at that boundary. Recording a boundary question is a valid terminal state.
 3. No self-approval. Every delivery requires a separate review conversation with frozen
    inputs.
-4. Percentages here are measurements at `360d88c` and must be recomputed, not quoted, by
+4. Percentages here are measurements at `a8fd2b7` and must be recomputed, not quoted, by
    any later status report.
 
 ## Explicit non-claims
