@@ -1,4 +1,63 @@
+---
+document_metadata:
+  domain: memory-compiler
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope: null
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "04-memory-compiler/evidence-and-provenance.md @ c3ee6ee75ca88ad131f686dfe1a0a430ace7195c"
+        - "OWNER-DECISION-FACT-CLAIM-001 (semantic dependency only)"
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-21"
+      last_verification_note: "Canonical source and bilingual mirror path verified; final DAG/reference contracts remain as stated in the candidate document."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Memory Compiler design specification: evidence-provenance"
+    canonical_scope_id: "memory-compiler/evidence-provenance"
+    canonical_scope_keywords:
+      - evidence
+      - provenance
+      - lineage
+      - forget
+      - authorization
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "04-memory-compiler/evidence-and-provenance.md"
+    en: "docs/en/04-memory-compiler/evidence-and-provenance.md"
+    zh-CN: "docs/zh-CN/04-memory-compiler/evidence-and-provenance.md"
+---
+
+
 # Evidence and Provenance
+
+- Document ID: E-EVIDENCE-001
+- Canonical source: [evidence-and-provenance.md](../../../04-memory-compiler/evidence-and-provenance.md)
+- Source blob: c3ee6ee75ca88ad131f686dfe1a0a430ace7195c
+
+- Restored source lineage: session-e-memory-compiler-2026-11-16
+- Historical source blob: 38bcacafa89ebe7b3eedb6f38d174e0c6a1f3963
+- Owner decision dependency: OWNER-DECISION-FACT-CLAIM-001 applies to Fact/Claim semantics only; this document's concrete schemas remain at the status stated below.
+
 
 **Status:** DECIDED for traceability, authorization and Forget obligations; CANDIDATE for graph representation; OPEN for final DAG and reference contracts pending D/I.  
 **Owner:** Memory Compiler / MC-03.  
@@ -185,7 +244,7 @@ B Domain Model reference/time/scope semantics; D canonical object and version co
 - A provenance edge alone is not proof that D's completion barrier has accounted for an in-flight producer. E must register the producer/run and obtain durable dependency-registration acknowledgement.
 - Source content, excerpt refs, raw payload hashes and reversible payload URIs must not be copied into Forget tombstones. Tombstones contain only minimum non-reconstructive suppression evidence permitted by I.
 - On fence activation, block dereference and lineage expansion into forgotten sources; mark descendants suppressed/restricted and report incomplete/unreachable traversal as pending/unknown, never complete.
-- See `forget-fence-and-derived-registration-part1.md` for the visibility gate, race protocol and failure matrix. Physical erasure and global completion remain I-owned.
+- See `forget-fence-and-derived-registration.md` for the visibility gate, race protocol and failure matrix. Physical erasure and global completion remain I-owned.
 
 
 ## 19. Phase 3 producer-registration, cursor and visibility alignment
