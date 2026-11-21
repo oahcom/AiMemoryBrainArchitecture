@@ -1,9 +1,9 @@
 # Agent Integration Reference Model
 
-This crate is a deterministic Rust reference model for two contracts:
-
+This crate is a deterministic Rust reference model for:
 1. Adapter operation authorization by capability tier.
-2. Rejection of writes to protected request regions and to a frozen inference request.
+2. Protected inference-boundary write rejection.
+3. Session-scoped context delivery through `ContextDeliveryAdapter`.
 
 Run from the repository root:
 
@@ -11,8 +11,10 @@ Run from the repository root:
 cargo test -p agent-integration
 ```
 
-The test suite contains four unit tests. Test execution status for this delivery: **NOT RUN (execution由派工方完成 / execution by dispatcher)**.
+The suite contains **eight unit tests**: the four original authorization/boundary tests and four delivery lifecycle tests (successor apply, stale/skipped rejection without mutation, clear/reset, and disconnect/reconnect reporting).
 
-This is not a production Adapter. It performs no real model inference, network transport, persistence, BMCP negotiation, or production telemetry. The model validates operations and returns typed `AdapterError` enum values.
+The `InMemoryContextDeliveryAdapter` stores snapshots and connection state only in process memory. It enforces exact-successor versions (starting at 1 for a new or cleared session), records only successful applies, clears applied state on forget/revocation, and reports the last applied version after reconnect.
 
-The two implemented inference-boundary cases were selected because `inference-boundary-model.md` marks both as DECIDED: (a) protected regions are not Brain-writable, and (b) a request is immutable after its assembly snapshot is frozen. Version-gap reconciliation remains specified but is intentionally outside this minimal model.
+**NOT IMPLEMENTED:** real transport; per-runtime Agent integration; durable delivery ledger or durable session state; automatic retry/re-delivery; production reconciliation or attestation. Reconnect is not evidence of remote Agent state. No real model inference, provider integration, BMCP negotiation, or production telemetry is performed or claimed.
+
+The version-successor check is not snapshot/delta reconciliation: production gap recovery remains out of scope.
