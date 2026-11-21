@@ -4,7 +4,7 @@
 - Owner: G — Memory Context Architect
 - Prompt: CHATGPT-OWNER-G-001 v1.0
 - Source tree: `1ad6c2cf67a228f597fcbe1c7149c328ecbf38e9`
-- Delivery branch: `gap-02-context-coverage-reference-model`
+- Assessment ref: `main` (read-only source inspection)
 - Status: implementation mapping; no self-approval
 - Scope: the 19 Markdown artifacts in `06-memory-context/` at the source SHA (README, 17 distinct English design/review artifacts, and the Chinese peer of the Phase 3.8.22 contract). The paired Phase 3.8.22 files are one semantic contract, not two independent requirements.
 
@@ -13,9 +13,8 @@
 - **IMPLEMENTED**: an executable function/type is identified together with an existing or added test name. This means only the stated reference-model behavior is executable.
 - **PARTIAL**: executable behavior exists, but a documented dimension, state, or evidence boundary is absent.
 - **NOT IMPLEMENTED**: no executable model covers the concern. The fourth column identifies whether G can implement it locally or an external authority/implementation is required.
-- **PENDING CROSS-OWNER DECISION**: the concern cannot be decided by G. No other Owner's contract is changed here.
 
-The Rust crate is deliberately private/staged: it does not persist, transport, authorize, query D/I, or publish. The Python Applied ledger is a single-node SQLite conformance prototype whose gates are caller-supplied. The new Context model is in-memory and is not a durable transaction implementation. None of these is production concurrency or end-to-end delivery.
+The Rust crate is deliberately private/staged: it does not persist, transport, authorize, query D/I, or publish. The Python Applied ledger is a single-node SQLite reference prototype whose gates are caller-supplied. No Context ChangeSet reference model is included in this mainline assessment. These are not production concurrency or end-to-end delivery.
 
 ## 2. Source inventory
 
