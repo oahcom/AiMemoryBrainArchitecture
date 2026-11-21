@@ -249,6 +249,15 @@ def check_embedded_registration_history() -> list[str]:
     return errors
 
 
+def _carries_chinese(source: str) -> bool:
+    """Return True when a source contains at least 100 CJK Unified Ideographs."""
+    path = ROOT / source
+    if not path.is_file():
+        return False
+    text = path.read_text(encoding="utf-8", errors="replace")
+    return sum(1 for ch in text if "\u4e00" <= ch <= "\u9fff") >= 100
+
+
 def current_bilingual_gaps() -> set[str]:
     """Return non-exempt normative Markdown sources missing either language mirror."""
     gaps: set[str] = set()
@@ -265,7 +274,12 @@ def current_bilingual_gaps() -> set[str]:
             chinese = REPO_ROOT / "docs" / "zh-CN" / source
             mirrored = english.is_file() and chinese.is_file()
             if root_name == "14-ai-development":
-                paired = mirrored or counterpart_14(source) is not None
+                # ponytail: structural pairing only; semantic translation parity remains a human-review responsibility.
+                paired = (
+                    mirrored
+                    or side_by_side_partner(source) is not None
+                    or (english.is_file() and _carries_chinese(source))
+                )
             else:
                 paired = mirrored
             if not paired:

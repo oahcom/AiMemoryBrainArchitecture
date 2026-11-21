@@ -98,11 +98,33 @@ class GateRootsTest(unittest.TestCase):
     # --- convention: docs/en mirror ---
 
     def test_docs_en_mirror_pair_passes(self):
-        self.write("14-ai-development/AI-EXEC-002.md")
-        self.write("docs/en/14-ai-development/AI-EXEC-002.md")
+        # Shape 3 is valid only when the root source is genuinely Chinese.
+        chinese = "这是中文原文。" * 20
+        self.write("14-ai-development/AI-EXEC-002.md", chinese)
+        self.write("docs/en/14-ai-development/AI-EXEC-002.md", "English translation.\n")
         changed = {"14-ai-development/AI-EXEC-002.md", "docs/en/14-ai-development/AI-EXEC-002.md"}
         self.assertEqual(self.normative(changed), [])
+        self.assertTrue(self.gate._carries_chinese("14-ai-development/AI-EXEC-002.md"))
         self.assertEqual(self.gate.check_mirror_pairing(changed, {p: "M" for p in changed}, False), [])
+
+        # A pair of English-only files must not satisfy the root-Chinese shape.
+        self.write("14-ai-development/english-only-probe.md", "English only.\n")
+        self.write("docs/en/14-ai-development/english-only-probe.md", "English only.\n")
+        self.gate.REPO_ROOT = self.root
+        self.assertIn("14-ai-development/english-only-probe.md", self.gate.current_bilingual_gaps())
+
+        # The two other legal shapes remain accepted by the structural inventory.
+        self.write("14-ai-development/side-by-side.en.md", "English only.\n")
+        self.write("14-ai-development/side-by-side.zh-CN.md", chinese)
+        self.write("14-ai-development/triple.md", chinese)
+        self.write("docs/en/14-ai-development/triple.md", "English translation.\n")
+        self.write("docs/zh-CN/14-ai-development/triple.md", chinese)
+        self.write("14-ai-development/no-pair.md", "English only.\n")
+        gaps = self.gate.current_bilingual_gaps()
+        self.assertNotIn("14-ai-development/side-by-side.en.md", gaps)
+        self.assertNotIn("14-ai-development/side-by-side.zh-CN.md", gaps)
+        self.assertNotIn("14-ai-development/triple.md", gaps)
+        self.assertIn("14-ai-development/no-pair.md", gaps)
 
     def test_docs_en_mirror_change_alone_fails(self):
         self.write("14-ai-development/AI-EXEC-002.md")
