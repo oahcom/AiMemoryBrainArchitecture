@@ -12,9 +12,11 @@ parse result cannot be trusted, no downstream rule result can be either.
 Checked mechanically (DM-01 .. DM-14). NOT checked mechanically, and printed on
 every run as `manual controls (policy 9.2)`: the ten items M-01 .. M-10, from
 whether a scope is genuinely non-overlapping to whether an exclusion reason is
-honest. `MANUAL_CONTROLS` below is the single list; T69 compares it to the
-policy table in both directions, because a boundary stated twice is a boundary
-that can be stated differently twice.
+honest. `MANUAL_CONTROLS` below is the single authority: policy section 9.2 is
+rendered from it, and the run prints each entry's id and control. T69 does not
+compare two lists -- it re-renders the table from the constant and compares
+bytes, because two independently maintained lists with a synchronisation test
+is the defect this file keeps finding.
 
 No third-party dependency: PyYAML is unavailable in this environment, so the
 supported subset is declared in _SUBSET below and everything else is rejected.
@@ -1544,17 +1546,36 @@ def backlog_roots(root: Path) -> tuple[str, ...]:
 # and true once. Checking that two statements agree is weaker than not having
 # two statements, so the registry prose is now forbidden from stating a count.
 #
-# Coverage is deliberately a word list, not a parser: English `documents`,
-# `docs`, `files`, `Markdown`, and Chinese `份`, `个`, `篇`, `文档`, `文件`.
-# What this does NOT catch is named rather than implied -- spelled-out numbers
-# ("twenty-seven documents"), a noun this list omits, and a number separated
-# from its noun by more than whitespace. The rule is a redundancy check on
-# prose, not the count's security boundary: the count's truth is still the
-# `documents:` versus disk comparison, which no phrasing can bypass. A miss
-# here costs a redundant sentence, not a wrong number.
+# Coverage: digits, optional `architecture`, then a document noun -- English
+# `documents`, `docs`, `files`, `Markdown`, Chinese `份`, `个`, `篇`, `文档`,
+# `文件`. Spelled-out numbers are also caught (`twenty-seven documents`), because
+# a spelled-out count is still a second statement of the count: the fact that a
+# regex cannot parse English is not a licence to restate the number in prose.
+# Numbers written as words are matched by a small explicit list of English and
+# Chinese numerals.
+#
+# Still not caught, and this is the boundary rather than a wish list: a noun
+# outside the list (`27 artefacts`), and a number separated from its noun by
+# something other than whitespace. Those are not declared acceptable -- they are
+# simply not detected, and a reviewer reading the registry sees them. The
+# guarantee is that the count is *checked against the disk*; this rule only
+# reduces the number of places a wrong count can be written.
+_WORDS = (
+    r"one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen"
+    r"|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty"
+    r"|forty|fifty|sixty|seventy|eighty|ninety|hundred"
+)
+# `\b` is a word boundary between a word character and a non-word character.
+# CJK characters are not word characters to `re`, so `\b二十七` never matches
+# inside Chinese prose -- the Chinese numerals need their own branch with no
+# boundary assertion at all.
 COUNT_CLAIM_RE = re.compile(
-    r"\d+\s*(?:architecture\s+)?(?:documents?|docs?|files?|Markdown"
-    r"|份|个|篇|文档|文件)"
+    r"(?:\d+"
+    r"|(?:\b(?:" + _WORDS + r")(?:[-\s](?:" + _WORDS + r"))*\b)"
+    r"|(?:[一二两三四五六七八九十百]+)"
+    r")\s*(?:architecture\s+)?(?:documents?|docs?|files?|Markdown"
+    r"|份|个|篇|文档|文件)",
+    re.I,
 )
 
 

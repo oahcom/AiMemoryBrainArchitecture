@@ -37,6 +37,17 @@ from check_document_management import (  # noqa: E402
 FILE = Path("synthetic.md")
 RESULTS: list[bool] = []
 SKIPPED: list[str] = []
+UNEXPECTED_SKIPS: list[str] = []
+
+# The only cases allowed to skip, and only for the stated reason. A skip is a
+# coverage hole; an unbounded skip API is a way to convert "the test cannot run
+# here" into "the suite is green". Both matter, so this list is the boundary:
+# an unregistered skip fails the run, and `main()` refuses to return success
+# when nothing executed.
+ALLOWED_SKIPS = {
+    "T68c a real 0o000 directory is reported by path (integration)":
+        "running as root",
+}
 
 
 def doc(body: str) -> str:
@@ -113,12 +124,19 @@ def skip(name: str, why: str) -> None:
 
     Recording a skipped case as `True` inflates the pass count with a test that
     proved nothing: running as root, for instance, means mode bits cannot deny
-    access, so a permission case silently became "ok" without executing. A skip
-    is its own outcome, reported separately so the total never implies coverage
-    the run did not have.
+    access, so a permission case silently became "ok" without executing.
+
+    A skip is also bounded. `ALLOWED_SKIPS` names the cases permitted to skip
+    and why; anything else is recorded as an unexpected skip, which `main()`
+    turns into a failure. Without that, `skip()` is an escape hatch any future
+    test can use to keep the suite green while checking nothing.
     """
     print(f"  [skip] {name}  ({why})")
     SKIPPED.append(name)
+    if name not in ALLOWED_SKIPS:
+        UNEXPECTED_SKIPS.append(f"{name} ({why})")
+    elif ALLOWED_SKIPS[name] not in why:
+        UNEXPECTED_SKIPS.append(f"{name}: skip reason {why!r} is not the registered one")
 
 
 def expect(name: str, text: str, needle: str = "", expect_clean: bool = False) -> None:
@@ -2159,9 +2177,16 @@ def run_count_vocabulary() -> None:
 
     A regex nobody tested is a regex whose coverage is whatever its author
     imagined. Both directions matter: a phrasing that must be caught, and a
-    phrasing that must not be (an unrelated number is not a count claim). The
-    `missed` list is the coverage gap the comment in the gate names -- pinning
-    it here means that comment cannot quietly become false in either direction.
+    phrasing that must not be (an unrelated number is not a count claim).
+
+    The fifteenth review rejected an earlier version of this test that listed
+    "twenty-seven documents" as a case that MUST be missed. That is not
+    documenting a boundary, it is licensing a defect: a spelled-out count is
+    still a second statement of the count, and "a regex cannot parse English" is
+    not a reason to accept it. Spelled-out numerals are now caught, so the only
+    remaining gaps are a noun outside the list and a number detached from its
+    noun -- and those are listed here as *not detected*, not as *required to go
+    undetected*.
     """
     print("count vocabulary")
     import check_document_management as gate
@@ -2170,24 +2195,35 @@ def run_count_vocabulary() -> None:
         "27 documents", "27 architecture documents", "27 docs", "27 files",
         "27 Markdown", "27 份", "27 个", "27 篇文档", "27 文档", "27 文件",
         "1 document", "3 doc",
-    ]
-    missed = [
-        # Named, not hidden: spelled-out numbers and nouns outside the list.
-        "twenty-seven documents", "27 artefacts", "27 records",
+        # Spelled-out numerals: still a second statement of the count.
+        "twenty-seven documents", "twenty seven documents", "a hundred files",
+        "二十七份文档", "三篇文档",
     ]
     not_a_claim = [
+        # No document noun: not a count of documents.
         "Backlog with a known count under `documents:`.",
         "See section 9 for the rule.",
         "The gate implements version 2.",
+        # A number that is not counting documents.
+        "The gate has 14 rules.",
+        "Two reviews rejected this.",
     ]
     bad = [s for s in caught if not gate.COUNT_CLAIM_RE.search(s)]
     record("T70 every declared phrasing is caught", not bad, f"  missed {bad}")
-    wrong = [s for s in missed if gate.COUNT_CLAIM_RE.search(s)]
-    record("T70 the documented coverage gap is the real one", not wrong,
-           f"  unexpectedly caught {wrong} (the comment now understates coverage)")
     noise = [s for s in not_a_claim if gate.COUNT_CLAIM_RE.search(s)]
-    record("T70 prose without a document noun is not a claim", not noise,
+    record("T70 prose that is not a document count is not a claim", not noise,
            f"  false positives {noise}")
+
+    # The remaining gap is *named*, and the name is checked: a noun outside the
+    # list is not detected. This is not "must stay undetected" -- if a future
+    # vocabulary change catches it, the case below is simply no longer true and
+    # the comment must be updated, which is the point.
+    documented_gap = ["27 artefacts", "27 records"]
+    still_gap = [s for s in documented_gap if not gate.COUNT_CLAIM_RE.search(s)]
+    record("T70 the documented gap is still the gap (comment is accurate)",
+           len(still_gap) == len(documented_gap),
+           f"  now caught: {sorted(set(documented_gap) - set(still_gap))} "
+           f"-- widen the comment, not the gap")
 
 
 def run_unreadable_walk() -> None:
@@ -2312,25 +2348,59 @@ def run_manual_controls() -> None:
 
     begin = "<!-- BEGIN MANUAL-CONTROLS"
     end = "<!-- END MANUAL-CONTROLS -->"
-    record("T69 section 9.2 is a generated block", begin in section and end in section,
-           "  missing generated-block markers")
 
     expected = "\n".join(
         f"| {cid} | {control} | {why} | {who} |"
         for cid, control, why, who in gate.MANUAL_CONTROLS
     )
+
+    # R15-02: a byte comparison of the rows proves the rows, not the structure
+    # around them. Two BEGIN markers, a missing END, or a second hand-kept table
+    # beside the generated one would all pass a row-only check.
+    record("T69 the BEGIN marker appears exactly once in section 9.2",
+           section.count(begin) == 1, f"  found {section.count(begin)}")
+    record("T69 the END marker appears exactly once in section 9.2",
+           section.count(end) == 1, f"  found {section.count(end)}")
     if begin in section and end in section:
-        block = section[section.index(begin):section.index(end)]
+        record("T69 BEGIN precedes END",
+               section.index(begin) < section.index(end))
+        block = section[section.index(begin):section.index(end) + len(end)]
+        body = section[section.index(end) + len(end):]
+        record("T69 the generated block is inside section 9.2, not after it",
+               body.strip() == body.strip() and begin in section)
+        # The header row is part of the contract: a table without it renders as
+        # prose in most viewers and as a headerless table in the rest.
+        record("T69 the generated block carries its header and separator rows",
+               "| ID | Manual control | Why a machine cannot do it | Accountable |" in block
+               and "|---|---|---|---|" in block)
         rows = [l for l in block.split("\n") if l.startswith("| M-")]
         record("T69 every control renders exactly one row",
                len(rows) == len(gate.MANUAL_CONTROLS),
                f"  {len(rows)} rows for {len(gate.MANUAL_CONTROLS)} controls")
+        record("T69 no control appears twice",
+               len({r.split("|")[1].strip() for r in rows}) == len(rows))
         record("T69 the table is byte-identical to the rendered constant",
                "\n".join(rows) == expected,
                f"  expected {expected[:120]!r}\n  got      {chr(10).join(rows)[:120]!r}")
-        # A hand edit inside the block is the failure mode; make sure the block
-        # is actually what is being compared, not an empty region.
         record("T69 the generated block is not empty", bool(rows))
+
+        # R15-02: the failure mode that survives a correct block is a *second*
+        # table maintained by hand elsewhere in the same section. A row starting
+        # with `| M-` outside the block is exactly that.
+        outside = [l for l in section.split("\n")
+                   if l.startswith("| M-") and l not in block.split("\n")]
+        record("T69 section 9.2 holds no hand-maintained control table",
+               not outside, f"  rows outside the block: {outside[:2]}")
+
+        # R15-06: the marker must not re-trigger DM-09. `GENERATED_MARKER`
+        # matches `DO NOT EDIT` and `GENERATED FILE`, so a marker worded to
+        # please a human would make this Normative policy a generated artifact
+        # and DM-09 would reject it. The marker is a comment the gate parses, so
+        # it is subject to the gate's own rules.
+        marker = section[section.index(begin):section.index(begin) + 160]
+        record("T69 the generated marker does not trip DM-09",
+               not gate.GENERATED_MARKER.search(marker),
+               f"  marker {marker[:80]!r}")
 
     # And it must reach the output, not just the constant: a list nothing prints
     # is a comment with a data type.
@@ -2443,8 +2513,19 @@ def main() -> int:
         # Printed separately, and deliberately not folded into the total: a
         # skipped case is coverage the run did not have, and `n/n passed` would
         # read as if it did.
-        print(f"{len(SKIPPED)} skipped (not counted as passing): "
-              + "; ".join(SKIPPED))
+        print(f"{len(SKIPPED)} skipped, {len(SKIPPED) - len(UNEXPECTED_SKIPS)} "
+              f"registered of {len(ALLOWED_SKIPS)} allowed: " + "; ".join(SKIPPED))
+    # Three ways to be green while proving less than claimed, all refused:
+    # a failure, an unregistered skip, and a run in which nothing executed.
+    # The last one is the reason `total` is checked: `0/0 passed` is arithmetically
+    # a pass and evidentially nothing.
+    if total == 0:
+        print("FAIL: no cases executed")
+        return 1
+    if UNEXPECTED_SKIPS:
+        print(f"FAIL: {len(UNEXPECTED_SKIPS)} unregistered skip(s): "
+              + "; ".join(UNEXPECTED_SKIPS))
+        return 1
     return 0 if passed == total else 1
 
 
