@@ -520,3 +520,187 @@ exists to prevent.
 - No gap is closed by this document, and none of this is acceptance.
 - The two review findings (#433's test miscount, #436's baseline/file mismatch) are
   independent of the gate question and remain unaddressed by #461.
+
+## Round three: four new PRs, one merged-file defect, and a gate that cannot see any of it
+
+This section covers work done after the correction above: PRs #463, #464, #465, #466, the
+merged state of #433, and an audit of #461's gate change.
+
+### Merged state of #433: a row cites a guard and a test that do not exist
+
+#433 merged at `09:33:25Z`. Its coverage map is now in `main`, and one row overclaims:
+
+```
+| Historical Applied versus current-use after Forget/revocation | ...
+  PARTIAL — current-use guard `current_use_allowed`;
+  test `test_current_use_requires_every_currentness_gate`; ... | D |
+```
+
+Measured on `main` at `0ccdf0a1`:
+
+```
+$ grep -rn "current_use_allowed\|current_use_requires" 06-memory-context/reference-model/
+(no output)
+```
+
+`06-memory-context/reference-model/` contains exactly two files, and
+`test_g_applied_ledger.py` defines 8 tests — none of them the ninth name the document cites.
+
+Of the 9 backticked test identifiers in the document, **8 are present and 1 is not.** That is
+a different class of defect from the miscount I reported earlier. A miscount is arithmetic;
+this is a row asserting that a capability exists in a `PARTIAL` state when the capability is
+absent entirely. A reader planning the remaining work would conclude the current-use guard
+needs persistence, when the guard itself does not exist.
+
+The other 18 rows hold: 19 rows, each pinned to a spec section, each with an explicit
+status and a named blocker owner, and the assessment pinned to a stated `main` SHA inside
+the document rather than in a PR comment. One row overclaims; the rest is the most
+disciplined artifact in the GAP series.
+
+### #465 is blocked by a tool artifact committed as content
+
+`9ff2f018` appends an execution-environment marker to **three** tracked files:
+
+```
+07-agent-integration/adapter-capability-tiers.md         line 232 of 232
+07-agent-integration/adapter-capability-tiers.zh-CN.md   line 52 of 52
+crates/agent-integration/src/lib.rs                      line 372 of 372
+```
+
+```
+[executed on device: VM-0-9-ubuntu (d03d92fd-4b5d-4bc1-a701-985eb5de69cc)]
+```
+
+The string appears in 0 files on `main`, #463, #464 and #466. It is introduced here.
+
+In Rust it is a hard failure — `expected item, found '['`, and `(d03d92fd-...)` is parsed as
+a float exponent. In the two `.md` files it is a quiet failure: the gate reads them, they
+parse as Markdown, and the marker renders as a bracketed paragraph. **So the bilingual pair
+satisfies the gate in its broken state.** If the Rust line alone were fixed, the PR would
+merge with the contamination intact and no check would notice.
+
+On a cleaned copy the work is real:
+
+```
+running 8 tests
+test result: ok. 8 passed; 0 failed
+```
+
+Covering apply/reconnect/clear, tier gating, frozen-region rejection, stale/skipped version
+handling with no mutation. One commit ago (`4f0b4dbd`, the blob the body cites) the tests
+passed. The body was not updated after the head moved, so every verification claim in it
+describes a superseded commit.
+
+### #466: gate PASS, 25/158 green, but the revision type lacks the fields it documents
+
+`cargo test -p memory-domain` → `25 passed`. `cargo test --workspace` → `158 passed`
+(base `0d0c1c6`: 146, so +12, matching the 12 added tests). The body says **156**; actual is
+**158**. Second PR in a row with a wrong test count.
+
+The substantive question is a design one. `ClaimRevision`'s doc comment says CI-09–CI-13 —
+including epistemic status and confidence — classify as `NEW_REVISION` under the same
+`ClaimRef`. But:
+
+```rust
+pub struct ClaimRevision { revision_ref, claim_ref, subject_ref, predicate,
+    object_value, polarity, asserted_at, scope_refs, qualifiers, evidence_refs }
+```
+
+No `epistemic_status`, no `confidence`. The legacy flat `Claim` has both. So migrating a
+consumer, which the `ponytail: superseded by ...` comment invites, would **lose** them. The
+revision cannot express the change class it was created to express.
+
+Two assertions are vacuous — `assert_ne!(fact_ref.as_str(), "claim-independent")` compares
+against a literal that never participates in construction.
+
+What holds: the four opaque newtypes are genuinely non-interchangeable at the type level;
+`ClaimRevision` separates stable proposition identity from revision identity and tests it;
+`FactRevision` binds `claim_revision_ref` and `authorization_decision_ref` exactly.
+
+### #464: the four corrections are right, the authority they cite is absent
+
+All four field changes verify against the GitHub API: branch, PR number, merge commit
+`776f04fb...`, and the `FROZEN` carrier blob `6eb1a1fd...` unchanged at `main`, base and
+head. Governance tests `Ran 25 tests ... OK`. The YAML parse failure reproduces on `main`,
+so it is pre-existing, exactly as claimed.
+
+But the `revision_history` entry cites `gap-owner-w1w3-decision.md` and
+`gap-owner-v1v4-decision.md` as its authority. Neither exists in the tree at `61a45da7` —
+1082 entries walked, 0 matches, and the only occurrence of those strings in the repository
+is the manifest citing itself.
+
+That is now three consecutive PRs whose stated authority cannot be read: #433's baseline
+row, #436's baseline row, and this. A pattern, not three coincidences.
+
+Two smaller things: the body labels `2fe294f5` as the `prompt-v1.md` blob when it is the
+`manifest.yaml` blob (the conclusion is true, the evidence line points at the wrong object);
+and `updated_at: 09:55:00Z` predates the commit that carries it (`61a45da7`, `09:59:33Z`).
+
+### #463 is the clean one
+
+```
+$ cargo test -p memory-store --test cross_crate_contract --offline
+running 6 tests ... test result: ok. 6 passed; 0 failed
+```
+
+Gate PASS. C2 and C3 assert that a *rejection* leaves no row behind — the failure mode that
+corrupts storage silently. C4 and C5 assert stale and replayed writes do not mutate the
+current revision. C6 asserts a duplicate creation preserves the typed error variant. That is
+contract coverage, which is what the title claims.
+
+### #461 weakened the gate, and the minimal exploit is a zero-byte file
+
+The gate change widened `side_by_side_partner()` from `14-ai-development` only to all nine
+normative roots, and deleted the root guard in `current_bilingual_gaps()`. The function tests
+existence only:
+
+```python
+elif source.endswith(".md"):
+    stem = source[: -len(".md")]
+    for cand in (stem + ".en.md", stem + ".zh-CN.md"):
+        if cand != source and (ROOT / cand).is_file():
+            return cand
+```
+
+`.is_file()` is true for zero bytes. Measured on `main` `0ccdf0a1`:
+
+```
+02-domain-model/zz-empty-probe.md        -> in_gaps: False  (309 bytes, English only)
+02-domain-model/zz-empty-probe.zh-CN.md  -> in_gaps: False  (0 bytes)
+```
+
+A zero-byte file satisfies the bilingual requirement, in eight additional roots. Pre-#461 the
+same tree reported both as gaps and exited 2.
+
+Inventory delta from the change, same tree, old vs new script: 93 gaps → 85, with 8 newly
+accepted and **0 newly rejected**. All four of the real `.zh-CN.md` files in that set are
+genuine translations (CJK counts 4020 / 2291 / 505 / 536), so the current inventory is not
+falsified — only the mechanism is now content-blind in more places.
+
+A second independent widening: `_carries_chinese()` now governs all nine roots instead of
+one, so a document with 20 English lines plus a 143-character Chinese glossary passes as
+bilingual where it previously did not.
+
+**My own proposed fix was wrong and I withdrew it.** Adding `_carries_chinese()` to the
+side-by-side branch produced **17 false positives**, because the helper requires >= 100 CJK
+characters and several legitimate bilingual policy stubs are shorter. I measured the patch
+before recommending it, which is the only reason it did not go out as advice. The narrow fix
+that needs no threshold decision is `and (ROOT / cand).stat().st_size > 0` — it cannot
+produce a false positive on any real document and raises the cheapest evasion from "create
+an empty file" to "put something in it".
+
+### What this round changes about the GAP series
+
+| PR | GAP | gate | tests | state |
+|---|---|---|---|---|
+| #463 | 06 | PASS | 6 passed | clean |
+| #464 | — | PASS | 25 passed (governance) | authority absent |
+| #465 | 03 | FAIL (no manifest) | build broken at head | blocked |
+| #466 | 05 | PASS | 25 / 158 passed | design question open |
+
+GAP-03 and GAP-05 are no longer 0% code — they are now two PRs with real implementations and
+real defects. That is progress of a specific kind: the gap between "nothing exists" and
+"something exists and does not compile" is smaller than it looks from a distance, and larger
+than it looks from a PR description.
+
+Still true: no gap is closed by this document, no PR has an approval, and no CI job has run.
