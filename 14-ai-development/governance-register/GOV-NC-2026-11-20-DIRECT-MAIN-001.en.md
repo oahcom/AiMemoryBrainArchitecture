@@ -167,6 +167,79 @@ The following three execution identities have no appointment record, permission 
 
 Whether these three are the same entity, and whether they are bound by the Owner authority in §5, is `NOT_VERIFIED`.
 
+## 14. Fifth round: 53 → 62, and a fourth unattributable commit identity (after 2026-11-21 03:30Z)
+
+### 14.1 Scale
+
+33 + 12 + 8 = 53 through the third round. After `1a0dc911` there are **9 more commits on `main` with no PR**, taking the total to **62**.
+
+| # | commit | time (Z) | author email | files | message |
+|---|---|---|---:|---:|---|
+| 1 | `39553c25a4` | 19:32:32 | `l0@local` | 4 | AID-2026-014 R4 correction: E Claim identity |
+| 2 | `5ed9669dd6` | 20:04:01 | `oahcom` | 1 | Apply AID-2026-014 correction round 5 |
+| 3 | `9c94b3c485` | 20:04:03 | `oahcom` | 1 | Apply AID-2026-014 correction round 5 |
+| 4 | `1733c3bf4a` | 20:05:06 | `governance@localhost` | **6** | docs(governance): GOV-DOC-002 v1.1 - fail-closed gate |
+| 5 | `95af790b45` | 20:12:24 | `oahcom` | 2 | AID-2026-014 R3 correction: §9.1 pinned read-back |
+| 6 | `da378340b0` | 20:45:18 | `oahcom` | 2 | AID-2026-014 R5 correction: 19.2 Producer Admission |
+| 7 | `ae5462f6ef` | 03:24:52 | `oahcom` | 2 | AID-2026-014 R5: admission stage relation |
+| 8 | `0f5b5a00e7` | 03:31:45 | `governance@localhost` | **12** | docs(governance): GOV-DOC-002 v1.2 |
+| 9 | `8dc92c3debde` | 03:33:15 | `oahcom` | 2 | AID-2026-014 R5: independent review disposition |
+
+`39553c25a4` has `1a0dc911` as its parent — the third round's endpoint. Every non-merge advance of `main` since then was a direct push. **None went through a PR.**
+
+### 14.2 Fourth identity: `governance@localhost`
+
+`1733c3bf4a` and `0f5b5a00e7` carry `governance@localhost` as author email, committer name `arch-governance`. That is a fourth identity that cannot map to a GitHub account:
+
+| Identity | First seen | Direct pushes | Authority source |
+|---|---|---:|---|
+| `oahcom` | round 1 | 26+ | repository Owner account |
+| `l0@local` | round 1 | 5 | `NOT_VERIFIED` |
+| `unknown <1491856051>` | round 1 | 5 | `NOT_VERIFIED` |
+| `governance@localhost` | **this round** | **2** | `NOT_VERIFIED` |
+
+`localhost` is not a deliverable domain. GitHub builds no account association for such commits, so they cannot be attributed in the UI — the same property as `1491856051`.
+
+### 14.3 Escalation: the gate implementation itself is now edited by direct push
+
+Earlier rounds mostly touched documents. **This round does not.**
+
+| commit | script touched | change |
+|---|---|---|
+| `1733c3bf4a` | `scripts/check_document_management.py` | **+721 / −166** |
+| `1733c3bf4a` | `.github/workflows/document-management.yml` | +16 / −0 |
+| `1733c3bf4a` | `scripts/test_check_document_management.py` | +317 / −84 |
+| `0f5b5a00e7` | `scripts/check_document_management.py` | **+141 / −63** |
+| `0f5b5a00e7` | `.github/workflows/document-management.yml` | +20 / −12 |
+| `0f5b5a00e7` | `scripts/test_check_document_management.py` | +105 / −1 |
+
+Total: **862 lines added and 229 removed in a gate implementation**, plus 36 lines in a CI workflow, by `governance@localhost` — no PR, no review, no `PR_BODY`.
+
+`e2644784c0`'s +3/−0 (one entry appended to the exemption set) was recorded as a second bypass class at the time. This round takes the same path to its limit: not adding one entry to a list, but rewriting the checker.
+
+Consequences:
+
+1. The gate's judgement logic can change without anyone reviewing it. Every "the gate passed" conclusion rests on a judge that can be rewritten by direct push.
+2. Checker and checked sit in the same trust domain, on the same ungated channel. That is self-certification, not control.
+3. `1733c3bf4a` adds this comment to `.github/workflows/document-management.yml`:
+
+   > `# Direct pushes are not gated by --require-changed: this repository still accepts direct pushes, so a whole-tree requirement would turn main red on the existing backlog. Policy §8 records this as an open gap.`
+
+   The existence of direct pushes is written into the workflow as the reason to weaken the check. This is not concealment; it is "cannot prevent" transcribed into "design premise". Recorded as fact, without a finding on intent.
+
+### 14.4 Evidence
+
+| Evidence | Value |
+|---|---|
+| Fifth-round `main` head | `8dc92c3debde36929d34808bead0a62ffc4f64fa` |
+| Cumulative direct commits | **62** (33 + 12 + 8 + 9) |
+| Cumulative `verified=true` | **0 / 62** |
+| `governance@localhost` direct pushes | 2 (`1733c3bf4a`, `0f5b5a00e7`) |
+| Gate implementation rewritten by direct push | `check_document_management.py` +862/−229; `document-management.yml` +36/−12 |
+| Raw data | `_round4.json`, `_round4_list.json`, `_paths_now.txt` |
+
+---
+
 **Register status**: `AUTHORITY_SOURCE_UNVERIFIED`
 
 ---

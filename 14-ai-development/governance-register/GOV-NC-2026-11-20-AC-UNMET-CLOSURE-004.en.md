@@ -94,20 +94,27 @@ EXIT=0
 
 > given a change set where a normative Chinese document already exists on `main` without a counterpart, and a PR adds only the English counterpart, the gate must **not** report complete bilingual compliance.
 
-**Measured**: faithful reproduction of the Issue #351 shape — Chinese normative file pushed directly to `main` (no PR), then a PR adding only the mirror side:
+**Measured (corrected — see §11.1)**: AC-5 names one shape only — "a PR adds **only** the English counterpart". Reproduced literally:
 
 ```
-BASE:   08-bmcp-protocol/bypass.md          (direct push, unpaired)
-HEAD:   docs/en/08-bmcp-protocol/bypass.md
-        docs/zh-CN/08-bmcp-protocol/bypass.md
+BASE:   08-bmcp-protocol/bypass9.md            (normative source on main, no counterpart)
+HEAD:   docs/en/08-bmcp-protocol/bypass9.md    (English side only)
 
-$ python3 scripts/check_bilingual_docs.py
-Bilingual documentation and prompt-library gate: PASS (2 changed paths inspected).
-STDERR: NOTE: 2 changed .md path(s) outside NORMATIVE_ROOTS were not pairing-checked
-EXIT=0
+$ BASE_SHA=<B> HEAD_SHA=<H> PR_BODY="BILINGUAL-MANIFEST: COMPLETE" \
+    python3 scripts/check_bilingual_docs.py
+::error::docs/en/08-bmcp-protocol/bypass9.md changed without paired change docs/zh-CN/...
+::error::Chinese counterpart does not exist: docs/zh-CN/08-bmcp-protocol/bypass9.md
+Bilingual documentation gate: FAIL
+EXIT=1
 ```
 
-**Verdict: `NOT_SATISFIED`.** This is precisely the outcome AC-5 forbids. The gate reports PASS while the Chinese normative file `08-bmcp-protocol/bypass.md` was never seen by any pairing check — it sits on the BASE side, outside the change set, and the gate inspects only the change set.
+**Verdict: `SATISFIED`.**
+
+> **Correction.** This section previously read `NOT_SATISFIED`, on a probe whose HEAD added **both** `docs/en/` and `docs/zh-CN/` (the old record is quoted above). That probe does not have the shape AC-5 describes, and its `PASS` was correct: the source was unpaired on BASE, the PR added both mirrors, so the source became paired.
+>
+> The previous version also attributed "the gate judges a diff, not a tree" to AC-5. The property is real, but its subject is the 83 pre-existing unpaired paths (§11.3), not AC-5.
+>
+> Basis: reproduced on `main @ eca6f5706e` and `@ 8dc92c3debde` (`EXIT=1`), and on #351's **real** commit pair `568b847ce39f → af1e93d49d` (`EXIT=1`).
 
 ### AC-6 — unpaired normative md fails
 
@@ -177,16 +184,18 @@ $ python3 -m pytest scripts/governance/evidence/test_gate_normative_roots.py -q
 | AC-2 | fail when the list names a nonexistent directory | `SATISFIED` |
 | AC-3 | every numbered directory covered or exempted with a reason | `PARTIALLY_SATISFIED` |
 | AC-4 | print both counts; error when both zero | `NOT_SATISFIED` |
-| AC-5 | direct-push bypass negative test must fail | `NOT_SATISFIED` |
+| AC-5 | direct-push bypass negative test must fail | `SATISFIED` (corrected) |
 | AC-6 | unpaired fails | `SATISFIED` |
 | AC-7 | unapproved exception fails | `SATISFIED` |
 | AC-8 | genuine pair passes | `SATISFIED` |
 | AC-9 | directory-set equality test | `NOT_SATISFIED` |
 | AC-10 | covered by the suite and recorded | `PARTIALLY_SATISFIED` |
 
-**4 satisfied, 2 partially satisfied, 4 not satisfied.**
+**5 satisfied, 2 partially satisfied, 3 not satisfied.**
 
-AC-1, AC-5 and AC-9 are the **core** of this Issue: "stop relying on a hand-maintained list", "the direct-push bypass is detected", "a regression test guards it". None of the three is met, which means **the defect #384 describes still exists after the fix, in a slightly altered form**.
+> Previously "4 / 2 / 4" with AC-5 as `NOT_SATISFIED`. Corrected per §11.1.
+
+AC-1 and AC-9 are the **core mechanism** criteria: "stop relying on a hand-maintained list" and "a regression test guards it". Both are unmet. AC-4 is the observability criterion and is unmet.
 
 ---
 
@@ -213,11 +222,11 @@ The second half is not implemented. Measured: `09-storage-and-index` exists, is 
 
 The 4 md files under `08-bmcp-protocol` were unchecked before the fix and are checked after it. So **after** the fix, any unpaired change to those files fails.
 
-But the AC-5 measurement shows: if those same files are pushed directly to `main` first, and the PR then adds the `docs/en` and `docs/zh-CN` mirrors, the gate still reports PASS.
+The corrected AC-5 measurement shows the bypass shape **is** closed: source on BASE, PR adds only EN → `EXIT=1`. That part of PR #394 works.
 
-That is: **coverage widened, the bypass remains**. The root cause of the bypass is not the list — it is that the gate inspects only the set returned by `changed_paths()`, and never asks whether normative files outside the change set already have counterparts.
+A **different** shape still passes: a PR that adds the English mirror *and* the Chinese mirror in the same change set reports `PASS`, while an unpaired source on the BASE side is never inspected. That `PASS` is correct behaviour — the source ends up paired — and what it exposes is a scope question: the gate's judgement domain is the diff, not the tree.
 
-Issue #384's AC-5 describes this precisely. The fix does not address it.
+That question is outside #384's AC set. It belongs to the existing backlog: see §11.3 and **#407**.
 
 ---
 
@@ -239,8 +248,9 @@ All four point at one root cause: **this repository currently has no role separa
 |---|---|---|---|
 | N-1 | Reopen #384, or file `#384-FOLLOWUP`, scoped only to AC-1, AC-4, AC-5, AC-9 | Scope correction | **Executed 2026-11-20** — #384 reopened, verdict comment `7048799466`, body scope clause added |
 | N-2 | Add a post-closure annotation to #384 stating "of 10 ACs, 4 satisfied, 4 not satisfied", linking this register | Retrospective annotation | **Executed** — folded into the same verdict comment |
-| N-3 | Implement AC-5's bypass detection: for a new `docs/en/<root>/x`, check whether the source `<root>/x` already has a counterpart on `main` | Implementation | Dispatched as #401 (implementation task, no merge authority) |
+| N-3 | Implement AC-5's bypass detection | Implementation | **Withdrawn** — AC-5 measured as satisfied, see §11.1 |
 | N-4 | Implement AC-9's directory-set equality test | Implementation | Not executed |
+| N-6 | Independent inventory of the 83 existing unpaired paths | Backlog | **Filed as #407**, see §11.3 |
 | N-5 | State in `PR-GOVERNANCE-001` that an Issue closure comment must list a verdict per acceptance criterion, and that a closure without such a list may not be treated as acceptance | Normative | Not executed (requires Owner) |
 
 N-5 is the only measure that stops this class of defect recurring. N-1 through N-4 only repair the instance.
@@ -279,4 +289,35 @@ The re-check ran on a shallow clone of `main`; test change sets were local tempo
 
 ---
 
-**Register conclusion**: Issue #384 was closed with 4 of its own 10 acceptance criteria unmet and 2 partially met, 2 seconds after the fix merged. All three core criteria (AC-1 tree derivation, AC-5 bypass detection, AC-9 regression test) are unimplemented, and the defect the Issue describes persists through the same mechanism. Recommendation: annotate #384's closure as `AC_PARTIALLY_UNMET` rather than `FIXED`.
+**Register conclusion**: Issue #384 was closed with **3 of its own 10 acceptance criteria unmet, 2 partially met, 5 satisfied**, the first closure 2 seconds after the fix merged. The core mechanism criteria (AC-1 tree derivation, AC-9 regression test) are unimplemented and AC-4 observability is unimplemented; AC-5 bypass detection **is** implemented. Recommendation: annotate #384's closure as `AC_PARTIALLY_UNMET` rather than `FIXED`.
+
+---
+
+## 11. Fifth verification round: corrections to this document (after 2026-11-21 03:30Z)
+
+### 11.1 AC-5 verdict corrected: `NOT_SATISFIED` → `SATISFIED`
+
+**What was wrong.** The §3 AC-5 probe added **both** mirrors. AC-5's text says "adds **only** the English counterpart". A probe with a different change set cannot decide the criterion.
+
+**Why the old `PASS` was not a defect.** The source was unpaired on BASE; the PR added both mirrors; the source became paired. Reporting compliance is correct.
+
+**Re-measured** on `eca6f5706e`, on `8dc92c3debde`, and on #351's real pair `568b847ce39f → af1e93d49d`: all `EXIT=1`.
+
+### 11.2 The right home for "the gate judges a diff, not a tree"
+
+Real property, wrong criterion. At `main @ 8dc92c3debde` a full-tree scan reports **409 in-scope, 107 exempt, 83 violations, `EXIT=1`** — the same 83 as at `ae5462f6ef`. N-3 is withdrawn; the 83 go to #407.
+
+### 11.3 New carrier: #407, disposition of the existing 83
+
+Gate fix (#401) and backlog disposition (#407) have different acceptance objects. #401 answers "can the gate see a base-side unpaired source?" with purpose-built negative tests. #407 answers "have the existing 83 been individually disposed of?" with per-path classification and reasons. Merging them lets either one cover for the other.
+
+### 11.4 New facts tied to this register
+
+| Fact | Value | Effect |
+|---|---|---|
+| PR #403 merged | 03:26:28Z, `merged_by=oahcom` | the "counterexample" lasted 7 hours; the 10-minute prediction failed, the merge still happened |
+| One review preceded it | 03:26:13Z, `COMMENTED`; author = reviewer = merger = `oahcom` | "has a review" ≠ "has an independent review"; gap 15 seconds |
+| Check at merge | `GOV-DOC-002 metadata checks` = `failure` | merged with a failing check |
+| #384 closed again | 20:06:51Z, 2 s after #402 merged | the 19:34Z reopen was overridden 32 minutes later; third closure |
+| Direct pushes | **53 → 62** (9 new, incl. 2 by `governance@localhost`) | `DIRECT-MAIN-001` §14 |
+| Gate implementation rewritten by direct push | `1733c3bf4a` +721/−166, `0f5b5a00e7` +141/−63 | the checker changes with no PR and no review |

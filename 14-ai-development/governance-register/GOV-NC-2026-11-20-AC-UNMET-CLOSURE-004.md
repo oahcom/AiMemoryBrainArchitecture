@@ -94,20 +94,27 @@ EXIT=0
 
 > given a change set where a normative Chinese document already exists on `main` without a counterpart, and a PR adds only the English counterpart, the gate must **not** report complete bilingual compliance.
 
-**实测**：忠实复现 Issue #351 记录的形态——中文规范文件先直推 main（无 PR），随后 PR 只补英文侧：
+**实测（更正后，见 §11）**：AC-5 原文只描述一种形态——PR **只**补英文侧。按字面复现：
 
 ```
-BASE:   08-bmcp-protocol/bypass.md        (直推，无配对)
-HEAD:   docs/en/08-bmcp-protocol/bypass.md
-        docs/zh-CN/08-bmcp-protocol/bypass.md
+BASE:   08-bmcp-protocol/bypass9.md            (中文规范文件已在 main，无配对)
+HEAD:   docs/en/08-bmcp-protocol/bypass9.md    (只加英文侧)
 
-$ python3 scripts/check_bilingual_docs.py
-Bilingual documentation and prompt-library gate: PASS (2 changed paths inspected).
-STDERR: NOTE: 2 changed .md path(s) outside NORMATIVE_ROOTS were not pairing-checked
-EXIT=0
+$ BASE_SHA=<B> HEAD_SHA=<H> PR_BODY="BILINGUAL-MANIFEST: COMPLETE" \
+  python3 scripts/check_bilingual_docs.py
+::error::docs/en/08-bmcp-protocol/bypass9.md changed without paired change docs/zh-CN/...
+::error::Chinese counterpart does not exist: docs/zh-CN/08-bmcp-protocol/bypass9.md
+Bilingual documentation gate: FAIL
+EXIT=1
 ```
 
-**判定：`NOT_SATISFIED`**。这正是 AC-5 明确要求**不得**出现的结果。门禁报告 PASS，而中文规范文件 `08-bmcp-protocol/bypass.md` 从未被任何配对检查看过——它在 BASE 侧，不在变更集内，而门禁只检查变更集。
+**判定：`SATISFIED`**。
+
+> **更正**：本节上一版判定为 `NOT_SATISFIED`，依据的探针在 HEAD 侧**同时加了** `docs/en/` 与 `docs/zh-CN/`（见上方旧记录），被测门禁 `PASS EXIT=0`。该探针与 AC-5 原文不符——AC-5 说的是「**只**加英文」。而且那个 `PASS` 不是缺陷：源文件在 BASE 未配对，PR 补齐双侧后源文件即已配对，报 PASS 正确。
+>
+> 上一版把「门禁只检查 diff、不检查整棵树」这个性质错误地挂到 AC-5 名下。该性质真实存在，但载体是存量 83 条未配对路径（§11.3），不是 AC-5。
+>
+> 更正依据：`main @ eca6f5706e`、`@ 8dc92c3debde` 各复现一次，均 `EXIT=1`；`#351` 的**真实**提交对 `568b847ce39f → af1e93d49d` 在同一门禁上同样 `EXIT=1`。
 
 ### AC-6 — 未配对规范 md 失败
 
@@ -177,16 +184,18 @@ $ python3 -m pytest scripts/governance/evidence/test_gate_normative_roots.py -q
 | AC-2 | 名单含不存在目录时失败 | `SATISFIED` |
 | AC-3 | 每个数字目录被覆盖或带理由豁免 | `PARTIALLY_SATISFIED` |
 | AC-4 | 打印归类数与跳过数，两者皆零报错 | `NOT_SATISFIED` |
-| AC-5 | 直推旁路负向测试必须失败 | `NOT_SATISFIED` |
+| AC-5 | 直推旁路负向测试必须失败 | `SATISFIED`（更正） |
 | AC-6 | 未配对失败 | `SATISFIED` |
 | AC-7 | 无审批例外失败 | `SATISFIED` |
 | AC-8 | 真实配对通过 | `SATISFIED` |
 | AC-9 | 目录集相等测试 | `NOT_SATISFIED` |
 | AC-10 | 测试套件覆盖并记录 | `PARTIALLY_SATISFIED` |
 
-**4 条满足、2 条部分满足、4 条不满足。**
+**5 条满足、2 条部分满足、3 条不满足。**
 
-其中 AC-1、AC-5、AC-9 是本次 Issue 的**核心**：它们分别对应「不再依赖手写名单」「直推旁路被发现」「回归有测试守住」。这三条全部不满足，意味着 **Issue #384 所描述的缺陷在修复后仍然存在，只是形态略有变化**。
+> 本节原为「4 满足 / 2 部分 / 4 不满足」，AC-5 记 `NOT_SATISFIED`。该判定已更正为 `SATISFIED`，理由见 §11.1。
+
+其中 AC-1、AC-9 是本次 Issue 的**核心机制项**：前者对应「不再依赖手写名单」，后者对应「回归有测试守住」。两条均不满足。AC-4 是观测能力项，不满足。
 
 ---
 
@@ -213,11 +222,11 @@ $ python3 -m pytest scripts/governance/evidence/test_gate_normative_roots.py -q
 
 `08-bmcp-protocol` 的 4 个 md 在修复前不受检查、修复后受检查，因此**在修复之后**，任何针对这 4 个文件的未配对变更会失败。
 
-但 AC-5 的实测显示：这 4 个文件若先直推到 main，再在 PR 中补 `docs/en` 与 `docs/zh-CN` 镜像，门禁仍报 PASS。
+本轮更正后的实测显示：AC-5 的旁路形态**确实被堵住**——源文件在 BASE、PR 只补英文侧 → `EXIT=1`。这一条 PR #394 的修复是有效的。
 
-即：**覆盖范围扩大了，旁路仍然存在**。旁路的根因不在名单，在于门禁只检查 `changed_paths()` 返回的变更集，而不检查变更集之外的既有规范文件是否已有配对。
+但**另一种形态仍然通过**：若 PR 在补英文的同时也补中文镜像（即同变更集内凑齐双侧），门禁报 `PASS`，而 BASE 侧那份未配对的源文件从未被看过。这一形态的 `PASS` 是**正确行为**（源文件此时已配对），它暴露的是另一个问题：门禁的判定域是 diff 而非树。
 
-这一点在 Issue #384 的 AC-5 中被准确描述，在修复中未被处理。
+该问题不属于 #384 的 AC 范围，属于存量债务，见 §11.3。
 
 ---
 
@@ -239,11 +248,12 @@ $ python3 -m pytest scripts/governance/evidence/test_gate_normative_roots.py -q
 |---|---|---|---|
 | N-1 | 重新打开 #384，或建立 `#384-FOLLOWUP`，仅覆盖 AC-1、AC-4、AC-5、AC-9 四条 | 范围修正 | 未执行（需授权） |
 | N-2 | 在 #384 补一条关闭后标注，写明「10 条 AC 中 4 条满足、4 条不满足」，并附本登记链接 | 追溯标注 | 未执行 |
-| N-3 | 实现 AC-5 所要求的旁路检测：对 `docs/en/<root>/x` 的新增，检查源 `<root>/x` 是否在 main 上已有配对 | 实现 | 未执行（需投入会话执行） |
+| N-3 | 实现 AC-5 所要求的旁路检测 | 实现 | **已撤回** —— AC-5 实测已满足，见 §11.1 |
 | N-4 | 实现 AC-9 的目录集相等测试 | 实现 | 未执行 |
 | N-5 | 在 `PR-GOVERNANCE-001` 中明确：Issue 关闭评论必须逐条列出 AC 判定，未逐条列出者不得视为已验收 | 规范 | 未执行（需 Owner） |
+| N-6 | 存量 83 条未配对路径的独立清查 | 存量债务 | **已立 #407**，见 §11.3 |
 
-N-5 是唯一能让本类缺陷不再重复的措施。N-1 至 N-4 只是补做。
+N-5 是唯一能让本类缺陷不再重复的措施。N-1、N-2、N-4 只是补做。
 
 ---
 
@@ -256,7 +266,7 @@ N-5 是唯一能让本类缺陷不再重复的措施。N-1 至 N-4 只是补做�
 | AC-1 实测 | 新建 `09-storage-and-index/spec.md` → `PASS`，`EXIT=0` |
 | AC-2 实测 | 注入 `99-nonexistent` → `EXIT=2` |
 | AC-4 实测 | 3 文件配对变更 → 仅 stderr skipped 计数，无 normative 计数，`EXIT=0` |
-| AC-5 实测 | #351 形态复现 → `PASS`，`EXIT=0` |
+| AC-5 实测 | 字面形态（只加英文）`EXIT=1`；更正见 §11.1 |
 | AC-6 实测 | 未配对 md → `EXIT=1` |
 | AC-7 实测 | 无审批例外 → `EXIT=1` |
 | AC-8 实测 | 三文件配对 → `EXIT=0` |
@@ -275,8 +285,63 @@ N-5 是唯一能让本类缺陷不再重复的措施。N-1 至 N-4 只是补做�
 - 未认定修复者的技术判断错误。PR #394 的四项改动均正确，问题在于范围不足。
 - 未主张应回滚 #394。`08-bmcp-protocol` 恢复覆盖是净改进，回滚会使情况更差。
 - 未认定关闭者明知 AC 未满足。2 秒的间隔只证明未执行验证，不证明主观故意。
-- 未修改门禁脚本。N-3、N-4 需由执行会话实现，本会话不代写。
+- 未修改门禁脚本。N-4 需由执行会话实现，本会话不代写。
 
 ---
 
-**登记结论**：Issue #384 在 10 条自定 AC 中 4 条不满足、2 条部分满足的情况下被关闭，且关闭距合并 2 秒。核心三条（AC-1 树推导、AC-5 旁路检测、AC-9 回归测试）全部未实现，Issue 所描述的缺陷在修复后以相同机制继续存在。建议将 #384 的关闭状态标注为 `AC_PARTIALLY_UNMET`，而非 `FIXED`。
+## 11. 第五轮复检：对本文档自身的三处更正（2026-11-21 03:30Z 后）
+
+### 11.1 AC-5 判定更正：`NOT_SATISFIED` → `SATISFIED`
+
+**错在哪里**：本文档 §3 AC-5 原先引用的探针，HEAD 侧同时加了 `docs/en/` 与 `docs/zh-CN/` 双侧镜像。但 AC-5 的原文是「a PR adds **only** the English counterpart」。探针与判据不同形，结论无效。
+
+**为什么那个 PASS 不是缺陷**：源文件在 BASE 侧未配对，PR 补齐双侧镜像后该源文件已配对。门禁报 `PASS` 在语义上正确。
+
+**更正后的实测**（两个基线各一次）：
+
+| 基线 | 变更集 | 结果 |
+|---|---|---|
+| `eca6f5706e` | BASE 有 `08-bmcp-protocol/bypass9.md`，HEAD 只加 `docs/en/.../bypass9.md` | `EXIT=1`，`::error::Chinese counterpart does not exist` |
+| `8dc92c3debde` | 同上 | `EXIT=1` |
+| `568b847ce39f → af1e93d49d`（#351 真实提交对） | ZH 文件在 BASE，PR 只加 EN | `EXIT=1` |
+
+**AC-5 = `SATISFIED`。** 账目由「4 满足 / 2 部分 / 4 不满足」改为「5 满足 / 2 部分 / 3 不满足」。
+
+**这次更正不是措辞让步**：上一版把一个超出 AC 原文的性质记成 AC 失败，会让修复者去实现一个没人要求的检查，同时让真正满足的条款显得未做。两者都是失实。
+
+### 11.2 「门禁判定域是 diff 而非树」的正确归属
+
+该性质真实存在，但**不是 AC-5**。它的正确载体是存量：在 `main @ 8dc92c3debde` 上跑全库扫描，**409 个在范围内 Markdown、107 个豁免、83 条未配对违规，`EXIT=1`**。
+
+```
+$ python3 check_bilingual_docs_full.py --paths-file <main@8dc92c3d 全路径> \
+    --source-revision 8dc92c3debde --report ...
+GOV-DOC-001 full scan: 409 in-scope Markdown files; 107 exempt; 83 violations.
+GOV-DOC-001 full scan: FAIL
+```
+
+83 这个数在 `ae5462f6ef` 与 `8dc92c3debde` 两次取树上都是 83，不随最近提交漂移。
+
+**归属更正**：N-3（在 #401 名下实现旁路检测）撤回。83 条存量走独立载体 **#407**（见 §11.3），不并入 #401。#401 继续只做它标题写的事。
+
+### 11.3 新增载体：#407 存量 83 条清查
+
+按 `PR-GOVERNANCE-001` 的分离原则，门禁修复（#401）与存量清查（#407）验收对象不同：
+
+- #401 答复「门禁能否发现 BASE 侧既有未配对文件」——用专门构造的 BASE/HEAD 负向测试验收。
+- #407 答复「仓内既有 83 条是否已逐项处置」——用逐路径分类与理由验收。
+
+两者互不代替。若并入，会出现两种错误归因：门禁实现被 83 条处置进度阻塞；83 条处置结果被当成门禁修复成功的证明。
+
+### 11.4 与本文档关联的新事实
+
+| 事实 | 值 | 影响 |
+|---|---|---|
+| PR #403 最终被合并 | 03:26:28Z，`merged_by=oahcom` | 我在 313 号回灌里报的「反例」**只维持了 7 小时**；十分之十分钟预测失败，但同类合并最终仍发生 |
+| #403 合并前有一次 review | 03:26:13Z，`COMMENTED`，作者 = 审查者 = 合并者 = `oahcom` | 「有 review」与「有独立 review」是两件事；此处 review 与合并间隔 15 秒 |
+| #403 合并时 check | `GOV-DOC-002 metadata checks` = `failure` | 合并仍在检查失败下完成 |
+| #384 再次被关闭 | 20:06:51Z，距 #402 合并 2 秒 | 我 19:34Z 的重开在 32 分钟后被覆盖；第三次关闭 |
+| 直推累计 | **53 → 62**（新增 9 个，含 `governance@localhost` 身份 2 个） | 见 `DIRECT-MAIN-001` §14 |
+| `check_document_management.py` 被直推大改 | `1733c3bf4a` +721/−166，`0f5b5a00e7` +141/−63 | 门禁实现本身以直推方式变更，无 PR、无 review |
+
+**登记结论**：Issue #384 在 10 条自定 AC 中 **3 条不满足、2 条部分满足、5 条满足**的情况下被关闭，且首次关闭距合并 2 秒。核心机制项（AC-1 树推导、AC-9 回归测试）未实现，AC-4 观测项未实现；AC-5 旁路检测**已实现**。建议将 #384 的关闭状态标注为 `AC_PARTIALLY_UNMET`，而非 `FIXED`。
