@@ -5,8 +5,8 @@
 - Prompt: CHATGPT-OWNER-G-001 v1.0
 - Source tree: `b9ddd241a18a00b3b8f3b0ce2e176b6f859bc0da`
 - Assessment ref: `main` (read-only source inspection)
-- Rust source blob: `crates/memory-context/src/lib.rs` = `d405f7927235a3cb75dbd2eb1942bf75b167643f`
-- Implementation commit: `46c4b67728db8c8b58e4d8e96b277cc75ddc1f35`
+- Rust source blob: `crates/memory-context/src/lib.rs` = `8e15e7b6c279183b0adaaca0557506e305739db7`
+- Implementation commit: `46c4b67728db8c8b58e4d8e96b277cc75ddc1f35`; Clippy/API follow-up: `aad4a6dff0daf5c263beaaa31b72a40347bddddf`
 - Status: implementation mapping; no self-approval
 - Scope: the 19 Markdown artifacts in `06-memory-context/` at the source SHA (README, 17 distinct English design/review artifacts, and the Chinese peer of the Phase 3.8.22 contract). The paired Phase 3.8.22 files are one semantic contract, not two independent requirements.
 
