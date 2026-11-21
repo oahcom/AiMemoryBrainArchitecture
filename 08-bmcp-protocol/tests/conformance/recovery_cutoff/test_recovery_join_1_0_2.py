@@ -124,6 +124,11 @@ def admission_row(proof: dict | None = None) -> dict:
         "owner_admission_entry_digest": p["owner_entry_digest"],
         "owner_sequence_namespace": p["owner_sequence_namespace"],
         "owner_sequence": p["owner_local_sequence"],
+        "gate_generation": p["owner_gate_generation"],
+        "scope_ref": p["scope_ref"],
+        "scope_generation": p["scope_generation"],
+        "operation_identity_ref": p["operation_identity_ref"],
+        "operation_digest": p["operation_digest"],
     }
 
 
