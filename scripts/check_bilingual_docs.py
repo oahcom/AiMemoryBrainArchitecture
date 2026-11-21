@@ -273,15 +273,15 @@ def current_bilingual_gaps() -> set[str]:
             english = REPO_ROOT / "docs" / "en" / source
             chinese = REPO_ROOT / "docs" / "zh-CN" / source
             mirrored = english.is_file() and chinese.is_file()
-            if root_name == "14-ai-development":
-                # ponytail: structural pairing only; semantic translation parity remains a human-review responsibility.
-                paired = (
-                    mirrored
-                    or side_by_side_partner(source) is not None
-                    or (english.is_file() and _carries_chinese(source))
-                )
-            else:
-                paired = mirrored
+            # Side-by-side pairing is a repository-wide convention, not a
+            # 14-ai-development privilege: the other eight roots ship 24 such
+            # pairs too, and restricting the rule to one root turned every one
+            # of them into a permanent gap.
+            paired = mirrored or _side_by_side_bilingual(source)
+            if not paired and root_name == "14-ai-development":
+                # Shape 3: the root file IS the Chinese source and docs/en holds
+                # the English side. It must be earned by actually carrying Chinese.
+                paired = english.is_file() and _carries_chinese(source)
             if not paired:
                 gaps.add(source)
     return gaps
@@ -617,23 +617,39 @@ def check_prompt_library() -> list[str]:
 
 
 def side_by_side_partner(source: str) -> str | None:
-    """Conventional side-by-side counterpart for a 14-ai-development path."""
-    if source.endswith(".en.md"):
-        stem = source[: -len(".en.md")]
-        for cand in (stem + ".zh-CN.md", stem + ".md"):
+    """Conventional side-by-side counterpart for a normative source path.
+
+    ponytail: all three spellings resolve in both directions. An earlier version
+    only looked for `.en.md`, so `X.md <-> X.zh-CN.md` resolved from neither side
+    even though the repository ships 24 such pairs. Adding a new spelling means
+    adding it to all three branches, or the pair stays invisible from one end.
+    """
+    suffixes = (".en.md", ".zh-CN.md", ".md")
+    for suffix in suffixes:
+        if not source.endswith(suffix):
+            continue
+        stem = source[: -len(suffix)]
+        for other in suffixes:
+            if other == suffix:
+                continue
+            cand = stem + other
             if cand != source and (ROOT / cand).is_file():
                 return cand
-    elif source.endswith(".zh-CN.md"):
-        stem = source[: -len(".zh-CN.md")]
-        cand = stem + ".en.md"
-        if (ROOT / cand).is_file():
-            return cand
-    elif source.endswith(".md"):
-        stem = source[: -len(".md")]
-        cand = stem + ".en.md"
-        if (ROOT / cand).is_file():
-            return cand
+        return None
     return None
+
+
+def _side_by_side_bilingual(source: str) -> bool:
+    """True when `source` has a side-by-side partner and the pair carries Chinese.
+
+    A pair only counts when at least one side actually contains Chinese text.
+    Two English files next to each other are not a bilingual pair, and an empty
+    `.zh-CN.md` placeholder is not a translation.
+    """
+    partner = side_by_side_partner(source)
+    if partner is None:
+        return False
+    return _carries_chinese(source) or _carries_chinese(partner)
 
 
 def mirror_partner(source: str) -> str | None:
