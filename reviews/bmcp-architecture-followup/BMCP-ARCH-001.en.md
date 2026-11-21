@@ -231,7 +231,7 @@ H-owned questions go to H first; they are not disguised as Owner decisions.
 - H_OWNED_CONTRACTS: envelope, versioning and wire names remain H-owned.
 - CROSS_MODULE_CONFLICT: C Request/Attempt IDs, H Message ID and domain Operation ID are not interchangeable.
 - OPTIONS: (A) use message_id as request identity and bind response causation to it; (B) introduce a distinct request_id/command identity with explicit message_id mapping.
-- RECOMMENDED_OPTION: H decides the exact identity model; C Request/Attempt, H Message/Request and domain Operation IDs remain distinct unless a versioned mapping explicitly relates them.
+- RECOMMENDED_OPTION: use message_id as the unique per-message identity; correlation_id groups the Agent request/workflow; causation_id identifies the immediate parent; no separate core request_id; C retains AgentRequestId/AgentAttemptId.
 - MEMORY_COMPILER_IMPACT: E receipt/idempotency identity remains distinct.
 - AGENT_INTEGRATION_IMPACT: C request/attempt mapping must be explicit.
 - D_I_IMPACT: no authority changes; identity claims still validated by D/I.
@@ -273,7 +273,7 @@ H-owned questions go to H first; they are not disguised as Owner decisions.
 - D_I_IMPACT: D/I independently evaluate Fence/target satisfaction.
 - RUNTIME_IMPLEMENTATION_IMPACT: ACK implementation waits for H and consumer acceptance.
 - REQUIRED_AUTHORITY: H; D/I/G/E review their own consumption.
-- OWNER_DECISION: PENDING_H_CONFIRMATION
+- OWNER_DECISION: ACCEPTED_SEMANTICALLY_BY_OWNER_DELEGATE; NOT_WIRE_FROZEN
 - EVIDENCE: H ACK Blob 5e2b33898cbc6a9c95e271ecd1d8a092d04c67f8.
 - FOLLOW_UP_ACTIONS: H publishes ACK-to-consumer matrix.
 
@@ -291,7 +291,7 @@ H-owned questions go to H first; they are not disguised as Owner decisions.
 - D_I_IMPACT: D/I decisions remain authoritative.
 - RUNTIME_IMPLEMENTATION_IMPACT: error mapping blocked until H contract.
 - REQUIRED_AUTHORITY: H; domain owners approve their outcomes.
-- OWNER_DECISION: PENDING_H_CONFIRMATION
+- OWNER_DECISION: ACCEPTED_SEMANTICALLY_BY_OWNER_DELEGATE; NOT_WIRE_FROZEN
 - EVIDENCE: H envelope Blob 5547ecd78d118bd63e571e5daad87194d9b694e4.
 - FOLLOW_UP_ACTIONS: H publishes taxonomy and vectors.
 
@@ -441,7 +441,7 @@ Issue #7 is currently CLOSED / not_planned under the Owner phase-closure ruling;
 
 | Document / version | English path | Chinese path | Source revision | Parity |
 |---|---|---|---|---|
-| BMCP-ARCH-001 / 0.1.0 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main 47b8600e7509ef4349c996dce15bd3146b155f75; H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74 | author-prepared pair; independent parity review PENDING |
+| BMCP-ARCH-001 / 0.1.1 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main fc171705c8098422c02bcc443f9d7680b0302b57; H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74 | Owner-delegate spot-check completed; independent semantic parity review not claimed |
 
 The coverage register records this as a review/handoff pair only. It does not change “BMCP Protocol detailed contracts (7 core specifications)”; bilingual normative core-spec coverage remains NOT STARTED.
 
@@ -449,7 +449,7 @@ The coverage register records this as a review/handoff pair only. It does not ch
 
 - ARCHITECTURE_DELIVERABLE_STATUS: **ARCHITECTURE_PARTIAL**
 - PARSE_CONTRACT_STATUS: candidate semantic boundary specified; H wire/decode mapping pending
-- EXECUTE_CONTRACT_STATUS: CANDIDATE; D/I/E/G APIs and Fact/Claim decision pending
+- EXECUTE_CONTRACT_STATUS: CANDIDATE; Option A + I1 semantic direction selected; exact D/I/E/G consumer APIs/mappings remain deferred or candidate.
 - RESPOND_CONTRACT_STATUS: CANDIDATE; H response envelope/correlation mapping pending
 - H_DEPENDENCY_STATUS: **SEMANTIC_CONFIRMATIONS_ACCEPTED / WIRE_CONTRACT_NOT_FROZEN**
 - CROSS_MODULE_DEPENDENCIES: H, B, C, D, E, G, I
