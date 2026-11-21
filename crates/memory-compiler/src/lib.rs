@@ -41,7 +41,7 @@ pub const PAYLOAD_CANONICALIZATION_VERSION: &str = "raw-v1";
 /// supplied by the BMCP/domain contract; until then this value is honestly
 /// labelled `raw-v1` rather than presented as canonical.
 fn raw_payload_digest(payload: &str) -> String {
-    format!("{:x}", Sha256::digest(payload.as_bytes()))
+    format!("sha256:{:x}", Sha256::digest(payload.as_bytes()))
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
@@ -739,7 +739,7 @@ impl<A: PublicationAuthority> MemoryCompiler<A> {
 fn digest_of(payload: &str) -> String {
     // Deliberately independent of raw_payload_digest: a fixture built from the
     // production helper would make every digest test tautological.
-    format!("{:x}", Sha256::digest(payload.as_bytes()))
+    format!("sha256:{:x}", Sha256::digest(payload.as_bytes()))
 }
 
 #[cfg(test)]
@@ -751,7 +751,7 @@ mod payload_digest_tests {
         // NIST FIPS 180-4 test vector for "abc".
         assert_eq!(
             raw_payload_digest("abc"),
-            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+            "sha256:ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
         );
         assert_eq!(raw_payload_digest("abc"), digest_of("abc"));
     }
@@ -838,20 +838,18 @@ mod payload_digest_tests {
     }
 
     #[test]
-    fn ingestion_rejects_a_prefixed_digest_format() {
-        let payload = "prefix format is not accepted";
+    fn ingestion_accepts_event_store_sha256_prefixed_digest() {
+        let payload = "prefix format is emitted by Event Store";
         let event = AcceptedEvent {
             event_id: Identity::new("event-prefixed-digest").unwrap(),
             receipt_id: Identity::new("receipt-prefixed-digest").unwrap(),
-            payload_digest: format!("sha256:{}", digest_of(payload)),
+            payload_digest: digest_of(payload),
             payload: payload.into(),
             compile_intent_durable: true,
         };
 
-        assert!(matches!(
-            IngestionStage::run(event, 1),
-            Err(CompilerError::PayloadDigestMismatch { .. })
-        ));
+        let ingested = IngestionStage::run(event, 1).unwrap();
+        assert_eq!(ingested.payload_digest, digest_of(payload));
     }
 }
 
