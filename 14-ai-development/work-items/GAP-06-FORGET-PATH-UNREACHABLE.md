@@ -16,7 +16,7 @@ The repository-level API search is:
 grep -rn "pub fn.*forget" crates/memory-store/src/lib.rs crates/memory-storage/src/lib.rs
 ```
 
-**Result: zero matches.** This exact command and result were independently reproduced during the Round 7 handoff review.
+**Result: zero matches.** The Owner's Round 7 handoff supplied this exact command and zero-match result as an independent repository check; this work item records that evidence without claiming a new local shell execution.
 
 The event-store fence is a separate mechanism: `ForgetFence::record_forget(namespace_key, reason_digest)` persists a namespace fence using its own database connection. Its restore operation applies the fence while restoring the event-store tables; it does not mutate Memory records and is not consulted by `MemoryStorage::read_current` or `MemoryStore::read_current`.
 
