@@ -604,6 +604,11 @@ impl AdmissionStore {
     /// This local implementation atomically persists the publication decision and
     /// consumes the observed protocol sequence. It is not a D service API and does
     /// not establish a cross-service Storage visibility transaction.
+    ///
+    /// Validation order is deliberate: the fence generation is checked before the
+    /// protocol sequence, so a concurrent fence installation always surfaces as
+    /// `StaleFence` rather than `StaleProtocol`. Callers must not depend on which
+    /// counter moved to distinguish the two races; both mean "re-observe and retry".
     pub fn final_publication_gate(
         &mut self,
         request: PublicationGateRequest,
@@ -1027,6 +1032,36 @@ mod tests {
     }
 
     #[test]
+    fn gate_reports_stale_protocol_when_fence_generation_matches() {
+        let mut db = AdmissionStore::in_memory().unwrap();
+        db.register_producer_work(producer()).unwrap();
+        let first = db
+            .register_dependency(dependency("dep-1", "source-1"))
+            .unwrap();
+        let second = db
+            .register_dependency(dependency("dep-2", "source-2"))
+            .unwrap();
+
+        let observed = db.observe_fence().unwrap();
+        let installed = db.install_fence(observed.protocol_sequence).unwrap();
+        assert_eq!(installed.fence_generation, observed.fence_generation + 1);
+        assert_eq!(installed.protocol_sequence, observed.protocol_sequence + 1);
+
+        let mut request = gate(observed, vec![first.receipt_id, second.receipt_id]);
+        request.observed_fence_generation = installed.fence_generation;
+        // Keep the old protocol sequence while observing the new fence generation:
+        // fence validation passes, then protocol-sequence validation must fail.
+        assert!(matches!(
+            db.final_publication_gate(request),
+            Err(AdmissionError::StaleProtocol {
+                expected,
+                actual
+            }) if expected == observed.protocol_sequence
+                && actual == installed.protocol_sequence
+        ));
+    }
+
+    #[test]
     fn fence_and_gate_compete_on_one_protocol_sequence_exactly_one_wins() {
         let path =
             std::env::temp_dir().join(format!("admission-race-{}.sqlite", std::process::id()));
@@ -1080,8 +1115,15 @@ mod tests {
             ));
         } else {
             assert_eq!(after.fence_generation, observed.fence_generation + 1);
+            // Fence installation advances both counters. The gate validates the fence
+            // generation first, so a winning fence produces StaleFence; StaleProtocol
+            // is possible only when the fence generation is unchanged.
             assert!(
-                matches!(&gate_result, Err(AdmissionError::StaleProtocol { .. })),
+                matches!(
+                    &gate_result,
+                    Err(AdmissionError::StaleFence { .. })
+                        | Err(AdmissionError::StaleProtocol { .. })
+                ),
                 "unexpected gate race result: {gate_result:?}"
             );
         }
