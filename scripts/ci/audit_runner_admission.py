@@ -169,7 +169,7 @@ def parse_triggers(lines: list[str]) -> Tuple[set[str], bool, Optional[list[str]
                 push_present = True
                 if child_value:
                     # A limited inline push map is supported for branches only.
-                    match = re.search(r"branches\\s*:\\s*(\\[[^]]*\\]|[^,}]+)", child_value)
+                    match = re.search(r"branches\s*:\s*(\[[^]]*\]|[^,}]+)", child_value)
                     if match:
                         push_branches = flow_items(match.group(1)) or [scalar(match.group(1))]
                 else:
