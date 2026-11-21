@@ -175,7 +175,7 @@ PR #354 独立记录，不与 33 个直推 commit 混同。
 |---|---|---|
 | C-1 | 建立本登记文件于仓库，作为统一缺陷记录 | 本文档为候选稿，未提交 |
 | C-2 | 对 20 处规范性路径变更补做追溯性独立审查 | 未开始 |
-| C-3 | 在仓库配置层强制 `main` 分支保护，使无 PR 的直推在平台侧失败 | 未开始（#134 / #283 仍在跟踪） |
+| C-3 | 在仓库配置层强制 `main` 分支保护，使无 PR 的直推在平台侧失败 | **`PLATFORM_UNAVAILABLE`** — 见 §13 |
 | C-4 | 明确 `L0-MAIN-WRITER-01` / `L0-manager` / `unknown` 的授权来源与权限边界 | 未开始 |
 | C-5 | 对 `02-domain-model` 当前 main 状态做一次完整基线复核 | 未开始 |
 
@@ -542,11 +542,119 @@ commit e2644784c010da488b4794f3e6b10d17c32e9b4b
 | 累计直推 commit | **53**（33 + 12 + 8） |
 | 累计 `verified=true` | **0 / 53** |
 | 第三轮新增直推 | 8（3 个身份） |
-| `1491856051` 累计 | 5 |
+| `1491856051` 累计 | 20（5 直推 / 15 经 PR） |
 | main blob 总数 | 826 |
-| 原始数据 | `reqs/_delta.json`、`reqs/_delta2.json`、`reqs/_delta3.json` |
+| 原始数据 | `reqs/_delta.json`、`reqs/_delta2.json`、`reqs/_delta3.json`、`reqs/_attr.json` |
 | 复检脚本 | `reqs/_recheck.py`、`reqs/_merge_ev.json` |
 
 ---
 
-**登记状态更新**：`OPEN` / `NOT_REMEDIATED` / **规模 53** / **性质由「流程疏漏」升级为「已知规则下的主动选择并书面合理化」**，第三轮追加：**在多身份并行下持续，并出现无法归属账号的提交身份**
+## 13. C-3 状态修正：`PLATFORM_UNAVAILABLE`
+
+§8 的 C-3 原记为「未开始（#134 / #283 仍在跟踪）」。本轮复检证明该表述不准确：它不是「尚未开始」，而是**在当前 GitHub 计划下无法开始**。
+
+依据（Issue #396 关闭评论中记录的实测）：
+
+```
+GET  /repos/oahcom/AiMemoryBrainArchitecture                         -> permissions.admin = true, private = true
+GET  /repos/.../branches/main/protection                             -> 403
+PUT  /repos/.../branches/main/protection                             -> 403
+     "Upgrade to GitHub Pro or make this repository public to enable this feature."
+```
+
+token 持有 `admin: true`，因此 403 不是权限问题。
+
+**后果，必须直说：**
+
+1. 本登记所记录的第 1 类失效（直推）在平台侧**无法被阻止**。`required_pull_request_reviews` 是阻止直推的唯一技术手段，而该 API 不可用。
+2. 第 3 类失效（无审查合并）同理。
+3. 因此「加强门禁」在本仓库当前配置下不是待办事项，是一个需要商业/披露决策的前置条件。
+
+三项可选路径，均为 Owner 层：
+
+| 路径 | 效果 | 代价 |
+|---|---|---|
+| 升级到 GitHub Pro（或含私有仓库分支保护的计划） | `required_pull_request_reviews`、`required_status_checks`、`enforce_admins` 全部可用 | 订阅成本 |
+| 将仓库设为公开 | 免费计划即含分支保护 | 全部设计文档、`reviews/`、治理登记对外可见 |
+| 接受无法强制 | — | 治理只能依赖自愿；三次实测表明自愿未发生 |
+
+在决策作出前，本登记的 `OPEN` 状态不因任何技术手段而改变。
+
+---
+
+---
+
+## 14. 第五轮复检：53 → 62，出现第四个无法归属的提交身份（2026-11-21 03:30Z 后）
+
+### 14.1 规模变化
+
+第一轮 33、第二轮 12、第三轮 8，合计 53。第四轮在 `1a0dc911` 之后又出现 **9 个无 PR 的直推 commit**，累计 **62**。
+
+| # | commit | 时间（Z） | 作者 email | 文件数 | 消息 |
+|---|---|---|---:|---:|---|
+| 1 | `39553c25a4` | 19:32:32 | `l0@local` | 4 | AID-2026-014 R4 correction: E Claim identity |
+| 2 | `5ed9669dd6` | 20:04:01 | `oahcom` | 1 | Apply AID-2026-014 correction round 5 |
+| 3 | `9c94b3c485` | 20:04:03 | `oahcom` | 1 | Apply AID-2026-014 correction round 5 |
+| 4 | `1733c3bf4a` | 20:05:06 | `governance@localhost` | **6** | docs(governance): GOV-DOC-002 v1.1 - fail-closed gate |
+| 5 | `95af790b45` | 20:12:24 | `oahcom` | 2 | AID-2026-014 R3 correction: §9.1 pinned read-back |
+| 6 | `da378340b0` | 20:45:18 | `oahcom` | 2 | AID-2026-014 R5 correction: 19.2 Producer Admission |
+| 7 | `ae5462f6ef` | 03:24:52 | `oahcom` | 2 | AID-2026-014 R5: admission stage relation |
+| 8 | `0f5b5a00e7` | 03:31:45 | `governance@localhost` | **12** | docs(governance): GOV-DOC-002 v1.2 |
+| 9 | `8dc92c3debde` | 03:33:15 | `oahcom` | 2 | AID-2026-014 R5: independent review disposition |
+
+`39553c25a4` 的父提交是 `1a0dc911`，即第三轮复检的终点。此后 main 的每一次非合并推进都是直推，**没有一次走 PR**。
+
+### 14.2 第四个身份：`governance@localhost`
+
+`1733c3bf4a` 与 `0f5b5a00e7` 的作者邮箱是 `governance@localhost`，提交者名 `arch-governance`。这是本登记记录的第四个无法映射到 GitHub 账号的身份：
+
+| 身份 | 首次出现 | 累计直推 | 授权来源 |
+|---|---|---:|---|
+| `oahcom` | 第一轮 | 26+ | 仓库 Owner 账号 |
+| `l0@local` | 第一轮 | 5 | `NOT_VERIFIED` |
+| `unknown <1491856051>` | 第一轮 | 5 | `NOT_VERIFIED` |
+| `governance@localhost` | **本轮** | **2** | `NOT_VERIFIED` |
+
+`localhost` 不是可投递域名。`git commit` 使用该 email 时 GitHub 不建立账号关联，因此这两个 commit 在 UI 上不可归属，与 `1491856051` 同一性质。
+
+### 14.3 性质升级：门禁实现本身被直推修改
+
+前四轮的直推大多改文档。**本轮不同**：
+
+| commit | 触及的脚本 | 改动量 |
+|---|---|---|
+| `1733c3bf4a` | `scripts/check_document_management.py` | **+721 / −166** |
+| `1733c3bf4a` | `.github/workflows/document-management.yml` | +16 / −0 |
+| `1733c3bf4a` | `scripts/test_check_document_management.py` | +317 / −84 |
+| `0f5b5a00e7` | `scripts/check_document_management.py` | **+141 / −63** |
+| `0f5b5a00e7` | `.github/workflows/document-management.yml` | +20 / −12 |
+| `0f5b5a00e7` | `scripts/test_check_document_management.py` | +105 / −1 |
+
+合计：门禁实现被直推改写 **862 行新增 / 229 行删除**，CI 工作流被直推改写 36 行。作者是 `governance@localhost`，无 PR、无 review、无 `PR_BODY`。
+
+`e2644784c0` 的 +3/−0（向豁免白名单追加一项）在当时已被记为「第二类旁路」。本轮把同一路径推到极端：**不是往名单里加一项，而是重写检查器**。
+
+后果：
+
+1. 门禁的判定逻辑可以在无人审查的情况下改变。任何「门禁通过」的结论都依赖一个可被直推改写的判定器。
+2. 检查脚本与被检查对象在同一信任域内、同一条无门禁的通道上。这是自证循环，不是控制。
+3. `1733c3bf4a` 的 `.github/workflows/document-management.yml` 改动加入了一条注释，原文：
+
+   > `# Direct pushes are not gated by --require-changed: this repository still accepts direct pushes, so a whole-tree requirement would turn main red on the existing backlog. Policy §8 records this as an open gap.`
+
+   即：**直推的存在被写进了工作流注释，作为降低检查强度的理由。** 这不是隐瞒，是把「无法阻止」转写为「设计前提」。本登记按事实记录，不评价动机。
+
+### 14.4 更新后的验证证据
+
+| 证据 | 值 |
+|---|---|
+| 第五轮 main head | `8dc92c3debde36929d34808bead0a62ffc4f64fa` |
+| 累计直推 commit | **62**（33 + 12 + 8 + 9） |
+| 累计 `verified=true` | **0 / 62** |
+| `governance@localhost` 直推 | 2（`1733c3bf4a`、`0f5b5a00e7`） |
+| 被直推改写的门禁实现 | `check_document_management.py` +862/−229；`document-management.yml` +36/−12 |
+| 原始数据 | `reqs/_round4.json`、`reqs/_round4_list.json`、`reqs/_paths_now.txt` |
+
+---
+
+**登记状态更新**：`OPEN` / `NOT_REMEDIATED` / **规模 62** / **性质由「流程疏漏」升级为「已知规则下的主动选择并书面合理化」**，第三轮追加：**在多身份并行下持续，并出现无法归属账号的提交身份**；第四轮追加：**C-3 纠正措施被证明在当前平台计划下不可执行**；第五轮追加：**门禁实现本身被直推改写，直推的存在被写入工作流注释作为降低检查强度的理由**

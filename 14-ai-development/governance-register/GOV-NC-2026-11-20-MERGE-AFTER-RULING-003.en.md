@@ -233,4 +233,66 @@ This forces a correction of this register's conclusion: **M-3 is not "not execut
 
 ---
 
+## 12. How PR #403 ended: the instance count is frozen at 4 by Owner ruling, but the facts are recorded
+
+### 12.1 The "counterexample" I reported lasted 7 hours
+
+In the 313 dispatch I reported that PR #403 had stayed `open`, `reviews=0`, unmerged past 15 minutes — the first counterexample after four same-class events.
+
+The Owner ruling that round accepted the falsification as fact and required `RECORDED_NOT_PREVENTED` to stand, because a single open PR cannot prove the platform blocks anything.
+
+**Seven hours later PR #403 was merged.**
+
+| Field | Value |
+|---|---|
+| created_at | 2026-11-20T20:19:54Z |
+| review submitted | 2026-11-21T03:26:13Z (`COMMENTED`, `oahcom`) |
+| merged_at | 2026-11-21T03:26:28Z |
+| merged_by | `oahcom` |
+| review → merge | **15 seconds** |
+| created → merge | **7 h 6 m 34 s** |
+| author = reviewer = merger | **yes** (all `oahcom`) |
+| check at merge | `GOV-DOC-002 metadata checks` = `failure` |
+
+### 12.2 Owner ruling: not a fifth instance
+
+The PR carries one substantive content review (id `6002557767`). The Owner therefore ruled it **not a fifth zero-review merge**, froze the count at **4**, and added:
+
+> Recording each zero-review merge requires another zero-review merge. To end the recursion: the count is frozen at 4 and no fifth entry is added; from now on, when the Owner merges, the standard evidence comment goes on the merged PR itself, not on a separate recording PR.
+
+**This register accepts that ruling.** The count is 4. The recursion is real and the rule is a sound way to end it.
+
+### 12.3 Three things recorded alongside "not a fifth instance"
+
+**1. That review is not independent.** Author, reviewer and merger are the same GitHub account. `PR-GOVERNANCE-001` §5 requires independent review; a self `COMMENTED` does not satisfy it. Not counted as a zero-review merge — also not recorded as independent review satisfied.
+
+**2. Review and merge are 15 seconds apart.** The review body is 617 bytes containing a fact check and two rulings. Reading it, checking four PRs' fields and ruling in 15 seconds is possible; running any independent verification in the same window is not — and the PR's content is precisely a record about verifying before merging.
+
+**3. The check was still `failure` at merge.** `GOV-DOC-002 metadata checks` had not turned green and the merge did not wait.
+
+**In sum**: not the fifth zero-review merge, but the first self-reviewed merge. The difference is real; the common property is that **no third party participated**. Recording only the first would leave the impression that the problem eased because a review appeared.
+
+### 12.4 What happened next on the same channel
+
+| commit | time (Z) | author | nature |
+|---|---|---|---|
+| `0f5b5a00e7` | 03:31:45 | `governance@localhost` | direct push, gate implementation +141/−63 |
+| `8dc92c3debde` | 03:33:15 | `oahcom` | direct push, documents |
+
+Five minutes after the reviewed merge, two direct pushes landed — one of them rewriting the gate implementation. Recorded in `DIRECT-MAIN-001` §14.3.
+
+### 12.5 Updated instance table
+
+| # | PR | created | merged | lag | reviews | independent | check at merge |
+|---|---|---|---:|---:|---:|---|---|
+| 1 | #390 | 17:37:24 | 18:14:05 | 36m41s | 0 | none | failure |
+| 2 | #394 | 18:24:50 | 18:25:04 | **14s** | 0 | none | failure |
+| 3 | #395 | 18:31:52 | 18:41:41 | 9m49s | 0 | none | failure |
+| 4 | #402 | 20:01:45 | 20:06:49 | 5m04s | 0 | none | failure |
+| — | #403 | 20:19:54 | 03:26:28 | 7h06m | **1 (self)** | **none** | failure |
+
+**Count: 4 zero-review merges (frozen by Owner ruling). Row 5 is excluded from the count but kept in the table: it is the only merge with a review, and deleting it would remove the control case.**
+
+---
+
 **Register conclusion**: The content of PR #390 is compliant; its manner of entry is not. Until M-3 is addressed, any PR can be merged without review regardless of whether its author states "do not merge". The subsequent merges of #394 and #395 show this was not a one-off. M-3 has now been shown to be non-executable under the current plan; the only available substitutes are a plan upgrade or making the repository public, both Owner-level decisions.
