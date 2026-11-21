@@ -45,7 +45,8 @@ class GateRootsTest(unittest.TestCase):
             if p.split("/")[0] in self.gate.NORMATIVE_ROOTS
             and Path(p).suffix.lower() in {".md", ".yaml", ".yml", ".json", ".toml", ".proto"}
         )
-        return self.gate.check_normative_pairing(changes, changed, complete, exception)
+        statuses = {path: "M" for path in changed}
+        return self.gate.check_normative_pairing(changes, changed, statuses, complete, exception)
 
     # --- F-07 exit condition: undeclared change must fail ---
 
@@ -53,7 +54,7 @@ class GateRootsTest(unittest.TestCase):
         self.write("14-ai-development/foo.md")
         changed = {"14-ai-development/foo.md"}
         changes = ["14-ai-development/foo.md"]
-        errors = self.gate.check_normative_pairing(changes, changed, complete=False, exception=False)
+        errors = self.gate.check_normative_pairing(changes, changed, {p: "M" for p in changed}, complete=False, exception=False)
         # With no declaration the pairing function is not the failing point;
         # the declaration check in main() is. Here we assert the pairing
         # function stays silent so the declaration error is the single gate.
@@ -95,7 +96,7 @@ class GateRootsTest(unittest.TestCase):
         self.write("docs/en/14-ai-development/AI-EXEC-002.md")
         changed = {"14-ai-development/AI-EXEC-002.md", "docs/en/14-ai-development/AI-EXEC-002.md"}
         self.assertEqual(self.normative(changed), [])
-        self.assertEqual(self.gate.check_mirror_pairing(changed, False), [])
+        self.assertEqual(self.gate.check_mirror_pairing(changed, {p: "M" for p in changed}, False), [])
 
     def test_docs_en_mirror_change_alone_fails(self):
         self.write("14-ai-development/AI-EXEC-002.md")
@@ -219,6 +220,141 @@ class GateRootsTest(unittest.TestCase):
         self.assertIn("docs/zh-CN/00-governance/policy.md", seen,
                       "--no-renames must report the moved-away side")
         self.assertIn("docs/governance/policy.md", seen)
+
+
+    # --- Issue #412: normative-root departures and mirror-only moves ---
+
+    def git(self, repo: Path, *args: str) -> str:
+        import subprocess
+        result = subprocess.run(
+            ["git", *args], cwd=repo, check=True,
+            capture_output=True, text=True,
+        )
+        return result.stdout.strip()
+
+    def commit_tree(self, repo: Path, message: str) -> str:
+        # A failed git mv/unlink must never silently re-test the previous tree.
+        status = self.git(repo, "status", "--porcelain")
+        self.assertTrue(status, "refusing to commit an unchanged fixture tree")
+        self.git(repo, "add", "-A")
+        self.git(repo, "commit", "-qm", message)
+        return self.git(repo, "rev-parse", "HEAD")
+
+    def make_git_history(self) -> tuple[Path, str]:
+        repo = self.root / "issue-412-repo"
+        repo.mkdir()
+        self.git(repo, "init", "-q")
+        self.git(repo, "config", "user.email", "tests@example.invalid")
+        self.git(repo, "config", "user.name", "Issue 412 tests")
+        for rel, body in (
+            ("00-governance/policy.md", "normative policy body\\n"),
+            ("docs/en/00-governance/policy.md", "English mirror body\\n"),
+            ("docs/zh-CN/00-governance/policy.md", "Chinese mirror body\\n"),
+        ):
+            target = repo / rel
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(body, encoding="utf-8")
+        base = self.commit_tree(repo, "base")
+        self.gate.ROOT = repo
+        return repo, base
+
+    def root_departures(self, repo: Path, base: str) -> list[str]:
+        import os
+        os.environ["BASE_SHA"] = base
+        os.environ["HEAD_SHA"] = self.git(repo, "rev-parse", "HEAD")
+        return self.gate.check_normative_root_departures(exception=False)
+
+    def git_move(self, repo: Path, src: str, dst: str) -> None:
+        import os
+        (repo / dst).parent.mkdir(parents=True, exist_ok=True)
+        self.git(repo, "mv", src, dst)
+
+    def test_issue_412_p2_normative_triple_move_within_same_root_is_allowed(self):
+        repo, base = self.make_git_history()
+        for src, dst in (
+            ("00-governance/policy.md", "00-governance/renamed-policy.md"),
+            ("docs/en/00-governance/policy.md", "docs/en/00-governance/renamed-policy.md"),
+            ("docs/zh-CN/00-governance/policy.md", "docs/zh-CN/00-governance/renamed-policy.md"),
+        ):
+            self.git_move(repo, src, dst)
+        self.commit_tree(repo, "move triple within docs")
+        self.assertEqual(self.root_departures(repo, base), [])
+
+    def test_issue_412_p3_mirror_only_pair_move_out_to_archive_is_allowed(self):
+        repo, _ = self.make_git_history()
+        (repo / "00-governance/policy.md").unlink()
+        base = self.commit_tree(repo, "fixture becomes mirror-only")
+        old_en = "docs/en/00-governance/policy.md"
+        old_zh = "docs/zh-CN/00-governance/policy.md"
+        self.git_move(repo, old_en, "docs/en/governance/archive/policy.md")
+        self.git_move(repo, old_zh, "docs/zh-CN/governance/archive/policy.md")
+        self.commit_tree(repo, "move mirror-only pair to archive")
+        self.assertEqual(self.root_departures(repo, base), [])
+        raw = self.git(repo, "diff", "--name-status", "--no-renames", f"{base}...HEAD")
+        statuses = {line.split("\\t", 1)[1]: line.split("\\t", 1)[0]
+                    for line in raw.splitlines()}
+        changed = set(statuses)
+        self.assertEqual(
+            self.gate.check_counterpart_requirement(old_en, [old_zh], changed, statuses, False),
+            [],
+        )
+
+    def test_issue_412_p5_mirror_only_pair_deleted_together_is_allowed(self):
+        repo, _ = self.make_git_history()
+        (repo / "00-governance/policy.md").unlink()
+        base = self.commit_tree(repo, "fixture becomes mirror-only")
+        old_en = repo / "docs/en/00-governance/policy.md"
+        old_zh = repo / "docs/zh-CN/00-governance/policy.md"
+        old_en.unlink()
+        old_zh.unlink()
+        self.commit_tree(repo, "delete mirror-only pair")
+        self.assertEqual(self.root_departures(repo, base), [])
+        raw = self.git(repo, "diff", "--name-status", "--no-renames", f"{base}...HEAD")
+        statuses = {line.split("\\t", 1)[1]: line.split("\\t", 1)[0]
+                    for line in raw.splitlines()}
+        self.assertEqual(
+            self.gate.check_counterpart_requirement(
+                "docs/en/00-governance/policy.md",
+                ["docs/zh-CN/00-governance/policy.md"],
+                set(statuses), statuses, False,
+            ),
+            [],
+        )
+
+    def test_issue_412_d7_normative_triple_move_outside_covered_set_is_rejected(self):
+        repo, base = self.make_git_history()
+        for src, dst in (
+            ("00-governance/policy.md", "docs/governance/archive/policy.md"),
+            ("docs/en/00-governance/policy.md", "docs/en/governance/archive/policy.md"),
+            ("docs/zh-CN/00-governance/policy.md", "docs/zh-CN/governance/archive/policy.md"),
+        ):
+            self.git_move(repo, src, dst)
+        self.commit_tree(repo, "move triple outside normative roots")
+        errors = self.root_departures(repo, base)
+        self.assertTrue(any("moved outside NORMATIVE_ROOTS" in e for e in errors), errors)
+
+    def test_issue_412_d8_normative_triple_deletion_is_rejected(self):
+        repo, base = self.make_git_history()
+        for rel in (
+            "00-governance/policy.md",
+            "docs/en/00-governance/policy.md",
+            "docs/zh-CN/00-governance/policy.md",
+        ):
+            (repo / rel).unlink()
+        self.commit_tree(repo, "delete normative triple")
+        errors = self.root_departures(repo, base)
+        self.assertTrue(any("by deletion" in e for e in errors), errors)
+
+    def test_issue_412_d9_normative_triple_move_to_another_normative_root_is_allowed(self):
+        repo, base = self.make_git_history()
+        for src, dst in (
+            ("00-governance/policy.md", "13-engineering-decisions/policy.md"),
+            ("docs/en/00-governance/policy.md", "docs/en/13-engineering-decisions/policy.md"),
+            ("docs/zh-CN/00-governance/policy.md", "docs/zh-CN/13-engineering-decisions/policy.md"),
+        ):
+            self.git_move(repo, src, dst)
+        self.commit_tree(repo, "move triple across normative roots")
+        self.assertEqual(self.root_departures(repo, base), [])
 
 
 if __name__ == "__main__":
