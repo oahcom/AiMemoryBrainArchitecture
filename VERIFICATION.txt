@@ -1,61 +1,82 @@
-F-MAIN-LINT-001 verification record
+# F-MAIN-CLIPPY-ALL — Verification record
 
-X committer timestamp: 2026-11-21T18:11:26+08:00
-Verification timestamp: 2026-11-21T18:13:00+08:00
-X: 897e726b0f4d90d59ddd845a07d04de96b7b9a66
+Baseline: latest `origin/main` at `b9ddd241a18a00b3b8f3b0ce2e176b6f859bc0da`
+Source commit X: `ec845216f7780db2f74a080d1b7a75cd4a40eb94 2026-11-21T19:01:04+08:00`
 
-Baseline cargo test --workspace before X: 146 passed, 0 failed, 0 ignored (24 result rows; 68 child-process filtered cases reported separately).
-After X cargo test --workspace: 146 passed, 0 failed, 0 ignored (24 result rows; 68 child-process filtered cases reported separately).
+## (1) Raw command output — X identity
 
-The three commands were run sequentially on X with TMPDIR=/home/ubuntu and CARGO_TARGET_DIR=/home/ubuntu/ai-projects/AiMemoryBrainArchitecture/target to reuse the existing build cache. The pipeline exit status was captured immediately after each pipeline from PIPESTATUS[0], then printed.
+```text
+$ git log -1 --format='%H %cI' ec845216f7780db2f74a080d1b7a75cd4a40eb94
+ec845216f7780db2f74a080d1b7a75cd4a40eb94 2026-11-21T19:01:04+08:00
+```
 
-Commands and immediate PIPESTATUS[0] captures:
+## (2) Raw command output — verification timestamp
 
+```text
+$ date -Iseconds
+2026-11-21T19:03:58+08:00
+```
+
+## (3) Complete verification shell fragment
+
+```bash
+export CARGO_TARGET_DIR=/home/ubuntu/cargo-tgt TMPDIR=/home/ubuntu/tmp-fmain-clippy
 set -o pipefail
-cargo build --workspace 2>&1 | tee /tmp/lint-build.log
+
+cargo build --workspace 2>&1 | tee /tmp/all-build.log
 build_status=${PIPESTATUS[0]}
 echo "workspace build exit => ${build_status}"
-# captured PIPESTATUS[0] = 0; echoed value = 0
+test "${build_status}" -eq 0 || exit "${build_status}"
 
-cargo test --workspace 2>&1 | tee /tmp/lint-test.log
+cargo test --workspace 2>&1 | tee /tmp/all-test.log
 test_status=${PIPESTATUS[0]}
 echo "workspace test exit => ${test_status}"
-# captured PIPESTATUS[0] = 0; echoed value = 0
+test "${test_status}" -eq 0 || exit "${test_status}"
 
-cargo clippy --workspace --all-targets -- -D warnings 2>&1 | tee /tmp/lint-clippy.log
+cargo clippy --workspace --all-targets -- -D warnings 2>&1 | tee /tmp/all-clippy.log
 clippy_status=${PIPESTATUS[0]}
 echo "workspace clippy exit => ${clippy_status}"
-# captured PIPESTATUS[0] = 101; echoed value = 101
+test "${clippy_status}" -eq 0 || exit "${clippy_status}"
+```
 
-Final statuses: build=0, test=0, clippy=101
+## (4) Actual command output
 
-===== FULL OUTPUT: cargo build --workspace =====
+### `cargo build --workspace`
+
+```text
     Updating crates.io index
+    Blocking waiting for file lock on package cache
      Locking 39 packages to highest compatible versions
       Adding generic-array v0.14.7 (available: v0.14.9)
       Adding sha2 v0.10.9 (available: v0.11.1)
-   Compiling memory-domain v0.1.0 (/tmp/f-main-lint-001/crates/memory-domain)
-   Compiling memory-storage v0.1.0 (/tmp/f-main-lint-001/crates/memory-storage)
-   Compiling memory-event-store v0.1.0 (/tmp/f-main-lint-001/crates/memory-event-store)
-   Compiling memory-compiler v0.1.0 (/tmp/f-main-lint-001/crates/memory-compiler)
-   Compiling memory-context v0.1.0 (/tmp/f-main-lint-001/crates/memory-context)
-   Compiling memory-store v0.1.0 (/tmp/f-main-lint-001/crates/memory-store)
-   Compiling memory-storage-sqlite v0.1.0 (/tmp/f-main-lint-001/crates/memory-storage-sqlite)
-   Compiling memory-event-store-sqlite v0.1.0 (/tmp/f-main-lint-001/crates/memory-event-store-sqlite)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.27s
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on shared package cache
+   Compiling memory-domain v0.1.0 (/tmp/f-main-clippy-work/crates/memory-domain)
+   Compiling memory-storage v0.1.0 (/tmp/f-main-clippy-work/crates/memory-storage)
+   Compiling memory-event-store v0.1.0 (/tmp/f-main-clippy-work/crates/memory-event-store)
+   Compiling memory-compiler v0.1.0 (/tmp/f-main-clippy-work/crates/memory-compiler)
+   Compiling memory-context v0.1.0 (/tmp/f-main-clippy-work/crates/memory-context)
+   Compiling memory-store v0.1.0 (/tmp/f-main-clippy-work/crates/memory-store)
+   Compiling memory-storage-sqlite v0.1.0 (/tmp/f-main-clippy-work/crates/memory-storage-sqlite)
+   Compiling memory-event-store-sqlite v0.1.0 (/tmp/f-main-clippy-work/crates/memory-event-store-sqlite)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.37s
 workspace build exit => 0
+```
 
-===== FULL OUTPUT: cargo test --workspace =====
-   Compiling memory-context v0.1.0 (/tmp/f-main-lint-001/crates/memory-context)
-   Compiling memory-store v0.1.0 (/tmp/f-main-lint-001/crates/memory-store)
-   Compiling memory-event-store-sqlite v0.1.0 (/tmp/f-main-lint-001/crates/memory-event-store-sqlite)
-   Compiling memory-compiler v0.1.0 (/tmp/f-main-lint-001/crates/memory-compiler)
-   Compiling memory-storage-sqlite v0.1.0 (/tmp/f-main-lint-001/crates/memory-storage-sqlite)
-   Compiling memory-storage v0.1.0 (/tmp/f-main-lint-001/crates/memory-storage)
-   Compiling memory-event-store v0.1.0 (/tmp/f-main-lint-001/crates/memory-event-store)
-   Compiling memory-domain v0.1.0 (/tmp/f-main-lint-001/crates/memory-domain)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.44s
-     Running unittests src/lib.rs (/home/ubuntu/ai-projects/AiMemoryBrainArchitecture/target/debug/build/agent-integration/4077b0c4897126dc/out/agent_integration-4077b0c4897126dc)
+### `cargo test --workspace`
+
+```text
+   Compiling memory-context v0.1.0 (/tmp/f-main-clippy-work/crates/memory-context)
+   Compiling memory-event-store-sqlite v0.1.0 (/tmp/f-main-clippy-work/crates/memory-event-store-sqlite)
+   Compiling memory-compiler v0.1.0 (/tmp/f-main-clippy-work/crates/memory-compiler)
+   Compiling memory-store v0.1.0 (/tmp/f-main-clippy-work/crates/memory-store)
+   Compiling memory-storage-sqlite v0.1.0 (/tmp/f-main-clippy-work/crates/memory-storage-sqlite)
+   Compiling memory-storage v0.1.0 (/tmp/f-main-clippy-work/crates/memory-storage)
+   Compiling memory-event-store v0.1.0 (/tmp/f-main-clippy-work/crates/memory-event-store)
+   Compiling memory-domain v0.1.0 (/tmp/f-main-clippy-work/crates/memory-domain)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.84s
+     Running unittests src/lib.rs (/home/ubuntu/cargo-tgt/debug/build/agent-integration/4077b0c4897126dc/out/agent_integration-4077b0c4897126dc)
 
 running 4 tests
 test tests::frozen_inference_request_write_is_rejected ... ok
@@ -65,110 +86,163 @@ test tests::protected_instruction_region_write_is_rejected ... ok
 
 test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src/lib.rs (/home/ubuntu/ai-projects/AiMemoryBrainArchitecture/target/debug/build/memory-compiler/50e196e65cd1055c/out/memory_compiler-50e196e65cd1055c)
+     Running unittests src/lib.rs (/home/ubuntu/cargo-tgt/debug/build/memory-compiler/50e196e65cd1055c/out/memory_compiler-50e196e65cd1055c)
 
 running 31 tests
 test admission::tests::final_gate_receipt_binds_observed_fence_and_permission_epoch ... ok
-test admission::tests::illegal_transition_accept_to_published_is_rejected ... ok
-test admission::tests::partial_dependencies_remain_hidden_until_all_edges_are_registered ... ok
 test admission::tests::gate_reports_stale_protocol_when_fence_generation_matches ... ok
-test admission::tests::producer_registration_is_idempotent_and_conflicting_digest_does_not_add_rows ... ok
+test admission::tests::illegal_transition_accept_to_published_is_rejected ... ok
+test admission::tests::alternative_exit_transitions_are_accepted_and_persisted ... ok
+test admission::tests::producer_receipt_lookup_and_not_found_are_distinct ... ok
 test state_tests::blocked_is_recoverable_and_not_terminal ... ok
 test state_tests::happy_path_transitions_are_all_legal ... ok
 test state_tests::illegal_transition_is_rejected ... ok
+test admission::tests::partial_dependencies_remain_hidden_until_all_edges_are_registered ... ok
 test state_tests::lease_generation_mismatch_is_not_current ... ok
 test state_tests::publication_admission_branches_to_four_dispositions ... ok
 test state_tests::published_is_terminal_and_cannot_transition ... ok
+test admission::tests::producer_registration_is_idempotent_and_conflicting_digest_does_not_add_rows ... ok
 test state_tests::resume_from_last_durable_stage_skips_completed_work ... ok
-test admission::tests::producer_receipt_lookup_and_not_found_are_distinct ... ok
 test state_tests::resume_rejects_terminal_state ... ok
 test state_tests::retry_increments_generation_and_preserves_stage_identity ... ok
 test state_tests::retry_on_blocked_returns_to_pending ... ok
 test state_tests::retry_on_published_is_rejected ... ok
-test state_tests::resume_rejects_stale_lease ... ok
 test tests::extraction_is_deterministic_and_lineaged ... ok
+test tests::ingestion_preserves_original_receipt ... ok
 test tests::ingestion_requires_durable_receipt_and_intent ... ok
-test tests::late_worker_cannot_publish ... ok
 test tests::normalization_preserves_upstream_identity ... ok
+test tests::late_worker_cannot_publish ... ok
 test tests::publication_requires_second_admission ... ok
 test tests::publication_requires_visibility_authorization ... ok
 test tests::staged_derivative_is_hidden ... ok
-test tests::ingestion_preserves_original_receipt ... ok
-test tests::staging_requires_producer_admission ... ok
-test tests::successful_publication_requires_both_admissions ... ok
 test tests::staging_requires_complete_dependency_closure ... ok
-test admission::tests::alternative_exit_transitions_are_accepted_and_persisted ... ok
+test tests::staging_requires_producer_admission ... ok
+test state_tests::resume_rejects_stale_lease ... ok
+test tests::successful_publication_requires_both_admissions ... ok
 test admission::tests::fence_and_gate_compete_on_one_protocol_sequence_exactly_one_wins ... ok
 
-test result: ok. 31 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+test result: ok. 31 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
 
-     Running unittests src/lib.rs (/home/ubuntu/ai-projects/AiMemoryBrainArchitecture/target/debug/build/memory-context/9fbabdba37886660/out/memory_context-9fbabdba37886660)
+     Running unittests src/lib.rs (/home/ubuntu/cargo-tgt/debug/build/memory-context/955d7a6951e10dd3/out/memory_context-955d7a6951e10dd3)
 
-running 20 tests
+running 50 tests
 test tests::build_context_rejects_candidates_without_lineage ... ok
 test tests::build_context_rejects_whitespace_only_rendered_content ... ok
-test tests::candidate_scope_must_be_contained_by_identity_scope ... ok
 test tests::build_context_order_is_deterministic_across_repeated_calls ... ok
+test tests::candidate_scope_must_be_contained_by_identity_scope ... ok
 test tests::build_context_rendered_byte_total_matches_entry_sum ... ok
-test tests::byte_budget_error_reports_accumulated_rendered_bytes ... ok
 test tests::delivery_intent_targets_snapshot_context_version ... ok
+test tests::byte_budget_error_reports_accumulated_rendered_bytes ... ok
 test tests::delivery_intent_snapshot_json_round_trips_to_equivalent_snapshot ... ok
+test tests::duplicate_entry_ids_are_rejected ... ok
 test tests::empty_identity_scope_purpose_and_schema_version_are_rejected ... ok
 test tests::entry_budget_error_reports_actual_candidate_count ... ok
 test tests::exact_entry_and_byte_budget_boundaries_succeed ... ok
-test tests::delivery_intent_visibility_is_always_private_pending_gate ... ok
 test tests::non_active_non_consolidated_lifecycles_are_rejected ... ok
-test tests::duplicate_entry_ids_are_rejected ... ok
+test tests::snapshot_accessors_report_entry_count_and_emptiness ... ok
+test tests::delivery_intent_visibility_is_always_private_pending_gate ... ok
 test tests::duplicate_memory_version_membership_is_rejected ... ok
 test tests::validate_snapshot_rejects_inconsistent_bytes_and_empty_entry_content ... ok
-test tests::snapshot_accessors_report_entry_count_and_emptiness ... ok
 test tests::zero_context_version_is_rejected ... ok
 test tests::sorting_uses_tier_then_descending_priority_then_entry_id ... ok
 test tests::zero_entry_or_byte_budget_is_rejected ... ok
+test version_tests::change_set_id_rejects_empty ... ok
+test version_tests::change_set_rejects_empty_operations ... ok
+test version_tests::change_set_rejects_payload_hash_mismatch ... ok
+test version_tests::change_set_rejects_precomputed_target_version_when_prepared ... ok
+test version_tests::change_set_rejects_duplicate_operation_ids ... ok
+test version_tests::commit_rejects_budget_summary_mismatch ... ok
+test version_tests::commit_is_idempotently_replayed_for_same_principal_and_key ... ok
+test version_tests::commit_rejects_context_mismatch ... ok
+test version_tests::commit_rejects_snapshot_hash_mismatch ... ok
+test version_tests::commit_rejects_stale_policy_epoch ... ok
+test version_tests::commit_rejects_wrong_base_version ... ok
+test version_tests::context_head_rejects_genesis_with_nonzero_sequence ... ok
+test version_tests::context_head_rejects_version_with_zero_sequence ... ok
+test version_tests::context_version_id_rejects_empty ... ok
+test version_tests::entry_version_rejects_rendered_byte_mismatch ... ok
+test version_tests::commit_returns_version_with_caller_metadata_and_computed_sequence ... ok
+test version_tests::entry_version_rejects_zero_revision ... ok
+test version_tests::rollback_from_genesis_is_rejected ... ok
+test version_tests::rollback_rejects_duplicate_target_entry_ids ... ok
+test version_tests::rollback_adds_missing_target_entry ... ok
+test version_tests::rollback_rejects_empty_created_at ... ok
+test version_tests::rollback_rejects_empty_reason ... ok
+test version_tests::rollback_rejects_noop_diff ... ok
+test version_tests::rollback_operation_ids_are_deterministic ... ok
+test version_tests::rollback_removes_entries_absent_from_target ... ok
+test version_tests::rollback_replaces_changed_entry_with_target_revision ... ok
+test version_tests::rollback_sets_all_declared_change_set_fields ... ok
+test version_tests::snapshot_hash_is_independent_of_entry_order ... ok
+test version_tests::supersede_version_increments_sequence_and_preserves_other_fields ... ok
+test version_tests::supersede_version_rejects_sequence_overflow ... ok
 
-test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 50 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running tests/e2e_store_to_context.rs (/home/ubuntu/ai-projects/AiMemoryBrainArchitecture/target/debug/build/memory-context/2fba82f207d185ad/out/e2e_store_to_context-2fba82f207d185ad)
+     Running tests/e2e_negative_paths.rs (/home/ubuntu/cargo-tgt/debug/build/memory-context/729f7f00f715b4c2/out/e2e_negative_paths-729f7f00f715b4c2)
+
+running 5 tests
+test foreign_scope_cannot_read_or_populate_context ... ok
+test candidate_lifecycle_is_refused_by_context_after_store_round_trip ... ok
+test entry_budget_overflow_reports_actual_and_limit_after_store_reads ... ok
+test stale_revision_is_rejected_and_current_version_remains_n_plus_one ... ok
+test file_backed_sqlite_survives_storage_handle_restart ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/e2e_store_to_context.rs (/home/ubuntu/cargo-tgt/debug/build/memory-context/61109e23ee74668a/out/e2e_store_to_context-61109e23ee74668a)
 
 running 1 test
 test sqlite_store_read_current_builds_context_from_persisted_revision ... ok
 
 test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src/lib.rs (/home/ubuntu/ai-projects/AiMemoryBrainArchitecture/target/debug/build/memory-domain/416c85709ae5476e/out/memory_domain-416c85709ae5476e)
+     Running unittests src/lib.rs (/home/ubuntu/cargo-tgt/debug/build/memory-domain/416c85709ae5476e/out/memory_domain-416c85709ae5476e)
 
-running 13 tests
-test tests::dm02_version_is_immutable_and_successor_validates_parent ... ok
+running 25 tests
+test tests::claim_revision_constructs_and_preserves_stable_identity_across_revisions ... ok
+test tests::claim_revision_ref_constructs_and_validates ... ok
+test tests::claim_ref_constructs_and_validates ... ok
+test tests::claim_ref_rejects_empty_id ... ok
+test tests::claim_revision_ref_rejects_empty_id ... ok
 test tests::dm01_objects_are_independent_types ... ok
-test tests::dm03_stale_parent_is_rejected ... ok
+test tests::claim_revision_rejects_empty_scope_and_empty_reference ... ok
+test tests::dm02_version_is_immutable_and_successor_validates_parent ... ok
 test tests::dm04_claim_status_is_separate_from_memory_lifecycle ... ok
+test tests::dm03_stale_parent_is_rejected ... ok
 test tests::dm06_provenance_is_explicit ... ok
 test tests::dm05_scope_isolation_requires_overlap_or_explicit_share ... ok
-test tests::dm08_validation_has_no_external_dependencies ... ok
 test tests::dm07_context_removal_does_not_mutate_memory ... ok
 test tests::dm08_required_domain_fields_are_enforced ... ok
-test tests::dm09_memory_and_version_required_fields_are_enforced ... ok
 test tests::dm09_domain_types_do_not_require_storage_or_network ... ok
+test tests::dm09_memory_and_version_required_fields_are_enforced ... ok
 test tests::dm10_idempotency_and_outcome_rules_are_deterministic ... ok
+test tests::dm08_validation_has_no_external_dependencies ... ok
+test tests::fact_ref_constructs_and_validates_independently ... ok
+test tests::fact_ref_rejects_empty_id ... ok
+test tests::fact_revision_constructs_and_binds_exact_claim_revision_and_authorization ... ok
+test tests::fact_revision_ref_rejects_empty_id ... ok
+test tests::fact_revision_rejects_missing_method_scope_and_empty_references ... ok
+test tests::fact_revision_ref_constructs_and_validates_independently ... ok
 test tests::scope_identity_requires_id_kind_and_namespace_to_match ... ok
 
-test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src/lib.rs (/home/ubuntu/ai-projects/AiMemoryBrainArchitecture/target/debug/build/memory-event-store/387274ee9198e4d8/out/memory_event_store-387274ee9198e4d8)
+     Running unittests src/lib.rs (/home/ubuntu/cargo-tgt/debug/build/memory-event-store/387274ee9198e4d8/out/memory_event_store-387274ee9198e4d8)
 
 running 2 tests
-test tests::accepted_receipt_is_not_a_compilation_receipt ... ok
 test tests::envelope_requires_explicit_scope_and_idempotency_identity ... ok
+test tests::accepted_receipt_is_not_a_compilation_receipt ... ok
 
 test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src/lib.rs (/home/ubuntu/ai-projects/AiMemoryBrainArchitecture/target/debug/build/memory-event-store-sqlite/7fc5152fefe670b4/out/memory_event_store_sqlite-7fc5152fefe670b4)
+     Running unittests src/lib.rs (/home/ubuntu/cargo-tgt/debug/build/memory-event-store-sqlite/7fc5152fefe670b4/out/memory_event_store_sqlite-7fc5152fefe670b4)
 
 running 18 tests
 test forget_fence::tests::missing_or_corrupt_fence_fails_closed ... ok
+test forget_fence::tests::crash_after_fence_commit_is_retried_safely_on_restore ... ok
 test forget_fence::tests::malformed_scope_refuses_activation_without_partial_change ... ok
 test payload::tests::duplicate_payload_append_returns_original_receipt_without_duplicate_rows ... ok
-test forget_fence::tests::crash_after_fence_commit_is_retried_safely_on_restore ... ok
 test payload::tests::payload_digest_mismatch_is_rejected_before_append ... ok
 test payload::tests::read_after_fails_closed_on_empty_persisted_scope_list ... ok
 test payload::tests::read_after_fails_closed_on_invalid_persisted_scope_ref ... ok
@@ -177,8 +251,8 @@ test payload::tests::read_after_skips_non_intersecting_scopes_and_limits_visible
 test payload::tests::payload_append_receipt_and_ordered_read_survive_reopen ... ok
 test tests::empty_scope_and_missing_payload_identity_are_rejected ... ok
 test tests::same_producer_key_and_digest_replay_original_receipt ... ok
-test tests::same_producer_key_with_different_digest_conflicts ... ok
 test tests::acceptance_persists_across_reopen_and_receipt_replay_is_stable ... ok
+test tests::same_producer_key_with_different_digest_conflicts ... ok
 test tests::status_and_replay_enforce_scope ... ok
 test tests::startup_backfills_compile_intent_for_preexisting_accepted_events ... ok
 test forget_fence::tests::restore_anti_resurrection_purges_only_fenced_scope_across_all_tables ... ok
@@ -186,18 +260,18 @@ test forget_fence::tests::concurrent_forget_serializes_behind_restore_fence_lock
 
 test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.23s
 
-     Running tests/forget_fence.rs (/home/ubuntu/ai-projects/AiMemoryBrainArchitecture/target/debug/build/memory-event-store-sqlite/2af3edc7d87beae7/out/forget_fence-2af3edc7d87beae7)
+     Running tests/forget_fence.rs (/home/ubuntu/cargo-tgt/debug/build/memory-event-store-sqlite/2af3edc7d87beae7/out/forget_fence-2af3edc7d87beae7)
 
 running 5 tests
 test missing_or_corrupt_fence_fails_closed ... ok
-test malformed_scope_refuses_activation_without_partial_change ... ok
 test crash_after_fence_commit_is_retried_without_resurrection ... ok
+test malformed_scope_refuses_activation_without_partial_change ... ok
 test restore_anti_resurrection_and_preserves_other_scope ... ok
 test concurrent_forget_waits_for_restore_snapshot_lock ... ok
 
 test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.24s
 
-     Running tests/resilience.rs (/home/ubuntu/ai-projects/AiMemoryBrainArchitecture/target/debug/build/memory-event-store-sqlite/8f8f82ccb6d0398c/out/resilience-8f8f82ccb6d0398c)
+     Running tests/resilience.rs (/home/ubuntu/cargo-tgt/debug/build/memory-event-store-sqlite/8f8f82ccb6d0398c/out/resilience-8f8f82ccb6d0398c)
 
 running 6 tests
 
@@ -209,9 +283,9 @@ test concurrent_appends_preserve_unique_order_and_payload_custody ... ok
 test payload_persistence_boundary_sizes_survive_reopen ... ok
 test committed_payload_survives_process_crash_and_wal_recovery ... ok
 
-test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.26s
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
 
-     Running unittests src/lib.rs (/home/ubuntu/ai-projects/AiMemoryBrainArchitecture/target/debug/build/memory-storage/1a423723a90d95c1/out/memory_storage-1a423723a90d95c1)
+     Running unittests src/lib.rs (/home/ubuntu/cargo-tgt/debug/build/memory-storage/1a423723a90d95c1/out/memory_storage-1a423723a90d95c1)
 
 running 3 tests
 test tests::change_page_can_stop_at_a_contiguous_cursor ... ok
@@ -220,7 +294,7 @@ test tests::commit_sequence_is_orderable_but_not_a_domain_identifier ... ok
 
 test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src/lib.rs (/home/ubuntu/ai-projects/AiMemoryBrainArchitecture/target/debug/build/memory-storage-sqlite/aa4e5ca34f94cf77/out/memory_storage_sqlite-aa4e5ca34f94cf77)
+     Running unittests src/lib.rs (/home/ubuntu/cargo-tgt/debug/build/memory-storage-sqlite/aa4e5ca34f94cf77/out/memory_storage_sqlite-aa4e5ca34f94cf77)
 
 running 35 tests
 test tests::abrupt_exit_worker ... ok
@@ -229,53 +303,53 @@ test tests::file_backed_connection_applies_required_sqlite_pragmas ... ok
 running 1 test
 test tests::abrupt_process_exit_rolls_back_entire_uncommitted_commit ... ok
 test tests::concurrent_identical_idempotency_requests_replay_one_durable_receipt ... ok
-test tests::file_db_nested_savepoint_rollback_preserves_outer_work ... ok
 test tests::file_db_interrupted_commit_keeps_version_pointer_log_and_idempotency_consistent ... ok
+test tests::file_db_nested_savepoint_rollback_preserves_outer_work ... ok
 test tests::file_db_unwinding_worker_releases_open_transaction_without_partial_state ... ok
 test tests::multi_process_cas_worker ... ok
 test tests::independent_connections_serialize_competing_compare_and_swap_writers ... ok
 test tests::sqlite_change_listing_surfaces_corrupt_scope_metadata_instead_of_silently_skipping_it ... ok
-test tests::independent_connections_serialize_conflicting_idempotency_payloads ... ok
+
+running 1 test
+
+running 1 test
 test tests::sqlite_change_pages_filter_scope_before_applying_limit ... ok
-test tests::sqlite_change_pages_with_limit_two_preserve_order_without_skips_or_duplicates ... ok
-test tests::sqlite_denies_fresh_cross_scope_write_without_persisting_any_commit_state ... ok
-
-running 1 test
-
-running 1 test
-test tests::sqlite_does_not_replay_idempotency_key_across_memories ... ok
-test tests::sqlite_does_not_replay_idempotency_receipt_before_scope_check ... ok
-test tests::sqlite_filters_nested_claims_by_the_callers_scope ... ok
 test tests::multi_process_cas_worker ... ok
 
 test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 34 filtered out; finished in 0.00s
 
-test tests::sqlite_hides_entire_multiscope_claim_from_partial_scope_reader ... ok
+test tests::independent_connections_serialize_conflicting_idempotency_payloads ... ok
+test tests::sqlite_change_pages_with_limit_two_preserve_order_without_skips_or_duplicates ... ok
+test tests::sqlite_denies_fresh_cross_scope_write_without_persisting_any_commit_state ... ok
+test tests::sqlite_does_not_replay_idempotency_key_across_memories ... ok
 test tests::multi_process_cas_worker ... ok
+test tests::sqlite_does_not_replay_idempotency_receipt_before_scope_check ... ok
 
 test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 34 filtered out; finished in 0.01s
 
+test tests::separate_processes_serialize_competing_file_backed_cas_writers ... ok
+test tests::sqlite_filters_nested_claims_by_the_callers_scope ... ok
+test tests::sqlite_hides_entire_multiscope_claim_from_partial_scope_reader ... ok
 test tests::sqlite_idempotency_digest_mismatch_conflicts_for_commit_and_receipt_lookup ... ok
 test tests::sqlite_rejects_claim_scope_outside_callers_scope_even_when_parent_contains_it ... ok
-test tests::separate_processes_serialize_competing_file_backed_cas_writers ... ok
 test tests::sqlite_rejects_claims_outside_the_parent_memory_scope ... ok
 test tests::sqlite_rejects_create_outside_requested_scope ... ok
 test tests::sqlite_rejects_empty_idempotency_key_or_request_digest ... ok
 test tests::sqlite_rejects_invalid_memory_and_orphan_initial_version_pointer ... ok
 test tests::sqlite_rejects_invalid_version_fields_before_writing_any_commit_state ... ok
 test tests::sqlite_rejects_malformed_nested_claims_before_commit ... ok
-test tests::sqlite_rejects_persisted_claim_with_mixed_parent_and_foreign_scopes ... ok
 test tests::sqlite_rejects_mixed_parent_and_foreign_claim_scopes_before_commit ... ok
-test tests::sqlite_committed_state_survives_close_and_reopen ... ok
 test tests::sqlite_rejects_stale_expected_version ... ok
-test tests::sqlite_storage_entry_points_reject_empty_and_malformed_scope_sets ... ok
-test tests::sqlite_round_trip_and_idempotency_are_atomic ... ok
+test tests::sqlite_rejects_persisted_claim_with_mixed_parent_and_foreign_scopes ... ok
 test tests::sqlite_scope_checks_cover_current_history_and_idempotency_receipt_reads ... ok
+test tests::sqlite_round_trip_and_idempotency_are_atomic ... ok
+test tests::sqlite_committed_state_survives_close_and_reopen ... ok
+test tests::sqlite_storage_entry_points_reject_empty_and_malformed_scope_sets ... ok
 test tests::file_db_busy_timeout_bounds_wait_for_long_immediate_transaction ... ok
 
 test result: ok. 35 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
 
-     Running unittests src/lib.rs (/home/ubuntu/ai-projects/AiMemoryBrainArchitecture/target/debug/build/memory-store/90bd3c9e271e3b7d/out/memory_store-90bd3c9e271e3b7d)
+     Running unittests src/lib.rs (/home/ubuntu/cargo-tgt/debug/build/memory-store/90bd3c9e271e3b7d/out/memory_store-90bd3c9e271e3b7d)
 
 running 4 tests
 test tests::create_and_read_are_scope_checked ... ok
@@ -285,7 +359,19 @@ test tests::stale_revision_is_rejected_by_storage_port ... ok
 
 test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running tests/sqlite_integration.rs (/home/ubuntu/ai-projects/AiMemoryBrainArchitecture/target/debug/build/memory-store/bc11d428c6f3635f/out/sqlite_integration-bc11d428c6f3635f)
+     Running tests/cross_crate_contract.rs (/home/ubuntu/cargo-tgt/debug/build/memory-store/92a860f25ecc349e/out/cross_crate_contract-92a860f25ecc349e)
+
+running 6 tests
+test c2_invalid_domain_memory_is_rejected_without_persisting_a_row ... ok
+test c1_facade_trait_and_sqlite_round_trip_preserves_every_revision_field ... ok
+test c4_stale_expected_version_returns_conflict_without_changing_current_revision ... ok
+test c3_non_intersecting_scope_is_rejected_with_storage_scope_mismatch ... ok
+test c6_duplicate_memory_creation_preserves_the_storage_error_variant ... ok
+test c5_idempotency_replay_does_not_add_a_revision_and_digest_conflict_is_rejected ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/sqlite_integration.rs (/home/ubuntu/cargo-tgt/debug/build/memory-store/bc11d428c6f3635f/out/sqlite_integration-bc11d428c6f3635f)
 
 running 2 tests
 test sqlite_rejects_revision_identity_mismatch_at_facade_boundary ... ok
@@ -346,101 +432,30 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-
 workspace test exit => 0
+```
 
-===== FULL OUTPUT: cargo clippy --workspace --all-targets -- -D warnings =====
-    Checking memory-domain v0.1.0 (/tmp/f-main-lint-001/crates/memory-domain)
-    Checking agent-integration v0.1.0 (/tmp/f-main-lint-001/crates/agent-integration)
-    Checking crypto-common v0.1.7
-    Checking block-buffer v0.10.4
-    Checking digest v0.10.7
-    Checking sha2 v0.10.9
-    Checking memory-storage v0.1.0 (/tmp/f-main-lint-001/crates/memory-storage)
-    Checking memory-event-store v0.1.0 (/tmp/f-main-lint-001/crates/memory-event-store)
-    Checking memory-context v0.1.0 (/tmp/f-main-lint-001/crates/memory-context)
-    Checking memory-event-store-sqlite v0.1.0 (/tmp/f-main-lint-001/crates/memory-event-store-sqlite)
-    Checking memory-storage-sqlite v0.1.0 (/tmp/f-main-lint-001/crates/memory-storage-sqlite)
-    Checking memory-store v0.1.0 (/tmp/f-main-lint-001/crates/memory-store)
-error: unnecessary use of `clone` to create a slice from a reference
-   --> crates/memory-event-store-sqlite/src/payload.rs:276:50
-    |
-276 |         let hidden_only = store.read_after(0, 1, &[scope_b.clone()]).unwrap();
-    |                                                  ^^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&scope_b)`
-    |
-    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.100.0/index.html#cloned_ref_to_slice_refs
-    = note: `-D clippy::cloned-ref-to-slice-refs` implied by `-D warnings`
-    = help: to override `-D warnings` add `#[allow(clippy::cloned_ref_to_slice_refs)]`
+### `cargo clippy --workspace --all-targets -- -D warnings`
 
-error: unnecessary use of `clone` to create a slice from a reference
-   --> crates/memory-event-store-sqlite/src/payload.rs:279:61
-    |
-279 |         let visible1 = store.accept_with_payload(b1, b"b1", &[scope_b.clone()]).unwrap();
-    |                                                             ^^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&scope_b)`
-    |
-    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.100.0/index.html#cloned_ref_to_slice_refs
+```text
+    Checking memory-domain v0.1.0 (/tmp/f-main-clippy-work/crates/memory-domain)
+    Checking memory-storage v0.1.0 (/tmp/f-main-clippy-work/crates/memory-storage)
+    Checking memory-event-store v0.1.0 (/tmp/f-main-clippy-work/crates/memory-event-store)
+    Checking memory-context v0.1.0 (/tmp/f-main-clippy-work/crates/memory-context)
+    Checking memory-event-store-sqlite v0.1.0 (/tmp/f-main-clippy-work/crates/memory-event-store-sqlite)
+    Checking memory-storage-sqlite v0.1.0 (/tmp/f-main-clippy-work/crates/memory-storage-sqlite)
+    Checking memory-store v0.1.0 (/tmp/f-main-clippy-work/crates/memory-store)
+    Checking memory-compiler v0.1.0 (/tmp/f-main-clippy-work/crates/memory-compiler)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.05s
+workspace clippy exit => 0
+```
 
-error: unnecessary use of `clone` to create a slice from a reference
-   --> crates/memory-event-store-sqlite/src/payload.rs:280:61
-    |
-280 |         let visible2 = store.accept_with_payload(b2, b"b2", &[scope_b.clone()]).unwrap();
-    |                                                             ^^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&scope_b)`
-    |
-    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.100.0/index.html#cloned_ref_to_slice_refs
+`error:` lines: none in all three successful command outputs.
 
-error: unnecessary use of `clone` to create a slice from a reference
-   --> crates/memory-event-store-sqlite/src/payload.rs:281:44
-    |
-281 |         let page1 = store.read_after(0, 1, &[scope_b.clone()]).unwrap();
-    |                                            ^^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&scope_b)`
-    |
-    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.100.0/index.html#cloned_ref_to_slice_refs
+## (5) Strict timestamp ordering self-proof
 
-error: unnecessary use of `clone` to create a slice from a reference
-   --> crates/memory-event-store-sqlite/src/payload.rs:342:46
-    |
-342 |         let first_a = store.read_after(0, 1, &[scope_a.clone()]).unwrap();
-    |                                              ^^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&scope_a)`
-    |
-    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.100.0/index.html#cloned_ref_to_slice_refs
-
-error: unnecessary use of `clone` to create a slice from a reference
-   --> crates/memory-event-store-sqlite/src/payload.rs:345:65
-    |
-345 |         let second_a = store.read_after(first_a[0].sequence, 1, &[scope_a.clone()]).unwrap();
-    |                                                                 ^^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&scope_a)`
-    |
-    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.100.0/index.html#cloned_ref_to_slice_refs
-
-error: unnecessary use of `clone` to create a slice from a reference
-   --> crates/memory-event-store-sqlite/src/payload.rs:350:46
-    |
-350 |         let first_b = store.read_after(0, 1, &[scope_b.clone()]).unwrap();
-    |                                              ^^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&scope_b)`
-    |
-    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.100.0/index.html#cloned_ref_to_slice_refs
-
-error: unnecessary use of `clone` to create a slice from a reference
-   --> crates/memory-event-store-sqlite/src/payload.rs:353:65
-    |
-353 |         let second_b = store.read_after(first_b[0].sequence, 1, &[scope_b.clone()]).unwrap();
-    |                                                                 ^^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&scope_b)`
-    |
-    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.100.0/index.html#cloned_ref_to_slice_refs
-
-error: unnecessary use of `clone` to create a slice from a reference
-   --> crates/memory-event-store-sqlite/src/lib.rs:377:52
-    |
-377 |         assert_eq!(store.status(&receipt.event_id, &[other.clone()]), Err(EventStoreError::ScopeMismatch));
-    |                                                    ^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&other)`
-    |
-    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.100.0/index.html#cloned_ref_to_slice_refs
-
-error: could not compile `memory-event-store-sqlite` (lib test) due to 9 previous errors
-warning: build failed, waiting for other jobs to finish...
-workspace clippy exit => 101
-
-Clippy remains BLOCKED by 9 additional cloned_ref_to_slice_refs diagnostics outside the two permitted files:
-- crates/memory-event-store-sqlite/src/payload.rs:276, 279, 280, 281, 342, 345, 350, 353
-- crates/memory-event-store-sqlite/src/lib.rs:377
-No unrelated files were changed and no lint suppression was added. Per task scope, these additional findings were not modified.
+```text
+X committer        = 2026-11-21T19:01:04+08:00
+Verification       = 2026-11-21T19:03:58+08:00
+Y committer        = 2026-11-21T19:05:35+08:00
+```
