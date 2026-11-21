@@ -1,0 +1,106 @@
+work_item_id: AID-2026-040
+title: E1–E8 Engineering Entry Gate Measurement and CI Custody Evidence
+
+class: DOC
+risk: R1
+risk_rationale: >-
+  Documentation-only work item recording the E1–E8 engineering entry gate
+  measurement and build/test CI custody evidence. It does not modify runtime
+  code, grant implementation authority, or establish architecture acceptance.
+
+security_scope: Documentation and CI evidence custody only; no runtime security implementation.
+
+status: REGISTERED
+
+sponsor: USER-PRINCIPAL-DELEGATED (human principal via the continuous instruction in this session: "所有 owner 都可以是一个会话，你持续到收敛即可")
+accountable_owner: USER-PRINCIPAL-DELEGATED (session-eligible under the user's continuous instruction in this session: "所有 owner 都可以是一个会话，你持续到收敛即可")
+implementing_ai_session: Current ChatGPT delivery session; platform session identifier NOT_EXPOSED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: bb49dc121c195d7fb2ffa0ffbb9d376186b802fc
+
+tracking_issue: "NONE — Issue #7 and #43 both closed 2026-11-20T16:20Z; this work item carries its own record"
+
+created_at: 2026-11-21
+updated_at: 2026-11-21
+
+prompt_id: AID-2026-040-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-040/prompt-v1.md
+prompt_status: FROZEN
+prompt_sha256: PENDING_L0_MEASUREMENT
+prompt_bytes: PENDING_L0_MEASUREMENT
+prompt_file_blob_sha: PENDING_L0_MEASUREMENT
+prompt_file_commit_sha: PENDING_L0_MEASUREMENT
+
+prompt_provenance_tier: T1
+prompt_provenance_note: >-
+  Frozen from the user-provided task instruction and its explicit background
+  facts in the current ChatGPT conversation. Raw source snapshot identity and
+  byte-level measurements are pending L0 measurement; no digest or byte count
+  is asserted in this manifest.
+
+dependency_refs:
+  - 14-ai-development/work-items/INDEX.md
+  - 14-ai-development/work-items/AID-2026-011/manifest.yaml
+  - 14-ai-development/work-items/AID-2026-040/E1-E8-entry-gate-measurement-2026-11-21.md
+  - oahcom/AiMemoryBrain/.github/workflows/build-and-test.yml
+  - oahcom/AiMemoryBrain PR #15
+
+deliverables:
+  - E1–E8 engineering entry gate measurement record, including the baseline measurement and the additional 2026-11-21 CI evidence; E6 remains PARTIALLY-EVIDENCED.
+  - Build/test CI custody evidence record, including the workflow integration, successful run, artifact identity and size, retention period, and remaining custody gaps.
+
+independent_reviewer: NOT_ASSIGNED
+integration_reviewer: NOT_ASSIGNED
+
+review:
+  status: NOT_ASSIGNED
+  report_ref: ""
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: USER-PRINCIPAL-DELEGATED (per the continuous user instruction in this session; no acceptance decision is made by this registration)
+
+implementation:
+  status: NOT_STARTED
+  branch: NOT_ASSIGNED
+  pull_request: NOT_ASSIGNED
+  merge_commit_sha: NOT_ASSIGNED
+
+authorization:
+  registration_write: USER-PRINCIPAL-DELEGATED (limited to this registration package)
+  prompt_write: USER-PRINCIPAL-DELEGATED (limited to this frozen prompt carrier)
+  measurement_record_write: USER-PRINCIPAL-DELEGATED (limited to this measurement record)
+  index_update: USER-PRINCIPAL-DELEGATED (limited to the single appended AID-2026-040 row)
+  runtime_implementation: NOT_GRANTED
+  development_start: NOT_GRANTED
+  architecture_acceptance: NOT_GRANTED
+  production_authorization: NOT_GRANTED
+
+governance:
+  aid_assignment: REGISTERED
+  aid_status: REGISTERED
+  registration_authorization: USER-PRINCIPAL-DELEGATED (limited to the four requested file deliverables)
+  development_start_authorization: NOT_GRANTED
+  architecture_status: NOT_ACCEPTED
+  g8_status: NOT_READY
+  e1_e8_status: NOT_SATISFIED
+  quota_change: NONE
+
+verification:
+  status: NOT_RUN
+  commands: []
+  evidence_refs:
+    - "Dev repository PR #15: .github/workflows/build-and-test.yml"
+    - "Build and Test run 44880135760: success"
+    - "Artifact build-test-evidence-56f642b6cbcb628eeba9bc94ccd850be81bb1778: 4599 bytes, 90-day retention"
+    - "Governance Gate run 44880135506: success"
+
+registration_boundary: >-
+  Registration records the task, frozen prompt, measurement snapshot and CI
+  evidence. It does not establish that E1–E8 are satisfied, does not grant
+  development-start authority, does not change G8 NOT READY, does not change
+  architecture NOT ACCEPTED, and does not constitute production authorization.
