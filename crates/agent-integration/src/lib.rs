@@ -119,14 +119,18 @@ pub fn validate_full_boundary_apply(
     validate_context_write(region, request_frozen)
 }
 
-/// An immutable, versioned context payload delivered to one session.
+/// An immutable, versioned payload delivered to one Agent session.
+///
+/// This adapter-boundary payload is deliberately distinct from
+/// `memory_context::ContextSnapshot`, which is the Brain-side build artifact
+/// containing context identity, entries, and rendered-byte accounting.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct ContextSnapshot {
+pub struct DeliveryPayload {
     pub version: u64,
     pub content: String,
 }
 
-impl ContextSnapshot {
+impl DeliveryPayload {
     pub fn new(version: u64, content: impl Into<String>) -> Self {
         Self {
             version,
@@ -142,7 +146,7 @@ impl ContextSnapshot {
 /// removes the applied snapshot and resets that sequence. Reconnect reports
 /// only the last successfully applied version.
 pub trait ContextDeliveryAdapter {
-    fn apply(&mut self, session_id: &str, snapshot: ContextSnapshot) -> Result<(), AdapterError>;
+    fn apply(&mut self, session_id: &str, snapshot: DeliveryPayload) -> Result<(), AdapterError>;
 
     fn clear(&mut self, session_id: &str) -> Result<(), AdapterError>;
 
@@ -151,12 +155,12 @@ pub trait ContextDeliveryAdapter {
     fn reconnect(&mut self, session_id: &str) -> Result<Option<u64>, AdapterError>;
 
     /// Read the payload currently recorded as applied for this session.
-    fn applied_snapshot(&self, session_id: &str) -> Option<&ContextSnapshot>;
+    fn applied_snapshot(&self, session_id: &str) -> Option<&DeliveryPayload>;
 }
 
 #[derive(Debug)]
 struct SessionState {
-    applied: Option<ContextSnapshot>,
+    applied: Option<DeliveryPayload>,
     connected: bool,
 }
 
@@ -178,7 +182,7 @@ pub struct InMemoryContextDeliveryAdapter {
 }
 
 impl ContextDeliveryAdapter for InMemoryContextDeliveryAdapter {
-    fn apply(&mut self, session_id: &str, snapshot: ContextSnapshot) -> Result<(), AdapterError> {
+    fn apply(&mut self, session_id: &str, snapshot: DeliveryPayload) -> Result<(), AdapterError> {
         let state = self.sessions.entry(session_id.to_owned()).or_default();
         if !state.connected {
             return Err(AdapterError::SessionDisconnected {
@@ -222,7 +226,7 @@ impl ContextDeliveryAdapter for InMemoryContextDeliveryAdapter {
         Ok(state.applied.as_ref().map(|snapshot| snapshot.version))
     }
 
-    fn applied_snapshot(&self, session_id: &str) -> Option<&ContextSnapshot> {
+    fn applied_snapshot(&self, session_id: &str) -> Option<&DeliveryPayload> {
         self.sessions.get(session_id)?.applied.as_ref()
     }
 }
@@ -286,10 +290,10 @@ mod tests {
     fn applying_a_valid_successor_updates_the_applied_version() {
         let mut adapter = InMemoryContextDeliveryAdapter::default();
         adapter
-            .apply("session-a", ContextSnapshot::new(1, "first"))
+            .apply("session-a", DeliveryPayload::new(1, "first"))
             .unwrap();
         adapter
-            .apply("session-a", ContextSnapshot::new(2, "second"))
+            .apply("session-a", DeliveryPayload::new(2, "second"))
             .unwrap();
 
         let applied = adapter.applied_snapshot("session-a").unwrap();
@@ -301,18 +305,18 @@ mod tests {
     fn stale_or_skipped_versions_return_typed_error_without_mutation() {
         let mut adapter = InMemoryContextDeliveryAdapter::default();
         adapter
-            .apply("session-a", ContextSnapshot::new(1, "accepted"))
+            .apply("session-a", DeliveryPayload::new(1, "accepted"))
             .unwrap();
 
         assert_eq!(
-            adapter.apply("session-a", ContextSnapshot::new(1, "stale")),
+            adapter.apply("session-a", DeliveryPayload::new(1, "stale")),
             Err(AdapterError::VersionMismatch {
                 expected: 2,
                 received: 1
             })
         );
         assert_eq!(
-            adapter.apply("session-a", ContextSnapshot::new(3, "skipped")),
+            adapter.apply("session-a", DeliveryPayload::new(3, "skipped")),
             Err(AdapterError::VersionMismatch {
                 expected: 2,
                 received: 3
@@ -329,17 +333,17 @@ mod tests {
     fn clear_resets_the_session_so_apply_starts_from_empty() {
         let mut adapter = InMemoryContextDeliveryAdapter::default();
         adapter
-            .apply("session-a", ContextSnapshot::new(1, "old-1"))
+            .apply("session-a", DeliveryPayload::new(1, "old-1"))
             .unwrap();
         adapter
-            .apply("session-a", ContextSnapshot::new(2, "old-2"))
+            .apply("session-a", DeliveryPayload::new(2, "old-2"))
             .unwrap();
 
         adapter.clear("session-a").unwrap();
         assert!(adapter.applied_snapshot("session-a").is_none());
 
         adapter
-            .apply("session-a", ContextSnapshot::new(1, "fresh"))
+            .apply("session-a", DeliveryPayload::new(1, "fresh"))
             .unwrap();
         let applied = adapter.applied_snapshot("session-a").unwrap();
         assert_eq!(applied.version, 1);
@@ -350,12 +354,12 @@ mod tests {
     fn reconnect_reports_last_applied_version_not_a_rejected_attempt() {
         let mut adapter = InMemoryContextDeliveryAdapter::default();
         adapter
-            .apply("session-a", ContextSnapshot::new(1, "committed"))
+            .apply("session-a", DeliveryPayload::new(1, "committed"))
             .unwrap();
         adapter.disconnect("session-a").unwrap();
 
         assert_eq!(
-            adapter.apply("session-a", ContextSnapshot::new(2, "not-delivered")),
+            adapter.apply("session-a", DeliveryPayload::new(2, "not-delivered")),
             Err(AdapterError::SessionDisconnected {
                 session_id: "session-a".into()
             })

@@ -37,7 +37,7 @@
 
 ## 17. 内存上下文交付生命周期（已实现的参考行为）
 
-crate 现在提供 `ContextDeliveryAdapter` trait 和 `InMemoryContextDeliveryAdapter`。内存实现按 session 保存已应用的 `ContextSnapshot` 与连接标志。
+crate 现在提供 `ContextDeliveryAdapter` trait 和 `InMemoryContextDeliveryAdapter`。内存实现按 session 保存已应用的 `DeliveryPayload` 与连接标志。 该适配器边界载荷不同于 Brain 侧的 `memory_context::ContextSnapshot` 构建产物。
 
 | 生命周期动作/状态 | 已实现行为 |
 |---|---|

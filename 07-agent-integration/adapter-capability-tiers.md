@@ -217,7 +217,7 @@ This mapping is an executable interpretation of the tier guarantees already mark
 
 ## 15. In-memory context delivery lifecycle (implemented reference behavior)
 
-The crate now exposes a `ContextDeliveryAdapter` trait and `InMemoryContextDeliveryAdapter`. The in-memory implementation maintains a per-session applied `ContextSnapshot` and connection flag.
+The crate now exposes a `ContextDeliveryAdapter` trait and `InMemoryContextDeliveryAdapter`. The in-memory implementation maintains a per-session applied `DeliveryPayload` and connection flag. This adapter-boundary payload is distinct from the Brain-side `memory_context::ContextSnapshot` build artifact.
 
 | Lifecycle action/state | Implemented behavior |
 |---|---|
