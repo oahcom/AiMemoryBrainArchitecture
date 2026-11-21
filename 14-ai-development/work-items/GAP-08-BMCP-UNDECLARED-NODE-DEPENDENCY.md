@@ -38,6 +38,27 @@ find . -name "package.json" -o -name "package-lock.json" \
 
 Zero results.
 
+A Python dependency manifest does exist —
+`08-bmcp-protocol/tests/conformance/provider_outcome/requirements.txt` — and it
+declares `jsonschema`, `rfc8785` and `cryptography`. It cannot express the Node
+dependency, and nothing else does.
+
+**2b. The tests that need it are outside CI coverage.**
+
+`.github/workflows/h-applied-delivery-evidence-conformance.yml` runs:
+
+```
+python -m unittest discover -s .../applied_delivery_evidence -p 'test_*.py' -v
+python -m unittest discover -s .../recovery_cutoff -p 'test_recovery_join*.py' -v
+```
+
+The three files that require `canonicalize` are
+`provider_outcome/test_c_crypto_profile_interop.py`,
+`provider_outcome/test_c_crypto_profile_1_0_1_interop.py` and
+`recovery_cutoff/test_i_crypto_profile.py`. None of them match either discover
+pattern. So the failure cannot appear in CI, which is why an undeclared
+dependency reached `main` unnoticed.
+
 **3. The suite fails on a clean tree.**
 
 ```
@@ -129,3 +150,5 @@ expects, so "run the conformance suite" has one meaning.
 4. The suite's pass count is reported with the runner and dependency state
    attached, so a future measurement does not repeat the 3-failure result as if
    it were a code defect.
+5. CI actually executes the three files that depend on Node. A dependency that
+   no workflow ever installs is indistinguishable from one that is missing.

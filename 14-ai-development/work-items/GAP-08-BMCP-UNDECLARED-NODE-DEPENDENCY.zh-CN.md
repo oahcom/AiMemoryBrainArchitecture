@@ -33,6 +33,26 @@ find . -name "package.json" -o -name "package-lock.json" \
 
 零结果。
 
+Python 依赖清单确实存在——
+`08-bmcp-protocol/tests/conformance/provider_outcome/requirements.txt`——它声明了
+`jsonschema`、`rfc8785` 与 `cryptography`。它无法表达 Node 依赖，也没有别的东西
+表达。
+
+**2b. 需要它的测试不在 CI 覆盖范围内。**
+
+`.github/workflows/h-applied-delivery-evidence-conformance.yml` 运行的是：
+
+```
+python -m unittest discover -s .../applied_delivery_evidence -p 'test_*.py' -v
+python -m unittest discover -s .../recovery_cutoff -p 'test_recovery_join*.py' -v
+```
+
+需要 `canonicalize` 的三个文件是
+`provider_outcome/test_c_crypto_profile_interop.py`、
+`provider_outcome/test_c_crypto_profile_1_0_1_interop.py` 与
+`recovery_cutoff/test_i_crypto_profile.py`。它们都不匹配上述任一 discover 模式。
+因此该失败不可能在 CI 中暴露——这正是未声明依赖能悄悄进入 `main` 的原因。
+
 **3. 干净树上套件失败。**
 
 ```
@@ -103,3 +123,5 @@ OK
 2. Node 依赖已锁定且锁文件已提交。
 3. `test_hrc_semantics.py` 要么在 pytest 下干净通过，要么按目录记录运行器契约。
 4. 报告套件通过数时必须附带运行器与依赖状态，以免未来的测量把这次的 3 个失败当作代码缺陷重演。
+5. CI 必须真正执行那三个依赖 Node 的文件。一个从未被任何工作流安装过的依赖，
+   与一个缺失的依赖没有区别。
