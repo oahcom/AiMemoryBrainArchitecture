@@ -54,6 +54,7 @@ TEST EXECUTION = SUSPENDED
 | R4 Fact/Claim 同步 | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
 | R5 端到端发布 | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
 | R5 Storage §8.8 | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
+| R5 Admission 阶段关系 | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
 | PASS 治理同步 | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
 
 ## 4. 应用证据要求
@@ -241,3 +242,35 @@ Claim identity mapping。此前独立复审在此点上的结论读自 `2717fadb
 
 上表不含两个状态文件自身，因为本小节即随它们一同提交：其提交前 Blob 为 `db3e9f394c61c247ae9dde51c92d190f194ee11a`（EN）与
 `87c00ade741ebc0837c2f6903b820741f2887e4a`（ZH），由新增本小节的提交取代。
+
+### 9.2 Admission 阶段关系轮次回读
+
+回读基线 HEAD：`da378340b0c7adb0ad3c1f128878bc96804c78d9`。两个提交闭合了独立复审提出的最后一项实质问题。
+
+| 目标 | 提交 | 修改前 Blob | 修改后 Blob | 大小 |
+|---|---|---|---|---|
+| docs/en/04-memory-compiler/extraction-and-normalization.md | da378340 | 10c46fd79c53 | 03c8a6f32113d54cac097c792b896a4ec3f873b1 | 18070 -> 20841 B |
+| docs/zh-CN/04-memory-compiler/extraction-and-normalization.md | da378340 | cec9cf318565 | ac484c860b9b8eb9da19801acd9a985f2a8b4b3a | 17662 -> 20233 B |
+| reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md（载体分支） | a5a13d63 | edd81e2ba21c | 8d4ac845f409c2cb64831c850219fdb84a113cf0 | 29945 -> 32954 B |
+
+缺口在于两个准入名称从未相遇。Extraction 只写 `Producer Admission`，位置在 D canonical commit
+之前；Storage ADR §8.8 只写 `PublicationParticipant Admission`，位置在 D canonical commit 与
+Storage 将准确 publication tuple 持久化为 `PREPARED_HIDDEN` 之后。在当时的文件状态下，同名动作
+带有两个互相矛盾的位置，且没有任何文字说明它们是不同的动作。
+
+所落文本裁定二者为两个不同的有序阶段，既非别名，也非可互换的决定。Producer Admission 在依赖
+集合登记和规范提交之前准入准确的 Producer/ProducerWork 身份。PublicationParticipant Admission
+在规范提交与 PREPARED_HIDDEN 持久化之后，准入绑定对应 StorageVisibilityParticipantRef 与
+publication tuple digest 的准确 PublicationParticipant。前者的成功明确不等于后者的成功。二者
+均须与各自的 participant 记录构成不可分操作，均针对同一权威排序锚点串行化。在 Producer
+Admission 与依赖集合登记阶段建立的 dependency closure，在发布时不得被创建、替换、缩减或独立
+重新定义。
+
+Extraction 以新增 §19.2 承载，插入在该文件既有 `#### Storage 边界` 小节之前。该小节原有的两句
+边界声明未改动，§19.2 未重复陈述它们。ADR 以 §8.8 内部澄清承载，位置在七步顺序之后、
+per-BrainAuthorityRef 序列化锚点声明之前。七步顺序、锚点、L1 决策与 L4 OPEN 边界均未触及。
+
+两处插入均声明这是 implementation-conformance gate，而非尚未解决的规范排序选择，故本次修正不
+重新打开任何已 DECIDED FOR CONVERGENCE 的内容。
+
+R3 处置、正式验收、Schema 冻结与实现一致性均不变。

@@ -54,6 +54,7 @@ TEST EXECUTION = SUSPENDED
 | R4 Fact/Claim synchronization | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
 | R5 End-to-end publication | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
 | R5 Storage §8.8 | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
+| R5 Admission stage relation | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
 | PASS governance synchronization | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
 
 ## 4. Application evidence requirements
@@ -245,3 +246,41 @@ application. Recorded here so the difference is not read as a ranking.
 
 The two status files carry no row above, because this section ships inside them: their pre-commit
 Blobs were `db3e9f394c61c247ae9dde51c92d190f194ee11a` (EN) and `87c00ade741ebc0837c2f6903b820741f2887e4a` (ZH), superseded by the commit that adds this section.
+
+### 9.2 Read-back of the admission stage relation round
+
+Read-back baseline HEAD: `da378340b0c7adb0ad3c1f128878bc96804c78d9`. Two commits closed the last substantive item from independent
+review.
+
+| Target | Commit | Blob before | Blob after | Size |
+|---|---|---|---|---|
+| docs/en/04-memory-compiler/extraction-and-normalization.md | da378340 | 10c46fd79c53 | 03c8a6f32113d54cac097c792b896a4ec3f873b1 | 18070 -> 20841 B |
+| docs/zh-CN/04-memory-compiler/extraction-and-normalization.md | da378340 | cec9cf318565 | ac484c860b9b8eb9da19801acd9a985f2a8b4b3a | 17662 -> 20233 B |
+| reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md (carrier branch) | a5a13d63 | edd81e2ba21c | 8d4ac845f409c2cb64831c850219fdb84a113cf0 | 29945 -> 32954 B |
+
+The gap was that the two admission names never met. Extraction named only `Producer Admission`,
+required before D canonical commit; the Storage ADR §8.8 named only `PublicationParticipant
+Admission`, required after D canonical commit and after Storage persisted the exact publication
+tuple as `PREPARED_HIDDEN`. In the files as they stood, the same-named act carried two
+contradictory positions and nothing said they were different acts.
+
+The applied text rules them two distinct ordered stages, not aliases and not interchangeable
+decisions. Producer Admission admits the exact Producer/ProducerWork identity before dependency-set
+registration and canonical commit. PublicationParticipant Admission admits the exact
+PublicationParticipant bound to the corresponding StorageVisibilityParticipantRef and publication
+tuple digest, after canonical commit and after PREPARED_HIDDEN persistence. Success in the first is
+explicitly not success in the second. Both MUST be atomic with their own participant recording.
+Both serialize against the same authoritative ordering anchor. The dependency closure established
+during Producer Admission and dependency-set registration MUST NOT be created, replaced, narrowed
+or independently redefined at publication.
+
+Extraction carries this as a new §19.2, inserted before that file's existing `#### Storage
+boundary` block. The two boundary sentences in that block are unchanged and are not restated in
+§19.2. The ADR carries it as a clarification inside §8.8, placed after the seven-step order and
+before the per-BrainAuthorityRef serialization-anchor statement. The seven steps, the anchor, the
+L1 decision and the L4 OPEN boundary are untouched.
+
+Both insertions state this is an implementation-conformance gate, not an unresolved normative
+ordering choice, so the fix reopens nothing that is already DECIDED FOR CONVERGENCE.
+
+R3 disposition, formal acceptance, schema freeze and implementation conformance are unchanged.
