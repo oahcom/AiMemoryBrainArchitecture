@@ -168,7 +168,7 @@ impl ContextDeliveryAdapter for InMemoryContextDeliveryAdapter {
         if self
             .sessions
             .get(session_id)
-            .is_some_and(|state| !state.connected)
+            .map_or(false, |state| !state.connected)
         {
             return Err(AdapterError::SessionDisconnected {
                 session_id: session_id.to_owned(),
@@ -177,7 +177,11 @@ impl ContextDeliveryAdapter for InMemoryContextDeliveryAdapter {
 
         validate_snapshot(&snapshot).map_err(AdapterError::InvalidSnapshot)?;
 
-        let expected = match self.sessions.get(session_id).and_then(|state| state.applied.as_ref()) {
+        let expected = match self
+            .sessions
+            .get(session_id)
+            .and_then(|state| state.applied.as_ref())
+        {
             Some(applied) => applied
                 .context_version
                 .checked_add(1)
