@@ -312,7 +312,7 @@ Phase 1 Domain Model 单元验收：
 | DM-07 | Outcome boundary | plan/prediction/attempt 不升级为 outcome |
 | DM-08 | Determinism | domain validation 不依赖模型或外部服务 |
 | DM-09 | Dependency boundary | domain 层不依赖 SQLite/HTTP/LLM |
-| DM-10 | Open-decision hygiene | 未验证的 ID/Claim identity 等不被实现偷偷冻结 |
+| DM-10 | Open-decision hygiene | 未决事项（ID generation 及 §7 列出的其余未决项）不得被实现偷偷冻结；已 DECIDED FOR CONVERGENCE 的稳定 Claim identity / ClaimRevision 语义不得再作为未验证项 |
 
 ## 7. Decision status after this freeze
 
