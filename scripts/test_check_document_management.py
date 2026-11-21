@@ -1845,6 +1845,181 @@ def run_declared_but_unread() -> None:
                    "when" in str(exc), f"  {exc}")
 
 
+
+def run_unified_scan() -> None:
+    """T57-T61: one governed set, no duplicates, no dropped diagnostics.
+
+    The eleventh review found that fixing "two walks with two skip rules" was
+    not the same as "one governed set". Three sources still fed the list at the
+    call site, the problems from the normative-root walk were discarded, and
+    nothing enforced uniqueness. `collect_governed()` is now the single entry
+    point and these cases pin its three properties.
+    """
+    print("unified governed set")
+    import check_document_management as gate
+
+    def run(root):
+        proc = subprocess.run(
+            [sys.executable, str(Path(__file__).resolve().parent
+                                 / "check_document_management.py"),
+             "--root", str(root)],
+            capture_output=True, text=True,
+        )
+        return proc.returncode, proc.stdout + proc.stderr
+
+    # T57: no file appears twice, however it is reached.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        original = gate.GOVERNED_FILES
+        # A governed file that a governed root already covers: the naive
+        # concatenation would list it twice and inflate every count derived
+        # from the list.
+        (root / "00-governance" / "dupe.md").write_text(doc(BASE), encoding="utf-8")
+        gate.GOVERNED_FILES = original + ("00-governance/dupe.md",)
+        try:
+            files, _ = gate.collect_governed(root)
+            names = [p.as_posix() for p in files]
+            record("T57 governed set contains each file exactly once",
+                   len(names) == len(set(names)),
+                   f"  {len(names)} entries, {len(set(names))} unique")
+        finally:
+            gate.GOVERNED_FILES = original
+
+    # T58: a symlinked subdirectory inside a *normative* root is reported.
+    #
+    # This is R11-05. Only backlog problems reached DM-14, because
+    # governed_files() discarded what scan_root() returned for normative roots.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        outside = Path(tmp).parent / "outside-norm-t58"
+        outside.mkdir(exist_ok=True)
+        (outside / "leak.md").write_text("# leak\n", encoding="utf-8")
+        (root / "00-governance" / "linked").symlink_to(outside, target_is_directory=True)
+        try:
+            code, out = run(root)
+            record("T58 symlinked subdirectory in a normative root is reported",
+                   code != 0 and "00-governance/linked is a symbolic link" in out,
+                   f"  exit {code}, output {out[:200]}")
+        finally:
+            shutil.rmtree(outside, ignore_errors=True)
+
+    # T59: a top-level symlink to a directory is not an accounted directory.
+    #
+    # R11-02. is_dir() follows links, so a link satisfied both "on disk" and
+    # "declared" -- making a registry entry true that pointed outside the repo.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        outside = Path(tmp).parent / "outside-top-t59"
+        outside.mkdir(exist_ok=True)
+        (root / "ghost").symlink_to(outside, target_is_directory=True)
+        try:
+            code, out = run(root)
+            record("T59 top-level symlink is reported and does not satisfy the registry",
+                   code != 0 and "symbolic links at the repository root" in out,
+                   f"  exit {code}, output {out[:200]}")
+        finally:
+            shutil.rmtree(outside, ignore_errors=True)
+
+    # T60: a declared directory that is only a symlink counts as missing.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        outside = Path(tmp).parent / "outside-decl-t60"
+        outside.mkdir(exist_ok=True)
+        # `tools` is declared as excluded by the fixture registry.
+        shutil.rmtree(root / "tools")
+        (root / "tools").symlink_to(outside, target_is_directory=True)
+        try:
+            code, out = run(root)
+            record("T60 declared directory that is only a symlink is reported",
+                   code != 0 and ("do not exist" in out or "symbolic links" in out),
+                   f"  exit {code}, output {out[:200]}")
+        finally:
+            shutil.rmtree(outside, ignore_errors=True)
+
+    # T61: DM-08 names the path it was given, not a same-named key elsewhere.
+    body = (
+        "  domain: architecture\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Draft\n"
+        "    evidence_verification:\n"
+        "      verification_status: Unverified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Non-Canonical\n"
+        "    normative_status: Informative\n"
+        "    canonical_conflict_status: None\n"
+        "    superseded_by: 00-governance/x.md\n"
+    )
+    errs, _ = check_document(FILE, doc(body))
+    dm08 = [e for e in errs if "DM-08" in e]
+    # The declared forbidden path is lifecycle.supersession.superseded_by, so a
+    # key of the same name under `authority` is NOT a DM-08 violation. Matching
+    # on the leaf name flagged it and named a location the author never wrote.
+    record("T61 a same-named key elsewhere is not reported as the forbidden path",
+           not dm08, f"  got {dm08}")
+
+    # T62: the declared forbidden path is the one that fires.
+    body2 = (
+        "  domain: architecture\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Draft\n"
+        "    supersession:\n"
+        "      superseded_by: 00-governance/x.md\n"
+        "    evidence_verification:\n"
+        "      verification_status: Unverified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Non-Canonical\n"
+        "    normative_status: Informative\n"
+        "    canonical_conflict_status: None\n"
+    )
+    errs2, _ = check_document(FILE, doc(body2))
+    record("T62 the declared forbidden path is matched in full",
+           any("lifecycle.supersession.superseded_by" in e for e in errs2 if "DM-08" in e),
+           f"  got {[e for e in errs2 if 'DM-08' in e]}")
+
+
+def run_schema_of_schema() -> None:
+    """T63: known keys with illegal values must be refused.
+
+    The eleventh review: rejecting unknown key *names* is not enforcement.
+    `required: "false"` is a string, `is True` is False for it, and the field
+    silently became optional. Every key is typed now.
+    """
+    print("schema-of-schema typing")
+    import check_document_management as gate
+
+    real = Path(__file__).resolve().parents[1] / gate.SCHEMA_FILE
+    src = real.read_text(encoding="utf-8")
+    base = "  domain:\n    kind: string\n    required: true\n"
+    record("T63 fixture anchor is present", base in src)
+
+    mutations = {
+        "required is a string": "  domain:\n    kind: string\n    required: \"false\"\n",
+        "items on a string kind": "  domain:\n    kind: string\n    items: string\n",
+        "unknown kind": "  domain:\n    kind: strng\n",
+        "enum on a boolean kind": "  domain:\n    kind: boolean\n    enum:\n      - x\n",
+        "neither kind nor fields": "  domain:\n    required: true\n",
+    }
+    for label, replacement in mutations.items():
+        mutated = src.replace(base, replacement, 1)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "00-governance").mkdir()
+            (root / gate.SCHEMA_FILE).write_text(mutated, encoding="utf-8")
+            try:
+                gate.schema(root)
+                record(f"T63 {label} is refused", False, "  schema loaded")
+            except SystemExit as exc:
+                record(f"T63 {label} is refused", True, f"  {str(exc)[:90]}")
+
+
 def main() -> int:
     print("check_document_management self-check")
     run_parser()
@@ -1863,6 +2038,8 @@ def main() -> int:
     run_symlink_boundary()
     run_scan_boundary()
     run_declared_but_unread()
+    run_unified_scan()
+    run_schema_of_schema()
     run_schema_agreement()
     passed, total = sum(RESULTS), len(RESULTS)
     print(f"{passed}/{total} passed")

@@ -447,6 +447,29 @@ def unknown_keys(node, allowed: set[str], where: str) -> list[str]:
     ]
 
 
+def walk_paths(node, segments: list[str], path: str = ""):
+    """Yield the dotted path of every occurrence of a full key path.
+
+    `walk_keys()` matches one segment anywhere in the tree, which is right for
+    "this key must not appear at all" and wrong for "this *path* must not
+    appear". DM-08 states paths, so it needs this.
+    """
+    if not segments:
+        return
+    head, rest = segments[0], segments[1:]
+    if isinstance(node, dict):
+        for key, value in node.items():
+            here = f"{path}.{key}" if path else key
+            if key == head:
+                if not rest:
+                    yield here
+                else:
+                    yield from walk_paths(value, rest, here)
+    elif isinstance(node, list):
+        for index, value in enumerate(node):
+            yield from walk_paths(value, segments, f"{path}[{index}]")
+
+
 def walk_keys(node, name: str, path: str = ""):
     if isinstance(node, dict):
         for key, value in node.items():
@@ -643,32 +666,105 @@ def schema(root: Path | None = None) -> dict:
     return _SCHEMA[key]
 
 def check_schema_keys(loaded: dict) -> list[str]:
-    """Reject constraint keys the gate does not read.
+    """Validate the schema against itself: keys, types, and combinations.
 
-    A key that is published but never executed is prose wearing a constraint's
-    clothes, and it is the defect class the reviewer kept finding: `required`
-    was published and not enforced, then `when` was published and only its rule
-    id checked. Rather than fix these one at a time, the vocabulary is closed:
-    a key outside this set means the schema promises something no code checks,
-    so the contract is refused at load time instead of at review time.
+    The eleventh review was right that rejecting unknown key *names* is not the
+    same as enforcing the contract. `required: "false"` is a string, and
+    `is True` is False for it, so the field was silently optional; `enum:
+    architecture` is a string, and iterating it yields characters, so the
+    enumeration check compared against letters; `items` on a non-sequence
+    describes a constraint nothing applies. All of these use only known keys.
+
+    So every key is typed here, and combinations that cannot mean anything are
+    refused. This is the schema-of-schema: the contract has to satisfy its own
+    kind of rigour before it can impose any.
     """
     allowed = {"kind", "required", "enum", "items", "fields"}
     problems: list[str] = []
 
     def walk(node, prefix: str) -> None:
-        for name, sub in (node or {}).items():
+        if not isinstance(node, dict):
+            problems.append(f"schema node {prefix or '<root>'} is not a mapping")
+            return
+        for name, sub in node.items():
+            here = f"{prefix}{name}"
             if not isinstance(sub, dict):
-                problems.append(f"schema field {prefix}{name} is not a mapping")
+                problems.append(f"schema field {here} is not a mapping")
                 continue
             unknown = set(sub) - allowed
             if unknown:
                 problems.append(
-                    f"schema field {prefix}{name} declares key(s) the gate does "
-                    f"not read: {sorted(unknown)}; remove them or implement them"
+                    f"schema field {here} declares key(s) the gate does not "
+                    f"read: {sorted(unknown)}; remove them or implement them"
                 )
+                continue
             nested = sub.get("fields")
             if nested is not None:
-                walk(nested, f"{prefix}{name}.")
+                walk(nested, f"{here}.")
+
+            kind = sub.get("kind")
+            if kind is not None and kind not in KINDS:
+                problems.append(
+                    f"schema field {here} declares unknown kind {kind!r}; "
+                    f"legal kinds are {sorted(KINDS)}"
+                )
+                continue
+
+            # `required` must be a real boolean. `required: "false"` is a string,
+            # `is True` is False, and the field silently became optional -- the
+            # exact class of defect this function exists to stop.
+            if "required" in sub and not isinstance(sub["required"], bool):
+                problems.append(
+                    f"schema field {here} declares required: {sub['required']!r}, "
+                    f"which is {type(sub['required']).__name__}, not a boolean"
+                )
+
+            # `enum` must be a list of scalars. A bare string iterates as
+            # characters, so every value would fail -- loudly but for the wrong
+            # reason -- and a mapping is not an enumeration at all.
+            if "enum" in sub:
+                values = sub["enum"]
+                if not isinstance(values, list) or not values:
+                    problems.append(
+                        f"schema field {here} declares enum as "
+                        f"{type(values).__name__}; it must be a non-empty sequence"
+                    )
+                elif any(isinstance(v, (dict, list)) for v in values):
+                    problems.append(
+                        f"schema field {here} declares a non-scalar enum value"
+                    )
+                if kind not in ("string", "nullable-string", "sequence"):
+                    problems.append(
+                        f"schema field {here} declares enum on kind {kind!r}, "
+                        f"which cannot hold an enumerated value"
+                    )
+
+            # `items` only means something for a sequence.
+            if "items" in sub:
+                if kind != "sequence":
+                    problems.append(
+                        f"schema field {here} declares items on kind {kind!r}; "
+                        f"only a sequence has items"
+                    )
+                elif not isinstance(sub["items"], str):
+                    problems.append(
+                        f"schema field {here} declares items as "
+                        f"{type(sub['items']).__name__}, not a kind name"
+                    )
+                elif sub["items"] not in KINDS:
+                    problems.append(
+                        f"schema field {here} declares items: {sub['items']!r}, "
+                        f"which is not a kind"
+                    )
+
+            # A leaf must say what it is. A node with `fields` is structural and
+            # needs no kind; a node without one must have a kind, or the gate
+            # has nothing to type-check it against.
+            if nested is None and kind is None:
+                problems.append(
+                    f"schema field {here} declares no kind and no fields; the "
+                    f"gate cannot type-check it"
+                )
 
     walk(loaded.get("fields"), "")
     return problems
@@ -900,8 +996,13 @@ def check_document(path: Path, text: str, root: Path | None = None) -> tuple[lis
     for forbidden_path in schema(root).get("forbidden") or []:
         if not isinstance(forbidden_path, str):
             continue
-        leaf = forbidden_path.rsplit(".", 1)[-1]
-        for where in walk_keys(meta, leaf):
+        # The whole path, not its last segment. Matching on the leaf name was a
+        # real misreport: `authority.superseded_by` was flagged as
+        # `lifecycle.supersession.superseded_by`, so the gate named a location
+        # the author had not written. It also merged two declarations that
+        # happened to share a leaf, turning a path rule into a global name rule
+        # -- a different contract from the one the schema states.
+        for where in walk_paths(meta, forbidden_path.split(".")):
             errors.append(
                 f"DM-08 {where} is {forbidden_path}: CI-derived, MUST NOT be "
                 f"hand-written"
@@ -1472,21 +1573,70 @@ def backlog_counts(root: Path) -> tuple[dict[str, int], list[str]]:
             counts[name] = len(found)
     return counts, problems
 
-def governed_files(root: Path) -> list[Path]:
-    """Every file the gate is responsible for: governed roots plus backlog."""
-    files: list[Path] = []
+def collect_governed(root: Path) -> tuple[list[Path], list[str]]:
+    """The governed set, built once, with every problem the walk found.
+
+    Three sources feed this set -- normative roots, backlog roots, and
+    individually governed files -- and the eleventh review was right that
+    concatenating them at the call site was not a unified scan. Two defects
+    followed from that shape and both are fixed here:
+
+      * the problems from `scan_root()` were discarded (`found, _ = ...`), so a
+        symlinked subdirectory inside a *normative* root produced no diagnostic
+        at all -- only backlog problems reached DM-14 (R11-05);
+      * nothing enforced uniqueness, so a path reachable both as a governed
+        file and through a root could be classified twice, inflating the counts
+        that DM-14's accounting identity is supposed to make trustworthy
+        (R11-01).
+
+    The set is therefore returned as a set-like list: one entry per resolved
+    path, and the problems travel with it instead of being dropped.
+    """
+    problems: list[str] = []
     backlog = set(backlog_roots(root))
     skip = governed_prefixes()
+    seen: dict[str, Path] = {}
+
+    def add(path: Path) -> None:
+        # Keyed on the resolved path: two spellings of one file are one file.
+        # A symlink never reaches here -- scan_root() reports it instead -- so
+        # this cannot silently collapse a link into its target.
+        try:
+            key = path.resolve(strict=True).as_posix()
+        except (OSError, RuntimeError):
+            key = path.as_posix()
+        seen.setdefault(key, path)
+
     for name in NORMATIVE_ROOTS + tuple(sorted(backlog)):
         # A backlog root must not re-scan a governed subtree inside it.
-        found, _ = scan_root(root, name, skip if name in backlog else ())
-        files.extend(found)
-    # GOVERNED_FILES uses the same containment test as the registry check, so
-    # the declared set and the scanned set cannot disagree: a path the registry
-    # accepts is a path this loop includes, and vice versa.
+        found, issues = scan_root(root, name, skip if name in backlog else ())
+        problems += issues
+        for path in found:
+            add(path)
+
+    # Individually governed files. They are checked with inside_repo() -- the
+    # same containment proof the registry uses -- and then enter the same set,
+    # so the declared set and the scanned set cannot diverge.
     for rel in GOVERNED_FILES:
         if inside_repo(root, rel):
-            files.append(root / rel)
+            add(root / rel)
+        else:
+            problems.append(
+                f"DM-14 governed file {rel} is not a regular file inside the "
+                f"repository (missing, a symlink, or reached through one)"
+            )
+
+    return list(seen.values()), problems
+
+def governed_files(root: Path) -> list[Path]:
+    """The governed set alone, for callers that only need the files.
+
+    Problems are *not* silently dropped here: they are reported by the one
+    caller that can fail (`main()`), through `collect_governed()`. This wrapper
+    exists because tests and diagnostics want the list without the error
+    channel; it must never be the only thing a verdict is built from.
+    """
+    files, _ = collect_governed(root)
     return files
 
 def check_scope_registry(root: Path) -> list[str]:
@@ -1594,17 +1744,24 @@ def check_scope_registry(root: Path) -> list[str]:
     # would assert something about a machine instead of about the repository --
     # a fresh clone would then fail for naming a directory it does not have.
     accounted = set(declared) | set(backlog) | set(excluded) | {"docs/en", "docs/zh-CN"}
-    on_disk = {p.name for p in root.iterdir() if p.is_dir()} - STRUCTURAL_EXCEPTIONS
-    # A symlinked directory is not part of this repository's content. Listing it
-    # in the registry would require the gate to scan through the link, so it is
-    # refused outright instead of being declared.
+    # `Path.is_dir()` follows links, so a symlink to a directory satisfied both
+    # "is a directory" and "is a symlink" and was subtracted from the unknown
+    # list twice: once as accounted, once as a link. It then also satisfied the
+    # `missing` check below, which asks whether every *declared* directory
+    # exists -- so pointing `docs` at /tmp/elsewhere made a registry entry true
+    # that was false. Enumeration is by `is_dir() and not is_symlink()`: a link
+    # is never a directory, for either purpose.
     links = sorted(p.name for p in root.iterdir() if p.is_symlink())
     if links:
         errors.append(
             f"DM-14 symbolic links at the repository root are not governed roots: {links}. "
             f"A symlink makes the governed set depend on a target outside the repository"
         )
-    unknown = sorted(on_disk - accounted - set(links))
+    on_disk = {
+        p.name for p in root.iterdir()
+        if p.is_dir() and not p.is_symlink()
+    } - STRUCTURAL_EXCEPTIONS
+    unknown = sorted(on_disk - accounted)
     if unknown:
         errors.append(
             f"DM-14 top-level directories not accounted for: {unknown}. "
@@ -1741,11 +1898,14 @@ def main() -> int:
     incremental = args.require_changed is not None
     if incremental and args.strict:
         parser.error("--require-changed and --strict are different verdicts; pick one")
-    targets = governed_files(root)
+    targets, walk_problems = collect_governed(root)
     required = changed_paths(root, args.require_changed) if args.require_changed else set()
     is_git = git(root, "rev-parse", "--git-dir") is not None
 
-    errors: list[str] = []
+    # Problems the walk itself found -- symlinks, unreadable roots -- are
+    # errors of the run, not warnings. They arrive with the file list so that
+    # no path can produce a shorter list without a diagnostic.
+    errors: list[str] = list(walk_problems)
     notes: list[str] = []
     docs: dict[str, dict] = {}
     unclassified: list[str] = []
