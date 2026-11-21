@@ -19,75 +19,154 @@ document_metadata:
 # BMCP 协议消息类型索引
 
 - 范围：`08-bmcp-protocol/`
-- 基线：`1ad6c2cf67a228f597fcbe1c7149c328ecbf38e9`
-- 目的：按文件是否存在登记消息类型工件，不为语义正确性背书。
+- 审计基线：`2f8c00d835b04c75e71f1a6ba33e1e465445dec0`
+- 目的：按 Schema 中真实的 `message_type` 约束登记消息及工件存在性。本索引不为语义正确性或生产一致性背书。
+- 检查器：`python3 08-bmcp-protocol/scripts/check_protocol_index.py`
+- 回归测试：`python3 -m unittest discover -s 08-bmcp-protocol/tests -p 'test_protocol_index_consistency.py' -v`
+
+## 盘点方法与实测结果
+
+盘点器只遍历 `08-bmcp-protocol/schemas/*.json`，只统计附着于名为 `message_type` 的属性上的有限字符串约束（`const`、`enum`，包括嵌套的 `oneOf`/`anyOf`/`allOf` 和条件分支）。其他枚举、状态值、事件名、散文、fixture，以及没有有限取值的通用声明 `message_type: { "type": "string" }` 均不计为消息类型。
+
+| 指标 | 审计基线结果 |
+|---|---:|
+| `schemas/` 中的 JSON Schema 文件 | 32 |
+| 含有限 `message_type` 约束的文件 | 31 |
+| 不含有限 `message_type` 约束的文件 | 1 |
+| 唯一消息类型 | 22 |
+| 本索引消息类型行数 | 22 |
+| 缺失 / 多余 / 重复 / 无效索引行 | 0 / 0 / 0 / 0 |
+
+唯一不含有限消息类型约束的文件是 `schemas/bmcp.i-owner-snapshot-attestation-1.0.0.schema.json`。它计入 Schema 文件总数，但不被误判为漏索引的消息。
 
 ## 消息类型
 
-| 消息类型 | 定义出处 | Schema | Validator | 一致性测试 | 状态 |
+以下 JSON Pointer 指向精确的 `const` 约束（另有说明时除外）。对于重复版本族，本索引记录代表性观测工件，不据此宣布该版本为规范当前版本。
+
+| 消息类型 | 定义来源 | Schema 与 JSON Pointer | Validator | 一致性测试 | 当前状态 |
 |---|---|---|---|---|---|
-| `APPLIED_DELIVERY_EVIDENCE_RECORDED` | Phase 3.8.25 加固补充；Phase 3.8.26 CSubmitOutcome 关联补充 | `schemas/bmcp.applied-delivery-evidence-1.0.0.schema.json`（1.0.0） | `validators/applied_delivery_evidence_validator.py` | `tests/conformance/applied_delivery_evidence/test_applied_delivery_evidence.py` | **IMPLEMENTED** — schema、validator、测试文件均存在。测试执行证据：由外部验证方提供，见 PR 描述。 |
-| `C_PROVIDER_OUTCOME_RECORDED` | C 所有的 CSubmitOutcome 1.0.1 来源 schema；Phase 3.8.26 引用 | C 所有外部 Schema Blob：`a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`；BMCP 内无 schema | **BMCP 内缺失** | `tests/conformance/provider_outcome/test_provider_outcome.py` — 仅结构验证，不含 C 语义一致性 | **PARTIAL** — BMCP 本地 validator 和 C 语义一致性验证仍缺失。本 PR 新增测试仅验证 schema 结构，不是 C 语义 Validator。 |
-| `RECOVERY_JOIN_PROOF`（RecoveryJoin 1.0.2） | Phase 3.8 H-RJ-HW-01 §§5–7 | `schemas/bmcp.recovery-join-1.0.2.schema.json` | `validators/recovery_join_validator.py` — 结构验证及 D 本地绑定 helper；D 权威能力通过回调注入 | `tests/conformance/recovery_cutoff/test_recovery_join_schema_artifact.py`（schema identity + valid/invalid fixtures）；`tests/conformance/recovery_cutoff/test_recovery_join_1_0_2.py`（D 绑定 helper） | **IMPLEMENTED（工件存在性）** — 三个文件均已存在。这不表示 D 已采纳 proof 格式、生产一致性已成立或权威 currentness 已验证；缺少 D callbacks 时结果保持 `UNKNOWN`。 |
+| `APPLIED_DELIVERY_EVIDENCE_RECORDED` | `phase-3.8.25-h-applied-delivery-evidence-hardening-addendum.md`；`phase-3.8.26-h-applied-delivery-evidence-csubmitoutcome-join-addendum.md` | `schemas/bmcp.applied-delivery-evidence-1.0.0.schema.json` — `/properties/message_type/const` | `validators/applied_delivery_evidence_validator.py` | `tests/conformance/applied_delivery_evidence/test_applied_delivery_evidence.py` | **IMPLEMENTED (artifact presence)** — Schema、Validator 和测试文件均存在；不代表生产一致性。 |
+| `COC_PARTICIPANT_MANIFEST` | Schema 内定义；`runtime_reference/recovery_cutoff_semantics.py` 是参考代码，不是权威来源 | `schemas/bmcp.recovery-cutoff-1.0.5.schema.json` — `/$defs/participantManifest/properties/message_type/const` | —（未找到专用 Validator） | `tests/conformance/recovery_cutoff/test_two_phase_recovery.py`（fixture/参考覆盖） | **SCHEMA PRESENT** — 测试/参考代码存在不等于权威一致性成立。 |
+| `COC_RECOVERY_CUTOFF_BATCH` | Schema 内定义；`runtime_reference/unified_manifest_semantics.py` 是参考代码，不是权威来源 | `schemas/bmcp.coc-jf10-unified-1.2.17.schema.json` — `/oneOf/0/allOf/1/properties/message_type/const` | —（参考语义不是生产 Validator） | `tests/conformance/recovery_cutoff/test_unified_manifest_1_2_15.py`；`tests/conformance/recovery_cutoff/test_unified_manifest_1_2_17.py` | **SCHEMA + REFERENCE TESTS PRESENT** — 不代表生产或权威一致性。 |
+| `C_PROVIDER_OUTCOME_RECORDED` | C 所有的 CSubmitOutcome 1.0.1 来源 Schema fixture；H Phase 3.8.26 join 补充；C Outcome 语义仍归 C 所有 | `schemas/bmcp.coc-jf10-unified-1.2.17.schema.json` — `/oneOf/10/allOf/1/properties/message_type/const`；重复条件 guard：`/oneOf/10/allOf/9/if/properties/message_type/const` | `validators/provider_outcome_validator.py`；`validators/provider_outcome_validator_1_2_15.py`；`validators/envelope_auth_validator.py`；`validators/gateway_attestation_validator.py` | `tests/conformance/provider_outcome/test_provider_outcome.py`；`tests/conformance/provider_outcome/test_provider_outcome_validator.py`；`tests/conformance/provider_outcome/test_envelope_auth_validator.py`；`tests/conformance/provider_outcome/test_gateway_attestation_validator.py` | **PARTIAL** — BMCP 结构/参考验证已存在；C 所有的 issuer、ledger、gate、provider side-effect 和最终请求权威检查仍属外部依赖；证据不可用时保持 UNKNOWN。 |
+| `I_JF10_TERMINAL_DECISION_OBSERVED` | `docs/en/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md`（来源引用）；保留精确消息拼写 | `schemas/bmcp.applied-ack-1.1.1-jf10-prepared-gid.schema.json` — `/oneOf/2/properties/message_type/const` | —（未找到专用 Validator） | —（未找到消息专属测试） | **SCHEMA PRESENT** — 不给出一致性结论。 |
+| `JF10_BRIDGE_RECONCILIATION_RECORDED` | Schema 内定义；本次限定范围内未映射到独立规范来源 | `schemas/bmcp.applied-ack-1.1.1-jf10-prepared-gid.schema.json` — `/oneOf/4/properties/message_type/const`；Unified 1.2.17：`/oneOf/9/allOf/1/properties/message_type/const` | —（未找到专用 Validator） | `tests/conformance/recovery_cutoff/test_unified_manifest_1_2_15.py`（消息族覆盖） | **SCHEMA + LIMITED TEST REFERENCE** — 无专用 Validator 或生产一致性结论。 |
+| `JF10_I_TERMINAL_DECISION_OBSERVED` | Schema 内定义；不得与 `I_JF10_TERMINAL_DECISION_OBSERVED` 混为一谈 | `schemas/bmcp.coc-jf10-unified-1.2.17.schema.json` — `/oneOf/7/allOf/1/properties/message_type/const` | —（未找到专用 Validator） | `tests/conformance/recovery_cutoff/test_unified_manifest_1_2_15.py`；`tests/conformance/recovery_cutoff/test_i_crypto_profile.py` | **SCHEMA + REFERENCE TESTS PRESENT** — 不代表生产权威验证。 |
+| `JF10_PREPARED_PARTICIPANT_REGISTERED` | `docs/en/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md` | `schemas/bmcp.applied-ack-1.1.1-jf10-prepared-gid.schema.json` — `/oneOf/1/properties/message_type/const`；Unified 1.2.17：`/oneOf/6/allOf/1/properties/message_type/const` | —（未找到专用 Validator） | `tests/conformance/recovery_cutoff/test_unified_manifest_1_2_15.py`（消息族覆盖） | **SCHEMA + LIMITED TEST REFERENCE** — 无专用 Validator 或生产一致性结论。 |
+| `JF10_PREPARE_INTENT_REGISTERED` | `docs/en/03-memory-brain/forget-fence-operation-and-publication-gate-part4.md`；`docs/en/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md` | `schemas/bmcp.applied-ack-1.1.1-jf10-prepared-gid.schema.json` — `/oneOf/0/properties/message_type/const`；Unified 1.2.17：`/oneOf/5/allOf/1/properties/message_type/const` | —（未找到专用 Validator） | `tests/conformance/recovery_cutoff/test_unified_manifest_1_2_15.py`（消息族覆盖） | **SCHEMA + LIMITED TEST REFERENCE** — 无专用 Validator 或生产一致性结论。 |
+| `JF10_STORAGE_PARTICIPANT_RESOLVED` | Schema 内定义；不得与 `STORAGE_JF10_PARTICIPANT_RESOLVED` 混为一谈 | `schemas/bmcp.coc-jf10-unified-1.2.17.schema.json` — `/oneOf/8/allOf/1/properties/message_type/const` | —（未找到专用 Validator） | `tests/conformance/recovery_cutoff/test_unified_manifest_1_2_15.py`（消息族覆盖） | **SCHEMA + LIMITED TEST REFERENCE** — 无专用 Validator 或生产一致性结论。 |
+| `OWNER_ADMISSION_ENTRY` | Schema 内定义；本次限定范围内未映射到独立规范来源 | `schemas/bmcp.recovery-cutoff-1.0.5.schema.json` — `/$defs/admissionEntry/properties/message_type/const` | —（未找到专用 Validator） | —（未找到消息专属测试） | **SCHEMA PRESENT** — 不给出一致性结论。 |
+| `OWNER_ADMISSION_SNAPSHOT_ATTESTATION` | Schema 内定义；本次限定范围内未映射到独立规范来源 | `schemas/bmcp.recovery-cutoff-1.0.5.schema.json` — `/$defs/ownerSnapshot/properties/message_type/const` | —（未找到专用 Validator） | —（未找到消息专属测试） | **SCHEMA PRESENT** — 不给出一致性结论。 |
+| `OWNER_GATE_RELEASE_ATTESTATION` | Schema 内定义；本次限定范围内未映射到独立规范来源 | `schemas/bmcp.recovery-cutoff-1.0.5.schema.json` — `/$defs/gateRelease/properties/message_type/const` | —（未找到专用 Validator） | —（未找到消息专属测试） | **SCHEMA PRESENT** — 不给出一致性结论。 |
+| `OWNER_LOCAL_GATE_RELEASE` | `runtime_reference/owner_gate_release_semantics_1_2_17.py`（仅参考语义） | `schemas/bmcp.coc-jf10-unified-1.2.17.schema.json` — `/oneOf/3/allOf/1/properties/message_type/const` | —（参考代码不是权威生产 Validator） | `tests/conformance/recovery_cutoff/test_owner_gate_release_1_2_17.py`；`tests/conformance/recovery_cutoff/test_unified_manifest_1_2_17.py` | **SCHEMA + REFERENCE TESTS PRESENT** — 缺少 Owner verifier 时，权威检查仍为 UNKNOWN。 |
+| `OWNER_LOCAL_PENDING_GATE` | `runtime_reference/unified_manifest_semantics.py`（仅参考语义） | `schemas/bmcp.coc-jf10-unified-1.2.17.schema.json` — `/oneOf/2/allOf/1/properties/message_type/const` | —（参考代码不是权威生产 Validator） | `tests/conformance/recovery_cutoff/test_unified_manifest_1_2_15.py`；`tests/conformance/recovery_cutoff/test_i_crypto_profile.py` | **SCHEMA + REFERENCE TESTS PRESENT** — 缺少 Owner verifier 时，权威检查仍为 UNKNOWN。 |
+| `PARTICIPANT_SET_RECONCILIATION` | `runtime_reference/unified_manifest_semantics.py`（仅参考语义） | `schemas/bmcp.coc-jf10-unified-1.2.17.schema.json` — `/oneOf/1/allOf/1/properties/message_type/const` | —（参考代码不是权威生产 Validator） | `tests/conformance/recovery_cutoff/test_unified_manifest_1_2_15.py`；`tests/conformance/recovery_cutoff/test_unified_manifest_1_2_17.py` | **SCHEMA + REFERENCE TESTS PRESENT** — 缺少 Owner verifier 时，权威检查仍为 UNKNOWN。 |
+| `RECOVERY_CUTOFF_BATCH` | `runtime_reference/recovery_cutoff_semantics.py`（仅参考语义） | `schemas/bmcp.recovery-cutoff-1.0.5.schema.json` — `/$defs/recoveryBatch/properties/message_type/const` | —（未找到专用权威 Validator） | `tests/conformance/recovery_cutoff/test_two_phase_recovery.py`；`tests/conformance/recovery_cutoff/test_hrc_semantics.py` | **SCHEMA + REFERENCE TESTS PRESENT** — 不代表生产或权威一致性。 |
+| `RECOVERY_EPOCH_COMPLETED` | Schema 内定义；同时存在于 Recovery Cutoff 与 Unified 版本族 | `schemas/bmcp.coc-jf10-unified-1.2.17.schema.json` — `/oneOf/4/allOf/1/properties/message_type/const`；以及 `schemas/bmcp.recovery-cutoff-1.0.5.schema.json` — `/$defs/epochCompleted/properties/message_type/const` | —（未找到专用 Validator） | `tests/conformance/recovery_cutoff/test_unified_manifest_1_2_15.py`; `tests/conformance/recovery_cutoff/test_unified_manifest_1_2_17.py`；`tests/conformance/recovery_cutoff/test_two_phase_recovery.py` | **SCHEMA + REFERENCE TESTS PRESENT** — 不代表生产一致性。 |
+| `RECOVERY_JOIN_PROOF` | Phase 3.8 H-RJ-HW-01 §§5–7；消息类型拼写继承自固定源 Schema Blob `4b664e3bce465499bcdfd93796349a4ba7074002` | `schemas/bmcp.recovery-join-1.0.2.schema.json` — `/properties/message_type/const` | `validators/recovery_join_validator.py` | `tests/conformance/recovery_cutoff/test_recovery_join_schema_artifact.py`；`tests/conformance/recovery_cutoff/test_recovery_join_1_0_2.py` | **IMPLEMENTED (artifact presence)** — 不代表 D 已采纳 proof、生产一致性成立或权威 currentness 已验证；缺少 D callbacks 时保持 UNKNOWN。 |
+| `STORAGE_JF10_PARTICIPANT_RESOLVED` | `docs/en/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md`；精确拼写不同于 Unified 的 `JF10_STORAGE_PARTICIPANT_RESOLVED` | `schemas/bmcp.applied-ack-1.1.1-jf10-prepared-gid.schema.json` — `/oneOf/3/properties/message_type/const` | —（未找到专用 Validator） | —（未找到消息专属测试） | **SCHEMA PRESENT** — 不给出一致性结论。 |
+| `Storage.PreparedParticipantReceipt` | Schema 内定义；本次限定范围内未映射到独立规范来源 | `schemas/bmcp.storage-prepared-participant-proof-1.0.0.schema.json` — `/$defs/preparedReceiptMessage/properties/message_type/const` | —（未找到专用 Validator） | —（未找到消息专属测试） | **SCHEMA PRESENT** — 不给出一致性结论。 |
+| `Storage.StorageResolutionProof` | Schema 内定义；本次限定范围内未映射到独立规范来源 | `schemas/bmcp.storage-prepared-participant-proof-1.0.0.schema.json` — `/$defs/storageResolutionMessage/properties/message_type/const` | —（未找到专用 Validator） | —（未找到消息专属测试） | **SCHEMA PRESENT** — 不给出一致性结论。 |
+
+## 完整 Schema 清单
+
+本次审计目录中全部 32 个 JSON Schema 文件：
+
+- `bmcp.applied-ack-1.1.0-jf10-bridge.schema.json`
+- `bmcp.applied-ack-1.1.1-jf10-prepared-gid.schema.json`
+- `bmcp.applied-delivery-evidence-1.0.0.schema.json`
+- `bmcp.coc-jf10-unified-1.2.0.schema.json`
+- `bmcp.coc-jf10-unified-1.2.1.schema.json`
+- `bmcp.coc-jf10-unified-1.2.2.schema.json`
+- `bmcp.coc-jf10-unified-1.2.3.schema.json`
+- `bmcp.coc-jf10-unified-1.2.4.schema.json`
+- `bmcp.coc-jf10-unified-1.2.5.schema.json`
+- `bmcp.coc-jf10-unified-1.2.6.schema.json`
+- `bmcp.coc-jf10-unified-1.2.7.schema.json`
+- `bmcp.coc-jf10-unified-1.2.8.schema.json`
+- `bmcp.coc-jf10-unified-1.2.9.schema.json`
+- `bmcp.coc-jf10-unified-1.2.10.schema.json`
+- `bmcp.coc-jf10-unified-1.2.11.schema.json`
+- `bmcp.coc-jf10-unified-1.2.12.schema.json`
+- `bmcp.coc-jf10-unified-1.2.13.schema.json`
+- `bmcp.coc-jf10-unified-1.2.14.schema.json`
+- `bmcp.coc-jf10-unified-1.2.15.schema.json`
+- `bmcp.coc-jf10-unified-1.2.16.schema.json`
+- `bmcp.coc-jf10-unified-1.2.17.schema.json`
+- `bmcp.i-owner-snapshot-attestation-1.0.0.schema.json`
+- `bmcp.recovery-cutoff-1.0.0.schema.json`
+- `bmcp.recovery-cutoff-1.0.1.schema.json`
+- `bmcp.recovery-cutoff-1.0.2.schema.json`
+- `bmcp.recovery-cutoff-1.0.3.schema.json`
+- `bmcp.recovery-cutoff-1.0.4.schema.json`
+- `bmcp.recovery-cutoff-1.0.5.schema.json`
+- `bmcp.recovery-join-1.0.0.schema.json`
+- `bmcp.recovery-join-1.0.1.schema.json`
+- `bmcp.recovery-join-1.0.2.schema.json`
+- `bmcp.storage-prepared-participant-proof-1.0.0.schema.json`
+
+## Unified Schema 版本声明
+
+**Latest observed artifact：** `bmcp.coc-jf10-unified-1.2.17.schema.json`；**canonical current version: NOT DECLARED**。
+
+证据：
+- 审计目录中存在 18 个不同的 Unified 工件，编号为 1.2.0 至 1.2.17。
+- 1.2.17 是当前观测到的最高语义版本，其自身 description 将其称为 artifact revision 1.2.17；这并未声明它是规范当前版本。
+- 在 Unified Schemas 和本索引中，没有找到版本发布/替代规则，也没有找到权威 current-version 声明。
+- 一致性材料仍明确引用较早版本，包括 1.2.8、1.2.10、1.2.11、1.2.12、1.2.14、1.2.15 和 1.2.16。1.2.10 测试有一条本地 skip 注释，称其语义被 1.2.11/1.2.12 替代；这条测试注释不是整个仓库的版本发布政策。
+- 因此，在权威裁定记录前，本索引 MUST NOT 写成 `Current unified schema: ...1.2.17...`。
+
+**所需权威裁定：** BMCP Protocol Owner（Owner H）必须提供版本发布/替代规则并推荐规范版本；Architecture Owner 必须批准 canonical-current 声明。本索引不以文件名排序代替任何一方的裁定。
 
 ## 类型定义（非消息类型）
 
-| 类型 | 定义出处 | 分类 |
+以下类型不计入 22 个消息类型：
+
+| 类型 | 定义来源 | 分类 |
 |---|---|---|
-| `ProducerRegistrationHighWater` | Phase 3.8 H-RJ-HW-01 §3 | 类型化高水位值；不是消息 envelope |
-| `ForgetFenceGeneration` | Phase 3.8 H-RJ-HW-01 §5 | 类型化 Fence generation；不是消息 envelope |
+| `ProducerRegistrationHighWater` | Phase 3.8 H-RJ-HW-01 §3 | 类型化 high-water 值；不是消息 envelope。 |
+| `ForgetFenceGeneration` | Phase 3.8 H-RJ-HW-01 §5 | 类型化 Fence generation；不是消息 envelope。 |
 
 ## 证据边界声明
 
-本索引只登记指定仓库基线中 schema、validator 和测试工件是否存在。它**不**判定这些工件的语义是否正确、完整、安全、可互操作或已获 Owner 接受。
+本索引记录 Schema 约束以及指定 Validator/测试工件是否存在。它**不**判定语义是否正确、完整、安全、可互操作或已获 Owner 接受。
 
-- `IMPLEMENTED` 表示 schema、validator、一致性测试文件三者均存在；这本身不代表本 PR 中测试已通过，也不代表生产/runtime 行为已经实现。
-- `PARTIAL` 明确标识缺失工件及所有权边界；外部 schema 不得被算作 BMCP 本地实现。
-- `NOT DEFINED` 表示契约/文档中存在引用，但 BMCP schema 目录没有交付相应 schema 工件。
-- 语义正确性由规范性契约及对应 Owner 裁定。CSubmitOutcome 的 Outcome 语义仍归 C 所有。
-- 对于 `APPLIED_DELIVERY_EVIDENCE_RECORDED`，测试执行证据由外部验证方提供，并在 PR 描述中引用；本索引不声称 Owner H 在本地执行过测试。
+- `IMPLEMENTED (artifact presence)` 不代表生产一致性、Runtime 集成、Owner 采纳或权威 currentness。
+- `PARTIAL` 不等于 DONE；它表示边界未完成且仍依赖外部权威。
+- BMCP 本地 Schema/结构验证不等于 C 语义验证。
+- 参考实现或 fixture 测试不会自动成为权威 Validator。
+- 必要权威或证据不可用时，`UNKNOWN` 必须继续保持 `UNKNOWN`。
+
+没有 C 权威能力时，BMCP 无法确立 issuer/profile/key authenticity、C ledger inclusion 或 high-water currentness、gate linearization、provider evidence authenticity、实际 provider side-effect truth、COC transaction joins，或 `RequestDigest` 与最终 provider 请求边界实际字节之间的绑定。这些检查必须委托给 C 所有的 verifier；权威能力或证据不可用时必须保持 `UNKNOWN`。
+
+I/D/Storage 所有的 trust、membership、fence 和 prepared-participant 权威也适用相同边界。本地结构或确定性绑定检查不能证明这些外部事实。
+
+## 索引一致性门禁
+
+检查器强制验证：
+1. 每个 Schema 中发现的有限消息类型必须且只能出现在索引中一次。
+2. 每个索引消息类型必须至少存在于一个 Schema。
+3. 重复索引行必须失败。
+4. 每行必须引用真实存在、且确实约束该消息类型的 Schema。
+5. 新增 Schema 消息类型后，未更新索引必须失败。
+6. 删除或重命名消息类型后，陈旧索引行必须被发现并失败。
+7. 与 `message_type` 无关的枚举不得被计入。
+
+从仓库根目录运行：
+
+```sh
+python3 08-bmcp-protocol/scripts/check_protocol_index.py
+python3 -m unittest discover -s 08-bmcp-protocol/tests -p 'test_protocol_index_consistency.py' -v
+```
+
+该检查器只负责索引一致性，不验证消息语义、transport、framing、session、handshake、生产 Runtime 或 C/D/I/Storage 权威。
 
 ## CSubmitOutcome 一致性边界
 
-provider_outcome 测试套件只针对固定的 C 所有 Draft 2020-12 schema 和确定性结构进行检查；它不是 C 的语义 Validator。CPO-02、CPO-04、CPO-05、CPO-09、CPO-10 仍然 skip，等待以下 C 所有输入。
+provider_outcome 测试套件只检查固定的 C 所有 Draft 2020-12 Schema 和确定性结构；它不是 C 的语义 Validator。CPO-02、CPO-04、CPO-05、CPO-09 和 CPO-10 仍依赖 C 所有的 Outcome 语义、Ledger/High-Water 权威、Gate 证据和最终请求边界证明。
 
-| 向量 | 向量断言 | C 必须提供的权威输入 |
-|---|---|---|
-| CPO-02 — rejected but ambiguous | `HANDOFF_REJECTED` + `POSSIBLE_OR_UNKNOWN` 是有效观测，但不是终局的无副作用结论 | 版本化 Outcome/Disposition 表，定义拒绝但仍有歧义的语义、终局性、重试/协调策略以及关闭不确定性所需证据；Validator 必须区分“观测有效”与“终局” |
-| CPO-04 — unknown | `UNKNOWN` 表示 Provider Outcome 未确定，不代表没有副作用 | 规范化 UNKNOWN 原因分类及状态迁移/关闭规则；权威证明来源；返回 `VALID`/`INVALID`/`UNKNOWN` 三态且不得把证据不可用转成成功的验证器 |
-| CPO-05 — in doubt | `IN_DOUBT` 不得与 `UNKNOWN` 混为一谈 | 独立的 IN_DOUBT 状态定义、协调迁移、终局性规则及解决所需证据；证明其与 CPO-04 区别的 Validator 测试 |
-| CPO-09 — high-water exceeded | `COwnerLocalSequence > COwnerHighWater` 无效 | C 权威 Ledger/High-Water 证明，包含 Ledger 身份、sequence namespace、root/version、签名和当前性；将记录序号绑定到该权威 cutoff 的验证器 |
-| CPO-10 — request digest conflict | C 记录的 `RequestDigest` 与实际最终请求边界的 digest 冲突 | C 的规范化/digest profile、权威最终边界字节或不可变边界证明，以及重新计算/绑定 wire digest 的验证器。Fixture 的 `wire_request_digest` 是向量上下文，不是 CSubmitOutcome schema 属性 |
-
-针对上述五个向量，Owner C 必须发布版本化规范 Outcome/验证契约、等价于 `validate_c_submit_outcome(record, context)` 的权威可调用接口、该函数使用的证据/证明格式及 trust/key/ledger 验证接口，以及带预期结果的原始正反向 fixtures。其结果契约必须把三态验证（`VALID`/`INVALID`/`UNKNOWN`）与 Provider observation disposition、终局性/协调状态分开表达；仅返回 Boolean 或三态不足以表达 CPO-02 的 `VALID_AS_OBSERVATION_NOT_TERMINAL`，也不足以区分 CPO-04 与 CPO-05。精确结果 schema 由 C 定义。只有函数桩而没有权威契约和证据输入是不够的。
-
-不依赖 C 的 BMCP 本地 Validator 可以检查：
-- Draft 2020-12 schema 有效性、必填字段、类型、枚举、未知成员和 schema 中依赖 Outcome 的结构规则；
-- COC participant intent/reservation 配对；
-- 重复 JSON member 拒绝，以及同一输入对象中确实同时存在的字段之间的确定性相等关系；
-- 引用/digest 的结构，以及测试 fixture 是否明确标注为未注册或仅含密码学占位值。
-
-没有 C 权威能力时，BMCP 无法确立 issuer/profile/key 的真实性、C Ledger inclusion 或当前 High-Water、gate linearization、Provider evidence 真实性、实际 Provider side-effect truth、COC transaction join，或 `RequestDigest` 与最终 Provider 请求边界实际字节之间的绑定。这些检查必须委托给 C 所有的 Validator；权威能力或证据不可用时必须保持 `UNKNOWN`。
-
-CPO-08 fixture 决策：**选项 1 — 修正有效基线，并单独保留无效向量。** `CPO-08-valid-baseline` 现在包含 HANDOFF_ACCEPTED 所需的两个 Provider 引用以及完整 COC 配对。`CPO-08-coc-half-pair` 是独立负向量，保留相同 Provider 引用，只将 COC reservation 设为 null，因此拒绝结果隔离地验证预期 COC 半配对规则。测试不再依赖无关的 Provider 引用缺失缺陷。
+BMCP 本地 Validator 可以检查 Schema 有效性、必填字段、类型、枚举、未知成员、重复 JSON member 拒绝，以及输入对象中实际存在字段之间的确定性关系。它不能把不可用的 C 证据转换为成功。
 
 ## RecoveryJoin 1.0.2 一致性边界
 
-以下三个 BMCP 工件现已存在：
-- `schemas/bmcp.recovery-join-1.0.2.schema.json`
-- `validators/recovery_join_validator.py`
-- `tests/conformance/recovery_cutoff/test_recovery_join_1_0_2.py`
-
-Schema 和测试覆盖 H-RJ-HW-01 §§5–7 中明确规定的结构字段及必填性。Schema 的精确 message_type 为 `RECOVERY_JOIN_PROOF`，继承自契约固定的源 Schema Blob `4b664e3bce465499bcdfd93796349a4ba7074002`；H-RJ-HW-01 本身并未独立定义该消息类型字符串，因此其规范性归属仍是契约缺口。Validator 检查 JSON/schema 结构和确定性的 D 类型化高水位/Fence 元组绑定。若未提供 D 权威 membership-proof authentication 或 Fence currentness 验证，则返回 `UNKNOWN`。这不代表 D 已采纳该 proposed proof 格式，也不代表生产/runtime 一致性已经成立。
-
-对契约歧义保留明确标记，不作猜测：
-- 固定源 Schema Blob `4b664e3bce465499bcdfd93796349a4ba7074002` 声明 envelope `schema_version = 1.0.0`，而 schema `$id` 和契约工件文件名标识 1.0.2。H-RJ-HW-01 没有明确解决此差异；保留现有 envelope const，并在 schema `$comment` 中标记。
-- §5.4 将 currentness-proof generation 字段命名为 `forget_fence_generation`；§5.9 伪代码却引用 `proof.fence_generation`。Schema 遵循 §5.4 明确的对象定义，不臆造别名。
-- §5.8 将 `lineage_manifest_digest` 命名为 currentness-proof 字段，但 §5.4 未将其列入对象属性和 required 列表。Schema 允许该字段但不要求；当 evidence 需要比较而 proof 未提供该字段时，Validator 返回 `UNKNOWN`。
-- §§3.5/4.2 引用 `snapshot.owner_specific_high_waters.producer_registration_high_water`，而 §§5.5/7.1 规定顶层 `ownerSnapshot.producer_registration_high_water`。Schema 和 Validator 遵循 §§5.5/7.1 的明确 schema-addition 片段；在语义采纳前，契约应统一该载体路径差异。
-- §5.7 规定 D LINEAGE/BARRIER_MEMBERSHIP evidence 的 `target_set_digest` 和 `forget_fence_namespace_ref` SHOULD 条件必填，而非 MUST。Schema 定义这两个属性但不强制；语义 helper 在缺失时返回 `UNKNOWN`。
-- D 实际 namespace identifier 编码、权威 proof 签发、签名验证和 currentness 查询接口仍未由契约提供。Schema 只验证结构；依赖权威的检查需要注入 D callbacks。
-
-## 测试执行证据
-
-Owner H 本轮未执行本地 pytest。测试函数数量不等于执行结果：provider_outcome 有 10 个测试函数（其中 5 个语义 skip）；applied_delivery_evidence 有 30 个；RecoveryJoin 1.0.2 有 26 个。本轮不声称任何 passed/skipped/failed 实际运行总数，仍需外部重新执行输出。
+RecoveryJoin Schema、Validator 和一致性测试均存在。Validator 检查 JSON/Schema 结构及确定性的 D 类型化 high-water/Fence 元组绑定。若未提供 D 权威 membership-proof authentication 或 Fence currentness 验证，则返回 `UNKNOWN`。这不表示 D 已采纳 proposed proof 格式，也不表示生产/Runtime 一致性已经成立。
