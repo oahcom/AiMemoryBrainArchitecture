@@ -61,6 +61,12 @@ Main pins are from fetched origin/main at 477a55e624bcc244dfb65c435bc8d03f718b1e
 
 This is a bounded source ledger, not a claim that every H artifact or consumer was independently reviewed.
 
+### 2.3 B/D/I Owner decision pins
+
+- B Owner decision: PR #429 comment 7060251435; B source branch `session-b-domain-model-phase3 @ 840202a98cf40a0b3f194afb84bed4d5f3326658`; `domain-model-overview.md` Blob `4d1debc0ec19b3917f9e76d04bb66da4df4cd346`.
+- D Owner decision: PR #429 comment 7060243632; D source branch `session-d-memory-brain-2026-11-16 @ b525e1f8fee2471a131e4a38efda99804045e424`; `memory-versioning.md` Blob `af747f339d03bdd4684b6ed60fca05957dc8e1fb`; Forget contract Blob `1f0391bc49d007c44ec74165bd33d37412cc7990`.
+- I Owner decision: PR #429 comment 7060259541; I source branch `session-i-security-governance-2026-11-16 @ 8abddf814467b271344a9814613a6b7ca6a446c6`; Principal/Actor contract Blob `03765efac4bb1153f303ce0030f9e277d602e81d`; Scope/Revocation Blob `71df6aaf21bb1767cd9fe5c947581b871325e023`; Global Forget inventory Blob `9100061fa986fb6676656169de3fcf9fc1c72664`.
+
 ## 3. File ownership matrix and allowed changes
 
 | File / area | Owner | This work item | Boundary |
@@ -433,18 +439,26 @@ The earlier broad acceptance wording is superseded by this scope correction. H r
 | Canonical BMCP name | RESOLVED — Brain Memory Context Protocol | Main terminology Blob `b8770fbb58e4fac087698043c40a57531b1d244d`; “Brain Memory Control Protocol” is non-canonical |
 | Fact/Claim semantics | RESOLVED — Option A + I1 | Merged Owner decision PR #446; Blob `d59756a8eb454480804c482ca03c68345ab5abf2` |
 | Fact/Claim field/wire schema | CANDIDATE / NOT FROZEN | B/D/E/F/G/H/I consumer artifacts must be version-pinned and reviewed; no payload fields approved |
-| H-CONFIRM-001..004 | ACCEPTED_SEMANTICALLY_BY_OWNER_DELEGATE / NOT_WIRE_FROZEN | H owns normative wire/spec updates; no independent H signature is claimed |
-| BMCP-DR-002 | DEFERRED_TO_D_I_OWNER_CONTRACT_PUBLICATION | D/I publish exact callable interface/IDL/currentness vocabulary; H must not invent authority APIs |
-| BMCP-DR-003 / MCP mapping | OPEN — Issue #449 | C publishes exact Agent/MCP-to-BMCP mapping; H reviews only its wire/transport side |
+| H-CONFIRM-001..004 | PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN | Logical semantics decided with INDEPENDENCE_UNVERIFIABLE; exact registry/schema/crypto/Storage/error artifacts remain open |
+| BMCP-DR-002 | DECIDED_AT_AUTHORITY_BOUNDARY / CALLABLE_API_IDL_DEFERRED | D/I are authoritative; exact callable API/IDL/currentness vocabulary remains D/I-owned and open |
+| BMCP-DR-003 / MCP mapping | PARTIALLY_DECIDED — Issue #449 | MCP is C-owned Agent Adapter/Gateway; exact C/H operation mapping remains open |
 | BMCP Runtime / AT-01..AT-20 | NOT AUTHORIZED / NOT RUN | Issue #7 implementation binding remains deferred |
 
 **D/I evidence for BMCP-DR-002 (ownership evidence, not callable API publication):**
 - D: `docs/en/03-memory-brain/forget-fence-and-completion-contract.md` Blob `c791895333ab6140f035f4f622d5dee9325d422d`; `forget-fence-operation-and-publication-gate.md` Blob `9c054932994bb078e2834df8bd66f73895aa04f5`; `memory-versioning.md` Blob `4efbd26db9586f6fcf1897f42ffba287d625b903`; `commit-cursor-semantics.md` Blob `2de7fe35229372ae5b06093e5e031c2c243fbd7c`.
 - I: `docs/en/09-security-governance/security-governance-guide.md` Blob `061c5847b3df879eeaf3c71e5eae0bfa162b276a`; Chinese mirror Blob `372d27c79dc79d09bcdb0f142c979efdba1c2b6e`.
 - These sources define domain semantics and operation names, not a complete callable API/IDL or frozen wire representation. D names RegisterProducerWork, InstallForgetFence, PublishDerivedIfFenceCurrent, CompleteProducerWork, ResolveProducerWork and ReconcileForgetBarrier. I defines PermissionEpoch, AuthorizationDecisionRef, revocation/currentness and evidence acceptance; no frozen public authorize() endpoint/schema exists.
-- Ruling: D remains sole authority for canonical ForgetOperation/Fence and producer-barrier semantics; I remains sole authority for Principal authorization, PermissionEpoch, revocation and global Forget policy. BMCP carries opaque owner-issued refs/epochs and calls only the owning authority's validation/currentness operation after publication. PermissionEpoch and ForgetFence are distinct nominal types. Missing/stale/unavailable/indeterminate evidence fails closed.
+- Ruling: D/I Owner comments 7060243632 and 7060259541 DECIDE this authority boundary. D remains sole authority for canonical ID/revision/currentness, lifecycle, ConflictSet, ForgetOperation/Fence and producer-barrier semantics; I remains sole authority for Principal/Actor/attestor authorization, PermissionEpoch, revocation, retention/legal-hold/backup and global Forget policy/evaluation. BMCP carries opaque owner-issued refs/epochs and calls only the owning authority's validation/currentness operation after publication. PermissionEpoch and ForgetFence are distinct nominal types. Missing/stale/unavailable/indeterminate evidence fails closed. Exact callable APIs/IDL/schema remain open and must be published by D/I.
 
 **C mapping boundary:** Issue #449 is open and records that MCP Server, if selected, is C's northbound Agent-facing Adapter/Gateway, not BMCP and not a parallel Brain API. C must map Agent request/attempt identities to H message_id/correlation_id/causation_id, preserve Principal provenance and I authorization, and distinguish tool result, BMCP business response, transport ACK, E receipt and G Applied. No C response or acceptance is recorded yet.
+
+### 7.4 B/D/I Owner decisions (delegated roles; no independent human signatures claimed)
+
+- **B — PR #429 comment 7060251435:** accepts Option A + I1. Claim is an attributable proposition thread; ClaimRevision is immutable; Fact is a separate governed attestation; FactRevision binds exact ClaimRevisionRef(s), Evidence/Provenance and authorized attestor/method context. B owns semantic vocabulary; D owns canonical identity; I owns authorization.
+- **D — PR #429 comment 7060243632:** accepts Option A + I1 as canonical-domain input. D owns ClaimRef/ClaimRevisionRef and FactRef/FactRevisionRef allocation, revision commit/currentness, lifecycle, lineage, ConflictSet and ForgetOperation/ForgetFence. Exact immutable-revision transaction/currentness, schema, migration/compatibility, consumer acceptance and conformance remain OPEN.
+- **I — PR #429 comment 7060259541:** accepts Option A + I1 as security-policy input. Fact creation/revision is a protected action requiring authenticated Principal/Actor binding, exact attestor authorization and current I-issued PermissionEpoch at final authorization/commit. Cached ALLOW/session/lease/ACK is not reusable authorization. I owns attestor authorization, revocation, retention/legal-hold/backup and global Forget evaluation. Exact policy partitioning, issuer/registry binding and consumer mapping remain OPEN.
+
+**Required source reconciliation:** B must update its domain-model-overview and B-ADR status/source pins; D must update existing memory-versioning/Forget sources and mirrors; I must update existing Principal/Actor authorization and Forget sources/mirrors. Current source statements that semantic selection is undecided/ADR-blocked are stale as to semantic selection, but schema/API/implementation gates remain open.
 
 ## 8. Runtime acceptance plan — NOT RUN
 
