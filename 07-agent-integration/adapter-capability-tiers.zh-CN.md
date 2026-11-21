@@ -35,7 +35,7 @@
 该映射是对本文已标记为 DECIDED 的等级保证所作的可执行解释。线上协商、已认证的能力声明、传输、Provider 集成、真实推理和生产级遥测均不在范围内。本模型不声称实现上述能力。
 
 
-## 15. 内存上下文交付生命周期（已实现的参考行为）
+## 17. 内存上下文交付生命周期（已实现的参考行为）
 
 crate 现在提供 `ContextDeliveryAdapter` trait 和 `InMemoryContextDeliveryAdapter`。内存实现按 session 保存已应用的 `ContextSnapshot` 与连接标志。
 
