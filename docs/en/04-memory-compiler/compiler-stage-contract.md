@@ -454,6 +454,8 @@ The reference crate MUST NOT claim production durability, distributed atomicity,
 
 Every unimplemented authority integration MUST be explicitly identified as `NOT IMPLEMENTED` with a named dependency.
 
+**NOT IMPLEMENTED:** The production `PublicationAuthority` adapter is absent; it depends on Owner D's authoritative Admission/Fence and canonical/dependency evidence, Owner I's current authorization evidence, and the Storage authority owner's `PREPARED_HIDDEN` and protected-visibility confirmation.
+
 Schema, DDL, Public API, H Wire Format, production keys, Trust Root, Crypto Profile and Storage L4 approval remain `NOT APPROVED`.
 
 ---
@@ -462,18 +464,13 @@ Schema, DDL, Public API, H Wire Format, production keys, Trust Root, Crypto Prof
 
 | Check | Command | Result |
 |---|---|---|
-| Build | `cargo build --offline -p memory-compiler` | PASS, 0 warnings |
-| Tests | `cargo test --offline -p memory-compiler` | PASS, 11 passed / 0 failed |
-| Dependencies | `Cargo.toml` `[dependencies]` | empty — pure Rust, no SQLite, no network, no model provider |
+| Build | `cargo build --offline -p memory-compiler` | PASS with default features; no C compiler invoked |
+| Tests | `cargo test --offline -p memory-compiler` | PASS, 30 passed / 0 failed / 0 ignored |
+| SQLite adapter | `cargo test --offline -p memory-compiler --features sqlite` | PASS, 30 passed / 0 failed / 1 ignored |
+| Dependencies | `Cargo.toml` | `rusqlite` is optional behind the non-default `sqlite` feature; the default compiler/admission suite has no SQLite native build dependency |
 
-Toolchain actually used: `cargo 1.100.0` / `rustc 1.100.0`.
+Toolchain actually used: `cargo 1.100.0` / `rustc 1.100.0` on Linux x86_64. The default test command was also run with `CC=/bin/false` and `CXX=/bin/false`, confirming that it does not invoke a C compiler.
 
-The crate deliberately depends on nothing. Any crate depending on `libsqlite3-sys` cannot be built
-in the current environment because the local `gcc` installation lacks `cc1`; that is an environment
-defect, not a defect in this crate, and it is why this crate carries no storage dependency.
+The 30 default tests comprise 23 compiler/execution-state tests and 7 admission-port tests. The one ignored feature-gated integration test exercises SQLite cross-connection transaction/locking serialization. It remains ignored in the ordinary feature-enabled suite because it requires an explicit integration run on a host with SQLite build/link support; it was also explicitly run with `-- --ignored` on this C-capable Linux host and passed (1 passed / 0 failed).
 
-What these 11 tests prove: the stage pipeline enforces the two admissions independently, refuses
-staged visibility before all six conditions hold, suppresses a late worker generation, and requires
-a complete dependency closure. What they do not prove: any property of a real Event Store, Storage
-adapter, Fence, or authorization service — none of those are implemented here.
-
+The default feature set can therefore be built and tested without a C toolchain. Enabling the optional `sqlite` adapter still builds bundled SQLite and requires a suitable C toolchain; the stated Windows machine still cannot run that one SQL integration test until it has SQLite build/link support. The port-level tests prove the in-memory admission semantics (idempotency, conflict detection, dependency completeness, state transitions, fence ordering and gate receipt behavior); neither they nor the local SQLite integration test prove production D/Storage/I integrations.

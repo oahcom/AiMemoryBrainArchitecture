@@ -1,6 +1,7 @@
 //! Memory Compiler reference pipeline.
-//! Pure Rust. No database, network, model-provider or authorization implementation.
-//! Production authority integrations are explicit traits and remain unimplemented.
+//! The core pipeline and in-memory admission conformance store are pure Rust.
+//! The optional `admission::sqlite` adapter uses SQLite for a local admission ledger.
+//! No network, model-provider or production authorization implementation is included.
 
 pub mod admission;
 

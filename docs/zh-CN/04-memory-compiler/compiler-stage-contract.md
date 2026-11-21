@@ -454,6 +454,8 @@ E MUST NOT 引入第二个 Forget Fence、独立 Ordering Anchor 或独立 Publi
 
 每项未实现的权威集成都 MUST 使用 `NOT IMPLEMENTED` 显式标注，并给出具名依赖。
 
+**NOT IMPLEMENTED：** 生产级 `PublicationAuthority` 适配器尚未实现；其依赖项为 Owner D 提供的权威 Admission/Fence 与 Canonical/Dependency 证据、Owner I 提供的当前 Authorization 证据，以及 Storage 权威责任方提供的 `PREPARED_HIDDEN` 与受保护可见性确认。
+
 Schema、DDL、Public API、H Wire Format、Production Keys、Trust Root、Crypto Profile 和 Storage L4 Approval 均保持 `NOT APPROVED`。
 
 ---
@@ -462,16 +464,13 @@ Schema、DDL、Public API、H Wire Format、Production Keys、Trust Root、Crypt
 
 | 检查 | 命令 | 结果 |
 |---|---|---|
-| 构建 | `cargo build --offline -p memory-compiler` | PASS，0 警告 |
-| 测试 | `cargo test --offline -p memory-compiler` | PASS，11 通过 / 0 失败 |
-| 依赖 | `Cargo.toml` 的 `[dependencies]` | 为空——纯 Rust，无 SQLite、无网络、无模型提供方 |
+| 构建 | `cargo build --offline -p memory-compiler` | PASS，默认 features；未调用 C 编译器 |
+| 测试 | `cargo test --offline -p memory-compiler` | PASS，30 通过 / 0 失败 / 0 忽略 |
+| SQLite 适配器 | `cargo test --offline -p memory-compiler --features sqlite` | PASS，30 通过 / 0 失败 / 1 忽略 |
+| 依赖 | `Cargo.toml` | `rusqlite` 通过非默认 `sqlite` feature 作为可选依赖；默认 Compiler/Admission 测试不依赖 SQLite 原生构建 |
 
-实际使用的工具链：`cargo 1.100.0` / `rustc 1.100.0`。
+实际使用的工具链：Linux x86_64 上的 `cargo 1.100.0` / `rustc 1.100.0`。默认测试命令还在 `CC=/bin/false`、`CXX=/bin/false` 环境下运行，以确认没有调用 C 编译器。
 
-本 crate 刻意不依赖任何东西。任何依赖 `libsqlite3-sys` 的 crate 在当前环境无法构建，因为本机
-`gcc` 缺少 `cc1`；这是环境缺陷，不是本 crate 的缺陷，也正是本 crate 不携带存储依赖的原因。
+默认的 30 项测试由 23 项 Compiler/ExecutionState 测试和 7 项 Admission Port 测试组成。唯一被忽略的 feature-gated 集成测试检查 SQLite 跨连接事务/锁定序列化。由于它需要在具备 SQLite 构建/链接支持的主机上显式执行，因此在普通的 feature-enabled 测试中仍标记为 ignored；本轮也已在具备 C 工具链的 Linux 主机上通过 `-- --ignored` 显式执行并通过（1 通过 / 0 失败）。
 
-这 11 个测试证明了什么：stage 管线独立执行两次准入，在六个条件全部成立之前拒绝暂存可见性，
-抑制过期的 worker generation，并要求完整依赖闭包。它们没有证明什么：任何真实 Event Store、
-Storage 适配器、Fence 或授权服务的性质——这些在此均未实现。
-
+因此，默认 feature 集可在没有 C 工具链的环境中构建和测试。启用可选 `sqlite` 适配器仍会构建 bundled SQLite，因而需要合适的 C 工具链；指定的 Windows 机器在具备 SQLite 构建/链接支持之前仍无法运行该 SQL 集成测试。Port 层测试证明内存 Admission 语义（幂等、冲突检测、依赖完整性、状态转换、Fence 顺序和 Gate Receipt 行为）；这些测试及本地 SQLite 集成测试均不证明生产 D/Storage/I 集成。

@@ -1,16 +1,18 @@
 //! Durable producer admission primitives for the Memory Compiler.
 //!
-//! This crate implements the E-side lifecycle and a local SQLite admission
-//! ledger. It does not claim to be the D-authoritative producer ledger or to
-//! provide a cross-service D/Storage visibility transaction.
+//! This module defines the E-side lifecycle and admission-store port, with a
+//! pure-Rust in-memory implementation for conformance tests. The optional
+//! SQLite adapter is local only, not the D-authoritative ledger or a
+//! cross-service D/Storage visibility transaction.
 
 use memory_domain::{OpaqueId, ScopeRef};
-use rusqlite::{params, Connection, OptionalExtension, Transaction, TransactionBehavior};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+#[cfg(feature = "sqlite")]
+use serde::de::DeserializeOwned;
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{
-    path::Path,
-    time::{Duration, SystemTime, UNIX_EPOCH},
+    collections::BTreeMap,
+    time::{SystemTime, UNIX_EPOCH},
 };
 
 /// E-side lifecycle state defined by compiler admission specification §2.
@@ -62,21 +64,32 @@ pub enum BarrierMeaning {
 /// Errors returned by state, registration and publication operations.
 #[derive(Debug)]
 pub enum AdmissionError {
+    #[cfg(feature = "sqlite")]
     Sqlite(rusqlite::Error),
     Serialization(serde_json::Error),
     InvalidInput(&'static str),
-    InvalidTransition { from: WorkState, to: WorkState },
+    InvalidTransition {
+        from: WorkState,
+        to: WorkState,
+    },
     IdempotencyConflict,
     NotFound,
     DependencySetIncomplete,
-    StaleFence { expected: u64, actual: u64 },
-    StaleProtocol { expected: u64, actual: u64 },
+    StaleFence {
+        expected: u64,
+        actual: u64,
+    },
+    StaleProtocol {
+        expected: u64,
+        actual: u64,
+    },
     ReceiptMismatch,
 }
 
 impl std::fmt::Display for AdmissionError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            #[cfg(feature = "sqlite")]
             Self::Sqlite(e) => write!(f, "admission SQLite error: {e}"),
             Self::Serialization(e) => write!(f, "admission serialization error: {e}"),
             Self::InvalidInput(s) => write!(f, "invalid admission input: {s}"),
@@ -104,6 +117,7 @@ impl std::fmt::Display for AdmissionError {
     }
 }
 impl std::error::Error for AdmissionError {}
+#[cfg(feature = "sqlite")]
 impl From<rusqlite::Error> for AdmissionError {
     fn from(value: rusqlite::Error) -> Self {
         Self::Sqlite(value)
@@ -216,589 +230,449 @@ pub struct PublicationReceipt {
 
 /// Result of a local fence-installation compare-and-swap, used to make the
 /// local serialization boundary explicit in tests.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Default)]
 pub struct FenceInstallReceipt {
     pub fence_generation: u64,
     pub protocol_sequence: u64,
 }
 
-/// Local SQLite-backed producer admission ledger.
-pub struct AdmissionStore {
-    connection: Connection,
+/// Storage port for producer admission semantics. Implementations own their
+/// transaction/serialization strategy; callers depend only on these operations.
+pub trait AdmissionStore {
+    fn transition_work_state(
+        &mut self,
+        work_item_id: &OpaqueId,
+        next: WorkState,
+    ) -> Result<(), AdmissionError>;
+    fn register_producer_work(
+        &mut self,
+        request: ProducerRegistrationRequest,
+    ) -> Result<ProducerRegistrationReceipt, AdmissionError>;
+    fn producer_receipt(
+        &self,
+        work_item_id: &OpaqueId,
+    ) -> Result<ProducerRegistrationReceipt, AdmissionError>;
+    fn producer_ledger_count(&self) -> Result<u64, AdmissionError>;
+    fn register_dependency(
+        &mut self,
+        request: DependencyRegistrationRequest,
+    ) -> Result<DependencyRegistrationReceipt, AdmissionError>;
+    fn dependencies_complete(
+        &self,
+        artifact_ref: &OpaqueId,
+        artifact_version: &OpaqueId,
+    ) -> Result<bool, AdmissionError>;
+    fn observe_fence(&self) -> Result<FenceInstallReceipt, AdmissionError>;
+    fn install_fence(
+        &mut self,
+        expected_protocol_sequence: u64,
+    ) -> Result<FenceInstallReceipt, AdmissionError>;
+    fn final_publication_gate(
+        &mut self,
+        request: PublicationGateRequest,
+    ) -> Result<PublicationReceipt, AdmissionError>;
+    fn is_artifact_visible(
+        &self,
+        artifact_ref: &OpaqueId,
+        artifact_version: &OpaqueId,
+    ) -> Result<bool, AdmissionError>;
+    fn dependency_ledger_count(&self) -> Result<u64, AdmissionError>;
+    fn publication_receipt(
+        &self,
+        operation_id: &OpaqueId,
+    ) -> Result<PublicationReceipt, AdmissionError>;
+    fn work_state(&self, work_item_id: &OpaqueId) -> Result<WorkState, AdmissionError>;
 }
 
-impl AdmissionStore {
-    /// Open a durable WAL-backed admission database, as required by §4.1–§4.3.
-    pub fn open(path: impl AsRef<Path>) -> Result<Self, AdmissionError> {
-        let connection = Connection::open(path)?;
-        connection.busy_timeout(Duration::from_secs(5))?;
-        connection.execute_batch("PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;")?;
-        let store = Self { connection };
-        store.initialize()?;
-        Ok(store)
-    }
+#[cfg(feature = "sqlite")]
+pub mod sqlite;
+#[cfg(feature = "sqlite")]
+pub use sqlite::SqliteAdmissionStore;
 
-    /// Open an in-memory admission database for isolated conformance tests (§4.1–§4.3).
-    pub fn in_memory() -> Result<Self, AdmissionError> {
-        let connection = Connection::open_in_memory()?;
-        connection.busy_timeout(Duration::from_secs(5))?;
-        connection.execute_batch(
-            "PRAGMA synchronous=FULL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;",
-        )?;
-        let store = Self { connection };
-        store.initialize()?;
-        Ok(store)
-    }
+/// Pure-Rust store used to exercise admission invariants without SQLite or a C toolchain.
+#[derive(Default)]
+pub struct MemoryAdmissionStore {
+    producers: BTreeMap<String, ProducerRecord>,
+    dependencies: BTreeMap<String, DependencyRecord>,
+    publications: BTreeMap<String, (String, PublicationReceipt)>,
+    fence: FenceInstallReceipt,
+}
+struct ProducerRecord {
+    digest: String,
+    receipt: ProducerRegistrationReceipt,
+    state: WorkState,
+}
+struct DependencyRecord {
+    request: DependencyRegistrationRequest,
+    receipt: DependencyRegistrationReceipt,
+}
 
-    fn initialize(&self) -> Result<(), AdmissionError> {
-        self.connection.execute_batch(
-            "CREATE TABLE IF NOT EXISTS admission_meta (
-                singleton INTEGER PRIMARY KEY CHECK(singleton=1),
-                fence_generation INTEGER NOT NULL CHECK(fence_generation>=0),
-                protocol_sequence INTEGER NOT NULL CHECK(protocol_sequence>=0)
-             );
-             INSERT OR IGNORE INTO admission_meta(singleton,fence_generation,protocol_sequence) VALUES(1,0,0);
-             CREATE TABLE IF NOT EXISTS producer_work (
-                ledger_sequence INTEGER PRIMARY KEY AUTOINCREMENT,
-                work_item_id TEXT NOT NULL UNIQUE,
-                request_digest TEXT NOT NULL,
-                request_json TEXT NOT NULL,
-                receipt_json TEXT NOT NULL,
-                state_json TEXT NOT NULL
-             );
-             CREATE TABLE IF NOT EXISTS dependency_edges (
-                ledger_sequence INTEGER PRIMARY KEY AUTOINCREMENT,
-                dependency_id TEXT NOT NULL UNIQUE,
-                artifact_ref TEXT NOT NULL,
-                artifact_version TEXT NOT NULL,
-                work_item_id TEXT NOT NULL,
-                request_digest TEXT NOT NULL,
-                request_json TEXT NOT NULL,
-                receipt_json TEXT NOT NULL
-             );
-             CREATE INDEX IF NOT EXISTS dependency_artifact_idx
-                ON dependency_edges(artifact_ref,artifact_version);
-             CREATE TABLE IF NOT EXISTS publication_receipts (
-                publication_id TEXT PRIMARY KEY,
-                artifact_ref TEXT NOT NULL,
-                artifact_version TEXT NOT NULL,
-                request_digest TEXT NOT NULL,
-                receipt_json TEXT NOT NULL
-             );"
-        )?;
-        Ok(())
+impl MemoryAdmissionStore {
+    pub fn new() -> Self {
+        Self::default()
     }
+}
 
-    /// Resolve the E-state to D barrier meaning defined by §3.
-    pub fn barrier_meaning(state: WorkState) -> BarrierMeaning {
-        match state {
-            WorkState::Received | WorkState::Validating | WorkState::Accepted => {
-                BarrierMeaning::NoAdmissionImplied
-            }
-            WorkState::DRegistrationPending | WorkState::UnknownReconciliation => {
-                BarrierMeaning::OutcomeUnknownFailClosed
-            }
-            WorkState::Registered | WorkState::Queued => BarrierMeaning::DurableRegistrationOpen,
-            WorkState::Leased => BarrierMeaning::DurableRegistrationOpenLeaseTelemetry,
-            WorkState::Running | WorkState::CandidatePrivate => {
-                BarrierMeaning::DurableRegistrationOpenExecutionTelemetry
-            }
-            WorkState::StagedPrivate => BarrierMeaning::DurableRegistrationOpenPrivateStaging,
-            WorkState::DependencyRegistrationPending => {
-                BarrierMeaning::DependencyInventoryMustBeComplete
-            }
-            WorkState::DependencyRegistered => BarrierMeaning::DependenciesDurableArtifactHidden,
-            WorkState::PreparedHidden => BarrierMeaning::DependenciesDurableArtifactHidden,
-            WorkState::PublicationGatePending => {
-                BarrierMeaning::PublicationDecisionPendingArtifactHidden
-            }
-            WorkState::Published => BarrierMeaning::PublicationReceiptDurable,
-            WorkState::RetryQueued | WorkState::DlqParked => {
-                BarrierMeaning::NonTerminalReplayRemainsPossible
-            }
-            WorkState::SuppressedQuarantined => {
-                BarrierMeaning::SuppressedNoPublicationEvidenceRequired
-            }
-            WorkState::Rejected | WorkState::Cancelled | WorkState::Terminal => {
-                BarrierMeaning::TerminalEvidenceRequiresDValidation
-            }
-        }
-    }
-
-    /// Return the complete legal transition relation defined by §2.
-    pub fn legal_transition(from: WorkState, to: WorkState) -> bool {
-        use WorkState::*;
-        matches!(
-            (from, to),
-            (Received, Validating)
-                | (Validating, Accepted)
-                | (Validating, Rejected)
-                | (Accepted, DRegistrationPending)
-                | (Accepted, Cancelled)
-                | (Accepted, SuppressedQuarantined)
-                | (DRegistrationPending, Registered)
-                | (DRegistrationPending, UnknownReconciliation)
-                | (UnknownReconciliation, Registered)
-                | (UnknownReconciliation, DRegistrationPending)
-                | (Registered, Queued)
-                | (Queued, Leased)
-                | (Leased, Running)
-                | (Running, CandidatePrivate)
-                | (Running, RetryQueued)
-                | (Running, SuppressedQuarantined)
-                | (CandidatePrivate, StagedPrivate)
-                | (CandidatePrivate, RetryQueued)
-                | (CandidatePrivate, SuppressedQuarantined)
-                | (StagedPrivate, DependencyRegistrationPending)
-                | (StagedPrivate, RetryQueued)
-                | (StagedPrivate, SuppressedQuarantined)
-                | (DependencyRegistrationPending, DependencyRegistered)
-                | (DependencyRegistrationPending, RetryQueued)
-                | (DependencyRegistrationPending, UnknownReconciliation)
-                | (DependencyRegistered, PreparedHidden)
-                | (PreparedHidden, PublicationGatePending)
-                | (PublicationGatePending, Published)
-                | (PublicationGatePending, SuppressedQuarantined)
-                | (RetryQueued, Queued)
-                | (RetryQueued, DlqParked)
-                | (DlqParked, RetryQueued)
-                | (SuppressedQuarantined, Terminal)
-                | (Published, Terminal)
-                | (Rejected, Terminal)
-                | (Cancelled, Terminal)
-                | (Leased, Cancelled)
-                | (Leased, SuppressedQuarantined)
-                | (Queued, Cancelled)
-                | (Queued, SuppressedQuarantined)
-                | (Running, Cancelled)
-                | (StagedPrivate, Cancelled)
-        )
-    }
-
-    /// Persist a legal lifecycle transition, rejecting all edges outside §2.
-    pub fn transition_work_state(
+impl AdmissionStore for MemoryAdmissionStore {
+    fn transition_work_state(
         &mut self,
         work_item_id: &OpaqueId,
         next: WorkState,
     ) -> Result<(), AdmissionError> {
-        let tx = self
-            .connection
-            .transaction_with_behavior(TransactionBehavior::Immediate)?;
-        let state_json: String = tx
-            .query_row(
-                "SELECT state_json FROM producer_work WHERE work_item_id=?1",
-                [work_item_id.as_str()],
-                |row| row.get(0),
-            )
-            .optional()?
+        let record = self
+            .producers
+            .get_mut(work_item_id.as_str())
             .ok_or(AdmissionError::NotFound)?;
-        let current: WorkState = decode(&state_json)?;
-        if !Self::legal_transition(current, next) {
+        if !legal_transition(record.state, next) {
             return Err(AdmissionError::InvalidTransition {
-                from: current,
+                from: record.state,
                 to: next,
             });
         }
-        tx.execute(
-            "UPDATE producer_work SET state_json=?1 WHERE work_item_id=?2",
-            params![encode(&next)?, work_item_id.as_str()],
-        )?;
-        tx.commit()?;
+        record.state = next;
         Ok(())
     }
 
-    /// Register one logical ProducerWorkItem idempotently, as required by §4.1.
-    pub fn register_producer_work(
+    fn register_producer_work(
         &mut self,
         request: ProducerRegistrationRequest,
     ) -> Result<ProducerRegistrationReceipt, AdmissionError> {
         validate_producer_request(&request)?;
-        let tx = self
-            .connection
-            .transaction_with_behavior(TransactionBehavior::Immediate)?;
-        if let Some((digest, receipt_json)) = tx
-            .query_row(
-                "SELECT request_digest,receipt_json FROM producer_work WHERE work_item_id=?1",
-                [request.producer_work_item_id.as_str()],
-                |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?)),
-            )
-            .optional()?
-        {
-            if digest != request.request_digest {
+        let key = request.producer_work_item_id.as_str().to_owned();
+        if let Some(existing) = self.producers.get(&key) {
+            if existing.digest != request.request_digest {
                 return Err(AdmissionError::IdempotencyConflict);
             }
-            let receipt = decode(&receipt_json)?;
-            tx.commit()?;
-            return Ok(receipt);
+            return Ok(existing.receipt.clone());
         }
-        let request_json = encode(&request)?;
-        tx.execute(
-            "INSERT INTO producer_work(work_item_id,request_digest,request_json,receipt_json,state_json) VALUES(?1,?2,?3,'',?4)",
-            params![request.producer_work_item_id.as_str(), request.request_digest, request_json, encode(&WorkState::Accepted)?]
-        )?;
-        let sequence = tx.last_insert_rowid() as u64;
+        let sequence = self.producers.len() as u64 + 1;
         let receipt = ProducerRegistrationReceipt {
             receipt_id: OpaqueId::new(format!("producer-registration:{sequence}"))
                 .map_err(|_| AdmissionError::InvalidInput("receipt id"))?,
-            producer_work_item_id: request.producer_work_item_id.clone(),
+            producer_work_item_id: request.producer_work_item_id,
             request_digest: request.request_digest.clone(),
             ledger_sequence: sequence,
             disposition: RegistrationDisposition::Accepted,
         };
-        tx.execute(
-            "UPDATE producer_work SET receipt_json=?1 WHERE work_item_id=?2",
-            params![encode(&receipt)?, request.producer_work_item_id.as_str()],
-        )?;
-        tx.commit()?;
+        self.producers.insert(
+            key,
+            ProducerRecord {
+                digest: request.request_digest,
+                receipt: receipt.clone(),
+                state: WorkState::Accepted,
+            },
+        );
         Ok(receipt)
     }
 
-    /// Look up the durable ProducerRegistrationReceipt by ProducerWorkItemId (§4.1).
-    pub fn producer_receipt(
+    fn producer_receipt(
         &self,
         work_item_id: &OpaqueId,
     ) -> Result<ProducerRegistrationReceipt, AdmissionError> {
-        let value: String = self
-            .connection
-            .query_row(
-                "SELECT receipt_json FROM producer_work WHERE work_item_id=?1",
-                [work_item_id.as_str()],
-                |row| row.get(0),
-            )
-            .optional()?
-            .ok_or(AdmissionError::NotFound)?;
-        decode(&value)
+        self.producers
+            .get(work_item_id.as_str())
+            .map(|r| r.receipt.clone())
+            .ok_or(AdmissionError::NotFound)
     }
 
-    /// Count producer ledger rows, exposing the idempotency invariant for §4.1 tests.
-    pub fn producer_ledger_count(&self) -> Result<u64, AdmissionError> {
-        let count: i64 =
-            self.connection
-                .query_row("SELECT COUNT(*) FROM producer_work", [], |row| row.get(0))?;
-        Ok(count as u64)
+    fn producer_ledger_count(&self) -> Result<u64, AdmissionError> {
+        Ok(self.producers.len() as u64)
     }
 
-    /// Register one artifact dependency edge idempotently; incomplete sets remain hidden (§4.2).
-    pub fn register_dependency(
+    fn register_dependency(
         &mut self,
         request: DependencyRegistrationRequest,
     ) -> Result<DependencyRegistrationReceipt, AdmissionError> {
         validate_dependency_request(&request)?;
-        let tx = self
-            .connection
-            .transaction_with_behavior(TransactionBehavior::Immediate)?;
-        if let Some((digest, receipt_json)) = tx
-            .query_row(
-                "SELECT request_digest,receipt_json FROM dependency_edges WHERE dependency_id=?1",
-                [request.dependency_registration_id.as_str()],
-                |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?)),
-            )
-            .optional()?
-        {
-            if digest != request.request_digest {
+        let key = request.dependency_registration_id.as_str().to_owned();
+        if let Some(existing) = self.dependencies.get(&key) {
+            if existing.request.request_digest != request.request_digest {
                 return Err(AdmissionError::IdempotencyConflict);
             }
-            let receipt = decode(&receipt_json)?;
-            tx.commit()?;
-            return Ok(receipt);
+            return Ok(existing.receipt.clone());
         }
-        let work_exists: bool = tx.query_row(
-            "SELECT EXISTS(SELECT 1 FROM producer_work WHERE work_item_id=?1)",
-            [request.producer_work_item_id.as_str()],
-            |row| row.get(0),
-        )?;
-        if !work_exists {
+        if !self
+            .producers
+            .contains_key(request.producer_work_item_id.as_str())
+        {
             return Err(AdmissionError::NotFound);
         }
-        let receipt_id = format!(
-            "dependency-registration:{}",
-            request.dependency_registration_id.as_str()
-        );
         let receipt = DependencyRegistrationReceipt {
-            receipt_id: OpaqueId::new(receipt_id)
-                .map_err(|_| AdmissionError::InvalidInput("dependency receipt id"))?,
+            receipt_id: OpaqueId::new(format!(
+                "dependency-registration:{}",
+                request.dependency_registration_id.as_str()
+            ))
+            .map_err(|_| AdmissionError::InvalidInput("dependency receipt id"))?,
             dependency_registration_id: request.dependency_registration_id.clone(),
             artifact_ref: request.artifact_ref.clone(),
             artifact_version: request.artifact_version.clone(),
             request_digest: request.request_digest.clone(),
         };
-        tx.execute(
-            "INSERT INTO dependency_edges(dependency_id,artifact_ref,artifact_version,work_item_id,request_digest,request_json,receipt_json) VALUES(?1,?2,?3,?4,?5,?6,?7)",
-            params![request.dependency_registration_id.as_str(), request.artifact_ref.as_str(), request.artifact_version.as_str(), request.producer_work_item_id.as_str(), request.request_digest, encode(&request)?, encode(&receipt)?]
-        )?;
-        tx.commit()?;
+        self.dependencies.insert(
+            key,
+            DependencyRecord {
+                request,
+                receipt: receipt.clone(),
+            },
+        );
         Ok(receipt)
     }
 
-    /// Return whether all declared dependency edges exist; never treats a partial set as visible (§4.2).
-    pub fn dependencies_complete(
+    fn dependencies_complete(
         &self,
         artifact_ref: &OpaqueId,
         artifact_version: &OpaqueId,
     ) -> Result<bool, AdmissionError> {
-        let mut statement = self.connection.prepare(
-            "SELECT request_json FROM dependency_edges WHERE artifact_ref=?1 AND artifact_version=?2"
-        )?;
-        let rows = statement.query_map(
-            params![artifact_ref.as_str(), artifact_version.as_str()],
-            |row| row.get::<_, String>(0),
-        )?;
-        let mut required = None;
-        let mut count = 0_u32;
-        for row in rows {
-            let request: DependencyRegistrationRequest = decode(&row?)?;
-            if let Some(expected) = required {
-                if expected != request.required_dependency_count {
-                    return Err(AdmissionError::InvalidInput(
-                        "inconsistent dependency count",
-                    ));
-                }
-            } else {
-                required = Some(request.required_dependency_count);
-            }
-            count += 1;
-        }
-        Ok(required.map(|n| count >= n).unwrap_or(false))
+        dependencies_complete(
+            self.dependencies
+                .values()
+                .filter(|edge| {
+                    edge.request.artifact_ref == *artifact_ref
+                        && edge.request.artifact_version == *artifact_version
+                })
+                .map(|edge| &edge.request),
+        )
     }
 
-    /// Read the current local fence generation and protocol sequence (§4.3).
-    pub fn observe_fence(&self) -> Result<FenceInstallReceipt, AdmissionError> {
-        self.connection
-            .query_row(
-                "SELECT fence_generation,protocol_sequence FROM admission_meta WHERE singleton=1",
-                [],
-                |row| {
-                    Ok(FenceInstallReceipt {
-                        fence_generation: row.get::<_, i64>(0)? as u64,
-                        protocol_sequence: row.get::<_, i64>(1)? as u64,
-                    })
-                },
-            )
-            .map_err(AdmissionError::from)
+    fn observe_fence(&self) -> Result<FenceInstallReceipt, AdmissionError> {
+        Ok(self.fence)
     }
 
-    /// Install a fence only if the observed protocol sequence is current (§4.3).
-    pub fn install_fence(
+    fn install_fence(
         &mut self,
         expected_protocol_sequence: u64,
     ) -> Result<FenceInstallReceipt, AdmissionError> {
-        let tx = self
-            .connection
-            .transaction_with_behavior(TransactionBehavior::Immediate)?;
-        let current = read_meta(&tx)?;
-        if current.protocol_sequence != expected_protocol_sequence {
+        if self.fence.protocol_sequence != expected_protocol_sequence {
             return Err(AdmissionError::StaleProtocol {
                 expected: expected_protocol_sequence,
-                actual: current.protocol_sequence,
+                actual: self.fence.protocol_sequence,
             });
         }
-        let next = FenceInstallReceipt {
-            fence_generation: current.fence_generation + 1,
-            protocol_sequence: current.protocol_sequence + 1,
-        };
-        tx.execute(
-            "UPDATE admission_meta SET fence_generation=?1,protocol_sequence=?2 WHERE singleton=1",
-            params![next.fence_generation as i64, next.protocol_sequence as i64],
-        )?;
-        tx.commit()?;
-        Ok(next)
+        self.fence.fence_generation += 1;
+        self.fence.protocol_sequence += 1;
+        Ok(self.fence)
     }
 
-    /// Execute the final gate in the same SQLite serialization domain as fence installation (§4.3).
-    ///
-    /// This local implementation atomically persists the publication decision and
-    /// consumes the observed protocol sequence. It is not a D service API and does
-    /// not establish a cross-service Storage visibility transaction.
-    ///
-    /// Validation order is deliberate: the fence generation is checked before the
-    /// protocol sequence, so a concurrent fence installation always surfaces as
-    /// `StaleFence` rather than `StaleProtocol`. Callers must not depend on which
-    /// counter moved to distinguish the two races; both mean "re-observe and retry".
-    pub fn final_publication_gate(
+    fn final_publication_gate(
         &mut self,
         request: PublicationGateRequest,
     ) -> Result<PublicationReceipt, AdmissionError> {
         validate_publication_request(&request)?;
-        let tx = self
-            .connection
-            .transaction_with_behavior(TransactionBehavior::Immediate)?;
-        if let Some((digest, receipt_json)) = tx.query_row(
-            "SELECT request_digest,receipt_json FROM publication_receipts WHERE publication_id=?1",
-            [request.publication_operation_id.as_str()],
-            |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
-        ).optional()? {
-            if digest != request.request_digest { return Err(AdmissionError::IdempotencyConflict); }
-            let receipt = decode(&receipt_json)?;
-            tx.commit()?;
-            return Ok(receipt);
+        let key = request.publication_operation_id.as_str().to_owned();
+        if let Some((digest, receipt)) = self.publications.get(&key) {
+            if digest != &request.request_digest {
+                return Err(AdmissionError::IdempotencyConflict);
+            }
+            return Ok(receipt.clone());
         }
-        let meta = read_meta(&tx)?;
-        if meta.fence_generation != request.observed_fence_generation {
+        if self.fence.fence_generation != request.observed_fence_generation {
             return Err(AdmissionError::StaleFence {
                 expected: request.observed_fence_generation,
-                actual: meta.fence_generation,
+                actual: self.fence.fence_generation,
             });
         }
-        if meta.protocol_sequence != request.observed_protocol_sequence {
+        if self.fence.protocol_sequence != request.observed_protocol_sequence {
             return Err(AdmissionError::StaleProtocol {
                 expected: request.observed_protocol_sequence,
-                actual: meta.protocol_sequence,
+                actual: self.fence.protocol_sequence,
             });
         }
-        let work_exists: bool = tx.query_row(
-            "SELECT EXISTS(SELECT 1 FROM producer_work WHERE work_item_id=?1)",
-            [request.producer_work_item_id.as_str()],
-            |row| row.get(0),
-        )?;
-        if !work_exists {
+        if !self
+            .producers
+            .contains_key(request.producer_work_item_id.as_str())
+        {
             return Err(AdmissionError::NotFound);
         }
-
-        let mut statement = tx.prepare(
-            "SELECT receipt_json FROM dependency_edges WHERE artifact_ref=?1 AND artifact_version=?2"
-        )?;
-        let rows = statement.query_map(
-            params![
-                request.artifact_ref.as_str(),
-                request.artifact_version.as_str()
-            ],
-            |row| row.get::<_, String>(0),
-        )?;
-        let mut stored_ids = Vec::new();
-        for row in rows {
-            let receipt: DependencyRegistrationReceipt = decode(&row?)?;
-            stored_ids.push(receipt.receipt_id);
-        }
-        drop(statement);
-        if !Self::dependencies_complete_tx(&tx, &request.artifact_ref, &request.artifact_version)? {
+        let matching: Vec<&DependencyRecord> = self
+            .dependencies
+            .values()
+            .filter(|edge| {
+                edge.request.artifact_ref == request.artifact_ref
+                    && edge.request.artifact_version == request.artifact_version
+            })
+            .collect();
+        let requests = matching.iter().map(|edge| &edge.request);
+        if !dependencies_complete(requests)? {
             return Err(AdmissionError::DependencySetIncomplete);
         }
+        let mut stored_ids: Vec<OpaqueId> = matching
+            .iter()
+            .map(|edge| edge.receipt.receipt_id.clone())
+            .collect();
         let mut provided = request.dependency_receipt_ids.clone();
         stored_ids.sort_by(|a, b| a.as_str().cmp(b.as_str()));
         provided.sort_by(|a, b| a.as_str().cmp(b.as_str()));
         if stored_ids != provided {
             return Err(AdmissionError::ReceiptMismatch);
         }
-
-        let next_sequence = meta.protocol_sequence + 1;
+        let next_sequence = self.fence.protocol_sequence + 1;
         let receipt = PublicationReceipt {
             receipt_id: OpaqueId::new(format!(
                 "publication:{}",
                 request.publication_operation_id.as_str()
             ))
             .map_err(|_| AdmissionError::InvalidInput("publication receipt id"))?,
-            publication_operation_id: request.publication_operation_id.clone(),
-            artifact_ref: request.artifact_ref.clone(),
-            artifact_version: request.artifact_version.clone(),
-            producer_work_item_id: request.producer_work_item_id.clone(),
+            publication_operation_id: request.publication_operation_id,
+            artifact_ref: request.artifact_ref,
+            artifact_version: request.artifact_version,
+            producer_work_item_id: request.producer_work_item_id,
             dependency_receipt_ids: provided,
-            fence_generation: meta.fence_generation,
-            permission_epoch: request.permission_epoch.clone(),
+            fence_generation: self.fence.fence_generation,
+            permission_epoch: request.permission_epoch,
             protocol_sequence: next_sequence,
             visible: true,
         };
-        tx.execute("INSERT INTO publication_receipts(publication_id,artifact_ref,artifact_version,request_digest,receipt_json) VALUES(?1,?2,?3,?4,?5)",
-            params![request.publication_operation_id.as_str(), request.artifact_ref.as_str(), request.artifact_version.as_str(), request.request_digest, encode(&receipt)?])?;
-        tx.execute(
-            "UPDATE admission_meta SET protocol_sequence=?1 WHERE singleton=1",
-            [next_sequence as i64],
-        )?;
-        tx.commit()?;
+        self.publications
+            .insert(key, (request.request_digest, receipt.clone()));
+        self.fence.protocol_sequence = next_sequence;
         Ok(receipt)
     }
 
-    fn dependencies_complete_tx(
-        tx: &Transaction<'_>,
-        artifact_ref: &OpaqueId,
-        artifact_version: &OpaqueId,
-    ) -> Result<bool, AdmissionError> {
-        let mut statement = tx.prepare("SELECT request_json FROM dependency_edges WHERE artifact_ref=?1 AND artifact_version=?2")?;
-        let rows = statement.query_map(
-            params![artifact_ref.as_str(), artifact_version.as_str()],
-            |row| row.get::<_, String>(0),
-        )?;
-        let mut required = None;
-        let mut count = 0_u32;
-        for row in rows {
-            let request: DependencyRegistrationRequest = decode(&row?)?;
-            if let Some(expected) = required {
-                if expected != request.required_dependency_count {
-                    return Err(AdmissionError::InvalidInput(
-                        "inconsistent dependency count",
-                    ));
-                }
-            } else {
-                required = Some(request.required_dependency_count);
-            }
-            count += 1;
-        }
-        Ok(required.map(|n| count >= n).unwrap_or(false))
-    }
-
-    /// Report whether an artifact has a committed local publication receipt (§4.2–§4.3).
-    pub fn is_artifact_visible(
+    fn is_artifact_visible(
         &self,
         artifact_ref: &OpaqueId,
         artifact_version: &OpaqueId,
     ) -> Result<bool, AdmissionError> {
-        let count: i64 = self.connection.query_row(
-            "SELECT COUNT(*) FROM publication_receipts WHERE artifact_ref=?1 AND artifact_version=?2",
-            params![artifact_ref.as_str(), artifact_version.as_str()], |row| row.get(0)
-        )?;
-        Ok(count > 0)
+        Ok(self.publications.values().any(|(_, receipt)| {
+            receipt.artifact_ref == *artifact_ref && receipt.artifact_version == *artifact_version
+        }))
     }
 
-    /// Count dependency ledger rows for idempotency and partial-registration checks (§4.2).
-    pub fn dependency_ledger_count(&self) -> Result<u64, AdmissionError> {
-        let count: i64 =
-            self.connection
-                .query_row("SELECT COUNT(*) FROM dependency_edges", [], |row| {
-                    row.get(0)
-                })?;
-        Ok(count as u64)
+    fn dependency_ledger_count(&self) -> Result<u64, AdmissionError> {
+        Ok(self.dependencies.len() as u64)
     }
 
-    /// Retrieve the committed PublicationReceipt by PublicationOperationId (§4.3).
-    pub fn publication_receipt(
+    fn publication_receipt(
         &self,
         operation_id: &OpaqueId,
     ) -> Result<PublicationReceipt, AdmissionError> {
-        let value: String = self
-            .connection
-            .query_row(
-                "SELECT receipt_json FROM publication_receipts WHERE publication_id=?1",
-                [operation_id.as_str()],
-                |row| row.get(0),
-            )
-            .optional()?
-            .ok_or(AdmissionError::NotFound)?;
-        decode(&value)
+        self.publications
+            .get(operation_id.as_str())
+            .map(|(_, receipt)| receipt.clone())
+            .ok_or(AdmissionError::NotFound)
     }
 
-    /// Compute a stable SHA-256 digest for a serializable request payload (§4.1–§4.3).
-    pub fn request_digest<T: Serialize>(request: &T) -> Result<String, AdmissionError> {
-        let bytes = serde_json::to_vec(request)?;
-        Ok(format!("{:x}", Sha256::digest(bytes)))
+    fn work_state(&self, work_item_id: &OpaqueId) -> Result<WorkState, AdmissionError> {
+        self.producers
+            .get(work_item_id.as_str())
+            .map(|r| r.state)
+            .ok_or(AdmissionError::NotFound)
     }
 }
 
-fn read_meta(tx: &Transaction<'_>) -> Result<FenceInstallReceipt, AdmissionError> {
-    tx.query_row(
-        "SELECT fence_generation,protocol_sequence FROM admission_meta WHERE singleton=1",
-        [],
-        |row| {
-            Ok(FenceInstallReceipt {
-                fence_generation: row.get::<_, i64>(0)? as u64,
-                protocol_sequence: row.get::<_, i64>(1)? as u64,
-            })
-        },
+pub fn barrier_meaning(state: WorkState) -> BarrierMeaning {
+    match state {
+        WorkState::Received | WorkState::Validating | WorkState::Accepted => {
+            BarrierMeaning::NoAdmissionImplied
+        }
+        WorkState::DRegistrationPending | WorkState::UnknownReconciliation => {
+            BarrierMeaning::OutcomeUnknownFailClosed
+        }
+        WorkState::Registered | WorkState::Queued => BarrierMeaning::DurableRegistrationOpen,
+        WorkState::Leased => BarrierMeaning::DurableRegistrationOpenLeaseTelemetry,
+        WorkState::Running | WorkState::CandidatePrivate => {
+            BarrierMeaning::DurableRegistrationOpenExecutionTelemetry
+        }
+        WorkState::StagedPrivate => BarrierMeaning::DurableRegistrationOpenPrivateStaging,
+        WorkState::DependencyRegistrationPending => {
+            BarrierMeaning::DependencyInventoryMustBeComplete
+        }
+        WorkState::DependencyRegistered | WorkState::PreparedHidden => {
+            BarrierMeaning::DependenciesDurableArtifactHidden
+        }
+        WorkState::PublicationGatePending => {
+            BarrierMeaning::PublicationDecisionPendingArtifactHidden
+        }
+        WorkState::Published => BarrierMeaning::PublicationReceiptDurable,
+        WorkState::RetryQueued | WorkState::DlqParked => {
+            BarrierMeaning::NonTerminalReplayRemainsPossible
+        }
+        WorkState::SuppressedQuarantined => BarrierMeaning::SuppressedNoPublicationEvidenceRequired,
+        WorkState::Rejected | WorkState::Cancelled | WorkState::Terminal => {
+            BarrierMeaning::TerminalEvidenceRequiresDValidation
+        }
+    }
+}
+
+pub fn legal_transition(from: WorkState, to: WorkState) -> bool {
+    use WorkState::*;
+    matches!(
+        (from, to),
+        (Received, Validating)
+            | (Validating, Accepted)
+            | (Validating, Rejected)
+            | (Accepted, DRegistrationPending)
+            | (Accepted, Cancelled)
+            | (Accepted, SuppressedQuarantined)
+            | (DRegistrationPending, Registered)
+            | (DRegistrationPending, UnknownReconciliation)
+            | (UnknownReconciliation, Registered)
+            | (UnknownReconciliation, DRegistrationPending)
+            | (Registered, Queued)
+            | (Queued, Leased)
+            | (Leased, Running)
+            | (Running, CandidatePrivate)
+            | (Running, RetryQueued)
+            | (Running, SuppressedQuarantined)
+            | (CandidatePrivate, StagedPrivate)
+            | (CandidatePrivate, RetryQueued)
+            | (CandidatePrivate, SuppressedQuarantined)
+            | (StagedPrivate, DependencyRegistrationPending)
+            | (StagedPrivate, RetryQueued)
+            | (StagedPrivate, SuppressedQuarantined)
+            | (DependencyRegistrationPending, DependencyRegistered)
+            | (DependencyRegistrationPending, RetryQueued)
+            | (DependencyRegistrationPending, UnknownReconciliation)
+            | (DependencyRegistered, PreparedHidden)
+            | (PreparedHidden, PublicationGatePending)
+            | (PublicationGatePending, Published)
+            | (PublicationGatePending, SuppressedQuarantined)
+            | (RetryQueued, Queued)
+            | (RetryQueued, DlqParked)
+            | (DlqParked, RetryQueued)
+            | (SuppressedQuarantined, Terminal)
+            | (Published, Terminal)
+            | (Rejected, Terminal)
+            | (Cancelled, Terminal)
+            | (Leased, Cancelled)
+            | (Leased, SuppressedQuarantined)
+            | (Queued, Cancelled)
+            | (Queued, SuppressedQuarantined)
+            | (Running, Cancelled)
+            | (StagedPrivate, Cancelled)
     )
-    .map_err(AdmissionError::from)
 }
 
+fn dependencies_complete<'a>(
+    requests: impl Iterator<Item = &'a DependencyRegistrationRequest>,
+) -> Result<bool, AdmissionError> {
+    let mut required = None;
+    let mut count = 0_u32;
+    for request in requests {
+        if let Some(expected) = required {
+            if expected != request.required_dependency_count {
+                return Err(AdmissionError::InvalidInput(
+                    "inconsistent dependency count",
+                ));
+            }
+        } else {
+            required = Some(request.required_dependency_count);
+        }
+        count += 1;
+    }
+    Ok(required.map(|n| count >= n).unwrap_or(false))
+}
+
+pub fn request_digest<T: Serialize>(request: &T) -> Result<String, AdmissionError> {
+    let bytes = serde_json::to_vec(request)?;
+    Ok(format!("{:x}", Sha256::digest(bytes)))
+}
+
+#[cfg(feature = "sqlite")]
 fn encode<T: Serialize>(value: &T) -> Result<String, AdmissionError> {
     Ok(serde_json::to_string(value)?)
 }
+#[cfg(feature = "sqlite")]
 fn decode<T: DeserializeOwned>(value: &str) -> Result<T, AdmissionError> {
     Ok(serde_json::from_str(value)?)
 }
@@ -857,8 +731,6 @@ pub fn timestamp_unix_nanos() -> u128 {
 mod tests {
     use super::*;
     use memory_domain::ScopeKind;
-    use std::sync::{Arc, Barrier};
-    use std::thread;
 
     fn id(s: &str) -> OpaqueId {
         OpaqueId::new(s).unwrap()
@@ -924,7 +796,7 @@ mod tests {
 
     #[test]
     fn producer_registration_is_idempotent_and_conflicting_digest_does_not_add_rows() {
-        let mut db = AdmissionStore::in_memory().unwrap();
+        let mut db = MemoryAdmissionStore::new();
         let first = db.register_producer_work(producer()).unwrap();
         let retry = db.register_producer_work(producer()).unwrap();
         assert_eq!(first.receipt_id, retry.receipt_id);
@@ -940,7 +812,7 @@ mod tests {
 
     #[test]
     fn producer_receipt_lookup_and_not_found_are_distinct() {
-        let mut db = AdmissionStore::in_memory().unwrap();
+        let mut db = MemoryAdmissionStore::new();
         let receipt = db.register_producer_work(producer()).unwrap();
         assert_eq!(db.producer_receipt(&id("work-1")).unwrap(), receipt);
         assert!(matches!(
@@ -951,7 +823,7 @@ mod tests {
 
     #[test]
     fn partial_dependencies_remain_hidden_until_all_edges_are_registered() {
-        let mut db = AdmissionStore::in_memory().unwrap();
+        let mut db = MemoryAdmissionStore::new();
         db.register_producer_work(producer()).unwrap();
         let first = db
             .register_dependency(dependency("dep-1", "source-1"))
@@ -999,7 +871,7 @@ mod tests {
 
     #[test]
     fn final_gate_receipt_binds_observed_fence_and_permission_epoch() {
-        let mut db = AdmissionStore::in_memory().unwrap();
+        let mut db = MemoryAdmissionStore::new();
         db.register_producer_work(producer()).unwrap();
         let first = db
             .register_dependency(dependency("dep-1", "source-1"))
@@ -1021,11 +893,8 @@ mod tests {
 
     #[test]
     fn illegal_transition_accept_to_published_is_rejected() {
-        assert!(!AdmissionStore::legal_transition(
-            WorkState::Accepted,
-            WorkState::Published
-        ));
-        let mut db = AdmissionStore::in_memory().unwrap();
+        assert!(!legal_transition(WorkState::Accepted, WorkState::Published));
+        let mut db = MemoryAdmissionStore::new();
         db.register_producer_work(producer()).unwrap();
         assert!(matches!(
             db.transition_work_state(&id("work-1"), WorkState::Published),
@@ -1079,7 +948,7 @@ mod tests {
         ];
 
         for (index, (path, expected_from, target)) in cases.into_iter().enumerate() {
-            let mut db = AdmissionStore::in_memory().unwrap();
+            let mut db = MemoryAdmissionStore::new();
             let mut request = producer();
             request.producer_work_item_id = id(&format!("work-alt-exit-{index}"));
             request.request_digest = format!("request-alt-exit-{index}");
@@ -1090,33 +959,17 @@ mod tests {
                     .unwrap();
             }
             let work_item_id = id(&format!("work-alt-exit-{index}"));
-            let before_json: String = db
-                .connection
-                .query_row(
-                    "SELECT state_json FROM producer_work WHERE work_item_id=?1",
-                    [work_item_id.as_str()],
-                    |row| row.get(0),
-                )
-                .unwrap();
-            assert_eq!(decode::<WorkState>(&before_json).unwrap(), expected_from);
+            assert_eq!(db.work_state(&work_item_id).unwrap(), expected_from);
 
             db.transition_work_state(&work_item_id, target).unwrap();
 
-            let after_json: String = db
-                .connection
-                .query_row(
-                    "SELECT state_json FROM producer_work WHERE work_item_id=?1",
-                    [work_item_id.as_str()],
-                    |row| row.get(0),
-                )
-                .unwrap();
-            assert_eq!(decode::<WorkState>(&after_json).unwrap(), target);
+            assert_eq!(db.work_state(&work_item_id).unwrap(), target);
         }
     }
 
     #[test]
     fn gate_reports_stale_protocol_when_fence_generation_matches() {
-        let mut db = AdmissionStore::in_memory().unwrap();
+        let mut db = MemoryAdmissionStore::new();
         db.register_producer_work(producer()).unwrap();
         let first = db
             .register_dependency(dependency("dep-1", "source-1"))
@@ -1142,76 +995,5 @@ mod tests {
             }) if expected == observed.protocol_sequence
                 && actual == installed.protocol_sequence
         ));
-    }
-
-    #[test]
-    fn fence_and_gate_compete_on_one_protocol_sequence_exactly_one_wins() {
-        let path =
-            std::env::temp_dir().join(format!("admission-race-{}.sqlite", std::process::id()));
-        let _ = std::fs::remove_file(&path);
-        let mut setup = AdmissionStore::open(&path).unwrap();
-        setup.register_producer_work(producer()).unwrap();
-        let first = setup
-            .register_dependency(dependency("dep-1", "source-1"))
-            .unwrap();
-        let second = setup
-            .register_dependency(dependency("dep-2", "source-2"))
-            .unwrap();
-        let observed = setup.observe_fence().unwrap();
-        drop(setup);
-
-        let barrier = Arc::new(Barrier::new(3));
-        let gate_barrier = barrier.clone();
-        let gate_path = path.clone();
-        let gate_receipts = vec![first.receipt_id, second.receipt_id];
-        let gate_thread = thread::spawn(move || {
-            let mut db = AdmissionStore::open(&gate_path).unwrap();
-            gate_barrier.wait();
-            db.final_publication_gate(gate(observed, gate_receipts))
-        });
-        let fence_barrier = barrier.clone();
-        let fence_path = path.clone();
-        let fence_thread = thread::spawn(move || {
-            let mut db = AdmissionStore::open(&fence_path).unwrap();
-            fence_barrier.wait();
-            db.install_fence(observed.protocol_sequence)
-        });
-        barrier.wait();
-        let gate_result = gate_thread.join().unwrap();
-        let fence_result = fence_thread.join().unwrap();
-        assert_ne!(
-            gate_result.is_ok(),
-            fence_result.is_ok(),
-            "same observed protocol sequence must have one CAS winner"
-        );
-        let after = AdmissionStore::open(&path)
-            .unwrap()
-            .observe_fence()
-            .unwrap();
-        assert_eq!(after.protocol_sequence, observed.protocol_sequence + 1);
-        if let Ok(receipt) = gate_result {
-            assert_eq!(receipt.protocol_sequence, observed.protocol_sequence + 1);
-            assert_eq!(receipt.fence_generation, observed.fence_generation);
-            assert!(matches!(
-                fence_result,
-                Err(AdmissionError::StaleProtocol { .. })
-            ));
-        } else {
-            assert_eq!(after.fence_generation, observed.fence_generation + 1);
-            // Fence installation advances both counters. The gate validates the fence
-            // generation first, so a winning fence produces StaleFence; StaleProtocol
-            // is possible only when the fence generation is unchanged.
-            assert!(
-                matches!(
-                    &gate_result,
-                    Err(AdmissionError::StaleFence { .. })
-                        | Err(AdmissionError::StaleProtocol { .. })
-                ),
-                "unexpected gate race result: {gate_result:?}"
-            );
-        }
-        let _ = std::fs::remove_file(&path);
-        let _ = std::fs::remove_file(path.with_extension("sqlite-wal"));
-        let _ = std::fs::remove_file(path.with_extension("sqlite-shm"));
     }
 }
