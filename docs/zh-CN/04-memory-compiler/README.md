@@ -1,7 +1,31 @@
+---
+document_metadata:
+  domain: memory-compiler
+  role: guide
+  lifecycle:
+    approval:
+      decision_status: Draft
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Owner semantic direction is recorded; cross-owner consumer contracts remain pending. GOV-DOC-001 remains PENDING until an authoritative artifact and exact version/Blob are adopted; the GOV-DOC-002 DM-12 source path is unresolved because no root source is authorized."
+    usage_status: Active
+    modification_status: Modified
+  authority:
+    canonical_status: Candidate
+    canonical_scope: null
+    canonical_scope_id: memory-compiler/reading-guide
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+---
+
 # Memory Compiler — 阅读指南
 
 - 文档 ID：E-READING-GUIDE-001
-- 版本：1.0
+- 版本：1.1
+- 当前 main 基线（修改前）：`0d0c1c6238e4e70a93609070b97fef596873916e`；来源 Blob：`1ce0146bfd4acfccc7c2747a5b1eaf6440002725`。
 - 英文对应：[Memory Compiler Reading Guide](../../en/04-memory-compiler/README.md)
 
 ## 已完成双语配对的源规范
@@ -9,13 +33,21 @@
 1. [Compiler 总览](compiler-overview.md) — Pipeline、职责边界、确定性/模型辅助阶段和安全不变量。
 2. [Accepted Receipt 与幂等契约](accepted-receipt-and-idempotency-contract.md) — 可靠接收、独立 Receipt、Retry/Replay 和 Evidence 边界。
 3. [Compiler 状态机与 D Producer Admission](compiler-state-and-producer-admission.md) — WorkItem/Attempt/Lease 身份、D Registration、Barrier 和 Terminal Disposition。
+4. [Compiler Stage Contract](compiler-stage-contract.md) — 五阶段 Rust 参考流水线；Provenance 是横切关注点，不是第六阶段。
+   - 当前 main 双语来源 Pin：英文 Blob `6d733294232a93aa59123009d2a2801d9b83f459`；简体中文 Blob `ad386cac5636b4ba3eaf8b93ad93afcb444e8b46`（main `0d0c1c6238e4e70a93609070b97fef596873916e`）。
 
 ## 尚待双语化的核心源规范
 
 E 分支清单还包含 Event Ingestion、Extraction/Normalization、Consolidation/Conflict Resolution、Evidence/Provenance，以及 Forget Fence/Derived Registration 规范。它们的完整双语伴随文档仍待完成，进度见[双语迁移状态](../../governance/translation-status.md)。
 
+## 架构完成契约
+
+当前 [Compiler 总览](compiler-overview.md) §§20–28 记录 Candidate IR / Canonical Schema 边界、五阶段拓扑、横切 Provenance、D/I 权威分工，以及 #459 执行生命周期覆盖层和其内存恢复能力限制。Option A + I1 已 DECIDED；B Schema Freeze/Consumer Acceptance、D Transaction/Currentness/Compatibility、I Attestor/Retention/Forget Mapping，以及所有跨 Owner Consumer Contract 仍为 OPEN。Runtime 验收矩阵仍是计划；Rust 参考 Crate 单元测试不构成矩阵或生产集成证据。
+
 ## 权威与状态
 
-E 拥有来源接收/编译编排、Candidate 生成、Stage Lineage、Retry/Replay 和 Producer-side Derivative Evidence。D 拥有 Canonical Identity/Version/Lifecycle 和 Forget Fence 语义。I 拥有授权/PermissionEpoch 和 Global Forget Policy。Storage/Consistency 默认不拥有领域语义；必须明确指定其实现责任 Owner。
+E 拥有来源接收/编译编排、Candidate 生成、Stage Lineage、Retry/Replay 和 Producer-side Derivative Evidence。D 拥有 Canonical Identity/Version/Lifecycle 和 D 侧 Forget Fence 语义。I 拥有 Authorization/PermissionEpoch、Revocation、Retention 和 Global Forget Policy/Completion。D/I 权威检查共同约束受保护发布。Storage/Consistency 默认不拥有领域语义；必须明确指定其实现责任 Owner。
 
-CANDIDATE 描述不是已批准 Schema。Fact/Claim 仍为 ADR-BLOCKED 时，不得冻结映射。D/E/Storage 的原子 Admission/Dependency/Publication 实现仍为 OPEN，直到联合证据通过审查。
+CANDIDATE 描述不是已批准 Schema。E 仅输出中立 CandidateProposition/ExtractionIR；不得签发 ClaimRef/ClaimRevisionRef/FactRef/FactRevisionRef，也不得根据 Confidence 推断 Fact。D 拥有 Canonical Identity/Revision/Currentness/Lifecycle 和 D ForgetFence；I 拥有 Authorization/PermissionEpoch、Attestor Authorization、Retention 和 Global Forget Policy/Completion。精确 B/D/I/H/Storage Consumer Contract、Transaction 和 Compatibility Evidence 仍为 OPEN。未授权 Schema、DDL、Public API、Wire 或 Runtime Freeze。
+
+**规范源/镜像状态：**英文与简体中文文件作为 `docs/en` 和 `docs/zh-CN` 下维护的配对语言镜像；不创建根目录重复规范文件。历史根目录源路径当前不存在；在权威工件及精确版本/Blob 获得采纳前，GOV-DOC-001 继续保持 PENDING。因此 GOV-DOC-002 DM-12 仍等待获授权的 Source Path 决定。
