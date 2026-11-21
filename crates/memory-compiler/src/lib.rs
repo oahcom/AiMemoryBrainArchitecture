@@ -263,10 +263,15 @@ pub struct PublishedDerivative {
     pub disposition: PublicationDisposition,
 }
 
+/// Publication outcome. `Failed` is reserved for the Storage boundary when
+/// visibility advancement fails; this crate has no Storage advancement hook
+/// and therefore has no in-crate trigger for that disposition.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum PublicationDisposition {
     Published,
     Suppressed,
+    Blocked,
+    Failed,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -510,19 +515,30 @@ impl PublicationGate {
         if lease.generation != current_generation
             || staged.provenance.attempt_generation != lease.generation
         {
-            return Err(CompilerError::StaleWorker);
+            return Ok(PublishedDerivative {
+                derivative: staged,
+                disposition: PublicationDisposition::Suppressed,
+            });
         }
 
         if staged.visibility != Visibility::Hidden {
-            return Err(CompilerError::InvalidPublicationProof);
+            return Ok(PublishedDerivative {
+                derivative: staged,
+                disposition: PublicationDisposition::Blocked,
+            });
         }
 
+        // Authority failures remain errors: they are not a publication
+        // disposition and must be propagated without reinterpretation.
         let proof = authority.obtain_proof(&staged, lease)?;
 
         if proof.publication_id != staged.publication_id
             || proof.generation != lease.generation
         {
-            return Err(CompilerError::InvalidPublicationProof);
+            return Ok(PublishedDerivative {
+                derivative: staged,
+                disposition: PublicationDisposition::Blocked,
+            });
         }
 
         if !proof.producer_admitted
@@ -530,7 +546,10 @@ impl PublicationGate {
             || !proof.canonical_commit_confirmed
             || !proof.storage_prepared_hidden
         {
-            return Err(CompilerError::InvalidPublicationProof);
+            return Ok(PublishedDerivative {
+                derivative: staged,
+                disposition: PublicationDisposition::Blocked,
+            });
         }
 
         if !proof.publication_participant_admitted
@@ -896,6 +915,30 @@ mod tests {
         visibility_authorized: bool,
     }
 
+    struct EvidenceAuthority {
+        producer_admitted: bool,
+        storage_prepared_hidden: bool,
+    }
+
+    impl PublicationAuthority for EvidenceAuthority {
+        fn obtain_proof(
+            &mut self,
+            staged: &StagedDerivative,
+            lease: &WorkerLease,
+        ) -> Result<PublicationProof, CompilerError> {
+            Ok(PublicationProof {
+                publication_id: staged.publication_id.clone(),
+                generation: lease.generation,
+                producer_admitted: self.producer_admitted,
+                dependency_closure_complete: true,
+                canonical_commit_confirmed: true,
+                storage_prepared_hidden: self.storage_prepared_hidden,
+                publication_participant_admitted: true,
+                protected_visibility_authorized: true,
+            })
+        }
+    }
+
     impl PublicationAuthority for TestAuthority {
         fn obtain_proof(
             &mut self,
@@ -1001,17 +1044,66 @@ mod tests {
     }
 
     #[test]
-    fn late_worker_cannot_publish() {
+    fn stale_generation_returns_suppressed() {
         let (_, _, normalized) = pipeline();
         let staged = StagingStage::run(staging_input(normalized), 1).unwrap();
         let mut authority = TestAuthority {
             publication_admitted: true,
             visibility_authorized: true,
         };
-        assert_eq!(
-            PublicationGate::run(staged, &lease(), 2, &mut authority),
-            Err(CompilerError::StaleWorker)
-        );
+        let result = PublicationGate::run(staged, &lease(), 2, &mut authority).unwrap();
+        assert_eq!(result.disposition, PublicationDisposition::Suppressed);
+        assert_eq!(result.derivative.visibility, Visibility::Hidden);
+    }
+
+    #[test]
+    fn non_hidden_visibility_returns_blocked() {
+        let (_, _, normalized) = pipeline();
+        let mut staged = StagingStage::run(staging_input(normalized), 1).unwrap();
+        staged.visibility = Visibility::Visible;
+        let mut authority = TestAuthority {
+            publication_admitted: true,
+            visibility_authorized: true,
+        };
+        let result = PublicationGate::run(staged, &lease(), 1, &mut authority).unwrap();
+        assert_eq!(result.disposition, PublicationDisposition::Blocked);
+        assert_eq!(result.derivative.visibility, Visibility::Visible);
+    }
+
+    #[test]
+    fn missing_storage_prepared_hidden_returns_blocked() {
+        let (_, _, normalized) = pipeline();
+        let staged = StagingStage::run(staging_input(normalized), 1).unwrap();
+        let mut authority = EvidenceAuthority {
+            producer_admitted: true,
+            storage_prepared_hidden: false,
+        };
+        let result = PublicationGate::run(staged, &lease(), 1, &mut authority).unwrap();
+        assert_eq!(result.disposition, PublicationDisposition::Blocked);
+        assert_eq!(result.derivative.visibility, Visibility::Hidden);
+    }
+
+    #[test]
+    fn missing_producer_admission_returns_blocked() {
+        let (_, _, normalized) = pipeline();
+        let staged = StagingStage::run(staging_input(normalized), 1).unwrap();
+        let mut authority = EvidenceAuthority {
+            producer_admitted: false,
+            storage_prepared_hidden: true,
+        };
+        let result = PublicationGate::run(staged, &lease(), 1, &mut authority).unwrap();
+        assert_eq!(result.disposition, PublicationDisposition::Blocked);
+        assert_eq!(result.derivative.visibility, Visibility::Hidden);
+    }
+
+    #[test]
+    fn failed_variant_exists_but_is_unreachable_here() {
+        // Storage owns visibility advancement and must report Failed when that
+        // boundary cannot advance visibility. PublicationGate has no such hook.
+        assert!(matches!(
+            PublicationDisposition::Failed,
+            PublicationDisposition::Failed
+        ));
     }
 
     #[test]
@@ -1171,6 +1263,19 @@ mod tests {
         let result = PublicationGate::run(staged, &lease(), 1, &mut authority).unwrap();
         assert_eq!(result.disposition, PublicationDisposition::Published);
         assert_eq!(result.derivative.visibility, Visibility::Visible);
+    }
+
+    #[test]
+    fn rejected_participant_admission_returns_suppressed() {
+        let (_, _, normalized) = pipeline();
+        let staged = StagingStage::run(staging_input(normalized), 1).unwrap();
+        let mut authority = TestAuthority {
+            publication_admitted: false,
+            visibility_authorized: true,
+        };
+        let result = PublicationGate::run(staged, &lease(), 1, &mut authority).unwrap();
+        assert_eq!(result.disposition, PublicationDisposition::Suppressed);
+        assert_eq!(result.derivative.visibility, Visibility::Hidden);
     }
 }
 
