@@ -138,7 +138,7 @@ BASELINE_PATH = REPO_ROOT / "scripts" / "bilingual-baseline.txt"
 
 
 def current_bilingual_gaps() -> set[str]:
-    """Return non-exempt normative Markdown sources missing a paired version."""
+    """Return non-exempt normative Markdown sources missing either language mirror."""
     gaps: set[str] = set()
     for root_name in sorted(NORMATIVE_ROOTS):
         root = REPO_ROOT / root_name
@@ -146,18 +146,11 @@ def current_bilingual_gaps() -> set[str]:
             source = path.relative_to(REPO_ROOT).as_posix()
             if source in EMBEDDED_BILINGUAL_SOURCES:
                 continue
-            if source.startswith(PAIR_EXEMPT_PREFIXES):
-                continue
-            if root_name == "14-ai-development":
-                if counterpart_14(source) is None:
-                    gaps.add(source)
-                continue
-            if not (REPO_ROOT / "docs" / "en" / source).is_file() or not (
-                REPO_ROOT / "docs" / "zh-CN" / source
-            ).is_file():
+            english = REPO_ROOT / "docs" / "en" / source
+            chinese = REPO_ROOT / "docs" / "zh-CN" / source
+            if not english.is_file() or not chinese.is_file():
                 gaps.add(source)
     return gaps
-
 
 def write_baseline() -> int:
     gaps = sorted(current_bilingual_gaps())
