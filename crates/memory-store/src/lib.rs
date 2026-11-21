@@ -1,7 +1,7 @@
 //! Minimal Phase 1 Memory Store facade.
 //! 仅负责领域校验、Scope 边界与 Storage Port 编排；不拥有持久化实现。
 
-use memory_domain::{scopes_intersect, Memory, MemoryVersion, OpaqueId, ScopeRef};
+use memory_domain::{Memory, MemoryVersion, OpaqueId, ScopeRef};
 use memory_storage::{CommitReceipt, CommitRequest, MemoryStorage, StorageError};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -111,6 +111,7 @@ fn validate_scope(scope: &[ScopeRef]) -> Result<(), MemoryStoreError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use memory_domain::scopes_intersect;
     use memory_domain::{MemoryLifecycle, ScopeKind};
     use std::collections::BTreeMap;
 
