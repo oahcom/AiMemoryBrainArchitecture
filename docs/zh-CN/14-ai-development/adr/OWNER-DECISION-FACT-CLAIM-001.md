@@ -120,7 +120,7 @@ document_metadata:
 
 本决策取代 B-ADR-FACT-CLAIM-001 中较早的 C2 / Option B 候选建议。本决策与当前 main 的 DOMAIN-MODEL-001、core-entities.md，以及区分 Fact 与 Claim 的 I-04 / P-04 保持一致。
 
-旧 ADR 文本保留为决策过程的历史证据。其 ADR-BLOCKED 结论已由本决策记录取代；引用旧 ADR 时不得忽略本记录。
+旧 ADR 文本保留为决策过程的历史证据。本记录仅取代“尚未选择语义方案”这一早期状态。B-ADR-FACT-CLAIM-001 对 Canonical Schema 冻结及下游实现映射仍保持 ADR-BLOCKED，直至其自身 §8 条件均有证据：B/D/E/F/G/H/I 消费者映射、迁移/兼容计划、符合性场景及验证证据。任何消费者都不得将本语义选择视为 Schema 冻结授权。
 
 术语表中的合并条目 Fact / Claim 必须拆分为 Claim、ClaimRevision、Fact 和 FactRevision。当前 BMCP 正式名称继续使用 Brain Memory Context Protocol。
 
@@ -132,7 +132,7 @@ document_metadata:
 
 ## 8. 必须执行的后续工作
 
-1. 更新 B ADR 状态和来源 Pin，使其引用本决策记录。
+1. 更新 B ADR 状态和来源 Pin，使其引用本语义选择；在 B-ADR-FACT-CLAIM-001 §8 全部条件得到证据支持前，继续保持 Schema 冻结状态为 ADR-BLOCKED。
 2. 对齐规范术语及双语领域读者文档。
 3. 更新 Memory Compiler 和 BMCP 工程交接文档，采用 Option A + I1，但不冻结 Wire/Storage Schema。
 4. 保持 Issue #7 的 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE 不变。

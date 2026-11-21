@@ -122,7 +122,7 @@ No authority may infer permission from Scope or infer truth from confidence, a m
 
 This decision supersedes the earlier C2 / Option B candidate recommendation in B-ADR-FACT-CLAIM-001. It aligns the conceptual model with current main DOMAIN-MODEL-001 and core-entities.md, and with I-04 / P-04, which distinguish Fact from Claim.
 
-The older ADR text remains historical evidence of the decision process. Its ADR-BLOCKED conclusion is superseded by this decision record; it must not be cited as the current state without this record.
+The older ADR text remains historical evidence of the decision process. This record supersedes only the earlier statement that no semantic option has been selected. B-ADR-FACT-CLAIM-001 remains ADR-BLOCKED for canonical schema freeze and downstream implementation mapping until its own §8 conditions are satisfied: B/D/E/F/G/H/I consumer mapping, migration/compatibility plan, conformance scenarios, and evidence. No consumer may treat this semantic selection as schema-freeze authority.
 
 The terminology entry Fact / Claim must be split into Claim, ClaimRevision, Fact, and FactRevision. The canonical BMCP expansion remains Brain Memory Context Protocol.
 
@@ -134,7 +134,7 @@ Those items remain subject to their own evidence and acceptance criteria.
 
 ## 8. Required follow-up
 
-1. Update the B ADR status and source pins to reference this decision record.
+1. Update the B ADR status and source pins to reference this semantic selection while keeping ADR-BLOCKED for schema freeze until all B-ADR-FACT-CLAIM-001 §8 conditions are evidenced.
 2. Reconcile canonical terminology and bilingual domain readers.
 3. Update Memory Compiler and BMCP handoff documents to consume Option A + I1 without freezing wire/storage schemas.
 4. Keep Issue #7 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE unchanged.
