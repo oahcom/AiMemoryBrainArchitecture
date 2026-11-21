@@ -1,10 +1,63 @@
+---
+document_metadata:
+  domain: memory-compiler
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope: null
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "04-memory-compiler/extraction-and-normalization.md @ 8d0a0e6bcb3ae1aec84c4f773dc4d5898516b467"
+        - "OWNER-DECISION-FACT-CLAIM-001, merged PR #446"
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-21"
+      last_verification_note: "Canonical source restored and bilingual mirror reconciled to the merged Owner semantic decision; concrete schemas remain unfrozen."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Memory Compiler design-specification: extraction-normalization"
+    canonical_scope_id: "memory-compiler/extraction-normalization"
+    canonical_scope_keywords:
+      - extraction-ir
+      - candidate-proposition
+      - normalization
+      - evidence
+      - scope
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "04-memory-compiler/extraction-and-normalization.md"
+    en: "docs/en/04-memory-compiler/extraction-and-normalization.md"
+    zh-CN: "docs/zh-CN/04-memory-compiler/extraction-and-normalization.md"
+---
+
+
 # Extraction and Normalization
 
 - Document ID: E-EXTRACTION-001
-- Version: 1.0
-- Source branch: session-e-memory-compiler-2026-11-16
-- Source blob: c18780403de2d1dbcf471bdb8abdaa009a4a78e1
-- Chinese counterpart: [提取与规范化](../../zh-CN/04-memory-compiler/extraction-and-normalization.md)
+- Canonical source: [extraction-and-normalization.md](../../../04-memory-compiler/extraction-and-normalization.md)
+- Source blob: 8d0a0e6bcb3ae1aec84c4f773dc4d5898516b467
+
+- Document ID: E-EXTRACTION-001
+- Version: 1.2
+- Restored source lineage: updated E owner design mirror in PR #429; historical source blob c18780403de2d1dbcf471bdb8abdaa009a4a78e1.
+- Owner semantic decision: OWNER-DECISION-FACT-CLAIM-001, merged in PR #446.
 - Status: epistemic, temporal, scope and trust constraints DECIDED; extraction IR/model routing CANDIDATE; accuracy/cost TO_VALIDATE
 - Owner: Memory Compiler / MC-02
 - Integration: INT-P0-01/02/04; INT-P1-02/03/06; C P1-02/P1-03
@@ -17,7 +70,7 @@ Convert heterogeneous accepted source material into a normalized, typed, uncerta
 
 Includes parsing text, structured events, documents and environment observations; modality classification; entity/time/relation mention extraction; candidate proposition formation; normalization; confidence/uncertainty recording; deterministic validation; model-assisted extraction orchestration; and source-span alignment.
 
-Excludes Fact-specific modeling, Fact Schema and Fact approval (OPEN under INT-P0-01); canonical Claim identity semantics are DECIDED FOR CONVERGENCE under D's Option A and are governed by D, not defined by E; canonical entity merge decisions, lifecycle decisions, source authorization policy, external tool execution and final truth adjudication.
+Fact/Claim semantics and the I1 identity/revision choice are decided by OWNER-DECISION-FACT-CLAIM-001 (PR #446 merged). This does not freeze field-level Fact/Claim schema, DDL, public API, wire fields, attestor policy or Runtime mapping. E continues to emit neutral CandidateProposition and cannot mint canonical identity or instantiate a Fact. D governs canonical identity/lifecycle; I governs authorization, PermissionEpoch and attestor approval. Canonical entity merge decisions, lifecycle decisions, source authorization policy, external tool execution and final truth adjudication are also excluded.
 
 ## 3. Responsibilities
 
@@ -90,7 +143,7 @@ CandidateProposition {
 }
 ~~~
 
-This is not a Claim schema. It is compiler IR whose Claim identity mapping follows D's DECIDED FOR CONVERGENCE — Option A semantics (stable Claim identity plus immutable ClaimRevision). CandidateProposition remains neutral and does not instantiate or freeze the canonical identity or any public schema. Fact-specific modeling, including whether and how a separate Fact object is represented, and Fact approval remain OPEN. No field name in this IR freezes public schema semantics.
+This is not a Claim or Fact schema; it is compiler IR. OWNER-DECISION-FACT-CLAIM-001 selects a separate Fact attestation and Claim proposition with stable ClaimRef and immutable ClaimRevisionRef. This resolves semantics, not field-level schema. D's concrete schema-freeze gate remains open pending D/I/H contracts and consumer acceptance. CandidateProposition remains neutral and does not instantiate canonical identity or a canonical Fact. Fact approval and attestor authorization remain governed by I. No field name in this IR freezes public schema semantics.
 
 ### 6.3 EntityMention / TimeMention
 
@@ -167,7 +220,7 @@ Record source/event ref, digest, schema/policy/model version, modality, extracti
 - **Extraction → Evidence:** source spans and exact locators; Evidence Manager validates and persists source reference.
 - **Extraction → Entity Manager:** scoped EntityMention and identity evidence; Entity Manager returns provisional/resolved refs and ambiguity.
 - **Extraction → Consolidation:** candidate propositions, modality, time, scope, qualifiers and method receipts.
-- **D:** receives candidate propositions for mapping under D's DECIDED FOR CONVERGENCE Option A Claim identity semantics; Fact-specific modeling and approval remain OPEN; candidate IR is not a public schema.
+- **D:** receives candidate propositions; Owner Decision Option A + I1 is adopted for semantics and identity/revision choice. D retains canonical identity/lifecycle and the concrete schema-freeze gate; E does not create canonical IDs or Fact records.
 - **H/C:** source classifications and telemetry semantics must align; observation/outcome distinctions are preserved.
 - **I:** data classification, permitted processing, source access and Forget Fence govern extraction.
 
@@ -183,7 +236,7 @@ D domain types and Fact/Claim ADR; B epistemic/temporal/scope semantics; C/H sou
 
 ## 18. Open questions
 
-- OPEN: INT-P0-01 Fact-specific modeling and Fact approval items not settled by D's DECIDED FOR CONVERGENCE Option A Claim identity semantics; CandidateProposition remains deliberately neutral.
+- RESOLVED: Fact/Claim semantics and I1 identity/revision choice are adopted by OWNER-DECISION-FACT-CLAIM-001. OPEN: D canonical field schema/ConflictSet and I attestor authorization/approval contracts; CandidateProposition remains deliberately neutral.
 - OPEN: C's final Observation versus Outcome mapping and Task/Plan revision semantics.
 - CANDIDATE: extraction IR and deterministic-first routing.
 - TO_VALIDATE: modality classifier quality, entity/time extraction accuracy, multilingual prompt-injection detection and local model resource use.
@@ -196,14 +249,14 @@ D domain types and Fact/Claim ADR; B epistemic/temporal/scope semantics; C/H sou
 - Persist a stage result and next-stage outbox/journal intent atomically or through an equivalent recoverable journal. A worker crash must not lose a completed stage or duplicate its externally visible effect.
 - Before payload dereference, source-span resolution, model prompt construction, stage-result publication or retry, re-check current permission and D Forget Fence. Unknown fence/policy state fails closed.
 - ExtractionIR, CandidateProposition, spans, embeddings and normalized values are derived objects: lineage and dependency registration must be durable before visibility under [Forget Fence and Derived Registration](forget-fence-and-derived-registration-part1.md).
-- CandidateProposition remains neutral pre-canonical IR. Claim identity mapping follows D's DECIDED FOR CONVERGENCE Option A semantics and is not ADR-BLOCKED. Fact-specific modeling and Fact approval remain OPEN; E must not infer or approve a Fact Schema, DDL, API or Wire contract.
+- CandidateProposition remains neutral pre-canonical IR. OWNER-DECISION-FACT-CLAIM-001 adopts Option A + I1 for semantics and identity/revision. D's concrete schema gate, I's attestor authorization/approval contract and H's wire mapping remain unfrozen. E must not infer or approve a Fact/Claim schema, DDL, API or wire contract.
 
 ### 19.1 Claim/Fact canonical publication order
 
 E's ExtractionIR and CandidateProposition MUST
 remain private staging artifacts.
 
-This publication ordering does not defer or reopen Claim identity semantics, which D has already DECIDED FOR CONVERGENCE under Option A. Fact-specific modeling and approval remain OPEN and are not approved by this publication protocol.
+This publication ordering incorporates the adopted Owner semantic decision Option A + I1. It does not freeze the concrete D schema, DDL, public API, H wire fields or I attestor authorization policy. Those contracts remain open and are not approved by this publication protocol.
 
 The normative order is:
 
