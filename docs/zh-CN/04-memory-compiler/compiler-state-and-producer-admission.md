@@ -1,10 +1,59 @@
+---
+document_metadata:
+  domain: memory-compiler
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope: null
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "04-memory-compiler/compiler-state-and-producer-admission.md @ bc36ad36895496f0f7707fcecb12d156c6be97c3"
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-21"
+      last_verification_note: "Canonical source and bilingual mirror path verified; design status remains as stated in the document."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Memory Compiler design specification: compiler-state-producer-admission"
+    canonical_scope_id: "memory-compiler/compiler-state-producer-admission"
+    canonical_scope_keywords:
+      - state-machine
+      - producer-admission
+      - lease
+      - barrier
+      - terminal-disposition
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "04-memory-compiler/compiler-state-and-producer-admission.md"
+    en: "docs/en/04-memory-compiler/compiler-state-and-producer-admission.md"
+    zh-CN: "docs/zh-CN/04-memory-compiler/compiler-state-and-producer-admission.md"
+---
+
 # Compiler 状态机与 D Producer Admission 接口
+
+- 规范源：[compiler-state-and-producer-admission.md](../../../04-memory-compiler/compiler-state-and-producer-admission.md)
+- 规范源 Blob：bc36ad36895496f0f7707fcecb12d156c6be97c3
 
 - 文档 ID：E-PRODUCER-ADMISSION-001
 - 版本：1.0
 - 源分支：session-e-memory-compiler-2026-11-16
-- 源文件版本：DEREFERENCED — 保留历史源 Blob `e59f517fff161ab882aa0ddc4a5bda513964ae1a`；当前仓库不存在可解析的规范性源文件。
-- 源规范：DEREFERENCED — 原规范源路径 `04-memory-compiler/compiler-state-and-producer-admission.md` 在当前 main tree 中不存在；替代物：[英文对照版](../../en/04-memory-compiler/compiler-state-and-producer-admission.md)（Blob `bdca52bfa74a32d3e9e9d2feaaa5ce8d0b75545f`；仅为对照文本，不是规范性替代源）。
 - 对应英文：[Compiler State Machine and D Producer Admission Interface](../../en/04-memory-compiler/compiler-state-and-producer-admission.md)
 - 状态：E Lifecycle 语义为 CANDIDATE；D 语义操作为 DECIDED；可调用 API/Transport 和 Storage 原子性为 OPEN
 
