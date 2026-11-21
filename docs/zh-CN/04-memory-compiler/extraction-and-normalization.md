@@ -367,6 +367,26 @@ dependency closure 和最终 Forget outcome。
 这是一个 implementation-conformance gate，
 不是尚未解决的规范排序选择。
 
+#### T17-PUB / T18-PUB — 第二阶段准入被 Forget Fence 拒绝
+
+当 Producer Admission 已成功线性化，但对应的 PublicationParticipant Admission 被 Forget Fence 拒绝时，该拒绝 MUST 为确切的 publication identity 产生明确的终态处置。Producer Admission 成功 MUST NOT 授权 publication 可见性推进，也 MUST NOT 替代成功的 PublicationParticipant Admission。
+
+以下要求具有规范约束力：
+
+1. **Canonical Revision 终态。** 该操作已经提交的任何 Canonical ClaimRevision/FactRevision MUST 保持为已提交的规范历史记录，但 MUST 永久保持不可公开。该 Revision MUST NOT 通过被拒绝的 publication 变为公开可见。后续独立操作 MAY 在满足所有适用的准入、依赖闭包及 ForgetFence 要求的前提下，建立新的授权 publication 结果。对同一被拒绝操作进行重试、重放或恢复 MUST NOT 构成独立授权。
+
+2. **E Publication 处置。** 已经为被拒绝的 publication identity 产生的任何 E Publication MUST 撤销其公开可见性，或 MUST 与所有公开可见性路径隔离。它 MUST NOT 被重放、恢复，也 MUST NOT 被视为该被拒绝 publication 的成功可见效果。E Publication 的存在 MUST NOT 证明 PublicationParticipant Admission 已成功。
+
+3. **Storage tuple 处置。** 已持久化为 PREPARED_HIDDEN 的确切 Storage publication tuple MUST 取消或隔离。无论采用哪种方式，该 tuple 都 MUST 保持不可见，并 MUST NOT 在被拒绝的 publication identity 下进入受保护的可见性推进。取消或隔离 MUST 具有可审计的终态结果。尚未解决的 tuple MUST NOT 被视为已取消、已成功发布或具备可见性推进资格。
+
+4. **第一阶段 participant 处置。** 已成功准入的 Producer participant MUST 针对被拒绝的 publication 获得可审计的抑制处置。该处置 MUST 显式标识并绑定到确切的、被拒绝的 PublicationParticipant identity、其对应的 StorageVisibilityParticipantRef，以及确切的 publication tuple identity。泛化的操作级抑制处置 MUST NOT 满足此要求。Fence MUST 保留原始 Producer participant identity，且 MUST NOT 以从未成功准入的 PublicationParticipant 替代它。
+
+5. **恢复、重试及替代发布路径。** 恢复 MUST 保留被拒绝 publication 的不可见终态处置。重试 MUST NOT 将被拒绝的第二阶段准入转化为成功准入。替代发布路径 MUST NOT 使同一 tuple 公开可见，也 MUST NOT 重现其被拒绝的可见性结果。任何恢复、重试及替代发布路径，在执行任何可见性推进之前，MUST 验证成功的第二阶段准入及独立授权的可见性结果所需的权威证据。证据缺失、冲突或为 UNKNOWN 时 MUST 失效关闭（fail closed）。没有成功第二阶段准入及授权可见性结果证明的 tuple MUST 保持不可见。
+
+以上要求适用于确切的 publication identity 及其关联的 Canonical Revision、E Publication、Storage tuple 和已准入 Producer participant。实现 MUST 在所有对应的终态处置之间维持可审计的关联关系。
+
+本规定属于 implementation-conformance gate。它不改变 §19.1 规定的十步顺序，也不改变 §19.2 规定的六步顺序。任何一项顺序都 MUST NOT 因这些终态处置要求而被重新排序、缩短或重新解释。
+
 #### Storage 边界
 
 既有 Storage L1 决策保持不变。

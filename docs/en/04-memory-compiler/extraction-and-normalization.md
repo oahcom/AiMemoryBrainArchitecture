@@ -395,6 +395,26 @@ Forget outcomes.
 This is an implementation-conformance gate, not an
 unresolved normative ordering choice.
 
+#### T17-PUB / T18-PUB — Second-stage Admission rejected by Forget Fence
+
+When Producer Admission has successfully linearized, but the corresponding PublicationParticipant Admission is rejected by a Forget Fence, the rejection MUST produce an explicit terminal disposition for the exact publication identity. Successful Producer Admission MUST NOT authorize publication visibility or substitute for successful PublicationParticipant Admission.
+
+The following requirements are normative:
+
+1. **Canonical Revision terminal state.** Any Canonical ClaimRevision/FactRevision already committed for the operation MUST remain committed as a canonical historical record, but MUST remain permanently non-public. It MUST NOT become publicly visible through the rejected publication. A subsequent independent operation MAY establish a new authorized publication outcome, subject to all applicable admission, dependency-closure and ForgetFence requirements. Retrying, replaying or resuming the same rejected operation MUST NOT constitute independent authorization.
+
+2. **E Publication disposition.** Any E Publication already produced for the rejected publication identity MUST have its public visibility revoked or MUST be isolated from all public visibility paths. It MUST NOT be replayed, restored or treated as a successful visible effect of the rejected publication. Its existence MUST NOT establish successful PublicationParticipant Admission.
+
+3. **Storage tuple disposition.** The exact Storage publication tuple persisted as PREPARED_HIDDEN MUST be cancelled or isolated. In either case, it MUST remain non-visible and MUST NOT advance through protected visibility processing under the rejected publication identity. Cancellation or isolation MUST have an auditable terminal outcome. An unresolved tuple MUST NOT be treated as cancelled, successfully published or eligible for visibility advancement.
+
+4. **First-stage participant disposition.** The successfully admitted Producer participant MUST receive an auditable suppression disposition for the rejected publication. That disposition MUST explicitly identify and bind to the exact rejected PublicationParticipant identity, its corresponding StorageVisibilityParticipantRef, and the exact publication tuple identity. A generic operation-level suppression disposition MUST NOT satisfy this requirement. The Fence MUST preserve the original Producer participant identity and MUST NOT substitute a PublicationParticipant that was never successfully admitted.
+
+5. **Recovery, retry and alternative publication paths.** Recovery MUST preserve the non-visible terminal disposition of the rejected publication. Retry MUST NOT convert the rejected second-stage Admission into successful Admission. An alternative publication path MUST NOT expose the same tuple or reproduce its rejected visibility outcome. Every recovery, retry and alternative publication path MUST verify authoritative evidence of successful second-stage Admission and an independently authorized visibility outcome before any visibility advancement. Missing, conflicting or UNKNOWN evidence MUST fail closed. A tuple without proven successful second-stage Admission and an authorized visibility outcome MUST remain non-visible.
+
+These requirements apply to the exact publication identity and its associated Canonical Revision, E Publication, Storage tuple and admitted Producer participant. The implementation MUST maintain an auditable association across all corresponding terminal dispositions.
+
+This is an implementation-conformance gate. It does not change the ten-step ordering specified in §19.1 or the six-step ordering specified in §19.2. Neither ordering MAY be reordered, shortened or reinterpreted by these terminal-disposition requirements.
+
 #### Storage boundary
 
 The existing Storage L1 decision remains unchanged.
