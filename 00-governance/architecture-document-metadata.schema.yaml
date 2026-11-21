@@ -20,7 +20,12 @@
 document_metadata:
 
   # ---- DIMENSION 1: DOMAIN (REQUIRED) ----
-  # Closed enumeration, see policy §3.1
+  # Closed enumeration, see policy §3.1. Every value is listed here so the
+  # self-check can prove the schema and the gate accept the same set.
+  # architecture | domain-model | memory-brain | memory-compiler |
+  # memory-runtime | memory-context | agent-integration | protocol |
+  # security-governance | storage-index | consistency-recovery |
+  # testing-acceptance | ai-development
   domain: architecture
 
   # ---- DIMENSION 2: ROLE (REQUIRED) ----
@@ -121,8 +126,18 @@ document_metadata:
   # authority; translations MUST NOT each claim the same canonical_scope_id.
   # The relation MUST be symmetric: a declared counterpart must declare this
   # document back, and must itself carry metadata (DM-12).
+  # A document under docs/en/ or docs/zh-CN/ MUST declare `source`: being in a
+  # mirror root puts it in scope, and one that names no source belongs to no
+  # group and could never be found by the closure check.
+  # Every value here is a normalised repository-relative path: no absolute
+  # paths, no `..`, no backslashes, no repeated `./`, no empty segments.
+  # A value that violates that is an error, never silently rewritten.
   # 双语配对：仅权威源声明权威性；各语言译本不得重复声明同一 canonical_scope_id。
   # 关系必须对称：被声明方必须反向声明本文件，且自身必须带元数据（DM-12）。
+  # 位于 docs/en/ 或 docs/zh-CN/ 下的文档必须声明 `source`：处在镜像根目录内
+  # 即已纳入范围；不声明 source 的镜像不属于任何组，闭包检查永远找不到它。
+  # 此处所有值均为规范化的仓库相对路径：禁止绝对路径、`..`、反斜杠、
+  # 重复的 `./` 与空段。违规即报错，绝不静默改写。
   bilingual_counterpart:
     source: null   # mirrors name their authoritative source here
     en: null

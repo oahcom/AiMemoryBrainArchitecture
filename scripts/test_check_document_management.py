@@ -18,9 +18,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from check_document_management import (  # noqa: E402
     NO_AUTHORITATIVE_SOURCE,
+    body_hash,
     check_document,
     main as gate_main,
     read_metadata,
+    rel_path,
     resolve_canonical,
 )
 
@@ -334,7 +336,9 @@ def run_repository_rules() -> None:
         root = _repo(tmp)
         (root / "00-governance" / "a.md").write_text(doc(BASE), encoding="utf-8")
         (root / "00-governance" / "b.md").write_text("# no metadata\n", encoding="utf-8")
-        expect_gate("unclassified is only a gap by default", root, 0)
+        expect_gate(
+            "unclassified is INCOMPLETE, never PASS", root, 2
+        )
         expect_gate("--strict rejects unclassified", root, 1, "--strict")
 
     # T06 / T07: a Resolved record must select the unique Canonical document.
@@ -502,6 +506,204 @@ def run_changed_paths() -> None:
         )
 
 
+def run_path_safety() -> None:
+    """T14/T15: a path reference is validated, never silently rewritten.
+
+    `lstrip("./")` takes a character set, so "../../x.md" would collapse to
+    "x.md" and an illegal reference would become a legal-looking one.
+    """
+    print("path normalisation")
+    for bad in (
+        "../../00-governance/a.md",
+        "/etc/passwd",
+        "C:/Windows/system.ini",
+        "././00-governance/a.md",
+        "00-governance/../../etc/passwd",
+        "a//b.md",
+        "./a.md/",
+        "..\\..\\a.md",
+        "a.md\x00b.md",
+    ):
+        errs: list[str] = []
+        got = rel_path(bad, "test", errs)
+        record(
+            f"T14 rejects unsafe path {bad!r}",
+            got is None and bool(errs),
+            f"  got {got!r}, errors {errs}",
+        )
+    record("T14 accepts a clean relative path",
+           rel_path("00-governance/a.md", "test", []) == "00-governance/a.md")
+    record("T14 accepts a single ./ prefix",
+           rel_path("./00-governance/a.md", "test", []) == "00-governance/a.md")
+
+def run_body_hash_equivalence() -> None:
+    """T16: only the equivalences the policy names may collapse two bodies."""
+    print("body hash equivalence")
+    record("T16 CRLF is the same body as LF",
+           body_hash("a\r\nb\r\n") == body_hash("a\nb\n"))
+    record("T16 bare CR is the same body as LF",
+           body_hash("a\rb\r") == body_hash("a\nb\n"))
+    record("T16 trailing spaces are ignored",
+           body_hash("a  \nb\t\n") == body_hash("a\nb\n"))
+    record("T16 leading blank lines are ignored",
+           body_hash("\n\na\nb\n") == body_hash("a\nb\n"))
+    record("T16 leading spaces on a non-blank line are NOT ignored",
+           body_hash("  a\n") != body_hash("a\n"))
+    for name, sep in (("U+2028", "\u2028"), ("U+2029", "\u2029"),
+                      ("U+000B", "\x0b"), ("U+000C", "\x0c"),
+                      ("U+001C", "\x1c"), ("U+0085", "\x85")):
+        record(
+            f"T16 {name} is NOT a line break",
+            body_hash(f"alpha{sep}beta") != body_hash("alpha\nbeta"),
+            "  a Unicode line separator collapsed two different bodies",
+        )
+
+def run_bilingual_closure() -> None:
+    """T17/T18: a mirror whose source declares nothing is an error."""
+    print("DM-12 group closure")
+    mirror = (
+        "  domain: architecture\n"
+        "  role: design-specification\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Draft\n"
+        "    evidence_verification:\n"
+        "      verification_status: Unverified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Non-Canonical\n"
+        "    normative_status: Informative\n"
+        "    canonical_conflict_status: None\n"
+    )
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "docs" / "en" / "00-governance").mkdir(parents=True)
+        (root / "docs" / "zh-CN" / "00-governance").mkdir(parents=True)
+        # Source exists and is classified, but declares no counterpart at all.
+        (root / "00-governance" / "src.md").write_text(doc(mirror), encoding="utf-8")
+        (root / "docs" / "en" / "00-governance" / "src.md").write_text(
+            doc(mirror + '  bilingual_counterpart:\n    source: "00-governance/src.md"\n'),
+            encoding="utf-8",
+        )
+        expect_gate(
+            "T17 mirror whose source lists nothing is an error", root, 1
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "docs" / "en" / "00-governance").mkdir(parents=True)
+        # The source exists but carries no metadata, so it cannot be a group
+        # member. The mirror must not be silently accepted.
+        (root / "00-governance" / "src.md").write_text("# no metadata\n", encoding="utf-8")
+        (root / "docs" / "en" / "00-governance" / "src.md").write_text(
+            doc(mirror + '  bilingual_counterpart:\n    source: "00-governance/src.md"\n'),
+            encoding="utf-8",
+        )
+        expect_gate(
+            "T18 mirror naming an unclassified source is an error", root, 1
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "docs" / "en" / "00-governance").mkdir(parents=True)
+        # A mirror that declares nothing is in no group at all: no source can
+        # list it, so the closure check above would never look at it.
+        (root / "docs" / "en" / "00-governance" / "orphan.md").write_text(
+            doc(mirror), encoding="utf-8"
+        )
+        expect_gate("T20 mirror with no declared source is an error", root, 1)
+
+def run_schema_agreement() -> None:
+    """T19: the published schema file and the gate must accept the same shape.
+
+    A schema that only *looks* like the code proves nothing. This walks the
+    template tree and compares it against the gate's own key sets, required
+    leaves and enumerations, in both directions: a key the schema shows but the
+    gate rejects is a documentation lie, and an enum value the gate accepts but
+    the schema never mentions is an undocumented state.
+    """
+    print("schema/gate agreement")
+    import check_document_management as gate
+
+    path = Path(__file__).resolve().parents[1] / gate.SCHEMA_FILE
+    record("T19 schema file exists", path.is_file())
+    if not path.is_file():
+        return
+    text = path.read_text(encoding="utf-8")
+    # The schema file is a template, not a governed document: it has no
+    # frontmatter delimiter of its own. Wrap it the way the gate would see it.
+    meta = read_metadata("---\n" + text + "\n---\n")
+    record("T19 schema template parses under the gate's own subset", meta is not None)
+    if meta is None:
+        return
+
+    keysets = {
+        "": gate.TOP_KEYS,
+        "lifecycle": gate.LIFECYCLE_KEYS,
+        "lifecycle.approval": gate.APPROVAL_KEYS,
+        "lifecycle.approval.approved_version": gate.VERSION_KEYS,
+        "lifecycle.approval.approval_scope": gate.SCOPE_KEYS,
+        "lifecycle.approval.revocation": gate.REVOCATION_KEYS,
+        "lifecycle.evidence_verification": gate.EVIDENCE_KEYS,
+        "lifecycle.supersession": gate.SUPERSESSION_KEYS,
+        "lifecycle.archival": gate.ARCHIVAL_KEYS,
+        "authority": gate.AUTHORITY_KEYS,
+        "authority.canonical_conflict_resolution": gate.RESOLUTION_KEYS,
+        "bilingual_counterpart": gate.BILINGUAL_KEYS,
+    }
+
+    def walk(node, prefix: str) -> None:
+        if not isinstance(node, dict):
+            return
+        allowed = keysets.get(prefix)
+        if allowed is None:
+            record(f"T19 schema documents unknown subtree {prefix!r}", False)
+            return
+        for key, value in node.items():
+            child = f"{prefix}.{key}" if prefix else key
+            if key not in allowed:
+                record(f"T19 schema shows key the gate rejects: {child}", False)
+            walk(value, child)
+
+    walk(meta, "")
+
+    for leaf in gate.REQUIRED_FIELDS:
+        node = meta
+        for part in leaf.split("."):
+            node = node.get(part) if isinstance(node, dict) else None
+        record(f"T19 required field shown in schema: {leaf}", node is not None)
+
+    enums = {
+        "domain": gate.DOMAINS, "role": gate.ROLES,
+        "lifecycle.approval.decision_status": gate.DECISION_STATUSES,
+        "lifecycle.usage_status": gate.USAGE_STATUSES,
+        "lifecycle.modification_status": gate.MODIFICATION_STATUSES,
+        "lifecycle.evidence_verification.verification_status": gate.VERIFICATION_STATUSES,
+        "lifecycle.approval.approval_scope.type": gate.SCOPE_TYPES,
+        "lifecycle.approval.approved_version.scheme": gate.VERSION_SCHEMES,
+        "lifecycle.approval.approval_applicability": gate.APPLICABILITY,
+        "authority.canonical_status": gate.CANONICAL_STATUSES,
+        "authority.normative_status": gate.NORMATIVE_STATUSES,
+        "authority.canonical_conflict_status": gate.CONFLICT_STATUSES,
+    }
+    for where, allowed in enums.items():
+        node = meta
+        for part in where.split("."):
+            node = node.get(part) if isinstance(node, dict) else None
+        if node is not None:
+            record(
+                f"T19 schema example value for {where} is legal",
+                str(node) in allowed,
+                f"  {node!r} not in {sorted(allowed)}",
+            )
+        missing = sorted(v for v in allowed if v not in text)
+        record(
+            f"T19 every {where} value is documented in the schema",
+            not missing,
+            f"  undocumented: {missing}",
+        )
+
 def main() -> int:
     print("check_document_management self-check")
     run_parser()
@@ -510,6 +712,10 @@ def main() -> int:
     run_repository_rules()
     run_approval_binding()
     run_changed_paths()
+    run_path_safety()
+    run_body_hash_equivalence()
+    run_bilingual_closure()
+    run_schema_agreement()
     passed, total = sum(RESULTS), len(RESULTS)
     print(f"{passed}/{total} passed")
     return 0 if passed == total else 1

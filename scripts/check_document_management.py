@@ -29,28 +29,28 @@ import json
 import re
 import subprocess
 import sys
+from collections import defaultdict
 from pathlib import Path
 
-# Normative roots and exemptions come from the bilingual gate, so the two
-# gates can never disagree about what is governed. Duplicating these lists is
+# Normative roots come from the bilingual gate, so the two gates can never
+# disagree about which directories are governed. Duplicating the list is
 # how 08-protocols silently stopped existing.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from check_bilingual_docs import (  # noqa: E402
-    NORMATIVE_ROOTS as _BILINGUAL_ROOTS,
-    PAIR_EXEMPT_PREFIXES as _BILINGUAL_EXEMPT,
-)
+from check_bilingual_docs import NORMATIVE_ROOTS as _BILINGUAL_ROOTS  # noqa: E402
 
 NORMATIVE_ROOTS = tuple(sorted(_BILINGUAL_ROOTS)) + (
     # Bilingual mirrors. Counted so mirror drift is visible instead of falling
     # outside the audit entirely.
     "docs/en", "docs/zh-CN",
 )
-EXEMPT_PREFIXES = tuple(_BILINGUAL_EXEMPT) + (
-    "00-governance/templates/",
-    "00-governance/reports/",
-    "00-governance/drafts/",
-)
+# No path exemptions. A bilingual *pairing* exemption is not a *governance*
+# exemption: `PAIR_EXEMPT_PREFIXES` in check_bilingual_docs.py means "this file
+# need not have a translated twin", which says nothing about whether it is a
+# governed document. Importing it here used to shrink the governed set silently
+# by 89 files (work-items, prompts, adr). If a path must be out of scope, say so
+# in policy section 2 with a reason, not by borrowing another gate's constant.
 GOVERNED_ENTRY = "document_metadata"
+SCHEMA_FILE = "00-governance/architecture-document-metadata.schema.yaml"
 
 DOMAINS = {
     "architecture", "domain-model", "memory-brain", "memory-compiler",
@@ -320,7 +320,7 @@ def read_metadata(text: str) -> dict | None:
 
     Raises ParseError for anything that is not in the declared subset.
     """
-    lines = text.splitlines()
+    lines = _lf(text).split("\n")
     if not lines or lines[0].strip() != "---":
         return None
     closing = next(
@@ -394,12 +394,53 @@ def walk_keys(node, name: str, path: str = ""):
             yield from walk_keys(value, name, f"{path}[{index}]")
 
 
+def rel_path(value, where: str, errors: list[str]) -> str | None:
+    """Normalise a repository-relative path, or reject it.
+
+    `str(value).lstrip("./")` is not "strip a leading ./": lstrip takes a
+    character set, so "../../00-governance/a.md" collapses to
+    "00-governance/a.md" and an illegal reference becomes a legal-looking one.
+    Anything that leaves the repository, is absolute, or carries a traversal
+    segment is a DM-01 error rather than a silently rewritten string.
+    """
+    raw = str(value)
+    if "\x00" in raw:
+        errors.append(f"DM-01 {where} contains a NUL byte")
+        return None
+    if "\\" in raw:
+        errors.append(f"DM-01 {where} uses a backslash separator: {raw!r}")
+        return None
+    if raw.startswith("/") or (len(raw) > 1 and raw[1] == ":"):
+        errors.append(f"DM-01 {where} must be repository-relative, got absolute {raw!r}")
+        return None
+    cleaned = raw.removeprefix("./") if raw.startswith("./") else raw
+    if cleaned != raw and cleaned.startswith("./"):
+        # "././x" and "./././x" are not paths this repository writes.
+        errors.append(f"DM-01 {where} has a repeated ./ prefix: {raw!r}")
+        return None
+    parts = cleaned.split("/")
+    if any(part in ("", ".", "..") for part in parts):
+        errors.append(f"DM-01 {where} is not a normalised relative path: {raw!r}")
+        return None
+    return cleaned
+
+def _lf(text: str) -> str:
+    """CRLF and CR become LF; nothing else is a line break.
+
+    `str.splitlines()` also breaks on U+2028, U+2029, U+000B, U+000C, U+001C..
+    U+001E and U+0085. Using it for the body hash would mean
+    "alpha\u2028beta" and "alpha\nbeta" hash identically — two different
+    documents carrying one approval. The policy authorises exactly one
+    equivalence (CRLF/CR -> LF), so exactly one is applied.
+    """
+    return text.replace("\r\n", "\n").replace("\r", "\n")
+
 def body_text(text: str) -> str:
     """Document body without its own frontmatter.
 
     An approval binds to document content, not to the governance metadata.
     """
-    lines = text.splitlines()
+    lines = _lf(text).split("\n")
     if lines and lines[0].strip() == "---":
         for i in range(1, len(lines)):
             if lines[i].strip() in ("---", "..."):
@@ -416,7 +457,7 @@ def body_hash(text: str) -> str:
     are ignored. Everything else is compared byte-for-byte, including leading
     spaces on a non-blank line.
     """
-    unified = body_text(text).replace("\r\n", "\n").replace("\r", "\n")
+    unified = _lf(body_text(text))
     lines = [line.rstrip(" \t") for line in unified.split("\n")]
     while lines and not lines[0]:
         lines.pop(0)
@@ -666,11 +707,13 @@ def resolve_canonical(docs: dict[str, dict], scope_id: str) -> str:
     return canonical[0] if len(canonical) == 1 else NO_AUTHORITATIVE_SOURCE
 
 
-def git(root: Path, *args: str, nul: bool = False) -> str | None:
+def git(root: Path, *args: str, nul: bool = False, raw: bool = False) -> str | None:
     """Run git, returning stdout or None when unavailable/failing.
 
     nul=True reads a NUL-separated path list, so filenames containing spaces
-    are not split into fragments.
+    are not split into fragments. raw=True returns stdout untouched: stripping
+    a `git show` result would be a second, undeclared normalisation applied
+    before the body hash ever sees the text.
     """
     try:
         out = subprocess.run(
@@ -681,7 +724,7 @@ def git(root: Path, *args: str, nul: bool = False) -> str | None:
         return None
     if out.returncode != 0:
         return None
-    return out.stdout if nul else out.stdout.strip()
+    return out.stdout if (nul or raw) else out.stdout.strip()
 
 
 def check_approval_binding(root: Path, rel: str, text: str, meta: dict,
@@ -722,7 +765,7 @@ def check_approval_binding(root: Path, rel: str, text: str, meta: dict,
                 f"DM-10 approved_version {value!r} is not a commit in this repository"
             )
             return errors, notes
-        historical = git(root, "show", f"{commit}:{rel}")
+        historical = git(root, "show", f"{commit}:{rel}", raw=True)
         if historical is None:
             errors.append(
                 f"DM-10 {rel} did not exist at approved_version {value[:12]}; "
@@ -784,8 +827,12 @@ def check_scope_and_relations(root: Path, docs: dict[str, dict]) -> list[str]:
                 )
             selected = dig(resolutions[0][1], "selected_document")
             if selected:
-                selected = str(selected).lstrip("./")
-                if selected not in owners:
+                selected = rel_path(
+                    selected, f"scope {scope_id!r} resolution selected_document", errors
+                )
+                if selected is None:
+                    pass
+                elif selected not in owners:
                     errors.append(
                         f"DM-11 scope {scope_id!r} resolution selects {selected!r}, "
                         "which does not declare this scope"
@@ -818,17 +865,17 @@ def check_scope_and_relations(root: Path, docs: dict[str, dict]) -> list[str]:
     # could be absent from both and nobody would notice.
     lang_prefix = {"en": "docs/en/", "zh-CN": "docs/zh-CN/"}
 
-    def source_of(meta: dict) -> str | None:
+    def source_of(meta: dict, rel: str) -> str | None:
         node = meta.get("bilingual_counterpart")
         if not isinstance(node, dict) or not node.get("source"):
             return None
-        return str(node["source"]).lstrip("./")
+        return rel_path(node["source"], f"{rel}: bilingual_counterpart.source", errors)
 
     for rel, meta in docs.items():
         counterpart = meta.get("bilingual_counterpart")
         if not isinstance(counterpart, dict):
             continue
-        own_source = source_of(meta)
+        own_source = source_of(meta, rel)
         if own_source and own_source.startswith(("docs/en/", "docs/zh-CN/")):
             errors.append(
                 f"DM-12 {rel}: source must be the authoritative file, not a mirror "
@@ -837,7 +884,11 @@ def check_scope_and_relations(root: Path, docs: dict[str, dict]) -> list[str]:
         for lang, target in counterpart.items():
             if not target:
                 continue
-            target_rel = str(target).lstrip("./")
+            target_rel = rel_path(
+                target, f"{rel}: bilingual_counterpart.{lang}", errors
+            )
+            if target_rel is None:
+                continue
             if target_rel == rel:
                 errors.append(f"DM-12 {rel}: bilingual_counterpart.{lang} points to itself")
                 continue
@@ -861,7 +912,7 @@ def check_scope_and_relations(root: Path, docs: dict[str, dict]) -> list[str]:
                 )
                 continue
             # Both ends must belong to the same group.
-            others_source = source_of(other)
+            others_source = source_of(other, target_rel)
             if own_source:
                 # A mirror may point at its own source, or at a sibling mirror
                 # of that same source; anything else is a stray link.
@@ -893,18 +944,41 @@ def check_scope_and_relations(root: Path, docs: dict[str, dict]) -> list[str]:
                 )
 
     # Every mirror must appear in its source's list: no silent third party.
-    listed_by_source = {
-        rel: {str(v).lstrip("./") for k, v in meta["bilingual_counterpart"].items()
-              if v and k in lang_prefix}
-        for rel, meta in docs.items()
-        if isinstance(meta.get("bilingual_counterpart"), dict)
-    }
+    # default=set() matters: a source with no bilingual_counterpart block has
+    # no entry here, and `.get()` returning None used to skip the check
+    # entirely. "The source never declared anything" is the strongest form of
+    # "the source does not list this mirror", not a reason to stay silent.
+    listed_by_source: dict[str, set[str]] = defaultdict(set)
     for rel, meta in docs.items():
-        source_rel = source_of(meta)
-        if not source_rel or source_rel not in docs:
+        node = meta.get("bilingual_counterpart")
+        if not isinstance(node, dict):
             continue
-        listed = listed_by_source.get(source_rel)
-        if listed is not None and rel not in listed:
+        for lang, value in node.items():
+            if value and lang in lang_prefix:
+                target_rel = rel_path(value, f"{rel}: bilingual_counterpart.{lang}", errors)
+                if target_rel is not None:
+                    listed_by_source[rel].add(target_rel)
+
+    for rel, meta in docs.items():
+        # A mirror that declares nothing is invisible to the closure check
+        # above: no source ever lists it, and nothing asks why. Being under a
+        # language mirror root is the declaration.
+        in_mirror_root = rel.startswith(("docs/en/", "docs/zh-CN/"))
+        if in_mirror_root and not source_of(meta, rel):
+            errors.append(
+                f"DM-12 {rel}: lives under a language mirror root but declares no "
+                "bilingual_counterpart.source, so it belongs to no group"
+            )
+        source_rel = source_of(meta, rel)
+        if not source_rel:
+            continue
+        if source_rel not in docs:
+            errors.append(
+                f"DM-12 {rel}: names {source_rel} as its source, but that file is "
+                "not a classified governed document"
+            )
+            continue
+        if rel not in listed_by_source[source_rel]:
             errors.append(
                 f"DM-12 {rel}: names {source_rel} as its source, but {source_rel} "
                 "does not list this mirror"
@@ -921,7 +995,11 @@ def check_scope_and_relations(root: Path, docs: dict[str, dict]) -> list[str]:
             continue
         resolved: list[str] = []
         for target in targets:
-            target_rel = str(target).lstrip("./")
+            target_rel = rel_path(
+                target, f"DM-13 {rel}: supersedes", errors
+            )
+            if target_rel is None:
+                continue
             if target_rel == rel:
                 errors.append(f"DM-13 {rel}: a document cannot supersede itself")
                 continue
@@ -959,9 +1037,6 @@ def governed_files(root: Path) -> list[Path]:
         if not base.is_dir():
             continue
         for path in sorted(base.rglob("*.md")):
-            rel = path.relative_to(root).as_posix()
-            if any(rel.startswith(prefix) for prefix in EXEMPT_PREFIXES):
-                continue
             files.append(path)
     return files
 
@@ -989,14 +1064,24 @@ def main() -> int:
     parser.add_argument("--root", default=".", help="repository root")
     parser.add_argument(
         "--strict", action="store_true",
-        help="treat every unclassified governed document as an error",
+        help="fail if any governed document is unclassified (whole-tree verdict)",
     )
     parser.add_argument(
         "--require-changed", metavar="REF", default=None,
-        help="require metadata on every governed file changed since REF",
+        help="require metadata on every governed file changed since REF "
+             "(incremental: does NOT claim the whole tree is classified)",
     )
     args = parser.parse_args()
 
+    # Two different verdicts, and they must not be confused:
+    #   --require-changed REF  incremental. The backlog may stay, it may not
+    #                          grow. Says nothing about the rest of the tree.
+    #   --strict               whole-tree. Any unclassified governed document
+    #                          is a failure.
+    # Neither flag = backlog allowed, tree-wide completeness NOT claimed. The
+    # PASS line says which of the three happened, so a first push (no base
+    # commit, no --strict) can never read as "the repository is classified".
+    #
     # There is deliberately no --only: cross-document rules (DM-07, DM-11,
     # DM-12, DM-13) are only sound over the whole tree. A partial set would let
     # one file hide another's duplicate Canonical claim and still print PASS.
@@ -1004,6 +1089,9 @@ def main() -> int:
     targets = governed_files(root)
     required = changed_paths(root, args.require_changed) if args.require_changed else set()
     is_git = git(root, "rev-parse", "--git-dir") is not None
+    incremental = args.require_changed is not None
+    if incremental and args.strict:
+        parser.error("--require-changed and --strict are different verdicts; pick one")
 
     errors: list[str] = []
     notes: list[str] = []
@@ -1095,7 +1183,30 @@ def main() -> int:
             print(f"  {err}", file=sys.stderr)
         return 1
 
-    print("PASS: no GOV-DOC-002 violations")
+    if unclassified and not incremental:
+        # Backlog is allowed to exist; it is not allowed to be called done.
+        print(
+            f"INCOMPLETE: no rule violations in {len(docs)} classified documents, "
+            f"but {len(unclassified)} governed documents are still unclassified",
+            file=sys.stderr,
+        )
+        print(
+            "  This is not a whole-tree pass. Run with --strict for that verdict, "
+            "or --require-changed REF for an incremental one.",
+            file=sys.stderr,
+        )
+        return 2
+
+    scope = "incremental" if incremental else "whole tree"
+    print(
+        f"PASS ({scope}): no GOV-DOC-002 violations; "
+        f"{len(docs)} classified, {len(unclassified)} unclassified"
+    )
+    if incremental:
+        print(
+            "  Incremental verdict only: files outside the changed set were not "
+            "required to be classified."
+        )
     return 0
 
 

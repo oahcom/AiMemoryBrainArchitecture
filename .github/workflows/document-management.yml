@@ -42,7 +42,14 @@ jobs:
           if [ -n "$REF" ]; then
             python3 scripts/check_document_management.py --require-changed "$REF"
           else
-            # No base to diff against (first push of a branch). Whole-tree scan:
-            # it cannot prove new files are classified, so the gap stays recorded.
-            python3 scripts/check_document_management.py
+            # No base to diff against (first push of a branch). Whole-tree scan.
+            # It now exits 2 (INCOMPLETE) while backlog remains, so this step
+            # fails loudly instead of printing PASS over an unclassified tree.
+            # It still cannot prove the NEW files are classified: GAP-02.
+            python3 scripts/check_document_management.py || {
+              status=$?
+              # 2 = INCOMPLETE (backlog, no rule violation); 1 = violations.
+              [ "$status" -eq 2 ] && echo "::error::No base commit to diff against and the tree still has an adoption backlog (GAP-02). Run this job from a pull request, or classify the backlog."
+              exit "$status"
+            }
           fi

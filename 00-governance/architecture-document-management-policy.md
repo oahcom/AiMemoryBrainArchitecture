@@ -46,7 +46,7 @@ document_metadata:
 # Architecture Document Management Policy / 架构文档管理条例
 
 - Policy ID: GOV-DOC-002
-- Version: 1.3
+- Version: 1.4
 - Status: **NORMATIVE — PARTIALLY MACHINE-CHECKED** (see §9.1 for exactly which rules a machine can prove)
 - Owner: A — Principal Integration / Architecture Governance
 - Relation to GOV-DOC-001: **SUPPLEMENTARY — does not weaken, replace or waive GOV-DOC-001**
@@ -65,9 +65,9 @@ Where this policy and GOV-DOC-001 differ, GOV-DOC-001 prevails. This policy adds
 
 ## 2. Scope / 适用范围
 
-Applies to every Markdown file under the normative roots declared in `scripts/check_bilingual_docs.py` (`NORMATIVE_ROOTS`) plus the bilingual mirrors `docs/en` and `docs/zh-CN`, excluding `PAIR_EXEMPT_PREFIXES` and the additional record paths in the gate. The gate imports the roots from that script rather than restating them, so the two gates cannot disagree about what is governed.
+Applies to every Markdown file under the normative roots declared in `scripts/check_bilingual_docs.py` (`NORMATIVE_ROOTS`) plus the bilingual mirrors `docs/en` and `docs/zh-CN`. The gate imports the roots from that script rather than restating them, so the two gates cannot disagree about what is governed. It imports the roots **only**: `PAIR_EXEMPT_PREFIXES` is a bilingual-pairing exemption ("this file needs no translated twin"), which is not a governance exemption ("this file need not be classified"). Borrowing that constant silently removed 89 work-item, prompt and ADR files from the governed set. There are no path exemptions. A path that must be out of scope has to be named here with a reason, in this paragraph, and kept in step with the gate.
 
-适用于 `scripts/check_bilingual_docs.py` 中 `NORMATIVE_ROOTS` 声明的所有 Markdown 文件，加上双语镜像 `docs/en` 与 `docs/zh-CN`，排除 `PAIR_EXEMPT_PREFIXES` 与门禁内列的记录类路径。门禁直接从该脚本导入根目录清单，不再自行重述，因此两个门禁对"受治理范围"不可能给出不同答案。
+适用于 `scripts/check_bilingual_docs.py` 中 `NORMATIVE_ROOTS` 声明的所有 Markdown 文件，加上双语镜像 `docs/en` 与 `docs/zh-CN`。门禁直接从该脚本导入根目录清单，不再自行重述，因此两个门禁对"受治理范围"不可能给出不同答案。但**只导入根目录**：`PAIR_EXEMPT_PREFIXES` 是双语配对豁免（"此文件不需要译文"），不等于治理豁免（"此文件不需要分类"）。借用该常量曾静默把 89 个 work-item / prompt / ADR 文件移出受治理集合。本规范不设路径豁免；若某路径确需排除，必须在本段写明理由，并与门禁保持同步。
 
 Generated artifacts are **in scope**: they are scanned so that DM-09 can hold them to "not Normative, not Canonical". Being in scope for scanning is not a requirement that they carry an approval.
 
@@ -294,9 +294,25 @@ Because the backlog is large, the gate also offers a hard edge that does not req
 
 由于存量积压较大，门禁另提供不依赖全量采纳的硬边界：`--require-changed <ref>` 要求自 `<ref>` 以来新增或修改（含未跟踪）的所有受治理文件必须带元数据。积压可以继续未分类，但禁止增长。
 
-Open gap / 未闭合缺口: if a branch's first push has no base commit to diff against (`github.event.before` all zeros), the workflow falls back to the whole-tree scan, which cannot prove that newly added files are classified. Recorded as GAP-02 in `docs/governance/documentation-gaps.md`.
+The gate therefore has three distinct verdicts, and they MUST NOT be reported as one another:
 
-未闭合缺口：若某分支的首次推送没有可比对的基线提交（`github.event.before` 全零），工作流退回全仓扫描，无法证明新增文件已分类。登记为 `docs/governance/documentation-gaps.md` 中的 GAP-02。
+1. **Incremental** (`--require-changed REF`): exit 0, message `PASS (incremental)`. Says the changed files are classified and no cross-document rule is violated. Says nothing about the rest of the tree.
+2. **Whole tree, complete** (`--strict`, zero unclassified): exit 0, message `PASS (whole tree)`.
+3. **Whole tree, backlog present** (no flag, unclassified > 0): exit **2**, message `INCOMPLETE`. Rules passed, adoption did not. This is deliberately not exit 0 and deliberately not the word PASS: a first push with no base commit lands here, and it must not read as "the repository is classified".
+
+`--require-changed` and `--strict` are mutually exclusive; combining them is a usage error.
+
+门禁因此有三种互不相同的判定，禁止互相冒充：
+
+1. **增量**（`--require-changed REF`）：退出 0，输出 `PASS (incremental)`。表示变更文件已分类且无跨文档规则违规，对树内其余部分不作任何声明。
+2. **全树且完成**（`--strict`，零未分类）：退出 0，输出 `PASS (whole tree)`。
+3. **全树但存在积压**（无参数，未分类 > 0）：退出 **2**，输出 `INCOMPLETE`。规则通过，采纳未完成。这里刻意不用退出 0、刻意不用 PASS 字样：首次推送无基线时会落到这一态，它不得被读成"仓库已完成分类"。
+
+`--require-changed` 与 `--strict` 互斥，同时使用属用法错误。
+
+Open gap / 未闭合缺口: if a branch's first push has no base commit to diff against (`github.event.before` all zeros), the workflow falls back to the whole-tree scan. That run now returns INCOMPLETE (exit 2) whenever the backlog is non-empty, so it fails loudly instead of passing quietly, but it still cannot prove that the *newly added* files are classified — it only proves the backlog exists. Recorded as GAP-02 in `docs/governance/documentation-gaps.md`.
+
+未闭合缺口：若某分支的首次推送没有可比对的基线提交（`github.event.before` 全零），工作流退回全仓扫描。该次运行在积压非空时现在返回 INCOMPLETE（退出 2），因此会显式失败而非静默通过；但它仍无法证明**本次新增**文件已分类，只能证明积压存在。登记为 `docs/governance/documentation-gaps.md` 中的 GAP-02。
 
 ## 9. Enforcement / 强制实施
 
@@ -308,7 +324,7 @@ Machine-checkable rules / 机器可检查规则：
 
 | ID | Rule | Severity |
 |---|---|---|
-| DM-01 | Frontmatter parses under the declared YAML subset; a node of the wrong type is an error, never a crash; every required field is present leaf by leaf (`domain`, `role`, `lifecycle.approval.decision_status`, `lifecycle.usage_status`, `lifecycle.modification_status`, `lifecycle.evidence_verification.verification_status`, `authority.canonical_status`, `authority.normative_status`, `authority.canonical_conflict_status`). An empty `lifecycle: {approval: {}}` is not a classification | Error |
+| DM-01 | Frontmatter parses under the declared YAML subset; a node of the wrong type is an error, never a crash; every required field is present leaf by leaf (`domain`, `role`, `lifecycle.approval.decision_status`, `lifecycle.usage_status`, `lifecycle.modification_status`, `lifecycle.evidence_verification.verification_status`, `authority.canonical_status`, `authority.normative_status`, `authority.canonical_conflict_status`). An empty `lifecycle: {approval: {}}` is not a classification. Every path-valued field is a normalised repository-relative path: absolute paths, `..` segments, backslashes, repeated `./`, and empty segments are errors, never silently rewritten | Error |
 | DM-02 | `domain`, `role` and every status value are in the closed enumerations; unknown keys are errors at every level | Error |
 | DM-03 | `Approved` has `approved_version` (scheme + value), `approval_scope.type` and `approval_applicability`; `Selected-sections` has a non-empty `included_sections` | Error |
 | DM-04 | `Revoked` has `revocation.revocation_decision_id`, `revoked_date`, `revocation_reason`; the id is unique repository-wide | Error |
@@ -317,9 +333,9 @@ Machine-checkable rules / 机器可检查规则：
 | DM-07 | At most one `Canonical` per `canonical_scope_id` | Error |
 | DM-08 | No hand-written `superseded_by` anywhere in the frontmatter | Error |
 | DM-09 | A file carrying the generated-artifact marker (an HTML comment containing `GENERATED FILE`, `GENERATED ARTIFACT` or `DO NOT EDIT`, anywhere in the body) MUST NOT be `Normative` or `Canonical` | Error |
-| DM-10 | `Approved` + `scheme: git` / `content-hash`: `approved_version.value` is an immutable full commit id; the body is unchanged since then, otherwise `Pending-Reapproval` + `Not-Applicable-To-Current-Version` | Error |
+| DM-10 | `Approved` + `scheme: git` / `content-hash`: `approved_version.value` is an immutable full commit id; the body is unchanged since then, otherwise `Pending-Reapproval` + `Not-Applicable-To-Current-Version`. "Unchanged" uses only the equivalence §9.1 declares: CRLF/CR → LF, trailing spaces/tabs per line, leading/trailing blank lines. No other character is treated as a line break — `U+2028`, `U+2029`, `U+000B`, `U+000C`, `U+001C`–`U+001E` and `U+0085` are content, so they change the hash | Error |
 | DM-11 | A document under `Under-Review` conflict MUST NOT be `Canonical`; `Resolved` requires a complete resolution record whose `selected_document` is the unique `Canonical` document of the scope | Error |
-| DM-12 | A mirror group is consistent: every declared counterpart exists, is classified, points into the language directory named by its field, belongs to the same source, and the source lists every mirror that names it. `domain`/`role`/`normative_status` agree, and only one document in the group is `Canonical` | Error |
+| DM-12 | A mirror group is consistent: every declared counterpart exists, is classified, points into the language directory named by its field, belongs to the same source, and the source lists every mirror that names it. A source that declares no mirrors at all is a failure, not a skipped check. `domain`/`role`/`normative_status` agree, and only one document in the group is `Canonical` | Error |
 | DM-13 | `supersedes` targets exist, are not self-references, and form no cycle | Error |
 
 ### 9.1 Verified versus unverified / 已验证与未验证
@@ -329,7 +345,10 @@ Machine-checkable rules / 机器可检查规则：
 | DM-01..DM-09, DM-11..DM-13 | Full | — |
 | DM-10 `Full-document` | Full (body hash, commit id pinned) | — |
 | DM-10 `Selected-sections` | Scope declared | Whether the selected sections are the right ones |
-| Body hash normalisation | CRLF/CR normalised to LF (checkout setting must not invalidate every approval); trailing spaces/tabs per line ignored; leading/trailing blank lines ignored; everything else, including leading spaces on a non-blank line, is compared byte-for-byte | Whether that equivalence is too coarse for a given document |
+| Body hash normalisation | CRLF/CR normalised to LF (checkout setting must not invalidate every approval); trailing spaces/tabs per line ignored; leading/trailing blank lines ignored; everything else, including leading spaces on a non-blank line, is compared byte-for-byte. Only these three equivalences apply: any other character, including Unicode line/paragraph separators, changes the hash | Whether that equivalence is too coarse for a given document |
+| Governed set | The roots come from `check_bilingual_docs.py`; no path exemption exists. A file either carries metadata or counts as backlog | Whether the root list covers every directory that should be governed (no repository-wide ground truth exists) |
+| Verdict semantics | Three distinct outcomes: incremental pass, whole-tree pass, whole-tree INCOMPLETE (exit 2). A run cannot report PASS while backlog exists | Whether a given directory's backlog is acceptable to ship with |
+| Schema/gate agreement | Both directions: keys shown but rejected, required leaves absent, enum values undocumented | Whether the schema's prose describes the rule correctly |
 | Cross-document rules (DM-07, DM-11, DM-12, DM-13) | Only over a whole-tree scan; the gate offers no partial mode, because one file can hide another's duplicate scope | — |
 | Canonical scope overlap | Unique ids, unique `Canonical` | Whether two scopes genuinely overlap |
 | Approval / evidence truth | Field presence and shape | Whether the decision or evidence is real |
@@ -358,3 +377,4 @@ Amendments require a `decision-record` role document, bilingual, approved by the
 | 1.1 | 2026-11-21 | Independent review response. Fail-closed parser (DM-01), version-bound approval made mechanical for full documents (DM-10), A1/A2 conflict state no longer doubles as authority and the date fallback is removed (DM-11), mirror consistency and supersession graph added (DM-12/13), domain count corrected to 13, completion redefined as zero unclassified, and the machine-checked claim replaced by the §9.1 split. |
 | 1.2 | 2026-11-21 | Second independent review (5.2/10). Parser: unescaped single quotes, missing space after `:`, and unknown keys under `supersession` now rejected; wrong node types produce a DM-01 error instead of a traceback. DM-09 scans the whole body and defines the marker as an HTML comment. DM-11 requires `selected_document` to be the unique Canonical document even when none holds Canonical. DM-12 requires the counterpart to be classified and to declare this document back. DM-10 requires a full 40-hex commit id, so a moving branch name cannot carry an approval. `--require-changed` reads NUL-separated paths, so a filename with spaces cannot dodge it, and now also runs on direct pushes. |
 | 1.3 | 2026-11-21 | Third independent review (56/100). `_enum()` now type-guards before the membership test, so a non-scalar (`domain: []`) yields a DM-01 error instead of a `TypeError` (P0-01). Required fields are checked leaf by leaf, so `lifecycle: {approval: {}}` plus `authority: {}` no longer passes as an empty shell (P1-01). §4.1 and §9.1 now state the same body-hash normalisation, and the ceiling of that equivalence is named as a residual risk (P1-02). `--only` is removed: cross-document rules are only sound over a whole tree (P1-03). DM-12 is restated as three-way group closure — source, `docs/en` mirror, `docs/zh-CN` mirror — so a missing third member is an error rather than an untested assumption (P1-04). The governed roots are imported from `check_bilingual_docs.py` instead of duplicated. |
+| 1.4 | 2026-11-21 | Fourth independent review (43/100). **Scope had been silently shrunk**: the gate imported `PAIR_EXEMPT_PREFIXES` and used it as a path exemption, so 89 work-item, prompt and ADR files were never governed. A pairing exemption is not a governance exemption; the import is now roots-only and §2 says so (P0-01). `lstrip("./")` is a character set, not a prefix — `"../../00-governance/a.md"` collapsed to `"00-governance/a.md"` — so every path-valued field goes through `rel_path()`, which rejects absolute paths, `..`, backslashes, repeated `./` and empty segments (P1-01). DM-12's reverse closure used `.get()`, so a source that declared nothing made the check silently pass; it now uses a `defaultdict(set)` and reports a mirror naming an undeclared or unclassified source (P1-02). DM-10's "unchanged" test used `str.splitlines()`, which also breaks on `U+2028`, `U+2029`, `U+000B`, `U+000C`, `U+001C`–`U+001E` and `U+0085` — two different bodies could hash alike; only CRLF/CR are normalised now, and `git show` is read raw instead of stripped (P1-03). Three verdicts replace the old single PASS: incremental, whole-tree complete, and whole-tree INCOMPLETE (exit 2) when backlog remains, so a first push with no base can no longer read as a full pass (P1-04). The schema file is now cross-checked against the gate in both directions — every key it shows, every required leaf, and every enum value — which immediately caught that it had never listed the 13 domain values. |
