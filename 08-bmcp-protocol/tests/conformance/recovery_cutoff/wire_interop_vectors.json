@@ -1,0 +1,36 @@
+[
+  {
+    "id": "utf8-nested",
+    "domain": "BMCP-RECOVERY-JOIN-TEST",
+    "value": {
+      "label": "恢复批次",
+      "nested": {
+        "z": "last",
+        "a": "first"
+      },
+      "version": "1.0.0"
+    },
+    "expected_canonical_utf8": "{\"label\":\"恢复批次\",\"nested\":{\"a\":\"first\",\"z\":\"last\"},\"version\":\"1.0.0\"}",
+    "expected_digest_sha256": "fed358ee8a684e23d7110bcee8df37fe9863c7f284006e362be195351bdccc8b"
+  },
+  {
+    "id": "empty-vs-absent",
+    "domain": "BMCP-RECOVERY-BATCH-TEST",
+    "value": {
+      "enumeration_status": "COMPLETE_EMPTY",
+      "participant_entries": []
+    },
+    "expected_canonical_utf8": "{\"enumeration_status\":\"COMPLETE_EMPTY\",\"participant_entries\":[]}",
+    "expected_digest_sha256": "d239ba1cf2789cc1a7d02da0a1f002aecaa1bc14bef335e3c62689c601deffab"
+  },
+  {
+    "id": "gid-opaque",
+    "domain": "BMCP-JF10-TEST",
+    "value": {
+      "prepared_transaction_gid": "jf10:tenant-a:op-00017",
+      "native_xid_observed": "17001"
+    },
+    "expected_canonical_utf8": "{\"native_xid_observed\":\"17001\",\"prepared_transaction_gid\":\"jf10:tenant-a:op-00017\"}",
+    "expected_digest_sha256": "35d6a9198865a8f56efc3bbea14774187d1a0e43cd62b063ca55d6b62ded0950"
+  }
+]

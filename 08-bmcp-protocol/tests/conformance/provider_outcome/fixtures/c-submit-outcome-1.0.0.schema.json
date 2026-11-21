@@ -1,0 +1,529 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:aimba:schema:c-submit-outcome:1.0.0",
+  "title": "CSubmitOutcome",
+  "description": "Immutable C-owned provider handoff outcome record. Schema validates structure only; issuer authentication, append-only ledger inclusion, gate linearization, provider evidence and COC joins require semantic validation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_id",
+    "schema_version",
+    "schema_artifact_revision",
+    "signature_profile_id",
+    "record_ref",
+    "record_id",
+    "record_sequence",
+    "created_at",
+    "issuer_authority_ref",
+    "issuer_subject_ref",
+    "audience",
+    "purpose",
+    "message_id",
+    "message_nonce",
+    "CAdmissionRef",
+    "CAdmissionDigest",
+    "COwnerLedgerRef",
+    "COwnerLedgerVersion",
+    "COwnerLocalSequence",
+    "COwnerHighWater",
+    "COwnerLedgerRoot",
+    "CGateRef",
+    "CGateGeneration",
+    "CGateCommitRef",
+    "CGateCommitDigest",
+    "ProviderAttemptRef",
+    "ProviderAttemptGeneration",
+    "ProviderRef",
+    "ProviderAccountRef",
+    "AdapterRef",
+    "AdapterBuildRef",
+    "EndpointRef",
+    "RegionRef",
+    "ApiOperation",
+    "IdempotencyNamespaceRef",
+    "IdempotencyKeyRef",
+    "ProviderCapabilityRecordRef",
+    "ProviderCapabilityDigest",
+    "FinalRequestBoundaryRef",
+    "FinalRequestBoundaryType",
+    "RequestDigest",
+    "RequestContentType",
+    "RequestMethod",
+    "CausalOrderTransactionRef",
+    "Outcome",
+    "SideEffectStatus",
+    "OutcomeObservedAt",
+    "OutcomeEvidenceRef",
+    "OutcomeEvidenceDigest",
+    "COCParticipantIntentRef",
+    "COCParticipantReservationRef",
+    "COCAbsenceReason",
+    "PriorObservationRef",
+    "SupersedesObservationRef",
+    "ReconciliationParentRef",
+    "payload_digest",
+    "key_id_ref",
+    "key_version",
+    "signature",
+    "ProviderEvidenceIssuerRef",
+    "ProviderEvidenceType",
+    "message_type",
+    "OwnerSignatureRef"
+  ],
+  "properties": {
+    "schema_id": {
+      "const": "CSubmitOutcome"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "schema_artifact_revision": {
+      "const": "1.0.0"
+    },
+    "signature_profile_id": {
+      "const": "AIMBA-C-CRYPTO-1.0"
+    },
+    "record_ref": {
+      "$ref": "#/$defs/ref"
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "record_sequence": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "maxLength": 40
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "issuer_authority_ref": {
+      "$ref": "#/$defs/ref"
+    },
+    "issuer_subject_ref": {
+      "$ref": "#/$defs/ref"
+    },
+    "audience": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "purpose": {
+      "const": "C_PROVIDER_SUBMIT_OUTCOME"
+    },
+    "message_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "message_nonce": {
+      "type": "string",
+      "minLength": 16,
+      "maxLength": 256
+    },
+    "CAdmissionRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "CAdmissionDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "COwnerLedgerRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "COwnerLedgerVersion": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "COwnerLocalSequence": {
+      "$ref": "#/$defs/sequence"
+    },
+    "COwnerHighWater": {
+      "$ref": "#/$defs/sequence"
+    },
+    "COwnerLedgerRoot": {
+      "$ref": "#/$defs/sha256"
+    },
+    "CGateRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "CGateGeneration": {
+      "$ref": "#/$defs/sequence"
+    },
+    "CGateCommitRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "CGateCommitDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "ProviderAttemptRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "ProviderAttemptGeneration": {
+      "$ref": "#/$defs/sequence"
+    },
+    "ProviderRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "ProviderAccountRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "AdapterRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "AdapterBuildRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "EndpointRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "RegionRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "ApiOperation": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "IdempotencyNamespaceRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "IdempotencyKeyRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "ProviderCapabilityRecordRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "ProviderCapabilityDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "FinalRequestBoundaryRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "FinalRequestBoundaryType": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "RequestDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "RequestContentType": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "RequestMethod": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 32
+    },
+    "CausalOrderTransactionRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "Outcome": {
+      "enum": [
+        "HANDOFF_ACCEPTED",
+        "HANDOFF_REJECTED",
+        "NOT_INVOKED",
+        "UNKNOWN",
+        "IN_DOUBT"
+      ]
+    },
+    "SideEffectStatus": {
+      "enum": [
+        "PROVEN_OCCURRED",
+        "PROVEN_NONE",
+        "POSSIBLE_OR_UNKNOWN"
+      ]
+    },
+    "OutcomeObservedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "OutcomeEvidenceRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "OutcomeEvidenceDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "ProviderRequestRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "ProviderReceiptRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "ProviderLookupProofRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "ProviderNoHandoffProofRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "NotInvokedProofRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "UnknownReasonRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "COCParticipantIntentRef": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 512
+    },
+    "COCParticipantReservationRef": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 512
+    },
+    "COCAbsenceReason": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 256
+    },
+    "PriorObservationRef": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 512
+    },
+    "SupersedesObservationRef": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 512
+    },
+    "ReconciliationParentRef": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 512
+    },
+    "payload_digest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "key_id_ref": {
+      "$ref": "#/$defs/ref"
+    },
+    "key_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "signature": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{86}$"
+    },
+    "ProviderEvidenceIssuerRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "ProviderEvidenceType": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "message_type": {
+      "const": "C_PROVIDER_OUTCOME_RECORDED"
+    },
+    "OwnerSignatureRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "ActualInferenceRequestId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    }
+  },
+  "$defs": {
+    "ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "sequence": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "maxLength": 40
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "Outcome": {
+            "const": "HANDOFF_ACCEPTED"
+          }
+        },
+        "required": [
+          "Outcome"
+        ]
+      },
+      "then": {
+        "required": [
+          "ProviderRequestRef",
+          "ProviderReceiptRef"
+        ],
+        "properties": {
+          "SideEffectStatus": {
+            "const": "PROVEN_OCCURRED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "Outcome": {
+            "const": "HANDOFF_REJECTED"
+          }
+        },
+        "required": [
+          "Outcome"
+        ]
+      },
+      "then": {
+        "required": [
+          "ProviderRequestRef"
+        ],
+        "properties": {
+          "SideEffectStatus": {
+            "enum": [
+              "PROVEN_NONE",
+              "POSSIBLE_OR_UNKNOWN",
+              "PROVEN_OCCURRED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "Outcome": {
+            "const": "NOT_INVOKED"
+          }
+        },
+        "required": [
+          "Outcome"
+        ]
+      },
+      "then": {
+        "required": [
+          "ProviderNoHandoffProofRef",
+          "NotInvokedProofRef"
+        ],
+        "properties": {
+          "SideEffectStatus": {
+            "const": "PROVEN_NONE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "Outcome": {
+            "enum": [
+              "UNKNOWN",
+              "IN_DOUBT"
+            ]
+          }
+        },
+        "required": [
+          "Outcome"
+        ]
+      },
+      "then": {
+        "required": [
+          "UnknownReasonRef"
+        ],
+        "properties": {
+          "SideEffectStatus": {
+            "const": "POSSIBLE_OR_UNKNOWN"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "COCParticipantIntentRef": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "COCParticipantIntentRef"
+        ]
+      },
+      "then": {
+        "properties": {
+          "COCParticipantReservationRef": {
+            "type": "null"
+          },
+          "COCAbsenceReason": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "COCParticipantIntentRef": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "COCParticipantIntentRef"
+        ]
+      },
+      "then": {
+        "properties": {
+          "COCParticipantReservationRef": {
+            "type": "string",
+            "minLength": 1
+          },
+          "COCAbsenceReason": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "COCParticipantReservationRef": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "COCParticipantReservationRef"
+        ]
+      },
+      "then": {
+        "properties": {
+          "COCParticipantIntentRef": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ]
+}

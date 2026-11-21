@@ -1,0 +1,1271 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.aimemorybrainarchitecture.invalid/bmcp.recovery-cutoff/1.0.5",
+  "title": "BMCP Recovery Cutoff 1.0.5 — two-phase batch/manifest binding",
+  "description": "Strict structural candidate for two-phase recovery cutoff: a precomputed manifest content digest is bound by the quorum-committed batch, then the committed manifest record binds back to that exact batch. Cross-message digest equality and authoritative completeness require semantic validators.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/ownerSnapshot"
+    },
+    {
+      "$ref": "#/$defs/participantManifest"
+    },
+    {
+      "$ref": "#/$defs/recoveryBatch"
+    },
+    {
+      "$ref": "#/$defs/admissionEntry"
+    },
+    {
+      "$ref": "#/$defs/gateRelease"
+    },
+    {
+      "$ref": "#/$defs/epochCompleted"
+    }
+  ],
+  "$defs": {
+    "ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^[A-Za-z][A-Za-z0-9._:/-]*$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "counter": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "description": "Canonical unsigned decimal string; no leading zeroes. Owner-local namespace only."
+    },
+    "envelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "issuer_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "subject_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_authority_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "audience_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "purpose": {
+          "type": "string",
+          "minLength": 1
+        },
+        "key_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "key_version": {
+          "$ref": "#/$defs/counter"
+        },
+        "algorithm_profile_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "canonicalization_profile_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "digest_profile_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "payload_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "signature_ref": {
+          "$ref": "#/$defs/ref"
+        }
+      },
+      "required": [
+        "issuer_ref",
+        "subject_ref",
+        "owner_authority_ref",
+        "audience_ref",
+        "purpose",
+        "key_ref",
+        "key_version",
+        "algorithm_profile_ref",
+        "canonicalization_profile_ref",
+        "digest_profile_ref",
+        "payload_digest",
+        "signature_ref"
+      ]
+    },
+    "member": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sequence": {
+          "$ref": "#/$defs/counter"
+        },
+        "entry_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "coc_registration_state": {
+          "enum": [
+            "REGISTERED",
+            "NOT_REGISTERED"
+          ]
+        },
+        "participant_intent_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "participant_position": {
+          "$ref": "#/$defs/ref"
+        },
+        "participant_entry_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "not_registered_reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "effect_boundary": {
+          "enum": [
+            "LOCAL_ACCEPTANCE",
+            "RECEIPT_ISSUE",
+            "RECEIPT_CONSUME",
+            "WORK_ADMISSION",
+            "RESERVATION",
+            "PROVIDER_ATTEMPT",
+            "PUBLICATION",
+            "RESTORE_REPLAY",
+            "OTHER"
+          ]
+        },
+        "terminal_state": {
+          "enum": [
+            "PENDING",
+            "TERMINAL_SUCCESS",
+            "TERMINAL_ABORT",
+            "NO_EFFECT_PROVEN",
+            "UNKNOWN",
+            "IN_DOUBT"
+          ]
+        },
+        "owner_entry_kind": {
+          "enum": [
+            "REQUEST",
+            "RECEIPT_ISSUE",
+            "RECEIPT_CONSUME",
+            "PRODUCER_REGISTRATION",
+            "WORK_ITEM",
+            "ATTEMPT",
+            "DERIVATIVE",
+            "RECALL",
+            "CONTEXT",
+            "RESTORE",
+            "RESERVATION",
+            "PROVIDER_ATTEMPT",
+            "OTHER"
+          ]
+        },
+        "operation_identity_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "operation_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "scope_binding_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "source_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "producer_class_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "lineage_parent_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "dependency_closure_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "attempt_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "lease_generation": {
+          "$ref": "#/$defs/counter"
+        },
+        "reservation_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "provider_attempt_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "idempotency_key_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "prepared_participant_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "terminal_evidence_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_entry_ref": {
+          "$ref": "#/$defs/ref"
+        }
+      },
+      "required": [
+        "sequence",
+        "entry_digest",
+        "coc_registration_state",
+        "effect_boundary",
+        "terminal_state",
+        "owner_entry_kind",
+        "operation_identity_ref",
+        "operation_digest",
+        "scope_binding_digest",
+        "owner_entry_ref"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "coc_registration_state": {
+                "const": "REGISTERED"
+              }
+            },
+            "required": [
+              "coc_registration_state"
+            ]
+          },
+          "then": {
+            "required": [
+              "participant_intent_ref",
+              "participant_position",
+              "participant_entry_digest"
+            ],
+            "not": {
+              "required": [
+                "not_registered_reason"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "coc_registration_state": {
+                "const": "NOT_REGISTERED"
+              }
+            },
+            "required": [
+              "coc_registration_state"
+            ]
+          },
+          "then": {
+            "required": [
+              "not_registered_reason"
+            ],
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "participant_intent_ref"
+                  ]
+                },
+                {
+                  "required": [
+                    "participant_position"
+                  ]
+                },
+                {
+                  "required": [
+                    "participant_entry_digest"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "ownerSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_id": {
+          "const": "bmcp.recovery-cutoff"
+        },
+        "schema_version": {
+          "const": "1.0.5"
+        },
+        "message_type": {
+          "const": "OWNER_ADMISSION_SNAPSHOT_ATTESTATION"
+        },
+        "message_id": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_kind": {
+          "enum": [
+            "I",
+            "D",
+            "C"
+          ]
+        },
+        "gate_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "gate_generation": {
+          "$ref": "#/$defs/counter"
+        },
+        "scope_binding_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "snapshot_generation": {
+          "$ref": "#/$defs/counter"
+        },
+        "request_high_water": {
+          "$ref": "#/$defs/counter"
+        },
+        "admission_high_water": {
+          "$ref": "#/$defs/counter"
+        },
+        "secondary_high_waters": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Z][A-Za-z0-9]*$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/counter"
+          }
+        },
+        "ledger_source_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "completeness_method_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "anti_rollback_anchor_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "recovery_epoch_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "recovery_round_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "envelope": {
+          "$ref": "#/$defs/envelope"
+        },
+        "scope_generation": {
+          "$ref": "#/$defs/counter"
+        },
+        "request_enumeration_status": {
+          "enum": [
+            "COMPLETE_NON_EMPTY",
+            "COMPLETE_EMPTY",
+            "NOT_ENUMERATED",
+            "PARTIAL",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        },
+        "request_members": {
+          "type": "array",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "#/$defs/member"
+              },
+              {
+                "properties": {
+                  "owner_entry_kind": {
+                    "const": "REQUEST"
+                  }
+                },
+                "required": [
+                  "owner_entry_kind"
+                ]
+              }
+            ]
+          },
+          "uniqueItems": true
+        },
+        "request_member_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "request_member_set_root": {
+          "$ref": "#/$defs/digest"
+        },
+        "admission_enumeration_status": {
+          "enum": [
+            "COMPLETE_NON_EMPTY",
+            "COMPLETE_EMPTY",
+            "NOT_ENUMERATED",
+            "PARTIAL",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        },
+        "admission_members": {
+          "type": "array",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "#/$defs/member"
+              },
+              {
+                "not": {
+                  "properties": {
+                    "owner_entry_kind": {
+                      "const": "REQUEST"
+                    }
+                  },
+                  "required": [
+                    "owner_entry_kind"
+                  ]
+                }
+              }
+            ]
+          },
+          "uniqueItems": true
+        },
+        "admission_member_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "admission_member_set_root": {
+          "$ref": "#/$defs/digest"
+        }
+      },
+      "required": [
+        "schema_id",
+        "schema_version",
+        "message_type",
+        "message_id",
+        "owner_kind",
+        "gate_ref",
+        "gate_generation",
+        "scope_binding_digest",
+        "snapshot_generation",
+        "request_high_water",
+        "admission_high_water",
+        "ledger_source_ref",
+        "completeness_method_ref",
+        "anti_rollback_anchor_ref",
+        "recovery_epoch_ref",
+        "recovery_round_ref",
+        "envelope",
+        "scope_generation",
+        "request_enumeration_status",
+        "request_members",
+        "request_member_count",
+        "request_member_set_root",
+        "admission_enumeration_status",
+        "admission_members",
+        "admission_member_count",
+        "admission_member_set_root",
+        "secondary_high_waters"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "request_enumeration_status": {
+                "const": "COMPLETE_EMPTY"
+              }
+            },
+            "required": [
+              "request_enumeration_status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "request_members": {
+                "maxItems": 0
+              },
+              "request_member_count": {
+                "const": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "request_enumeration_status": {
+                "const": "COMPLETE_NON_EMPTY"
+              }
+            },
+            "required": [
+              "request_enumeration_status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "request_members": {
+                "minItems": 1
+              },
+              "request_member_count": {
+                "minimum": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "admission_enumeration_status": {
+                "const": "COMPLETE_EMPTY"
+              }
+            },
+            "required": [
+              "admission_enumeration_status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "admission_members": {
+                "maxItems": 0
+              },
+              "admission_member_count": {
+                "const": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "admission_enumeration_status": {
+                "const": "COMPLETE_NON_EMPTY"
+              }
+            },
+            "required": [
+              "admission_enumeration_status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "admission_members": {
+                "minItems": 1
+              },
+              "admission_member_count": {
+                "minimum": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "owner_kind": {
+                "const": "I"
+              }
+            },
+            "required": [
+              "owner_kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "secondary_high_waters": {
+                "required": [
+                  "receipt_issue",
+                  "receipt_consume",
+                  "producer_domain_inventory_epoch"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "owner_kind": {
+                "const": "D"
+              }
+            },
+            "required": [
+              "owner_kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "secondary_high_waters": {
+                "required": [
+                  "producer_registration",
+                  "work_item",
+                  "attempt",
+                  "barrier"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "owner_kind": {
+                "const": "C"
+              }
+            },
+            "required": [
+              "owner_kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "secondary_high_waters": {
+                "required": [
+                  "reservation",
+                  "provider_attempt"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "participantManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_id": {
+          "const": "bmcp.recovery-cutoff"
+        },
+        "schema_version": {
+          "const": "1.0.5"
+        },
+        "message_type": {
+          "const": "COC_PARTICIPANT_MANIFEST"
+        },
+        "message_id": {
+          "$ref": "#/$defs/ref"
+        },
+        "recovery_epoch_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "prefix_term": {
+          "$ref": "#/$defs/counter"
+        },
+        "prefix_index": {
+          "$ref": "#/$defs/counter"
+        },
+        "prefix_root": {
+          "$ref": "#/$defs/digest"
+        },
+        "enumeration_status": {
+          "enum": [
+            "COMPLETE_NON_EMPTY",
+            "COMPLETE_EMPTY",
+            "NOT_ENUMERATED",
+            "PARTIAL",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        },
+        "participant_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "participant_set_root": {
+          "$ref": "#/$defs/digest"
+        },
+        "previous_prefix_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "quorum_commit_proof_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "envelope": {
+          "$ref": "#/$defs/envelope"
+        },
+        "participant_entries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/participantEntry"
+          },
+          "uniqueItems": true
+        },
+        "recovery_batch_ref": {
+          "$ref": "#/$defs/ref",
+          "description": "Exact quorum-committed RecoveryCutoffBatch message identity."
+        },
+        "recovery_batch_digest": {
+          "$ref": "#/$defs/digest",
+          "description": "Exact batch_digest of the batch that committed before this manifest record."
+        },
+        "participant_manifest_content_digest": {
+          "$ref": "#/$defs/digest",
+          "description": "Domain-separated digest of the immutable manifest content projection, excluding recovery_batch_ref, recovery_batch_digest, quorum proof and envelope."
+        }
+      },
+      "required": [
+        "schema_id",
+        "schema_version",
+        "message_type",
+        "message_id",
+        "recovery_epoch_ref",
+        "prefix_term",
+        "prefix_index",
+        "prefix_root",
+        "enumeration_status",
+        "participant_count",
+        "participant_set_root",
+        "previous_prefix_digest",
+        "quorum_commit_proof_ref",
+        "envelope",
+        "participant_entries",
+        "recovery_batch_ref",
+        "recovery_batch_digest",
+        "participant_manifest_content_digest"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "enumeration_status": {
+                "const": "COMPLETE_EMPTY"
+              }
+            },
+            "required": [
+              "enumeration_status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "participant_entries": {
+                "maxItems": 0
+              },
+              "participant_count": {
+                "const": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "enumeration_status": {
+                "const": "COMPLETE_NON_EMPTY"
+              }
+            },
+            "required": [
+              "enumeration_status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "participant_entries": {
+                "minItems": 1
+              },
+              "participant_count": {
+                "minimum": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "recoveryBatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_id": {
+          "const": "bmcp.recovery-cutoff"
+        },
+        "schema_version": {
+          "const": "1.0.5"
+        },
+        "message_type": {
+          "const": "RECOVERY_CUTOFF_BATCH"
+        },
+        "message_id": {
+          "$ref": "#/$defs/ref"
+        },
+        "recovery_epoch_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "recovery_round_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "prefix_term": {
+          "$ref": "#/$defs/counter"
+        },
+        "prefix_index": {
+          "$ref": "#/$defs/counter"
+        },
+        "prefix_root": {
+          "$ref": "#/$defs/digest"
+        },
+        "participant_manifest_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_snapshot_refs": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "enum": [
+              "I",
+              "D",
+              "C"
+            ]
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ref"
+          },
+          "required": [
+            "I",
+            "D",
+            "C"
+          ]
+        },
+        "owner_snapshot_digests": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "enum": [
+              "I",
+              "D",
+              "C"
+            ]
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/digest"
+          },
+          "required": [
+            "I",
+            "D",
+            "C"
+          ]
+        },
+        "scope_binding_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "reconciliation_attempt_generation": {
+          "$ref": "#/$defs/counter"
+        },
+        "previous_batch_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "batch_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "quorum_commit_proof_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "envelope": {
+          "$ref": "#/$defs/envelope"
+        },
+        "participant_manifest_content_digest": {
+          "$ref": "#/$defs/digest",
+          "description": "Precomputed immutable manifest content digest; not the later committed manifest record digest."
+        }
+      },
+      "required": [
+        "schema_id",
+        "schema_version",
+        "message_type",
+        "message_id",
+        "recovery_epoch_ref",
+        "recovery_round_ref",
+        "prefix_term",
+        "prefix_index",
+        "prefix_root",
+        "participant_manifest_ref",
+        "participant_manifest_content_digest",
+        "owner_snapshot_refs",
+        "owner_snapshot_digests",
+        "scope_binding_digest",
+        "reconciliation_attempt_generation",
+        "batch_digest",
+        "quorum_commit_proof_ref",
+        "envelope"
+      ]
+    },
+    "admissionEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_id": {
+          "const": "bmcp.recovery-cutoff"
+        },
+        "schema_version": {
+          "const": "1.0.5"
+        },
+        "message_type": {
+          "const": "OWNER_ADMISSION_ENTRY"
+        },
+        "message_id": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_kind": {
+          "enum": [
+            "I",
+            "D",
+            "C"
+          ]
+        },
+        "admission_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "sequence": {
+          "$ref": "#/$defs/counter"
+        },
+        "entry_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "coc_registration_state": {
+          "enum": [
+            "REGISTERED",
+            "NOT_REGISTERED"
+          ]
+        },
+        "participant_intent_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "participant_position": {
+          "$ref": "#/$defs/ref"
+        },
+        "participant_entry_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "not_registered_reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "effect_boundary": {
+          "enum": [
+            "LOCAL_ACCEPTANCE",
+            "RECEIPT_ISSUE",
+            "RECEIPT_CONSUME",
+            "WORK_ADMISSION",
+            "RESERVATION",
+            "PROVIDER_ATTEMPT",
+            "PUBLICATION",
+            "RESTORE_REPLAY",
+            "OTHER"
+          ]
+        },
+        "terminal_state": {
+          "enum": [
+            "PENDING",
+            "TERMINAL_SUCCESS",
+            "TERMINAL_ABORT",
+            "NO_EFFECT_PROVEN",
+            "UNKNOWN",
+            "IN_DOUBT"
+          ]
+        },
+        "envelope": {
+          "$ref": "#/$defs/envelope"
+        }
+      },
+      "required": [
+        "schema_id",
+        "schema_version",
+        "message_type",
+        "message_id",
+        "owner_kind",
+        "admission_ref",
+        "sequence",
+        "entry_digest",
+        "coc_registration_state",
+        "effect_boundary",
+        "terminal_state",
+        "envelope"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "coc_registration_state": {
+                "const": "REGISTERED"
+              }
+            },
+            "required": [
+              "coc_registration_state"
+            ]
+          },
+          "then": {
+            "required": [
+              "participant_intent_ref",
+              "participant_position",
+              "participant_entry_digest"
+            ],
+            "not": {
+              "required": [
+                "not_registered_reason"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "coc_registration_state": {
+                "const": "NOT_REGISTERED"
+              }
+            },
+            "required": [
+              "coc_registration_state"
+            ]
+          },
+          "then": {
+            "required": [
+              "not_registered_reason"
+            ],
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "participant_intent_ref"
+                  ]
+                },
+                {
+                  "required": [
+                    "participant_position"
+                  ]
+                },
+                {
+                  "required": [
+                    "participant_entry_digest"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "gateRelease": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_id": {
+          "const": "bmcp.recovery-cutoff"
+        },
+        "schema_version": {
+          "const": "1.0.5"
+        },
+        "message_type": {
+          "const": "OWNER_GATE_RELEASE_ATTESTATION"
+        },
+        "message_id": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_kind": {
+          "enum": [
+            "I",
+            "D",
+            "C"
+          ]
+        },
+        "gate_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "gate_generation": {
+          "$ref": "#/$defs/counter"
+        },
+        "release_kind": {
+          "const": "OUTAGE_ADMISSION_RELEASE_ONLY"
+        },
+        "recovery_epoch_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "recovery_round_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "recovery_batch_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "recovery_batch_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "snapshot_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "snapshot_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "request_high_water": {
+          "$ref": "#/$defs/counter"
+        },
+        "admission_high_water": {
+          "$ref": "#/$defs/counter"
+        },
+        "member_set_root": {
+          "$ref": "#/$defs/digest"
+        },
+        "scope_binding_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "anti_rollback_anchor_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "final_currentness_cas_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "envelope": {
+          "$ref": "#/$defs/envelope"
+        },
+        "scope_generation": {
+          "$ref": "#/$defs/counter"
+        },
+        "request_member_set_root": {
+          "$ref": "#/$defs/digest"
+        },
+        "admission_member_set_root": {
+          "$ref": "#/$defs/digest"
+        },
+        "participant_manifest_content_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "participant_manifest_record_digest": {
+          "$ref": "#/$defs/digest",
+          "description": "Digest of the committed COC_PARTICIPANT_MANIFEST record payload (envelope payload_digest)."
+        }
+      },
+      "required": [
+        "schema_id",
+        "schema_version",
+        "message_type",
+        "message_id",
+        "owner_kind",
+        "gate_ref",
+        "gate_generation",
+        "release_kind",
+        "recovery_epoch_ref",
+        "recovery_round_ref",
+        "recovery_batch_ref",
+        "recovery_batch_digest",
+        "participant_manifest_content_digest",
+        "snapshot_ref",
+        "snapshot_digest",
+        "request_high_water",
+        "admission_high_water",
+        "member_set_root",
+        "scope_binding_digest",
+        "anti_rollback_anchor_ref",
+        "final_currentness_cas_ref",
+        "envelope",
+        "scope_generation",
+        "request_member_set_root",
+        "admission_member_set_root",
+        "participant_manifest_record_digest"
+      ]
+    },
+    "epochCompleted": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_id": {
+          "const": "bmcp.recovery-cutoff"
+        },
+        "schema_version": {
+          "const": "1.0.5"
+        },
+        "message_type": {
+          "const": "RECOVERY_EPOCH_COMPLETED"
+        },
+        "message_id": {
+          "$ref": "#/$defs/ref"
+        },
+        "recovery_epoch_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "final_batch_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "final_batch_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "required_owner_release_refs": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "$ref": "#/$defs/ref"
+          },
+          "uniqueItems": true
+        },
+        "all_rounds_root": {
+          "$ref": "#/$defs/digest"
+        },
+        "completion_observation_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "quorum_commit_proof_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "envelope": {
+          "$ref": "#/$defs/envelope"
+        },
+        "participant_manifest_content_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "participant_manifest_record_digest": {
+          "$ref": "#/$defs/digest"
+        }
+      },
+      "required": [
+        "schema_id",
+        "schema_version",
+        "message_type",
+        "message_id",
+        "recovery_epoch_ref",
+        "final_batch_ref",
+        "final_batch_digest",
+        "participant_manifest_content_digest",
+        "required_owner_release_refs",
+        "all_rounds_root",
+        "completion_observation_ref",
+        "quorum_commit_proof_ref",
+        "envelope",
+        "participant_manifest_record_digest"
+      ]
+    },
+    "participantEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "participant_intent_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_kind": {
+          "enum": [
+            "C",
+            "STORAGE",
+            "OTHER"
+          ]
+        },
+        "operation_identity_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "participant_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "prefix_term": {
+          "$ref": "#/$defs/counter"
+        },
+        "prefix_index": {
+          "$ref": "#/$defs/counter"
+        },
+        "entry_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "owner_admission_ref": {
+          "$ref": "#/$defs/ref"
+        }
+      },
+      "required": [
+        "participant_intent_ref",
+        "owner_kind",
+        "operation_identity_ref",
+        "participant_digest",
+        "prefix_term",
+        "prefix_index",
+        "entry_digest",
+        "owner_admission_ref"
+      ]
+    }
+  }
+}

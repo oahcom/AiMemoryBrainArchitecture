@@ -1,0 +1,718 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.aimemorybrainarchitecture.invalid/bmcp.storage-prepared-participant-proof/1.0.0",
+  "title": "BMCP Storage Prepared Participant Proof 1.0.0 — candidate",
+  "description": "Candidate strict shape for Storage.PreparedParticipantReceipt and Storage.StorageResolutionProof. It encodes nominal identity and outcome fields but does not select or verify a cryptographic suite, canonicalization profile, key policy, or cross-message owner authority.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/preparedReceiptMessage"
+    },
+    {
+      "$ref": "#/$defs/storageResolutionMessage"
+    }
+  ],
+  "$defs": {
+    "opaqueRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "description": "Opaque issuer-namespaced reference; never parse, coerce or compare across authorities."
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "Candidate lowercase hexadecimal SHA-256 digest encoding."
+    },
+    "preparedTransactionGid": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "description": "PostgreSQL client-chosen PreparedTransactionGID; exact byte/case preservation; not a native XID."
+    },
+    "postgresqlNativeXid": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295,
+      "description": "PostgreSQL engine-assigned native XID observed after PREPARE; not client-selected and not a participant identity."
+    },
+    "postgresqlSystemIdentifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20,
+      "pattern": "^[0-9]{1,20}$"
+    },
+    "postgresqlDatabaseOid": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 10,
+      "pattern": "^[0-9]{1,10}$"
+    },
+    "postgresqlTimeline": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 4294967295
+    },
+    "postgresqlLsn": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 32,
+      "pattern": "^[0-9A-F]+/[0-9A-F]+$"
+    },
+    "positiveVersion": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "signatureEnvelope": {
+      "type": "object",
+      "properties": {
+        "payload_type": {
+          "type": "string",
+          "enum": [
+            "Storage.PreparedParticipantReceipt",
+            "Storage.StorageResolutionProof"
+          ]
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "issuer_principal_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "subject_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_authority_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "audience_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "target_environment_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "purpose": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "key_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "key_version": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "algorithm_profile_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "canonicalization_profile_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "digest_profile_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "issued_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "trust_status_evidence_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "payload_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "signature": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16384,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "description": "Base64url-shaped signature bytes; cryptographic verification is outside JSON Schema."
+        }
+      },
+      "required": [
+        "payload_type",
+        "schema_version",
+        "issuer_principal_ref",
+        "subject_ref",
+        "owner_authority_ref",
+        "audience_ref",
+        "target_environment_ref",
+        "purpose",
+        "key_id",
+        "key_version",
+        "algorithm_profile_ref",
+        "canonicalization_profile_ref",
+        "digest_profile_ref",
+        "issued_at",
+        "trust_status_evidence_ref",
+        "payload_digest",
+        "signature"
+      ],
+      "additionalProperties": false
+    },
+    "commonPayload": {
+      "type": "object",
+      "properties": {
+        "prepared_participant_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_transaction_gid": {
+          "$ref": "#/$defs/preparedTransactionGid"
+        },
+        "postgresql_native_xid": {
+          "$ref": "#/$defs/postgresqlNativeXid"
+        },
+        "canonical_authority_db_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "database_incarnation_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "postgresql_system_identifier": {
+          "$ref": "#/$defs/postgresqlSystemIdentifier"
+        },
+        "postgresql_database_oid": {
+          "$ref": "#/$defs/postgresqlDatabaseOid"
+        },
+        "original_prepare_timeline": {
+          "$ref": "#/$defs/postgresqlTimeline"
+        },
+        "original_prepare_lsn": {
+          "$ref": "#/$defs/postgresqlLsn"
+        },
+        "publication_operation_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "request_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "participant_tuple_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "owner_boundary_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "causal_order_domain_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "policy_domain_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "coc_prepare_intent_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "coc_prepare_intent_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "prepare_attempt_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepare_attempt_generation": {
+          "$ref": "#/$defs/positiveVersion"
+        },
+        "participant_ledger_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "participant_ledger_version": {
+          "$ref": "#/$defs/positiveVersion"
+        }
+      },
+      "required": [
+        "prepared_participant_ref",
+        "prepared_transaction_gid",
+        "postgresql_native_xid",
+        "canonical_authority_db_ref",
+        "database_incarnation_ref",
+        "postgresql_system_identifier",
+        "postgresql_database_oid",
+        "original_prepare_timeline",
+        "original_prepare_lsn",
+        "publication_operation_id",
+        "request_digest",
+        "participant_tuple_digest",
+        "owner_boundary_ref",
+        "causal_order_domain_ref",
+        "policy_domain_ref",
+        "coc_prepare_intent_position",
+        "coc_prepare_intent_digest",
+        "prepare_attempt_ref",
+        "prepare_attempt_generation",
+        "participant_ledger_ref",
+        "participant_ledger_version"
+      ]
+    },
+    "preparedReceiptPayload": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/commonPayload"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "prepared_state": {
+              "const": "PREPARED"
+            },
+            "prepared_observation_source": {
+              "const": "AUTHORITATIVE_WRITABLE_PRIMARY_READBACK"
+            },
+            "prepared_observed_at": {
+              "$ref": "#/$defs/timestamp"
+            }
+          },
+          "required": [
+            "prepared_state",
+            "prepared_observation_source",
+            "prepared_observed_at"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "recoveryObservation": {
+      "type": "object",
+      "properties": {
+        "recovery_epoch_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "observed_database_incarnation_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "postgresql_system_identifier": {
+          "$ref": "#/$defs/postgresqlSystemIdentifier"
+        },
+        "recovery_timeline": {
+          "$ref": "#/$defs/postgresqlTimeline"
+        },
+        "recovery_lsn": {
+          "$ref": "#/$defs/postgresqlLsn"
+        },
+        "source_role": {
+          "type": "string",
+          "enum": [
+            "CANONICAL_WRITABLE_PRIMARY",
+            "RECOVERY_AUTHORITY",
+            "DURABLE_PARTICIPANT_LEDGER"
+          ]
+        },
+        "observed_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "evidence_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "evidence_digest": {
+          "$ref": "#/$defs/sha256"
+        }
+      },
+      "required": [
+        "recovery_epoch_ref",
+        "observed_database_incarnation_ref",
+        "postgresql_system_identifier",
+        "recovery_timeline",
+        "recovery_lsn",
+        "source_role",
+        "observed_at",
+        "evidence_ref",
+        "evidence_digest"
+      ],
+      "additionalProperties": false
+    },
+    "storageResolutionPayload": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/commonPayload"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "storage_resolution_outcome": {
+              "type": "string",
+              "enum": [
+                "COMMITTED",
+                "ROLLED_BACK",
+                "UNKNOWN"
+              ]
+            },
+            "participant_outcome_ledger_ref": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "participant_outcome_ledger_version": {
+              "$ref": "#/$defs/positiveVersion"
+            },
+            "authoritative_source_role": {
+              "type": "string",
+              "enum": [
+                "CANONICAL_WRITABLE_PRIMARY",
+                "RECOVERY_AUTHORITY",
+                "DURABLE_PARTICIPANT_LEDGER"
+              ]
+            },
+            "owner_final_gate_participant_ref": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "commit_authorization_receipt_ref": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "commit_authorization_receipt_digest": {
+              "$ref": "#/$defs/sha256"
+            },
+            "i_receipt_consumption_ref": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "i_receipt_consumption_digest": {
+              "$ref": "#/$defs/sha256"
+            },
+            "i_terminal_proof_ref": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "i_terminal_proof_digest": {
+              "$ref": "#/$defs/sha256"
+            },
+            "i_sequencer_ref": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "i_sequencer_epoch": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "i_sequencer_position": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "i_permission_epoch": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "i_terminal_outcome": {
+              "type": "string",
+              "enum": [
+                "COMMIT_WON",
+                "REVOCATION_WON",
+                "INDETERMINATE_ABORTED",
+                "UNKNOWN",
+                "PENDING"
+              ]
+            },
+            "storage_same_gid_resolution_ref": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "storage_private_visibility_state": {
+              "type": "string",
+              "enum": [
+                "VISIBLE",
+                "NOT_VISIBLE"
+              ]
+            },
+            "storage_lock_retention_state": {
+              "type": "string",
+              "enum": [
+                "RETAINED",
+                "RELEASED_AFTER_TERMINAL"
+              ]
+            },
+            "visibility_pointer_transaction_ref": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "publication_receipt_ref": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "publication_receipt_digest": {
+              "$ref": "#/$defs/sha256"
+            },
+            "atomic_publication_transaction_ref": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "nonpublication_proof_ref": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "unknown_reason_class": {
+              "type": "string",
+              "enum": [
+                "I_PROOF_MISSING",
+                "I_OUTCOME_UNKNOWN",
+                "STORAGE_LOOKUP_AMBIGUOUS",
+                "DB_INCARNATION_UNVERIFIED",
+                "AUTHORITATIVE_SOURCE_UNAVAILABLE",
+                "CONFLICTING_EVIDENCE"
+              ]
+            },
+            "recovery_observations": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/recoveryObservation"
+              },
+              "minItems": 0
+            }
+          },
+          "required": [
+            "storage_resolution_outcome",
+            "participant_outcome_ledger_ref",
+            "participant_outcome_ledger_version",
+            "authoritative_source_role",
+            "storage_same_gid_resolution_ref",
+            "storage_private_visibility_state",
+            "storage_lock_retention_state",
+            "recovery_observations",
+            "i_terminal_outcome"
+          ]
+        },
+        {
+          "if": {
+            "properties": {
+              "storage_resolution_outcome": {
+                "const": "COMMITTED"
+              }
+            },
+            "required": [
+              "storage_resolution_outcome"
+            ]
+          },
+          "then": {
+            "required": [
+              "owner_final_gate_participant_ref",
+              "commit_authorization_receipt_ref",
+              "commit_authorization_receipt_digest",
+              "i_receipt_consumption_ref",
+              "i_receipt_consumption_digest",
+              "i_terminal_proof_ref",
+              "i_terminal_proof_digest",
+              "i_sequencer_ref",
+              "i_sequencer_epoch",
+              "i_sequencer_position",
+              "i_permission_epoch",
+              "i_terminal_outcome",
+              "visibility_pointer_transaction_ref",
+              "publication_receipt_ref",
+              "publication_receipt_digest",
+              "atomic_publication_transaction_ref"
+            ],
+            "properties": {
+              "i_terminal_outcome": {
+                "const": "COMMIT_WON"
+              },
+              "storage_private_visibility_state": {
+                "const": "VISIBLE"
+              },
+              "storage_lock_retention_state": {
+                "const": "RELEASED_AFTER_TERMINAL"
+              },
+              "nonpublication_proof_ref": false,
+              "unknown_reason_class": false
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "storage_resolution_outcome": {
+                "const": "ROLLED_BACK"
+              }
+            },
+            "required": [
+              "storage_resolution_outcome"
+            ]
+          },
+          "then": {
+            "required": [
+              "owner_final_gate_participant_ref",
+              "commit_authorization_receipt_ref",
+              "commit_authorization_receipt_digest",
+              "i_receipt_consumption_ref",
+              "i_receipt_consumption_digest",
+              "i_terminal_proof_ref",
+              "i_terminal_proof_digest",
+              "i_sequencer_ref",
+              "i_sequencer_epoch",
+              "i_sequencer_position",
+              "i_permission_epoch",
+              "i_terminal_outcome",
+              "nonpublication_proof_ref"
+            ],
+            "properties": {
+              "i_terminal_outcome": {
+                "enum": [
+                  "REVOCATION_WON",
+                  "INDETERMINATE_ABORTED"
+                ]
+              },
+              "storage_private_visibility_state": {
+                "const": "NOT_VISIBLE"
+              },
+              "storage_lock_retention_state": {
+                "const": "RELEASED_AFTER_TERMINAL"
+              },
+              "visibility_pointer_transaction_ref": false,
+              "publication_receipt_ref": false,
+              "publication_receipt_digest": false,
+              "atomic_publication_transaction_ref": false,
+              "unknown_reason_class": false
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "storage_resolution_outcome": {
+                "const": "UNKNOWN"
+              }
+            },
+            "required": [
+              "storage_resolution_outcome"
+            ]
+          },
+          "then": {
+            "required": [
+              "unknown_reason_class"
+            ],
+            "properties": {
+              "i_terminal_outcome": {
+                "enum": [
+                  "UNKNOWN",
+                  "PENDING"
+                ]
+              },
+              "storage_private_visibility_state": {
+                "const": "NOT_VISIBLE"
+              },
+              "storage_lock_retention_state": {
+                "const": "RETAINED"
+              },
+              "owner_final_gate_participant_ref": false,
+              "i_terminal_proof_ref": false,
+              "i_terminal_proof_digest": false,
+              "visibility_pointer_transaction_ref": false,
+              "publication_receipt_ref": false,
+              "publication_receipt_digest": false,
+              "atomic_publication_transaction_ref": false,
+              "nonpublication_proof_ref": false
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "preparedReceiptMessage": {
+      "type": "object",
+      "properties": {
+        "schema_id": {
+          "const": "bmcp.storage-prepared-participant-proof"
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "message_type": {
+          "const": "Storage.PreparedParticipantReceipt"
+        },
+        "message_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "message_nonce": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "signature_envelope": {
+          "$ref": "#/$defs/signatureEnvelope"
+        },
+        "payload": {
+          "$ref": "#/$defs/preparedReceiptPayload"
+        }
+      },
+      "required": [
+        "schema_id",
+        "schema_version",
+        "message_type",
+        "message_id",
+        "message_nonce",
+        "signature_envelope",
+        "payload"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "message_type": {
+                "const": "Storage.PreparedParticipantReceipt"
+              }
+            },
+            "required": [
+              "message_type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "signature_envelope": {
+                "properties": {
+                  "payload_type": {
+                    "const": "Storage.PreparedParticipantReceipt"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "storageResolutionMessage": {
+      "type": "object",
+      "properties": {
+        "schema_id": {
+          "const": "bmcp.storage-prepared-participant-proof"
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "message_type": {
+          "const": "Storage.StorageResolutionProof"
+        },
+        "message_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "message_nonce": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "signature_envelope": {
+          "$ref": "#/$defs/signatureEnvelope"
+        },
+        "payload": {
+          "$ref": "#/$defs/storageResolutionPayload"
+        }
+      },
+      "required": [
+        "schema_id",
+        "schema_version",
+        "message_type",
+        "message_id",
+        "message_nonce",
+        "signature_envelope",
+        "payload"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "message_type": {
+                "const": "Storage.StorageResolutionProof"
+              }
+            },
+            "required": [
+              "message_type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "signature_envelope": {
+                "properties": {
+                  "payload_type": {
+                    "const": "Storage.StorageResolutionProof"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
