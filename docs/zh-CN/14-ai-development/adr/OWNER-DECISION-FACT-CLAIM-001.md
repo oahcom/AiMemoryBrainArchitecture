@@ -50,8 +50,6 @@ document_metadata:
     normative_status: Normative
   bilingual_counterpart:
     source: "14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md"
-    en: "docs/en/14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md"
-    zh-CN: "docs/zh-CN/14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md"
 ---
 
 # Owner 决策 — Fact / Claim 语义与身份
