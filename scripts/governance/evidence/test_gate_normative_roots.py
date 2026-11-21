@@ -32,6 +32,31 @@ def load_gate(root: Path):
     mod.ROOT = root
     return mod
 
+# Full-history provenance snapshot for all currently embedded bilingual sources.
+EMBEDDED_PROVENANCE_SHA_SNAPSHOT = {
+    '00-governance/architecture-document-management-policy.md': ('0c73f639bf7392a5381d0cc0d9cafd53017bfe05', '0c73f639bf7392a5381d0cc0d9cafd53017bfe05'),
+    '00-governance/architecture-document-metadata.schema.yaml': ('0c73f639bf7392a5381d0cc0d9cafd53017bfe05', '965a66b9a92cd4c2b20f4b6100721c779be7f784'),
+    '00-governance/bilingual-documentation-policy.md': ('cd1ab0fb346c770d779b1d8d24297f6811a1a74f', '32a35f422ba6442d1f700cfb327f348c0740a7f2'),
+    '00-governance/bilingual-governance-migration-register.md': ('a77219fa2834af0c4535e6692029adaec2e62638', '88c251178d510d247f28137c3821cee982cedd5e'),
+    '00-governance/drafts/GOV-DOC-001-v1.2-DRAFT.md': ('04d35f90d6f1389ee17dc8fba1a32600bd7ac8ec', '04d35f90d6f1389ee17dc8fba1a32600bd7ac8ec'),
+    '00-governance/reports/bilingual-baseline-remediation-report.md': ('a77219fa2834af0c4535e6692029adaec2e62638', '88c251178d510d247f28137c3821cee982cedd5e'),
+    '00-governance/reports/f06-object-reconciliation.md': ('9990b645555aef83714ff92c97255110b1fa0960', '9990b645555aef83714ff92c97255110b1fa0960'),
+    '00-governance/templates/bilingual-commit-message.md': ('a77219fa2834af0c4535e6692029adaec2e62638', '88c251178d510d247f28137c3821cee982cedd5e'),
+    '00-governance/templates/bilingual-issue-template.md': ('a77219fa2834af0c4535e6692029adaec2e62638', '88c251178d510d247f28137c3821cee982cedd5e'),
+    '00-governance/templates/bilingual-umbrella-requirement-template.md': ('a77219fa2834af0c4535e6692029adaec2e62638', '88c251178d510d247f28137c3821cee982cedd5e'),
+    '00-governance/templates/document-metadata-template.md': ('ae37a41900f1950a8d78d4be9e1f6a27b2edb1bb', 'b45430428c1e65cae36a9f7d63a11a78008a8f8a'),
+    '00-governance/templates/repository-policy-inheritance.md': ('a77219fa2834af0c4535e6692029adaec2e62638', '88c251178d510d247f28137c3821cee982cedd5e'),
+    '14-ai-development/AI-EXEC-INDEPENDENCE-RULING-001.md': ('1957faa6349613280576bfa5f2a3a7107f6cb719', 'e949d82b6cc3681a04631aa429e1bc2ab815305b'),
+    '14-ai-development/AI-EXEC-UNIFICATION-RULING-001.md': ('1f97c3fae65828266a0c3cb1d1e8d4e6cb330856', 'e949d82b6cc3681a04631aa429e1bc2ab815305b'),
+    '14-ai-development/PR-GOVERNANCE-001.md': ('3754d049db840b049728afd814faac968bf10749', 'e949d82b6cc3681a04631aa429e1bc2ab815305b'),
+    '14-ai-development/README.md': ('55d44b9276456f88bd2193de8b06aff146c228a4', 'e949d82b6cc3681a04631aa429e1bc2ab815305b'),
+    '14-ai-development/ai-development-standard.md': ('55d44b9276456f88bd2193de8b06aff146c228a4', 'e949d82b6cc3681a04631aa429e1bc2ab815305b'),
+    '14-ai-development/iteration-lifecycle.md': ('55d44b9276456f88bd2193de8b06aff146c228a4', 'e949d82b6cc3681a04631aa429e1bc2ab815305b'),
+    '14-ai-development/owner-automation-operating-model.md': ('6faa3b038c02bce27b3b4443d6f1be95cf5c5beb', 'e949d82b6cc3681a04631aa429e1bc2ab815305b'),
+    '14-ai-development/prompt-and-evidence-template.md': ('55d44b9276456f88bd2193de8b06aff146c228a4', 'e949d82b6cc3681a04631aa429e1bc2ab815305b'),
+    '14-ai-development/prompt-authoring-standard.md': ('6faa3b038c02bce27b3b4443d6f1be95cf5c5beb', 'e949d82b6cc3681a04631aa429e1bc2ab815305b'),
+}
+
 
 class GateRootsTest(unittest.TestCase):
     def setUp(self):
@@ -147,6 +172,53 @@ class GateRootsTest(unittest.TestCase):
     def test_every_registered_embedded_file_is_under_normative_root(self):
         for src in self.gate.EMBEDDED_BILINGUAL_SOURCES:
             self.assertEqual(src.split("/")[0] in self.gate.NORMATIVE_ROOTS, True, src)
+
+
+    def test_shallow_history_is_rejected_before_provenance_lookup(self):
+        from types import SimpleNamespace
+
+        fake_git = SimpleNamespace(stdout="true\n")
+        with patch.object(self.gate.subprocess, "run", return_value=fake_git) as run:
+            errors = self.gate.check_embedded_registration_history()
+            self.assertEqual(errors, [self.gate.SHALLOW_HISTORY_ERROR])
+            for lookup in (self.gate._file_add_commit, self.gate._registration_add_commit):
+                with self.subTest(lookup=lookup.__name__):
+                    with self.assertRaisesRegex(
+                        self.gate.ShallowRepositoryError,
+                        "cannot verify registration provenance on a shallow clone",
+                    ):
+                        lookup("00-governance/bilingual-documentation-policy.md")
+        self.assertEqual(run.call_count, 3)
+        run.assert_any_call(
+            ["git", "rev-parse", "--is-shallow-repository"],
+            cwd=self.gate.ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+    def test_all_21_embedded_provenance_pairs_match_full_history_snapshot(self):
+        self.gate.ROOT = self.gate.REPO_ROOT
+        self.assertEqual(
+            set(self.gate.EMBEDDED_BILINGUAL_SOURCES),
+            set(EMBEDDED_PROVENANCE_SHA_SNAPSHOT),
+        )
+        for source, expected in EMBEDDED_PROVENANCE_SHA_SNAPSHOT.items():
+            with self.subTest(source=source):
+                actual = (
+                    self.gate._file_add_commit(source),
+                    self.gate._registration_add_commit(source),
+                )
+                self.assertEqual(actual, expected, source)
+                file_commit, registration_commit = actual
+                if file_commit == registration_commit:
+                    self.assertEqual(
+                        self.gate.SELF_REGISTERED_AT_CREATION.get(source),
+                        file_commit,
+                        source,
+                    )
+                else:
+                    self.assertNotIn(source, self.gate.SELF_REGISTERED_AT_CREATION, source)
 
     # --- Issue #420: exemption registration must follow file creation ---
 

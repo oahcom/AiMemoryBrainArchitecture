@@ -27,6 +27,7 @@ Two kinds of content in this table age differently, and the difference is normat
 
 | [AID-2026-030](AID-2026-030/manifest.yaml) | F-REQ01-09 SQLite process-level crash-recovery conformance probe — [Issue #366](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/366) | USER-PRINCIPAL-DELEGATED (Issue #305 comment 7042461592) | TEST/R1 | PR #372 OPEN | T2 current user delivery instruction; session ID NOT_EXPOSED; SHA-256 NOT_VERIFIED | `scripts/verification/sqlite_process_conformance.py` (Blob `8c3cc1eb43992ac2e4f27ed51db0a82439eeec5e`): two-process CAS race, pre-COMMIT abrupt process exit/reopen, committed-state reopen | Author self-check only; independent review NOT_CLAIMED | Python stdlib SQLite path 3/3 PASS; Rust adapter execution NOT_RUN; production/recovery limits explicit |
 | [AID-2026-040](AID-2026-040/manifest.yaml) | E1–E8 engineering entry gate measurement and CI custody evidence | USER-PRINCIPAL-DELEGATED | DOC/R1 | REGISTERED | [prompt-v1](AID-2026-040/prompt-v1.md) | `14-ai-development/work-items/AID-2026-040/E1-E8-entry-gate-measurement-2026-11-21.md`; dev repo CI run `44880135760` | NOT_ASSIGNED | NOT_ASSIGNED |
+| [AID-2026-041](AID-2026-041/manifest.yaml) | Refuse bilingual registration provenance judgment on shallow Git clones | USER-PRINCIPAL-DELEGATED | TEST/R1 | REGISTERED | [prompt-v1](AID-2026-041/prompt-v1.md) | `scripts/check_bilingual_docs.py`; `scripts/governance/evidence/test_gate_normative_roots.py` | NOT_ASSIGNED | NOT_ASSIGNED |
 
 ## Session-level delivery records / 会话级交付记录
 
