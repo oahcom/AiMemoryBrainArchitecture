@@ -159,3 +159,90 @@ invisible coverage hole.
    out of scope with a reason.
 4. The script runs in CI and blocks merges, so a red gate is not discovered
    weeks later.
+
+## Round-eight re-measurement (2026-11-22 02:25 +08:00, `main @ 6696ca8a`)
+
+Appended; §above is unchanged and still accurate. This narrows the numbers and
+confirms the mechanism.
+
+```
+$ cd 08-bmcp-protocol/schemas && python3 test_nonempty_audit.py; echo "EXIT=$?"
+... 5506 lines of  <schema>.json:<pointer>:<constraint>  ...
+EXIT=1
+```
+
+Unchanged from the previous measurement. Nothing was fixed in between; the item is
+still red.
+
+### The gap is now attributable to a single number
+
+```
+$ ls 08-bmcp-protocol/schemas/*.json | wc -l
+32
+
+$ sed -n 3p 08-bmcp-protocol/schema-nonempty-audit.md
+**Audit baseline:** `main` at `88bf4875...` (2026-11-21). Scope: every
+direct-child `*.json` in `08-bmcp-protocol/schemas/`; 2 files were present.
+```
+
+The audit table's own declared scope is *every direct-child `*.json` in this
+directory*. It audited 2. The directory holds 32. The 30-file difference is the
+5506 unregistered constraints, and the arithmetic is checkable: 93 registered
+constraints over 2 files, 5506 unregistered over 30.
+
+Provenance, from `git log --diff-filter=A`:
+
+| commit | effect |
+|---|---|
+| `9a98956f` (#500) | merged the H protocol schemas — this is where the 30 files arrived |
+| `3aaf761f` (#505) | last edit to the audit table itself |
+
+`#500` added the schemas and did not extend the audit. `#505` touched the table
+afterwards without noticing the scope mismatch. Both facts are in the log; neither
+is an inference.
+
+### Why regenerating the 5506 rows is still the wrong repair
+
+The table is not a list of constraint strings. Each row carries a judgement:
+
+```
+| schema | location | constraint | may be legally empty? | disposition | rationale |
+```
+
+The table's own Summary documents that 2 conditional constraints were deliberately
+*changed* in `#505` — "zero-count PARTIAL/NOT_ENUMERATED/UNAVAILABLE/UNKNOWN
+states may have no reportable highwater and must not synthesize one". That ruling
+required reading the schema's semantics. Auto-generating 5506 rows with a default
+disposition would produce a table that passes the script and contains zero
+judgements, which is a worse state than a red gate: it would be a green gate that
+certifies nothing.
+
+So closure criterion 3 ("every schema is either audited or explicitly listed as
+out of scope with a reason") is the real work, and it is a reading task, not a
+scripting task.
+
+### Sibling-gate contrast, unchanged
+
+For the same directory family, two other gates are green and measurable:
+
+- `08-bmcp-protocol/scripts/check_protocol_index.py` → `missing=0 extra=0
+  duplicate_types=0 invalid_rows=0 PASS`, exit 0.
+- `08-bmcp-protocol/tests/conformance` → 585 passed / 27 skipped / 0 failed when
+  `requirements.txt` is installed (see GAP-08's round-eight section).
+
+Both are green. Only the non-empty audit is red. That removes the "the area is in
+transition" explanation: three gates over one directory, two fine, one red, and the
+red one is red because of a merge that predates the last edit to its own table.
+
+### CI status, unchanged and now decisive
+
+`#536` merged a workspace-wide rustfmt pass. CI did not run for it either. As
+established in GAP-11 §6, every check run in this repository currently carries
+
+> The job was not started because recent account payments have failed or your
+> spending limit needs to be increased.
+
+so wiring direction (c) today would import a red gate into a workflow that cannot
+execute. That does not weaken the recommendation — it makes the ordering explicit:
+**(a) must land before (c) is meaningful**, otherwise CI will be red for a reason
+nobody can observe.

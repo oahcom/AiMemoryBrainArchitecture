@@ -144,3 +144,81 @@ PASS
 2. 表中声明的基线与已检 schema 数量与现实一致。
 3. 目录中每个 schema 要么已审计，要么带理由明确列为范围外。
 4. 脚本在 CI 中运行并阻断合并，使红色闸门不会数周后才被发现。
+
+## 第八轮复测（2026-11-22 02:25 +08:00，`main @ 6696ca8a`）
+
+追加内容；上方正文未改动且仍然准确。本节收窄数字并确认机制。
+
+```
+$ cd 08-bmcp-protocol/schemas && python3 test_nonempty_audit.py; echo "EXIT=$?"
+... 5506 行  <schema>.json:<pointer>:<constraint> ...
+EXIT=1
+```
+
+与上次测量一致。这期间没有任何修复；本项仍然是红的。
+
+### 缺口现在归因到单独一个数字
+
+```
+$ ls 08-bmcp-protocol/schemas/*.json | wc -l
+32
+
+$ sed -n 3p 08-bmcp-protocol/schema-nonempty-audit.md
+**Audit baseline:** `main` at `88bf4875...` (2026-11-21). Scope: every
+direct-child `*.json` in `08-bmcp-protocol/schemas/`; 2 files were present.
+```
+
+审计表自己声明的范围是*该目录下每一个 direct-child `*.json`*。它审计了 2 个。目录里
+有 32 个。30 个文件的差额就是那 5506 条未登记约束，而且算术可核对：2 个文件 93 条
+已登记约束，30 个文件 5506 条未登记。
+
+provenance，来自 `git log --diff-filter=A`：
+
+| 提交 | 效果 |
+|---|---|
+| `9a98956f`（#500） | 合入 H 协议 schemas —— 30 个文件就是这里进来的 |
+| `3aaf761f`（#505） | 审计表自身的最后一次修改 |
+
+`#500` 加了 schema 但没有扩展审计。`#505` 之后动了这张表，却没注意到范围不匹配。两条
+事实都在 log 里，都不是推断。
+
+### 为什么重新生成 5506 行仍然是错误的修法
+
+这张表不是一串约束字符串。每一行都带着一个判断：
+
+```
+| schema | location | constraint | may be legally empty? | disposition | rationale |
+```
+
+该表自己的 Summary 记录着 #505 里**有意改动**了 2 条条件约束 —— "zero-count
+PARTIAL/NOT_ENUMERATED/UNAVAILABLE/UNKNOWN 状态可以没有可报告的 highwater，且不得
+凭空合成一个"。那条裁定需要读懂 schema 语义。用默认处置自动生成 5506 行，会得到一张
+能通过脚本、但一个判断都没有的表 —— 那比红闸门更糟：它是一个什么都不认证的绿闸门。
+
+因此关闭标准 3（"目录中每个 schema 要么已审计，要么带理由明确列为范围外"）才是真正的
+工作，而它是阅读任务，不是脚本任务。
+
+### 兄弟闸门对照，未变
+
+同一目录族里，另两个闸门是绿的且可测：
+
+- `08-bmcp-protocol/scripts/check_protocol_index.py` → `missing=0 extra=0
+  duplicate_types=0 invalid_rows=0 PASS`，exit 0。
+- `08-bmcp-protocol/tests/conformance` → 装齐 `requirements.txt` 后 585 passed /
+  27 skipped / 0 failed（见 GAP-08 第八轮小节）。
+
+两个都是绿的。只有非空审计是红的。这排除了"该区域处于过渡状态"的解释：同一目录上三个
+闸门，两个正常，一个红，而红的那个之所以红，是因为一次比它自己那张表最后一次修改更早
+的合并。
+
+### CI 状态，未变且现在具有决定性
+
+`#536` 合入了一次全工作区 rustfmt。CI 也没有为它跑起来。如 GAP-11 §6 所确立，本仓库
+当前每个 check run 都带着
+
+> The job was not started because recent account payments have failed or your
+> spending limit needs to be increased.
+
+所以在今天就接入方向 (c)，等于把一个红闸门引入一个无法执行的工作流。这并不削弱该建议
+—— 它把顺序讲明确了：**(a) 必须先落地，(c) 才有意义**，否则 CI 会因为一个没人能观察到
+的原因变红。
