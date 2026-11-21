@@ -152,3 +152,80 @@ compile() 变为可达，并返回 Ok(Blocked)，处置得以保留。
 - 如果 `canonical_commit_confirmed` 获得生产者（`admission_canonical_commit_cursor`
   字段暗示曾经打算有）。
 - 如果后续规范修订赋予 E 独立可见性授权，而 §8 目前禁止这一点。
+
+## 增补 —— D6，2026-11-22 02:35 +08:00 作出（#552、#545 落地之后）
+
+D3 把 `canonical_commit_confirmed` 归为"没有生产者"的标志。这个理由是错的，
+而错误的代价很具体：它会让下一个人去"把字段暗示的那个生产者补上"。没有这样的
+生产者可补，因为它要产出的事实，其主人自己还没有定义。
+
+### 矛盾，实测
+
+以下四处读取均来自 `444deef1`。
+
+| 位置 | 它说的是什么 |
+|---|---|
+| `memory-compiler/src/lib.rs:633-635` | `if producer_request.admission_canonical_commit_cursor.is_none() { return Err(MissingCanonicalCommit) }` |
+| `memory-compiler/src/lib.rs:641` | `staging.canonical_commit_confirmed = true;` |
+| `memory-compiler/src/publication_authority.rs:103` | `canonical_commit_confirmed: false,` |
+| `memory-compiler/src/lib.rs:531` | `if !proof.canonical_commit_confirmed { return Blocked }` |
+
+在一次 `compile()` 调用里，compiler 先断言提交已确认（否则直接报错不往下走），
+随后又把"未确认"的证明交给 gate。gate 于是阻塞。这不是保守的默认值，而是同一个
+布尔量在同一次运行里取了对立的值。
+
+又因为 staging 对缺失游标是**硬报错**，要走到 gate，唯一的办法就是提供一个游标。
+也就是说，gate 的可达性依赖于把那个事实断言出来。
+
+### 被断言的事实从哪来
+
+`admission_canonical_commit_cursor` 是 `ProducerRegistrationRequest` 的字段
+（`admission.rs:127-137`），由调用方提供，账本只是把它存下来。没有任何东西校验它，
+也无法校验：仓库里没有可用于比对的 canonical commit 记录类型。
+
+domain 自己就是这么写的（`memory-domain/src/lib.rs:489-500`）：
+
+```rust
+/// NOT DEFINED: awaiting D. Required placeholder with no invented commit semantics.
+/// `pending_d()` is public and any caller can create this placeholder.
+pub struct CanonicalCommitRef(());
+impl CanonicalCommitRef { pub const fn pending_d() -> Self { Self(()) } }
+```
+
+`CanonicalCommitRef` 不携带任何数据，`pending_d()` 让任何调用方都能凭空造一个。
+它是一个公开声明的占位符，等待其主人冻结契约。
+
+所以真实的链条是：调用方断言一个不透明游标 → 账本存下 → compiler 读回来称之为
+"已确认的 canonical commit" → 而 domain 在另一处说这种契约根本不存在。这正是
+`compiler-stage-contract.md` §8 所禁止的"替代授权决定"，而且它是今天通往发布
+gate 的**唯一**路径。
+
+### 决定
+
+**D6.1. `canonical_commit_confirmed` 在生产适配器中保持 `false`，直到 owner D
+冻结 canonical commit 契约，并给出可构造、携带内容的引用类型与校验器。**
+不是"直到出现生产者"——那个貌似生产者的东西是调用方断言，把它提升上来，等于把
+未校验的声明洗成 `Published`。
+
+**D6.2. staging 不得再把调用方提供的游标称作"已确认的提交"。** 它的前置条件改名
+为它真正校验的东西：`canonical_commit_cursor_recorded`。检查、错误与所有 disposition
+逐字节不变，缩小的只是"声明"的幅度，让它回到证据范围内。
+
+**D6.3. `ProducerRegistrationRequest::admission_canonical_commit_cursor` 在 E 侧
+任何地方都不得被当作提交确认的证据**，注释与文档字符串同样适用。若它作为请求字段
+继续存在，必须标注为未校验。
+
+**D6.4. `CanonicalCommitRef::pending_d()` 不得出现在任何喂给发布授权的路径上。**
+它是占位便利设施，不是证据。
+
+### D6 不决定什么
+
+D 何时交付该契约。那是 D 自己的前沿（frontier），§8 也不允许 E 代为发明。D6 只做一件事：
+让 E 停止假装该契约已经存在。
+
+### 后果
+
+行为不变：`compile()` 仍返回 `Ok(Blocked)` 并指明 `canonical_commit_confirmed`，
+`brain-cli` 仍以 0 退出。变的是：树里不再有一行断言"其自身 domain 拒绝定义的事实"。
+`Published` 仍只能经由一份真实的 canonical commit 契约，加上 D3 已点名的那两个
+参与者授权才能达成。

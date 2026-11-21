@@ -175,3 +175,87 @@ silent.
   field suggests one was intended).
 - If a later spec revision assigns E an independent visibility authority, which
   §8 currently forbids.
+
+## Amendment — D6, taken 2026-11-22 02:35 +08:00, after #552 and #545 landed
+
+D3 treated `canonical_commit_confirmed` as a flag with "no producer". That reason
+was wrong, and the error matters: it invites the next person to "just add the
+producer the field suggests". There is no producer to add, because the fact it
+would produce is undefined by its own owner.
+
+### The contradiction, measured
+
+All four readings are from `444deef1`.
+
+| location | what it says |
+|---|---|
+| `memory-compiler/src/lib.rs:633-635` | `if producer_request.admission_canonical_commit_cursor.is_none() { return Err(MissingCanonicalCommit) }` |
+| `memory-compiler/src/lib.rs:641` | `staging.canonical_commit_confirmed = true;` |
+| `memory-compiler/src/publication_authority.rs:103` | `canonical_commit_confirmed: false,` |
+| `memory-compiler/src/lib.rs:531` | `if !proof.canonical_commit_confirmed { return Blocked }` |
+
+In one call to `compile()`, the compiler first asserts the commit is confirmed —
+it will not proceed otherwise — and then hands the gate a proof that says the
+commit is not confirmed. The gate blocks. This is not a conservative default; it
+is the same boolean holding opposite values inside a single run.
+
+Because staging *hard-errors* on a missing cursor, the only way to reach the gate
+at all is to supply one. So the gate's reachability depends on asserting the fact.
+
+### Where the asserted fact comes from
+
+`admission_canonical_commit_cursor` is a field of `ProducerRegistrationRequest`
+(`admission.rs:127-137`), which is caller-supplied and merely persisted by the
+ledger. Nothing validates it, and nothing can: there is no canonical-commit record
+type to validate against.
+
+The domain says so itself, in its own words (`memory-domain/src/lib.rs:489-500`):
+
+```rust
+/// NOT DEFINED: awaiting D. Required placeholder with no invented commit semantics.
+/// `pending_d()` is public and any caller can create this placeholder.
+pub struct CanonicalCommitRef(());
+impl CanonicalCommitRef { pub const fn pending_d() -> Self { Self(()) } }
+```
+
+`CanonicalCommitRef` carries no data and `pending_d()` lets any caller mint one.
+It is a declared placeholder for a contract its owner has not frozen.
+
+So the honest chain is: caller asserts an opaque cursor → the ledger stores it →
+the compiler reads it back and calls it a confirmed canonical commit → the domain
+elsewhere says no such contract exists. That is a substitute authorization
+decision of exactly the shape `compiler-stage-contract.md` §8 forbids, and it is
+the *only* route by which the publication gate is reachable today.
+
+### Decision
+
+**D6.1. `canonical_commit_confirmed` stays `false` in the production adapter until
+owner D freezes a canonical-commit contract that provides a constructible,
+content-bearing reference and a validator for it.** Not "until a producer exists" —
+the apparent producer is a caller assertion, and promoting it would launder an
+unvalidated claim into a `Published` disposition.
+
+**D6.2. Staging must stop naming a caller-supplied cursor a confirmed commit.**
+Its precondition is renamed to what it actually verifies:
+`canonical_commit_cursor_recorded`. The check, the error and every disposition stay
+byte-for-byte identical; only the claim shrinks to the evidence.
+
+**D6.3. `ProducerRegistrationRequest::admission_canonical_commit_cursor` must not
+be treated as evidence of commit confirmation anywhere in E**, including comments
+and doc strings. If it survives as a request field it is documented as unvalidated.
+
+**D6.4. `CanonicalCommitRef::pending_d()` must not appear on any path that feeds
+publication authorization.** It is a placeholder affordance, not evidence.
+
+### What D6 does not decide
+
+Whether D delivers the contract, or when. That is D's own frontier, and §8 keeps E
+from inventing it. D6 only stops E from pretending the contract already exists.
+
+### Consequence
+
+Behaviour does not change: `compile()` still returns `Ok(Blocked)` naming
+`canonical_commit_confirmed`, and `brain-cli` still exits 0. What changes is that
+the tree no longer contains a line asserting a fact its own domain refuses to
+define. `Published` remains reachable only through a real canonical-commit
+contract plus the two participants D3 already names.
