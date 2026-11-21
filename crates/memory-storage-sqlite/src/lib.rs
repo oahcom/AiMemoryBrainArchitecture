@@ -641,7 +641,10 @@ mod tests {
         let second_result = second.join().unwrap();
         let successes = usize::from(first_result.is_ok()) + usize::from(second_result.is_ok());
         assert_eq!(successes, 1, "exactly one CAS writer may commit");
-        let loser = if first_result.is_err() { first_result.unwrap_err() } else { second_result.unwrap_err() };
+        let loser = match first_result {
+            Err(error) => error,
+            Ok(_) => second_result.unwrap_err(),
+        };
         assert_eq!(loser, StorageError::StaleVersion);
 
         let reopened = SqliteMemoryStorage::open(&path).unwrap();
@@ -785,7 +788,7 @@ mod tests {
             let mut item = memory();
             item.memory_id = id(memory_id);
             item.scope_refs = vec![item_scope.clone()];
-            store.create_memory(item, &[item_scope.clone()]).unwrap();
+            store.create_memory(item, std::slice::from_ref(&item_scope)).unwrap();
 
             let mut item_version = version(version_id, 1, None);
             item_version.memory_id = id(memory_id);
@@ -798,12 +801,12 @@ mod tests {
             }, &[item_scope]).unwrap();
         }
 
-        let first = store.list_changes(None, &[visible_scope.clone()], 1).unwrap();
+        let first = store.list_changes(None, std::slice::from_ref(&visible_scope), 1).unwrap();
         assert_eq!(first.records.len(), 1);
         assert_eq!(first.records[0].memory_id, id("m1"));
         assert_eq!(first.next_cursor, Some(CommitSequence(1)));
 
-        let second = store.list_changes(first.next_cursor, &[visible_scope.clone()], 1).unwrap();
+        let second = store.list_changes(first.next_cursor, std::slice::from_ref(&visible_scope), 1).unwrap();
         assert_eq!(second.records.len(), 1);
         assert_eq!(second.records[0].memory_id, id("m4"));
         assert_eq!(second.next_cursor, Some(CommitSequence(4)));
@@ -1081,11 +1084,11 @@ mod tests {
             namespace_key: "user:s2".into(),
         };
         assert_eq!(
-            store.read_current(&id("m1"), &[other.clone()]),
+            store.read_current(&id("m1"), std::slice::from_ref(&other)),
             Err(StorageError::ScopeMismatch)
         );
         assert_eq!(
-            store.read_version(&id("m1"), &id("v1"), &[other.clone()]),
+            store.read_version(&id("m1"), &id("v1"), std::slice::from_ref(&other)),
             Err(StorageError::ScopeMismatch)
         );
         assert_eq!(
@@ -1244,7 +1247,7 @@ mod tests {
         let first_reader = store.read_current(&id("m1"), &[first_scope]).unwrap().unwrap();
         assert!(first_reader.claims.is_empty(), "scope s1 must not receive the s2-only Claim");
 
-        let second_reader = store.read_current(&id("m1"), &[second_scope.clone()]).unwrap().unwrap();
+        let second_reader = store.read_current(&id("m1"), std::slice::from_ref(&second_scope)).unwrap().unwrap();
         assert_eq!(second_reader.claims.len(), 1);
         assert_eq!(second_reader.claims[0].claim_id, id("claim-s2"));
 
@@ -1382,9 +1385,9 @@ mod tests {
         };
 
         assert_eq!(store.create_memory(memory(), &empty), Err(StorageError::InvalidSchema));
-        assert_eq!(store.create_memory(memory(), &[malformed.clone()]), Err(StorageError::InvalidSchema));
+        assert_eq!(store.create_memory(memory(), std::slice::from_ref(&malformed)), Err(StorageError::InvalidSchema));
         assert_eq!(store.read_current(&id("missing"), &empty), Err(StorageError::InvalidSchema));
-        assert_eq!(store.read_version(&id("missing"), &id("missing-v"), &[malformed.clone()]), Err(StorageError::InvalidSchema));
+        assert_eq!(store.read_version(&id("missing"), &id("missing-v"), std::slice::from_ref(&malformed)), Err(StorageError::InvalidSchema));
         assert_eq!(store.commit_version(CommitRequest {
             memory_id: id("missing"),
             expected_current_version: None,
@@ -1555,7 +1558,7 @@ mod tests {
             let mut item = memory();
             item.memory_id = id(memory_id);
             item.scope_refs = vec![item_scope.clone()];
-            store.create_memory(item, &[item_scope.clone()]).unwrap();
+            store.create_memory(item, std::slice::from_ref(&item_scope)).unwrap();
 
             let mut item_version = version(version_id, 1, None);
             item_version.memory_id = id(memory_id);
@@ -1568,14 +1571,14 @@ mod tests {
             }, &[item_scope]).unwrap();
         }
 
-        let first = store.list_changes(None, &[visible_scope.clone()], 2).unwrap();
+        let first = store.list_changes(None, std::slice::from_ref(&visible_scope), 2).unwrap();
         assert_eq!(
             first.records.iter().map(|record| record.memory_id.clone()).collect::<Vec<_>>(),
             vec![id("m1"), id("m4")]
         );
         assert_eq!(first.next_cursor, Some(CommitSequence(4)));
 
-        let second = store.list_changes(first.next_cursor, &[visible_scope.clone()], 2).unwrap();
+        let second = store.list_changes(first.next_cursor, std::slice::from_ref(&visible_scope), 2).unwrap();
         assert_eq!(
             second.records.iter().map(|record| record.memory_id.clone()).collect::<Vec<_>>(),
             vec![id("m5"), id("m7")]
@@ -1612,12 +1615,12 @@ mod tests {
                 new_version,
                 idempotency_key: "unauthorized-claim-scope".into(),
                 request_digest: "unauthorized-claim-scope-digest".into(),
-            }, &[first_scope.clone()]),
+            }, std::slice::from_ref(&first_scope)),
             Err(StorageError::ScopeMismatch)
         );
-        assert!(store.read_current(&id("m1"), &[first_scope.clone()]).unwrap().is_none());
+        assert!(store.read_current(&id("m1"), std::slice::from_ref(&first_scope)).unwrap().is_none());
         assert_eq!(
-            store.resolve_idempotency("unauthorized-claim-scope", "unauthorized-claim-scope-digest", &[first_scope.clone()]).unwrap(),
+            store.resolve_idempotency("unauthorized-claim-scope", "unauthorized-claim-scope-digest", std::slice::from_ref(&first_scope)).unwrap(),
             None
         );
         assert!(store.list_changes(None, &[first_scope], 10).unwrap().records.is_empty());
@@ -1651,7 +1654,7 @@ mod tests {
             request_digest: "multiscope-claim-digest".into(),
         }, &[first_scope.clone(), second_scope.clone()]).unwrap();
 
-        let partial_reader = store.read_current(&id("m1"), &[first_scope.clone()]).unwrap().unwrap();
+        let partial_reader = store.read_current(&id("m1"), std::slice::from_ref(&first_scope)).unwrap().unwrap();
         assert!(partial_reader.claims.is_empty(), "partial scope access must not disclose a partial Claim");
         let full_reader = store.read_current(&id("m1"), &[first_scope, second_scope]).unwrap().unwrap();
         assert_eq!(full_reader.claims.len(), 1);

@@ -905,17 +905,31 @@ fn stable_digest(bytes: &[u8]) -> String {
     format!("fnv1a64:{hash:016x}")
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct RollbackPlanRequest {
+    pub target: ContextVersionId,
+    pub target_entries: Vec<ContextEntryVersion>,
+    pub current_entries: Vec<ContextEntryVersion>,
+    pub reason: String,
+    pub actor: ActorRef,
+    pub change_set_id: ChangeSetId,
+    pub created_at: String,
+    pub policy_epoch: u64,
+}
+
 pub fn plan_rollback(
     head: &ContextHead,
-    target: &ContextVersionId,
-    target_entries: &[ContextEntryVersion],
-    current_entries: &[ContextEntryVersion],
-    reason: &str,
-    actor: ActorRef,
-    change_set_id: ChangeSetId,
-    created_at: String,
-    policy_epoch: u64,
+    request: RollbackPlanRequest,
 ) -> Result<ContextChangeSet, ContextError> {
+    let target = &request.target;
+    let target_entries = request.target_entries.as_slice();
+    let current_entries = request.current_entries.as_slice();
+    let reason = request.reason.as_str();
+    let actor = request.actor;
+    let change_set_id = request.change_set_id;
+    let created_at = request.created_at;
+    let policy_epoch = request.policy_epoch;
+
     head.validate()?;
     let base_version = head
         .version
@@ -1042,12 +1056,6 @@ pub fn supersede_version(
     };
     replacement.validate()?;
     Ok(replacement)
-}
-
-impl ContextError {
-    fn payload_hash_mismatch(declared: String, actual: String) -> Self {
-        Self::PayloadHashMismatch { declared, actual }
-    }
 }
 
 #[cfg(test)]
@@ -1545,14 +1553,16 @@ mod version_tests {
     ) -> Result<ContextChangeSet, ContextError> {
         plan_rollback(
             &head(),
-            &version_id("v0"),
-            target_entries,
-            current_entries,
-            reason,
-            actor(),
-            changeset_id("rollback-1"),
-            "2026-01-01T00:00:00Z".into(),
-            7,
+            RollbackPlanRequest {
+                target: version_id("v0"),
+                target_entries: target_entries.to_vec(),
+                current_entries: current_entries.to_vec(),
+                reason: reason.to_owned(),
+                actor: actor(),
+                change_set_id: changeset_id("rollback-1"),
+                created_at: "2026-01-01T00:00:00Z".into(),
+                policy_epoch: 7,
+            },
         )
     }
 
@@ -1708,14 +1718,16 @@ mod version_tests {
         assert_eq!(
             plan_rollback(
                 &genesis,
-                &version_id("v0"),
-                &[entry("a", "a", 1)],
-                &[],
-                "restore",
-                actor(),
-                changeset_id("cs"),
-                "time".into(),
-                1
+                RollbackPlanRequest {
+                    target: version_id("v0"),
+                    target_entries: vec![entry("a", "a", 1)],
+                    current_entries: vec![],
+                    reason: "restore".into(),
+                    actor: actor(),
+                    change_set_id: changeset_id("cs"),
+                    created_at: "time".into(),
+                    policy_epoch: 1,
+                }
             ),
             Err(ContextError::RollbackFromGenesis)
         );
@@ -1734,14 +1746,16 @@ mod version_tests {
         assert_eq!(
             plan_rollback(
                 &head(),
-                &version_id("v0"),
-                &[entry("a", "a", 1)],
-                &[],
-                "restore",
-                actor(),
-                changeset_id("cs"),
-                String::new(),
-                1
+                RollbackPlanRequest {
+                    target: version_id("v0"),
+                    target_entries: vec![entry("a", "a", 1)],
+                    current_entries: vec![],
+                    reason: "restore".into(),
+                    actor: actor(),
+                    change_set_id: changeset_id("cs"),
+                    created_at: String::new(),
+                    policy_epoch: 1,
+                }
             ),
             Err(ContextError::EmptyField("created_at"))
         );
@@ -1760,7 +1774,7 @@ mod version_tests {
     fn rollback_rejects_noop_diff() {
         let same = entry("a", "same", 1);
         assert_eq!(
-            rollback(&[same.clone()], &[same]),
+            rollback(std::slice::from_ref(&same), std::slice::from_ref(&same)),
             Err(ContextError::NoOpRollback)
         );
     }
@@ -1987,7 +2001,7 @@ mod version_tests {
             &[],
             &mut log,
             7,
-            metadata(&[added.clone()]),
+            metadata(std::slice::from_ref(&added)),
         )
         .unwrap();
         let second = commit_change_set(

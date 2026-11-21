@@ -56,7 +56,7 @@ fn main() -> Result<(), String> {
 
     let mut store = SqliteMemoryStorage::open(&db).map_err(|e| format!("{e:?}"))?;
     let visible_scope = scope();
-    store.create_memory(memory(), &[visible_scope.clone()]).map_err(|e| format!("{e:?}"))?;
+    store.create_memory(memory(), std::slice::from_ref(&visible_scope)).map_err(|e| format!("{e:?}"))?;
 
     for n in 1..=warmup {
         let parent = if n == 1 { None } else { Some(id(format!("bench-v{}", n - 1))) };
@@ -66,7 +66,7 @@ fn main() -> Result<(), String> {
             new_version: version(n as u64, parent),
             idempotency_key: format!("bench-op-{n}"),
             request_digest: format!("bench-digest-{n}"),
-        }, &[visible_scope.clone()]).map_err(|e| format!("{e:?}"))?;
+        }, std::slice::from_ref(&visible_scope)).map_err(|e| format!("{e:?}"))?;
     }
 
     let cpu_start = process_cpu_ticks();
@@ -82,7 +82,7 @@ fn main() -> Result<(), String> {
             request_digest: format!("bench-digest-{n}"),
         };
         let one = Instant::now();
-        store.commit_version(request, &[visible_scope.clone()]).map_err(|e| format!("{e:?}"))?;
+        store.commit_version(request, std::slice::from_ref(&visible_scope)).map_err(|e| format!("{e:?}"))?;
         latencies.push(one.elapsed().as_nanos());
     }
     let elapsed = started.elapsed();

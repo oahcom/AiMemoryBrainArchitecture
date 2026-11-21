@@ -273,12 +273,12 @@ mod tests {
         b2.scope_refs = vec![scope_b.clone()];
 
         store.accept_with_payload(a, b"a1", &[scope_a]).unwrap();
-        let hidden_only = store.read_after(0, 1, &[scope_b.clone()]).unwrap();
+        let hidden_only = store.read_after(0, 1, std::slice::from_ref(&scope_b)).unwrap();
         assert!(hidden_only.is_empty());
 
-        let visible1 = store.accept_with_payload(b1, b"b1", &[scope_b.clone()]).unwrap();
-        let visible2 = store.accept_with_payload(b2, b"b2", &[scope_b.clone()]).unwrap();
-        let page1 = store.read_after(0, 1, &[scope_b.clone()]).unwrap();
+        let visible1 = store.accept_with_payload(b1, b"b1", std::slice::from_ref(&scope_b)).unwrap();
+        let visible2 = store.accept_with_payload(b2, b"b2", std::slice::from_ref(&scope_b)).unwrap();
+        let page1 = store.read_after(0, 1, std::slice::from_ref(&scope_b)).unwrap();
         assert_eq!(page1.len(), 1);
         assert_eq!(page1[0].receipt, visible1);
         let page2 = store.read_after(page1[0].sequence, 1, &[scope_b]).unwrap();
@@ -339,18 +339,18 @@ mod tests {
             expected.push(receipt);
         }
 
-        let first_a = store.read_after(0, 1, &[scope_a.clone()]).unwrap();
+        let first_a = store.read_after(0, 1, std::slice::from_ref(&scope_a)).unwrap();
         assert_eq!(first_a.len(), 1);
         assert_eq!(first_a[0].receipt, expected[0]);
-        let second_a = store.read_after(first_a[0].sequence, 1, &[scope_a.clone()]).unwrap();
+        let second_a = store.read_after(first_a[0].sequence, 1, std::slice::from_ref(&scope_a)).unwrap();
         assert_eq!(second_a.len(), 1);
         assert_eq!(second_a[0].receipt, expected[2]);
         assert!(store.read_after(second_a[0].sequence, 1, &[scope_a]).unwrap().is_empty());
 
-        let first_b = store.read_after(0, 1, &[scope_b.clone()]).unwrap();
+        let first_b = store.read_after(0, 1, std::slice::from_ref(&scope_b)).unwrap();
         assert_eq!(first_b.len(), 1);
         assert_eq!(first_b[0].receipt, expected[1]);
-        let second_b = store.read_after(first_b[0].sequence, 1, &[scope_b.clone()]).unwrap();
+        let second_b = store.read_after(first_b[0].sequence, 1, std::slice::from_ref(&scope_b)).unwrap();
         assert_eq!(second_b.len(), 1);
         assert_eq!(second_b[0].receipt, expected[3]);
         assert!(store.read_after(second_b[0].sequence, 1, &[scope_b]).unwrap().is_empty());
