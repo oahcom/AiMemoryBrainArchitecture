@@ -583,37 +583,34 @@ class GateRootsTest(unittest.TestCase):
             "BILINGUAL-MANIFEST: COMPLETE\n"
             "BILINGUAL-CATCH-UP: "
             "source=02-domain-model/probe.zh-CN.md "
-            "counterpart=02-domain-model/probe.md "
-            "base-blob=" + "a" * 40 + "\n"
+            "counterpart=02-domain-model/probe.md\n"
         )
         declarations, errors = self.gate.parse_catch_up_declarations(body)
         self.assertEqual(errors, [])
         self.assertEqual(
             declarations,
-            {"02-domain-model/probe.zh-CN.md": ("02-domain-model/probe.md", "a" * 40)},
+            {"02-domain-model/probe.zh-CN.md": "02-domain-model/probe.md"},
         )
 
     def test_catch_up_declaration_rejects_duplicate_source(self):
         line = (
             "BILINGUAL-CATCH-UP: "
             "source=02-domain-model/probe.zh-CN.md "
-            "counterpart=02-domain-model/probe.md "
-            "base-blob=" + "a" * 40
+            "counterpart=02-domain-model/probe.md"
         )
-        declarations, errors = self.gate.parse_catch_up_declarations(
-            line + "\n" + line + "\n"
-        )
+        _, errors = self.gate.parse_catch_up_declarations(line + "\n" + line + "\n")
         self.assertEqual(len(errors), 1)
         self.assertIn("Duplicate", errors[0])
 
-    def test_catch_up_declaration_rejects_malformed_blob(self):
+    def test_catch_up_declaration_rejects_malformed_declaration(self):
+        # Missing counterpart, missing source, a stray base-blob field, and an
+        # empty path are all malformed: the declaration carries intent only.
         for bad in (
+            "BILINGUAL-CATCH-UP: source=02-domain-model/probe.zh-CN.md\n",
+            "BILINGUAL-CATCH-UP: counterpart=02-domain-model/probe.md\n",
             "BILINGUAL-CATCH-UP: source=02-domain-model/probe.zh-CN.md "
-            "counterpart=02-domain-model/probe.md base-blob=abc\n",
-            "BILINGUAL-CATCH-UP: source=02-domain-model/probe.zh-CN.md "
-            "base-blob=" + "a" * 40 + "\n",
-            "BILINGUAL-CATCH-UP: source=02-domain-model/probe.zh-CN.md "
-            "counterpart=02-domain-model/probe.md base-blob=" + "A" * 40 + "\n",
+            "counterpart=02-domain-model/probe.md base-blob=" + "a" * 40 + "\n",
+            "BILINGUAL-CATCH-UP: source= counterpart=02-domain-model/probe.md\n",
         ):
             _, errors = self.gate.parse_catch_up_declarations(bad)
             self.assertEqual(len(errors), 1, bad)
@@ -638,7 +635,7 @@ class GateRootsTest(unittest.TestCase):
                     {source},
                     {source: "M"},
                     False,
-                    catch_up_declaration=(counterpart, blob),
+                    catch_up_declaration=counterpart,
                 )
 
         self.assertEqual(errors, [])
@@ -657,7 +654,7 @@ class GateRootsTest(unittest.TestCase):
             errors,
         )
 
-    def test_catch_up_rejects_wrong_base_blob(self):
+    def test_catch_up_rejects_changed_partner_blob(self):
         source = "02-domain-model/zz-catchup-probe.zh-CN.md"
         counterpart = "02-domain-model/zz-catchup-probe.md"
         self.write(source, "\u4e2d\u6587\n")
@@ -667,7 +664,7 @@ class GateRootsTest(unittest.TestCase):
             with patch.object(
                 self.gate.subprocess,
                 "check_output",
-                side_effect=["b" * 40 + "\n", "b" * 40 + "\n"],
+                side_effect=["a" * 40 + "\n", "b" * 40 + "\n"],
             ):
                 errors = self.gate.check_counterpart_requirement(
                     source,
@@ -675,13 +672,80 @@ class GateRootsTest(unittest.TestCase):
                     {source},
                     {source: "M"},
                     False,
-                    catch_up_declaration=(counterpart, "a" * 40),
+                    catch_up_declaration=counterpart,
                 )
 
-        self.assertTrue(
-            any("requires all counterparts changed in this PR" in e for e in errors),
-            errors,
+        self.assertEqual(len(errors), 1)
+        self.assertIn("invalid BILINGUAL-CATCH-UP declaration", errors[0])
+        self.assertIn("blob changed between PR base and HEAD", errors[0])
+
+    def test_catch_up_rejects_missing_counterpart_at_base(self):
+        source = "02-domain-model/zz-catchup-probe.zh-CN.md"
+        counterpart = "02-domain-model/zz-catchup-probe.md"
+        self.write(source, "\u4e2d\u6587\n")
+        self.write(counterpart, "English\n")
+
+        with patch.dict(os.environ, {"BASE_SHA": "base", "HEAD_SHA": "head"}):
+            with patch.object(
+                self.gate.subprocess,
+                "check_output",
+                side_effect=self.gate.subprocess.CalledProcessError(1, "git"),
+            ):
+                errors = self.gate.check_counterpart_requirement(
+                    source,
+                    [counterpart],
+                    {source},
+                    {source: "M"},
+                    False,
+                    catch_up_declaration=counterpart,
+                )
+
+        self.assertEqual(len(errors), 1)
+        self.assertIn("does not exist at PR base", errors[0])
+
+    def test_catch_up_rejects_missing_counterpart_at_head(self):
+        source = "02-domain-model/zz-catchup-probe.zh-CN.md"
+        counterpart = "02-domain-model/zz-catchup-probe.md"
+        self.write(source, "\u4e2d\u6587\n")
+        self.write(counterpart, "English\n")
+
+        with patch.dict(os.environ, {"BASE_SHA": "base", "HEAD_SHA": "head"}):
+            with patch.object(
+                self.gate.subprocess,
+                "check_output",
+                side_effect=[
+                    "a" * 40 + "\n",
+                    self.gate.subprocess.CalledProcessError(1, "git"),
+                ],
+            ):
+                errors = self.gate.check_counterpart_requirement(
+                    source,
+                    [counterpart],
+                    {source},
+                    {source: "M"},
+                    False,
+                    catch_up_declaration=counterpart,
+                )
+
+        self.assertEqual(len(errors), 1)
+        self.assertIn("does not exist at PR HEAD", errors[0])
+
+    def test_catch_up_rejects_mismatched_counterpart(self):
+        source = "02-domain-model/zz-catchup-probe.zh-CN.md"
+        counterpart = "02-domain-model/zz-catchup-probe.md"
+        self.write(source, "\u4e2d\u6587\n")
+        self.write(counterpart, "English\n")
+
+        errors = self.gate.check_counterpart_requirement(
+            source,
+            [counterpart],
+            {source},
+            {source: "M"},
+            False,
+            catch_up_declaration="02-domain-model/other.md",
         )
+        self.assertEqual(len(errors), 1)
+        self.assertIn("does not match side-by-side partner", errors[0])
 
     def test_catch_up_rejects_partner_that_changed_in_pr(self):
         source = "02-domain-model/zz-catchup-probe.zh-CN.md"
@@ -695,7 +759,7 @@ class GateRootsTest(unittest.TestCase):
             {source, counterpart},
             {source: "M", counterpart: "M"},
             False,
-            catch_up_declaration=(counterpart, "a" * 40),
+            catch_up_declaration=counterpart,
         )
         self.assertEqual(errors, [])
 
@@ -705,19 +769,24 @@ class GateRootsTest(unittest.TestCase):
         self.write(source, "English\n")
         self.write(counterpart, "\u4e2d\u6587\n")
 
-        with patch.dict(os.environ, {"BASE_SHA": "base", "HEAD_SHA": "head"}):
-            with patch.object(
-                self.gate.subprocess,
-                "check_output",
-                side_effect=["a" * 40 + "\n", "a" * 40 + "\n"],
-            ):
-                # The English side is the source: a one-sided catch-up is only
-                # allowed for a translation file (.zh-CN.md / .en.md).
-                self.assertFalse(
-                    self.gate.valid_side_by_side_catch_up(
-                        source, counterpart, "a" * 40, {source}, {source: "M"}
-                    )
-                )
+        # The English side is the source: a one-sided catch-up is only allowed
+        # for a translation file (.zh-CN.md / .en.md).
+        reason = self.gate.check_side_by_side_catch_up(
+            source, counterpart, {source}, {source: "M"}
+        )
+        self.assertEqual(reason, "source is not a translation file (.zh-CN.md or .en.md)")
+
+    def test_catch_up_declaration_does_not_relax_mirror_pairing(self):
+        # A catch-up declaration is a side-by-side concept. A docs/en mirror
+        # change must still require both sides, declaration or not.
+        source = "02-domain-model/zz-mirror-probe.md"
+        mirror = f"docs/en/{source}"
+        self.write(source, "English source.\n")
+        self.write(mirror, "English mirror.\n")
+
+        errors = self.gate.check_mirror_pairing({mirror}, {mirror: "M"}, False)
+        self.assertTrue(errors, "mirror pairing must still require both sides")
+        self.assertIn("requires all counterparts changed", errors[0])
 
 if __name__ == "__main__":
     unittest.main()

@@ -366,15 +366,14 @@ def changed_paths() -> set[str]:
 CATCH_UP_DECLARATION_RE = re.compile(
     r"^BILINGUAL-CATCH-UP:\s+"
     r"source=(\S+)\s+"
-    r"counterpart=(\S+)\s+"
-    r"base-blob=([0-9a-f]{40})\s*$"
+    r"counterpart=(\S+)\s*$"
 )
 
 def parse_catch_up_declarations(
     body: str,
-) -> tuple[dict[str, tuple[str, str]], list[str]]:
+) -> tuple[dict[str, str], list[str]]:
     """Parse explicit one-sided translation catch-up declarations."""
-    declarations: dict[str, tuple[str, str]] = {}
+    declarations: dict[str, str] = {}
     errors: list[str] = []
 
     for line_number, line in enumerate(body.splitlines(), start=1):
@@ -389,66 +388,83 @@ def parse_catch_up_declarations(
             )
             continue
 
-        source, counterpart, base_blob = match.groups()
+        source, counterpart = match.groups()
         if source in declarations:
             errors.append(
                 f"Duplicate BILINGUAL-CATCH-UP declaration for {source}"
             )
             continue
 
-        declarations[source] = (counterpart, base_blob)
+        declarations[source] = counterpart
 
     return declarations, errors
 
-def valid_side_by_side_catch_up(
+def _blob_at(revision: str, path: str) -> str | None:
+    """Return the git blob id of path at revision, or None when absent."""
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "--verify", f"{revision}:{path}"],
+            cwd=ROOT,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip() or None
+    except subprocess.CalledProcessError:
+        return None
+
+def check_side_by_side_catch_up(
     source: str,
     counterpart: str,
-    declared_base_blob: str,
     changed: set[str],
     statuses: dict[str, str],
-) -> bool:
-    """Verify that an unchanged side-by-side partner existed at the PR base."""
-    if not (source.endswith(".zh-CN.md") or source.endswith(".en.md")):
-        return False
+) -> str | None:
+    """Return None when the catch-up is verifiable, else the failure reason.
 
-    if source not in changed or statuses.get(source) == "D":
-        return False
+    The declared version is not trusted and is not supplied by the author:
+    both blobs are read from the object database, so a rebase cannot leave a
+    stale declaration behind and a PR cannot edit both sides and call it a
+    catch-up.
+    """
+    if not (source.endswith(".zh-CN.md") or source.endswith(".en.md")):
+        return "source is not a translation file (.zh-CN.md or .en.md)"
+
+    if source not in changed:
+        return "source is not changed in this PR"
+
+    if statuses.get(source) == "D":
+        return "source is deleted in this PR"
 
     if counterpart in changed:
-        return False
+        return "counterpart is also changed in this PR"
 
     if side_by_side_partner(source) != counterpart:
-        return False
-
-    if not (ROOT / counterpart).is_file():
-        return False
+        return "declared counterpart does not match side-by-side partner"
 
     base = os.environ.get("BASE_SHA", "")
     head = os.environ.get("HEAD_SHA", "")
     if not base or not head:
-        return False
+        return "BASE_SHA and HEAD_SHA must both be set"
 
-    try:
-        base_blob = subprocess.check_output(
-            ["git", "rev-parse", "--verify", f"{base}:{counterpart}"],
-            cwd=ROOT,
-            text=True,
-            stderr=subprocess.DEVNULL,
-        ).strip()
+    base_blob = _blob_at(base, counterpart)
+    if base_blob is None:
+        return "counterpart does not exist at PR base"
 
-        head_blob = subprocess.check_output(
-            ["git", "rev-parse", "--verify", f"{head}:{counterpart}"],
-            cwd=ROOT,
-            text=True,
-            stderr=subprocess.DEVNULL,
-        ).strip()
-    except subprocess.CalledProcessError:
-        return False
+    head_blob = _blob_at(head, counterpart)
+    if head_blob is None:
+        return "counterpart does not exist at PR HEAD"
 
-    return (
-        base_blob == declared_base_blob
-        and head_blob == declared_base_blob
-    )
+    if base_blob != head_blob:
+        return "counterpart blob changed between PR base and HEAD"
+
+    return None
+
+def valid_side_by_side_catch_up(
+    source: str,
+    counterpart: str,
+    changed: set[str],
+    statuses: dict[str, str],
+) -> bool:
+    """Boolean view of check_side_by_side_catch_up for callers and tests."""
+    return check_side_by_side_catch_up(source, counterpart, changed, statuses) is None
 
 def check_counterpart_requirement(
     source: str,
@@ -456,7 +472,7 @@ def check_counterpart_requirement(
     changed: set[str],
     statuses: dict[str, str],
     exception: bool,
-    catch_up_declaration: tuple[str, str] | None = None,
+    catch_up_declaration: str | None = None,
 ) -> list[str]:
     """Require paired edits, with a verified side-by-side translation catch-up."""
     if exception:
@@ -465,36 +481,38 @@ def check_counterpart_requirement(
     required = [source, *counterparts]
 
     if any(path not in changed for path in required):
-        catch_up_valid = False
+        catch_up_failure = "no catch-up declaration"
 
-        if (
-            len(counterparts) == 1
-            and catch_up_declaration is not None
-            and source in changed
-            and counterparts[0] not in changed
-        ):
-            declared_counterpart, declared_base_blob = catch_up_declaration
-
-            catch_up_valid = (
-                declared_counterpart == counterparts[0]
-                and valid_side_by_side_catch_up(
+        if len(counterparts) == 1 and catch_up_declaration is not None:
+            if catch_up_declaration != counterparts[0]:
+                catch_up_failure = (
+                    "declared counterpart does not match side-by-side partner"
+                )
+            else:
+                reason = check_side_by_side_catch_up(
                     source,
                     counterparts[0],
-                    declared_base_blob,
                     changed,
                     statuses,
                 )
-            )
+                if reason is None:
+                    # The changed translation side is required; the verified
+                    # counterpart is unchanged and identical at base and HEAD.
+                    required = [source]
+                    catch_up_failure = None
+                else:
+                    catch_up_failure = reason
 
-        if not catch_up_valid:
+        if catch_up_failure is not None:
+            if catch_up_declaration is None:
+                return [
+                    f"{source} requires all counterparts changed in this PR: "
+                    + ", ".join(required)
+                ]
             return [
-                f"{source} requires all counterparts changed in this PR: "
-                + ", ".join(required)
+                f"{source} has an invalid BILINGUAL-CATCH-UP declaration: "
+                + catch_up_failure
             ]
-
-        # The changed translation side is required; the verified counterpart
-        # is intentionally unchanged and was proven identical at base and HEAD.
-        required = [source]
     deleted = [path for path in required if statuses.get(path) == "D"]
     if deleted and len(deleted) != len(required):
         return [
@@ -859,7 +877,7 @@ def check_normative_pairing(
 ):
     # type: (
     #     list[str], set[str], dict[str, str], bool, bool,
-    #     dict[str, tuple[str, str]] | None
+    #     dict[str, str] | None
     # ) -> list[str]
     """Normative changes need paired counterparts (or an explicit exemption)."""
     errors = []
