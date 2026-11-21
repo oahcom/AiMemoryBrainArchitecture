@@ -22,7 +22,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-21"
-      last_verification_note: "Fact and Claim are separated under OWNER-DECISION-FACT-CLAIM-001; this is a bilingual mirror of the canonical terminology source."
+      last_verification_note: "Fact 与 Claim 已依据 OWNER-DECISION-FACT-CLAIM-001 分离；本文件为已批准的规范术语源中文镜像。"
     usage_status: Active
     modification_status: Modified
     supersession:
