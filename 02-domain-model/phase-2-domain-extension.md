@@ -87,6 +87,8 @@ The BMCP contract's ProducerWork Registration Ledger Namespace and ForgetFence C
 
 **Relationship to Phase 1:** Both types are new. They do not replace Claim or Evidence.
 
+**PENDING SEMANTIC DECISION — retraction of a pinned ClaimRevision:** The current normative sources do not decide the disposition of a FactRevision when one of its exact pinned ClaimRevision values is later assigned `Retracted`. `epistemic-and-temporal-semantics.md` §§2 and 9 define append-only Claim status transitions and preservation of the historical assertion; `domain-model-overview.md` §3.15 and `OWNER-DECISION-FACT-CLAIM-001` §§2 and 5 require exact immutable ClaimRevision pins but do not specify propagation to Fact. No choice among continued attestation, invalidation, successor FactRevision, or suppression is made here. This remains **PENDING** and requires an explicit semantic ruling; implementations must not silently infer a disposition.
+
 **PENDING CROSS-OWNER DECISION:** I must define/approve Attestor principal identity, authorization decision semantics, and the security meaning of the authorization reference. D must confirm the canonical commit, revision, and Forget/dependency semantics for Fact/FactRevision. Until both decisions bind the same exact contract version, these fields are semantic placeholders only; no implementation may infer authorization or canonical acceptance.
 
 ### 3.3 Entity identity
@@ -265,16 +267,17 @@ Phase 2 implementation status at this branch:
 
 | Specification row | Status | Executable proof |
 |---|---|---|
-| ClaimRef / ClaimRevisionRef / ClaimRevision | TYPED | `dm2_01_claim_revision_parent_must_belong_to_same_claim`, `dm2_02_claim_revision_is_append_only_and_immutable`; compile-fail doctests prove cross-ref mixing and mutation are rejected |
-| FactRef / FactRevisionRef / Fact / FactRevision | TYPED | `dm2_03_fact_refs_are_distinct_and_fact_pins_exact_claim_revision`, `dm2_04_fact_cannot_be_constructed_without_claim_evidence_provenance`; compile-fail doctest proves confidence/Verified alone cannot construct Fact |
-| Entity identity extension | TYPED | `dm2_05_entity_merge_requires_successor_lineage_but_alias_does_not` |
-| Relation typed endpoints and valid-time distinction | TYPED | `dm2_06_relation_endpoint_kind_is_checked_against_definition`, `dm2_08_unknown_valid_time_is_not_timeless` |
+| ClaimRef / ClaimRevisionRef / ClaimRevision | TYPED | `dm2_01_claim_revision_parent_must_belong_to_same_claim`; `dm2_02_claim_revision_is_append_only_and_immutable` serializes the parent before/after successor append and proves byte-identical preservation; compile-fail doctests prove cross-ref mixing and mutation are rejected |
+| FactRef / FactRevisionRef / Fact / FactRevision | TYPED | `dm2_03_fact_refs_are_distinct_and_fact_pins_exact_claim_revision`; `dm2_09_fact_pinning_does_not_follow_claim_head_after_append` appends Claim revision 2 and resolves the Fact's unchanged exact revision-1 pin; `dm2_04_fact_cannot_be_constructed_without_claim_evidence_provenance`; compile-fail doctest proves confidence/Verified alone cannot construct Fact |
+| Entity identity extension | TYPED | `dm2_05_entity_merge_requires_successor_lineage_but_alias_does_not` proves A redirects to B, B does not redirect to A, and A's aliases/scoped external identifiers are migrated to B |
+| Relation typed endpoints and valid-time distinction | TYPED | `dm2_06_relation_endpoint_kind_is_checked_against_definition` rejects (Entity, Claim) under an (Entity, Entity) vocabulary; `dm2_08_unknown_valid_time_is_not_timeless` |
 | Evidence extension | TYPED | `dm2_07_evidence_extension_requires_integrity_and_scope` |
 | Provenance graph expansion | NOT TYPED | Only the `ProvenanceRef` newtype exists; no expanded Provenance record or DAG validation |
 | MemorySource expansion | NOT TYPED | Explicitly out of scope for this implementation round |
 | Temporal precision/timezone/certainty expansion | NOT TYPED | Only Relation's Unknown-versus-AllTime valid-time distinction is typed/tested |
 | I authorization and Attestor semantics | PLACEHOLDER ONLY | Required `AttestorRef` and `AuthorizationDecisionRef` placeholders are marked `NOT DEFINED: awaiting I` |
 | D canonical commit semantics | PLACEHOLDER ONLY | Required `CanonicalCommitRef` placeholder is marked `NOT DEFINED: awaiting D` |
+| Fact disposition after pinned ClaimRevision retraction | PENDING | No rule in the reviewed normative sources or PR #446 decision; no behavior/test is claimed pending an explicit semantic ruling |
 
 The Entity, Relation and Evidence Phase 1 structs remain source-compatible; their Phase 2 semantics are represented by additive extension records. Claim remains unchanged; ClaimRevision is additive. Fact construction requires a complete initial FactRevision and its required I/D placeholders.
 
