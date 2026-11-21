@@ -216,6 +216,27 @@ def parse_jobs(lines: list[str]) -> list[Tuple[str, list[str], int]]:
     return jobs
 
 
+
+def may_be_self_hosted(lines: list[str], index: int, indent: int, value: str) -> bool:
+    """Identify literal self-hosted labels and fail-closed dynamic runner values."""
+    if value:
+        return "self-hosted" in value or "${{" in value
+    for cursor in range(index + 1, len(lines)):
+        raw = uncomment(lines[cursor])
+        if not raw.strip():
+            continue
+        current_indent = len(raw) - len(raw.lstrip(" "))
+        if current_indent <= indent:
+            break
+        item = raw.strip()
+        if item.startswith("-"):
+            if "self-hosted" in item or "${{" in item:
+                return True
+        else:
+            break
+    return False
+
+
 def audit_workflow(path: Path) -> Tuple[int, list[str]]:
     lines = path.read_text(encoding="utf-8").splitlines()
     triggers, push_present, push_branches = parse_triggers(lines)
@@ -231,10 +252,8 @@ def audit_workflow(path: Path) -> Tuple[int, list[str]]:
                 idx_text, indent_text, value = rest.split(":", 2)
                 run_entries.append((int(idx_text), int(indent_text), value))
         candidate = any(
-            "self-hosted" in (flow_items(value) or [scalar(value)])
-            or "${{" in value
-            or (not value and any("self-hosted" in line for line in job_lines))
-            for _, _, value in run_entries
+            may_be_self_hosted(lines, index, indent, value)
+            for index, indent, value in run_entries
         )
         if not candidate:
             continue
