@@ -2,17 +2,12 @@
 # This baseline may only shrink; entries must never be added.
 # Regenerate only when explicitly adopting a new baseline.
 00-governance/reports/gov-doc-001-full-scan-2026-11-20.md
-06-memory-context/README.md
 06-memory-context/context-architecture.md
 06-memory-context/context-budget-and-sufficiency.md
 06-memory-context/context-edit-operations.md
 06-memory-context/context-manager.md
 06-memory-context/context-reconciliation.md
 06-memory-context/context-versioning.md
-06-memory-context/phase-3.6.2-g-jf10-coc-bridge-applied-evidence-acceptance.md
-06-memory-context/phase-3.6.3-g-coc-durable-protocol-applied-boundary-acceptance.md
-06-memory-context/phase-3.6.4-g-prepared-participant-gid-applied-acceptance.md
-06-memory-context/phase-3.6.5-g-restore-reconciliation-consumer-acceptance.md
 06-memory-context/phase-3.7-g-local-lifecycle-producer-derivative-queue-recall-context-restore.md
 06-memory-context/phase-3.8.4-g-c-provider-outcome-consumer-review.md
 06-memory-context/phase-3.8.5-g-storage-logical-serialization-topology-impact-review.md
