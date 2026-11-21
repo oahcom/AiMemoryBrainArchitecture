@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 import sqlite3
+from contextlib import closing
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -56,7 +57,7 @@ class GAppliedLedger:
     def __init__(self, database: str | Path):
         self.database = str(database)
         Path(self.database).parent.mkdir(parents=True, exist_ok=True)
-        with self._connect() as db:
+        with closing(self._connect()) as db:
             db.executescript(
                 """
                 CREATE TABLE IF NOT EXISTS applied (
@@ -174,7 +175,7 @@ class GAppliedLedger:
         if not isinstance(identity, Mapping) or set(identity) != set(IDENTITY_FIELDS):
             raise ValueError("identity must contain exactly the nine declared GApplied identity fields")
         key = _digest({"domain": "AIMBA-G-APPLIED-IDENTITY-v1", "identity": dict(identity)})
-        with self._connect() as db:
+        with closing(self._connect()) as db:
             row = db.execute(
                 "SELECT record_id, identity_json, evidence_digest, evidence_json FROM applied WHERE identity_key=?",
                 (key,),
@@ -190,7 +191,7 @@ class GAppliedLedger:
 
     def conflict_count(self, identity: Mapping[str, Any]) -> int:
         key = _digest({"domain": "AIMBA-G-APPLIED-IDENTITY-v1", "identity": dict(identity)})
-        with self._connect() as db:
+        with closing(self._connect()) as db:
             return db.execute(
                 "SELECT COUNT(*) FROM conflicts WHERE identity_key=?", (key,)
             ).fetchone()[0]
