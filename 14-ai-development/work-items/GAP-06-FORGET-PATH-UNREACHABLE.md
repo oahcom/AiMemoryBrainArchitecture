@@ -34,7 +34,7 @@ grep -RIn 'restore_backup' crates
 
 The Rust production matches are confined to `crates/memory-event-store-sqlite/src/forget_fence.rs`:
 
-- `record_forget` writes the row.
+- `record_forget` first runs `SELECT fence_seq FROM forget_fence WHERE namespace_key=?1` to make repeated writes idempotent, then inserts a row if none exists. This is a write-path deduplication read, not a Memory read gate.
 - `open_existing` calls `load_fences` to validate the existing fence database; this reads and validates the rows but does not enforce them against live Memory reads.
 - `restore_backup` calls `load_fences`; `load_fences` executes `SELECT namespace_key,fence_seq,reason_digest FROM forget_fence`. The resulting namespace set is used while scanning the backup's `accepted_events.scope_json`, and matching event rows are purged from `accepted_events`, `event_payloads`, and `compile_outbox` before activation.
 
