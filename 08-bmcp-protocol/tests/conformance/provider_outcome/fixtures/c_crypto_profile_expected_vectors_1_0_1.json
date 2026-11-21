@@ -1,0 +1,53 @@
+{
+  "profile_id": "AIMBA-C-CRYPTO-1.0",
+  "schema_version": "1.0.1",
+  "status": "CANDIDATE_TEST_ONLY_NOT_REGISTERED",
+  "seed_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+  "vectors": [
+    {
+      "id": "CPO-01-accepted",
+      "p0_sha256": "3d0faf27c0f5ebcda1760dcddcedd54bdafceba506f63534da65f44a14cc4a93",
+      "payload_digest": "2e9e545bee4723d2f45f7f3f7f199efc84f4e42aae11eaccb2a1efe3978ab132",
+      "signed_projection_sha256": "1c34d66910df0e442c863ef5012454aa955bf6abb7d9175fd1b05f440f33e73a",
+      "signature_preimage_sha256": "4a165f82fe3b08c305dd7be504fa4dc3f4015e5415f38aef669334cbb8da3dc1",
+      "public_key_hex": "03a107bff3ce10be1d70dd18e74bc09967e4d6309ba50d5f1ddc8664125531b8",
+      "signature_base64url": "Wd0rQbq580VCI-MhvTQTpYx0tXTfqt38hcJRIhNRd_ZlUo8KdmkB8MKUhLI6ugBczSEUar_tmlbkqeyxF8KdDg"
+    },
+    {
+      "id": "CPO-02-rejected-ambiguous",
+      "p0_sha256": "76446b1f479bdcbd537e892f85647bd6734f4c43a7ece184a8d03b68fc1b801b",
+      "payload_digest": "8ff5e8e612bba6bbbea3eea5525c49a3f7ac39aa1aa0988cf6f6ea1ee6b7ad92",
+      "signed_projection_sha256": "aacce7cf7726315344e5cd69dce12952247065922be094371357fb9268da9b54",
+      "signature_preimage_sha256": "a028b894baa95cab3e457dc45241c4d5344ecfa87e2e066bb486cf0faaff05c1",
+      "public_key_hex": "03a107bff3ce10be1d70dd18e74bc09967e4d6309ba50d5f1ddc8664125531b8",
+      "signature_base64url": "sCdttySWNVaPQb9vJwyuWj3Dn3wkqjo2xY2fW-rZzD_DtVIMq5ZM_Ypwy87iy_YY5MuL4iSKMjArAo3v0k20DQ"
+    },
+    {
+      "id": "CPO-03-not-invoked",
+      "p0_sha256": "6a5c6f0c6ca0d5952ef454a9316a393bd1b338737a4f2ffe84daf58b099f137a",
+      "payload_digest": "a0ae4a2c5f6e9be3939e2de4d3c760c4b403f781c78a6651c0dcf1a5cc03b806",
+      "signed_projection_sha256": "6348573b0ca140df7fba7111fccf572f736ea2aa693ca0b5b21596c8ae825fd8",
+      "signature_preimage_sha256": "68f83a51d7813cef4f07abf2b11732049c555f581820da4e47df5083717a4eae",
+      "public_key_hex": "03a107bff3ce10be1d70dd18e74bc09967e4d6309ba50d5f1ddc8664125531b8",
+      "signature_base64url": "AElJ8SxibqMNtN47PPzDut0zebMbSAFjILAGcr-bAxFfwr4o1VQ8CpwN1Dhz-Hp4HcOWlCWjgMeiX2RGFDXcCQ"
+    },
+    {
+      "id": "CPO-04-unknown",
+      "p0_sha256": "a84a4e6004c431e222f89615293edc520b7c422e78225cd91c676707574d69cc",
+      "payload_digest": "a5f743a231a8b5507bfd44bd7e162d6b66249577ee6b1747069349e41ac98fe8",
+      "signed_projection_sha256": "b45f138e131d7a3490b13ade6427154642af9913e24a9d6b2f4436696a38353e",
+      "signature_preimage_sha256": "30cca6db5c351d7ad0daaada8b5c2103feab0c1bfa061345f77e700178d5b708",
+      "public_key_hex": "03a107bff3ce10be1d70dd18e74bc09967e4d6309ba50d5f1ddc8664125531b8",
+      "signature_base64url": "w_q0ZSTslfo1mfJi4KVh4hQqWYznalD4hKAYLNWjC0HhO1H1OEK8f9FguDsxNH84oy74_yDCKyzR3y_-hm_qBg"
+    },
+    {
+      "id": "CPO-05-in-doubt",
+      "p0_sha256": "ed0c4bfc5f9dfd785a7215fd65e0d8c0000c4d012ad684a39c9fb906c9497d9b",
+      "payload_digest": "ffa63ed83018ff4f7c23c783a9459fb37b25a4dc9a13ca664b2622afd3d1089f",
+      "signed_projection_sha256": "0c1ed14eabd3e95b4e9093b6e6088e45f6ab8b626887421f6388d4ee88683a03",
+      "signature_preimage_sha256": "5c4f112ca39a7a1b8efcf4cc2352d7652b5a7a5b38a01644502a2acb9c3260b8",
+      "public_key_hex": "03a107bff3ce10be1d70dd18e74bc09967e4d6309ba50d5f1ddc8664125531b8",
+      "signature_base64url": "LSc3swNAqphkPJisxOKpF42rkl742v9T7G40EfefbEG2xHcVOP0lpUBPKDRckkUToFOMZHkBoSHYGSbmnH_NCQ"
+    }
+  ]
+}

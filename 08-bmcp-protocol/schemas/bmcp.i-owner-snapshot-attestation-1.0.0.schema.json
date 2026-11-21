@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.aimemorybrainarchitecture.invalid/bmcp.i-owner-snapshot-attestation/1.0.0",
+  "title": "I Owner Snapshot Attestation 1.0.0",
+  "description": "Standalone I-signed attestation for one exact I owner snapshot. The COC ownerSnapshot object carries only a summary plus this attestation reference and digest; it is not itself the I signature object.",
+  "type": "object",
+  "properties": {
+    "attestation_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "owner_authority_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "description": "Typed I owner authority reference; semantic validator resolves it to the unique I authority"
+    },
+    "snapshot_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "snapshot_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "request_high_water": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "request_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "request_set_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "request_ledger_root": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "admission_high_water": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "admission_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "admission_set_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "admission_ledger_root": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "owner_ledger_root": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "owner_specific_high_waters": {
+      "type": "object",
+      "properties": {
+        "receipt_issue_high_water": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "receipt_consume_high_water": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "inventory_epoch_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "registry_snapshot_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "relevant_entry_set_root": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "receipt_issue_high_water",
+        "receipt_consume_high_water",
+        "inventory_epoch_ref",
+        "registry_snapshot_digest",
+        "relevant_entry_set_root"
+      ],
+      "additionalProperties": false
+    },
+    "gate_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "gate_generation": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "scope_generation": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "anti_rollback_anchor_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "request_enumeration_status": {
+      "enum": [
+        "COMPLETE",
+        "INCOMPLETE",
+        "UNKNOWN"
+      ]
+    },
+    "admission_enumeration_status": {
+      "enum": [
+        "COMPLETE",
+        "INCOMPLETE",
+        "UNKNOWN"
+      ]
+    },
+    "request_ledger_query_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "request_pagination_complete": {
+      "type": "boolean"
+    },
+    "admission_ledger_query_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "admission_pagination_complete": {
+      "type": "boolean"
+    },
+    "key_status_generation": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "request_complete_empty_proof_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "admission_complete_empty_proof_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "signature_profile_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "signature_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "attestation_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "required": [
+    "attestation_ref",
+    "owner_authority_ref",
+    "snapshot_ref",
+    "snapshot_digest",
+    "request_high_water",
+    "request_count",
+    "request_set_digest",
+    "request_ledger_root",
+    "admission_high_water",
+    "admission_count",
+    "admission_set_digest",
+    "admission_ledger_root",
+    "owner_ledger_root",
+    "owner_specific_high_waters",
+    "gate_ref",
+    "gate_generation",
+    "scope_generation",
+    "anti_rollback_anchor_ref",
+    "request_enumeration_status",
+    "admission_enumeration_status",
+    "request_ledger_query_ref",
+    "request_pagination_complete",
+    "admission_ledger_query_ref",
+    "admission_pagination_complete",
+    "key_status_generation",
+    "request_complete_empty_proof_ref",
+    "admission_complete_empty_proof_ref",
+    "signature_profile_ref",
+    "signature_ref",
+    "issued_at",
+    "attestation_digest"
+  ],
+  "additionalProperties": false
+}

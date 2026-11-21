@@ -1,0 +1,19 @@
+{
+  "profile_id": "AIMBA-C-CRYPTO-1.0",
+  "profile_status": "PROPOSED_NOT_REGISTERED",
+  "canonicalization": "RFC8785-JCS-1.0",
+  "digest_algorithm": "SHA-256",
+  "signature_algorithm": "Ed25519",
+  "encoding": "Base64url-no-padding",
+  "payload_domain_tag": "AIMBA-C-PAYLOAD-v1",
+  "signature_domain_tag": "AIMBA-C-SIGNATURE-v1",
+  "seed_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+  "seed_disclaimer": "PUBLIC TEST-ONLY DETERMINISTIC SEED; NEVER REUSE FOR PRODUCTION",
+  "vector_ids": [
+    "CPO-01-accepted",
+    "CPO-02-rejected-ambiguous",
+    "CPO-03-not-invoked",
+    "CPO-04-unknown",
+    "CPO-05-in-doubt"
+  ]
+}
