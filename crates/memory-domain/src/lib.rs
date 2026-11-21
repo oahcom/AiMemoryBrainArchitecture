@@ -441,6 +441,16 @@ impl ClaimRevision {
             qualifiers, epistemic_status, valid_time, evidence_refs, provenance_refs, asserted_at, revision_reason };
         value.validate()?; Ok(value)
     }
+    /// Re-check a deserialized revision against its resolved parent. Serde can
+    /// materialize private fields without invoking constructors, so repository
+    /// loaders must call this after resolving the parent reference.
+    pub fn validate_parent(&self, parent: Option<&ClaimRevision>) -> Result<(), DomainError> {
+        match (&self.parent_revision_ref, parent) {
+            (None, None) => Ok(()),
+            (Some(expected), Some(actual)) if expected == &actual.revision_ref && self.claim_ref == actual.claim_ref => Ok(()),
+            _ => Err(DomainError::InvalidParent),
+        }
+    }
     pub fn validate(&self) -> Result<(), DomainError> {
         for (field, value) in [("subject",&self.subject),("predicate",&self.predicate),("object",&self.object),
             ("polarity",&self.polarity),("asserted_at",&self.asserted_at),("revision_reason",&self.revision_reason)] {
@@ -515,6 +525,14 @@ impl FactRevision {
             outcome, rationale, canonical_commit_ref, correction_or_revocation_reason };
         value.validate()?; Ok(value)
     }
+    /// Re-check a deserialized FactRevision against its resolved parent.
+    pub fn validate_parent(&self, parent: Option<&FactRevision>) -> Result<(), DomainError> {
+        match (&self.parent_revision_ref, parent) {
+            (None, None) => Ok(()),
+            (Some(expected), Some(actual)) if expected == &actual.revision_ref && self.fact_ref == actual.fact_ref => Ok(()),
+            _ => Err(DomainError::InvalidParent),
+        }
+    }
     pub fn validate(&self)->Result<(),DomainError> {
         if self.claim_revision_refs.is_empty(){return Err(DomainError::MissingClaimRevision)}
         if self.evidence_refs.is_empty(){return Err(DomainError::MissingFactEvidence)}
@@ -554,7 +572,7 @@ impl EntityIdentityExtension {
   if self.aliases.iter().any(|a|a.value.is_empty()){return Err(DomainError::EmptyRequiredField("alias"))}
   if self.external_identifiers.iter().any(|i|i.namespace.is_empty()||i.value.is_empty()){return Err(DomainError::EmptyRequiredField("external_identifier"))}
   if self.status==EntityIdentityStatus::Merged {let l=self.merge_lineage.as_ref().ok_or(DomainError::MissingIdentityLineage)?;
-   if l.successor_ref==self.entity_ref||l.predecessor_refs.is_empty()||l.reason.is_empty(){return Err(DomainError::MissingIdentityLineage)}}
+   if l.successor_ref==self.entity_ref||!l.predecessor_refs.contains(&self.entity_ref)||l.reason.is_empty(){return Err(DomainError::MissingIdentityLineage)}}
   if self.status==EntityIdentityStatus::Split&&self.split_successor_refs.is_empty(){return Err(DomainError::MissingIdentityLineage)}
   Ok(())
  }
