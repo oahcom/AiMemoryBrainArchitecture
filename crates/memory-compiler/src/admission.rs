@@ -462,7 +462,6 @@ impl AdmissionStore {
         &mut self,
         request: ProducerRegistrationRequest,
     ) -> Result<ProducerRegistrationReceipt, AdmissionError> {
-        validate_producer_request(&request)?;
         let tx = self
             .connection
             .transaction_with_behavior(TransactionBehavior::Immediate)?;
@@ -476,6 +475,7 @@ impl AdmissionStore {
                 producer_id: request.producer_identity.as_str().to_owned(),
             });
         }
+        validate_producer_request(&request)?;
         if let Some((digest, receipt_json)) = tx
             .query_row(
                 "SELECT request_digest,receipt_json FROM producer_work WHERE work_item_id=?1",
