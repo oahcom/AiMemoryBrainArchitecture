@@ -4,12 +4,17 @@ document_metadata:
   role: decision-record
   lifecycle:
     approval:
-      decision_status: Draft
-      approver: null
-      decision_date: null
-      approved_version: null
-      approval_scope: null
-      approval_applicability: Not-Applicable-To-Current-Version
+      decision_status: Approved
+      approver: "Project Owner delegate under Issue #305 comment 7042461592"
+      decision_date: "2026-11-21"
+      approved_version:
+        scheme: git
+        value: "e02848d7aa09aea8fce1fdd5bdf0e306f5a21d0b"
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Applicable-To-Current-Version
       evidence_reference:
         - "GOV-DOC-002 DM-14 local verification on PR #438 pre-correction"
         - "00-governance/document-scope-registry.yaml"
