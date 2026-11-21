@@ -1,0 +1,1830 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.aimemorybrainarchitecture.invalid/bmcp.recovery-join/1.0.2",
+  "title": "BMCP RecoveryJoin Proof Schema 1.0.2",
+  "description": "RecoveryJoin 1.0.2 adds explicit owner-signed snapshot membership proof payloads for every represented owner admission, binding exact ledger row identity, owner-local high-water, frozen snapshot/root, gate/scope and anti-rollback state. This artifact defines structural shape only; owner-specific signature verification and completeness remain semantic responsibilities.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_id": {
+      "const": "bmcp.recovery-join"
+    },
+    "schema_version": {
+      "const": "1.0.2"
+    },
+    "message_type": {
+      "const": "RECOVERY_JOIN_PROOF"
+    },
+    "message_id": {
+      "$ref": "#/$defs/ref"
+    },
+    "recovery_epoch_ref": {
+      "$ref": "#/$defs/ref"
+    },
+    "recovery_round": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "reconciliation_attempt_generation": {
+      "$ref": "#/$defs/counter"
+    },
+    "causal_order_domain_ref": {
+      "$ref": "#/$defs/ref"
+    },
+    "scope_ref": {
+      "$ref": "#/$defs/ref"
+    },
+    "scope_generation": {
+      "$ref": "#/$defs/counter"
+    },
+    "recovery_cutoff_batch_ref": {
+      "$ref": "#/$defs/ref"
+    },
+    "recovery_batch_digest": {
+      "$ref": "#/$defs/digest"
+    },
+    "participant_manifest_ref": {
+      "$ref": "#/$defs/ref"
+    },
+    "participant_manifest_content_digest": {
+      "$ref": "#/$defs/digest"
+    },
+    "participant_manifest_record_digest": {
+      "$ref": "#/$defs/digest"
+    },
+    "coc_prefix": {
+      "$ref": "#/$defs/prefix"
+    },
+    "owner_snapshots": {
+      "$ref": "#/$defs/ownerSnapshots"
+    },
+    "owner_admission_to_participant": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/admissionJoin"
+      },
+      "uniqueItems": true
+    },
+    "owner_admission_no_participant": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/noParticipantDisposition"
+      },
+      "uniqueItems": true
+    },
+    "participant_to_owner_evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/participantEvidenceJoin"
+      },
+      "uniqueItems": true
+    },
+    "jf10_participant_joins": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/jf10Join"
+      },
+      "uniqueItems": true
+    },
+    "completeness": {
+      "$ref": "#/$defs/completeness"
+    },
+    "difference_sets": {
+      "$ref": "#/$defs/differenceSets"
+    },
+    "join_root": {
+      "$ref": "#/$defs/digest"
+    },
+    "canonicalization_profile_ref": {
+      "$ref": "#/$defs/ref"
+    },
+    "digest_profile_ref": {
+      "$ref": "#/$defs/ref"
+    },
+    "envelope": {
+      "$ref": "#/$defs/envelope"
+    },
+    "owner_request_dispositions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/requestDisposition"
+      },
+      "uniqueItems": true
+    },
+    "owner_snapshot_membership_proofs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ownerSnapshotMembershipProof"
+      },
+      "uniqueItems": true,
+      "description": "Owner-authored proof payloads for exact admission rows referenced by admission joins or no-participant dispositions."
+    }
+  },
+  "required": [
+    "schema_id",
+    "schema_version",
+    "message_type",
+    "message_id",
+    "recovery_epoch_ref",
+    "recovery_round",
+    "reconciliation_attempt_generation",
+    "causal_order_domain_ref",
+    "scope_ref",
+    "scope_generation",
+    "recovery_cutoff_batch_ref",
+    "recovery_batch_digest",
+    "participant_manifest_ref",
+    "participant_manifest_content_digest",
+    "participant_manifest_record_digest",
+    "coc_prefix",
+    "owner_snapshots",
+    "owner_admission_to_participant",
+    "owner_admission_no_participant",
+    "participant_to_owner_evidence",
+    "jf10_participant_joins",
+    "completeness",
+    "difference_sets",
+    "join_root",
+    "canonicalization_profile_ref",
+    "digest_profile_ref",
+    "envelope",
+    "owner_request_dispositions",
+    "owner_snapshot_membership_proofs"
+  ],
+  "$defs": {
+    "ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^[A-Za-z][A-Za-z0-9._:/-]*$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "counter": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$"
+    },
+    "position": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "term": {
+          "$ref": "#/$defs/counter"
+        },
+        "index": {
+          "$ref": "#/$defs/counter"
+        },
+        "entry_digest": {
+          "$ref": "#/$defs/digest"
+        }
+      },
+      "required": [
+        "term",
+        "index",
+        "entry_digest"
+      ]
+    },
+    "prefix": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "term": {
+          "$ref": "#/$defs/counter"
+        },
+        "index": {
+          "$ref": "#/$defs/counter"
+        },
+        "root": {
+          "$ref": "#/$defs/digest"
+        },
+        "configuration_epoch": {
+          "$ref": "#/$defs/counter"
+        },
+        "previous_prefix_digest": {
+          "$ref": "#/$defs/digest"
+        }
+      },
+      "required": [
+        "term",
+        "index",
+        "root",
+        "configuration_epoch",
+        "previous_prefix_digest"
+      ]
+    },
+    "ownerSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "owner_authority_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "snapshot_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "snapshot_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "request_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "request_root": {
+          "$ref": "#/$defs/digest"
+        },
+        "request_highwaters": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "$ref": "#/$defs/counter"
+          }
+        },
+        "admission_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "admission_root": {
+          "$ref": "#/$defs/digest"
+        },
+        "admission_highwaters": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "$ref": "#/$defs/counter"
+          }
+        },
+        "gate_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "gate_generation": {
+          "$ref": "#/$defs/counter"
+        },
+        "scope_generation": {
+          "$ref": "#/$defs/counter"
+        },
+        "anti_rollback_anchor_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "signature_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "request_enumeration_status": {
+          "enum": [
+            "COMPLETE_EMPTY",
+            "COMPLETE_NON_EMPTY",
+            "PARTIAL",
+            "NOT_ENUMERATED",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        },
+        "admission_enumeration_status": {
+          "enum": [
+            "COMPLETE_EMPTY",
+            "COMPLETE_NON_EMPTY",
+            "PARTIAL",
+            "NOT_ENUMERATED",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        },
+        "request_ledger_query_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "request_pagination_complete": {
+          "type": "boolean"
+        },
+        "admission_ledger_query_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "admission_pagination_complete": {
+          "type": "boolean"
+        },
+        "key_status_generation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "request_complete_empty_proof_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "admission_complete_empty_proof_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "producer_registration_sequence_namespace_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "producer_registration_high_water": {
+          "$ref": "#/$defs/counter"
+        },
+        "forget_fence_namespace_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "forget_fence_generation_high_water": {
+          "$ref": "#/$defs/forgetFenceGeneration"
+        },
+        "forget_fence_currentness_proof_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "forget_fence_currentness_proof_digest": {
+          "$ref": "#/$defs/digest"
+        }
+      },
+      "required": [
+        "owner_authority_ref",
+        "snapshot_ref",
+        "snapshot_digest",
+        "request_count",
+        "request_root",
+        "request_highwaters",
+        "admission_count",
+        "admission_root",
+        "admission_highwaters",
+        "gate_ref",
+        "gate_generation",
+        "scope_generation",
+        "anti_rollback_anchor_ref",
+        "signature_ref",
+        "request_enumeration_status",
+        "admission_enumeration_status"
+      ]
+    },
+    "ownerSnapshots": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "I": {
+          "$ref": "#/$defs/ownerSnapshot"
+        },
+        "D": {
+          "$ref": "#/$defs/ownerSnapshot"
+        },
+        "C": {
+          "$ref": "#/$defs/ownerSnapshot"
+        }
+      },
+      "required": [
+        "I",
+        "D",
+        "C"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "D"
+            ]
+          },
+          "then": {
+            "properties": {
+              "D": {
+                "required": [
+                  "producer_registration_sequence_namespace_ref",
+                  "producer_registration_high_water",
+                  "forget_fence_namespace_ref",
+                  "forget_fence_generation_high_water",
+                  "forget_fence_currentness_proof_ref",
+                  "forget_fence_currentness_proof_digest"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "admissionJoin": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "owner_kind": {
+          "enum": [
+            "I",
+            "D",
+            "C"
+          ]
+        },
+        "owner_admission_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_admission_entry_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "owner_sequence_namespace": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_sequence": {
+          "$ref": "#/$defs/counter"
+        },
+        "gate_generation": {
+          "$ref": "#/$defs/counter"
+        },
+        "scope_generation": {
+          "$ref": "#/$defs/counter"
+        },
+        "operation_identity_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "operation_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "scope_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "participant_intent_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "participant_position": {
+          "$ref": "#/$defs/position"
+        },
+        "participant_manifest_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "participant_manifest_record_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "cardinality_rule_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "participant_position_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_entry_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_snapshot_membership_proof_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_snapshot_membership_proof_digest": {
+          "$ref": "#/$defs/digest"
+        }
+      },
+      "required": [
+        "owner_kind",
+        "owner_admission_ref",
+        "owner_admission_entry_digest",
+        "owner_sequence_namespace",
+        "owner_sequence",
+        "gate_generation",
+        "scope_generation",
+        "operation_identity_ref",
+        "operation_digest",
+        "scope_ref",
+        "participant_intent_ref",
+        "participant_position",
+        "participant_manifest_ref",
+        "participant_manifest_record_digest",
+        "cardinality_rule_ref",
+        "participant_position_ref",
+        "owner_entry_ref",
+        "owner_snapshot_membership_proof_ref",
+        "owner_snapshot_membership_proof_digest"
+      ]
+    },
+    "noParticipantDisposition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "owner_kind": {
+          "enum": [
+            "I",
+            "D",
+            "C"
+          ]
+        },
+        "owner_admission_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_admission_entry_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "owner_sequence_namespace": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_sequence": {
+          "$ref": "#/$defs/counter"
+        },
+        "registration_state": {
+          "const": "NOT_REGISTERED"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "terminal_state": {
+          "enum": [
+            "NO_EFFECT_PROVEN",
+            "PENDING",
+            "UNKNOWN",
+            "IN_DOUBT"
+          ]
+        },
+        "no_effect_proof_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_signature_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_entry_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "operation_identity_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "operation_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "scope_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "gate_generation": {
+          "$ref": "#/$defs/counter"
+        },
+        "scope_generation": {
+          "$ref": "#/$defs/counter"
+        },
+        "out_of_scope_proof_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "out_of_scope_proof_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "owner_snapshot_membership_proof_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_snapshot_membership_proof_digest": {
+          "$ref": "#/$defs/digest"
+        }
+      },
+      "required": [
+        "owner_kind",
+        "owner_admission_ref",
+        "owner_admission_entry_digest",
+        "owner_sequence_namespace",
+        "owner_sequence",
+        "registration_state",
+        "reason",
+        "terminal_state",
+        "owner_signature_ref",
+        "owner_entry_ref",
+        "operation_identity_ref",
+        "operation_digest",
+        "scope_ref",
+        "gate_generation",
+        "scope_generation",
+        "owner_snapshot_membership_proof_ref",
+        "owner_snapshot_membership_proof_digest"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "terminal_state": {
+                "const": "NO_EFFECT_PROVEN"
+              }
+            },
+            "required": [
+              "terminal_state"
+            ]
+          },
+          "then": {
+            "required": [
+              "no_effect_proof_ref"
+            ]
+          }
+        }
+      ]
+    },
+    "participantEvidenceJoin": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "participant_intent_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "participant_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "participant_position": {
+          "$ref": "#/$defs/position"
+        },
+        "primary_owner_kind": {
+          "const": "C"
+        },
+        "primary_owner_admission_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "required_owner_set": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "I",
+              "D",
+              "C",
+              "STORAGE"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "owner_evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ownerEvidence"
+          },
+          "uniqueItems": true
+        },
+        "primary_owner_entry_ref": {
+          "$ref": "#/$defs/ref"
+        }
+      },
+      "required": [
+        "participant_intent_ref",
+        "participant_digest",
+        "participant_position",
+        "primary_owner_kind",
+        "primary_owner_admission_ref",
+        "required_owner_set",
+        "owner_evidence",
+        "primary_owner_entry_ref"
+      ]
+    },
+    "ownerEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "owner_kind": {
+          "enum": [
+            "I",
+            "D",
+            "C",
+            "STORAGE"
+          ]
+        },
+        "evidence_kind": {
+          "enum": [
+            "ADMISSION",
+            "RECEIPT_ISSUE",
+            "RECEIPT_CONSUME",
+            "TERMINAL_PROOF",
+            "WORK_ITEM",
+            "ATTEMPT",
+            "BARRIER_MEMBERSHIP",
+            "LINEAGE",
+            "RESERVATION",
+            "PROVIDER_ATTEMPT",
+            "PROVIDER_OUTCOME",
+            "PREPARED_PARTICIPANT",
+            "STORAGE_RESOLUTION",
+            "NOT_APPLICABLE_PROOF"
+          ]
+        },
+        "evidence_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "evidence_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "disposition": {
+          "enum": [
+            "PRESENT",
+            "NOT_APPLICABLE_WITH_PROOF",
+            "PENDING",
+            "UNKNOWN"
+          ]
+        },
+        "not_applicable_proof_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "forget_operation_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "fence_generation": {
+          "$ref": "#/$defs/counter"
+        },
+        "lineage_manifest_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "lineage_manifest_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "barrier_member_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "producer_work_item_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "attempt_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "terminal_proof_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "policy_domain_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "permission_epoch": {
+          "$ref": "#/$defs/counter"
+        },
+        "producer_domain_inventory_epoch": {
+          "$ref": "#/$defs/counter"
+        },
+        "receipt_nonce": {
+          "$ref": "#/$defs/ref"
+        },
+        "issuer_key_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "authorization_receipt_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "provider_attempt_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "reservation_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "provider_outcome_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "idempotency_key_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "provider_effect_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "prepared_participant_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "prepared_transaction_gid": {
+          "$ref": "#/$defs/ref"
+        },
+        "database_incarnation_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "storage_resolution_proof_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "target_set_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "forget_fence_namespace_ref": {
+          "$ref": "#/$defs/ref"
+        }
+      },
+      "required": [
+        "owner_kind",
+        "evidence_kind",
+        "evidence_ref",
+        "evidence_digest",
+        "disposition"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "owner_kind": {
+                "const": "D"
+              },
+              "evidence_kind": {
+                "enum": [
+                  "LINEAGE",
+                  "BARRIER_MEMBERSHIP"
+                ]
+              }
+            },
+            "required": [
+              "owner_kind",
+              "evidence_kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "forget_operation_ref",
+              "fence_generation",
+              "lineage_manifest_ref",
+              "lineage_manifest_digest",
+              "barrier_member_ref"
+            ]
+          },
+          "$comment": "§5.7 says target_set_digest and forget_fence_namespace_ref SHOULD be conditionally required for D LINEAGE/BARRIER_MEMBERSHIP. They are defined as optional properties; schema-level MUST enforcement is not inferred."
+        },
+        {
+          "if": {
+            "properties": {
+              "owner_kind": {
+                "const": "I"
+              },
+              "evidence_kind": {
+                "enum": [
+                  "RECEIPT_ISSUE",
+                  "RECEIPT_CONSUME",
+                  "TERMINAL_PROOF"
+                ]
+              }
+            },
+            "required": [
+              "owner_kind",
+              "evidence_kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "policy_domain_ref",
+              "permission_epoch",
+              "producer_domain_inventory_epoch",
+              "issuer_key_ref",
+              "authorization_receipt_ref"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "owner_kind": {
+                "const": "C"
+              },
+              "evidence_kind": {
+                "enum": [
+                  "PROVIDER_ATTEMPT",
+                  "PROVIDER_OUTCOME"
+                ]
+              }
+            },
+            "required": [
+              "owner_kind",
+              "evidence_kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "reservation_ref",
+              "provider_attempt_ref",
+              "idempotency_key_ref"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "owner_kind": {
+                "const": "STORAGE"
+              },
+              "evidence_kind": {
+                "enum": [
+                  "PREPARED_PARTICIPANT",
+                  "STORAGE_RESOLUTION"
+                ]
+              }
+            },
+            "required": [
+              "owner_kind",
+              "evidence_kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "prepared_participant_ref",
+              "prepared_transaction_gid",
+              "database_incarnation_ref"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "disposition": {
+                "const": "NOT_APPLICABLE_WITH_PROOF"
+              }
+            },
+            "required": [
+              "disposition"
+            ]
+          },
+          "then": {
+            "required": [
+              "not_applicable_proof_ref"
+            ]
+          }
+        }
+      ]
+    },
+    "jf10Join": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "participant_intent_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "causal_order_transaction_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "publication_operation_id": {
+          "$ref": "#/$defs/ref"
+        },
+        "request_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "participant_tuple_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "prepared_participant_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "prepared_transaction_gid": {
+          "$ref": "#/$defs/ref"
+        },
+        "canonical_authority_db_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "database_incarnation_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "postgres_cluster_system_identifier": {
+          "type": "string",
+          "minLength": 1
+        },
+        "database_oid": {
+          "$ref": "#/$defs/counter"
+        },
+        "postgresql_native_xid_observed": {
+          "$ref": "#/$defs/counter"
+        },
+        "prepare_attempt_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "prepare_attempt_generation": {
+          "$ref": "#/$defs/counter"
+        },
+        "participant_ledger_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "participant_ledger_version": {
+          "$ref": "#/$defs/counter"
+        },
+        "coc_prepare_intent_position": {
+          "$ref": "#/$defs/position"
+        },
+        "i_commit_authorization_receipt_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "i_terminal_state": {
+          "enum": [
+            "COMMIT_WON",
+            "REVOCATION_WON",
+            "INDETERMINATE_ABORTED",
+            "UNKNOWN",
+            "IN_DOUBT"
+          ]
+        },
+        "storage_prepared_receipt_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "storage_resolution_proof_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "storage_terminal_state": {
+          "enum": [
+            "COMMITTED",
+            "ROLLED_BACK",
+            "UNKNOWN",
+            "IN_DOUBT"
+          ]
+        }
+      },
+      "required": [
+        "participant_intent_ref",
+        "causal_order_transaction_ref",
+        "publication_operation_id",
+        "request_digest",
+        "participant_tuple_digest",
+        "prepared_participant_ref",
+        "prepared_transaction_gid",
+        "canonical_authority_db_ref",
+        "database_incarnation_ref",
+        "postgres_cluster_system_identifier",
+        "database_oid",
+        "prepare_attempt_ref",
+        "prepare_attempt_generation",
+        "participant_ledger_ref",
+        "participant_ledger_version",
+        "coc_prepare_intent_position",
+        "i_commit_authorization_receipt_ref",
+        "i_terminal_state",
+        "storage_prepared_receipt_ref",
+        "storage_terminal_state"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "storage_terminal_state": {
+                "enum": [
+                  "COMMITTED",
+                  "ROLLED_BACK"
+                ]
+              }
+            },
+            "required": [
+              "storage_terminal_state"
+            ]
+          },
+          "then": {
+            "required": [
+              "storage_resolution_proof_ref"
+            ]
+          }
+        }
+      ]
+    },
+    "completeness": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "coc_participant_set": {
+          "enum": [
+            "COMPLETE_EMPTY",
+            "COMPLETE_NON_EMPTY",
+            "UNKNOWN"
+          ]
+        },
+        "i_request_set": {
+          "enum": [
+            "COMPLETE_EMPTY",
+            "COMPLETE_NON_EMPTY",
+            "UNKNOWN"
+          ]
+        },
+        "i_admission_set": {
+          "enum": [
+            "COMPLETE_EMPTY",
+            "COMPLETE_NON_EMPTY",
+            "UNKNOWN"
+          ]
+        },
+        "d_request_set": {
+          "enum": [
+            "COMPLETE_EMPTY",
+            "COMPLETE_NON_EMPTY",
+            "UNKNOWN"
+          ]
+        },
+        "d_admission_set": {
+          "enum": [
+            "COMPLETE_EMPTY",
+            "COMPLETE_NON_EMPTY",
+            "UNKNOWN"
+          ]
+        },
+        "c_request_set": {
+          "enum": [
+            "COMPLETE_EMPTY",
+            "COMPLETE_NON_EMPTY",
+            "UNKNOWN"
+          ]
+        },
+        "c_admission_set": {
+          "enum": [
+            "COMPLETE_EMPTY",
+            "COMPLETE_NON_EMPTY",
+            "UNKNOWN"
+          ]
+        },
+        "all_required_edges_resolved": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "coc_participant_set",
+        "i_request_set",
+        "i_admission_set",
+        "d_request_set",
+        "d_admission_set",
+        "c_request_set",
+        "c_admission_set",
+        "all_required_edges_resolved"
+      ]
+    },
+    "differenceSets": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "owner_registered_without_participant": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ref"
+          },
+          "uniqueItems": true
+        },
+        "participant_without_primary_owner_admission": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ref"
+          },
+          "uniqueItems": true
+        },
+        "participant_without_required_owner_evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ref"
+          },
+          "uniqueItems": true
+        },
+        "duplicate_or_conflicting_join_edges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ref"
+          },
+          "uniqueItems": true
+        },
+        "unproved_not_registered_effects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ref"
+          },
+          "uniqueItems": true
+        },
+        "owner_request_without_disposition": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ref"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "owner_registered_without_participant",
+        "participant_without_primary_owner_admission",
+        "participant_without_required_owner_evidence",
+        "duplicate_or_conflicting_join_edges",
+        "unproved_not_registered_effects",
+        "owner_request_without_disposition"
+      ]
+    },
+    "envelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "issuer_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "subject_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "audience_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_authority_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "key_id": {
+          "$ref": "#/$defs/ref"
+        },
+        "key_version": {
+          "$ref": "#/$defs/ref"
+        },
+        "signature_profile_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "signature_ref": {
+          "$ref": "#/$defs/ref"
+        }
+      },
+      "required": [
+        "issuer_ref",
+        "subject_ref",
+        "audience_ref",
+        "owner_authority_ref",
+        "key_id",
+        "key_version",
+        "signature_profile_ref",
+        "signature_ref"
+      ]
+    },
+    "requestDisposition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "owner_kind": {
+          "enum": [
+            "I",
+            "D",
+            "C"
+          ]
+        },
+        "owner_request_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_entry_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_request_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "owner_sequence_namespace": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_sequence": {
+          "$ref": "#/$defs/counter"
+        },
+        "scope_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "disposition": {
+          "enum": [
+            "IN_BATCH_REQUEST_SET",
+            "OUT_OF_SCOPE_WITH_PROOF"
+          ]
+        },
+        "proof_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_signature_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_entry_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "out_of_scope_proof_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "out_of_scope_proof_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "owner_kind",
+        "owner_request_ref",
+        "owner_entry_ref",
+        "owner_request_digest",
+        "owner_sequence_namespace",
+        "owner_sequence",
+        "scope_ref",
+        "disposition",
+        "owner_signature_ref",
+        "owner_entry_digest"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "disposition": {
+                "const": "OUT_OF_SCOPE_WITH_PROOF"
+              }
+            },
+            "required": [
+              "disposition"
+            ]
+          },
+          "then": {
+            "required": [
+              "proof_ref"
+            ]
+          }
+        }
+      ]
+    },
+    "completeEmptyProof": {
+      "type": "object",
+      "properties": {
+        "proof_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "owner_authority_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "set_kind": {
+          "enum": [
+            "REQUEST_SET",
+            "ADMISSION_SET"
+          ]
+        },
+        "scope_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "scope_generation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "owner_ledger_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "owner_ledger_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "ledger_query_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "owner_high_water": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "pagination_complete": {
+          "const": true
+        },
+        "count": {
+          "const": 0
+        },
+        "canonical_empty_root": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "key_status_generation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "anti_rollback_anchor_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "signature_profile_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "signature_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "proof_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "proof_ref",
+        "owner_authority_ref",
+        "set_kind",
+        "scope_ref",
+        "scope_generation",
+        "owner_ledger_ref",
+        "owner_ledger_version",
+        "ledger_query_ref",
+        "owner_high_water",
+        "pagination_complete",
+        "count",
+        "canonical_empty_root",
+        "key_status_generation",
+        "anti_rollback_anchor_ref",
+        "signature_profile_ref",
+        "signature_ref",
+        "issued_at",
+        "proof_digest"
+      ],
+      "additionalProperties": false
+    },
+    "outOfScopeProof": {
+      "type": "object",
+      "properties": {
+        "proof_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "owner_authority_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "request_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "operation_identity_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "operation_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "target_class_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "scope_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "scope_generation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "applicability_policy_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "decision": {
+          "const": "OUT_OF_SCOPE_WITH_PROOF"
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "owner_ledger_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "owner_ledger_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "owner_high_water": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "ledger_query_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "pagination_complete": {
+          "const": true
+        },
+        "key_status_generation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "anti_rollback_anchor_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "signature_profile_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "signature_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "proof_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "proof_ref",
+        "owner_authority_ref",
+        "request_ref",
+        "operation_identity_ref",
+        "operation_digest",
+        "target_class_ref",
+        "scope_ref",
+        "scope_generation",
+        "applicability_policy_ref",
+        "decision",
+        "reason_code",
+        "owner_ledger_ref",
+        "owner_ledger_version",
+        "owner_high_water",
+        "ledger_query_ref",
+        "pagination_complete",
+        "key_status_generation",
+        "anti_rollback_anchor_ref",
+        "signature_profile_ref",
+        "signature_ref",
+        "issued_at",
+        "proof_digest"
+      ],
+      "additionalProperties": false
+    },
+    "ownerSnapshotMembershipProof": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "proof_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_kind": {
+          "enum": [
+            "I",
+            "D",
+            "C"
+          ]
+        },
+        "owner_authority_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "issuer_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "subject_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "audience_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "purpose": {
+          "const": "COC_RECOVERY_CUTOFF_MANIFEST_MEMBERSHIP"
+        },
+        "owner_ledger_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_ledger_version": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_entry_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_entry_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "owner_admission_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_sequence_namespace": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_local_sequence": {
+          "$ref": "#/$defs/counter"
+        },
+        "owner_high_water": {
+          "$ref": "#/$defs/counter"
+        },
+        "owner_ledger_root": {
+          "$ref": "#/$defs/digest"
+        },
+        "owner_snapshot_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_snapshot_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "owner_snapshot_attestation_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_snapshot_attestation_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "owner_gate_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_gate_generation": {
+          "$ref": "#/$defs/counter"
+        },
+        "scope_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "scope_generation": {
+          "$ref": "#/$defs/counter"
+        },
+        "scope_binding_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "operation_identity_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "operation_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "request_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "anti_rollback_anchor_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "key_status_generation": {
+          "$ref": "#/$defs/ref"
+        },
+        "signature_profile_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "key_id": {
+          "$ref": "#/$defs/ref"
+        },
+        "key_version": {
+          "$ref": "#/$defs/ref"
+        },
+        "canonicalization_profile_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "digest_profile_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "proof_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "signature_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "producer_registration_sequence_namespace_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "producer_registration_high_water": {
+          "$ref": "#/$defs/counter"
+        },
+        "forget_fence_namespace_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "forget_fence_generation_high_water": {
+          "$ref": "#/$defs/forgetFenceGeneration"
+        },
+        "forget_fence_currentness_proof_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "forget_fence_currentness_proof_digest": {
+          "$ref": "#/$defs/digest"
+        }
+      },
+      "required": [
+        "proof_ref",
+        "owner_kind",
+        "owner_authority_ref",
+        "issuer_ref",
+        "subject_ref",
+        "audience_ref",
+        "purpose",
+        "owner_ledger_ref",
+        "owner_ledger_version",
+        "owner_entry_ref",
+        "owner_entry_digest",
+        "owner_admission_ref",
+        "owner_sequence_namespace",
+        "owner_local_sequence",
+        "owner_high_water",
+        "owner_ledger_root",
+        "owner_snapshot_ref",
+        "owner_snapshot_digest",
+        "owner_snapshot_attestation_ref",
+        "owner_snapshot_attestation_digest",
+        "owner_gate_ref",
+        "owner_gate_generation",
+        "scope_ref",
+        "scope_generation",
+        "scope_binding_digest",
+        "operation_identity_ref",
+        "operation_digest",
+        "request_digest",
+        "anti_rollback_anchor_ref",
+        "key_status_generation",
+        "signature_profile_ref",
+        "key_id",
+        "key_version",
+        "canonicalization_profile_ref",
+        "digest_profile_ref",
+        "proof_digest",
+        "signature_ref"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "owner_kind": {
+                "const": "D"
+              }
+            },
+            "required": [
+              "owner_kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "producer_registration_sequence_namespace_ref",
+              "producer_registration_high_water",
+              "forget_fence_namespace_ref",
+              "forget_fence_generation_high_water",
+              "forget_fence_currentness_proof_ref",
+              "forget_fence_currentness_proof_digest"
+            ]
+          }
+        }
+      ]
+    },
+    "forgetFenceGeneration": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "description": "D ForgetFence namespace generation; distinct from ProducerRegistrationHighWater."
+    },
+    "forgetFenceCurrentnessProof": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "H-side proposed D currentness-proof shape from H-RJ-HW-01 §5.4. This is not evidence that D has issued or adopted this proof format.",
+      "properties": {
+        "proof_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "proof_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "owner_kind": {
+          "const": "D"
+        },
+        "forget_operation_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "target_set_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "forget_fence_namespace_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "forget_fence_generation": {
+          "$ref": "#/$defs/forgetFenceGeneration"
+        },
+        "forget_fence_generation_high_water": {
+          "$ref": "#/$defs/forgetFenceGeneration"
+        },
+        "producer_registration_high_water": {
+          "$ref": "#/$defs/counter"
+        },
+        "owner_snapshot_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_snapshot_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "owner_gate_generation": {
+          "$ref": "#/$defs/counter"
+        },
+        "anti_rollback_anchor_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "currentness_status": {
+          "enum": [
+            "CURRENT",
+            "STALE",
+            "UNKNOWN"
+          ]
+        },
+        "signature_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "lineage_manifest_digest": {
+          "$ref": "#/$defs/digest",
+          "$comment": "Named by §5.8 but omitted from the §5.4 object and required list; optional here pending clarification."
+        }
+      },
+      "required": [
+        "proof_ref",
+        "proof_digest",
+        "owner_kind",
+        "forget_operation_ref",
+        "target_set_digest",
+        "forget_fence_namespace_ref",
+        "forget_fence_generation",
+        "forget_fence_generation_high_water",
+        "producer_registration_high_water",
+        "owner_snapshot_ref",
+        "owner_snapshot_digest",
+        "owner_gate_generation",
+        "anti_rollback_anchor_ref",
+        "currentness_status",
+        "signature_ref"
+      ]
+    }
+  },
+  "$comment": "Derived from H-RJ-HW-01 §§5–7. This is a structural artifact only; it does not authenticate D-issued proofs or establish currentness. The contract H-RJ-HW-01 §11.7 pins the artifact filename bmcp.recovery-join-1.0.2.schema.json and source Blob 4b664e3bce465499bcdfd93796349a4ba7074002. That pinned source snapshot had a stale schema_version=1.0.0 const despite its 1.0.2 $id/title. This delivered artifact follows the contract's explicit 1.0.2 artifact identity: filename, $id and schema_version const all say 1.0.2. The pinned Blob is retained as provenance for the source snapshot, not as the final extended artifact Blob. H-RJ-HW-01 §5.4 names the currentness-proof field forget_fence_generation; §5.9 pseudocode instead refers to proof.fence_generation. This schema follows the explicit §5.4 JSON object and does not add an alias. H-RJ-HW-01 §5.8 requires lineage_manifest_digest to be added to the currentness proof but does not state whether it is required. The property is admitted but not required pending authority clarification. H-RJ-HW-01 §5.7 says target_set_digest and forget_fence_namespace_ref SHOULD be conditionally required for D LINEAGE/BARRIER_MEMBERSHIP evidence; they remain optional at schema level because the contract does not say MUST. H-RJ-HW-01 §§3.5/4.2 refer to snapshot.owner_specific_high_waters.producer_registration_high_water, while §§5.5/7.1 specify a top-level ownerSnapshot producer_registration_high_water. This schema follows the explicit schema-addition snippets and summary in §§5.5/7.1; it does not invent the owner_specific_high_waters map."
+}

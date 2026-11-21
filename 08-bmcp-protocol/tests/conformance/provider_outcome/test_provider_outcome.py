@@ -11,7 +11,6 @@ as a test-only immutable snapshot because BMCP does not own or install a copy.
 """
 from __future__ import annotations
 
-import copy
 import json
 import unittest
 from pathlib import Path
@@ -67,30 +66,31 @@ class ProviderOutcomeStructureTests(unittest.TestCase):
         self.assertNotIn("NotInvokedProofRef", record)
         self.assert_schema_rejected(record)
 
-    def test_cpo08_fixture_is_rejected_and_coc_half_pair_rule_is_checked(self):
-        record = VECTORS["CPO-08-coc-half-pair"]["record"]
-        # Checked-in CPO-08 actually has BOTH COC refs as non-null strings.
-        # It is rejected because HANDOFF_ACCEPTED lacks ProviderRequestRef
-        # and ProviderReceiptRef. Do not misreport this as a COC fixture defect.
-        self.assertIsInstance(record["COCParticipantIntentRef"], str)
-        self.assertIsInstance(record["COCParticipantReservationRef"], str)
-        self.assertNotIn("ProviderRequestRef", record)
-        self.assertNotIn("ProviderReceiptRef", record)
-        self.assert_schema_rejected(record)
+    def test_cpo08_valid_baseline_and_separate_coc_half_pair_rejection(self):
+        # The valid baseline has all HANDOFF_ACCEPTED provider references and
+        # a complete COC participant pair.
+        valid_record = VECTORS["CPO-08-valid-baseline"]["record"]
+        self.validator.validate(valid_record)
+        self.assertIsInstance(valid_record["ProviderRequestRef"], str)
+        self.assertIsInstance(valid_record["ProviderReceiptRef"], str)
+        self.assertIsInstance(valid_record["COCParticipantIntentRef"], str)
+        self.assertIsInstance(valid_record["COCParticipantReservationRef"], str)
 
-        # Separately probe the schema COC half-pair rule using an in-memory
-        # mutation; the checked-in fixture remains untouched.
-        half_pair = copy.deepcopy(record)
-        half_pair["COCParticipantReservationRef"] = None
+        # The separately named negative vector changes only the COC pair:
+        # intent remains present while reservation is null.
+        half_pair = VECTORS["CPO-08-coc-half-pair"]["record"]
+        self.assertIsInstance(half_pair["ProviderRequestRef"], str)
+        self.assertIsInstance(half_pair["ProviderReceiptRef"], str)
+        self.assertIsInstance(half_pair["COCParticipantIntentRef"], str)
+        self.assertIsNone(half_pair["COCParticipantReservationRef"])
         errors = list(self.validator.iter_errors(half_pair))
         self.assertTrue(errors)
         self.assertTrue(
             any(
-                "COCParticipantReservationRef" in error.message
-                or "COCParticipantReservationRef" in str(list(error.path))
+                list(error.path) == ["COCParticipantReservationRef"]
                 for error in errors
             ),
-            "Expected schema rejection of a COC intent/reservation half-pair",
+            "Expected rejection specifically at the COC reservation half-pair",
         )
 
     def test_unregistered_profile_and_placeholder_signature_are_not_valid_evidence(self):

@@ -1,0 +1,20 @@
+{
+  "proof_ref": "T/proof",
+  "owner_authority_ref": "T/authority",
+  "set_kind": "REQUEST_SET",
+  "scope_ref": "T/scope",
+  "scope_generation": "0",
+  "owner_ledger_ref": "T/ledger",
+  "owner_ledger_version": "T/ledger-version",
+  "ledger_query_ref": "T/query",
+  "owner_high_water": "0",
+  "pagination_complete": true,
+  "count": 1,
+  "canonical_empty_root": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "key_status_generation": "T/key-status",
+  "anti_rollback_anchor_ref": "T/anchor",
+  "signature_profile_ref": "T/signature-profile",
+  "signature_ref": "T/signature",
+  "issued_at": "2026-11-21T00:00:00Z",
+  "proof_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}
