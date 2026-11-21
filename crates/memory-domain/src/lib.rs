@@ -383,7 +383,9 @@ pub struct EntityRef(OpaqueId);
 pub struct EventRef(OpaqueId);
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, PartialEq)]
 pub struct ExternalSourceRef(OpaqueId);
-ref_ctor!(EntityRef, EventRef, ExternalSourceRef);
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, PartialEq)]
+pub struct MemoryRef(OpaqueId);
+ref_ctor!(EntityRef, EventRef, ExternalSourceRef, MemoryRef);
 
 /// NOT DEFINED: awaiting I. Placeholder only; security identity semantics are not inferred.
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -401,7 +403,7 @@ impl CanonicalCommitRef { pub const fn pending_d() -> Self { Self { _pending_d: 
 #[doc = r#"Immutable revision fields are private; corrections append successors.
 ```compile_fail
 use memory_domain::{ClaimRevision, ClaimRef, ClaimRevisionRef, EpistemicStatus, TimeValue};
-let mut r=ClaimRevision::new(ClaimRevisionRef::new("r").unwrap(),ClaimRef::new("c").unwrap(),None,"s".into(),"p".into(),"o".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t".into(),"initial".into()).unwrap();
+let mut r=ClaimRevision::initial(ClaimRevisionRef::new("r").unwrap(),ClaimRef::new("c").unwrap(),"s".into(),"p".into(),"o".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t".into(),"initial".into()).unwrap();
 r.predicate=String::from("mutated");
 ```"#]
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -413,7 +415,23 @@ pub struct ClaimRevision {
 }
 impl ClaimRevision {
     #[allow(clippy::too_many_arguments)]
-    pub fn new(revision_ref: ClaimRevisionRef, claim_ref: ClaimRef, parent: Option<&ClaimRevision>,
+    pub fn initial(revision_ref: ClaimRevisionRef, claim_ref: ClaimRef, subject: String, predicate: String,
+        object: String, polarity: String, qualifiers: Vec<String>, epistemic_status: EpistemicStatus,
+        valid_time: TimeValue, evidence_refs: Vec<EvidenceRef>, provenance_refs: Vec<ProvenanceRef>,
+        asserted_at: String, revision_reason: String) -> Result<Self, DomainError> {
+        Self::new(revision_ref, claim_ref, None, subject, predicate, object, polarity, qualifiers,
+            epistemic_status, valid_time, evidence_refs, provenance_refs, asserted_at, revision_reason)
+    }
+    #[allow(clippy::too_many_arguments)]
+    pub fn successor(revision_ref: ClaimRevisionRef, claim_ref: ClaimRef, parent: &ClaimRevision,
+        subject: String, predicate: String, object: String, polarity: String, qualifiers: Vec<String>,
+        epistemic_status: EpistemicStatus, valid_time: TimeValue, evidence_refs: Vec<EvidenceRef>,
+        provenance_refs: Vec<ProvenanceRef>, asserted_at: String, revision_reason: String) -> Result<Self, DomainError> {
+        Self::new(revision_ref, claim_ref, Some(parent), subject, predicate, object, polarity, qualifiers,
+            epistemic_status, valid_time, evidence_refs, provenance_refs, asserted_at, revision_reason)
+    }
+    #[allow(clippy::too_many_arguments)]
+    fn new(revision_ref: ClaimRevisionRef, claim_ref: ClaimRef, parent: Option<&ClaimRevision>,
         subject: String, predicate: String, object: String, polarity: String, qualifiers: Vec<String>,
         epistemic_status: EpistemicStatus, valid_time: TimeValue, evidence_refs: Vec<EvidenceRef>,
         provenance_refs: Vec<ProvenanceRef>, asserted_at: String, revision_reason: String) -> Result<Self, DomainError> {
@@ -550,7 +568,7 @@ impl RelationExtension {
 #[derive(serde::Serialize,serde::Deserialize,Clone,Debug,Eq,PartialEq)]
 pub enum EvidenceKind { Document, Message, Observation, Record, Dataset, Other(String) }
 #[derive(serde::Serialize,serde::Deserialize,Clone,Debug,Eq,PartialEq)]
-pub enum EvidenceSourceRef { Event(EventRef), Memory(OpaqueId), External(ExternalSourceRef) }
+pub enum EvidenceSourceRef { Event(EventRef), Memory(MemoryRef), External(ExternalSourceRef) }
 #[derive(serde::Serialize,serde::Deserialize,Clone,Debug,Eq,PartialEq)]
 pub enum EvidenceAvailability { Available, Restricted, Unavailable, Forgotten }
 #[derive(serde::Serialize,serde::Deserialize,Clone,Debug,Eq,PartialEq)]
@@ -569,14 +587,14 @@ impl EvidenceExtension { pub fn validate(&self)->Result<(),DomainError>{
     #[test]
     fn dm2_01_claim_revision_parent_must_belong_to_same_claim() {
         let ca=ClaimRef::new("ca").unwrap(); let cb=ClaimRef::new("cb").unwrap();
-        let parent=ClaimRevision::new(ClaimRevisionRef::new("r1").unwrap(),ca.clone(),None,"s".into(),"p".into(),"o".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t1".into(),"initial".into()).unwrap();
-        let bad=ClaimRevision::new(ClaimRevisionRef::new("r2").unwrap(),cb,Some(&parent),"s".into(),"p".into(),"o".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t2".into(),"correction".into());
+        let parent=ClaimRevision::initial(ClaimRevisionRef::new("r1").unwrap(),ca.clone(),"s".into(),"p".into(),"o".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t1".into(),"initial".into()).unwrap();
+        let bad=ClaimRevision::successor(ClaimRevisionRef::new("r2").unwrap(),cb,&parent,"s".into(),"p".into(),"o".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t2".into(),"correction".into());
         assert_eq!(bad.unwrap_err(),DomainError::InvalidParent);
     }
     #[test]
     fn dm2_02_claim_revision_is_append_only_and_immutable() {
-        let first=ClaimRevision::new(ClaimRevisionRef::new("r1").unwrap(),ClaimRef::new("c").unwrap(),None,"s".into(),"p".into(),"old".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t1".into(),"initial".into()).unwrap();
-        let next=ClaimRevision::new(ClaimRevisionRef::new("r2").unwrap(),first.claim_ref().clone(),Some(&first),"s".into(),"p".into(),"new".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t2".into(),"correction".into()).unwrap();
+        let first=ClaimRevision::initial(ClaimRevisionRef::new("r1").unwrap(),ClaimRef::new("c").unwrap(),"s".into(),"p".into(),"old".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t1".into(),"initial".into()).unwrap();
+        let next=ClaimRevision::successor(ClaimRevisionRef::new("r2").unwrap(),first.claim_ref().clone(),&first,"s".into(),"p".into(),"new".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t2".into(),"correction".into()).unwrap();
         assert_eq!(first.predicate(),"p"); assert_eq!(next.parent_revision_ref(),Some(first.revision_ref()));
     }
     #[test]
