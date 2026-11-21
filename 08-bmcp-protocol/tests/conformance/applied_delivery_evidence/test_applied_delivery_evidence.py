@@ -211,5 +211,22 @@ class AppliedDeliveryEvidenceTests(unittest.TestCase):
         self.assertNotIn("original_result_ref",result)
 
 
+    def test_31_rfc3339_accepts_lowercase_and_leap_second_forms(self):
+        for observed_at in ("2024-01-01t00:00:00z", "2016-12-31T23:59:60Z"):
+            value = fixture()
+            value["submission_observed_at"] = observed_at
+            value["payload_digest"] = hashlib.sha256(canonical_p0_bytes(value)).hexdigest()
+            with self.subTest(observed_at=observed_at):
+                self.assertEqual(self.validate(value)["status"], "VALID_NEW")
+
+    def test_32_rfc3339_rejects_impossible_calendar_date(self):
+        value = fixture()
+        value["submission_observed_at"] = "2024-02-30T00:00:00Z"
+        value["payload_digest"] = hashlib.sha256(canonical_p0_bytes(value)).hexdigest()
+        result = self.validate(value)
+        self.assertEqual(result["status"], "INVALID")
+        self.assertIn("invalid RFC3339", result["errors"][0])
+
+
 if __name__ == "__main__":
     unittest.main()
