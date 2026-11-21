@@ -165,11 +165,7 @@ pub struct InMemoryContextDeliveryAdapter {
 
 impl ContextDeliveryAdapter for InMemoryContextDeliveryAdapter {
     fn apply(&mut self, session_id: &str, snapshot: ContextSnapshot) -> Result<(), AdapterError> {
-        if self
-            .sessions
-            .get(session_id)
-            .map_or(false, |state| !state.connected)
-        {
+        if matches!(self.sessions.get(session_id), Some(state) if !state.connected) {
             return Err(AdapterError::SessionDisconnected {
                 session_id: session_id.to_owned(),
             });
