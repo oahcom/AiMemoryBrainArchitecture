@@ -153,6 +153,18 @@ Each authorization decision MUST bind:
 6. Delegation: explicit ALLOWED or PROHIBITED decision.
 7. Decision identity: immutable AuthorizationDecisionRef and policy/version reference.
 
+<!-- insert after §12.3 item 7, before "The decision MUST also retain its issuing authority and decision provenance." -->
+
+8. **Unique Attestation Operation Binding:** Each authorization decision MUST bind to exactly one immutable `AttestationOperationRef`. The binding MUST identify the exact `FactRef` and `FactRevisionRef` targeted by that operation.
+
+9. **Exact Claim and Evidence Binding:** Each authorization decision MUST bind to the complete, exact set of `ClaimRevisionRef` values and `EvidenceRef` values used by the authorized operation. The sets MUST be unambiguous and immutable for that operation. The decision MUST NOT authorize an unspecified, subsequently expanded, substituted, or implicitly resolved set of claims or evidence. The decision MUST also bind the exact `ProvenanceRef` values when provenance references form part of the operation's attested input.
+
+10. **Single-Use Consumption and Replay Protection:** Each authorization decision MUST be consumable by exactly one `AttestationOperationRef`. Its consumption state MUST distinguish an unused decision from a decision consumed by its uniquely bound operation. Once consumed, the decision MUST NOT authorize another operation, FactRevision, target, ClaimRevision set, or Evidence set. Reuse of the same `AuthorizationDecisionRef` by a second operation MUST fail closed, regardless of Scope compatibility, Method/Version compatibility, or validity period.
+
+11. **Idempotent Submission:** Repeated submission of the same `AttestationOperationRef` with the same exact target, ClaimRevision set, Evidence set, and authorization decision MUST be treated as an idempotent replay and MUST return the original committed result. It MUST NOT create another FactRevision, another authorization consumption, or another independent attestation result. A submission using the same operation reference with any different bound identity or content MUST fail closed. A different operation reference MUST NOT inherit the original operation's authorization consumption.
+
+12. **Revocation and Fresh Authorization:** Revocation MUST NOT restore or release a consumed authorization decision for reuse. Any subsequent attestation requiring authorization after revocation MUST use a fresh `AuthorizationDecisionRef` bound to a new unique `AttestationOperationRef`. A fresh decision MUST NOT be interpreted as reuse, renewal, or reassignment of the revoked or previously consumed decision.
+
 The decision MUST also retain its issuing authority and decision provenance.
 
 Delegation is NOT_ALLOWED by default.
@@ -202,11 +214,31 @@ Before committing a FactRevision, D MUST:
 9. Bind the exact authorization decision reference to the FactRevision.
 10. Persist the decision reference and verification outcome in the auditable commit record.
 
+<!-- insert after §12.6 item 10 -->
+
+11. **Unique Operation Binding Verification:** D MUST verify that the `AuthorizationDecisionRef` is bound to exactly one `AttestationOperationRef` and that the current attestation submission presents that exact operation reference.
+
+12. **Exact Target Verification:** D MUST verify that the `FactRef` and `FactRevisionRef` bound by the authorization decision exactly match the target of the current submission. Any missing, ambiguous, substituted, or mismatched target reference MUST fail closed.
+
+13. **Exact Claim and Evidence Set Verification:** D MUST verify that the complete `ClaimRevisionRef` set and `EvidenceRef` set bound by the authorization decision exactly match the sets presented by the current submission. D MUST also verify the exact `ProvenanceRef` set when provenance references form part of the authorized operation's attested input. Missing, additional, substituted, ambiguous, or otherwise mismatched members MUST fail closed.
+
+14. **Authorization Consumption Verification:** D MUST verify that the authorization decision has not previously been consumed by another operation. An unused decision MAY be consumed only by its uniquely bound `AttestationOperationRef`. If the decision is already consumed, D MUST accept only an idempotent replay of that same operation with identical bound identities and content, returning the original committed result without creating another FactRevision or consuming the decision again. Any other reuse, competing consumption, or conflicting replay MUST fail closed.
+
+15. **Binding and Consumption Integrity:** D MUST verify that the authorization decision's operation binding, target binding, ClaimRevision set, Evidence set, and consumption state remain consistent throughout commit processing. A mismatch or unverifiable state MUST fail closed. D MUST NOT infer authorization from Scope compatibility, Method/Version compatibility, or validity alone when any operation-binding or consumption requirement is unsatisfied.
+
+D performs these checks as contract-compliance and reference-integrity verification. D MUST NOT independently reassess, replace, or override I's governance eligibility judgment, authorization decision, or authority as the sole governance decision-maker.
+
 D MUST preserve the exact AuthorizationDecisionRef, Attestor principal reference, Method/Version, Scope, authorization context, evidence digest/reference, commit sequence, and FactRevision lineage.
 
 D MUST reject an attestation with missing authorization evidence or an authorization reference that cannot be resolved and validated.
 
 D verifies contract compliance and reference integrity. It does not replace I's governance judgment.
+
+<!-- append to the end of §12.6 -->
+
+**Semantic Contract and Implementation-Conformance Boundary**
+
+The operation-binding, exact-target, exact-input, single-use consumption, replay-protection, and idempotent-submission requirements in this section are semantic contract requirements and an implementation-conformance gate. They MUST NOT be interpreted as approval of any Schema, DDL, Public API, storage model, persistence mechanism, or implementation-specific data representation. This contract does not prescribe or select a storage implementation, physical data structure, transaction mechanism, or wire format. It does not introduce a new governance role or transfer governance decision authority. I remains the sole governance decision authority for authorization decisions. D verifies the resulting contract compliance and reference integrity without assuming or exercising I's governance authority. No Schema, DDL, Public API, production key, Trust Root, or cryptographic Profile is approved by these requirements.
 
 ### 12.7 Method correctness boundary
 

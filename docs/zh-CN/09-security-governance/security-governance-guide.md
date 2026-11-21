@@ -153,6 +153,18 @@ FactRevision MUST NOT 自动跟随 Claim 的最新 Revision。
 6. Delegation：明确的 ALLOWED 或 PROHIBITED 决定。
 7. 决策身份：不可变 AuthorizationDecisionRef 及对应 Policy/Version 引用。
 
+<!--插入于§12.3 第 7 项之后、"The decision MUST also retain its issuing authority and decision provenance."之前-->
+
+8. **唯一证明操作绑定：**每个授权决定 MUST 绑定且仅绑定一个不可变的 `AttestationOperationRef`。该绑定 MUST 标识该操作所针对的精确 `FactRef` 和 `FactRevisionRef`。
+
+9. **精确声明与证据绑定：**每个授权决定 MUST 绑定本次获准操作所使用的完整且精确的 `ClaimRevisionRef` 值集合和 `EvidenceRef` 值集合。对于该操作，这些集合 MUST 明确且不可变。授权决定 MUST NOT 授权未明确指定、事后扩展、替换或隐式解析的声明或证据集合。当来源引用构成本次证明操作的输入部分时，授权决定 MUST 同时绑定精确的 `ProvenanceRef` 值集合。
+
+10. **一次性消费与防重放：**每个授权决定 MUST 且仅 MUST 由其唯一绑定的 `AttestationOperationRef` 消费。其消费状态 MUST 能够区分未消费的授权决定与已由其唯一绑定操作消费的授权决定。消费后，该决定 MUST NOT 再授权其他操作、FactRevision、目标、ClaimRevision 集合或 Evidence 集合。第二个操作引用同一个 `AuthorizationDecisionRef` 时，MUST 失效关闭（fail closed），无论其准入范围、Method/Version 兼容性或有效期是否满足要求。
+
+11. **幂等提交：**使用相同 `AttestationOperationRef`、相同精确目标、ClaimRevision 集合、Evidence 集合及授权决定重复提交时，MUST 作为幂等重放处理，并 MUST 返回原始已提交结果。该操作 MUST NOT 产生另一份 FactRevision、另一次授权决定消费或另一份独立证明结果。使用相同操作引用但任何已绑定身份或内容不同的提交 MUST 失效关闭（fail closed）。不同的操作引用 MUST NOT 继承原操作的授权消费状态。
+
+12. **撤销与重新授权：**撤销 MUST NOT 恢复或释放已消费的授权决定以供重用。撤销后需要授权的任何后续证明操作 MUST 使用新的 `AuthorizationDecisionRef`，并绑定新的唯一 `AttestationOperationRef`。新的授权决定 MUST NOT 被解释为对已撤销或已消费授权决定的重用、续期或重新分配。
+
 授权决定还 MUST 保留签发权威和决策 Provenance。
 
 Delegation 默认 NOT_ALLOWED。
@@ -202,11 +214,31 @@ Attestor 授权被撤销或发生实质变化后，后续 Attestation 必须使�
 9. 将精确授权决定引用绑定至 FactRevision。
 10. 在可审计提交记录中持久化决定引用和验证结果。
 
+<!--插入于§12.6 第 10 项之后-->
+
+11. **唯一操作绑定验证：**D MUST 验证 `AuthorizationDecisionRef` 恰好绑定一个 `AttestationOperationRef`，且当前证明提交所提供的操作引用与该绑定完全一致。
+
+12. **精确目标验证：**D MUST 验证授权决定绑定的 `FactRef` 和 `FactRevisionRef` 与当前提交的目标完全一致。任何缺失、含糊、替换或不匹配的目标引用 MUST 失效关闭（fail closed）。
+
+13. **精确声明与证据集合验证：**D MUST 验证授权决定绑定的完整 `ClaimRevisionRef` 集合和 `EvidenceRef` 集合与当前提交提供的集合完全一致。当来源引用构成本次获准操作的证明输入部分时，D MUST 同时验证精确的 `ProvenanceRef` 集合。任何缺失、额外、替换、含糊或其他不匹配的集合成员 MUST 失效关闭（fail closed）。
+
+14. **授权消费状态验证：**D MUST 验证授权决定此前未被其他操作消费。未消费的决定 MUST 仅由其唯一绑定的 `AttestationOperationRef` 消费。如果决定已经被消费，D MUST 仅接受该同一操作且所有已绑定身份和内容完全一致的幂等重放，并返回原始已提交结果，不得再次创建 FactRevision 或再次消费该决定。任何其他重用、竞争性消费或冲突重放 MUST 失效关闭（fail closed）。
+
+15. **绑定与消费完整性验证：**D MUST 验证授权决定的操作绑定、目标绑定、ClaimRevision 集合、Evidence 集合及消费状态在整个提交处理过程中保持一致。任何不匹配或无法验证的状态 MUST 失效关闭（fail closed）。当操作绑定或消费要求未得到满足时，D MUST NOT 仅凭准入范围兼容性、Method/Version 兼容性或有效期推断授权成立。
+
+D 执行上述检查属于契约合规性与引用完整性验证。D MUST NOT 独立重新评估、替代或推翻 I 的治理资格判断、授权决定或其作为唯一治理决策权威的地位。
+
 D MUST 保存精确 AuthorizationDecisionRef、Attestor Principal 引用、Method/Version、Scope、授权上下文、授权证据 Digest/引用、Commit Sequence 和 FactRevision 谱系。
 
 授权证据缺失，或授权引用无法解析、验证时，D MUST 拒绝该 Attestation。
 
 D 负责验证契约符合性和引用完整性，不替代 I 作出治理资格判断。
+
+<!--追加于§12.6 末尾-->
+
+**语义契约与实现一致性边界**
+
+本节新增的操作绑定、精确目标、精确输入、一次性消费、防重放及幂等提交要求属于语义契约要求和实现一致性门禁（implementation-conformance gate）。这些要求 MUST NOT 被解释为 Schema、DDL、Public API、存储模型、持久化机制或特定实现数据表示已获批准。本契约不规定或选择任何存储实现、物理数据结构、事务机制或线格式。本契约不引入新的治理角色，也不转移治理决策权。I 仍然是授权决定的唯一治理决策权威。D 仅验证由此产生的契约合规性与引用完整性，不承担或行使 I 的治理权威。这些要求不构成对 Schema、DDL、Public API、生产密钥、Trust Root 或密码学 Profile 的批准。
 
 ### 12.7 Method 正确性边界
 
