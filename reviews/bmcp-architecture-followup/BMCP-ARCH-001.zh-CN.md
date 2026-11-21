@@ -502,16 +502,16 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 - Issue #43：根据 Owner 阶段关闭裁决关闭为 superseded。本 FollowUp 是候选架构交接，不是 Runtime 实施。
 - 当前 Main 基线：713774c381effbbe9e70693f88a7fa99a33a040d（Owner 指定的控制基线 `0d0c1c6238e4e70a93609070b97fef596873916e` 已是祖先；当前 Main 还包含 PR #463、PR #472 及后续治理/文档更正）；H 来源分支已重新读取：session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74；七个 H Blob Pin 已重新获取且 SHA 未变化。
 - 未修改 Runtime 代码或 H 所有源文件。
-- 当前 Main 基线 `713774c381effbbe9e70693f88a7fa99a33a040d` 上的本地门禁：`git diff --check origin/main...HEAD` PASS（退出码 0）；`python3 scripts/check_document_management.py --require-changed origin/main` PASS，仅增量（458 governed documents；16 classified / 442 unclassified；退出码 0）；`python3 scripts/ci/audit_runner_admission.py` PASS（审计 1 个 self-hosted job / 0 violations；退出码 0）。
-- `BASE_SHA=$(git merge-base HEAD origin/main) HEAD_SHA=$(git rev-parse HEAD) PR_BODY='BILINGUAL-MANIFEST: COMPLETE' python3 scripts/check_bilingual_docs.py` PASS（85 frozen / 0 new gaps；3 个变更 Markdown 路径位于 NORMATIVE_ROOTS 之外，未执行配对检查；仅结构门禁；退出码 0）。
-- `python3 scripts/check_bilingual_docs_full.py --source-revision <实测 Head>` FAIL（424 个范围内 Markdown；112 exempt；89 个结构配对缺口；退出码 1）。这是比 PR 增量门禁更广的全树清点，本 PR 不越界修复。
-- `python3 scripts/governance/bilingual/test_bilingual_scripts.py` PASS（13/13；退出码 0）；`python3 scripts/test_check_document_management.py` PASS（202/202；退出码 0）。
+- 当前 Main 基线 `713774c381effbbe9e70693f88a7fa99a33a040d` 上的本地门禁：`git diff --check origin/main...HEAD` PASS（退出码 0）；`python3 scripts/check_document_management.py --require-changed origin/main` PASS，仅增量（468 governed documents；16 classified / 452 unclassified；退出码 0）；`python3 scripts/ci/audit_runner_admission.py` PASS（审计 1 个 self-hosted job / 0 violations；退出码 0）。
+- `BASE_SHA=$(git merge-base HEAD origin/main) HEAD_SHA=$(git rev-parse HEAD) PR_BODY='BILINGUAL-MANIFEST: COMPLETE' python3 scripts/check_bilingual_docs.py` FAIL（80 frozen / 0 new gaps；3 个变更 Markdown 路径位于 NORMATIVE_ROOTS 之外，未执行配对检查；当前 Main 的 PR #472 基线登记产生 21 条 `Embedded bilingual source ... was registered in the same commit that added the file (713774c3)` 错误；退出码 1）。这些路径不在本 PR 三个修改文件中；本 PR 不修改治理门禁或基线。）
+- `python3 scripts/check_bilingual_docs_full.py --source-revision <实测 Head>` FAIL（434 个范围内 Markdown；112 exempt；84 个结构配对缺口；退出码 1）。这是比 PR 增量门禁更广的全树清点，本 PR 不越界修复。
+- `python3 scripts/governance/bilingual/test_bilingual_scripts.py` PASS（13/13；退出码 0）；`python3 scripts/test_check_document_management.py` PASS（207/207；退出码 0）。
 - Applied Delivery Evidence：`python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v`——30 passed / 0 failed（退出码 0）。Provider Outcome：`python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/provider_outcome -p 'test_*.py' -v`——10 run / 5 passed / 5 skipped / 0 failed（退出码 0）；CPO-02/04/05/09/10 仍等待 Owner C 权威 Semantic Validator。
-- EN/ZH 决议状态和范围断言：7/7 PASS（DR-002、DR-003、H-CONFIRM-001..004、`INDEPENDENCE_UNVERIFIABLE`、AT-01..AT-20 `PLANNED_NOT_RUN`、以及仅三个授权修改路径）。这些是结构/状态断言，不是语义双语审查。独立语义/双语审查仍 PENDING。
+- EN/ZH 来源登记和决议状态断言：8/8 PASS（DR-002、DR-003、H-CONFIRM-001..004、`INDEPENDENCE_UNVERIFIABLE`、AT-01..AT-20 `PLANNED_NOT_RUN`、以及仅三个授权修改路径）。这些是结构/状态断言，不是语义双语审查。独立语义/双语审查仍 PENDING。
 - 已知双语内容不对称：AT-01..AT-20 的 20 行详细验收矩阵目前只在中文镜像中逐项列出；英文镜像仅记录汇总状态 `PLANNED_NOT_RUN`，未列出逐项行。本文不将其表述为语义双语一致，待独立双语复审处理。全部 20 项仍为 PLANNED_NOT_RUN。
 - 已按当前 Main 核验 comment 7060675803 的门禁回退指控：`check_schema_keys()` 存在且实际调用；允许键仅为 `kind/required/enum/items/fields`；当前 Schema 没有活动的 `when:` 字段。现有证据不能证明当前 Main 存在该回退，且它不在本 PR diff 中。本 PR 未加入治理门禁/Schema 改动。
 - Owner comment 7061006814 所列前一 Head workflow 失败属于历史记录：44891409843 / 44891373089（Bilingual）、44891373074（Architecture document management）、44891373084（Runner admission）。当前最终 Head 的 workflow IDs 和结果记在 PR delivery record；缺失日志或 step summary 不得推断 PASS。
-- GOV-DOC-002 增量 PASS 不等于全树 PASS；仍有 442 个文档未分类。结构配对不等于语义双语一致性。
+- GOV-DOC-002 增量 PASS 不等于全树 PASS；仍有 452 个文档未分类。结构配对不等于语义双语一致性。
 - Runtime 验收测试：NOT RUN——无 Runtime 授权/仓库。
 - 独立语义一致性审查：PENDING。H/Owner 回复：PENDING。
 
