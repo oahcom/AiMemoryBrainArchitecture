@@ -258,6 +258,9 @@ def current_bilingual_gaps() -> set[str]:
             source = path.relative_to(REPO_ROOT).as_posix()
             if source in EMBEDDED_BILINGUAL_SOURCES:
                 continue
+            # Inventory and changed-path gates must share prefixes or pair-exempt paths become permanent gaps.
+            if source.startswith(PAIR_EXEMPT_PREFIXES):
+                continue
             english = REPO_ROOT / "docs" / "en" / source
             chinese = REPO_ROOT / "docs" / "zh-CN" / source
             # Keep 14-ai-development resolution aligned with the existing
