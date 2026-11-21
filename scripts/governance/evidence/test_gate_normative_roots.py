@@ -102,7 +102,7 @@ class GateRootsTest(unittest.TestCase):
         self.write("14-ai-development/AI-EXEC-002.md")
         self.write("docs/en/14-ai-development/AI-EXEC-002.md")
         changed = {"docs/en/14-ai-development/AI-EXEC-002.md"}
-        errors = self.gate.check_mirror_pairing(changed, False)
+        errors = self.gate.check_mirror_pairing(changed, {p: "M" for p in changed}, False)
         self.assertTrue(any("without paired change" in e for e in errors), errors)
 
     # --- explicit embedded registration (F-07 exit-condition option 2) ---
@@ -147,7 +147,7 @@ class GateRootsTest(unittest.TestCase):
         self.write("docs/en/00-governance/policy.md")
         self.write("docs/zh-CN/00-governance/policy.md")
         changed = {"docs/en/00-governance/policy.md"}
-        errors = self.gate.check_mirror_pairing(changed, False)
+        errors = self.gate.check_mirror_pairing(changed, {p: "M" for p in changed}, False)
         self.assertTrue(any("without paired change" in e for e in errors), errors)
 
     # --- regression: a moved-away side must not demand a partner at the old path ---
@@ -162,7 +162,7 @@ class GateRootsTest(unittest.TestCase):
         self.write("docs/en/00-governance/sub/policy.md")
         self.write("docs/zh-CN/00-governance/sub/policy.md")
         changed = {"docs/en/00-governance/policy.md", "docs/zh-CN/00-governance/policy.md"}
-        self.assertEqual(self.gate.check_mirror_pairing(changed, False), [])
+        self.assertEqual(self.gate.check_mirror_pairing(changed, {p: "M" for p in changed}, False), [])
 
     def test_moved_away_side_still_requires_paired_change(self):
         """A one-sided move remains an error: the pair was split."""
@@ -172,7 +172,7 @@ class GateRootsTest(unittest.TestCase):
             "docs/en/00-governance/policy.md",
             "docs/en/00-governance/sub/policy.md",
         }
-        errors = self.gate.check_mirror_pairing(changed, False)
+        errors = self.gate.check_mirror_pairing(changed, {p: "M" for p in changed}, False)
         self.assertTrue(any("without paired change" in e for e in errors), errors)
 
     # --- root cause: a move must expose its deleted side to changed_paths() ---
