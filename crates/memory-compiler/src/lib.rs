@@ -1267,14 +1267,6 @@ mod scenario_tests {
         }
     }
 
-    fn scenario_lease(generation: u64) -> WorkerLease {
-        WorkerLease {
-            operation_id: id("scenario-operation"),
-            worker_id: id("scenario-worker"),
-            generation,
-        }
-    }
-
     #[test]
     fn llm_outage_before_accepted_leaves_stage_pending() {
         let mut execution =
@@ -1476,7 +1468,6 @@ mod scenario_tests {
     fn forget_while_leased_prevents_publication() {
         #[derive(Clone, Copy, Debug, Eq, PartialEq)]
         enum ForgetCheck {
-            Clear,
             Tombstoned,
         }
 
