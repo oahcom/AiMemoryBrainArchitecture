@@ -3,7 +3,9 @@
 
 use std::collections::BTreeMap;
 
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(
+    serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd,
+)]
 pub struct OpaqueId(String);
 
 impl OpaqueId {
@@ -18,6 +20,121 @@ impl OpaqueId {
     pub fn as_str(&self) -> &str {
         &self.0
     }
+}
+
+/// Stable proposition identity. Per §2.4, proposition-preserving revisions
+/// retain this reference; proposition-identity changes receive a new one.
+/// ID generation remains the caller's responsibility.
+#[derive(
+    serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd,
+)]
+pub struct ClaimRef(OpaqueId);
+
+impl ClaimRef {
+    pub fn new(id: OpaqueId) -> Result<Self, DomainError> {
+        validate_opaque_id(&id)?;
+        Ok(Self(id))
+    }
+
+    pub fn as_str(&self) -> &str {
+        self.0.as_str()
+    }
+
+    pub fn validate(&self) -> Result<(), DomainError> {
+        validate_opaque_id(&self.0)
+    }
+}
+
+/// Exact reference to one immutable ClaimRevision.
+#[derive(
+    serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd,
+)]
+pub struct ClaimRevisionRef(OpaqueId);
+
+impl ClaimRevisionRef {
+    pub fn new(id: OpaqueId) -> Result<Self, DomainError> {
+        validate_opaque_id(&id)?;
+        Ok(Self(id))
+    }
+
+    pub fn as_str(&self) -> &str {
+        self.0.as_str()
+    }
+
+    pub fn validate(&self) -> Result<(), DomainError> {
+        validate_opaque_id(&self.0)
+    }
+}
+
+/// Independent stable identity for a governed Fact attestation.
+#[derive(
+    serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd,
+)]
+pub struct FactRef(OpaqueId);
+
+impl FactRef {
+    pub fn new(id: OpaqueId) -> Result<Self, DomainError> {
+        validate_opaque_id(&id)?;
+        Ok(Self(id))
+    }
+
+    pub fn as_str(&self) -> &str {
+        self.0.as_str()
+    }
+
+    pub fn validate(&self) -> Result<(), DomainError> {
+        validate_opaque_id(&self.0)
+    }
+}
+
+/// Exact reference to one immutable FactRevision, independent of Claim identity.
+#[derive(
+    serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd,
+)]
+pub struct FactRevisionRef(OpaqueId);
+
+impl FactRevisionRef {
+    pub fn new(id: OpaqueId) -> Result<Self, DomainError> {
+        validate_opaque_id(&id)?;
+        Ok(Self(id))
+    }
+
+    pub fn as_str(&self) -> &str {
+        self.0.as_str()
+    }
+
+    pub fn validate(&self) -> Result<(), DomainError> {
+        validate_opaque_id(&self.0)
+    }
+}
+
+fn validate_opaque_id(id: &OpaqueId) -> Result<(), DomainError> {
+    if id.as_str().is_empty() {
+        Err(DomainError::EmptyId)
+    } else {
+        Ok(())
+    }
+}
+
+fn validate_scope_refs(scope_refs: &[ScopeRef]) -> Result<(), DomainError> {
+    if scope_refs.is_empty() {
+        return Err(DomainError::EmptyRequiredField("scope_refs"));
+    }
+    for scope_ref in scope_refs {
+        validate_opaque_id(&scope_ref.scope_id)?;
+        scope_ref.validate()?;
+    }
+    Ok(())
+}
+
+fn validate_id_refs(refs: &[OpaqueId], field: &'static str) -> Result<(), DomainError> {
+    if refs.is_empty() {
+        return Err(DomainError::EmptyRequiredField(field));
+    }
+    for id in refs {
+        validate_opaque_id(id)?;
+    }
+    Ok(())
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -83,6 +200,90 @@ impl Claim {
     }
 }
 
+/// Immutable proposition state. §2.4 CI-01–CI-08 (referent, predicate,
+/// object, polarity, substantive quantifier/modality/temporal meaning, and
+/// scope) classify as NEW_CLAIM. CI-09–CI-13 (evidence, provenance, epistemic
+/// status, confidence/evidence strength, and presentation-only correction)
+/// classify as NEW_REVISION under the same ClaimRef. This value records the
+/// resulting identities separately; it does not mint IDs or classify inputs.
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct ClaimRevision {
+    pub revision_ref: ClaimRevisionRef,
+    pub claim_ref: ClaimRef,
+    pub subject_ref: OpaqueId,
+    pub predicate: String,
+    pub object_value: String,
+    pub polarity: String,
+    pub asserted_at: String,
+    pub scope_refs: Vec<ScopeRef>,
+    pub qualifiers: Vec<String>,
+    pub evidence_refs: Vec<OpaqueId>,
+}
+
+impl ClaimRevision {
+    pub fn validate(&self) -> Result<(), DomainError> {
+        self.revision_ref.validate()?;
+        self.claim_ref.validate()?;
+        validate_opaque_id(&self.subject_ref)?;
+        if self.predicate.is_empty() {
+            return Err(DomainError::EmptyRequiredField("predicate"));
+        }
+        if self.object_value.is_empty() {
+            return Err(DomainError::EmptyRequiredField("object_value"));
+        }
+        if self.polarity.is_empty() {
+            return Err(DomainError::EmptyRequiredField("polarity"));
+        }
+        if self.asserted_at.is_empty() {
+            return Err(DomainError::EmptyRequiredField("asserted_at"));
+        }
+        validate_scope_refs(&self.scope_refs)?;
+        for evidence_ref in &self.evidence_refs {
+            validate_opaque_id(evidence_ref)?;
+        }
+        Ok(())
+    }
+}
+
+/// Independently identified immutable revision of a governed Fact attestation.
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct FactRevision {
+    pub revision_ref: FactRevisionRef,
+    pub fact_ref: FactRef,
+    pub claim_revision_ref: ClaimRevisionRef,
+    pub evidence_refs: Vec<OpaqueId>,
+    pub provenance_refs: Vec<OpaqueId>,
+    pub scope_refs: Vec<ScopeRef>,
+    pub attestor_ref: OpaqueId,
+    pub method: String,
+    pub method_version: String,
+    pub authorization_decision_ref: OpaqueId,
+    pub established_at: String,
+}
+
+impl FactRevision {
+    pub fn validate(&self) -> Result<(), DomainError> {
+        self.revision_ref.validate()?;
+        self.fact_ref.validate()?;
+        self.claim_revision_ref.validate()?;
+        validate_id_refs(&self.evidence_refs, "evidence_refs")?;
+        validate_id_refs(&self.provenance_refs, "provenance_refs")?;
+        validate_scope_refs(&self.scope_refs)?;
+        validate_opaque_id(&self.attestor_ref)?;
+        if self.method.is_empty() {
+            return Err(DomainError::EmptyRequiredField("method"));
+        }
+        if self.method_version.is_empty() {
+            return Err(DomainError::EmptyRequiredField("method_version"));
+        }
+        validate_opaque_id(&self.authorization_decision_ref)?;
+        if self.established_at.is_empty() {
+            return Err(DomainError::EmptyRequiredField("established_at"));
+        }
+        Ok(())
+    }
+}
+
 impl Memory {
     pub fn validate(&self) -> Result<(), DomainError> {
         if self.memory_kind.is_empty() { return Err(DomainError::EmptyRequiredField("memory_kind")); }
@@ -141,6 +342,7 @@ pub struct Event {
     pub retention_class: String,
 }
 
+/// ponytail: superseded by ClaimRef + ClaimRevision; kept until call sites migrate.
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct Claim {
     pub claim_id: OpaqueId,
@@ -674,6 +876,184 @@ mod tests {
         assert!(scopes_intersect(&[canonical.clone()], &[canonical.clone()]));
         assert!(!scopes_intersect(&[canonical.clone()], &[other_namespace]));
         assert!(!scopes_intersect(&[canonical], &[other_kind]));
+    }
+
+    fn claim_revision_fixture() -> ClaimRevision {
+        ClaimRevision {
+            revision_ref: ClaimRevisionRef::new(id("claim-revision-1")).unwrap(),
+            claim_ref: ClaimRef::new(id("claim-1")).unwrap(),
+            subject_ref: id("subject"),
+            predicate: "has_value".into(),
+            object_value: "blue".into(),
+            polarity: "affirm".into(),
+            asserted_at: "2026-01-01T00:00:00Z".into(),
+            scope_refs: vec![scope("s1")],
+            qualifiers: vec![],
+            evidence_refs: vec![id("evidence-1")],
+        }
+    }
+
+    fn fact_revision_fixture() -> FactRevision {
+        FactRevision {
+            revision_ref: FactRevisionRef::new(id("fact-revision-1")).unwrap(),
+            fact_ref: FactRef::new(id("fact-1")).unwrap(),
+            claim_revision_ref: ClaimRevisionRef::new(id("claim-revision-1")).unwrap(),
+            evidence_refs: vec![id("evidence-1")],
+            provenance_refs: vec![id("provenance-1")],
+            scope_refs: vec![scope("s1")],
+            attestor_ref: id("attestor"),
+            method: "independent_review".into(),
+            method_version: "1.0".into(),
+            authorization_decision_ref: id("authorization-decision"),
+            established_at: "2026-01-02T00:00:00Z".into(),
+        }
+    }
+
+    #[test]
+    fn claim_ref_constructs_and_validates() {
+        let claim_ref = ClaimRef::new(id("claim-stable")).unwrap();
+        assert_eq!(claim_ref.as_str(), "claim-stable");
+        assert!(claim_ref.validate().is_ok());
+    }
+
+    #[test]
+    fn claim_ref_rejects_empty_id() {
+        assert_eq!(
+            ClaimRef::new(OpaqueId(String::new())),
+            Err(DomainError::EmptyId)
+        );
+        assert_eq!(
+            ClaimRef(OpaqueId(String::new())).validate(),
+            Err(DomainError::EmptyId)
+        );
+    }
+
+    #[test]
+    fn claim_revision_ref_constructs_and_validates() {
+        let revision_ref = ClaimRevisionRef::new(id("claim-revision")).unwrap();
+        assert_eq!(revision_ref.as_str(), "claim-revision");
+        assert!(revision_ref.validate().is_ok());
+    }
+
+    #[test]
+    fn claim_revision_ref_rejects_empty_id() {
+        assert_eq!(
+            ClaimRevisionRef::new(OpaqueId(String::new())),
+            Err(DomainError::EmptyId)
+        );
+        assert_eq!(
+            ClaimRevisionRef(OpaqueId(String::new())).validate(),
+            Err(DomainError::EmptyId)
+        );
+    }
+
+    #[test]
+    fn fact_ref_constructs_and_validates_independently() {
+        let fact_ref = FactRef::new(id("fact-independent")).unwrap();
+        assert_eq!(fact_ref.as_str(), "fact-independent");
+        assert!(fact_ref.validate().is_ok());
+        assert_ne!(fact_ref.as_str(), "claim-independent");
+    }
+
+    #[test]
+    fn fact_ref_rejects_empty_id() {
+        assert_eq!(
+            FactRef::new(OpaqueId(String::new())),
+            Err(DomainError::EmptyId)
+        );
+        assert_eq!(
+            FactRef(OpaqueId(String::new())).validate(),
+            Err(DomainError::EmptyId)
+        );
+    }
+
+    #[test]
+    fn fact_revision_ref_constructs_and_validates_independently() {
+        let revision_ref = FactRevisionRef::new(id("fact-revision-independent")).unwrap();
+        assert_eq!(revision_ref.as_str(), "fact-revision-independent");
+        assert!(revision_ref.validate().is_ok());
+        assert_ne!(revision_ref.as_str(), "claim-revision-independent");
+    }
+
+    #[test]
+    fn fact_revision_ref_rejects_empty_id() {
+        assert_eq!(
+            FactRevisionRef::new(OpaqueId(String::new())),
+            Err(DomainError::EmptyId)
+        );
+        assert_eq!(
+            FactRevisionRef(OpaqueId(String::new())).validate(),
+            Err(DomainError::EmptyId)
+        );
+    }
+
+    #[test]
+    fn claim_revision_constructs_and_preserves_stable_identity_across_revisions() {
+        let first = claim_revision_fixture();
+        let mut second = first.clone();
+        second.revision_ref = ClaimRevisionRef::new(id("claim-revision-2")).unwrap();
+        assert!(first.validate().is_ok());
+        assert!(second.validate().is_ok());
+        assert_eq!(first.claim_ref, second.claim_ref);
+        assert_ne!(first.revision_ref, second.revision_ref);
+    }
+
+    #[test]
+    fn claim_revision_rejects_empty_scope_and_empty_reference() {
+        let mut missing_scope = claim_revision_fixture();
+        missing_scope.scope_refs.clear();
+        assert_eq!(
+            missing_scope.validate(),
+            Err(DomainError::EmptyRequiredField("scope_refs"))
+        );
+
+        let mut missing_subject = claim_revision_fixture();
+        missing_subject.subject_ref = OpaqueId(String::new());
+        assert_eq!(missing_subject.validate(), Err(DomainError::EmptyId));
+
+        let mut empty_evidence_ref = claim_revision_fixture();
+        empty_evidence_ref.evidence_refs = vec![OpaqueId(String::new())];
+        assert_eq!(empty_evidence_ref.validate(), Err(DomainError::EmptyId));
+    }
+
+    #[test]
+    fn fact_revision_constructs_and_binds_exact_claim_revision_and_authorization() {
+        let revision = fact_revision_fixture();
+        assert!(revision.validate().is_ok());
+        assert_eq!(revision.claim_revision_ref.as_str(), "claim-revision-1");
+        assert_eq!(
+            revision.authorization_decision_ref.as_str(),
+            "authorization-decision"
+        );
+        assert_eq!(revision.fact_ref.as_str(), "fact-1");
+    }
+
+    #[test]
+    fn fact_revision_rejects_missing_method_scope_and_empty_references() {
+        let mut missing_method = fact_revision_fixture();
+        missing_method.method.clear();
+        assert_eq!(
+            missing_method.validate(),
+            Err(DomainError::EmptyRequiredField("method"))
+        );
+
+        let mut missing_scope = fact_revision_fixture();
+        missing_scope.scope_refs.clear();
+        assert_eq!(
+            missing_scope.validate(),
+            Err(DomainError::EmptyRequiredField("scope_refs"))
+        );
+
+        let mut missing_authorization = fact_revision_fixture();
+        missing_authorization.authorization_decision_ref = OpaqueId(String::new());
+        assert_eq!(missing_authorization.validate(), Err(DomainError::EmptyId));
+
+        let mut missing_evidence = fact_revision_fixture();
+        missing_evidence.evidence_refs.clear();
+        assert_eq!(
+            missing_evidence.validate(),
+            Err(DomainError::EmptyRequiredField("evidence_refs"))
+        );
     }
 
 }
