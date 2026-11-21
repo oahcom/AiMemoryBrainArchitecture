@@ -217,7 +217,7 @@ This mapping is an executable interpretation of the tier guarantees already mark
 
 ## 15. In-memory context delivery lifecycle (implemented reference behavior)
 
-The crate now exposes a `ContextDeliveryAdapter` trait and `InMemoryContextDeliveryAdapter`. The in-memory implementation maintains a per-session applied `DeliveryPayload` and connection flag.
+The crate now exposes a `ContextDeliveryAdapter` trait and `InMemoryContextDeliveryAdapter`. The in-memory implementation maintains a per-session applied `DeliveryPayload` and connection flag. This adapter-boundary payload is distinct from the Brain-side `memory_context::ContextSnapshot` build artifact.
 
 | Lifecycle action/state | Implemented behavior |
 |---|---|
@@ -228,5 +228,3 @@ The crate now exposes a `ContextDeliveryAdapter` trait and `InMemoryContextDeliv
 | Reconnected | Restore the in-memory connection flag and report the last successfully applied version (or `None`) |
 
 **NOT IMPLEMENTED:** real transport; per-runtime Agent integration; a durable delivery ledger; durable session state; automatic retry/re-delivery; production reconciliation or attestation. Reconnect is a deterministic in-memory state transition, not proof of remote Agent state. This implementation does not translate provider-specific runtime objects or claim delivery outside its own process memory.
-
-[executed on device: VM-0-9-ubuntu (d03d92fd-4b5d-4bc1-a701-985eb5de69cc)]
