@@ -1,8 +1,8 @@
 # Memory Compiler 阶段契约
 
-**状态：** PROPOSED — 契约级参考；不构成生产授权  
-**Owner：** E — Memory Compiler 与派生记忆生产  
-**Work Item：** GAP-BASELINE-001 / GAP-01  
+**状态：** PROPOSED — 契约级参考；不构成生产授权
+**Owner：** E — Memory Compiler 与派生记忆生产
+**Work Item：** GAP-BASELINE-001 / GAP-01
 **基线：** 1ad6c2cf67a228f597fcbe1c7149c328ecbf38e9
 
 ## 1. 目的与权限

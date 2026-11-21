@@ -1,9 +1,9 @@
 # Memory Compiler Stage Contract
 
-**Status:** PROPOSED — contract-level reference; not production authorization  
-**Owner:** E — Memory Compiler and derived-memory production  
-**Work Item:** GAP-BASELINE-001 / GAP-01  
-**Baseline:** 1ad6c2cf67a228f597fcbe1c7149c328ecbf38e9
+- **Status:** PROPOSED — contract-level reference; not production authorization
+- **Owner:** E — Memory Compiler and derived-memory production
+- **Work Item:** GAP-BASELINE-001 / GAP-01
+- **Baseline:** 1ad6c2cf67a228f597fcbe1c7149c328ecbf38e9
 
 ## 1. Purpose and authority
 

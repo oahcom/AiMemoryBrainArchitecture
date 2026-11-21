@@ -24,4 +24,3 @@ The table maps the six stages in the compiler stage contract to the current ten 
 | Publish gate | §3 — Publish gate; §5 — Cross-owner decisions | No direct test. `test_derive_identity_is_stable` covers candidate identity only, not the gate. | Policy/authority decision availability, fail-closed publication blocking, Owner I permission outcomes, Owner D canonical acceptance, concurrent publication races, and publisher idempotency are not tested or implemented. |
 
 The suite contains ten tests and intentionally does not claim full semantic coverage of any stage. In particular, the Publish gate is a contract boundary only; this reference model has no publication side effect.
-
