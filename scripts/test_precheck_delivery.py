@@ -23,7 +23,7 @@ class PrecheckDeliveryTests(unittest.TestCase):
         )
 
     def make_repo(self, source: str) -> tuple[tempfile.TemporaryDirectory[str], Path]:
-        temporary = tempfile.TemporaryDirectory()
+        temporary = tempfile.TemporaryDirectory(dir="/dev/shm")
         root = Path(temporary.name)
         rust_file = root / "crates" / "sample" / "src" / "lib.rs"
         rust_file.parent.mkdir(parents=True)
