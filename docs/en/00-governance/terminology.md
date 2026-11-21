@@ -4,22 +4,27 @@ document_metadata:
   role: normative-standard
   lifecycle:
     approval:
-      decision_status: Under-Review
-      approver: null
-      decision_date: null
-      approved_version: null
-      approval_scope: null
-      approval_applicability: Not-Applicable-To-Current-Version
+      decision_status: Approved
+      approver: "Project Owner delegate under Issue #305 comment 7042461592"
+      decision_date: "2026-11-21"
+      approved_version:
+        scheme: git
+        value: "7aadf01ea896884d76380010c55aeeca241fe04b"
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Applicable-To-Current-Version
       evidence_reference:
         - "00-governance/terminology.md"
         - "14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md"
       revocation: null
     evidence_verification:
-      verification_status: Invalidated
-      last_verified_date: null
+      verification_status: Verified
+      last_verified_date: "2026-11-21"
       last_verification_note: "Fact and Claim are separated under OWNER-DECISION-FACT-CLAIM-001; this is a bilingual mirror of the canonical terminology source."
     usage_status: Active
-    modification_status: Pending-Reapproval
+    modification_status: Modified
     supersession:
       supersedes: []
       supersession_reason: null
