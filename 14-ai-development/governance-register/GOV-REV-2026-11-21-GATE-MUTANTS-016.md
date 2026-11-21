@@ -14,12 +14,12 @@ Four single-line mutations of `scripts/check_bilingual_docs.py`, each applied al
 
 ```
 python -m unittest discover -s scripts/governance/evidence -p "test_gate*.py"
--> Ran 43 tests
+-> Ran 47 tests
 ```
 
 The file was restored after each run and `git status` confirmed clean.
 
-A mutant is **killed** if at least one test fails. A mutant **survives** if all 43 pass — which means the line it removed is not protected by any test.
+A mutant is **killed** if at least one test fails. A mutant **survives** if all 47 pass — which means the line it removed is not protected by any test.
 
 ---
 
@@ -28,8 +28,8 @@ A mutant is **killed** if at least one test fails. A mutant **survives** if all 
 | # | Mutation | Effect of the mutation | Tests | Verdict |
 |---|---|---|---|---|
 | **M4** | delete `and not partial_side_by_side` | a pair registered as partially translated counts as paired again | **1 failure** | **KILLED** |
-| **M5** | `if not paired and root_name == "14-ai-development":` → `if not paired:` | embedded-bilingual recognition applies to **all nine roots** | **43 OK** | **SURVIVED** |
-| **M6** | `ROOT = Path.cwd()` → `ROOT = REPO_ROOT` | the register-014 defect is fixed (single anchor) | **43 OK** | **SURVIVED** |
+| **M5** | `if not paired and root_name == "14-ai-development":` → `if not paired:` | embedded-bilingual recognition applies to **all nine roots** | **47 OK** | **SURVIVED** |
+| **M6** | `ROOT = Path.cwd()` → `ROOT = REPO_ROOT` | the register-014 defect is fixed (single anchor) | **47 OK** | **SURVIVED** |
 | **M7** | `_has_any_chinese` returns `any(...)` → returns `True` | the content check becomes unconditional | **1 failure** | **KILLED** |
 
 Verbatim failure for M4:
@@ -41,7 +41,7 @@ FAILED (failures=1)
 
 Verbatim failure count for M7: `FAILED (failures=1)`.
 
-Verbatim result for M5 and M6: `Ran 43 tests in ... OK`.
+Verbatim result for M5 and M6: `Ran 47 tests in ... OK`.
 
 ---
 
@@ -56,7 +56,7 @@ if not paired and root_name == "14-ai-development":
     paired = english.is_file() and _carries_chinese(source)
 ```
 
-Deleting `root_name == "14-ai-development"` — making embedded-bilingual recognition root-agnostic — breaks **nothing** in the test suite. All 43 tests still pass.
+Deleting `root_name == "14-ai-development"` — making embedded-bilingual recognition root-agnostic — breaks **nothing** in the test suite. All 47 tests still pass.
 
 So the test suite cannot tell the difference between:
 
@@ -76,6 +76,8 @@ Combined with register 014: a change that would fix a defect corrupts no test, a
 ### 2.3 M4 and M7 are the exception, and the difference is instructive
 
 `PARTIAL_SIDE_BY_SIDE_PAIRS` **is** covered: `test_gate_normative_roots.py` lines 549/562 add entries and line 577 asserts the register is empty at rest. The content predicate is also covered.
+
+**Caveat added after further measurement — see `GOV-REV-2026-11-21-PARTIAL-SCOPE-019.md`.** The coverage is real, but the control it protects is narrower than I implied here. `PARTIAL_SIDE_BY_SIDE_PAIRS` is referenced only at line 44 (declaration) and line 305 (inside `current_bilingual_gaps()`); `check_normative_pairing()` contains **zero** references to it. So M4 being killed proves the *scan* honours the register, not that PR enforcement does. It does not.
 
 So the suite protects the **newest** controls and leaves the **oldest** ones unconstrained. That is the ordinary shape of test decay: tests are written with the feature and never backfilled.
 
@@ -118,18 +120,18 @@ cwd:    repo root   (register 014: a foreign cwd invalidates this measurement)
 
 # baseline
 python -m unittest discover -s scripts/governance/evidence -p "test_gate*.py"
--> Ran 43 tests ... OK
+-> Ran 47 tests ... OK
 
 # M5
 sed -i 's/if not paired and root_name == "14-ai-development":/if not paired:/' scripts/check_bilingual_docs.py
 python -m unittest discover -s scripts/governance/evidence -p "test_gate*.py"
--> Ran 43 tests ... OK          # survived
+-> Ran 47 tests ... OK          # survived
 git checkout -- scripts/check_bilingual_docs.py
 
 # M6
 sed -i 's/^ROOT = Path.cwd()/ROOT = REPO_ROOT/' scripts/check_bilingual_docs.py
 python -m unittest discover -s scripts/governance/evidence -p "test_gate*.py"
--> Ran 43 tests ... OK          # survived
+-> Ran 47 tests ... OK          # survived
 git checkout -- scripts/check_bilingual_docs.py
 
 # M4  -> FAILED (failures=1)     killed
