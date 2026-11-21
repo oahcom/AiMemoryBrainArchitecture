@@ -44,7 +44,7 @@ class RecoveryJoinSchemaArtifactTests(unittest.TestCase):
         self.assertEqual(message_type, "RECOVERY_JOIN_PROOF")
 
         index = (ROOT / "protocol-index.md").read_text(encoding="utf-8")
-        row = next((line for line in index.splitlines() if "| `RECOVERY_JOIN_PROOF` |" in line), None)
+        row = next((line for line in index.splitlines() if len(line.split("|")) > 2 and line.split("|")[1].strip().startswith("`RECOVERY_JOIN_PROOF`")), None)
         self.assertIsNotNone(row, "protocol index must use the schema's exact message_type")
         self.assertIn("schemas/bmcp.recovery-join-1.0.2.schema.json", row)
         self.assertIn("tests/conformance/recovery_cutoff/test_recovery_join_schema_artifact.py", row)
