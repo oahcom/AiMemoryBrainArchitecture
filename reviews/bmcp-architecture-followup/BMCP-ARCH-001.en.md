@@ -237,7 +237,7 @@ H-owned questions go to H first; they are not disguised as Owner decisions.
 - D_I_IMPACT: no authority changes; identity claims still validated by D/I.
 - RUNTIME_IMPLEMENTATION_IMPACT: request/response correlation blocked pending H mapping.
 - REQUIRED_AUTHORITY: H, with C/E/G consumer review.
-- OWNER_DECISION: NAME_RESOLVED_BY_CANONICAL_TERMINOLOGY; REQUEST_IDENTITY_PENDING_H_CONFIRMATION
+- OWNER_DECISION: NAME_RESOLVED_BY_CANONICAL_TERMINOLOGY; MESSAGE_ID_MODEL_ACCEPTED_SEMANTICALLY_BY_OWNER_DELEGATE; NOT_WIRE_FROZEN
 - EVIDENCE: `00-governance/terminology.md` Blob b8770fbb58e4fac087698043c40a57531b1d244d; H envelope Blob 5547ecd78d118bd63e571e5daad87194d9b694e4.
 - FOLLOW_UP_ACTIONS: H publishes versioned mapping; consumers review.
 
