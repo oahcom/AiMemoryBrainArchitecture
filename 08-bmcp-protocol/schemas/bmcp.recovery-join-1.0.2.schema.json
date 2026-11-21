@@ -156,15 +156,18 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 512,
-      "pattern": "^[A-Za-z][A-Za-z0-9._:/-]*$"
+      "pattern": "^[A-Za-z][A-Za-z0-9._:/-]*$",
+      "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
     },
     "digest": {
       "type": "string",
-      "pattern": "^[0-9a-f]{64}$"
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "This digest MUST be a complete fixed-width lowercase hexadecimal value; empty or partial text is not a content commitment."
     },
     "counter": {
       "type": "string",
-      "pattern": "^(0|[1-9][0-9]*)$"
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "description": "This typed counter MUST use the canonical non-negative decimal representation; empty text is outside that numeric domain."
     },
     "position": {
       "type": "object",
@@ -293,7 +296,8 @@
         "request_ledger_query_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "request_pagination_complete": {
           "type": "boolean"
@@ -301,7 +305,8 @@
         "admission_ledger_query_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "admission_pagination_complete": {
           "type": "boolean"
@@ -309,17 +314,20 @@
         "key_status_generation": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this typed sequence, generation, epoch, or version token MUST be parseable and comparable in its declared namespace."
         },
         "request_complete_empty_proof_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "admission_complete_empty_proof_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "producer_registration_sequence_namespace_ref": {
           "$ref": "#/$defs/ref"
@@ -361,23 +369,35 @@
       "allOf": [
         {
           "if": {
-            "properties": {
-              "request_enumeration_status": {
-                "const": "COMPLETE_EMPTY"
+            "anyOf": [
+              {
+                "properties": {
+                  "request_enumeration_status": {
+                    "const": "COMPLETE_NON_EMPTY"
+                  }
+                },
+                "required": [
+                  "request_enumeration_status"
+                ]
               },
-              "request_count": {
-                "const": 0
+              {
+                "properties": {
+                  "request_count": {
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "request_count"
+                ]
               }
-            },
-            "required": [
-              "request_enumeration_status",
-              "request_count"
             ]
           },
           "then": {
             "properties": {
               "request_highwaters": {
-                "type": "object"
+                "type": "object",
+                "minProperties": 1,
+                "description": "When at least one request is observed, or enumeration is COMPLETE_NON_EMPTY, at least one corresponding request high-water is required. Zero-count incomplete/unavailable states may use an empty map; do not synthesize entries."
               }
             }
           },
@@ -385,30 +405,42 @@
             "properties": {
               "request_highwaters": {
                 "type": "object",
-                "minProperties": 1
+                "description": "May be empty when request_count is zero and enumeration is not COMPLETE_NON_EMPTY, including PARTIAL, NOT_ENUMERATED, UNAVAILABLE, or UNKNOWN. Do not synthesize an entry."
               }
             }
           }
         },
         {
           "if": {
-            "properties": {
-              "admission_enumeration_status": {
-                "const": "COMPLETE_EMPTY"
+            "anyOf": [
+              {
+                "properties": {
+                  "admission_enumeration_status": {
+                    "const": "COMPLETE_NON_EMPTY"
+                  }
+                },
+                "required": [
+                  "admission_enumeration_status"
+                ]
               },
-              "admission_count": {
-                "const": 0
+              {
+                "properties": {
+                  "admission_count": {
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "admission_count"
+                ]
               }
-            },
-            "required": [
-              "admission_enumeration_status",
-              "admission_count"
             ]
           },
           "then": {
             "properties": {
               "admission_highwaters": {
-                "type": "object"
+                "type": "object",
+                "minProperties": 1,
+                "description": "When at least one admission is observed, or enumeration is COMPLETE_NON_EMPTY, at least one corresponding admission high-water is required. Zero-count incomplete/unavailable states may use an empty map; do not synthesize entries."
               }
             }
           },
@@ -416,7 +448,7 @@
             "properties": {
               "admission_highwaters": {
                 "type": "object",
-                "minProperties": 1
+                "description": "May be empty when admission_count is zero and enumeration is not COMPLETE_NON_EMPTY, including PARTIAL, NOT_ENUMERATED, UNAVAILABLE, or UNKNOWN. Do not synthesize an entry."
               }
             }
           }
@@ -582,7 +614,8 @@
         },
         "reason": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "When present, this reason MUST identify the disposition; an empty string communicates no rationale."
         },
         "terminal_state": {
           "enum": [
@@ -619,11 +652,13 @@
         "out_of_scope_proof_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "out_of_scope_proof_digest": {
           "type": "string",
-          "pattern": "^[0-9a-f]{64}$"
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "This digest MUST be a complete fixed-width lowercase hexadecimal value; empty or partial text is not a content commitment."
         },
         "owner_snapshot_membership_proof_ref": {
           "$ref": "#/$defs/ref"
@@ -1017,7 +1052,8 @@
         },
         "postgres_cluster_system_identifier": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "When present, this value MUST identify the PostgreSQL cluster; empty text identifies no cluster."
         },
         "database_oid": {
           "$ref": "#/$defs/counter"
@@ -1323,11 +1359,13 @@
         "out_of_scope_proof_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "out_of_scope_proof_digest": {
           "type": "string",
-          "pattern": "^[0-9a-f]{64}$"
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "This digest MUST be a complete fixed-width lowercase hexadecimal value; empty or partial text is not a content commitment."
         }
       },
       "required": [
@@ -1368,12 +1406,14 @@
         "proof_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "owner_authority_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "set_kind": {
           "enum": [
@@ -1384,32 +1424,38 @@
         "scope_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "scope_generation": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this typed sequence, generation, epoch, or version token MUST be parseable and comparable in its declared namespace."
         },
         "owner_ledger_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "owner_ledger_version": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this typed sequence, generation, epoch, or version token MUST be parseable and comparable in its declared namespace."
         },
         "ledger_query_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "owner_high_water": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this typed sequence, generation, epoch, or version token MUST be parseable and comparable in its declared namespace."
         },
         "pagination_complete": {
           "const": true
@@ -1419,27 +1465,32 @@
         },
         "canonical_empty_root": {
           "type": "string",
-          "pattern": "^[0-9a-f]{64}$"
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "This digest MUST be a complete fixed-width lowercase hexadecimal value; empty or partial text is not a content commitment."
         },
         "key_status_generation": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this typed sequence, generation, epoch, or version token MUST be parseable and comparable in its declared namespace."
         },
         "anti_rollback_anchor_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "signature_profile_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "signature_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "issued_at": {
           "type": "string",
@@ -1447,7 +1498,8 @@
         },
         "proof_digest": {
           "type": "string",
-          "pattern": "^[0-9a-f]{64}$"
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "This digest MUST be a complete fixed-width lowercase hexadecimal value; empty or partial text is not a content commitment."
         }
       },
       "required": [
@@ -1478,46 +1530,55 @@
         "proof_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "owner_authority_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "request_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "operation_identity_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "operation_digest": {
           "type": "string",
-          "pattern": "^[0-9a-f]{64}$"
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "This digest MUST be a complete fixed-width lowercase hexadecimal value; empty or partial text is not a content commitment."
         },
         "target_class_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "scope_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "scope_generation": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this typed sequence, generation, epoch, or version token MUST be parseable and comparable in its declared namespace."
         },
         "applicability_policy_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "decision": {
           "const": "OUT_OF_SCOPE_WITH_PROOF"
@@ -1525,27 +1586,32 @@
         "reason_code": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 128
+          "maxLength": 128,
+          "description": "When present, this reason MUST identify the disposition; an empty string communicates no rationale."
         },
         "owner_ledger_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "owner_ledger_version": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this typed sequence, generation, epoch, or version token MUST be parseable and comparable in its declared namespace."
         },
         "owner_high_water": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this typed sequence, generation, epoch, or version token MUST be parseable and comparable in its declared namespace."
         },
         "ledger_query_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "pagination_complete": {
           "const": true
@@ -1553,22 +1619,26 @@
         "key_status_generation": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this typed sequence, generation, epoch, or version token MUST be parseable and comparable in its declared namespace."
         },
         "anti_rollback_anchor_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "signature_profile_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "signature_ref": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
         },
         "issued_at": {
           "type": "string",
@@ -1576,7 +1646,8 @@
         },
         "proof_digest": {
           "type": "string",
-          "pattern": "^[0-9a-f]{64}$"
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "This digest MUST be a complete fixed-width lowercase hexadecimal value; empty or partial text is not a content commitment."
         }
       },
       "required": [
