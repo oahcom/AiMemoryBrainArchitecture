@@ -58,7 +58,7 @@ document_metadata:
 
 ## 1. 目的与状态
 
-本文完成 Agent、MCP、BMCP 之间的架构阶段接入说明，提出职责边界、调用链、依赖契约、生命周期、路由、安全和未来 Runtime 验收计划。本文不定义或修改 H 所有的 BMCP Wire 字段、Transport Envelope、ACK 家族或 Validator，也不授权 Runtime 实施。
+本文完成 Agent、MCP（Model Context Protocol）、BMCP（Brain Memory Context Protocol）之间的架构阶段接入说明，提出职责边界、调用链、依赖契约、生命周期、路由、安全和未来 Runtime 验收计划。本文不定义或修改 H 所有的 BMCP Wire 字段、Transport Envelope、ACK 家族或 Validator，也不授权 Runtime 实施。
 
 状态词汇：DECIDED BASELINE 表示已有源文件或明确 Owner 指令支持；CANDIDATE 表示等待有权 Owner 裁决；DEPENDENCY_NOT_FROZEN 表示上游契约缺失、不完整或未获 Owner 接受；NOT RUN / NOT VERIFIED 表示没有可执行证据；PENDING_OWNER_DECISION 表示尚无有权 Owner 裁决证据。
 
@@ -86,18 +86,20 @@ Issue #7 保留控制性实现状态 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEER
 
 该图表示逻辑依赖关系，不代表每个组件当前都已成为可调用服务。仓库已有 Memory Context 规划 Crate，但没有完整 Agent Integration Server、可调用的端到端 Memory Retrieval 服务，也没有冻结的 BMCP Runtime Transport。
 
+现有系统架构还区分 Brain 到 Adapter 的 Context Delivery 路径：G Memory Context Manager 创建权威 Context Version/ChangeSet；Context Synchronization Engine 跟踪 Delivery Attempt/Status 和 Reconciliation，但不创建 Context 语义；H Protocol Gateway/BMCP 层校验并传输协议；C Agent Adapter 在约定的 Inference Boundary 应用 Managed Context；ACK/Applied Evidence 通过已接受的 H/C 映射返回 G。该路径与北向 MCP Tool Request/Response 相关，但不是同一种 Wire Protocol。
+
 ### 2.2 MCP 与 BMCP 是不同层次
 
 | 关注点 | MCP | BMCP |
 |---|---|---|
 | 关系 | Agent Host/Client 到 Tool/Resource Server | Agent Adapter/Runtime 到 Memory Brain |
-| 目的 | 标准化工具和资源交互 | Brain 记忆控制语义：Telemetry、Recall/Context 交换、Delivery/Applied Evidence |
+| 目的 | Agent Host 与 Server 之间的标准化工具和资源交互 | Memory Brain 与 Agent Adapter 之间的 Brain Memory Context Protocol：Telemetry、Event Ingress 引用、Context Snapshot/Delta、Delivery Lifecycle、ACK、Capability Negotiation、Forget/Revocation 和 Administrative Governance |
 | 负责内容 | MCP Server 生命周期、方法、Tool/Resource 暴露、MCP 请求/响应与协议错误 | 记忆控制消息语义和版本化 BMCP 契约 |
 | Transport | 按采用的 MCP 规范选择并实现 | H 所有的 BMCP Transport Binding；尚未冻结 |
 | 权威性 | 本身不授予 Brain 数据访问权 | 不替代 I 授权、D 生命周期/Forget 或 G Context 权威 |
 | 状态 | 建议的北向接入；Runtime 未实现 | 完整 Wire/Transport/ACK/Validator 映射为 DEPENDENCY_NOT_FROZEN |
 
-**MCP Server 是接入层，不能替代 BMCP。** MCP Tool Call 可以映射为内部类型化操作，但它本身不是 BMCP 消息。MCP 成功不代表 BMCP 接受、交付、ACK 或 Applied。
+**MCP Server 是接入层，不能替代 BMCP。** MCP Tool Call 可以映射为内部类型化操作，但它本身不是 BMCP 消息。MCP 成功不代表 BMCP 接受、交付、ACK 或 Applied。BMCP 携带领域引用和 Payload，但不重新定义 Memory、Claim、Scope、Permission、ContextVersion 或 Forget 语义；这些语义仍归 B/D/G/I。并非每个 MCP Tool Call 都会序列化为 BMCP：只有明确跨越已接受 BMCP Adapter Boundary 的操作才使用 H 定义的 BMCP Wire/Transport。
 
 只允许暴露后端契约和授权均已具备的操作。BMCP 映射冻结前，任何声称 BMCP Delivery 或 Applied 的操作都必须不可用，或明确返回依赖未就绪结果。不得发明占位 BMCP 消息格式。
 
@@ -105,8 +107,10 @@ Issue #7 保留控制性实现状态 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEER
 
 - Agent / Host：推理、规划、任务拆解、行动选择、工具调用、原生会话状态和 Agent 安全策略。
 - Agent Integration（C）：Agent 兼容性、MCP 分发映射、请求关联、校验和响应映射；不拥有 H Wire 契约。
-- MCP Server Runtime：Listener/进程生命周期和 MCP 协议处理；不拥有 Canonical Memory 语义。
-- BMCP Protocol / Adapter（H）：Wire Schema、Transport Envelope、ACK 语义、Validator 和协议符合性。
+- MCP Server Runtime：Listener/进程生命周期和 Model Context Protocol 处理；不拥有 Canonical Memory 语义。
+- Context Synchronization Engine（Runtime 子系统；确切工程 Owner/仓库仍待工程阶段指定）：Delivery Attempt/Status 和 Reconciliation；不创建 Context Version 或语义 ChangeSet。
+- Protocol Gateway / BMCP（H）：已认证协议 Envelope、Version/Capability Negotiation、Wire Schema、Transport、ACK Encoding 和 Validator；不解释语义真值，也不拥有 Memory。
+- Agent Adapter（C）：Agent 侧集成和 Inference Boundary 应用；不重新定义 Brain Memory Policy 或 H Wire Encoding。
 - Memory Context（G）：期望 Context 成员、确定性排序/预算、Context 版本和私有 Delivery Intent。
 - Memory Domain/Lifecycle（B/D/E/F/Storage）：各自权威范围内的规范身份、生命周期、检索/激活、生产和持久化。
 - 身份与授权（I）：主体、策略决策、PermissionEpoch、信任和撤销语义。
@@ -150,6 +154,8 @@ Agent Integration 可以定义消费者需求和内部类型化接口，但不�
 | 依赖 | 当前 main / GitHub 证据 | 裁定 |
 |---|---|---|
 | Agent Integration 逻辑边界 | C Overview、Capability Tiers、Inference Boundary 和 Telemetry 模型已存在 | 基线存在；本文补充候选 MCP 接入架构 |
+| Model Context Protocol Runtime/源文档 | 当前 main 未发现独立 MCP 专项指南、SDK 集成或 Runtime 实现路径；现有协议指南实际是 BMCP 指南 | MCP Server 仍为架构提案；不声称已有 SDK/版本/Transport 实现 |
+| Identity Binding | H Phase 3.6 Identity 记录称协议绑定技术设计为 JOINT-DECIDED；C/F/G 消费者接受仍 OPEN，外部治理批准 GOVERNANCE-BLOCKED，H36 测试 NOT RUN | 不构成生产认证/符合性；消费者接受和 Runtime 证据仍待完成 |
 | Applied Delivery Evidence | main 有 H Applied Delivery Evidence 1.0.0 Schema、Validator 和符合性测试；H 3.8.25/3.8.26 补充说明候选加固 | 仅为候选证据家族，不证明完整 BMCP 映射或生产信任 |
 | 完整 Message Family 映射 | Issue #3 历史记录八家族 Causal-Order Wire 映射缺口；该 Issue 被关闭为 superseded，不是技术验收 | DEPENDENCY_NOT_FROZEN；刷新控制性后继工件并取得 H 决议 |
 | H Transport Binding | 当前 main 源文件未发现已接受的完整 Agent Integration Transport Binding | DEPENDENCY_NOT_FROZEN |
@@ -159,7 +165,27 @@ Agent Integration 可以定义消费者需求和内部类型化接口，但不�
 
 H 补充文件明确指出，真实 C Ledger/Signature 验证、生产 Trust Root、持久 Replay、Crash-Safe Reservation 和 Runtime Adapter 集成仍未完成。Issue #3 历史也指出 Applied Delivery Evidence 与 JF-10 Schema 不会自动满足独立的八家族 Causal-Order 映射。Issue #3 被关闭为 superseded，不会把这些缺口转为批准。
 
-### 4.3 BMCP URI 与 Transport 语义
+### 4.3 BMCP 逻辑消息家族与 Delivery 真实性
+
+当前 H 所有的 BMCP 架构指南列出以下九个逻辑消息家族。该清单仅是家族目录，不冻结字段名、Wire Schema、Transport Framing 或 Version Negotiation。
+
+| 家族 | H 指南中的方向 | 目的 |
+|---|---|---|
+| Telemetry | Adapter -> Brain | 结构化 Agent 观察和结果 |
+| Event Ingress | Producer -> Brain | 携带 Provenance/Idempotency 引用的类型化源 Event |
+| Context Snapshot | Brain -> Adapter | 指定目标版本的完整 Managed Context View |
+| Context Delta | Brain -> Adapter | 从精确 Base 到 Target Version 的原子 ChangeSet |
+| Delivery | Brain -> Adapter | 将 Snapshot/Delta 绑定到 Recipient/Session 和 Delivery Lifecycle |
+| Acknowledgement | Adapter -> Brain | 报告 Lifecycle 状态和 Evidence |
+| Capability Negotiation | 双向 | 协商 Protocol Version、Family、Limit 和 Proof Tier |
+| Forget / Revocation | Brain/I -> Adapter | 使 Managed Content、Session、Queued Work 和离线旧状态失效 |
+| Administrative Governance | I/Control Plane -> Adapter/Gateway | 承载 Policy Epoch、Revocation、Recipient Scope 和 Control Directive |
+
+H 指南区分 Prepared、Delivered、Applied、Rejected、Expired、Superseded 和 Unknown；这些状态不可互换：Delivered 不等于 Applied，Applied 也不证明模型注意或理解。只有 Tier 1 Final-Request-Observable Adapter 且每项已批准的逐请求谓词均通过时，才能发出 Full Applied；Tier 2 和 Tier 3 不得声称 Full Applied。
+
+Issue #3 历史记录中的“八家族 Causal-Order 映射缺口”指当时的映射工作集，不表示当前 H 指南只定义八个逻辑家族；当前指南列出九个。精确映射/版本接受仍归 H。
+
+### 4.4 BMCP URI 与 Transport 语义
 
 - Agent Integration 源文档没有将 bmcp:// 定义为完整 URI Scheme。Authority、Grammar、默认端口、Path 语义、Discovery、Authentication、TLS、Framing、Error Mapping 和 Client Implementation 均未定义。
 - BMCP 是应用层记忆控制协议，不是 URI Scheme 或 Transport。
@@ -227,11 +253,11 @@ H 补充文件明确指出，真实 C Ledger/Signature 验证、生产 Trust Roo
 
 ## 7. 安全与隔离契约
 
-1. Agent、Agent Instance、User/Tenant/Workspace/Project、Session、Task、Environment 是不同类型化身份。Request Body 不能自报已认证身份。
-2. I 拥有 PermissionDecision、PermissionEpoch、Trust 和 Revocation。Agent Integration 消费 I 权威决策/当前性，不自行签发、无限期缓存或本地重解释 Permission。
+1. Agent、Agent Instance、User/Tenant/Workspace/Project、Session、Task、Environment 是不同类型化身份。Request Body 不能自报已认证身份。调用方自行构造 ActorRef 不构成认证证明；H 绑定已认证 Transport Principal，I 定义 Trust Policy。
+2. I 拥有 PermissionDecision、PermissionEpoch、Trust、Revocation 和 Global Forget Governance Policy。Agent Integration 消费 I 权威决策/当前性，不自行签发、无限期缓存或本地重解释 Permission。
 3. PermissionEpoch 变化使受保护操作的缓存授权失效。重新校验遵循 I 的 Ordering/Currentness；本地时间戳比较不能替代。
-4. D 拥有 ForgetFence Token、Lineage 和 Ordering。受保护 Memory Candidate、Context Publication 和迟到结果遵守 D 当前 Fence；Agent/MCP Caller 不能通过重提请求绕过。
-5. Scope 不等于 Permission。Retrieval 前解析并授权 Scope；测试跨 Tenant、跨 Agent、跨 Session 和 Confused Deputy。
+4. D 拥有 Canonical ForgetOperation、Target Reference、ForgetFence Generation、Lineage 和 D 域 Ordering。I 拥有发起/批准权限、跨系统 Target Inventory Policy、Evidence Acceptance Criteria、Retention/Legal Hold/Backup Policy 和 Global Governance Evaluation；I 不重新定义 D 域完成状态。受保护 Memory Candidate、Context Publication 和迟到结果遵守 D 当前 Fence；Agent/MCP Caller 不能通过重提请求绕过。
+5. Scope 不等于 Permission。Retrieval 前解析并授权 Scope；缺失必需 Scope 维度时必须 Deny/Indeterminate，绝不能作为 Wildcard。测试跨 Tenant、跨 Agent、跨 Session 和 Confused Deputy。
 6. Agent Telemetry、Memory Text、Resource Content、Tool Description 和 Annotation 都是不可信数据，不是指令。Memory 不得提升为 System/Developer 权限或授权 Tool。
 7. 暴露 MCP Tool 不等于授权执行。Host Consent 和 I/Tool Host Policy 必须在真实执行边界授权 Invocation 和数据访问。
 8. Principal、Scope、Deadline、Cancellation Token 和 Trace Context 是请求级状态。无明确并发安全契约时，不跨请求共享可变授权或 Memory 状态。
@@ -333,7 +359,7 @@ PR #421 已合并，不再是 Draft：
 - RUNTIME_IMPLEMENTATION_IMPACT: H 冻结前不得实现 BMCP Sender、URI Handler、ACK Parser 或 Validator 集成。
 - REQUIRED_AUTHORITY: H Owner；C 消费者接受；涉及各自绑定的 D/I/G Owner。
 - OWNER_DECISION: PENDING_OWNER_DECISION
-- EVIDENCE: 当前 main H Addenda 3.8.25/3.8.26；Issue #3 历史八家族缺口记录；PR #428 仍是 Open Draft 候选。
+- EVIDENCE: 当前 main H Addenda 3.8.25/3.8.26；BMCP Guide DOC-BMCP-001 仍为 CANDIDATE；H Phase 3.6 Identity-Binding Consumer Status 中 C/F/G 接受仍 OPEN、Governance Approval BLOCKED；Issue #3 历史映射缺口；PR #428 仍是 Open Draft 候选。
 - FOLLOW_UP_ACTIONS: H 发布精确 Pin；C 记录消费者映射；相关 Owner 接受各自绑定。
 
 ### DECISION_REQUEST_ID: AI-INT-DR-002
@@ -351,7 +377,7 @@ PR #421 已合并，不再是 Draft：
 - RUNTIME_IMPLEMENTATION_IMPACT: 不得仅凭 Caller 自报身份、缓存 Permission 或本地 Fence 近似值执行受保护 Retrieval/Send/Publication。
 - REQUIRED_AUTHORITY: I Owner 与 D Owner 独立裁决；C/H/G 消费者分别审查自己的绑定。
 - OWNER_DECISION: PENDING_OWNER_DECISION
-- EVIDENCE: Agent Integration Security Boundary；PR #421 合并代码/正文；D/I 权威声明。
+- EVIDENCE: Agent Integration Security Boundary；PR #421 合并代码/正文；I Security Governance Guide、Scope/Permission Model；D/I 权威声明。
 - FOLLOW_UP_ACTIONS: I/D 发布精确接口和 Test Vector；Runtime Entry Plan 固定引用，不改变语义。
 
 ### DECISION_REQUEST_ID: AI-INT-DR-003
@@ -395,12 +421,27 @@ Runtime 入口保持 Pending，直到记录：
 - 07-agent-integration/adapter-capability-tiers.md
 - 07-agent-integration/inference-boundary-model.md
 - 07-agent-integration/telemetry-model.md
+- 01-system-architecture/system-overview.md
+- 01-system-architecture/component-map.md
+- 01-system-architecture/component-interactions.md
+- 01-system-architecture/data-flows.md
+- 01-system-architecture/responsibility-matrix.md
 - 08-bmcp-protocol/phase-3.8.25-h-applied-delivery-evidence-hardening-addendum.md
 - 08-bmcp-protocol/phase-3.8.26-h-applied-delivery-evidence-csubmitoutcome-join-addendum.md
+- docs/en/08-bmcp-protocol/bmcp-guide.md
+- docs/en/08-bmcp-protocol/adapter-capability-and-applied-attestation.md
+- docs/en/08-bmcp-protocol/phase-3.6-identity-binding-consumer-conformance-status.md
+- 08-bmcp-protocol/owner-snapshot-namespace-and-fence-currentness-contract.md
+- 08-bmcp-protocol/phase-3.8-h-rj-hw-01-typed-watermark-and-fence-binding-contract.md
 - 08-bmcp-protocol/schemas/bmcp.applied-delivery-evidence-1.0.0.schema.json
 - 08-bmcp-protocol/validators/applied_delivery_evidence_validator.py
 - 08-bmcp-protocol/tests/conformance/applied_delivery_evidence/test_applied_delivery_evidence.py
 - 06-memory-context/README.md
+- docs/en/02-domain-model/scope-and-permission-model.md
+- docs/en/09-security-governance/security-governance-guide.md
+- docs/en/12-testing-and-acceptance/cross-module-conformance-guide.md
+- 13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-validation-plan.md
+- docs/architecture-convergence/ARCH-CONVERGENCE-001-CONTRACT-DEPENDENCY-MAP.md
 - crates/memory-context/Cargo.toml
 - crates/memory-context/src/lib.rs
 - 00-governance/architecture-document-management-policy.md

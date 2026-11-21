@@ -63,7 +63,7 @@ document_metadata:
 
 ## 1. Purpose and status
 
-This document completes the architecture-phase integration description for Agent, MCP and BMCP. It proposes the boundary, call path, dependency contract, lifecycle, routing, security and future Runtime acceptance plan. It does not define or amend H-owned BMCP wire fields, transport envelopes, ACK families or validators, and does not authorize Runtime implementation.
+This document completes the architecture-phase integration description for Agent, MCP (Model Context Protocol) and BMCP (Brain Memory Context Protocol). It proposes the boundary, call path, dependency contract, lifecycle, routing, security and future Runtime acceptance plan. It does not define or amend H-owned BMCP wire fields, transport envelopes, ACK families or validators, and does not authorize Runtime implementation.
 
 Status vocabulary: DECIDED BASELINE = supported by an existing source or explicit Owner direction; CANDIDATE = proposed and awaiting the competent Owner; DEPENDENCY_NOT_FROZEN = upstream contract absent, incomplete or not accepted; NOT RUN / NOT VERIFIED = no executable evidence; PENDING_OWNER_DECISION = no competent Owner ruling is evidenced.
 
@@ -91,18 +91,20 @@ Issue #7 retains IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE. Its lates
 
 This is a logical dependency graph, not a claim that every component currently exists as a callable service. The repository has a Memory Context planning crate, but no complete Agent Integration Server, no callable end-to-end Memory Retrieval service, and no frozen BMCP Runtime transport.
 
+The existing system architecture also distinguishes the Brain-to-Adapter context-delivery path: G Memory Context Manager creates the authoritative Context version/ChangeSet; the Context Synchronization Engine tracks delivery attempts/status and reconciliation but does not create Context semantics; the H Protocol Gateway/BMCP layer validates and transports the protocol; the C Agent Adapter applies managed Context at the agreed inference boundary; ACK/Applied evidence returns to G through the accepted H/C mapping. This delivery path is related to, but not the same wire protocol as, the northbound MCP tool request/response path.
+
 ### 2.2 MCP and BMCP are different layers
 
 | Concern | MCP | BMCP |
 |---|---|---|
 | Relationship | Agent Host/Client to tool/resource server | Agent Adapter/Runtime to Memory Brain |
-| Purpose | Standardized tool and resource interaction | Brain memory-control semantics: telemetry, recall/context exchange, delivery/application evidence |
+| Purpose | Standardized tool and resource interaction between Agent Host and Server | Brain Memory Context Protocol between Memory Brain and Agent Adapters: telemetry, event-ingress references, Context snapshots/deltas, delivery lifecycle, ACK, capability negotiation, Forget/revocation and administrative governance |
 | Owns | MCP server lifecycle, methods, tool/resource exposure, MCP request/response and protocol errors | Memory-control message semantics and versioned BMCP contract |
 | Transport | Selected according to adopted MCP specification | H-owned BMCP transport binding; not frozen |
 | Authority | Does not itself grant access to Brain data | Does not replace I authorization, D lifecycle/Forget or G Context authority |
 | Status | Proposed northbound integration; Runtime not implemented | Complete wire/transport/ACK/validator mapping is DEPENDENCY_NOT_FROZEN |
 
-**MCP Server is an access layer, not a substitute for BMCP.** An MCP tool call may map to an internal typed operation; it is not itself a BMCP message. MCP success does not mean BMCP acceptance, delivery, ACK or Applied.
+**MCP Server is an access layer, not a substitute for BMCP.** An MCP tool call may map to an internal typed operation; it is not itself a BMCP message. MCP success does not mean BMCP acceptance, delivery, ACK or Applied. BMCP carries domain references and payloads but does not redefine Memory, Claim, Scope, Permission, ContextVersion or Forget semantics; those remain with B/D/G/I. Not every MCP tool call is serialized as BMCP: only operations explicitly crossing the accepted BMCP adapter boundary use H-defined BMCP wire/transport.
 
 Only operations whose backend contract and authorization exist may be exposed. Until BMCP mapping is frozen, operations claiming BMCP delivery/application remain unavailable or return an explicit dependency-not-ready result. No placeholder BMCP message shape may be invented.
 
@@ -110,8 +112,10 @@ Only operations whose backend contract and authorization exist may be exposed. U
 
 - Agent / Host: reasoning, planning, task decomposition, action selection, tool invocation, native session state and Agent safety policy.
 - Agent Integration (C): Agent-facing compatibility, MCP dispatch mapping, request correlation, validation and response mapping; it does not own H wire contracts.
-- MCP Server Runtime: listener/process lifecycle and MCP protocol handling; it does not own canonical memory semantics.
-- BMCP protocol / Adapter (H): wire schemas, transport envelope, ACK semantics, validators and protocol conformance.
+- MCP Server Runtime: listener/process lifecycle and Model Context Protocol handling; it does not own canonical memory semantics.
+- Context Synchronization Engine (Runtime subsystem; exact engineering owner/repository remains an engineering-phase assignment): delivery attempts/status and reconciliation; it does not create Context versions or semantic ChangeSets.
+- Protocol Gateway / BMCP (H): authenticated protocol envelope, version/capability negotiation, wire schemas, transport, ACK encoding and validation; it does not interpret semantic truth or own memory.
+- Agent Adapter (C): Agent-side integration and inference-boundary application; it does not redefine Brain memory policy or H wire encoding.
 - Memory Context (G): desired Context membership, deterministic ordering/budget, Context version and private delivery intent.
 - Memory domain/lifecycle (B/D/E/F/Storage): canonical identity, lifecycle, retrieval/activation, production and persistence within each Owner's authority.
 - Identity and authorization (I): principal, policy decision, PermissionEpoch, trust and revocation semantics.
@@ -155,6 +159,8 @@ Agent Integration may define consumer requirements and typed internal interfaces
 | Dependency | Evidence on current main / GitHub | Disposition |
 |---|---|---|
 | Agent Integration logical boundary | C overview, capability tiers, inference-boundary and telemetry models exist | Baseline exists; this document adds candidate MCP-facing architecture |
+| Model Context Protocol Runtime/source docs | No separate MCP-specific guide, SDK integration or Runtime implementation path found in current main; current protocol guide is specifically BMCP | MCP Server remains architecture proposal; no SDK/version/transport is claimed implemented |
+| Identity binding | H Phase 3.6 identity record says technical protocol-binding design is JOINT-DECIDED; C/F/G consumer acceptance remains OPEN, external governance approval is GOVERNANCE-BLOCKED, and H36 tests are NOT RUN | Not production authentication/conformance; exact consumer acceptance and runtime evidence remain pending |
 | Applied Delivery Evidence | Main contains H Applied Delivery Evidence 1.0.0 schema, validator and conformance tests; H addenda 3.8.25/3.8.26 describe candidate hardening | Candidate evidence family only; not complete BMCP mapping or production trust |
 | Complete message-family mapping | Issue #3 history records unresolved eight-family causal-order mapping gaps; it was closed as superseded, not technical acceptance | DEPENDENCY_NOT_FROZEN; refresh controlling successor artifacts and H decision |
 | H transport binding | No accepted complete Agent Integration transport binding identified in current main source set | DEPENDENCY_NOT_FROZEN |
@@ -164,7 +170,28 @@ Agent Integration may define consumer requirements and typed internal interfaces
 
 H addenda explicitly leave live C ledger/signature verification, production trust roots, durable replay, crash-safe reservation and Runtime Adapter integration open. Issue #3 history states that Applied Delivery Evidence and JF-10 schemas do not automatically satisfy the separate eight-family causal-order mapping. Closing Issue #3 as superseded does not turn those gaps into approval.
 
-### 4.3 BMCP URI and transport semantics
+
+### 4.3 Logical BMCP families and delivery truth
+
+The current H-owned BMCP architecture guide lists these nine logical message families. This is a family inventory only; it does not freeze field names, wire schemas, transport framing or version negotiation.
+
+| Family | Direction in H guide | Purpose |
+|---|---|---|
+| Telemetry | Adapter -> Brain | Structured Agent observations and outcomes |
+| Event Ingress | Producer -> Brain | Typed source Events with provenance/idempotency references |
+| Context Snapshot | Brain -> Adapter | Complete managed Context view at a target version |
+| Context Delta | Brain -> Adapter | Atomic ChangeSet from exact base to target version |
+| Delivery | Brain -> Adapter | Bind snapshot/delta to recipient/session and delivery lifecycle |
+| Acknowledgement | Adapter -> Brain | Report lifecycle state and evidence |
+| Capability Negotiation | Bidirectional | Negotiate protocol versions, families, limits and proof tiers |
+| Forget / Revocation | Brain/I -> Adapter | Invalidate managed content, sessions, queued work and stale offline state |
+| Administrative Governance | I/control plane -> Adapter/Gateway | Carry policy epochs, revocation, recipient scope and control directives |
+
+The H guide distinguishes Prepared, Delivered, Applied, Rejected, Expired, Superseded and Unknown. These states are not interchangeable: Delivered is not Applied, and Applied does not prove model attention or comprehension. Only a Tier 1 final-request-observable Adapter may emit Full Applied, and only when every approved per-request predicate passes; Tier 2 and Tier 3 MUST NOT claim Full Applied.
+
+Issue #3 history uses the phrase eight-family causal-order mapping gap for its historical workset. That wording is not an assertion that the current H guide lists only eight logical families; the current guide lists nine. Exact mapping/version acceptance remains H-owned and open.
+
+### 4.4 BMCP URI and transport semantics
 
 - Agent Integration sources do not define bmcp:// as a complete URI scheme. Authority, grammar, default port, path semantics, discovery, authentication, TLS, framing, error mapping and client implementation are unspecified.
 - BMCP is an application-level memory-control protocol, not a URI scheme or transport.
@@ -232,11 +259,11 @@ Malformed MCP envelopes and valid MCP tool invocations denied by domain authoriz
 
 ## 7. Security and isolation contract
 
-1. Agent, Agent instance, user/tenant/workspace/project, session, task and environment are distinct typed identities. A request body cannot self-assert authenticated identity.
-2. I owns PermissionDecision, PermissionEpoch, trust and revocation. Agent Integration consumes I's authoritative decision/currentness; it does not mint, indefinitely cache or locally reinterpret permission.
+1. Agent, Agent instance, user/tenant/workspace/project, session, task and environment are distinct typed identities. A request body cannot self-assert authenticated identity. A caller-constructed ActorRef is not proof of authentication; H binds the authenticated transport principal and I defines trust policy.
+2. I owns PermissionDecision, PermissionEpoch, trust, revocation and global Forget governance policy. Agent Integration consumes I's authoritative decision/currentness; it does not mint, indefinitely cache or locally reinterpret permission.
 3. PermissionEpoch changes invalidate cached authorization for protected operations. Revalidation follows I ordering/currentness; local timestamp comparison is not a substitute.
-4. D owns ForgetFence token, lineage and ordering. Protected memory candidates, context publication and late results honor D's current fence. Agent/MCP callers cannot bypass it by resubmitting.
-5. Scope is not permission. Resolve and authorize scope before retrieval; test cross-tenant, cross-agent, cross-session and confused-deputy attempts.
+4. D owns the canonical ForgetOperation, target references, ForgetFence generation, lineage and D-domain ordering. I owns initiation/approval authority, cross-system target-inventory policy, evidence-acceptance criteria, retention/legal-hold/backup policy and global governance evaluation; I does not redefine D-domain completion. Protected memory candidates, context publication and late results honor D's current fence. Agent/MCP callers cannot bypass it by resubmitting.
+5. Scope is not permission. Resolve and authorize scope before retrieval; missing required scope dimensions are deny/indeterminate, never wildcard. Test cross-tenant, cross-agent, cross-session and confused-deputy attempts.
 6. Agent telemetry, memory text, resource content, tool descriptions and annotations are untrusted data, not instructions. Retrieved memory cannot elevate itself to System/Developer authority or authorize a tool.
 7. Exposing an MCP tool does not authorize execution. Host consent and I/tool-host policy authorize invocation and data access at the actual execution boundary.
 8. Principal, scope, deadline, cancellation token and trace context are request-local. No mutable authorization or memory state is shared across requests without an explicit concurrency-safe contract.
@@ -254,7 +281,7 @@ PR #421 is merged, not Draft:
 - PR: [#421 feat(memory): implement Memory Context](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/421)
 - Head commit: 0a4e84276fbcdb94f8efff33d881becc5be460a4
 - Merge commit: d381e7a1fc17bea1dd14be54e8dfd497e8ca2e83
-- Current main observed in this follow-up: bb49dc121c195d7fb2ffa0ffbb9d376186b802fc
+- Current main observed in this follow-up: 277daec7d0c6b5c93d785e9e9c7fd63889827c8f
 - Changed files: Cargo.toml; crates/memory-context/Cargo.toml; crates/memory-context/src/lib.rs.
 
 The merged crate provides deterministic scoped Context snapshot planning and a private non-sendable DeliveryIntent. Its builder accepts ContextIdentity, ContextBudget and already-provided ContextCandidate values. It validates scope membership, Active/Consolidated lifecycle, lineage, duplicate entries/memberships and entry/byte budgets, then orders candidates deterministically and serializes the staged snapshot.
@@ -338,7 +365,7 @@ These requests seek decisions only within the named authority's scope. They do n
 - RUNTIME_IMPLEMENTATION_IMPACT: No BMCP sender, URI handler, ACK parser or validator integration before H freeze.
 - REQUIRED_AUTHORITY: H Owner; C consumer acceptance; affected D/I/G Owners for their own bindings.
 - OWNER_DECISION: PENDING_OWNER_DECISION
-- EVIDENCE: Current main H addenda 3.8.25/3.8.26; Issue #3 historical eight-family gap record; PR #428 is an open Draft candidate only.
+- EVIDENCE: Current main H addenda 3.8.25/3.8.26; BMCP guide DOC-BMCP-001 remains CANDIDATE; H Phase 3.6 identity-binding consumer status leaves C/F/G acceptance OPEN and governance approval BLOCKED; Issue #3 historical mapping gap; PR #428 is an open Draft candidate only.
 - FOLLOW_UP_ACTIONS: H publishes exact pins; C records consumer mapping; affected Owners accept their bindings.
 
 ### DECISION_REQUEST_ID: AI-INT-DR-002
@@ -356,7 +383,7 @@ These requests seek decisions only within the named authority's scope. They do n
 - RUNTIME_IMPLEMENTATION_IMPACT: No protected retrieval/send/publication based solely on caller identity, cached permission or local fence approximation.
 - REQUIRED_AUTHORITY: I Owner and D Owner independently; C/H/G consumers review their own bindings.
 - OWNER_DECISION: PENDING_OWNER_DECISION
-- EVIDENCE: Agent Integration security boundary; merged PR #421 code/body; D/I authority statements.
+- EVIDENCE: Agent Integration security boundary; merged PR #421 code/body; I Security Governance Guide and Scope/Permission Model; D/I authority statements.
 - FOLLOW_UP_ACTIONS: I/D publish exact interfaces and test vectors; Runtime entry plan pins them without changing semantics.
 
 ### DECISION_REQUEST_ID: AI-INT-DR-003
@@ -400,12 +427,27 @@ Verified current-main source set:
 - 07-agent-integration/adapter-capability-tiers.md
 - 07-agent-integration/inference-boundary-model.md
 - 07-agent-integration/telemetry-model.md
+- 01-system-architecture/system-overview.md
+- 01-system-architecture/component-map.md
+- 01-system-architecture/component-interactions.md
+- 01-system-architecture/data-flows.md
+- 01-system-architecture/responsibility-matrix.md
 - 08-bmcp-protocol/phase-3.8.25-h-applied-delivery-evidence-hardening-addendum.md
 - 08-bmcp-protocol/phase-3.8.26-h-applied-delivery-evidence-csubmitoutcome-join-addendum.md
+- docs/en/08-bmcp-protocol/bmcp-guide.md
+- docs/en/08-bmcp-protocol/adapter-capability-and-applied-attestation.md
+- docs/en/08-bmcp-protocol/phase-3.6-identity-binding-consumer-conformance-status.md
+- 08-bmcp-protocol/owner-snapshot-namespace-and-fence-currentness-contract.md
+- 08-bmcp-protocol/phase-3.8-h-rj-hw-01-typed-watermark-and-fence-binding-contract.md
 - 08-bmcp-protocol/schemas/bmcp.applied-delivery-evidence-1.0.0.schema.json
 - 08-bmcp-protocol/validators/applied_delivery_evidence_validator.py
 - 08-bmcp-protocol/tests/conformance/applied_delivery_evidence/test_applied_delivery_evidence.py
 - 06-memory-context/README.md
+- docs/en/02-domain-model/scope-and-permission-model.md
+- docs/en/09-security-governance/security-governance-guide.md
+- docs/en/12-testing-and-acceptance/cross-module-conformance-guide.md
+- 13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-validation-plan.md
+- docs/architecture-convergence/ARCH-CONVERGENCE-001-CONTRACT-DEPENDENCY-MAP.md
 - crates/memory-context/Cargo.toml
 - crates/memory-context/src/lib.rs
 - 00-governance/architecture-document-management-policy.md
