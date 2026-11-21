@@ -16,7 +16,7 @@
 grep -rn "pub fn.*forget" crates/memory-store/src/lib.rs crates/memory-storage/src/lib.rs
 ```
 
-**结果：零命中。** 该精确命令及零命中结果已在 Round 7 交接核验中由独立审查者复现。
+**结果：零命中。** Round 7 交接中 Owner 提供了这条精确命令及零命中结果，作为独立仓库核验；本文记录该证据，不冒称本会话重新执行了本地 shell 命令。
 
 Event-store fence 是一套独立机制：`ForgetFence::record_forget(namespace_key, reason_digest)` 使用自己的数据库连接持久化 namespace fence。其 restore 操作只在恢复 event-store 表时应用 fence；它不会修改 Memory 记录，也不会被 `MemoryStorage::read_current` 或 `MemoryStore::read_current` 查询。
 
