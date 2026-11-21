@@ -9,7 +9,7 @@
 | 消息类型 | 定义出处 | Schema | Validator | 一致性测试 | 状态 |
 |---|---|---|---|---|---|
 | `APPLIED_DELIVERY_EVIDENCE_RECORDED` | Phase 3.8.25 加固补充；Phase 3.8.26 CSubmitOutcome 关联补充 | `schemas/bmcp.applied-delivery-evidence-1.0.0.schema.json`（1.0.0） | `validators/applied_delivery_evidence_validator.py` | `tests/conformance/applied_delivery_evidence/test_applied_delivery_evidence.py` | **IMPLEMENTED** — schema、validator、测试文件均存在。测试执行证据：由外部验证方提供，见 PR 描述。 |
-| `C_PROVIDER_OUTCOME_RECORDED` | C 所有的 CSubmitOutcome 1.0.1 来源 schema；Phase 3.8.26 引用 | C 所有外部 Schema Blob：`a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`；BMCP 内无 schema | **BMCP 内缺失** | **基线 provider_outcome 套件内缺失** | **PARTIAL** — BMCP 本地 validator 和一致性测试缺失。本 PR 新增测试仅验证 schema 结构，不是 C 语义 Validator。 |
+| `C_PROVIDER_OUTCOME_RECORDED` | C 所有的 CSubmitOutcome 1.0.1 来源 schema；Phase 3.8.26 引用 | C 所有外部 Schema Blob：`a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`；BMCP 内无 schema | **BMCP 内缺失** | `tests/conformance/provider_outcome/test_provider_outcome.py` — 仅结构验证，不含 C 语义一致性 | **PARTIAL** — BMCP 本地 validator 和 C 语义一致性验证仍缺失。本 PR 新增测试仅验证 schema 结构，不是 C 语义 Validator。 |
 | `RECOVERY_JOIN`（RecoveryJoin 1.0.2） | Phase 3.8 H-RJ-HW-01 契约引用 | `schemas/` 下**未交付** | **未交付** | **未交付** | **NOT DEFINED** — 存在契约引用，但 schema 未交付。 |
 
 ## 类型定义（非消息类型）
