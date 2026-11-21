@@ -665,7 +665,7 @@ mod tests {
         let mut e=EntityIdentityExtension{entity_ref:EntityRef::new("e1").unwrap(),status:EntityIdentityStatus::Resolved,aliases:vec![],external_identifiers:vec![],merge_lineage:None,split_successor_refs:vec![]};
         e.add_alias(EntityAlias{value:"label".into(),language:None}).unwrap(); assert!(e.validate().is_ok());
         e.status=EntityIdentityStatus::Merged; assert_eq!(e.validate(),Err(DomainError::MissingIdentityLineage));
-        e.merge_lineage=Some(EntityMergeLineage{predecessor_refs:vec![EntityRef::new("e0").unwrap()],successor_ref:EntityRef::new("e2").unwrap(),reason:"resolved".into()}); assert!(e.validate().is_ok());
+        e.merge_lineage=Some(EntityMergeLineage{predecessor_refs:vec![EntityRef::new("e0").unwrap(),EntityRef::new("e1").unwrap()],successor_ref:EntityRef::new("e2").unwrap(),reason:"resolved".into()}); assert!(e.validate().is_ok());
     }
     #[test]
     fn dm2_06_relation_endpoint_kind_is_checked_against_definition() {
