@@ -312,7 +312,37 @@ publication identity，不得创建、替换、缩减或独立重新定义
 阶段建立的 dependency closure。
 
 两个准入阶段都必须针对权威 ForgetFence/Admission
-排序锚点进行串行化。
+排序锚点进行串行化。这里的
+“ForgetFence/Admission ordering anchor”与
+“per-BrainAuthorityRef serialization anchor”
+MUST 指同一个权威排序锚点；不得将任一名称解释为
+独立锁或独立事务域。
+
+对于每个已准入的 Producer participant P，Producer Admission
+所建立的完整 direct 和 transitive dependency closure
+MUST 在对应 participant barrier 被判定为 resolved
+或完成之前持久化完毕。只要该完整依赖闭包中仍有任何成员
+尚未持久化，Fence MUST NOT 将该 participant barrier
+判定为 resolved 或完成。
+
+可观察的完成谓词为：
+DependencyClosurePersisted(P) = TRUE 当且仅当权威持久化
+dependency-registration record 明确标识 P 的完整 direct
+和 transitive dependency set，其完整性状态为 COMPLETE，
+其已持久化 closure digest 与该准确集合匹配，并且权威
+read-after-commit 已确认该记录。只有该谓词为 TRUE 时，
+participant barrier MUST 才可被判定为 resolved 或完成。
+
+UNKNOWN dependency、缺失 dependency record、不完整的
+closure record、不可用的权威读取，或任何 dependency
+persistence failure，MUST NOT 被视为依赖持久化成功
+或 barrier 完成成功。UNKNOWN MUST 保持未解决状态。
+
+MUST NOT 通过 narrowing、截断或以其他方式缩减
+dependency closure，使 participant barrier 更早变为
+resolved 或完成。PublicationParticipant Admission
+MUST 保留 Producer Admission 所建立的完整闭包；
+MUST NOT 重新定义或缩减完成谓词所使用的集合。
 
 对于每个准入阶段，准入成功与对准确准入 participant
 的持久化记录，必须在权威串行化 Transaction Domain
