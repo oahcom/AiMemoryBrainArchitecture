@@ -58,6 +58,110 @@ pub enum CompilerError {
     StaleWorker,
     PublicationSuppressed,
     InvalidPublicationProof,
+    IllegalStateTransition,
+    LeaseExpired,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
+pub enum ExecutionState {
+    Pending,
+    Leased,
+    Running,
+    Staged,
+    PreparedHidden,
+    PublicationAdmission,
+    Published,
+    Suppressed,
+    Blocked,
+    Failed,
+}
+
+impl ExecutionState {
+    pub fn is_terminal(&self) -> bool {
+        matches!(
+            self,
+            Self::Published | Self::Suppressed | Self::Failed
+        )
+    }
+
+    pub fn can_transition_to(&self, next: ExecutionState) -> bool {
+        matches!(
+            (self, next),
+            (Self::Pending, Self::Leased)
+                | (Self::Leased, Self::Running)
+                | (Self::Running, Self::Staged)
+                | (Self::Staged, Self::PreparedHidden)
+                | (Self::PreparedHidden, Self::PublicationAdmission)
+                | (Self::PublicationAdmission, Self::Published)
+                | (Self::PublicationAdmission, Self::Suppressed)
+                | (Self::PublicationAdmission, Self::Blocked)
+                | (Self::PublicationAdmission, Self::Failed)
+                | (Self::Blocked, Self::Pending)
+        )
+    }
+}
+
+/// Recoverable execution metadata for one logical operation and stage.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct StageExecution {
+    pub operation_id: Identity,
+    pub stage: StageName,
+    pub state: ExecutionState,
+    pub attempt_generation: u64,
+    pub last_durable_stage: Option<StageName>,
+    pub lease: Option<WorkerLease>,
+}
+
+impl StageExecution {
+    pub fn new(operation_id: Identity, stage: StageName) -> Self {
+        Self {
+            operation_id,
+            stage,
+            state: ExecutionState::Pending,
+            attempt_generation: 1,
+            last_durable_stage: None,
+            lease: None,
+        }
+    }
+
+    pub fn advance(&mut self, next: ExecutionState) -> Result<(), CompilerError> {
+        if !self.state.can_transition_to(next) {
+            return Err(CompilerError::IllegalStateTransition);
+        }
+        self.state = next;
+        Ok(())
+    }
+
+    pub fn record_durable(&mut self, stage: StageName) {
+        self.last_durable_stage = Some(stage);
+    }
+
+    pub fn retry(&mut self) -> Result<(), CompilerError> {
+        if !matches!(self.state, ExecutionState::Failed | ExecutionState::Blocked) {
+            return Err(CompilerError::IllegalStateTransition);
+        }
+
+        let next_generation = self
+            .attempt_generation
+            .checked_add(1)
+            .ok_or(CompilerError::IllegalStateTransition)?;
+
+        self.attempt_generation = next_generation;
+        self.state = ExecutionState::Pending;
+        self.lease = None;
+        Ok(())
+    }
+
+    pub fn lease_is_current(&self, current_generation: u64) -> bool {
+        self.lease
+            .as_ref()
+            .map(|lease| lease.generation == current_generation)
+            .unwrap_or(false)
+    }
+
+    pub fn can_publish(&self) -> bool {
+        self.state == ExecutionState::PublicationAdmission && self.lease.is_some()
+    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -426,6 +530,60 @@ impl<A: PublicationAuthority> MemoryCompiler<A> {
             &mut self.authority,
         )
     }
+
+    /// §6.3 recovery entry point.
+    ///
+    /// The supplied StagingInput contains the normalized stage result, so this
+    /// reference implementation resumes from that typed result and does not
+    /// repeat ingestion, extraction, or normalization. A missing durable-stage
+    /// marker does not provide an AcceptedEvent to this API; consequently the
+    /// available normalized input is the earliest stage result it can consume.
+    ///
+    /// This is deterministic in-process recovery only. It does not establish
+    /// durable storage, commit-outcome resolution, or production authorization.
+    pub fn resume(
+        &mut self,
+        execution: &StageExecution,
+        staging: StagingInput,
+        lease: WorkerLease,
+        current_generation: u64,
+    ) -> Result<PublishedDerivative, CompilerError> {
+        if execution.state.is_terminal() {
+            return Err(CompilerError::IllegalStateTransition);
+        }
+
+        if !execution.lease_is_current(current_generation)
+            || lease.generation != current_generation
+            || lease.operation_id != execution.operation_id
+            || execution
+                .lease
+                .as_ref()
+                .map(|current| current != &lease)
+                .unwrap_or(true)
+        {
+            return Err(CompilerError::LeaseExpired);
+        }
+
+        if !matches!(
+            execution.last_durable_stage,
+            None
+                | Some(StageName::Ingestion)
+                | Some(StageName::Extraction)
+                | Some(StageName::Normalization)
+                | Some(StageName::Staging)
+                | Some(StageName::PublicationGate)
+        ) {
+            return Err(CompilerError::IllegalStateTransition);
+        }
+
+        let staged = StagingStage::run(staging, lease.generation)?;
+        PublicationGate::run(
+            staged,
+            &lease,
+            current_generation,
+            &mut self.authority,
+        )
+    }
 }
 
 #[cfg(test)]
@@ -612,5 +770,258 @@ mod tests {
         let result = PublicationGate::run(staged, &lease(), 1, &mut authority).unwrap();
         assert_eq!(result.disposition, PublicationDisposition::Published);
         assert_eq!(result.derivative.visibility, Visibility::Visible);
+    }
+}
+
+#[cfg(test)]
+mod state_tests {
+    use super::*;
+
+    fn id(value: &str) -> Identity {
+        Identity::new(value).unwrap()
+    }
+
+    fn execution() -> StageExecution {
+        StageExecution::new(id("operation-1"), StageName::Normalization)
+    }
+
+    fn worker_lease(generation: u64) -> WorkerLease {
+        WorkerLease {
+            operation_id: id("operation-1"),
+            worker_id: id("worker-1"),
+            generation,
+        }
+    }
+
+    fn normalized() -> NormalizedIR {
+        let event = AcceptedEvent {
+            event_id: id("event-1"),
+            receipt_id: id("receipt-1"),
+            payload_digest: "sha256:source".into(),
+            payload: "A deterministic recovery test.".into(),
+            compile_intent_durable: true,
+        };
+        let ingested = IngestionStage::run(event, 1).unwrap();
+        let extracted = ExtractionStage::run(ingested, 1).unwrap();
+        NormalizationStage::run(extracted, 1).unwrap()
+    }
+
+    fn staging_input() -> StagingInput {
+        StagingInput {
+            normalized: normalized(),
+            derivative_id: id("derivative-recovery"),
+            publication_id: id("publication-recovery"),
+            dependency_ids: vec![id("event-1"), id("source-1")],
+            dependency_closure_complete: true,
+            producer_admitted: true,
+            canonical_commit_confirmed: true,
+        }
+    }
+
+    struct RecoveryAuthority {
+        calls: usize,
+    }
+
+    impl PublicationAuthority for RecoveryAuthority {
+        fn obtain_proof(
+            &mut self,
+            staged: &StagedDerivative,
+            lease: &WorkerLease,
+        ) -> Result<PublicationProof, CompilerError> {
+            self.calls += 1;
+            Ok(PublicationProof {
+                publication_id: staged.publication_id.clone(),
+                generation: lease.generation,
+                producer_admitted: true,
+                dependency_closure_complete: true,
+                canonical_commit_confirmed: true,
+                storage_prepared_hidden: true,
+                publication_participant_admitted: true,
+                protected_visibility_authorized: true,
+            })
+        }
+    }
+
+    #[test]
+    fn blocked_is_recoverable_and_not_terminal() {
+        assert!(!ExecutionState::Blocked.is_terminal());
+        assert!(ExecutionState::Blocked.can_transition_to(ExecutionState::Pending));
+    }
+
+    #[test]
+    fn published_is_terminal_and_cannot_transition() {
+        assert!(ExecutionState::Published.is_terminal());
+
+        for next in [
+            ExecutionState::Pending,
+            ExecutionState::Leased,
+            ExecutionState::Running,
+            ExecutionState::Staged,
+            ExecutionState::PreparedHidden,
+            ExecutionState::PublicationAdmission,
+            ExecutionState::Published,
+            ExecutionState::Suppressed,
+            ExecutionState::Blocked,
+            ExecutionState::Failed,
+        ] {
+            assert!(!ExecutionState::Published.can_transition_to(next));
+        }
+    }
+
+    #[test]
+    fn illegal_transition_is_rejected() {
+        let mut execution = execution();
+        assert_eq!(
+            execution.advance(ExecutionState::Published),
+            Err(CompilerError::IllegalStateTransition)
+        );
+        assert_eq!(execution.state, ExecutionState::Pending);
+    }
+
+    #[test]
+    fn happy_path_transitions_are_all_legal() {
+        let mut state = ExecutionState::Pending;
+        for next in [
+            ExecutionState::Leased,
+            ExecutionState::Running,
+            ExecutionState::Staged,
+            ExecutionState::PreparedHidden,
+            ExecutionState::PublicationAdmission,
+            ExecutionState::Published,
+        ] {
+            assert!(state.can_transition_to(next));
+            state = next;
+        }
+        assert_eq!(state, ExecutionState::Published);
+    }
+
+    #[test]
+    fn publication_admission_branches_to_four_dispositions() {
+        for next in [
+            ExecutionState::Published,
+            ExecutionState::Suppressed,
+            ExecutionState::Blocked,
+            ExecutionState::Failed,
+        ] {
+            assert!(ExecutionState::PublicationAdmission.can_transition_to(next));
+        }
+    }
+
+    #[test]
+    fn retry_increments_generation_and_preserves_stage_identity() {
+        let mut execution = execution();
+        execution.state = ExecutionState::Failed;
+        execution.attempt_generation = 7;
+        execution.lease = Some(worker_lease(7));
+
+        let original_operation = execution.operation_id.clone();
+        let original_stage = execution.stage.clone();
+
+        execution.retry().unwrap();
+
+        assert_eq!(execution.state, ExecutionState::Pending);
+        assert_eq!(execution.attempt_generation, 8);
+        assert_eq!(execution.operation_id, original_operation);
+        assert_eq!(execution.stage, original_stage);
+        assert!(execution.lease.is_none());
+    }
+
+    #[test]
+    fn retry_on_published_is_rejected() {
+        let mut execution = execution();
+        execution.state = ExecutionState::Published;
+        assert_eq!(
+            execution.retry(),
+            Err(CompilerError::IllegalStateTransition)
+        );
+        assert_eq!(execution.attempt_generation, 1);
+        assert_eq!(execution.state, ExecutionState::Published);
+    }
+
+    #[test]
+    fn retry_on_blocked_returns_to_pending() {
+        let mut execution = execution();
+        execution.state = ExecutionState::Blocked;
+        execution.attempt_generation = 3;
+
+        execution.retry().unwrap();
+
+        assert_eq!(execution.state, ExecutionState::Pending);
+        assert_eq!(execution.attempt_generation, 4);
+    }
+
+    #[test]
+    fn lease_generation_mismatch_is_not_current() {
+        let mut execution = execution();
+        execution.lease = Some(worker_lease(4));
+
+        assert!(execution.lease_is_current(4));
+        assert!(!execution.lease_is_current(5));
+    }
+
+    #[test]
+    fn resume_rejects_terminal_state() {
+        let mut compiler = MemoryCompiler {
+            authority: RecoveryAuthority { calls: 0 },
+        };
+        let mut execution = execution();
+        execution.state = ExecutionState::Published;
+        execution.lease = Some(worker_lease(1));
+
+        assert_eq!(
+            compiler.resume(
+                &execution,
+                staging_input(),
+                worker_lease(1),
+                1,
+            ),
+            Err(CompilerError::IllegalStateTransition)
+        );
+        assert_eq!(compiler.authority.calls, 0);
+    }
+
+    #[test]
+    fn resume_rejects_stale_lease() {
+        let mut compiler = MemoryCompiler {
+            authority: RecoveryAuthority { calls: 0 },
+        };
+        let mut execution = execution();
+        execution.lease = Some(worker_lease(1));
+
+        assert_eq!(
+            compiler.resume(
+                &execution,
+                staging_input(),
+                worker_lease(1),
+                2,
+            ),
+            Err(CompilerError::LeaseExpired)
+        );
+        assert_eq!(compiler.authority.calls, 0);
+    }
+
+    #[test]
+    fn resume_from_last_durable_stage_skips_completed_work() {
+        let mut compiler = MemoryCompiler {
+            authority: RecoveryAuthority { calls: 0 },
+        };
+        let mut execution = execution();
+        execution.state = ExecutionState::PublicationAdmission;
+        execution.record_durable(StageName::Normalization);
+        execution.lease = Some(worker_lease(1));
+
+        let result = compiler
+            .resume(
+                &execution,
+                staging_input(),
+                worker_lease(1),
+                1,
+            )
+            .unwrap();
+
+        assert_eq!(result.disposition, PublicationDisposition::Published);
+        assert_eq!(result.derivative.visibility, Visibility::Visible);
+        assert_eq!(result.derivative.provenance.stage_name, StageName::Staging);
+        assert_eq!(compiler.authority.calls, 1);
     }
 }
