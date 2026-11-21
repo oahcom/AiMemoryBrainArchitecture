@@ -87,7 +87,10 @@ fields:
                 kind: nullable-string
           approval_scope:
             kind: mapping
-            required: true
+            # Not unconditionally required: DM-03 requires it when the decision
+            # is Approved. Declaring `required: true` here contradicted every
+            # Draft document, including the policy itself.
+            when: decision_status == Approved
             fields:
               type:
                 kind: string
