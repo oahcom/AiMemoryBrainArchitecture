@@ -67,6 +67,10 @@ def validate_recovery_join(raw_envelope: bytes | str) -> dict[str, Any]:
     except DuplicateJSONMemberError as exc:
         return {"status": "INVALID", "errors": [str(exc)]}
     except Exception as exc:
+        # Duplicate members are an attack signature, not a plain syntax error:
+        # surface the hook's message so callers can alarm on it distinctly.
+        if isinstance(exc, ValueError) and str(exc).startswith("duplicate JSON object member"):
+            return {"status": "INVALID", "errors": [str(exc)]}
         return {"status": "INVALID", "errors": [f"invalid JSON: {type(exc).__name__}"]}
     if not isinstance(envelope, dict):
         return {"status": "INVALID", "errors": ["RecoveryJoin envelope must be an object"]}

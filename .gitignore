@@ -1,2 +1,6 @@
 __pycache__/
 *.pyc
+
+# Build output and tool caches (not repository content).
+target/
+.pytest_cache/

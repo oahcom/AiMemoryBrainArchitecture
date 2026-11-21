@@ -77,6 +77,18 @@ pub enum AdapterError {
     },
     /// The current version cannot be incremented without wrapping.
     VersionExhausted,
+    /// The requested delivery-state transition is not permitted by the contract.
+    IllegalStateTransition {
+        from: DeliveryState,
+        to: DeliveryState,
+    },
+    /// `Applied` was requested without an Applied attestation.
+    AppliedRequiresAttestation,
+    /// The attestation's target version is not this delivery's target version.
+    AppliedVersionMismatch {
+        expected: u64,
+        received: u64,
+    },
 }
 
 /// Check whether an adapter tier is sufficient for an operation.
@@ -136,6 +148,138 @@ impl DeliveryPayload {
             version,
             content: content.into(),
         }
+    }
+}
+
+/// Delivery lifecycle states (inference-boundary-model.md §5).
+///
+/// `Delivered` is not `Received`; `Received` is not `Accepted`; `Accepted` is
+/// not `Applied`. Each transition requires its own evidence.
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
+pub enum DeliveryState {
+    Delivered,
+    Received,
+    Accepted,
+    Applied,
+    Rejected,
+    Expired,
+    Superseded,
+}
+
+impl DeliveryState {
+    /// Terminal states cannot transition anywhere (§8).
+    pub const fn is_terminal(self) -> bool {
+        matches!(
+            self,
+            Self::Applied | Self::Rejected | Self::Expired | Self::Superseded
+        )
+    }
+
+    /// Whether `self -> next` is a legal transition per §5/§8.
+    ///
+    /// Notably `Delivered -> Applied` and `Received -> Applied` are false: an
+    /// update must be received *and* accepted before it can be applied.
+    pub const fn can_transition_to(self, next: Self) -> bool {
+        use DeliveryState::{
+            Accepted, Applied, Delivered, Expired, Received, Rejected, Superseded,
+        };
+        matches!(
+            (self, next),
+            (Delivered, Received)
+                | (Received, Accepted)
+                | (Received, Rejected)
+                | (Accepted, Applied)
+                | (Accepted, Rejected)
+                | (Delivered, Expired)
+                | (Received, Expired)
+                | (Accepted, Expired)
+                | (Delivered, Superseded)
+                | (Received, Superseded)
+                | (Accepted, Superseded)
+        )
+    }
+}
+
+/// Applied attestation (§6): proof that the Adapter materialized the exact
+/// target version in the managed region at an inference boundary.
+///
+/// This is an Adapter assertion, not provider-side proof, and it does not prove
+/// model attention, comprehension, or compliance.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct AppliedAttestation {
+    pub context_id: String,
+    pub context_session_id: String,
+    pub target_context_version: u64,
+    pub adapter_id: String,
+    pub adapter_instance_id: String,
+    pub agent_instance_id: String,
+    pub boundary_id: String,
+    pub inference_request_id: Option<String>,
+    /// ISO-8601 timestamp; kept as a string because this crate has no deps.
+    pub applied_at: String,
+}
+
+/// One delivery's lifecycle record: current state plus optional attestation.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct DeliveryRecord {
+    target_context_version: u64,
+    state: DeliveryState,
+    attestation: Option<AppliedAttestation>,
+}
+
+impl DeliveryRecord {
+    /// A newly transported delivery starts at `Delivered` for `target_context_version`.
+    pub fn new(target_context_version: u64) -> Self {
+        Self {
+            target_context_version,
+            state: DeliveryState::Delivered,
+            attestation: None,
+        }
+    }
+
+    pub fn state(&self) -> DeliveryState {
+        self.state
+    }
+
+    pub fn target_context_version(&self) -> u64 {
+        self.target_context_version
+    }
+
+    pub fn attestation(&self) -> Option<&AppliedAttestation> {
+        self.attestation.as_ref()
+    }
+
+    pub fn set_attestation(&mut self, attestation: AppliedAttestation) {
+        self.attestation = Some(attestation);
+    }
+
+    /// Advance the delivery state, enforcing §5.
+    ///
+    /// `Applied` additionally requires an attestation whose
+    /// `target_context_version` equals this delivery's target version: receipt,
+    /// parsing, queueing, or caching never substitutes for materialization.
+    pub fn transition(&mut self, next: DeliveryState) -> Result<(), AdapterError> {
+        if !self.state.can_transition_to(next) {
+            return Err(AdapterError::IllegalStateTransition {
+                from: self.state,
+                to: next,
+            });
+        }
+
+        if next == DeliveryState::Applied {
+            let attestation = self
+                .attestation
+                .as_ref()
+                .ok_or(AdapterError::AppliedRequiresAttestation)?;
+            if attestation.target_context_version != self.target_context_version {
+                return Err(AdapterError::AppliedVersionMismatch {
+                    expected: self.target_context_version,
+                    received: attestation.target_context_version,
+                });
+            }
+        }
+        self.state = next;
+        Ok(())
     }
 }
 

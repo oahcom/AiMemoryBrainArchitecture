@@ -80,7 +80,7 @@ SCHEMA_VERSION = "2"
 REGISTRY_VERSION = "2"
 # Build and VCS state: present in some working copies, absent in others.
 # Declaring them would make the registry describe a machine, not the repo.
-STRUCTURAL_EXCEPTIONS = {".git", "target"}
+STRUCTURAL_EXCEPTIONS = {".git", "target", ".pytest_cache", "__pycache__"}
 SCOPE_REGISTRY = "00-governance/document-scope-registry.yaml"
 
 # The controls a machine cannot perform. **This tuple is the authority**: policy
