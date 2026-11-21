@@ -1,9 +1,12 @@
 //! Memory Compiler reference pipeline.
 //! Deterministic five-stage reference pipeline with a local SQLite admission ledger.
-//! Production D/Storage authority integrations remain explicit and unimplemented.
+//! Production D/Storage authority integrations are provided by the
+//! `publication_authority` adapter.
 
 #[cfg(feature = "sqlite")]
 pub mod admission;
+#[cfg(feature = "sqlite")]
+pub mod publication_authority;
 
 use memory_domain::OpaqueId;
 use sha2::{Digest, Sha256};
@@ -551,7 +554,7 @@ impl PublicationGate {
     }
 }
 
-fn map_admission_error(error: admission::AdmissionError) -> CompilerError {
+pub(crate) fn map_admission_error(error: admission::AdmissionError) -> CompilerError {
     match error {
         admission::AdmissionError::NotFound => CompilerError::MissingProducerAdmission,
         _ => CompilerError::AdmissionStoreFailure,
