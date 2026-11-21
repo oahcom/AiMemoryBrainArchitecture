@@ -1,9 +1,58 @@
+---
+document_metadata:
+  domain: memory-compiler
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope: null
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "04-memory-compiler/consolidation-and-conflict-resolution.md @ a02706344dc8f4f4c0ff3b2433a261156b821b65"
+        - "OWNER-DECISION-FACT-CLAIM-001 (semantic identity dependency)"
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-21"
+      last_verification_note: "Canonical source and bilingual mirror path verified; candidate/open implementation contracts remain unfrozen."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Memory Compiler design specification: consolidation-conflict-resolution"
+    canonical_scope_id: "memory-compiler/consolidation-conflict-resolution"
+    canonical_scope_keywords:
+      - consolidation
+      - conflict
+      - claim-revision
+      - evidence
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "04-memory-compiler/consolidation-and-conflict-resolution.md"
+    en: "docs/en/04-memory-compiler/consolidation-and-conflict-resolution.md"
+    zh-CN: "docs/zh-CN/04-memory-compiler/consolidation-and-conflict-resolution.md"
+---
+
 # 巩固与冲突解决
+
+- 规范源：[consolidation-and-conflict-resolution.md](../../../04-memory-compiler/consolidation-and-conflict-resolution.md)
+- 规范源 Blob：a02706344dc8f4f4c0ff3b2433a261156b821b65
 
 - 文档 ID：E-CONSOLIDATION-001
 - 版本：1.0
-- 源分支：session-e-memory-compiler-2026-11-16
-- 源 Blob：d16f8e2e41a6cca81ad285e5f79f075d87e64edb
 - 对应英文：[Consolidation and Conflict Resolution](../../en/04-memory-compiler/consolidation-and-conflict-resolution.md)
 - 状态：禁止静默覆盖、Evidence 保留和 Canonical Authority 边界已 DECIDED；匹配/评分策略为 CANDIDATE；Claim Identity/Revision 和 ConflictSet Schema 为 OPEN
 - Owner：Memory Compiler / MC-04
@@ -183,7 +232,7 @@ D Canonical Memory/Lifecycle/Entity Manager；B Claim/Epistemic/Time/Provenance 
 
 ## 18. 开放问题
 
-- OPEN：INT-P0-01 Fact/Claim ADR 和 Output Mapping。
+- RESOLVED：INT-P0-01 Fact/Claim 语义及 I1 身份/修订选择已由 OWNER-DECISION-FACT-CLAIM-001 采纳。OPEN：D/I/H 具体 Output Schema、Authorization 和 Consumer Acceptance。
 - OPEN：INT-P1-02 Stable Claim ID 与 Successor Revision 的选择，以及 Canonical ConflictSet Model。
 - OPEN：INT-P1-06 Lifecycle Authority Record 和 Provenance DAG。
 - CANDIDATE：Deterministic Blocking Key + Semantic Candidate Generation + Explicit Review。
