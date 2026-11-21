@@ -30,6 +30,8 @@ pub enum DomainError {
     CrossScopeReference,
     MissingOutcomeEvidence,
     ConflictingIdempotencyPayload,
+    MissingClaimRevision, MissingFactEvidence, MissingFactProvenance, MissingRevisionReason,
+    MissingIdentityLineage, InvalidRelationEndpoint,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -368,6 +370,103 @@ macro_rules! ref_ctor { ($($t:ty),*) => {$(
 impl $t { pub fn new(v: impl Into<String>) -> Result<Self, DomainError> { Ok(Self(OpaqueId::new(v)?)) } pub fn as_str(&self)->&str { self.0.as_str() } }
 )*};}
 ref_ctor!(ClaimRef,ClaimRevisionRef,FactRef,FactRevisionRef,EvidenceRef,ProvenanceRef);
+
+
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, PartialEq)]
+pub struct EntityRef(OpaqueId);
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, PartialEq)]
+pub struct EventRef(OpaqueId);
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, PartialEq)]
+pub struct ExternalSourceRef(OpaqueId);
+ref_ctor!(EntityRef, EventRef, ExternalSourceRef);
+
+/// NOT DEFINED: awaiting I. Placeholder only; security identity semantics are not inferred.
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct AttestorRef { _pending_i: () }
+impl AttestorRef { pub const fn pending_i() -> Self { Self { _pending_i: () } } }
+/// NOT DEFINED: awaiting I. Required placeholder; this is not an authorization grant.
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct AuthorizationDecisionRef { _pending_i: () }
+impl AuthorizationDecisionRef { pub const fn pending_i() -> Self { Self { _pending_i: () } } }
+/// NOT DEFINED: awaiting D. Required placeholder with no invented commit semantics.
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct CanonicalCommitRef { _pending_d: () }
+impl CanonicalCommitRef { pub const fn pending_d() -> Self { Self { _pending_d: () } }
+
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct ClaimRevision {
+    revision_ref: ClaimRevisionRef, claim_ref: ClaimRef, parent_revision_ref: Option<ClaimRevisionRef>,
+    subject: String, predicate: String, object: String, polarity: String, qualifiers: Vec<String>,
+    epistemic_status: EpistemicStatus, valid_time: TimeValue, evidence_refs: Vec<EvidenceRef>,
+    provenance_refs: Vec<ProvenanceRef>, asserted_at: String, revision_reason: String,
+}
+impl ClaimRevision {
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(revision_ref: ClaimRevisionRef, claim_ref: ClaimRef, parent_revision_ref: Option<ClaimRevisionRef>,
+        subject: String, predicate: String, object: String, polarity: String, qualifiers: Vec<String>,
+        epistemic_status: EpistemicStatus, valid_time: TimeValue, evidence_refs: Vec<EvidenceRef>,
+        provenance_refs: Vec<ProvenanceRef>, asserted_at: String, revision_reason: String) -> Result<Self, DomainError> {
+        let value = Self { revision_ref, claim_ref, parent_revision_ref, subject, predicate, object, polarity,
+            qualifiers, epistemic_status, valid_time, evidence_refs, provenance_refs, asserted_at, revision_reason };
+        value.validate()?; Ok(value)
+    }
+    pub fn validate(&self) -> Result<(), DomainError> {
+        for (field, value) in [("subject",&self.subject),("predicate",&self.predicate),("object",&self.object),
+            ("polarity",&self.polarity),("asserted_at",&self.asserted_at),("revision_reason",&self.revision_reason)] {
+            if value.is_empty() { return Err(DomainError::EmptyRequiredField(field)); }
+        }
+        Ok(())
+    }
+    pub fn revision_ref(&self)->&ClaimRevisionRef { &self.revision_ref }
+    pub fn claim_ref(&self)->&ClaimRef { &self.claim_ref }
+    pub fn parent_revision_ref(&self)->Option<&ClaimRevisionRef> { self.parent_revision_ref.as_ref() }
+    pub fn predicate(&self)->&str { &self.predicate }
+    pub fn evidence_refs(&self)->&[EvidenceRef] { &self.evidence_refs }
+    pub fn provenance_refs(&self)->&[ProvenanceRef] { &self.provenance_refs }
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct Fact { fact_ref: FactRef }
+impl Fact { pub fn new(fact_ref: FactRef)->Self { Self { fact_ref } } pub fn fact_ref(&self)->&FactRef { &self.fact_ref } }
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum FactOutcome { Attested, Corrected, Revoked, Withdrawn }
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct FactRevision {
+    fact_ref: FactRef, revision_ref: FactRevisionRef, parent_revision_ref: Option<FactRevisionRef>,
+    claim_revision_refs: Vec<ClaimRevisionRef>, evidence_refs: Vec<EvidenceRef>, provenance_refs: Vec<ProvenanceRef>,
+    scope_ref: ScopeRef, attestor_ref: AttestorRef, authorization_decision_ref: AuthorizationDecisionRef,
+    attestation_method_id: String, attestation_method_version: String, outcome: FactOutcome, rationale: String,
+    canonical_commit_ref: CanonicalCommitRef, correction_or_revocation_reason: Option<String>,
+}
+impl FactRevision {
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(fact_ref: FactRef, revision_ref: FactRevisionRef, parent_revision_ref: Option<FactRevisionRef>,
+        claim_revision_refs: Vec<ClaimRevisionRef>, evidence_refs: Vec<EvidenceRef>, provenance_refs: Vec<ProvenanceRef>,
+        scope_ref: ScopeRef, attestor_ref: AttestorRef, authorization_decision_ref: AuthorizationDecisionRef,
+        attestation_method_id: String, attestation_method_version: String, outcome: FactOutcome, rationale: String,
+        canonical_commit_ref: CanonicalCommitRef, correction_or_revocation_reason: Option<String>) -> Result<Self, DomainError> {
+        let value=Self { fact_ref, revision_ref, parent_revision_ref, claim_revision_refs, evidence_refs, provenance_refs,
+            scope_ref, attestor_ref, authorization_decision_ref, attestation_method_id, attestation_method_version,
+            outcome, rationale, canonical_commit_ref, correction_or_revocation_reason };
+        value.validate()?; Ok(value)
+    }
+    pub fn validate(&self)->Result<(),DomainError> {
+        if self.claim_revision_refs.is_empty(){return Err(DomainError::MissingClaimRevision)}
+        if self.evidence_refs.is_empty(){return Err(DomainError::MissingFactEvidence)}
+        if self.provenance_refs.is_empty(){return Err(DomainError::MissingFactProvenance)}
+        self.scope_ref.validate()?;
+        for (n,v) in [("attestation_method_id",&self.attestation_method_id),("attestation_method_version",&self.attestation_method_version),("rationale",&self.rationale)] {
+            if v.is_empty(){return Err(DomainError::EmptyRequiredField(n))}
+        }
+        if self.parent_revision_ref.is_some() && self.correction_or_revocation_reason.as_deref().unwrap_or("").is_empty(){return Err(DomainError::MissingRevisionReason)}
+        Ok(())
+    }
+    pub fn fact_ref(&self)->&FactRef { &self.fact_ref }
+    pub fn revision_ref(&self)->&FactRevisionRef { &self.revision_ref }
+    pub fn claim_revision_refs(&self)->&[ClaimRevisionRef] { &self.claim_revision_refs }
+    pub fn evidence_refs(&self)->&[EvidenceRef] { &self.evidence_refs }
+    pub fn provenance_refs(&self)->&[ProvenanceRef] { &self.provenance_refs }
+}
 
 #[cfg(test)]
 mod tests {
