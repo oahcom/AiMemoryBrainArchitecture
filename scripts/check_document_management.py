@@ -31,22 +31,21 @@ import subprocess
 import sys
 from pathlib import Path
 
-# Normative roots to govern. Keep in sync with check_bilingual_docs.py.
-NORMATIVE_ROOTS = (
-    "00-governance", "01-system-architecture", "02-domain-model",
-    "03-memory-brain", "04-memory-compiler", "05-memory-runtime",
-    "06-memory-context", "07-agent-integration", "08-protocols",
-    "09-storage-and-index", "10-security-and-governance",
-    "11-consistency-and-recovery", "12-testing-and-acceptance",
-    "13-engineering-decisions", "14-ai-development",
-    # Bilingual mirrors of the sources above. Counted so that mirror drift is
-    # visible rather than falling outside the audit entirely.
+# Normative roots and exemptions come from the bilingual gate, so the two
+# gates can never disagree about what is governed. Duplicating these lists is
+# how 08-protocols silently stopped existing.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from check_bilingual_docs import (  # noqa: E402
+    NORMATIVE_ROOTS as _BILINGUAL_ROOTS,
+    PAIR_EXEMPT_PREFIXES as _BILINGUAL_EXEMPT,
+)
+
+NORMATIVE_ROOTS = tuple(sorted(_BILINGUAL_ROOTS)) + (
+    # Bilingual mirrors. Counted so mirror drift is visible instead of falling
+    # outside the audit entirely.
     "docs/en", "docs/zh-CN",
 )
-EXEMPT_PREFIXES = (
-    "14-ai-development/work-items/",
-    "14-ai-development/prompts/",
-    "14-ai-development/adr/",
+EXEMPT_PREFIXES = tuple(_BILINGUAL_EXEMPT) + (
     "00-governance/templates/",
     "00-governance/reports/",
     "00-governance/drafts/",
@@ -117,6 +116,20 @@ SCOPE_ID_RE = re.compile(r"^[a-z][a-z0-9-]*/[a-z0-9]+(-[a-z0-9]+)*$")
 KEY_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]*$")
 SEQ_MAPPING_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]*:(\s|$)")
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
+
+# Always required, checked leaf by leaf. A dimension that exists but declares
+# no state is not a classification.
+REQUIRED_FIELDS = (
+    "domain",
+    "role",
+    "lifecycle.approval.decision_status",
+    "lifecycle.usage_status",
+    "lifecycle.modification_status",
+    "lifecycle.evidence_verification.verification_status",
+    "authority.canonical_status",
+    "authority.normative_status",
+    "authority.canonical_conflict_status",
+)
 
 class ParseError(Exception):
     pass
@@ -395,12 +408,33 @@ def body_text(text: str) -> str:
 
 
 def body_hash(text: str) -> str:
-    normalised = "\n".join(line.rstrip() for line in body_text(text).splitlines())
-    return hashlib.sha256((normalised.strip() + "\n").encode()).hexdigest()
+    """Hash of the document body under the declared equivalence.
+
+    Declared, not incidental: line endings are normalised to LF because
+    checkouts differ (core.autocrlf) and would otherwise break every approval;
+    trailing spaces/tabs per line are ignored; leading and trailing blank lines
+    are ignored. Everything else is compared byte-for-byte, including leading
+    spaces on a non-blank line.
+    """
+    unified = body_text(text).replace("\r\n", "\n").replace("\r", "\n")
+    lines = [line.rstrip(" \t") for line in unified.split("\n")]
+    while lines and not lines[0]:
+        lines.pop(0)
+    while lines and not lines[-1]:
+        lines.pop()
+    return hashlib.sha256(("\n".join(lines) + "\n").encode()).hexdigest()
 
 
 def _enum(errors, value, allowed, label, rule="DM-02"):
-    if value is not None and value not in allowed:
+    if value is None:
+        return
+    if not isinstance(value, str):
+        # A list or mapping here would raise TypeError on set membership.
+        errors.append(
+            f"DM-01 {label} must be a scalar, got {type(value).__name__}"
+        )
+        return
+    if value not in allowed:
         errors.append(f"{rule} {label} not in enumeration: {value!r}")
 
 
@@ -434,11 +468,13 @@ def check_document(path: Path, text: str) -> tuple[list[str], dict | None]:
 
     errors: list[str] = []
 
-    # DM-01 structure.
+    # DM-01 structure. Presence is checked leaf by leaf: `lifecycle: {approval:
+    # {}}` would otherwise satisfy "the dimension exists" while declaring no
+    # lifecycle state at all.
     errors += unknown_keys(meta, TOP_KEYS, GOVERNED_ENTRY)
-    for field in ("domain", "role", "lifecycle", "authority"):
-        if meta.get(field) is None:
-            errors.append(f"DM-01 missing required dimension: {field}")
+    for leaf in REQUIRED_FIELDS:
+        if dig(meta, *leaf.split(".")) is None:
+            errors.append(f"DM-01 missing required field: {leaf}")
     lifecycle = as_map(meta.get("lifecycle"), "lifecycle", errors)
     authority = as_map(meta.get("authority"), "authority", errors)
     errors += unknown_keys(lifecycle, LIFECYCLE_KEYS, "lifecycle")
@@ -771,12 +807,33 @@ def check_scope_and_relations(root: Path, docs: dict[str, dict]) -> list[str]:
             if conflicted:
                 print(f"  conflict: scope {scope_id!r} has no authoritative source")
 
-    # DM-12 bilingual counterpart: exists, symmetric, classified, agrees.
-    declared: dict[str, set[str]] = {}
+    # DM-12 bilingual counterpart: exists, classified, same group, no missing
+    # link.
+    #
+    # Model: a source document names its mirrors under en / zh-CN. A mirror
+    # names the source under `source`, and may name its sibling mirror. Every
+    # document in one group therefore resolves to the same source, and the
+    # source lists every mirror that names it. That last check is what a plain
+    # pairwise symmetry test cannot catch: with A<->en only, a third mirror
+    # could be absent from both and nobody would notice.
+    lang_prefix = {"en": "docs/en/", "zh-CN": "docs/zh-CN/"}
+
+    def source_of(meta: dict) -> str | None:
+        node = meta.get("bilingual_counterpart")
+        if not isinstance(node, dict) or not node.get("source"):
+            return None
+        return str(node["source"]).lstrip("./")
+
     for rel, meta in docs.items():
         counterpart = meta.get("bilingual_counterpart")
         if not isinstance(counterpart, dict):
             continue
+        own_source = source_of(meta)
+        if own_source and own_source.startswith(("docs/en/", "docs/zh-CN/")):
+            errors.append(
+                f"DM-12 {rel}: source must be the authoritative file, not a mirror "
+                f"({own_source})"
+            )
         for lang, target in counterpart.items():
             if not target:
                 continue
@@ -790,7 +847,12 @@ def check_scope_and_relations(root: Path, docs: dict[str, dict]) -> list[str]:
                     f"{target_rel}"
                 )
                 continue
-            declared.setdefault(rel, set()).add(target_rel)
+            expected = lang_prefix.get(lang)
+            if expected and not target_rel.startswith(expected):
+                errors.append(
+                    f"DM-12 {rel}: bilingual_counterpart.{lang} must point under "
+                    f"{expected}, got {target_rel}"
+                )
             other = docs.get(target_rel)
             if other is None:
                 errors.append(
@@ -798,15 +860,21 @@ def check_scope_and_relations(root: Path, docs: dict[str, dict]) -> list[str]:
                     "document_metadata, so parity cannot be verified"
                 )
                 continue
-            # Symmetry: the counterpart must point back at this document.
-            back = other.get("bilingual_counterpart")
-            back_targets = {
-                str(v).lstrip("./") for v in back.values() if v
-            } if isinstance(back, dict) else set()
-            if rel not in back_targets:
+            # Both ends must belong to the same group.
+            others_source = source_of(other)
+            if own_source:
+                # A mirror may point at its own source, or at a sibling mirror
+                # of that same source; anything else is a stray link.
+                if target_rel != own_source and others_source != own_source:
+                    errors.append(
+                        f"DM-12 {rel} -> {target_rel}: neither its source "
+                        f"({own_source}) nor a sibling mirror of it "
+                        f"({others_source!r})"
+                    )
+            elif others_source != rel:
                 errors.append(
-                    f"DM-12 {rel} <-> {target_rel}: counterpart relation is not "
-                    "symmetric (the mirror does not declare this document)"
+                    f"DM-12 {rel} <-> {target_rel}: the counterpart does not name "
+                    f"{rel} as its source"
                 )
             for field in (("domain",), ("role",), ("authority", "normative_status")):
                 mine, theirs = dig(meta, *field), dig(other, *field)
@@ -823,6 +891,24 @@ def check_scope_and_relations(root: Path, docs: dict[str, dict]) -> list[str]:
                     f"DM-12 {rel}: both a document and its mirror claim Canonical "
                     f"({target_rel})"
                 )
+
+    # Every mirror must appear in its source's list: no silent third party.
+    listed_by_source = {
+        rel: {str(v).lstrip("./") for k, v in meta["bilingual_counterpart"].items()
+              if v and k in lang_prefix}
+        for rel, meta in docs.items()
+        if isinstance(meta.get("bilingual_counterpart"), dict)
+    }
+    for rel, meta in docs.items():
+        source_rel = source_of(meta)
+        if not source_rel or source_rel not in docs:
+            continue
+        listed = listed_by_source.get(source_rel)
+        if listed is not None and rel not in listed:
+            errors.append(
+                f"DM-12 {rel}: names {source_rel} as its source, but {source_rel} "
+                "does not list this mirror"
+            )
 
     # DM-13 supersession graph.
     graph: dict[str, list[str]] = {}
@@ -906,17 +992,16 @@ def main() -> int:
         help="treat every unclassified governed document as an error",
     )
     parser.add_argument(
-        "--only", nargs="*", default=None,
-        help="restrict the run to these repository-relative paths",
-    )
-    parser.add_argument(
         "--require-changed", metavar="REF", default=None,
         help="require metadata on every governed file changed since REF",
     )
     args = parser.parse_args()
 
+    # There is deliberately no --only: cross-document rules (DM-07, DM-11,
+    # DM-12, DM-13) are only sound over the whole tree. A partial set would let
+    # one file hide another's duplicate Canonical claim and still print PASS.
     root = Path(args.root).resolve()
-    targets = [root / p for p in args.only] if args.only else governed_files(root)  # noqa: E501
+    targets = governed_files(root)
     required = changed_paths(root, args.require_changed) if args.require_changed else set()
     is_git = git(root, "rev-parse", "--git-dir") is not None
 

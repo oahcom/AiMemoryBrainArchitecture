@@ -38,11 +38,14 @@ BASE = """
   lifecycle:
     approval:
       decision_status: Draft
+    evidence_verification:
+      verification_status: Unverified
     usage_status: Active
     modification_status: Unchanged
   authority:
     canonical_status: Non-Canonical
     normative_status: Informative
+    canonical_conflict_status: None
 """
 
 APPROVED = """
@@ -57,11 +60,14 @@ APPROVED = """
       approval_scope:
         type: Full-document
       approval_applicability: Applicable-To-Current-Version
+    evidence_verification:
+      verification_status: Unverified
     usage_status: Active
     modification_status: Unchanged
   authority:
     canonical_status: Non-Canonical
     normative_status: Informative
+    canonical_conflict_status: None
 """
 
 CANONICAL = """
@@ -70,6 +76,8 @@ CANONICAL = """
   lifecycle:
     approval:
       decision_status: Draft
+    evidence_verification:
+      verification_status: Unverified
     usage_status: Active
     modification_status: Unchanged
   authority:
@@ -158,6 +166,7 @@ PARSER_REJECTS = {
     ),
     "lifecycle is a string": BASE.replace(
         "  lifecycle:\n    approval:\n      decision_status: Draft\n"
+        "    evidence_verification:\n      verification_status: Unverified\n"
         "    usage_status: Active\n    modification_status: Unchanged",
         "  lifecycle: unexpected-string",
     ),
@@ -190,6 +199,18 @@ def run_parser() -> None:
 def run_fields() -> None:
     print("field rules")
     expect("bad domain rejected", doc(BASE.replace("architecture", "misc")), "DM-02")
+    # P0-01: a non-scalar must be an error, not an unhashable-type crash.
+    expect("list-valued domain is a DM-01 error", doc(BASE.replace(
+        "  domain: architecture", "  domain: []"
+    )), "DM-01")
+    # P1-01: an empty shell must not pass just because the keys are present.
+    expect("empty lifecycle/authority shell rejected", doc("""
+  domain: architecture
+  role: design-specification
+  lifecycle:
+    approval:
+  authority:
+"""), "DM-01")
     expect("unknown key rejected", doc(BASE + "\n  lifecycle_status: Active"), "unknown key")
     expect("Approved without version rejected", doc(APPROVED.replace(
         '      approved_version:\n        scheme: git\n        value: "deadbeef"\n', ""
@@ -342,30 +363,52 @@ def run_repository_rules() -> None:
         (root / "00-governance" / "b.md").write_text(doc(CANONICAL), encoding="utf-8")
         expect_gate("T07 Resolved selecting a non-Canonical document fails", root, 1)
 
-    # T09 / T10: mirror parity needs a classified, symmetric counterpart.
-    def with_mirror(target: str) -> str:
-        return BASE + f'\n  bilingual_counterpart:\n    en: "{target}"'
+    # T09 / T10: mirror parity needs a classified, correctly named group.
+    def with_block(extra: str) -> str:
+        return BASE + "\n  bilingual_counterpart:\n" + extra
+
+    source_block = (
+        '    en: "docs/en/a.md"\n'
+        '    zh-CN: "docs/zh-CN/a.md"'
+    )
+    mirror_block = '    source: "00-governance/a.md"'
+
+    def write_group(root: Path, *, source: str | None, mirrors: dict[str, str | None]):
+        (root / "docs" / "en").mkdir(parents=True, exist_ok=True)
+        (root / "docs" / "zh-CN").mkdir(parents=True, exist_ok=True)
+        if source is not None:
+            (root / "00-governance" / "a.md").write_text(
+                doc(with_block(source)), encoding="utf-8")
+        for lang, body in mirrors.items():
+            p = root / "docs" / lang / "a.md"
+            if body is None:
+                p.write_text("---\ntitle: no metadata\n---\n\n# T\n", encoding="utf-8")
+            else:
+                p.write_text(doc(with_block(body)), encoding="utf-8")
 
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
-        (root / "00-governance" / "a.md").write_text(
-            doc(with_mirror("00-governance/b.md")), encoding="utf-8")
-        (root / "00-governance" / "b.md").write_text("# no metadata\n", encoding="utf-8")
+        write_group(root, source=source_block, mirrors={"en": None, "zh-CN": mirror_block})
         expect_gate("T09 counterpart without metadata fails", root, 1)
 
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
-        (root / "00-governance" / "a.md").write_text(
-            doc(with_mirror("00-governance/b.md")), encoding="utf-8")
-        (root / "00-governance" / "b.md").write_text(doc(BASE), encoding="utf-8")
-        expect_gate("T10 asymmetric counterpart relation fails", root, 1)
+        write_group(root, source=source_block,
+                    mirrors={"en": "", "zh-CN": mirror_block})
+        expect_gate("T10 counterpart not naming its source fails", root, 1)
 
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
-        for name, other in (("a", "b"), ("b", "a")):
-            (root / "00-governance" / f"{name}.md").write_text(
-                doc(with_mirror(f"00-governance/{other}.md")), encoding="utf-8")
-        expect_gate("symmetric counterparts conform", root, 0)
+        write_group(root, source=source_block,
+                    mirrors={"en": mirror_block, "zh-CN": mirror_block})
+        expect_gate("T12 symmetric source/mirror group conforms", root, 0)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        # Source lists only en; zh-CN still claims it: a missing third party.
+        write_group(root, source='    en: "docs/en/a.md"',
+                    mirrors={"en": mirror_block, "zh-CN": mirror_block})
+        expect_gate("T13 unlisted third mirror fails", root, 1)
 
     # T08: the generated marker counts anywhere in the body, not just line 1-8.
     with tempfile.TemporaryDirectory() as tmp:

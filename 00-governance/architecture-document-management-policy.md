@@ -46,7 +46,7 @@ document_metadata:
 # Architecture Document Management Policy / 架构文档管理条例
 
 - Policy ID: GOV-DOC-002
-- Version: 1.2
+- Version: 1.3
 - Status: **NORMATIVE — PARTIALLY MACHINE-CHECKED** (see §9.1 for exactly which rules a machine can prove)
 - Owner: A — Principal Integration / Architecture Governance
 - Relation to GOV-DOC-001: **SUPPLEMENTARY — does not weaken, replace or waive GOV-DOC-001**
@@ -65,13 +65,17 @@ Where this policy and GOV-DOC-001 differ, GOV-DOC-001 prevails. This policy adds
 
 ## 2. Scope / 适用范围
 
-Applies to every Markdown file under the normative roots declared in `scripts/check_bilingual_docs.py` (`NORMATIVE_ROOTS`), excluding `PAIR_EXEMPT_PREFIXES` and generated outputs.
+Applies to every Markdown file under the normative roots declared in `scripts/check_bilingual_docs.py` (`NORMATIVE_ROOTS`) plus the bilingual mirrors `docs/en` and `docs/zh-CN`, excluding `PAIR_EXEMPT_PREFIXES` and the additional record paths in the gate. The gate imports the roots from that script rather than restating them, so the two gates cannot disagree about what is governed.
 
-适用于 `scripts/check_bilingual_docs.py` 中 `NORMATIVE_ROOTS` 声明的所有 Markdown 文件，排除 `PAIR_EXEMPT_PREFIXES` 与生成产物。
+适用于 `scripts/check_bilingual_docs.py` 中 `NORMATIVE_ROOTS` 声明的所有 Markdown 文件，加上双语镜像 `docs/en` 与 `docs/zh-CN`，排除 `PAIR_EXEMPT_PREFIXES` 与门禁内列的记录类路径。门禁直接从该脚本导入根目录清单，不再自行重述，因此两个门禁对"受治理范围"不可能给出不同答案。
 
-Out of scope: source code, machine-generated schema dumps, raw test logs, images. Their architectural meaning MUST be documented in an in-scope document.
+Generated artifacts are **in scope**: they are scanned so that DM-09 can hold them to "not Normative, not Canonical". Being in scope for scanning is not a requirement that they carry an approval.
 
-不适用：源代码、机器生成的 Schema 转储、原始测试日志、图片。其架构含义 MUST 在适用范围内的文档中说明。
+生成产物**在治理范围内**：纳入扫描，正是为了让 DM-09 能约束其不得成为 `Normative` / `Canonical`。纳入扫描不等于要求其具备审批。
+
+Out of scope: source code, machine-generated non-Markdown dumps, raw test logs, images. Their architectural meaning MUST be documented in an in-scope document.
+
+不适用：源代码、机器生成的非 Markdown 转储、原始测试日志、图片。其架构含义 MUST 在适用范围内的文档中说明。
 
 ## 3. The four-dimension model / 四维模型
 
@@ -146,9 +150,9 @@ approval:
 
 **规则 L1 — 失效审批**：若 `approval_scope` 范围内内容在 `approved_version` 之后发生变化，`modification_status` MUST 变为 `Pending-Reapproval`，`approval_applicability` MUST 变为 `Not-Applicable-To-Current-Version`。历史 `Approved` 记录必须保留，禁止改写。
 
-L1 enforcement boundary / L1 执行边界: for `approval_scope.type: Full-document` the gate compares the body hash (frontmatter excluded) at `approved_version` with the body hash now, and fails when a stale approval still presents itself as applicable. `approved_version.value` under `scheme: git` MUST be a full 40-hex commit id: a branch or tag name can move, which would silently re-point the approval at different content. The body hash normalises trailing whitespace per line and leading/trailing blank lines, and compares everything else exactly. For `Selected-sections` and `Selected-assets` the gate only checks that the declared scope is non-empty; section-level staleness remains a manual control, because no stable section identity exists yet.
+L1 enforcement boundary / L1 执行边界: for `approval_scope.type: Full-document` the gate compares the body hash (frontmatter excluded) at `approved_version` with the body hash now, and fails when a stale approval still presents itself as applicable. `approved_version.value` under `scheme: git` MUST be a full 40-hex commit id: a branch or tag name can move, which would silently re-point the approval at different content. The body hash normalisation is defined in §9.1: CRLF and CR become LF (otherwise a checkout setting would invalidate every approval at once), trailing spaces and tabs per line are ignored, leading and trailing blank lines are ignored, and everything else is compared byte-for-byte — including leading spaces on a non-blank line. For `Selected-sections` and `Selected-assets` the gate only checks that the declared scope is non-empty; section-level staleness remains a manual control, because no stable section identity exists yet.
 
-L1 执行边界：当 `approval_scope.type: Full-document` 时，门禁比较 `approved_version` 时点与当前正文（不含 frontmatter）的哈希，若失效审批仍声称适用则报错。`scheme: git` 下的 `approved_version.value` MUST 为完整 40 位 commit id：分支名或标签可移动，会静默把审批指向不同内容。正文哈希规范化仅忽略行尾空白与首尾空行，其余逐字节比较。当为 `Selected-sections` / `Selected-assets` 时，门禁只校验声明的范围非空；章节级失效仍属人工控制，因为目前尚无稳定的章节标识。
+L1 执行边界：当 `approval_scope.type: Full-document` 时，门禁比较 `approved_version` 时点与当前正文（不含 frontmatter）的哈希，若失效审批仍声称适用则报错。`scheme: git` 下的 `approved_version.value` MUST 为完整 40 位 commit id：分支名或标签可移动，会静默把审批指向不同内容。正文哈希规范化口径见 §9.1：CRLF 与 CR 规范化为 LF（否则 checkout 设置会把所有审批一次性判失效）、忽略每行行尾空格与制表符、忽略首尾空行；其余逐字节比较，非空行行首空格也算差异。当为 `Selected-sections` / `Selected-assets` 时，门禁只校验声明的范围非空；章节级失效仍属人工控制，因为目前尚无稳定的章节标识。
 
 **Rule L2 — revocation evidence / 撤销证据**: `decision_status: Revoked` REQUIRES a non-null `revocation` block containing a unique `revocation_decision_id`.
 
@@ -304,7 +308,7 @@ Machine-checkable rules / 机器可检查规则：
 
 | ID | Rule | Severity |
 |---|---|---|
-| DM-01 | Frontmatter parses under the declared YAML subset and contains all four dimensions; parse failure is an error, never a skip | Error |
+| DM-01 | Frontmatter parses under the declared YAML subset; a node of the wrong type is an error, never a crash; every required field is present leaf by leaf (`domain`, `role`, `lifecycle.approval.decision_status`, `lifecycle.usage_status`, `lifecycle.modification_status`, `lifecycle.evidence_verification.verification_status`, `authority.canonical_status`, `authority.normative_status`, `authority.canonical_conflict_status`). An empty `lifecycle: {approval: {}}` is not a classification | Error |
 | DM-02 | `domain`, `role` and every status value are in the closed enumerations; unknown keys are errors at every level | Error |
 | DM-03 | `Approved` has `approved_version` (scheme + value), `approval_scope.type` and `approval_applicability`; `Selected-sections` has a non-empty `included_sections` | Error |
 | DM-04 | `Revoked` has `revocation.revocation_decision_id`, `revoked_date`, `revocation_reason`; the id is unique repository-wide | Error |
@@ -315,7 +319,7 @@ Machine-checkable rules / 机器可检查规则：
 | DM-09 | A file carrying the generated-artifact marker (an HTML comment containing `GENERATED FILE`, `GENERATED ARTIFACT` or `DO NOT EDIT`, anywhere in the body) MUST NOT be `Normative` or `Canonical` | Error |
 | DM-10 | `Approved` + `scheme: git` / `content-hash`: `approved_version.value` is an immutable full commit id; the body is unchanged since then, otherwise `Pending-Reapproval` + `Not-Applicable-To-Current-Version` | Error |
 | DM-11 | A document under `Under-Review` conflict MUST NOT be `Canonical`; `Resolved` requires a complete resolution record whose `selected_document` is the unique `Canonical` document of the scope | Error |
-| DM-12 | A declared bilingual counterpart exists, is itself classified, declares this document back, agrees on `domain`/`role`/`normative_status`, and does not double the `Canonical` claim | Error |
+| DM-12 | A mirror group is consistent: every declared counterpart exists, is classified, points into the language directory named by its field, belongs to the same source, and the source lists every mirror that names it. `domain`/`role`/`normative_status` agree, and only one document in the group is `Canonical` | Error |
 | DM-13 | `supersedes` targets exist, are not self-references, and form no cycle | Error |
 
 ### 9.1 Verified versus unverified / 已验证与未验证
@@ -325,10 +329,11 @@ Machine-checkable rules / 机器可检查规则：
 | DM-01..DM-09, DM-11..DM-13 | Full | — |
 | DM-10 `Full-document` | Full (body hash, commit id pinned) | — |
 | DM-10 `Selected-sections` | Scope declared | Whether the selected sections are the right ones |
-| Body hash normalisation | Trailing whitespace per line and leading/trailing blank lines are ignored; everything else is compared byte-for-byte | Whether that equivalence is too coarse for a given document |
+| Body hash normalisation | CRLF/CR normalised to LF (checkout setting must not invalidate every approval); trailing spaces/tabs per line ignored; leading/trailing blank lines ignored; everything else, including leading spaces on a non-blank line, is compared byte-for-byte | Whether that equivalence is too coarse for a given document |
+| Cross-document rules (DM-07, DM-11, DM-12, DM-13) | Only over a whole-tree scan; the gate offers no partial mode, because one file can hide another's duplicate scope | — |
 | Canonical scope overlap | Unique ids, unique `Canonical` | Whether two scopes genuinely overlap |
 | Approval / evidence truth | Field presence and shape | Whether the decision or evidence is real |
-| Bilingual parity | Existence, symmetry, metadata agreement | Semantic parity (GOV-DOC-001) |
+| Bilingual parity | Existence, language-directory match, group closure, metadata agreement | Semantic parity (GOV-DOC-001) |
 | `_unclassified` citation ban | Not verifiable in-repo | Enforced by readers and AI agents |
 
 The table is the contract. A rule listed in the right column MUST NOT be described elsewhere as governed by CI.
@@ -352,3 +357,4 @@ Amendments require a `decision-record` role document, bilingual, approved by the
 | 1.0 | 2026-11-21 | Initial policy. Consolidates the four-dimension model, lifecycle and authority rules from the v3.1 design into an enforceable repository policy. |
 | 1.1 | 2026-11-21 | Independent review response. Fail-closed parser (DM-01), version-bound approval made mechanical for full documents (DM-10), A1/A2 conflict state no longer doubles as authority and the date fallback is removed (DM-11), mirror consistency and supersession graph added (DM-12/13), domain count corrected to 13, completion redefined as zero unclassified, and the machine-checked claim replaced by the §9.1 split. |
 | 1.2 | 2026-11-21 | Second independent review (5.2/10). Parser: unescaped single quotes, missing space after `:`, and unknown keys under `supersession` now rejected; wrong node types produce a DM-01 error instead of a traceback. DM-09 scans the whole body and defines the marker as an HTML comment. DM-11 requires `selected_document` to be the unique Canonical document even when none holds Canonical. DM-12 requires the counterpart to be classified and to declare this document back. DM-10 requires a full 40-hex commit id, so a moving branch name cannot carry an approval. `--require-changed` reads NUL-separated paths, so a filename with spaces cannot dodge it, and now also runs on direct pushes. |
+| 1.3 | 2026-11-21 | Third independent review (56/100). `_enum()` now type-guards before the membership test, so a non-scalar (`domain: []`) yields a DM-01 error instead of a `TypeError` (P0-01). Required fields are checked leaf by leaf, so `lifecycle: {approval: {}}` plus `authority: {}` no longer passes as an empty shell (P1-01). §4.1 and §9.1 now state the same body-hash normalisation, and the ceiling of that equivalence is named as a residual risk (P1-02). `--only` is removed: cross-document rules are only sound over a whole tree (P1-03). DM-12 is restated as three-way group closure — source, `docs/en` mirror, `docs/zh-CN` mirror — so a missing third member is an error rather than an untested assumption (P1-04). The governed roots are imported from `check_bilingual_docs.py` instead of duplicated. |
