@@ -1,7 +1,59 @@
+---
+document_metadata:
+  domain: memory-compiler
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope: null
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "04-memory-compiler/extraction-and-normalization.md @ 8d0a0e6bcb3ae1aec84c4f773dc4d5898516b467"
+        - "OWNER-DECISION-FACT-CLAIM-001, merged PR #446"
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-21"
+      last_verification_note: "Canonical source restored and bilingual mirror reconciled to the merged Owner semantic decision; concrete schemas remain unfrozen."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Memory Compiler design-specification: extraction-normalization"
+    canonical_scope_id: "memory-compiler/extraction-normalization"
+    canonical_scope_keywords:
+      - extraction-ir
+      - candidate-proposition
+      - normalization
+      - evidence
+      - scope
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "04-memory-compiler/extraction-and-normalization.md"
+    en: "docs/en/04-memory-compiler/extraction-and-normalization.md"
+    zh-CN: "docs/zh-CN/04-memory-compiler/extraction-and-normalization.md"
+---
+
 # 提取与规范化
 
+- 规范源：[extraction-and-normalization.md](../../../04-memory-compiler/extraction-and-normalization.md)
+- 规范源 Blob：8d0a0e6bcb3ae1aec84c4f773dc4d5898516b467
+
 - 文档 ID：E-EXTRACTION-001
-- 版本：1.0
+- 版本：1.1
 - 源分支：session-e-memory-compiler-2026-11-16
 - 源 Blob：c18780403de2d1dbcf471bdb8abdaa009a4a78e1
 - 对应英文：[Extraction and Normalization](../../en/04-memory-compiler/extraction-and-normalization.md)
@@ -17,7 +69,7 @@
 
 包括文本、结构化 Event、Document 和 Environment Observation 的解析；Modality Classification；Entity/Time/Relation Mention Extraction；Candidate Proposition 形成；Normalization；Confidence/Uncertainty 记录；确定性校验；模型辅助 Extraction 编排；Source Span 对齐。
 
-不包括 Fact 专属建模、Fact Schema 和 Fact 批准事项（INT-P0-01 下仍为 OPEN）；Canonical Claim Identity 语义已依据 D 的 Option A 决定为 DECIDED FOR CONVERGENCE，其权威定义由 D 负责而非 E；Canonical Entity Merge Decision、Lifecycle Decision、Source Authorization Policy、外部 Tool Execution 和最终 Truth Adjudication。
+Fact/Claim 语义和 I1 身份/修订选择已由 OWNER-DECISION-FACT-CLAIM-001（PR #446 已合并）决定。本决定不冻结字段级 Fact/Claim Schema、DDL、Public API、Wire Field、Attestor Policy 或 Runtime Mapping。E 继续输出中立 CandidateProposition，不得签发 Canonical Identity 或实例化 Fact。Canonical Identity/Lifecycle 由 D 管辖；Authorization、PermissionEpoch 和 Attestor Approval 由 I 管辖。Canonical Entity Merge Decision、Lifecycle Decision、Source Authorization Policy、外部 Tool Execution 和最终 Truth Adjudication 同样不属于 E 的职责。
 
 ## 3. 职责
 
@@ -90,7 +142,7 @@ CandidateProposition {
 }
 ~~~
 
-这不是 Claim Schema，而是 Compiler IR；其 Claim Identity Mapping 遵循 D 已 DECIDED FOR CONVERGENCE 的 Option A 语义（稳定 Claim Identity 加不可变 ClaimRevision）。CandidateProposition 继续保持中立，不实例化或冻结 Canonical Identity，也不冻结任何公共 Schema。Fact 专属建模（包括是否以及如何表示独立 Fact Object）和 Fact 批准继续保持 OPEN。IR 中任何字段名都不能冻结公共 Schema 语义。
+这不是 Claim 或 Fact Schema，而是 Compiler IR。OWNER-DECISION-FACT-CLAIM-001 选择独立 Fact Attestation 和 Claim Proposition，并采用稳定 ClaimRef 与不可变 ClaimRevisionRef（I1）。该决策解决语义，不冻结字段级 Schema。D 的具体 Schema Freeze Gate 仍开放，等待 D/I/H 契约和 Consumer Acceptance。CandidateProposition 保持中立，不实例化 Canonical Identity 或 Canonical Fact。Fact Approval 和 Attestor Authorization 仍由 I 管辖。IR 中任何字段名都不能冻结公共 Schema 语义。
 
 ### 6.3 EntityMention / TimeMention
 
@@ -167,7 +219,7 @@ Prompt Injection 控制措施：维护 Source Type/Trust Label；启发式识别
 - **Extraction → Evidence：** Source Span 和准确 Locator；Evidence Manager 校验并持久化 Source Ref。
 - **Extraction → Entity Manager：** 带 Scope 的 EntityMention 和 Identity Evidence；Entity Manager 返回 Provisional/Resolved Ref 及 Ambiguity。
 - **Extraction → Consolidation：** Candidate Proposition、Modality、Time、Scope、Qualifier 和 Method Receipt。
-- **D：** 接收 Candidate Proposition，并依据 D 已 DECIDED FOR CONVERGENCE 的 Option A Claim Identity 语义进行映射；Fact 专属建模和批准继续保持 OPEN；Candidate IR 不是公共 Schema。
+- **D：** 接收 Candidate Proposition；Owner Decision Option A + I1 已采纳语义和身份/修订选择。D 继续拥有 Canonical Identity/Lifecycle 和具体 Schema Freeze Gate；E 不创建 Canonical ID 或 Fact Record。
 - **H/C：** Source Classification 和 Telemetry Semantics 必须一致；保留 Observation/Outcome 区别。
 - **I：** Data Classification、允许的处理方式、Source Access 和 Forget Fence 共同约束 Extraction。
 
@@ -183,7 +235,7 @@ D Domain Type 和 Fact/Claim ADR；B Epistemic/Temporal/Scope Semantics；C/H So
 
 ## 18. 开放问题
 
-- OPEN：INT-P0-01 中尚未由 D 已 DECIDED FOR CONVERGENCE 的 Option A Claim Identity 语义解决的 Fact 专属建模和 Fact 批准事项；CandidateProposition 刻意保持中立。
+- RESOLVED：Fact/Claim 语义和 I1 身份/修订选择已由 OWNER-DECISION-FACT-CLAIM-001 采纳。OPEN：D Canonical Field Schema/ConflictSet，以及 I Attestor Authorization/Approval 契约；CandidateProposition 继续保持中立。
 - OPEN：C 最终 Observation/Outcome Mapping 和 Task/Plan Revision Semantics。
 - CANDIDATE：Extraction IR 和 Deterministic-first Routing。
 - TO_VALIDATE：Modality Classifier 质量、Entity/Time Extraction Accuracy、多语言 Prompt Injection Detection 和本地 Model Resource Use。
@@ -196,14 +248,14 @@ D Domain Type 和 Fact/Claim ADR；B Epistemic/Temporal/Scope Semantics；C/H So
 - Stage Result 与下一阶段 Outbox/Journal Intent 必须原子持久化，或通过等价可恢复 Journal 持久化。Worker 崩溃不得丢失已完成 Stage，也不得重复产生外部可见效果。
 - 在 Payload Dereference、Source Span Resolution、Model Prompt Construction、Stage Result Publication 或 Retry 前，重新检查当前 Permission 和 D Forget Fence。Fence/Policy 状态未知时 Fail-closed。
 - ExtractionIR、CandidateProposition、Span、Embedding 和 Normalized Value 都是派生对象：根据 [Forget Fence and Derived Registration](forget-fence-and-derived-registration-part1.md)，必须在可见前持久化 Lineage 和 Dependency Registration。
-- CandidateProposition 保持中立的 Pre-canonical IR。Claim Identity Mapping 遵循 D 已 DECIDED FOR CONVERGENCE 的 Option A 语义，不再属于 ADR-BLOCKED。Fact 专属建模和 Fact 批准继续保持 OPEN；E 不得自行推断或批准 Fact Schema、DDL、API 或 Wire Contract。
+- CandidateProposition 保持中立的 Pre-canonical IR。OWNER-DECISION-FACT-CLAIM-001 采纳 Option A + I1 作为语义和身份/修订模型。D 的具体 Schema Gate、I 的 Attestor Authorization/Approval Contract 和 H 的 Wire Mapping 仍未冻结。E 不得自行推断或批准 Fact/Claim Schema、DDL、API 或 Wire Contract。
 
 ### 19.1 Claim/Fact 规范发布顺序
 
 E 的 ExtractionIR 和 CandidateProposition MUST
 保持为私有 Staging 产物。
 
-本发布顺序不会推迟或重新开放 Claim Identity 语义；D 已依据 Option A 将其决定为 DECIDED FOR CONVERGENCE。Fact 专属建模和批准仍为 OPEN，本发布协议不构成对这些事项的批准。
+本发布顺序采用 Owner 已批准的 Option A + I1 语义决策，但不冻结具体 D Schema、DDL、Public API、H Wire Field 或 I Attestor Authorization Policy。这些契约仍开放，本发布协议不构成对它们的批准。
 
 唯一规范顺序如下：
 
