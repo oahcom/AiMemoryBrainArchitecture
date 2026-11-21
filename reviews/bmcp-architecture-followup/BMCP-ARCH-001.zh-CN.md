@@ -41,11 +41,32 @@ Issue #7 的记录保持 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE。
 | docs/en/03-memory-brain/forget-fence-and-completion-contract.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | c791895333ab6140f035f4f622d5dee9325d422d | D/I Forget 边界 |
 | docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | 9c054932994bb078e2834df8bd66f73895aa04f5 | D Lifecycle/Fence |
 | 13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593 | 历史 ADR；语义决策已被取代；消费者映射仍为 Candidate |
+| 14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0`（批准来源 `c138654c942dc93b5a36eccb2ff0e41452156429`） | d59756a8eb454480804c482ca03c68345ab5abf2 | 当前来源 Pin；Owner 语义批准是历史证据（Option A + I1），不冻结 Schema |
+| docs/en/03-memory-brain/memory-versioning.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | 4efbd26db9586f6fcf1897f42ffba287d625b903 | D Revision / Consumer Freeze 边界 |
+| docs/en/03-memory-brain/commit-cursor-semantics.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | 2de7fe35229372ae5b06093e5e031c2c243fbd7c | D Cursor 语义 |
+| docs/en/09-security-governance/security-governance-guide.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | 061c5847b3df879eeaf3c71e5eae0bfa162b276a | I Principal / Authorization / PermissionEpoch |
+| docs/zh-CN/09-security-governance/security-governance-guide.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | 372d27c79dc79d09bcdb0f142c979efdba1c2b6e | I 双语对应文档 |
+| 07-agent-integration/agent-integration-overview.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | 073ff4ddf71fbcaf959107bb06ab724bfa48e63b | C 规范 Agent 边界 |
+| 07-agent-integration/adapter-capability-tiers.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | ca422000ec98cca543fd96b59710346949f7d82e | C Capability Tiers |
+| 07-agent-integration/inference-boundary-model.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | e2d5cb6abd9ec40da6e3680531de5944fc8b14df | C Inference Boundary |
+| 07-agent-integration/telemetry-model.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | 9bb4a77e4bd79caaf3e1faeaf77c6b42858998f0 | C Telemetry |
 | C Family Boundary 决策 | PR #430 comment 7060351480；Issue #449 comment 7060126722 | Owner-delegate 决议；不声称独立人工 C 签名 | Family 方向已决定；精确 H Operation Registry / C-H Mapping 仍 OPEN |
 | H Confirmation 范围澄清 | PR #428 comment 7060351041；H Scope Correction comment 7060264372 | 仅接受 Owner-delegate 逻辑选择；INDEPENDENCE_UNVERIFIABLE | H-CONFIRM-001..004 各自均为 PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN |
+| B domain-model-overview.md | B 分支 `session-b-domain-model-phase3 @ 840202a98cf40a0b3f194afb84bed4d5f3326658` | Blob `4d1debc0ec19b3917f9e76d04bb66da4df4cd346` | B 接受 Option A + I1；来源对齐仍待完成 |
+| D memory-versioning.md | D 分支 `session-d-memory-brain-2026-11-16 @ b525e1f8fee2471a131e4a38efda99804045e424` | Blob `af747f339d03bdd4684b6ed60fca05957dc8e1fb` | D Identity/Revision/ConflictSet 边界；Schema/Currentness Gate 开放 |
+| D forget-fence-and-completion-contract.md | 同一 D ref | Blob `1f0391bc49d007c44ec74165bd33d37412cc7990` | D ForgetOperation/Fence 权威 |
+| I principal-actor-and-authorization-contract.md | I 分支 `session-i-security-governance-2026-11-16 @ 8abddf814467b271344a9814613a6b7ca6a446c6` | Blob `03765efac4bb1153f303ce0030f9e277d602e81d` | I Principal/Actor/Attestor Authorization 边界 |
+| I scope-and-revocation-policy.md | 同一 I ref | Blob `71df6aaf21bb1767cd9fe5c947581b871325e023` | I PermissionEpoch/Revocation |
+| I global-forget-target-inventory-and-completion-evidence.md | 同一 I ref | Blob `9100061fa986fb6676656169de3fcf9fc1c72664` | I Retention/Global Forget Evaluation |
 | PR #436 协议索引/provider_outcome 测试 | PR Head 1ffed9ed127df98b2f823a66ec80ea43d08cb9dc；Merge Commit 02f61194fd4e12993b4c83f7fac8382eee20f5d8 | 已合入 Main | 结构性 Provider Outcome 证据；5 passed / 5 semantic skips |
 
 本次更新已从实时 `session-h-bmcp-protocol` 分支重新读取上述七个 H Blob Pin；它们在当前分支 HEAD `3e8b33df18b9e6fc757ca84ff07a12faebc78e74` 均解析为表中 Blob SHA。此处是有界来源登记，不代表所有 H 工件或消费者均已独立审查。
+
+### 2.3 B/D/I Owner 决议 Pin
+
+- B Owner 决议：PR #429 comment 7060251435；B 来源分支 `session-b-domain-model-phase3 @ 840202a98cf40a0b3f194afb84bed4d5f3326658`；`domain-model-overview.md` Blob `4d1debc0ec19b3917f9e76d04bb66da4df4cd346`。
+- D Owner 决议：PR #429 comment 7060243632；D 来源分支 `session-d-memory-brain-2026-11-16 @ b525e1f8fee2471a131e4a38efda99804045e424`；`memory-versioning.md` Blob `af747f339d03bdd4684b6ed60fca05957dc8e1fb`；Forget 契约 Blob `1f0391bc49d007c44ec74165bd33d37412cc7990`。
+- I Owner 决议：PR #429 comment 7060259541；I 来源分支 `session-i-security-governance-2026-11-16 @ 8abddf814467b271344a9814613a6b7ca6a446c6`；Principal/Actor 契约 Blob `03765efac4bb1153f303ce0030f9e277d602e81d`；Scope/Revocation Blob `71df6aaf21bb1767cd9fe5c947581b871325e023`；Global Forget Inventory Blob `9100061fa986fb6676656169de3fcf9fc1c72664`。
 
 ## 3. 文件所有权矩阵与修改范围
 
@@ -476,9 +497,16 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 - Issue #43：根据 Owner 阶段关闭裁决关闭为 superseded。本 FollowUp 是候选架构交接，不是 Runtime 实施。
 - 当前 Main 基线：0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0（Owner 指定的控制基线 `0d0c1c6238e4e70a93609070b97fef596873916e` 已是祖先；Main 在其后沿 first-parent 前进 3 个 Commit（包含合并侧分支历史时共 5 个可达 Commit），包含 PR #463 及其门禁结果更正）；H 来源分支已重新读取：session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74；七个 H Blob Pin 已重新获取且 SHA 未变化。
 - 未修改 Runtime 代码或 H 所有源文件。
-- 本次重基分支的本地门禁：git diff --check PASS；check_document_management.py --require-changed origin/main PASS（仅增量，16 classified / 439 unclassified）；audit_runner_admission.py PASS（审计 1 个 self-hosted job，0 violations）；Applied Delivery Evidence 30/30 PASS；Provider Outcome 5 PASS / 5 SKIPPED / 0 failed。
-- 本地 check_bilingual_docs.py：FAIL，退出码 2；报告当前 Main 已存在的五个新缺口，均不在本 PR 修改文件中：02-domain-model/phase-2-domain-extension.md 及其 zh-CN 镜像；07-agent-integration/adapter-capability-tiers.zh-CN.md；08-bmcp-protocol/protocol-index.md 及其 zh-CN 镜像。本 PR 不越界修复这些文件。
-- Owner comment 7060427638 报告的前一 Head workflow 失败：文档管理 run 44887211373；Runner Admission run 44887211369；Bilingual Gate run 44887211374。三个 Job 均以 FAILURE 结束。最近读取当前 PR Head 时，workflow-run 和 combined-status 查询均无记录；不声称当前 Head 的 GitHub Actions PASS。
+- 当前 Main 基线 `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` 上的本地门禁：`git diff --check origin/main...HEAD` PASS（退出码 0）；`python3 scripts/check_document_management.py --require-changed origin/main` PASS，仅增量（458 governed documents；16 classified / 442 unclassified；退出码 0）；`python3 scripts/ci/audit_runner_admission.py` PASS（审计 1 个 self-hosted job / 0 violations；退出码 0）。
+- `BASE_SHA=$(git merge-base HEAD origin/main) HEAD_SHA=$(git rev-parse HEAD) PR_BODY='BILINGUAL-MANIFEST: COMPLETE' python3 scripts/check_bilingual_docs.py` PASS（85 frozen / 0 new gaps；3 个变更 Markdown 路径位于 NORMATIVE_ROOTS 之外，未执行配对检查；仅结构门禁；退出码 0）。
+- `python3 scripts/check_bilingual_docs_full.py --source-revision <实测 Head>` FAIL（424 个范围内 Markdown；112 exempt；89 个结构配对缺口；退出码 1）。这是比 PR 增量门禁更广的全树清点，本 PR 不越界修复。
+- `python3 scripts/governance/bilingual/test_bilingual_scripts.py` PASS（13/13；退出码 0）；`python3 scripts/test_check_document_management.py` PASS（202/202；退出码 0）。
+- Applied Delivery Evidence：`python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v`——30 passed / 0 failed（退出码 0）。Provider Outcome：`python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/provider_outcome -p 'test_*.py' -v`——10 run / 5 passed / 5 skipped / 0 failed（退出码 0）；CPO-02/04/05/09/10 仍等待 Owner C 权威 Semantic Validator。
+- EN/ZH 决议状态和范围断言：7/7 PASS（DR-002、DR-003、H-CONFIRM-001..004、`INDEPENDENCE_UNVERIFIABLE`、AT-01..AT-20 `PLANNED_NOT_RUN`、以及仅三个授权修改路径）。这些是结构/状态断言，不是语义双语审查。独立语义/双语审查仍 PENDING。
+- 已知双语内容不对称：AT-01..AT-20 的 20 行详细验收矩阵目前只在中文镜像中逐项列出；英文镜像仅记录汇总状态 `PLANNED_NOT_RUN`，未列出逐项行。本文不将其表述为语义双语一致，待独立双语复审处理。全部 20 项仍为 PLANNED_NOT_RUN。
+- 已按当前 Main 核验 comment 7060675803 的门禁回退指控：`check_schema_keys()` 存在且实际调用；允许键仅为 `kind/required/enum/items/fields`；当前 Schema 没有活动的 `when:` 字段。现有证据不能证明当前 Main 存在该回退，且它不在本 PR diff 中。本 PR 未加入治理门禁/Schema 改动。
+- Owner comment 7061006814 所列前一 Head workflow 失败属于历史记录：44891409843 / 44891373089（Bilingual）、44891373074（Architecture document management）、44891373084（Runner admission）。当前最终 Head 的 workflow IDs 和结果记在 PR delivery record；缺失日志或 step summary 不得推断 PASS。
+- GOV-DOC-002 增量 PASS 不等于全树 PASS；仍有 442 个文档未分类。结构配对不等于语义双语一致性。
 - Runtime 验收测试：NOT RUN——无 Runtime 授权/仓库。
 - 独立语义一致性审查：PENDING。H/Owner 回复：PENDING。
 
