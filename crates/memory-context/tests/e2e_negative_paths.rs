@@ -13,6 +13,7 @@
 use memory_context::{
     build_context, ContextBudget, ContextCandidate, ContextError, ContextIdentity, ContextTier,
 };
+use memory_event_store_sqlite::forget_fence::ForgetFence;
 use memory_domain::{
     Claim, EpistemicStatus, Memory, MemoryLifecycle, MemoryVersion, OpaqueId, ScopeKind, ScopeRef,
 };
@@ -196,12 +197,67 @@ fn foreign_scope_cannot_read_or_populate_context() {
 /// contract can durably transition a Memory to a forgotten/tombstoned state and
 /// ensure reads cannot return it as a context candidate.
 #[test]
-#[ignore = "unreachable: ForgetFence only purges accepted_events during event-store restore; MemoryStorage and MemoryStore expose no forget/tombstone operation"]
+#[ignore = "unreachable: no public forget API; see GAP-06-FORGET-PATH-UNREACHABLE"]
 fn forgotten_memory_is_excluded_from_context() {
     // Intended public flow once the boundary exists:
     // create + write -> MemoryStore::forget_memory(memory_id, scope)
     // -> read_current returns no eligible revision -> build_context is empty.
     // Do not emulate this by editing ContextCandidate.lifecycle.
+}
+
+/// This is an intentional characterization test, not a desired-behavior test:
+/// it proves that the durable ForgetFence can record this namespace while the
+/// current MemoryStore read path still returns its revision. When the fence is
+/// wired into the shared SQLite read boundary, this assertion must fail and
+/// the ignored desired E2E above must be enabled with the enforced behavior.
+#[test]
+fn forget_fence_is_not_yet_enforced_by_memory_store_reads() {
+    let visible_scope = scope("fence-not-wired");
+    let temp_db = TempDatabase::new();
+    let sqlite = SqliteMemoryStorage::open(temp_db.path()).unwrap();
+    let mut store = MemoryStore::new(sqlite);
+
+    store
+        .create_memory(
+            memory("memory-fence-not-wired", &visible_scope, MemoryLifecycle::Active),
+            std::slice::from_ref(&visible_scope),
+        )
+        .unwrap();
+    write(
+        &mut store,
+        "memory-fence-not-wired",
+        "version-fence-not-wired",
+        1,
+        None,
+        None,
+        &visible_scope,
+    );
+
+    // Use the same physical SQLite database: the fence is present and durable,
+    // but today's MemoryStorage read implementation does not consult it.
+    let fence = ForgetFence::open(temp_db.path()).unwrap();
+    assert_eq!(
+        fence
+            .record_forget(&visible_scope.namespace_key, "sha256:round7-forget")
+            .unwrap(),
+        1
+    );
+
+    let still_readable = store
+        .read_current(
+            &id("memory-fence-not-wired"),
+            std::slice::from_ref(&visible_scope),
+        )
+        .unwrap()
+        .expect("current behavior: the unconnected fence does not block reads");
+    assert_eq!(
+        still_readable.memory_version_id,
+        id("version-fence-not-wired")
+    );
+
+    drop(store.into_storage());
+    drop(fence);
+    drop(temp_db);
 }
 
 #[test]
