@@ -1057,3 +1057,90 @@ No CI job in this repository has started since billing broke. Every number above
 execution in WSL2 (`cargo 1.95.0`, `CARGO_BUILD_JOBS=1`, `--offline`) or local inspection.
 Builds must be run from a native filesystem — compiling on the `/mnt/c` mount fails with
 `Cannot allocate memory (os error 12)`.
+
+## Correction to round three: the zero-byte gate exploit is closed on current `main`
+
+Round three above states, with a reproduction, that a zero-byte `X.zh-CN.md` satisfies the
+bilingual gate in eight additional roots. **That is no longer true, and it was fixed by a
+better mechanism than the one I proposed.**
+
+### Re-measured on `main` `f687346c`
+
+Two scratch trees copied from `main`, one pair each, both under `02-domain-model/`:
+
+```
+=== zero-byte .zh-CN.md ===
+  zz-empty-probe.md          exists=True  size=805  in_gaps=True
+  zz-empty-probe.zh-CN.md    exists=True  size=0    in_gaps=True
+
+=== all-English .zh-CN.md (byte-identical copy of the .md) ===
+  zz-eng-probe.md            exists=True  size=805  in_gaps=True
+  zz-eng-probe.zh-CN.md      exists=True  size=805  in_gaps=True
+```
+
+Both files of both pairs are reported as gaps. The exploit does not reproduce.
+
+### The mechanism, which is the part worth recording
+
+`main` now contains:
+
+```python
+def _side_by_side_bilingual(source: str) -> bool:
+    partner = side_by_side_partner(source)
+    if partner is None:
+        return False
+    return _has_any_chinese(source) or _has_any_chinese(partner)
+
+paired = mirrored or _side_by_side_bilingual(source)
+```
+
+with `_has_any_chinese()` requiring **one** CJK character, while the >= 100 threshold in
+`_carries_chinese()` stays for the embedded-bilingual shape only.
+
+This is exactly the split I failed to produce. My proposed patch routed the side-by-side
+branch through `_carries_chinese()` and generated **17 false positives** on short but genuine
+bilingual policy stubs; I withdrew it. The fix that landed instead added a second predicate
+calibrated for a different shape.
+
+**The lesson is specific, not general:** the 100-character threshold was calibrated for one
+pairing shape, and reusing it for another shape was the error. Two shapes, two rules. I
+looked for one rule that would cover both and concluded the threshold was the problem.
+
+### What this changes in the round-three text
+
+| round-three claim | status |
+|---|---|
+| a zero-byte `X.zh-CN.md` satisfies the gate | **withdrawn** — re-measured, both files are gaps |
+| an all-English `X.zh-CN.md` satisfies the gate | **withdrawn** — same |
+| my two-line patch closes it | **withdrawn earlier** — 17 false positives |
+| #461 widened content-blind pairing to eight more roots | **stands as history** — true when measured, since fixed |
+| `_carries_chinese`'s 100-char threshold is too blunt for short docs | **stands** — which is why a separate predicate was needed |
+
+### And #485 adds a further layer
+
+PR #485 (head `9d77fd96`, `+11 -1`) introduces `PARTIAL_SIDE_BY_SIDE_PAIRS`:
+
+```python
+partial_side_by_side = (
+    side_by_side is not None
+    and frozenset((source, side_by_side)) in PARTIAL_SIDE_BY_SIDE_PAIRS
+)
+paired = mirrored or (_side_by_side_bilingual(source) and not partial_side_by_side)
+```
+
+A pair registered as partially translated does not count as paired even though it carries
+CJK. That closes the "10% translated, passes `_has_any_chinese`, counted as done" case, which
+is the next hole after the one that was just closed.
+
+I have not verified the register's entries, or that the accompanying test change
+(`test_gate_normative_roots.py`, `+49 -1`) covers the register rather than only the happy
+path.
+
+### Why this correction matters more than the average one
+
+I published a reproduction and a patch on a public PR. Both were wrong, in opposite
+directions: the reproduction stopped being true, and the patch would have made things worse.
+Leaving either standing means the next reader tests a finding that does not reproduce.
+
+The gate is materially stronger than when I last examined it. Recorded here because most of
+this document is about what the gate cannot see, and that balance should be accurate.
