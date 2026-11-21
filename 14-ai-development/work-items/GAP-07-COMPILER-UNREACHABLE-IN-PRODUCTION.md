@@ -18,25 +18,31 @@ compiler stage skipped: PublicationAuthority has no production implementation
 Everything downstream of `memory-context` works end to end. Everything inside
 `memory-compiler` is exercised only by `#[cfg(test)]` code.
 
-## Evidence (verified on `main @ b961ba31`)
+## Evidence (re-verified on `main @ 5643974b`, after #523 and #533)
 
 Every claim below is a repository search, reproducible without reading any
 owner handoff.
 
-**1. Both `PublicationAuthority` implementations are inside `#[cfg(test)]`.**
+**1. All three `PublicationAuthority` implementations are inside `#[cfg(test)]`.**
 
 ```sh
 grep -rn "impl PublicationAuthority" --include=*.rs crates/
 ```
 
 ```
-crates/memory-compiler/src/lib.rs:899: impl PublicationAuthority for TestAuthority {
-crates/memory-compiler/src/lib.rs:1227: impl PublicationAuthority for RecoveryAuthority {
+crates/memory-compiler/src/lib.rs:923: impl PublicationAuthority for EvidenceAuthority {
+crates/memory-compiler/src/lib.rs:942: impl PublicationAuthority for TestAuthority {
+crates/memory-compiler/src/lib.rs:1332: impl PublicationAuthority for RecoveryAuthority {
 ```
 
-`#[cfg(test)]` appears at lines 738, 745, 856, 1177, 1434. Both implementations
-fall after 856 and before 1434, i.e. inside test-only modules. Neither is
-reachable from a non-test build.
+`#[cfg(test)]` appears at lines 757, 764, 875, 1282, 1539. The module gated at
+875 covers 923 and 942; the module gated at 1282 covers 1332. All three
+implementations are therefore test-only and unreachable from a non-test build.
+
+Note that #533 added `EvidenceAuthority` to model the four publication
+dispositions. That is a real improvement to the test model and it does not
+change this gap: the new implementation is the third one, and it is also
+test-only.
 
 **2. `compile()` is called only from tests.**
 
@@ -44,8 +50,8 @@ reachable from a non-test build.
 grep -n "\.compile(" crates/memory-compiler/src/lib.rs
 ```
 
-All five hits are at lines 1095–1157, inside the `#[cfg(test)]` module starting
-at 1177's predecessor block. `grep -rn "MemoryCompiler" crates/` outside
+All hits are at lines 1187–1249, inside the `#[cfg(test)]` module gated at
+1282. `grep -rn "MemoryCompiler" crates/` outside
 `memory-compiler/src/lib.rs` returns **zero matches**.
 
 **3. `brain-cli` imports the compiler for a version string only.**
@@ -61,7 +67,43 @@ grep -n "memory_compiler" crates/brain-cli/src/main.rs
 The CLI wires `memory-domain` → `memory-storage-sqlite` → `memory-store` →
 `memory-context`, then stops. Its own verbose output confirms this ordering.
 
-**4. End-to-end run reproduces the skip.**
+**4. The publication primitive now exists but is not exposed.**
+
+#523 added exactly the storage operation `PublicationProof.storage_prepared_hidden`
+needs. It is on the trait and implemented in SQLite:
+
+```sh
+grep -n "prepare_version\|publish_prepared" crates/memory-storage/src/lib.rs
+```
+
+```
+74: fn prepare_version(&mut self, request: PrepareRequest, scope: &[ScopeRef]) -> Result<PreparedCommitReceipt, StorageError>;
+77: fn publish_prepared(&mut self, publication_id: &str, expected_current_version: Option<OpaqueId>, scope: &[ScopeRef]) -> Result<CommitReceipt, StorageError>;
+```
+
+`memory-storage-sqlite` implements both. But `MemoryStore` — the façade the CLI
+actually uses — exposes none of it:
+
+```sh
+awk 'NR<200 && /pub fn /{print NR": "$0}' crates/memory-store/src/lib.rs
+```
+
+```
+33:     pub fn new(storage: S) -> Self { Self { storage } }
+35:     pub fn into_storage(self) -> S { self.storage }
+37:     pub fn create_memory(
+48:     pub fn read_current(
+57:     pub fn read_revision(
+67:     pub fn write_revision(
+89:     pub fn resolve_idempotency(
+```
+
+The only `prepare_version`/`publish_prepared` bodies in `memory-store` are on
+`FakeStorage` at lines 212 and 286, inside the `#[cfg(test)]` module gated at
+112. So the primitive exists one layer below where anything can call it, and
+the one layer that could call it does not surface it.
+
+**5. End-to-end run reproduces the skip.**
 
 A real event JSON through `brain compile --verbose` produces a valid
 1103-byte ContextSnapshot with one entry, and prints the skip notice above.
@@ -87,9 +129,14 @@ The gap is that the authority they feed has no production implementor.
 
 Implement the trait against the actual publication path: obtain the proof from
 whatever durable publication record exists, return typed failure when it cannot
-be obtained. This is the only direction that makes the compiler reachable. It
-requires first naming the production publication store, which does not exist
-yet.
+be obtained. This is the only direction that makes the compiler reachable.
+
+#523 materially reduces the work: `prepare_version` returns a
+`PreparedCommitReceipt` proving the derivative is staged but not yet readable,
+which is what `storage_prepared_hidden` asserts. Two things are still missing
+before this can be done honestly: `MemoryStore` must surface prepare/publish,
+and the publication record must be durable across process restart rather than
+held in the compiler's in-memory admission store.
 
 ### (b) Wire `brain-cli` to fail closed instead of skipping
 
