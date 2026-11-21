@@ -54,15 +54,34 @@ class RecoveryJoinSchemaArtifactTests(unittest.TestCase):
         errors = list(VALIDATOR.iter_errors(instance))
         self.assertEqual(errors, [], "\n".join(error.message for error in errors))
 
-    def test_03_invalid_forget_fence_generation_fixture_is_rejected(self):
+    def test_03_complete_empty_highwaters_require_zero_count(self):
+        fixture = json.loads((FIXTURES / "valid_recovery_join_1_0_2.json").read_text(encoding="utf-8"))
+
+        for count_field, status_field, highwaters_field in (
+            ("request_count", "request_enumeration_status", "request_highwaters"),
+            ("admission_count", "admission_enumeration_status", "admission_highwaters"),
+        ):
+            instance = json.loads(json.dumps(fixture))
+            snapshot = instance["owner_snapshots"]["I"]
+            self.assertEqual(snapshot[status_field], "COMPLETE_EMPTY")
+            self.assertEqual(snapshot[highwaters_field], {})
+            snapshot[count_field] = 5
+
+            errors = list(VALIDATOR.iter_errors(instance))
+            self.assertTrue(
+                any(list(error.path)[-1:] == [highwaters_field] for error in errors),
+                f"{status_field}=COMPLETE_EMPTY with {count_field}=5 and empty {highwaters_field} must be rejected",
+            )
+
+    def test_04_invalid_forget_fence_generation_fixture_is_rejected(self):
         instance = json.loads((FIXTURES / "invalid_forget_fence_generation.json").read_text(encoding="utf-8"))
         self.assertTrue(list(fragment_validator("forgetFenceGeneration").iter_errors(instance)))
 
-    def test_04_invalid_owner_snapshot_membership_proof_fixture_is_rejected(self):
+    def test_05_invalid_owner_snapshot_membership_proof_fixture_is_rejected(self):
         instance = json.loads((FIXTURES / "invalid_owner_snapshot_membership_proof.json").read_text(encoding="utf-8"))
         self.assertTrue(list(fragment_validator("ownerSnapshotMembershipProof").iter_errors(instance)))
 
-    def test_05_invalid_complete_empty_proof_fixture_is_rejected(self):
+    def test_06_invalid_complete_empty_proof_fixture_is_rejected(self):
         instance = json.loads((FIXTURES / "invalid_complete_empty_proof.json").read_text(encoding="utf-8"))
         self.assertTrue(list(fragment_validator("completeEmptyProof").iter_errors(instance)))
 
