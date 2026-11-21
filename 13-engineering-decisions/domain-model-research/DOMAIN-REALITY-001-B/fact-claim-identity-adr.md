@@ -169,11 +169,12 @@ Until explicit decisions and consumer acceptances are recorded:
 
 在明确决定及消费者验收记录完成前：
 
-- Preserve `Claim` as the working proposition term; do not create a separate Fact entity.
-- Keep the current `claim_id` identity policy OPEN; do not assume globally stable identity or version-local identity.
-- Keep `ClaimSnapshot` immutable and do not change the persisted schema.
-- Do not issue JSON Schema, database migration, implementation authorization or downstream contract freeze based on this candidate.
-- Treat a Claim reference whose identity semantics are ambiguous as unresolved; do not deduplicate or merge by text similarity alone.
+- Adopt the Owner-selected semantic direction in §12: Claim is an attributable proposition thread; Fact is a separately identified, governed attestation object (Option A); ClaimRef is stable and each assertion state is an immutable ClaimRevision (I1).
+- This is a semantic decision only. It does not freeze field-level canonical schema, ID allocation/commit APIs, DDL, persistence layout, or BMCP wire payloads.
+- Keep E CandidateProposition/ExtractionIR neutral and pre-canonical. E MUST NOT mint ClaimRef, ClaimRevisionRef, FactRef or FactRevisionRef; D remains the canonical identity/lifecycle authority.
+- Keep exact schema mapping, D/I/Storage interfaces, migration/compatibility and consumer conformance blocked until the B ADR §8 conditions are evidenced.
+- Do not issue JSON Schema, database migration, Runtime implementation authorization or downstream contract freeze based on this semantic selection alone.
+- Treat ambiguous identity classification as unresolved; fail closed and never deduplicate or merge by text similarity alone.
 
 - 暂以 `Claim` 作为工作命题术语；不创建独立 Fact 实体。
 - `claim_id` 身份策略继续 OPEN；不得假定全局稳定身份或版本局部身份。
@@ -181,9 +182,9 @@ Until explicit decisions and consumer acceptances are recorded:
 - 不得基于本候选发布 JSON Schema、数据库迁移、实现授权或下游契约冻结。
 - 身份语义不明确的 Claim 引用视为未解决；不得仅凭文本相似度去重或合并。
 
-**ADR status:** CANDIDATE / DECISION REQUEST. B2/B3 remain OPEN until B's explicit decision and required D/E/F/G/Storage consumer acceptance are exact-version pinned. B4 remains NOT READY. No Owner approval is inferred from silence or role simulation.
+**ADR status:** Owner semantic direction selected (Option A + I1) by §12. The B ADR itself remains **ADR-BLOCKED / NOT ACCEPTED / NOT SCHEMA-FROZEN** until its §8 consumer mapping, migration/compatibility and conformance conditions are exact-version pinned. B2/B3 remain OPEN; B4 remains NOT READY. No schema approval is inferred from this semantic selection.
 
-**ADR 状态：**CANDIDATE / DECISION REQUEST。B 作出明确决定并完成 D/E/F/G/Storage 消费者精确版本验收前，B2/B3 保持 OPEN。B4 仍 NOT READY。不得从沉默或角色模拟推断 Owner 批准。
+**ADR 状态：**Owner 已在 §12 选择语义方向（Option A + I1）。B ADR 本身仍为 **ADR-BLOCKED / NOT ACCEPTED / NOT SCHEMA-FROZEN**，直至 §8 消费者映射、迁移/兼容和符合性条件均完成精确版本 Pin。B2/B3 保持 OPEN；B4 仍 NOT READY。本语义选择不构成 Schema 批准。
 
 
 ## 11. Current B Owner ADR reconciliation — 2026-11-18 / 当前 B Owner ADR 对账 — 2026-11-18
@@ -217,6 +218,32 @@ Main I-04 (Blob `33b037318e459ebb73bea33b3186f31a41d5dcfe`) and P-04 (Blob `192e
 
 Main I-04（Blob `33b037318e459ebb73bea33b3186f31a41d5dcfe`）和 P-04（Blob `192e6ba6e9287792a02b679dda0d391844270228`）规范性地区分 Fact 与 Claim，视为不同领域概念/对象。Main Domain Overview Blob `4d1debc0ec19b3917f9e76d04bb66da4df4cd346` 仍将 Fact 描述为 Claim 的限定解释；而当前中英文指南（EN Blob `8a19cebacf5aefb0aded5fdbfeaff406291a5cf1`；ZH Blob `a9f53a453aec25c47c58c4aea75adc43c83028d3`）明确保留 ADR-BLOCKED，并禁止下游 Schema 冻结。Main Terminology Blob `9b287ebe027ae01128baf164952ce15aad050638` 仍将 “Fact / Claim” 合并定义。这些来源层面的不一致仍未解决。
 
-Issue #43 remains OPEN and preserves the Fact/Claim ADR blocker. Issue #5 remains OPEN for I36 governance approvals; it is a separate I identity-trust governance dependency and must not be misrepresented as the missing Architecture Governance decision authority for this ADR. No named Architecture Governance decision-maker, approval timestamp or approved option is recorded in the current B ADR artifacts. Therefore the recommendation remains Option A / CANDIDATE and the ADR remains BLOCKED.
+Issue #43 remains OPEN and preserves the Fact/Claim schema/consumer blocker. Issue #5 remains OPEN for I36 governance approvals; it is a separate I identity-trust governance dependency and must not be misrepresented as the missing Architecture Governance decision authority for this ADR. An Owner semantic decision is now recorded in §12 and PR #438; it selects Option A + I1 only. It does not constitute B/D/E/F/G/H/I/Storage consumer acceptance, does not satisfy the B ADR §8 migration/conformance checklist, and does not approve schema/API/DDL/wire fields. Therefore the B ADR remains BLOCKED for schema freeze and implementation mapping.
 
-Issue #43 仍 OPEN，并保留 Fact/Claim ADR 阻塞。Issue #5 仍 OPEN，负责 I36 治理批准；它是独立的 I 身份信任治理依赖，不得误称为本 ADR 缺失的 Architecture Governance 决策权威。当前 B ADR 工件中没有记录具名 Architecture Governance 决策人、批准时间或获批方案。因此当前建议为 Option A / CANDIDATE，ADR 仍 BLOCKED。
+Issue #43 仍 OPEN，并保留 Fact/Claim Schema/消费者阻塞。Issue #5 仍 OPEN，负责 I36 治理批准；它是独立的 I 身份信任治理依赖，不得误称为本 ADR 缺失的 Architecture Governance 决策权威。§12 和 PR #438 现已记录 Owner 语义决策，仅选择 Option A + I1。该决策不等于 B/D/E/F/G/H/I/Storage 消费者验收，不满足 B ADR §8 的迁移/符合性清单，也不批准 Schema/API/DDL/Wire 字段。因此 B ADR 对 Schema 冻结和实现映射仍保持 BLOCKED。
+
+## 12. Owner semantic selection — 2026-11-21 / Owner 语义选择 — 2026-11-21
+
+**Decision record:** `OWNER-DECISION-FACT-CLAIM-001`, PR #438, head `60fb3a6a36bcd2ebe9197e4a1c8d24302b34f168` (Draft / not merged at this ADR revision).
+
+**Selected semantic direction:** Option A + I1.
+
+- Claim is an attributable proposition thread; ClaimRevision is an immutable assertion state under stable ClaimRef.
+- Fact is a separately identified, governed attestation/adjudication thread; FactRevision is immutable and references exact ClaimRevisionRef(s), Evidence/Provenance, Scope, authorized attestor, method/version, applicable I authorization, temporal context and correction/revocation lineage.
+- A Claim may exist without a Fact. A Verified Claim does not automatically create a Fact. Confidence does not mint Fact or canonical identity.
+- D owns canonical identity allocation, lifecycle, revision commit and ConflictSet lifecycle. I owns Principal/attestor authorization, PermissionEpoch, revocation, retention and global Forget policy. D/I retain their respective Forget Fence and global completion boundaries.
+- E remains neutral CandidateProposition/ExtractionIR and may submit proposals only; it cannot mint canonical IDs or infer Fact from extraction confidence. F/G consume exact revision-pinned references. H may carry opaque references but owns and has not frozen wire representation.
+
+**Explicit boundary:** this selection resolves the semantic direction only. B-ADR-FACT-CLAIM-001 remains ADR-BLOCKED for canonical schema freeze, field mapping, DDL, API, migrations and Runtime implementation until the §8 checklist is complete: exact B/D/E/F/G/H/I/Storage consumer mapping and acceptance, migration/compatibility plan, conformance scenarios and source-version pins. This addendum does not claim B Owner sign-off on behalf of B, does not close Issue #43, and does not change Issue #7's `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`.
+
+**决策记录：**`OWNER-DECISION-FACT-CLAIM-001`，PR #438，Head `60fb3a6a36bcd2ebe9197e4a1c8d24302b34f168`（本 ADR 修订时仍为 Draft / 未合并）。
+
+**选择的语义方向：**Option A + I1。
+
+- Claim 是可归属的命题线程；ClaimRevision 是稳定 ClaimRef 下的不可变断言状态。
+- Fact 是独立标识、受治理的 Attestation/Adjudication 线程；FactRevision 不可变，并引用精确 ClaimRevisionRef、Evidence/Provenance、Scope、授权 Attestor、Method/Version、适用的 I 授权、时间上下文以及更正/撤销谱系。
+- Claim 可以没有 Fact。Verified Claim 不会自动生成 Fact。Confidence 不会签发 Fact 或规范身份。
+- D 负责规范身份分配、生命周期、Revision Commit 和 ConflictSet 生命周期。I 负责 Principal/Attestor 授权、PermissionEpoch、撤销、保留和 Global Forget Policy。D/I 保留各自的 Forget Fence 和全局完成边界。
+- E 继续使用中立 CandidateProposition/ExtractionIR，只能提交提案；不得签发规范 ID，也不得从抽取置信度推导 Fact。F/G 只消费精确版本绑定引用。H 可以传递不透明引用，但 Wire 表示仍归 H 所有且尚未冻结。
+
+**明确边界：**本选择只解决语义方向。B-ADR-FACT-CLAIM-001 对 Canonical Schema 冻结、字段映射、DDL、API、迁移和 Runtime 实施仍为 ADR-BLOCKED，直至 §8 清单完成：B/D/E/F/G/H/I/Storage 精确消费者映射与验收、迁移/兼容计划、符合性场景及来源版本 Pin。本补充不代替 B Owner 签字，不关闭 Issue #43，也不改变 Issue #7 的 `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`。
