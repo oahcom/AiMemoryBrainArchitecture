@@ -215,9 +215,9 @@ read-back that names no baseline is not evidence, so §4 is satisfied here by pi
 
 | Target | Group | Value this round supersedes | Blob at baseline HEAD | Producing commit |
 |---|---|---|---|---|
-| docs/en/02-domain-model/domain-model-overview.md | R1/R4 | 46fbdcacbe8a | 5b86fe23ab7c670b4ae13331b56572aee35f5d00 | bc114263 |
+| docs/en/02-domain-model/domain-model-overview.md | R1/R4 | 443b35b288fc | 5b86fe23ab7c670b4ae13331b56572aee35f5d00 | bc114263 |
 | docs/zh-CN/02-domain-model/domain-model-overview.md | R1/R4 | d80d0515f9e0 | 03129ded6e9532048240aea3a18414370cbcb73d | bc114263 |
-| 02-domain-model/domain-model-overview.md | R1/R4 | 46fbdcacbe8a | 5b86fe23ab7c670b4ae13331b56572aee35f5d00 | 778d1bee |
+| 02-domain-model/domain-model-overview.md | R1/R4 | 443b35b288fc | 5b86fe23ab7c670b4ae13331b56572aee35f5d00 | 778d1bee |
 | docs/en/02-domain-model/phase-1-domain-model-freeze.md | R4 | 80a159515717 | 1a18c6b8424c939dd90986527a24807c8f74d552 | bc114263 |
 | docs/zh-CN/02-domain-model/phase-1-domain-model-freeze.md | R4 | acf12e265b52 | 408a606c44fcf271f265508bc9d3029f8fc889cb | bc114263 |
 | 02-domain-model/phase-1-domain-model-freeze.md | R4 | not in §8 | d1102a0adf32e3f7b3eb9091758823f990a2a37c | ae5a886f |
@@ -689,9 +689,9 @@ docs/zh-CN/04-memory-compiler/extraction-and-normalization.md  8dd0b5b29ecd37cea
 Note the third row. `02-domain-model/domain-model-overview.md` exists at repository root alongside
 `docs/en` and `docs/zh-CN`. Its Blob is `5b86fe23ab7c`, which is the value `§9.1` records as the
 result of the R1 correction on that path, produced by `778d1bee`. The root copy is therefore not
-stale on Claim identity: it was corrected in the same round, and its pre-correction Blob was
-`46fbdcacbe8a`. What differs is that the root copy has not moved since, while `docs/en` advanced to
-`1a1a10b24d68` in a later round.
+stale on Claim identity: it was corrected in the same round, and the value it superseded was
+`443b35b288fc`, produced by `961d2191bb`. What differs is that the root copy has not moved since,
+while `docs/en` advanced to `1a1a10b24d68` in a later round.
 
 Whether the root copy is a legitimate third authoritative copy, a mirror, or dead weight remains a
 question `§9.1` recorded but did not resolve: it noted the root-level freeze file has no row in
@@ -730,7 +730,7 @@ untouched, so the three statements in that file now agree.
 **R1-02 — `§9.8` misdescribed the root Overview Blob, and that error was mine.** `§9.8` said the
 root-level `02-domain-model/domain-model-overview.md` "still carries Blob `5b86fe23ab7c` — the
 pre-R1-correction value". That is false. `§9.1` records `5b86fe23ab7c` as the *result* of the R1
-correction on that path, produced by `778d1bee`, and records `46fbdcacbe8a` as the superseded value.
+correction on that path, produced by `778d1bee`, and the value it superseded was `443b35b288fc`.
 The reviewer verified this by reading the `778d1bee` diff, which replaces the old
 `ClaimId identity policy across Memory versions remains OPEN` sentence with the decided
 `ClaimRef is stable across Memory versions` formulation.

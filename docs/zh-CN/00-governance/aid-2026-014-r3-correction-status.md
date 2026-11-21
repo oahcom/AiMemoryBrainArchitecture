@@ -213,9 +213,9 @@ R3 复审处置、正式验收、Schema 冻结与实现一致性均不因本注�
 
 | 目标 | 组 | 本轮回读所取代的值 | 基线 HEAD 处 Blob | 产生该 Blob 的提交 |
 |---|---|---|---|---|
-| docs/en/02-domain-model/domain-model-overview.md | R1/R4 | 46fbdcacbe8a | 5b86fe23ab7c670b4ae13331b56572aee35f5d00 | bc114263 |
+| docs/en/02-domain-model/domain-model-overview.md | R1/R4 | 443b35b288fc | 5b86fe23ab7c670b4ae13331b56572aee35f5d00 | bc114263 |
 | docs/zh-CN/02-domain-model/domain-model-overview.md | R1/R4 | d80d0515f9e0 | 03129ded6e9532048240aea3a18414370cbcb73d | bc114263 |
-| 02-domain-model/domain-model-overview.md | R1/R4 | 46fbdcacbe8a | 5b86fe23ab7c670b4ae13331b56572aee35f5d00 | 778d1bee |
+| 02-domain-model/domain-model-overview.md | R1/R4 | 443b35b288fc | 5b86fe23ab7c670b4ae13331b56572aee35f5d00 | 778d1bee |
 | docs/en/02-domain-model/phase-1-domain-model-freeze.md | R4 | 80a159515717 | 1a18c6b8424c939dd90986527a24807c8f74d552 | bc114263 |
 | docs/zh-CN/02-domain-model/phase-1-domain-model-freeze.md | R4 | acf12e265b52 | 408a606c44fcf271f265508bc9d3029f8fc889cb | bc114263 |
 | 02-domain-model/phase-1-domain-model-freeze.md | R4 | 第 8 节未登记 | d1102a0adf32e3f7b3eb9091758823f990a2a37c | ae5a886f |
@@ -608,9 +608,9 @@ docs/zh-CN/04-memory-compiler/extraction-and-normalization.md  8dd0b5b29ecd37cea
 
 注意第三行。`02-domain-model/domain-model-overview.md` 与 `docs/en`、`docs/zh-CN` 并列存在于
 仓库根级。其 Blob 为 `5b86fe23ab7c`，正是 `§9.1` 登记的该路径 R1 修正结果，由 `778d1bee`
-产生。因此根级副本在 Claim identity 上并未过期：它与本轮同时被修正，其修正前 Blob 为
-`46fbdcacbe8a`。差别只在于根级副本此后未再推进，而 `docs/en` 在后续轮次推进到
-`1a1a10b24d68`。
+产生。因此根级副本在 Claim identity 上并未过期：它与本轮同时被修正，其所取代的值为
+`443b35b288fc`，产生于 `961d2191bb`。差别只在于根级副本此后未再推进，而 `docs/en` 在后续
+轮次推进到 `1a1a10b24d68`。
 
 根级副本究竟是合法的第三份权威副本、镜像，还是冗余，仍是 `§9.1` 记录但未裁定的问题：该节已
 指出根级 freeze 文件在 `§8` 中根本没有行，根级 `context-versioning.md` 仅以「本轮未应用」
@@ -644,8 +644,8 @@ docs/zh-CN/04-memory-compiler/extraction-and-normalization.md  8dd0b5b29ecd37cea
 
 **R1-02 —— `§9.8` 对根级 Overview Blob 的描述错误，而这个错误是本轮自身造成的。** `§9.8` 曾写
 根级 `02-domain-model/domain-model-overview.md`「其 Blob 仍为 `5b86fe23ab7c`——即 R1 修正前的值」。
-这是错的。`§9.1` 登记 `5b86fe23ab7c` 为该路径 R1 修正的**结果**，由 `778d1bee` 产生，而被取代值
-是 `46fbdcacbe8a`。复审方读取 `778d1bee` 的 diff 予以确认：该提交把旧句
+这是错的。`§9.1` 登记 `5b86fe23ab7c` 为该路径 R1 修正的**结果**，由 `778d1bee` 产生，其所取代的值
+是 `443b35b288fc`。复审方读取 `778d1bee` 的 diff 予以确认：该提交把旧句
 `ClaimId identity policy across Memory versions remains OPEN` 替换为已决的
 `ClaimRef is stable across Memory versions` 表述。
 
