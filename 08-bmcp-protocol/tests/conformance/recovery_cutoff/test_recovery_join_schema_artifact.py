@@ -33,10 +33,10 @@ class RecoveryJoinSchemaArtifactTests(unittest.TestCase):
     def test_01_schema_identity_and_index_are_consistent(self):
         Draft202012Validator.check_schema(SCHEMA)
         self.assertEqual(SCHEMA_PATH.name, "bmcp.recovery-join-1.0.2.schema.json")
-        match = re.search(r"-(\d+\\.\d+\\.\d+)\\.schema\\.json$", SCHEMA_PATH.name)
+        match = re.search(r"-(\d+\.\d+\.\d+)\.schema\.json$", SCHEMA_PATH.name)
         self.assertIsNotNone(match, "schema filename must end in a semantic version")
         filename_version = match.group(1)
-        id_match = re.search(r"/(\d+\\.\d+\\.\d+)$", SCHEMA["$id"])
+        id_match = re.search(r"/(\d+\.\d+\.\d+)$", SCHEMA["$id"])
         self.assertIsNotNone(id_match, "$id must end in a semantic version")
         self.assertEqual(id_match.group(1), filename_version)
         self.assertEqual(SCHEMA["properties"]["schema_version"]["const"], filename_version)
