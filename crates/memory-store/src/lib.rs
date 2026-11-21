@@ -134,7 +134,7 @@ mod tests {
     use super::*;
     use memory_domain::{scope_set_contains_all, scopes_intersect};
     use memory_domain::{MemoryLifecycle, ScopeKind};
-    use memory_storage::{PrepareRequest, PreparedCommitReceipt};
+    use memory_storage::{PrepareRequest, PreparedCommitReceipt, PublicationState};
     use std::collections::BTreeMap;
 
     #[derive(Clone)]
@@ -280,6 +280,39 @@ mod tests {
                 .get(version_id.as_str())
                 .filter(|v| &v.memory_id == memory_id)
                 .cloned())
+        }
+
+        fn publication_state(
+            &self,
+            publication_id: &str,
+            scope: &[ScopeRef],
+        ) -> Result<Option<PublicationState>, StorageError> {
+            if scope.is_empty() {
+                return Err(StorageError::InvalidSchema);
+            }
+            let Some(record) = self.prepared.get(publication_id) else {
+                return Ok(None);
+            };
+            let memory = self
+                .memories
+                .get(record.request.memory_id.as_str())
+                .ok_or(StorageError::NotFoundOrNotVisible)?;
+            if !scopes_intersect(&memory.scope_refs, scope) {
+                return Err(StorageError::ScopeMismatch);
+            }
+            if self.is_fenced("Memory", record.request.memory_id.as_str())
+                || self.is_fenced(
+                    "Version",
+                    record.request.new_version.memory_version_id.as_str(),
+                )
+            {
+                return Ok(None);
+            }
+            Ok(Some(if record.published.is_some() {
+                PublicationState::Published
+            } else {
+                PublicationState::PreparedHidden
+            }))
         }
 
         fn commit_version(

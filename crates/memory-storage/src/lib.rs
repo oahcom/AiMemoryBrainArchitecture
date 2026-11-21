@@ -62,6 +62,15 @@ pub struct PreparedCommitReceipt {
 )]
 pub struct CommitSequence(pub u64);
 
+/// The persisted publication state of one version, mirroring the
+/// `publication_preparations.state` constraint of the SQLite adapter.
+#[derive(serde::Serialize, serde::Deserialize, Clone, Copy, Debug, Eq, PartialEq)]
+pub enum PublicationState {
+    PreparedHidden,
+    Published,
+    Suppressed,
+}
+
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct ChangeRecord {
     pub commit_sequence: CommitSequence,
@@ -116,6 +125,16 @@ pub trait MemoryStorage {
         expected_current_version: Option<OpaqueId>,
         scope: &[ScopeRef],
     ) -> Result<CommitReceipt, StorageError>;
+    /// The persisted publication state of one version, as recorded by
+    /// `prepare_version` / `publish_prepared`. Returns `None` when no preparation
+    /// row exists for that publication. Visibility semantics follow `read_current`:
+    /// absent or forgotten yields `Ok(None)`, non-intersecting scope yields
+    /// `ScopeMismatch`.
+    fn publication_state(
+        &self,
+        publication_id: &str,
+        scope: &[ScopeRef],
+    ) -> Result<Option<PublicationState>, StorageError>;
     /// Permanently hide a memory and all of its versions.
     /// Repeated calls return the original fence sequence.
     fn forget_memory(

@@ -7,7 +7,7 @@ use memory_domain::{
 };
 use memory_storage::{
     ChangePage, ChangeRecord, CommitReceipt, CommitRequest, CommitSequence, MemoryStorage,
-    PrepareRequest, PreparedCommitReceipt, StorageError,
+    PrepareRequest, PreparedCommitReceipt, PublicationState, StorageError,
 };
 use rusqlite::{params, Connection, OptionalExtension, TransactionBehavior};
 use std::time::Duration;
@@ -383,6 +383,51 @@ impl MemoryStorage for SqliteMemoryStorage {
     ) -> Result<Option<MemoryVersion>, StorageError> {
         Self::validate_scope_set(scope)?;
         self.read_version_row(memory_id, version_id, scope)
+    }
+
+    fn publication_state(
+        &self,
+        publication_id: &str,
+        scope: &[ScopeRef],
+    ) -> Result<Option<PublicationState>, StorageError> {
+        Self::validate_scope_set(scope)?;
+        let row = self
+            .connection
+            .query_row(
+                "SELECT v.scope_json, v.memory_id, v.version_id, p.state
+                 FROM publication_preparations p
+                 JOIN versions v ON v.version_id = p.version_id
+                 WHERE p.publication_id = ?1",
+                params![publication_id],
+                |row| {
+                    Ok((
+                        row.get::<_, String>(0)?,
+                        row.get::<_, String>(1)?,
+                        row.get::<_, String>(2)?,
+                        row.get::<_, String>(3)?,
+                    ))
+                },
+            )
+            .optional()
+            .map_err(|_| StorageError::TransactionUnavailable)?;
+        let Some((scope_json, memory_id, version_id, state)) = row else {
+            return Ok(None);
+        };
+        Self::scope_allowed(&scope_json, scope)?;
+        // Forgotten targets are invisible on every read path, exactly as
+        // `read_version_row` excludes fenced versions.
+        if Self::is_fenced(&self.connection, "Memory", &memory_id)?
+            || Self::is_fenced(&self.connection, "Version", &version_id)?
+        {
+            return Ok(None);
+        }
+        let state = match state.as_str() {
+            "PreparedHidden" => PublicationState::PreparedHidden,
+            "Published" => PublicationState::Published,
+            "Suppressed" => PublicationState::Suppressed,
+            _ => return Err(StorageError::InvalidSchema),
+        };
+        Ok(Some(state))
     }
 
     fn commit_version(
@@ -3193,6 +3238,119 @@ mod tests {
             )
             .unwrap();
         assert_eq!(state, "Published");
+    }
+
+    #[test]
+    fn sqlite_publication_state_reports_prepared_hidden_then_published() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        store
+            .prepare_version(
+                PrepareRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v7-hidden", 1, None),
+                    idempotency_key: "t7-op".into(),
+                    request_digest: "t7-digest".into(),
+                    publication_id: "t7-publication".into(),
+                    generation: 1,
+                },
+                &[scope()],
+            )
+            .unwrap();
+
+        assert_eq!(
+            store
+                .publication_state("t7-publication", &[scope()])
+                .unwrap(),
+            Some(PublicationState::PreparedHidden),
+            "a prepared version must be reported as PreparedHidden, not as published"
+        );
+
+        store
+            .publish_prepared("t7-publication", None, &[scope()])
+            .unwrap();
+
+        assert_eq!(
+            store
+                .publication_state("t7-publication", &[scope()])
+                .unwrap(),
+            Some(PublicationState::Published)
+        );
+    }
+
+    #[test]
+    fn sqlite_publication_state_returns_none_for_unknown_or_legacy_publication() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        store
+            .commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v8-legacy", 1, None),
+                    idempotency_key: "t8-op".into(),
+                    request_digest: "t8-digest".into(),
+                },
+                &[scope()],
+            )
+            .unwrap();
+
+        assert_eq!(
+            store
+                .publication_state("no-such-publication", &[scope()])
+                .unwrap(),
+            None
+        );
+        assert_eq!(
+            store.publication_state("t8-op", &[scope()]).unwrap(),
+            None,
+            "the legacy commit path writes no preparation row"
+        );
+    }
+
+    #[test]
+    fn sqlite_publication_state_honours_scope_and_forget_fences() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+        store
+            .prepare_version(
+                PrepareRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v9-hidden", 1, None),
+                    idempotency_key: "t9-op".into(),
+                    request_digest: "t9-digest".into(),
+                    publication_id: "t9-publication".into(),
+                    generation: 1,
+                },
+                &[scope()],
+            )
+            .unwrap();
+
+        let other = ScopeRef {
+            scope_id: id("s2"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:s2".into(),
+        };
+        assert_eq!(
+            store.publication_state("t9-publication", &[other]),
+            Err(StorageError::ScopeMismatch),
+            "a non-intersecting scope must not reveal the publication at all"
+        );
+
+        store
+            .forget_version(&id("m1"), &id("v9-hidden"), "forget-digest", &[scope()])
+            .unwrap();
+        assert_eq!(
+            store
+                .publication_state("t9-publication", &[scope()])
+                .unwrap(),
+            None,
+            "a forgotten version yields no publication state"
+        );
     }
 
     #[test]
