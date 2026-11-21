@@ -8,8 +8,7 @@ use memory_context::{
     build_context, ContextBudget, ContextCandidate, ContextError, ContextIdentity, ContextTier,
 };
 use memory_domain::{
-    Claim, EpistemicStatus, Memory, MemoryLifecycle, MemoryVersion, OpaqueId, ScopeKind,
-    ScopeRef,
+    Claim, EpistemicStatus, Memory, MemoryLifecycle, MemoryVersion, OpaqueId, ScopeKind, ScopeRef,
 };
 use memory_storage_sqlite::SqliteMemoryStorage;
 use memory_store::{MemoryStore, RevisionWrite};

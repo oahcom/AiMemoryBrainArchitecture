@@ -23,8 +23,10 @@ fn enable_wal(connection: &Connection) -> rusqlite::Result<()> {
         match connection.execute_batch("PRAGMA journal_mode = WAL;") {
             Ok(()) => return Ok(()),
             Err(Error::SqliteFailure(error, _))
-                if matches!(error.code, ErrorCode::DatabaseBusy | ErrorCode::DatabaseLocked)
-                    && std::time::Instant::now() < deadline =>
+                if matches!(
+                    error.code,
+                    ErrorCode::DatabaseBusy | ErrorCode::DatabaseLocked
+                ) && std::time::Instant::now() < deadline =>
             {
                 std::thread::sleep(delay);
                 delay = (delay * 2).min(Duration::from_millis(100));
@@ -34,34 +36,43 @@ fn enable_wal(connection: &Connection) -> rusqlite::Result<()> {
     }
 }
 
-
 pub struct SqliteMemoryStorage {
     connection: Connection,
 }
 
 impl SqliteMemoryStorage {
     pub fn open(path: impl AsRef<std::path::Path>) -> Result<Self, StorageError> {
-        let connection = Connection::open(path).map_err(|_| StorageError::TransactionUnavailable)?;
-        connection.busy_timeout(Duration::from_secs(5)).map_err(|_| StorageError::TransactionUnavailable)?;
+        let connection =
+            Connection::open(path).map_err(|_| StorageError::TransactionUnavailable)?;
+        connection
+            .busy_timeout(Duration::from_secs(5))
+            .map_err(|_| StorageError::TransactionUnavailable)?;
         enable_wal(&connection).map_err(|_| StorageError::TransactionUnavailable)?;
-        connection.execute_batch(
-            "PRAGMA synchronous = FULL;
+        connection
+            .execute_batch(
+                "PRAGMA synchronous = FULL;
              PRAGMA foreign_keys = ON;
-             PRAGMA busy_timeout = 5000;"
-        ).map_err(|_| StorageError::TransactionUnavailable)?;
+             PRAGMA busy_timeout = 5000;",
+            )
+            .map_err(|_| StorageError::TransactionUnavailable)?;
         let store = Self { connection };
         store.initialize()?;
         Ok(store)
     }
 
     pub fn in_memory() -> Result<Self, StorageError> {
-        let connection = Connection::open_in_memory().map_err(|_| StorageError::TransactionUnavailable)?;
-        connection.busy_timeout(Duration::from_secs(5)).map_err(|_| StorageError::TransactionUnavailable)?;
-        connection.execute_batch(
-            "PRAGMA synchronous = FULL;
+        let connection =
+            Connection::open_in_memory().map_err(|_| StorageError::TransactionUnavailable)?;
+        connection
+            .busy_timeout(Duration::from_secs(5))
+            .map_err(|_| StorageError::TransactionUnavailable)?;
+        connection
+            .execute_batch(
+                "PRAGMA synchronous = FULL;
              PRAGMA foreign_keys = ON;
-             PRAGMA busy_timeout = 5000;"
-        ).map_err(|_| StorageError::TransactionUnavailable)?;
+             PRAGMA busy_timeout = 5000;",
+            )
+            .map_err(|_| StorageError::TransactionUnavailable)?;
         let store = Self { connection };
         store.initialize()?;
         Ok(store)
@@ -138,7 +149,8 @@ impl SqliteMemoryStorage {
         if scope.is_empty() {
             return Err(StorageError::InvalidSchema);
         }
-        scope.iter()
+        scope
+            .iter()
             .try_for_each(|item| item.validate().map_err(|_| StorageError::InvalidSchema))
     }
 
@@ -251,7 +263,9 @@ impl SqliteMemoryStorage {
                 let stored_scopes: Vec<ScopeRef> = Self::decode(&scope_json)?;
                 let mut version: MemoryVersion = Self::decode(&version_json)?;
 
-                version.validate().map_err(|_| StorageError::InvalidSchema)?;
+                version
+                    .validate()
+                    .map_err(|_| StorageError::InvalidSchema)?;
 
                 if version
                     .claims
@@ -273,7 +287,6 @@ impl SqliteMemoryStorage {
             None => Ok(None),
         }
     }
-
 }
 
 impl MemoryStorage for SqliteMemoryStorage {
@@ -285,11 +298,7 @@ impl MemoryStorage for SqliteMemoryStorage {
             return Err(StorageError::InvalidReference);
         }
         Self::scope_allowed(&Self::encode(&memory.scope_refs)?, scope)?;
-        if Self::is_fenced(
-            &self.connection,
-            "Memory",
-            memory.memory_id.as_str(),
-        )? {
+        if Self::is_fenced(&self.connection, "Memory", memory.memory_id.as_str())? {
             return Err(StorageError::Forgotten);
         }
         let scope_json = Self::encode(&memory.scope_refs)?;
@@ -324,7 +333,9 @@ impl MemoryStorage for SqliteMemoryStorage {
             )
             .optional()
             .map_err(|_| StorageError::TransactionUnavailable)?;
-        let Some((scope_json, memory_json)) = row else { return Ok(None) };
+        let Some((scope_json, memory_json)) = row else {
+            return Ok(None);
+        };
         Self::scope_allowed(&scope_json, scope)?;
         // A forgotten memory is invisible on every read path, not only on version reads.
         if Self::is_fenced(&self.connection, "Memory", memory_id.as_str())? {
@@ -353,9 +364,13 @@ impl MemoryStorage for SqliteMemoryStorage {
             )
             .optional()
             .map_err(|_| StorageError::TransactionUnavailable)?;
-        let Some((scope_json, current)) = row else { return Ok(None) };
+        let Some((scope_json, current)) = row else {
+            return Ok(None);
+        };
         Self::scope_allowed(&scope_json, scope)?;
-        let Some(current) = current else { return Ok(None) };
+        let Some(current) = current else {
+            return Ok(None);
+        };
         let version_id = OpaqueId::new(current).map_err(|_| StorageError::InvalidSchema)?;
         self.read_version_row(memory_id, &version_id, scope)
     }
@@ -379,7 +394,10 @@ impl MemoryStorage for SqliteMemoryStorage {
         if request.memory_id != request.new_version.memory_id {
             return Err(StorageError::InvalidReference);
         }
-        request.new_version.validate().map_err(|_| StorageError::InvalidSchema)?;
+        request
+            .new_version
+            .validate()
+            .map_err(|_| StorageError::InvalidSchema)?;
         if request.idempotency_key.is_empty() || request.request_digest.is_empty() {
             return Err(StorageError::InvalidSchema);
         }
@@ -438,7 +456,12 @@ impl MemoryStorage for SqliteMemoryStorage {
         }
 
         let current_id = memory_row.1.as_deref();
-        if current_id != request.expected_current_version.as_ref().map(OpaqueId::as_str) {
+        if current_id
+            != request
+                .expected_current_version
+                .as_ref()
+                .map(OpaqueId::as_str)
+        {
             return Err(StorageError::StaleVersion);
         }
 
@@ -455,14 +478,20 @@ impl MemoryStorage for SqliteMemoryStorage {
                 .new_version
                 .validate_successor(&current)
                 .map_err(|_| StorageError::StaleVersion)?;
-        } else if request.new_version.version_number != 1 || request.new_version.parent_version_id.is_some() {
+        } else if request.new_version.version_number != 1
+            || request.new_version.parent_version_id.is_some()
+        {
             return Err(StorageError::StaleVersion);
         }
 
         let scope_json = memory_row.0.clone();
         let version_json = Self::encode(&request.new_version)?;
         let next_sequence: i64 = tx
-            .query_row("SELECT COALESCE(MAX(commit_sequence), 0) + 1 FROM commit_log", [], |row| row.get(0))
+            .query_row(
+                "SELECT COALESCE(MAX(commit_sequence), 0) + 1 FROM commit_log",
+                [],
+                |row| row.get(0),
+            )
             .map_err(|_| StorageError::TransactionUnavailable)?;
 
         tx.execute(
@@ -503,7 +532,11 @@ impl MemoryStorage for SqliteMemoryStorage {
 
         tx.execute(
             "INSERT INTO commit_log(commit_sequence, memory_id, version_id) VALUES (?1, ?2, ?3)",
-            params![next_sequence, request.memory_id.as_str(), request.new_version.memory_version_id.as_str()],
+            params![
+                next_sequence,
+                request.memory_id.as_str(),
+                request.new_version.memory_version_id.as_str()
+            ],
         )
         .map_err(|_| StorageError::TransactionUnavailable)?;
 
@@ -520,7 +553,8 @@ impl MemoryStorage for SqliteMemoryStorage {
         )
         .map_err(|_| StorageError::IdempotencyConflict)?;
 
-        tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+        tx.commit()
+            .map_err(|_| StorageError::TransactionUnavailable)?;
         Ok(receipt)
     }
 
@@ -533,7 +567,10 @@ impl MemoryStorage for SqliteMemoryStorage {
         if request.memory_id != request.new_version.memory_id {
             return Err(StorageError::InvalidReference);
         }
-        request.new_version.validate().map_err(|_| StorageError::InvalidSchema)?;
+        request
+            .new_version
+            .validate()
+            .map_err(|_| StorageError::InvalidSchema)?;
         if request.idempotency_key.is_empty()
             || request.request_digest.is_empty()
             || request.publication_id.is_empty()
@@ -578,12 +615,14 @@ impl MemoryStorage for SqliteMemoryStorage {
                 "SELECT memory_id, request_digest, publication_id, generation
                  FROM publication_preparations WHERE idempotency_key = ?1",
                 params![request.idempotency_key.as_str()],
-                |row| Ok((
-                    row.get::<_, String>(0)?,
-                    row.get::<_, String>(1)?,
-                    row.get::<_, String>(2)?,
-                    row.get::<_, i64>(3)?,
-                )),
+                |row| {
+                    Ok((
+                        row.get::<_, String>(0)?,
+                        row.get::<_, String>(1)?,
+                        row.get::<_, String>(2)?,
+                        row.get::<_, i64>(3)?,
+                    ))
+                },
             )
             .optional()
             .map_err(|_| StorageError::TransactionUnavailable)?
@@ -602,10 +641,12 @@ impl MemoryStorage for SqliteMemoryStorage {
                     |row| row.get(0),
                 )
                 .map_err(|_| StorageError::TransactionUnavailable)?;
-            tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+            tx.commit()
+                .map_err(|_| StorageError::TransactionUnavailable)?;
             return Ok(PreparedCommitReceipt {
                 memory_id: request.memory_id,
-                prepared_version_id: OpaqueId::new(version_id).map_err(|_| StorageError::InvalidSchema)?,
+                prepared_version_id: OpaqueId::new(version_id)
+                    .map_err(|_| StorageError::InvalidSchema)?,
                 publication_id: request.publication_id,
                 generation: request.generation,
                 idempotency_key: request.idempotency_key,
@@ -637,12 +678,23 @@ impl MemoryStorage for SqliteMemoryStorage {
         }
 
         let current_id = memory_row.1.as_deref();
-        if current_id != request.expected_current_version.as_ref().map(OpaqueId::as_str) {
+        if current_id
+            != request
+                .expected_current_version
+                .as_ref()
+                .map(OpaqueId::as_str)
+        {
             return Err(StorageError::StaleVersion);
         }
 
         if let Some(current_id) = current_id {
-            if request.new_version.parent_version_id.as_ref().map(OpaqueId::as_str) != Some(current_id) {
+            if request
+                .new_version
+                .parent_version_id
+                .as_ref()
+                .map(OpaqueId::as_str)
+                != Some(current_id)
+            {
                 return Err(StorageError::StaleVersion);
             }
             let current_json: String = tx
@@ -657,7 +709,9 @@ impl MemoryStorage for SqliteMemoryStorage {
                 .new_version
                 .validate_successor(&current)
                 .map_err(|_| StorageError::StaleVersion)?;
-        } else if request.new_version.version_number != 1 || request.new_version.parent_version_id.is_some() {
+        } else if request.new_version.version_number != 1
+            || request.new_version.parent_version_id.is_some()
+        {
             return Err(StorageError::StaleVersion);
         }
 
@@ -709,7 +763,8 @@ impl MemoryStorage for SqliteMemoryStorage {
         )
         .map_err(|_| StorageError::PublicationStateConflict)?;
 
-        tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+        tx.commit()
+            .map_err(|_| StorageError::TransactionUnavailable)?;
         Ok(PreparedCommitReceipt {
             memory_id: request.memory_id,
             prepared_version_id: request.new_version.memory_version_id,
@@ -745,29 +800,44 @@ impl MemoryStorage for SqliteMemoryStorage {
                  JOIN versions v ON v.version_id = p.version_id
                  WHERE p.publication_id = ?1",
                 params![publication_id],
-                |row| Ok((
-                    row.get::<_, String>(0)?,
-                    row.get::<_, String>(1)?,
-                    row.get::<_, String>(2)?,
-                    row.get::<_, String>(3)?,
-                    row.get::<_, Option<String>>(4)?,
-                    row.get::<_, String>(5)?,
-                    row.get::<_, Option<i64>>(6)?,
-                    row.get::<_, String>(7)?,
-                    row.get::<_, Option<String>>(8)?,
-                    row.get::<_, String>(9)?,
-                    row.get::<_, String>(10)?,
-                )),
+                |row| {
+                    Ok((
+                        row.get::<_, String>(0)?,
+                        row.get::<_, String>(1)?,
+                        row.get::<_, String>(2)?,
+                        row.get::<_, String>(3)?,
+                        row.get::<_, Option<String>>(4)?,
+                        row.get::<_, String>(5)?,
+                        row.get::<_, Option<i64>>(6)?,
+                        row.get::<_, String>(7)?,
+                        row.get::<_, Option<String>>(8)?,
+                        row.get::<_, String>(9)?,
+                        row.get::<_, String>(10)?,
+                    ))
+                },
             )
             .optional()
             .map_err(|_| StorageError::TransactionUnavailable)?
             .ok_or(StorageError::NotFoundOrNotVisible)?;
 
-        let (memory_id_text, version_id_text, idempotency_key, request_digest, stored_expected, state, stored_sequence, scope_json, current_id, memory_json, version_json) = row;
+        let (
+            memory_id_text,
+            version_id_text,
+            idempotency_key,
+            request_digest,
+            stored_expected,
+            state,
+            stored_sequence,
+            scope_json,
+            current_id,
+            memory_json,
+            version_json,
+        ) = row;
 
         Self::scope_allowed(&scope_json, scope)?;
         let memory_id = OpaqueId::new(memory_id_text).map_err(|_| StorageError::InvalidSchema)?;
-        let version_id = OpaqueId::new(version_id_text.clone()).map_err(|_| StorageError::InvalidSchema)?;
+        let version_id =
+            OpaqueId::new(version_id_text.clone()).map_err(|_| StorageError::InvalidSchema)?;
 
         let prepared_version: MemoryVersion = Self::decode(&version_json)?;
 
@@ -790,7 +860,8 @@ impl MemoryStorage for SqliteMemoryStorage {
                 commit_sequence: CommitSequence(sequence as u64),
                 idempotency_key,
             };
-            tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+            tx.commit()
+                .map_err(|_| StorageError::TransactionUnavailable)?;
             return Ok(receipt);
         }
         if state != "PreparedHidden" {
@@ -805,7 +876,9 @@ impl MemoryStorage for SqliteMemoryStorage {
 
         let memory_scopes: Vec<ScopeRef> = Self::decode(&scope_json)?;
         let version: MemoryVersion = Self::decode(&version_json)?;
-        version.validate().map_err(|_| StorageError::InvalidSchema)?;
+        version
+            .validate()
+            .map_err(|_| StorageError::InvalidSchema)?;
         if version.claims.iter().any(|claim| {
             !scope_set_contains_all(&memory_scopes, &claim.scope_refs)
                 || !scope_set_contains_all(scope, &claim.scope_refs)
@@ -827,7 +900,9 @@ impl MemoryStorage for SqliteMemoryStorage {
                 )
                 .map_err(|_| StorageError::TransactionUnavailable)?;
             let current: MemoryVersion = Self::decode(&current_json)?;
-            version.validate_successor(&current).map_err(|_| StorageError::StaleVersion)?;
+            version
+                .validate_successor(&current)
+                .map_err(|_| StorageError::StaleVersion)?;
         } else if version.version_number != 1 || version.parent_version_id.is_some() {
             return Err(StorageError::StaleVersion);
         }
@@ -903,7 +978,8 @@ impl MemoryStorage for SqliteMemoryStorage {
             return Err(StorageError::PublicationStateConflict);
         }
 
-        tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+        tx.commit()
+            .map_err(|_| StorageError::TransactionUnavailable)?;
         Ok(receipt)
     }
 
@@ -946,7 +1022,8 @@ impl MemoryStorage for SqliteMemoryStorage {
             .optional()
             .map_err(|_| StorageError::TransactionUnavailable)?
         {
-            tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+            tx.commit()
+                .map_err(|_| StorageError::TransactionUnavailable)?;
             return Ok(sequence);
         }
 
@@ -974,7 +1051,8 @@ impl MemoryStorage for SqliteMemoryStorage {
         )
         .map_err(|_| StorageError::TransactionUnavailable)?;
 
-        tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+        tx.commit()
+            .map_err(|_| StorageError::TransactionUnavailable)?;
         Ok(sequence)
     }
 
@@ -1036,7 +1114,8 @@ impl MemoryStorage for SqliteMemoryStorage {
             .optional()
             .map_err(|_| StorageError::TransactionUnavailable)?
         {
-            tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+            tx.commit()
+                .map_err(|_| StorageError::TransactionUnavailable)?;
             return Ok(sequence);
         }
 
@@ -1059,7 +1138,8 @@ impl MemoryStorage for SqliteMemoryStorage {
         )
         .map_err(|_| StorageError::TransactionUnavailable)?;
 
-        tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+        tx.commit()
+            .map_err(|_| StorageError::TransactionUnavailable)?;
         Ok(sequence)
     }
 
@@ -1071,10 +1151,14 @@ impl MemoryStorage for SqliteMemoryStorage {
     ) -> Result<ChangePage, StorageError> {
         Self::validate_scope_set(scope)?;
         if limit == 0 {
-            return Ok(ChangePage { records: vec![], next_cursor: after });
+            return Ok(ChangePage {
+                records: vec![],
+                next_cursor: after,
+            });
         }
         let start = after.map(|c| c.0 as i64).unwrap_or(0);
-        let mut stmt = self.connection
+        let mut stmt = self
+            .connection
             .prepare(
                 "SELECT c.commit_sequence, c.memory_id, c.version_id, m.scope_json
                  FROM commit_log c JOIN memories m ON m.memory_id = c.memory_id
@@ -1109,8 +1193,10 @@ impl MemoryStorage for SqliteMemoryStorage {
                 Ok(()) => {
                     records.push(ChangeRecord {
                         commit_sequence: CommitSequence(sequence as u64),
-                        memory_id: OpaqueId::new(memory_id).map_err(|_| StorageError::InvalidSchema)?,
-                        version_id: OpaqueId::new(version_id).map_err(|_| StorageError::InvalidSchema)?,
+                        memory_id: OpaqueId::new(memory_id)
+                            .map_err(|_| StorageError::InvalidSchema)?,
+                        version_id: OpaqueId::new(version_id)
+                            .map_err(|_| StorageError::InvalidSchema)?,
                     });
                     if records.len() > limit {
                         break;
@@ -1124,7 +1210,10 @@ impl MemoryStorage for SqliteMemoryStorage {
             records.pop();
         }
         let next_cursor = records.last().map(|r| r.commit_sequence);
-        Ok(ChangePage { records, next_cursor })
+        Ok(ChangePage {
+            records,
+            next_cursor,
+        })
     }
 
     fn resolve_idempotency(
@@ -1146,11 +1235,13 @@ impl MemoryStorage for SqliteMemoryStorage {
                        WHERE f.target_kind = 'Memory' AND f.target_id = i.memory_id
                    )",
                 params![idempotency_key],
-                |row| Ok((
-                    row.get::<_, String>(0)?,
-                    row.get::<_, String>(1)?,
-                    row.get::<_, String>(2)?,
-                )),
+                |row| {
+                    Ok((
+                        row.get::<_, String>(0)?,
+                        row.get::<_, String>(1)?,
+                        row.get::<_, String>(2)?,
+                    ))
+                },
             )
             .optional()
             .map_err(|_| StorageError::TransactionUnavailable)?;
@@ -1184,23 +1275,45 @@ mod tests {
     use super::*;
     use memory_domain::{Claim, EpistemicStatus, MemoryLifecycle, ScopeKind};
 
-    fn id(value: &str) -> OpaqueId { OpaqueId::new(value).unwrap() }
-    fn scope() -> ScopeRef { ScopeRef { scope_id: id("s1"), scope_kind: ScopeKind::User, namespace_key: "user:s1".into() } }
+    fn id(value: &str) -> OpaqueId {
+        OpaqueId::new(value).unwrap()
+    }
+    fn scope() -> ScopeRef {
+        ScopeRef {
+            scope_id: id("s1"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:s1".into(),
+        }
+    }
     fn memory() -> Memory {
         Memory {
-            memory_id: id("m1"), memory_kind: "knowledge".into(), scope_refs: vec![scope()],
-            current_version_id: None, lifecycle_state: MemoryLifecycle::Candidate,
-            retention_class: "default".into(), sensitivity: "normal".into(),
-            created_at: "now".into(), updated_at: "now".into(),
+            memory_id: id("m1"),
+            memory_kind: "knowledge".into(),
+            scope_refs: vec![scope()],
+            current_version_id: None,
+            lifecycle_state: MemoryLifecycle::Candidate,
+            retention_class: "default".into(),
+            sensitivity: "normal".into(),
+            created_at: "now".into(),
+            updated_at: "now".into(),
         }
     }
     fn version(idv: &str, n: u64, parent: Option<&str>) -> MemoryVersion {
         MemoryVersion {
-            memory_version_id: id(idv), memory_id: id("m1"), version_number: n,
-            parent_version_id: parent.map(id), created_at: "now".into(),
-            author_kind: "test".into(), change_reason: "test".into(),
-            claims: vec![], entity_refs: vec![], relation_refs: vec![], source_refs: vec![],
-            provenance_refs: vec![], content_digest: format!("digest-{idv}"), schema_version: "1".into(),
+            memory_version_id: id(idv),
+            memory_id: id("m1"),
+            version_number: n,
+            parent_version_id: parent.map(id),
+            created_at: "now".into(),
+            author_kind: "test".into(),
+            change_reason: "test".into(),
+            claims: vec![],
+            entity_refs: vec![],
+            relation_refs: vec![],
+            source_refs: vec![],
+            provenance_refs: vec![],
+            content_digest: format!("digest-{idv}"),
+            schema_version: "1".into(),
         }
     }
 
@@ -1221,11 +1334,15 @@ mod tests {
         }
     }
 
-
     fn temp_db_path(label: &str) -> std::path::PathBuf {
         let nonce = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos();
-        std::env::temp_dir().join(format!("memory-brain-{label}-{}-{nonce}.sqlite", std::process::id()))
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        std::env::temp_dir().join(format!(
+            "memory-brain-{label}-{}-{nonce}.sqlite",
+            std::process::id()
+        ))
     }
 
     fn remove_db_files(path: &std::path::Path) {
@@ -1240,15 +1357,35 @@ mod tests {
         let receipt = {
             let mut store = SqliteMemoryStorage::open(&path).unwrap();
             store.create_memory(memory(), &[scope()]).unwrap();
-            store.commit_version(CommitRequest {
-                memory_id: id("m1"), expected_current_version: None, new_version: version("v1", 1, None),
-                idempotency_key: "restart-op".into(), request_digest: "restart-digest".into(),
-            }, &[scope()]).unwrap()
+            store
+                .commit_version(
+                    CommitRequest {
+                        memory_id: id("m1"),
+                        expected_current_version: None,
+                        new_version: version("v1", 1, None),
+                        idempotency_key: "restart-op".into(),
+                        request_digest: "restart-digest".into(),
+                    },
+                    &[scope()],
+                )
+                .unwrap()
         };
 
         let reopened = SqliteMemoryStorage::open(&path).unwrap();
-        assert_eq!(reopened.read_current(&id("m1"), &[scope()]).unwrap().unwrap().memory_version_id, id("v1"));
-        assert_eq!(reopened.resolve_idempotency("restart-op", "restart-digest", &[scope()]).unwrap(), Some(receipt));
+        assert_eq!(
+            reopened
+                .read_current(&id("m1"), &[scope()])
+                .unwrap()
+                .unwrap()
+                .memory_version_id,
+            id("v1")
+        );
+        assert_eq!(
+            reopened
+                .resolve_idempotency("restart-op", "restart-digest", &[scope()])
+                .unwrap(),
+            Some(receipt)
+        );
         let changes = reopened.list_changes(None, &[scope()], 10).unwrap();
         assert_eq!(changes.records.len(), 1);
         assert_eq!(changes.records[0].commit_sequence, CommitSequence(1));
@@ -1260,9 +1397,14 @@ mod tests {
     // Rust destructors, leaving SQLite to recover an uncommitted WAL transaction.
     #[test]
     fn abrupt_exit_worker() {
-        let Ok(path) = std::env::var("MEMORY_SQLITE_CRASH_WORKER_PATH") else { return; };
+        let Ok(path) = std::env::var("MEMORY_SQLITE_CRASH_WORKER_PATH") else {
+            return;
+        };
         let mut store = SqliteMemoryStorage::open(path).unwrap();
-        let tx = store.connection.transaction_with_behavior(TransactionBehavior::Immediate).unwrap();
+        let tx = store
+            .connection
+            .transaction_with_behavior(TransactionBehavior::Immediate)
+            .unwrap();
 
         let mut updated_memory = memory();
         updated_memory.current_version_id = Some(id("v-crash"));
@@ -1279,14 +1421,17 @@ mod tests {
         ).unwrap();
         tx.execute("INSERT INTO commit_log(commit_sequence, memory_id, version_id) VALUES (1, 'm1', 'v-crash')", []).unwrap();
         let receipt = CommitReceipt {
-            memory_id: id("m1"), resulting_version_id: id("v-crash"),
-            commit_sequence: CommitSequence(1), idempotency_key: "crash-op".into(),
+            memory_id: id("m1"),
+            resulting_version_id: id("v-crash"),
+            commit_sequence: CommitSequence(1),
+            idempotency_key: "crash-op".into(),
         };
         tx.execute(
             "INSERT INTO idempotency(idempotency_key, memory_id, request_digest, receipt_json)
              VALUES ('crash-op', 'm1', 'crash-digest', ?1)",
             params![SqliteMemoryStorage::encode(&receipt).unwrap()],
-        ).unwrap();
+        )
+        .unwrap();
 
         // Deliberately terminate with the transaction still uncommitted.
         std::process::exit(86);
@@ -1304,18 +1449,35 @@ mod tests {
         let status = std::process::Command::new(std::env::current_exe().unwrap())
             .args(["--exact", "tests::abrupt_exit_worker", "--nocapture"])
             .env("MEMORY_SQLITE_CRASH_WORKER_PATH", &path)
-            .status().unwrap();
+            .status()
+            .unwrap();
         assert_eq!(status.code(), Some(86));
 
         let reopened = SqliteMemoryStorage::open(&path).unwrap();
-        assert!(reopened.read_current(&id("m1"), &[scope()]).unwrap().is_none());
-        assert_eq!(reopened.read_version(&id("m1"), &id("v-crash"), &[scope()]).unwrap(), None);
-        assert_eq!(reopened.resolve_idempotency("crash-op", "crash-digest", &[scope()]).unwrap(), None);
-        assert!(reopened.list_changes(None, &[scope()], 10).unwrap().records.is_empty());
+        assert!(reopened
+            .read_current(&id("m1"), &[scope()])
+            .unwrap()
+            .is_none());
+        assert_eq!(
+            reopened
+                .read_version(&id("m1"), &id("v-crash"), &[scope()])
+                .unwrap(),
+            None
+        );
+        assert_eq!(
+            reopened
+                .resolve_idempotency("crash-op", "crash-digest", &[scope()])
+                .unwrap(),
+            None
+        );
+        assert!(reopened
+            .list_changes(None, &[scope()], 10)
+            .unwrap()
+            .records
+            .is_empty());
         drop(reopened);
         remove_db_files(&path);
     }
-
 
     #[test]
     fn independent_connections_serialize_competing_compare_and_swap_writers() {
@@ -1335,22 +1497,32 @@ mod tests {
         let first = thread::spawn(move || {
             let mut store = first_store;
             first_barrier.wait();
-            store.commit_version(CommitRequest {
-                memory_id: id("m1"), expected_current_version: None,
-                new_version: version("v-race-a", 1, None),
-                idempotency_key: "race-a".into(), request_digest: "race-a-digest".into(),
-            }, &[scope()])
+            store.commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v-race-a", 1, None),
+                    idempotency_key: "race-a".into(),
+                    request_digest: "race-a-digest".into(),
+                },
+                &[scope()],
+            )
         });
 
         let second_barrier = barrier.clone();
         let second = thread::spawn(move || {
             let mut store = second_store;
             second_barrier.wait();
-            store.commit_version(CommitRequest {
-                memory_id: id("m1"), expected_current_version: None,
-                new_version: version("v-race-b", 1, None),
-                idempotency_key: "race-b".into(), request_digest: "race-b-digest".into(),
-            }, &[scope()])
+            store.commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v-race-b", 1, None),
+                    idempotency_key: "race-b".into(),
+                    request_digest: "race-b-digest".into(),
+                },
+                &[scope()],
+            )
         });
 
         let first_result = first.join().unwrap();
@@ -1364,8 +1536,14 @@ mod tests {
         assert_eq!(loser, StorageError::StaleVersion);
 
         let reopened = SqliteMemoryStorage::open(&path).unwrap();
-        let current = reopened.read_current(&id("m1"), &[scope()]).unwrap().unwrap();
-        assert!(current.memory_version_id == id("v-race-a") || current.memory_version_id == id("v-race-b"));
+        let current = reopened
+            .read_current(&id("m1"), &[scope()])
+            .unwrap()
+            .unwrap();
+        assert!(
+            current.memory_version_id == id("v-race-a")
+                || current.memory_version_id == id("v-race-b")
+        );
         let changes = reopened.list_changes(None, &[scope()], 10).unwrap();
         assert_eq!(changes.records.len(), 1);
         drop(reopened);
@@ -1390,30 +1568,52 @@ mod tests {
         let first = thread::spawn(move || {
             let mut store = first_store;
             first_barrier.wait();
-            store.commit_version(CommitRequest {
-                memory_id: id("m1"), expected_current_version: None,
-                new_version: version("v-idempotent-race", 1, None),
-                idempotency_key: "same-race-key".into(), request_digest: "same-race-digest".into(),
-            }, &[scope()])
+            store.commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v-idempotent-race", 1, None),
+                    idempotency_key: "same-race-key".into(),
+                    request_digest: "same-race-digest".into(),
+                },
+                &[scope()],
+            )
         });
 
         let second_barrier = barrier.clone();
         let second = thread::spawn(move || {
             let mut store = second_store;
             second_barrier.wait();
-            store.commit_version(CommitRequest {
-                memory_id: id("m1"), expected_current_version: None,
-                new_version: version("v-idempotent-race", 1, None),
-                idempotency_key: "same-race-key".into(), request_digest: "same-race-digest".into(),
-            }, &[scope()])
+            store.commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v-idempotent-race", 1, None),
+                    idempotency_key: "same-race-key".into(),
+                    request_digest: "same-race-digest".into(),
+                },
+                &[scope()],
+            )
         });
 
         let first_receipt = first.join().unwrap().unwrap();
         let second_receipt = second.join().unwrap().unwrap();
         assert_eq!(first_receipt, second_receipt);
         let reopened = SqliteMemoryStorage::open(&path).unwrap();
-        assert_eq!(reopened.resolve_idempotency("same-race-key", "same-race-digest", &[scope()]).unwrap(), Some(first_receipt));
-        assert_eq!(reopened.list_changes(None, &[scope()], 10).unwrap().records.len(), 1);
+        assert_eq!(
+            reopened
+                .resolve_idempotency("same-race-key", "same-race-digest", &[scope()])
+                .unwrap(),
+            Some(first_receipt)
+        );
+        assert_eq!(
+            reopened
+                .list_changes(None, &[scope()], 10)
+                .unwrap()
+                .records
+                .len(),
+            1
+        );
         drop(reopened);
         remove_db_files(&path);
     }
@@ -1422,40 +1622,94 @@ mod tests {
     fn sqlite_round_trip_and_idempotency_are_atomic() {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         store.create_memory(memory(), &[scope()]).unwrap();
-        let receipt = store.commit_version(CommitRequest {
-            memory_id: id("m1"), expected_current_version: None, new_version: version("v1", 1, None),
-            idempotency_key: "op1".into(), request_digest: "d1".into(),
-        }, &[scope()]).unwrap();
+        let receipt = store
+            .commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v1", 1, None),
+                    idempotency_key: "op1".into(),
+                    request_digest: "d1".into(),
+                },
+                &[scope()],
+            )
+            .unwrap();
         assert_eq!(receipt.commit_sequence, CommitSequence(1));
-        assert_eq!(store.read_current(&id("m1"), &[scope()]).unwrap().unwrap().version_number, 1);
-        assert_eq!(store.resolve_idempotency("op1", "d1", &[scope()]).unwrap(), Some(receipt.clone()));
-        assert_eq!(store.commit_version(CommitRequest {
-            memory_id: id("m1"), expected_current_version: None, new_version: version("v1", 1, None),
-            idempotency_key: "op1".into(), request_digest: "d1".into(),
-        }, &[scope()]).unwrap(), receipt);
+        assert_eq!(
+            store
+                .read_current(&id("m1"), &[scope()])
+                .unwrap()
+                .unwrap()
+                .version_number,
+            1
+        );
+        assert_eq!(
+            store.resolve_idempotency("op1", "d1", &[scope()]).unwrap(),
+            Some(receipt.clone())
+        );
+        assert_eq!(
+            store
+                .commit_version(
+                    CommitRequest {
+                        memory_id: id("m1"),
+                        expected_current_version: None,
+                        new_version: version("v1", 1, None),
+                        idempotency_key: "op1".into(),
+                        request_digest: "d1".into(),
+                    },
+                    &[scope()]
+                )
+                .unwrap(),
+            receipt
+        );
     }
 
     #[test]
     fn sqlite_rejects_create_outside_requested_scope() {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
-        let other = ScopeRef { scope_id: id("s2"), scope_kind: ScopeKind::User, namespace_key: "user:s2".into() };
-        assert_eq!(store.create_memory(memory(), &[other]), Err(StorageError::ScopeMismatch));
+        let other = ScopeRef {
+            scope_id: id("s2"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:s2".into(),
+        };
+        assert_eq!(
+            store.create_memory(memory(), &[other]),
+            Err(StorageError::ScopeMismatch)
+        );
     }
 
     #[test]
     fn sqlite_does_not_replay_idempotency_receipt_before_scope_check() {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         store.create_memory(memory(), &[scope()]).unwrap();
-        store.commit_version(CommitRequest {
-            memory_id: id("m1"), expected_current_version: None, new_version: version("v1", 1, None),
-            idempotency_key: "op1".into(), request_digest: "d1".into(),
-        }, &[scope()]).unwrap();
-        let other = ScopeRef { scope_id: id("s2"), scope_kind: ScopeKind::User, namespace_key: "user:s2".into() };
+        store
+            .commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v1", 1, None),
+                    idempotency_key: "op1".into(),
+                    request_digest: "d1".into(),
+                },
+                &[scope()],
+            )
+            .unwrap();
+        let other = ScopeRef {
+            scope_id: id("s2"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:s2".into(),
+        };
         assert_eq!(
-            store.commit_version(CommitRequest {
-                memory_id: id("m1"), expected_current_version: None, new_version: version("v1", 1, None),
-                idempotency_key: "op1".into(), request_digest: "d1".into(),
-            }, &[other]),
+            store.commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v1", 1, None),
+                    idempotency_key: "op1".into(),
+                    request_digest: "d1".into(),
+                },
+                &[other]
+            ),
             Err(StorageError::ScopeMismatch)
         );
     }
@@ -1469,18 +1723,32 @@ mod tests {
         second_memory.memory_id = id("m2");
         store.create_memory(second_memory, &[scope()]).unwrap();
 
-        store.commit_version(CommitRequest {
-            memory_id: id("m1"), expected_current_version: None, new_version: version("v1", 1, None),
-            idempotency_key: "shared-op".into(), request_digest: "same-digest".into(),
-        }, &[scope()]).unwrap();
+        store
+            .commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v1", 1, None),
+                    idempotency_key: "shared-op".into(),
+                    request_digest: "same-digest".into(),
+                },
+                &[scope()],
+            )
+            .unwrap();
 
         let mut second_version = version("v2", 1, None);
         second_version.memory_id = id("m2");
         assert_eq!(
-            store.commit_version(CommitRequest {
-                memory_id: id("m2"), expected_current_version: None, new_version: second_version,
-                idempotency_key: "shared-op".into(), request_digest: "same-digest".into(),
-            }, &[scope()]),
+            store.commit_version(
+                CommitRequest {
+                    memory_id: id("m2"),
+                    expected_current_version: None,
+                    new_version: second_version,
+                    idempotency_key: "shared-op".into(),
+                    request_digest: "same-digest".into(),
+                },
+                &[scope()]
+            ),
             Err(StorageError::IdempotencyConflict)
         );
     }
@@ -1504,30 +1772,43 @@ mod tests {
             let mut item = memory();
             item.memory_id = id(memory_id);
             item.scope_refs = vec![item_scope.clone()];
-            store.create_memory(item, std::slice::from_ref(&item_scope)).unwrap();
+            store
+                .create_memory(item, std::slice::from_ref(&item_scope))
+                .unwrap();
 
             let mut item_version = version(version_id, 1, None);
             item_version.memory_id = id(memory_id);
-            store.commit_version(CommitRequest {
-                memory_id: id(memory_id),
-                expected_current_version: None,
-                new_version: item_version,
-                idempotency_key: format!("op-{memory_id}"),
-                request_digest: format!("digest-{memory_id}"),
-            }, &[item_scope]).unwrap();
+            store
+                .commit_version(
+                    CommitRequest {
+                        memory_id: id(memory_id),
+                        expected_current_version: None,
+                        new_version: item_version,
+                        idempotency_key: format!("op-{memory_id}"),
+                        request_digest: format!("digest-{memory_id}"),
+                    },
+                    &[item_scope],
+                )
+                .unwrap();
         }
 
-        let first = store.list_changes(None, std::slice::from_ref(&visible_scope), 1).unwrap();
+        let first = store
+            .list_changes(None, std::slice::from_ref(&visible_scope), 1)
+            .unwrap();
         assert_eq!(first.records.len(), 1);
         assert_eq!(first.records[0].memory_id, id("m1"));
         assert_eq!(first.next_cursor, Some(CommitSequence(1)));
 
-        let second = store.list_changes(first.next_cursor, std::slice::from_ref(&visible_scope), 1).unwrap();
+        let second = store
+            .list_changes(first.next_cursor, std::slice::from_ref(&visible_scope), 1)
+            .unwrap();
         assert_eq!(second.records.len(), 1);
         assert_eq!(second.records[0].memory_id, id("m4"));
         assert_eq!(second.next_cursor, Some(CommitSequence(4)));
 
-        let end = store.list_changes(second.next_cursor, &[visible_scope], 1).unwrap();
+        let end = store
+            .list_changes(second.next_cursor, &[visible_scope], 1)
+            .unwrap();
         assert!(end.records.is_empty());
         assert_eq!(end.next_cursor, None);
     }
@@ -1536,14 +1817,28 @@ mod tests {
     fn sqlite_rejects_stale_expected_version() {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         store.create_memory(memory(), &[scope()]).unwrap();
-        store.commit_version(CommitRequest {
-            memory_id: id("m1"), expected_current_version: None, new_version: version("v1", 1, None),
-            idempotency_key: "op1".into(), request_digest: "d1".into(),
-        }, &[scope()]).unwrap();
-        let result = store.commit_version(CommitRequest {
-            memory_id: id("m1"), expected_current_version: Some(id("wrong")), new_version: version("v2", 2, Some("wrong")),
-            idempotency_key: "op2".into(), request_digest: "d2".into(),
-        }, &[scope()]);
+        store
+            .commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v1", 1, None),
+                    idempotency_key: "op1".into(),
+                    request_digest: "d1".into(),
+                },
+                &[scope()],
+            )
+            .unwrap();
+        let result = store.commit_version(
+            CommitRequest {
+                memory_id: id("m1"),
+                expected_current_version: Some(id("wrong")),
+                new_version: version("v2", 2, Some("wrong")),
+                idempotency_key: "op2".into(),
+                request_digest: "d2".into(),
+            },
+            &[scope()],
+        );
         assert_eq!(result, Err(StorageError::StaleVersion));
     }
 
@@ -1551,20 +1846,29 @@ mod tests {
     fn file_db_nested_savepoint_rollback_preserves_outer_work() {
         let path = temp_db_path("nested-savepoint");
         let mut store = SqliteMemoryStorage::open(&path).unwrap();
-        store.connection.execute_batch(
-            "CREATE TABLE rollback_probe (value INTEGER PRIMARY KEY);"
-        ).unwrap();
+        store
+            .connection
+            .execute_batch("CREATE TABLE rollback_probe (value INTEGER PRIMARY KEY);")
+            .unwrap();
 
-        let mut outer = store.connection
-            .transaction_with_behavior(TransactionBehavior::Immediate).unwrap();
-        outer.execute("INSERT INTO rollback_probe(value) VALUES (1)", []).unwrap();
+        let mut outer = store
+            .connection
+            .transaction_with_behavior(TransactionBehavior::Immediate)
+            .unwrap();
+        outer
+            .execute("INSERT INTO rollback_probe(value) VALUES (1)", [])
+            .unwrap();
 
         {
             let mut middle = outer.savepoint().unwrap();
-            middle.execute("INSERT INTO rollback_probe(value) VALUES (2)", []).unwrap();
+            middle
+                .execute("INSERT INTO rollback_probe(value) VALUES (2)", [])
+                .unwrap();
             {
                 let mut inner = middle.savepoint().unwrap();
-                inner.execute("INSERT INTO rollback_probe(value) VALUES (3)", []).unwrap();
+                inner
+                    .execute("INSERT INTO rollback_probe(value) VALUES (3)", [])
+                    .unwrap();
                 inner.rollback().unwrap();
             }
             middle.commit().unwrap();
@@ -1572,10 +1876,14 @@ mod tests {
         outer.commit().unwrap();
 
         let values: Vec<i64> = {
-            let mut stmt = store.connection
-                .prepare("SELECT value FROM rollback_probe ORDER BY value").unwrap();
-            stmt.query_map([], |row| row.get(0)).unwrap()
-                .collect::<Result<Vec<_>, _>>().unwrap()
+            let mut stmt = store
+                .connection
+                .prepare("SELECT value FROM rollback_probe ORDER BY value")
+                .unwrap();
+            stmt.query_map([], |row| row.get(0))
+                .unwrap()
+                .collect::<Result<Vec<_>, _>>()
+                .unwrap()
         };
         assert_eq!(values, vec![1, 2]);
         drop(store);
@@ -1590,10 +1898,15 @@ mod tests {
         let mut blocker = SqliteMemoryStorage::open(&path).unwrap();
         blocker.create_memory(memory(), &[scope()]).unwrap();
         let mut contender = SqliteMemoryStorage::open(&path).unwrap();
-        contender.connection.busy_timeout(Duration::from_millis(100)).unwrap();
+        contender
+            .connection
+            .busy_timeout(Duration::from_millis(100))
+            .unwrap();
 
-        let held = blocker.connection
-            .transaction_with_behavior(TransactionBehavior::Immediate).unwrap();
+        let held = blocker
+            .connection
+            .transaction_with_behavior(TransactionBehavior::Immediate)
+            .unwrap();
         // BEGIN IMMEDIATE acquires the write reservation even without a row update.
         thread::sleep(Duration::from_millis(150));
 
@@ -1608,8 +1921,14 @@ mod tests {
         let blocked = contender.commit_version(request.clone(), &[scope()]);
         let elapsed = started.elapsed();
         assert_eq!(blocked, Err(StorageError::TransactionUnavailable));
-        assert!(elapsed >= Duration::from_millis(80), "busy timeout returned too early: {elapsed:?}");
-        assert!(elapsed < Duration::from_secs(2), "busy timeout did not bound lock wait: {elapsed:?}");
+        assert!(
+            elapsed >= Duration::from_millis(80),
+            "busy timeout returned too early: {elapsed:?}"
+        );
+        assert!(
+            elapsed < Duration::from_secs(2),
+            "busy timeout did not bound lock wait: {elapsed:?}"
+        );
 
         held.rollback().unwrap();
         let receipt = contender.commit_version(request, &[scope()]).unwrap();
@@ -1618,7 +1937,14 @@ mod tests {
         drop(contender);
         drop(blocker);
         let reopened = SqliteMemoryStorage::open(&path).unwrap();
-        assert_eq!(reopened.read_current(&id("m1"), &[scope()]).unwrap().unwrap().memory_version_id, id("v-busy"));
+        assert_eq!(
+            reopened
+                .read_current(&id("m1"), &[scope()])
+                .unwrap()
+                .unwrap()
+                .memory_version_id,
+            id("v-busy")
+        );
         drop(reopened);
         remove_db_files(&path);
     }
@@ -1628,27 +1954,50 @@ mod tests {
         let path = temp_db_path("interrupted-write");
         let mut store = SqliteMemoryStorage::open(&path).unwrap();
         store.create_memory(memory(), &[scope()]).unwrap();
-        store.connection.execute_batch(
-            "CREATE TRIGGER interrupt_commit_log
+        store
+            .connection
+            .execute_batch(
+                "CREATE TRIGGER interrupt_commit_log
              BEFORE INSERT ON commit_log
-             BEGIN SELECT RAISE(ABORT, 'injected write interruption'); END;"
-        ).unwrap();
+             BEGIN SELECT RAISE(ABORT, 'injected write interruption'); END;",
+            )
+            .unwrap();
 
-        let result = store.commit_version(CommitRequest {
-            memory_id: id("m1"),
-            expected_current_version: None,
-            new_version: version("v-interrupted", 1, None),
-            idempotency_key: "interrupted-op".into(),
-            request_digest: "interrupted-digest".into(),
-        }, &[scope()]);
+        let result = store.commit_version(
+            CommitRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version: version("v-interrupted", 1, None),
+                idempotency_key: "interrupted-op".into(),
+                request_digest: "interrupted-digest".into(),
+            },
+            &[scope()],
+        );
         assert_eq!(result, Err(StorageError::TransactionUnavailable));
 
         drop(store);
         let reopened = SqliteMemoryStorage::open(&path).unwrap();
-        assert!(reopened.read_current(&id("m1"), &[scope()]).unwrap().is_none());
-        assert_eq!(reopened.read_version(&id("m1"), &id("v-interrupted"), &[scope()]).unwrap(), None);
-        assert_eq!(reopened.resolve_idempotency("interrupted-op", "interrupted-digest", &[scope()]).unwrap(), None);
-        assert!(reopened.list_changes(None, &[scope()], 10).unwrap().records.is_empty());
+        assert!(reopened
+            .read_current(&id("m1"), &[scope()])
+            .unwrap()
+            .is_none());
+        assert_eq!(
+            reopened
+                .read_version(&id("m1"), &id("v-interrupted"), &[scope()])
+                .unwrap(),
+            None
+        );
+        assert_eq!(
+            reopened
+                .resolve_idempotency("interrupted-op", "interrupted-digest", &[scope()])
+                .unwrap(),
+            None
+        );
+        assert!(reopened
+            .list_changes(None, &[scope()], 10)
+            .unwrap()
+            .records
+            .is_empty());
         drop(reopened);
         remove_db_files(&path);
     }
@@ -1664,8 +2013,10 @@ mod tests {
         let worker_path = path.clone();
         let worker = std::thread::spawn(move || {
             let mut store = SqliteMemoryStorage::open(&worker_path).unwrap();
-            let tx = store.connection
-                .transaction_with_behavior(TransactionBehavior::Immediate).unwrap();
+            let tx = store
+                .connection
+                .transaction_with_behavior(TransactionBehavior::Immediate)
+                .unwrap();
             let scope_json = SqliteMemoryStorage::encode(&vec![scope()]).unwrap();
             let version_json = SqliteMemoryStorage::encode(&version("v-unwind", 1, None)).unwrap();
             tx.execute(
@@ -1676,7 +2027,8 @@ mod tests {
             tx.execute(
                 "UPDATE memories SET current_version_id = 'v-unwind' WHERE memory_id = 'm1'",
                 [],
-            ).unwrap();
+            )
+            .unwrap();
             tx.execute(
                 "INSERT INTO commit_log(commit_sequence, memory_id, version_id) VALUES (1, 'm1', 'v-unwind')",
                 [],
@@ -1686,9 +2038,21 @@ mod tests {
         assert!(worker.join().is_err());
 
         let reopened = SqliteMemoryStorage::open(&path).unwrap();
-        assert!(reopened.read_current(&id("m1"), &[scope()]).unwrap().is_none());
-        assert_eq!(reopened.read_version(&id("m1"), &id("v-unwind"), &[scope()]).unwrap(), None);
-        assert!(reopened.list_changes(None, &[scope()], 10).unwrap().records.is_empty());
+        assert!(reopened
+            .read_current(&id("m1"), &[scope()])
+            .unwrap()
+            .is_none());
+        assert_eq!(
+            reopened
+                .read_version(&id("m1"), &id("v-unwind"), &[scope()])
+                .unwrap(),
+            None
+        );
+        assert!(reopened
+            .list_changes(None, &[scope()], 10)
+            .unwrap()
+            .records
+            .is_empty());
         drop(reopened);
         remove_db_files(&path);
     }
@@ -1722,33 +2086,53 @@ mod tests {
         let mut missing_digest = version("v-invalid-digest", 1, None);
         missing_digest.content_digest.clear();
         assert_eq!(
-            store.commit_version(CommitRequest {
-                memory_id: id("m1"),
-                expected_current_version: None,
-                new_version: missing_digest,
-                idempotency_key: "invalid-digest-op".into(),
-                request_digest: "invalid-digest".into(),
-            }, &[scope()]),
+            store.commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: missing_digest,
+                    idempotency_key: "invalid-digest-op".into(),
+                    request_digest: "invalid-digest".into(),
+                },
+                &[scope()]
+            ),
             Err(StorageError::InvalidSchema)
         );
 
         let mut missing_created_at = version("v-invalid-time", 1, None);
         missing_created_at.created_at.clear();
         assert_eq!(
-            store.commit_version(CommitRequest {
-                memory_id: id("m1"),
-                expected_current_version: None,
-                new_version: missing_created_at,
-                idempotency_key: "invalid-time-op".into(),
-                request_digest: "invalid-time".into(),
-            }, &[scope()]),
+            store.commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: missing_created_at,
+                    idempotency_key: "invalid-time-op".into(),
+                    request_digest: "invalid-time".into(),
+                },
+                &[scope()]
+            ),
             Err(StorageError::InvalidSchema)
         );
 
         assert!(store.read_current(&id("m1"), &[scope()]).unwrap().is_none());
-        assert_eq!(store.read_version(&id("m1"), &id("v-invalid-digest"), &[scope()]).unwrap(), None);
-        assert_eq!(store.resolve_idempotency("invalid-digest-op", "invalid-digest", &[scope()]).unwrap(), None);
-        assert!(store.list_changes(None, &[scope()], 10).unwrap().records.is_empty());
+        assert_eq!(
+            store
+                .read_version(&id("m1"), &id("v-invalid-digest"), &[scope()])
+                .unwrap(),
+            None
+        );
+        assert_eq!(
+            store
+                .resolve_idempotency("invalid-digest-op", "invalid-digest", &[scope()])
+                .unwrap(),
+            None
+        );
+        assert!(store
+            .list_changes(None, &[scope()], 10)
+            .unwrap()
+            .records
+            .is_empty());
     }
 
     #[test]
@@ -1757,42 +2141,57 @@ mod tests {
         store.create_memory(memory(), &[scope()]).unwrap();
 
         assert_eq!(
-            store.commit_version(CommitRequest {
-                memory_id: id("m1"),
-                expected_current_version: None,
-                new_version: version("v-empty-key", 1, None),
-                idempotency_key: String::new(),
-                request_digest: "digest".into(),
-            }, &[scope()]),
+            store.commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v-empty-key", 1, None),
+                    idempotency_key: String::new(),
+                    request_digest: "digest".into(),
+                },
+                &[scope()]
+            ),
             Err(StorageError::InvalidSchema)
         );
 
         assert_eq!(
-            store.commit_version(CommitRequest {
-                memory_id: id("m1"),
-                expected_current_version: None,
-                new_version: version("v-empty-digest", 1, None),
-                idempotency_key: "empty-digest-op".into(),
-                request_digest: String::new(),
-            }, &[scope()]),
+            store.commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v-empty-digest", 1, None),
+                    idempotency_key: "empty-digest-op".into(),
+                    request_digest: String::new(),
+                },
+                &[scope()]
+            ),
             Err(StorageError::InvalidSchema)
         );
 
         assert!(store.read_current(&id("m1"), &[scope()]).unwrap().is_none());
-        assert!(store.list_changes(None, &[scope()], 10).unwrap().records.is_empty());
+        assert!(store
+            .list_changes(None, &[scope()], 10)
+            .unwrap()
+            .records
+            .is_empty());
     }
 
     #[test]
     fn sqlite_scope_checks_cover_current_history_and_idempotency_receipt_reads() {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         store.create_memory(memory(), &[scope()]).unwrap();
-        store.commit_version(CommitRequest {
-            memory_id: id("m1"),
-            expected_current_version: None,
-            new_version: version("v1", 1, None),
-            idempotency_key: "scope-read-op".into(),
-            request_digest: "scope-read-digest".into(),
-        }, &[scope()]).unwrap();
+        store
+            .commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v1", 1, None),
+                    idempotency_key: "scope-read-op".into(),
+                    request_digest: "scope-read-digest".into(),
+                },
+                &[scope()],
+            )
+            .unwrap();
 
         let other = ScopeRef {
             scope_id: id("s2"),
@@ -1817,29 +2216,44 @@ mod tests {
     fn sqlite_idempotency_digest_mismatch_conflicts_for_commit_and_receipt_lookup() {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         store.create_memory(memory(), &[scope()]).unwrap();
-        store.commit_version(CommitRequest {
-            memory_id: id("m1"),
-            expected_current_version: None,
-            new_version: version("v1", 1, None),
-            idempotency_key: "digest-conflict".into(),
-            request_digest: "digest-a".into(),
-        }, &[scope()]).unwrap();
+        store
+            .commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v1", 1, None),
+                    idempotency_key: "digest-conflict".into(),
+                    request_digest: "digest-a".into(),
+                },
+                &[scope()],
+            )
+            .unwrap();
 
         assert_eq!(
-            store.commit_version(CommitRequest {
-                memory_id: id("m1"),
-                expected_current_version: None,
-                new_version: version("v1", 1, None),
-                idempotency_key: "digest-conflict".into(),
-                request_digest: "digest-b".into(),
-            }, &[scope()]),
+            store.commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v1", 1, None),
+                    idempotency_key: "digest-conflict".into(),
+                    request_digest: "digest-b".into(),
+                },
+                &[scope()]
+            ),
             Err(StorageError::IdempotencyConflict)
         );
         assert_eq!(
             store.resolve_idempotency("digest-conflict", "digest-b", &[scope()]),
             Err(StorageError::IdempotencyConflict)
         );
-        assert_eq!(store.list_changes(None, &[scope()], 10).unwrap().records.len(), 1);
+        assert_eq!(
+            store
+                .list_changes(None, &[scope()], 10)
+                .unwrap()
+                .records
+                .len(),
+            1
+        );
     }
 
     #[test]
@@ -1860,26 +2274,32 @@ mod tests {
         let first = thread::spawn(move || {
             let mut store = first_store;
             first_barrier.wait();
-            store.commit_version(CommitRequest {
-                memory_id: id("m1"),
-                expected_current_version: None,
-                new_version: version("v-conflict-a", 1, None),
-                idempotency_key: "same-conflict-key".into(),
-                request_digest: "payload-a".into(),
-            }, &[scope()])
+            store.commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v-conflict-a", 1, None),
+                    idempotency_key: "same-conflict-key".into(),
+                    request_digest: "payload-a".into(),
+                },
+                &[scope()],
+            )
         });
 
         let second_barrier = barrier.clone();
         let second = thread::spawn(move || {
             let mut store = second_store;
             second_barrier.wait();
-            store.commit_version(CommitRequest {
-                memory_id: id("m1"),
-                expected_current_version: None,
-                new_version: version("v-conflict-b", 1, None),
-                idempotency_key: "same-conflict-key".into(),
-                request_digest: "payload-b".into(),
-            }, &[scope()])
+            store.commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v-conflict-b", 1, None),
+                    idempotency_key: "same-conflict-key".into(),
+                    request_digest: "payload-b".into(),
+                },
+                &[scope()],
+            )
         });
 
         let first_result = first.join().unwrap();
@@ -1891,16 +2311,25 @@ mod tests {
         );
         let first_won = first_result.is_ok();
         let winner_digest = if first_won { "payload-a" } else { "payload-b" };
-        let loser = if first_won { second_result.unwrap_err() } else { first_result.unwrap_err() };
+        let loser = if first_won {
+            second_result.unwrap_err()
+        } else {
+            first_result.unwrap_err()
+        };
         assert_eq!(loser, StorageError::IdempotencyConflict);
 
         let reopened = SqliteMemoryStorage::open(&path).unwrap();
-        assert_eq!(reopened.list_changes(None, &[scope()], 10).unwrap().records.len(), 1);
-        let receipt = reopened.resolve_idempotency(
-            "same-conflict-key",
-            winner_digest,
-            &[scope()],
-        ).unwrap();
+        assert_eq!(
+            reopened
+                .list_changes(None, &[scope()], 10)
+                .unwrap()
+                .records
+                .len(),
+            1
+        );
+        let receipt = reopened
+            .resolve_idempotency("same-conflict-key", winner_digest, &[scope()])
+            .unwrap();
         assert!(receipt.is_some());
         drop(reopened);
         remove_db_files(&path);
@@ -1911,18 +2340,22 @@ mod tests {
         let path = temp_db_path("pragma-profile");
         let store = SqliteMemoryStorage::open(&path).unwrap();
 
-        let journal_mode: String = store.connection.query_row(
-            "PRAGMA journal_mode", [], |row| row.get(0)
-        ).unwrap();
-        let synchronous: i64 = store.connection.query_row(
-            "PRAGMA synchronous", [], |row| row.get(0)
-        ).unwrap();
-        let foreign_keys: i64 = store.connection.query_row(
-            "PRAGMA foreign_keys", [], |row| row.get(0)
-        ).unwrap();
-        let busy_timeout: i64 = store.connection.query_row(
-            "PRAGMA busy_timeout", [], |row| row.get(0)
-        ).unwrap();
+        let journal_mode: String = store
+            .connection
+            .query_row("PRAGMA journal_mode", [], |row| row.get(0))
+            .unwrap();
+        let synchronous: i64 = store
+            .connection
+            .query_row("PRAGMA synchronous", [], |row| row.get(0))
+            .unwrap();
+        let foreign_keys: i64 = store
+            .connection
+            .query_row("PRAGMA foreign_keys", [], |row| row.get(0))
+            .unwrap();
+        let busy_timeout: i64 = store
+            .connection
+            .query_row("PRAGMA busy_timeout", [], |row| row.get(0))
+            .unwrap();
 
         assert_eq!(journal_mode.to_ascii_lowercase(), "wal");
         assert_eq!(synchronous, 2, "SQLite FULL synchronous mode");
@@ -1945,33 +2378,48 @@ mod tests {
 
         let mut multi_scope_memory = memory();
         multi_scope_memory.scope_refs = vec![first_scope.clone(), second_scope.clone()];
-        store.create_memory(
-            multi_scope_memory,
-            &[first_scope.clone(), second_scope.clone()],
-        ).unwrap();
+        store
+            .create_memory(
+                multi_scope_memory,
+                &[first_scope.clone(), second_scope.clone()],
+            )
+            .unwrap();
 
         let mut new_version = version("v-multi-scope", 1, None);
         new_version.claims = vec![claim_in_scope("claim-s2", second_scope.clone())];
-        store.commit_version(CommitRequest {
-            memory_id: id("m1"),
-            expected_current_version: None,
-            new_version,
-            idempotency_key: "multi-scope-claim".into(),
-            request_digest: "multi-scope-claim-digest".into(),
-        }, &[first_scope.clone(), second_scope.clone()]).unwrap();
+        store
+            .commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version,
+                    idempotency_key: "multi-scope-claim".into(),
+                    request_digest: "multi-scope-claim-digest".into(),
+                },
+                &[first_scope.clone(), second_scope.clone()],
+            )
+            .unwrap();
 
-        let first_reader = store.read_current(&id("m1"), &[first_scope]).unwrap().unwrap();
-        assert!(first_reader.claims.is_empty(), "scope s1 must not receive the s2-only Claim");
+        let first_reader = store
+            .read_current(&id("m1"), &[first_scope])
+            .unwrap()
+            .unwrap();
+        assert!(
+            first_reader.claims.is_empty(),
+            "scope s1 must not receive the s2-only Claim"
+        );
 
-        let second_reader = store.read_current(&id("m1"), std::slice::from_ref(&second_scope)).unwrap().unwrap();
+        let second_reader = store
+            .read_current(&id("m1"), std::slice::from_ref(&second_scope))
+            .unwrap()
+            .unwrap();
         assert_eq!(second_reader.claims.len(), 1);
         assert_eq!(second_reader.claims[0].claim_id, id("claim-s2"));
 
-        let historical = store.read_version(
-            &id("m1"),
-            &id("v-multi-scope"),
-            &[second_scope],
-        ).unwrap().unwrap();
+        let historical = store
+            .read_version(&id("m1"), &id("v-multi-scope"), &[second_scope])
+            .unwrap()
+            .unwrap();
         assert_eq!(historical.claims.len(), 1);
     }
 
@@ -1987,17 +2435,24 @@ mod tests {
         let mut new_version = version("v-cross-scope-claim", 1, None);
         new_version.claims = vec![claim_in_scope("claim-s2", other_scope)];
         assert_eq!(
-            store.commit_version(CommitRequest {
-                memory_id: id("m1"),
-                expected_current_version: None,
-                new_version,
-                idempotency_key: "cross-scope-claim".into(),
-                request_digest: "cross-scope-claim-digest".into(),
-            }, &[scope()]),
+            store.commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version,
+                    idempotency_key: "cross-scope-claim".into(),
+                    request_digest: "cross-scope-claim-digest".into(),
+                },
+                &[scope()]
+            ),
             Err(StorageError::ScopeMismatch)
         );
         assert!(store.read_current(&id("m1"), &[scope()]).unwrap().is_none());
-        assert!(store.list_changes(None, &[scope()], 10).unwrap().records.is_empty());
+        assert!(store
+            .list_changes(None, &[scope()], 10)
+            .unwrap()
+            .records
+            .is_empty());
     }
 
     #[test]
@@ -2016,19 +2471,36 @@ mod tests {
         new_version.claims = vec![mixed_claim];
 
         assert_eq!(
-            store.commit_version(CommitRequest {
-                memory_id: id("m1"),
-                expected_current_version: None,
-                new_version,
-                idempotency_key: "mixed-scope-op".into(),
-                request_digest: "mixed-scope-digest".into(),
-            }, &[scope()]),
+            store.commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version,
+                    idempotency_key: "mixed-scope-op".into(),
+                    request_digest: "mixed-scope-digest".into(),
+                },
+                &[scope()]
+            ),
             Err(StorageError::ScopeMismatch)
         );
         assert!(store.read_current(&id("m1"), &[scope()]).unwrap().is_none());
-        assert_eq!(store.read_version(&id("m1"), &id("v-mixed-scope"), &[scope()]).unwrap(), None);
-        assert_eq!(store.resolve_idempotency("mixed-scope-op", "mixed-scope-digest", &[scope()]).unwrap(), None);
-        assert!(store.list_changes(None, &[scope()], 10).unwrap().records.is_empty());
+        assert_eq!(
+            store
+                .read_version(&id("m1"), &id("v-mixed-scope"), &[scope()])
+                .unwrap(),
+            None
+        );
+        assert_eq!(
+            store
+                .resolve_idempotency("mixed-scope-op", "mixed-scope-digest", &[scope()])
+                .unwrap(),
+            None
+        );
+        assert!(store
+            .list_changes(None, &[scope()], 10)
+            .unwrap()
+            .records
+            .is_empty());
     }
 
     #[test]
@@ -2037,24 +2509,32 @@ mod tests {
         store.create_memory(memory(), &[scope()]).unwrap();
         let mut new_version = version("v-persisted-mixed-scope", 1, None);
         new_version.claims = vec![claim_in_scope("claim-persisted-mixed", scope())];
-        store.commit_version(CommitRequest {
-            memory_id: id("m1"),
-            expected_current_version: None,
-            new_version,
-            idempotency_key: "persisted-mixed-op".into(),
-            request_digest: "persisted-mixed-digest".into(),
-        }, &[scope()]).unwrap();
+        store
+            .commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version,
+                    idempotency_key: "persisted-mixed-op".into(),
+                    request_digest: "persisted-mixed-digest".into(),
+                },
+                &[scope()],
+            )
+            .unwrap();
 
         let other_scope = ScopeRef {
             scope_id: id("s2"),
             scope_kind: ScopeKind::User,
             namespace_key: "user:s2".into(),
         };
-        let version_json: String = store.connection.query_row(
-            "SELECT version_json FROM versions WHERE version_id = 'v-persisted-mixed-scope'",
-            [],
-            |row| row.get(0),
-        ).unwrap();
+        let version_json: String = store
+            .connection
+            .query_row(
+                "SELECT version_json FROM versions WHERE version_id = 'v-persisted-mixed-scope'",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
         let mut persisted: MemoryVersion = SqliteMemoryStorage::decode(&version_json).unwrap();
         persisted.claims[0].scope_refs.push(other_scope);
         let corrupted = SqliteMemoryStorage::encode(&persisted).unwrap();
@@ -2078,13 +2558,16 @@ mod tests {
         let mut new_version = version("v-invalid-claim", 1, None);
         new_version.claims = vec![malformed];
         assert_eq!(
-            store.commit_version(CommitRequest {
-                memory_id: id("m1"),
-                expected_current_version: None,
-                new_version,
-                idempotency_key: "invalid-claim".into(),
-                request_digest: "invalid-claim-digest".into(),
-            }, &[scope()]),
+            store.commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version,
+                    idempotency_key: "invalid-claim".into(),
+                    request_digest: "invalid-claim-digest".into(),
+                },
+                &[scope()]
+            ),
             Err(StorageError::InvalidSchema)
         );
         assert!(store.read_current(&id("m1"), &[scope()]).unwrap().is_none());
@@ -2100,37 +2583,73 @@ mod tests {
             namespace_key: String::new(),
         };
 
-        assert_eq!(store.create_memory(memory(), &empty), Err(StorageError::InvalidSchema));
-        assert_eq!(store.create_memory(memory(), std::slice::from_ref(&malformed)), Err(StorageError::InvalidSchema));
-        assert_eq!(store.read_current(&id("missing"), &empty), Err(StorageError::InvalidSchema));
-        assert_eq!(store.read_version(&id("missing"), &id("missing-v"), std::slice::from_ref(&malformed)), Err(StorageError::InvalidSchema));
-        assert_eq!(store.commit_version(CommitRequest {
-            memory_id: id("missing"),
-            expected_current_version: None,
-            new_version: version("missing-v", 1, None),
-            idempotency_key: "scope-validation".into(),
-            request_digest: "scope-validation".into(),
-        }, &empty), Err(StorageError::InvalidSchema));
-        assert_eq!(store.list_changes(None, &empty, 0), Err(StorageError::InvalidSchema));
-        assert_eq!(store.resolve_idempotency("missing", "digest", &[malformed]), Err(StorageError::InvalidSchema));
+        assert_eq!(
+            store.create_memory(memory(), &empty),
+            Err(StorageError::InvalidSchema)
+        );
+        assert_eq!(
+            store.create_memory(memory(), std::slice::from_ref(&malformed)),
+            Err(StorageError::InvalidSchema)
+        );
+        assert_eq!(
+            store.read_current(&id("missing"), &empty),
+            Err(StorageError::InvalidSchema)
+        );
+        assert_eq!(
+            store.read_version(
+                &id("missing"),
+                &id("missing-v"),
+                std::slice::from_ref(&malformed)
+            ),
+            Err(StorageError::InvalidSchema)
+        );
+        assert_eq!(
+            store.commit_version(
+                CommitRequest {
+                    memory_id: id("missing"),
+                    expected_current_version: None,
+                    new_version: version("missing-v", 1, None),
+                    idempotency_key: "scope-validation".into(),
+                    request_digest: "scope-validation".into(),
+                },
+                &empty
+            ),
+            Err(StorageError::InvalidSchema)
+        );
+        assert_eq!(
+            store.list_changes(None, &empty, 0),
+            Err(StorageError::InvalidSchema)
+        );
+        assert_eq!(
+            store.resolve_idempotency("missing", "digest", &[malformed]),
+            Err(StorageError::InvalidSchema)
+        );
     }
 
     #[test]
     fn sqlite_change_listing_surfaces_corrupt_scope_metadata_instead_of_silently_skipping_it() {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         store.create_memory(memory(), &[scope()]).unwrap();
-        store.commit_version(CommitRequest {
-            memory_id: id("m1"),
-            expected_current_version: None,
-            new_version: version("v1", 1, None),
-            idempotency_key: "corrupt-scope-op".into(),
-            request_digest: "corrupt-scope-digest".into(),
-        }, &[scope()]).unwrap();
+        store
+            .commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v1", 1, None),
+                    idempotency_key: "corrupt-scope-op".into(),
+                    request_digest: "corrupt-scope-digest".into(),
+                },
+                &[scope()],
+            )
+            .unwrap();
 
-        store.connection.execute(
-            "UPDATE memories SET scope_json = 'not-json' WHERE memory_id = 'm1'",
-            [],
-        ).unwrap();
+        store
+            .connection
+            .execute(
+                "UPDATE memories SET scope_json = 'not-json' WHERE memory_id = 'm1'",
+                [],
+            )
+            .unwrap();
 
         assert_eq!(
             store.list_changes(None, &[scope()], 10),
@@ -2154,17 +2673,23 @@ mod tests {
         let mut store = SqliteMemoryStorage::open(path).unwrap();
         let deadline = std::time::Instant::now() + Duration::from_secs(10);
         while !std::path::Path::new(&gate).exists() {
-            assert!(std::time::Instant::now() < deadline, "timed out waiting for multiprocess CAS gate");
+            assert!(
+                std::time::Instant::now() < deadline,
+                "timed out waiting for multiprocess CAS gate"
+            );
             std::thread::sleep(Duration::from_millis(5));
         }
 
-        let result = store.commit_version(CommitRequest {
-            memory_id: id("m1"),
-            expected_current_version: None,
-            new_version: version(&version_id, 1, None),
-            idempotency_key: format!("mp-{version_id}"),
-            request_digest: format!("mp-digest-{version_id}"),
-        }, &[scope()]);
+        let result = store.commit_version(
+            CommitRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version: version(&version_id, 1, None),
+                idempotency_key: format!("mp-{version_id}"),
+                request_digest: format!("mp-digest-{version_id}"),
+            },
+            &[scope()],
+        );
         let outcome = match result {
             Ok(_) => "success",
             Err(StorageError::StaleVersion) => "stale",
@@ -2205,13 +2730,37 @@ mod tests {
             std::fs::read_to_string(&first_result).unwrap(),
             std::fs::read_to_string(&second_result).unwrap(),
         ];
-        assert_eq!(outcomes.iter().filter(|value| value.as_str() == "success").count(), 1);
-        assert_eq!(outcomes.iter().filter(|value| value.as_str() == "stale").count(), 1);
+        assert_eq!(
+            outcomes
+                .iter()
+                .filter(|value| value.as_str() == "success")
+                .count(),
+            1
+        );
+        assert_eq!(
+            outcomes
+                .iter()
+                .filter(|value| value.as_str() == "stale")
+                .count(),
+            1
+        );
 
         let reopened = SqliteMemoryStorage::open(&path).unwrap();
-        let current = reopened.read_current(&id("m1"), &[scope()]).unwrap().unwrap();
-        assert!(current.memory_version_id == id("v-mp-a") || current.memory_version_id == id("v-mp-b"));
-        assert_eq!(reopened.list_changes(None, &[scope()], 10).unwrap().records.len(), 1);
+        let current = reopened
+            .read_current(&id("m1"), &[scope()])
+            .unwrap()
+            .unwrap();
+        assert!(
+            current.memory_version_id == id("v-mp-a") || current.memory_version_id == id("v-mp-b")
+        );
+        assert_eq!(
+            reopened
+                .list_changes(None, &[scope()], 10)
+                .unwrap()
+                .records
+                .len(),
+            1
+        );
         drop(reopened);
 
         remove_db_files(&path);
@@ -2219,7 +2768,6 @@ mod tests {
         let _ = std::fs::remove_file(first_result);
         let _ = std::fs::remove_file(second_result);
     }
-
 
     #[test]
     fn sqlite_denies_fresh_cross_scope_write_without_persisting_any_commit_state() {
@@ -2231,25 +2779,40 @@ mod tests {
             namespace_key: "user:s2".into(),
         };
 
-        let result = store.commit_version(CommitRequest {
-            memory_id: id("m1"),
-            expected_current_version: None,
-            new_version: version("v-denied-cross-scope", 1, None),
-            idempotency_key: "fresh-foreign-write".into(),
-            request_digest: "fresh-foreign-write-digest".into(),
-        }, &[foreign_scope]);
+        let result = store.commit_version(
+            CommitRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version: version("v-denied-cross-scope", 1, None),
+                idempotency_key: "fresh-foreign-write".into(),
+                request_digest: "fresh-foreign-write-digest".into(),
+            },
+            &[foreign_scope],
+        );
         assert_eq!(result, Err(StorageError::ScopeMismatch));
 
         assert!(store.read_current(&id("m1"), &[scope()]).unwrap().is_none());
         assert_eq!(
-            store.read_version(&id("m1"), &id("v-denied-cross-scope"), &[scope()]).unwrap(),
+            store
+                .read_version(&id("m1"), &id("v-denied-cross-scope"), &[scope()])
+                .unwrap(),
             None
         );
         assert_eq!(
-            store.resolve_idempotency("fresh-foreign-write", "fresh-foreign-write-digest", &[scope()]).unwrap(),
+            store
+                .resolve_idempotency(
+                    "fresh-foreign-write",
+                    "fresh-foreign-write-digest",
+                    &[scope()]
+                )
+                .unwrap(),
             None
         );
-        assert!(store.list_changes(None, &[scope()], 10).unwrap().records.is_empty());
+        assert!(store
+            .list_changes(None, &[scope()], 10)
+            .unwrap()
+            .records
+            .is_empty());
     }
 
     #[test]
@@ -2274,34 +2837,55 @@ mod tests {
             let mut item = memory();
             item.memory_id = id(memory_id);
             item.scope_refs = vec![item_scope.clone()];
-            store.create_memory(item, std::slice::from_ref(&item_scope)).unwrap();
+            store
+                .create_memory(item, std::slice::from_ref(&item_scope))
+                .unwrap();
 
             let mut item_version = version(version_id, 1, None);
             item_version.memory_id = id(memory_id);
-            store.commit_version(CommitRequest {
-                memory_id: id(memory_id),
-                expected_current_version: None,
-                new_version: item_version,
-                idempotency_key: format!("page-two-{memory_id}"),
-                request_digest: format!("page-two-digest-{memory_id}"),
-            }, &[item_scope]).unwrap();
+            store
+                .commit_version(
+                    CommitRequest {
+                        memory_id: id(memory_id),
+                        expected_current_version: None,
+                        new_version: item_version,
+                        idempotency_key: format!("page-two-{memory_id}"),
+                        request_digest: format!("page-two-digest-{memory_id}"),
+                    },
+                    &[item_scope],
+                )
+                .unwrap();
         }
 
-        let first = store.list_changes(None, std::slice::from_ref(&visible_scope), 2).unwrap();
+        let first = store
+            .list_changes(None, std::slice::from_ref(&visible_scope), 2)
+            .unwrap();
         assert_eq!(
-            first.records.iter().map(|record| record.memory_id.clone()).collect::<Vec<_>>(),
+            first
+                .records
+                .iter()
+                .map(|record| record.memory_id.clone())
+                .collect::<Vec<_>>(),
             vec![id("m1"), id("m4")]
         );
         assert_eq!(first.next_cursor, Some(CommitSequence(4)));
 
-        let second = store.list_changes(first.next_cursor, std::slice::from_ref(&visible_scope), 2).unwrap();
+        let second = store
+            .list_changes(first.next_cursor, std::slice::from_ref(&visible_scope), 2)
+            .unwrap();
         assert_eq!(
-            second.records.iter().map(|record| record.memory_id.clone()).collect::<Vec<_>>(),
+            second
+                .records
+                .iter()
+                .map(|record| record.memory_id.clone())
+                .collect::<Vec<_>>(),
             vec![id("m5"), id("m7")]
         );
         assert_eq!(second.next_cursor, Some(CommitSequence(7)));
 
-        let end = store.list_changes(second.next_cursor, &[visible_scope], 2).unwrap();
+        let end = store
+            .list_changes(second.next_cursor, &[visible_scope], 2)
+            .unwrap();
         assert!(end.records.is_empty());
         assert_eq!(end.next_cursor, None);
     }
@@ -2317,29 +2901,47 @@ mod tests {
         };
         let mut multi_scope_memory = memory();
         multi_scope_memory.scope_refs = vec![first_scope.clone(), second_scope.clone()];
-        store.create_memory(
-            multi_scope_memory,
-            &[first_scope.clone(), second_scope.clone()],
-        ).unwrap();
+        store
+            .create_memory(
+                multi_scope_memory,
+                &[first_scope.clone(), second_scope.clone()],
+            )
+            .unwrap();
 
         let mut new_version = version("v-unauthorized-claim-scope", 1, None);
         new_version.claims = vec![claim_in_scope("claim-s2", second_scope)];
         assert_eq!(
-            store.commit_version(CommitRequest {
-                memory_id: id("m1"),
-                expected_current_version: None,
-                new_version,
-                idempotency_key: "unauthorized-claim-scope".into(),
-                request_digest: "unauthorized-claim-scope-digest".into(),
-            }, std::slice::from_ref(&first_scope)),
+            store.commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version,
+                    idempotency_key: "unauthorized-claim-scope".into(),
+                    request_digest: "unauthorized-claim-scope-digest".into(),
+                },
+                std::slice::from_ref(&first_scope)
+            ),
             Err(StorageError::ScopeMismatch)
         );
-        assert!(store.read_current(&id("m1"), std::slice::from_ref(&first_scope)).unwrap().is_none());
+        assert!(store
+            .read_current(&id("m1"), std::slice::from_ref(&first_scope))
+            .unwrap()
+            .is_none());
         assert_eq!(
-            store.resolve_idempotency("unauthorized-claim-scope", "unauthorized-claim-scope-digest", std::slice::from_ref(&first_scope)).unwrap(),
+            store
+                .resolve_idempotency(
+                    "unauthorized-claim-scope",
+                    "unauthorized-claim-scope-digest",
+                    std::slice::from_ref(&first_scope)
+                )
+                .unwrap(),
             None
         );
-        assert!(store.list_changes(None, &[first_scope], 10).unwrap().records.is_empty());
+        assert!(store
+            .list_changes(None, &[first_scope], 10)
+            .unwrap()
+            .records
+            .is_empty());
     }
 
     #[test]
@@ -2353,45 +2955,65 @@ mod tests {
         };
         let mut multi_scope_memory = memory();
         multi_scope_memory.scope_refs = vec![first_scope.clone(), second_scope.clone()];
-        store.create_memory(
-            multi_scope_memory,
-            &[first_scope.clone(), second_scope.clone()],
-        ).unwrap();
+        store
+            .create_memory(
+                multi_scope_memory,
+                &[first_scope.clone(), second_scope.clone()],
+            )
+            .unwrap();
 
         let mut new_version = version("v-multiscope-claim", 1, None);
         let mut multi_scope_claim = claim_in_scope("claim-both", first_scope.clone());
         multi_scope_claim.scope_refs.push(second_scope.clone());
         new_version.claims = vec![multi_scope_claim];
-        store.commit_version(CommitRequest {
-            memory_id: id("m1"),
-            expected_current_version: None,
-            new_version,
-            idempotency_key: "multiscope-claim".into(),
-            request_digest: "multiscope-claim-digest".into(),
-        }, &[first_scope.clone(), second_scope.clone()]).unwrap();
+        store
+            .commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version,
+                    idempotency_key: "multiscope-claim".into(),
+                    request_digest: "multiscope-claim-digest".into(),
+                },
+                &[first_scope.clone(), second_scope.clone()],
+            )
+            .unwrap();
 
-        let partial_reader = store.read_current(&id("m1"), std::slice::from_ref(&first_scope)).unwrap().unwrap();
-        assert!(partial_reader.claims.is_empty(), "partial scope access must not disclose a partial Claim");
-        let full_reader = store.read_current(&id("m1"), &[first_scope, second_scope]).unwrap().unwrap();
+        let partial_reader = store
+            .read_current(&id("m1"), std::slice::from_ref(&first_scope))
+            .unwrap()
+            .unwrap();
+        assert!(
+            partial_reader.claims.is_empty(),
+            "partial scope access must not disclose a partial Claim"
+        );
+        let full_reader = store
+            .read_current(&id("m1"), &[first_scope, second_scope])
+            .unwrap()
+            .unwrap();
         assert_eq!(full_reader.claims.len(), 1);
         assert_eq!(full_reader.claims[0].claim_id, id("claim-both"));
     }
-
 
     #[test]
     fn sqlite_prepare_keeps_current_version_unchanged() {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         store.create_memory(memory(), &[scope()]).unwrap();
 
-        let prepared = store.prepare_version(PrepareRequest {
-            memory_id: id("m1"),
-            expected_current_version: None,
-            new_version: version("v1-prepared", 1, None),
-            idempotency_key: "t1-op".into(),
-            request_digest: "t1-digest".into(),
-            publication_id: "t1-publication".into(),
-            generation: 1,
-        }, &[scope()]).unwrap();
+        let prepared = store
+            .prepare_version(
+                PrepareRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v1-prepared", 1, None),
+                    idempotency_key: "t1-op".into(),
+                    request_digest: "t1-digest".into(),
+                    publication_id: "t1-publication".into(),
+                    generation: 1,
+                },
+                &[scope()],
+            )
+            .unwrap();
 
         assert_eq!(prepared.prepared_version_id, id("v1-prepared"));
         assert!(
@@ -2399,11 +3021,14 @@ mod tests {
             "prepare must not advance the current-version pointer"
         );
 
-        let current_id: Option<String> = store.connection.query_row(
-            "SELECT current_version_id FROM memories WHERE memory_id = 'm1'",
-            [],
-            |row| row.get(0),
-        ).unwrap();
+        let current_id: Option<String> = store
+            .connection
+            .query_row(
+                "SELECT current_version_id FROM memories WHERE memory_id = 'm1'",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
         assert_eq!(current_id, None);
     }
 
@@ -2412,18 +3037,25 @@ mod tests {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         store.create_memory(memory(), &[scope()]).unwrap();
 
-        store.prepare_version(PrepareRequest {
-            memory_id: id("m1"),
-            expected_current_version: None,
-            new_version: version("v2-hidden", 1, None),
-            idempotency_key: "t2-op".into(),
-            request_digest: "t2-digest".into(),
-            publication_id: "t2-publication".into(),
-            generation: 1,
-        }, &[scope()]).unwrap();
+        store
+            .prepare_version(
+                PrepareRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v2-hidden", 1, None),
+                    idempotency_key: "t2-op".into(),
+                    request_digest: "t2-digest".into(),
+                    publication_id: "t2-publication".into(),
+                    generation: 1,
+                },
+                &[scope()],
+            )
+            .unwrap();
 
         assert_eq!(
-            store.read_version(&id("m1"), &id("v2-hidden"), &[scope()]).unwrap(),
+            store
+                .read_version(&id("m1"), &id("v2-hidden"), &[scope()])
+                .unwrap(),
             None,
             "PreparedHidden versions must not be disclosed by read_version"
         );
@@ -2434,27 +3066,33 @@ mod tests {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         store.create_memory(memory(), &[scope()]).unwrap();
 
-        store.commit_version(CommitRequest {
-            memory_id: id("m1"),
-            expected_current_version: None,
-            new_version: version("v3-legacy", 1, None),
-            idempotency_key: "t3-legacy-op".into(),
-            request_digest: "t3-legacy-digest".into(),
-        }, &[scope()]).unwrap();
+        store
+            .commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v3-legacy", 1, None),
+                    idempotency_key: "t3-legacy-op".into(),
+                    request_digest: "t3-legacy-digest".into(),
+                },
+                &[scope()],
+            )
+            .unwrap();
 
-        let preparation_count: i64 = store.connection.query_row(
-            "SELECT COUNT(*) FROM publication_preparations
+        let preparation_count: i64 = store
+            .connection
+            .query_row(
+                "SELECT COUNT(*) FROM publication_preparations
              WHERE version_id = 'v3-legacy'",
-            [],
-            |row| row.get(0),
-        ).unwrap();
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
         assert_eq!(preparation_count, 0);
 
-        let visible = store.read_version(
-            &id("m1"),
-            &id("v3-legacy"),
-            &[scope()],
-        ).unwrap();
+        let visible = store
+            .read_version(&id("m1"), &id("v3-legacy"), &[scope()])
+            .unwrap();
 
         assert_eq!(
             visible.unwrap().memory_version_id,
@@ -2468,15 +3106,20 @@ mod tests {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         store.create_memory(memory(), &[scope()]).unwrap();
 
-        store.prepare_version(PrepareRequest {
-            memory_id: id("m1"),
-            expected_current_version: None,
-            new_version: version("v4-hidden", 1, None),
-            idempotency_key: "t4-op".into(),
-            request_digest: "t4-digest".into(),
-            publication_id: "t4-publication".into(),
-            generation: 1,
-        }, &[scope()]).unwrap();
+        store
+            .prepare_version(
+                PrepareRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v4-hidden", 1, None),
+                    idempotency_key: "t4-op".into(),
+                    request_digest: "t4-digest".into(),
+                    publication_id: "t4-publication".into(),
+                    generation: 1,
+                },
+                &[scope()],
+            )
+            .unwrap();
 
         let changes = store.list_changes(None, &[scope()], 10).unwrap();
         assert!(
@@ -2484,11 +3127,14 @@ mod tests {
             "a prepared version must not appear in the public change log"
         );
 
-        let log_count: i64 = store.connection.query_row(
-            "SELECT COUNT(*) FROM commit_log WHERE version_id = 'v4-hidden'",
-            [],
-            |row| row.get(0),
-        ).unwrap();
+        let log_count: i64 = store
+            .connection
+            .query_row(
+                "SELECT COUNT(*) FROM commit_log WHERE version_id = 'v4-hidden'",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
         assert_eq!(log_count, 0);
     }
 
@@ -2497,43 +3143,55 @@ mod tests {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         store.create_memory(memory(), &[scope()]).unwrap();
 
-        store.prepare_version(PrepareRequest {
-            memory_id: id("m1"),
-            expected_current_version: None,
-            new_version: version("v5-publish", 1, None),
-            idempotency_key: "t5-op".into(),
-            request_digest: "t5-digest".into(),
-            publication_id: "t5-publication".into(),
-            generation: 1,
-        }, &[scope()]).unwrap();
+        store
+            .prepare_version(
+                PrepareRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v5-publish", 1, None),
+                    idempotency_key: "t5-op".into(),
+                    request_digest: "t5-digest".into(),
+                    publication_id: "t5-publication".into(),
+                    generation: 1,
+                },
+                &[scope()],
+            )
+            .unwrap();
 
-        let receipt = store.publish_prepared(
-            "t5-publication",
-            None,
-            &[scope()],
-        ).unwrap();
+        let receipt = store
+            .publish_prepared("t5-publication", None, &[scope()])
+            .unwrap();
 
         assert_eq!(receipt.memory_id, id("m1"));
         assert_eq!(receipt.resulting_version_id, id("v5-publish"));
         assert_eq!(receipt.commit_sequence, CommitSequence(1));
 
         assert_eq!(
-            store.read_current(&id("m1"), &[scope()])
-                .unwrap().unwrap().memory_version_id,
+            store
+                .read_current(&id("m1"), &[scope()])
+                .unwrap()
+                .unwrap()
+                .memory_version_id,
             id("v5-publish")
         );
         assert_eq!(
-            store.read_version(&id("m1"), &id("v5-publish"), &[scope()])
-                .unwrap().unwrap().memory_version_id,
+            store
+                .read_version(&id("m1"), &id("v5-publish"), &[scope()])
+                .unwrap()
+                .unwrap()
+                .memory_version_id,
             id("v5-publish")
         );
 
-        let state: String = store.connection.query_row(
-            "SELECT state FROM publication_preparations
+        let state: String = store
+            .connection
+            .query_row(
+                "SELECT state FROM publication_preparations
              WHERE publication_id = 't5-publication'",
-            [],
-            |row| row.get(0),
-        ).unwrap();
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
         assert_eq!(state, "Published");
     }
 
@@ -2543,67 +3201,88 @@ mod tests {
         store.create_memory(memory(), &[scope()]).unwrap();
 
         // 先提交一个正式版本，确保 MAX 不只是空表的 NULL。
-        let first = store.commit_version(CommitRequest {
-            memory_id: id("m1"),
-            expected_current_version: None,
-            new_version: version("v6-base", 1, None),
-            idempotency_key: "t6-base-op".into(),
-            request_digest: "t6-base-digest".into(),
-        }, &[scope()]).unwrap();
+        let first = store
+            .commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v6-base", 1, None),
+                    idempotency_key: "t6-base-op".into(),
+                    request_digest: "t6-base-digest".into(),
+                },
+                &[scope()],
+            )
+            .unwrap();
         assert_eq!(first.commit_sequence, CommitSequence(1));
 
-        let max_before: i64 = store.connection.query_row(
-            "SELECT COALESCE(MAX(commit_sequence), 0) FROM commit_log",
-            [],
-            |row| row.get(0),
-        ).unwrap();
+        let max_before: i64 = store
+            .connection
+            .query_row(
+                "SELECT COALESCE(MAX(commit_sequence), 0) FROM commit_log",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
         assert_eq!(max_before, 1);
 
         // 两次 prepare 均不得推进正式 commit_log 序列。
-        store.prepare_version(PrepareRequest {
-            memory_id: id("m1"),
-            expected_current_version: Some(id("v6-base")),
-            new_version: version("v6-prepared-a", 2, Some("v6-base")),
-            idempotency_key: "t6-a-op".into(),
-            request_digest: "t6-a-digest".into(),
-            publication_id: "t6-a-publication".into(),
-            generation: 1,
-        }, &[scope()]).unwrap();
+        store
+            .prepare_version(
+                PrepareRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: Some(id("v6-base")),
+                    new_version: version("v6-prepared-a", 2, Some("v6-base")),
+                    idempotency_key: "t6-a-op".into(),
+                    request_digest: "t6-a-digest".into(),
+                    publication_id: "t6-a-publication".into(),
+                    generation: 1,
+                },
+                &[scope()],
+            )
+            .unwrap();
 
-        store.prepare_version(PrepareRequest {
-            memory_id: id("m1"),
-            expected_current_version: Some(id("v6-base")),
-            new_version: version("v6-prepared-b", 2, Some("v6-base")),
-            idempotency_key: "t6-b-op".into(),
-            request_digest: "t6-b-digest".into(),
-            publication_id: "t6-b-publication".into(),
-            generation: 1,
-        }, &[scope()]).unwrap();
+        store
+            .prepare_version(
+                PrepareRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: Some(id("v6-base")),
+                    new_version: version("v6-prepared-b", 2, Some("v6-base")),
+                    idempotency_key: "t6-b-op".into(),
+                    request_digest: "t6-b-digest".into(),
+                    publication_id: "t6-b-publication".into(),
+                    generation: 1,
+                },
+                &[scope()],
+            )
+            .unwrap();
 
-        let max_after_prepare: i64 = store.connection.query_row(
-            "SELECT COALESCE(MAX(commit_sequence), 0) FROM commit_log",
-            [],
-            |row| row.get(0),
-        ).unwrap();
+        let max_after_prepare: i64 = store
+            .connection
+            .query_row(
+                "SELECT COALESCE(MAX(commit_sequence), 0) FROM commit_log",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
         assert_eq!(
-            max_after_prepare,
-            max_before,
+            max_after_prepare, max_before,
             "prepare must not consume a formal commit_log sequence"
         );
 
-        let published = store.publish_prepared(
-            "t6-a-publication",
-            Some(id("v6-base")),
-            &[scope()],
-        ).unwrap();
+        let published = store
+            .publish_prepared("t6-a-publication", Some(id("v6-base")), &[scope()])
+            .unwrap();
 
         assert_eq!(published.commit_sequence, CommitSequence(2));
 
-        let max_after_publish: i64 = store.connection.query_row(
-            "SELECT COALESCE(MAX(commit_sequence), 0) FROM commit_log",
-            [],
-            |row| row.get(0),
-        ).unwrap();
+        let max_after_publish: i64 = store
+            .connection
+            .query_row(
+                "SELECT COALESCE(MAX(commit_sequence), 0) FROM commit_log",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
         assert_eq!(max_after_publish, 2);
     }
 
@@ -2627,17 +3306,23 @@ mod tests {
 
         assert_eq!(first, replay);
 
-        let versions: i64 = store.connection.query_row(
-            "SELECT COUNT(*) FROM versions WHERE version_id = 'v7-replay'",
-            [],
-            |row| row.get(0),
-        ).unwrap();
-        let preparations: i64 = store.connection.query_row(
-            "SELECT COUNT(*) FROM publication_preparations
+        let versions: i64 = store
+            .connection
+            .query_row(
+                "SELECT COUNT(*) FROM versions WHERE version_id = 'v7-replay'",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
+        let preparations: i64 = store
+            .connection
+            .query_row(
+                "SELECT COUNT(*) FROM publication_preparations
              WHERE publication_id = 't7-publication'",
-            [],
-            |row| row.get(0),
-        ).unwrap();
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
 
         assert_eq!(versions, 1);
         assert_eq!(preparations, 1);
@@ -2649,40 +3334,54 @@ mod tests {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         store.create_memory(memory(), &[scope()]).unwrap();
 
-        store.prepare_version(PrepareRequest {
-            memory_id: id("m1"),
-            expected_current_version: None,
-            new_version: version("v8-original", 1, None),
-            idempotency_key: "t8-shared-op".into(),
-            request_digest: "t8-original-digest".into(),
-            publication_id: "t8-original-publication".into(),
-            generation: 1,
-        }, &[scope()]).unwrap();
+        store
+            .prepare_version(
+                PrepareRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v8-original", 1, None),
+                    idempotency_key: "t8-shared-op".into(),
+                    request_digest: "t8-original-digest".into(),
+                    publication_id: "t8-original-publication".into(),
+                    generation: 1,
+                },
+                &[scope()],
+            )
+            .unwrap();
 
-        let result = store.prepare_version(PrepareRequest {
-            memory_id: id("m1"),
-            expected_current_version: None,
-            new_version: version("v8-conflict", 1, None),
-            idempotency_key: "t8-shared-op".into(),
-            request_digest: "t8-different-digest".into(),
-            publication_id: "t8-conflict-publication".into(),
-            generation: 1,
-        }, &[scope()]);
+        let result = store.prepare_version(
+            PrepareRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version: version("v8-conflict", 1, None),
+                idempotency_key: "t8-shared-op".into(),
+                request_digest: "t8-different-digest".into(),
+                publication_id: "t8-conflict-publication".into(),
+                generation: 1,
+            },
+            &[scope()],
+        );
 
         assert_eq!(result, Err(StorageError::IdempotencyConflict));
 
-        let version_count: i64 = store.connection.query_row(
-            "SELECT COUNT(*) FROM versions WHERE version_id IN
+        let version_count: i64 = store
+            .connection
+            .query_row(
+                "SELECT COUNT(*) FROM versions WHERE version_id IN
              ('v8-original', 'v8-conflict')",
-            [],
-            |row| row.get(0),
-        ).unwrap();
-        let preparation_count: i64 = store.connection.query_row(
-            "SELECT COUNT(*) FROM publication_preparations
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
+        let preparation_count: i64 = store
+            .connection
+            .query_row(
+                "SELECT COUNT(*) FROM publication_preparations
              WHERE idempotency_key = 't8-shared-op'",
-            [],
-            |row| row.get(0),
-        ).unwrap();
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
 
         assert_eq!(version_count, 1);
         assert_eq!(preparation_count, 1);
@@ -2693,34 +3392,52 @@ mod tests {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         store.create_memory(memory(), &[scope()]).unwrap();
 
-        store.prepare_version(PrepareRequest {
-            memory_id: id("m1"),
-            expected_current_version: None,
-            new_version: version("v9-publish-replay", 1, None),
-            idempotency_key: "t9-op".into(),
-            request_digest: "t9-digest".into(),
-            publication_id: "t9-publication".into(),
-            generation: 1,
-        }, &[scope()]).unwrap();
+        store
+            .prepare_version(
+                PrepareRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v9-publish-replay", 1, None),
+                    idempotency_key: "t9-op".into(),
+                    request_digest: "t9-digest".into(),
+                    publication_id: "t9-publication".into(),
+                    generation: 1,
+                },
+                &[scope()],
+            )
+            .unwrap();
 
-        let first = store.publish_prepared("t9-publication", None, &[scope()]).unwrap();
-        let replay = store.publish_prepared("t9-publication", None, &[scope()]).unwrap();
+        let first = store
+            .publish_prepared("t9-publication", None, &[scope()])
+            .unwrap();
+        let replay = store
+            .publish_prepared("t9-publication", None, &[scope()])
+            .unwrap();
 
         assert_eq!(first, replay);
 
-        let log_count: i64 = store.connection.query_row(
-            "SELECT COUNT(*) FROM commit_log
+        let log_count: i64 = store
+            .connection
+            .query_row(
+                "SELECT COUNT(*) FROM commit_log
              WHERE version_id = 'v9-publish-replay'",
-            [],
-            |row| row.get(0),
-        ).unwrap();
-        let idempotency_count: i64 = store.connection.query_row(
-            "SELECT COUNT(*) FROM idempotency WHERE idempotency_key = 't9-op'",
-            [],
-            |row| row.get(0),
-        ).unwrap();
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
+        let idempotency_count: i64 = store
+            .connection
+            .query_row(
+                "SELECT COUNT(*) FROM idempotency WHERE idempotency_key = 't9-op'",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
 
-        assert_eq!(log_count, 1, "replay must not insert a second commit_log row");
+        assert_eq!(
+            log_count, 1,
+            "replay must not insert a second commit_log row"
+        );
         assert_eq!(idempotency_count, 1);
         assert_eq!(first.commit_sequence, CommitSequence(1));
     }
@@ -2730,72 +3447,92 @@ mod tests {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         store.create_memory(memory(), &[scope()]).unwrap();
 
-        store.commit_version(CommitRequest {
-            memory_id: id("m1"),
-            expected_current_version: None,
-            new_version: version("v10-base", 1, None),
-            idempotency_key: "t10-base-op".into(),
-            request_digest: "t10-base-digest".into(),
-        }, &[scope()]).unwrap();
+        store
+            .commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v10-base", 1, None),
+                    idempotency_key: "t10-base-op".into(),
+                    request_digest: "t10-base-digest".into(),
+                },
+                &[scope()],
+            )
+            .unwrap();
 
-        store.prepare_version(PrepareRequest {
-            memory_id: id("m1"),
-            expected_current_version: Some(id("v10-base")),
-            new_version: version("v10-prepared", 2, Some("v10-base")),
-            idempotency_key: "t10-prepared-op".into(),
-            request_digest: "t10-prepared-digest".into(),
-            publication_id: "t10-publication".into(),
-            generation: 1,
-        }, &[scope()]).unwrap();
+        store
+            .prepare_version(
+                PrepareRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: Some(id("v10-base")),
+                    new_version: version("v10-prepared", 2, Some("v10-base")),
+                    idempotency_key: "t10-prepared-op".into(),
+                    request_digest: "t10-prepared-digest".into(),
+                    publication_id: "t10-publication".into(),
+                    generation: 1,
+                },
+                &[scope()],
+            )
+            .unwrap();
 
         // 兼容路径先提交另一条 successor，令 prepared parent 变旧。
-        store.commit_version(CommitRequest {
-            memory_id: id("m1"),
-            expected_current_version: Some(id("v10-base")),
-            new_version: version("v10-competitor", 2, Some("v10-base")),
-            idempotency_key: "t10-competitor-op".into(),
-            request_digest: "t10-competitor-digest".into(),
-        }, &[scope()]).unwrap();
+        store
+            .commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: Some(id("v10-base")),
+                    new_version: version("v10-competitor", 2, Some("v10-base")),
+                    idempotency_key: "t10-competitor-op".into(),
+                    request_digest: "t10-competitor-digest".into(),
+                },
+                &[scope()],
+            )
+            .unwrap();
 
-        let result = store.publish_prepared(
-            "t10-publication",
-            Some(id("v10-base")),
-            &[scope()],
-        );
+        let result = store.publish_prepared("t10-publication", Some(id("v10-base")), &[scope()]);
         assert_eq!(result, Err(StorageError::StaleVersion));
 
         assert_eq!(
-            store.read_current(&id("m1"), &[scope()])
-                .unwrap().unwrap().memory_version_id,
+            store
+                .read_current(&id("m1"), &[scope()])
+                .unwrap()
+                .unwrap()
+                .memory_version_id,
             id("v10-competitor")
         );
         assert_eq!(
-            store.read_version(&id("m1"), &id("v10-prepared"), &[scope()])
+            store
+                .read_version(&id("m1"), &id("v10-prepared"), &[scope()])
                 .unwrap(),
             None,
             "failed publication must leave the prepared version hidden"
         );
 
-        let prepared_log_count: i64 = store.connection.query_row(
-            "SELECT COUNT(*) FROM commit_log WHERE version_id = 'v10-prepared'",
-            [],
-            |row| row.get(0),
-        ).unwrap();
-        let prepared_state: String = store.connection.query_row(
-            "SELECT state FROM publication_preparations
+        let prepared_log_count: i64 = store
+            .connection
+            .query_row(
+                "SELECT COUNT(*) FROM commit_log WHERE version_id = 'v10-prepared'",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
+        let prepared_state: String = store
+            .connection
+            .query_row(
+                "SELECT state FROM publication_preparations
              WHERE publication_id = 't10-publication'",
-            [],
-            |row| row.get(0),
-        ).unwrap();
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
 
         assert_eq!(prepared_log_count, 0);
         assert_eq!(prepared_state, "PreparedHidden");
 
-        let total_log_count: i64 = store.connection.query_row(
-            "SELECT COUNT(*) FROM commit_log",
-            [],
-            |row| row.get(0),
-        ).unwrap();
+        let total_log_count: i64 = store
+            .connection
+            .query_row("SELECT COUNT(*) FROM commit_log", [], |row| row.get(0))
+            .unwrap();
         assert_eq!(total_log_count, 2);
     }
 
@@ -2804,33 +3541,47 @@ mod tests {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         store.create_memory(memory(), &[scope()]).unwrap();
 
-        store.prepare_version(PrepareRequest {
-            memory_id: id("m1"),
-            expected_current_version: None,
-            new_version: version("v11-a", 1, None),
-            idempotency_key: "t11-a-op".into(),
-            request_digest: "t11-a-digest".into(),
-            publication_id: "t11-a-publication".into(),
-            generation: 1,
-        }, &[scope()]).unwrap();
+        store
+            .prepare_version(
+                PrepareRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v11-a", 1, None),
+                    idempotency_key: "t11-a-op".into(),
+                    request_digest: "t11-a-digest".into(),
+                    publication_id: "t11-a-publication".into(),
+                    generation: 1,
+                },
+                &[scope()],
+            )
+            .unwrap();
 
-        store.prepare_version(PrepareRequest {
-            memory_id: id("m1"),
-            expected_current_version: None,
-            new_version: version("v11-b", 1, None),
-            idempotency_key: "t11-b-op".into(),
-            request_digest: "t11-b-digest".into(),
-            publication_id: "t11-b-publication".into(),
-            generation: 1,
-        }, &[scope()]).unwrap();
+        store
+            .prepare_version(
+                PrepareRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v11-b", 1, None),
+                    idempotency_key: "t11-b-op".into(),
+                    request_digest: "t11-b-digest".into(),
+                    publication_id: "t11-b-publication".into(),
+                    generation: 1,
+                },
+                &[scope()],
+            )
+            .unwrap();
 
-        let mut stmt = store.connection.prepare(
-            "SELECT commit_sequence FROM versions
+        let mut stmt = store
+            .connection
+            .prepare(
+                "SELECT commit_sequence FROM versions
              WHERE version_id IN ('v11-a', 'v11-b')
              ORDER BY version_id",
-        ).unwrap();
+            )
+            .unwrap();
 
-        let values: Vec<i64> = stmt.query_map([], |row| row.get(0))
+        let values: Vec<i64> = stmt
+            .query_map([], |row| row.get(0))
             .unwrap()
             .collect::<Result<Vec<_>, _>>()
             .unwrap();
@@ -2838,16 +3589,18 @@ mod tests {
         assert_eq!(values.len(), 2);
         assert!(values.iter().all(|value| *value < 0));
         assert_ne!(
-            values[0],
-            values[1],
+            values[0], values[1],
             "each prepared version must reserve a distinct negative commit_sequence"
         );
 
-        let log_max: i64 = store.connection.query_row(
-            "SELECT COALESCE(MAX(commit_sequence), 0) FROM commit_log",
-            [],
-            |row| row.get(0),
-        ).unwrap();
+        let log_max: i64 = store
+            .connection
+            .query_row(
+                "SELECT COALESCE(MAX(commit_sequence), 0) FROM commit_log",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
         assert_eq!(log_max, 0, "hidden preparations must not enter commit_log");
     }
 
@@ -2856,26 +3609,34 @@ mod tests {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         store.create_memory(memory(), &[scope()]).unwrap();
 
-        store.prepare_version(PrepareRequest {
-            memory_id: id("m1"),
-            expected_current_version: None,
-            new_version: version("v12-original", 1, None),
-            idempotency_key: "t12-original-op".into(),
-            request_digest: "t12-original-digest".into(),
-            publication_id: "t12-shared-publication".into(),
-            generation: 1,
-        }, &[scope()]).unwrap();
+        store
+            .prepare_version(
+                PrepareRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v12-original", 1, None),
+                    idempotency_key: "t12-original-op".into(),
+                    request_digest: "t12-original-digest".into(),
+                    publication_id: "t12-shared-publication".into(),
+                    generation: 1,
+                },
+                &[scope()],
+            )
+            .unwrap();
 
         // publication_id 是唯一键，第二个 preparation 必须被拒绝。
-        let duplicate_publication = store.prepare_version(PrepareRequest {
-            memory_id: id("m1"),
-            expected_current_version: None,
-            new_version: version("v12-duplicate", 1, None),
-            idempotency_key: "t12-duplicate-op".into(),
-            request_digest: "t12-duplicate-digest".into(),
-            publication_id: "t12-shared-publication".into(),
-            generation: 2,
-        }, &[scope()]);
+        let duplicate_publication = store.prepare_version(
+            PrepareRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version: version("v12-duplicate", 1, None),
+                idempotency_key: "t12-duplicate-op".into(),
+                request_digest: "t12-duplicate-digest".into(),
+                publication_id: "t12-shared-publication".into(),
+                generation: 2,
+            },
+            &[scope()],
+        );
 
         assert_eq!(
             duplicate_publication,
@@ -2883,38 +3644,41 @@ mod tests {
         );
 
         // 当前没有 suppress API；测试直接将 preparation 状态置为 Suppressed。
-        let changed = store.connection.execute(
-            "UPDATE publication_preparations
+        let changed = store
+            .connection
+            .execute(
+                "UPDATE publication_preparations
              SET state = 'Suppressed'
              WHERE publication_id = 't12-shared-publication'",
-            [],
-        ).unwrap();
+                [],
+            )
+            .unwrap();
         assert_eq!(changed, 1);
 
         assert_eq!(
-            store.read_version(&id("m1"), &id("v12-original"), &[scope()])
+            store
+                .read_version(&id("m1"), &id("v12-original"), &[scope()])
                 .unwrap(),
             None,
             "Suppressed versions must remain hidden"
         );
 
         assert_eq!(
-            store.publish_prepared(
-                "t12-shared-publication",
-                None,
-                &[scope()],
-            ),
+            store.publish_prepared("t12-shared-publication", None, &[scope()],),
             Err(StorageError::PublicationStateConflict),
             "Suppressed preparations must not be publishable"
         );
 
         assert!(store.read_current(&id("m1"), &[scope()]).unwrap().is_none());
 
-        let log_count: i64 = store.connection.query_row(
-            "SELECT COUNT(*) FROM commit_log WHERE version_id = 'v12-original'",
-            [],
-            |row| row.get(0),
-        ).unwrap();
+        let log_count: i64 = store
+            .connection
+            .query_row(
+                "SELECT COUNT(*) FROM commit_log WHERE version_id = 'v12-original'",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
         assert_eq!(log_count, 0);
     }
 
@@ -2923,33 +3687,45 @@ mod tests {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         store.create_memory(memory(), &[scope()]).unwrap();
 
-        store.commit_version(
-            CommitRequest {
-                memory_id: id("m1"),
-                expected_current_version: None,
-                new_version: version("v1", 1, None),
-                idempotency_key: "f1-op1".into(),
-                request_digest: "f1-d1".into(),
-            },
-            &[scope()],
-        ).unwrap();
+        store
+            .commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v1", 1, None),
+                    idempotency_key: "f1-op1".into(),
+                    request_digest: "f1-d1".into(),
+                },
+                &[scope()],
+            )
+            .unwrap();
 
-        store.commit_version(
-            CommitRequest {
-                memory_id: id("m1"),
-                expected_current_version: Some(id("v1")),
-                new_version: version("v2", 2, Some("v1")),
-                idempotency_key: "f1-op2".into(),
-                request_digest: "f1-d2".into(),
-            },
-            &[scope()],
-        ).unwrap();
+        store
+            .commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: Some(id("v1")),
+                    new_version: version("v2", 2, Some("v1")),
+                    idempotency_key: "f1-op2".into(),
+                    request_digest: "f1-d2".into(),
+                },
+                &[scope()],
+            )
+            .unwrap();
 
-        store.forget_memory(&id("m1"), "reason-f1", &[scope()]).unwrap();
+        store
+            .forget_memory(&id("m1"), "reason-f1", &[scope()])
+            .unwrap();
 
         assert!(store.read_current(&id("m1"), &[scope()]).unwrap().is_none());
-        assert!(store.read_version(&id("m1"), &id("v1"), &[scope()]).unwrap().is_none());
-        assert!(store.read_version(&id("m1"), &id("v2"), &[scope()]).unwrap().is_none());
+        assert!(store
+            .read_version(&id("m1"), &id("v1"), &[scope()])
+            .unwrap()
+            .is_none());
+        assert!(store
+            .read_version(&id("m1"), &id("v2"), &[scope()])
+            .unwrap()
+            .is_none());
     }
 
     #[test]
@@ -2957,20 +3733,31 @@ mod tests {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         store.create_memory(memory(), &[scope()]).unwrap();
 
-        store.commit_version(
-            CommitRequest {
-                memory_id: id("m1"),
-                expected_current_version: None,
-                new_version: version("v1", 1, None),
-                idempotency_key: "f2-op".into(),
-                request_digest: "f2-d".into(),
-            },
-            &[scope()],
-        ).unwrap();
+        store
+            .commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v1", 1, None),
+                    idempotency_key: "f2-op".into(),
+                    request_digest: "f2-d".into(),
+                },
+                &[scope()],
+            )
+            .unwrap();
 
-        assert_eq!(store.list_changes(None, &[scope()], 10).unwrap().records.len(), 1);
+        assert_eq!(
+            store
+                .list_changes(None, &[scope()], 10)
+                .unwrap()
+                .records
+                .len(),
+            1
+        );
 
-        store.forget_memory(&id("m1"), "reason-f2", &[scope()]).unwrap();
+        store
+            .forget_memory(&id("m1"), "reason-f2", &[scope()])
+            .unwrap();
 
         let page = store.list_changes(None, &[scope()], 10).unwrap();
         assert!(page.records.is_empty());
@@ -2981,7 +3768,9 @@ mod tests {
     fn f3_forget_memory_rejects_new_commit() {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         store.create_memory(memory(), &[scope()]).unwrap();
-        store.forget_memory(&id("m1"), "reason-f3", &[scope()]).unwrap();
+        store
+            .forget_memory(&id("m1"), "reason-f3", &[scope()])
+            .unwrap();
 
         let result = store.commit_version(
             CommitRequest {
@@ -3002,20 +3791,24 @@ mod tests {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         store.create_memory(memory(), &[scope()]).unwrap();
 
-        store.prepare_version(
-            PrepareRequest {
-                memory_id: id("m1"),
-                expected_current_version: None,
-                new_version: version("v1", 1, None),
-                idempotency_key: "f4-prepare-op".into(),
-                request_digest: "f4-prepare-d".into(),
-                publication_id: "f4-publication".into(),
-                generation: 1,
-            },
-            &[scope()],
-        ).unwrap();
+        store
+            .prepare_version(
+                PrepareRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v1", 1, None),
+                    idempotency_key: "f4-prepare-op".into(),
+                    request_digest: "f4-prepare-d".into(),
+                    publication_id: "f4-publication".into(),
+                    generation: 1,
+                },
+                &[scope()],
+            )
+            .unwrap();
 
-        store.forget_memory(&id("m1"), "reason-f4", &[scope()]).unwrap();
+        store
+            .forget_memory(&id("m1"), "reason-f4", &[scope()])
+            .unwrap();
 
         let result = store.publish_prepared("f4-publication", None, &[scope()]);
         assert_eq!(result, Err(StorageError::Forgotten));
@@ -3050,14 +3843,20 @@ mod tests {
 
         let receipt = store.commit_version(request.clone(), &[scope()]).unwrap();
         assert_eq!(
-            store.resolve_idempotency("f5-op", "f5-d", &[scope()]).unwrap(),
+            store
+                .resolve_idempotency("f5-op", "f5-d", &[scope()])
+                .unwrap(),
             Some(receipt)
         );
 
-        store.forget_memory(&id("m1"), "reason-f5", &[scope()]).unwrap();
+        store
+            .forget_memory(&id("m1"), "reason-f5", &[scope()])
+            .unwrap();
 
         assert_eq!(
-            store.resolve_idempotency("f5-op", "f5-d", &[scope()]).unwrap(),
+            store
+                .resolve_idempotency("f5-op", "f5-d", &[scope()])
+                .unwrap(),
             None
         );
 
@@ -3072,17 +3871,24 @@ mod tests {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         store.create_memory(memory(), &[scope()]).unwrap();
 
-        let first = store.forget_memory(&id("m1"), "reason-f6-a", &[scope()]).unwrap();
-        let second = store.forget_memory(&id("m1"), "reason-f6-b", &[scope()]).unwrap();
+        let first = store
+            .forget_memory(&id("m1"), "reason-f6-a", &[scope()])
+            .unwrap();
+        let second = store
+            .forget_memory(&id("m1"), "reason-f6-b", &[scope()])
+            .unwrap();
 
         assert_eq!(first, second);
 
-        let count: i64 = store.connection.query_row(
-            "SELECT COUNT(*) FROM canonical_forget_fences
+        let count: i64 = store
+            .connection
+            .query_row(
+                "SELECT COUNT(*) FROM canonical_forget_fences
              WHERE target_kind = 'Memory' AND target_id = 'm1'",
-            [],
-            |row| row.get(0),
-        ).unwrap();
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
 
         assert_eq!(count, 1);
     }
@@ -3092,41 +3898,52 @@ mod tests {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         store.create_memory(memory(), &[scope()]).unwrap();
 
-        store.commit_version(
-            CommitRequest {
-                memory_id: id("m1"),
-                expected_current_version: None,
-                new_version: version("v1", 1, None),
-                idempotency_key: "f7-op1".into(),
-                request_digest: "f7-d1".into(),
-            },
-            &[scope()],
-        ).unwrap();
+        store
+            .commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v1", 1, None),
+                    idempotency_key: "f7-op1".into(),
+                    request_digest: "f7-d1".into(),
+                },
+                &[scope()],
+            )
+            .unwrap();
 
-        store.commit_version(
-            CommitRequest {
-                memory_id: id("m1"),
-                expected_current_version: Some(id("v1")),
-                new_version: version("v2", 2, Some("v1")),
-                idempotency_key: "f7-op2".into(),
-                request_digest: "f7-d2".into(),
-            },
-            &[scope()],
-        ).unwrap();
+        store
+            .commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: Some(id("v1")),
+                    new_version: version("v2", 2, Some("v1")),
+                    idempotency_key: "f7-op2".into(),
+                    request_digest: "f7-d2".into(),
+                },
+                &[scope()],
+            )
+            .unwrap();
 
-        store.forget_version(
-            &id("m1"),
-            &id("v1"),
-            "reason-f7",
-            &[scope()],
-        ).unwrap();
+        store
+            .forget_version(&id("m1"), &id("v1"), "reason-f7", &[scope()])
+            .unwrap();
 
-        assert!(store.read_version(&id("m1"), &id("v1"), &[scope()]).unwrap().is_none());
+        assert!(store
+            .read_version(&id("m1"), &id("v1"), &[scope()])
+            .unwrap()
+            .is_none());
         assert_eq!(
-            store.read_current(&id("m1"), &[scope()]).unwrap().unwrap().memory_version_id,
+            store
+                .read_current(&id("m1"), &[scope()])
+                .unwrap()
+                .unwrap()
+                .memory_version_id,
             id("v2")
         );
-        assert!(store.read_version(&id("m1"), &id("v2"), &[scope()]).unwrap().is_some());
+        assert!(store
+            .read_version(&id("m1"), &id("v2"), &[scope()])
+            .unwrap()
+            .is_some());
     }
 
     #[test]
@@ -3134,23 +3951,22 @@ mod tests {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         store.create_memory(memory(), &[scope()]).unwrap();
 
-        store.commit_version(
-            CommitRequest {
-                memory_id: id("m1"),
-                expected_current_version: None,
-                new_version: version("v1", 1, None),
-                idempotency_key: "f8-op1".into(),
-                request_digest: "f8-d1".into(),
-            },
-            &[scope()],
-        ).unwrap();
+        store
+            .commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v1", 1, None),
+                    idempotency_key: "f8-op1".into(),
+                    request_digest: "f8-d1".into(),
+                },
+                &[scope()],
+            )
+            .unwrap();
 
-        store.forget_version(
-            &id("m1"),
-            &id("v1"),
-            "reason-f8",
-            &[scope()],
-        ).unwrap();
+        store
+            .forget_version(&id("m1"), &id("v1"), "reason-f8", &[scope()])
+            .unwrap();
 
         let result = store.commit_version(
             CommitRequest {
@@ -3171,13 +3987,18 @@ mod tests {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         store.create_memory(memory(), &[scope()]).unwrap();
 
-        store.forget_memory(&id("m1"), "reason-f9", &[scope()]).unwrap();
+        store
+            .forget_memory(&id("m1"), "reason-f9", &[scope()])
+            .unwrap();
 
-        let memory_json: String = store.connection.query_row(
-            "SELECT memory_json FROM memories WHERE memory_id = 'm1'",
-            [],
-            |row| row.get(0),
-        ).unwrap();
+        let memory_json: String = store
+            .connection
+            .query_row(
+                "SELECT memory_json FROM memories WHERE memory_id = 'm1'",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
 
         let stored: Memory = SqliteMemoryStorage::decode(&memory_json).unwrap();
         assert_eq!(stored.lifecycle_state, MemoryLifecycle::Forgotten);
@@ -3191,31 +4012,44 @@ mod tests {
             let mut store = SqliteMemoryStorage::open(&path).unwrap();
             store.create_memory(memory(), &[scope()]).unwrap();
 
-            store.commit_version(
-                CommitRequest {
-                    memory_id: id("m1"),
-                    expected_current_version: None,
-                    new_version: version("v1", 1, None),
-                    idempotency_key: "f10-op".into(),
-                    request_digest: "f10-d".into(),
-                },
-                &[scope()],
-            ).unwrap();
+            store
+                .commit_version(
+                    CommitRequest {
+                        memory_id: id("m1"),
+                        expected_current_version: None,
+                        new_version: version("v1", 1, None),
+                        idempotency_key: "f10-op".into(),
+                        request_digest: "f10-d".into(),
+                    },
+                    &[scope()],
+                )
+                .unwrap();
 
-            store.forget_memory(&id("m1"), "reason-f10", &[scope()]).unwrap()
+            store
+                .forget_memory(&id("m1"), "reason-f10", &[scope()])
+                .unwrap()
         };
 
         let reopened = SqliteMemoryStorage::open(&path).unwrap();
 
-        assert!(reopened.read_current(&id("m1"), &[scope()]).unwrap().is_none());
-        assert!(reopened.read_version(&id("m1"), &id("v1"), &[scope()]).unwrap().is_none());
+        assert!(reopened
+            .read_current(&id("m1"), &[scope()])
+            .unwrap()
+            .is_none());
+        assert!(reopened
+            .read_version(&id("m1"), &id("v1"), &[scope()])
+            .unwrap()
+            .is_none());
 
-        let stored_sequence: i64 = reopened.connection.query_row(
-            "SELECT fence_sequence FROM canonical_forget_fences
+        let stored_sequence: i64 = reopened
+            .connection
+            .query_row(
+                "SELECT fence_sequence FROM canonical_forget_fences
              WHERE target_kind = 'Memory' AND target_id = 'm1'",
-            [],
-            |row| row.get(0),
-        ).unwrap();
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
 
         assert_eq!(stored_sequence, sequence);
 

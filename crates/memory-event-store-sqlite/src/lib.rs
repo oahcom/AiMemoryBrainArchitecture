@@ -7,7 +7,9 @@ pub mod payload;
 pub use payload::{PayloadEventStoreExt, StoredEvent};
 
 use memory_domain::{scopes_intersect, OpaqueId, ScopeRef};
-use memory_event_store::{AcceptedReceipt, EventEnvelope, EventStore, EventStoreError, ProcessingState};
+use memory_event_store::{
+    AcceptedReceipt, EventEnvelope, EventStore, EventStoreError, ProcessingState,
+};
 use rusqlite::{params, Connection, OptionalExtension, TransactionBehavior};
 use std::path::Path;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
@@ -23,8 +25,10 @@ fn enable_wal(connection: &Connection) -> rusqlite::Result<()> {
         match connection.execute_batch("PRAGMA journal_mode = WAL;") {
             Ok(()) => return Ok(()),
             Err(Error::SqliteFailure(error, _))
-                if matches!(error.code, ErrorCode::DatabaseBusy | ErrorCode::DatabaseLocked)
-                    && std::time::Instant::now() < deadline =>
+                if matches!(
+                    error.code,
+                    ErrorCode::DatabaseBusy | ErrorCode::DatabaseLocked
+                ) && std::time::Instant::now() < deadline =>
             {
                 std::thread::sleep(delay);
                 delay = (delay * 2).min(Duration::from_millis(100));
@@ -34,34 +38,43 @@ fn enable_wal(connection: &Connection) -> rusqlite::Result<()> {
     }
 }
 
-
 pub struct SqliteEventStore {
     connection: Connection,
 }
 
 impl SqliteEventStore {
     pub fn open(path: impl AsRef<Path>) -> Result<Self, EventStoreError> {
-        let connection = Connection::open(path).map_err(|_| EventStoreError::TransactionUnavailable)?;
-        connection.busy_timeout(Duration::from_secs(5)).map_err(|_| EventStoreError::TransactionUnavailable)?;
+        let connection =
+            Connection::open(path).map_err(|_| EventStoreError::TransactionUnavailable)?;
+        connection
+            .busy_timeout(Duration::from_secs(5))
+            .map_err(|_| EventStoreError::TransactionUnavailable)?;
         enable_wal(&connection).map_err(|_| EventStoreError::TransactionUnavailable)?;
-        connection.execute_batch(
-            "PRAGMA synchronous = FULL;
+        connection
+            .execute_batch(
+                "PRAGMA synchronous = FULL;
              PRAGMA foreign_keys = ON;
-             PRAGMA busy_timeout = 5000;"
-        ).map_err(|_| EventStoreError::TransactionUnavailable)?;
+             PRAGMA busy_timeout = 5000;",
+            )
+            .map_err(|_| EventStoreError::TransactionUnavailable)?;
         let store = Self { connection };
         store.initialize()?;
         Ok(store)
     }
 
     pub fn in_memory() -> Result<Self, EventStoreError> {
-        let connection = Connection::open_in_memory().map_err(|_| EventStoreError::TransactionUnavailable)?;
-        connection.busy_timeout(Duration::from_secs(5)).map_err(|_| EventStoreError::TransactionUnavailable)?;
-        connection.execute_batch(
-            "PRAGMA synchronous = FULL;
+        let connection =
+            Connection::open_in_memory().map_err(|_| EventStoreError::TransactionUnavailable)?;
+        connection
+            .busy_timeout(Duration::from_secs(5))
+            .map_err(|_| EventStoreError::TransactionUnavailable)?;
+        connection
+            .execute_batch(
+                "PRAGMA synchronous = FULL;
              PRAGMA foreign_keys = ON;
-             PRAGMA busy_timeout = 5000;"
-        ).map_err(|_| EventStoreError::TransactionUnavailable)?;
+             PRAGMA busy_timeout = 5000;",
+            )
+            .map_err(|_| EventStoreError::TransactionUnavailable)?;
         let store = Self { connection };
         store.initialize()?;
         Ok(store)
@@ -113,7 +126,10 @@ impl SqliteEventStore {
         Ok(())
     }
 
-    fn validate_envelope(envelope: &EventEnvelope, scope: &[ScopeRef]) -> Result<(), EventStoreError> {
+    fn validate_envelope(
+        envelope: &EventEnvelope,
+        scope: &[ScopeRef],
+    ) -> Result<(), EventStoreError> {
         Self::validate_scope(scope)?;
         if envelope.event_kind.is_empty()
             || envelope.source_type.is_empty()
@@ -143,17 +159,26 @@ impl SqliteEventStore {
     }
 
     fn row_id(event_id: &OpaqueId) -> Result<i64, EventStoreError> {
-        event_id.as_str().strip_prefix("event:")
+        event_id
+            .as_str()
+            .strip_prefix("event:")
             .and_then(|value| value.parse::<i64>().ok())
             .filter(|value| *value > 0)
             .ok_or(EventStoreError::NotFoundOrNotVisible)
     }
 
-    fn receipt(row_id: i64, accepted_at: String, payload_digest: String, state_json: &str) -> Result<AcceptedReceipt, EventStoreError> {
+    fn receipt(
+        row_id: i64,
+        accepted_at: String,
+        payload_digest: String,
+        state_json: &str,
+    ) -> Result<AcceptedReceipt, EventStoreError> {
         let processing_state = Self::decode(state_json)?;
         Ok(AcceptedReceipt {
-            event_id: OpaqueId::new(format!("event:{row_id}")).map_err(|_| EventStoreError::TransactionUnavailable)?,
-            receipt_id: OpaqueId::new(format!("receipt:{row_id}")).map_err(|_| EventStoreError::TransactionUnavailable)?,
+            event_id: OpaqueId::new(format!("event:{row_id}"))
+                .map_err(|_| EventStoreError::TransactionUnavailable)?,
+            receipt_id: OpaqueId::new(format!("receipt:{row_id}"))
+                .map_err(|_| EventStoreError::TransactionUnavailable)?,
             accepted_at,
             payload_digest,
             processing_state,
@@ -161,28 +186,46 @@ impl SqliteEventStore {
     }
 
     fn now() -> String {
-        SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_nanos().to_string()
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_nanos()
+            .to_string()
     }
 }
 
 impl EventStore for SqliteEventStore {
-    fn accept(&mut self, envelope: EventEnvelope, scope: &[ScopeRef]) -> Result<AcceptedReceipt, EventStoreError> {
+    fn accept(
+        &mut self,
+        envelope: EventEnvelope,
+        scope: &[ScopeRef],
+    ) -> Result<AcceptedReceipt, EventStoreError> {
         Self::validate_envelope(&envelope, scope)?;
-        let tx = self.connection.transaction_with_behavior(TransactionBehavior::Immediate)
+        let tx = self
+            .connection
+            .transaction_with_behavior(TransactionBehavior::Immediate)
             .map_err(|_| EventStoreError::TransactionUnavailable)?;
 
-        let existing = tx.query_row(
-            "SELECT event_row, payload_digest, scope_json, accepted_at, processing_state_json
+        let existing = tx
+            .query_row(
+                "SELECT event_row, payload_digest, scope_json, accepted_at, processing_state_json
              FROM accepted_events WHERE producer_actor_ref = ?1 AND idempotency_key = ?2",
-            params![envelope.producer_actor_ref.as_str(), envelope.idempotency_key],
-            |row| Ok((
-                row.get::<_, i64>(0)?,
-                row.get::<_, String>(1)?,
-                row.get::<_, String>(2)?,
-                row.get::<_, String>(3)?,
-                row.get::<_, String>(4)?,
-            )),
-        ).optional().map_err(|_| EventStoreError::TransactionUnavailable)?;
+                params![
+                    envelope.producer_actor_ref.as_str(),
+                    envelope.idempotency_key
+                ],
+                |row| {
+                    Ok((
+                        row.get::<_, i64>(0)?,
+                        row.get::<_, String>(1)?,
+                        row.get::<_, String>(2)?,
+                        row.get::<_, String>(3)?,
+                        row.get::<_, String>(4)?,
+                    ))
+                },
+            )
+            .optional()
+            .map_err(|_| EventStoreError::TransactionUnavailable)?;
 
         if let Some((row_id, digest, scope_json, accepted_at, state_json)) = existing {
             Self::scope_allowed(&scope_json, scope)?;
@@ -190,7 +233,8 @@ impl EventStore for SqliteEventStore {
                 return Err(EventStoreError::IdempotencyConflict);
             }
             let receipt = Self::receipt(row_id, accepted_at, digest, &state_json)?;
-            tx.commit().map_err(|_| EventStoreError::TransactionUnavailable)?;
+            tx.commit()
+                .map_err(|_| EventStoreError::TransactionUnavailable)?;
             return Ok(receipt);
         }
 
@@ -217,39 +261,61 @@ impl EventStore for SqliteEventStore {
             "INSERT INTO compile_outbox (event_row, intent_kind, created_at)
              VALUES (?1, 'compile', ?2)",
             params![row_id, accepted_at],
-        ).map_err(|_| EventStoreError::TransactionUnavailable)?;
+        )
+        .map_err(|_| EventStoreError::TransactionUnavailable)?;
         let receipt = Self::receipt(row_id, accepted_at, envelope.payload_digest, &state_json)?;
-        tx.commit().map_err(|_| EventStoreError::TransactionUnavailable)?;
+        tx.commit()
+            .map_err(|_| EventStoreError::TransactionUnavailable)?;
         Ok(receipt)
     }
 
-    fn status(&self, event_id: &OpaqueId, scope: &[ScopeRef]) -> Result<Option<AcceptedReceipt>, EventStoreError> {
+    fn status(
+        &self,
+        event_id: &OpaqueId,
+        scope: &[ScopeRef],
+    ) -> Result<Option<AcceptedReceipt>, EventStoreError> {
         Self::validate_scope(scope)?;
         let row_id = Self::row_id(event_id)?;
-        let row = self.connection.query_row(
-            "SELECT payload_digest, scope_json, accepted_at, processing_state_json
+        let row = self
+            .connection
+            .query_row(
+                "SELECT payload_digest, scope_json, accepted_at, processing_state_json
              FROM accepted_events WHERE event_row = ?1",
-            params![row_id],
-            |row| Ok((
-                row.get::<_, String>(0)?,
-                row.get::<_, String>(1)?,
-                row.get::<_, String>(2)?,
-                row.get::<_, String>(3)?,
-            )),
-        ).optional().map_err(|_| EventStoreError::TransactionUnavailable)?;
+                params![row_id],
+                |row| {
+                    Ok((
+                        row.get::<_, String>(0)?,
+                        row.get::<_, String>(1)?,
+                        row.get::<_, String>(2)?,
+                        row.get::<_, String>(3)?,
+                    ))
+                },
+            )
+            .optional()
+            .map_err(|_| EventStoreError::TransactionUnavailable)?;
         match row {
             None => Ok(None),
             Some((digest, scope_json, accepted_at, state_json)) => {
                 Self::scope_allowed(&scope_json, scope)?;
-                Ok(Some(Self::receipt(row_id, accepted_at, digest, &state_json)?))
+                Ok(Some(Self::receipt(
+                    row_id,
+                    accepted_at,
+                    digest,
+                    &state_json,
+                )?))
             }
         }
     }
 
     // Receipt replay is deliberately not queue execution: it returns the original
     // acceptance identity/time/state. No worker or processing queue is implemented here.
-    fn replay(&mut self, event_id: &OpaqueId, scope: &[ScopeRef]) -> Result<AcceptedReceipt, EventStoreError> {
-        self.status(event_id, scope)?.ok_or(EventStoreError::NotFoundOrNotVisible)
+    fn replay(
+        &mut self,
+        event_id: &OpaqueId,
+        scope: &[ScopeRef],
+    ) -> Result<AcceptedReceipt, EventStoreError> {
+        self.status(event_id, scope)?
+            .ok_or(EventStoreError::NotFoundOrNotVisible)
     }
 }
 
@@ -259,9 +325,15 @@ mod tests {
     use memory_domain::ScopeKind;
     use memory_event_store::EventClassification;
 
-    fn id(value: &str) -> OpaqueId { OpaqueId::new(value).unwrap() }
+    fn id(value: &str) -> OpaqueId {
+        OpaqueId::new(value).unwrap()
+    }
     fn scope() -> ScopeRef {
-        ScopeRef { scope_id: id("scope-1"), scope_kind: ScopeKind::User, namespace_key: "user:scope-1".into() }
+        ScopeRef {
+            scope_id: id("scope-1"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:scope-1".into(),
+        }
     }
     fn envelope(key: &str, digest: &str) -> EventEnvelope {
         EventEnvelope {
@@ -281,7 +353,10 @@ mod tests {
     }
 
     fn path() -> std::path::PathBuf {
-        let nonce = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
+        let nonce = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
         std::env::temp_dir().join(format!("event-store-{}-{nonce}.sqlite", std::process::id()))
     }
     fn cleanup(path: &Path) {
@@ -295,16 +370,20 @@ mod tests {
         let path = path();
         let first = {
             let mut store = SqliteEventStore::open(&path).unwrap();
-            store.accept(envelope("op-1", "digest-1"), &[scope()]).unwrap()
+            store
+                .accept(envelope("op-1", "digest-1"), &[scope()])
+                .unwrap()
         };
         let mut reopened = SqliteEventStore::open(&path).unwrap();
-        assert_eq!(reopened.status(&first.event_id, &[scope()]).unwrap(), Some(first.clone()));
+        assert_eq!(
+            reopened.status(&first.event_id, &[scope()]).unwrap(),
+            Some(first.clone())
+        );
         assert_eq!(reopened.replay(&first.event_id, &[scope()]).unwrap(), first);
-        let outbox_count: i64 = reopened.connection.query_row(
-            "SELECT COUNT(*) FROM compile_outbox",
-            [],
-            |row| row.get(0),
-        ).unwrap();
+        let outbox_count: i64 = reopened
+            .connection
+            .query_row("SELECT COUNT(*) FROM compile_outbox", [], |row| row.get(0))
+            .unwrap();
         assert_eq!(outbox_count, 1);
         cleanup(&path);
     }
@@ -314,8 +393,9 @@ mod tests {
         let path = path();
         {
             let legacy = Connection::open(&path).unwrap();
-            legacy.execute_batch(
-                "CREATE TABLE accepted_events (
+            legacy
+                .execute_batch(
+                    "CREATE TABLE accepted_events (
                     event_row INTEGER PRIMARY KEY AUTOINCREMENT,
                     producer_actor_ref TEXT NOT NULL,
                     idempotency_key TEXT NOT NULL,
@@ -330,16 +410,20 @@ mod tests {
                     (event_row, producer_actor_ref, idempotency_key, payload_digest,
                      scope_json, envelope_json, accepted_at, processing_state_json)
                 VALUES (1, 'actor-legacy', 'legacy-op', 'legacy-digest',
-                        '[]', '{}', '12345', '\"Pending\"');"
-            ).unwrap();
+                        '[]', '{}', '12345', '\"Pending\"');",
+                )
+                .unwrap();
         }
 
         let store = SqliteEventStore::open(&path).unwrap();
-        let outbox_count: i64 = store.connection.query_row(
-            "SELECT COUNT(*) FROM compile_outbox WHERE event_row = 1",
-            [],
-            |row| row.get(0),
-        ).unwrap();
+        let outbox_count: i64 = store
+            .connection
+            .query_row(
+                "SELECT COUNT(*) FROM compile_outbox WHERE event_row = 1",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
         assert_eq!(outbox_count, 1);
         cleanup(&path);
     }
@@ -347,22 +431,27 @@ mod tests {
     #[test]
     fn same_producer_key_and_digest_replay_original_receipt() {
         let mut store = SqliteEventStore::in_memory().unwrap();
-        let first = store.accept(envelope("op-1", "digest-1"), &[scope()]).unwrap();
-        let retry = store.accept(envelope("op-1", "digest-1"), &[scope()]).unwrap();
+        let first = store
+            .accept(envelope("op-1", "digest-1"), &[scope()])
+            .unwrap();
+        let retry = store
+            .accept(envelope("op-1", "digest-1"), &[scope()])
+            .unwrap();
         assert_eq!(retry, first);
         assert_eq!(retry.processing_state, ProcessingState::Pending);
-        let outbox_count: i64 = store.connection.query_row(
-            "SELECT COUNT(*) FROM compile_outbox",
-            [],
-            |row| row.get(0),
-        ).unwrap();
+        let outbox_count: i64 = store
+            .connection
+            .query_row("SELECT COUNT(*) FROM compile_outbox", [], |row| row.get(0))
+            .unwrap();
         assert_eq!(outbox_count, 1);
     }
 
     #[test]
     fn same_producer_key_with_different_digest_conflicts() {
         let mut store = SqliteEventStore::in_memory().unwrap();
-        store.accept(envelope("op-1", "digest-1"), &[scope()]).unwrap();
+        store
+            .accept(envelope("op-1", "digest-1"), &[scope()])
+            .unwrap();
         assert_eq!(
             store.accept(envelope("op-1", "different-digest"), &[scope()]),
             Err(EventStoreError::IdempotencyConflict)
@@ -372,19 +461,37 @@ mod tests {
     #[test]
     fn status_and_replay_enforce_scope() {
         let mut store = SqliteEventStore::in_memory().unwrap();
-        let receipt = store.accept(envelope("op-1", "digest-1"), &[scope()]).unwrap();
-        let other = ScopeRef { scope_id: id("scope-2"), scope_kind: ScopeKind::User, namespace_key: "user:scope-2".into() };
-        assert_eq!(store.status(&receipt.event_id, std::slice::from_ref(&other)), Err(EventStoreError::ScopeMismatch));
-        assert_eq!(store.replay(&receipt.event_id, &[other]), Err(EventStoreError::ScopeMismatch));
+        let receipt = store
+            .accept(envelope("op-1", "digest-1"), &[scope()])
+            .unwrap();
+        let other = ScopeRef {
+            scope_id: id("scope-2"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:scope-2".into(),
+        };
+        assert_eq!(
+            store.status(&receipt.event_id, std::slice::from_ref(&other)),
+            Err(EventStoreError::ScopeMismatch)
+        );
+        assert_eq!(
+            store.replay(&receipt.event_id, &[other]),
+            Err(EventStoreError::ScopeMismatch)
+        );
     }
 
     #[test]
     fn empty_scope_and_missing_payload_identity_are_rejected() {
         let mut store = SqliteEventStore::in_memory().unwrap();
-        assert_eq!(store.accept(envelope("op-1", "digest-1"), &[]), Err(EventStoreError::ScopeMismatch));
+        assert_eq!(
+            store.accept(envelope("op-1", "digest-1"), &[]),
+            Err(EventStoreError::ScopeMismatch)
+        );
         let mut invalid = envelope("op-1", "digest-1");
         invalid.payload_digest.clear();
-        assert_eq!(store.accept(invalid, &[scope()]), Err(EventStoreError::InvalidEnvelope));
+        assert_eq!(
+            store.accept(invalid, &[scope()]),
+            Err(EventStoreError::InvalidEnvelope)
+        );
     }
 }
 

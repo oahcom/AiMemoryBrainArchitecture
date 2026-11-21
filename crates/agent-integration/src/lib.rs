@@ -3,8 +3,8 @@
 //! This crate does not perform model inference, network transport, persistence,
 //! BMCP negotiation, or production telemetry.
 
-use std::collections::BTreeMap;
 use memory_context::{validate_snapshot, ContextError, ContextSnapshot};
+use std::collections::BTreeMap;
 
 /// Capability tier demonstrated by an adapter.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
@@ -77,9 +77,14 @@ pub enum AdapterError {
         received: u64,
     },
     /// A received version skips one or more required context versions.
-    VersionGap { current: u64, received: u64 },
+    VersionGap {
+        current: u64,
+        received: u64,
+    },
     /// A Brain-side snapshot failed canonical validation before delivery.
-    InvalidSnapshot { reason: String },
+    InvalidSnapshot {
+        reason: String,
+    },
     /// The current version cannot be incremented without wrapping.
     VersionExhausted,
     /// The requested delivery-state transition is not permitted by the contract.
@@ -150,22 +155,36 @@ pub struct DeliveryPayload {
 impl DeliveryPayload {
     /// Build an adapter payload only from a validated Brain context snapshot.
     pub fn from_snapshot(snapshot: &ContextSnapshot) -> Result<Self, AdapterError> {
-        validate_snapshot(snapshot).map_err(|error: ContextError| AdapterError::InvalidSnapshot {
-            reason: format!("{error:?}"),
+        validate_snapshot(snapshot).map_err(|error: ContextError| {
+            AdapterError::InvalidSnapshot {
+                reason: format!("{error:?}"),
+            }
         })?;
-        let content = snapshot.serialize().map_err(|error| AdapterError::InvalidSnapshot {
-            reason: format!("{error:?}"),
-        })?;
-        Ok(Self { version: snapshot.context_version, content })
+        let content = snapshot
+            .serialize()
+            .map_err(|error| AdapterError::InvalidSnapshot {
+                reason: format!("{error:?}"),
+            })?;
+        Ok(Self {
+            version: snapshot.context_version,
+            content,
+        })
     }
 
-    pub fn version(&self) -> u64 { self.version }
-    pub fn content(&self) -> &str { &self.content }
+    pub fn version(&self) -> u64 {
+        self.version
+    }
+    pub fn content(&self) -> &str {
+        &self.content
+    }
 
     /// Test-only fixture constructor; production code must use `from_snapshot`.
     #[cfg(test)]
     fn new_for_test(version: u64, content: impl Into<String>) -> Self {
-        Self { version, content: content.into() }
+        Self {
+            version,
+            content: content.into(),
+        }
     }
 }
 
@@ -314,7 +333,11 @@ impl DeliveryRecord {
 /// removes the applied snapshot and resets that sequence. Reconnect reports
 /// only the last successfully applied version.
 pub trait ContextDeliveryAdapter {
-    fn apply(&mut self, session_id: &str, snapshot: DeliveryPayload) -> Result<ApplyOutcome, AdapterError>;
+    fn apply(
+        &mut self,
+        session_id: &str,
+        snapshot: DeliveryPayload,
+    ) -> Result<ApplyOutcome, AdapterError>;
 
     fn clear(&mut self, session_id: &str) -> Result<(), AdapterError>;
 
@@ -350,7 +373,11 @@ pub struct InMemoryContextDeliveryAdapter {
 }
 
 impl ContextDeliveryAdapter for InMemoryContextDeliveryAdapter {
-    fn apply(&mut self, session_id: &str, snapshot: DeliveryPayload) -> Result<ApplyOutcome, AdapterError> {
+    fn apply(
+        &mut self,
+        session_id: &str,
+        snapshot: DeliveryPayload,
+    ) -> Result<ApplyOutcome, AdapterError> {
         let state = self.sessions.entry(session_id.to_owned()).or_default();
         if !state.connected {
             return Err(AdapterError::SessionDisconnected {
@@ -364,12 +391,20 @@ impl ContextDeliveryAdapter for InMemoryContextDeliveryAdapter {
             }
         }
         let current = state.applied.as_ref().map_or(0, |applied| applied.version);
-        let expected = current.checked_add(1).ok_or(AdapterError::VersionExhausted)?;
+        let expected = current
+            .checked_add(1)
+            .ok_or(AdapterError::VersionExhausted)?;
         if snapshot.version > expected {
-            return Err(AdapterError::VersionGap { current, received: snapshot.version });
+            return Err(AdapterError::VersionGap {
+                current,
+                received: snapshot.version,
+            });
         }
         if snapshot.version != expected {
-            return Err(AdapterError::VersionMismatch { expected, received: snapshot.version });
+            return Err(AdapterError::VersionMismatch {
+                expected,
+                received: snapshot.version,
+            });
         }
         state.applied = Some(snapshot);
         Ok(ApplyOutcome::Applied)
@@ -403,23 +438,52 @@ mod tests {
     use super::*;
 
     fn test_snapshot(version: u64, content: &str) -> ContextSnapshot {
-        use memory_context::{build_context, ContextBudget, ContextCandidate, ContextIdentity, ContextTier};
+        use memory_context::{
+            build_context, ContextBudget, ContextCandidate, ContextIdentity, ContextTier,
+        };
         use memory_domain::{MemoryLifecycle, OpaqueId, ScopeKind, ScopeRef};
         let id = |value: &str| OpaqueId::new(value).unwrap();
-        let scope = ScopeRef { scope_id: id("scope"), scope_kind: ScopeKind::User, namespace_key: "user:test".into() };
+        let scope = ScopeRef {
+            scope_id: id("scope"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:test".into(),
+        };
         let identity = ContextIdentity {
-            context_id: id("context"), scope_refs: vec![scope.clone()], agent_id: id("agent"),
-            agent_instance_id: id("instance"), session_id: id("session"), task_id: None,
-            environment_id: None, purpose: "adapter test".into(), schema_version: "1".into(),
+            context_id: id("context"),
+            scope_refs: vec![scope.clone()],
+            agent_id: id("agent"),
+            agent_instance_id: id("instance"),
+            session_id: id("session"),
+            task_id: None,
+            environment_id: None,
+            purpose: "adapter test".into(),
+            schema_version: "1".into(),
         };
         let candidate = ContextCandidate {
-            entry_id: id("entry"), memory_id: id("memory"), memory_version_id: id("memory-version"),
-            memory_lifecycle: MemoryLifecycle::Active, scope_refs: vec![scope], tier: ContextTier::P0,
-            priority: 0, activation_reason: "test fixture".into(), rendered_content: content.into(),
-            source_refs: vec![id("source")], evidence_refs: vec![], epistemic_qualifiers: vec![],
+            entry_id: id("entry"),
+            memory_id: id("memory"),
+            memory_version_id: id("memory-version"),
+            memory_lifecycle: MemoryLifecycle::Active,
+            scope_refs: vec![scope],
+            tier: ContextTier::P0,
+            priority: 0,
+            activation_reason: "test fixture".into(),
+            rendered_content: content.into(),
+            source_refs: vec![id("source")],
+            evidence_refs: vec![],
+            epistemic_qualifiers: vec![],
             content_hash: "test-hash".into(),
         };
-        build_context(identity, version, ContextBudget { max_entries: 8, max_rendered_bytes: 4096 }, vec![candidate]).unwrap()
+        build_context(
+            identity,
+            version,
+            ContextBudget {
+                max_entries: 8,
+                max_rendered_bytes: 4096,
+            },
+            vec![candidate],
+        )
+        .unwrap()
     }
 
     #[test]
@@ -430,40 +494,67 @@ mod tests {
         assert_eq!(payload.content(), snapshot.serialize().unwrap());
         let mut invalid = snapshot;
         invalid.rendered_bytes += 1;
-        assert!(matches!(DeliveryPayload::from_snapshot(&invalid), Err(AdapterError::InvalidSnapshot { .. })));
+        assert!(matches!(
+            DeliveryPayload::from_snapshot(&invalid),
+            Err(AdapterError::InvalidSnapshot { .. })
+        ));
     }
 
     #[test]
     fn reapplying_identical_snapshot_returns_already_applied_without_mutation() {
         let mut adapter = InMemoryContextDeliveryAdapter::default();
         let payload = DeliveryPayload::from_snapshot(&test_snapshot(1, "same")).unwrap();
-        assert_eq!(adapter.apply("session-a", payload.clone()), Ok(ApplyOutcome::Applied));
+        assert_eq!(
+            adapter.apply("session-a", payload.clone()),
+            Ok(ApplyOutcome::Applied)
+        );
         let before = adapter.applied_snapshot("session-a").unwrap().clone();
-        assert_eq!(adapter.apply("session-a", payload), Ok(ApplyOutcome::AlreadyApplied));
+        assert_eq!(
+            adapter.apply("session-a", payload),
+            Ok(ApplyOutcome::AlreadyApplied)
+        );
         assert_eq!(adapter.applied_snapshot("session-a"), Some(&before));
-        assert_eq!(adapter.apply("session-a", DeliveryPayload::new_for_test(1, "different")),
-            Err(AdapterError::VersionMismatch { expected: 2, received: 1 }));
+        assert_eq!(
+            adapter.apply("session-a", DeliveryPayload::new_for_test(1, "different")),
+            Err(AdapterError::VersionMismatch {
+                expected: 2,
+                received: 1
+            })
+        );
     }
 
     #[test]
     fn skipped_context_version_returns_version_gap_without_mutation() {
         let mut adapter = InMemoryContextDeliveryAdapter::default();
-        adapter.apply("session-a", DeliveryPayload::new_for_test(1, "first")).unwrap();
+        adapter
+            .apply("session-a", DeliveryPayload::new_for_test(1, "first"))
+            .unwrap();
         let before = adapter.applied_snapshot("session-a").unwrap().clone();
-        assert_eq!(adapter.apply("session-a", DeliveryPayload::new_for_test(3, "third")),
-            Err(AdapterError::VersionGap { current: 1, received: 3 }));
+        assert_eq!(
+            adapter.apply("session-a", DeliveryPayload::new_for_test(3, "third")),
+            Err(AdapterError::VersionGap {
+                current: 1,
+                received: 3
+            })
+        );
         assert_eq!(adapter.applied_snapshot("session-a"), Some(&before));
     }
 
     #[test]
     fn disconnect_preserves_last_applied_snapshot_but_rejects_new_apply() {
         let mut adapter = InMemoryContextDeliveryAdapter::default();
-        adapter.apply("session-a", DeliveryPayload::new_for_test(1, "committed")).unwrap();
+        adapter
+            .apply("session-a", DeliveryPayload::new_for_test(1, "committed"))
+            .unwrap();
         let before = adapter.applied_snapshot("session-a").unwrap().clone();
         adapter.disconnect("session-a").unwrap();
         assert_eq!(adapter.applied_snapshot("session-a"), Some(&before));
-        assert_eq!(adapter.apply("session-a", DeliveryPayload::new_for_test(2, "blocked")),
-            Err(AdapterError::SessionDisconnected { session_id: "session-a".into() }));
+        assert_eq!(
+            adapter.apply("session-a", DeliveryPayload::new_for_test(2, "blocked")),
+            Err(AdapterError::SessionDisconnected {
+                session_id: "session-a".into()
+            })
+        );
         assert_eq!(adapter.applied_snapshot("session-a"), Some(&before));
     }
 
@@ -549,7 +640,10 @@ mod tests {
         );
         assert_eq!(
             adapter.apply("session-a", DeliveryPayload::new_for_test(3, "skipped")),
-            Err(AdapterError::VersionGap { current: 1, received: 3 })
+            Err(AdapterError::VersionGap {
+                current: 1,
+                received: 3
+            })
         );
         assert_eq!(adapter.applied_snapshot("session-a").unwrap().version, 1);
         assert_eq!(
@@ -588,7 +682,10 @@ mod tests {
         adapter.disconnect("session-a").unwrap();
 
         assert_eq!(
-            adapter.apply("session-a", DeliveryPayload::new_for_test(2, "not-delivered")),
+            adapter.apply(
+                "session-a",
+                DeliveryPayload::new_for_test(2, "not-delivered")
+            ),
             Err(AdapterError::SessionDisconnected {
                 session_id: "session-a".into()
             })

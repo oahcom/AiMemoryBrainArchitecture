@@ -18,8 +18,14 @@ use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 fn temp(name: &str) -> PathBuf {
-    let n = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
-    std::env::temp_dir().join(format!("forget-fence-real-{name}-{}-{n}.sqlite", std::process::id()))
+    let n = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_nanos();
+    std::env::temp_dir().join(format!(
+        "forget-fence-real-{name}-{}-{n}.sqlite",
+        std::process::id()
+    ))
 }
 
 fn cleanup(path: &Path) {
@@ -33,7 +39,11 @@ fn id(value: &str) -> OpaqueId {
 }
 
 fn scope(namespace: &str) -> ScopeRef {
-    ScopeRef { scope_id: id(namespace), scope_kind: ScopeKind::User, namespace_key: namespace.into() }
+    ScopeRef {
+        scope_id: id(namespace),
+        scope_kind: ScopeKind::User,
+        namespace_key: namespace.into(),
+    }
 }
 
 fn digest(bytes: &[u8]) -> String {
@@ -77,7 +87,9 @@ fn schema_of(path: &Path) -> Vec<(String, String)> {
 
 fn namespaces(path: &Path) -> Vec<String> {
     let db = Connection::open(path).unwrap();
-    let mut stmt = db.prepare("SELECT scope_json FROM accepted_events ORDER BY event_row").unwrap();
+    let mut stmt = db
+        .prepare("SELECT scope_json FROM accepted_events ORDER BY event_row")
+        .unwrap();
     let rows = stmt
         .query_map([], |r| r.get::<_, String>(0))
         .unwrap()
@@ -92,7 +104,10 @@ fn namespaces(path: &Path) -> Vec<String> {
 }
 
 fn rows(path: &Path, table: &str) -> i64 {
-    Connection::open(path).unwrap().query_row(&format!("SELECT COUNT(*) FROM {table}"), [], |r| r.get(0)).unwrap()
+    Connection::open(path)
+        .unwrap()
+        .query_row(&format!("SELECT COUNT(*) FROM {table}"), [], |r| r.get(0))
+        .unwrap()
 }
 
 #[test]
@@ -104,38 +119,105 @@ fn fence_restore_purges_one_scope_from_a_store_built_database() {
     // 1. A real SqliteEventStore creates the production schema; no hand-built DDL.
     {
         let mut store = SqliteEventStore::open(&live).unwrap();
-        store.accept_with_payload(envelope("actor-alice", "alice-1", "user:alice", b"alice-1"), b"alice-1", &[scope("user:alice")]).unwrap();
-        store.accept_with_payload(envelope("actor-alice", "alice-2", "user:alice", b"alice-2"), b"alice-2", &[scope("user:alice")]).unwrap();
-        store.accept_with_payload(envelope("actor-bob", "bob-1", "user:bob", b"bob-1"), b"bob-1", &[scope("user:bob")]).unwrap();
-        store.accept_with_payload(envelope("actor-bob", "bob-2", "user:bob", b"bob-2"), b"bob-2", &[scope("user:bob")]).unwrap();
+        store
+            .accept_with_payload(
+                envelope("actor-alice", "alice-1", "user:alice", b"alice-1"),
+                b"alice-1",
+                &[scope("user:alice")],
+            )
+            .unwrap();
+        store
+            .accept_with_payload(
+                envelope("actor-alice", "alice-2", "user:alice", b"alice-2"),
+                b"alice-2",
+                &[scope("user:alice")],
+            )
+            .unwrap();
+        store
+            .accept_with_payload(
+                envelope("actor-bob", "bob-1", "user:bob", b"bob-1"),
+                b"bob-1",
+                &[scope("user:bob")],
+            )
+            .unwrap();
+        store
+            .accept_with_payload(
+                envelope("actor-bob", "bob-2", "user:bob", b"bob-2"),
+                b"bob-2",
+                &[scope("user:bob")],
+            )
+            .unwrap();
     } // drop closes the connection, checkpointing WAL into the main file.
 
-    assert_eq!((rows(&live, "accepted_events"), rows(&live, "event_payloads"), rows(&live, "compile_outbox")), (4, 4, 4));
+    assert_eq!(
+        (
+            rows(&live, "accepted_events"),
+            rows(&live, "event_payloads"),
+            rows(&live, "compile_outbox")
+        ),
+        (4, 4, 4)
+    );
     let schema_before = schema_of(&live);
-    assert_eq!(schema_before.len(), 3, "production schema must expose all three tables");
+    assert_eq!(
+        schema_before.len(),
+        3,
+        "production schema must expose all three tables"
+    );
 
     // 2. Snapshot the real database file.
     fs::copy(&live, &backup).unwrap();
 
     // 3. Fence one namespace only, then restore the snapshot through the fence.
     let fence = ForgetFence::open(&fence_path).unwrap();
-    assert_eq!(fence.record_forget("user:alice", "sha256:forget-alice").unwrap(), 1);
-    assert_eq!(fence.restore_backup(&backup, &live).unwrap(), 2, "both alice rows must be purged");
+    assert_eq!(
+        fence
+            .record_forget("user:alice", "sha256:forget-alice")
+            .unwrap(),
+        1
+    );
+    assert_eq!(
+        fence.restore_backup(&backup, &live).unwrap(),
+        2,
+        "both alice rows must be purged"
+    );
 
     // 4. The adapter can still open the restored file: schema survived the purge.
     let mut reopened = SqliteEventStore::open(&live).unwrap();
 
     // 5. Fence semantics on the real schema.
-    assert_eq!(namespaces(&live), vec!["user:bob".to_string(), "user:bob".to_string()]);
-    assert_eq!((rows(&live, "accepted_events"), rows(&live, "event_payloads"), rows(&live, "compile_outbox")), (2, 2, 2));
-    let check: String = Connection::open(&live).unwrap().query_row("PRAGMA integrity_check", [], |r| r.get(0)).unwrap();
+    assert_eq!(
+        namespaces(&live),
+        vec!["user:bob".to_string(), "user:bob".to_string()]
+    );
+    assert_eq!(
+        (
+            rows(&live, "accepted_events"),
+            rows(&live, "event_payloads"),
+            rows(&live, "compile_outbox")
+        ),
+        (2, 2, 2)
+    );
+    let check: String = Connection::open(&live)
+        .unwrap()
+        .query_row("PRAGMA integrity_check", [], |r| r.get(0))
+        .unwrap();
     assert_eq!(check, "ok");
 
     // 6. No schema drift: the fence must not have reshaped the tables it edited.
-    assert_eq!(schema_of(&live), schema_before, "fence restore changed the production schema");
+    assert_eq!(
+        schema_of(&live),
+        schema_before,
+        "fence restore changed the production schema"
+    );
 
     // 7. The restored database is still writable through the real adapter.
-    reopened.accept_with_payload(envelope("actor-carol", "carol-1", "user:carol", b"carol-1"), b"carol-1", &[scope("user:carol")]).unwrap();
+    reopened
+        .accept_with_payload(
+            envelope("actor-carol", "carol-1", "user:carol", b"carol-1"),
+            b"carol-1",
+            &[scope("user:carol")],
+        )
+        .unwrap();
     assert_eq!(rows(&live, "compile_outbox"), 3);
 
     drop(reopened);
@@ -161,17 +243,34 @@ fn live_wal_copy_fails_closed_until_checkpointed() {
     let fence_path = temp("wal-fence");
 
     let mut store = SqliteEventStore::open(&live).unwrap();
-    store.accept_with_payload(envelope("actor-alice", "alice-1", "user:alice", b"alice-1"), b"alice-1", &[scope("user:alice")]).unwrap();
-    store.accept_with_payload(envelope("actor-bob", "bob-1", "user:bob", b"bob-1"), b"bob-1", &[scope("user:bob")]).unwrap();
+    store
+        .accept_with_payload(
+            envelope("actor-alice", "alice-1", "user:alice", b"alice-1"),
+            b"alice-1",
+            &[scope("user:alice")],
+        )
+        .unwrap();
+    store
+        .accept_with_payload(
+            envelope("actor-bob", "bob-1", "user:bob", b"bob-1"),
+            b"bob-1",
+            &[scope("user:bob")],
+        )
+        .unwrap();
     // The store is deliberately NOT dropped: committed rows are still in -wal.
     let wal_sidecar = PathBuf::from(format!("{}-wal", live.display()));
-    assert!(wal_sidecar.is_file(), "expected a -wal sidecar while the store is open");
+    assert!(
+        wal_sidecar.is_file(),
+        "expected a -wal sidecar while the store is open"
+    );
 
     // Copy only the main database file, exactly as restore_backup's staging step would.
     fs::copy(&live, &backup).unwrap();
 
     let fence = ForgetFence::open(&fence_path).unwrap();
-    fence.record_forget("user:alice", "sha256:forget-alice").unwrap();
+    fence
+        .record_forget("user:alice", "sha256:forget-alice")
+        .unwrap();
 
     // Fail closed on the un-checkpointed copy, with the typed schema error.
     let error = fence.restore_backup(&backup, &live).unwrap_err();
@@ -180,12 +279,21 @@ fn live_wal_copy_fails_closed_until_checkpointed() {
         "expected MissingSchema(accepted_events), got {error:?}"
     );
     // A refused activation must leave the live database untouched.
-    assert_eq!(rows(&live, "accepted_events"), 2, "failed restore must not modify live data");
+    assert_eq!(
+        rows(&live, "accepted_events"),
+        2,
+        "failed restore must not modify live data"
+    );
 
     // Checkpointing first makes the single-file copy a complete database.
-    let busy: i64 = Connection::open(&live).unwrap()
-        .query_row("PRAGMA wal_checkpoint(TRUNCATE)", [], |r| r.get(0)).unwrap();
-    assert_eq!(busy, 0, "checkpoint was blocked; the copy would still be incomplete");
+    let busy: i64 = Connection::open(&live)
+        .unwrap()
+        .query_row("PRAGMA wal_checkpoint(TRUNCATE)", [], |r| r.get(0))
+        .unwrap();
+    assert_eq!(
+        busy, 0,
+        "checkpoint was blocked; the copy would still be incomplete"
+    );
     fs::copy(&live, &checkpointed).unwrap();
 
     assert_eq!(fence.restore_backup(&checkpointed, &live).unwrap(), 1);
