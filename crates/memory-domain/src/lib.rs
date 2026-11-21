@@ -3,6 +3,9 @@
 
 use std::collections::BTreeMap;
 
+mod claim_identity;
+pub use claim_identity::*;
+
 #[derive(
     serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd,
 )]
@@ -690,6 +693,24 @@ impl ClaimRevision {
     }
     pub fn predicate(&self) -> &str {
         &self.predicate
+    }
+    pub fn subject(&self) -> &str {
+        &self.subject
+    }
+    pub fn object(&self) -> &str {
+        &self.object
+    }
+    pub fn polarity(&self) -> &str {
+        &self.polarity
+    }
+    pub fn qualifiers(&self) -> &[String] {
+        &self.qualifiers
+    }
+    pub fn epistemic_status(&self) -> &EpistemicStatus {
+        &self.epistemic_status
+    }
+    pub fn valid_time(&self) -> &TimeValue {
+        &self.valid_time
     }
     pub fn scope_refs(&self) -> &[ScopeRef] {
         &self.scope_refs
