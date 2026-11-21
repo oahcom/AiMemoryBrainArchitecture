@@ -935,3 +935,125 @@ Two statements in the round-three section above are wrong and are superseded her
 
 Both errors are the same error: I checked a convenient source (`main`) for a claim about a
 branch. The corrected comment is on #433 at `7061701355`.
+
+## Round five: the three PRs that were open at round four, measured
+
+#471, #482, #483. All three pass the bilingual gate. Two of the three carry a structural
+problem that the gate cannot see.
+
+### Gate results, all measured against each tree's own baseline
+
+| PR | GAP | gate | tests |
+|---|---|---|---|
+| #471 | compiler admission | PASS (85/85) | 30 passed default; SQLite test `#[ignore]`d |
+| #482 | Phase 2 domain | PASS (80/80) | 21 passed + 3 compile-fail doctests |
+| #483 | context ChangeSet | PASS (77/77) | not run (documentation + 1032-line lib.rs) |
+
+### #471: the SQLite integration test never executes
+
+The feature change is correct and does what the title says:
+
+```toml
+[features]
+default = []
+sqlite = ["dep:rusqlite"]
+```
+
+```
+$ cargo test -p memory-compiler --offline
+test result: ok. 30 passed; 0 failed; 0 ignored
+```
+
+No C toolchain, no SQLite. But the new 143-line `tests/sqlite_admission.rs` is gated twice:
+
+```
+$ cargo test -p memory-compiler --test sqlite_admission
+error: target `sqlite_admission` requires the features: `sqlite`
+
+$ cargo test -p memory-compiler --features sqlite --test sqlite_admission
+test sqlite_fence_and_publication_gate_compete_on_one_protocol_sequence ... ignored
+test result: ok. 0 passed; 0 failed; 1 ignored
+```
+
+`#[ignore]` survives `--all-features`, so this test does not run in a full-suite CI either.
+It is well-written and dead by default. Making `rusqlite` optional is the right call — the
+Windows host here cannot build it at all — but the "and here is where it actually runs" line
+is missing, so a future green CI will not report that the real SQLite path is untested.
+
+### #482 collides with `main`, and its version is the better one
+
+`main` (`b9ddd241`, includes merged #466):
+
+```rust
+pub struct ClaimRevision { revision_ref, claim_ref, subject_ref, predicate,
+    object_value, polarity, asserted_at, scope_refs, qualifiers, evidence_refs }
+```
+
+#482 (`4984042a`):
+
+```rust
+pub struct ClaimRevision { revision_ref, claim_ref, parent_revision_ref, subject,
+    predicate, object, polarity, qualifiers, epistemic_status, valid_time,
+    evidence_refs, provenance_refs, asserted_at, revision_reason }
+```
+
+Different field names, private visibility, different ref types, plus `epistemic_status`,
+`valid_time` and `parent_revision_ref` that `main` lacks. Test sets confirm the fork point:
+of `main`'s 25 tests, **12 are absent** — exactly the 12 #466 added.
+
+So this branch forked before #466 merged and re-implemented the same types from a different
+reading. Merging it replaces #466's types rather than extending them, and resolving the
+conflict in this branch's favour silently reverts 12 tests that are now on `main`.
+
+**And this branch's version fixes the exact defect I reported against #466.** I said
+`ClaimRevision` cannot express a `NEW_REVISION` because it lacks `epistemic_status` while its
+doc comment says CI-09–CI-13 classify as one. This version has `epistemic_status`, plus
+`valid_time` and `parent_revision_ref`.
+
+That is the shape of the problem in one PR: #466 merged a structurally incomplete type, and
+the version that completes it arrives incompatible with what just landed. Three defensible
+resolutions (rebase and reconcile; merge as explicit replacement; split the type change into
+its own PR) and no way to pick one from measurement. Recorded, not decided.
+
+### #483 rewrites the document that carries the defect, and keeps the defect
+
+This PR modifies `06-memory-context/context-implementation-coverage.md` (`+20 -19`, 25354 →
+29505 bytes), updates the base SHA to `b9ddd241`, and adds a ChangeSet round.
+
+Line 104 is untouched:
+
+```
+| Historical Applied versus current-use after Forget/revocation | ...
+  PARTIAL — current-use guard `current_use_allowed`;
+  test `test_current_use_requires_every_currentness_gate`; ... | D |
+```
+
+Neither artifact exists in this tree. The reference model has 8 test functions; the document
+cites 9 test identifiers, and the ninth is this one.
+
+So the row has now propagated: written once, committed to `main` by direct commit
+(`5cc54a54..351f4a4c`), carried through #433 where the code **does** exist, and carried again
+here where it does not. The fix is either one row edit or merging #433 first.
+
+### What round five adds to the pattern
+
+Round four showed that a `FAIL` review, a wrong test count and an absent authority file do
+not affect whether a PR merges. Round five shows the next layer: a document can be rewritten
+by a later PR without the known-wrong row being fixed, because nothing checks a document
+against the tree it describes.
+
+The gate checks whether `X.md` has a partner. It does not check whether the claims inside
+`X.md` are true. Every defect in this document — the miscount, the absent guard, the absent
+test, the baseline row in `protocol-index.md` — is invisible to it, and all four survived at
+least one merge or rewrite.
+
+That is not an argument for a semantic gate; that is out of reach. It is an argument that
+"the bilingual gate passed" is currently being read as "the document is sound", and those are
+different claims.
+
+### Standing caveat
+
+No CI job in this repository has started since billing broke. Every number above is local
+execution in WSL2 (`cargo 1.95.0`, `CARGO_BUILD_JOBS=1`, `--offline`) or local inspection.
+Builds must be run from a native filesystem — compiling on the `/mnt/c` mount fails with
+`Cannot allocate memory (os error 12)`.
