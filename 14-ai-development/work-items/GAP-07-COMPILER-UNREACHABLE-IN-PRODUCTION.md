@@ -138,13 +138,27 @@ before this can be done honestly: `MemoryStore` must surface prepare/publish,
 and the publication record must be durable across process restart rather than
 held in the compiler's in-memory admission store.
 
-### (b) Wire `brain-cli` to fail closed instead of skipping
+### (b) Make the skip unmissable, and mark the output
 
-Change the CLI from "skip the compiler stage" to "refuse to produce output
-unless a publication authority is configured". This does not add capability but
-removes the false impression that `brain compile` compiles. It is small and
-honest, and it makes the gap visible to anyone running the binary rather than
-only to anyone reading the source.
+An earlier draft of this item recommended "refuse to produce output". That is
+too blunt: it would disable the one working entrypoint and remove the only
+executable demonstration that ingestion → storage → context assembly works.
+The real defect is not that the CLI runs; it is that a plausible-looking output
+can be produced without anyone learning that the most important stage was
+skipped.
+
+Minimal honest version:
+
+1. Print the skip notice unconditionally, not only under `--verbose`. It is
+   currently inside an `if verbose` block, so the default run says nothing.
+2. Record the skip in the produced artifact, so the fact travels with the file
+   instead of being lost when stderr is not read. This must not change the
+   `ContextSnapshot` serialization contract; a sibling sidecar or an explicit
+   top-level marker outside the snapshot is enough.
+3. Leave the exit status alone, so existing callers do not break.
+
+This keeps the pipeline runnable while making "this was not compiled"
+impossible to mistake for "this was compiled".
 
 ### (c) Leave as is and stop calling the path end-to-end
 
@@ -154,11 +168,13 @@ stderr and is easy to miss.
 
 ## Recommendation
 
-Do **(b) now, (a) when a publication store is specified.** The skip notice is
-currently the only signal that the most important stage did not run, and it is
-suppressed without `--verbose`. A CLI that silently returns a context snapshot
-after skipping compilation is worse than a CLI that refuses, because the output
-looks correct.
+Do **(b) now, (a) when a publication store is specified.** (b) as scoped above
+is a few lines and does not remove capability. A CLI that returns a context
+snapshot after skipping compilation, while staying silent unless `--verbose` is
+passed, is worse than one that refuses, because the output looks correct; but
+one that refuses outright also destroys the only working demonstration. Making
+the skip unconditional and attaching it to the output gets the honesty without
+the loss.
 
 Direction (a) must not be improvised. Implementing a `PublicationAuthority`
 against an ad-hoc store would manufacture the same class of unreachable
@@ -167,8 +183,9 @@ abstraction this item is about.
 ## Closure criteria
 
 1. Either a production `PublicationAuthority` exists and `compile()` is called
-   from at least one non-test code path, or `brain-cli` refuses to emit output
-   when the compiler stage cannot run.
+   from at least one non-test code path, or every successful `brain compile`
+   run reports that the compiler stage was skipped, both on stderr without
+   requiring `--verbose` and inside or beside the produced artifact.
 2. A test proves the chosen behavior through the binary or a non-test entry
    point — not through `#[cfg(test)]` internals.
 3. `--verbose` is no longer the only place the skip is reported.
