@@ -87,7 +87,7 @@ The BMCP contract's ProducerWork Registration Ledger Namespace and ForgetFence C
 
 **Relationship to Phase 1:** Both types are new. They do not replace Claim or Evidence.
 
-**PENDING SEMANTIC DECISION — retraction of a pinned ClaimRevision (see `domain-model-overview.md` §3.16):** The current normative sources do not decide the disposition of a FactRevision when one of its exact pinned ClaimRevision values is later assigned `Retracted`. `epistemic-and-temporal-semantics.md` §§2 and 9 define append-only Claim status transitions and preservation of the historical assertion; `domain-model-overview.md` §3.15 and `OWNER-DECISION-FACT-CLAIM-001` §§2 and 5 require exact immutable ClaimRevision pins but do not specify propagation to Fact. No choice among continued attestation, invalidation, successor FactRevision, or suppression is made here. This remains **PENDING** and requires an explicit semantic ruling; implementations must not silently infer a disposition.
+**RESOLVED SEMANTIC DECISION — retraction of a pinned ClaimRevision (see `domain-model-overview.md` §3.16, `OWNER-DECISION-FACT-RETRACTION-001`):** The current normative sources do not decide the disposition of a FactRevision when one of its exact pinned ClaimRevision values is later assigned `Retracted`. `epistemic-and-temporal-semantics.md` §§2 and 9 define append-only Claim status transitions and preservation of the historical assertion; `domain-model-overview.md` §3.15 and `OWNER-DECISION-FACT-CLAIM-001` §§2 and 5 require exact immutable ClaimRevision pins but do not specify propagation to Fact. **Candidate 3 is selected**: the original FactRevision is retained unchanged and a successor FactRevision is appended with `outcome: FactOutcome::Revoked` and a non-empty `correction_or_revocation_reason`. This requires no new types, because `FactOutcome::Revoked`, `parent_revision_ref` and `correction_or_revocation_reason` already exist and `FactRevision::successor()` already enforces same-`FactRef` parentage. Candidate 1 is excluded by §8.1 item 3 (Fact visibility is already conjunctive over all disclosed dependencies); candidate 2 is excluded by this section's prohibition on a mutable `retracted` field and by the append-only revision invariant. Retraction is not Forget: a revoked FactRevision stays historically readable, whereas a forgotten Memory becomes unreadable. Propagation is not automatic. Still undefined: the trigger, the scope (one or all pinned ClaimRevisions), mixed-dependency treatment, and read-path behavior.
 
 **PENDING CROSS-OWNER DECISION:** I must define/approve Attestor principal identity, authorization decision semantics, and the security meaning of the authorization reference. D must confirm the canonical commit, revision, and Forget/dependency semantics for Fact/FactRevision. Until both decisions bind the same exact contract version, these fields are semantic placeholders only; no implementation may infer authorization or canonical acceptance.
 
@@ -184,7 +184,7 @@ Extend TimeValue/TemporalRef to preserve explicit precision, timezone, certainty
 
 **PENDING CROSS-OWNER DECISION:** D must decide whether canonical commit/transaction time is represented in the domain object or only in canonical storage metadata. F owns temporal query behavior; this specification does not define retrieval semantics.
 
-### 3.16 OPEN: Retraction propagation to pinned FactRevision
+### 3.16 RESOLVED: Retraction propagation to pinned FactRevision
 
 **Status: OPEN / PENDING — no semantic choice is authorized.**
 
@@ -292,7 +292,7 @@ Phase 2 implementation status at this branch:
 | Temporal precision/timezone/certainty expansion | NOT TYPED | Only Relation's Unknown-versus-AllTime valid-time distinction is typed/tested |
 | I authorization and Attestor semantics | PLACEHOLDER ONLY — KNOWN CONSTRUCTION WINDOW | `pending_i()` is public; `FactRevision::validate` cannot distinguish the placeholder from a real I-issued reference. `fact_with_placeholder_attestor_validates_today` deliberately records this behavior; closing it requires I's contract and non-forgeable validated refs |
 | D canonical commit semantics | PLACEHOLDER ONLY — KNOWN CONSTRUCTION WINDOW | `pending_d()` is public; `FactRevision::validate` cannot distinguish it from a real D-issued commit reference. Closing it requires D's contract and non-forgeable validated refs |
-| Fact disposition after pinned ClaimRevision retraction | PENDING | Open item in this specification §3.16 enumerates three candidates; no propagation logic or `retracted` field is implemented |
+| Fact disposition after pinned ClaimRevision retraction | RESOLVED | `OWNER-DECISION-FACT-RETRACTION-001` selects candidate 3: append a successor FactRevision with `FactOutcome::Revoked`. No `retracted` field is added and no existing FactRevision is mutated. Propagation trigger, scope, mixed-dependency treatment and read-path behavior remain undefined |
 
 The Entity, Relation and Evidence Phase 1 structs remain source-compatible; their Phase 2 semantics are represented by additive extension records. Claim remains unchanged; ClaimRevision is additive. Fact construction requires a complete initial FactRevision and its required I/D placeholders.
 

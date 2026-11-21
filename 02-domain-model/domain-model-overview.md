@@ -246,19 +246,40 @@ Attestation Method identity proves which declared procedure was invoked. It does
 This section defines semantic and governance contracts only. It does not approve physical Schema, DDL, public API, production keys, Trust Root or cryptographic profile.
 
 
-### 3.16 OPEN: Retraction propagation to pinned FactRevision
+### 3.16 RESOLVED: Retraction propagation to pinned FactRevision
 
-**Status: OPEN — no semantic ruling has been made.**
+**Status: RESOLVED by `OWNER-DECISION-FACT-RETRACTION-001` — candidate 3 (append a suppressing revision) is selected.**
+
+A FactRevision pins one or more exact ClaimRevisionRef values. When a pinned ClaimRevision is later assigned the epistemic status `Retracted`, the FactRevision is NOT mutated. The governed response is to **retain the original FactRevision unchanged and append a new successor FactRevision** whose `outcome` is `FactOutcome::Revoked` and whose `correction_or_revocation_reason` records why. The original remains historically addressable and auditable; the successor carries the current disposition.
 
 A FactRevision pins one or more exact ClaimRevisionRef values. The domain contract does not yet decide what happens when a pinned ClaimRevision is later assigned the epistemic status `Retracted`. This question is distinct from Forget: retraction changes the epistemic status/history of a ClaimRevision; Forget governs disclosure and dependency suppression.
 
-The following candidate semantics remain under consideration; none is selected:
+#### Why candidate 3, on evidence rather than preference
 
-1. **Continue visible:** the historical FactRevision remains visible and its attestation remains readable even though a pinned ClaimRevision is retracted. This preserves the historical attestation but risks presenting a Fact without signaling that a dependency has been retracted.
-2. **Mark invalid:** the FactRevision remains historically addressable but is marked ineligible/invalid for current use. This avoids silently treating the attestation as current, but requires a defined propagation rule, status vocabulary and read-path behavior.
-3. **Append a suppression revision:** retain the original FactRevision unchanged and append a new FactRevision recording suppression/revocation. This preserves append-only history, but requires a defined outcome, rationale, authorization and canonical-commit contract.
+Three candidate semantics were considered. Only one survives the existing normative sources:
 
-**No choice is made by this specification.** Implementations MUST NOT select, infer or introduce retraction-propagation behavior. In particular, do not add a `retracted` field to FactRevision or mutate an existing FactRevision to represent this unresolved question. A future decision must specify the trigger, scope (one or all pinned ClaimRevisions), treatment of mixed dependencies, read-path behavior and required authorization/commit evidence.
+1. **Continue visible — not a live option.** §8.1 item 3 already requires that a FactRevision "may remain visible only if every disclosed dependency is independently authorized and not suppressed by an applicable Forget decision". Fact visibility is therefore already conjunctive over all disclosed dependencies. Continuing to present a Fact whose pinned ClaimRevision is `Retracted`, with no signal at all, describes a state the specification already forbids rather than an open choice.
+
+2. **Mark invalid — forbidden by this section itself.** It requires a mutable `retracted` field on `FactRevision`. This section's own closing prohibition rules that out, and a mutable disposition field would also violate the append-only revision invariant in §3.15 and in `epistemic-and-temporal-semantics.md` §§2 and 9, under which historical revisions MUST NOT be overwritten.
+
+3. **Append a suppressing revision — selected.** It requires **zero new types**. `FactOutcome::Revoked`, `FactRevision::parent_revision_ref` and `FactRevision::correction_or_revocation_reason` already exist in the domain model, and `FactRevision::successor()` already enforces that the parent belongs to the same `FactRef`. The ruling therefore adds no vocabulary; it names a mechanism that already exists and was previously unreachable.
+
+#### Boundaries this decision preserves
+
+- **Retraction is not Forget.** A revoked FactRevision remains historically readable and its attestation remains auditable. A forgotten Memory becomes unreadable. These are different dispositions on different objects and MUST NOT be conflated.
+- **Propagation is not automatic.** Appending the successor requires an authorized call with a non-empty `correction_or_revocation_reason`. Nothing observes a `Retracted` status and propagates it by itself.
+- **The original is never rewritten.** The successor is appended; the prior FactRevision is preserved exactly as asserted.
+
+#### What this decision deliberately does not define
+
+The following remain open and MUST NOT be inferred by an implementation:
+
+- **Trigger** — which actor or process observes the retraction and decides to propagate, and under what authority.
+- **Scope** — whether one successor covers one pinned ClaimRevision or all of them.
+- **Mixed dependencies** — the disposition when some pinned ClaimRevisions are retracted and others are not.
+- **Read-path behavior** — how a revoked FactRevision is surfaced relative to its predecessor.
+
+An implementation MUST NOT introduce a `retracted` field on `FactRevision`, and MUST NOT mutate an existing `FactRevision` to represent a retraction. A future decision must specify the four items above together with the required authorization and canonical-commit evidence.
 
 ## 4. Orthogonal state dimensions
 

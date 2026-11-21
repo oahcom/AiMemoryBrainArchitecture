@@ -87,7 +87,7 @@ BMCP 契约中的 ProducerWork Registration Ledger Namespace 和 ForgetFence Cur
 
 **与 Phase 1 的关系：** 两种类型均为新增，不替换 Claim 或 Evidence。
 
-**PENDING 语义决策——固定 ClaimRevision 被撤回后的处理（参见 `domain-model-overview.md` §3.16）：** 当前规范来源尚未决定：当 FactRevision 固定的某个精确 ClaimRevision 后续被标记为 `Retracted` 时，该 FactRevision 应如何处置。`epistemic-and-temporal-semantics.md` §2、§9 规定 Claim 状态变更采用追加式历史并保留历史断言；`domain-model-overview.md` §3.15 和 `OWNER-DECISION-FACT-CLAIM-001` §2、§5 要求 Fact 固定精确、不可变的 ClaimRevision，但没有规定该撤回状态如何影响 Fact。当前不选择继续有效、失效、追加 FactRevision 或抑制中的任何一种处理方式。本事项保持 **PENDING**，必须有明确语义裁定；实现不得静默推断处理结果。
+**已裁定语义决策——固定 ClaimRevision 被撤回后的处理（参见 `domain-model-overview.md` §3.16、`OWNER-DECISION-FACT-RETRACTION-001`）：** 当前规范来源尚未决定：当 FactRevision 固定的某个精确 ClaimRevision 后续被标记为 `Retracted` 时，该 FactRevision 应如何处置。`epistemic-and-temporal-semantics.md` §2、§9 规定 Claim 状态变更采用追加式历史并保留历史断言；`domain-model-overview.md` §3.15 和 `OWNER-DECISION-FACT-CLAIM-001` §2、§5 要求 Fact 固定精确、不可变的 ClaimRevision，但没有规定该撤回状态如何影响 Fact。**已选定候选方案 3**：原 FactRevision 保持不变，追加一条后继 FactRevision，其 `outcome` 为 `FactOutcome::Revoked`，并记录非空的 `correction_or_revocation_reason`。该方案**不需要新增任何类型**——`FactOutcome::Revoked`、`parent_revision_ref` 与 `correction_or_revocation_reason` 均已存在，且 `FactRevision::successor()` 已强制父级同属一个 `FactRef`。候选 1 被 §8.1 第 3 条排除：Fact 的可见性本就对所有已披露依赖取合取。候选 2 被本节自身「不得新增 `retracted` 字段」的禁令以及追加式修订不变式排除。撤回不等于 Forget：被撤回的 FactRevision 仍可历史读取，而被遗忘的 Memory 变为不可读。传播不是自动发生的。仍未定义：触发者、作用范围（一条还是全部固定的 ClaimRevision）、混合依赖的处理方式、以及读取路径行为。
 
 **PENDING CROSS-OWNER DECISION：** I 必须定义/批准 Attestor 主体身份、授权决定语义，以及授权引用的安全含义。D 必须确认 Fact/FactRevision 的规范提交、Revision 和 Forget/依赖语义。在两个决策绑定到同一精确契约版本之前，这些字段仅是语义占位引用；实现不得自行推断授权或规范接收结果。
 
@@ -184,7 +184,7 @@ MemorySource 是 MemoryVersion/派生资产与一个来源之间的类型化关�
 
 **PENDING CROSS-OWNER DECISION：** D 必须决定规范提交/事务时间属于领域对象，还是仅属于规范存储元数据。F 拥有时间查询行为；本规格不定义检索语义。
 
-### 3.16 OPEN：固定 ClaimRevision 撤回后向 FactRevision 的传播
+### 3.16 已裁定：固定 ClaimRevision 撤回后向 FactRevision 的传播
 
 **状态：OPEN / PENDING——尚未授权选择任何语义。**
 
@@ -292,7 +292,7 @@ ScopeRef 仍是领域适用范围/命名空间引用，不是授权 Grant。OPEN
 | 时间精度/时区/确定性扩展 | NOT TYPED | 仅类型化并测试了 Relation 的 Unknown 与 AllTime 有效时间区别 |
 | I 授权与 Attestor 语义 | PLACEHOLDER ONLY — 已知可构造窗口 | `pending_i()` 为公开方法；`FactRevision::validate` 无法区分占位值与真实 I 签发引用。`fact_with_placeholder_attestor_validates_today` 有意固定此行为；关闭窗口需要 I 的契约及不可伪造、可验证的引用 |
 | D 规范提交语义 | PLACEHOLDER ONLY — 已知可构造窗口 | `pending_d()` 为公开方法；`FactRevision::validate` 无法区分占位值与真实 D 提交引用。关闭窗口需要 D 的契约及不可伪造、可验证的引用 |
-| 固定 ClaimRevision 被撤回后的 Fact 处置 | PENDING | 开放项见本规格 §3.16，列出三个候选方案；未实现传播逻辑，也未增加 `retracted` 字段 |
+| 固定 ClaimRevision 被撤回后的 Fact 处置 | 已裁定 | `OWNER-DECISION-FACT-RETRACTION-001` 选定候选方案 3：追加一条 `FactOutcome::Revoked` 的后继 FactRevision。不新增 `retracted` 字段，不改写既有 FactRevision。传播触发者、范围、混合依赖处理与读取路径行为仍未定义 |
 
 Entity、Relation 和 Evidence 的 Phase 1 结构体保持源码兼容；Phase 2 语义通过新增扩展记录表达。Claim 保持不变，ClaimRevision 为新增类型。Fact 构造必须提供完整的初始 FactRevision 及其必需的 I/D 占位字段。
 
