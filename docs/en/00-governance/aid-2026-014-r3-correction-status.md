@@ -49,7 +49,7 @@ TEST EXECUTION DISPATCH GATE = UNLOCKED-WITH-CONDITIONS (REQ-04 STEP 5 DISPATCH 
 
 | Requirement | Application status | Independent review |
 |---|---|---|
-| R1 Claim identity | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
+| R1 Claim identity | APPLIED | PENDING (no independent review of the applied Blob; M19 recorded only "no regression" on the Phase-1 freeze carriers) |
 | R2 Attestor authorization | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
 | R3 Shared Fact Forget | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
 | R4 Fact/Claim synchronization | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
@@ -687,15 +687,17 @@ docs/zh-CN/04-memory-compiler/extraction-and-normalization.md  8dd0b5b29ecd37cea
 ```
 
 Note the third row. `02-domain-model/domain-model-overview.md` exists at repository root alongside
-`docs/en` and `docs/zh-CN`, and it still carries Blob `5b86fe23ab7c` — the pre-R1-correction value.
-The `docs/en` copy has moved to `1a1a10b24d68`. Whether the root-level copy is a legitimate third
-authoritative copy, a stale mirror, or dead weight is a question `§9.1` recorded but did not
-resolve: it noted the root-level freeze file has no row in `§8` at all and that the root-level
-`context-versioning.md` appears only as a "not applied" bullet. The same doubt now attaches to the
-root-level domain-model Overview.
+`docs/en` and `docs/zh-CN`. Its Blob is `5b86fe23ab7c`, which is the value `§9.1` records as the
+result of the R1 correction on that path, produced by `778d1bee`. The root copy is therefore not
+stale on Claim identity: it was corrected in the same round, and its pre-correction Blob was
+`46fbdcacbe8a`. What differs is that the root copy has not moved since, while `docs/en` advanced to
+`1a1a10b24d68` in a later round.
 
-This is stated as an open question, not as a finding. Resolving it requires an owner decision on
-which copies are authoritative, which is outside what an application round may decide on its own.
+Whether the root copy is a legitimate third authoritative copy, a mirror, or dead weight remains a
+question `§9.1` recorded but did not resolve: it noted the root-level freeze file has no row in
+`§8` at all and that the root-level `context-versioning.md` appears only as a "not applied" bullet.
+That is a governance question about which copies are authoritative, and an application round may
+not decide it alone.
 
 ### 9.9 Read-back of the predicate-equivalence round
 

@@ -49,7 +49,7 @@ TEST EXECUTION 派发门禁 = UNLOCKED-WITH-CONDITIONS（仅限 REQ-04 第⑤步
 
 | 要求 | 应用状态 | 独立复审 |
 |---|---|---|
-| R1 Claim 身份 | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
+| R1 Claim 身份 | APPLIED | PENDING（applied Blob 尚无独立复审；M19 仅记录 Phase-1 freeze 载体「未回归」） |
 | R2 Attestor 授权 | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
 | R3 共享 Fact Forget | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
 | R4 Fact/Claim 同步 | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
@@ -607,13 +607,14 @@ docs/zh-CN/04-memory-compiler/extraction-and-normalization.md  8dd0b5b29ecd37cea
 ```
 
 注意第三行。`02-domain-model/domain-model-overview.md` 与 `docs/en`、`docs/zh-CN` 并列存在于
-仓库根级，且其 Blob 仍为 `5b86fe23ab7c`——即 R1 修正前的值。`docs/en` 副本已推进到
-`1a1a10b24d68`。根级副本究竟是合法的第三份权威副本、过期镜像，还是冗余，是 `§9.1` 记录但
-未裁定的问题：该节已指出根级 freeze 文件在 `§8` 中根本没有行，根级 `context-versioning.md`
-仅以「本轮未应用」条目出现。同样的疑问现在也落在根级 domain-model Overview 上。
+仓库根级。其 Blob 为 `5b86fe23ab7c`，正是 `§9.1` 登记的该路径 R1 修正结果，由 `778d1bee`
+产生。因此根级副本在 Claim identity 上并未过期：它与本轮同时被修正，其修正前 Blob 为
+`46fbdcacbe8a`。差别只在于根级副本此后未再推进，而 `docs/en` 在后续轮次推进到
+`1a1a10b24d68`。
 
-此处作为开放问题陈述，不作为发现。裁定哪些副本具有权威性需要 Owner 决定，不属于应用轮次
-可自行决定的范围。
+根级副本究竟是合法的第三份权威副本、镜像，还是冗余，仍是 `§9.1` 记录但未裁定的问题：该节已
+指出根级 freeze 文件在 `§8` 中根本没有行，根级 `context-versioning.md` 仅以「本轮未应用」
+条目出现。这是关于哪些副本具有权威性的治理问题，应用轮次不得自行裁定。
 
 ### 9.9 谓词等价修正轮的合并后回读
 
