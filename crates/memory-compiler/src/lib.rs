@@ -99,6 +99,12 @@ pub enum CompilerError {
     MissingPublicationAdmission,
     StaleWorker,
     PublicationSuppressed,
+    /// Publication was blocked by missing or conflicting evidence. The
+    /// operation is recoverable: ExecutionState::Blocked is not terminal and
+    /// ExecutionState::retry() accepts it.
+    PublicationBlocked,
+    /// Publication reached the Storage boundary and failed there. Terminal.
+    PublicationFailed,
     InvalidPublicationProof,
     IllegalStateTransition,
     LeaseExpired,
@@ -660,8 +666,17 @@ impl<A: PublicationAuthority> MemoryCompiler<A> {
             current_generation,
             &mut self.authority,
         )?;
-        if gated.disposition != PublicationDisposition::Published {
-            return Err(CompilerError::PublicationSuppressed);
+        match gated.disposition {
+            PublicationDisposition::Published => {}
+            PublicationDisposition::Suppressed => {
+                return Err(CompilerError::PublicationSuppressed)
+            }
+            PublicationDisposition::Blocked => {
+                return Err(CompilerError::PublicationBlocked)
+            }
+            PublicationDisposition::Failed => {
+                return Err(CompilerError::PublicationFailed)
+            }
         }
 
         let observation = self.admission.observe_fence().map_err(map_admission_error)?;
@@ -964,6 +979,116 @@ mod tests {
             worker_id: id("worker-1"),
             generation: 1,
         }
+    }
+
+    fn compile_admission_store() -> admission::AdmissionStore {
+        use memory_domain::ScopeKind;
+
+        let mut store = admission::AdmissionStore::in_memory().unwrap();
+        let scope = memory_domain::ScopeRef {
+            scope_id: OpaqueId::new("scope-1").unwrap(),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:scope-1".into(),
+        };
+        let producer_id = OpaqueId::new("producer-identity").unwrap();
+        store.register_producer(&producer_id, "registry-digest").unwrap();
+        store.register_producer_work(admission::ProducerRegistrationRequest {
+            producer_work_item_id: OpaqueId::new("work-1").unwrap(),
+            producer_class: "compiler".into(),
+            producer_identity: producer_id,
+            source_refs: vec![OpaqueId::new("event-1").unwrap()],
+            source_lineage_digest: "lineage-1".into(),
+            scope_refs: vec![scope.clone()],
+            operation_id: OpaqueId::new("operation-1").unwrap(),
+            correlation_id: OpaqueId::new("correlation-1").unwrap(),
+            causation_id: None,
+            admission_canonical_commit_cursor: Some(OpaqueId::new("commit-1").unwrap()),
+            observed_fence_cursor: OpaqueId::new("fence-0").unwrap(),
+            permission_epoch: OpaqueId::new("permission-1").unwrap(),
+            request_digest: "producer-request-1".into(),
+            producer_schema_version: "v1".into(),
+        }).unwrap();
+
+        for (edge, source) in [("edge-1", "event-1"), ("edge-2", "source-1")] {
+            store.register_dependency(admission::DependencyRegistrationRequest {
+                dependency_registration_id: OpaqueId::new(edge).unwrap(),
+                artifact_ref: OpaqueId::new("derivative-1").unwrap(),
+                artifact_version: OpaqueId::new("publication-1").unwrap(),
+                producer_work_item_id: OpaqueId::new("work-1").unwrap(),
+                derivation_run_id: OpaqueId::new("run-1").unwrap(),
+                source_ref: OpaqueId::new(source).unwrap(),
+                source_version: None,
+                provenance_ref: OpaqueId::new("provenance-1").unwrap(),
+                scope_refs: vec![scope.clone()],
+                lineage_digest: "lineage-1".into(),
+                required_dependency_count: 2,
+                request_digest: format!("digest-{edge}"),
+            }).unwrap();
+        }
+        store
+    }
+
+    fn compile_input() -> (AcceptedEvent, StagingInput, ProducerWorkItemId) {
+        let (_, _, normalized) = pipeline();
+        (
+            event(),
+            staging_input(normalized),
+            ProducerWorkItemId::new(OpaqueId::new("work-1").unwrap()),
+        )
+    }
+
+    #[test]
+    fn compile_returns_blocked_error_for_missing_evidence() {
+        let mut compiler = MemoryCompiler {
+            authority: EvidenceAuthority {
+                producer_admitted: false,
+                storage_prepared_hidden: true,
+            },
+            admission: compile_admission_store(),
+        };
+        let (event, staging, work_item) = compile_input();
+
+        assert_eq!(
+            compiler.compile(event, staging, lease(), 1, &work_item),
+            Err(CompilerError::PublicationBlocked)
+        );
+    }
+
+    #[test]
+    fn compile_returns_suppressed_error_for_rejected_second_admission() {
+        let mut compiler = MemoryCompiler {
+            authority: TestAuthority {
+                publication_admitted: false,
+                visibility_authorized: true,
+            },
+            admission: compile_admission_store(),
+        };
+        let (event, staging, work_item) = compile_input();
+
+        assert_eq!(
+            compiler.compile(event, staging, lease(), 1, &work_item),
+            Err(CompilerError::PublicationSuppressed)
+        );
+    }
+
+    #[test]
+    fn blocked_is_recoverable_but_suppressed_is_not() {
+        assert!(!ExecutionState::Blocked.is_terminal());
+        assert!(ExecutionState::Suppressed.is_terminal());
+
+        let mut blocked = execution();
+        blocked.state = ExecutionState::Blocked;
+        assert!(blocked.retry().is_ok());
+        assert_eq!(blocked.state, ExecutionState::Pending);
+
+        let mut suppressed = execution();
+        suppressed.state = ExecutionState::Suppressed;
+        assert!(suppressed.state.is_terminal());
+        assert_eq!(
+            suppressed.retry(),
+            Err(CompilerError::IllegalStateTransition)
+        );
+        assert!(!suppressed.state.is_terminal() == false);
     }
 
     #[test]
