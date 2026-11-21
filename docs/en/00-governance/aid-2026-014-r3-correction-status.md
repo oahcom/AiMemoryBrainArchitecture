@@ -216,7 +216,7 @@ read-back that names no baseline is not evidence, so §4 is satisfied here by pi
 | Target | Group | Value this round supersedes | Blob at baseline HEAD | Producing commit |
 |---|---|---|---|---|
 | docs/en/02-domain-model/domain-model-overview.md | R1/R4 | 443b35b288fc | 5b86fe23ab7c670b4ae13331b56572aee35f5d00 | bc114263 |
-| docs/zh-CN/02-domain-model/domain-model-overview.md | R1/R4 | d80d0515f9e0 | 03129ded6e9532048240aea3a18414370cbcb73d | bc114263 |
+| docs/zh-CN/02-domain-model/domain-model-overview.md | R1/R4 | 736fc5865c54 | 03129ded6e9532048240aea3a18414370cbcb73d | bc114263 |
 | 02-domain-model/domain-model-overview.md | R1/R4 | 443b35b288fc | 5b86fe23ab7c670b4ae13331b56572aee35f5d00 | 778d1bee |
 | docs/en/02-domain-model/phase-1-domain-model-freeze.md | R4 | 80a159515717 | 1a18c6b8424c939dd90986527a24807c8f74d552 | bc114263 |
 | docs/zh-CN/02-domain-model/phase-1-domain-model-freeze.md | R4 | acf12e265b52 | 408a606c44fcf271f265508bc9d3029f8fc889cb | bc114263 |
@@ -862,3 +862,43 @@ The read-back does not demonstrate that the underlying storage implementation pr
 No Schema, DDL, public API, H Wire, production key, Trust Root, Crypto Profile, or Storage L4 approval is granted by this section.
 
 This section records a completed normative read-back, not a completed implementation test.
+
+### 9.11 R1-02 closed: the superseded-value column was wrong twice, not once
+
+The fifth independent review named one row. Checking the column against §8 rather than against
+intuition found two.
+
+**What the review caught.** §9.8 and §9.9 had described the root-level
+`02-domain-model/domain-model-overview.md` as still carrying the pre-correction Blob. `§9.1`
+already said otherwise: `5b86fe23ab7c` is what `778d1bee` *produced*, and the value it superseded
+was `443b35b288fc`, produced by `961d2191bb`. Read at the parent of `778d1bee` — `1cf71dffb2a6` —
+the root path returns `443b35b288fcbefe32af7abcb48ec58a170bef71`, and `46fbdcacbe8a` is the
+`docs/en` path's R4 value. Both §9.1 root rows and §9.8/§9.9 now carry `443b35b288fc`.
+
+**What the review did not catch, and this round did.** §9.1's row for
+`docs/zh-CN/02-domain-model/domain-model-overview.md` cited `d80d0515f9e0` as the superseded value.
+That is the R4-round value. §8 records a later write to the same path: `961d2191bba6` produced
+`736fc5865c54`. Verified directly — the parent of `bc114263` is `927eadcb`, and at `927eadcb` that
+path returns `736fc5865c54d7f8163166b4c668361ebb03a2f5`, 24245 B. The `docs/en` row had the same
+class of error and was corrected in the previous round; the ZH row was left behind.
+
+The distinction that matters: "the value this round supersedes" is not "the value the previous
+round wrote". A round that writes to a path twice leaves the first write superseded by the second
+inside the same round, and §8 records both. Citing the earlier one understates what was replaced.
+
+| Target | Was registered | Correct value | Verified at |
+|---|---|---|---|
+| `02-domain-model/domain-model-overview.md` | `46fbdcacbe8a` | `443b35b288fc` | parent of `778d1bee` = `1cf71dffb2a6` |
+| `docs/en/02-domain-model/domain-model-overview.md` | `46fbdcacbe8a` | `443b35b288fc` | parent of `bc114263` = `927eadcb` |
+| `docs/zh-CN/02-domain-model/domain-model-overview.md` | `d80d0515f9e0` | `736fc5865c54` | parent of `bc114263` = `927eadcb` |
+
+Full-column re-verification, run after the fix, compared all thirteen §9.1 rows against the last
+§8 write for the same path. Twelve match. The thirteenth is the root `06-memory-context/context-versioning.md`
+row, which cites `05c0739d0c22` with an explicit `(§8 bullet)` qualifier because that path has no §8
+table row — §8 records it only inside the "Not applied in this round" bullet, which itself states
+that `05c0739d...` is superseded by `8503a171922a` from `2606978e`. The qualifier is what makes the
+citation honest; without it the row would read as a claim about the current value.
+
+No normative text changed. This section corrects evidence registration only, and the eight rows of
+§3 are untouched: seven `PASS`, R1 still `REQUEST CHANGES` until the corrected column is reviewed.
+

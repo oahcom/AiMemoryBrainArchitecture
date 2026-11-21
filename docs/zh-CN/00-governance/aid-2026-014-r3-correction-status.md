@@ -214,7 +214,7 @@ R3 复审处置、正式验收、Schema 冻结与实现一致性均不因本注�
 | 目标 | 组 | 本轮回读所取代的值 | 基线 HEAD 处 Blob | 产生该 Blob 的提交 |
 |---|---|---|---|---|
 | docs/en/02-domain-model/domain-model-overview.md | R1/R4 | 443b35b288fc | 5b86fe23ab7c670b4ae13331b56572aee35f5d00 | bc114263 |
-| docs/zh-CN/02-domain-model/domain-model-overview.md | R1/R4 | d80d0515f9e0 | 03129ded6e9532048240aea3a18414370cbcb73d | bc114263 |
+| docs/zh-CN/02-domain-model/domain-model-overview.md | R1/R4 | 736fc5865c54 | 03129ded6e9532048240aea3a18414370cbcb73d | bc114263 |
 | 02-domain-model/domain-model-overview.md | R1/R4 | 443b35b288fc | 5b86fe23ab7c670b4ae13331b56572aee35f5d00 | 778d1bee |
 | docs/en/02-domain-model/phase-1-domain-model-freeze.md | R4 | 80a159515717 | 1a18c6b8424c939dd90986527a24807c8f74d552 | bc114263 |
 | docs/zh-CN/02-domain-model/phase-1-domain-model-freeze.md | R4 | acf12e265b52 | 408a606c44fcf271f265508bc9d3029f8fc889cb | bc114263 |
@@ -770,3 +770,39 @@ PASS 是独立复审判定，不是正式接受决定。
 本节不批准 Schema、DDL、公共 API、H Wire、生产密钥、Trust Root、Crypto Profile 或 Storage L4。
 
 本节记录的是规范回读完成，不是实现测试完成。
+
+### 9.11 R1-02 闭合：被取代值列错了两次，不是一次
+
+第五轮独立复审点名一行。按第 8 节的口径逐行核对后，实际是两行。
+
+**复审发现的那一处。** 第 9.8 节与第 9.9 节曾把根级 `02-domain-model/domain-model-overview.md`
+描述为仍持有修正前的 Blob。第 9.1 节的记载相反：`5b86fe23ab7c` 是 `778d1bee` **产生**的值，
+它所取代的是 `961d2191bb` 产生的 `443b35b288fc`。在 `778d1bee` 的父提交 `1cf71dffb2a6` 处读取
+根级路径，返回 `443b35b288fcbefe32af7abcb48ec58a170bef71`；而 `46fbdcacbe8a` 是 `docs/en` 路径
+在第 4 轮的值。第 9.1 节两条根级相关行与第 9.8、9.9 节现均记为 `443b35b288fc`。
+
+**复审未发现、本轮自行发现的那一处。** 第 9.1 节中
+`docs/zh-CN/02-domain-model/domain-model-overview.md` 一行把 `d80d0515f9e0` 记为被取代值。
+那是第 4 轮的值。第 8 节记载了同一路径的后续写入：`961d2191bba6` 产生 `736fc5865c54`。
+实测确认：`bc114263` 的父提交为 `927eadcb`，在 `927eadcb` 处该路径返回
+`736fc5865c54d7f8163166b4c668361ebb03a2f5`，24245 字节。`docs/en` 一行曾有同类错误并在上一轮
+修正，ZH 一行被遗漏。
+
+这里要分清的是：「本轮所取代的值」不等于「上一轮写入的值」。同一轮内对同一路径写入两次时，
+第一次写入已被第二次取代，而第 8 节两次都记。引用较早那一次会低估被取代的范围。
+
+| 目标 | 原登记值 | 正确值 | 实测位置 |
+|---|---|---|---|
+| `02-domain-model/domain-model-overview.md` | `46fbdcacbe8a` | `443b35b288fc` | `778d1bee` 的父提交 `1cf71dffb2a6` |
+| `docs/en/02-domain-model/domain-model-overview.md` | `46fbdcacbe8a` | `443b35b288fc` | `bc114263` 的父提交 `927eadcb` |
+| `docs/zh-CN/02-domain-model/domain-model-overview.md` | `d80d0515f9e0` | `736fc5865c54` | `bc114263` 的父提交 `927eadcb` |
+
+修正后执行全列复核：第 9.1 节十三行逐行与第 8 节中同路径的最后一次写入比对，十二行相符。
+第十三行为根级 `06-memory-context/context-versioning.md`，记 `05c0739d0c22` 并带显式
+`(§8 bullet)` 限定，因为该路径在第 8 节没有表格行——第 8 节只在「本轮未应用」条目中记载它，
+且该条目自身写明 `05c0739d...` 已被 `2606978e` 的 `8503a171922a` 取代。限定语正是这条引用
+诚实的原因；去掉限定语，这一行就会被读成关于当前值的断言。
+
+规范正文未改。本节只纠正证据登记；第 3 节八行未动：七行 `PASS`，R1 在修正后的列获得复审前
+仍为 `REQUEST CHANGES`。
+
