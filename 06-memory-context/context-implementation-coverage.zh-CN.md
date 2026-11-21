@@ -3,8 +3,9 @@
 - Work Item：GAP-02 / GAP-BASELINE-001
 - Owner：G — Memory Context Architect
 - 提示词：CHATGPT-OWNER-G-001 v1.0
-- 源树：`1ad6c2cf67a228f597fcbe1c7149c328ecbf38e9`
+- 源树：`5f1d7838a9b6436e78a8f30295fb73b31bf75bc6`
 - 评估引用：`main`（只读源码核验）
+- Rust 源文件 Blob：`crates/memory-context/src/lib.rs` = `49a61da1b6464b575c191365321b1f1826c3a12b`
 - 状态：实现映射；不自我批准
 - 范围：指定 SHA 下 `06-memory-context/` 的 19 个 Markdown 文件（README、17 份不同的英文设计/评审文档，以及 Phase 3.8.22 合同的中文对应文件）。Phase 3.8.22 中英文文件属于同一语义合同，不重复计算独立要求。
 
@@ -45,18 +46,18 @@ Rust crate 刻意停留在 private/staged 阶段：不做持久化、传输、�
 | 关注点 | 设计出处（文件 + 章节） | 当前实现状态 | 阻塞归属 |
 |---|---|---|---|
 | README 范围、索引和 Owner 边界 | README §1–§4 | PARTIAL — 仅索引，无独立可执行行为；以下条目为实际依据 | 不在范围 |
-| Brain 拥有的期望 Context 成员与 Canonical Memory 分离 | context-architecture.md §1–§2 | PARTIAL — 有 `ContextEntry`、`ContextSnapshot`；无 canonical-store adapter；测试 `serializes_snapshot_and_prepares_non_sendable_delivery_intent` | D |
-| Context 身份绑定 Scope、Agent、实例、Session、Task、Environment 和 Purpose | context-architecture.md §3 | PARTIAL — `ContextIdentity::validate`；正向间接覆盖 `build_sorts_by_tier_then_priority_then_entry_id`；缺少 Environment 缺失/歧义专门测试 | I |
+| Brain 拥有的期望 Context 成员与 Canonical Memory 分离 | context-architecture.md §1–§2 | PARTIAL — 有 `ContextEntry`、`ContextSnapshot`；`delivery_intent_snapshot_json_round_trips_to_equivalent_snapshot` 验证 JSON Snapshot 往返；无 canonical-store adapter | D |
+| Context 身份绑定 Scope、Agent、实例、Session、Task、Environment 和 Purpose | context-architecture.md §3 | PARTIAL — `ContextIdentity::validate`；`empty_identity_scope_purpose_and_schema_version_are_rejected` 检查必需身份字段，`candidate_scope_must_be_contained_by_identity_scope` 检查 Scope 包含关系；缺少 Environment 缺失/歧义专门测试 | I |
 | 环境相关身份必须 Fail-Closed | context-architecture.md §3 | NOT IMPLEMENTED — Rust Environment 字段可选，未实现环境依赖判定 | I |
-| P0–P3 仅是优先级，不是信任或指令等级 | context-architecture.md §4、§6 | PARTIAL — 有 `ContextTier` 和候选排序；测试 `build_sorts_by_tier_then_priority_then_entry_id`；无下游指令边界执行 | I |
+| P0–P3 仅是优先级，不是信任或指令等级 | context-architecture.md §4、§6 | PARTIAL — 有 `ContextTier`；测试 `sorting_uses_tier_then_descending_priority_then_entry_id` 验证 Tier、降序 Priority 和 Entry ID 排序；无下游指令边界执行 | I |
 | Planner 消费授权候选，F 拥有检索与排序 | context-architecture.md §5、§9 | PARTIAL — `build_context` 消费调用方候选；无 F adapter 或检索实现 | I |
 | Editor、Versioner、Reconciler、Budget Manager、Delivery Coordinator 是逻辑模块 | context-architecture.md §5 | PARTIAL — 有预算/快照/Delivery 基础类型，无模块级工作流 | 本线程可做 |
-| Entry 保留结构化来源、认知限定和生命周期 | context-architecture.md §6 | PARTIAL — `ContextCandidate`/`ContextEntry` 保留来源/证据/限定字段；测试 `rejects_missing_lineage_and_empty_content`；无来源授权校验器 | D |
+| Entry 保留结构化来源、认知限定和生命周期 | context-architecture.md §6 | PARTIAL — `ContextCandidate`/`ContextEntry` 保留来源/证据/限定字段；`build_context_rejects_candidates_without_lineage` 和 `build_context_rejects_whitespace_only_rendered_content` 验证输入拒绝；无来源授权校验器 | D |
 | Memory 内容不得成为指令或工具授权 | context-architecture.md §6 | NOT IMPLEMENTED — 数据结构不执行下游 Prompt Region 隔离 | I |
-| Context、Entry、Delivery 生命周期分离 | context-architecture.md §7 | PARTIAL — 有 Context/Delivery 基础类型，缺少三套独立状态机 | 本线程可做 |
+| Context、Entry、Delivery 生命周期分离 | context-architecture.md §7 | PARTIAL — `non_active_non_consolidated_lifecycles_are_rejected` 验证候选生命周期准入；Context/Entry/Delivery 仍缺少各自独立状态机 | 本线程可做 |
 | Forget/撤权 Tombstone 阻断活动及待处理投影 | context-architecture.md §8 | NOT IMPLEMENTED — 所引用的 `ContextLedger`/`reconcile_entry` 参考模型不在本次核验的 mainline；Rust crate 未实现 ChangeSet 编辑器。 | D |
 | Adapter 按 Session 清除状态及 Reconnect | context-architecture.md §8 | NOT IMPLEMENTED — 无 Adapter/Session Runtime | 不在范围 |
-| Budget 是向量而不是单一 Top-K | context-budget-and-sufficiency.md §1–§2 | PARTIAL — `ContextBudget` 检查 Entry 数和渲染字节；测试 `enforces_entry_and_byte_budgets_without_truncation`；缺 Token、Fan-out、来源深度、延迟、CPU、Tier 预留 | 本线程可做 |
+| Budget 是向量而不是单一 Top-K | context-budget-and-sufficiency.md §1–§2 | PARTIAL — `ContextBudget` 检查 Entry 数和渲染字节；`entry_budget_error_reports_actual_candidate_count`、`byte_budget_error_reports_accumulated_rendered_bytes`、`exact_entry_and_byte_budget_boundaries_succeed` 覆盖溢出与精确边界；缺 Token、Fan-out、来源深度、延迟、CPU、Tier 预留 | 本线程可做 |
 | 任务特定 Sufficiency 覆盖十个维度 | context-budget-and-sufficiency.md §3 | NOT IMPLEMENTED — 无 Requirement Graph 或逐维评估器 | D |
 | 规划保留必需锚点、证据、冲突和不确定性 | context-budget-and-sufficiency.md §4 | PARTIAL — 有候选准入和稳定排序；无 Requirement Graph 优化器或冲突覆盖测试 | D |
 | 在向量约束下优化候选集边际覆盖 | context-budget-and-sufficiency.md §5 | NOT IMPLEMENTED — 无优化器/压缩器 | 本线程可做 |
@@ -64,7 +65,7 @@ Rust crate 刻意停留在 private/staged 阶段：不做持久化、传输、�
 | Sufficiency 结果和安全溢出降级 | context-budget-and-sufficiency.md §6–§7 | NOT IMPLEMENTED — 无 Sufficient/Conditional/Insufficient/Unknown 评估器或溢出规划器 | 本线程可做 |
 | Budget/Sufficiency 可观测性 | context-budget-and-sufficiency.md §8–§9.4 | NOT IMPLEMENTED — 无 Metrics/Report 模型 | 本线程可做 |
 | ChangeSet 公共封套、前置条件和全有或全无暂存 | context-edit-operations.md §1 | NOT IMPLEMENTED — 所引用的 `ContextLedger`/`reconcile_entry` 参考模型不在本次核验的 mainline；Rust crate 未实现 ChangeSet 编辑器。 | 本线程可做 |
-| Add 精确 Canonical Ref、Lineage 和重复防护 | context-edit-operations.md §2 Add | NOT IMPLEMENTED — 所引用的 `ContextLedger`/`reconcile_entry` 参考模型不在本次核验的 mainline；Rust crate 未实现 ChangeSet 编辑器。 | D |
+| Add 精确 Canonical Ref、Lineage 和重复防护 | context-edit-operations.md §2 Add | PARTIAL — 候选准入检查非空 Lineage（`build_context_rejects_candidates_without_lineage`），并拒绝重复 Entry/Memory-Version 成员（`duplicate_entry_ids_are_rejected`、`duplicate_memory_version_membership_is_rejected`）；仍无 ChangeSet Add 操作或 Canonical Ref Adapter | D |
 | Update 仅修改 Context 元数据/渲染，不修改 Canonical Memory | context-edit-operations.md §2 Update | NOT IMPLEMENTED — 所引用的 `ContextLedger`/`reconcile_entry` 参考模型不在本次核验的 mainline；Rust crate 未实现 ChangeSet 编辑器。 | 本线程可做 |
 | Remove 仅移除成员，不执行 Canonical Forget | context-edit-operations.md §2 Remove | NOT IMPLEMENTED — 所引用的 `ContextLedger`/`reconcile_entry` 参考模型不在本次核验的 mainline；Rust crate 未实现 ChangeSet 编辑器。 | D |
 | Replace 原子替换并保留旧成员 Tombstone | context-edit-operations.md §2 Replace | NOT IMPLEMENTED — 所引用的 `ContextLedger`/`reconcile_entry` 参考模型不在本次核验的 mainline；Rust crate 未实现 ChangeSet 编辑器。 | D |
@@ -88,9 +89,9 @@ Rust crate 刻意停留在 private/staged 阶段：不做持久化、传输、�
 | Forget/撤权失效和 Adapter Target 状态 | context-reconciliation.md §5 | PARTIAL — 仅内存 Tombstone；无持久化 Target Evidence 或 Adapter Clear | D |
 | Offline Reconnect、缓存失效和安全替换 | context-reconciliation.md §5–§6 | NOT IMPLEMENTED — 无 Reconnect/Adapter Runtime | D |
 | Reconciliation Audit 和 Typed Cursor 分离 | context-reconciliation.md §7–§9 | NOT IMPLEMENTED — 无持久化 Run Record/向量验证器 | D |
-| 不可变 ContextVersion 和 ChangeSet 历史 | context-versioning.md §1–§4 | NOT IMPLEMENTED — 所引用的 `ContextLedger`/`reconcile_entry` 参考模型不在本次核验的 mainline；Rust crate 未实现 ChangeSet 编辑器。 | 不在范围 |
-| Context/Entry/Delivery/Applied 对象分离 | context-versioning.md §5–§6 | PARTIAL — 有 Snapshot 和 DeliveryIntent；无持久化 Context/Applied 对象 | 本线程可做 |
-| Snapshot/Delta 语义及精确 Base 应用 | context-versioning.md §7 | PARTIAL — 有 JSON Snapshot 序列化；测试 `serializes_snapshot_and_prepares_non_sendable_delivery_intent`；无 Delta Apply/Replay 模型 | D |
+| 不可变 ContextVersion 和 ChangeSet 历史 | context-versioning.md §1–§4 | PARTIAL — `ContextSnapshot` 携带 `context_version`，`zero_context_version_is_rejected` 拒绝零版本，`delivery_intent_targets_snapshot_context_version` 绑定 Delivery 目标；仍无不可变版本历史或 ChangeSet 历史/编辑器 | 不在范围 |
+| Context/Entry/Delivery/Applied 对象分离 | context-versioning.md §5–§6 | PARTIAL — 有 Snapshot 和 DeliveryIntent；`delivery_intent_targets_snapshot_context_version` 验证目标版本绑定；无持久化 Context/Applied 对象 | 本线程可做 |
+| Snapshot/Delta 语义及精确 Base 应用 | context-versioning.md §7 | PARTIAL — 有 JSON Snapshot 往返（`delivery_intent_snapshot_json_round_trips_to_equivalent_snapshot`）和完整性检查（`validate_snapshot_rejects_inconsistent_bytes_and_empty_entry_content`）；无 Delta Apply/Replay 模型 | D |
 | CAS、幂等、原子 ChangeSet、禁止隐式合并 | context-versioning.md §8 | NOT IMPLEMENTED — 所引用的 `ContextLedger`/`reconcile_entry` 参考模型不在本次核验的 mainline；Rust crate 未实现 ChangeSet 编辑器。 | 不在范围 |
 | Delivery 生命周期、迟到 ACK 和 Supersession | context-versioning.md §9 | NOT IMPLEMENTED — 无 Attempt Ledger/ACK 消费者 | 本线程可做 |
 | Rollback、补偿和 Replay | context-versioning.md §10 | PARTIAL — 有 Tombstone 和内存历史；无持久化 Replay/Rebuild | D |
@@ -125,7 +126,7 @@ Rust crate 刻意停留在 private/staged 阶段：不做持久化、传输、�
 
 ## 4. 本次范围与测试证据
 
-本交付仅为覆盖率映射，不新增代码或测试。评估对象为 mainline 当前可见实现；未合并分支中的 `ContextLedger`/`reconcile_entry` 模型不计入当前实现。`crates/memory-context/src/lib.rs` 有 7 个单元测试：`build_sorts_by_tier_then_priority_then_entry_id`、`rejects_cross_scope_candidates`、`rejects_forgotten_and_superseded_lifecycle`、`rejects_duplicate_membership_and_entry_ids`、`enforces_entry_and_byte_budgets_without_truncation`、`serializes_snapshot_and_prepares_non_sendable_delivery_intent`、`rejects_missing_lineage_and_empty_content`。Python Applied Ledger 参考模型有 8 个既有测试：`test_new_complete_success_commits_one_full_applied_record`、`test_same_identity_and_same_evidence_is_idempotent`、`test_same_identity_changed_evidence_is_conflict_and_original_is_unchanged`、`test_non_accepted_c_outcomes_never_create_applied`、`test_missing_or_failed_authority_gate_blocks_commit`、`test_restart_reads_original_record_and_replay_returns_same_id`、`test_different_logical_identity_gets_a_distinct_record`、`test_identity_requires_exact_typed_field_set`。已执行命令 `python3 -m unittest discover -s 06-memory-context/reference-model -p 'test_g_applied_ledger.py' -v`：`Ran 8 tests in 0.009s`，结果 `OK`（Linux，Python 3.14.4）。
+本交付仅为覆盖率映射，不新增代码或测试。评估基线固定为当前 `main`：`5f1d7838a9b6436e78a8f30295fb73b31bf75bc6`。派发时 `main` 为 `477a55e624bcc244dfb65c435bc8d03f718b1e2a`；此后仅前进了两个治理脚本提交。§2 中的 19 个源文档和 `crates/memory-context/src/lib.rs` 在这两个引用间均未变化；Rust 源文件 Blob 为 `49a61da1b6464b575c191365321b1f1826c3a12b`。该 crate 现有 20 个单元测试：`build_context_order_is_deterministic_across_repeated_calls`、`sorting_uses_tier_then_descending_priority_then_entry_id`、`entry_budget_error_reports_actual_candidate_count`、`byte_budget_error_reports_accumulated_rendered_bytes`、`exact_entry_and_byte_budget_boundaries_succeed`、`duplicate_entry_ids_are_rejected`、`duplicate_memory_version_membership_is_rejected`、`non_active_non_consolidated_lifecycles_are_rejected`、`candidate_scope_must_be_contained_by_identity_scope`、`empty_identity_scope_purpose_and_schema_version_are_rejected`、`zero_context_version_is_rejected`、`zero_entry_or_byte_budget_is_rejected`、`delivery_intent_visibility_is_always_private_pending_gate`、`delivery_intent_targets_snapshot_context_version`、`delivery_intent_snapshot_json_round_trips_to_equivalent_snapshot`、`build_context_rejects_candidates_without_lineage`、`build_context_rejects_whitespace_only_rendered_content`、`snapshot_accessors_report_entry_count_and_emptiness`、`build_context_rendered_byte_total_matches_entry_sum`、`validate_snapshot_rejects_inconsistent_bytes_and_empty_entry_content`。在 `477a55e624bcc244dfb65c435bc8d03f718b1e2a` 上执行（Rust 源文件 Blob 与当前 main 相同），命令为 `cargo test -p memory-context --offline`：结果 `test result: ok. 20 passed; 0 failed`（Rust `rustc 1.100.0`，Cargo `1.100.0`）。有两行依据新测试从 NOT IMPLEMENTED 调整为 PARTIAL：ChangeSet Add 已有候选 Lineage 与重复防护测试，但仍无 Add 操作；ContextVersion 已有非零版本表示和 Delivery 目标绑定，但仍无不可变历史/ChangeSet 历史。77 行状态合计：2 IMPLEMENTED / 37 PARTIAL / 38 NOT IMPLEMENTED。现有 Python Applied Ledger 参考模型有 8 个测试：`test_new_complete_success_commits_one_full_applied_record`、`test_same_identity_and_same_evidence_is_idempotent`、`test_same_identity_changed_evidence_is_conflict_and_original_is_unchanged`、`test_non_accepted_c_outcomes_never_create_applied`、`test_missing_or_failed_authority_gate_blocks_commit`、`test_restart_reads_original_record_and_replay_returns_same_id`、`test_different_logical_identity_gets_a_distinct_record`、`test_identity_requires_exact_typed_field_set`。已执行命令 `python3 -m unittest discover -s 06-memory-context/reference-model -p 'test_g_applied_ledger.py' -v`：`Ran 8 tests in 0.009s`，结果 `OK`（Linux，Python 3.14.4）。
 
 ## 5. 评估边界
 
