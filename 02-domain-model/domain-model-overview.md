@@ -245,6 +245,21 @@ Attestation Method identity proves which declared procedure was invoked. It does
 
 This section defines semantic and governance contracts only. It does not approve physical Schema, DDL, public API, production keys, Trust Root or cryptographic profile.
 
+
+### 3.16 OPEN: Retraction propagation to pinned FactRevision
+
+**Status: OPEN — no semantic ruling has been made.**
+
+A FactRevision pins one or more exact ClaimRevisionRef values. The domain contract does not yet decide what happens when a pinned ClaimRevision is later assigned the epistemic status `Retracted`. This question is distinct from Forget: retraction changes the epistemic status/history of a ClaimRevision; Forget governs disclosure and dependency suppression.
+
+The following candidate semantics remain under consideration; none is selected:
+
+1. **Continue visible:** the historical FactRevision remains visible and its attestation remains readable even though a pinned ClaimRevision is retracted. This preserves the historical attestation but risks presenting a Fact without signaling that a dependency has been retracted.
+2. **Mark invalid:** the FactRevision remains historically addressable but is marked ineligible/invalid for current use. This avoids silently treating the attestation as current, but requires a defined propagation rule, status vocabulary and read-path behavior.
+3. **Append a suppression revision:** retain the original FactRevision unchanged and append a new FactRevision recording suppression/revocation. This preserves append-only history, but requires a defined outcome, rationale, authorization and canonical-commit contract.
+
+**No choice is made by this specification.** Implementations MUST NOT select, infer or introduce retraction-propagation behavior. In particular, do not add a `retracted` field to FactRevision or mutate an existing FactRevision to represent this unresolved question. A future decision must specify the trigger, scope (one or all pinned ClaimRevisions), treatment of mixed dependencies, read-path behavior and required authorization/commit evidence.
+
 ## 4. Orthogonal state dimensions
 
 The model MUST NOT use one universal status field.
