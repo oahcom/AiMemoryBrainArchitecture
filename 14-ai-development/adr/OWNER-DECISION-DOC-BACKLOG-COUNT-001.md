@@ -46,6 +46,10 @@ document_metadata:
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Normative
+  bilingual_counterpart:
+    source: null
+    en: "docs/en/14-ai-development/adr/OWNER-DECISION-DOC-BACKLOG-COUNT-001.md"
+    zh-CN: "docs/zh-CN/14-ai-development/adr/OWNER-DECISION-DOC-BACKLOG-COUNT-001.md"
 ---
 
 # OWNER DECISION — DOCUMENT BACKLOG COUNT CORRECTION
