@@ -16,7 +16,7 @@
 - **PARTIAL**：已有可执行行为，但文档中的某个维度、状态或证据边界尚未覆盖。
 - **NOT IMPLEMENTED**：尚无可执行模型覆盖该关注点。第四列说明是 G 本线程可做，还是依赖外部权威/实现。
 
-Rust crate 仍停留在 private/staged 阶段。本轮新增纯内存 `ChangeSet` 编辑器，具备 Base-Version 前置条件、克隆暂存的全有或全无应用、类型化错误、操作记录和成员 Tombstone；但不提供持久化原子提交、传输、授权、D/I 查询或发布。Python Applied Ledger 仍是 Gate 由调用方提供的单节点 SQLite 参考原型。两条参考路径均不构成生产级分布式并发或端到端交付。
+Rust crate 仍停留在 private/staged 阶段。Round 6 新增纯内存 `ChangeSet` 编辑器，具备 Base-Version 前置条件、全有或全无暂存、类型化错误、操作记录和成员 Tombstone。Round 7 新增任务特定 Sufficiency 结果评估器：目前只测量 Evidence Ref 和明确的 Environment Identity；不支持的维度保持 Unknown。它仍不提供持久化原子提交、传输、授权、D/I 查询、发布、Requirement Graph、候选优化器、Overflow Planner 或 Compaction。Python Applied Ledger 仍是 Gate 由调用方提供的单节点 SQLite 参考原型。两条参考路径均不构成生产级分布式并发或端到端交付。
 
 ## 2. 源文件清单
 
@@ -132,7 +132,7 @@ Rust crate 仍停留在 private/staged 阶段。本轮新增纯内存 `ChangeSet
 
 ### Round 7 — Sufficiency 结果评估器
 
-评估基线：`0cce40aae5c642f30fabef7b844ac8397322684b`；执行命令：`cargo test -p memory-context`。新增 `SufficiencyRequirement`、十个命名的 `SufficiencyDimension` 及向前兼容的未知维度、`SufficiencyAssessment` 和四种结果。当前仅能测量不同的 Evidence Ref 数量，以及快照中明确存在的 Environment Identity。其余八个维度因快照 Schema 缺少结构化证据而返回 Unknown；不尝试从文本推断。任何不可判定需求优先于已知缺口，因此 Unknown 不会被降级为 Insufficient。空需求集为 Unknown，而不是空真意义上的 Sufficient。新增七项测试覆盖四种结果、带名称的 Mandatory 缺口、Advisory 缺口、空需求、未知维度、Unknown 优先级以及互斥/穷尽性。精确结果：68 个单元测试、5 个负向路径集成测试、1 个 Store-to-Context 集成测试、0 个 Doc Test，全部通过。77 行映射现在为 25 NOT IMPLEMENTED / 43 PARTIAL / 9 IMPLEMENTED。Requirement Graph、候选优化器、Compact、Fidelity Validator 和 Overflow Planner 仍为 NOT IMPLEMENTED。
+评估基线：`0cce40aae5c642f30fabef7b844ac8397322684b`；实现提交：`ad7a05843ebdcbcaaec2a51d9a6ace307ae1054d`；文档后续提交：`d236fcc94b230c2ca57e720ebc607bf8a1f72590`；Rust 源文件 Blob：`4fad76242c6426f594904d0f0c9f8871670aecc4`；执行命令：`cargo test -p memory-context`。新增 `SufficiencyRequirement`、十个命名的 `SufficiencyDimension` 及向前兼容的未知维度、`SufficiencyAssessment` 和四种结果。当前仅能测量不同的 Evidence Ref 数量，以及快照中明确存在的 Environment Identity。其余八个维度因快照 Schema 缺少结构化证据而返回 Unknown；不尝试从文本推断。任何不可判定需求优先于已知缺口，因此 Unknown 不会被降级为 Insufficient。空需求集为 Unknown，而不是空真意义上的 Sufficient。新增七项测试覆盖四种结果、带名称的 Mandatory 缺口、Advisory 缺口、空需求、未知维度、Unknown 优先级以及互斥/穷尽性。精确结果：68 个单元测试、5 个负向路径集成测试、1 个 Store-to-Context 集成测试、0 个 Doc Test，全部通过。77 行映射现在为 25 NOT IMPLEMENTED / 43 PARTIAL / 9 IMPLEMENTED。Requirement Graph、候选优化器、Compact、Fidelity Validator 和 Overflow Planner 仍为 NOT IMPLEMENTED。
 
 ## 5. 评估边界
 
