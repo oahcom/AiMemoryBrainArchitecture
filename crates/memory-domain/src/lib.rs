@@ -354,11 +354,11 @@ pub fn validate_outcome_claim(
 }
 
 
-#[doc="Claim and Fact references are intentionally incompatible.
+#[doc = r#"Claim and Fact references are intentionally incompatible.
 ```compile_fail
 use memory_domain::{ClaimRef, FactRef};
 let claim: ClaimRef = FactRef::new("f").unwrap();
-```"]
+```"#]
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, PartialEq)]
 pub struct ClaimRef(OpaqueId);
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, PartialEq)]
@@ -398,12 +398,12 @@ impl AuthorizationDecisionRef { pub const fn pending_i() -> Self { Self { _pendi
 pub struct CanonicalCommitRef { _pending_d: () }
 impl CanonicalCommitRef { pub const fn pending_d() -> Self { Self { _pending_d: () } } }
 
-#[doc="Immutable revision fields are private; corrections append successors.
+#[doc = r#"Immutable revision fields are private; corrections append successors.
 ```compile_fail
 use memory_domain::{ClaimRevision, ClaimRef, ClaimRevisionRef, EpistemicStatus, TimeValue};
 let mut r=ClaimRevision::new(ClaimRevisionRef::new("r").unwrap(),ClaimRef::new("c").unwrap(),None,"s".into(),"p".into(),"o".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t".into(),"initial".into()).unwrap();
 r.predicate=String::from("mutated");
-```"]
+```"#]
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct ClaimRevision {
     revision_ref: ClaimRevisionRef, claim_ref: ClaimRef, parent_revision_ref: Option<ClaimRevisionRef>,
