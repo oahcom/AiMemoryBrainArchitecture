@@ -2,6 +2,7 @@
 //! Deterministic five-stage reference pipeline with a local SQLite admission ledger.
 //! Production D/Storage authority integrations remain explicit and unimplemented.
 
+#[cfg(feature = "sqlite")]
 pub mod admission;
 
 use std::collections::BTreeSet;
