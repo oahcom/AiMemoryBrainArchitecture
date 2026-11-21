@@ -2,6 +2,8 @@
 //! Pure Rust. No database, network, model-provider or authorization implementation.
 //! Production authority integrations are explicit traits and remain unimplemented.
 
+pub mod admission;
+
 use std::collections::BTreeSet;
 
 pub const COMPILER_VERSION: &str = "0.1.0";

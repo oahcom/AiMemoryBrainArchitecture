@@ -1,0 +1,134 @@
+IMPL-001 integration verification (post-code-commit X2)
+Verification timestamp (UTC): 2026-11-21T08:10:34Z
+Code commit X2: b971a7ed33fcae8ad56c0af8dd9f6dc5ec159b74
+Code commit X2 timestamp: 2026-11-21T16:10:17+08:00 (2026-11-21T08:10:17Z)
+Merge strategy: git merge origin/main (no rebase)
+Merged origin/main: 52b93353f111acd979602235df4d34e8f8713285
+
+Toolchain:
+rustc 1.100.0 (0ef1bc386 2026-11-09)
+cargo 1.100.0 (3acc79c0c 2026-11-05)
+
+$ cargo build -p memory-compiler 2>&1 | tee /tmp/impl001-integrate-build.log
+    Updating crates.io index
+     Locking 39 packages to highest compatible versions
+      Adding generic-array v0.14.7 (available: v0.14.9)
+      Adding sha2 v0.10.9 (available: v0.11.1)
+   Compiling version_check v0.9.5
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling serde_core v1.0.229
+   Compiling typenum v1.20.1
+   Compiling generic-array v0.14.7
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.15
+   Compiling vcpkg v0.2.15
+   Compiling cc v1.11.3
+   Compiling pkg-config v0.3.34
+   Compiling syn v3.0.10
+   Compiling serde v1.0.229
+   Compiling foldhash v0.2.0
+   Compiling zmij v1.0.23
+   Compiling hashbrown v0.17.1
+   Compiling libsqlite3-sys v0.40.0
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling serde_json v1.0.154
+   Compiling digest v0.10.7
+   Compiling hashlink v0.12.2
+   Compiling serde_derive v1.0.229
+   Compiling smallvec v1.16.6
+   Compiling itoa v1.0.19
+   Compiling memchr v2.8.3
+   Compiling cpufeatures v0.2.17
+   Compiling cfg-if v1.0.5
+   Compiling fallible-streaming-iterator v0.1.9
+   Compiling fallible-iterator v0.3.0
+   Compiling bitflags v2.13.2
+   Compiling sha2 v0.10.9
+   Compiling memory-domain v0.1.0 (/home/ubuntu/ai-projects/AiMemoryBrainArchitecture-impl-001/crates/memory-domain)
+   Compiling rusqlite v0.43.0
+   Compiling memory-compiler v0.1.0 (/home/ubuntu/ai-projects/AiMemoryBrainArchitecture-impl-001/crates/memory-compiler)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 13.66s
+build exit => 0
+
+$ cargo test -p memory-compiler 2>&1 | tee /tmp/impl001-integrate-test.log
+   Compiling memory-compiler v0.1.0 (/home/ubuntu/ai-projects/AiMemoryBrainArchitecture-impl-001/crates/memory-compiler)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.03s
+     Running unittests src/lib.rs (target/debug/build/memory-compiler/50e196e65cd1055c/out/memory_compiler-50e196e65cd1055c)
+
+running 19 tests
+test admission::tests::final_gate_receipt_binds_observed_fence_and_permission_epoch ... ok
+test admission::tests::gate_reports_stale_protocol_when_fence_generation_matches ... ok
+test admission::tests::illegal_transition_accept_to_published_is_rejected ... ok
+test admission::tests::producer_receipt_lookup_and_not_found_are_distinct ... ok
+test admission::tests::partial_dependencies_remain_hidden_until_all_edges_are_registered ... ok
+test tests::extraction_is_deterministic_and_lineaged ... ok
+test tests::ingestion_preserves_original_receipt ... ok
+test tests::ingestion_requires_durable_receipt_and_intent ... ok
+test tests::late_worker_cannot_publish ... ok
+test admission::tests::producer_registration_is_idempotent_and_conflicting_digest_does_not_add_rows ... ok
+test tests::publication_requires_second_admission ... ok
+test tests::normalization_preserves_upstream_identity ... ok
+test tests::publication_requires_visibility_authorization ... ok
+test tests::staged_derivative_is_hidden ... ok
+test tests::staging_requires_complete_dependency_closure ... ok
+test tests::staging_requires_producer_admission ... ok
+test tests::successful_publication_requires_both_admissions ... ok
+test admission::tests::alternative_exit_transitions_are_accepted_and_persisted ... ok
+test admission::tests::fence_and_gate_compete_on_one_protocol_sequence_exactly_one_wins ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+   Doc-tests memory_compiler
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+test exit => 0
+
+$ cargo clippy -p memory-compiler -- -D warnings 2>&1 | tee /tmp/impl001-integrate-clippy.log
+    Checking typenum v1.20.1
+    Checking serde_core v1.0.229
+    Checking foldhash v0.2.0
+    Checking libsqlite3-sys v0.40.0
+    Checking hashbrown v0.17.1
+    Checking zmij v1.0.23
+    Checking smallvec v1.16.6
+    Checking hashlink v0.12.2
+    Checking itoa v1.0.19
+    Checking memchr v2.8.3
+    Checking generic-array v0.14.7
+    Checking cpufeatures v0.2.17
+    Checking cfg-if v1.0.5
+    Checking bitflags v2.13.2
+    Checking fallible-iterator v0.3.0
+    Checking fallible-streaming-iterator v0.1.9
+    Checking rusqlite v0.43.0
+    Checking block-buffer v0.10.4
+    Checking crypto-common v0.1.7
+    Checking digest v0.10.7
+    Checking sha2 v0.10.9
+    Checking serde v1.0.229
+    Checking serde_json v1.0.154
+    Checking memory-domain v0.1.0 (/home/ubuntu/ai-projects/AiMemoryBrainArchitecture-impl-001/crates/memory-domain)
+    Checking memory-compiler v0.1.0 (/home/ubuntu/ai-projects/AiMemoryBrainArchitecture-impl-001/crates/memory-compiler)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.57s
+clippy exit => 0
+
+main lib #[test] count: 11
+admission #[test] count: 8
+admission.rs lines: 1217
+
+Module split:
+5:pub mod admission;
+
+NOT COVERED (unchanged Admission scope):
+1. D authoritative Producer Registry / ProducerClass registration integration.
+2. H/I identity authentication and actual PermissionEpoch authorization validation.
+3. D authoritative Dependency Inventory interface.
+4. D/Storage cross-service atomic visibility transaction.
+5. Complete Lease, Retry, DLQ, Recovery and Terminal ACK execution protocol.
+6. Extraction / Consolidation / Retrieval.
