@@ -444,13 +444,4 @@ Every row is a future Runtime requirement. No test below was executed by this wo
 
 
 
-### 8.1 Existing conformance evidence — bounded, not full-protocol PASS
-
-- Main `c138654c942dc93b5a36eccb2ff0e41452156429`: `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v` — **30 passed, 0 failed**, exit 0. This is the Applied Delivery Evidence conformance suite only.
-- Open PR #436 exact head `1ffed9ed127df98b2f823a66ec80ea43d08cb9dc`: `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/provider_outcome -p 'test_*.py' -v` — **10 run; 5 passed; 5 skipped; 0 failed**, exit 0. Skipped CPO-02/04/05/09/10 explicitly require Owner C's authoritative semantic validator. This is structural schema conformance only; it does not validate C semantics or cryptographic signatures.
-- PR #436's bilingual protocol index and provider_outcome test are still an open PR, not mainline integration. Its index marks RecoveryJoin 1.0.2 schema/validator/test as not delivered.
-- These results do not establish full BMCP conformance. The strict JSON parser is a reference model, not production transport. `tests/protocol_test.rs` and `crates/bmcp` are absent.
-- AT-01..AT-20 remain **PLANNED_NOT_RUN**. No Runtime repository/authorization exists in this architecture phase.
-
-
 
