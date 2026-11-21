@@ -61,8 +61,8 @@ Rust crate 仍停留在 private/staged 阶段。本轮新增纯内存 `ChangeSet
 | Budget 是向量而不是单一 Top-K | context-budget-and-sufficiency.md §1–§2 | PARTIAL — `ContextBudget` 检查 Entry 数和渲染字节；`entry_budget_error_reports_actual_candidate_count`、`byte_budget_error_reports_accumulated_rendered_bytes`、`exact_entry_and_byte_budget_boundaries_succeed` 覆盖溢出与精确边界；缺 Token、Fan-out、来源深度、延迟、CPU、Tier 预留 | 本线程可做 |
 | 任务特定 Sufficiency 覆盖十个维度 | context-budget-and-sufficiency.md §3 | PARTIAL — 已有 `SufficiencyRequirement`/`SufficiencyDimension` 和 `assess_sufficiency`；当前快照字段可测量 Evidence 与 Environment，其余八个维度会正确返回 Unknown；仍无 Requirement Graph 或语义证据模型 | D |
 | 规划保留必需锚点、证据、冲突和不确定性 | context-budget-and-sufficiency.md §4 | PARTIAL — 有候选准入和稳定排序；无 Requirement Graph 优化器或冲突覆盖测试 | D |
-| 在向量约束下优化候选集边际覆盖 | context-budget-and-sufficiency.md §5 | NOT IMPLEMENTED — 无优化器/压缩器 | 本线程可做 |
-| Compaction 保留 Lineage、限定和冲突 | context-budget-and-sufficiency.md §5、§9.3 | NOT IMPLEMENTED — 无 Compaction 模型或 Fidelity Validator | D |
+| 在向量约束下优化候选集边际覆盖 | context-budget-and-sufficiency.md §5 | NOT IMPLEMENTED — Sufficiency 评估器已落地，但尚无候选集优化器或边际覆盖选择器 | 本线程可做 |
+| Compaction 保留 Lineage、限定和冲突 | context-budget-and-sufficiency.md §5、§9.3 | NOT IMPLEMENTED — Sufficiency 评估器已落地；仍无 Compaction 模型或 Fidelity Validator | D |
 | Sufficiency 结果和安全溢出降级 | context-budget-and-sufficiency.md §6–§7 | PARTIAL — 四种互斥结果及 Mandatory/Advisory/Unknown 判定规则已可执行；仍无 Overflow Planner 或预算降级工作流 | 本线程可做 |
 | Budget/Sufficiency 可观测性 | context-budget-and-sufficiency.md §8–§9.4 | NOT IMPLEMENTED — 无 Metrics/Report 模型 | 本线程可做 |
 | ChangeSet 公共封套、前置条件和全有或全无暂存 | context-edit-operations.md §1 | IMPLEMENTED — `ChangeSet`/`apply_change_set` 绑定 `base_version`，拒绝过期 Snapshot，并在私有克隆上应用；测试 `stale_base_is_rejected_without_changing_snapshot`、`any_failing_operation_discards_the_entire_staged_set`、`change_set_rejects_duplicate_operation_ids`；仅内存，持久化 T1 单独核算 | 本线程可做 |
@@ -72,7 +72,7 @@ Rust crate 仍停留在 private/staged 阶段。本轮新增纯内存 `ChangeSet
 | Replace 原子替换并保留旧成员 Tombstone | context-edit-operations.md §2 Replace | IMPLEMENTED — `ChangeSetOperation::Replace` 在同一结果中替换暂存成员并追加旧成员 Tombstone；测试 `replace_tombstones_old_membership_in_the_same_result` | D |
 | Reorder 要求精确覆盖同一 Context 的成员集合 | context-edit-operations.md §2 Reorder | IMPLEMENTED — `ChangeSetOperation::Reorder` 只接受精确排列；测试 `reorder_rejects_non_permutation` | 本线程可做 |
 | Expire 移除活动成员并保留 Tombstone | context-edit-operations.md §2 Expire | IMPLEMENTED — 基于版本截止条件的 `Expire` 移除到期成员并追加 `Expired` Tombstone；测试 `expire_uses_target_version_and_preserves_expiration_tombstone` | 本线程可做 |
-| Compact 操作和 Lineage 安全输出 | context-edit-operations.md §2 Compact | NOT IMPLEMENTED — 模型中没有 Compact 操作 | D |
+| Compact 操作和 Lineage 安全输出 | context-edit-operations.md §2 Compact | NOT IMPLEMENTED — Sufficiency 评估器已落地；仍无 Compact 操作或 Lineage 安全输出 | D |
 | Reconcile 操作和补偿 ChangeSet | context-edit-operations.md §2 Reconcile | IMPLEMENTED — `Reconcile` 将期望状态编译为 Update/Remove/Replace/Reorder，检查 Tombstone 并原子应用；测试 `reconcile_emits_updates_replacements_and_a_valid_final_order`、`remove_tombstone_is_visible_to_later_reconcile` | D |
 | 操作冲突、审计和错误分类 | context-edit-operations.md §3–§5 | PARTIAL — 已有 Stale-Base/Missing/Duplicate/Reorder/Version/Budget 类型化错误，以及带操作 ID/原因的操作记录和 Tombstone；仍无持久化审计日志或隐私安全的外部错误投影 | I |
 | Context Manager 组件责任边界 | context-manager.md §1–§2 | PARTIAL — 有数据原语和参考流程；无 Coordinator/Ports/Services | D |
