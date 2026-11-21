@@ -5,10 +5,19 @@ use memory_domain::{Memory, MemoryVersion, OpaqueId, ScopeRef};
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub enum StorageError {
-    NotFoundOrNotVisible, StaleVersion, IdempotencyConflict, InvalidReference,
-    ScopeMismatch, PermissionDenied, InvalidSchema, ProvenanceIncomplete,
-    ContentDigestMismatch, HistoryUnavailable, TransactionUnavailable,
+    NotFoundOrNotVisible,
+    StaleVersion,
+    IdempotencyConflict,
+    InvalidReference,
+    ScopeMismatch,
+    PermissionDenied,
+    InvalidSchema,
+    ProvenanceIncomplete,
+    ContentDigestMismatch,
+    HistoryUnavailable,
+    TransactionUnavailable,
     PublicationStateConflict,
+    Forgotten,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -67,6 +76,10 @@ pub struct ChangePage {
 pub trait MemoryStorage {
     fn create_memory(&mut self, memory: Memory, scope: &[ScopeRef]) -> Result<(), StorageError>;
     fn read_current(&self, memory_id: &OpaqueId, scope: &[ScopeRef]) -> Result<Option<MemoryVersion>, StorageError>;
+    /// Returns the `Memory` aggregate (lifecycle, retention, sensitivity) rather than a
+    /// `MemoryVersion`. Visibility semantics are identical to `read_current`: absent or
+    /// forgotten yields `Ok(None)`, non-intersecting scope yields `ScopeMismatch`.
+    fn read_memory(&self, memory_id: &OpaqueId, scope: &[ScopeRef]) -> Result<Option<Memory>, StorageError>;
     fn read_version(&self, memory_id: &OpaqueId, version_id: &OpaqueId, scope: &[ScopeRef]) -> Result<Option<MemoryVersion>, StorageError>;
     fn commit_version(&mut self, request: CommitRequest, scope: &[ScopeRef]) -> Result<CommitReceipt, StorageError>;
     /// Stage a version as hidden: it must not become current and must not be
@@ -75,6 +88,24 @@ pub trait MemoryStorage {
     /// Authorize a prepared version: allocate the canonical sequence, advance the
     /// current pointer and append the change record, all in one transaction.
     fn publish_prepared(&mut self, publication_id: &str, expected_current_version: Option<OpaqueId>, scope: &[ScopeRef]) -> Result<CommitReceipt, StorageError>;
+    /// Permanently hide a memory and all of its versions.
+    /// Repeated calls return the original fence sequence.
+    fn forget_memory(
+        &mut self,
+        memory_id: &OpaqueId,
+        reason_digest: &str,
+        scope: &[ScopeRef],
+    ) -> Result<i64, StorageError>;
+
+    /// Permanently hide one version. Other versions of the memory remain visible.
+    fn forget_version(
+        &mut self,
+        memory_id: &OpaqueId,
+        version_id: &OpaqueId,
+        reason_digest: &str,
+        scope: &[ScopeRef],
+    ) -> Result<i64, StorageError>;
+
     fn list_changes(&self, after: Option<CommitSequence>, scope: &[ScopeRef], limit: usize) -> Result<ChangePage, StorageError>;
     fn resolve_idempotency(&self, idempotency_key: &str, request_digest: &str, scope: &[ScopeRef]) -> Result<Option<CommitReceipt>, StorageError>;
 }

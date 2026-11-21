@@ -1,7 +1,10 @@
 //! SQLite implementation of the Phase 1 MemoryStorage port.
 //! 这是第一个具体持久化适配器；事务边界仍严格受 Storage Trait 约束。
 
-use memory_domain::{scope_set_contains_all, scopes_intersect, Memory, MemoryVersion, OpaqueId, ScopeRef};
+use memory_domain::{
+    scope_set_contains_all, scopes_intersect, Memory, MemoryLifecycle, MemoryVersion, OpaqueId,
+    ScopeRef,
+};
 use memory_storage::{
     ChangePage, ChangeRecord, CommitReceipt, CommitRequest, CommitSequence, MemoryStorage,
     PrepareRequest, PreparedCommitReceipt, StorageError,
@@ -110,7 +113,15 @@ impl SqliteMemoryStorage {
                    commit_sequence INTEGER
                  );
                  CREATE INDEX IF NOT EXISTS publication_preparations_memory_idx
-                   ON publication_preparations(memory_id, state);",
+                   ON publication_preparations(memory_id, state);
+                 CREATE TABLE IF NOT EXISTS canonical_forget_fences (
+                   target_kind TEXT NOT NULL CHECK (target_kind IN ('Memory', 'Version')),
+                   target_id TEXT NOT NULL,
+                   fence_sequence INTEGER NOT NULL UNIQUE CHECK (fence_sequence > 0),
+                   reason_digest TEXT NOT NULL,
+                   recorded_at TEXT NOT NULL,
+                   PRIMARY KEY (target_kind, target_id)
+                 );",
             )
             .map_err(|_| StorageError::TransactionUnavailable)
     }
@@ -142,6 +153,73 @@ impl SqliteMemoryStorage {
         }
     }
 
+    fn is_fenced(
+        connection: &Connection,
+        target_kind: &str,
+        target_id: &str,
+    ) -> Result<bool, StorageError> {
+        connection
+            .query_row(
+                "SELECT EXISTS(
+                    SELECT 1 FROM canonical_forget_fences
+                    WHERE target_kind = ?1 AND target_id = ?2
+                 )",
+                params![target_kind, target_id],
+                |row| row.get(0),
+            )
+            .map_err(|_| StorageError::TransactionUnavailable)
+    }
+
+    fn ensure_not_forgotten(
+        connection: &Connection,
+        memory_id: &OpaqueId,
+        version_id: Option<&OpaqueId>,
+        parent_version_id: Option<&OpaqueId>,
+    ) -> Result<(), StorageError> {
+        if Self::is_fenced(connection, "Memory", memory_id.as_str())? {
+            return Err(StorageError::Forgotten);
+        }
+
+        if let Some(version_id) = version_id {
+            if Self::is_fenced(connection, "Version", version_id.as_str())? {
+                return Err(StorageError::Forgotten);
+            }
+        }
+
+        if let Some(parent_id) = parent_version_id {
+            if Self::is_fenced(connection, "Version", parent_id.as_str())? {
+                return Err(StorageError::Forgotten);
+            }
+        }
+
+        Ok(())
+    }
+
+    fn next_fence_sequence(connection: &Connection) -> Result<i64, StorageError> {
+        let sequence: i64 = connection
+            .query_row(
+                "SELECT COALESCE(MAX(fence_sequence), 0) + 1
+                 FROM canonical_forget_fences",
+                [],
+                |row| row.get(0),
+            )
+            .map_err(|_| StorageError::TransactionUnavailable)?;
+
+        if sequence <= 0 {
+            return Err(StorageError::TransactionUnavailable);
+        }
+
+        Ok(sequence)
+    }
+
+    fn recorded_at() -> String {
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default();
+
+        format!("{}.{:09}Z", now.as_secs(), now.subsec_nanos())
+    }
+
     fn read_version_row(
         &self,
         memory_id: &OpaqueId,
@@ -155,25 +233,41 @@ impl SqliteMemoryStorage {
                  FROM versions v
                  LEFT JOIN publication_preparations p ON p.version_id = v.version_id
                  WHERE v.memory_id = ?1 AND v.version_id = ?2
-                   AND (p.version_id IS NULL OR p.state = 'Published')",
+                   AND (p.version_id IS NULL OR p.state = 'Published')
+                   AND NOT EXISTS (
+                       SELECT 1 FROM canonical_forget_fences f
+                       WHERE (f.target_kind = 'Memory' AND f.target_id = v.memory_id)
+                          OR (f.target_kind = 'Version' AND f.target_id = v.version_id)
+                   )",
                 params![memory_id.as_str(), version_id.as_str()],
                 |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?)),
             )
             .optional()
             .map_err(|_| StorageError::TransactionUnavailable)?;
+
         match row {
             Some((scope_json, version_json)) => {
                 Self::scope_allowed(&scope_json, scope)?;
                 let stored_scopes: Vec<ScopeRef> = Self::decode(&scope_json)?;
                 let mut version: MemoryVersion = Self::decode(&version_json)?;
+
                 version.validate().map_err(|_| StorageError::InvalidSchema)?;
-                if version.claims.iter().any(|claim| !scope_set_contains_all(&stored_scopes, &claim.scope_refs)) {
+
+                if version
+                    .claims
+                    .iter()
+                    .any(|claim| !scope_set_contains_all(&stored_scopes, &claim.scope_refs))
+                {
                     return Err(StorageError::InvalidSchema);
                 }
+
                 // A Claim is an indivisible disclosure unit: if any of its ScopeRefs
                 // is outside the caller-visible set, hide the entire Claim rather
                 // than returning a partial or existence-revealing projection.
-                version.claims.retain(|claim| scope_set_contains_all(scope, &claim.scope_refs));
+                version
+                    .claims
+                    .retain(|claim| scope_set_contains_all(scope, &claim.scope_refs));
+
                 Ok(Some(version))
             }
             None => Ok(None),
@@ -191,6 +285,13 @@ impl MemoryStorage for SqliteMemoryStorage {
             return Err(StorageError::InvalidReference);
         }
         Self::scope_allowed(&Self::encode(&memory.scope_refs)?, scope)?;
+        if Self::is_fenced(
+            &self.connection,
+            "Memory",
+            memory.memory_id.as_str(),
+        )? {
+            return Err(StorageError::Forgotten);
+        }
         let scope_json = Self::encode(&memory.scope_refs)?;
         let memory_json = Self::encode(&memory)?;
         self.connection
@@ -206,6 +307,35 @@ impl MemoryStorage for SqliteMemoryStorage {
             )
             .map_err(|_| StorageError::InvalidReference)?;
         Ok(())
+    }
+
+    fn read_memory(
+        &self,
+        memory_id: &OpaqueId,
+        scope: &[ScopeRef],
+    ) -> Result<Option<Memory>, StorageError> {
+        Self::validate_scope_set(scope)?;
+        let row = self
+            .connection
+            .query_row(
+                "SELECT scope_json, memory_json FROM memories WHERE memory_id = ?1",
+                params![memory_id.as_str()],
+                |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?)),
+            )
+            .optional()
+            .map_err(|_| StorageError::TransactionUnavailable)?;
+        let Some((scope_json, memory_json)) = row else { return Ok(None) };
+        Self::scope_allowed(&scope_json, scope)?;
+        // A forgotten memory is invisible on every read path, not only on version reads.
+        if Self::is_fenced(&self.connection, "Memory", memory_id.as_str())? {
+            return Ok(None);
+        }
+        let memory: Memory = Self::decode(&memory_json)?;
+        memory.validate().map_err(|_| StorageError::InvalidSchema)?;
+        if &memory.memory_id != memory_id {
+            return Err(StorageError::InvalidSchema);
+        }
+        Ok(Some(memory))
     }
 
     fn read_current(
@@ -270,6 +400,12 @@ impl MemoryStorage for SqliteMemoryStorage {
             .ok_or(StorageError::NotFoundOrNotVisible)?;
 
         Self::scope_allowed(&memory_row.0, scope)?;
+        Self::ensure_not_forgotten(
+            &tx,
+            &request.memory_id,
+            Some(&request.new_version.memory_version_id),
+            request.new_version.parent_version_id.as_ref(),
+        )?;
         let memory_scopes: Vec<ScopeRef> = Self::decode(&memory_row.0)?;
         if request.new_version.claims.iter().any(|claim| {
             !scope_set_contains_all(&memory_scopes, &claim.scope_refs)
@@ -422,6 +558,12 @@ impl MemoryStorage for SqliteMemoryStorage {
             .ok_or(StorageError::NotFoundOrNotVisible)?;
 
         Self::scope_allowed(&memory_row.0, scope)?;
+        Self::ensure_not_forgotten(
+            &tx,
+            &request.memory_id,
+            Some(&request.new_version.memory_version_id),
+            request.new_version.parent_version_id.as_ref(),
+        )?;
         let memory_scopes: Vec<ScopeRef> = Self::decode(&memory_row.0)?;
         if request.new_version.claims.iter().any(|claim| {
             !scope_set_contains_all(&memory_scopes, &claim.scope_refs)
@@ -627,6 +769,15 @@ impl MemoryStorage for SqliteMemoryStorage {
         let memory_id = OpaqueId::new(memory_id_text).map_err(|_| StorageError::InvalidSchema)?;
         let version_id = OpaqueId::new(version_id_text.clone()).map_err(|_| StorageError::InvalidSchema)?;
 
+        let prepared_version: MemoryVersion = Self::decode(&version_json)?;
+
+        Self::ensure_not_forgotten(
+            &tx,
+            &memory_id,
+            Some(&version_id),
+            prepared_version.parent_version_id.as_ref(),
+        )?;
+
         // Replay of a published preparation restores the original receipt and
         // never allocates a second sequence.
         if state == "Published" {
@@ -756,6 +907,162 @@ impl MemoryStorage for SqliteMemoryStorage {
         Ok(receipt)
     }
 
+    fn forget_memory(
+        &mut self,
+        memory_id: &OpaqueId,
+        reason_digest: &str,
+        scope: &[ScopeRef],
+    ) -> Result<i64, StorageError> {
+        Self::validate_scope_set(scope)?;
+
+        if reason_digest.is_empty() {
+            return Err(StorageError::InvalidSchema);
+        }
+
+        let tx = self
+            .connection
+            .transaction_with_behavior(TransactionBehavior::Immediate)
+            .map_err(|_| StorageError::TransactionUnavailable)?;
+
+        let (scope_json, memory_json): (String, String) = tx
+            .query_row(
+                "SELECT scope_json, memory_json FROM memories WHERE memory_id = ?1",
+                params![memory_id.as_str()],
+                |row| Ok((row.get(0)?, row.get(1)?)),
+            )
+            .optional()
+            .map_err(|_| StorageError::TransactionUnavailable)?
+            .ok_or(StorageError::NotFoundOrNotVisible)?;
+
+        Self::scope_allowed(&scope_json, scope)?;
+
+        if let Some(sequence) = tx
+            .query_row(
+                "SELECT fence_sequence FROM canonical_forget_fences
+                 WHERE target_kind = 'Memory' AND target_id = ?1",
+                params![memory_id.as_str()],
+                |row| row.get::<_, i64>(0),
+            )
+            .optional()
+            .map_err(|_| StorageError::TransactionUnavailable)?
+        {
+            tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+            return Ok(sequence);
+        }
+
+        let sequence = Self::next_fence_sequence(&tx)?;
+        let mut memory: Memory = Self::decode(&memory_json)?;
+        memory.lifecycle_state = MemoryLifecycle::Forgotten;
+        let updated_memory_json = Self::encode(&memory)?;
+
+        tx.execute(
+            "UPDATE memories SET memory_json = ?1 WHERE memory_id = ?2",
+            params![updated_memory_json, memory_id.as_str()],
+        )
+        .map_err(|_| StorageError::TransactionUnavailable)?;
+
+        tx.execute(
+            "INSERT INTO canonical_forget_fences
+                (target_kind, target_id, fence_sequence, reason_digest, recorded_at)
+             VALUES ('Memory', ?1, ?2, ?3, ?4)",
+            params![
+                memory_id.as_str(),
+                sequence,
+                reason_digest,
+                Self::recorded_at()
+            ],
+        )
+        .map_err(|_| StorageError::TransactionUnavailable)?;
+
+        tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+        Ok(sequence)
+    }
+
+    fn forget_version(
+        &mut self,
+        memory_id: &OpaqueId,
+        version_id: &OpaqueId,
+        reason_digest: &str,
+        scope: &[ScopeRef],
+    ) -> Result<i64, StorageError> {
+        Self::validate_scope_set(scope)?;
+
+        if reason_digest.is_empty() {
+            return Err(StorageError::InvalidSchema);
+        }
+
+        let tx = self
+            .connection
+            .transaction_with_behavior(TransactionBehavior::Immediate)
+            .map_err(|_| StorageError::TransactionUnavailable)?;
+
+        let scope_json: String = tx
+            .query_row(
+                "SELECT scope_json FROM memories WHERE memory_id = ?1",
+                params![memory_id.as_str()],
+                |row| row.get(0),
+            )
+            .optional()
+            .map_err(|_| StorageError::TransactionUnavailable)?
+            .ok_or(StorageError::NotFoundOrNotVisible)?;
+
+        Self::scope_allowed(&scope_json, scope)?;
+
+        // Order matters: confirm the version belongs to this memory, then honour
+        // an existing version fence before reporting the memory-level fence, so
+        // repeated forgets stay idempotent across a later memory-level forget.
+        let version_exists: bool = tx
+            .query_row(
+                "SELECT EXISTS(
+                    SELECT 1 FROM versions
+                    WHERE memory_id = ?1 AND version_id = ?2
+                 )",
+                params![memory_id.as_str(), version_id.as_str()],
+                |row| row.get(0),
+            )
+            .map_err(|_| StorageError::TransactionUnavailable)?;
+
+        if !version_exists {
+            return Err(StorageError::NotFoundOrNotVisible);
+        }
+
+        if let Some(sequence) = tx
+            .query_row(
+                "SELECT fence_sequence FROM canonical_forget_fences
+                 WHERE target_kind = 'Version' AND target_id = ?1",
+                params![version_id.as_str()],
+                |row| row.get::<_, i64>(0),
+            )
+            .optional()
+            .map_err(|_| StorageError::TransactionUnavailable)?
+        {
+            tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+            return Ok(sequence);
+        }
+
+        if Self::is_fenced(&tx, "Memory", memory_id.as_str())? {
+            return Err(StorageError::Forgotten);
+        }
+
+        let sequence = Self::next_fence_sequence(&tx)?;
+
+        tx.execute(
+            "INSERT INTO canonical_forget_fences
+                (target_kind, target_id, fence_sequence, reason_digest, recorded_at)
+             VALUES ('Version', ?1, ?2, ?3, ?4)",
+            params![
+                version_id.as_str(),
+                sequence,
+                reason_digest,
+                Self::recorded_at()
+            ],
+        )
+        .map_err(|_| StorageError::TransactionUnavailable)?;
+
+        tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+        Ok(sequence)
+    }
+
     fn list_changes(
         &self,
         after: Option<CommitSequence>,
@@ -771,7 +1078,13 @@ impl MemoryStorage for SqliteMemoryStorage {
             .prepare(
                 "SELECT c.commit_sequence, c.memory_id, c.version_id, m.scope_json
                  FROM commit_log c JOIN memories m ON m.memory_id = c.memory_id
-                 WHERE c.commit_sequence > ?1 ORDER BY c.commit_sequence ASC",
+                 WHERE c.commit_sequence > ?1
+                   AND NOT EXISTS (
+                       SELECT 1 FROM canonical_forget_fences f
+                       WHERE (f.target_kind = 'Memory' AND f.target_id = c.memory_id)
+                          OR (f.target_kind = 'Version' AND f.target_id = c.version_id)
+                   )
+                 ORDER BY c.commit_sequence ASC",
             )
             .map_err(|_| StorageError::TransactionUnavailable)?;
         let rows = stmt
@@ -827,7 +1140,11 @@ impl MemoryStorage for SqliteMemoryStorage {
                 "SELECT i.request_digest, i.receipt_json, m.scope_json
                  FROM idempotency i
                  JOIN memories m ON m.memory_id = i.memory_id
-                 WHERE i.idempotency_key = ?1",
+                 WHERE i.idempotency_key = ?1
+                   AND NOT EXISTS (
+                       SELECT 1 FROM canonical_forget_fences f
+                       WHERE f.target_kind = 'Memory' AND f.target_id = i.memory_id
+                   )",
                 params![idempotency_key],
                 |row| Ok((
                     row.get::<_, String>(0)?,
@@ -841,11 +1158,22 @@ impl MemoryStorage for SqliteMemoryStorage {
             None => Ok(None),
             Some((stored_digest, receipt_json, scope_json)) => {
                 Self::scope_allowed(&scope_json, scope)?;
-                if stored_digest == request_digest {
-                    Ok(Some(Self::decode(&receipt_json)?))
-                } else {
-                    Err(StorageError::IdempotencyConflict)
+                if stored_digest != request_digest {
+                    return Err(StorageError::IdempotencyConflict);
                 }
+
+                let receipt: CommitReceipt = Self::decode(&receipt_json)?;
+
+                // A version-level Forget also suppresses replay of its receipt.
+                if Self::is_fenced(
+                    &self.connection,
+                    "Version",
+                    receipt.resulting_version_id.as_str(),
+                )? {
+                    return Ok(None);
+                }
+
+                Ok(Some(receipt))
             }
         }
     }
@@ -2588,5 +2916,310 @@ mod tests {
             |row| row.get(0),
         ).unwrap();
         assert_eq!(log_count, 0);
+    }
+
+    #[test]
+    fn f1_forget_memory_hides_current_and_history() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        store.commit_version(
+            CommitRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version: version("v1", 1, None),
+                idempotency_key: "f1-op1".into(),
+                request_digest: "f1-d1".into(),
+            },
+            &[scope()],
+        ).unwrap();
+
+        store.commit_version(
+            CommitRequest {
+                memory_id: id("m1"),
+                expected_current_version: Some(id("v1")),
+                new_version: version("v2", 2, Some("v1")),
+                idempotency_key: "f1-op2".into(),
+                request_digest: "f1-d2".into(),
+            },
+            &[scope()],
+        ).unwrap();
+
+        store.forget_memory(&id("m1"), "reason-f1", &[scope()]).unwrap();
+
+        assert!(store.read_current(&id("m1"), &[scope()]).unwrap().is_none());
+        assert!(store.read_version(&id("m1"), &id("v1"), &[scope()]).unwrap().is_none());
+        assert!(store.read_version(&id("m1"), &id("v2"), &[scope()]).unwrap().is_none());
+    }
+
+    #[test]
+    fn f2_forget_memory_excludes_from_change_pages() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        store.commit_version(
+            CommitRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version: version("v1", 1, None),
+                idempotency_key: "f2-op".into(),
+                request_digest: "f2-d".into(),
+            },
+            &[scope()],
+        ).unwrap();
+
+        assert_eq!(store.list_changes(None, &[scope()], 10).unwrap().records.len(), 1);
+
+        store.forget_memory(&id("m1"), "reason-f2", &[scope()]).unwrap();
+
+        let page = store.list_changes(None, &[scope()], 10).unwrap();
+        assert!(page.records.is_empty());
+        assert_eq!(page.next_cursor, None);
+    }
+
+    #[test]
+    fn f3_forget_memory_rejects_new_commit() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+        store.forget_memory(&id("m1"), "reason-f3", &[scope()]).unwrap();
+
+        let result = store.commit_version(
+            CommitRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version: version("v1", 1, None),
+                idempotency_key: "f3-op".into(),
+                request_digest: "f3-d".into(),
+            },
+            &[scope()],
+        );
+
+        assert_eq!(result, Err(StorageError::Forgotten));
+    }
+
+    #[test]
+    fn f4_forget_memory_rejects_prepare_and_publish() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        store.prepare_version(
+            PrepareRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version: version("v1", 1, None),
+                idempotency_key: "f4-prepare-op".into(),
+                request_digest: "f4-prepare-d".into(),
+                publication_id: "f4-publication".into(),
+                generation: 1,
+            },
+            &[scope()],
+        ).unwrap();
+
+        store.forget_memory(&id("m1"), "reason-f4", &[scope()]).unwrap();
+
+        let result = store.publish_prepared("f4-publication", None, &[scope()]);
+        assert_eq!(result, Err(StorageError::Forgotten));
+
+        let prepare_replay = store.prepare_version(
+            PrepareRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version: version("v1", 1, None),
+                idempotency_key: "f4-prepare-op".into(),
+                request_digest: "f4-prepare-d".into(),
+                publication_id: "f4-publication".into(),
+                generation: 1,
+            },
+            &[scope()],
+        );
+        assert_eq!(prepare_replay, Err(StorageError::Forgotten));
+    }
+
+    #[test]
+    fn f5_forget_memory_blocks_idempotency_replay() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        let request = CommitRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version: version("v1", 1, None),
+            idempotency_key: "f5-op".into(),
+            request_digest: "f5-d".into(),
+        };
+
+        let receipt = store.commit_version(request.clone(), &[scope()]).unwrap();
+        assert_eq!(
+            store.resolve_idempotency("f5-op", "f5-d", &[scope()]).unwrap(),
+            Some(receipt)
+        );
+
+        store.forget_memory(&id("m1"), "reason-f5", &[scope()]).unwrap();
+
+        assert_eq!(
+            store.resolve_idempotency("f5-op", "f5-d", &[scope()]).unwrap(),
+            None
+        );
+
+        assert_eq!(
+            store.commit_version(request, &[scope()]),
+            Err(StorageError::Forgotten)
+        );
+    }
+
+    #[test]
+    fn f6_forget_is_idempotent() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        let first = store.forget_memory(&id("m1"), "reason-f6-a", &[scope()]).unwrap();
+        let second = store.forget_memory(&id("m1"), "reason-f6-b", &[scope()]).unwrap();
+
+        assert_eq!(first, second);
+
+        let count: i64 = store.connection.query_row(
+            "SELECT COUNT(*) FROM canonical_forget_fences
+             WHERE target_kind = 'Memory' AND target_id = 'm1'",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+
+        assert_eq!(count, 1);
+    }
+
+    #[test]
+    fn f7_forget_version_only_hides_that_version() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        store.commit_version(
+            CommitRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version: version("v1", 1, None),
+                idempotency_key: "f7-op1".into(),
+                request_digest: "f7-d1".into(),
+            },
+            &[scope()],
+        ).unwrap();
+
+        store.commit_version(
+            CommitRequest {
+                memory_id: id("m1"),
+                expected_current_version: Some(id("v1")),
+                new_version: version("v2", 2, Some("v1")),
+                idempotency_key: "f7-op2".into(),
+                request_digest: "f7-d2".into(),
+            },
+            &[scope()],
+        ).unwrap();
+
+        store.forget_version(
+            &id("m1"),
+            &id("v1"),
+            "reason-f7",
+            &[scope()],
+        ).unwrap();
+
+        assert!(store.read_version(&id("m1"), &id("v1"), &[scope()]).unwrap().is_none());
+        assert_eq!(
+            store.read_current(&id("m1"), &[scope()]).unwrap().unwrap().memory_version_id,
+            id("v2")
+        );
+        assert!(store.read_version(&id("m1"), &id("v2"), &[scope()]).unwrap().is_some());
+    }
+
+    #[test]
+    fn f8_forget_version_blocks_child_commit() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        store.commit_version(
+            CommitRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version: version("v1", 1, None),
+                idempotency_key: "f8-op1".into(),
+                request_digest: "f8-d1".into(),
+            },
+            &[scope()],
+        ).unwrap();
+
+        store.forget_version(
+            &id("m1"),
+            &id("v1"),
+            "reason-f8",
+            &[scope()],
+        ).unwrap();
+
+        let result = store.commit_version(
+            CommitRequest {
+                memory_id: id("m1"),
+                expected_current_version: Some(id("v1")),
+                new_version: version("v2", 2, Some("v1")),
+                idempotency_key: "f8-op2".into(),
+                request_digest: "f8-d2".into(),
+            },
+            &[scope()],
+        );
+
+        assert_eq!(result, Err(StorageError::Forgotten));
+    }
+
+    #[test]
+    fn f9_forget_memory_sets_lifecycle_state() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        store.forget_memory(&id("m1"), "reason-f9", &[scope()]).unwrap();
+
+        let memory_json: String = store.connection.query_row(
+            "SELECT memory_json FROM memories WHERE memory_id = 'm1'",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+
+        let stored: Memory = SqliteMemoryStorage::decode(&memory_json).unwrap();
+        assert_eq!(stored.lifecycle_state, MemoryLifecycle::Forgotten);
+    }
+
+    #[test]
+    fn f10_forget_survives_reopen() {
+        let path = temp_db_path("forget-reopen");
+
+        let sequence = {
+            let mut store = SqliteMemoryStorage::open(&path).unwrap();
+            store.create_memory(memory(), &[scope()]).unwrap();
+
+            store.commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: version("v1", 1, None),
+                    idempotency_key: "f10-op".into(),
+                    request_digest: "f10-d".into(),
+                },
+                &[scope()],
+            ).unwrap();
+
+            store.forget_memory(&id("m1"), "reason-f10", &[scope()]).unwrap()
+        };
+
+        let reopened = SqliteMemoryStorage::open(&path).unwrap();
+
+        assert!(reopened.read_current(&id("m1"), &[scope()]).unwrap().is_none());
+        assert!(reopened.read_version(&id("m1"), &id("v1"), &[scope()]).unwrap().is_none());
+
+        let stored_sequence: i64 = reopened.connection.query_row(
+            "SELECT fence_sequence FROM canonical_forget_fences
+             WHERE target_kind = 'Memory' AND target_id = 'm1'",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+
+        assert_eq!(stored_sequence, sequence);
+
+        drop(reopened);
+        remove_db_files(&path);
     }
 }
