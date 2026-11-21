@@ -351,9 +351,40 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - FOLLOW_UP_ACTIONS：C/H 发布映射和符合性用例；不建平行 API。
 
 
+
+### 7.3 已解决与仍开放的决策登记
+
+| 项目 | 处置 | 精确边界 / 下一责任方 |
+|---|---|---|
+| BMCP 规范名称 | 已解决——Brain Memory Context Protocol | Main terminology Blob `b8770fbb58e4fac087698043c40a57531b1d244d`；“Brain Memory Control Protocol”不是规范名称 |
+| Fact/Claim 语义 | 已解决——Option A + I1 | 已合并 Owner 决策 PR #446；Blob `d59756a8eb454480804c482ca03c68345ab5abf2` |
+| Fact/Claim 字段/Wire Schema | CANDIDATE / NOT FROZEN | B/D/E/F/G/H/I 消费者工件须完成版本 Pin 和审查；未批准任何 Payload 字段 |
+| H-CONFIRM-001..004 | ACCEPTED_SEMANTICALLY_BY_OWNER_DELEGATE / NOT_WIRE_FROZEN | H 负责规范 Wire/Spec 更新；不声称存在独立 H 签名 |
+| BMCP-DR-002 | DEFERRED_TO_D_I_OWNER_CONTRACT_PUBLICATION | D/I 发布精确可调用接口/IDL/Currentness 词汇；H 不得发明权威 API |
+| BMCP-DR-003 / MCP Mapping | OPEN——Issue #449 | C 发布精确 Agent/MCP-to-BMCP Mapping；H 只审查 Wire/Transport 范围 |
+| BMCP Runtime / AT-01..AT-20 | NOT AUTHORIZED / NOT RUN | Issue #7 实施绑定继续延期 |
+
+**BMCP-DR-002 的 D/I 证据（权属证据，不是可调用 API 发布）：**
+- D：`docs/en/03-memory-brain/forget-fence-and-completion-contract.md` Blob `c791895333ab6140f035f4f622d5dee9325d422d`；`forget-fence-operation-and-publication-gate.md` Blob `9c054932994bb078e2834df8bd66f73895aa04f5`；`memory-versioning.md` Blob `4efbd26db9586f6fcf1897f42ffba287d625b903`；`commit-cursor-semantics.md` Blob `2de7fe35229372ae5b06093e5e031c2c243fbd7c`。
+- I：`docs/en/09-security-governance/security-governance-guide.md` Blob `061c5847b3df879eeaf3c71e5eae0bfa162b276a`；中文镜像 Blob `372d27c79dc79d09bcdb0f142c979efdba1c2b6e`。
+- 这些来源定义领域语义和操作名称，不是完整可调用 API/IDL，也没有冻结 Wire 表示。D 定义 RegisterProducerWork、InstallForgetFence、PublishDerivedIfFenceCurrent、CompleteProducerWork、ResolveProducerWork、ReconcileForgetBarrier 等操作。I 定义 PermissionEpoch、AuthorizationDecisionRef、撤销/Currentness 和证据接受语义；没有冻结的公共 authorize() Endpoint/Schema。
+- 裁决：D 仍是 Canonical ForgetOperation/Fence 和 Producer-barrier 语义的唯一权威；I 仍是 Principal Authorization、PermissionEpoch、撤销和 Global Forget Policy 的唯一权威。BMCP 只携带 Owner 签发的不透明 Ref/Epoch，并在接口发布后调用对应权威的 Validation/Currentness 操作。PermissionEpoch 与 ForgetFence 是不同名义类型。缺失/过期/不可用/不确定证据必须 Fail-closed。
+
+**C Mapping 边界：**Issue #449 仍 OPEN，规定 MCP Server（若选用）是 C 的北向 Agent-facing Adapter/Gateway，不是 BMCP，也不得形成平行 Brain API。C 必须将 Agent Request/Attempt Identity 映射到 H 的 message_id/correlation_id/causation_id，保留 Principal 来源与 I Authorization，并区分 Tool Result、BMCP Business Response、Transport ACK、E Receipt 和 G Applied。目前没有 C 的答复或验收记录。
+
 ## 8. Runtime 验收计划——NOT RUN
 
 每行都是未来 Runtime 要求。本工作未执行下列任何测试。设计文档/参考模型不等于 Runtime PASS。
+
+### 8.1 现有符合性证据——范围受限，不代表完整协议 PASS
+
+- Main `c138654c942dc93b5a36eccb2ff0e41452156429`：`python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v`——**30 passed，0 failed**，退出码 0。该结果只覆盖 Applied Delivery Evidence 符合性套件。
+- Open PR #436 精确 Head `1ffed9ed127df98b2f823a66ec80ea43d08cb9dc`：`python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/provider_outcome -p 'test_*.py' -v`——**运行 10 项；5 passed；5 skipped；0 failed**，退出码 0。跳过的 CPO-02/04/05/09/10 明确需要 Owner C 权威语义 Validator。该结果仅验证 Schema 结构，不验证 C 语义或密码学签名。
+- PR #436 的双语协议索引和 provider_outcome 测试仍在 Open PR 中，尚未合入 Main。其索引将 RecoveryJoin 1.0.2 的 Schema/Validator/Test 标记为未交付。
+- 这些结果不构成完整 BMCP 符合性。Strict JSON Parser 是参考模型，不是生产 Transport。当前不存在 `tests/protocol_test.rs` 和 `crates/bmcp`。
+- AT-01..AT-20 仍为 **PLANNED_NOT_RUN**。本架构阶段不存在 Runtime 仓库/实施授权。
+
+
 
 | ID / 场景 | OWNER | PRECONDITION | EXPECTED_RESULT | TEST_METHOD | DEPENDENCY | ACCEPTANCE_STATUS |
 |---|---|---|---|---|---|---|
@@ -364,21 +395,21 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 | AT-05 未知操作 | H | Family/Operation 未注册 | 副作用前拒绝 | Registry 负向/Fuzz | H Registry | BLOCKED_BY_H_CONTRACT |
 | AT-06 未授权 | I + H | 认证 Principal 被当前 I Policy 拒绝 | Deny；不调用受保护服务；不泄露跨 Scope | Authorization 负向集成 | I API/Epoch + H Binding | BLOCKED_BY_OWNER_CONTRACT |
 | AT-07 Request/Response 关联 | H | Request 有 message_id/correlation_id | Response Causation 引用 Request；保留 Correlation | 多消息 Round-trip | H Request Identity | BLOCKED_BY_H_CONTRACT |
-| AT-08 执行成功 | 领域 Owner + BMCP | Parse/校验/授权通过；Owner 返回成功 Receipt | Response 含精确 Owner Result；ACK 独立 | Service Contract 集成 | E/D/G API | BLOCKED_BY_OWNER_DECISION |
+| AT-08 执行成功 | 领域 Owner + BMCP | Parse/校验/授权通过；Owner 返回成功 Receipt | Response 含精确 Owner Result；ACK 独立 | Service Contract 集成 | E/D/G API | BLOCKED_BY_OWNER_CONTRACT |
 | AT-09 执行失败 | 领域 Owner + H | Owner 返回确定失败 | 保留 Failure；不伪造成功 | 注入 Service Fault | Owner Error + H Mapping | BLOCKED_BY_H_CONTRACT |
-| AT-10 超时 | Owner + H | 可能副作用前后 Timeout | Owner Reconciliation 前 UNKNOWN；同一 Key | 各边界 Crash/Timeout | Owner Lookup/Reconcile | BLOCKED_BY_OWNER_DECISION |
+| AT-10 超时 | Owner + H | 可能副作用前后 Timeout | Owner Reconciliation 前 UNKNOWN；同一 Key | 各边界 Crash/Timeout | Owner Lookup/Reconcile | BLOCKED_BY_OWNER_CONTRACT |
 | AT-11 ACK Receipt | H | 对一个声明边界的有效 ACK | 只记录该边界；不推断执行/持久化 | ACK Schema/Consumer | H ACK | BLOCKED_BY_H_CONTRACT |
 | AT-12 ACK 丢失 | H + Owner | 副作用可能完成；ACK/Response 丢失 | UNKNOWN；同身份 Reconcile；不盲目重复 | Network Fault + Journal Reconcile | H ACK + Owner Idempotency | BLOCKED_BY_H_CONTRACT |
-| AT-13 重复 Request | Owner + H | 相同幂等身份和摘要 | 返回原结果；不重复副作用 | 并发 Duplicate/Replay | Owner Idempotency | BLOCKED_BY_OWNER_DECISION |
+| AT-13 重复 Request | Owner + H | 相同幂等身份和摘要 | 返回原结果；不重复副作用 | 并发 Duplicate/Replay | Owner Idempotency | BLOCKED_BY_OWNER_CONTRACT |
 | AT-14 重复 ACK | H + Consumer | 相同 ACK ID/Digest，再相同 ID/不同 Digest | Replay 幂等；摘要改变 Conflict；不变更状态 | ACK Replay/Mutation Vector | H ACK + D/G/I Mapping | BLOCKED_BY_H_CONTRACT |
 | AT-15 Validator 拒绝 | H + Owner | Envelope/Schema/Critical Extension 无效 | 在正确层拒绝；不进入后续阶段 | 分层负向套件 | H Validator + Domain Schema | BLOCKED_BY_H_CONTRACT |
-| AT-16 Forget Fence 冲突 | D + I + H | D Fence 或 I Epoch Stale/Unknown | Fail-closed；不执行受保护 Apply/Commit；保留抑制 | 两种 Race 顺序 + 权威故障 | D/I Currentness API | BLOCKED_BY_OWNER_DECISION |
-| AT-17 Canonical Identity 冲突 | D（Fact/Claim 另依赖 B ADR） | Payload Ref 与 D Identity 不匹配或 Fact/Claim 未决 | Reject/Quarantine；不签发/转换身份 | Forged/Mismatch Identity Vector | D API；B ADR | BLOCKED_BY_OWNER_DECISION |
+| AT-16 Forget Fence 冲突 | D + I + H | D Fence 或 I Epoch Stale/Unknown | Fail-closed；不执行受保护 Apply/Commit；保留抑制 | 两种 Race 顺序 + 权威故障 | D/I Currentness API | BLOCKED_BY_OWNER_CONTRACT |
+| AT-17 Canonical Identity 冲突 | D（Fact/Claim 另依赖 B ADR） | Payload Ref 与 D Identity 不匹配或 Fact/Claim 未决 | Reject/Quarantine；不签发/转换身份 | Forged/Mismatch Identity Vector | D API；B ADR | BLOCKED_BY_OWNER_CONTRACT |
 | AT-18 序列化稳定性 | H | 精确 Schema/Profile/Version | 同语义对象产生获批 Canonical Bytes/Digest | 跨语言 Golden Vector | H Canonicalization/Signature | BLOCKED_BY_H_CONTRACT |
 | AT-19 Unicode | H | 有效/无效 UTF-8、补充字符、规范化边界、重复 Key | 按 Profile 保留有效 Unicode；拒绝无效/歧义形式 | 跨语言 Unicode/畸形字节 | H Wire Decode/Canonicalization | BLOCKED_BY_H_CONTRACT |
 | AT-20 Request/Response 一致性 | H + 领域 Owner | Request ID/Correlation/Operation/Idempotency 固定 | Response 关联精确 Request，只返回 Owner Result | 端到端 Trace 断言 | H Correlation + Owner Result | BLOCKED_BY_H_CONTRACT |
 
-BLOCKED_BY_H_CONTRACT 表示缺少 H 所有的 Wire/Transport/ACK/Validator 决策或精确映射。BLOCKED_BY_OWNER_DECISION 表示缺少权威 Owner 领域契约/API 或 ADR 决议。Runtime 授权和精确 Build 可用前所有测试均为 NOT RUN；依赖标签不是测试结果。
+BLOCKED_BY_H_CONTRACT 表示缺少 H 所有的 Wire/Transport/ACK/Validator 决策或精确映射。BLOCKED_BY_OWNER_CONTRACT 表示缺少权威 Owner 领域契约/API 或 ADR 决议。Runtime 授权和精确 Build 可用前所有测试均为 NOT RUN；依赖标签不是测试结果。
 
 ## 9. Runtime 工程交接 / Issue #7 进入条件
 
@@ -401,12 +432,12 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 | 工作流 | 下一项工件 | 责任权威 | 进入状态 |
 |---|---|---|---|
 | H | 冻结 Envelope/Version、Wire Decode、ACK、Validator、Error/Conformance | H | BLOCKED_BY_H_CONTRACT |
-| B / Governance | 正式 Fact/Claim ADR 和 Schema 影响 | B + 有权治理机构 | BLOCKED_BY_OWNER_DECISION |
-| D | Canonical Identity/Lifecycle/Fence API 和 Receipt | D | BLOCKED_BY_OWNER_DECISION |
-| I | Authorization/PermissionEpoch/Revocation API | I | BLOCKED_BY_OWNER_DECISION |
-| E | Candidate IR、AcceptedReceipt、Service 边界 | E | BLOCKED_BY_OWNER_DECISION |
-| C | Agent/MCP Adapter-to-BMCP Mapping | C + H | BLOCKED_BY_OWNER_DECISION |
-| G | ContextVersion/Delivery/Applied/ACK Mapping | G + H | BLOCKED_BY_OWNER_DECISION |
+| B / Governance | 正式 Fact/Claim ADR 和 Schema 影响 | B + 有权治理机构 | BLOCKED_BY_OWNER_CONTRACT |
+| D | Canonical Identity/Lifecycle/Fence API 和 Receipt | D | BLOCKED_BY_OWNER_CONTRACT |
+| I | Authorization/PermissionEpoch/Revocation API | I | BLOCKED_BY_OWNER_CONTRACT |
+| E | Candidate IR、AcceptedReceipt、Service 边界 | E | BLOCKED_BY_OWNER_CONTRACT |
+| C | Agent/MCP Adapter-to-BMCP Mapping | C + H | BLOCKED_BY_OWNER_CONTRACT |
+| G | ContextVersion/Delivery/Applied/ACK Mapping | G + H | BLOCKED_BY_OWNER_CONTRACT |
 | Engineering Leadership | Canonical Runtime Repo/Team/CI/Deployment 权限 | Engineering Leadership | DEFERRED_TO_ENGINEERING_PHASE |
 | BMCP 架构集成 | Owner 回复后刷新来源 Pin | BMCP 架构负责人 | NOT STARTED |
 
@@ -424,7 +455,7 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 
 | 文档 / 版本 | 英文路径 | 中文路径 | 来源版本 | 一致性 |
 |---|---|---|---|---|
-| BMCP-ARCH-001 / 0.2.0 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main 47b8600e7509ef4349c996dce15bd3146b155f75；H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74 | 作者准备双语 Pair；独立一致性审查 PENDING |
+| BMCP-ARCH-001 / 0.2.0 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main c138654c942dc93b5a36eccb2ff0e41452156429；H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74 | 作者准备双语 Pair；独立一致性审查 PENDING |
 
 Coverage Register 仅将此登记为 Review/Handoff Pair，不改变 “BMCP Protocol detailed contracts (7 core specifications)” 条目；双语规范核心文档覆盖仍为 NOT STARTED。
 
@@ -432,13 +463,13 @@ Coverage Register 仅将此登记为 Review/Handoff Pair，不改变 “BMCP Pro
 
 - ARCHITECTURE_DELIVERABLE_STATUS：**ARCHITECTURE_PARTIAL**
 - PARSE_CONTRACT_STATUS：候选语义边界已说明；H Wire/Decode Mapping 待定
-- EXECUTE_CONTRACT_STATUS：CANDIDATE；D/I/E/G API 和 Fact/Claim 决议待定
+- EXECUTE_CONTRACT_STATUS：CANDIDATE；D/I 可调用接口和 C/H Mapping 待定；Fact/Claim 语义已批准
 - RESPOND_CONTRACT_STATUS：CANDIDATE；H Response Envelope/Correlation Mapping 待定
 - H_DEPENDENCY_STATUS：**BLOCKED_BY_H_CONTRACT**
 - CROSS_MODULE_DEPENDENCIES：H、B、C、D、E、G、I
-- OWNER_DECISIONS_REQUIRED：BMCP-DR-001 语义已解决；BMCP-DR-002 DEFERRED_TO_D_I_OWNER_CONTRACT_PUBLICATION；BMCP-DR-003 由 Issue #449 跟踪且仍 OPEN
+- OWNER_DECISIONS_REQUIRED：BMCP-DR-001 语义已批准；BMCP-DR-002 DEFERRED_TO_D_I_OWNER_CONTRACT_PUBLICATION；BMCP-DR-003 由 Issue #449 跟踪且仍 OPEN
 - ISSUE_7_STATUS：IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE；GitHub CLOSED / not_planned；未改变
 - RUNTIME_IMPLEMENTATION_STATUS：NOT AUTHORIZED / NOT STARTED
 - PR / Commit：仅在 Push 和 PR 成功后填写；不授权 Merge
 
-**下一步：** H 处理 H-CONFIRM-001..004（规范名称已确定；Request Identity、Decode Boundary、ACK 和 Validator 细节仍开放）。B/D/E/F/G/H/I 完成精确消费者工件版本 Pin 与审查；D/I 发布精确权威接口；C/H 完成 MCP-to-BMCP 映射。随后 BMCP 架构集成刷新精确 Pin。所有工程进入前置条件均有证据前，Runtime 继续延期。
+**下一步：** H 根据已接受的 H-CONFIRM-001..004 更新并版本化规范双语 Wire/Envelope/ACK/Validator 工件。B/D/E/F/G/H/I 完成精确消费者工件版本 Pin 与审查；D/I 发布精确权威接口；C 通过 Issue #449 发布 MCP-to-BMCP 映射。随后 BMCP 架构集成刷新精确 Pin。所有工程进入前置条件均有证据前，Runtime 继续延期。
