@@ -357,6 +357,70 @@
         "signature_ref",
         "request_enumeration_status",
         "admission_enumeration_status"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "request_enumeration_status": {
+                "const": "COMPLETE_EMPTY"
+              },
+              "request_count": {
+                "const": 0
+              }
+            },
+            "required": [
+              "request_enumeration_status",
+              "request_count"
+            ]
+          },
+          "then": {
+            "properties": {
+              "request_highwaters": {
+                "type": "object"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "request_highwaters": {
+                "type": "object",
+                "minProperties": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "admission_enumeration_status": {
+                "const": "COMPLETE_EMPTY"
+              },
+              "admission_count": {
+                "const": 0
+              }
+            },
+            "required": [
+              "admission_enumeration_status",
+              "admission_count"
+            ]
+          },
+          "then": {
+            "properties": {
+              "admission_highwaters": {
+                "type": "object"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "admission_highwaters": {
+                "type": "object",
+                "minProperties": 1
+              }
+            }
+          }
+        }
       ]
     },
     "ownerSnapshots": {
