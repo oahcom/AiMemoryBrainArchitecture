@@ -10,7 +10,7 @@ ADR Carrier: #43, comment 7034237663
 
 Disposition: CORR-APPLY-DISP-01
 
-Correction Status: APPLIED_PENDING_INDEPENDENT_REVIEW
+Correction Status: APPLIED
 
 ## 2. Decision status
 
@@ -55,7 +55,7 @@ TEST EXECUTION DISPATCH GATE = UNLOCKED-WITH-CONDITIONS (REQ-04 STEP 5 DISPATCH 
 | R4 Fact/Claim synchronization | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
 | R5 End-to-end publication | APPLIED | PASS (M19: 7050001430; M20: 7050002020; M27: 7057332489; M28: 7057332846) |
 | R5 Storage §8.8 | APPLIED | PASS (M22: 7056912025; M27: 7057332489; M28: 7057332846) |
-| R5 Admission stage relation | APPLIED | PASS (M22: 7056912025; M27: 7057332489; M28: 7057332846) |
+| R5 Admission stage relation | APPLIED | PASS (M25: 7057203158; M26: 7057203517; M27: 7057332489; M28: 7057332846) |
 | PASS governance synchronization | APPLIED | PASS (M19: 7050001430; M20: 7050002020; M27: 7057332489; M28: 7057332846) |
 
 ## 4. Application evidence requirements
@@ -240,10 +240,11 @@ by D; Fact-specific modeling and Fact approval remain `OPEN` under INT-P0-01; ph
 DDL remain `NOT APPROVED`. `ADR-BLOCKED` no longer describes Claim identity mapping. The
 independent-review finding on this point was read from `2717fadb`, which is superseded.
 
-Two status values appear in §3: `FIX_APPLIED_AWAITING_REREVIEW` and
-`APPLIED_PENDING_INDEPENDENT_REVIEW`. They are one certainty level, not two grades. Both mean the
-application happened and independent review has not; they differ only in which round produced the
-application. Recorded here so the difference is not read as a ranking.
+Earlier versions of §3 used two status values, `FIX_APPLIED_AWAITING_REREVIEW` and
+`APPLIED_PENDING_INDEPENDENT_REVIEW`. At that time both denoted one certainty level, not two
+grades: the application happened and independent review had not, differing only in which round
+produced the application. These are historical values. They no longer describe the current §3
+rows, which record `APPLIED` together with the independent-review result.
 
 The two status files carry no row above, because this section ships inside them: their pre-commit
 Blobs were `db3e9f394c61c247ae9dde51c92d190f194ee11a` (EN) and `87c00ade741ebc0837c2f6903b820741f2887e4a` (ZH), superseded by the commit that adds this section.
@@ -543,8 +544,9 @@ R1-R5 = PASS / NOT REOPENED
 FORMAL ACCEPTANCE = PENDING
 IMPLEMENTATION CONFORMANCE = NOT ESTABLISHED
 
-TEST EXECUTION GATE = UNLOCKED-WITH-CONDITIONS
-UNLOCKED SCOPE = REQ-04 STEP 5 DISPATCH ONLY
+TEST EXECUTION = SUSPENDED
+TEST EXECUTION DISPATCH GATE = UNLOCKED-WITH-CONDITIONS
+UNLOCKED SCOPE = REQ-04 STEP 5 DISPATCH SPEC ONLY
 ```
 
 The PASS decision is an independent review disposition. It is not an acceptance decision.
