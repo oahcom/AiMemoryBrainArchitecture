@@ -1,8 +1,50 @@
+---
+document_metadata:
+  domain: security-governance
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Under-Review
+      approver: NOT_RECORDED
+      decision_date: NOT_RECORDED
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "00-governance/architecture-document-management-policy.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Records gaps observed during the GOV-DOC-002 rollout; no independent verification of each gap's status exists."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    normative_status: Informative
+    canonical_conflict_status: None
+---
+
 # Documentation gaps / 文档缺口登记
 
 Referenced-but-missing normative documents. Each entry records a link that could not be resolved during the GOV-DOC-002 rollout.
 
 指向但缺失的规范文档。每条记录在 GOV-DOC-002 推行过程中无法解析的链接。
+
+This file is governed by GOV-DOC-002 even though `docs/` as a whole is not: the policy cites it in three places as the record of what remains unclosed, so a change here that escaped the gate would let the governance record drift outside governance. It is listed individually in `GOVERNED_FILES` rather than by directory, to keep the exception as small as its reason.
+
+本文件虽位于整体不受治理的 `docs/` 下，仍受 GOV-DOC-002 治理：条例三处引用它作为"尚未闭合事项"的记录，因此若对它的修改能绕过门禁，治理记录本身就会漂移到治理之外。它在 `GOVERNED_FILES` 中按单文件登记，而非按目录，以使例外的范围与理由一样小。
 
 | ID | Missing document | Referenced from | Disposition |
 |---|---|---|---|

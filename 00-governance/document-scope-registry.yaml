@@ -14,8 +14,19 @@
 # right. This registry is what makes an omission visible.
 # 本文件是门禁无法自行推导的独立依据。会计恒等式只能证明扫描集内部没有文件被丢弃，
 # 不能证明扫描集本身正确；遗漏只能靠本表暴露。
+#
+# Two kinds of exclusion, never blurred (policy section 2):
+#   not-documentation : makes no architecture claim, so no classification applies
+#   not-yet-migrated  : is architecture documentation, is backlog, is a named gap
+# Every entry below is `not-documentation`. `not-yet-migrated` is a gap the
+# policy must name, not an exclusion it may grant itself.
+# 两类排除，不得混淆（条例第 2 节）：
+#   not-documentation ：不作出架构主张，因此不适用分类
+#   not-yet-migrated  ：本属架构文档，属积压，是必须点名的缺口
+# 下列全部为 `not-documentation`。`not-yet-migrated` 是条例必须点名的缺口，
+# 而不是它可以自行授予的排除。
 
-registry_version: "1"
+registry_version: "2"
 
 # Governed roots are also declared in scripts/check_bilingual_docs.py
 # (NORMATIVE_ROOTS). The gate fails if the two disagree, so the declared scope
@@ -38,44 +49,68 @@ governed:
 # the second one is a gap that must be named, not quietly excluded.
 # 非架构文档的目录。每个都必须给理由："不是文档"与"尚未迁移"是两种不同状态，
 # 后者是必须点名的缺口，不能悄悄排除。
+# Individual files governed although their directory is not. Kept as one path
+# per entry so the exception is exactly as large as its reason.
+# 单文件受治理：其所在目录不受治理，但该文件本身受治理。逐条登记单一路径，
+# 使例外的范围与其理由一样小。
+governed_files:
+  - docs/governance/documentation-gaps.md
+
 excluded:
 
   docs:
+    kind: not-documentation
+    # docs/governance/documentation-gaps.md is the one governed file here: this
+    # policy cites it in three places as the record of what remains unclosed,
+    # and a governance record that could drift outside governance would defeat
+    # its own purpose. It is listed under `governed_files` above.
+    # docs/governance/documentation-gaps.md 是本目录中唯一受治理的文件：本条例
+    # 三处引用它作为尚未闭合事项的记录，而一份能漂移到治理之外的治理记录会自毁
+    # 其目的。它登记在上方 `governed_files` 中。
     reason: "Only the bilingual mirrors docs/en and docs/zh-CN are governed; the gate appends them to NORMATIVE_ROOTS. docs/research, docs/glossary, docs/architecture-convergence and the loose pages are not architecture documents and carry no normative claims."
     reason_zh: "仅双语镜像 docs/en 与 docs/zh-CN 受治理（门禁将其追加进 NORMATIVE_ROOTS）。docs/research、docs/glossary、docs/architecture-convergence 及散页不是架构文档，不承载规范性主张。"
 
   reviews:
+    kind: not-documentation
     reason: "Review transcripts of external tools. They record what a reviewer said, not what the architecture is; treating them as governed documents would let a review comment acquire normative standing."
     reason_zh: "外部工具的审查记录。它记录的是审查方说了什么，不是架构本身是什么；若视为受治理文档，会使审查意见获得规范效力。"
 
   benchmarks:
+    kind: not-documentation
     reason: "Benchmark harness notes and result logs; measurements, not decisions."
     reason_zh: "基准测试框架说明与结果日志；属于测量数据，不是决策。"
 
   crates:
+    kind: not-documentation
     reason: "Rust source, including inline doc comments. Code is not a Markdown document."
     reason_zh: "Rust 源码，含内联文档注释。代码不是 Markdown 文档。"
 
   experiments:
+    kind: not-documentation
     reason: "Throwaway experiments; explicitly non-normative by construction."
     reason_zh: "一次性实验；按其定义即非规范性。"
 
   prompts:
+    kind: not-documentation
     reason: "Prompt text consumed by tools at runtime. Changing it changes behaviour, not architecture; version control is the right record for it."
     reason_zh: "运行时被工具消费的提示词文本。修改它改变的是行为而非架构；版本控制才是它应当的记录方式。"
 
   recovery:
+    kind: not-documentation
     reason: "Operational recovery runbooks; procedures, not architecture decisions."
     reason_zh: "运维恢复手册；属于操作流程，不是架构决策。"
 
   scripts:
+    kind: not-documentation
     reason: "Gate and tooling source. The governance rules themselves are in 00-governance."
     reason_zh: "门禁与工具源码。治理规则本身位于 00-governance。"
 
   tests:
+    kind: not-documentation
     reason: "Test code and fixtures; fixtures deliberately contain invalid documents."
     reason_zh: "测试代码与夹具；夹具中有意包含非法文档。"
 
   tools:
+    kind: not-documentation
     reason: "Developer tooling source, same as scripts."
     reason_zh: "开发者工具源码，同 scripts。"

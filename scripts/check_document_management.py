@@ -43,6 +43,16 @@ NORMATIVE_ROOTS = tuple(sorted(_BILINGUAL_ROOTS)) + (
     # outside the audit entirely.
     "docs/en", "docs/zh-CN",
 )
+# Individual files that are governed although their directory is not. The gap
+# register is the case that forced this: the policy cites it in three places as
+# the record of what is unclosed, so a change to it that escapes GOV-DOC-002
+# would let the governance record drift outside governance. A directory would
+# pull in unrelated pages; one path keeps the exception as small as the reason.
+GOVERNED_FILES = ("docs/governance/documentation-gaps.md",)
+# Two exclusion kinds, never blurred (policy section 2). "not documentation"
+# makes no architecture claim; "not yet migrated" IS documentation and is
+# backlog, so it is a gap the policy names rather than an exclusion it grants.
+EXCLUSION_KINDS = {"not-documentation", "not-yet-migrated"}
 # No path exemptions. A bilingual *pairing* exemption is not a *governance*
 # exemption: `PAIR_EXEMPT_PREFIXES` in check_bilingual_docs.py means "this file
 # need not have a translated twin", which says nothing about whether it is a
@@ -113,6 +123,10 @@ RESOLUTION_KEYS = {
 }
 BILINGUAL_KEYS = {"source", "en", "zh-CN"}
 
+# The four dimensions. A schema missing any of them cannot describe a
+# classification, so schema() refuses to load rather than checking nothing.
+DIMENSIONS = {"domain", "role", "lifecycle", "authority"}
+
 SCOPE_ID_RE = re.compile(r"^[a-z][a-z0-9-]*/[a-z0-9]+(-[a-z0-9]+)*$")
 KEY_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]*$")
 SEQ_MAPPING_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]*:(\s|$)")
@@ -120,17 +134,27 @@ COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 
 # Always required, checked leaf by leaf. A dimension that exists but declares
 # no state is not a classification.
-REQUIRED_FIELDS = (
-    "domain",
-    "role",
-    "lifecycle.approval.decision_status",
-    "lifecycle.usage_status",
-    "lifecycle.modification_status",
-    "lifecycle.evidence_verification.verification_status",
-    "authority.canonical_status",
-    "authority.normative_status",
-    "authority.canonical_conflict_status",
-)
+# Required leaves are NOT restated here. They live in the schema's `required:
+# true` and are enforced by check_kinds(). A second hand-maintained list is how
+# `approval_scope: required true` stayed unenforceable: the list omitted it, the
+# schema declared it, and nothing compared the two.
+def _required_in(spec: dict) -> tuple[str, ...]:
+    out: list[str] = []
+    def walk(node: dict, prefix: str) -> None:
+        for name, sub in (node.get("fields") or {}).items():
+            if not isinstance(sub, dict):
+                continue
+            path = f"{prefix}{name}"
+            if sub.get("required") is True:
+                out.append(path)
+            if isinstance(sub.get("fields"), dict):
+                walk(sub, path + ".")
+    walk(spec, "")
+    return tuple(out)
+
+def required_fields(root: Path | None = None) -> tuple[str, ...]:
+    """Every leaf path the schema marks required, in document order."""
+    return _required_in(schema(root))
 
 class ParseError(Exception):
     pass
@@ -527,25 +551,54 @@ def _kind_ok(value, kind: str) -> bool:
         return isinstance(value, bool)
     raise AssertionError(f"unreachable kind {kind!r}")
 
-_SCHEMA: dict | None = None
+_SCHEMA: dict[str, dict] = {}
 
-def schema() -> dict:
+def schema(root: Path | None = None) -> dict:
     """The published metadata contract, parsed by this gate's own reader.
 
-    Fail-closed: a missing or unparseable schema stops the run. Falling back to
-    "no schema" would turn every type rule below into a silent no-op, which is
-    the failure mode this function exists to prevent.
+    Loaded from `root`, not from the script's own directory: the contract
+    belongs to the repository being checked. Reading it from the script's
+    location meant `--root elsewhere` silently validated against this
+    repository's schema, so a repository could not ship its own contract and a
+    test could not substitute a broken one.
+
+    Fail-closed at three levels, because each one alone is a silent no-op:
+      * a missing or unparseable file stops the run;
+      * a `fields` node that is not a mapping stops the run;
+      * a `fields` node that has lost the four dimensions, or marks fewer than
+        five leaves required, stops the run.
+
+    The third check exists because `fields: {}` parses, is a dict, and leaves
+    check_kinds() with nothing to check -- every type and required rule would
+    quietly pass. A schema that declares nothing must not read as "no rules".
     """
     global _SCHEMA
-    if _SCHEMA is None:
-        path = Path(__file__).resolve().parents[1] / SCHEMA_FILE
+    key = str(root) if root is not None else ""
+    if key not in _SCHEMA:
+        base = root if root is not None else Path(__file__).resolve().parents[1]
+        path = base / SCHEMA_FILE
         try:
-            _SCHEMA = parse_yaml_subset(path.read_text(encoding="utf-8"))
+            loaded = parse_yaml_subset(path.read_text(encoding="utf-8"))
         except (OSError, ParseError) as exc:
             raise SystemExit(f"cannot load {SCHEMA_FILE}: {exc}")
-        if not isinstance(_SCHEMA.get("fields"), dict):
+        if not isinstance(loaded, dict):
+            raise SystemExit(f"{SCHEMA_FILE} is not a mapping")
+        fields = loaded.get("fields")
+        if not isinstance(fields, dict) or not fields:
             raise SystemExit(f"{SCHEMA_FILE} declares no fields mapping")
-    return _SCHEMA
+        missing = DIMENSIONS - set(fields)
+        if missing:
+            raise SystemExit(
+                f"{SCHEMA_FILE} no longer declares {sorted(missing)}; a schema "
+                f"without the four dimensions cannot describe a classification"
+            )
+        if len(_required_in(loaded)) < 5:
+            raise SystemExit(
+                f"{SCHEMA_FILE} marks fewer than 5 leaves required; "
+                f"a classification needs at least the four dimensions' states"
+            )
+        _SCHEMA[key] = loaded
+    return _SCHEMA[key]
 
 def check_kinds(node, spec: dict, errors: list[str], where: str = "") -> None:
     """Enforce the schema's declared kind for every present field.
@@ -567,6 +620,12 @@ def check_kinds(node, spec: dict, errors: list[str], where: str = "") -> None:
             errors.append(f"DM-01 schema field {where}{name} declares unknown kind {kind!r}")
             continue
         if name not in node:
+            # `required` is a constraint, not a comment. Skipping absent fields
+            # made `approval_scope: required true` unenforceable while
+            # REQUIRED_FIELDS never listed it -- the schema and the gate
+            # disagreed and neither noticed.
+            if sub.get("required") is True:
+                errors.append(f"DM-01 missing required field: {where}{name}")
             continue
         path = f"{where}{name}"
         value = node[name]
@@ -608,8 +667,13 @@ def as_map(node, where: str, errors: list[str]) -> dict:
     return node
 
 
-def check_document(path: Path, text: str) -> tuple[list[str], dict | None]:
-    """Return (errors, metadata). Empty errors means the file conforms."""
+def check_document(path: Path, text: str, root: Path | None = None) -> tuple[list[str], dict | None]:
+    """Return (errors, metadata). Empty errors means the file conforms.
+
+    `root` selects which repository's schema applies. Callers that pass a
+    document from a temp repo must pass that repo's root, otherwise the
+    contract checked is this repository's, not the one under test.
+    """
     try:
         meta = read_metadata(text)
     except ParseError as exc:
@@ -626,12 +690,11 @@ def check_document(path: Path, text: str) -> tuple[list[str], dict | None]:
     # {}}` would otherwise satisfy "the dimension exists" while declaring no
     # lifecycle state at all.
     errors += unknown_keys(meta, TOP_KEYS, GOVERNED_ENTRY)
-    # Type contract first: a null where the schema declares `mapping` must be a
-    # type error, not merely a missing leaf that DM-03 happens to tolerate.
-    check_kinds(meta, schema(), errors)
-    for leaf in REQUIRED_FIELDS:
-        if dig(meta, *leaf.split(".")) is None:
-            errors.append(f"DM-01 missing required field: {leaf}")
+    # Type and presence contract, both from the schema. A null where the schema
+    # declares `mapping` is a type error, not merely a missing leaf that DM-03
+    # happens to tolerate; an absent field the schema marks required is equally
+    # an error, not an optional omission.
+    check_kinds(meta, schema(root), errors)
     lifecycle = as_map(meta.get("lifecycle"), "lifecycle", errors)
     authority = as_map(meta.get("authority"), "authority", errors)
     errors += unknown_keys(lifecycle, LIFECYCLE_KEYS, "lifecycle")
@@ -1152,7 +1215,18 @@ def governed_files(root: Path) -> list[Path]:
         base = root / name
         if not base.is_dir():
             continue
+        # A symlinked root would make the governed set depend on something
+        # outside the repository: `Path.is_dir()` follows links, and rglob then
+        # reads through them. Refusing is cheaper than proving containment.
+        if base.is_symlink():
+            continue
         for path in sorted(base.rglob("*.md")):
+            if path.is_symlink():
+                continue
+            files.append(path)
+    for rel in GOVERNED_FILES:
+        path = root / rel
+        if path.is_file() and not path.is_symlink():
             files.append(path)
     return files
 
@@ -1199,6 +1273,12 @@ def check_scope_registry(root: Path) -> list[str]:
         if not isinstance(node, dict):
             errors.append(f"DM-14 excluded {name!r} must be a mapping with a reason")
             continue
+        kind = node.get("kind")
+        if kind not in EXCLUSION_KINDS:
+            errors.append(
+                f"DM-14 excluded {name!r} must declare kind one of "
+                f"{sorted(EXCLUSION_KINDS)}, got {kind!r}"
+            )
         if not str(node.get("reason") or "").strip():
             errors.append(f"DM-14 excluded {name!r} has no reason")
         if not str(node.get("reason_zh") or "").strip():
@@ -1224,7 +1304,19 @@ def check_scope_registry(root: Path) -> list[str]:
         p.name for p in root.iterdir()
         if p.is_dir() and not p.name.startswith(".")
     }
-    unknown = sorted(on_disk - accounted)
+    # A symlinked directory is not part of this repository's content. Listing it
+    # in the registry would require the gate to scan through the link, so it is
+    # refused outright instead of being declared.
+    links = sorted(
+        p.name for p in root.iterdir()
+        if p.is_symlink() and not p.name.startswith(".")
+    )
+    if links:
+        errors.append(
+            f"DM-14 symbolic links at the repository root are not governed roots: {links}. "
+            f"A symlink makes the governed set depend on a target outside the repository"
+        )
+    unknown = sorted(on_disk - accounted - set(links))
     if unknown:
         errors.append(
             f"DM-14 top-level directories not accounted for: {unknown}. "
@@ -1240,6 +1332,38 @@ def check_scope_registry(root: Path) -> list[str]:
     for mirror in ("docs/en", "docs/zh-CN"):
         if not (root / mirror).is_dir():
             errors.append(f"DM-14 bilingual mirror directory {mirror} is missing")
+
+    # (4) individually governed files must exist and sit in an excluded dir:
+    # otherwise GOVERNED_FILES is dead weight or a hidden scope expansion.
+    registry_files = registry.get("governed_files")
+    if registry_files is None:
+        registry_files = []
+    if not isinstance(registry_files, list):
+        errors.append(f"DM-14 {SCOPE_REGISTRY} governed_files must be a sequence")
+        registry_files = []
+    registry_files = [str(x).lstrip("/") for x in registry_files]
+    if set(registry_files) != set(GOVERNED_FILES):
+        errors.append(
+            f"DM-14 governed_files disagrees with the gate; "
+            f"registry-only {sorted(set(registry_files) - set(GOVERNED_FILES))}, "
+            f"gate-only {sorted(set(GOVERNED_FILES) - set(registry_files))}"
+        )
+
+    for rel in GOVERNED_FILES:
+        if not (root / rel).is_file():
+            errors.append(f"DM-14 governed file {rel} does not exist")
+            continue
+        top = rel.split("/")[0]
+        if top in declared:
+            errors.append(
+                f"DM-14 governed file {rel} is already covered by root {top}; "
+                f"drop the individual entry"
+            )
+        elif top not in excluded:
+            errors.append(
+                f"DM-14 governed file {rel} sits in {top}, which is neither "
+                f"governed nor excluded: declare the directory's status first"
+            )
 
     return errors
 
@@ -1327,7 +1451,7 @@ def main() -> int:
         except UnicodeDecodeError:
             errors.append(f"DM-01 not valid UTF-8: {rel}")
             continue
-        file_errors, meta = check_document(path, text)
+        file_errors, meta = check_document(path, text, root)
         errors.extend(f"{rel}: {err}" for err in file_errors)
 
         bucket = per_root.setdefault(rel.split("/")[0] if "/" in rel else rel, [0, 0])

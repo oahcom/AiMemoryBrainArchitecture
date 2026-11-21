@@ -17,6 +17,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from check_document_management import (  # noqa: E402
+    GOVERNED_FILES,
     NO_AUTHORITATIVE_SOURCE,
     ParseError,
     body_hash,
@@ -291,24 +292,30 @@ def run_resolver() -> None:
 # 4. Repository-wide rules
 # --------------------------------------------------------------------------
 
-def registry_text(governed, excluded=("tools",)) -> str:
+def registry_text(governed, excluded=("tools",), files=None) -> str:
     """A scope registry matching the gate's own enforced roots.
 
     Built from NORMATIVE_ROOTS rather than hard-coded, so the fixture stays
     valid when the real roots change; the tests that matter pass an explicit
     governed list instead.
     """
-    lines = ['registry_version: "1"', "", "governed:"]
+    if files is None:
+        files = GOVERNED_FILES
+    lines = ['registry_version: "2"', "", "governed:"]
     lines += [f"  - {name}" for name in governed]
+    lines += ["", "governed_files:"]
+    lines += [f"  - {rel}" for rel in files]
     lines += ["", "excluded:", ""]
     for name in excluded:
         lines.append(f"  {name}:")
+        lines.append("    kind: not-documentation")
         lines.append('    reason: "not documentation"')
         lines.append('    reason_zh: "非文档"')
         lines.append("")
     lines.append("  docs:")
-    lines.append('    reason: "mirrors only"')
-    lines.append('    reason_zh: "仅镜像"')
+    lines.append("    kind: not-documentation")
+    lines.append('    reason: "mirrors and one governed file only"')
+    lines.append('    reason_zh: "仅镜像与一个受治理文件"')
     return "\n".join(lines) + "\n"
 
 def gate_roots():
@@ -329,6 +336,19 @@ def _repo(tmp: str) -> Path:
     (root / "00-governance" / "document-scope-registry.yaml").write_text(
         registry_text(ENFORCED_ROOTS), encoding="utf-8"
     )
+    # The contract travels with the repository. The gate loads the schema from
+    # --root, so a fixture repo without one is a repo that cannot be checked.
+    real = Path(__file__).resolve().parents[1] / "00-governance/architecture-document-metadata.schema.yaml"
+    (root / "00-governance" / real.name).write_text(
+        real.read_text(encoding="utf-8"), encoding="utf-8"
+    )
+    # GOVERNED_FILES names files that live in an excluded directory. The fixture
+    # must provide them, or DM-14 correctly reports that they do not exist.
+    import check_document_management as gate
+    for rel in gate.GOVERNED_FILES:
+        target = root / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(doc(BASE), encoding="utf-8")
     return root
 
 
@@ -383,8 +403,10 @@ def run_repository_rules() -> None:
         # smaller total that nobody questions.
         record(
             "T21 governed count equals classified plus unclassified",
-            len(governed_files(root)) == 2,
-            f"  governed {len(governed_files(root))}, expected 2",
+            len(governed_files(root)) == 2 + len(GOVERNED_FILES),
+            f"  governed {len(governed_files(root))}, "
+            f"expected {2 + len(GOVERNED_FILES)} (2 written + "
+            f"{len(GOVERNED_FILES)} fixture governed files)",
         )
 
     # T06 / T07: a Resolved record must select the unique Canonical document.
@@ -803,22 +825,25 @@ def run_schema_agreement() -> None:
         record(f"T19 {where} enum matches the gate exactly", got == set(allowed),
                f"  schema {sorted(got)} vs gate {sorted(allowed)}")
 
-    for leaf in gate.REQUIRED_FIELDS:
+    for leaf in gate.required_fields():
         node = node_at(leaf)
         record(f"T19 required leaf declared and marked required: {leaf}",
                isinstance(node, dict) and node.get("required") is True)
 
-    structural = {
-        "lifecycle", "lifecycle.approval", "lifecycle.approval.approval_scope",
-        "lifecycle.evidence_verification", "authority",
-    }
+    # No second hand-maintained list may exist: REQUIRED_FIELDS used to be one,
+    # and it omitted approval_scope while the schema declared it required.
+    record("T19 required leaves come from the schema, not a second list",
+           not hasattr(gate, "REQUIRED_FIELDS"),
+           "  gate still exposes a hard-coded REQUIRED_FIELDS")
+
     declared_required = {
         name for name in declared
         if isinstance(node_at(name), dict) and node_at(name).get("required") is True
     }
-    record("T19 no field claims required that the gate does not require",
-           declared_required <= set(gate.REQUIRED_FIELDS) | structural,
-           f"  unexpected: {sorted(declared_required - set(gate.REQUIRED_FIELDS) - structural)}")
+    record("T19 every required declaration is a leaf the gate checks",
+           declared_required == set(gate.required_fields()),
+           f"  schema-only {sorted(declared_required - set(gate.required_fields()))}, "
+           f"gate-only {sorted(set(gate.required_fields()) - declared_required)}")
 
     forbidden = schema.get("forbidden")
     record("T19 forbidden list names superseded_by",
@@ -893,6 +918,39 @@ def run_scope_registry() -> None:
             encoding="utf-8",
         )
         expect_gate("T26 governed and excluded at once is an error", root, 1)
+
+    # An individually governed file must sit in an excluded directory, and
+    # must exist. Otherwise the list is either dead weight or a hidden scope
+    # expansion nobody declared.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        for rel in GOVERNED_FILES:
+            (root / rel).unlink()
+        expect_gate("T38 governed file that does not exist is an error", root, 1)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        # Point the individual entry at a governed root instead.
+        import check_document_management as gate_mod
+        original = gate_mod.GOVERNED_FILES
+        gate_mod.GOVERNED_FILES = ("00-governance/extra.md",)
+        (root / "00-governance" / "extra.md").write_text(doc(BASE), encoding="utf-8")
+        try:
+            expect_gate(
+                "T39 governed file inside an already-governed root is an error",
+                root, 1,
+            )
+        finally:
+            gate_mod.GOVERNED_FILES = original
+
+    # The registry's governed_files must equal the gate's, or one of them is a
+    # claim the other does not honour.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "00-governance" / "document-scope-registry.yaml").write_text(
+            registry_text(governed, files=()), encoding="utf-8"
+        )
+        expect_gate("T40 registry omitting a governed file is an error", root, 1)
 
 def run_kind_contract() -> None:
     """P0-01: the schema's declared kind must be enforced, not merely published.
@@ -1222,6 +1280,73 @@ GOLDEN = [
     ),
 ]
 
+# DM-09 needs the body, not just the metadata: the rule is "a file carrying the
+# generated marker MUST NOT be Normative or Canonical". These three cases are
+# the three dispositions the policy names, and each is written from the policy
+# text rather than from GENERATED_MARKER's pattern.
+GENERATED_MARKER_TEXT = "<!-- GENERATED FILE - DO NOT EDIT -->\n"
+
+GOLDEN_GENERATED = [
+    (
+        "generated artifact claiming Canonical is rejected",
+        "  domain: architecture\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Draft\n"
+        "    evidence_verification:\n"
+        "      verification_status: Unverified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Canonical\n"
+        "    canonical_scope: \"Architecture: x\"\n"
+        "    canonical_scope_id: \"architecture/x\"\n"
+        "    canonical_scope_keywords:\n"
+        "      - x\n"
+        "    normative_status: Informative\n"
+        "    canonical_conflict_status: None\n",
+        False,
+        "generated artifact",
+    ),
+    (
+        "generated artifact claiming Normative is rejected",
+        "  domain: architecture\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Draft\n"
+        "    evidence_verification:\n"
+        "      verification_status: Unverified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Non-Canonical\n"
+        "    normative_status: Normative\n"
+        "    canonical_conflict_status: None\n",
+        False,
+        "generated artifact",
+    ),
+    (
+        "generated artifact that stays Informative is accepted",
+        "  domain: architecture\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Draft\n"
+        "    evidence_verification:\n"
+        "      verification_status: Unverified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Non-Canonical\n"
+        "    normative_status: Informative\n"
+        "    canonical_conflict_status: None\n",
+        True,
+        "",
+    ),
+]
+
 def run_golden_corpus() -> None:
     """T32: hand-written expectations, independent of the gate's constants."""
     print("golden corpus")
@@ -1239,6 +1364,127 @@ def run_golden_corpus() -> None:
                 f"  wanted {fragment!r}, got {errs}",
             )
 
+    # DM-09 is about the body, so these need the marker in the file itself.
+    for label, body, should_pass, fragment in GOLDEN_GENERATED:
+        text = doc(body).replace("# Title\n", "# Title\n\n" + GENERATED_MARKER_TEXT, 1)
+        errs, meta = check_document(FILE, text)
+        if meta is None:
+            record(f"T32 {label}", False, "  metadata did not parse")
+            continue
+        if should_pass:
+            record(f"T32 {label}", not errs, f"  got {errs}")
+        else:
+            record(
+                f"T32 {label}",
+                any(fragment in e for e in errs),
+                f"  wanted {fragment!r}, got {errs}",
+            )
+
+def run_schema_fail_closed() -> None:
+    """P1-04: a schema that declares nothing must not read as "no rules".
+
+    `fields: {}` parses, is a dict, and leaves check_kinds() with nothing to
+    check. Every type and required rule would pass silently. These cases pin
+    the runtime guard, not just the self-check.
+    """
+    print("schema fail-closed")
+    import check_document_management as gate
+
+    real = Path(__file__).resolve().parents[1] / gate.SCHEMA_FILE
+
+    def with_schema(body: str) -> tuple[int, str]:
+        """Run the gate against a temp repo whose schema file is `body`."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = _repo(tmp)
+            (root / "00-governance" / gate.SCHEMA_FILE.split("/")[-1]).write_text(
+                body, encoding="utf-8"
+            )
+            (root / "00-governance" / "a.md").write_text(doc(BASE), encoding="utf-8")
+            proc = subprocess.run(
+                [sys.executable, str(real.parent.parent / "scripts" / "check_document_management.py"),
+                 "--root", str(root)],
+                capture_output=True, text=True,
+            )
+            return proc.returncode, (proc.stdout + proc.stderr)
+
+    # Empty fields: must stop, not silently check nothing.
+    code, out = with_schema('schema_version: "2"\nfields: {}\n')
+    record("T33 empty fields stops the gate",
+           code != 0 and "no fields mapping" in out or "no longer declares" in out,
+           f"  exit {code}: {out.strip()[:160]}")
+
+    # Fields without the four dimensions: also must stop.
+    code, out = with_schema(
+        'schema_version: "2"\nfields:\n  domain:\n    kind: string\n'
+    )
+    record("T34 schema missing the four dimensions stops the gate",
+           code != 0 and ("no longer declares" in out or "fewer than" in out),
+           f"  exit {code}: {out.strip()[:160]}")
+
+    # A required leaf absent from the document must be reported, by path.
+    missing = doc(
+        "  domain: architecture\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Draft\n"
+        "    evidence_verification:\n"
+        "      verification_status: Unverified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Non-Canonical\n"
+        "    normative_status: Informative\n"
+        "    canonical_conflict_status: None\n"
+    )
+    # `approval_scope` is not required for Draft (DM-03 covers Approved), so
+    # drop a leaf that is: `authority.normative_status`.
+    missing = missing.replace("    normative_status: Informative\n", "")
+    errs, _ = check_document(FILE, missing)
+    record("T35 absent required leaf is an error naming its path",
+           any("missing required field" in e and "normative_status" in e for e in errs),
+           f"  got {errs}")
+
+def run_symlink_boundary() -> None:
+    """P1-02: a directory symlink must not silently extend the governed set.
+
+    DM-14 asks every top-level directory to be declared. `Path.is_dir()`
+    follows symlinks, so an `external-docs -> /outside` link looks like a
+    directory the registry must name. The gate must refuse to treat a symlink
+    as a governed root, because scanning through it would read files that are
+    not in this repository.
+    """
+    print("symlink boundary")
+    import check_document_management as gate
+
+    with tempfile.TemporaryDirectory() as tmp, tempfile.TemporaryDirectory() as outside:
+        root = _repo(tmp)
+        victim = Path(outside) / "leaked.md"
+        victim.write_text(doc(BASE), encoding="utf-8")
+        link = root / "15-linked"
+        try:
+            link.symlink_to(Path(outside), target_is_directory=True)
+        except (OSError, NotImplementedError):
+            record("T36 directory symlink is rejected as a governed root", True,
+                   "  (symlinks unavailable on this platform; skipped)")
+            return
+
+        (root / "00-governance" / "document-scope-registry.yaml").write_text(
+            registry_text(ENFORCED_ROOTS + ["15-linked"]), encoding="utf-8"
+        )
+        errors = gate.check_scope_registry(root)
+        record(
+            "T36 directory symlink is rejected as a governed root",
+            any("symbolic link" in e or "symlink" in e for e in errors),
+            f"  got {errors}",
+        )
+
+        # And it must not be scanned even if someone names it.
+        scanned = {p.name for p in gate.governed_files(root)}
+        record("T37 governed_files does not descend into a symlinked root",
+               "leaked.md" not in scanned,
+               f"  scanned {sorted(scanned)}")
+
 def main() -> int:
     print("check_document_management self-check")
     run_parser()
@@ -1253,6 +1499,8 @@ def main() -> int:
     run_scope_registry()
     run_kind_contract()
     run_golden_corpus()
+    run_schema_fail_closed()
+    run_symlink_boundary()
     run_schema_agreement()
     passed, total = sum(RESULTS), len(RESULTS)
     print(f"{passed}/{total} passed")

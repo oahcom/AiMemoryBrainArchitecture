@@ -49,7 +49,7 @@ TEST EXECUTION 派发门禁 = UNLOCKED-WITH-CONDITIONS（仅限 REQ-04 第⑤步
 
 | 要求 | 应用状态 | 独立复审 |
 |---|---|---|
-| R1 Claim 身份 | APPLIED | PENDING（applied Blob 尚无独立复审；M19 仅记录 Phase-1 freeze 载体「未回归」） |
+| R1 Claim 身份 | APPLIED | REQUEST CHANGES（R1-01、R1-02；§9.9） |
 | R2 Attestor 授权 | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
 | R3 共享 Fact Forget | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
 | R4 Fact/Claim 同步 | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
@@ -616,13 +616,68 @@ docs/zh-CN/04-memory-compiler/extraction-and-normalization.md  8dd0b5b29ecd37cea
 指出根级 freeze 文件在 `§8` 中根本没有行，根级 `context-versioning.md` 仅以「本轮未应用」
 条目出现。这是关于哪些副本具有权威性的治理问题，应用轮次不得自行裁定。
 
-### 9.9 谓词等价修正轮的合并后回读
+### 9.9 R1 首次独立复审，以及本轮自身的一处事实错误
+
+复审方：独立会话 `6b01353c-6468-83e8-8158-9aa8750e05c2`（只读，未写仓库，未由复审方发布评论）。
+2026-11-21 返回裁决。回读钉定：`b752aad0fc0f5cd1525c35515b01d2acd990c438`。裁决：`REQUEST CHANGES`，
+两项发现。
+
+| 审查项 | 裁定 | 阻断编号 |
+|---|---|---|
+| R1 OPEN 条款删除完整性 | REQUEST CHANGES | R1-01 |
+| 是否越权删除仍应 OPEN 的项 | PASS | — |
+| 三份副本一致性 | Claim identity 层面 PASS | — |
+| Claim identity 语义自洽性 | PASS | — |
+| 双语一致性 | PASS | — |
+| `§9.1` R1 行真实性 | REQUEST CHANGES | R1-02 |
+
+**R1-01 —— 根级 freeze 仍把 Claim identity 当作未验证。** 在
+`02-domain-model/phase-1-domain-model-freeze.md` 中，`§2.6` 已写明 Claim identity 语义分类为
+`DECIDED FOR CONVERGENCE`、仅 ID 生成算法仍为 `CANDIDATE`；`§7` 列出 `ID generation: CANDIDATE`
+及其余六项未决事项。但 `§6` 的 DM-10 验收行原文为
+`未验证的 ID/Claim identity 等不被实现偷偷冻结`——把已决定的 Claim identity 与未决定的 ID 生成
+重新并列进未验证集合。只读验收表的实施者无法判断 Claim identity 是否仍需保持开放。此问题仅在
+根级 freeze；EN 与 ZH 副本不以该形式承载此行。
+
+修正把未验证集合限定为仍未决定的事项，并写明已 `DECIDED FOR CONVERGENCE` 的稳定 Claim identity
+与 ClaimRevision 语义不得再作为未验证项。`§2.6` 与 `§7` 未改动，该文件三处表述现已一致。
+
+**R1-02 —— `§9.8` 对根级 Overview Blob 的描述错误，而这个错误是本轮自身造成的。** `§9.8` 曾写
+根级 `02-domain-model/domain-model-overview.md`「其 Blob 仍为 `5b86fe23ab7c`——即 R1 修正前的值」。
+这是错的。`§9.1` 登记 `5b86fe23ab7c` 为该路径 R1 修正的**结果**，由 `778d1bee` 产生，而被取代值
+是 `46fbdcacbe8a`。复审方读取 `778d1bee` 的 diff 予以确认：该提交把旧句
+`ClaimId identity policy across Memory versions remains OPEN` 替换为已决的
+`ClaimRef is stable across Memory versions` 表述。
+
+副本之间真正的差别是：根级副本自那次修正后未再推进，而 `docs/en` 在后续轮次推进到
+`1a1a10b24d68`。本轮 L0 把「Blob 不同」读成「尚未修正」，写下了 `§9.1` 在往前两节就已否定的
+断言。`§9.8` 现改为正确的产生关系，并把「哪些副本具有权威性」这一治理问题保持为未决。
+
+复审方另在 `§9.1` 的基线 `dd4ecf16` 处独立核对，确认 `§9.1` 登记的十一个 Blob 全部一致，且其
+列出的六个 producing commit 确实改动了它声称改动的文件。它同时认定 `§9.1` 使用的两处限定
+（根级 freeze 的 `not in §8`、根级 context-versioning 的 `(§8 bullet)`）是对登记位置的事实描述，
+不是掩盖遗漏。
+
+本轮特别追问的那个问题，复审方的回答是：根级副本在 Claim identity 上并未过期，故三份副本在该
+内容上一致；而根级副本是否具有独立规范权威性，仍属 Owner 裁定。R1-01 是另一回事——它是另一个
+根级文件中的真实残留，因此构成 R1 的真实阻断。
+
+| 目标 | 变更前 Blob | 变更后 Blob | 大小 |
+|---|---|---|---|
+| `02-domain-model/phase-1-domain-model-freeze.md` | `d1102a0adf32` | `5e30c5b6c68f` | 10457 -> 10595 B |
+| `docs/en/00-governance/aid-2026-014-r3-correction-status.md` | `f2ef0f80b707` | `9a757ffc14e7` | 50375 -> 50493 B |
+| `docs/zh-CN/00-governance/aid-2026-014-r3-correction-status.md` | `319409a40cf3` | `5fcac6d7c60f` | 45786 -> 45878 B |
+
+R1 因此从 `FIX_APPLIED_AWAITING_REREVIEW` 转为 `APPLIED_PENDING_INDEPENDENT_REVIEW`，独立复审列
+仍为 `REQUEST CHANGES`，直至两项发现得到复审。`§2` 未变。
+
+### 9.10 谓词等价修正轮的合并后回读
 
 本节记录 REREVIEW-8 所审查的第七轮谓词等价修正完成合并后的回读结果。
 
 本节仅记录仓库状态及内容身份。REREVIEW-8 = PASS 不构成 FORMAL ACCEPTANCE，也不建立实现符合性。
 
-#### 9.9.1 精确修正提交 HEAD
+#### 9.10.1 精确修正提交 HEAD
 
 | 目标 | 已复审的修正 HEAD | 修正内容 |
 |---|---|---|
@@ -631,7 +686,7 @@ docs/zh-CN/04-memory-compiler/extraction-and-normalization.md  8dd0b5b29ecd37cea
 
 两个修正提交均只替换原有英文定义中的谓词连接词。中文定义此前已经使用「当且仅当」。
 
-#### 9.9.2 精确合并目标
+#### 9.10.2 精确合并目标
 
 | 目标分支 | 合并提交 |
 |---|---|
@@ -642,7 +697,7 @@ docs/zh-CN/04-memory-compiler/extraction-and-normalization.md  8dd0b5b29ecd37cea
 
 Extraction 文件从指定的 `main` 合并结果读取。Storage ADR 从其独立载体分支的合并结果读取。
 
-#### 9.9.3 合并后 Blob 回读
+#### 9.10.3 合并后 Blob 回读
 
 下表 Blob 值钉定于 R7 合并结果（`main` `f1a6028d`）。它们是历史回读值，
 不描述当前 `main` HEAD——该分支此后已被后续治理轮次推进。
@@ -659,7 +714,7 @@ Extraction 文件从指定的 `main` 合并结果读取。Storage ADR 从其独�
 - Extraction ZH：`9657949af482`
 - Storage ADR：`62ae6e878657`
 
-#### 9.9.4 谓词等价回读
+#### 9.10.4 谓词等价回读
 
 四处规范定义分别为：
 
@@ -683,7 +738,7 @@ Extraction 文件从指定的 `main` 合并结果读取。Storage ADR 从其独�
 
 Participant barrier 只有在该谓词为 TRUE 时才 MUST 被判定为 resolved 或完成。
 
-#### 9.9.5 复审及治理处置
+#### 9.10.5 复审及治理处置
 
 ```text
 REREVIEW-8 = PASS
@@ -703,6 +758,10 @@ TEST EXECUTION = SUSPENDED
 TEST EXECUTION DISPATCH GATE = UNLOCKED-WITH-CONDITIONS
 UNLOCKED SCOPE = REQ-04 STEP 5 DISPATCH SPEC ONLY
 ```
+
+上文 `R1-R5 = PASS / NOT REOPENED` 是 M27 在 REREVIEW-8 时点的判定。
+R1 此后在 `§9.9` 单独接受复审并得出 `REQUEST CHANGES`（R1-01、R1-02）。
+就 R1 而言，以 `§9.9` 为准。
 
 PASS 是独立复审判定，不是正式接受决定。
 

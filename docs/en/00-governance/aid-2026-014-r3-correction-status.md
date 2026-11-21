@@ -49,7 +49,7 @@ TEST EXECUTION DISPATCH GATE = UNLOCKED-WITH-CONDITIONS (REQ-04 STEP 5 DISPATCH 
 
 | Requirement | Application status | Independent review |
 |---|---|---|
-| R1 Claim identity | APPLIED | PENDING (no independent review of the applied Blob; M19 recorded only "no regression" on the Phase-1 freeze carriers) |
+| R1 Claim identity | APPLIED | REQUEST CHANGES (R1-01, R1-02; §9.9) |
 | R2 Attestor authorization | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
 | R3 Shared Fact Forget | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
 | R4 Fact/Claim synchronization | APPLIED | PASS (M19: 7050001430; M20: 7050002020) |
@@ -699,13 +699,76 @@ question `§9.1` recorded but did not resolve: it noted the root-level freeze fi
 That is a governance question about which copies are authoritative, and an application round may
 not decide it alone.
 
-### 9.9 Read-back of the predicate-equivalence round
+### 9.9 R1 first independent review, and a factual error this round made
+
+Reviewer: independent session `6b01353c-6468-83e8-8158-9aa8750e05c2` (read-only, no repository
+write, no comment posted by the reviewer). Verdict returned 2026-11-21. Read-back pin:
+`b752aad0fc0f5cd1525c35515b01d2acd990c438`. Verdict: `REQUEST CHANGES`, two findings.
+
+| Item reviewed | Verdict | Blocking finding |
+|---|---|---|
+| R1 open-clause removal completeness | REQUEST CHANGES | R1-01 |
+| No over-deletion of items that must stay `OPEN` | PASS | — |
+| Three-copy consistency | PASS on Claim identity | — |
+| Claim identity semantic self-consistency | PASS | — |
+| Bilingual equivalence | PASS | — |
+| `§9.1` R1 row truthfulness | REQUEST CHANGES | R1-02 |
+
+**R1-01 — the root-level freeze still treats Claim identity as unverified.** In
+`02-domain-model/phase-1-domain-model-freeze.md`, `§2.6` states that the Claim identity semantic
+classification is `DECIDED FOR CONVERGENCE` and that only the ID generation algorithm remains
+`CANDIDATE`; `§7` lists `ID generation: CANDIDATE` and six other open items. But `§6`'s DM-10
+acceptance row read `未验证的 ID/Claim identity 等不被实现偷偷冻结` — putting the decided Claim
+identity back into the unverified set alongside the undecided ID generation. An implementer reading
+only the acceptance table cannot tell whether Claim identity must still be kept open. This is the
+root-level freeze only; the EN and ZH copies do not carry the row in that form.
+
+The fix scopes the unverified set to the still-open items and states that the decided Claim
+identity and ClaimRevision semantics must not be treated as unverified. `§2.6` and `§7` are
+untouched, so the three statements in that file now agree.
+
+**R1-02 — `§9.8` misdescribed the root Overview Blob, and that error was mine.** `§9.8` said the
+root-level `02-domain-model/domain-model-overview.md` "still carries Blob `5b86fe23ab7c` — the
+pre-R1-correction value". That is false. `§9.1` records `5b86fe23ab7c` as the *result* of the R1
+correction on that path, produced by `778d1bee`, and records `46fbdcacbe8a` as the superseded value.
+The reviewer verified this by reading the `778d1bee` diff, which replaces the old
+`ClaimId identity policy across Memory versions remains OPEN` sentence with the decided
+`ClaimRef is stable across Memory versions` formulation.
+
+What actually differs between the copies is that the root copy has not advanced since that
+correction, while `docs/en` moved to `1a1a10b24d68` in a later round. This round's L0 read
+"different Blob" as "not yet corrected" and wrote a claim `§9.1` already contradicted two sections
+earlier. `§9.8` now states the correct provenance and keeps the separate governance question —
+which copies are authoritative — as unresolved.
+
+The reviewer also checked, independently and at the `§9.1` baseline `dd4ecf16`, that all eleven
+Blobs `§9.1` registers match, and that the six producing commits it names do touch the files it
+says they touch. It further accepted the two qualifiers `§9.1` uses (`not in §8` for the root
+freeze, `(§8 bullet)` for the root context-versioning) as honest descriptions of where those
+files were or were not registered, not as cover for omissions.
+
+On the question this round specifically asked: the reviewer's answer is that the root copy is not
+stale on Claim identity, so three-copy consistency passes on that content, and that whether the
+root copy carries independent normative authority stays an owner decision. R1-01 is a different
+matter — a real residue in a different root-level file, and therefore a genuine R1 blocker.
+
+| Target | Blob before | Blob after | Size |
+|---|---|---|---|
+| `02-domain-model/phase-1-domain-model-freeze.md` | `d1102a0adf32` | `5e30c5b6c68f` | 10457 -> 10595 B |
+| `docs/en/00-governance/aid-2026-014-r3-correction-status.md` | `f2ef0f80b707` | `9a757ffc14e7` | 50375 -> 50493 B |
+| `docs/zh-CN/00-governance/aid-2026-014-r3-correction-status.md` | `319409a40cf3` | `5fcac6d7c60f` | 45786 -> 45878 B |
+
+R1 therefore moves from `FIX_APPLIED_AWAITING_REREVIEW` to
+`APPLIED_PENDING_INDEPENDENT_REVIEW`, with the independent-review column still `REQUEST CHANGES`
+until the two findings are re-reviewed. `§2` is unchanged.
+
+### 9.10 Read-back of the predicate-equivalence round
 
 This section records the post-merge read-back for the R7 predicate-equivalence correction reviewed in REREVIEW-8.
 
 It records repository state and content identity only. REREVIEW-8 = PASS is not FORMAL ACCEPTANCE and does not establish implementation conformance.
 
-#### 9.9.1 Exact correction heads
+#### 9.10.1 Exact correction heads
 
 | Target | Reviewed correction HEAD | Correction |
 |---|---|---|
@@ -714,7 +777,7 @@ It records repository state and content identity only. REREVIEW-8 = PASS is not 
 
 The two correction commits each replace the predicate connector in one existing English definition. The Chinese definitions already use `当且仅当`.
 
-#### 9.9.2 Exact merge targets
+#### 9.10.2 Exact merge targets
 
 | Target branch | Merge commit |
 |---|---|
@@ -725,7 +788,7 @@ These are separate Git histories and must not be represented as one common atomi
 
 The Extraction files are read from the specified `main` merge result. The Storage ADR is read from its separate carrier branch merge result.
 
-#### 9.9.3 Post-merge Blob read-back
+#### 9.10.3 Post-merge Blob read-back
 
 The Blob values below are pinned to the R7 merge result (`main` `f1a6028d`).
 They are historical read-back values and do not describe the current `main` HEAD,
@@ -743,7 +806,7 @@ The complete Blob identifiers are recorded by the post-merge read-back:
 - Extraction ZH: `9657949af482`
 - Storage ADR: `62ae6e878657`
 
-#### 9.9.4 Predicate-equivalence read-back
+#### 9.10.4 Predicate-equivalence read-back
 
 The four normative definitions are:
 
@@ -767,7 +830,7 @@ The English and Chinese definitions express the same necessary-and-sufficient co
 
 The participant barrier MUST be resolved or completed only when the predicate is TRUE.
 
-#### 9.9.5 Review and governance disposition
+#### 9.10.5 Review and governance disposition
 
 ```text
 REREVIEW-8 = PASS
@@ -787,6 +850,10 @@ TEST EXECUTION = SUSPENDED
 TEST EXECUTION DISPATCH GATE = UNLOCKED-WITH-CONDITIONS
 UNLOCKED SCOPE = REQ-04 STEP 5 DISPATCH SPEC ONLY
 ```
+
+The `R1-R5 = PASS / NOT REOPENED` line above is M27's verdict at the REREVIEW-8 point in time.
+R1 was subsequently reviewed on its own in `§9.9` and returned `REQUEST CHANGES` (R1-01, R1-02).
+For R1, `§9.9` governs.
 
 The PASS decision is an independent review disposition. It is not an acceptance decision.
 
