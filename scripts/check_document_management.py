@@ -1554,12 +1554,13 @@ def backlog_roots(root: Path) -> tuple[str, ...]:
 # Numbers written as words are matched by a small explicit list of English and
 # Chinese numerals.
 #
-# Still not caught, and this is the boundary rather than a wish list: a noun
-# outside the list (`27 artefacts`), and a number separated from its noun by
-# something other than whitespace. Those are not declared acceptable -- they are
-# simply not detected, and a reviewer reading the registry sees them. The
-# guarantee is that the count is *checked against the disk*; this rule only
-# reduces the number of places a wrong count can be written.
+# Still not caught: a noun outside the list (`27 artefacts`), and a number
+# separated from its noun by something other than whitespace. Neither is
+# declared acceptable -- they are simply not detected, and the guarantee that
+# matters is elsewhere: the count is *checked against the disk*. This rule only
+# reduces the number of places a wrong count can be written, and no test asserts
+# that a gap stays a gap, because a test that protects a shortfall also blocks
+# fixing it.
 _WORDS = (
     r"one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen"
     r"|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty"

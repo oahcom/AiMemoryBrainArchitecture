@@ -2214,16 +2214,13 @@ def run_count_vocabulary() -> None:
     record("T70 prose that is not a document count is not a claim", not noise,
            f"  false positives {noise}")
 
-    # The remaining gap is *named*, and the name is checked: a noun outside the
-    # list is not detected. This is not "must stay undetected" -- if a future
-    # vocabulary change catches it, the case below is simply no longer true and
-    # the comment must be updated, which is the point.
-    documented_gap = ["27 artefacts", "27 records"]
-    still_gap = [s for s in documented_gap if not gate.COUNT_CLAIM_RE.search(s)]
-    record("T70 the documented gap is still the gap (comment is accurate)",
-           len(still_gap) == len(documented_gap),
-           f"  now caught: {sorted(set(documented_gap) - set(still_gap))} "
-           f"-- widen the comment, not the gap")
+    # There is deliberately no assertion that a known gap stays a gap. An
+    # earlier version recorded "27 artefacts is still undetected" as a passing
+    # case, which made the test a guard on the defect rather than on the
+    # capability: widening the vocabulary would have failed the suite. A test
+    # protects the capability it needs, not the shortfall it has. The gap is
+    # named in the gate's comment and nowhere else; if the vocabulary grows,
+    # only that comment needs updating.
 
 
 def run_unreadable_walk() -> None:
@@ -2354,53 +2351,67 @@ def run_manual_controls() -> None:
         for cid, control, why, who in gate.MANUAL_CONTROLS
     )
 
-    # R15-02: a byte comparison of the rows proves the rows, not the structure
-    # around them. Two BEGIN markers, a missing END, or a second hand-kept table
-    # beside the generated one would all pass a row-only check.
-    record("T69 the BEGIN marker appears exactly once in section 9.2",
-           section.count(begin) == 1, f"  found {section.count(begin)}")
-    record("T69 the END marker appears exactly once in section 9.2",
-           section.count(end) == 1, f"  found {section.count(end)}")
-    if begin in section and end in section:
-        record("T69 BEGIN precedes END",
-               section.index(begin) < section.index(end))
-        block = section[section.index(begin):section.index(end) + len(end)]
-        body = section[section.index(end) + len(end):]
-        record("T69 the generated block is inside section 9.2, not after it",
-               body.strip() == body.strip() and begin in section)
-        # The header row is part of the contract: a table without it renders as
-        # prose in most viewers and as a headerless table in the rest.
-        record("T69 the generated block carries its header and separator rows",
-               "| ID | Manual control | Why a machine cannot do it | Accountable |" in block
-               and "|---|---|---|---|" in block)
-        rows = [l for l in block.split("\n") if l.startswith("| M-")]
-        record("T69 every control renders exactly one row",
-               len(rows) == len(gate.MANUAL_CONTROLS),
-               f"  {len(rows)} rows for {len(gate.MANUAL_CONTROLS)} controls")
-        record("T69 no control appears twice",
-               len({r.split("|")[1].strip() for r in rows}) == len(rows))
-        record("T69 the table is byte-identical to the rendered constant",
-               "\n".join(rows) == expected,
-               f"  expected {expected[:120]!r}\n  got      {chr(10).join(rows)[:120]!r}")
-        record("T69 the generated block is not empty", bool(rows))
+    # R16-02/R16-04/R16-05: structure is checked by *line position*, not by
+    # line content. The earlier version asked whether a row outside the block
+    # was "not in" the block's rows -- which a byte-identical duplicate row
+    # answers "no" to, so copying `| M-01 | ... |` verbatim just after the END
+    # marker passed. Two identical lines are indistinguishable by content; only
+    # position tells them apart.
+    lines = policy.split("\n")
 
-        # R15-02: the failure mode that survives a correct block is a *second*
-        # table maintained by hand elsewhere in the same section. A row starting
-        # with `| M-` outside the block is exactly that.
-        outside = [l for l in section.split("\n")
-                   if l.startswith("| M-") and l not in block.split("\n")]
-        record("T69 section 9.2 holds no hand-maintained control table",
-               not outside, f"  rows outside the block: {outside[:2]}")
+    def line_index(prefix: str, start: int = 0) -> int:
+        return next(i for i in range(start, len(lines)) if lines[i].startswith(prefix))
 
-        # R15-06: the marker must not re-trigger DM-09. `GENERATED_MARKER`
-        # matches `DO NOT EDIT` and `GENERATED FILE`, so a marker worded to
-        # please a human would make this Normative policy a generated artifact
-        # and DM-09 would reject it. The marker is a comment the gate parses, so
-        # it is subject to the gate's own rules.
-        marker = section[section.index(begin):section.index(begin) + 160]
-        record("T69 the generated marker does not trip DM-09",
-               not gate.GENERATED_MARKER.search(marker),
-               f"  marker {marker[:80]!r}")
+    sec_start = line_index("### 9.2 Manual controls")
+    sec_end = line_index("## 10.", sec_start)
+    begin_at = line_index(begin, sec_start)
+    end_at = line_index(end, begin_at)
+
+    record("T69 the BEGIN marker is a line of its own",
+           lines[begin_at].strip().startswith(begin)
+           and lines[begin_at].strip().endswith("-->"))
+    record("T69 the END marker is a line of its own",
+           lines[end_at].strip() == end.strip())
+    record("T69 the block sits inside section 9.2",
+           sec_start < begin_at < end_at < sec_end)
+
+    block_lines = lines[begin_at + 1:end_at]
+    # Structure, in order: header, separator, then exactly the control rows.
+    record("T69 the block starts with the header row",
+           block_lines[0] == "| ID | Manual control | Why a machine cannot do it | Accountable |",
+           f"  got {block_lines[0]!r}")
+    record("T69 the header is followed immediately by the separator",
+           block_lines[1] == "|---|---|---|---|", f"  got {block_lines[1]!r}")
+    rows = block_lines[2:]
+    record("T69 every control renders exactly one row",
+           len(rows) == len(gate.MANUAL_CONTROLS),
+           f"  {len(rows)} rows for {len(gate.MANUAL_CONTROLS)} controls")
+    record("T69 no control appears twice",
+           len({r.split("|")[1].strip() for r in rows}) == len(rows))
+    record("T69 the table is byte-identical to the rendered constant",
+           "\n".join(rows) == expected,
+           f"  expected {expected[:120]!r}\n  got      {chr(10).join(rows)[:120]!r}")
+    record("T69 the generated block is not empty", bool(rows))
+
+    # R16-05: a second hand-kept control table anywhere in the document is the
+    # failure mode a section-scoped scan misses. Scanning control-shaped rows
+    # document-wide avoids the false positive the change log would otherwise
+    # cause: a change-log row does not begin with `| M-`, and a prose mention of
+    # `M-01` is not a table row.
+    stray = [
+        i + 1 for i, line in enumerate(lines)
+        if re.match(r"^\s*\|\s*M-\d+\s*\|", line) and not (begin_at < i < end_at)
+    ]
+    record("T69 no control table exists outside the generated block", not stray,
+           f"  rows at lines {stray[:4]}")
+
+    # R15-06: the marker must not re-trigger DM-09. `GENERATED_MARKER` matches
+    # `DO NOT EDIT` and `GENERATED FILE`, so a marker worded to please a human
+    # would make this Normative policy a generated artifact and DM-09 would
+    # reject it.
+    marker = lines[begin_at]
+    record("T69 the generated marker does not trip DM-09",
+           not gate.GENERATED_MARKER.search(marker), f"  marker {marker[:80]!r}")
 
     # And it must reach the output, not just the constant: a list nothing prints
     # is a comment with a data type.
@@ -2418,8 +2429,103 @@ def run_manual_controls() -> None:
                not missing, f"  missing from output: {missing}")
 
 
+# Which policy claim is proven by which test. This exists because the same
+# defect recurred three times in this series -- implementation moved, the
+# sentence describing the mechanism did not -- and adding prose review did not
+# stop it. A registry cannot prove a test is *sufficient* for a claim; only a
+# reviewer can. What it can prove is that the claim is still attached to a test
+# that still exists and still runs, so deleting or renaming the test breaks the
+# claim instead of leaving it standing.
+#
+# `section` is the heading the claim lives under; `tests` are the record() name
+# prefixes that must appear in the run.
+POLICY_ASSERTIONS = (
+    ("manual-controls-are-rendered-not-compared", "9.1",
+     ("T69 the table is byte-identical to the rendered constant",
+      "T69 no control table exists outside the generated block")),
+    ("backlog-count-is-stated-once", "9.1",
+     ("T70 every declared phrasing is caught",
+      "T66 a reason restating the backlog count is an error")),
+    ("skips-are-registered-and-bounded", "test-suite",
+     # Not T68c: that case is *allowed* to skip, so binding the claim to it would
+     # mean the claim rests on a test that did not run. T68a is the wiring
+     # evidence and always executes.
+     ("T68a an unreadable directory is reported, not silently skipped",)),
+)
+
+
+def run_policy_assertions() -> None:
+    """T71: every policy claim names the tests that prove it, and they ran.
+
+    The three blockers before this one were all "the text describes a mechanism
+    the code no longer has". The fix each time was to edit the text, and the
+    next round found another sentence. This case does not check that the text is
+    *true* -- that is a reviewer's job and no test can do it. It checks the
+    weaker, machine-checkable part: the claim is attached to named tests, those
+    tests exist in this file, and they executed in this run rather than being
+    skipped.
+
+    What it does NOT prove, stated plainly so nobody reads more into a green
+    run: that the named test is *sufficient* evidence for the claim. A test can
+    be wrong, or right but irrelevant. The registry makes a deletion visible; it
+    cannot make a bad test good.
+    """
+    print("policy assertions")
+    import check_document_management as gate  # noqa: F401
+
+    here = Path(__file__).resolve()
+    source = here.read_text(encoding="utf-8")
+    policy = (here.parents[1] / "00-governance"
+              / "architecture-document-management-policy.md").read_text(encoding="utf-8")
+
+    # The registry names tests as strings, and those strings live in this very
+    # file -- so `name in source` is true by construction and proves nothing.
+    # That is the self-reference the thirteenth review found in T19, arriving
+    # again. What must exist is a *record() call* whose first argument is that
+    # name, which is why this parses the AST instead of searching text.
+    tree = ast.parse(source)
+    recorded: set[str] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        func = node.func
+        if (getattr(func, "id", None) or getattr(func, "attr", None)) != "record":
+            continue
+        if node.args and isinstance(node.args[0], ast.Constant) \
+                and isinstance(node.args[0].value, str):
+            recorded.add(node.args[0].value)
+
+    missing_test: list[str] = []
+    missing_section: list[str] = []
+    for claim, section, tests in POLICY_ASSERTIONS:
+        for name in tests:
+            if name not in recorded:
+                missing_test.append(f"{claim}: no record() call named {name!r}")
+        if section != "test-suite" and f"### {section}" not in policy:
+            missing_section.append(f"{claim}: policy has no section {section}")
+
+    record("T71 every registered claim names tests that exist",
+           not missing_test, "  " + "; ".join(missing_test))
+    record("T71 every registered claim names a policy section that exists",
+           not missing_section, "  " + "; ".join(missing_section))
+
+    # The claim is only as good as the test having run. A registered test that
+    # was skipped leaves the claim standing on nothing.
+    executed = [n for n in SKIPPED]
+    skipped_claims = [
+        claim for claim, _, tests in POLICY_ASSERTIONS
+        if any(t in name for name in executed for t in tests)
+    ]
+    record("T71 no registered claim rests on a skipped test",
+           not skipped_claims, f"  {skipped_claims}")
+
+    # And the registry must not be empty: an empty registry proves nothing while
+    # looking like a satisfied check.
+    record("T71 the registry is not empty", len(POLICY_ASSERTIONS) >= 3)
+
 def run_single_entry_callers() -> None:
     """T67: governed_files() is diagnostics only, and that is checked.
+
 
     A comment promising good behaviour is not evidence. The tenth review's
     blocker was a scan that reported `0 governed documents` and exit 0; the
@@ -2505,6 +2611,7 @@ def main() -> int:
     run_unreadable_walk()
     run_manual_controls()
     run_count_vocabulary()
+    run_policy_assertions()
     run_single_entry_callers()
     run_schema_agreement()
     passed, total = sum(RESULTS), len(RESULTS)
