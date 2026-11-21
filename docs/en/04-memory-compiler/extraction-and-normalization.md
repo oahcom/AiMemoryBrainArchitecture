@@ -1,10 +1,36 @@
+---
+document_metadata:
+  domain: memory-compiler
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Owner semantic direction is recorded; cross-owner consumer contracts remain pending. GOV-DOC-001 remains PENDING until an authoritative artifact and exact version/Blob are adopted; the GOV-DOC-002 DM-12 source path is unresolved because no root source is authorized."
+    usage_status: Active
+    modification_status: Modified
+  authority:
+    canonical_status: Candidate
+    canonical_scope: null
+    canonical_scope_id: memory-compiler/extraction-normalization
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+---
+
 # Extraction and Normalization
 
 - Document ID: E-EXTRACTION-001
-- Version: 1.0
-- Source branch: session-e-memory-compiler-2026-11-16
-- Source blob: c18780403de2d1dbcf471bdb8abdaa009a4a78e1
+- Version: 1.1
+- Current-main baseline (pre-change): `0d0c1c6238e4e70a93609070b97fef596873916e`; source Blob: `e6aad4b7504fa61fd0feb8b1da7aa8801103bc60`.
+- Historical source branch: `session-e-memory-compiler-2026-11-16` (provenance only).
+- Historical source blob: `c18780403de2d1dbcf471bdb8abdaa009a4a78e1`.
+- Normative bilingual relationship: this file and [the Chinese counterpart](../../zh-CN/04-memory-compiler/extraction-and-normalization.md) are the maintained paired language mirrors under `docs/en` + `docs/zh-CN`; no separate root source file is recreated or claimed.
 - Chinese counterpart: [提取与规范化](../../zh-CN/04-memory-compiler/extraction-and-normalization.md)
+- Current-main paired extraction source: EN Blob `e6aad4b7504fa61fd0feb8b1da7aa8801103bc60`; ZH-CN Blob `8dd0b5b29ecd37ceac6750c4ad8fa07c1c46cb4c` (main `0d0c1c6238e4e70a93609070b97fef596873916e`).
 - Status: epistemic, temporal, scope and trust constraints DECIDED; extraction IR/model routing CANDIDATE; accuracy/cost TO_VALIDATE
 - Owner: Memory Compiler / MC-02
 - Integration: INT-P0-01/02/04; INT-P1-02/03/06; C P1-02/P1-03
@@ -17,7 +43,7 @@ Convert heterogeneous accepted source material into a normalized, typed, uncerta
 
 Includes parsing text, structured events, documents and environment observations; modality classification; entity/time/relation mention extraction; candidate proposition formation; normalization; confidence/uncertainty recording; deterministic validation; model-assisted extraction orchestration; and source-span alignment.
 
-Excludes Fact-specific modeling, Fact Schema and Fact approval (OPEN under INT-P0-01); canonical Claim identity semantics are DECIDED FOR CONVERGENCE under D's Option A and are governed by D, not defined by E; canonical entity merge decisions, lifecycle decisions, source authorization policy, external tool execution and final truth adjudication.
+Excludes canonical Fact/Claim schema, DDL, public API, wire mapping and Runtime implementation. The Owner-approved semantic direction is Option A + I1: Claim is a proposition thread with stable ClaimRef and immutable ClaimRevisionRef; Fact is a separately identified governed attestation bound to exact ClaimRevisionRef(s), evidence/provenance and authorized attestor/method context. B accepts the semantic baseline; D accepts the identity/revision/Forget authority boundary; I accepts the authorization/attestor/retention/Forget boundary. The B ADR is historical evidence, not the live semantic decision request. B schema-freeze/consumer acceptance, D immutable-revision transaction/currentness and migration/compatibility, I exact attestor/retention/Forget mapping, and all cross-owner consumer contracts remain OPEN. E remains CandidateProposition/ExtractionIR-only and does not mint canonical IDs or infer Fact from confidence. D governs canonical identity/lifecycle; I governs authorization/PermissionEpoch and security policy. Canonical entity merge decisions, final lifecycle decisions, source authorization policy, external tool execution and final truth adjudication are also excluded.
 
 ## 3. Responsibilities
 
@@ -90,7 +116,7 @@ CandidateProposition {
 }
 ~~~
 
-This is not a Claim schema. It is compiler IR whose Claim identity mapping follows D's DECIDED FOR CONVERGENCE — Option A semantics (stable Claim identity plus immutable ClaimRevision). CandidateProposition remains neutral and does not instantiate or freeze the canonical identity or any public schema. Fact-specific modeling, including whether and how a separate Fact object is represented, and Fact approval remain OPEN. No field name in this IR freezes public schema semantics.
+This is not a Claim or Fact schema; it is compiler IR. Option A + I1 is the approved semantic direction, but CandidateProposition remains neutral and does not instantiate canonical identity or freeze any public schema. B schema-freeze/consumer acceptance remains OPEN; D immutable-revision transaction/currentness and migration/compatibility remain OPEN; I exact attestor authorization, retention and Forget mapping remain OPEN. E must not map fields to canonical records until the exact B/D/I/Storage/H consumer contracts are version-pinned and reviewed. No field name in this IR freezes public schema semantics.
 
 ### 6.3 EntityMention / TimeMention
 
@@ -110,7 +136,7 @@ flowchart TD
  G --> I[Schema / Span / Scope Validation]
  H --> I
  I --> J[Normalized Candidate IR]
- J --> K[Evidence & Provenance stages]
+ J --> K[Evidence/Provenance derivation (cross-cutting)]
 ~~~
 
 State: PENDING → DECODED → SEGMENTED → CLASSIFIED → EXTRACTED → VALIDATED → NORMALIZED. Errors transition to RETRYABLE, PARTIAL, QUARANTINED or UNSUPPORTED. A partial IR may proceed only for fields with validated provenance; unresolved fields remain unknown.
@@ -167,7 +193,8 @@ Record source/event ref, digest, schema/policy/model version, modality, extracti
 - **Extraction → Evidence:** source spans and exact locators; Evidence Manager validates and persists source reference.
 - **Extraction → Entity Manager:** scoped EntityMention and identity evidence; Entity Manager returns provisional/resolved refs and ambiguity.
 - **Extraction → Consolidation:** candidate propositions, modality, time, scope, qualifiers and method receipts.
-- **D:** receives candidate propositions for mapping under D's DECIDED FOR CONVERGENCE Option A Claim identity semantics; Fact-specific modeling and approval remain OPEN; candidate IR is not a public schema.
+- **Admission boundary:** the Rust `admission` module is a local SQLite reference layer only. It is not D-authoritative producer registration, does not replace D-owned ForgetFence authority, and does not prove cross-service atomicity. Execution state/retry/lease/recovery is a cross-cutting lifecycle overlay over the five stages; the current in-memory `resume` path only continues from a supplied `NormalizedIR` through Staging and PublicationGate, and does not implement §6.3 durable crash recovery (see [Compiler Overview](compiler-overview.md) §28).
+- **D:** receives neutral candidate propositions. D accepts Option A + I1 semantics and owns canonical identity, immutable revisions, currentness, lifecycle, ConflictSet lifecycle and D ForgetFence. D transaction/currentness and migration/compatibility contracts remain OPEN; E does not allocate canonical IDs or write canonical records.
 - **H/C:** source classifications and telemetry semantics must align; observation/outcome distinctions are preserved.
 - **I:** data classification, permitted processing, source access and Forget Fence govern extraction.
 
@@ -183,7 +210,8 @@ D domain types and Fact/Claim ADR; B epistemic/temporal/scope semantics; C/H sou
 
 ## 18. Open questions
 
-- OPEN: INT-P0-01 Fact-specific modeling and Fact approval items not settled by D's DECIDED FOR CONVERGENCE Option A Claim identity semantics; CandidateProposition remains deliberately neutral.
+- DECIDED: Option A + I1 semantic direction is accepted by the Project Owner and B/D/I. The B ADR is historical evidence, not the live semantic decision request.
+- OPEN: B schema-freeze/consumer acceptance; D transaction/currentness and migration/compatibility; I exact attestor authorization/retention/Forget mapping; and all cross-owner consumer contracts. CandidateProposition remains deliberately neutral.
 - OPEN: C's final Observation versus Outcome mapping and Task/Plan revision semantics.
 - CANDIDATE: extraction IR and deterministic-first routing.
 - TO_VALIDATE: modality classifier quality, entity/time extraction accuracy, multilingual prompt-injection detection and local model resource use.
@@ -196,14 +224,14 @@ D domain types and Fact/Claim ADR; B epistemic/temporal/scope semantics; C/H sou
 - Persist a stage result and next-stage outbox/journal intent atomically or through an equivalent recoverable journal. A worker crash must not lose a completed stage or duplicate its externally visible effect.
 - Before payload dereference, source-span resolution, model prompt construction, stage-result publication or retry, re-check current permission and D Forget Fence. Unknown fence/policy state fails closed.
 - ExtractionIR, CandidateProposition, spans, embeddings and normalized values are derived objects: lineage and dependency registration must be durable before visibility under [Forget Fence and Derived Registration](forget-fence-and-derived-registration-part1.md).
-- CandidateProposition remains neutral pre-canonical IR. Claim identity mapping follows D's DECIDED FOR CONVERGENCE Option A semantics and is not ADR-BLOCKED. Fact-specific modeling and Fact approval remain OPEN; E must not infer or approve a Fact Schema, DDL, API or Wire contract.
+- CandidateProposition remains neutral pre-canonical IR. Option A + I1 semantics are DECIDED, but B schema-freeze/consumer acceptance, D transaction/currentness/compatibility, I attestor/retention/Forget mapping and all cross-owner contracts remain OPEN. E must not infer or approve a Fact/Claim Schema, DDL, API or Wire contract, mint canonical IDs, or infer Fact from confidence.
 
 ### 19.1 Claim/Fact canonical publication order
 
 E's ExtractionIR and CandidateProposition MUST
 remain private staging artifacts.
 
-This publication ordering does not defer or reopen Claim identity semantics, which D has already DECIDED FOR CONVERGENCE under Option A. Fact-specific modeling and approval remain OPEN and are not approved by this publication protocol.
+This publication ordering implements no canonical mapping. Option A + I1 semantics are DECIDED, but B schema-freeze/consumer acceptance, D transaction/currentness/compatibility, I attestor/retention/Forget mapping and all cross-owner contracts remain OPEN. This protocol does not approve schema, DDL, API, wire fields or Runtime implementation.
 
 The normative order is:
 
