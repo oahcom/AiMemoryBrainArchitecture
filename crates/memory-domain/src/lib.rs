@@ -351,6 +351,24 @@ pub fn validate_outcome_claim(
     Ok(())
 }
 
+
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, PartialEq)]
+pub struct ClaimRef(OpaqueId);
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, PartialEq)]
+pub struct ClaimRevisionRef(OpaqueId);
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, PartialEq)]
+pub struct FactRef(OpaqueId);
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, PartialEq)]
+pub struct FactRevisionRef(OpaqueId);
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, PartialEq)]
+pub struct EvidenceRef(OpaqueId);
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, PartialEq)]
+pub struct ProvenanceRef(OpaqueId);
+macro_rules! ref_ctor { ($($t:ty),*) => {$(
+impl $t { pub fn new(v: impl Into<String>) -> Result<Self, DomainError> { Ok(Self(OpaqueId::new(v)?)) } pub fn as_str(&self)->&str { self.0.as_str() } }
+)*};}
+ref_ctor!(ClaimRef,ClaimRevisionRef,FactRef,FactRevisionRef,EvidenceRef,ProvenanceRef);
+
 #[cfg(test)]
 mod tests {
     use super::*;
