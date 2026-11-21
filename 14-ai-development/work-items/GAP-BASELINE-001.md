@@ -1144,3 +1144,102 @@ Leaving either standing means the next reader tests a finding that does not repr
 
 The gate is materially stronger than when I last examined it. Recorded here because most of
 this document is about what the gate cannot see, and that balance should be accurate.
+
+## Correction to the correction: the gate hole is half closed, not closed
+
+The section above says the zero-byte exploit "does not reproduce" and "is closed on current
+`main`". **That is half true, and stated as if it were wholly true.** The direction I tested
+is closed; the other direction is open.
+
+### What I tested, and what I failed to vary
+
+My probe held the source English and varied only the partner:
+
+```
+zz-empty-probe.md        = 20 lines of English   (805 bytes)
+zz-empty-probe.zh-CN.md  = ""                    (0 bytes)
+-> both in_gaps=True    correctly rejected
+```
+
+Correct. But `_side_by_side_bilingual()` is:
+
+```python
+return _has_any_chinese(source) or _has_any_chinese(partner)
+```
+
+An `or`. I varied the right operand and left the left one English, so the short-circuit
+never fired. The case that matters is the mirror image, and I did not test it.
+
+### Both directions, measured on `main` `f687346c`
+
+```
+=== one CJK character, both files otherwise English ===
+02-domain-model/zz-c1_one_char.md        = "# Title\n\nThis is English.\n\n一\n"
+02-domain-model/zz-c1_one_char.zh-CN.md  = "# Title\n\nThis is English.\n\n一\n"
+.md_in_gaps=False  .zh_in_gaps=False  =>  ACCEPTED as pair
+
+=== Chinese source, zero-byte partner ===
+02-domain-model/zz-c3_zero_partner.md        = 29 lines of Chinese
+02-domain-model/zz-c3_zero_partner.zh-CN.md  = "" (0 bytes)
+.md_in_gaps=False  .zh_in_gaps=False  =>  ACCEPTED as pair
+```
+
+Both pass. So:
+
+| case | before #487 | after #487 (`main` now) |
+|---|---|---|
+| all-English `.zh-CN.md` | accepted | **rejected** — fixed |
+| zero-byte `.zh-CN.md` with English source | accepted | **rejected** — fixed |
+| zero-byte `.zh-CN.md` with Chinese source | accepted | **accepted** — still open |
+| one `一` character in both files | accepted | **accepted** — still open |
+
+`_has_any_chinese()` raised the floor from "no content check" to "one CJK character somewhere
+in the pair". That closes the all-English case and leaves the asymmetric one open.
+
+### The accurate statement of the current state
+
+Not "the hole is closed" and not "the hole is open", but:
+
+> The side-by-side branch now requires one CJK character in at least one of the two files.
+> It does not require the *partner* to contain anything, and it does not require the two
+> files to differ. A Chinese source with a zero-byte `.zh-CN.md` passes, and so does a pair
+> of English files that each contain `一`.
+
+The remaining fix is small and has no threshold problem: require `_has_any_chinese(partner)`
+specifically — the partner must carry Chinese — rather than the disjunction. That is one
+predicate, not a threshold decision, and it cannot produce a false positive on a real pair
+because a real `.zh-CN.md` contains Chinese by definition.
+
+### Where this came from, and why it is worth recording
+
+Register 013 in PR #494 documents both cases with reproductions. I read it, re-ran them
+myself, and they reproduce. I did not find them; I confirmed them, and in doing so found that
+my own earlier "closed" conclusion was scoped to the one direction I happened to test.
+
+That is the same failure as the #433 error recorded above, in a different form: I measured a
+convenient instance of a claim instead of the claim. There I checked `main` for a branch
+artifact; here I checked one operand of an `or`.
+
+### Register 013 itself
+
+The document is the most useful artifact in this repository on this subject, and specifically
+because it withdraws its own claims:
+
+```
+C-1  "PR #470 wrote a GitHub API JSON body into scripts/bilingual-baseline.txt"  WITHDRAWN
+C-2  "7 three-file (ambiguous) side-by-side groups exist"                       WITHDRAWN (this round)
+C-3  "AI-EXEC-001.md edit returns rc=0, so the 14 root passes"                  CORRECTED
+```
+
+> C-2 and C-3 matter because both, taken at face value, would have inflated the defect count.
+> A register that overstates its findings is as unusable as one that understates them.
+
+One observation about the PR's own files: `docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-21-PAIRING-RESIDUAL-013.md`
+contains **3 CJK characters in 10171 bytes**, and all three are the literal `一` being quoted
+as the exploit. The register documenting that one character suffices is written entirely in
+English in the `zh-CN` slot. It passes the gate — which is the point the register is making —
+and it is the strongest available example of its own §3.1, which the document does not say.
+
+The other three files in the PR are genuinely Chinese (764, 1565, 5896 CJK), and all four
+root copies are byte-identical to their `docs/zh-CN/` counterparts, which is correct for this
+repository's convention.
