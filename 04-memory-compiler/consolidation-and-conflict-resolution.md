@@ -53,7 +53,7 @@ document_metadata:
 - Owner decision dependency: OWNER-DECISION-FACT-CLAIM-001 applies to Fact/Claim semantics only; this document's concrete schemas remain at the status stated below.
 
 
-**Status:** DECIDED for no-silent-overwrite, evidence preservation and canonical authority boundaries; CANDIDATE for matching and scoring policies; OPEN for Claim identity/revision and Conflict Set schema.  
+**Status:** DECIDED for no-silent-overwrite, evidence preservation, canonical authority boundaries, and the Option A + I1 Fact/Claim semantic identity/revision model under OWNER-DECISION-FACT-CLAIM-001; CANDIDATE for matching and scoring policies; OPEN for D's concrete ClaimRevision/Conflict Set schema and lifecycle contract.  
 **Owner:** Memory Compiler / MC-04.  
 **Integration:** INT-P0-01/02/03; INT-P1-02/04/06; AR-004.
 
@@ -146,7 +146,7 @@ ClaimRevisionProposal {
 }
 ~~~
 
-This supports either stable Claim identity plus immutable revisions or successor Claim identity. It must be mapped after D resolves the policy.
+OWNER-DECISION-FACT-CLAIM-001 adopts stable Claim identity plus immutable Claim revisions (I1). Identity-changing changes create a new Claim; non-identity-changing evidence/provenance/epistemic updates create a new ClaimRevision. D still owns canonical identity/lifecycle and the concrete schema contract.
 
 ## 7. Pipeline / State Machine
 
@@ -231,7 +231,7 @@ D Canonical Memory/Lifecycle/Entity Manager; B Claim/epistemic/time/provenance s
 
 ## 18. Open Questions
 
-- **OPEN:** INT-P0-01 Fact/Claim ADR and output mapping.
+- **RESOLVED:** INT-P0-01 Fact/Claim semantics and I1 identity/revision choice are adopted by OWNER-DECISION-FACT-CLAIM-001. **OPEN:** D/I/H concrete output schema, authorization and consumer acceptance.
 - **OPEN:** INT-P1-02 stable Claim ID versus successor revision and canonical Conflict Set model.
 - **OPEN:** INT-P1-06 lifecycle authority record and Provenance DAG.
 - **CANDIDATE:** deterministic blocking keys + semantic candidate generation + explicit review.
@@ -273,5 +273,5 @@ D owns canonical object semantics and write decisions; F owns index projection a
 - Canonical write operation identity is stable across retries. If D's response is unknown, query D using the same operation key; never generate a new key to force another canonical effect.
 - D alone returns CanonicalCommitted and its canonical cursor. E records the reference but does not allocate or interpret it. F alone confirms Indexed and advances its per-index/per-partition watermark.
 - No candidate, conflict proposal, review payload or canonical-write envelope derived from a forgotten source may be newly published after fence activation. Derived dependency registration precedes visibility.
-- CandidateProposition/ExtractionIR to canonical Claim mapping remains **ADR-BLOCKED** pending B/Governance approval.
+- CandidateProposition/ExtractionIR remains neutral pre-canonical IR. Option A + I1 semantics are adopted by the Owner; canonical mapping remains blocked until D's schema/lifecycle contract and I/H consumer contracts are version-pinned.
 - See `accepted-receipt-and-idempotency-contract.md` and `forget-fence-and-derived-registration.md` for normative E boundary proposals; these remain CANDIDATE until D/H/I/Storage/F owners approve their interfaces.
