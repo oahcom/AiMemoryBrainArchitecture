@@ -38,6 +38,10 @@ PAIR_EXEMPT_PREFIXES = (
 )
 # For 14-ai-development, counterpart pairing applies to prose documents only.
 PAIR_ENFORCED_SUFFIXES = {".md"}
+# Exact side-by-side pairs temporarily known to be incomplete translations.
+# Each key is an unordered pair of repository-relative paths.
+# Keep empty when no reviewed partial pair remains unresolved.
+PARTIAL_SIDE_BY_SIDE_PAIRS: set[frozenset[str]] = set()
 EXEMPT_SUFFIXES = {".png", ".jpg", ".jpeg", ".svg", ".drawio"}
 # Each entry is a reviewed single-file bilingual source. The reason must add
 # information about the file's external contract, consumer, or governance role
@@ -295,8 +299,14 @@ def current_bilingual_gaps() -> set[str]:
             english = REPO_ROOT / "docs" / "en" / source
             chinese = REPO_ROOT / "docs" / "zh-CN" / source
             mirrored = english.is_file() and chinese.is_file()
+            side_by_side = side_by_side_partner(source)
+            partial_side_by_side = (
+                side_by_side is not None
+                and frozenset((source, side_by_side)) in PARTIAL_SIDE_BY_SIDE_PAIRS
+            )
             # Structural pairing is not enough: a side-by-side pair must carry Chinese text.
-            paired = mirrored or _side_by_side_bilingual(source)
+            # A pair registered as partially translated is not a pairing at all.
+            paired = mirrored or (_side_by_side_bilingual(source) and not partial_side_by_side)
             if not paired and root_name == "14-ai-development":
                 # Shape 3: the root file IS the Chinese source and docs/en holds
                 # the English side. It must be earned by actually carrying Chinese.
