@@ -268,3 +268,190 @@ Memory/Version），位于不同 crate，且没有对账路径。
 ```
 
 本文中每一处"绿"都是本地测量。没有任何一项经过 workflow 检查。
+
+## 7. 在 `dba34a35` 上的重测（2026-11-22 03:05 +08:00）
+
+同样是追加。§1-§6 未改动。自 `b29278a8` 以来 main 上有六处变化，其中一处
+使一条 `#[ignore]` 理由变成假的，而不是关闭了一个缺口。
+
+### 7.1 测试总数变了，ignore 数的变化是错的原因
+
+```
+$ CC=zigcc AR=zigar cargo test --workspace --all-targets
+binaries: 26
+TOTAL passed=438 failed=0 ignored=9
+```
+
+§6.1 在 `b29278a8` 记录的是 385 / 0 / 10。+53 通过是真实的工作量。10 → 9
+**不是**转化了一条测试：见 §7.2。
+
+同一轮运行的按 crate 拆分：
+
+| crate | 单元 | 集成 |
+|---|---|---|
+| agent-integration | 36 | 2 + 19 |
+| bmcp-protocol | 42 | 4 |
+| brain-cli | 1 | 4 |
+| memory-compiler | 62 | 1 |
+| memory-context | 68 | 8 + 1 |
+| memory-domain | 55 | 11（+9 ignored） |
+| memory-event-store | 2 | — |
+| memory-event-store-sqlite | 18 | 5 + 2 + 6 |
+| memory-storage | 3 | — |
+| memory-storage-sqlite | 60 | — |
+| memory-store | 15 | 6 + 3 + 2 |
+
+§6.2 标记的 `371 vs 385` 分歧在这里也没有解决。现在能确定的是：§6.1 的表与
+本表统计的目标集合不同——`--all-targets` 包含集成二进制，而 §6.1 的数字与
+只跑 `--lib` 一致。
+
+### 7.2 一条 `#[ignore]` 理由现在是假的，而测试本身没变
+
+`#545`（444deef1）新增了 `crates/memory-domain/src/claim_identity.rs`，经
+`lib.rs:7` 的 `pub use claim_identity::*` 再导出。它提供的正是 `dm2_03` 声称
+不存在的那套 API：
+
+```rust
+pub fn classify(prior: &ClaimRevision, candidate: &ClaimRevision) -> ClaimIdentityDecision
+```
+
+`phase2_acceptance.rs:160` 的 ignore 理由仍写着：
+
+> `blocked: memory_domain 当前没有 classify_claim_change / CI-01..CI-13 classifier 函数`
+
+实测：
+
+```
+$ cargo test -p memory-domain --lib claim_identity
+test result: ok. 19 passed; 0 failed; 0 ignored
+```
+
+19 个测试覆盖 CI-01、CI-02、CI-03、CI-04、CI-07、CI-08、CI-09、CI-10、CI-11、
+CI-13，加上 label-only、qualifier 歧义、多维度歧义、scope 歧义、跨 Claim、
+禁止回落、确定性。CI-05 / CI-06 / CI-12 在模块头被记录为**不可达**而非缺失：
+`ClaimRevision` 没有 quantifier、modality、confidence 字段，分类器无法被问到
+那个问题。
+
+所以 `dm2_03` 不是被阻塞，是**过期**。它的 `unimplemented!()` 函数体若去掉
+ignore 会失败，所以不能简单删掉 ignore——测试体本身从未针对 `classify()`
+写过。这是验收文件里的缺陷，不是领域 crate 的缺陷。
+
+其余 9 条逐条重新探测，**8 条仍然成立**：
+
+| 测试 | 探测的符号 | `crates/` 内命中 |
+|---|---|---|
+| dm2_01 | `ClaimRevisionRegistry`、`register_revision` | 0 |
+| dm2_02 | `AcceptedRevisionState` | 0 |
+| dm2_04 | `ClaimRevisionResolver`、`resolve_claim_head` | 0 |
+| dm2_06 | 已验证状态的 `AuthorizationDecisionRef` | 只有 `pending_i()` |
+| dm2_08 | `RelationTypeRegistry`、`contains_relation_type` | 0 |
+| dm2_09 | `RelationExtension.scope_refs` | 结构体无此字段 |
+| dm2_11 | `Provenance::validate`、`parent_provenance_refs`、`unavailable_reason` | 0 |
+| dm2_12 | `ProvenanceGraph`、`DerivationEdge`、`validate_independent` | 0 |
+
+`memory-domain/src/lib.rs` 的 `RelationExtension` 带 `valid_time`、
+`epistemic_status`、`lifecycle_state`，没有 `scope_refs`；`Provenance` 带
+`provenance_id`、`source_refs`、`derivation_kind`、`actor_ref`、`created_at`，
+没有 lineage 或 unavailable-reason 字段。两条理由都是准确的。
+
+### 7.3 GAP-07 的缺口陈述现在是假的；它的闭环条件只满足一半
+
+GAP-07 §1.2 原文称 `compile` "no production implementation of its required
+`PublicationAuthority` trait, and no non-test caller"。两半现在都错了：
+
+```
+$ grep -rn "impl.*PublicationAuthority for" --include=*.rs crates/
+crates/memory-compiler/src/lib.rs:921:  impl PublicationAuthority for EvidenceAuthority      (cfg(test))
+crates/memory-compiler/src/lib.rs:940:  impl PublicationAuthority for TestAuthority          (cfg(test))
+crates/memory-compiler/src/lib.rs:1355: impl PublicationAuthority for RecoveryAuthority      (cfg(test))
+crates/memory-compiler/src/publication_authority.rs:50:
+        impl PublicationAuthority for AdmissionPublicationAuthority<'_>   (生产)
+```
+
+`brain-cli/src/main.rs:4` 引入 `memory_compiler::publication_authority::AdmissionPublicationAuthority`，
+在第 245 行构造，`run_compiler_stage` 在第 285 行调用 `compiler.compile(...)`。
+一次真实运行：
+
+```
+$ brain compile --input fixtures/event.json --out ctx.json --verbose
+compiler stage blocked: publication not authorized; blocking flag: canonical_commit_confirmed;
+  false flags: [canonical_commit_confirmed, publication_participant_admitted,
+                protected_visibility_authorized]
+EXIT=0
+```
+
+对照 GAP-07 自己的闭环条件：
+
+1. **满足** — 存在生产权威，且有一条非测试路径调用 `compile`。
+2. **满足** — `crates/brain-cli/tests/compiler_skip_is_visible.rs`，4 个测试，
+   启动构建出的二进制，断言提示在 stderr 上恰好出现一次、在 sidecar 里出现
+   一次，且退出码为 0。
+3. **满足** — 提示是无条件的，不在 `--verbose` 之内。
+4. **不满足，且这是唯一还站着的** — GAP-07 仍在用现在时描述自己为 open，
+   而它的主语已不存在。
+
+三个 `false` 标志不是 bug。`OWNER-DECISION-PUBLICATION-RECORD-001` D3 规定该
+适配器 "never computes, infers, defaults or substitutes a flag"，
+`compiler-stage-contract.md` §8 规定 "E MUST NOT implement substitute
+authorization decisions"。在没有权威签发者时报 `false` 是必需行为。因此这次
+运行是**正确地拒绝发布**，与"该阶段没有运行"是两种不同的结果。
+
+这正是 GAP-10 §5 想抓的那类文档缺陷：关于现在的陈述过期了，被继承而不是
+被重新推导。
+
+### 7.4 E2E 的说法从"假"变成"到发布闸门为止为真"
+
+§5 关于 E2E 的那行写 "`brain-cli` runs ingestion → storage → context end to
+end. It stops at the compiler skip"。现在的路径跑的是 ingestion → extraction →
+normalization → staging → `compile` → 取证明 → 拒绝。比 §5 记录的多了两个
+阶段，且拒绝是来自真实权威的真实决定，不是跳过。
+
+仍然缺的是**一次成功的发布**。仓库里没有任何东西能产出 `Published`
+处置，因为三个证明字段没有签发者。没有任何非测试路径的测试断言过
+`PublicationDisposition::Published`。
+
+### 7.5 双语门禁被未跟踪的构建产物污染
+
+```
+$ BASE_SHA=HEAD~1 HEAD_SHA=HEAD python scripts/check_bilingual_docs.py
+::error::New bilingual gap outside frozen baseline: 08-bmcp-protocol/.pytest_cache/README.md
+::error::New bilingual gap outside frozen baseline: 08-bmcp-protocol/tests/conformance/.pytest_cache/README.md
+EXIT=2
+```
+
+两个路径都是未跟踪的（`.gitignore` 第 6 行有 `.pytest_cache/`），而
+`current_bilingual_gaps()` 用 `root.rglob("*.md")` 走文件系统，不是
+`git ls-files`。所以任何一次本地 pytest 都会让门禁在 CI 里不可能存在的文件
+上变红。移除它们后：
+
+```
+bilingual baseline: 77 frozen, 0 new gaps
+EXIT=1   （只剩 PR body 的 manifest 错误）
+```
+
+这不是新缺口，是**可复现性缺陷**：门禁的答案依赖未跟踪的本地状态，因此
+"门禁通过"不是关于该提交的陈述。
+
+### 7.6 77 条基线没动，其形状现在完全归因
+
+`current_bilingual_gaps()` 本地返回 79，干净树上返回 77。干净树的分布：
+
+| 根 | 缺口 | 说明 |
+|---|---:|---|
+| `13-engineering-decisions` | 58 | 58 个 `.md`，0 个 `.en.md`，0 个 `docs/en` 镜像 |
+| `06-memory-context` | 10 | |
+| `08-bmcp-protocol` | 6 | |
+| `14-ai-development` | 4 | 全是 `research/phase-0/SESSION-*.md` |
+| `00-governance` | 1 | `reports/gov-doc-001-full-scan-2026-11-20.md` |
+
+`13-engineering-decisions` 是**它自己子树的 100%**，占整个基线的 75%。
+`PAIR_EXEMPT_PREFIXES` 覆盖 14 下的 `work-items/`、`prompts/`、`adr/`，13 下
+一个都没有；`EMBEDDED_BILINGUAL_SOURCES` 共 21 条，13 下**零条**。所以整个根
+之所以在基线里，是因为从未为它创建过门禁认可的任何形态——与 GAP-10 §1 和
+登记 015 为 77 条确立的机制相同，现在定位到单个根。
+
+`14-ai-development/governance-register/` 有 31 个 `.md` 却**不在**基线里：19 个
+有 `docs/en` + `docs/zh-CN` 镜像，剩下 12 个是并排配对（`README.md` +
+`README.en.md`，以及五对 `GOV-NC-2026-11-20-*`）。`side_by_side_partner()`
+全部解析得到。这是机制按设计工作，也是 §7.5 的反例：登记目录干净，因为它的
+文件被跟踪、配对是真实的。
