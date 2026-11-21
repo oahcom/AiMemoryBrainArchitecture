@@ -481,7 +481,29 @@ pub struct FactRevision {
 }
 impl FactRevision {
     #[allow(clippy::too_many_arguments)]
-    pub fn new(fact_ref: FactRef, revision_ref: FactRevisionRef, parent: Option<&FactRevision>,
+    pub fn initial(fact_ref: FactRef, revision_ref: FactRevisionRef, claim_revision_refs: Vec<ClaimRevisionRef>,
+        evidence_refs: Vec<EvidenceRef>, provenance_refs: Vec<ProvenanceRef>, scope_ref: ScopeRef,
+        attestor_ref: AttestorRef, authorization_decision_ref: AuthorizationDecisionRef,
+        attestation_method_id: String, attestation_method_version: String, outcome: FactOutcome,
+        rationale: String, canonical_commit_ref: CanonicalCommitRef,
+        correction_or_revocation_reason: Option<String>) -> Result<Self, DomainError> {
+        Self::new(fact_ref, revision_ref, None, claim_revision_refs, evidence_refs, provenance_refs,
+            scope_ref, attestor_ref, authorization_decision_ref, attestation_method_id,
+            attestation_method_version, outcome, rationale, canonical_commit_ref, correction_or_revocation_reason)
+    }
+    #[allow(clippy::too_many_arguments)]
+    pub fn successor(fact_ref: FactRef, revision_ref: FactRevisionRef, parent: &FactRevision,
+        claim_revision_refs: Vec<ClaimRevisionRef>, evidence_refs: Vec<EvidenceRef>,
+        provenance_refs: Vec<ProvenanceRef>, scope_ref: ScopeRef, attestor_ref: AttestorRef,
+        authorization_decision_ref: AuthorizationDecisionRef, attestation_method_id: String,
+        attestation_method_version: String, outcome: FactOutcome, rationale: String,
+        canonical_commit_ref: CanonicalCommitRef, correction_or_revocation_reason: Option<String>) -> Result<Self, DomainError> {
+        Self::new(fact_ref, revision_ref, Some(parent), claim_revision_refs, evidence_refs, provenance_refs,
+            scope_ref, attestor_ref, authorization_decision_ref, attestation_method_id,
+            attestation_method_version, outcome, rationale, canonical_commit_ref, correction_or_revocation_reason)
+    }
+    #[allow(clippy::too_many_arguments)]
+    fn new(fact_ref: FactRef, revision_ref: FactRevisionRef, parent: Option<&FactRevision>,
         claim_revision_refs: Vec<ClaimRevisionRef>, evidence_refs: Vec<EvidenceRef>, provenance_refs: Vec<ProvenanceRef>,
         scope_ref: ScopeRef, attestor_ref: AttestorRef, authorization_decision_ref: AuthorizationDecisionRef,
         attestation_method_id: String, attestation_method_version: String, outcome: FactOutcome, rationale: String,
@@ -600,12 +622,12 @@ impl EvidenceExtension { pub fn validate(&self)->Result<(),DomainError>{
     #[test]
     fn dm2_03_fact_refs_are_distinct_and_fact_pins_exact_claim_revision() {
         let pinned=ClaimRevisionRef::new("cr1").unwrap(); let fact_ref=FactRef::new("f").unwrap();
-        let rev=FactRevision::new(fact_ref.clone(),FactRevisionRef::new("fr1").unwrap(),None,vec![pinned.clone()],vec![EvidenceRef::new("e").unwrap()],vec![ProvenanceRef::new("p").unwrap()],scope("s"),AttestorRef::pending_i(),AuthorizationDecisionRef::pending_i(),"method".into(),"v1".into(),FactOutcome::Attested,"reason".into(),CanonicalCommitRef::pending_d(),None).unwrap();
+        let rev=FactRevision::initial(fact_ref.clone(),FactRevisionRef::new("fr1").unwrap(),None,vec![pinned.clone()],vec![EvidenceRef::new("e").unwrap()],vec![ProvenanceRef::new("p").unwrap()],scope("s"),AttestorRef::pending_i(),AuthorizationDecisionRef::pending_i(),"method".into(),"v1".into(),FactOutcome::Attested,"reason".into(),CanonicalCommitRef::pending_d(),None).unwrap();
         let fact=Fact::new(fact_ref,rev).unwrap(); let _head=ClaimRevisionRef::new("cr2").unwrap(); assert_eq!(fact.initial_revision().claim_revision_refs(),&[pinned]);
     }
     #[test]
     fn dm2_04_fact_cannot_be_constructed_without_claim_evidence_provenance() {
-        let r=FactRevision::new(FactRef::new("f").unwrap(),FactRevisionRef::new("fr").unwrap(),None,vec![],vec![],vec![],scope("s"),AttestorRef::pending_i(),AuthorizationDecisionRef::pending_i(),"m".into(),"v1".into(),FactOutcome::Attested,"why".into(),CanonicalCommitRef::pending_d(),None);
+        let r=FactRevision::initial(FactRef::new("f").unwrap(),FactRevisionRef::new("fr").unwrap(),None,vec![],vec![],vec![],scope("s"),AttestorRef::pending_i(),AuthorizationDecisionRef::pending_i(),"m".into(),"v1".into(),FactOutcome::Attested,"why".into(),CanonicalCommitRef::pending_d(),None);
         assert_eq!(r.unwrap_err(),DomainError::MissingClaimRevision);
     }
     #[test]
