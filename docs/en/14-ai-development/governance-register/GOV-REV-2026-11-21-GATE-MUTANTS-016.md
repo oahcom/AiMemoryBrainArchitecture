@@ -2,9 +2,20 @@
 
 **Status:** OPEN — MEASUREMENT ONLY
 **Nature:** `REGISTER_ONLY / NO_IMPLEMENTATION / NO_GATE_CHANGE / REQUIRES_INDEPENDENT_REVIEW`
-**Measured at:** `main = 1d0ecb975c`
+**Measured at:** `main = 1d0ecb975c`; re-verified at `fa9c32a` and `8a2ce1b` (47 tests, same verdicts)
 **Extends:** `GOV-REV-2026-11-21-PR425-001.md` (which found mutant M3 surviving in the digest path)
 **Register author:** strategic requirement orchestrator session. **Not** an independent reviewer, **not** the accountable owner.
+
+---
+
+## 0.1 Revision history
+
+| Version | Date | Change |
+|---|---|---|
+| v1 | 2026-11-21 | Initial. Four mutants, M5/M6 survive, with the claim that M5 surviving means "the guard producing 75% of the baseline has no test" |
+| **v2** | 2026-11-21 | **M5's interpretation corrected.** Measured: deleting that guard leaves the gap count **unchanged** (77 → 77), because Shape 3 needs a `docs/en` mirror and none of the 77 has one. M5 is an **unloaded mutant**; surviving is not evidence of a test gap. The real gap is §2.3 |
+
+**M5 surviving is a fact; v1's explanation of it was wrong.** A mutant whose removal changes no output cannot be evidence about test quality.
 
 ---
 
@@ -47,23 +58,55 @@ Verbatim result for M5 and M6: `Ran 47 tests in ... OK`.
 
 ## 2. What the two survivors mean
 
-### 2.1 M5: the root guard that produces 75% of the baseline is untested
+### 2.1 M5: the guard survives because the branch it guards never fires
 
-Register 015 measured that **58 of 77 frozen baseline entries are the entire `13-engineering-decisions` root**, and that the mechanism excluding them is:
+**v1 said "M5 surviving means the guard producing 75% of the baseline has no test coverage". The second half of that needs correcting.**
+
+Measured: deleting `root_name == "14-ai-development"` leaves `current_bilingual_gaps()` **completely unchanged**:
+
+```
+BEFORE  gaps=77 baseline=77 new=0 resolved=0
+AFTER   gaps=77 baseline=77 new=0 resolved=0
+```
+
+Not one gap moves. The reason is in register 015 v2 §3.1: Shape 3 requires `docs/en/X` to exist, and **none** of the 77 gaps has one.
 
 ```python
 if not paired and root_name == "14-ai-development":
-    paired = english.is_file() and _carries_chinese(source)
+    paired = english.is_file() and _carries_chinese(source)   # english must exist
 ```
 
-Deleting `root_name == "14-ai-development"` — making embedded-bilingual recognition root-agnostic — breaks **nothing** in the test suite. All 47 tests still pass.
+So M5 surviving is **not** "the tests missed an important guard". It is "**this guard carries zero load on all 77 baseline entries; deleting it changes nothing**". The tests did not kill it because it does not change behaviour today — not because the tests are badly written.
 
-So the test suite cannot tell the difference between:
+Shape 3's actual scope, measured, is three files, all in the 14 root:
 
-- the current policy: embedded bilingual counts **only** in `14-ai-development`
-- the alternative policy: embedded bilingual counts **everywhere**
+```
+14-ai-development/AI-EXEC-001.md
+14-ai-development/AI-EXEC-002.md
+14-ai-development/AI-EXEC-ROLLOUT-001.md
+```
 
-A 58-entry policy consequence rests on a line no test constrains. Whether the guard is correct is a policy question (register 015 §6 lists three readings I cannot distinguish). That it is **unprotected** is not a policy question.
+With the guard removed, the number of files in the other eight roots meeting all four conditions (no `docs/zh-CN`, no side-by-side partner, a `docs/en` mirror, Chinese content) is **0**.
+
+**M5 is therefore an unloaded mutant**: its survival is real, but it proves less than v1 claimed. It proves "this branch carries no load today", not "there is a hole in the tests". The hole is elsewhere — see §2.3.
+
+### 2.3 Corrected reading: the real test gap is that embedded bilingual has no shape
+
+Register 015 v2 §3.2 measured that all 77 gaps fall into a single mechanism class: **no counterpart file of any kind, 77/77**.
+
+And all three gate shapes **require a second file to exist**:
+
+| Shape | Requires |
+|---|---|
+| mirror | `docs/en/X` + `docs/zh-CN/X` |
+| side-by-side | a `X.zh-CN.md` or `X.en.md` sibling |
+| embedded (Shape 3) | `docs/en/X` **and** `_carries_chinese(X)` |
+
+**No shape accepts "one file carrying both languages internally".** The 13 root's 57 embedded-bilingual files are gaps because they have **no second file at all** — not because a root name blocks them.
+
+That means `EMBEDDED_BILINGUAL_SOURCES`' 21 entries are not "exemptions" but the **only** mechanism by which embedded bilingual can pass, and it requires registering each file individually. `00-governance` registered 12, the 14 root 9, the 13 root 0 — in the root where embedded bilingual is most concentrated.
+
+**The real test gap is therefore**: no test asserts how single-file embedded bilingual should be handled. M5 surviving is one symptom of that gap, not the gap itself.
 
 ### 2.2 M6: the `cwd` split from register 014 is untested
 
