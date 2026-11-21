@@ -4,6 +4,11 @@
 **Owner:** Session G  
 **Related:** INT-P0-02, INT-P0-03, INT-P1-06
 
+Requirement ID `CR-01` is a stable reference for the 1 MUST occurrence in
+this document. It is a label only; the normative text is unchanged. Other
+documents SHOULD cite `CR-nn` rather than a section number, because section
+numbers drift.
+
 ## 1. Purpose and sources
 
 Reconciliation compares desired Context with current canonical, permission, temporal, retrieval-freshness and Adapter-delivery reality. It detects drift and creates a new valid Context version or blocks use. It does not change Canonical Memory or decide claim truth.
@@ -155,7 +160,7 @@ A reconciliation run records the exact typed vector it observed: D CanonicalComm
 
 ### 9.1 Normative reconnect contract (H executes wire/Adapter order; G supplies current Context state)
 
-Reconnect MUST be treated as a fresh authorization and reconciliation boundary, not a continuation of the last local session.
+**CR-01** — Reconnect MUST be treated as a fresh authorization and reconciliation boundary, not a continuation of the last local session.
 
 1. H authenticates transport and binds Adapter Principal/Instance, Agent Principal/Instance, Runtime Instance/Session, issuer, audience and typed ScopeRef. Payload IDs remain claims only.
 2. H negotiates protocol/schema and capability set; establishes current CapabilityEpoch. A changed Adapter instance or capability epoch invalidates old proof coverage for new actions.

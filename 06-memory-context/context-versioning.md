@@ -4,6 +4,11 @@
 **Owner:** Session G  
 **Related:** INT-P1-01, INT-P1-05, C review P2-05/P2-06
 
+Requirement IDs `CV-01`..`CV-48` are stable references for the 48 MUST
+occurrences in this document. They are labels only; the normative text is
+unchanged. Other documents SHOULD cite `CV-nn` rather than a section number,
+because section numbers drift.
+
 ## 1. Guarantees
 
 A Context Version is immutable and identifies one complete desired managed-region state. Each Context has one authoritative monotonically increasing sequence. Every committed Change Set identifies Base Version and Target Version. Concurrent mutations cannot silently overwrite; commit uses CAS or equivalent per-Context serialization. Snapshot and Delta represent the same target state; Delta is not independently authoritative. Adapter Applied is separate from Context head.
@@ -80,7 +85,7 @@ Required fields: delivery_id, context_id, change_set_id, base_version, target_ve
 
 Semantic extensions: adapter_id, agent_instance_id, agent_context_session_id, inference_request_id, capability_epoch/tier, applied_coverage, managed_region_hash, final_request_hash or privacy-safe attestation ref, boundary_id/timestamp, correlation_id, forget_clear_state and application authorization epoch.
 
-Applied requires explicit Adapter confirmation that the exact target version is completely materialized in the controlled managed region and that this region belongs to the final request submitted to inference runtime. If Adapter cannot observe that final request boundary, it MUST report Unknown or lower capability; it MUST NOT claim Tier 1. A digest is insufficient unless H/C define canonicalization, capture and correlation.
+Applied requires explicit Adapter confirmation that the exact target version is completely materialized in the controlled managed region and that this region belongs to the final request submitted to inference runtime. **CV-01, CV-02** — If Adapter cannot observe that final request boundary, it MUST report Unknown or lower capability; it MUST NOT claim Tier 1. A digest is insufficient unless H/C define canonicalization, capture and correlation.
 
 ## 7. Snapshot and Delta
 
@@ -188,7 +193,7 @@ Addendum is merged into this section. Its normative
 requirements are not an independent competing
 protocol.
 
-The paired EN/ZH documents MUST remain synchronized
+**CV-03** — The paired EN/ZH documents MUST remain synchronized
 with this section. If textual drift occurs, this
 root section controls until the paired documents
 are corrected.
@@ -202,12 +207,12 @@ Addendum and the AID-2026-014 R5 correction.
 The logical Context commit remains G-owned and
 creates one immutable ContextVersion.
 
-A ContextVersion referencing ClaimRevision,
+**CV-04** — A ContextVersion referencing ClaimRevision,
 FactRevision or derived artifacts MUST bind exact
 immutable revision references and the applicable
 ForgetFenceCursor.
 
-G MUST NOT substitute a current Claim head for
+**CV-05** — G MUST NOT substitute a current Claim head for
 a pinned ClaimRevisionRef.
 
 #### 2. Required protected ordering
@@ -232,7 +237,7 @@ The shared protected publication order is:
 
 #### 3. T17 — Fence-first
 
-If a Forget Fence linearizes before Producer
+**CV-06** — If a Forget Fence linearizes before Producer
 Admission, the affected work MUST NOT be admitted.
 
 No staging, canonical commit, publication intent,
@@ -241,30 +246,30 @@ may bypass the Fence decision.
 
 #### 4. T18 — Participant-first
 
-Once Producer Admission successfully linearizes,
+**CV-07** — Once Producer Admission successfully linearizes,
 the exact operation MUST be durably recorded
 as an authoritative participant.
 
-Successful Producer Admission and durable recording of
+**CV-08** — Successful Producer Admission and durable recording of
 the exact admitted participant MUST form one indivisible
 operation under the authoritative serialized
 Fence/Admission boundary.
 
-A subsequent Forget Fence MUST NOT linearize or complete
+**CV-09** — A subsequent Forget Fence MUST NOT linearize or complete
 its participant-barrier evaluation until the admitted
 participant record is durably visible to that barrier.
 
-Participant recording failure MUST prevent Admission
+**CV-10** — Participant recording failure MUST prevent Admission
 from reporting success.
 
-A Fence MUST NOT ignore an admitted operation whose
+**CV-11** — A Fence MUST NOT ignore an admitted operation whose
 participant recording is incomplete or unresolved.
 
-UNKNOWN MUST remain non-final.
+**CV-12** — UNKNOWN MUST remain non-final.
 
-Recovery MUST use the original Operation identity.
+**CV-13** — Recovery MUST use the original Operation identity.
 
-The Fence MUST record an auditable completion or
+**CV-14** — The Fence MUST record an auditable completion or
 suppression disposition for every admitted participant.
 
 The six-component protected publication failure
@@ -272,36 +277,36 @@ matrix in D memory-versioning.md §16.1 is normative
 for G ContextVersion commits derived from
 protected Claim/Fact content.
 
-G MUST NOT commit or expose a ContextVersion
+**CV-15** — G MUST NOT commit or expose a ContextVersion
 before the corresponding participant-barrier
 and Storage visibility conditions are resolved.
 
-A later Forget Fence MUST NOT silently skip,
+**CV-16** — A later Forget Fence MUST NOT silently skip,
 erase or misclassify that participant.
 
-The Fence/Admission barrier MUST account for
+**CV-17** — The Fence/Admission barrier MUST account for
 the participant and preserve its exact identity,
 dependency closure and auditable disposition.
 
-The final completion or suppression decision
+**CV-18** — The final completion or suppression decision
 MUST follow the declared Forget policy.
 
-UNKNOWN MUST remain non-final until the
+**CV-19** — UNKNOWN MUST remain non-final until the
 authoritative outcome is resolved.
 
 #### Second-stage Admission rejection and protected ContextVersion visibility
 
-When PublicationParticipant Admission has not successfully linearized against the authoritative ForgetFence/Admission ordering anchor, G MUST NOT commit or publish the corresponding ContextVersion as a visible result of that publication.
+**CV-20** — When PublicationParticipant Admission has not successfully linearized against the authoritative ForgetFence/Admission ordering anchor, G MUST NOT commit or publish the corresponding ContextVersion as a visible result of that publication.
 
-Successful Producer Admission MUST NOT be treated as evidence of successful PublicationParticipant Admission. G MUST independently establish the successful second-stage Admission of the exact PublicationParticipant bound to the applicable StorageVisibilityParticipantRef and publication tuple identity before committing or publishing a corresponding visible ContextVersion.
+**CV-21** — Successful Producer Admission MUST NOT be treated as evidence of successful PublicationParticipant Admission. **CV-22** — G MUST independently establish the successful second-stage Admission of the exact PublicationParticipant bound to the applicable StorageVisibilityParticipantRef and publication tuple identity before committing or publishing a corresponding visible ContextVersion.
 
-Any ContextVersion already committed that references a
+**CV-23** — Any ContextVersion already committed that references a
 publication object for which second-stage Admission did not
 successfully occur MUST receive the applicable terminal
 disposition specified by the Forget terminal-state ×
 component disposition matrix in D memory-versioning.md
 §16.1, which covers four Forget terminal states across
-seven logical components. The disposition of the
+seven logical components. **CV-24, CV-25, CV-26** — The disposition of the
 corresponding G Context Commit MUST be consistent with
 the applicable Forget terminal state: under Failed and
 Cancelled, G MUST NOT commit the ContextVersion; under
@@ -309,19 +314,19 @@ CompletedWithPolicyException, G MAY commit the ContextVersion
 only when the exception has received named approval and
 all applicable preconditions are satisfied; under Completed,
 G MUST satisfy the complete-completion requirements before
-committing the ContextVersion. G MUST NOT preserve or expose
+committing the ContextVersion. **CV-27** — G MUST NOT preserve or expose
 that ContextVersion as a successful visible publication
 merely because its canonical commit previously succeeded.
 
-Recovery and replay MUST reevaluate the authoritative second-stage Admission evidence, ForgetFence disposition and Storage visibility outcome at every read. Historical ContextVersion commitment MUST NOT confer permanent visibility, bypass a subsequent ForgetFence disposition or substitute for the required successful second-stage Admission. Missing, conflicting or UNKNOWN evidence MUST fail closed. Until the authoritative terminal outcome and authorized visibility conditions are proven, the corresponding ContextVersion MUST remain non-visible.
+**CV-28** — Recovery and replay MUST reevaluate the authoritative second-stage Admission evidence, ForgetFence disposition and Storage visibility outcome at every read. **CV-29** — Historical ContextVersion commitment MUST NOT confer permanent visibility, bypass a subsequent ForgetFence disposition or substitute for the required successful second-stage Admission. **CV-30** — Missing, conflicting or UNKNOWN evidence MUST fail closed. **CV-31** — Until the authoritative terminal outcome and authorized visibility conditions are proven, the corresponding ContextVersion MUST remain non-visible.
 
-G MUST preserve the exact publication identity and its relationship to the corresponding Producer participant, PublicationParticipant, canonical dependency closure and terminal Forget disposition throughout commit, recovery, replay and read-time visibility evaluation.
+**CV-32** — G MUST preserve the exact publication identity and its relationship to the corresponding Producer participant, PublicationParticipant, canonical dependency closure and terminal Forget disposition throughout commit, recovery, replay and read-time visibility evaluation.
 
-These requirements are an implementation-conformance gate under §16.1 and MUST NOT be interpreted as changing the admission ordering or participant-first requirements defined in §13.3.
+**CV-33** — These requirements are an implementation-conformance gate under §16.1 and MUST NOT be interpreted as changing the admission ordering or participant-first requirements defined in §13.3.
 
 #### 5. G protected commit requirements
 
-G MUST:
+**CV-34** — G MUST:
 
 - Revalidate current I authorization.
 - Revalidate the applicable D Forget Fence.
@@ -333,7 +338,7 @@ G MUST:
   the protected visibility protocol.
 - Publish only after authoritative commit resolution.
 
-G MUST NOT expose a new ContextVersion based only
+**CV-35** — G MUST NOT expose a new ContextVersion based only
 on a local pre-check followed by an independent,
 unprotected head update.
 
@@ -342,41 +347,41 @@ unprotected head update.
 A ContextVersion committed before a later Forget
 does not grant perpetual access.
 
-Historical Context reads and replay MUST
+**CV-36** — Historical Context reads and replay MUST
 re-evaluate current authorization and Forget
 suppression.
 
-A forgotten ClaimRevision MUST NOT be disclosed
+**CV-37** — A forgotten ClaimRevision MUST NOT be disclosed
 through an existing FactRevision or historical
 ContextVersion.
 
 #### 7. UNKNOWN and recovery
 
-UNKNOWN commit or lost acknowledgement MUST
+**CV-38** — UNKNOWN commit or lost acknowledgement MUST
 remain non-final.
 
-Recovery MUST resolve the same operation and
+**CV-39** — Recovery MUST resolve the same operation and
 exact ContextVersion identity.
 
 No retry may create duplicate visible
 ContextVersion state.
 
-Recovery MUST reconcile Fence, Admission,
+**CV-40** — Recovery MUST reconcile Fence, Admission,
 dependency registration, canonical commit,
 E publication, Storage visibility and G state.
 
-Recovery MUST NOT manufacture a successful
+**CV-41** — Recovery MUST NOT manufacture a successful
 terminal state from missing evidence.
 
 #### 8. Physical realization gate
 
-The physical transaction/CAS or equivalent
+**CV-42** — The physical transaction/CAS or equivalent
 recoverable prepare/commit realization spanning
 G visibility and D's final gate MUST be specified
 and independently proven by D and Storage/
 Consistency before public visibility is enabled.
 
-Until that proof exists, G may stage privately
+**CV-43** — Until that proof exists, G may stage privately
 but MUST NOT expose the artifact, advance the
 public head or send a delivery.
 
@@ -428,7 +433,7 @@ Delivery lifecycle includes Prepared, Delivered, Applied, Rejected, Expired, Sup
 
 ### 14.1 Context invalidation matrix
 
-The matrix distinguishes logical eligibility from immutable audit retention. “Invalidate” means the object MUST NOT be used to plan, deliver, replay or apply protected content; it does not mean the historical record is physically erased.
+The matrix distinguishes logical eligibility from immutable audit retention. **CV-44** — “Invalidate” means the object MUST NOT be used to plan, deliver, replay or apply protected content; it does not mean the historical record is physically erased.
 
 | Trigger | ContextEntry | ContextVersion / Snapshot | Delta | Delivery / Pending Delivery | Applied Context Reference |
 |---|---|---|---|---|---|
@@ -443,13 +448,13 @@ The matrix distinguishes logical eligibility from immutable audit retention. “
 Rules:
 1. Forget suppression and permission denial take effect before reconciliation work; no read/plan/edit/snapshot/delta/replay/delivery/apply path may wait for a new ContextVersion.
 2. Canonical supersession and Scope change require exact owner resolution; G does not invent successor identity or broaden Scope.
-3. A Context Remove changes only G membership. It MUST NOT create a D ForgetOperation, advance a D ForgetFence, or be reported as canonical deletion.
+3. A Context Remove changes only G membership. **CV-45** — It MUST NOT create a D ForgetOperation, advance a D ForgetFence, or be reported as canonical deletion.
 4. Historical ContextVersion, ChangeSet, Delivery and ACK records are retained only under I policy and must not retain reconstructive forgotten plaintext.
 5. A new safe ContextVersion is a new immutable version with a new sequence, parent=head observed at commit, freshly authorized exact refs, current typed authority vector and new dependency/publication receipts. Never mutate an old version or reset sequence.
 
 ### 14.2 Delivery state machine and evidence
 
-Logical DeliveryId identifies one desired delivery. DeliveryAttemptId identifies one transmission/application attempt. A retry may reuse DeliveryId but MUST use a distinct attempt identity whenever a new attempt is created. A new InferenceRequestId is required for each actual inference invocation.
+Logical DeliveryId identifies one desired delivery. DeliveryAttemptId identifies one transmission/application attempt. **CV-46** — A retry may reuse DeliveryId but MUST use a distinct attempt identity whenever a new attempt is created. A new InferenceRequestId is required for each actual inference invocation.
 
 | State | Entry condition / minimum evidence | Allowed next states | Forbidden interpretation |
 |---|---|---|---|
@@ -461,7 +466,7 @@ Logical DeliveryId identifies one desired delivery. DeliveryAttemptId identifies
 | Superseded | Newer Context target, ForgetFence, permission revocation, scope/capability change invalidates attempt before valid application | Terminal for attempt; create a new delivery from current safe version | Cannot return to Prepared/Delivered/Applied-current |
 | Unknown | Timeout, crash, offline Adapter, lost ACK or insufficient evidence; query/reconcile required | Applied only if valid evidence proves application occurred before invalidation and all ordering is provable; otherwise Rejected/Expired/Superseded after reconciliation | Never success; no current Applied pointer |
 
-State transitions are per attempt and monotonic in the audit log. A late ACK is accepted as historical evidence only when its authenticated event time/sequence and authority ordering prove it occurred before Expired, Superseded, ForgetFence or revocation. If ordering cannot be proven, preserve Unknown and block current use. A late ACK for an old target MUST NOT overwrite the Context head, current Applied reference, or a newer attempt's state.
+State transitions are per attempt and monotonic in the audit log. A late ACK is accepted as historical evidence only when its authenticated event time/sequence and authority ordering prove it occurred before Expired, Superseded, ForgetFence or revocation. If ordering cannot be proven, preserve Unknown and block current use. **CV-47** — A late ACK for an old target MUST NOT overwrite the Context head, current Applied reference, or a newer attempt's state.
 
 ### 14.3 Applied Evidence Mapping (G consumes C/H; does not define their wire)
 
@@ -505,4 +510,4 @@ Applied is an immutable historical observation, not a permanent authorization le
 - Delivery ACK idempotency is scoped by authenticated Adapter instance + DeliveryId + AttemptId + ACK identity. Same identity/same digest returns the prior outcome; same identity/different digest is a conflict/security signal.
 - Repeated ACKs do not create a new Applied record or alter the current pointer.
 - Context head advances once per successfully committed ChangeSet. A stale BaseVersion returns conflict and requires re-read/re-plan; no implicit merge.
-- The G head/version visibility transition for canonical-derived artifacts remains gated by D's dependency registration and PublishDerivedIfFenceCurrent semantics. The physical transaction/recoverable realization is governed by §13.3 as a subordinate constraint: the ordering is normative and DECIDED, while the physical realization remains an implementation-conformance gate that D and Storage/Consistency MUST specify and independently prove before public visibility is enabled. Until that proof exists, stage privately and do not publish/send. §13.3 controls this relationship; this subsection does not restate it as an open normative choice.
+- The G head/version visibility transition for canonical-derived artifacts remains gated by D's dependency registration and PublishDerivedIfFenceCurrent semantics. **CV-48** — The physical transaction/recoverable realization is governed by §13.3 as a subordinate constraint: the ordering is normative and DECIDED, while the physical realization remains an implementation-conformance gate that D and Storage/Consistency MUST specify and independently prove before public visibility is enabled. Until that proof exists, stage privately and do not publish/send. §13.3 controls this relationship; this subsection does not restate it as an open normative choice.
