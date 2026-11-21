@@ -7,6 +7,7 @@ publish = false
 
 [dependencies]
 memory-domain = { path = "../memory-domain" }
+memory-event-store-sqlite = { path = "../memory-event-store-sqlite" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 
