@@ -497,14 +497,14 @@ class GateRootsTest(unittest.TestCase):
 
     def test_issue_461_n3_md_and_zh_cn_pair_is_accepted(self):
         self.write("02-domain-model/zz-probe-pair.md", "English source.\\n")
-        self.write("02-domain-model/zz-probe-pair.zh-CN.md", "中文翻译。" * 30)
+        self.write("02-domain-model/zz-probe-pair.zh-CN.md", "中文翻译。\n")
         gaps = self.inventory_02()
         self.assertNotIn("02-domain-model/zz-probe-pair.md", gaps)
         self.assertNotIn("02-domain-model/zz-probe-pair.zh-CN.md", gaps)
 
     def test_issue_461_n4_en_and_zh_cn_pair_is_accepted(self):
         self.write("02-domain-model/zz-probe-en.en.md", "English source.\\n")
-        self.write("02-domain-model/zz-probe-en.zh-CN.md", "中文翻译。" * 30)
+        self.write("02-domain-model/zz-probe-en.zh-CN.md", "中文翻译。\n")
         gaps = self.inventory_02()
         self.assertNotIn("02-domain-model/zz-probe-en.en.md", gaps)
         self.assertNotIn("02-domain-model/zz-probe-en.zh-CN.md", gaps)
@@ -513,10 +513,17 @@ class GateRootsTest(unittest.TestCase):
         english = "02-domain-model/phase-2-domain-extension.md"
         chinese = "02-domain-model/phase-2-domain-extension.zh-CN.md"
         self.write(english, "English source.\\n")
-        self.write(chinese, "中文翻译。" * 30)
+        self.write(chinese, "中文翻译。\n")
         self.assertNotIn(english, self.inventory_02())
         (self.root / chinese).unlink()
         self.assertIn(english, self.inventory_02())
+
+    def test_issue_469_short_translation_is_accepted(self):
+        self.write("02-domain-model/zz-probe-short.md", "English source.\n")
+        self.write("02-domain-model/zz-probe-short.zh-CN.md", "中文翻译。\n")
+        gaps = self.inventory_02()
+        self.assertNotIn("02-domain-model/zz-probe-short.md", gaps)
+        self.assertNotIn("02-domain-model/zz-probe-short.zh-CN.md", gaps)
 
     def test_issue_461_n6_pair_without_chinese_is_rejected(self):
         self.write("02-domain-model/zz-probe-fake.md", "English source.\n")
