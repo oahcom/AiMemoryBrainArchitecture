@@ -1,3 +1,47 @@
+---
+document_metadata:
+  domain: security-governance
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Under-Review
+      approver: NOT_RECORDED
+      decision_date: NOT_RECORDED
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "00-governance/bilingual-documentation-policy.md"
+        - "00-governance/document-scope-registry.yaml"
+        - "Issue #305 comment 7042461592"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Coverage register is a work record; semantic parity of each listed pair is not independently verified by this document."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+---
+
 # Bilingual Documentation Coverage & Migration Plan / 双语文档覆盖与迁移计划
 
 - Document ID: DOC-STATUS-001
