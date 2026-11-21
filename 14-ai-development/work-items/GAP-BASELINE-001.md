@@ -704,3 +704,86 @@ real defects. That is progress of a specific kind: the gap between "nothing exis
 than it looks from a PR description.
 
 Still true: no gap is closed by this document, no PR has an approval, and no CI job has run.
+
+## Correction to round three: the merged-overclaim finding was mine, not the repository's
+
+The round-three section above states that #433 merged and that one of its rows cites a guard
+and a test absent from `main`. **Both parts are wrong.** I am appending the correction rather
+than editing the section, because the wrong version is the one that was published.
+
+### Wrong claim 1: #433 has not merged
+
+```
+GET /pulls/433 -> state=open  merged=False  merged_at=None
+```
+
+`09:33:25Z` is when **#436 and #444** merged. I read a batch of PR states and attached the
+wrong timestamp to the wrong PR number.
+
+### Wrong claim 2: the artifacts are in the PR, not missing from it
+
+I checked `main` for `current_use_allowed` and
+`test_current_use_requires_every_currentness_gate`, found them absent, and attributed the
+absence to #433. I never checked #433's own tree. On head `2d291569`:
+
+```
+06-memory-context/reference-model/g_context_model.py         contains `current_use_allowed` -> True
+06-memory-context/reference-model/test_g_context_model.py   defines the test             -> True
+                                                            15 test functions
+```
+
+Both artifacts are present. The PR supplies them.
+
+### What is actually true — the reverse of what I wrote
+
+`main` already carries the coverage document, by direct commit rather than by PR:
+
+```
+5cc54a54  08:54:37Z  docs(memory-context): add implementation coverage map
+b68b96bb  08:55:09Z  docs(memory-context): qualify design source filenames
+9c92fefd  08:55:45Z  docs(memory-context): correct assessment scope and status legend
+3fef2d7f  09:06:39Z  docs(memory-context): record applied ledger test result
+351f4a4c  09:22:41Z  docs(GAP-02): refresh Memory Context coverage map to current main
+```
+
+And `main` at `b9ddd241` contains only:
+
+```
+06-memory-context/reference-model/g_applied_ledger.py
+06-memory-context/reference-model/test_g_applied_ledger.py   (8 tests)
+```
+
+No `g_context_model.py`, no `test_g_context_model.py`. Yet `main`'s copy of the document cites
+both `current_use_allowed` and `test_current_use_requires_every_currentness_gate`:
+
+```
+main doc cites current_use_allowed:                              True
+main doc cites test_current_use_requires_every_currentness_gate: True
+main doc cites g_context_model:                                  False
+g_context_model files in main:                                   NONE
+```
+
+So the document reached `main` describing a reference model that is not on `main`. **#433 is
+the delivery that closes that gap, not the defect that opened it.** Merging it moves `main`
+from "document describes absent code" to "document describes present code".
+
+### What survives from round three
+
+The two independent review findings on #433 and #436 are unaffected, because they were about
+different things: a test count (14 stated, 15 measured — re-verified by `grep -c` and by
+`unittest`), and a baseline row in `protocol-index.md` listing a file the baseline does not
+contain (verified 404). Neither depended on merge state or on where I looked for an artifact.
+
+Everything else in round three stands: #465's three stray marker lines, #466's missing
+`epistemic_status`/`confidence` and its 156-vs-158 count, #464's absent authority files,
+#463's clean six tests, and the #461 zero-byte exploit.
+
+### The failure mode, named
+
+Both errors are the same error: I checked a convenient thing instead of the thing I was
+claiming about. A batch read for merge state; `main` for a branch artifact. The first is
+careless, the second is worse — `main` is exactly where an artifact would be missing if a PR
+had not landed, so checking `main` guaranteed the answer I then misattributed.
+
+Recorded because a wrong finding published on a PR is worse than no finding: someone acts on
+it. The corrected comment is on #433 at `7061701355`.
