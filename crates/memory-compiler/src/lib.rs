@@ -981,92 +981,38 @@ mod tests {
         }
     }
 
-    fn compile_admission_store() -> admission::AdmissionStore {
-        use memory_domain::ScopeKind;
-
-        let mut store = admission::AdmissionStore::in_memory().unwrap();
-        let scope = memory_domain::ScopeRef {
-            scope_id: OpaqueId::new("scope-1").unwrap(),
-            scope_kind: ScopeKind::User,
-            namespace_key: "user:scope-1".into(),
-        };
-        let producer_id = OpaqueId::new("producer-identity").unwrap();
-        store.register_producer(&producer_id, "registry-digest").unwrap();
-        store.register_producer_work(admission::ProducerRegistrationRequest {
-            producer_work_item_id: OpaqueId::new("work-1").unwrap(),
-            producer_class: "compiler".into(),
-            producer_identity: producer_id,
-            source_refs: vec![OpaqueId::new("event-1").unwrap()],
-            source_lineage_digest: "lineage-1".into(),
-            scope_refs: vec![scope.clone()],
-            operation_id: OpaqueId::new("operation-1").unwrap(),
-            correlation_id: OpaqueId::new("correlation-1").unwrap(),
-            causation_id: None,
-            admission_canonical_commit_cursor: Some(OpaqueId::new("commit-1").unwrap()),
-            observed_fence_cursor: OpaqueId::new("fence-0").unwrap(),
-            permission_epoch: OpaqueId::new("permission-1").unwrap(),
-            request_digest: "producer-request-1".into(),
-            producer_schema_version: "v1".into(),
-        }).unwrap();
-
-        for (edge, source) in [("edge-1", "event-1"), ("edge-2", "source-1")] {
-            store.register_dependency(admission::DependencyRegistrationRequest {
-                dependency_registration_id: OpaqueId::new(edge).unwrap(),
-                artifact_ref: OpaqueId::new("derivative-1").unwrap(),
-                artifact_version: OpaqueId::new("publication-1").unwrap(),
-                producer_work_item_id: OpaqueId::new("work-1").unwrap(),
-                derivation_run_id: OpaqueId::new("run-1").unwrap(),
-                source_ref: OpaqueId::new(source).unwrap(),
-                source_version: None,
-                provenance_ref: OpaqueId::new("provenance-1").unwrap(),
-                scope_refs: vec![scope.clone()],
-                lineage_digest: "lineage-1".into(),
-                required_dependency_count: 2,
-                request_digest: format!("digest-{edge}"),
-            }).unwrap();
-        }
-        store
-    }
-
-    fn compile_input() -> (AcceptedEvent, StagingInput, ProducerWorkItemId) {
-        let (_, _, normalized) = pipeline();
-        (
-            event(),
-            staging_input(normalized),
-            ProducerWorkItemId::new(OpaqueId::new("work-1").unwrap()),
-        )
-    }
-
     #[test]
     fn compile_returns_blocked_error_for_missing_evidence() {
+        let mut store = admission::AdmissionStore::in_memory().unwrap();
+        let work_item = register_compile_inputs(&mut store);
         let mut compiler = MemoryCompiler {
             authority: EvidenceAuthority {
                 producer_admitted: false,
                 storage_prepared_hidden: true,
             },
-            admission: compile_admission_store(),
+            admission: store,
         };
-        let (event, staging, work_item) = compile_input();
 
         assert_eq!(
-            compiler.compile(event, staging, lease(), 1, &work_item),
+            compiler.compile(event(), staging_input(pipeline().2), lease(), 1, &work_item),
             Err(CompilerError::PublicationBlocked)
         );
     }
 
     #[test]
     fn compile_returns_suppressed_error_for_rejected_second_admission() {
+        let mut store = admission::AdmissionStore::in_memory().unwrap();
+        let work_item = register_compile_inputs(&mut store);
         let mut compiler = MemoryCompiler {
             authority: TestAuthority {
                 publication_admitted: false,
                 visibility_authorized: true,
             },
-            admission: compile_admission_store(),
+            admission: store,
         };
-        let (event, staging, work_item) = compile_input();
 
         assert_eq!(
-            compiler.compile(event, staging, lease(), 1, &work_item),
+            compiler.compile(event(), staging_input(pipeline().2), lease(), 1, &work_item),
             Err(CompilerError::PublicationSuppressed)
         );
     }
