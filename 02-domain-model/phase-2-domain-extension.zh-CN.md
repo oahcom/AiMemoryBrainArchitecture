@@ -23,6 +23,12 @@ Phase 2 范围：
 
 Phase 2 **不包括** Phase 3、运行时检索/排序、编译器提取、Context 规划/版本生命周期、BMCP Wire Schema、Storage DDL/事务机制、授权策略、密码学信任或物理 Forget 实现。
 
+
+
+### Phase 分类说明
+
+基线时 `02-domain-model/` 中的十份文件全部属于 Phase 1 范围；没有任何一份命名 Phase 2。六份基础模型文档描述了更广泛的逻辑 Schema，而 `phase-1-domain-model-freeze.md` 刻意冻结了较小的最小实现闭环。因此，本提案中的 Phase 2 标签，是 GAP-05 对当前 Rust crate 尚未表示的领域概念所采用的交付分组，**并不表示源文档原本将这些概念归类为 Phase 2**。现有 DECIDED 语义在此延续，不重新裁定；OPEN/CANDIDATE 事项继续保持未决。对于广义逻辑 Schema 中描述为 Phase 1、但未进入最小冻结范围且未出现在 Rust 模型中的概念，本提案将其记录为实现/表示缺口，而不是静默改写 Phase 1 决策历史。
+
 ## 2. 基于证据的缺口评估
 
 | 缺失或建模不足的概念 | 被何处需要 | Phase 1 现状 | Phase 2 处置 |
