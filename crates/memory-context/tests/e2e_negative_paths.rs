@@ -1,14 +1,8 @@
 //! Cross-crate negative-path E2E coverage for MemoryStore -> SQLite -> Context.
 //!
-//! Public-API finding (GAP-06 round 5, case 2): forgetting cannot currently be
-//! exercised end-to-end. Neither MemoryStore nor MemoryStorage exposes a
-//! forget/tombstone operation; SqliteMemoryStorage has no public equivalent.
-//! The exact missing boundary call is a public
-//! `MemoryStore::forget_memory(memory_id, scope)` (or an explicitly named
-//! lifecycle-transition API) whose successful result makes subsequent
-//! `read_current`/Context construction exclude the forgotten memory. Do not
-//! simulate this by mutating a ContextCandidate: that would not test Store's
-//! forget path.
+//! GAP-06-FORGET-PATH-UNREACHABLE is closed: the public
+//! `MemoryStore::forget_memory` facade delegates to the canonical SQLite fence,
+//! and the read gate denies the forgotten Memory so no candidate reaches Context.
 
 use memory_context::{
     build_context, ContextBudget, ContextCandidate, ContextError, ContextIdentity, ContextTier,
@@ -16,7 +10,6 @@ use memory_context::{
 use memory_domain::{
     Claim, EpistemicStatus, Memory, MemoryLifecycle, MemoryVersion, OpaqueId, ScopeKind, ScopeRef,
 };
-use memory_event_store_sqlite::forget_fence::ForgetFence;
 use memory_storage::StorageError;
 use memory_storage_sqlite::SqliteMemoryStorage;
 use memory_store::{MemoryStore, MemoryStoreError, RevisionWrite};
@@ -199,74 +192,113 @@ fn foreign_scope_cannot_read_or_populate_context() {
     assert!(snapshot.is_empty());
 }
 
-/// Desired Store-level forget E2E. This remains ignored until the memory-store
-/// contract can durably transition a Memory to a forgotten/tombstoned state and
-/// ensure reads cannot return it as a context candidate.
 #[test]
-#[ignore = "unreachable: no public forget API; see GAP-06-FORGET-PATH-UNREACHABLE"]
 fn forgotten_memory_is_excluded_from_context() {
-    // Intended public flow once the boundary exists:
-    // create + write -> MemoryStore::forget_memory(memory_id, scope)
-    // -> read_current returns no eligible revision -> build_context is empty.
-    // Do not emulate this by editing ContextCandidate.lifecycle.
-}
-
-/// Pins the CURRENT (defective) behaviour: a ForgetFence record does not
-/// suppress reads through MemoryStore. This test is expected to FAIL the
-/// moment forget is wired into the read gate. When it does, delete it and
-/// un-ignore `forgotten_memory_is_excluded_from_context`.
-#[test]
-fn forget_api_absence_is_detectable() {
-    let visible_scope = scope("fence-not-wired");
-    let temp_db = TempDatabase::new();
-    let sqlite = SqliteMemoryStorage::open(temp_db.path()).unwrap();
-    let mut store = MemoryStore::new(sqlite);
-
+    let s = scope("forgotten");
+    let mut store = MemoryStore::new(SqliteMemoryStorage::in_memory().unwrap());
     store
         .create_memory(
-            memory(
-                "memory-fence-not-wired",
-                &visible_scope,
-                MemoryLifecycle::Active,
-            ),
-            std::slice::from_ref(&visible_scope),
+            memory("memory-forgotten", &s, MemoryLifecycle::Active),
+            std::slice::from_ref(&s),
         )
         .unwrap();
     write(
         &mut store,
-        "memory-fence-not-wired",
-        "version-fence-not-wired",
+        "memory-forgotten",
+        "version-forgotten-1",
         1,
         None,
         None,
-        &visible_scope,
+        &s,
     );
 
-    // Use the same physical SQLite database: the fence is present and durable,
-    // but today's MemoryStorage read implementation does not consult it.
-    let fence = ForgetFence::open(temp_db.path()).unwrap();
-    assert_eq!(
-        fence
-            .record_forget(&visible_scope.namespace_key, "sha256:round7-forget")
-            .unwrap(),
-        1
-    );
-
-    let still_readable = store
-        .read_current(
-            &id("memory-fence-not-wired"),
-            std::slice::from_ref(&visible_scope),
-        )
+    // Prove the memory is observable before forgetting, else the assertions below prove nothing.
+    let before = store
+        .read_current(&id("memory-forgotten"), std::slice::from_ref(&s))
         .unwrap()
-        .expect("current behavior: the unconnected fence does not block reads");
+        .expect("memory must be visible before forget");
+    assert_eq!(before.memory_version_id, id("version-forgotten-1"));
+
+    let scope_slice = std::slice::from_ref(&s);
+    let fence_sequence = store
+        .forget_memory(&id("memory-forgotten"), "sha256:e2e-forget", scope_slice)
+        .expect("forget through the public facade");
+
     assert_eq!(
-        still_readable.memory_version_id,
-        id("version-fence-not-wired")
+        store.read_current(&id("memory-forgotten"), scope_slice),
+        Ok(None)
+    );
+    assert_eq!(
+        store.read_revision(
+            &id("memory-forgotten"),
+            &id("version-forgotten-1"),
+            scope_slice,
+        ),
+        Ok(None)
     );
 
-    drop(store.into_storage());
-    drop(fence);
-    drop(temp_db);
+    let fenced_write = store.write_revision(
+        RevisionWrite {
+            memory_id: id("memory-forgotten"),
+            expected_current_version: Some(id("version-forgotten-1")),
+            revision: revision(
+                "memory-forgotten",
+                "version-forgotten-2",
+                2,
+                Some("version-forgotten-1"),
+                &s,
+            ),
+            idempotency_key: "op-forgotten-2".into(),
+            request_digest: "request-forgotten-2".into(),
+        },
+        scope_slice,
+    );
+    // Canonical SQLite commit_version rejects a fenced Memory via
+    // ensure_not_forgotten -> StorageError::Forgotten (not NotFoundOrNotVisible).
+    assert_eq!(
+        fenced_write,
+        Err(MemoryStoreError::Storage(StorageError::Forgotten))
+    );
+
+    // Idempotent: a different reason digest still returns the original fence sequence.
+    assert_eq!(
+        store
+            .forget_memory(
+                &id("memory-forgotten"),
+                "sha256:e2e-forget-again",
+                scope_slice
+            )
+            .expect("repeated forget is idempotent"),
+        fence_sequence
+    );
+
+    // No hand-written empty candidate list: candidates are derived from the denied
+    // read. A forgotten Memory yields Ok(None), so the derived set is empty and
+    // Context receives nothing to render.
+    let denied = store
+        .read_current(&id("memory-forgotten"), scope_slice)
+        .expect("forgotten read is Ok(None), not an error");
+    assert!(denied.is_none());
+    let derived_candidates: Vec<ContextCandidate> = denied
+        .into_iter()
+        .map(|rev| {
+            candidate(
+                "memory-forgotten",
+                &rev,
+                MemoryLifecycle::Active,
+                "entry-forgotten",
+            )
+        })
+        .collect();
+    assert!(derived_candidates.is_empty());
+    let snapshot = build_context(
+        identity(s, "forgotten"),
+        1,
+        default_budget(4),
+        derived_candidates,
+    )
+    .expect("empty candidate set builds an empty context");
+    assert!(snapshot.is_empty());
 }
 
 #[test]

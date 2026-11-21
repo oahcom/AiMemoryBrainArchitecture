@@ -115,6 +115,38 @@ impl<S: MemoryStorage> MemoryStore<S> {
             .storage
             .resolve_idempotency(key, request_digest, scope)?)
     }
+
+    /// Permanently hide a Memory and all of its versions.
+    ///
+    /// `reason_digest` is an opaque digest, not free text. Repeating the call
+    /// with a different digest returns the original fence sequence (idempotent).
+    /// A forgotten Memory is unobservable through reads (`Ok(None)`) by design:
+    /// a third "forgotten" response would leak its existence.
+    pub fn forget_memory(
+        &mut self,
+        memory_id: &OpaqueId,
+        reason_digest: &str,
+        scope: &[ScopeRef],
+    ) -> Result<i64, MemoryStoreError> {
+        validate_scope(scope)?;
+        Ok(self
+            .storage
+            .forget_memory(memory_id, reason_digest, scope)?)
+    }
+
+    /// Permanently hide one version of a Memory; other versions stay readable.
+    pub fn forget_version(
+        &mut self,
+        memory_id: &OpaqueId,
+        version_id: &OpaqueId,
+        reason_digest: &str,
+        scope: &[ScopeRef],
+    ) -> Result<i64, MemoryStoreError> {
+        validate_scope(scope)?;
+        Ok(self
+            .storage
+            .forget_version(memory_id, version_id, reason_digest, scope)?)
+    }
 }
 
 fn validate_scope(scope: &[ScopeRef]) -> Result<(), MemoryStoreError> {
