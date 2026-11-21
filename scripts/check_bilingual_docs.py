@@ -11,6 +11,7 @@ from datetime import date
 import subprocess
 import sys
 import re
+from collections import Counter
 from pathlib import Path
 
 NORMATIVE_ROOTS = {
@@ -185,20 +186,82 @@ def read_baseline() -> set[str] | None:
 
 
 
-def changed_paths() -> set[str]:
+def changed_status() -> dict[str, str]:
+    """Return changed paths and their A/M/D status without rename collapsing."""
     base = os.environ.get("BASE_SHA", "")
     head = os.environ.get("HEAD_SHA", "")
     if not base or not head:
         raise RuntimeError("BASE_SHA and HEAD_SHA are required")
-    # --no-renames is deliberate: with rename detection a `git mv` reports only
-    # the destination, so the deleted side of a moved bilingual pair drops out
-    # of this set and the pairing check silently passes. Reporting the move as
-    # add+delete keeps both paths visible to every downstream check.
     raw = subprocess.check_output(
-        ["git", "diff", "--name-only", "--no-renames", f"{base}...{head}"],
+        ["git", "diff", "--name-status", "--no-renames", f"{base}...{head}"],
         text=True,
     )
-    return {line.strip() for line in raw.splitlines() if line.strip()}
+    result: dict[str, str] = {}
+    for line in raw.splitlines():
+        fields = line.split("\t", 1)
+        if len(fields) != 2 or fields[0] not in {"A", "M", "D"}:
+            raise RuntimeError(f"Unexpected name-status record: {line!r}")
+        result[fields[1]] = fields[0]
+    return result
+
+
+def changed_paths() -> set[str]:
+    """Compatibility set view for existing callers."""
+    return set(changed_status())
+
+
+def check_counterpart_requirement(
+    source: str, counterparts: list[str], changed: set[str],
+    statuses: dict[str, str], exception: bool,
+) -> list[str]:
+    """Shared existence/pairing rule for normative and mirror counterparts."""
+    if exception:
+        return []
+    required = [source, *counterparts]
+    if any(path not in changed for path in required):
+        return [
+            f"{source} requires all counterparts changed in this PR: "
+            + ", ".join(required)
+        ]
+    deleted = [path for path in required if statuses.get(path) == "D"]
+    if deleted:
+        if len(deleted) != len(required):
+            return [f"{source} has an unpaired deletion; all related paths must move together or remain present"]
+
+        added = {path for path, status in statuses.items() if status == "A"}
+        root_deletions = [
+            path for path in deleted
+            if len(Path(path).parts) >= 2 and Path(path).parts[0] in NORMATIVE_ROOTS
+        ]
+        en_deletions = [path for path in deleted if path.startswith("docs/en/")]
+        zh_deletions = [path for path in deleted if path.startswith("docs/zh-CN/")]
+
+        # A move is balanced by destination tier, not by basename: names may
+        # change, but every moved English mirror must have a newly added
+        # Chinese mirror at the same destination-relative path.
+        added_roots = [
+            path for path in added
+            if len(Path(path).parts) >= 2 and Path(path).parts[0] in NORMATIVE_ROOTS
+        ]
+        added_en = {path for path in added if path.startswith("docs/en/")}
+        added_zh = {path for path in added if path.startswith("docs/zh-CN/")}
+
+        if root_deletions and len(added_roots) < len(root_deletions):
+            return [f"{source} was deleted without a replacement normative source; all related destination files must be added in this PR"]
+        if en_deletions and len(added_en) < len(en_deletions):
+            return [f"{source} was deleted without a replacement docs/en mirror; all related destination files must be added in this PR"]
+        if zh_deletions and len(added_zh) < len(zh_deletions):
+            return [f"{source} was deleted without a replacement docs/zh-CN mirror; all related destination files must be added in this PR"]
+        if en_deletions or zh_deletions:
+            for en_path in sorted(added_en):
+                zh_path = "docs/zh-CN/" + en_path[len("docs/en/"):]
+                if zh_path not in added_zh:
+                    return [f"{en_path} was added without its matching new Chinese mirror {zh_path}"]
+        return []
+    return [
+        f"Counterpart file must exist for {source}: {path}"
+        for path in required if not (ROOT / path).is_file()
+    ]
 
 
 def approved_exception(body: str) -> bool:
@@ -462,8 +525,8 @@ def counterpart_14(source: str) -> str | None:
     return side_by_side_partner(source) or mirror_partner(source)
 
 
-def check_mirror_pairing(changed, exception):
-    # type: (set[str], bool) -> list[str]
+def check_mirror_pairing(changed, statuses, exception):
+    # type: (set[str], dict[str, str], bool) -> list[str]
     """A docs/en or docs/zh-CN change must update both sides in the same PR."""
     errors = []
     for path in sorted(changed):
@@ -477,8 +540,7 @@ def check_mirror_pairing(changed, exception):
                         "a documented BILINGUAL-EXCEPTION"
                     )
                 continue
-            if counterpart not in changed and not exception:
-                errors.append(f"{path} changed without paired change {counterpart}")
+            errors.extend(check_counterpart_requirement(path, [counterpart], changed, statuses, exception))
         elif path.startswith("docs/zh-CN/14-ai-development/"):
             counterpart = counterpart_14(path)
             if counterpart is None:
@@ -493,24 +555,19 @@ def check_mirror_pairing(changed, exception):
                 errors.append(f"{path} changed without paired change {counterpart}")
         elif path.startswith("docs/en/"):
             counterpart = "docs/zh-CN/" + path[len("docs/en/"):]
-            if counterpart not in changed and not exception:
-                errors.append(f"{path} changed without paired change {counterpart}")
-            # Only require the counterpart to exist while this side still exists.
-            # A moved-away path is deleted here; demanding its partner still sit
-            # at the old location would reject legitimate paired moves.
-            if (ROOT / path).is_file() and not (ROOT / counterpart).is_file() and not exception:
-                errors.append(f"Chinese counterpart does not exist: {counterpart}")
+            errors.extend(check_counterpart_requirement(
+                path, [counterpart], changed, statuses, exception
+            ))
         elif path.startswith("docs/zh-CN/"):
             counterpart = "docs/en/" + path[len("docs/zh-CN/"):]
-            if counterpart not in changed and not exception:
-                errors.append(f"{path} changed without paired change {counterpart}")
-            if (ROOT / path).is_file() and not (ROOT / counterpart).is_file() and not exception:
-                errors.append(f"English counterpart does not exist: {counterpart}")
+            errors.extend(check_counterpart_requirement(
+                path, [counterpart], changed, statuses, exception
+            ))
     return errors
 
 
-def check_normative_pairing(normative_changes, changed, complete, exception):
-    # type: (list[str], set[str], bool, bool) -> list[str]
+def check_normative_pairing(normative_changes, changed, statuses, complete, exception):
+    # type: (list[str], set[str], dict[str, str], bool, bool) -> list[str]
     """Normative changes need paired counterparts (or an explicit exemption)."""
     errors = []
     if not (normative_changes and complete):
@@ -532,23 +589,11 @@ def check_normative_pairing(normative_changes, changed, complete, exception):
                     "or use a documented BILINGUAL-EXCEPTION"
                 )
                 continue
-            if partner not in changed:
-                errors.append(
-                    f"{source} requires its counterpart changed in this PR: {partner}"
-                )
-            if not (ROOT / partner).is_file():
-                errors.append(f"Counterpart file must exist for {source}: {partner}")
+            errors.extend(check_counterpart_requirement(source, [partner], changed, statuses, exception))
             continue
         en = f"docs/en/{source}"
         zh = f"docs/zh-CN/{source}"
-        if en not in changed or zh not in changed:
-            errors.append(
-                f"{source} requires both counterparts changed in this PR: {en}, {zh}"
-            )
-        if not (ROOT / en).is_file() or not (ROOT / zh).is_file():
-            errors.append(
-                f"Both counterpart files must exist for {source}: {en}, {zh}"
-            )
+        errors.extend(check_counterpart_requirement(source, [en, zh], changed, statuses, exception))
     return errors
 
 
@@ -564,7 +609,8 @@ def main() -> int:
         return 2
 
     try:
-        changed = changed_paths()
+        statuses = changed_status()
+        changed = set(statuses)
     except Exception as exc:
         print(f"::error::Unable to determine changed paths: {exc}")
         return 2
@@ -600,7 +646,7 @@ def main() -> int:
     complete = "BILINGUAL-MANIFEST: COMPLETE" in body
 
     # A language-pair change must update both sides in the same PR.
-    errors.extend(check_mirror_pairing(changed, exception))
+    errors.extend(check_mirror_pairing(changed, statuses, exception))
 
     bilingual_doc_changes = any(
         path.startswith("docs/en/") or path.startswith("docs/zh-CN/")
@@ -631,7 +677,7 @@ def main() -> int:
             "'BILINGUAL-EXCEPTION: APPROVED'."
         )
 
-    errors.extend(check_normative_pairing(normative_changes, changed, complete, exception))
+    errors.extend(check_normative_pairing(normative_changes, changed, statuses, complete, exception))
 
     skipped = [p for p in changed if Path(p).parts and Path(p).parts[0] not in NORMATIVE_ROOTS
                and Path(p).suffix.lower() == ".md"]
