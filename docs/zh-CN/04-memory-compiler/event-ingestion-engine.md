@@ -1,9 +1,59 @@
+---
+document_metadata:
+  domain: memory-compiler
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope: null
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "04-memory-compiler/event-ingestion-engine.md @ b463e01a9d831e5678041c370065472b3924c0b3"
+        - "OWNER-DECISION-FACT-CLAIM-001 (semantic identity dependency)"
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-21"
+      last_verification_note: "Canonical source and bilingual mirror path verified; candidate/open implementation contracts remain unfrozen."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Memory Compiler design specification: event-ingestion"
+    canonical_scope_id: "memory-compiler/event-ingestion"
+    canonical_scope_keywords:
+      - event
+      - ingestion
+      - outbox
+      - queue
+      - accepted
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "04-memory-compiler/event-ingestion-engine.md"
+    en: "docs/en/04-memory-compiler/event-ingestion-engine.md"
+    zh-CN: "docs/zh-CN/04-memory-compiler/event-ingestion-engine.md"
+---
+
 # 事件接收引擎
+
+- 规范源：[event-ingestion-engine.md](../../../04-memory-compiler/event-ingestion-engine.md)
+- 规范源 Blob：b463e01a9d831e5678041c370065472b3924c0b3
 
 - 文档 ID：E-INGEST-001
 - 版本：1.0
-- 源分支：session-e-memory-compiler-2026-11-16
-- 源 Blob：9fa3db53175452bf9e6f0fce8b1540765e46905f
 - 对应英文：[Event Ingestion Engine](../../en/04-memory-compiler/event-ingestion-engine.md)
 - 状态：Accepted 语义和安全不变量已 DECIDED；Outbox/Queue 拓扑为 CANDIDATE；容量和排序目标为 TO_VALIDATE
 - Owner：Memory Compiler / MC-01
