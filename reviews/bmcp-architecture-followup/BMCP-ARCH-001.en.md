@@ -531,7 +531,9 @@ Issue #7 is currently CLOSED / not_planned under the Owner phase-closure ruling;
 - No Runtime code or H-owned source file modified.
 - Runtime acceptance tests: NOT RUN — no Runtime authorization/repository.
 - Owner-delegate semantic review is bounded; `INDEPENDENCE_UNVERIFIABLE`. A separate independent bilingual semantic review is not claimed.
-- GitHub Actions on the previous exact PR #453 head completed with FAILURE for GOV-DOC-002, Runner Admission and Bilingual Gate; job logs returned 404. No CI PASS is claimed. Exact-head checks must be rerun after this source update.
+- Local gates on the rebased branch: git diff --check PASS; check_document_management.py --require-changed origin/main PASS (incremental only, 16 classified / 439 unclassified); audit_runner_admission.py PASS (1 self-hosted job, 0 violations); Applied Delivery Evidence 30/30 PASS; Provider Outcome 5 PASS / 5 SKIPPED / 0 failed.
+- Local check_bilingual_docs.py: FAIL, exit 2, reporting five new gaps already present in current main outside this PR's changed files: 02-domain-model/phase-2-domain-extension.md and its zh-CN mirror; 07-agent-integration/adapter-capability-tiers.zh-CN.md; 08-bmcp-protocol/protocol-index.md and its zh-CN mirror. These are not repaired in this scoped PR.
+- Owner comment 7060427638 reported prior-head workflow failures: document management run 44887211373; Runner Admission run 44887211369; Bilingual Gate run 44887211374. All three jobs completed FAILURE. For current PR head at the last read, workflow-run and combined-status queries returned no records; no current-head GitHub Actions PASS is claimed.
 - GOV-DOC-002 incremental PASS is not whole-tree PASS; the whole-tree adoption backlog remains INCOMPLETE. Structural pairing is not semantic bilingual parity.
 
 

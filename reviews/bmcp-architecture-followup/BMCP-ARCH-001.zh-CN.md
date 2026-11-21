@@ -475,6 +475,9 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 - Issue #43：根据 Owner 阶段关闭裁决关闭为 superseded。本 FollowUp 是候选架构交接，不是 Runtime 实施。
 - Main Fetch SHA：59c15db9c0ea13f86b05b1f30ab0b4973a49e4dd（Owner comment 指定的 `477a55e624bcc244dfb65c435bc8d03f718b1e2a` 之后 Main 又前进 39 个 Commit）；H 来源分支已重新读取：session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74；七个 H Blob Pin 已重新获取且 SHA 未变化。
 - 未修改 Runtime 代码或 H 所有源文件。
+- 本次重基分支的本地门禁：git diff --check PASS；check_document_management.py --require-changed origin/main PASS（仅增量，16 classified / 439 unclassified）；audit_runner_admission.py PASS（审计 1 个 self-hosted job，0 violations）；Applied Delivery Evidence 30/30 PASS；Provider Outcome 5 PASS / 5 SKIPPED / 0 failed。
+- 本地 check_bilingual_docs.py：FAIL，退出码 2；报告当前 Main 已存在的五个新缺口，均不在本 PR 修改文件中：02-domain-model/phase-2-domain-extension.md 及其 zh-CN 镜像；07-agent-integration/adapter-capability-tiers.zh-CN.md；08-bmcp-protocol/protocol-index.md 及其 zh-CN 镜像。本 PR 不越界修复这些文件。
+- Owner comment 7060427638 报告的前一 Head workflow 失败：文档管理 run 44887211373；Runner Admission run 44887211369；Bilingual Gate run 44887211374。三个 Job 均以 FAILURE 结束。最近读取当前 PR Head 时，workflow-run 和 combined-status 查询均无记录；不声称当前 Head 的 GitHub Actions PASS。
 - Runtime 验收测试：NOT RUN——无 Runtime 授权/仓库。
 - 独立语义一致性审查：PENDING。H/Owner 回复：PENDING。
 
