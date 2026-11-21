@@ -229,3 +229,69 @@ D 何时交付该契约。那是 D 自己的前沿（frontier），§8 也不允
 `brain-cli` 仍以 0 退出。变的是：树里不再有一行断言"其自身 domain 拒绝定义的事实"。
 `Published` 仍只能经由一份真实的 canonical commit 契约，加上 D3 已点名的那两个
 参与者授权才能达成。
+
+## 增补 —— D7，2026-11-22 02:52 +08:00 作出
+
+D3 把 `publication_participant_admitted` 列为"来源不足"，而"后果"一节又承诺下一项
+工作是"实现 D 侧的发布参与者登记表"。读过 C 契约之后，可以看出这个承诺在 E 这一层
+就不该作出。这个标志需要的不是一张登记表，而是两个在本仓库里并不存在的组件。
+
+### 签发者是规定好的，而且不在本地
+
+`docs/en/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md:137`
+（中文镜像 `docs/zh-CN/.../phase-3.6-c-submit-...:137`）对 C 的约束是：
+
+> C MUST NOT invoke a protected provider side effect until the exact participant has
+> a quorum-committed `JF10_PREPARE_INTENT_REGISTERED`, a **Storage-signed**
+> `PreparedParticipantReceipt` is durably registered as
+> `JF10_PREPARED_PARTICIPANT_REGISTERED`, and the I owner-final gate has produced an
+> authoritative terminal decision for the exact immutable tuple.
+
+三个签发者，各有其名：COC 的 quorum、Storage 的签名、I 的 terminal decision。
+
+### 这三者在本仓库里都不存在
+
+| 元素 | 状态 | 实测方式 |
+|---|---|---|
+| Rust 中的 `JF10_*` 状态 | 不存在 | `grep -rn "JF10" --include=*.rs crates/` → 0 处 |
+| 回执的线上形状 | 仅候选 | schema 标题："… — **candidate**"；描述："does not select or verify a cryptographic suite, canonicalization profile, key policy, or cross-message owner authority" |
+| 一致性结论 | 无人主张 | `08-bmcp-protocol/protocol-index.md:55` → "no dedicated validator or production conformance claim" |
+| C 侧条件 | 已规定、未运行 | C 契约："C-CO-01..10 and H-JF10-01..10 remain SPECIFIED / NOT RUN" |
+
+### 为什么本地登记表是错误的修法
+
+要把 `publication_participant_admitted` 记成 `true`，系统必须接受一份
+`PreparedParticipantReceipt` 并把它当作"已准入"。但是：
+
+- 没有任何密钥策略可以校验"Storage 签名"这一要求，而 schema 明确声明自己不是密码学 profile；
+- 没有 quorum，无法确立 `JF10_PREPARE_INTENT_REGISTERED`；
+- 没有 I 的 terminal decision 来绑定精确 tuple。
+
+在这些条件下写出来的登记表，只会存下无法校验的声明，并把它报告成准入。那就是
+`compiler-stage-contract.md` §8 所禁止的替代授权决定，而且比 `false` 更糟：它看起来
+像一个真实的见证，实际只是调用方断言的转发器。这与 D6 从 canonical commit 路径上
+移除的缺陷，是同一类，只是低了一层。
+
+### 决定
+
+**D7.1. `publication_participant_admitted` 保持 `false`；在 Storage 签名、COC quorum
+与 I terminal decision 存在之前，E 不得构建发布参与者登记表。** 本增补撤回"后果"一节
+中关于 D 侧登记表的承诺。
+
+**D7.2. 阻塞依赖记为外部依赖，并点名归属：** COC（quorum）、Storage（签名 +
+`JF10_PREPARED_PARTICIPANT_REGISTERED` 的持久注册）、I（针对精确 tuple 的 terminal
+decision）。三者 E 都无法提供。
+
+**D7.3. 协议索引对这一映射的记录偏弱。** `protocol-index.md:68` 把
+`Storage.PreparedParticipantReceipt` 记为 "Schema-local definition; no separate
+normative source mapped in this scoped audit"，而 C 契约第 137 行正是它的规范来源。
+"in this scoped audit" 这个限定是诚实的，但索引是本仓库"什么实现了什么"的权威，
+该行应当引用 C 契约。
+
+### 后果
+
+三个缺失的证明标志中，有两个现在用同样的方式解释清楚了，而且都无法由 E 关闭：
+`canonical_commit_confirmed`（D6：契约未由 D 定义）与
+`publication_participant_admitted`（D7：签发者需要 Storage 签名 + COC quorum + I 决定）。
+`Published` 依然不可达，但现在有三个点名的原因，而不是一个含糊的原因。这就是 E 权限
+范围内能给出的、诚实的收敛结论。

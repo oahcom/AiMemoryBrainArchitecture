@@ -259,3 +259,73 @@ Behaviour does not change: `compile()` still returns `Ok(Blocked)` naming
 the tree no longer contains a line asserting a fact its own domain refuses to
 define. `Published` remains reachable only through a real canonical-commit
 contract plus the two participants D3 already names.
+
+## Amendment — D7, taken 2026-11-22 02:52 +08:00
+
+D3 listed `publication_participant_admitted` as "unsourced", and the Consequences
+section promised "a D-side publication-participant registry" as a next work item.
+Reading the C contract shows that promise was wrong to make at E's level. The flag
+does not need a registry. It needs two components that do not exist here.
+
+### The issuer is specified, and it is not local
+
+`docs/en/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md:137`
+(mirrored at `docs/zh-CN/.../phase-3.6-c-submit-...:137`) binds C as follows:
+
+> C MUST NOT invoke a protected provider side effect until the exact participant has
+> a quorum-committed `JF10_PREPARE_INTENT_REGISTERED`, a **Storage-signed**
+> `PreparedParticipantReceipt` is durably registered as
+> `JF10_PREPARED_PARTICIPANT_REGISTERED`, and the I owner-final gate has produced an
+> authoritative terminal decision for the exact immutable tuple.
+
+Three issuers, named: a COC quorum, Storage's signature, and I's terminal decision.
+
+### None of the three exists in this workspace
+
+| element | state | measurement |
+|---|---|---|
+| `JF10_*` states in Rust | absent | `grep -rn "JF10" --include=*.rs crates/` → 0 matches |
+| receipt wire shape | candidate only | schema title: "… — **candidate**"; description: "does not select or verify a cryptographic suite, canonicalization profile, key policy, or cross-message owner authority" |
+| conformance | none claimed | `08-bmcp-protocol/protocol-index.md:55` → "no dedicated validator or production conformance claim" |
+| C-owned conditions | specified, not run | C contract: "C-CO-01..10 and H-JF10-01..10 remain SPECIFIED / NOT RUN" |
+
+### Why a local registry would be the wrong repair
+
+To record `publication_participant_admitted = true`, the system would have to accept
+a `PreparedParticipantReceipt` and treat it as admitted. But:
+
+- no key policy exists to verify the "Storage-signed" requirement, and the schema is
+  explicitly not a cryptographic profile;
+- no quorum exists to establish `JF10_PREPARE_INTENT_REGISTERED`;
+- no I terminal decision exists to bind the exact tuple.
+
+A registry written under those conditions would store an unverifiable claim and
+report it as an admission. That is a substitute authorization decision, forbidden by
+`compiler-stage-contract.md` §8, and it would be strictly worse than `false`: it
+would look like a real witness while being a relay for caller assertions. It is the
+same defect class D6 removes from the canonical-commit path, one layer down.
+
+### Decision
+
+**D7.1. `publication_participant_admitted` stays `false`, and no publication-
+participant registry is to be built in E until Storage signing, the COC quorum and
+the I terminal decision exist.** The Consequences section's promise of a D-side
+registry is withdrawn by this amendment.
+
+**D7.2. The blocking dependency is recorded as external, with named owners:** COC
+(quorum), Storage (signing + durable `JF10_PREPARED_PARTICIPANT_REGISTERED`
+registration), I (terminal decision for the exact tuple). E cannot supply any of them.
+
+**D7.3. The protocol index understates this mapping.** `protocol-index.md:68` records
+`Storage.PreparedParticipantReceipt` as "Schema-local definition; no separate
+normative source mapped in this scoped audit", while C contract line 137 binds it.
+The hedge ("in this scoped audit") is honest, but the index is the repo's authority
+for *what implements what*, so the row should cite the C contract.
+
+### Consequence
+
+Two of the three missing proof flags are now explained the same way, and neither can
+be closed by E: `canonical_commit_confirmed` (D6: contract undefined by D) and
+`publication_participant_admitted` (D7: issuer requires Storage signing + COC quorum
++ I decision). `Published` remains unreachable, and now for three named reasons
+rather than one vague one. That is the honest converged statement available to E.
