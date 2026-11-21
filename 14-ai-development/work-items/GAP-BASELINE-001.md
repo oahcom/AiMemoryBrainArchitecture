@@ -165,3 +165,119 @@ observable contract outcome, runnable by a single documented command.
   finding in the R3 defect register.
 - The corrected verdicts above are measurements of *presence in the tree*, not quality
   judgements of the code that exists.
+
+## Post-baseline measurements
+
+Everything above is a measurement at `a8fd2b7` and is left unedited, per dispatch
+rule 4. This section records what changed afterwards, so a reader can tell a frozen
+baseline from a moving target.
+
+### GAP-01 — the compiler now has an executing admission layer
+
+`GAP-01` above says "0% code". That is no longer true, and the change came from two
+commits that were not part of the original dispatch:
+
+| Commit | Content |
+|---|---|
+| `a730880e` | `crates/memory-compiler` — five typed stages, structured provenance, two distinct admissions, `PREPARED_HIDDEN`, pure Rust, zero dependencies |
+| `8c58d4c6` (PR #427) | `src/admission.rs` +1217 lines — producer admission, fence/gate contention, protocol-sequence receipts; crate gains `rusqlite`, `sha2`, `serde` |
+
+Measured on `main` at `8c58d4c6`, tree read back from the API and built in a clean
+directory:
+
+```
+$ cargo test --offline -p memory-compiler
+running 19 tests
+test admission::tests::alternative_exit_transitions_are_accepted_and_persisted ... ok
+test admission::tests::fence_and_gate_compete_on_one_protocol_sequence_exactly_one_wins ... ok
+test admission::tests::final_gate_receipt_binds_observed_fence_and_permission_epoch ... ok
+test admission::tests::gate_reports_stale_protocol_when_fence_generation_matches ... ok
+test admission::tests::illegal_transition_accept_to_published_is_rejected ... ok
+test admission::tests::partial_dependencies_remain_hidden_until_all_edges_are_registered ... ok
+test admission::tests::producer_receipt_lookup_and_not_found_are_distinct ... ok
+test admission::tests::producer_registration_is_idempotent_and_conflicting_digest_does_not_add_rows ... ok
+test tests::extraction_is_deterministic_and_lineaged ... ok
+test tests::ingestion_preserves_original_receipt ... ok
+test tests::ingestion_requires_durable_receipt_and_intent ... ok
+test tests::late_worker_cannot_publish ... ok
+test tests::normalization_preserves_upstream_identity ... ok
+test tests::publication_requires_second_admission ... ok
+test tests::publication_requires_visibility_authorization ... ok
+test tests::staged_derivative_is_hidden ... ok
+test tests::staging_requires_complete_dependency_closure ... ok
+test tests::staging_requires_producer_admission ... ok
+test tests::successful_publication_requires_both_admissions ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.29s
+```
+
+Nineteen tests, not eleven. The eight new ones are all admission-layer behaviour.
+
+**Environment note, because it changes how this must be reproduced:** the crate now
+depends on `rusqlite`, which needs a C compiler. On the Windows host `gcc` cannot
+execute `cc1`, so `libsqlite3-sys` cannot build there at all — this is a host
+environment defect, not a crate defect. The run above was executed in WSL2 Ubuntu
+with `cargo 1.95.0` / `gcc 13.3.0` and `CARGO_BUILD_JOBS=1` (parallel codegen on the
+`/mnt/c` mount exhausts memory). Any future claim about this crate must state which
+toolchain produced it.
+
+### GAP-01 — one architecture, not two: Owner E ruling recorded
+
+A second GAP-01 delivery existed as PR #425 (root `04-memory-compiler/`, six stages,
+Python reference model, 10 tests). Owner E was asked to adjudicate and returned
+`FINAL: DECIDED`:
+
+| Question | Ruling |
+|---|---|
+| Path convention | `docs/en/` + `docs/zh-CN/` mirrors. Root `.zh-CN.md` suffix is **not** the pattern for new normative documents. |
+| Stage inventory | **Five** stages. `Provenance` is a cross-cutting field on every stage output, **not** a sixth stage. |
+| Reference implementation | `crates/memory-compiler` (Rust) only. The Python model does not survive as a second executable authority. |
+
+The ruling is `DECIDED FOR CONVERGENCE`, explicitly not `ACCEPTED`, and it does not
+grant Owner E any authority over D, I or Storage admission — `PublicationAuthority`
+stays an injection boundary, and the seven `PublicationProof` booleans are evidence
+inputs E may verify but may not issue.
+
+This ruling was not accepted on assertion. Reproducing `current_bilingual_gaps()` from
+`scripts/check_bilingual_docs.py` against both trees showed PR #425 would add **three**
+new bilingual gaps (its two contract files plus `reference-model/README.md`, none with
+`docs/en` or `docs/zh-CN` counterparts), and `main()` returns 2 on any new gap. `main`
+itself has **zero** gaps in that directory. One of the two placements could not
+survive the gate; the ruling chose the one that can.
+
+### GAP-06 — first cross-module test exists and executes
+
+PR #444 adds `crates/memory-context/tests/e2e_store_to_context.rs`, spanning
+`memory-storage-sqlite` → `memory-store` → `memory-context`. Measured:
+
+```
+$ cargo test -p memory-context --test e2e_store_to_context
+running 1 test
+test sqlite_store_read_current_builds_context_from_persisted_revision ... ok
+test result: ok. 1 passed; 0 failed; 0 ignored
+```
+
+One test is not an E2E suite, and `benchmarks/req10_e2e/README.md` still says
+`NOT_MEASURED` — correctly, because this exercises modules, not the product runtime.
+The GAP-06 acceptance condition ("a path spanning two or more modules, single
+documented command") is met for the first time.
+
+### GAP-02, GAP-04 — suites now execute
+
+| Gap | Suite | Measured |
+|---|---|---|
+| 02 | `06-memory-context/reference-model/test_g_context_model.py` (PR #433) | `Ran 15 tests ... OK` |
+| 04 | `08-bmcp-protocol/tests/conformance/provider_outcome/test_provider_outcome.py` (PR #436) | `Ran 10 tests ... OK (skipped=5)` |
+
+The five skips in GAP-04 name their own blocker (`requires Owner C authoritative
+validator`). Recording a skip with a named dependency is the correct outcome; making
+them pass against a local reimplementation would have been a false green.
+
+### What has not changed
+
+- GAP-03 remains 0% code. PR #430 is a candidate specification, `DRAFT`, `approver:
+  null`, `normative_status: Informative`.
+- GAP-05 remains unimplemented. PR #435 is a specification; the Phase 2 entities,
+  revisions and invariants it defines exist in no Rust type.
+- No gap is closed. Every number above is a measurement of presence, not a quality
+  judgement, and none of it is acceptance.
