@@ -60,6 +60,17 @@ Round 8 的行为探测器命名为 `forget_api_absence_is_detectable`。它故�
 
 **推荐 (b)：在 MemoryStorage 读取边界强制执行 fence。** 正确性属性是“被 fence 的 namespace 不能产出可读的 Memory revision”，因此检查应位于数据返回前的最后一个共同边界。只增加 Store 层方法可能被直接使用 Storage 的调用者或未来新增的读取入口绕过；读取边界不变量更难绕过，也提供了统一 fail-closed 位置。实现前必须先解决 Memory 数据库如何原子地观察 fence（共享 SQLite 数据库/连接，或明确定义的等价机制）；本 work item 不授权采用存在竞态窗口的临时第二数据库查询。
 
+## 建议实现改动面（本 work item 尚未授权实施）
+
+若获得实施授权，我会选择方向 (b)，由 storage adapter 强制执行读取不变量，而不是由调用方做先检查再读取：
+
+1. 在 `crates/memory-store/src/lib.rs` 增加 `MemoryStore::forget_namespace(namespace_key, reason_digest)`。它校验非空参数并委托 storage port；自身不能实现“先检查、再读取”的两步流程。
+2. 在 `crates/memory-storage/src/lib.rs` 的 `MemoryStorage` trait 增加持久化 namespace fence 的记录操作，并明确规定 `read_current` 和 `read_version` 都必须拒绝被 fence 的 namespace。`MemoryStore::read_current` 和 `read_revision` 已分别经由这两个 trait 方法读取。
+3. 在 `crates/memory-storage-sqlite/src/lib.rs` 实现记录和强制检查：SQLite adapter 必须在 revision 读取的同一 storage 边界内作出 fence 判定，并定义事务/锁策略。禁止先单独查询一次、再无保护地读取。
+4. 重构 `crates/memory-event-store-sqlite/src/forget_fence.rs`，暴露基于调用方连接/事务的记录和查询原语（例如 `record_forget_in` 与 `is_fenced_in`），同时保留 restore 调用方现有的路径 API。adapter 必须使用同一个权威 fence 状态，并提供原子可见性策略；仅增加一个内部另开连接的公开 `is_fenced` 不足以消除竞态。
+
+主要改动文件预计为：`crates/memory-store/src/lib.rs`、`crates/memory-storage/src/lib.rs`、`crates/memory-storage-sqlite/src/lib.rs`、`crates/memory-event-store-sqlite/src/forget_fence.rs`，另需 adapter 和跨 crate 测试。这只是实施改动面说明，不构成实施授权。
+
 ## 关闭条件
 
 只有以下条件全部满足，才能关闭本项：
