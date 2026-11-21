@@ -10,6 +10,10 @@
 //!
 //! Ambiguity never degrades to `NewRevision`: the spec states "It MUST NOT silently
 //! select NEW_REVISION as a fallback."
+//!
+//! `classify()` intentionally does not compare `revision_ref`, `parent_revision_ref`,
+//! `asserted_at` or `revision_reason`: these necessarily differ between revisions and
+//! carry no proposition identity, so comparing them would make every revision noisy.
 
 use crate::ClaimRevision;
 
@@ -48,7 +52,9 @@ pub enum ChangeDimension {
     ConfidenceAssessment,
     /// CI-13
     PresentationOnly,
-    /// Substantive qualifier rule.
+    /// Declared to align with §2.4; currently unreachable: every qualifier change is
+    /// governed as `QualifierSubstantivenessUnprovable`, because substantive-qualifier
+    /// status is semantic and cannot be determined syntactically.
     SubstantiveQualifier,
     /// Identity resolution rule: displayed label changed, referent unchanged.
     LabelOnly,
