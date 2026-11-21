@@ -42,6 +42,7 @@ Main Pin 来自 origin/main @ 59c15db9c0ea13f86b05b1f30ab0b4973a49e4dd；H Pin �
 | docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md | main | 9c054932994bb078e2834df8bd66f73895aa04f5 | D Lifecycle/Fence |
 | 13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md | main | 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593 | 历史 ADR；语义决策已被取代；消费者映射仍为 Candidate |
 | C Family Boundary 决策 | PR #430 comment 7060351480；Issue #449 comment 7060126722 | Owner-delegate 决议；不声称独立人工 C 签名 | Family 方向已决定；精确 H Operation Registry / C-H Mapping 仍 OPEN |
+| H Confirmation 范围澄清 | PR #428 comment 7060351041；H Scope Correction comment 7060264372 | 仅接受 Owner-delegate 逻辑选择；INDEPENDENCE_UNVERIFIABLE | H-CONFIRM-001..004 各自均为 PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN |
 | PR #436 协议索引/provider_outcome 测试 | PR Head 1ffed9ed127df98b2f823a66ec80ea43d08cb9dc；Merge Commit 02f61194fd4e12993b4c83f7fac8382eee20f5d8 | 已合入 Main | 结构性 Provider Outcome 证据；5 passed / 5 semantic skips |
 
 本次更新已从实时 `session-h-bmcp-protocol` 分支重新读取上述七个 H Blob Pin；它们在当前分支 HEAD `3e8b33df18b9e6fc757ca84ff07a12faebc78e74` 均解析为表中 Blob SHA。此处是有界来源登记，不代表所有 H 工件或消费者均已独立审查。
@@ -375,7 +376,7 @@ H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体
 - REQUIRED_AUTHORITY：C + H；D/I 审查涉及权威身份的映射。
 - OWNER_DECISION：PARTIALLY_DECIDED；MCP_IS_AGENT_HOST_TO_C_NORTHBOUND；BMCP_IS_C_ADAPTER_TO_BRAIN_VIA_H；FAMILY_DIRECTION_DECIDED_PER_PR_430_COMMENT_7060351480；EXACT_H_OPERATION_IDS_SCHEMAS_C_TOOL_RESOURCE_NAMES_AND_CONSUMER_ACCEPTANCE_OPEN_UNDER_ISSUE_449
 - EVIDENCE：C Guide Blob c4e076887634a9e8e46df076efb0f4b70d816e0a；`07-agent-integration/agent-integration-overview.md` 与 `08-bmcp-protocol` 权属边界。
-- FOLLOW_UP_ACTIONS：C 将 Family Matrix 和逻辑 Identity Mapping 对齐到其 Canonical Source/Mirrors；C/H 在 Issue #449 下发布并接受精确版本化 Operation Mapping；H 只审查 H-owned Wire/Transport 工件；不建平行 API。
+- FOLLOW_UP_ACTIONS：C 将 Family Matrix 和逻辑 Identity Mapping 对齐到其 Canonical Source/Mirrors；C/H 在 [Issue #449](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/449) 下发布并接受精确版本化 Operation Mapping；H 只审查 H-owned Wire/Transport 工件；不建平行 API。
 
 
 
@@ -386,7 +387,7 @@ H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体
 | BMCP 规范名称 | 已解决——Brain Memory Context Protocol | Main terminology Blob `b8770fbb58e4fac087698043c40a57531b1d244d`；“Brain Memory Control Protocol”不是规范名称 |
 | Fact/Claim 语义 | 已解决——Option A + I1 | 已合并 Owner 决策 PR #446；Blob `d59756a8eb454480804c482ca03c68345ab5abf2` |
 | Fact/Claim 字段/Wire Schema | CANDIDATE / NOT FROZEN | B/D/E/F/G/H/I 消费者工件须完成版本 Pin 和审查；未批准任何 Payload 字段 |
-| H-CONFIRM-001..004 | PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN | 逻辑层选择按 PR #428 comments 7060190878 / 7060264372；INDEPENDENCE_UNVERIFIABLE；精确 Registry/Schema/Crypto/Persistence/Error/Consumer Artifact 仍 OPEN |
+| H-CONFIRM-001..004 | PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN | 逻辑层选择按 PR #428 comments 7060351041 / 7060264372；INDEPENDENCE_UNVERIFIABLE；精确 Registry/Schema/Crypto/Persistence/Error/Consumer Artifact 仍 OPEN |
 | BMCP-DR-002 | DECIDED_AT_AUTHORITY_BOUNDARY / CALLABLE_API_IDL_SCHEMA_DEFERRED | D/I 权威边界已决定；精确 Callable API/IDL/Schema/Crypto/Storage/Wire Mapping 仍由 D/I/H 发布并保持 OPEN |
 | BMCP-DR-003 / MCP Mapping | PARTIALLY_DECIDED——Issue #449 | MCP 为 C 北向 Agent Adapter/Gateway；BMCP 为 C Adapter 经 H 到 Brain；Family Routing 已由 PR #430 comment 7060351480 决定；精确 C/H Operation Mapping 仍 OPEN |
 | BMCP Runtime / AT-01..AT-20 | NOT AUTHORIZED / NOT RUN | Issue #7 实施绑定继续延期 |
@@ -397,7 +398,7 @@ H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体
 - 这些来源定义领域语义和操作名称，不是完整可调用 API/IDL，也没有冻结 Wire 表示。D 定义 RegisterProducerWork、InstallForgetFence、PublishDerivedIfFenceCurrent、CompleteProducerWork、ResolveProducerWork、ReconcileForgetBarrier 等操作。I 定义 PermissionEpoch、AuthorizationDecisionRef、撤销/Currentness 和证据接受语义；没有冻结的公共 authorize() Endpoint/Schema。
 - 裁决：D 仍是 Canonical ForgetOperation/Fence 和 Producer-barrier 语义的唯一权威；I 仍是 Principal Authorization、PermissionEpoch、撤销和 Global Forget Policy 的唯一权威。BMCP 只携带 Owner 签发的不透明 Ref/Epoch，并在接口发布后调用对应权威的 Validation/Currentness 操作。PermissionEpoch 与 ForgetFence 是不同名义类型。缺失/过期/不可用/不确定证据必须 Fail-closed。
 
-**C Mapping 边界：**PR #430 comment 7060351480 已决定 Family-level Routing；Issue #449 仍 OPEN，跟踪精确 H Operation ID/Schema、C Tool/Resource Name、C-H Consumer Acceptance。MCP 是 Agent Host ↔ C 北向接口；BMCP 是 C Adapter ↔ Brain 经 H 的协议边界。C 的 AgentRequestId 仅可作为本地 Workflow Correlation 输入，不得新增 H request_id；H 每条 Message 有独立 message_id，correlation_id/causation_id 分别表示 Workflow/直接父事件。Event Ingress/Telemetry/Forget/Admin 必须经过注册 H Operation 和 Owner Authorization；Context Snapshot/Delta/Delivery 为入站；Acknowledgement 仅是 Adapter Evidence，不是 MCP Success 或 G Applied。Recall/Search 归 F，当前不是 BMCP Family，不得发明 Search。
+**C Mapping 边界：**PR #430 comment 7060351480 已决定 Family-level Routing；[Issue #449](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/449) 仍 OPEN，跟踪精确 H Operation ID/Schema、C Tool/Resource Name、C-H Consumer Acceptance。MCP 是 Agent Host ↔ C 北向接口；BMCP 是 C Adapter ↔ Brain 经 H 的协议边界。C 的 AgentRequestId 仅可作为本地 Workflow Correlation 输入，不得新增 H request_id；H 每条 Message 有独立 message_id，correlation_id/causation_id 分别表示 Workflow/直接父事件。Event Ingress/Telemetry/Forget/Admin 必须经过注册 H Operation 和 Owner Authorization；Context Snapshot/Delta/Delivery 为入站；Acknowledgement 仅是 Adapter Evidence，不是 MCP Success 或 G Applied。Recall/Search 归 F，当前不是 BMCP Family，不得发明 Search。
 
 ## 8. Runtime 验收计划——NOT RUN
 
