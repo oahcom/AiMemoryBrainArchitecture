@@ -391,7 +391,7 @@ impl AuthorizationDecisionRef { pub const fn pending_i() -> Self { Self { _pendi
 /// NOT DEFINED: awaiting D. Required placeholder with no invented commit semantics.
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct CanonicalCommitRef { _pending_d: () }
-impl CanonicalCommitRef { pub const fn pending_d() -> Self { Self { _pending_d: () } }
+impl CanonicalCommitRef { pub const fn pending_d() -> Self { Self { _pending_d: () } } }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct ClaimRevision {
@@ -402,10 +402,12 @@ pub struct ClaimRevision {
 }
 impl ClaimRevision {
     #[allow(clippy::too_many_arguments)]
-    pub fn new(revision_ref: ClaimRevisionRef, claim_ref: ClaimRef, parent_revision_ref: Option<ClaimRevisionRef>,
+    pub fn new(revision_ref: ClaimRevisionRef, claim_ref: ClaimRef, parent: Option<&ClaimRevision>,
         subject: String, predicate: String, object: String, polarity: String, qualifiers: Vec<String>,
         epistemic_status: EpistemicStatus, valid_time: TimeValue, evidence_refs: Vec<EvidenceRef>,
         provenance_refs: Vec<ProvenanceRef>, asserted_at: String, revision_reason: String) -> Result<Self, DomainError> {
+        let parent_revision_ref = parent.map(|p| p.revision_ref.clone());
+        if let Some(p) = parent { if p.claim_ref != claim_ref { return Err(DomainError::InvalidParent); } }
         let value = Self { revision_ref, claim_ref, parent_revision_ref, subject, predicate, object, polarity,
             qualifiers, epistemic_status, valid_time, evidence_refs, provenance_refs, asserted_at, revision_reason };
         value.validate()?; Ok(value)
@@ -426,8 +428,17 @@ impl ClaimRevision {
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct Fact { fact_ref: FactRef }
-impl Fact { pub fn new(fact_ref: FactRef)->Self { Self { fact_ref } } pub fn fact_ref(&self)->&FactRef { &self.fact_ref } }
+pub struct Fact { fact_ref: FactRef, initial_revision: Box<FactRevision> }
+impl Fact {
+    pub fn new(fact_ref: FactRef, initial_revision: FactRevision) -> Result<Self, DomainError> {
+        if initial_revision.fact_ref != fact_ref || initial_revision.parent_revision_ref.is_some() {
+            return Err(DomainError::InvalidParent);
+        }
+        Ok(Self { fact_ref, initial_revision: Box::new(initial_revision) })
+    }
+    pub fn fact_ref(&self)->&FactRef { &self.fact_ref }
+    pub fn initial_revision(&self)->&FactRevision { &self.initial_revision }
+}
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub enum FactOutcome { Attested, Corrected, Revoked, Withdrawn }
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -545,20 +556,20 @@ impl EvidenceExtension { pub fn validate(&self)->Result<(),DomainError>{
     fn dm2_01_claim_revision_parent_must_belong_to_same_claim() {
         let ca=ClaimRef::new("ca").unwrap(); let cb=ClaimRef::new("cb").unwrap();
         let parent=ClaimRevision::new(ClaimRevisionRef::new("r1").unwrap(),ca.clone(),None,"s".into(),"p".into(),"o".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t1".into(),"initial".into()).unwrap();
-        let bad=ClaimRevision::new(ClaimRevisionRef::new("r2").unwrap(),cb,Some(parent.revision_ref().clone()),"s".into(),"p".into(),"o".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t2".into(),"correction".into()).unwrap();
+        let bad=ClaimRevision::new(ClaimRevisionRef::new("r2").unwrap(),cb,Some(&parent),"s".into(),"p".into(),"o".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t2".into(),"correction".into()).unwrap();
         assert_eq!(bad.validate(),Err(DomainError::InvalidParent));
     }
     #[test]
     fn dm2_02_claim_revision_is_append_only_and_immutable() {
         let first=ClaimRevision::new(ClaimRevisionRef::new("r1").unwrap(),ClaimRef::new("c").unwrap(),None,"s".into(),"p".into(),"old".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t1".into(),"initial".into()).unwrap();
-        let next=ClaimRevision::new(ClaimRevisionRef::new("r2").unwrap(),first.claim_ref().clone(),Some(first.revision_ref().clone()),"s".into(),"p".into(),"new".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t2".into(),"correction".into()).unwrap();
+        let next=ClaimRevision::new(ClaimRevisionRef::new("r2").unwrap(),first.claim_ref().clone(),Some(&first),"s".into(),"p".into(),"new".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t2".into(),"correction".into()).unwrap();
         assert_eq!(first.predicate(),"p"); assert_eq!(next.parent_revision_ref(),Some(first.revision_ref()));
     }
     #[test]
     fn dm2_03_fact_refs_are_distinct_and_fact_pins_exact_claim_revision() {
-        let pinned=ClaimRevisionRef::new("cr1").unwrap(); let fact=Fact::new(FactRef::new("f").unwrap());
-        let rev=FactRevision::new(fact.fact_ref().clone(),FactRevisionRef::new("fr1").unwrap(),None,vec![pinned.clone()],vec![EvidenceRef::new("e").unwrap()],vec![ProvenanceRef::new("p").unwrap()],scope("s"),AttestorRef::pending_i(),AuthorizationDecisionRef::pending_i(),"method".into(),"v1".into(),FactOutcome::Attested,"reason".into(),CanonicalCommitRef::pending_d(),None).unwrap();
-        let _head=ClaimRevisionRef::new("cr2").unwrap(); assert_eq!(rev.claim_revision_refs(),&[pinned]);
+        let pinned=ClaimRevisionRef::new("cr1").unwrap(); let fact_ref=FactRef::new("f").unwrap();
+        let rev=FactRevision::new(fact_ref.clone(),FactRevisionRef::new("fr1").unwrap(),None,vec![pinned.clone()],vec![EvidenceRef::new("e").unwrap()],vec![ProvenanceRef::new("p").unwrap()],scope("s"),AttestorRef::pending_i(),AuthorizationDecisionRef::pending_i(),"method".into(),"v1".into(),FactOutcome::Attested,"reason".into(),CanonicalCommitRef::pending_d(),None).unwrap();
+        let fact=Fact::new(fact_ref,rev).unwrap(); let _head=ClaimRevisionRef::new("cr2").unwrap(); assert_eq!(fact.initial_revision().claim_revision_refs(),&[pinned]);
     }
     #[test]
     fn dm2_04_fact_cannot_be_constructed_without_claim_evidence_provenance() {
