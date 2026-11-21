@@ -11,6 +11,7 @@ path = "src/main.rs"
 
 [dependencies]
 memory-domain = { path = "../memory-domain" }
+memory-storage = { path = "../memory-storage" }
 memory-storage-sqlite = { path = "../memory-storage-sqlite" }
 memory-store = { path = "../memory-store" }
 memory-context = { path = "../memory-context" }
