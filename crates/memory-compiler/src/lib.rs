@@ -9,6 +9,20 @@ use memory_domain::OpaqueId;
 
 pub const COMPILER_VERSION: &str = "0.1.0";
 
+/// Strongly typed identifier for a producer work item admitted by the compiler.
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub struct ProducerWorkItemId(OpaqueId);
+
+impl ProducerWorkItemId {
+    pub fn new(value: OpaqueId) -> Self {
+        Self(value)
+    }
+
+    pub fn as_opaque_id(&self) -> &OpaqueId {
+        &self.0
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub struct Identity(pub String);
 
@@ -520,16 +534,16 @@ impl<A: PublicationAuthority> MemoryCompiler<A> {
         mut staging: StagingInput,
         lease: WorkerLease,
         current_generation: u64,
-        producer_work_item_id: &OpaqueId,
+        producer_work_item_id: &ProducerWorkItemId,
     ) -> Result<PublishedDerivative, CompilerError> {
         let producer_receipt = self.admission
-            .producer_receipt(producer_work_item_id)
+            .producer_receipt(producer_work_item_id.as_opaque_id())
             .map_err(map_admission_error)?;
         if producer_receipt.disposition != admission::RegistrationDisposition::Accepted {
             return Err(CompilerError::MissingProducerAdmission);
         }
         let producer_request = self.admission
-            .producer_request(producer_work_item_id)
+            .producer_request(producer_work_item_id.as_opaque_id())
             .map_err(map_admission_error)?;
 
         let artifact_ref = OpaqueId::new(staging.derivative_id.0.clone())
@@ -542,7 +556,7 @@ impl<A: PublicationAuthority> MemoryCompiler<A> {
             return Err(CompilerError::IncompleteDependencyClosure);
         }
         let dependency_entries = self.admission
-            .dependency_entries_for(&artifact_ref, &artifact_version, producer_work_item_id)
+            .dependency_entries_for(&artifact_ref, &artifact_version, producer_work_item_id.as_opaque_id())
             .map_err(map_admission_error)?;
         if dependency_entries.is_empty() {
             return Err(CompilerError::IncompleteDependencyClosure);
@@ -597,7 +611,7 @@ impl<A: PublicationAuthority> MemoryCompiler<A> {
             publication_operation_id: publication_operation_id.clone(),
             artifact_ref,
             artifact_version,
-            producer_work_item_id: producer_work_item_id.clone(),
+            producer_work_item_id: producer_work_item_id.as_opaque_id().clone(),
             derivation_run_id,
             attempt_id: OpaqueId::new(format!("attempt:{}", lease.generation))
                 .map_err(|_| CompilerError::InvalidIdentity)?,
@@ -611,7 +625,7 @@ impl<A: PublicationAuthority> MemoryCompiler<A> {
             request_digest: format!(
                 "compiler-publication:{}:{}:{}",
                 gated.derivative.publication_id.0,
-                producer_work_item_id.as_str(),
+                producer_work_item_id.as_opaque_id().as_str(),
                 lease.generation
             ),
         };
@@ -864,7 +878,11 @@ mod tests {
         }
     }
 
-    fn register_compile_inputs(store: &mut admission::AdmissionStore) -> OpaqueId {
+    fn register_compile_inputs(store: &mut admission::AdmissionStore) -> ProducerWorkItemId {
+        let producer_id = oid("producer-identity");
+        if !store.is_producer_registered(&producer_id).unwrap() {
+            store.register_producer(&producer_id, "compiler-test-registry-digest").unwrap();
+        }
         let work_id = oid("work-1");
         store.register_producer_work(admission::ProducerRegistrationRequest {
             producer_work_item_id: work_id.clone(),
@@ -898,7 +916,7 @@ mod tests {
                 request_digest: format!("digest-{edge}"),
             }).unwrap();
         }
-        work_id
+        ProducerWorkItemId::new(work_id)
     }
 
     #[test]
@@ -915,7 +933,7 @@ mod tests {
         let result = compiler.compile(event(), staging_input(pipeline().2), lease(), 1, &work_id).unwrap();
         assert_eq!(result.disposition, PublicationDisposition::Published);
         assert_eq!(result.derivative.visibility, Visibility::Visible);
-        assert_eq!(compiler.admission.producer_receipt(&work_id).unwrap().producer_work_item_id, work_id);
+        assert_eq!(compiler.admission.producer_receipt(work_id.as_opaque_id()).unwrap().producer_work_item_id, work_id.as_opaque_id().clone());
         assert_eq!(compiler.admission.publication_receipt_count().unwrap(), 1);
         let publication_id = oid("compiler-publication:publication-1");
         assert!(compiler.admission.publication_receipt(&publication_id).unwrap().visible);
@@ -930,7 +948,9 @@ mod tests {
             },
             admission: admission::AdmissionStore::in_memory().unwrap(),
         };
-        let work_id = oid("work-1");
+        let producer_id = oid("producer-identity");
+        compiler.admission.register_producer(&producer_id, "compiler-test-registry-digest").unwrap();
+        let work_id = ProducerWorkItemId::new(oid("work-1"));
         assert_eq!(
             compiler.compile(event(), staging_input(pipeline().2), lease(), 1, &work_id),
             Err(CompilerError::MissingProducerAdmission)

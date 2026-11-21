@@ -67,6 +67,8 @@ pub enum AdmissionError {
     InvalidInput(&'static str),
     InvalidTransition { from: WorkState, to: WorkState },
     IdempotencyConflict,
+    ProducerAlreadyRegistered,
+    ProducerNotRegistered { producer_id: String },
     NotFound,
     DependencySetIncomplete,
     StaleFence { expected: u64, actual: u64 },
@@ -85,6 +87,10 @@ impl std::fmt::Display for AdmissionError {
             }
             Self::IdempotencyConflict => {
                 write!(f, "idempotency key reused with a different digest")
+            }
+            Self::ProducerAlreadyRegistered => write!(f, "producer is already registered"),
+            Self::ProducerNotRegistered { producer_id } => {
+                write!(f, "producer is not registered: {producer_id}")
             }
             Self::NotFound => write!(f, "admission receipt or work item not found"),
             Self::DependencySetIncomplete => write!(f, "dependency registration set is incomplete"),
@@ -258,6 +264,11 @@ impl AdmissionStore {
                 protocol_sequence INTEGER NOT NULL CHECK(protocol_sequence>=0)
              );
              INSERT OR IGNORE INTO admission_meta(singleton,fence_generation,protocol_sequence) VALUES(1,0,0);
+             CREATE TABLE IF NOT EXISTS producer_registry (
+                producer_id TEXT PRIMARY KEY,
+                registered_at TEXT NOT NULL,
+                registry_digest TEXT NOT NULL
+             );
              CREATE TABLE IF NOT EXISTS producer_work (
                 ledger_sequence INTEGER PRIMARY KEY AUTOINCREMENT,
                 work_item_id TEXT NOT NULL UNIQUE,
@@ -407,6 +418,45 @@ impl AdmissionStore {
         Ok(())
     }
 
+    /// Register a producer identity independently from admitting any work item.
+    /// Repeated registration is an explicit error, even when the digest matches.
+    /// This is a local registry operation: callers must restrict access to this
+    /// method to trusted bootstrap/configuration code; it does not authenticate identities.
+    pub fn register_producer(
+        &mut self,
+        producer_id: &OpaqueId,
+        registry_digest: &str,
+    ) -> Result<(), AdmissionError> {
+        if registry_digest.trim().is_empty() {
+            return Err(AdmissionError::InvalidInput("producer registry digest"));
+        }
+        let registered_at = timestamp_unix_nanos().to_string();
+        match self.connection.execute(
+            "INSERT INTO producer_registry(producer_id,registered_at,registry_digest) VALUES(?1,?2,?3)",
+            params![producer_id.as_str(), registered_at, registry_digest],
+        ) {
+            Ok(_) => Ok(()),
+            Err(rusqlite::Error::SqliteFailure(error, _))
+                if error.code == rusqlite::ErrorCode::ConstraintViolation =>
+            {
+                Err(AdmissionError::ProducerAlreadyRegistered)
+            }
+            Err(error) => Err(AdmissionError::Sqlite(error)),
+        }
+    }
+
+    /// Whether a producer identity has an independent registry row.
+    pub fn is_producer_registered(
+        &self,
+        producer_id: &OpaqueId,
+    ) -> Result<bool, AdmissionError> {
+        self.connection.query_row(
+            "SELECT EXISTS(SELECT 1 FROM producer_registry WHERE producer_id=?1)",
+            [producer_id.as_str()],
+            |row| row.get(0),
+        ).map_err(AdmissionError::from)
+    }
+
     /// Register one logical ProducerWorkItem idempotently, as required by §4.1.
     pub fn register_producer_work(
         &mut self,
@@ -416,6 +466,16 @@ impl AdmissionStore {
         let tx = self
             .connection
             .transaction_with_behavior(TransactionBehavior::Immediate)?;
+        let producer_registered: bool = tx.query_row(
+            "SELECT EXISTS(SELECT 1 FROM producer_registry WHERE producer_id=?1)",
+            [request.producer_identity.as_str()],
+            |row| row.get(0),
+        )?;
+        if !producer_registered {
+            return Err(AdmissionError::ProducerNotRegistered {
+                producer_id: request.producer_identity.as_str().to_owned(),
+            });
+        }
         if let Some((digest, receipt_json)) = tx
             .query_row(
                 "SELECT request_digest,receipt_json FROM producer_work WHERE work_item_id=?1",
@@ -931,6 +991,17 @@ mod tests {
             namespace_key: "user:scope-1".into(),
         }
     }
+    fn register_work(
+        db: &mut AdmissionStore,
+        request: ProducerRegistrationRequest,
+    ) -> Result<ProducerRegistrationReceipt, AdmissionError> {
+        let producer_id = request.producer_identity.clone();
+        if !db.is_producer_registered(&producer_id)? {
+            db.register_producer(&producer_id, "test-registry-digest")?;
+        }
+        db.register_producer_work(request)
+    }
+
     fn producer() -> ProducerRegistrationRequest {
         ProducerRegistrationRequest {
             producer_work_item_id: id("work-1"),
@@ -984,16 +1055,56 @@ mod tests {
     }
 
     #[test]
+    fn producer_work_rejects_unregistered_producer_as_configuration_error() {
+        let mut db = AdmissionStore::in_memory().unwrap();
+        let request = producer();
+        let producer_id = request.producer_identity.clone();
+        assert!(matches!(
+            db.register_producer_work(request),
+            Err(AdmissionError::ProducerNotRegistered { producer_id: found })
+                if found == producer_id.as_str()
+        ));
+        assert_eq!(db.producer_ledger_count().unwrap(), 0);
+    }
+
+    #[test]
+    fn producer_registry_rejects_duplicate_registration() {
+        let mut db = AdmissionStore::in_memory().unwrap();
+        let producer_id = id("producer-identity");
+        db.register_producer(&producer_id, "registry-digest-1").unwrap();
+        assert!(matches!(
+            db.register_producer(&producer_id, "registry-digest-1"),
+            Err(AdmissionError::ProducerAlreadyRegistered)
+        ));
+    }
+
+    #[test]
+    fn one_registered_producer_can_admit_multiple_distinct_work_items() {
+        let mut db = AdmissionStore::in_memory().unwrap();
+        let producer_id = id("producer-identity");
+        db.register_producer(&producer_id, "registry-digest-1").unwrap();
+
+        let first = db.register_producer_work(producer()).unwrap();
+        let mut second_request = producer();
+        second_request.producer_work_item_id = id("work-2");
+        second_request.request_digest = "request-digest-2".into();
+        let second = db.register_producer_work(second_request).unwrap();
+
+        assert_ne!(first.producer_work_item_id, second.producer_work_item_id);
+        assert_eq!(db.producer_ledger_count().unwrap(), 2);
+    }
+
+    #[test]
     fn producer_registration_is_idempotent_and_conflicting_digest_does_not_add_rows() {
         let mut db = AdmissionStore::in_memory().unwrap();
-        let first = db.register_producer_work(producer()).unwrap();
-        let retry = db.register_producer_work(producer()).unwrap();
+        let first = register_work(&mut db, producer()).unwrap();
+        let retry = register_work(&mut db, producer()).unwrap();
         assert_eq!(first.receipt_id, retry.receipt_id);
         assert_eq!(db.producer_ledger_count().unwrap(), 1);
         let mut conflict = producer();
         conflict.request_digest = "different-digest".into();
         assert!(matches!(
-            db.register_producer_work(conflict),
+            register_work(&mut db, conflict),
             Err(AdmissionError::IdempotencyConflict)
         ));
         assert_eq!(db.producer_ledger_count().unwrap(), 1);
@@ -1002,7 +1113,7 @@ mod tests {
     #[test]
     fn producer_receipt_lookup_and_not_found_are_distinct() {
         let mut db = AdmissionStore::in_memory().unwrap();
-        let receipt = db.register_producer_work(producer()).unwrap();
+        let receipt = register_work(&mut db, producer()).unwrap();
         assert_eq!(db.producer_receipt(&id("work-1")).unwrap(), receipt);
         assert!(matches!(
             db.producer_receipt(&id("missing")),
@@ -1013,7 +1124,7 @@ mod tests {
     #[test]
     fn partial_dependencies_remain_hidden_until_all_edges_are_registered() {
         let mut db = AdmissionStore::in_memory().unwrap();
-        db.register_producer_work(producer()).unwrap();
+        register_work(&mut db, producer()).unwrap();
         let first = db
             .register_dependency(dependency("dep-1", "source-1"))
             .unwrap();
@@ -1060,7 +1171,7 @@ mod tests {
     #[test]
     fn final_gate_receipt_binds_observed_fence_and_permission_epoch() {
         let mut db = AdmissionStore::in_memory().unwrap();
-        db.register_producer_work(producer()).unwrap();
+        register_work(&mut db, producer()).unwrap();
         let first = db
             .register_dependency(dependency("dep-1", "source-1"))
             .unwrap();
@@ -1086,7 +1197,7 @@ mod tests {
             WorkState::Published
         ));
         let mut db = AdmissionStore::in_memory().unwrap();
-        db.register_producer_work(producer()).unwrap();
+        register_work(&mut db, producer()).unwrap();
         assert!(matches!(
             db.transition_work_state(&id("work-1"), WorkState::Published),
             Err(AdmissionError::InvalidTransition {
@@ -1143,7 +1254,7 @@ mod tests {
             let mut request = producer();
             request.producer_work_item_id = id(&format!("work-alt-exit-{index}"));
             request.request_digest = format!("request-alt-exit-{index}");
-            db.register_producer_work(request).unwrap();
+            register_work(&mut db, request).unwrap();
 
             for state in path {
                 db.transition_work_state(&id(&format!("work-alt-exit-{index}")), *state)
@@ -1177,7 +1288,7 @@ mod tests {
     #[test]
     fn gate_reports_stale_protocol_when_fence_generation_matches() {
         let mut db = AdmissionStore::in_memory().unwrap();
-        db.register_producer_work(producer()).unwrap();
+        register_work(&mut db, producer()).unwrap();
         let first = db
             .register_dependency(dependency("dep-1", "source-1"))
             .unwrap();
@@ -1210,7 +1321,7 @@ mod tests {
             std::env::temp_dir().join(format!("admission-race-{}.sqlite", std::process::id()));
         let _ = std::fs::remove_file(&path);
         let mut setup = AdmissionStore::open(&path).unwrap();
-        setup.register_producer_work(producer()).unwrap();
+        register_work(&mut setup, producer()).unwrap();
         let first = setup
             .register_dependency(dependency("dep-1", "source-1"))
             .unwrap();
