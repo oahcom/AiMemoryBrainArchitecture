@@ -2,7 +2,7 @@
 
 - Work Item: BMCP-ARCH-FOLLOWUP-001; Document: BMCP-ARCH-001; Version: 0.1.0
 - Status: CANDIDATE / ARCHITECTURE_PARTIAL — not a frozen protocol specification
-- Main baseline: bb49dc121c195d7fb2ffa0ffbb9d376186b802fc
+- Main baseline: 47b8600e7509ef4349c996dce15bd3146b155f75
 - H source snapshot: session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74
 - Peers: [中文版本](BMCP-ARCH-001.zh-CN.md) | [English](BMCP-ARCH-001.en.md)
 - Scope: architecture semantics, phase boundaries, dependency map, acceptance plan and engineering handoff.
@@ -414,7 +414,7 @@ Issue #7 is currently CLOSED / not_planned under the Owner phase-closure ruling;
 - Issue #7: CLOSED / not_planned; body retains IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE. No status edit.
 - Issue #3: CLOSED / not_planned as superseded. Its historical body says Applied Contract Frozen = NO and Test Executed / Passed = NO / NO; closure does not prove a new BMCP core freeze.
 - Issue #43: closed as superseded by Owner phase-closure ruling. This is a candidate architecture handoff, not Runtime implementation.
-- Main fetched SHA: bb49dc121c195d7fb2ffa0ffbb9d376186b802fc; H branch HEAD: 3e8b33df18b9e6fc757ca84ff07a12faebc78e74.
+- Main fetched SHA: 47b8600e7509ef4349c996dce15bd3146b155f75; H branch HEAD: 3e8b33df18b9e6fc757ca84ff07a12faebc78e74.
 - No Runtime code or H-owned source file modified.
 - Runtime acceptance tests: NOT RUN — no Runtime authorization/repository.
 - Independent semantic parity review: PENDING. H/Owner responses: PENDING.
@@ -423,7 +423,7 @@ Issue #7 is currently CLOSED / not_planned under the Owner phase-closure ruling;
 
 | Document / version | English path | Chinese path | Source revision | Parity |
 |---|---|---|---|---|
-| BMCP-ARCH-001 / 0.1.0 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main bb49dc121c195d7fb2ffa0ffbb9d376186b802fc; H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74 | author-prepared pair; independent parity review PENDING |
+| BMCP-ARCH-001 / 0.1.0 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main 47b8600e7509ef4349c996dce15bd3146b155f75; H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74 | author-prepared pair; independent parity review PENDING |
 
 The coverage register records this as a review/handoff pair only. It does not change “BMCP Protocol detailed contracts (7 core specifications)”; bilingual normative core-spec coverage remains NOT STARTED.
 

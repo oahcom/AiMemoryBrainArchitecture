@@ -2,7 +2,7 @@
 
 - 工作项：BMCP-ARCH-FOLLOWUP-001；文档：BMCP-ARCH-001；版本：0.1.0
 - 状态：CANDIDATE / ARCHITECTURE_PARTIAL——不是已冻结协议规范
-- Main 基线：bb49dc121c195d7fb2ffa0ffbb9d376186b802fc
+- Main 基线：47b8600e7509ef4349c996dce15bd3146b155f75
 - H 源快照：session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74
 - 对应版本：[English](BMCP-ARCH-001.en.md) | [中文版本](BMCP-ARCH-001.zh-CN.md)
 - 范围：架构语义、阶段边界、依赖映射、验收计划和工程交接
@@ -414,7 +414,7 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 - Issue #7：CLOSED / not_planned；正文保留 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE。未修改。
 - Issue #3：CLOSED / not_planned，作为 superseded 处理。历史正文写明 Applied Contract Frozen = NO、Test Executed / Passed = NO / NO；关闭不证明新的 BMCP 核心契约已冻结。
 - Issue #43：根据 Owner 阶段关闭裁决关闭为 superseded。本 FollowUp 是候选架构交接，不是 Runtime 实施。
-- Main Fetch SHA：bb49dc121c195d7fb2ffa0ffbb9d376186b802fc；H Branch HEAD：3e8b33df18b9e6fc757ca84ff07a12faebc78e74。
+- Main Fetch SHA：47b8600e7509ef4349c996dce15bd3146b155f75；H Branch HEAD：3e8b33df18b9e6fc757ca84ff07a12faebc78e74。
 - 未修改 Runtime 代码或 H 所有源文件。
 - Runtime 验收测试：NOT RUN——无 Runtime 授权/仓库。
 - 独立语义一致性审查：PENDING。H/Owner 回复：PENDING。
@@ -423,7 +423,7 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 
 | 文档 / 版本 | 英文路径 | 中文路径 | 来源版本 | 一致性 |
 |---|---|---|---|---|
-| BMCP-ARCH-001 / 0.1.0 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main bb49dc121c195d7fb2ffa0ffbb9d376186b802fc；H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74 | 作者准备双语 Pair；独立一致性审查 PENDING |
+| BMCP-ARCH-001 / 0.1.0 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main 47b8600e7509ef4349c996dce15bd3146b155f75；H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74 | 作者准备双语 Pair；独立一致性审查 PENDING |
 
 Coverage Register 仅将此登记为 Review/Handoff Pair，不改变 “BMCP Protocol detailed contracts (7 core specifications)” 条目；双语规范核心文档覆盖仍为 NOT STARTED。
 
