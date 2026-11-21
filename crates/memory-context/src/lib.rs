@@ -131,11 +131,49 @@ pub struct ContextEntry {
     pub rendered_bytes: usize,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub enum TombstoneKind {
+    Removed,
+    Replaced,
+    Expired,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct ContextTombstone {
+    pub entry_id: OpaqueId,
+    pub memory_id: OpaqueId,
+    pub memory_version_id: OpaqueId,
+    pub operation_id: String,
+    pub reason: String,
+    pub kind: TombstoneKind,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub enum ContextOperationKind {
+    Update,
+    Remove,
+    Replace,
+    Reorder,
+    Expire,
+    Reconcile,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct ContextOperationRecord {
+    pub operation_id: String,
+    pub kind: ContextOperationKind,
+    pub reason: String,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ContextSnapshot {
     pub identity: ContextIdentity,
     pub context_version: u64,
     pub entries: Vec<ContextEntry>,
+    #[serde(default)]
+    pub tombstones: Vec<ContextTombstone>,
+    #[serde(default)]
+    pub operation_records: Vec<ContextOperationRecord>,
     pub rendered_bytes: usize,
 }
 
@@ -149,8 +187,7 @@ impl ContextSnapshot {
     }
 
     pub fn serialize(&self) -> Result<String, ContextError> {
-        serde_json::to_string(self)
-            .map_err(|error| ContextError::Serialization(error.to_string()))
+        serde_json::to_string(self).map_err(|error| ContextError::Serialization(error.to_string()))
     }
 }
 
@@ -177,6 +214,504 @@ pub fn validate_snapshot(snapshot: &ContextSnapshot) -> Result<(), ContextError>
         return Err(ContextError::EmptyField("rendered_content"));
     }
     Ok(())
+}
+
+/// A pure in-memory edit envelope. The source snapshot is never mutated.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct ChangeSet {
+    pub base_version: u64,
+    pub operations: Vec<ChangeSetOperation>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub enum ChangeSetOperation {
+    Update {
+        operation_id: String,
+        entry_id: OpaqueId,
+        updated: ContextEntry,
+        reason: String,
+    },
+    Remove {
+        operation_id: String,
+        entry_id: OpaqueId,
+        reason: String,
+    },
+    Replace {
+        operation_id: String,
+        old_entry_id: Option<OpaqueId>,
+        replacement: ContextEntry,
+        reason: String,
+    },
+    Reorder {
+        operation_id: String,
+        entry_ids: Vec<OpaqueId>,
+        reason: String,
+    },
+    Expire {
+        operation_id: String,
+        entry_id: OpaqueId,
+        expires_at_context_version: u64,
+        reason: String,
+    },
+    Reconcile {
+        operation_id: String,
+        desired_entries: Vec<ContextEntry>,
+        reason: String,
+    },
+}
+
+impl ChangeSetOperation {
+    fn operation_id(&self) -> &str {
+        match self {
+            Self::Update { operation_id, .. }
+            | Self::Remove { operation_id, .. }
+            | Self::Replace { operation_id, .. }
+            | Self::Reorder { operation_id, .. }
+            | Self::Expire { operation_id, .. }
+            | Self::Reconcile { operation_id, .. } => operation_id,
+        }
+    }
+}
+
+impl ChangeSet {
+    pub fn validate(&self) -> Result<(), ContextError> {
+        if self.base_version == 0 || self.operations.is_empty() {
+            return Err(ContextError::InvalidOperation);
+        }
+        let mut ids = HashSet::new();
+        for operation in &self.operations {
+            let id = operation.operation_id();
+            if id.trim().is_empty() {
+                return Err(ContextError::InvalidOperationId);
+            }
+            if !ids.insert(id) {
+                return Err(ContextError::DuplicateOperationId);
+            }
+            match operation {
+                ChangeSetOperation::Update {
+                    updated, reason, ..
+                }
+                | ChangeSetOperation::Replace {
+                    replacement: updated,
+                    reason,
+                    ..
+                } => {
+                    validate_edit_entry(updated)?;
+                    if reason.trim().is_empty() {
+                        return Err(ContextError::EmptyField("reason"));
+                    }
+                }
+                ChangeSetOperation::Remove { reason, .. }
+                | ChangeSetOperation::Expire { reason, .. }
+                | ChangeSetOperation::Reconcile { reason, .. } => {
+                    if reason.trim().is_empty() {
+                        return Err(ContextError::EmptyField("reason"));
+                    }
+                }
+                ChangeSetOperation::Reorder {
+                    entry_ids, reason, ..
+                } => {
+                    if reason.trim().is_empty() {
+                        return Err(ContextError::EmptyField("reason"));
+                    }
+                    if entry_ids.is_empty() {
+                        return Err(ContextError::InvalidReorder);
+                    }
+                }
+            }
+            if let ChangeSetOperation::Expire {
+                expires_at_context_version,
+                ..
+            } = operation
+            {
+                if *expires_at_context_version == 0 {
+                    return Err(ContextError::InvalidVersion);
+                }
+            }
+            if let ChangeSetOperation::Reconcile {
+                desired_entries, ..
+            } = operation
+            {
+                let mut desired_ids = HashSet::new();
+                for entry in desired_entries {
+                    validate_edit_entry(entry)?;
+                    if !desired_ids.insert(entry.entry_id.clone()) {
+                        return Err(ContextError::DuplicateEntry);
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+}
+
+fn validate_edit_entry(entry: &ContextEntry) -> Result<(), ContextError> {
+    if entry.rendered_content.trim().is_empty() {
+        return Err(ContextError::EmptyField("rendered_content"));
+    }
+    if entry.content_hash.trim().is_empty() {
+        return Err(ContextError::EmptyField("content_hash"));
+    }
+    if entry.source_refs.is_empty() {
+        return Err(ContextError::MissingLineage);
+    }
+    if entry.rendered_bytes != entry.rendered_content.len() {
+        return Err(ContextError::EntryByteCountMismatch {
+            actual: entry.rendered_content.len(),
+            recorded: entry.rendered_bytes,
+        });
+    }
+    Ok(())
+}
+
+/// Applies all operations against the declared base version. A failure drops
+/// the staged clone and leaves the borrowed input snapshot untouched.
+pub fn apply_change_set(
+    snapshot: &ContextSnapshot,
+    change_set: &ChangeSet,
+    budget: &ContextBudget,
+) -> Result<ContextSnapshot, ContextError> {
+    if snapshot.context_version != change_set.base_version {
+        return Err(ContextError::StaleBase {
+            expected: change_set.base_version,
+            actual: snapshot.context_version,
+        });
+    }
+    change_set.validate()?;
+    budget.validate()?;
+    validate_snapshot(snapshot)?;
+    let target_version = snapshot
+        .context_version
+        .checked_add(1)
+        .ok_or(ContextError::SequenceOverflow)?;
+    let mut staged = snapshot.clone();
+    for operation in &change_set.operations {
+        apply_change_operation(&mut staged, operation, target_version)?;
+    }
+    if staged.entries.len() > budget.max_entries {
+        return Err(ContextError::EntryBudgetExceeded {
+            actual: staged.entries.len(),
+            limit: budget.max_entries,
+        });
+    }
+    let rendered_bytes = staged
+        .entries
+        .iter()
+        .try_fold(0usize, |sum, entry| sum.checked_add(entry.rendered_bytes))
+        .ok_or(ContextError::ByteBudgetExceeded {
+            actual: usize::MAX,
+            limit: budget.max_rendered_bytes,
+        })?;
+    if rendered_bytes > budget.max_rendered_bytes {
+        return Err(ContextError::ByteBudgetExceeded {
+            actual: rendered_bytes,
+            limit: budget.max_rendered_bytes,
+        });
+    }
+    staged.context_version = target_version;
+    staged.rendered_bytes = rendered_bytes;
+    validate_snapshot(&staged)?;
+    Ok(staged)
+}
+
+fn append_tombstone(
+    snapshot: &mut ContextSnapshot,
+    entry: &ContextEntry,
+    operation_id: &str,
+    reason: &str,
+    kind: TombstoneKind,
+) {
+    snapshot.tombstones.push(ContextTombstone {
+        entry_id: entry.entry_id.clone(),
+        memory_id: entry.memory_id.clone(),
+        memory_version_id: entry.memory_version_id.clone(),
+        operation_id: operation_id.to_owned(),
+        reason: reason.to_owned(),
+        kind,
+    });
+}
+
+fn apply_change_operation(
+    snapshot: &mut ContextSnapshot,
+    operation: &ChangeSetOperation,
+    target_version: u64,
+) -> Result<(), ContextError> {
+    match operation {
+        ChangeSetOperation::Update {
+            entry_id, updated, ..
+        } => {
+            let Some(index) = snapshot
+                .entries
+                .iter()
+                .position(|entry| &entry.entry_id == entry_id)
+            else {
+                return Err(ContextError::MissingEntry);
+            };
+            let current = &snapshot.entries[index];
+            if updated.entry_id != current.entry_id
+                || updated.memory_id != current.memory_id
+                || updated.memory_version_id != current.memory_version_id
+            {
+                return Err(ContextError::ImmutableMemoryVersion);
+            }
+            snapshot.entries[index] = updated.clone();
+        }
+        ChangeSetOperation::Remove {
+            operation_id,
+            entry_id,
+            reason,
+        } => {
+            let Some(index) = snapshot
+                .entries
+                .iter()
+                .position(|entry| &entry.entry_id == entry_id)
+            else {
+                return Err(ContextError::MissingEntry);
+            };
+            let removed = snapshot.entries.remove(index);
+            append_tombstone(
+                snapshot,
+                &removed,
+                operation_id,
+                reason,
+                TombstoneKind::Removed,
+            );
+        }
+        ChangeSetOperation::Replace {
+            operation_id,
+            old_entry_id,
+            replacement,
+            reason,
+        } => {
+            let position = match old_entry_id {
+                Some(old_id) => {
+                    let Some(index) = snapshot
+                        .entries
+                        .iter()
+                        .position(|entry| &entry.entry_id == old_id)
+                    else {
+                        return Err(ContextError::MissingEntry);
+                    };
+                    Some(index)
+                }
+                None => None,
+            };
+            if snapshot.entries.iter().enumerate().any(|(index, entry)| {
+                entry.entry_id == replacement.entry_id && Some(index) != position
+            }) {
+                return Err(ContextError::DuplicateEntry);
+            }
+            if !snapshot
+                .entries
+                .iter()
+                .any(|entry| entry.entry_id == replacement.entry_id)
+                && snapshot
+                    .tombstones
+                    .iter()
+                    .any(|tombstone| tombstone.entry_id == replacement.entry_id)
+            {
+                return Err(ContextError::TombstonedEntry);
+            }
+            if let Some(index) = position {
+                let old = snapshot.entries.remove(index);
+                append_tombstone(
+                    snapshot,
+                    &old,
+                    operation_id,
+                    reason,
+                    TombstoneKind::Replaced,
+                );
+                snapshot.entries.insert(index, replacement.clone());
+            } else {
+                snapshot.entries.push(replacement.clone());
+            }
+        }
+        ChangeSetOperation::Reorder { entry_ids, .. } => {
+            let current: HashSet<_> = snapshot
+                .entries
+                .iter()
+                .map(|entry| entry.entry_id.clone())
+                .collect();
+            let requested: HashSet<_> = entry_ids.iter().cloned().collect();
+            if entry_ids.len() != snapshot.entries.len()
+                || requested.len() != entry_ids.len()
+                || current != requested
+            {
+                return Err(ContextError::InvalidReorder);
+            }
+            let mut reordered = Vec::with_capacity(snapshot.entries.len());
+            for id in entry_ids {
+                let Some(index) = snapshot
+                    .entries
+                    .iter()
+                    .position(|entry| &entry.entry_id == id)
+                else {
+                    return Err(ContextError::InvalidReorder);
+                };
+                reordered.push(snapshot.entries[index].clone());
+            }
+            snapshot.entries = reordered;
+        }
+        ChangeSetOperation::Expire {
+            operation_id,
+            entry_id,
+            expires_at_context_version,
+            reason,
+        } => {
+            if *expires_at_context_version > target_version {
+                return Err(ContextError::ExpirationNotDue {
+                    expires_at: *expires_at_context_version,
+                    target_version,
+                });
+            }
+            let Some(index) = snapshot
+                .entries
+                .iter()
+                .position(|entry| &entry.entry_id == entry_id)
+            else {
+                return Err(ContextError::MissingEntry);
+            };
+            let expired = snapshot.entries.remove(index);
+            append_tombstone(
+                snapshot,
+                &expired,
+                operation_id,
+                reason,
+                TombstoneKind::Expired,
+            );
+        }
+        ChangeSetOperation::Reconcile {
+            operation_id,
+            desired_entries,
+            reason,
+        } => {
+            let expanded = reconcile_operations(snapshot, desired_entries, operation_id, reason)?;
+            for child in &expanded {
+                apply_change_operation(snapshot, child, target_version)?;
+            }
+        }
+    }
+    let (kind, reason) = match operation {
+        ChangeSetOperation::Update { reason, .. } => (ContextOperationKind::Update, reason),
+        ChangeSetOperation::Remove { reason, .. } => (ContextOperationKind::Remove, reason),
+        ChangeSetOperation::Replace { reason, .. } => (ContextOperationKind::Replace, reason),
+        ChangeSetOperation::Reorder { reason, .. } => (ContextOperationKind::Reorder, reason),
+        ChangeSetOperation::Expire { reason, .. } => (ContextOperationKind::Expire, reason),
+        ChangeSetOperation::Reconcile { reason, .. } => (ContextOperationKind::Reconcile, reason),
+    };
+    snapshot.operation_records.push(ContextOperationRecord {
+        operation_id: operation.operation_id().to_owned(),
+        kind,
+        reason: reason.to_owned(),
+    });
+    Ok(())
+}
+
+/// Reconcile is compiled into Update, Remove, Replace and Reorder operations.
+/// A tombstoned identity cannot silently re-enter the active membership set.
+fn reconcile_operations(
+    snapshot: &ContextSnapshot,
+    desired_entries: &[ContextEntry],
+    operation_id: &str,
+    reason: &str,
+) -> Result<Vec<ChangeSetOperation>, ContextError> {
+    let mut desired_ids = HashSet::new();
+    for entry in desired_entries {
+        validate_edit_entry(entry)?;
+        if !desired_ids.insert(entry.entry_id.clone()) {
+            return Err(ContextError::DuplicateEntry);
+        }
+        if !snapshot
+            .entries
+            .iter()
+            .any(|active| active.entry_id == entry.entry_id)
+            && snapshot
+                .tombstones
+                .iter()
+                .any(|tombstone| tombstone.entry_id == entry.entry_id)
+        {
+            return Err(ContextError::TombstonedEntry);
+        }
+    }
+    let desired_by_id: HashMap<_, _> = desired_entries
+        .iter()
+        .map(|entry| (entry.entry_id.clone(), entry))
+        .collect();
+    let mut unmatched: Vec<_> = snapshot
+        .entries
+        .iter()
+        .filter(|entry| !desired_ids.contains(&entry.entry_id))
+        .map(|entry| entry.entry_id.clone())
+        .collect();
+    let mut operations = Vec::new();
+
+    for current in &snapshot.entries {
+        let Some(desired) = desired_by_id.get(&current.entry_id) else {
+            continue;
+        };
+        if current == *desired {
+            continue;
+        }
+        let index = operations.len();
+        if current.memory_id != desired.memory_id
+            || current.memory_version_id != desired.memory_version_id
+        {
+            operations.push(ChangeSetOperation::Replace {
+                operation_id: format!("{}:replace:{}", operation_id, index),
+                old_entry_id: Some(current.entry_id.clone()),
+                replacement: (*desired).clone(),
+                reason: reason.to_owned(),
+            });
+        } else {
+            operations.push(ChangeSetOperation::Update {
+                operation_id: format!("{}:update:{}", operation_id, index),
+                entry_id: current.entry_id.clone(),
+                updated: (*desired).clone(),
+                reason: reason.to_owned(),
+            });
+        }
+    }
+
+    for desired in desired_entries {
+        if snapshot
+            .entries
+            .iter()
+            .any(|current| current.entry_id == desired.entry_id)
+        {
+            continue;
+        }
+        let old_entry_id = if unmatched.is_empty() {
+            None
+        } else {
+            Some(unmatched.remove(0))
+        };
+        let index = operations.len();
+        operations.push(ChangeSetOperation::Replace {
+            operation_id: format!("{}:replace:{}", operation_id, index),
+            old_entry_id,
+            replacement: desired.clone(),
+            reason: reason.to_owned(),
+        });
+    }
+    for old_entry_id in unmatched {
+        let index = operations.len();
+        operations.push(ChangeSetOperation::Remove {
+            operation_id: format!("{}:remove:{}", operation_id, index),
+            entry_id: old_entry_id,
+            reason: reason.to_owned(),
+        });
+    }
+    if !desired_entries.is_empty() {
+        operations.push(ChangeSetOperation::Reorder {
+            operation_id: format!("{}:reorder", operation_id),
+            entry_ids: desired_entries
+                .iter()
+                .map(|entry| entry.entry_id.clone())
+                .collect(),
+            reason: reason.to_owned(),
+        });
+    }
+    Ok(operations)
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -239,12 +774,13 @@ pub fn build_context(
     let mut entries = Vec::with_capacity(candidates.len());
     for candidate in candidates {
         let bytes = candidate.rendered_content.len();
-        rendered_bytes = rendered_bytes.checked_add(bytes).ok_or(
-            ContextError::ByteBudgetExceeded {
-                actual: usize::MAX,
-                limit: budget.max_rendered_bytes,
-            },
-        )?;
+        rendered_bytes =
+            rendered_bytes
+                .checked_add(bytes)
+                .ok_or(ContextError::ByteBudgetExceeded {
+                    actual: usize::MAX,
+                    limit: budget.max_rendered_bytes,
+                })?;
         if rendered_bytes > budget.max_rendered_bytes {
             return Err(ContextError::ByteBudgetExceeded {
                 actual: rendered_bytes,
@@ -279,6 +815,8 @@ pub fn build_context(
         identity,
         context_version,
         entries,
+        tombstones: Vec::new(),
+        operation_records: Vec::new(),
         rendered_bytes,
     })
 }
@@ -307,10 +845,32 @@ pub enum ContextError {
     MissingLineage,
     DuplicateEntry,
     DuplicateMembership,
-    EntryBudgetExceeded { actual: usize, limit: usize },
-    ByteBudgetExceeded { actual: usize, limit: usize },
+    EntryBudgetExceeded {
+        actual: usize,
+        limit: usize,
+    },
+    ByteBudgetExceeded {
+        actual: usize,
+        limit: usize,
+    },
     Serialization(String),
-    SnapshotByteCountMismatch { actual: usize, recorded: usize },
+    SnapshotByteCountMismatch {
+        actual: usize,
+        recorded: usize,
+    },
+    StaleBase {
+        expected: u64,
+        actual: u64,
+    },
+    MissingEntry,
+    InvalidReorder,
+    ImmutableMemoryVersion,
+    TombstonedEntry,
+    ExpirationNotDue {
+        expires_at: u64,
+        target_version: u64,
+    },
+    InvalidOperationId,
     InvalidContextVersionId,
     InvalidChangeSetId,
     InvalidEntryRevision,
@@ -321,11 +881,17 @@ pub enum ContextError {
     InvalidChangeSetStatus,
     BaseVersionMismatch,
     ContextMismatch,
-    PolicyEpochStale { expected: u64, actual: u64 },
+    PolicyEpochStale {
+        expected: u64,
+        actual: u64,
+    },
     SequenceOverflow,
     RollbackFromGenesis,
     NoOpRollback,
-    SnapshotHashMismatch { declared: String, actual: String },
+    SnapshotHashMismatch {
+        declared: String,
+        actual: String,
+    },
     BudgetSummaryMismatch,
     IdempotencyConflict,
     IdempotencyResultMissing,
@@ -334,8 +900,14 @@ pub enum ContextError {
     VersionNotFound,
     VersionAlreadySuperseded,
     InvalidVersionLineage,
-    EntryByteCountMismatch { actual: usize, recorded: usize },
-    PayloadHashMismatch { declared: String, actual: String },
+    EntryByteCountMismatch {
+        actual: usize,
+        recorded: usize,
+    },
+    PayloadHashMismatch {
+        declared: String,
+        actual: String,
+    },
 }
 
 impl std::fmt::Display for ContextError {
@@ -567,9 +1139,7 @@ impl ContextChangeSet {
                 ContextOperation::ReplaceEntry { entry, .. } => entry.validate()?,
                 ContextOperation::RemoveEntry {
                     expected_revision, ..
-                } if *expected_revision == 0 => {
-                    return Err(ContextError::InvalidEntryRevision)
-                }
+                } if *expected_revision == 0 => return Err(ContextError::InvalidEntryRevision),
                 _ => {}
             }
         }
@@ -737,9 +1307,10 @@ pub fn commit_change_set(
         });
     }
 
-    let rendered_bytes = staged.iter().try_fold(0usize, |sum, entry| {
-        sum.checked_add(entry.rendered_bytes)
-    }).ok_or(ContextError::BudgetSummaryMismatch)?;
+    let rendered_bytes = staged
+        .iter()
+        .try_fold(0usize, |sum, entry| sum.checked_add(entry.rendered_bytes))
+        .ok_or(ContextError::BudgetSummaryMismatch)?;
     let actual_summary = ContextBudgetSummary {
         entry_count: staged.len(),
         rendered_bytes,
@@ -829,7 +1400,10 @@ fn apply_operations(
     for operation in operations {
         match operation {
             ContextOperation::AddEntry { entry, .. } => {
-                if entries.iter().any(|existing| existing.entry_id == entry.entry_id) {
+                if entries
+                    .iter()
+                    .any(|existing| existing.entry_id == entry.entry_id)
+                {
                     return Err(ContextError::DuplicateEntryId);
                 }
                 entries.push(entry.clone());
@@ -872,11 +1446,13 @@ fn apply_operations(
                 }
                 let mut reordered = Vec::with_capacity(entries.len());
                 for id in entry_ids {
-                    let Some(index) = entries.iter().position(|entry| &entry.entry_id == id)
-                    else {
+                    let Some(index) = entries.iter().position(|entry| &entry.entry_id == id) else {
                         return Err(ContextError::InvalidOperation);
                     };
-                    if reordered.iter().any(|entry: &ContextEntryVersion| &entry.entry_id == id) {
+                    if reordered
+                        .iter()
+                        .any(|entry: &ContextEntryVersion| &entry.entry_id == id)
+                    {
                         return Err(ContextError::InvalidOperation);
                     }
                     reordered.push(entries[index].clone());
@@ -905,17 +1481,31 @@ fn stable_digest(bytes: &[u8]) -> String {
     format!("fnv1a64:{hash:016x}")
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct RollbackPlanRequest {
+    pub target: ContextVersionId,
+    pub target_entries: Vec<ContextEntryVersion>,
+    pub current_entries: Vec<ContextEntryVersion>,
+    pub reason: String,
+    pub actor: ActorRef,
+    pub change_set_id: ChangeSetId,
+    pub created_at: String,
+    pub policy_epoch: u64,
+}
+
 pub fn plan_rollback(
     head: &ContextHead,
-    target: &ContextVersionId,
-    target_entries: &[ContextEntryVersion],
-    current_entries: &[ContextEntryVersion],
-    reason: &str,
-    actor: ActorRef,
-    change_set_id: ChangeSetId,
-    created_at: String,
-    policy_epoch: u64,
+    request: RollbackPlanRequest,
 ) -> Result<ContextChangeSet, ContextError> {
+    let target = &request.target;
+    let target_entries = request.target_entries.as_slice();
+    let current_entries = request.current_entries.as_slice();
+    let reason = request.reason.as_str();
+    let actor = request.actor;
+    let change_set_id = request.change_set_id;
+    let created_at = request.created_at;
+    let policy_epoch = request.policy_epoch;
+
     head.validate()?;
     let base_version = head
         .version
@@ -1042,12 +1632,6 @@ pub fn supersede_version(
     };
     replacement.validate()?;
     Ok(replacement)
-}
-
-impl ContextError {
-    fn payload_hash_mismatch(declared: String, actual: String) -> Self {
-        Self::PayloadHashMismatch { declared, actual }
-    }
 }
 
 #[cfg(test)]
@@ -1545,14 +2129,16 @@ mod version_tests {
     ) -> Result<ContextChangeSet, ContextError> {
         plan_rollback(
             &head(),
-            &version_id("v0"),
-            target_entries,
-            current_entries,
-            reason,
-            actor(),
-            changeset_id("rollback-1"),
-            "2026-01-01T00:00:00Z".into(),
-            7,
+            RollbackPlanRequest {
+                target: version_id("v0"),
+                target_entries: target_entries.to_vec(),
+                current_entries: current_entries.to_vec(),
+                reason: reason.to_owned(),
+                actor: actor(),
+                change_set_id: changeset_id("rollback-1"),
+                created_at: "2026-01-01T00:00:00Z".into(),
+                policy_epoch: 7,
+            },
         )
     }
 
@@ -1607,10 +2193,7 @@ mod version_tests {
 
     #[test]
     fn change_set_id_rejects_empty() {
-        assert_eq!(
-            ChangeSetId::new(""),
-            Err(ContextError::InvalidChangeSetId)
-        );
+        assert_eq!(ChangeSetId::new(""), Err(ContextError::InvalidChangeSetId));
     }
 
     #[test]
@@ -1708,14 +2291,16 @@ mod version_tests {
         assert_eq!(
             plan_rollback(
                 &genesis,
-                &version_id("v0"),
-                &[entry("a", "a", 1)],
-                &[],
-                "restore",
-                actor(),
-                changeset_id("cs"),
-                "time".into(),
-                1
+                RollbackPlanRequest {
+                    target: version_id("v0"),
+                    target_entries: vec![entry("a", "a", 1)],
+                    current_entries: vec![],
+                    reason: "restore".into(),
+                    actor: actor(),
+                    change_set_id: changeset_id("cs"),
+                    created_at: "time".into(),
+                    policy_epoch: 1,
+                }
             ),
             Err(ContextError::RollbackFromGenesis)
         );
@@ -1734,14 +2319,16 @@ mod version_tests {
         assert_eq!(
             plan_rollback(
                 &head(),
-                &version_id("v0"),
-                &[entry("a", "a", 1)],
-                &[],
-                "restore",
-                actor(),
-                changeset_id("cs"),
-                String::new(),
-                1
+                RollbackPlanRequest {
+                    target: version_id("v0"),
+                    target_entries: vec![entry("a", "a", 1)],
+                    current_entries: vec![],
+                    reason: "restore".into(),
+                    actor: actor(),
+                    change_set_id: changeset_id("cs"),
+                    created_at: String::new(),
+                    policy_epoch: 1,
+                }
             ),
             Err(ContextError::EmptyField("created_at"))
         );
@@ -1760,7 +2347,7 @@ mod version_tests {
     fn rollback_rejects_noop_diff() {
         let same = entry("a", "same", 1);
         assert_eq!(
-            rollback(&[same.clone()], &[same]),
+            rollback(std::slice::from_ref(&same), std::slice::from_ref(&same)),
             Err(ContextError::NoOpRollback)
         );
     }
@@ -1987,18 +2574,11 @@ mod version_tests {
             &[],
             &mut log,
             7,
-            metadata(&[added.clone()]),
+            metadata(std::slice::from_ref(&added)),
         )
         .unwrap();
-        let second = commit_change_set(
-            &head(),
-            change_set,
-            &[],
-            &mut log,
-            7,
-            metadata(&[added]),
-        )
-        .unwrap();
+        let second =
+            commit_change_set(&head(), change_set, &[], &mut log, 7, metadata(&[added])).unwrap();
         assert!(matches!(first, CommitOutcome::Committed { .. }));
         assert!(matches!(second, CommitOutcome::Replayed { .. }));
         assert_eq!(log.len(), 1);
@@ -2080,5 +2660,379 @@ mod version_tests {
         let first = vec![entry("a", "a", 1), entry("b", "b", 1)];
         let second = vec![entry("b", "b", 1), entry("a", "a", 1)];
         assert_eq!(snapshot_hash(&first), snapshot_hash(&second));
+    }
+}
+
+#[cfg(test)]
+mod changeset_tests {
+    use super::*;
+    use memory_domain::ScopeKind;
+
+    fn id(value: &str) -> OpaqueId {
+        OpaqueId::new(value).unwrap()
+    }
+
+    fn scope() -> ScopeRef {
+        ScopeRef {
+            scope_id: id("scope"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:test".into(),
+        }
+    }
+
+    fn snapshot(values: &[(&str, &str)]) -> ContextSnapshot {
+        let identity = ContextIdentity {
+            context_id: id("ctx"),
+            scope_refs: vec![scope()],
+            agent_id: id("agent"),
+            agent_instance_id: id("instance"),
+            session_id: id("session"),
+            task_id: None,
+            environment_id: None,
+            purpose: "test".into(),
+            schema_version: "1".into(),
+        };
+        let candidates = values
+            .iter()
+            .map(|(entry, content)| ContextCandidate {
+                entry_id: id(entry),
+                memory_id: id(&format!("memory-{entry}")),
+                memory_version_id: id(&format!("version-{entry}")),
+                memory_lifecycle: MemoryLifecycle::Active,
+                scope_refs: vec![scope()],
+                tier: ContextTier::P1,
+                priority: 10,
+                activation_reason: "test".into(),
+                rendered_content: (*content).into(),
+                source_refs: vec![id("source")],
+                evidence_refs: vec![],
+                epistemic_qualifiers: vec![],
+                content_hash: format!("hash-{entry}"),
+            })
+            .collect();
+        build_context(
+            identity,
+            1,
+            ContextBudget {
+                max_entries: 8,
+                max_rendered_bytes: 1024,
+            },
+            candidates,
+        )
+        .unwrap()
+    }
+
+    fn budget(max_entries: usize, max_rendered_bytes: usize) -> ContextBudget {
+        ContextBudget {
+            max_entries,
+            max_rendered_bytes,
+        }
+    }
+
+    fn set(operations: Vec<ChangeSetOperation>) -> ChangeSet {
+        ChangeSet {
+            base_version: 1,
+            operations,
+        }
+    }
+
+    fn updated(entry: &ContextEntry, content: &str) -> ContextEntry {
+        let mut value = entry.clone();
+        value.rendered_content = content.into();
+        value.rendered_bytes = content.len();
+        value.content_hash = format!("updated:{content}");
+        value
+    }
+
+    #[test]
+    fn change_set_rejects_duplicate_operation_ids() {
+        let change_set = set(vec![
+            ChangeSetOperation::Remove {
+                operation_id: "same".into(),
+                entry_id: id("a"),
+                reason: "first".into(),
+            },
+            ChangeSetOperation::Remove {
+                operation_id: "same".into(),
+                entry_id: id("b"),
+                reason: "second".into(),
+            },
+        ]);
+        assert_eq!(
+            change_set.validate(),
+            Err(ContextError::DuplicateOperationId)
+        );
+    }
+
+    #[test]
+    fn stale_base_is_rejected_without_changing_snapshot() {
+        let base = snapshot(&[("a", "a")]);
+        let mut stale = set(vec![ChangeSetOperation::Remove {
+            operation_id: "remove-a".into(),
+            entry_id: id("a"),
+            reason: "no longer needed".into(),
+        }]);
+        stale.base_version = 2;
+        assert_eq!(
+            apply_change_set(&base, &stale, &budget(8, 1024)),
+            Err(ContextError::StaleBase {
+                expected: 2,
+                actual: 1
+            })
+        );
+        assert_eq!(base.entries[0].entry_id, id("a"));
+        assert!(base.tombstones.is_empty());
+    }
+
+    #[test]
+    fn any_failing_operation_discards_the_entire_staged_set() {
+        let base = snapshot(&[("a", "before")]);
+        let original = base.clone();
+        let after_first = updated(&base.entries[0], "after");
+        let after_second = updated(&after_first, "after again");
+        let change_set = set(vec![
+            ChangeSetOperation::Update {
+                operation_id: "update-a-1".into(),
+                entry_id: id("a"),
+                updated: after_first,
+                reason: "first valid staged edit".into(),
+            },
+            ChangeSetOperation::Update {
+                operation_id: "update-a-2".into(),
+                entry_id: id("a"),
+                updated: after_second,
+                reason: "second valid staged edit".into(),
+            },
+            ChangeSetOperation::Remove {
+                operation_id: "remove-missing".into(),
+                entry_id: id("missing"),
+                reason: "third operation is invalid".into(),
+            },
+        ]);
+        assert_eq!(
+            apply_change_set(&base, &change_set, &budget(8, 1024)),
+            Err(ContextError::MissingEntry)
+        );
+        assert_eq!(base, original);
+    }
+
+    #[test]
+    fn remove_tombstone_is_visible_to_later_reconcile() {
+        let base = snapshot(&[("a", "keep")]);
+        let old_entry = base.entries[0].clone();
+        let removed = apply_change_set(
+            &base,
+            &set(vec![ChangeSetOperation::Remove {
+                operation_id: "remove-a".into(),
+                entry_id: id("a"),
+                reason: "membership removed, not forgotten".into(),
+            }]),
+            &budget(8, 1024),
+        )
+        .unwrap();
+        assert_eq!(removed.tombstones.len(), 1);
+        assert_eq!(removed.tombstones[0].operation_id, "remove-a");
+        assert_eq!(
+            removed.tombstones[0].reason,
+            "membership removed, not forgotten"
+        );
+        let reconcile = ChangeSet {
+            base_version: removed.context_version,
+            operations: vec![ChangeSetOperation::Reconcile {
+                operation_id: "reconcile".into(),
+                desired_entries: vec![old_entry.clone()],
+                reason: "desired state supplied".into(),
+            }],
+        };
+        assert_eq!(
+            apply_change_set(&removed, &reconcile, &budget(8, 1024)),
+            Err(ContextError::TombstonedEntry)
+        );
+        let direct_replace = ChangeSet {
+            base_version: removed.context_version,
+            operations: vec![ChangeSetOperation::Replace {
+                operation_id: "attempt-resurrection".into(),
+                old_entry_id: None,
+                replacement: old_entry,
+                reason: "must not bypass tombstone".into(),
+            }],
+        };
+        assert_eq!(
+            apply_change_set(&removed, &direct_replace, &budget(8, 1024)),
+            Err(ContextError::TombstonedEntry)
+        );
+    }
+
+    #[test]
+    fn reorder_rejects_non_permutation() {
+        let base = snapshot(&[("a", "a"), ("b", "b")]);
+        let change_set = set(vec![ChangeSetOperation::Reorder {
+            operation_id: "reorder".into(),
+            entry_ids: vec![id("a"), id("new")],
+            reason: "invalid permutation".into(),
+        }]);
+        assert_eq!(
+            apply_change_set(&base, &change_set, &budget(8, 1024)),
+            Err(ContextError::InvalidReorder)
+        );
+        assert_eq!(base.entries[1].entry_id, id("b"));
+    }
+
+    #[test]
+    fn replace_tombstones_old_membership_in_the_same_result() {
+        let base = snapshot(&[("old", "old content")]);
+        let replacement = snapshot(&[("new", "new content")]).entries.remove(0);
+        let result = apply_change_set(
+            &base,
+            &set(vec![ChangeSetOperation::Replace {
+                operation_id: "replace-old".into(),
+                old_entry_id: Some(id("old")),
+                replacement,
+                reason: "superseded membership".into(),
+            }]),
+            &budget(8, 1024),
+        )
+        .unwrap();
+        assert_eq!(result.entries.len(), 1);
+        assert_eq!(result.entries[0].entry_id, id("new"));
+        assert_eq!(result.tombstones.len(), 1);
+        assert_eq!(result.tombstones[0].entry_id, id("old"));
+        assert_eq!(result.tombstones[0].operation_id, "replace-old");
+        assert_eq!(result.tombstones[0].kind, TombstoneKind::Replaced);
+        assert_eq!(result.operation_records[0].operation_id, "replace-old");
+        assert_eq!(result.operation_records[0].reason, "superseded membership");
+    }
+
+    #[test]
+    fn update_preserves_memory_version_and_rejects_version_changes() {
+        let base = snapshot(&[("a", "before")]);
+        let memory_version_id = base.entries[0].memory_version_id.clone();
+        let result = apply_change_set(
+            &base,
+            &set(vec![ChangeSetOperation::Update {
+                operation_id: "update-a".into(),
+                entry_id: id("a"),
+                updated: updated(&base.entries[0], "after"),
+                reason: "render-only update".into(),
+            }]),
+            &budget(8, 1024),
+        )
+        .unwrap();
+        assert_eq!(result.entries[0].rendered_content, "after");
+        assert_eq!(result.entries[0].memory_version_id, memory_version_id);
+        assert_eq!(
+            result.operation_records[0].kind,
+            ContextOperationKind::Update
+        );
+        assert_eq!(result.operation_records[0].reason, "render-only update");
+
+        let mut invalid = updated(&base.entries[0], "changed version");
+        invalid.memory_version_id = id("different-version");
+        assert_eq!(
+            apply_change_set(
+                &base,
+                &set(vec![ChangeSetOperation::Update {
+                    operation_id: "illegal-update".into(),
+                    entry_id: id("a"),
+                    updated: invalid,
+                    reason: "must not mutate canonical version".into(),
+                }]),
+                &budget(8, 1024),
+            ),
+            Err(ContextError::ImmutableMemoryVersion)
+        );
+    }
+
+    #[test]
+    fn rendered_byte_budget_is_revalidated_after_update() {
+        let base = snapshot(&[("a", "a")]);
+        let change_set = set(vec![ChangeSetOperation::Update {
+            operation_id: "grow-content".into(),
+            entry_id: id("a"),
+            updated: updated(&base.entries[0], "12345"),
+            reason: "larger rendering".into(),
+        }]);
+        assert_eq!(
+            apply_change_set(&base, &change_set, &budget(8, 4)),
+            Err(ContextError::ByteBudgetExceeded {
+                actual: 5,
+                limit: 4
+            })
+        );
+        assert_eq!(base.entries[0].rendered_content, "a");
+    }
+
+    #[test]
+    fn expire_uses_target_version_and_preserves_expiration_tombstone() {
+        let base = snapshot(&[("a", "expires")]);
+        let not_due = set(vec![ChangeSetOperation::Expire {
+            operation_id: "expire-a".into(),
+            entry_id: id("a"),
+            expires_at_context_version: 3,
+            reason: "version deadline".into(),
+        }]);
+        assert_eq!(
+            apply_change_set(&base, &not_due, &budget(8, 1024)),
+            Err(ContextError::ExpirationNotDue {
+                expires_at: 3,
+                target_version: 2
+            })
+        );
+        let due = set(vec![ChangeSetOperation::Expire {
+            operation_id: "expire-a".into(),
+            entry_id: id("a"),
+            expires_at_context_version: 2,
+            reason: "version deadline".into(),
+        }]);
+        let result = apply_change_set(&base, &due, &budget(8, 1024)).unwrap();
+        assert!(result.entries.is_empty());
+        assert_eq!(result.tombstones[0].kind, TombstoneKind::Expired);
+        assert_eq!(result.operation_records[0].operation_id, "expire-a");
+    }
+
+    #[test]
+    fn reconcile_materializes_new_desired_membership_through_replace() {
+        let base = snapshot(&[("a", "existing")]);
+        let desired = snapshot(&[("a", "existing"), ("b", "new")]).entries;
+        let result = apply_change_set(
+            &base,
+            &set(vec![ChangeSetOperation::Reconcile {
+                operation_id: "reconcile-add".into(),
+                desired_entries: desired.clone(),
+                reason: "desired set includes a new membership".into(),
+            }]),
+            &budget(8, 1024),
+        )
+        .unwrap();
+        assert_eq!(result.entries, desired);
+        assert!(result.tombstones.is_empty());
+        assert!(result.operation_records.iter().any(|record| {
+            record.kind == ContextOperationKind::Replace
+                && record.operation_id == "reconcile-add:replace:0"
+        }));
+    }
+
+    #[test]
+    fn reconcile_emits_updates_replacements_and_a_valid_final_order() {
+        let base = snapshot(&[("a", "old-a"), ("b", "remove-b")]);
+        let desired_a = updated(&base.entries[0], "new-a");
+        let desired_c = snapshot(&[("c", "new-c")]).entries.remove(0);
+        let desired = vec![desired_c, desired_a];
+        let result = apply_change_set(
+            &base,
+            &set(vec![ChangeSetOperation::Reconcile {
+                operation_id: "reconcile".into(),
+                desired_entries: desired.clone(),
+                reason: "authoritative desired membership".into(),
+            }]),
+            &budget(8, 1024),
+        )
+        .unwrap();
+        assert_eq!(result.entries, desired);
+        assert_eq!(result.tombstones.len(), 1);
+        assert_eq!(result.tombstones[0].entry_id, id("b"));
+        assert!(result.operation_records.iter().any(|record| {
+            record.kind == ContextOperationKind::Reconcile && record.operation_id == "reconcile"
+        }));
     }
 }
