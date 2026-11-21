@@ -33,3 +33,18 @@
 ## 16. 范围与状态
 
 该映射是对本文已标记为 DECIDED 的等级保证所作的可执行解释。线上协商、已认证的能力声明、传输、Provider 集成、真实推理和生产级遥测均不在范围内。本模型不声称实现上述能力。
+
+
+## 17. 内存上下文交付生命周期（已实现的参考行为）
+
+crate 现在提供 `ContextDeliveryAdapter` trait 和 `InMemoryContextDeliveryAdapter`。内存实现按 session 保存已应用的 `ContextSnapshot` 与连接标志。
+
+| 生命周期动作/状态 | 已实现行为 |
+|---|---|
+| 已连接 / apply | 仅接受精确的后继版本（新 session 或清空后的 session 从版本 1 开始）；只有接受后才记录快照 |
+| 版本拒绝 | 返回类型化错误 `AdapterError::VersionMismatch { expected, received }`；已应用快照保持不变 |
+| Clear | 移除已应用快照；下一次 apply 从版本 1 开始 |
+| 已断连 | 使用 `SessionDisconnected` 拒绝 apply；保留最后一次成功应用的快照 |
+| Reconnected | 恢复内存连接标志，并报告最后一次成功应用的版本（或 `None`） |
+
+**NOT IMPLEMENTED（未实现）：** 真实传输；逐运行时 Agent 集成；持久化交付账本；持久化 session 状态；自动重试/重新交付；生产级协调或应用证明。Reconnect 只是确定性的内存状态转换，并不能证明远端 Agent 的真实状态。本实现不转换 Provider 特定运行时对象，也不声称交付状态超出当前进程内存的范围。
