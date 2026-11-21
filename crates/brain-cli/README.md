@@ -11,7 +11,11 @@ cargo run -p brain-cli --offline -- compile \
   --out /tmp/ctx.json
 ```
 
-Add `--verbose` to print each completed stage.
+The compiler skip notice is printed to stderr on every successful run,
+regardless of whether `--verbose` is supplied.
+
+The command preserves its existing exit status: a successful context build
+still exits with status `0`.
 
 The input is a JSON envelope containing the domain Event, its referenced raw payload,
 the Memory metadata, one Claim, and the context identity. The memory lifecycle is supplied
@@ -25,9 +29,23 @@ memories are eligible for a ContextCandidate.
 3. Persist through `SqliteMemoryStorage` in a temporary file-backed SQLite database.
 4. Call `MemoryStore::create_memory`, `write_revision`, and `read_current`.
 5. Build a ContextSnapshot with `memory_context::build_context` and serialize it to `--out`.
+6. Write a compiler-status sidecar recording that the compiler stage was skipped.
 
 The temporary database is removed after the command. The JSON output contains no runtime
 timestamps or generated random identifiers, so identical input produces identical output.
+
+The ContextSnapshot JSON serialization contract is unchanged. The compiler status
+is recorded in a separate sidecar file alongside the output.
+
+For `/tmp/ctx.json`, the sidecar is:
+
+`/tmp/ctx.json.compiler-status`
+
+Its complete contents are:
+
+```text
+compiler stage skipped: PublicationAuthority has no production implementation
+```
 
 ## Compiler boundary
 
@@ -37,10 +55,22 @@ D/Storage boundaries. The repository has no production implementation of that au
 The compiler also requires prior durable producer/dependency admission records. This CLI
 does not fabricate either prerequisite and does not call the publication path.
 
-**compiler stage skipped: PublicationAuthority has no production implementation**
+The CLI does not execute the compiler publication path. Every successful invocation
+prints the skip notice to stderr and records the same declaration in the
+`.compiler-status` sidecar. This behavior is unconditional and does not depend on
+`--verbose`.
 
-The CLI reports this exact reason with `--verbose`. A successful context build is not
-represented as a compiler publication or as externally authorized memory.
+A successful ContextSnapshot build must not be interpreted as a compiler publication
+or as externally authorized memory.
+
+### Exit status
+
+The existing exit-status behavior is preserved:
+
+| Status | Meaning |
+|---|---|
+| `0` | Existing successful context-build and output path; compiler stage skipped and explicitly recorded |
+| `1` | Existing command usage or runtime error |
 
 ## Fixture
 
