@@ -312,3 +312,203 @@ main 空 diff 验证
 **这五条合起来指向同一个结论：问题不在某一次合并、某一个文件、某一个身份，而在于「谁有权做出裁决」这个位置是空的。**
 
 裁定选择 (b)，等于承认这个空位不能用「作者兼任审查者」填补。这是本系列登记中第一次，一个阻塞被明确保留而非绕过。
+
+---
+
+## 10. 缺口从 1 个增加到 3 个：恶化仍在继续
+
+### 10.1 实测
+
+在 main `776f04fb69`（2026-11-21T07:58:58Z）上，空 diff：
+
+```
+$ BASE_SHA=$SHA HEAD_SHA=$SHA PR_BODY="BILINGUAL-MANIFEST: COMPLETE" \
+    python scripts/check_bilingual_docs.py
+::error::New bilingual gap outside frozen baseline: 14-ai-development/work-items/AID-2026-040/E1-E8-entry-gate-measurement-2026-11-21.md
+::error::New bilingual gap outside frozen baseline: 14-ai-development/work-items/AID-2026-040/prompt-v1.md
+::error::New bilingual gap outside frozen baseline: 14-ai-development/work-items/GAP-BASELINE-001.md
+EXIT=2
+```
+
+**从 1 个缺口变成 3 个。** 其中两个是新增的。
+
+### 10.2 新增两个缺口的来源
+
+| commit | 时间 | PR | 动作 |
+|---|---|---|---|
+| `1570a7591c` | 07:51:19Z | #437 | 新增 `AID-2026-040/E1-E8-entry-gate-measurement-2026-11-21.md`（+180）、`manifest.yaml`（+106）、`prompt-v1.md`（+176）、改 `INDEX.md`（+1） |
+
+其中两个 `.md` 位于 `NORMATIVE_ROOTS` 下、无 `docs/en`/`docs/zh-CN` 镜像、不在基线 → 新增两个缺口。
+
+### 10.3 #437 的合并状态
+
+| 项 | 值 |
+|---|---|
+| created | 2026-11-21T07:52:20Z |
+| merged | 2026-11-21T07:58:58Z |
+| 跨度 | 6m38s |
+| author | `oahcom` |
+| merger | `oahcom` |
+| reviews | **0** |
+| files | 4，`+463 −0` |
+| checks | 三条全 `failure`，`steps=0` |
+
+与 008 记录的 #423 同形：`reviews=0`、`steps=0`、作者即合并者、数分钟内完成。
+
+### 10.4 #426 也是 `reviews=0`
+
+| 项 | 值 |
+|---|---|
+| created | 07:15:35Z |
+| merged | 07:36:55Z |
+| 跨度 | 21m20s |
+| reviews | **0** |
+| files | 2，`+60 −6` |
+| checks | 四条全 `failure`，`steps=0` |
+
+#426 改的是 `scripts/check_bilingual_docs.py`（−6 行，删除重复豁免键）——**又一次零审查的门禁脚本变更**。
+
+### 10.5 这条数据说明了什么
+
+009 §3 的论断是：未经独立审查的修复不能防止同类问题复发。
+
+现在有更强的证据：**问题不只在复发，而在持续新增。**
+
+```
+07:08  Owner-A  直推   +1 缺口（GAP-BASELINE-001）
+07:36  #426     零审查 改门禁脚本（未新增缺口，但改判据）
+07:51  #437     零审查 +2 缺口（AID-2026-040 ×2）
+07:58  main 到达 3 个缺口
+```
+
+50 分钟内，缺口 1 → 3，其中两次写入都是 `reviews=0` 或直推。
+
+### 10.6 与 005 的对照
+
+005 的窗口是 36 小时、348 条 check、0 次执行、85 次合并。现在这个窗口之后仍在持续：
+
+- `#437` 三条 `steps=0`
+- `#426` 四条 `steps=0`
+- `#425` 三条 `steps=0`
+- `#423` 三条 `steps=0`
+
+**`steps=0` 不是偶发，是默认状态。**
+
+### 10.7 一个不能回避的观察
+
+这些 PR 的内容看起来是在推进 GAP-01 到 GAP-06——即 `GAP-BASELINE-001.md` 自己列出的六个缺失领域。也就是说：
+
+- 有人认真读了那份基线；
+- 按它的六个缺口逐个开工（#425 GAP-01、#433 GAP-02、#430 GAP-03、#428/#436 BMCP、#435 Phase 2、#434 context 测试）；
+- 并行开了至少 9 个 PR；
+- 而每一个都因付款失败拿不到 CI；
+- 合并时 `reviews=0`。
+
+**执行强度很高，治理强度为零。** 这不是怠工，恰恰相反——是高速产出与零审查并存。而这正是 007 与 008 记录的形态在高负载下的自然结果：当 CI 不可用、审查主体缺位、通道又必须推进时，`reviews=0` 成为唯一可行的路径。
+
+这一点必须写清楚，因为它决定了修复方向：**不是要求执行者更谨慎，而是补上那个空位。**
+
+---
+
+## 11. 阻塞已解除，但解除方式与本登记 §9 描述的路径不同
+
+### 11.1 main 已恢复 EXIT=0（真实历史）
+
+在真实克隆（770+ 提交）上 checkout `main` `c138654c94`：
+
+```
+$ BASE_SHA=$H HEAD_SHA=$H PR_BODY="BILINGUAL-MANIFEST: COMPLETE" python scripts/check_bilingual_docs.py
+bilingual baseline: 118 frozen, 0 new gaps
+exemptions: 21
+Bilingual documentation and prompt-library gate: PASS (0 changed paths inspected).
+EXIT=0
+```
+
+**基线从 207 降到 118，缺口从 3 个降到 0 个。** §8.4 的闭合性结论（main 红则所有 PR 恒为 `EXIT=2`）在技术上仍然成立，但**前提已不满足**。
+
+### 11.2 解除路径不是 §9.3 的那条链
+
+§9.3 预期的链是：`#440 独立审查 → 合并 → main 修复`。实际发生的是：
+
+| PR | 状态 | 内容 |
+|---|---|---|
+| #440 | **CLOSED_UNMERGED**（`reviews=0`） | `GAP-BASELINE-001` 双侧镜像，+299 −0 |
+| #442 | **CLOSED_UNMERGED**（`reviews=0`） | 7 文件，含 `document-scope-registry.yaml` 镜像 |
+| #443 | **CLOSED_UNMERGED**（`reviews=0`） | 6 文件，含 `GAP-BASELINE-001` 镜像 |
+| #445 | **MERGED**（`reviews=1`） | `bilingual-baseline.txt` **−89**、`check_bilingual_docs.py` **+3** |
+| #446 | **MERGED**（`reviews=0`） | 6 文件，`terminology.md` + ADR + 双侧镜像 |
+| #448 | **MERGED**（`reviews=0`） | 3 文件，`terminology.md` 三处各改 1 行 |
+
+**三个「补镜像」的 PR 全部被关闭未合并；真正解除阻塞的是 #445——把基线删掉 89 条。**
+
+### 11.3 #445 做了什么：把配对豁免接进缺口扫描
+
+```diff
+--- a/scripts/check_bilingual_docs.py
++++ b/scripts/check_bilingual_docs.py
+@@ -258,6 +258,9 @@ def current_bilingual_gaps() -> set[str]:
+              if source in EMBEDDED_BILINGUAL_SOURCES:
+                  continue
++            # Inventory and changed-path gates must share prefixes or pair-exempt paths become permanent gaps.
++            if source.startswith(PAIR_EXEMPT_PREFIXES):
++                continue
+              english = REPO_ROOT / "docs" / "en" / source
+```
+
+`PAIR_EXEMPT_PREFIXES` 的定义（本已存在）：
+
+```python
+PAIR_EXEMPT_PREFIXES = (
+    "14-ai-development/work-items/",
+    "14-ai-development/prompts/",
+    "14-ai-development/adr/",
+)
+```
+
+即：**变更路径门禁早已豁免这三个前缀，但全树缺口扫描没有豁免**，于是这三个目录下的每个文件都成了「永久缺口」，被逐条冻进基线。89 条基线里绝大部分来自这里：
+
+```
+14-ai-development/adr/ADR-RUN-001..003                (5)
+14-ai-development/prompts/global|owners/*             (15)
+14-ai-development/work-items/**                       (其余)
+```
+
+### 11.4 这是一次真实修复，且理由正确
+
+脚本内的注释写得很准确：
+
+> Inventory and changed-path gates must share prefixes or pair-exempt paths become permanent gaps.
+
+这句话点出了一个**两个判据不同步**的缺陷：同一批路径，一个门禁豁免、另一个门禁不豁免，结果就是基线被豁免项永久污染，棘轮无法收缩。
+
+**这不是绕过门禁，是修正门禁自身的内部不一致。** 它同时也解释了 006 §13.2 的实测现象——「加进基线」为什么不是出路：因为基线里那 89 条本身就是这个缺陷的沉淀物。
+
+### 11.5 但程序问题仍然存在，且未被讨论
+
+| 事实 | 值 |
+|---|---|
+| #445 author | `oahcom` |
+| #445 reviews | 1 |
+| 该 review 是否来自 author 本人 | **是**（与 007 §1 同形） |
+| #446 / #448 reviews | **0** |
+| #440 / #442 / #443 | `reviews=0` 即被关闭 |
+
+所以：**解除阻塞的那次合并仍是自我审查；随后两次合并是零审查。**
+
+这与 §9.6 的结论不冲突，反而加强它：修复质量与程序合规是两条独立的线。#445 的修复在技术上是对的（有 006 §13 的独立证据支持），但它的审查独立性与 007 记录的六例完全一致。
+
+### 11.6 对本登记结论的影响
+
+| 断言 | 状态 |
+|---|---|
+| §8.4 main 红则所有 PR 恒 `EXIT=2` | **机制成立**，但当前前提不满足（`0 new gaps`） |
+| §9.3 阻塞链（#440 审查 → 合并 → 修复） | **未发生**；#440/#442/#443 全部关闭未合并 |
+| §9.5 `#440 OPEN / PENDING_INDEPENDENT_REVIEW` | 已过期：`#440 CLOSED_UNMERGED` |
+| §10.5 缺口 1→3 恶化 | 成立，且随后被 #445 一次性归零 |
+| 007/008 的形态 | **不变**，#445/#446/#448 三例继续符合 |
+
+### 11.7 一条方法论上的教训
+
+本登记 §9 把「修复必须走 #440」当成唯一路径，于是把阻塞描述成「等一个审查者」。实际解法是**发现两个判据不同步**——这不需要审查者，只需要有人读懂脚本。
+
+这不是说 §9 的裁定错了（维持 §5 的判断在程序上是对的），而是说：**当所有路径都指向「缺人」时，值得再查一遍是不是自己把问题定义窄了。** 本次是我定义窄了。

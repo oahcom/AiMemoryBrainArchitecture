@@ -312,3 +312,201 @@ Section 9 does not record "blocked again". It records a **structural fact**:
 **Together they point at one thing: the problem is not a particular merge, file or identity. It is that the position "who has authority to decide" is empty.**
 
 Choosing (b) is an admission that this vacancy cannot be filled by the author doubling as reviewer. It is the first time in this series that a blockage has been explicitly preserved rather than routed around.
+
+---
+
+## 10. The gap count went from one to three: deterioration continues
+
+### 10.1 Measured
+
+On main `776f04fb69` (2026-11-21T07:58:58Z), empty diff:
+
+```
+$ BASE_SHA=$SHA HEAD_SHA=$SHA PR_BODY="BILINGUAL-MANIFEST: COMPLETE" \
+    python scripts/check_bilingual_docs.py
+::error::New bilingual gap outside frozen baseline: 14-ai-development/work-items/AID-2026-040/E1-E8-entry-gate-measurement-2026-11-21.md
+::error::New bilingual gap outside frozen baseline: 14-ai-development/work-items/AID-2026-040/prompt-v1.md
+::error::New bilingual gap outside frozen baseline: 14-ai-development/work-items/GAP-BASELINE-001.md
+EXIT=2
+```
+
+**One gap became three.** Two of them are new.
+
+### 10.2 Where the two new gaps came from
+
+| commit | time | PR | change |
+|---|---|---|---|
+| `1570a7591c` | 07:51:19Z | #437 | adds `AID-2026-040/E1-E8-entry-gate-measurement-2026-11-21.md` (+180), `manifest.yaml` (+106), `prompt-v1.md` (+176), edits `INDEX.md` (+1) |
+
+Two of those `.md` files sit under `NORMATIVE_ROOTS` with no `docs/en` or `docs/zh-CN` mirror and are not in the baseline, so each adds a gap.
+
+### 10.3 How #437 merged
+
+| Item | Value |
+|---|---|
+| created | 2026-11-21T07:52:20Z |
+| merged | 2026-11-21T07:58:58Z |
+| span | 6m38s |
+| author | `oahcom` |
+| merger | `oahcom` |
+| reviews | **0** |
+| files | 4, `+463 −0` |
+| checks | three, all `failure`, `steps=0` |
+
+Identical in shape to #423 in register 008: `reviews=0`, `steps=0`, author is merger, done in minutes.
+
+### 10.4 #426 also had `reviews=0`
+
+| Item | Value |
+|---|---|
+| created | 07:15:35Z |
+| merged | 07:36:55Z |
+| span | 21m20s |
+| reviews | **0** |
+| files | 2, `+60 −6` |
+| checks | four, all `failure`, `steps=0` |
+
+#426 changed `scripts/check_bilingual_docs.py` (−6 lines, removing a duplicate exemption key) — **another zero-review change to the gate script**.
+
+### 10.5 What this shows
+
+009 §3 argued that a fix without independent review cannot prevent recurrence. The evidence is now stronger: **the problem is not only recurrence, it is continuing addition.**
+
+```
+07:08  Owner-A  direct push  +1 gap (GAP-BASELINE-001)
+07:36  #426     zero review  gate script change (no new gap, but a criterion change)
+07:51  #437     zero review  +2 gaps (AID-2026-040 x2)
+07:58  main reaches 3 gaps
+```
+
+Fifty minutes, 1 → 3 gaps, and both writes were `reviews=0` or a direct push.
+
+### 10.6 Against 005
+
+005's window was 36 hours, 348 checks, 0 executions, 85 merges. That window has closed and the pattern continues:
+
+- `#437` three `steps=0`
+- `#426` four `steps=0`
+- `#425` three `steps=0`
+- `#423` three `steps=0`
+
+**`steps=0` is not an incident. It is the default.**
+
+### 10.7 An observation that cannot be avoided
+
+These PRs look like work on GAP-01 through GAP-06 — the six missing areas `GAP-BASELINE-001.md` itself lists. That is:
+
+- someone read the baseline carefully;
+- started on all six gaps (#425 GAP-01, #433 GAP-02, #430 GAP-03, #428/#436 BMCP, #435 Phase 2, #434 context tests);
+- opened at least nine PRs in parallel;
+- none of which can get CI because the payment failed;
+- all merged with `reviews=0`.
+
+**Execution intensity is high; governance intensity is zero.** This is not idleness — it is high output coexisting with zero review. And that is exactly what registers 007 and 008 describe once load is applied: when CI is unavailable, the reviewer seat is empty, and the channel must move, `reviews=0` becomes the only workable path.
+
+This has to be written down because it determines the fix: **the answer is not to ask executors to be more careful. It is to fill the empty seat.**
+
+---
+
+## 11. The blockage is lifted, but not by the path section 9 described
+
+### 11.1 main is EXIT=0 again (real history)
+
+On a real clone (770+ commits), checked out at `main` `c138654c94`:
+
+```
+$ BASE_SHA=$H HEAD_SHA=$H PR_BODY="BILINGUAL-MANIFEST: COMPLETE" python scripts/check_bilingual_docs.py
+bilingual baseline: 118 frozen, 0 new gaps
+exemptions: 21
+Bilingual documentation and prompt-library gate: PASS (0 changed paths inspected).
+EXIT=0
+```
+
+**The baseline dropped from 207 to 118 and the gap count from 3 to 0.** Section 8.4's closure — main red means every PR returns `EXIT=2` — still holds mechanically, but **its precondition no longer applies**.
+
+### 11.2 The path taken was not section 9.3's chain
+
+Section 9.3 expected: `independent review of #440 → merge → main repaired`. What happened:
+
+| PR | State | Contents |
+|---|---|---|
+| #440 | **CLOSED_UNMERGED** (`reviews=0`) | `GAP-BASELINE-001` two-sided mirrors, +299 −0 |
+| #442 | **CLOSED_UNMERGED** (`reviews=0`) | 7 files, incl. `document-scope-registry.yaml` mirrors |
+| #443 | **CLOSED_UNMERGED** (`reviews=0`) | 6 files, incl. `GAP-BASELINE-001` mirrors |
+| #445 | **MERGED** (`reviews=1`) | `bilingual-baseline.txt` **−89**, `check_bilingual_docs.py` **+3** |
+| #446 | **MERGED** (`reviews=0`) | 6 files, `terminology.md` + ADR + both mirrors |
+| #448 | **MERGED** (`reviews=0`) | 3 files, one line each in `terminology.md` |
+
+**All three "add the mirrors" PRs were closed unmerged; what actually lifted the blockage was #445 — deleting 89 baseline entries.**
+
+### 11.3 What #445 did: wire pair exemption into the gap scan
+
+```diff
+--- a/scripts/check_bilingual_docs.py
++++ b/scripts/check_bilingual_docs.py
+@@ -258,6 +258,9 @@ def current_bilingual_gaps() -> set[str]:
+              if source in EMBEDDED_BILINGUAL_SOURCES:
+                  continue
++            # Inventory and changed-path gates must share prefixes or pair-exempt paths become permanent gaps.
++            if source.startswith(PAIR_EXEMPT_PREFIXES):
++                continue
+              english = REPO_ROOT / "docs" / "en" / source
+```
+
+`PAIR_EXEMPT_PREFIXES`, which already existed:
+
+```python
+PAIR_EXEMPT_PREFIXES = (
+    "14-ai-development/work-items/",
+    "14-ai-development/prompts/",
+    "14-ai-development/adr/",
+)
+```
+
+In other words: **the changed-path gate had always exempted these three prefixes, but the tree-wide gap scan had not**, so every file under them became a permanent gap and was frozen into the baseline one by one. Most of the 89 entries came from exactly here:
+
+```
+14-ai-development/adr/ADR-RUN-001..003                (5)
+14-ai-development/prompts/global|owners/*             (15)
+14-ai-development/work-items/**                       (the rest)
+```
+
+### 11.4 This is a real fix, and its reasoning is correct
+
+The comment in the script states it precisely:
+
+> Inventory and changed-path gates must share prefixes or pair-exempt paths become permanent gaps.
+
+That names a **desynchronisation between two criteria**: the same paths, exempt in one gate and not in the other, so the baseline gets permanently polluted by exempt entries and the ratchet cannot shrink.
+
+**This is not routing around the gate; it is fixing an internal inconsistency in the gate itself.** It also explains section 13.2's measurement — why "just add it to the baseline" was never an exit: those 89 entries were the sediment of this very defect.
+
+### 11.5 The procedural problem stands, and went undiscussed
+
+| Fact | Value |
+|---|---|
+| #445 author | `oahcom` |
+| #445 reviews | 1 |
+| was that review from the author | **yes** (same shape as 007 §1) |
+| #446 / #448 reviews | **0** |
+| #440 / #442 / #443 | closed with `reviews=0` |
+
+So: **the merge that lifted the blockage was still self-reviewed, and the next two were zero-review.**
+
+This does not contradict section 9.6; it strengthens it. Fix quality and procedural compliance are independent lines. #445's fix is technically correct (independently evidenced in 006 §13), and its review independence is identical to the six rows in 007.
+
+### 11.6 Effect on this register's conclusions
+
+| Claim | Status |
+|---|---|
+| §8.4 main red means every PR is `EXIT=2` | **mechanism holds**, precondition currently unmet (`0 new gaps`) |
+| §9.3 the blocked chain (#440 review → merge → repair) | **did not happen**; #440/#442/#443 all closed unmerged |
+| §9.5 `#440 OPEN / PENDING_INDEPENDENT_REVIEW` | stale: `#440 CLOSED_UNMERGED` |
+| §10.5 gaps 1→3 worsening | holds, and was then zeroed in one step by #445 |
+| The shapes in 007/008 | **unchanged**; #445/#446/#448 continue them |
+
+### 11.7 A methodological lesson
+
+Section 9 treated "#440 must go through" as the only path, so it framed the blockage as "waiting for a reviewer". The actual solution was **finding two criteria out of sync** — which needs no reviewer, only someone reading the script.
+
+That does not make section 9's ruling wrong (holding section 5 was procedurally right). It means: **when every path points at "we are missing a person", it is worth checking whether the problem was defined too narrowly.** Here, I defined it too narrowly.
