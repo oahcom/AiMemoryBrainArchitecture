@@ -661,7 +661,10 @@ impl<A: PublicationAuthority> MemoryCompiler<A> {
             &mut self.authority,
         )?;
         if gated.disposition != PublicationDisposition::Published {
-            return Err(CompilerError::PublicationSuppressed);
+            // Preserve the publication gate's typed terminal outcome.
+            // In particular, Suppressed must remain distinguishable from
+            // retryable Blocked outcomes.
+            return Ok(gated);
         }
 
         let observation = self.admission.observe_fence().map_err(map_admission_error)?;
@@ -1216,7 +1219,7 @@ mod tests {
     }
 
     #[test]
-    fn compile_authority_refusal_does_not_persist_publication_receipt() {
+    fn compile_preserves_terminal_suppression_without_persisting_publication_receipt() {
         let mut store = admission::AdmissionStore::in_memory().unwrap();
         let work_id = register_compile_inputs(&mut store);
         let mut compiler = MemoryCompiler {
@@ -1226,10 +1229,10 @@ mod tests {
             },
             admission: store,
         };
-        assert_eq!(
-            compiler.compile(event(), staging_input(pipeline().2), lease(), 1, &work_id),
-            Err(CompilerError::PublicationSuppressed)
-        );
+        let result = compiler
+            .compile(event(), staging_input(pipeline().2), lease(), 1, &work_id)
+            .unwrap();
+        assert_eq!(result.disposition, PublicationDisposition::Suppressed);
         assert_eq!(compiler.admission.publication_receipt_count().unwrap(), 0);
     }
 
