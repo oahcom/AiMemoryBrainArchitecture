@@ -11,7 +11,6 @@ as a test-only immutable snapshot because BMCP does not own or install a copy.
 """
 from __future__ import annotations
 
-import copy
 import json
 import unittest
 from pathlib import Path
