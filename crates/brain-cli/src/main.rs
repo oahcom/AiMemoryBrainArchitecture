@@ -10,6 +10,9 @@ use sha2::{Digest, Sha256};
 use std::fs;
 use std::path::{Path, PathBuf};
 
+const COMPILER_SKIP_NOTICE: &str =
+    "compiler stage skipped: PublicationAuthority has no production implementation";
+
 #[derive(Deserialize)]
 struct Input {
     event: Event,
@@ -223,20 +226,31 @@ fn run() -> Result<(), String> {
         .map_err(|error| format!("build_context failed: {error:?}"))?
     };
 
+    let mut sidecar_name = std::ffi::OsString::from(&output_path);
+    sidecar_name.push(".compiler-status");
+    let sidecar_path = PathBuf::from(sidecar_name);
+    let sidecar_content = format!("{COMPILER_SKIP_NOTICE}\n");
+
     let output = snapshot
         .serialize()
         .map_err(|error| format!("cannot serialize ContextSnapshot: {error:?}"))?;
     fs::write(&output_path, &output)
         .map_err(|error| format!("cannot write output {}: {error}", output_path))?;
+    if let Err(error) = fs::write(&sidecar_path, sidecar_content.as_bytes()) {
+        let _ = fs::remove_file(&output_path);
+        return Err(format!(
+            "cannot write compiler status {}: {error}",
+            sidecar_path.display()
+        ));
+    }
+
+    eprintln!("{COMPILER_SKIP_NOTICE}");
 
     if verbose {
         eprintln!("memory-domain: Event, Memory, Claim and MemoryVersion validated");
         eprintln!("memory-storage-sqlite: persisted revision to a temporary SQLite database");
         eprintln!("memory-store: create_memory -> write_revision -> read_current succeeded");
         eprintln!("memory-context: build_context produced {} entr(y/ies)", snapshot.total_entries());
-        eprintln!(
-            "compiler stage skipped: PublicationAuthority has no production implementation"
-        );
         eprintln!("memory-compiler reference version: {COMPILER_VERSION}");
         eprintln!("output: {} ({} bytes)", output_path, output.len());
     }
