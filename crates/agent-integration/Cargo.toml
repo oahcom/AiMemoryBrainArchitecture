@@ -10,4 +10,6 @@ path = "src/lib.rs"
 
 [dependencies]
 memory-context = { path = "../memory-context" }
+
+[dev-dependencies]
 memory-domain = { path = "../memory-domain" }
