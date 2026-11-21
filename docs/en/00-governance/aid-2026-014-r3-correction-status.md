@@ -561,3 +561,79 @@ All nine targets were re-read at `836dc1055547f1dd9fba2081a5280ef22cbb94c5` afte
 R3 review disposition remains `REQUEST CHANGES`; the three blocking items are applied but not
 re-reviewed. `TEST EXECUTION = SUSPENDED` stands. No acceptance gate changed: `§2` is
 byte-identical across all four commits.
+
+### 9.6 Third independent review and closure of its two blocking findings
+
+Reviewer: independent session `6b012e23-5ff0-83ee-95e1-1bea41ad85cf` (read-only, no repository
+write, no comment posted by the reviewer). Verdict returned 2026-11-21. Read-back pin:
+`7d2233a5bee2369fbb6358374ec5c2f049de88df`.
+
+Five of seven items passed: R2-01 single-use binding, R3-01 terminal-state mapping, R5-01
+second-stage convergence, bilingual equivalence, and the application-record audit. Two blocking
+findings remained, both closed by `3b452dbe`.
+
+| Item reviewed | Verdict | Blocking finding |
+|---|---|---|
+| R2-01 single-use authorization binding | PASS | — |
+| R3-01 Forget terminal-state mapping | PASS | — |
+| R5-02 two admission stages | REQUEST CHANGES | R5-02-01 |
+| R5-01 second-stage convergence | PASS | — |
+| SYNC-07 G-side constraint | REQUEST CHANGES | SYNC-07-01 |
+| Bilingual equivalence | PASS | — |
+| Application-record truthfulness (9.5) | PASS | — |
+
+**R5-02-01 — the second admission had no indivisibility clause.** `§16.1` required that successful
+Producer Admission and durable recording of the exact admitted Producer participant form one
+indivisible operation. The second admission stated which identity it binds and forbade narrowing
+the closure, but never forbade the state where second-stage admission has succeeded while its
+exact participant record is not yet durable. A Fence could therefore observe the admission
+without the record. The fix adds the symmetric requirement: successful
+`PublicationParticipant` Admission and durable recording of the exact admitted
+`PublicationParticipant` identity, its `StorageVisibilityParticipantRef` and the exact publication
+tuple identity bound to the committed publication identity form one indivisible operation; the
+intermediate state MUST NOT exist; and a Fence MUST NOT observe successful second-stage Admission
+without simultaneously observing the complete durable participant record for that exact Admission.
+
+**SYNC-07-01 — G pointed at the wrong matrix.** `§13.3` said a committed `ContextVersion` receives
+the terminal disposition of the `six-component` protected publication failure matrix. That name
+still describes the old scenario table, which was kept for T17/T18 row meanings and is not the new
+terminal-disposition artefact. The fix repoints the sentence at the Forget terminal-state by
+component disposition matrix, states its dimensions (four terminal states across seven logical
+components), and ties the `G Context Commit` disposition to the applicable terminal state: no
+commit under `Failed` and `Cancelled`; commit under `CompletedWithPolicyException` only when the
+exception has received named approval and all preconditions hold; complete-completion
+requirements under `Completed`. The existing prohibition on preserving a `ContextVersion` as a
+successful visible publication merely because its canonical commit succeeded is retained.
+
+The `six-component` phrase survives exactly once in the file, in `§13.3`'s pre-existing sentence
+that the six-component matrix is normative for G `ContextVersion` commits derived from protected
+Claim/Fact content. That sentence was correct before this round and is still correct: the old
+table really does have six component columns. Only the new block's reference was wrong.
+
+| Target | Blob before | Blob after | Size |
+|---|---|---|---|
+| `docs/en/03-memory-brain/memory-versioning.md` | `84aabc25bb07` | `4efbd26db958` | 48474 -> 49348 B |
+| `docs/zh-CN/03-memory-brain/memory-versioning.md` | `aa2fc775c786` | `5ff17ab6cb56` | 44569 -> 45301 B |
+| `06-memory-context/context-versioning.md` | `ce952ba3eca3` | `1bfe7f1891e1` | 34566 -> 35100 B |
+
+One inconsistency in the reviewer's own output is recorded rather than smoothed over: its opening
+summary table marks R5-02 as `PASS`, while its body adjudicates `REQUEST CHANGES` with blocking
+finding R5-02-01 and the closing disposition is `REQUEST CHANGES`. The body governs. Reading the
+summary row as the verdict would have closed a gap the same review opened three paragraphs later.
+
+What the review confirms, in its own words, and what it does not do:
+
+- The reviewer independently compared the pre-fix and post-fix Blobs and states that
+  `#### 5. G protected commit requirements` and `#### 6. Historical visibility` are byte-identical,
+  so the new G block did not rewrite either existing normative paragraph.
+- It independently verified the nine pre-change Blobs and nine post-change Blobs in `§9.5` as
+  MATCH, and independently re-read `782c4c8d` and `836dc105` to confirm the three-then-zero HTML
+  comment counts.
+- It re-checked the T17/T18 rows rather than accepting the column rename at face value, and states
+  that only the `Admission` column name changed and row contents did not.
+- It does not reopen any `DECIDED FOR CONVERGENCE` decision.
+- It does not constitute `FORMAL ACCEPTANCE`, does not establish `IMPLEMENTATION CONFORMANT`, and
+  does not lift `TEST EXECUTION = SUSPENDED`.
+
+R3 review disposition after this round is still `REQUEST CHANGES`: the two findings are applied
+but not yet re-reviewed. `§2` is unchanged in every line across all five commits of this round.

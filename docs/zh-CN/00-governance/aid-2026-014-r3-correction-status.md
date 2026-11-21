@@ -500,3 +500,66 @@ E Publication 撤销公开可见性或被隔离，且不得作为成功可见效
 
 R3 复审处置仍为 `REQUEST CHANGES`：三个阻断项已应用但尚未复审。`TEST EXECUTION = SUSPENDED`
 维持。验收门禁未变：`§2` 在四次提交之间逐字节相同。
+
+### 9.6 第三轮独立复审及其两项阻断的闭合
+
+复审方：独立会话 `6b012e23-5ff0-83ee-95e1-1bea41ad85cf`（只读，未写仓库，未由复审方发布评论）。
+2026-11-21 返回裁决。回读钉定：`7d2233a5bee2369fbb6358374ec5c2f049de88df`。
+
+七项中五项通过：R2-01 单次用途绑定、R3-01 终态映射、R5-01 第二阶段收敛、双语一致性、
+应用记录审计。两项阻断保留，均由 `3b452dbe` 闭合。
+
+| 审查项 | 裁定 | 阻断编号 |
+|---|---|---|
+| R2-01 授权单次用途绑定 | PASS | — |
+| R3-01 Forget 终态映射 | PASS | — |
+| R5-02 两准入阶段 | REQUEST CHANGES | R5-02-01 |
+| R5-01 第二阶段收敛 | PASS | — |
+| SYNC-07 G 侧约束 | REQUEST CHANGES | SYNC-07-01 |
+| 双语一致性 | PASS | — |
+| 应用记录真实性（9.5） | PASS | — |
+
+**R5-02-01 —— 第二阶段准入缺少不可分条款。** `§16.1` 原已要求成功的 Producer Admission 与精确
+准入 Producer 参与者的持久记录构成不可分割的操作。第二阶段准入写明了它绑定哪个身份、禁止缩小
+闭包，却从未禁止「第二阶段准入已成功、而其确切 participant 记录尚未持久」这一状态。Fence 因此
+可能观察到准入而未观察到记录。修正补上对称要求：成功的 `PublicationParticipant` Admission 与
+确切的已准入 `PublicationParticipant` identity、其 `StorageVisibilityParticipantRef`、以及绑定于
+已提交发布身份的确切发布元组的持久记录，构成不可分割的操作；该中间状态 MUST NOT 存在；Forget
+Fence MUST NOT 在观察到成功的第二阶段准入时，未能同时观察到该次确切准入对应的完整持久
+participant 记录。
+
+**SYNC-07-01 —— G 指向了错误的矩阵。** `§13.3` 原文称已提交的 `ContextVersion` 按
+`six-component` 保护性发布失败矩阵取得终态处置。该名称指的仍是为保持 T17/T18 行义而保留的旧场景
+矩阵，不是新增的终态处置产物。修正把该句重新指向 Forget 终态 × 分量处置矩阵，写明其维度（四种
+终态 × 七个逻辑分量），并把 `G Context Commit` 的处置与适用终态绑定：`Failed` 与 `Cancelled` 下
+MUST NOT 提交；`CompletedWithPolicyException` 下仅在例外获得具名批准且全部前置条件满足时才可提交；
+`Completed` 下须满足完整完成要求。原有「不得仅因规范提交曾成功就保留或暴露为成功可见发布」这一
+禁令保留。
+
+`six-component` 一词在文件中仍恰好保留一处，位于 `§13.3` 既有的那句「六分量矩阵对由受保护
+Claim/Fact 内容派生的 G `ContextVersion` 提交具有规范约束力」。该句在本轮之前是正确的，现在仍然
+正确：旧表确实有六个分量列。错的只是新增块里的引用。
+
+| 目标 | 变更前 Blob | 变更后 Blob | 大小 |
+|---|---|---|---|
+| `docs/en/03-memory-brain/memory-versioning.md` | `84aabc25bb07` | `4efbd26db958` | 48474 -> 49348 B |
+| `docs/zh-CN/03-memory-brain/memory-versioning.md` | `aa2fc775c786` | `5ff17ab6cb56` | 44569 -> 45301 B |
+| `06-memory-context/context-versioning.md` | `ce952ba3eca3` | `1bfe7f1891e1` | 34566 -> 35100 B |
+
+复审方自身输出的一处不一致，此处如实记录而非抹平：其开头的汇总表把 R5-02 标为 `PASS`，而其正文
+裁定为 `REQUEST CHANGES` 并给出阻断编号 R5-02-01，最终处置亦为 `REQUEST CHANGES`。以正文为准。
+若采信汇总表那一行，就会把同一份复审在三个段落后亲手打开的缺口重新关上。
+
+复审方明确确认的事项，以及它没有做的事：
+
+- 独立比较修正前后的 Blob，陈述 `#### 5. G protected commit requirements` 与
+  `#### 6. Historical visibility` 逐字节未变，新增 G 块未改写这两个既有规范段落。
+- 独立核对 `§9.5` 的九个变更前 Blob 与九个变更后 Blob 全部 MATCH，并独立回读 `782c4c8d` 与
+  `836dc105` 确认注释数为三后归零。
+- 逐行复核 T17/T18，而非采信列名重命名，陈述仅 `Admission` 列名改变、行内容未变。
+- 未重新打开任何 `DECIDED FOR CONVERGENCE` 决定。
+- 不构成 `FORMAL ACCEPTANCE`，不确立 `IMPLEMENTATION CONFORMANT`，不解除
+  `TEST EXECUTION = SUSPENDED`。
+
+本轮之后 R3 复审处置仍为 `REQUEST CHANGES`：两项已应用但尚未复审。`§2` 在本轮五次提交之间逐行
+未变。
