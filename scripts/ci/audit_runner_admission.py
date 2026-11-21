@@ -16,7 +16,7 @@ from __future__ import annotations
 import re
 import sys
 from pathlib import Path
-from typing import Iterable, Optional, Tuple
+from typing import Optional, Tuple
 
 WORKFLOW_DIR = Path(".github/workflows")
 UNTRUSTED_TRIGGERS = {
@@ -232,6 +232,7 @@ def audit_workflow(path: Path) -> Tuple[int, list[str]]:
                 run_entries.append((int(idx_text), int(indent_text), value))
         candidate = any(
             "self-hosted" in (flow_items(value) or [scalar(value)])
+            or "${{" in value
             or (not value and any("self-hosted" in line for line in job_lines))
             for _, _, value in run_entries
         )
