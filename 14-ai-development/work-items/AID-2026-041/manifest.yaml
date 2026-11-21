@@ -64,9 +64,11 @@ acceptance:
   acceptance_authority: USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)
 
 implementation:
-  status: IMPLEMENTED_PENDING_PR
+  status: PR_OPEN
   branch: ai/AID-2026-041/IO-bilingual-legacy
-  pull_request: NOT_YET_CREATED
+  pull_request: 521
+  pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/521
+  implementation_commit_sha: c2162667b1424ad74dcb34ab0ff1ab640ac35a46
   merge_commit_sha: NOT_MERGED
 
 authorization:
@@ -92,6 +94,8 @@ verification:
     - "BASE_SHA=$(git rev-parse HEAD) HEAD_SHA=$(git rev-parse HEAD) python3 scripts/check_bilingual_docs.py — full-history baseline: EXIT 0"
     - "TMPDIR=/var/tmp python3 -m unittest scripts.governance.evidence.test_gate_normative_roots -v — 49/49 tests PASS"
     - "git clone --depth 50 (local file:// source) into /var/tmp/aid041-depth50; run gate with BASE_SHA=HEAD_SHA=HEAD — exact shallow-history diagnostic, EXIT 2"
+    - "git fetch --unshallow origin in the same depth-limited clone — is-shallow=false; check_embedded_registration_history() returns 0 errors across 21 sources"
+    - "Independent git clone --depth 50 reproduction — is-shallow=true; exact diagnostic; EXIT 2"
     - "git diff --check — EXIT 0"
   evidence_refs:
     - "Full-history creation/registration snapshot: 21/21 SHA pairs match the committed test fixture; bilingual-documentation-policy.md creation cd1ab0fb346c770d779b1d8d24297f6811a1a74f / registration 32a35f422ba6442d1f700cfb327f348c0740a7f2"
@@ -100,4 +104,4 @@ verification:
 findings:
   - id: F-BILINGUAL-SHALLOW-PROVENANCE-001
     severity: P1
-    feedback_destination: "This PR closeout; close when the shallow-clone EXIT=2 behavior and all 21 full-history snapshot pairs remain verified"
+    feedback_destination: "PR #521 closeout; close when the shallow-clone EXIT=2 behavior and all 21 full-history snapshot pairs remain verified"
