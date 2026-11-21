@@ -652,13 +652,26 @@ mod tests {
     #[test]
     fn dm2_03_fact_refs_are_distinct_and_fact_pins_exact_claim_revision() {
         let pinned=ClaimRevisionRef::new("cr1").unwrap(); let fact_ref=FactRef::new("f").unwrap();
-        let rev=FactRevision::initial(fact_ref.clone(),FactRevisionRef::new("fr1").unwrap(),vec![pinned.clone()],vec![EvidenceRef::new("e").unwrap()],vec![ProvenanceRef::new("p").unwrap()],scope("s"),AttestorRef::pending_i(),AuthorizationDecisionRef::pending_i(),"method".into(),"v1".into(),FactOutcome::Attested,"reason".into(),CanonicalCommitRef::pending_d(),None).unwrap();
+        let evidence=EvidenceRef::new("e").unwrap(); let provenance=ProvenanceRef::new("p").unwrap();
+        let rev=FactRevision::initial(fact_ref.clone(),FactRevisionRef::new("fr1").unwrap(),vec![pinned.clone()],vec![evidence.clone()],vec![provenance.clone()],scope("s"),AttestorRef::pending_i(),AuthorizationDecisionRef::pending_i(),"method".into(),"v1".into(),FactOutcome::Attested,"reason".into(),CanonicalCommitRef::pending_d(),None).unwrap();
         let fact=Fact::new(fact_ref,rev).unwrap(); let _head=ClaimRevisionRef::new("cr2").unwrap(); assert_eq!(fact.initial_revision().claim_revision_refs(),&[pinned]);
+        assert_eq!(fact.initial_revision().evidence_refs(),&[evidence]);
+        assert_eq!(fact.initial_revision().provenance_refs(),&[provenance]);
     }
     #[test]
     fn dm2_04_fact_cannot_be_constructed_without_claim_evidence_provenance() {
         let r=FactRevision::initial(FactRef::new("f").unwrap(),FactRevisionRef::new("fr").unwrap(),vec![],vec![],vec![],scope("s"),AttestorRef::pending_i(),AuthorizationDecisionRef::pending_i(),"m".into(),"v1".into(),FactOutcome::Attested,"why".into(),CanonicalCommitRef::pending_d(),None);
         assert_eq!(r.unwrap_err(),DomainError::MissingClaimRevision);
+        let no_evidence=FactRevision::initial(FactRef::new("f").unwrap(),FactRevisionRef::new("fr2").unwrap(),
+            vec![ClaimRevisionRef::new("cr").unwrap()],vec![],vec![ProvenanceRef::new("p").unwrap()],scope("s"),
+            AttestorRef::pending_i(),AuthorizationDecisionRef::pending_i(),"m".into(),"v1".into(),FactOutcome::Attested,
+            "why".into(),CanonicalCommitRef::pending_d(),None);
+        assert_eq!(no_evidence.unwrap_err(),DomainError::MissingFactEvidence);
+        let no_provenance=FactRevision::initial(FactRef::new("f").unwrap(),FactRevisionRef::new("fr3").unwrap(),
+            vec![ClaimRevisionRef::new("cr").unwrap()],vec![EvidenceRef::new("e").unwrap()],vec![],scope("s"),
+            AttestorRef::pending_i(),AuthorizationDecisionRef::pending_i(),"m".into(),"v1".into(),FactOutcome::Attested,
+            "why".into(),CanonicalCommitRef::pending_d(),None);
+        assert_eq!(no_provenance.unwrap_err(),DomainError::MissingFactProvenance);
     }
     #[test]
     fn dm2_05_entity_merge_requires_successor_lineage_but_alias_does_not() {
@@ -666,6 +679,10 @@ mod tests {
         e.add_alias(EntityAlias{value:"label".into(),language:None}).unwrap(); assert!(e.validate().is_ok());
         e.status=EntityIdentityStatus::Merged; assert_eq!(e.validate(),Err(DomainError::MissingIdentityLineage));
         e.merge_lineage=Some(EntityMergeLineage{predecessor_refs:vec![EntityRef::new("e0").unwrap(),EntityRef::new("e1").unwrap()],successor_ref:EntityRef::new("e2").unwrap(),reason:"resolved".into()}); assert!(e.validate().is_ok());
+        let mut split=e.clone(); split.status=EntityIdentityStatus::Split;
+        assert_eq!(split.validate(),Err(DomainError::MissingIdentityLineage));
+        split.split_successor_refs=vec![EntityRef::new("e3").unwrap()];
+        assert!(split.validate().is_ok());
     }
     #[test]
     fn dm2_06_relation_endpoint_kind_is_checked_against_definition() {
@@ -677,6 +694,8 @@ mod tests {
     fn dm2_07_evidence_extension_requires_integrity_and_scope() {
         let e=EvidenceExtension{evidence_ref:EvidenceRef::new("e").unwrap(),kind:EvidenceKind::Document,source_ref:EvidenceSourceRef::Event(EventRef::new("ev").unwrap()),locator:None,observed_at:None,collector:ActorRef{actor_id:id("collector")},integrity_digest:"sha256:x".into(),availability:EvidenceAvailability::Available,scope_refs:vec![scope("s")]};
         assert!(e.validate().is_ok());
+        let mut invalid=e.clone(); invalid.integrity_digest.clear();
+        assert_eq!(invalid.validate(),Err(DomainError::EmptyRequiredField("integrity_digest")));
     }
     #[test]
     fn dm2_08_unknown_valid_time_is_not_timeless() {
