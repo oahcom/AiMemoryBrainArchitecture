@@ -148,7 +148,16 @@ def current_bilingual_gaps() -> set[str]:
                 continue
             english = REPO_ROOT / "docs" / "en" / source
             chinese = REPO_ROOT / "docs" / "zh-CN" / source
-            if not english.is_file() or not chinese.is_file():
+            # Keep 14-ai-development resolution aligned with the existing
+            # side-by-side/mirror parser used by the changed-path gate.
+            resolved_14 = (
+                counterpart_14(source) if root_name == "14-ai-development" else True
+            )
+            if (
+                not english.is_file()
+                or not chinese.is_file()
+                or resolved_14 is None
+            ):
                 gaps.add(source)
     return gaps
 
