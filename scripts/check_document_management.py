@@ -783,6 +783,15 @@ def check_document(path: Path, text: str, root: Path | None = None) -> tuple[lis
             errors.append(
                 "DM-03 Selected-sections requires a non-empty included_sections list"
             )
+    if scope.get("type") == "Selected-assets":
+        # Symmetric with Selected-sections. The scope type existed in the
+        # enumeration and required nothing: declaring it and listing no asset
+        # was accepted, which made the type a label rather than a scope.
+        assets = scope.get("included_assets")
+        if not assets or not isinstance(assets, list):
+            errors.append(
+                "DM-03 Selected-assets requires a non-empty included_assets list"
+            )
 
     # DM-04 Revoked must carry a unique revocation decision id.
     revocation = approval.get("revocation")

@@ -1321,6 +1321,30 @@ GOLDEN = [
         "must equal the declared domain",
     ),
     (
+        "selected-assets scope without assets is rejected",
+        "  domain: architecture\n"
+        "  role: reference\n"
+        "  lifecycle:\n"
+        "    approval:\n"
+        "      decision_status: Approved\n"
+        "      approved_version:\n"
+        "        scheme: git\n"
+        "        value: \"0000000000000000000000000000000000000000\"\n"
+        "      approval_scope:\n"
+        "        type: Selected-assets\n"
+        "      approval_applicability: Applicable-To-Current-Version\n"
+        "    evidence_verification:\n"
+        "      verification_status: Verified\n"
+        "    usage_status: Active\n"
+        "    modification_status: Unchanged\n"
+        "  authority:\n"
+        "    canonical_status: Non-Canonical\n"
+        "    normative_status: Informative\n"
+        "    canonical_conflict_status: None\n",
+        False,
+        "included_assets",
+    ),
+    (
         "selected-sections scope without sections is rejected",
         "  domain: architecture\n"
         "  role: reference\n"
