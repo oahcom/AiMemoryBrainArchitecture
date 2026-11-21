@@ -82,6 +82,11 @@ EMBEDDED_BILINGUAL_SOURCES: dict[str, str] = {
         "Defines exact inheritance declaration labels and values consumed by "
         "governance checks, which must not diverge between language templates."
     ),
+    "00-governance/templates/document-metadata-template.md": (
+        "Provides one copy-paste metadata block whose field names, closed enums, "
+        "and REQUIRED markers are consumed verbatim by check_document_management.py; "
+        "split mirrors would let the two languages document different enum values."
+    ),
     "00-governance/reports/bilingual-baseline-remediation-report.md": (
         "Combines remediation scope, status, and evidence in a single report "
         "so readers cannot mistake divergent language copies for separate facts."
