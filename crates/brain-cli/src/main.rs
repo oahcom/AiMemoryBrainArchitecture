@@ -1,8 +1,17 @@
-use memory_compiler::COMPILER_VERSION;
+use memory_compiler::admission::{
+    AdmissionStore, DependencyRegistrationRequest, ProducerRegistrationRequest,
+};
+use memory_compiler::publication_authority::AdmissionPublicationAuthority;
+use memory_compiler::{
+    AcceptedEvent, ExtractionStage, Identity, IngestionStage, MemoryCompiler, NormalizationStage,
+    ProducerWorkItemId, PublicationAuthority, PublicationDisposition, PublicationProof,
+    StagingInput, WorkerLease, COMPILER_VERSION,
+};
 use memory_context::{
     build_context, ContextBudget, ContextCandidate, ContextIdentity, ContextTier,
 };
-use memory_domain::{Claim, Event, Memory, MemoryLifecycle, MemoryVersion, OpaqueId};
+use memory_domain::{Claim, Event, Memory, MemoryLifecycle, MemoryVersion, OpaqueId, ScopeRef};
+use memory_storage::{MemoryStorage, PrepareRequest};
 use memory_storage_sqlite::SqliteMemoryStorage;
 use memory_store::{MemoryStore, RevisionWrite};
 use serde::Deserialize;
@@ -10,8 +19,8 @@ use sha2::{Digest, Sha256};
 use std::fs;
 use std::path::{Path, PathBuf};
 
-const COMPILER_SKIP_NOTICE: &str =
-    "compiler stage skipped: PublicationAuthority has no production implementation";
+/// Generation used for the single compiler attempt this binary makes.
+const COMPILER_GENERATION: u64 = 1;
 
 #[derive(Deserialize)]
 struct Input {
@@ -54,11 +63,8 @@ struct ContextInput {
 struct TemporaryDatabase(PathBuf);
 
 impl TemporaryDatabase {
-    fn new() -> Self {
-        Self(std::env::temp_dir().join(format!(
-            "brain-cli-{}.sqlite",
-            std::process::id()
-        )))
+    fn new(label: &str) -> Self {
+        Self(std::env::temp_dir().join(format!("brain-cli-{label}-{}.sqlite", std::process::id())))
     }
 
     fn path(&self) -> &Path {
@@ -79,6 +85,220 @@ fn main() {
         eprintln!("brain: {error}");
         std::process::exit(1);
     }
+}
+
+/// Everything the compiler stage needs from the CLI input. The derivative is
+/// staged hidden in storage before the gate runs, so the proof can report the
+/// durable preparation state instead of guessing it.
+struct CompilerStageRequest<'a> {
+    event_id: &'a OpaqueId,
+    source_ref: &'a OpaqueId,
+    payload: &'a str,
+    scope: &'a [ScopeRef],
+    source_version_id: &'a OpaqueId,
+    derivative_version: MemoryVersion,
+    publication_id: &'a str,
+    storage_path: &'a Path,
+    admission_path: &'a Path,
+}
+
+struct CompilerStageOutcome {
+    disposition: PublicationDisposition,
+    proof: PublicationProof,
+}
+
+impl CompilerStageOutcome {
+    /// A single line naming the disposition and, when publication is refused,
+    /// the flag that caused it. Three flags have no authoritative issuer yet
+    /// (OWNER-DECISION-PUBLICATION-RECORD-001 D3), so `Blocked` is the expected
+    /// outcome of a real run.
+    fn notice(&self) -> String {
+        let false_flags = false_flags(&self.proof);
+        let blocking = false_flags.first().copied().unwrap_or("none");
+        match self.disposition {
+            PublicationDisposition::Published => {
+                "compiler stage published: all eight publication flags are true".to_owned()
+            }
+            PublicationDisposition::Blocked => format!(
+                "compiler stage blocked: publication not authorized; blocking flag: {blocking}; false flags: [{}]",
+                false_flags.join(", ")
+            ),
+            PublicationDisposition::Suppressed => format!(
+                "compiler stage suppressed: publication not authorized; blocking flag: {blocking}; false flags: [{}]",
+                false_flags.join(", ")
+            ),
+            PublicationDisposition::Failed => {
+                "compiler stage failed: storage visibility advancement failed".to_owned()
+            }
+        }
+    }
+}
+
+/// The eight proof flags in the order `PublicationGate` evaluates them, so the
+/// first `false` entry is exactly the flag that produced the disposition.
+fn false_flags(proof: &PublicationProof) -> Vec<&'static str> {
+    [
+        ("producer_admitted", proof.producer_admitted),
+        (
+            "dependency_closure_complete",
+            proof.dependency_closure_complete,
+        ),
+        (
+            "canonical_commit_confirmed",
+            proof.canonical_commit_confirmed,
+        ),
+        ("storage_prepared_hidden", proof.storage_prepared_hidden),
+        (
+            "publication_participant_admitted",
+            proof.publication_participant_admitted,
+        ),
+        (
+            "protected_visibility_authorized",
+            proof.protected_visibility_authorized,
+        ),
+    ]
+    .into_iter()
+    .filter(|(_, value)| !value)
+    .map(|(name, _)| name)
+    .collect()
+}
+
+fn identifier(value: impl Into<String>) -> Result<OpaqueId, String> {
+    OpaqueId::new(value).map_err(|error| format!("invalid identifier: {error:?}"))
+}
+
+/// Runs the compiler publication stage through the production adapter.
+///
+/// This seeds the local admission ledger and stages the derivative hidden, then
+/// lets `MemoryCompiler::compile` decide. Publication itself is expected to be
+/// refused: the adapter may not authorize what no issuer has authorized.
+fn run_compiler_stage(request: CompilerStageRequest<'_>) -> Result<CompilerStageOutcome, String> {
+    let event_id = request.event_id.as_str();
+    let work_item_id = ProducerWorkItemId::new(identifier(format!("work:{event_id}"))?);
+    let producer_identity = identifier("producer:brain-cli")?;
+
+    let storage = {
+        let mut storage = SqliteMemoryStorage::open(request.storage_path)
+            .map_err(|error| format!("cannot open SQLite storage: {error:?}"))?;
+        storage
+            .prepare_version(
+                PrepareRequest {
+                    memory_id: request.derivative_version.memory_id.clone(),
+                    expected_current_version: Some(request.source_version_id.clone()),
+                    new_version: request.derivative_version,
+                    idempotency_key: format!("prepare:{event_id}"),
+                    request_digest: format!("prepare-digest:{event_id}"),
+                    publication_id: request.publication_id.to_owned(),
+                    generation: COMPILER_GENERATION,
+                },
+                request.scope,
+            )
+            .map_err(|error| format!("prepare_version failed: {error:?}"))?;
+        storage
+    };
+
+    let mut admission = AdmissionStore::open(request.admission_path)
+        .map_err(|error| format!("cannot open admission ledger: {error}"))?;
+    admission
+        .register_producer(&producer_identity, "brain-cli-registry-digest")
+        .map_err(|error| format!("register_producer failed: {error}"))?;
+    admission
+        .register_producer_work(ProducerRegistrationRequest {
+            producer_work_item_id: work_item_id.as_opaque_id().clone(),
+            producer_class: "compiler".into(),
+            producer_identity: producer_identity.clone(),
+            source_refs: vec![request.source_ref.clone()],
+            source_lineage_digest: format!("lineage:{event_id}"),
+            scope_refs: request.scope.to_vec(),
+            operation_id: identifier(format!("operation:{event_id}"))?,
+            correlation_id: identifier(format!("correlation:{event_id}"))?,
+            causation_id: None,
+            admission_canonical_commit_cursor: Some(identifier(format!(
+                "canonical-commit:{event_id}"
+            ))?),
+            observed_fence_cursor: identifier("fence:0")?,
+            permission_epoch: identifier("permission-epoch:1")?,
+            request_digest: format!("producer-request:{event_id}"),
+            producer_schema_version: "1".into(),
+        })
+        .map_err(|error| format!("register_producer_work failed: {error}"))?;
+    admission
+        .register_dependency(DependencyRegistrationRequest {
+            dependency_registration_id: identifier(format!("dependency:{event_id}"))?,
+            artifact_ref: identifier(format!("derivative:{event_id}"))?,
+            artifact_version: identifier(request.publication_id.to_owned())?,
+            producer_work_item_id: work_item_id.as_opaque_id().clone(),
+            derivation_run_id: identifier(format!("run:{event_id}"))?,
+            source_ref: request.source_ref.clone(),
+            source_version: None,
+            provenance_ref: identifier(format!("provenance:{event_id}"))?,
+            scope_refs: request.scope.to_vec(),
+            lineage_digest: format!("lineage:{event_id}"),
+            required_dependency_count: 1,
+            request_digest: format!("dependency-request:{event_id}"),
+        })
+        .map_err(|error| format!("register_dependency failed: {error}"))?;
+
+    // The adapter reads committed rows through its own handle; it never writes.
+    let authority_admission = AdmissionStore::open(request.admission_path)
+        .map_err(|error| format!("cannot open admission ledger: {error}"))?;
+    let authority =
+        AdmissionPublicationAuthority::new(authority_admission, &storage, work_item_id.clone());
+
+    let accepted = AcceptedEvent {
+        event_id: Identity(event_id.to_owned()),
+        receipt_id: Identity(format!("accepted:{event_id}")),
+        payload_digest: format!("sha256:{}", sha256_hex(request.payload.as_bytes())),
+        payload: request.payload.to_owned(),
+        compile_intent_durable: true,
+    };
+    let normalized = {
+        let ingested = IngestionStage::run(accepted.clone(), COMPILER_GENERATION)
+            .map_err(|error| format!("ingestion stage failed: {error:?}"))?;
+        let extracted = ExtractionStage::run(ingested, COMPILER_GENERATION)
+            .map_err(|error| format!("extraction stage failed: {error:?}"))?;
+        NormalizationStage::run(extracted, COMPILER_GENERATION)
+            .map_err(|error| format!("normalization stage failed: {error:?}"))?
+    };
+    let staging = StagingInput {
+        normalized,
+        derivative_id: Identity(format!("derivative:{event_id}")),
+        publication_id: Identity(request.publication_id.to_owned()),
+        // Admission booleans and dependency ids are derived from the durable
+        // ledger inside `compile`; these placeholders are overwritten there.
+        dependency_ids: Vec::new(),
+        dependency_closure_complete: false,
+        producer_admitted: false,
+        canonical_commit_confirmed: false,
+    };
+    let lease = WorkerLease {
+        operation_id: Identity(format!("operation:{event_id}")),
+        worker_id: Identity("brain-cli-worker".into()),
+        generation: COMPILER_GENERATION,
+    };
+
+    let mut compiler = MemoryCompiler {
+        authority,
+        admission,
+    };
+    let outcome = compiler
+        .compile(
+            accepted,
+            staging,
+            lease.clone(),
+            COMPILER_GENERATION,
+            &work_item_id,
+        )
+        .map_err(|error| format!("compiler stage failed: {error:?}"))?;
+    let proof = compiler
+        .authority
+        .obtain_proof(&outcome.derivative, &lease)
+        .map_err(|error| format!("publication proof unavailable: {error:?}"))?;
+
+    Ok(CompilerStageOutcome {
+        disposition: outcome.disposition,
+        proof,
+    })
 }
 
 fn run() -> Result<(), String> {
@@ -110,8 +330,14 @@ fn run() -> Result<(), String> {
     let input: Input = serde_json::from_slice(&input_bytes)
         .map_err(|error| format!("invalid input JSON: {error}"))?;
 
-    input.event.validate().map_err(|error| format!("invalid event: {error:?}"))?;
-    input.claim.validate().map_err(|error| format!("invalid claim: {error:?}"))?;
+    input
+        .event
+        .validate()
+        .map_err(|error| format!("invalid event: {error:?}"))?;
+    input
+        .claim
+        .validate()
+        .map_err(|error| format!("invalid claim: {error:?}"))?;
 
     let idempotency_key = input
         .event
@@ -122,6 +348,31 @@ fn run() -> Result<(), String> {
         .clone();
 
     let content_digest = sha256_hex(input.payload.as_bytes());
+    let scope = input.event.scope_refs.clone();
+    let source_version_id = input.memory.memory_version_id.clone();
+    let publication_id = format!("publication:{}", input.event.event_id.as_str());
+    let derivative_version_id = format!("{}:derivative", source_version_id.as_str());
+    let derivative_version = MemoryVersion {
+        memory_version_id: OpaqueId::new(derivative_version_id.clone())
+            .map_err(|error| format!("invalid derivative version id: {error:?}"))?,
+        memory_id: input.memory.memory_id.clone(),
+        version_number: 2,
+        parent_version_id: Some(source_version_id.clone()),
+        created_at: input.memory.version_created_at.clone(),
+        author_kind: "compiler".into(),
+        change_reason: "compiler derivative".into(),
+        claims: vec![input.claim.clone()],
+        entity_refs: Vec::new(),
+        relation_refs: Vec::new(),
+        source_refs: vec![input.event.source_id.clone()],
+        provenance_refs: Vec::new(),
+        content_digest: format!("{content_digest}:derivative"),
+        schema_version: input.memory.schema_version.clone(),
+    };
+    derivative_version
+        .validate()
+        .map_err(|error| format!("invalid derivative version: {error:?}"))?;
+
     let memory = Memory {
         memory_id: input.memory.memory_id.clone(),
         memory_kind: input.memory.memory_kind,
@@ -133,7 +384,9 @@ fn run() -> Result<(), String> {
         created_at: input.memory.created_at,
         updated_at: input.memory.updated_at,
     };
-    memory.validate().map_err(|error| format!("invalid memory: {error:?}"))?;
+    memory
+        .validate()
+        .map_err(|error| format!("invalid memory: {error:?}"))?;
 
     let revision = MemoryVersion {
         memory_version_id: input.memory.memory_version_id,
@@ -155,7 +408,7 @@ fn run() -> Result<(), String> {
         .validate()
         .map_err(|error| format!("invalid memory version: {error:?}"))?;
 
-    let database = TemporaryDatabase::new();
+    let database = TemporaryDatabase::new("storage");
     let snapshot = {
         let sqlite = SqliteMemoryStorage::open(database.path())
             .map_err(|error| format!("cannot open SQLite storage: {error:?}"))?;
@@ -226,10 +479,24 @@ fn run() -> Result<(), String> {
         .map_err(|error| format!("build_context failed: {error:?}"))?
     };
 
+    let admission_database = TemporaryDatabase::new("admission");
+    let stage = run_compiler_stage(CompilerStageRequest {
+        event_id: &input.event.event_id,
+        source_ref: &input.event.source_id,
+        payload: &input.payload,
+        scope: &scope,
+        source_version_id: &source_version_id,
+        derivative_version,
+        publication_id: &publication_id,
+        storage_path: database.path(),
+        admission_path: admission_database.path(),
+    })?;
+    let notice = stage.notice();
+
     let mut sidecar_name = std::ffi::OsString::from(&output_path);
     sidecar_name.push(".compiler-status");
     let sidecar_path = PathBuf::from(sidecar_name);
-    let sidecar_content = format!("{COMPILER_SKIP_NOTICE}\n");
+    let sidecar_content = format!("{notice}\n");
 
     let output = snapshot
         .serialize()
@@ -244,13 +511,16 @@ fn run() -> Result<(), String> {
         ));
     }
 
-    eprintln!("{COMPILER_SKIP_NOTICE}");
+    eprintln!("{notice}");
 
     if verbose {
         eprintln!("memory-domain: Event, Memory, Claim and MemoryVersion validated");
         eprintln!("memory-storage-sqlite: persisted revision to a temporary SQLite database");
         eprintln!("memory-store: create_memory -> write_revision -> read_current succeeded");
-        eprintln!("memory-context: build_context produced {} entr(y/ies)", snapshot.total_entries());
+        eprintln!(
+            "memory-context: build_context produced {} entr(y/ies)",
+            snapshot.total_entries()
+        );
         eprintln!("memory-compiler reference version: {COMPILER_VERSION}");
         eprintln!("output: {} ({} bytes)", output_path, output.len());
     }

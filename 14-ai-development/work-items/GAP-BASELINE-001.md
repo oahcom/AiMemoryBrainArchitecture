@@ -1455,3 +1455,194 @@ round pointed at root directories that are incomplete. Each was corrected mid-fl
 the mirror path and an instruction to read both roots. The specs those agents produce will
 carry a "Spec location defect" section stating the assumption they make, so that a later
 reader does not inherit an unstated one.
+
+## Round seven: measured against main `1ebbab84`, and the percentages re-derived
+
+The instruction for this round was to advance the six named gap areas. Before writing
+anything I re-measured, because every inventory I had was taken against `_gm10` = `665c8869`
+and main has moved through `94a05a3a`, `b961ba31`, `5453aabf`, `2998f632`, `0e6f9f4d`,
+`665c8869`, `c3713452`, `1ebbab84`. Nine PRs merged in that window. Several recorded gaps
+are now closed, and one recorded defect is fixed. This section states what is true at
+`1ebbab84` and withdraws the parts that are no longer.
+
+### Test totals, measured
+
+```
+$ cargo test --workspace --offline      # WSL2, CARGO_BUILD_JOBS=1, --offline
+TOTAL passed=371 failed=0 ignored=10
+```
+
+Against 314 passed / 0 failed / 12 ignored when this document's earlier sections were
+written. Every target green; no failure to explain away.
+
+Per crate `#[test]` counts at `1ebbab84`:
+
+| crate | src lines | `#[test]` |
+|---|---|---|
+| agent-integration | 1043 | 33 |
+| bmcp-protocol | 1476 | 46 |
+| brain-cli | 488 | 5 |
+| memory-compiler | 3354 | 59 |
+| memory-context | 4263 | 78 |
+| memory-domain | 1886 | 56 |
+| memory-event-store | 123 | 2 |
+| memory-event-store-sqlite | 1673 | 31 |
+| memory-storage | 115 | 3 |
+| memory-storage-sqlite | 2710 | 47 |
+| memory-store | 916 | 14 |
+
+### The dependency graph changed, and it is the important measurement
+
+Two of the three uncrossed links from the round-five section are now joined at the
+Cargo.toml level:
+
+```
+agent-integration          -> memory-context, memory-domain      (was: NONE)
+memory-compiler            -> memory-domain, memory-event-store, memory-event-store-sqlite
+                                                                  (was: memory-domain only)
+memory-context             -> memory-domain, memory-event-store-sqlite, memory-storage,
+                              memory-storage-sqlite, memory-store
+brain-cli                  -> memory-compiler, memory-context, memory-domain,
+                              memory-storage-sqlite, memory-store
+bmcp-protocol              -> NONE
+agent-integration used by:  NOBODY
+bmcp-protocol     used by:  NOBODY
+```
+
+So: the compiler can now see the event store, and agent-integration can now see the context
+engine. **Both remain unreachable from any executable.** `brain-cli` is still the only
+binary and it still does not import either.
+
+### The three links, re-measured
+
+| link | round five | at `1ebbab84` | how |
+|---|---|---|---|
+| event-store -> compiler | ABSENT | **PARTIAL** | `memory-compiler` now depends on `memory-event-store-sqlite`; `tests/event_store_digest_compat.rs` exists |
+| context -> agent-integration | ABSENT | **PARTIAL** | `agent-integration` now depends on `memory-context`; `tests/context_snapshot_delivery.rs` (2 tests) exists |
+| agent-integration -> bmcp-protocol | ABSENT | ABSENT | still zero dependency, zero conversion, zero test |
+
+PARTIAL, not COVERED, and the distinction matters. `event_store_digest_compat.rs` is 53
+lines with 1 test. It does this:
+
+```rust
+let receipt = store.accept_with_payload(envelope, payload.as_bytes(), &[scope])?;
+let accepted = AcceptedEvent {
+    event_id: Identity::new(receipt.event_id.as_str())?,
+    receipt_id: Identity::new(receipt.receipt_id.as_str())?,
+    payload_digest: receipt.payload_digest.clone(),
+    payload: payload.to_owned(),
+    compile_intent_durable: true,          // <- hand-written literal
+};
+let ingested = IngestionStage::run(accepted, 1)?;
+```
+
+The conversion is performed **in the test**, field by field, with `compile_intent_durable`
+set to `true` by hand. There is still no production function that reads `compile_outbox` and
+produces an `AcceptedEvent`, and `compile_outbox` still has INSERT and DELETE but no SELECT.
+So the test proves the digest formats are compatible — which is real and worth having — and
+it does not prove the outbox can be consumed. `compile_intent_durable` being a caller-written
+bool is the same weakness the ingestion stage always had.
+
+### A defect I recorded earlier is now fixed, and I should say so
+
+In the round-three section I recorded that `ClaimRevision` lacked `epistemic_status`,
+`confidence`, `provenance_refs`, `parent_revision_ref`, `valid_time` and
+`correction_reason`, while its own doc comment named CI-09..CI-13 as NEW_REVISION triggers.
+At `1ebbab84` it has them:
+
+```rust
+pub struct ClaimRevision {
+    revision_ref: ClaimRevisionRef, claim_ref: ClaimRef,
+    parent_revision_ref: Option<ClaimRevisionRef>,
+    subject: String, predicate: String, object: String, polarity: String,
+    qualifiers: Vec<String>,
+    epistemic_status: EpistemicStatus, valid_time: TimeValue,
+    evidence_refs: Vec<EvidenceRef>, provenance_refs: Vec<ProvenanceRef>,
+    asserted_at: String, revision_reason: String, scope_refs: Vec<ScopeRef>,
+}
+```
+
+`FactRevision` was extended in the same pass: `parent_revision_ref`,
+`claim_revision_refs: Vec<ClaimRevisionRef>` (plural — the earlier single-pin narrowing is
+gone), `outcome: FactOutcome`, `rationale`, `canonical_commit_ref`,
+`correction_or_revocation_reason`. And the newtype set grew `EvidenceRef`, `ProvenanceRef`,
+`AttestorRef`, `AuthorizationDecisionRef`, `CanonicalCommitRef`.
+
+`tests/phase2_acceptance.rs` went from 18 tests (7 running, 11 ignored) to 20 tests
+(11 running, 9 ignored). The ignore count dropped by two.
+
+### A freeze violation that is still there
+
+`phase-1-domain-model-freeze.md` §2.3 lists the Event minimum fields:
+
+```
+| source_type | 必填 |
+```
+
+`memory-domain::Event` at `1ebbab84`:
+
+```rust
+pub struct Event {
+    pub event_id: OpaqueId, pub event_kind: String,
+    pub source_id: OpaqueId,              // <- source_type absent
+    pub recorded_at: String, pub scope_refs: Vec<ScopeRef>,
+    pub occurred_at: Option<TimeValue>, pub idempotency_key: Option<String>,
+    pub payload_ref: String, pub classification: String,
+    pub schema_version: String, pub retention_class: String,
+}
+```
+
+No `source_type`. Meanwhile `memory_event_store::EventEnvelope` — the type actually written
+to SQLite — **does** have `pub source_type: String`, and also `producer_actor_ref`,
+`payload_digest`, `correlation_id`, none of which the frozen type has.
+
+So there are two Event types: the frozen normative one, which is missing a required field,
+and the storage one, which has it plus four more. The frozen type is not what the system
+stores. That is a specification-to-code divergence, not a formatting difference, and it is
+the kind of thing that makes "Phase 1 is frozen and implemented" untrue in a way nobody
+notices because both types compile.
+
+### The six areas, re-derived
+
+The instruction named six areas with percentages. Measured at `1ebbab84`:
+
+| area | stated | measured basis | verdict |
+|---|---|---|---|
+| Memory Compiler core | 85% unimplemented | 3354 src lines, 59 tests, 5 stages with entry points, admission ledger with 22-state machine; blocked only on `PublicationAuthority` having no production impl | **stale.** Core logic largely exists; the missing piece is one trait implementation and a persistent stage journal |
+| Memory Context engine | 80% unimplemented | 4263 src lines, 78 tests, coverage doc says 9 IMPLEMENTED / 42 PARTIAL / 26 NOT IMPLEMENTED | **roughly right for full scope, wrong for core.** The build/validate/budget path executes and is cross-crate tested |
+| Agent Integration core | 90% unimplemented | 1043 src lines, 33 tests, depends on memory-context, 2 cross-boundary tests | **stale on code, right on reachability.** The crate is implemented and tested; it has no consumer |
+| BMCP full stack | 60% unimplemented | 1476 src lines, 46 tests, 1 of ~11 message types typed; 32 schemas + 5 runtime_reference modules now on main | **now two-layer.** Spec/validator layer landed via #500; the Rust layer is still P0-only |
+| Phase 2/3 domain | 100% not started | 56 tests, `ClaimRevision`/`FactRevision`/Entity/Relation/Evidence/Provenance all present and extended | **clearly stale.** Phase 2 is substantially typed; 9 tests remain ignored |
+| End-to-end tests | 100% not started | 11 integration files, 4 links genuinely crossed, 371 tests total | **stale.** E2E exists; 3 of 7 adjacent links remain uncrossed |
+
+The pattern: the percentages were accurate when they were written and have been overtaken by
+nine merges. Repeating them now would misdirect work toward code that already exists. The
+honest current statement is not a percentage — it is that **four of the six areas are blocked
+on a specific missing seam, not on volume of missing code.**
+
+### What each area is actually blocked on
+
+- **Compiler**: `PublicationAuthority::obtain_proof` has no production implementation.
+  `brain-cli/src/main.rs:14` still carries the string
+  `"compiler stage skipped: PublicationAuthority has no production implementation"` and now
+  writes it to a `.compiler-status` sidecar file, and there is a 4-test integration test
+  (`brain-cli/tests/compiler_skip_is_visible.rs`) asserting that the skip **is** visible.
+  The skip is now a tested, intentional, documented behaviour rather than an oversight. That
+  is honest engineering, and it also means the compiler is still not invoked.
+- **Context**: 26 NOT IMPLEMENTED rows in its own coverage document, each naming what is absent.
+- **Agent integration**: no consumer. See the two-futures section of the spec.
+- **BMCP**: the Rust layer types one message; the other ten exist as schemas and Python
+  validators. `agent-integration -> bmcp-protocol` has no conversion in either direction.
+- **Domain**: 9 ignored tests name their blockers; `Event.source_type` freeze violation above.
+- **E2E**: `compile_outbox` has no SELECT; `AppliedDeliveryEvidence` has no public constructor
+  (48 fields, all `pub(super)`, zero `impl` blocks); `MemoryVersion -> ContextCandidate`
+  projection exists only hand-written inside tests and `brain-cli`.
+
+### What I am not claiming
+
+- Not claiming the percentages were wrong when written. They were measured then; they are
+  stale now, and the staleness is the finding.
+- Not claiming 371 passing tests means the system works. 10 are ignored by design and the
+  compiler is not in the path of any of them.
+- No gap is closed by this section. No PR is approved. No CI job in this repository has
+  started since billing broke.

@@ -1,6 +1,6 @@
 # GAP-08 · BMCP 一致性测试套件存在未声明的 Node 依赖
 
-**状态**：未关闭 — 套件在干净检出上无法通过
+**状态**：未关闭 — 仓库侧已在 #546 完成；关闭标准 1 与 5 受 CI 计费中断阻塞
 **领域**：08-bmcp-protocol / conformance
 **归属线**：Owner H（协议）
 
@@ -125,3 +125,68 @@ OK
 4. 报告套件通过数时必须附带运行器与依赖状态，以免未来的测量把这次的 3 个失败当作代码缺陷重演。
 5. CI 必须真正执行那三个依赖 Node 的文件。一个从未被任何工作流安装过的依赖，
    与一个缺失的依赖没有区别。
+
+## #546 之后的状态
+
+仓库侧已完成：依赖已锁定并提交锁文件，辅助函数不再与 pytest 的测试收集冲突，工作流现在会执行此前未被覆盖的四份文件。
+
+关闭标准 2、3、4 已满足，且每一条都在本机实测而非推断；测量结果附在该 PR 正文中。关闭标准 1 要求干净检出上自动安装依赖，关闭标准 5 要求 CI 真正执行那三个依赖 Node 的文件。两者都被同一次计费中断阻塞，而该中断不在本工作项范围内。
+
+在被实测之前，本工作项保持开启。
+
+## 第八轮独立测量：装齐已声明依赖后，套件全绿
+
+追加于 2026-11-22 02:20 +08:00，`main @ 0aff9695`。本节不改变上方状态，它提供关闭
+标准 4 所要求的测量，并纠正两个已发布的失败数。
+
+同一棵树、同一个提交，只有环境不同，三种依赖状态：
+
+| 环境 | 发现测试数 | 结果 |
+|---|---|---|
+| 系统 `python3`，无 `node_modules` | 493 | `FAILED (errors=6, skipped=27)` |
+| 系统 `python3`，已 `npm install` | 493 | `FAILED (errors=6, skipped=27)` |
+| 装齐 `requirements.txt` 的 venv | 585 | **`OK (skipped=27)`** |
+
+命令原文：
+
+```sh
+# 状态 2 —— Node 依赖已装，Python 依赖缺失
+cd 08-bmcp-protocol/tests/conformance && npm install --no-audit --no-fund
+cd ../.. && python3 -m unittest discover -s tests/conformance
+# -> Ran 493 tests, FAILED (errors=6, skipped=27)
+#    6 个全部是 ModuleNotFoundError: No module named 'rfc8785'
+
+# 状态 3 —— 三个已声明依赖全部装上
+python3 -m venv /tmp/venv8785
+/tmp/venv8785/bin/pip install rfc8785==0.1.4 cryptography==44.0.2 jsonschema
+cd 08-bmcp-protocol/tests/conformance && /tmp/venv8785/bin/python -m unittest discover -s .
+# -> Ran 585 tests in 26.739s, OK (skipped=27)
+```
+
+### 这确立了什么
+
+1. **一致性套件没有缺陷。** 装齐其声明的依赖后它是 585/585 全绿。本工作项历史中的
+   每一个"6 个失败"与"3 个失败"都是缺依赖的产物，不是失败的测试。
+2. **`#546` 确实修好了它声称修的部分。** 仅执行 `npm install` 之后，Node 错误
+   （`ERR_MODULE_NOT_FOUND: canonicalize`）已消失；剩下 6 个错误是 Python 的，
+   不是 Node 的。所以本工作项的"未声明 Node 依赖"这一半是可测的、已闭合的。
+3. **发现数的变化比错误数更重要。** 在 conformance 目录内执行 `discover -s .` 发现
+   585 条；在协议根执行 `discover -s tests/conformance` 发现 493 条。92 条的差额是
+   那些只有从一个根才能解析 `__init__.py` 链的目录。这是关闭标准 3 所针对的同一类
+   运行器契约歧义，且尚未被记录。
+4. **关闭标准 1 比上方状态所述的更接近完成。** 干净检出仍需要一个手动步骤，但该
+   步骤现在是机械的且已声明（`pip install -r ...requirements.txt`、`npm ci`）。
+   剩余缺口在于：除被阻塞的工作流外，没有任何东西自动执行它们。
+
+### 对已发布数字的更正
+
+- 那 6 个 error 不是"6 个失败的测试"，而是 6 个**导入失败**的模块，其中零断言被执行。
+- 只装 `rfc8785` 与 `jsonschema` 得到的 3 个 error 同样是 3 个导入失败
+  （缺 `cryptography`），不是 3 个测试失败。装齐全集后全部消失。
+- 因此不应从这两个数字中的任何一个推导 bug 报告、bisect 或代码改动。对两者的正确
+  响应都是 `pip install -r requirements.txt`。
+
+### 仍未闭合的部分
+
+只剩关闭标准 5：CI 必须执行那三个依赖 Node 的文件。它仍被计费中断阻塞，而该中断现在
+也阻塞了 Python 这一半 —— 因为工作流是唯一会自动安装任一依赖集的东西。

@@ -1,6 +1,6 @@
 # GAP-08 — BMCP conformance suite has an undeclared Node dependency
 
-**Status:** Open — the suite cannot pass on a clean checkout
+**Status:** Open — repository side done in #546; closure criteria 1 and 5 blocked by the CI billing interruption
 **Area:** 08-bmcp-protocol / conformance
 **Owner track:** Owner H (Protocol)
 
@@ -152,3 +152,83 @@ expects, so "run the conformance suite" has one meaning.
    it were a code defect.
 5. CI actually executes the three files that depend on Node. A dependency that
    no workflow ever installs is indistinguishable from one that is missing.
+
+## Status after #546
+
+The repository side is complete: the dependency is pinned with a committed
+lockfile, the helper no longer collides with pytest collection, and the workflow
+now executes all four previously uncovered files.
+
+Criteria 2, 3 and 4 are met, and each was measured locally rather than inferred;
+the measurements are attached to the PR body. Criterion 1 requires an automatic
+install on a clean checkout, and criterion 5 requires CI to execute the three
+Node-dependent files. Both are blocked by the same billing interruption, which is
+outside this work item.
+
+This item stays open until those two are measured.
+
+## Round-eight independent measurement: the suite is fully green once the declared dependencies are installed
+
+Appended 2026-11-22 02:20 +08:00 at `main @ 0aff9695`. This does not change the
+status above; it supplies the measurement that criterion 4 asks for, and it
+corrects two published failure counts.
+
+Three dependency states, same tree, same commit, only the environment differs:
+
+| environment | tests discovered | result |
+|---|---|---|
+| system `python3`, no `node_modules` | 493 | `FAILED (errors=6, skipped=27)` |
+| system `python3`, after `npm install` | 493 | `FAILED (errors=6, skipped=27)` |
+| venv with `requirements.txt` installed | 585 | **`OK (skipped=27)`** |
+
+Commands, verbatim:
+
+```sh
+# state 2 — Node dependency present, Python dependencies absent
+cd 08-bmcp-protocol/tests/conformance && npm install --no-audit --no-fund
+cd ../.. && python3 -m unittest discover -s tests/conformance
+# -> Ran 493 tests, FAILED (errors=6, skipped=27)
+#    all 6: ModuleNotFoundError: No module named 'rfc8785'
+
+# state 3 — the three declared dependencies installed
+python3 -m venv /tmp/venv8785
+/tmp/venv8785/bin/pip install rfc8785==0.1.4 cryptography==44.0.2 jsonschema
+cd 08-bmcp-protocol/tests/conformance && /tmp/venv8785/bin/python -m unittest discover -s .
+# -> Ran 585 tests in 26.739s, OK (skipped=27)
+```
+
+### What this establishes
+
+1. **There is no defect in the conformance suite.** With its declared dependencies
+   present it is 585/585 green. Every "6 failures" and "3 failures" figure in this
+   item's history is a missing-dependency artefact, not a failing test.
+2. **`#546` did fix what it claimed.** After `npm install` alone the Node error
+   (`ERR_MODULE_NOT_FOUND: canonicalize`) is gone; the six remaining errors are
+   Python, not Node. So the undeclared-Node-dependency half of this item is closed
+   and measurable.
+3. **The discovery-count change matters more than the error count.** `discover -s .`
+   from inside the conformance directory finds 585 tests; `discover -s
+   tests/conformance` from the protocol root finds 493. The 92-test difference is
+   directories whose `__init__.py` chain only resolves from one of the two roots.
+   This is a second runner-contract ambiguity of exactly the kind criterion 3 was
+   written about, and it is not yet documented.
+4. **Criterion 1 is closer than the status above says.** A clean checkout still
+   needs a manual step, but the step is now mechanical and declared
+   (`pip install -r ...requirements.txt`, `npm ci`). The remaining gap is that
+   nothing runs them automatically outside the blocked workflow.
+
+### Correction to previously published numbers
+
+- The 6 errors are not "6 failing tests". They are 6 modules that fail to *import*.
+  Zero assertions execute in them.
+- The 3-error figure obtained after installing only `rfc8785` and
+  `jsonschema` is likewise 3 import failures (`cryptography` missing), not 3 test
+  failures. Installing the full declared set removes all of them.
+- Therefore no bug report, bisect, or code change should be derived from either
+  figure. The right response to both is `pip install -r requirements.txt`.
+
+### What remains open
+
+Criterion 5 only: CI must execute the three Node-dependent files. That is still
+blocked by the billing interruption, which now also blocks the Python half, since
+the workflow is the only thing that would install either dependency set.

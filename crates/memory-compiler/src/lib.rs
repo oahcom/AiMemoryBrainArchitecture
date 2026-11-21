@@ -1,13 +1,16 @@
 //! Memory Compiler reference pipeline.
 //! Deterministic five-stage reference pipeline with a local SQLite admission ledger.
-//! Production D/Storage authority integrations remain explicit and unimplemented.
+//! Production D/Storage authority integrations are provided by the
+//! `publication_authority` adapter.
 
 #[cfg(feature = "sqlite")]
 pub mod admission;
+#[cfg(feature = "sqlite")]
+pub mod publication_authority;
 
-use std::collections::BTreeSet;
 use memory_domain::OpaqueId;
 use sha2::{Digest, Sha256};
+use std::collections::BTreeSet;
 
 pub const COMPILER_VERSION: &str = "0.1.0";
 
@@ -86,10 +89,7 @@ pub enum CompilerError {
     MissingAcceptedReceipt,
     MissingCompileIntent,
     InvalidPayloadDigest,
-    PayloadDigestMismatch {
-        declared: String,
-        computed: String,
-    },
+    PayloadDigestMismatch { declared: String, computed: String },
     EmptyExtraction,
     InvalidNormalizedValue,
     IncompleteDependencyClosure,
@@ -121,10 +121,7 @@ pub enum ExecutionState {
 
 impl ExecutionState {
     pub fn is_terminal(&self) -> bool {
-        matches!(
-            self,
-            Self::Published | Self::Suppressed | Self::Failed
-        )
+        matches!(self, Self::Published | Self::Suppressed | Self::Failed)
     }
 
     pub fn can_transition_to(&self, next: ExecutionState) -> bool {
@@ -298,10 +295,7 @@ pub struct PublicationProof {
 pub struct IngestionStage;
 
 impl IngestionStage {
-    pub fn run(
-        event: AcceptedEvent,
-        generation: u64,
-    ) -> Result<IngestedEvent, CompilerError> {
+    pub fn run(event: AcceptedEvent, generation: u64) -> Result<IngestedEvent, CompilerError> {
         if event.receipt_id.0.is_empty() {
             return Err(CompilerError::MissingAcceptedReceipt);
         }
@@ -347,11 +341,9 @@ impl IngestionStage {
 pub struct ExtractionStage;
 
 impl ExtractionStage {
-    pub fn run(
-        input: IngestedEvent,
-        generation: u64,
-    ) -> Result<ExtractionIR, CompilerError> {
-        let segments: Vec<String> = input.payload
+    pub fn run(input: IngestedEvent, generation: u64) -> Result<ExtractionIR, CompilerError> {
+        let segments: Vec<String> = input
+            .payload
             .split(['.', '!', '?', '\n'])
             .map(str::trim)
             .filter(|s| !s.is_empty())
@@ -391,11 +383,9 @@ impl ExtractionStage {
 pub struct NormalizationStage;
 
 impl NormalizationStage {
-    pub fn run(
-        input: ExtractionIR,
-        generation: u64,
-    ) -> Result<NormalizedIR, CompilerError> {
-        let values: Vec<String> = input.segments
+    pub fn run(input: ExtractionIR, generation: u64) -> Result<NormalizedIR, CompilerError> {
+        let values: Vec<String> = input
+            .segments
             .iter()
             .map(|s| s.split_whitespace().collect::<Vec<_>>().join(" "))
             .filter(|s| !s.is_empty())
@@ -444,10 +434,7 @@ pub struct StagingInput {
 pub struct StagingStage;
 
 impl StagingStage {
-    pub fn run(
-        input: StagingInput,
-        generation: u64,
-    ) -> Result<StagedDerivative, CompilerError> {
+    pub fn run(input: StagingInput, generation: u64) -> Result<StagedDerivative, CompilerError> {
         if !input.producer_admitted {
             return Err(CompilerError::MissingProducerAdmission);
         }
@@ -532,9 +519,7 @@ impl PublicationGate {
         // disposition and must be propagated without reinterpretation.
         let proof = authority.obtain_proof(&staged, lease)?;
 
-        if proof.publication_id != staged.publication_id
-            || proof.generation != lease.generation
-        {
+        if proof.publication_id != staged.publication_id || proof.generation != lease.generation {
             return Ok(PublishedDerivative {
                 derivative: staged,
                 disposition: PublicationDisposition::Blocked,
@@ -552,9 +537,7 @@ impl PublicationGate {
             });
         }
 
-        if !proof.publication_participant_admitted
-            || !proof.protected_visibility_authorized
-        {
+        if !proof.publication_participant_admitted || !proof.protected_visibility_authorized {
             return Ok(PublishedDerivative {
                 derivative: staged,
                 disposition: PublicationDisposition::Suppressed,
@@ -571,7 +554,7 @@ impl PublicationGate {
     }
 }
 
-fn map_admission_error(error: admission::AdmissionError) -> CompilerError {
+pub(crate) fn map_admission_error(error: admission::AdmissionError) -> CompilerError {
     match error {
         admission::AdmissionError::NotFound => CompilerError::MissingProducerAdmission,
         _ => CompilerError::AdmissionStoreFailure,
@@ -598,13 +581,15 @@ impl<A: PublicationAuthority> MemoryCompiler<A> {
         current_generation: u64,
         producer_work_item_id: &ProducerWorkItemId,
     ) -> Result<PublishedDerivative, CompilerError> {
-        let producer_receipt = self.admission
+        let producer_receipt = self
+            .admission
             .producer_receipt(producer_work_item_id.as_opaque_id())
             .map_err(map_admission_error)?;
         if producer_receipt.disposition != admission::RegistrationDisposition::Accepted {
             return Err(CompilerError::MissingProducerAdmission);
         }
-        let producer_request = self.admission
+        let producer_request = self
+            .admission
             .producer_request(producer_work_item_id.as_opaque_id())
             .map_err(map_admission_error)?;
 
@@ -612,25 +597,37 @@ impl<A: PublicationAuthority> MemoryCompiler<A> {
             .map_err(|_| CompilerError::InvalidIdentity)?;
         let artifact_version = OpaqueId::new(staging.publication_id.0.clone())
             .map_err(|_| CompilerError::InvalidIdentity)?;
-        if !self.admission.dependencies_complete(&artifact_ref, &artifact_version)
+        if !self
+            .admission
+            .dependencies_complete(&artifact_ref, &artifact_version)
             .map_err(map_admission_error)?
         {
             return Err(CompilerError::IncompleteDependencyClosure);
         }
-        let dependency_entries = self.admission
-            .dependency_entries_for(&artifact_ref, &artifact_version, producer_work_item_id.as_opaque_id())
+        let dependency_entries = self
+            .admission
+            .dependency_entries_for(
+                &artifact_ref,
+                &artifact_version,
+                producer_work_item_id.as_opaque_id(),
+            )
             .map_err(map_admission_error)?;
         if dependency_entries.is_empty() {
             return Err(CompilerError::IncompleteDependencyClosure);
         }
-        let dependency_ids = dependency_entries.iter()
+        let dependency_ids = dependency_entries
+            .iter()
             .map(|(request, _)| Identity(request.source_ref.as_str().to_owned()))
             .collect::<Vec<_>>();
-        let dependency_receipt_ids = dependency_entries.iter()
+        let dependency_receipt_ids = dependency_entries
+            .iter()
             .map(|(_, receipt)| receipt.receipt_id.clone())
             .collect::<Vec<_>>();
         let derivation_run_id = dependency_entries[0].0.derivation_run_id.clone();
-        if dependency_entries.iter().any(|(request, _)| request.derivation_run_id != derivation_run_id) {
+        if dependency_entries
+            .iter()
+            .any(|(request, _)| request.derivation_run_id != derivation_run_id)
+        {
             return Err(CompilerError::IncompleteDependencyClosure);
         }
         if producer_request.admission_canonical_commit_cursor.is_none() {
@@ -651,15 +648,13 @@ impl<A: PublicationAuthority> MemoryCompiler<A> {
             return Err(CompilerError::InvalidPublicationProof);
         }
         let staged = StagingStage::run(
-            StagingInput { normalized, ..staging },
+            StagingInput {
+                normalized,
+                ..staging
+            },
             lease.generation,
         )?;
-        let gated = PublicationGate::run(
-            staged,
-            &lease,
-            current_generation,
-            &mut self.authority,
-        )?;
+        let gated = PublicationGate::run(staged, &lease, current_generation, &mut self.authority)?;
         if gated.disposition != PublicationDisposition::Published {
             // Preserve the publication gate's typed terminal outcome.
             // In particular, Suppressed must remain distinguishable from
@@ -667,11 +662,15 @@ impl<A: PublicationAuthority> MemoryCompiler<A> {
             return Ok(gated);
         }
 
-        let observation = self.admission.observe_fence().map_err(map_admission_error)?;
+        let observation = self
+            .admission
+            .observe_fence()
+            .map_err(map_admission_error)?;
         let publication_operation_id = OpaqueId::new(format!(
             "compiler-publication:{}",
             gated.derivative.publication_id.0
-        )).map_err(|_| CompilerError::InvalidIdentity)?;
+        ))
+        .map_err(|_| CompilerError::InvalidIdentity)?;
         let gate_request = admission::PublicationGateRequest {
             publication_operation_id: publication_operation_id.clone(),
             artifact_ref,
@@ -694,7 +693,9 @@ impl<A: PublicationAuthority> MemoryCompiler<A> {
                 lease.generation
             ),
         };
-        let receipt = self.admission.final_publication_gate(gate_request)
+        let receipt = self
+            .admission
+            .final_publication_gate(gate_request)
             .map_err(map_admission_error)?;
         if !receipt.visible {
             return Err(CompilerError::PublicationSuppressed);
@@ -737,8 +738,7 @@ impl<A: PublicationAuthority> MemoryCompiler<A> {
 
         if !matches!(
             execution.last_durable_stage,
-            None
-                | Some(StageName::Ingestion)
+            None | Some(StageName::Ingestion)
                 | Some(StageName::Extraction)
                 | Some(StageName::Normalization)
                 | Some(StageName::Staging)
@@ -748,12 +748,7 @@ impl<A: PublicationAuthority> MemoryCompiler<A> {
         }
 
         let staged = StagingStage::run(staging, lease.generation)?;
-        PublicationGate::run(
-            staged,
-            &lease,
-            current_generation,
-            &mut self.authority,
-        )
+        PublicationGate::run(staged, &lease, current_generation, &mut self.authority)
     }
 }
 
@@ -1122,7 +1117,6 @@ mod tests {
         assert_eq!(result.derivative.visibility, Visibility::Hidden);
     }
 
-
     fn oid(value: &str) -> OpaqueId {
         OpaqueId::new(value).unwrap()
     }
@@ -1138,40 +1132,46 @@ mod tests {
     fn register_compile_inputs(store: &mut admission::AdmissionStore) -> ProducerWorkItemId {
         let producer_id = oid("producer-identity");
         if !store.is_producer_registered(&producer_id).unwrap() {
-            store.register_producer(&producer_id, "compiler-test-registry-digest").unwrap();
+            store
+                .register_producer(&producer_id, "compiler-test-registry-digest")
+                .unwrap();
         }
         let work_id = oid("work-1");
-        store.register_producer_work(admission::ProducerRegistrationRequest {
-            producer_work_item_id: work_id.clone(),
-            producer_class: "compiler".into(),
-            producer_identity: oid("producer-identity"),
-            source_refs: vec![oid("event-1")],
-            source_lineage_digest: "lineage-1".into(),
-            scope_refs: vec![admission_scope()],
-            operation_id: oid("operation-1"),
-            correlation_id: oid("correlation-1"),
-            causation_id: Some(oid("cause-1")),
-            admission_canonical_commit_cursor: Some(oid("canonical-commit-1")),
-            observed_fence_cursor: oid("fence-observation-0"),
-            permission_epoch: oid("permission-epoch-1"),
-            request_digest: "producer-request-1".into(),
-            producer_schema_version: "v1".into(),
-        }).unwrap();
-        for (edge, source) in [("dep-1", "source-1"), ("dep-2", "source-2")] {
-            store.register_dependency(admission::DependencyRegistrationRequest {
-                dependency_registration_id: oid(edge),
-                artifact_ref: oid("derivative-1"),
-                artifact_version: oid("publication-1"),
+        store
+            .register_producer_work(admission::ProducerRegistrationRequest {
                 producer_work_item_id: work_id.clone(),
-                derivation_run_id: oid("run-1"),
-                source_ref: oid(source),
-                source_version: None,
-                provenance_ref: oid("provenance-1"),
+                producer_class: "compiler".into(),
+                producer_identity: oid("producer-identity"),
+                source_refs: vec![oid("event-1")],
+                source_lineage_digest: "lineage-1".into(),
                 scope_refs: vec![admission_scope()],
-                lineage_digest: "lineage-1".into(),
-                required_dependency_count: 2,
-                request_digest: format!("digest-{edge}"),
-            }).unwrap();
+                operation_id: oid("operation-1"),
+                correlation_id: oid("correlation-1"),
+                causation_id: Some(oid("cause-1")),
+                admission_canonical_commit_cursor: Some(oid("canonical-commit-1")),
+                observed_fence_cursor: oid("fence-observation-0"),
+                permission_epoch: oid("permission-epoch-1"),
+                request_digest: "producer-request-1".into(),
+                producer_schema_version: "v1".into(),
+            })
+            .unwrap();
+        for (edge, source) in [("dep-1", "source-1"), ("dep-2", "source-2")] {
+            store
+                .register_dependency(admission::DependencyRegistrationRequest {
+                    dependency_registration_id: oid(edge),
+                    artifact_ref: oid("derivative-1"),
+                    artifact_version: oid("publication-1"),
+                    producer_work_item_id: work_id.clone(),
+                    derivation_run_id: oid("run-1"),
+                    source_ref: oid(source),
+                    source_version: None,
+                    provenance_ref: oid("provenance-1"),
+                    scope_refs: vec![admission_scope()],
+                    lineage_digest: "lineage-1".into(),
+                    required_dependency_count: 2,
+                    request_digest: format!("digest-{edge}"),
+                })
+                .unwrap();
         }
         ProducerWorkItemId::new(work_id)
     }
@@ -1187,13 +1187,28 @@ mod tests {
             },
             admission: store,
         };
-        let result = compiler.compile(event(), staging_input(pipeline().2), lease(), 1, &work_id).unwrap();
+        let result = compiler
+            .compile(event(), staging_input(pipeline().2), lease(), 1, &work_id)
+            .unwrap();
         assert_eq!(result.disposition, PublicationDisposition::Published);
         assert_eq!(result.derivative.visibility, Visibility::Visible);
-        assert_eq!(compiler.admission.producer_receipt(work_id.as_opaque_id()).unwrap().producer_work_item_id, work_id.as_opaque_id().clone());
+        assert_eq!(
+            compiler
+                .admission
+                .producer_receipt(work_id.as_opaque_id())
+                .unwrap()
+                .producer_work_item_id,
+            work_id.as_opaque_id().clone()
+        );
         assert_eq!(compiler.admission.publication_receipt_count().unwrap(), 1);
         let publication_id = oid("compiler-publication:publication-1");
-        assert!(compiler.admission.publication_receipt(&publication_id).unwrap().visible);
+        assert!(
+            compiler
+                .admission
+                .publication_receipt(&publication_id)
+                .unwrap()
+                .visible
+        );
     }
 
     #[test]
@@ -1206,7 +1221,10 @@ mod tests {
             admission: admission::AdmissionStore::in_memory().unwrap(),
         };
         let producer_id = oid("producer-identity");
-        compiler.admission.register_producer(&producer_id, "compiler-test-registry-digest").unwrap();
+        compiler
+            .admission
+            .register_producer(&producer_id, "compiler-test-registry-digest")
+            .unwrap();
         let work_id = ProducerWorkItemId::new(oid("work-1"));
         assert_eq!(
             compiler.compile(event(), staging_input(pipeline().2), lease(), 1, &work_id),
@@ -1214,7 +1232,9 @@ mod tests {
         );
         assert_eq!(compiler.admission.publication_receipt_count().unwrap(), 0);
         register_compile_inputs(&mut compiler.admission);
-        let result = compiler.compile(event(), staging_input(pipeline().2), lease(), 1, &work_id).unwrap();
+        let result = compiler
+            .compile(event(), staging_input(pipeline().2), lease(), 1, &work_id)
+            .unwrap();
         assert_eq!(result.disposition, PublicationDisposition::Published);
     }
 
@@ -1480,12 +1500,7 @@ mod state_tests {
         execution.lease = Some(worker_lease(1));
 
         assert_eq!(
-            compiler.resume(
-                &execution,
-                staging_input(),
-                worker_lease(1),
-                1,
-            ),
+            compiler.resume(&execution, staging_input(), worker_lease(1), 1,),
             Err(CompilerError::IllegalStateTransition)
         );
         assert_eq!(compiler.authority.calls, 0);
@@ -1501,12 +1516,7 @@ mod state_tests {
         execution.lease = Some(worker_lease(1));
 
         assert_eq!(
-            compiler.resume(
-                &execution,
-                staging_input(),
-                worker_lease(1),
-                2,
-            ),
+            compiler.resume(&execution, staging_input(), worker_lease(1), 2,),
             Err(CompilerError::LeaseExpired)
         );
         assert_eq!(compiler.authority.calls, 0);
@@ -1524,12 +1534,7 @@ mod state_tests {
         execution.lease = Some(worker_lease(1));
 
         let result = compiler
-            .resume(
-                &execution,
-                staging_input(),
-                worker_lease(1),
-                1,
-            )
+            .resume(&execution, staging_input(), worker_lease(1), 1)
             .unwrap();
 
         assert_eq!(result.disposition, PublicationDisposition::Published);
@@ -1560,8 +1565,7 @@ mod scenario_tests {
 
     #[test]
     fn llm_outage_before_accepted_leaves_stage_pending() {
-        let mut execution =
-            StageExecution::new(id("before-accepted"), StageName::Ingestion);
+        let mut execution = StageExecution::new(id("before-accepted"), StageName::Ingestion);
         execution.state = ExecutionState::Running;
 
         let mut event = accepted_event();
@@ -1594,8 +1598,7 @@ mod scenario_tests {
         let staged_result = ExtractionStage::run(ingested, 1).unwrap();
         let original_stage_output = staged_result.provenance.stage_output_id.clone();
 
-        let mut execution =
-            StageExecution::new(id("after-accepted"), StageName::Extraction);
+        let mut execution = StageExecution::new(id("after-accepted"), StageName::Extraction);
         execution.state = ExecutionState::Staged;
         execution.record_durable(StageName::Extraction);
 
@@ -1606,13 +1609,13 @@ mod scenario_tests {
         assert_eq!(execution.state, ExecutionState::Pending);
         assert_eq!(execution.attempt_generation, 2);
         assert_eq!(execution.stage, StageName::Extraction);
-        assert_eq!(staged_result.provenance.stage_output_id, original_stage_output);
+        assert_eq!(
+            staged_result.provenance.stage_output_id,
+            original_stage_output
+        );
         assert_eq!(staged_result.provenance.attempt_generation, 1);
         assert_eq!(extraction_calls, 1);
-        assert_eq!(
-            execution.last_durable_stage,
-            Some(StageName::Extraction)
-        );
+        assert_eq!(execution.last_durable_stage, Some(StageName::Extraction));
     }
 
     #[test]
@@ -1670,11 +1673,7 @@ mod scenario_tests {
         }
 
         impl IdempotencyFixture {
-            fn accept(
-                &mut self,
-                key: &str,
-                digest: &str,
-            ) -> Result<(), IdempotencyError> {
+            fn accept(&mut self, key: &str, digest: &str) -> Result<(), IdempotencyError> {
                 match self.entries.get(key) {
                     Some(existing) if existing != digest => {
                         Err(IdempotencyError::KeyDigestConflict)
@@ -1715,8 +1714,7 @@ mod scenario_tests {
             Err(CompilerError::EmptyExtraction)
         );
 
-        let execution =
-            StageExecution::new(id("plan-only-operation"), StageName::Extraction);
+        let execution = StageExecution::new(id("plan-only-operation"), StageName::Extraction);
         assert_eq!(execution.state, ExecutionState::Pending);
         assert_ne!(execution.state, ExecutionState::PreparedHidden);
         assert_ne!(execution.state, ExecutionState::Published);
@@ -1832,10 +1830,8 @@ mod scenario_tests {
             index_available: false,
         };
 
-        let mut execution = StageExecution::new(
-            id("commit-index-operation"),
-            StageName::PublicationGate,
-        );
+        let mut execution =
+            StageExecution::new(id("commit-index-operation"), StageName::PublicationGate);
         execution.state = ExecutionState::PublicationAdmission;
         execution.advance(fixture.resulting_state()).unwrap();
 

@@ -385,7 +385,55 @@ pub fn validate_full_boundary_apply(
     state: &AssemblyState,
 ) -> Result<(), AdapterError> {
     authorize(tier, AdapterOperation::ApplyFullBoundaryMemory)?;
+
     validate_context_write(region, state)
+}
+
+/// An immutable, versioned payload delivered to one Agent session.
+///
+/// This adapter-boundary payload is deliberately distinct from
+/// `memory_context::ContextSnapshot`, which is the Brain-side build artifact
+/// containing context identity, entries, and rendered-byte accounting.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct DeliveryPayload {
+    version: u64,
+    content: String,
+}
+
+impl DeliveryPayload {
+    /// Build an adapter payload only from a validated Brain context snapshot.
+    pub fn from_snapshot(snapshot: &ContextSnapshot) -> Result<Self, AdapterError> {
+        validate_snapshot(snapshot).map_err(|error: ContextError| {
+            AdapterError::InvalidSnapshot {
+                reason: format!("{error:?}"),
+            }
+        })?;
+        let content = snapshot
+            .serialize()
+            .map_err(|error| AdapterError::InvalidSnapshot {
+                reason: format!("{error:?}"),
+            })?;
+        Ok(Self {
+            version: snapshot.context_version,
+            content,
+        })
+    }
+
+    pub fn version(&self) -> u64 {
+        self.version
+    }
+    pub fn content(&self) -> &str {
+        &self.content
+    }
+
+    /// Test-only fixture constructor; production code must use `from_snapshot`.
+    #[cfg(test)]
+    fn new_for_test(version: u64, content: impl Into<String>) -> Self {
+        Self {
+            version,
+            content: content.into(),
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -523,54 +571,6 @@ impl DeliveryRecord {
         }
         self.state = next;
         Ok(())
-    }
-}
-
-/// An immutable, versioned payload delivered to one Agent session.
-///
-/// This adapter-boundary payload is deliberately distinct from
-/// `memory_context::ContextSnapshot`, which is the Brain-side build artifact
-/// containing context identity, entries, and rendered-byte accounting.
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct DeliveryPayload {
-    pub version: u64,
-    pub content: String,
-}
-
-impl DeliveryPayload {
-    /// Build an adapter payload only from a validated Brain context snapshot.
-    pub fn from_snapshot(snapshot: &ContextSnapshot) -> Result<Self, AdapterError> {
-        validate_snapshot(snapshot).map_err(|error: ContextError| {
-            AdapterError::InvalidSnapshot {
-                reason: format!("{error:?}"),
-            }
-        })?;
-        let content = snapshot
-            .serialize()
-            .map_err(|error| AdapterError::InvalidSnapshot {
-                reason: format!("{error:?}"),
-            })?;
-        Ok(Self::new(snapshot.context_version, content))
-    }
-
-    pub fn new(version: u64, content: impl Into<String>) -> Self {
-        Self {
-            version,
-            content: content.into(),
-        }
-    }
-
-    pub fn version(&self) -> u64 {
-        self.version
-    }
-    pub fn content(&self) -> &str {
-        &self.content
-    }
-
-    /// Test-only fixture constructor; production code should use `from_snapshot`.
-    #[cfg(test)]
-    fn new_for_test(version: u64, content: impl Into<String>) -> Self {
-        Self::new(version, content)
     }
 }
 

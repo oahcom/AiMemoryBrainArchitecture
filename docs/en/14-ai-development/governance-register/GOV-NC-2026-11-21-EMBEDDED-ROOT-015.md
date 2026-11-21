@@ -2,9 +2,20 @@
 
 **Status:** OPEN — MEASUREMENT ONLY
 **Nature:** `REGISTER_ONLY / NO_IMPLEMENTATION / NO_GATE_CHANGE / REQUIRES_INDEPENDENT_REVIEW`
-**Measured at:** `main = 67074d2ff7`
+**Measured at:** `main = 67074d2ff7`; re-verified at `8a2ce1b` with identical counts
 **Extends:** `GOV-NC-2026-11-21-SPLIT-DOMAIN-011.md`, `...-PAIRING-RESIDUAL-013.md`, `...-CWD-SPLIT-014.md`
 **Register author:** strategic requirement orchestrator session. **Not** an independent reviewer, **not** the accountable owner.
+
+---
+
+## 0.1 Revision history
+
+| Version | Date | Change |
+|---|---|---|
+| v1 | 2026-11-21 | Initial. Claimed the 58 gaps are caused by Shape 3 being gated on `root_name == "14-ai-development"` |
+| **v2** | 2026-11-21 | **Attribution corrected**: Shape 3 requires a `docs/en` mirror, and none of these 58 has one, so Shape 3 was never the cause. The real mechanism is that the gate has **no shape at all** for single-file embedded bilingual, only a per-file allowlist. See §3.1, §3.2 |
+
+**The v2 correction matters**: v1 pointed at a fix that does nothing. Measured, removing the root-name guard leaves the gap count at 77 — unchanged. Following v1 would have produced a large diff with no effect.
 
 ---
 
@@ -24,7 +35,7 @@ total                     77
 
 `13-engineering-decisions` contains exactly **58** `.md` files. **All 58 are gaps. Zero pass.**
 
-This is not a documentation backlog. Those files are bilingual — they carry both languages inside one file, which is the third legitimate shape the policy describes. The gate cannot see that shape for this root, because the exemption list does not include it.
+This is not a documentation backlog. Those files are bilingual — they carry both languages inside one file. **The gate has no shape that recognises this** (§3.2), so the only way such a file can pass is a per-file entry in `EMBEDDED_BILINGUAL_SOURCES`. That list has 21 entries; none is in this root.
 
 ---
 
@@ -76,20 +87,56 @@ Every row is `REMEDIATED`. The remediation was performed **inside the file**, wh
 |---|---|---|
 | 1. mirror | `docs/en/X` **and** `docs/zh-CN/X` both exist | only 3 files have this |
 | 2. side-by-side | `X.zh-CN.md` / `X.en.md` sibling | 0 files have this |
-| 3. embedded | `docs/en/X` exists **and** `_carries_chinese(X)` | **gated on `root_name == "14-ai-development"`** |
+| 3. embedded | `docs/en/X` exists **and** `_carries_chinese(X)` | **0 files qualify — see §3.1** |
 
-Shape 3 is the one that matches these files. It is hard-coded to a single root:
+### 3.1 Correction: Shape 3 was never the cause
 
-```python
-paired = mirrored or _side_by_side_bilingual(source)
-if not paired and root_name == "14-ai-development":
-    # Shape 3: the root file IS the Chinese source and docs/en holds the English side.
-    paired = english.is_file() and _carries_chinese(source)
+**v1 of this register claimed "Shape 3 is the shape that matches these files, and it is hard-coded to a single root". That attribution was wrong.**
+
+Shape 3 requires `docs/en/X` to exist. Measured:
+
+```
+of the 77 gaps, how many have a docs/en mirror:      0
+of the 13 root's 58 gaps, how many have docs/en:     0
 ```
 
-Shape 3 also requires a `docs/en/X` mirror to exist. The 13 root has only 3 such mirrors (`req02-fts5-vs-like-benchmark.md`, `req02-fts5-vs-like-decision.md`, `technology-architecture-overview.md`), and those 3 happen to be the only files in the root that are *not* embedded bilingual.
+So removing the root-name guard entirely rescues **nothing**. Confirmed by running it:
 
-**The two mechanisms are mutually exclusive in practice:** the files that are embedded bilingual have no `docs/en` mirror, and the files that have a `docs/en` mirror are not embedded bilingual.
+```
+M5 (delete the root_name == "14-ai-development" guard)
+BEFORE  gaps=77 baseline=77 new=0 resolved=0
+AFTER   gaps=77 baseline=77 new=0 resolved=0
+```
+
+Not one gap moves. That is also why mutant M5 can survive unnoticed: **the branch it guards never fires on any of the 77 baseline entries.**
+
+Shape 3's actual scope, measured, is exactly three files, all inside the 14 root:
+
+```
+14-ai-development/AI-EXEC-001.md
+14-ai-development/AI-EXEC-002.md
+14-ai-development/AI-EXEC-ROLLOUT-001.md
+```
+
+They satisfy all four conditions at once: no `docs/zh-CN`, no side-by-side partner, a `docs/en` mirror, and Chinese content. With the guard removed, the number of files in the other eight roots meeting those four conditions is **0**. So removing it changes nothing today — which does not prove it is harmless, only that it currently carries no load.
+
+### 3.2 The real mechanism for the 58: no counterpart file of any kind
+
+Classifying all 77 gaps by what counterpart exists:
+
+| Mechanism | Count |
+|---|---|
+| has a side-by-side partner | 0 |
+| has both `docs/en` and `docs/zh-CN` | 0 |
+| `docs/en` only | 0 |
+| `docs/zh-CN` only | 0 |
+| **no counterpart at all** | **77** |
+
+The 13 root's 58 are the same: `docs/en` = 0, `docs/zh-CN` = 0, side-by-side = 0, and 57 of the 58 carry Chinese.
+
+**The correct statement is therefore**: these 58 files are single-file embedded bilingual, and all three gate shapes **require a second file to exist** (a mirror or a sibling). The gate has no shape that accepts "one file carrying both languages". The 21 entries in `EMBEDDED_BILINGUAL_SOURCES` exist precisely because of this — they are a **per-file allowlist**, not a shape recogniser.
+
+The policy/gate contradiction is therefore more fundamental than v1 stated: not "the shape exists but is gated to one root", but "**the shape does not exist in the gate at all**; it can only be registered file by file". `00-governance` registered 12, the 14 root registered 9, and the 13 root registered 0 — in the root where embedded bilingual is most concentrated (57 of 58).
 
 ## 4. The exemption list makes the asymmetry explicit
 

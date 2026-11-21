@@ -161,6 +161,21 @@ python3 -m unittest discover -s 08-bmcp-protocol/tests -p 'test_protocol_index_c
 
 该检查器只负责索引一致性，不验证消息语义、transport、framing、session、handshake、生产 Runtime 或 C/D/I/Storage 权威。
 
+## 一致性测试运行入口
+
+一致性测试位于 `08-bmcp-protocol/tests/conformance/` 下。
+
+| 范围 | 运行命令或准备步骤 | 覆盖内容 |
+|---|---|---|
+| `applied_delivery_evidence/` | `python -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v` | 此目录下的全部测试。 |
+| `recovery_cutoff/` — RecoveryJoin | `python -m unittest discover -s 08-bmcp-protocol/tests/conformance/recovery_cutoff -p 'test_recovery_join*.py' -v` | 文件名匹配该模式的 RecoveryJoin 测试。 |
+| `provider_outcome/` — C 加密配置 | `python -m unittest discover -s provider_outcome -p 'test_c_crypto_profile*interop.py' -v`（在 `08-bmcp-protocol/tests/conformance/` 下运行） | C 加密配置互操作测试；6 项。 |
+| `recovery_cutoff/` — I 加密配置 | `python -m unittest discover -s recovery_cutoff -p 'test_i_crypto_profile.py' -v`（在 `08-bmcp-protocol/tests/conformance/` 下运行） | I 加密配置互操作测试；7 项。 |
+| `recovery_cutoff/` — HRC 语义 | `python -m unittest discover -s recovery_cutoff -p 'test_hrc_semantics.py' -v`（在 `08-bmcp-protocol/tests/conformance/` 下运行） | HRC 语义测试；44 项。 |
+| Conformance Node 依赖 | 在 `08-bmcp-protocol/tests/conformance/` 下运行 `npm ci`。 | 根据 `package-lock.json` 安装锁定的 `canonicalize@5.1.0` 依赖。三个 `.mjs` 参考实现均导入 `canonicalize`。 |
+
+工作流 `.github/workflows/h-applied-delivery-evidence-conformance.yml` 运行上述五条 Python discover 命令。三个加密配置互操作测试文件需要 Node 依赖；未安装该依赖时，其 Node 子进程会失败，而不是跳过测试。本机安装依赖后，三个测试文件通过（共 13 项）。HRC 语义测试文件分别通过 `python -m unittest` 和 `python -m pytest`（44 项）。这些本机结果不表示工作流已经通过。
+
 ## CSubmitOutcome 一致性边界
 
 provider_outcome 测试套件只检查固定的 C 所有 Draft 2020-12 Schema 和确定性结构；它不是 C 的语义 Validator。CPO-02、CPO-04、CPO-05、CPO-09 和 CPO-10 仍依赖 C 所有的 Outcome 语义、Ledger/High-Water 权威、Gate 证据和最终请求边界证明。

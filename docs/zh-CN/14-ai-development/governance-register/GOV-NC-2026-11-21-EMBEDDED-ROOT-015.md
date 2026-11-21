@@ -2,9 +2,20 @@
 
 **Status:** OPEN — MEASUREMENT ONLY
 **Nature:** `REGISTER_ONLY / NO_IMPLEMENTATION / NO_GATE_CHANGE / REQUIRES_INDEPENDENT_REVIEW`
-**Measured at:** `main = 67074d2ff7`
+**Measured at:** `main = 67074d2ff7`; re-verified at `8a2ce1b` with the same counts
 **Extends:** `GOV-NC-2026-11-21-SPLIT-DOMAIN-011.md`, `...-PAIRING-RESIDUAL-013.md`, `...-CWD-SPLIT-014.md`
 **Register author:** strategic requirement orchestrator session. **Not** an independent reviewer, **not** the accountable owner.
+
+---
+
+## 0.1 修订记录
+
+| 版本 | 日期 | 变更 |
+|---|---|---|
+| v1 | 2026-11-21 | 初版。声称 58 条缺口的原因是 Shape 3 被 `root_name == "14-ai-development"` 挡住 |
+| **v2** | 2026-11-21 | **更正归因**：Shape 3 需要 `docs/en` 镜像，而这 58 条一条都没有，所以 Shape 3 从来不是原因。真实机制是「门禁没有任何形态承认单文件内嵌双语，只能靠白名单」。见 §3.1、§3.2 |
+
+**v2 的更正很重要**：v1 指向了一个错的修复方向（放宽根名守卫），而那个改动实测对 77 条缺口**零影响**。按 v1 去修会得到「改了很多、什么都没变」的结果。
 
 ---
 
@@ -24,7 +35,7 @@ total                     77
 
 `13-engineering-decisions` contains exactly **58** `.md` files. **All 58 are gaps. Zero pass.**
 
-This is not a documentation backlog. Those files are bilingual — they carry both languages inside one file, which is the third legitimate shape the policy describes. The gate cannot see that shape for this root, because the exemption list does not include it.
+This is not a documentation backlog. Those files are bilingual — they carry both languages inside one file. **The gate has no shape that recognises this at all** (§3.2), so the only way such a file can pass is a per-file entry in `EMBEDDED_BILINGUAL_SOURCES`. That list has 21 entries; none of them is in this root.
 
 ---
 
@@ -76,20 +87,56 @@ Every row is `REMEDIATED`. The remediation was performed **inside the file**, wh
 |---|---|---|
 | 1. mirror | `docs/en/X` **and** `docs/zh-CN/X` both exist | only 3 files have this |
 | 2. side-by-side | `X.zh-CN.md` / `X.en.md` sibling | 0 files have this |
-| 3. embedded | `docs/en/X` exists **and** `_carries_chinese(X)` | **gated on `root_name == "14-ai-development"`** |
+| 3. embedded | `docs/en/X` exists **and** `_carries_chinese(X)` | **0 files qualify — see §3.1** |
 
-Shape 3 is the one that matches these files. It is hard-coded to a single root:
+### 3.1 更正：Shape 3 不是这 58 条的原因
 
-```python
-paired = mirrored or _side_by_side_bilingual(source)
-if not paired and root_name == "14-ai-development":
-    # Shape 3: the root file IS the Chinese source and docs/en holds the English side.
-    paired = english.is_file() and _carries_chinese(source)
+**本登记的 v1 声称「Shape 3 正是匹配这些文件的形态，只是被 `root_name == "14-ai-development"` 挡住」。这个归因是错的。**
+
+Shape 3 的前置条件是 `docs/en/X` 必须存在。实测：
+
+```
+77 条缺口中，有 docs/en 镜像的：0 条
+13 根的 58 条缺口中，有 docs/en 镜像的：0 条
 ```
 
-Shape 3 also requires a `docs/en/X` mirror to exist. The 13 root has only 3 such mirrors (`req02-fts5-vs-like-benchmark.md`, `req02-fts5-vs-like-decision.md`, `technology-architecture-overview.md`), and those 3 happen to be the only files in the root that are *not* embedded bilingual.
+所以即使把根名守卫整个删掉，Shape 3 也**救不了任何一条**。实测确认：
 
-**The two mechanisms are mutually exclusive in practice:** the files that are embedded bilingual have no `docs/en` mirror, and the files that have a `docs/en` mirror are not embedded bilingual.
+```
+M5（删除 root_name == "14-ai-development" 守卫）
+BEFORE  gaps=77 baseline=77 new=0 resolved=0
+AFTER   gaps=77 baseline=77 new=0 resolved=0
+```
+
+缺口一个都没变。这也解释了为什么 M5 变异体能存活而无人察觉——**它守的分支在 77 条基线上从不触发**。
+
+Shape 3 真正服务的范围，实测只有 3 个文件，全在 14 根：
+
+```
+14-ai-development/AI-EXEC-001.md
+14-ai-development/AI-EXEC-002.md
+14-ai-development/AI-EXEC-ROLLOUT-001.md
+```
+
+它们同时满足「无 `docs/zh-CN`」「无并排配对」「有 `docs/en`」「含中文」。把守卫删掉后，其他八根里符合这四个条件的文件数是 **0**，所以删掉它今天不改变任何结果——但这不证明它无害，只证明它今天没有载荷。
+
+### 3.2 58 条缺口的真实机制：完全没有任何对应文件
+
+按对应文件的存在性对 77 条缺口分类，结果只有一类：
+
+| 机制 | 条数 |
+|---|---|
+| 有并排配对 | 0 |
+| `docs/en` + `docs/zh-CN` 双镜像齐全 | 0 |
+| 只有 `docs/en` | 0 |
+| 只有 `docs/zh-CN` | 0 |
+| **完全没有对应文件** | **77** |
+
+13 根的 58 条同样如此：`docs/en` = 0，`docs/zh-CN` = 0，并排配对 = 0，其中 57 条含中文。
+
+**因此正确的表述是**：这 58 个文件是**单文件内嵌双语**，而门禁的三种形态**全部要求存在第二个文件**（镜像或并排）。门禁没有任何形态承认「一个文件内部同时承载两种语言」。`EMBEDDED_BILINGUAL_SOURCES` 那 21 条豁免之所以存在，正是因为这个——它们是**逐文件白名单**，不是形态识别。
+
+政策与门禁的矛盾因此比我原来写的更根本：不是「形态存在但被根名挡住」，而是「**这个形态在门禁里根本不存在**，只能靠白名单逐个登记」。00-governance 登记了 12 个，14 根登记了 9 个，13 根登记了 0 个——而 13 根恰恰是内嵌双语最集中的地方（57/58）。
 
 ## 4. The exemption list makes the asymmetry explicit
 

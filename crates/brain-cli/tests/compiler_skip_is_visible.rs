@@ -3,8 +3,12 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 use std::sync::atomic::{AtomicU64, Ordering};
 
-const COMPILER_SKIP_NOTICE: &str =
-    "compiler stage skipped: PublicationAuthority has no production implementation";
+/// The compiler stage now runs for real. With no authoritative issuer for
+/// `canonical_commit_confirmed` it must refuse publication and say which flag
+/// blocked it (OWNER-DECISION-PUBLICATION-RECORD-001 D3).
+const COMPILER_BLOCKED_NOTICE: &str = "compiler stage blocked: publication not authorized; \
+     blocking flag: canonical_commit_confirmed; false flags: [canonical_commit_confirmed, \
+     publication_participant_admitted, protected_visibility_authorized]";
 
 const EXPECTED_USAGE: &str =
     "brain: usage: brain compile --input <event.json> --out <context.json> [--verbose]";
@@ -20,7 +24,7 @@ impl TestDirectory {
         let id = NEXT_TEST_ID.fetch_add(1, Ordering::Relaxed);
 
         let path = std::env::temp_dir().join(format!(
-            "brain-cli-compiler-skip-{}-{id}",
+            "brain-cli-compiler-status-{}-{id}",
             std::process::id()
         ));
 
@@ -69,7 +73,7 @@ fn execute_compile(verbose: bool, output_path: &Path) -> Output {
     command.output().expect("execute brain binary")
 }
 
-fn assert_success_and_skip_marker(output: &Output, output_path: &Path) {
+fn assert_success_and_blocked_notice(output: &Output, output_path: &Path) {
     assert_eq!(
         output.status.code(),
         Some(0),
@@ -82,10 +86,10 @@ fn assert_success_and_skip_marker(output: &Output, output_path: &Path) {
     assert_eq!(
         stderr
             .lines()
-            .filter(|line| *line == COMPILER_SKIP_NOTICE)
+            .filter(|line| *line == COMPILER_BLOCKED_NOTICE)
             .count(),
         1,
-        "the skip notice must appear exactly once; stderr:\n{stderr}"
+        "the blocked notice must appear exactly once; stderr:\n{stderr}"
     );
 
     assert!(
@@ -105,8 +109,8 @@ fn assert_success_and_skip_marker(output: &Output, output_path: &Path) {
 
     assert_eq!(
         sidecar_content,
-        format!("{COMPILER_SKIP_NOTICE}\n"),
-        "sidecar must contain the exact compiler skip declaration"
+        format!("{COMPILER_BLOCKED_NOTICE}\n"),
+        "sidecar must contain the exact compiler blocked declaration"
     );
 
     // The sidecar must not change the existing ContextSnapshot JSON.
@@ -123,23 +127,23 @@ fn assert_success_and_skip_marker(output: &Output, output_path: &Path) {
 }
 
 #[test]
-fn compile_without_verbose_reports_skip_and_records_sidecar() {
+fn compile_without_verbose_reports_blocked_publication_and_records_sidecar() {
     let directory = TestDirectory::new();
     let output_path = directory.output_path();
 
     let output = execute_compile(false, &output_path);
 
-    assert_success_and_skip_marker(&output, &output_path);
+    assert_success_and_blocked_notice(&output, &output_path);
 }
 
 #[test]
-fn compile_with_verbose_reports_skip_exactly_once_and_records_sidecar() {
+fn compile_with_verbose_reports_blocked_publication_exactly_once_and_records_sidecar() {
     let directory = TestDirectory::new();
     let output_path = directory.output_path();
 
     let output = execute_compile(true, &output_path);
 
-    assert_success_and_skip_marker(&output, &output_path);
+    assert_success_and_blocked_notice(&output, &output_path);
 
     let stderr = String::from_utf8_lossy(&output.stderr);
 

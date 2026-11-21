@@ -13,10 +13,10 @@
 use memory_context::{
     build_context, ContextBudget, ContextCandidate, ContextError, ContextIdentity, ContextTier,
 };
-use memory_event_store_sqlite::forget_fence::ForgetFence;
 use memory_domain::{
     Claim, EpistemicStatus, Memory, MemoryLifecycle, MemoryVersion, OpaqueId, ScopeKind, ScopeRef,
 };
+use memory_event_store_sqlite::forget_fence::ForgetFence;
 use memory_storage::StorageError;
 use memory_storage_sqlite::SqliteMemoryStorage;
 use memory_store::{MemoryStore, MemoryStoreError, RevisionWrite};
@@ -115,7 +115,13 @@ fn write(
             RevisionWrite {
                 memory_id: id(memory_id),
                 expected_current_version: expected_current_version.map(id),
-                revision: revision(memory_id, version_id, version_number, parent_version_id, scope),
+                revision: revision(
+                    memory_id,
+                    version_id,
+                    version_number,
+                    parent_version_id,
+                    scope,
+                ),
                 idempotency_key: format!("op-{version_id}"),
                 request_digest: format!("request-{version_id}"),
             },
@@ -218,7 +224,11 @@ fn forget_api_absence_is_detectable() {
 
     store
         .create_memory(
-            memory("memory-fence-not-wired", &visible_scope, MemoryLifecycle::Active),
+            memory(
+                "memory-fence-not-wired",
+                &visible_scope,
+                MemoryLifecycle::Active,
+            ),
             std::slice::from_ref(&visible_scope),
         )
         .unwrap();
@@ -265,7 +275,11 @@ fn candidate_lifecycle_is_refused_by_context_after_store_round_trip() {
     let mut store = MemoryStore::new(SqliteMemoryStorage::in_memory().unwrap());
     store
         .create_memory(
-            memory("memory-candidate", &visible_scope, MemoryLifecycle::Candidate),
+            memory(
+                "memory-candidate",
+                &visible_scope,
+                MemoryLifecycle::Candidate,
+            ),
             std::slice::from_ref(&visible_scope),
         )
         .unwrap();
@@ -279,7 +293,10 @@ fn candidate_lifecycle_is_refused_by_context_after_store_round_trip() {
         &visible_scope,
     );
     let read_back = store
-        .read_current(&id("memory-candidate"), std::slice::from_ref(&visible_scope))
+        .read_current(
+            &id("memory-candidate"),
+            std::slice::from_ref(&visible_scope),
+        )
         .unwrap()
         .unwrap();
     let ineligible = candidate(
@@ -315,15 +332,7 @@ fn mixed_scope_candidate_set_is_rejected_instead_of_filtered() {
                 std::slice::from_ref(item_scope),
             )
             .unwrap();
-        write(
-            &mut store,
-            memory_id,
-            version_id,
-            1,
-            None,
-            None,
-            item_scope,
-        );
+        write(&mut store, memory_id, version_id, 1, None, None, item_scope);
     }
 
     let read_a = store
@@ -335,8 +344,18 @@ fn mixed_scope_candidate_set_is_rejected_instead_of_filtered() {
         .unwrap()
         .unwrap();
     let candidates = vec![
-        candidate("memory-mixed-a", &read_a, MemoryLifecycle::Active, "entry-mixed-a"),
-        candidate("memory-mixed-b", &read_b, MemoryLifecycle::Active, "entry-mixed-b"),
+        candidate(
+            "memory-mixed-a",
+            &read_a,
+            MemoryLifecycle::Active,
+            "entry-mixed-a",
+        ),
+        candidate(
+            "memory-mixed-b",
+            &read_b,
+            MemoryLifecycle::Active,
+            "entry-mixed-b",
+        ),
     ];
 
     let result = build_context(
@@ -469,7 +488,11 @@ fn rejected_stale_write_remains_rejected_after_file_backed_restart() {
         let mut store = MemoryStore::new(sqlite);
         store
             .create_memory(
-                memory("memory-stale-restart", &visible_scope, MemoryLifecycle::Active),
+                memory(
+                    "memory-stale-restart",
+                    &visible_scope,
+                    MemoryLifecycle::Active,
+                ),
                 std::slice::from_ref(&visible_scope),
             )
             .unwrap();
@@ -519,7 +542,10 @@ fn rejected_stale_write_remains_rejected_after_file_backed_restart() {
     let sqlite = SqliteMemoryStorage::open(temp_db.path()).unwrap();
     let store = MemoryStore::new(sqlite);
     let current = store
-        .read_current(&id("memory-stale-restart"), std::slice::from_ref(&visible_scope))
+        .read_current(
+            &id("memory-stale-restart"),
+            std::slice::from_ref(&visible_scope),
+        )
         .unwrap()
         .unwrap();
     assert_eq!(current.memory_version_id, id("version-stale-restart-2"));
@@ -607,10 +633,7 @@ fn file_backed_sqlite_survives_storage_handle_restart() {
     )
     .expect("reopened persisted revision must build context");
     assert_eq!(snapshot.entries.len(), 1);
-    assert_eq!(
-        snapshot.entries[0].memory_version_id,
-        id("version-restart")
-    );
+    assert_eq!(snapshot.entries[0].memory_version_id, id("version-restart"));
 
     drop(store.into_storage());
     drop(temp_db);

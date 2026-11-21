@@ -446,15 +446,14 @@ impl AdmissionStore {
     }
 
     /// Whether a producer identity has an independent registry row.
-    pub fn is_producer_registered(
-        &self,
-        producer_id: &OpaqueId,
-    ) -> Result<bool, AdmissionError> {
-        self.connection.query_row(
-            "SELECT EXISTS(SELECT 1 FROM producer_registry WHERE producer_id=?1)",
-            [producer_id.as_str()],
-            |row| row.get(0),
-        ).map_err(AdmissionError::from)
+    pub fn is_producer_registered(&self, producer_id: &OpaqueId) -> Result<bool, AdmissionError> {
+        self.connection
+            .query_row(
+                "SELECT EXISTS(SELECT 1 FROM producer_registry WHERE producer_id=?1)",
+                [producer_id.as_str()],
+                |row| row.get(0),
+            )
+            .map_err(AdmissionError::from)
     }
 
     /// Register one logical ProducerWorkItem idempotently, as required by §4.1.
@@ -530,7 +529,6 @@ impl AdmissionStore {
         decode(&value)
     }
 
-
     /// Read the request paired with a local producer receipt. This proves only
     /// that a row exists in this local ledger; it is not external registry
     /// authorization and must not be represented as such.
@@ -538,11 +536,15 @@ impl AdmissionStore {
         &self,
         work_item_id: &OpaqueId,
     ) -> Result<ProducerRegistrationRequest, AdmissionError> {
-        let value: String = self.connection.query_row(
-            "SELECT request_json FROM producer_work WHERE work_item_id=?1",
-            [work_item_id.as_str()],
-            |row| row.get(0),
-        ).optional()?.ok_or(AdmissionError::NotFound)?;
+        let value: String = self
+            .connection
+            .query_row(
+                "SELECT request_json FROM producer_work WHERE work_item_id=?1",
+                [work_item_id.as_str()],
+                |row| row.get(0),
+            )
+            .optional()?
+            .ok_or(AdmissionError::NotFound)?;
         decode(&value)
     }
 
@@ -553,7 +555,8 @@ impl AdmissionStore {
         artifact_ref: &OpaqueId,
         artifact_version: &OpaqueId,
         work_item_id: &OpaqueId,
-    ) -> Result<Vec<(DependencyRegistrationRequest, DependencyRegistrationReceipt)>, AdmissionError> {
+    ) -> Result<Vec<(DependencyRegistrationRequest, DependencyRegistrationReceipt)>, AdmissionError>
+    {
         let mut statement = self.connection.prepare(
             "SELECT request_json,receipt_json FROM dependency_edges WHERE artifact_ref=?1 AND artifact_version=?2"
         )?;
@@ -576,9 +579,11 @@ impl AdmissionStore {
 
     /// Count publication receipts for a focused compiler-wiring assertion.
     pub fn publication_receipt_count(&self) -> Result<u64, AdmissionError> {
-        let count: i64 = self.connection.query_row(
-            "SELECT COUNT(*) FROM publication_receipts", [], |row| row.get(0)
-        )?;
+        let count: i64 =
+            self.connection
+                .query_row("SELECT COUNT(*) FROM publication_receipts", [], |row| {
+                    row.get(0)
+                })?;
         Ok(count as u64)
     }
 
@@ -586,7 +591,7 @@ impl AdmissionStore {
     pub(crate) fn block_publication_receipt_writes(&self) -> Result<(), AdmissionError> {
         self.connection.execute_batch(
             "CREATE TRIGGER reject_compiler_publication BEFORE INSERT ON publication_receipts
-             BEGIN SELECT RAISE(FAIL, 'injected publication receipt write failure'); END;"
+             BEGIN SELECT RAISE(FAIL, 'injected publication receipt write failure'); END;",
         )?;
         Ok(())
     }
@@ -1071,7 +1076,8 @@ mod tests {
     fn producer_registry_rejects_duplicate_registration() {
         let mut db = AdmissionStore::in_memory().unwrap();
         let producer_id = id("producer-identity");
-        db.register_producer(&producer_id, "registry-digest-1").unwrap();
+        db.register_producer(&producer_id, "registry-digest-1")
+            .unwrap();
         assert!(matches!(
             db.register_producer(&producer_id, "registry-digest-1"),
             Err(AdmissionError::ProducerAlreadyRegistered)
@@ -1082,7 +1088,8 @@ mod tests {
     fn one_registered_producer_can_admit_multiple_distinct_work_items() {
         let mut db = AdmissionStore::in_memory().unwrap();
         let producer_id = id("producer-identity");
-        db.register_producer(&producer_id, "registry-digest-1").unwrap();
+        db.register_producer(&producer_id, "registry-digest-1")
+            .unwrap();
 
         let first = db.register_producer_work(producer()).unwrap();
         let mut second_request = producer();

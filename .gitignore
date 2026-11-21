@@ -4,3 +4,6 @@ __pycache__/
 # Build output and tool caches (not repository content).
 target/
 .pytest_cache/
+
+# Installed Node dependencies (the manifests that pin them are committed).
+node_modules/

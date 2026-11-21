@@ -161,6 +161,21 @@ python3 -m unittest discover -s 08-bmcp-protocol/tests -p 'test_protocol_index_c
 
 The checker is an index-consistency gate only. It does not validate the message semantics, transport, framing, session, handshake, production runtime, or C/D/I/Storage authority.
 
+## Conformance test runners
+
+The conformance tests are organized under `08-bmcp-protocol/tests/conformance/`.
+
+| Scope | Run command or setup | Coverage |
+|---|---|---|
+| `applied_delivery_evidence/` | `python -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v` | All tests in this directory. |
+| `recovery_cutoff/` — RecoveryJoin | `python -m unittest discover -s 08-bmcp-protocol/tests/conformance/recovery_cutoff -p 'test_recovery_join*.py' -v` | RecoveryJoin tests matching the filename pattern. |
+| `provider_outcome/` — C crypto profile | `python -m unittest discover -s provider_outcome -p 'test_c_crypto_profile*interop.py' -v` (run from `08-bmcp-protocol/tests/conformance/`) | C crypto profile interoperability tests; 6 tests. |
+| `recovery_cutoff/` — I crypto profile | `python -m unittest discover -s recovery_cutoff -p 'test_i_crypto_profile.py' -v` (run from `08-bmcp-protocol/tests/conformance/`) | I crypto profile interoperability tests; 7 tests. |
+| `recovery_cutoff/` — HRC semantics | `python -m unittest discover -s recovery_cutoff -p 'test_hrc_semantics.py' -v` (run from `08-bmcp-protocol/tests/conformance/`) | HRC semantic tests; 44 tests. |
+| Conformance Node dependencies | Run `npm ci` from `08-bmcp-protocol/tests/conformance/`. | Installs the locked `canonicalize@5.1.0` dependency from `package-lock.json`. The three `.mjs` reference implementations import `canonicalize`. |
+
+The workflow `.github/workflows/h-applied-delivery-evidence-conformance.yml` runs the five Python discovery commands above. The Node dependency is required by the three crypto profile interoperability test files: without the installed dependency, their Node subprocesses fail rather than skip. Locally, the three test files passed with the dependency installed (13 tests total). The HRC semantic test file passed with both `python -m unittest` and `python -m pytest` (44 tests). These local results do not state that the workflow has passed.
+
 ## CSubmitOutcome conformance boundary
 
 The provider_outcome suite checks the pinned C-owned Draft 2020-12 schema and deterministic structure. It is not C's semantic validator. CPO-02, CPO-04, CPO-05, CPO-09 and CPO-10 remain dependent on C-owned outcome semantics, ledger/high-water authority, gate evidence and final-request-boundary proof.
