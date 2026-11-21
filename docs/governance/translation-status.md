@@ -1,3 +1,47 @@
+---
+document_metadata:
+  domain: security-governance
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Under-Review
+      approver: NOT_RECORDED
+      decision_date: NOT_RECORDED
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "00-governance/bilingual-documentation-policy.md"
+        - "00-governance/document-scope-registry.yaml"
+        - "Issue #305 comment 7042461592"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Coverage register is a work record; semantic parity of each listed pair is not independently verified by this document."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+---
+
 # Bilingual Documentation Coverage & Migration Plan / 双语文档覆盖与迁移计划
 
 - Document ID: DOC-STATUS-001
@@ -71,6 +115,7 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 | Memory Context reader guide | G owner branch: 06-memory-context/ | docs/zh-CN/06-memory-context/memory-context-guide.md | docs/en/06-memory-context/memory-context-guide.md | COMPLETE — overview guide only |
 | Agent Integration reader guide | C owner branch: 07-agent-integration/ | docs/zh-CN/07-agent-integration/agent-integration-guide.md | docs/en/07-agent-integration/agent-integration-guide.md | COMPLETE — overview guide only |
 | BMCP Protocol reader guide | H owner branch: 08-bmcp-protocol/ | docs/zh-CN/08-bmcp-protocol/bmcp-guide.md | docs/en/08-bmcp-protocol/bmcp-guide.md | COMPLETE — overview guide only |
+| BMCP architecture review/handoff (BMCP-ARCH-001 v0.2.2) | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | base bmcp-validation-base-c588 @ c58878fce24528a0842b4f8887c93ddbf465b566; H branch 3e8b33df18b9e6fc757ca84ff07a12faebc78e74; eight H Blob pins re-fetched | REVIEW/HANDOFF PAIR ONLY — independent semantic bilingual review PENDING; does not count toward the 7 normative core specifications |
 | H Phase 3.6 identity consumer/conformance status report | 08-bmcp-protocol/phase-3.6-identity-binding-consumer-conformance-status.md; source Blob 8afb914731a34d8ab44331f54f1f39bfd8ec37ce | docs/zh-CN/08-bmcp-protocol/phase-3.6-identity-binding-consumer-conformance-status.md | docs/en/08-bmcp-protocol/phase-3.6-identity-binding-consumer-conformance-status.md | PAIRED — status report only; H36/H36-SR NOT RUN; does not count as a normative core-spec pair |
 | Storage and Index | 09-storage-and-index/ | Pending | Existing English sources | NOT STARTED |
 | Security & Governance reader guide | I owner branch: 09-security-governance/ | docs/zh-CN/09-security-governance/security-governance-guide.md | docs/en/09-security-governance/security-governance-guide.md | COMPLETE — overview guide only |
