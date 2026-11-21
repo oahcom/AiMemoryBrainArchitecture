@@ -14,7 +14,7 @@
 
 H 实时分支包含候选 Envelope、版本、规范化、错误分类、Delivery/ACK、Forget/重连、Strict JSON Parser 参考和符合性材料。这些文件仍归 H 所有；文件存在不等于批准或冻结。H 生命周期交接明确标记 Wire Schema NOT FROZEN；符合性矩阵是候选测试规范，不是 Runtime 证据。
 
-Compiler Fact/Claim 映射仍为 ADR-BLOCKED。BMCP MUST NOT 冻结规范 Fact/Claim Payload 字段。D 拥有 Canonical Identity/Lifecycle 和 D Forget Fence；I 拥有授权和 PermissionEpoch。BMCP 消费这些权威，不得创建替代机制。
+Owner 已批准 Fact/Claim 语义决策（Option A + I1）；精确 Compiler/Domain 消费者映射仍为 Candidate。BMCP MUST NOT 冻结规范 Fact/Claim Wire Payload 字段。D 拥有 Canonical Identity/Lifecycle 和 D Forget Fence；I 拥有授权和 PermissionEpoch。BMCP 消费这些权威，不得创建替代机制。
 
 Issue #7 的记录保持 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE。根据 Owner 阶段关闭裁决，GitHub 当前报告 Issue #7 为 CLOSED / not_planned；本工作不重开或修改它。延期不等于 Runtime 授权。
 
@@ -40,7 +40,7 @@ Main Pin 来自上述基线的 origin/main；H Pin 来自实时 fetch 的 H 分�
 | docs/en/07-agent-integration/agent-integration-guide.md | main | c4e076887634a9e8e46df076efb0f4b70d816e0a | C 所有 Agent 边界 |
 | docs/en/03-memory-brain/forget-fence-and-completion-contract.md | main | c791895333ab6140f035f4f622d5dee9325d422d | D/I Forget 边界 |
 | docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md | main | 9c054932994bb078e2834df8bd66f73895aa04f5 | D Lifecycle/Fence |
-| 13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md | main | 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593 | ADR-BLOCKED |
+| 13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md | main | 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593 | 历史 ADR；语义决策已被取代；消费者映射仍为 Candidate |
 
 这是有界来源登记，不代表所有 H 工件或消费者均已独立审查。
 
@@ -193,7 +193,7 @@ H 当前 Envelope 候选列出 ENVELOPE_INVALID、VERSION_UNSUPPORTED、MESSAGE_
 |---|---|---|---|
 | H | Wire Envelope/Version、Transport、ACK 编码、Validator、协议符合性 | 认证解码 Envelope；Family Registry；Response/ACK 序列化 | 精确 Wire/Transport/ACK/Validator 仍 CANDIDATE / NOT FROZEN |
 | E | Ingress 接受、Candidate IR、Compiler 阶段/Lineage、AcceptedReceipt | 类型化 Ingress Operation；原样返回 E Receipt/Result | 可调用 API 和 Wire 映射；AcceptedReceipt 不等于 Canonical Commit |
-| B | Fact/Claim 含义和规范领域决策 | 仅携带 Owner 批准的类型化 Ref/Payload | B-ADR-FACT-CLAIM-001 ADR-BLOCKED |
+| B | Fact/Claim 含义和规范领域决策 | 仅携带 Owner 批准的类型化 Ref/Payload | Owner 已批准 Option A + I1；精确消费者映射仍为 Candidate |
 | D | Canonical Identity、Lifecycle、Canonical Commit/Revision、Forget Fence | 传递类型化 Ref 并消费 D Receipt/Currentness | 精确 Runtime API 绑定 |
 | I | Principal Trust、Authorization、PermissionEpoch、Revocation、Global Forget Policy | 受保护 Principal Context 和当前授权决策 | 精确批准接口/Profile |
 | C | Agent/Adapter 边界、Telemetry、Final Inference Request | C Adapter 将 Agent Request 映射到注册 BMCP Operation | MCP/Adapter Mapping 和 Request Identity |
@@ -204,7 +204,7 @@ H 当前 Envelope 候选列出 ENVELOPE_INVALID、VERSION_UNSUPPORTED、MESSAGE_
 
 BMCP 不是 Memory Compiler。E 拥有 Candidate IR 和 Compiler Pipeline。BMCP 只能按 E 当前 Schema/Receipt 契约携带 E 所有的 Ingress/Candidate 对象。必须区分：Transport Receipt/Delivery；E 持久化 AcceptedReceipt；Compiler Execution/Candidate；D Producer Admission/Canonical Commit；Dependency Registration/Final Publication；F Indexing/G Context Activation。
 
-B 当前首选 Fact/Claim Option A（Fact Attestation 独立于 Claim 命题）仍为 ADR-BLOCKED / NOT APPROVED。BMCP MUST NOT 根据该推荐冻结 Fact/Claim Discriminator、Canonical Identity、Schema、DDL 或 Wire Payload。正式决议和消费者验收前，相关 Payload 保持不透明，或只用已批准的中立候选引用。
+合并的 Owner 决策已选择 Option A + I1 作为 Fact/Claim 语义方向。本决策不批准 Fact/Claim Discriminator、Canonical Wire Identity、Schema、DDL 或 Payload 字段。精确消费者映射仍为 Candidate，直至责任工件完成版本 Pin 和审查；相关 Payload 保持不透明，或只使用已批准的中立候选引用。
 
 ### 6.2 Agent Integration / MCP
 
@@ -226,7 +226,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - MODULE：BMCP / H
 - ISSUE_OR_ADR：H message-envelope-and-versioning.md；protocol-overview.md
 - DECISION_REQUIRED：BMCP 规范全称；message_id 是否就是 Request Identity 或需独立 request_id；精确 Response Correlation；Version/Type/Payload Schema/Idempotency 必填性；Operation Registry 和未知操作行为。
-- CURRENT_FACTS：H Envelope 为 CANDIDATE；公开指南写 “Brain Memory Context Protocol”；任务表述写 “Brain Memory Control Protocol”。
+- CURRENT_FACTS：H Envelope 为 CANDIDATE；规范术语表已确定为 “Brain Memory Context Protocol”；初始派发中的 “Brain Memory Control Protocol” 已纠正为非规范写法。
 - H_OWNED_CONTRACTS：Envelope、Versioning 和 Wire 字段名归 H。
 - CROSS_MODULE_CONFLICT：C Request/Attempt ID、H Message ID、领域 Operation ID 不可互换。
 - OPTIONS：保留当前全称和 message_id；或发布独立 Command ID 及显式映射。
@@ -300,7 +300,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - MODULE：BMCP
 - ISSUE_OR_ADR：B-ADR-FACT-CLAIM-001（13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md）
 - DECISION_REQUIRED：使 B-ADR-FACT-CLAIM-001 与 Owner 语义选择对齐，并完成消费者映射/验收；在此之前不得冻结 Canonical Schema 或 Wire 字段。
-- CURRENT_FACTS：PR #446 (merged) Head `ad5ca81a32b413aef3f9b5bccd06030aabde8275` 中的 `OWNER-DECISION-FACT-CLAIM-001` 选择 Option A（Fact 独立 Attestation、Claim 表示命题）及 I1（稳定 Claim Identity + 不可变 ClaimRevision）。PR #446 (merged) 仍为 Draft/未合并。B-ADR-FACT-CLAIM-001 对 Canonical Schema 冻结和实现映射仍保持 ADR-BLOCKED，直至其 §8 消费者、迁移/兼容和符合性条件均有证据。
+- CURRENT_FACTS：合并的 `OWNER-DECISION-FACT-CLAIM-001` 已选择 Option A（Fact 独立 Attestation、Claim 表示命题）及 I1（稳定 Claim Identity + 不可变 ClaimRevision），并取代 B ADR 作为当前语义决策请求。精确消费者实现映射、迁移/兼容和符合性仍为 Candidate，直至责任工件完成版本 Pin 和审查；没有任何 Wire 字段获批。
 - H_OWNED_CONTRACTS：未来 Wire 字段/Schema Mapping 归 H 所有且未冻结；本语义选择不批准任何 Wire 字段。
 - CROSS_MODULE_CONFLICT：语义方向已选择，但 E Candidate IR、D Identity/Lifecycle、I Authorization/Attestor Policy 和 H Payload Mapping 仍需精确消费者验收和来源 Pin，之后才能冻结共享 Schema。
 - OPTIONS：(A) 保留已选 Option A + I1 语义方向，在 消费者契约验收 门禁完成前继续保持 Payload 字段不透明；(B) 只有通过后续替代 Owner 决策才重新打开语义选择。
@@ -310,7 +310,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - D_I_IMPACT：D/I 语义不变；B 决议后审查消费者。
 - RUNTIME_IMPLEMENTATION_IMPACT：决议前不能实现最终 Fact/Claim Payload/Schema/Migration。
 - REQUIRED_AUTHORITY：Owner 语义选择记录于 PR #446 (merged)；Schema 冻结仍需 B/D/E/F/G/H/I 消费者映射和验收。
-- OWNER_DECISION：SEMANTIC_DIRECTION_SELECTED_OPTION_A_I1；ADR_SCHEMA_FREEZE_STILL_BLOCKED
+- OWNER_DECISION：SEMANTIC_DIRECTION_APPROVED_OPTION_A_I1；WIRE_SCHEMA_MAPPING_CANDIDATE
 - EVIDENCE：`OWNER-DECISION-FACT-CLAIM-001` PR #446 (merged) @ `ad5ca81a32b413aef3f9b5bccd06030aabde8275`；B ADR Blob 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593。
 - FOLLOW_UP_ACTIONS：B 更新 ADR 状态/来源 Pin；D/E/F/G/H/I 记录精确消费者映射和验收；补齐迁移/兼容计划及符合性场景；所有 §8 条件满足前 Payload 保持不透明。
 
