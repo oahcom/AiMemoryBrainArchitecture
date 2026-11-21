@@ -54,7 +54,7 @@ The BMCP contract's ProducerWork Registration Ledger Namespace and ForgetFence C
 
 **Claim** is the stable identity of a proposition. It contains ClaimRef and the Scope identity to which that proposition belongs. It is not itself a mutable assertion state.
 
-**ClaimRevision** is one immutable assertion state for a Claim. It contains ClaimRevisionRef, ClaimRef, optional exact parent ClaimRevisionRef, proposition fields (subject, predicate, object, polarity and substantive qualifiers), epistemic status, valid-time reference, Evidence references, Provenance references, assertion time, and correction/revision reason.
+**ClaimRevision** is one immutable assertion state for a Claim. It contains ClaimRevisionRef, ClaimRef, optional exact parent ClaimRevisionRef, proposition fields (subject, predicate, object, polarity and substantive qualifiers), epistemic status, valid-time reference, Scope references, Evidence references, Provenance references, assertion time, and correction/revision reason.
 
 **Invariants (testable):**
 
@@ -78,7 +78,7 @@ The BMCP contract's ProducerWork Registration Ledger Namespace and ForgetFence C
 **Invariants (testable):**
 
 - FactRef and FactRevisionRef are distinct from ClaimRef and ClaimRevisionRef.
-- Every FactRevision pins one or more exact ClaimRevisionRef values; it never follows a Claim's current head.
+- Every FactRevision pins one or more exact ClaimRevisionRef values; it never follows a Claim's current head. The plural set is required by `domain-model-overview.md` §8.1, item 3 (Shared Fact visibility): "A FactRevision linked to multiple ClaimRevisions may remain visible only if every disclosed dependency is independently authorized and not suppressed by an applicable Forget decision." Empty sets are rejected by `FactRevision::validate`.
 - Every FactRevision pins exact EvidenceRef and ProvenanceRef values and one Scope identity.
 - Confidence alone and Verified status alone cannot create a Fact.
 - Correction, withdrawal or reassessment appends a FactRevision; prior revisions are not overwritten.
@@ -86,6 +86,8 @@ The BMCP contract's ProducerWork Registration Ledger Namespace and ForgetFence C
 - A shared Fact does not confer access to its linked ClaimRevision, Evidence or Provenance.
 
 **Relationship to Phase 1:** Both types are new. They do not replace Claim or Evidence.
+
+**PENDING SEMANTIC DECISION — retraction of a pinned ClaimRevision (see `domain-model-overview.md` §3.16):** The current normative sources do not decide the disposition of a FactRevision when one of its exact pinned ClaimRevision values is later assigned `Retracted`. `epistemic-and-temporal-semantics.md` §§2 and 9 define append-only Claim status transitions and preservation of the historical assertion; `domain-model-overview.md` §3.15 and `OWNER-DECISION-FACT-CLAIM-001` §§2 and 5 require exact immutable ClaimRevision pins but do not specify propagation to Fact. No choice among continued attestation, invalidation, successor FactRevision, or suppression is made here. This remains **PENDING** and requires an explicit semantic ruling; implementations must not silently infer a disposition.
 
 **PENDING CROSS-OWNER DECISION:** I must define/approve Attestor principal identity, authorization decision semantics, and the security meaning of the authorization reference. D must confirm the canonical commit, revision, and Forget/dependency semantics for Fact/FactRevision. Until both decisions bind the same exact contract version, these fields are semantic placeholders only; no implementation may infer authorization or canonical acceptance.
 
@@ -182,6 +184,20 @@ Extend TimeValue/TemporalRef to preserve explicit precision, timezone, certainty
 
 **PENDING CROSS-OWNER DECISION:** D must decide whether canonical commit/transaction time is represented in the domain object or only in canonical storage metadata. F owns temporal query behavior; this specification does not define retrieval semantics.
 
+### 3.16 OPEN: Retraction propagation to pinned FactRevision
+
+**Status: OPEN / PENDING — no semantic choice is authorized.**
+
+A FactRevision pins exact ClaimRevisionRef values. The normative domain documents and the PR #446 `DECIDED FOR CONVERGENCE` section do not decide what happens when a pinned ClaimRevision is subsequently marked `Retracted`. Retraction MUST NOT be treated as equivalent to Forget; no propagation behavior is specified here.
+
+The following candidate semantics remain unresolved:
+
+1. **Continue visible:** the FactRevision remains visible with its exact historical pin. This preserves the attestation history, but may expose a fact whose supporting claim is no longer accepted.
+2. **Mark invalid:** the FactRevision remains stored but is treated as invalid for disclosure or use. This requires a defined invalidation status and rules for downstream consumers.
+3. **Append a suppressing revision:** a new FactRevision records suppression/revocation while preserving the prior immutable revision. This preserves append-only history, but requires a defined attestation and authorization path for the suppressing revision.
+
+**No candidate is selected. Implementations MUST NOT choose, infer, or add retraction propagation behavior until an explicit domain ruling resolves this item.** In particular, do not add a `retracted` field to FactRevision or silently invalidate/retain a Fact based on an implementation-local policy.
+
 ## 4. Phase 2 exclusions and ownership boundary
 
 The following are deliberately not added to `memory-domain` by this specification:
@@ -261,12 +277,30 @@ All five rows are **PENDING CROSS-OWNER DECISION**. No security, canonical persi
 
 ## 9. Phase boundary and status
 
-- Phase 1: implemented bounded core; this document does not reopen its accepted invariants.
-- Phase 2: this specification is PROPOSED; future implementation requires cross-owner decisions where listed and separate authorization.
+Phase 2 implementation status at this branch:
+
+| Specification row | Status | Executable proof |
+|---|---|---|
+| ClaimRef / ClaimRevisionRef / ClaimRevision | TYPED | `dm2_01_claim_revision_parent_must_belong_to_same_claim`; `dm2_02_claim_revision_is_append_only_and_immutable` serializes the parent before/after successor append and proves byte-identical preservation; restored Phase 1 assertions: `claim_revision_ref_constructs_and_validates`, `claim_revision_ref_rejects_empty_id`, `claim_revision_constructs_and_preserves_stable_identity_across_revisions`, `claim_revision_rejects_empty_scope_and_empty_reference`; compile-fail doctests prove cross-ref mixing and mutation are rejected |
+| FactRef / FactRevisionRef / Fact / FactRevision | TYPED | `dm2_03_fact_refs_are_distinct_and_fact_pins_exact_claim_revision`; `dm2_09_fact_pinning_does_not_follow_claim_head_after_append` appends Claim revision 2 and resolves the Fact's unchanged exact revision-1 pin; `dm2_04_fact_cannot_be_constructed_without_claim_evidence_provenance`; restored Phase 1 assertions: `fact_revision_ref_constructs_and_validates_independently`, `fact_revision_ref_rejects_empty_id`, `fact_revision_constructs_and_binds_exact_claim_revision_and_authorization`, `fact_revision_rejects_missing_method_scope_and_empty_references`; `fact_with_placeholder_attestor_validates_today` pins the known temporary placeholder window; compile-fail doctest proves confidence/Verified alone cannot construct Fact |
+| ClaimRef / FactRef construction | TYPED | Restored Phase 1 assertions: `claim_ref_constructs_and_validates`, `claim_ref_rejects_empty_id`, `fact_ref_constructs_and_validates_independently`, `fact_ref_rejects_empty_id`; `all_macro_generated_refs_reject_empty_id` exercises empty-ID rejection for all ten macro-generated ref types; constructor and post-deserialization empty-ID validation are both covered |
+| Entity identity extension | TYPED | `dm2_05_entity_merge_requires_successor_lineage_but_alias_does_not` proves A redirects to B, B does not redirect to A, and A's aliases/scoped external identifiers are migrated to B |
+| Relation typed endpoints and valid-time distinction | TYPED | `dm2_06_relation_endpoint_kind_is_checked_against_definition` rejects (Entity, Claim) under an (Entity, Entity) vocabulary; `dm2_08_unknown_valid_time_is_not_timeless` |
+| Evidence extension | TYPED | `dm2_07_evidence_extension_requires_integrity_and_scope` |
+| Provenance graph expansion | NOT TYPED | Only the `ProvenanceRef` newtype exists; no expanded Provenance record or DAG validation |
+| MemorySource expansion | NOT TYPED | Explicitly out of scope for this implementation round |
+| Temporal precision/timezone/certainty expansion | NOT TYPED | Only Relation's Unknown-versus-AllTime valid-time distinction is typed/tested |
+| I authorization and Attestor semantics | PLACEHOLDER ONLY — KNOWN CONSTRUCTION WINDOW | `pending_i()` is public; `FactRevision::validate` cannot distinguish the placeholder from a real I-issued reference. `fact_with_placeholder_attestor_validates_today` deliberately records this behavior; closing it requires I's contract and non-forgeable validated refs |
+| D canonical commit semantics | PLACEHOLDER ONLY — KNOWN CONSTRUCTION WINDOW | `pending_d()` is public; `FactRevision::validate` cannot distinguish it from a real D-issued commit reference. Closing it requires D's contract and non-forgeable validated refs |
+| Fact disposition after pinned ClaimRevision retraction | PENDING | Open item in this specification §3.16 enumerates three candidates; no propagation logic or `retracted` field is implemented |
+
+The Entity, Relation and Evidence Phase 1 structs remain source-compatible; their Phase 2 semantics are represented by additive extension records. Claim remains unchanged; ClaimRevision is additive. Fact construction requires a complete initial FactRevision and its required I/D placeholders.
+
+- Phase 1: implemented bounded core; this implementation does not reopen its accepted invariants.
+- Phase 2: the listed rows are TYPED only to the extent shown above; NOT TYPED rows remain open. The implementation is not accepted and requires independent review.
 - Phase 3: NOT ASSESSED and NOT CLAIMED COMPLETE.
 
-No code has been changed. No tests have been run by this specification task. No self-approval or acceptance is claimed.
-
+The code and tests are present on this branch. Test execution is reported separately; no self-approval or acceptance is claimed.
 ## 10. References
 
 All repository sources below were read at baseline `1ad6c2cf67a228f597fcbe1c7149c328ecbf38e9`:
