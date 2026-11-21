@@ -17,7 +17,8 @@ on:
 
 jobs:
   rust-workspace-test:
-    runs-on: ubuntu-latest
+    # Use the online self-hosted runner to avoid the GitHub-hosted runner billing block.
+    runs-on: [self-hosted, linux, x64]
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable

@@ -11,7 +11,8 @@ permissions:
 jobs:
   bilingual-docs:
     name: GOV-DOC-001 structural checks
-    runs-on: ubuntu-latest
+    # Use the online self-hosted runner to avoid the GitHub-hosted runner billing block.
+    runs-on: [self-hosted, linux, x64]
     steps:
       - name: Checkout pull request
         uses: actions/checkout@v4
