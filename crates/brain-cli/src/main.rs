@@ -7,7 +7,6 @@ use memory_storage_sqlite::SqliteMemoryStorage;
 use memory_store::{MemoryStore, RevisionWrite};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
-use std::fmt::Write as _;
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -246,10 +245,12 @@ fn run() -> Result<(), String> {
 }
 
 fn sha256_hex(bytes: &[u8]) -> String {
+    const HEX: &[u8; 16] = b"0123456789abcdef";
     let digest = Sha256::digest(bytes);
     let mut output = String::with_capacity(64);
     for byte in digest {
-        let _ = write!(output, "{byte:02x}");
+        output.push(HEX[(byte >> 4) as usize] as char);
+        output.push(HEX[(byte & 0x0f) as usize] as char);
     }
     output
 }
