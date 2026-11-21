@@ -20,46 +20,71 @@ fn scope(value: &str) -> ScopeRef {
     }
 }
 
-/// 空 OpaqueId 的元组字段是 crate 私有，集成测试只能经 serde 造出非法值。
-fn empty_id() -> OpaqueId {
-    serde_json::from_str("\"\"").unwrap()
-}
-
-fn with_empty_ref(value: serde_json::Value, field: &str) -> serde_json::Value {
-    let mut value = value;
-    value[field] = json!("");
-    value
-}
-
 fn claim_revision(revision: &str, claim: &str, evidence: &[&str]) -> ClaimRevision {
-    ClaimRevision {
-        revision_ref: ClaimRevisionRef::new(id(revision)).unwrap(),
-        claim_ref: ClaimRef::new(id(claim)).unwrap(),
-        subject_ref: id("subject"),
-        predicate: "has_value".into(),
-        object_value: "blue".into(),
-        polarity: "affirm".into(),
-        asserted_at: "2026-01-01T00:00:00Z".into(),
-        scope_refs: vec![scope("s1")],
-        qualifiers: vec![],
-        evidence_refs: evidence.iter().map(|e| id(e)).collect(),
-    }
+    ClaimRevision::initial(
+        ClaimRevisionRef::new(revision).unwrap(),
+        ClaimRef::new(claim).unwrap(),
+        "subject".into(),
+        "has_value".into(),
+        "blue".into(),
+        "affirm".into(),
+        vec![],
+        EpistemicStatus::Observed,
+        TimeValue::Unknown,
+        evidence
+            .iter()
+            .map(|value| EvidenceRef::new(*value).unwrap())
+            .collect(),
+        vec![ProvenanceRef::new("prov-claim").unwrap()],
+        "2026-01-01T00:00:00Z".into(),
+        "initial".into(),
+        vec![scope("s1")],
+    )
+    .unwrap()
+}
+
+fn fact_revision_with_pin(pin: &str) -> FactRevision {
+    FactRevision::initial(
+        FactRef::new("fact-1").unwrap(),
+        FactRevisionRef::new("fr-1").unwrap(),
+        vec![ClaimRevisionRef::new(pin).unwrap()],
+        vec![EvidenceRef::new("ev-1").unwrap()],
+        vec![ProvenanceRef::new("prov-1").unwrap()],
+        scope("s1"),
+        AttestorRef::pending_i(),
+        AuthorizationDecisionRef::pending_i(),
+        "independent_review".into(),
+        "1.0".into(),
+        FactOutcome::Attested,
+        "independent review supports the pinned claim".into(),
+        CanonicalCommitRef::pending_d(),
+        None,
+    )
+    .unwrap()
 }
 
 fn fact_revision() -> FactRevision {
-    FactRevision {
-        revision_ref: FactRevisionRef::new(id("fr-1")).unwrap(),
-        fact_ref: FactRef::new(id("fact-1")).unwrap(),
-        claim_revision_ref: ClaimRevisionRef::new(id("cr-1")).unwrap(),
-        evidence_refs: vec![id("ev-1")],
-        provenance_refs: vec![id("prov-1")],
-        scope_refs: vec![scope("s1")],
-        attestor_ref: id("attestor-1"),
-        method: "independent_review".into(),
-        method_version: "1.0".into(),
-        authorization_decision_ref: id("authz-1"),
-        established_at: "2026-01-02T00:00:00Z".into(),
-    }
+    fact_revision_with_pin("cr-1")
+}
+
+fn claim_revision_json_with(
+    value: &ClaimRevision,
+    field: &str,
+    replacement: serde_json::Value,
+) -> ClaimRevision {
+    let mut json = serde_json::to_value(value).unwrap();
+    json[field] = replacement;
+    serde_json::from_value(json).unwrap()
+}
+
+fn fact_revision_json_with(
+    value: &FactRevision,
+    field: &str,
+    replacement: serde_json::Value,
+) -> FactRevision {
+    let mut json = serde_json::to_value(value).unwrap();
+    json[field] = replacement;
+    serde_json::from_value(json).unwrap()
 }
 
 // ---------------------------------------------------------------- DM2-01
@@ -72,24 +97,19 @@ fn dm2_01_stable_claim_ref_across_revisions() {
 
     assert!(first.validate().is_ok());
     assert!(second.validate().is_ok());
-    assert_eq!(first.claim_ref, second.claim_ref);
-    assert_ne!(first.revision_ref, second.revision_ref);
+    assert_eq!(first.claim_ref(), second.claim_ref());
+    assert_ne!(first.revision_ref(), second.revision_ref());
 
     // 修订是追加而非覆盖：旧 revision 的证据集合原样保留。
-    assert_eq!(first.evidence_refs, vec![id("ev-1")]);
-    assert_eq!(second.evidence_refs.len(), 2);
+    assert_eq!(first.evidence_refs(), &[EvidenceRef::new("ev-1").unwrap()]);
+    assert_eq!(second.evidence_refs().len(), 2);
 
     // 校验必须拒绝空 revision_ref，而不是静默接受一个不可引用的 revision。
-    let broken: ClaimRevision = serde_json::from_value(with_empty_ref(
-        serde_json::to_value(&first).unwrap(),
-        "revision_ref",
-    ))
-    .unwrap();
+    let broken = claim_revision_json_with(&first, "revision_ref", json!(""));
     assert_eq!(broken.validate(), Err(DomainError::EmptyId));
 
     // 校验必须拒绝空 scope 集合。
-    let mut no_scope = first.clone();
-    no_scope.scope_refs.clear();
+    let no_scope = claim_revision_json_with(&first, "scope_refs", json!([]));
     assert_eq!(
         no_scope.validate(),
         Err(DomainError::EmptyRequiredField("scope_refs"))
@@ -97,7 +117,7 @@ fn dm2_01_stable_claim_ref_across_revisions() {
 }
 
 #[test]
-#[ignore = "blocked: 没有 revision registry / append-only store，ClaimRevisionRef 的全局唯一性与复用检测属于 D 的 canonical 存储语义 (B-P2-XO-02)，domain 层无处表达"]
+#[ignore = "blocked: 当前无 ClaimRevisionRegistry、register_revision 或 uniqueness-check API；ClaimRevision::validate 只校验单个值，不能检测跨 revision 的重复 ID"]
 fn dm2_01_claim_revision_ref_uniqueness_enforced() {
     unimplemented!()
 }
@@ -105,13 +125,31 @@ fn dm2_01_claim_revision_ref_uniqueness_enforced() {
 // ---------------------------------------------------------------- DM2-02
 
 #[test]
-#[ignore = "blocked: ClaimRevision 没有 parent_revision_ref 字段，无法表达「非初始 revision 恰有一个同 ClaimRef 父节点、初始 revision 无父」"]
 fn dm2_02_revision_parent_mismatch_rejected() {
-    unimplemented!()
+    let parent = claim_revision("cr-parent", "claim-a", &["ev-1"]);
+    let wrong_claim = ClaimRef::new("claim-b").unwrap();
+    let result = ClaimRevision::successor(
+        ClaimRevisionRef::new("cr-child").unwrap(),
+        wrong_claim,
+        &parent,
+        "subject".into(),
+        "has_value".into(),
+        "green".into(),
+        "affirm".into(),
+        vec![],
+        EpistemicStatus::Observed,
+        TimeValue::Unknown,
+        vec![EvidenceRef::new("ev-2").unwrap()],
+        vec![ProvenanceRef::new("prov-2").unwrap()],
+        "2026-01-02T00:00:00Z".into(),
+        "correction".into(),
+        vec![scope("s1")],
+    );
+    assert_eq!(result.unwrap_err(), DomainError::InvalidParent);
 }
 
 #[test]
-#[ignore = "blocked: 没有 accepted/immutable 状态表示，也没有可变路径；不可变性由 &self 与无 setter 在编译期保证，运行时无可观测的失败模式"]
+#[ignore = "blocked: ClaimRevision 没有 AcceptedRevisionState / acceptance transition API；私有字段与无 setter 只证明不可变值，不能验证被接受状态的 append-only 转移"]
 fn dm2_02_accepted_revision_is_append_only() {
     unimplemented!()
 }
@@ -119,7 +157,7 @@ fn dm2_02_accepted_revision_is_append_only() {
 // ---------------------------------------------------------------- DM2-03
 
 #[test]
-#[ignore = "blocked: 没有 CI-01..CI-13 分类器（无 classify API、DomainError 无 AmbiguousIdentityClassification 变体）；实现分类属于 Phase 2 实现授权范围，契约 §7 明确未冻结"]
+#[ignore = "blocked: memory_domain 当前没有 classify_claim_change / CI-01..CI-13 classifier 函数，也没有 DomainError::AmbiguousIdentityClassification"]
 fn dm2_03_ci_classification_vectors() {
     unimplemented!()
 }
@@ -131,30 +169,24 @@ fn dm2_04_fact_pins_exact_claim_revision_not_head() {
     // claim-1 已有更新的 head (cr-2)，但 FactRevision 仍精确指向旧 revision cr-1。
     let head = claim_revision("cr-2", "claim-1", &["ev-2"]);
     let pinned_old = claim_revision("cr-1", "claim-1", &["ev-1"]);
-
-    let mut fact = fact_revision();
-    fact.claim_revision_ref = pinned_old.revision_ref.clone();
+    let fact = fact_revision_with_pin(pinned_old.revision_ref().as_str());
     assert!(fact.validate().is_ok());
-
-    assert_eq!(fact.claim_revision_ref, pinned_old.revision_ref);
-    assert_ne!(fact.claim_revision_ref, head.revision_ref);
+    assert_eq!(
+        fact.claim_revision_refs(),
+        &[pinned_old.revision_ref().clone()]
+    );
+    assert_ne!(fact.claim_revision_refs()[0], *head.revision_ref());
 
     // 序列化往返不得把精确引用"升级"为 head。
-    let round: FactRevision =
-        serde_json::from_str(&serde_json::to_string(&fact).unwrap()).unwrap();
-    assert_eq!(round.claim_revision_ref.as_str(), "cr-1");
+    let round: FactRevision = serde_json::from_str(&serde_json::to_string(&fact).unwrap()).unwrap();
+    assert_eq!(round.claim_revision_refs()[0].as_str(), "cr-1");
 
     // 空的精确引用必须被拒绝，不得被解释为"取当前 head"。
-    let broken: FactRevision = serde_json::from_value(with_empty_ref(
-        serde_json::to_value(&fact).unwrap(),
-        "claim_revision_ref",
-    ))
-    .unwrap();
+    let broken = fact_revision_json_with(&fact, "claim_revision_refs", json!([""]));
     assert_eq!(broken.validate(), Err(DomainError::EmptyId));
 }
-
 #[test]
-#[ignore = "blocked: 没有 ClaimRef -> ClaimRevision 的解析 API，无法证明解析器拒绝 head 替换（只能证明值类型保存了精确引用）"]
+#[ignore = "blocked: memory_domain 当前没有 ClaimRevisionResolver trait、resolve_claim_head 或 resolve_revision API；只能验证 FactRevision 保存精确 ClaimRevisionRef，不能验证 resolver 拒绝 head substitution"]
 fn dm2_04_resolution_rejects_claim_head_substitution() {
     unimplemented!()
 }
@@ -166,75 +198,144 @@ fn dm2_05_fact_identity_distinct_and_pins_exact_refs() {
     let fact = fact_revision();
     assert!(fact.validate().is_ok());
 
-    // Fact 身份独立于它引用的 ClaimRevision：换 pin 不改 FactRef。
-    let mut repinned = fact.clone();
-    repinned.claim_revision_ref = ClaimRevisionRef::new(id("cr-other")).unwrap();
-    assert_eq!(repinned.fact_ref, fact.fact_ref);
-    assert_ne!(repinned.claim_revision_ref, fact.claim_revision_ref);
+    // Fact 身份独立于它引用的 ClaimRevision：不同 pin 不改 FactRef。
+    let repinned = fact_revision_with_pin("cr-other");
+    assert_eq!(repinned.fact_ref(), fact.fact_ref());
+    assert_ne!(repinned.claim_revision_refs(), fact.claim_revision_refs());
 
     // Evidence 必须非空且精确。
-    let mut no_evidence = fact.clone();
-    no_evidence.evidence_refs.clear();
+    let no_evidence = fact_revision_json_with(&fact, "evidence_refs", json!([]));
     assert_eq!(
         no_evidence.validate(),
-        Err(DomainError::EmptyRequiredField("evidence_refs"))
+        Err(DomainError::MissingFactEvidence)
     );
 
     // Provenance 必须非空且精确。
-    let mut no_provenance = fact.clone();
-    no_provenance.provenance_refs.clear();
+    let no_provenance = fact_revision_json_with(&fact, "provenance_refs", json!([]));
     assert_eq!(
         no_provenance.validate(),
-        Err(DomainError::EmptyRequiredField("provenance_refs"))
+        Err(DomainError::MissingFactProvenance)
     );
 
-    let mut empty_evidence = fact.clone();
-    empty_evidence.evidence_refs = vec![empty_id()];
+    let empty_evidence = fact_revision_json_with(&fact, "evidence_refs", json!([""]));
     assert_eq!(empty_evidence.validate(), Err(DomainError::EmptyId));
 
-    let mut empty_provenance = fact.clone();
-    empty_provenance.provenance_refs = vec![empty_id()];
+    let empty_provenance = fact_revision_json_with(&fact, "provenance_refs", json!([""]));
     assert_eq!(empty_provenance.validate(), Err(DomainError::EmptyId));
+}
+
+#[test]
+fn dm2_05_fact_revision_accepts_multiple_exact_claim_revision_pins() {
+    let first = ClaimRevisionRef::new("cr-1").unwrap();
+    let second = ClaimRevisionRef::new("cr-2").unwrap();
+    let fact = FactRevision::initial(
+        FactRef::new("fact-multi").unwrap(),
+        FactRevisionRef::new("fr-multi").unwrap(),
+        vec![first.clone(), second.clone()],
+        vec![EvidenceRef::new("ev-multi").unwrap()],
+        vec![ProvenanceRef::new("prov-multi").unwrap()],
+        scope("s1"),
+        AttestorRef::pending_i(),
+        AuthorizationDecisionRef::pending_i(),
+        "joint_review".into(),
+        "1.0".into(),
+        FactOutcome::Attested,
+        "both independently authorized dependencies are required".into(),
+        CanonicalCommitRef::pending_d(),
+        None,
+    )
+    .unwrap();
+    assert!(fact.validate().is_ok());
+    assert_eq!(fact.claim_revision_refs(), &[first, second]);
 }
 
 // ---------------------------------------------------------------- DM2-06
 
 #[test]
+#[ignore = "blocked: FactRevision::initial 强制要求 AuthorizationDecisionRef，但当前唯一公开构造是 AuthorizationDecisionRef::pending_i()；类型没有 absent/validated-I-issued 状态，无法证明缺失授权被拒绝。Round 4 的 fact_with_placeholder_attestor_validates_today 固定了当前占位符可通过的事实"]
 fn dm2_06_missing_authorization_ref_blocks_fact_publication() {
-    let fact = fact_revision();
-    assert!(fact.validate().is_ok());
-
-    // 缺失 I 授权决策引用 → 不可进入 canonical 发布。
-    let mut missing = fact.clone();
-    missing.authorization_decision_ref = empty_id();
-    assert_eq!(missing.validate(), Err(DomainError::EmptyId));
-
-    // 有引用即可通过 domain 校验；引用在 I 语义上是否有效属 B-P2-XO-01 未冻结范围。
-    let mut present = fact.clone();
-    present.authorization_decision_ref = id("authz-2");
-    assert!(present.validate().is_ok());
+    unimplemented!()
 }
 
 // ---------------------------------------------------------------- DM2-07
 
 #[test]
-#[ignore = "blocked: Entity 只有 entity_id/entity_type/canonical_label/scope_refs，没有 alias、identity status、merge/split lineage 字段，也没有身份解析 API；「标签相同不合并身份」在当前模型中无任何可失败路径"]
 fn dm2_07_label_alias_does_not_merge_identity() {
-    unimplemented!()
+    let mut left = EntityIdentityExtension {
+        entity_ref: EntityRef::new("entity-left").unwrap(),
+        status: EntityIdentityStatus::Resolved,
+        aliases: vec![],
+        external_identifiers: vec![],
+        merge_lineage: None,
+        split_successor_refs: vec![],
+    };
+    let right = EntityIdentityExtension {
+        entity_ref: EntityRef::new("entity-right").unwrap(),
+        status: EntityIdentityStatus::Resolved,
+        aliases: vec![],
+        external_identifiers: vec![],
+        merge_lineage: None,
+        split_successor_refs: vec![],
+    };
+    left.add_alias(EntityAlias {
+        value: "same label".into(),
+        language: Some("en".into()),
+    })
+    .unwrap();
+    assert_ne!(left.entity_ref, right.entity_ref);
+    assert_eq!(left.aliases[0].value, "same label");
+    assert!(left.merge_lineage.is_none());
+    assert!(right.merge_lineage.is_none());
 }
 
 // ---------------------------------------------------------------- DM2-08
 
 #[test]
-#[ignore = "blocked: Relation 的端点是无类型 OpaqueId、relation_type 是裸 String、没有 Relation::validate 也没有关系词汇表 registry，无法表达「端点类型不被关系定义允许」与「未注册关系类型」"]
-fn dm2_08_invalid_relation_endpoint_and_unregistered_type_rejected() {
+fn dm2_08_invalid_relation_endpoint_rejected() {
+    let extension = RelationExtension {
+        subject: RelationEndpoint::Entity(EntityRef::new("entity-1").unwrap()),
+        object: RelationEndpoint::Fact(FactRef::new("fact-1").unwrap()),
+        directionality: RelationDirectionality::Directed,
+        qualifiers: vec![],
+        valid_time: Some(ValidTimeRef::Unknown),
+        epistemic_status: EpistemicStatus::Observed,
+        evidence_refs: vec![EvidenceRef::new("ev-1").unwrap()],
+        lifecycle_state: RelationLifecycleState::Active,
+    };
+    let definition = RelationDefinition {
+        relation_type: "owns".into(),
+        allowed_subject_kinds: vec![RelationEndpointKind::Entity],
+        allowed_object_kinds: vec![RelationEndpointKind::Entity],
+    };
+    assert_eq!(
+        extension.validate(&definition),
+        Err(DomainError::InvalidRelationEndpoint)
+    );
+
+    let empty_type = RelationDefinition {
+        relation_type: String::new(),
+        ..definition
+    };
+    let compatible = RelationExtension {
+        object: RelationEndpoint::Entity(EntityRef::new("entity-2").unwrap()),
+        ..extension
+    };
+    assert_eq!(
+        compatible.validate(&empty_type),
+        Err(DomainError::EmptyRequiredField("relation_type"))
+    );
+}
+
+#[test]
+#[ignore = "blocked: RelationDefinition 只描述单个 relation_type 的允许端点，没有 RelationTypeRegistry / contains_relation_type API；无法判定一个非空 relation_type 是否已注册"]
+fn dm2_08_unregistered_relation_type_rejected() {
     unimplemented!()
 }
 
 // ---------------------------------------------------------------- DM2-09
 
 #[test]
-#[ignore = "blocked: Relation 只有 relation_type/端点/scope_refs，没有 valid time、epistemic status、relation lifecycle 字段，三个维度无法在模型中区分"]
+#[ignore = "blocked: RelationExtension 提供 valid_time/epistemic_status/lifecycle_state，但没有 scope_refs；当前不能断言时间、scope、lifecycle 三者可独立变化"]
 fn dm2_09_relation_time_scope_lifecycle_independent() {
     unimplemented!()
 }
@@ -260,15 +361,44 @@ fn dm2_10_evidence_role_is_closed_to_four_allowed_values() {
 }
 
 #[test]
-#[ignore = "blocked: Evidence 没有 availability 字段、没有 kind/collector/integrity，也没有 Evidence::validate；「至少一个 ScopeRef」「availability 显式表示」均无法校验"]
 fn dm2_10_evidence_availability_and_scope_enforced_independently() {
-    unimplemented!()
+    let base = EvidenceExtension {
+        evidence_ref: EvidenceRef::new("ev-1").unwrap(),
+        kind: EvidenceKind::Document,
+        source_ref: EvidenceSourceRef::External(ExternalSourceRef::new("source-1").unwrap()),
+        locator: Some("doc://1".into()),
+        observed_at: Some(TimeValue::Unknown),
+        collector: ActorRef {
+            actor_id: id("collector"),
+        },
+        integrity_digest: "sha256:abc".into(),
+        availability: EvidenceAvailability::Available,
+        scope_refs: vec![scope("s1")],
+    };
+    assert!(base.validate().is_ok());
+    let restricted = EvidenceExtension {
+        availability: EvidenceAvailability::Restricted,
+        ..base.clone()
+    };
+    let forgotten = EvidenceExtension {
+        availability: EvidenceAvailability::Forgotten,
+        ..base.clone()
+    };
+    assert_ne!(restricted.availability, forgotten.availability);
+    let no_scope = EvidenceExtension {
+        scope_refs: vec![],
+        ..base
+    };
+    assert_eq!(
+        no_scope.validate(),
+        Err(DomainError::EmptyRequiredField("scope_refs"))
+    );
 }
 
 // ---------------------------------------------------------------- DM2-11
 
 #[test]
-#[ignore = "blocked: Provenance 只有 provenance_id/source_refs/derivation_kind/actor_ref/created_at，没有 Provenance::validate、没有 source version、没有 parent lineage、没有 unavailable reason 字段"]
+#[ignore = "blocked: Provenance 当前字段仅为 provenance_id/source_refs/derivation_kind/actor_ref/created_at；没有 Provenance::validate、source_version_ref、parent_provenance_refs 或 unavailable_reason"]
 fn dm2_11_provenance_lineage_or_unavailable_reason_mandatory() {
     unimplemented!()
 }
@@ -276,7 +406,7 @@ fn dm2_11_provenance_lineage_or_unavailable_reason_mandatory() {
 // ---------------------------------------------------------------- DM2-12
 
 #[test]
-#[ignore = "blocked: 没有 ancestry/derivation graph 结构，也没有 Evidence 去重或独立性判定 API，无法表达「共同祖先的重复派生不构成独立佐证」"]
+#[ignore = "blocked: 当前无 ProvenanceGraph / DerivationEdge 类型，也无 EvidenceIndependence::validate_independent 或 ancestry traversal API；不能判定两条 Evidence 是否共享祖先"]
 fn dm2_12_shared_ancestry_not_independent_evidence() {
     unimplemented!()
 }
@@ -400,7 +530,9 @@ fn dm2_14_phase1_serialization_remains_compatible() {
         provenance_id: id("prov-1"),
         source_refs: vec![id("src-1")],
         derivation_kind: "direct_capture".into(),
-        actor_ref: ActorRef { actor_id: id("actor-1") },
+        actor_ref: ActorRef {
+            actor_id: id("actor-1"),
+        },
         created_at: "2026-01-01T00:00:00Z".into(),
     };
     assert_eq!(

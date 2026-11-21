@@ -7,8 +7,42 @@ pub mod admission;
 
 use std::collections::BTreeSet;
 use memory_domain::OpaqueId;
+use sha2::{Digest, Sha256};
 
 pub const COMPILER_VERSION: &str = "0.1.0";
+
+/// Strongly typed identifier for a producer work item admitted by the compiler.
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub struct ProducerWorkItemId(OpaqueId);
+
+impl ProducerWorkItemId {
+    pub fn new(value: OpaqueId) -> Self {
+        Self(value)
+    }
+
+    pub fn as_opaque_id(&self) -> &OpaqueId {
+        &self.0
+    }
+}
+
+/// Digest algorithm used for the interim payload integrity check.
+pub const PAYLOAD_DIGEST_ALGORITHM: &str = "sha256";
+
+/// Representation the digest is computed over. `raw-v1` means the exact UTF-8
+/// bytes of the accepted payload, with no canonical envelope normalisation.
+/// A versioned canonical envelope is owned by the BMCP/domain contract and is
+/// not defined here.
+pub const PAYLOAD_CANONICALIZATION_VERSION: &str = "raw-v1";
+
+/// SHA-256 over the exact UTF-8 bytes of the accepted payload.
+///
+/// ponytail: raw bytes only, not the canonical envelope the stage contract
+/// ultimately describes. Upgrade path is a versioned `canonicalization_version`
+/// supplied by the BMCP/domain contract; until then this value is honestly
+/// labelled `raw-v1` rather than presented as canonical.
+fn raw_payload_digest(payload: &str) -> String {
+    format!("sha256:{:x}", Sha256::digest(payload.as_bytes()))
+}
 
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub struct Identity(pub String);
@@ -27,6 +61,8 @@ impl Identity {
 pub struct Provenance {
     pub source_event_id: Identity,
     pub source_payload_digest: String,
+    pub payload_digest_algorithm: String,
+    pub canonicalization_version: String,
     pub stage_output_id: Identity,
     pub upstream_outputs: Vec<Identity>,
     pub compiler_version: String,
@@ -50,6 +86,10 @@ pub enum CompilerError {
     MissingAcceptedReceipt,
     MissingCompileIntent,
     InvalidPayloadDigest,
+    PayloadDigestMismatch {
+        declared: String,
+        computed: String,
+    },
     EmptyExtraction,
     InvalidNormalizedValue,
     IncompleteDependencyClosure,
@@ -223,10 +263,15 @@ pub struct PublishedDerivative {
     pub disposition: PublicationDisposition,
 }
 
+/// Publication outcome. `Failed` is reserved for the Storage boundary when
+/// visibility advancement fails; this crate has no Storage advancement hook
+/// and therefore has no in-crate trigger for that disposition.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum PublicationDisposition {
     Published,
     Suppressed,
+    Blocked,
+    Failed,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -267,9 +312,19 @@ impl IngestionStage {
             return Err(CompilerError::InvalidPayloadDigest);
         }
 
+        let computed_digest = raw_payload_digest(&event.payload);
+        if event.payload_digest != computed_digest {
+            return Err(CompilerError::PayloadDigestMismatch {
+                declared: event.payload_digest,
+                computed: computed_digest,
+            });
+        }
+
         let provenance = Provenance {
             source_event_id: event.event_id.clone(),
-            source_payload_digest: event.payload_digest.clone(),
+            source_payload_digest: computed_digest.clone(),
+            payload_digest_algorithm: PAYLOAD_DIGEST_ALGORITHM.into(),
+            canonicalization_version: PAYLOAD_CANONICALIZATION_VERSION.into(),
             stage_output_id: Identity(format!("{}:ingestion", event.event_id.0)),
             upstream_outputs: vec![],
             compiler_version: COMPILER_VERSION.into(),
@@ -281,7 +336,7 @@ impl IngestionStage {
         Ok(IngestedEvent {
             event_id: event.event_id,
             receipt_id: event.receipt_id,
-            payload_digest: event.payload_digest,
+            payload_digest: computed_digest,
             payload: event.payload,
             provenance,
         })
@@ -310,6 +365,8 @@ impl ExtractionStage {
         let provenance = Provenance {
             source_event_id: input.event_id.clone(),
             source_payload_digest: input.payload_digest,
+            payload_digest_algorithm: input.provenance.payload_digest_algorithm.clone(),
+            canonicalization_version: input.provenance.canonicalization_version.clone(),
             stage_output_id: Identity(format!(
                 "{}:extraction:{}",
                 input.event_id.0,
@@ -351,6 +408,8 @@ impl NormalizationStage {
         let provenance = Provenance {
             source_event_id: input.event_id.clone(),
             source_payload_digest: input.provenance.source_payload_digest.clone(),
+            payload_digest_algorithm: input.provenance.payload_digest_algorithm.clone(),
+            canonicalization_version: input.provenance.canonicalization_version.clone(),
             stage_output_id: Identity(format!(
                 "{}:normalization:{}",
                 input.event_id.0,
@@ -411,6 +470,8 @@ impl StagingStage {
         let provenance = Provenance {
             source_event_id: input.normalized.event_id.clone(),
             source_payload_digest: input.normalized.provenance.source_payload_digest.clone(),
+            payload_digest_algorithm: input.normalized.provenance.payload_digest_algorithm.clone(),
+            canonicalization_version: input.normalized.provenance.canonicalization_version.clone(),
             stage_output_id: input.derivative_id.clone(),
             upstream_outputs: vec![input.normalized.provenance.stage_output_id],
             compiler_version: COMPILER_VERSION.into(),
@@ -454,19 +515,30 @@ impl PublicationGate {
         if lease.generation != current_generation
             || staged.provenance.attempt_generation != lease.generation
         {
-            return Err(CompilerError::StaleWorker);
+            return Ok(PublishedDerivative {
+                derivative: staged,
+                disposition: PublicationDisposition::Suppressed,
+            });
         }
 
         if staged.visibility != Visibility::Hidden {
-            return Err(CompilerError::InvalidPublicationProof);
+            return Ok(PublishedDerivative {
+                derivative: staged,
+                disposition: PublicationDisposition::Blocked,
+            });
         }
 
+        // Authority failures remain errors: they are not a publication
+        // disposition and must be propagated without reinterpretation.
         let proof = authority.obtain_proof(&staged, lease)?;
 
         if proof.publication_id != staged.publication_id
             || proof.generation != lease.generation
         {
-            return Err(CompilerError::InvalidPublicationProof);
+            return Ok(PublishedDerivative {
+                derivative: staged,
+                disposition: PublicationDisposition::Blocked,
+            });
         }
 
         if !proof.producer_admitted
@@ -474,7 +546,10 @@ impl PublicationGate {
             || !proof.canonical_commit_confirmed
             || !proof.storage_prepared_hidden
         {
-            return Err(CompilerError::InvalidPublicationProof);
+            return Ok(PublishedDerivative {
+                derivative: staged,
+                disposition: PublicationDisposition::Blocked,
+            });
         }
 
         if !proof.publication_participant_admitted
@@ -521,16 +596,16 @@ impl<A: PublicationAuthority> MemoryCompiler<A> {
         mut staging: StagingInput,
         lease: WorkerLease,
         current_generation: u64,
-        producer_work_item_id: &OpaqueId,
+        producer_work_item_id: &ProducerWorkItemId,
     ) -> Result<PublishedDerivative, CompilerError> {
         let producer_receipt = self.admission
-            .producer_receipt(producer_work_item_id)
+            .producer_receipt(producer_work_item_id.as_opaque_id())
             .map_err(map_admission_error)?;
         if producer_receipt.disposition != admission::RegistrationDisposition::Accepted {
             return Err(CompilerError::MissingProducerAdmission);
         }
         let producer_request = self.admission
-            .producer_request(producer_work_item_id)
+            .producer_request(producer_work_item_id.as_opaque_id())
             .map_err(map_admission_error)?;
 
         let artifact_ref = OpaqueId::new(staging.derivative_id.0.clone())
@@ -543,7 +618,7 @@ impl<A: PublicationAuthority> MemoryCompiler<A> {
             return Err(CompilerError::IncompleteDependencyClosure);
         }
         let dependency_entries = self.admission
-            .dependency_entries_for(&artifact_ref, &artifact_version, producer_work_item_id)
+            .dependency_entries_for(&artifact_ref, &artifact_version, producer_work_item_id.as_opaque_id())
             .map_err(map_admission_error)?;
         if dependency_entries.is_empty() {
             return Err(CompilerError::IncompleteDependencyClosure);
@@ -586,7 +661,10 @@ impl<A: PublicationAuthority> MemoryCompiler<A> {
             &mut self.authority,
         )?;
         if gated.disposition != PublicationDisposition::Published {
-            return Err(CompilerError::PublicationSuppressed);
+            // Preserve the publication gate's typed terminal outcome.
+            // In particular, Suppressed must remain distinguishable from
+            // retryable Blocked outcomes.
+            return Ok(gated);
         }
 
         let observation = self.admission.observe_fence().map_err(map_admission_error)?;
@@ -598,7 +676,7 @@ impl<A: PublicationAuthority> MemoryCompiler<A> {
             publication_operation_id: publication_operation_id.clone(),
             artifact_ref,
             artifact_version,
-            producer_work_item_id: producer_work_item_id.clone(),
+            producer_work_item_id: producer_work_item_id.as_opaque_id().clone(),
             derivation_run_id,
             attempt_id: OpaqueId::new(format!("attempt:{}", lease.generation))
                 .map_err(|_| CompilerError::InvalidIdentity)?,
@@ -612,7 +690,7 @@ impl<A: PublicationAuthority> MemoryCompiler<A> {
             request_digest: format!(
                 "compiler-publication:{}:{}:{}",
                 gated.derivative.publication_id.0,
-                producer_work_item_id.as_str(),
+                producer_work_item_id.as_opaque_id().as_str(),
                 lease.generation
             ),
         };
@@ -680,6 +758,124 @@ impl<A: PublicationAuthority> MemoryCompiler<A> {
 }
 
 #[cfg(test)]
+fn digest_of(payload: &str) -> String {
+    // Deliberately independent of raw_payload_digest: a fixture built from the
+    // production helper would make every digest test tautological.
+    format!("sha256:{:x}", Sha256::digest(payload.as_bytes()))
+}
+
+#[cfg(test)]
+mod payload_digest_tests {
+    use super::*;
+
+    #[test]
+    fn sha256_raw_v1_matches_a_known_vector() {
+        // NIST FIPS 180-4 test vector for "abc".
+        assert_eq!(
+            raw_payload_digest("abc"),
+            "sha256:ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        );
+        assert_eq!(raw_payload_digest("abc"), digest_of("abc"));
+    }
+
+    #[test]
+    fn ingestion_rejects_payload_changed_without_digest_update() {
+        let mut event = AcceptedEvent {
+            event_id: Identity::new("event-tampered-payload").unwrap(),
+            receipt_id: Identity::new("receipt-tampered-payload").unwrap(),
+            payload_digest: digest_of("original payload"),
+            payload: "original payload".into(),
+            compile_intent_durable: true,
+        };
+        event.payload = "tampered payload".into();
+
+        let result = IngestionStage::run(event, 1);
+        assert!(matches!(
+            &result,
+            Err(CompilerError::PayloadDigestMismatch { .. })
+        ));
+
+        match result {
+            Err(CompilerError::PayloadDigestMismatch { declared, computed }) => {
+                assert_eq!(declared, digest_of("original payload"));
+                assert_eq!(computed, digest_of("tampered payload"));
+                assert_ne!(declared, computed);
+            }
+            other => panic!("expected PayloadDigestMismatch, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn ingestion_rejects_digest_changed_without_payload_update() {
+        let payload = "payload remains unchanged";
+        let mut event = AcceptedEvent {
+            event_id: Identity::new("event-tampered-digest").unwrap(),
+            receipt_id: Identity::new("receipt-tampered-digest").unwrap(),
+            payload_digest: digest_of(payload),
+            payload: payload.into(),
+            compile_intent_durable: true,
+        };
+        let correct = event.payload_digest.clone();
+        event.payload_digest = "0".repeat(64);
+
+        let result = IngestionStage::run(event, 1);
+        assert!(matches!(
+            &result,
+            Err(CompilerError::PayloadDigestMismatch { .. })
+        ));
+        match result {
+            Err(CompilerError::PayloadDigestMismatch { declared, computed }) => {
+                assert_eq!(declared, "0".repeat(64));
+                assert_eq!(computed, correct);
+            }
+            other => panic!("expected PayloadDigestMismatch, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn valid_digest_is_recomputed_and_carried_to_the_next_stage() {
+        let payload = "A valid payload. A second sentence.";
+        let expected = digest_of(payload);
+
+        let event = AcceptedEvent {
+            event_id: Identity::new("event-valid-digest").unwrap(),
+            receipt_id: Identity::new("receipt-valid-digest").unwrap(),
+            payload_digest: expected.clone(),
+            payload: payload.into(),
+            compile_intent_durable: true,
+        };
+
+        let ingested = IngestionStage::run(event, 1).unwrap();
+        // The stored value is the recomputed one, which is what proves the
+        // comparison actually ran rather than the input being copied through.
+        assert_eq!(ingested.payload_digest, expected);
+        assert_eq!(ingested.provenance.source_payload_digest, expected);
+        assert_eq!(ingested.provenance.payload_digest_algorithm, "sha256");
+        assert_eq!(ingested.provenance.canonicalization_version, "raw-v1");
+
+        let extracted = ExtractionStage::run(ingested, 1).unwrap();
+        assert_eq!(extracted.provenance.source_payload_digest, expected);
+        assert_eq!(extracted.provenance.payload_digest_algorithm, "sha256");
+        assert_eq!(extracted.provenance.canonicalization_version, "raw-v1");
+    }
+
+    #[test]
+    fn ingestion_accepts_event_store_sha256_prefixed_digest() {
+        let payload = "prefix format is emitted by Event Store";
+        let event = AcceptedEvent {
+            event_id: Identity::new("event-prefixed-digest").unwrap(),
+            receipt_id: Identity::new("receipt-prefixed-digest").unwrap(),
+            payload_digest: digest_of(payload),
+            payload: payload.into(),
+            compile_intent_durable: true,
+        };
+
+        let ingested = IngestionStage::run(event, 1).unwrap();
+        assert_eq!(ingested.payload_digest, digest_of(payload));
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
 
@@ -688,11 +884,12 @@ mod tests {
     }
 
     fn event() -> AcceptedEvent {
+        let payload = "I plan to move to Tokyo. I tried to deploy.".to_owned();
         AcceptedEvent {
             event_id: id("event-1"),
             receipt_id: id("receipt-1"),
-            payload_digest: "sha256:source".into(),
-            payload: "I plan to move to Tokyo. I tried to deploy.".into(),
+            payload_digest: digest_of(&payload),
+            payload,
             compile_intent_durable: true,
         }
     }
@@ -719,6 +916,30 @@ mod tests {
     struct TestAuthority {
         publication_admitted: bool,
         visibility_authorized: bool,
+    }
+
+    struct EvidenceAuthority {
+        producer_admitted: bool,
+        storage_prepared_hidden: bool,
+    }
+
+    impl PublicationAuthority for EvidenceAuthority {
+        fn obtain_proof(
+            &mut self,
+            staged: &StagedDerivative,
+            lease: &WorkerLease,
+        ) -> Result<PublicationProof, CompilerError> {
+            Ok(PublicationProof {
+                publication_id: staged.publication_id.clone(),
+                generation: lease.generation,
+                producer_admitted: self.producer_admitted,
+                dependency_closure_complete: true,
+                canonical_commit_confirmed: true,
+                storage_prepared_hidden: self.storage_prepared_hidden,
+                publication_participant_admitted: true,
+                protected_visibility_authorized: true,
+            })
+        }
     }
 
     impl PublicationAuthority for TestAuthority {
@@ -826,17 +1047,66 @@ mod tests {
     }
 
     #[test]
-    fn late_worker_cannot_publish() {
+    fn stale_generation_returns_suppressed() {
         let (_, _, normalized) = pipeline();
         let staged = StagingStage::run(staging_input(normalized), 1).unwrap();
         let mut authority = TestAuthority {
             publication_admitted: true,
             visibility_authorized: true,
         };
-        assert_eq!(
-            PublicationGate::run(staged, &lease(), 2, &mut authority),
-            Err(CompilerError::StaleWorker)
-        );
+        let result = PublicationGate::run(staged, &lease(), 2, &mut authority).unwrap();
+        assert_eq!(result.disposition, PublicationDisposition::Suppressed);
+        assert_eq!(result.derivative.visibility, Visibility::Hidden);
+    }
+
+    #[test]
+    fn non_hidden_visibility_returns_blocked() {
+        let (_, _, normalized) = pipeline();
+        let mut staged = StagingStage::run(staging_input(normalized), 1).unwrap();
+        staged.visibility = Visibility::Visible;
+        let mut authority = TestAuthority {
+            publication_admitted: true,
+            visibility_authorized: true,
+        };
+        let result = PublicationGate::run(staged, &lease(), 1, &mut authority).unwrap();
+        assert_eq!(result.disposition, PublicationDisposition::Blocked);
+        assert_eq!(result.derivative.visibility, Visibility::Visible);
+    }
+
+    #[test]
+    fn missing_storage_prepared_hidden_returns_blocked() {
+        let (_, _, normalized) = pipeline();
+        let staged = StagingStage::run(staging_input(normalized), 1).unwrap();
+        let mut authority = EvidenceAuthority {
+            producer_admitted: true,
+            storage_prepared_hidden: false,
+        };
+        let result = PublicationGate::run(staged, &lease(), 1, &mut authority).unwrap();
+        assert_eq!(result.disposition, PublicationDisposition::Blocked);
+        assert_eq!(result.derivative.visibility, Visibility::Hidden);
+    }
+
+    #[test]
+    fn missing_producer_admission_returns_blocked() {
+        let (_, _, normalized) = pipeline();
+        let staged = StagingStage::run(staging_input(normalized), 1).unwrap();
+        let mut authority = EvidenceAuthority {
+            producer_admitted: false,
+            storage_prepared_hidden: true,
+        };
+        let result = PublicationGate::run(staged, &lease(), 1, &mut authority).unwrap();
+        assert_eq!(result.disposition, PublicationDisposition::Blocked);
+        assert_eq!(result.derivative.visibility, Visibility::Hidden);
+    }
+
+    #[test]
+    fn failed_variant_exists_but_is_unreachable_here() {
+        // Storage owns visibility advancement and must report Failed when that
+        // boundary cannot advance visibility. PublicationGate has no such hook.
+        assert!(matches!(
+            PublicationDisposition::Failed,
+            PublicationDisposition::Failed
+        ));
     }
 
     #[test]
@@ -865,7 +1135,11 @@ mod tests {
         }
     }
 
-    fn register_compile_inputs(store: &mut admission::AdmissionStore) -> OpaqueId {
+    fn register_compile_inputs(store: &mut admission::AdmissionStore) -> ProducerWorkItemId {
+        let producer_id = oid("producer-identity");
+        if !store.is_producer_registered(&producer_id).unwrap() {
+            store.register_producer(&producer_id, "compiler-test-registry-digest").unwrap();
+        }
         let work_id = oid("work-1");
         store.register_producer_work(admission::ProducerRegistrationRequest {
             producer_work_item_id: work_id.clone(),
@@ -899,7 +1173,7 @@ mod tests {
                 request_digest: format!("digest-{edge}"),
             }).unwrap();
         }
-        work_id
+        ProducerWorkItemId::new(work_id)
     }
 
     #[test]
@@ -916,7 +1190,7 @@ mod tests {
         let result = compiler.compile(event(), staging_input(pipeline().2), lease(), 1, &work_id).unwrap();
         assert_eq!(result.disposition, PublicationDisposition::Published);
         assert_eq!(result.derivative.visibility, Visibility::Visible);
-        assert_eq!(compiler.admission.producer_receipt(&work_id).unwrap().producer_work_item_id, work_id);
+        assert_eq!(compiler.admission.producer_receipt(work_id.as_opaque_id()).unwrap().producer_work_item_id, work_id.as_opaque_id().clone());
         assert_eq!(compiler.admission.publication_receipt_count().unwrap(), 1);
         let publication_id = oid("compiler-publication:publication-1");
         assert!(compiler.admission.publication_receipt(&publication_id).unwrap().visible);
@@ -931,7 +1205,9 @@ mod tests {
             },
             admission: admission::AdmissionStore::in_memory().unwrap(),
         };
-        let work_id = oid("work-1");
+        let producer_id = oid("producer-identity");
+        compiler.admission.register_producer(&producer_id, "compiler-test-registry-digest").unwrap();
+        let work_id = ProducerWorkItemId::new(oid("work-1"));
         assert_eq!(
             compiler.compile(event(), staging_input(pipeline().2), lease(), 1, &work_id),
             Err(CompilerError::MissingProducerAdmission)
@@ -943,7 +1219,7 @@ mod tests {
     }
 
     #[test]
-    fn compile_authority_refusal_does_not_persist_publication_receipt() {
+    fn compile_preserves_terminal_suppression_without_persisting_publication_receipt() {
         let mut store = admission::AdmissionStore::in_memory().unwrap();
         let work_id = register_compile_inputs(&mut store);
         let mut compiler = MemoryCompiler {
@@ -953,10 +1229,10 @@ mod tests {
             },
             admission: store,
         };
-        assert_eq!(
-            compiler.compile(event(), staging_input(pipeline().2), lease(), 1, &work_id),
-            Err(CompilerError::PublicationSuppressed)
-        );
+        let result = compiler
+            .compile(event(), staging_input(pipeline().2), lease(), 1, &work_id)
+            .unwrap();
+        assert_eq!(result.disposition, PublicationDisposition::Suppressed);
         assert_eq!(compiler.admission.publication_receipt_count().unwrap(), 0);
     }
 
@@ -991,6 +1267,19 @@ mod tests {
         assert_eq!(result.disposition, PublicationDisposition::Published);
         assert_eq!(result.derivative.visibility, Visibility::Visible);
     }
+
+    #[test]
+    fn rejected_participant_admission_returns_suppressed() {
+        let (_, _, normalized) = pipeline();
+        let staged = StagingStage::run(staging_input(normalized), 1).unwrap();
+        let mut authority = TestAuthority {
+            publication_admitted: false,
+            visibility_authorized: true,
+        };
+        let result = PublicationGate::run(staged, &lease(), 1, &mut authority).unwrap();
+        assert_eq!(result.disposition, PublicationDisposition::Suppressed);
+        assert_eq!(result.derivative.visibility, Visibility::Hidden);
+    }
 }
 
 #[cfg(test)]
@@ -1014,11 +1303,12 @@ mod state_tests {
     }
 
     fn normalized() -> NormalizedIR {
+        let payload = "A deterministic recovery test.".to_owned();
         let event = AcceptedEvent {
             event_id: id("event-1"),
             receipt_id: id("receipt-1"),
-            payload_digest: "sha256:source".into(),
-            payload: "A deterministic recovery test.".into(),
+            payload_digest: digest_of(&payload),
+            payload,
             compile_intent_durable: true,
         };
         let ingested = IngestionStage::run(event, 1).unwrap();
@@ -1258,20 +1548,13 @@ mod scenario_tests {
     }
 
     fn accepted_event() -> AcceptedEvent {
+        let payload = "A scenario test payload.".to_owned();
         AcceptedEvent {
             event_id: id("scenario-event"),
             receipt_id: id("scenario-receipt"),
-            payload_digest: "sha256:scenario".into(),
-            payload: "A scenario test payload.".into(),
+            payload_digest: digest_of(&payload),
+            payload,
             compile_intent_durable: true,
-        }
-    }
-
-    fn scenario_lease(generation: u64) -> WorkerLease {
-        WorkerLease {
-            operation_id: id("scenario-operation"),
-            worker_id: id("scenario-worker"),
-            generation,
         }
     }
 
@@ -1424,6 +1707,7 @@ mod scenario_tests {
     fn plan_only_input_cannot_reach_publication() {
         let mut event = accepted_event();
         event.payload.clear();
+        event.payload_digest = digest_of(&event.payload);
 
         let ingested = IngestionStage::run(event, 1).unwrap();
         assert_eq!(
@@ -1476,7 +1760,6 @@ mod scenario_tests {
     fn forget_while_leased_prevents_publication() {
         #[derive(Clone, Copy, Debug, Eq, PartialEq)]
         enum ForgetCheck {
-            Clear,
             Tombstoned,
         }
 
@@ -1517,6 +1800,12 @@ mod scenario_tests {
         );
         assert!(!fixture.lease_valid);
         assert!(fixture.checked_low_watermark);
+
+        // 租约有效且墓碑晚于低水位时，授权必须放行：这是 Clear 曾被用来表达的
+        // 成功路径，语义上由 Ok(()) 承载，不应再占用一个错误变体。
+        fixture.lease_valid = true;
+        fixture.tombstone_epoch = 13;
+        assert_eq!(fixture.authorize_publication(12), Ok(()));
     }
 
     #[test]

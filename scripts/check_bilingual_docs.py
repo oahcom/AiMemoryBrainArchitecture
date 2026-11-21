@@ -51,7 +51,14 @@ EXEMPT_SUFFIXES = {".png", ".jpg", ".jpeg", ".svg", ".drawio"}
 #
 # Three legacy registrations were made by the same author in the commit that
 # created each file. They remain exempt only as explicitly named findings, not
-# as precedent for future registrations. Owner measurement found bilingual
+# as precedent for future registrations. IMPORTANT: every SHA in this mapping
+# MUST come from _file_add_commit() with complete Git history. A shallow clone
+# can report its shallow-boundary commit instead of the true creation commit.
+# Example measured on full history: bilingual-documentation-policy.md was
+# created at cd1ab0fb346c770d779b1d8d24297f6811a1a74f and registered at
+# 32a35f422ba6442d1f700cfb327f348c0740a7f2; these are distinct commits.
+# Never calculate or refresh this mapping from a shallow clone.
+# Owner measurement found bilingual
 # headings and both scripts interleaved across 15–19% of lines (above the 9%
 # control-template density), confirming that their content is genuinely
 # embedded-bilingual; the defect was the missing second-party registration.
@@ -170,8 +177,38 @@ def _git_log_output(*args: str) -> str:
     return result.stdout.strip()
 
 
+SHALLOW_HISTORY_ERROR = (
+    "cannot verify registration provenance on a shallow clone; "
+    "run git fetch --unshallow"
+)
+
+
+class ShallowRepositoryError(RuntimeError):
+    """Raised when provenance cannot be established from incomplete history."""
+
+
+def _require_full_git_history() -> None:
+    """Fail closed before deriving provenance from a potentially shallow log."""
+    result = subprocess.run(
+        ["git", "rev-parse", "--is-shallow-repository"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    shallow = result.stdout.strip().lower()
+    if shallow == "true":
+        raise ShallowRepositoryError(SHALLOW_HISTORY_ERROR)
+    if shallow != "false":
+        raise RuntimeError(
+            "Unable to determine whether the Git repository has complete history: "
+            f"unexpected rev-parse output {result.stdout!r}"
+        )
+
+
 def _file_add_commit(source: str) -> str | None:
-    """Return the newest commit that added this path to the repository."""
+    """Return the newest commit that added this path (full history required)."""
+    _require_full_git_history()
     commits = _git_log_output(
         "log", "--diff-filter=A", "--format=%H", "-1", "HEAD", "--", source
     )
@@ -196,7 +233,8 @@ def _embedded_sources_in_revision(revision: str, gate_path: str) -> set[str]:
 
 
 def _registration_add_commit(source: str) -> str | None:
-    """Return the commit that added this source to the exemption dictionary."""
+    """Return the registration commit; full Git history is required."""
+    _require_full_git_history()
     gate_path = "scripts/check_bilingual_docs.py"
     commits = _git_log_output(
         "log", "--format=%H", "-S", f'"{source}"', "HEAD", "--", gate_path
@@ -220,6 +258,13 @@ def check_embedded_registration_history() -> list[str]:
     The only same-commit cases accepted are the three explicitly identified
     legacy self-registrations above, pinned to their measured creation SHAs.
     """
+    try:
+        _require_full_git_history()
+    except ShallowRepositoryError as exc:
+        return [str(exc)]
+    except (OSError, subprocess.CalledProcessError, RuntimeError) as exc:
+        return [f"Unable to determine Git history completeness: {exc}"]
+
     errors: list[str] = []
     for source in sorted(EMBEDDED_BILINGUAL_SOURCES):
         try:
@@ -934,6 +979,18 @@ def main() -> int:
         print("::error::Unknown argument. Supported option: --write-baseline")
         return 2
 
+    # Refuse to make any gate judgment from a shallow checkout. This must run
+    # before baseline/path checks so their unrelated diagnostics cannot mask
+    # the fact that provenance is unverifiable.
+    try:
+        _require_full_git_history()
+    except ShallowRepositoryError as exc:
+        print(f"::error::{exc}")
+        return 2
+    except (OSError, subprocess.CalledProcessError, RuntimeError) as exc:
+        print(f"::error::Unable to determine Git history completeness: {exc}")
+        return 2
+
     try:
         statuses = changed_status()
         changed = set(statuses)
@@ -962,7 +1019,15 @@ def main() -> int:
 
     body = os.environ.get("PR_BODY", "")
     errors: list[str] = check_prompt_library()
-    errors.extend(check_embedded_registration_history())
+    history_errors = check_embedded_registration_history()
+    if SHALLOW_HISTORY_ERROR in history_errors:
+        print(f"::error::{SHALLOW_HISTORY_ERROR}")
+        return 2
+    if any(error.startswith("Unable to determine Git history completeness:") for error in history_errors):
+        for error in history_errors:
+            print(f"::error::{error}")
+        return 2
+    errors.extend(history_errors)
     catch_up_declarations, catch_up_errors = parse_catch_up_declarations(body)
     errors.extend(catch_up_errors)
     # ADVISORY ONLY: the inheritance requirement originates from the unadopted
@@ -996,7 +1061,7 @@ def main() -> int:
         if len(parts) >= 2 and parts[0] in NORMATIVE_ROOTS:
             if Path(path).suffix.lower() in EXEMPT_SUFFIXES:
                 continue
-            if Path(path).suffix.lower() in {".md", ".yaml", ".yml", ".json", ".toml", ".proto"}:
+            if Path(path).suffix.lower() == ".md":
                 normative_changes.append(path)
 
     if normative_changes and not complete and not exception:

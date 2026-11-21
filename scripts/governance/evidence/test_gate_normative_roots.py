@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import importlib.util
 import os
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -32,6 +33,31 @@ def load_gate(root: Path):
     mod.ROOT = root
     return mod
 
+# Full-history provenance snapshot for all currently embedded bilingual sources.
+EMBEDDED_PROVENANCE_SHA_SNAPSHOT = {
+    '00-governance/architecture-document-management-policy.md': ('0c73f639bf7392a5381d0cc0d9cafd53017bfe05', '0c73f639bf7392a5381d0cc0d9cafd53017bfe05'),
+    '00-governance/architecture-document-metadata.schema.yaml': ('0c73f639bf7392a5381d0cc0d9cafd53017bfe05', '965a66b9a92cd4c2b20f4b6100721c779be7f784'),
+    '00-governance/bilingual-documentation-policy.md': ('cd1ab0fb346c770d779b1d8d24297f6811a1a74f', '32a35f422ba6442d1f700cfb327f348c0740a7f2'),
+    '00-governance/bilingual-governance-migration-register.md': ('a77219fa2834af0c4535e6692029adaec2e62638', '88c251178d510d247f28137c3821cee982cedd5e'),
+    '00-governance/drafts/GOV-DOC-001-v1.2-DRAFT.md': ('04d35f90d6f1389ee17dc8fba1a32600bd7ac8ec', '04d35f90d6f1389ee17dc8fba1a32600bd7ac8ec'),
+    '00-governance/reports/bilingual-baseline-remediation-report.md': ('a77219fa2834af0c4535e6692029adaec2e62638', '88c251178d510d247f28137c3821cee982cedd5e'),
+    '00-governance/reports/f06-object-reconciliation.md': ('9990b645555aef83714ff92c97255110b1fa0960', '9990b645555aef83714ff92c97255110b1fa0960'),
+    '00-governance/templates/bilingual-commit-message.md': ('a77219fa2834af0c4535e6692029adaec2e62638', '88c251178d510d247f28137c3821cee982cedd5e'),
+    '00-governance/templates/bilingual-issue-template.md': ('a77219fa2834af0c4535e6692029adaec2e62638', '88c251178d510d247f28137c3821cee982cedd5e'),
+    '00-governance/templates/bilingual-umbrella-requirement-template.md': ('a77219fa2834af0c4535e6692029adaec2e62638', '88c251178d510d247f28137c3821cee982cedd5e'),
+    '00-governance/templates/document-metadata-template.md': ('ae37a41900f1950a8d78d4be9e1f6a27b2edb1bb', 'b45430428c1e65cae36a9f7d63a11a78008a8f8a'),
+    '00-governance/templates/repository-policy-inheritance.md': ('a77219fa2834af0c4535e6692029adaec2e62638', '88c251178d510d247f28137c3821cee982cedd5e'),
+    '14-ai-development/AI-EXEC-INDEPENDENCE-RULING-001.md': ('1957faa6349613280576bfa5f2a3a7107f6cb719', 'e949d82b6cc3681a04631aa429e1bc2ab815305b'),
+    '14-ai-development/AI-EXEC-UNIFICATION-RULING-001.md': ('1f97c3fae65828266a0c3cb1d1e8d4e6cb330856', 'e949d82b6cc3681a04631aa429e1bc2ab815305b'),
+    '14-ai-development/PR-GOVERNANCE-001.md': ('3754d049db840b049728afd814faac968bf10749', 'e949d82b6cc3681a04631aa429e1bc2ab815305b'),
+    '14-ai-development/README.md': ('55d44b9276456f88bd2193de8b06aff146c228a4', 'e949d82b6cc3681a04631aa429e1bc2ab815305b'),
+    '14-ai-development/ai-development-standard.md': ('55d44b9276456f88bd2193de8b06aff146c228a4', 'e949d82b6cc3681a04631aa429e1bc2ab815305b'),
+    '14-ai-development/iteration-lifecycle.md': ('55d44b9276456f88bd2193de8b06aff146c228a4', 'e949d82b6cc3681a04631aa429e1bc2ab815305b'),
+    '14-ai-development/owner-automation-operating-model.md': ('6faa3b038c02bce27b3b4443d6f1be95cf5c5beb', 'e949d82b6cc3681a04631aa429e1bc2ab815305b'),
+    '14-ai-development/prompt-and-evidence-template.md': ('55d44b9276456f88bd2193de8b06aff146c228a4', 'e949d82b6cc3681a04631aa429e1bc2ab815305b'),
+    '14-ai-development/prompt-authoring-standard.md': ('6faa3b038c02bce27b3b4443d6f1be95cf5c5beb', 'e949d82b6cc3681a04631aa429e1bc2ab815305b'),
+}
+
 
 class GateRootsTest(unittest.TestCase):
     def setUp(self):
@@ -46,6 +72,52 @@ class GateRootsTest(unittest.TestCase):
         p = self.root / rel
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(text, encoding="utf-8")
+
+    def _run_real_git_gate_for_change(self, rel: str):
+        """Run main's production normative-file selection against a real git diff."""
+        import contextlib
+        import io
+        import subprocess
+
+        run = lambda *args: subprocess.run(
+            args, cwd=self.root, check=True, capture_output=True, text=True
+        )
+        run("git", "init", "-q")
+        run("git", "config", "user.email", "tests@example.invalid")
+        run("git", "config", "user.name", "Bilingual gate regression")
+        run("git", "commit", "--allow-empty", "-qm", "baseline")
+        base = run("git", "rev-parse", "HEAD").stdout.strip()
+        self.write(rel, "single-sided change\n")
+        run("git", "add", "--", rel)
+        run("git", "commit", "-qm", "single-sided change")
+        head = run("git", "rev-parse", "HEAD").stdout.strip()
+
+        previous_cwd = os.getcwd()
+        output = io.StringIO()
+        try:
+            os.chdir(self.root)
+            with patch.dict(
+                os.environ,
+                {"BASE_SHA": base, "HEAD_SHA": head, "PR_BODY": "BILINGUAL-MANIFEST: COMPLETE"},
+            ):
+                self.assertIn(rel, self.gate.changed_paths())
+                with contextlib.ExitStack() as stack:
+                    stack.enter_context(patch.object(sys, "argv", ["scripts/check_bilingual_docs.py"]))
+                    stack.enter_context(patch.object(self.gate, "read_baseline", return_value=set()))
+                    stack.enter_context(patch.object(self.gate, "current_bilingual_gaps", return_value=set()))
+                    stack.enter_context(patch.object(self.gate, "check_prompt_library", return_value=[]))
+                    stack.enter_context(patch.object(self.gate, "check_embedded_registration_history", return_value=[]))
+                    stack.enter_context(patch.object(self.gate, "parse_catch_up_declarations", return_value=({}, [])))
+                    stack.enter_context(patch.object(self.gate, "check_policy_inheritance", return_value=[]))
+                    stack.enter_context(patch.object(self.gate, "approved_exception", return_value=False))
+                    stack.enter_context(patch.object(self.gate, "check_mirror_pairing", return_value=[]))
+                    stack.enter_context(patch.object(self.gate, "check_normative_root_departures", return_value=[]))
+                    stack.enter_context(contextlib.redirect_stdout(output))
+                    stack.enter_context(contextlib.redirect_stderr(output))
+                    exit_code = self.gate.main()
+            return exit_code, output.getvalue()
+        finally:
+            os.chdir(previous_cwd)
 
     def normative(self, changed: set[str], complete: bool = True, exception: bool = False):
         changes = sorted(
@@ -147,6 +219,53 @@ class GateRootsTest(unittest.TestCase):
     def test_every_registered_embedded_file_is_under_normative_root(self):
         for src in self.gate.EMBEDDED_BILINGUAL_SOURCES:
             self.assertEqual(src.split("/")[0] in self.gate.NORMATIVE_ROOTS, True, src)
+
+
+    def test_shallow_history_is_rejected_before_provenance_lookup(self):
+        from types import SimpleNamespace
+
+        fake_git = SimpleNamespace(stdout="true\n")
+        with patch.object(self.gate.subprocess, "run", return_value=fake_git) as run:
+            errors = self.gate.check_embedded_registration_history()
+            self.assertEqual(errors, [self.gate.SHALLOW_HISTORY_ERROR])
+            for lookup in (self.gate._file_add_commit, self.gate._registration_add_commit):
+                with self.subTest(lookup=lookup.__name__):
+                    with self.assertRaisesRegex(
+                        self.gate.ShallowRepositoryError,
+                        "cannot verify registration provenance on a shallow clone",
+                    ):
+                        lookup("00-governance/bilingual-documentation-policy.md")
+        self.assertEqual(run.call_count, 3)
+        run.assert_any_call(
+            ["git", "rev-parse", "--is-shallow-repository"],
+            cwd=self.gate.ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+    def test_all_21_embedded_provenance_pairs_match_full_history_snapshot(self):
+        self.gate.ROOT = self.gate.REPO_ROOT
+        self.assertEqual(
+            set(self.gate.EMBEDDED_BILINGUAL_SOURCES),
+            set(EMBEDDED_PROVENANCE_SHA_SNAPSHOT),
+        )
+        for source, expected in EMBEDDED_PROVENANCE_SHA_SNAPSHOT.items():
+            with self.subTest(source=source):
+                actual = (
+                    self.gate._file_add_commit(source),
+                    self.gate._registration_add_commit(source),
+                )
+                self.assertEqual(actual, expected, source)
+                file_commit, registration_commit = actual
+                if file_commit == registration_commit:
+                    self.assertEqual(
+                        self.gate.SELF_REGISTERED_AT_CREATION.get(source),
+                        file_commit,
+                        source,
+                    )
+                else:
+                    self.assertNotIn(source, self.gate.SELF_REGISTERED_AT_CREATION, source)
 
     # --- Issue #420: exemption registration must follow file creation ---
 
@@ -787,6 +906,30 @@ class GateRootsTest(unittest.TestCase):
         errors = self.gate.check_mirror_pairing({mirror}, {mirror: "M"}, False)
         self.assertTrue(errors, "mirror pairing must still require both sides")
         self.assertIn("requires all counterparts changed", errors[0])
+
+    # --- Issue #522: data formats are not bilingual document roots ---
+
+    def test_schema_json_change_does_not_require_counterpart(self):
+        exit_code, output = self._run_real_git_gate_for_change(
+            "08-bmcp-protocol/schemas/bmcp.applied-delivery-evidence-1.0.0.schema.json"
+        )
+        self.assertEqual(exit_code, 0, output)
+        self.assertIn("Bilingual documentation and prompt-library gate: PASS", output)
+
+    def test_markdown_still_requires_counterpart(self):
+        exit_code, output = self._run_real_git_gate_for_change(
+            "08-bmcp-protocol/gate-single-sided-probe.md"
+        )
+        self.assertEqual(exit_code, 1, output)
+        self.assertIn("requires all counterparts changed in this PR", output)
+
+    def test_governance_markdown_still_requires_counterpart(self):
+        exit_code, output = self._run_real_git_gate_for_change(
+            "00-governance/gate-single-sided-probe.md"
+        )
+        self.assertEqual(exit_code, 1, output)
+        self.assertIn("requires all counterparts changed in this PR", output)
+
 
 if __name__ == "__main__":
     unittest.main()

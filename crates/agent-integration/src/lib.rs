@@ -3,9 +3,8 @@
 //! This crate does not perform model inference, network transport, persistence,
 //! BMCP negotiation, or production telemetry.
 
+use memory_context::{validate_snapshot, ContextError, ContextSnapshot};
 use std::collections::BTreeMap;
-
-use memory_context::ContextSnapshot;
 
 /// Capability tier demonstrated by an adapter.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
@@ -77,6 +76,15 @@ pub enum AdapterError {
         expected: u64,
         received: u64,
     },
+    /// A received version skips one or more required context versions.
+    VersionGap {
+        current: u64,
+        received: u64,
+    },
+    /// A Brain-side snapshot failed canonical validation before delivery.
+    InvalidSnapshot {
+        reason: String,
+    },
     /// The current version cannot be incremented without wrapping.
     VersionExhausted,
     /// The requested delivery-state transition is not permitted by the contract.
@@ -106,10 +114,7 @@ pub enum AdapterError {
 }
 
 /// Check whether an adapter tier is sufficient for an operation.
-pub fn authorize(
-    actual: CapabilityTier,
-    operation: AdapterOperation,
-) -> Result<(), AdapterError> {
+pub fn authorize(actual: CapabilityTier, operation: AdapterOperation) -> Result<(), AdapterError> {
     let required = operation.required_tier();
     // Tier1 is strongest: the derived ordering is Tier1 < Tier2 < Tier3.
     if actual <= required {
@@ -333,10 +338,7 @@ fn calculate_region_digest(snapshot: &ContextSnapshot, context_id: &str) -> Stri
 
 /// Assert that content intended for the managed-memory region contains no
 /// markers belonging to protected request regions.
-pub fn assert_region_isolation(
-    region: ContextRegion,
-    content: &str,
-) -> Result<(), AdapterError> {
+pub fn assert_region_isolation(region: ContextRegion, content: &str) -> Result<(), AdapterError> {
     if region != ContextRegion::BrainManagedMemory {
         return Err(AdapterError::ProtectedRegionMutation(region));
     }
@@ -384,6 +386,12 @@ pub fn validate_full_boundary_apply(
 ) -> Result<(), AdapterError> {
     authorize(tier, AdapterOperation::ApplyFullBoundaryMemory)?;
     validate_context_write(region, state)
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ApplyOutcome {
+    Applied,
+    AlreadyApplied,
 }
 
 /// Delivery lifecycle states (inference-boundary-model.md §5).
@@ -530,11 +538,39 @@ pub struct DeliveryPayload {
 }
 
 impl DeliveryPayload {
+    /// Build an adapter payload only from a validated Brain context snapshot.
+    pub fn from_snapshot(snapshot: &ContextSnapshot) -> Result<Self, AdapterError> {
+        validate_snapshot(snapshot).map_err(|error: ContextError| {
+            AdapterError::InvalidSnapshot {
+                reason: format!("{error:?}"),
+            }
+        })?;
+        let content = snapshot
+            .serialize()
+            .map_err(|error| AdapterError::InvalidSnapshot {
+                reason: format!("{error:?}"),
+            })?;
+        Ok(Self::new(snapshot.context_version, content))
+    }
+
     pub fn new(version: u64, content: impl Into<String>) -> Self {
         Self {
             version,
             content: content.into(),
         }
+    }
+
+    pub fn version(&self) -> u64 {
+        self.version
+    }
+    pub fn content(&self) -> &str {
+        &self.content
+    }
+
+    /// Test-only fixture constructor; production code should use `from_snapshot`.
+    #[cfg(test)]
+    fn new_for_test(version: u64, content: impl Into<String>) -> Self {
+        Self::new(version, content)
     }
 }
 
@@ -545,7 +581,11 @@ impl DeliveryPayload {
 /// removes the applied snapshot and resets that sequence. Reconnect reports
 /// only the last successfully applied version.
 pub trait ContextDeliveryAdapter {
-    fn apply(&mut self, session_id: &str, snapshot: DeliveryPayload) -> Result<(), AdapterError>;
+    fn apply(
+        &mut self,
+        session_id: &str,
+        snapshot: DeliveryPayload,
+    ) -> Result<ApplyOutcome, AdapterError>;
 
     fn clear(&mut self, session_id: &str) -> Result<(), AdapterError>;
 
@@ -581,7 +621,11 @@ pub struct InMemoryContextDeliveryAdapter {
 }
 
 impl ContextDeliveryAdapter for InMemoryContextDeliveryAdapter {
-    fn apply(&mut self, session_id: &str, snapshot: DeliveryPayload) -> Result<(), AdapterError> {
+    fn apply(
+        &mut self,
+        session_id: &str,
+        snapshot: DeliveryPayload,
+    ) -> Result<ApplyOutcome, AdapterError> {
         let state = self.sessions.entry(session_id.to_owned()).or_default();
         if !state.connected {
             return Err(AdapterError::SessionDisconnected {
@@ -589,22 +633,29 @@ impl ContextDeliveryAdapter for InMemoryContextDeliveryAdapter {
             });
         }
 
-        let expected = match state.applied.as_ref() {
-            Some(applied) => applied
-                .version
-                .checked_add(1)
-                .ok_or(AdapterError::VersionExhausted)?,
-            None => 1,
-        };
+        if let Some(applied) = state.applied.as_ref() {
+            if snapshot.version == applied.version && snapshot == *applied {
+                return Ok(ApplyOutcome::AlreadyApplied);
+            }
+        }
+        let current = state.applied.as_ref().map_or(0, |applied| applied.version);
+        let expected = current
+            .checked_add(1)
+            .ok_or(AdapterError::VersionExhausted)?;
+        if snapshot.version > expected {
+            return Err(AdapterError::VersionGap {
+                current,
+                received: snapshot.version,
+            });
+        }
         if snapshot.version != expected {
             return Err(AdapterError::VersionMismatch {
                 expected,
                 received: snapshot.version,
             });
         }
-
         state.applied = Some(snapshot);
-        Ok(())
+        Ok(ApplyOutcome::Applied)
     }
 
     fn clear(&mut self, session_id: &str) -> Result<(), AdapterError> {
@@ -712,10 +763,134 @@ mod tests {
         AssemblyState::Frozen(assembler.freeze().expect("staged request freezes"))
     }
 
+    fn test_snapshot(version: u64, content: &str) -> ContextSnapshot {
+        use memory_context::{
+            build_context, ContextBudget, ContextCandidate, ContextIdentity, ContextTier,
+        };
+        use memory_domain::{MemoryLifecycle, OpaqueId, ScopeKind, ScopeRef};
+        let id = |value: &str| OpaqueId::new(value).unwrap();
+        let scope = ScopeRef {
+            scope_id: id("scope"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:test".into(),
+        };
+        let identity = ContextIdentity {
+            context_id: id("context"),
+            scope_refs: vec![scope.clone()],
+            agent_id: id("agent"),
+            agent_instance_id: id("instance"),
+            session_id: id("session"),
+            task_id: None,
+            environment_id: None,
+            purpose: "adapter test".into(),
+            schema_version: "1".into(),
+        };
+        let candidate = ContextCandidate {
+            entry_id: id("entry"),
+            memory_id: id("memory"),
+            memory_version_id: id("memory-version"),
+            memory_lifecycle: MemoryLifecycle::Active,
+            scope_refs: vec![scope],
+            tier: ContextTier::P0,
+            priority: 0,
+            activation_reason: "test fixture".into(),
+            rendered_content: content.into(),
+            source_refs: vec![id("source")],
+            evidence_refs: vec![],
+            epistemic_qualifiers: vec![],
+            content_hash: "test-hash".into(),
+        };
+        build_context(
+            identity,
+            version,
+            ContextBudget {
+                max_entries: 8,
+                max_rendered_bytes: 4096,
+            },
+            vec![candidate],
+        )
+        .unwrap()
+    }
+
+    #[test]
+    fn from_snapshot_validates_and_serializes_the_canonical_snapshot() {
+        let snapshot = test_snapshot(1, "canonical");
+        let payload = DeliveryPayload::from_snapshot(&snapshot).unwrap();
+        assert_eq!(payload.version(), snapshot.context_version);
+        assert_eq!(payload.content(), snapshot.serialize().unwrap());
+        let mut invalid = snapshot;
+        invalid.rendered_bytes += 1;
+        assert!(matches!(
+            DeliveryPayload::from_snapshot(&invalid),
+            Err(AdapterError::InvalidSnapshot { .. })
+        ));
+    }
+
+    #[test]
+    fn reapplying_identical_snapshot_returns_already_applied_without_mutation() {
+        let mut adapter = InMemoryContextDeliveryAdapter::default();
+        let payload = DeliveryPayload::from_snapshot(&test_snapshot(1, "same")).unwrap();
+        assert_eq!(
+            adapter.apply("session-a", payload.clone()),
+            Ok(ApplyOutcome::Applied)
+        );
+        let before = adapter.applied_snapshot("session-a").unwrap().clone();
+        assert_eq!(
+            adapter.apply("session-a", payload),
+            Ok(ApplyOutcome::AlreadyApplied)
+        );
+        assert_eq!(adapter.applied_snapshot("session-a"), Some(&before));
+        assert_eq!(
+            adapter.apply("session-a", DeliveryPayload::new_for_test(1, "different")),
+            Err(AdapterError::VersionMismatch {
+                expected: 2,
+                received: 1
+            })
+        );
+    }
+
+    #[test]
+    fn skipped_context_version_returns_version_gap_without_mutation() {
+        let mut adapter = InMemoryContextDeliveryAdapter::default();
+        adapter
+            .apply("session-a", DeliveryPayload::new_for_test(1, "first"))
+            .unwrap();
+        let before = adapter.applied_snapshot("session-a").unwrap().clone();
+        assert_eq!(
+            adapter.apply("session-a", DeliveryPayload::new_for_test(3, "third")),
+            Err(AdapterError::VersionGap {
+                current: 1,
+                received: 3
+            })
+        );
+        assert_eq!(adapter.applied_snapshot("session-a"), Some(&before));
+    }
+
+    #[test]
+    fn disconnect_preserves_last_applied_snapshot_but_rejects_new_apply() {
+        let mut adapter = InMemoryContextDeliveryAdapter::default();
+        adapter
+            .apply("session-a", DeliveryPayload::new_for_test(1, "committed"))
+            .unwrap();
+        let before = adapter.applied_snapshot("session-a").unwrap().clone();
+        adapter.disconnect("session-a").unwrap();
+        assert_eq!(adapter.applied_snapshot("session-a"), Some(&before));
+        assert_eq!(
+            adapter.apply("session-a", DeliveryPayload::new_for_test(2, "blocked")),
+            Err(AdapterError::SessionDisconnected {
+                session_id: "session-a".into()
+            })
+        );
+        assert_eq!(adapter.applied_snapshot("session-a"), Some(&before));
+    }
+
     #[test]
     fn legal_tier_three_telemetry_call_is_allowed() {
         assert_eq!(
-            authorize(CapabilityTier::Tier3, AdapterOperation::SubmitScopedTelemetry),
+            authorize(
+                CapabilityTier::Tier3,
+                AdapterOperation::SubmitScopedTelemetry
+            ),
             Ok(())
         );
     }
@@ -723,7 +898,10 @@ mod tests {
     #[test]
     fn insufficient_tier_is_rejected_with_typed_error() {
         assert_eq!(
-            authorize(CapabilityTier::Tier3, AdapterOperation::ObserveFullInferenceBoundary),
+            authorize(
+                CapabilityTier::Tier3,
+                AdapterOperation::ObserveFullInferenceBoundary
+            ),
             Err(AdapterError::TierInsufficient {
                 required: CapabilityTier::Tier1,
                 actual: CapabilityTier::Tier3,
@@ -811,12 +989,15 @@ mod tests {
             BoundaryId::new("boundary").expect("valid id"),
             InferenceRequestId::new("request").expect("valid id"),
         );
-        let region = materialize_managed_region(&one_entry_snapshot(), &budget())
-            .expect("fixture fits");
+        let region =
+            materialize_managed_region(&one_entry_snapshot(), &budget()).expect("fixture fits");
         assembler.stage(&region).expect("first stage succeeds");
         let frozen = assembler.clone().freeze().expect("clone freezes");
         assembler.state = AssemblyState::Frozen(frozen);
-        assert_eq!(assembler.stage(&region), Err(AdapterError::RequestAlreadyFrozen));
+        assert_eq!(
+            assembler.stage(&region),
+            Err(AdapterError::RequestAlreadyFrozen)
+        );
     }
 
     #[test]
@@ -834,8 +1015,8 @@ mod tests {
             BoundaryId::new("boundary").expect("valid id"),
             InferenceRequestId::new("request").expect("valid id"),
         );
-        let region = materialize_managed_region(&one_entry_snapshot(), &budget())
-            .expect("fixture fits");
+        let region =
+            materialize_managed_region(&one_entry_snapshot(), &budget()).expect("fixture fits");
         assembler.stage(&region).expect("stage succeeds");
         let frozen = assembler.freeze().expect("freeze succeeds");
         assert_eq!(frozen.request_id.as_str(), "request");
@@ -872,14 +1053,42 @@ mod tests {
     #[test]
     fn all_nine_identity_types_preserve_nonempty_values() {
         assert_eq!(ContextId::new("ctx").expect("valid").as_str(), "ctx");
-        assert_eq!(ContextSessionId::new("session").expect("valid").as_str(), "session");
-        assert_eq!(AdapterId::new("adapter").expect("valid").as_str(), "adapter");
-        assert_eq!(AdapterInstanceId::new("adapter-instance").expect("valid").as_str(), "adapter-instance");
-        assert_eq!(AgentInstanceId::new("agent-instance").expect("valid").as_str(), "agent-instance");
-        assert_eq!(BoundaryId::new("boundary").expect("valid").as_str(), "boundary");
-        assert_eq!(InferenceRequestId::new("request").expect("valid").as_str(), "request");
-        assert_eq!(DeliveryId::new("delivery").expect("valid").as_str(), "delivery");
-        assert_eq!(RegionDigest::new("digest").expect("valid").as_str(), "digest");
+        assert_eq!(
+            ContextSessionId::new("session").expect("valid").as_str(),
+            "session"
+        );
+        assert_eq!(
+            AdapterId::new("adapter").expect("valid").as_str(),
+            "adapter"
+        );
+        assert_eq!(
+            AdapterInstanceId::new("adapter-instance")
+                .expect("valid")
+                .as_str(),
+            "adapter-instance"
+        );
+        assert_eq!(
+            AgentInstanceId::new("agent-instance")
+                .expect("valid")
+                .as_str(),
+            "agent-instance"
+        );
+        assert_eq!(
+            BoundaryId::new("boundary").expect("valid").as_str(),
+            "boundary"
+        );
+        assert_eq!(
+            InferenceRequestId::new("request").expect("valid").as_str(),
+            "request"
+        );
+        assert_eq!(
+            DeliveryId::new("delivery").expect("valid").as_str(),
+            "delivery"
+        );
+        assert_eq!(
+            RegionDigest::new("digest").expect("valid").as_str(),
+            "digest"
+        );
     }
 
     #[test]
@@ -1006,8 +1215,14 @@ mod tests {
         let mut second_snapshot = first_snapshot.clone();
         second_snapshot.entries[0].content_hash = "different-content-hash".into();
 
-        assert_eq!(first_snapshot.context_version, second_snapshot.context_version);
-        assert_eq!(first_snapshot.rendered_bytes, second_snapshot.rendered_bytes);
+        assert_eq!(
+            first_snapshot.context_version,
+            second_snapshot.context_version
+        );
+        assert_eq!(
+            first_snapshot.rendered_bytes,
+            second_snapshot.rendered_bytes
+        );
         assert_eq!(first_snapshot.entries.len(), second_snapshot.entries.len());
         assert_eq!(
             first_snapshot.entries[0].entry_id,
@@ -1091,42 +1306,45 @@ mod tests {
         let mut region =
             materialize_managed_region(&one_entry_snapshot(), &budget()).expect("fits");
         region.digest = RegionDigest::new("NOT-A-VALID-DIGEST").expect("nonempty identity");
-        assert_eq!(assembler.stage(&region), Err(AdapterError::InvalidRegionDigest));
+        assert_eq!(
+            assembler.stage(&region),
+            Err(AdapterError::InvalidRegionDigest)
+        );
     }
 
     #[test]
     fn applying_a_valid_successor_updates_the_applied_version() {
         let mut adapter = InMemoryContextDeliveryAdapter::default();
         adapter
-            .apply("session-a", DeliveryPayload::new(1, "first"))
+            .apply("session-a", DeliveryPayload::new_for_test(1, "first"))
             .unwrap();
         adapter
-            .apply("session-a", DeliveryPayload::new(2, "second"))
+            .apply("session-a", DeliveryPayload::new_for_test(2, "second"))
             .unwrap();
 
         let applied = adapter.applied_snapshot("session-a").unwrap();
-        assert_eq!(applied.version, 2);
-        assert_eq!(applied.content, "second");
+        assert_eq!(applied.version(), 2);
+        assert_eq!(applied.content(), "second");
     }
 
     #[test]
     fn stale_or_skipped_versions_return_typed_error_without_mutation() {
         let mut adapter = InMemoryContextDeliveryAdapter::default();
         adapter
-            .apply("session-a", DeliveryPayload::new(1, "accepted"))
+            .apply("session-a", DeliveryPayload::new_for_test(1, "accepted"))
             .unwrap();
 
         assert_eq!(
-            adapter.apply("session-a", DeliveryPayload::new(1, "stale")),
+            adapter.apply("session-a", DeliveryPayload::new_for_test(1, "stale")),
             Err(AdapterError::VersionMismatch {
                 expected: 2,
                 received: 1
             })
         );
         assert_eq!(
-            adapter.apply("session-a", DeliveryPayload::new(3, "skipped")),
-            Err(AdapterError::VersionMismatch {
-                expected: 2,
+            adapter.apply("session-a", DeliveryPayload::new_for_test(3, "skipped")),
+            Err(AdapterError::VersionGap {
+                current: 1,
                 received: 3
             })
         );
@@ -1141,17 +1359,17 @@ mod tests {
     fn clear_resets_the_session_so_apply_starts_from_empty() {
         let mut adapter = InMemoryContextDeliveryAdapter::default();
         adapter
-            .apply("session-a", DeliveryPayload::new(1, "old-1"))
+            .apply("session-a", DeliveryPayload::new_for_test(1, "old-1"))
             .unwrap();
         adapter
-            .apply("session-a", DeliveryPayload::new(2, "old-2"))
+            .apply("session-a", DeliveryPayload::new_for_test(2, "old-2"))
             .unwrap();
 
         adapter.clear("session-a").unwrap();
         assert!(adapter.applied_snapshot("session-a").is_none());
 
         adapter
-            .apply("session-a", DeliveryPayload::new(1, "fresh"))
+            .apply("session-a", DeliveryPayload::new_for_test(1, "fresh"))
             .unwrap();
         let applied = adapter.applied_snapshot("session-a").unwrap();
         assert_eq!(applied.version, 1);
@@ -1162,16 +1380,20 @@ mod tests {
     fn reconnect_reports_last_applied_version_not_a_rejected_attempt() {
         let mut adapter = InMemoryContextDeliveryAdapter::default();
         adapter
-            .apply("session-a", DeliveryPayload::new(1, "committed"))
+            .apply("session-a", DeliveryPayload::new_for_test(1, "committed"))
             .unwrap();
         adapter.disconnect("session-a").unwrap();
 
         assert_eq!(
-            adapter.apply("session-a", DeliveryPayload::new(2, "not-delivered")),
+            adapter.apply(
+                "session-a",
+                DeliveryPayload::new_for_test(2, "not-delivered")
+            ),
             Err(AdapterError::SessionDisconnected {
                 session_id: "session-a".into()
             })
         );
         assert_eq!(adapter.reconnect("session-a"), Ok(Some(1)));
         assert_eq!(adapter.applied_snapshot("session-a").unwrap().version, 1);
-    }}
+    }
+}

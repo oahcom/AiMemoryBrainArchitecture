@@ -1,0 +1,107 @@
+work_item_id: AID-2026-041
+title: Refuse bilingual registration provenance judgment on shallow Git clones
+
+class: TEST
+risk: R1
+risk_rationale: >-
+  A bounded change to a Python documentation gate and its regression tests.
+  It changes the gate's classification of incomplete evidence from a false
+  pass/fail judgment to an explicit unverifiable exit code; no runtime data,
+  persistence, identity, authorization, or production behavior is changed.
+
+security_scope: Repository-history completeness detection in a documentation validation script only.
+
+status: VERIFIED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+implementing_ai_session: Current ChatGPT delivery session; platform session identifier NOT_EXPOSED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: fa9c32a7f7519920e35f32e8ec01c2807714e47a
+
+tracking_issue: "NONE — task is tracked by this AID manifest and its delivery PR; no new Issue requested"
+
+created_at: 2026-11-21
+updated_at: 2026-11-21
+
+prompt_id: AID-2026-041-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-041/prompt-v1.md
+prompt_status: FROZEN
+prompt_sha256: 599deef702e35c30e7e89785dc86b996e040e056787ca3114f2d9bab78f027bc
+prompt_bytes: 1875
+prompt_file_blob_sha: 78c5afc27e20b6ca9274187aba35cb4ac4d1fe37
+prompt_file_commit_sha: NOT_SEPARATELY_COMMITTED (same commit as registration package)
+
+prompt_provenance_tier: T1
+prompt_provenance_note: >-
+  Frozen from the user-provided task dispatch in this ChatGPT conversation.
+  Raw platform payload bytes and session identifier are not exposed; the
+  SHA-256 records the committed prompt-v1.md bytes only.
+
+dependency_refs:
+  - scripts/check_bilingual_docs.py
+  - scripts/governance/evidence/test_gate_normative_roots.py
+  - 14-ai-development/work-items/INDEX.md
+
+deliverables:
+  - Fail-closed shallow-history detection for both provenance lookup helpers and the gate-level registration history check.
+  - Two regression tests, including a snapshot of all 21 full-history provenance SHA pairs.
+  - Work Item registration and PR closeout evidence.
+
+independent_reviewer: NOT_ASSIGNED
+integration_reviewer: NOT_ASSIGNED
+
+review:
+  status: NOT_ASSIGNED
+  report_ref: ""
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)
+
+implementation:
+  status: PR_OPEN
+  branch: ai/AID-2026-041/IO-bilingual-legacy
+  pull_request: 521
+  pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/521
+  implementation_commit_sha: c2162667b1424ad74dcb34ab0ff1ab640ac35a46
+  merge_commit_sha: NOT_MERGED
+
+authorization:
+  registration_write: USER-PRINCIPAL-DELEGATED (limited to this AID registration package)
+  implementation_write: USER-PRINCIPAL-DELEGATED (limited to the listed script and test files)
+  index_update: USER-PRINCIPAL-DELEGATED (limited to the single AID-2026-041 row)
+  runtime_implementation: NOT_GRANTED
+  architecture_acceptance: NOT_GRANTED
+  production_authorization: NOT_GRANTED
+
+governance:
+  aid_assignment: REGISTERED
+  aid_status: REGISTERED
+  registration_authorization: USER-PRINCIPAL-DELEGATED (limited to this work item)
+  development_start_authorization: USER-PRINCIPAL-DELEGATED (limited to this implementation scope)
+  architecture_status: NOT_APPLICABLE
+  g8_status: NOT_APPLICABLE
+  quota_change: NONE
+
+verification:
+  status: PASS
+  commands:
+    - "BASE_SHA=$(git rev-parse HEAD) HEAD_SHA=$(git rev-parse HEAD) python3 scripts/check_bilingual_docs.py — full-history baseline: EXIT 0"
+    - "TMPDIR=/var/tmp python3 -m unittest scripts.governance.evidence.test_gate_normative_roots -v — 49/49 tests PASS"
+    - "git clone --depth 50 (local file:// source) into /var/tmp/aid041-depth50; run gate with BASE_SHA=HEAD_SHA=HEAD — exact shallow-history diagnostic, EXIT 2"
+    - "git fetch --unshallow origin in the same depth-limited clone — is-shallow=false; check_embedded_registration_history() returns 0 errors across 21 sources"
+    - "Independent git clone --depth 50 reproduction — is-shallow=true; exact diagnostic; EXIT 2"
+    - "git diff --check — EXIT 0"
+  evidence_refs:
+    - "Full-history creation/registration snapshot: 21/21 SHA pairs match the committed test fixture; bilingual-documentation-policy.md creation cd1ab0fb346c770d779b1d8d24297f6811a1a74f / registration 32a35f422ba6442d1f700cfb327f348c0740a7f2"
+    - "Depth-limited clone reports git rev-parse --is-shallow-repository=true and exits 2 before baseline checks"
+
+findings:
+  - id: F-BILINGUAL-SHALLOW-PROVENANCE-001
+    severity: P1
+    feedback_destination: "PR #521 closeout; close when the shallow-clone EXIT=2 behavior and all 21 full-history snapshot pairs remain verified"

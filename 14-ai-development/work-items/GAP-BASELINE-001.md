@@ -1243,3 +1243,215 @@ and it is the strongest available example of its own §3.1, which the document d
 The other three files in the PR are genuinely Chinese (764, 1565, 5896 CJK), and all four
 root copies are byte-identical to their `docs/zh-CN/` counterparts, which is correct for this
 repository's convention.
+
+## Round five: the gate stopped being the bottleneck, and two crates turned out to be islands
+
+This section records a measurement round taken against `main` at `665c8869`, after the
+bilingual gate was repaired three times in one hour (`5f109308`, `d647e7d5`, and the
+`_side_by_side_bilingual` / `_has_any_chinese` pair). The gate is no longer the thing that
+rejects work. Something else is, and it is worth naming.
+
+### Every open PR passes the gate. All nine of them.
+
+Measured by overlaying each PR's *actual changed paths* (from the files API) onto a clean
+`main` tree at `665c8869`, then running `current_bilingual_gaps()` from the tree root:
+
+| PR | state | files | gate |
+|---|---|---|---|
+| #517 | READY | 1 | PASS |
+| #513 | READY | 2 | PASS |
+| #512 | READY | 2 | PASS |
+| #507 | DRAFT | 4 | PASS |
+| #500 | READY | 77 | PASS |
+| #496 | DRAFT | 9 | PASS |
+| #494 | READY | 30 | PASS |
+| #471 | DRAFT | 8 | PASS |
+| #433 | READY | 3 | PASS |
+
+All nine: `gaps=77 base=77 new=0 resolved=0`.
+
+**This contradicts what I reported twice before, and the contradiction was my method.**
+My earlier runs measured each PR's *branch snapshot*, where files added to `main` after the
+branch point appear as gaps the PR did not introduce. Two examples of that artefact, both
+of which I published before checking:
+
+- I reported #471 and #433 as introducing 6 new gaps each. Those six were
+  `06-memory-context/README.md`, four `phase-3.6.x` contracts and
+  `07-agent-integration/agent-integration-overview.md` — all added to `main` by later
+  commits, none touched by either PR. Overlaid correctly, both are clean.
+- My first overlay attempt was also wrong, in the opposite direction: it copied *every*
+  file in the PR tree that differed from `main`, which re-introduced the same drift and
+  reported `resolved=8, FAIL`. Copying only the paths the files API names is the correct
+  method.
+
+The lesson is narrow and worth keeping: **a PR's gate result is only meaningful on
+`main + this PR's changed paths`.** Branch snapshots answer a different question.
+
+### Two crates in this workspace are used by nobody
+
+This is the finding that explains the completion percentages better than any line count.
+
+```
+agent-integration    used by: NOBODY     production deps: NONE
+bmcp-protocol        used by: NOBODY     production deps: NONE
+memory-compiler      used by: brain-cli
+```
+
+`crates/brain-cli/src/main.rs` is the only executable entry point in the workspace. It
+imports `memory_domain`, `memory_storage_sqlite`, `memory_store`, `memory_context` and
+`memory_compiler`. It does **not** import `agent-integration`. It does **not** import
+`bmcp-protocol`.
+
+So the chain that actually executes today is:
+
+```
+event -> memory-compiler -> memory-domain -> memory-storage-sqlite -> memory-store -> memory-context -> (stdout)
+```
+
+and it stops at `memory-context`. The two crates that represent "delivery to an agent" and
+"the wire protocol" are both terminal leaves with no consumer and no production dependency.
+They compile, they have 27 and 46 tests respectively, and nothing calls them.
+
+That is not a gap that more tests close. It is a missing edge in the dependency graph, and
+it is the highest-value thing in the backlog.
+
+### Measured code size and test count per crate at `665c8869`
+
+| crate | src lines | `#[test]` | consumed by |
+|---|---|---|---|
+| memory-context | 3468 | 78 | brain-cli |
+| memory-compiler | 3032 | 48 | brain-cli |
+| memory-storage-sqlite | 1782 | 35 | memory-store |
+| memory-event-store-sqlite | 1475 | 29 | memory-context |
+| memory-domain | 1059 | 43 | everything |
+| bmcp-protocol | 1373 | 46 | **nobody** |
+| agent-integration | 514 | 27 | **nobody** |
+| memory-store | 670 | 12 | brain-cli |
+| brain-cli | 273 | 1 | — (binary) |
+| memory-event-store | 123 | 2 | memory-event-store-sqlite |
+| memory-storage | 88 | 3 | memory-store |
+
+### Memory Context is further along than its own coverage document implies
+
+`06-memory-context/context-implementation-coverage.md` at this commit records
+**9 IMPLEMENTED / 43 PARTIAL / 25 NOT IMPLEMENTED**. The crate has 42 public items
+including `ChangeSet`, `apply_change_set`, `commit_change_set`, `plan_rollback`,
+`supersede_version`, `assess_sufficiency`, `prepare_delivery_intent` and
+`build_context`. The 25 "NOT IMPLEMENTED" rows are mostly about *delivery and
+reconciliation* — adapters, attempt ledgers, reconnect, durable cursors — not about the
+context engine itself. Reading the percentage as "the engine is 80% missing" would be
+wrong; the engine is largely there and the delivery half is not.
+
+### Two open PRs map directly onto the two islands
+
+Neither is merged, and both are the kind of change that closes a structural gap rather
+than adding surface:
+
+- **#513** adds `memory-context` as a **dev**-dependency of `agent-integration` and a
+  `tests/context_snapshot_delivery.rs` that carries a real `ContextSnapshot` across the
+  crate boundary. Measured on `main + #513`: 8 unit + 2 cross-boundary + 19 lifecycle
+  tests, all pass. This is the first test in the repository that crosses into
+  `agent-integration` from outside it.
+- **#512** replaces `request_frozen: bool` with `AssemblyState::{Open, Frozen}` and
+  consumes `self` on `freeze`, so freezing can no longer be bypassed by passing `false`.
+  Measured on `main + #512`: 32 unit + 19 integration tests, all pass.
+
+The `bool` → typestate change in #512 is the single clearest correctness improvement in the
+open queue: a security-relevant check gated by a caller-supplied boolean is not a check.
+
+### What has not changed
+
+- No PR in this repository has an approval. All nine open PRs show `reviews=0`.
+- No CI job has started since billing broke. Every check run still carries the
+  spending-limit annotation, so every number above is local execution.
+- GAP-03 and GAP-05 still have no merged code. #507 is the GAP-05 draft at round 4.
+
+## Round six: the spec set is split across two roots, and that distorts every completion percentage
+
+This section records a documentation-governance finding, measured at `main` `665c8869`. It
+is not about any PR. It changes what "X% unimplemented" means in this repository.
+
+### The measurement
+
+Each numbered domain exists in up to three places: `NN-name/` at the repository root,
+`docs/en/NN-name/`, and `docs/zh-CN/NN-name/`. `docs/en/` and `docs/zh-CN/` are exact
+filename mirrors of each other in 12 of 13 domains (the exception is `14-ai-development`,
+7 vs 4). The root directory is **not** the same set as the mirror.
+
+| domain | docs/en | root | only in `docs/en/` | only at root |
+|---|---|---|---|---|
+| 00-governance | 4 | 11 | 1 | 3 |
+| 01-system-architecture | 10 | 7 | 3 | 0 |
+| 02-domain-model | 13 | 12 | 3 | 2 |
+| 03-memory-brain | 14 | **0** | 14 | 0 |
+| 04-memory-compiler | 13 | **2** | 11 | 0 |
+| 05-memory-runtime | 6 | **0** | 6 | 0 |
+| 06-memory-context | 11 | 22 | 2 | 12 |
+| 07-agent-integration | 8 | 7 | 3 | 2 |
+| 08-bmcp-protocol | 3 | **11** | 3 | 8 |
+| 09-security-governance | 1 | **0** | 1 | 0 |
+| 12-testing-and-acceptance | 1 | **0** | 1 | 0 |
+| 13-engineering-decisions | 3 | 3 | 3 | 1 |
+| 14-ai-development | 7 | 35 | 2 | 26 |
+
+### The four cases that matter
+
+**`04-memory-compiler`: 13 in the mirror, 2 at root.** The root has only
+`phase-1-event-store-contract.md` and its `.zh-CN.md`. `compiler-stage-contract.md`,
+`event-ingestion-engine.md`, `evidence-and-provenance.md`,
+`extraction-and-normalization.md`, `consolidation-and-conflict-resolution.md`,
+`compiler-state-and-producer-admission.md` and
+`accepted-receipt-and-idempotency-contract.md` exist **only** in `docs/en/` and
+`docs/zh-CN/`.
+
+Consequence: a reader who opens `04-memory-compiler/` finds two files and concludes the
+compiler is under-specified. The thirteen-file contract set is one directory over. I made
+this exact mistake when briefing the gap-analysis agents this round and had to correct four
+of them mid-flight.
+
+**`03-memory-brain` and `05-memory-runtime`: 14 and 6 files, zero at root.** Read from the
+root, these two domains do not exist at all. Any analysis that walks root directories
+silently omits 20 specification documents.
+
+**`08-bmcp-protocol` is inverted: 3 in the mirror, 11 at root.** `bmcp-guide.md` and
+`adapter-capability-and-applied-attestation.md` are mirror-only; `protocol-index.md`,
+`schema-nonempty-audit.md` and the four `phase-3.8.x` contracts are root-only. A reader who
+reads only the mirror misses the protocol contracts; a reader who reads only the root misses
+the guide.
+
+**`06-memory-context` is root-heavy: 11 in the mirror, 22 at root.** The 12 root-only files
+include `context-implementation-coverage.md`, `context-architecture.md`,
+`context-edit-operations.md` and `context-reconciliation.md`.
+
+### Why this matters, stated plainly
+
+Two distortions follow, both of which I have observed being read as fact:
+
+1. **A missing root file reads as a missing requirement.** `compiler-stage-contract.md` not
+   being at `04-memory-compiler/` does not mean the stage contract is undefined. It means it
+   is at `docs/en/04-memory-compiler/compiler-stage-contract.md`.
+
+2. **A root-only file reads as the whole requirement.** `context-implementation-coverage.md`
+   and `protocol-index.md` are root-only, so they are the two documents most people open —
+   and they are the two documents in which I have found actual defects this week (a test
+   miscount in the first, a baseline/file mismatch in the second). The documents being
+   audited are the root-only ones. The mirrored ones are the ones nobody is reading.
+
+### What is not resolved
+
+The repository does not state which root is authoritative. `14-ai-development` has 35 root
+files and 7 mirrored, which suggests root-first there; `03` and `05` are mirror-only, which
+suggests mirror-first there. The convention is not uniform, and the bilingual gate enforces
+only that mirrors *exist* — it says nothing about which is the source of truth.
+
+This is an open documentation-governance decision, escalated in a comment on #422
+(`7064423207`). Every completion percentage in this document should be read as "computed
+against whichever root the author happened to open".
+
+### One correction to this document's own method
+
+While measuring the above I found that four of the gap-analysis briefs I dispatched this
+round pointed at root directories that are incomplete. Each was corrected mid-flight with
+the mirror path and an instruction to read both roots. The specs those agents produce will
+carry a "Spec location defect" section stating the assumption they make, so that a later
+reader does not inherit an unstated one.

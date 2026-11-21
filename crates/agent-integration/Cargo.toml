@@ -11,3 +11,6 @@ path = "src/lib.rs"
 [dependencies]
 memory-context = { path = "../memory-context" }
 memory-domain = { path = "../memory-domain" }
+
+[dev-dependencies]
+serde_json = "1"

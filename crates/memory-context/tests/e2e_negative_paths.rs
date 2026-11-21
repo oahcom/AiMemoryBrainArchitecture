@@ -205,13 +205,12 @@ fn forgotten_memory_is_excluded_from_context() {
     // Do not emulate this by editing ContextCandidate.lifecycle.
 }
 
-/// This is an intentional characterization test, not a desired-behavior test:
-/// it proves that the durable ForgetFence can record this namespace while the
-/// current MemoryStore read path still returns its revision. When the fence is
-/// wired into the shared SQLite read boundary, this assertion must fail and
-/// the ignored desired E2E above must be enabled with the enforced behavior.
+/// Pins the CURRENT (defective) behaviour: a ForgetFence record does not
+/// suppress reads through MemoryStore. This test is expected to FAIL the
+/// moment forget is wired into the read gate. When it does, delete it and
+/// un-ignore `forgotten_memory_is_excluded_from_context`.
 #[test]
-fn forget_fence_is_not_yet_enforced_by_memory_store_reads() {
+fn forget_api_absence_is_detectable() {
     let visible_scope = scope("fence-not-wired");
     let temp_db = TempDatabase::new();
     let sqlite = SqliteMemoryStorage::open(temp_db.path()).unwrap();

@@ -2,7 +2,10 @@
 //! 这是第一个具体持久化适配器；事务边界仍严格受 Storage Trait 约束。
 
 use memory_domain::{scope_set_contains_all, scopes_intersect, Memory, MemoryVersion, OpaqueId, ScopeRef};
-use memory_storage::{ChangePage, ChangeRecord, CommitReceipt, CommitRequest, CommitSequence, MemoryStorage, StorageError};
+use memory_storage::{
+    ChangePage, ChangeRecord, CommitReceipt, CommitRequest, CommitSequence, MemoryStorage,
+    PrepareRequest, PreparedCommitReceipt, StorageError,
+};
 use rusqlite::{params, Connection, OptionalExtension, TransactionBehavior};
 use std::time::Duration;
 
@@ -92,7 +95,22 @@ impl SqliteMemoryStorage {
                    commit_sequence INTEGER PRIMARY KEY,
                    memory_id TEXT NOT NULL REFERENCES memories(memory_id),
                    version_id TEXT NOT NULL UNIQUE REFERENCES versions(version_id)
-                 );",
+                 );
+                 CREATE TABLE IF NOT EXISTS publication_preparations (
+                   version_id TEXT PRIMARY KEY REFERENCES versions(version_id),
+                   memory_id TEXT NOT NULL REFERENCES memories(memory_id),
+                   publication_id TEXT NOT NULL UNIQUE,
+                   generation INTEGER NOT NULL CHECK(generation >= 0),
+                   request_digest TEXT NOT NULL,
+                   idempotency_key TEXT NOT NULL UNIQUE,
+                   expected_current_version TEXT,
+                   state TEXT NOT NULL CHECK (
+                     state IN ('PreparedHidden', 'Published', 'Suppressed')
+                   ),
+                   commit_sequence INTEGER
+                 );
+                 CREATE INDEX IF NOT EXISTS publication_preparations_memory_idx
+                   ON publication_preparations(memory_id, state);",
             )
             .map_err(|_| StorageError::TransactionUnavailable)
     }
@@ -135,7 +153,9 @@ impl SqliteMemoryStorage {
             .query_row(
                 "SELECT v.scope_json, v.version_json
                  FROM versions v
-                 WHERE v.memory_id = ?1 AND v.version_id = ?2",
+                 LEFT JOIN publication_preparations p ON p.version_id = v.version_id
+                 WHERE v.memory_id = ?1 AND v.version_id = ?2
+                   AND (p.version_id IS NULL OR p.state = 'Published')",
                 params![memory_id.as_str(), version_id.as_str()],
                 |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?)),
             )
@@ -363,6 +383,374 @@ impl MemoryStorage for SqliteMemoryStorage {
             params![request.idempotency_key, request.memory_id.as_str(), request.request_digest, receipt_json],
         )
         .map_err(|_| StorageError::IdempotencyConflict)?;
+
+        tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+        Ok(receipt)
+    }
+
+    fn prepare_version(
+        &mut self,
+        request: PrepareRequest,
+        scope: &[ScopeRef],
+    ) -> Result<PreparedCommitReceipt, StorageError> {
+        Self::validate_scope_set(scope)?;
+        if request.memory_id != request.new_version.memory_id {
+            return Err(StorageError::InvalidReference);
+        }
+        request.new_version.validate().map_err(|_| StorageError::InvalidSchema)?;
+        if request.idempotency_key.is_empty()
+            || request.request_digest.is_empty()
+            || request.publication_id.is_empty()
+            || request.generation > i64::MAX as u64
+        {
+            return Err(StorageError::InvalidSchema);
+        }
+
+        let tx = self
+            .connection
+            .transaction_with_behavior(TransactionBehavior::Immediate)
+            .map_err(|_| StorageError::TransactionUnavailable)?;
+
+        let memory_row = tx
+            .query_row(
+                "SELECT scope_json, current_version_id FROM memories WHERE memory_id = ?1",
+                params![request.memory_id.as_str()],
+                |row| Ok((row.get::<_, String>(0)?, row.get::<_, Option<String>>(1)?)),
+            )
+            .optional()
+            .map_err(|_| StorageError::TransactionUnavailable)?
+            .ok_or(StorageError::NotFoundOrNotVisible)?;
+
+        Self::scope_allowed(&memory_row.0, scope)?;
+        let memory_scopes: Vec<ScopeRef> = Self::decode(&memory_row.0)?;
+        if request.new_version.claims.iter().any(|claim| {
+            !scope_set_contains_all(&memory_scopes, &claim.scope_refs)
+                || !scope_set_contains_all(scope, &claim.scope_refs)
+        }) {
+            return Err(StorageError::ScopeMismatch);
+        }
+
+        // Replay of an identical preparation returns the original receipt.
+        if let Some((stored_memory, stored_digest, stored_publication, stored_generation)) = tx
+            .query_row(
+                "SELECT memory_id, request_digest, publication_id, generation
+                 FROM publication_preparations WHERE idempotency_key = ?1",
+                params![request.idempotency_key.as_str()],
+                |row| Ok((
+                    row.get::<_, String>(0)?,
+                    row.get::<_, String>(1)?,
+                    row.get::<_, String>(2)?,
+                    row.get::<_, i64>(3)?,
+                )),
+            )
+            .optional()
+            .map_err(|_| StorageError::TransactionUnavailable)?
+        {
+            if stored_memory != request.memory_id.as_str()
+                || stored_digest != request.request_digest
+                || stored_publication != request.publication_id
+                || stored_generation != request.generation as i64
+            {
+                return Err(StorageError::IdempotencyConflict);
+            }
+            let version_id: String = tx
+                .query_row(
+                    "SELECT version_id FROM publication_preparations WHERE idempotency_key = ?1",
+                    params![request.idempotency_key.as_str()],
+                    |row| row.get(0),
+                )
+                .map_err(|_| StorageError::TransactionUnavailable)?;
+            tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+            return Ok(PreparedCommitReceipt {
+                memory_id: request.memory_id,
+                prepared_version_id: OpaqueId::new(version_id).map_err(|_| StorageError::InvalidSchema)?,
+                publication_id: request.publication_id,
+                generation: request.generation,
+                idempotency_key: request.idempotency_key,
+            });
+        }
+
+        // The legacy commit path owns its own idempotency namespace; refuse a key
+        // that it already consumed so a single key can never mean two commits.
+        let legacy_key_used: bool = tx
+            .query_row(
+                "SELECT EXISTS(SELECT 1 FROM idempotency WHERE idempotency_key = ?1)",
+                params![request.idempotency_key.as_str()],
+                |row| row.get(0),
+            )
+            .map_err(|_| StorageError::TransactionUnavailable)?;
+        if legacy_key_used {
+            return Err(StorageError::IdempotencyConflict);
+        }
+
+        let publication_exists: bool = tx
+            .query_row(
+                "SELECT EXISTS(SELECT 1 FROM publication_preparations WHERE publication_id = ?1)",
+                params![request.publication_id.as_str()],
+                |row| row.get(0),
+            )
+            .map_err(|_| StorageError::TransactionUnavailable)?;
+        if publication_exists {
+            return Err(StorageError::PublicationStateConflict);
+        }
+
+        let current_id = memory_row.1.as_deref();
+        if current_id != request.expected_current_version.as_ref().map(OpaqueId::as_str) {
+            return Err(StorageError::StaleVersion);
+        }
+
+        if let Some(current_id) = current_id {
+            if request.new_version.parent_version_id.as_ref().map(OpaqueId::as_str) != Some(current_id) {
+                return Err(StorageError::StaleVersion);
+            }
+            let current_json: String = tx
+                .query_row(
+                    "SELECT version_json FROM versions WHERE version_id = ?1",
+                    params![current_id],
+                    |row| row.get(0),
+                )
+                .map_err(|_| StorageError::TransactionUnavailable)?;
+            let current: MemoryVersion = Self::decode(&current_json)?;
+            request
+                .new_version
+                .validate_successor(&current)
+                .map_err(|_| StorageError::StaleVersion)?;
+        } else if request.new_version.version_number != 1 || request.new_version.parent_version_id.is_some() {
+            return Err(StorageError::StaleVersion);
+        }
+
+        // Hidden versions take strictly-decreasing negative sequences so the
+        // existing NOT NULL UNIQUE constraint holds without touching the
+        // canonical positive sequence, which is allocated from commit_log only.
+        let min_negative: Option<i64> = tx
+            .query_row(
+                "SELECT MIN(commit_sequence) FROM versions WHERE commit_sequence < 0",
+                [],
+                |row| row.get(0),
+            )
+            .map_err(|_| StorageError::TransactionUnavailable)?;
+        let reserved_sequence = min_negative
+            .unwrap_or(0)
+            .checked_sub(1)
+            .ok_or(StorageError::TransactionUnavailable)?;
+
+        let scope_json = memory_row.0;
+        let version_json = Self::encode(&request.new_version)?;
+        tx.execute(
+            "INSERT INTO versions(version_id, memory_id, version_number, parent_version_id, scope_json, version_json, commit_sequence)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+            params![
+                request.new_version.memory_version_id.as_str(),
+                request.memory_id.as_str(),
+                request.new_version.version_number as i64,
+                request.new_version.parent_version_id.as_ref().map(OpaqueId::as_str),
+                scope_json,
+                version_json,
+                reserved_sequence
+            ],
+        )
+        .map_err(|_| StorageError::InvalidReference)?;
+
+        tx.execute(
+            "INSERT INTO publication_preparations(version_id, memory_id, publication_id, generation,
+                request_digest, idempotency_key, expected_current_version, state, commit_sequence)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, 'PreparedHidden', NULL)",
+            params![
+                request.new_version.memory_version_id.as_str(),
+                request.memory_id.as_str(),
+                request.publication_id.as_str(),
+                request.generation as i64,
+                request.request_digest.as_str(),
+                request.idempotency_key.as_str(),
+                request.expected_current_version.as_ref().map(OpaqueId::as_str),
+            ],
+        )
+        .map_err(|_| StorageError::PublicationStateConflict)?;
+
+        tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+        Ok(PreparedCommitReceipt {
+            memory_id: request.memory_id,
+            prepared_version_id: request.new_version.memory_version_id,
+            publication_id: request.publication_id,
+            generation: request.generation,
+            idempotency_key: request.idempotency_key,
+        })
+    }
+
+    fn publish_prepared(
+        &mut self,
+        publication_id: &str,
+        expected_current_version: Option<OpaqueId>,
+        scope: &[ScopeRef],
+    ) -> Result<CommitReceipt, StorageError> {
+        Self::validate_scope_set(scope)?;
+        if publication_id.is_empty() {
+            return Err(StorageError::InvalidSchema);
+        }
+
+        let tx = self
+            .connection
+            .transaction_with_behavior(TransactionBehavior::Immediate)
+            .map_err(|_| StorageError::TransactionUnavailable)?;
+
+        let row = tx
+            .query_row(
+                "SELECT p.memory_id, p.version_id, p.idempotency_key, p.request_digest,
+                        p.expected_current_version, p.state, p.commit_sequence,
+                        m.scope_json, m.current_version_id, m.memory_json, v.version_json
+                 FROM publication_preparations p
+                 JOIN memories m ON m.memory_id = p.memory_id
+                 JOIN versions v ON v.version_id = p.version_id
+                 WHERE p.publication_id = ?1",
+                params![publication_id],
+                |row| Ok((
+                    row.get::<_, String>(0)?,
+                    row.get::<_, String>(1)?,
+                    row.get::<_, String>(2)?,
+                    row.get::<_, String>(3)?,
+                    row.get::<_, Option<String>>(4)?,
+                    row.get::<_, String>(5)?,
+                    row.get::<_, Option<i64>>(6)?,
+                    row.get::<_, String>(7)?,
+                    row.get::<_, Option<String>>(8)?,
+                    row.get::<_, String>(9)?,
+                    row.get::<_, String>(10)?,
+                )),
+            )
+            .optional()
+            .map_err(|_| StorageError::TransactionUnavailable)?
+            .ok_or(StorageError::NotFoundOrNotVisible)?;
+
+        let (memory_id_text, version_id_text, idempotency_key, request_digest, stored_expected, state, stored_sequence, scope_json, current_id, memory_json, version_json) = row;
+
+        Self::scope_allowed(&scope_json, scope)?;
+        let memory_id = OpaqueId::new(memory_id_text).map_err(|_| StorageError::InvalidSchema)?;
+        let version_id = OpaqueId::new(version_id_text.clone()).map_err(|_| StorageError::InvalidSchema)?;
+
+        // Replay of a published preparation restores the original receipt and
+        // never allocates a second sequence.
+        if state == "Published" {
+            let sequence = stored_sequence
+                .filter(|value| *value > 0)
+                .ok_or(StorageError::PublicationStateConflict)?;
+            let receipt = CommitReceipt {
+                memory_id,
+                resulting_version_id: version_id,
+                commit_sequence: CommitSequence(sequence as u64),
+                idempotency_key,
+            };
+            tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+            return Ok(receipt);
+        }
+        if state != "PreparedHidden" {
+            return Err(StorageError::PublicationStateConflict);
+        }
+
+        if current_id.as_deref() != stored_expected.as_deref()
+            || current_id.as_deref() != expected_current_version.as_ref().map(OpaqueId::as_str)
+        {
+            return Err(StorageError::StaleVersion);
+        }
+
+        let memory_scopes: Vec<ScopeRef> = Self::decode(&scope_json)?;
+        let version: MemoryVersion = Self::decode(&version_json)?;
+        version.validate().map_err(|_| StorageError::InvalidSchema)?;
+        if version.claims.iter().any(|claim| {
+            !scope_set_contains_all(&memory_scopes, &claim.scope_refs)
+                || !scope_set_contains_all(scope, &claim.scope_refs)
+        }) {
+            return Err(StorageError::ScopeMismatch);
+        }
+
+        // Re-validate the parent at publish time; the prepare-time check alone
+        // cannot vouch for a pointer that may have moved since.
+        if let Some(current_id) = current_id.as_deref() {
+            if version.parent_version_id.as_ref().map(OpaqueId::as_str) != Some(current_id) {
+                return Err(StorageError::StaleVersion);
+            }
+            let current_json: String = tx
+                .query_row(
+                    "SELECT version_json FROM versions WHERE version_id = ?1",
+                    params![current_id],
+                    |row| row.get(0),
+                )
+                .map_err(|_| StorageError::TransactionUnavailable)?;
+            let current: MemoryVersion = Self::decode(&current_json)?;
+            version.validate_successor(&current).map_err(|_| StorageError::StaleVersion)?;
+        } else if version.version_number != 1 || version.parent_version_id.is_some() {
+            return Err(StorageError::StaleVersion);
+        }
+
+        let key_exists: bool = tx
+            .query_row(
+                "SELECT EXISTS(SELECT 1 FROM idempotency WHERE idempotency_key = ?1)",
+                params![idempotency_key.as_str()],
+                |row| row.get(0),
+            )
+            .map_err(|_| StorageError::TransactionUnavailable)?;
+        if key_exists {
+            return Err(StorageError::IdempotencyConflict);
+        }
+
+        let next_sequence: i64 = tx
+            .query_row(
+                "SELECT COALESCE(MAX(commit_sequence), 0) + 1 FROM commit_log",
+                [],
+                |row| row.get(0),
+            )
+            .map_err(|_| StorageError::TransactionUnavailable)?;
+        if next_sequence <= 0 {
+            return Err(StorageError::TransactionUnavailable);
+        }
+
+        let changed = tx
+            .execute(
+                "UPDATE versions SET commit_sequence = ?1 WHERE version_id = ?2 AND commit_sequence < 0",
+                params![next_sequence, version_id_text.as_str()],
+            )
+            .map_err(|_| StorageError::TransactionUnavailable)?;
+        if changed != 1 {
+            return Err(StorageError::PublicationStateConflict);
+        }
+
+        let mut updated_memory: Memory = Self::decode(&memory_json)?;
+        updated_memory.current_version_id = Some(version_id.clone());
+        let updated_memory_json = Self::encode(&updated_memory)?;
+        tx.execute(
+            "UPDATE memories SET current_version_id = ?1, memory_json = ?2 WHERE memory_id = ?3",
+            params![version_id.as_str(), updated_memory_json, memory_id.as_str()],
+        )
+        .map_err(|_| StorageError::TransactionUnavailable)?;
+
+        tx.execute(
+            "INSERT INTO commit_log(commit_sequence, memory_id, version_id) VALUES (?1, ?2, ?3)",
+            params![next_sequence, memory_id.as_str(), version_id.as_str()],
+        )
+        .map_err(|_| StorageError::TransactionUnavailable)?;
+
+        let receipt = CommitReceipt {
+            memory_id: memory_id.clone(),
+            resulting_version_id: version_id.clone(),
+            commit_sequence: CommitSequence(next_sequence as u64),
+            idempotency_key: idempotency_key.clone(),
+        };
+        let receipt_json = Self::encode(&receipt)?;
+        tx.execute(
+            "INSERT INTO idempotency(idempotency_key, memory_id, request_digest, receipt_json) VALUES (?1, ?2, ?3, ?4)",
+            params![idempotency_key.as_str(), memory_id.as_str(), request_digest.as_str(), receipt_json],
+        )
+        .map_err(|_| StorageError::IdempotencyConflict)?;
+
+        let changed = tx
+            .execute(
+                "UPDATE publication_preparations SET state = 'Published', commit_sequence = ?1
+                 WHERE publication_id = ?2 AND state = 'PreparedHidden'",
+                params![next_sequence, publication_id],
+            )
+            .map_err(|_| StorageError::TransactionUnavailable)?;
+        if changed != 1 {
+            return Err(StorageError::PublicationStateConflict);
+        }
 
         tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
         Ok(receipt)
@@ -1661,4 +2049,544 @@ mod tests {
         assert_eq!(full_reader.claims[0].claim_id, id("claim-both"));
     }
 
+
+    #[test]
+    fn sqlite_prepare_keeps_current_version_unchanged() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        let prepared = store.prepare_version(PrepareRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version: version("v1-prepared", 1, None),
+            idempotency_key: "t1-op".into(),
+            request_digest: "t1-digest".into(),
+            publication_id: "t1-publication".into(),
+            generation: 1,
+        }, &[scope()]).unwrap();
+
+        assert_eq!(prepared.prepared_version_id, id("v1-prepared"));
+        assert!(
+            store.read_current(&id("m1"), &[scope()]).unwrap().is_none(),
+            "prepare must not advance the current-version pointer"
+        );
+
+        let current_id: Option<String> = store.connection.query_row(
+            "SELECT current_version_id FROM memories WHERE memory_id = 'm1'",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+        assert_eq!(current_id, None);
+    }
+
+    #[test]
+    fn sqlite_prepare_hides_version_from_read_version() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        store.prepare_version(PrepareRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version: version("v2-hidden", 1, None),
+            idempotency_key: "t2-op".into(),
+            request_digest: "t2-digest".into(),
+            publication_id: "t2-publication".into(),
+            generation: 1,
+        }, &[scope()]).unwrap();
+
+        assert_eq!(
+            store.read_version(&id("m1"), &id("v2-hidden"), &[scope()]).unwrap(),
+            None,
+            "PreparedHidden versions must not be disclosed by read_version"
+        );
+    }
+
+    #[test]
+    fn sqlite_read_version_keeps_legacy_versions_visible() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        store.commit_version(CommitRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version: version("v3-legacy", 1, None),
+            idempotency_key: "t3-legacy-op".into(),
+            request_digest: "t3-legacy-digest".into(),
+        }, &[scope()]).unwrap();
+
+        let preparation_count: i64 = store.connection.query_row(
+            "SELECT COUNT(*) FROM publication_preparations
+             WHERE version_id = 'v3-legacy'",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+        assert_eq!(preparation_count, 0);
+
+        let visible = store.read_version(
+            &id("m1"),
+            &id("v3-legacy"),
+            &[scope()],
+        ).unwrap();
+
+        assert_eq!(
+            visible.unwrap().memory_version_id,
+            id("v3-legacy"),
+            "legacy versions without a preparation row must remain readable"
+        );
+    }
+
+    #[test]
+    fn sqlite_prepare_does_not_add_change_log_entries() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        store.prepare_version(PrepareRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version: version("v4-hidden", 1, None),
+            idempotency_key: "t4-op".into(),
+            request_digest: "t4-digest".into(),
+            publication_id: "t4-publication".into(),
+            generation: 1,
+        }, &[scope()]).unwrap();
+
+        let changes = store.list_changes(None, &[scope()], 10).unwrap();
+        assert!(
+            changes.records.is_empty(),
+            "a prepared version must not appear in the public change log"
+        );
+
+        let log_count: i64 = store.connection.query_row(
+            "SELECT COUNT(*) FROM commit_log WHERE version_id = 'v4-hidden'",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+        assert_eq!(log_count, 0);
+    }
+
+    #[test]
+    fn sqlite_publish_makes_prepared_version_current_and_readable() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        store.prepare_version(PrepareRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version: version("v5-publish", 1, None),
+            idempotency_key: "t5-op".into(),
+            request_digest: "t5-digest".into(),
+            publication_id: "t5-publication".into(),
+            generation: 1,
+        }, &[scope()]).unwrap();
+
+        let receipt = store.publish_prepared(
+            "t5-publication",
+            None,
+            &[scope()],
+        ).unwrap();
+
+        assert_eq!(receipt.memory_id, id("m1"));
+        assert_eq!(receipt.resulting_version_id, id("v5-publish"));
+        assert_eq!(receipt.commit_sequence, CommitSequence(1));
+
+        assert_eq!(
+            store.read_current(&id("m1"), &[scope()])
+                .unwrap().unwrap().memory_version_id,
+            id("v5-publish")
+        );
+        assert_eq!(
+            store.read_version(&id("m1"), &id("v5-publish"), &[scope()])
+                .unwrap().unwrap().memory_version_id,
+            id("v5-publish")
+        );
+
+        let state: String = store.connection.query_row(
+            "SELECT state FROM publication_preparations
+             WHERE publication_id = 't5-publication'",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+        assert_eq!(state, "Published");
+    }
+
+    #[test]
+    fn sqlite_publish_allocates_sequence_only_at_publish_time() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        // 先提交一个正式版本，确保 MAX 不只是空表的 NULL。
+        let first = store.commit_version(CommitRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version: version("v6-base", 1, None),
+            idempotency_key: "t6-base-op".into(),
+            request_digest: "t6-base-digest".into(),
+        }, &[scope()]).unwrap();
+        assert_eq!(first.commit_sequence, CommitSequence(1));
+
+        let max_before: i64 = store.connection.query_row(
+            "SELECT COALESCE(MAX(commit_sequence), 0) FROM commit_log",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+        assert_eq!(max_before, 1);
+
+        // 两次 prepare 均不得推进正式 commit_log 序列。
+        store.prepare_version(PrepareRequest {
+            memory_id: id("m1"),
+            expected_current_version: Some(id("v6-base")),
+            new_version: version("v6-prepared-a", 2, Some("v6-base")),
+            idempotency_key: "t6-a-op".into(),
+            request_digest: "t6-a-digest".into(),
+            publication_id: "t6-a-publication".into(),
+            generation: 1,
+        }, &[scope()]).unwrap();
+
+        store.prepare_version(PrepareRequest {
+            memory_id: id("m1"),
+            expected_current_version: Some(id("v6-base")),
+            new_version: version("v6-prepared-b", 2, Some("v6-base")),
+            idempotency_key: "t6-b-op".into(),
+            request_digest: "t6-b-digest".into(),
+            publication_id: "t6-b-publication".into(),
+            generation: 1,
+        }, &[scope()]).unwrap();
+
+        let max_after_prepare: i64 = store.connection.query_row(
+            "SELECT COALESCE(MAX(commit_sequence), 0) FROM commit_log",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+        assert_eq!(
+            max_after_prepare,
+            max_before,
+            "prepare must not consume a formal commit_log sequence"
+        );
+
+        let published = store.publish_prepared(
+            "t6-a-publication",
+            Some(id("v6-base")),
+            &[scope()],
+        ).unwrap();
+
+        assert_eq!(published.commit_sequence, CommitSequence(2));
+
+        let max_after_publish: i64 = store.connection.query_row(
+            "SELECT COALESCE(MAX(commit_sequence), 0) FROM commit_log",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+        assert_eq!(max_after_publish, 2);
+    }
+
+    #[test]
+    fn sqlite_prepare_replay_returns_same_receipt() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        let request = PrepareRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version: version("v7-replay", 1, None),
+            idempotency_key: "t7-op".into(),
+            request_digest: "t7-digest".into(),
+            publication_id: "t7-publication".into(),
+            generation: 7,
+        };
+
+        let first = store.prepare_version(request.clone(), &[scope()]).unwrap();
+        let replay = store.prepare_version(request, &[scope()]).unwrap();
+
+        assert_eq!(first, replay);
+
+        let versions: i64 = store.connection.query_row(
+            "SELECT COUNT(*) FROM versions WHERE version_id = 'v7-replay'",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+        let preparations: i64 = store.connection.query_row(
+            "SELECT COUNT(*) FROM publication_preparations
+             WHERE publication_id = 't7-publication'",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+
+        assert_eq!(versions, 1);
+        assert_eq!(preparations, 1);
+        assert!(store.read_current(&id("m1"), &[scope()]).unwrap().is_none());
+    }
+
+    #[test]
+    fn sqlite_prepare_rejects_idempotency_digest_conflict() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        store.prepare_version(PrepareRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version: version("v8-original", 1, None),
+            idempotency_key: "t8-shared-op".into(),
+            request_digest: "t8-original-digest".into(),
+            publication_id: "t8-original-publication".into(),
+            generation: 1,
+        }, &[scope()]).unwrap();
+
+        let result = store.prepare_version(PrepareRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version: version("v8-conflict", 1, None),
+            idempotency_key: "t8-shared-op".into(),
+            request_digest: "t8-different-digest".into(),
+            publication_id: "t8-conflict-publication".into(),
+            generation: 1,
+        }, &[scope()]);
+
+        assert_eq!(result, Err(StorageError::IdempotencyConflict));
+
+        let version_count: i64 = store.connection.query_row(
+            "SELECT COUNT(*) FROM versions WHERE version_id IN
+             ('v8-original', 'v8-conflict')",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+        let preparation_count: i64 = store.connection.query_row(
+            "SELECT COUNT(*) FROM publication_preparations
+             WHERE idempotency_key = 't8-shared-op'",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+
+        assert_eq!(version_count, 1);
+        assert_eq!(preparation_count, 1);
+    }
+
+    #[test]
+    fn sqlite_publish_replay_returns_original_receipt() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        store.prepare_version(PrepareRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version: version("v9-publish-replay", 1, None),
+            idempotency_key: "t9-op".into(),
+            request_digest: "t9-digest".into(),
+            publication_id: "t9-publication".into(),
+            generation: 1,
+        }, &[scope()]).unwrap();
+
+        let first = store.publish_prepared("t9-publication", None, &[scope()]).unwrap();
+        let replay = store.publish_prepared("t9-publication", None, &[scope()]).unwrap();
+
+        assert_eq!(first, replay);
+
+        let log_count: i64 = store.connection.query_row(
+            "SELECT COUNT(*) FROM commit_log
+             WHERE version_id = 'v9-publish-replay'",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+        let idempotency_count: i64 = store.connection.query_row(
+            "SELECT COUNT(*) FROM idempotency WHERE idempotency_key = 't9-op'",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+
+        assert_eq!(log_count, 1, "replay must not insert a second commit_log row");
+        assert_eq!(idempotency_count, 1);
+        assert_eq!(first.commit_sequence, CommitSequence(1));
+    }
+
+    #[test]
+    fn sqlite_publish_rejects_stale_parent_without_partial_commit() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        store.commit_version(CommitRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version: version("v10-base", 1, None),
+            idempotency_key: "t10-base-op".into(),
+            request_digest: "t10-base-digest".into(),
+        }, &[scope()]).unwrap();
+
+        store.prepare_version(PrepareRequest {
+            memory_id: id("m1"),
+            expected_current_version: Some(id("v10-base")),
+            new_version: version("v10-prepared", 2, Some("v10-base")),
+            idempotency_key: "t10-prepared-op".into(),
+            request_digest: "t10-prepared-digest".into(),
+            publication_id: "t10-publication".into(),
+            generation: 1,
+        }, &[scope()]).unwrap();
+
+        // 兼容路径先提交另一条 successor，令 prepared parent 变旧。
+        store.commit_version(CommitRequest {
+            memory_id: id("m1"),
+            expected_current_version: Some(id("v10-base")),
+            new_version: version("v10-competitor", 2, Some("v10-base")),
+            idempotency_key: "t10-competitor-op".into(),
+            request_digest: "t10-competitor-digest".into(),
+        }, &[scope()]).unwrap();
+
+        let result = store.publish_prepared(
+            "t10-publication",
+            Some(id("v10-base")),
+            &[scope()],
+        );
+        assert_eq!(result, Err(StorageError::StaleVersion));
+
+        assert_eq!(
+            store.read_current(&id("m1"), &[scope()])
+                .unwrap().unwrap().memory_version_id,
+            id("v10-competitor")
+        );
+        assert_eq!(
+            store.read_version(&id("m1"), &id("v10-prepared"), &[scope()])
+                .unwrap(),
+            None,
+            "failed publication must leave the prepared version hidden"
+        );
+
+        let prepared_log_count: i64 = store.connection.query_row(
+            "SELECT COUNT(*) FROM commit_log WHERE version_id = 'v10-prepared'",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+        let prepared_state: String = store.connection.query_row(
+            "SELECT state FROM publication_preparations
+             WHERE publication_id = 't10-publication'",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+
+        assert_eq!(prepared_log_count, 0);
+        assert_eq!(prepared_state, "PreparedHidden");
+
+        let total_log_count: i64 = store.connection.query_row(
+            "SELECT COUNT(*) FROM commit_log",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+        assert_eq!(total_log_count, 2);
+    }
+
+    #[test]
+    fn sqlite_multiple_preparations_reserve_unique_negative_sequences() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        store.prepare_version(PrepareRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version: version("v11-a", 1, None),
+            idempotency_key: "t11-a-op".into(),
+            request_digest: "t11-a-digest".into(),
+            publication_id: "t11-a-publication".into(),
+            generation: 1,
+        }, &[scope()]).unwrap();
+
+        store.prepare_version(PrepareRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version: version("v11-b", 1, None),
+            idempotency_key: "t11-b-op".into(),
+            request_digest: "t11-b-digest".into(),
+            publication_id: "t11-b-publication".into(),
+            generation: 1,
+        }, &[scope()]).unwrap();
+
+        let mut stmt = store.connection.prepare(
+            "SELECT commit_sequence FROM versions
+             WHERE version_id IN ('v11-a', 'v11-b')
+             ORDER BY version_id",
+        ).unwrap();
+
+        let values: Vec<i64> = stmt.query_map([], |row| row.get(0))
+            .unwrap()
+            .collect::<Result<Vec<_>, _>>()
+            .unwrap();
+
+        assert_eq!(values.len(), 2);
+        assert!(values.iter().all(|value| *value < 0));
+        assert_ne!(
+            values[0],
+            values[1],
+            "each prepared version must reserve a distinct negative commit_sequence"
+        );
+
+        let log_max: i64 = store.connection.query_row(
+            "SELECT COALESCE(MAX(commit_sequence), 0) FROM commit_log",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+        assert_eq!(log_max, 0, "hidden preparations must not enter commit_log");
+    }
+
+    #[test]
+    fn sqlite_publish_rejects_duplicate_publication_and_suppressed_state() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        store.prepare_version(PrepareRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version: version("v12-original", 1, None),
+            idempotency_key: "t12-original-op".into(),
+            request_digest: "t12-original-digest".into(),
+            publication_id: "t12-shared-publication".into(),
+            generation: 1,
+        }, &[scope()]).unwrap();
+
+        // publication_id 是唯一键，第二个 preparation 必须被拒绝。
+        let duplicate_publication = store.prepare_version(PrepareRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version: version("v12-duplicate", 1, None),
+            idempotency_key: "t12-duplicate-op".into(),
+            request_digest: "t12-duplicate-digest".into(),
+            publication_id: "t12-shared-publication".into(),
+            generation: 2,
+        }, &[scope()]);
+
+        assert_eq!(
+            duplicate_publication,
+            Err(StorageError::PublicationStateConflict)
+        );
+
+        // 当前没有 suppress API；测试直接将 preparation 状态置为 Suppressed。
+        let changed = store.connection.execute(
+            "UPDATE publication_preparations
+             SET state = 'Suppressed'
+             WHERE publication_id = 't12-shared-publication'",
+            [],
+        ).unwrap();
+        assert_eq!(changed, 1);
+
+        assert_eq!(
+            store.read_version(&id("m1"), &id("v12-original"), &[scope()])
+                .unwrap(),
+            None,
+            "Suppressed versions must remain hidden"
+        );
+
+        assert_eq!(
+            store.publish_prepared(
+                "t12-shared-publication",
+                None,
+                &[scope()],
+            ),
+            Err(StorageError::PublicationStateConflict),
+            "Suppressed preparations must not be publishable"
+        );
+
+        assert!(store.read_current(&id("m1"), &[scope()]).unwrap().is_none());
+
+        let log_count: i64 = store.connection.query_row(
+            "SELECT COUNT(*) FROM commit_log WHERE version_id = 'v12-original'",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+        assert_eq!(log_count, 0);
+    }
 }
