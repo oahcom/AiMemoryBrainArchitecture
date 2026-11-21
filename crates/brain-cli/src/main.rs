@@ -226,7 +226,7 @@ fn run() -> Result<(), String> {
     let output = snapshot
         .serialize()
         .map_err(|error| format!("cannot serialize ContextSnapshot: {error:?}"))?;
-    fs::write(&output_path, output)
+    fs::write(&output_path, &output)
         .map_err(|error| format!("cannot write output {}: {error}", output_path))?;
 
     if verbose {
