@@ -1,3 +1,42 @@
+---
+document_metadata:
+  domain: security-governance
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Under-Review
+      approver: NOT_RECORDED
+      decision_date: NOT_RECORDED
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "00-governance/architecture-document-management-policy.md"
+        - "PR #428 — BMCP architecture follow-up coverage-register entry"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Bilingual coverage register; status entries are tracking evidence, not proof of normative specification completion."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    normative_status: Informative
+    canonical_conflict_status: None
+---
+
 # Bilingual Documentation Coverage & Migration Plan / 双语文档覆盖与迁移计划
 
 - Document ID: DOC-STATUS-001
