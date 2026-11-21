@@ -124,6 +124,46 @@ class GateRootsTest(unittest.TestCase):
         for src in self.gate.EMBEDDED_BILINGUAL_SOURCES:
             self.assertEqual(src.split("/")[0] in self.gate.NORMATIVE_ROOTS, True, src)
 
+    # --- Issue #420: exemption registration must follow file creation ---
+
+    def make_registration_repo(self, register_in_creation_commit: bool):
+        repo = self.root / ("registration-same-commit" if register_in_creation_commit else "registration-later-commit")
+        repo.mkdir()
+        self.git(repo, "init", "-q")
+        self.git(repo, "config", "user.email", "tests@example.invalid")
+        self.git(repo, "config", "user.name", "Issue 420 tests")
+        source = "00-governance/new-embedded-source.md"
+        target = repo / source
+        target.parent.mkdir(parents=True)
+        target.write_text("embedded bilingual source\n", encoding="utf-8")
+        gate_file = repo / "scripts/check_bilingual_docs.py"
+        gate_file.parent.mkdir(parents=True)
+        if register_in_creation_commit:
+            gate_file.write_text(
+                f'EMBEDDED_BILINGUAL_SOURCES = {{\n    "{source}": "independent reason",\n}}\n',
+                encoding="utf-8",
+            )
+        self.commit_tree(repo, "add source" if register_in_creation_commit else "add source before registration")
+        if not register_in_creation_commit:
+            gate_file.write_text(
+                f'EMBEDDED_BILINGUAL_SOURCES = {{\n    "{source}": "independent reason",\n}}\n',
+                encoding="utf-8",
+            )
+            self.commit_tree(repo, "register existing source")
+        self.gate.ROOT = repo
+        self.gate.EMBEDDED_BILINGUAL_SOURCES = {source: "independent reason"}
+        self.gate.SELF_REGISTERED_AT_CREATION = {}
+        return repo, source
+
+    def test_issue_420_same_commit_file_add_and_exemption_registration_rejected(self):
+        self.make_registration_repo(register_in_creation_commit=True)
+        errors = self.gate.check_embedded_registration_history()
+        self.assertTrue(any("same commit that added the file" in error for error in errors), errors)
+
+    def test_issue_420_registration_in_later_commit_is_accepted(self):
+        self.make_registration_repo(register_in_creation_commit=False)
+        self.assertEqual(self.gate.check_embedded_registration_history(), [])
+
     # --- operational-record subtrees: declaration only, no pairing ---
 
     def test_work_items_change_is_pairing_exempt(self):
