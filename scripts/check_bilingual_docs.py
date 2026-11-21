@@ -125,12 +125,12 @@ EMBEDDED_BILINGUAL_SOURCES: dict[str, str] = {
 for _source, _reason in EMBEDDED_BILINGUAL_SOURCES.items():
     if not (REPO_ROOT / _source).is_file():
         sys.stderr.write(
-            f"EMBEDDED_BILINGUAL_SOURCES references missing file: {_source}\\n"
+            f"EMBEDDED_BILINGUAL_SOURCES references missing file: {_source}\n"
         )
         sys.exit(2)
     if not _reason.strip() or len(_reason.strip()) <= 10:
         sys.stderr.write(
-            f"EMBEDDED_BILINGUAL_SOURCES has missing or placeholder reason: {_source}\\n"
+            f"EMBEDDED_BILINGUAL_SOURCES has missing or placeholder reason: {_source}\n"
         )
         sys.exit(2)
 ROOT = Path.cwd()
