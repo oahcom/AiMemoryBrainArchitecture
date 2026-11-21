@@ -182,3 +182,34 @@ Acceptance:
 - **DECIDED:** No tier guarantees model comprehension.
 - **DECIDED:** Capability claims require conformance evidence; failures trigger explicit degradation.
 - **OPEN:** Wire-level negotiation belongs to Session H.
+
+
+## 14. Executable operation binding (reference-model contract)
+
+The following operation mapping makes the DECIDED tier guarantees executable. It is a deterministic reference-model contract, not a BMCP wire negotiation or a production Adapter implementation.
+
+| Operation enum | Minimum tier | Tier 1 | Tier 2 | Tier 3 |
+|---|---:|---:|---:|---:|
+| `SubmitScopedTelemetry` | 3 | Allow | Allow | Allow |
+| `RequestActiveRecall` | 3 | Allow | Allow | Allow |
+| `InsertMiddlewareMemorySlot` | 2 | Allow | Allow | Reject |
+| `AttestMiddlewareApplication` | 2 | Allow | Allow | Reject |
+| `ObserveFullInferenceBoundary` | 1 | Allow | Reject | Reject |
+| `ApplyFullBoundaryMemory` | 1 | Allow | Reject | Reject |
+| `AttestFullBoundaryApplication` | 1 | Allow | Reject | Reject |
+| `ReconcileSnapshotAndDelta` | 1 | Allow | Reject | Reject |
+
+A lower tier is not permitted to perform an operation merely because it can represent the request. The reference model returns `AdapterError::TierInsufficient { required, actual }`; callers must branch on the enum, not parse display text. Tier 1 subsumes Tier 2 and Tier 3 operations; Tier 2 subsumes Tier 3 operations.
+
+### Boundary rejection codes
+
+The reference model also exposes typed boundary rejection reasons:
+
+- `ProtectedRegionMutation(region)`: any attempt to write System instructions, Developer instructions, user input, Agent safety policy, tool schemas/authorization, or Agent working state.
+- `RequestAlreadyFrozen`: attempting to change the managed region after the request assembler has frozen the inference request.
+
+Both rules directly enforce DECIDED principles in `inference-boundary-model.md`: protected regions are not Brain-writable, and an in-flight/frozen request is immutable. These are the two implemented boundary cases; version-gap reconciliation remains specified by the source contract but is not implemented by this minimal reference model.
+
+### Scope and status
+
+This mapping is an executable interpretation of the tier guarantees already marked DECIDED in this document. Wire-level negotiation, authenticated capability claims, transport, provider integration, actual inference, and production telemetry remain out of scope. The model does not claim any of them.
