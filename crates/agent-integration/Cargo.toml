@@ -7,3 +7,7 @@ publish = false
 
 [lib]
 path = "src/lib.rs"
+
+[dependencies]
+memory-context = { path = "../memory-context" }
+memory-domain = { path = "../memory-domain" }
