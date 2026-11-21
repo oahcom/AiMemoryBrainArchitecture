@@ -640,13 +640,70 @@ What the review confirms, in its own words, and what it does not do:
 R3 review disposition after this round is still `REQUEST CHANGES`: the two findings are applied
 but not yet re-reviewed. `§2` is unchanged in every line across all five commits of this round.
 
-### 9.7 Read-back of the predicate-equivalence round
+### 9.7 Fourth independent review — PASS on both closures
+
+Reviewer: independent session `6b0133e2-3ce0-83ee-aa0c-8a994b9ea682` (read-only, no repository
+write, no comment posted by the reviewer). Verdict returned 2026-11-21. Read-back pin:
+`2fab32dea01310eb50f74aded3fa06e261e8e356`.
+
+`PASS` on all five items: R5-02-01, SYNC-07-01, no newly introduced defect, bilingual equivalence
+of the new `§16.1` paragraph, and the `§9.6` record. The reviewer states it checked the actual
+`G Context Commit` column of the terminal-state matrix against the new G paragraph row by row and
+found the four dispositions consistent, rather than accepting the pointer as sufficient.
+
+It also settled the one point `§9.6` argued in prose: the old scenario matrix really does have six
+component columns, so the surviving `six-component` sentence is correct and is not a blocking
+finding.
+
+It confirms the `3b452dbe` diff changed only the three target files, and that the nine-step
+execution order, the existing T17/T18 rows, and the Schema / DDL / Public API / wire-format
+exclusions are untouched.
+
+Boundary, stated by the reviewer and preserved: no `DECIDED FOR CONVERGENCE` decision was reopened;
+`FORMAL ACCEPTANCE` is not granted; `IMPLEMENTATION CONFORMANT` is not established; test execution
+is not authorized and `TEST EXECUTION = SUSPENDED` stands.
+
+### 9.8 R1 has no independent review, and that is the only thing left
+
+`§3` carries `PENDING` on exactly one row: R1 Claim identity. Every other row is either `PASS` or
+has an applied fix whose blocking findings are now closed. R1's application was recorded in `§9.1`
+and its consumer text was never challenged — but "never challenged" is not `PASS`, and §5 requires
+an independent reviewer to check the applied Blob. So the disposition cannot become `PASS` on the
+strength of the other seven rows.
+
+The R1 targets, read at the pin above:
+
+```
+docs/en/02-domain-model/domain-model-overview.md  1a1a10b24d68dbc2de20cbe4cd6419a7ca037bed  28507 B
+docs/zh-CN/02-domain-model/domain-model-overview.md  8ef976789af64afc5e02e8dbdeb2b5f7e1f3df58  25636 B
+02-domain-model/domain-model-overview.md  5b86fe23ab7c670b4ae13331b56572aee35f5d00  26974 B
+docs/en/02-domain-model/phase-1-domain-model-freeze.md  1a18c6b8424c939dd90986527a24807c8f74d552  5946 B
+docs/zh-CN/02-domain-model/phase-1-domain-model-freeze.md  408a606c44fcf271f265508bc9d3029f8fc889cb  5553 B
+02-domain-model/phase-1-domain-model-freeze.md  d1102a0adf32e3f7b3eb9091758823f990a2a37c  10457 B
+docs/en/03-memory-brain/memory-versioning.md  4efbd26db9586f6fcf1897f42ffba287d625b903  49348 B
+docs/zh-CN/03-memory-brain/memory-versioning.md  5ff17ab6cb561407806fe63e1b5aa18f399cbed1  45301 B
+docs/en/04-memory-compiler/extraction-and-normalization.md  e6aad4b7504fa61fd0feb8b1da7aa8801103bc60  26256 B
+docs/zh-CN/04-memory-compiler/extraction-and-normalization.md  8dd0b5b29ecd37ceac6750c4ad8fa07c1c46cb4c  25185 B
+```
+
+Note the third row. `02-domain-model/domain-model-overview.md` exists at repository root alongside
+`docs/en` and `docs/zh-CN`, and it still carries Blob `5b86fe23ab7c` — the pre-R1-correction value.
+The `docs/en` copy has moved to `1a1a10b24d68`. Whether the root-level copy is a legitimate third
+authoritative copy, a stale mirror, or dead weight is a question `§9.1` recorded but did not
+resolve: it noted the root-level freeze file has no row in `§8` at all and that the root-level
+`context-versioning.md` appears only as a "not applied" bullet. The same doubt now attaches to the
+root-level domain-model Overview.
+
+This is stated as an open question, not as a finding. Resolving it requires an owner decision on
+which copies are authoritative, which is outside what an application round may decide on its own.
+
+### 9.9 Read-back of the predicate-equivalence round
 
 This section records the post-merge read-back for the R7 predicate-equivalence correction reviewed in REREVIEW-8.
 
 It records repository state and content identity only. REREVIEW-8 = PASS is not FORMAL ACCEPTANCE and does not establish implementation conformance.
 
-#### 9.7.1 Exact correction heads
+#### 9.9.1 Exact correction heads
 
 | Target | Reviewed correction HEAD | Correction |
 |---|---|---|
@@ -655,7 +712,7 @@ It records repository state and content identity only. REREVIEW-8 = PASS is not 
 
 The two correction commits each replace the predicate connector in one existing English definition. The Chinese definitions already use `当且仅当`.
 
-#### 9.7.2 Exact merge targets
+#### 9.9.2 Exact merge targets
 
 | Target branch | Merge commit |
 |---|---|
@@ -666,7 +723,7 @@ These are separate Git histories and must not be represented as one common atomi
 
 The Extraction files are read from the specified `main` merge result. The Storage ADR is read from its separate carrier branch merge result.
 
-#### 9.7.3 Post-merge Blob read-back
+#### 9.9.3 Post-merge Blob read-back
 
 The Blob values below are pinned to the R7 merge result (`main` `f1a6028d`).
 They are historical read-back values and do not describe the current `main` HEAD,
@@ -684,7 +741,7 @@ The complete Blob identifiers are recorded by the post-merge read-back:
 - Extraction ZH: `9657949af482`
 - Storage ADR: `62ae6e878657`
 
-#### 9.7.4 Predicate-equivalence read-back
+#### 9.9.4 Predicate-equivalence read-back
 
 The four normative definitions are:
 
@@ -708,7 +765,7 @@ The English and Chinese definitions express the same necessary-and-sufficient co
 
 The participant barrier MUST be resolved or completed only when the predicate is TRUE.
 
-#### 9.7.5 Review and governance disposition
+#### 9.9.5 Review and governance disposition
 
 ```text
 REREVIEW-8 = PASS

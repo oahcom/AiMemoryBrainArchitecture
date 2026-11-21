@@ -566,13 +566,62 @@ Claim/Fact 内容派生的 G `ContextVersion` 提交具有规范约束力」。�
 本轮之后 R3 复审处置仍为 `REQUEST CHANGES`：两项已应用但尚未复审。`§2` 在本轮五次提交之间逐行
 未变。
 
-### 9.7 谓词等价修正轮的合并后回读
+### 9.7 第四轮独立复审 —— 两项闭合均 PASS
+
+复审方：独立会话 `6b0133e2-3ce0-83ee-aa0c-8a994b9ea682`（只读，未写仓库，未由复审方发布评论）。
+2026-11-21 返回裁决。回读钉定：`2fab32dea01310eb50f74aded3fa06e261e8e356`。
+
+五项全部 `PASS`：R5-02-01、SYNC-07-01、未引入新缺陷、新增 `§16.1` 段的双语等价性、
+`§9.6` 记录。复审方明确陈述其逐行核对了终态矩阵 `G Context Commit` 列与新增 G 段的对应关系，
+确认四种处置一致，而非仅采信指向关系。
+
+它同时裁定了 `§9.6` 以散文方式论证的那一点：旧场景矩阵确实只有六个分量列，因此残留的
+`six-component` 一句正确，不构成阻断。
+
+它确认 `3b452dbe` 的 diff 仅改动三个目标文件，九步执行顺序、既有 T17/T18 各行，以及
+Schema / DDL / Public API / 线格式的排除条款均未被动。
+
+复审方明示并在此保留的边界：未重新打开任何 `DECIDED FOR CONVERGENCE` 决定；不授予
+`FORMAL ACCEPTANCE`；不确立 `IMPLEMENTATION CONFORMANT`；不授权测试执行，
+`TEST EXECUTION = SUSPENDED` 维持。
+
+### 9.8 R1 尚无独立复审，而这是唯一剩下的事
+
+`§3` 中仅有一行仍为 `PENDING`：R1 Claim 身份。其余各行或为 `PASS`，或已有应用修正且其阻断项
+现已闭合。R1 的应用记录在 `§9.1`，其消费者文本从未被质疑——但「未被质疑」不等于 `PASS`，
+而第 5 节要求独立复审者核对已应用的 Blob。因此处置不能凭其余七行的成绩直接转为 `PASS`。
+
+R1 的目标文件，在上述钉定处回读：
+
+```
+docs/en/02-domain-model/domain-model-overview.md  1a1a10b24d68dbc2de20cbe4cd6419a7ca037bed  28507 B
+docs/zh-CN/02-domain-model/domain-model-overview.md  8ef976789af64afc5e02e8dbdeb2b5f7e1f3df58  25636 B
+02-domain-model/domain-model-overview.md  5b86fe23ab7c670b4ae13331b56572aee35f5d00  26974 B
+docs/en/02-domain-model/phase-1-domain-model-freeze.md  1a18c6b8424c939dd90986527a24807c8f74d552  5946 B
+docs/zh-CN/02-domain-model/phase-1-domain-model-freeze.md  408a606c44fcf271f265508bc9d3029f8fc889cb  5553 B
+02-domain-model/phase-1-domain-model-freeze.md  d1102a0adf32e3f7b3eb9091758823f990a2a37c  10457 B
+docs/en/03-memory-brain/memory-versioning.md  4efbd26db9586f6fcf1897f42ffba287d625b903  49348 B
+docs/zh-CN/03-memory-brain/memory-versioning.md  5ff17ab6cb561407806fe63e1b5aa18f399cbed1  45301 B
+docs/en/04-memory-compiler/extraction-and-normalization.md  e6aad4b7504fa61fd0feb8b1da7aa8801103bc60  26256 B
+docs/zh-CN/04-memory-compiler/extraction-and-normalization.md  8dd0b5b29ecd37ceac6750c4ad8fa07c1c46cb4c  25185 B
+```
+
+注意第三行。`02-domain-model/domain-model-overview.md` 与 `docs/en`、`docs/zh-CN` 并列存在于
+仓库根级，且其 Blob 仍为 `5b86fe23ab7c`——即 R1 修正前的值。`docs/en` 副本已推进到
+`1a1a10b24d68`。根级副本究竟是合法的第三份权威副本、过期镜像，还是冗余，是 `§9.1` 记录但
+未裁定的问题：该节已指出根级 freeze 文件在 `§8` 中根本没有行，根级 `context-versioning.md`
+仅以「本轮未应用」条目出现。同样的疑问现在也落在根级 domain-model Overview 上。
+
+此处作为开放问题陈述，不作为发现。裁定哪些副本具有权威性需要 Owner 决定，不属于应用轮次
+可自行决定的范围。
+
+### 9.9 谓词等价修正轮的合并后回读
 
 本节记录 REREVIEW-8 所审查的第七轮谓词等价修正完成合并后的回读结果。
 
 本节仅记录仓库状态及内容身份。REREVIEW-8 = PASS 不构成 FORMAL ACCEPTANCE，也不建立实现符合性。
 
-#### 9.7.1 精确修正提交 HEAD
+#### 9.9.1 精确修正提交 HEAD
 
 | 目标 | 已复审的修正 HEAD | 修正内容 |
 |---|---|---|
@@ -581,7 +630,7 @@ Claim/Fact 内容派生的 G `ContextVersion` 提交具有规范约束力」。�
 
 两个修正提交均只替换原有英文定义中的谓词连接词。中文定义此前已经使用「当且仅当」。
 
-#### 9.7.2 精确合并目标
+#### 9.9.2 精确合并目标
 
 | 目标分支 | 合并提交 |
 |---|---|
@@ -592,7 +641,7 @@ Claim/Fact 内容派生的 G `ContextVersion` 提交具有规范约束力」。�
 
 Extraction 文件从指定的 `main` 合并结果读取。Storage ADR 从其独立载体分支的合并结果读取。
 
-#### 9.7.3 合并后 Blob 回读
+#### 9.9.3 合并后 Blob 回读
 
 下表 Blob 值钉定于 R7 合并结果（`main` `f1a6028d`）。它们是历史回读值，
 不描述当前 `main` HEAD——该分支此后已被后续治理轮次推进。
@@ -609,7 +658,7 @@ Extraction 文件从指定的 `main` 合并结果读取。Storage ADR 从其独�
 - Extraction ZH：`9657949af482`
 - Storage ADR：`62ae6e878657`
 
-#### 9.7.4 谓词等价回读
+#### 9.9.4 谓词等价回读
 
 四处规范定义分别为：
 
@@ -633,7 +682,7 @@ Extraction 文件从指定的 `main` 合并结果读取。Storage ADR 从其独�
 
 Participant barrier 只有在该谓词为 TRUE 时才 MUST 被判定为 resolved 或完成。
 
-#### 9.7.5 复审及治理处置
+#### 9.9.5 复审及治理处置
 
 ```text
 REREVIEW-8 = PASS
