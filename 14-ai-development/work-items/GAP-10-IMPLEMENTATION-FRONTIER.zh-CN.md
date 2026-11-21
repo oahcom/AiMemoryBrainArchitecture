@@ -169,3 +169,102 @@ GAP-08 与 GAP-09 都是在红灯状态下进入 `main` 的，因为 PR 上只�
 | BMCP | 60% 未实现 | 产物可观（32 schema、545 一致性测试）。传输/服务端完全缺失——那是一个二进制，不是一个百分比 |
 | Phase 2 领域 | 100% 未启动 | **不成立。** 类型与不变量已实现，36 单元 + 11 验收测试；9 个因缺失注册表而 ignore |
 | 端到端 | 100% 未启动 | 部分不成立。`brain-cli` 已端到端跑通摄取 → 存储 → 上下文，止于编译器跳过（GAP-07） |
+
+## 6. 在 `b29278a8` 上的重测（2026-11-22 02:05 +08:00）
+
+本节是追加内容。它不修改上方 §1–§5，只记录那些章节写就之后发生变化的部分，
+以及一个无法对上的数字。
+
+### 6.1 测试总数变了
+
+```
+$ cargo test --workspace --all-targets
+TOTAL passed=385 failed=0 ignored=10
+```
+
+逐 crate 单独测量：
+
+| crate | 通过 |
+|---|---|
+| agent-integration | 33 |
+| bmcp-protocol | 46 |
+| brain-cli | 5 |
+| memory-compiler | 59 |
+| memory-context | 77 |
+| memory-domain | 47 |
+| memory-event-store | 2 |
+| memory-event-store-sqlite | 31 |
+| memory-storage | 3 |
+| memory-storage-sqlite | 59 |
+| memory-store | 23 |
+
+### 6.2 有一个数字对不上，记录为未解决
+
+本目录另一份文档记录 `1ebbab84` 上 **371 passed**。我在 `b29278a8` 上测得
+**385**。#541 自身 diff 新增 19 个 `#[test]`，而 371 + 19 = 390 ≠ 385。所以两个
+数字统计的是不同的目标集，或者其中之一是错的。此处不解释抹平，只做标注，让下一个
+人重新推导而不是继承。
+
+### 6.3 依赖图多了一条消费链接，没有减少
+
+从 `crates/*/Cargo.toml` 实测：
+
+```
+agent-integration          -> memory-context, memory-domain
+bmcp-protocol              -> NONE
+brain-cli                  -> memory-domain, memory-storage-sqlite, memory-store,
+                              memory-context, memory-compiler
+memory-compiler            -> memory-domain, memory-event-store, memory-event-store-sqlite
+memory-context             -> memory-domain, memory-event-store-sqlite, memory-store,
+                              memory-storage, memory-storage-sqlite
+memory-domain              -> NONE
+memory-event-store         -> memory-domain
+memory-event-store-sqlite  -> memory-domain, memory-event-store
+memory-storage             -> memory-domain
+memory-storage-sqlite      -> memory-domain, memory-storage
+memory-store               -> memory-domain, memory-storage, memory-storage-sqlite
+
+无任何使用者：  agent-integration, bmcp-protocol
+唯一二进制：    brain-cli
+```
+
+上方 §1.5 与 §2 仍然成立：`brain-cli` 依旧既不 import `agent-integration`
+也不 import `bmcp-protocol`。
+
+### 6.4 Tier 1 第 2 项改变了形状
+
+GAP-06 没有被 #541 关闭。#541 在既有的 *namespace* 围栏（`forget_fence`，主键
+`namespace_key`）之外，新增了一套 *target* 围栏（`canonical_forget_fences`，主键
+Memory/Version），位于不同 crate，且没有对账路径。
+`forget_api_absence_is_detectable` 仍然通过 —— 而这正是它被写出来要检测的缺陷。
+测量与关闭条件见 `GAP-11-FORGET-FENCE-SPLIT-AUTHORITY.md`。因此 Tier 1 第 2 项
+不是"把围栏接进去"，而是"先决定哪一套围栏是权威，再删除另一套"。
+
+### 6.5 闸门未变，其中一个现在可测量
+
+- `08-bmcp-protocol/scripts/check_protocol_index.py` → `missing=0 extra=0
+  duplicate_types=0 invalid_rows=0 PASS`。
+- `08-bmcp-protocol/schemas/test_nonempty_audit.py` → **exit 1**，5506 条未登记
+  约束（GAP-09，未变）。
+- `python3 -m unittest discover -s tests/conformance` → **Ran 493 tests**，
+  6 errors，27 skipped。6 个 error 全部是
+  `ModuleNotFoundError: No module named 'rfc8785'`，即未安装的已声明依赖
+  （`requirements.txt` 锁定 `rfc8785==0.1.4`），不是代码缺陷。在 #540 之前，
+  这条命令发现 0 条测试并因 ImportError 直接死掉。
+- #546 已声明 GAP-08 报告的 Node 依赖；值得复验那三个 `.mjs` 引用在干净检出上
+  是否已可解析。
+
+### 6.6 CI 依然什么都不评估
+
+#541 head commit 与 `main` 上的四个 check run 携带同一条注解，原文：
+
+> The job was not started because recent account payments have failed or your
+> spending limit needs to be increased.
+
+`GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection` →
+
+```
+403 — Upgrade to GitHub Pro or make this repository public to enable this feature.
+```
+
+本文中每一处"绿"都是本地测量。没有任何一项经过 workflow 检查。

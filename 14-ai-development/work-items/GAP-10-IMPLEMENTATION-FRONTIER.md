@@ -224,3 +224,107 @@ settle, because it is the single gate in front of the largest block of work.
 | BMCP | 60% unimplemented | Artifacts substantial (32 schemas, 545 conformance tests). Transport/server entirely absent — a binary, not a percentage |
 | Phase 2 domain | 100% not started | **False.** Types + invariants implemented, 36 unit + 11 acceptance tests; 9 ignored for named missing registries |
 | E2E | 100% not started | Partially false. `brain-cli` runs ingestion → storage → context end to end. It stops at the compiler skip (GAP-07) |
+
+## 6. Re-measurement at `b29278a8` (2026-11-22 02:05 +08:00)
+
+This section is additive. It does not edit §1-§5 above; it records what changed
+after those sections were written, and one figure that does not reconcile.
+
+### 6.1 Test totals changed
+
+```
+$ cargo test --workspace --all-targets
+TOTAL passed=385 failed=0 ignored=10
+```
+
+Per crate, measured separately:
+
+| crate | passing |
+|---|---|
+| agent-integration | 33 |
+| bmcp-protocol | 46 |
+| brain-cli | 5 |
+| memory-compiler | 59 |
+| memory-context | 77 |
+| memory-domain | 47 |
+| memory-event-store | 2 |
+| memory-event-store-sqlite | 31 |
+| memory-storage | 3 |
+| memory-storage-sqlite | 59 |
+| memory-store | 23 |
+
+### 6.2 One figure does not reconcile, and is recorded unresolved
+
+Another document in this directory records **371 passed at `1ebbab84`**. I measure
+**385 at `b29278a8`**. #541's own diff adds 19 `#[test]` attributes, and
+371 + 19 = 390 ≠ 385. So the two figures count different target sets, or one of
+them is wrong. This is not explained away here; it is flagged so the next person
+re-derives rather than inherits.
+
+### 6.3 The dependency graph gained one consumer link, and lost none
+
+Measured from `crates/*/Cargo.toml`:
+
+```
+agent-integration          -> memory-context, memory-domain
+bmcp-protocol              -> NONE
+brain-cli                  -> memory-domain, memory-storage-sqlite, memory-store,
+                              memory-context, memory-compiler
+memory-compiler            -> memory-domain, memory-event-store, memory-event-store-sqlite
+memory-context             -> memory-domain, memory-event-store-sqlite, memory-store,
+                              memory-storage, memory-storage-sqlite
+memory-domain              -> NONE
+memory-event-store         -> memory-domain
+memory-event-store-sqlite  -> memory-domain, memory-event-store
+memory-storage             -> memory-domain
+memory-storage-sqlite      -> memory-domain, memory-storage
+memory-store               -> memory-domain, memory-storage, memory-storage-sqlite
+
+used by NOBODY:  agent-integration, bmcp-protocol
+only binary:     brain-cli
+```
+
+§1.5 and §2 above remain correct: `brain-cli` still imports neither
+`agent-integration` nor `bmcp-protocol`.
+
+### 6.4 Tier 1 item 2 changed shape
+
+GAP-06 was not closed by #541. #541 added a *target*-keyed fence
+(`canonical_forget_fences`, keyed by Memory/Version) alongside the pre-existing
+*namespace*-keyed fence (`forget_fence`, keyed by `namespace_key`), in a different
+crate, with no reconciliation. `forget_api_absence_is_detectable` still passes —
+which is the defect it was written to detect. See
+`GAP-11-FORGET-FENCE-SPLIT-AUTHORITY.md` for the measurements and the closure
+criteria. Tier 1 item 2 is therefore not "wire the fence in"; it is "decide which
+fence is canonical, then delete the other".
+
+### 6.5 The gates are unchanged, and one of them is now measurable
+
+- `08-bmcp-protocol/scripts/check_protocol_index.py` → `missing=0 extra=0
+  duplicate_types=0 invalid_rows=0 PASS`.
+- `08-bmcp-protocol/schemas/test_nonempty_audit.py` → **exit 1**, 5506 lines of
+  unregistered constraints (GAP-09, unchanged).
+- `python3 -m unittest discover -s tests/conformance` → **Ran 493 tests**,
+  6 errors, 27 skipped. The 6 errors are all
+  `ModuleNotFoundError: No module named 'rfc8785'`, i.e. an uninstalled declared
+  dependency (`requirements.txt` pins `rfc8785==0.1.4`), not a code defect.
+  Before #540 this command found 0 tests and died on ImportError.
+- #546 declared the Node dependency that GAP-08 reported; worth re-checking
+  whether the three `.mjs` references now resolve on a clean checkout.
+
+### 6.6 CI still evaluates nothing
+
+All four check runs on both the #541 head commit and on `main` carry the same
+annotation, verbatim:
+
+> The job was not started because recent account payments have failed or your
+> spending limit needs to be increased.
+
+`GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection` →
+
+```
+403 — Upgrade to GitHub Pro or make this repository public to enable this feature.
+```
+
+Every green in this document is a local measurement. Nothing here was checked by
+a workflow.
