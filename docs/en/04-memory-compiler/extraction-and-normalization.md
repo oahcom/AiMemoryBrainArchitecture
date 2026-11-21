@@ -332,7 +332,42 @@ closure established during Producer Admission and
 dependency-set registration.
 
 Both admission stages MUST be serialized against the
-authoritative ForgetFence/Admission ordering anchor.
+authoritative ForgetFence/Admission ordering anchor. The
+"ForgetFence/Admission ordering anchor" and the
+"per-BrainAuthorityRef serialization anchor" MUST denote
+the same authoritative ordering anchor; neither name may
+be interpreted as a separate lock or transaction domain.
+
+For each admitted Producer participant P, the complete
+direct and transitive dependency closure established by
+Producer Admission MUST be durably persisted before the
+corresponding participant barrier may be resolved or
+completed. A Fence MUST NOT mark that participant barrier
+resolved or complete while any member of that complete
+dependency closure remains unpersisted.
+
+The observable completion predicate is:
+DependencyClosurePersisted(P) = TRUE if and only if the
+authoritative durable dependency-registration record for
+P identifies the complete direct and transitive dependency
+set, its completeness state is COMPLETE, its persisted
+closure digest matches that exact set, and an authoritative
+read-after-commit confirms that record. A participant
+barrier MUST be resolved or completed only when this
+predicate is TRUE.
+
+An UNKNOWN dependency, a missing dependency record, an
+incomplete closure record, an unavailable authoritative
+read, or any dependency-persistence failure MUST NOT be
+treated as successful dependency persistence or successful
+barrier completion. UNKNOWN MUST remain unresolved.
+
+The dependency closure MUST NOT be narrowed, truncated,
+or otherwise reduced to make a participant barrier resolve
+or complete earlier. PublicationParticipant Admission
+MUST preserve the complete closure established by Producer
+Admission; it MUST NOT redefine or reduce the set used by
+the completion predicate.
 
 For each admission stage, successful admission and durable
 recording of the exact admitted participant MUST form one
