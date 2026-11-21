@@ -309,6 +309,35 @@ impl MemoryStorage for SqliteMemoryStorage {
         Ok(())
     }
 
+    fn read_memory(
+        &self,
+        memory_id: &OpaqueId,
+        scope: &[ScopeRef],
+    ) -> Result<Option<Memory>, StorageError> {
+        Self::validate_scope_set(scope)?;
+        let row = self
+            .connection
+            .query_row(
+                "SELECT scope_json, memory_json FROM memories WHERE memory_id = ?1",
+                params![memory_id.as_str()],
+                |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?)),
+            )
+            .optional()
+            .map_err(|_| StorageError::TransactionUnavailable)?;
+        let Some((scope_json, memory_json)) = row else { return Ok(None) };
+        Self::scope_allowed(&scope_json, scope)?;
+        // A forgotten memory is invisible on every read path, not only on version reads.
+        if Self::is_fenced(&self.connection, "Memory", memory_id.as_str())? {
+            return Ok(None);
+        }
+        let memory: Memory = Self::decode(&memory_json)?;
+        memory.validate().map_err(|_| StorageError::InvalidSchema)?;
+        if &memory.memory_id != memory_id {
+            return Err(StorageError::InvalidSchema);
+        }
+        Ok(Some(memory))
+    }
+
     fn read_current(
         &self,
         memory_id: &OpaqueId,

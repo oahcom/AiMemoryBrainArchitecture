@@ -54,6 +54,15 @@ impl<S: MemoryStorage> MemoryStore<S> {
         Ok(self.storage.read_current(memory_id, scope)?)
     }
 
+    pub fn read_memory(
+        &self,
+        memory_id: &OpaqueId,
+        scope: &[ScopeRef],
+    ) -> Result<Option<Memory>, MemoryStoreError> {
+        validate_scope(scope)?;
+        Ok(self.storage.read_memory(memory_id, scope)?)
+    }
+
     pub fn read_revision(
         &self,
         memory_id: &OpaqueId,
@@ -169,6 +178,9 @@ mod tests {
 
     impl MemoryStorage for FakeStorage {
         fn create_memory(&mut self, memory: Memory, scope: &[ScopeRef]) -> Result<(), StorageError> {
+            if scope.is_empty() {
+                return Err(StorageError::InvalidSchema);
+            }
             if !scopes_intersect(&memory.scope_refs, scope) {
                 return Err(StorageError::ScopeMismatch);
             }
@@ -179,7 +191,24 @@ mod tests {
             Ok(())
         }
 
+        fn read_memory(&self, memory_id: &OpaqueId, scope: &[ScopeRef]) -> Result<Option<Memory>, StorageError> {
+            if scope.is_empty() {
+                return Err(StorageError::InvalidSchema);
+            }
+            let Some(memory) = self.memories.get(memory_id.as_str()) else { return Ok(None) };
+            if !scopes_intersect(&memory.scope_refs, scope) {
+                return Err(StorageError::ScopeMismatch);
+            }
+            if self.is_fenced("Memory", memory_id.as_str()) {
+                return Ok(None);
+            }
+            Ok(Some(memory.clone()))
+        }
+
         fn read_current(&self, memory_id: &OpaqueId, scope: &[ScopeRef]) -> Result<Option<MemoryVersion>, StorageError> {
+            if scope.is_empty() {
+                return Err(StorageError::InvalidSchema);
+            }
             let Some(memory) = self.memories.get(memory_id.as_str()) else { return Ok(None) };
             if !scopes_intersect(&memory.scope_refs, scope) {
                 return Err(StorageError::ScopeMismatch);
@@ -718,5 +747,135 @@ mod tests {
         let current = storage.read_current(&id("m1"), &[scope()])
             .unwrap().unwrap();
         assert_eq!(current.memory_version_id, id("fake-replay-v1"));
+    }
+
+    #[test]
+    fn read_memory_round_trips_memory_and_current_version_pointer() {
+        let mut store = MemoryStore::new(FakeStorage::default());
+        let mut original = memory();
+        original.lifecycle_state = MemoryLifecycle::Active;
+        store.create_memory(original.clone(), &[scope()]).unwrap();
+        store.write_revision(RevisionWrite {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            revision: revision("v1", 1, None),
+            idempotency_key: "read-memory-round-trip".into(),
+            request_digest: "read-memory-round-trip".into(),
+        }, &[scope()]).unwrap();
+
+        let loaded = store.read_memory(&id("m1"), &[scope()]).unwrap().unwrap();
+        assert_eq!(loaded.memory_id, original.memory_id);
+        assert_eq!(loaded.lifecycle_state, MemoryLifecycle::Active);
+        assert_eq!(loaded.current_version_id, Some(id("v1")));
+    }
+
+    #[test]
+    fn read_memory_and_read_current_return_distinct_domain_objects() {
+        let mut store = MemoryStore::new(FakeStorage::default());
+        store.create_memory(memory(), &[scope()]).unwrap();
+        store.write_revision(RevisionWrite {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            revision: revision("v1", 1, None),
+            idempotency_key: "distinct-read-apis".into(),
+            request_digest: "distinct-read-apis".into(),
+        }, &[scope()]).unwrap();
+
+        let loaded_memory = store.read_memory(&id("m1"), &[scope()]).unwrap().unwrap();
+        let loaded_current = store.read_current(&id("m1"), &[scope()]).unwrap().unwrap();
+        assert_eq!(loaded_memory.current_version_id, Some(id("v1")));
+        assert_eq!(loaded_current.memory_version_id, id("v1"));
+        assert_eq!(loaded_memory.memory_kind, "semantic");
+        assert_eq!(loaded_current.version_number, 1);
+    }
+
+    #[test]
+    fn read_memory_returns_none_for_missing_memory() {
+        let store = MemoryStore::new(FakeStorage::default());
+        assert_eq!(store.read_memory(&id("missing"), &[scope()]), Ok(None));
+    }
+
+    #[test]
+    fn read_memory_scope_mismatch_matches_read_current() {
+        let mut fake = FakeStorage::default();
+        fake.create_memory(memory(), &[scope()]).unwrap();
+        let other = ScopeRef { scope_id: id("s2"), scope_kind: ScopeKind::User, namespace_key: "other".into() };
+        assert_eq!(fake.read_memory(&id("m1"), std::slice::from_ref(&other)), Err(StorageError::ScopeMismatch));
+        assert_eq!(fake.read_current(&id("m1"), &[other]), Err(StorageError::ScopeMismatch));
+    }
+
+    #[test]
+    fn read_memory_empty_scope_matches_read_current() {
+        let mut fake = FakeStorage::default();
+        fake.create_memory(memory(), &[scope()]).unwrap();
+        let empty: [ScopeRef; 0] = [];
+        assert_eq!(fake.read_memory(&id("m1"), &empty), Err(StorageError::InvalidSchema));
+        assert_eq!(fake.read_current(&id("m1"), &empty), Err(StorageError::InvalidSchema));
+    }
+
+    #[test]
+    fn memory_store_reads_lifecycle_metadata_without_a_current_version() {
+        let mut store = MemoryStore::new(FakeStorage::default());
+        let mut item = memory();
+        item.lifecycle_state = MemoryLifecycle::Archived;
+        store.create_memory(item, &[scope()]).unwrap();
+
+        let loaded = store.read_memory(&id("m1"), &[scope()]).unwrap().unwrap();
+        assert_eq!(loaded.lifecycle_state, MemoryLifecycle::Archived);
+        assert_eq!(loaded.current_version_id, None);
+    }
+
+    #[test]
+    fn read_memory_hides_a_forgotten_memory_like_read_current_does() {
+        let mut fake = FakeStorage::default();
+        fake.create_memory(memory(), &[scope()]).unwrap();
+        fake.forget_memory(&id("m1"), "forget-digest", &[scope()]).unwrap();
+
+        assert_eq!(fake.read_memory(&id("m1"), &[scope()]), Ok(None));
+        assert_eq!(fake.read_current(&id("m1"), &[scope()]), Ok(None));
+    }
+
+    #[test]
+    fn fake_storage_matches_sqlite_scope_semantics() {
+        use memory_storage_sqlite::SqliteMemoryStorage;
+
+        let mut fake = FakeStorage::default();
+        let mut sqlite = SqliteMemoryStorage::in_memory().unwrap();
+        let stored = memory();
+        fake.create_memory(stored.clone(), &[scope()]).unwrap();
+        sqlite.create_memory(stored, &[scope()]).unwrap();
+
+        let empty: [ScopeRef; 0] = [];
+        assert_eq!(fake.read_memory(&id("m1"), &empty), Err(StorageError::InvalidSchema));
+        assert_eq!(sqlite.read_memory(&id("m1"), &empty), Err(StorageError::InvalidSchema));
+        assert_eq!(fake.read_memory(&id("missing"), &empty), Err(StorageError::InvalidSchema));
+        assert_eq!(sqlite.read_memory(&id("missing"), &empty), Err(StorageError::InvalidSchema));
+
+        let other = ScopeRef { scope_id: id("s2"), scope_kind: ScopeKind::User, namespace_key: "other".into() };
+        assert_eq!(fake.read_memory(&id("m1"), std::slice::from_ref(&other)), Err(StorageError::ScopeMismatch));
+        assert_eq!(sqlite.read_memory(&id("m1"), std::slice::from_ref(&other)), Err(StorageError::ScopeMismatch));
+
+        assert_eq!(fake.read_memory(&id("m1"), &[scope()]), Ok(Some(memory())));
+        assert_eq!(sqlite.read_memory(&id("m1"), &[scope()]), Ok(Some(memory())));
+
+        let empty_fake = FakeStorage::default();
+        let mut empty_sqlite = SqliteMemoryStorage::in_memory().unwrap();
+        assert_eq!(empty_fake.read_current(&id("missing"), &empty), Err(StorageError::InvalidSchema));
+        assert_eq!(empty_sqlite.read_current(&id("missing"), &empty), Err(StorageError::InvalidSchema));
+        assert_eq!(empty_sqlite.create_memory(memory(), &empty), Err(StorageError::InvalidSchema));
+        let mut create_fake = FakeStorage::default();
+        assert_eq!(create_fake.create_memory(memory(), &empty), Err(StorageError::InvalidSchema));
+    }
+
+    #[test]
+    fn sqlite_read_memory_hides_a_forgotten_memory() {
+        use memory_storage_sqlite::SqliteMemoryStorage;
+
+        let mut sqlite = SqliteMemoryStorage::in_memory().unwrap();
+        sqlite.create_memory(memory(), &[scope()]).unwrap();
+        sqlite.forget_memory(&id("m1"), "forget-digest", &[scope()]).unwrap();
+
+        assert_eq!(sqlite.read_memory(&id("m1"), &[scope()]), Ok(None));
+        assert_eq!(sqlite.read_current(&id("m1"), &[scope()]), Ok(None));
     }
 }
