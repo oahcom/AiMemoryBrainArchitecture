@@ -892,12 +892,28 @@ inside the same round, and §8 records both. Citing the earlier one understates 
 | `docs/en/02-domain-model/domain-model-overview.md` | `46fbdcacbe8a` | `443b35b288fc` | parent of `bc114263` = `927eadcb` |
 | `docs/zh-CN/02-domain-model/domain-model-overview.md` | `d80d0515f9e0` | `736fc5865c54` | parent of `bc114263` = `927eadcb` |
 
-Full-column re-verification, run after the fix, compared all thirteen §9.1 rows against the last
-§8 write for the same path. Twelve match. The thirteenth is the root `06-memory-context/context-versioning.md`
-row, which cites `05c0739d0c22` with an explicit `(§8 bullet)` qualifier because that path has no §8
-table row — §8 records it only inside the "Not applied in this round" bullet, which itself states
-that `05c0739d...` is superseded by `8503a171922a` from `2606978e`. The qualifier is what makes the
-citation honest; without it the row would read as a claim about the current value.
+Full-column re-verification, run after the fix, compared all thirteen §9.1 rows against §8. The
+result is three groups, not two:
+
+| Group | Rows | Basis |
+|---|---:|---|
+| Direct match against the last §8 table write for the same path | 11 | §8 table row |
+| No §8 record exists for that path | 1 | §9.1 says `not in §8`, literally |
+| §8 records the path only outside its table | 1 | §9.1 cites it with `(§8 bullet)` |
+
+The middle group is the root `02-domain-model/phase-1-domain-model-freeze.md`. §8 has no row for
+that path at all, so there is no superseded value to compare against; §9.1 marks the cell
+`not in §8`, and that marker is the evidence, not a gap in it.
+
+The last group is the root `06-memory-context/context-versioning.md`. §8 does mention it, but only
+inside the "Not applied in this round" bullet, which itself states that `05c0739d...` is superseded
+by `8503a171922a` from `2606978e`. §9.1 therefore cites `05c0739d0c22` with an explicit
+`(§8 bullet)` qualifier rather than presenting it as a table value.
+
+These two are not the same kind of exception and must not be counted as one. A row with no §8
+record is a documented absence; a row with a bullet-only §8 record is a documented out-of-table
+citation. Collapsing them into "twelve match, one is special" overstates how many rows the §8 table
+actually supports.
 
 No normative text changed. This section corrects evidence registration only, and the eight rows of
 §3 are untouched: seven `PASS`, R1 still `REQUEST CHANGES` until the corrected column is reviewed.
