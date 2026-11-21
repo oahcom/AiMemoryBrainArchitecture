@@ -98,15 +98,17 @@ def validate_d_producer_registration_binding(
 
     proof_required = (
         "owner_admission_ref", "owner_entry_ref", "owner_entry_digest",
-        "owner_sequence_namespace", "owner_local_sequence", "owner_high_water",
+        "owner_authority_ref", "owner_sequence_namespace", "owner_local_sequence", "owner_high_water",
         "owner_snapshot_ref", "owner_snapshot_digest", "owner_gate_ref",
-        "owner_gate_generation", "anti_rollback_anchor_ref",
+        "owner_gate_generation", "scope_ref", "scope_generation",
+        "operation_identity_ref", "operation_digest", "anti_rollback_anchor_ref",
         "producer_registration_sequence_namespace_ref",
         "producer_registration_high_water",
     )
     row_required = (
         "owner_admission_ref", "owner_entry_ref", "owner_admission_entry_digest",
-        "owner_sequence_namespace", "owner_sequence",
+        "owner_sequence_namespace", "owner_sequence", "gate_generation",
+        "scope_ref", "scope_generation", "operation_identity_ref", "operation_digest",
     )
     missing_proof = [name for name in proof_required if name not in proof]
     missing_row = [name for name in row_required if name not in row]
@@ -118,8 +120,8 @@ def validate_d_producer_registration_binding(
         )
 
     snapshot_required = (
-        "snapshot_ref", "snapshot_digest", "gate_ref", "gate_generation",
-        "anti_rollback_anchor_ref", "producer_registration_sequence_namespace_ref",
+        "owner_authority_ref", "snapshot_ref", "snapshot_digest", "gate_ref", "gate_generation",
+        "scope_generation", "anti_rollback_anchor_ref", "producer_registration_sequence_namespace_ref",
         "producer_registration_high_water",
     )
     missing_snapshot = [name for name in snapshot_required if name not in snapshot]
@@ -132,6 +134,13 @@ def validate_d_producer_registration_binding(
     for field, left, right in (
         ("owner_admission_ref", proof["owner_admission_ref"], row["owner_admission_ref"]),
         ("owner_entry_ref", proof["owner_entry_ref"], row["owner_entry_ref"]),
+        ("owner_authority_ref", proof["owner_authority_ref"], snapshot["owner_authority_ref"]),
+        ("scope_ref", proof["scope_ref"], row["scope_ref"]),
+        ("scope_generation/row", proof["scope_generation"], row["scope_generation"]),
+        ("scope_generation/snapshot", proof["scope_generation"], snapshot["scope_generation"]),
+        ("operation_identity_ref", proof["operation_identity_ref"], row["operation_identity_ref"]),
+        ("operation_digest", proof["operation_digest"], row["operation_digest"]),
+        ("owner_gate_generation/row", proof["owner_gate_generation"], row["gate_generation"]),
         ("owner_entry_digest", proof["owner_entry_digest"], row["owner_admission_entry_digest"]),
         ("owner_sequence_namespace", proof["owner_sequence_namespace"], row["owner_sequence_namespace"]),
         ("owner_local_sequence", proof["owner_local_sequence"], row["owner_sequence"]),
