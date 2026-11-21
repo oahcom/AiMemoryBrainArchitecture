@@ -125,15 +125,64 @@ EMBEDDED_BILINGUAL_SOURCES: dict[str, str] = {
 for _source, _reason in EMBEDDED_BILINGUAL_SOURCES.items():
     if not (REPO_ROOT / _source).is_file():
         sys.stderr.write(
-            f"EMBEDDED_BILINGUAL_SOURCES references missing file: {_source}\\n"
+            f"EMBEDDED_BILINGUAL_SOURCES references missing file: {_source}\n"
         )
         sys.exit(2)
     if not _reason.strip() or len(_reason.strip()) <= 10:
         sys.stderr.write(
-            f"EMBEDDED_BILINGUAL_SOURCES has missing or placeholder reason: {_source}\\n"
+            f"EMBEDDED_BILINGUAL_SOURCES has missing or placeholder reason: {_source}\n"
         )
         sys.exit(2)
 ROOT = Path.cwd()
+BASELINE_PATH = REPO_ROOT / "scripts" / "bilingual-baseline.txt"
+
+
+def current_bilingual_gaps() -> set[str]:
+    """Return non-exempt normative Markdown sources missing either language mirror."""
+    gaps: set[str] = set()
+    for root_name in sorted(NORMATIVE_ROOTS):
+        root = REPO_ROOT / root_name
+        for path in sorted(root.rglob("*.md")):
+            source = path.relative_to(REPO_ROOT).as_posix()
+            if source in EMBEDDED_BILINGUAL_SOURCES:
+                continue
+            english = REPO_ROOT / "docs" / "en" / source
+            chinese = REPO_ROOT / "docs" / "zh-CN" / source
+            # Keep 14-ai-development resolution aligned with the existing
+            # side-by-side/mirror parser used by the changed-path gate.
+            resolved_14 = (
+                counterpart_14(source) if root_name == "14-ai-development" else True
+            )
+            if (
+                not english.is_file()
+                or not chinese.is_file()
+                or resolved_14 is None
+            ):
+                gaps.add(source)
+    return gaps
+
+def write_baseline() -> int:
+    gaps = sorted(current_bilingual_gaps())
+    header = (
+        "# Frozen inventory of pre-existing bilingual documentation gaps.\n"
+        "# This baseline may only shrink; entries must never be added.\n"
+        "# Regenerate only when explicitly adopting a new baseline.\n"
+    )
+    BASELINE_PATH.write_text(header + "\n".join(gaps) + "\n", encoding="utf-8")
+    print(f"baseline written: {len(gaps)} entries")
+    return 0
+
+
+def read_baseline() -> set[str] | None:
+    if not BASELINE_PATH.is_file():
+        print(f"::error::Required bilingual baseline is missing: {BASELINE_PATH.relative_to(REPO_ROOT)}")
+        return None
+    return {
+        line.strip()
+        for line in BASELINE_PATH.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    }
+
 
 
 def changed_paths() -> set[str]:
@@ -504,11 +553,40 @@ def check_normative_pairing(normative_changes, changed, complete, exception):
 
 
 def main() -> int:
+    if len(sys.argv) == 2 and sys.argv[1] == "--write-baseline":
+        try:
+            return write_baseline()
+        except Exception as exc:
+            print(f"::error::Unable to write bilingual baseline: {exc}")
+            return 2
+    if len(sys.argv) > 1:
+        print("::error::Unknown argument. Supported option: --write-baseline")
+        return 2
+
     try:
         changed = changed_paths()
     except Exception as exc:
         print(f"::error::Unable to determine changed paths: {exc}")
         return 2
+
+    baseline = read_baseline()
+    if baseline is None:
+        return 2
+    gap_now = current_bilingual_gaps()
+    new_gaps = sorted(gap_now - baseline)
+    resolved = sorted(baseline - gap_now)
+    if new_gaps:
+        for path in new_gaps:
+            print(f"::error::New bilingual gap outside frozen baseline: {path}")
+        return 2
+    if resolved:
+        for path in resolved:
+            print(
+                f"::error::Resolved bilingual gap must be removed from "
+                f"scripts/bilingual-baseline.txt: {path}"
+            )
+        return 2
+    print(f"bilingual baseline: {len(baseline)} frozen, 0 new gaps")
 
     body = os.environ.get("PR_BODY", "")
     errors: list[str] = check_prompt_library()
