@@ -119,11 +119,11 @@ pub fn validate_full_boundary_apply(
     validate_context_write(region, request_frozen)
 }
 
-/// A versioned delivery payload handed to one session.
+/// An immutable, versioned payload delivered to one Agent session.
 ///
-/// Deliberately distinct from `memory_context::ContextSnapshot`, which is the
-/// Brain-side build artifact (identity + entries + rendered bytes). This one is
-/// only what crosses the adapter boundary: a version and the rendered text.
+/// This adapter-boundary payload is deliberately distinct from
+/// `memory_context::ContextSnapshot`, which is the Brain-side build artifact
+/// containing context identity, entries, and rendered-byte accounting.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct DeliveryPayload {
     pub version: u64,
@@ -368,5 +368,3 @@ mod tests {
         assert_eq!(adapter.applied_snapshot("session-a").unwrap().version, 1);
     }
 }
-
-[executed on device: VM-0-9-ubuntu (d03d92fd-4b5d-4bc1-a701-985eb5de69cc)]
