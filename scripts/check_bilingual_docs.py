@@ -159,7 +159,7 @@ def write_baseline() -> int:
         "# This baseline may only shrink; entries must never be added.\n"
         "# Regenerate only when explicitly adopting a new baseline.\n"
     )
-    BASELINE_PATH.write_text(header + "".join(f"{item}\\n" for item in gaps), encoding="utf-8")
+    BASELINE_PATH.write_text(header + "".join(f"{item}\n" for item in gaps), encoding="utf-8")
     print(f"baseline written: {len(gaps)} entries")
     return 0
 
