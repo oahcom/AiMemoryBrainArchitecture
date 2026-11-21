@@ -9,6 +9,9 @@ on:
       - "08-bmcp-protocol/schemas/bmcp.applied-delivery-evidence-1.0.0.schema.json"
       - "08-bmcp-protocol/validators/applied_delivery_evidence_validator.py"
       - "08-bmcp-protocol/tests/conformance/applied_delivery_evidence/**"
+      - "08-bmcp-protocol/tests/conformance/package.json"
+      - "08-bmcp-protocol/tests/conformance/package-lock.json"
+      - "08-bmcp-protocol/tests/conformance/provider_outcome/**"
       - "08-bmcp-protocol/schemas/bmcp.recovery-join-1.0.2.schema.json"
       - "08-bmcp-protocol/validators/recovery_join_validator.py"
       - "08-bmcp-protocol/tests/conformance/recovery_cutoff/**"
@@ -21,6 +24,9 @@ on:
       - "08-bmcp-protocol/schemas/bmcp.applied-delivery-evidence-1.0.0.schema.json"
       - "08-bmcp-protocol/validators/applied_delivery_evidence_validator.py"
       - "08-bmcp-protocol/tests/conformance/applied_delivery_evidence/**"
+      - "08-bmcp-protocol/tests/conformance/package.json"
+      - "08-bmcp-protocol/tests/conformance/package-lock.json"
+      - "08-bmcp-protocol/tests/conformance/provider_outcome/**"
       - "08-bmcp-protocol/schemas/bmcp.recovery-join-1.0.2.schema.json"
       - "08-bmcp-protocol/validators/recovery_join_validator.py"
       - "08-bmcp-protocol/tests/conformance/recovery_cutoff/**"
@@ -41,7 +47,19 @@ jobs:
           cache-dependency-path: 08-bmcp-protocol/tests/conformance/provider_outcome/requirements.txt
       - name: Install pinned test dependencies
         run: python -m pip install -r 08-bmcp-protocol/tests/conformance/provider_outcome/requirements.txt
+      - name: Install conformance Node dependencies
+        working-directory: 08-bmcp-protocol/tests/conformance
+        run: npm ci
       - name: Run Applied Delivery Evidence schema and semantic conformance tests
         run: python -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v
       - name: Run RecoveryJoin schema and semantic conformance tests
         run: python -m unittest discover -s 08-bmcp-protocol/tests/conformance/recovery_cutoff -p 'test_recovery_join*.py' -v
+      - name: Run C provider outcome crypto profile interoperability tests
+        working-directory: 08-bmcp-protocol/tests/conformance
+        run: python -m unittest discover -s provider_outcome -p 'test_c_crypto_profile*interop.py' -v
+      - name: Run I crypto profile interoperability tests
+        working-directory: 08-bmcp-protocol/tests/conformance
+        run: python -m unittest discover -s recovery_cutoff -p 'test_i_crypto_profile.py' -v
+      - name: Run HRC semantic conformance tests
+        working-directory: 08-bmcp-protocol/tests/conformance
+        run: python -m unittest discover -s recovery_cutoff -p 'test_hrc_semantics.py' -v

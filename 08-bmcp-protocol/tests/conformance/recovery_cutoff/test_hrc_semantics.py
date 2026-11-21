@@ -21,7 +21,7 @@ VALID, INVALID, UNKNOWN, STALE, CONFLICT = (
 )
 
 # TEST-ONLY deterministic digest. Not a normative production wire profile.
-def test_digest(value, domain="HRC-TEST-v1"):
+def digest(value, domain="HRC-TEST-v1"):
     raw = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
     return hashlib.sha256((domain + "\0").encode() + raw).hexdigest()
 
@@ -43,8 +43,8 @@ def owner_snapshot(owner="I", requests=None, admissions=None, highwaters=None,
         "anti_rollback_anchor": owner + "/anchor/1",
         "request_entries": deepcopy(requests), "admission_entries": deepcopy(admissions),
         "request_count": len(requests), "admission_count": len(admissions),
-        "request_root": test_digest(requests, "owner-request-set"),
-        "admission_root": test_digest(admissions, "owner-admission-set"),
+        "request_root": digest(requests, "owner-request-set"),
+        "admission_root": digest(admissions, "owner-admission-set"),
         "request_highwaters": deepcopy(defaults), "admission_highwaters": deepcopy(defaults),
         "completeness": "COMPLETE" if complete else "PARTIAL",
         "request_enumeration_status": ("COMPLETE_EMPTY" if not requests else "COMPLETE_NON_EMPTY") if complete else "PARTIAL",
@@ -87,7 +87,7 @@ def manifest(entries=None, complete=True, quorum=True, prefix=(1, 10, "d" * 64))
         "prefix": {"term": prefix[0], "index": prefix[1], "root": prefix[2]},
         "entries": deepcopy(entries), "count": len(entries),
         "authoritative_prefix_entries": deepcopy(entries),
-        "root": test_digest(entries, "participant-set"),
+        "root": digest(entries, "participant-set"),
         "enumeration_complete": complete, "quorum_read": quorum,
         "cursor_complete": complete, "signature_valid": True,
     }
@@ -99,9 +99,9 @@ def batch(snaps=None, man=None):
     return {
         "batch_id": "batch/1", "recovery_epoch": "epoch/1", "round": 1,
         "previous_batch_digest": "0" * 64,
-        "snapshots": {k: {"ref": k + "/snapshot/1", "digest": test_digest(v, "snapshot"),
+        "snapshots": {k: {"ref": k + "/snapshot/1", "digest": digest(v, "snapshot"),
                           "value": deepcopy(v)} for k, v in snaps.items()},
-        "manifest_ref": man["manifest_id"], "manifest_digest": test_digest(man, "manifest-record"),
+        "manifest_ref": man["manifest_id"], "manifest_digest": digest(man, "manifest-record"),
         "manifest": deepcopy(man), "prefix": deepcopy(man["prefix"]),
         "quorum_proof_valid": True, "append_after_prefix": True,
         "scope_ref": "scope/test", "scope_complete": True,
@@ -145,7 +145,7 @@ def validate_snapshot(s):
             return INVALID
         if refs != sorted(refs, key=lambda x: (next((e.get("sequence", 0) for e in entries if e["owner_entry_ref"] == x), 0), x)):
             return INVALID
-        if s.get(root_name) != test_digest(entries, "owner-request-set" if name.startswith("request") else "owner-admission-set"):
+        if s.get(root_name) != digest(entries, "owner-request-set" if name.startswith("request") else "owner-admission-set"):
             return INVALID
         status_name = "request_enumeration_status" if name.startswith("request") else "admission_enumeration_status"
         state = s.get(status_name)
@@ -207,7 +207,7 @@ def validate_manifest(m):
             return INVALID
         if not e.get("entry_digest") or not e.get("operation_digest"):
             return INVALID
-    if m.get("root") != test_digest(entries, "participant-set"):
+    if m.get("root") != digest(entries, "participant-set"):
         return INVALID
     authoritative = m.get("authoritative_prefix_entries")
     if authoritative is None:
@@ -225,7 +225,7 @@ def validate_batch(b):
     if set(b.get("snapshots", {})) != {"I", "D", "C"}:
         return INVALID
     for owner, item in b["snapshots"].items():
-        if test_digest(item.get("value"), "snapshot") != item.get("digest"):
+        if digest(item.get("value"), "snapshot") != item.get("digest"):
             return INVALID
         result = validate_snapshot(item.get("value", {}))
         if result != VALID:
@@ -236,7 +236,7 @@ def validate_batch(b):
         return result
     if b.get("manifest_ref") != m.get("manifest_id"):
         return INVALID
-    if b.get("manifest_digest") != test_digest(m, "manifest-record"):
+    if b.get("manifest_digest") != digest(m, "manifest-record"):
         return INVALID
     if b.get("prefix") != m.get("prefix") or not b.get("scope_complete"):
         return INVALID
@@ -427,7 +427,7 @@ class HRCConformance(unittest.TestCase):
         a = admission("I/a", "I", seq=1); b = admission("I/b", "I", seq=2)
         s = owner_snapshot("I", admissions=[b, a])
         s["admission_count"] = 2
-        s["admission_root"] = test_digest([b, a], "owner-admission-set")
+        s["admission_root"] = digest([b, a], "owner-admission-set")
         self.assertEqual(validate_snapshot(s), INVALID)
         s = owner_snapshot("I", admissions=[a, a])
         self.assertEqual(validate_snapshot(s), INVALID)

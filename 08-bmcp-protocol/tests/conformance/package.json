@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "description": "Node reference implementation dependencies for cross-language consistency tests.",
+  "dependencies": {
+    "canonicalize": "5.1.0"
+  }
+}
