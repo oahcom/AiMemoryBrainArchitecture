@@ -468,6 +468,127 @@ impl FactRevision {
     pub fn provenance_refs(&self)->&[ProvenanceRef] { &self.provenance_refs }
 }
 
+
+#[derive(serde::Serialize,serde::Deserialize,Clone,Debug,Eq,PartialEq)]
+pub enum EntityIdentityStatus { Provisional, Resolved, Merged, Split, Retired }
+#[derive(serde::Serialize,serde::Deserialize,Clone,Debug,Eq,PartialEq)]
+pub struct EntityAlias { pub value:String, pub language:Option<String> }
+#[derive(serde::Serialize,serde::Deserialize,Clone,Debug,Eq,PartialEq)]
+pub struct ScopedExternalIdentifier { pub namespace:String, pub value:String, pub scope_ref:ScopeRef }
+#[derive(serde::Serialize,serde::Deserialize,Clone,Debug,Eq,PartialEq)]
+pub struct EntityMergeLineage { pub predecessor_refs:Vec<EntityRef>, pub successor_ref:EntityRef, pub reason:String }
+/// Sidecar keeps Phase 1 Entity struct literals source-compatible.
+#[derive(serde::Serialize,serde::Deserialize,Clone,Debug,Eq,PartialEq)]
+pub struct EntityIdentityExtension {
+ pub entity_ref:EntityRef, pub status:EntityIdentityStatus, pub aliases:Vec<EntityAlias>,
+ pub external_identifiers:Vec<ScopedExternalIdentifier>, pub merge_lineage:Option<EntityMergeLineage>,
+ pub split_successor_refs:Vec<EntityRef>
+}
+impl EntityIdentityExtension {
+ pub fn validate(&self)->Result<(),DomainError>{
+  if self.aliases.iter().any(|a|a.value.is_empty()){return Err(DomainError::EmptyRequiredField("alias"))}
+  if self.external_identifiers.iter().any(|i|i.namespace.is_empty()||i.value.is_empty()){return Err(DomainError::EmptyRequiredField("external_identifier"))}
+  if self.status==EntityIdentityStatus::Merged {let l=self.merge_lineage.as_ref().ok_or(DomainError::MissingIdentityLineage)?;
+   if l.successor_ref==self.entity_ref||l.predecessor_refs.is_empty()||l.reason.is_empty(){return Err(DomainError::MissingIdentityLineage)}}
+  if self.status==EntityIdentityStatus::Split&&self.split_successor_refs.is_empty(){return Err(DomainError::MissingIdentityLineage)}
+  Ok(())
+ }
+ pub fn add_alias(&mut self,a:EntityAlias)->Result<(),DomainError>{if a.value.is_empty(){return Err(DomainError::EmptyRequiredField("alias"))}self.aliases.push(a);Ok(())}
+}
+#[derive(serde::Serialize,serde::Deserialize,Clone,Debug,Eq,PartialEq)]
+pub enum RelationEndpoint { Entity(EntityRef), Claim(ClaimRef), Fact(FactRef) }
+#[derive(serde::Serialize,serde::Deserialize,Clone,Debug,Eq,PartialEq)]
+pub enum RelationEndpointKind { Entity, Claim, Fact }
+impl RelationEndpoint { pub fn kind(&self)->RelationEndpointKind {match self{Self::Entity(_)=>RelationEndpointKind::Entity,Self::Claim(_)=>RelationEndpointKind::Claim,Self::Fact(_)=>RelationEndpointKind::Fact}} }
+#[derive(serde::Serialize,serde::Deserialize,Clone,Debug,Eq,PartialEq)]
+pub enum RelationDirectionality { Directed, Undirected, Symmetric }
+#[derive(serde::Serialize,serde::Deserialize,Clone,Debug,Eq,PartialEq)]
+pub enum RelationLifecycleState { Proposed, Active, Superseded, Retracted }
+#[derive(serde::Serialize,serde::Deserialize,Clone,Debug,Eq,PartialEq)]
+pub enum ValidTimeRef { Unknown, Bounded(TimeValue), AllTime }
+#[derive(serde::Serialize,serde::Deserialize,Clone,Debug,Eq,PartialEq)]
+pub struct RelationDefinition { pub relation_type:String, pub allowed_subject_kinds:Vec<RelationEndpointKind>, pub allowed_object_kinds:Vec<RelationEndpointKind> }
+#[derive(serde::Serialize,serde::Deserialize,Clone,Debug,Eq,PartialEq)]
+pub struct RelationExtension {
+ pub subject:RelationEndpoint, pub object:RelationEndpoint, pub directionality:RelationDirectionality,
+ pub qualifiers:Vec<String>, pub valid_time:Option<ValidTimeRef>, pub epistemic_status:EpistemicStatus,
+ pub evidence_refs:Vec<EvidenceRef>, pub lifecycle_state:RelationLifecycleState
+}
+impl RelationExtension {
+ /// Registry-dependent endpoint compatibility cannot be expressed in static Rust types.
+ pub fn validate(&self,d:&RelationDefinition)->Result<(),DomainError>{
+  if !d.allowed_subject_kinds.contains(&self.subject.kind())||!d.allowed_object_kinds.contains(&self.object.kind()){return Err(DomainError::InvalidRelationEndpoint)}
+  if d.relation_type.is_empty(){return Err(DomainError::EmptyRequiredField("relation_type"))} Ok(())
+ }
+ pub fn valid_time_or_unknown(&self)->ValidTimeRef{self.valid_time.clone().unwrap_or(ValidTimeRef::Unknown)}
+}
+#[derive(serde::Serialize,serde::Deserialize,Clone,Debug,Eq,PartialEq)]
+pub enum EvidenceKind { Document, Message, Observation, Record, Dataset, Other(String) }
+#[derive(serde::Serialize,serde::Deserialize,Clone,Debug,Eq,PartialEq)]
+pub enum EvidenceSourceRef { Event(EventRef), Memory(OpaqueId), External(ExternalSourceRef) }
+#[derive(serde::Serialize,serde::Deserialize,Clone,Debug,Eq,PartialEq)]
+pub enum EvidenceAvailability { Available, Restricted, Unavailable, Forgotten }
+#[derive(serde::Serialize,serde::Deserialize,Clone,Debug,Eq,PartialEq)]
+pub struct EvidenceExtension {
+ pub evidence_ref:EvidenceRef, pub kind:EvidenceKind, pub source_ref:EvidenceSourceRef, pub locator:Option<String>,
+ pub observed_at:Option<TimeValue>, pub collector:ActorRef, pub integrity_digest:String,
+ pub availability:EvidenceAvailability, pub scope_refs:Vec<ScopeRef>
+}
+impl EvidenceExtension { pub fn validate(&self)->Result<(),DomainError>{
+ if self.integrity_digest.is_empty(){return Err(DomainError::EmptyRequiredField("integrity_digest"))}
+ if self.scope_refs.is_empty(){return Err(DomainError::EmptyRequiredField("scope_refs"))}
+ self.scope_refs.iter().try_for_each(ScopeRef::validate)
+}}
+
+
+    #[test]
+    fn dm2_01_claim_revision_parent_must_belong_to_same_claim() {
+        let ca=ClaimRef::new("ca").unwrap(); let cb=ClaimRef::new("cb").unwrap();
+        let parent=ClaimRevision::new(ClaimRevisionRef::new("r1").unwrap(),ca.clone(),None,"s".into(),"p".into(),"o".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t1".into(),"initial".into()).unwrap();
+        let bad=ClaimRevision::new(ClaimRevisionRef::new("r2").unwrap(),cb,Some(parent.revision_ref().clone()),"s".into(),"p".into(),"o".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t2".into(),"correction".into()).unwrap();
+        assert_eq!(bad.validate(),Err(DomainError::InvalidParent));
+    }
+    #[test]
+    fn dm2_02_claim_revision_is_append_only_and_immutable() {
+        let first=ClaimRevision::new(ClaimRevisionRef::new("r1").unwrap(),ClaimRef::new("c").unwrap(),None,"s".into(),"p".into(),"old".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t1".into(),"initial".into()).unwrap();
+        let next=ClaimRevision::new(ClaimRevisionRef::new("r2").unwrap(),first.claim_ref().clone(),Some(first.revision_ref().clone()),"s".into(),"p".into(),"new".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t2".into(),"correction".into()).unwrap();
+        assert_eq!(first.predicate(),"p"); assert_eq!(next.parent_revision_ref(),Some(first.revision_ref()));
+    }
+    #[test]
+    fn dm2_03_fact_refs_are_distinct_and_fact_pins_exact_claim_revision() {
+        let pinned=ClaimRevisionRef::new("cr1").unwrap(); let fact=Fact::new(FactRef::new("f").unwrap());
+        let rev=FactRevision::new(fact.fact_ref().clone(),FactRevisionRef::new("fr1").unwrap(),None,vec![pinned.clone()],vec![EvidenceRef::new("e").unwrap()],vec![ProvenanceRef::new("p").unwrap()],scope("s"),AttestorRef::pending_i(),AuthorizationDecisionRef::pending_i(),"method".into(),"v1".into(),FactOutcome::Attested,"reason".into(),CanonicalCommitRef::pending_d(),None).unwrap();
+        let _head=ClaimRevisionRef::new("cr2").unwrap(); assert_eq!(rev.claim_revision_refs(),&[pinned]);
+    }
+    #[test]
+    fn dm2_04_fact_cannot_be_constructed_without_claim_evidence_provenance() {
+        let r=FactRevision::new(FactRef::new("f").unwrap(),FactRevisionRef::new("fr").unwrap(),None,vec![],vec![],vec![],scope("s"),AttestorRef::pending_i(),AuthorizationDecisionRef::pending_i(),"m".into(),"v1".into(),FactOutcome::Attested,"why".into(),CanonicalCommitRef::pending_d(),None);
+        assert_eq!(r.unwrap_err(),DomainError::MissingClaimRevision);
+    }
+    #[test]
+    fn dm2_05_entity_merge_requires_successor_lineage_but_alias_does_not() {
+        let mut e=EntityIdentityExtension{entity_ref:EntityRef::new("e1").unwrap(),status:EntityIdentityStatus::Resolved,aliases:vec![],external_identifiers:vec![],merge_lineage:None,split_successor_refs:vec![]};
+        e.add_alias(EntityAlias{value:"label".into(),language:None}).unwrap(); assert!(e.validate().is_ok());
+        e.status=EntityIdentityStatus::Merged; assert_eq!(e.validate(),Err(DomainError::MissingIdentityLineage));
+        e.merge_lineage=Some(EntityMergeLineage{predecessor_refs:vec![EntityRef::new("e0").unwrap()],successor_ref:EntityRef::new("e2").unwrap(),reason:"resolved".into()}); assert!(e.validate().is_ok());
+    }
+    #[test]
+    fn dm2_06_relation_endpoint_kind_is_checked_against_definition() {
+        let r=RelationExtension{subject:RelationEndpoint::Entity(EntityRef::new("e").unwrap()),object:RelationEndpoint::Claim(ClaimRef::new("c").unwrap()),directionality:RelationDirectionality::Directed,qualifiers:vec![],valid_time:None,epistemic_status:EpistemicStatus::Observed,evidence_refs:vec![],lifecycle_state:RelationLifecycleState::Proposed};
+        let d=RelationDefinition{relation_type:"owns".into(),allowed_subject_kinds:vec![RelationEndpointKind::Entity],allowed_object_kinds:vec![RelationEndpointKind::Entity]};
+        assert_eq!(r.validate(&d),Err(DomainError::InvalidRelationEndpoint));
+    }
+    #[test]
+    fn dm2_07_evidence_extension_requires_integrity_and_scope() {
+        let e=EvidenceExtension{evidence_ref:EvidenceRef::new("e").unwrap(),kind:EvidenceKind::Document,source_ref:EvidenceSourceRef::Event(EventRef::new("ev").unwrap()),locator:None,observed_at:None,collector:ActorRef{actor_id:id("collector")},integrity_digest:"sha256:x".into(),availability:EvidenceAvailability::Available,scope_refs:vec![scope("s")]};
+        assert!(e.validate().is_ok());
+    }
+    #[test]
+    fn dm2_08_unknown_valid_time_is_not_timeless() {
+        let r=RelationExtension{subject:RelationEndpoint::Entity(EntityRef::new("e").unwrap()),object:RelationEndpoint::Entity(EntityRef::new("e2").unwrap()),directionality:RelationDirectionality::Directed,qualifiers:vec![],valid_time:None,epistemic_status:EpistemicStatus::Observed,evidence_refs:vec![],lifecycle_state:RelationLifecycleState::Active};
+        assert_eq!(r.valid_time_or_unknown(),ValidTimeRef::Unknown); assert_ne!(r.valid_time_or_unknown(),ValidTimeRef::AllTime);
+    }
+
 #[cfg(test)]
 mod tests {
     use super::*;
