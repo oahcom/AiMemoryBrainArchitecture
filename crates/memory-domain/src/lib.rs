@@ -743,7 +743,6 @@ mod tests {
         // A label-only alias addition is not an identity merge.
         a.add_alias(EntityAlias{value:"another alias".into(),language:None}).unwrap();
         assert_eq!(a.status,EntityIdentityStatus::Resolved);
-        a.aliases.push(alias.clone());
 
         a.merge_into(&mut b,"duplicate identity resolved").unwrap();
         assert_eq!(a.status,EntityIdentityStatus::Merged);
