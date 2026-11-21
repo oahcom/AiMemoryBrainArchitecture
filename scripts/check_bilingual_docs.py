@@ -227,10 +227,36 @@ def check_counterpart_requirement(
     if deleted:
         if len(deleted) != len(required):
             return [f"{source} has an unpaired deletion; all related paths must move together or remain present"]
-        added_names = Counter(Path(path).name for path, status in statuses.items() if status == "A")
-        deleted_names = Counter(Path(path).name for path in deleted)
-        if any(added_names[name] < count for name, count in deleted_names.items()):
-            return [f"{source} was deleted without a complete corresponding move; all related destination files must be added in this PR"]
+
+        added = {path for path, status in statuses.items() if status == "A"}
+        root_deletions = [
+            path for path in deleted
+            if len(Path(path).parts) >= 2 and Path(path).parts[0] in NORMATIVE_ROOTS
+        ]
+        en_deletions = [path for path in deleted if path.startswith("docs/en/")]
+        zh_deletions = [path for path in deleted if path.startswith("docs/zh-CN/")]
+
+        # A move is balanced by destination tier, not by basename: names may
+        # change, but every moved English mirror must have a newly added
+        # Chinese mirror at the same destination-relative path.
+        added_roots = [
+            path for path in added
+            if len(Path(path).parts) >= 2 and Path(path).parts[0] in NORMATIVE_ROOTS
+        ]
+        added_en = {path for path in added if path.startswith("docs/en/")}
+        added_zh = {path for path in added if path.startswith("docs/zh-CN/")}
+
+        if root_deletions and len(added_roots) < len(root_deletions):
+            return [f"{source} was deleted without a replacement normative source; all related destination files must be added in this PR"]
+        if en_deletions and len(added_en) < len(en_deletions):
+            return [f"{source} was deleted without a replacement docs/en mirror; all related destination files must be added in this PR"]
+        if zh_deletions and len(added_zh) < len(zh_deletions):
+            return [f"{source} was deleted without a replacement docs/zh-CN mirror; all related destination files must be added in this PR"]
+        if en_deletions or zh_deletions:
+            for en_path in sorted(added_en):
+                zh_path = "docs/zh-CN/" + en_path[len("docs/en/"):]
+                if zh_path not in added_zh:
+                    return [f"{en_path} was added without its matching new Chinese mirror {zh_path}"]
         return []
     return [
         f"Counterpart file must exist for {source}: {path}"
@@ -529,12 +555,14 @@ def check_mirror_pairing(changed, statuses, exception):
                 errors.append(f"{path} changed without paired change {counterpart}")
         elif path.startswith("docs/en/"):
             counterpart = "docs/zh-CN/" + path[len("docs/en/"):]
-            if counterpart not in changed and not exception:
-                errors.append(f"{path} changed without paired change {counterpart}")
+            errors.extend(check_counterpart_requirement(
+                path, [counterpart], changed, statuses, exception
+            ))
         elif path.startswith("docs/zh-CN/"):
             counterpart = "docs/en/" + path[len("docs/zh-CN/"):]
-            if counterpart not in changed and not exception:
-                errors.append(f"{path} changed without paired change {counterpart}")
+            errors.extend(check_counterpart_requirement(
+                path, [counterpart], changed, statuses, exception
+            ))
     return errors
 
 
