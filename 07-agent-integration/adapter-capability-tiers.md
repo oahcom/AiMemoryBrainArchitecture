@@ -213,3 +213,18 @@ Both rules directly enforce DECIDED principles in `inference-boundary-model.md`:
 ### Scope and status
 
 This mapping is an executable interpretation of the tier guarantees already marked DECIDED in this document. Wire-level negotiation, authenticated capability claims, transport, provider integration, actual inference, and production telemetry remain out of scope. The model does not claim any of them.
+
+
+## 15. In-memory context delivery lifecycle (implemented reference behavior)
+
+The crate now exposes a `ContextDeliveryAdapter` trait and `InMemoryContextDeliveryAdapter`. The in-memory implementation maintains a per-session applied `ContextSnapshot` and connection flag.
+
+| Lifecycle action/state | Implemented behavior |
+|---|---|
+| Connected / apply | Accept only the exact successor version (new or cleared session starts at version 1); record the snapshot only after acceptance |
+| Version rejection | Return typed `AdapterError::VersionMismatch { expected, received }`; leave the applied snapshot unchanged |
+| Clear | Remove the applied snapshot; the next accepted apply starts at version 1 |
+| Disconnected | Reject apply with `SessionDisconnected`; retain the last successfully applied snapshot |
+| Reconnected | Restore the in-memory connection flag and report the last successfully applied version (or `None`) |
+
+**NOT IMPLEMENTED:** real transport; per-runtime Agent integration; a durable delivery ledger; durable session state; automatic retry/re-delivery; production reconciliation or attestation. Reconnect is a deterministic in-memory state transition, not proof of remote Agent state. This implementation does not translate provider-specific runtime objects or claim delivery outside its own process memory.
