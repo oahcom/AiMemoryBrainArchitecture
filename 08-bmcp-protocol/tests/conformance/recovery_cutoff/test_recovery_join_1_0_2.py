@@ -6,7 +6,6 @@ D production key, ledger, or currentness service is available in this suite.
 """
 from __future__ import annotations
 
-import copy
 import json
 import sys
 import unittest
