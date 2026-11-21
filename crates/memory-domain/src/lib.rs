@@ -606,6 +606,18 @@ impl EvidenceExtension { pub fn validate(&self)->Result<(),DomainError>{
 }}
 
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn id(value: &str) -> OpaqueId {
+        OpaqueId::new(value).unwrap()
+    }
+
+    fn scope(value: &str) -> ScopeRef {
+        ScopeRef { scope_id: id(value), scope_kind: ScopeKind::User, namespace_key: format!("user:{value}") }
+    }
+
     #[test]
     fn dm2_01_claim_revision_parent_must_belong_to_same_claim() {
         let ca=ClaimRef::new("ca").unwrap(); let cb=ClaimRef::new("cb").unwrap();
@@ -654,17 +666,6 @@ impl EvidenceExtension { pub fn validate(&self)->Result<(),DomainError>{
         assert_eq!(r.valid_time_or_unknown(),ValidTimeRef::Unknown); assert_ne!(r.valid_time_or_unknown(),ValidTimeRef::AllTime);
     }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn id(value: &str) -> OpaqueId {
-        OpaqueId::new(value).unwrap()
-    }
-
-    fn scope(value: &str) -> ScopeRef {
-        ScopeRef { scope_id: id(value), scope_kind: ScopeKind::User, namespace_key: format!("user:{value}") }
-    }
 
     fn claim(value: &str, scope_refs: Vec<ScopeRef>) -> Claim {
         Claim {
