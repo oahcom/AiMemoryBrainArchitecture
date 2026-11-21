@@ -5,11 +5,11 @@ document_metadata:
   lifecycle:
     approval:
       decision_status: Approved
-      approver: NOT_RECORDED
-      decision_date: NOT_RECORDED
+      approver: "Project Owner delegate under Issue #305 comment 7042461592"
+      decision_date: "2026-11-21"
       approved_version:
         scheme: git
-        value: "a7d12fe9835d8f53403946ab08c1cae8c3f12fbf"
+        value: "7aadf01ea896884d76380010c55aeeca241fe04b"
       approval_scope:
         type: Full-document
         included_sections: []
@@ -17,13 +17,14 @@ document_metadata:
       approval_applicability: Applicable-To-Current-Version
       evidence_reference:
         - "00-governance/terminology.md"
+        - "14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md"
       revocation: null
     evidence_verification:
-      verification_status: Unverified
-      last_verified_date: null
-      last_verification_note: "通常用于定义仓库内具有规范效力的术语"
+      verification_status: Verified
+      last_verified_date: "2026-11-21"
+      last_verification_note: "Fact and Claim are separated under OWNER-DECISION-FACT-CLAIM-001; this is a bilingual mirror of the canonical terminology source."
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Modified
     supersession:
       supersedes: []
       supersession_reason: null
@@ -53,7 +54,7 @@ document_metadata:
 # 规范术语表
 
 - 文档 ID：GOV-TERM-001
-- 版本：1.0
+- 版本：1.1
 - 源规范：[项目规范性原文](../../../00-governance/terminology.md)
 - 对应英文：[Canonical Terminology](../../en/00-governance/terminology.md)
 - 状态：DECIDED（已决议基线）
@@ -67,7 +68,10 @@ document_metadata:
 | Adapter | 将 Agent 遥测映射为规范信号，并在推理边界应用 Brain 上下文变更的集成组件 | Brain 内部策略的所有者 |
 | Event | 系统捕获的、有时间范围的发生、观察、报告或状态变化 | 持久记忆或已验证事实 |
 | Memory | 从 Event、文档、用户输入等来源形成并保留、可寻址的知识资产 | 原始事件或必然为真的事实 |
-| Fact / Claim | 关于实体、事件或状态，带有认知和时间限定的命题 | 来源证据本身 |
+| Claim | 由 Actor 或来源断言、观察、报告、推断、质疑、争议、更正或撤回的可归属命题线程 | Fact Attestation 或来源证据本身 |
+| ClaimRevision | 稳定 Claim 身份下的一个不可变断言状态 | 可变或 latest Claim 状态 |
+| Fact | 独立标识、受治理的 Attestation/Adjudication 对象，并绑定精确 ClaimRevision；不保证绝对客观真理 | Verified Claim 的同义词或置信度阈值 |
+| FactRevision | Fact Attestation 的不可变版本，绑定精确 ClaimRevision 与 Evidence/Provenance 引用 | 可变或 latest Fact 状态 |
 | Entity | 具有身份的对象，记忆和命题可以围绕其组织 | 一次文本提及或字符串出现 |
 | Relation | 实体、记忆、事件或命题之间带类型、可能具有时间属性的关联 | 未经限定的文本共现 |
 | Evidence | 支持、反驳或限定某个命题的来源材料或观察 | Confidence 分数 |

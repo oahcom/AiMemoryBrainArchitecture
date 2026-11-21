@@ -5,11 +5,11 @@ document_metadata:
   lifecycle:
     approval:
       decision_status: Approved
-      approver: NOT_RECORDED
-      decision_date: NOT_RECORDED
+      approver: "Project Owner delegate under Issue #305 comment 7042461592"
+      decision_date: "2026-11-21"
       approved_version:
         scheme: git
-        value: "a7d12fe9835d8f53403946ab08c1cae8c3f12fbf"
+        value: "7aadf01ea896884d76380010c55aeeca241fe04b"
       approval_scope:
         type: Full-document
         included_sections: []
@@ -17,13 +17,14 @@ document_metadata:
       approval_applicability: Applicable-To-Current-Version
       evidence_reference:
         - "00-governance/terminology.md"
+        - "14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md"
       revocation: null
     evidence_verification:
-      verification_status: Unverified
-      last_verified_date: null
-      last_verification_note: "Status is DECIDED in the document body. No formal approval record, approver identity or decision date exists in this repository; recorded as NOT_RECORDED rather than inferred."
+      verification_status: Verified
+      last_verified_date: "2026-11-21"
+      last_verification_note: "Fact and Claim are separated under OWNER-DECISION-FACT-CLAIM-001; this version is awaiting the version-bound approval update in the same change set."
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Modified
     supersession:
       supersedes: []
       supersession_reason: null
@@ -50,6 +51,8 @@ document_metadata:
 
 # Canonical Terminology
 
+- Version: 1.1
+
 Terms in this document are normative within this repository. A subsystem specification may refine a term but must not silently redefine it.
 
 | Term | Definition | Not to be confused with |
@@ -59,7 +62,10 @@ Terms in this document are normative within this repository. A subsystem specifi
 | Adapter | Integration component mapping Agent telemetry and applying Brain context changes at an inference boundary. | Policy owner for Brain internals |
 | Event | A time-bounded occurrence, observation, report, or state transition captured by the system. | Durable memory or verified fact |
 | Memory | A retained, addressable knowledge asset derived from events, documents, user input, or other sources. | Raw event or necessarily true fact |
-| Fact / Claim | A proposition about an entity, event, or state, with epistemic and temporal qualifications. | Source evidence itself |
+| Claim | An attributable proposition thread asserted, observed, reported, inferred, questioned, disputed, corrected, or withdrawn by an actor or source. | Fact attestation or source evidence itself |
+| ClaimRevision | An immutable assertion state under a stable Claim identity. | Mutable/latest Claim state |
+| Fact | A separately identified, governed attestation/adjudication object bound to exact ClaimRevision references; it does not guarantee objective truth. | A synonym for Verified Claim or a confidence threshold |
+| FactRevision | An immutable revision of a Fact attestation, bound to exact ClaimRevision and Evidence/Provenance references. | Mutable/latest Fact state |
 | Entity | An identity-bearing object about which memories and claims can be organized. | A mention/string occurrence |
 | Relation | A typed, potentially temporal association among entities, memories, events, or claims. | Unqualified textual co-occurrence |
 | Evidence | Source material or observation supporting, refuting, or qualifying a claim. | Confidence score |
