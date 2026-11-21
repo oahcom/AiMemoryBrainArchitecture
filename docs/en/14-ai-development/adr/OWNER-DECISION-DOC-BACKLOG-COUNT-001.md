@@ -4,12 +4,17 @@ document_metadata:
   role: decision-record
   lifecycle:
     approval:
-      decision_status: Draft
-      approver: null
-      decision_date: null
-      approved_version: null
-      approval_scope: null
-      approval_applicability: Not-Applicable-To-Current-Version
+      decision_status: Approved
+      approver: "Project Owner delegate under Issue #305 comment 7042461592"
+      decision_date: "2026-11-21"
+      approved_version:
+        scheme: git
+        value: "433d17135df4cdada2a6949e95da6341d8130108"
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Applicable-To-Current-Version
       evidence_reference:
         - "14-ai-development/adr/OWNER-DECISION-DOC-BACKLOG-COUNT-001.md"
         - "Issue #305 comment 7042461592"
