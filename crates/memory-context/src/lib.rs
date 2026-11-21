@@ -191,6 +191,173 @@ impl ContextSnapshot {
     }
 }
 
+/// A task-specific information dimension whose evidence may be assessed from a ContextSnapshot.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub enum SufficiencyDimension {
+    SemanticCoverage,
+    EntityCoverage,
+    RelationCoverage,
+    EnvironmentCoverage,
+    TemporalValidity,
+    EvidenceCoverage,
+    RiskCoverage,
+    UncertaintyCoverage,
+    FreshnessCompleteness,
+    NonRedundancy,
+    /// Forward-compatible dimension unknown to this evaluator.
+    Unknown(String),
+}
+
+impl SufficiencyDimension {
+    fn label(&self) -> String {
+        match self {
+            Self::SemanticCoverage => "semantic_coverage".into(),
+            Self::EntityCoverage => "entity_coverage".into(),
+            Self::RelationCoverage => "relation_coverage".into(),
+            Self::EnvironmentCoverage => "environment_coverage".into(),
+            Self::TemporalValidity => "temporal_validity".into(),
+            Self::EvidenceCoverage => "evidence_coverage".into(),
+            Self::RiskCoverage => "risk_coverage".into(),
+            Self::UncertaintyCoverage => "uncertainty_coverage".into(),
+            Self::FreshnessCompleteness => "freshness_completeness".into(),
+            Self::NonRedundancy => "non_redundancy".into(),
+            Self::Unknown(value) => value.clone(),
+        }
+    }
+}
+
+/// One named task requirement. Thresholds are minimum counts for dimensions
+/// with an explicit countable representation in the snapshot.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct SufficiencyRequirement {
+    pub requirement_id: String,
+    pub dimension: SufficiencyDimension,
+    pub threshold: usize,
+    pub mandatory: bool,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub enum SufficiencyOutcome {
+    Sufficient,
+    Conditional {
+        unmet_advisory: Vec<SufficiencyRequirement>,
+    },
+    Insufficient {
+        unmet_mandatory: Vec<SufficiencyRequirement>,
+    },
+    Unknown {
+        reason: String,
+    },
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct SufficiencyAssessment {
+    pub outcome: SufficiencyOutcome,
+    pub evaluated_requirements: usize,
+}
+
+/// Evaluate explicit requirements only. Missing structured evidence produces
+/// Unknown; it is never converted into an unmet requirement.
+pub fn assess_sufficiency(
+    snapshot: &ContextSnapshot,
+    requirements: &[SufficiencyRequirement],
+) -> SufficiencyAssessment {
+    if requirements.is_empty() {
+        // No requirements means there is no task-specific basis for a sufficiency claim.
+        return SufficiencyAssessment {
+            outcome: SufficiencyOutcome::Unknown {
+                reason: "empty requirement set: nothing to judge".into(),
+            },
+            evaluated_requirements: 0,
+        };
+    }
+    if let Err(error) = validate_snapshot(snapshot) {
+        return SufficiencyAssessment {
+            outcome: SufficiencyOutcome::Unknown {
+                reason: format!("snapshot cannot be validated: {error}"),
+            },
+            evaluated_requirements: 0,
+        };
+    }
+
+    let mut seen_ids = HashSet::new();
+    let mut unmet_mandatory = Vec::new();
+    let mut unmet_advisory = Vec::new();
+    let mut unknown = Vec::new();
+
+    for requirement in requirements {
+        if requirement.requirement_id.trim().is_empty()
+            || !seen_ids.insert(requirement.requirement_id.as_str())
+        {
+            unknown.push(format!(
+                "requirement id is empty or duplicated: {:?}",
+                requirement.requirement_id
+            ));
+            continue;
+        }
+
+        match sufficiency_measure(snapshot, &requirement.dimension) {
+            Ok(measured) if measured >= requirement.threshold => {}
+            Ok(_) if requirement.mandatory => unmet_mandatory.push(requirement.clone()),
+            Ok(_) => unmet_advisory.push(requirement.clone()),
+            Err(reason) => unknown.push(format!(
+                "{} [{}]: {}",
+                requirement.requirement_id,
+                requirement.dimension.label(),
+                reason
+            )),
+        }
+    }
+
+    // Unknown evidence takes precedence: the evaluator must never turn an unjudgeable
+    // requirement into an Insufficient verdict, even when another requirement is unmet.
+    let outcome = if !unknown.is_empty() {
+        SufficiencyOutcome::Unknown {
+            reason: unknown.join("; "),
+        }
+    } else if !unmet_mandatory.is_empty() {
+        SufficiencyOutcome::Insufficient { unmet_mandatory }
+    } else if !unmet_advisory.is_empty() {
+        SufficiencyOutcome::Conditional { unmet_advisory }
+    } else {
+        SufficiencyOutcome::Sufficient
+    };
+
+    SufficiencyAssessment {
+        outcome,
+        evaluated_requirements: requirements.len(),
+    }
+}
+
+/// Returns a measured count, or a reason why this snapshot cannot judge the dimension.
+fn sufficiency_measure(
+    snapshot: &ContextSnapshot,
+    dimension: &SufficiencyDimension,
+) -> Result<usize, String> {
+    match dimension {
+        SufficiencyDimension::EvidenceCoverage => {
+            let refs: HashSet<_> = snapshot
+                .entries
+                .iter()
+                .flat_map(|entry| entry.evidence_refs.iter())
+                .collect();
+            Ok(refs.len())
+        }
+        SufficiencyDimension::EnvironmentCoverage => {
+            if snapshot.identity.environment_id.is_some() {
+                Ok(1)
+            } else {
+                Err("environment identity is absent from the snapshot".into())
+            }
+        }
+        SufficiencyDimension::Unknown(value) => Err(format!("unknown dimension {value:?}")),
+        known => Err(format!(
+            "snapshot has no structured evidence for {}",
+            known.label()
+        )),
+    }
+}
+
 pub fn validate_snapshot(snapshot: &ContextSnapshot) -> Result<(), ContextError> {
     let Some(actual) = snapshot.entries.iter().try_fold(0usize, |total, entry| {
         total.checked_add(entry.rendered_bytes)
@@ -3036,3 +3203,267 @@ mod changeset_tests {
         }));
     }
 }
+
+#[cfg(test)]
+mod sufficiency_tests {
+    use super::*;
+    use memory_domain::ScopeKind;
+
+    fn id(value: &str) -> OpaqueId {
+        OpaqueId::new(value).unwrap()
+    }
+
+    fn snapshot(evidence_ids: &[&str], with_environment: bool) -> ContextSnapshot {
+        let scope = ScopeRef {
+            scope_id: id("scope"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:sufficiency-test".into(),
+        };
+        let identity = ContextIdentity {
+            context_id: id("context"),
+            scope_refs: vec![scope],
+            agent_id: id("agent"),
+            agent_instance_id: id("instance"),
+            session_id: id("session"),
+            task_id: Some(id("task")),
+            environment_id: with_environment.then(|| id("environment")),
+            purpose: "sufficiency test".into(),
+            schema_version: "1".into(),
+        };
+        let evidence_refs = evidence_ids.iter().map(|value| id(value)).collect();
+        let entry = ContextEntry {
+            entry_id: id("entry"),
+            memory_id: id("memory"),
+            memory_version_id: id("memory-version"),
+            tier: ContextTier::P1,
+            priority: 1,
+            activation_reason: "test fixture".into(),
+            rendered_content: "grounded content".into(),
+            source_refs: vec![id("source")],
+            evidence_refs,
+            epistemic_qualifiers: vec![],
+            content_hash: "content-hash".into(),
+            rendered_bytes: "grounded content".len(),
+        };
+        ContextSnapshot {
+            identity,
+            context_version: 1,
+            rendered_bytes: entry.rendered_bytes,
+            entries: vec![entry],
+            tombstones: vec![],
+            operation_records: vec![],
+        }
+    }
+
+    fn requirement(
+        requirement_id: &str,
+        dimension: SufficiencyDimension,
+        threshold: usize,
+        mandatory: bool,
+    ) -> SufficiencyRequirement {
+        SufficiencyRequirement {
+            requirement_id: requirement_id.into(),
+            dimension,
+            threshold,
+            mandatory,
+        }
+    }
+
+    #[test]
+    fn all_mandatory_requirements_met_are_sufficient() {
+        let result = assess_sufficiency(
+            &snapshot(&["evidence-1", "evidence-2"], true),
+            &[
+                requirement(
+                    "evidence-primary",
+                    SufficiencyDimension::EvidenceCoverage,
+                    2,
+                    true,
+                ),
+                requirement(
+                    "environment-bound",
+                    SufficiencyDimension::EnvironmentCoverage,
+                    1,
+                    true,
+                ),
+            ],
+        );
+        assert_eq!(result.outcome, SufficiencyOutcome::Sufficient);
+        assert_eq!(result.evaluated_requirements, 2);
+    }
+
+    #[test]
+    fn one_unmet_mandatory_requirement_is_named_in_insufficient_outcome() {
+        let result = assess_sufficiency(
+            &snapshot(&["evidence-1"], true),
+            &[requirement(
+                "two-independent-evidence-refs",
+                SufficiencyDimension::EvidenceCoverage,
+                2,
+                true,
+            )],
+        );
+        assert_eq!(
+            result.outcome,
+            SufficiencyOutcome::Insufficient {
+                unmet_mandatory: vec![requirement(
+                    "two-independent-evidence-refs",
+                    SufficiencyDimension::EvidenceCoverage,
+                    2,
+                    true
+                )]
+            }
+        );
+    }
+
+    #[test]
+    fn unmet_advisory_requirement_is_conditional_not_insufficient() {
+        let result = assess_sufficiency(
+            &snapshot(&["evidence-1"], true),
+            &[
+                requirement(
+                    "mandatory-evidence",
+                    SufficiencyDimension::EvidenceCoverage,
+                    1,
+                    true,
+                ),
+                requirement(
+                    "optional-extra-evidence",
+                    SufficiencyDimension::EvidenceCoverage,
+                    2,
+                    false,
+                ),
+            ],
+        );
+        assert_eq!(
+            result.outcome,
+            SufficiencyOutcome::Conditional {
+                unmet_advisory: vec![requirement(
+                    "optional-extra-evidence",
+                    SufficiencyDimension::EvidenceCoverage,
+                    2,
+                    false
+                )]
+            }
+        );
+    }
+
+    #[test]
+    fn empty_requirement_set_is_unknown_not_vacuously_sufficient() {
+        let result = assess_sufficiency(&snapshot(&[], true), &[]);
+        assert!(matches!(
+            result.outcome,
+            SufficiencyOutcome::Unknown { ref reason }
+                if reason.contains("empty requirement set")
+        ));
+        assert_eq!(result.evaluated_requirements, 0);
+    }
+
+    #[test]
+    fn unknown_dimension_returns_unknown_and_never_insufficient() {
+        let result = assess_sufficiency(
+            &snapshot(&[], true),
+            &[requirement(
+                "future-dimension",
+                SufficiencyDimension::Unknown("quantum-state".into()),
+                1,
+                true,
+            )],
+        );
+        assert!(matches!(
+            result.outcome,
+            SufficiencyOutcome::Unknown { ref reason }
+                if reason.contains("future-dimension") && reason.contains("quantum-state")
+        ));
+        assert!(!matches!(
+            result.outcome,
+            SufficiencyOutcome::Insufficient { .. }
+        ));
+    }
+
+    #[test]
+    fn unknown_evidence_takes_precedence_over_a_known_mandatory_gap() {
+        let result = assess_sufficiency(
+            &snapshot(&[], false),
+            &[
+                requirement(
+                    "known-evidence-gap",
+                    SufficiencyDimension::EvidenceCoverage,
+                    1,
+                    true,
+                ),
+                requirement(
+                    "environment-unknown",
+                    SufficiencyDimension::EnvironmentCoverage,
+                    1,
+                    true,
+                ),
+            ],
+        );
+        assert!(matches!(result.outcome, SufficiencyOutcome::Unknown { .. }));
+        assert!(!matches!(
+            result.outcome,
+            SufficiencyOutcome::Insufficient { .. }
+        ));
+    }
+
+    #[test]
+    fn four_outcomes_are_mutually_exclusive_and_exhaustive_for_the_decision_rule() {
+        let cases = vec![
+            assess_sufficiency(
+                &snapshot(&["evidence-1"], true),
+                &[requirement(
+                    "met",
+                    SufficiencyDimension::EvidenceCoverage,
+                    1,
+                    true,
+                )],
+            )
+            .outcome,
+            assess_sufficiency(
+                &snapshot(&["evidence-1"], true),
+                &[requirement(
+                    "advisory-gap",
+                    SufficiencyDimension::EvidenceCoverage,
+                    2,
+                    false,
+                )],
+            )
+            .outcome,
+            assess_sufficiency(
+                &snapshot(&["evidence-1"], true),
+                &[requirement(
+                    "mandatory-gap",
+                    SufficiencyDimension::EvidenceCoverage,
+                    2,
+                    true,
+                )],
+            )
+            .outcome,
+            assess_sufficiency(
+                &snapshot(&[], true),
+                &[requirement(
+                    "unknown",
+                    SufficiencyDimension::Unknown("future".into()),
+                    1,
+                    true,
+                )],
+            )
+            .outcome,
+        ];
+        let mut seen = [false; 4];
+        for outcome in cases {
+            let index = match outcome {
+                SufficiencyOutcome::Sufficient => 0,
+                SufficiencyOutcome::Conditional { .. } => 1,
+                SufficiencyOutcome::Insufficient { .. } => 2,
+                SufficiencyOutcome::Unknown { .. } => 3,
+            };
+            assert!(!seen[index], "one case must map to exactly one outcome");
+            seen[index] = true;
+        }
+        assert!(seen.into_iter().all(|value| value));
+    }
+}
+
+[executed on device: VM-0-9-ubuntu (d03d92fd-4b5d-4bc1-a701-985eb5de69cc)]
