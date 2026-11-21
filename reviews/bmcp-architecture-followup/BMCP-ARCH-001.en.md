@@ -247,7 +247,7 @@ H-owned questions go to H first; they are not disguised as Owner decisions.
 - D_I_IMPACT: no authority changes; identity claims still validated by D/I.
 - RUNTIME_IMPLEMENTATION_IMPACT: request/response correlation blocked pending H mapping.
 - REQUIRED_AUTHORITY: H, with C/E/G consumer review.
-- OWNER_DECISION: NAME_RESOLVED_BY_CANONICAL_TERMINOLOGY; REQUEST_IDENTITY_ACCEPTED_SEMANTICALLY_BY_OWNER_DELEGATE; NOT_WIRE_FROZEN
+- OWNER_DECISION: ACCEPTED_SEMANTICALLY_BY_OWNER_DELEGATE; NOT_WIRE_FROZEN
 - EVIDENCE: `00-governance/terminology.md` Blob b8770fbb58e4fac087698043c40a57531b1d244d; H envelope Blob 5547ecd78d118bd63e571e5daad87194d9b694e4.
 - FOLLOW_UP_ACTIONS: H publishes versioned mapping; consumers review.
 
@@ -265,7 +265,7 @@ H-owned questions go to H first; they are not disguised as Owner decisions.
 - D_I_IMPACT: no authority change.
 - RUNTIME_IMPLEMENTATION_IMPACT: raw bytes must not enter semantic parser.
 - REQUIRED_AUTHORITY: H.
-- OWNER_DECISION: PENDING_H_CONFIRMATION
+- OWNER_DECISION: ACCEPTED_SEMANTICALLY_BY_OWNER_DELEGATE; NOT_WIRE_FROZEN
 - EVIDENCE: strict parser Blob 3b9b3da645448c773c95a9dcd3c57c8c109bb2da.
 - FOLLOW_UP_ACTIONS: H publishes stage contract and vectors.
 
@@ -283,7 +283,7 @@ H-owned questions go to H first; they are not disguised as Owner decisions.
 - D_I_IMPACT: D/I independently evaluate Fence/target satisfaction.
 - RUNTIME_IMPLEMENTATION_IMPACT: ACK implementation waits for H and consumer acceptance.
 - REQUIRED_AUTHORITY: H; D/I/G/E review their own consumption.
-- OWNER_DECISION: PENDING_H_CONFIRMATION
+- OWNER_DECISION: ACCEPTED_SEMANTICALLY_BY_OWNER_DELEGATE; NOT_WIRE_FROZEN
 - EVIDENCE: H ACK Blob 5e2b33898cbc6a9c95e271ecd1d8a092d04c67f8.
 - FOLLOW_UP_ACTIONS: H publishes ACK-to-consumer matrix.
 
@@ -301,7 +301,7 @@ H-owned questions go to H first; they are not disguised as Owner decisions.
 - D_I_IMPACT: D/I decisions remain authoritative.
 - RUNTIME_IMPLEMENTATION_IMPACT: error mapping blocked until H contract.
 - REQUIRED_AUTHORITY: H; domain owners approve their outcomes.
-- OWNER_DECISION: PENDING_H_CONFIRMATION
+- OWNER_DECISION: ACCEPTED_SEMANTICALLY_BY_OWNER_DELEGATE; NOT_WIRE_FROZEN
 - EVIDENCE: H envelope Blob 5547ecd78d118bd63e571e5daad87194d9b694e4.
 - FOLLOW_UP_ACTIONS: H publishes taxonomy and vectors.
 
@@ -370,7 +370,7 @@ H-owned questions go to H first; they are not disguised as Owner decisions.
 - REQUIRED_AUTHORITY: Owner semantic selection is recorded in PR #446 (merged) under the standing Owner instruction; B/D/E/F/G/H/I consumer mapping and acceptance remain required for schema freeze.
 - OWNER_DECISION: SEMANTIC_DIRECTION_APPROVED_OPTION_A_I1; WIRE_SCHEMA_MAPPING_CANDIDATE
 - EVIDENCE: `OWNER-DECISION-FACT-CLAIM-001` PR #446 (merged) @ `ad5ca81a32b413aef3f9b5bccd06030aabde8275`; B ADR Blob 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593.
-- FOLLOW_UP_ACTIONS: B updates ADR status/source pins; D/E/F/G/H/I record exact consumer mappings and acceptance; publish migration/compatibility plan and conformance scenarios; keep payload opaque until all §8 conditions are met.
+- FOLLOW_UP_ACTIONS: B updates ADR status/source pins; D/E/F/G/H/I record exact consumer mappings and acceptance; publish migration/compatibility plan and conformance scenarios; keep payload opaque until responsible consumer artifacts are version-pinned and reviewed.
 
 **DECISION_REQUEST_ID: BMCP-DR-002**
 - MODULE: BMCP
@@ -409,6 +409,10 @@ H-owned questions go to H first; they are not disguised as Owner decisions.
 - FOLLOW_UP_ACTIONS: C/H publish mapping and conformance cases; no parallel API.
 
 
+## 8. Runtime acceptance plan — NOT RUN
+
+Every row is a future Runtime requirement. No test below was executed by this work item. Design documents/reference models are not Runtime PASS.
+
 ### 8.1 Existing conformance evidence — bounded, not full-protocol PASS
 
 - Main `c138654c942dc93b5a36eccb2ff0e41452156429`: `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v` — **30 passed, 0 failed**, exit 0. This is the Applied Delivery Evidence conformance suite only.
@@ -438,9 +442,7 @@ H-owned questions go to H first; they are not disguised as Owner decisions.
 
 **C mapping boundary:** Issue #449 is open and records that MCP Server, if selected, is C's northbound Agent-facing Adapter/Gateway, not BMCP and not a parallel Brain API. C must map Agent request/attempt identities to H message_id/correlation_id/causation_id, preserve Principal provenance and I authorization, and distinguish tool result, BMCP business response, transport ACK, E receipt and G Applied. No C response or acceptance is recorded yet.
 
-## 8. Runtime acceptance plan — NOT RUN
 
-Every row is a future Runtime requirement. No test below was executed by this work item. Design documents/reference models are not Runtime PASS.
 
 | ID / scenario | OWNER | PRECONDITION | EXPECTED_RESULT | TEST_METHOD | DEPENDENCY | ACCEPTANCE_STATUS |
 |---|---|---|---|---|---|---|
@@ -528,4 +530,4 @@ The coverage register records this as a review/handoff pair only. It does not ch
 - RUNTIME_IMPLEMENTATION_STATUS: NOT AUTHORIZED / NOT STARTED
 - PR / Commit: populate only after successful push and PR creation; no merge authorized
 
-**Next action:** H answers H-CONFIRM-001..004 first; B/Architecture Governance, D, I and C resolve their requests; BMCP architecture integration refreshes exact pins and publishes a successor. Runtime remains deferred until all engineering-entry conditions are evidenced.
+**Next action:** H updates and versions normative bilingual Wire/Envelope/ACK/Validator artifacts using the accepted H-CONFIRM-001..004; C publishes the MCP-to-BMCP mapping through Issue #449; D/I publish exact authority interfaces/IDL. BMCP architecture integration then refreshes all source pins for independent review. Runtime remains deferred until all engineering-entry conditions are evidenced.
