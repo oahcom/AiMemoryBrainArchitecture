@@ -236,7 +236,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - D_I_IMPACT：权威不变；Identity Claims 仍由 D/I 校验。
 - RUNTIME_IMPLEMENTATION_IMPACT：Request/Response Correlation 等待 H 映射。
 - REQUIRED_AUTHORITY：H，C/E/G 消费者复审。
-- OWNER_DECISION：NAME_RESOLVED_BY_CANONICAL_TERMINOLOGY；REQUEST_IDENTITY_ACCEPTED_SEMANTICALLY_BY_OWNER_DELEGATE; NOT_WIRE_FROZEN
+- OWNER_DECISION：ACCEPTED_SEMANTICALLY_BY_OWNER_DELEGATE / NOT_WIRE_FROZEN
 - EVIDENCE：`00-governance/terminology.md` Blob b8770fbb58e4fac087698043c40a57531b1d244d；H Envelope Blob 5547ecd78d118bd63e571e5daad87194d9b694e4。
 - FOLLOW_UP_ACTIONS：H 发布版本化映射；消费者复审。
 
@@ -421,8 +421,8 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 1. BMCP 语义契约获责任架构权威接受；未决语义明确列出。
 2. H 冻结版本化 Wire、Transport、ACK、Validator 契约，包括 Error/Conformance Mapping。
 3. H/C/E/D/I/G 按需接受跨模块 Request/Response/Receipt/ACK 映射。
-4. Fact/Claim ADR 正式决议，或依赖操作明确排除/保持不透明；E Candidate IR 和 Receipt API 精确固定。
-5. C/H 接受 Agent Integration / MCP-to-BMCP Adapter 边界；MCP 不得替代协议。
+4. Owner 已批准 Fact/Claim Option A + I1 语义；精确消费者映射仍为 Candidate，直至 D/I/Storage/H 契约完成版本 Pin 和审查；E Candidate IR 和 Receipt API 精确固定。
+5. C 通过 Issue #449 发布、H 审查 Agent Integration / MCP-to-BMCP Mapping；MCP 不得替代协议。
 6. D/I 发布 Identity/Lifecycle、Forget Fence、Authorization、PermissionEpoch Currentness 的精确可调用接口。
 7. 指定 Canonical Runtime 仓库/分支（或授权新仓库）、责任工程 Owner/维护者、Build、CI、测试命令和产物来源。
 8. 相关权威记录 Deployment Topology、持久化、队列、Recipient Adapter、Observability、Recovery 和 Operator 职责。
@@ -432,7 +432,7 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 | 工作流 | 下一项工件 | 责任权威 | 进入状态 |
 |---|---|---|---|
 | H | 冻结 Envelope/Version、Wire Decode、ACK、Validator、Error/Conformance | H | BLOCKED_BY_H_CONTRACT |
-| B / Governance | 正式 Fact/Claim ADR 和 Schema 影响 | B + 有权治理机构 | BLOCKED_BY_OWNER_CONTRACT |
+| B / Governance | 将已批准 Owner 决策映射到精确消费者契约；Schema 仍为 Candidate | B + D/E/F/G/H/I | BLOCKED_BY_OWNER_CONTRACT |
 | D | Canonical Identity/Lifecycle/Fence API 和 Receipt | D | BLOCKED_BY_OWNER_CONTRACT |
 | I | Authorization/PermissionEpoch/Revocation API | I | BLOCKED_BY_OWNER_CONTRACT |
 | E | Candidate IR、AcceptedReceipt、Service 边界 | E | BLOCKED_BY_OWNER_CONTRACT |
