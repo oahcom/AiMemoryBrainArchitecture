@@ -374,7 +374,7 @@ mod tests {
         let mut store = SqliteEventStore::in_memory().unwrap();
         let receipt = store.accept(envelope("op-1", "digest-1"), &[scope()]).unwrap();
         let other = ScopeRef { scope_id: id("scope-2"), scope_kind: ScopeKind::User, namespace_key: "user:scope-2".into() };
-        assert_eq!(store.status(&receipt.event_id, &[other.clone()]), Err(EventStoreError::ScopeMismatch));
+        assert_eq!(store.status(&receipt.event_id, std::slice::from_ref(&other)), Err(EventStoreError::ScopeMismatch));
         assert_eq!(store.replay(&receipt.event_id, &[other]), Err(EventStoreError::ScopeMismatch));
     }
 

@@ -1044,11 +1044,6 @@ pub fn supersede_version(
     Ok(replacement)
 }
 
-impl ContextError {
-    fn payload_hash_mismatch(declared: String, actual: String) -> Self {
-        Self::PayloadHashMismatch { declared, actual }
-    }
-}
 
 #[cfg(test)]
 mod tests {
@@ -1760,7 +1755,7 @@ mod version_tests {
     fn rollback_rejects_noop_diff() {
         let same = entry("a", "same", 1);
         assert_eq!(
-            rollback(&[same.clone()], &[same]),
+            rollback(std::slice::from_ref(&same), std::slice::from_ref(&same)),
             Err(ContextError::NoOpRollback)
         );
     }
@@ -1987,7 +1982,7 @@ mod version_tests {
             &[],
             &mut log,
             7,
-            metadata(&[added.clone()]),
+            metadata(std::slice::from_ref(&added)),
         )
         .unwrap();
         let second = commit_change_set(

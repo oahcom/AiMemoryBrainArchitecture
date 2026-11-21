@@ -988,10 +988,9 @@ mod tests {
         assert!(!db
             .is_artifact_visible(&id("artifact-1"), &id("artifact-version-1"))
             .unwrap());
-        assert!(matches!(
-            db.final_publication_gate(gate(obs, vec![first.receipt_id, second.receipt_id])),
-            Ok(_)
-        ));
+        assert!(db
+            .final_publication_gate(gate(obs, vec![first.receipt_id, second.receipt_id]))
+            .is_ok());
         assert!(db
             .is_artifact_visible(&id("artifact-1"), &id("artifact-version-1"))
             .unwrap());
