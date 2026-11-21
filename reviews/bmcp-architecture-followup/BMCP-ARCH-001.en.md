@@ -103,7 +103,7 @@ Parse failures: malformed decoded envelope; missing required field; unsupported 
 
 H's candidate negotiation forbids silent major downgrade. Exact major/minor/patch and payload-schema negotiation remain H-owned.
 
-**H request-ID question:** current envelope defines message_id, not a separate request_id. H must decide whether message_id is the request identity referenced by response causation_id, or whether a distinct stable command identity is required. BMCP MUST NOT add a wire request_id unilaterally.
+**Owner-delegate semantic disposition (H-CONFIRM-001):** message_id is unique per BMCP message; correlation_id groups the Agent request/workflow; causation_id identifies the immediate parent BMCP message/event. No separate core request_id is introduced. C retains AgentRequestId/AgentAttemptId. H's future versioned Wire spec may encode this mapping but does not reopen the semantic distinction or imply a frozen field encoding.
 
 ### 4.3 Execute
 
@@ -128,7 +128,7 @@ A business response is the semantic result of an operation; an ACK is a separate
 
 Logical response: negotiated protocol version; new immutable response message identity; request association; operation discriminator; mutually exclusive success/result or failure/error; owner-issued result/receipt/evidence refs; and H-approved safe retry metadata.
 
-**Candidate correlation:** response causation_id references request message_id; response correlation_id preserves workflow correlation; response has its own message_id. H must confirm; this is not a frozen wire rule.
+**Owner-delegate accepted semantic correlation:** response causation_id references request message_id; response correlation_id preserves workflow correlation; response has its own message_id. H must encode the mapping in its future versioned Wire contract; this is not a frozen wire rule.
 
 Success exists only when the operation owner returns its defined successful terminal/receipt. Transport send success, HTTP 2xx, queue acceptance or ACK receipt is not business success. Failure preserves the owner's outcome and distinguishes pre-execution rejection, domain conflict, authorization denial, timeout/unknown and internal failure. UNKNOWN must not become definitive success/failure.
 
@@ -150,7 +150,7 @@ H's candidate design distinguishes Prepared/Delivered/Applied/Rejected/Expired/S
 | Duplicate ACK | same stable ACK ID+digest idempotent; same ID/different digest conflict | H candidate; consumer owns state |
 | Correlation | exact operation/delivery/attempt/session/target/evidence tuple | H wire mapping; D/G/I consume |
 
-H must confirm ACK families, evidence boundary, persistence point, correlation tuple, retry horizon, replay/retention and consumer mapping. This document does not design ACK.
+The Owner delegate has accepted the semantic separation of ACK families, their bounded evidence scope, UNKNOWN-on-ambiguity, stable ACK identity/digest and retry/idempotency distinction. H must still publish exact versioned wire encoding, persistence/replay profile and consumer mapping. This document does not freeze ACK schema.
 
 ### 5.2 Validator layers
 
@@ -416,14 +416,14 @@ Issue #7 is currently CLOSED / not_planned under the Owner phase-closure ruling;
 | Workstream | Next artifact | Responsible authority | Entry status |
 |---|---|---|---|
 | H | frozen envelope/version, wire decode, ACK, Validator, error/conformance | H | BLOCKED_BY_H_CONTRACT |
-| B / Governance | formal Fact/Claim ADR and schema impact | B + authorized governance | BLOCKED_BY_OWNER_DECISION |
-| D | canonical identity/lifecycle/Fence API and receipts | D | BLOCKED_BY_OWNER_DECISION |
-| I | authorization/PermissionEpoch/revocation API | I | BLOCKED_BY_OWNER_DECISION |
+| B / Governance | consumer mapping, compatibility/migration and schema-impact acceptance | B/D/E/F/G/H/I + authorized governance | BLOCKED_BY_CONSUMER_ACCEPTANCE |
+| D | canonical identity/lifecycle/Fence API and receipts | D | DEFERRED_TO_D_I_OWNER_CONTRACT_PUBLICATION |
+| I | authorization/PermissionEpoch/revocation API | I | DEFERRED_TO_D_I_OWNER_CONTRACT_PUBLICATION |
 | E | Candidate IR, AcceptedReceipt and service boundary | E | BLOCKED_BY_OWNER_DECISION |
-| C | Agent/MCP adapter-to-BMCP mapping | C + H | BLOCKED_BY_OWNER_DECISION |
+| C | exact Agent/MCP adapter-to-BMCP mapping | C + H | PENDING_C_MAPPING_ISSUE_449 |
 | G | ContextVersion/Delivery/Applied/ACK mapping | G + H | BLOCKED_BY_OWNER_DECISION |
 | Engineering leadership | canonical Runtime repo/team/CI/deployment authority | Engineering leadership | DEFERRED_TO_ENGINEERING_PHASE |
-| BMCP architecture integration | refresh source pins after Owner responses | BMCP architecture lead | NOT STARTED |
+| BMCP architecture integration | refresh source pins and incorporate H decisions/C mapping | BMCP architecture lead | IN_PROGRESS |
 
 ## 10. Governance and verification
 
