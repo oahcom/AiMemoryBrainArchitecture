@@ -9,6 +9,7 @@ root, so every input outside the declared subset must fail, not degrade.
 
 from __future__ import annotations
 
+import re
 import subprocess
 import sys
 import tempfile
@@ -726,7 +727,11 @@ def run_schema_agreement() -> None:
         "authority.canonical_conflict_resolution": gate.RESOLUTION_KEYS,
         "bilingual_counterpart": gate.BILINGUAL_KEYS,
     }
-    constraint_keys = {"kind", "required", "enum", "items", "pattern", "when", "fields"}
+    # `pattern` is deliberately absent: the gate never evaluates it, so allowing
+    # it would let the schema publish a constraint nothing enforces. That is the
+    # exact failure this test exists to catch, so the vocabulary is the set of
+    # keys the gate actually reads.
+    constraint_keys = {"kind", "required", "enum", "items", "when", "fields"}
     # The closed set of value kinds. Without this, `kind: completely-unknown-kind`
     # would pass a check that only asks whether `kind` is present.
     KINDS = {"string", "nullable-string", "mapping", "nullable-mapping", "sequence", "boolean"}
@@ -811,6 +816,34 @@ def run_schema_agreement() -> None:
                 return None
         return node
 
+    # `when` is declarative: the gate never executes it. That makes it the one
+    # key in the schema that can quietly lie -- a condition naming a rule that
+    # does not exist reads like enforcement and enforces nothing, which is the
+    # same failure `required: true` used to be. It must name a real rule.
+    policy = (Path(__file__).resolve().parents[1]
+              / "00-governance/architecture-document-management-policy.md")
+    rule_ids = set()
+    if policy.is_file():
+        rule_ids = set(re.findall(r"^\|\s*(DM-\d+)\s*\|",
+                                  policy.read_text(encoding="utf-8"), re.M))
+    record("T19 policy rule table is readable", len(rule_ids) >= 10,
+           f"  found {sorted(rule_ids)}")
+
+    dangling: list[str] = []
+    for name in sorted(declared):
+        node = node_at(name)
+        when = node.get("when") if isinstance(node, dict) else None
+        if when is None:
+            continue
+        if not isinstance(when, str):
+            dangling.append(f"{name}: when is not a string")
+            continue
+        head = when.split()[0] if when.split() else ""
+        if head not in rule_ids:
+            dangling.append(f"{name}: when names {head!r}, not a policy rule")
+    record("T19 every `when` names a rule that exists in the policy", not dangling,
+           "  " + "; ".join(dangling[:6]))
+
     for where, allowed in enums.items():
         node = node_at(where)
         if not isinstance(node, dict):
@@ -849,7 +882,6 @@ def run_schema_agreement() -> None:
     record("T19 forbidden list names superseded_by",
            isinstance(forbidden, list)
            and "lifecycle.supersession.superseded_by" in forbidden)
-
     tpl = (Path(__file__).resolve().parents[1]
            / "00-governance/templates/document-metadata-template.md")
     record("T19 copy-paste template exists", tpl.is_file())

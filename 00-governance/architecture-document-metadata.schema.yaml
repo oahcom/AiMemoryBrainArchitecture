@@ -10,12 +10,24 @@
 # To fill in a document, copy 00-governance/templates/document-metadata-template.md.
 # 填写文档时复制 00-governance/templates/document-metadata-template.md。
 #
-# Per-field keys: kind / required / enum / items / pattern / when / fields.
-# 每字段可用键：kind / required / enum / items / pattern / when / fields。
+# Per-field keys: kind / required / enum / items / when / fields.
+# 每字段可用键：kind / required / enum / items / when / fields。
 # `kind` is the value type; it is not called `type` because `approval_scope.type` is a field name.
 # `fields` nests one level, so the shape here is the shape of the metadata block.
 # `kind` 表示值类型；不叫 `type` 是因为 `approval_scope.type` 本身是字段名。
 # `fields` 表示下一层，因此本文件的结构即元数据块的结构。
+#
+# `when` is declarative only: it names the rule that makes the field required,
+# and the gate does NOT execute it. DM-03 (a separate rule in the policy) does.
+# Keeping it here as prose was the same mistake as `required: true` used to be
+# -- a constraint the machine never reads. It is kept because it says which
+# rule owns the requirement, and T19 rejects a `when` whose named rule does not
+# exist in the policy.
+# `when` 仅为声明：它指明哪条规则使该字段成为必填，门禁**不执行**它；
+# 执行者是条例中的 DM-03。把它写成散文，与当初的 `required: true` 是同一类错误
+# ——机器从不读取的约束。保留它的理由是指出需求归属，且 T19 会拒绝指向不存在规则的
+# `when`。
+#
 
 schema_version: "2"
 
@@ -90,7 +102,11 @@ fields:
             # Not unconditionally required: DM-03 requires it when the decision
             # is Approved. Declaring `required: true` here contradicted every
             # Draft document, including the policy itself.
-            when: decision_status == Approved
+            # The leading DM-id is mandatory: it names the rule that owns this
+            # requirement, and T19 fails if that id is not a rule in the policy.
+            # 前导 DM 编号是强制的：它指明哪条规则拥有该必填要求；若该编号不在条例
+            # 规则表中，T19 失败。
+            when: DM-03 decision_status == Approved
             fields:
               type:
                 kind: string
