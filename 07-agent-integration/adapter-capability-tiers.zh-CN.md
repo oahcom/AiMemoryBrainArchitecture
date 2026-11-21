@@ -37,7 +37,7 @@
 
 ## 17. 内存上下文交付生命周期（已实现的参考行为）
 
-crate 现在提供 `ContextDeliveryAdapter` trait 和 `InMemoryContextDeliveryAdapter`。内存实现按 session 保存已应用的 `DeliveryPayload` 与连接标志。
+crate 现在提供 `ContextDeliveryAdapter` trait 和 `InMemoryContextDeliveryAdapter`。内存实现按 session 保存已应用的 `DeliveryPayload` 与连接标志。 该适配器边界载荷不同于 Brain 侧的 `memory_context::ContextSnapshot` 构建产物。
 
 | 生命周期动作/状态 | 已实现行为 |
 |---|---|
@@ -48,5 +48,3 @@ crate 现在提供 `ContextDeliveryAdapter` trait 和 `InMemoryContextDeliveryAd
 | Reconnected | 恢复内存连接标志，并报告最后一次成功应用的版本（或 `None`） |
 
 **NOT IMPLEMENTED（未实现）：** 真实传输；逐运行时 Agent 集成；持久化交付账本；持久化 session 状态；自动重试/重新交付；生产级协调或应用证明。Reconnect 只是确定性的内存状态转换，并不能证明远端 Agent 的真实状态。本实现不转换 Provider 特定运行时对象，也不声称交付状态超出当前进程内存的范围。
-
-[executed on device: VM-0-9-ubuntu (d03d92fd-4b5d-4bc1-a701-985eb5de69cc)]
