@@ -1,3 +1,20 @@
+---
+document_metadata:
+  domain: protocol
+  role: index
+  lifecycle:
+    approval:
+      decision_status: Draft
+    evidence_verification:
+      verification_status: Unverified
+    usage_status: Active
+    modification_status: Modified
+  authority:
+    canonical_status: Candidate
+    normative_status: Informative
+    canonical_conflict_status: None
+---
+
 # BMCP Protocol Message Index
 
 - Scope: `08-bmcp-protocol/`
