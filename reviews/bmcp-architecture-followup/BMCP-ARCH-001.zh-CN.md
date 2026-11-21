@@ -2,7 +2,7 @@
 
 - 工作项：BMCP-ARCH-FOLLOWUP-001；文档：BMCP-ARCH-001；版本：0.2.1
 - 状态：CANDIDATE / ARCHITECTURE_PARTIAL——不是已冻结协议规范
-- Main 基线：477a55e624bcc244dfb65c435bc8d03f718b1e2a
+- Main 基线：59c15db9c0ea13f86b05b1f30ab0b4973a49e4dd
 - H 源快照：session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74
 - 对应版本：[English](BMCP-ARCH-001.en.md) | [中文版本](BMCP-ARCH-001.zh-CN.md)
 - 范围：架构语义、阶段边界、依赖映射、验收计划和工程交接
@@ -18,11 +18,11 @@ Owner 已合并批准 Fact/Claim 语义决策（Option A + I1）；精确 Compil
 
 Issue #7 的记录保持 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE。根据 Owner 阶段关闭裁决，GitHub 当前报告 Issue #7 为 CLOSED / not_planned；本工作不重开或修改它。延期不等于 Runtime 授权。
 
-**规范名称：** 仓库规范术语表 `00-governance/terminology.md` 将 BMCP 定义为 **Brain Memory Context Protocol**（main `477a55e624bcc244dfb65c435bc8d03f718b1e2a`，术语表 Blob `b8770fbb58e4fac087698043c40a57531b1d244d`）。初始派发文本中的 “Brain Memory Control Protocol” 在本仓库中不是规范名称，予以纠正。H 的协议文档必须保留 “Context”；名称问题不再是未决项。
+**规范名称：** 仓库规范术语表 `00-governance/terminology.md` 将 BMCP 定义为 **Brain Memory Context Protocol**（main `59c15db9c0ea13f86b05b1f30ab0b4973a49e4dd`，术语表 Blob `b8770fbb58e4fac087698043c40a57531b1d244d`）。初始派发文本中的 “Brain Memory Control Protocol” 在本仓库中不是规范名称，予以纠正。H 的协议文档必须保留 “Context”；名称问题不再是未决项。
 
 ## 2. 精确来源登记
 
-Main Pin 来自 origin/main @ 477a55e624bcc244dfb65c435bc8d03f718b1e2a；H Pin 来自 session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74。
+Main Pin 来自 origin/main @ 59c15db9c0ea13f86b05b1f30ab0b4973a49e4dd；H Pin 来自 session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74。
 
 | 来源 | Ref | Blob SHA | 状态 / 用途 |
 |---|---|---|---|
@@ -42,6 +42,7 @@ Main Pin 来自 origin/main @ 477a55e624bcc244dfb65c435bc8d03f718b1e2a；H Pin �
 | docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md | main | 9c054932994bb078e2834df8bd66f73895aa04f5 | D Lifecycle/Fence |
 | 13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md | main | 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593 | 历史 ADR；语义决策已被取代；消费者映射仍为 Candidate |
 | C Family Boundary 决策 | PR #430 comment 7060351480；Issue #449 comment 7060126722 | Owner-delegate 决议；不声称独立人工 C 签名 | Family 方向已决定；精确 H Operation Registry / C-H Mapping 仍 OPEN |
+| PR #436 协议索引/provider_outcome 测试 | PR Head 1ffed9ed127df98b2f823a66ec80ea43d08cb9dc；Merge Commit 02f61194fd4e12993b4c83f7fac8382eee20f5d8 | 已合入 Main | 结构性 Provider Outcome 证据；5 passed / 5 semantic skips |
 
 本次更新已从实时 `session-h-bmcp-protocol` 分支重新读取上述七个 H Blob Pin；它们在当前分支 HEAD `3e8b33df18b9e6fc757ca84ff07a12faebc78e74` 均解析为表中 Blob SHA。此处是有界来源登记，不代表所有 H 工件或消费者均已独立审查。
 
@@ -404,9 +405,9 @@ H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体
 
 ### 8.1 现有符合性证据——范围受限，不代表完整协议 PASS
 
-- Main `477a55e624bcc244dfb65c435bc8d03f718b1e2a`：`python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v`——**30 passed，0 failed**，退出码 0。该结果只覆盖 Applied Delivery Evidence 符合性套件。
-- Open PR #436 精确 Head `1ffed9ed127df98b2f823a66ec80ea43d08cb9dc`：`python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/provider_outcome -p 'test_*.py' -v`——**运行 10 项；5 passed；5 skipped；0 failed**，退出码 0。跳过的 CPO-02/04/05/09/10 明确需要 Owner C 权威语义 Validator。该结果仅验证 Schema 结构，不验证 C 语义或密码学签名。
-- PR #436 的双语协议索引和 provider_outcome 测试仍在 Open PR 中，尚未合入 Main。其索引将 RecoveryJoin 1.0.2 的 Schema/Validator/Test 标记为未交付。
+- Main `59c15db9c0ea13f86b05b1f30ab0b4973a49e4dd`：`python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v`——**30 passed，0 failed**，退出码 0。该结果只覆盖 Applied Delivery Evidence 符合性套件。
+- PR #436（已于 `02f61194fd4e12993b4c83f7fac8382eee20f5d8` 合并），源 Head `1ffed9ed127df98b2f823a66ec80ea43d08cb9dc`：`python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/provider_outcome -p 'test_*.py' -v`——**运行 10 项；5 passed；5 skipped；0 failed**，退出码 0。跳过的 CPO-02/04/05/09/10 明确需要 Owner C 权威语义 Validator。该结果仅验证 Schema 结构，不验证 C 语义或密码学签名。
+- PR #436 的双语协议索引和 provider_outcome 测试现已合入 Main。其索引仍将 RecoveryJoin 1.0.2 的 Schema/Validator/Test 标记为未交付；五个语义测试方法仍需等待 C 的权威 Validator。
 - 这些结果不构成完整 BMCP 符合性。Strict JSON Parser 是参考模型，不是生产 Transport。当前不存在 `tests/protocol_test.rs` 和 `crates/bmcp`。
 - AT-01..AT-20 仍为 **PLANNED_NOT_RUN**。本架构阶段不存在 Runtime 仓库/实施授权。
 
@@ -472,7 +473,7 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 - Issue #7：CLOSED / not_planned；正文保留 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE。未修改。
 - Issue #3：CLOSED / not_planned，作为 superseded 处理。历史正文写明 Applied Contract Frozen = NO、Test Executed / Passed = NO / NO；关闭不证明新的 BMCP 核心契约已冻结。
 - Issue #43：根据 Owner 阶段关闭裁决关闭为 superseded。本 FollowUp 是候选架构交接，不是 Runtime 实施。
-- Main Fetch SHA：477a55e624bcc244dfb65c435bc8d03f718b1e2a；H 来源分支已重新读取：session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74；七个 H Blob Pin 已重新获取且 SHA 未变化。
+- Main Fetch SHA：59c15db9c0ea13f86b05b1f30ab0b4973a49e4dd（Owner comment 指定的 `477a55e624bcc244dfb65c435bc8d03f718b1e2a` 之后 Main 又前进 39 个 Commit）；H 来源分支已重新读取：session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74；七个 H Blob Pin 已重新获取且 SHA 未变化。
 - 未修改 Runtime 代码或 H 所有源文件。
 - Runtime 验收测试：NOT RUN——无 Runtime 授权/仓库。
 - 独立语义一致性审查：PENDING。H/Owner 回复：PENDING。
@@ -481,7 +482,7 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 
 | 文档 / 版本 | 英文路径 | 中文路径 | 来源版本 | 一致性 |
 |---|---|---|---|---|
-| BMCP-ARCH-001 / 0.2.1 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main 477a55e624bcc244dfb65c435bc8d03f718b1e2a；H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74 | 作者准备双语 Pair；独立一致性审查 PENDING |
+| BMCP-ARCH-001 / 0.2.1 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main 59c15db9c0ea13f86b05b1f30ab0b4973a49e4dd；H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74 | 作者准备双语 Pair；独立一致性审查 PENDING |
 
 Coverage Register 仅将此登记为 Review/Handoff Pair，不改变 “BMCP Protocol detailed contracts (7 core specifications)” 条目；双语规范核心文档覆盖仍为 NOT STARTED。结构配对不等于语义双语一致性审查。
 

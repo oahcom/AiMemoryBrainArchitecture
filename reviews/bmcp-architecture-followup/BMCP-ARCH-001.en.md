@@ -2,7 +2,7 @@
 
 - Work Item: BMCP-ARCH-FOLLOWUP-001; Document: BMCP-ARCH-001; Version: 0.2.1
 - Status: CANDIDATE / ARCHITECTURE_PARTIAL — not a frozen protocol specification
-- Main baseline: 477a55e624bcc244dfb65c435bc8d03f718b1e2a
+- Main baseline: 59c15db9c0ea13f86b05b1f30ab0b4973a49e4dd
 - H source snapshot: session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74
 - Peers: [中文版本](BMCP-ARCH-001.zh-CN.md) | [English](BMCP-ARCH-001.en.md)
 - Scope: architecture semantics, phase boundaries, dependency map, acceptance plan and engineering handoff.
@@ -18,11 +18,11 @@ The merged Owner semantic decision approves Fact/Claim Option A + I1; exact comp
 
 Issue #7's recorded binding remains IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE. GitHub currently reports Issue #7 CLOSED / not_planned under the Owner phase-closure ruling; this work does not reopen or alter it. Deferral is not Runtime authorization.
 
-**Canonical name:** the repository canonical terminology at `00-governance/terminology.md` defines BMCP as **Brain Memory Context Protocol** (main `477a55e624bcc244dfb65c435bc8d03f718b1e2a`, terminology Blob `b8770fbb58e4fac087698043c40a57531b1d244d`). The initial dispatch phrase “Brain Memory Control Protocol” is non-canonical for this repository and is rejected. H must retain “Context” in protocol documentation; no naming decision remains open.
+**Canonical name:** the repository canonical terminology at `00-governance/terminology.md` defines BMCP as **Brain Memory Context Protocol** (main `59c15db9c0ea13f86b05b1f30ab0b4973a49e4dd`, terminology Blob `b8770fbb58e4fac087698043c40a57531b1d244d`). The initial dispatch phrase “Brain Memory Control Protocol” is non-canonical for this repository and is rejected. H must retain “Context” in protocol documentation; no naming decision remains open.
 
 ## 2. Exact source ledger
 
-Main pins are from fetched origin/main at 477a55e624bcc244dfb65c435bc8d03f718b1e2a. H pins are from H branch session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74.
+Main pins are from fetched origin/main at 59c15db9c0ea13f86b05b1f30ab0b4973a49e4dd. H pins are from H branch session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74.
 
 | Source | Ref | Blob SHA | Status / use |
 |---|---|---|---|
@@ -47,11 +47,11 @@ Main pins are from fetched origin/main at 477a55e624bcc244dfb65c435bc8d03f718b1e
 | docs/en/09-security-governance/security-governance-guide.md | main | 061c5847b3df879eeaf3c71e5eae0bfa162b276a | I Principal/authorization/PermissionEpoch |
 | docs/zh-CN/09-security-governance/security-governance-guide.md | main | 372d27c79dc79d09bcdb0f142c979efdba1c2b6e | I bilingual peer |
 | 07-agent-integration/agent-integration-overview.md | main | 073ff4ddf71fbcaf959107bb06ab724bfa48e63b | C canonical Agent boundary |
-| 07-agent-integration/adapter-capability-tiers.md | main | 09c5932350c48f950ee16f6b246f54e661f0c420 | C capability tiers |
+| 07-agent-integration/adapter-capability-tiers.md | main | ca422000ec98cca543fd96b59710346949f7d82e | C capability tiers |
 | 07-agent-integration/inference-boundary-model.md | main | e2d5cb6abd9ec40da6e3680531de5944fc8b14df | C inference boundary |
 | 07-agent-integration/telemetry-model.md | main | 9bb4a77e4bd79caaf3e1faeaf77c6b42858998f0 | C telemetry |
 | 14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md | main | d59756a8eb454480804c482ca03c68345ab5abf2 | Approved semantic decision; Option A + I1 |
-| PR #436 protocol index/provider_outcome tests | PR head 1ffed9ed127df98b2f823a66ec80ea43d08cb9dc | open, not merged | structural-only provider outcome evidence |
+| PR #436 protocol index/provider_outcome tests | PR head 1ffed9ed127df98b2f823a66ec80ea43d08cb9dc; merge commit 02f61194fd4e12993b4c83f7fac8382eee20f5d8 | merged into main | structural-only provider outcome evidence; 5 pass / 5 semantic skips |
 | C family boundary decision | PR #430 comment 7060351480; Issue #449 comment 7060126722 | Owner-delegate decision; no independent human C signature claimed | Family direction decided; exact H operation registry/C-H mapping remains OPEN |
 | B domain-model-overview.md | B branch session-b-domain-model-phase3 @ 840202a98cf40a0b3f194afb84bed4d5f3326658 | Blob 4d1debc0ec19b3917f9e76d04bb66da4df4cd346 | B accepts Option A + I1; source reconciliation pending |
 | D memory-versioning.md | D branch session-d-memory-brain-2026-11-16 @ b525e1f8fee2471a131e4a38efda99804045e424 | Blob af747f339d03bdd4684b6ed60fca05957dc8e1fb | D identity/revision/ConflictSet boundary; schema/currentness gate open |
@@ -483,8 +483,8 @@ Every row is a future Runtime requirement. No test below was executed by this wo
 ### 8.1 Existing conformance evidence — bounded, not full-protocol PASS
 
 - Main `c138654c942dc93b5a36eccb2ff0e41452156429`: `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v` — **30 passed, 0 failed**, exit 0. This is the Applied Delivery Evidence conformance suite only.
-- Open PR #436 exact head `1ffed9ed127df98b2f823a66ec80ea43d08cb9dc`: `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/provider_outcome -p 'test_*.py' -v` — **10 run; 5 passed; 5 skipped; 0 failed**, exit 0. Skipped CPO-02/04/05/09/10 explicitly require Owner C's authoritative semantic validator. This is structural schema conformance only; it does not validate C semantics or cryptographic signatures.
-- PR #436's bilingual protocol index and provider_outcome test are still an open PR, not mainline integration. Its index marks RecoveryJoin 1.0.2 schema/validator/test as not delivered.
+- PR #436 (merged at `02f61194fd4e12993b4c83f7fac8382eee20f5d8`), source head `1ffed9ed127df98b2f823a66ec80ea43d08cb9dc`: `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/provider_outcome -p 'test_*.py' -v` — **10 run; 5 passed; 5 skipped; 0 failed**, exit 0. Skipped CPO-02/04/05/09/10 explicitly require Owner C's authoritative semantic validator. This is structural schema conformance only; it does not validate C semantics or cryptographic signatures.
+- PR #436's bilingual protocol index and provider_outcome test are now integrated into main. Its index still marks RecoveryJoin 1.0.2 schema/validator/test as not delivered; five semantic test methods remain skipped pending C's authoritative validator.
 - These results do not establish full BMCP conformance. The strict JSON parser is a reference model, not production transport. `tests/protocol_test.rs` and `crates/bmcp` are absent.
 - AT-01..AT-20 remain **PLANNED_NOT_RUN**. No Runtime repository/authorization exists in this architecture phase.
 
@@ -524,7 +524,7 @@ Issue #7 is currently CLOSED / not_planned under the Owner phase-closure ruling;
 - Issue #7: CLOSED / not_planned; body retains `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`. Not edited.
 - Issue #3: CLOSED / not_planned as superseded. Its historical body says Applied Contract Frozen = NO and Test Executed / Passed = NO / NO; closure does not prove a new BMCP core freeze.
 - Issue #43: closed as superseded by Owner phase-closure ruling. This work is an architecture handoff, not Runtime implementation.
-- Main baseline at this refresh: `477a55e624bcc244dfb65c435bc8d03f718b1e2a`; H source branch re-read at `session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74`; seven H Blob pins were re-fetched and are unchanged.
+- Main baseline at this refresh: `59c15db9c0ea13f86b05b1f30ab0b4973a49e4dd` (main advanced 39 commits beyond the Owner comment's `477a55e624bcc244dfb65c435bc8d03f718b1e2a` pin before this update); H source branch re-read at `session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74`; seven H Blob pins were re-fetched and are unchanged.
 - PR #443 is CLOSED / unmerged; PR #445 is merged. Main bilingual structural gate has 89 frozen / 0 new gaps at the fc1717 baseline; this is not semantic parity or whole-tree document-adoption PASS.
 - PR #425 is CLOSED WITHOUT MERGE. Its 10/10 Python result is historical reference evidence only; E's five-stage Rust pipeline is the sole reference implementation. PR #427 merged the local SQLite Admission reference layer; at merge `8c58d4c679cdddfb30c4d9cae4d71302e95fb1a5`, `cargo test --offline -p memory-compiler` measured 19 passed / 0 failed. This is reference-crate evidence, not production Runtime conformance.
 - Owner decisions: PR #446 merged (Option A + I1); B/D/I role decisions are PR #429 comments 7060251435 / 7060243632 / 7060259541; H scope correction is PR #428 comment 7060264372. All are consolidated-delegate decisions; independence is not claimed.
@@ -539,7 +539,7 @@ Issue #7 is currently CLOSED / not_planned under the Owner phase-closure ruling;
 
 | Document / version | English path | Chinese path | Source revision | Parity |
 |---|---|---|---|---|
-| BMCP-ARCH-001 / 0.2.1 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main 477a55e624bcc244dfb65c435bc8d03f718b1e2a; H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74; B/D/I owner pins in §2/§7 | Owner-delegate semantic review; independent parity review not claimed |
+| BMCP-ARCH-001 / 0.2.1 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main 59c15db9c0ea13f86b05b1f30ab0b4973a49e4dd; H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74; B/D/I owner pins in §2/§7 | Owner-delegate semantic review; independent parity review not claimed |
 
 The coverage register records this as a review/handoff pair only. It does not change “BMCP Protocol detailed contracts (7 core specifications)”; bilingual normative core-spec coverage remains NOT STARTED.
 
