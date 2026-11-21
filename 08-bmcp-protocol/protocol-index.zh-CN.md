@@ -41,7 +41,7 @@ provider_outcome 测试套件只针对固定的 C 所有 Draft 2020-12 schema �
 | CPO-09 — high-water exceeded | `COwnerLocalSequence > COwnerHighWater` 无效 | C 权威 Ledger/High-Water 证明，包含 Ledger 身份、sequence namespace、root/version、签名和当前性；将记录序号绑定到该权威 cutoff 的验证器 |
 | CPO-10 — request digest conflict | C 记录的 `RequestDigest` 与实际最终请求边界的 digest 冲突 | C 的规范化/digest profile、权威最终边界字节或不可变边界证明，以及重新计算/绑定 wire digest 的验证器。Fixture 的 `wire_request_digest` 是向量上下文，不是 CSubmitOutcome schema 属性 |
 
-针对上述五个向量，Owner C 必须发布版本化规范 Outcome/验证契约、等价于 `validate_c_submit_outcome(record, context) -> VALID | INVALID | UNKNOWN` 的权威可调用接口、该函数使用的证据/证明格式及 trust/key/ledger 验证接口，以及带预期结果的原始正反向 fixtures。只有函数桩而没有权威契约和证据输入是不够的。
+针对上述五个向量，Owner C 必须发布版本化规范 Outcome/验证契约、等价于 `validate_c_submit_outcome(record, context)` 的权威可调用接口、该函数使用的证据/证明格式及 trust/key/ledger 验证接口，以及带预期结果的原始正反向 fixtures。其结果契约必须把三态验证（`VALID`/`INVALID`/`UNKNOWN`）与 Provider observation disposition、终局性/协调状态分开表达；仅返回 Boolean 或三态不足以表达 CPO-02 的 `VALID_AS_OBSERVATION_NOT_TERMINAL`，也不足以区分 CPO-04 与 CPO-05。精确结果 schema 由 C 定义。只有函数桩而没有权威契约和证据输入是不够的。
 
 不依赖 C 的 BMCP 本地 Validator 可以检查：
 - Draft 2020-12 schema 有效性、必填字段、类型、枚举、未知成员和 schema 中依赖 Outcome 的结构规则；
