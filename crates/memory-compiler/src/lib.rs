@@ -2,6 +2,7 @@
 //! Pure Rust. No database, network, model-provider or authorization implementation.
 //! Production authority integrations are explicit traits and remain unimplemented.
 
+#[cfg(feature = "sqlite")]
 pub mod admission;
 
 use std::collections::BTreeSet;
