@@ -15,16 +15,26 @@
 # 本文件是门禁无法自行推导的独立依据。会计恒等式只能证明扫描集内部没有文件被丢弃，
 # 不能证明扫描集本身正确；遗漏只能靠本表暴露。
 #
-# Two kinds of exclusion, never blurred (policy section 2):
-#   not-documentation : makes no architecture claim, so no classification applies
-#   not-yet-migrated  : is architecture documentation, is backlog, is a named gap
-# Every entry below is `not-documentation`. `not-yet-migrated` is a gap the
-# policy must name, not an exclusion it may grant itself.
-# 两类排除，不得混淆（条例第 2 节）：
-#   not-documentation ：不作出架构主张，因此不适用分类
-#   not-yet-migrated  ：本属架构文档，属积压，是必须点名的缺口
-# 下列全部为 `not-documentation`。`not-yet-migrated` 是条例必须点名的缺口，
-# 而不是它可以自行授予的排除。
+# Three states, and only the first is an exemption (policy section 2):
+#   governed          : scanned, must carry metadata
+#   backlog           : scanned, counted, may lack metadata; the count is a claim
+#                       the gate checks against the disk
+#   excluded          : not scanned; must be `not-documentation` and say why
+#
+# `not-yet-migrated` used to be a fourth, as an exclusion kind. That was wrong
+# and the gate now rejects it: backlog is the opposite of an exemption, and
+# letting it be declared as one made "we have not classified these" identical to
+# "these are not architecture". A directory whose documents are architecture
+# goes in `backlog:` with a count, never in `excluded:` with a reason.
+# 三种状态，只有第一种是豁免（条例第 2 节）：
+#   governed ：被扫描，必须带元数据
+#   backlog  ：被扫描、被计数，可缺元数据；计数是门禁会与磁盘核对的声明
+#   excluded ：不被扫描；必须是 `not-documentation` 并给出理由
+#
+# `not-yet-migrated` 曾是第四种（作为排除类型），这是错的，门禁现已拒绝它：
+# 积压是豁免的反面，把它声明为排除，会使"我们还没分类这些"与"这些不是架构"
+# 完全等同。文档属于架构的目录应进入 `backlog:` 并给出计数，绝不进入
+# `excluded:` 给一个理由。
 
 registry_version: "2"
 
@@ -56,19 +66,53 @@ governed:
 governed_files:
   - docs/governance/documentation-gaps.md
 
+# Backlog: architecture documents that ARE scanned and ARE counted, and simply
+# have not been classified yet. This is not a third kind of exclusion -- it is
+# the opposite of one. DM-14 requires a document count per entry, so the number
+# is a claim the gate can check against the file system, and a gate run reports
+# it as unclassified rather than hiding it behind a reason.
+# 积压：**会被扫描、会被计数**、只是尚未分类的架构文档。这不是第三种排除，而是
+# 排除的反面。DM-14 要求每项声明文档数，使该数字成为门禁可与文件系统核对的声明，
+# 并且门禁运行会把它报为未分类，而不是用一句理由把它藏起来。
+backlog:
+  docs:
+    documents: 26
+    # This is backlog, not an exemption. 26 Markdown files under docs/ (outside
+    # the bilingual mirrors) are architecture documents: MINIMUM-RUNNABLE-
+    # ARCHITECTURE, CANONICAL-TRANSACTION, SOURCE-OF-TRUTH, CONFLICT-REGISTER,
+    # the CONTEXT-APPLIED and FORGET-AUTHORIZATION contracts, the convergence
+    # and product-first research programmes. Most say `DRAFT / NON-NORMATIVE`
+    # in their own header, and that is exactly why they belong here: `Draft` is
+    # a value of `lifecycle.approval.decision_status`, not a reason to be
+    # excluded from classification. Excluding them made "we have not classified
+    # these" indistinguishable from "these are not architecture", which is the
+    # one thing this registry must never allow.
+    #
+    # Three exceptions inside docs/:
+    #   docs/en, docs/zh-CN        governed mirrors, appended to NORMATIVE_ROOTS
+    #   docs/governance/documentation-gaps.md   governed individually below
+    # Everything else under docs/ is backlog with a known count, which is a
+    # number that can go down. `kind: not-yet-migrated` requires exactly that.
+    # 这是积压，不是豁免。docs/ 下（双语镜像之外）的 26 个 Markdown 是架构文档：
+    # 最小可运行架构、规范事务、事实源清单、冲突登记、上下文应用与遗忘授权契约、
+    # 收敛与产品优先研究。它们大多在自身头部写着 `DRAFT / NON-NORMATIVE`，而这正是
+    # 它们该在此处的原因：`Draft` 是 `lifecycle.approval.decision_status` 的取值，
+    # 不是免于分类的理由。把它们排除，会使"我们还没分类这些"与"这些不是架构"变得
+    # 无法区分，而后者是本登记表绝不能允许的事。
+    reason: "Backlog with a known count: 26 architecture documents under docs/ outside the mirrors and the gap record, all unclassified. Not an exemption -- DM-14 reports this kind separately so the number is visible and can decrease."
+    reason_zh: "有明确数量的积压：docs/ 下镜像与缺口记录之外的 26 份架构文档，均未分类。这不是豁免——DM-14 单独报告该类别，使这个数字可见且可下降。"
+
 excluded:
 
-  docs:
+  ".github":
     kind: not-documentation
-    # docs/governance/documentation-gaps.md is the one governed file here: this
-    # policy cites it in three places as the record of what remains unclosed,
-    # and a governance record that could drift outside governance would defeat
-    # its own purpose. It is listed under `governed_files` above.
-    # docs/governance/documentation-gaps.md 是本目录中唯一受治理的文件：本条例
-    # 三处引用它作为尚未闭合事项的记录，而一份能漂移到治理之外的治理记录会自毁
-    # 其目的。它登记在上方 `governed_files` 中。
-    reason: "Only the bilingual mirrors docs/en and docs/zh-CN are governed; the gate appends them to NORMATIVE_ROOTS. docs/research, docs/glossary, docs/architecture-convergence and the loose pages are not architecture documents and carry no normative claims."
-    reason_zh: "仅双语镜像 docs/en 与 docs/zh-CN 受治理（门禁将其追加进 NORMATIVE_ROOTS）。docs/research、docs/glossary、docs/architecture-convergence 及散页不是架构文档，不承载规范性主张。"
+    reason: "CI configuration and issue/PR templates. They describe how the repository is checked, not what the architecture is; a workflow file makes no architectural claim."
+    reason_zh: "CI 配置与 issue/PR 模板。它们描述仓库如何被检查，而不是架构本身是什么；工作流文件不作出架构主张。"
+
+  ".governance":
+    kind: not-documentation
+    reason: "Machine-readable policy inheritance record (GOV-DOC-001-inheritance.json). It is evidence that a policy version was inherited at a commit, not a document that states an architecture."
+    reason_zh: "机器可读的策略继承记录（GOV-DOC-001-inheritance.json）。它是某策略版本在某提交被继承的证据，不是陈述架构的文档。"
 
   reviews:
     kind: not-documentation

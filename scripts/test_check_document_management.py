@@ -293,7 +293,7 @@ def run_resolver() -> None:
 # 4. Repository-wide rules
 # --------------------------------------------------------------------------
 
-def registry_text(governed, excluded=("tools",), files=None) -> str:
+def registry_text(governed, excluded=("tools",), files=None, backlog=None) -> str:
     """A scope registry matching the gate's own enforced roots.
 
     Built from NORMATIVE_ROOTS rather than hard-coded, so the fixture stays
@@ -302,21 +302,27 @@ def registry_text(governed, excluded=("tools",), files=None) -> str:
     """
     if files is None:
         files = GOVERNED_FILES
+    if backlog is None:
+        backlog = {"docs": 1}
     lines = ['registry_version: "2"', "", "governed:"]
     lines += [f"  - {name}" for name in governed]
     lines += ["", "governed_files:"]
     lines += [f"  - {rel}" for rel in files]
-    lines += ["", "excluded:", ""]
+    lines += ["", "backlog:", ""]
+    for name, count in backlog.items():
+        lines.append(f"  {name}:")
+        lines.append(f"    documents: {count}")
+        lines.append('    reason: "architecture documents not yet classified"')
+        lines.append('    reason_zh: "尚未分类的架构文档"')
+        lines.append("")
+    lines.append("excluded:")
+    lines.append("")
     for name in excluded:
         lines.append(f"  {name}:")
         lines.append("    kind: not-documentation")
         lines.append('    reason: "not documentation"')
         lines.append('    reason_zh: "非文档"')
         lines.append("")
-    lines.append("  docs:")
-    lines.append("    kind: not-documentation")
-    lines.append('    reason: "mirrors and one governed file only"')
-    lines.append('    reason_zh: "仅镜像与一个受治理文件"')
     return "\n".join(lines) + "\n"
 
 def gate_roots():
@@ -350,6 +356,11 @@ def _repo(tmp: str) -> Path:
         target = root / rel
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(doc(BASE), encoding="utf-8")
+    # A backlog root must contain the documents the registry claims. DM-14
+    # compares the declared count to the disk, so an empty backlog directory
+    # would fail the fixture before the test it belongs to ran.
+    (root / "docs" / "research").mkdir(parents=True, exist_ok=True)
+    (root / "docs" / "research" / "backlog.md").write_text(doc(BASE), encoding="utf-8")
     return root
 
 
@@ -404,9 +415,9 @@ def run_repository_rules() -> None:
         # smaller total that nobody questions.
         record(
             "T21 governed count equals classified plus unclassified",
-            len(governed_files(root)) == 2 + len(GOVERNED_FILES),
+            len(governed_files(root)) == 3 + len(GOVERNED_FILES),
             f"  governed {len(governed_files(root))}, "
-            f"expected {2 + len(GOVERNED_FILES)} (2 written + "
+            f"expected {3 + len(GOVERNED_FILES)} (2 written + 1 backlog + "
             f"{len(GOVERNED_FILES)} fixture governed files)",
         )
 
@@ -571,6 +582,28 @@ def run_changed_paths() -> None:
         (root / "00-governance" / "new policy.md").write_text("# no metadata\n", encoding="utf-8")
         expect_gate(
             "T01 spaced filename without metadata fails",
+            root, 1, "--require-changed", base,
+        )
+
+    # S1-03: deleting metadata from an already-classified file. The increment
+    # only requires metadata on changed files, so the question is whether a
+    # removal counts as a change. It must: otherwise the cheapest way to escape
+    # the gate would be to delete the block that proves you complied.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        victim = root / "00-governance" / "was-classified.md"
+        victim.write_text(doc(BASE), encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "seed")
+        base = _git(root, "rev-parse", "HEAD")
+        victim.write_text("# metadata deleted\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "strip metadata")
+        expect_gate(
+            "T48 removing metadata from a classified file fails the increment",
             root, 1, "--require-changed", base,
         )
 
@@ -919,8 +952,9 @@ def run_scope_registry() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
         (root / "00-governance" / "document-scope-registry.yaml").write_text(
-            registry_text(governed, excluded=()) .replace(
-                "  docs:", "  tools:\n    reason_zh: \"非文档\"\n\n  docs:"
+            registry_text(governed, excluded=("tools",)).replace(
+                '  tools:\n    kind: not-documentation\n    reason: "not documentation"\n',
+                "  tools:\n    kind: not-documentation\n",
             ),
             encoding="utf-8",
         )
@@ -1516,6 +1550,105 @@ def run_symlink_boundary() -> None:
         record("T37 governed_files does not descend into a symlinked root",
                "leaked.md" not in scanned,
                f"  scanned {sorted(scanned)}")
+
+    # R1-01: a governed FILE that is a symlink. The registry check used
+    # `is_file()`, which follows links, so it passed; the scanner skipped
+    # symlinks, so the file was never scanned. Declared and enforced sets
+    # disagreed, and the gate reported zero governed documents.
+    with tempfile.TemporaryDirectory() as tmp, tempfile.TemporaryDirectory() as outside:
+        root = _repo(tmp)
+        victim = Path(outside) / "gaps.md"
+        victim.write_text(doc(BASE), encoding="utf-8")
+        for rel in gate.GOVERNED_FILES:
+            target = root / rel
+            target.unlink()
+            try:
+                target.symlink_to(victim)
+            except (OSError, NotImplementedError):
+                record("T41 symlinked governed file is rejected", True,
+                       "  (symlinks unavailable; skipped)")
+                return
+        errors = gate.check_scope_registry(root)
+        record("T41 symlinked governed file is rejected",
+               any("not a regular file inside the repository" in e for e in errors),
+               f"  got {errors}")
+
+    # R1-01b: the file is regular, but its PARENT is a link out of the repo.
+    # `is_symlink()` on the final component cannot see this; containment is
+    # proven on the resolved path instead.
+    with tempfile.TemporaryDirectory() as tmp, tempfile.TemporaryDirectory() as outside:
+        root = _repo(tmp)
+        victim_dir = Path(outside) / "governance"
+        victim_dir.mkdir()
+        (victim_dir / "documentation-gaps.md").write_text(doc(BASE), encoding="utf-8")
+        parent = root / "docs" / "governance"
+        import shutil
+        shutil.rmtree(parent)
+        try:
+            parent.symlink_to(victim_dir, target_is_directory=True)
+        except (OSError, NotImplementedError):
+            record("T42 governed file reached through a symlinked parent is rejected",
+                   True, "  (symlinks unavailable; skipped)")
+            return
+        errors = gate.check_scope_registry(root)
+        record("T42 governed file reached through a symlinked parent is rejected",
+               any("not a regular file inside the repository" in e for e in errors),
+               f"  got {errors}")
+
+    # R1-02: a hidden top-level directory. Excluding dot-directories from the
+    # on-disk set meant `.new-architecture/` was neither governed, excluded,
+    # reported, nor scanned.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        hidden = root / ".new-architecture"
+        hidden.mkdir()
+        (hidden / "design.md").write_text(doc(BASE), encoding="utf-8")
+        errors = gate.check_scope_registry(root)
+        record("T43 hidden top-level directory must be accounted for",
+               any(".new-architecture" in e for e in errors),
+               f"  got {errors}")
+
+    # `.git` is the one structural exception: present in every clone, absent in
+    # every export, so requiring it in a tracked file would describe the working
+    # copy rather than the repository.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / ".git").mkdir()
+        errors = gate.check_scope_registry(root)
+        record("T44 .git is structurally exempt from the registry",
+               not any(".git" in e for e in errors),
+               f"  got {errors}")
+
+    # Backlog must be a number, not a sentence: a declared count that disagrees
+    # with the disk is how "26 documents remain" quietly becomes false.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "00-governance" / "document-scope-registry.yaml").write_text(
+            registry_text(ENFORCED_ROOTS, backlog={"docs": 99}), encoding="utf-8"
+        )
+        errors = gate.check_scope_registry(root)
+        record("T45 backlog count disagreeing with the disk is an error",
+               any("declares 99 documents" in e for e in errors),
+               f"  got {errors}")
+
+    # And it must be a count, not free text.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "00-governance" / "document-scope-registry.yaml").write_text(
+            registry_text(ENFORCED_ROOTS, backlog={"docs": "many"}), encoding="utf-8"
+        )
+        errors = gate.check_scope_registry(root)
+        record("T46 backlog count that is not an integer is an error",
+               any("non-negative integer" in e for e in errors),
+               f"  got {errors}")
+
+    # A backlog directory is scanned. Otherwise declaring it would be the same
+    # silent exclusion the registry exists to prevent, under a friendlier name.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        scanned = {p.name for p in gate.governed_files(root)}
+        record("T47 backlog documents are actually scanned",
+               "backlog.md" in scanned, f"  scanned {sorted(scanned)}")
 
 def main() -> int:
     print("check_document_management self-check")
