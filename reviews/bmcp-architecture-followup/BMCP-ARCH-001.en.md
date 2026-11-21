@@ -1,8 +1,8 @@
 # BMCP Architecture Completion — Semantic Contract & Engineering Handoff
 
-- Work Item: BMCP-ARCH-FOLLOWUP-001; Document: BMCP-ARCH-001; Version: 0.2.1
+- Work Item: BMCP-ARCH-FOLLOWUP-001; Document: BMCP-ARCH-001; Version: 0.2.2
 - Status: CANDIDATE / ARCHITECTURE_PARTIAL — not a frozen protocol specification
-- Main baseline: 59c15db9c0ea13f86b05b1f30ab0b4973a49e4dd
+- Main baseline: 0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0
 - H source snapshot: session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74
 - Peers: [中文版本](BMCP-ARCH-001.zh-CN.md) | [English](BMCP-ARCH-001.en.md)
 - Scope: architecture semantics, phase boundaries, dependency map, acceptance plan and engineering handoff.
@@ -18,15 +18,15 @@ The merged Owner semantic decision approves Fact/Claim Option A + I1; exact comp
 
 Issue #7's recorded binding remains IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE. GitHub currently reports Issue #7 CLOSED / not_planned under the Owner phase-closure ruling; this work does not reopen or alter it. Deferral is not Runtime authorization.
 
-**Canonical name:** the repository canonical terminology at `00-governance/terminology.md` defines BMCP as **Brain Memory Context Protocol** (main `59c15db9c0ea13f86b05b1f30ab0b4973a49e4dd`, terminology Blob `b8770fbb58e4fac087698043c40a57531b1d244d`). The initial dispatch phrase “Brain Memory Control Protocol” is non-canonical for this repository and is rejected. H must retain “Context” in protocol documentation; no naming decision remains open.
+**Canonical name:** the repository canonical terminology at `00-governance/terminology.md` defines BMCP as **Brain Memory Context Protocol** (main `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0`, terminology Blob `b8770fbb58e4fac087698043c40a57531b1d244d`). The initial dispatch phrase “Brain Memory Control Protocol” is non-canonical for this repository and is rejected. H must retain “Context” in protocol documentation; no naming decision remains open.
 
 ## 2. Exact source ledger
 
-Main pins are from fetched origin/main at 59c15db9c0ea13f86b05b1f30ab0b4973a49e4dd. H pins are from H branch session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74.
+Current main source pins are from fetched origin/main at 0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0. Historical decision/test evidence is separately labeled with its original commit where applicable. H pins are from H branch session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74.
 
 | Source | Ref | Blob SHA | Status / use |
 |---|---|---|---|
-| docs/en/08-bmcp-protocol/bmcp-guide.md | main | 228d28671955c977f653bef5b537554e431f9137 | CANDIDATE overview / H ownership |
+| docs/en/08-bmcp-protocol/bmcp-guide.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | 228d28671955c977f653bef5b537554e431f9137 | CANDIDATE overview / H ownership |
 | 08-bmcp-protocol/protocol-overview.md | H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74 | b88ef3a6fd3be293e7c2e77d9652f386b169bc47 | CANDIDATE |
 | 08-bmcp-protocol/message-envelope-and-versioning.md | same H ref | 5547ecd78d118bd63e571e5daad87194d9b694e4 | CANDIDATE; H-owned |
 | 08-bmcp-protocol/context-delivery-and-acknowledgement.md | same H ref | bf9732cc39d156853b507c3a3a4e573159978f49 | CANDIDATE; G semantics / H wire |
@@ -34,23 +34,23 @@ Main pins are from fetched origin/main at 59c15db9c0ea13f86b05b1f30ab0b4973a49e4
 | 08-bmcp-protocol/phase-3.7-h-lifecycle-handoff-envelope-semantics-not-frozen.md | same H ref | b2a2648d5576511f68fdb9d87ce4388a1fedd5e9 | NOT FROZEN |
 | 08-bmcp-protocol/protocol-conformance-matrix.md | same H ref | 075b2ac6ebe9bda4ec83de04fad07e8027e6a440 | CANDIDATE tests; no Runtime PASS |
 | 08-bmcp-protocol/runtime_reference/strict_json_parser.py | same H ref | 3b9b3da645448c773c95a9dcd3c57c8c109bb2da | Reference model, not production transport |
-| docs/en/04-memory-compiler/README.md | main | 5f50d470bf26d46dfffad48ad23059fc7a36c489 | E/D/I ownership |
-| docs/en/04-memory-compiler/compiler-overview.md | main | c89a256afda105ceac3db75d743ab58d177ef586 | E pipeline |
-| docs/en/04-memory-compiler/accepted-receipt-and-idempotency-contract.md | main | f2a4007f4b17e33de9bcd183c57ee504cfeef6cd | CANDIDATE E receipt |
-| docs/en/07-agent-integration/agent-integration-guide.md | main | c4e076887634a9e8e46df076efb0f4b70d816e0a | C-owned Agent boundary |
-| docs/en/03-memory-brain/forget-fence-and-completion-contract.md | main | c791895333ab6140f035f4f622d5dee9325d422d | D/I Forget boundary |
-| docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md | main | 9c054932994bb078e2834df8bd66f73895aa04f5 | D lifecycle/Fence |
-| 13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md | main | 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593 | historical ADR; semantic decision superseded; consumer mapping Candidate |
-| 14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md | main @ `c138654c942dc93b5a36eccb2ff0e41452156429` | Blob `d59756a8eb454480804c482ca03c68345ab5abf2` | Approved Owner semantic selection: Option A + I1; does not freeze schema |
-| docs/en/03-memory-brain/memory-versioning.md | main | 4efbd26db9586f6fcf1897f42ffba287d625b903 | D revision/consumer freeze boundary |
-| docs/en/03-memory-brain/commit-cursor-semantics.md | main | 2de7fe35229372ae5b06093e5e031c2c243fbd7c | D cursor semantics |
-| docs/en/09-security-governance/security-governance-guide.md | main | 061c5847b3df879eeaf3c71e5eae0bfa162b276a | I Principal/authorization/PermissionEpoch |
-| docs/zh-CN/09-security-governance/security-governance-guide.md | main | 372d27c79dc79d09bcdb0f142c979efdba1c2b6e | I bilingual peer |
-| 07-agent-integration/agent-integration-overview.md | main | 073ff4ddf71fbcaf959107bb06ab724bfa48e63b | C canonical Agent boundary |
-| 07-agent-integration/adapter-capability-tiers.md | main | ca422000ec98cca543fd96b59710346949f7d82e | C capability tiers |
-| 07-agent-integration/inference-boundary-model.md | main | e2d5cb6abd9ec40da6e3680531de5944fc8b14df | C inference boundary |
-| 07-agent-integration/telemetry-model.md | main | 9bb4a77e4bd79caaf3e1faeaf77c6b42858998f0 | C telemetry |
-| 14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md | main | d59756a8eb454480804c482ca03c68345ab5abf2 | Approved semantic decision; Option A + I1 |
+| docs/en/04-memory-compiler/README.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | 5f50d470bf26d46dfffad48ad23059fc7a36c489 | E/D/I ownership |
+| docs/en/04-memory-compiler/compiler-overview.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | c89a256afda105ceac3db75d743ab58d177ef586 | E pipeline |
+| docs/en/04-memory-compiler/accepted-receipt-and-idempotency-contract.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | f2a4007f4b17e33de9bcd183c57ee504cfeef6cd | CANDIDATE E receipt |
+| docs/en/07-agent-integration/agent-integration-guide.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | c4e076887634a9e8e46df076efb0f4b70d816e0a | C-owned Agent boundary |
+| docs/en/03-memory-brain/forget-fence-and-completion-contract.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | c791895333ab6140f035f4f622d5dee9325d422d | D/I Forget boundary |
+| docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | 9c054932994bb078e2834df8bd66f73895aa04f5 | D lifecycle/Fence |
+| 13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593 | historical ADR; semantic decision superseded; consumer mapping Candidate |
+| 14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` (approval origin `c138654c942dc93b5a36eccb2ff0e41452156429`) | Blob `d59756a8eb454480804c482ca03c68345ab5abf2` | Current source pin; Owner semantic approval is historical evidence (Option A + I1), not schema freeze |
+| docs/en/03-memory-brain/memory-versioning.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | 4efbd26db9586f6fcf1897f42ffba287d625b903 | D revision/consumer freeze boundary |
+| docs/en/03-memory-brain/commit-cursor-semantics.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | 2de7fe35229372ae5b06093e5e031c2c243fbd7c | D cursor semantics |
+| docs/en/09-security-governance/security-governance-guide.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | 061c5847b3df879eeaf3c71e5eae0bfa162b276a | I Principal/authorization/PermissionEpoch |
+| docs/zh-CN/09-security-governance/security-governance-guide.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | 372d27c79dc79d09bcdb0f142c979efdba1c2b6e | I bilingual peer |
+| 07-agent-integration/agent-integration-overview.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | 073ff4ddf71fbcaf959107bb06ab724bfa48e63b | C canonical Agent boundary |
+| 07-agent-integration/adapter-capability-tiers.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | ca422000ec98cca543fd96b59710346949f7d82e | C capability tiers |
+| 07-agent-integration/inference-boundary-model.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | e2d5cb6abd9ec40da6e3680531de5944fc8b14df | C inference boundary |
+| 07-agent-integration/telemetry-model.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | 9bb4a77e4bd79caaf3e1faeaf77c6b42858998f0 | C telemetry |
+| 14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md | main @ `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` | d59756a8eb454480804c482ca03c68345ab5abf2 | Approved semantic decision; Option A + I1 |
 | PR #436 protocol index/provider_outcome tests | PR head 1ffed9ed127df98b2f823a66ec80ea43d08cb9dc; merge commit 02f61194fd4e12993b4c83f7fac8382eee20f5d8 | merged into main | structural-only provider outcome evidence; 5 pass / 5 semantic skips |
 | C family boundary decision | PR #430 comment 7060351480; Issue #449 comment 7060126722 | Owner-delegate decision; no independent human C signature claimed | Family direction decided; exact H operation registry/C-H mapping remains OPEN |
 | H confirmation scope correction | PR #428 comment 7060351041; H scope correction comment 7060264372 | Owner-delegate logical choices only; INDEPENDENCE_UNVERIFIABLE | H-CONFIRM-001..004 each PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN |
@@ -525,7 +525,7 @@ Issue #7 is currently CLOSED / not_planned under the Owner phase-closure ruling;
 - Issue #7: CLOSED / not_planned; body retains `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`. Not edited.
 - Issue #3: CLOSED / not_planned as superseded. Its historical body says Applied Contract Frozen = NO and Test Executed / Passed = NO / NO; closure does not prove a new BMCP core freeze.
 - Issue #43: closed as superseded by Owner phase-closure ruling. This work is an architecture handoff, not Runtime implementation.
-- Main baseline at this refresh: `59c15db9c0ea13f86b05b1f30ab0b4973a49e4dd` (main advanced 39 commits beyond the Owner comment's `477a55e624bcc244dfb65c435bc8d03f718b1e2a` pin before this update); H source branch re-read at `session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74`; seven H Blob pins were re-fetched and are unchanged.
+- Current main baseline: `0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0` (the Owner-designated controlling main `0d0c1c6238e4e70a93609070b97fef596873916e` is now an ancestor; main has advanced three commits beyond it, including PR #463 and its follow-up gate-result correction); H source branch re-read at `session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74`; seven H Blob pins were re-fetched and are unchanged.
 - PR #443 is CLOSED / unmerged; PR #445 is merged. Main bilingual structural gate has 89 frozen / 0 new gaps at the fc1717 baseline; this is not semantic parity or whole-tree document-adoption PASS.
 - PR #425 is CLOSED WITHOUT MERGE. Its 10/10 Python result is historical reference evidence only; E's five-stage Rust pipeline is the sole reference implementation. PR #427 merged the local SQLite Admission reference layer; at merge `8c58d4c679cdddfb30c4d9cae4d71302e95fb1a5`, `cargo test --offline -p memory-compiler` measured 19 passed / 0 failed. This is reference-crate evidence, not production Runtime conformance.
 - Owner decisions: PR #446 merged (Option A + I1); B/D/I role decisions are PR #429 comments 7060251435 / 7060243632 / 7060259541; H scope correction is PR #428 comment 7060264372. All are consolidated-delegate decisions; independence is not claimed.
@@ -542,7 +542,7 @@ Issue #7 is currently CLOSED / not_planned under the Owner phase-closure ruling;
 
 | Document / version | English path | Chinese path | Source revision | Parity |
 |---|---|---|---|---|
-| BMCP-ARCH-001 / 0.2.1 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main 59c15db9c0ea13f86b05b1f30ab0b4973a49e4dd; H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74; B/D/I owner pins in §2/§7 | Owner-delegate semantic review; independent parity review not claimed |
+| BMCP-ARCH-001 / 0.2.2 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main 0ccdf0a18a0238e076aa21dc4d4b4eef9a2f4bc0; H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74; B/D/I owner pins in §2/§7 | Owner-delegate semantic review; independent parity review not claimed |
 
 The coverage register records this as a review/handoff pair only. It does not change “BMCP Protocol detailed contracts (7 core specifications)”; bilingual normative core-spec coverage remains NOT STARTED.
 
