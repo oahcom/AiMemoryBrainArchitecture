@@ -259,6 +259,41 @@ Attestation Method 身份只能证明调用了哪个声明程序，不能证明�
 
 本节只定义语义和治理契约，不批准物理 Schema、DDL、公开 API、生产密钥、Trust Root 或密码学 Profile。
 
+### 3.16 已裁定：固定 ClaimRevision 撤回后向 FactRevision 的传播
+
+**状态：已由 `OWNER-DECISION-FACT-RETRACTION-001` 裁定 —— 选定候选方案 3（追加一条抑制性修订）。**
+
+一个 FactRevision 固定一个或多个精确的 ClaimRevisionRef。当被固定的某个 ClaimRevision 后续被赋予认知状态 `Retracted` 时，**不得改写**该 FactRevision。受治理的响应方式是：**保持原 FactRevision 不变，追加一条后继 FactRevision**，其 `outcome` 为 `FactOutcome::Revoked`，并在 `correction_or_revocation_reason` 中记录理由。原修订仍可历史寻址与审计；后继修订承载当前处置状态。
+
+本问题与 Forget 不同：撤回改变的是某个 ClaimRevision 的认知状态与历史；Forget 治理的是披露与依赖抑制。
+
+#### 为何依据证据而非偏好选定候选方案 3
+
+曾考虑三种候选语义，只有一种能在既有规范来源下成立：
+
+1. **继续可见 —— 不是一个可选选项。** §8.1 第 3 条已要求 FactRevision「只有在每一项已披露依赖都被独立授权、且未被适用的 Forget 决定抑制时，才可保持可见」。因此 Fact 的可见性本就对所有已披露依赖取合取。在固定依赖已被撤回、且毫无信号的情况下继续呈现该 Fact，描述的是规范**已经禁止**的状态，而不是一个尚未决定的选项。
+
+2. **标记为失效 —— 被本节自身禁止。** 该方案需要在 `FactRevision` 上增加可变的 `retracted` 字段。本节结尾的禁令已排除此做法；此外，可变的处置字段也违反 §3.15 与 `epistemic-and-temporal-semantics.md` §2、§9 所确立的追加式修订不变式——历史修订 MUST NOT 被覆盖。
+
+3. **追加一条抑制性修订 —— 选定。** 该方案**不需要任何新类型**。`FactOutcome::Revoked`、`FactRevision::parent_revision_ref` 与 `FactRevision::correction_or_revocation_reason` 在领域模型中均已存在，且 `FactRevision::successor()` 已强制父级同属一个 `FactRef`。因此本裁定并未引入新词汇，只是为一个已存在、此前不可达的机制命名。
+
+#### 本决定保留的边界
+
+- **撤回不等于 Forget。** 被撤回的 FactRevision 仍可历史读取，其 attestation 仍可审计；被遗忘的 Memory 则变为不可读。二者是作用于不同对象的不同处置，MUST NOT 混同。
+- **传播不是自动的。** 追加后继修订需要一次被授权的调用，且 `correction_or_revocation_reason` 非空。没有任何机制会自动观察到 `Retracted` 状态并自行传播。
+- **原修订永不被改写。** 后继修订是追加的；先前的 FactRevision 按其原始断言完整保留。
+
+#### 本决定刻意未定义的内容
+
+以下事项仍为开放项，实现 MUST NOT 自行推断：
+
+- **触发者** —— 由哪个主体或进程观察到撤回并决定传播，依据何种授权。
+- **范围** —— 一条后继修订覆盖一个固定 ClaimRevision，还是覆盖全部。
+- **混合依赖** —— 当部分固定 ClaimRevision 被撤回、其余未被撤回时的处置。
+- **读取路径行为** —— 被撤回的 FactRevision 相对其前驱如何呈现。
+
+实现 MUST NOT 在 `FactRevision` 上引入 `retracted` 字段，MUST NOT 通过改写既有 `FactRevision` 来表示撤回。后续决定必须同时规定上述四项，以及所需的授权与规范提交证据。
+
 ## 4. 正交状态维度
 
 模型不得使用一个通用 Status 字段承载所有状态。
