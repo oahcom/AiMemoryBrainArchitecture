@@ -1365,3 +1365,93 @@ open queue: a security-relevant check gated by a caller-supplied boolean is not 
 - No CI job has started since billing broke. Every check run still carries the
   spending-limit annotation, so every number above is local execution.
 - GAP-03 and GAP-05 still have no merged code. #507 is the GAP-05 draft at round 4.
+
+## Round six: the spec set is split across two roots, and that distorts every completion percentage
+
+This section records a documentation-governance finding, measured at `main` `665c8869`. It
+is not about any PR. It changes what "X% unimplemented" means in this repository.
+
+### The measurement
+
+Each numbered domain exists in up to three places: `NN-name/` at the repository root,
+`docs/en/NN-name/`, and `docs/zh-CN/NN-name/`. `docs/en/` and `docs/zh-CN/` are exact
+filename mirrors of each other in 12 of 13 domains (the exception is `14-ai-development`,
+7 vs 4). The root directory is **not** the same set as the mirror.
+
+| domain | docs/en | root | only in `docs/en/` | only at root |
+|---|---|---|---|---|
+| 00-governance | 4 | 11 | 1 | 3 |
+| 01-system-architecture | 10 | 7 | 3 | 0 |
+| 02-domain-model | 13 | 12 | 3 | 2 |
+| 03-memory-brain | 14 | **0** | 14 | 0 |
+| 04-memory-compiler | 13 | **2** | 11 | 0 |
+| 05-memory-runtime | 6 | **0** | 6 | 0 |
+| 06-memory-context | 11 | 22 | 2 | 12 |
+| 07-agent-integration | 8 | 7 | 3 | 2 |
+| 08-bmcp-protocol | 3 | **11** | 3 | 8 |
+| 09-security-governance | 1 | **0** | 1 | 0 |
+| 12-testing-and-acceptance | 1 | **0** | 1 | 0 |
+| 13-engineering-decisions | 3 | 3 | 3 | 1 |
+| 14-ai-development | 7 | 35 | 2 | 26 |
+
+### The four cases that matter
+
+**`04-memory-compiler`: 13 in the mirror, 2 at root.** The root has only
+`phase-1-event-store-contract.md` and its `.zh-CN.md`. `compiler-stage-contract.md`,
+`event-ingestion-engine.md`, `evidence-and-provenance.md`,
+`extraction-and-normalization.md`, `consolidation-and-conflict-resolution.md`,
+`compiler-state-and-producer-admission.md` and
+`accepted-receipt-and-idempotency-contract.md` exist **only** in `docs/en/` and
+`docs/zh-CN/`.
+
+Consequence: a reader who opens `04-memory-compiler/` finds two files and concludes the
+compiler is under-specified. The thirteen-file contract set is one directory over. I made
+this exact mistake when briefing the gap-analysis agents this round and had to correct four
+of them mid-flight.
+
+**`03-memory-brain` and `05-memory-runtime`: 14 and 6 files, zero at root.** Read from the
+root, these two domains do not exist at all. Any analysis that walks root directories
+silently omits 20 specification documents.
+
+**`08-bmcp-protocol` is inverted: 3 in the mirror, 11 at root.** `bmcp-guide.md` and
+`adapter-capability-and-applied-attestation.md` are mirror-only; `protocol-index.md`,
+`schema-nonempty-audit.md` and the four `phase-3.8.x` contracts are root-only. A reader who
+reads only the mirror misses the protocol contracts; a reader who reads only the root misses
+the guide.
+
+**`06-memory-context` is root-heavy: 11 in the mirror, 22 at root.** The 12 root-only files
+include `context-implementation-coverage.md`, `context-architecture.md`,
+`context-edit-operations.md` and `context-reconciliation.md`.
+
+### Why this matters, stated plainly
+
+Two distortions follow, both of which I have observed being read as fact:
+
+1. **A missing root file reads as a missing requirement.** `compiler-stage-contract.md` not
+   being at `04-memory-compiler/` does not mean the stage contract is undefined. It means it
+   is at `docs/en/04-memory-compiler/compiler-stage-contract.md`.
+
+2. **A root-only file reads as the whole requirement.** `context-implementation-coverage.md`
+   and `protocol-index.md` are root-only, so they are the two documents most people open —
+   and they are the two documents in which I have found actual defects this week (a test
+   miscount in the first, a baseline/file mismatch in the second). The documents being
+   audited are the root-only ones. The mirrored ones are the ones nobody is reading.
+
+### What is not resolved
+
+The repository does not state which root is authoritative. `14-ai-development` has 35 root
+files and 7 mirrored, which suggests root-first there; `03` and `05` are mirror-only, which
+suggests mirror-first there. The convention is not uniform, and the bilingual gate enforces
+only that mirrors *exist* — it says nothing about which is the source of truth.
+
+This is an open documentation-governance decision, escalated in a comment on #422
+(`7064423207`). Every completion percentage in this document should be read as "computed
+against whichever root the author happened to open".
+
+### One correction to this document's own method
+
+While measuring the above I found that four of the gap-analysis briefs I dispatched this
+round pointed at root directories that are incomplete. Each was corrected mid-flight with
+the mirror path and an instruction to read both roots. The specs those agents produce will
+carry a "Spec location defect" section stating the assumption they make, so that a later
+reader does not inherit an unstated one.
