@@ -37,35 +37,102 @@ PAIR_EXEMPT_PREFIXES = (
 # For 14-ai-development, counterpart pairing applies to prose documents only.
 PAIR_ENFORCED_SUFFIXES = {".md"}
 EXEMPT_SUFFIXES = {".png", ".jpg", ".jpeg", ".svg", ".drawio"}
-# These governance sources intentionally contain both languages in one source file.
-EMBEDDED_BILINGUAL_SOURCES = {
-    "00-governance/bilingual-documentation-policy.md",
-    "14-ai-development/ai-development-standard.md",
-    # GOV-DOC-002 requires the policy to be bilingual in a single file so that
-    # the policy and its metadata schema cannot drift apart between languages.
-    "00-governance/architecture-document-management-policy.md",
-    "00-governance/architecture-document-metadata.schema.yaml",
-    "00-governance/drafts/GOV-DOC-001-v1.2-DRAFT.md",
-    "00-governance/bilingual-governance-migration-register.md",
-    "00-governance/templates/bilingual-issue-template.md",
-    "00-governance/templates/bilingual-umbrella-requirement-template.md",
-    "00-governance/templates/bilingual-commit-message.md",
-    "00-governance/templates/repository-policy-inheritance.md",
-    "00-governance/reports/bilingual-baseline-remediation-report.md",
-    "00-governance/reports/f06-object-reconciliation.md",
-    # 14-ai-development single-file bilingual sources (F-07 explicit
-    # registration so the exemption is documented rather than implied by a
-    # constant gap).
-    "14-ai-development/ai-development-standard.md",
-    "14-ai-development/AI-EXEC-UNIFICATION-RULING-001.md",
-    "14-ai-development/AI-EXEC-INDEPENDENCE-RULING-001.md",
-    "14-ai-development/PR-GOVERNANCE-001.md",
-    "14-ai-development/prompt-and-evidence-template.md",
-    "14-ai-development/prompt-authoring-standard.md",
-    "14-ai-development/iteration-lifecycle.md",
-    "14-ai-development/owner-automation-operating-model.md",
-    "14-ai-development/README.md",
+# Each entry is a reviewed single-file bilingual source. The reason states
+# which shared contract, machine interface, or audit record would drift if
+# the languages were split into independently edited mirror files.
+EMBEDDED_BILINGUAL_SOURCES: dict[str, str] = {
+    "00-governance/bilingual-documentation-policy.md": (
+        "Defines one repository-wide bilingual obligation, parity rules, "
+        "exception fields, and authority boundaries that must remain identical."
+    ),
+    "14-ai-development/ai-development-standard.md": (
+        "Defines shared AI roles, risk classes, task gates, and evidence duties; "
+        "splitting it could make one language authorize different workflows."
+    ),
+    "00-governance/architecture-document-management-policy.md": (
+        "Defines document metadata, lifecycle, approval, and validation rules "
+        "whose field meanings and governance states must stay in one contract."
+    ),
+    "00-governance/architecture-document-metadata.schema.yaml": (
+        "Is the machine-consumed GOV-DOC-002 metadata schema; one YAML source "
+        "keeps parser keys and validation structure canonical across languages."
+    ),
+    "00-governance/drafts/GOV-DOC-001-v1.2-DRAFT.md": (
+        "Records a non-normative policy proposal and its explicit adoption "
+        "limits, so both language renderings preserve the same draft authority."
+    ),
+    "00-governance/bilingual-governance-migration-register.md": (
+        "Tracks bilingual migration classifications, source versions, and "
+        "pending governance decisions as one auditable register."
+    ),
+    "00-governance/templates/bilingual-issue-template.md": (
+        "Provides one shared Issue field layout and bilingual prompts so copied "
+        "records retain identical identifiers and acceptance fields."
+    ),
+    "00-governance/templates/bilingual-umbrella-requirement-template.md": (
+        "Defines the common umbrella-requirement metadata and status fields; "
+        "separate templates could create incompatible requirement records."
+    ),
+    "00-governance/templates/bilingual-commit-message.md": (
+        "Specifies one commit subject syntax with paired language summaries, "
+        "types, and examples that must be copied consistently."
+    ),
+    "00-governance/templates/repository-policy-inheritance.md": (
+        "Defines exact inheritance declaration labels and values consumed by "
+        "governance checks, which must not diverge between language templates."
+    ),
+    "00-governance/reports/bilingual-baseline-remediation-report.md": (
+        "Combines remediation scope, status, and evidence in a single report "
+        "so readers cannot mistake divergent language copies for separate facts."
+    ),
+    "00-governance/reports/f06-object-reconciliation.md": (
+        "Presents one object-level reconciliation with computed counts, SHAs, "
+        "and verdicts that must describe the same audit evidence in both languages."
+    ),
+    "14-ai-development/AI-EXEC-UNIFICATION-RULING-001.md": (
+        "Publishes binding Owner rulings resolving cross-standard conflicts; "
+        "one source prevents the operative decision text from splitting by language."
+    ),
+    "14-ai-development/AI-EXEC-INDEPENDENCE-RULING-001.md": (
+        "States one proposed ruling on session independence and R3 review limits, "
+        "requiring identical proposal status and caveats in both languages."
+    ),
+    "14-ai-development/PR-GOVERNANCE-001.md": (
+        "Defines shared PR lifecycle, review, and integration controls; divergent "
+        "copies could assign different authority to the same repository actions."
+    ),
+    "14-ai-development/prompt-and-evidence-template.md": (
+        "Supplies one Work Item and prompt evidence record structure with stable "
+        "IDs, SHA fields, and acceptance evidence slots."
+    ),
+    "14-ai-development/prompt-authoring-standard.md": (
+        "Defines controlled prompt scope, prohibitions, and evidence requirements "
+        "whose normative force must be equivalent in both languages."
+    ),
+    "14-ai-development/iteration-lifecycle.md": (
+        "Defines the ordered implementation, verification, review, and acceptance "
+        "stages as one shared lifecycle rather than independent language workflows."
+    ),
+    "14-ai-development/owner-automation-operating-model.md": (
+        "Defines the common Issue, PR, and scheduled-task operating model, "
+        "including authority and safety boundaries that cannot vary by language."
+    ),
+    "14-ai-development/README.md": (
+        "Acts as the bilingual governance portal and canonical navigation index; "
+        "a single file keeps entry points and normative-document links synchronized."
+    ),
 }
+for _source, _reason in EMBEDDED_BILINGUAL_SOURCES.items():
+    if not (REPO_ROOT / _source).is_file():
+        sys.stderr.write(
+            f"EMBEDDED_BILINGUAL_SOURCES references missing file: {_source}\\n"
+        )
+        sys.exit(2)
+    if not _reason.strip() or len(_reason.strip()) <= 10:
+        sys.stderr.write(
+            f"EMBEDDED_BILINGUAL_SOURCES has missing or placeholder reason: {_source}\\n"
+        )
+        sys.exit(2)
 ROOT = Path.cwd()
 
 
@@ -501,6 +568,7 @@ def main() -> int:
         print("Bilingual documentation gate: FAIL")
         return 1
 
+    print(f"exemptions: {len(EMBEDDED_BILINGUAL_SOURCES)}")
     print(f"Bilingual documentation and prompt-library gate: PASS ({len(changed)} changed paths inspected).")
     print("This is a structural gate only; semantic parity requires independent review.")
     return 0
