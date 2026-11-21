@@ -1,10 +1,42 @@
+---
+document_metadata:
+  domain: memory-compiler
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Owner authorized this root source/mirror topology in PR #429 comment 7061562608; content acceptance, bilingual semantic parity, independent review and CI remain pending."
+    usage_status: Active
+    modification_status: Modified
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Memory Compiler design specification: extraction-normalization"
+    canonical_scope_id: memory-compiler/extraction-normalization
+    canonical_scope_keywords:
+      - extraction-ir
+      - candidate-proposition
+      - normalization
+      - evidence
+      - scope
+    canonical_conflict_status: None
+    normative_status: Normative
+  bilingual_counterpart:
+    source: "04-memory-compiler/extraction-and-normalization.md"
+    en: "docs/en/04-memory-compiler/extraction-and-normalization.md"
+---
+
 # 提取与规范化
 
 - 文档 ID：E-EXTRACTION-001
-- 版本：1.0
-- 源分支：session-e-memory-compiler-2026-11-16
-- 源 Blob：c18780403de2d1dbcf471bdb8abdaa009a4a78e1
-- 对应英文：[Extraction and Normalization](../../en/04-memory-compiler/extraction-and-normalization.md)
+- 版本：1.2
+- 本批次 main 快照：`c58878fce24528a0842b4f8887c93ddbf465b566`；来源 Blob：`8dd0b5b29ecd37ceac6750c4ad8fa07c1c46cb4c`。
+- 历史源分支：`session-e-memory-compiler-2026-11-16`（仅记录来源）。
+- 历史源 Blob：`c18780403de2d1dbcf471bdb8abdaa009a4a78e1`。
+- 规范根源文件：[`04-memory-compiler/extraction-and-normalization.md`](../../../04-memory-compiler/extraction-and-normalization.md)；来源 Blob：`4d82b0860b6545b59e58896bf938bbcc0d757654`；本文与英文文件均为该根源文件的非规范语言镜像。
+- 冻结基线配对提取规范来源：英文 Blob `e6aad4b7504fa61fd0feb8b1da7aa8801103bc60`；简体中文 Blob `8dd0b5b29ecd37ceac6750c4ad8fa07c1c46cb4c`（main `c58878fce24528a0842b4f8887c93ddbf465b566`）。
 - 状态：认知、时间、Scope 和 Trust 约束已 DECIDED；Extraction IR/模型路由为 CANDIDATE；准确率/成本为 TO_VALIDATE
 - Owner：Memory Compiler / MC-02
 - 集成关系：INT-P0-01/02/04；INT-P1-02/03/06；C P1-02/P1-03
@@ -17,7 +49,7 @@
 
 包括文本、结构化 Event、Document 和 Environment Observation 的解析；Modality Classification；Entity/Time/Relation Mention Extraction；Candidate Proposition 形成；Normalization；Confidence/Uncertainty 记录；确定性校验；模型辅助 Extraction 编排；Source Span 对齐。
 
-不包括 Fact 专属建模、Fact Schema 和 Fact 批准事项（INT-P0-01 下仍为 OPEN）；Canonical Claim Identity 语义已依据 D 的 Option A 决定为 DECIDED FOR CONVERGENCE，其权威定义由 D 负责而非 E；Canonical Entity Merge Decision、Lifecycle Decision、Source Authorization Policy、外部 Tool Execution 和最终 Truth Adjudication。
+不包括 Canonical Fact/Claim Schema、DDL、Public API、Wire Mapping 和 Runtime Implementation。Owner 已批准 Option A + I1 语义方向：Claim 是具有稳定 ClaimRef 和不可变 ClaimRevisionRef 的命题线程；Fact 是独立标识的受治理 Attestation，并绑定精确 ClaimRevisionRef、Evidence/Provenance 和获授权的 Attestor/Method Context。B 接受该语义基线；D 接受 Identity/Revision/Forget 权威边界；I 接受 Authorization/Attestor/Retention/Forget 边界。B ADR 保留为历史证据，不再是当前语义决策请求。B Schema Freeze/Consumer Acceptance、D 不可变 Revision Transaction/Currentness 和 Migration/Compatibility、I 精确 Attestor/Retention/Forget Mapping，以及所有跨 Owner Consumer Contract 仍为 OPEN。E 继续仅输出 CandidateProposition/ExtractionIR，不签发 Canonical ID，也不根据 Confidence 推断 Fact。D 管辖 Canonical Identity/Lifecycle；I 管辖 Authorization/PermissionEpoch 和 Security Policy。Canonical Entity Merge Decision、最终 Lifecycle Decision、Source Authorization Policy、外部 Tool Execution 和最终 Truth Adjudication 同样不属于 E 的职责。
 
 ## 3. 职责
 
@@ -90,7 +122,7 @@ CandidateProposition {
 }
 ~~~
 
-这不是 Claim Schema，而是 Compiler IR；其 Claim Identity Mapping 遵循 D 已 DECIDED FOR CONVERGENCE 的 Option A 语义（稳定 Claim Identity 加不可变 ClaimRevision）。CandidateProposition 继续保持中立，不实例化或冻结 Canonical Identity，也不冻结任何公共 Schema。Fact 专属建模（包括是否以及如何表示独立 Fact Object）和 Fact 批准继续保持 OPEN。IR 中任何字段名都不能冻结公共 Schema 语义。
+这不是 Claim 或 Fact Schema，而是 Compiler IR。Option A + I1 已获批准作为语义方向，但 CandidateProposition 继续保持中立，不实例化 Canonical Identity，也不冻结任何公共 Schema。B Schema Freeze/Consumer Acceptance 仍为 OPEN；D 不可变 Revision Transaction/Currentness 和 Migration/Compatibility 仍为 OPEN；I 精确 Attestor Authorization、Retention 和 Forget Mapping 仍为 OPEN。精确 B/D/I/Storage/H Consumer Contract 完成版本 Pin 和审查前，E 不得将字段映射到 Canonical Record。IR 中任何字段名都不能冻结公共 Schema 语义。
 
 ### 6.3 EntityMention / TimeMention
 
@@ -110,7 +142,7 @@ flowchart TD
  G --> I[Schema / Span / Scope Validation]
  H --> I
  I --> J[Normalized Candidate IR]
- J --> K[Evidence & Provenance stages]
+ J --> K[Evidence/Provenance derivation (cross-cutting)]
 ~~~
 
 状态：PENDING → DECODED → SEGMENTED → CLASSIFIED → EXTRACTED → VALIDATED → NORMALIZED。错误状态转为 RETRYABLE、PARTIAL、QUARANTINED 或 UNSUPPORTED。Partial IR 只能让 Provenance 已验证的字段继续流转；未解决字段仍保持 Unknown。
@@ -167,7 +199,8 @@ Prompt Injection 控制措施：维护 Source Type/Trust Label；启发式识别
 - **Extraction → Evidence：** Source Span 和准确 Locator；Evidence Manager 校验并持久化 Source Ref。
 - **Extraction → Entity Manager：** 带 Scope 的 EntityMention 和 Identity Evidence；Entity Manager 返回 Provisional/Resolved Ref 及 Ambiguity。
 - **Extraction → Consolidation：** Candidate Proposition、Modality、Time、Scope、Qualifier 和 Method Receipt。
-- **D：** 接收 Candidate Proposition，并依据 D 已 DECIDED FOR CONVERGENCE 的 Option A Claim Identity 语义进行映射；Fact 专属建模和批准继续保持 OPEN；Candidate IR 不是公共 Schema。
+- **Admission 边界：** Rust `admission` 模块是本地 SQLite 参考 Ledger。`MemoryCompiler::compile()` 要求预先登记的本地 Producer Work/Dependency Receipt，并在注入式 Publication Authority 通过后写入本地 Publication Receipt；`AdmissionStore::open()` 使用 WAL 与 `synchronous=FULL`。它不是 D 权威 Producer Registration、D-owned ForgetFence、I PermissionEpoch 或 Storage Commit/Visibility Authority，也不证明跨服务 Atomicity。该 Ledger 不保存 `StageExecution`、Stage Result 或 Next-stage Intent。Execution State/Retry/Lease/Recovery 仍是五阶段的横切生命周期层；当前内存 `resume` 仅从调用方提供的 `NormalizedIR` 继续执行 Staging 和 PublicationGate，不会从本地 Ledger 重建 `NormalizedIR`，也不会持久化本地 Publication Receipt，且未实现 §6.3 持久化 Crash Recovery（见 [Compiler 总览](compiler-overview.md) §28）。
+- **D：** 接收中立 Candidate Proposition。D 接受 Option A + I1 语义，并拥有 Canonical Identity、不可变 Revision、Currentness、Lifecycle、ConflictSet Lifecycle 和 D ForgetFence。D Transaction/Currentness 与 Migration/Compatibility Contract 仍为 OPEN；E 不分配 Canonical ID，也不写入 Canonical Record。
 - **H/C：** Source Classification 和 Telemetry Semantics 必须一致；保留 Observation/Outcome 区别。
 - **I：** Data Classification、允许的处理方式、Source Access 和 Forget Fence 共同约束 Extraction。
 
@@ -183,7 +216,8 @@ D Domain Type 和 Fact/Claim ADR；B Epistemic/Temporal/Scope Semantics；C/H So
 
 ## 18. 开放问题
 
-- OPEN：INT-P0-01 中尚未由 D 已 DECIDED FOR CONVERGENCE 的 Option A Claim Identity 语义解决的 Fact 专属建模和 Fact 批准事项；CandidateProposition 刻意保持中立。
+- DECIDED：Project Owner 和 B/D/I 已接受 Option A + I1 语义方向。B ADR 保留为历史证据，不再是当前语义决策请求。
+- OPEN：B Schema Freeze/Consumer Acceptance；D Transaction/Currentness 和 Migration/Compatibility；I 精确 Attestor Authorization/Retention/Forget Mapping；以及所有跨 Owner Consumer Contract。CandidateProposition 刻意保持中立。
 - OPEN：C 最终 Observation/Outcome Mapping 和 Task/Plan Revision Semantics。
 - CANDIDATE：Extraction IR 和 Deterministic-first Routing。
 - TO_VALIDATE：Modality Classifier 质量、Entity/Time Extraction Accuracy、多语言 Prompt Injection Detection 和本地 Model Resource Use。
@@ -196,14 +230,14 @@ D Domain Type 和 Fact/Claim ADR；B Epistemic/Temporal/Scope Semantics；C/H So
 - Stage Result 与下一阶段 Outbox/Journal Intent 必须原子持久化，或通过等价可恢复 Journal 持久化。Worker 崩溃不得丢失已完成 Stage，也不得重复产生外部可见效果。
 - 在 Payload Dereference、Source Span Resolution、Model Prompt Construction、Stage Result Publication 或 Retry 前，重新检查当前 Permission 和 D Forget Fence。Fence/Policy 状态未知时 Fail-closed。
 - ExtractionIR、CandidateProposition、Span、Embedding 和 Normalized Value 都是派生对象：根据 [Forget Fence and Derived Registration](forget-fence-and-derived-registration-part1.md)，必须在可见前持久化 Lineage 和 Dependency Registration。
-- CandidateProposition 保持中立的 Pre-canonical IR。Claim Identity Mapping 遵循 D 已 DECIDED FOR CONVERGENCE 的 Option A 语义，不再属于 ADR-BLOCKED。Fact 专属建模和 Fact 批准继续保持 OPEN；E 不得自行推断或批准 Fact Schema、DDL、API 或 Wire Contract。
+- CandidateProposition 保持中立的 Pre-canonical IR。Option A + I1 语义已 DECIDED，但 B Schema Freeze/Consumer Acceptance、D Transaction/Currentness/Compatibility、I Attestor/Retention/Forget Mapping 和所有跨 Owner Contract 仍为 OPEN。E 不得自行推断或批准 Fact/Claim Schema、DDL、API 或 Wire Contract，不得签发 Canonical ID，也不得根据 Confidence 推断 Fact。
 
 ### 19.1 Claim/Fact 规范发布顺序
 
 E 的 ExtractionIR 和 CandidateProposition MUST
 保持为私有 Staging 产物。
 
-本发布顺序不会推迟或重新开放 Claim Identity 语义；D 已依据 Option A 将其决定为 DECIDED FOR CONVERGENCE。Fact 专属建模和批准仍为 OPEN，本发布协议不构成对这些事项的批准。
+本发布顺序不执行 Canonical Mapping。Option A + I1 语义已 DECIDED，但 B Schema Freeze/Consumer Acceptance、D Transaction/Currentness/Compatibility、I Attestor/Retention/Forget Mapping 和所有跨 Owner Contract 仍为 OPEN。本协议不批准 Schema、DDL、API、Wire Field 或 Runtime Implementation。
 
 唯一规范顺序如下：
 
