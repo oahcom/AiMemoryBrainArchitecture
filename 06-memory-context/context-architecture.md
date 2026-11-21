@@ -4,6 +4,11 @@
 **Owner:** Session G — Memory Context Manager  
 **Baseline:** A/B/C and Phase-1 integration review, 2026-11-16
 
+Requirement IDs `CA-01`..`CA-02` are stable references for the 2 MUST
+occurrences in this document. They are labels only; the normative text is
+unchanged. Other documents SHOULD cite `CA-nn` rather than a section number,
+because section numbers drift.
+
 ## 1. Purpose and authority
 
 Memory Context is the Brain-owned, scoped, versioned working view of selected Canonical Memory assets for a particular Agent execution context. It is a managed memory region, not a prompt, not the complete Memory Store, and not the Agent's private working state.
@@ -127,7 +132,7 @@ G stores resolved typed references, not caller-supplied labels or credentials. T
 
 A Context's isolation key includes the required ownership and applicability dimensions: Principal/tenant, project, Agent, Agent Instance, Session, Task and Environment. The exact required subset is declared by operation class. EnvironmentRef is mandatory whenever Context semantics or any entry are environment-dependent. Missing, ambiguous, retired or mismatched EnvironmentRef blocks use; display names never substitute. Inheritance across task/session/environment requires an explicit authorized relation and creates a separately resolved Context identity or versioned inheritance decision.
 
-The following are distinct opaque typed namespaces. G and consumers MUST NOT numerically compare, cast, increment or substitute them:
+The following are distinct opaque typed namespaces. **CA-01** — G and consumers MUST NOT numerically compare, cast, increment or substitute them:
 
 | Type | Owner | G use |
 |---|---|---|
@@ -146,7 +151,7 @@ A scalar applied_version is only a convenience projection. Application history i
 
 ### 11.2 G as a registered derivative producer
 
-D's current semantic contract includes G Context membership/materializations, ChangeSets, Snapshots, Deltas and Delivery Intents in the derivative-producer inventory. G MUST register its producer class and every derivative-capable work item with D before queueing, leasing, dereferencing protected canonical source payload, executing a rebuild/replay or making an artifact visible.
+D's current semantic contract includes G Context membership/materializations, ChangeSets, Snapshots, Deltas and Delivery Intents in the derivative-producer inventory. **CA-02** — G MUST register its producer class and every derivative-capable work item with D before queueing, leasing, dereferencing protected canonical source payload, executing a rebuild/replay or making an artifact visible.
 
 The G work record binds a stable ProducerWorkItemId, ProducerClass/registry version, normalized request digest, exact source Memory/MemoryVersion and transitive lineage refs, ScopeRefs, Context ID, intended artifact class, observed D ForgetFenceCursor, current I PermissionEpoch/authorization decision, and correlation/causation. Retries and lease replacement retain ProducerWorkItemId and digest; AttemptId/LeaseId identify attempts. A new derivation run is explicitly linked and re-admitted; it cannot acquire new publication rights by changing artifact ID.
 
