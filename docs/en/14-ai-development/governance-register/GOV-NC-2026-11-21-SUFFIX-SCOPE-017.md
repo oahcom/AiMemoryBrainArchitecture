@@ -67,31 +67,66 @@ All nine open PRs, each overlaid on `main = d647e7d5ef` at its exact head, `PR_B
 | PR | head | gate | errors | class | touches `scripts/`/`crates/` |
 |---|---|---|---|---|---|
 | #509 | `78d61766` | **PASS** | 0 | — | yes |
-| #507 | `c8f496ae` | FAIL | 1 | manifest missing | yes |
-| #505 | `75e3b9e2` | FAIL | 1 | manifest missing | no |
+| #507 | `c8f496ae` | FAIL | 1 -> **1** after manifest | manifest, then **011** | yes |
+| #505 | `75e3b9e2` | FAIL | 1 -> **2** after manifest | manifest, then **017 x2** | no |
 | #504 | `a608df27` | **PASS** | 0 | — | yes |
 | #500 | `6a7cafdb` | **FAIL** | **41** | **PAIR x41, all `.json`** | no |
 | #496 | `4495b314` | **PASS** | 0 | — | no |
 | #494 | `c572c946` | **PASS** | 0 | — | no |
-| #471 | `d33ee2bb` | FAIL | 1 | manifest missing | yes |
+| #471 | `d33ee2bb` | FAIL | 1 -> **0** after manifest | manifest only | yes |
 | #433 | `81558c89` | **PASS** | 0 | — | yes |
 
-5 pass, 4 fail.
+5 pass, 4 fail. After supplying the missing manifest: **6 pass, 3 fail** — and all 3 remaining failures are gate defects (011 or 017), not author defects.
 
-### 2.1 The three manifest failures are legitimate
+### 2.1 The manifest error is only the first error, not the only error
 
-`#507`, `#505`, `#471` fail with:
+`#507`, `#505`, `#471` all fail first with:
 
 ```
 Normative source files changed but PR body lacks 'BILINGUAL-MANIFEST: COMPLETE'
 or a fully documented 'BILINGUAL-EXCEPTION: APPROVED' block
 ```
 
-That is the gate working as designed. The author must declare a manifest status. I am not disputing these.
+**I initially recorded this as the whole story and that was wrong.** Re-running each PR twice — once with its real body, once with `BILINGUAL-MANIFEST: COMPLETE` appended — separates manifest failures from structural ones:
 
-### 2.2 #500 is the only structural failure
+| PR | real body | body + `BILINGUAL-MANIFEST: COMPLETE` |
+|---|---|---|
+| `#471` | `EXIT=1` (manifest) | **`EXIT=0`** — manifest was the only problem |
+| `#507` | `EXIT=1` (manifest) | **`EXIT=1`** — `02-domain-model/domain-model-overview.md requires all counterparts changed` |
+| `#505` | `EXIT=1` (manifest) | **`EXIT=1`** — `08-bmcp-protocol/schemas/bmcp.applied-delivery-evidence-1.0.0.schema.json requires all counterparts changed` (x2) |
 
-41 errors, zero of which the author can fix by writing better documentation, because the required files are `docs/zh-CN/08-bmcp-protocol/schemas/*.schema.json`. Either those get created (translating a JSON Schema, which changes what it validates against) or the file type leaves the pairing rule.
+So of the three, **only `#471` is a pure manifest failure.** The other two have a structural error underneath, and the manifest error was masking it because the gate returns early.
+
+### 2.2 Three PRs are structurally blocked, and all three are the same two defects
+
+| PR | blocking file | defect |
+|---|---|---|
+| `#500` | 41 x `08-bmcp-protocol/schemas/*.schema.json` | **017** — `.json` subject to pairing |
+| `#505` | 2 x `08-bmcp-protocol/schemas/*.schema.json` | **017** — same |
+| `#507` | `02-domain-model/domain-model-overview.md` | **011** — `.md` without mirrors in a non-14 root |
+
+`#507`'s file list is instructive:
+
+```
+modified 02-domain-model/domain-model-overview.md        <- no partner, blocked by 011
+modified 02-domain-model/phase-2-domain-extension.md     <- has .zh-CN.md partner, ALSO blocked by 011
+modified 02-domain-model/phase-2-domain-extension.zh-CN.md
+modified crates/memory-domain/src/lib.rs
+```
+
+It **did** pair `phase-2-domain-extension` correctly — both sides in the same PR — and is still rejected, because the diff domain wants `docs/en` + `docs/zh-CN`, not the side-by-side pair. That is register 011's exact claim, now with a live PR as its witness.
+
+`#505`'s file list shows the author doing the right thing twice over:
+
+```
+added    08-bmcp-protocol/schema-nonempty-audit.md        <- correct .md + .zh-CN.md pair
+added    08-bmcp-protocol/schema-nonempty-audit.zh-CN.md
+modified 08-bmcp-protocol/schemas/bmcp.applied-delivery-evidence-1.0.0.schema.json
+modified 08-bmcp-protocol/schemas/bmcp.recovery-join-1.0.2.schema.json
+added    08-bmcp-protocol/schemas/test_nonempty_audit.py
+```
+
+The `.md` pair is satisfied. The two `.json` edits are not, and cannot be.
 
 ### 2.3 #494 passes
 
@@ -106,6 +141,18 @@ The constant is correct and was presumably added when someone hit exactly this p
 The other eight roots never got the filter, because they were never given a `counterpart_14()`-style resolution path at all — they got the blanket two-mirror rule. So the suffix policy was written once, for one root, and the blanket branch was written without it.
 
 This is the same structural pattern as register 015: a rule that exists, is correct, and is scoped to one root by a hard-coded prefix.
+
+**Measured exposure:** non-`.md` files inside normative roots, which would all be blocked if touched:
+
+```
+00-governance              2
+06-memory-context          2
+08-bmcp-protocol          14
+13-engineering-decisions   2
+14-ai-development         47   (these are protected by the suffix filter)
+```
+
+`docs/zh-CN/` contains **zero** `.json` files. `docs/en/` contains **zero** `.json` files. `docs/zh-CN/08-bmcp-protocol/schemas/` does not exist. So for the 20 non-`.md` files outside the 14 root, the required counterparts have never existed and are not being created.
 
 **Measured exposure:** non-`.md` files inside normative roots, which would all be blocked if touched:
 
