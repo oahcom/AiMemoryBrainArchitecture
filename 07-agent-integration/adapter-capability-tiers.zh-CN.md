@@ -48,3 +48,22 @@ crate 现在提供 `ContextDeliveryAdapter` trait 和 `InMemoryContextDeliveryAd
 | Reconnected | 恢复内存连接标志，并报告最后一次成功应用的版本（或 `None`） |
 
 **NOT IMPLEMENTED（未实现）：** 真实传输；逐运行时 Agent 集成；持久化交付账本；持久化 session 状态；自动重试/重新交付；生产级协调或应用证明。Reconnect 只是确定性的内存状态转换，并不能证明远端 Agent 的真实状态。本实现不转换 Provider 特定运行时对象，也不声称交付状态超出当前进程内存的范围。
+
+## 18. 规范快照类型接入（round 6）
+
+内存交付适配器现在直接接收并保留规范类型
+`memory_context::ContextSnapshot`。`agent-integration` 依赖
+`memory-context`；依赖方向仍为单向，因为 `memory-context` 不依赖
+`agent-integration`。不再定义适配器本地的第二种快照结构，也不需要
+调用方手工进行序列化转换。
+
+适配器只使用 `ContextSnapshot.context_version` 作为版本值。接受 apply
+之前，必须调用 `memory_context::validate_snapshot`。验证失败通过类型化
+错误 `AdapterError::InvalidSnapshot(ContextError)` 返回；版本不连续返回
+`VersionMismatch { expected, received }`；断连 session 返回
+`SessionDisconnected`。这三种拒绝路径都必须保持最后一次成功应用的快照
+不变。`applied_snapshot` 返回适配器实际接受的同一个规范快照值。
+
+这仍然是内存中的参考适配器，不是传输层或生产运行时集成。采用规范类型
+消除了调用方手工序列化的边界，但本身并不能证明远端 Agent 运行时已经应用
+该上下文。
