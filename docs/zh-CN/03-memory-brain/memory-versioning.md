@@ -463,6 +463,14 @@ PREPARED_HIDDEN 是 Storage Visibility 分量的强制入口状态。其持久�
 
 成功的 PublicationParticipant Admission MUST 绑定精确的已提交发布身份，以及原始 Producer 登记的依赖闭包。该准入行为 MUST NOT 创建、替换、缩小或独立重新定义该依赖闭包。
 
+成功的 PublicationParticipant Admission 与确切的已准入 PublicationParticipant
+identity、其对应的 StorageVisibilityParticipantRef、以及绑定于已提交发布身份的
+确切发布元组的持久记录 MUST 在权威串行化 Fence/Admission 边界下构成不可分割的操作。
+确切的已提交发布身份及所有对应的 PublicationParticipant 绑定 MUST 作为该操作的一部分
+被持久记录。第二阶段 PublicationParticipant Admission 已成功发生、而其对应的完整持久
+participant 记录尚未成立的状态 MUST NOT 存在。Forget Fence MUST NOT 在观察到成功的
+第二阶段准入时，未能同时观察到该次确切准入对应的完整持久 participant 记录。
+
 后续 Forget Fence MUST 直到每个成功的 Producer Admission 均已使其精确参与者记录持久可见后，才进行线性化或完成其参与者屏障评估。
 
 PublicationParticipant Admission MUST 独立地针对权威 ForgetFence 排序边界进行串行化。成功的 Producer Admission MUST NOT 被解释为成功的 PublicationParticipant Admission。

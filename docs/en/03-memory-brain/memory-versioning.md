@@ -566,6 +566,22 @@ dependency closure registered by the original Producer.
 It MUST NOT create, replace, narrow, or independently
 redefine that dependency closure.
 
+Successful PublicationParticipant Admission and durable recording
+of the exact admitted PublicationParticipant identity, its
+corresponding StorageVisibilityParticipantRef, and the exact
+publication tuple identity bound to the committed publication
+identity MUST form one indivisible operation under the
+authoritative serialized Fence/Admission boundary. The exact
+committed publication identity and all corresponding
+PublicationParticipant bindings MUST be durably recorded as
+part of that operation. A state in which second-stage
+PublicationParticipant Admission has successfully occurred
+but its corresponding complete, durable participant record
+has not yet been established MUST NOT exist. A Forget Fence
+MUST NOT observe successful second-stage Admission without
+simultaneously observing the complete, durable participant
+record corresponding to that exact Admission.
+
 A subsequent Forget Fence MUST NOT linearize or complete
 its participant-barrier evaluation until every successful
 Producer Admission has its exact participant record

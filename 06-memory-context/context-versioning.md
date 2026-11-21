@@ -295,7 +295,23 @@ When PublicationParticipant Admission has not successfully linearized against th
 
 Successful Producer Admission MUST NOT be treated as evidence of successful PublicationParticipant Admission. G MUST independently establish the successful second-stage Admission of the exact PublicationParticipant bound to the applicable StorageVisibilityParticipantRef and publication tuple identity before committing or publishing a corresponding visible ContextVersion.
 
-Any ContextVersion already committed that references a publication object for which second-stage Admission did not successfully occur MUST receive the applicable terminal disposition specified by the six-component protected publication failure matrix in D memory-versioning.md §16.1. G MUST NOT preserve or expose that ContextVersion as a successful visible publication merely because its canonical commit previously succeeded.
+Any ContextVersion already committed that references a
+publication object for which second-stage Admission did not
+successfully occur MUST receive the applicable terminal
+disposition specified by the Forget terminal-state ×
+component disposition matrix in D memory-versioning.md
+§16.1, which covers four Forget terminal states across
+seven logical components. The disposition of the
+corresponding G Context Commit MUST be consistent with
+the applicable Forget terminal state: under Failed and
+Cancelled, G MUST NOT commit the ContextVersion; under
+CompletedWithPolicyException, G MAY commit the ContextVersion
+only when the exception has received named approval and
+all applicable preconditions are satisfied; under Completed,
+G MUST satisfy the complete-completion requirements before
+committing the ContextVersion. G MUST NOT preserve or expose
+that ContextVersion as a successful visible publication
+merely because its canonical commit previously succeeded.
 
 Recovery and replay MUST reevaluate the authoritative second-stage Admission evidence, ForgetFence disposition and Storage visibility outcome at every read. Historical ContextVersion commitment MUST NOT confer permanent visibility, bypass a subsequent ForgetFence disposition or substitute for the required successful second-stage Admission. Missing, conflicting or UNKNOWN evidence MUST fail closed. Until the authoritative terminal outcome and authorized visibility conditions are proven, the corresponding ContextVersion MUST remain non-visible.
 
