@@ -389,16 +389,16 @@ ref_ctor!(EntityRef, EventRef, ExternalSourceRef, MemoryRef);
 
 /// NOT DEFINED: awaiting I. Placeholder only; security identity semantics are not inferred.
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct AttestorRef { _pending_i: () }
-impl AttestorRef { pub const fn pending_i() -> Self { Self { _pending_i: () } } }
+pub struct AttestorRef(());
+impl AttestorRef { pub const fn pending_i() -> Self { Self(()) } }
 /// NOT DEFINED: awaiting I. Required placeholder; this is not an authorization grant.
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct AuthorizationDecisionRef { _pending_i: () }
-impl AuthorizationDecisionRef { pub const fn pending_i() -> Self { Self { _pending_i: () } } }
+pub struct AuthorizationDecisionRef(());
+impl AuthorizationDecisionRef { pub const fn pending_i() -> Self { Self(()) } }
 /// NOT DEFINED: awaiting D. Required placeholder with no invented commit semantics.
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct CanonicalCommitRef { _pending_d: () }
-impl CanonicalCommitRef { pub const fn pending_d() -> Self { Self { _pending_d: () } } }
+pub struct CanonicalCommitRef(());
+impl CanonicalCommitRef { pub const fn pending_d() -> Self { Self(()) } }
 
 #[doc = r#"Immutable revision fields are private; corrections append successors.
 ```compile_fail
