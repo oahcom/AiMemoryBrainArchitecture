@@ -84,7 +84,7 @@ Rust crate 仍停留在 private/staged 阶段。Round 6 新增纯内存 `ChangeS
 | F 协作：候选是提案，不完整不等于不存在 | context-manager.md §5 | PARTIAL — 有候选输入；无 F 接口/Watermark 向量 | 不在范围 |
 | 故障行为和错误分类 | context-manager.md §6、§8 | PARTIAL — 有部分 Fail-Closed 错误；缺少完整错误目录和隐私安全投影 | I |
 | 状态所有权与可观测性 | context-manager.md §7、§9 | NOT IMPLEMENTED — 无生产 Metrics/Traces | D |
-| Reconciliation 触发器和权威信号归属 | context-reconciliation.md §1–§2 | NOT IMPLEMENTED — 所引用的 `ContextLedger`/`reconcile_entry` 参考模型不在本次核验的 mainline；Rust crate 未实现 ChangeSet 编辑器。 | D |
+| Reconciliation 触发器和权威信号归属 | context-reconciliation.md §1–§2 | NOT IMPLEMENTED — 所引用的 `ContextLedger`/`reconcile_entry` 参考模型不在本次核验的 mainline。本地 `ChangeSet` 编辑器确实存在（`apply_change_set`/`commit_change_set`）；缺失的是权威触发器与信号归属模型——即由它来决定何时执行 Reconcile。 | D |
 | Stale/ReconcileRequired/Reconciled/Blocked/Closed 区分 | context-reconciliation.md §3 | PARTIAL — 有 Entry 分类；无 Context/Run 状态机 | 本线程可做 |
 | Reconciliation 算法：触发、精确 Context、先 Tombstone、加载、授权、Canonical 校验、水位比较、分类、补偿、CAS、Delivery、审计 | context-reconciliation.md §4 | PARTIAL — 本地 Tombstone-aware Reconcile 和 Base-Version 暂存已实现；权威触发、重新授权、Canonical/Watermark 校验、持久化 Saga、Delivery 和审计仍缺失 | D |
 | Forget/撤权失效和 Adapter Target 状态 | context-reconciliation.md §5 | PARTIAL — 仅内存 Tombstone；无持久化 Target Evidence 或 Adapter Clear | D |
