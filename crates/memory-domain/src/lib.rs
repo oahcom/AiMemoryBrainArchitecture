@@ -354,6 +354,11 @@ pub fn validate_outcome_claim(
 }
 
 
+#[doc="Claim and Fact references are intentionally incompatible.
+```compile_fail
+use memory_domain::{ClaimRef, FactRef};
+let claim: ClaimRef = FactRef::new("f").unwrap();
+```"]
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, PartialEq)]
 pub struct ClaimRef(OpaqueId);
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, PartialEq)]
@@ -393,6 +398,12 @@ impl AuthorizationDecisionRef { pub const fn pending_i() -> Self { Self { _pendi
 pub struct CanonicalCommitRef { _pending_d: () }
 impl CanonicalCommitRef { pub const fn pending_d() -> Self { Self { _pending_d: () } } }
 
+#[doc="Immutable revision fields are private; corrections append successors.
+```compile_fail
+use memory_domain::{ClaimRevision, ClaimRef, ClaimRevisionRef, EpistemicStatus, TimeValue};
+let mut r=ClaimRevision::new(ClaimRevisionRef::new("r").unwrap(),ClaimRef::new("c").unwrap(),None,"s".into(),"p".into(),"o".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t".into(),"initial".into()).unwrap();
+r.predicate=String::from("mutated");
+```"]
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct ClaimRevision {
     revision_ref: ClaimRevisionRef, claim_ref: ClaimRef, parent_revision_ref: Option<ClaimRevisionRef>,
@@ -469,7 +480,7 @@ impl FactRevision {
         for (n,v) in [("attestation_method_id",&self.attestation_method_id),("attestation_method_version",&self.attestation_method_version),("rationale",&self.rationale)] {
             if v.is_empty(){return Err(DomainError::EmptyRequiredField(n))}
         }
-        if self.parent_revision_ref.is_some() && self.correction_or_revocation_reason.as_deref().unwrap_or("").is_empty(){return Err(DomainError::MissingRevisionReason)}
+        if (self.parent_revision_ref.is_some() || matches!(self.outcome, FactOutcome::Corrected | FactOutcome::Revoked | FactOutcome::Withdrawn)) && self.correction_or_revocation_reason.as_deref().unwrap_or("").is_empty(){return Err(DomainError::MissingRevisionReason)}
         Ok(())
     }
     pub fn fact_ref(&self)->&FactRef { &self.fact_ref }
