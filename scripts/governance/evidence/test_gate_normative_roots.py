@@ -478,5 +478,46 @@ class GateRootsTest(unittest.TestCase):
         self.assertEqual(self.root_departures(repo, base), [])
 
 
+    # --- Issue #461: X.md <-> X.zh-CN.md pairs in every normative root ---
+
+    def inventory_02(self):
+        self.gate.ROOT = self.root
+        self.gate.REPO_ROOT = self.root
+        self.gate.NORMATIVE_ROOTS = {"02-domain-model"}
+        (self.root / "02-domain-model").mkdir(parents=True, exist_ok=True)
+        return self.gate.current_bilingual_gaps()
+
+    def test_issue_461_n1_md_without_zh_cn_is_rejected(self):
+        self.write("02-domain-model/zz-probe-alone.md", "English only.\\n")
+        self.assertIn("02-domain-model/zz-probe-alone.md", self.inventory_02())
+
+    def test_issue_461_n2_zh_cn_without_md_is_rejected(self):
+        self.write("02-domain-model/zz-probe-alone.zh-CN.md", "中文内容。\\n")
+        self.assertIn("02-domain-model/zz-probe-alone.zh-CN.md", self.inventory_02())
+
+    def test_issue_461_n3_md_and_zh_cn_pair_is_accepted(self):
+        self.write("02-domain-model/zz-probe-pair.md", "English source.\\n")
+        self.write("02-domain-model/zz-probe-pair.zh-CN.md", "中文翻译。\\n")
+        gaps = self.inventory_02()
+        self.assertNotIn("02-domain-model/zz-probe-pair.md", gaps)
+        self.assertNotIn("02-domain-model/zz-probe-pair.zh-CN.md", gaps)
+
+    def test_issue_461_n4_en_and_zh_cn_pair_is_accepted(self):
+        self.write("02-domain-model/zz-probe-en.en.md", "English source.\\n")
+        self.write("02-domain-model/zz-probe-en.zh-CN.md", "中文翻译。\\n")
+        gaps = self.inventory_02()
+        self.assertNotIn("02-domain-model/zz-probe-en.en.md", gaps)
+        self.assertNotIn("02-domain-model/zz-probe-en.zh-CN.md", gaps)
+
+    def test_issue_461_n5_deleting_zh_cn_side_rejects_pair(self):
+        english = "02-domain-model/phase-2-domain-extension.md"
+        chinese = "02-domain-model/phase-2-domain-extension.zh-CN.md"
+        self.write(english, "English source.\\n")
+        self.write(chinese, "中文翻译。\\n")
+        self.assertNotIn(english, self.inventory_02())
+        (self.root / chinese).unlink()
+        self.assertIn(english, self.inventory_02())
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -273,15 +273,12 @@ def current_bilingual_gaps() -> set[str]:
             english = REPO_ROOT / "docs" / "en" / source
             chinese = REPO_ROOT / "docs" / "zh-CN" / source
             mirrored = english.is_file() and chinese.is_file()
-            if root_name == "14-ai-development":
-                # ponytail: structural pairing only; semantic translation parity remains a human-review responsibility.
-                paired = (
-                    mirrored
-                    or side_by_side_partner(source) is not None
-                    or (english.is_file() and _carries_chinese(source))
-                )
-            else:
-                paired = mirrored
+            # ponytail: structural pairing only; semantic translation parity remains a human-review responsibility.
+            paired = (
+                mirrored
+                or side_by_side_partner(source) is not None
+                or (english.is_file() and _carries_chinese(source))
+            )
             if not paired:
                 gaps.add(source)
     return gaps
@@ -617,7 +614,7 @@ def check_prompt_library() -> list[str]:
 
 
 def side_by_side_partner(source: str) -> str | None:
-    """Conventional side-by-side counterpart for a 14-ai-development path."""
+    """Conventional side-by-side counterpart, accepted in every normative root."""
     if source.endswith(".en.md"):
         stem = source[: -len(".en.md")]
         for cand in (stem + ".zh-CN.md", stem + ".md"):
@@ -625,14 +622,14 @@ def side_by_side_partner(source: str) -> str | None:
                 return cand
     elif source.endswith(".zh-CN.md"):
         stem = source[: -len(".zh-CN.md")]
-        cand = stem + ".en.md"
-        if (ROOT / cand).is_file():
-            return cand
+        for cand in (stem + ".en.md", stem + ".md"):
+            if cand != source and (ROOT / cand).is_file():
+                return cand
     elif source.endswith(".md"):
         stem = source[: -len(".md")]
-        cand = stem + ".en.md"
-        if (ROOT / cand).is_file():
-            return cand
+        for cand in (stem + ".en.md", stem + ".zh-CN.md"):
+            if cand != source and (ROOT / cand).is_file():
+                return cand
     return None
 
 
