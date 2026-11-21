@@ -22,7 +22,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-21"
-      last_verification_note: "Fact and Claim are separated under OWNER-DECISION-FACT-CLAIM-001; this version is awaiting the version-bound approval update in the same change set."
+      last_verification_note: "Fact and Claim are separated under OWNER-DECISION-FACT-CLAIM-001; full-document approval is version-bound to the approved source revision."
     usage_status: Active
     modification_status: Modified
     supersession:
