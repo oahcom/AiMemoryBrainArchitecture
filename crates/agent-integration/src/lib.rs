@@ -67,18 +67,20 @@ pub enum AdapterError {
     ProtectedRegionMutation(ContextRegion),
     RequestAlreadyFrozen,
     /// The caller attempted delivery while this session was disconnected.
-    SessionDisconnected { session_id: String },
+    SessionDisconnected {
+        session_id: String,
+    },
     /// The supplied snapshot is not the exact next version for this session.
-    VersionMismatch { expected: u64, received: u64 },
+    VersionMismatch {
+        expected: u64,
+        received: u64,
+    },
     /// The current version cannot be incremented without wrapping.
     VersionExhausted,
 }
 
 /// Check whether an adapter tier is sufficient for an operation.
-pub fn authorize(
-    actual: CapabilityTier,
-    operation: AdapterOperation,
-) -> Result<(), AdapterError> {
+pub fn authorize(actual: CapabilityTier, operation: AdapterOperation) -> Result<(), AdapterError> {
     let required = operation.required_tier();
     if actual <= required {
         Ok(())
@@ -126,7 +128,10 @@ pub struct ContextSnapshot {
 
 impl ContextSnapshot {
     pub fn new(version: u64, content: impl Into<String>) -> Self {
-        Self { version, content: content.into() }
+        Self {
+            version,
+            content: content.into(),
+        }
     }
 }
 
@@ -137,11 +142,7 @@ impl ContextSnapshot {
 /// removes the applied snapshot and resets that sequence. Reconnect reports
 /// only the last successfully applied version.
 pub trait ContextDeliveryAdapter {
-    fn apply(
-        &mut self,
-        session_id: &str,
-        snapshot: ContextSnapshot,
-    ) -> Result<(), AdapterError>;
+    fn apply(&mut self, session_id: &str, snapshot: ContextSnapshot) -> Result<(), AdapterError>;
 
     fn clear(&mut self, session_id: &str) -> Result<(), AdapterError>;
 
@@ -161,7 +162,10 @@ struct SessionState {
 
 impl Default for SessionState {
     fn default() -> Self {
-        Self { applied: None, connected: true }
+        Self {
+            applied: None,
+            connected: true,
+        }
     }
 }
 
@@ -174,11 +178,7 @@ pub struct InMemoryContextDeliveryAdapter {
 }
 
 impl ContextDeliveryAdapter for InMemoryContextDeliveryAdapter {
-    fn apply(
-        &mut self,
-        session_id: &str,
-        snapshot: ContextSnapshot,
-    ) -> Result<(), AdapterError> {
+    fn apply(&mut self, session_id: &str, snapshot: ContextSnapshot) -> Result<(), AdapterError> {
         let state = self.sessions.entry(session_id.to_owned()).or_default();
         if !state.connected {
             return Err(AdapterError::SessionDisconnected {
@@ -187,7 +187,10 @@ impl ContextDeliveryAdapter for InMemoryContextDeliveryAdapter {
         }
 
         let expected = match state.applied.as_ref() {
-            Some(applied) => applied.version.checked_add(1).ok_or(AdapterError::VersionExhausted)?,
+            Some(applied) => applied
+                .version
+                .checked_add(1)
+                .ok_or(AdapterError::VersionExhausted)?,
             None => 1,
         };
         if snapshot.version != expected {
@@ -231,7 +234,10 @@ mod tests {
     #[test]
     fn legal_tier_three_telemetry_call_is_allowed() {
         assert_eq!(
-            authorize(CapabilityTier::Tier3, AdapterOperation::SubmitScopedTelemetry),
+            authorize(
+                CapabilityTier::Tier3,
+                AdapterOperation::SubmitScopedTelemetry
+            ),
             Ok(())
         );
     }
@@ -239,7 +245,10 @@ mod tests {
     #[test]
     fn insufficient_tier_is_rejected_with_typed_error() {
         assert_eq!(
-            authorize(CapabilityTier::Tier3, AdapterOperation::ObserveFullInferenceBoundary),
+            authorize(
+                CapabilityTier::Tier3,
+                AdapterOperation::ObserveFullInferenceBoundary
+            ),
             Err(AdapterError::TierInsufficient {
                 required: CapabilityTier::Tier1,
                 actual: CapabilityTier::Tier3,
@@ -276,8 +285,12 @@ mod tests {
     #[test]
     fn applying_a_valid_successor_updates_the_applied_version() {
         let mut adapter = InMemoryContextDeliveryAdapter::default();
-        adapter.apply("session-a", ContextSnapshot::new(1, "first")).unwrap();
-        adapter.apply("session-a", ContextSnapshot::new(2, "second")).unwrap();
+        adapter
+            .apply("session-a", ContextSnapshot::new(1, "first"))
+            .unwrap();
+        adapter
+            .apply("session-a", ContextSnapshot::new(2, "second"))
+            .unwrap();
 
         let applied = adapter.applied_snapshot("session-a").unwrap();
         assert_eq!(applied.version, 2);
@@ -287,30 +300,47 @@ mod tests {
     #[test]
     fn stale_or_skipped_versions_return_typed_error_without_mutation() {
         let mut adapter = InMemoryContextDeliveryAdapter::default();
-        adapter.apply("session-a", ContextSnapshot::new(1, "accepted")).unwrap();
+        adapter
+            .apply("session-a", ContextSnapshot::new(1, "accepted"))
+            .unwrap();
 
         assert_eq!(
             adapter.apply("session-a", ContextSnapshot::new(1, "stale")),
-            Err(AdapterError::VersionMismatch { expected: 2, received: 1 })
+            Err(AdapterError::VersionMismatch {
+                expected: 2,
+                received: 1
+            })
         );
         assert_eq!(
             adapter.apply("session-a", ContextSnapshot::new(3, "skipped")),
-            Err(AdapterError::VersionMismatch { expected: 2, received: 3 })
+            Err(AdapterError::VersionMismatch {
+                expected: 2,
+                received: 3
+            })
         );
         assert_eq!(adapter.applied_snapshot("session-a").unwrap().version, 1);
-        assert_eq!(adapter.applied_snapshot("session-a").unwrap().content, "accepted");
+        assert_eq!(
+            adapter.applied_snapshot("session-a").unwrap().content,
+            "accepted"
+        );
     }
 
     #[test]
     fn clear_resets_the_session_so_apply_starts_from_empty() {
         let mut adapter = InMemoryContextDeliveryAdapter::default();
-        adapter.apply("session-a", ContextSnapshot::new(1, "old-1")).unwrap();
-        adapter.apply("session-a", ContextSnapshot::new(2, "old-2")).unwrap();
+        adapter
+            .apply("session-a", ContextSnapshot::new(1, "old-1"))
+            .unwrap();
+        adapter
+            .apply("session-a", ContextSnapshot::new(2, "old-2"))
+            .unwrap();
 
         adapter.clear("session-a").unwrap();
         assert!(adapter.applied_snapshot("session-a").is_none());
 
-        adapter.apply("session-a", ContextSnapshot::new(1, "fresh")).unwrap();
+        adapter
+            .apply("session-a", ContextSnapshot::new(1, "fresh"))
+            .unwrap();
         let applied = adapter.applied_snapshot("session-a").unwrap();
         assert_eq!(applied.version, 1);
         assert_eq!(applied.content, "fresh");
@@ -319,12 +349,16 @@ mod tests {
     #[test]
     fn reconnect_reports_last_applied_version_not_a_rejected_attempt() {
         let mut adapter = InMemoryContextDeliveryAdapter::default();
-        adapter.apply("session-a", ContextSnapshot::new(1, "committed")).unwrap();
+        adapter
+            .apply("session-a", ContextSnapshot::new(1, "committed"))
+            .unwrap();
         adapter.disconnect("session-a").unwrap();
 
         assert_eq!(
             adapter.apply("session-a", ContextSnapshot::new(2, "not-delivered")),
-            Err(AdapterError::SessionDisconnected { session_id: "session-a".into() })
+            Err(AdapterError::SessionDisconnected {
+                session_id: "session-a".into()
+            })
         );
         assert_eq!(adapter.reconnect("session-a"), Ok(Some(1)));
         assert_eq!(adapter.applied_snapshot("session-a").unwrap().version, 1);
