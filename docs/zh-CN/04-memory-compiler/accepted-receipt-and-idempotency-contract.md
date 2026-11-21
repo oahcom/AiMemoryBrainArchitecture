@@ -1,10 +1,59 @@
+---
+document_metadata:
+  domain: memory-compiler
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope: null
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "04-memory-compiler/accepted-receipt-and-idempotency-contract.md @ 6888075ad1db4121f831332e2cdeece899a5f244"
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-21"
+      last_verification_note: "Canonical source and bilingual mirror path verified; design status remains as stated in the document."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Memory Compiler design specification: accepted-receipt-idempotency"
+    canonical_scope_id: "memory-compiler/accepted-receipt-idempotency"
+    canonical_scope_keywords:
+      - receipt
+      - idempotency
+      - completion
+      - retry
+      - replay
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "04-memory-compiler/accepted-receipt-and-idempotency-contract.md"
+    en: "docs/en/04-memory-compiler/accepted-receipt-and-idempotency-contract.md"
+    zh-CN: "docs/zh-CN/04-memory-compiler/accepted-receipt-and-idempotency-contract.md"
+---
+
 # Accepted Receipt、Compiler 完成与幂等契约
+
+- 规范源：[accepted-receipt-and-idempotency-contract.md](../../../04-memory-compiler/accepted-receipt-and-idempotency-contract.md)
+- 规范源 Blob：6888075ad1db4121f831332e2cdeece899a5f244
 
 - 文档 ID：E-RECEIPT-001
 - 版本：1.0
 - 源分支：session-e-memory-compiler-2026-11-16
-- 源文件版本：DEREFERENCED — 保留历史源 Blob `5ca77a5b48e69afb3bc81429baf538be7dce4d46`；当前仓库不存在可解析的规范性源文件。
-- 源规范：DEREFERENCED — 原规范源路径 `04-memory-compiler/accepted-receipt-and-idempotency-contract.md` 在当前 main tree 中不存在；替代物：[英文对照版](../../en/04-memory-compiler/accepted-receipt-and-idempotency-contract.md)（Blob `f2a4007f4b17e33de9bcd183c57ee504cfeef6cd`；仅为对照文本，不是规范性替代源）。
 - 对应英文：[Accepted Receipt, Compiler Completion and Idempotency Contract](../../en/04-memory-compiler/accepted-receipt-and-idempotency-contract.md)
 - 状态：E 的 CANDIDATE 契约；Storage 实现、D Producer API、H Envelope 和 I Policy 批准仍为 OPEN
 
