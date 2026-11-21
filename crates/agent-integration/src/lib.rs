@@ -4,6 +4,7 @@
 //! BMCP negotiation, or production telemetry.
 
 use std::collections::BTreeMap;
+use memory_context::{validate_snapshot, ContextError, ContextSnapshot};
 
 /// Capability tier demonstrated by an adapter.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
@@ -75,6 +76,10 @@ pub enum AdapterError {
         expected: u64,
         received: u64,
     },
+    /// A received version skips one or more required context versions.
+    VersionGap { current: u64, received: u64 },
+    /// A Brain-side snapshot failed canonical validation before delivery.
+    InvalidSnapshot { reason: String },
     /// The current version cannot be incremented without wrapping.
     VersionExhausted,
     /// The requested delivery-state transition is not permitted by the contract.
@@ -138,17 +143,36 @@ pub fn validate_full_boundary_apply(
 /// containing context identity, entries, and rendered-byte accounting.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct DeliveryPayload {
-    pub version: u64,
-    pub content: String,
+    version: u64,
+    content: String,
 }
 
 impl DeliveryPayload {
-    pub fn new(version: u64, content: impl Into<String>) -> Self {
-        Self {
-            version,
-            content: content.into(),
-        }
+    /// Build an adapter payload only from a validated Brain context snapshot.
+    pub fn from_snapshot(snapshot: &ContextSnapshot) -> Result<Self, AdapterError> {
+        validate_snapshot(snapshot).map_err(|error: ContextError| AdapterError::InvalidSnapshot {
+            reason: format!("{error:?}"),
+        })?;
+        let content = snapshot.serialize().map_err(|error| AdapterError::InvalidSnapshot {
+            reason: format!("{error:?}"),
+        })?;
+        Ok(Self { version: snapshot.context_version, content })
     }
+
+    pub fn version(&self) -> u64 { self.version }
+    pub fn content(&self) -> &str { &self.content }
+
+    /// Test-only fixture constructor; production code must use `from_snapshot`.
+    #[cfg(test)]
+    fn new_for_test(version: u64, content: impl Into<String>) -> Self {
+        Self { version, content: content.into() }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ApplyOutcome {
+    Applied,
+    AlreadyApplied,
 }
 
 /// Delivery lifecycle states (inference-boundary-model.md §5).
@@ -290,7 +314,7 @@ impl DeliveryRecord {
 /// removes the applied snapshot and resets that sequence. Reconnect reports
 /// only the last successfully applied version.
 pub trait ContextDeliveryAdapter {
-    fn apply(&mut self, session_id: &str, snapshot: DeliveryPayload) -> Result<(), AdapterError>;
+    fn apply(&mut self, session_id: &str, snapshot: DeliveryPayload) -> Result<ApplyOutcome, AdapterError>;
 
     fn clear(&mut self, session_id: &str) -> Result<(), AdapterError>;
 
@@ -326,7 +350,7 @@ pub struct InMemoryContextDeliveryAdapter {
 }
 
 impl ContextDeliveryAdapter for InMemoryContextDeliveryAdapter {
-    fn apply(&mut self, session_id: &str, snapshot: DeliveryPayload) -> Result<(), AdapterError> {
+    fn apply(&mut self, session_id: &str, snapshot: DeliveryPayload) -> Result<ApplyOutcome, AdapterError> {
         let state = self.sessions.entry(session_id.to_owned()).or_default();
         if !state.connected {
             return Err(AdapterError::SessionDisconnected {
@@ -334,22 +358,21 @@ impl ContextDeliveryAdapter for InMemoryContextDeliveryAdapter {
             });
         }
 
-        let expected = match state.applied.as_ref() {
-            Some(applied) => applied
-                .version
-                .checked_add(1)
-                .ok_or(AdapterError::VersionExhausted)?,
-            None => 1,
-        };
-        if snapshot.version != expected {
-            return Err(AdapterError::VersionMismatch {
-                expected,
-                received: snapshot.version,
-            });
+        if let Some(applied) = state.applied.as_ref() {
+            if snapshot.version == applied.version && snapshot == *applied {
+                return Ok(ApplyOutcome::AlreadyApplied);
+            }
         }
-
+        let current = state.applied.as_ref().map_or(0, |applied| applied.version);
+        let expected = current.checked_add(1).ok_or(AdapterError::VersionExhausted)?;
+        if snapshot.version > expected {
+            return Err(AdapterError::VersionGap { current, received: snapshot.version });
+        }
+        if snapshot.version != expected {
+            return Err(AdapterError::VersionMismatch { expected, received: snapshot.version });
+        }
         state.applied = Some(snapshot);
-        Ok(())
+        Ok(ApplyOutcome::Applied)
     }
 
     fn clear(&mut self, session_id: &str) -> Result<(), AdapterError> {
@@ -378,6 +401,71 @@ impl ContextDeliveryAdapter for InMemoryContextDeliveryAdapter {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn test_snapshot(version: u64, content: &str) -> ContextSnapshot {
+        use memory_context::{build_context, ContextBudget, ContextCandidate, ContextIdentity, ContextTier};
+        use memory_domain::{MemoryLifecycle, OpaqueId, ScopeKind, ScopeRef};
+        let id = |value: &str| OpaqueId::new(value).unwrap();
+        let scope = ScopeRef { scope_id: id("scope"), scope_kind: ScopeKind::User, namespace_key: "user:test".into() };
+        let identity = ContextIdentity {
+            context_id: id("context"), scope_refs: vec![scope.clone()], agent_id: id("agent"),
+            agent_instance_id: id("instance"), session_id: id("session"), task_id: None,
+            environment_id: None, purpose: "adapter test".into(), schema_version: "1".into(),
+        };
+        let candidate = ContextCandidate {
+            entry_id: id("entry"), memory_id: id("memory"), memory_version_id: id("memory-version"),
+            memory_lifecycle: MemoryLifecycle::Active, scope_refs: vec![scope], tier: ContextTier::P0,
+            priority: 0, activation_reason: "test fixture".into(), rendered_content: content.into(),
+            source_refs: vec![id("source")], evidence_refs: vec![], epistemic_qualifiers: vec![],
+            content_hash: "test-hash".into(),
+        };
+        build_context(identity, version, ContextBudget { max_entries: 8, max_rendered_bytes: 4096 }, vec![candidate]).unwrap()
+    }
+
+    #[test]
+    fn from_snapshot_validates_and_serializes_the_canonical_snapshot() {
+        let snapshot = test_snapshot(1, "canonical");
+        let payload = DeliveryPayload::from_snapshot(&snapshot).unwrap();
+        assert_eq!(payload.version(), snapshot.context_version);
+        assert_eq!(payload.content(), snapshot.serialize().unwrap());
+        let mut invalid = snapshot;
+        invalid.rendered_bytes += 1;
+        assert!(matches!(DeliveryPayload::from_snapshot(&invalid), Err(AdapterError::InvalidSnapshot { .. })));
+    }
+
+    #[test]
+    fn reapplying_identical_snapshot_returns_already_applied_without_mutation() {
+        let mut adapter = InMemoryContextDeliveryAdapter::default();
+        let payload = DeliveryPayload::from_snapshot(&test_snapshot(1, "same")).unwrap();
+        assert_eq!(adapter.apply("session-a", payload.clone()), Ok(ApplyOutcome::Applied));
+        let before = adapter.applied_snapshot("session-a").unwrap().clone();
+        assert_eq!(adapter.apply("session-a", payload), Ok(ApplyOutcome::AlreadyApplied));
+        assert_eq!(adapter.applied_snapshot("session-a"), Some(&before));
+        assert_eq!(adapter.apply("session-a", DeliveryPayload::new_for_test(1, "different")),
+            Err(AdapterError::VersionMismatch { expected: 2, received: 1 }));
+    }
+
+    #[test]
+    fn skipped_context_version_returns_version_gap_without_mutation() {
+        let mut adapter = InMemoryContextDeliveryAdapter::default();
+        adapter.apply("session-a", DeliveryPayload::new_for_test(1, "first")).unwrap();
+        let before = adapter.applied_snapshot("session-a").unwrap().clone();
+        assert_eq!(adapter.apply("session-a", DeliveryPayload::new_for_test(3, "third")),
+            Err(AdapterError::VersionGap { current: 1, received: 3 }));
+        assert_eq!(adapter.applied_snapshot("session-a"), Some(&before));
+    }
+
+    #[test]
+    fn disconnect_preserves_last_applied_snapshot_but_rejects_new_apply() {
+        let mut adapter = InMemoryContextDeliveryAdapter::default();
+        adapter.apply("session-a", DeliveryPayload::new_for_test(1, "committed")).unwrap();
+        let before = adapter.applied_snapshot("session-a").unwrap().clone();
+        adapter.disconnect("session-a").unwrap();
+        assert_eq!(adapter.applied_snapshot("session-a"), Some(&before));
+        assert_eq!(adapter.apply("session-a", DeliveryPayload::new_for_test(2, "blocked")),
+            Err(AdapterError::SessionDisconnected { session_id: "session-a".into() }));
+        assert_eq!(adapter.applied_snapshot("session-a"), Some(&before));
+    }
 
     #[test]
     fn legal_tier_three_telemetry_call_is_allowed() {
@@ -434,15 +522,15 @@ mod tests {
     fn applying_a_valid_successor_updates_the_applied_version() {
         let mut adapter = InMemoryContextDeliveryAdapter::default();
         adapter
-            .apply("session-a", DeliveryPayload::new(1, "first"))
+            .apply("session-a", DeliveryPayload::new_for_test(1, "first"))
             .unwrap();
         adapter
             .apply("session-a", DeliveryPayload::new(2, "second"))
             .unwrap();
 
         let applied = adapter.applied_snapshot("session-a").unwrap();
-        assert_eq!(applied.version, 2);
-        assert_eq!(applied.content, "second");
+        assert_eq!(applied.version(), 2);
+        assert_eq!(applied.content(), "second");
     }
 
     #[test]
@@ -461,10 +549,7 @@ mod tests {
         );
         assert_eq!(
             adapter.apply("session-a", DeliveryPayload::new(3, "skipped")),
-            Err(AdapterError::VersionMismatch {
-                expected: 2,
-                received: 3
-            })
+            Err(AdapterError::VersionGap { current: 1, received: 3 })
         );
         assert_eq!(adapter.applied_snapshot("session-a").unwrap().version, 1);
         assert_eq!(
