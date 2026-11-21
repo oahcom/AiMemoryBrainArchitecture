@@ -433,24 +433,111 @@ Storage L4 继续保持 OPEN / NOT APPROVED。
 
 以下矩阵对逻辑 Claim/Fact 发布操作具有规范效力。
 
-六个组件顺序如下：
+七个逻辑分量定义如下：
 
 1. D Fence
-2. Admission
-3. D 规范提交
-4. E Publication
-5. Storage Visibility
-6. G Context Commit
+2. Producer Admission（生产者准入）
+3. D Canonical Commit（D 规范提交）
+4. E Publication（E 发布）
+5. PublicationParticipant Admission（发布参与者准入）
+6. Storage Visibility（存储可见性）
+7. G Context Commit（G 上下文提交）
 
-Producer Admission 成功与精确已准入 Participant 的
-持久化记录 MUST 在权威串行化 Fence/Admission 边界内
-构成一个不可分割的操作。
+两个准入阶段 MUST 保持独立，MUST NOT 被视为别名或可互换的操作。
 
-后续 Forget Fence MUST NOT 在已准入 Participant
-记录对该 Barrier 持久可见之前，线性化或完成
-Participant Barrier 评估。
+规范执行顺序如下：
 
-| 场景 | D Fence | Admission | D 规范提交 | E Publication | Storage Visibility | G Context Commit | 禁止的半发布或重复可见效果 |
+1. D Fence 建立权威排序边界。
+2. Producer Admission 持久记录精确准入的 Producer 参与者。
+3. 完整的直接及传递依赖集合完成持久登记。
+4. D Canonical Commit 提交精确的规范版本及必需的规范引用。
+5. E Publication 生成精确的发布制品。
+6. Storage Visibility 首先将精确的发布元组持久保存为 PREPARED_HIDDEN。
+7. PublicationParticipant Admission 针对当前 ForgetFence，核验精确的已提交发布身份。
+8. Storage Visibility 仅执行获得授权的后续可见性处理。
+9. G Context Commit 提交或恢复精确的授权 ContextVersion。
+
+PREPARED_HIDDEN 是 Storage Visibility 分量的强制入口状态。其持久化 MUST 先于 PublicationParticipant Admission，而可见性推进 MUST 后于 PublicationParticipant Admission 成功。
+
+成功的 Producer Admission 与精确准入 Producer 参与者的持久记录 MUST 在权威串行化 Fence/Admission 边界下构成不可分割的操作。
+
+成功的 PublicationParticipant Admission MUST 绑定精确的已提交发布身份，以及原始 Producer 登记的依赖闭包。该准入行为 MUST NOT 创建、替换、缩小或独立重新定义该依赖闭包。
+
+后续 Forget Fence MUST 直到每个成功的 Producer Admission 均已使其精确参与者记录持久可见后，才进行线性化或完成其参与者屏障评估。
+
+PublicationParticipant Admission MUST 独立地针对权威 ForgetFence 排序边界进行串行化。成功的 Producer Admission MUST NOT 被解释为成功的 PublicationParticipant Admission。
+
+#### Forget 终态 × 分量处置矩阵
+
+本矩阵是 implementation-conformance gate（实现一致性门禁）。
+它规定每一种 Forget 终态下每个逻辑分量的强制处置。
+
+四种终态互斥且共同穷尽。每个进入终态的 Forget 操作 MUST 且只能声明其中一种终态。
+
+| Forget 终态 | D Fence | Producer Admission | D Canonical Commit | E Publication | PublicationParticipant Admission | Storage Visibility | G Context Commit |
+|---|---|---|---|---|---|---|---|
+| Completed | MUST 完成 | MUST 完成 | MUST 完成 | MUST 完成 | MUST 完成 | MUST 完成 | MUST 完成 |
+| CompletedWithPolicyException | MUST 完成 | MUST 完成或具有可审计的抑制处置 | MUST 完成或保持已提交但 MUST 保持非公开 | MUST 完成或保持非公开 | MUST 完成或具有可审计的抑制处置 | MUST 完成，或在获批残余例外下保持不可见 | 仅在全部发布前置条件及例外证据完整后 MAY 提交 |
+| Failed | MUST 完成或保留其权威结果 | MUST 具有可审计的完成或抑制处置 | MAY 保持已提交，但 MUST 保持非公开 | MAY 保持已发布，但 MUST 撤销公开可见性或隔离 | 终止 Fence 后 MUST NOT 新准入；既有准入 MUST 具有可审计处置 | MUST 保持不可见，或被取消或隔离 | MUST NOT 提交 |
+| Cancelled | MUST 完成或保留其权威结果 | MUST 具有可审计的完成或抑制处置 | MAY 保持已提交，但 MUST 保持非公开 | MAY 保持已发布，但 MUST 撤销公开可见性或隔离 | 终止 Fence 后 MUST NOT 新准入；既有准入 MUST 具有可审计处置 | MUST 保持不可见，或被取消或隔离 | MUST NOT 提交 |
+
+以下规则是对矩阵的规范性解释。
+
+**1. Completed**
+
+- 最后允许可见的分量是 G Context Commit。
+- 精确的规范版本 MUST 与已完成的 Forget 结果保持一致。
+- 每个 E Artifact MUST 具有经过授权的终态发布处置。
+- 每个 PREPARED_HIDDEN 元组 MUST 完成其获授权的可见性处理。
+- 每个已准入参与者及每个已登记依赖 MUST 具有可审计的完成或抑制处置。
+- 审计证据 MUST 证明精确的 Forget 操作身份、ForgetFence 结果、完整依赖闭包、两个准入结果、规范提交回执、发布身份、Storage Visibility 结果及 ContextVersion。
+- MUST NOT 存在未决（UNKNOWN）。
+
+**2. CompletedWithPolicyException**
+
+- 最后允许可见的分量是 G Context Commit，但 MUST 遵守本节限制。
+- 规范版本 MAY 保持持久提交，但其公开可见性 MUST 与获批准的 Forget 结果一致。未经授权的规范版本 MUST 保持非公开。
+- 已存在的 E Artifact MAY 保持持久存储，但仅限于其已撤销公开可见性或保持隔离的情况。
+- PREPARED_HIDDEN 元组 MUST 保持不可见，除非其精确的可见性推进另行获得授权。
+- 只有在精确 ContextVersion 的全部前置条件均满足时，G Context Commit 才 MAY 发生。策略例外 MUST NOT 授权原本被禁止的可见性推进。
+- 例外 MUST 明确列出每个受影响分量、每个残余目标、获批准的残余状态、批准权限主体及适用证据。
+- 负责 I 治理的授权主体 MUST 在终态声明之前明确批准残余例外。
+- 审计证据 MUST 包含适用于已完成分量的 Completed 全部证据，以及明确的批准记录和残余清单。
+- MUST NOT 存在未决（UNKNOWN）。未决目标 MUST NOT 在没有权威已决处置的情况下被表示为已批准残余。
+
+**3. Failed**
+
+- 最后允许的外部可见分量是权威 D Fence 和操作状态记录。此前已提交的规范状态 MUST NOT 因此变为公开可见。
+- 已提交的 Canonical Revision MAY 保持持久提交，但 MUST 保持非公开。
+- 已发布的 E Artifact MUST 撤销公开可见性或进入隔离。MUST NOT 将其重新发布为成功的可见效果。
+- 每个 PREPARED_HIDDEN 元组 MUST 被取消或隔离，并 MUST 保持不可见。
+- 已存在的 PublicationParticipant MUST 获得可审计的抑制或隔离处置。尚未成功通过 PublicationParticipant Admission 的参与者 MUST NOT 被视为已准入。
+- G Context Commit MUST NOT 发生。
+- 审计证据 MUST 标识失败原因、精确的最后权威分量结果、全部已准入参与者、全部已登记依赖、规范提交回执、既有发布身份、元组处置，以及抑制或隔离证据。
+- MUST NOT 存在未决（UNKNOWN）。无法解决权威结果时，操作 MUST 保持非终态，而 MUST NOT 被静默转换为 Failed。
+
+**4. Cancelled**
+
+- 最后允许的外部可见分量是权威 D Fence 和操作状态记录。此前已提交的规范状态 MUST NOT 因此变为公开可见。
+- 已提交的 Canonical Revision MAY 保持持久提交，但 MUST 保持非公开。
+- 已发布的 E Artifact MUST 撤销公开可见性或进入隔离。
+- 每个 PREPARED_HIDDEN 元组 MUST 被取消或隔离，并 MUST 保持不可见。
+- 每个此前已准入参与者 MUST 获得可审计的取消或抑制处置。尚未成功通过 PublicationParticipant Admission 的参与者 MUST NOT 被视为已准入。
+- G Context Commit MUST NOT 发生。
+- 取消 MUST 具有明确的权威取消结果。执行失败 MUST NOT 被重新标记为 Cancelled。
+- 审计证据 MUST 标识取消权限主体、取消结果、精确的最后权威分量、全部已准入参与者、全部已登记依赖、规范提交回执、发布身份、元组处置，以及取消或抑制证据。
+- MUST NOT 存在未决（UNKNOWN）。尚未解决的取消结果 MUST NOT 被声明为 Cancelled。
+
+以下分类规则保证四种终态互斥：
+
+- 仅当每个分量及每个已登记依赖均满足完整终态要求，且不存在获批准的残余例外时，MUST 声明 Completed。
+- 仅当 I 治理授权主体明确批准了已标识的残余例外，且其余终态要求均已满足时，MUST 声明 CompletedWithPolicyException。
+- 当权威执行失败阻止成功完成，且不存在取代该失败的权威取消结果时，MUST 声明 Failed。
+- 仅当存在权威取消结果，且操作根据该结果终止时，MUST 声明 Cancelled。
+
+只要任何分量结果、参与者处置、依赖处置、发布身份或必需证据仍为未决（UNKNOWN），MUST NOT 声明终态。
+
+| 场景 | D Fence | Producer Admission | D 规范提交 | E Publication | Storage Visibility | G Context Commit | 禁止的半发布或重复可见效果 |
 |---|---|---|---|---|---|---|---|
 | Fence before Admission（T17） | Fence 先线性化 | MUST 拒绝准入 | MUST NOT 提交 | MUST NOT 发布 | MUST NOT 推进 | MUST NOT 提交 | 不得出现任何规范 Revision、Artifact、Serving Reference 或 ContextVersion |
 | Fence after Admission（T18） | Fence 发现持久 Participant | 原已准入操作保持可识别 | 按声明的完成/抑制策略处置 | 仅授权终态结果可发布 | 仅授权终态结果可推进 | 仅精确授权结果可提交 | Fence MUST NOT 在遗漏已准入 Participant 的情况下完成屏障 |
@@ -459,6 +546,57 @@ Participant Barrier 评估。
 | Lost ACK | 保留权威操作状态 | 查询原始 Operation identity | 返回原提交 Receipt | 解析原 Publication identity | 返回原可见性结果 | 解析原 ContextVersion identity | ACK 丢失 MUST NOT 产生第二个逻辑操作或重复可见效果 |
 | Retry | 复用原始 Operation identity 与请求摘要 | 返回原准入结果 | 幂等 Receipt 查询 | 幂等发布 | 幂等可见性解析 | 幂等 Context 提交 | 不得重复 Participant、Publication、Visibility 转换或 ContextVersion |
 | Crash after Storage Visibility | 保留精确 Participant 与 Fence 处置 | 解析原 Admission | 验证原规范提交 | 验证原 Publication | 恢复精确已提交可见性结果 | 提交或恢复精确 ContextVersion | 不得第二次推进可见性；不得重复 ContextVersion |
+
+#### 第二阶段准入竞争矩阵
+
+以下四种时序情况具有规范效力。
+它们分别区分 Producer Admission 竞争与
+PublicationParticipant Admission 竞争。
+
+T17-P 和 T18-P 分别细化现有 T17 和 T18
+场景。它们 MUST 保留 Fence before Admission
+和 Fence after Admission 的原有含义。
+
+T17-PUB 和 T18-PUB 描述独立的
+PublicationParticipant Admission 竞争。
+它们 MUST NOT 重新解释或替代第一阶段场景。
+
+| 场景 | D Fence 排序 | Producer Admission 与依赖闭包 | Canonical Revision 可见性 | 已存在的 E Publication | PREPARED_HIDDEN 元组 | PublicationParticipant 处置 | 恢复与重试不变量 |
+|---|---|---|---|---|---|---|---|
+| T17-P | Fence 在线性化顺序上先于 Producer Admission | Producer Admission MUST 拒绝；依赖登记 MUST NOT 授权后续分量 | 不得产生新的规范提交；任何此前存在的版本 MUST 保持非公开 | 不得产生新的发布 | 被拒绝的操作 MUST NOT 创建该元组 | 不存在已准入的 Producer 参与者 | 原始拒绝结果 MUST 具有权威性；重试 MUST NOT 创建新的准入 |
+| T18-P | Producer Admission 在线性化顺序上先于 Fence | 精确 Producer 参与者 MUST 被持久记录；完整依赖闭包 MUST 完成登记，否则 MUST 明确保持不完整并阻断 | 仅在原始已准入操作下 MAY 提交；在获得独立授权之前 MUST 保持非公开 | 仅在原始操作下 MAY 存在；在第二阶段准入及可见性授权之前 MUST 保持非公开 | MAY 持久准备，但 MUST 保持隐藏 | 第一阶段参与者 MUST 保持可识别；后续处置 MUST 关联该精确参与者 | Fence MUST 处理原始参与者；恢复 MUST NOT 替换 Operation 身份或遗漏其依赖 |
+| T17-PUB | Fence 在线性化顺序上先于 PublicationParticipant Admission | 先前的 Producer Admission 和依赖登记 MUST 保持记录，且 MUST NOT 被删除或缩小 | 已提交版本 MAY 保持提交，但 MUST 保持非公开 | 已存在的 E Publication MUST 撤销公开可见性或进入隔离 | MUST 被取消或隔离；MUST 保持不可见 | PublicationParticipant Admission MUST 拒绝；第一阶段 Producer 参与者 MUST 获得覆盖该被拒绝发布的可审计抑制处置 | 恢复 MUST 保留拒绝和隔离结果；任何重放、重试或替代发布路径 MUST NOT 暴露该元组 |
+| T18-PUB | PublicationParticipant Admission 在线性化顺序上先于 Fence | 原始 Producer 参与者及完整已登记依赖闭包 MUST 保持可识别 | 已提交版本 MAY 保持提交；可见性 MUST 遵循精确的授权终态处置 | 已存在的 E Publication MUST 绑定原始发布身份；MUST NOT 独立变为可见 | MUST 保持持久可识别；MAY 为获授权处置或恢复而保持隐藏 | 成功准入的 PublicationParticipant MUST 纳入 Fence 屏障，并获得可审计的完成或抑制处置 | 恢复 MUST 解决原始发布身份及 Fence 处置；MUST NOT 发生重复准入或可见性重复推进 |
+
+**T17-P 和 T18-P 的对应关系**
+
+- T17-P 对应现有 Fence before Admission (T17)。
+  原场景中的 Admission 指 Producer Admission。
+  先线性化的 Fence MUST 拒绝 Producer Admission。
+- T18-P 对应现有 Fence after Admission (T18)。
+  原场景中的 Admission 指 Producer Admission。
+  Fence MUST 观察到持久化的 Producer 参与者记录，
+  且 MUST NOT 在其屏障中遗漏该参与者。
+
+**T17-PUB 和 T18-PUB 的对应关系**
+
+- T17-PUB 表示 Fence 先于第二阶段准入。
+  它 MUST NOT 撤销此前成功的 Producer Admission、
+  规范提交、E Publication 或 PREPARED_HIDDEN 持久化。
+  它阻止的是后续 PublicationParticipant Admission
+  和可见性推进。
+- T18-PUB 表示 PublicationParticipant Admission
+  先于第二阶段 Fence。Fence MUST 观察到精确准入的
+  PublicationParticipant，并 MUST 将其纳入屏障。
+
+以下防复活要求适用于全部四种场景：
+
+1. 每个 PREPARED_HIDDEN 元组 MUST 绑定精确的发布身份、原始 Operation 身份、Producer 参与者、已登记依赖闭包及权威 ForgetFence 处置。
+2. 被拒绝的 PublicationParticipant Admission MUST 产生与原始 Producer 参与者关联的可审计抑制处置。第二阶段准入的缺失 MUST NOT 删除或绕过第一阶段参与者义务。
+3. 恢复在执行任何可见性推进之前 MUST 核验权威准入记录、Fence 记录及抑制或完成记录。
+4. 重试 MUST 重用原始 Operation 身份及发布身份。MUST NOT 创建另一个参与者，或将被拒绝的准入重新解释为成功。
+5. 替代发布路径 MUST 执行相同的 ForgetFence 和 PublicationParticipant 授权边界。MUST NOT 绕过被拒绝或未决的第二阶段准入。
+6. 未能证明第二阶段准入成功且可见性结果获得授权的元组 MUST 保持不可见。证据缺失、冲突或未决（UNKNOWN）时 MUST 失效关闭（fail closed）。
 
 在权威结果得到解析之前，UNKNOWN MUST 保持非最终状态。
 
