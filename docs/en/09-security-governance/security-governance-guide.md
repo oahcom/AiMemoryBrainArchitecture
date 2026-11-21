@@ -153,8 +153,6 @@ Each authorization decision MUST bind:
 6. Delegation: explicit ALLOWED or PROHIBITED decision.
 7. Decision identity: immutable AuthorizationDecisionRef and policy/version reference.
 
-<!-- insert after §12.3 item 7, before "The decision MUST also retain its issuing authority and decision provenance." -->
-
 8. **Unique Attestation Operation Binding:** Each authorization decision MUST bind to exactly one immutable `AttestationOperationRef`. The binding MUST identify the exact `FactRef` and `FactRevisionRef` targeted by that operation.
 
 9. **Exact Claim and Evidence Binding:** Each authorization decision MUST bind to the complete, exact set of `ClaimRevisionRef` values and `EvidenceRef` values used by the authorized operation. The sets MUST be unambiguous and immutable for that operation. The decision MUST NOT authorize an unspecified, subsequently expanded, substituted, or implicitly resolved set of claims or evidence. The decision MUST also bind the exact `ProvenanceRef` values when provenance references form part of the operation's attested input.
@@ -214,8 +212,6 @@ Before committing a FactRevision, D MUST:
 9. Bind the exact authorization decision reference to the FactRevision.
 10. Persist the decision reference and verification outcome in the auditable commit record.
 
-<!-- insert after §12.6 item 10 -->
-
 11. **Unique Operation Binding Verification:** D MUST verify that the `AuthorizationDecisionRef` is bound to exactly one `AttestationOperationRef` and that the current attestation submission presents that exact operation reference.
 
 12. **Exact Target Verification:** D MUST verify that the `FactRef` and `FactRevisionRef` bound by the authorization decision exactly match the target of the current submission. Any missing, ambiguous, substituted, or mismatched target reference MUST fail closed.
@@ -233,8 +229,6 @@ D MUST preserve the exact AuthorizationDecisionRef, Attestor principal reference
 D MUST reject an attestation with missing authorization evidence or an authorization reference that cannot be resolved and validated.
 
 D verifies contract compliance and reference integrity. It does not replace I's governance judgment.
-
-<!-- append to the end of §12.6 -->
 
 **Semantic Contract and Implementation-Conformance Boundary**
 
