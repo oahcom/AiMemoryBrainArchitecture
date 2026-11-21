@@ -23,6 +23,12 @@ Phase 2 covers:
 
 Phase 2 does **not** cover Phase 3, runtime retrieval/ranking, compiler extraction, context planning/version lifecycle, BMCP wire schemas, Storage DDL/transaction mechanics, authorization policy, cryptographic trust, or physical Forget implementation.
 
+
+
+### Phase classification caveat
+
+All ten files present in `02-domain-model/` at the baseline are Phase-1-scoped; none names Phase 2. The six foundational model documents describe a broader logical schema, while `phase-1-domain-model-freeze.md` deliberately freezes the smaller minimum implementation loop. Therefore, the Phase 2 label in this proposal is the GAP-05 delivery grouping for domain concepts not represented by the current Rust crate; it is **not** a claim that the source documents originally classified those concepts as Phase 2. Existing DECIDED semantics are carried forward, not re-decided. OPEN/CANDIDATE items remain open. Where a concept is described as Phase 1 in the broader logical schema but omitted from the minimum freeze and Rust model, this is recorded as an implementation/representation gap rather than silently rewriting the Phase 1 decision history.
+
 ## 2. Evidence-based gap assessment
 
 | Missing or under-modelled concept | Where required | Phase 1 state | Phase 2 disposition |
