@@ -87,6 +87,8 @@ BMCP 契约中的 ProducerWork Registration Ledger Namespace 和 ForgetFence Cur
 
 **与 Phase 1 的关系：** 两种类型均为新增，不替换 Claim 或 Evidence。
 
+**PENDING 语义决策——固定 ClaimRevision 被撤回后的处理：** 当前规范来源尚未决定：当 FactRevision 固定的某个精确 ClaimRevision 后续被标记为 `Retracted` 时，该 FactRevision 应如何处置。`epistemic-and-temporal-semantics.md` §2、§9 规定 Claim 状态变更采用追加式历史并保留历史断言；`domain-model-overview.md` §3.15 和 `OWNER-DECISION-FACT-CLAIM-001` §2、§5 要求 Fact 固定精确、不可变的 ClaimRevision，但没有规定该撤回状态如何影响 Fact。当前不选择继续有效、失效、追加 FactRevision 或抑制中的任何一种处理方式。本事项保持 **PENDING**，必须有明确语义裁定；实现不得静默推断处理结果。
+
 **PENDING CROSS-OWNER DECISION：** I 必须定义/批准 Attestor 主体身份、授权决定语义，以及授权引用的安全含义。D 必须确认 Fact/FactRevision 的规范提交、Revision 和 Forget/依赖语义。在两个决策绑定到同一精确契约版本之前，这些字段仅是语义占位引用；实现不得自行推断授权或规范接收结果。
 
 ### 3.3 Entity 身份
@@ -265,16 +267,17 @@ ScopeRef 仍是领域适用范围/命名空间引用，不是授权 Grant。OPEN
 
 | 规格条目 | 状态 | 可执行证明 |
 |---|---|---|
-| ClaimRef / ClaimRevisionRef / ClaimRevision | TYPED | `dm2_01_claim_revision_parent_must_belong_to_same_claim`、`dm2_02_claim_revision_is_append_only_and_immutable`；compile-fail doctest 证明不同引用类型混用及修改操作会被拒绝 |
-| FactRef / FactRevisionRef / Fact / FactRevision | TYPED | `dm2_03_fact_refs_are_distinct_and_fact_pins_exact_claim_revision`、`dm2_04_fact_cannot_be_constructed_without_claim_evidence_provenance`；compile-fail doctest 证明仅凭 confidence/Verified 无法构造 Fact |
-| Entity 身份扩展 | TYPED | `dm2_05_entity_merge_requires_successor_lineage_but_alias_does_not` |
-| Relation 类型化端点及有效时间区分 | TYPED | `dm2_06_relation_endpoint_kind_is_checked_against_definition`、`dm2_08_unknown_valid_time_is_not_timeless` |
+| ClaimRef / ClaimRevisionRef / ClaimRevision | TYPED | `dm2_01_claim_revision_parent_must_belong_to_same_claim`；`dm2_02_claim_revision_is_append_only_and_immutable` 在追加后继 Revision 前后序列化父 Revision，并证明字节完全一致；compile-fail doctest 证明不同引用类型混用及修改操作会被拒绝 |
+| FactRef / FactRevisionRef / Fact / FactRevision | TYPED | `dm2_03_fact_refs_are_distinct_and_fact_pins_exact_claim_revision`；`dm2_09_fact_pinning_does_not_follow_claim_head_after_append` 追加 Claim Revision 2 后，解析 Fact 固定的 Revision 1，证明引用未跟随 Head；`dm2_04_fact_cannot_be_constructed_without_claim_evidence_provenance`；compile-fail doctest 证明仅凭 confidence/Verified 无法构造 Fact |
+| Entity 身份扩展 | TYPED | `dm2_05_entity_merge_requires_successor_lineage_but_alias_does_not` 证明 A 指向后继 B、B 不反向指向 A，且 A 的 aliases/带 Scope 外部标识符迁移到 B |
+| Relation 类型化端点及有效时间区分 | TYPED | `dm2_06_relation_endpoint_kind_is_checked_against_definition` 在词汇表仅允许 (Entity, Entity) 时拒绝 (Entity, Claim)；`dm2_08_unknown_valid_time_is_not_timeless` |
 | Evidence 扩展 | TYPED | `dm2_07_evidence_extension_requires_integrity_and_scope` |
 | Provenance 图扩展 | NOT TYPED | 仅新增 `ProvenanceRef` newtype；尚无扩展后的 Provenance 记录或 DAG 校验 |
 | MemorySource 扩展 | NOT TYPED | 本轮明确排除 |
 | 时间精度/时区/确定性扩展 | NOT TYPED | 仅类型化并测试了 Relation 的 Unknown 与 AllTime 有效时间区别 |
 | I 授权与 Attestor 语义 | PLACEHOLDER ONLY | 必需的 `AttestorRef` 和 `AuthorizationDecisionRef` 占位类型明确标注 `NOT DEFINED: awaiting I` |
 | D 规范提交语义 | PLACEHOLDER ONLY | 必需的 `CanonicalCommitRef` 占位类型明确标注 `NOT DEFINED: awaiting D` |
+| 固定 ClaimRevision 被撤回后的 Fact 处置 | PENDING | 已审阅的规范来源及 PR #446 决策均无此规则；在明确语义裁定前，不声称存在处理行为或测试 |
 
 Entity、Relation 和 Evidence 的 Phase 1 结构体保持源码兼容；Phase 2 语义通过新增扩展记录表达。Claim 保持不变，ClaimRevision 为新增类型。Fact 构造必须提供完整的初始 FactRevision 及其必需的 I/D 占位字段。
 
