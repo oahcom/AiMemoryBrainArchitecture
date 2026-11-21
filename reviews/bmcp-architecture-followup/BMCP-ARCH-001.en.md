@@ -18,7 +18,7 @@ The Compiler Fact/Claim mapping remains ADR-BLOCKED. BMCP MUST NOT freeze canoni
 
 Issue #7's recorded binding remains IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE. GitHub currently reports Issue #7 CLOSED / not_planned under the Owner phase-closure ruling; this work does not reopen or alter it. Deferral is not Runtime authorization.
 
-**Naming conflict:** the public BMCP guide expands BMCP as “Brain Memory Context Protocol”; task wording also uses “Brain Memory Control Protocol”. This document uses “BMCP” only. H / Architecture Governance must settle the canonical expansion before any rename.
+**Canonical name:** the repository canonical terminology at `00-governance/terminology.md` defines BMCP as **Brain Memory Context Protocol** (main `f23906dc75256a6ffb90051a6c0888d0dd247e62`, terminology Blob `c7e0ca36fcff7cdc8fdd1367dbaa77e494bd1eef`). The initial dispatch phrase “Brain Memory Control Protocol” is non-canonical for this repository and is rejected. H must retain “Context” in protocol documentation; no naming decision remains open.
 
 ## 2. Exact source ledger
 
@@ -40,7 +40,8 @@ Main pins are from fetched origin/main at the baseline above. H pins are from th
 | docs/en/07-agent-integration/agent-integration-guide.md | main | c4e076887634a9e8e46df076efb0f4b70d816e0a | C-owned Agent boundary |
 | docs/en/03-memory-brain/forget-fence-and-completion-contract.md | main | c791895333ab6140f035f4f622d5dee9325d422d | D/I Forget boundary |
 | docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md | main | 9c054932994bb078e2834df8bd66f73895aa04f5 | D lifecycle/Fence |
-| 13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md | main | 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593 | ADR-BLOCKED |
+| 13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md | main | 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593 | ADR-BLOCKED for schema freeze |
+| 14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md | PR #438 @ `60fb3a6a36bcd2ebe9197e4a1c8d24302b34f168` | pending merge | Owner semantic selection: Option A + I1; explicitly does not unfreeze schema |
 
 This is a bounded source ledger, not a claim that every H artifact or consumer was independently reviewed.
 
@@ -225,19 +226,19 @@ H-owned questions go to H first; they are not disguised as Owner decisions.
 **H-CONFIRM-001 — Envelope / request identity**
 - MODULE: BMCP / H
 - ISSUE_OR_ADR: H message-envelope-and-versioning.md; protocol-overview.md
-- DECISION_REQUIRED: canonical BMCP expansion; whether message_id is request identity or distinct request_id; exact response correlation; requiredness of version/type/payload schema/idempotency; operation registry and unknown-operation behavior.
-- CURRENT_FACTS: H envelope is CANDIDATE; public guide says “Brain Memory Context Protocol”; task wording says “Brain Memory Control Protocol”.
+- DECISION_REQUIRED: whether message_id is the request identity or a distinct request_id; exact response correlation; requiredness of version/type/payload schema/idempotency; operation registry and unknown-operation behavior.
+- CURRENT_FACTS: canonical BMCP expansion is settled by `00-governance/terminology.md` as Brain Memory Context Protocol. H envelope remains CANDIDATE; current candidate uses message_id and does not define a separate request_id.
 - H_OWNED_CONTRACTS: envelope, versioning and wire names remain H-owned.
 - CROSS_MODULE_CONFLICT: C Request/Attempt IDs, H Message ID and domain Operation ID are not interchangeable.
-- OPTIONS: retain existing expansion and message_id; or publish a distinct command ID with explicit mapping.
-- RECOMMENDED_OPTION: preserve H ownership; keep IDs distinct; publish mapping before freeze.
+- OPTIONS: (A) use message_id as request identity and bind response causation to it; (B) introduce a distinct request_id/command identity with explicit message_id mapping.
+- RECOMMENDED_OPTION: H decides the exact identity model; C Request/Attempt, H Message/Request and domain Operation IDs remain distinct unless a versioned mapping explicitly relates them.
 - MEMORY_COMPILER_IMPACT: E receipt/idempotency identity remains distinct.
 - AGENT_INTEGRATION_IMPACT: C request/attempt mapping must be explicit.
 - D_I_IMPACT: no authority changes; identity claims still validated by D/I.
 - RUNTIME_IMPLEMENTATION_IMPACT: request/response correlation blocked pending H mapping.
 - REQUIRED_AUTHORITY: H, with C/E/G consumer review.
-- OWNER_DECISION: PENDING_H_CONFIRMATION
-- EVIDENCE: H envelope Blob 5547ecd78d118bd63e571e5daad87194d9b694e4.
+- OWNER_DECISION: NAME_RESOLVED_BY_CANONICAL_TERMINOLOGY; REQUEST_IDENTITY_PENDING_H_CONFIRMATION
+- EVIDENCE: `00-governance/terminology.md` Blob c7e0ca36fcff7cdc8fdd1367dbaa77e494bd1eef; H envelope Blob 5547ecd78d118bd63e571e5daad87194d9b694e4.
 - FOLLOW_UP_ACTIONS: H publishes versioned mapping; consumers review.
 
 **H-CONFIRM-002 — Wire decode / Parse boundary**
@@ -299,20 +300,20 @@ H-owned questions go to H first; they are not disguised as Owner decisions.
 **DECISION_REQUEST_ID: BMCP-DR-001**
 - MODULE: BMCP
 - ISSUE_OR_ADR: B-ADR-FACT-CLAIM-001 (13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md)
-- DECISION_REQUIRED: decide canonical Fact/Claim model and identity/version relationship; approve exact schema and consumer mapping only through ADR authority.
-- CURRENT_FACTS: B currently prefers Option A (separate Fact attestation and Claim proposition), but ADR is ADR-BLOCKED / NOT APPROVED; I-04/P-04 and domain overview are inconsistent.
-- H_OWNED_CONTRACTS: future wire field/schema mapping remains H-owned and unfrozen.
-- CROSS_MODULE_CONFLICT: E Candidate IR, D identity/lifecycle and H payload mapping cannot finalize a shared model while ADR is blocked.
-- OPTIONS: (A) approve Option A with examples/consumer review; (B) approve another explicit model and reconcile I-04/P-04; (C) keep payload opaque and defer dependent operations.
-- RECOMMENDED_OPTION: C interim; do not treat B's preference as approval.
+- DECISION_REQUIRED: reconcile B-ADR-FACT-CLAIM-001 with the Owner semantic selection, then complete the required consumer mapping and acceptance before any canonical schema or wire-field freeze.
+- CURRENT_FACTS: Owner semantic decision record `OWNER-DECISION-FACT-CLAIM-001` in PR #438 head `60fb3a6a36bcd2ebe9197e4a1c8d24302b34f168` selects Option A (separate Fact attestation and Claim proposition) with I1 (stable Claim identity plus immutable ClaimRevision). PR #438 is still Draft/unmerged. B-ADR-FACT-CLAIM-001 remains ADR-BLOCKED for canonical schema freeze and implementation mapping until its §8 consumer, migration/compatibility and conformance conditions are evidenced.
+- H_OWNED_CONTRACTS: future wire field/schema mapping remains H-owned and unfrozen; this semantic selection approves no wire field.
+- CROSS_MODULE_CONFLICT: semantic direction is selected, but E Candidate IR, D identity/lifecycle, I authorization/attestor policy, and H payload mapping still require exact consumer acceptance and source pins before a shared schema can be frozen.
+- OPTIONS: (A) preserve the selected Option A + I1 semantic direction while keeping payload fields opaque until the B ADR §8 gate is complete; (B) reopen the semantic choice only through a superseding Owner decision.
+- RECOMMENDED_OPTION: A; do not treat semantic selection as schema approval.
 - MEMORY_COMPILER_IMPACT: E remains candidate-neutral; no canonical Fact/Claim output schema.
 - AGENT_INTEGRATION_IMPACT: C carries only opaque approved refs.
 - D_I_IMPACT: D/I semantics unchanged; review consumers after B decision.
 - RUNTIME_IMPLEMENTATION_IMPACT: no final Fact/Claim payload/schema/migration until decision.
-- REQUIRED_AUTHORITY: authorized Architecture Governance decision-maker + B; D/E/I/H consumer review as applicable. Named governance decision-maker is NOT_RECORDED.
-- OWNER_DECISION: PENDING_OWNER_DECISION
-- EVIDENCE: ADR Blob 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593.
-- FOLLOW_UP_ACTIONS: identify authority; issue exact ADR disposition; then update consumers.
+- REQUIRED_AUTHORITY: Owner semantic selection is recorded in PR #438 under the standing Owner instruction; B/D/E/F/G/H/I consumer mapping and acceptance remain required for schema freeze.
+- OWNER_DECISION: SEMANTIC_DIRECTION_SELECTED_OPTION_A_I1; ADR_SCHEMA_FREEZE_STILL_BLOCKED
+- EVIDENCE: `OWNER-DECISION-FACT-CLAIM-001` PR #438 @ `60fb3a6a36bcd2ebe9197e4a1c8d24302b34f168`; B ADR Blob 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593.
+- FOLLOW_UP_ACTIONS: B updates ADR status/source pins; D/E/F/G/H/I record exact consumer mappings and acceptance; publish migration/compatibility plan and conformance scenarios; keep payload opaque until all §8 conditions are met.
 
 **DECISION_REQUEST_ID: BMCP-DR-002**
 - MODULE: BMCP
@@ -328,7 +329,7 @@ H-owned questions go to H first; they are not disguised as Owner decisions.
 - D_I_IMPACT: no authority change; exact interface publication and consumer review only.
 - RUNTIME_IMPLEMENTATION_IMPACT: protected handlers blocked until API/currentness evidence exists.
 - REQUIRED_AUTHORITY: D and I; H confirms wire mapping afterwards.
-- OWNER_DECISION: PENDING_OWNER_DECISION
+- OWNER_DECISION: DEFERRED_TO_D_I_INTERFACE_PUBLICATION; H MUST NOT INVENT AUTHORITY API OR CURRENTNESS SEMANTICS
 - EVIDENCE: H overview Blob b88ef3a6fd3be293e7c2e77d9652f386b169bc47; D Forget Blob c791895333ab6140f035f4f622d5dee9325d422d.
 - FOLLOW_UP_ACTIONS: D/I publish interfaces/vectors; H maps; BMCP updates crosswalk.
 
@@ -346,8 +347,8 @@ H-owned questions go to H first; they are not disguised as Owner decisions.
 - D_I_IMPACT: canonical identity/lifecycle and authorization remain D/I-owned.
 - RUNTIME_IMPLEMENTATION_IMPACT: gateway waits for H mapping and C acceptance.
 - REQUIRED_AUTHORITY: C + H; D/I review authority-bearing identity mapping.
-- OWNER_DECISION: PENDING_OWNER_DECISION
-- EVIDENCE: C guide Blob c4e076887634a9e8e46df076efb0f4b70d816e0a.
+- OWNER_DECISION: ARCHITECTURE_BASELINE_CONFIRMS_OPTION_A_MCP_AS_AGENT_FACING_ADAPTER_TO_BMCP; EXACT_MAPPING_PENDING_C_H_CONTRACT
+- EVIDENCE: C guide Blob c4e076887634a9e8e46df076efb0f4b70d816e0a; `07-agent-integration/agent-integration-overview.md` and `08-bmcp-protocol` ownership boundary.
 - FOLLOW_UP_ACTIONS: C/H publish mapping and conformance cases; no parallel API.
 
 ## 8. Runtime acceptance plan — NOT RUN
