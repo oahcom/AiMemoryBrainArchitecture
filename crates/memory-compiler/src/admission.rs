@@ -470,6 +470,67 @@ impl AdmissionStore {
         decode(&value)
     }
 
+
+    /// Read the request paired with a local producer receipt. This proves only
+    /// that a row exists in this local ledger; it is not external registry
+    /// authorization and must not be represented as such.
+    pub fn producer_request(
+        &self,
+        work_item_id: &OpaqueId,
+    ) -> Result<ProducerRegistrationRequest, AdmissionError> {
+        let value: String = self.connection.query_row(
+            "SELECT request_json FROM producer_work WHERE work_item_id=?1",
+            [work_item_id.as_str()],
+            |row| row.get(0),
+        ).optional()?.ok_or(AdmissionError::NotFound)?;
+        decode(&value)
+    }
+
+    /// Return persisted dependency requests and receipts for the exact artifact.
+    /// A foreign producer work item is rejected rather than silently included.
+    pub fn dependency_entries_for(
+        &self,
+        artifact_ref: &OpaqueId,
+        artifact_version: &OpaqueId,
+        work_item_id: &OpaqueId,
+    ) -> Result<Vec<(DependencyRegistrationRequest, DependencyRegistrationReceipt)>, AdmissionError> {
+        let mut statement = self.connection.prepare(
+            "SELECT request_json,receipt_json FROM dependency_edges WHERE artifact_ref=?1 AND artifact_version=?2"
+        )?;
+        let rows = statement.query_map(
+            params![artifact_ref.as_str(), artifact_version.as_str()],
+            |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?)),
+        )?;
+        let mut entries = Vec::new();
+        for row in rows {
+            let (request_json, receipt_json) = row?;
+            let request: DependencyRegistrationRequest = decode(&request_json)?;
+            let receipt: DependencyRegistrationReceipt = decode(&receipt_json)?;
+            if &request.producer_work_item_id != work_item_id {
+                return Err(AdmissionError::ReceiptMismatch);
+            }
+            entries.push((request, receipt));
+        }
+        Ok(entries)
+    }
+
+    /// Count publication receipts for a focused compiler-wiring assertion.
+    pub fn publication_receipt_count(&self) -> Result<u64, AdmissionError> {
+        let count: i64 = self.connection.query_row(
+            "SELECT COUNT(*) FROM publication_receipts", [], |row| row.get(0)
+        )?;
+        Ok(count as u64)
+    }
+
+    #[cfg(test)]
+    pub(crate) fn block_publication_receipt_writes(&self) -> Result<(), AdmissionError> {
+        self.connection.execute_batch(
+            "CREATE TRIGGER reject_compiler_publication BEFORE INSERT ON publication_receipts
+             BEGIN SELECT RAISE(FAIL, 'injected publication receipt write failure'); END;"
+        )?;
+        Ok(())
+    }
+
     /// Count producer ledger rows, exposing the idempotency invariant for §4.1 tests.
     pub fn producer_ledger_count(&self) -> Result<u64, AdmissionError> {
         let count: i64 =
