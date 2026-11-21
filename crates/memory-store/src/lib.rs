@@ -111,7 +111,8 @@ fn validate_scope(scope: &[ScopeRef]) -> Result<(), MemoryStoreError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use memory_domain::scopes_intersect;
+    use memory_domain::{scope_set_contains_all, scopes_intersect};
+    use memory_storage::{PrepareRequest, PreparedCommitReceipt};
     use memory_domain::{MemoryLifecycle, ScopeKind};
     use std::collections::BTreeMap;
 
@@ -122,11 +123,19 @@ mod tests {
         memory_id: String,
     }
 
+    #[derive(Clone)]
+    struct FakePreparedRecord {
+        request: PrepareRequest,
+        receipt: PreparedCommitReceipt,
+        published: Option<CommitReceipt>,
+    }
+
     #[derive(Default)]
     struct FakeStorage {
         memories: BTreeMap<String, Memory>,
         versions: BTreeMap<String, MemoryVersion>,
         receipts: BTreeMap<String, FakeReceiptRecord>,
+        prepared: BTreeMap<String, FakePreparedRecord>,
     }
 
     impl MemoryStorage for FakeStorage {
@@ -150,6 +159,13 @@ mod tests {
             let Some(memory) = self.memories.get(memory_id.as_str()) else { return Ok(None) };
             if !scopes_intersect(&memory.scope_refs, scope) {
                 return Err(StorageError::ScopeMismatch);
+            }
+            let hidden = self
+                .prepared
+                .values()
+                .any(|p| p.request.new_version.memory_version_id == *version_id && p.published.is_none());
+            if hidden {
+                return Ok(None);
             }
             Ok(self.versions.get(version_id.as_str()).filter(|v| &v.memory_id == memory_id).cloned())
         }
@@ -190,6 +206,139 @@ mod tests {
                 request_digest: request.request_digest,
                 memory_id: request.memory_id.as_str().into(),
             });
+            Ok(receipt)
+        }
+
+        fn prepare_version(&mut self, request: PrepareRequest, scope: &[ScopeRef]) -> Result<PreparedCommitReceipt, StorageError> {
+            if request.memory_id != request.new_version.memory_id {
+                return Err(StorageError::InvalidReference);
+            }
+            request.new_version.validate().map_err(|_| StorageError::InvalidSchema)?;
+            if request.idempotency_key.is_empty()
+                || request.request_digest.is_empty()
+                || request.publication_id.is_empty()
+            {
+                return Err(StorageError::InvalidSchema);
+            }
+            let memory = self
+                .memories
+                .get(request.memory_id.as_str())
+                .ok_or(StorageError::NotFoundOrNotVisible)?;
+            if !scopes_intersect(&memory.scope_refs, scope) {
+                return Err(StorageError::ScopeMismatch);
+            }
+            if request.new_version.claims.iter().any(|claim| {
+                !scope_set_contains_all(&memory.scope_refs, &claim.scope_refs)
+                    || !scope_set_contains_all(scope, &claim.scope_refs)
+            }) {
+                return Err(StorageError::ScopeMismatch);
+            }
+            if let Some(existing) = self
+                .prepared
+                .values()
+                .find(|p| p.request.idempotency_key == request.idempotency_key)
+            {
+                if existing.request.memory_id == request.memory_id
+                    && existing.request.request_digest == request.request_digest
+                    && existing.request.publication_id == request.publication_id
+                    && existing.request.generation == request.generation
+                {
+                    return Ok(existing.receipt.clone());
+                }
+                return Err(StorageError::IdempotencyConflict);
+            }
+            if self.receipts.contains_key(&request.idempotency_key) {
+                return Err(StorageError::IdempotencyConflict);
+            }
+            if self.prepared.contains_key(&request.publication_id) {
+                return Err(StorageError::PublicationStateConflict);
+            }
+            if memory.current_version_id != request.expected_current_version {
+                return Err(StorageError::StaleVersion);
+            }
+            if let Some(parent) = request.expected_current_version.as_ref() {
+                if request.new_version.parent_version_id.as_ref() != Some(parent) {
+                    return Err(StorageError::StaleVersion);
+                }
+                let current = self.versions.get(parent.as_str()).ok_or(StorageError::StaleVersion)?;
+                request.new_version.validate_successor(current).map_err(|_| StorageError::StaleVersion)?;
+            } else if request.new_version.version_number != 1 || request.new_version.parent_version_id.is_some() {
+                return Err(StorageError::StaleVersion);
+            }
+            let receipt = PreparedCommitReceipt {
+                memory_id: request.memory_id.clone(),
+                prepared_version_id: request.new_version.memory_version_id.clone(),
+                publication_id: request.publication_id.clone(),
+                generation: request.generation,
+                idempotency_key: request.idempotency_key.clone(),
+            };
+            self.versions.insert(
+                request.new_version.memory_version_id.as_str().into(),
+                request.new_version.clone(),
+            );
+            self.prepared.insert(
+                request.publication_id.clone(),
+                FakePreparedRecord { request, receipt: receipt.clone(), published: None },
+            );
+            Ok(receipt)
+        }
+
+        fn publish_prepared(&mut self, publication_id: &str, expected_current_version: Option<OpaqueId>, scope: &[ScopeRef]) -> Result<CommitReceipt, StorageError> {
+            let record = self
+                .prepared
+                .get(publication_id)
+                .cloned()
+                .ok_or(StorageError::NotFoundOrNotVisible)?;
+            if let Some(receipt) = record.published {
+                return Ok(receipt);
+            }
+            let request = record.request;
+            let memory = self
+                .memories
+                .get(request.memory_id.as_str())
+                .ok_or(StorageError::NotFoundOrNotVisible)?;
+            if !scopes_intersect(&memory.scope_refs, scope) {
+                return Err(StorageError::ScopeMismatch);
+            }
+            if expected_current_version != request.expected_current_version
+                || memory.current_version_id != request.expected_current_version
+            {
+                return Err(StorageError::StaleVersion);
+            }
+            if let Some(parent) = request.expected_current_version.as_ref() {
+                if request.new_version.parent_version_id.as_ref() != Some(parent) {
+                    return Err(StorageError::StaleVersion);
+                }
+                let current = self.versions.get(parent.as_str()).ok_or(StorageError::StaleVersion)?;
+                request.new_version.validate_successor(current).map_err(|_| StorageError::StaleVersion)?;
+            } else if request.new_version.version_number != 1 || request.new_version.parent_version_id.is_some() {
+                return Err(StorageError::StaleVersion);
+            }
+            if self.receipts.contains_key(&request.idempotency_key) {
+                return Err(StorageError::IdempotencyConflict);
+            }
+            let receipt = CommitReceipt {
+                memory_id: request.memory_id.clone(),
+                resulting_version_id: request.new_version.memory_version_id.clone(),
+                commit_sequence: CommitReceiptSequence::next(&self.receipts),
+                idempotency_key: request.idempotency_key.clone(),
+            };
+            let memory = self
+                .memories
+                .get_mut(request.memory_id.as_str())
+                .ok_or(StorageError::NotFoundOrNotVisible)?;
+            memory.current_version_id = Some(request.new_version.memory_version_id.clone());
+            self.receipts.insert(
+                request.idempotency_key.clone(),
+                FakeReceiptRecord {
+                    receipt: receipt.clone(),
+                    request_digest: request.request_digest,
+                    memory_id: request.memory_id.as_str().into(),
+                },
+            );
+            if let Some(prepared) = self.prepared.get_mut(publication_id) {
+                prepared.published = Some(receipt.clone());
+            }
             Ok(receipt)
         }
 
@@ -306,5 +455,102 @@ mod tests {
             store.write_revision(stale, &[scope()]),
             Err(MemoryStoreError::Storage(StorageError::StaleVersion)),
         );
+    }
+
+    #[test]
+    fn fake_prepare_does_not_advance_current_version() {
+        let mut storage = FakeStorage::default();
+        storage.create_memory(memory(), &[scope()]).unwrap();
+
+        let prepared = storage.prepare_version(
+            memory_storage::PrepareRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version: revision("fake-prepared-v1", 1, None),
+                idempotency_key: "fake-prepare-op".into(),
+                request_digest: "fake-prepare-digest".into(),
+                publication_id: "fake-prepare-publication".into(),
+                generation: 1,
+            },
+            &[scope()],
+        ).unwrap();
+
+        assert_eq!(prepared.prepared_version_id, id("fake-prepared-v1"));
+
+        assert!(
+            storage.read_current(&id("m1"), &[scope()]).unwrap().is_none(),
+            "FakeStorage prepare must not advance the current pointer"
+        );
+
+        assert!(
+            storage.read_version(
+                &id("m1"),
+                &id("fake-prepared-v1"),
+                &[scope()],
+            ).unwrap().is_none(),
+            "FakeStorage must hide a prepared but unpublished version"
+        );
+
+        let receipt = storage.publish_prepared(
+            "fake-prepare-publication",
+            None,
+            &[scope()],
+        ).unwrap();
+
+        assert_eq!(receipt.resulting_version_id, id("fake-prepared-v1"));
+        assert_eq!(
+            storage.read_current(&id("m1"), &[scope()])
+                .unwrap().unwrap().memory_version_id,
+            id("fake-prepared-v1")
+        );
+        assert!(
+            storage.read_version(
+                &id("m1"),
+                &id("fake-prepared-v1"),
+                &[scope()],
+            ).unwrap().is_some(),
+            "published version must become readable"
+        );
+    }
+
+    #[test]
+    fn fake_publish_is_idempotent() {
+        let mut storage = FakeStorage::default();
+        storage.create_memory(memory(), &[scope()]).unwrap();
+
+        storage.prepare_version(
+            memory_storage::PrepareRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version: revision("fake-replay-v1", 1, None),
+                idempotency_key: "fake-replay-op".into(),
+                request_digest: "fake-replay-digest".into(),
+                publication_id: "fake-replay-publication".into(),
+                generation: 1,
+            },
+            &[scope()],
+        ).unwrap();
+
+        let first = storage.publish_prepared(
+            "fake-replay-publication",
+            None,
+            &[scope()],
+        ).unwrap();
+
+        let replay = storage.publish_prepared(
+            "fake-replay-publication",
+            None,
+            &[scope()],
+        ).unwrap();
+
+        assert_eq!(first, replay);
+        assert_eq!(first.commit_sequence, memory_storage::CommitSequence(1));
+
+        let stored_receipt = storage.receipts.get("fake-replay-op").unwrap();
+        assert_eq!(stored_receipt.receipt, first);
+
+        let current = storage.read_current(&id("m1"), &[scope()])
+            .unwrap().unwrap();
+        assert_eq!(current.memory_version_id, id("fake-replay-v1"));
     }
 }
