@@ -14,75 +14,93 @@
     },
     "issuer_ref": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
     },
     "sender_authority_ref": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
     },
     "sender_subject_ref": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
     },
     "audience": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
     },
     "message_id": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When supplied, this protocol value MUST be non-empty; an empty string cannot carry the identifier or evidence value represented by this field."
     },
     "message_nonce": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When supplied, this protocol value MUST be non-empty; an empty string cannot carry the identifier or evidence value represented by this field."
     },
     "signing_sequence_namespace_ref": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
     },
     "signing_record_sequence": {
       "type": "string",
-      "pattern": "^(0|[1-9][0-9]*)$"
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "description": "This typed counter MUST use the canonical non-negative decimal representation; empty text is outside that numeric domain."
     },
     "signature_profile_id": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When present, this signature MUST contain authentication material; an empty string cannot authenticate evidence."
     },
     "key_id_ref": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
     },
     "key_version": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When present, this typed sequence, generation, epoch, or version token MUST be parseable and comparable in its declared namespace."
     },
     "adapter_instance_ref": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
     },
     "runtime_session_ref": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
     },
     "delivery_id": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When supplied, this protocol value MUST be non-empty; an empty string cannot carry the identifier or evidence value represented by this field."
     },
     "delivery_attempt_id": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When supplied, this protocol value MUST be non-empty; an empty string cannot carry the identifier or evidence value represented by this field."
     },
     "inference_request_id": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When supplied, this protocol value MUST be non-empty; an empty string cannot carry the identifier or evidence value represented by this field."
     },
     "final_request_boundary_id": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When supplied, this protocol value MUST be non-empty; an empty string cannot carry the identifier or evidence value represented by this field."
     },
     "adapter_capability_epoch": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When present, this typed sequence, generation, epoch, or version token MUST be parseable and comparable in its declared namespace."
     },
     "evidence_kind": {
       "enum": [
@@ -101,39 +119,48 @@
     },
     "adapter_ref": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
     },
     "runtime_instance_ref": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
     },
     "context_id": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When supplied, this protocol value MUST be non-empty; an empty string cannot carry the identifier or evidence value represented by this field."
     },
     "context_version": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When present, this typed sequence, generation, epoch, or version token MUST be parseable and comparable in its declared namespace."
     },
     "materialized_context_version": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When present, this typed sequence, generation, epoch, or version token MUST be parseable and comparable in its declared namespace."
     },
     "final_request_boundary_type": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When supplied, this protocol value MUST be non-empty; an empty string cannot carry the identifier or evidence value represented by this field."
     },
     "managed_region_id": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When supplied, this protocol value MUST be non-empty; an empty string cannot carry the identifier or evidence value represented by this field."
     },
     "managed_region_revision": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When supplied, this protocol value MUST be non-empty; an empty string cannot carry the identifier or evidence value represented by this field."
     },
     "managed_region_inventory_digest": {
       "type": "string",
-      "pattern": "^[0-9a-f]{64}$"
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "This digest MUST be a complete fixed-width lowercase hexadecimal value; empty or partial text is not a content commitment."
     },
     "managed_region_coverage": {
       "enum": [
@@ -145,19 +172,23 @@
     },
     "managed_region_digest": {
       "type": "string",
-      "pattern": "^[0-9a-f]{64}$"
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "This digest MUST be a complete fixed-width lowercase hexadecimal value; empty or partial text is not a content commitment."
     },
     "digest_profile": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When present, this digest MUST carry its complete canonical content commitment; an empty string is not a digest."
     },
     "evidence_issuer_ref": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
     },
     "evidence_schema_version": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When present, this typed sequence, generation, epoch, or version token MUST be parseable and comparable in its declared namespace."
     },
     "submission_observed_at": {
       "type": "string",
@@ -165,47 +196,58 @@
     },
     "submission_monotonic_sequence": {
       "type": "string",
-      "pattern": "^(0|[1-9][0-9]*)$"
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "description": "This typed counter MUST use the canonical non-negative decimal representation; empty text is outside that numeric domain."
     },
     "correlation_ref": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
     },
     "causation_ref": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
     },
     "audit_ref": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
     },
     "c_submit_outcome_ref": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
     },
     "c_outcome_record_ref": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
     },
     "c_outcome_record_sequence": {
       "type": "string",
-      "pattern": "^(0|[1-9][0-9]*)$"
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "description": "This typed counter MUST use the canonical non-negative decimal representation; empty text is outside that numeric domain."
     },
     "c_outcome_payload_digest": {
       "type": "string",
-      "pattern": "^[0-9a-f]{64}$"
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "This digest MUST be a complete fixed-width lowercase hexadecimal value; empty or partial text is not a content commitment."
     },
     "payload_digest": {
       "type": "string",
-      "pattern": "^[0-9a-f]{64}$"
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "This digest MUST be a complete fixed-width lowercase hexadecimal value; empty or partial text is not a content commitment."
     },
     "signature": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When present, this signature MUST contain authentication material; an empty string cannot authenticate evidence."
     },
     "integrity_proof_ref": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "When present, this reference/identity MUST be non-empty; empty text cannot identify the referenced protocol object, authority, recipient, or resource."
     }
   },
   "required": [
