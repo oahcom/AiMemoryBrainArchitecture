@@ -1,0 +1,66 @@
+{
+  "event": {
+    "event_id": "event-demo-001",
+    "event_kind": "observation",
+    "source_id": "source-demo-001",
+    "recorded_at": "2026-11-21T00:00:00Z",
+    "scope_refs": [
+      {
+        "scope_id": "scope-demo",
+        "scope_kind": "User",
+        "namespace_key": "user:demo"
+      }
+    ],
+    "occurred_at": null,
+    "idempotency_key": "event-demo-001",
+    "payload_ref": "payload-demo-001",
+    "classification": "observed",
+    "schema_version": "1",
+    "retention_class": "default"
+  },
+  "payload": "The project uses a governed memory context.",
+  "memory": {
+    "memory_id": "memory-demo-001",
+    "memory_version_id": "memory-version-demo-001",
+    "memory_kind": "knowledge",
+    "lifecycle_state": "Active",
+    "retention_class": "default",
+    "sensitivity": "normal",
+    "created_at": "2026-11-21T00:00:00Z",
+    "updated_at": "2026-11-21T00:00:00Z",
+    "version_created_at": "2026-11-21T00:00:00Z",
+    "author_kind": "cli-input",
+    "change_reason": "initial import",
+    "schema_version": "1"
+  },
+  "claim": {
+    "claim_id": "claim-demo-001",
+    "subject_ref": "subject-demo-001",
+    "predicate": "uses",
+    "object_value": "a governed memory context",
+    "polarity": "affirm",
+    "epistemic_status": "Observed",
+    "confidence": null,
+    "temporal_ref": null,
+    "asserted_at": "2026-11-21T00:00:00Z",
+    "scope_refs": [
+      {
+        "scope_id": "scope-demo",
+        "scope_kind": "User",
+        "namespace_key": "user:demo"
+      }
+    ],
+    "qualifiers": [],
+    "evidence_refs": ["evidence-demo-001"]
+  },
+  "context": {
+    "context_id": "context-demo-001",
+    "agent_id": "agent-demo-001",
+    "agent_instance_id": "agent-instance-demo-001",
+    "session_id": "session-demo-001",
+    "task_id": null,
+    "environment_id": null,
+    "purpose": "demo",
+    "schema_version": "1"
+  }
+}
