@@ -16,6 +16,7 @@ pub struct ContextBudget {
 }
 
 impl ContextBudget {
+    /// Validates that both configured limits are non-zero.
     pub fn validate(&self) -> Result<(), ContextError> {
         if self.max_entries == 0 || self.max_rendered_bytes == 0 {
             return Err(ContextError::InvalidBudget);
@@ -38,6 +39,7 @@ pub struct ContextIdentity {
 }
 
 impl ContextIdentity {
+    /// Validates required identity fields and scope references.
     pub fn validate(&self) -> Result<(), ContextError> {
         if self.scope_refs.is_empty() {
             return Err(ContextError::Domain(DomainError::EmptyRequiredField(
@@ -138,10 +140,46 @@ pub struct ContextSnapshot {
 }
 
 impl ContextSnapshot {
+    /// Number of entries currently held by this snapshot.
+    pub fn total_entries(&self) -> usize {
+        self.entries.len()
+    }
+
+    /// Whether this snapshot contains no entries.
+    pub fn is_empty(&self) -> bool {
+        self.entries.is_empty()
+    }
+
     /// Serialize the staged snapshot as JSON. Serialization does not publish it.
     pub fn serialize(&self) -> Result<String, ContextError> {
         serde_json::to_string(self).map_err(|error| ContextError::Serialization(error.to_string()))
     }
+}
+
+/// Validates invariants that can be checked without the original build budget.
+pub fn validate_snapshot(snapshot: &ContextSnapshot) -> Result<(), ContextError> {
+    let Some(actual) = snapshot.entries.iter().try_fold(0usize, |total, entry| {
+        total.checked_add(entry.rendered_bytes)
+    }) else {
+        return Err(ContextError::SnapshotByteCountMismatch {
+            actual: usize::MAX,
+            recorded: snapshot.rendered_bytes,
+        });
+    };
+    if actual != snapshot.rendered_bytes {
+        return Err(ContextError::SnapshotByteCountMismatch {
+            actual,
+            recorded: snapshot.rendered_bytes,
+        });
+    }
+    if snapshot
+        .entries
+        .iter()
+        .any(|entry| entry.rendered_content.trim().is_empty())
+    {
+        return Err(ContextError::EmptyField("rendered_content"));
+    }
+    Ok(())
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -237,6 +275,17 @@ pub fn build_context(
         });
     }
 
+    // The byte total is accumulated from the same entry lengths above. Keep
+    // this as a debug invariant: it detects internal drift without adding a
+    // new runtime failure mode to this pure constructor.
+    debug_assert_eq!(
+        entries
+            .iter()
+            .map(|entry| entry.rendered_bytes)
+            .sum::<usize>(),
+        rendered_bytes
+    );
+
     Ok(ContextSnapshot {
         identity,
         context_version,
@@ -274,6 +323,7 @@ pub enum ContextError {
     EntryBudgetExceeded { actual: usize, limit: usize },
     ByteBudgetExceeded { actual: usize, limit: usize },
     Serialization(String),
+    SnapshotByteCountMismatch { actual: usize, recorded: usize },
 }
 
 impl std::fmt::Display for ContextError {
@@ -340,102 +390,294 @@ mod tests {
         }
     }
 
+    fn ordered_ids(candidates: Vec<ContextCandidate>) -> Vec<String> {
+        build_context(identity(), 1, budget(), candidates)
+            .unwrap()
+            .entries
+            .iter()
+            .map(|entry| entry.entry_id.as_str().to_owned())
+            .collect()
+    }
+
+    // A1 — identical candidate batches produce identical ordered entries.
     #[test]
-    fn build_sorts_by_tier_then_priority_then_entry_id() {
+    fn build_context_order_is_deterministic_across_repeated_calls() {
+        let candidates = vec![
+            candidate("z", ContextTier::P1, 10, "one"),
+            candidate("b", ContextTier::P0, 1, "two"),
+            candidate("a", ContextTier::P1, 10, "three"),
+        ];
+        let first = build_context(identity(), 7, budget(), candidates.clone()).unwrap();
+        let second = build_context(identity(), 7, budget(), candidates).unwrap();
+        assert_eq!(first.entries, second.entries);
+    }
+
+    // A2 — each sort key is independently verified: tier, priority, entry ID.
+    #[test]
+    fn sorting_uses_tier_then_descending_priority_then_entry_id() {
+        assert_eq!(
+            ordered_ids(vec![
+                candidate("z-tier", ContextTier::P1, 5, "a"),
+                candidate("a-tier", ContextTier::P0, 5, "b"),
+                candidate("m-tier", ContextTier::P2, 5, "c"),
+            ]),
+            vec!["a-tier", "z-tier", "m-tier"]
+        );
+        assert_eq!(
+            ordered_ids(vec![
+                candidate("a-priority", ContextTier::P1, 1, "a"),
+                candidate("z-priority", ContextTier::P1, 9, "b"),
+                candidate("m-priority", ContextTier::P1, 5, "c"),
+            ]),
+            vec!["z-priority", "m-priority", "a-priority"]
+        );
+        assert_eq!(
+            ordered_ids(vec![
+                candidate("z-entry", ContextTier::P1, 5, "a"),
+                candidate("a-entry", ContextTier::P1, 5, "b"),
+                candidate("m-entry", ContextTier::P1, 5, "c"),
+            ]),
+            vec!["a-entry", "m-entry", "z-entry"]
+        );
+    }
+
+    // A3 — entry overflow reports the actual candidate count.
+    #[test]
+    fn entry_budget_error_reports_actual_candidate_count() {
+        let result = build_context(
+            identity(),
+            1,
+            ContextBudget {
+                max_entries: 2,
+                max_rendered_bytes: 100,
+            },
+            vec![
+                candidate("a", ContextTier::P0, 1, "a"),
+                candidate("b", ContextTier::P1, 1, "b"),
+                candidate("c", ContextTier::P2, 1, "c"),
+            ],
+        );
+        assert_eq!(
+            result.unwrap_err(),
+            ContextError::EntryBudgetExceeded {
+                actual: 3,
+                limit: 2
+            }
+        );
+    }
+
+    // A4 — byte overflow reports the real accumulated byte count.
+    #[test]
+    fn byte_budget_error_reports_accumulated_rendered_bytes() {
+        let result = build_context(
+            identity(),
+            1,
+            ContextBudget {
+                max_entries: 3,
+                max_rendered_bytes: 4,
+            },
+            vec![
+                candidate("a", ContextTier::P0, 1, "ab"),
+                candidate("b", ContextTier::P1, 1, "cde"),
+            ],
+        );
+        assert_eq!(
+            result.unwrap_err(),
+            ContextError::ByteBudgetExceeded {
+                actual: 5,
+                limit: 4
+            }
+        );
+    }
+
+    // A5 — both budget limits accept exact equality.
+    #[test]
+    fn exact_entry_and_byte_budget_boundaries_succeed() {
         let snapshot = build_context(
             identity(),
-            7,
-            budget(),
+            1,
+            ContextBudget {
+                max_entries: 2,
+                max_rendered_bytes: 3,
+            },
             vec![
-                candidate("z", ContextTier::P1, 10, "one"),
-                candidate("b", ContextTier::P0, 1, "two"),
-                candidate("a", ContextTier::P1, 10, "three"),
+                candidate("a", ContextTier::P0, 1, "a"),
+                candidate("b", ContextTier::P1, 1, "bc"),
             ],
         )
         .unwrap();
-
-        let ids: Vec<_> = snapshot
-            .entries
-            .iter()
-            .map(|entry| entry.entry_id.as_str())
-            .collect();
-        assert_eq!(ids, vec!["b", "a", "z"]);
+        assert_eq!(snapshot.entries.len(), 2);
+        assert_eq!(snapshot.rendered_bytes, 3);
     }
 
+    // A6 — duplicate entry IDs are rejected even for different memories.
     #[test]
-    fn rejects_cross_scope_candidates() {
-        let mut candidate = candidate("a", ContextTier::P0, 1, "private");
-        candidate.scope_refs[0].namespace_key = "user:other".into();
+    fn duplicate_entry_ids_are_rejected() {
+        let first = candidate("same", ContextTier::P0, 1, "one");
+        let mut second = candidate("other", ContextTier::P1, 1, "two");
+        second.entry_id = id("same");
         assert_eq!(
-            build_context(identity(), 1, budget(), vec![candidate]).unwrap_err(),
-            ContextError::ScopeMismatch
-        );
-    }
-
-    #[test]
-    fn rejects_forgotten_and_superseded_lifecycle() {
-        let mut candidate = candidate("a", ContextTier::P0, 1, "private");
-        candidate.memory_lifecycle = MemoryLifecycle::Forgotten;
-        assert_eq!(
-            build_context(identity(), 1, budget(), vec![candidate]).unwrap_err(),
-            ContextError::IneligibleLifecycle
-        );
-    }
-
-    #[test]
-    fn rejects_duplicate_membership_and_entry_ids() {
-        let mut first = candidate("a", ContextTier::P0, 1, "one");
-        let mut duplicate = first.clone();
-        duplicate.entry_id = id("b");
-        assert_eq!(
-            build_context(identity(), 1, budget(), vec![first.clone(), duplicate]).unwrap_err(),
-            ContextError::DuplicateMembership
-        );
-
-        first.memory_id = id("other-memory");
-        let duplicate_id = first.clone();
-        assert_eq!(
-            build_context(identity(), 1, budget(), vec![first, duplicate_id]).unwrap_err(),
+            build_context(identity(), 1, budget(), vec![first, second]).unwrap_err(),
             ContextError::DuplicateEntry
         );
     }
 
+    // A7 — one memory/version membership cannot appear under two entry IDs.
     #[test]
-    fn enforces_entry_and_byte_budgets_without_truncation() {
-        let entry_limited = ContextBudget {
-            max_entries: 1,
-            max_rendered_bytes: 100,
-        };
-        assert!(matches!(
-            build_context(
-                identity(),
-                1,
-                entry_limited,
-                vec![
-                    candidate("a", ContextTier::P0, 1, "a"),
-                    candidate("b", ContextTier::P1, 1, "b"),
-                ],
-            ),
-            Err(ContextError::EntryBudgetExceeded { .. })
-        ));
-
-        let byte_limited = ContextBudget {
-            max_entries: 2,
-            max_rendered_bytes: 3,
-        };
-        assert!(matches!(
-            build_context(
-                identity(),
-                1,
-                byte_limited,
-                vec![candidate("a", ContextTier::P0, 1, "four")]
-            ),
-            Err(ContextError::ByteBudgetExceeded { .. })
-        ));
+    fn duplicate_memory_version_membership_is_rejected() {
+        let first = candidate("a", ContextTier::P0, 1, "one");
+        let mut second = first.clone();
+        second.entry_id = id("b");
+        assert_eq!(
+            build_context(identity(), 1, budget(), vec![first, second]).unwrap_err(),
+            ContextError::DuplicateMembership
+        );
     }
 
+    // A8 — every lifecycle other than Active and Consolidated is ineligible.
     #[test]
-    fn serializes_snapshot_and_prepares_non_sendable_delivery_intent() {
+    fn non_active_non_consolidated_lifecycles_are_rejected() {
+        for lifecycle in [
+            MemoryLifecycle::Candidate,
+            MemoryLifecycle::Superseded,
+            MemoryLifecycle::Archived,
+            MemoryLifecycle::Forgotten,
+        ] {
+            let mut item = candidate("a", ContextTier::P0, 1, "text");
+            item.memory_lifecycle = lifecycle;
+            assert_eq!(
+                build_context(identity(), 1, budget(), vec![item]).unwrap_err(),
+                ContextError::IneligibleLifecycle
+            );
+        }
+    }
+
+    // A9 — candidates outside the identity scope are rejected.
+    #[test]
+    fn candidate_scope_must_be_contained_by_identity_scope() {
+        let mut item = candidate("a", ContextTier::P0, 1, "private");
+        item.scope_refs[0].namespace_key = "user:other".into();
+        assert_eq!(
+            build_context(identity(), 1, budget(), vec![item]).unwrap_err(),
+            ContextError::ScopeMismatch
+        );
+    }
+
+    // A10 — empty identity scope, purpose, and schema version each fail validation.
+    #[test]
+    fn empty_identity_scope_purpose_and_schema_version_are_rejected() {
+        let mut empty_scope = identity();
+        empty_scope.scope_refs.clear();
+        assert_eq!(
+            build_context(empty_scope, 1, budget(), vec![]).unwrap_err(),
+            ContextError::Domain(DomainError::EmptyRequiredField("scope_refs"))
+        );
+
+        let mut empty_purpose = identity();
+        empty_purpose.purpose.clear();
+        assert_eq!(
+            build_context(empty_purpose, 1, budget(), vec![]).unwrap_err(),
+            ContextError::EmptyField("purpose")
+        );
+
+        let mut empty_schema = identity();
+        empty_schema.schema_version.clear();
+        assert_eq!(
+            build_context(empty_schema, 1, budget(), vec![]).unwrap_err(),
+            ContextError::EmptyField("schema_version")
+        );
+    }
+
+    // A11 — context version zero is invalid.
+    #[test]
+    fn zero_context_version_is_rejected() {
+        assert_eq!(
+            build_context(identity(), 0, budget(), vec![]).unwrap_err(),
+            ContextError::InvalidVersion
+        );
+    }
+
+    // A12 — either zero-valued budget field invalidates the budget.
+    #[test]
+    fn zero_entry_or_byte_budget_is_rejected() {
+        for invalid_budget in [
+            ContextBudget {
+                max_entries: 0,
+                max_rendered_bytes: 1,
+            },
+            ContextBudget {
+                max_entries: 1,
+                max_rendered_bytes: 0,
+            },
+        ] {
+            assert_eq!(
+                build_context(identity(), 1, invalid_budget, vec![]).unwrap_err(),
+                ContextError::InvalidBudget
+            );
+        }
+    }
+
+    // A13 — delivery intent visibility remains private across distinct inputs.
+    #[test]
+    fn delivery_intent_visibility_is_always_private_pending_gate() {
+        let configurations = vec![
+            (
+                3,
+                ContextBudget {
+                    max_entries: 1,
+                    max_rendered_bytes: 32,
+                },
+                vec![candidate("a", ContextTier::P0, 1, "memory text")],
+            ),
+            (
+                17,
+                ContextBudget {
+                    max_entries: 2,
+                    max_rendered_bytes: 128,
+                },
+                vec![
+                    candidate("b", ContextTier::P2, 3, "second"),
+                    candidate("c", ContextTier::P1, 8, "third"),
+                ],
+            ),
+            (
+                99,
+                ContextBudget {
+                    max_entries: 4,
+                    max_rendered_bytes: 512,
+                },
+                vec![
+                    candidate("d", ContextTier::P3, 1, "fourth"),
+                    candidate("e", ContextTier::P0, 9, "fifth"),
+                    candidate("f", ContextTier::P2, 4, "sixth"),
+                ],
+            ),
+        ];
+
+        for (context_version, context_budget, candidates) in configurations {
+            let snapshot =
+                build_context(identity(), context_version, context_budget, candidates).unwrap();
+            let intent =
+                prepare_delivery_intent(id(&format!("delivery-{context_version}")), &snapshot)
+                    .unwrap();
+            assert_eq!(
+                intent.visibility,
+                DeliveryVisibility::PrivatePendingPublicationGate
+            );
+        }
+    }
+
+    // A14 — delivery intent targets exactly the snapshot context version.
+    #[test]
+    fn delivery_intent_targets_snapshot_context_version() {
+        let snapshot = build_context(identity(), 42, budget(), vec![]).unwrap();
+        let intent = prepare_delivery_intent(id("delivery-1"), &snapshot).unwrap();
+        assert_eq!(intent.target_context_version, snapshot.context_version);
+    }
+
+    // A15 — serialized delivery snapshot round-trips to an equivalent structure.
+    #[test]
+    fn delivery_intent_snapshot_json_round_trips_to_equivalent_snapshot() {
         let snapshot = build_context(
             identity(),
             3,
@@ -443,30 +685,102 @@ mod tests {
             vec![candidate("a", ContextTier::P0, 1, "memory text")],
         )
         .unwrap();
-        let json = snapshot.serialize().unwrap();
-        assert!(json.contains("\"context_version\":3"));
         let intent = prepare_delivery_intent(id("delivery-1"), &snapshot).unwrap();
-        assert_eq!(
-            intent.visibility,
-            DeliveryVisibility::PrivatePendingPublicationGate
-        );
-        assert_eq!(intent.target_context_version, 3);
-        assert!(intent.snapshot_json.contains("memory text"));
+        let decoded: ContextSnapshot = serde_json::from_str(&intent.snapshot_json).unwrap();
+        assert_eq!(decoded, snapshot);
     }
 
+    // Restores the original build_context input-lineage rejection assertion.
     #[test]
-    fn rejects_missing_lineage_and_empty_content() {
-        let mut no_lineage = candidate("a", ContextTier::P0, 1, "text");
-        no_lineage.source_refs.clear();
+    fn build_context_rejects_candidates_without_lineage() {
+        let mut item = candidate("missing-lineage", ContextTier::P0, 1, "valid content");
+        item.source_refs.clear();
+
         assert_eq!(
-            build_context(identity(), 1, budget(), vec![no_lineage]).unwrap_err(),
+            build_context(identity(), 1, budget(), vec![item]).unwrap_err(),
             ContextError::MissingLineage
         );
+    }
 
-        let empty = candidate("b", ContextTier::P0, 1, " ");
+    // Restores the original build_context input-content rejection assertion.
+    #[test]
+    fn build_context_rejects_whitespace_only_rendered_content() {
+        let item = candidate("empty-content", ContextTier::P0, 1, "   \n\t ");
+
         assert_eq!(
-            build_context(identity(), 1, budget(), vec![empty]).unwrap_err(),
+            build_context(identity(), 1, budget(), vec![item]).unwrap_err(),
             ContextError::EmptyField("rendered_content")
         );
     }
+
+    // B1 — snapshot entry-count and emptiness accessors reflect the entries.
+    #[test]
+    fn snapshot_accessors_report_entry_count_and_emptiness() {
+        let empty = build_context(identity(), 1, budget(), vec![]).unwrap();
+        assert_eq!(empty.total_entries(), 0);
+        assert!(empty.is_empty());
+
+        let populated = build_context(
+            identity(),
+            1,
+            budget(),
+            vec![candidate("a", ContextTier::P0, 1, "text")],
+        )
+        .unwrap();
+        assert_eq!(populated.total_entries(), 1);
+        assert!(!populated.is_empty());
+    }
+
+    // B2 — constructor output keeps the sum of entry byte counts self-consistent.
+    #[test]
+    fn build_context_rendered_byte_total_matches_entry_sum() {
+        let snapshot = build_context(
+            identity(),
+            1,
+            budget(),
+            vec![
+                candidate("a", ContextTier::P0, 1, "one"),
+                candidate("b", ContextTier::P1, 1, "two!"),
+            ],
+        )
+        .unwrap();
+        assert_eq!(
+            snapshot
+                .entries
+                .iter()
+                .map(|entry| entry.rendered_bytes)
+                .sum::<usize>(),
+            snapshot.rendered_bytes
+        );
+    }
+
+    // B3 — deserialized snapshots can be checked for byte totals and empty content.
+    #[test]
+    fn validate_snapshot_rejects_inconsistent_bytes_and_empty_entry_content() {
+        let snapshot = build_context(
+            identity(),
+            1,
+            budget(),
+            vec![candidate("a", ContextTier::P0, 1, "text")],
+        )
+        .unwrap();
+
+        let mut wrong_total = snapshot.clone();
+        wrong_total.rendered_bytes += 1;
+        assert_eq!(
+            validate_snapshot(&wrong_total),
+            Err(ContextError::SnapshotByteCountMismatch {
+                actual: 4,
+                recorded: 5
+            })
+        );
+
+        let mut empty_content = snapshot;
+        empty_content.entries[0].rendered_content.clear();
+        assert_eq!(
+            validate_snapshot(&empty_content),
+            Err(ContextError::EmptyField("rendered_content"))
+        );
+    }
 }
+
