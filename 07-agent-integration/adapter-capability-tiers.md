@@ -228,3 +228,25 @@ The crate now exposes a `ContextDeliveryAdapter` trait and `InMemoryContextDeliv
 | Reconnected | Restore the in-memory connection flag and report the last successfully applied version (or `None`) |
 
 **NOT IMPLEMENTED:** real transport; per-runtime Agent integration; a durable delivery ledger; durable session state; automatic retry/re-delivery; production reconciliation or attestation. Reconnect is a deterministic in-memory state transition, not proof of remote Agent state. This implementation does not translate provider-specific runtime objects or claim delivery outside its own process memory.
+
+# Canonical snapshot integration (round 6)
+
+The in-memory delivery adapter now accepts and retains the canonical
+`memory_context::ContextSnapshot` directly. `agent-integration` depends on
+`memory-context`; the dependency direction remains one-way because
+`memory-context` does not depend on `agent-integration`. There is no second
+adapter-local snapshot struct or serialization conversion.
+
+The adapter uses `ContextSnapshot.context_version` as the sole version value.
+Before accepting an apply, it calls `memory_context::validate_snapshot`.
+Validation failures are returned as the typed
+`AdapterError::InvalidSnapshot(ContextError)`; version gaps return
+`VersionMismatch { expected, received }`. Disconnected sessions return
+`SessionDisconnected`. All three rejection paths preserve the last applied
+snapshot unchanged. `applied_snapshot` returns the exact canonical snapshot
+accepted by the adapter.
+
+This remains an in-memory reference adapter, not a transport or production
+runtime integration. The canonical type removes the caller-side hand-rolled
+serialization boundary; it does not itself prove that a remote Agent runtime
+has applied the context.
