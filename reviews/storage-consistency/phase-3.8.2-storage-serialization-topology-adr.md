@@ -297,6 +297,47 @@ participant protocol MUST preserve the following order:
 - G commits a new public ContextVersion only after
   the applicable authoritative visibility outcome.
 
+Producer Admission and PublicationParticipant Admission
+are distinct, ordered operations within the same protected
+production and publication lifecycle.
+
+Producer Admission establishes the exact Producer/ProducerWork
+participant before dependency-set registration and D canonical
+commit.
+
+PublicationParticipant Admission is a subsequent operation.
+It admits the exact PublicationParticipant bound to the
+StorageVisibilityParticipantRef and publication tuple digest,
+after D canonical commit and durable Storage persistence of
+the exact publication tuple as PREPARED_HIDDEN.
+
+The two admissions MUST NOT be treated as the same operation
+or as interchangeable participant records.
+
+Producer Admission MUST precede complete dependency-set
+registration and canonical commit.
+
+PublicationParticipant Admission MUST follow canonical
+commit and PREPARED_HIDDEN persistence.
+
+Both admissions MUST be serialized against the same
+authoritative per-BrainAuthorityRef ordering anchor.
+
+For each admission, successful admission and durable recording
+of the exact participant identity MUST form one indivisible
+operation within the authoritative Transaction Domain.
+
+A successful Producer Admission does not constitute
+PublicationParticipant Admission.
+
+PublicationParticipant Admission MUST preserve and bind to
+the dependency closure already established for the committed
+canonical revisions. It MUST NOT independently redefine
+or narrow that closure.
+
+This is an implementation-conformance gate, not an
+unresolved normative ordering choice.
+
 The existing per-BrainAuthorityRef serialization
 anchor remains the L1 ordering mechanism for protected
 D/Storage transitions.
@@ -324,6 +365,45 @@ D 规范提交与 Storage Publication Participant
 - Storage 执行最终受保护 Visibility Transaction。
 - 只有在适用权威 Visibility Outcome 确认后，
   G 才能提交新的公开 ContextVersion。
+
+Producer Admission 与 PublicationParticipant Admission
+是同一受保护生产和发布生命周期中的两个不同且有序的操作。
+
+Producer Admission 在 dependency-set registration 和
+D canonical commit 之前，建立准确的 Producer/ProducerWork
+participant 身份。
+
+PublicationParticipant Admission 是后续操作。
+它在 D canonical commit 和 Storage 将准确的 publication
+tuple 持久化为 PREPARED_HIDDEN 之后，准入准确的
+PublicationParticipant，并将其绑定到
+StorageVisibilityParticipantRef 和 publication tuple digest。
+
+不得将两个准入操作视为同一个操作，
+也不得将两个 participant 记录相互替代。
+
+Producer Admission 必须先于完整 dependency-set registration
+和 canonical commit。
+
+PublicationParticipant Admission 必须发生在 canonical commit
+和 PREPARED_HIDDEN 持久化之后。
+
+两个准入操作必须针对同一个权威 per-BrainAuthorityRef
+排序锚点进行串行化。
+
+对于每次准入，准入成功与对准确 participant identity
+的持久化记录，必须在权威 Transaction Domain 内
+构成一个不可分操作。
+
+Producer Admission 成功不代表
+PublicationParticipant Admission 成功。
+
+PublicationParticipant Admission 必须保留并绑定已经为
+已提交规范 Revision 建立的 dependency closure。
+不得独立重新定义或缩减该依赖闭包。
+
+这是一个 implementation-conformance gate，
+不是尚未解决的规范排序选择。
 
 现有 per-BrainAuthorityRef Serialization Anchor
 仍然是受保护 D/Storage 转换的 L1 排序机制。
