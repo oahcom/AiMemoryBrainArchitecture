@@ -321,7 +321,34 @@ PublicationParticipant Admission MUST follow canonical
 commit and PREPARED_HIDDEN persistence.
 
 Both admissions MUST be serialized against the same
-authoritative per-BrainAuthorityRef ordering anchor.
+authoritative per-BrainAuthorityRef ordering anchor. The
+"ForgetFence/Admission ordering anchor" and the
+"per-BrainAuthorityRef serialization anchor" MUST denote
+the same authoritative ordering anchor; neither name may
+be interpreted as a separate lock or transaction domain.
+
+The complete direct and transitive dependency closure
+established by Producer Admission MUST be durably persisted
+before the corresponding participant barrier may be
+resolved or completed. A Fence MUST NOT complete that
+participant barrier until the complete dependency closure
+has been durably persisted. This is the same normative
+constraint specified in Extraction §19.2, not a second
+independent mechanism.
+
+The observable completion predicate is:
+DependencyClosurePersisted(P) = TRUE only when the
+authoritative durable dependency-registration record for
+Producer participant P identifies the complete direct and
+transitive dependency set, records completeness as COMPLETE,
+has a persisted closure digest matching that exact set,
+and is confirmed by authoritative read-after-commit.
+A participant barrier MUST be resolved or completed only
+when this predicate is TRUE. UNKNOWN dependencies, missing
+dependency records, incomplete closure records, unavailable
+authoritative reads, and dependency-persistence failures
+MUST NOT be treated as success. The dependency closure
+MUST NOT be narrowed to complete the barrier earlier.
 
 For each admission, successful admission and durable recording
 of the exact participant identity MUST form one indivisible
@@ -389,7 +416,30 @@ PublicationParticipant Admission 必须发生在 canonical commit
 和 PREPARED_HIDDEN 持久化之后。
 
 两个准入操作必须针对同一个权威 per-BrainAuthorityRef
-排序锚点进行串行化。
+排序锚点进行串行化。这里的
+“ForgetFence/Admission ordering anchor”与
+“per-BrainAuthorityRef serialization anchor”
+MUST 指同一个权威排序锚点；不得将任一名称解释为
+独立锁或独立事务域。
+
+Producer Admission 所建立的完整 direct 和 transitive
+dependency closure MUST 在对应 participant barrier
+被判定为 resolved 或完成之前持久化完毕。只有完整依赖闭包
+已经持久化，Fence 才 MUST 可完成该 participant barrier。
+这与 Extraction §19.2 规定的是同一规范约束，
+不是第二个独立机制。
+
+可观察的完成谓词为：
+DependencyClosurePersisted(P) = TRUE 当且仅当权威持久化
+dependency-registration record 明确标识 Producer participant P
+的完整 direct 和 transitive dependency set，完整性状态为
+COMPLETE，已持久化 closure digest 与该准确集合匹配，
+且权威 read-after-commit 已确认该记录。只有该谓词为 TRUE，
+participant barrier MUST 才可被判定为 resolved 或完成。
+UNKNOWN dependency、缺失 dependency record、不完整 closure
+record、不可用的权威读取及 dependency persistence failure
+MUST NOT 被视为成功。MUST NOT 通过缩减 dependency closure
+使 barrier 提前完成。
 
 对于每次准入，准入成功与对准确 participant identity
 的持久化记录，必须在权威 Transaction Domain 内
