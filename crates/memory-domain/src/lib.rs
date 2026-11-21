@@ -463,11 +463,13 @@ pub struct FactRevision {
 }
 impl FactRevision {
     #[allow(clippy::too_many_arguments)]
-    pub fn new(fact_ref: FactRef, revision_ref: FactRevisionRef, parent_revision_ref: Option<FactRevisionRef>,
+    pub fn new(fact_ref: FactRef, revision_ref: FactRevisionRef, parent: Option<&FactRevision>,
         claim_revision_refs: Vec<ClaimRevisionRef>, evidence_refs: Vec<EvidenceRef>, provenance_refs: Vec<ProvenanceRef>,
         scope_ref: ScopeRef, attestor_ref: AttestorRef, authorization_decision_ref: AuthorizationDecisionRef,
         attestation_method_id: String, attestation_method_version: String, outcome: FactOutcome, rationale: String,
         canonical_commit_ref: CanonicalCommitRef, correction_or_revocation_reason: Option<String>) -> Result<Self, DomainError> {
+        let parent_revision_ref=parent.map(|p|p.revision_ref.clone());
+        if let Some(p)=parent { if p.fact_ref != fact_ref { return Err(DomainError::InvalidParent); } }
         let value=Self { fact_ref, revision_ref, parent_revision_ref, claim_revision_refs, evidence_refs, provenance_refs,
             scope_ref, attestor_ref, authorization_decision_ref, attestation_method_id, attestation_method_version,
             outcome, rationale, canonical_commit_ref, correction_or_revocation_reason };
@@ -568,8 +570,8 @@ impl EvidenceExtension { pub fn validate(&self)->Result<(),DomainError>{
     fn dm2_01_claim_revision_parent_must_belong_to_same_claim() {
         let ca=ClaimRef::new("ca").unwrap(); let cb=ClaimRef::new("cb").unwrap();
         let parent=ClaimRevision::new(ClaimRevisionRef::new("r1").unwrap(),ca.clone(),None,"s".into(),"p".into(),"o".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t1".into(),"initial".into()).unwrap();
-        let bad=ClaimRevision::new(ClaimRevisionRef::new("r2").unwrap(),cb,Some(&parent),"s".into(),"p".into(),"o".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t2".into(),"correction".into()).unwrap();
-        assert_eq!(bad.validate(),Err(DomainError::InvalidParent));
+        let bad=ClaimRevision::new(ClaimRevisionRef::new("r2").unwrap(),cb,Some(&parent),"s".into(),"p".into(),"o".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t2".into(),"correction".into());
+        assert_eq!(bad.unwrap_err(),DomainError::InvalidParent);
     }
     #[test]
     fn dm2_02_claim_revision_is_append_only_and_immutable() {
