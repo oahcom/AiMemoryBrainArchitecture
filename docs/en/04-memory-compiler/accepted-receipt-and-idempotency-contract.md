@@ -1,14 +1,63 @@
+---
+document_metadata:
+  domain: memory-compiler
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope: null
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "04-memory-compiler/accepted-receipt-and-idempotency-contract.md @ 6888075ad1db4121f831332e2cdeece899a5f244"
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-21"
+      last_verification_note: "Canonical source and bilingual mirror path verified; design status remains as stated in the document."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Memory Compiler design specification: accepted-receipt-idempotency"
+    canonical_scope_id: "memory-compiler/accepted-receipt-idempotency"
+    canonical_scope_keywords:
+      - receipt
+      - idempotency
+      - completion
+      - retry
+      - replay
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "04-memory-compiler/accepted-receipt-and-idempotency-contract.md"
+    en: "docs/en/04-memory-compiler/accepted-receipt-and-idempotency-contract.md"
+    zh-CN: "docs/zh-CN/04-memory-compiler/accepted-receipt-and-idempotency-contract.md"
+---
+
+
 # Accepted Receipt, Compiler Completion and Idempotency Contract
 
 - Document ID: E-RECEIPT-001
 - Version: 1.0
-- Source branch: session-e-memory-compiler-2026-11-16
-- Source revision: DEREFERENCED — historical source blob `5ca77a5b48e69afb3bc81429baf538be7dce4d46` retained; no current normative source path exists.
-- Source: DEREFERENCED — original normative path `04-memory-compiler/accepted-receipt-and-idempotency-contract.md` is absent from the current main tree; alternative: [surviving Chinese counterpart](../../zh-CN/04-memory-compiler/accepted-receipt-and-idempotency-contract.md) (blob `fa8c005a6b8c599c10e71150fb2056d5685e76fd`; translation only, not an authoritative substitute).
-- Chinese counterpart: [Accepted Receipt、Compiler 完成与幂等契约](../../zh-CN/04-memory-compiler/accepted-receipt-and-idempotency-contract.md)
-- Status: CANDIDATE E contract; Storage realization, D producer APIs, H envelope and I policy approval remain OPEN
+- Canonical source: [accepted-receipt-and-idempotency-contract.md](../../../04-memory-compiler/accepted-receipt-and-idempotency-contract.md)
+- Source blob: 6888075ad1db4121f831332e2cdeece899a5f244
 
-# Accepted Receipt, Compiler Completion and Idempotency Contract
+- Restored source lineage: session-e-memory-compiler-2026-11-16
+- Historical source blob: 5ca77a5b48e69afb3bc81429baf538be7dce4d46
+- Owner decision dependency: OWNER-DECISION-FACT-CLAIM-001 applies to Fact/Claim semantics only; this document's concrete schemas remain at the status stated below.
+
 
 **Status:** CANDIDATE E contract; durable Storage realization, D producer APIs, H envelope and I policy approval remain OPEN.
 **Owner:** Session E — Memory Compiler.
