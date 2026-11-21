@@ -1,6 +1,6 @@
 # GAP-08 — BMCP conformance suite has an undeclared Node dependency
 
-**Status:** Open — the suite cannot pass on a clean checkout
+**Status:** Open — repository side done in #546; closure criteria 1 and 5 blocked by the CI billing interruption
 **Area:** 08-bmcp-protocol / conformance
 **Owner track:** Owner H (Protocol)
 
@@ -152,3 +152,17 @@ expects, so "run the conformance suite" has one meaning.
    it were a code defect.
 5. CI actually executes the three files that depend on Node. A dependency that
    no workflow ever installs is indistinguishable from one that is missing.
+
+## Status after #546
+
+The repository side is complete: the dependency is pinned with a committed
+lockfile, the helper no longer collides with pytest collection, and the workflow
+now executes all four previously uncovered files.
+
+Criteria 2, 3 and 4 are met, and each was measured locally rather than inferred;
+the measurements are attached to the PR body. Criterion 1 requires an automatic
+install on a clean checkout, and criterion 5 requires CI to execute the three
+Node-dependent files. Both are blocked by the same billing interruption, which is
+outside this work item.
+
+This item stays open until those two are measured.
