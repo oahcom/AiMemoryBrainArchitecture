@@ -4,12 +4,17 @@ document_metadata:
   role: decision-record
   lifecycle:
     approval:
-      decision_status: Draft
-      approver: null
-      decision_date: null
-      approved_version: null
-      approval_scope: null
-      approval_applicability: Not-Applicable-To-Current-Version
+      decision_status: Approved
+      approver: "Project Owner delegate under Issue #305 comment 7042461592"
+      decision_date: "2026-11-21"
+      approved_version:
+        scheme: git
+        value: "0d640134fab62ede64634e8a68baaf4aeda9c43d"
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Applicable-To-Current-Version
       evidence_reference:
         - "Issue #305 comment 7042461592"
         - "02-domain-model/domain-model-overview.md @ 5b86fe23ab7c670b4ae13331b56572aee35f5d00"
