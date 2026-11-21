@@ -1,9 +1,59 @@
+---
+document_metadata:
+  domain: memory-compiler
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope: null
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "04-memory-compiler/evidence-and-provenance.md @ c3ee6ee75ca88ad131f686dfe1a0a430ace7195c"
+        - "OWNER-DECISION-FACT-CLAIM-001 (semantic dependency only)"
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-21"
+      last_verification_note: "Canonical source and bilingual mirror path verified; final DAG/reference contracts remain as stated in the candidate document."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Memory Compiler design specification: evidence-provenance"
+    canonical_scope_id: "memory-compiler/evidence-provenance"
+    canonical_scope_keywords:
+      - evidence
+      - provenance
+      - lineage
+      - forget
+      - authorization
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "04-memory-compiler/evidence-and-provenance.md"
+    en: "docs/en/04-memory-compiler/evidence-and-provenance.md"
+    zh-CN: "docs/zh-CN/04-memory-compiler/evidence-and-provenance.md"
+---
+
 # 证据与来源血缘
+
+- 规范源：[evidence-and-provenance.md](../../../04-memory-compiler/evidence-and-provenance.md)
+- 规范源 Blob：c3ee6ee75ca88ad131f686dfe1a0a430ace7195c
 
 - 文档 ID：E-EVIDENCE-001
 - 版本：1.0
-- 源分支：session-e-memory-compiler-2026-11-16
-- 源 Blob：38bcacafa89ebe7b3eedb6f38d174e0c6a1f3963
 - 对应英文：[Evidence and Provenance](../../en/04-memory-compiler/evidence-and-provenance.md)
 - 状态：可追溯性、授权和 Forget 义务已 DECIDED；Graph 表示为 CANDIDATE；最终 DAG/Reference Contract 等待 D/I，状态 OPEN
 - Owner：Memory Compiler / MC-03
