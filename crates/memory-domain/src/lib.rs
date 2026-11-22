@@ -669,7 +669,7 @@ fn valid_rfc3339_utc(value: &str) -> bool {
         || bytes.get(7) != Some(&b'-')
         || bytes
             .get(10)
-            .map_or(true, |byte| *byte != b'T' && *byte != b't')
+            .is_none_or(|byte| *byte != b'T' && *byte != b't')
         || bytes.get(13) != Some(&b':')
         || bytes.get(16) != Some(&b':')
     {
