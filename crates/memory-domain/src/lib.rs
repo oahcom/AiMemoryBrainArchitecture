@@ -8,6 +8,9 @@ mod claim_revision_registry;
 pub use claim_identity::*;
 pub use claim_revision_registry::*;
 
+mod relation_registry;
+pub use relation_registry::*;
+
 #[derive(
     serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd,
 )]
@@ -1148,6 +1151,7 @@ pub struct RelationExtension {
     pub epistemic_status: EpistemicStatus,
     pub evidence_refs: Vec<EvidenceRef>,
     pub lifecycle_state: RelationLifecycleState,
+    pub scope_refs: Vec<ScopeRef>,
 }
 impl RelationExtension {
     /// Registry-dependent endpoint compatibility cannot be expressed in static Rust types.
@@ -1554,6 +1558,7 @@ mod tests {
             epistemic_status: EpistemicStatus::Observed,
             evidence_refs: vec![],
             lifecycle_state: RelationLifecycleState::Proposed,
+            scope_refs: vec![],
         };
         let d = RelationDefinition {
             relation_type: "owns".into(),
@@ -1596,6 +1601,7 @@ mod tests {
             epistemic_status: EpistemicStatus::Observed,
             evidence_refs: vec![],
             lifecycle_state: RelationLifecycleState::Active,
+            scope_refs: vec![],
         };
         assert_eq!(r.valid_time_or_unknown(), ValidTimeRef::Unknown);
         assert_ne!(r.valid_time_or_unknown(), ValidTimeRef::AllTime);

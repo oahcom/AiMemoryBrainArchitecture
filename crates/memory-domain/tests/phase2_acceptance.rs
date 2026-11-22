@@ -522,6 +522,7 @@ fn dm2_08_invalid_relation_endpoint_rejected() {
         epistemic_status: EpistemicStatus::Observed,
         evidence_refs: vec![EvidenceRef::new("ev-1").unwrap()],
         lifecycle_state: RelationLifecycleState::Active,
+        scope_refs: vec![],
     };
     let definition = RelationDefinition {
         relation_type: "owns".into(),
@@ -548,17 +549,135 @@ fn dm2_08_invalid_relation_endpoint_rejected() {
 }
 
 #[test]
-#[ignore = "blocked: RelationDefinition 只描述单个 relation_type 的允许端点，没有 RelationTypeRegistry / contains_relation_type API；无法判定一个非空 relation_type 是否已注册"]
 fn dm2_08_unregistered_relation_type_rejected() {
-    unimplemented!()
+    let definition = RelationDefinition {
+        relation_type: "owns".into(),
+        allowed_subject_kinds: vec![RelationEndpointKind::Entity],
+        allowed_object_kinds: vec![RelationEndpointKind::Fact],
+    };
+
+    let mut registry = RelationTypeRegistry::new();
+
+    // 1. A registered relation type with compatible endpoints is accepted.
+    registry.register(1, definition.clone()).unwrap();
+
+    assert!(registry.contains_relation_type("owns"));
+    assert_eq!(registry.version("owns"), Some(1));
+    assert_eq!(registry.lookup("owns"), Some(&definition));
+
+    let compatible = RelationExtension {
+        subject: RelationEndpoint::Entity(EntityRef::new("entity-1").unwrap()),
+        object: RelationEndpoint::Fact(FactRef::new("fact-1").unwrap()),
+        directionality: RelationDirectionality::Directed,
+        qualifiers: vec![],
+        valid_time: Some(ValidTimeRef::Unknown),
+        epistemic_status: EpistemicStatus::Observed,
+        evidence_refs: vec![EvidenceRef::new("ev-1").unwrap()],
+        lifecycle_state: RelationLifecycleState::Active,
+        scope_refs: vec![],
+    };
+
+    assert_eq!(
+        registry.validate_against_registry("owns", &compatible),
+        Ok(())
+    );
+
+    // 2. An unregistered relation type is rejected.
+    assert!(!registry.contains_relation_type("contains"));
+
+    assert_eq!(
+        registry.validate_against_registry("contains", &compatible),
+        Err(DomainError::InvalidRelationEndpoint)
+    );
+
+    // 3. Registering the same relation type twice is rejected.
+    let duplicate = RelationDefinition {
+        relation_type: "owns".into(),
+        allowed_subject_kinds: vec![RelationEndpointKind::Entity],
+        allowed_object_kinds: vec![RelationEndpointKind::Entity],
+    };
+
+    assert_eq!(
+        registry.register(2, duplicate),
+        Err(DomainError::InvalidRelationEndpoint)
+    );
+
+    // 4. A registered relation type with incompatible endpoints is rejected.
+    let incompatible = RelationExtension {
+        subject: RelationEndpoint::Fact(FactRef::new("fact-2").unwrap()),
+        ..compatible
+    };
+
+    assert_eq!(
+        registry.validate_against_registry("owns", &incompatible),
+        Err(DomainError::InvalidRelationEndpoint)
+    );
 }
 
 // ---------------------------------------------------------------- DM2-09
 
 #[test]
-#[ignore = "blocked: RelationExtension 提供 valid_time/epistemic_status/lifecycle_state，但没有 scope_refs；当前不能断言时间、scope、lifecycle 三者可独立变化"]
 fn dm2_09_relation_time_scope_lifecycle_independent() {
-    unimplemented!()
+    let scope_a = ScopeRef {
+        scope_id: id("scope-a"),
+        scope_kind: ScopeKind::Project,
+        namespace_key: "namespace-a".into(),
+    };
+    let scope_b = ScopeRef {
+        scope_id: id("scope-b"),
+        scope_kind: ScopeKind::Session,
+        namespace_key: "namespace-b".into(),
+    };
+
+    let base = RelationExtension {
+        subject: RelationEndpoint::Entity(EntityRef::new("entity-1").unwrap()),
+        object: RelationEndpoint::Fact(FactRef::new("fact-1").unwrap()),
+        directionality: RelationDirectionality::Directed,
+        qualifiers: vec![],
+        valid_time: Some(ValidTimeRef::Unknown),
+        epistemic_status: EpistemicStatus::Observed,
+        evidence_refs: vec![EvidenceRef::new("ev-1").unwrap()],
+        lifecycle_state: RelationLifecycleState::Proposed,
+        scope_refs: vec![scope_a.clone()],
+    };
+
+    // 1. Only valid_time changes; scope and lifecycle stay put.
+    let time_changed = RelationExtension {
+        valid_time: Some(ValidTimeRef::AllTime),
+        ..base.clone()
+    };
+
+    assert_eq!(time_changed.valid_time, Some(ValidTimeRef::AllTime));
+    assert_eq!(time_changed.scope_refs, base.scope_refs);
+    assert_eq!(time_changed.lifecycle_state, base.lifecycle_state);
+
+    // 2. Only scope_refs changes; time and lifecycle stay put.
+    let scope_changed = RelationExtension {
+        scope_refs: vec![scope_b.clone()],
+        ..base.clone()
+    };
+
+    assert_eq!(scope_changed.scope_refs, vec![scope_b]);
+    assert_eq!(scope_changed.valid_time, base.valid_time);
+    assert_eq!(scope_changed.lifecycle_state, base.lifecycle_state);
+
+    // 3. Only lifecycle_state changes; time and scope stay put.
+    let lifecycle_changed = RelationExtension {
+        lifecycle_state: RelationLifecycleState::Active,
+        ..base.clone()
+    };
+
+    assert_eq!(
+        lifecycle_changed.lifecycle_state,
+        RelationLifecycleState::Active
+    );
+    assert_eq!(lifecycle_changed.valid_time, base.valid_time);
+    assert_eq!(lifecycle_changed.scope_refs, base.scope_refs);
+
+    // 4. Lifecycle state is not the epistemic status: the spec states relation
+    // lifecycle states "are not MemoryLifecycle or Claim epistemic status".
+    let _: RelationLifecycleState = RelationLifecycleState::Proposed;
+    let _: EpistemicStatus = EpistemicStatus::Observed;
 }
 
 // ---------------------------------------------------------------- DM2-10
