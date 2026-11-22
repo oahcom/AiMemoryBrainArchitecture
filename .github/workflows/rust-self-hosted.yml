@@ -35,16 +35,19 @@ permissions:
   contents: read
 
 concurrency:
-  # Shared with gates.yml on purpose (#700). Both workflows compile the whole
-  # workspace on the repository's only runner; different group names let them
-  # build at the same time and double the disk churn, which is what pushed the
-  # host to 94% and made the disk guard refuse before any Rust ran.
+  # Own group, NOT gates.yml's. #712 tried the shared group #700 item 1 asked
+  # for, and it does not serialise - it deletes. GitHub keeps one running and
+  # one pending run per group, so with both workflows in one group a push that
+  # triggers both leaves only one survivor: run 45038164281 (this workflow) was
+  # cancelled at creation with zero jobs, and 45038090599 (gates) the same way.
+  # cancel-in-progress: false does not help; it only protects a run that has
+  # started, and a pending run is replaced regardless.
   #
-  # cancel-in-progress must stay false in the shared group. With one group and
-  # true, a push to the branch would cancel the in-flight *gates* run mid-step,
-  # and gates.yml is the hard gate - a cancelled gate is not a passed gate.
-  group: existing-gates-self-hosted
-  cancel-in-progress: false
+  # A dropped Rust run is worse than two concurrent builds. The disk churn has
+  # to be solved on the host (#700 item 2) or by chaining the workflows, not by
+  # sharing a queue slot.
+  group: rust-self-hosted
+  cancel-in-progress: true
 
 jobs:
   rust-workspace-test:
