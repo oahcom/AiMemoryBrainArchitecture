@@ -1,3 +1,31 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+
+    evidence_verification:
+      verification_status: Unverified
+
+    usage_status: Active
+    modification_status: Modified
+
+  authority:
+    canonical_status: Canonical
+    canonical_scope: "Authoritative record of the six GAP workload-presence measurements at baseline commit a8fd2b7 and explicitly recorded subsequent measurements."
+    canonical_scope_id: ai-development/gap-baseline-measurement-record
+    canonical_scope_keywords:
+      - gap-baseline
+      - workload-measurements
+      - implementation-presence
+    canonical_conflict_status: None
+    normative_status: Informative
+---
+
 # GAP-BASELINE-001 — Key Missing Workload Baseline
 
 - Repository: `oahcom/AiMemoryBrainArchitecture`
