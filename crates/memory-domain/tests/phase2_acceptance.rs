@@ -157,9 +157,92 @@ fn dm2_02_accepted_revision_is_append_only() {
 // ---------------------------------------------------------------- DM2-03
 
 #[test]
-#[ignore = "blocked: memory_domain 当前没有 classify_claim_change / CI-01..CI-13 classifier 函数，也没有 DomainError::AmbiguousIdentityClassification"]
 fn dm2_03_ci_classification_vectors() {
-    unimplemented!()
+    // PR #545 exposed classify() publicly; these vectors exercise the real API end to end.
+    let prior = claim_revision("cr-1", "claim-1", &["ev-1"]);
+    let candidate = || claim_revision("cr-2", "claim-1", &["ev-1"]);
+
+    // Identity resolution: a normalised label-only subject change stays the same Claim
+    // and must be a NewRevision on the LabelOnly dimension (CI-13), not a NewClaim.
+    assert_eq!(
+        classify(
+            &prior,
+            &claim_revision_json_with(&candidate(), "subject", json!(" Subject "))
+        ),
+        ClaimIdentityDecision::Classified {
+            class: ClaimIdentityClass::NewRevision,
+            dimension: ChangeDimension::LabelOnly,
+        }
+    );
+
+    // CI-02: predicate change is substantive -> NewClaim/Predicate.
+    assert_eq!(
+        classify(
+            &prior,
+            &claim_revision_json_with(&candidate(), "predicate", json!("holds"))
+        ),
+        ClaimIdentityDecision::Classified {
+            class: ClaimIdentityClass::NewClaim,
+            dimension: ChangeDimension::Predicate,
+        }
+    );
+
+    // CI-03: object change -> NewClaim/Object.
+    assert_eq!(
+        classify(
+            &prior,
+            &claim_revision_json_with(&candidate(), "object", json!("red"))
+        ),
+        ClaimIdentityDecision::Classified {
+            class: ClaimIdentityClass::NewClaim,
+            dimension: ChangeDimension::Object,
+        }
+    );
+
+    // CI-04: polarity change -> NewClaim/Polarity.
+    assert_eq!(
+        classify(
+            &prior,
+            &claim_revision_json_with(&candidate(), "polarity", json!("negate"))
+        ),
+        ClaimIdentityDecision::Classified {
+            class: ClaimIdentityClass::NewClaim,
+            dimension: ChangeDimension::Polarity,
+        }
+    );
+
+    // A different ClaimRef is a governed decision; ambiguity MUST NOT silently fall
+    // back to NewRevision.
+    let decision = classify(&prior, &claim_revision("cr-2", "claim-2", &["ev-1"]));
+    assert_eq!(
+        decision,
+        ClaimIdentityDecision::RequiresGovernedDecision {
+            reason: AmbiguousReason::ReferentResolutionUncertain,
+        }
+    );
+    assert_ne!(
+        decision,
+        ClaimIdentityDecision::Classified {
+            class: ClaimIdentityClass::NewRevision,
+            dimension: ChangeDimension::PresentationOnly,
+        }
+    );
+
+    // Two substantive dimensions changed together -> governed MultipleSubstantiveDimensions.
+    let multi = claim_revision_json_with(
+        &claim_revision_json_with(&candidate(), "object", json!("red")),
+        "polarity",
+        json!("negate"),
+    );
+    match classify(&prior, &multi) {
+        ClaimIdentityDecision::RequiresGovernedDecision {
+            reason: AmbiguousReason::MultipleSubstantiveDimensions { dimensions },
+        } => assert_eq!(
+            dimensions,
+            vec![ChangeDimension::Object, ChangeDimension::Polarity]
+        ),
+        other => panic!("expected a governed decision, got {other:?}"),
+    }
 }
 
 // ---------------------------------------------------------------- DM2-04
