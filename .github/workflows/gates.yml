@@ -298,6 +298,31 @@ jobs:
       # subsequent Rust job silently. Failing here is diagnosable; mutating the
       # host is not.
       #
+      # SOURCE ~/.cargo/env FIRST -- THAT IS THE WHOLE BUG THIS FIXES.
+      # Rust IS on zesu-x64. The first run of this job reported
+      # `cargo=MISSING rustc=MISSING cargo-clippy=MISSING` and that was read as
+      # "the host has no Rust". It has Rust; the shell cannot see it.
+      #
+      # GitHub runs `shell: bash` as `/usr/bin/bash --noprofile --norc`, so
+      # `~/.cargo/bin` is never added to PATH. rustup's own installer says so
+      # verbatim, in the log of the first rust-self-hosted run whose Toolchain
+      # step succeeded (run 45011526690, head c031c401):
+      #
+      #   warn: it looks like you have an existing rustup settings file at:
+      #   warn: /home/ubuntu/.rustup/settings.toml
+      #   warn: Updating existing toolchain, profile choice will be ignored
+      #     stable-x86_64-unknown-linux-gnu unchanged - rustc 1.100.0
+      #
+      # "existing settings file" and "unchanged" mean the toolchain was already
+      # installed before that job ran: the install branch re-linked a toolchain
+      # that was already there. What made cargo resolve was the next line,
+      # `. "$HOME/.cargo/env"`.
+      #
+      # So the prerequisite was never missing, only unexported. Sourcing here
+      # fixes the probe without mutating the host, which is what this comment
+      # block already required. Adding a `rustup` install instead would mutate
+      # a shared machine on every job to accomplish nothing.
+      #
       # `rustfmt` is deliberately NOT probed: this job no longer formats.
       #
       # `cc` is checked because `libsqlite3-sys` compiles C in its build script,
@@ -307,6 +332,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # Guarded: a distro-packaged cargo has no ~/.cargo/env, and `set -e`
+          # would abort on the missing file instead of probing.
+          if [ -f "$HOME/.cargo/env" ]; then . "$HOME/.cargo/env"; fi
           missing=""
           for c in cargo rustc cargo-clippy cc; do
             if command -v "$c" >/dev/null 2>&1; then
@@ -317,7 +345,7 @@ jobs:
             fi
           done
           if [ -n "$missing" ]; then
-            echo "::error::zesu-x64 lacks:$missing -- install on the host out of band (see AI-RUN-002-RUNBOOK), do not install it in this workflow"
+            echo "::error::zesu-x64 lacks:$missing after sourcing $HOME/.cargo/env -- install on the host out of band (see AI-RUN-002-RUNBOOK), do not install it in this workflow"
             exit 1
           fi
           cargo --version
@@ -351,4 +379,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # Same non-login shell as the probe step, so PATH still lacks
+          # ~/.cargo/bin. Without this, step 5 passes and this step dies with
+          # `cargo: command not found` -- which reads as "the fix did not work".
+          if [ -f "$HOME/.cargo/env" ]; then . "$HOME/.cargo/env"; fi
           cargo clippy --workspace --all-targets -- -D warnings
