@@ -1,6 +1,6 @@
 ---
 document_metadata:
-  domain: governance
+  domain: security-governance
   role: work-record
 
   lifecycle:
