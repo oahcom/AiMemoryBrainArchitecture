@@ -289,7 +289,7 @@ fn handle_request_body_with_deadline(body: &[u8], request_deadline_ms: u64) -> R
     if method == "initialize" {
         RequestOutcome::Responded {
             body: format!(
-                "{{\"jsonrpc\":\"2.0\",\"id\":{id},\"result\":{{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{{\"tools\":{{}}}},\"serverInfo\":{{\"name\":\"bmcp-server\",\"version\":\"0.1.0\"}}}}}}"
+                "{{\"jsonrpc\":\"2.0\",\"id\":{id},\"result\":{{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{{}},\"serverInfo\":{{\"name\":\"bmcp-server\",\"version\":\"0.1.0\"}}}}}}"
             ),
         }
     } else {
