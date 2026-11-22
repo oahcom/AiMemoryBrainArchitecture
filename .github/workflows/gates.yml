@@ -288,41 +288,51 @@ jobs:
             echo "::warning::only ${avail_gb}G free; free space on this runner has been shrinking between runs that build nothing. Investigate the leak, do not just re-run."
           fi
 
-      # NO TOOLCHAIN INSTALL STEP. This runner is a shared, operator-managed
-      # host; a workflow that runs `rustup` would mutate the toolchain every
-      # other job on this machine sees. `actions/checkout` cleans
-      # `$GITHUB_WORKSPACE` but not `$HOME`, so `~/.cargo` and `~/.rustup` would
-      # persist and every later job's result would depend on which job ran
-      # first -- irreproducible and very hard to diagnose. A half-finished
-      # rustup install would also leave a broken `~/.rustup` that breaks every
-      # subsequent Rust job silently. Failing here is diagnosable; mutating the
-      # host is not.
+      # TOOLCHAIN. This job used to require cargo/rustc/cargo-clippy on the
+      # host and hard-fail otherwise; run 45013278749 measured all three
+      # MISSING on zesu-x64, so every push failed for a reason unrelated to the
+      # code. `rust-self-hosted.yml` installs Rust in-workflow on the same
+      # runner and succeeds (run 45013113393), so this job now does the same.
+      # The install is skipped when cargo is already on PATH, so provisioning
+      # the host properly later silently takes over instead of reinstalling.
       #
-      # `rustfmt` is deliberately NOT probed: this job no longer formats.
-      #
-      # `cc` is checked because `libsqlite3-sys` compiles C in its build script,
-      # and discovering a missing compiler 40 crates into a build wastes the
-      # whole job.
-      - name: Require the host Rust toolchain
+      # `--component clippy` is load-bearing: `--profile minimal` omits it, and
+      # without it the install "succeeds" while the clippy step dies on
+      # `cargo-clippy: command not found`.
+      - name: Toolchain
         shell: bash
         run: |
           set -euo pipefail
-          missing=""
-          for c in cargo rustc cargo-clippy cc; do
-            if command -v "$c" >/dev/null 2>&1; then
-              echo "$c=$(command -v "$c")"
-            else
-              echo "$c=MISSING"
-              missing="$missing $c"
-            fi
-          done
-          if [ -n "$missing" ]; then
-            echo "::error::zesu-x64 lacks:$missing -- install on the host out of band (see AI-RUN-002-RUNBOOK), do not install it in this workflow"
-            exit 1
+          # rustup writes PATH to a profile a non-login shell does not read,
+          # so a rustup-installed cargo is invisible to `command -v` until it
+          # is sourced. Source FIRST, then probe -- probing before sourcing
+          # made every run reinstall rustup on a host that already had it,
+          # which is the host mutation this job was originally written to avoid.
+          # Guarded: a distro-packaged cargo has no ~/.cargo/env, and an
+          # unconditional source would abort the step under `set -e`.
+          if [ -f "$HOME/.cargo/env" ]; then . "$HOME/.cargo/env"; fi
+          if ! command -v cargo >/dev/null 2>&1; then
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+              | sh -s -- -y --profile minimal --default-toolchain stable --component clippy
+            # The installer writes ~/.cargo/env, which this shell has not read.
+            if [ -f "$HOME/.cargo/env" ]; then . "$HOME/.cargo/env"; fi
           fi
           cargo --version
           rustc --version
           cargo clippy --version
+
+      # A report, not a gate. `cargo=/home/runner/.cargo/bin/cargo` in the log
+      # is the evidence the step above took effect. `cc` stays in the list
+      # because clippy needs a linker and a missing `cc` is a real signal -- it
+      # just must not be fatal when rustup can provide the rest.
+      - name: Report the toolchain source
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f "$HOME/.cargo/env" ]; then . "$HOME/.cargo/env"; fi
+          for c in cargo rustc cargo-clippy cc; do
+            printf '%s=%s\n' "$c" "$(command -v "$c" || echo MISSING)"
+          done
 
       # CACHE AND MEMORY POLICY.
       #
@@ -351,4 +361,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # Each step is a fresh shell, so the Toolchain step PATH does not
+          # carry over. Same guarded source as above: a distro-packaged cargo
+          # has no ~/.cargo/env and an unguarded source aborts under `set -e`.
+          if [ -f "$HOME/.cargo/env" ]; then . "$HOME/.cargo/env"; fi
           cargo clippy --workspace --all-targets -- -D warnings
