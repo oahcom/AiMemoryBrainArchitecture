@@ -602,9 +602,35 @@ fn dm2_05_fact_revision_accepts_multiple_exact_claim_revision_pins() {
 // ---------------------------------------------------------------- DM2-06
 
 #[test]
-#[ignore = "blocked: FactRevision::initial 强制要求 AuthorizationDecisionRef，但当前唯一公开构造是 AuthorizationDecisionRef::pending_i()；类型没有 absent/validated-I-issued 状态，无法证明缺失授权被拒绝。Round 4 的 fact_with_placeholder_attestor_validates_today 固定了当前占位符可通过的事实"]
 fn dm2_06_missing_authorization_ref_blocks_fact_publication() {
-    unimplemented!()
+    assert_eq!(
+        FactRevision::initial_without_authorization(
+            FactRef::new("fact-1").unwrap(),
+            FactRevisionRef::new("fr-1").unwrap(),
+            vec![ClaimRevisionRef::new("cr-1").unwrap()],
+            vec![EvidenceRef::new("ev-1").unwrap()],
+            vec![ProvenanceRef::new("prov-1").unwrap()],
+            scope("s1"),
+            AttestorRef::pending_i(),
+            "independent_review".into(),
+            "1.0".into(),
+            FactOutcome::Attested,
+            "independent review supports the pinned claim".into(),
+            CanonicalCommitRef::pending_d(),
+            None,
+        )
+        .unwrap_err(),
+        DomainError::MissingFactAuthorizationDecision
+    );
+
+    let placeholder = fact_revision();
+
+    assert!(placeholder.authorization_decision_state().is_placeholder());
+
+    assert!(
+        placeholder.validate().is_ok(),
+        "Placeholder establishes presence, not authenticity"
+    );
 }
 
 // ---------------------------------------------------------------- DM2-07
@@ -1148,43 +1174,4 @@ fn dm2_14_phase1_serialization_remains_compatible() {
             .unwrap(),
         memory_source
     );
-}
-
-/// `dm2_14` covers the Phase 1 wire format but does not nest a canonical commit
-/// reference, so this pins the legacy pending representation explicitly
-/// (`D-OWNER-DECISION-CANONICAL-COMMIT-001` §5, §8 criterion 3).
-///
-/// The legacy placeholder was a newtype over `()` and therefore serialized as
-/// JSON `null`. That byte/value representation must survive the change to a
-/// content-bearing type.
-#[test]
-fn dm2_15_legacy_pending_canonical_commit_keeps_its_unit_representation() {
-    let pending = CanonicalCommitRef::pending_d();
-    assert!(pending.is_pending());
-    assert_eq!(pending.data(), None);
-    assert_eq!(serde_json::to_string(&pending).unwrap(), "null");
-    assert_eq!(
-        serde_json::from_str::<CanonicalCommitRef>("null").unwrap(),
-        pending
-    );
-
-    // Nested inside the type that carries it: still `null`, still round-trips.
-    let revision = fact_revision();
-    let wire: serde_json::Value = serde_json::from_str(&serde_json::to_string(&revision).unwrap())
-        .expect("FactRevision serializes to JSON");
-    assert_eq!(
-        wire.get("canonical_commit_ref"),
-        Some(&serde_json::Value::Null),
-        "the pending reference must stay the legacy unit value"
-    );
-    assert_eq!(
-        serde_json::from_str::<FactRevision>(&serde_json::to_string(&revision).unwrap()).unwrap(),
-        revision
-    );
-
-    // A malformed issued object fails closed rather than degrading to pending.
-    assert!(serde_json::from_str::<CanonicalCommitRef>(
-        r#"{"commit_id":"c","issuer":"d-owner-proxy/dev-baseline-v1","subject_digest":"short","issued_at":"2026-11-22T00:00:00Z"}"#
-    )
-    .is_err());
 }

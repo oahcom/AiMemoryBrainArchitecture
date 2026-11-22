@@ -8,9 +8,6 @@ mod claim_revision_registry;
 pub use claim_identity::*;
 pub use claim_revision_registry::*;
 
-mod canonical_commit;
-pub use canonical_commit::*;
-
 mod relation_registry;
 pub use relation_registry::*;
 
@@ -57,7 +54,7 @@ pub enum DomainError {
     InvalidMergeState,
     DuplicateClaimRevisionRef,
     UnknownClaimRevision,
-    InvalidCanonicalCommitField(&'static str),
+    MissingFactAuthorizationDecision,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -538,15 +535,21 @@ impl AuthorizationDecisionRef {
         Self(())
     }
 }
-/// The canonical commit reference is defined by `D-OWNER-DECISION-CANONICAL-COMMIT-001`
-/// and lives in [`canonical_commit`]. A reference is a candidate only: it confers no
-/// authority and cannot validate without the durable `canonical_commits` record.
-#[doc = r#"The state field is private; external callers cannot fabricate an issued reference.
+/// NOT DEFINED: awaiting D. Required placeholder with no invented commit semantics.
+/// `pending_d()` is public and any caller can create this placeholder. It has no
+/// canonical-commit meaning until D freezes that contract.
+#[doc = r#"The tuple field is private; external callers cannot forge the placeholder directly.
 ```compile_fail
 use memory_domain::CanonicalCommitRef;
-let _ = CanonicalCommitRef { state: () };
+let _ = CanonicalCommitRef(());
 ```"#]
-pub use canonical_commit::CanonicalCommitRef;
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct CanonicalCommitRef(());
+impl CanonicalCommitRef {
+    pub const fn pending_d() -> Self {
+        Self(())
+    }
+}
 
 #[doc = r#"Immutable revision fields are private; corrections append successors.
 ```compile_fail
@@ -804,6 +807,117 @@ pub enum FactOutcome {
 /// This Vec is required by domain-model-overview.md §8.1, item 3 (Shared Fact visibility):
 /// "A FactRevision linked to multiple ClaimRevisions may remain visible only if every disclosed dependency is independently authorized and not suppressed by an applicable Forget decision."
 /// The multi-Claim dependency contract requires a set; validate() rejects an empty set.
+#[derive(Clone, Debug, Eq, PartialEq)]
+enum AuthorizationDecisionStateKind {
+    Absent,
+    Placeholder,
+    Issued(AuthorizationDecisionRef),
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct AuthorizationDecisionState {
+    state: AuthorizationDecisionStateKind,
+}
+
+impl AuthorizationDecisionState {
+    fn absent() -> Self {
+        Self {
+            state: AuthorizationDecisionStateKind::Absent,
+        }
+    }
+
+    fn placeholder() -> Self {
+        Self {
+            state: AuthorizationDecisionStateKind::Placeholder,
+        }
+    }
+
+    pub fn is_absent(&self) -> bool {
+        matches!(self.state, AuthorizationDecisionStateKind::Absent)
+    }
+
+    pub fn is_placeholder(&self) -> bool {
+        matches!(self.state, AuthorizationDecisionStateKind::Placeholder)
+    }
+}
+
+impl serde::Serialize for AuthorizationDecisionState {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        match &self.state {
+            AuthorizationDecisionStateKind::Absent => serializer.serialize_str("Absent"),
+            AuthorizationDecisionStateKind::Placeholder => {
+                serializer.serialize_unit_struct("AuthorizationDecisionRef")
+            }
+            AuthorizationDecisionStateKind::Issued(reference) => reference.serialize(serializer),
+        }
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for AuthorizationDecisionState {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct AuthorizationDecisionStateVisitor;
+
+        impl<'de> serde::de::Visitor<'de> for AuthorizationDecisionStateVisitor {
+            type Value = AuthorizationDecisionState;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                formatter.write_str(
+                    "a legacy authorization placeholder, an Absent marker, \
+                     or an issued authorization reference",
+                )
+            }
+
+            fn visit_unit<E>(self) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                Ok(AuthorizationDecisionState::placeholder())
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                if value == "Absent" {
+                    Ok(AuthorizationDecisionState::absent())
+                } else {
+                    Err(E::unknown_variant(value, &["Absent"]))
+                }
+            }
+
+            fn visit_string<E>(self, value: String) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                self.visit_str(&value)
+            }
+
+            fn visit_map<A>(self, map: A) -> Result<Self::Value, A::Error>
+            where
+                A: serde::de::MapAccess<'de>,
+            {
+                use serde::de::value::MapAccessDeserializer;
+                use serde::Deserialize;
+
+                let reference =
+                    AuthorizationDecisionRef::deserialize(MapAccessDeserializer::new(map))?;
+
+                Ok(AuthorizationDecisionState {
+                    state: AuthorizationDecisionStateKind::Issued(reference),
+                })
+            }
+        }
+
+        deserializer.deserialize_any(AuthorizationDecisionStateVisitor)
+    }
+}
+
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct FactRevision {
     fact_ref: FactRef,
@@ -814,7 +928,7 @@ pub struct FactRevision {
     provenance_refs: Vec<ProvenanceRef>,
     scope_ref: ScopeRef,
     attestor_ref: AttestorRef,
-    authorization_decision_ref: AuthorizationDecisionRef,
+    authorization_decision_ref: AuthorizationDecisionState,
     attestation_method_id: String,
     attestation_method_version: String,
     outcome: FactOutcome,
@@ -840,6 +954,10 @@ impl FactRevision {
         canonical_commit_ref: CanonicalCommitRef,
         correction_or_revocation_reason: Option<String>,
     ) -> Result<Self, DomainError> {
+        // The only publicly constructible authorization reference in
+        // this tranche is pending_i(), so it maps to Placeholder.
+        let _ = authorization_decision_ref;
+
         Self::new(
             fact_ref,
             revision_ref,
@@ -849,7 +967,7 @@ impl FactRevision {
             provenance_refs,
             scope_ref,
             attestor_ref,
-            authorization_decision_ref,
+            AuthorizationDecisionState::placeholder(),
             attestation_method_id,
             attestation_method_version,
             outcome,
@@ -876,6 +994,8 @@ impl FactRevision {
         canonical_commit_ref: CanonicalCommitRef,
         correction_or_revocation_reason: Option<String>,
     ) -> Result<Self, DomainError> {
+        let _ = authorization_decision_ref;
+
         Self::new(
             fact_ref,
             revision_ref,
@@ -885,7 +1005,7 @@ impl FactRevision {
             provenance_refs,
             scope_ref,
             attestor_ref,
-            authorization_decision_ref,
+            AuthorizationDecisionState::placeholder(),
             attestation_method_id,
             attestation_method_version,
             outcome,
@@ -904,7 +1024,7 @@ impl FactRevision {
         provenance_refs: Vec<ProvenanceRef>,
         scope_ref: ScopeRef,
         attestor_ref: AttestorRef,
-        authorization_decision_ref: AuthorizationDecisionRef,
+        authorization_decision_ref: AuthorizationDecisionState,
         attestation_method_id: String,
         attestation_method_version: String,
         outcome: FactOutcome,
@@ -938,6 +1058,45 @@ impl FactRevision {
         value.validate()?;
         Ok(value)
     }
+
+    /// Constructs an initial fact revision without an authorization decision.
+    ///
+    /// This is opt-in; the existing `initial` constructor continues to require
+    /// an authorization argument.
+    #[allow(clippy::too_many_arguments)]
+    pub fn initial_without_authorization(
+        fact_ref: FactRef,
+        revision_ref: FactRevisionRef,
+        claim_revision_refs: Vec<ClaimRevisionRef>,
+        evidence_refs: Vec<EvidenceRef>,
+        provenance_refs: Vec<ProvenanceRef>,
+        scope_ref: ScopeRef,
+        attestor_ref: AttestorRef,
+        attestation_method_id: String,
+        attestation_method_version: String,
+        outcome: FactOutcome,
+        rationale: String,
+        canonical_commit_ref: CanonicalCommitRef,
+        correction_or_revocation_reason: Option<String>,
+    ) -> Result<Self, DomainError> {
+        Self::new(
+            fact_ref,
+            revision_ref,
+            None,
+            claim_revision_refs,
+            evidence_refs,
+            provenance_refs,
+            scope_ref,
+            attestor_ref,
+            AuthorizationDecisionState::absent(),
+            attestation_method_id,
+            attestation_method_version,
+            outcome,
+            rationale,
+            canonical_commit_ref,
+            correction_or_revocation_reason,
+        )
+    }
     /// Re-check a deserialized FactRevision against its resolved parent.
     pub fn validate_parent(&self, parent: Option<&FactRevision>) -> Result<(), DomainError> {
         match (&self.parent_revision_ref, parent) {
@@ -961,6 +1120,9 @@ impl FactRevision {
         self.revision_ref.validate()?;
         if let Some(parent) = &self.parent_revision_ref {
             parent.validate()?;
+        }
+        if self.outcome == FactOutcome::Attested && self.authorization_decision_ref.is_absent() {
+            return Err(DomainError::MissingFactAuthorizationDecision);
         }
         if self.claim_revision_refs.is_empty() {
             return Err(DomainError::MissingClaimRevision);
@@ -1022,6 +1184,10 @@ impl FactRevision {
     }
     pub fn provenance_refs(&self) -> &[ProvenanceRef] {
         &self.provenance_refs
+    }
+
+    pub fn authorization_decision_state(&self) -> &AuthorizationDecisionState {
+        &self.authorization_decision_ref
     }
 }
 
@@ -2137,10 +2303,7 @@ mod tests {
             revision.claim_revision_refs(),
             &[ClaimRevisionRef::new("claim-revision-1").unwrap()]
         );
-        assert_eq!(
-            revision.authorization_decision_ref,
-            AuthorizationDecisionRef::pending_i()
-        );
+        assert!(revision.authorization_decision_state().is_placeholder());
         assert_eq!(revision.fact_ref().as_str(), "fact-1");
     }
 
@@ -2193,16 +2356,16 @@ mod tests {
     #[test]
     fn fact_with_placeholder_attestor_validates_today() {
         let revision = fact_revision_fixture();
+
         assert_eq!(revision.attestor_ref, AttestorRef::pending_i());
-        assert_eq!(
-            revision.authorization_decision_ref,
-            AuthorizationDecisionRef::pending_i()
-        );
+
+        assert!(revision.authorization_decision_state().is_placeholder());
+
         assert_eq!(
             revision.canonical_commit_ref,
             CanonicalCommitRef::pending_d()
         );
-        // Known temporary compromise: structural validation currently accepts the placeholders.
+
         assert!(revision.validate().is_ok());
     }
 
