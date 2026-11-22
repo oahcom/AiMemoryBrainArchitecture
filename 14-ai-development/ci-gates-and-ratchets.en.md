@@ -1,37 +1,86 @@
 # CI gates and ratchets
 
 **Document:** GATE-CI-001
-**Status:** ACTIVE — authored and locally verified; not yet observed running (see §1)
+**Status:** ACTIVE — authored and locally verified; see §1 for what has and has
+not been observed running
 **Related:** GAP-10 Tier 2 item 2 (T2.2), GAP-08, GAP-09, DOC-OPS-001, AI-RUN-002-RUNBOOK
 
 This document states which gates CI runs, which of them are hard gates and which
 are ratchets, and what a ratchet baseline means. The workflow is
 `.github/workflows/gates.yml`; the ratchet tool is `scripts/ci/gate_ratchet.py`.
 
-## 1. These jobs have not run yet, and this document does not claim they have
+## 1. Where these jobs run, and what that costs
 
-Every job in `gates.yml` is pinned to `ubuntu-latest`. On this account,
-GitHub-hosted minutes are blocked by a billing failure: branch protection on
-`main` returns `403`, and every check run carries the annotation *"the job was
-not started because recent account payments have failed"*. `rust-phase1.yml` has
-therefore never executed a single test in this repository's history.
+Every job in `gates.yml` is pinned to `runs-on: [self-hosted, linux, x64]`.
 
-The status of this work is exactly: **the workflow file is correct and every
-command it runs was executed locally with the output recorded.** Nothing here is
-evidence that a check run went green. Do not read it as that.
+That is not a preference. `GET /repos/oahcom/AiMemoryBrainArchitecture/actions/runners`
+returns `total_count: 1`: a single runner, `zesu-x64`, labels
+`self-hosted, Linux, X64`. GitHub-hosted minutes are blocked by a billing failure
+on this account, so a job written `runs-on: ubuntu-latest` is allocated no runner
+at all and fails with an **empty `steps` array** — it never reaches the first
+step. Observed on `main`, 2026-11-22T04:29:56Z, on `GOV-DOC-002 metadata checks`
+and `audit`: both `failure`, both with zero steps executed. Twelve of the
+thirteen workflows in this repository are in that state. A gate authored on
+`ubuntu-latest` here is dead on arrival, so these jobs target the one runner that
+exists.
 
-The jobs are deliberately *not* moved to the self-hosted runner. Two binding
-rules prevent it:
+### 1.1 What that costs: this is a post-merge detector, not a pre-merge gate
 
-* **L1 (service layer):** the runner's job-started hook denies any job whose ref
-  is not `refs/heads/main`. A `pull_request` job is denied with
-  `ref_not_default_branch` before any step runs.
-* **L2 (repository layer):** `scripts/ci/audit_runner_admission.py` rejects
-  `pull_request` on any self-hosted job.
+Two controls, both already in force, force the trigger set:
 
-A gate that can only run after merge is not a gate. These jobs therefore stay on
-the hosted runner, where they will start running when the billing block is
-cleared.
+* **L1 (service layer).** The runner's job-started hook (`AI-RUN-002-RUNBOOK`
+  §4.1) fails any job whose `GITHUB_REF` is not exactly `refs/heads/main`, or
+  whose event is not `push` / `workflow_dispatch` / `schedule`. A job on a
+  feature branch is denied before any step runs.
+* **L2 (repository layer).** `scripts/ci/audit_runner_admission.py`, enforced by
+  `runner-admission-policy.yml`, rejects `pull_request` on any self-hosted job, a
+  `push` with no `branches:` filter, and `push.branches` naming anything but
+  `main`.
+
+So `gates.yml` triggers on `push` to `main` and `workflow_dispatch`, and on
+nothing else. **It cannot gate a pull request.** It converts "a gate is red on
+`main` and nobody knows" into "a gate is red on `main` and a check run says so
+within minutes". That is the GAP-10 defect and it is what this workflow fixes. It
+is not a pre-merge gate, and this document does not claim it is one.
+
+Pre-merge gating needs one of three things, each an Owner decision rather than an
+edit to this workflow:
+
+1. GitHub-hosted minutes restored (billing cleared), or
+2. a second runner, so the first is not the only place work can land, or
+3. a relaxed L1/L2 policy accepting the risk of running untrusted PR code on a
+   sudo-capable host.
+
+### 1.2 One runner means serialisation
+
+A single `concurrency` group, `existing-gates-self-hosted`, with
+`cancel-in-progress: false`, makes runs queue rather than overlap. Jobs inside a
+run queue on the runner by themselves. Every job also carries `timeout-minutes`,
+because a wedged job on a one-runner repository blocks every other workflow in
+the repository, not just this one.
+
+### 1.3 Self-hosted is not a clean container
+
+The jobs are written against that reality rather than assuming a fresh VM:
+
+* **No `sudo`, no host mutation.** Python dependencies go into a throwaway venv
+  under `$RUNNER_TEMP`, which the runner wipes between jobs. Nothing is installed
+  into the host interpreter. No `rustup` step: the runner is operator-managed and
+  a workflow that changes the toolchain would change it for every other job on
+  the machine.
+* **Dependency install degrades, never skips.** If the venv build or the pip
+  install fails, the job falls back to the system interpreter *only if* it
+  already satisfies `jsonschema`, `rfc8785`, `cryptography`; otherwise it fails
+  with the missing names. A failed install is a warning plus a real run, never a
+  silent pass.
+* **Warm state is reused, not trusted.** `npm ci` is skipped when `canonicalize`
+  already resolves, so a warm `node_modules` is not thrown away. `target/` is
+  never cleaned — on one runner it is the only build cache there is — but nothing
+  depends on it being present.
+* **`--offline` is deliberately not used.** A cold runner has an empty registry
+  cache, and `--offline` would turn a missing crate into a confusing failure. The
+  tradeoff is that the `rust` job needs the crates.io egress the runner already
+  has for its other Rust work.
 
 ## 2. Jobs
 
@@ -118,17 +167,24 @@ regression or a stale baseline; the offending items are printed as
 
 ## 5. Known sharp edges
 
-* **No `rust-toolchain.toml` and no `rustfmt.toml`.** The `rust` job uses
-  `dtolnay/rust-toolchain@stable`, so a rustfmt release that changes formatting
-  can turn `cargo fmt --all --check` red without any code change. This is
-  recorded rather than hidden: formatting drift on `main` is itself a recurring
-  regression in GAP-10, so the job is a hard gate. Pinning the toolchain would
-  remove the sharp edge and is the obvious next step.
-* **`cargo clippy` needs a C toolchain** for `libsqlite3-sys`. It builds on the
-  hosted runner; a local Windows host without `cc1` cannot run it.
+* **No `rust-toolchain.toml` and no `rustfmt.toml`.** The `rust` job uses whatever
+  `cargo` / `rustfmt` the runner has installed and reports the versions it found,
+  so a rustfmt release that changes formatting can turn `cargo fmt --all --check`
+  red without any code change. This is recorded rather than hidden: formatting
+  drift on `main` is itself a recurring regression in GAP-10, so the job is a
+  hard gate. Pinning the toolchain in-repo would remove the sharp edge and is the
+  obvious next step.
+* **`cargo clippy` and `cargo test` need a C toolchain** for `libsqlite3-sys`.
+  They build on the runner; a local Windows host without `cc1` cannot run them.
+  The failure mode is a `cc1` error, not a code defect, and the job reports it
+  verbatim rather than masking it.
 * **`check_bilingual_docs_full.py` reads the working tree**, not `git ls-files`.
   Untracked build output can change its answer locally. CI checks out clean, so
   the CI answer is reproducible; a local answer may not be.
+* **The ratchet baseline is only as honest as the reviewer.** A regression fails,
+  and a stale baseline also fails, but nothing stops someone from regenerating
+  the baseline from a worse tree. The mitigation is that regenerating it is a
+  visible diff in a file whose entire purpose is to be read.
 
 ## 6. Evidence
 
@@ -145,5 +201,6 @@ Recorded on `6de4e38c` (the commit this work is based on):
 | `cargo test --workspace` | exit 0 |
 | `gate_ratchet.py` on both baselines | exit 0 — `regressions=0 fixed=0` |
 
-This is local execution of the commands the workflow runs. It is not a green
-check run. See §1.
+This is local execution of the commands the workflow runs, on the same commit the
+workflow is based on. It is evidence about the gates, not about the workflow's
+execution. §7 records what the workflow itself has done.

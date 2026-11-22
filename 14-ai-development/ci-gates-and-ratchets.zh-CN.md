@@ -1,30 +1,66 @@
 # CI 门禁与棘轮
 
 **文档：** GATE-CI-001
-**状态：** 生效 —— 已编写并在本地验证；尚未被观测到实际运行（见 §1）
+**状态：** 生效 —— 已编写并在本地验证；§1 说明哪些已被观测运行、哪些没有
 **相关：** GAP-10 Tier 2 item 2（T2.2）、GAP-08、GAP-09、DOC-OPS-001、AI-RUN-002-RUNBOOK
 
 本文说明 CI 运行哪些门禁、其中哪些是硬门禁、哪些是棘轮，以及棘轮基线的含义。
 工作流为 `.github/workflows/gates.yml`，棘轮工具为 `scripts/ci/gate_ratchet.py`。
 
-## 1. 这些 Job 尚未运行，本文不宣称它们运行过
+## 1. 这些 Job 在哪里运行，以及代价是什么
 
-`gates.yml` 中每个 Job 都固定在 `ubuntu-latest`。在本账户上，GitHub 托管运行分钟数
-因账单失败被阻断：`main` 的分支保护返回 `403`，每个 check run 都带有注解
-*"the job was not started because recent account payments have failed"*。
-因此 `rust-phase1.yml` 在本仓库历史中从未执行过一个测试。
+`gates.yml` 中每个 Job 都固定在 `runs-on: [self-hosted, linux, x64]`。
 
-本项工作的状态确切地是：**工作流文件正确，且其中每一条命令都已在本地执行并记录了输出。**
-这里没有任何内容是某个 check run 变绿的证据。请不要那样理解。
+这不是偏好问题。`GET /repos/oahcom/AiMemoryBrainArchitecture/actions/runners` 返回
+`total_count: 1`：只有一个 runner，名为 `zesu-x64`，标签为 `self-hosted, Linux, X64`。
+本账户的 GitHub 托管分钟数因账单失败被阻断，所以写成 `runs-on: ubuntu-latest` 的 Job
+**根本分配不到 runner**，并且以**空的 `steps` 数组**失败——它连第一步都到不了。2026-11-22T04:29:56Z
+在 `main` 上的 `GOV-DOC-002 metadata checks` 与 `audit` 两个 Job 即为实例：都是 `failure`，
+都是零步骤执行。本仓库 13 个工作流里有 12 个处于这个状态。在这里用 `ubuntu-latest` 编写的门禁
+是死胎，因此这些 Job 指向唯一存在的那个 runner。
 
-这些 Job 刻意**不**迁移到自托管 runner，有两条具约束力的规则阻止这么做：
+### 1.1 代价：这是合并后探测器，不是合并前门禁
 
-* **L1（服务层）：** runner 的 job-started 钩子拒绝任何 ref 不是 `refs/heads/main` 的 Job。
-  `pull_request` Job 在任何步骤执行前即以 `ref_not_default_branch` 被拒绝。
-* **L2（仓库层）：** `scripts/ci/audit_runner_admission.py` 拒绝任何自托管 Job 使用 `pull_request`。
+两条已经生效的控制共同限定了触发条件：
 
-只能在合并之后运行的门禁不是门禁。因此这些 Job 留在托管 runner 上；当账单阻断解除时
-它们会开始运行。
+* **L1（服务层）。** runner 的 job-started 钩子（`AI-RUN-002-RUNBOOK` §4.1）会让任何
+  `GITHUB_REF` 不等于 `refs/heads/main`、或事件不是 `push` / `workflow_dispatch` / `schedule`
+  的 Job 失败。功能分支上的 Job 在任何步骤执行前即被拒绝。
+* **L2（仓库层）。** `scripts/ci/audit_runner_admission.py`（由 `runner-admission-policy.yml`
+  强制执行）拒绝任何自托管 Job 使用 `pull_request`，拒绝没有 `branches:` 过滤器的 `push`，
+  以及拒绝 `push.branches` 中出现 `main` 以外的分支。
+
+因此 `gates.yml` 只在 `push` 到 `main` 与 `workflow_dispatch` 时触发，别无其他。
+**它无法对 pull request 设卡。** 它把"门禁在 `main` 上红着而无人知道"变成"门禁在 `main` 上红着，
+并且几分钟内就有 check run 说出来"。这就是 GAP-10 的缺陷，也正是本工作流修掉的东西。
+它不是合并前门禁，本文也不宣称它是。
+
+合并前设卡需要以下三者之一，且都是 Owner 决策，而不是对本工作流的一次编辑：
+
+1. GitHub 托管分钟数恢复（账单清除），或
+2. 第二个 runner，使第一个不再是工作唯一可落地的位置，或
+3. 放宽 L1/L2 策略，接受在一台具备 sudo 能力的主机上运行不可信 PR 代码的风险。
+
+### 1.2 一个 runner 意味着串行化
+
+单一 `concurrency` 组 `existing-gates-self-hosted`，配 `cancel-in-progress: false`，使多次运行
+排队而不是重叠。同一次运行内的 Job 会自行在 runner 上排队。每个 Job 还带 `timeout-minutes`，
+因为在一个单 runner 仓库里，一个卡死的 Job 阻塞的是整个仓库的每一个工作流，而不只是这一个。
+
+### 1.3 自托管不是干净容器
+
+这些 Job 是针对这一现实写的，而不是假设一台全新虚拟机：
+
+* **不用 `sudo`，不改主机。** Python 依赖装进 `$RUNNER_TEMP` 下的一次性 venv，runner 会在 Job
+  之间清掉它。宿主解释器不被写入任何东西。没有 `rustup` 步骤：runner 由运维管理，一个会改动
+  工具链的工作流会改动这台机器上其他所有 Job 看到的工具链。
+* **依赖安装会降级，但从不跳过。** 若 venv 创建或 pip 安装失败，Job 会退回系统解释器，
+  **前提是**它已满足 `jsonschema`、`rfc8785`、`cryptography`；否则带着缺失的包名失败。
+  安装失败是"一条 warning 加一次真实运行"，绝不是静默通过。
+* **热状态被复用，但不被信任。** 当 `canonicalize` 已可解析时跳过 `npm ci`，不白白丢弃已热的
+  `node_modules`。`target/` 永不清洗——在单 runner 上它是唯一的构建缓存——但没有任何东西依赖它存在。
+* **刻意不用 `--offline`。** 冷 runner 的 registry 缓存是空的，`--offline` 会把"缺 crate"
+  变成一条令人困惑的失败。代价是 `rust` Job 需要 runner 为其他 Rust 工作本就具备的 crates.io 出口。
 
 ## 2. Job 清单
 
@@ -103,15 +139,19 @@ python3 scripts/ci/gate_ratchet.py \
 
 ## 5. 已知的锋利边缘
 
-* **没有 `rust-toolchain.toml`，也没有 `rustfmt.toml`。** `rust` Job 使用
-  `dtolnay/rust-toolchain@stable`，因此某个改变格式化的 rustfmt 版本可能在没有代码改动的情况下
-  让 `cargo fmt --all --check` 变红。这一点被记录而不是被隐藏：`main` 上的格式漂移本身就是
-  GAP-10 中反复出现的回归，所以该 Job 是硬门禁。固定工具链可以消除这个锋利边缘，是显而易见的
-  下一步。
-* **`cargo clippy` 需要 C 工具链**（用于 `libsqlite3-sys`）。它在托管 runner 上可以构建；
-  没有 `cc1` 的本地 Windows 主机无法运行它。
+* **没有 `rust-toolchain.toml`，也没有 `rustfmt.toml`。** `rust` Job 使用 runner 上已安装的
+  `cargo` / `rustfmt`，并打印它实际找到的版本，因此某个改变格式化的 rustfmt 版本可能在没有代码
+  改动的情况下让 `cargo fmt --all --check` 变红。这一点被记录而不是被隐藏：`main` 上的格式漂移
+  本身就是 GAP-10 中反复出现的回归，所以该 Job 是硬门禁。在仓库内固定工具链可以消除这个锋利
+  边缘，是显而易见的下一步。
+* **`cargo clippy` 与 `cargo test` 需要 C 工具链**（用于 `libsqlite3-sys`）。它们在 runner 上
+  可以构建；没有 `cc1` 的本地 Windows 主机无法运行。其失效形态是一条 `cc1` 错误而非代码缺陷，
+  Job 会原样报出而不是掩盖它。
 * **`check_bilingual_docs_full.py` 读取工作树**，而不是 `git ls-files`。未跟踪的构建产物会
   改变它在本地的答案。CI 是干净检出，因此 CI 的答案是可复现的；本地答案未必是。
+* **棘轮的诚实度取决于评审者。** 回归会失败，过期基线也会失败，但没有东西能阻止有人从一棵更差的
+  树上重新生成基线。缓解措施是：重新生成它会是某个文件的可见 diff，而那个文件存在的全部目的就是
+  被阅读。
 
 ## 6. 证据
 
@@ -128,4 +168,5 @@ python3 scripts/ci/gate_ratchet.py \
 | `cargo test --workspace` | 退出 0 |
 | 两个基线上的 `gate_ratchet.py` | 退出 0 —— `regressions=0 fixed=0` |
 
-这是对工作流所运行命令的本地执行，不是一次绿色的 check run。见 §1。
+这是对工作流所运行命令的本地执行，且在与工作流相同的提交上。它是关于门禁的证据，不是关于工作流
+执行的证据。§7 记录工作流自身做了什么。
