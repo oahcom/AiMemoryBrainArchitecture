@@ -1,3 +1,4 @@
+use memory_event_store::{EventStore, ProcessingState};
 use memory_event_store_sqlite::SqliteEventStore;
 use serde_json::Value;
 use std::fs;
@@ -83,8 +84,8 @@ fn receipt_id(stderr: &str) -> String {
     stderr
         .lines()
         .find_map(|line| line.strip_prefix("accepted receipt: "))
+        .and_then(|value| value.split_whitespace().next())
         .expect("accepted receipt must appear in verbose stderr")
-        .trim()
         .to_owned()
 }
 
@@ -152,43 +153,90 @@ fn normal_input_is_accepted_and_receipt_is_visible_without_changing_snapshot() {
 #[test]
 fn repeated_processes_reuse_receipt_and_create_only_one_compile_intent() {
     let directory = TestDirectory::new();
-    let database = directory.event_database();
     let input = TestDirectory::fixture();
+    let database = directory.event_database();
 
     let first_output = directory.path.join("first-context.json");
     let second_output = directory.path.join("second-context.json");
 
-    // First independent CLI process.
+    // Process 1: accept the fixture event and persist its compile intent.
     let first = execute(&input, &first_output, Some(&database));
     assert_success(&first);
 
-    // Second independent CLI process, using the same persistent EventStore.
+    let first_receipt = receipt_id(&String::from_utf8_lossy(&first.stderr));
+
+    // Read the durable outbox state before the retry.
+    let first_snapshot = {
+        let store =
+            SqliteEventStore::open(&database).expect("reopen EventStore after first process");
+        store
+            .pending_compile_intents()
+            .expect("read compile outbox after first process")
+    };
+
+    assert_eq!(
+        first_snapshot.len(),
+        1,
+        "first process must create exactly one compile intent"
+    );
+
+    // Process 2: retry the same fixture against the same persistent database.
     let second = execute(&input, &second_output, Some(&database));
     assert_success(&second);
 
-    let first_stderr = String::from_utf8_lossy(&first.stderr);
-    let second_stderr = String::from_utf8_lossy(&second.stderr);
+    let second_receipt = receipt_id(&String::from_utf8_lossy(&second.stderr));
 
-    let first_receipt = receipt_id(&first_stderr);
-    let second_receipt = receipt_id(&second_stderr);
-
-    assert_eq!(
-        first_receipt, second_receipt,
-        "idempotent acceptance must return the original receipt"
-    );
-
-    let store = SqliteEventStore::open(&database).expect("reopen persistent EventStore");
-
-    let intents = store
+    // Reopen the database and read the outbox again after the retry.
+    let store =
+        SqliteEventStore::open(&database).expect("reopen persistent EventStore after retry");
+    let second_snapshot = store
         .pending_compile_intents()
-        .expect("read compile outbox");
+        .expect("read compile outbox after retry");
 
     assert_eq!(
-        intents.len(),
+        second_snapshot.len(),
         1,
-        "idempotent acceptance must not create a second outbox row"
+        "retry must not create a duplicate compile intent"
     );
 
+    // Receipt identity must be reused across independent processes.
+    assert_eq!(first_receipt, second_receipt);
+
+    let first_intent = &first_snapshot[0];
+    let second_intent = &second_snapshot[0];
+
+    // The accepted work must be a compile intent with the exact fixture payload.
+    assert_eq!(first_intent.intent_kind, "compile");
+    assert_eq!(
+        first_intent.payload_bytes,
+        b"The project uses a governed memory context."
+    );
+
+    // Acceptance is durable, but compilation has not been acknowledged.
+    assert_eq!(
+        first_intent.receipt.processing_state,
+        ProcessingState::Pending
+    );
+
+    // Both persisted row identities must remain stable across the retry.
+    assert_eq!(first_intent.outbox_row, second_intent.outbox_row);
+    assert_eq!(first_intent.event_row, second_intent.event_row);
+
+    // The receipt and payload must remain unchanged across the retry.
+    assert_eq!(first_intent.receipt, second_intent.receipt);
+    assert_eq!(first_intent.payload_bytes, second_intent.payload_bytes);
+
+    // EventStore status must agree with the persisted receipt.
+    let status = store
+        .status(
+            &second_intent.receipt.event_id,
+            &second_intent.envelope.scope_refs,
+        )
+        .expect("read EventStore status for accepted event");
+
+    assert_eq!(status, Some(second_intent.receipt.clone()));
+
+    // Both processes must produce valid snapshots with an observable compiler block.
     assert_snapshot(&first_output);
     assert_snapshot(&second_output);
 }
