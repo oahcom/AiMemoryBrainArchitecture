@@ -164,6 +164,19 @@ fn accept_loop(
                     break;
                 }
 
+                // Windows accepted sockets inherit the listener's nonblocking
+                // mode. The listener must stay nonblocking for this accept
+                // loop, but client sockets must be blocking or the configured
+                // read/write timeouts below never take effect.
+                //
+                // ponytail: Linux does not inherit O_NONBLOCK on accept, so
+                // this is a no-op there; it is unconditional to keep the two
+                // platforms on one code path.
+                let stream = match stream.set_nonblocking(false) {
+                    Ok(()) => stream,
+                    Err(_) => continue,
+                };
+
                 active.fetch_add(1, Ordering::AcqRel);
 
                 let worker_active = Arc::clone(&active);
