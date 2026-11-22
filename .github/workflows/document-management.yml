@@ -1,10 +1,48 @@
 name: Architecture document management gate
 
+# ---------------------------------------------------------------------------
+# RUNNER: `[self-hosted, linux, x64]`, because `ubuntu-latest` is allocated no
+# runner on this account and this gate has therefore never executed.
+#
+# Measured at `16c725ab`, run `45030567079`: the job `GOV-DOC-002 metadata
+# checks` failed 2 seconds after it was queued with **zero steps executed** and
+# one annotation:
+#
+#   The job was not started because recent account payments have failed or your
+#   spending limit needs to be increased.
+#
+# A gate that cannot start is not a gate. Worse, its red check is
+# byte-identical in shape to a red check that ran and found violations, which is
+# the defect `GAP-25` / `149618dc` is about -- so until now the honest reading of
+# every red run here was "unknown", and the dishonest reading, "the documents
+# are wrong", was free.
+#
+# TRIGGER: `pull_request` is GONE, and that is a loss, not a simplification.
+# `scripts/ci/audit_runner_admission.py` admits a self-hosted job only when
+# `GITHUB_EVENT_NAME` is one of push / workflow_dispatch / schedule; running this
+# on a self-hosted runner from `pull_request` would execute a pull request's own
+# `scripts/test_check_document_management.py` on the operator's machine. That is
+# the one thing the admission policy exists to prevent, so the trigger changed
+# with the runner rather than around it.
+#
+# WHAT IS LOST: a pull request can no longer be told its metadata is missing
+# before it merges. The compensating controls are the `push` run below, which
+# checks the merge commit, and the operator's local run -- and the local run has
+# a caveat worth knowing: this script walks the filesystem, so it counts files
+# git ignores. CI runs `git clean -ffdx` and never sees them; a working tree that
+# has run the conformance suite does (`node_modules/**/*.md`), and its governed
+# total reads higher than CI's. Quote numbers from `git worktree add --detach`,
+# not from a dirty tree.
+#
+# Do not add `pull_request` back without first reading the admission policy. If
+# hosted minutes are ever restored, the right fix is to restore this file's
+# original trigger and runner together, not one of them.
+# ---------------------------------------------------------------------------
+
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -12,7 +50,7 @@ permissions:
 jobs:
   document-management:
     name: GOV-DOC-002 metadata checks
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,32 +62,31 @@ jobs:
       - name: Self-check the gate
         run: python3 scripts/test_check_document_management.py
 
-      # Every governed file added or modified here must carry metadata. The
-      # backlog stays unclassified; it may not grow. Both event kinds are
-      # covered: a pull request diffs against its base commit, a direct push
-      # diffs against github.event.before (GAP-02).
+      # Every governed file this push touched must carry metadata. The backlog
+      # stays unclassified; it may not grow.
+      #
+      # `github.event.before` is the parent of the merge commit on a normal push
+      # to main, which is exactly the "what did this change touch" set. It is
+      # all-zeros for a branch's first push and for some force-pushes, and there
+      # the step falls back to a whole-tree scan, which exits 2 (INCOMPLETE)
+      # while backlog remains. That fallback is not a courtesy: it fails, on
+      # purpose, rather than printing PASS over an unclassified tree.
       - name: Validate document metadata (changed files must be classified)
         env:
-          PR_BASE: ${{ github.event.pull_request.base.sha }}
           PUSH_BEFORE: ${{ github.event.before }}
         run: |
-          REF=""
-          if [ -n "$PR_BASE" ] && [ "$PR_BASE" != "0000000000000000000000000000000000000000" ]; then
-            REF="$PR_BASE"
-          elif [ -n "$PUSH_BEFORE" ] && [ "$PUSH_BEFORE" != "0000000000000000000000000000000000000000" ]; then
-            REF="$PUSH_BEFORE"
+          set -euo pipefail
+          REF="$PUSH_BEFORE"
+          if [ "$REF" = "0000000000000000000000000000000000000000" ]; then
+            REF=""
           fi
           if [ -n "$REF" ]; then
             python3 scripts/check_document_management.py --require-changed "$REF"
           else
-            # No base to diff against (first push of a branch). Whole-tree scan.
-            # It now exits 2 (INCOMPLETE) while backlog remains, so this step
-            # fails loudly instead of printing PASS over an unclassified tree.
-            # It still cannot prove the NEW files are classified: GAP-02.
             python3 scripts/check_document_management.py || {
               status=$?
               # 2 = INCOMPLETE (backlog, no rule violation); 1 = violations.
-              [ "$status" -eq 2 ] && echo "::error::No base commit to diff against and the tree still has an adoption backlog (GAP-02). Run this job from a pull request, or classify the backlog."
+              [ "$status" -eq 2 ] && echo "::error::No base commit to diff against and the tree still has an adoption backlog (GAP-02). Dispatch this workflow from a commit with a parent, or classify the backlog."
               exit "$status"
             }
           fi

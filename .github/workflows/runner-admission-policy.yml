@@ -1,13 +1,42 @@
 name: Runner admission policy
 
+# ---------------------------------------------------------------------------
+# RUNNER: `[self-hosted, linux, x64]`, because `ubuntu-latest` is allocated no
+# runner on this account.
+#
+# Measured at `16c725ab`, run `45030566968`: job `audit` failed with zero steps
+# executed, annotation "The job was not started because recent account payments
+# have failed or your spending limit needs to be increased." The audit that
+# enforces the self-hosted admission policy had therefore never run, which is
+# why `GAP-30` found the policy described in prose and enforced nowhere.
+#
+# TRIGGER: `pull_request` is gone for the same reason the job is self-hosted --
+# `ALLOWED_TRIGGERS` in `scripts/ci/audit_runner_admission.py` admits only push /
+# workflow_dispatch / schedule for a self-hosted job. Running the audit from
+# `pull_request` would put pull request code on the operator's machine, which is
+# the exact case the audit exists to reject.
+#
+# WHAT IS LOST: the audit reports after merge instead of before it. That is
+# weaker, and it is the strongest arrangement available: an unexecuted audit
+# reported nothing at all, before or after.
+#
+# This job reads workflow YAML and nothing else. It needs no build, no network
+# and no cache, which makes it the cheapest possible thing to run on the one
+# runner and the least likely to collide with a build's disk floor.
+# ---------------------------------------------------------------------------
+
 on:
-  pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   audit:
-    runs-on: ubuntu-latest
+    name: Audit self-hosted runner admission
+    runs-on: [self-hosted, linux, x64]
     steps:
       - uses: actions/checkout@v4
       - name: Audit self-hosted runner admission
