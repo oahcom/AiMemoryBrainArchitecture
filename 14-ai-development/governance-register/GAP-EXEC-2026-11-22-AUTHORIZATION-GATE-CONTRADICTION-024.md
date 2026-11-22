@@ -1,6 +1,7 @@
-# Two merges, one field, opposite assertions — the type-state decision was applied twice, incompatibly
+# 两次合并、同一个字段、相反的断言 —— 类型状态决定被应用了两次，且互不兼容
 
-**Status:** Open — needs an Owner ruling, not a patch
+**Status:** Open — 需要 Owner 裁决，不是补丁
+**Language note:** 本文件正文保留英文原文，仅标题与本节为中文；正文的逐字引用不得翻译，否则失去证据效力。
 **Area:** memory-domain / governance
 **Measured at:** `main @ 4a7624da86`, `2026-11-22T07:10Z`
 **Related:** `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001`, `I-OWNER-DECISION-AUTHORIZATION-DECISION-001`, PR #623, PR #634, `dm2_06`
