@@ -211,10 +211,18 @@ pub fn validate_authorization_decision(
     &self,
     reference: &AuthorizationDecisionRef,
     expected_subject_digest: &OpaqueId,
+) -> Result<bool, AuthorizationDecisionValidationError>;
+
+// Read the already-validated recorded kind from the same immutable record;
+// this accessor is not itself an authority check. Publication may proceed
+// only when validation returned Ok(true) AND the recorded kind is Approved.
+pub fn authorization_decision_kind(
+    &self,
+    reference: &AuthorizationDecisionRef,
 ) -> Result<AuthorizationDecisionKind, AuthorizationDecisionValidationError>;
 ```
 
-Returning the recorded kind preserves the distinction between approval, denial and conditional approval. Only Approved satisfies an unconditional authorization requirement. The concrete error may use an existing compiler/admission error or a new compiler error added by E. This decision adds no `DomainError` variant.
+The boolean validator preserves D's three-outcome contract exactly. The recorded kind remains a separately inspectable field and MUST be checked by the publication consumer: only Approved satisfies an unconditional authorization requirement. The concrete error may use an existing compiler/admission error or a new compiler error added by E. This decision adds no `DomainError` variant.
 
 The attestor counterpart is separate:
 
@@ -228,9 +236,9 @@ pub fn validate_attestor(
 
 ### 4.2 Three outcomes
 
-- **`Ok(Approved)`**: issued reference; durable row exists and is readable; stored ID, issuer, digest, timestamp and kind exactly match the reference; issuer is allowlisted; and stored digest equals the expected subject digest.
-- **`Ok(Denied)` / `Ok(Conditional)`**: the same record-existence, issuer, metadata and subject-binding checks succeed, but the recorded terminal decision is Denied or Conditional. These are valid authority records, not infrastructure errors; neither is an unconditional grant.
-- **`Err(...)`**: pending reference; missing row; unreadable database; unsupported/unverifiable issuer; malformed/corrupt record; reference/record metadata mismatch; subject digest mismatch; or any other failure to establish authority.
+- **`Ok(true)`**: issued reference; durable row exists and is readable; stored ID, issuer, digest, timestamp and kind exactly match the reference; issuer is allowlisted; and stored subject digest equals the expected subject digest. The consumer MUST additionally require the recorded `decision_kind == Approved`; a valid Denied or Conditional record is not an unconditional grant.
+- **`Ok(false)`**: the durable row exists and is readable, issuer and reference metadata are valid and match the row, but the stored subject digest does not equal the expected subject digest. This is a content mismatch, not an authority failure.
+- **`Err(...)`**: pending reference; missing row; unreadable database; unsupported/unverifiable issuer; malformed/corrupt record; reference/record metadata mismatch; or any other failure to establish authority.
 
 **A missing authorization record is always Err, never a denial result.** This follows `memory-compiler/src/lib.rs:519-521`: authority failures remain errors, not publication dispositions. A denial is a recorded I decision; absence is failure to establish that I decided anything.
 
@@ -238,7 +246,7 @@ pub fn validate_attestor(
 
 `dm2_06_missing_authorization_ref_blocks_fact_publication` must exercise the **Pending reference** path and assert a propagated authority `Err`, not `Ok(false)`. The field is required and non-optional; there is no `None` state. An issued candidate with no durable row is also Err. A recorded Denied decision is a separate negative-disposition test, not the missing-authorization test.
 
-This distinction prevents a known negative decision from being conflated with missing authority and follows the compiler's authority-error rule. The validator returns the recorded decision kind for readable, valid records and reserves Err for missing/unverifiable authority.
+This distinction prevents a known negative decision from being conflated with missing authority and follows the compiler's authority-error rule. The validator returns Ok(true) only for a matching subject, Ok(false) only for a readable subject-digest mismatch, and Err for missing/unverifiable authority. E must separately require the recorded kind to be Approved.
 
 ## 5. Phase 1 compatibility
 
