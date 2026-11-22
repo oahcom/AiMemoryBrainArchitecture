@@ -81,10 +81,7 @@ precisely the failure mode D2 exists to prevent.
    adapter. E MUST NOT source this D-owned `FactRevision` commit flag from a
    cursor, from `StagedDerivative`, or from a validator for a subject absent from
    its production inputs. See `D-OWNER-DECISION-CANONICAL-COMMIT-001.md` D8.
-4. **(D, DECIDED — see D-OWNER-DECISION-PARTICIPANT-ADMISSION-001)** Keep
-   `publication_participant_admitted` false under the current baseline; §8's D
-   authoritative Fence/Admission is not the E-side `AdmissionStore`, and the
-   required COC/Storage/I evidence issuers are not implemented.
+4. **(D, DECIDED — see D-OWNER-DECISION-PARTICIPANT-ADMISSION-001)** Keep `publication_participant_admitted` false under the current baseline; §8's D authoritative Fence/Admission is not the E-side `AdmissionStore`, and the required COC/Storage/I evidence issuers are not implemented.
 5. **(I, blocking, independent)** Protected-visibility authority, so
    `protected_visibility_authorized` has an issuer.
 
