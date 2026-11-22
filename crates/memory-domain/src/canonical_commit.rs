@@ -18,20 +18,7 @@ pub const DEV_BASELINE_ISSUER: &str = "d-owner-proxy/dev-baseline-v1";
 /// new tag; the tag is part of the digested bytes.
 pub const CANONICAL_COMMIT_SUBJECT_VERSION: &str = "CanonicalCommitSubjectV1";
 
-/// Issuer identity. Validated by the `OpaqueId` convention, not by an allowlist:
-/// whether an issuer is trusted is decided when a record is validated (§4.2).
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct IssuerId(OpaqueId);
-
-impl IssuerId {
-    pub fn new(value: impl Into<String>) -> Result<Self, DomainError> {
-        Ok(Self(OpaqueId::new(value)?))
-    }
-
-    pub fn as_str(&self) -> &str {
-        self.0.as_str()
-    }
-}
+pub use crate::IssuerId;
 
 /// The content a committed reference carries (§2.1).
 #[derive(Clone, Debug, Eq, PartialEq)]
