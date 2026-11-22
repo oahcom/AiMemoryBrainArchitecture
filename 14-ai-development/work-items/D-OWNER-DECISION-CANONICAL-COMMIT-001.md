@@ -228,3 +228,63 @@ E may mark GAP-12 step 2 implemented only when all of the following are evidence
 12. No production `.rs` change is part of this decision record; implementation and tests are delivered by E in a separate implementation PR.
 
 **Finding / impact / recommendation:** the existing placeholder and unvalidated cursor cannot establish a canonical commit (finding); treating either as confirmation would violate D2/D3 and permit a false `Published` result (impact); implement this record-backed dev-baseline contract and retain cryptographic hardening as an explicit production replacement (recommendation).
+
+## Amendment — D8, taken 2026-11-22T05:08:00Z
+
+### The premise that was wrong
+
+The original §2.1 and §8 closure criterion 9 assumed that the compiler publication adapter could obtain an expected subject digest for the committed `FactRevision`.
+
+That premise is false for the measured production path.
+
+Repository evidence:
+
+```text
+grep -rn "FactRevision" --include="*.rs" crates/memory-compiler/ | wc -l
+0
+
+grep -rn "FactRevision" --include="*.rs" crates/ | cut -d/ -f2 | sort | uniq -c
+50 memory-domain
+```
+
+The `FactRevision` construction sites in `memory-domain` are test-only (`lib.rs:1368,1413,1470,1487,1504,2004`, all inside `#[cfg(test)]`). The compiler production path stages and submits `StagedDerivative`; `FactRevision` does not enter that path. Consequently `AdmissionPublicationAuthority::obtain_proof` cannot derive a `FactRevision` subject digest from its production inputs.
+
+The earlier contract treated a domain type that is absent from the compiler production path as though it were the compiler's commit subject.
+
+### Decision
+
+**Option A is selected.**
+
+`PublicationProof.canonical_commit_confirmed` remains permanently `false` in the E-side production adapter under the current authority and pipeline contract.
+
+The authority table in `compiler-stage-contract.md` §8 assigns `FactRevision commit` to D and assigns E only the recording of unresolved dependencies. E cannot issue or attest D's `FactRevision` commit. The absence of `FactRevision` from the compiler production path does not transfer that authority to E.
+
+Option B is rejected. Replacing `FactRevision` with `StagedDerivative` would define a new canonical commit subject and implicitly require authority to commit that subject. The existing authority table does not grant or define `StagedDerivative commit`. A new D authority grant and corresponding ordering contract would be required; E's use of `StagedDerivative` is not itself such a grant.
+
+Option C is rejected. A second proof flag would change the `PublicationProof` contract and its Phase 1 shape, contrary to the current Phase 1 freeze.
+
+This decision accepts the consequence: with this proof flag permanently false, the current publication gate remains `Blocked` and `Published` is unreachable through this path. That is an honest consequence of the current authority boundary, not permission for E to synthesize commit evidence.
+
+### Consequence for GAP-12 §5 step 3
+
+Step 3 is superseded and its instruction to E is withdrawn. E MUST NOT source `canonical_commit_confirmed` from a validator for a `FactRevision` subject absent from its production inputs. The E-side adapter MUST keep this flag false. Cursor presence, cursor persistence, and `StagedDerivative` staging are not substitutes for D's `FactRevision` commit authority.
+
+### Subject encoding authority
+
+The reported encoding gap is **not upheld** as a D-level blocker.
+
+§2.1 already specifies the required properties of `CanonicalCommitSubjectV1`: deterministic, versioned, length-prefixed UTF-8 fields, with the self-referential canonical reference excluded.
+
+The byte-level mapping from domain fields — including nested values, enums, options, and collections — to the canonical payload bytes is an E implementation responsibility. D does not prescribe each field's byte representation.
+
+E is explicitly authorized to determine that byte-level encoding, provided it remains deterministic, versioned, length-prefixed, and excludes the self-referential canonical reference. Issuance and validation MUST use the same encoding. JSON object serialization order MUST NOT be used as a substitute.
+
+### What this does not decide
+
+- This amendment does not grant E authority to commit `FactRevision` or `StagedDerivative`.
+- It does not authorize changing the canonical subject to `StagedDerivative`.
+- It does not add a proof flag or change `PublicationProof`.
+- It does not change the Phase 1 freeze or any Phase 1 serialization.
+- It does not authorize production Rust changes, a new `DomainError` variant, or a substitute publication authority.
+- Any future path that makes canonical commit confirmation reachable requires an explicit authority decision defining its subject, issuer, durable record, and ordering.
+- §1–§8 remain in force except where this amendment expressly supersedes the E-side integration assumption in §4.3 and closure criterion 9.
