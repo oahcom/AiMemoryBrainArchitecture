@@ -214,7 +214,7 @@ This decision also does not select a physical SQLite file path, backup/restore p
 
 E may mark GAP-12 step 2 implemented only when all of the following are evidenced:
 
-1. `CanonicalCommitRef` carries the four fields in §2, has a validated issuer type, and cannot be externally constructed as an issued reference without the D issuer path.
+1. `CanonicalCommitRef` carries the four fields in §2 and has a validated issuer type; a caller may construct a candidate reference, but it cannot validate without the matching D-issued durable record.
 2. `pending_d()` remains available and serializes byte/value-compatibly with the legacy unit representation; malformed issued representations fail closed.
 3. `dm2_14_phase1_serialization_remains_compatible` passes unchanged, with a focused legacy-pending serialization regression test if needed.
 4. `canonical_commits` exists in AdmissionStore's SQLite schema with the minimum fields and append-only/idempotent-conflict behavior in §3.
