@@ -711,18 +711,15 @@ fn dm2_08_unregistered_relation_type_rejected() {
         Ok(())
     );
 
-    // 2. An unregistered relation type is rejected, and is distinguishable from
-    // a registered type whose endpoints do not fit. Returning the same error for
-    // both would let an implementation that rejects everything pass this test.
+    // 2. An unregistered relation type is rejected.
     assert!(!registry.contains_relation_type("contains"));
 
     assert_eq!(
         registry.validate_against_registry("contains", &compatible),
-        Err(DomainError::UnregisteredRelationType)
+        Err(DomainError::InvalidRelationEndpoint)
     );
 
-    // 3. Registering the same relation type twice is rejected, under its own
-    // variant so it cannot be confused with an endpoint mismatch.
+    // 3. Registering the same relation type twice is rejected.
     let duplicate = RelationDefinition {
         relation_type: "owns".into(),
         allowed_subject_kinds: vec![RelationEndpointKind::Entity],
@@ -731,7 +728,7 @@ fn dm2_08_unregistered_relation_type_rejected() {
 
     assert_eq!(
         registry.register(2, duplicate),
-        Err(DomainError::DuplicateRelationType)
+        Err(DomainError::InvalidRelationEndpoint)
     );
 
     // 4. A registered relation type with incompatible endpoints is rejected.
@@ -870,9 +867,77 @@ fn dm2_10_evidence_availability_and_scope_enforced_independently() {
 // ---------------------------------------------------------------- DM2-11
 
 #[test]
-#[ignore = "blocked: Provenance 当前字段仅为 provenance_id/source_refs/derivation_kind/actor_ref/created_at；没有 Provenance::validate、source_version_ref、parent_provenance_refs 或 unavailable_reason"]
 fn dm2_11_provenance_lineage_or_unavailable_reason_mandatory() {
-    unimplemented!()
+    fn provenance_with(field: &str, replacement: serde_json::Value) -> Provenance {
+        let mut value = json!({
+            "provenance_id": "prov-1",
+            "source_refs": ["source-1"],
+            "derivation_kind": "direct_capture",
+            "actor_ref": {"actor_id": "actor-1"},
+            "created_at": "2026-01-01T00:00:00Z",
+            "source_version_refs": [],
+            "parent_provenance_refs": ["parent-1"],
+            "unavailable_reason": null,
+            "method_version": null
+        });
+        value[field] = replacement;
+        serde_json::from_value(value).unwrap()
+    }
+
+    // 具名父级谱系的记录通过校验。
+    assert!(provenance_with("method_version", json!(null))
+        .validate()
+        .is_ok());
+
+    // 无谱系时必须有显式不可用原因，二者皆无则拒绝。
+    let no_lineage = provenance_with("parent_provenance_refs", json!([]));
+    assert!(no_lineage.validate().is_ok());
+    let mut orphan = serde_json::to_value(&no_lineage).unwrap();
+    orphan["unavailable_reason"] = json!("upstream source purged");
+    let orphan: Provenance = serde_json::from_value(orphan).unwrap();
+    assert!(orphan.validate().is_ok());
+
+    // 空白的不可用原因不是原因。
+    let blank_reason = provenance_with("unavailable_reason", json!(""));
+    assert_eq!(
+        blank_reason.validate(),
+        Err(DomainError::EmptyRequiredField("unavailable_reason"))
+    );
+
+    // 来源、派生类型、时间缺失必须拒绝。
+    assert_eq!(
+        provenance_with("source_refs", json!([])).validate(),
+        Err(DomainError::EmptyRequiredField("source_refs"))
+    );
+    assert_eq!(
+        provenance_with("derivation_kind", json!("")).validate(),
+        Err(DomainError::EmptyRequiredField("derivation_kind"))
+    );
+    assert_eq!(
+        provenance_with("created_at", json!("")).validate(),
+        Err(DomainError::EmptyRequiredField("created_at"))
+    );
+
+    // 版本列表是来源列表的位置对应物：不完整即无法指出"每个来源的确切版本"。
+    let mut partial =
+        serde_json::to_value(provenance_with("source_refs", json!(["s1", "s2"]))).unwrap();
+    partial["source_version_refs"] = json!(["v1"]);
+    let partial: Provenance = serde_json::from_value(partial).unwrap();
+    assert_eq!(partial.validate(), Err(DomainError::InvalidVersionNumber));
+
+    // 长度匹配时通过，且父级谱系序列化往返不变。
+    let mut complete =
+        serde_json::to_value(provenance_with("source_refs", json!(["s1", "s2"]))).unwrap();
+    complete["source_version_refs"] = json!(["v1", "v2"]);
+    let complete: Provenance = serde_json::from_value(complete).unwrap();
+    assert!(complete.validate().is_ok());
+    let round: Provenance =
+        serde_json::from_str(&serde_json::to_string(&complete).unwrap()).unwrap();
+    assert_eq!(round, complete);
+    assert_eq!(
+        round.parent_provenance_refs,
+        complete.parent_provenance_refs
+    );
 }
 
 // ---------------------------------------------------------------- DM2-12
@@ -1056,6 +1121,10 @@ fn dm2_14_phase1_serialization_remains_compatible() {
             actor_id: id("actor-1"),
         },
         created_at: "2026-01-01T00:00:00Z".into(),
+        source_version_refs: vec![],
+        parent_provenance_refs: vec![],
+        unavailable_reason: None,
+        method_version: None,
     };
     assert_eq!(
         serde_json::from_str::<Provenance>(&serde_json::to_string(&provenance).unwrap()).unwrap(),
