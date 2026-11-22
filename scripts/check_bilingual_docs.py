@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import ast
 import os
+import tempfile
 from datetime import date
 import subprocess
 import sys
@@ -165,14 +166,15 @@ for _source, _reason in EMBEDDED_BILINGUAL_SOURCES.items():
             f"EMBEDDED_BILINGUAL_SOURCES has missing or placeholder reason: {_source}\n"
         )
         sys.exit(2)
-ROOT = Path.cwd()
+
+ROOT = REPO_ROOT
 BASELINE_PATH = REPO_ROOT / "scripts" / "bilingual-baseline.txt"
 
 
 def _git_log_output(*args: str) -> str:
     """Read repository history for registration provenance checks."""
     result = subprocess.run(
-        ["git", *args], cwd=ROOT, check=True, capture_output=True, text=True
+        ["git", *args], cwd=REPO_ROOT, check=True, capture_output=True, text=True
     )
     return result.stdout.strip()
 
@@ -191,7 +193,7 @@ def _require_full_git_history() -> None:
     """Fail closed before deriving provenance from a potentially shallow log."""
     result = subprocess.run(
         ["git", "rev-parse", "--is-shallow-repository"],
-        cwd=ROOT,
+        cwd=REPO_ROOT,
         check=True,
         capture_output=True,
         text=True,
@@ -313,14 +315,14 @@ def _has_any_chinese(source: str) -> bool:
     if not path.is_file():
         return False
     text = path.read_text(encoding="utf-8", errors="replace")
-    return any("\u4e00" <= ch <= "\u9fff" for ch in text)
+    return any(1 for ch in text if "\u4e00" <= ch <= "\u9fff")
 
 
 def _side_by_side_bilingual(source: str) -> bool:
     """True when `source` has a side-by-side partner and the pair carries Chinese.
 
     One CJK character anywhere in either file is enough: a short but genuine
-    translation must not be rejected for being brief.  The >=100 threshold in
+    translation must not be rejected for being brief. The >=100 threshold in
     _carries_chinese() stays for the embedded-bilingual shape only.
     """
     partner = side_by_side_partner(source)
@@ -330,46 +332,132 @@ def _side_by_side_bilingual(source: str) -> bool:
 
 
 def current_bilingual_gaps() -> set[str]:
-    """Return non-exempt normative Markdown sources missing either language mirror."""
+    """Return non-exempt normative Markdown sources missing either language mirror.
+
+    Git's index is the sole enumeration authority. Files merely present on disk,
+    including ignored caches and untracked Markdown files, are not candidates.
+    """
+    result = subprocess.run(
+        ["git", "ls-files", "-z", "--", "*.md"],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+    )
+    tracked_paths = {
+        os.fsdecode(raw_path)
+        for raw_path in result.stdout.split(b"\0")
+        if raw_path
+    }
+
+    normative_paths = sorted(
+        source
+        for source in tracked_paths
+        if source.endswith(".md")
+        and any(source.startswith(root_name + "/") for root_name in NORMATIVE_ROOTS)
+    )
+
     gaps: set[str] = set()
-    for root_name in sorted(NORMATIVE_ROOTS):
-        root = REPO_ROOT / root_name
-        for path in sorted(root.rglob("*.md")):
-            source = path.relative_to(REPO_ROOT).as_posix()
-            if source in EMBEDDED_BILINGUAL_SOURCES:
-                continue
-            # Inventory and changed-path gates must share prefixes or pair-exempt paths become permanent gaps.
-            if source.startswith(PAIR_EXEMPT_PREFIXES):
-                continue
-            english = REPO_ROOT / "docs" / "en" / source
-            chinese = REPO_ROOT / "docs" / "zh-CN" / source
-            mirrored = english.is_file() and chinese.is_file()
-            side_by_side = side_by_side_partner(source)
-            partial_side_by_side = (
-                side_by_side is not None
-                and frozenset((source, side_by_side)) in PARTIAL_SIDE_BY_SIDE_PAIRS
-            )
-            # Structural pairing is not enough: a side-by-side pair must carry Chinese text.
-            # A pair registered as partially translated is not a pairing at all.
-            paired = mirrored or (_side_by_side_bilingual(source) and not partial_side_by_side)
-            if not paired and root_name == "14-ai-development":
-                # Shape 3: the root file IS the Chinese source and docs/en holds
-                # the English side. It must be earned by actually carrying Chinese.
-                paired = english.is_file() and _carries_chinese(source)
-            if not paired:
-                gaps.add(source)
+    for source in normative_paths:
+        if source in EMBEDDED_BILINGUAL_SOURCES:
+            continue
+        # Inventory and changed-path gates must share prefixes or pair-exempt paths become permanent gaps.
+        if source.startswith(PAIR_EXEMPT_PREFIXES):
+            continue
+        english = REPO_ROOT / "docs" / "en" / source
+        chinese = REPO_ROOT / "docs" / "zh-CN" / source
+        mirrored = english.is_file() and chinese.is_file()
+        side_by_side = side_by_side_partner(source)
+        partial_side_by_side = (
+            side_by_side is not None
+            and frozenset((source, side_by_side)) in PARTIAL_SIDE_BY_SIDE_PAIRS
+        )
+        # Structural pairing is not enough: a side-by-side pair must carry Chinese text.
+        # A pair registered as partially translated is not a pairing at all.
+        paired = mirrored or (_side_by_side_bilingual(source) and not partial_side_by_side)
+        if not paired and source.startswith("14-ai-development/"):
+            # Shape 3: the root file IS the Chinese source and docs/en holds
+            # the English side. It must be earned by actually carrying Chinese.
+            paired = english.is_file() and _carries_chinese(source)
+        if not paired:
+            gaps.add(source)
     return gaps
 
+
 def write_baseline() -> int:
-    gaps = sorted(current_bilingual_gaps())
-    header = (
-        "# Frozen inventory of pre-existing bilingual documentation gaps.\n"
-        "# This baseline may only shrink; entries must never be added.\n"
-        "# Regenerate only when explicitly adopting a new baseline.\n"
-    )
-    BASELINE_PATH.write_text(header + "\n".join(gaps) + "\n", encoding="utf-8")
-    print(f"baseline written: {len(gaps)} entries")
-    return 0
+    """Write the frozen inventory only from a clean working tree."""
+    temporary_path: str | None = None
+    try:
+        status_result = subprocess.run(
+            ["git", "status", "--porcelain", "--untracked-files=all"],
+            cwd=REPO_ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        dirty_status = status_result.stdout
+        if dirty_status:
+            print(
+                "baseline write refused: working tree is not clean; "
+                "git status --porcelain --untracked-files=all:\n"
+                + dirty_status.rstrip("\n"),
+                file=sys.stderr,
+            )
+            return 2
+
+        gaps = sorted(current_bilingual_gaps())
+        header = (
+            "# Frozen inventory of pre-existing bilingual documentation gaps.\n"
+            "# This baseline may only shrink; entries must never be added.\n"
+            "# Regenerate only when explicitly adopting a new baseline.\n"
+        )
+        content = header + "\n".join(gaps) + "\n"
+
+        BASELINE_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+        # The temporary file MUST be in the baseline directory: os.replace()
+        # must stay on the same filesystem/volume, including on Windows, where
+        # a temporary file in a system-wide tmp directory may be cross-volume.
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            newline="\n",
+            dir=BASELINE_PATH.parent,
+            prefix=f".{BASELINE_PATH.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as temporary_file:
+            temporary_path = temporary_file.name
+            temporary_file.write(content)
+            temporary_file.flush()
+            os.fsync(temporary_file.fileno())
+
+        os.replace(temporary_path, BASELINE_PATH)
+        temporary_path = None
+        print(f"baseline written: {len(gaps)} entries")
+        return 0
+
+    except (OSError, subprocess.CalledProcessError, RuntimeError) as exc:
+        detail = str(exc)
+        if isinstance(exc, subprocess.CalledProcessError):
+            stdout = exc.stdout or ""
+            stderr = exc.stderr or ""
+            detail = (
+                f"{exc}; stdout={stdout!r}; stderr={stderr!r}"
+            )
+        print(f"baseline write refused: {detail}", file=sys.stderr)
+        return 2
+    finally:
+        if temporary_path is not None:
+            try:
+                os.unlink(temporary_path)
+            except FileNotFoundError:
+                pass
+            except OSError as cleanup_error:
+                print(
+                    f"baseline write refused: unable to remove temporary file "
+                    f"{temporary_path}: {cleanup_error}",
+                    file=sys.stderr,
+                )
 
 
 def read_baseline() -> set[str] | None:
@@ -383,7 +471,6 @@ def read_baseline() -> set[str] | None:
     }
 
 
-
 def changed_status() -> dict[str, str]:
     """Return changed paths and their A/M/D status without rename collapsing."""
     base = os.environ.get("BASE_SHA", "")
@@ -392,6 +479,7 @@ def changed_status() -> dict[str, str]:
         raise RuntimeError("BASE_SHA and HEAD_SHA are required")
     raw = subprocess.check_output(
         ["git", "diff", "--name-status", "--no-renames", f"{base}...{head}"],
+        cwd=REPO_ROOT,
         text=True,
     )
     result: dict[str, str] = {}
@@ -413,6 +501,7 @@ CATCH_UP_DECLARATION_RE = re.compile(
     r"source=(\S+)\s+"
     r"counterpart=(\S+)\s*$"
 )
+
 
 def parse_catch_up_declarations(
     body: str,
@@ -444,17 +533,19 @@ def parse_catch_up_declarations(
 
     return declarations, errors
 
+
 def _blob_at(revision: str, path: str) -> str | None:
     """Return the git blob id of path at revision, or None when absent."""
     try:
         return subprocess.check_output(
             ["git", "rev-parse", "--verify", f"{revision}:{path}"],
-            cwd=ROOT,
+            cwd=REPO_ROOT,
             text=True,
             stderr=subprocess.DEVNULL,
         ).strip() or None
     except subprocess.CalledProcessError:
         return None
+
 
 def check_side_by_side_catch_up(
     source: str,
@@ -502,6 +593,7 @@ def check_side_by_side_catch_up(
 
     return None
 
+
 def valid_side_by_side_catch_up(
     source: str,
     counterpart: str,
@@ -510,6 +602,7 @@ def valid_side_by_side_catch_up(
 ) -> bool:
     """Boolean view of check_side_by_side_catch_up for callers and tests."""
     return check_side_by_side_catch_up(source, counterpart, changed, statuses) is None
+
 
 def check_counterpart_requirement(
     source: str,
@@ -589,7 +682,7 @@ def check_normative_root_departures(exception: bool) -> list[str]:
         raise RuntimeError("BASE_SHA and HEAD_SHA are required")
     raw = subprocess.check_output(
         ["git", "diff", "--name-status", "-M", f"{base}...{head}"],
-        cwd=ROOT,
+        cwd=REPO_ROOT,
         text=True,
     )
     errors: list[str] = []
@@ -613,6 +706,7 @@ def check_normative_root_departures(exception: bool) -> list[str]:
             if not (len(fields) == 3 and fields[0].startswith("R")):
                 raise RuntimeError(f"Unexpected name-status record: {line!r}")
     return errors
+
 
 def approved_exception(body: str) -> bool:
     if "BILINGUAL-EXCEPTION: APPROVED" not in body:
@@ -642,7 +736,6 @@ def approved_exception(body: str) -> bool:
     except ValueError:
         return False
     return True
-
 
 
 def check_policy_inheritance(body: str, changed: set[str]) -> list[str]:
@@ -754,6 +847,7 @@ def check_policy_inheritance(body: str, changed: set[str]) -> list[str]:
             )
 
     return errors
+
 
 def check_prompt_library() -> list[str]:
     """Validate the canonical global/Owner prompt library structure and metadata."""
