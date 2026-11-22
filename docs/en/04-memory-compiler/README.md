@@ -13,9 +13,6 @@ document_metadata:
     modification_status: Modified
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "Memory Compiler reading guide"
-    canonical_scope_id: memory-compiler/reading-guide
-    canonical_scope_keywords: []
     canonical_conflict_status: None
     normative_status: Informative
   bilingual_counterpart:
