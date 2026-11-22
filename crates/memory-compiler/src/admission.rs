@@ -4,7 +4,10 @@
 //! ledger. It does not claim to be the D-authoritative producer ledger or to
 //! provide a cross-service D/Storage visibility transaction.
 
-use memory_domain::{OpaqueId, ScopeRef};
+use memory_domain::{
+    is_rfc3339_utc, is_sha256_hex, CanonicalCommitData, CanonicalCommitRef, IssuerId, OpaqueId,
+    ScopeRef, DEV_BASELINE_ISSUER,
+};
 use rusqlite::{params, Connection, OptionalExtension, Transaction, TransactionBehavior};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -137,6 +140,11 @@ pub struct ProducerRegistrationRequest {
     /// Caller-supplied cursor, persisted without validation. Its presence is not
     /// evidence that a canonical commit was confirmed (D6.3).
     pub admission_canonical_commit_cursor: Option<OpaqueId>,
+    /// The reference the cursor selects. Only an issued reference can validate,
+    /// and only against the durable `canonical_commits` row. Rows written before
+    /// this field existed decode as `pending_d()`, which never validates (§6).
+    #[serde(default = "pending_canonical_commit_ref")]
+    pub canonical_commit_ref: CanonicalCommitRef,
     pub observed_fence_cursor: OpaqueId,
     pub permission_epoch: OpaqueId,
     pub request_digest: String,
@@ -205,6 +213,48 @@ pub struct PublicationGateRequest {
     pub scope_refs: Vec<ScopeRef>,
     pub request_digest: String,
 }
+
+/// Why a canonical commit could not be established (§4.2 of
+/// `D-OWNER-DECISION-CANONICAL-COMMIT-001`).
+///
+/// Every variant maps to `Err` at the validator boundary. `Ok(false)` is
+/// reserved for exactly one case: a readable record whose subject digest does
+/// not equal the expected one.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub enum CanonicalCommitValidationError {
+    /// The reference is `pending_d()`; it carries no commit evidence.
+    PendingReference,
+    /// The cursor is a lookup selector and must name the reference's commit.
+    CursorMismatch,
+    /// No durable `canonical_commits` row exists for the commit id.
+    RecordMissing,
+    /// The stored row exists but is not a well-formed record.
+    RecordMalformed,
+    /// A stored field differs from the reference it is supposed to back.
+    RecordMismatch(&'static str),
+    /// The issuer is not the dev-baseline trust anchor.
+    UnsupportedIssuer,
+    /// The database could not be read.
+    ReadFailed,
+}
+
+impl std::fmt::Display for CanonicalCommitValidationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::PendingReference => write!(f, "reference is pending"),
+            Self::CursorMismatch => write!(f, "cursor does not select the reference's commit"),
+            Self::RecordMissing => write!(f, "no durable canonical commit record"),
+            Self::RecordMalformed => write!(f, "canonical commit record is malformed"),
+            Self::RecordMismatch(field) => {
+                write!(f, "canonical commit record disagrees on {field}")
+            }
+            Self::UnsupportedIssuer => write!(f, "issuer is not on the dev-baseline allowlist"),
+            Self::ReadFailed => write!(f, "canonical commit record is unreadable"),
+        }
+    }
+}
+
+impl std::error::Error for CanonicalCommitValidationError {}
 
 /// Durable publication decision bound to the exact artifact, dependencies,
 /// fence generation and permission epoch, per §4.3.
@@ -297,6 +347,13 @@ impl AdmissionStore {
                 artifact_version TEXT NOT NULL,
                 request_digest TEXT NOT NULL,
                 receipt_json TEXT NOT NULL
+             );
+             CREATE TABLE IF NOT EXISTS canonical_commits (
+                commit_id       TEXT PRIMARY KEY NOT NULL,
+                issuer_id       TEXT NOT NULL,
+                subject_digest  TEXT NOT NULL,
+                issued_at       TEXT NOT NULL,
+                signature       TEXT NOT NULL
              );"
         )?;
         Ok(())
@@ -908,6 +965,161 @@ impl AdmissionStore {
         let bytes = serde_json::to_vec(request)?;
         Ok(format!("{:x}", Sha256::digest(bytes)))
     }
+
+    /// Insert one immutable `canonical_commits` row and return the reference that
+    /// names it (`D-OWNER-DECISION-CANONICAL-COMMIT-001` §3).
+    ///
+    /// The row is written before the reference escapes, in a single transaction
+    /// with `synchronous=FULL`, so a returned reference always names a committed
+    /// row. A byte-identical replay is idempotent; the same `commit_id` with any
+    /// differing field is an integrity conflict. There is no update or delete.
+    ///
+    /// Dev baseline only: `signature` is the empty string (see §7). This is the
+    /// issuer's write path, not the compiler's; the publication authority never
+    /// calls it.
+    pub fn issue_canonical_commit(
+        &mut self,
+        commit_id: &OpaqueId,
+        issuer: &IssuerId,
+        subject_digest: &OpaqueId,
+        issued_at: &str,
+    ) -> Result<CanonicalCommitRef, AdmissionError> {
+        if issuer.as_str() != DEV_BASELINE_ISSUER {
+            return Err(AdmissionError::InvalidInput(
+                "issuer is not on the dev-baseline allowlist",
+            ));
+        }
+        if !is_sha256_hex(subject_digest.as_str()) || !is_rfc3339_utc(issued_at) {
+            return Err(AdmissionError::InvalidInput(
+                "subject digest or issued_at is not in canonical form",
+            ));
+        }
+        let data = CanonicalCommitData {
+            commit_id: commit_id.clone(),
+            issuer: issuer.clone(),
+            subject_digest: subject_digest.clone(),
+            issued_at: issued_at.to_owned(),
+        };
+        let reference = CanonicalCommitRef::from_issued_data(data)
+            .map_err(|_| AdmissionError::InvalidInput("canonical commit fields"))?;
+
+        let tx = self
+            .connection
+            .transaction_with_behavior(TransactionBehavior::Immediate)?;
+        let inserted = tx.execute(
+            "INSERT INTO canonical_commits(commit_id,issuer_id,subject_digest,issued_at,signature)
+             VALUES(?1,?2,?3,?4,'')",
+            params![
+                commit_id.as_str(),
+                issuer.as_str(),
+                subject_digest.as_str(),
+                issued_at
+            ],
+        );
+        match inserted {
+            Ok(_) => {}
+            Err(rusqlite::Error::SqliteFailure(ref code, _))
+                if code.code == rusqlite::ErrorCode::ConstraintViolation =>
+            {
+                // A duplicate primary key is either an idempotent replay or an
+                // integrity conflict; only byte-identical fields are a replay.
+                let stored = read_canonical_commit(&tx, commit_id)?;
+                let identical = stored.issuer_id == issuer.as_str()
+                    && stored.subject_digest == subject_digest.as_str()
+                    && stored.issued_at == issued_at;
+                if !identical {
+                    return Err(AdmissionError::IdempotencyConflict);
+                }
+            }
+            Err(error) => return Err(AdmissionError::Sqlite(error)),
+        }
+        tx.commit()?;
+        Ok(reference)
+    }
+
+    /// Record-backed, three-outcome canonical commit validation (§4).
+    ///
+    /// `Ok(true)` — issued reference, cursor equal to its `commit_id`, a readable
+    /// row whose commit id, issuer, digest and timestamp match the reference, an
+    /// allowlisted issuer, and a stored digest equal to
+    /// `expected_subject_digest`.
+    ///
+    /// `Ok(false)` — the row exists and is readable and every reference field
+    /// matches it, but the stored subject digest differs from the expected one.
+    ///
+    /// `Err(..)` — everything else, including a missing row. A missing record is
+    /// never `Ok(false)`: authority failures stay errors
+    /// (`memory-compiler/src/lib.rs`, publication gate contract).
+    pub fn validate_canonical_commit(
+        &self,
+        cursor: &OpaqueId,
+        reference: &CanonicalCommitRef,
+        expected_subject_digest: &OpaqueId,
+    ) -> Result<bool, CanonicalCommitValidationError> {
+        let data = reference
+            .data()
+            .ok_or(CanonicalCommitValidationError::PendingReference)?;
+        if cursor != &data.commit_id {
+            return Err(CanonicalCommitValidationError::CursorMismatch);
+        }
+
+        let stored =
+            read_canonical_commit(&self.connection, &data.commit_id).map_err(
+                |error| match error {
+                    rusqlite::Error::QueryReturnedNoRows => {
+                        CanonicalCommitValidationError::RecordMissing
+                    }
+                    _ => CanonicalCommitValidationError::ReadFailed,
+                },
+            )?;
+
+        // Shape first: a corrupt row is malformed whatever the reference repeats,
+        // and a non-allowlisted issuer is never trustworthy. `from_issued_data`
+        // pins the reference's issuer to the allowlist, so this also covers an
+        // issuer disagreement.
+        if stored.issuer_id != DEV_BASELINE_ISSUER {
+            return Err(CanonicalCommitValidationError::UnsupportedIssuer);
+        }
+        if !is_sha256_hex(&stored.subject_digest) || !is_rfc3339_utc(&stored.issued_at) {
+            return Err(CanonicalCommitValidationError::RecordMalformed);
+        }
+        if stored.subject_digest != data.subject_digest.as_str() {
+            return Err(CanonicalCommitValidationError::RecordMismatch(
+                "subject_digest",
+            ));
+        }
+        if stored.issued_at != data.issued_at {
+            return Err(CanonicalCommitValidationError::RecordMismatch("issued_at"));
+        }
+
+        Ok(stored.subject_digest == expected_subject_digest.as_str())
+    }
+}
+
+/// One decoded `canonical_commits` row.
+struct StoredCanonicalCommit {
+    issuer_id: String,
+    subject_digest: String,
+    issued_at: String,
+}
+
+/// Reads a row by primary key. `QueryReturnedNoRows` is preserved so the caller
+/// can distinguish a missing record from an unreadable one.
+fn read_canonical_commit(
+    connection: &Connection,
+    commit_id: &OpaqueId,
+) -> Result<StoredCanonicalCommit, rusqlite::Error> {
+    connection.query_row(
+        "SELECT issuer_id,subject_digest,issued_at FROM canonical_commits WHERE commit_id=?1",
+        [commit_id.as_str()],
+        |row| {
+            Ok(StoredCanonicalCommit {
+                issuer_id: row.get(0)?,
+                subject_digest: row.get(1)?,
+                issued_at: row.get(2)?,
+            })
+        },
+    )
 }
 
 fn read_meta(tx: &Transaction<'_>) -> Result<FenceInstallReceipt, AdmissionError> {
@@ -926,6 +1138,12 @@ fn read_meta(tx: &Transaction<'_>) -> Result<FenceInstallReceipt, AdmissionError
 
 fn encode<T: Serialize>(value: &T) -> Result<String, AdmissionError> {
     Ok(serde_json::to_string(value)?)
+}
+
+/// §6 migration: a persisted request written before the reference existed
+/// decodes as the legacy pending marker, which never validates.
+fn pending_canonical_commit_ref() -> CanonicalCommitRef {
+    CanonicalCommitRef::pending_d()
 }
 fn decode<T: DeserializeOwned>(value: &str) -> Result<T, AdmissionError> {
     Ok(serde_json::from_str(value)?)
@@ -981,6 +1199,35 @@ pub fn timestamp_unix_nanos() -> u128 {
         .as_nanos()
 }
 
+/// The dev-baseline issuer's clock, formatted as RFC 3339 UTC.
+///
+/// Validation checks syntax and equality only; it never decides freshness, so a
+/// small civil-date conversion is enough and no time-zone database is involved.
+pub fn rfc3339_utc_now() -> String {
+    let seconds = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+    let days = (seconds / 86_400) as i64;
+    let of_day = seconds % 86_400;
+    // Howard Hinnant's civil_from_days: shift the epoch to 0000-03-01.
+    let z = days + 719_468;
+    let era = z.div_euclid(146_097);
+    let doe = z.rem_euclid(146_097);
+    let yoe = (doe - doe / 1460 + doe / 36_524 - doe / 146_096) / 365;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    let mp = (5 * doy + 2) / 153;
+    let day = doy - (153 * mp + 2) / 5 + 1;
+    let month = if mp < 10 { mp + 3 } else { mp - 9 };
+    let year = yoe + era * 400 + i64::from(month <= 2);
+    format!(
+        "{year:04}-{month:02}-{day:02}T{:02}:{:02}:{:02}Z",
+        of_day / 3600,
+        (of_day % 3600) / 60,
+        of_day % 60
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1021,6 +1268,7 @@ mod tests {
             correlation_id: id("correlation-1"),
             causation_id: Some(id("cause-1")),
             admission_canonical_commit_cursor: None,
+            canonical_commit_ref: CanonicalCommitRef::pending_d(),
             observed_fence_cursor: id("fence-observation-0"),
             permission_epoch: id("permission-epoch-1"),
             request_digest: "request-digest-1".into(),
@@ -1393,5 +1641,225 @@ mod tests {
         let _ = std::fs::remove_file(&path);
         let _ = std::fs::remove_file(path.with_extension("sqlite-wal"));
         let _ = std::fs::remove_file(path.with_extension("sqlite-shm"));
+    }
+
+    // ---- canonical commit record and validator (§3, §4, §8 criterion 7) ----
+
+    fn issued_store() -> (AdmissionStore, OpaqueId, CanonicalCommitRef, OpaqueId) {
+        let mut db = AdmissionStore::in_memory().unwrap();
+        let commit_id = id("commit-1");
+        let subject = OpaqueId::new("b".repeat(64)).unwrap();
+        let reference = db
+            .issue_canonical_commit(
+                &commit_id,
+                &IssuerId::new(DEV_BASELINE_ISSUER).unwrap(),
+                &subject,
+                "2026-11-22T00:00:00Z",
+            )
+            .unwrap();
+        (db, commit_id, reference, subject)
+    }
+
+    #[test]
+    fn validator_confirms_a_matching_record() {
+        let (db, cursor, reference, subject) = issued_store();
+        assert_eq!(
+            db.validate_canonical_commit(&cursor, &reference, &subject),
+            Ok(true)
+        );
+    }
+
+    #[test]
+    fn validator_reports_false_for_a_subject_digest_mismatch() {
+        let (db, cursor, reference, _) = issued_store();
+        let other = OpaqueId::new("c".repeat(64)).unwrap();
+        assert_eq!(
+            db.validate_canonical_commit(&cursor, &reference, &other),
+            Ok(false),
+            "a readable, matching record with a different subject is a content mismatch"
+        );
+    }
+
+    #[test]
+    fn validator_reports_a_missing_record_as_an_error_not_false() {
+        let (db, cursor, reference, subject) = issued_store();
+        let absent = id("commit-never-issued");
+        let forged = CanonicalCommitRef::from_issued_data(CanonicalCommitData {
+            commit_id: absent.clone(),
+            issuer: IssuerId::new(DEV_BASELINE_ISSUER).unwrap(),
+            subject_digest: subject.clone(),
+            issued_at: "2026-11-22T00:00:00Z".into(),
+        })
+        .unwrap();
+        assert_eq!(
+            db.validate_canonical_commit(&absent, &forged, &subject),
+            Err(CanonicalCommitValidationError::RecordMissing)
+        );
+        // The issued row still validates; the forged one did not disturb it.
+        assert_eq!(
+            db.validate_canonical_commit(&cursor, &reference, &subject),
+            Ok(true)
+        );
+    }
+
+    #[test]
+    fn validator_rejects_a_pending_reference() {
+        let (db, cursor, _, subject) = issued_store();
+        assert_eq!(
+            db.validate_canonical_commit(&cursor, &CanonicalCommitRef::pending_d(), &subject),
+            Err(CanonicalCommitValidationError::PendingReference)
+        );
+    }
+
+    #[test]
+    fn validator_rejects_a_cursor_that_does_not_select_the_reference() {
+        let (db, _, reference, subject) = issued_store();
+        assert_eq!(
+            db.validate_canonical_commit(&id("commit-other"), &reference, &subject),
+            Err(CanonicalCommitValidationError::CursorMismatch)
+        );
+    }
+
+    #[test]
+    fn validator_rejects_an_issuer_mismatch_as_an_authority_failure() {
+        let (db, cursor, reference, subject) = issued_store();
+        db.connection
+            .execute(
+                "UPDATE canonical_commits SET issuer_id='someone-else' WHERE commit_id=?1",
+                [cursor.as_str()],
+            )
+            .unwrap();
+        assert_eq!(
+            db.validate_canonical_commit(&cursor, &reference, &subject),
+            Err(CanonicalCommitValidationError::UnsupportedIssuer)
+        );
+    }
+
+    #[test]
+    fn issuance_refuses_an_issuer_outside_the_allowlist() {
+        let mut db = AdmissionStore::in_memory().unwrap();
+        assert!(matches!(
+            db.issue_canonical_commit(
+                &id("commit-rogue"),
+                &IssuerId::new("someone-else").unwrap(),
+                &OpaqueId::new("d".repeat(64)).unwrap(),
+                "2026-11-22T00:00:00Z"
+            ),
+            Err(AdmissionError::InvalidInput(_))
+        ));
+        // Nothing was written.
+        assert_eq!(
+            db.validate_canonical_commit(
+                &id("commit-rogue"),
+                &CanonicalCommitRef::pending_d(),
+                &OpaqueId::new("d".repeat(64)).unwrap()
+            ),
+            Err(CanonicalCommitValidationError::PendingReference)
+        );
+    }
+
+    #[test]
+    fn validator_rejects_a_record_that_disagrees_with_the_reference() {
+        let (db, cursor, reference, subject) = issued_store();
+        db.connection
+            .execute(
+                "UPDATE canonical_commits SET subject_digest=?2 WHERE commit_id=?1",
+                params![cursor.as_str(), "9".repeat(64)],
+            )
+            .unwrap();
+        assert_eq!(
+            db.validate_canonical_commit(&cursor, &reference, &subject),
+            Err(CanonicalCommitValidationError::RecordMismatch(
+                "subject_digest"
+            ))
+        );
+
+        let (db, cursor, reference, subject) = issued_store();
+        db.connection
+            .execute(
+                "UPDATE canonical_commits SET issued_at='2026-11-23T00:00:00Z' WHERE commit_id=?1",
+                [cursor.as_str()],
+            )
+            .unwrap();
+        assert_eq!(
+            db.validate_canonical_commit(&cursor, &reference, &subject),
+            Err(CanonicalCommitValidationError::RecordMismatch("issued_at"))
+        );
+    }
+
+    #[test]
+    fn validator_rejects_a_malformed_record() {
+        let (db, cursor, reference, subject) = issued_store();
+        db.connection
+            .execute(
+                "UPDATE canonical_commits SET subject_digest='not-a-digest' WHERE commit_id=?1",
+                [cursor.as_str()],
+            )
+            .unwrap();
+        assert_eq!(
+            db.validate_canonical_commit(&cursor, &reference, &subject),
+            Err(CanonicalCommitValidationError::RecordMalformed)
+        );
+
+        let (db, cursor, reference, subject) = issued_store();
+        db.connection
+            .execute(
+                "UPDATE canonical_commits SET issued_at='yesterday' WHERE commit_id=?1",
+                [cursor.as_str()],
+            )
+            .unwrap();
+        assert_eq!(
+            db.validate_canonical_commit(&cursor, &reference, &subject),
+            Err(CanonicalCommitValidationError::RecordMalformed)
+        );
+    }
+
+    #[test]
+    fn validator_reports_an_unreadable_database_as_an_error() {
+        let (db, cursor, reference, subject) = issued_store();
+        db.connection
+            .execute_batch("DROP TABLE canonical_commits;")
+            .unwrap();
+        assert_eq!(
+            db.validate_canonical_commit(&cursor, &reference, &subject),
+            Err(CanonicalCommitValidationError::ReadFailed)
+        );
+    }
+
+    #[test]
+    fn issuance_is_idempotent_only_for_byte_identical_rows() {
+        let mut db = AdmissionStore::in_memory().unwrap();
+        let commit_id = id("commit-1");
+        let issuer = IssuerId::new(DEV_BASELINE_ISSUER).unwrap();
+        let subject = OpaqueId::new("e".repeat(64)).unwrap();
+        let first = db
+            .issue_canonical_commit(&commit_id, &issuer, &subject, "2026-11-22T00:00:00Z")
+            .unwrap();
+        let replay = db
+            .issue_canonical_commit(&commit_id, &issuer, &subject, "2026-11-22T00:00:00Z")
+            .unwrap();
+        assert_eq!(first, replay);
+        assert!(matches!(
+            db.issue_canonical_commit(&commit_id, &issuer, &subject, "2026-11-23T00:00:00Z"),
+            Err(AdmissionError::IdempotencyConflict)
+        ));
+    }
+
+    #[test]
+    fn a_request_row_written_before_the_reference_existed_decodes_as_pending() {
+        // §6: the field is additive and defaults to the legacy marker, which
+        // never validates. The stored JSON below is the pre-change shape.
+        let legacy = r#"{
+            "producer_work_item_id":"work-1","producer_class":"compiler",
+            "producer_identity":"producer-identity","source_refs":["event-1"],
+            "source_lineage_digest":"lineage-1",
+            "scope_refs":[{"scope_id":"scope-1","scope_kind":"User","namespace_key":"user:scope-1"}],
+            "operation_id":"operation-1","correlation_id":"correlation-1","causation_id":null,
+            "admission_canonical_commit_cursor":"cursor-1",
+            "observed_fence_cursor":"fence-observation-0","permission_epoch":"permission-epoch-1",
+            "request_digest":"request-digest-1","producer_schema_version":"v1"
+        }"#;
+        let request: ProducerRegistrationRequest = decode(legacy).unwrap();
+        assert!(request.canonical_commit_ref.is_pending());
     }
 }

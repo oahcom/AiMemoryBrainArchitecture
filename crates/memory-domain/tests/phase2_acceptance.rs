@@ -1149,3 +1149,42 @@ fn dm2_14_phase1_serialization_remains_compatible() {
         memory_source
     );
 }
+
+/// `dm2_14` covers the Phase 1 wire format but does not nest a canonical commit
+/// reference, so this pins the legacy pending representation explicitly
+/// (`D-OWNER-DECISION-CANONICAL-COMMIT-001` §5, §8 criterion 3).
+///
+/// The legacy placeholder was a newtype over `()` and therefore serialized as
+/// JSON `null`. That byte/value representation must survive the change to a
+/// content-bearing type.
+#[test]
+fn dm2_15_legacy_pending_canonical_commit_keeps_its_unit_representation() {
+    let pending = CanonicalCommitRef::pending_d();
+    assert!(pending.is_pending());
+    assert_eq!(pending.data(), None);
+    assert_eq!(serde_json::to_string(&pending).unwrap(), "null");
+    assert_eq!(
+        serde_json::from_str::<CanonicalCommitRef>("null").unwrap(),
+        pending
+    );
+
+    // Nested inside the type that carries it: still `null`, still round-trips.
+    let revision = fact_revision();
+    let wire: serde_json::Value = serde_json::from_str(&serde_json::to_string(&revision).unwrap())
+        .expect("FactRevision serializes to JSON");
+    assert_eq!(
+        wire.get("canonical_commit_ref"),
+        Some(&serde_json::Value::Null),
+        "the pending reference must stay the legacy unit value"
+    );
+    assert_eq!(
+        serde_json::from_str::<FactRevision>(&serde_json::to_string(&revision).unwrap()).unwrap(),
+        revision
+    );
+
+    // A malformed issued object fails closed rather than degrading to pending.
+    assert!(serde_json::from_str::<CanonicalCommitRef>(
+        r#"{"commit_id":"c","issuer":"d-owner-proxy/dev-baseline-v1","subject_digest":"short","issued_at":"2026-11-22T00:00:00Z"}"#
+    )
+    .is_err());
+}

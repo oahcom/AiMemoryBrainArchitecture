@@ -2,18 +2,22 @@ use agent_integration::{
     ApplyOutcome, ContextDeliveryAdapter, DeliveryPayload, InMemoryContextDeliveryAdapter,
 };
 use memory_compiler::admission::{
-    AdmissionStore, DependencyRegistrationRequest, ProducerRegistrationRequest,
+    rfc3339_utc_now, AdmissionStore, DependencyRegistrationRequest, ProducerRegistrationRequest,
 };
 use memory_compiler::publication_authority::AdmissionPublicationAuthority;
 use memory_compiler::{
-    accepted_event_from, ExtractionStage, Identity, IngestionStage, MemoryCompiler,
-    NormalizationStage, ProducerWorkItemId, PublicationAuthority, PublicationDisposition,
-    PublicationProof, StagingInput, WorkerLease, COMPILER_VERSION,
+    accepted_event_from, canonical_subject_digest, ExtractionStage, Identity, IngestionStage,
+    MemoryCompiler, NormalizationStage, ProducerWorkItemId, PublicationAuthority,
+    PublicationDisposition, PublicationProof, StagingInput, StagingStage, WorkerLease,
+    COMPILER_VERSION,
 };
 use memory_context::{
     build_context, ContextBudget, ContextCandidate, ContextIdentity, ContextTier,
 };
-use memory_domain::{Claim, Event, Memory, MemoryLifecycle, MemoryVersion, OpaqueId, ScopeRef};
+use memory_domain::{
+    CanonicalCommitRef, Claim, Event, IssuerId, Memory, MemoryLifecycle, MemoryVersion, OpaqueId,
+    ScopeRef, DEV_BASELINE_ISSUER,
+};
 use memory_event_store::{EventClassification, EventEnvelope};
 use memory_event_store_sqlite::{PayloadEventStoreExt, SqliteEventStore};
 use memory_storage::{MemoryStorage, PrepareRequest};
@@ -108,6 +112,10 @@ struct CompilerStageRequest<'a> {
     publication_id: &'a str,
     storage_path: &'a Path,
     admission_path: &'a Path,
+    /// Issue a durable dev-baseline canonical commit record for this run's
+    /// derivative. Off by default so the ordinary path keeps the legacy pending
+    /// reference and the unchanged `blocked` disposition.
+    issue_canonical_commit: bool,
 }
 
 struct CompilerStageOutcome {
@@ -231,6 +239,68 @@ fn run_compiler_stage(request: CompilerStageRequest<'_>) -> Result<CompilerStage
 
     let mut admission = AdmissionStore::open(request.admission_path)
         .map_err(|error| format!("cannot open admission ledger: {error}"))?;
+    // Built from the outbox row, not assembled here. Before this the CLI
+    // computed its own digest and hard-coded `compile_intent_durable: true`,
+    // which meant `IngestionStage::run`'s durable-intent guard could never fire
+    // on the production path.
+    let accepted = accepted_event_from(request.intent)
+        .map_err(|error| format!("invalid pending compile intent: {error:?}"))?;
+    let normalized = {
+        let ingested = IngestionStage::run(accepted.clone(), COMPILER_GENERATION)
+            .map_err(|error| format!("ingestion stage failed: {error:?}"))?;
+        let extracted = ExtractionStage::run(ingested, COMPILER_GENERATION)
+            .map_err(|error| format!("extraction stage failed: {error:?}"))?;
+        NormalizationStage::run(extracted, COMPILER_GENERATION)
+            .map_err(|error| format!("normalization stage failed: {error:?}"))?
+    };
+    let staging = StagingInput {
+        normalized,
+        derivative_id: Identity(format!("derivative:{event_id}")),
+        publication_id: Identity(request.publication_id.to_owned()),
+        // Admission booleans and dependency ids are derived from the durable
+        // ledger inside `compile`; these placeholders are overwritten there.
+        dependency_ids: Vec::new(),
+        dependency_closure_complete: false,
+        producer_admitted: false,
+        canonical_commit_cursor_recorded: false,
+    };
+    // The dev-baseline issuer writes one durable record for exactly the
+    // derivative this run stages. Staging is deterministic, so the preview below
+    // produces the same provenance `compile` re-derives; the record commits
+    // before the reference is handed to the request. Without the flag the run
+    // carries the legacy pending reference, which never validates.
+    let (cursor, reference) = if request.issue_canonical_commit {
+        let preview = StagingStage::run(
+            StagingInput {
+                dependency_ids: vec![Identity(request.source_ref.as_str().to_owned())],
+                dependency_closure_complete: true,
+                producer_admitted: true,
+                canonical_commit_cursor_recorded: true,
+                ..staging.clone()
+            },
+            COMPILER_GENERATION,
+        )
+        .map_err(|error| format!("staging preview failed: {error:?}"))?;
+        let subject = canonical_subject_digest(&preview.provenance)
+            .map_err(|error| format!("cannot derive canonical subject digest: {error:?}"))?;
+        let commit_id = identifier(format!("canonical-commit:{event_id}"))?;
+        let issued = admission
+            .issue_canonical_commit(
+                &commit_id,
+                &IssuerId::new(DEV_BASELINE_ISSUER)
+                    .map_err(|error| format!("invalid issuer: {error:?}"))?,
+                &subject,
+                &rfc3339_utc_now(),
+            )
+            .map_err(|error| format!("issue_canonical_commit failed: {error}"))?;
+        (commit_id, issued)
+    } else {
+        (
+            identifier(format!("canonical-commit:{event_id}"))?,
+            CanonicalCommitRef::pending_d(),
+        )
+    };
+
     admission
         .register_producer(&producer_identity, "brain-cli-registry-digest")
         .map_err(|error| format!("register_producer failed: {error}"))?;
@@ -245,9 +315,8 @@ fn run_compiler_stage(request: CompilerStageRequest<'_>) -> Result<CompilerStage
             operation_id: identifier(format!("operation:{event_id}"))?,
             correlation_id: identifier(format!("correlation:{event_id}"))?,
             causation_id: None,
-            admission_canonical_commit_cursor: Some(identifier(format!(
-                "canonical-commit:{event_id}"
-            ))?),
+            admission_canonical_commit_cursor: Some(cursor),
+            canonical_commit_ref: reference,
             observed_fence_cursor: identifier("fence:0")?,
             permission_epoch: identifier("permission-epoch:1")?,
             request_digest: format!("producer-request:{event_id}"),
@@ -277,31 +346,6 @@ fn run_compiler_stage(request: CompilerStageRequest<'_>) -> Result<CompilerStage
     let authority =
         AdmissionPublicationAuthority::new(authority_admission, &storage, work_item_id.clone());
 
-    // Built from the outbox row, not assembled here. Before this the CLI
-    // computed its own digest and hard-coded `compile_intent_durable: true`,
-    // which meant `IngestionStage::run`'s durable-intent guard could never fire
-    // on the production path.
-    let accepted = accepted_event_from(request.intent)
-        .map_err(|error| format!("invalid pending compile intent: {error:?}"))?;
-    let normalized = {
-        let ingested = IngestionStage::run(accepted.clone(), COMPILER_GENERATION)
-            .map_err(|error| format!("ingestion stage failed: {error:?}"))?;
-        let extracted = ExtractionStage::run(ingested, COMPILER_GENERATION)
-            .map_err(|error| format!("extraction stage failed: {error:?}"))?;
-        NormalizationStage::run(extracted, COMPILER_GENERATION)
-            .map_err(|error| format!("normalization stage failed: {error:?}"))?
-    };
-    let staging = StagingInput {
-        normalized,
-        derivative_id: Identity(format!("derivative:{event_id}")),
-        publication_id: Identity(request.publication_id.to_owned()),
-        // Admission booleans and dependency ids are derived from the durable
-        // ledger inside `compile`; these placeholders are overwritten there.
-        dependency_ids: Vec::new(),
-        dependency_closure_complete: false,
-        producer_admitted: false,
-        canonical_commit_cursor_recorded: false,
-    };
     let lease = WorkerLease {
         operation_id: Identity(format!("operation:{event_id}")),
         worker_id: Identity("brain-cli-worker".into()),
@@ -378,6 +422,7 @@ fn run() -> Result<(), String> {
     let mut output_path = None;
     let mut event_store_path: Option<PathBuf> = None;
     let mut verbose = false;
+    let mut issue_canonical_commit = false;
 
     while let Some(argument) = args.next() {
         match argument.as_str() {
@@ -391,6 +436,9 @@ fn run() -> Result<(), String> {
                 );
             }
             "--verbose" => verbose = true,
+            // Dev-baseline issuance. Without it the run keeps the legacy pending
+            // reference and the unchanged `blocked` disposition.
+            "--canonical-commit" => issue_canonical_commit = true,
             _ => return Err(format!("unknown argument: {argument}\n{}", usage())),
         }
     }
@@ -656,6 +704,7 @@ fn run() -> Result<(), String> {
         publication_id: &publication_id,
         storage_path: database.path(),
         admission_path: admission_database.path(),
+        issue_canonical_commit,
     })?;
     let notice = stage.notice();
 
