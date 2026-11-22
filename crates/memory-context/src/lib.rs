@@ -4431,3 +4431,7 @@ pub mod delivery_ledger;
 pub use delivery_ledger::{
     AckDisposition, DeliveryAck, DeliveryAttempt, DeliveryAttemptId, DeliveryId, DeliveryLedger,
 };
+
+pub mod delivery_lifecycle;
+
+pub use delivery_lifecycle::{AckOutcome, DeliveryLifecycle, DeliveryRecord, DeliveryState};
