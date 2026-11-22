@@ -34,8 +34,8 @@ is actually unblocked.
 grep -rn "todo!\|unimplemented!" --include=*.rs crates/
 ```
 
-All 5 hits are in `crates/memory-domain/tests/phase2_acceptance.rs`, inside
-`#[ignore]`d test bodies at lines 607, 682, 690, 753, 761.
+All 3 hits are in `crates/memory-domain/tests/phase2_acceptance.rs`, inside
+`#[ignore]`d test bodies at lines 607, 872, 880.
 
 There is no half-written production code anywhere in the workspace. "Not
 implemented" here means **a specified concern with no code at all**, not an
@@ -62,26 +62,25 @@ grep -n "pub struct Fact\b\|pub struct FactRevision\|pub enum EntityIdentityStat
 686: pub struct EvidenceExtension {
 ```
 
-`crates/memory-domain` runs 36 unit tests plus 20 acceptance tests, of which 5
-are `#[ignore]`d with a named missing API each. Nine of those twenty were
-closed on `main` by #570 and #574.
+`crates/memory-domain` runs 36 unit tests plus 20 acceptance tests, of which 3
+are `#[ignore]`d. Nine of those twenty were closed on `main` by #570 (three
+registries/resolver plus the `dm2_03` vectors) and #574 (`RelationTypeRegistry`,
+`scope_refs`).
 
 So Phase 2 is now "types and invariants done; three concerns deliberately left
-open". The remaining five split into two groups, and the split matters:
+open". The remaining three all need a decision, not code:
 
 | test | reason it stays ignored | what would close it |
 |---|---|---|
 | `dm2_06` | cross-owner decision `B-P2-XO-01` (§8 PENDING, §9 `PLACEHOLDER ONLY`) | an owner decision |
-| `dm2_08` | `RelationTypeRegistry` absent | code — PR #574 |
-| `dm2_09` | `RelationExtension::scope_refs` absent | code — PR #574 |
 | `dm2_11` | Provenance DAG is `NOT TYPED` (§9) | a spec decision |
 | `dm2_12` | same | a spec decision |
 
-Three of the five cannot be closed by writing code at all. `dm2_11`/`dm2_12`
+None of the three can be closed by writing code. `dm2_11`/`dm2_12`
 need `phase-2-domain-extension.md` §9 to type the DAG and §7 to settle
 cycle/compaction policy; `dm2_06` needs `B-P2-XO-01` resolved, and §8 forbids
-inferring authorization. Only `dm2_08` and `dm2_09` were ordinary
-implementation work, and PR #574 is that work.
+inferring authorization. The two that were ordinary implementation work
+(`dm2_08`, `dm2_09`) were closed by #574.
 
 ### 1.3 Memory Context has a measured 77-row coverage map
 
@@ -136,7 +135,7 @@ those without inventing contracts.
 ## 2. The dependency chain
 
 ```
-Phase 2 domain types            DONE (5 ignores left: 2 code, 3 decision)
+Phase 2 domain types            DONE (3 ignores left, all decision-blocked)
         |
         v
 memory-storage / memory-store   DONE incl. hidden prepare / explicit publish (#523)
@@ -230,18 +229,18 @@ vectors: CI-01..CI-04, CI-07..CI-11 and CI-13. CI-05, CI-06 and CI-12 are
 unreachable because `ClaimRevision` has no quantifier, modality or confidence
 field; they are explicitly not counted as covered.
 
-The remaining ignored acceptance tests split three ways, and only one third is
+The remaining ignored acceptance tests are all decision-blocked, none of them
 implementation work:
 
 | test | closure requires |
 |---|---|
-| `dm2_08`, `dm2_09` | code — PR #574 (`RelationTypeRegistry`, `scope_refs`) |
 | `dm2_06` | owner decision `B-P2-XO-01`; §8 forbids inferring authorization |
 | `dm2_11`, `dm2_12` | spec decision — §9 marks Provenance DAG `NOT TYPED`, §7 leaves cycle policy open |
 
 `ClaimRevisionRegistry`, `AcceptedRevisionState` and `ClaimRevisionResolver`
-landed in #570. `EvidenceIndependence::validate` is not a named blocker in any
-current ignore reason.
+landed in #570; `RelationTypeRegistry` and `scope_refs` landed in #574.
+`EvidenceIndependence::validate` is not a named blocker in any current ignore
+reason.
 
 **T2.2 — CI wiring for the existing gates**
 
@@ -286,7 +285,7 @@ re-implemented work #570 had already landed, because nobody had re-measured
 | Memory Context | 80% unimplemented | 77-row map: 9 implemented / 43 partial / 25 absent. 19 rows locally doable, 40 waiting on a durable publication record |
 | Agent Integration | 90% unimplemented | Accurate for runtime; but blocked by H/D/I, not by absence of effort. RT-01..RT-09 all NOT RUN |
 | BMCP | 60% unimplemented | Artifacts substantial (32 schemas, 545 conformance tests). Transport/server entirely absent — a binary, not a percentage |
-| Phase 2 domain | 100% not started | **False.** Types, invariants, `claim_identity::classify`, `ClaimRevisionRegistry`, `AcceptedRevisionState` and `ClaimRevisionResolver` are all implemented. 5 ignores left: 2 code (#574), 3 decisions |
+| Phase 2 domain | 100% not started | **False.** Types, invariants, `claim_identity::classify`, `ClaimRevisionRegistry`, `AcceptedRevisionState` and `ClaimRevisionResolver` are all implemented. 3 ignores left, all decision-blocked (§1.2) |
 | E2E | 100% not started | **False.** `brain-cli` runs ingestion → storage → context → compiler end to end, including the publication gate and its visible skip |
 
 ## 6. Re-measurement at `b29278a8` (2026-11-22 02:05 +08:00)
@@ -579,3 +578,113 @@ side-by-side pairs (`README.md` + `README.en.md`, and the five `GOV-NC-2026-11-2
 pairs). `side_by_side_partner()` resolves all of them. This is the mechanism
 working as designed, and it is the counter-example to §7.5: the register is
 clean because its files are tracked and its pairs are real.
+
+## 8. The whole workspace builds and tests green (2026-11-22 12:00 +08:00)
+
+This section exists because §7 and the PR bodies that preceded it asserted
+something that is not true on this host: that six crates cannot be built because
+`libsqlite3-sys` (bundled) needs a C compiler and none exists here.
+
+That was a **measurement error, not an environment limit.** A working C compiler
+was already on the machine.
+
+### 8.1 What was actually wrong
+
+`gcc` at `~/.local/bin/gcc.exe` is a real MinGW-w64 GCC 14.2.0, but its `libexec`
+tree is missing, so `cc1` cannot be spawned:
+
+```
+$ gcc t.c -o t.exe
+gcc.exe: fatal error: cannot execute 'cc1': CreateProcess: No such file or directory
+```
+
+`gcc -print-search-dirs` still points at `~/.local/libexec/gcc/x86_64-w64-mingw32/14.2.0/`,
+which does not exist. So `cc` is on `PATH`, reports a version, and fails on the
+first translation unit — the worst possible failure shape, because a version
+check says it works.
+
+MSVC is genuinely absent (`link.exe` missing), which is why
+`+stable-x86_64-pc-windows-msvc` fails too.
+
+### 8.2 What was already installed
+
+A complete Zig toolchain at
+`%LOCALAPPDATA%/Temp/zigpkg/ziglang/zig.exe` (190 MB), plus a `zigcc.exe`
+wrapper left over from an earlier probe at
+`2026-11-18-13-49-20/_l0probe/zigcc.exe`. The wrapper spawns
+`zig cc -fno-sanitize=all` and forwards arguments.
+
+§7's own command line already used it:
+
+```
+$ CC=zigcc AR=zigar cargo test --workspace --all-targets
+TOTAL passed=438 failed=0 ignored=9
+```
+
+So §7 recorded the working invocation and §7's own prose then claimed the
+workspace could not be built. The two statements were never reconciled.
+
+`zigar` did not exist; it was built from the same wrapper pattern:
+
+```c
+nv[n++] = "C:/Users/Administrator/AppData/Local/Temp/zigpkg/ziglang/zig.exe";
+nv[n++] = "ar";
+```
+
+### 8.3 Measured result
+
+```
+$ CC=<zigcc> AR=<zigar> cargo test --workspace --all-targets --offline
+TOTAL passed=476 failed=0 ignored=3
+```
+
+| crate | passed | ignored |
+|---|---:|---:|
+| agent-integration | 57 | 0 |
+| bmcp-protocol | 48 | 0 |
+| brain-cli | 6 | 0 |
+| memory-compiler | 66 | 0 |
+| memory-context | 91 | 0 |
+| memory-domain | 77 | 3 |
+| memory-event-store | 2 | 0 |
+| memory-event-store-sqlite | 38 | 0 |
+| memory-storage | 3 | 0 |
+| memory-storage-sqlite | 62 | 0 |
+| memory-store | 26 | 0 |
+| **total** | **476** | **3** |
+
+The 3 ignored are `dm2_06`, `dm2_11`, `dm2_12` — the decision-blocked ones from
+§1.2. Every other test in the workspace runs.
+
+Also green:
+
+```
+cargo clippy --workspace --all-targets -- -D warnings   # clean
+cargo fmt --all -- --check                              # clean
+```
+
+### 8.4 Why this matters beyond a number
+
+Three PRs (#573, #574, #581) were scoped down to `memory-domain` and their bodies
+told the reviewer that six crates could not be built here. That disclaimer was
+false, and it made the PRs look smaller and less verifiable than they were. The
+correct framing was always available: the whole workspace builds, and every
+claim about `memory-compiler` or `brain-cli` can be checked locally.
+
+The lesson is specific and worth recording: **a compiler that reports a version
+but cannot compile is worse than no compiler**, because every "is it installed?"
+check passes. The check that would have caught it is one translation unit, not
+`--version`.
+
+### 8.5 What this does not change
+
+Nothing above §8 is invalidated. The chokepoint analysis in §2, the attribution
+counts in §1.3, and the decision-blocked items in §1.2 all stand. What changes is
+the claim that the workspace is unbuildable here — that claim was wrong, and it
+is the reason several PRs were under-verified.
+
+The environment fix is not in the repository: `CC`/`AR` are passed per
+invocation, and no toolchain is vendored. A future contributor still hits the
+broken `gcc` unless they know to override it. Recording the working invocation
+in this section is the only durable artifact.
+

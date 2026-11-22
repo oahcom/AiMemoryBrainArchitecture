@@ -12,7 +12,12 @@
 
 本文用计数替换百分比，并按"真正未被阻塞"来排序。
 
-## 1. 实测状态（在 `main @ 76b6470e` 上核验）
+## 1. 实测状态（在 `main @ caa37a7` 上核验）
+
+> **修订说明**：本节早先版本测的是 `main @ 76b6470e`，并据此断言
+> `PublicationAuthority` 有三个实现、全部位于 `#[cfg(test)]`，因而是
+> "THE CHOKEPOINT"。该结论已不成立。`main` 在一天内先后推进了 #523、#545、
+> #555、#570，§2 已相应重写，那个卡点已经关闭。
 
 ### 1.1 生产代码零桩
 
@@ -20,7 +25,7 @@
 grep -rn "todo!\|unimplemented!" --include=*.rs crates/
 ```
 
-8 处命中全部位于 `crates/memory-domain/tests/phase2_acceptance.rs`，且在 `#[ignore]` 的测试体内（154、162、191、257、332、340、403、411 行）。
+3 处命中全部位于 `crates/memory-domain/tests/phase2_acceptance.rs`，且在 `#[ignore]` 的测试体内（607、872、880 行）。
 
 工作区里没有任何半写的生产代码。此处的"未实现"指**有规格但一行代码都没有**，而不是"函数没写完"。这一区分很重要：它意味着下一个增量永远是"写出 X 的第一版"，而不是"把 X 补完"。
 
@@ -43,12 +48,24 @@ grep -n "pub struct Fact\b\|pub struct FactRevision\|pub enum EntityIdentityStat
 686: pub struct EvidenceExtension {
 ```
 
-`crates/memory-domain` 的 Claim 身份分类器已由 PR #545 实现，公开函数为
-`claim_identity::classify`。其余被 ignore 的验收测试仍指向其他缺失能力，
-例如 `ClaimRevisionRegistry`、`RelationTypeRegistry` 和 `ProvenanceGraph`；
-`classify_claim_change` 并不是实际 API 名称，不得继续计为缺失符号。
+`crates/memory-domain` 有 36 个单元测试加 20 个验收测试，其中 3 个被
+`#[ignore]`。二十个中有九个已由 `main` 上的 #570（三个注册表/解析器加
+`dm2_03` 向量）与 #574（`RelationTypeRegistry`、`scope_refs`）关闭。
 
-因此 Phase 2 的现状是"类型、不变量和 Claim 身份分类已实现；部分注册表与图能力仍缺失"。
+因此 Phase 2 的现状是"类型与不变量已完成；三个关注点被刻意留开"。剩下三个
+都需要决策，而不是代码：
+
+| 测试 | 保持 ignore 的原因 | 需要什么才能关闭 |
+|---|---|---|
+| `dm2_06` | 跨 Owner 决策 `B-P2-XO-01`（§8 标 PENDING，§9 标 `PLACEHOLDER ONLY`） | 一个 Owner 决策 |
+| `dm2_11` | Provenance DAG 为 `NOT TYPED`（§9） | 一个规格决策 |
+| `dm2_12` | 同上 | 一个规格决策 |
+
+三个都无法靠写代码关闭。`dm2_11`/`dm2_12` 需要
+`phase-2-domain-extension.md` §9 先把 DAG 类型化、§7 先定下 cycle/compaction
+策略；`dm2_06` 需要 `B-P2-XO-01` 有结论，且 §8 禁止推断授权。真正属于普通
+实现工作的两项（`dm2_08`、`dm2_09`）已由 #574 完成。
+
 Phase 3 是另一个问题，本文不涉及。
 
 ### 1.3 Memory Context 已有 77 行实测覆盖表
@@ -87,7 +104,7 @@ grep -rn "TcpListener\|hyper\|axum\|transport" --include=*.rs crates/
 ## 2. 依赖链
 
 ```
-Phase 2 领域类型            已完成（注册表/分类器缺失）
+Phase 2 领域类型            已完成（剩 3 个 ignore，全部被决策阻塞）
         |
         v
 memory-storage / memory-store  已完成，含 hidden prepare / explicit publish（#523）
@@ -96,37 +113,61 @@ memory-storage / memory-store  已完成，含 hidden prepare / explicit publish
 memory-context                 77 行表：9 已实现，43 部分，25 缺失
         |                      其中 19 行可本地实现
         v
-PublicationAuthority  <-- 咽喉点。3 个实现全部在 #[cfg(test)] 内
-        |
-        +--> memory-compiler::compile 可达
+PublicationAuthority          已完成。AdmissionPublicationAuthority 是生产代码，
+        |                      读持久准入台账，brain-cli 正在使用它。
+        +--> memory-compiler::compile 可达  <-- brain-cli 已在调用
         +--> 25+43 行中 40 行解锁
         +--> Agent Integration 第 3-6 步解锁
         |
         v
-BMCP 传输 + 服务端   <-- 不存在；同时也卡住 Agent Integration
+BMCP 传输 + 服务端   <-- 不存在；现在是唯一剩下的咽喉点
         |
         v
 端到端（brain-cli 越过上下文组装）
 ```
 
-**咽喉点是 `PublicationAuthority`（GAP-07）。** 它是单个 trait 的单个缺失生产实现。链上它以上的部分要么已完成、要么可本地实现；它以下的部分全部被阻塞。
+**`PublicationAuthority` 不再是咽喉点。** 截至 `main @ caa37a7`，有两类实现：
 
-这就是"六路同时推进"行不通的原因：六项里有五项汇聚到同一个缺失的 trait 实现，加上一个缺失的传输层。
+| 实现 | 位置 | 支撑 |
+|---|---|---|
+| `AdmissionPublicationAuthority` | `publication_authority.rs:50` | 持久准入台账 + storage prepare 行 |
+| `EvidenceAuthority`、`TestAuthority`、`RecoveryAuthority` | `lib.rs:921/940/1355` | `#[cfg(test)] mod tests` |
+
+`AdmissionPublicationAuthority` 不是测试替身。它接收 `AdmissionStore` 与
+`&dyn MemoryStorage`，只读已提交行，生产者身份与 scope 边界取自持久准入请求，
+而不是调用方传入的布尔值。`crates/brain-cli/src/main.rs:280` 用它构造
+`MemoryCompiler` 并调用 `compile`，随后无条件向 stderr 报告
+`published` / `blocked` / `suppressed`。GAP-07 (b)（"跳过不可见"）已由 sidecar
+文件加二进制级测试 `crates/brain-cli/tests/compiler_skip_is_visible.rs` 关闭。
+
+**唯一剩下的咽喉点是 BMCP 传输 + 服务端。** 它卡住 Agent Integration 与端到端
+路径，而它以上的部分都不再卡住。
+
+这就是"六路同时推进"行不通的原因：六项里有五项汇聚到同一个缺失的传输层。
+早先的读法——汇聚到一个缺失的 trait 实现**加上**一个缺失的传输层——在
+`76b6470e` 上成立，现在已解决了一半。
 
 ## 3. 现在真正未被阻塞的工作
 
 按依赖排序。每一项今天就能派工，无需任何外部决定。
 
+> **部分已被取代。** 下面的 T1.1 已由 `AdmissionPublicationAuthority` 与
+> `brain-cli` 接线完成，见 §2 与 §8。T1.2、T2.2 仍然开放；T2.1 只剩决策项。
+
 ### 第一层 — 解锁最多下游
 
-**T1.1 — 生产版 `PublicationAuthority`（GAP-07 方向 (a)）**
+**T1.1 — 生产版 `PublicationAuthority`（GAP-07 方向 (a)）— 已完成**
 
-`prepare_version` / `publish_prepared` 已在 Storage trait 与 `memory-storage-sqlite` 中（#523）。缺的是：
+由 `AdmissionPublicationAuthority` 关闭。它接收 `AdmissionStore` 与
+`&dyn MemoryStorage`，只读已提交行，生产者身份与 scope 取自持久准入请求而非
+调用方布尔值。`crates/brain-cli/src/main.rs:280` 用它构造 `MemoryCompiler`
+并调用 `compile`，无条件向 stderr 报告 `published` / `blocked` /
+`suppressed`，另有 sidecar 文件与二进制级测试
+（`compiler_skip_is_visible.rs`）保证跳过不会被漏看。
 
-- `MemoryStore` 没有暴露它们（只暴露 5 个方法，无 prepare/publish；仅有的函数体在 `cfg(test)` 内的 `FakeStorage` 上）。
-- 编译器内存态准入存储之外，没有持久发布记录。
-
-实现它使 `MemoryCompiler::compile` 可达，这是任何"系统能编译"主张的前提。
+`MemoryStore` 仍未暴露 `prepare_version` / `publish_prepared`。这已不再是
+`compile` 的阻塞（权威直接读 storage），但仍是 Store 抽象上的一个洞；诚实的
+说法是"咽喉点被绕过了"，而不是"抽象补完了"。
 
 **T1.2 — 19 行可本地实现的 Memory Context**
 
@@ -145,10 +186,16 @@ Claim 身份分类器已由 PR #545 实现，函数名是
 CI-07..CI-11 和 CI-13。CI-05、CI-06、CI-12 因 `ClaimRevision` 没有
 quantifier、modality、confidence 字段而不可达，不得计为已覆盖。
 
-其余被 ignore 的验收测试针对其他缺失 API，包括 `ClaimRevisionRegistry`、
-`RelationTypeRegistry`、`ProvenanceGraph` 和
-`EvidenceIndependence::validate`。这些能力与已经存在的 Claim 身份分类器
-是不同缺口。
+其余被 ignore 的验收测试全部被决策阻塞，没有一项是实现工作：
+
+| 测试 | 关闭条件 |
+|---|---|
+| `dm2_06` | Owner 决策 `B-P2-XO-01`；§8 禁止推断授权 |
+| `dm2_11`、`dm2_12` | 规格决策 — §9 标 Provenance DAG `NOT TYPED`，§7 未定 cycle 策略 |
+
+`ClaimRevisionRegistry`、`AcceptedRevisionState`、`ClaimRevisionResolver`
+已由 #570 落地；`RelationTypeRegistry` 与 `scope_refs` 已由 #574 落地。
+`EvidenceIndependence::validate` 在当前任何 ignore 理由中都不是被点名的阻塞项。
 
 **T2.2 — 给现有闸门接 CI**
 
@@ -160,29 +207,35 @@ GAP-08 与 GAP-09 都是在红灯状态下进入 `main` 的，因为 PR 上只�
 |---|---|---|
 | BMCP 传输/服务端 | H 尚未冻结传输契约 | H 决定 |
 | Agent Integration RT-01..RT-09 | 同上，另加 D 与 I 闸门 | H + D + I |
-| 40 行归属 `D` 的 context | 发布权威 | T1.1 |
+| 40 行归属 `D` 的 context | ~~发布权威~~ 发布**记录**的形状 | `AdmissionPublicationAuthority` 已解锁 `compile`；这 40 行仍需一个经 `MemoryStore` 暴露的持久发布记录 |
 | 8 行归属 `I` 的 context | 授权权威 | I 决定 |
+| `dm2_06` | 跨 Owner 决策 `B-P2-XO-01` | Owner 决策 |
+| `dm2_11`、`dm2_12` | Provenance DAG 为 `NOT TYPED`（§9） | 规格决策 |
 
 为这些派工实现只会产出无法合并的工作。它们需要的是决定，不是代码。
 
 ## 4. 建议
 
-**先 T1.1，再 T1.2，然后 T2.1/T2.2。** 第三层不得作为实现派工。
+**T1.1 已完成。接下来做 T1.2，然后 T2.2，然后是决策项。**
 
-先做 T1.1 而不是更大的 T1.2，理由是：T1.1 是单个 trait 实现，却同时解锁 40 行归属 `D`、编译器、以及 Agent Integration 第 3–6 步。T1.2 的 19 行各自小且独立，可以与 T1.1 并行推进，也应该并行。
+T1.2 的 19 行各自小且独立，不需要外部权威，是唯一一块既有分量、今天又能派工
+的工作。T2.2（接 CI）不增加能力，但能阻止"测量成为唯一探测器"——正因为便宜，
+值得早做。
 
-若 T1.1 确实卡在某个没人做出的决定上——即**持久发布记录究竟是什么**——那么该决定就是最高价值的事，因为它是最大一块工作前面的唯一闸门。
+第三层里需要决策的四项，应当作为决策上报。把它们当作实现来派工，正是 #573
+的成因：那个 PR 重新实现了 #570 已经落地的内容，因为没人在写代码前重测
+`main`。
 
 ## 5. 对既有估计的更正
 
 | 领域 | 所述 | 实测 |
 |---|---|---|
-| Memory Compiler | 85% 未实现 | `compile` 约 100% 不可达；准入/注册表/fence 已实现并测试（58 测试）。缺：生产权威、Store 层 prepare/publish 暴露 |
-| Memory Context | 80% 未实现 | 77 行表：9 已实现 / 43 部分 / 25 缺失。19 行可本地做，40 行等 D |
+| Memory Compiler | 85% 未实现 | `compile` 现已通过 `AdmissionPublicationAuthority` 与 `brain-cli` 可达；准入/注册表/fence 已实现并测试。缺：`MemoryStore` 未暴露 prepare/publish |
+| Memory Context | 80% 未实现 | 77 行表：9 已实现 / 43 部分 / 25 缺失。19 行可本地做，40 行等一个持久发布记录 |
 | Agent Integration | 90% 未实现 | 对运行时而言准确；但阻塞来自 H/D/I，而非努力不足。RT-01..RT-09 全部 NOT RUN |
 | BMCP | 60% 未实现 | 产物可观（32 schema、545 一致性测试）。传输/服务端完全缺失——那是一个二进制，不是一个百分比 |
-| Phase 2 领域 | 100% 未启动 | **不成立。** 类型、不变量和 `claim_identity::classify` 已实现；`dm2_03` 覆盖 10 条可达 CI 向量。CI-05/06/12 因 `ClaimRevision` 类型形状不可达；其他注册表/图能力仍有缺口 |
-| 端到端 | 100% 未启动 | 部分不成立。`brain-cli` 已端到端跑通摄取 → 存储 → 上下文，止于编译器跳过（GAP-07） |
+| Phase 2 领域 | 100% 未启动 | **不成立。** 类型、不变量、`claim_identity::classify`、`ClaimRevisionRegistry`、`AcceptedRevisionState`、`ClaimRevisionResolver` 均已实现。剩 3 个 ignore，全部被决策阻塞（§1.2） |
+| 端到端 | 100% 未启动 | **不成立。** `brain-cli` 已端到端跑通摄取 → 存储 → 上下文 → 编译器，包括发布闸门与可见的跳过 |
 
 ## 6. 在 `b29278a8` 上的重测（2026-11-22 02:05 +08:00）
 
@@ -448,3 +501,103 @@ EXIT=1   （只剩 PR body 的 manifest 错误）
 `README.en.md`，以及五对 `GOV-NC-2026-11-20-*`）。`side_by_side_partner()`
 全部解析得到。这是机制按设计工作，也是 §7.5 的反例：登记目录干净，因为它的
 文件被跟踪、配对是真实的。
+
+## 8. 整个工作区可以构建、测试全绿（2026-11-22 12:00 +08:00）
+
+本节存在的原因：§7 以及它之前的若干 PR 正文都断言过一件在本机上并不成立的
+事——六个 crate 因为 `libsqlite3-sys`（bundled）需要 C 编译器而无法构建。
+
+那是**测量错误，不是环境限制。** 机器上一直有一个可用的 C 编译器。
+
+### 8.1 真正坏在哪里
+
+`~/.local/bin/gcc.exe` 是真正的 MinGW-w64 GCC 14.2.0，但它的 `libexec` 目录
+缺失，所以 `cc1` 无法被拉起：
+
+```
+$ gcc t.c -o t.exe
+gcc.exe: fatal error: cannot execute 'cc1': CreateProcess: No such file or directory
+```
+
+`gcc -print-search-dirs` 仍指向
+`~/.local/libexec/gcc/x86_64-w64-mingw32/14.2.0/`，而该目录不存在。于是 `cc`
+在 `PATH` 上、能报版本号、却在第一个编译单元上失败——这是最坏的失败形态，
+因为版本检查会说它正常。
+
+MSVC 确实缺失（无 `link.exe`），这就是 `+stable-x86_64-pc-windows-msvc` 也
+失败的原因。
+
+### 8.2 已经装好的东西
+
+`%LOCALAPPDATA%/Temp/zigpkg/ziglang/zig.exe`（190 MB）处有一套完整的 Zig
+工具链，另有 `2026-11-18-13-49-20/_l0probe/zigcc.exe`——一个早先探测留下的
+`zigcc` 包装器，它启动 `zig cc -fno-sanitize=all` 并转发参数。
+
+§7 自己的命令行已经在用它：
+
+```
+$ CC=zigcc AR=zigar cargo test --workspace --all-targets
+TOTAL passed=438 failed=0 ignored=9
+```
+
+也就是说 §7 记录了可用的调用方式，紧接着其正文又声称工作区无法构建。这两句
+从未被对上。
+
+`zigar` 并不存在，用同一套包装器模式补上：
+
+```c
+nv[n++] = "C:/Users/Administrator/AppData/Local/Temp/zigpkg/ziglang/zig.exe";
+nv[n++] = "ar";
+```
+
+### 8.3 实测结果
+
+```
+$ CC=<zigcc> AR=<zigar> cargo test --workspace --all-targets --offline
+TOTAL passed=476 failed=0 ignored=3
+```
+
+| crate | 通过 | ignore |
+|---|---:|---:|
+| agent-integration | 57 | 0 |
+| bmcp-protocol | 48 | 0 |
+| brain-cli | 6 | 0 |
+| memory-compiler | 66 | 0 |
+| memory-context | 91 | 0 |
+| memory-domain | 77 | 3 |
+| memory-event-store | 2 | 0 |
+| memory-event-store-sqlite | 38 | 0 |
+| memory-storage | 3 | 0 |
+| memory-storage-sqlite | 62 | 0 |
+| memory-store | 26 | 0 |
+| **合计** | **476** | **3** |
+
+3 个 ignore 就是 §1.2 里那三个被决策阻塞的 `dm2_06`、`dm2_11`、`dm2_12`。
+工作区其余测试全部运行。
+
+同时全绿：
+
+```
+cargo clippy --workspace --all-targets -- -D warnings   # clean
+cargo fmt --all -- --check                              # clean
+```
+
+### 8.4 为什么这不只是一个数字
+
+有三个 PR（#573、#574、#581）被收窄到 `memory-domain`，其正文告诉审阅者
+"六个 crate 在本机无法构建"。那条免责声明是错的，它让这些 PR 显得比实际更小、
+更不可验证。正确的表述一直存在：整个工作区可以构建，任何关于
+`memory-compiler` 或 `brain-cli` 的主张都能本地核验。
+
+教训具体且值得记下：**一个能报版本号却编不出东西的编译器，比没有编译器更糟**，
+因为所有"装了吗"的检查都会通过。能抓到它的检查是一个编译单元，不是 `--version`。
+
+### 8.5 这没有改变什么
+
+§8 以上的内容无一失效。§2 的咽喉点分析、§1.3 的归属计数、§1.2 的决策阻塞项
+全部成立。改变的是"工作区在本机不可构建"这一主张——它是错的，而且它正是若干
+PR 验证不足的原因。
+
+环境修复没有进入仓库：`CC`/`AR` 按次传入，没有 vendored 工具链。未来的贡献者
+仍会撞上坏掉的 `gcc`，除非知道要覆盖它。把可用的调用方式记在本节，是唯一
+持久化的产物。
