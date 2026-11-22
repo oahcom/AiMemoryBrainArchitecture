@@ -79,6 +79,68 @@ fn execute(input: &Path, output: &Path, event_database: Option<&Path>) -> Output
     command.output().expect("spawn brain CLI")
 }
 
+/// The Owner ruling of 2026-11-22 made compile results deliberately ephemeral:
+/// `run_compiler_stage` gets `storage_path` and `admission_path` from
+/// `TemporaryDatabase`, which deletes both in `Drop`, so the only durable
+/// artifact a compile leaves behind is the accepted event and its outbox row.
+///
+/// This test pins the part of that contract that is observable from outside the
+/// binary. If someone adds a `--storage` flag or starts persisting a result, the
+/// outbox count or the snapshot will move, and the change has to be argued for
+/// instead of slipping in.
+///
+/// ponytail: this checks the outbox and the output, not the schema. A table
+/// named something unexpected would pass. Checking `sqlite_master` would mean
+/// adding `rusqlite` as a `brain-cli` dev-dependency to read a file this crate
+/// does not otherwise open; when a durable result actually appears, that is the
+/// moment to pay for it, not now.
+#[test]
+fn compile_leaves_no_durable_result_behind() {
+    let directory = TestDirectory::new();
+    let input = TestDirectory::fixture();
+    let database = directory.event_database();
+    let first = directory.output();
+    let second = directory.path.join("context-second.json");
+
+    assert_success(&execute(&input, &first, Some(&database)));
+
+    let store = SqliteEventStore::open(&database).expect("open event store");
+    let intents_after_first = store
+        .pending_compile_intents()
+        .expect("read pending compile intents");
+    drop(store);
+
+    assert_success(&execute(&input, &second, Some(&database)));
+
+    let store = SqliteEventStore::open(&database).expect("open event store");
+    let intents_after_second = store
+        .pending_compile_intents()
+        .expect("read pending compile intents");
+    drop(store);
+
+    // A second compile must not enqueue a second intent. `compile_outbox.event_row`
+    // is UNIQUE, so a growing count would mean someone added a second row per
+    // attempt, which is the first half of "a compile result became durable".
+    assert_eq!(
+        intents_after_first.len(),
+        1,
+        "one accepted event must produce exactly one compile intent"
+    );
+    assert_eq!(
+        intents_after_second.len(),
+        1,
+        "a re-run must re-read the same intent, not enqueue another"
+    );
+
+    // And both runs must agree. They can only agree if neither wrote a result
+    // the other one read.
+    assert_eq!(
+        fs::read(&first).expect("read first snapshot"),
+        fs::read(&second).expect("read second snapshot"),
+        "two runs of the same event must produce the same snapshot"
+    );
+}
+
 fn receipt_id(stderr: &str) -> String {
     stderr
         .lines()
