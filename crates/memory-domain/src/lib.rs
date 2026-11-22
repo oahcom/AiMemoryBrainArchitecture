@@ -8,6 +8,9 @@ mod claim_revision_registry;
 pub use claim_identity::*;
 pub use claim_revision_registry::*;
 
+mod canonical_commit;
+pub use canonical_commit::*;
+
 mod relation_registry;
 pub use relation_registry::*;
 
@@ -54,6 +57,7 @@ pub enum DomainError {
     InvalidMergeState,
     DuplicateClaimRevisionRef,
     UnknownClaimRevision,
+    InvalidCanonicalCommitField(&'static str),
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -534,21 +538,15 @@ impl AuthorizationDecisionRef {
         Self(())
     }
 }
-/// NOT DEFINED: awaiting D. Required placeholder with no invented commit semantics.
-/// `pending_d()` is public and any caller can create this placeholder. It has no
-/// canonical-commit meaning until D freezes that contract.
-#[doc = r#"The tuple field is private; external callers cannot forge the placeholder directly.
+/// The canonical commit reference is defined by `D-OWNER-DECISION-CANONICAL-COMMIT-001`
+/// and lives in [`canonical_commit`]. A reference is a candidate only: it confers no
+/// authority and cannot validate without the durable `canonical_commits` record.
+#[doc = r#"The state field is private; external callers cannot fabricate an issued reference.
 ```compile_fail
 use memory_domain::CanonicalCommitRef;
-let _ = CanonicalCommitRef(());
+let _ = CanonicalCommitRef { state: () };
 ```"#]
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct CanonicalCommitRef(());
-impl CanonicalCommitRef {
-    pub const fn pending_d() -> Self {
-        Self(())
-    }
-}
+pub use canonical_commit::CanonicalCommitRef;
 
 #[doc = r#"Immutable revision fields are private; corrections append successors.
 ```compile_fail
