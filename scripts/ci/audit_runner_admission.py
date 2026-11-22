@@ -19,6 +19,24 @@ from pathlib import Path
 from typing import Optional, Tuple
 
 WORKFLOW_DIR = Path(".github/workflows")
+# L1 (the runner's job-started hook) is an ALLOWLIST: it admits a job only when
+# GITHUB_EVENT_NAME is push, workflow_dispatch or schedule. L2 used to be a
+# DENYLIST of the triggers people had thought of, which meant every trigger
+# nobody had thought of -- `issues`, `release`, `merge_group`, `discussion`, and
+# anything GitHub adds next -- passed L2 and was then silently denied by L1.
+# A green L2 that L1 contradicts is worse than no L2: it is a security audit
+# reporting safety it does not have.
+#
+# So L2 now mirrors L1's allowlist. The two controls agree by construction
+# instead of by two lists that must be kept in sync by hand.
+ALLOWED_TRIGGERS = {
+    "push",
+    "workflow_dispatch",
+    "schedule",
+}
+# Kept only to produce a clearer message for the triggers that are both common
+# and obviously untrusted. Membership here does not affect the verdict: the
+# verdict comes from ALLOWED_TRIGGERS alone.
 UNTRUSTED_TRIGGERS = {
     "pull_request",
     "pull_request_target",
@@ -260,8 +278,17 @@ def audit_workflow(path: Path) -> Tuple[int, list[str]]:
         audited += 1
         prefix = f"{path.as_posix()}:{job_name}: "
 
-        for trigger in sorted(UNTRUSTED_TRIGGERS.intersection(triggers)):
-            violations.append(prefix + f"untrusted trigger '{trigger}' is not permitted for self-hosted jobs")
+        for trigger in sorted(triggers - ALLOWED_TRIGGERS):
+            if trigger in UNTRUSTED_TRIGGERS:
+                violations.append(
+                    prefix + f"untrusted trigger '{trigger}' is not permitted for self-hosted jobs"
+                )
+            else:
+                violations.append(
+                    prefix
+                    + f"trigger '{trigger}' is not permitted for self-hosted jobs "
+                    + f"(L1 admits only {', '.join(sorted(ALLOWED_TRIGGERS))})"
+                )
 
         if push_present:
             if push_branches is None:
