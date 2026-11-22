@@ -14,6 +14,8 @@ document_metadata:
     canonical_scope_id: protocol/bmcp-message-type-index
     normative_status: Informative
     canonical_conflict_status: None
+  bilingual_counterpart:
+    source: "08-bmcp-protocol/protocol-index.md"
 ---
 
 # BMCP 协议消息类型索引
