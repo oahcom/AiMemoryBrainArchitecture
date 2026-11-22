@@ -36,6 +36,31 @@ impl OpaqueId {
     }
 }
 
+/// Shared issuer identity for the D and I owner contracts.
+#[derive(
+    serde::Serialize,
+    serde::Deserialize,
+    Clone,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+#[serde(transparent)]
+pub struct IssuerId(OpaqueId);
+
+impl IssuerId {
+    pub fn new(value: impl Into<String>) -> Result<Self, DomainError> {
+        Ok(Self(OpaqueId::new(value)?))
+    }
+
+    pub fn as_str(&self) -> &str {
+        self.0.as_str()
+    }
+}
+
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub enum DomainError {
     EmptyId,
@@ -59,6 +84,15 @@ pub enum DomainError {
     UnknownClaimRevision,
     InvalidCanonicalCommitField(&'static str),
 }
+
+impl std::fmt::Display for DomainError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl std::error::Error for DomainError {}
+
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct ScopeRef {
@@ -510,32 +544,357 @@ pub struct ExternalSourceRef(OpaqueId);
 pub struct MemoryRef(OpaqueId);
 ref_ctor!(EntityRef, EventRef, ExternalSourceRef, MemoryRef);
 
-/// NOT DEFINED: awaiting I. Placeholder only; security identity semantics are not inferred.
-/// `pending_i()` is public and any caller can create this placeholder. It is not proof of
-/// an attestor identity. This known temporary construction window closes only when I
-/// defines the contract and the placeholder is replaced by a validated, non-forgeable ref.
-#[doc = r#"The tuple field is private; external callers cannot forge the placeholder directly.
-```compile_fail
-use memory_domain::{AttestorRef, AuthorizationDecisionRef};
-let _ = AttestorRef(());
-let _ = AuthorizationDecisionRef(());
-let _ = AuthorizationDecisionRef::new("");
-```"#]
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct AttestorRef(());
-impl AttestorRef {
-    pub const fn pending_i() -> Self {
-        Self(())
-    }
+pub const I_DEV_BASELINE_ISSUER: &str = "i-owner-proxy/dev-baseline-v1";
+
+#[derive(serde::Serialize, Clone, Debug, Eq, PartialEq)]
+pub struct AuthorizationDecisionData {
+    pub decision_id: OpaqueId,
+    pub issuer: IssuerId,
+    pub subject_digest: OpaqueId,
+    pub issued_at: String,
+    pub decision_kind: AuthorizationDecisionKind,
 }
-/// NOT DEFINED: awaiting I. Required placeholder; this is not an authorization grant.
-/// `pending_i()` is public and any caller can create this placeholder. Validation cannot
-/// establish that it is an I-issued authorization decision; see FactRevision::validate.
+
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct AuthorizationDecisionRef(());
+pub enum AuthorizationDecisionKind {
+    Approved,
+    Denied,
+    Conditional,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+enum AuthorizationDecisionRefState {
+    Pending,
+    Issued(AuthorizationDecisionData),
+}
+
+#[doc = r#"The state is private; external callers cannot forge an issued authorization reference.
+```compile_fail
+use memory_domain::AuthorizationDecisionRef;
+let _ = AuthorizationDecisionRef { state: AuthorizationDecisionRefState::Pending };
+```"#]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct AuthorizationDecisionRef {
+    state: AuthorizationDecisionRefState,
+}
+
+#[derive(serde::Serialize, Clone, Debug, Eq, PartialEq)]
+pub struct AttestorData {
+    pub attestation_id: OpaqueId,
+    pub issuer: IssuerId,
+    pub subject_digest: OpaqueId,
+    pub issued_at: String,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+enum AttestorRefState {
+    Pending,
+    Issued(AttestorData),
+}
+
+#[doc = r#"The state is private; external callers cannot forge an issued attestor reference.
+```compile_fail
+use memory_domain::AttestorRef;
+let _ = AttestorRef { state: AttestorRefState::Pending };
+```"#]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct AttestorRef {
+    state: AttestorRefState,
+}
+
 impl AuthorizationDecisionRef {
     pub const fn pending_i() -> Self {
-        Self(())
+        Self {
+            state: AuthorizationDecisionRefState::Pending,
+        }
+    }
+
+    pub fn from_issued_data(data: AuthorizationDecisionData) -> Result<Self, DomainError> {
+        validate_authorization_decision_data(&data)?;
+        Ok(Self {
+            state: AuthorizationDecisionRefState::Issued(data),
+        })
+    }
+
+    pub fn is_pending(&self) -> bool {
+        matches!(&self.state, AuthorizationDecisionRefState::Pending)
+    }
+
+    pub fn data(&self) -> Option<&AuthorizationDecisionData> {
+        match &self.state {
+            AuthorizationDecisionRefState::Pending => None,
+            AuthorizationDecisionRefState::Issued(data) => Some(data),
+        }
+    }
+}
+
+impl AttestorRef {
+    pub const fn pending_i() -> Self {
+        Self {
+            state: AttestorRefState::Pending,
+        }
+    }
+
+    pub fn from_issued_data(data: AttestorData) -> Result<Self, DomainError> {
+        validate_attestor_data(&data)?;
+        Ok(Self {
+            state: AttestorRefState::Issued(data),
+        })
+    }
+
+    pub fn is_pending(&self) -> bool {
+        matches!(&self.state, AttestorRefState::Pending)
+    }
+
+    pub fn data(&self) -> Option<&AttestorData> {
+        match &self.state {
+            AttestorRefState::Pending => None,
+            AttestorRefState::Issued(data) => Some(data),
+        }
+    }
+}
+
+fn valid_lowercase_sha256(value: &str) -> bool {
+    value.len() == 64
+        && value
+            .bytes()
+            .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+}
+
+fn decimal_component(bytes: &[u8], start: usize, end: usize) -> Option<u32> {
+    let component = bytes.get(start..end)?;
+    if !component.iter().all(|byte| byte.is_ascii_digit()) {
+        return None;
+    }
+    std::str::from_utf8(component).ok()?.parse().ok()
+}
+
+/// Validate an RFC 3339 timestamp whose represented offset is UTC.
+fn valid_rfc3339_utc(value: &str) -> bool {
+    let bytes = value.as_bytes();
+
+    if bytes.len() < 20
+        || bytes.get(4) != Some(&b'-')
+        || bytes.get(7) != Some(&b'-')
+        || bytes.get(10).map_or(true, |byte| *byte != b'T' && *byte != b't')
+        || bytes.get(13) != Some(&b':')
+        || bytes.get(16) != Some(&b':')
+    {
+        return false;
+    }
+
+    let year = match decimal_component(bytes, 0, 4) {
+        Some(value) => value,
+        None => return false,
+    };
+    let month = match decimal_component(bytes, 5, 7) {
+        Some(value) => value,
+        None => return false,
+    };
+    let day = match decimal_component(bytes, 8, 10) {
+        Some(value) => value,
+        None => return false,
+    };
+    let hour = match decimal_component(bytes, 11, 13) {
+        Some(value) => value,
+        None => return false,
+    };
+    let minute = match decimal_component(bytes, 14, 16) {
+        Some(value) => value,
+        None => return false,
+    };
+    let second = match decimal_component(bytes, 17, 19) {
+        Some(value) => value,
+        None => return false,
+    };
+
+    let leap_year = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
+    let days_in_month = match month {
+        1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,
+        4 | 6 | 9 | 11 => 30,
+        2 if leap_year => 29,
+        2 => 28,
+        _ => return false,
+    };
+
+    if day == 0
+        || day > days_in_month
+        || hour > 23
+        || minute > 59
+        || second > 60
+    {
+        return false;
+    }
+
+    let mut suffix_start = 19;
+    if bytes.get(19) == Some(&b'.') {
+        suffix_start = 20;
+        while suffix_start < bytes.len()
+            && bytes[suffix_start].is_ascii_digit()
+        {
+            suffix_start += 1;
+        }
+        if suffix_start == 20 {
+            return false;
+        }
+    }
+
+    if suffix_start >= bytes.len() {
+        return false;
+    }
+
+    let suffix = &bytes[suffix_start..];
+    suffix == b"Z" || suffix == b"z" || suffix == b"+00:00"
+}
+
+pub fn validate_authorization_decision_data(
+    data: &AuthorizationDecisionData,
+) -> Result<(), DomainError> {
+    if data.decision_id.as_str().is_empty() {
+        return Err(DomainError::EmptyId);
+    }
+    if data.issuer.as_str() != I_DEV_BASELINE_ISSUER {
+        return Err(DomainError::EmptyRequiredField("issuer"));
+    }
+    if !valid_lowercase_sha256(data.subject_digest.as_str()) {
+        return Err(DomainError::EmptyRequiredField("subject_digest"));
+    }
+    if !valid_rfc3339_utc(&data.issued_at) {
+        return Err(DomainError::EmptyRequiredField("issued_at"));
+    }
+    Ok(())
+}
+
+pub fn validate_attestor_data(data: &AttestorData) -> Result<(), DomainError> {
+    if data.attestation_id.as_str().is_empty() {
+        return Err(DomainError::EmptyId);
+    }
+    if data.issuer.as_str() != I_DEV_BASELINE_ISSUER {
+        return Err(DomainError::EmptyRequiredField("issuer"));
+    }
+    if !valid_lowercase_sha256(data.subject_digest.as_str()) {
+        return Err(DomainError::EmptyRequiredField("subject_digest"));
+    }
+    if !valid_rfc3339_utc(&data.issued_at) {
+        return Err(DomainError::EmptyRequiredField("issued_at"));
+    }
+    Ok(())
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct AuthorizationDecisionDataWire {
+    decision_id: OpaqueId,
+    issuer: IssuerId,
+    subject_digest: OpaqueId,
+    issued_at: String,
+    decision_kind: AuthorizationDecisionKind,
+}
+
+impl From<AuthorizationDecisionDataWire> for AuthorizationDecisionData {
+    fn from(value: AuthorizationDecisionDataWire) -> Self {
+        Self {
+            decision_id: value.decision_id,
+            issuer: value.issuer,
+            subject_digest: value.subject_digest,
+            issued_at: value.issued_at,
+            decision_kind: value.decision_kind,
+        }
+    }
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct AttestorDataWire {
+    attestation_id: OpaqueId,
+    issuer: IssuerId,
+    subject_digest: OpaqueId,
+    issued_at: String,
+}
+
+impl From<AttestorDataWire> for AttestorData {
+    fn from(value: AttestorDataWire) -> Self {
+        Self {
+            attestation_id: value.attestation_id,
+            issuer: value.issuer,
+            subject_digest: value.subject_digest,
+            issued_at: value.issued_at,
+        }
+    }
+}
+
+impl serde::Serialize for AuthorizationDecisionRef {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        match &self.state {
+            AuthorizationDecisionRefState::Pending => {
+                serializer.serialize_unit_struct("AuthorizationDecisionRef")
+            }
+            AuthorizationDecisionRefState::Issued(data) => {
+                serde::Serialize::serialize(data, serializer)
+            }
+        }
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for AuthorizationDecisionRef {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let wire =
+            <Option<AuthorizationDecisionDataWire> as serde::Deserialize>::deserialize(
+                deserializer,
+            )?;
+
+        match wire {
+            None => Ok(Self::pending_i()),
+            Some(wire) => {
+                let data = AuthorizationDecisionData::from(wire);
+                validate_authorization_decision_data(&data)
+                    .map_err(serde::de::Error::custom)?;
+                Ok(Self {
+                    state: AuthorizationDecisionRefState::Issued(data),
+                })
+            }
+        }
+    }
+}
+
+impl serde::Serialize for AttestorRef {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        match &self.state {
+            AttestorRefState::Pending => serializer.serialize_unit_struct("AttestorRef"),
+            AttestorRefState::Issued(data) => {
+                serde::Serialize::serialize(data, serializer)
+            }
+        }
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for AttestorRef {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let wire =
+            <Option<AttestorDataWire> as serde::Deserialize>::deserialize(deserializer)?;
+
+        match wire {
+            None => Ok(Self::pending_i()),
+            Some(wire) => {
+                let data = AttestorData::from(wire);
+                validate_attestor_data(&data).map_err(serde::de::Error::custom)?;
+                Ok(Self {
+                    state: AttestorRefState::Issued(data),
+                })
+            }
+        }
     }
 }
 /// The canonical commit reference is defined by `D-OWNER-DECISION-CANONICAL-COMMIT-001`
@@ -950,12 +1309,9 @@ impl FactRevision {
             _ => Err(DomainError::InvalidParent),
         }
     }
-    /// Structural validation cannot distinguish a real I-issued attestor/authorization
-    /// reference from public pending_i() placeholders, nor a D-issued commit from
-    /// pending_d(). A FactRevision using placeholders can therefore validate today.
-    /// This known temporary construction window closes only after I and D freeze their
-    /// contracts and the placeholders are replaced with validated, non-forgeable refs.
-    /// Ok(()) here is not evidence of authorization or canonical acceptance.
+    /// A pending authorization decision is not sufficient to validate a FactRevision.
+    /// Pending attestor references remain representable while the compiler records their
+    /// unresolved dependency; durable I authority is checked by the persistence layer.
     pub fn validate(&self) -> Result<(), DomainError> {
         self.fact_ref.validate()?;
         self.revision_ref.validate()?;
@@ -981,6 +1337,11 @@ impl FactRevision {
             .iter()
             .try_for_each(ProvenanceRef::validate)?;
         self.scope_ref.validate()?;
+        if self.authorization_decision_ref.is_pending() {
+            // ponytail: reuses EmptyRequiredField to avoid a new variant this round;
+            // rename when the variant set is next revised.
+            return Err(DomainError::EmptyRequiredField("authorization_decision_ref"));
+        }
         for (n, v) in [
             ("attestation_method_id", &self.attestation_method_id),
             (
@@ -1371,7 +1732,7 @@ mod tests {
             vec![provenance.clone()],
             scope("s"),
             AttestorRef::pending_i(),
-            AuthorizationDecisionRef::pending_i(),
+            issued_authorization("dm2-03"),
             "method".into(),
             "v1".into(),
             FactOutcome::Attested,
@@ -1416,7 +1777,7 @@ mod tests {
             vec![ProvenanceRef::new("provenance").unwrap()],
             scope("s"),
             AttestorRef::pending_i(),
-            AuthorizationDecisionRef::pending_i(),
+            issued_authorization("dm2-09"),
             "review".into(),
             "1".into(),
             FactOutcome::Attested,
@@ -1473,7 +1834,7 @@ mod tests {
             vec![],
             scope("s"),
             AttestorRef::pending_i(),
-            AuthorizationDecisionRef::pending_i(),
+            issued_authorization("dm2-04-empty"),
             "m".into(),
             "v1".into(),
             FactOutcome::Attested,
@@ -1490,7 +1851,7 @@ mod tests {
             vec![ProvenanceRef::new("p").unwrap()],
             scope("s"),
             AttestorRef::pending_i(),
-            AuthorizationDecisionRef::pending_i(),
+            issued_authorization("dm2-04-evidence"),
             "m".into(),
             "v1".into(),
             FactOutcome::Attested,
@@ -1507,7 +1868,7 @@ mod tests {
             vec![],
             scope("s"),
             AttestorRef::pending_i(),
-            AuthorizationDecisionRef::pending_i(),
+            issued_authorization("dm2-04-provenance"),
             "m".into(),
             "v1".into(),
             FactOutcome::Attested,
@@ -1998,6 +2359,17 @@ mod tests {
         .unwrap()
     }
 
+    fn issued_authorization(seed: &str) -> AuthorizationDecisionRef {
+        AuthorizationDecisionRef::from_issued_data(AuthorizationDecisionData {
+            decision_id: OpaqueId::new(format!("decision-{seed}")).unwrap(),
+            issuer: IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap(),
+            subject_digest: OpaqueId::new("a".repeat(64)).unwrap(),
+            issued_at: "2026-11-22T00:00:00Z".into(),
+            decision_kind: AuthorizationDecisionKind::Approved,
+        })
+        .unwrap()
+    }
+
     fn fact_revision_fixture() -> FactRevision {
         FactRevision::initial(
             FactRef::new("fact-1").unwrap(),
@@ -2007,7 +2379,7 @@ mod tests {
             vec![ProvenanceRef::new("provenance-1").unwrap()],
             scope("s1"),
             AttestorRef::pending_i(),
-            AuthorizationDecisionRef::pending_i(),
+            issued_authorization("fact-fixture"),
             "independent_review".into(),
             "1.0".into(),
             FactOutcome::Attested,
@@ -2016,6 +2388,92 @@ mod tests {
             None,
         )
         .unwrap()
+    }
+
+    #[test]
+    fn i_refs_preserve_pending_null_and_validate_issued_wire_data() {
+        let pending_authorization = AuthorizationDecisionRef::pending_i();
+        let pending_attestor = AttestorRef::pending_i();
+
+        assert_eq!(
+            serde_json::to_string(&pending_authorization).unwrap(),
+            "null"
+        );
+        assert_eq!(serde_json::to_string(&pending_attestor).unwrap(), "null");
+        assert!(serde_json::from_str::<AuthorizationDecisionRef>("null")
+            .unwrap()
+            .is_pending());
+        assert!(serde_json::from_str::<AttestorRef>("null")
+            .unwrap()
+            .is_pending());
+
+        assert!(valid_rfc3339_utc("2026-11-22T00:00:00Z"));
+        assert!(valid_rfc3339_utc("2026-11-22T00:00:00z"));
+        assert!(valid_rfc3339_utc("2026-11-22T00:00:00+00:00"));
+        assert!(!valid_rfc3339_utc("2026-11-22T00:00:00+01:00"));
+        assert!(!valid_rfc3339_utc("2026-02-30T00:00:00Z"));
+        assert!(!valid_rfc3339_utc("2026-11-22T00:00:00.Z"));
+
+        let authorization = issued_authorization("serde");
+        let authorization_json = serde_json::to_value(&authorization).unwrap();
+        let authorization_object = authorization_json.as_object().unwrap();
+        assert_eq!(authorization_object.len(), 5);
+        assert!(authorization_object.contains_key("decision_id"));
+        assert!(authorization_object.contains_key("issuer"));
+        assert!(authorization_object.contains_key("subject_digest"));
+        assert!(authorization_object.contains_key("issued_at"));
+        assert_eq!(
+            authorization_object.get("decision_kind").unwrap(),
+            &serde_json::json!("Approved")
+        );
+        assert_eq!(
+            serde_json::from_value::<AuthorizationDecisionRef>(
+                authorization_json.clone()
+            )
+            .unwrap(),
+            authorization
+        );
+
+        let mut malformed_authorization = authorization_json.clone();
+        malformed_authorization["subject_digest"] = serde_json::json!("ABC");
+        assert!(
+            serde_json::from_value::<AuthorizationDecisionRef>(malformed_authorization)
+                .is_err()
+        );
+
+        let mut unknown_authorization = authorization_json;
+        unknown_authorization["unexpected"] = serde_json::json!(true);
+        assert!(
+            serde_json::from_value::<AuthorizationDecisionRef>(unknown_authorization)
+                .is_err()
+        );
+
+        let attestor = AttestorRef::from_issued_data(AttestorData {
+            attestation_id: OpaqueId::new("attestation-serde").unwrap(),
+            issuer: IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap(),
+            subject_digest: OpaqueId::new("b".repeat(64)).unwrap(),
+            issued_at: "2026-11-22T00:00:00Z".into(),
+        })
+        .unwrap();
+        let attestor_json = serde_json::to_value(&attestor).unwrap();
+        let attestor_object = attestor_json.as_object().unwrap();
+        assert_eq!(attestor_object.len(), 4);
+        assert!(attestor_object.contains_key("attestation_id"));
+        assert!(attestor_object.contains_key("issuer"));
+        assert!(attestor_object.contains_key("subject_digest"));
+        assert!(attestor_object.contains_key("issued_at"));
+        assert_eq!(
+            serde_json::from_value::<AttestorRef>(attestor_json.clone()).unwrap(),
+            attestor
+        );
+
+        let mut malformed_attestor = attestor_json.clone();
+        malformed_attestor["subject_digest"] = serde_json::json!("not-a-digest");
+        assert!(serde_json::from_value::<AttestorRef>(malformed_attestor).is_err());
+
+        let mut unknown_attestor = attestor_json;
+        unknown_attestor["unexpected"] = serde_json::json!(true);
+        assert!(serde_json::from_value::<AttestorRef>(unknown_attestor).is_err());
     }
 
     #[test]
@@ -2137,10 +2595,7 @@ mod tests {
             revision.claim_revision_refs(),
             &[ClaimRevisionRef::new("claim-revision-1").unwrap()]
         );
-        assert_eq!(
-            revision.authorization_decision_ref,
-            AuthorizationDecisionRef::pending_i()
-        );
+        assert!(!revision.authorization_decision_ref.is_pending());
         assert_eq!(revision.fact_ref().as_str(), "fact-1");
     }
 
@@ -2191,8 +2646,12 @@ mod tests {
     }
 
     #[test]
-    fn fact_with_placeholder_attestor_validates_today() {
-        let revision = fact_revision_fixture();
+    fn fact_with_pending_authorization_is_rejected_after_i_contract() {
+        let issued_revision = fact_revision_fixture();
+        let mut wire = serde_json::to_value(&issued_revision).unwrap();
+        wire["authorization_decision_ref"] = serde_json::Value::Null;
+        let revision: FactRevision = serde_json::from_value(wire).unwrap();
+
         assert_eq!(revision.attestor_ref, AttestorRef::pending_i());
         assert_eq!(
             revision.authorization_decision_ref,
@@ -2202,8 +2661,10 @@ mod tests {
             revision.canonical_commit_ref,
             CanonicalCommitRef::pending_d()
         );
-        // Known temporary compromise: structural validation currently accepts the placeholders.
-        assert!(revision.validate().is_ok());
+        assert_eq!(
+            revision.validate(),
+            Err(DomainError::EmptyRequiredField("authorization_decision_ref"))
+        );
     }
 
     #[test]

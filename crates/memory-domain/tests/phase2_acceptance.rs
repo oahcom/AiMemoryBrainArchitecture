@@ -43,6 +43,17 @@ fn claim_revision(revision: &str, claim: &str, evidence: &[&str]) -> ClaimRevisi
     .unwrap()
 }
 
+fn issued_authorization(seed: &str) -> AuthorizationDecisionRef {
+    AuthorizationDecisionRef::from_issued_data(AuthorizationDecisionData {
+        decision_id: OpaqueId::new(format!("decision-{seed}")).unwrap(),
+        issuer: IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap(),
+        subject_digest: OpaqueId::new("a".repeat(64)).unwrap(),
+        issued_at: "2026-11-22T00:00:00Z".into(),
+        decision_kind: AuthorizationDecisionKind::Approved,
+    })
+    .unwrap()
+}
+
 fn fact_revision_with_pin(pin: &str) -> FactRevision {
     FactRevision::initial(
         FactRef::new("fact-1").unwrap(),
@@ -52,7 +63,7 @@ fn fact_revision_with_pin(pin: &str) -> FactRevision {
         vec![ProvenanceRef::new("prov-1").unwrap()],
         scope("s1"),
         AttestorRef::pending_i(),
-        AuthorizationDecisionRef::pending_i(),
+        issued_authorization("phase2-fact-pin"),
         "independent_review".into(),
         "1.0".into(),
         FactOutcome::Attested,
@@ -586,7 +597,7 @@ fn dm2_05_fact_revision_accepts_multiple_exact_claim_revision_pins() {
         vec![ProvenanceRef::new("prov-multi").unwrap()],
         scope("s1"),
         AttestorRef::pending_i(),
-        AuthorizationDecisionRef::pending_i(),
+        issued_authorization("phase2-multiple-pins"),
         "joint_review".into(),
         "1.0".into(),
         FactOutcome::Attested,
@@ -602,9 +613,15 @@ fn dm2_05_fact_revision_accepts_multiple_exact_claim_revision_pins() {
 // ---------------------------------------------------------------- DM2-06
 
 #[test]
-#[ignore = "blocked: FactRevision::initial 强制要求 AuthorizationDecisionRef，但当前唯一公开构造是 AuthorizationDecisionRef::pending_i()；类型没有 absent/validated-I-issued 状态，无法证明缺失授权被拒绝。Round 4 的 fact_with_placeholder_attestor_validates_today 固定了当前占位符可通过的事实"]
 fn dm2_06_missing_authorization_ref_blocks_fact_publication() {
-    unimplemented!()
+    let issued = fact_revision();
+    let mut wire = serde_json::to_value(&issued).unwrap();
+    wire["authorization_decision_ref"] = serde_json::Value::Null;
+    let pending: FactRevision = serde_json::from_value(wire).unwrap();
+    assert_eq!(
+        pending.validate(),
+        Err(DomainError::EmptyRequiredField("authorization_decision_ref"))
+    );
 }
 
 // ---------------------------------------------------------------- DM2-07
