@@ -1,9 +1,9 @@
 # Two merges, one field, opposite assertions — the type-state decision was applied twice, incompatibly
 
-**Status:** Open — needs an Owner ruling, not a patch
+**Status:** Resolved by `OWNER-RULING-AUTHORIZATION-PRESENCE-GATE-025` — the two PRs were closed unmerged; the residue it exposed is `GAP-18-AUTHORIZATION-VALIDATOR-REMAINDER` §3 Step 3
 **Area:** memory-domain / governance
-**Measured at:** `main @ 4a7624da86`, `2026-11-22T07:10Z`
-**Related:** `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001`, `I-OWNER-DECISION-AUTHORIZATION-DECISION-001`, PR #623, PR #634, `dm2_06`
+**Measured at:** `main @ 4a7624da86`, `2026-11-22T07:10Z`; ruling added `2026-11-22T08:06:21Z`
+**Related:** `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001`, `I-OWNER-DECISION-AUTHORIZATION-DECISION-001`, `OWNER-RULING-AUTHORIZATION-PRESENCE-GATE-025`, `GAP-18-AUTHORIZATION-VALIDATOR-WORK-ORDER`, `GAP-18-AUTHORIZATION-VALIDATOR-REMAINDER`, PR #623, PR #634, `dm2_06`
 
 ## 1. What happened
 
@@ -18,7 +18,7 @@ Two PRs, opened eleven minutes apart by two different sessions, both un-ignore `
 | `dm2_06` assertion | `pending` **must fail** `validate()` with `EmptyRequiredField("authorization_decision_ref")` | `Absent` **must fail**, `Placeholder` **must pass** |
 | cites | `I-OWNER-DECISION-AUTHORIZATION-DECISION-001` (#595) | `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001` |
 
-Both authorities are merged. Both are in the tree. Both PRs are open and `mergeable: true`. Only one of them can be right, and the two decisions do not say the same thing.
+Both authorities were merged and both were in the tree. Both PRs were open and `mergeable: true`. Only one of them could be right.
 
 ## 2. The contradiction, in the authorities' own words
 
@@ -44,47 +44,74 @@ PR #623 implements the opposite of D3:
         }
 ```
 
-Under this rule `Placeholder` — the only state any caller can construct today — is rejected. That makes `dm2_06` pass, and it makes every other `FactRevision` construction path that uses `pending_i()` fail. Which is why #623 also had to rewrite the fixtures in `phase2_acceptance.rs` from `pending_i()` to a new `issued_authorization(..)` helper, and rewrite the unit test's assertion to `assert!(!revision.authorization_decision_ref.is_pending())`.
+Under this rule `Placeholder` — the only state any caller could construct at the time — is rejected. That makes `dm2_06` pass, and it makes every other `FactRevision` construction path that uses `pending_i()` fail. Which is why #623 also had to rewrite the fixtures in `phase2_acceptance.rs` from `pending_i()` to a new `issued_authorization(..)` helper, and rewrite the unit test's assertion to `assert!(!revision.authorization_decision_ref.is_pending())`.
 
-So #623 is not just a different implementation of the same decision. It is a **stricter gate** that rejects the placeholder, and it can only pass its own suite by first manufacturing issued references in test fixtures.
+So #623 was not just a different implementation of the same decision. It was a **stricter gate** that rejected the placeholder, and it could only pass its own suite by first manufacturing issued references in test fixtures.
 
-## 3. Why this is not a merge conflict
+## 3. The ruling, and why it is a reading rather than a choice
 
-A merge conflict would be resolvable by reading both sides. This is not that:
+`OWNER-RULING-AUTHORIZATION-PRESENCE-GATE-025` (merged as `c9036544`) settles this. Its §1:
 
-- Git will report a conflict in `lib.rs` and in `phase2_acceptance.rs`, and the conflict markers will show two *coherent* alternatives.
-- Resolving it by "take both" produces a struct with two authorization fields or a `validate()` that rejects `Absent` **and** `Placeholder`, i.e. a gate nothing can pass.
-- Resolving it by "take theirs" silently discards one merged decision.
-- Resolving it by "take mine" silently discards the other.
+> `Placeholder` satisfies the presence gate. `FactRevision::validate()` MUST reject `Absent` and MUST NOT reject `Placeholder`. `I-OWNER-DECISION-AUTHORIZATION-DECISION-001` §4.3 does not require otherwise: it requires `dm2_06` to assert a propagated authority `Err`, and that error is produced by the `AdmissionStore`-backed validator of §4.1, not by `FactRevision::validate()`. `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001` D3 is correct as written. Neither open PR may merge as written: #634 on a measurable regression, #623 on crate-boundary scope.
 
-Neither PR is wrong on its own terms. #623 is a faithful implementation of #595, which froze a five-field `AuthorizationDecisionRef` with private `Pending | Issued` state and mandated custom Serde preserving the legacy unit/null form. #634 is a faithful implementation of the type-state decision, which froze a three-state field on `FactRevision` and required `Placeholder` to pass.
+It does not overturn a decision. It reads `I-OWNER-DECISION-AUTHORIZATION-DECISION-001` §3.3, which is not the ruling session's own instrument and which settles the question by itself:
 
-**The two decisions overlap on one question and answer it differently: does a pending placeholder satisfy the presence gate?** #595 never says. The type-state decision says yes, explicitly, and explains why. #623 assumed no.
+> The validator is **not** a `FactRevision::validate()` responsibility. Domain validation may validate candidate field syntax and reject Pending, but only the compiler's AdmissionStore-backed validator can establish durable existence and authority. Structural validation must not claim a candidate reference is issued.
 
-## 4. Which one is actually binding
+The decisive step is §2 of the ruling:
 
-This is the part I can measure rather than argue, so I will only state what the documents say and stop.
+> `FactRevision::validate()` returning `Err` is not the propagated authority error. It is a *second, earlier, unrelated* error of the same shape. Asserting it satisfies the letter of "assert an `Err`" while destroying the distinction §4.3 exists to protect — and §3.3 forbids it in the same document, in the sentence immediately before the validator is introduced.
 
-- The type-state decision addresses the question directly, names `dm2_06` as its subject, and its §4 specifies the exact two assertions. It is the more specific instrument.
-- #595 addresses the *shape of the reference*, and its own scope note says the durable-row validator is what makes a candidate valid. It does not rule on whether a `FactRevision` with a pending reference may validate structurally.
+So the two authorities never contradicted. **#623 misread #595.** §1 of this document stated the contradiction as "does a pending placeholder satisfy the presence gate? #595 never says" — true of the question as posed, false of the answer needed: #595 does not need to say, because it puts the rejection somewhere else entirely, and says so twice.
 
-By specificity, the type-state decision governs the gate. But specificity is my reading, and this is precisely the kind of reading that should not be made by the session that wrote one of the two competing patches.
+The earlier draft of this document resolved the question "by specificity" in its §4. That reasoning is superseded and removed: it is not needed, it is the kind of reading the ruling explicitly declines to rely on, and it happened to reach the right answer for the wrong reason.
 
-## 5. What must not happen
+## 4. #634 was rejected on a separate, measurable regression
 
-- **Do not merge both.** They cannot both be true.
-- **Do not merge #623 as-is** without amending either it or D3, because it contradicts a merged decision while citing a different one.
-- **Do not merge #634 as-is** without checking whether D3 itself was superseded by #595's later landing — #595 is the older decision but it landed in the same window, and "older" is not "superseded" here.
-- **Do not let a third session "fix" this by adding a fourth state.** The defect is two incompatible answers, not too few states.
+Independent of the reading above, #634 carried a regression, verified by blob SHA rather than `contents?ref=` (which the #612 audit found can return stale bodies).
 
-## 6. The three questions an Owner has to answer
+At #634's own base `85504756b8`:
 
-1. **Does `Placeholder` satisfy the presence gate?** D3 says yes. #623 says no. One of them must yield, and the yielding one must be amended in the record, not just in code — otherwise the next session re-derives the same contradiction.
-2. **If `Placeholder` is rejected (i.e. #623 wins), what happens to `FactRevision::initial`?** Every existing call site passes `pending_i()`. Under #623's rule they all construct values that immediately fail `validate()`, and `new()` calls `validate()`. So `initial` becomes unusable, which is a larger change than #623's diff admits — its own fixtures had to switch to `issued_authorization(..)` to keep compiling-and-passing.
-3. **If `Placeholder` is accepted (i.e. #634 wins), what does #595's `from_issued_data` buy?** It buys authenticity, which the presence gate explicitly does not check. That is consistent — but it means #623's `is_pending()` check has no home in `FactRevision::validate()` and belongs somewhere else, or nowhere yet.
+| fact | value |
+|---|---|
+| `mod canonical_commit;` present in `lib.rs` | **True** |
+| `pub use canonical_commit::*;` present in `lib.rs` | **True** |
+| `pub struct CanonicalCommitRef(())` present in `lib.rs` | **False** |
+| `dm2_15` test present in `tests/phase2_acceptance.rs` | **True** |
 
-## 7. What this document does not do
+At #634's head `d55f4996ca`:
 
-It does not pick a winner, close either PR, or edit either decision. It records that two merged authorities were applied incompatibly within half an hour, by two sessions that each had grounds, and that the resolution is a ruling rather than a diff.
+| fact | value |
+|---|---|
+| `mod canonical_commit;` present in `lib.rs` | **False** |
+| `pub use canonical_commit::*;` present in `lib.rs` | **False** |
+| `pub struct CanonicalCommitRef(())` present in `lib.rs` | **True** |
+| `dm2_15` test present in `tests/phase2_acceptance.rs` | **False** |
 
-It also does not claim #634 is correct. I wrote it, which disqualifies me from ruling on it. The only thing I will assert is the measurement: the two patches cannot both be merged, and the contradiction is between the decisions, not between the implementations.
+`CanonicalCommitRef` is the subject of `D-OWNER-DECISION-CANONICAL-COMMIT-001`. On `main` it is a content-bearing type whose private state is `CanonicalCommitRefState { Pending | Issued(data) }`, defined in `crates/memory-domain/src/canonical_commit.rs`. #634 replaced it with a unit struct and stopped compiling the module. `dm2_15_legacy_pending_canonical_commit_keeps_its_unit_representation` — the regression test that pins the legacy `null` wire form, cited to that decision's §5 and §8 criterion 3 — was deleted.
+
+In the ruling's words:
+
+> That is not a difference of opinion about authorization. It reverts a merged decision about canonical commit, in a PR about `dm2_06`, and it deletes the test that would have caught it.
+
+## 5. Disposition
+
+- **PR #634** closed unmerged at `2026-11-22T08:13:06Z`. Its authorization layer was the correct one; the regression is what blocked it.
+- **PR #623** closed unmerged at `2026-11-22T08:14:06Z`. Its crate boundary was wrong: it put the gate in `memory-domain`, which has one dependency (`serde`) and cannot host an `AdmissionStore`-backed validator.
+- **This document (PR #640)** merged at `2026-11-22T08:13:30Z`, before the ruling landed. The ruling's §6 says it "should merge: its measurement is correct and its refusal to rule was the right call. Its §4 'specificity' reading is superseded by §2 above."
+
+That is exactly what this revision does: §3 now carries the ruling instead of the specificity argument, and §4 records the regression the ruling measured. Nothing in §1, §2 or §4's measurements changed, because they were right.
+
+This revision also notes where the ruling's remaining requirement stands. `GAP-18-AUTHORIZATION-VALIDATOR-REMAINDER` §3 Step 3 is that requirement, and it is not yet satisfied: `dm2_06` proves presence in `memory-domain`, and no test in `crates/memory-compiler/tests/` asserts the propagated authority `Err`. This document does not restate that work order; it records that the ruling's §5 step 4 is still open, so a reader of §3 above does not conclude that the ruling closed it.
+
+## 6. What the ruling deliberately did not decide
+
+- Whether `Placeholder` should eventually be rejected at publication. That is `B-P2-XO-01`, still `PENDING CROSS-OWNER DECISION`.
+- The authenticity of any `Issued` value. Same owner, same reason.
+- The cause of the `CanonicalCommitRef` regression. The ruling records it as a rebase problem, not a decision.
+
+## 7. Authority and independence disclosure
+
+The measurement in §1–§2 and §4 is mine. I wrote PR #634, which disqualifies me from ruling on its merits, and I declined to do so — that refusal is the one thing the ruling singled out as correct.
+
+I did not write `OWNER-RULING-AUTHORIZATION-PRESENCE-GATE-025`, and I am not its author's proxy. I am recording that it exists, what it says, and that it supersedes §4 of the earlier draft of this document. If a future change conflicts with that ruling, the correct response is a new Owner ruling, not an edit to this document.
