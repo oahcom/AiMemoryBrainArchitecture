@@ -1,5 +1,6 @@
 use agent_integration::{
-    ApplyOutcome, ContextDeliveryAdapter, DeliveryPayload, InMemoryContextDeliveryAdapter,
+    ApplyOutcome, ContextDeliveryAdapter, DeliveryPayload, FileContextDeliveryAdapter,
+    InMemoryContextDeliveryAdapter,
 };
 use memory_compiler::admission::{
     rfc3339_utc_now, AdmissionStore, DependencyRegistrationRequest, ProducerRegistrationRequest,
@@ -414,16 +415,17 @@ fn deliver_snapshot(
 
 /// Select the delivery adapter for this process.
 ///
-/// ponytail: `FileContextDeliveryAdapter` is not on `main` yet (parallel task).
-/// Until it lands this falls back to the in-memory adapter and says so; the
-/// switch is a one-line change here.
-fn delivery_adapter(delivery_root: Option<&Path>) -> Box<dyn ContextDeliveryAdapter> {
-    if delivery_root.is_some() {
-        eprintln!(
-            "warning: --delivery-root ignored, no persistent adapter available in this build"
-        );
+/// A `--delivery-root` selects the file-backed adapter, so an applied delivery
+/// survives the process; without one the run stays in memory.
+fn delivery_adapter(
+    delivery_root: Option<&Path>,
+) -> Result<Box<dyn ContextDeliveryAdapter>, String> {
+    match delivery_root {
+        Some(root) => FileContextDeliveryAdapter::open(root)
+            .map(|adapter| Box::new(adapter) as Box<dyn ContextDeliveryAdapter>)
+            .map_err(|error| format!("cannot open delivery root {}: {error:?}", root.display())),
+        None => Ok(Box::new(InMemoryContextDeliveryAdapter::default())),
     }
-    Box::new(InMemoryContextDeliveryAdapter::default())
 }
 
 fn run() -> Result<(), String> {
@@ -746,9 +748,10 @@ fn run() -> Result<(), String> {
 
     // Context delivery is independent of the compiler publication gate.
     // Delivery failures are observable but must not change CLI success.
-    let session_id = "brain-cli-session";
-    let mut adapter = delivery_adapter(delivery_root.as_deref());
-    match deliver_snapshot(adapter.as_mut(), session_id, &snapshot) {
+    let session_id = snapshot.identity.session_id.as_str();
+    let delivery = delivery_adapter(delivery_root.as_deref())
+        .and_then(|mut adapter| deliver_snapshot(adapter.as_mut(), session_id, &snapshot));
+    match delivery {
         Ok(version) => {
             eprintln!("delivery applied: session={session_id} version={version}");
         }

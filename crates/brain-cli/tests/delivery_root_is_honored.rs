@@ -1,18 +1,17 @@
 //! `--delivery-root` must be honored by a persistent adapter.
 //!
-//! Case B at the time of writing: `FileContextDeliveryAdapter` lives in a
-//! parallel task and is not on `main` yet. So `--delivery-root` is accepted,
-//! warned about on stderr, and the run still succeeds on the in-memory
-//! adapter. When the file adapter lands, the second test below flips to
-//! asserting persisted files and cross-process applied state.
+//! A `--delivery-root <dir>` selects `FileContextDeliveryAdapter`, so each
+//! session's applied snapshot lands in `<dir>/<session_id>.json` and survives
+//! the process. The adapter reads the existing record on open, which makes a
+//! repeat delivery of the same snapshot an `AlreadyApplied` no-op rather than
+//! a version error.
 
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 use std::sync::atomic::{AtomicU64, Ordering};
 
-const WARNING: &str =
-    "warning: --delivery-root ignored, no persistent adapter available in this build";
+const IGNORED_WARNING: &str = "--delivery-root ignored";
 
 static NEXT_TEST_ID: AtomicU64 = AtomicU64::new(0);
 
@@ -44,6 +43,23 @@ impl TestDirectory {
             .join("fixtures")
             .join("event.json")
     }
+
+    /// The fixture with `context.session_id` replaced, so each run is a
+    /// distinct session and therefore a distinct record file.
+    fn fixture_with_session(&self, session_id: &str, name: &str) -> PathBuf {
+        let text = fs::read_to_string(Self::fixture_path()).expect("read fixture");
+        let patched = text.replace(
+            "\"session_id\": \"session-demo-001\"",
+            &format!("\"session_id\": \"{session_id}\""),
+        );
+        assert!(
+            patched.contains(session_id),
+            "fixture must contain the session id to replace"
+        );
+        let path = self.output_path(name);
+        fs::write(&path, patched).expect("write patched fixture");
+        path
+    }
 }
 
 impl Drop for TestDirectory {
@@ -52,11 +68,11 @@ impl Drop for TestDirectory {
     }
 }
 
-fn compile(delivery_root: &Path, output_path: &Path) -> Output {
+fn compile(input: &Path, delivery_root: &Path, output_path: &Path) -> Output {
     Command::new(env!("CARGO_BIN_EXE_brain"))
         .arg("compile")
         .arg("--input")
-        .arg(TestDirectory::fixture_path())
+        .arg(input)
         .arg("--out")
         .arg(output_path)
         .arg("--delivery-root")
@@ -65,45 +81,110 @@ fn compile(delivery_root: &Path, output_path: &Path) -> Output {
         .expect("execute brain binary")
 }
 
+fn record_names(delivery_root: &Path) -> Vec<String> {
+    let mut names: Vec<String> = fs::read_dir(delivery_root)
+        .expect("delivery root must exist")
+        .map(|entry| entry.expect("read entry").file_name())
+        .map(|name| name.to_string_lossy().into_owned())
+        .collect();
+    names.sort();
+    names
+}
+
 #[test]
-fn delivery_root_is_accepted_and_delivery_still_succeeds() {
+fn delivery_root_persists_one_record_per_session_across_processes() {
     let directory = TestDirectory::new();
     let delivery_root = directory.delivery_root();
 
-    let output = compile(&delivery_root, &directory.output_path("context.json"));
-    let stderr = String::from_utf8_lossy(&output.stderr);
+    let first_input = directory.fixture_with_session("session-alpha", "alpha.json");
+    let first = compile(
+        &first_input,
+        &delivery_root,
+        &directory.output_path("alpha-context.json"),
+    );
+    let first_stderr = String::from_utf8_lossy(&first.stderr);
+    assert_eq!(
+        first.status.code(),
+        Some(0),
+        "first run must succeed:\n{first_stderr}"
+    );
+    assert!(
+        first_stderr.contains("delivery applied: session=session-alpha version="),
+        "first run must apply the delivery:\n{first_stderr}"
+    );
+
+    let second_input = directory.fixture_with_session("session-beta", "beta.json");
+    let second = compile(
+        &second_input,
+        &delivery_root,
+        &directory.output_path("beta-context.json"),
+    );
+    let second_stderr = String::from_utf8_lossy(&second.stderr);
+    assert_eq!(
+        second.status.code(),
+        Some(0),
+        "second run must succeed:\n{second_stderr}"
+    );
+    assert!(
+        !second_stderr.contains(IGNORED_WARNING),
+        "--delivery-root must not be ignored any more:\n{second_stderr}"
+    );
 
     assert_eq!(
-        output.status.code(),
-        Some(0),
-        "--delivery-root must not fail the run:\n{stderr}"
-    );
-    assert!(
-        stderr.contains(WARNING),
-        "case B must warn that --delivery-root is ignored:\n{stderr}"
-    );
-    assert!(
-        stderr.contains("delivery applied: session=brain-cli-session version="),
-        "delivery must still be applied:\n{stderr}"
+        record_names(&delivery_root),
+        vec![
+            "session-alpha.json".to_owned(),
+            "session-beta.json".to_owned()
+        ],
+        "each session must persist its own record under --delivery-root"
     );
 }
 
 #[test]
-fn delivery_root_is_reported_once_per_run() {
+fn same_session_redelivery_is_accepted() {
     let directory = TestDirectory::new();
+    let delivery_root = directory.delivery_root();
+    let input = directory.fixture_with_session("session-gamma", "gamma.json");
 
-    let first = compile(&directory.delivery_root(), &directory.output_path("a.json"));
-    let second = compile(&directory.delivery_root(), &directory.output_path("b.json"));
+    let first = compile(
+        &input,
+        &delivery_root,
+        &directory.output_path("gamma-context-1.json"),
+    );
+    assert_eq!(
+        first.status.code(),
+        Some(0),
+        "first run must succeed:\n{}",
+        String::from_utf8_lossy(&first.stderr)
+    );
 
-    for output in [&first, &second] {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        assert_eq!(output.status.code(), Some(0), "run must succeed:\n{stderr}");
-        assert_eq!(
-            stderr.lines().filter(|line| *line == WARNING).count(),
-            1,
-            "warning must appear exactly once:\n{stderr}"
-        );
-    }
+    // The file adapter reopens the applied record, so the identical snapshot
+    // resolves to `ApplyOutcome::AlreadyApplied` and still reports success.
+    let second = compile(
+        &input,
+        &delivery_root,
+        &directory.output_path("gamma-context-2.json"),
+    );
+    let second_stderr = String::from_utf8_lossy(&second.stderr);
+
+    assert_eq!(
+        second.status.code(),
+        Some(0),
+        "redelivery must not fail the run:\n{second_stderr}"
+    );
+    assert!(
+        second_stderr.contains("delivery applied: session=session-gamma version=1"),
+        "redelivery must be reported as applied:\n{second_stderr}"
+    );
+    assert!(
+        !second_stderr.contains("delivery failed"),
+        "redelivery must not report a delivery failure:\n{second_stderr}"
+    );
+    assert_eq!(
+        record_names(&delivery_root),
+        vec!["session-gamma.json".to_owned()],
+        "redelivery must not create a second record"
+    );
 }
 
 #[test]
