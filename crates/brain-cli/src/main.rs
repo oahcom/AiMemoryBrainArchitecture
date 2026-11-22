@@ -193,6 +193,17 @@ fn identifier(value: impl Into<String>) -> Result<OpaqueId, String> {
 /// This seeds the local admission ledger and stages the derivative hidden, then
 /// lets `MemoryCompiler::compile` decide. Publication itself is expected to be
 /// refused: the adapter may not authorize what no issuer has authorized.
+///
+/// Storage and admission are process-scoped. `storage_path` and `admission_path`
+/// are supplied by the caller as `TemporaryDatabase` files, which are removed in
+/// `Drop`, so every compile result in this binary is deliberately ephemeral. The
+/// durable boundary here is event acceptance and outbox delivery, not the
+/// compiler's output; persisting a compile result is outside this binary's
+/// contract. An Owner ruling on 2026-11-22 settled this: no cursor table, no
+/// `compiled_at` column, and no durable storage flags are required, and the
+/// "who owns compile progress" question is not applicable to `brain-cli`.
+///
+/// `Blocked` is therefore the normal outcome, not an unfinished hook.
 fn run_compiler_stage(request: CompilerStageRequest<'_>) -> Result<CompilerStageOutcome, String> {
     let event_id = request.event_id.as_str();
     let work_item_id = ProducerWorkItemId::new(identifier(format!("work:{event_id}"))?);
