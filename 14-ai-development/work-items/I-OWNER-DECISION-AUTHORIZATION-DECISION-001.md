@@ -41,6 +41,8 @@ The subject uses a deterministic, versioned `AuthorizationDecisionSubjectV1` enc
 
 ### 2.2 Rust type shape
 
+> **Amended 2026-11-22 15:52 +0800 — see the amendment at the end of this document.** The two-state `AuthorizationDecisionRefState` below is superseded by `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001` D2 (`Absent` / `Placeholder` / `Issued`). The rest of this section — `AuthorizationDecisionData`, the shared `IssuerId`, field validation, private state — stands.
+
 **D's `IssuerId` and I's `IssuerId` are the same Rust type**, defined once in `memory-domain` and shared across owner contracts; do not create an I-specific duplicate. The allowlists remain owner-specific: this contract accepts exactly `i-owner-proxy/dev-baseline-v1`, while D's contract accepts exactly `d-owner-proxy/dev-baseline-v1`.
 
 The following is normative. Private state prevents struct-literal construction. The public candidate constructor does not issue authority; only the matching durable row can make the candidate validate.
@@ -244,6 +246,8 @@ pub fn validate_attestor(
 
 ### 4.3 dm2_06 semantics
 
+> **Amended 2026-11-22 15:52 +0800 — see the amendment at the end of this document.** The assignment of `dm2_06` below is superseded by `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001` §4: `dm2_06` lives at `crates/memory-domain/tests/phase2_acceptance.rs:606`, which cannot reach `memory-compiler`, so the compiler-layer `Err` described here is unreachable at that path. The text below describes the compiler-layer authority contract, which stands, and which now needs its own test.
+
 `dm2_06_missing_authorization_ref_blocks_fact_publication` must exercise the **Pending reference** path and assert a propagated authority `Err`, not `Ok(false)`. The field is required and non-optional; there is no `None` state. An issued candidate with no durable row is also Err. A recorded Denied decision is a separate negative-disposition test, not the missing-authorization test.
 
 This distinction prevents a known negative decision from being conflated with missing authority and follows the compiler's authority-error rule. The validator returns Ok(true) only for a matching subject, Ok(false) only for a readable subject-digest mismatch, and Err for missing/unverifiable authority. E must separately require the recorded kind to be Approved.
@@ -297,3 +301,28 @@ E may mark this contract implemented only when:
 13. No production `.rs` change is part of this decision record; implementation and tests are delivered by E in a separate implementation PR.
 
 **Finding / impact / recommendation:** public `pending_i()` placeholders currently let structurally valid FactRevision values carry no verifiable I authorization or attestation (finding); treating a placeholder or caller-created candidate as authority can permit publication without an I-issued decision (impact); implement distinct record-backed I authorization and attestation contracts in AdmissionStore, preserve legacy pending serialization, and retain cryptographic hardening as an explicit production replacement (recommendation).
+
+## Amendment — supersession by `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001`, taken 2026-11-22 15:52 +0800
+
+This document (`c9a6394d`, 2026-11-22 12:54 +0800) and `14-ai-development/adr/OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001.md` (`986c42bc`, 2026-11-22 13:41 +0800) were both recorded `DECIDED` by an owner proxy 47 minutes apart. ADR-001 said `Supersedes: nothing` while contradicting this document in two places. That was false, and it left two contradictory normative documents with no adjudication. The adjudication is recorded here and in ADR-001 §8.
+
+**Two clauses of this document are superseded. Everything else stands.**
+
+### Superseded
+
+1. **§2.2's two-state `AuthorizationDecisionRefState { Pending, Issued(..) }`** is superseded by ADR-001 D2 (`Absent` / `Placeholder` / `Issued(AuthorizationDecisionRef)`). The two-state enum cannot represent absence: `pending_i()` is a value that exists, so there is no shape in §2.2 that means "no authorization was recorded" — which is precisely the condition `dm2_06` must prove is rejected. ADR-001 is later and the type state is its explicit subject.
+
+2. **§4.3's assignment of `dm2_06`** is superseded by ADR-001 §4. `dm2_06_missing_authorization_ref_blocks_fact_publication` lives at `crates/memory-domain/tests/phase2_acceptance.rs:606`. `crates/memory-domain/Cargo.toml` declares `serde` and `serde_json` only; it does not depend on `memory-compiler`, and the dependency direction is the reverse. The propagated authority `Err` §4.3 requires cannot be produced at that path. §4.3 as written is not a strict requirement but an unreachable one; `dm2_06` becomes ADR-001 §4's two assertions on `FactRevision::validate()`.
+
+### Narrowed
+
+3. **§3.3's "Domain validation may validate candidate field syntax and reject Pending"** is narrowed by ADR-001 D3: under the three-state type, the domain presence gate rejects `Absent` and **must NOT reject `Placeholder`**. "Pending" in §3.3 named everything that was not issued; under D2 that splits into two states, and only one of them is absence. Rejecting `Placeholder` at the domain gate would move the authenticity question into the presence gate.
+
+### Unchanged, and still required
+
+- **§4.1 and §4.2, the whole validator contract.** `validate_authorization_decision` returning `Ok(true)` / `Ok(false)` on subject-digest mismatch / `Err` for missing authority stands exactly as written, including "a missing authorization record is always `Err`, never a denial result". ADR-001 does not touch it.
+- **§3.3's compiler-layer validator behind `AdmissionStore`.** Superseding §4.3 removes the `dm2_06` assignment, not the gate. ADR-001 D6's domain presence gate and this document's compiler authenticity gate answer different questions and both exist.
+- **The compiler-layer validator now needs its own test**, at a location that can reach `memory-compiler`. It is not `dm2_06`, must not be named `dm2_06`, and must not be counted toward `dm2_06`'s closure.
+- §1, §2.1, §2.3, §2.4, §3.1, §3.2, §5, §6, §7, and closure criteria 1–13 except as item 1 depends on §2.2's shape and item 12 depends on §4.3's assignment.
+
+Closure criterion 12 requires deleting the `#[ignore]` and replacing `unimplemented!()` with a real assertion. That obligation survives; what changes is which assertion satisfies it — ADR-001 §4's two domain-layer assertions, not a compiler-layer `Err`.
