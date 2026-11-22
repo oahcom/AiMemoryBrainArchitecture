@@ -1258,7 +1258,9 @@ pub struct SelectionOutcome {
 /// It does not establish that two sources contain independent information.
 type CoverageUnit = (OpaqueId, OpaqueId);
 
-fn candidate_coverage_units(candidate: &ContextCandidate) -> std::collections::BTreeSet<CoverageUnit> {
+fn candidate_coverage_units(
+    candidate: &ContextCandidate,
+) -> std::collections::BTreeSet<CoverageUnit> {
     let mut units = std::collections::BTreeSet::new();
 
     for source_id in &candidate.source_refs {
@@ -1393,8 +1395,7 @@ pub fn select_within_budget(
                     Some(previous_index) => {
                         gain > best_gain
                             || (gain == best_gain
-                                && candidate.entry_id
-                                    < remaining[previous_index].entry_id)
+                                && candidate.entry_id < remaining[previous_index].entry_id)
                     }
                 };
 
@@ -1470,11 +1471,7 @@ pub fn select_within_budget(
         left.candidate
             .tier
             .cmp(&right.candidate.tier)
-            .then_with(|| {
-                left.candidate
-                    .entry_id
-                    .cmp(&right.candidate.entry_id)
-            })
+            .then_with(|| left.candidate.entry_id.cmp(&right.candidate.entry_id))
     });
 
     let total_units = all_units.len();
