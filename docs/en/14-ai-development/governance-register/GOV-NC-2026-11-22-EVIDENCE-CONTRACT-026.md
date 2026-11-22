@@ -1,10 +1,10 @@
-# GOV-NC-2026-11-22-EVIDENCE-CONTRACT-023 — Evidence Domain Contract Conformance
+# GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026 — Evidence Domain Contract Conformance
 
 ## 1. Registration Information
 
 | Item | Value |
 |---|---|
-| Registration ID | GOV-NC-2026-11-22-EVIDENCE-CONTRACT-023 |
+| Registration ID | GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026 |
 | Registration Date | 2026-11-22 |
 | Category | MIGRATION_DEBT / DOMAIN_CONTRACT_CONFORMANCE |
 | Status | OPEN |
@@ -426,7 +426,7 @@ The current Evidence implementation has structural conformance gaps against the 
 
 These gaps include a missing field, inconsistent field names and identity ownership, type mismatches, and value-set mismatches in both enums.
 
-This issue is consolidated under GOV-NC-2026-11-22-EVIDENCE-CONTRACT-023 and divided into two independently verified work packages: WP-A and WP-B.
+This issue is consolidated under GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026 and divided into two independently verified work packages: WP-A and WP-B.
 
 This registration does not authorize destructive migration.
 

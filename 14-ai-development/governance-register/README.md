@@ -17,7 +17,7 @@
 | `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` | 裁定后无审查合并 | High | `OPEN` / `NOT_REMEDIATED` | 4 个 PR（#390 / #394 / #395 / #402） |
 | `GOV-NC-2026-11-20-AC-UNMET-CLOSURE-004` | 验收条件未满足即关闭 | High | `OPEN` / `NOT_REMEDIATED` | 1 个 Issue（#384），4/10 条 AC 不满足 |
 | `GOV-NC-CONVERGENCE-2026-11-20` | 治理收敛定义与执行边界 | — | `ACTIVE` / `RECORDED_NOT_PREVENTED` | 3 个层次 |
-| `GOV-NC-2026-11-22-EVIDENCE-CONTRACT-023` | Evidence 领域契约符合性 | High | `OPEN` / `NOT_AUTHORIZED` | 1 个实体，2 个工作包 |
+| `GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026` | Evidence 领域契约符合性 | High | `OPEN` / `NOT_AUTHORIZED` | 1 个实体，2 个工作包 |
 
 ## 证据
 

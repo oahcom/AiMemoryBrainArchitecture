@@ -1,10 +1,10 @@
-# GOV-NC-2026-11-22-EVIDENCE-CONTRACT-023 — Evidence Domain Contract Conformance
+# GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026 — Evidence Domain Contract Conformance
 
 ## 1. 登记信息
 
 | 项目 | 内容 |
 |---|---|
-| 登记编号 | GOV-NC-2026-11-22-EVIDENCE-CONTRACT-023 |
+| 登记编号 | GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026 |
 | 登记日期 | 2026-11-22 |
 | 类别 | MIGRATION_DEBT / DOMAIN_CONTRACT_CONFORMANCE |
 | 状态 | OPEN |
@@ -426,7 +426,7 @@ Evidence 当前实现与权威领域契约之间存在结构性符合性缺口�
 
 该缺口包括字段缺失、字段名称与身份归属不一致、字段类型不一致以及两个枚举的值域不一致。
 
-本问题统一登记为 GOV-NC-2026-11-22-EVIDENCE-CONTRACT-023，分为 WP-A 和 WP-B 两个独立验证工作包。
+本问题统一登记为 GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026，分为 WP-A 和 WP-B 两个独立验证工作包。
 
 本登记不构成破坏性迁移授权。
 
