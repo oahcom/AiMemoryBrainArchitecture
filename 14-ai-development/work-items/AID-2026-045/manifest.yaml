@@ -19,11 +19,14 @@ implementing_ai_session: NOT_ASSIGNED
 
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: 792565ac60795ece14f8575774a72563c69e8b1f
+base_commit_sha: 87f54bb44d9cd2872d7faf7c5c146dd85cae6fc1
 
 tracking_issue: "#348 (REQ-08); related reliability parent #349 (REQ-09)"
-registration_pr: 622
-registration_pr_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/622
+baseline_pr: 614
+baseline_pr_status: MERGED
+baseline_merge_commit_sha: c9f4a7fe021f53e101b3977fc12b6f7fc50ca29b
+registration_pr: 623
+registration_pr_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/623
 registration_pr_status: OPEN
 
 created_at: 2026-11-22
@@ -33,10 +36,10 @@ prompt_id: AID-2026-045-PROMPT
 prompt_version: v1
 prompt_file: 14-ai-development/work-items/AID-2026-045/prompt-v1.md
 prompt_status: FROZEN
-prompt_sha256: d551edcf2f9faff15b83b06b17fea3e2a534f96a559e1994d02ea5ea88de46c0
-prompt_bytes: 3347
-prompt_file_blob_sha: 99c014e54a4e90fb72dca217e26bbaf72ec132b6
-prompt_file_commit_sha: 6bb00f3d371f4dcaac5e137a89978ca26f3422ac
+prompt_sha256: 2701c73b90de8c875e4e7aae3a7194d0b1a0fcf2566e6aa891fe2909f326aeec
+prompt_bytes: 3446
+prompt_file_blob_sha: 40142832002ff13caf4476326510254bc7875c2e
+prompt_file_commit_sha: 72258a68f41994148ab340b873f21ab00d5610c4
 
 prompt_provenance_tier: T1
 prompt_provenance_note: >-
@@ -48,7 +51,7 @@ prompt_provenance_note: >-
 dependency_refs:
   - crates/bmcp-server/src/lib.rs
   - crates/bmcp-server/tests/rt_scenarios.rs
-  - PR #614
+  - PR #614 (merged baseline)
   - Issue #615 (absolute slow-drip deadline is separate)
 
 deliverables:
@@ -63,7 +66,7 @@ integration_reviewer: NOT_ASSIGNED
 
 review:
   status: SESSION_SEPARATION_RECORDED_PROMPT_UNVERIFIED
-  report_ref: "PR #614 comment 7075140973; reviewer session is separate, paired author prompt not exposed"
+  report_ref: "PR #614 post-merge review comment 7075140973; reviewer session is separate, paired author prompt not exposed"
 
 acceptance:
   status: NOT_ASSIGNED
@@ -71,16 +74,16 @@ acceptance:
   acceptance_authority: USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)
 
 implementation:
-  status: PR_OPEN
-  branch: fix/bmcp-accepted-socket-blocking
-  pull_request: 614
-  pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/614
-  implementation_commit_sha: bab4e464830421b7e3b0c0273b928b8e52f55cdc
+  status: NOT_STARTED
+  branch: NOT_ASSIGNED
+  pull_request: NOT_CREATED
+  pull_request_url: NOT_CREATED
+  implementation_commit_sha: NOT_STARTED
   merge_commit_sha: NOT_MERGED
 
 authorization:
   registration_write: USER-PRINCIPAL-DELEGATED (limited to this AID registration package)
-  implementation_write: USER-PRINCIPAL-DELEGATED (limited to the review follow-up on PR #614)
+  implementation_write: USER-PRINCIPAL-DELEGATED (limited to a new follow-up PR after baseline PR #614 merge)
   index_update: USER-PRINCIPAL-DELEGATED (limited to the single AID-2026-045 row)
   production_authorization: NOT_GRANTED
 
@@ -88,7 +91,7 @@ governance:
   aid_assignment: REGISTERED
   aid_status: PR_OPEN
   registration_authorization: USER-PRINCIPAL-DELEGATED (limited to this work item)
-  development_start_authorization: USER-PRINCIPAL-DELEGATED (limited to the bounded PR #614 follow-up)
+  development_start_authorization: USER-PRINCIPAL-DELEGATED (limited to the bounded AID-2026-045 follow-up)
   architecture_status: NOT_APPLICABLE
   g8_status: NOT_APPLICABLE
   quota_change: NONE
@@ -96,10 +99,10 @@ governance:
 verification:
   status: NOT_RUN
   prior_evidence: >-
-    PR #614 reported 10 bmcp-server tests passing on original head
-    18e14a168db0b90402502273b6ae2428b2b39ed3, but no exact environment or
-    raw output was recorded. Current head bab4e464830421b7e3b0c0273b928b8e52f55cdc
-    is a rebase and has not been rerun.
+    PR #614 merged at c9f4a7fe021f53e101b3977fc12b6f7fc50ca29b. Its body reports
+    18 bmcp-server tests and 522 workspace tests passing locally on Windows,
+    but exact environment and raw output were not recorded. The remaining
+    child-process cleanup/startup-wait follow-up has not been implemented.
   environment: >-
     Self-hosted runner VM-0-9-ubuntu had no Cargo on PATH in Run 44991500213.
     GitHub-hosted Actions remain billing-blocked. Windows-specific verification
