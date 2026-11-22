@@ -8,6 +8,8 @@ publish = false
 [dependencies]
 memory-domain = { path = "../memory-domain" }
 memory-storage = { path = "../memory-storage" }
+memory-event-store = { path = "../memory-event-store", optional = true }
+memory-event-store-sqlite = { path = "../memory-event-store-sqlite", optional = true }
 rusqlite = { version = "0.43.0", features = ["bundled"], optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -15,9 +17,11 @@ sha2 = "0.10"
 
 [features]
 default = ["sqlite"]
-sqlite = ["dep:rusqlite"]
+sqlite = [
+    "dep:rusqlite",
+    "dep:memory-event-store",
+    "dep:memory-event-store-sqlite",
+]
 
 [dev-dependencies]
-memory-event-store = { path = "../memory-event-store" }
-memory-event-store-sqlite = { path = "../memory-event-store-sqlite" }
 memory-storage-sqlite = { path = "../memory-storage-sqlite" }
