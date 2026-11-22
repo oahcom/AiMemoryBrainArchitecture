@@ -5,9 +5,10 @@
 //! provide a cross-service D/Storage visibility transaction.
 
 use memory_domain::{
-    is_rfc3339_utc, is_sha256_hex, AuthorizationDecisionData, AuthorizationDecisionKind,
-    AuthorizationDecisionRef, CanonicalCommitData, CanonicalCommitRef, IssuerId, OpaqueId,
-    ScopeRef, DEV_BASELINE_ISSUER, I_DEV_BASELINE_ISSUER,
+    is_rfc3339_utc, is_sha256_hex, AttestorData, AuthorizationDecisionData,
+    AuthorizationDecisionKind, AuthorizationDecisionRef, CanonicalCommitData, CanonicalCommitRef,
+    IssuedAttestorRef, IssuerId, OpaqueId, ScopeRef, DEV_BASELINE_ISSUER, I_DEV_BASELINE_ATTESTOR,
+    I_DEV_BASELINE_ISSUER,
 };
 use rusqlite::{params, Connection, OptionalExtension, Transaction, TransactionBehavior};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -1260,6 +1261,136 @@ impl AdmissionStore {
         Ok(reference)
     }
 
+    /// Records an I-side attestation and returns the reference that names it.
+    ///
+    /// Rejects the same malformed cases `issue_authorization_decision` rejects,
+    /// plus one it does not need: an issuer outside the attestor allowlist. That
+    /// check is here and not only in the domain type because this is the writer —
+    /// a caller that skips `AttestorData::validate` must still be stopped before
+    /// the row exists.
+    ///
+    /// Replay with an identical payload succeeds and returns the same reference.
+    /// Replay with a differing payload is `IdempotencyConflict`, matching the
+    /// decision writer, so a retry cannot silently overwrite a recorded
+    /// attestation.
+    pub fn issue_attestation(
+        &mut self,
+        attestation_id: &OpaqueId,
+        issuer: &IssuerId,
+        subject_digest: &OpaqueId,
+        issued_at: &str,
+    ) -> Result<IssuedAttestorRef, AdmissionError> {
+        if issuer.as_str() != I_DEV_BASELINE_ATTESTOR {
+            return Err(AdmissionError::InvalidInput(
+                "issuer is not on the I dev-baseline attestor allowlist",
+            ));
+        }
+
+        if !is_sha256_hex(subject_digest.as_str()) || !is_rfc3339_utc(issued_at) {
+            return Err(AdmissionError::InvalidInput(
+                "subject digest or issued_at is not in canonical form",
+            ));
+        }
+
+        let data = AttestorData {
+            attestation_id: attestation_id.clone(),
+            issuer: issuer.clone(),
+            subject_digest: subject_digest.clone(),
+            issued_at: issued_at.to_owned(),
+        };
+
+        let reference = IssuedAttestorRef::from_issued_data(data);
+
+        let tx = self
+            .connection
+            .transaction_with_behavior(TransactionBehavior::Immediate)?;
+
+        let inserted = tx.execute(
+            "INSERT INTO i_attestations(
+                attestation_id,issuer_id,subject_digest,issued_at,signature
+             )
+             VALUES(?1,?2,?3,?4,'')",
+            params![
+                attestation_id.as_str(),
+                issuer.as_str(),
+                subject_digest.as_str(),
+                issued_at,
+            ],
+        );
+
+        match inserted {
+            Ok(_) => {}
+            Err(rusqlite::Error::SqliteFailure(ref code, _))
+                if code.code == rusqlite::ErrorCode::ConstraintViolation =>
+            {
+                let stored = read_attestation(&tx, attestation_id)?;
+
+                let identical = stored.issuer_id == issuer.as_str()
+                    && stored.subject_digest == subject_digest.as_str()
+                    && stored.issued_at == issued_at;
+
+                if !identical {
+                    return Err(AdmissionError::IdempotencyConflict);
+                }
+            }
+            Err(error) => return Err(AdmissionError::Sqlite(error)),
+        }
+
+        tx.commit()?;
+        Ok(reference)
+    }
+
+    /// Record-backed attestation validation.
+    ///
+    /// `Ok(true)` when the reference matches a readable durable row and the
+    /// stored digest matches `expected_subject_digest`. `Ok(false)` when the row
+    /// is readable and every reference field matches it but the stored digest
+    /// differs from the expected one. Every other case is `Err`, including a
+    /// missing row — absence of an attestation is never `Ok(false)`, because a
+    /// caller that cannot tell "no attestation" from "attestation says no" will
+    /// eventually treat the first as the second.
+    pub fn validate_attestation(
+        &self,
+        reference: &IssuedAttestorRef,
+        expected_subject_digest: &OpaqueId,
+    ) -> Result<bool, AttestationValidationError> {
+        let data = reference
+            .data()
+            .ok_or(AttestationValidationError::PendingReference)?;
+
+        let stored =
+            read_attestation(&self.connection, &data.attestation_id).map_err(
+                |error| match error {
+                    rusqlite::Error::QueryReturnedNoRows => {
+                        AttestationValidationError::RecordMissing
+                    }
+                    _ => AttestationValidationError::ReadFailed,
+                },
+            )?;
+
+        // Authority check precedes content comparison, as in the decision path.
+        if stored.issuer_id != I_DEV_BASELINE_ATTESTOR {
+            return Err(AttestationValidationError::UnsupportedIssuer);
+        }
+
+        if !is_sha256_hex(&stored.subject_digest) || !is_rfc3339_utc(&stored.issued_at) {
+            return Err(AttestationValidationError::RecordMalformed);
+        }
+
+        // The reference must agree with the row on every field it carries.
+        if stored.issuer_id != data.issuer.as_str() {
+            return Err(AttestationValidationError::RecordMismatch("issuer"));
+        }
+        if stored.subject_digest != data.subject_digest.as_str() {
+            return Err(AttestationValidationError::RecordMismatch("subject_digest"));
+        }
+        if stored.issued_at != data.issued_at {
+            return Err(AttestationValidationError::RecordMismatch("issued_at"));
+        }
+
+        Ok(stored.subject_digest == expected_subject_digest.as_str())
+    }
+
     /// Record-backed authorization decision validation.
     ///
     /// Ok(true): all reference fields match the readable durable record,
@@ -1410,6 +1541,90 @@ fn parse_authorization_decision_kind(value: &str) -> Option<AuthorizationDecisio
         "conditional" => Some(AuthorizationDecisionKind::Conditional),
         _ => None,
     }
+}
+
+// ---------------------------------------------------------------- attestations
+//
+// `i_attestations` is the second half of GAP-18. #662 created the table but no
+// Rust reads or writes it, so criterion 6 is met only on the decision side: the
+// attestor table exists and nothing touches it.
+//
+// The three functions below are the attestor counterpart of
+// `issue_authorization_decision` / `validate_authorization_decision` /
+// `read_authorization_decision`. They are written out separately rather than
+// generic over a record kind because the two contracts differ in one
+// load-bearing way — the issuer. `GAP-18-AUTHORIZATION-VALIDATOR-REMAINDER` §5
+// says the separation is the point, and a generic version would have to take the
+// allowlist as a parameter, which is how one compromised constant ends up
+// covering both tables.
+
+/// Why a durable attestation could not confirm a reference.
+///
+/// A separate type from `AuthorizationDecisionValidationError` on purpose: a
+/// caller that conflates "no attestation" with "no decision" cannot tell an
+/// attestor failure from an authority failure, which is the same reasoning that
+/// made the decision validator an enum instead of a `bool`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum AttestationValidationError {
+    /// The reference carries no issued attestation data.
+    PendingReference,
+    /// No durable attestation row exists.
+    RecordMissing,
+    /// The stored row is not a well-formed record.
+    RecordMalformed,
+    /// A stored field differs from the issued reference.
+    RecordMismatch(&'static str),
+    /// The issuer is not the I dev-baseline attestor anchor.
+    UnsupportedIssuer,
+    /// The database could not be read.
+    ReadFailed,
+}
+
+impl std::fmt::Display for AttestationValidationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::PendingReference => write!(f, "reference is pending"),
+            Self::RecordMissing => write!(f, "no durable attestation record"),
+            Self::RecordMalformed => write!(f, "attestation record is malformed"),
+            Self::RecordMismatch(field) => {
+                write!(f, "attestation record disagrees on {field}")
+            }
+            Self::UnsupportedIssuer => {
+                write!(f, "issuer is not on the I dev-baseline attestor allowlist")
+            }
+            Self::ReadFailed => write!(f, "attestation store could not be read"),
+        }
+    }
+}
+
+impl std::error::Error for AttestationValidationError {}
+
+/// One decoded `i_attestations` row.
+struct StoredAttestation {
+    issuer_id: String,
+    subject_digest: String,
+    issued_at: String,
+}
+
+/// Reads an attestation by primary key.
+///
+/// `QueryReturnedNoRows` is preserved so the caller can distinguish a missing
+/// record from an unreadable database.
+fn read_attestation(
+    connection: &Connection,
+    attestation_id: &OpaqueId,
+) -> Result<StoredAttestation, rusqlite::Error> {
+    connection.query_row(
+        "SELECT issuer_id,subject_digest,issued_at FROM i_attestations WHERE attestation_id=?1",
+        [attestation_id.as_str()],
+        |row| {
+            Ok(StoredAttestation {
+                issuer_id: row.get(0)?,
+                subject_digest: row.get(1)?,
+                issued_at: row.get(2)?,
+            })
+        },
+    )
 }
 /// One decoded `canonical_commits` row.
 struct StoredCanonicalCommit {
