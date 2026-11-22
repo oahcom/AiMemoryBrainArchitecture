@@ -1,4 +1,5 @@
 use bmcp_server::{handle_request_body, RequestOutcome};
+use serde_json::Value;
 
 /// A semantically valid `AppliedDeliveryEvidence` record, taken from
 /// `bmcp-protocol`'s `valid_value()` fixture with `payload_digest` filled in.
@@ -51,6 +52,41 @@ fn tool_call(id: u64, tool: &str, evidence: &str) -> String {
     )
 }
 
+fn response_json(body: &str) -> Value {
+    serde_json::from_str(body)
+        .unwrap_or_else(|error| panic!("response is not valid JSON ({error}): {body}"))
+}
+
+fn tool_result_json(body: &str) -> Value {
+    let response = response_json(body);
+
+    assert!(
+        response.get("error").is_none(),
+        "expected a tool result, got a JSON-RPC error: {response}"
+    );
+
+    assert_eq!(
+        response["result"]["content"][0]["type"], "text",
+        "tool result must contain a text content block: {response}"
+    );
+
+    assert!(
+        response["result"]["isError"].is_boolean(),
+        "result.isError must be a JSON boolean: {response}"
+    );
+
+    response
+}
+
+fn tool_payload(response: &Value) -> Value {
+    let text = response["result"]["content"][0]["text"]
+        .as_str()
+        .expect("content[0].text must be a string");
+
+    serde_json::from_str(text)
+        .unwrap_or_else(|error| panic!("tool text is not valid inner JSON ({error}): {text:?}"))
+}
+
 #[test]
 fn tools_list_exposes_validate_and_digest() {
     let body = responded(r#"{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}"#);
@@ -72,17 +108,15 @@ fn validate_tool_accepts_valid_evidence() {
         "validate_applied_delivery_evidence",
         VALID_EVIDENCE,
     ));
+    let response = tool_result_json(&body);
+    let payload = tool_payload(&response);
 
-    assert!(
-        body.contains(r#"\"valid\":true"#),
-        "successful validate payload must be present in the escaped text block: {body}"
-    );
+    assert_eq!(response["result"]["isError"], false);
+    assert_eq!(payload["valid"], true);
 
-    let digest = body
-        .split(r#"\"digest\":\""#)
-        .nth(1)
-        .and_then(|rest| rest.split(r#"\""#).next())
-        .unwrap_or_else(|| panic!("no digest in response: {body}"));
+    let digest = payload["digest"]
+        .as_str()
+        .expect("valid validate payload must contain a string digest");
 
     assert!(is_hex64(digest), "digest is not 64 hex chars: {digest}");
 }
@@ -100,12 +134,20 @@ fn validate_tool_rejects_duplicate_key() {
         "validate_applied_delivery_evidence",
         &duplicated,
     ));
+    let response = tool_result_json(&body);
+    let payload = tool_payload(&response);
 
-    assert!(
-        body.contains("\"isError\":true"),
-        "invalid evidence must be a tool error: {body}"
+    assert_eq!(
+        response["result"]["isError"], false,
+        "ordinary validate failure must not be a tool execution error: {response}"
     );
-    assert!(body.contains("DuplicateKey"), "unexpected error: {body}");
+    assert_eq!(payload["valid"], false);
+    assert!(
+        payload["error"]
+            .as_str()
+            .is_some_and(|error| error.contains("DuplicateKey")),
+        "duplicate-key validation result must describe DuplicateKey: {payload}"
+    );
 }
 
 #[test]
@@ -117,10 +159,19 @@ fn validate_tool_rejects_missing_field() {
         "validate_applied_delivery_evidence",
         &missing,
     ));
+    let response = tool_result_json(&body);
+    let payload = tool_payload(&response);
 
+    assert_eq!(
+        response["result"]["isError"], false,
+        "ordinary validate failure must not be a tool execution error: {response}"
+    );
+    assert_eq!(payload["valid"], false);
     assert!(
-        body.contains("\"isError\":true"),
-        "invalid evidence must be a tool error: {body}"
+        payload["error"]
+            .as_str()
+            .is_some_and(|error| !error.is_empty()),
+        "missing-field validation result must contain an error description: {payload}"
     );
 }
 
@@ -131,12 +182,14 @@ fn digest_tool_returns_hex64() {
         "digest_applied_delivery_evidence",
         VALID_EVIDENCE,
     ));
+    let response = tool_result_json(&body);
+    let payload = tool_payload(&response);
 
-    let digest = body
-        .split(r#"\"digest\":\""#)
-        .nth(1)
-        .and_then(|rest| rest.split(r#"\""#).next())
-        .unwrap_or_else(|| panic!("no digest in response: {body}"));
+    assert_eq!(response["result"]["isError"], false);
+
+    let digest = payload["digest"]
+        .as_str()
+        .expect("valid digest payload must contain a string digest");
 
     assert!(is_hex64(digest), "digest is not 64 hex chars: {digest}");
     assert_eq!(
@@ -152,16 +205,20 @@ fn digest_tool_rejects_invalid_evidence() {
         "digest_applied_delivery_evidence",
         r#"{"schema_artifact_revision":"1.0.0"}"#,
     ));
+    let response = tool_result_json(&body);
+    let payload = tool_payload(&response);
 
-    assert!(
-        body.contains("\"isError\":true"),
-        "invalid evidence is a tool error, not a protocol error: {body}"
+    assert_eq!(
+        response["result"]["isError"], true,
+        "invalid digest evidence must be a tool execution error: {response}"
     );
+    assert_eq!(payload["valid"], false);
     assert!(
-        !body.contains("\"code\":-32602"),
-        "tool business failure must not be -32602: {body}"
+        payload["error"]
+            .as_str()
+            .is_some_and(|error| !error.is_empty()),
+        "invalid digest payload must contain an error description: {payload}"
     );
-    assert!(body.contains("\"id\":6"), "unexpected body: {body}");
 }
 
 #[test]
@@ -190,29 +247,19 @@ fn call_tool_result_has_text_content_block() {
         "validate_applied_delivery_evidence",
         VALID_EVIDENCE,
     ));
+    let response = tool_result_json(&body);
+    let payload = tool_payload(&response);
 
-    assert!(
-        body.contains(r#""content":[{"type":"text","text":"{\"valid\":true,\"digest\":\""#),
-        "missing MCP text content block or expected payload: {body}"
-    );
-    assert!(
-        body.contains(r#""isError":false"#),
-        "successful tool result must have isError=false: {body}"
-    );
+    assert_eq!(response["result"]["isError"], false);
+    assert_eq!(payload["valid"], true);
 
-    let digest = body
-        .split(r#""text":"{\"valid\":true,\"digest\":\""#)
-        .nth(1)
-        .and_then(|rest| rest.split(r#"\"}"#).next())
-        .unwrap_or_else(|| panic!("could not extract JSON payload from text content: {body}"));
+    let digest = payload["digest"]
+        .as_str()
+        .expect("text payload must contain a string digest");
 
     assert!(
         is_hex64(digest),
-        "text payload digest is not a 64-character hex string: {body}"
-    );
-    assert!(
-        body.contains(r#"\"}"#),
-        "text content does not terminate as the expected JSON object string: {body}"
+        "text payload digest is not a 64-character hex string: {payload}"
     );
 }
 
@@ -223,29 +270,16 @@ fn invalid_evidence_yields_tool_error_not_protocol_error() {
         "digest_applied_delivery_evidence",
         r#"{"schema_artifact_revision":"1.0.0"}"#,
     ));
+    let response = tool_result_json(&body);
+    let payload = tool_payload(&response);
 
+    assert_eq!(response["result"]["isError"], true);
+    assert_eq!(payload["valid"], false);
     assert!(
-        !body.contains(r#","error":{"code""#),
-        "business failure must not be returned as a JSON-RPC protocol error: {body}"
-    );
-    assert!(
-        body.contains(r#""isError":true"#),
-        "invalid evidence must set result.isError=true: {body}"
-    );
-    assert!(
-        body.contains(r#""content":[{"type":"text","text":""#),
-        "business failure must include a text content block: {body}"
-    );
-
-    let text = body
-        .split(r#""text":""#)
-        .nth(1)
-        .and_then(|rest| rest.split(r#""}],"isError""#).next())
-        .unwrap_or_else(|| panic!("could not extract tool error text: {body}"));
-
-    assert!(
-        !text.is_empty(),
-        "tool error text must not be empty: {body}"
+        payload["error"]
+            .as_str()
+            .is_some_and(|error| !error.is_empty()),
+        "tool error payload must contain a non-empty error description: {payload}"
     );
 }
 
@@ -283,4 +317,31 @@ fn unknown_tool_name_remains_protocol_error() {
         !body.contains(r#""result""#),
         "unknown tool protocol error must not contain a result field: {body}"
     );
+}
+
+#[test]
+fn structural_protocol_error_cases_remain_json_rpc_errors() {
+    let malformed_requests = [
+        r#"{"jsonrpc":"2.0","id":21,"method":"tools/call"}"#,
+        r#"{"jsonrpc":"2.0","id":22,"method":"tools/call","params":{}}"#,
+        r#"{"jsonrpc":"2.0","id":23,"method":"tools/call","params":{"name":"digest_applied_delivery_evidence","arguments":{}}}"#,
+        r#"{"jsonrpc":"2.0","id":24,"method":"tools/call","params":{"name":7,"arguments":{"evidence":{}}}}"#,
+    ];
+
+    for request in malformed_requests {
+        let response = response_json(&responded(request));
+
+        assert_eq!(response["error"]["code"], -32602);
+        assert!(response.get("result").is_none());
+    }
+
+    let unknown_tool = response_json(&responded(&tool_call(25, "no_such_tool", VALID_EVIDENCE)));
+    assert_eq!(unknown_tool["error"]["code"], -32602);
+    assert!(unknown_tool.get("result").is_none());
+
+    let unknown_method = response_json(&responded(
+        r#"{"jsonrpc":"2.0","id":26,"method":"no/such/method"}"#,
+    ));
+    assert_eq!(unknown_method["error"]["code"], -32601);
+    assert!(unknown_method.get("result").is_none());
 }

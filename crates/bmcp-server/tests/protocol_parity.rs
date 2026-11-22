@@ -15,6 +15,7 @@ use std::path::Path;
 use std::process::Command;
 
 use bmcp_server::{handle_request_body, RequestOutcome};
+use serde_json::Value;
 
 const VALIDATE_TOOL: &str = "validate_applied_delivery_evidence";
 const DIGEST_TOOL: &str = "digest_applied_delivery_evidence";
@@ -89,35 +90,59 @@ fn tool_call(id: u64, tool: &str, evidence: &str) -> String {
     )
 }
 
-fn field(body: &str, key: &str) -> Option<String> {
-    let needle = format!("\"{key}\":\"");
-    body.split(needle.as_str())
-        .nth(1)
-        .and_then(|rest| rest.split('"').next())
-        .map(str::to_owned)
+fn parse_json(body: &str) -> Value {
+    serde_json::from_str(body)
+        .unwrap_or_else(|error| panic!("response is not valid JSON ({error}): {body}"))
+}
+
+fn tool_payload(body: &str) -> (Value, Value) {
+    let response = parse_json(body);
+
+    assert!(
+        response.get("error").is_none(),
+        "tools/call unexpectedly returned a JSON-RPC error: {response}"
+    );
+    assert_eq!(
+        response["result"]["content"][0]["type"], "text",
+        "CallToolResult must contain a text content block: {response}"
+    );
+    assert!(
+        response["result"]["isError"].is_boolean(),
+        "CallToolResult.isError must be a boolean: {response}"
+    );
+
+    let text = response["result"]["content"][0]["text"]
+        .as_str()
+        .expect("CallToolResult text content must be a string");
+    let payload = parse_json(text);
+
+    (response, payload)
 }
 
 /// Returns the verdict and digest the server reports for a fixture.
 fn rust_verdict(name: &str) -> (bool, Option<String>) {
     let body = responded(&tool_call(1, VALIDATE_TOOL, &read_fixture(name)));
-    if body.contains("\"error\":{") {
-        panic!("tools/call failed for {name}: {body}");
-    }
-    // The verdict now travels inside the MCP text content block, so the
-    // payload keys appear escaped on the wire. Parity is about the verdict,
-    // not about the envelope, so match the escaped form.
-    let valid = body.contains(r#"\"valid\":true"#);
+    let (response, payload) = tool_payload(&body);
+
+    assert_eq!(
+        response["result"]["isError"], false,
+        "validate semantic outcomes must not be tool execution errors: {response}"
+    );
+
+    let valid = payload["valid"]
+        .as_bool()
+        .expect("validate payload must contain a boolean `valid` field");
+    let digest = payload["digest"].as_str().map(str::to_owned);
+
     if !valid {
         assert!(
-            body.contains(r#""isError":true"#),
-            "invalid verdict must be a tool error: {body}"
+            payload["error"]
+                .as_str()
+                .is_some_and(|error| !error.is_empty()),
+            "invalid validate result must describe the validation failure: {payload}"
         );
     }
-    let digest = body
-        .split(r#"\"digest\":\""#)
-        .nth(1)
-        .and_then(|rest| rest.split(r#"\""#).next())
-        .map(str::to_owned);
+
     (valid, digest)
 }
 
@@ -166,16 +191,15 @@ fn python_verdict(name: &str) -> Option<PythonVerdict> {
 
     let stdout = String::from_utf8_lossy(&output.stdout);
     let stdout = stdout.trim();
-    assert!(
-        stdout.starts_with('{') && stdout.ends_with('}'),
-        "unexpected python output for {name}: {stdout}"
-    );
-    eprintln!("python reference validator said: {stdout}");
+    let result = parse_json(stdout);
+    eprintln!("python reference validator said: {result}");
 
     Some(PythonVerdict {
-        valid: stdout.contains("\"valid\":true"),
-        status: field(stdout, "status").unwrap_or_default(),
-        digest: field(stdout, "digest"),
+        valid: result["valid"]
+            .as_bool()
+            .expect("python validator output must contain boolean `valid`"),
+        status: result["status"].as_str().unwrap_or_default().to_owned(),
+        digest: result["digest"].as_str().map(str::to_owned),
     })
 }
 
@@ -191,13 +215,11 @@ fn valid_fixture_agrees_with_python_and_pins_digest() {
 
     // The digest tool must agree with the validate tool on the same bytes.
     let digest_body = responded(&tool_call(2, DIGEST_TOOL, &read_fixture("valid.json")));
-    let digest_tool_digest = digest_body
-        .split(r#"\"digest\":\""#)
-        .nth(1)
-        .and_then(|rest| rest.split(r#"\""#).next())
-        .map(str::to_owned);
+    let (digest_response, digest_payload) = tool_payload(&digest_body);
+
+    assert_eq!(digest_response["result"]["isError"], false);
     assert_eq!(
-        digest_tool_digest.as_deref(),
+        digest_payload["digest"].as_str(),
         Some(VALID_DIGEST),
         "digest tool and validate tool disagree: {digest_body}"
     );
@@ -253,9 +275,19 @@ fn duplicate_key_fixture_is_rejected_by_both_sides() {
 fn invalid_fixtures_never_expose_a_digest() {
     for name in ["invalid_missing_field.json", "invalid_duplicate_key.json"] {
         let body = responded(&tool_call(3, VALIDATE_TOOL, &read_fixture(name)));
+        let (response, payload) = tool_payload(&body);
+
+        assert_eq!(response["result"]["isError"], false);
+        assert_eq!(payload["valid"], false);
         assert!(
-            !body.contains("\"digest\":\""),
-            "a rejected record must not report a digest ({name}): {body}"
+            payload.get("digest").is_none(),
+            "a rejected record must not report a digest ({name}): {payload}"
+        );
+        assert!(
+            payload["error"]
+                .as_str()
+                .is_some_and(|error| !error.is_empty()),
+            "a rejected record must include its validation error ({name}): {payload}"
         );
     }
 }
