@@ -145,13 +145,32 @@ compile() 变为可达，并返回 Ok(Blocked)，处置得以保留。
 
 ## 什么情况会重开本决定
 
-- 如果 D 的 fence/admission 权威并非 `AdmissionStore` —— 即如果 `AdmissionStore`
-  本意是本地测试替身而非 D 侧账本。待查证据：`07-agent-integration` 或
-  `01-system-architecture` 中是否指定了别的 crate 作为 producer registry。目前树里
-  没有任何东西与"视之为权威"矛盾；但也没有任何东西明确确认它，这一残余风险记录在此。
-- 如果 `canonical_commit_confirmed` 获得生产者（`admission_canonical_commit_cursor`
-  字段暗示曾经打算有）。
+### `AdmissionStore` 不是 D 的账本 —— 这是定论，不是开放问题
+
+此处原先的第一条记录了一项残余风险：`AdmissionStore` 可能是本地测试替身而非
+D 侧账本，而树里既没有确认也没有否认它的权威。这个风险不存在。模块用自己的
+doc comment 声明了自己的范围（`crates/memory-compiler/src/admission.rs:3-5`）：
+
+```
+//! This crate implements the E-side lifecycle and a local SQLite admission
+//! ledger. It does not claim to be the D-authoritative producer ledger or to
+//! provide a cross-service D/Storage visibility transaction.
+```
+
+`AdmissionStore` 是 E 侧的本地账本。它**不是** D 权威的 producer 账本，也不是
+测试替身 —— 它是 E 为自己保留的持久记录。那条 bullet 悬置的问题，正是它所指向
+的那个文件回答的。
+
+对 D1 的后果：那里点名的持久发布记录，记录的是**E 的本地视图**，不是跨服务的
+D/Storage 事务。日后若有人主张 `publication_receipts` 是 D 权威的，那将与模块自己的
+doc comment 相矛盾；那是模块文档的缺陷、应当修正，而不是对它的某种读法。
+
+### 仍然开放的
+
 - 如果后续规范修订赋予 E 独立可见性授权，而 §8 目前禁止这一点。
+
+原先的第二条 —— `canonical_commit_confirmed` 获得生产者 —— 已解决。它在此删除，
+并记入下方 D8 增补，那里点名了生产者。
 
 ## 增补 —— D6，2026-11-22 02:35 +08:00 作出（#552、#545 落地之后）
 
@@ -318,3 +337,60 @@ PR #552 及后续生产集成已取代"阻断本项的问题"一节中的事实�
 3. 发布记录的持久恢复尚未经独立验证（GAP-14-C）。
 
 原文保留于上而非改写，因为一份所述前提被静默修改的决策记录是无法审计的。
+
+## 增补 —— D8，2026-11-22 作出（GAP-12 第 3 步落地之后）
+
+三处更正，全部读自 `main` 的 `4a7624da`（#622 的合并提交，head 为 `0b446492`）。
+
+### D8.1 —— `AdmissionStore` 是 E 的账本，D1 按此读
+
+`crates/memory-compiler/src/admission.rs:3-5`：
+
+```
+//! This crate implements the E-side lifecycle and a local SQLite admission
+//! ledger. It does not claim to be the D-authoritative producer ledger or to
+//! provide a cross-service D/Storage visibility transaction.
+```
+
+因此 D1 的记录，是 E 对自己准入与发布了什么的本地视图，并与 storage 的
+`PreparedHidden` 行做联合。它不是跨服务 D/Storage 可见性事务，本 ADR 也不这样主张。
+"什么情况会重开本决定"下的那条残余风险予以撤回：它不是开放问题，而是一个没被读到
+的定论否定。
+
+### D8.2 —— `canonical_commit_confirmed` 已有生产者
+
+`D-OWNER-DECISION-CANONICAL-COMMIT-001` 冻结了契约；#622 实现了它。链条在
+`4a7624da` 上：
+
+| 步骤 | 位置 |
+|---|---|
+| 签发记录 | `AdmissionStore::issue_canonical_commit`，`admission.rs:996` |
+| 校验记录，三态 | `AdmissionStore::validate_canonical_commit`，`admission.rs:1069` |
+| 读入标志 | `AdmissionPublicationAuthority::canonical_commit_confirmed`，`publication_authority.rs:56-73` |
+| 报告标志 | `publication_authority.rs:132` 的 `canonical_commit_confirmed,`，取代 D3 要求的字面 `false` |
+
+"什么情况会重开本决定"下的第二条已删除，而不是留成陈旧条目：它的条件已经发生，
+本小节就是它去的地方。D6.1 的暂停由它所等待的契约解除 —— 一个可构造、携带内容的
+引用类型，以及针对它的校验器。
+
+有一项范围事实必须随之记录，因为这份记录并不是生产身份：签发者是 dev-baseline
+签发者（`d-owner-proxy/dev-baseline-v1`），其自身决策称它为 "an explicit
+development trust anchor, not a production cryptographic identity"。该标志确认的是
+一份 dev-baseline 记录。
+
+### D8.3 —— `Published` 仍然不可达
+
+`publication_authority.rs:133-139` 仍然如此报告，D3 的注释原样保留：
+
+```rust
+publication_participant_admitted: false,
+protected_visibility_authorized: false,
+```
+
+`PublicationGate::run` 把其中任一为 `false` 映射为 `Suppressed`（`lib.rs:646-650`），
+所以一次带有合法 canonical-commit 记录的运行报告 `Suppressed`，永远不会是 `Published`。
+原因是 D7 与 D3，未变：没有 Storage 签名、没有 COC quorum、没有 I terminal decision，
+也没有 E 的独立可见性授权。
+
+这就是 D8 之后的收敛结论：三个无来源标志中一个有了来源，两个仍然没有，而 `Published`
+仍然需要八个全部成立。
