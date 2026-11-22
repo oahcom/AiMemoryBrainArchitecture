@@ -702,6 +702,6 @@ The coverage register records this as a review/handoff pair only. It does not ch
 - OWNER_DECISIONS_REQUIRED: BMCP-DR-001 semantic direction RESOLVED / consumer-schema gate OPEN; BMCP-DR-002 authority boundary DECIDED / callable API- IDL deferred; BMCP-DR-003 MCP adapter boundary PARTIALLY DECIDED / exact C mapping OPEN under Issue #449.
 - ISSUE_7_STATUS: `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`; GitHub CLOSED / not_planned; unchanged.
 - RUNTIME_IMPLEMENTATION_STATUS: NOT AUTHORIZED / NOT STARTED
-- PR / Commit: PR #453 remains Draft pending exact-head verification and semantic review; merge would accept only a partial architecture handoff, not freeze protocol/schema or authorize Runtime.
+- PR / Commit: PR #453 was merged into the pinned validation branch `bmcp-validation-base-c588` at merge commit `7c7801db396b92c57ad37020fe170f65f25e43ce`; this snapshot merge is not a merge to live `main`. Independent semantic/bilingual review remains pending; the artifact remains `ARCHITECTURE_PARTIAL` and does not freeze protocol/schema or authorize Runtime.
 
 **Next action:** B/D/I reconcile their existing source/mirror documents and refresh pins; H publishes versioned normative wire artifacts and closes the remaining registry/schema/crypto/Storage/error sub-items; C publishes exact Agent/MCP-to-BMCP mapping under Issue #449; E integrates the five-stage Rust compiler docs and consumer boundaries; BMCP refreshes the bilingual handoff. Runtime remains deferred until every engineering-entry condition is evidenced.
