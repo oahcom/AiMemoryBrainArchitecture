@@ -1092,6 +1092,13 @@ def main() -> int:
         print(f"::error::Unable to determine changed paths: {exc}")
         return 2
 
+    if not changed:
+        print(
+            "::error::NOT_APPLICABLE: BASE_SHA...HEAD_SHA contains zero changed paths; "
+            "no bilingual incremental verification was performed."
+        )
+        return 2
+
     baseline = read_baseline()
     if baseline is None:
         return 2
