@@ -108,7 +108,7 @@ Rust crate 仍停留在 private/staged 阶段。Round 6 新增纯内存 `ChangeS
 | Local Lifecycle、Producer/Derivative、Queue、Recall、Context、Restore 状态 | phase-3.7 §1–§8 | PARTIAL — ChangeSet/Reconcile 参考部分存在；无持久化 Producer/Queue/Recall/Restore Ledger | D |
 | 入队/租约/读取受保护源之前完成 Producer Registration | phase-3.7 §2、§10.1 | NOT IMPLEMENTED — 无 D Producer Registry Receipt 或 Queue Admission | D |
 | 可见前完成 Derivative Dependency Registration | phase-3.7 §3、§10.1 | NOT IMPLEMENTED — 无 Dependency Receipt 或 Publication Gate | D |
-| Delivery Queue Attempt 身份、重试和 ACK 分离 | phase-3.7 §4 | NOT IMPLEMENTED — 无持久化 DeliveryId/Attempt Ledger | 本线程可做 |
+| Delivery Queue Attempt 身份、重试和 ACK 分离 | phase-3.7 §4 | PARTIAL — `crates/memory-context/src/delivery_ledger.rs` 中的 `DeliveryLedger` 已建模 `DeliveryId`/`DeliveryAttemptId`、重试链与 ACK 到 delivery 的分离；无持久化、无 ACK consumer、无生产调用方 | 本线程可做 |
 | Recall 候选 Canonical 校验和 Sufficiency | phase-3.7 §5 | PARTIAL — Rust 候选校验和 Reconciliation 模型存在；无 F Watermark 向量或实时 D/I 重验证 | D |
 | Context 与 Applied 生命周期分离 | phase-3.7 §6 | PARTIAL — 模型区分 Context Version 与 Applied Ledger；无集成状态机 | 本线程可做 |
 | Restore/Reconnect 隔离及当前状态协调 | phase-3.7 §7 | NOT IMPLEMENTED — 无 Restore Fence、Ledger Replay 或 Adapter Reconnect | D |

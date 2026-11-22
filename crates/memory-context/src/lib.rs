@@ -4425,3 +4425,9 @@ mod pr433_tests {
         assert_eq!(s.rendered_bytes, 4);
     }
 }
+
+pub mod delivery_ledger;
+
+pub use delivery_ledger::{
+    AckDisposition, DeliveryAck, DeliveryAttempt, DeliveryAttemptId, DeliveryId, DeliveryLedger,
+};
