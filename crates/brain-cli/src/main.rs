@@ -1,3 +1,6 @@
+use agent_integration::{
+    ApplyOutcome, ContextDeliveryAdapter, DeliveryPayload, InMemoryContextDeliveryAdapter,
+};
 use memory_compiler::admission::{
     AdmissionStore, DependencyRegistrationRequest, ProducerRegistrationRequest,
 };
@@ -10,11 +13,7 @@ use memory_compiler::{
 use memory_context::{
     build_context, ContextBudget, ContextCandidate, ContextIdentity, ContextTier,
 };
-use memory_domain::{
-    Claim, Event, Memory, MemoryLifecycle, MemoryVersion, OpaqueId, ScopeRef,
-};
-use memory_event_store::{EventClassification, EventEnvelope};
-use memory_event_store_sqlite::{PayloadEventStoreExt, SqliteEventStore};
+use memory_domain::{Claim, Event, Memory, MemoryLifecycle, MemoryVersion, OpaqueId, ScopeRef};
 use memory_storage::{MemoryStorage, PrepareRequest};
 use memory_storage_sqlite::SqliteMemoryStorage;
 use memory_store::{MemoryStore, RevisionWrite};
@@ -96,7 +95,6 @@ fn main() {
 /// durable preparation state instead of guessing it.
 struct CompilerStageRequest<'a> {
     event_id: &'a OpaqueId,
-    receipt_id: &'a OpaqueId,
     source_ref: &'a OpaqueId,
     payload: &'a str,
     scope: &'a [ScopeRef],
@@ -166,19 +164,6 @@ fn false_flags(proof: &PublicationProof) -> Vec<&'static str> {
     .filter(|(_, value)| !value)
     .map(|(name, _)| name)
     .collect()
-}
-
-fn event_classification(value: &str) -> EventClassification {
-    match value.to_ascii_lowercase().as_str() {
-        "observed" => EventClassification::Observed,
-        "reported" => EventClassification::Reported,
-        "planned" => EventClassification::Planned,
-        "predicted" => EventClassification::Predicted,
-        "attempted" => EventClassification::Attempted,
-        "outcome" => EventClassification::Outcome,
-        "administrative" => EventClassification::Administrative,
-        _ => EventClassification::Unknown,
-    }
 }
 
 fn identifier(value: impl Into<String>) -> Result<OpaqueId, String> {
@@ -265,7 +250,7 @@ fn run_compiler_stage(request: CompilerStageRequest<'_>) -> Result<CompilerStage
 
     let accepted = AcceptedEvent {
         event_id: Identity(event_id.to_owned()),
-        receipt_id: Identity(request.receipt_id.as_str().to_owned()),
+        receipt_id: Identity(format!("accepted:{event_id}")),
         payload_digest: format!("sha256:{}", sha256_hex(request.payload.as_bytes())),
         payload: request.payload.to_owned(),
         compile_intent_durable: true,
@@ -319,6 +304,39 @@ fn run_compiler_stage(request: CompilerStageRequest<'_>) -> Result<CompilerStage
     })
 }
 
+/// Deliver a validated Brain context snapshot to the local Agent adapter.
+///
+/// Independent of compiler publication authorization: the adapter receives the
+/// context snapshot, not the publication decision.
+fn deliver_snapshot(snapshot: &memory_context::ContextSnapshot) -> Result<u64, String> {
+    let payload = DeliveryPayload::from_snapshot(snapshot)
+        .map_err(|error| format!("cannot construct delivery payload: {error:?}"))?;
+
+    let expected_version = snapshot.context_version;
+    let session_id = "brain-cli-session";
+    let mut adapter = InMemoryContextDeliveryAdapter::default();
+
+    match adapter
+        .apply(session_id, payload)
+        .map_err(|error| format!("adapter apply failed: {error:?}"))?
+    {
+        ApplyOutcome::Applied | ApplyOutcome::AlreadyApplied => {}
+    }
+
+    let applied = adapter
+        .applied_snapshot(session_id)
+        .ok_or_else(|| "adapter has no applied snapshot after apply".to_owned())?;
+
+    if applied.version() != expected_version {
+        return Err(format!(
+            "adapter version mismatch: expected {expected_version}, got {}",
+            applied.version()
+        ));
+    }
+
+    Ok(applied.version())
+}
+
 fn run() -> Result<(), String> {
     let mut args = std::env::args().skip(1);
     let Some(command) = args.next() else {
@@ -330,20 +348,12 @@ fn run() -> Result<(), String> {
 
     let mut input_path = None;
     let mut output_path = None;
-    let mut event_store_path: Option<PathBuf> = None;
     let mut verbose = false;
 
     while let Some(argument) = args.next() {
         match argument.as_str() {
             "--input" => input_path = args.next(),
             "--out" => output_path = args.next(),
-            "--event-store" => {
-                event_store_path = Some(
-                    args.next()
-                        .ok_or_else(|| "--event-store requires a path".to_owned())?
-                        .into(),
-                );
-            }
             "--verbose" => verbose = true,
             _ => return Err(format!("unknown argument: {argument}\n{}", usage())),
         }
@@ -356,98 +366,22 @@ fn run() -> Result<(), String> {
     let input: Input = serde_json::from_slice(&input_bytes)
         .map_err(|error| format!("invalid input JSON: {error}"))?;
 
-    // An empty scope must reach EventStore::accept so its own scope
-    // validation rejects the attempted acceptance. For non-empty scopes,
-    // retain the existing domain validation before persisting anything.
-    if !input.event.scope_refs.is_empty() {
-        input
-            .event
-            .validate()
-            .map_err(|error| format!("invalid event: {error:?}"))?;
-    }
+    input
+        .event
+        .validate()
+        .map_err(|error| format!("invalid event: {error:?}"))?;
     input
         .claim
         .validate()
         .map_err(|error| format!("invalid claim: {error:?}"))?;
 
-    let idempotency_key = match input.event.idempotency_key.as_deref() {
-        Some(key) if !key.trim().is_empty() => key.to_owned(),
-        Some(_) => return Err("event.idempotency_key must not be empty".into()),
-        None => {
-            // A missing key falls back to the stable event identity. This is
-            // safe for retries of the same event and does not merge different
-            // event IDs under the fixed brain-cli producer identity.
-            format!("brain-cli:{}", input.event.event_id.as_str())
-        }
-    };
-
-    // The default database is process-scoped and cleaned up by RAII.
-    // An explicitly supplied path belongs to the caller and is never deleted.
-    let temporary_event_database = if event_store_path.is_none() {
-        Some(TemporaryDatabase::new("event"))
-    } else {
-        None
-    };
-
-    let event_database_path = event_store_path
-        .as_deref()
-        .or_else(|| temporary_event_database.as_ref().map(TemporaryDatabase::path))
-        .expect("one EventStore database path must be selected");
-
-    let mut event_store = SqliteEventStore::open(event_database_path)
-        .map_err(|error| format!("cannot open EventStore SQLite database: {error:?}"))?;
-
-    let envelope = EventEnvelope {
-        event_kind: input.event.event_kind.clone(),
-
-        // Event has no source_type field. The explicit producer adapter
-        // identifies this ingress path rather than inventing source metadata.
-        source_type: "brain-cli".into(),
-
-        source_id: input.event.source_id.clone(),
-
-        // Stable producer identity makes idempotency keys comparable across
-        // independent CLI processes.
-        producer_actor_ref: identifier("producer:brain-cli")?,
-
-        scope_refs: input.event.scope_refs.clone(),
-        event_time: input.event.occurred_at.clone(),
-        payload_ref: input.event.payload_ref.clone(),
-        payload_digest: format!("sha256:{}", sha256_hex(input.payload.as_bytes())),
-        classification: event_classification(&input.event.classification),
-        idempotency_key: idempotency_key.clone(),
-        retention_class: input.event.retention_class.clone(),
-
-        // Event has no correlation_id field. Deriving it from event identity
-        // is deterministic, non-empty, and stable across retries.
-        correlation_id: identifier(format!(
-            "correlation:{}",
-            input.event.event_id.as_str()
-        ))?,
-    };
-
-    // EventStore is the durable acceptance boundary, not an authorization
-    // authority. Its scope argument is the event's declared scope.
-    // Payload custody, not bare acceptance: `pending_compile_intents` joins
-    // `event_payloads`, so a bare `accept` leaves the outbox row unreachable
-    // to the compile read path.
-    let accepted_receipt = event_store
-        .accept_with_payload(envelope, input.payload.as_bytes(), &input.event.scope_refs)
-        .map_err(|error| format!("event-store accept failed: {error:?}"))?;
-
-    if verbose {
-        eprintln!(
-            "accepted receipt: {}",
-            accepted_receipt.receipt_id.as_str()
-        );
-    }
-
-    // EventStore acceptance succeeded. Continue with the existing domain
-    // validation and Memory/Version/Context pipeline.
-    input
+    let idempotency_key = input
         .event
-        .validate()
-        .map_err(|error| format!("invalid event: {error:?}"))?;
+        .idempotency_key
+        .as_ref()
+        .filter(|key| !key.trim().is_empty())
+        .ok_or_else(|| "event.idempotency_key is required".to_owned())?
+        .clone();
 
     let content_digest = sha256_hex(input.payload.as_bytes());
     let scope = input.event.scope_refs.clone();
@@ -584,7 +518,6 @@ fn run() -> Result<(), String> {
     let admission_database = TemporaryDatabase::new("admission");
     let stage = run_compiler_stage(CompilerStageRequest {
         event_id: &input.event.event_id,
-        receipt_id: &accepted_receipt.receipt_id,
         source_ref: &input.event.source_id,
         payload: &input.payload,
         scope: &scope,
@@ -606,6 +539,17 @@ fn run() -> Result<(), String> {
         .map_err(|error| format!("cannot serialize ContextSnapshot: {error:?}"))?;
     fs::write(&output_path, &output)
         .map_err(|error| format!("cannot write output {}: {error}", output_path))?;
+
+    // Context delivery is independent of the compiler publication gate.
+    // Delivery failures are observable but must not change CLI success.
+    match deliver_snapshot(&snapshot) {
+        Ok(version) => {
+            eprintln!("delivery applied: session=brain-cli-session version={version}");
+        }
+        Err(reason) => {
+            eprintln!("delivery failed: {reason}");
+        }
+    }
     if let Err(error) = fs::write(&sidecar_path, sidecar_content.as_bytes()) {
         let _ = fs::remove_file(&output_path);
         return Err(format!(
