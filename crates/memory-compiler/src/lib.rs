@@ -2,6 +2,11 @@
 //! Deterministic five-stage reference pipeline with a local SQLite admission ledger.
 //! Production D/Storage authority integrations are provided by the
 //! `publication_authority` adapter.
+//!
+//! Without the `sqlite` feature the crate exposes the five pure stages, the
+//! domain types, and `PublicationAuthority`. `MemoryCompiler`, the admission
+//! ledger, and `accepted_event_from` require the feature because the only
+//! admission store is SQLite-backed.
 
 #[cfg(feature = "sqlite")]
 pub mod admission;
@@ -148,6 +153,7 @@ pub enum CompilerError {
     AdmissionStoreFailure,
     /// Canonical commit authority could not be established. Carried unchanged
     /// from the validator so the gate never sees it as a disposition.
+    #[cfg(feature = "sqlite")]
     CanonicalCommitNotEstablished(crate::admission::CanonicalCommitValidationError),
     /// The stored payload is not valid UTF-8. Kept distinct from
     /// `PayloadDigestMismatch` because no digest can be computed at all: the
@@ -660,6 +666,7 @@ impl PublicationGate {
     }
 }
 
+#[cfg(feature = "sqlite")]
 pub(crate) fn map_admission_error(error: admission::AdmissionError) -> CompilerError {
     match error {
         admission::AdmissionError::NotFound => CompilerError::MissingProducerAdmission,
@@ -669,11 +676,13 @@ pub(crate) fn map_admission_error(error: admission::AdmissionError) -> CompilerE
 
 /// Reference pipeline: five explicit typed stages.
 /// External authorities remain injected through PublicationAuthority.
+#[cfg(feature = "sqlite")]
 pub struct MemoryCompiler<A> {
     pub authority: A,
     pub admission: admission::AdmissionStore,
 }
 
+#[cfg(feature = "sqlite")]
 impl<A: PublicationAuthority> MemoryCompiler<A> {
     /// Compile only after the caller has durably registered producer work and
     /// every dependency in the local AdmissionStore. A receipt proves only that
@@ -1229,10 +1238,12 @@ mod tests {
         assert_eq!(result.derivative.visibility, Visibility::Hidden);
     }
 
+    #[cfg(feature = "sqlite")]
     fn oid(value: &str) -> OpaqueId {
         OpaqueId::new(value).unwrap()
     }
 
+    #[cfg(feature = "sqlite")]
     fn admission_scope() -> memory_domain::ScopeRef {
         memory_domain::ScopeRef {
             scope_id: oid("scope-1"),
@@ -1241,6 +1252,7 @@ mod tests {
         }
     }
 
+    #[cfg(feature = "sqlite")]
     fn register_compile_inputs(store: &mut admission::AdmissionStore) -> ProducerWorkItemId {
         let producer_id = oid("producer-identity");
         if !store.is_producer_registered(&producer_id).unwrap() {
@@ -1289,6 +1301,7 @@ mod tests {
         ProducerWorkItemId::new(work_id)
     }
 
+    #[cfg(feature = "sqlite")]
     #[test]
     fn compile_persists_admission_and_publication_receipts_before_returning_visible_derivative() {
         let mut store = admission::AdmissionStore::in_memory().unwrap();
@@ -1324,6 +1337,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "sqlite")]
     #[test]
     fn compile_requires_preexisting_producer_receipt_and_succeeds_after_registration() {
         let mut compiler = MemoryCompiler {
@@ -1351,6 +1365,7 @@ mod tests {
         assert_eq!(result.disposition, PublicationDisposition::Published);
     }
 
+    #[cfg(feature = "sqlite")]
     #[test]
     fn compile_preserves_terminal_suppression_without_persisting_publication_receipt() {
         let mut store = admission::AdmissionStore::in_memory().unwrap();
@@ -1369,6 +1384,7 @@ mod tests {
         assert_eq!(compiler.admission.publication_receipt_count().unwrap(), 0);
     }
 
+    #[cfg(feature = "sqlite")]
     #[test]
     fn compile_returns_typed_error_when_publication_receipt_write_fails() {
         let mut store = admission::AdmissionStore::in_memory().unwrap();
@@ -1435,6 +1451,7 @@ mod state_tests {
         }
     }
 
+    #[cfg(feature = "sqlite")]
     fn normalized() -> NormalizedIR {
         let payload = "A deterministic recovery test.".to_owned();
         let event = AcceptedEvent {
@@ -1449,6 +1466,7 @@ mod state_tests {
         NormalizationStage::run(extracted, 1).unwrap()
     }
 
+    #[cfg(feature = "sqlite")]
     fn staging_input() -> StagingInput {
         StagingInput {
             normalized: normalized(),
@@ -1461,10 +1479,12 @@ mod state_tests {
         }
     }
 
+    #[cfg(feature = "sqlite")]
     struct RecoveryAuthority {
         calls: usize,
     }
 
+    #[cfg(feature = "sqlite")]
     impl PublicationAuthority for RecoveryAuthority {
         fn obtain_proof(
             &mut self,
@@ -1602,6 +1622,7 @@ mod state_tests {
         assert!(!execution.lease_is_current(5));
     }
 
+    #[cfg(feature = "sqlite")]
     #[test]
     fn resume_rejects_terminal_state() {
         let mut compiler = MemoryCompiler {
@@ -1619,6 +1640,7 @@ mod state_tests {
         assert_eq!(compiler.authority.calls, 0);
     }
 
+    #[cfg(feature = "sqlite")]
     #[test]
     fn resume_rejects_stale_lease() {
         let mut compiler = MemoryCompiler {
@@ -1635,6 +1657,7 @@ mod state_tests {
         assert_eq!(compiler.authority.calls, 0);
     }
 
+    #[cfg(feature = "sqlite")]
     #[test]
     fn resume_from_last_durable_stage_skips_completed_work() {
         let mut compiler = MemoryCompiler {
