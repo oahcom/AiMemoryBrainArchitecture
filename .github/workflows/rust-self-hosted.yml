@@ -1,0 +1,71 @@
+name: Rust Workspace Tests (self-hosted)
+
+# Why this exists: every gate workflow in this repository is pinned to
+# `ubuntu-latest`, and hosted minutes are blocked on this account by a billing
+# failure. `rust-phase1.yml` therefore has never executed a single test in this
+# repository's history -- every check run it produced carries exactly one
+# annotation, "the job was not started because recent account payments have failed".
+#
+# The self-hosted runner already works. `zesu-x64` completed the read-only
+# diagnostics job at 04:41:52Z on 2026-11-22. Self-hosted minutes are not billed,
+# so this is the only path by which a Rust test result can reach a check run.
+#
+# Triggers are restricted on purpose, and the restriction is binding, not stylistic:
+#   - `14-ai-development/ubuntu-self-hosted-runner-bootstrap.en.md` §4.1 L1: the
+#     runner's job-started hook denies any job whose GITHUB_REF is not exactly
+#     `refs/heads/main`. A `pull_request` job is denied with `ref_not_default_branch`
+#     before any step runs -- observed on this PR as run 44988094101.
+#   - §4.1 L2: `scripts/ci/audit_runner_admission.py` rejects `pull_request` on any
+#     self-hosted job. It caught this workflow's first draft and was right to.
+# So this runs on `main` only. It cannot gate a PR, and it is not claimed to. What it
+# does is produce the first real test result this repository has ever had.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "crates/**"
+      - ".github/workflows/rust-self-hosted.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rust-self-hosted
+  cancel-in-progress: true
+
+jobs:
+  rust-workspace-test:
+    runs-on: [self-hosted, linux, x64]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo --version
+          rustc --version
+
+      # `--all-targets` is what rust-phase1.yml uses. Kept identical on purpose:
+      # a self-hosted run that tested a different target set would not be evidence
+      # about the same thing. The --all-targets / --lib difference already produced
+      # one wrong test count here (438/0/9 vs 385/0/10, GAP-10 §7.1).
+      - name: cargo test --workspace --all-targets
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test --workspace --all-targets --no-fail-fast 2>&1 | tee /tmp/rust-test.log
+          status=${PIPESTATUS[0]}
+
+          echo "--- summary ---"
+          grep '^test result:' /tmp/rust-test.log \
+            | sed -E 's/.*: (ok|FAILED)\. ([0-9]+) passed; ([0-9]+) failed; ([0-9]+) ignored.*/\2 \3 \4/' \
+            | awk '{p+=$1; f+=$2; i+=$3} END{printf "passed=%d failed=%d ignored=%d\n", p, f, i}'
+
+          exit "$status"
