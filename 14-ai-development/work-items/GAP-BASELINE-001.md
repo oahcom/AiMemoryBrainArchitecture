@@ -1781,3 +1781,83 @@ Step 1 is mechanical and reviewable on its own. Step 2 is the same ownership que
 ### The honest count
 
 Two seams moved from "missing code" to "code exists, nothing uses it." That is progress in the sense that the missing piece is now a `Cargo.toml` line plus a decision rather than an unwritten function. It is not progress in the sense that any end-to-end path works today, because none does.
+
+---
+
+## Round ten — the read side is connected
+
+**Measured at:** `f4ad82c` (main, squash of #580), 2026-11-22
+**Previous round:** `ef0b792e`, which recorded two seams merged and neither connected.
+
+### What changed since round nine
+
+Round nine ended with the honest sentence "two seams moved from missing code to code exists, nothing uses it." That sentence is no longer true for one of them.
+
+`#571` (`578f19dc`) put the Event Store on the **write** side of `brain-cli`: real `accept_with_payload`, an `--event-store` path, `event_classification` mapping, an idempotency-key fallback, and a 240-line `event_store_acceptance.rs`. Good work, and this round builds on it rather than replacing it.
+
+What `#571` did not do is read the row back. On `578f19dc`, `run_compiler_stage` still assembled the compiler input by hand:
+
+```rust
+let accepted = AcceptedEvent {
+    event_id: Identity(event_id.to_owned()),                       // CLI input id
+    receipt_id: Identity(request.receipt_id.as_str().to_owned()),  // passed down in memory
+    payload_digest: format!("sha256:{}", sha256_hex(...)),         // computed again here
+    payload: request.payload.to_owned(),
+    compile_intent_durable: true,                                  // still hard-coded
+};
+```
+
+And `pending_compile_intents()` had exactly two mentions on that tree, neither of them a call:
+
+```
+crates/brain-cli/src/main.rs:431:    // Payload custody, not bare acceptance: `pending_compile_intents` joins
+crates/brain-cli/tests/event_store_acceptance.rs:197:        .pending_compile_intents()
+```
+
+One comment asserting the read path exists, one call inside a test. That is the same shape of gap round nine recorded, one layer deeper: acceptance happened, and the compiler could not see that it had.
+
+### Why the hard-coded flag mattered
+
+`IngestionStage::run`'s only durable-intent guard is:
+
+```rust
+if !event.compile_intent_durable {
+    return Err(CompilerError::MissingCompileIntent);
+}
+```
+
+The sole production caller always passed `true`. A guard that no production path can fail is not a guard; it is a comment with a branch. Round nine called this out as "the guard is a formality on the production path" without noticing that the fix required a read, not a flag.
+
+### What #580 landed
+
+1. `accepted_event_from(&PendingCompileIntent) -> Result<AcceptedEvent, CompilerError>` re-digests the payload bytes rather than copying the declared digest, rejects non-UTF-8 with a new `InvalidPayloadEncoding` variant, and checks `receipt.payload_digest` and `envelope.payload_digest` separately.
+2. `brain-cli` calls `pending_compile_intents()` after acceptance and locates the row by receipt id. `CompilerStageRequest` carries the intent; its `payload` field is gone because the payload now arrives through the outbox and the field had no reader left.
+3. `memory-event-store` and `memory-event-store-sqlite` moved from `[dev-dependencies]` to optional `[dependencies]` behind the existing `sqlite` feature. Round seven claimed this edge already existed; round nine corrected the claim; round ten applied the correction.
+
+### Verification
+
+```
+cargo test --workspace --offline --all-targets
+passed=502 failed=0 ignored=2
+```
+
+Three new tests in `memory-compiler` cover the accept-read-adapt-ingest path, tampered bytes, and non-UTF-8. Two mutations were each caught:
+
+- trusting `receipt.payload_digest` instead of recomputing -> `outbox_adapter_rejects_tampered_payload_bytes` failed
+- neutralising the outbox read in `brain-cli` -> `e2e_full_chain` failed
+
+The second mutation is the one that matters. It shows the CLI now depends on the read path rather than passing because the fabricated value happened to be correct.
+
+### What is still not true
+
+**`compile_intent_durable` is not unforgeable.** `PendingCompileIntent` has public fields, so any caller can build one by hand and obtain `compile_intent_durable: true`. The adapter guarantees it never launders bad bytes; it does not make the flag a proof. Closing that needs a private constructor or a witness type in `memory-event-store-sqlite`, which is a change to that crate's public surface and was deliberately left out of scope. The adapter's doc comment marks this with `ponytail:`.
+
+**`agent-integration` -> `bmcp-protocol` is still fully disconnected.** Zero dependencies, zero conversions, zero tests. Round nine recorded this; round ten did not touch it.
+
+**Progress ownership is still undecided.** `pending_compile_intents()` is non-consuming by design. Nothing on `main` records that a given outbox row has been compiled, so a second run reads the same row again. The three candidate designs from round nine — a `compiled_at` column, a cursor table, or a rule that the compiler is idempotent and re-reads everything — are still three different systems, and picking one inside a wiring PR would be picking it by accident. The wiring PR did not pick one; it reads the row and compiles, and a re-run compiles again. That is honest but not finished.
+
+### The honest count, revised
+
+One seam is now connected: `compile_outbox` has a production reader, and the compiler input is derived from durable state rather than assembled beside it. One seam is still merged-but-unused: `bmcp-protocol`'s 48 getters have no consumer in `agent-integration`. One decision is still open: what "already compiled" means.
+
+The difference between round nine and round ten is that the first sentence used to be "the read side exists and nothing reads." It is now "the read side exists and the compiler reads it."
