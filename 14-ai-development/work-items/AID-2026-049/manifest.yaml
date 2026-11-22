@@ -1,0 +1,120 @@
+work_item_id: AID-2026-049
+title: Carry the four §9.4 sufficiency-report fields the observability projection does not model
+
+class: DOMAIN/TEST/DOC
+risk: R1
+risk_rationale: "Bounded additive data carrier in one crate plus a bilingual coverage-row correction that downgrades an overstated claim. No persistence, no transport, no change to an existing public type's semantics, no dependency change, no architecture decision. The one public type it replaces (IndexWatermark) was introduced by this same delivery and is not referenced anywhere else."
+
+security_scope: "In-memory report fields only. BlockedRefs keeps an API-level disclosure boundary and deliberately exposes no total-count accessor, not even a crate-private one."
+
+status: PR_OPEN
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+implementing_ai_session: "ChatGPT delivery session (acct2), platform session identifier NOT_EXPOSED"
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 550bb864ed09dc6b76471f799c31e6d83b3b3b00
+
+tracking_issue: "NONE — task is tracked by this AID manifest and its delivery PR; no new Issue requested"
+
+created_at: 2026-11-22
+updated_at: 2026-11-22
+
+prompt_id: AID-2026-049-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-049/prompt-v1.md
+prompt_status: FROZEN
+prompt_sha256: c4be14e26f2aa7a64edcae1b12ebcb896382865a83ced0987ec00e1e584c096a
+prompt_bytes: 31989
+
+prompt_provenance_tier: T1
+prompt_provenance_note: "Frozen from the Owner-dispatched task in this session. Raw platform payload bytes and the session identifier are not exposed; the SHA-256 identifies the committed prompt-v1.md bytes, which include the two source files handed to the delivery session as read-only input."
+
+dependency_refs:
+  - crates/memory-context/src/sufficiency_report.rs
+  - crates/memory-context/src/observability.rs
+  - crates/memory-context/src/budget.rs
+  - crates/memory-context/src/lib.rs
+  - 06-memory-context/context-budget-and-sufficiency.md
+  - 06-memory-context/context-implementation-coverage.md
+  - 06-memory-context/context-implementation-coverage.zh-CN.md
+  - 14-ai-development/work-items/AID-2026-048/manifest.yaml
+
+deliverables:
+  - "SufficiencyReport carries the four §9.4 fields observability.rs does not model: canonical_commit_ref/forget_fence_ref/permission_epoch, budget+budget_usage+token_estimate_profile+rendered_bytes+entries, compacted_sources+validation_profile+digest_profile, blocked+deferred."
+  - "The module consumes budget::BudgetVector and budget::BudgetUsage instead of redefining them; a first revision declared a second BudgetVector and shadowed main's type at the crate root, which made four of main's symbols dead and failed clippy -D warnings."
+  - "IndexWatermark is deleted in favour of CanonicalWatermark plus PartitionState, because CanonicalWatermark already carried source/partition/revision; only the per-partition gap verdict was new, and §9.1 makes that three states rather than a bool."
+  - "Row 67 of the English and Chinese coverage tables moves from IMPLEMENTED to PARTIAL, with the four absent §9.4 fields named and the previous claim recorded as an error."
+
+independent_reviewer: NOT_ASSIGNED
+integration_reviewer: NOT_ASSIGNED
+
+review:
+  status: NOT_ASSIGNED
+  report_ref: ""
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+implementation:
+  status: PR_OPEN
+  branch: feat/context-sufficiency-report-fields-2026-11-22
+  pull_request: PENDING
+  pull_request_url: PENDING
+  implementation_commit_sha: PENDING
+  merge_commit_sha: NOT_MERGED
+
+authorization:
+  registration_write: "USER-PRINCIPAL-DELEGATED (limited to this AID registration package)"
+  implementation_write: "USER-PRINCIPAL-DELEGATED (limited to crates/memory-context and the two coverage rows)"
+  index_update: "USER-PRINCIPAL-DELEGATED (limited to the single AID-2026-049 row)"
+  persistence_implementation: NOT_GRANTED
+  transport_implementation: NOT_GRANTED
+  supersession_cascade: NOT_GRANTED
+  architecture_acceptance: NOT_GRANTED
+  production_authorization: NOT_GRANTED
+
+governance:
+  aid_assignment: REGISTERED
+  aid_status: REGISTERED
+  registration_authorization: "USER-PRINCIPAL-DELEGATED (limited to this work item)"
+  development_start_authorization: "USER-PRINCIPAL-DELEGATED (limited to this implementation scope)"
+  architecture_status: NOT_APPLICABLE
+  g8_status: NOT_APPLICABLE
+  quota_change: NONE
+
+verification:
+  status: RUN
+  environment: "Windows natively, no WSL. Zig toolchain as CC/AR via zigcc and 'zig ar'. PATH extended with the zigwrap and ziglang directories; CARGO_NET_OFFLINE unset."
+  commands:
+    - "cargo build -p memory-context; echo BUILD=$?  -> EXIT 0, zero warnings"
+    - "cargo clippy -p memory-context --all-targets -- -D warnings; echo CLIPPY=$?  -> EXIT 0"
+    - "cargo fmt --all -- --check; echo FMT=$?  -> EXIT 0"
+    - "cargo test -p memory-context --test sufficiency_report  -> 21 passed, 0 failed, 0 ignored"
+    - "cargo test -p memory-context --test observability  -> 10 passed, 0 failed, 0 ignored (unchanged)"
+    - "cargo test -p memory-context --test budget_vector  -> 10 passed, 0 failed, 0 ignored (unchanged)"
+    - "cargo test --workspace --all-targets --no-fail-fast; echo FULL=$?  -> EXIT 0, 687 passed, 0 failed, 0 ignored"
+    - "grep -rn 'IndexWatermark|CompletenessOutcome' --include=*.rs crates/  -> 0 hits"
+    - "grep -rn '^#\\[ignore' --include=*.rs crates/  -> 0 hits"
+    - "grep -rn 'todo!|unimplemented!' --include=*.rs crates/  -> 0 hits"
+  evidence_refs:
+    - "main at 550bb864 alone measures 666 passed, 0 failed, 0 ignored; adding this work item's 21 tests yields 687."
+    - "One earlier full run reported exit 101 with a single failure in memory-event-store-sqlite tests/forget_fence.rs: 'table accepted_events already exists'. It did not reproduce in 12 isolated runs, 6 serial runs, or a second full run, and memory-context has no dependency on that crate. Filed as GAP-21 rather than repaired here."
+
+findings:
+  - id: AID-2026-049-F1
+    severity: P1
+    feedback_destination: "Delivery PR conversation. The first revision declared its own BudgetVector while main had just merged budget::BudgetVector (limits) and budget::BudgetUsage (measurements). The explicit re-export shadowed main's glob re-export at the crate root, making budget::BudgetVector, BudgetUsage, violations, check and entries_in unreachable; clippy -D warnings failed with four errors on a crate whose only mistake was importing the module. Fixed by deleting the local type and consuming main's, which is also what the coverage-row text already described."
+  - id: AID-2026-049-F2
+    severity: P2
+    feedback_destination: "Delivery PR conversation. The module also declared IndexWatermark while CanonicalWatermark already carried source/partition/revision. Deleted; the only genuinely new information was the per-partition gap verdict, now PartitionState wrapping CanonicalWatermark. CompletenessOutcome was renamed rather than aliased, since two names for one concept is the same defect in a different costume."
+  - id: AID-2026-049-F3
+    severity: P1
+    feedback_destination: "Coverage table. Row 67 was recorded as IMPLEMENTED by a direct-to-main commit (79a1f8b1) that cited observability.rs. Four of the seven §9.4 fields are absent from that file: canonical commit/fence refs with PermissionEpoch, the budget vector, compacted sources with validation/digest profiles, and blocked/deferred refs. The single grep hit for those names is a comment quoting §9.4. Row downgraded to PARTIAL in both languages."
+  - id: AID-2026-049-F4
+    severity: P3
+    feedback_destination: "Delivery PR conversation. A python3 -c one-liner used to append the lib.rs re-export silently rewrote 4458 lines because the shell quoting corrupted the replacement text. Caught by checking git diff --numstat before committing (4458/4451 instead of 6/0) and reverted. The append was redone from a script file and re-verified at 6 insertions, 0 deletions."
