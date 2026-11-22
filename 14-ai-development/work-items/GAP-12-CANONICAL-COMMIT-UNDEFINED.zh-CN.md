@@ -72,7 +72,7 @@ impl CanonicalCommitRef { pub const fn pending_d() -> Self { Self(()) } }
    在此之前不可能有生产者，也不应模拟。
 3. **（E，待 2 完成后）** 从该校验器取 `canonical_commit_confirmed`，并停止把游标当作
    证据（D6.3）。
-4. **（D，阻塞，独立）** 发布参与者登记表，使 `publication_participant_admitted` 有签发者。
+4. **（D，已裁定——见 `D-OWNER-DECISION-PARTICIPANT-ADMISSION-001`）** 当前基线下，`publication_participant_admitted` 保持 `false`；§8 的 D 权威 Fence/Admission 并非 E 侧 `AdmissionStore`，且所需的 COC、Storage、I 证据签发方尚未实现。
 5. **（I，阻塞，独立）** 受保护可见性授权，使 `protected_visibility_authorized` 有签发者。
 
 第 2、4、5 步的归属在 E 之外。第 1 步是今天唯一能落地的。
