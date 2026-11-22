@@ -134,6 +134,8 @@ pub struct ProducerRegistrationRequest {
     pub operation_id: OpaqueId,
     pub correlation_id: OpaqueId,
     pub causation_id: Option<OpaqueId>,
+    /// Caller-supplied cursor, persisted without validation. Its presence is not
+    /// evidence that a canonical commit was confirmed (D6.3).
     pub admission_canonical_commit_cursor: Option<OpaqueId>,
     pub observed_fence_cursor: OpaqueId,
     pub permission_epoch: OpaqueId,

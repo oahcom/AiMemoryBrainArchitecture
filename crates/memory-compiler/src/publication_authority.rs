@@ -114,7 +114,8 @@ mod tests {
         DependencyRegistrationRequest, ProducerRegistrationRequest, RegistrationDisposition,
     };
     use crate::{
-        Identity, Provenance, PublicationDisposition, PublicationGate, StageName, Visibility,
+        CompilerError, Identity, NormalizedIR, Provenance, PublicationDisposition, PublicationGate,
+        StageName, StagingInput, StagingStage, Visibility,
     };
     use memory_domain::{Memory, MemoryLifecycle, MemoryVersion, ScopeKind, ScopeRef};
     use memory_storage::PrepareRequest;
@@ -302,6 +303,113 @@ mod tests {
         assert!(!proof.protected_visibility_authorized);
         assert_eq!(proof.publication_id, identity("publication-1"));
         assert_eq!(proof.generation, 1);
+    }
+
+    /// GAP-12 closure criterion 3: a caller-supplied cursor alone must not be able
+    /// to produce `canonical_commit_confirmed == true` in any `PublicationProof`.
+    ///
+    /// The two facts are deliberately separated. Staging accepts the run because a
+    /// cursor was recorded (D6.2 renamed that precondition to say so); the
+    /// production adapter still refuses to call the commit confirmed (D6.1).
+    #[test]
+    fn caller_supplied_cursor_does_not_confirm_canonical_commit() {
+        let admission = admitted_store();
+
+        let recorded_cursor = admission
+            .producer_request(&id("work-1"))
+            .unwrap()
+            .admission_canonical_commit_cursor;
+        assert!(
+            recorded_cursor.is_some(),
+            "the fixture must actually persist a caller-supplied cursor"
+        );
+
+        let storage = storage_with_prepared_hidden();
+        let mut authority = AdmissionPublicationAuthority::new(
+            admission,
+            &storage,
+            ProducerWorkItemId::new(id("work-1")),
+        );
+
+        let proof = authority.obtain_proof(&staged(), &lease()).unwrap();
+
+        assert!(
+            !proof.canonical_commit_confirmed,
+            "a caller-supplied cursor is not evidence of a confirmed canonical commit (D6.3)"
+        );
+    }
+
+    #[test]
+    fn staging_accepts_a_recorded_cursor_without_calling_the_commit_confirmed() {
+        let staged = StagingStage::run(
+            StagingInput {
+                normalized: NormalizedIR {
+                    event_id: identity("event-1"),
+                    values: vec!["value".into()],
+                    provenance: Provenance {
+                        source_event_id: identity("event-1"),
+                        source_payload_digest: "sha256:test".into(),
+                        payload_digest_algorithm: "sha256".into(),
+                        canonicalization_version: "raw-v1".into(),
+                        stage_output_id: identity("derivative-1"),
+                        upstream_outputs: vec![],
+                        compiler_version: crate::COMPILER_VERSION.into(),
+                        parameter_digest: "dependency-closure:event-1".into(),
+                        stage_name: StageName::Normalization,
+                        attempt_generation: 1,
+                    },
+                },
+                derivative_id: identity("derivative-1"),
+                publication_id: identity("publication-1"),
+                dependency_ids: vec![identity("event-1")],
+                dependency_closure_complete: true,
+                producer_admitted: true,
+                canonical_commit_cursor_recorded: true,
+            },
+            1,
+        )
+        .expect("a recorded cursor satisfies the renamed staging precondition");
+
+        assert_eq!(staged.derivative_id, identity("derivative-1"));
+        assert_eq!(
+            staged.visibility,
+            Visibility::Hidden,
+            "staging yields a hidden derivative; it never publishes"
+        );
+    }
+
+    #[test]
+    fn staging_rejects_a_run_with_no_recorded_cursor() {
+        let error = StagingStage::run(
+            StagingInput {
+                normalized: NormalizedIR {
+                    event_id: identity("event-1"),
+                    values: vec!["value".into()],
+                    provenance: Provenance {
+                        source_event_id: identity("event-1"),
+                        source_payload_digest: "sha256:test".into(),
+                        payload_digest_algorithm: "sha256".into(),
+                        canonicalization_version: "raw-v1".into(),
+                        stage_output_id: identity("derivative-1"),
+                        upstream_outputs: vec![],
+                        compiler_version: crate::COMPILER_VERSION.into(),
+                        parameter_digest: "dependency-closure:event-1".into(),
+                        stage_name: StageName::Normalization,
+                        attempt_generation: 1,
+                    },
+                },
+                derivative_id: identity("derivative-1"),
+                publication_id: identity("publication-1"),
+                dependency_ids: vec![identity("event-1")],
+                dependency_closure_complete: true,
+                producer_admitted: true,
+                canonical_commit_cursor_recorded: false,
+            },
+            1,
+        )
+        .expect_err("staging must still refuse when no cursor was recorded");
+
+        assert_eq!(error, CompilerError::MissingCanonicalCommit);
     }
 
     #[test]

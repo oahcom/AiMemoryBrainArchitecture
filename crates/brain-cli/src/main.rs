@@ -269,7 +269,7 @@ fn run_compiler_stage(request: CompilerStageRequest<'_>) -> Result<CompilerStage
         dependency_ids: Vec::new(),
         dependency_closure_complete: false,
         producer_admitted: false,
-        canonical_commit_confirmed: false,
+        canonical_commit_cursor_recorded: false,
     };
     let lease = WorkerLease {
         operation_id: Identity(format!("operation:{event_id}")),
