@@ -787,3 +787,95 @@ inventory audited at a pinned base; whether it is *authoritative* for the
 message-type namespace, or merely a report about it, has not been decided.
 
 Both are recorded in #564. Neither is fixed by this document.
+
+## 10. Errata for §9, measured at `61b9d743` (2026-11-22 13:30 +08:00)
+
+§9 is not edited above. Two of its statements were wrong when written, and one
+became wrong when `main` moved. They are corrected here rather than in place,
+because a frontier document whose measurements are silently rewritten cannot be
+audited — the next reader cannot tell a correction from an original claim.
+
+### 10.1 `bmcp-server` exists, and §9 said it did not
+
+§9 §2 said:
+
+> No `TcpListener`, no `hyper`, no `axum` anywhere in `crates/`.
+
+False at `61b9d743`. `crates/bmcp-server` is a workspace member — 723-line
+`lib.rs`, 67-line `main.rs`, 166-line `rt_scenarios.rs` — and its fourth line is:
+
+```rust
+use std::net::{SocketAddr, TcpListener, TcpStream};
+```
+
+The error is worth naming because it is the same class §9 exists to diagnose: an
+absence reported without checking for the artifact. I measured `crates/` from a
+tree that predated the crate.
+
+### 10.2 The corrected BMCP finding is narrower and more useful
+
+What is actually true is not "transport absent" and not "transport present":
+
+- 22 unique `message_type` values are declared across 32 schemas, and the index
+  checker passes (`unique_message_types=22`, `missing=0`, `extra=0`).
+- Exactly **one** has a Rust parser: `parse_and_validate` returns
+  `AppliedDeliveryEvidence` by name, and the `message_type` check is a constant
+  comparison (`lib.rs:892-903`), so any other type yields `WrongConst`.
+- `bmcp-server` implements one JSON-RPC method (`initialize`) and returns
+  `-32601 Method not found` for everything else.
+- `bmcp-server` never reaches the parser. Its only `bmcp_protocol` reference in
+  the whole crate is:
+
+```rust
+// lib.rs:718-723
+// This local formatter is available for a future evidence-validation call site.
+#[allow(dead_code)]
+fn describe(error: &bmcp_protocol::validate::EvidenceError) -> String {
+```
+
+`#[allow(dead_code)]`, "for a future call site", zero call sites.
+
+So: **a listener exists, and zero of the 22 message types reach a parser.** That
+is a routing gap plus 21 missing parsers, not a missing binary. The 21 parsers
+are transcription against existing JSON Schema and are not frozen by anything.
+Framing, session and handshake remain frozen by H — `TECH-REALITY-001-C/README.md:70`
+still reads *"H wire mapping remains NOT FROZEN"* — so building on the existing
+JSON-RPC/TCP choice would build on an undocumented premise.
+
+Full measurement: GAP-16.
+
+### 10.3 §9 filed `dm2_06` under the wrong owner
+
+§9 §3 said `dm2_06` was "blocked by `B-P2-XO-01` and by §8's prohibition on
+inferring authorization". The second half is right; the first is a conflation.
+
+`B-P2-XO-01` asks *is this authorization genuine?* — I's question, still open.
+`dm2_06` asks *is one present at all?* — a type-state question.
+`FactRevision::initial` takes `AuthorizationDecisionRef` as a **required,
+non-`Option`** parameter (`memory-domain/src/lib.rs:831`) and the type is a unit
+struct whose only constructor is `pending_i() -> Self(())`, so no value of it can
+mean "absent". That is why the negative case could not be written, and it needs
+nothing from I.
+
+Decided in `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001`: three states
+(`Absent` / `Placeholder` / `Issued`), only `Absent` blocks, and the type must
+not be nameable as proof.
+
+### 10.4 What survives §9 unchanged
+
+The four falsified percentages, the `503 / 0 / 1` measurement, the
+`13-engineering-decisions` 58-of-77 attribution, and the ruling that the two
+`NO_AUTHORITATIVE_SOURCE` scopes are retirements rather than promotions. §9's
+central claim — that the six percentages are the wrong frame — is strengthened
+by these corrections, not weakened: three different errors of the same class
+(reporting a state without re-measuring it) appeared inside the document that
+argues against that class.
+
+**Authority correction for the reading-guide scope:** §9.5's statement that the
+reading guide had been ruled `Canonical / Informative` is superseded by Issue
+#564 comment `7074302216`. The current Owner decision is not to promote it:
+`04-memory-compiler/README.md` remains `canonical_status: Non-Canonical` and
+`normative_status: Informative`. The later execution records in #564 comments
+`7074470193` and `7074777892` clarify clauses 2/3; they do not reverse clause 1.
+The protocol index remains `Candidate` with canonical current version
+`NOT DECLARED`.
