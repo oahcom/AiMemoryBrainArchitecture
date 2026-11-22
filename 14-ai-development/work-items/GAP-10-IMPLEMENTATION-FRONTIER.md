@@ -328,3 +328,200 @@ annotation, verbatim:
 
 Every green in this document is a local measurement. Nothing here was checked by
 a workflow.
+
+## 7. Re-measurement at `dba34a35` (2026-11-22 03:05 +08:00)
+
+Additive again. §1-§6 are untouched. Six things changed on main since `b29278a8`,
+and one of them invalidates a `#[ignore]` reason rather than closing a gap.
+
+### 7.1 Test totals moved, and the ignored count moved for the wrong reason
+
+```
+$ CC=zigcc AR=zigar cargo test --workspace --all-targets
+binaries: 26
+TOTAL passed=438 failed=0 ignored=9
+```
+
+§6.1 recorded 385 / 0 / 10 at `b29278a8`. The +53 passing is real work. The
+10 → 9 ignored is **not** a converted test: see §7.2.
+
+Per crate, from the same run:
+
+| crate | unit | integration |
+|---|---|---|
+| agent-integration | 36 | 2 + 19 |
+| bmcp-protocol | 42 | 4 |
+| brain-cli | 1 | 4 |
+| memory-compiler | 62 | 1 |
+| memory-context | 68 | 8 + 1 |
+| memory-domain | 55 | 11 (+9 ignored) |
+| memory-event-store | 2 | — |
+| memory-event-store-sqlite | 18 | 5 + 2 + 6 |
+| memory-storage | 3 | — |
+| memory-storage-sqlite | 60 | — |
+| memory-store | 15 | 6 + 3 + 2 |
+
+The `371 vs 385` discrepancy flagged in §6.2 is not resolved here either. What is
+now certain is that the §6.1 table counted a different target set than this one:
+`--all-targets` includes integration binaries, and the §6.1 numbers match the
+`--lib`-only runs.
+
+### 7.2 One `#[ignore]` reason is now false, and the test did not change
+
+`#545` (444deef1) added `crates/memory-domain/src/claim_identity.rs`, re-exported
+via `pub use claim_identity::*` at `lib.rs:7`. It provides exactly the API that
+`dm2_03` says does not exist:
+
+```rust
+pub fn classify(prior: &ClaimRevision, candidate: &ClaimRevision) -> ClaimIdentityDecision
+```
+
+The ignore reason at `phase2_acceptance.rs:160` still reads:
+
+> `blocked: memory_domain 当前没有 classify_claim_change / CI-01..CI-13 classifier 函数`
+
+Measured:
+
+```
+$ cargo test -p memory-domain --lib claim_identity
+test result: ok. 19 passed; 0 failed; 0 ignored
+```
+
+19 tests cover CI-01, CI-02, CI-03, CI-04, CI-07, CI-08, CI-09, CI-10, CI-11,
+CI-13 plus label-only, qualifier ambiguity, multi-dimension ambiguity, scope
+ambiguity, cross-claim, no-fallback, and determinism. CI-05 / CI-06 / CI-12 are
+documented in the module header as **unreachable**, not missing: `ClaimRevision`
+has no quantifier, modality or confidence field, so the classifier cannot be
+asked the question.
+
+So `dm2_03` is not blocked. It is **stale**. The `unimplemented!()` body would
+fail if un-ignored, so the ignore cannot simply be dropped — the test body itself
+was never written against `classify()`. This is a defect in the acceptance file,
+not in the domain crate.
+
+The 9 remaining ignores were re-probed one by one; **8 still hold**:
+
+| test | probed symbol | hits in `crates/` |
+|---|---|---|
+| dm2_01 | `ClaimRevisionRegistry`, `register_revision` | 0 |
+| dm2_02 | `AcceptedRevisionState` | 0 |
+| dm2_04 | `ClaimRevisionResolver`, `resolve_claim_head` | 0 |
+| dm2_06 | validated `AuthorizationDecisionRef` | only `pending_i()` |
+| dm2_08 | `RelationTypeRegistry`, `contains_relation_type` | 0 |
+| dm2_09 | `RelationExtension.scope_refs` | struct has no such field |
+| dm2_11 | `Provenance::validate`, `parent_provenance_refs`, `unavailable_reason` | 0 |
+| dm2_12 | `ProvenanceGraph`, `DerivationEdge`, `validate_independent` | 0 |
+
+`RelationExtension` at `memory-domain/src/lib.rs` carries `valid_time`,
+`epistemic_status`, `lifecycle_state` and no `scope_refs`; `Provenance` carries
+`provenance_id`, `source_refs`, `derivation_kind`, `actor_ref`, `created_at` and
+no lineage or unavailable-reason field. Both reasons are accurate.
+
+### 7.3 GAP-07's gap statement is now false; its closure criteria are half met
+
+§1.2 of GAP-07 says, verbatim, that `compile` has "no production implementation
+of its required `PublicationAuthority` trait, and no non-test caller". Both
+halves are now wrong:
+
+```
+$ grep -rn "impl.*PublicationAuthority for" --include=*.rs crates/
+crates/memory-compiler/src/lib.rs:921:  impl PublicationAuthority for EvidenceAuthority      (cfg(test))
+crates/memory-compiler/src/lib.rs:940:  impl PublicationAuthority for TestAuthority          (cfg(test))
+crates/memory-compiler/src/lib.rs:1355: impl PublicationAuthority for RecoveryAuthority      (cfg(test))
+crates/memory-compiler/src/publication_authority.rs:50:
+        impl PublicationAuthority for AdmissionPublicationAuthority<'_>   (production)
+```
+
+`brain-cli/src/main.rs:4` imports `memory_compiler::publication_authority::AdmissionPublicationAuthority`,
+constructs it at line 245, and `run_compiler_stage` calls `compiler.compile(...)`
+at line 285. A real run:
+
+```
+$ brain compile --input fixtures/event.json --out ctx.json --verbose
+compiler stage blocked: publication not authorized; blocking flag: canonical_commit_confirmed;
+  false flags: [canonical_commit_confirmed, publication_participant_admitted,
+                protected_visibility_authorized]
+EXIT=0
+```
+
+Against GAP-07's own closure criteria:
+
+1. **MET** — a production authority exists and a non-test path calls `compile`.
+2. **MET** — `crates/brain-cli/tests/compiler_skip_is_visible.rs`, 4 tests, spawns
+   the built binary and asserts the notice appears exactly once on stderr and in
+   the sidecar, with exit code 0.
+3. **MET** — the notice is unconditional, outside `--verbose`.
+4. **Not met, and now the only thing standing** — GAP-07 still describes itself
+   as open in the present tense while its subject no longer exists.
+
+The three `false` flags are not a bug. `OWNER-DECISION-PUBLICATION-RECORD-001` D3
+states the adapter "never computes, infers, defaults or substitutes a flag", and
+`compiler-stage-contract.md` §8 states "E MUST NOT implement substitute
+authorization decisions". Reporting `false` is the required behaviour when no
+authoritative issuer exists. The run is therefore **correctly refusing to
+publish**, which is a different outcome from "the stage did not run".
+
+This is a documentation defect of the exact kind GAP-10 §5 was written to catch:
+a stale statement about the present, inherited rather than re-derived.
+
+### 7.4 The E2E claim moves from "false" to "true up to the publication gate"
+
+§5 row for E2E says "`brain-cli` runs ingestion → storage → context end to end.
+It stops at the compiler skip". The path now runs ingestion → extraction →
+normalization → staging → `compile` → proof acquisition → refusal. That is one
+more stage than §5 recorded, and the refusal is a real decision from a real
+authority rather than a skip.
+
+What is still absent is a **successful** publication. Nothing in the repository
+can produce a `Published` disposition, because the three proof fields have no
+issuer. No test asserts `PublicationDisposition::Published` from a non-test path.
+
+### 7.5 The bilingual gate is contaminated by untracked build output
+
+```
+$ BASE_SHA=HEAD~1 HEAD_SHA=HEAD python scripts/check_bilingual_docs.py
+::error::New bilingual gap outside frozen baseline: 08-bmcp-protocol/.pytest_cache/README.md
+::error::New bilingual gap outside frozen baseline: 08-bmcp-protocol/tests/conformance/.pytest_cache/README.md
+EXIT=2
+```
+
+Both paths are untracked (`.gitignore` line 6 has `.pytest_cache/`), and
+`current_bilingual_gaps()` walks `root.rglob("*.md")` on the filesystem rather
+than `git ls-files`. So any local pytest run turns the gate red on files that
+cannot exist in CI. Removing them:
+
+```
+bilingual baseline: 77 frozen, 0 new gaps
+EXIT=1   (only the PR-body manifest error remains)
+```
+
+This is not a new gap. It is a **reproducibility defect**: the gate's answer
+depends on untracked local state, so "the gate passes" is not a statement about
+the commit.
+
+### 7.6 The 77-gap baseline did not move, and its shape is now fully attributed
+
+`current_bilingual_gaps()` returns 79 locally, 77 on a clean tree. The clean-tree
+distribution:
+
+| root | gaps | note |
+|---|---:|---|
+| `13-engineering-decisions` | 58 | 58 `.md` files, 0 `.en.md`, 0 `docs/en` mirror |
+| `06-memory-context` | 10 | |
+| `08-bmcp-protocol` | 6 | |
+| `14-ai-development` | 4 | all `research/phase-0/SESSION-*.md` |
+| `00-governance` | 1 | `reports/gov-doc-001-full-scan-2026-11-20.md` |
+
+`13-engineering-decisions` is **100% of its own subtree** and 75% of the whole
+baseline. `PAIR_EXEMPT_PREFIXES` covers `work-items/`, `prompts/`, `adr/` under
+14 but nothing under 13, and `EMBEDDED_BILINGUAL_SOURCES` has 21 entries of which
+**zero** are under 13. So the entire root is in the baseline because no shape the
+gate accepts was ever created for it — the same mechanism GAP-10 §1 and register
+015 established for the 77, now localised to one root.
+
+`14-ai-development/governance-register/` is **not** in the baseline despite 31
+`.md` files: 19 have `docs/en` + `docs/zh-CN` mirrors, and the 12 that do not are
+side-by-side pairs (`README.md` + `README.en.md`, and the five `GOV-NC-2026-11-20-*`
+pairs). `side_by_side_partner()` resolves all of them. This is the mechanism
+working as designed, and it is the counter-example to §7.5: the register is
+clean because its files are tracked and its pairs are real.
