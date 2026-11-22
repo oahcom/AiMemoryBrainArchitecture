@@ -23,12 +23,13 @@ document_metadata:
     normative_status: Informative
 ---
 
-# GAP-27 — `forget_fence` builds fixture paths that collide under concurrency
+# GAP-29 — `forget_fence` builds fixture paths that collide under concurrency
 
 **Status:** Open — not repaired here
 **Area:** test harness, not production code
 **Found at:** a full-workspace run on `feat/context-sufficiency-report-fields-2026-11-22`
 **Confirmed at:** `main` @ `22a1f30f`
+**Renumbered:** filed as GAP-27 in #690; `GAP-27-THE-BACKLOG-IS-NOT-ONE-BACKLOG.md` landed first (#686, 20:02) and the two numbers collided. The #690 commit message still says `gap-27`.
 
 ---
 
