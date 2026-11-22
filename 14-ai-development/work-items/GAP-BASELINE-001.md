@@ -1646,3 +1646,61 @@ on a specific missing seam, not on volume of missing code.**
   compiler is not in the path of any of them.
 - No gap is closed by this section. No PR is approved. No CI job in this repository has
   started since billing broke.
+
+## Round eight: measured against main cf460ba4, and what round seven got wrong
+
+Round seven was measured at `1ebbab84`. That is already three merges stale. The list below is measured at `cf460ba4` (`merge: carry PR #433 memory-context ChangeSet/expiry/ack into main`).
+
+### What moved between round seven and now
+
+| commit | what it did | why it invalidates round seven |
+|---|---|---|
+| `666d77da` | `feat(store): expose canonical Forget through the MemoryStore facade (#556)` | Forget is now reachable through the facade. Round seven said the store layer had no write-out path. |
+| `cf460ba4` | `merge: carry PR #433 memory-context ChangeSet/expiry/ack into main` | PR #433 is merged. Round seven and every round before it recorded #433 as **open** with an unresolved review FAIL. |
+
+### The #433 correction
+
+Every earlier round of this document, and several comments I posted on other PRs, treated #433 as an open PR carrying an unresolved review that found two defects (a test count of 14 vs 15, and a reference to a non-existent `current_use_allowed`). That is now wrong in the way that matters: it is merged into main. Whether those two defects were fixed before merge, I did not verify, and I am not going to claim they were. What I can say is that they are no longer a reason to hold anything, because the code is in main and the workspace compiles and tests green against it.
+
+### Test totals
+
+`cargo test --workspace --offline --all-targets` at `cf460ba4`:
+
+```
+TOTAL passed=452 failed=0 ignored=9
+```
+
+Round seven recorded `371 passed, 0 failed, 10 ignored` at `1ebbab84`. The delta is +81 passing, -1 ignored. That is not from my work; my only change is the unmerged PR #559, which adds 4. The rest came from #433, #512, #537 and #556.
+
+### The three broken links, re-measured
+
+| link | round seven | now | evidence |
+|---|---|---|---|
+| event-store -> compiler | PARTIAL | **PARTIAL, and now named precisely** | `compile_outbox` still has no read path. Confirmed by `grep compile_outbox` on `crates/memory-event-store-sqlite/src/lib.rs` at `cf460ba4`: the `CREATE TABLE`, two `INSERT`s, and three `SELECT COUNT(*)` inside `#[cfg(test)]`. PR #559 adds the missing read side but is unmerged. |
+| context -> agent | PARTIAL | **PARTIAL** | `agent-integration` gained 357 lines and 3 tests from #512, but its `Cargo.toml` still lists only `memory-context` and `memory-domain`. No bmcp dependency, then or now. |
+| agent -> bmcp | ABSENT | **ABSENT** | Unchanged. `crates/agent-integration/src/lib.rs` contains the string `bmcp` zero times and `AppliedDeliveryEvidence` zero times. |
+
+### The bmcp-protocol measurement that has not moved
+
+At `cf460ba4`, `crates/bmcp-protocol/src/lib.rs` is 1374 lines with:
+
+- `impl` blocks: **0**
+- `pub fn`: `parse_strict`, `p0_digest`, `p0_digest_of_value`, `parse_and_validate` — four free functions, none of them a method
+- `#[test]`: 42
+- `pub(super)` fields: 48, all on `AppliedDeliveryEvidence`
+- `pub struct`: 1
+
+So the type with 48 fields still has no accessor. A caller can obtain one from `parse_and_validate` and cannot read a single field from it. This is not a coverage gap; it is a missing `impl` block, and it is why nothing in the workspace consumes the crate. The fix is roughly thirty getters and one `is_complete`. It is not a protocol design question.
+
+### What round seven got right, and what it got wrong
+
+Right: the six percentages were stale, and four of them were stale in the direction of overstating the gap. The honest statement from round seven — that four of six areas are blocked on a specific missing seam rather than on volume of missing code — survives this re-measurement.
+
+Wrong: I anchored the whole round on a baseline that was already three commits behind when I measured it, and I repeated the #433 status from earlier rounds without re-checking it. A document whose entire purpose is to correct stale baselines was itself carrying a stale baseline. The fix is not a new round of prose; it is that this document should be re-derived from `main` at read time, not from a commit hash frozen in a paragraph.
+
+### The two seams, stated as work rather than percentages
+
+1. **`compile_outbox` has no read side.** PR #559 supplies it: one type, one method, four tests, 113 lines, one file. Mutation-verified — reversing the `ORDER BY` fails exactly the ordering test. Not merged; its CI cannot run because the account's Actions billing has failed, which is unrelated to the diff.
+2. **`AppliedDeliveryEvidence` has no accessors.** Not started. Roughly thirty getters plus `is_complete`, one file, no new dependency.
+
+Neither needs an Owner ruling. Both are the kind of change a reviewer can accept or reject on the diff alone.
