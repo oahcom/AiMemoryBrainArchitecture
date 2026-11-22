@@ -228,5 +228,41 @@ class AppliedDeliveryEvidenceTests(unittest.TestCase):
         self.assertIn("invalid RFC3339", result["errors"][0])
 
 
+    def test_33_profile_registration_rejection(self):
+        c=checks(); c.verify_profile_registration=lambda e: False
+        result=self.validate(fixture(),c)
+        self.assertEqual(result["status"],"INVALID")
+        self.assertIn("profile registration verifier rejected evidence",result["errors"])
+
+    def test_34_protected_identity_binding_rejection(self):
+        c=checks(); c.verify_protected_identity_binding=lambda e: False
+        result=self.validate(fixture(),c)
+        self.assertEqual(result["status"],"INVALID")
+        self.assertIn("protected identity binding verifier rejected evidence",result["errors"])
+
+    def test_35_c_final_boundary_rejection(self):
+        c=checks(); c.verify_c_final_boundary=lambda e: False
+        result=self.validate(fixture(),c)
+        self.assertEqual(result["status"],"INVALID")
+        self.assertIn("C final boundary verifier rejected evidence",result["errors"])
+
+    def test_36_g_delivery_binding_rejection(self):
+        c=checks(); c.verify_g_delivery_binding=lambda e: False
+        result=self.validate(fixture(),c)
+        self.assertEqual(result["status"],"INVALID")
+        self.assertIn("G delivery binding verifier rejected evidence",result["errors"])
+
+    def test_37_capability_epoch_rejection(self):
+        c=checks(); c.verify_capability_epoch=lambda e: False
+        result=self.validate(fixture(),c)
+        self.assertEqual(result["status"],"INVALID")
+        self.assertIn("Adapter capability epoch verifier rejected evidence",result["errors"])
+
+    def test_38_profile_registration_unknown_is_not_rejection(self):
+        c=checks(); c.verify_profile_registration=lambda e: None
+        result=self.validate(fixture(),c)
+        self.assertEqual(result["status"],"UNKNOWN")
+        self.assertIn("profile registration verifier result is indeterminate",result["unknown"])
+
 if __name__ == "__main__":
     unittest.main()
