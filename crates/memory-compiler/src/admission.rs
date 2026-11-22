@@ -5,8 +5,9 @@
 //! provide a cross-service D/Storage visibility transaction.
 
 use memory_domain::{
-    is_rfc3339_utc, is_sha256_hex, CanonicalCommitData, CanonicalCommitRef, IssuerId, OpaqueId,
-    ScopeRef, DEV_BASELINE_ISSUER,
+    is_rfc3339_utc, is_sha256_hex, AuthorizationDecisionData, AuthorizationDecisionKind,
+    AuthorizationDecisionRef, CanonicalCommitData, CanonicalCommitRef, IssuerId, OpaqueId,
+    ScopeRef, DEV_BASELINE_ISSUER, I_DEV_BASELINE_ISSUER,
 };
 use rusqlite::{params, Connection, OptionalExtension, Transaction, TransactionBehavior};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -92,6 +93,9 @@ pub enum AdmissionError {
     /// `D-OWNER-DECISION-CANONICAL-COMMIT-001`: a missing or unreadable record
     /// is an authority failure, never `Ok(false)`.
     CanonicalCommit(CanonicalCommitValidationError),
+    /// Authorization decision validation could not establish a matching
+    /// durable I record.
+    AuthorizationDecision(AuthorizationDecisionValidationError),
 }
 
 impl std::fmt::Display for AdmissionError {
@@ -125,6 +129,9 @@ impl std::fmt::Display for AdmissionError {
                 "dependency receipt set does not match the registered artifact"
             ),
             Self::CanonicalCommit(e) => write!(f, "canonical commit not established: {e}"),
+            Self::AuthorizationDecision(e) => {
+                write!(f, "authorization decision not established: {e}")
+            }
         }
     }
 }
@@ -272,6 +279,52 @@ impl std::fmt::Display for CanonicalCommitValidationError {
 
 impl std::error::Error for CanonicalCommitValidationError {}
 
+/// Why a durable authorization decision could not be validated.
+///
+/// Missing and unreadable records are errors, never `Ok(false)`.
+/// `Ok(false)` is reserved exclusively for a matching record whose
+/// subject digest differs from the expected digest.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum AuthorizationDecisionValidationError {
+    /// The reference does not carry issued decision data.
+    PendingReference,
+    /// No durable authorization decision row exists.
+    RecordMissing,
+    /// The stored row is not a well-formed record.
+    RecordMalformed,
+    /// A stored field differs from the issued reference.
+    RecordMismatch(&'static str),
+    /// The issuer is not the I dev-baseline trust anchor.
+    UnsupportedIssuer,
+    /// The database could not be read.
+    ReadFailed,
+}
+
+impl std::fmt::Display for AuthorizationDecisionValidationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::PendingReference => write!(f, "reference is pending"),
+            Self::RecordMissing => {
+                write!(f, "no durable authorization decision record")
+            }
+            Self::RecordMalformed => {
+                write!(f, "authorization decision record is malformed")
+            }
+            Self::RecordMismatch(field) => {
+                write!(f, "authorization decision record disagrees on {field}")
+            }
+            Self::UnsupportedIssuer => {
+                write!(f, "issuer is not on the I dev-baseline allowlist")
+            }
+            Self::ReadFailed => {
+                write!(f, "authorization decision record is unreadable")
+            }
+        }
+    }
+}
+
+impl std::error::Error for AuthorizationDecisionValidationError {}
+
 /// Durable publication decision bound to the exact artifact, dependencies,
 /// fence generation and permission epoch, per §4.3.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -370,6 +423,21 @@ impl AdmissionStore {
                 subject_digest  TEXT NOT NULL,
                 issued_at       TEXT NOT NULL,
                 signature       TEXT NOT NULL
+             );
+             CREATE TABLE IF NOT EXISTS authorization_decisions (
+                decision_id      TEXT PRIMARY KEY NOT NULL,
+                issuer_id        TEXT NOT NULL,
+                subject_digest   TEXT NOT NULL,
+                issued_at        TEXT NOT NULL,
+                decision_kind    TEXT NOT NULL,
+                signature        TEXT NOT NULL
+             );
+             CREATE TABLE IF NOT EXISTS i_attestations (
+                attestation_id   TEXT PRIMARY KEY NOT NULL,
+                issuer_id        TEXT NOT NULL,
+                subject_digest   TEXT NOT NULL,
+                issued_at        TEXT NOT NULL,
+                signature        TEXT NOT NULL
              );"
         )?;
         Ok(())
@@ -1110,8 +1178,239 @@ impl AdmissionStore {
 
         Ok(stored.subject_digest == expected_subject_digest.as_str())
     }
+
+    /// Insert one immutable authorization decision and return its
+    /// content-bearing reference.
+    ///
+    /// The durable row is committed before the reference escapes.
+    /// Byte-identical replay is idempotent; conflicting reuse of the
+    /// decision ID is rejected.
+    ///
+    /// Dev baseline only: signature is the empty string.
+    pub fn issue_authorization_decision(
+        &mut self,
+        decision_id: &OpaqueId,
+        issuer: &IssuerId,
+        subject_digest: &OpaqueId,
+        issued_at: &str,
+        decision_kind: AuthorizationDecisionKind,
+    ) -> Result<AuthorizationDecisionRef, AdmissionError> {
+        if issuer.as_str() != I_DEV_BASELINE_ISSUER {
+            return Err(AdmissionError::InvalidInput(
+                "issuer is not on the I dev-baseline allowlist",
+            ));
+        }
+
+        if !is_sha256_hex(subject_digest.as_str()) || !is_rfc3339_utc(issued_at) {
+            return Err(AdmissionError::InvalidInput(
+                "subject digest or issued_at is not in canonical form",
+            ));
+        }
+
+        let data = AuthorizationDecisionData {
+            decision_id: decision_id.clone(),
+            issuer: issuer.clone(),
+            subject_digest: subject_digest.clone(),
+            issued_at: issued_at.to_owned(),
+            decision_kind,
+        };
+
+        let reference = AuthorizationDecisionRef::from_issued_data(data);
+
+        let kind = authorization_decision_kind_str(decision_kind);
+
+        let tx = self
+            .connection
+            .transaction_with_behavior(TransactionBehavior::Immediate)?;
+
+        let inserted = tx.execute(
+            "INSERT INTO authorization_decisions(
+                decision_id,issuer_id,subject_digest,issued_at,decision_kind,signature
+             )
+             VALUES(?1,?2,?3,?4,?5,'')",
+            params![
+                decision_id.as_str(),
+                issuer.as_str(),
+                subject_digest.as_str(),
+                issued_at,
+                kind,
+            ],
+        );
+
+        match inserted {
+            Ok(_) => {}
+            Err(rusqlite::Error::SqliteFailure(ref code, _))
+                if code.code == rusqlite::ErrorCode::ConstraintViolation =>
+            {
+                let stored = read_authorization_decision(&tx, decision_id)?;
+
+                let identical = stored.issuer_id == issuer.as_str()
+                    && stored.subject_digest == subject_digest.as_str()
+                    && stored.issued_at == issued_at
+                    && stored.decision_kind == kind;
+
+                if !identical {
+                    return Err(AdmissionError::IdempotencyConflict);
+                }
+            }
+            Err(error) => return Err(AdmissionError::Sqlite(error)),
+        }
+
+        tx.commit()?;
+        Ok(reference)
+    }
+
+    /// Record-backed authorization decision validation.
+    ///
+    /// Ok(true): all reference fields match the readable durable record,
+    /// the issuer is allowlisted, and the digest matches the expected digest.
+    ///
+    /// Ok(false): all reference fields match the readable durable record,
+    /// but the stored digest differs from the expected digest.
+    ///
+    /// Err(..): every other case, including a missing or unreadable row.
+    ///
+    /// Decision kind is deliberately not an authorization policy check.
+    /// A valid Denied or Conditional decision is still a valid recorded
+    /// decision.
+    pub fn validate_authorization_decision(
+        &self,
+        reference: &AuthorizationDecisionRef,
+        expected_subject_digest: &OpaqueId,
+    ) -> Result<bool, AuthorizationDecisionValidationError> {
+        let data = reference
+            .data()
+            .ok_or(AuthorizationDecisionValidationError::PendingReference)?;
+
+        let stored =
+            read_authorization_decision(&self.connection, &data.decision_id).map_err(|error| {
+                match error {
+                    rusqlite::Error::QueryReturnedNoRows => {
+                        AuthorizationDecisionValidationError::RecordMissing
+                    }
+                    _ => AuthorizationDecisionValidationError::ReadFailed,
+                }
+            })?;
+
+        // Authority check precedes content comparison.
+        if stored.issuer_id != I_DEV_BASELINE_ISSUER {
+            return Err(AuthorizationDecisionValidationError::UnsupportedIssuer);
+        }
+
+        if !is_sha256_hex(&stored.subject_digest)
+            || !is_rfc3339_utc(&stored.issued_at)
+            || !matches!(
+                stored.decision_kind.as_str(),
+                "approved" | "denied" | "conditional"
+            )
+        {
+            return Err(AuthorizationDecisionValidationError::RecordMalformed);
+        }
+
+        if stored.issuer_id != data.issuer.as_str() {
+            return Err(AuthorizationDecisionValidationError::RecordMismatch(
+                "issuer",
+            ));
+        }
+
+        if stored.subject_digest != data.subject_digest.as_str() {
+            return Err(AuthorizationDecisionValidationError::RecordMismatch(
+                "subject_digest",
+            ));
+        }
+
+        if stored.issued_at != data.issued_at {
+            return Err(AuthorizationDecisionValidationError::RecordMismatch(
+                "issued_at",
+            ));
+        }
+
+        let reference_kind = authorization_decision_kind_str(data.decision_kind);
+
+        if stored.decision_kind != reference_kind {
+            return Err(AuthorizationDecisionValidationError::RecordMismatch(
+                "decision_kind",
+            ));
+        }
+
+        Ok(stored.subject_digest == expected_subject_digest.as_str())
+    }
+
+    /// Read the recorded decision kind.
+    ///
+    /// This is a record-reading operation, not an authorization check.
+    /// Denied and Conditional are valid stored decision kinds.
+    pub fn authorization_decision_kind(
+        &self,
+        reference: &AuthorizationDecisionRef,
+    ) -> Result<AuthorizationDecisionKind, AuthorizationDecisionValidationError> {
+        let data = reference
+            .data()
+            .ok_or(AuthorizationDecisionValidationError::PendingReference)?;
+
+        let stored =
+            read_authorization_decision(&self.connection, &data.decision_id).map_err(|error| {
+                match error {
+                    rusqlite::Error::QueryReturnedNoRows => {
+                        AuthorizationDecisionValidationError::RecordMissing
+                    }
+                    _ => AuthorizationDecisionValidationError::ReadFailed,
+                }
+            })?;
+
+        parse_authorization_decision_kind(&stored.decision_kind)
+            .ok_or(AuthorizationDecisionValidationError::RecordMalformed)
+    }
 }
 
+/// One decoded authorization_decisions row.
+struct StoredAuthorizationDecision {
+    issuer_id: String,
+    subject_digest: String,
+    issued_at: String,
+    decision_kind: String,
+}
+
+/// Reads an authorization decision by primary key.
+///
+/// QueryReturnedNoRows is preserved so the caller can distinguish
+/// a missing record from an unreadable database.
+fn read_authorization_decision(
+    connection: &Connection,
+    decision_id: &OpaqueId,
+) -> Result<StoredAuthorizationDecision, rusqlite::Error> {
+    connection.query_row(
+        "SELECT issuer_id,subject_digest,issued_at,decision_kind
+         FROM authorization_decisions
+         WHERE decision_id=?1",
+        [decision_id.as_str()],
+        |row| {
+            Ok(StoredAuthorizationDecision {
+                issuer_id: row.get(0)?,
+                subject_digest: row.get(1)?,
+                issued_at: row.get(2)?,
+                decision_kind: row.get(3)?,
+            })
+        },
+    )
+}
+
+fn authorization_decision_kind_str(kind: AuthorizationDecisionKind) -> &'static str {
+    match kind {
+        AuthorizationDecisionKind::Approved => "approved",
+        AuthorizationDecisionKind::Denied => "denied",
+        AuthorizationDecisionKind::Conditional => "conditional",
+    }
+}
+
+fn parse_authorization_decision_kind(value: &str) -> Option<AuthorizationDecisionKind> {
+    match value {
+        "approved" => Some(AuthorizationDecisionKind::Approved),
+        "denied" => Some(AuthorizationDecisionKind::Denied),
+        "conditional" => Some(AuthorizationDecisionKind::Conditional),
+        _ => None,
+    }
+}
 /// One decoded `canonical_commits` row.
 struct StoredCanonicalCommit {
     issuer_id: String,
@@ -1857,6 +2156,251 @@ mod tests {
         assert_eq!(first, replay);
         assert!(matches!(
             db.issue_canonical_commit(&commit_id, &issuer, &subject, "2026-11-23T00:00:00Z"),
+            Err(AdmissionError::IdempotencyConflict)
+        ));
+    }
+
+    // ---- authorization decision record and validator ----
+
+    fn issued_authorization_store(
+        kind: AuthorizationDecisionKind,
+    ) -> (AdmissionStore, AuthorizationDecisionRef, OpaqueId) {
+        let mut db = AdmissionStore::in_memory().unwrap();
+
+        let decision_id = id("authorization-decision-1");
+        let subject = OpaqueId::new("a".repeat(64)).unwrap();
+
+        let reference = db
+            .issue_authorization_decision(
+                &decision_id,
+                &IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap(),
+                &subject,
+                "2026-11-22T00:00:00Z",
+                kind,
+            )
+            .unwrap();
+
+        (db, reference, subject)
+    }
+
+    #[test]
+    fn authorization_validator_accepts_approved_decision() {
+        let (db, reference, subject) =
+            issued_authorization_store(AuthorizationDecisionKind::Approved);
+
+        assert_eq!(
+            db.validate_authorization_decision(&reference, &subject),
+            Ok(true)
+        );
+    }
+
+    #[test]
+    fn authorization_validator_accepts_denied_decision() {
+        let (db, reference, subject) =
+            issued_authorization_store(AuthorizationDecisionKind::Denied);
+
+        assert_eq!(
+            db.validate_authorization_decision(&reference, &subject),
+            Ok(true)
+        );
+    }
+
+    #[test]
+    fn authorization_validator_accepts_conditional_decision() {
+        let (db, reference, subject) =
+            issued_authorization_store(AuthorizationDecisionKind::Conditional);
+
+        assert_eq!(
+            db.validate_authorization_decision(&reference, &subject),
+            Ok(true)
+        );
+    }
+
+    #[test]
+    fn authorization_validator_reports_missing_record_as_error() {
+        let (db, reference, subject) =
+            issued_authorization_store(AuthorizationDecisionKind::Approved);
+
+        let mut data = reference.data().unwrap().clone();
+        data.decision_id = id("authorization-decision-never-issued");
+
+        let missing = AuthorizationDecisionRef::from_issued_data(data);
+
+        assert_eq!(
+            db.validate_authorization_decision(&missing, &subject),
+            Err(AuthorizationDecisionValidationError::RecordMissing)
+        );
+    }
+
+    #[test]
+    fn authorization_validator_rejects_unsupported_issuer() {
+        let (db, reference, subject) =
+            issued_authorization_store(AuthorizationDecisionKind::Approved);
+
+        let decision_id = reference.data().unwrap().decision_id.clone();
+
+        db.connection
+            .execute(
+                "UPDATE authorization_decisions
+                 SET issuer_id='someone-else'
+                 WHERE decision_id=?1",
+                [decision_id.as_str()],
+            )
+            .unwrap();
+
+        assert_eq!(
+            db.validate_authorization_decision(&reference, &subject),
+            Err(AuthorizationDecisionValidationError::UnsupportedIssuer)
+        );
+    }
+
+    #[test]
+    fn authorization_validator_rejects_subject_digest_reference_mismatch() {
+        let (db, reference, subject) =
+            issued_authorization_store(AuthorizationDecisionKind::Approved);
+
+        let decision_id = reference.data().unwrap().decision_id.clone();
+
+        db.connection
+            .execute(
+                "UPDATE authorization_decisions
+                 SET subject_digest=?2
+                 WHERE decision_id=?1",
+                params![decision_id.as_str(), "9".repeat(64)],
+            )
+            .unwrap();
+
+        assert_eq!(
+            db.validate_authorization_decision(&reference, &subject),
+            Err(AuthorizationDecisionValidationError::RecordMismatch(
+                "subject_digest"
+            ))
+        );
+    }
+
+    #[test]
+    fn authorization_validator_rejects_issued_at_reference_mismatch() {
+        let (db, reference, subject) =
+            issued_authorization_store(AuthorizationDecisionKind::Approved);
+
+        let decision_id = reference.data().unwrap().decision_id.clone();
+
+        db.connection
+            .execute(
+                "UPDATE authorization_decisions
+                 SET issued_at='2026-11-23T00:00:00Z'
+                 WHERE decision_id=?1",
+                [decision_id.as_str()],
+            )
+            .unwrap();
+
+        assert_eq!(
+            db.validate_authorization_decision(&reference, &subject),
+            Err(AuthorizationDecisionValidationError::RecordMismatch(
+                "issued_at"
+            ))
+        );
+    }
+
+    #[test]
+    fn authorization_validator_rejects_decision_kind_reference_mismatch() {
+        let (db, reference, subject) =
+            issued_authorization_store(AuthorizationDecisionKind::Approved);
+
+        let decision_id = reference.data().unwrap().decision_id.clone();
+
+        db.connection
+            .execute(
+                "UPDATE authorization_decisions
+                 SET decision_kind='denied'
+                 WHERE decision_id=?1",
+                [decision_id.as_str()],
+            )
+            .unwrap();
+
+        assert_eq!(
+            db.validate_authorization_decision(&reference, &subject),
+            Err(AuthorizationDecisionValidationError::RecordMismatch(
+                "decision_kind"
+            ))
+        );
+    }
+
+    #[test]
+    fn authorization_validator_reports_dropped_table_as_read_failed() {
+        let (db, reference, subject) =
+            issued_authorization_store(AuthorizationDecisionKind::Approved);
+
+        db.connection
+            .execute_batch("DROP TABLE authorization_decisions;")
+            .unwrap();
+
+        assert_eq!(
+            db.validate_authorization_decision(&reference, &subject),
+            Err(AuthorizationDecisionValidationError::ReadFailed)
+        );
+    }
+
+    #[test]
+    fn authorization_decision_kind_returns_denied_without_rejecting_it() {
+        let (db, reference, _) = issued_authorization_store(AuthorizationDecisionKind::Denied);
+
+        assert_eq!(
+            db.authorization_decision_kind(&reference),
+            Ok(AuthorizationDecisionKind::Denied)
+        );
+    }
+
+    #[test]
+    fn authorization_validator_returns_false_only_for_expected_digest_mismatch() {
+        let (db, reference, _) = issued_authorization_store(AuthorizationDecisionKind::Approved);
+
+        let other = OpaqueId::new("c".repeat(64)).unwrap();
+
+        assert_eq!(
+            db.validate_authorization_decision(&reference, &other),
+            Ok(false)
+        );
+    }
+
+    #[test]
+    fn authorization_issuance_is_idempotent_only_for_identical_rows() {
+        let mut db = AdmissionStore::in_memory().unwrap();
+
+        let decision_id = id("authorization-decision-replay");
+        let issuer = IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap();
+        let subject = OpaqueId::new("d".repeat(64)).unwrap();
+
+        let first = db
+            .issue_authorization_decision(
+                &decision_id,
+                &issuer,
+                &subject,
+                "2026-11-22T00:00:00Z",
+                AuthorizationDecisionKind::Approved,
+            )
+            .unwrap();
+
+        let replay = db
+            .issue_authorization_decision(
+                &decision_id,
+                &issuer,
+                &subject,
+                "2026-11-22T00:00:00Z",
+                AuthorizationDecisionKind::Approved,
+            )
+            .unwrap();
+
+        assert_eq!(first, replay);
+
+        assert!(matches!(
+            db.issue_authorization_decision(
+                &decision_id,
+                &issuer,
+                &subject,
+                "2026-11-22T00:00:00Z",
+                AuthorizationDecisionKind::Denied,
+            ),
             Err(AdmissionError::IdempotencyConflict)
         ));
     }
