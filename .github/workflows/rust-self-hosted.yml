@@ -64,6 +64,25 @@ jobs:
           if [ -f "$HOME/.cargo/env" ]; then . "$HOME/.cargo/env"; fi
           cargo --version
           rustc --version
+          # libsqlite3-sys builds bundled SQLite (three crates request "bundled"),
+          # so this job needs a C compiler. Detect and name it here; do not install
+          # one — a system package installed from a workflow step widens what a
+          # compromised dependency can reach (AI-RUN-002-RUNBOOK §4.1). Provisioning
+          # is the runbook's job, detection is this step's.
+          #
+          # Presence is checked first, then capability, because the two disagree:
+          # a `cc` with no cc1 behind it passes `command -v` and fails inside
+          # libsqlite3-sys with a message that does not name the host as the cause.
+          if ! command -v cc >/dev/null 2>&1; then
+            echo "::error::no C compiler on PATH; libsqlite3-sys builds bundled SQLite and requires one"
+            exit 1
+          fi
+          if ! printf 'int main(void){return 0;}\n' | cc -x c - -o /tmp/cc-probe 2>/tmp/cc-probe.err; then
+            echo "::error::cc is on PATH but cannot compile or link; libsqlite3-sys builds bundled SQLite and requires a working one"
+            head -3 /tmp/cc-probe.err || true
+            exit 1
+          fi
+          rm -f /tmp/cc-probe /tmp/cc-probe.err
 
       # `--all-targets` is what rust-phase1.yml uses. Kept identical on purpose:
       # a self-hosted run that tested a different target set would not be evidence
