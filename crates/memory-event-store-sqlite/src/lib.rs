@@ -42,6 +42,18 @@ pub struct SqliteEventStore {
     connection: Connection,
 }
 
+/// A pending compile intent read from the durable compile outbox.
+///
+/// This is a read-only snapshot. Reading does not consume, delete, or mark the
+/// intent. Callers may read the same intent again after compilation fails.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct PendingCompileIntent {
+    pub outbox_row: i64,
+    pub event_row: i64,
+    pub intent_kind: String,
+    pub created_at: String,
+}
+
 impl SqliteEventStore {
     pub fn open(path: impl AsRef<Path>) -> Result<Self, EventStoreError> {
         let connection =
@@ -191,6 +203,38 @@ impl SqliteEventStore {
             .unwrap_or_default()
             .as_nanos()
             .to_string()
+    }
+
+    /// Returns every pending compile intent in deterministic acceptance order.
+    ///
+    /// This is a read-only snapshot. Reading does not consume, delete, or mark
+    /// any intent. Callers may read the same intent again after compilation
+    /// fails.
+    pub fn pending_compile_intents(
+        &self,
+    ) -> Result<Vec<PendingCompileIntent>, EventStoreError> {
+        let mut statement = self
+            .connection
+            .prepare(
+                "SELECT outbox_row, event_row, intent_kind, created_at
+                 FROM compile_outbox
+                 ORDER BY created_at ASC, outbox_row ASC",
+            )
+            .map_err(|_| EventStoreError::TransactionUnavailable)?;
+
+        let rows = statement
+            .query_map([], |row| {
+                Ok(PendingCompileIntent {
+                    outbox_row: row.get(0)?,
+                    event_row: row.get(1)?,
+                    intent_kind: row.get(2)?,
+                    created_at: row.get(3)?,
+                })
+            })
+            .map_err(|_| EventStoreError::TransactionUnavailable)?;
+
+        rows.collect::<rusqlite::Result<Vec<PendingCompileIntent>>>()
+            .map_err(|_| EventStoreError::TransactionUnavailable)
     }
 }
 
@@ -363,6 +407,75 @@ mod tests {
         let _ = std::fs::remove_file(path);
         let _ = std::fs::remove_file(path.with_extension("sqlite-wal"));
         let _ = std::fs::remove_file(path.with_extension("sqlite-shm"));
+    }
+
+
+    #[test]
+    fn pending_compile_intents_is_empty_on_a_fresh_store() {
+        let store = SqliteEventStore::in_memory().unwrap();
+
+        assert!(store.pending_compile_intents().unwrap().is_empty());
+    }
+
+    #[test]
+    fn pending_compile_intents_returns_accepted_events_in_insertion_order() {
+        let mut store = SqliteEventStore::in_memory().unwrap();
+
+        let first = store
+            .accept(envelope("op-1", "digest-1"), &[scope()])
+            .unwrap();
+        let second = store
+            .accept(envelope("op-2", "digest-2"), &[scope()])
+            .unwrap();
+
+        let intents = store.pending_compile_intents().unwrap();
+        assert_eq!(intents.len(), 2);
+
+        let first_row = SqliteEventStore::row_id(&first.event_id).unwrap();
+        let second_row = SqliteEventStore::row_id(&second.event_id).unwrap();
+        assert_eq!(intents[0].event_row, first_row);
+        assert_eq!(intents[1].event_row, second_row);
+        assert_eq!(intents[0].intent_kind, "compile");
+        assert_eq!(intents[1].intent_kind, "compile");
+        assert!(intents[0].outbox_row < intents[1].outbox_row);
+    }
+
+    #[test]
+    fn pending_compile_intents_is_idempotent_and_does_not_consume() {
+        let mut store = SqliteEventStore::in_memory().unwrap();
+        store
+            .accept(envelope("op-1", "digest-1"), &[scope()])
+            .unwrap();
+        store
+            .accept(envelope("op-2", "digest-2"), &[scope()])
+            .unwrap();
+
+        let first_read = store.pending_compile_intents().unwrap();
+        let count_before: i64 = store
+            .connection
+            .query_row("SELECT COUNT(*) FROM compile_outbox", [], |row| row.get(0))
+            .unwrap();
+        let second_read = store.pending_compile_intents().unwrap();
+        let count_after: i64 = store
+            .connection
+            .query_row("SELECT COUNT(*) FROM compile_outbox", [], |row| row.get(0))
+            .unwrap();
+
+        assert_eq!(first_read, second_read);
+        assert_eq!(count_before, count_after);
+        assert_eq!(count_after, 2);
+    }
+
+    #[test]
+    fn pending_compile_intent_created_at_matches_the_acceptance_time() {
+        let mut store = SqliteEventStore::in_memory().unwrap();
+        let receipt = store
+            .accept(envelope("op-1", "digest-1"), &[scope()])
+            .unwrap();
+
+        let intents = store.pending_compile_intents().unwrap();
+        assert_eq!(intents.len(), 1);
+        assert_eq!(intents[0].created_at, receipt.accepted_at);
     }
 
     #[test]
