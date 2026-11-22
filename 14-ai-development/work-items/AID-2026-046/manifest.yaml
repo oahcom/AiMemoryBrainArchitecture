@@ -1,0 +1,118 @@
+work_item_id: AID-2026-046
+title: Prove the key-status verifier's False rejection path
+
+class: TEST
+risk: R1
+risk_rationale: >-
+  A focused negative-path conformance test for an existing trust callback.
+  It changes no validator implementation, cryptographic algorithm, evidence
+  schema, or production behavior.
+
+security_scope: AppliedDeliveryChecks verify_key_status False-result rejection test only.
+
+status: PR_OPEN
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+implementing_ai_session: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 792565ac60795ece14f8575774a72563c69e8b1f
+
+tracking_issue: "#348 (REQ-08 applied-delivery trust callback conformance)"
+registration_pr: 622
+registration_pr_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/622
+registration_pr_status: OPEN
+
+created_at: 2026-11-22
+updated_at: 2026-11-22
+
+prompt_id: AID-2026-046-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-046/prompt-v1.md
+prompt_status: FROZEN
+prompt_sha256: 8f905f0726257eb21e694439b49d98ed97a48690604fe718be4d086bda90fff3
+prompt_bytes: 3071
+prompt_file_blob_sha: 3e943eefbf75649d58dca4ee29f67b400143a577
+prompt_file_commit_sha: fb1fa93ffb9d0b27b8f2fff6db39d649421b0788
+
+prompt_provenance_tier: T1
+prompt_provenance_note: >-
+  This v1 prompt governs the remaining key-status rejection test and exact-head
+  verification from the separate-session technical review and current user
+  instruction to continue convergence. The original implementation prompt is
+  not available; no original author prompt, session ID, or hash is fabricated.
+
+dependency_refs:
+  - 08-bmcp-protocol/tests/conformance/applied_delivery_evidence/test_applied_delivery_evidence.py
+  - 08-bmcp-protocol/validators/applied_delivery_evidence_validator.py
+  - PR #616
+  - Issue #348
+
+deliverables:
+  - Add verify_key_status=False rejection test.
+  - Assert status INVALID and exact error "key status verifier rejected evidence".
+  - Preserve verify_key_status=None as UNKNOWN.
+  - Preserve separate signature and CSubmitOutcomeRecord callback tests.
+  - Run the focused Python suite and protocol-index checker on exact final PR head.
+  - Record exact Python version, OS/architecture, commands, exit codes and mutation-test evidence.
+
+independent_reviewer: SESSION_SEPARATION_RECORDED_PROMPT_UNVERIFIED
+integration_reviewer: NOT_ASSIGNED
+
+review:
+  status: SESSION_SEPARATION_RECORDED_PROMPT_UNVERIFIED
+  report_ref: "PR #616 comments 7075204689 and 7075206732; reviewer session is separate, paired author prompt not exposed"
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)
+
+implementation:
+  status: PR_OPEN
+  branch: test/bmcp-tri-state-negative-coverage
+  pull_request: 616
+  pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/616
+  implementation_commit_sha: f9e88cd7329e42ab616ba6837a7348411a5c929e
+  merge_commit_sha: NOT_MERGED
+
+authorization:
+  registration_write: USER-PRINCIPAL-DELEGATED (limited to this AID registration package)
+  implementation_write: USER-PRINCIPAL-DELEGATED (limited to the key-status negative test and verification on PR #616)
+  index_update: USER-PRINCIPAL-DELEGATED (limited to the single AID-2026-046 row)
+  validator_implementation: NOT_AUTHORIZED
+  production_authorization: NOT_GRANTED
+
+governance:
+  aid_assignment: REGISTERED
+  aid_status: PR_OPEN
+  registration_authorization: USER-PRINCIPAL-DELEGATED (limited to this work item)
+  development_start_authorization: USER-PRINCIPAL-DELEGATED (limited to the bounded PR #616 follow-up)
+  architecture_status: NOT_APPLICABLE
+  g8_status: NOT_APPLICABLE
+  quota_change: NONE
+
+verification:
+  status: NOT_RUN
+  prior_evidence: >-
+    PR #616 reported 38 tests passing on original head
+    eac8c4655539c46f8d3ac9650a38fa7512c562b4, but the current head
+    f9e88cd7329e42ab616ba6837a7348411a5c929e is a rebase and has not been
+    rerun. The original report did not include Python version or OS/architecture.
+  environment: >-
+    Python-only suite; Rust/Cargo availability is not a dependency. GitHub-hosted
+    Actions remain billing-blocked. Exact-head local execution is required.
+  commands:
+    - "python -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py'"
+    - "python 08-bmcp-protocol/tools/check_protocol_index.py (confirm exact path/command from repository before execution)"
+    - "Recorded mutation test for each new negative callback path"
+  evidence_refs:
+    - "PR #616 review comment 7075204689"
+    - "PR #616 exact-head evidence comment 7075206732"
+
+findings:
+  - id: F-BMCP-KEY-STATUS-NEGATIVE-001
+    severity: P2
+    feedback_destination: "PR #616; close after verify_key_status=False is tested and exact-head suite evidence is recorded."
