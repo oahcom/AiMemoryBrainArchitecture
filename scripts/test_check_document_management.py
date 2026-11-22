@@ -689,8 +689,7 @@ def run_changed_paths() -> None:
         _git(root, "add", "-A")
         _git(root, "commit", "-q", "-m", "seed")
         base = _git(root, "rev-parse", "HEAD")
-        (root / "src").mkdir()
-        (root / "src" / "only.rs").write_text("// code-only change\n", encoding="utf-8")
+        (root / "tools" / "only.rs").write_text("// code-only change\n", encoding="utf-8")
         _git(root, "add", "-A")
         _git(root, "commit", "-q", "-m", "code only")
         expect_gate(
