@@ -277,7 +277,8 @@ impl SqliteEventStore {
             {
                 return Err(EventStoreError::PayloadIntegrityMismatch);
             }
-            let receipt = Self::receipt(event_row, created_at.clone(), declared_digest, &state_json)?;
+            let receipt =
+                Self::receipt(event_row, created_at.clone(), declared_digest, &state_json)?;
             intents.push(PendingCompileIntent {
                 outbox_row,
                 event_row,
@@ -479,10 +480,18 @@ mod tests {
         let mut store = SqliteEventStore::in_memory().unwrap();
 
         let first = store
-            .accept_with_payload(envelope_with_payload("op-1", b"payload-one"), b"payload-one", &[scope()])
+            .accept_with_payload(
+                envelope_with_payload("op-1", b"payload-one"),
+                b"payload-one",
+                &[scope()],
+            )
             .unwrap();
         let second = store
-            .accept_with_payload(envelope_with_payload("op-2", b"payload-two"), b"payload-two", &[scope()])
+            .accept_with_payload(
+                envelope_with_payload("op-2", b"payload-two"),
+                b"payload-two",
+                &[scope()],
+            )
             .unwrap();
 
         let intents = store.pending_compile_intents().unwrap();
@@ -501,10 +510,18 @@ mod tests {
     fn pending_compile_intents_is_idempotent_and_does_not_consume() {
         let mut store = SqliteEventStore::in_memory().unwrap();
         store
-            .accept_with_payload(envelope_with_payload("op-1", b"payload-one"), b"payload-one", &[scope()])
+            .accept_with_payload(
+                envelope_with_payload("op-1", b"payload-one"),
+                b"payload-one",
+                &[scope()],
+            )
             .unwrap();
         store
-            .accept_with_payload(envelope_with_payload("op-2", b"payload-two"), b"payload-two", &[scope()])
+            .accept_with_payload(
+                envelope_with_payload("op-2", b"payload-two"),
+                b"payload-two",
+                &[scope()],
+            )
             .unwrap();
 
         let first_read = store.pending_compile_intents().unwrap();
@@ -527,7 +544,11 @@ mod tests {
     fn pending_compile_intent_created_at_matches_the_acceptance_time() {
         let mut store = SqliteEventStore::in_memory().unwrap();
         let receipt = store
-            .accept_with_payload(envelope_with_payload("op-1", b"payload-one"), b"payload-one", &[scope()])
+            .accept_with_payload(
+                envelope_with_payload("op-1", b"payload-one"),
+                b"payload-one",
+                &[scope()],
+            )
             .unwrap();
 
         let intents = store.pending_compile_intents().unwrap();
@@ -539,7 +560,11 @@ mod tests {
     fn pending_compile_intent_carries_the_payload_and_envelope_a_compiler_needs() {
         let mut store = SqliteEventStore::in_memory().unwrap();
         store
-            .accept_with_payload(envelope_with_payload("op-1", b"payload-one"), b"payload-one", &[scope()])
+            .accept_with_payload(
+                envelope_with_payload("op-1", b"payload-one"),
+                b"payload-one",
+                &[scope()],
+            )
             .unwrap();
 
         let intents = store.pending_compile_intents().unwrap();
@@ -557,7 +582,10 @@ mod tests {
         );
         assert_eq!(intent.receipt.accepted_at, intent.created_at);
         // The digest the receipt reports is the digest of the bytes carried.
-        assert_eq!(intent.receipt.payload_digest, intent.envelope.payload_digest);
+        assert_eq!(
+            intent.receipt.payload_digest,
+            intent.envelope.payload_digest
+        );
     }
 
     #[test]
@@ -565,7 +593,9 @@ mod tests {
         let mut store = SqliteEventStore::in_memory().unwrap();
         // accept() records an outbox row but no payload row. An intent without
         // payload bytes cannot start a compile, so it must not be reported.
-        store.accept(envelope("op-1", "digest-1"), &[scope()]).unwrap();
+        store
+            .accept(envelope("op-1", "digest-1"), &[scope()])
+            .unwrap();
 
         assert!(store.pending_compile_intents().unwrap().is_empty());
     }
@@ -574,7 +604,11 @@ mod tests {
     fn pending_compile_intent_fails_closed_when_stored_payload_is_tampered_with() {
         let mut store = SqliteEventStore::in_memory().unwrap();
         store
-            .accept_with_payload(envelope_with_payload("op-1", b"payload-one"), b"payload-one", &[scope()])
+            .accept_with_payload(
+                envelope_with_payload("op-1", b"payload-one"),
+                b"payload-one",
+                &[scope()],
+            )
             .unwrap();
 
         store
