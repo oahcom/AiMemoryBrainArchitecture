@@ -25,8 +25,8 @@ tracking_issue: "#348 (REQ-08); related reliability parent #349 (REQ-09)"
 baseline_pr: 614
 baseline_pr_status: MERGED
 baseline_merge_commit_sha: c9f4a7fe021f53e101b3977fc12b6f7fc50ca29b
-registration_pr: 623
-registration_pr_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/623
+registration_pr: 624
+registration_pr_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/624
 registration_pr_status: OPEN
 
 created_at: 2026-11-22
