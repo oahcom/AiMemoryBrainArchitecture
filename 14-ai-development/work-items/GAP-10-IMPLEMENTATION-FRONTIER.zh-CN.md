@@ -356,6 +356,8 @@ ignore 会失败，所以不能简单删掉 ignore——测试体本身从未针
 
 ### 7.3 GAP-07 的缺口陈述现在是假的；它的闭环条件只满足一半
 
+> **状态更正（2026-11-22）：** 所引 GAP-07 缺口陈述已被 PR #552 及后续生产集成取代。`AdmissionPublicationAuthority` 现提供生产实现，`brain-cli` 通过非测试路径调用 `MemoryCompiler::compile()`。GAP-07 因此**就生产可达性而言已关闭**——其四条闭环标准均已在 `main @ 87d503ba` 核实。发布成功与持久发布权威仍未解决，另登记于 `GAP-14-PUBLICATION-AUTHORITY-AND-STORE-LIFECYCLE.md`（A：门面未暴露 prepare/publish；B：三个标志在 D3 下无签发者；C：持久性未验证）。以下正文保留为产生本次更正的测量记录。
+
 GAP-07 §1.2 原文称 `compile` "no production implementation of its required
 `PublicationAuthority` trait, and no non-test caller"。两半现在都错了：
 

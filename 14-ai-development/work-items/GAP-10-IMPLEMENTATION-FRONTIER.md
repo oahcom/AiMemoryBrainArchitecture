@@ -419,6 +419,18 @@ no lineage or unavailable-reason field. Both reasons are accurate.
 
 ### 7.3 GAP-07's gap statement is now false; its closure criteria are half met
 
+> **Status correction (2026-11-22):** The quoted GAP-07 gap statement has been
+> superseded by PR #552 and subsequent production integration.
+> `AdmissionPublicationAuthority` now provides a production implementation, and
+> `brain-cli` invokes `MemoryCompiler::compile()` through a non-test path. GAP-07
+> is therefore **closed for production reachability** — all four of its closure
+> criteria were verified at `main @ 87d503ba`. Publication success and durable
+> publication authority remain unresolved and are tracked separately under
+> `GAP-14-PUBLICATION-AUTHORITY-AND-STORE-LIFECYCLE.md` (A: facade does not
+> surface prepare/publish; B: three flags have no issuer under D3; C: durability
+> unverified). The text below is retained as the measurement that produced this
+> correction.
+
 §1.2 of GAP-07 says, verbatim, that `compile` has "no production implementation
 of its required `PublicationAuthority` trait, and no non-test caller". Both
 halves are now wrong:
