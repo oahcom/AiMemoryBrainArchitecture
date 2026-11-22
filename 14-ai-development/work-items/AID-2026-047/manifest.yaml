@@ -1,0 +1,101 @@
+work_item_id: AID-2026-047
+title: Type the delivery attempt ledger for Memory Context
+
+class: DOMAIN/TEST/DOC
+risk: R1
+risk_rationale: "Bounded additive domain types in one crate plus a bilingual coverage-row correction. No persistence, no transport, no public API change to existing types, no dependency change, no architecture decision."
+
+security_scope: "In-memory attempt bookkeeping only. No credential, network or storage surface."
+
+status: PR_OPEN
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+implementing_ai_session: "Current ChatGPT delivery session; platform session identifier NOT_EXPOSED"
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: f34d96a9
+
+tracking_issue: "NONE — task is tracked by this AID manifest and its delivery PR; no new Issue requested"
+
+created_at: 2026-11-22
+updated_at: 2026-11-22
+
+prompt_id: AID-2026-047-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-047/prompt-v1.md
+prompt_status: FROZEN
+prompt_sha256: 6d2c40800c1f40ba05653d23beea9b2f89db7467519bf7eebb1d48fef5770871
+prompt_bytes: 2185
+
+prompt_provenance_tier: T1
+prompt_provenance_note: "Frozen from the user-provided task dispatch in this ChatGPT conversation. Raw platform payload bytes and session identifier are not exposed; SHA-256 identifies the committed prompt-v1.md bytes."
+
+dependency_refs:
+  - crates/memory-context/src/lib.rs
+  - 06-memory-context/context-implementation-coverage.md
+  - 06-memory-context/context-implementation-coverage.zh-CN.md
+  - 06-memory-context/phase-3.7-g-local-lifecycle-producer-derivative-queue-recall-context-restore.md
+  - 14-ai-development/work-items/GAP-10-IMPLEMENTATION-FRONTIER.md
+
+deliverables:
+  - "DeliveryLedger models attempt identity, retry chains and ACK-to-delivery separation; ACK is issued against DeliveryId, never against DeliveryAttemptId."
+  - "classify_ack returns Accepted, Late or UnknownDelivery; a late ACK is classified, never silently dropped."
+  - "Row 111 of the English and Chinese coverage tables moves from NOT IMPLEMENTED to PARTIAL with the residual gaps named."
+
+independent_reviewer: NOT_ASSIGNED
+integration_reviewer: NOT_ASSIGNED
+
+review:
+  status: NOT_ASSIGNED
+  report_ref: ""
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+implementation:
+  status: PR_OPEN
+  branch: feat/context-delivery-attempt-ledger-2026-11-22
+  pull_request: PENDING
+  pull_request_url: PENDING
+  implementation_commit_sha: PENDING
+  merge_commit_sha: NOT_MERGED
+
+authorization:
+  registration_write: "USER-PRINCIPAL-DELEGATED (limited to this AID registration package)"
+  implementation_write: "USER-PRINCIPAL-DELEGATED (limited to crates/memory-context and the two coverage rows)"
+  index_update: "USER-PRINCIPAL-DELEGATED (limited to the single AID-2026-047 row)"
+  persistence_implementation: NOT_GRANTED
+  transport_implementation: NOT_GRANTED
+  ack_consumer_implementation: NOT_GRANTED
+  architecture_acceptance: NOT_GRANTED
+  production_authorization: NOT_GRANTED
+
+governance:
+  aid_assignment: REGISTERED
+  aid_status: REGISTERED
+  registration_authorization: "USER-PRINCIPAL-DELEGATED (limited to this work item)"
+  development_start_authorization: "USER-PRINCIPAL-DELEGATED (limited to this implementation scope)"
+  architecture_status: NOT_APPLICABLE
+  g8_status: NOT_APPLICABLE
+  quota_change: NONE
+
+verification:
+  status: RUN
+  environment: "Windows natively, no WSL. CC=zigcc AR=zig ar, CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0."
+  commands:
+    - "cargo fmt --all -- --check; echo FMT_EXIT=$?  -> EXIT 0"
+    - "cargo clippy --workspace --all-targets -- -D warnings; echo CLIPPY_EXIT=$?  -> EXIT 0"
+    - "cargo test --workspace --all-targets  -> 576 passed, 0 failed, 1 ignored"
+    - "cargo test -p memory-context --test delivery_attempt_ledger  -> 9 passed, 0 failed, 0 ignored"
+    - "BASE_SHA=$(git rev-parse HEAD) HEAD_SHA=$(git rev-parse HEAD) PR_BODY='BILINGUAL-MANIFEST: COMPLETE' python3 scripts/check_bilingual_docs.py  -> PASS"
+  evidence_refs:
+    - "The single workspace ignore is dm2_06, blocked by the cross-owner decision B-P2-XO-01 and unrelated to this work item."
+
+findings:
+  - id: AID-2026-047-F1
+    severity: P3
+    feedback_destination: "Delivery PR conversation. The dispatched spec asked for a test rejecting a retry whose predecessor belongs to a different delivery, but DeliveryAttempt::retry takes only the predecessor, so the callee cannot observe a second delivery. The delivered test forks the chain from one predecessor and asserts the fork is rejected with ContextMismatch. Recorded rather than silently narrowed."
