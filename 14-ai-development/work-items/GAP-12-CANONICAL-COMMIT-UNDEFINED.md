@@ -73,9 +73,9 @@ precisely the failure mode D2 exists to prevent.
 1. **(E, small, behaviour-preserving)** D6.2 — rename staging's precondition to
    `canonical_commit_cursor_recorded`; keep gate flag `false`; keep every
    disposition identical. Removes the contradiction without changing output.
-2. **(D, FROZEN)** Freeze the canonical commit contract: a reference type that
-   carries content, a durable record, and a validator. See
-   `D-OWNER-DECISION-CANONICAL-COMMIT-001`.
+2. **(D, FROZEN — see D-OWNER-DECISION-CANONICAL-COMMIT-001)** Freeze the canonical commit contract: a reference type that
+   carries content, a durable record, and a validator. Until then no producer is
+   possible and none should be simulated.
 3. **(E, after 2)** Source `canonical_commit_confirmed` from that validator, and
    stop accepting the cursor as evidence (D6.3).
 4. **(D, blocking, independent)** Publication-participant registry, so
