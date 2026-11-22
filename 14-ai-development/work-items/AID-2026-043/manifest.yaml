@@ -71,9 +71,9 @@ acceptance:
 implementation:
   status: PR_OPEN
   branch: fix/dm2-03-claim-identity-acceptance-2026-11-21
-  pull_request: PENDING
-  pull_request_url: PENDING
-  implementation_commit_sha: PENDING
+  pull_request: 567
+  pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/567
+  implementation_commit_sha: 61bc67e857a92d2f287c2afd546019eb676a283c
   merge_commit_sha: NOT_MERGED
 
 authorization:
