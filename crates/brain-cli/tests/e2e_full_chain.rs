@@ -12,10 +12,8 @@ fn raw_event_to_persisted_memory_context_and_compiler_gate_is_observable() {
         "brain-e2e-full-chain-{}-{nonce}.json",
         std::process::id()
     ));
-    let sidecar_path = std::path::PathBuf::from(format!(
-        "{}.compiler-status",
-        output_path.display()
-    ));
+    let sidecar_path =
+        std::path::PathBuf::from(format!("{}.compiler-status", output_path.display()));
     let fixture = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("fixtures")
         .join("event.json");
@@ -43,7 +41,13 @@ fn raw_event_to_persisted_memory_context_and_compiler_gate_is_observable() {
 
     assert_eq!(snapshot["identity"]["context_id"], "context-demo-001");
     assert_eq!(snapshot["context_version"], 1);
-    assert_eq!(snapshot["entries"].as_array().expect("entries must be an array").len(), 1);
+    assert_eq!(
+        snapshot["entries"]
+            .as_array()
+            .expect("entries must be an array")
+            .len(),
+        1
+    );
     assert_eq!(snapshot["entries"][0]["memory_id"], "memory-demo-001");
     assert_eq!(
         snapshot["entries"][0]["memory_version_id"],
