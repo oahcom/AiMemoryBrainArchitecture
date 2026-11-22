@@ -12,7 +12,7 @@ document_metadata:
       last_verified_date: "2026-11-22"
       last_verification_note: "Re-read from main @ 550bb864ed: validate_authorization_decision at admission.rs:1276 has the two-parameter signature, Issued carries AuthorizationDecisionData at lib.rs:566, and memory-compiler/tests holds one file. Each claim is a blob read, not a commit message."
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Modified
     supersession:
       supersedes: []
       supersession_reason: null
@@ -25,8 +25,8 @@ document_metadata:
 
 # GAP-18 (continued) — one step left, and it is not the one that was blocked
 
-**Status:** Open — one step remains · **Companion to:** `GAP-18-AUTHORIZATION-VALIDATOR-WORK-ORDER.md`
-**Measured at:** `main` @ `550bb864ed`
+**Status:** Closed — the five steps and the attestor half have all shipped (evidence in §6 and §8) · **Companion to:** `GAP-18-AUTHORIZATION-VALIDATOR-WORK-ORDER.md`
+**Measured at:** `main` @ `550bb864ed` (§8 measured at `f1365f97`)
 **Author:** owner delegate under standing instruction (Issue #564, comment 7074302216)
 
 ---
@@ -137,15 +137,27 @@ A test file with only the `Err` case would leave `Ok(false)` unreachable by any 
 
 ## 6. Definition of done
 
-- [ ] `crates/memory-compiler/tests/authorization_authority.rs` exists.
-- [ ] `Err(RecordMissing)` for an unbacked `issued()` reference.
-- [ ] `Ok(true)` after a real issue-then-validate round trip.
-- [ ] `Ok(false)` when the expected subject digest differs from the stored one.
-- [ ] `dm2_06` unchanged.
-- [ ] `cargo test --workspace --all-targets` reports `ignored = 0`.
+- [x] `crates/memory-compiler/tests/authorization_authority.rs` exists.
+- [x] `Err(RecordMissing)` for an unbacked `issued()` reference — `authorization_authority.rs:52`.
+- [x] `Ok(true)` after a real issue-then-validate round trip — `authorization_authority.rs:62`.
+- [x] `Ok(false)` when the expected subject digest differs from the stored one — `authorization_authority.rs:94`.
+- [x] `dm2_06` unchanged — `memory-domain/src/lib.rs:1701`, no `#[ignore]`.
+- [x] `cargo test --workspace --all-targets` reports `ignored = 0` — no `#[ignore]` attribute remains in `crates/`; the step passed in run 45027564643.
 
 ## 7. Why this is a work order and not a patch
 
 I do not write code on this repository. That constraint has not moved, and it is why this document gives the exact assertion, the exact file path, and the three failure modes instead of the diff.
 
 The reason to prefer it over silence is measurable in this repository's own history: `#623` and `#634` both re-derived this step, both got it wrong in different directions, and one lost four unrelated items to a rebase. A written target is cheaper than a third derivation.
+
+## 8. The attestor half, which this document left undone
+
+`f1365f97` (`#691`) implements the counterpart this document only named. Recorded here because §1 says a record that is correct when written and misleading when read is the failure this file exists to prevent, and "one step left" stopped being the whole truth the moment the attestor writer landed.
+
+- `crates/memory-domain/src/attestor.rs` — `AttestorData`, a three-state `IssuedAttestorRef` (`Absent | PendingI | Issued`, the same shape as `AuthorizationDecisionRef`), and `I_DEV_BASELINE_ATTESTOR`, a constant separate from `I_DEV_BASELINE_ISSUER` for the §5 reason.
+- `AdmissionStore::issue_attestation`, `::validate_attestation`, `read_attestation`, `AttestationValidationError`.
+- `crates/memory-compiler/tests/attestation_authority.rs`, eleven tests.
+
+What that changes: criterion 6 previously held for one table and was aspirational for the other. `i_attestations` was created by `#662` as DDL with no Rust reading or writing it, so an attestation could be referenced and never checked. It is now written, read and validated, and the two paths are separate down to the issuer string.
+
+**A note on how `#691` was verified**, because it will be true of the next PR too. Nothing in this repository can verify a pull request. `rust-self-hosted.yml` is `main`-only, and deliberately: the runner's job-started hook denies any `GITHUB_REF` other than `refs/heads/main`, and `audit_runner_admission.py` rejects `pull_request` on self-hosted jobs. Every other workflow is pinned to `ubuntu-latest`, whose minutes are blocked by the billing failure in #283. So a red check on a PR here carries no information about the diff — `#691`'s four check runs were `steps=0` with no runner assigned, and so were `#679`'s, which changed two Markdown files. Verification happened after merge: run `45027564643`, `Rust Workspace Tests (self-hosted)`, `cargo test --workspace --all-targets` and `cargo fmt --all --check` both `success`.

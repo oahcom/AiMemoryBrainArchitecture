@@ -1305,6 +1305,27 @@ impl AdmissionStore {
         Ok(reference)
     }
 
+    /// Records an I-side attestation and returns the reference that names it.
+    ///
+    /// Rejects the same malformed cases `issue_authorization_decision` rejects,
+    /// plus one it does not need: an issuer outside the attestor allowlist. That
+    /// check is here and not only in the domain type because this is the writer —
+    /// a caller that skips `AttestorData::validate` must still be stopped before
+    /// the row exists.
+    ///
+    /// Replay with an identical payload succeeds and returns the same reference.
+    /// Replay with a differing payload is `IdempotencyConflict`, matching the
+    /// decision writer, so a retry cannot silently overwrite a recorded
+    /// attestation.
+    /// Record-backed attestation validation.
+    ///
+    /// `Ok(true)` when the reference matches a readable durable row and the
+    /// stored digest matches `expected_subject_digest`. `Ok(false)` when the row
+    /// is readable and every reference field matches it but the stored digest
+    /// differs from the expected one. Every other case is `Err`, including a
+    /// missing row — absence of an attestation is never `Ok(false)`, because a
+    /// caller that cannot tell "no attestation" from "attestation says no" will
+    /// eventually treat the first as the second.
     /// Record-backed authorization decision validation.
     ///
     /// Ok(true): all reference fields match the readable durable record,
@@ -1657,6 +1678,34 @@ fn parse_authorization_decision_kind(value: &str) -> Option<AuthorizationDecisio
         _ => None,
     }
 }
+
+// ---------------------------------------------------------------- attestations
+//
+// `i_attestations` is the second half of GAP-18. #662 created the table but no
+// Rust reads or writes it, so criterion 6 is met only on the decision side: the
+// attestor table exists and nothing touches it.
+//
+// The three functions below are the attestor counterpart of
+// `issue_authorization_decision` / `validate_authorization_decision` /
+// `read_authorization_decision`. They are written out separately rather than
+// generic over a record kind because the two contracts differ in one
+// load-bearing way — the issuer. `GAP-18-AUTHORIZATION-VALIDATOR-REMAINDER` §5
+// says the separation is the point, and a generic version would have to take the
+// allowlist as a parameter, which is how one compromised constant ends up
+// covering both tables.
+
+/// Why a durable attestation could not confirm a reference.
+///
+/// A separate type from `AuthorizationDecisionValidationError` on purpose: a
+/// caller that conflates "no attestation" with "no decision" cannot tell an
+/// attestor failure from an authority failure, which is the same reasoning that
+/// made the decision validator an enum instead of a `bool`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+/// One decoded `i_attestations` row.
+/// Reads an attestation by primary key.
+///
+/// `QueryReturnedNoRows` is preserved so the caller can distinguish a missing
+/// record from an unreadable database.
 /// One decoded `canonical_commits` row.
 struct StoredCanonicalCommit {
     issuer_id: String,
@@ -2990,6 +3039,53 @@ mod tests {
             Err(AuthorizationDecisionValidationError::RecordMismatch(
                 "decision_kind"
             ))
+        );
+    }
+    #[test]
+    fn attestor_issuance_accepts_an_identical_replay() {
+        let mut db = AdmissionStore::in_memory().unwrap();
+        let attestation_id = id("attestation-replay-identical");
+        let issuer = IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap();
+        let subject = OpaqueId::new("a".repeat(64)).unwrap();
+
+        let first = db
+            .issue_attestation(&attestation_id, &issuer, &subject, "2026-11-22T00:00:00Z")
+            .unwrap();
+        let second = db
+            .issue_attestation(&attestation_id, &issuer, &subject, "2026-11-22T00:00:00Z")
+            .unwrap();
+
+        assert_eq!(first, second);
+        assert_eq!(db.validate_attestor(&second, &subject), Ok(()));
+    }
+
+    /// §3.1 keeps two tables so an attestation id cannot be mistaken for a
+    /// decision id. Same string in both tables, no collision, both validators
+    /// still work.
+    #[test]
+    fn attestor_and_decision_ids_are_separate_namespaces() {
+        let mut db = AdmissionStore::in_memory().unwrap();
+        let shared = id("same-id-both-tables");
+        let issuer = IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap();
+        let subject = OpaqueId::new("a".repeat(64)).unwrap();
+
+        let attestation = db
+            .issue_attestation(&shared, &issuer, &subject, "2026-11-22T00:00:00Z")
+            .unwrap();
+        let decision = db
+            .issue_authorization_decision(
+                &shared,
+                &issuer,
+                &subject,
+                "2026-11-22T00:00:00Z",
+                AuthorizationDecisionKind::Approved,
+            )
+            .unwrap();
+
+        assert_eq!(db.validate_attestor(&attestation, &subject), Ok(()));
+        assert_eq!(
+            db.validate_authorization_decision(&decision, &subject),
+            Ok(true)
         );
     }
 }

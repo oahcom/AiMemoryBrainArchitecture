@@ -102,7 +102,14 @@ In the ruling's words:
 
 That is exactly what this revision does: §3 now carries the ruling instead of the specificity argument, and §4 records the regression the ruling measured. Nothing in §1, §2 or §4's measurements changed, because they were right.
 
-This revision also notes where the ruling's remaining requirement stands. `GAP-18-AUTHORIZATION-VALIDATOR-REMAINDER` §3 Step 3 is that requirement, and it is not yet satisfied: `dm2_06` proves presence in `memory-domain`, and no test in `crates/memory-compiler/tests/` asserts the propagated authority `Err`. This document does not restate that work order; it records that the ruling's §5 step 4 is still open, so a reader of §3 above does not conclude that the ruling closed it.
+This revision also records where the ruling's remaining requirement stands. `GAP-18-AUTHORIZATION-VALIDATOR-REMAINDER` §3 Step 3 is that requirement, and it was satisfied by PR #671 at `2026-11-22T10:41:51Z`, before this revision merged. `crates/memory-compiler/tests/authorization_authority.rs` now asserts the propagated authority `Err` directly:
+
+| test | assertion |
+|---|---|
+| `pending_reference_propagates_authority_validation_error` | `Err(AuthorizationDecisionValidationError::PendingReference)` |
+| `issued_reference_without_durable_row_propagates_record_missing` | `Err(AuthorizationDecisionValidationError::RecordMissing)` |
+
+Both are `Err`, not `Ok(false)`, and both name the specific variant rather than accepting any error — the three properties the ruling's §5 step 4 and the work order's §3 Step 3 each called load-bearing. `dm2_06` still asserts the structural `Err` in `memory-domain`, and that is now correct rather than a gap: the ruling's §2 says the structural rejection and the propagated authority rejection are different errors at different layers, and the test at each layer asserts its own.
 
 ## 6. What the ruling deliberately did not decide
 

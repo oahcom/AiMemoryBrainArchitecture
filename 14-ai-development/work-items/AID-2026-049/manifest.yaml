@@ -103,7 +103,7 @@ verification:
     - "grep -rn 'todo!|unimplemented!' --include=*.rs crates/  -> 0 hits"
   evidence_refs:
     - "main at 550bb864 alone measures 666 passed, 0 failed, 0 ignored; adding this work item's 21 tests yields 687."
-    - "One earlier full run reported exit 101 with a single failure in memory-event-store-sqlite tests/forget_fence.rs: 'table accepted_events already exists'. It did not reproduce in 12 isolated runs, 6 serial runs, or a second full run, and memory-context has no dependency on that crate. Filed as GAP-21 rather than repaired here."
+    - "One earlier full run reported exit 101 with a single failure in memory-event-store-sqlite tests/forget_fence.rs: 'table accepted_events already exists'. It did not reproduce in 12 isolated runs, 6 serial runs, or a second full run, and memory-context has no dependency on that crate. Filed as GAP-29 rather than repaired here; GAP-29 was written after this item merged and proves the collision deterministically (21-24 duplicate paths per 1600 concurrent calls)."
 
 findings:
   - id: AID-2026-049-F1

@@ -40,6 +40,43 @@ jobs:
           printf 'cpu_count='; nproc
           free -h
           df -h /
+          # Three crates build bundled SQLite through cc::Build, so a compiler is
+          # a precondition for `cargo test --workspace --all-targets`. Presence is
+          # reported separately from capability: `command -v gcc` succeeds on a
+          # host whose gcc is a lone binary with no cc1 behind it, and the build
+          # then fails inside libsqlite3-sys instead of at the toolchain check.
+          echo "=== Build toolchain ==="
+          for t in cc gcc clang cargo rustc pkg-config make; do
+            if command -v "$t" >/dev/null 2>&1; then
+              printf '%-12s PRESENT %s\n' "$t" "$("$t" --version 2>&1 | head -1)"
+            else
+              printf '%-12s ABSENT\n' "$t"
+            fi
+          done
+          # Compile and link one translation unit. Diagnostics must not fail the
+          # job on this, so the status is recorded rather than asserted.
+          probe_dir="$(mktemp -d)"
+          printf 'int main(void){return 0;}\n' >"${probe_dir}/probe.c"
+          c_status=no-compiler-on-path
+          for c in cc gcc clang; do
+            command -v "$c" >/dev/null 2>&1 || continue
+            if "$c" "${probe_dir}/probe.c" -o "${probe_dir}/probe" >"${probe_dir}/err" 2>&1; then
+              c_status="ok ($c)"
+            else
+              c_status="BROKEN ($c is on PATH but cannot compile)"
+            fi
+            break
+          done
+          case "$c_status" in
+            ok\ *)
+              printf 'c_compile_link=%s\n' "$c_status"
+              ;;
+            *)
+              printf 'c_compile_link=%s\n' "$c_status"
+              head -3 "${probe_dir}/err" 2>/dev/null || true
+              ;;
+          esac
+          rm -rf "$probe_dir"
           echo "=== Time synchronization ==="
           timedatectl show -p NTPSynchronized --value 2>/dev/null || true
           echo "=== Tailscale service state (no peer inventory) ==="

@@ -432,4 +432,27 @@ mod tests {
             Err(DomainError::InvalidCanonicalCommitField("issued_at"))
         );
     }
+    #[test]
+    fn attestor_ref_distinguishes_pending_from_issued() {
+        let pending = AttestorRef::pending_i();
+        assert!(pending.is_pending());
+        assert!(pending.data().is_none());
+
+        let issued = AttestorRef::from_issued_data(valid_attestor_data()).unwrap();
+        assert!(!issued.is_pending());
+        assert_eq!(
+            issued.data().unwrap().attestation_id.as_str(),
+            "attestation-domain-test"
+        );
+    }
+
+    #[test]
+    fn attestor_ref_issued_round_trips_through_json() {
+        let issued = AttestorRef::from_issued_data(valid_attestor_data()).unwrap();
+        let wire = serde_json::to_string(&issued).unwrap();
+
+        // Flat four-field object, not a tagged enum variant (§2.4).
+        assert!(wire.starts_with("{\"attestation_id\""), "got {wire}");
+        assert_eq!(serde_json::from_str::<AttestorRef>(&wire).unwrap(), issued);
+    }
 }

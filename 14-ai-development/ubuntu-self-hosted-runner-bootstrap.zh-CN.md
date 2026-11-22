@@ -60,6 +60,23 @@ tailscale status
 tailscale ip -4
 ```
 
+然后是构建工具链。`cargo test --workspace --all-targets` 会通过 `cc::Build` 编译内置 SQLite，因此编译器是运行器存在意义所在的那个作业的前置条件——而 `cc` **存在**不等于**可用**。一个没有 `cc1` 的 `gcc` 能被 `command -v` 找到，却仍在 `libsqlite3-sys` 内部失败。请分别检查存在性与可用性：
+
+```bash
+for t in cc gcc pkg-config make; do
+  command -v "$t" >/dev/null 2>&1 && printf '%-12s PRESENT\n' "$t" || printf '%-12s MISSING\n' "$t"
+done
+printf 'int main(void){return 0;}\n' >/tmp/cc-probe.c
+if cc /tmp/cc-probe.c -o /tmp/cc-probe 2>/tmp/cc-probe.err; then
+  echo "OK: cc compiles and links"
+else
+  echo "MISSING C TOOLCHAIN: cc is on PATH but cannot compile; see /tmp/cc-probe.err"
+fi
+rm -f /tmp/cc-probe.c /tmp/cc-probe /tmp/cc-probe.err
+```
+
+`cc ... cannot compile` 属于供给失败，不是依赖缺陷：在注册运行器之前安装 `build-essential`（或将 `CC` 指向真实的工具链）。若 `cc` 直接为 `MISSING`，结论相同——下一次 `cargo test` 会在 `libsqlite3-sys` 内部失败，看起来像 `rusqlite` 的问题，而不是主机的问题。
+
 将非密钥输出记录在部署证据中。在选择运行器软件包之前，确认架构：**此主机为 `x86_64`**。从 `arch=arm64` 页面选择的软件包是错误的制品；此外，部分下载的软件包也无法通过 `tar tzf` 检查，并且不会留下 `config.sh`。提取之前，必须同时验证架构和归档文件哈希值。
 
 ## 2. 服务身份 / 2. Service identity
