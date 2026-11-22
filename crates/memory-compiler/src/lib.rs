@@ -236,33 +236,33 @@ pub struct AcceptedEvent {
 /// `receipt.payload_digest` without recomputing would pass a tampered payload
 /// straight into compilation.
 ///
-/// ponytail: this checks the bytes, not the provenance. `PendingCompileIntent`
-/// has public fields, so any caller can build one by hand and get
-/// `compile_intent_durable: true`. Closing that needs a private constructor or
-/// a witness type in the event-store crate, which is a change to that crate's
-/// public surface; until then the guarantee is "this adapter never launders bad
-/// bytes", not "no one can forge a flag".
+/// The struct is sealed: its fields are private, and its only source is a
+/// store-backed row returned by `SqliteEventStore::pending_compile_intents()`.
+/// Callers cannot construct a forged intent with
+/// `compile_intent_durable: true`. The remaining guarantee boundary is that
+/// the payload bytes are re-digested by this adapter rather than trusted from
+/// the stored receipt or envelope.
 #[cfg(feature = "sqlite")]
 pub fn accepted_event_from(
     intent: &memory_event_store_sqlite::PendingCompileIntent,
 ) -> Result<AcceptedEvent, CompilerError> {
-    let event_id = Identity::new(intent.receipt.event_id.as_str().to_owned())?;
-    let receipt_id = Identity::new(intent.receipt.receipt_id.as_str().to_owned())?;
+    let event_id = Identity::new(intent.receipt().event_id.as_str().to_owned())?;
+    let receipt_id = Identity::new(intent.receipt().receipt_id.as_str().to_owned())?;
 
     // Lossy decoding would silently change the bytes whose digest was accepted.
-    let payload = String::from_utf8(intent.payload_bytes.clone())
+    let payload = String::from_utf8(intent.payload_bytes())
         .map_err(|_| CompilerError::InvalidPayloadEncoding)?;
 
     let computed_digest = raw_payload_digest(&payload);
-    if intent.receipt.payload_digest != computed_digest {
+    if intent.receipt().payload_digest != computed_digest {
         return Err(CompilerError::PayloadDigestMismatch {
-            declared: intent.receipt.payload_digest.clone(),
+            declared: intent.receipt().payload_digest.clone(),
             computed: computed_digest,
         });
     }
-    if intent.envelope.payload_digest != computed_digest {
+    if intent.envelope().payload_digest != computed_digest {
         return Err(CompilerError::PayloadDigestMismatch {
-            declared: intent.envelope.payload_digest.clone(),
+            declared: intent.envelope().payload_digest.clone(),
             computed: computed_digest,
         });
     }
@@ -2015,6 +2015,23 @@ mod outbox_adapter_tests {
         }
     }
 
+    fn envelope_with_raw_payload_digest(payload: &[u8]) -> EventEnvelope {
+        EventEnvelope {
+            event_kind: "observation".into(),
+            source_type: "compiler-test".into(),
+            source_id: id("source-1"),
+            producer_actor_ref: id("actor-1"),
+            scope_refs: vec![scope()],
+            event_time: None,
+            payload_ref: "payload://source-1".into(),
+            payload_digest: format!("sha256:{:x}", Sha256::digest(payload)),
+            classification: EventClassification::Observed,
+            idempotency_key: "compile-test-1".into(),
+            retention_class: "default".into(),
+            correlation_id: id("correlation-1"),
+        }
+    }
+
     /// The positive path: accept, read the outbox, adapt, ingest. Every digest
     /// the compiler sees must be the one the store issued, not one computed
     /// alongside it.
@@ -2043,53 +2060,27 @@ mod outbox_adapter_tests {
         assert_eq!(ingested.payload_digest, receipt.payload_digest);
     }
 
-    /// The negative path that makes the flag mean something: a tampered
-    /// snapshot must not reach `IngestionStage`, and must not come back with
-    /// `compile_intent_durable: true` attached to bytes the store never
-    /// verified.
-    #[test]
-    fn outbox_adapter_rejects_tampered_payload_bytes() {
-        let mut store = SqliteEventStore::in_memory().expect("store should open");
-        let payload = b"Original accepted payload.";
-
-        store
-            .accept_with_payload(envelope(payload), payload, &[scope()])
-            .expect("accept should succeed");
-
-        let pending = store
-            .pending_compile_intents()
-            .expect("outbox read should succeed");
-        let mut tampered = pending[0].clone();
-        tampered.payload_bytes[0] ^= 0x01;
-
-        match accepted_event_from(&tampered) {
-            Err(CompilerError::PayloadDigestMismatch { declared, computed }) => {
-                assert_eq!(declared, tampered.receipt.payload_digest);
-                assert_ne!(declared, computed);
-            }
-            other => panic!("expected PayloadDigestMismatch, got {other:?}"),
-        }
-    }
-
-    /// Non-UTF-8 bytes get their own error rather than being lossily decoded
-    /// into a different payload than the one the store accepted.
+    /// Genuinely non-UTF-8 bytes can be accepted and retrieved intact, but
+    /// the compiler adapter rejects them rather than decoding them lossily.
     #[test]
     fn outbox_adapter_rejects_non_utf8_payload() {
         let mut store = SqliteEventStore::in_memory().expect("store should open");
-        let payload = b"valid start";
+        let payload = &[0xff, 0xfe];
 
         store
-            .accept_with_payload(envelope(payload), payload, &[scope()])
+            .accept_with_payload(
+                envelope_with_raw_payload_digest(payload),
+                payload,
+                &[scope()],
+            )
             .expect("accept should succeed");
 
         let pending = store
             .pending_compile_intents()
             .expect("outbox read should succeed");
-        let mut broken = pending[0].clone();
-        broken.payload_bytes = vec![0xff, 0xfe];
 
         assert_eq!(
-            accepted_event_from(&broken),
+            accepted_event_from(&pending[0]),
             Err(CompilerError::InvalidPayloadEncoding)
         );
     }

@@ -479,7 +479,7 @@ fn run() -> Result<(), String> {
         .map_err(|error| format!("cannot read compile outbox: {error:?}"))?;
     let pending_intent = pending
         .iter()
-        .find(|intent| intent.receipt.receipt_id == accepted_receipt.receipt_id)
+        .find(|intent| intent.receipt().receipt_id == accepted_receipt.receipt_id)
         .ok_or_else(|| {
             format!(
                 "accepted receipt {} has no pending compile intent",
@@ -491,7 +491,7 @@ fn run() -> Result<(), String> {
         eprintln!(
             "accepted receipt: {} (outbox row {})",
             accepted_receipt.receipt_id.as_str(),
-            pending_intent.outbox_row
+            pending_intent.outbox_row()
         );
     }
 
