@@ -12,8 +12,10 @@ document_metadata:
     usage_status: Active
     modification_status: Unchanged
     supersession:
-      supersedes: []
-      supersession_reason: null
+      supersedes:
+        - 14-ai-development/work-items/I-OWNER-DECISION-AUTHORIZATION-DECISION-001.md
+      supersession_reason: "Supersedes exactly two clauses of I-OWNER-DECISION-AUTHORIZATION-DECISION-001: §2.2's two-state AuthorizationDecisionRefState enum (replaced by D2's Absent/Placeholder/Issued) and §4.3's assignment of dm2_06 to the compiler-layer Pending/Err path (replaced by §4's domain-layer assertions, because dm2_06 lives at crates/memory-domain/tests/phase2_acceptance.rs:606 where memory-compiler is unreachable). Everything else in I-001 stands, including its §3.3 compiler-layer validator, which needs its own test. See §8."
+      effective_date: "2026-11-22"
 
   authority:
     canonical_status: Canonical
@@ -33,7 +35,7 @@ document_metadata:
 **Status:** DECIDED (owner-proxy decision, 2026-11-22T05:10Z)
 **Decided by:** Verifier acting as owner proxy, exercising Owner I, B and D in one session, per the standing instruction that a blocking decision with no human available is to be taken and recorded rather than left open.
 **Effect:** unblocks `dm2_06`, the last `#[ignore]` in the workspace. Does not by itself make any publication flag sourceable.
-**Supersedes:** nothing. **Amends:** the scope of `B-P2-XO-01`, the framing of `GAP-14-B`, and closure criterion 4 of `GAP-13`.
+**Supersedes:** I-OWNER-DECISION-AUTHORIZATION-DECISION-001 §2.2 (two-state enum) and §4.3 (dm2_06 assignment), and nothing else. **Amends:** the scope of `B-P2-XO-01`, the framing of `GAP-14-B`, and closure criterion 4 of `GAP-13`. **Reconciliation:** §8.
 
 ---
 
@@ -152,3 +154,31 @@ This does not unblock `GAP-14-B`, and it does not change the decision above. It 
 The change is small — one enum, one constructor, one validation branch, one test. It is recorded as a decision because the small change settles a question four rounds of work treated as open, and because the *shape* of the change (three states, presence-not-authenticity) is what future work must respect. An implementation note would not bind the next person; a decision does.
 
 The code is not written here. Per the operating constraint, this document authorizes the change and specifies it exactly; writing it is a separate act with its own review.
+
+## 8. Reconciliation with I-OWNER-DECISION-AUTHORIZATION-DECISION-001
+
+`I-OWNER-DECISION-AUTHORIZATION-DECISION-001` (`c9a6394d`, 2026-11-22 12:54 +0800) and this document (`986c42bc`, 2026-11-22 13:41 +0800) are both `DECIDED` and both owner-proxy decisions. They were recorded 47 minutes apart without a recorded supersession, which left the repository with two contradictory normative documents and no way to adjudicate between them. This section records the adjudication.
+
+Most of the apparent conflict is not a conflict: the two documents gate **two different layers**. Two clauses genuinely collide, and on those this document governs.
+
+### 8.1 Clauses that coexist, because they answer different questions
+
+| I-001 clause | this document | why both stand |
+|---|---|---|
+| §3.3 — the validator lives in `memory-compiler` behind `AdmissionStore` | D6 — the presence gate lives in domain `validate()` | Different questions. §3.3 asks *"was this authorization real?"* and needs the durable `authorization_decisions` row. D6 asks *"was any authorization recorded at all?"* and needs only the value's state. §1 of this document argues the distinction explicitly: `B-P2-XO-01` asks authenticity, `dm2_06` asks presence. Both gates coexist, in that order: the domain gate rejects `Absent` at construction, the compiler gate establishes durable authority before publication. |
+| §4.2 — three outcomes: `Ok(true)`, `Ok(false)` on subject-digest mismatch, `Err` for missing authority | not touched | This document does not amend the validator contract. §5 of this document explicitly leaves a stricter publication-time rejection of `Placeholder` open, so the compiler gate keeps every outcome §4.2 defines. |
+| §6 — `FactRevision.authorization_decision_ref` stays required and non-optional; `Pending` is the explicit legacy state | D5 — keep the required-argument constructor and add one that does not require authorization | Same intent, different mechanism. §6 forbids migrating the field to `Option`; D5 keeps the existing 11 call sites compiling unchanged and makes absence opt-in. Neither silently turns an existing value into `Absent`. |
+
+### 8.2 Clauses this document supersedes or narrows
+
+| I-001 clause | effect here | why |
+|---|---|---|
+| §2.2 — `enum AuthorizationDecisionRefState { Pending, Issued(..) }` | **superseded** by D2 — `Absent` / `Placeholder` / `Issued(AuthorizationDecisionRef)` | The two-state enum cannot express absence. `pending_i()` is a value that exists, so §2.2's shape makes "no authorization was recorded" unrepresentable, which is exactly the thing `dm2_06` must test. This document is 47 minutes later and the type state is its explicit subject. |
+| §4.3 — `dm2_06_missing_authorization_ref_blocks_fact_publication` "must exercise the **Pending reference** path and assert a propagated authority `Err`" | **superseded** by §4 — `dm2_06` is a domain-layer test with two assertions on `FactRevision::validate()` | **Decisive, and it is a reachability fact, not a preference:** the test lives at `crates/memory-domain/tests/phase2_acceptance.rs:606`. `crates/memory-domain/Cargo.toml` declares `serde` and `serde_json` only — no `memory-compiler` — and the dependency direction is the reverse. A compiler-layer authority `Err` cannot be produced or asserted at that path. §4.3's requirement is not a hard requirement; it is an unreachable one, and a requirement that cannot exist where it is specified is a defect in the document, not an obligation on the implementer. |
+| §3.3, second sentence — "Domain validation may validate candidate field syntax and reject Pending" | **narrowed**: the domain presence gate rejects `Absent` and must **NOT** reject `Placeholder` (D3) | §3.3 was written against §2.2's two states, where "Pending" covered everything that was not issued. Under D2 those become two distinct states, and only `Absent` is absence. Rejecting `Placeholder` at the domain gate would move the authenticity question into the presence gate, which is the conflation §1 of this document exists to undo. |
+
+### 8.3 Consequence that must be recorded
+
+I-001 §3.3's compiler-layer authenticity validator **remains required**. Superseding §4.3 removes the assignment of `dm2_06`, not the gate. The validator contract in §4.1 and its three outcomes in §4.2 stand unchanged, and they need their **own** test at a location that can reach `memory-compiler`. That test is not `dm2_06`, must not be named `dm2_06`, and must not be counted toward `dm2_06`'s closure.
+
+`dm2_06` closes when §4's two domain assertions exist. The compiler-layer authenticity test closes when the `AdmissionStore`-backed validator exists. Two gates, two tests, two closure conditions.
