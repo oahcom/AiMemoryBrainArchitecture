@@ -11,7 +11,7 @@ risk_rationale: >-
 
 security_scope: BMCP server accepted-socket test process cleanup and exact-head regression verification only.
 
-status: PR_OPEN
+status: REGISTERED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -27,7 +27,8 @@ baseline_pr_status: MERGED
 baseline_merge_commit_sha: c9f4a7fe021f53e101b3977fc12b6f7fc50ca29b
 registration_pr: 624
 registration_pr_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/624
-registration_pr_status: OPEN
+registration_pr_status: MERGED
+registration_merge_commit_sha: 3015a68f9acec79c9e7ce02b43783e03939dfa79
 
 created_at: 2026-11-22
 updated_at: 2026-11-22
@@ -89,7 +90,7 @@ authorization:
 
 governance:
   aid_assignment: REGISTERED
-  aid_status: PR_OPEN
+  aid_status: REGISTERED
   registration_authorization: USER-PRINCIPAL-DELEGATED (limited to this work item)
   development_start_authorization: USER-PRINCIPAL-DELEGATED (limited to the bounded AID-2026-045 follow-up)
   architecture_status: NOT_APPLICABLE
