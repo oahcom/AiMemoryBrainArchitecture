@@ -1,0 +1,117 @@
+work_item_id: AID-2026-044
+title: Implement MCP tools/call CallToolResult and tool-error semantics
+
+class: CODE/TEST
+risk: R1
+risk_rationale: >-
+  A bounded MCP server wire-response correction. It makes successful tool calls
+  interoperable with the declared 2024-11-05 protocol and distinguishes tool
+  execution failures from malformed JSON-RPC requests. It does not change
+  evidence semantics, identity, authorization, persistence, or production state.
+
+security_scope: MCP server tools/call response envelope and tool execution error semantics only.
+
+status: PR_OPEN
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+implementing_ai_session: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 792565ac60795ece14f8575774a72563c69e8b1f
+
+tracking_issue: "#617 (REQ-08 / BMCP MCP server)"
+
+created_at: 2026-11-22
+updated_at: 2026-11-22
+
+prompt_id: AID-2026-044-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-044/prompt-v1.md
+prompt_status: FROZEN
+prompt_sha256: 2e5cd574b97d8622abbd9b3dc9f65060207db5b89f08360e4339bef7de616bdb
+prompt_bytes: 4206
+prompt_file_blob_sha: 2576bc98f3bd1070c86cf11c45af80988d1df085
+prompt_file_commit_sha: 32c074d0d43a66221b79946daf7ace3badc55c32
+
+prompt_provenance_tier: T1
+prompt_provenance_note: >-
+  Frozen from the current user instruction to continue REQ-08 convergence and
+  the evidence-backed Owner finding in #348 comment 7075050295 / Issue #617.
+  Raw platform payload bytes and session identifier are not exposed; the
+  SHA-256 identifies the committed prompt-v1.md bytes only.
+
+dependency_refs:
+  - crates/bmcp-server/src/lib.rs
+  - crates/bmcp-server/tests/tool_dispatch.rs
+  - Issue #617
+  - Issue #348 comment 7075050295
+
+deliverables:
+  - Return a protocol-valid CallToolResult with content text blocks for successful tools/call responses.
+  - Preserve valid:false as an ordinary validate-tool result.
+  - Represent invalid evidence during digest execution with isError: true inside CallToolResult.
+  - Preserve JSON-RPC protocol/request errors for malformed envelopes, missing required parameters, unknown methods, and unknown tool names.
+  - Add structural response tests and an MCP decoder interoperability fixture if an available dependency supports it.
+  - Record exact-head verification and all environment limitations.
+
+independent_reviewer: NOT_ASSIGNED
+integration_reviewer: NOT_ASSIGNED
+
+review:
+  status: NOT_ASSIGNED
+  report_ref: ""
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)
+
+implementation:
+  status: NOT_STARTED
+  branch: NOT_ASSIGNED
+  pull_request: NOT_CREATED
+  pull_request_url: NOT_CREATED
+  implementation_commit_sha: NOT_STARTED
+  merge_commit_sha: NOT_MERGED
+
+authorization:
+  registration_write: USER-PRINCIPAL-DELEGATED (limited to this AID registration package)
+  implementation_write: USER-PRINCIPAL-DELEGATED (limited to Issue #617; implementation code must be authored by a separate execution session, not this Owner/coordinator session)
+  index_update: USER-PRINCIPAL-DELEGATED (limited to the single AID-2026-044 row)
+  validator_changes: NOT_AUTHORIZED
+  schema_changes: NOT_AUTHORIZED
+  architecture_acceptance: NOT_GRANTED
+  production_authorization: NOT_GRANTED
+
+governance:
+  aid_assignment: REGISTERED
+  aid_status: PR_OPEN
+  registration_authorization: USER-PRINCIPAL-DELEGATED (limited to this work item)
+  development_start_authorization: USER-PRINCIPAL-DELEGATED (limited to Issue #617 implementation scope)
+  architecture_status: NOT_APPLICABLE
+  g8_status: NOT_APPLICABLE
+  quota_change: NONE
+
+verification:
+  status: NOT_RUN
+  environment: >-
+    GitHub-hosted Actions currently fail before steps due account billing.
+    The self-hosted runner admission works, but Run 44991500213 failed at
+    cargo --version with "cargo: command not found" (exit 127); workspace
+    tests were skipped. Runner toolchain and native compiler must be checked.
+  commands:
+    - "cargo test -p bmcp-server"
+    - "cargo test --workspace"
+    - "cargo fmt --all -- --check"
+    - "cargo clippy --workspace --all-targets -- -D warnings"
+  evidence_refs:
+    - "Issue #617 and #348 comment 7075050295"
+    - "Self-hosted workflow Run 44991500213: cargo missing, exit 127; no Rust tests executed"
+    - "No CI PASS or implementation PASS is claimed"
+
+findings:
+  - id: F-REQ08-MCP-TOOL-RESULT-001
+    severity: P1
+    feedback_destination: "Issue #617; close only after CallToolResult shape, tool-error semantics, structural tests and exact-head verification are complete."
