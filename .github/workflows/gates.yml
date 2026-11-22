@@ -1,0 +1,143 @@
+name: Existing gates
+
+# GAP-10 Tier 2 item 2 (T2.2): wire the gates this repository already owns into
+# CI, so a gate cannot reach main red without anybody noticing.
+#
+# Two kinds of job here, and the difference is deliberate:
+#
+#   * HARD GATES fail on any deviation. The gate is green today and must stay
+#     green: `protocol-index`, `conformance`.
+#
+#   * RATCHETS fail only when the failure set gets WORSE than the recorded
+#     baseline: `schema-nonempty`, `bilingual`. These gates are already red on
+#     main (GAP-08, GAP-09). Making them hard gates today would paint every PR
+#     red and teach everyone to ignore the check, which is exactly how they
+#     reached main red in the first place. A ratchet converts "permanently red
+#     and ignored" into "cannot get worse, and gets better when someone fixes
+#     an item".
+#
+# A RATCHET IS NOT A GREEN EXEMPTION. `scripts/ci/gate_ratchet.py` fails on two
+# conditions:
+#   1. a failure appears that is not in the baseline  -> regression, blocks.
+#   2. a baseline item no longer fails                -> baseline is stale.
+# Condition 2 is what keeps the ratchet honest: you cannot quietly fix nothing
+# and you cannot leave the baseline inflated after fixing something. Fixing an
+# item requires lowering the baseline in the same PR.
+#
+# Baselines live in `scripts/ci/baselines/`. Each file is the exact set of
+# currently-failing items, one per line; `#` starts a comment.
+#
+# Runner note: every job below is pinned to `ubuntu-latest`. On this account
+# GitHub-hosted minutes are currently blocked by a billing failure, so these
+# jobs are authored to run but are NOT observed running yet -- see
+# `14-ai-development/ci-gates-and-ratchets.md`. They are deliberately not moved
+# to the self-hosted runner: `scripts/ci/audit_runner_admission.py` (L2) forbids
+# `pull_request` on any self-hosted job, and the runner's own job-started hook
+# (L1) denies every ref except `refs/heads/main`. A gate that can only run after
+# merge is not a gate.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: existing-gates-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  protocol-index:
+    name: BMCP protocol index (hard gate)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # Green on main at the time of writing: 22 index rows, missing=0 extra=0
+      # duplicate_types=0 invalid_rows=0. Any deviation is a real defect, so
+      # this is a hard gate and not a ratchet.
+      - name: Check protocol index against schema message types
+        run: python3 08-bmcp-protocol/scripts/check_protocol_index.py
+
+  conformance:
+    name: BMCP conformance suite (hard gate)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: 08-bmcp-protocol/tests/conformance/provider_outcome/requirements.txt
+      - name: Install pinned Python test dependencies
+        run: python -m pip install -r 08-bmcp-protocol/tests/conformance/provider_outcome/requirements.txt
+      # The cross-language vectors shell out to `node` and import the pinned
+      # `canonicalize` package. Without this install three tests error out with
+      # ERR_MODULE_NOT_FOUND -- that is a missing dependency, not a red gate.
+      - name: Install conformance Node dependencies
+        working-directory: 08-bmcp-protocol/tests/conformance
+        run: npm ci
+      # With both dependency sets installed this suite is fully green on main
+      # (585 tests, 27 skipped, 0 failures). Verified before wiring it as a hard
+      # gate; if it were not green it would have been a ratchet instead.
+      - name: Run the full conformance suite
+        run: python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance
+
+  schema-nonempty:
+    name: Schema non-empty audit (ratchet)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # GAP-09: 5506 constraints exist in the schemas that the bilingual audit
+      # inventory does not register. Red on main, so ratchet rather than gate.
+      - name: Ratchet the schema non-empty audit
+        run: |
+          python3 scripts/ci/gate_ratchet.py \
+            --baseline scripts/ci/baselines/schema-nonempty.txt \
+            --format schema \
+            --command "python3 08-bmcp-protocol/schemas/test_nonempty_audit.py"
+
+  bilingual:
+    name: Bilingual docs coverage (ratchet)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # GOV-DOC-001 full scan: 81 normative paths lack an en/zh-CN counterpart.
+      # Red on main, so ratchet rather than gate.
+      - name: Ratchet the GOV-DOC-001 full scan
+        run: |
+          python3 scripts/ci/gate_ratchet.py \
+            --baseline scripts/ci/baselines/bilingual-docs.txt \
+            --format paths \
+            --command "python3 scripts/check_bilingual_docs_full.py"
+
+  rust:
+    name: Rust fmt + clippy + test (hard gate)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      # rustfmt has no pin file in this repository, so a rustfmt release that
+      # changes formatting can turn this job red without any code change. That
+      # is a known sharp edge; it is still a hard gate because formatting drift
+      # on main is what GAP-10 records as a recurring regression.
+      - name: cargo fmt --all --check
+        run: cargo fmt --all --check
+      - name: cargo clippy --workspace --all-targets -- -D warnings
+        run: cargo clippy --workspace --all-targets -- -D warnings
+      - name: cargo test --workspace
+        run: cargo test --workspace
