@@ -231,7 +231,7 @@ exit=0
 | **P1** | `aid-2026-001-reference-model`（`push`→`main`）、`g-applied-reference-model`（`push`→`main`）—— 作为 M-2 | 除合并外无需其他改动。纯标准库，236 K 测试 | 以零依赖风险证明 runner 上的 `python3` 可用。若失败，其他一切都没有建立在假设之上 |
 | **P2** | `document-management`（`push`→`main`）—— 作为 M-1 | 无需。纯标准库，本地 3.2 秒 | runner 上的第一个真实门禁。用实测校准第 8 节那个 30 秒模型 |
 | **P3** | `aid-2026-001-manifest-validation`（`push`→`main`） | 预置 `PyYAML==6.0.2`（runner 侧 venv 或经白名单 egress 的 `pip install --user`），或改用脚本里已实现的纯标准库重复键检查 | 首个 `net` 先例。如果 egress 被挡，这里就是发现它的地方 —— 而且很便宜 |
-| **P4** | `rust-phase1`（`push`→`main`） | 钉住工具链而非 `@stable`；把 `CARGO_TARGET_DIR` 设到 checkout 路径之外；限制 `CARGO_BUILD_JOBS=2`；加一个 `df -h /` 前置守卫 | 收益最高（中位 45 秒、11 次成功），失败代价也最高（1 GB target、1.4 GiB 内存、6.8 GB 磁盘）。必须在 P1–P3 证明 runner 之后 |
+| **P4** | `rust-phase1`（`push`→`main`） | 钉住工具链而非 `@stable`；让 `target/` 留在 checkout 路径内（`actions/checkout` 默认 `git clean -ffdx`，因此自限；路径之外是永久泄漏）；限制 `CARGO_BUILD_JOBS=2`；加一个 `df -h /` 前置守卫 | 收益最高（中位 45 秒、11 次成功），失败代价也最高（1 GB target、1.4 GiB 内存、6.8 GB 磁盘）。必须在 P1–P3 证明 runner 之后 |
 | **P5** | `h-applied-delivery-evidence-conformance`（`workflow_dispatch` + `push`→`main`） | 预置 `jsonschema`/`rfc8785`/`cryptography`；决定 runner 上是否需要 `npm ci`，还是只跑 Python 那一半 | 最后：依赖面最宽，也是唯一同时需要 PyPI 与 npm 的 workflow |
 
 **永不迁：** `runner-admission-policy`（审计器不能与被审计主机共享信任域）与 `ai-owner-worker`（被放行的 job 可以 `sudo`；这个持有 `contents: write` 并推分支）。
