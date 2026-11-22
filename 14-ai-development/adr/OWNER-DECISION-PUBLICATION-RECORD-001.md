@@ -329,3 +329,32 @@ be closed by E: `canonical_commit_confirmed` (D6: contract undefined by D) and
 `publication_participant_admitted` (D7: issuer requires Storage signing + COC quorum
 + I decision). `Published` remains unreachable, and now for three named reasons
 rather than one vague one. That is the honest converged statement available to E.
+
+## Post-decision factual correction — 2026-11-22
+
+PR #552 and subsequent production integration have superseded the factual premise
+stated in "The question that was blocking", namely that `PublicationAuthority` has
+no production implementation.
+
+`AdmissionPublicationAuthority` (`crates/memory-compiler/src/publication_authority.rs:50`)
+now exists as a production implementation, and `brain-cli` invokes
+`MemoryCompiler::compile()` through a non-test execution path
+(`crates/brain-cli/src/main.rs:4`, `:246`, `:285`). GAP-07 was closed on
+2026-11-22 for production reachability on that evidence.
+
+This correction does not invalidate the historical decision, and it does not
+establish that publication authorization is complete. The decision above — what
+the durable publication record is — stands unchanged, as does D3 and the D6/D7
+findings in this amendment.
+
+The unresolved concerns remain, and are tracked separately under
+`GAP-14-PUBLICATION-AUTHORITY-AND-STORE-LIFECYCLE.md`:
+
+1. `MemoryStore` does not expose the production prepare/publish lifecycle
+   (GAP-14-A).
+2. The three publication flags lack an authoritative issuer under D3 (GAP-14-B).
+3. Durable publication-record recovery has not been independently verified
+   (GAP-14-C).
+
+The original wording is preserved above rather than rewritten, because a decision
+record whose stated premise is silently edited cannot be audited.

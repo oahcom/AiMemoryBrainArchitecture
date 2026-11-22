@@ -295,3 +295,26 @@ normative source mapped in this scoped audit"，而 C 契约第 137 行正是它
 `publication_participant_admitted`（D7：签发者需要 Storage 签名 + COC quorum + I 决定）。
 `Published` 依然不可达，但现在有三个点名的原因，而不是一个含糊的原因。这就是 E 权限
 范围内能给出的、诚实的收敛结论。
+
+## 决策后事实更正 — 2026-11-22
+
+PR #552 及后续生产集成已取代"阻断本项的问题"一节中的事实前提，即
+`PublicationAuthority` 没有生产实现。
+
+`AdmissionPublicationAuthority`
+（`crates/memory-compiler/src/publication_authority.rs:50`）现已作为生产实现存在，
+且 `brain-cli` 通过非测试执行路径调用 `MemoryCompiler::compile()`
+（`crates/brain-cli/src/main.rs:4`、`:246`、`:285`）。GAP-07 已于 2026-11-22
+基于该证据就生产可达性关闭。
+
+本次更正不使历史决策失效，也不确立发布授权已经完整。上文关于"持久发布记录是什么"的
+决策本身不变，D3 以及本修正案中的 D6/D7 结论亦不变。
+
+未解决的关切仍然存在，另登记于
+`GAP-14-PUBLICATION-AUTHORITY-AND-STORE-LIFECYCLE.md`：
+
+1. `MemoryStore` 未暴露生产 prepare/publish 生命周期（GAP-14-A）。
+2. 三个发布标志在 D3 下缺少权威签发者（GAP-14-B）。
+3. 发布记录的持久恢复尚未经独立验证（GAP-14-C）。
+
+原文保留于上而非改写，因为一份所述前提被静默修改的决策记录是无法审计的。
