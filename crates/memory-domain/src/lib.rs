@@ -11,6 +11,9 @@ pub use claim_revision_registry::*;
 mod canonical_commit;
 pub use canonical_commit::*;
 
+mod attestor;
+pub use attestor::*;
+
 mod relation_registry;
 pub use relation_registry::*;
 
