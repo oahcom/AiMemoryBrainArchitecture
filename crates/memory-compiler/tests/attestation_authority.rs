@@ -6,7 +6,7 @@
 //! `issue_attestation` not existing, which is the point — the table being present
 //! was never evidence that the attestor half of GAP-18 was implemented.
 
-use memory_compiler::admission::{AdmissionStore, AttestationValidationError};
+use memory_compiler::admission::{AdmissionError, AdmissionStore, AttestationValidationError};
 use memory_domain::{
     AttestorData, IssuedAttestorRef, IssuerId, OpaqueId, I_DEV_BASELINE_ATTESTOR,
     I_DEV_BASELINE_ISSUER,
@@ -113,8 +113,8 @@ fn the_decision_issuer_cannot_mint_an_attestation() {
     );
 
     assert!(
-        result.is_err(),
-        "decision issuer must not issue attestations"
+        matches!(result, Err(AdmissionError::InvalidInput(_))),
+        "the decision issuer must be refused as an input error, got {result:?}"
     );
 }
 
@@ -130,7 +130,10 @@ fn a_malformed_digest_is_refused_at_issuance() {
         "2026-11-22T00:00:00Z",
     );
 
-    assert!(result.is_err(), "a short digest is not canonical");
+    assert!(
+        matches!(result, Err(AdmissionError::InvalidInput(_))),
+        "a short digest must be an input error, got {result:?}"
+    );
 }
 
 #[test]
@@ -145,7 +148,10 @@ fn a_non_utc_timestamp_is_refused_at_issuance() {
         "2026-11-22 00:00:00",
     );
 
-    assert!(result.is_err(), "a non-UTC timestamp is not canonical");
+    assert!(
+        matches!(result, Err(AdmissionError::InvalidInput(_))),
+        "a non-UTC timestamp must be an input error, got {result:?}"
+    );
 }
 
 #[test]
@@ -185,7 +191,10 @@ fn a_differing_replay_is_an_idempotency_conflict() {
         "2026-11-22T00:00:00Z",
     );
 
-    assert!(conflicting.is_err(), "a differing replay must be refused");
+    assert!(
+        matches!(conflicting, Err(AdmissionError::IdempotencyConflict)),
+        "a differing replay must be an idempotency conflict, got {conflicting:?}"
+    );
 }
 
 #[test]
@@ -215,5 +224,62 @@ fn an_attestation_id_and_a_decision_id_are_separate_namespaces() {
     assert_eq!(
         db.validate_authorization_decision(&decision, &subject),
         Ok(true)
+    );
+}
+
+/// A reference carrying the right primary key but a field the row disagrees with.
+///
+/// `from_issued_data` deliberately confers no authority, so a caller can build
+/// one of these without satisfying the writer's rules. That is what makes it a
+/// usable probe for the three comparison branches.
+fn forged(
+    reference: &IssuedAttestorRef,
+    edit: impl FnOnce(&mut AttestorData),
+) -> IssuedAttestorRef {
+    let mut data = reference.data().expect("issued reference").clone();
+    edit(&mut data);
+    IssuedAttestorRef::from_issued_data(data)
+}
+
+#[test]
+fn a_reference_naming_a_different_issuer_is_record_mismatch() {
+    let (db, reference, subject) = issued_store();
+    let probe = forged(&reference, |data| {
+        data.issuer = IssuerId::new("i-attestor-proxy/other").unwrap();
+    });
+
+    assert_eq!(
+        db.validate_attestation(&probe, &subject),
+        Err(AttestationValidationError::RecordMismatch("issuer"))
+    );
+}
+
+#[test]
+fn a_reference_naming_a_different_digest_is_record_mismatch_not_false() {
+    // Distinct from the `Ok(false)` case: here the reference disagrees with the
+    // row, so no digest comparison is even reached. Collapsing this into
+    // `Ok(false)` would tell the caller the attestation does not cover its
+    // subject, when the truth is that the reference is not this record.
+    let (db, reference, subject) = issued_store();
+    let probe = forged(&reference, |data| {
+        data.subject_digest = OpaqueId::new("b".repeat(64)).unwrap();
+    });
+
+    assert_eq!(
+        db.validate_attestation(&probe, &subject),
+        Err(AttestationValidationError::RecordMismatch("subject_digest"))
+    );
+}
+
+#[test]
+fn a_reference_naming_a_different_issued_at_is_record_mismatch() {
+    let (db, reference, subject) = issued_store();
+    let probe = forged(&reference, |data| {
+        data.issued_at = "2026-11-23T00:00:00Z".into();
+    });
+
+    assert_eq!(
+        db.validate_attestation(&probe, &subject),
+        Err(AttestationValidationError::RecordMismatch("issued_at"))
     );
 }
