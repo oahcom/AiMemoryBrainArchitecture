@@ -11,6 +11,9 @@ pub use claim_revision_registry::*;
 mod relation_registry;
 pub use relation_registry::*;
 
+mod provenance_graph;
+pub use provenance_graph::*;
+
 #[derive(
     serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd,
 )]
