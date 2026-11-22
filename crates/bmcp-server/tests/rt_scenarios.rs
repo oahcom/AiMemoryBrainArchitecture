@@ -66,6 +66,10 @@ fn rt_04_initialize_handshake() {
         RequestOutcome::Responded { body } => {
             assert!(body.contains("\"protocolVersion\":\"2024-11-05\""));
             assert!(body.contains("\"id\":1"));
+            // A capability this server cannot serve must not be claimed: tools/list
+            // is answered with -32601 below, so advertising tools would be a lie.
+            assert!(body.contains("\"capabilities\":{}"));
+            assert!(!body.contains("\"tools\""));
         }
         other => panic!("expected initialize response, got: {other:?}"),
     }
@@ -73,7 +77,7 @@ fn rt_04_initialize_handshake() {
 
 #[test]
 fn rt_04_unknown_method() {
-    let request = br#"{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}"#;
+    let request = br#"{"jsonrpc":"2.0","id":2,"method":"no/such/method","params":{}}"#;
 
     match handle_request_body(request) {
         RequestOutcome::Responded { body } => {
