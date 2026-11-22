@@ -8,11 +8,11 @@ document_metadata:
     evidence_verification:
       verification_status: Unverified
       last_verified_date: null
-      last_verification_note: "Owner authorized this root source/mirror topology in PR #429 comment 7061562608; content acceptance, bilingual semantic parity, independent review and CI remain pending."
+      last_verification_note: "Source/mirror topology was authorized by PR #429 comment 7061562608; the later Owner decision in Issue #564 comment 7074302216 keeps this reading guide Informative / Non-Canonical. Content acceptance, bilingual semantic parity, independent review and CI remain pending."
     usage_status: Active
     modification_status: Modified
   authority:
-    canonical_status: Canonical
+    canonical_status: Non-Canonical
     canonical_scope: "Memory Compiler reading guide"
     canonical_scope_id: memory-compiler/reading-guide
     canonical_scope_keywords:
@@ -57,4 +57,4 @@ E owns source ingestion/compilation orchestration, candidate generation, stage l
 
 CANDIDATE descriptions are not approved schemas. E emits neutral CandidateProposition/ExtractionIR only; it does not mint ClaimRef/ClaimRevisionRef/FactRef/FactRevisionRef or infer Fact from confidence. D owns canonical identity/revision/currentness/lifecycle and D ForgetFence; I owns authorization/PermissionEpoch, attestor authorization, retention and global Forget policy/completion. Exact B/D/I/H/Storage consumer contracts and transaction/compatibility evidence remain OPEN. No schema, DDL, public API, wire or Runtime freeze is authorized.
 
-**Source/mirror status:** this root reading guide is Informative / Canonical for the `memory-compiler/reading-guide` scope. The EN and ZH-CN files under `docs/en` and `docs/zh-CN` are its Non-Canonical language mirrors. The normative Compiler Overview and Extraction/Normalization specifications have separate canonical root sources.
+**Source/mirror status:** this root reading guide is Informative / Non-Canonical. The EN and ZH-CN files under `docs/en` and `docs/zh-CN` are its Non-Canonical language mirrors. The normative Compiler Overview and Extraction/Normalization specifications have separate canonical root sources.
