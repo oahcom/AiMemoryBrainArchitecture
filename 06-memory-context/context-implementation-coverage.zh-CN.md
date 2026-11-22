@@ -61,7 +61,7 @@ Rust crate 仍停留在 private/staged 阶段。Round 6 新增纯内存 `ChangeS
 | Budget 是向量而不是单一 Top-K | context-budget-and-sufficiency.md §1–§2 | PARTIAL — `ContextBudget` 检查 Entry 数和渲染字节；`entry_budget_error_reports_actual_candidate_count`、`byte_budget_error_reports_accumulated_rendered_bytes`、`exact_entry_and_byte_budget_boundaries_succeed` 覆盖溢出与精确边界；缺 Token、Fan-out、来源深度、延迟、CPU、Tier 预留 | 本线程可做 |
 | 任务特定 Sufficiency 覆盖十个维度 | context-budget-and-sufficiency.md §3 | PARTIAL — 已有 `SufficiencyRequirement`/`SufficiencyDimension` 和 `assess_sufficiency`；当前快照字段可测量 Evidence 与 Environment，其余八个维度会正确返回 Unknown；仍无 Requirement Graph 或语义证据模型 | D |
 | 规划保留必需锚点、证据、冲突和不确定性 | context-budget-and-sufficiency.md §4 | PARTIAL — 有候选准入和稳定排序；无 Requirement Graph 优化器或冲突覆盖测试 | D |
-| 在向量约束下优化候选集边际覆盖 | context-budget-and-sufficiency.md §5 | NOT IMPLEMENTED — Sufficiency 评估器已落地，但尚无候选集优化器或边际覆盖选择器 | 本线程可做 |
+| 在向量约束下优化候选集边际覆盖 | context-budget-and-sufficiency.md §5 | IMPLEMENTED — `selector.rs` 的 `select_candidates` 在排序前过滤硬约束（授权、Forget、时间有效性、环境匹配、必需证据），不满足者进入 `excluded` 并带首个未满足约束名，且不消耗预算；每次选择只对尚未覆盖的维度计分，并对冗余、字节成本、不确定性计罚，最优边际分不为正时停止。15 个测试含 `hard_constraint_violation_excludes_candidate_before_ranking`、`excluded_candidates_consume_no_budget`、`subsequent_selection_scores_only_new_dimensions`、`selection_is_deterministic_across_repeated_calls` | 本线程可做 |
 | Compaction 保留 Lineage、限定和冲突 | context-budget-and-sufficiency.md §5、§9.3 | NOT IMPLEMENTED — Sufficiency 评估器已落地；仍无 Compaction 模型或 Fidelity Validator | D |
 | Sufficiency 结果和安全溢出降级 | context-budget-and-sufficiency.md §6–§7 | PARTIAL — 四种互斥结果及 Mandatory/Advisory/Unknown 判定规则已可执行；仍无 Overflow Planner 或预算降级工作流 | 本线程可做 |
 | Budget/Sufficiency 可观测性 | context-budget-and-sufficiency.md §8–§9.4 | NOT IMPLEMENTED — 无 Metrics/Report 模型 | 本线程可做 |
