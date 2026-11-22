@@ -103,14 +103,22 @@ fn rust_verdict(name: &str) -> (bool, Option<String>) {
     if body.contains("\"error\":{") {
         panic!("tools/call failed for {name}: {body}");
     }
-    let valid = body.contains("\"valid\":true");
+    // The verdict now travels inside the MCP text content block, so the
+    // payload keys appear escaped on the wire. Parity is about the verdict,
+    // not about the envelope, so match the escaped form.
+    let valid = body.contains(r#"\"valid\":true"#);
     if !valid {
         assert!(
-            field(&body, "error").is_some(),
-            "invalid verdict must carry an error: {body}"
+            body.contains(r#""isError":true"#),
+            "invalid verdict must be a tool error: {body}"
         );
     }
-    (valid, field(&body, "digest"))
+    let digest = body
+        .split(r#"\"digest\":\""#)
+        .nth(1)
+        .and_then(|rest| rest.split(r#"\""#).next())
+        .map(str::to_owned);
+    (valid, digest)
 }
 
 struct PythonVerdict {
@@ -183,8 +191,13 @@ fn valid_fixture_agrees_with_python_and_pins_digest() {
 
     // The digest tool must agree with the validate tool on the same bytes.
     let digest_body = responded(&tool_call(2, DIGEST_TOOL, &read_fixture("valid.json")));
+    let digest_tool_digest = digest_body
+        .split(r#"\"digest\":\""#)
+        .nth(1)
+        .and_then(|rest| rest.split(r#"\""#).next())
+        .map(str::to_owned);
     assert_eq!(
-        field(&digest_body, "digest").as_deref(),
+        digest_tool_digest.as_deref(),
         Some(VALID_DIGEST),
         "digest tool and validate tool disagree: {digest_body}"
     );

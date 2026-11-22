@@ -381,8 +381,8 @@ fn handle_tool_call(id: &str, params: Option<&[u8]>) -> RequestOutcome {
         None => return invalid_params(id, "tools/call requires a string name"),
     };
 
-    // `evidence` is handed over as raw bytes: `parse_strict` rejects duplicate
-    // keys, and re-encoding a parsed object would erase them.
+    // Preserve the raw evidence bytes so parse_and_validate can reject
+    // duplicate keys rather than silently accepting a reconstructed object.
     let evidence =
         object_value(params, "arguments").and_then(|arguments| object_value(arguments, "evidence"));
 
@@ -394,39 +394,32 @@ fn handle_tool_call(id: &str, params: Option<&[u8]>) -> RequestOutcome {
     match name.as_str() {
         VALIDATE_TOOL => match bmcp_protocol::parse_and_validate(evidence) {
             Ok(parsed) => match bmcp_protocol::digest::p0_digest(&parsed) {
-                Ok(digest) => {
-                    tool_result(id, &format!("{{\"valid\":true,\"digest\":\"{digest}\"}}"))
-                }
-                Err(error) => tool_result(
+                Ok(digest) => tool_result(
                     id,
-                    &format!(
-                        "{{\"valid\":false,\"error\":\"{}\"}}",
-                        json_escape(&describe(&error))
-                    ),
+                    &format!("{{\"valid\":true,\"digest\":\"{digest}\"}}"),
+                    false,
                 ),
+                Err(error) => tool_result(id, &describe(&error), true),
             },
-            Err(error) => tool_result(
-                id,
-                &format!(
-                    "{{\"valid\":false,\"error\":\"{}\"}}",
-                    json_escape(&describe(&error))
-                ),
-            ),
+            Err(error) => tool_result(id, &describe(&error), true),
         },
         DIGEST_TOOL => match bmcp_protocol::parse_and_validate(evidence) {
             Ok(parsed) => match bmcp_protocol::digest::p0_digest(&parsed) {
-                Ok(digest) => tool_result(id, &format!("{{\"digest\":\"{digest}\"}}")),
-                Err(error) => invalid_params(id, &describe(&error)),
+                Ok(digest) => tool_result(id, &format!("{{\"digest\":\"{digest}\"}}"), false),
+                Err(error) => tool_result(id, &describe(&error), true),
             },
-            Err(error) => invalid_params(id, &describe(&error)),
+            Err(error) => tool_result(id, &describe(&error), true),
         },
         other => invalid_params(id, &format!("unknown tool: {other}")),
     }
 }
 
-fn tool_result(id: &str, result: &str) -> RequestOutcome {
+fn tool_result(id: &str, text: &str, is_error: bool) -> RequestOutcome {
     RequestOutcome::Responded {
-        body: format!("{{\"jsonrpc\":\"2.0\",\"id\":{id},\"result\":{result}}}"),
+        body: format!(
+            "{{\"jsonrpc\":\"2.0\",\"id\":{id},\"result\":{{\"content\":[{{\"type\":\"text\",\"text\":\"{}\"}}],\"isError\":{is_error}}}}}",
+            json_escape(text)
+        ),
     }
 }
 
