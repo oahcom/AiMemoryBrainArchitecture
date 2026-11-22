@@ -11,6 +11,12 @@ pub use claim_revision_registry::*;
 mod canonical_commit;
 pub use canonical_commit::*;
 
+mod authorization_decision;
+pub use authorization_decision::*;
+
+/// The single I-side issuer identity admitted by the dev baseline.
+pub const I_DEV_BASELINE_ISSUER: &str = "i-owner-proxy/dev-baseline-v1";
+
 mod relation_registry;
 pub use relation_registry::*;
 
@@ -511,63 +517,6 @@ pub struct ExternalSourceRef(OpaqueId);
 pub struct MemoryRef(OpaqueId);
 ref_ctor!(EntityRef, EventRef, ExternalSourceRef, MemoryRef);
 
-/// NOT DEFINED: awaiting I. Placeholder only; security identity semantics are not inferred.
-/// `pending_i()` is public and any caller can create this placeholder. It is not proof of
-/// an attestor identity. This known temporary construction window closes only when I
-/// defines the contract and the placeholder is replaced by a validated, non-forgeable ref.
-#[doc = r#"The tuple field is private; external callers cannot forge the placeholder directly.
-```compile_fail
-use memory_domain::{AttestorRef, AuthorizationDecisionRef};
-let _ = AttestorRef(());
-let _ = AuthorizationDecisionRef(());
-let _ = AuthorizationDecisionRef::new("");
-```"#]
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct AttestorRef(());
-impl AttestorRef {
-    pub const fn pending_i() -> Self {
-        Self(())
-    }
-}
-/// NOT DEFINED: awaiting I. Presence only; no variant asserts that a decision was actually
-/// issued by I. `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001` requires absence to be
-/// representable before presence can mean anything, so these states are structural, not
-/// cryptographic. `pending_i()` stays public, so no value here proves issuance.
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
-#[serde(rename_all = "snake_case")]
-pub enum AuthorizationDecisionRef {
-    /// No authorization decision was recorded. This is the only state that blocks publication.
-    Absent,
-    /// The known unvalidated placeholder: a value exists, nothing is proven.
-    PendingI,
-    /// A caller-claimed I-issued reference. Authenticity is not asserted; whether it is
-    /// genuine is I's contract and `B-P2-XO-01`'s question.
-    Issued(OpaqueId),
-}
-impl AuthorizationDecisionRef {
-    /// Explicit absence. `FactRevision::validate` rejects a fact carrying this.
-    pub const fn absent() -> Self {
-        Self::Absent
-    }
-
-    /// Legacy placeholder. Public, and therefore never proof of an I-issued decision.
-    pub const fn pending_i() -> Self {
-        Self::PendingI
-    }
-
-    /// A claimed I-issued reference. Carries no proof of issuance.
-    pub fn issued(decision_id: OpaqueId) -> Self {
-        Self::Issued(decision_id)
-    }
-
-    pub const fn is_absent(&self) -> bool {
-        matches!(self, Self::Absent)
-    }
-
-    pub const fn is_pending(&self) -> bool {
-        matches!(self, Self::PendingI)
-    }
-}
 /// The canonical commit reference is defined by `D-OWNER-DECISION-CANONICAL-COMMIT-001`
 /// and lives in [`canonical_commit`]. A reference is a candidate only: it confers no
 /// authority and cannot validate without the durable `canonical_commits` record.

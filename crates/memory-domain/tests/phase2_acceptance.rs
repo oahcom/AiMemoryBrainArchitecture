@@ -636,7 +636,15 @@ fn dm2_06_missing_authorization_ref_blocks_fact_publication() {
     assert!(placeholder.validate().is_ok());
 
     // 3. A claimed I-issued reference also passes presence. This is not proof of issuance.
-    let issued = with_decision(AuthorizationDecisionRef::issued(id("ad-1"))).unwrap();
+    let issued_data = AuthorizationDecisionData {
+        decision_id: id("ad-1"),
+        issuer: IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap(),
+        subject_digest: id(&"a".repeat(64)),
+        issued_at: "2026-01-01T00:00:00Z".into(),
+        decision_kind: AuthorizationDecisionKind::Approved,
+    };
+    let issued =
+        with_decision(AuthorizationDecisionRef::from_issued_data(issued_data).unwrap()).unwrap();
     assert!(issued.validate().is_ok());
 
     // 4. A revision that already exists cannot be edited into absence: deserializing the
