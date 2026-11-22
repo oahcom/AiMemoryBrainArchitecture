@@ -428,7 +428,7 @@ pub struct StagingInput {
     pub dependency_ids: Vec<Identity>,
     pub dependency_closure_complete: bool,
     pub producer_admitted: bool,
-    pub canonical_commit_confirmed: bool,
+    pub canonical_commit_cursor_recorded: bool,
 }
 
 pub struct StagingStage;
@@ -441,7 +441,7 @@ impl StagingStage {
         if !input.dependency_closure_complete || input.dependency_ids.is_empty() {
             return Err(CompilerError::IncompleteDependencyClosure);
         }
-        if !input.canonical_commit_confirmed {
+        if !input.canonical_commit_cursor_recorded {
             return Err(CompilerError::MissingCanonicalCommit);
         }
 
@@ -630,6 +630,8 @@ impl<A: PublicationAuthority> MemoryCompiler<A> {
         {
             return Err(CompilerError::IncompleteDependencyClosure);
         }
+        // D6.3: presence records only a caller-supplied cursor. It is persisted
+        // without validation and does not establish that a commit was confirmed.
         if producer_request.admission_canonical_commit_cursor.is_none() {
             return Err(CompilerError::MissingCanonicalCommit);
         }
@@ -638,7 +640,11 @@ impl<A: PublicationAuthority> MemoryCompiler<A> {
         // durable local ledger, never accepted from caller-provided flags.
         staging.producer_admitted = true;
         staging.dependency_closure_complete = true;
-        staging.canonical_commit_confirmed = true;
+        // D6.2: this asserts only that a caller supplied a cursor and the ledger
+        // persisted it. It is NOT evidence that a canonical commit was confirmed;
+        // `PublicationProof::canonical_commit_confirmed` stays false in the
+        // production adapter until owner D freezes that contract (D6.1).
+        staging.canonical_commit_cursor_recorded = true;
         staging.dependency_ids = dependency_ids;
 
         let ingested = IngestionStage::run(event, lease.generation)?;
@@ -904,7 +910,7 @@ mod tests {
             dependency_ids: vec![id("event-1"), id("source-1")],
             dependency_closure_complete: true,
             producer_admitted: true,
-            canonical_commit_confirmed: true,
+            canonical_commit_cursor_recorded: true,
         }
     }
 
@@ -1344,7 +1350,7 @@ mod state_tests {
             dependency_ids: vec![id("event-1"), id("source-1")],
             dependency_closure_complete: true,
             producer_admitted: true,
-            canonical_commit_confirmed: true,
+            canonical_commit_cursor_recorded: true,
         }
     }
 
