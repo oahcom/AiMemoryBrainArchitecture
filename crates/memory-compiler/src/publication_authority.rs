@@ -45,6 +45,32 @@ impl<'a> AdmissionPublicationAuthority<'a> {
             producer_work_item_id: producer_work_item_id.as_opaque_id().clone(),
         }
     }
+
+    /// Resolve `canonical_commit_confirmed` from the durable record (§4.3).
+    ///
+    /// The cursor is only a lookup selector and the reference is only a
+    /// candidate; the durable row decides. A reference that is still pending
+    /// makes no commit claim at all, so the adapter answers `false` rather than
+    /// asking the validator to adjudicate a non-claim. Any validator failure is
+    /// an authority failure and is propagated unchanged.
+    fn canonical_commit_confirmed(
+        &self,
+        staged: &StagedDerivative,
+        producer_request: &crate::admission::ProducerRegistrationRequest,
+    ) -> Result<bool, CompilerError> {
+        let reference = &producer_request.canonical_commit_ref;
+        if reference.is_pending() {
+            return Ok(false);
+        }
+        let cursor = producer_request
+            .admission_canonical_commit_cursor
+            .as_ref()
+            .ok_or(CompilerError::MissingCanonicalCommit)?;
+        let expected = crate::canonical_subject_digest(&staged.provenance)?;
+        self.admission
+            .validate_canonical_commit(cursor, reference, &expected)
+            .map_err(CompilerError::CanonicalCommitNotEstablished)
+    }
 }
 
 impl PublicationAuthority for AdmissionPublicationAuthority<'_> {
@@ -89,18 +115,26 @@ impl PublicationAuthority for AdmissionPublicationAuthority<'_> {
             .map_err(|_| CompilerError::AdmissionStoreFailure)?
             == Some(PublicationState::PreparedHidden);
 
+        // D-OWNER-DECISION-CANONICAL-COMMIT-001 §4.3: the only permitted source of
+        // `canonical_commit_confirmed`. `Ok(true)` confirms; `Ok(false)` is a
+        // subject-content mismatch and leaves the flag false; `Err` is an
+        // authority failure and is propagated unchanged, never converted to
+        // `false` or to a publication disposition.
+        let canonical_commit_confirmed =
+            self.canonical_commit_confirmed(staged, &producer_request)?;
+
         Ok(PublicationProof {
             publication_id: staged.publication_id.clone(),
             generation: lease.generation,
             producer_admitted,
             dependency_closure_complete,
             storage_prepared_hidden,
+            canonical_commit_confirmed,
             // OWNER-DECISION-PUBLICATION-RECORD-001 D3: no authoritative issuer
             // exists for these flags, so the production adapter reports them as
             // `false` and lets the gate return `Blocked`. They must not be
             // inferred, defaulted or copied from the test-only authorities that
             // hardcode `true`.
-            canonical_commit_confirmed: false,
             publication_participant_admitted: false,
             protected_visibility_authorized: false,
         })
@@ -182,6 +216,7 @@ mod tests {
             correlation_id: id("correlation-1"),
             causation_id: None,
             admission_canonical_commit_cursor: Some(id("commit-cursor-1")),
+            canonical_commit_ref: memory_domain::CanonicalCommitRef::pending_d(),
             observed_fence_cursor: id("fence-observation-0"),
             permission_epoch: id("permission-epoch-1"),
             request_digest: "producer-request-digest-1".into(),
@@ -239,13 +274,50 @@ mod tests {
     }
 
     fn admitted_store() -> AdmissionStore {
+        admitted_store_with(
+            Some(id("commit-cursor-1")),
+            memory_domain::CanonicalCommitRef::pending_d(),
+        )
+    }
+
+    fn admitted_store_with(
+        cursor: Option<OpaqueId>,
+        reference: memory_domain::CanonicalCommitRef,
+    ) -> AdmissionStore {
         let mut admission = AdmissionStore::in_memory().unwrap();
         admission
             .register_producer(&id("producer-identity"), "registry-digest-1")
             .unwrap();
-        let receipt = admission
-            .register_producer_work(producer_request())
+        let mut request = producer_request();
+        request.admission_canonical_commit_cursor = cursor;
+        request.canonical_commit_ref = reference;
+        let receipt = admission.register_producer_work(request).unwrap();
+        assert_eq!(receipt.disposition, RegistrationDisposition::Accepted);
+        admission.register_dependency(dependency_request()).unwrap();
+        admission
+    }
+
+    /// A fully admitted store whose request carries a reference backed by a real
+    /// `canonical_commits` row for exactly the derivative `staged()` describes.
+    fn admitted_store_with_issued_record(issued_at: &str) -> AdmissionStore {
+        let subject = crate::canonical_subject_digest(&staged().provenance).unwrap();
+        let mut admission = AdmissionStore::in_memory().unwrap();
+        admission
+            .register_producer(&id("producer-identity"), "registry-digest-1")
             .unwrap();
+        let commit_id = id("commit-1");
+        let reference = admission
+            .issue_canonical_commit(
+                &commit_id,
+                &memory_domain::IssuerId::new(memory_domain::DEV_BASELINE_ISSUER).unwrap(),
+                &subject,
+                issued_at,
+            )
+            .unwrap();
+        let mut request = producer_request();
+        request.admission_canonical_commit_cursor = Some(commit_id);
+        request.canonical_commit_ref = reference;
+        let receipt = admission.register_producer_work(request).unwrap();
         assert_eq!(receipt.disposition, RegistrationDisposition::Accepted);
         admission.register_dependency(dependency_request()).unwrap();
         admission
@@ -468,6 +540,112 @@ mod tests {
         assert!(
             !proof.storage_prepared_hidden,
             "no preparation row exists for this publication id"
+        );
+    }
+
+    /// §4.3 + §8 criteria 9 and 11: a validated record confirms the commit, and
+    /// because `publication_participant_admitted` and
+    /// `protected_visibility_authorized` still have no issuer (GAP-13) the gate
+    /// reports `Suppressed`, not `Published`.
+    #[test]
+    fn a_validated_record_confirms_the_commit_and_the_gate_still_suppresses() {
+        let admission = admitted_store_with_issued_record("2026-11-22T00:00:00Z");
+        let storage = storage_with_prepared_hidden();
+        let mut authority = AdmissionPublicationAuthority::new(
+            admission,
+            &storage,
+            ProducerWorkItemId::new(id("work-1")),
+        );
+
+        let proof = authority.obtain_proof(&staged(), &lease()).unwrap();
+        assert!(
+            proof.canonical_commit_confirmed,
+            "only a validated Ok(true) may set the flag"
+        );
+        assert!(!proof.publication_participant_admitted);
+        assert!(!proof.protected_visibility_authorized);
+
+        let outcome = PublicationGate::run(staged(), &lease(), 1, &mut authority).unwrap();
+        assert_eq!(outcome.disposition, PublicationDisposition::Suppressed);
+        assert_eq!(
+            outcome.derivative.visibility,
+            Visibility::Hidden,
+            "Suppressed never publishes"
+        );
+    }
+
+    /// A reference that names a real row but a subject digest that does not match
+    /// the derivative is `Ok(false)`: the flag stays false and the gate blocks.
+    #[test]
+    fn a_subject_mismatch_leaves_the_flag_false_and_blocks() {
+        let mut admission = admitted_store_with_issued_record("2026-11-22T00:00:00Z");
+        // Re-issue under a different commit id and point the request at it, so the
+        // row exists and matches the reference but not this derivative's subject.
+        let other_subject = OpaqueId::new("f".repeat(64)).unwrap();
+        let other = admission
+            .issue_canonical_commit(
+                &id("commit-2"),
+                &memory_domain::IssuerId::new(memory_domain::DEV_BASELINE_ISSUER).unwrap(),
+                &other_subject,
+                "2026-11-22T00:00:00Z",
+            )
+            .unwrap();
+        let mut request = producer_request();
+        request.producer_work_item_id = id("work-2");
+        request.request_digest = "producer-request-digest-2".into();
+        request.admission_canonical_commit_cursor = Some(id("commit-2"));
+        request.canonical_commit_ref = other;
+        admission.register_producer_work(request).unwrap();
+
+        let storage = storage_with_prepared_hidden();
+        let mut authority = AdmissionPublicationAuthority::new(
+            admission,
+            &storage,
+            ProducerWorkItemId::new(id("work-2")),
+        );
+
+        let proof = authority.obtain_proof(&staged(), &lease()).unwrap();
+        assert!(
+            !proof.canonical_commit_confirmed,
+            "a subject mismatch is Ok(false), not confirmation"
+        );
+        let outcome = PublicationGate::run(staged(), &lease(), 1, &mut authority).unwrap();
+        assert_eq!(outcome.disposition, PublicationDisposition::Blocked);
+    }
+
+    /// A reference naming no row at all is an authority failure: it must surface
+    /// as an error, never as `false` and never as a disposition.
+    #[test]
+    fn a_missing_record_surfaces_as_an_error_from_the_adapter() {
+        let mut admission = admitted_store();
+        let orphan = memory_domain::CanonicalCommitRef::from_issued_data(
+            memory_domain::CanonicalCommitData {
+                commit_id: id("commit-never-issued"),
+                issuer: memory_domain::IssuerId::new(memory_domain::DEV_BASELINE_ISSUER).unwrap(),
+                subject_digest: crate::canonical_subject_digest(&staged().provenance).unwrap(),
+                issued_at: "2026-11-22T00:00:00Z".into(),
+            },
+        )
+        .unwrap();
+        let mut request = producer_request();
+        request.producer_work_item_id = id("work-3");
+        request.request_digest = "producer-request-digest-3".into();
+        request.admission_canonical_commit_cursor = Some(id("commit-never-issued"));
+        request.canonical_commit_ref = orphan;
+        admission.register_producer_work(request).unwrap();
+
+        let storage = storage_with_prepared_hidden();
+        let mut authority = AdmissionPublicationAuthority::new(
+            admission,
+            &storage,
+            ProducerWorkItemId::new(id("work-3")),
+        );
+
+        assert_eq!(
+            authority.obtain_proof(&staged(), &lease()),
+            Err(CompilerError::CanonicalCommitNotEstablished(
+                crate::admission::CanonicalCommitValidationError::RecordMissing
+            ))
         );
     }
 }

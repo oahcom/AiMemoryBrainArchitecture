@@ -49,7 +49,6 @@ fn raw_payload_digest(payload: &str) -> String {
 
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub struct Identity(pub String);
-
 impl Identity {
     pub fn new(value: impl Into<String>) -> Result<Self, CompilerError> {
         let value = value.into();
@@ -72,6 +71,47 @@ pub struct Provenance {
     pub parameter_digest: String,
     pub stage_name: StageName,
     pub attempt_generation: u64,
+}
+
+/// The subject digest of a staged derivative: SHA-256 over the one shared
+/// `CanonicalCommitSubjectV1` encoding (`D-OWNER-DECISION-CANONICAL-COMMIT-001`
+/// §2.1). Issuance and validation both call this function; neither reimplements
+/// the encoding, and JSON object ordering is never involved.
+pub fn canonical_subject_digest(provenance: &Provenance) -> Result<OpaqueId, CompilerError> {
+    let stage_name = match provenance.stage_name {
+        StageName::Ingestion => "Ingestion",
+        StageName::Extraction => "Extraction",
+        StageName::Normalization => "Normalization",
+        StageName::Staging => "Staging",
+        StageName::PublicationGate => "PublicationGate",
+    };
+    // Length-prefixed, fixed order. The generator is local so the temporary
+    // string lives long enough for the borrow.
+    let generation = provenance.attempt_generation.to_string();
+    let mut payload = String::new();
+    for field in [
+        provenance.source_payload_digest.as_str(),
+        provenance.payload_digest_algorithm.as_str(),
+        provenance.canonicalization_version.as_str(),
+        provenance.compiler_version.as_str(),
+        provenance.parameter_digest.as_str(),
+        stage_name,
+        generation.as_str(),
+    ] {
+        payload.push_str(&format!("{}:{}", field.len(), field));
+    }
+    for upstream in &provenance.upstream_outputs {
+        payload.push_str(&format!("{}:{}", upstream.0.len(), upstream.0));
+    }
+    let subject = memory_domain::CanonicalCommitSubjectV1::from_parts(
+        "compiler-derivative",
+        provenance.stage_output_id.0.as_str(),
+        provenance.source_event_id.0.as_str(),
+        payload.as_bytes(),
+    )
+    .map_err(|_| CompilerError::InvalidIdentity)?;
+    OpaqueId::new(format!("{:x}", Sha256::digest(subject.as_bytes())))
+        .map_err(|_| CompilerError::InvalidIdentity)
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -106,6 +146,9 @@ pub enum CompilerError {
     IllegalStateTransition,
     LeaseExpired,
     AdmissionStoreFailure,
+    /// Canonical commit authority could not be established. Carried unchanged
+    /// from the validator so the gate never sees it as a disposition.
+    CanonicalCommitNotEstablished(crate::admission::CanonicalCommitValidationError),
     /// The stored payload is not valid UTF-8. Kept distinct from
     /// `PayloadDigestMismatch` because no digest can be computed at all: the
     /// bytes never become the `String` the pipeline digests.
@@ -1218,6 +1261,7 @@ mod tests {
                 correlation_id: oid("correlation-1"),
                 causation_id: Some(oid("cause-1")),
                 admission_canonical_commit_cursor: Some(oid("canonical-commit-1")),
+                canonical_commit_ref: memory_domain::CanonicalCommitRef::pending_d(),
                 observed_fence_cursor: oid("fence-observation-0"),
                 permission_epoch: oid("permission-epoch-1"),
                 request_digest: "producer-request-1".into(),
