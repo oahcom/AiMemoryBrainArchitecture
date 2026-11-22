@@ -1704,3 +1704,80 @@ Wrong: I anchored the whole round on a baseline that was already three commits b
 2. **`AppliedDeliveryEvidence` has no accessors.** Not started. Roughly thirty getters plus `is_complete`, one file, no new dependency.
 
 Neither needs an Owner ruling. Both are the kind of change a reviewer can accept or reject on the diff alone.
+
+## Round nine: the two seams closed as code, and neither one is connected
+
+Rounds seven and eight ended with the same sentence in different words: four of six areas are blocked on a specific missing seam. Two of those seams now have code in `main`. This round is about what that did and did not change, because the answer is uncomfortable.
+
+### What merged
+
+| PR | merged at | what it added |
+|---|---|---|
+| #559 | 2026-11-22T02:31:29Z | `PendingCompileIntent` + `SqliteEventStore::pending_compile_intents()` + 4 tests |
+| #562 | 2026-11-22T02:31:50Z | `impl AppliedDeliveryEvidence` with 48 accessors + 2 tests |
+| #560 | 2026-11-22T02:32:08Z | round eight of this document |
+
+Verified on `ef0b792e` (main after the merges):
+
+- `crates/memory-event-store-sqlite/src/lib.rs` — 610 lines, contains `PendingCompileIntent` and `pending_compile_intents`
+- `crates/bmcp-protocol/src/lib.rs` — 1550 lines, 1 `impl` block, `issuer_ref` accessor present
+- all six new tests appear in `cargo test` output and pass
+
+```
+cargo test --workspace --offline --all-targets
+TOTAL passed=459 failed=0 ignored=8
+```
+
+### What did not change
+
+**`pending_compile_intents()` has zero callers.** The only definition is in the crate that owns the table:
+
+```
+$ grep -rn "pending_compile_intents\|PendingCompileIntent" --include=*.rs crates/ \
+    | grep -v "memory-event-store-sqlite/src/lib.rs"
+(no output)
+```
+
+**`AppliedDeliveryEvidence` still has zero consumers.** `crates/agent-integration/src/lib.rs` contains the string `bmcp` zero times, and its `Cargo.toml` lists only `memory-context` and `memory-domain`.
+
+So the read side exists and nothing reads. The accessors exist and nothing accesses. This is exactly what both PR bodies said would be true — #559: "The compiler still does not call this"; #562: "This makes the crate readable, not used." The merges did not contradict that. But it does mean a reader who sees two merged PRs titled "expose" and "give a readable surface" would reasonably assume the chain moved, and it did not.
+
+### A correction to round seven's dependency graph
+
+Round seven recorded:
+
+> `memory-compiler -> memory-domain, memory-event-store, memory-event-store-sqlite` (was only memory-domain)
+
+That is wrong in the way that matters. `crates/memory-compiler/Cargo.toml` on `ef0b792e`:
+
+```toml
+[dependencies]
+memory-domain = { path = "../memory-domain" }
+memory-storage = { path = "../memory-storage" }
+rusqlite = { version = "0.43.0", features = ["bundled"], optional = true }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+
+[dev-dependencies]
+memory-event-store = { path = "../memory-event-store" }
+memory-event-store-sqlite = { path = "../memory-event-store-sqlite" }
+memory-storage-sqlite = { path = "../memory-storage-sqlite" }
+```
+
+The event store crates are **dev-dependencies only**. Production code in `memory-compiler` cannot name `SqliteEventStore` or `EventStore` at all. They are visible to the integration tests and to nothing else.
+
+That is a materially different statement from "the compiler depends on the event store." It means the event-store-to-compiler link is not merely uncalled — it is unnameable from production code without a Cargo.toml change. I recorded the edge from `[dev-dependencies]`, which is the same mistake as counting a test-only `SELECT COUNT(*)` as a read path. Both are the error of reading a capability off a line of text without checking which build configuration it belongs to.
+
+### What the next step actually is
+
+Not "wire the compiler to the outbox." That phrasing hides two prerequisites:
+
+1. **Promote the dependency.** `memory-event-store` and `memory-event-store-sqlite` move from `[dev-dependencies]` to `[dependencies]` in `crates/memory-compiler/Cargo.toml`. Until that happens, no production call site can compile.
+2. **Decide who owns progress.** `pending_compile_intents()` is deliberately non-consuming. Something has to decide what "already compiled" means — a `compiled_at` column, a separate cursor table, or a rule that the compiler is idempotent and re-reads everything every run. Those are three different systems. Picking one inside a wiring PR would be picking it by accident.
+
+Step 1 is mechanical and reviewable on its own. Step 2 is the same ownership question that #559's body declined to answer, and it has not become easier since.
+
+### The honest count
+
+Two seams moved from "missing code" to "code exists, nothing uses it." That is progress in the sense that the missing piece is now a `Cargo.toml` line plus a decision rather than an unwritten function. It is not progress in the sense that any end-to-end path works today, because none does.
