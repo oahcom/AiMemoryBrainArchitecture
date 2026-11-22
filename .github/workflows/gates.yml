@@ -41,11 +41,12 @@ name: Existing gates
 #     green: `protocol-index`, `conformance`, `schema-nonempty`, `clippy`.
 #
 #   * RATCHETS fail only when the failure set gets WORSE than the recorded
-#     baseline: `bilingual`. This gate is already red on main (GAP-08). Making it
-#     a hard gate today would paint every run red and teach everyone to ignore
-#     the check, which is exactly how it reached main red in the first place. A
-#     ratchet converts "permanently red and ignored" into "cannot get worse, and
-#     gets better when someone fixes an item".
+#     baseline: `bilingual`, `docs-management`. These gates are already red on
+#     main (GAP-08, and 567 DM-01 errors respectively). Making them hard gates
+#     today would paint every run red and teach everyone to ignore the check,
+#     which is exactly how they reached main red in the first place. A ratchet
+#     converts "permanently red and ignored" into "cannot get worse, and gets
+#     better when someone fixes an item".
 #
 # A GATE MOVES FROM RATCHET TO HARD GATE THE DAY IT GOES GREEN, and it must, or
 # the ratchet becomes a permanent exemption. `schema-nonempty` was a ratchet in
@@ -67,9 +68,10 @@ name: Existing gates
 #
 # Baselines live in `scripts/ci/baselines/`. Each file is the exact set of
 # currently-failing items, one per line; `#` starts a comment. After the
-# `schema-nonempty` ratchet was retired there is exactly one baseline left,
-# `bilingual-docs.txt`. A baseline directory with a file per green gate would be
-# a directory of exemptions.
+# `schema-nonempty` ratchet was retired there are two left, and only two,
+# `bilingual-docs.txt` and `document-management.txt` -- one per gate that is
+# genuinely red on main today. A baseline directory with a file per green gate
+# would be a directory of exemptions.
 #
 # ---------------------------------------------------------------------------
 # ONE RUNNER MEANS SERIALISATION. The single `concurrency` group below is not
@@ -207,6 +209,68 @@ jobs:
             --baseline scripts/ci/baselines/bilingual-docs.txt \
             --format paths \
             --command "python3 scripts/check_bilingual_docs_full.py"
+
+  # DOCUMENT-MANAGEMENT: the gate that never ran. `.github/workflows/
+  # document-management.yml` is `runs-on: ubuntu-latest`, which on this account
+  # is allocated no runner at all: 794 runs, every one with `steps: 0`, no
+  # `runner_name`, dead in 2-4 seconds. So nobody has ever seen
+  # `scripts/check_document_management.py` run in CI. Pointed at a real runner
+  # it reports FAIL: 567 error(s) on main, all DM-01 (567 of 625 governed
+  # documents carry no `document_metadata` block). A gate that has never
+  # executed is not a gate; this job executes it, and ratchets it because 567
+  # red on the first run is information nobody reads.
+  #
+  # `document-management.yml` is deliberately left in place and untouched here:
+  # whether to delete it is a separate decision, and deleting it in the same
+  # change would make this job's history uncomparable.
+  #
+  # DISK AND MEMORY: none of the `clippy` job's policy applies, on purpose.
+  # Nothing here compiles, links or downloads -- it reads markdown and shells
+  # out to `git`, so there is no `target/`, no crate registry and no `CARGO_*`
+  # tuning to make, and no disk preflight, because this job cannot be the thing
+  # that fills the runner's 5.6G. The one real cost is `fetch-depth: 0`; the
+  # full history of this repository is an 18.8 MiB pack, not gigabytes.
+  #
+  # Measured on the working copy: the gate self-test runs 225 tests in ~0.9s and
+  # the gate itself takes ~0.2s, so `timeout-minutes: 10` is slack, not a
+  # budget.
+  docs-management:
+    name: Document metadata (ratchet)
+    runs-on: [self-hosted, linux, x64]
+    timeout-minutes: 10
+    steps:
+      # `fetch-depth: 0` IS LOAD-BEARING, not tidiness. DM-10 compares a
+      # document's current body against the ancestor commit that
+      # `approval.approved_version` names. On a shallow clone that commit is not
+      # present, and the gate does NOT fail: it downgrades to 13 "approval
+      # binding NOT VERIFIED" notes and reports a different, smaller error set.
+      # A ratchet would then see items missing from the baseline and fail as
+      # "stale", for a reason that has nothing to do with the change. GAP-25
+      # records this trap. `actions/checkout` defaults to depth 1.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Gate self-test first. If the gate's own rules are broken, its error list
+      # means nothing and the ratchet below would be ratcheting noise.
+      - name: Gate self-test
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 --version
+          python3 scripts/test_check_document_management.py
+
+      # The baseline records the exact 567 paths, not a count. A 568th failing
+      # document fails the run; fixing one fails the run until the baseline is
+      # lowered in the same change. There is no "close enough".
+      - name: Ratchet the document-management gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/ci/gate_ratchet.py \
+            --baseline scripts/ci/baselines/document-management.txt \
+            --format dm \
+            --command "python3 scripts/check_document_management.py --strict"
 
   # CLIPPY ONLY, AND WHY. `rust-self-hosted.yml` on main already runs
   # `cargo test --workspace --all-targets --no-fail-fast` and

@@ -46,6 +46,14 @@ SUMMARY_PREFIXES = (
     "runner admission:",
 )
 
+# Which stream each format's offending items are printed to. Anything not
+# listed defaults to stdout. `dm` reads stderr because the document-management
+# gate reports its verdict and statistics on stdout and its errors on stderr;
+# see the module docstring.
+ITEM_STREAM = {
+    "dm": "stderr",
+}
+
 
 def normalize(lines: list[str], fmt: str) -> list[str]:
     """Reduce raw gate output to the stable set of offending items."""
@@ -60,6 +68,11 @@ def normalize(lines: list[str], fmt: str) -> list[str]:
             # Bilingual scanner: "042. some/path.md -> target expression"
             line = NUMBERED_PREFIX.sub("", line)
             line = ARROW_SUFFIX.sub("", line)
+        elif fmt == "dm":
+            # Document-management gate: "DM-01 <rule text>: some/path.md".
+            # The path after the last ": " is the stable identifier; the rule
+            # text in front of it changes whenever a rule is reworded.
+            line = line.rsplit(": ", 1)[-1]
         # fmt == "schema": already one item per line, keep verbatim.
         items.add(line)
     return sorted(items)
@@ -83,7 +96,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--command", required=True)
     parser.add_argument(
         "--format",
-        choices=("schema", "paths"),
+        choices=("schema", "paths", "dm"),
         default="schema",
         help="output shape of the wrapped gate",
     )
@@ -99,10 +112,13 @@ def main(argv: list[str] | None = None) -> int:
         encoding="utf-8",
         errors="replace",
     )
-    # Items are printed to stdout. stderr carries interpreter warnings and
-    # tracebacks, which are not items; a crash yields zero items and is caught
-    # below as a stale baseline (fail-closed), never as a pass.
-    current = normalize(proc.stdout.splitlines(), args.format)
+    # Items are printed to the stream `ITEM_STREAM` names for this format
+    # (stdout unless the gate reports errors on stderr). The other stream
+    # carries interpreter warnings and tracebacks, which are not items; a crash
+    # there yields zero items and is caught below as a stale baseline
+    # (fail-closed), never as a pass.
+    stream = proc.stderr if ITEM_STREAM.get(args.format) == "stderr" else proc.stdout
+    current = normalize(stream.splitlines(), args.format)
 
     current_set, baseline_set = set(current), set(baseline)
     regressions = sorted(current_set - baseline_set)
