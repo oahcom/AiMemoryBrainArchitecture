@@ -16,6 +16,7 @@ It is **not** a place to record acceptance, approval, or review conclusions. Not
 | `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` | Merge without review after a hold ruling | High | `OPEN` / `NOT_REMEDIATED` | 4 PRs (#390 / #394 / #395 / #402) |
 | `GOV-NC-2026-11-20-AC-UNMET-CLOSURE-004` | Issue closed with unmet acceptance criteria | High | `OPEN` / `NOT_REMEDIATED` | 1 Issue (#384), 4/10 ACs unmet |
 | `GOV-NC-CONVERGENCE-2026-11-20` | Governance convergence definition and execution boundary | — | `ACTIVE` / `RECORDED_NOT_PREVENTED` | 3 levels |
+| `GOV-NC-2026-11-22-EVIDENCE-CONTRACT-023` | Evidence domain contract conformance | High | `OPEN` / `NOT_AUTHORIZED` | 1 entity, 2 work packages |
 
 ## Evidence
 
