@@ -38,10 +38,9 @@ impl TestDirectory {
     }
 
     fn input_with_empty_scope(&self) -> PathBuf {
-        let mut input: Value = serde_json::from_slice(
-            &fs::read(Self::fixture()).expect("read fixture"),
-        )
-        .expect("parse fixture");
+        let mut input: Value =
+            serde_json::from_slice(&fs::read(Self::fixture()).expect("read fixture"))
+                .expect("parse fixture");
 
         input["event"]["scope_refs"] = Value::Array(Vec::new());
 
@@ -62,11 +61,7 @@ impl Drop for TestDirectory {
     }
 }
 
-fn execute(
-    input: &Path,
-    output: &Path,
-    event_database: Option<&Path>,
-) -> Output {
+fn execute(input: &Path, output: &Path, event_database: Option<&Path>) -> Output {
     let mut command = Command::new(env!("CARGO_BIN_EXE_brain"));
 
     command
@@ -104,18 +99,11 @@ fn assert_success(output: &Output) {
 
 fn assert_snapshot(output_path: &Path) {
     let bytes = fs::read(output_path).expect("read context snapshot");
-    let snapshot: Value =
-        serde_json::from_slice(&bytes).expect("parse context snapshot");
+    let snapshot: Value = serde_json::from_slice(&bytes).expect("parse context snapshot");
 
-    assert_eq!(
-        snapshot["identity"]["context_id"],
-        "context-demo-001"
-    );
+    assert_eq!(snapshot["identity"]["context_id"], "context-demo-001");
 
-    assert_eq!(
-        snapshot["entries"].as_array().map(Vec::len),
-        Some(1)
-    );
+    assert_eq!(snapshot["entries"].as_array().map(Vec::len), Some(1));
 
     let rendered = snapshot["entries"][0]["rendered_content"]
         .as_str()
@@ -185,13 +173,11 @@ fn repeated_processes_reuse_receipt_and_create_only_one_compile_intent() {
     let second_receipt = receipt_id(&second_stderr);
 
     assert_eq!(
-        first_receipt,
-        second_receipt,
+        first_receipt, second_receipt,
         "idempotent acceptance must return the original receipt"
     );
 
-    let store = SqliteEventStore::open(&database)
-        .expect("reopen persistent EventStore");
+    let store = SqliteEventStore::open(&database).expect("reopen persistent EventStore");
 
     let intents = store
         .pending_compile_intents()

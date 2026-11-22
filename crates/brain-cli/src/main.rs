@@ -10,9 +10,7 @@ use memory_compiler::{
 use memory_context::{
     build_context, ContextBudget, ContextCandidate, ContextIdentity, ContextTier,
 };
-use memory_domain::{
-    Claim, Event, Memory, MemoryLifecycle, MemoryVersion, OpaqueId, ScopeRef,
-};
+use memory_domain::{Claim, Event, Memory, MemoryLifecycle, MemoryVersion, OpaqueId, ScopeRef};
 use memory_event_store::{EventClassification, EventEnvelope};
 use memory_event_store_sqlite::{PayloadEventStoreExt, SqliteEventStore};
 use memory_storage::{MemoryStorage, PrepareRequest};
@@ -391,7 +389,11 @@ fn run() -> Result<(), String> {
 
     let event_database_path = event_store_path
         .as_deref()
-        .or_else(|| temporary_event_database.as_ref().map(TemporaryDatabase::path))
+        .or_else(|| {
+            temporary_event_database
+                .as_ref()
+                .map(TemporaryDatabase::path)
+        })
         .expect("one EventStore database path must be selected");
 
     let mut event_store = SqliteEventStore::open(event_database_path)
@@ -420,10 +422,7 @@ fn run() -> Result<(), String> {
 
         // Event has no correlation_id field. Deriving it from event identity
         // is deterministic, non-empty, and stable across retries.
-        correlation_id: identifier(format!(
-            "correlation:{}",
-            input.event.event_id.as_str()
-        ))?,
+        correlation_id: identifier(format!("correlation:{}", input.event.event_id.as_str()))?,
     };
 
     // EventStore is the durable acceptance boundary, not an authorization
@@ -436,10 +435,7 @@ fn run() -> Result<(), String> {
         .map_err(|error| format!("event-store accept failed: {error:?}"))?;
 
     if verbose {
-        eprintln!(
-            "accepted receipt: {}",
-            accepted_receipt.receipt_id.as_str()
-        );
+        eprintln!("accepted receipt: {}", accepted_receipt.receipt_id.as_str());
     }
 
     // EventStore acceptance succeeded. Continue with the existing domain
