@@ -1,10 +1,12 @@
 use std::fmt;
-use std::io::{self, Read, Write};
+use std::io::{self, Read};
 use std::net::{SocketAddr, TcpListener, TcpStream};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
+
+mod response_writer;
 
 pub const DEFAULT_MAX_CONCURRENCY: usize = 4;
 pub const DEFAULT_REQUEST_DEADLINE_MS: u64 = 5_000;
@@ -284,20 +286,15 @@ fn handle_connection(mut stream: TcpStream, request_deadline_ms: u64) {
     let outcome = handle_request_body_with_deadline(&body, request_deadline_ms);
 
     if let RequestOutcome::Responded { body } = outcome {
-        // Response writing shares the same absolute connection deadline;
-        // request processing time therefore reduces the available write time.
-        let remaining = match deadline.checked_duration_since(std::time::Instant::now()) {
-            Some(remaining) if !remaining.is_zero() => remaining,
-            _ => return,
-        };
-
-        if stream.set_write_timeout(Some(remaining)).is_err() {
-            return;
-        }
-
-        let _ = stream.write_all(body.as_bytes());
-        let _ = stream.write_all(b"\n");
-        let _ = stream.flush();
+        // Response writing uses the same absolute connection deadline as
+        // accept/read and request processing. Every underlying write and
+        // flush recomputes its remaining budget inside the write helper.
+        let _ = response_writer::write_response_until(
+            &mut stream,
+            body.as_bytes(),
+            deadline,
+            std::time::Instant::now,
+        );
     }
 }
 
