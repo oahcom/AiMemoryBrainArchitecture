@@ -14,6 +14,8 @@ memory-domain = { path = "../memory-domain" }
 memory-storage = { path = "../memory-storage" }
 memory-storage-sqlite = { path = "../memory-storage-sqlite" }
 memory-store = { path = "../memory-store" }
+memory-event-store = { path = "../memory-event-store" }
+memory-event-store-sqlite = { path = "../memory-event-store-sqlite" }
 memory-context = { path = "../memory-context" }
 memory-compiler = { path = "../memory-compiler" }
 serde = { version = "1", features = ["derive"] }
