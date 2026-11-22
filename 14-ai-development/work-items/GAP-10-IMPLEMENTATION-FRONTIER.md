@@ -20,7 +20,13 @@ merged.
 This document replaces the percentages with counts, and orders the work by what
 is actually unblocked.
 
-## 1. Measured state (verified on `main @ 76b6470e`)
+## 1. Measured state (verified on `main @ caa37a7`)
+
+> **Revision note.** An earlier version of this section measured `main @ 76b6470e`
+> and concluded that `PublicationAuthority` had three implementations, all
+> `#[cfg(test)]`, and was therefore "THE CHOKEPOINT". That is no longer true.
+> `main` advanced through #523, #545, #555 and #570 in a single day. Section 2
+> has been rewritten accordingly; the chokepoint is closed.
 
 ### 1.1 Production code has zero stubs
 
@@ -28,8 +34,8 @@ is actually unblocked.
 grep -rn "todo!\|unimplemented!" --include=*.rs crates/
 ```
 
-All 8 hits are in `crates/memory-domain/tests/phase2_acceptance.rs`, inside
-`#[ignore]`d test bodies at lines 154, 162, 191, 257, 332, 340, 403, 411.
+All 5 hits are in `crates/memory-domain/tests/phase2_acceptance.rs`, inside
+`#[ignore]`d test bodies at lines 607, 682, 690, 753, 761.
 
 There is no half-written production code anywhere in the workspace. "Not
 implemented" here means **a specified concern with no code at all**, not an
@@ -56,15 +62,26 @@ grep -n "pub struct Fact\b\|pub struct FactRevision\|pub enum EntityIdentityStat
 686: pub struct EvidenceExtension {
 ```
 
-`crates/memory-domain` has implemented the Claim identity classifier in
-`claim_identity::classify` (PR #545). The remaining ignored acceptance tests
-name other missing capabilities such as `ClaimRevisionRegistry`,
-`RelationTypeRegistry` and `ProvenanceGraph`; `classify_claim_change` is
-not the API name and must not be counted as a missing symbol.
+`crates/memory-domain` runs 36 unit tests plus 20 acceptance tests, of which 5
+are `#[ignore]`d with a named missing API each. Nine of those twenty were
+closed on `main` by #570 and #574.
 
-So Phase 2 is "types, invariants and Claim identity classification implemented;
-some registries and graph capabilities remain absent". Phase 3 is a different
-question and is not addressed here.
+So Phase 2 is now "types and invariants done; three concerns deliberately left
+open". The remaining five split into two groups, and the split matters:
+
+| test | reason it stays ignored | what would close it |
+|---|---|---|
+| `dm2_06` | cross-owner decision `B-P2-XO-01` (§8 PENDING, §9 `PLACEHOLDER ONLY`) | an owner decision |
+| `dm2_08` | `RelationTypeRegistry` absent | code — PR #574 |
+| `dm2_09` | `RelationExtension::scope_refs` absent | code — PR #574 |
+| `dm2_11` | Provenance DAG is `NOT TYPED` (§9) | a spec decision |
+| `dm2_12` | same | a spec decision |
+
+Three of the five cannot be closed by writing code at all. `dm2_11`/`dm2_12`
+need `phase-2-domain-extension.md` §9 to type the DAG and §7 to settle
+cycle/compaction policy; `dm2_06` needs `B-P2-XO-01` resolved, and §8 forbids
+inferring authorization. Only `dm2_08` and `dm2_09` were ordinary
+implementation work, and PR #574 is that work.
 
 ### 1.3 Memory Context has a measured 77-row coverage map
 
@@ -119,7 +136,7 @@ those without inventing contracts.
 ## 2. The dependency chain
 
 ```
-Phase 2 domain types            DONE (registries/classifiers missing)
+Phase 2 domain types            DONE (5 ignores left: 2 code, 3 decision)
         |
         v
 memory-storage / memory-store   DONE incl. hidden prepare / explicit publish (#523)
@@ -128,44 +145,70 @@ memory-storage / memory-store   DONE incl. hidden prepare / explicit publish (#5
 memory-context                 77-row map: 9 done, 43 partial, 25 absent
         |                      19 rows implementable locally
         v
-PublicationAuthority  <-- THE CHOKEPOINT. 3 impls exist, all #[cfg(test)]
-        |
-        +--> memory-compiler::compile reachable
+PublicationAuthority            DONE. AdmissionPublicationAuthority is production
+        |                       code, reads the durable ledger, and brain-cli uses it.
+        +--> memory-compiler::compile reachable  <-- brain-cli calls it
         +--> 40 of the 25+43 context rows unblocked
         +--> Agent Integration steps 3-6 unblocked
         |
         v
-BMCP transport + server   <-- does not exist; also gates Agent Integration
+BMCP transport + server   <-- does not exist; now the only remaining chokepoint
         |
         v
 End-to-end (brain-cli beyond context assembly)
 ```
 
-**The chokepoint is `PublicationAuthority` (GAP-07).** It is a single trait
-with a single missing production implementation. Everything above it in the
-chain is either done or locally implementable; everything below it is blocked.
+**`PublicationAuthority` is no longer the chokepoint.** As of `main @ caa37a7`
+there are two production implementations:
 
-This is why "advance all six domains" cannot work as stated. Five of the six
-converge on one missing trait implementation plus one missing transport.
+| impl | location | backing |
+|---|---|---|
+| `AdmissionPublicationAuthority` | `publication_authority.rs:50` | durable admission ledger + storage prepare row |
+| `EvidenceAuthority`, `TestAuthority`, `RecoveryAuthority` | `lib.rs:921/940/1355` | `#[cfg(test)] mod tests` |
+
+`AdmissionPublicationAuthority` is not a test double. It takes an
+`AdmissionStore` and a `&dyn MemoryStorage`, reads committed rows only, and
+derives producer identity and scope from the durable admission request rather
+than from a caller-supplied boolean. `crates/brain-cli/src/main.rs:280`
+constructs a `MemoryCompiler` with it and calls `compile`, then reports
+`published` / `blocked` / `suppressed` on stderr unconditionally. GAP-07 (b) —
+"skip is invisible" — was closed with a sidecar file plus a binary-level test at
+`crates/brain-cli/tests/compiler_skip_is_visible.rs`.
+
+**The only remaining chokepoint is BMCP transport + server.** It gates Agent
+Integration and the end-to-end path, and nothing above it does.
+
+This is why "advance all six domains" cannot work as stated: five of the six
+converge on one missing transport. The earlier reading — that they converge on a
+missing trait implementation *plus* a missing transport — was true at
+`76b6470e` and is now half resolved.
 
 ## 3. What is actually unblocked right now
 
 In dependency order. Each item is dispatchable today with no external decision.
 
+> **Partly superseded.** T1.1 below was completed by `AdmissionPublicationAuthority`
+> and the `brain-cli` wiring. See §2 and §7.3. T1.2 and T2.2 are still open;
+> T2.1 is down to `dm2_08`/`dm2_09` (PR #574) plus three items that need
+> decisions, not code.
+
 ### Tier 1 — unblocks the most downstream work
 
-**T1.1 — A production `PublicationAuthority` (GAP-07, direction (a))**
+**T1.1 — A production `PublicationAuthority` (GAP-07, direction (a)) — DONE**
 
-`prepare_version` / `publish_prepared` already exist on the Storage trait and in
-`memory-storage-sqlite` (#523). What is missing:
+Closed by `AdmissionPublicationAuthority`. It takes an `AdmissionStore` plus a
+`&dyn MemoryStorage`, reads committed rows only, and derives producer identity
+and scope from the durable admission request rather than from a caller-supplied
+boolean. `crates/brain-cli/src/main.rs:280` constructs `MemoryCompiler` with it
+and calls `compile`, reporting `published` / `blocked` / `suppressed` to stderr
+unconditionally, with a sidecar file and a binary-level test
+(`compiler_skip_is_visible.rs`) so the skip cannot go unseen.
 
-- `MemoryStore` does not surface them (it exposes 5 methods, none of them
-  prepare/publish; the only bodies are on `FakeStorage` inside `cfg(test)`).
-- No durable publication record outside the compiler's in-memory admission
-  store.
-
-Implementing this makes `MemoryCompiler::compile` reachable, which is the
-prerequisite for any claim that the system compiles.
+`MemoryStore` still does not surface `prepare_version` / `publish_prepared`.
+That is no longer a blocker for `compile` — the authority reads storage
+directly — but it remains a hole in the Store abstraction, and the honest
+description is "the chokepoint was routed around", not "the abstraction was
+completed".
 
 **T1.2 — 19 locally-implementable Memory Context rows**
 
@@ -187,10 +230,18 @@ vectors: CI-01..CI-04, CI-07..CI-11 and CI-13. CI-05, CI-06 and CI-12 are
 unreachable because `ClaimRevision` has no quantifier, modality or confidence
 field; they are explicitly not counted as covered.
 
-The remaining ignored acceptance tests concern other missing APIs, including
-`ClaimRevisionRegistry`, `RelationTypeRegistry`, `ProvenanceGraph` and
-`EvidenceIndependence::validate`. Implementing those capabilities is separate
-from the already-present Claim identity classifier.
+The remaining ignored acceptance tests split three ways, and only one third is
+implementation work:
+
+| test | closure requires |
+|---|---|
+| `dm2_08`, `dm2_09` | code — PR #574 (`RelationTypeRegistry`, `scope_refs`) |
+| `dm2_06` | owner decision `B-P2-XO-01`; §8 forbids inferring authorization |
+| `dm2_11`, `dm2_12` | spec decision — §9 marks Provenance DAG `NOT TYPED`, §7 leaves cycle policy open |
+
+`ClaimRevisionRegistry`, `AcceptedRevisionState` and `ClaimRevisionResolver`
+landed in #570. `EvidenceIndependence::validate` is not a named blocker in any
+current ignore reason.
 
 **T2.2 — CI wiring for the existing gates**
 
@@ -205,36 +256,38 @@ stops the measurement from being the only detector.
 |---|---|---|
 | BMCP transport/server | H has not frozen the transport contract | H decision |
 | Agent Integration RT-01..RT-09 | same, plus D and I gates | H + D + I |
-| 40 context rows attributed `D` | publication authority | T1.1 |
+| 40 context rows attributed `D` | ~~publication authority~~ publication **record** shape | `AdmissionPublicationAuthority` unblocked `compile`; the 40 rows still need a durable publication record surfaced through `MemoryStore` |
 | 8 context rows attributed `I` | authorization authority | I decision |
+| `dm2_06` | cross-owner decision `B-P2-XO-01` | owner decision |
+| `dm2_11`, `dm2_12` | Provenance DAG `NOT TYPED` (§9) | spec decision |
 
 Dispatching implementation for these produces unmergeable work. They need
 decisions, not code.
 
 ## 4. Recommendation
 
-**Do T1.1 first, then T1.2, then T2.1/T2.2.** Do not dispatch Tier 3 as
-implementation.
+**T1.1 is done. Do T1.2 next, then T2.2, then the decision items.**
 
-The reason to start with T1.1 rather than the larger T1.2 is that T1.1 is one
-trait implementation that unblocks 40 attributed-`D` rows plus the compiler plus
-Agent Integration steps 3–6. T1.2's 19 rows are each small and independent; they
-can run in parallel with T1.1 and should.
+T1.2's 19 rows are each small and independent, need no external authority, and
+are the only remaining block of work that is both substantial and dispatchable
+today. T2.2 (CI wiring) adds no capability but stops the measurement from being
+the only detector — worth doing early precisely because it is cheap.
 
-If T1.1 is genuinely blocked on a decision nobody has made — namely *what is the
-durable publication record* — then that decision is the highest-value thing to
-settle, because it is the single gate in front of the largest block of work.
+The four items in Tier 3 that need decisions should be escalated as decisions.
+Dispatching them as implementation is what produced #573: a PR that
+re-implemented work #570 had already landed, because nobody had re-measured
+`main` before writing code.
 
 ## 5. Correction to the stated estimates
 
 | domain | stated | measured |
 |---|---|---|
-| Memory Compiler | 85% unimplemented | ~100% of `compile` unreachable; admission/registry/fence implemented and tested (58 tests). Missing: production authority, Store-level prepare/publish exposure |
-| Memory Context | 80% unimplemented | 77-row map: 9 implemented / 43 partial / 25 absent. 19 rows locally doable, 40 waiting on D |
+| Memory Compiler | 85% unimplemented | `compile` is now reachable via `AdmissionPublicationAuthority` and `brain-cli`. Admission/registry/fence implemented and tested. Remaining: `MemoryStore` does not surface prepare/publish |
+| Memory Context | 80% unimplemented | 77-row map: 9 implemented / 43 partial / 25 absent. 19 rows locally doable, 40 waiting on a durable publication record |
 | Agent Integration | 90% unimplemented | Accurate for runtime; but blocked by H/D/I, not by absence of effort. RT-01..RT-09 all NOT RUN |
 | BMCP | 60% unimplemented | Artifacts substantial (32 schemas, 545 conformance tests). Transport/server entirely absent — a binary, not a percentage |
-| Phase 2 domain | 100% not started | **False.** Types, invariants and `claim_identity::classify` are implemented; `dm2_03` now exercises 10 reachable CI vectors. CI-05/06/12 are unreachable from the current `ClaimRevision` shape; other registry/graph gaps remain |
-| E2E | 100% not started | Partially false. `brain-cli` runs ingestion → storage → context end to end. It stops at the compiler skip (GAP-07) |
+| Phase 2 domain | 100% not started | **False.** Types, invariants, `claim_identity::classify`, `ClaimRevisionRegistry`, `AcceptedRevisionState` and `ClaimRevisionResolver` are all implemented. 5 ignores left: 2 code (#574), 3 decisions |
+| E2E | 100% not started | **False.** `brain-cli` runs ingestion → storage → context → compiler end to end, including the publication gate and its visible skip |
 
 ## 6. Re-measurement at `b29278a8` (2026-11-22 02:05 +08:00)
 
