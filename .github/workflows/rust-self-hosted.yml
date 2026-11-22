@@ -69,3 +69,12 @@ jobs:
             | awk '{p+=$1; f+=$2; i+=$3} END{printf "passed=%d failed=%d ignored=%d\n", p, f, i}'
 
           exit "$status"
+
+      # `cargo fmt --all --check` was in no workflow: rust-phase1.yml and this file
+      # both only run tests, so an unformatted commit could merge green. The script
+      # pins the SHA it measured, so a passing log names the exact tree it passed on.
+      - name: cargo fmt --all --check
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/check_fmt.py --expect "$(git rev-parse HEAD)"
