@@ -1193,6 +1193,309 @@ pub struct DeliveryIntent {
     pub visibility: DeliveryVisibility,
 }
 
+/// Reason why a candidate was not included in the selected context.
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub enum SelectionDropReason {
+    /// The candidate would exceed the remaining entry or rendered-byte budget.
+    BudgetInsufficient,
+
+    /// Every coverage unit contributed by this candidate was already covered.
+    ZeroMarginalGain,
+}
+
+/// A candidate rejected by the selection algorithm.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct DroppedCandidate {
+    pub candidate: ContextCandidate,
+    pub reason: SelectionDropReason,
+}
+
+/// Coverage statistics for a selection.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct SelectionCoverage {
+    /// Number of distinct coverage units present in the original candidate set.
+    pub total_units: usize,
+
+    /// Number of distinct units covered by selected candidates.
+    pub covered_units: usize,
+
+    /// Number of candidate-set coverage units not covered by the selection.
+    pub uncovered_units: usize,
+}
+
+/// Actual budget consumption of a selection.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct SelectionBudgetUsage {
+    pub entries: usize,
+    pub rendered_bytes: usize,
+}
+
+/// Result of deterministic marginal-coverage selection.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct SelectionOutcome {
+    /// Candidates in deterministic greedy selection order.
+    pub selected: Vec<ContextCandidate>,
+
+    /// Rejected candidates in deterministic tier/entry-id order.
+    pub dropped: Vec<DroppedCandidate>,
+
+    pub coverage: SelectionCoverage,
+    pub budget_usage: SelectionBudgetUsage,
+}
+
+/// A structured provenance coverage unit.
+///
+/// A source is meaningful only in the scope in which it is applicable.
+/// Therefore a source referenced by two different scopes represents two
+/// distinct units. `scope_id` is used rather than `ScopeRef` because
+/// `ScopeRef` deliberately does not implement `Ord`.
+///
+/// Evidence references are not counted separately: they frequently overlap
+/// with source references, and counting both would artificially inflate
+/// coverage for candidates describing the same provenance.
+///
+/// ponytail: This is a structural provenance proxy, not semantic coverage.
+/// It does not establish that two sources contain independent information.
+type CoverageUnit = (OpaqueId, OpaqueId);
+
+fn candidate_coverage_units(candidate: &ContextCandidate) -> std::collections::BTreeSet<CoverageUnit> {
+    let mut units = std::collections::BTreeSet::new();
+
+    for source_id in &candidate.source_refs {
+        for scope in &candidate.scope_refs {
+            units.insert((source_id.clone(), scope.scope_id.clone()));
+        }
+    }
+
+    units
+}
+
+/// Select a subset of candidates maximizing structured marginal coverage
+/// under the existing entry-count and rendered-byte constraints.
+///
+/// Candidates are processed in strict tier order: P0, P1, P2, P3.
+/// Within each tier, the candidate with the largest marginal coverage gain
+/// is selected first. Equal gains are resolved by ascending `entry_id`.
+///
+/// This is a deterministic greedy approximation to maximum coverage under
+/// cardinality and byte constraints. Maximum coverage is NP-hard; this
+/// algorithm does not guarantee a globally optimal subset, nor does it
+/// provide the classical unconstrained maximum-coverage approximation
+/// guarantee for arbitrary nonuniform byte costs.
+///
+/// Higher tiers cannot be displaced by lower tiers. Remaining capacity is
+/// passed to the next tier without reserving a fixed quota.
+///
+/// The function is pure: it performs no storage, clock, random, or external
+/// model operations. Equal logical inputs produce equal serialized outputs.
+///
+/// The caller may pass `selected` to `build_context`. The behavior of
+/// `build_context` itself is intentionally unchanged.
+pub fn select_within_budget(
+    identity: &ContextIdentity,
+    budget: &ContextBudget,
+    candidates: Vec<ContextCandidate>,
+) -> Result<SelectionOutcome, ContextError> {
+    use std::collections::BTreeSet;
+
+    identity.validate()?;
+    budget.validate()?;
+
+    // Validate the complete input before making any selection decisions.
+    // Duplicate detection is global, not limited to selected candidates.
+    let mut seen_entries = HashSet::new();
+    let mut seen_memberships = HashSet::new();
+
+    for candidate in &candidates {
+        candidate.validate_for(identity)?;
+
+        if !seen_entries.insert(candidate.entry_id.clone()) {
+            return Err(ContextError::DuplicateEntry);
+        }
+
+        let membership = (
+            candidate.memory_id.clone(),
+            candidate.memory_version_id.clone(),
+        );
+
+        if !seen_memberships.insert(membership) {
+            return Err(ContextError::DuplicateMembership);
+        }
+    }
+
+    let mut all_units = BTreeSet::new();
+
+    for candidate in &candidates {
+        all_units.extend(candidate_coverage_units(candidate));
+    }
+
+    // Canonical initial order removes input Vec order as a source of
+    // nondeterminism, including the ordering of dropped candidates.
+    let mut remaining = candidates;
+
+    remaining.sort_by(|left, right| {
+        left.tier
+            .cmp(&right.tier)
+            .then_with(|| left.entry_id.cmp(&right.entry_id))
+    });
+
+    let mut selected = Vec::new();
+    let mut dropped = Vec::new();
+    let mut covered_units = BTreeSet::new();
+
+    let mut rendered_bytes = 0usize;
+
+    for tier in [
+        ContextTier::P0,
+        ContextTier::P1,
+        ContextTier::P2,
+        ContextTier::P3,
+    ] {
+        loop {
+            if remaining.is_empty() {
+                break;
+            }
+
+            if selected.len() >= budget.max_entries {
+                // No lower-tier candidate can displace an already selected
+                // higher-tier candidate.
+                for candidate in remaining.drain(..) {
+                    dropped.push(DroppedCandidate {
+                        candidate,
+                        reason: SelectionDropReason::BudgetInsufficient,
+                    });
+                }
+                break;
+            }
+
+            // Only candidates in the current tier participate in this round.
+            let mut best_index: Option<usize> = None;
+            let mut best_gain = 0usize;
+
+            for (index, candidate) in remaining.iter().enumerate() {
+                if candidate.tier != tier {
+                    continue;
+                }
+
+                let units = candidate_coverage_units(candidate);
+
+                let gain = units
+                    .iter()
+                    .filter(|unit| !covered_units.contains(*unit))
+                    .count();
+
+                if gain == 0 {
+                    continue;
+                }
+
+                let is_better = match best_index {
+                    None => true,
+                    Some(previous_index) => {
+                        gain > best_gain
+                            || (gain == best_gain
+                                && candidate.entry_id
+                                    < remaining[previous_index].entry_id)
+                    }
+                };
+
+                if is_better {
+                    best_index = Some(index);
+                    best_gain = gain;
+                }
+            }
+
+            let Some(best_index) = best_index else {
+                // No remaining candidate in this tier can improve coverage.
+                // Remove zero-gain candidates deterministically.
+                let mut index = 0;
+
+                while index < remaining.len() {
+                    if remaining[index].tier == tier {
+                        let candidate = remaining.remove(index);
+
+                        dropped.push(DroppedCandidate {
+                            candidate,
+                            reason: SelectionDropReason::ZeroMarginalGain,
+                        });
+                    } else {
+                        index += 1;
+                    }
+                }
+
+                break;
+            };
+
+            let candidate_bytes = remaining[best_index].rendered_content.len();
+
+            let next_bytes = rendered_bytes.checked_add(candidate_bytes);
+
+            let fits_budget = next_bytes
+                .map(|bytes| bytes <= budget.max_rendered_bytes)
+                .unwrap_or(false);
+
+            if !fits_budget {
+                // A large candidate must not prevent a smaller candidate
+                // from fitting. Reject this candidate and recompute gains.
+                let candidate = remaining.remove(best_index);
+
+                dropped.push(DroppedCandidate {
+                    candidate,
+                    reason: SelectionDropReason::BudgetInsufficient,
+                });
+
+                continue;
+            }
+
+            let candidate = remaining.remove(best_index);
+
+            rendered_bytes = next_bytes.expect("checked above");
+
+            covered_units.extend(candidate_coverage_units(&candidate));
+
+            selected.push(candidate);
+        }
+    }
+
+    // The tier loop processes every candidate. Keep an explicit safeguard
+    // against accidental loss if a future tier is added without updating
+    // the ordered tier list.
+    for candidate in remaining {
+        dropped.push(DroppedCandidate {
+            candidate,
+            reason: SelectionDropReason::BudgetInsufficient,
+        });
+    }
+
+    dropped.sort_by(|left, right| {
+        left.candidate
+            .tier
+            .cmp(&right.candidate.tier)
+            .then_with(|| {
+                left.candidate
+                    .entry_id
+                    .cmp(&right.candidate.entry_id)
+            })
+    });
+
+    let total_units = all_units.len();
+    let covered_count = covered_units.len();
+    let selected_entries = selected.len();
+
+    Ok(SelectionOutcome {
+        selected,
+        dropped,
+        coverage: SelectionCoverage {
+            total_units,
+            covered_units: covered_count,
+            uncovered_units: total_units - covered_count,
+        },
+        budget_usage: SelectionBudgetUsage {
+            entries: selected_entries,
+            rendered_bytes,
+        },
+    })
+}
+
 pub fn build_context(
     identity: ContextIdentity,
     context_version: u64,
