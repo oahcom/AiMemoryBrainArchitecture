@@ -89,7 +89,10 @@ pub enum CompilerError {
     MissingAcceptedReceipt,
     MissingCompileIntent,
     InvalidPayloadDigest,
-    PayloadDigestMismatch { declared: String, computed: String },
+    PayloadDigestMismatch {
+        declared: String,
+        computed: String,
+    },
     EmptyExtraction,
     InvalidNormalizedValue,
     IncompleteDependencyClosure,
@@ -103,6 +106,10 @@ pub enum CompilerError {
     IllegalStateTransition,
     LeaseExpired,
     AdmissionStoreFailure,
+    /// The stored payload is not valid UTF-8. Kept distinct from
+    /// `PayloadDigestMismatch` because no digest can be computed at all: the
+    /// bytes never become the `String` the pipeline digests.
+    InvalidPayloadEncoding,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
@@ -211,6 +218,62 @@ pub struct AcceptedEvent {
     pub payload_digest: String,
     pub payload: String,
     pub compile_intent_durable: bool,
+}
+
+/// Build the compiler input from a pending compile intent read out of the
+/// durable outbox.
+///
+/// This is the only place a production caller gets an `AcceptedEvent` whose
+/// `compile_intent_durable` is not a lie. `IngestionStage::run` rejects
+/// `compile_intent_durable == false`, so the flag has to come from evidence
+/// rather than from the caller. The evidence here is that the row was returned
+/// by `SqliteEventStore::pending_compile_intents()`, whose query inner-joins
+/// `compile_outbox` with `accepted_events` and `event_payloads`: a row exists
+/// only because a `compile_outbox` row exists.
+///
+/// The bytes are re-digested instead of trusted. The store verified them on
+/// write, but the intent is a snapshot taken later, and an adapter that copies
+/// `receipt.payload_digest` without recomputing would pass a tampered payload
+/// straight into compilation.
+///
+/// ponytail: this checks the bytes, not the provenance. `PendingCompileIntent`
+/// has public fields, so any caller can build one by hand and get
+/// `compile_intent_durable: true`. Closing that needs a private constructor or
+/// a witness type in the event-store crate, which is a change to that crate's
+/// public surface; until then the guarantee is "this adapter never launders bad
+/// bytes", not "no one can forge a flag".
+#[cfg(feature = "sqlite")]
+pub fn accepted_event_from(
+    intent: &memory_event_store_sqlite::PendingCompileIntent,
+) -> Result<AcceptedEvent, CompilerError> {
+    let event_id = Identity::new(intent.receipt.event_id.as_str().to_owned())?;
+    let receipt_id = Identity::new(intent.receipt.receipt_id.as_str().to_owned())?;
+
+    // Lossy decoding would silently change the bytes whose digest was accepted.
+    let payload = String::from_utf8(intent.payload_bytes.clone())
+        .map_err(|_| CompilerError::InvalidPayloadEncoding)?;
+
+    let computed_digest = raw_payload_digest(&payload);
+    if intent.receipt.payload_digest != computed_digest {
+        return Err(CompilerError::PayloadDigestMismatch {
+            declared: intent.receipt.payload_digest.clone(),
+            computed: computed_digest,
+        });
+    }
+    if intent.envelope.payload_digest != computed_digest {
+        return Err(CompilerError::PayloadDigestMismatch {
+            declared: intent.envelope.payload_digest.clone(),
+            computed: computed_digest,
+        });
+    }
+
+    Ok(AcceptedEvent {
+        event_id,
+        receipt_id,
+        payload_digest: computed_digest,
+        payload,
+        compile_intent_durable: true,
+    })
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -1911,5 +1974,123 @@ mod scenario_tests {
 
         assert_eq!(disposition, DocumentDisposition::Quarantined);
         assert_ne!(disposition, DocumentDisposition::Accepted);
+    }
+}
+
+#[cfg(all(test, feature = "sqlite"))]
+mod outbox_adapter_tests {
+    use super::*;
+    use memory_domain::{OpaqueId, ScopeKind, ScopeRef};
+    use memory_event_store::{EventClassification, EventEnvelope};
+    use memory_event_store_sqlite::{PayloadEventStoreExt, SqliteEventStore};
+
+    fn id(value: &str) -> OpaqueId {
+        OpaqueId::new(value).expect("test identifier should be valid")
+    }
+
+    fn scope() -> ScopeRef {
+        ScopeRef {
+            scope_id: id("scope-1"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:scope-1".into(),
+        }
+    }
+
+    fn envelope(payload: &[u8]) -> EventEnvelope {
+        EventEnvelope {
+            event_kind: "observation".into(),
+            source_type: "compiler-test".into(),
+            source_id: id("source-1"),
+            producer_actor_ref: id("actor-1"),
+            scope_refs: vec![scope()],
+            event_time: None,
+            payload_ref: "payload://source-1".into(),
+            payload_digest: raw_payload_digest(
+                std::str::from_utf8(payload).expect("test payload is utf-8"),
+            ),
+            classification: EventClassification::Observed,
+            idempotency_key: "compile-test-1".into(),
+            retention_class: "default".into(),
+            correlation_id: id("correlation-1"),
+        }
+    }
+
+    /// The positive path: accept, read the outbox, adapt, ingest. Every digest
+    /// the compiler sees must be the one the store issued, not one computed
+    /// alongside it.
+    #[test]
+    fn outbox_adapter_builds_accepted_event_from_real_acceptance() {
+        let mut store = SqliteEventStore::in_memory().expect("store should open");
+        let payload = b"A durable observation for compiler ingestion.";
+
+        let receipt = store
+            .accept_with_payload(envelope(payload), payload, &[scope()])
+            .expect("accept should succeed");
+
+        let pending = store
+            .pending_compile_intents()
+            .expect("outbox read should succeed");
+        assert_eq!(pending.len(), 1);
+
+        let accepted = accepted_event_from(&pending[0]).expect("adapter should accept real intent");
+
+        assert_eq!(accepted.payload_digest, receipt.payload_digest);
+        assert_eq!(accepted.receipt_id.0, receipt.receipt_id.as_str());
+        assert_eq!(accepted.event_id.0, receipt.event_id.as_str());
+        assert!(accepted.compile_intent_durable);
+
+        let ingested = IngestionStage::run(accepted, 1).expect("ingestion should accept the event");
+        assert_eq!(ingested.payload_digest, receipt.payload_digest);
+    }
+
+    /// The negative path that makes the flag mean something: a tampered
+    /// snapshot must not reach `IngestionStage`, and must not come back with
+    /// `compile_intent_durable: true` attached to bytes the store never
+    /// verified.
+    #[test]
+    fn outbox_adapter_rejects_tampered_payload_bytes() {
+        let mut store = SqliteEventStore::in_memory().expect("store should open");
+        let payload = b"Original accepted payload.";
+
+        store
+            .accept_with_payload(envelope(payload), payload, &[scope()])
+            .expect("accept should succeed");
+
+        let pending = store
+            .pending_compile_intents()
+            .expect("outbox read should succeed");
+        let mut tampered = pending[0].clone();
+        tampered.payload_bytes[0] ^= 0x01;
+
+        match accepted_event_from(&tampered) {
+            Err(CompilerError::PayloadDigestMismatch { declared, computed }) => {
+                assert_eq!(declared, tampered.receipt.payload_digest);
+                assert_ne!(declared, computed);
+            }
+            other => panic!("expected PayloadDigestMismatch, got {other:?}"),
+        }
+    }
+
+    /// Non-UTF-8 bytes get their own error rather than being lossily decoded
+    /// into a different payload than the one the store accepted.
+    #[test]
+    fn outbox_adapter_rejects_non_utf8_payload() {
+        let mut store = SqliteEventStore::in_memory().expect("store should open");
+        let payload = b"valid start";
+
+        store
+            .accept_with_payload(envelope(payload), payload, &[scope()])
+            .expect("accept should succeed");
+
+        let pending = store
+            .pending_compile_intents()
+            .expect("outbox read should succeed");
+        let mut broken = pending[0].clone();
+        broken.payload_bytes = vec![0xff, 0xfe];
+
+        assert_eq!(
+            accepted_event_from(&broken),
+            Err(CompilerError::InvalidPayloadEncoding)
+        );
     }
 }

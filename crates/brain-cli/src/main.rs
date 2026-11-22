@@ -3,9 +3,9 @@ use memory_compiler::admission::{
 };
 use memory_compiler::publication_authority::AdmissionPublicationAuthority;
 use memory_compiler::{
-    AcceptedEvent, ExtractionStage, Identity, IngestionStage, MemoryCompiler, NormalizationStage,
-    ProducerWorkItemId, PublicationAuthority, PublicationDisposition, PublicationProof,
-    StagingInput, WorkerLease, COMPILER_VERSION,
+    accepted_event_from, ExtractionStage, Identity, IngestionStage, MemoryCompiler,
+    NormalizationStage, ProducerWorkItemId, PublicationAuthority, PublicationDisposition,
+    PublicationProof, StagingInput, WorkerLease, COMPILER_VERSION,
 };
 use memory_context::{
     build_context, ContextBudget, ContextCandidate, ContextIdentity, ContextTier,
@@ -93,10 +93,12 @@ fn main() {
 /// staged hidden in storage before the gate runs, so the proof can report the
 /// durable preparation state instead of guessing it.
 struct CompilerStageRequest<'a> {
+    /// The row read back out of `compile_outbox`. The compiler input is built
+    /// from this and nothing else, so `compile_intent_durable` is a fact about
+    /// the database rather than a flag the caller sets.
+    intent: &'a memory_event_store_sqlite::PendingCompileIntent,
     event_id: &'a OpaqueId,
-    receipt_id: &'a OpaqueId,
     source_ref: &'a OpaqueId,
-    payload: &'a str,
     scope: &'a [ScopeRef],
     source_version_id: &'a OpaqueId,
     derivative_version: MemoryVersion,
@@ -261,13 +263,12 @@ fn run_compiler_stage(request: CompilerStageRequest<'_>) -> Result<CompilerStage
     let authority =
         AdmissionPublicationAuthority::new(authority_admission, &storage, work_item_id.clone());
 
-    let accepted = AcceptedEvent {
-        event_id: Identity(event_id.to_owned()),
-        receipt_id: Identity(request.receipt_id.as_str().to_owned()),
-        payload_digest: format!("sha256:{}", sha256_hex(request.payload.as_bytes())),
-        payload: request.payload.to_owned(),
-        compile_intent_durable: true,
-    };
+    // Built from the outbox row, not assembled here. Before this the CLI
+    // computed its own digest and hard-coded `compile_intent_durable: true`,
+    // which meant `IngestionStage::run`'s durable-intent guard could never fire
+    // on the production path.
+    let accepted = accepted_event_from(request.intent)
+        .map_err(|error| format!("invalid pending compile intent: {error:?}"))?;
     let normalized = {
         let ingested = IngestionStage::run(accepted.clone(), COMPILER_GENERATION)
             .map_err(|error| format!("ingestion stage failed: {error:?}"))?;
@@ -434,8 +435,28 @@ fn run() -> Result<(), String> {
         .accept_with_payload(envelope, input.payload.as_bytes(), &input.event.scope_refs)
         .map_err(|error| format!("event-store accept failed: {error:?}"))?;
 
+    // Read the accepted row back through the outbox join. Keeping the receipt
+    // in memory would prove acceptance happened but say nothing about whether
+    // the compile read path can see it, which is the path the compiler uses.
+    let pending = event_store
+        .pending_compile_intents()
+        .map_err(|error| format!("cannot read compile outbox: {error:?}"))?;
+    let pending_intent = pending
+        .iter()
+        .find(|intent| intent.receipt.receipt_id == accepted_receipt.receipt_id)
+        .ok_or_else(|| {
+            format!(
+                "accepted receipt {} has no pending compile intent",
+                accepted_receipt.receipt_id.as_str()
+            )
+        })?;
+
     if verbose {
-        eprintln!("accepted receipt: {}", accepted_receipt.receipt_id.as_str());
+        eprintln!(
+            "accepted receipt: {} (outbox row {})",
+            accepted_receipt.receipt_id.as_str(),
+            pending_intent.outbox_row
+        );
     }
 
     // EventStore acceptance succeeded. Continue with the existing domain
@@ -579,10 +600,9 @@ fn run() -> Result<(), String> {
 
     let admission_database = TemporaryDatabase::new("admission");
     let stage = run_compiler_stage(CompilerStageRequest {
+        intent: pending_intent,
         event_id: &input.event.event_id,
-        receipt_id: &accepted_receipt.receipt_id,
         source_ref: &input.event.source_id,
-        payload: &input.payload,
         scope: &scope,
         source_version_id: &source_version_id,
         derivative_version,
