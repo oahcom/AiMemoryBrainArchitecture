@@ -399,19 +399,35 @@ fn handle_tool_call(id: &str, params: Option<&[u8]>) -> RequestOutcome {
                     &format!("{{\"valid\":true,\"digest\":\"{digest}\"}}"),
                     false,
                 ),
-                Err(error) => tool_result(id, &describe(&error), true),
+                Err(error) => invalid_evidence_result(id, &error, false),
             },
-            Err(error) => tool_result(id, &describe(&error), true),
+            Err(error) => invalid_evidence_result(id, &error, false),
         },
         DIGEST_TOOL => match bmcp_protocol::parse_and_validate(evidence) {
             Ok(parsed) => match bmcp_protocol::digest::p0_digest(&parsed) {
                 Ok(digest) => tool_result(id, &format!("{{\"digest\":\"{digest}\"}}"), false),
-                Err(error) => tool_result(id, &describe(&error), true),
+                Err(error) => invalid_evidence_result(id, &error, true),
             },
-            Err(error) => tool_result(id, &describe(&error), true),
+            Err(error) => invalid_evidence_result(id, &error, true),
         },
         other => invalid_params(id, &format!("unknown tool: {other}")),
     }
+}
+
+fn invalid_evidence_result(
+    id: &str,
+    error: &bmcp_protocol::validate::EvidenceError,
+    is_error: bool,
+) -> RequestOutcome {
+    let description = describe(error);
+    let payload = format!(
+        "{{\"valid\":false,\"error\":\"{}\"}}",
+        json_escape(&description)
+    );
+
+    // tool_result performs the separate outer-envelope escaping for the text
+    // content block. The description above is escaped only for the inner JSON.
+    tool_result(id, &payload, is_error)
 }
 
 fn tool_result(id: &str, text: &str, is_error: bool) -> RequestOutcome {
