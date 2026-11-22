@@ -345,3 +345,285 @@ fn rt_13_fragmented_request_is_served() {
 
     server.shutdown().expect("server should shut down");
 }
+#[test]
+fn rt_14_slow_drip_is_closed_at_absolute_deadline() {
+    let server =
+        RunningServer::start(ServerConfig::new("127.0.0.1:0").with_request_deadline_ms(1_000))
+            .expect("server should start");
+
+    let mut stream = TcpStream::connect(server.local_addr()).expect("connect to server");
+    stream
+        .set_read_timeout(Some(Duration::from_secs(5)))
+        .expect("set client read timeout");
+
+    let drip_stream = stream.try_clone().expect("clone client stream");
+    let (stop_tx, stop_rx) = std::sync::mpsc::channel();
+
+    let dripper = thread::spawn(move || {
+        let mut drip_stream = drip_stream;
+
+        loop {
+            if drip_stream.write_all(b"x").is_err() {
+                break;
+            }
+
+            match stop_rx.recv_timeout(Duration::from_millis(150)) {
+                Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {}
+                Ok(()) | Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => break,
+            }
+        }
+    });
+
+    let started = Instant::now();
+    let mut response = Vec::new();
+
+    stream
+        .read_to_end(&mut response)
+        .expect("server should close the slow-drip connection before client timeout");
+
+    let elapsed = started.elapsed();
+
+    let _ = stop_tx.send(());
+    dripper.join().expect("dripper thread should not panic");
+
+    assert!(
+        response.is_empty(),
+        "slow-drip connection received response bytes: {response:?}, elapsed: {elapsed:?}"
+    );
+    assert!(
+        (Duration::from_millis(1_000)..=Duration::from_millis(1_800)).contains(&elapsed),
+        "slow-drip connection closed outside the expected deadline window: {elapsed:?}"
+    );
+
+    server.shutdown().expect("server should shut down");
+}
+
+#[test]
+fn rt_15_fragmented_request_within_deadline_succeeds() {
+    let server =
+        RunningServer::start(ServerConfig::new("127.0.0.1:0").with_request_deadline_ms(2_000))
+            .expect("server should start");
+
+    let mut stream = TcpStream::connect(server.local_addr()).expect("connect to server");
+    stream
+        .set_read_timeout(Some(Duration::from_secs(3)))
+        .expect("set client read timeout");
+
+    thread::sleep(Duration::from_millis(200));
+
+    stream
+        .write_all(br#"{"jsonrpc":"2.0","#)
+        .expect("write first request fragment");
+    stream.flush().expect("flush first request fragment");
+
+    thread::sleep(Duration::from_millis(200));
+
+    stream
+        .write_all(br#""id":15,"method":"initialize","#)
+        .expect("write second request fragment");
+    stream.flush().expect("flush second request fragment");
+
+    thread::sleep(Duration::from_millis(200));
+
+    stream
+        .write_all(b"\"params\":{}}\n")
+        .expect("write third request fragment");
+    stream.flush().expect("flush third request fragment");
+
+    let mut response = String::new();
+    stream
+        .read_to_string(&mut response)
+        .expect("read initialize response");
+
+    assert!(
+        response.contains(r#""jsonrpc":"2.0""#),
+        "fragmented request response lacks JSON-RPC version: {response}"
+    );
+    assert!(
+        response.contains(r#""id":15"#),
+        "fragmented request response did not echo id 15: {response}"
+    );
+    assert!(
+        response.contains(r#""protocolVersion":"2024-11-05""#),
+        "fragmented request did not receive initialize success: {response}"
+    );
+
+    server.shutdown().expect("server should shut down");
+}
+
+#[test]
+fn rt_16_request_after_deadline_is_rejected() {
+    let server =
+        RunningServer::start(ServerConfig::new("127.0.0.1:0").with_request_deadline_ms(1_000))
+            .expect("server should start");
+
+    let mut stream = TcpStream::connect(server.local_addr()).expect("connect to server");
+    let started = Instant::now();
+
+    stream
+        .set_read_timeout(Some(Duration::from_secs(3)))
+        .expect("set client read timeout");
+
+    thread::sleep(Duration::from_millis(1_300));
+
+    let request = initialize_request(16);
+    let write_result = stream.write_all(request.as_bytes());
+
+    if write_result.is_ok() {
+        let _ = stream.shutdown(std::net::Shutdown::Write);
+    }
+
+    let mut response = String::new();
+    let read_result = stream.read_to_string(&mut response);
+    let elapsed = started.elapsed();
+
+    let read_kind = read_result.as_ref().err().map(|error| error.kind());
+
+    let server_closed = match &read_result {
+        Ok(_) => true,
+        Err(error)
+            if matches!(
+                error.kind(),
+                std::io::ErrorKind::ConnectionAborted
+                    | std::io::ErrorKind::ConnectionReset
+                    | std::io::ErrorKind::UnexpectedEof
+            ) =>
+        {
+            true
+        }
+        Err(error) if error.kind() == std::io::ErrorKind::TimedOut => {
+            panic!(
+                "server did not close the connection; client read timed out; \
+                 elapsed: {elapsed:?}, write_result: {write_result:?}, \
+                 read kind: {:?}",
+                error.kind()
+            );
+        }
+        Err(error) => {
+            panic!(
+                "unexpected error while reading late-request connection: {error}; \
+                 elapsed: {elapsed:?}, write_result: {write_result:?}, \
+                 read kind: {:?}",
+                error.kind()
+            );
+        }
+    };
+
+    assert!(
+        server_closed,
+        "server did not close the connection; elapsed: {elapsed:?}, \
+         write_result: {write_result:?}, read kind: {read_kind:?}"
+    );
+    assert!(
+        response.is_empty() || !response.contains(r#""protocolVersion""#),
+        "late request received a successful initialize response: {response}, \
+         elapsed: {elapsed:?}, write_result: {write_result:?}, \
+         read kind: {read_kind:?}"
+    );
+    assert!(
+        elapsed <= Duration::from_millis(1_600),
+        "connection remained open beyond deadline plus 600ms: {elapsed:?}, \
+         response: {response:?}, write_result: {write_result:?}, \
+         read kind: {read_kind:?}"
+    );
+
+    server.shutdown().expect("server should shut down");
+}
+
+#[test]
+fn rt_17_parallel_connections_have_independent_deadlines() {
+    let server =
+        RunningServer::start(ServerConfig::new("127.0.0.1:0").with_request_deadline_ms(1_000))
+            .expect("server should start");
+
+    let address = server.local_addr();
+
+    // Establish all three connections before starting any drip sender.
+    let mut clients = Vec::with_capacity(3);
+    let mut connect_times = Vec::with_capacity(3);
+
+    for _ in 0..3 {
+        let stream = TcpStream::connect(address).expect("connect slow-drip client");
+        connect_times.push(Instant::now());
+        stream
+            .set_read_timeout(Some(Duration::from_secs(5)))
+            .expect("set client read timeout");
+        clients.push(stream);
+    }
+
+    let connect_span = connect_times
+        .last()
+        .expect("three connection timestamps")
+        .duration_since(*connect_times.first().expect("first connection timestamp"));
+
+    assert!(
+        connect_span < Duration::from_millis(100),
+        "connections were not established close together: span {connect_span:?}"
+    );
+
+    let drip_delays = [
+        Duration::ZERO,
+        Duration::from_millis(400),
+        Duration::from_millis(800),
+    ];
+
+    let workers: Vec<_> = clients
+        .into_iter()
+        .zip(connect_times)
+        .zip(drip_delays)
+        .enumerate()
+        .map(|(index, ((mut stream, connected_at), drip_delay))| {
+            thread::spawn(move || {
+                let drip_stream = stream.try_clone().expect("clone client stream");
+                let (stop_tx, stop_rx) = std::sync::mpsc::channel();
+
+                let dripper = thread::spawn(move || {
+                    let mut drip_stream = drip_stream;
+                    thread::sleep(drip_delay);
+
+                    loop {
+                        if drip_stream.write_all(b"x").is_err() {
+                            break;
+                        }
+
+                        match stop_rx.recv_timeout(Duration::from_millis(150)) {
+                            Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {}
+                            Ok(()) | Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => {
+                                break;
+                            }
+                        }
+                    }
+                });
+
+                let mut response = Vec::new();
+                stream
+                    .read_to_end(&mut response)
+                    .expect("server should close slow-drip connection");
+
+                let elapsed = connected_at.elapsed();
+
+                let _ = stop_tx.send(());
+                dripper.join().expect("dripper thread should not panic");
+
+                (index + 1, elapsed, response)
+            })
+        })
+        .collect();
+
+    for worker in workers {
+        let (index, elapsed, response) = worker.join().expect("client worker should not panic");
+
+        assert!(
+            response.is_empty(),
+            "slow-drip connection {index} received response bytes: {response:?}, \
+             elapsed: {elapsed:?}"
+        );
+        assert!(
+            (Duration::from_millis(950)..=Duration::from_millis(1_600)).contains(&elapsed),
+            "slow-drip connection {index} did not close near its own connection deadline: \
+             elapsed {elapsed:?}"
+        );
+    }
+
+    server.shutdown().expect("server should shut down");
+}

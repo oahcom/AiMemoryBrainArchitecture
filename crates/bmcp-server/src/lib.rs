@@ -219,14 +219,41 @@ impl Drop for ActiveConnectionGuard {
 
 fn handle_connection(mut stream: TcpStream, request_deadline_ms: u64) {
     let timeout = Duration::from_millis(request_deadline_ms);
-    let _ = stream.set_read_timeout(Some(timeout));
-    let _ = stream.set_write_timeout(Some(timeout));
+    let deadline = match std::time::Instant::now().checked_add(timeout) {
+        Some(deadline) => deadline,
+        None => return,
+    };
 
     let mut body = Vec::new();
     let mut buffer = [0_u8; 4096];
 
     loop {
-        match stream.read(&mut buffer) {
+        let now = std::time::Instant::now();
+        let remaining = match deadline.checked_duration_since(now) {
+            Some(remaining) if !remaining.is_zero() => remaining,
+            _ => return,
+        };
+
+        if stream.set_read_timeout(Some(remaining)).is_err() {
+            return;
+        }
+
+        let read_result = stream.read(&mut buffer);
+
+        // A socket read timeout does not guarantee that read returns before
+        // the absolute deadline: the thread may be descheduled after data
+        // becomes available. Recheck here so a complete buffered request
+        // cannot be dispatched after the connection deadline.
+        //
+        // This is a real race, not defensive filler, but it has no stable
+        // black-box trigger: it needs the thread to be descheduled between
+        // set_read_timeout and read. Verified by mutation that no test covers
+        // it; documented rather than papered over with a flaky sleep test.
+        if std::time::Instant::now() >= deadline {
+            return;
+        }
+
+        match read_result {
             Ok(0) => break,
             Ok(count) => {
                 if body.len().saturating_add(count) > MAX_REQUEST_BYTES {
@@ -235,15 +262,11 @@ fn handle_connection(mut stream: TcpStream, request_deadline_ms: u64) {
 
                 body.extend_from_slice(&buffer[..count]);
 
-                // The transport accepts one JSON request per connection.
-                // A newline terminates the request; EOF also terminates it.
                 if body.contains(&b'\n') {
                     break;
                 }
             }
-            Err(error) if error.kind() == io::ErrorKind::Interrupted => {
-                continue;
-            }
+            Err(error) if error.kind() == io::ErrorKind::Interrupted => continue,
             Err(error)
                 if error.kind() == io::ErrorKind::WouldBlock
                     || error.kind() == io::ErrorKind::TimedOut =>
@@ -261,6 +284,17 @@ fn handle_connection(mut stream: TcpStream, request_deadline_ms: u64) {
     let outcome = handle_request_body_with_deadline(&body, request_deadline_ms);
 
     if let RequestOutcome::Responded { body } = outcome {
+        // Response writing shares the same absolute connection deadline;
+        // request processing time therefore reduces the available write time.
+        let remaining = match deadline.checked_duration_since(std::time::Instant::now()) {
+            Some(remaining) if !remaining.is_zero() => remaining,
+            _ => return,
+        };
+
+        if stream.set_write_timeout(Some(remaining)).is_err() {
+            return;
+        }
+
         let _ = stream.write_all(body.as_bytes());
         let _ = stream.write_all(b"\n");
         let _ = stream.flush();
