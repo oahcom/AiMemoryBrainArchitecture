@@ -21,12 +21,12 @@ repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
 base_commit_sha: 87f54bb44d9cd2872d7faf7c5c146dd85cae6fc1
 
-tracking_issue: "#348 (REQ-08); related reliability parent #349 (REQ-09)"
+tracking_issue: "#624 (AID-2026-045 follow-up); parent #348 (REQ-08) and #349 (REQ-09)"
 baseline_pr: 614
 baseline_pr_status: MERGED
 baseline_merge_commit_sha: c9f4a7fe021f53e101b3977fc12b6f7fc50ca29b
-registration_pr: 624
-registration_pr_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/624
+registration_pr: 625
+registration_pr_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/625
 registration_pr_status: MERGED
 registration_merge_commit_sha: 3015a68f9acec79c9e7ce02b43783e03939dfa79
 
@@ -37,10 +37,10 @@ prompt_id: AID-2026-045-PROMPT
 prompt_version: v1
 prompt_file: 14-ai-development/work-items/AID-2026-045/prompt-v1.md
 prompt_status: FROZEN
-prompt_sha256: 2701c73b90de8c875e4e7aae3a7194d0b1a0fcf2566e6aa891fe2909f326aeec
-prompt_bytes: 3446
-prompt_file_blob_sha: 40142832002ff13caf4476326510254bc7875c2e
-prompt_file_commit_sha: 72258a68f41994148ab340b873f21ab00d5610c4
+prompt_sha256: 5e986909d6973b27f55be3ba90d1bdae0fad950b7054f996c1e092e0f94c28bc
+prompt_bytes: 3924
+prompt_file_blob_sha: 1880f3884a7e5e1f9cace8246a8d403ad7cd5661
+prompt_file_commit_sha: db42187b259c1ecaace5d0e5d164f4ab4bc947b3
 
 prompt_provenance_tier: T1
 prompt_provenance_note: >-
@@ -53,6 +53,7 @@ dependency_refs:
   - crates/bmcp-server/src/lib.rs
   - crates/bmcp-server/tests/rt_scenarios.rs
   - PR #614 (merged baseline)
+  - Issue #624 (follow-up implementation carrier)
   - Issue #615 (absolute slow-drip deadline is separate)
 
 deliverables:
