@@ -4449,3 +4449,9 @@ pub use observability::{
     BudgetUtilization, DeliveryLifecycleReport, DimensionOmission, ExclusionCount,
     SufficiencyOutcomeKind,
 };
+pub mod sufficiency_report;
+
+pub use sufficiency_report::{
+    BlockedRefs, DimensionCoverage, OmissionReason, PartitionCompleteness, PartitionState,
+    SafeOmission, SafeOmissions, SufficiencyReport,
+};
