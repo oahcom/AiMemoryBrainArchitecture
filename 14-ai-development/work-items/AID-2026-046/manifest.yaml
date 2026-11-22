@@ -18,11 +18,14 @@ implementing_ai_session: NOT_ASSIGNED
 
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: 792565ac60795ece14f8575774a72563c69e8b1f
+base_commit_sha: 87f54bb44d9cd2872d7faf7c5c146dd85cae6fc1
 
 tracking_issue: "#348 (REQ-08 applied-delivery trust callback conformance)"
-registration_pr: 622
-registration_pr_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/622
+baseline_pr: 616
+baseline_pr_status: MERGED
+baseline_merge_commit_sha: fe5bad9eb8f6261f040bb2a10bfccc46ceb603b9
+registration_pr: 623
+registration_pr_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/623
 registration_pr_status: OPEN
 
 created_at: 2026-11-22
@@ -32,10 +35,10 @@ prompt_id: AID-2026-046-PROMPT
 prompt_version: v1
 prompt_file: 14-ai-development/work-items/AID-2026-046/prompt-v1.md
 prompt_status: FROZEN
-prompt_sha256: 8f905f0726257eb21e694439b49d98ed97a48690604fe718be4d086bda90fff3
-prompt_bytes: 3071
-prompt_file_blob_sha: 3e943eefbf75649d58dca4ee29f67b400143a577
-prompt_file_commit_sha: fb1fa93ffb9d0b27b8f2fff6db39d649421b0788
+prompt_sha256: 119a087185500d55db7bad6cbedca053192735604c528085c910f52dbf233295
+prompt_bytes: 3225
+prompt_file_blob_sha: 903d3fa141a4148de91915b297bff45c87637493
+prompt_file_commit_sha: 5b783d6f07ea35aee91a23d3c42e593b21c4b4d7
 
 prompt_provenance_tier: T1
 prompt_provenance_note: >-
@@ -47,7 +50,7 @@ prompt_provenance_note: >-
 dependency_refs:
   - 08-bmcp-protocol/tests/conformance/applied_delivery_evidence/test_applied_delivery_evidence.py
   - 08-bmcp-protocol/validators/applied_delivery_evidence_validator.py
-  - PR #616
+  - PR #616 (merged baseline)
   - Issue #348
 
 deliverables:
@@ -63,7 +66,7 @@ integration_reviewer: NOT_ASSIGNED
 
 review:
   status: SESSION_SEPARATION_RECORDED_PROMPT_UNVERIFIED
-  report_ref: "PR #616 comments 7075204689 and 7075206732; reviewer session is separate, paired author prompt not exposed"
+  report_ref: "PR #616 post-merge review comment 7075204689; reviewer session is separate, paired author prompt not exposed"
 
 acceptance:
   status: NOT_ASSIGNED
@@ -71,16 +74,16 @@ acceptance:
   acceptance_authority: USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)
 
 implementation:
-  status: PR_OPEN
-  branch: test/bmcp-tri-state-negative-coverage
-  pull_request: 616
-  pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/616
-  implementation_commit_sha: f9e88cd7329e42ab616ba6837a7348411a5c929e
+  status: NOT_STARTED
+  branch: NOT_ASSIGNED
+  pull_request: NOT_CREATED
+  pull_request_url: NOT_CREATED
+  implementation_commit_sha: NOT_STARTED
   merge_commit_sha: NOT_MERGED
 
 authorization:
   registration_write: USER-PRINCIPAL-DELEGATED (limited to this AID registration package)
-  implementation_write: USER-PRINCIPAL-DELEGATED (limited to the key-status negative test and verification on PR #616)
+  implementation_write: USER-PRINCIPAL-DELEGATED (limited to a new follow-up PR after baseline PR #616 merge)
   index_update: USER-PRINCIPAL-DELEGATED (limited to the single AID-2026-046 row)
   validator_implementation: NOT_AUTHORIZED
   production_authorization: NOT_GRANTED
@@ -89,7 +92,7 @@ governance:
   aid_assignment: REGISTERED
   aid_status: PR_OPEN
   registration_authorization: USER-PRINCIPAL-DELEGATED (limited to this work item)
-  development_start_authorization: USER-PRINCIPAL-DELEGATED (limited to the bounded PR #616 follow-up)
+  development_start_authorization: USER-PRINCIPAL-DELEGATED (limited to the bounded AID-2026-046 follow-up)
   architecture_status: NOT_APPLICABLE
   g8_status: NOT_APPLICABLE
   quota_change: NONE
@@ -97,10 +100,10 @@ governance:
 verification:
   status: NOT_RUN
   prior_evidence: >-
-    PR #616 reported 38 tests passing on original head
-    eac8c4655539c46f8d3ac9650a38fa7512c562b4, but the current head
-    f9e88cd7329e42ab616ba6837a7348411a5c929e is a rebase and has not been
-    rerun. The original report did not include Python version or OS/architecture.
+    PR #616 merged at fe5bad9eb8f6261f040bb2a10bfccc46ceb603b9 with the five added
+    callback rejection tests. The merged suite still lacks verify_key_status=False;
+    test_08 covers only None -> UNKNOWN. No exact-head Python environment or
+    raw exit code was recorded.
   environment: >-
     Python-only suite; Rust/Cargo availability is not a dependency. GitHub-hosted
     Actions remain billing-blocked. Exact-head local execution is required.
