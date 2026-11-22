@@ -36,7 +36,7 @@
   L2 现在镜像 L1 的白名单（`push`、`workflow_dispatch`、`schedule`），两者靠构造保持一致，而不是靠
   两张手工维护的表。已验证：自托管 Job 挂 `issues`、`merge_group`、`release`、`discussion` 现在都会
   被拒，报 `trigger '<x>' is not permitted for self-hosted jobs (L1 admits only push, schedule,
-  workflow_dispatch)`；而仓库里真实的工作流审计仍然是 6 个 Job / 0 违规。
+  workflow_dispatch)`；而仓库里真实的工作流审计仍然是 7 个 Job / 0 违规。
 
 因此 `gates.yml` 只在 `push` 到 `main` 与 `workflow_dispatch` 时触发，别无其他。
 **它无法对 pull request 设卡。** 它把"门禁在 `main` 上红着而无人知道"变成"门禁在 `main` 上红着，
@@ -72,7 +72,7 @@
   checkout 清的是工作区，不是家目录。本文早期草稿曾声称 `target/` 是 runner 的构建缓存、永不清洗。
   那是错的，这里记录这次更正，而不是把它悄悄改掉。
 * **刻意不用 `--offline`。** 冷 runner 的 registry 缓存是空的，`--offline` 会把"缺 crate"
-  变成一条令人困惑的失败。代价是 `rust` Job 需要 runner 为其他 Rust 工作本就具备的 crates.io 出口。
+  变成一条令人困惑的失败。代价是 `clippy` Job 需要 runner 为其他 Rust 工作本就具备的 crates.io 出口。
 
 ## 2. Job 清单
 
@@ -80,9 +80,9 @@
 |---|---|---|---|
 | `protocol-index` | BMCP 消息索引 vs schema `message_type` 约束 | `python3 08-bmcp-protocol/scripts/check_protocol_index.py` | 硬门禁 |
 | `conformance` | BMCP 一致性测试套件 | `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance` | 硬门禁 |
-| `schema-nonempty` | schema 非空约束审计 | `python3 08-bmcp-protocol/schemas/test_nonempty_audit.py` | 棘轮 |
+| `schema-nonempty` | schema 非空约束审计 | `python3 08-bmcp-protocol/schemas/test_nonempty_audit.py` | 硬门禁 |
 | `bilingual` | GOV-DOC-001 双语文档全量扫描 | `python3 scripts/check_bilingual_docs_full.py` | 棘轮 |
-| `rust` | 格式、lint、测试 | `cargo fmt --all --check`、`cargo clippy --workspace --all-targets -- -D warnings`、`cargo test --workspace` | 硬门禁 |
+| `clippy` | Rust lint | `cargo clippy --workspace --all-targets -- -D warnings` | 硬门禁 |
 
 ### 2.1 为什么 `conformance` 是硬门禁
 
@@ -98,13 +98,52 @@
 
 因为该套件是通过的，所以它是硬门禁。若它是红的，它就会是棘轮。
 
+### 2.2 为什么 `schema-nonempty` 现在是硬门禁，之前是棘轮
+
+`gates.yml` 的早期版本把这个审计包在 `gate_ratchet.py` 里，配一份 5506 行的基线，因为当时 GAP-09
+是开着的：schema 里存在 5506 条约束，而双语审计清单没有登记它们。
+
+GAP-09 已在 `main` 上由 `6897e53c`（"audit the 30 unregistered schemas, closing GAP-09 gate"）
+关闭：该提交把 `08-bmcp-protocol/schema-nonempty-audit.md` 从 135 行扩到 5582 行，登记了 32 个
+schema 里的全部 5599 条约束。现在该审计在 `main` 上退出 0。
+
+**绿了的门禁必须是硬门禁。** 继续保留棘轮，等于把基线文件变成一份长期豁免：Job 会报绿，而真正的
+要求——永远不允许出现未登记的约束——根本没有被执行。因此包装器、基线文件和 Job 名里的 `(ratchet)`
+三者一起删掉，Job 直接运行审计。
+
+这是规则，不是特例：**门禁在变绿的那一天、由让它变绿的那同一个改动，从棘轮升为硬门禁。**
+比它的红活得更久的棘轮，就是一份带排期的豁免。
+
+### 2.3 为什么 `clippy` 不跑格式和测试
+
+`main` 上的 `rust-self-hosted.yml` 已经在跑
+`cargo test --workspace --all-targets --no-fail-fast` 与
+`python3 scripts/check_fmt.py --expect "$(git rev-parse HEAD)"`。在这里重复其中任何一项，都比
+什么都不做更糟：
+
+* **两边的测试数会对不上，而且看起来绿的那个是错的。**
+  `cargo test --workspace` 不跑 doctest，`--all-targets` 会跑。在同一棵树上实测：`--all-targets`
+  → `passed=546 failed=0 ignored=1`，纯 `--workspace` → `passed=551 failed=0 ignored=1`。
+  差的 5 个就是 doctest。GAP-10 §7.1 记录过同一个陷阱，当时是 371 vs 385。两个工作流对同一个提交
+  报出不同的总数，等于两个数字都不可信，而**少跑却报成功**的那个恰恰是错的那个。
+* **两个工作流在唯一一台 runner 上编译同一个 workspace，磁盘翻倍。**
+  而这台主机的可用空间在**不构建**的运行之间都在缩（见 §5）。花两倍代价去换一个和另一个 Job
+  互相矛盾的数字，是严格亏本的交易。
+
+保留 `cargo clippy --workspace --all-targets -- -D warnings`，因为它是真正无人覆盖的：
+`rust-phase1.yml` 里有 clippy，但它是 `runs-on: ubuntu-latest`，在本账户下根本分配不到 runner，
+因此从未执行过。clippy 就是这个 Job 的独立价值。
+
+后果已写进工作流本身：rustfmt 与测试套件**不**由 `gates.yml` 设卡，它们由 `rust-self-hosted.yml`
+设卡。若那个工作流被删除，`clippy` Job 必须把它们加回来——并且要带 `--all-targets`。
+
 ## 3. 棘轮是什么，不是什么
 
-`schema-nonempty` 与 `bilingual` 目前在 `main` 上是红的。GAP-09 与 GAP-08 记录了它们
-如何变成这样：没有任何东西运行它们，因此没有任何东西发现它们。
+`bilingual` 目前在 `main` 上是红的。GAP-08 记录了它如何变成这样：没有任何东西运行它，
+因此没有任何东西发现它。
 
-立刻把它们变成硬门禁，会让每个 pull request 因作者并未造成的原因变红。这不会产生合规，
-只会产生一个人人都学会忽略的检查——而这正是当初让这些门禁红着进入 `main` 的失效模式。
+立刻把它变成硬门禁，会让每个 pull request 因作者并未造成的原因变红。这不会产生合规，
+只会产生一个人人都学会忽略的检查——而这正是当初让该门禁红着进入 `main` 的失效模式。
 
 棘轮改为钉住**当前失败项的确切集合**，并在该集合朝任一方向变化时失败：
 
@@ -117,21 +156,20 @@
 **棘轮不是绿色豁免。** 它不是说门禁"允许是红的"，而是说"必须不比基线更差，并且必须
 对此保持诚实"。
 
+现在只剩一个棘轮。这不是应该追求的状态：每一个棘轮都是一笔记了名字的债，目标是把数量降到零。
+`schema-nonempty` 已经走完了这段路（§2.2）。
+
 ## 4. 基线
 
 基线是 `scripts/ci/baselines/` 下的文件，每行一个失败项，`#` 开始注释。
 
 | 文件 | 项数 | 含义 |
 |---|---|---|
-| `scripts/ci/baselines/schema-nonempty.txt` | 5506 | 未登记在双语审计清单中的 schema 约束 |
 | `scripts/ci/baselines/bilingual-docs.txt` | 81 | 缺少 `en` / `zh-CN` 对应件的规范路径 |
 
 仅在失败集合确实发生变化时重新生成基线：
 
 ```bash
-python3 08-bmcp-protocol/schemas/test_nonempty_audit.py \
-  | sort -u > scripts/ci/baselines/schema-nonempty.txt
-
 python3 scripts/check_bilingual_docs_full.py \
   | grep -E '^[0-9]{3}\. ' | sed -E 's/^[0-9]{3}\. //' | sed -E 's/ -> .*$//' \
   | sort -u > scripts/ci/baselines/bilingual-docs.txt
@@ -151,32 +189,31 @@ python3 scripts/ci/gate_ratchet.py \
 
 ## 5. 已知的锋利边缘
 
-* **没有 `rust-toolchain.toml`，也没有 `rustfmt.toml`。** `rust` Job 使用 runner 上已安装的
-  `cargo` / `rustfmt`，并打印它实际找到的版本，因此某个改变格式化的 rustfmt 版本可能在没有代码
-  改动的情况下让 `cargo fmt --all --check` 变红。这一点被记录而不是被隐藏：`main` 上的格式漂移
-  本身就是 GAP-10 中反复出现的回归，所以该 Job 是硬门禁。在仓库内固定工具链可以消除这个锋利
-  边缘，是显而易见的下一步。
-* **`cargo clippy` 与 `cargo test` 需要 C 工具链**（用于 `libsqlite3-sys`）。它们在 runner 上
-  可以构建；没有 `cc1` 的本地 Windows 主机无法运行。其失效形态是一条 `cc1` 错误而非代码缺陷，
-  Job 会原样报出而不是掩盖它。
+* **没有 `rust-toolchain.toml`，也没有 `rustfmt.toml`。** `clippy` Job 使用 runner 上已安装的
+  `cargo` / `cargo-clippy`，并打印它实际找到的版本。lint 是移动靶：某个 clippy 版本新增一条 lint
+  就可能在没有代码改动的情况下让该 Job 变红。这一点被记录而不是被隐藏。格式不在此处设卡
+  （见 §2.3），它由 `rust-self-hosted.yml` 的 `scripts/check_fmt.py` 设卡，后者会钉住它期望被
+  格式化的那个提交 SHA。在仓库内固定工具链可以同时消除两者的锋利边缘，是显而易见的下一步。
+* **`cargo clippy` 需要 C 工具链**（用于 `libsqlite3-sys`）。它在 runner 上可以构建；没有 `cc1`
+  的本地 Windows 主机无法运行。其失效形态是一条 `cc1` 错误而非代码缺陷，Job 会原样报出而不是掩盖它。
 * **磁盘是真实约束，而它的下限是实测出来的，不是猜的。** 在 `run 44992270090` 实测：39G 总量，
   已用 32G，**只剩 5.6G**，内存 3.6G，4 核。runner 运维在一台可比主机上实测：`cargo test
   --workspace --all-targets` 在 45 个 crate 上产出 **1009 MB** 的 `target/`，`~/.cargo/registry`
-  在 290 个 crate 上是 **319 MB**。`clippy --workspace --all-targets` 加 `test --workspace` 共用
-  同一个 `CARGO_TARGET_DIR`，**估算**（非实测）为 1.7–2.0 GB，因为 `clippy-driver` 会为每个依赖在
-  `rustc` 那份之外再产出一份 artifact。所以单个 Job 含 registry 约 **2.0–2.5 GB**，装得进 5.6G。
+  在 290 个 crate 上是 **319 MB**。只跑 clippy 是同一批编译换一个 driver、且不链接测试二进制，
+  含 registry 约 **1.0–1.3 GB**。
 
-  因此 `rust` Job 带一道**磁盘预检**，在低于 `GATES_MIN_FREE_GB`（默认 **4**）时拒绝，低于 8 时警告。
-  早期草稿在低于 6G 时就拒绝，那会让一个**本来会成功**的 Job 变红——一个因为不成立的理由而红的门禁。
-  这个阈值是下限而不是目标：只能调高，绝不能为了跑绿而调低。
+  因此 `clippy` Job 带一道**磁盘预检**，在低于 `GATES_MIN_FREE_GB`（默认 **3**）时拒绝，低于 6 时
+  警告。该下限曾是 4，因为那时 Job 还跑 `cargo test` 并与 clippy 共用同一个 `CARGO_TARGET_DIR`
+  （估算 1.7–2.0 GB）；测试步骤删掉后下限也随之下降——一个与 Job 不再匹配的下限是一个说谎的数字。
+  为了跑绿而调低下限是禁止的；因为 Job 确实变小而调低，只是把账记对。
 
   **看趋势，不要只看数值。** 两次什么都不编译的诊断运行分别报告约 6.8G 和约 5.6G 可用：在没有任何
   构建的情况下累积了约 1.2 GB。在单 runner 上，最终一次性打死所有工作流的是这个漂移，而不是绝对值。
 
 * **构建 profile 与并行度针对同一台主机钉死。** Job 级 `CARGO_PROFILE_DEV_DEBUG=0` /
   `CARGO_PROFILE_TEST_DEBUG=0` 去掉 debuginfo，那是那 1009 MB 里的大头，顺带降低链接内存。
-  `CARGO_BUILD_JOBS=2`，因为主机 4 核但只有 3.6G 内存：默认 `-j 4` 在 45 个 crate 加一个 C 编译再加
-  链接测试二进制，是现实的 OOM 候选，而构建中途 OOM 比慢一点的构建是更糟的失败。
+  `CARGO_BUILD_JOBS=2`，因为主机 4 核但只有 3.6G 内存：默认 `-j 4` 在 45 个 crate 加一个 C 编译，
+  是现实的 OOM 候选，而构建中途 OOM 比慢一点的构建是更糟的失败。
 
 * **`Cargo.lock` 在本仓库未被跟踪**（`git ls-files` 无匹配，`.gitignore` 里也没写——既有缺陷）。
   因此每次运行都重新解析依赖：registry index 重拉、版本漂移就重下，约 290 个 crate。提交
@@ -190,21 +227,41 @@ python3 scripts/ci/gate_ratchet.py \
 
 ## 6. 证据
 
-在 `6de4e38c`（本项工作所基于的提交）上记录：
+在 `6de4e38c`（本项工作起步时的提交）上记录：
 
-| 门禁 | 结果 |
+| 门禁 | `6de4e38c` 上的结果 |
 |---|---|
 | `check_protocol_index.py` | 退出 0 —— `missing=0 extra=0 duplicate_types=0 invalid_rows=0`，`PASS` |
 | 两组依赖齐备的 conformance | 退出 0 —— `Ran 585 tests`，`OK (skipped=27)` |
-| `test_nonempty_audit.py` | 退出 1 —— 5506 个未登记约束（GAP-09） |
+| `test_nonempty_audit.py` | 退出 1 —— 5506 个未登记约束（GAP-09，现已关闭） |
 | `check_bilingual_docs_full.py` | 退出 1 —— 81 个未覆盖路径（GAP-08） |
 | `cargo fmt --all --check` | 退出 0 |
 | `cargo clippy --workspace --all-targets -- -D warnings` | 退出 0 |
 | `cargo test --workspace` | 退出 0 |
 | 两个基线上的 `gate_ratchet.py` | 退出 0 —— `regressions=0 fixed=0` |
 
-这是对工作流所运行命令的本地执行，且在与工作流相同的提交上。它是关于门禁的证据，不是关于工作流
-执行的证据。§7 记录工作流自身做了什么。
+那张表是历史：它是接线工作开始时的门禁状态，也是 `schema-nonempty` 最初被做成棘轮的原因。
+它不是工作流现在的样子。
+
+### 6.1 在 rebase 后的树上重新实测
+
+本分支打开期间 `main` 前进过（`6897e53c` 关闭了 GAP-09；`#627` 加入了 `rust-self-hosted.yml`；
+`7d816980` 给 `rust-phase1.yml` 加了 fmt+clippy）。§2.2 与 §2.3 的两个阻塞项都来自这次前进。
+rebase 后重新实测：
+
+| 命令 | 结果 |
+|---|---|
+| `python3 08-bmcp-protocol/schemas/test_nonempty_audit.py` | 退出 0 —— `OK: 32 schemas; 5599 registered constraints; no unregistered or stale entries.` |
+| `gate_ratchet.py --baseline .../bilingual-docs.txt` | 退出 0 —— `baseline=81 current=81 regressions=0 fixed=0`，`PASS` |
+| `audit_runner_admission.py` | 退出 0 —— `7 self-hosted job(s) audited, 0 violation(s)` |
+| `cargo test --workspace --all-targets`（在 `main` 上） | `passed=546 failed=0 ignored=1` |
+| `cargo test --workspace`（在 `main` 上） | `passed=551 failed=0 ignored=1` |
+
+最后两行就是 §2.3 的全部论据：同一提交、同一 workspace、五个不同的测试，而两条命令里只有一条是
+`main` 真正在跑的那条。
+
+这是对工作流所运行命令的本地执行。它是关于门禁的证据，不是关于工作流执行的证据。
+§7 记录工作流自身做了什么。
 
 ## 7. 实际观测到什么
 
@@ -245,8 +302,9 @@ runner admission guard: DENY reason=ref_not_default_branch
 
 ### 7.3 L2 确实会拒绝一个「PR 设卡版」所需的形态
 
-`scripts/ci/audit_runner_admission.py` 对 `gates.yml`：**审计 6 个自托管 Job，0 违规，退出 0**
-（这里 5 个加上既有的 diagnostics）。对一个故意写错的探针工作流，它报出的正是预期的两条违规，退出 1：
+`scripts/ci/audit_runner_admission.py` 对 `gates.yml`：**审计 7 个自托管 Job，0 违规，退出 0**
+（这里 5 个加上 `rust-self-hosted.yml` 和既有的 diagnostics）。对一个故意写错的探针工作流，
+它报出的正是预期的两条违规，退出 1：
 
 ```
 ::error::.github/workflows/zz-probe.yml:probe: untrusted trigger 'pull_request' is not permitted for self-hosted jobs
@@ -264,32 +322,40 @@ node 22）上以 `bash --noprofile --norc -e -o pipefail` 执行，并按 runner
 | `protocol-index` | 协议索引 | 退出 0，`missing=0 extra=0 duplicate_types=0 invalid_rows=0`，`PASS` |
 | `conformance` | venv 依赖安装（真实脚本） | 退出 0，`using venv at /tmp/rt/gates-venv`，venv 满足 `jsonschema`/`rfc8785`/`cryptography` |
 | `conformance` | 通过该 venv 跑完整套件 | 退出 0，`Ran 585 tests`，`OK (skipped=27)` |
-| `schema-nonempty` | 棘轮 | 退出 0，`baseline=5506 current=5506 regressions=0 fixed=0` |
+| `schema-nonempty` | 硬门禁审计 | 退出 0，`OK: 32 schemas; 5599 registered constraints` |
 | `bilingual` | 棘轮 | 退出 0，`baseline=81 current=81 regressions=0 fixed=0` |
-| `rust` | 磁盘预检 | 在 721G 可用的主机上退出 0（拒绝路径见 §7.5） |
-| `rust` | 工具链存在性 | 退出 0，`cargo 1.95.0`、`rustc 1.95.0`、`rustfmt 1.9.0-stable`、`clippy 0.1.95` |
-| `rust` | `cargo fmt --all --check` | 退出 0 |
-| `rust` | `cargo clippy --workspace --all-targets -- -D warnings` | 退出 0 |
-| `rust` | `cargo test --workspace` | 退出 0，`passed=508 failed=0 ignored=1` |
+| `clippy` | 磁盘预检 | 在 721G 可用的主机上退出 0（拒绝路径见 §7.5） |
+| `clippy` | 工具链存在性 | 退出 0，`cargo 1.95.0`、`rustc 1.95.0`、`clippy 0.1.95` |
+| `clippy` | `cargo clippy --workspace --all-targets -- -D warnings` | 退出 0 |
 
 其中两项值得单独点出，因为它们是唯一可能被伪造的部分。venv 脚本是按原文执行的，并在一个系统 python
 受 PEP-668 外部管理的主机上产出了具备三个固定导入的可用解释器——也就是「直接 `pip install` 会失败」
 的那个场景。而 conformance 套件是**通过那个 venv** 跑的，不是通过碰巧已安装的东西跑的，所以 585 这个
 结果是该 Job 会得到的结果。
 
+`clippy` 这几行来自更早那个更大的 Job（fmt + clippy + test）。fmt 与 test 步骤随后被删除（§2.3），
+所以只有磁盘预检、工具链探测和 clippy 这三行仍然描述着实际存在的步骤。clippy 步骤的实测结果没有变化
+——同一棵树上的同一条命令。
+
 ### 7.5 磁盘预检会拒绝，这是故意的，而且阈值是实测出来的
 
-预检对三种模拟文件系统做过实测：
+预检对模拟文件系统做过实测。当前下限 3G，警告线 6G：
 
-| 可用空间 | 结果 |
+| 可用空间 | 下限 3、警告 6（当前） |
 |---|---|
-| 5.6G（runner 的实测值） | 静默通过——这个 Job 装得下（见 §5） |
-| 5G | `::error::only 5G free (… KiB), below the 4G floor…`，退出 1 |
-| 8G | `::warning::…`，退出 0 |
+| 2G | 退出 1 —— `::error::only 2G free (2597152 KiB), below the 3G floor.` |
+| 3G | 退出 0 —— `::warning::only 3G free; shrinking between runs that build nothing.` |
+| 5.6G（runner 的实测值） | 退出 0 —— 会告警，因为 `df` 的 KiB 被截断为整 GiB，5.6 报成 5 |
+| 6G | 退出 0 —— 静默 |
+| 9G | 退出 0 —— 静默 |
 
 本表早期版本显示 5.6G 会被拒绝，因为当时下限是 6G。那个下限是错的：实测该 Job 的成本是
-2.0–2.5 GB，所以 5.6G 够用，拒绝它只会造出一个理由不成立的红门禁。下限现在是 4G。这次更正是被
-记录下来的，不是悄悄改掉的。
+2.0–2.5 GB，所以 5.6G 够用，拒绝它只会造出一个理由不成立的红门禁。下限随后降到 4G，又在删掉测试
+步骤、Job 变小之后降到 3G。两次更正都被记录下来了，不是悄悄改掉的。
+
+`5.6G` 那行的告警是截断造成的假象，不是真实信号：`df -Pk` 报的是 KiB，脚本除成整 GiB，5.6 向下取整
+成 5，低于 6G 的警告线。两种情况都是退出 0。保留这种截断而不向上取整是刻意的——一个朝宽松方向取整的
+下限比较，就是下限不再是下限的开始。
 
 ### 7.6 仍然未被观测到的
 

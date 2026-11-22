@@ -12,11 +12,16 @@ absorbing fixed items and drifting into a permanent blanket exemption.
 
 Usage:
     python3 scripts/ci/gate_ratchet.py \
-        --baseline scripts/ci/baselines/schema-nonempty.txt \
-        --format schema \
-        --command "python3 08-bmcp-protocol/schemas/test_nonempty_audit.py"
+        --baseline scripts/ci/baselines/bilingual-docs.txt \
+        --format paths \
+        --command "python3 scripts/check_bilingual_docs_full.py"
 
 Exit codes: 0 ratchet holds, 1 regression or stale baseline, 2 usage/IO error.
+
+ponytail: `--format schema` is now uncalled -- the only gate that used it
+(`schema-nonempty`) went green and became a hard gate, and its baseline was
+deleted. The branch costs three lines; delete it, and the `--format` flag with
+it, whenever this file is next touched for another reason.
 """
 from __future__ import annotations
 

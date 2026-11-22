@@ -47,7 +47,7 @@ Two controls, both already in force, force the trigger set:
   `issues`, `merge_group`, `release` and `discussion` is now rejected with
   `trigger '<x>' is not permitted for self-hosted jobs (L1 admits only push,
   schedule, workflow_dispatch)`, while the repository's real workflows still audit
-  clean at 6 jobs / 0 violations.
+  clean at 7 jobs / 0 violations.
 
 So `gates.yml` triggers on `push` to `main` and `workflow_dispatch`, and on
 nothing else. **It cannot gate a pull request.** It converts "a gate is red on
@@ -97,7 +97,7 @@ The jobs are written against that reality rather than assuming a fresh VM:
   is recorded here rather than quietly edited away.
 * **`--offline` is deliberately not used.** A cold runner has an empty registry
   cache, and `--offline` would turn a missing crate into a confusing failure. The
-  tradeoff is that the `rust` job needs the crates.io egress the runner already
+  tradeoff is that the `clippy` job needs the crates.io egress the runner already
   has for its other Rust work.
 
 ## 2. Jobs
@@ -106,9 +106,9 @@ The jobs are written against that reality rather than assuming a fresh VM:
 |---|---|---|---|
 | `protocol-index` | BMCP message index vs schema `message_type` constraints | `python3 08-bmcp-protocol/scripts/check_protocol_index.py` | hard gate |
 | `conformance` | BMCP conformance suite | `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance` | hard gate |
-| `schema-nonempty` | schema non-empty constraint audit | `python3 08-bmcp-protocol/schemas/test_nonempty_audit.py` | ratchet |
+| `schema-nonempty` | schema non-empty constraint audit | `python3 08-bmcp-protocol/schemas/test_nonempty_audit.py` | hard gate |
 | `bilingual` | GOV-DOC-001 full bilingual coverage scan | `python3 scripts/check_bilingual_docs_full.py` | ratchet |
-| `rust` | formatting, lints, tests | `cargo fmt --all --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` | hard gate |
+| `clippy` | Rust lints | `cargo clippy --workspace --all-targets -- -D warnings` | hard gate |
 
 ### 2.1 Why `conformance` is a hard gate
 
@@ -126,14 +126,64 @@ gate, which is why the install step is part of the job rather than a note.
 Because the suite is green, it is a hard gate. Had it been red, it would have
 been a ratchet.
 
+### 2.2 Why `schema-nonempty` is a hard gate now, and was a ratchet before
+
+An earlier revision of `gates.yml` wrapped this audit in `gate_ratchet.py` with a
+5506-line baseline, because GAP-09 was open: 5506 constraints existed in the
+schemas that the bilingual audit inventory did not register.
+
+GAP-09 was closed on `main` by `6897e53c` ("audit the 30 unregistered schemas,
+closing GAP-09 gate"), which expanded
+`08-bmcp-protocol/schema-nonempty-audit.md` from 135 lines to 5582 and registered
+all 5599 constraints across the 32 schemas. The audit now exits 0 on `main`.
+
+A green gate must be a hard gate. Keeping the ratchet would have made the
+baseline file a standing exemption: the job would report green while the actual
+requirement — no unregistered constraint, ever — went unenforced. So the wrapper,
+the baseline file and the `(ratchet)` in the job name were all removed together,
+and the job runs the audit directly.
+
+This is the rule, not a special case: **a gate moves from ratchet to hard gate the
+day it goes green, in the same change that makes it green.** A ratchet that
+outlives its red is an exemption with a schedule attached.
+
+### 2.3 Why `clippy` does not run fmt or tests
+
+`rust-self-hosted.yml` on `main` already runs
+`cargo test --workspace --all-targets --no-fail-fast` and
+`python3 scripts/check_fmt.py --expect "$(git rev-parse HEAD)"`. Duplicating
+either here is worse than doing nothing:
+
+* **The test counts disagree, and the wrong one looks green.**
+  `cargo test --workspace` does not run doctests; `--all-targets` does. Measured
+  on the same tree: `--all-targets` → `passed=546 failed=0 ignored=1`, plain
+  `--workspace` → `passed=551 failed=0 ignored=1`. The 5-test gap is doctests.
+  GAP-10 §7.1 records this exact trap at 371 vs 385. Two workflows reporting
+  different totals for the same commit make neither number trustworthy, and the
+  version that silently runs less is the one that reports success.
+* **Two workflows compiling one workspace on one runner doubles the disk churn**
+  on a host whose free space has been shrinking between runs that build nothing
+  (§5). Paying that twice to obtain a number that contradicts the other job's
+  number is a strictly bad trade.
+
+`cargo clippy --workspace --all-targets -- -D warnings` is kept because it is
+genuinely uncovered: `rust-phase1.yml` has clippy, but it is
+`runs-on: ubuntu-latest`, which on this account is allocated no runner at all, so
+it has never executed. Clippy is the independent value of this job.
+
+The consequence is stated in the workflow itself: rustfmt and the test suite are
+**not** gated by `gates.yml`. They are gated by `rust-self-hosted.yml`. If that
+workflow is ever deleted, the `clippy` job must grow them back — with
+`--all-targets`.
+
 ## 3. What a ratchet is, and what it is not
 
-`schema-nonempty` and `bilingual` are red on `main` today. GAP-09 and GAP-08
-record how they got there: nothing ran them, so nothing noticed.
+`bilingual` is red on `main` today. GAP-08 records how it got there: nothing ran
+it, so nothing noticed.
 
-Turning them into hard gates immediately would paint every pull request red for
+Turning it into a hard gate immediately would paint every pull request red for
 reasons no author caused. That does not produce compliance; it produces a check
-everybody learns to ignore, which is the failure mode that let the gates reach
+everybody learns to ignore, which is the failure mode that let the gate reach
 `main` red in the first place.
 
 A ratchet instead pins the *exact set* of currently-failing items and fails when
@@ -149,6 +199,10 @@ fixing an item forces the author to lower the baseline in the same pull request.
 **A ratchet is not a green exemption.** The gate is not "allowed to be red"; it
 is "required to be no worse, and required to stay honest about it".
 
+There is exactly one ratchet left. That is not a stable state to aim for: every
+ratchet is a debt with a name attached, and the goal is for the count to reach
+zero. `schema-nonempty` already made that trip (§2.2).
+
 ## 4. Baselines
 
 Baselines are files under `scripts/ci/baselines/`, one failing item per line,
@@ -156,15 +210,11 @@ Baselines are files under `scripts/ci/baselines/`, one failing item per line,
 
 | File | Items | Meaning |
 |---|---|---|
-| `scripts/ci/baselines/schema-nonempty.txt` | 5506 | schema constraints absent from the bilingual audit inventory |
 | `scripts/ci/baselines/bilingual-docs.txt` | 81 | normative paths with no `en` / `zh-CN` counterpart |
 
 Regenerate a baseline only when the failure set legitimately changed:
 
 ```bash
-python3 08-bmcp-protocol/schemas/test_nonempty_audit.py \
-  | sort -u > scripts/ci/baselines/schema-nonempty.txt
-
 python3 scripts/check_bilingual_docs_full.py \
   | grep -E '^[0-9]{3}\. ' | sed -E 's/^[0-9]{3}\. //' | sed -E 's/ -> .*$//' \
   | sort -u > scripts/ci/baselines/bilingual-docs.txt
@@ -185,32 +235,33 @@ regression or a stale baseline; the offending items are printed as
 
 ## 5. Known sharp edges
 
-* **No `rust-toolchain.toml` and no `rustfmt.toml`.** The `rust` job uses whatever
-  `cargo` / `rustfmt` the runner has installed and reports the versions it found,
-  so a rustfmt release that changes formatting can turn `cargo fmt --all --check`
-  red without any code change. This is recorded rather than hidden: formatting
-  drift on `main` is itself a recurring regression in GAP-10, so the job is a
-  hard gate. Pinning the toolchain in-repo would remove the sharp edge and is the
-  obvious next step.
-* **`cargo clippy` and `cargo test` need a C toolchain** for `libsqlite3-sys`.
-  They build on the runner; a local Windows host without `cc1` cannot run them.
-  The failure mode is a `cc1` error, not a code defect, and the job reports it
-  verbatim rather than masking it.
+* **No `rust-toolchain.toml` and no `rustfmt.toml`.** The `clippy` job uses
+  whatever `cargo` / `cargo-clippy` the runner has installed and reports the
+  versions it found. Lints are a moving target: a clippy release that adds a lint
+  can turn the job red without any code change. This is recorded rather than
+  hidden. Formatting is not gated here (see §2.3); it is gated by
+  `rust-self-hosted.yml`'s `scripts/check_fmt.py`, which pins the commit SHA it
+  expects to be formatted. Pinning the toolchain in-repo would remove the sharp
+  edge for both and is the obvious next step.
+* **`cargo clippy` needs a C toolchain** for `libsqlite3-sys`. It builds on the
+  runner; a local Windows host without `cc1` cannot run it. The failure mode is a
+  `cc1` error, not a code defect, and the job reports it verbatim rather than
+  masking it.
 * **Disk is a real constraint, and its floor is measured, not guessed.** Measured
   at `run 44992270090`: 39G total, 32G used, **5.6G free**, 3.6G RAM, 4 CPUs. The
   runner operator measured a comparable host: `cargo test --workspace
   --all-targets` produces a **1009 MB** `target/` over 45 crates, and
-  `~/.cargo/registry` is **319 MB** for 290 crates. `clippy --workspace
-  --all-targets` plus `test --workspace` share one `CARGO_TARGET_DIR` and are
-  **estimated** (not measured) at 1.7–2.0 GB, because `clippy-driver` emits its
-  own artifact per dependency alongside `rustc`'s. So a job costs roughly
-  **2.0–2.5 GB** including the registry, which fits in 5.6G.
+  `~/.cargo/registry` is **319 MB** for 290 crates. Clippy-only is the same
+  compilation with a different driver and no test binaries linked, so roughly
+  **1.0–1.3 GB** including the registry.
 
-  The `rust` job therefore has a **disk preflight** that refuses below
-  `GATES_MIN_FREE_GB` (default **4**) and warns below 8. An earlier draft refused
-  below 6G, which would have failed a job that would in fact have succeeded — a
-  gate that is red for a reason that is not true. The threshold is a floor, not a
-  target: raise it, never lower it to make a run go green.
+  The `clippy` job therefore has a **disk preflight** that refuses below
+  `GATES_MIN_FREE_GB` (default **3**) and warns below 6. The floor was 4 when the
+  job also ran `cargo test` and shared one `CARGO_TARGET_DIR` with clippy (an
+  estimated 1.7–2.0 GB); it dropped with the test step, because a floor that no
+  longer matches the job is a number that lies. Lowering a floor to make a run go
+  green is forbidden; lowering it because the job genuinely got smaller is just
+  bookkeeping.
 
   **Watch the trend, not the value.** Two diagnostic runs that compile nothing
   reported ~6.8G and then ~5.6G free: about 1.2 GB accumulated with no build in
@@ -221,8 +272,8 @@ regression or a stale baseline; the offending items are printed as
   `CARGO_PROFILE_DEV_DEBUG=0` / `CARGO_PROFILE_TEST_DEBUG=0` drop debuginfo,
   which is the bulk of that 1009 MB and also cuts link-time memory.
   `CARGO_BUILD_JOBS=2` because the host has 4 CPUs but 3.6G RAM: the default
-  `-j 4` over 45 crates plus a C compile plus linking test binaries is a
-  plausible OOM, and an OOM mid-build is a worse failure than a slower build.
+  `-j 4` over 45 crates plus a C compile is a plausible OOM, and an OOM mid-build
+  is a worse failure than a slower build.
 
 * **`Cargo.lock` is not tracked in this repository** (absent from
   `git ls-files`, and not in `.gitignore` either — a pre-existing defect). Every
@@ -240,22 +291,43 @@ regression or a stale baseline; the offending items are printed as
 
 ## 6. Evidence
 
-Recorded on `6de4e38c` (the commit this work is based on):
+Recorded on `6de4e38c` (the commit this work started from):
 
-| Gate | Result |
+| Gate | Result at `6de4e38c` |
 |---|---|
 | `check_protocol_index.py` | exit 0 — `missing=0 extra=0 duplicate_types=0 invalid_rows=0`, `PASS` |
 | conformance with both dependency sets | exit 0 — `Ran 585 tests`, `OK (skipped=27)` |
-| `test_nonempty_audit.py` | exit 1 — 5506 unregistered constraints (GAP-09) |
+| `test_nonempty_audit.py` | exit 1 — 5506 unregistered constraints (GAP-09, since closed) |
 | `check_bilingual_docs_full.py` | exit 1 — 81 uncovered paths (GAP-08) |
 | `cargo fmt --all --check` | exit 0 |
 | `cargo clippy --workspace --all-targets -- -D warnings` | exit 0 |
 | `cargo test --workspace` | exit 0 |
 | `gate_ratchet.py` on both baselines | exit 0 — `regressions=0 fixed=0` |
 
-This is local execution of the commands the workflow runs, on the same commit the
-workflow is based on. It is evidence about the gates, not about the workflow's
-execution. §7 records what the workflow itself has done.
+That table is history: it is what the gates looked like when the wiring started,
+and it is why `schema-nonempty` was originally a ratchet. It is not what the
+workflow looks like now.
+
+### 6.1 Re-measured on the rebased tree
+
+`main` moved while this branch was open (`6897e53c` closed GAP-09; `#627` added
+`rust-self-hosted.yml`; `7d816980` added fmt+clippy to `rust-phase1.yml`). Both
+blockers in §2.2 and §2.3 come from that move. Re-measured after rebasing:
+
+| Command | Result |
+|---|---|
+| `python3 08-bmcp-protocol/schemas/test_nonempty_audit.py` | exit 0 — `OK: 32 schemas; 5599 registered constraints; no unregistered or stale entries.` |
+| `gate_ratchet.py --baseline .../bilingual-docs.txt` | exit 0 — `baseline=81 current=81 regressions=0 fixed=0`, `PASS` |
+| `audit_runner_admission.py` | exit 0 — `7 self-hosted job(s) audited, 0 violation(s)` |
+| `cargo test --workspace --all-targets` (on `main`) | `passed=546 failed=0 ignored=1` |
+| `cargo test --workspace` (on `main`) | `passed=551 failed=0 ignored=1` |
+
+The last two rows are the whole argument for §2.3: same commit, same workspace,
+five different tests, and only one of the two commands is the one `main` runs.
+
+This is local execution of the commands the workflow runs. It is evidence about
+the gates, not about the workflow's execution. §7 records what the workflow
+itself has done.
 
 ## 7. What was actually observed running
 
@@ -298,10 +370,10 @@ cannot carry a `pull_request` trigger, and it is measured rather than inferred.
 
 ### 7.3 L2 really does reject the shape a PR-gating version would need
 
-`scripts/ci/audit_runner_admission.py` against `gates.yml`: **6 self-hosted jobs
-audited, 0 violations, exit 0** (5 here plus the pre-existing diagnostics job).
-Against a deliberately wrong probe workflow it reported exactly the two
-violations expected, exit 1:
+`scripts/ci/audit_runner_admission.py` against `gates.yml`: **7 self-hosted jobs
+audited, 0 violations, exit 0** (5 here plus `rust-self-hosted.yml` and the
+pre-existing diagnostics job). Against a deliberately wrong probe workflow it
+reported exactly the two violations expected, exit 1:
 
 ```
 ::error::.github/workflows/zz-probe.yml:probe: untrusted trigger 'pull_request' is not permitted for self-hosted jobs
@@ -319,13 +391,11 @@ cargo 1.95.0, node 22), with `RUNNER_TEMP` set as the runner sets it. Results:
 | `protocol-index` | protocol index | exit 0, `missing=0 extra=0 duplicate_types=0 invalid_rows=0`, `PASS` |
 | `conformance` | venv dependency install (the real script) | exit 0, `using venv at /tmp/rt/gates-venv`, venv satisfies `jsonschema`/`rfc8785`/`cryptography` |
 | `conformance` | full suite, run through that venv | exit 0, `Ran 585 tests`, `OK (skipped=27)` |
-| `schema-nonempty` | ratchet | exit 0, `baseline=5506 current=5506 regressions=0 fixed=0` |
+| `schema-nonempty` | hard gate audit | exit 0, `OK: 32 schemas; 5599 registered constraints` |
 | `bilingual` | ratchet | exit 0, `baseline=81 current=81 regressions=0 fixed=0` |
-| `rust` | disk preflight | exit 0 on a host with 721G free (see §7.5 for the refusal path) |
-| `rust` | toolchain presence | exit 0, `cargo 1.95.0`, `rustc 1.95.0`, `rustfmt 1.9.0-stable`, `clippy 0.1.95` |
-| `rust` | `cargo fmt --all --check` | exit 0 |
-| `rust` | `cargo clippy --workspace --all-targets -- -D warnings` | exit 0 |
-| `rust` | `cargo test --workspace` | exit 0, `passed=508 failed=0 ignored=1` |
+| `clippy` | disk preflight | exit 0 on a host with 721G free (see §7.5 for the refusal path) |
+| `clippy` | toolchain presence | exit 0, `cargo 1.95.0`, `rustc 1.95.0`, `clippy 0.1.95` |
+| `clippy` | `cargo clippy --workspace --all-targets -- -D warnings` | exit 0 |
 
 Two of these are worth calling out because they are the ones that could have been
 fake. The venv script was executed as written and produced a working interpreter
@@ -334,20 +404,36 @@ externally managed, i.e. exactly the situation where "just `pip install`" fails.
 And the conformance suite was run *through that venv*, not through whatever
 happened to be installed, so the 585-test result is the result the job would get.
 
+The `clippy` rows are from the earlier, larger job (fmt + clippy + test). The fmt
+and test steps were removed afterwards (§2.3), so only the disk preflight,
+toolchain probe and clippy rows still describe a step that exists. The measured
+result of the clippy step is unchanged — it is the same command against the same
+tree.
+
 ### 7.5 The disk preflight refuses, on purpose, at a measured threshold
 
-The preflight was exercised against three simulated filesystems:
+The preflight was exercised against simulated filesystems at both floors it has
+carried. The floor is 3G now; the warn threshold is 6G:
 
-| Free space | Outcome |
+| Free space | Floor 3, warn 6 (current) |
 |---|---|
-| 5.6G (the runner's measured value) | silent pass — the job fits (§5) |
-| 5G | `::error::only 5G free (… KiB), below the 4G floor…`, exit 1 |
-| 8G | `::warning::…`, exit 0 |
+| 2G | exit 1 — `::error::only 2G free (2597152 KiB), below the 3G floor.` |
+| 3G | exit 0 — `::warning::only 3G free; shrinking between runs that build nothing.` |
+| 5.6G (the runner's measured value) | exit 0 — warns, because `df` KiB is truncated to whole GiB and 5.6 reports as 5 |
+| 6G | exit 0 — silent |
+| 9G | exit 0 — silent |
 
 An earlier version of this table showed 5.6G being refused, because the floor was
-then 6G. That floor was wrong: the measured cost of the job is 2.0–2.5 GB, so 5.6G
-is enough and refusing it would have been a red gate with a false reason. The
-floor is now 4G. The correction is recorded rather than quietly applied.
+then 6G. That floor was wrong: the measured cost was 2.0–2.5 GB, so 5.6G was
+enough and refusing it would have been a red gate with a false reason. The floor
+dropped to 4G then, and to 3G when the test step was removed and the job got
+smaller. Both corrections are recorded rather than quietly applied.
+
+The `5.6G` row warning is a truncation artefact, not a real signal: `df -Pk`
+reports KiB, the script divides to whole GiB, and 5.6 floors to 5, which is under
+the 6G warn line. It exits 0 either way. Leaving the truncation in rather than
+rounding up is deliberate — a floor comparison that rounds in the permissive
+direction is how a floor stops being a floor.
 
 ### 7.6 What is still NOT observed
 
