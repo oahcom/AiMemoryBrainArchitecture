@@ -687,3 +687,80 @@ bilingual baseline: 77 frozen, 0 new gaps
 它对 message-type 命名空间究竟是**权威**，还是只是**关于**它的报告，尚未决定。
 
 两条都记录在 #564。本文档不修复其中任何一条。
+
+## 10. §9 的勘误，在 `61b9d743` 处实测（2026-11-22 13:30 +08:00）
+
+上文 §9 未被编辑。它有两处陈述在写下时就是错的，另有一处在 `main` 前进后变错。
+它们在此更正而非就地改写，因为一份测量值被静默重写的治理文档无法审计——
+下一位读者分不清哪句是更正、哪句是原始断言。
+
+### 10.1 `bmcp-server` 存在，而 §9 说它不存在
+
+§9 第 2 条写道：
+
+> `crates/` 里没有 `TcpListener`、没有 `hyper`、没有 `axum`。
+
+在 `61b9d743` 上不成立。`crates/bmcp-server` 是 workspace 成员——`lib.rs` 723 行、
+`main.rs` 67 行、`rt_scenarios.rs` 166 行——而它第四行就是：
+
+```rust
+use std::net::{SocketAddr, TcpListener, TcpStream};
+```
+
+这个错误的性质值得点名，因为它正是 §9 要诊断的那一类：**在未检查工件的情况下
+报告缺失**。我当时是从一棵早于该 crate 的树上测量的 `crates/`。
+
+### 10.2 修正后的 BMCP 结论更窄，也更有用
+
+真实情况既不是"传输缺失"，也不是"传输已就绪"：
+
+- 32 个 schema 声明了 22 个唯一 `message_type`，索引检查器通过
+  （`unique_message_types=22`、`missing=0`、`extra=0`）。
+- 其中**恰好一个**有 Rust 解析器：`parse_and_validate` 的返回类型点名
+  `AppliedDeliveryEvidence`，而 `message_type` 检查是常量比较
+  （`lib.rs:892-903`），任何其他类型都会得到 `WrongConst`。
+- `bmcp-server` 只实现一个 JSON-RPC 方法（`initialize`），其余一律
+  `-32601 Method not found`。
+- `bmcp-server` 从不触达解析器。它整个 crate 里唯一的 `bmcp_protocol` 引用是：
+
+```rust
+// lib.rs:718-723
+// This local formatter is available for a future evidence-validation call site.
+#[allow(dead_code)]
+fn describe(error: &bmcp_protocol::validate::EvidenceError) -> String {
+```
+
+`#[allow(dead_code)]`、"留给未来的调用点"、零个调用点。
+
+所以：**监听器存在，而 22 个消息类型一个都到不了解析器。** 这是一个路由缺口
+加上 21 个缺失解析器，不是一个缺失的二进制。21 个解析器是针对既有 JSON Schema
+的转写，不被任何决策冻结。framing、session、handshake 仍由 H 冻结——
+`TECH-REALITY-001-C/README.md:70` 仍写着 *"H wire mapping remains NOT FROZEN"*——
+所以在现有 JSON-RPC/TCP 选择之上继续搭建，等于搭建在一个未记录的前提上。
+
+完整测量见 GAP-16。
+
+### 10.3 §9 把 `dm2_06` 归错了所有者
+
+§9 第 3 条说 `dm2_06` "被 `B-P2-XO-01` 与 §8 的禁止推断授权阻塞"。后半句对，
+前半句是混淆。
+
+`B-P2-XO-01` 问的是*这份授权是否真实*——I 的问题，仍然开放。
+`dm2_06` 问的是*是否存在一份授权*——类型状态问题。
+`FactRevision::initial` 把 `AuthorizationDecisionRef` 作为**必填、非 `Option`**
+参数（`memory-domain/src/lib.rs:831`），而该类型是单元结构体，唯一构造器是
+`pending_i() -> Self(())`，因此它的任何值都不可能表示"缺失"。这就是负例写不出来
+的原因，而它不需要 I 提供任何东西。
+
+已由 `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001` 裁定：三态
+（`Absent` / `Placeholder` / `Issued`），只有 `Absent` 阻断，且该类型不得被命名为
+"证明"。
+
+### 10.4 §9 中未变的部分
+
+四项被证伪的百分比、`503 / 0 / 1` 的测量、`13-engineering-decisions` 占 77 行中的
+58 行、以及两个 `NO_AUTHORITATIVE_SOURCE` scope 属"退役"而非"提升"的裁定，全部不变。
+§9 的核心主张——六个百分比是错误框架——被这些更正加强而非削弱：同一类错误
+（报告状态而不重新测量）在同一份反对该错误的文档里出现了三次。
+
+**阅读指南权威性更正：** §9.5 中“阅读指南已被裁定为 `Canonical / Informative`”的说法，已被 Issue #564 评论 `7074302216` 取代。当前 Owner 裁定是不提升该文档：`04-memory-compiler/README.md` 继续保持 `canonical_status: Non-Canonical` 与 `normative_status: Informative`。#564 评论 `7074470193` 和 `7074777892` 对第 2/3 条的后续执行说明，不会反转第 1 条“不提升”的裁定。`protocol-index.md` 继续保持 `Candidate`，其规范当前版本仍为 `NOT DECLARED`。
