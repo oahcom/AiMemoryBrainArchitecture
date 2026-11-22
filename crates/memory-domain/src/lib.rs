@@ -4,7 +4,9 @@
 use std::collections::BTreeMap;
 
 mod claim_identity;
+mod claim_revision_registry;
 pub use claim_identity::*;
+pub use claim_revision_registry::*;
 
 #[derive(
     serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd,
@@ -42,6 +44,8 @@ pub enum DomainError {
     MissingIdentityLineage,
     InvalidRelationEndpoint,
     InvalidMergeState,
+    DuplicateClaimRevisionRef,
+    UnknownClaimRevision,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
