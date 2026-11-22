@@ -1,6 +1,6 @@
 # GAP-14 — Production publication authority and MemoryStore publication lifecycle
 
-**Status:** Open — A open, B blocked on D3, C unverified
+**Status:** Open — A unblocked (B decided), C unverified
 **Area:** memory-store / memory-compiler / memory-storage-sqlite
 **Owner track:** Owner D (Publication) + Owner I (Authorization)
 **Split from:** GAP-07, closed 2026-11-22 for production reachability only
@@ -63,7 +63,19 @@ So the primitive exists where nothing can reach it, and the layer that could rea
 
 ## GAP-14-B — Three publication flags have no authoritative issuer
 
-**Status:** BLOCKED — requires the D3 decision
+**Status:** DECIDED — all three flags have an authoritative issuer ruling; two are permanently `false`
+
+The three questions below are answered. The answers are decisions, not code:
+
+| Flag | Decision | Ruling |
+|---|---|---|
+| `canonical_commit_confirmed` | `D-OWNER-DECISION-CANONICAL-COMMIT-001` | D owner-proxy dev-baseline issuer, append-only `canonical_commits` record, record-backed three-outcome validator |
+| `publication_participant_admitted` | `D-OWNER-DECISION-PARTICIPANT-ADMISSION-001` | Permanently `false`. Section 8's "D authoritative Fence/Admission" is not `AdmissionStore`; COC quorum + Storage signature + I terminal decision do not exist locally |
+| `protected_visibility_authorized` | `D-OWNER-DECISION-PROTECTED-VISIBILITY-001` | Permanently `false`. Section 8 assigns "Storage and applicable D/I authorization" jointly; no local component may substitute |
+
+**Consequence, stated plainly:** `Published` is unreachable in production under the current contract. `canonical_commit_confirmed` is *not* permanently false — D authorised a dev-baseline issuer and a record-backed validator for it, so it becomes reachable once that issuer and validator are implemented. But `crates/memory-compiler/src/lib.rs:603` requires `publication_participant_admitted`, and that flag is decided permanently `false` because its evidence is external (COC quorum, Storage signature, I terminal decision). `protected_visibility_authorized` is likewise permanently `false`. So even after the canonical-commit work lands, `Published` stays unreachable. This is not a bug and not a pending task — it is the decided state of the contract until a new cross-owner decision creates the external issuers.
+
+The original open question is preserved below for context.
 
 `PublicationProof` carries eight flags. `brain-cli` reports the false ones in gate order:
 
