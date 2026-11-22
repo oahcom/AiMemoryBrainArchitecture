@@ -46,12 +46,22 @@ pub struct SqliteEventStore {
 ///
 /// This is a read-only snapshot. Reading does not consume, delete, or mark the
 /// intent. Callers may read the same intent again after compilation fails.
+///
+/// The payload and envelope are carried because an outbox row alone is not
+/// enough to start a compile: the compiler needs the accepted payload, its
+/// digest, and the envelope the producer supplied. Returning only
+/// `(outbox_row, event_row)` would have forced every caller to re-query
+/// `accepted_events` and `event_payloads`, and to re-derive the receipt - which
+/// is the same work this read path exists to remove.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct PendingCompileIntent {
     pub outbox_row: i64,
     pub event_row: i64,
     pub intent_kind: String,
     pub created_at: String,
+    pub receipt: AcceptedReceipt,
+    pub envelope: EventEnvelope,
+    pub payload_bytes: Vec<u8>,
 }
 
 impl SqliteEventStore {
@@ -210,29 +220,75 @@ impl SqliteEventStore {
     /// This is a read-only snapshot. Reading does not consume, delete, or mark
     /// any intent. Callers may read the same intent again after compilation
     /// fails.
+    ///
+    /// Each intent carries the receipt, envelope, and payload bytes needed to
+    /// build a compiler input, so a caller does not re-query the same rows.
+    /// The digest is re-verified against the stored bytes on every read and the
+    /// call fails closed on any mismatch, matching `read_after`.
     pub fn pending_compile_intents(&self) -> Result<Vec<PendingCompileIntent>, EventStoreError> {
         let mut statement = self
             .connection
             .prepare(
-                "SELECT outbox_row, event_row, intent_kind, created_at
-                 FROM compile_outbox
-                 ORDER BY created_at ASC, outbox_row ASC",
+                "SELECT o.outbox_row, o.event_row, o.intent_kind, o.created_at,
+                    e.payload_digest, e.envelope_json, e.processing_state_json,
+                    p.payload_bytes, p.verified_digest
+                 FROM compile_outbox o
+                 INNER JOIN accepted_events e ON e.event_row = o.event_row
+                 INNER JOIN event_payloads p ON p.event_row = o.event_row
+                 ORDER BY o.created_at ASC, o.outbox_row ASC",
             )
             .map_err(|_| EventStoreError::TransactionUnavailable)?;
 
         let rows = statement
             .query_map([], |row| {
-                Ok(PendingCompileIntent {
-                    outbox_row: row.get(0)?,
-                    event_row: row.get(1)?,
-                    intent_kind: row.get(2)?,
-                    created_at: row.get(3)?,
-                })
+                Ok((
+                    row.get::<_, i64>(0)?,
+                    row.get::<_, i64>(1)?,
+                    row.get::<_, String>(2)?,
+                    row.get::<_, String>(3)?,
+                    row.get::<_, String>(4)?,
+                    row.get::<_, String>(5)?,
+                    row.get::<_, String>(6)?,
+                    row.get::<_, Vec<u8>>(7)?,
+                    row.get::<_, String>(8)?,
+                ))
             })
             .map_err(|_| EventStoreError::TransactionUnavailable)?;
 
-        rows.collect::<rusqlite::Result<Vec<PendingCompileIntent>>>()
-            .map_err(|_| EventStoreError::TransactionUnavailable)
+        let mut intents = Vec::new();
+        for row in rows {
+            let (
+                outbox_row,
+                event_row,
+                intent_kind,
+                created_at,
+                declared_digest,
+                envelope_json,
+                state_json,
+                payload_bytes,
+                verified_digest,
+            ) = row.map_err(|_| EventStoreError::TransactionUnavailable)?;
+
+            let envelope: EventEnvelope = Self::decode(&envelope_json)?;
+            let actual_digest = payload::digest(&payload_bytes);
+            if declared_digest != actual_digest
+                || verified_digest != actual_digest
+                || envelope.payload_digest != actual_digest
+            {
+                return Err(EventStoreError::PayloadIntegrityMismatch);
+            }
+            let receipt = Self::receipt(event_row, created_at.clone(), declared_digest, &state_json)?;
+            intents.push(PendingCompileIntent {
+                outbox_row,
+                event_row,
+                intent_kind,
+                created_at,
+                receipt,
+                envelope,
+                payload_bytes,
+            });
+        }
+        Ok(intents)
     }
 }
 
@@ -394,6 +450,10 @@ mod tests {
         }
     }
 
+    fn envelope_with_payload(key: &str, payload: &[u8]) -> EventEnvelope {
+        envelope(key, &super::payload::digest(payload))
+    }
+
     fn path() -> std::path::PathBuf {
         let nonce = SystemTime::now()
             .duration_since(UNIX_EPOCH)
@@ -419,10 +479,10 @@ mod tests {
         let mut store = SqliteEventStore::in_memory().unwrap();
 
         let first = store
-            .accept(envelope("op-1", "digest-1"), &[scope()])
+            .accept_with_payload(envelope_with_payload("op-1", b"payload-one"), b"payload-one", &[scope()])
             .unwrap();
         let second = store
-            .accept(envelope("op-2", "digest-2"), &[scope()])
+            .accept_with_payload(envelope_with_payload("op-2", b"payload-two"), b"payload-two", &[scope()])
             .unwrap();
 
         let intents = store.pending_compile_intents().unwrap();
@@ -441,10 +501,10 @@ mod tests {
     fn pending_compile_intents_is_idempotent_and_does_not_consume() {
         let mut store = SqliteEventStore::in_memory().unwrap();
         store
-            .accept(envelope("op-1", "digest-1"), &[scope()])
+            .accept_with_payload(envelope_with_payload("op-1", b"payload-one"), b"payload-one", &[scope()])
             .unwrap();
         store
-            .accept(envelope("op-2", "digest-2"), &[scope()])
+            .accept_with_payload(envelope_with_payload("op-2", b"payload-two"), b"payload-two", &[scope()])
             .unwrap();
 
         let first_read = store.pending_compile_intents().unwrap();
@@ -467,12 +527,68 @@ mod tests {
     fn pending_compile_intent_created_at_matches_the_acceptance_time() {
         let mut store = SqliteEventStore::in_memory().unwrap();
         let receipt = store
-            .accept(envelope("op-1", "digest-1"), &[scope()])
+            .accept_with_payload(envelope_with_payload("op-1", b"payload-one"), b"payload-one", &[scope()])
             .unwrap();
 
         let intents = store.pending_compile_intents().unwrap();
         assert_eq!(intents.len(), 1);
         assert_eq!(intents[0].created_at, receipt.accepted_at);
+    }
+
+    #[test]
+    fn pending_compile_intent_carries_the_payload_and_envelope_a_compiler_needs() {
+        let mut store = SqliteEventStore::in_memory().unwrap();
+        store
+            .accept_with_payload(envelope_with_payload("op-1", b"payload-one"), b"payload-one", &[scope()])
+            .unwrap();
+
+        let intents = store.pending_compile_intents().unwrap();
+        assert_eq!(intents.len(), 1);
+        let intent = &intents[0];
+
+        // The payload bytes are the accepted bytes, not a re-serialization.
+        assert_eq!(intent.payload_bytes, b"payload-one");
+        // The envelope is the one the producer supplied.
+        assert_eq!(intent.envelope.idempotency_key, "op-1");
+        // The receipt is a real receipt for this row, not a placeholder.
+        assert_eq!(
+            SqliteEventStore::row_id(&intent.receipt.event_id).unwrap(),
+            intent.event_row
+        );
+        assert_eq!(intent.receipt.accepted_at, intent.created_at);
+        // The digest the receipt reports is the digest of the bytes carried.
+        assert_eq!(intent.receipt.payload_digest, intent.envelope.payload_digest);
+    }
+
+    #[test]
+    fn pending_compile_intent_is_invisible_when_no_payload_was_stored() {
+        let mut store = SqliteEventStore::in_memory().unwrap();
+        // accept() records an outbox row but no payload row. An intent without
+        // payload bytes cannot start a compile, so it must not be reported.
+        store.accept(envelope("op-1", "digest-1"), &[scope()]).unwrap();
+
+        assert!(store.pending_compile_intents().unwrap().is_empty());
+    }
+
+    #[test]
+    fn pending_compile_intent_fails_closed_when_stored_payload_is_tampered_with() {
+        let mut store = SqliteEventStore::in_memory().unwrap();
+        store
+            .accept_with_payload(envelope_with_payload("op-1", b"payload-one"), b"payload-one", &[scope()])
+            .unwrap();
+
+        store
+            .connection
+            .execute(
+                "UPDATE event_payloads SET payload_bytes = ?1",
+                params![b"payload-evil".to_vec()],
+            )
+            .unwrap();
+
+        assert_eq!(
+            store.pending_compile_intents().unwrap_err(),
+            EventStoreError::PayloadIntegrityMismatch
+        );
     }
 
     #[test]

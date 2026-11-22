@@ -36,7 +36,7 @@ pub trait PayloadEventStoreExt {
     ) -> Result<Vec<StoredEvent>, EventStoreError>;
 }
 
-fn digest(payload: &[u8]) -> String {
+pub(super) fn digest(payload: &[u8]) -> String {
     let hash = Sha256::digest(payload);
     let mut encoded = String::with_capacity(71);
     encoded.push_str("sha256:");
