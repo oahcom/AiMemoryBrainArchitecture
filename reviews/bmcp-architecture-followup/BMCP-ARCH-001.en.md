@@ -697,7 +697,7 @@ The coverage register records this as a review/handoff pair only. It does not ch
 - PARSE_CONTRACT_STATUS: logical boundary decided; JCS basis selected; exact signed bytes/crypto profile and H wire mapping remain open.
 - EXECUTE_CONTRACT_STATUS: CANDIDATE; Option A + I1 selected; D/I authority boundaries decided; callable API/IDL/schema deferred to D/I contracts; C mapping open.
 - RESPOND_CONTRACT_STATUS: CANDIDATE; logical ACK/response distinctions decided; exact H envelope/field mapping and Storage persistence topology remain open.
-- H_DEPENDENCY_STATUS: **PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN**
+- H_DEPENDENCY_STATUS: **PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN**; INDEPENDENCE_UNVERIFIABLE
 - CROSS_MODULE_DEPENDENCIES: H, B, C, D, E, G, I, Storage
 - OWNER_DECISIONS_REQUIRED: BMCP-DR-001 semantic direction RESOLVED / consumer-schema gate OPEN; BMCP-DR-002 authority boundary DECIDED / callable API- IDL deferred; BMCP-DR-003 MCP adapter boundary PARTIALLY DECIDED / exact C mapping OPEN under Issue #449.
 - ISSUE_7_STATUS: `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`; GitHub CLOSED / not_planned; unchanged.
