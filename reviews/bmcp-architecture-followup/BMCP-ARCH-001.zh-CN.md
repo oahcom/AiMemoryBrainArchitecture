@@ -719,14 +719,14 @@ Coverage Register 仅将此登记为 Review/Handoff Pair，不改变 “BMCP Pro
 ## 12. 最终状态
 
 - ARCHITECTURE_DELIVERABLE_STATUS：**ARCHITECTURE_PARTIAL**
-- PARSE_CONTRACT_STATUS：候选语义边界已说明；H Wire/Decode Mapping 待定
-- EXECUTE_CONTRACT_STATUS：CANDIDATE；D/I 可调用接口和 C/H Mapping 待定；Fact/Claim 语义已批准
-- RESPOND_CONTRACT_STATUS：CANDIDATE；H Response Envelope/Correlation Mapping 待定
+- PARSE_CONTRACT_STATUS：逻辑边界已确定；JCS 基础已选定；精确签名字节/密码学配置及 H Wire 映射仍待确定。
+- EXECUTE_CONTRACT_STATUS：CANDIDATE；已选定 Option A + I1；D/I 权限边界已确定；可调用 API/IDL/Schema 延后由 D/I 契约定义；C 映射仍待确定。
+- RESPOND_CONTRACT_STATUS：CANDIDATE；逻辑 ACK/Response 区分已确定；精确 H Envelope/字段映射及 Storage 持久化拓扑仍待确定。
 - H_DEPENDENCY_STATUS：**PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN**；INDEPENDENCE_UNVERIFIABLE
-- CROSS_MODULE_DEPENDENCIES：H、B、C、D、E、G、I
-- OWNER_DECISIONS_REQUIRED：BMCP-DR-001 语义已批准 / Consumer-Schema Gate OPEN；BMCP-DR-002 Authority Boundary DECIDED / Callable API-IDL-Schema-Crypto-Storage-Wire Mapping OPEN；BMCP-DR-003 Family Routing PARTIALLY DECIDED / Exact C-H Mapping OPEN under Issue #449
+- CROSS_MODULE_DEPENDENCIES：H、B、C、D、E、G、I、Storage
+- OWNER_DECISIONS_REQUIRED：BMCP-DR-001 语义方向 RESOLVED / Consumer-Schema Gate OPEN；BMCP-DR-002 Authority Boundary DECIDED / 可调用 API/IDL 延后由 D/I 契约定义；BMCP-DR-003 MCP Adapter Boundary PARTIALLY DECIDED / 精确 C 映射 OPEN under Issue #449
 - ISSUE_7_STATUS：IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE；GitHub CLOSED / not_planned；未改变
 - RUNTIME_IMPLEMENTATION_STATUS：NOT AUTHORIZED / NOT STARTED
-- PR / Commit：仅在 Push 和 PR 成功后填写；不授权 Merge
+- PR / Commit：PR #453 仍为 Draft，等待精确 Head 验证和语义审查；合并仅接受部分架构交接，不冻结协议/Schema，也不授权 Runtime。
 
-**下一步：** H 根据已接受的 H-CONFIRM-001..004 更新并版本化规范双语 Wire/Envelope/ACK/Validator 工件。B/D/E/F/G/H/I 完成精确消费者工件版本 Pin 与审查；D/I 发布精确权威接口；C 通过 Issue #449 发布 MCP-to-BMCP 映射。随后 BMCP 架构集成刷新精确 Pin。所有工程进入前置条件均有证据前，Runtime 继续延期。
+**下一步：** B/D/I 对齐现有源文档/镜像文档并刷新版本 Pin；H 发布带版本的规范 Wire 工件，并关闭剩余 Registry/Schema/Crypto/Storage/Error 子项；C 根据 Issue #449 发布精确的 Agent/MCP-to-BMCP 映射；E 集成五阶段 Rust Compiler 文档及消费者边界；BMCP 刷新双语交接文档。只有在所有工程进入条件均有证据后，Runtime 才可解除延期。
