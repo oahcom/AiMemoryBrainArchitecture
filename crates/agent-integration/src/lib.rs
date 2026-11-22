@@ -5,6 +5,10 @@
 
 use memory_context::{validate_snapshot, ContextError, ContextSnapshot};
 use std::collections::BTreeMap;
+use std::ffi::OsStr;
+use std::fs;
+use std::io::ErrorKind;
+use std::path::{Path, PathBuf};
 
 /// Capability tier demonstrated by an adapter.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
@@ -111,6 +115,14 @@ pub enum AdapterError {
     },
     NotFrozen,
     InvalidRegionDigest,
+    /// A session id is not usable as a portable file name under the adapter root.
+    InvalidSessionId {
+        session_id: String,
+    },
+    /// The durable session record could not be read, decoded, or written.
+    Persistence {
+        reason: String,
+    },
 }
 
 /// Check whether an adapter tier is sufficient for an operation.
@@ -679,6 +691,253 @@ impl ContextDeliveryAdapter for InMemoryContextDeliveryAdapter {
     fn applied_snapshot(&self, session_id: &str) -> Option<&DeliveryPayload> {
         self.sessions.get(session_id)?.applied.as_ref()
     }
+}
+
+/// A file-backed delivery adapter that persists each session's state to
+/// `<root>/<session_id>.json`, so an applied delivery survives the process.
+///
+/// Record format: `{"connected":<bool>,"applied":{"version":<u64>,"content":"…"}}`
+/// with `"applied":null` when nothing is applied. A connected session with no
+/// applied snapshot has no file at all.
+///
+/// Writes are not atomic: a crash mid-write loses that session's record. Add
+/// write-temp-then-rename if torn records ever matter.
+pub struct FileContextDeliveryAdapter {
+    root: PathBuf,
+    sessions: BTreeMap<String, SessionState>,
+}
+
+impl FileContextDeliveryAdapter {
+    /// Open a directory of per-session records, creating it if missing.
+    pub fn open(root: impl AsRef<Path>) -> Result<Self, AdapterError> {
+        let root = root.as_ref().to_path_buf();
+        fs::create_dir_all(&root).map_err(persistence_error)?;
+
+        let mut sessions = BTreeMap::new();
+        for entry in fs::read_dir(&root).map_err(persistence_error)? {
+            let path = entry.map_err(persistence_error)?.path();
+            if path.extension().and_then(OsStr::to_str) != Some("json") {
+                continue;
+            }
+            let Some(session_id) = path.file_stem().and_then(OsStr::to_str) else {
+                continue;
+            };
+            validate_session_id(session_id)?;
+            let text = fs::read_to_string(&path).map_err(persistence_error)?;
+            let state = decode_state(&text).ok_or_else(|| AdapterError::Persistence {
+                reason: format!("unreadable session record: {}", path.display()),
+            })?;
+            sessions.insert(session_id.to_owned(), state);
+        }
+
+        Ok(Self { root, sessions })
+    }
+
+    fn session(&mut self, session_id: &str) -> Result<&mut SessionState, AdapterError> {
+        validate_session_id(session_id)?;
+        Ok(self.sessions.entry(session_id.to_owned()).or_default())
+    }
+
+    fn persist(&self, session_id: &str) -> Result<(), AdapterError> {
+        let path = self.root.join(format!("{session_id}.json"));
+        let state = &self.sessions[session_id];
+        if state.applied.is_none() && state.connected {
+            return match fs::remove_file(&path) {
+                Err(error) if error.kind() != ErrorKind::NotFound => Err(persistence_error(error)),
+                _ => Ok(()),
+            };
+        }
+        fs::write(&path, encode_state(state)).map_err(persistence_error)
+    }
+}
+
+impl ContextDeliveryAdapter for FileContextDeliveryAdapter {
+    fn apply(
+        &mut self,
+        session_id: &str,
+        snapshot: DeliveryPayload,
+    ) -> Result<ApplyOutcome, AdapterError> {
+        let state = self.session(session_id)?;
+        if !state.connected {
+            return Err(AdapterError::SessionDisconnected {
+                session_id: session_id.to_owned(),
+            });
+        }
+
+        if let Some(applied) = state.applied.as_ref() {
+            if snapshot.version == applied.version && snapshot == *applied {
+                return Ok(ApplyOutcome::AlreadyApplied);
+            }
+        }
+        let current = state.applied.as_ref().map_or(0, |applied| applied.version);
+        let expected = current
+            .checked_add(1)
+            .ok_or(AdapterError::VersionExhausted)?;
+        if snapshot.version > expected {
+            return Err(AdapterError::VersionGap {
+                current,
+                received: snapshot.version,
+            });
+        }
+        if snapshot.version != expected {
+            return Err(AdapterError::VersionMismatch {
+                expected,
+                received: snapshot.version,
+            });
+        }
+        state.applied = Some(snapshot);
+        self.persist(session_id)?;
+        Ok(ApplyOutcome::Applied)
+    }
+
+    fn clear(&mut self, session_id: &str) -> Result<(), AdapterError> {
+        self.session(session_id)?.applied = None;
+        self.persist(session_id)
+    }
+
+    fn disconnect(&mut self, session_id: &str) -> Result<(), AdapterError> {
+        self.session(session_id)?.connected = false;
+        self.persist(session_id)
+    }
+
+    fn reconnect(&mut self, session_id: &str) -> Result<Option<u64>, AdapterError> {
+        let state = self.session(session_id)?;
+        state.connected = true;
+        let version = state.applied.as_ref().map(|snapshot| snapshot.version);
+        self.persist(session_id)?;
+        Ok(version)
+    }
+
+    fn applied_snapshot(&self, session_id: &str) -> Option<&DeliveryPayload> {
+        if validate_session_id(session_id).is_err() {
+            return None;
+        }
+        self.sessions.get(session_id)?.applied.as_ref()
+    }
+}
+
+/// Reject anything that could escape `root` or produce a non-portable name.
+fn validate_session_id(session_id: &str) -> Result<(), AdapterError> {
+    let invalid = || AdapterError::InvalidSessionId {
+        session_id: session_id.to_owned(),
+    };
+    if session_id.is_empty() || session_id.len() > 128 || session_id.starts_with('.') {
+        return Err(invalid());
+    }
+    if !session_id
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.'))
+    {
+        return Err(invalid());
+    }
+    Ok(())
+}
+
+fn persistence_error(error: std::io::Error) -> AdapterError {
+    AdapterError::Persistence {
+        reason: error.to_string(),
+    }
+}
+
+fn encode_state(state: &SessionState) -> String {
+    let mut out = String::from("{\"connected\":");
+    out.push_str(if state.connected { "true" } else { "false" });
+    match state.applied.as_ref() {
+        None => out.push_str(",\"applied\":null}"),
+        Some(applied) => {
+            out.push_str(",\"applied\":{\"version\":");
+            out.push_str(&applied.version.to_string());
+            out.push_str(",\"content\":");
+            push_json_string(&applied.content, &mut out);
+            out.push_str("}}");
+        }
+    }
+    out
+}
+
+fn push_json_string(value: &str, out: &mut String) {
+    out.push('"');
+    for c in value.chars() {
+        match c {
+            '"' => out.push_str("\\\""),
+            '\\' => out.push_str("\\\\"),
+            '\n' => out.push_str("\\n"),
+            '\r' => out.push_str("\\r"),
+            '\t' => out.push_str("\\t"),
+            c if (c as u32) < 0x20 => out.push_str(&format!("\\u{:04x}", c as u32)),
+            c => out.push(c),
+        }
+    }
+    out.push('"');
+}
+
+/// Parse the exact layout written by `encode_state`; anything else is `None`.
+fn decode_state(text: &str) -> Option<SessionState> {
+    let rest = text.strip_prefix("{\"connected\":")?;
+    let (connected, rest) = match rest.strip_prefix("true") {
+        Some(tail) => (true, tail),
+        None => (false, rest.strip_prefix("false")?),
+    };
+
+    let rest = rest.strip_prefix(",\"applied\":")?;
+    let applied = if let Some(tail) = rest.strip_prefix("null}") {
+        if !tail.trim().is_empty() {
+            return None;
+        }
+        None
+    } else {
+        let tail = rest.strip_prefix("{\"version\":")?;
+        let digits = tail.chars().take_while(char::is_ascii_digit).count();
+        let version: u64 = tail.get(..digits)?.parse().ok()?;
+        let tail = tail.get(digits..)?.strip_prefix(",\"content\":")?;
+        let (content, consumed) = parse_json_string(tail.as_bytes())?;
+        let tail = tail.get(consumed..)?.strip_prefix("}}")?;
+        if !tail.trim().is_empty() {
+            return None;
+        }
+        Some(DeliveryPayload { version, content })
+    };
+
+    Some(SessionState { applied, connected })
+}
+
+/// Decode a JSON string literal at the start of `bytes`; returns it and the
+/// number of bytes consumed.
+fn parse_json_string(bytes: &[u8]) -> Option<(String, usize)> {
+    if bytes.first() != Some(&b'"') {
+        return None;
+    }
+    let mut at = 1;
+    let mut out = String::new();
+    while let Some(&byte) = bytes.get(at) {
+        match byte {
+            b'"' => return Some((out, at + 1)),
+            b'\\' => {
+                let escape = *bytes.get(at + 1)?;
+                at += 2;
+                match escape {
+                    b'"' => out.push('"'),
+                    b'\\' => out.push('\\'),
+                    b'/' => out.push('/'),
+                    b'n' => out.push('\n'),
+                    b'r' => out.push('\r'),
+                    b't' => out.push('\t'),
+                    b'u' => {
+                        let hex = std::str::from_utf8(bytes.get(at..at + 4)?).ok()?;
+                        out.push(char::from_u32(u32::from_str_radix(hex, 16).ok()?)?);
+                        at += 4;
+                    }
+                    _ => return None,
+                }
+            }
+            _ => {
+                let c = std::str::from_utf8(bytes.get(at..)?).ok()?.chars().next()?;
+                out.push(c);
+                at += c.len_utf8();
+            }
+        }
+    }
+    None
 }
 
 #[cfg(test)]
