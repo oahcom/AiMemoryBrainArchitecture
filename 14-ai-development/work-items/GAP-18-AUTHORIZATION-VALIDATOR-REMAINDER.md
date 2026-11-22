@@ -10,12 +10,14 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-22"
-      last_verification_note: "Every line number re-read from main @ 2093e07a; the two shipped steps are verified against the blob of phase2_acceptance.rs (6135a8db30) and the current lib.rs, not against a commit message."
+      last_verification_note: "Re-read from main @ 550bb864ed: validate_authorization_decision at admission.rs:1276 has the two-parameter signature, Issued carries AuthorizationDecisionData at lib.rs:566, and memory-compiler/tests holds one file. Each claim is a blob read, not a commit message."
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Modified
     supersession:
-      supersedes: []
-      supersession_reason: null
+      supersedes:
+        - 14-ai-development/work-items/GAP-18-AUTHORIZATION-VALIDATOR-REMAINDER.md
+      supersession_reason: "The superseded version said three steps remained; #662 shipped two of them within the hour, leaving one. Keeping the old text would make the record misleading on read, which is the defect it was written to prevent."
+    modification_note: "Rewritten to reflect #662. Same file path so the two versions do not both appear in the work-items index."
 
   authority:
     canonical_status: Non-Canonical
@@ -23,146 +25,87 @@ document_metadata:
     normative_status: Informative
 ---
 
-# GAP-18 (continued) — the authorization validator: what is left, exactly
+# GAP-18 (continued) — one step left, and it is not the one that was blocked
 
-**Status:** Open · **Supersedes nothing** · **Companion to:** `GAP-18-AUTHORIZATION-VALIDATOR-WORK-ORDER.md`
-**Measured at:** `main` @ `2093e07ae2ef1edd44993853e87f998af155ff3a`
+**Status:** Open — one step remains · **Companion to:** `GAP-18-AUTHORIZATION-VALIDATOR-WORK-ORDER.md`
+**Measured at:** `main` @ `550bb864ed`
 **Author:** owner delegate under standing instruction (Issue #564, comment 7074302216)
 
 ---
 
-## 1. Why this document exists
+## 1. Why this document was rewritten
 
-`GAP-18` (`#653`, `456d4d55`) described a five-step work order and said the template was already in the tree. Two of those five steps have since shipped, by a commit that was not written against this work order:
+The first version of this document, merged as `#663` (`0fda02e2c8`), said three steps remained. Two of them shipped in the two hours that followed, in `#662` (`f98a45995d`). Leaving the document as it was would make it an instance of exactly what it was written to prevent: a record that is correct when written and misleading when read.
 
-`001248d452` — *feat(domain): let AuthorizationDecisionRef express absence, closing the last phase-2 ignore*
+So this is the same document with the completed work marked done and one step left. The one step left is the only one that was ever blocked, and it is still blocked for the same reason.
 
-It modified two files:
+## 2. What has shipped, in the order it shipped
 
-| file | +/− | what it did |
+| commit | what it did | which of the five steps |
 |---|---|---|
-| `crates/memory-domain/src/lib.rs` | +41 / −5 | replaced `pub struct AuthorizationDecisionRef(())` with a three-state enum |
-| `crates/memory-domain/tests/phase2_acceptance.rs` | +54 / −2 | removed the last `#[ignore]` and wrote the real `dm2_06` |
+| `001248d452` | `AuthorizationDecisionRef` became `Absent \| PendingI \| Issued`; `dm2_06` lost its `#[ignore]` | 3 (domain type), 5 (validate rejects only `Absent`) |
+| `f98a45995d` (`#662`) | `authorization_decisions` + `i_attestations` tables, `issue_authorization_decision`, `validate_authorization_decision`, `IssuerId` moved to crate root | 1 (table), 2 (writer + validator) |
 
-That commit is correct. This document records **what it left**, so the remaining work is not re-derived and the shipped work is not redone. Three of the five steps remain, and none of them is in `memory-domain`.
+Four of five steps are done. What remains is step 4: the assertion that a present-but-unbacked reference is refused by the authority.
 
-I am writing this because the alternative is what happened twice already in this repository: a later session re-reads the work order, sees five steps, and implements step 3 a second time against a struct that is no longer a struct.
+## 3. Verified, not assumed
 
-## 2. What shipped, verified rather than assumed
+Read from `main` at `550bb864ed`, not from commit messages.
 
-Read from `main` at `2093e07a`, blob `6135a8db30` for the test file and the current `lib.rs`:
-
-**The type** (`crates/memory-domain/src/lib.rs:538`):
-
-```rust
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
-#[serde(rename_all = "snake_case")]
-pub enum AuthorizationDecisionRef {
-    /// No authorization decision was recorded. This is the only state that blocks publication.
-    Absent,
-    /// The known unvalidated placeholder: a value exists, nothing is proven.
-    PendingI,
-    /// A caller-claimed I-issued reference. Authenticity is not asserted; whether it is
-    /// genuine is I's contract and `B-P2-XO-01`'s question.
-    Issued(OpaqueId),
-}
-```
-
-**The gate** (`:1008`), inside `FactRevision::validate`:
-
-```rust
-// Presence gate, not authenticity: `Absent` means nobody recorded a decision, which
-// is exactly what DM2-06 says must not publish. `PendingI`/`Issued` pass because
-// presence is all this gate can check; proving issuance is `B-P2-XO-01`.
-if self.authorization_decision_ref.is_absent() {
-    return Err(DomainError::MissingAuthorizationDecision);
-}
-```
-
-This is `OWNER-RULING-025` implemented exactly: `Absent` blocks, `PendingI` and `Issued` pass presence. Step 3 and step 5 of the original work order are done.
-
-**The test** (`crates/memory-domain/tests/phase2_acceptance.rs:608`), five assertions:
-
-| # | assertion | ruling clause satisfied |
-|---|---|---|
-| 1 | `with_decision(absent())` → `Err(MissingAuthorizationDecision)` | §3.1 — absence blocks |
-| 2 | `with_decision(pending_i()).unwrap()` then `validate().is_ok()` | §3.2 — placeholder satisfies presence |
-| 3 | `with_decision(issued(..)).unwrap()` then `validate().is_ok()` | §3.2 — claimed issuance satisfies presence |
-| 4 | wire form rewritten to `"absent"`, re-validated → same `Err` | §3.4 — a persisted revision cannot be edited into absence |
-| 5 | `absent()` / `pending_i()` stay distinguishable after round-trip | §3.5 — a reader cannot mistake one for the other |
-
-`grep -c '#\[ignore\]'` on that file returns `1`, and the single match is a comment on line 5 (`//! 纪律：当前类型系统无法表达的条目一律 ...`), not an attribute. **There are zero ignored tests in that file.** The PR body of `#659` claims `0 ignored` for `main`; for this file that is correct.
-
-## 3. What remains: three steps, all in `memory-compiler`
-
-`GAP-18` §3 established the correspondence. Here it is again with the line numbers as they stand at `2093e07a`, because the earlier document used the numbers from an older tree:
-
-| concern | canonical commit (exists today) | authorization (to add) |
-|---|---|---|
-| table | `canonical_commits` — `admission.rs:367` | `authorization_decisions` |
-| writer | `issue_canonical_commit` — `admission.rs:996` | `issue_authorization_decision` |
-| validator | `validate_canonical_commit` — `admission.rs:1069` | `validate_authorization_decision` |
-| error enum | `CanonicalCommitValidationError` — `admission.rs:240` | `AuthorizationDecisionValidationError` |
-| row reader | `read_canonical_commit` — `admission.rs:1124` | `read_authorization_decision` |
-| issuer const | `DEV_BASELINE_ISSUER` — `canonical_commit.rs:15` | `I_DEV_BASELINE_ISSUER` |
-
-### Step 1 — the table
-
-Append to the same `execute_batch` that already ends with `canonical_commits` (`admission.rs:367`–`374`), inside the same string, before the closing quote:
-
-```sql
-CREATE TABLE IF NOT EXISTS authorization_decisions (
-   decision_id     TEXT PRIMARY KEY NOT NULL,
-   issuer_id       TEXT NOT NULL,
-   subject_digest  TEXT NOT NULL,
-   issued_at       TEXT NOT NULL,
-   signature       TEXT NOT NULL
-);
-```
-
-Why the shape is identical to `canonical_commits` and not "similar": `I-OWNER-DECISION-AUTHORIZATION-DECISION-001` §3.1 specifies this DDL. A column added here that the decision does not name is a field the validator will not check, and an unchecked field in an authority table is a place a wrong value can live undisturbed. If the decision's DDL and this block ever diverge, the decision is right.
-
-`signature` is written as `''` by the writer, exactly as `issue_canonical_commit:1027` does. It is present so the schema can carry a real signature later without a migration; nothing reads it today, and the validator must not pretend it verified anything.
-
-### Step 2 — the writer and the validator
-
-Copy `issue_canonical_commit` (`:996`) and `validate_canonical_commit` (`:1069`) and rename. Three things must change and everything else must not:
-
-**(a) The issuer constant.** `I_DEV_BASELINE_ISSUER` is a different string from `DEV_BASELINE_ISSUER`. If the same constant is reused, an I-issued decision becomes indistinguishable from a D-issued commit at the storage layer, which is the confusion this whole line of work exists to remove. Define it next to `DEV_BASELINE_ISSUER` in `canonical_commit.rs`, or in a new `authorization.rs` beside it — but define it, do not alias it.
-
-**(b) The cursor.** `validate_canonical_commit` takes `cursor: &OpaqueId` and rejects it at `:1078` when it does not equal `data.commit_id`. The decision's §4.1 signature has **no cursor parameter**:
+**The table and the validator exist** (`admission.rs:1276`):
 
 ```rust
 pub fn validate_authorization_decision(
     &self,
     reference: &AuthorizationDecisionRef,
     expected_subject_digest: &OpaqueId,
-) -> Result<bool, AuthorizationDecisionValidationError>;
+) -> Result<bool, AuthorizationDecisionValidationError> {
+    let data = reference
+        .data()
+        .ok_or(AuthorizationDecisionValidationError::PendingReference)?;
 ```
 
-Do not add one for symmetry. The cursor exists in the canonical-commit validator because a publication path selects a commit by cursor; no such selector exists for decisions, and inventing one creates a second way to name a decision that the decision document does not recognize. **This is the one place where copying the template is wrong**, and it is the place a mechanical copy gets wrong.
+Two parameters, no cursor. That is `§4.1` exactly, and it is the one place I flagged in the previous version where a mechanical copy of `validate_canonical_commit` would have gone wrong. It did not go wrong.
 
-**(c) The reference's absence state.** `validate_canonical_commit:1075` starts with `reference.data().ok_or(PendingReference)?` because `CanonicalCommitRef` is a three-state struct with an `Option` payload. `AuthorizationDecisionRef` is an **enum** with three variants, and the mapping is:
-
-| variant | validator outcome |
-|---|---|
-| `Absent` | `Err(..)` — absence is never a validation result, it is a failure to have a reference at all |
-| `PendingI` | `Err(..)` — same reason; a placeholder carries no decision id |
-| `Issued(id)` | look up `id` and proceed to the three-outcome logic |
-
-A mechanical copy that writes `reference.data().ok_or(..)` will not compile, because there is no `data()`. That compile error is the good outcome. The bad outcome is a `match` that folds `Absent` and `PendingI` into one arm and returns `Ok(false)` for both, which would make "nobody authorized this" indistinguishable from "authorized, wrong subject" — and `Ok(false)` is a **success** shape.
-
-### Step 3 — `dm2_06` gains its authority assertion
-
-This is the step the contradiction in `#623` / `#634` was about, and `GAP-EXEC-2026-11-22-AUTHORIZATION-GATE-CONTRADICTION-024` (`#640`) is the register entry. `OWNER-RULING-025` §5 and `I-OWNER-DECISION-...-001` §4.3 both require it.
-
-The test as it stands at `phase2_acceptance.rs:608` proves presence. It does not prove that a **present but unbacked** reference is refused, because `memory-domain` cannot see the store: its `Cargo.toml` depends on `serde` and nothing else. So the assertion has to live where the store lives.
-
-Add a new integration test under `crates/memory-compiler/tests/` — not in `phase2_acceptance.rs` — with this shape:
+**The type carries content now** (`lib.rs:566`):
 
 ```rust
-// A decision reference that claims issuance but has no durable row must be
-// refused by the authority, and that refusal must be an Err, not Ok(false).
+Issued(AuthorizationDecisionData),
+```
+
+This is a change from what the earlier version of this document specified (`Issued(OpaqueId)`), and it is an improvement I did not ask for. §4.2 requires per-field comparison between reference and stored row; a bare id gives that comparison nothing to compare. `#662`'s message states the reason directly: "so §4.2's per-field comparison has an input."
+
+**The old constructor was kept and made honest** (`lib.rs:585`):
+
+```rust
+pub fn issued(decision_id: OpaqueId) -> Self {
+    Self::Issued(AuthorizationDecisionData {
+        decision_id,
+        issuer: IssuerId(OpaqueId::new("i-owner-proxy/dev-baseline-v1")...),
+        subject_digest: OpaqueId::new("0".repeat(64))...,
+        issued_at: "1970-01-01T00:00:00Z".to_owned(),
+        decision_kind: AuthorizationDecisionKind::Conditional,
+    })
+}
+```
+
+The doc comment says what the sentinels are for: "deliberately NOT valid issued data — `validate_authorization_decision` will not match it against any row, and no row can be written from it."
+
+That is the right shape. `dm2_06` calls `issued(id("ad-1"))` and asserts presence passes; it does not need real data to assert presence, and the sentinel guarantees the test cannot accidentally become an authority test that passes for the wrong reason. A constructor that silently filled plausible-looking fields would have made `dm2_06` assertion 3 meaningless.
+
+## 4. The one step left
+
+`crates/memory-compiler/tests/` contains exactly one file: `event_store_digest_compat.rs`. There is no authorization test. `dm2_06` proves presence and cannot prove authority, because `memory-domain` has one dependency and cannot see the store.
+
+`#662`'s message says this explicitly: "the un-ignore belongs to the follow-up that can call it." That follow-up is this step.
+
+### The assertion
+
+New file `crates/memory-compiler/tests/authorization_authority.rs`:
+
+```rust
+// A reference that claims issuance but has no durable row must be refused by the
+// authority, and the refusal must be Err, not Ok(false).
 let reference = AuthorizationDecisionRef::issued(id("ad-never-issued"));
 let outcome = store.validate_authorization_decision(&reference, &subject_digest);
 assert!(
@@ -171,36 +114,40 @@ assert!(
 );
 ```
 
-Three properties of that assertion are load-bearing and each corresponds to a mistake made in a real PR:
+Three properties, each traceable to a defect that actually happened:
 
-1. **`Err`, not `Ok(false)`.** `#623` asserted `Err(EmptyRequiredField)` — the wrong error, produced by the wrong layer, because it drove the gate through `FactRevision::validate()` where the only reachable failure was a field check. The decision document is explicit (§4.2): "a missing row is always `Err`".
-2. **`RecordMissing`, not any `Err`.** An assertion that accepts any error passes when the validator is broken in a way that fails earlier — for example at `Absent` handling — and then the test is green and measures nothing.
-3. **In `memory-compiler`, not `memory-domain`.** `#623` put the gate in `memory-domain` and had to rewrite the fixtures to avoid `pending_i()`, because `FactRevision::validate()` rejected `is_pending()` at the time. That rejection is gone (`:1008` now rejects only `is_absent()`), so the fixtures are safe again — but the store still is not reachable from `memory-domain`, and no amount of fixture rewriting changes that.
+1. **`Err`, not `Ok(false)`.** `#623` asserted `Err(EmptyRequiredField)` — the wrong error from the wrong layer, because it drove the gate through `FactRevision::validate()` where the only reachable failure was a field check. §4.2: "a missing row is always `Err`".
+2. **`RecordMissing` specifically.** An assertion accepting any `Err` passes when the validator fails earlier — at `PendingReference`, for instance — and then the test is green and measures nothing.
+3. **In `memory-compiler`.** `#623` put it in `memory-domain` and rewrote the fixtures; the store was never reachable there. `#634` did it in the right crate but lost `mod canonical_commit;`, `pub use canonical_commit::*;`, the content-bearing `CanonicalCommitRef`, and `dm2_15` to a rebase.
 
-## 4. What not to do
+### The other two outcomes, which the same file should cover
 
-Each item is a defect observed in a real PR on this repository, not a hypothetical.
+§4.2 has three outcomes and only `Err` is above. The other two need a real row, so they need `issue_authorization_decision`:
 
-- **Do not implement the validator in `memory-domain`.** Its `Cargo.toml` has one dependency (`serde`). Adding `rusqlite` to it inverts the layering the workspace is built on: the domain crate is the thing that must be testable without a database. `#623` is what this looks like when it is tried.
-- **Do not make `FactRevision::validate()` reject `PendingI`.** `OWNER-RULING-025` exists because that reading was attempted. A `PendingI` that fails validation makes every `initial(.., pending_i(), ..)` call site fail at construction, which forces fixtures to be rewritten and hides the real gate behind a constructor error.
-- **Do not fold `Absent` and `PendingI` into one validator arm returning `Ok(false)`.** See §3 step 2(c). `Ok(false)` means "the record exists and disagrees", which is a different fact.
-- **Do not add a cursor parameter.** See §3 step 2(b).
-- **Do not reuse `DEV_BASELINE_ISSUER`.** See §3 step 2(a).
-- **Do not remove `dm2_06`'s presence assertions while adding the authority one.** `#634` did this as a rebase accident and lost `mod canonical_commit;`, `pub use canonical_commit::*;`, the content-bearing `CanonicalCommitRef`, and `dm2_15` along with it. The presence test and the authority test assert different things and both must exist.
+- `Ok(true)` — issue a decision, then validate the reference it returned against the same subject digest.
+- `Ok(false)` — issue, then validate against a *different* subject digest. The row is readable and every reference field matches it, so this must be `Ok(false)` and not `Err`.
 
-## 5. Definition of done
+A test file with only the `Err` case would leave `Ok(false)` unreachable by any test, and `Ok(false)` is the one outcome where a bug makes a wrong thing look like a valid answer.
 
-- [ ] `authorization_decisions` table created in the same batch as `canonical_commits`, columns exactly as §3.1 of the decision.
-- [ ] `issue_authorization_decision` with the idempotent-replay handling copied from `issue_canonical_commit:1035`–`1051`: duplicate primary key reads back and compares fields, byte-identical is a replay, anything else is `IdempotencyConflict`.
-- [ ] `validate_authorization_decision(reference, expected_subject_digest)` — **two parameters**, matching §4.1.
-- [ ] `AuthorizationDecisionValidationError` with at least `RecordMissing`, `RecordMalformed`, `RecordMismatch(&'static str)`, `UnsupportedIssuer`, `ReadFailed`, and one variant for the absent/placeholder case. `Display` implemented, following `:257`.
-- [ ] A new test in `crates/memory-compiler/tests/` asserting `Err(RecordMissing)` for an unbacked `issued()` reference.
-- [ ] A second test in the same file asserting `Ok(true)` after a real `issue_authorization_decision` call, and `Ok(false)` when `expected_subject_digest` differs — the three outcomes of §4.2, each reached by a path that can only reach it.
-- [ ] `dm2_06` in `phase2_acceptance.rs` unchanged. It is correct.
-- [ ] `cargo test --workspace --all-targets` reports zero ignored in `memory-domain`.
+## 5. What not to do
 
-## 6. Why this is a work order and not a patch
+- **Do not remove `dm2_06`'s presence assertions.** They assert something the authority test cannot: that `Absent` blocks at construction and `PendingI` does not. Both tests are needed.
+- **Do not make `FactRevision::validate()` reject `PendingI`.** `OWNER-RULING-025` exists because that was attempted. It would fail every `initial(.., pending_i(), ..)` at construction.
+- **Do not add a cursor parameter** to `validate_authorization_decision`. It has two, matching §4.1, and it is correct.
+- **Do not fold `Absent` and `PendingI` into one arm returning `Ok(false)`.** `#662` maps both to `PendingReference` via `data()`; keep it.
+- **Do not reuse `DEV_BASELINE_ISSUER` for decisions.** `#662` introduced a separate issuer and a separate primary-key namespace (`i_attestations`). That separation is the point.
 
-I do not write code on this repository. That is the one constraint I hold without exception, and it is why this document specifies line numbers, exact SQL, exact signatures, and the three places a mechanical copy fails instead of producing the diff itself. Everything needed to write the diff is here; the diff is not.
+## 6. Definition of done
 
-The reason to prefer this over another round of discussion is in §2: the two steps that shipped were correct, and they shipped without this document. What was missing was not judgment but a record of what remained, and the cost of that absence is measurable — `#623` and `#634` both re-derived step 3, both got it wrong in different directions, and one of them lost four unrelated items to a rebase.
+- [ ] `crates/memory-compiler/tests/authorization_authority.rs` exists.
+- [ ] `Err(RecordMissing)` for an unbacked `issued()` reference.
+- [ ] `Ok(true)` after a real issue-then-validate round trip.
+- [ ] `Ok(false)` when the expected subject digest differs from the stored one.
+- [ ] `dm2_06` unchanged.
+- [ ] `cargo test --workspace --all-targets` reports `ignored = 0`.
+
+## 7. Why this is a work order and not a patch
+
+I do not write code on this repository. That constraint has not moved, and it is why this document gives the exact assertion, the exact file path, and the three failure modes instead of the diff.
+
+The reason to prefer it over silence is measurable in this repository's own history: `#623` and `#634` both re-derived this step, both got it wrong in different directions, and one lost four unrelated items to a rebase. A written target is cheaper than a third derivation.
