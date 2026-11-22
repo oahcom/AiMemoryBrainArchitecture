@@ -1904,3 +1904,34 @@ So "who owns progress" is a real design question about a system that does not ye
 **Unchanged and still true.** `agent-integration` -> `bmcp-protocol`: zero dependencies, zero conversions, zero tests (`grep -c bmcp crates/agent-integration/Cargo.toml` returns `0`).
 
 **Method note.** The two facts above took one shell script and two CLI invocations. Rounds eight through ten each took a session of reading. The cheaper measurement was available the whole time, and the reason it was not taken is that a grep that returns matches feels like more evidence than a CLI run that returns a status line. It is not.
+
+## Round twelve — the durability question is answered, so it stops being asked
+
+Round eleven ended with one decision and said it gated everything else. It is now ruled.
+
+**Ruling (Owner channel, 2026-11-22): compile output is not durable.** `brain-cli` is a demonstration/verification binary. Its compile output is deliberately ephemeral; the durable boundary is event acceptance and outbox delivery, not persistence of compiler results. `Blocked` is expected and creates no requirement for compile-result ownership. No cursor table, no `compiled_at` column, no `--storage` / `--admission` flags.
+
+**What landed** (`#605`, merged as `61b9d743`):
+
+- `run_compiler_stage`'s doc comment now states the contract instead of leaving it to be inferred from two `TemporaryDatabase` call sites.
+- `compile_leaves_no_durable_result_behind` pins the observable half: one accepted event yields exactly one pending intent, a re-run re-reads that same intent rather than enqueueing another, and both runs produce byte-identical snapshots.
+
+**Mutation evidence, including the failure.** Two mutations were caught: `pending_compile_intents` returning every intent twice (`UNION ALL`), and `storage` becoming a stable path across runs (`std::fs::copy` to a fixed temp file). A third mutation -- writing a marker file without changing the database lifetime -- survived, and it survived *correctly*: it changed no behaviour. That one is recorded rather than discarded because "the mutation survived" and "the mutation was wrong" produce identical output, and round seven's mistake was exactly this confusion in reverse.
+
+**What the test deliberately does not check.** It does not read `sqlite_master`, so a durable result table with an unexpected name would pass. Reading the schema would mean adding `rusqlite` as a `brain-cli` dev-dependency to open a file this crate does not otherwise open. The `ponytail:` note in the test names that ceiling and the upgrade path.
+
+**Closed by this ruling.** Round nine's three candidates (`compiled_at` column, cursor table, idempotent re-read) are not-applicable to this binary. They are not deferred; they are answered. If a future binary does persist compile output, they reopen as a fresh question with a fresh owner, not as an inherited TODO.
+
+**Still open, unchanged.** `compile_intent_durable` remains forgeable: `PendingCompileIntent` has public fields, and `accepted_event_from` guarantees only that it does not launder bad bytes, not that the flag is proof. This is the one seam that has survived three rounds without moving, and it is now the oldest open item in this file.
+
+**Measurement**
+
+```
+cargo test --workspace --offline --all-targets
+  passed=511 failed=0 ignored=1      (main before #605: 503 / 0 / 2)
+
+rustfmt --check on both changed files: 0 diffs
+#605: 2 files changed, 73 insertions(+)
+```
+
+**Method note, second occurrence.** Round eleven observed that one shell script and two CLI runs beat three rounds of reading. This round the same pattern held: the mutation that actually mattered took one `std::fs::copy` and one `cargo test`, while the first two mutations I wrote were guesses about the code that turned out to change nothing. The cheap experiment and the correct experiment are not the same thing, and both are cheaper than reasoning.
