@@ -246,3 +246,78 @@ so wiring direction (c) today would import a red gate into a workflow that canno
 execute. That does not weaken the recommendation — it makes the ordering explicit:
 **(a) must land before (c) is meaningful**, otherwise CI will be red for a reason
 nobody can observe.
+
+## Round-eleven closure of criteria 1–3 (2026-11-22, `main @ f3ddeb76`)
+
+Direction (a) landed. The 30 unregistered schemas are audited by family-level
+rulings in `08-bmcp-protocol/schema-nonempty-audit.md`; the rows are the
+projection of those rulings, not a generated list.
+
+```
+$ cd 08-bmcp-protocol/schemas && python3 test_nonempty_audit.py; echo "EXIT=$?"
+OK: 32 schemas; 5599 registered constraints; no unregistered or stale entries.
+EXIT=0
+```
+
+| criterion | state |
+|---|---|
+| 1. guard exits 0 on `main` | **met** — `OK: 32 schemas; 5599 registered constraints` |
+| 2. stated baseline and inspected count match reality | **met** — baseline `f3ddeb76`, 2026-11-22, 32 files |
+| 3. every schema audited or listed out of scope with a reason | **met** — 32/32 audited; nothing declared out of scope |
+| 4. guard runs in CI and blocks merges | **NOT met** — unchanged, see below |
+
+### What the audit actually decided
+
+29 field-class rulings cover 223 distinct `(field, constraint)` pairs across
+5506 triples. The classes are: reference/identity, fixed-width digest, canonical
+counter, typed sequence/generation/position, signature, reason, PostgreSQL engine
+identity, and purpose. Each class gets one ruling with its own domain rationale;
+rows inherit it. Nine rows carry their own ruling instead, because their
+semantics differ from their family:
+
+- `owner_snapshots` `minItems: 3` — one snapshot per owner authority.
+- `owner_release_refs` `minItems: 3` — epoch completion needs all three releases.
+- `required_owner_release_refs` — `minItems: 1` in 1.0.0, `minItems: 3` from 1.0.1.
+- `request_members` / `admission_members` / `members` / `participant_refs` /
+  `participant_entries` `minItems: 1` — all five sit in `then` branches
+  conditioned on COMPLETE_NON_EMPTY, and the COMPLETE_EMPTY branch caps the same
+  array at `maxItems: 0`.
+- `owner_admission_bindings` `minItems: 0` — the schema's own description says
+  the empty array is a represented state.
+- `recovery_observations` `minItems: 0` — no observation to report.
+- `owner_snapshot_refs` / `owner_snapshot_digests` `minProperties: 1` — also
+  `required: [I, D, C]`, so the floor is met by construction.
+- `request_highwaters` / `admission_highwaters` — unconditional in 1.0.0/1.0.1,
+  conditional from 1.0.2. The 1.0.2 form is the correct ruling; the older
+  unconditional floors are frozen artefacts and are marked as superseded.
+
+14 of the 5506 rows are recorded as legally empty; the other 5492 as not. That
+split is the point: a generator with a default disposition would have produced
+5506 identical verdicts and the gate would certify nothing.
+
+### Two schema defects found while reading, not repaired
+
+Neither is a non-empty question, so neither is fixed here — fixing either means
+editing a schema.
+
+1. `bmcp.recovery-cutoff` 1.0.3–1.0.5: `secondary_high_waters.propertyNames`
+   requires `^[A-Z][A-Za-z0-9]*$`, while the sibling `allOf` branches require
+   `receipt_issue`, `producer_registration`, `provider_attempt` and six other
+   snake_case keys. Under `owner_kind` I/D/C those revisions have no satisfiable
+   instance. 1.0.0–1.0.2 have no such branches and are unaffected.
+2. `bmcp.coc-jf10-unified` 1.2.5: `owner_snapshots` changes from a 3-element
+   array (1.2.0–1.2.4) to a `required: [I, D, C]` object. Both are non-empty by
+   construction, but a consumer sharing one code path across 1.2.4 and 1.2.5
+   sees a type change.
+
+Both need an Owner H ruling. They are recorded in the audit table's "Open
+questions for Owner H" section so they are not lost with this work item.
+
+### Criterion 4 remains open
+
+CI is still unable to execute: every check run in this repository carries the
+billing message quoted above. Wiring `test_nonempty_audit.py` into a workflow
+today would add a gate nobody can observe, which is the failure mode this item
+was opened to name. Criterion 4 stays open until CI billing is restored; the
+ordering established in the previous round is unchanged — (a) is now done, so
+(c) becomes meaningful the moment CI can run.

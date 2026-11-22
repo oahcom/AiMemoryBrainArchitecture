@@ -222,3 +222,65 @@ PARTIAL/NOT_ENUMERATED/UNAVAILABLE/UNKNOWN 状态可以没有可报告的 highwa
 所以在今天就接入方向 (c)，等于把一个红闸门引入一个无法执行的工作流。这并不削弱该建议
 —— 它把顺序讲明确了：**(a) 必须先落地，(c) 才有意义**，否则 CI 会因为一个没人能观察到
 的原因变红。
+
+## 第十一轮：判据 1–3 闭合（2026-11-22，`main @ f3ddeb76`）
+
+方向 (a) 已落地。30 个未登记 schema 通过家族级裁定写入
+`08-bmcp-protocol/schema-nonempty-audit.md`；表中的行是这些裁定的投影，不是程序化生成的清单。
+
+```
+$ cd 08-bmcp-protocol/schemas && python3 test_nonempty_audit.py; echo "EXIT=$?"
+OK: 32 schemas; 5599 registered constraints; no unregistered or stale entries.
+EXIT=0
+```
+
+| 判据 | 状态 |
+|---|---|
+| 1. 闸门在 `main` 上 exit 0 | **满足**——`OK: 32 schemas; 5599 registered constraints` |
+| 2. 声明的基线与检查数量与实际一致 | **满足**——基线 `f3ddeb76`、2026-11-22、32 个文件 |
+| 3. 每个 schema 均已审计，或以理由显式列为范围外 | **满足**——32/32 已审计，未将任何 schema 列为范围外 |
+| 4. 闸门接入 CI 并阻断合并 | **未满足**——未变，见下 |
+
+### 审计实际裁定了什么
+
+29 条字段类别裁定覆盖 223 个去重的 `(字段, 约束)` 对，投影到 5506 个三元组。类别为：
+引用/标识、定宽摘要、规范计数器、类型化序列/代际/位置、签名、理由、PostgreSQL 引擎标识、
+purpose。每个类别给出一条带领域理由的裁定，行继承该裁定。另有九处字段因其语义与家族通例不同，
+单独给出裁定：
+
+- `owner_snapshots` `minItems: 3`——每个 Owner Authority 一份快照。
+- `owner_release_refs` `minItems: 3`——epoch 完成需三方 release 齐备。
+- `required_owner_release_refs`——1.0.0 为 `minItems: 1`，1.0.1 起为 `minItems: 3`。
+- `request_members` / `admission_members` / `members` / `participant_refs` /
+  `participant_entries` 的 `minItems: 1`——五处均位于以 COMPLETE_NON_EMPTY 为条件的
+  `then` 分支，而 COMPLETE_EMPTY 分支将同一数组限制为 `maxItems: 0`。
+- `owner_admission_bindings` `minItems: 0`——schema 自带 description 已把空数组定义为可表示状态。
+- `recovery_observations` `minItems: 0`——无观测结果可报告。
+- `owner_snapshot_refs` / `owner_snapshot_digests` 的 `minProperties: 1`——同时
+  `required: [I, D, C]`，下限由构造必然满足。
+- `request_highwaters` / `admission_highwaters`——1.0.0/1.0.1 无条件要求，1.0.2 起改为条件分支。
+  以 1.0.2 的形态为正确裁定；早期无条件下限为冻结产物，标注为已被取代。
+
+5506 行中有 14 行判定为可合法为空，其余 5492 行判定为不可。这个区分正是重点：
+一个带默认处置的生成器会产出 5506 条完全相同的结论，闸门将不证明任何事。
+
+### 读 schema 时发现的两处缺陷，未修复
+
+二者都不是“是否可空”的问题，故此处不修——修任何一个都意味着改动 schema。
+
+1. `bmcp.recovery-cutoff` 1.0.3–1.0.5：`secondary_high_waters.propertyNames` 要求
+   `^[A-Z][A-Za-z0-9]*$`，而同级的 `allOf` 分支要求 `receipt_issue`、`producer_registration`、
+   `provider_attempt` 等九个 snake_case 键。`owner_kind` 为 I/D/C 时，这些修订不存在可满足实例。
+   1.0.0–1.0.2 无此类分支，不受影响。
+2. `bmcp.coc-jf10-unified` 1.2.5：`owner_snapshots` 由 3 元素数组（1.2.0–1.2.4）改为
+   `required: [I, D, C]` 的对象。两者在构造上都非空，但共用同一代码路径校验 1.2.4 与 1.2.5
+   的消费方会遇到类型变化。
+
+两项均需 Owner H 裁定，已写入审计表「待 Owner H 裁定的问题」一节，以免随本工作项失传。
+
+### 判据 4 仍然开放
+
+CI 仍无法执行：本仓库每个 check run 都带着上文引用的计费提示。今天把
+`test_nonempty_audit.py` 接入 workflow，只会增加一个无人能观察的门禁，而这正是本工作项要
+指出的失效模式。判据 4 保持开放，直到 CI 计费恢复；上一轮确立的顺序不变——(a) 已完成，
+故一旦 CI 可运行，(c) 立即具有意义。
