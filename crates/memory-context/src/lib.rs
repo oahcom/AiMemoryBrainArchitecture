@@ -11,6 +11,9 @@ use memory_domain::{
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashMap, HashSet};
 
+mod selector;
+pub use selector::*;
+
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ContextBudget {
     pub max_entries: usize,
