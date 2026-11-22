@@ -383,7 +383,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - Delivered 仅证明传输端点已收到。只有具备 G 所有的 context／application 语义，以及 C 推理边界所要求的证据时，才接受 Applied。H 负责传输／验证证据，但不得签发 G 的 Applied。
 - Forget ACK 与 Applied 分开处理。适配器本地状态 SUPPRESSED、LOCAL_BUFFER_CLEARED、LOCAL_CACHE_PURGED、QUEUED_DELIVERY_CANCELLED、FAILED、UNKNOWN 和 UNSUPPORTED，仅能证明所声明的 target／region／session／capability 范围。只有 I 负责评估全局 target 是否满足，以及 PolicyException。
 - 对同一个已完成操作，ACK identity／evidence digest 必须保持稳定；重传时复用该身份。Transport attempt identity 可以变化。相同 operation key 加相同 target digest 属于幂等操作；相同 key 加不同 digest 属于冲突。本地操作成功后若缺少 ACK，在通过查询／协调确认之前仍保持 Unknown。
-- 任何 ACK 都不意味着模型已关注、理解，也不意味着 provider 已删除、数据已物理擦除或全局 Forget 已完成。
+- 任何 ACK 都不意味着模型已注意到相关内容或已经理解，也不证明 provider 侧已完成删除、数据已被物理擦除，或全局 Forget 已完成。
 
 #### H-CONFIRM-004 —— Validator 层级／错误映射：PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN
 
@@ -485,7 +485,7 @@ H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体
 
 ### 7.4 B/D/I Owner 决议（委派角色；不声称存在独立人类签署）
 
-- **B — PR #429 comment 7060251435：** 接受 Option A + I1。Claim 是一条可归属的命题线程；ClaimRevision 不可变；Fact 是独立的受治理 attest；FactRevision 绑定精确的 ClaimRevisionRef、Evidence／Provenance，以及经授权的 attestor／method 上下文。B 负责语义词汇；D 负责规范身份；I 负责授权。
+- **B — PR #429 comment 7060251435：** 接受 Option A + I1。Claim 是一条可归属的命题线程；ClaimRevision 不可变；Fact 是独立于 Claim 的、单独受治理的证明记录（attestation）；FactRevision 绑定一个或多个精确的 ClaimRevisionRef，以及 Evidence／Provenance 和经授权的 attestor／method 上下文。B 负责语义词汇；D 负责规范身份；I 负责授权。
 - **D — PR #429 comment 7060243632：** 接受 Option A + I1 作为规范领域输入。D 负责 ClaimRef／ClaimRevisionRef 和 FactRef／FactRevisionRef 的分配、revision commit／currentness、生命周期、lineage、ConflictSet 以及 ForgetOperation／ForgetFence。精确的不可变 revision 事务／currentness、schema、迁移／兼容性、consumer acceptance 和符合性仍为 OPEN。
 - **I — PR #429 comment 7060259541：** 接受 Option A + I1 作为安全策略输入。Fact 创建／修订属于受保护操作，必须具备经过认证的 Principal／Actor 绑定、精确的 attestor 授权，以及在最终授权／提交时仍有效的由 I 签发的 PermissionEpoch。缓存的 ALLOW／session／lease／ACK 不得作为可复用授权。I 负责 attestor 授权、撤销、保留／法律保全／备份，以及全局 Forget 评估。精确的策略划分、issuer／registry 绑定和 consumer 映射仍为 OPEN。
 
