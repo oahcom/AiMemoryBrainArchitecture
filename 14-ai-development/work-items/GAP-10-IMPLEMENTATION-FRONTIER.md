@@ -688,3 +688,102 @@ invocation, and no toolchain is vendored. A future contributor still hits the
 broken `gcc` unless they know to override it. Recording the working invocation
 in this section is the only durable artifact.
 
+
+## 9. Re-measurement at `d89fd5fa8` (2026-11-22 12:30 +08:00)
+
+Additive again. §1-§8 untouched. This section exists because the six percentages
+in the original request were re-stated a fourth time, and because §8's own
+numbers were already stale when they landed.
+
+Observed at `2026-11-22T04:29:28Z`, tree `d89fd5fa8`.
+
+### 9.1 The whole workspace is green, and the ignored count is down to one
+
+```
+$ CC=<zigcc> AR=<zigar> cargo test --workspace --all-targets --offline
+TOTAL passed=503 failed=0 ignored=1
+$ cargo clippy --workspace --all-targets -- -D warnings   # clean
+$ cargo fmt --all -- --check                              # clean
+```
+
+§8.3 recorded `476 / 0 / 3` at `0ae644f32`. Between that commit and this one,
+`fe9e25a5c` landed `ProvenanceGraph` and evidence independence, which closed
+`dm2_11` and `dm2_12`.
+
+The single remaining ignore is `dm2_06_missing_authorization_ref_blocks_fact_publication`.
+Its reason is not a missing API: `FactRevision::initial` *requires* an
+`AuthorizationDecisionRef`, and the only public constructor is
+`AuthorizationDecisionRef::pending_i()`. Proving that a missing authorization is
+rejected needs a type state that distinguishes absent from I-issued, and §8 of
+`phase-2-domain-extension.md` forbids inferring authorization. So this one is
+decision-blocked, not code-blocked — the same category §1.2 put it in, now the
+only member of that category.
+
+### 9.2 Four of the six stated percentages are now measurably wrong
+
+| domain | stated | measured at `d89fd5fa8` |
+|---|---|---|
+| Memory Compiler | 85% unimplemented | `compile` is reachable from `brain-cli` through a production `AdmissionPublicationAuthority`. 66 tests. Five stages all have entry points. `Published` remains unreachable for three named reasons (GAP-12/13/14), none of which is "the compiler is 85% unwritten". |
+| Memory Context | 80% unimplemented | 77-row map unchanged in counts (9 implemented / 42 partial / 26 absent) but the crate now runs **82 unit + 17 integration = 99 tests**, up from 68+9. The coverage map has not been re-attributed since the code moved; treat the row counts as stale, not the tests. |
+| Agent Integration | 90% unimplemented | **False.** The crate now depends on `memory-context` *and* `memory-domain` at runtime, `brain-cli` consumes it (`crates/brain-cli/Cargo.toml:13`), and it runs 36 unit + 21 integration tests including `context_snapshot_delivery.rs`, which crosses the crate boundary with a real `ContextSnapshot`. #525's premise is dead. |
+| BMCP | 60% unimplemented | Protocol artifacts substantial; `bmcp-protocol` is 44 unit + 4 conformance tests. Transport/server still absent — a binary, not a percentage. Unchanged from §1.4. |
+| Phase 2 domain | 100% not started | **False.** 70 unit + 20 acceptance tests, 1 ignore (`dm2_06`), decision-blocked. `ClaimRevisionRegistry`, `ClaimRevisionResolver`, `AcceptedRevisionState`, `RelationTypeRegistry`, `ProvenanceGraph`, `EvidenceIndependence` and `claim_identity::classify` are all implemented. |
+| E2E | 100% not started | **False.** `brain-cli` runs ingestion → extraction → normalization → staging → `compile` → proof → context assembly → adapter delivery. `crates/brain-cli/tests/e2e_full_chain.rs` asserts the whole chain including the persisted snapshot and the refusal notice. One test, 3.6 s, passes. |
+
+The pattern worth naming: **each of these six numbers was true at some earlier
+commit.** They are not lies, they are fossils. Re-stating them without
+re-measuring is what makes them wrong.
+
+### 9.3 What is genuinely absent, and it is three things
+
+Everything above is code that exists. The set of specified work with no
+implementation at all is now:
+
+1. **A successful `Published` disposition.** Blocked by three issuer-less proof
+   fields, each tracked: GAP-12 (canonical commit), GAP-13 (participant
+   admission, external and tripartite), GAP-14 (store lifecycle plus the other
+   two).
+2. **BMCP transport and server.** No `TcpListener`, no `hyper`, no `axum`
+   anywhere in `crates/`. Frozen by H, so dispatching it produces unmergeable
+   work.
+3. **`dm2_06`'s authorization type state.** Blocked by `B-P2-XO-01` and by §8's
+   prohibition on inferring authorization.
+
+That is the honest frontier: one decision-gated disposition, one
+transport-frozen binary, one owner-gated type state. Not six percentages.
+
+### 9.4 The `13-engineering-decisions` bilingual gap is still 75% of the baseline
+
+§7.6 measured 58 of 77 gaps in that one root, and nothing has changed:
+
+```
+$ BASE_SHA=HEAD~1 HEAD_SHA=HEAD python scripts/check_bilingual_docs.py
+bilingual baseline: 77 frozen, 0 new gaps
+```
+
+`PAIR_EXEMPT_PREFIXES` and `EMBEDDED_BILINGUAL_SOURCES` still cover nothing
+under `13-engineering-decisions`. This is not a code defect and not a doc defect;
+it is a policy shape that root has never satisfied. Recorded here so the next
+reader does not re-derive it.
+
+### 9.5 Two governance records are red on main, and one of them is a ruling that did not land
+
+`GOV-DOC-002` fails on `main` with exactly two errors, both `NO_AUTHORITATIVE_SOURCE`:
+
+| scope | declaring file | status |
+|---|---|---|
+| `memory-compiler/reading-guide` | `04-memory-compiler/README.md:15` | `Non-Canonical` |
+| `protocol/bmcp-message-type-index` | `08-bmcp-protocol/protocol-index.md:14` | `Candidate` |
+
+The first is the one Architecture Owner already ruled on. PR #496 merged the
+root README with `canonical_status: Non-Canonical`, but the ruling was
+`Canonical / Informative`. The merge did not carry the ruling. Fixing it is a
+one-line metadata edit plus the same edit in the two mirrors — and it is a
+content-authority assertion, not a code change, which is why it needs an owner
+rather than a patch.
+
+The second has had no ruling at all. `protocol-index.md` is a generated
+inventory audited at a pinned base; whether it is *authoritative* for the
+message-type namespace, or merely a report about it, has not been decided.
+
+Both are recorded in #564. Neither is fixed by this document.

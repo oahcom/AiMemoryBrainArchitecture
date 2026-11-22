@@ -601,3 +601,89 @@ PR 验证不足的原因。
 环境修复没有进入仓库：`CC`/`AR` 按次传入，没有 vendored 工具链。未来的贡献者
 仍会撞上坏掉的 `gcc`，除非知道要覆盖它。把可用的调用方式记在本节，是唯一
 持久化的产物。
+
+## 9. 在 `d89fd5fa8` 处的重测（2026-11-22 12:30 +08:00）
+
+仍然是增量。§1-§8 未改动。本节存在的原因是：原始请求里的六个百分比被第四次重述，
+而 §8 自己的数字在落地时就已经过期。
+
+观测时间 `2026-11-22T04:29:28Z`，树 `d89fd5fa8`。
+
+### 9.1 整个工作区全绿，ignore 降到一条
+
+```
+$ CC=<zigcc> AR=<zigar> cargo test --workspace --all-targets --offline
+TOTAL passed=503 failed=0 ignored=1
+$ cargo clippy --workspace --all-targets -- -D warnings   # clean
+$ cargo fmt --all -- --check                              # clean
+```
+
+§8.3 在 `0ae644f32` 记录的是 `476 / 0 / 3`。在那一提交与本提交之间，
+`fe9e25a5c` 落地了 `ProvenanceGraph` 与证据独立性，闭合了 `dm2_11` 与 `dm2_12`。
+
+仅剩的一条 ignore 是 `dm2_06_missing_authorization_ref_blocks_fact_publication`。
+它的原因不是缺 API：`FactRevision::initial` **要求**一个 `AuthorizationDecisionRef`，
+而唯一公开构造是 `AuthorizationDecisionRef::pending_i()`。要证明"缺失授权会被拒绝"，
+需要能区分"不存在"与"I 已签发"的类型状态，而 `phase-2-domain-extension.md` §8
+禁止推断授权。所以这一条是决策阻塞，不是代码阻塞——与 §1.2 归入的类别相同，
+只是现在该类只剩它一个成员。
+
+### 9.2 六个百分比里有四个现在可测地是错的
+
+| 领域 | 陈述值 | 在 `d89fd5fa8` 实测 |
+|---|---|---|
+| Memory Compiler | 85% 未实现 | `compile` 已通过生产版 `AdmissionPublicationAuthority` 从 `brain-cli` 可达。66 个测试。五个阶段都有入口。`Published` 仍不可达，原因有三个且都已具名（GAP-12/13/14），其中没有一条是"编译器还有 85% 没写"。 |
+| Memory Context | 80% 未实现 | 77 行覆盖图的计数未变（9 已实现 / 42 部分 / 26 缺失），但该 crate 现在跑 **82 单测 + 17 集成 = 99 个测试**，此前是 68+9。覆盖图自代码移动后未重新归属；应视为行数过期，而非测试过期。 |
+| Agent Integration | 90% 未实现 | **错。** 该 crate 现在运行时依赖 `memory-context` **与** `memory-domain`，`brain-cli` 已消费它（`crates/brain-cli/Cargo.toml:13`），并跑 36 单测 + 21 集成测试，其中 `context_snapshot_delivery.rs` 携带真实 `ContextSnapshot` 跨 crate 边界。#525 的前提已死。 |
+| BMCP | 60% 未实现 | 协议产物充实；`bmcp-protocol` 有 44 单测 + 4 一致性测试。传输与服务端仍缺失——那是一个二进制，不是一个百分比。与 §1.4 相同。 |
+| Phase 2 领域模型 | 100% 未启动 | **错。** 70 单测 + 20 验收测试，1 条 ignore（`dm2_06`），决策阻塞。`ClaimRevisionRegistry`、`ClaimRevisionResolver`、`AcceptedRevisionState`、`RelationTypeRegistry`、`ProvenanceGraph`、`EvidenceIndependence` 与 `claim_identity::classify` 均已实现。 |
+| 端到端 | 100% 未启动 | **错。** `brain-cli` 跑通 摄取 → 抽取 → 规范化 → 暂存 → `compile` → 取证明 → 上下文装配 → 适配器投递。`crates/brain-cli/tests/e2e_full_chain.rs` 断言了整条链，含持久化快照与拒绝通告。一个测试，3.6 秒，通过。 |
+
+值得点名的规律：**这六个数字在某个更早的提交上都曾为真。** 它们不是谎言，是化石。
+不重测就重述，才是它们变错的原因。
+
+### 9.3 真正缺失的只有三件事
+
+上述全部是已存在的代码。完全没有任何实现的、已规格化的工作，现在是：
+
+1. **一次成功的 `Published` 处置。** 被三个无签发者的证明字段阻塞，各自已立项：
+   GAP-12（canonical commit）、GAP-13（参与者准入，外部且三方）、
+   GAP-14（存储生命周期加上另外两个）。
+2. **BMCP 传输与服务端。** `crates/` 里没有 `TcpListener`、没有 `hyper`、没有 `axum`。
+   由 H 冻结，因此派发它只会产出无法合并的工作。
+3. **`dm2_06` 的授权类型状态。** 被 `B-P2-XO-01` 与 §8 的禁止推断授权阻塞。
+
+这才是诚实的前沿：一个决策阻塞的处置、一个传输冻结的二进制、一个所有者阻塞的
+类型状态。不是六个百分比。
+
+### 9.4 `13-engineering-decisions` 的双语缺口仍占基线 75%
+
+§7.6 测到该单一 root 占 77 个缺口中的 58 个，至今未变：
+
+```
+$ BASE_SHA=HEAD~1 HEAD_SHA=HEAD python scripts/check_bilingual_docs.py
+bilingual baseline: 77 frozen, 0 new gaps
+```
+
+`PAIR_EXEMPT_PREFIXES` 与 `EMBEDDED_BILINGUAL_SOURCES` 仍不覆盖
+`13-engineering-decisions` 下任何内容。这不是代码缺陷，也不是文档缺陷；
+是该 root 从未满足过的一种策略形态。记在此处，免得下一位读者重新推导。
+
+### 9.5 两条治理记录在 main 上为红，其中一条是没落地的裁定
+
+`GOV-DOC-002` 在 `main` 上恰好报两个错误，都是 `NO_AUTHORITATIVE_SOURCE`：
+
+| scope | 声明文件 | 当前状态 |
+|---|---|---|
+| `memory-compiler/reading-guide` | `04-memory-compiler/README.md:15` | `Non-Canonical` |
+| `protocol/bmcp-message-type-index` | `08-bmcp-protocol/protocol-index.md:14` | `Candidate` |
+
+第一条是 Architecture Owner 已经裁定过的那一个。PR #496 以
+`canonical_status: Non-Canonical` 合并了 root README，而裁定是
+`Canonical / Informative`。合并没有携带裁定。修法是改一行元数据、并在两个镜像里
+改同样一行——而这是一次内容权威性断言，不是代码改动，所以它需要所有者，而不是补丁。
+
+第二条从未有过裁定。`protocol-index.md` 是在固定基线上审计生成的清单；
+它对 message-type 命名空间究竟是**权威**，还是只是**关于**它的报告，尚未决定。
+
+两条都记录在 #564。本文档不修复其中任何一条。
