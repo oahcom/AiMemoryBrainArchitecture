@@ -1,3 +1,26 @@
+---
+document_metadata:
+  domain: protocol
+  role: work-record
+
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+    evidence_verification:
+      verification_status: Unverified
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Informative
+---
+
 # GAP-16 — BMCP is a single-message validator, not a protocol stack
 
 **Status:** Open — 1 of 22 message types has a Rust parser; transport has no specification at all

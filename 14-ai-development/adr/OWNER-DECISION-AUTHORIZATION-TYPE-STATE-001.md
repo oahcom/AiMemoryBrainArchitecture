@@ -1,3 +1,33 @@
+---
+document_metadata:
+  domain: domain-model
+  role: decision-record
+
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+    evidence_verification:
+      verification_status: Unverified
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+
+  authority:
+    canonical_status: Canonical
+    canonical_scope: "Owner ruling: absence of an authorization decision must be representable as a distinct state before presence can be validated. Resolves the type-level blocker on dm2_06."
+    canonical_scope_id: domain-model/authorization-decision-ref-type-state
+    canonical_scope_keywords:
+      - authorization-decision-ref
+      - type-state
+      - absent-placeholder-issued
+      - dm2-06
+    canonical_conflict_status: None
+    normative_status: Normative
+---
+
 # OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001 — Absence must be representable before presence means anything
 
 **Status:** DECIDED (owner-proxy decision, 2026-11-22T05:10Z)
