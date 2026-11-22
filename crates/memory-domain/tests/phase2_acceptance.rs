@@ -601,10 +601,62 @@ fn dm2_05_fact_revision_accepts_multiple_exact_claim_revision_pins() {
 
 // ---------------------------------------------------------------- DM2-06
 
+/// `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001` D3/D6: the gate checks *presence*, not
+/// authenticity. `Absent` blocks publication; `PendingI` and `Issued` do not, because
+/// asserting that a present reference is genuine is `B-P2-XO-01`'s question, not this one.
 #[test]
-#[ignore = "blocked: FactRevision::initial 强制要求 AuthorizationDecisionRef，但当前唯一公开构造是 AuthorizationDecisionRef::pending_i()；类型没有 absent/validated-I-issued 状态，无法证明缺失授权被拒绝。Round 4 的 fact_with_placeholder_attestor_validates_today 固定了当前占位符可通过的事实"]
 fn dm2_06_missing_authorization_ref_blocks_fact_publication() {
-    unimplemented!()
+    fn with_decision(decision: AuthorizationDecisionRef) -> Result<FactRevision, DomainError> {
+        FactRevision::initial(
+            FactRef::new("fact-auth").unwrap(),
+            FactRevisionRef::new("fr-auth").unwrap(),
+            vec![ClaimRevisionRef::new("cr-1").unwrap()],
+            vec![EvidenceRef::new("ev-1").unwrap()],
+            vec![ProvenanceRef::new("prov-1").unwrap()],
+            scope("s1"),
+            AttestorRef::pending_i(),
+            decision,
+            "independent_review".into(),
+            "1.0".into(),
+            FactOutcome::Attested,
+            "attested fact needs a recorded authorization decision".into(),
+            CanonicalCommitRef::pending_d(),
+            None,
+        )
+    }
+
+    // 1. No authorization decision recorded -> the fact cannot be constructed at all.
+    assert_eq!(
+        with_decision(AuthorizationDecisionRef::absent()),
+        Err(DomainError::MissingAuthorizationDecision)
+    );
+
+    // 2. Presence passes: the placeholder still validates (Round 4's pinned fact).
+    let placeholder = with_decision(AuthorizationDecisionRef::pending_i()).unwrap();
+    assert!(placeholder.validate().is_ok());
+
+    // 3. A claimed I-issued reference also passes presence. This is not proof of issuance.
+    let issued = with_decision(AuthorizationDecisionRef::issued(id("ad-1"))).unwrap();
+    assert!(issued.validate().is_ok());
+
+    // 4. A revision that already exists cannot be edited into absence: deserializing the
+    //    absent wire form and re-validating must fail the same gate.
+    let mut wire = serde_json::to_value(placeholder.clone()).unwrap();
+    wire["authorization_decision_ref"] = json!("absent");
+    let absent_from_wire: FactRevision = serde_json::from_value(wire).unwrap();
+    assert_eq!(
+        absent_from_wire.validate(),
+        Err(DomainError::MissingAuthorizationDecision)
+    );
+
+    // 5. The states stay distinguishable after a round-trip, so a reader cannot mistake a
+    //    placeholder for an issued decision.
+    let round: AuthorizationDecisionRef =
+        serde_json::from_str(&serde_json::to_string(&AuthorizationDecisionRef::absent()).unwrap())
+            .unwrap();
+    assert!(round.is_absent());
+    assert!(AuthorizationDecisionRef::pending_i().is_pending());
+    assert!(!AuthorizationDecisionRef::pending_i().is_absent());
 }
 
 // ---------------------------------------------------------------- DM2-07

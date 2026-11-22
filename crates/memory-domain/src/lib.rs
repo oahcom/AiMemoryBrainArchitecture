@@ -49,6 +49,7 @@ pub enum DomainError {
     MissingClaimRevision,
     MissingFactEvidence,
     MissingFactProvenance,
+    MissingAuthorizationDecision,
     MissingRevisionReason,
     MissingIdentityLineage,
     InvalidRelationEndpoint,
@@ -528,14 +529,43 @@ impl AttestorRef {
         Self(())
     }
 }
-/// NOT DEFINED: awaiting I. Required placeholder; this is not an authorization grant.
-/// `pending_i()` is public and any caller can create this placeholder. Validation cannot
-/// establish that it is an I-issued authorization decision; see FactRevision::validate.
+/// NOT DEFINED: awaiting I. Presence only; no variant asserts that a decision was actually
+/// issued by I. `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001` requires absence to be
+/// representable before presence can mean anything, so these states are structural, not
+/// cryptographic. `pending_i()` stays public, so no value here proves issuance.
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct AuthorizationDecisionRef(());
+#[serde(rename_all = "snake_case")]
+pub enum AuthorizationDecisionRef {
+    /// No authorization decision was recorded. This is the only state that blocks publication.
+    Absent,
+    /// The known unvalidated placeholder: a value exists, nothing is proven.
+    PendingI,
+    /// A caller-claimed I-issued reference. Authenticity is not asserted; whether it is
+    /// genuine is I's contract and `B-P2-XO-01`'s question.
+    Issued(OpaqueId),
+}
 impl AuthorizationDecisionRef {
+    /// Explicit absence. `FactRevision::validate` rejects a fact carrying this.
+    pub const fn absent() -> Self {
+        Self::Absent
+    }
+
+    /// Legacy placeholder. Public, and therefore never proof of an I-issued decision.
     pub const fn pending_i() -> Self {
-        Self(())
+        Self::PendingI
+    }
+
+    /// A claimed I-issued reference. Carries no proof of issuance.
+    pub fn issued(decision_id: OpaqueId) -> Self {
+        Self::Issued(decision_id)
+    }
+
+    pub const fn is_absent(&self) -> bool {
+        matches!(self, Self::Absent)
+    }
+
+    pub const fn is_pending(&self) -> bool {
+        matches!(self, Self::PendingI)
     }
 }
 /// The canonical commit reference is defined by `D-OWNER-DECISION-CANONICAL-COMMIT-001`
@@ -970,6 +1000,12 @@ impl FactRevision {
         }
         if self.provenance_refs.is_empty() {
             return Err(DomainError::MissingFactProvenance);
+        }
+        // Presence gate, not authenticity: `Absent` means nobody recorded a decision, which
+        // is exactly what DM2-06 says must not publish. `PendingI`/`Issued` pass because
+        // presence is all this gate can check; proving issuance is `B-P2-XO-01`.
+        if self.authorization_decision_ref.is_absent() {
+            return Err(DomainError::MissingAuthorizationDecision);
         }
         self.claim_revision_refs
             .iter()
