@@ -76,8 +76,11 @@ precisely the failure mode D2 exists to prevent.
 2. **(D, FROZEN — see D-OWNER-DECISION-CANONICAL-COMMIT-001)** Freeze the canonical commit contract: a reference type that
    carries content, a durable record, and a validator. Until then no producer is
    possible and none should be simulated.
-3. **(E, after 2)** Source `canonical_commit_confirmed` from that validator, and
-   stop accepting the cursor as evidence (D6.3).
+3. **(E, NOT AUTHORIZED — superseded by D8)** Keep
+   `canonical_commit_confirmed` permanently `false` in the E-side production
+   adapter. E MUST NOT source this D-owned `FactRevision` commit flag from a
+   cursor, from `StagedDerivative`, or from a validator for a subject absent from
+   its production inputs. See `D-OWNER-DECISION-CANONICAL-COMMIT-001.md` D8.
 4. **(D, blocking, independent)** Publication-participant registry, so
    `publication_participant_admitted` has an issuer.
 5. **(I, blocking, independent)** Protected-visibility authority, so
