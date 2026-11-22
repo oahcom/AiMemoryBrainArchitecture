@@ -117,9 +117,63 @@ fn dm2_01_stable_claim_ref_across_revisions() {
 }
 
 #[test]
-#[ignore = "blocked: 当前无 ClaimRevisionRegistry、register_revision 或 uniqueness-check API；ClaimRevision::validate 只校验单个值，不能检测跨 revision 的重复 ID"]
 fn dm2_01_claim_revision_ref_uniqueness_enforced() {
-    unimplemented!()
+    let first = claim_revision("cr-1", "claim-1", &["ev-1"]);
+    let first_ref = first.revision_ref().clone();
+
+    let mut registry = ClaimRevisionRegistry::new();
+
+    // 1. Registering the initial revision succeeds.
+    assert_eq!(registry.register_revision(first.clone()), Ok(()));
+    assert!(registry.contains(&first_ref));
+    assert_eq!(registry.len(), 1);
+    assert_eq!(registry.get(&first_ref), Some(&first));
+
+    // 2. Reusing the same revision reference is rejected.
+    assert_eq!(
+        registry.register_revision(first.clone()),
+        Err(DomainError::StaleVersion)
+    );
+    assert_eq!(registry.len(), 1);
+
+    // 3. A revision whose parent has not been registered is rejected.
+    let missing_parent = claim_revision_json_with(
+        &claim_revision("cr-2", "claim-1", &["ev-1", "ev-2"]),
+        "parent_revision_ref",
+        json!("cr-missing"),
+    );
+
+    assert_eq!(
+        registry.register_revision(missing_parent),
+        Err(DomainError::InvalidParent)
+    );
+    assert_eq!(registry.len(), 1);
+
+    // 4. A revision whose parent belongs to a different claim is rejected.
+    let wrong_claim = claim_revision_json_with(
+        &claim_revision("cr-3", "claim-2", &["ev-1", "ev-2"]),
+        "parent_revision_ref",
+        json!("cr-1"),
+    );
+
+    assert_eq!(
+        registry.register_revision(wrong_claim),
+        Err(DomainError::InvalidParent)
+    );
+    assert_eq!(registry.len(), 1);
+
+    // 5. A successor of the same claim with the correct parent succeeds.
+    let successor = claim_revision_json_with(
+        &claim_revision("cr-4", "claim-1", &["ev-1", "ev-2"]),
+        "parent_revision_ref",
+        json!("cr-1"),
+    );
+    let successor_ref = successor.revision_ref().clone();
+
+    assert_eq!(registry.register_revision(successor.clone()), Ok(()));
+    assert!(registry.contains(&successor_ref));
+    assert_eq!(registry.len(), 2);
+    assert_eq!(registry.get(&successor_ref), Some(&successor));
 }
 
 // ---------------------------------------------------------------- DM2-02
@@ -149,17 +203,249 @@ fn dm2_02_revision_parent_mismatch_rejected() {
 }
 
 #[test]
-#[ignore = "blocked: ClaimRevision 没有 AcceptedRevisionState / acceptance transition API；私有字段与无 setter 只证明不可变值，不能验证被接受状态的 append-only 转移"]
 fn dm2_02_accepted_revision_is_append_only() {
-    unimplemented!()
+    let first = claim_revision("cr-1", "claim-1", &["ev-1"]);
+
+    // 1. An initial revision can be accepted.
+    let accepted = AcceptedRevisionState::accept(first.clone()).unwrap();
+
+    assert_eq!(accepted.revision().revision_ref(), first.revision_ref());
+    assert_eq!(accepted.revision(), &first);
+
+    // Capture the complete serialized representation before appending.
+    let old_bytes_before = serde_json::to_vec(accepted.revision()).unwrap();
+
+    // Build a correction as a distinct successor revision.
+    let successor = ClaimRevision::successor(
+        ClaimRevisionRef::new("cr-2").unwrap(),
+        first.claim_ref().clone(),
+        &first,
+        first.subject().to_owned(),
+        first.predicate().to_owned(),
+        "green".into(),
+        first.polarity().to_owned(),
+        first.qualifiers().to_vec(),
+        first.epistemic_status().clone(),
+        first.valid_time().clone(),
+        vec![EvidenceRef::new("ev-2").unwrap()],
+        first.provenance_refs().to_vec(),
+        "2026-01-02T00:00:00Z".into(),
+        "correction".into(),
+        first.scope_refs().to_vec(),
+    )
+    .unwrap();
+
+    // 2. Append returns both the preserved old state and the new state.
+    let (preserved_old, appended) = accepted.append_successor(successor).unwrap();
+
+    // 3. The old revision is byte-for-byte identical after the append.
+    let old_bytes_after = serde_json::to_vec(accepted.revision()).unwrap();
+    let preserved_bytes = serde_json::to_vec(preserved_old.revision()).unwrap();
+
+    assert_eq!(old_bytes_before, old_bytes_after);
+    assert_eq!(old_bytes_before, preserved_bytes);
+
+    // 4. The new state points to the successor, not the old revision.
+    assert_eq!(appended.revision().revision_ref().as_str(), "cr-2");
+    assert_eq!(
+        appended.revision().parent_revision_ref(),
+        Some(first.revision_ref())
+    );
+    assert_eq!(appended.revision().object(), "green");
+
+    // 5. The previous state still points to cr-1 and retains its old content.
+    assert_eq!(
+        preserved_old.revision().revision_ref(),
+        first.revision_ref()
+    );
+    assert_eq!(preserved_old.revision().object(), "blue");
+    assert_eq!(
+        preserved_old.revision().evidence_refs(),
+        first.evidence_refs()
+    );
+
+    // The appended revision has distinct serialized content.
+    let new_bytes = serde_json::to_vec(appended.revision()).unwrap();
+    assert_ne!(old_bytes_before, new_bytes);
 }
 
 // ---------------------------------------------------------------- DM2-03
 
 #[test]
-#[ignore = "blocked: memory_domain 当前没有 classify_claim_change / CI-01..CI-13 classifier 函数，也没有 DomainError::AmbiguousIdentityClassification"]
 fn dm2_03_ci_classification_vectors() {
-    unimplemented!()
+    let prior = claim_revision("cr-1", "claim-1", &["ev-1"]);
+    let candidate = || claim_revision("cr-2", "claim-1", &["ev-1"]);
+
+    let classified = |class, dimension| ClaimIdentityDecision::Classified { class, dimension };
+
+    // CI-01: a different subject referent creates a NewClaim.
+    assert_eq!(
+        classify(
+            &prior,
+            &claim_revision_json_with(&candidate(), "subject", json!("different subject"))
+        ),
+        classified(
+            ClaimIdentityClass::NewClaim,
+            ChangeDimension::SubjectReferent
+        )
+    );
+
+    // CI-01 label-only branch: trim + lowercase normalization makes these
+    // subjects equivalent, so the change is LabelOnly rather than NewClaim.
+    assert_eq!(
+        classify(
+            &prior,
+            &claim_revision_json_with(&candidate(), "subject", json!(" SUBJECT "))
+        ),
+        classified(ClaimIdentityClass::NewRevision, ChangeDimension::LabelOnly)
+    );
+
+    // CI-02: predicate change creates a NewClaim.
+    assert_eq!(
+        classify(
+            &prior,
+            &claim_revision_json_with(&candidate(), "predicate", json!("holds"))
+        ),
+        classified(ClaimIdentityClass::NewClaim, ChangeDimension::Predicate)
+    );
+
+    // CI-03: object change creates a NewClaim.
+    assert_eq!(
+        classify(
+            &prior,
+            &claim_revision_json_with(&candidate(), "object", json!("red"))
+        ),
+        classified(ClaimIdentityClass::NewClaim, ChangeDimension::Object)
+    );
+
+    // CI-04: polarity change creates a NewClaim.
+    assert_eq!(
+        classify(
+            &prior,
+            &claim_revision_json_with(&candidate(), "polarity", json!("negate"))
+        ),
+        classified(ClaimIdentityClass::NewClaim, ChangeDimension::Polarity)
+    );
+
+    // CI-07: valid_time change creates a NewClaim.
+    assert_eq!(
+        classify(
+            &prior,
+            &claim_revision_json_with(
+                &candidate(),
+                "valid_time",
+                serde_json::to_value(TimeValue::Instant("2026-05-01T00:00:00Z".into())).unwrap()
+            )
+        ),
+        classified(
+            ClaimIdentityClass::NewClaim,
+            ChangeDimension::TemporalQualifier
+        )
+    );
+
+    // CI-08: a scope-only change creates a NewClaim.
+    assert_eq!(
+        classify(
+            &prior,
+            &claim_revision_json_with(
+                &candidate(),
+                "scope_refs",
+                serde_json::to_value(vec![scope("s2")]).unwrap()
+            )
+        ),
+        classified(ClaimIdentityClass::NewClaim, ChangeDimension::Scope)
+    );
+
+    // CI-09: evidence change creates a NewRevision.
+    assert_eq!(
+        classify(
+            &prior,
+            &claim_revision_json_with(&candidate(), "evidence_refs", json!(["ev-2"]))
+        ),
+        classified(ClaimIdentityClass::NewRevision, ChangeDimension::Evidence)
+    );
+
+    // CI-10: provenance change creates a NewRevision.
+    assert_eq!(
+        classify(
+            &prior,
+            &claim_revision_json_with(&candidate(), "provenance_refs", json!(["prov-other"]))
+        ),
+        classified(ClaimIdentityClass::NewRevision, ChangeDimension::Provenance)
+    );
+
+    // CI-11: epistemic status change creates a NewRevision.
+    assert_eq!(
+        classify(
+            &prior,
+            &claim_revision_json_with(
+                &candidate(),
+                "epistemic_status",
+                serde_json::to_value(EpistemicStatus::Verified).unwrap()
+            )
+        ),
+        classified(
+            ClaimIdentityClass::NewRevision,
+            ChangeDimension::EpistemicStatus
+        )
+    );
+
+    // CI-13: changing revision_reason alone does not change proposition
+    // identity. classify() intentionally ignores revision_reason and therefore
+    // classifies this as PresentationOnly / NewRevision.
+    assert_eq!(
+        classify(
+            &prior,
+            &claim_revision_json_with(
+                &candidate(),
+                "revision_reason",
+                json!("presentation metadata changed")
+            )
+        ),
+        classified(
+            ClaimIdentityClass::NewRevision,
+            ChangeDimension::PresentationOnly
+        )
+    );
+
+    // Multiple substantive dimensions must require a governed decision.
+    // Here both predicate and object change; neither dimension takes priority.
+    let multiple = claim_revision_json_with(
+        &claim_revision_json_with(&candidate(), "predicate", json!("holds")),
+        "object",
+        json!("red"),
+    );
+
+    assert_eq!(
+        classify(&prior, &multiple),
+        ClaimIdentityDecision::RequiresGovernedDecision {
+            reason: AmbiguousReason::MultipleSubstantiveDimensions {
+                dimensions: vec![ChangeDimension::Predicate, ChangeDimension::Object],
+            },
+        }
+    );
+
+    // A qualifier change is semantically ambiguous: the classifier cannot
+    // determine whether it changes the proposition's truth conditions.
+    let qualifier_change =
+        claim_revision_json_with(&candidate(), "qualifiers", json!(["during-2026"]));
+
+    assert_eq!(
+        classify(&prior, &qualifier_change),
+        ClaimIdentityDecision::RequiresGovernedDecision {
+            reason: AmbiguousReason::QualifierSubstantivenessUnprovable,
+        }
+    );
+
+    // CI-05, CI-06 and CI-12 are intentionally not exercised with fabricated
+    // vectors:
+    // - CI-05 Quantifier: ClaimRevision has no quantifier field.
+    // - CI-06 Modality: ClaimRevision has no modality field.
+    // - CI-12 ConfidenceAssessment: ClaimRevision has no confidence field.
+    //
+    // These are model-reachability limitations, not missing classifier
+    // branches. The corresponding ChangeDimension enum variants exist, but
+    // there is no ClaimRevision input field to change and classify.
 }
 
 // ---------------------------------------------------------------- DM2-04
@@ -186,9 +472,73 @@ fn dm2_04_fact_pins_exact_claim_revision_not_head() {
     assert_eq!(broken.validate(), Err(DomainError::EmptyId));
 }
 #[test]
-#[ignore = "blocked: memory_domain 当前没有 ClaimRevisionResolver trait、resolve_claim_head 或 resolve_revision API；只能验证 FactRevision 保存精确 ClaimRevisionRef，不能验证 resolver 拒绝 head substitution"]
 fn dm2_04_resolution_rejects_claim_head_substitution() {
-    unimplemented!()
+    let first = claim_revision("cr-1", "claim-1", &["ev-1"]);
+    let first_ref = first.revision_ref().clone();
+
+    let second = claim_revision_json_with(
+        &claim_revision("cr-2", "claim-1", &["ev-1", "ev-2"]),
+        "parent_revision_ref",
+        json!("cr-1"),
+    );
+    let second_ref = second.revision_ref().clone();
+
+    let claim_ref = first.claim_ref().clone();
+
+    let mut resolver = ClaimRevisionResolver::new();
+
+    // 1. Register the initial revision and its successor.
+    assert_eq!(resolver.register_revision(first.clone()), Ok(()));
+    assert_eq!(resolver.register_revision(second.clone()), Ok(()));
+
+    // The current head is cr-2.
+    assert_eq!(
+        resolver.resolve_head(&claim_ref).unwrap().revision_ref(),
+        &second_ref
+    );
+
+    // 2. Exact resolution of cr-1 must return cr-1, not the newer cr-2.
+    assert_eq!(
+        resolver.resolve(&first_ref).unwrap().revision_ref(),
+        &first_ref
+    );
+    assert_ne!(
+        resolver.resolve(&first_ref).unwrap().revision_ref(),
+        &second_ref
+    );
+
+    // 3. Exact resolution of cr-2 returns cr-2.
+    assert_eq!(
+        resolver.resolve(&second_ref).unwrap().revision_ref(),
+        &second_ref
+    );
+
+    // 4. A FactRevision pin to cr-1 remains bound to cr-1 even though
+    // the current head of claim-1 is cr-2.
+    let fact = fact_revision_json_with(&fact_revision(), "claim_revision_refs", json!(["cr-1"]));
+
+    assert_eq!(fact.claim_revision_refs(), std::slice::from_ref(&first_ref));
+
+    for pinned_ref in fact.claim_revision_refs() {
+        let resolved = resolver.resolve(pinned_ref).unwrap();
+        assert_eq!(resolved.revision_ref(), &first_ref);
+        assert_ne!(resolved.revision_ref(), &second_ref);
+    }
+
+    // 5. An unknown exact revision reference must not fall back to the head.
+    let missing_ref = ClaimRevisionRef::new("cr-missing").unwrap();
+
+    assert_eq!(
+        resolver.resolve(&missing_ref),
+        Err(DomainError::MissingClaimRevision)
+    );
+
+    // 6. Explicit anti-substitution check:
+    // pinned=cr-1, current head=cr-2. The API must return cr-1.
+    let exact = resolver.resolve_exact(&first_ref, &second_ref).unwrap();
+
+    assert_eq!(exact.revision_ref(), &first_ref);
+    assert_ne!(exact.revision_ref(), &second_ref);
 }
 
 // ---------------------------------------------------------------- DM2-05
@@ -301,6 +651,7 @@ fn dm2_08_invalid_relation_endpoint_rejected() {
         epistemic_status: EpistemicStatus::Observed,
         evidence_refs: vec![EvidenceRef::new("ev-1").unwrap()],
         lifecycle_state: RelationLifecycleState::Active,
+        scope_refs: vec![],
     };
     let definition = RelationDefinition {
         relation_type: "owns".into(),
@@ -327,17 +678,134 @@ fn dm2_08_invalid_relation_endpoint_rejected() {
 }
 
 #[test]
-#[ignore = "blocked: RelationDefinition 只描述单个 relation_type 的允许端点，没有 RelationTypeRegistry / contains_relation_type API；无法判定一个非空 relation_type 是否已注册"]
 fn dm2_08_unregistered_relation_type_rejected() {
-    unimplemented!()
+    let definition = RelationDefinition {
+        relation_type: "owns".into(),
+        allowed_subject_kinds: vec![RelationEndpointKind::Entity],
+        allowed_object_kinds: vec![RelationEndpointKind::Fact],
+    };
+
+    let mut registry = RelationTypeRegistry::new();
+
+    // 1. A registered relation type with compatible endpoints is accepted.
+    registry.register(1, definition.clone()).unwrap();
+
+    assert!(registry.contains_relation_type("owns"));
+    assert_eq!(registry.version("owns"), Some(1));
+    assert_eq!(registry.lookup("owns"), Some(&definition));
+
+    let compatible = RelationExtension {
+        subject: RelationEndpoint::Entity(EntityRef::new("entity-1").unwrap()),
+        object: RelationEndpoint::Fact(FactRef::new("fact-1").unwrap()),
+        directionality: RelationDirectionality::Directed,
+        qualifiers: vec![],
+        valid_time: Some(ValidTimeRef::Unknown),
+        epistemic_status: EpistemicStatus::Observed,
+        evidence_refs: vec![EvidenceRef::new("ev-1").unwrap()],
+        lifecycle_state: RelationLifecycleState::Active,
+        scope_refs: vec![],
+    };
+
+    assert_eq!(
+        registry.validate_against_registry("owns", &compatible),
+        Ok(())
+    );
+
+    // 2. An unregistered relation type is rejected.
+    assert!(!registry.contains_relation_type("contains"));
+
+    assert_eq!(
+        registry.validate_against_registry("contains", &compatible),
+        Err(DomainError::InvalidRelationEndpoint)
+    );
+
+    // 3. Registering the same relation type twice is rejected.
+    let duplicate = RelationDefinition {
+        relation_type: "owns".into(),
+        allowed_subject_kinds: vec![RelationEndpointKind::Entity],
+        allowed_object_kinds: vec![RelationEndpointKind::Entity],
+    };
+
+    assert_eq!(
+        registry.register(2, duplicate),
+        Err(DomainError::InvalidRelationEndpoint)
+    );
+
+    // 4. A registered relation type with incompatible endpoints is rejected.
+    let incompatible = RelationExtension {
+        subject: RelationEndpoint::Fact(FactRef::new("fact-2").unwrap()),
+        ..compatible
+    };
+
+    assert_eq!(
+        registry.validate_against_registry("owns", &incompatible),
+        Err(DomainError::InvalidRelationEndpoint)
+    );
 }
 
 // ---------------------------------------------------------------- DM2-09
 
 #[test]
-#[ignore = "blocked: RelationExtension 提供 valid_time/epistemic_status/lifecycle_state，但没有 scope_refs；当前不能断言时间、scope、lifecycle 三者可独立变化"]
 fn dm2_09_relation_time_scope_lifecycle_independent() {
-    unimplemented!()
+    let scope_a = ScopeRef {
+        scope_id: id("scope-a"),
+        scope_kind: ScopeKind::Project,
+        namespace_key: "namespace-a".into(),
+    };
+    let scope_b = ScopeRef {
+        scope_id: id("scope-b"),
+        scope_kind: ScopeKind::Session,
+        namespace_key: "namespace-b".into(),
+    };
+
+    let base = RelationExtension {
+        subject: RelationEndpoint::Entity(EntityRef::new("entity-1").unwrap()),
+        object: RelationEndpoint::Fact(FactRef::new("fact-1").unwrap()),
+        directionality: RelationDirectionality::Directed,
+        qualifiers: vec![],
+        valid_time: Some(ValidTimeRef::Unknown),
+        epistemic_status: EpistemicStatus::Observed,
+        evidence_refs: vec![EvidenceRef::new("ev-1").unwrap()],
+        lifecycle_state: RelationLifecycleState::Proposed,
+        scope_refs: vec![scope_a.clone()],
+    };
+
+    // 1. 只改变 valid_time。
+    let time_changed = RelationExtension {
+        valid_time: Some(ValidTimeRef::AllTime),
+        ..base.clone()
+    };
+
+    assert_eq!(time_changed.valid_time, Some(ValidTimeRef::AllTime));
+    assert_eq!(time_changed.scope_refs, base.scope_refs);
+    assert_eq!(time_changed.lifecycle_state, base.lifecycle_state);
+
+    // 2. 只改变 scope_refs。
+    let scope_changed = RelationExtension {
+        scope_refs: vec![scope_b.clone()],
+        ..base.clone()
+    };
+
+    assert_eq!(scope_changed.scope_refs, vec![scope_b]);
+    assert_eq!(scope_changed.valid_time, base.valid_time);
+    assert_eq!(scope_changed.lifecycle_state, base.lifecycle_state);
+
+    // 3. 只改变 lifecycle_state。
+    let lifecycle_changed = RelationExtension {
+        lifecycle_state: RelationLifecycleState::Active,
+        ..base.clone()
+    };
+
+    assert_eq!(
+        lifecycle_changed.lifecycle_state,
+        RelationLifecycleState::Active
+    );
+    assert_eq!(lifecycle_changed.valid_time, base.valid_time);
+    assert_eq!(lifecycle_changed.scope_refs, base.scope_refs);
+
+    // 4. 生命周期状态与认知状态是不同类型（规格 §3.4：不是 MemoryLifecycle 或 Claim epistemic status）。
+    let _: RelationLifecycleState = RelationLifecycleState::Proposed;
+    let _: EpistemicStatus = EpistemicStatus::Observed;
 }
 
 // ---------------------------------------------------------------- DM2-10
