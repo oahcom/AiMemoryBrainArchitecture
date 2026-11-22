@@ -11,6 +11,35 @@ use memory_domain::{
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
+mod budget_vector;
+mod compact;
+mod coverage_optimizer;
+mod delivery_ledger;
+mod observability;
+mod overflow;
+
+pub use budget_vector::{
+    BudgetUsage, BudgetVectorViolation, ContextBudgetVector, TierReserve, TierUsage, TokenBudget,
+    TokenEstimate,
+};
+pub use compact::{
+    compact_entries, CompactedGroup, CompactionOmission, CompactionOutput, CompactionProfile,
+};
+pub use coverage_optimizer::{
+    select_coverage_optimal_candidates, CandidateCoverage, CandidateSelection, CoverageRequest,
+    CoverageWeight, DeferredCandidate, DeferredReason, SelectedCandidate,
+};
+pub use delivery_ledger::{
+    AppliedDisposition, AppliedProof, DeliveryAttempt, DeliveryAttemptDescriptor,
+    DeliveryAttemptId, DeliveryAttemptLedger, DeliveryAttemptState, DeliveryBoundary,
+    LateAckDisposition,
+};
+pub use observability::{
+    build_sufficiency_report, BlockedRefReport, BudgetUtilization, CoverageStatus,
+    DimensionCoverage, SufficiencyReport, SufficiencyReportInput,
+};
+pub use overflow::{plan_overflow, OverflowPlan, OverflowStep};
+
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ContextBudget {
     pub max_entries: usize,
@@ -85,7 +114,7 @@ pub struct ContextCandidate {
 }
 
 impl ContextCandidate {
-    fn validate_for(&self, identity: &ContextIdentity) -> Result<(), ContextError> {
+    pub(crate) fn validate_for(&self, identity: &ContextIdentity) -> Result<(), ContextError> {
         if self.memory_lifecycle != MemoryLifecycle::Active
             && self.memory_lifecycle != MemoryLifecycle::Consolidated
         {
@@ -129,6 +158,11 @@ pub struct ContextEntry {
     pub epistemic_qualifiers: Vec<String>,
     pub content_hash: String,
     pub rendered_bytes: usize,
+    /// Source entry ids this entry was compacted from. Empty for a plain entry,
+    /// and the only supported way to expand a compacted projection back to the
+    /// exact membership it replaced.
+    #[serde(default)]
+    pub compacted_from: Vec<OpaqueId>,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -136,6 +170,10 @@ pub enum TombstoneKind {
     Removed,
     Replaced,
     Expired,
+    /// The membership was folded into a compacted projection. Re-entering the
+    /// active membership requires the compacted group to be removed, not a
+    /// silent re-add of the source entry.
+    Compacted,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -155,6 +193,7 @@ pub enum ContextOperationKind {
     Replace,
     Reorder,
     Expire,
+    Compact,
     Reconcile,
 }
 
@@ -330,7 +369,7 @@ pub fn assess_sufficiency(
 }
 
 /// Returns a measured count, or a reason why this snapshot cannot judge the dimension.
-fn sufficiency_measure(
+pub(crate) fn sufficiency_measure(
     snapshot: &ContextSnapshot,
     dimension: &SufficiencyDimension,
 ) -> Result<usize, String> {
@@ -420,6 +459,16 @@ pub enum ChangeSetOperation {
         expires_at_context_version: u64,
         reason: String,
     },
+    /// Fold a group of entries into one lineage-safe projection. The source
+    /// memberships are tombstoned in the same result, so they cannot silently
+    /// re-enter the active set.
+    Compact {
+        operation_id: String,
+        source_entry_ids: Vec<OpaqueId>,
+        output: CompactionOutput,
+        profile: CompactionProfile,
+        reason: String,
+    },
     Reconcile {
         operation_id: String,
         desired_entries: Vec<ContextEntry>,
@@ -435,6 +484,7 @@ impl ChangeSetOperation {
             | Self::Replace { operation_id, .. }
             | Self::Reorder { operation_id, .. }
             | Self::Expire { operation_id, .. }
+            | Self::Compact { operation_id, .. }
             | Self::Reconcile { operation_id, .. } => operation_id,
         }
     }
@@ -484,6 +534,27 @@ impl ChangeSet {
                     if entry_ids.is_empty() {
                         return Err(ContextError::InvalidReorder);
                     }
+                }
+                ChangeSetOperation::Compact {
+                    source_entry_ids,
+                    output,
+                    profile,
+                    reason,
+                    ..
+                } => {
+                    if reason.trim().is_empty() {
+                        return Err(ContextError::EmptyField("reason"));
+                    }
+                    if source_entry_ids.is_empty() {
+                        return Err(ContextError::InvalidOperation);
+                    }
+                    if output.rendered_content.trim().is_empty() {
+                        return Err(ContextError::EmptyField("rendered_content"));
+                    }
+                    if output.content_hash.trim().is_empty() {
+                        return Err(ContextError::EmptyField("content_hash"));
+                    }
+                    profile.validate()?;
                 }
             }
             if let ChangeSetOperation::Expire {
@@ -747,6 +818,65 @@ fn apply_change_operation(
                 TombstoneKind::Expired,
             );
         }
+        ChangeSetOperation::Compact {
+            operation_id,
+            source_entry_ids,
+            output,
+            profile,
+            reason,
+        } => {
+            let mut requested: HashSet<OpaqueId> = HashSet::new();
+            for entry_id in source_entry_ids {
+                if !requested.insert(entry_id.clone()) {
+                    return Err(ContextError::DuplicateEntry);
+                }
+                if !snapshot
+                    .entries
+                    .iter()
+                    .any(|entry| &entry.entry_id == entry_id)
+                {
+                    return Err(ContextError::MissingEntry);
+                }
+            }
+            if snapshot
+                .entries
+                .iter()
+                .any(|entry| entry.entry_id == output.group_id)
+                || snapshot
+                    .tombstones
+                    .iter()
+                    .any(|tombstone| tombstone.entry_id == output.group_id)
+            {
+                return Err(ContextError::DuplicateEntry);
+            }
+            let sources: Vec<ContextEntry> = snapshot
+                .entries
+                .iter()
+                .filter(|entry| requested.contains(&entry.entry_id))
+                .cloned()
+                .collect();
+            let group = compact_entries(&sources, output.clone(), profile)?;
+            let insert_at = snapshot
+                .entries
+                .iter()
+                .position(|entry| requested.contains(&entry.entry_id))
+                .unwrap_or(snapshot.entries.len());
+            snapshot
+                .entries
+                .retain(|entry| !requested.contains(&entry.entry_id));
+            for source in &sources {
+                append_tombstone(
+                    snapshot,
+                    source,
+                    operation_id,
+                    reason,
+                    TombstoneKind::Compacted,
+                );
+            }
+            snapshot
+                .entries
+                .insert(insert_at.min(snapshot.entries.len()), group.to_entry());
+        }
         ChangeSetOperation::Reconcile {
             operation_id,
             desired_entries,
@@ -764,6 +894,7 @@ fn apply_change_operation(
         ChangeSetOperation::Replace { reason, .. } => (ContextOperationKind::Replace, reason),
         ChangeSetOperation::Reorder { reason, .. } => (ContextOperationKind::Reorder, reason),
         ChangeSetOperation::Expire { reason, .. } => (ContextOperationKind::Expire, reason),
+        ChangeSetOperation::Compact { reason, .. } => (ContextOperationKind::Compact, reason),
         ChangeSetOperation::Reconcile { reason, .. } => (ContextOperationKind::Reconcile, reason),
     };
     snapshot.operation_records.push(ContextOperationRecord {
@@ -967,6 +1098,7 @@ pub fn build_context(
             epistemic_qualifiers: candidate.epistemic_qualifiers,
             content_hash: candidate.content_hash,
             rendered_bytes: bytes,
+            compacted_from: Vec::new(),
         });
     }
 
@@ -1075,6 +1207,26 @@ pub enum ContextError {
         declared: String,
         actual: String,
     },
+    /// The candidate or entry set crosses a declared budget-vector boundary.
+    BudgetVector(BudgetVectorViolation),
+    /// A compacted projection would lose lineage, evidence or a qualifier.
+    CompactionFidelity(String),
+    /// The coverage declaration used for optimizer input is malformed.
+    InvalidCoverageRequest(String),
+    /// No attempt with that identity exists in the ledger.
+    DeliveryAttemptNotFound(String),
+    /// The attempt machine has no edge from one state to another.
+    InvalidDeliveryTransition {
+        from: &'static str,
+        to: &'static str,
+    },
+    /// An attempt operation would move the desired head backwards.
+    ContextVersionRegression {
+        current: u64,
+        requested: u64,
+    },
+    /// An attempt operation contradicts an already recorded attempt fact.
+    DeliveryAttemptConflict(&'static str),
 }
 
 impl std::fmt::Display for ContextError {
@@ -1639,7 +1791,7 @@ pub fn snapshot_hash(entries: &[ContextEntryVersion]) -> Result<String, ContextE
     Ok(stable_digest(&bytes))
 }
 
-fn stable_digest(bytes: &[u8]) -> String {
+pub(crate) fn stable_digest(bytes: &[u8]) -> String {
     let mut hash: u64 = 0xcbf29ce484222325;
     for byte in bytes {
         hash ^= u64::from(*byte);
@@ -3244,6 +3396,11 @@ mod sufficiency_tests {
             epistemic_qualifiers: vec![],
             content_hash: "content-hash".into(),
             rendered_bytes: "grounded content".len(),
+            // This fixture is a plain (non-compacted) entry, so it replaced no
+            // membership: an empty `compacted_from` is the correct value, not a
+            // placeholder. A compacted projection always carries its exact source
+            // entry ids here (`CompactedGroup::to_entry`).
+            compacted_from: Vec::new(),
         };
         ContextSnapshot {
             identity,
