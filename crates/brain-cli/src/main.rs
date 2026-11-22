@@ -433,10 +433,15 @@ fn run() -> Result<(), String> {
     let Some(command) = args.next() else {
         return Err(usage());
     };
-    if command != "compile" {
-        return Err(usage());
+    match command.as_str() {
+        "compile" => run_compile(args),
+        "forget" => run_forget(args),
+        _ => Err(usage()),
     }
+}
 
+/// The `compile` verb: build a ContextSnapshot from one event envelope.
+fn run_compile(mut args: impl Iterator<Item = String>) -> Result<(), String> {
     let mut input_path = None;
     let mut output_path = None;
     let mut event_store_path: Option<PathBuf> = None;
@@ -784,6 +789,90 @@ fn run() -> Result<(), String> {
     Ok(())
 }
 
+/// The `forget` verb: record the canonical forget fence for one Memory, or for
+/// one of its versions, in an existing memory database.
+///
+/// This is the production caller the forget facade was missing: every caller of
+/// `MemoryStore::forget_*` used to live inside `#[cfg(test)]`, so no executable
+/// path could forget anything. It writes the same `canonical_forget_fences` row
+/// the read gate already consults, so a forgotten Memory reads as `Ok(None)`
+/// afterwards. It adds no second fence and does not touch the event store's
+/// namespace fence, whose reconciliation with the target fence is still an open
+/// architecture question (GAP-06 / GAP-11).
+fn run_forget(mut args: impl Iterator<Item = String>) -> Result<(), String> {
+    let mut store_path: Option<PathBuf> = None;
+    let mut scope_path: Option<PathBuf> = None;
+    let mut memory_id: Option<String> = None;
+    let mut version_id: Option<String> = None;
+    let mut reason_digest: Option<String> = None;
+
+    while let Some(argument) = args.next() {
+        match argument.as_str() {
+            "--store" => {
+                store_path = Some(
+                    args.next()
+                        .ok_or_else(|| "--store requires a path".to_owned())?
+                        .into(),
+                );
+            }
+            "--scope" => {
+                scope_path = Some(
+                    args.next()
+                        .ok_or_else(|| "--scope requires a path".to_owned())?
+                        .into(),
+                );
+            }
+            "--forget" => memory_id = args.next(),
+            "--forget-version" => version_id = args.next(),
+            "--forget-reason" => reason_digest = args.next(),
+            _ => return Err(format!("unknown argument: {argument}\n{}", usage())),
+        }
+    }
+
+    let store_path = store_path.ok_or_else(usage)?;
+    let scope_path = scope_path.ok_or_else(usage)?;
+    let memory_id = identifier(memory_id.ok_or_else(usage)?)?;
+    let reason_digest = reason_digest.ok_or_else(usage)?;
+    if reason_digest.trim().is_empty() {
+        return Err("--forget-reason must not be empty".to_owned());
+    }
+    let scope_bytes = fs::read(&scope_path)
+        .map_err(|error| format!("cannot read scope {}: {error}", scope_path.display()))?;
+    let scope: Vec<ScopeRef> = serde_json::from_slice(&scope_bytes)
+        .map_err(|error| format!("invalid scope JSON: {error}"))?;
+
+    let sqlite = SqliteMemoryStorage::open(&store_path)
+        .map_err(|error| format!("cannot open SQLite storage: {error:?}"))?;
+    let mut store = MemoryStore::new(sqlite);
+
+    let (target, detail, fence_sequence) = match version_id {
+        Some(version_id) => {
+            let version_id = identifier(version_id)?;
+            let sequence = store
+                .forget_version(&memory_id, &version_id, &reason_digest, &scope)
+                .map_err(|error| format!("forget_version failed: {error:?}"))?;
+            (
+                "Version",
+                format!(
+                    "memory={} version={}",
+                    memory_id.as_str(),
+                    version_id.as_str()
+                ),
+                sequence,
+            )
+        }
+        None => {
+            let sequence = store
+                .forget_memory(&memory_id, &reason_digest, &scope)
+                .map_err(|error| format!("forget_memory failed: {error:?}"))?;
+            ("Memory", format!("memory={}", memory_id.as_str()), sequence)
+        }
+    };
+
+    println!("forget applied: target={target} {detail} fence_sequence={fence_sequence}");
+    Ok(())
+}
+
 fn sha256_hex(bytes: &[u8]) -> String {
     const HEX: &[u8; 16] = b"0123456789abcdef";
     let digest = Sha256::digest(bytes);
@@ -796,7 +885,12 @@ fn sha256_hex(bytes: &[u8]) -> String {
 }
 
 fn usage() -> String {
-    "usage: brain compile --input <event.json> --out <context.json> [--verbose]".to_owned()
+    concat!(
+        "usage: brain compile --input <event.json> --out <context.json> [--verbose]\n",
+        "usage: brain forget --store <memory.sqlite> --scope <scope.json> ",
+        "--forget <memory_id> --forget-reason <digest> [--forget-version <version_id>]"
+    )
+    .to_owned()
 }
 
 #[cfg(test)]
