@@ -35,8 +35,16 @@ permissions:
   contents: read
 
 concurrency:
-  group: rust-self-hosted
-  cancel-in-progress: true
+  # Shared with gates.yml on purpose (#700). Both workflows compile the whole
+  # workspace on the repository's only runner; different group names let them
+  # build at the same time and double the disk churn, which is what pushed the
+  # host to 94% and made the disk guard refuse before any Rust ran.
+  #
+  # cancel-in-progress must stay false in the shared group. With one group and
+  # true, a push to the branch would cancel the in-flight *gates* run mid-step,
+  # and gates.yml is the hard gate - a cancelled gate is not a passed gate.
+  group: existing-gates-self-hosted
+  cancel-in-progress: false
 
 jobs:
   rust-workspace-test:
