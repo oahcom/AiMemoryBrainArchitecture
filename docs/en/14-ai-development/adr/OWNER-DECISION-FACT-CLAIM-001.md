@@ -14,7 +14,7 @@ document_metadata:
         type: Full-document
         included_sections: []
         included_assets: []
-      approval_applicability: Applicable-To-Current-Version
+      approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "Issue #305 comment 7042461592"
         - "02-domain-model/domain-model-overview.md @ 5b86fe23ab7c670b4ae13331b56572aee35f5d00"
@@ -26,7 +26,7 @@ document_metadata:
       last_verified_date: "2026-11-21"
       last_verification_note: "Live GitHub readback of cited main and B-branch artifacts; semantic decision only, no implementation schema freeze."
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Pending-Reapproval
     supersession:
       supersedes: []
       supersession_reason: null
@@ -59,7 +59,7 @@ document_metadata:
 - Decision date: 2026-11-21 UTC
 - Decision authority: Project Owner delegate under Issue #305, comment 7042461592
 - Capacity: consolidated architecture-owner session under the Owner's standing instruction
-- Evidence posture: INDEPENDENCE_UNVERIFIABLE across GitHub session identity; no independent human signature is claimed.
+- Evidence posture: `INDEPENDENCE_UNVERIFIABLE` because this decision records no prompt-pairing evidence with the implementation session; a shared GitHub account is not grounds for denying independence. No independent human signature is claimed.
 
 ## 1. Decision
 

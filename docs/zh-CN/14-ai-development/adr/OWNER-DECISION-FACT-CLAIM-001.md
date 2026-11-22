@@ -14,7 +14,7 @@ document_metadata:
         type: Full-document
         included_sections: []
         included_assets: []
-      approval_applicability: Applicable-To-Current-Version
+      approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "Issue #305 comment 7042461592"
         - "02-domain-model/domain-model-overview.md @ 5b86fe23ab7c670b4ae13331b56572aee35f5d00"
@@ -26,7 +26,7 @@ document_metadata:
       last_verified_date: "2026-11-21"
       last_verification_note: "已实时读取所引用的 main 与 B 分支工件；本决策仅确定语义，不冻结实现 Schema。"
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Pending-Reapproval
     supersession:
       supersedes: []
       supersession_reason: null
@@ -59,7 +59,7 @@ document_metadata:
 - 决策日期：2026-11-21 UTC
 - 决策权威：Issue #305 评论 7042461592 授权的 Project Owner delegate
 - 行使身份：依照 Project Owner 持续指令履职的统一架构 Owner 会话
-- 证据等级：GitHub 会话身份无法独立验证，记为 INDEPENDENCE_UNVERIFIABLE；不声称存在独立人工签名。
+- 证据等级：该决策未记录与实现会话的 prompt 配对证据，因此保持 `INDEPENDENCE_UNVERIFIABLE`；共用 GitHub 账号不构成独立性否决理由；不声称存在独立人工签名。
 
 ## 1. 决策
 

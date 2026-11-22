@@ -349,6 +349,52 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - EVIDENCE：H Envelope Blob 5547ecd78d118bd63e571e5daad87194d9b694e4。
 - FOLLOW_UP_ACTIONS：H 发布 Taxonomy 和测试向量。
 
+### 7.1.1 H 逻辑确认处置——PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN
+
+**权威性／履职身份：** 根据 Issue #305 comment 7042461592 及 Owner 的常设指示，由担任 H 协议 Owner 角色的综合 Project Owner 代表作出。本确认并非独立的人类 H 签署。证据状态仍为 `INDEPENDENCE_UNVERIFIABLE`。
+
+**H 精确源快照：** 分支 `session-h-bmcp-protocol` @ `3e8b33df18b9e6fc757ca84ff07a12faebc78e74`。
+- Protocol overview Blob：`b88ef3a6fd3be293e7c2e77d9652f386b169bc47`
+- Message envelope/versioning Blob：`5547ecd78d118bd63e571e5daad87194d9b694e4`
+- Context delivery/acknowledgement Blob：`bf9732cc39d156853b507c3a3a4e573159978f49`
+- Adapter Forget ACK/target binding Blob：`5e2b33898cbc6a9c95e271ecd1d8a092d04c67f8`
+- Strict JSON parser reference Blob：`3b9b3da645448c773c95a9dcd3c57c8c109bb2da`
+- Phase 3.7 lifecycle handoff Blob：`b2a2648d5576511f68fdb9d87ce4388a1fedd5e9`
+- Protocol conformance matrix Blob：`075b2ac6ebe9bda4ec83de04fad07e8027e6a440`
+
+#### H-CONFIRM-001 —— 消息／请求身份：PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN
+
+- `message_id` 是一条 BMCP 消息唯一且不可变的身份标识。
+- `correlation_id` 用于关联一个 workflow／turn／delivery；`causation_id` 用于标识直接父级消息／事件。
+- 会改变状态或可重试的操作，还必须具备由 Owner 限定作用域的幂等身份，以及规范化 payload digest。
+- 当前 H 候选方案中**不存在独立的核心 envelope `request_id`**。C 保留由 C 自主管理的 `AgentRequestId` 和 `AgentAttemptId`。C 使用 correlation／causation 将一条 Agent request 映射到一条或多条 BMCP 消息，不得将 Agent request、Agent attempt、BMCP message、transport attempt 或 idempotency identity 混为一体。
+- 本确认仅接受逻辑身份的区分；字段编码、命名空间语法和 wire schema 尚未冻结。
+
+#### H-CONFIRM-002 —— 原始 Wire Decode 与语义 Parse：PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN
+
+- H 负责经过认证的传输绑定、framing／原始字节接收、严格 UTF-8／JSON 解码、重复键／非有限数值／深度／大小拒绝、envelope 结构验证、协议版本／能力及完整性检查。
+- BMCP 语义 Parse 仅在成功完成解码和 envelope 验证后开始。它解析已注册的 family／operation，并分派给相应的领域权威方。
+- 语义 Parse **不得**重新解析原始字节，也不得绕过 H 的严格解码器。H 解码**不得**推断 B/D/E/F/G/I 的业务语义。
+- Strict parser Blob 是非生产环境的参考模型，不是 Runtime parser，也不构成实现 PASS。
+
+#### H-CONFIRM-003 —— ACK family／证据／重试：PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN
+
+- 交付生命周期仍为 Prepared / Delivered / Applied / Rejected / Expired / Superseded / Unknown。超时或缺少证据时状态为 Unknown，绝不得推断为成功。
+- Delivered 仅证明传输端点已收到。只有具备 G 所有的 context／application 语义，以及 C 推理边界所要求的证据时，才接受 Applied。H 负责传输／验证证据，但不得签发 G 的 Applied。
+- Forget ACK 与 Applied 分开处理。适配器本地状态 SUPPRESSED、LOCAL_BUFFER_CLEARED、LOCAL_CACHE_PURGED、QUEUED_DELIVERY_CANCELLED、FAILED、UNKNOWN 和 UNSUPPORTED，仅能证明所声明的 target／region／session／capability 范围。只有 I 负责评估全局 target 是否满足，以及 PolicyException。
+- 对同一个已完成操作，ACK identity／evidence digest 必须保持稳定；重传时复用该身份。Transport attempt identity 可以变化。相同 operation key 加相同 target digest 属于幂等操作；相同 key 加不同 digest 属于冲突。本地操作成功后若缺少 ACK，在通过查询／协调确认之前仍保持 Unknown。
+- 任何 ACK 都不意味着模型已关注、理解，也不意味着 provider 已删除、数据已物理擦除或全局 Forget 已完成。
+
+#### H-CONFIRM-004 —— Validator 层级／错误映射：PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN
+
+1. 传输／安全集成负责认证对端／工作负载 Principal；Principal 和授权策略由 I 管理。Payload identity 字段仅是声明。
+2. H 验证原始语法、envelope 必填字段／未知关键字段处理行为、协议版本／能力、完整性、重放和幂等性。
+3. 领域验证器仍由各自权威方负责：B 负责语义；D 负责规范身份／生命周期／ForgetFence；E 负责 admission／receipt；F 负责 retrieval；G 负责 ContextVersion／delivery／Applied；I 负责授权／PermissionEpoch／Forget policy。
+4. C 负责最终 inference-request 边界证据；H 不得根据 transport ACK 推断 Applied。
+5. 错误类别保留 Authentication、Authorization、Validation、Unsupported、Conflict、Expired、RateLimited／ResourceExhausted、Internal 和 Unknown。现有代码标签在 H 单独审查有版本号的 wire contract 之前仍属于 Candidate；目前没有任何 error enum 被冻结。
+
+**H-CONFIRM-001..004 各项当前状态：** 均为 `PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN`，且带有 `INDEPENDENCE_UNVERIFIABLE`。PR #428 comments 7060351041 和 7060264372 中记录的逻辑决议，仅在其明确声明的范围内予以接受；精确的 registry／schema／requiredness／crypto／persistence／error／consumer 工件仍未解决。不得将 H 的七项规范性核心规范标记为已完成，也不得声称存在独立 H 签署、跨 Owner 的 consumer acceptance，或 H 实现／符合性闭环。
+
 ### 7.1.2 H 范围澄清——逻辑决议与精确工件状态
 
 H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体标记为关闭；当前每项状态统一为 `PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN`，并保留 `INDEPENDENCE_UNVERIFIABLE`：
@@ -436,6 +482,14 @@ H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体
 - 裁决：D 仍是 Canonical ForgetOperation/Fence 和 Producer-barrier 语义的唯一权威；I 仍是 Principal Authorization、PermissionEpoch、撤销和 Global Forget Policy 的唯一权威。BMCP 只携带 Owner 签发的不透明 Ref/Epoch，并在接口发布后调用对应权威的 Validation/Currentness 操作。PermissionEpoch 与 ForgetFence 是不同名义类型。缺失/过期/不可用/不确定证据必须 Fail-closed。
 
 **C Mapping 边界：**PR #430 comment 7060351480 已决定 Family-level Routing；[Issue #449](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/449) 仍 OPEN，跟踪精确 H Operation ID/Schema、C Tool/Resource Name、C-H Consumer Acceptance。MCP 是 Agent Host ↔ C 北向接口；BMCP 是 C Adapter ↔ Brain 经 H 的协议边界。C 的 AgentRequestId 仅可作为本地 Workflow Correlation 输入，不得新增 H request_id；H 每条 Message 有独立 message_id，correlation_id/causation_id 分别表示 Workflow/直接父事件。Event Ingress/Telemetry/Forget/Admin 必须经过注册 H Operation 和 Owner Authorization；Context Snapshot/Delta/Delivery 为入站；Acknowledgement 仅是 Adapter Evidence，不是 MCP Success 或 G Applied。Recall/Search 归 F，当前不是 BMCP Family，不得发明 Search。
+
+### 7.4 B/D/I Owner 决议（委派角色；不声称存在独立人类签署）
+
+- **B — PR #429 comment 7060251435：** 接受 Option A + I1。Claim 是一条可归属的命题线程；ClaimRevision 不可变；Fact 是独立的受治理 attest；FactRevision 绑定精确的 ClaimRevisionRef、Evidence／Provenance，以及经授权的 attestor／method 上下文。B 负责语义词汇；D 负责规范身份；I 负责授权。
+- **D — PR #429 comment 7060243632：** 接受 Option A + I1 作为规范领域输入。D 负责 ClaimRef／ClaimRevisionRef 和 FactRef／FactRevisionRef 的分配、revision commit／currentness、生命周期、lineage、ConflictSet 以及 ForgetOperation／ForgetFence。精确的不可变 revision 事务／currentness、schema、迁移／兼容性、consumer acceptance 和符合性仍为 OPEN。
+- **I — PR #429 comment 7060259541：** 接受 Option A + I1 作为安全策略输入。Fact 创建／修订属于受保护操作，必须具备经过认证的 Principal／Actor 绑定、精确的 attestor 授权，以及在最终授权／提交时仍有效的由 I 签发的 PermissionEpoch。缓存的 ALLOW／session／lease／ACK 不得作为可复用授权。I 负责 attestor 授权、撤销、保留／法律保全／备份，以及全局 Forget 评估。精确的策略划分、issuer／registry 绑定和 consumer 映射仍为 OPEN。
+
+**所需源文件协调：** B 必须更新其 domain-model-overview 及 B-ADR 状态／源版本固定信息；D 必须更新现有 memory-versioning／Forget 源文件及镜像；I 必须更新现有 Principal／Actor 授权及 Forget 源文件／镜像。当前源文件中关于语义选择尚未决定／受 ADR 阻塞的表述，就语义选择而言已经过时；但 schema／API／实现门禁仍保持开放。
 
 ## 8. Runtime 验收计划——NOT RUN
 

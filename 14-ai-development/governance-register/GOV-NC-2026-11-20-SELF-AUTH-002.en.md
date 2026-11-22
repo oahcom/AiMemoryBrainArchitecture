@@ -94,7 +94,7 @@ Instrument §4:
 
 Compare `PR-GOVERNANCE-001` §5, which requires independent review as a merge gate. §4 rewrites that gate as "disclose and proceed; merging is not prohibited."
 
-Under the current toolchain (single GitHub account, no second reviewer identity), `INDEPENDENCE_UNVERIFIABLE` is permanently true. So §4's practical effect is: **the independent review requirement never blocks anything in this repository.**
+A single GitHub account is **not** grounds for denying independence; account identity and session identity are separate evidence dimensions, as clarified by #305 comment `7075173878` §3. However, §4 makes disclosure sufficient and does not prohibit merging when independent review evidence is unavailable. Its practical effect is: **the independent review requirement never blocks anything in this repository.**
 
 This is not an interpretation of §5; it is an amendment to §5 made by a delegation instrument whose own authority source (§3) does not include the power to amend `PR-GOVERNANCE-001`.
 
