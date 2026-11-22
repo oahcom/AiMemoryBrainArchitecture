@@ -60,6 +60,23 @@ tailscale status
 tailscale ip -4
 ```
 
+Then the build toolchain. `cargo test --workspace --all-targets` compiles bundled SQLite through `cc::Build`, so a compiler is a precondition for the job the runner exists to run — and a *present* `cc` is not a *working* one. A `gcc` with no `cc1` behind it is found by `command -v` and still dies inside `libsqlite3-sys`. Check presence and capability separately:
+
+```bash
+for t in cc gcc pkg-config make; do
+  command -v "$t" >/dev/null 2>&1 && printf '%-12s PRESENT\n' "$t" || printf '%-12s MISSING\n' "$t"
+done
+printf 'int main(void){return 0;}\n' >/tmp/cc-probe.c
+if cc /tmp/cc-probe.c -o /tmp/cc-probe 2>/tmp/cc-probe.err; then
+  echo "OK: cc compiles and links"
+else
+  echo "MISSING C TOOLCHAIN: cc is on PATH but cannot compile; see /tmp/cc-probe.err"
+fi
+rm -f /tmp/cc-probe.c /tmp/cc-probe /tmp/cc-probe.err
+```
+
+`cc ... cannot compile` is a provisioning failure, not a dependency bug: install `build-essential` (or set `CC` to a real toolchain) before registering the runner. If `cc` is `MISSING` outright, the same applies — the next `cargo test` would fail inside `libsqlite3-sys`, which reads as a `rusqlite` problem rather than a host problem.
+
 Record non-secret output in the deployment evidence. Confirm architecture before choosing the runner package: **this host is `x86_64`**. A package chosen from an `arch=arm64` page is the wrong artifact; a partially downloaded package additionally fails `tar tzf` and leaves no `config.sh`. Verify both the architecture and the archive hash before extracting.
 
 ## 2. Service identity
