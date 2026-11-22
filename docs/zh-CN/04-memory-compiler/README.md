@@ -8,7 +8,7 @@ document_metadata:
     evidence_verification:
       verification_status: Unverified
       last_verified_date: null
-      last_verification_note: "Owner authorized this root source/mirror topology in PR #429 comment 7061562608; content acceptance, bilingual semantic parity, independent review and CI remain pending."
+      last_verification_note: "Source/mirror topology was authorized by PR #429 comment 7061562608; the later Owner decision in Issue #564 comment 7074302216 keeps this reading guide Informative / Non-Canonical. Content acceptance, bilingual semantic parity, independent review and CI remain pending."
     usage_status: Active
     modification_status: Modified
   authority:
@@ -52,4 +52,4 @@ E 拥有来源接收/编译编排、Candidate 生成、Stage Lineage、Retry/Rep
 
 CANDIDATE 描述不是已批准 Schema。E 仅输出中立 CandidateProposition/ExtractionIR；不得签发 ClaimRef/ClaimRevisionRef/FactRef/FactRevisionRef，也不得根据 Confidence 推断 Fact。D 拥有 Canonical Identity/Revision/Currentness/Lifecycle 和 D ForgetFence；I 拥有 Authorization/PermissionEpoch、Attestor Authorization、Retention 和 Global Forget Policy/Completion。精确 B/D/I/H/Storage Consumer Contract、Transaction 和 Compatibility Evidence 仍为 OPEN。未授权 Schema、DDL、Public API、Wire 或 Runtime Freeze。
 
-**源文件/镜像状态：**本文是根目录 Informative / Canonical 阅读指南 `04-memory-compiler/README.md`（Scope `memory-compiler/reading-guide`）的非规范简体中文镜像；英文文件是其非规范配对语言镜像。规范规格各自拥有独立的根目录规范源文件。
+**源文件/镜像状态：**本文是根目录 Informative / Non-Canonical 阅读指南 `04-memory-compiler/README.md` 的非规范简体中文镜像；英文文件是其非规范配对语言镜像。规范规格各自拥有独立的根目录规范源文件。
