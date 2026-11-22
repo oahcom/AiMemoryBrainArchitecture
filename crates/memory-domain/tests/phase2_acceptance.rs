@@ -156,93 +156,222 @@ fn dm2_02_accepted_revision_is_append_only() {
 
 // ---------------------------------------------------------------- DM2-03
 
+#[derive(Clone)]
+struct ClaimRevisionDraft {
+    subject: String,
+    predicate: String,
+    object: String,
+    polarity: String,
+    qualifiers: Vec<String>,
+    epistemic_status: EpistemicStatus,
+    valid_time: TimeValue,
+    evidence_refs: Vec<EvidenceRef>,
+    provenance_refs: Vec<ProvenanceRef>,
+    scope_refs: Vec<ScopeRef>,
+}
+
+fn claim_revision_successor(
+    prior: &ClaimRevision,
+    revision: &str,
+    edit: impl FnOnce(&mut ClaimRevisionDraft),
+) -> ClaimRevision {
+    let mut draft = ClaimRevisionDraft {
+        subject: prior.subject().to_owned(),
+        predicate: prior.predicate().to_owned(),
+        object: prior.object().to_owned(),
+        polarity: prior.polarity().to_owned(),
+        qualifiers: prior.qualifiers().to_vec(),
+        epistemic_status: prior.epistemic_status().clone(),
+        valid_time: prior.valid_time().clone(),
+        evidence_refs: prior.evidence_refs().to_vec(),
+        provenance_refs: prior.provenance_refs().to_vec(),
+        scope_refs: prior.scope_refs().to_vec(),
+    };
+    edit(&mut draft);
+
+    ClaimRevision::successor(
+        ClaimRevisionRef::new(revision).unwrap(),
+        prior.claim_ref().clone(),
+        prior,
+        draft.subject,
+        draft.predicate,
+        draft.object,
+        draft.polarity,
+        draft.qualifiers,
+        draft.epistemic_status,
+        draft.valid_time,
+        draft.evidence_refs,
+        draft.provenance_refs,
+        "2026-01-02T00:00:00Z".into(),
+        "phase2 classification vector".into(),
+        draft.scope_refs,
+    )
+    .unwrap()
+}
+
 #[test]
 fn dm2_03_ci_classification_vectors() {
-    // PR #545 exposed classify() publicly; these vectors exercise the real API end to end.
     let prior = claim_revision("cr-1", "claim-1", &["ev-1"]);
-    let candidate = || claim_revision("cr-2", "claim-1", &["ev-1"]);
 
-    // Identity resolution: a normalised label-only subject change stays the same Claim
-    // and must be a NewRevision on the LabelOnly dimension (CI-13), not a NewClaim.
+    // CI-01: changing the subject's actual referent creates a NewClaim.
+    let candidate = claim_revision_successor(&prior, "ci-01", |d| {
+        d.subject = "different-referent".into();
+    });
     assert_eq!(
-        classify(
-            &prior,
-            &claim_revision_json_with(&candidate(), "subject", json!(" Subject "))
-        ),
+        classify(&prior, &candidate),
         ClaimIdentityDecision::Classified {
-            class: ClaimIdentityClass::NewRevision,
-            dimension: ChangeDimension::LabelOnly,
+            class: ClaimIdentityClass::NewClaim,
+            dimension: ChangeDimension::SubjectReferent,
         }
     );
 
-    // CI-02: predicate change is substantive -> NewClaim/Predicate.
+    // CI-02: predicate change creates a NewClaim.
+    let candidate = claim_revision_successor(&prior, "ci-02", |d| {
+        d.predicate = "holds".into();
+    });
     assert_eq!(
-        classify(
-            &prior,
-            &claim_revision_json_with(&candidate(), "predicate", json!("holds"))
-        ),
+        classify(&prior, &candidate),
         ClaimIdentityDecision::Classified {
             class: ClaimIdentityClass::NewClaim,
             dimension: ChangeDimension::Predicate,
         }
     );
 
-    // CI-03: object change -> NewClaim/Object.
+    // CI-03: object/value change creates a NewClaim.
+    let candidate = claim_revision_successor(&prior, "ci-03", |d| {
+        d.object = "red".into();
+    });
     assert_eq!(
-        classify(
-            &prior,
-            &claim_revision_json_with(&candidate(), "object", json!("red"))
-        ),
+        classify(&prior, &candidate),
         ClaimIdentityDecision::Classified {
             class: ClaimIdentityClass::NewClaim,
             dimension: ChangeDimension::Object,
         }
     );
 
-    // CI-04: polarity change -> NewClaim/Polarity.
+    // CI-04: polarity change creates a NewClaim.
+    let candidate = claim_revision_successor(&prior, "ci-04", |d| {
+        d.polarity = "negate".into();
+    });
     assert_eq!(
-        classify(
-            &prior,
-            &claim_revision_json_with(&candidate(), "polarity", json!("negate"))
-        ),
+        classify(&prior, &candidate),
         ClaimIdentityDecision::Classified {
             class: ClaimIdentityClass::NewClaim,
             dimension: ChangeDimension::Polarity,
         }
     );
 
-    // A different ClaimRef is a governed decision; ambiguity MUST NOT silently fall
-    // back to NewRevision.
-    let decision = classify(&prior, &claim_revision("cr-2", "claim-2", &["ev-1"]));
+    // CI-07: valid-time change creates a NewClaim.
+    let candidate = claim_revision_successor(&prior, "ci-07", |d| {
+        d.valid_time = TimeValue::Instant("2026-05-01T00:00:00Z".into());
+    });
     assert_eq!(
-        decision,
-        ClaimIdentityDecision::RequiresGovernedDecision {
-            reason: AmbiguousReason::ReferentResolutionUncertain,
+        classify(&prior, &candidate),
+        ClaimIdentityDecision::Classified {
+            class: ClaimIdentityClass::NewClaim,
+            dimension: ChangeDimension::TemporalQualifier,
         }
     );
-    assert_ne!(
-        decision,
+
+    // CI-08: scope boundary change creates a NewClaim.
+    let candidate = claim_revision_successor(&prior, "ci-08", |d| {
+        d.scope_refs = vec![scope("s2")];
+    });
+    assert_eq!(
+        classify(&prior, &candidate),
+        ClaimIdentityDecision::Classified {
+            class: ClaimIdentityClass::NewClaim,
+            dimension: ChangeDimension::Scope,
+        }
+    );
+
+    // CI-09: evidence-only change preserves Claim identity as a NewRevision.
+    let candidate = claim_revision_successor(&prior, "ci-09", |d| {
+        d.evidence_refs = vec![EvidenceRef::new("ev-2").unwrap()];
+    });
+    assert_eq!(
+        classify(&prior, &candidate),
+        ClaimIdentityDecision::Classified {
+            class: ClaimIdentityClass::NewRevision,
+            dimension: ChangeDimension::Evidence,
+        }
+    );
+
+    // CI-10: provenance-only change preserves Claim identity as a NewRevision.
+    let candidate = claim_revision_successor(&prior, "ci-10", |d| {
+        d.provenance_refs = vec![ProvenanceRef::new("prov-2").unwrap()];
+    });
+    assert_eq!(
+        classify(&prior, &candidate),
+        ClaimIdentityDecision::Classified {
+            class: ClaimIdentityClass::NewRevision,
+            dimension: ChangeDimension::Provenance,
+        }
+    );
+
+    // CI-11: epistemic-status change preserves Claim identity as a NewRevision.
+    let candidate = claim_revision_successor(&prior, "ci-11", |d| {
+        d.epistemic_status = EpistemicStatus::Verified;
+    });
+    assert_eq!(
+        classify(&prior, &candidate),
+        ClaimIdentityDecision::Classified {
+            class: ClaimIdentityClass::NewRevision,
+            dimension: ChangeDimension::EpistemicStatus,
+        }
+    );
+
+    // CI-13: a presentation-only successor remains a NewRevision.
+    let candidate = claim_revision_successor(&prior, "ci-13", |_| {});
+    assert_eq!(
+        classify(&prior, &candidate),
         ClaimIdentityDecision::Classified {
             class: ClaimIdentityClass::NewRevision,
             dimension: ChangeDimension::PresentationOnly,
         }
     );
 
-    // Two substantive dimensions changed together -> governed MultipleSubstantiveDimensions.
-    let multi = claim_revision_json_with(
-        &claim_revision_json_with(&candidate(), "object", json!("red")),
-        "polarity",
-        json!("negate"),
+    // LabelOnly refinement: a display-label spelling/case change with the same
+    // normalised referent is not a NewClaim.
+    let candidate = claim_revision_successor(&prior, "label-only", |d| {
+        d.subject = " Subject ".into();
+    });
+    assert_eq!(
+        classify(&prior, &candidate),
+        ClaimIdentityDecision::Classified {
+            class: ClaimIdentityClass::NewRevision,
+            dimension: ChangeDimension::LabelOnly,
+        }
     );
-    match classify(&prior, &multi) {
+
+    // CI-05 / CI-06 / CI-12 are unreachable in the current input type, not passing
+    // vectors: ClaimRevision has no quantifier, modality or confidence field.
+    // Source-shape evidence (run from repository root):
+    // $ sed -n '/^pub struct ClaimRevision {/,/^}/p' crates/memory-domain/src/lib.rs | grep -En '\b(quantifier|modality|confidence)\b'
+    // (no output; grep exits 1)
+
+    // A qualifier change is semantically undecidable here. It MUST be governed and
+    // MUST NOT silently fall back to NewRevision.
+    let candidate = claim_revision_successor(&prior, "qualifier-change", |d| {
+        d.qualifiers = vec!["during-2026".into()];
+    });
+    let decision = classify(&prior, &candidate);
+    assert_eq!(
+        decision,
         ClaimIdentityDecision::RequiresGovernedDecision {
-            reason: AmbiguousReason::MultipleSubstantiveDimensions { dimensions },
-        } => assert_eq!(
-            dimensions,
-            vec![ChangeDimension::Object, ChangeDimension::Polarity]
+            reason: AmbiguousReason::QualifierSubstantivenessUnprovable,
+        }
+    );
+    assert!(
+        !matches!(
+            decision,
+            ClaimIdentityDecision::Classified {
+                class: ClaimIdentityClass::NewRevision,
+                ..
+            }
         ),
-        other => panic!("expected a governed decision, got {other:?}"),
-    }
+        "qualifier ambiguity must not fall back to NewRevision"
+    );
 }
 
 // ---------------------------------------------------------------- DM2-04
