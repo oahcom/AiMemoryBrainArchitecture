@@ -250,9 +250,9 @@ This section defines semantic and governance contracts only. It does not approve
 
 **Status: RESOLVED by `OWNER-DECISION-FACT-RETRACTION-001` — candidate 3 (append a suppressing revision) is selected.**
 
-A FactRevision pins one or more exact ClaimRevisionRef values. When a pinned ClaimRevision is later assigned the epistemic status `Retracted`, the FactRevision is NOT mutated. The governed response is to **retain the original FactRevision unchanged and append a new successor FactRevision** whose `outcome` is `FactOutcome::Revoked` and whose `correction_or_revocation_reason` records why. The original remains historically addressable and auditable; the successor carries the current disposition.
+Ruling provenance: GitHub Issue #265, comment 7064801226 — https://github.com/oahcom/AiMemoryBrainArchitecture/issues/265#issuecomment-7064801226
 
-A FactRevision pins one or more exact ClaimRevisionRef values. The domain contract does not yet decide what happens when a pinned ClaimRevision is later assigned the epistemic status `Retracted`. This question is distinct from Forget: retraction changes the epistemic status/history of a ClaimRevision; Forget governs disclosure and dependency suppression.
+A FactRevision pins one or more exact ClaimRevisionRef values. When a pinned ClaimRevision is later assigned the epistemic status `Retracted`, the FactRevision is NOT mutated. The governed response is to **retain the original FactRevision unchanged and append a new successor FactRevision** whose `outcome` is `FactOutcome::Revoked` and whose `correction_or_revocation_reason` records why. The original remains historically addressable and auditable; the successor carries the current disposition.
 
 #### Why candidate 3, on evidence rather than preference
 

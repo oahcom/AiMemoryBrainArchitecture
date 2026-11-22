@@ -263,15 +263,15 @@ Attestation Method 身份只能证明调用了哪个声明程序，不能证明�
 
 **状态：已由 `OWNER-DECISION-FACT-RETRACTION-001` 裁定 —— 选定候选方案 3（追加一条抑制性修订）。**
 
-一个 FactRevision 固定一个或多个精确的 ClaimRevisionRef。当被固定的某个 ClaimRevision 后续被赋予认知状态 `Retracted` 时，**不得改写**该 FactRevision。受治理的响应方式是：**保持原 FactRevision 不变，追加一条后继 FactRevision**，其 `outcome` 为 `FactOutcome::Revoked`，并在 `correction_or_revocation_reason` 中记录理由。原修订仍可历史寻址与审计；后继修订承载当前处置状态。
+裁定出处：GitHub Issue #265，评论 7064801226 — https://github.com/oahcom/AiMemoryBrainArchitecture/issues/265#issuecomment-7064801226
 
-本问题与 Forget 不同：撤回改变的是某个 ClaimRevision 的认知状态与历史；Forget 治理的是披露与依赖抑制。
+一个 FactRevision 固定一个或多个精确的 ClaimRevisionRef。当被固定的某个 ClaimRevision 后续被赋予认知状态 `Retracted` 时，**不得改写**该 FactRevision。受治理的响应方式是：**保持原 FactRevision 不变，追加一条后继 FactRevision**，其 `outcome` 为 `FactOutcome::Revoked`，并在 `correction_or_revocation_reason` 中记录理由。原修订仍可历史寻址与审计；后继修订承载当前处置状态。
 
 #### 为何依据证据而非偏好选定候选方案 3
 
 曾考虑三种候选语义，只有一种能在既有规范来源下成立：
 
-1. **继续可见 —— 不是一个可选选项。** §8.1 第 3 条已要求 FactRevision「只有在每一项已披露依赖都被独立授权、且未被适用的 Forget 决定抑制时，才可保持可见」。因此 Fact 的可见性本就对所有已披露依赖取合取。在固定依赖已被撤回、且毫无信号的情况下继续呈现该 Fact，描述的是规范**已经禁止**的状态，而不是一个尚未决定的选项。
+1. **继续可见 —— 不是一个可选选项。** §8.1 第 3 条已要求 FactRevision「只有在每一项已披露依赖都被独立授权、且未被适用的 Forget 决定抑制时，才可保持可见」。因此 Fact 的可见性本就对所有已披露依赖取合取。在固定依赖已被撤回、且毫无信号的情况下继续呈现该 Fact，描述的是规范**已经禁止**的状态，而不是一个仍待选择的选项。
 
 2. **标记为失效 —— 被本节自身禁止。** 该方案需要在 `FactRevision` 上增加可变的 `retracted` 字段。本节结尾的禁令已排除此做法；此外，可变的处置字段也违反 §3.15 与 `epistemic-and-temporal-semantics.md` §2、§9 所确立的追加式修订不变式——历史修订 MUST NOT 被覆盖。
 
