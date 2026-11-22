@@ -1861,3 +1861,46 @@ The second mutation is the one that matters. It shows the CLI now depends on the
 One seam is now connected: `compile_outbox` has a production reader, and the compiler input is derived from durable state rather than assembled beside it. One seam is still merged-but-unused: `bmcp-protocol`'s 48 getters have no consumer in `agent-integration`. One decision is still open: what "already compiled" means.
 
 The difference between round nine and round ten is that the first sentence used to be "the read side exists and nothing reads." It is now "the read side exists and the compiler reads it."
+
+## Round eleven — the round-ten correction was aimed at the wrong problem
+
+Round ten named three open items. The first one was: *"`pending_compile_intents()` is non-consuming, nothing records that a row has been compiled, and a re-run compiles again."* The observation is correct. The priority it implies is not.
+
+Measured on `b093b59` with `crates/brain-cli/fixtures/event.json` and one persistent `--event-store` file, two consecutive runs of the same event:
+
+```
+run1 exit=0
+run2 exit=0
+
+persistent store after both runs
+  accepted_events 1
+  compile_outbox   1
+  event_payloads   1
+
+outputs identical?  IDENTICAL
+compiler status:    compiler stage blocked: publication not authorized;
+                    blocking flag: canonical_commit_confirmed;
+                    false flags: [canonical_commit_confirmed,
+                                  publication_participant_admitted,
+                                  protected_visibility_authorized]
+```
+
+Two facts follow, and the second one reorders the backlog.
+
+**1. The re-run is already idempotent at the acceptance boundary.** `accepted_events` stays at one row because `UNIQUE(producer_actor_ref, idempotency_key)` refuses the second insert, and `compile_outbox` has `event_row INTEGER NOT NULL UNIQUE`, so the outbox does not grow either. What repeats is the compile *attempt*, not a durable effect.
+
+**2. There is no durable effect to repeat.** `run_compiler_stage` receives `storage_path` and `admission_path` from two `TemporaryDatabase` values (`main.rs:566`, `main.rs:637`). `TemporaryDatabase` joins `std::env::temp_dir()` with the pid and removes the file in `Drop` (`main.rs:70-86`). `--event-store` is the only caller-owned database, and it holds acceptance state only: the tables in it are `accepted_events`, `event_payloads`, `compile_outbox`. A grep for a compiled-result table returns only `compile_outbox`.
+
+So "who owns progress" is a real design question about a system that does not yet exist. Asking it before there is a durable compile output is the same mistake as round seven's dependency graph: reasoning about a seam by reading its name rather than its call site.
+
+**What the status string actually says.** `Blocked` is not a regression and not an unfinished hook. `run_compiler_stage`'s own doc comment states the intent: *"Publication itself is expected to be refused: the adapter may not authorize what no issuer has authorized."* The three false flags are the ones no local issuer can set. The CLI is a correctly-refusing publisher, not a broken one.
+
+**Reordered backlog.** The blocking item is not progress ownership. It is:
+
+1. **Decide whether a compile output should be durable at all.** If the answer is no, the CLI is a demonstration binary and progress ownership never needs solving. If yes, the storage and admission handles have to outlive the process, which means a `--storage` / `--admission` flag or a single durable database. That is one decision, and it gates the rest.
+2. Only after (1): record that a row has been compiled. The three round-nine candidates (a `compiled_at` column, a cursor table, idempotent re-read) are still three different systems, and which one is right depends on whether a compile output can be partially written.
+3. `compile_intent_durable` remains forgeable. `PendingCompileIntent` has public fields; `accepted_event_from` guarantees it does not launder bad bytes, not that the flag is proof. Unchanged from round ten.
+
+**Unchanged and still true.** `agent-integration` -> `bmcp-protocol`: zero dependencies, zero conversions, zero tests (`grep -c bmcp crates/agent-integration/Cargo.toml` returns `0`).
+
+**Method note.** The two facts above took one shell script and two CLI invocations. Rounds eight through ten each took a session of reading. The cheaper measurement was available the whole time, and the reason it was not taken is that a grep that returns matches feels like more evidence than a CLI run that returns a status line. It is not.
