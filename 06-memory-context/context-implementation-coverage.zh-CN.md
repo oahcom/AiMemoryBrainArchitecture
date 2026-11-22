@@ -94,7 +94,7 @@ Rust crate 仍停留在 private/staged 阶段。Round 6 新增纯内存 `ChangeS
 | Context/Entry/Delivery/Applied 对象分离 | context-versioning.md §5–§6 | PARTIAL — 有 Snapshot 和 DeliveryIntent；`delivery_intent_targets_snapshot_context_version` 验证目标版本绑定；无持久化 Context/Applied 对象 | 本线程可做 |
 | Snapshot/Delta 语义及精确 Base 应用 | context-versioning.md §7 | PARTIAL — `apply_change_set` 针对精确 Base-Version 应用并暂存新 Snapshot；测试 `stale_base_is_rejected_without_changing_snapshot` 和 `any_failing_operation_discards_the_entire_staged_set`；仍无持久化 Delta 历史/Replay | D |
 | CAS、幂等、原子 ChangeSet、禁止隐式合并 | context-versioning.md §8 | PARTIAL — `commit_change_set` 有内存 Base-Version CAS/幂等，`apply_change_set` 拒绝过期 Base 且不隐式合并；仍无持久化 Context 原子提交或持久化幂等记录 | I |
-| Delivery 生命周期、迟到 ACK 和 Supersession | context-versioning.md §9 | NOT IMPLEMENTED — 无 Attempt Ledger/ACK 消费者 | 本线程可做 |
+| Delivery 生命周期、迟到 ACK 和 Supersession | context-versioning.md §9 | PARTIAL — `crates/memory-context/src/delivery_lifecycle.rs` 中的 `DeliveryLifecycle` 是五态状态机（Pending/Delivered/Acknowledged/Superseded/Abandoned），终态拒绝一切转换；ACK 消费方区分已接受、重复、迟到（已 supersede）、旧尝试、未知 delivery 五类，并逐类记录而非丢弃；无持久化、无 supersession 级联、无生产调用方 | 本线程可做 |
 | Rollback、补偿和 Replay | context-versioning.md §10 | PARTIAL — 有 Tombstone 和内存历史；无持久化 Replay/Rebuild | D |
 | Full/Partial/Bypassed/Unknown 覆盖语义 | context-versioning.md §11、§14.3 | PARTIAL — Applied Ledger 要求调用方 Gate 全部为真；无完整 Region 提取或 Coverage Proof | D |
 | Typed Cursor 分离和 Producer Admission | context-versioning.md §13.1–§13.2 | NOT IMPLEMENTED — 无 D 注册或 Typed Cursor Validator | D |
