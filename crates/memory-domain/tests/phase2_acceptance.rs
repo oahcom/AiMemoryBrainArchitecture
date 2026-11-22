@@ -582,15 +582,18 @@ fn dm2_08_unregistered_relation_type_rejected() {
         Ok(())
     );
 
-    // 2. An unregistered relation type is rejected.
+    // 2. An unregistered relation type is rejected, and is distinguishable from
+    // a registered type whose endpoints do not fit. Returning the same error for
+    // both would let an implementation that rejects everything pass this test.
     assert!(!registry.contains_relation_type("contains"));
 
     assert_eq!(
         registry.validate_against_registry("contains", &compatible),
-        Err(DomainError::InvalidRelationEndpoint)
+        Err(DomainError::UnregisteredRelationType)
     );
 
-    // 3. Registering the same relation type twice is rejected.
+    // 3. Registering the same relation type twice is rejected, under its own
+    // variant so it cannot be confused with an endpoint mismatch.
     let duplicate = RelationDefinition {
         relation_type: "owns".into(),
         allowed_subject_kinds: vec![RelationEndpointKind::Entity],
@@ -599,7 +602,7 @@ fn dm2_08_unregistered_relation_type_rejected() {
 
     assert_eq!(
         registry.register(2, duplicate),
-        Err(DomainError::InvalidRelationEndpoint)
+        Err(DomainError::DuplicateRelationType)
     );
 
     // 4. A registered relation type with incompatible endpoints is rejected.
