@@ -62,3 +62,22 @@ jobs:
           echo "=== Runner account ==="
           id
           echo "Diagnostics complete. No environment variables, secrets, peer list, or user files were read."
+          echo "=== Rust toolchain probe (read-only, no install) ==="
+          if command -v cargo >/dev/null 2>&1; then
+            printf 'cargo_present=yes\n'
+            cargo --version || true
+            rustc --version || true
+          else
+            printf 'cargo_present=no\n'
+          fi
+          if command -v curl >/dev/null 2>&1; then
+            printf 'curl_present=yes\n'
+            curl --version | head -1 || true
+          else
+            printf 'curl_present=no\n'
+          fi
+          printf 'rustup_home_exists='; [ -d "$HOME/.rustup" ] && echo yes || echo no
+          printf 'cargo_home_exists='; [ -d "$HOME/.cargo" ] && echo yes || echo no
+          printf 'cargo_env_exists='; [ -f "$HOME/.cargo/env" ] && echo yes || echo no
+          echo "=== can we reach static.rust-lang.org? ==="
+          curl -sS -o /dev/null -w 'http_code=%{http_code}\n' --max-time 20 https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rustup-init || echo "curl_failed=$?"
