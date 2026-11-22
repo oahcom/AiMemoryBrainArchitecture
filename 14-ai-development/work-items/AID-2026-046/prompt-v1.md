@@ -4,8 +4,8 @@
 
 Repository: `oahcom/AiMemoryBrainArchitecture`.
 Baseline: PR #616 merged at `fe5bad9eb8f6261f040bb2a10bfccc46ceb603b9`.
+Tracking issue: #628 (AID-2026-046); parent #348 (REQ-08).
 Current base: `main` at `87f54bb44d9cd2872d7faf7c5c146dd85cae6fc1`.
-Tracking scope: REQ-08, Issue #348.
 Task: complete the one remaining negative-path test for the seven `AppliedDeliveryChecks` tri-state callbacks. PR #616 is already merged; deliver a new follow-up PR.
 
 ## Authorized scope
@@ -18,7 +18,7 @@ Task: complete the one remaining negative-path test for the seven `AppliedDelive
 - Preserve existing signature rejection and the separate `verify_c_submit_outcome_record` callback test.
 - Update the test count and any coverage claims so they accurately state that all seven tri-state callbacks have a False-return negative test.
 - Do not change validator implementation or `_tri_state`.
-- Deliver through a new PR linked to AID-2026-046; do not modify `main` directly.
+- Deliver through a new PR linked to AID-2026-046 and Issue #628; do not modify `main` directly.
 
 ## Explicit non-goals
 
@@ -42,4 +42,4 @@ Run the focused Python unittest suite on the exact final follow-up PR head. Reco
 
 ## Provenance
 
-Frozen from the separate-session technical review of PR #616 and its post-merge coverage finding, plus the current user instruction to continue convergence. The original PR #616 implementation prompt is not available; this v1 prompt governs only the remaining key-status test and does not fabricate the original author prompt or session ID.
+Frozen from the separate-session technical review of PR #616, the post-merge coverage finding recorded in Issue #628, and the current user instruction to continue convergence. The original PR #616 implementation prompt is not available; this v1 prompt governs only the remaining key-status test and does not fabricate the original author prompt or session ID.

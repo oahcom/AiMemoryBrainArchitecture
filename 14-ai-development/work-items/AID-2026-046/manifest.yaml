@@ -10,7 +10,7 @@ risk_rationale: >-
 
 security_scope: AppliedDeliveryChecks verify_key_status False-result rejection test only.
 
-status: PR_OPEN
+status: REGISTERED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -20,13 +20,14 @@ repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
 base_commit_sha: 87f54bb44d9cd2872d7faf7c5c146dd85cae6fc1
 
-tracking_issue: "#348 (REQ-08 applied-delivery trust callback conformance)"
+tracking_issue: "#628 (AID-2026-046 follow-up); parent #348 (REQ-08)"
 baseline_pr: 616
 baseline_pr_status: MERGED
 baseline_merge_commit_sha: fe5bad9eb8f6261f040bb2a10bfccc46ceb603b9
-registration_pr: 624
-registration_pr_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/624
-registration_pr_status: OPEN
+registration_pr: 625
+registration_pr_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/625
+registration_pr_status: MERGED
+registration_merge_commit_sha: 3015a68f9acec79c9e7ce02b43783e03939dfa79
 
 created_at: 2026-11-22
 updated_at: 2026-11-22
@@ -35,10 +36,10 @@ prompt_id: AID-2026-046-PROMPT
 prompt_version: v1
 prompt_file: 14-ai-development/work-items/AID-2026-046/prompt-v1.md
 prompt_status: FROZEN
-prompt_sha256: 119a087185500d55db7bad6cbedca053192735604c528085c910f52dbf233295
-prompt_bytes: 3225
-prompt_file_blob_sha: 903d3fa141a4148de91915b297bff45c87637493
-prompt_file_commit_sha: 5b783d6f07ea35aee91a23d3c42e593b21c4b4d7
+prompt_sha256: 0deb2a9b5f8475171ee4264cbff0ef576054c837e1bf94a2bcb5a22135034bae
+prompt_bytes: 3282
+prompt_file_blob_sha: de839175c7e1dc8091d491d39cb755ffb356b776
+prompt_file_commit_sha: 68d42e8dfd73c96c541a05f7438222e1daf628b7
 
 prompt_provenance_tier: T1
 prompt_provenance_note: >-
@@ -51,6 +52,7 @@ dependency_refs:
   - 08-bmcp-protocol/tests/conformance/applied_delivery_evidence/test_applied_delivery_evidence.py
   - 08-bmcp-protocol/validators/applied_delivery_evidence_validator.py
   - PR #616 (merged baseline)
+  - Issue #628 (follow-up implementation carrier)
   - Issue #348
 
 deliverables:
@@ -90,7 +92,7 @@ authorization:
 
 governance:
   aid_assignment: REGISTERED
-  aid_status: PR_OPEN
+  aid_status: REGISTERED
   registration_authorization: USER-PRINCIPAL-DELEGATED (limited to this work item)
   development_start_authorization: USER-PRINCIPAL-DELEGATED (limited to the bounded AID-2026-046 follow-up)
   architecture_status: NOT_APPLICABLE
