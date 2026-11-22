@@ -27,7 +27,7 @@ The subject is the exact immutable domain revision being committed, identified b
 
 ### 2.2 Rust type shape
 
-The following is the normative public shape. The private state prevents callers from manufacturing an issued reference by struct literal. `IssuerId` is a validated newtype using the existing `OpaqueId` validation convention.
+The following is the normative public shape. The private state prevents struct-literal construction. The public candidate constructor is available across the `memory-domain` / `memory-compiler` crate boundary, but it does not issue authority: only the D issuer's durable row can make the candidate validate. `IssuerId` is a validated newtype using the existing `OpaqueId` validation convention.
 
 ```rust
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -70,10 +70,10 @@ impl CanonicalCommitRef {
         }
     }
 
-    /// Construct an issued reference after validating all fields.
-    /// Production issuance is mediated by the D issuer, not exposed as an
-    /// authorization-free public minting operation.
-    pub(crate) fn issued(data: CanonicalCommitData) -> Result<Self, DomainError> {
+    /// Construct a candidate reference after validating its fields.
+    /// This does not issue a commit or establish authority; the matching
+    /// durable canonical_commits row is required by the validator.
+    pub fn from_issued_data(data: CanonicalCommitData) -> Result<Self, DomainError> {
         validate_commit_data(&data)?;
         Ok(Self {
             state: CanonicalCommitRefState::Issued(data),
