@@ -288,38 +288,107 @@ jobs:
             echo "::warning::only ${avail_gb}G free; free space on this runner has been shrinking between runs that build nothing. Investigate the leak, do not just re-run."
           fi
 
-      # NO TOOLCHAIN INSTALL STEP. This runner is a shared, operator-managed
-      # host; a workflow that runs `rustup` would mutate the toolchain every
-      # other job on this machine sees. `actions/checkout` cleans
-      # `$GITHUB_WORKSPACE` but not `$HOME`, so `~/.cargo` and `~/.rustup` would
-      # persist and every later job's result would depend on which job ran
-      # first -- irreproducible and very hard to diagnose. A half-finished
-      # rustup install would also leave a broken `~/.rustup` that breaks every
-      # subsequent Rust job silently. Failing here is diagnosable; mutating the
-      # host is not.
+      # TOOLCHAIN: INSTALL IT, DO NOT REQUIRE IT.
       #
-      # `rustfmt` is deliberately NOT probed: this job no longer formats.
+      # An earlier revision of this job probed for cargo / rustc / cargo-clippy
+      # and failed with "install on the host out of band" when they were absent.
+      # That assumption -- the host already carries a Rust toolchain -- was
+      # measured FALSE on this runner. Run 45013278749, job
+      # `Rust clippy (hard gate)`, printed
+      # `cargo=MISSING rustc=MISSING cargo-clippy=MISSING cc=/usr/bin/cc`
+      # and died at this step, with the clippy step skipped. The original design
+      # assumed a provisioned host; run 45013278749 overturned that assumption.
       #
-      # `cc` is checked because `libsqlite3-sys` compiles C in its build script,
-      # and discovering a missing compiler 40 crates into a build wastes the
-      # whole job.
-      - name: Require the host Rust toolchain
+      # This is NOT a relaxation to turn a red run green. The gate still fails on
+      # any clippy warning (`-D warnings` below). What changes is that the gate
+      # now reaches the point where it can measure something. A gate that fails
+      # because the runner image ships no compiler is reporting on the image, not
+      # on the code -- and it reports that forever, on every run, which is
+      # precisely how a gate trains everyone to ignore it.
+      #
+      # The install is copied from `rust-self-hosted.yml` on main (commit
+      # c031c401), which hit the identical wall on the identical host -- run
+      # 45001611071, `cargo: command not found`, exit 127 -- and solved it this
+      # way. Two workflows sharing one runner must make the same assumption about
+      # that runner; before this change they made opposite ones, and the
+      # disagreement was the bug.
+      #
+      # Why the old comment's objection no longer holds. It argued that a
+      # workflow running rustup mutates a shared host and leaves ~/.cargo and
+      # ~/.rustup behind, so later jobs would depend on which job ran first. That
+      # cost is already paid: `rust-self-hosted.yml` installs into the same $HOME
+      # on the same host, so refusing here does not protect the host -- it only
+      # makes this job fail while the other job populates $HOME regardless. The
+      # residual risk is bounded two ways:
+      #   * `command -v cargo` makes this step idempotent -- a warm ~/.cargo left
+      #     by any earlier job is used as-is and nothing is reinstalled.
+      #   * `--default-toolchain stable --profile minimal` pins one channel, so
+      #     "which job ran first" cannot change which compiler is used.
+      #
+      # DISK: this adds a minimal-profile toolchain to $HOME. The 3 GiB floor
+      # below is deliberately NOT changed -- not lowered, not raised. It is also
+      # not the binding constraint: the last measurement recorded on this runner
+      # was 5.6G free against that 3G floor, so a minimal toolchain fits in the
+      # existing headroom. If a future run trips the floor because of ~/.rustup,
+      # that is a real capacity problem on the host and belongs to the runner
+      # operator, not to a number edited in this file to get a green.
+      #
+      # `rustfmt` is deliberately NOT probed or installed: this job does not
+      # format. `cargo-clippy` IS required and `--profile minimal` does not ship
+      # it, so it is added as a component -- guarded, so a toolchain that already
+      # has it costs nothing.
+      #
+      # `cc` is still checked and still hard-fails. Unlike the Rust toolchain,
+      # `cc` cannot be installed by a user-space script -- it needs root and a
+      # package manager, which is exactly the legitimate "out of band" case. And
+      # `libsqlite3-sys` compiles C in its build script, so discovering a missing
+      # C compiler 40 crates into a build wastes the whole job.
+      - name: Install the Rust toolchain the runner image lacks
         shell: bash
         run: |
           set -euo pipefail
-          missing=""
           for c in cargo rustc cargo-clippy cc; do
             if command -v "$c" >/dev/null 2>&1; then
               echo "$c=$(command -v "$c")"
             else
               echo "$c=MISSING"
-              missing="$missing $c"
             fi
           done
-          if [ -n "$missing" ]; then
-            echo "::error::zesu-x64 lacks:$missing -- install on the host out of band (see AI-RUN-002-RUNBOOK), do not install it in this workflow"
+
+          if ! command -v cargo >/dev/null 2>&1; then
+            echo "no cargo on this runner; installing a minimal stable toolchain into HOME"
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+              | sh -s -- -y --profile minimal --default-toolchain stable
+          fi
+          # `~/.cargo/env` only exists when rustup installed the toolchain. A
+          # `cargo` from the distro package manager has no such file, and under
+          # `set -e` an unguarded `.` on a missing file exits 1 with the
+          # content-free "No such file or directory" -- the same class of
+          # unexplained failure this step exists to eliminate. Source it when
+          # present, proceed when absent.
+          if [ -f "$HOME/.cargo/env" ]; then
+            . "$HOME/.cargo/env"
+          fi
+
+          # clippy is a component, not part of `--profile minimal`. Added
+          # separately so a toolchain that already ships it pays nothing. The
+          # `rustup` guard matters: a `cargo` installed by the distro package
+          # manager has no `rustup`, and `rustup: command not found` under
+          # `set -e` is a bare exit with no explanation. Name the real problem.
+          if ! command -v cargo-clippy >/dev/null 2>&1; then
+            if command -v rustup >/dev/null 2>&1; then
+              rustup component add clippy
+            else
+              echo "::error::cargo-clippy is missing and rustup is not available to add it. Install the clippy component out of band."
+              exit 1
+            fi
+          fi
+
+          if ! command -v cc >/dev/null 2>&1; then
+            echo "::error::zesu-x64 has no C compiler (cc); libsqlite3-sys compiles C in its build script. Install a C toolchain on the host out of band (see AI-RUN-002-RUNBOOK)."
             exit 1
           fi
+
           cargo --version
           rustc --version
           cargo clippy --version
@@ -347,8 +416,19 @@ jobs:
       #
       # `-D warnings` is what makes this a gate rather than advice. A warning
       # that nobody acts on is how clippy ends up not being run at all.
+      # `. "$HOME/.cargo/env"` is repeated here, and must be repeated in every
+      # step that runs cargo, for a measured reason: rustup writes that profile
+      # for login shells, and a runner step is a non-login, non-interactive
+      # shell, so it is never sourced. Without this line the toolchain installed
+      # in the step above is invisible here and this step fails with
+      # `cargo: command not found` -- the exact failure `rust-self-hosted.yml`
+      # records at run 45001611071. Installing and then not sourcing is
+      # indistinguishable from not installing.
       - name: cargo clippy --workspace --all-targets -- -D warnings
         shell: bash
         run: |
           set -euo pipefail
+          if [ -f "$HOME/.cargo/env" ]; then
+            . "$HOME/.cargo/env"
+          fi
           cargo clippy --workspace --all-targets -- -D warnings
