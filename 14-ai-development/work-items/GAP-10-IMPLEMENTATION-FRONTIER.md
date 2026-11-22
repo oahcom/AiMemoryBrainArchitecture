@@ -726,7 +726,7 @@ only member of that category.
 | Memory Compiler | 85% unimplemented | `compile` is reachable from `brain-cli` through a production `AdmissionPublicationAuthority`. 66 tests. Five stages all have entry points. `Published` remains unreachable for three named reasons (GAP-12/13/14), none of which is "the compiler is 85% unwritten". |
 | Memory Context | 80% unimplemented | 77-row map unchanged in counts (9 implemented / 42 partial / 26 absent) but the crate now runs **82 unit + 17 integration = 99 tests**, up from 68+9. The coverage map has not been re-attributed since the code moved; treat the row counts as stale, not the tests. |
 | Agent Integration | 90% unimplemented | **False.** The crate now depends on `memory-context` *and* `memory-domain` at runtime, `brain-cli` consumes it (`crates/brain-cli/Cargo.toml:13`), and it runs 36 unit + 21 integration tests including `context_snapshot_delivery.rs`, which crosses the crate boundary with a real `ContextSnapshot`. #525's premise is dead. |
-| BMCP | 60% unimplemented | Protocol artifacts substantial; `bmcp-protocol` is 44 unit + 4 conformance tests. Transport/server still absent — a binary, not a percentage. Unchanged from §1.4. |
+| BMCP | 60% unimplemented | Protocol artifacts substantial; `bmcp-protocol` is 44 unit + 4 conformance tests. **Corrected at `61b9d743`:** a transport listener does exist (`crates/bmcp-server`, 723-line `lib.rs`, `TcpListener` at `:4`), so "transport/server absent" was wrong. What is true: 22 schema-declared `message_type` values, 1 Rust parser, and the listener reaches none of them — its only `bmcp_protocol` reference is `#[allow(dead_code)]`. See GAP-16. |
 | Phase 2 domain | 100% not started | **False.** 70 unit + 20 acceptance tests, 1 ignore (`dm2_06`), decision-blocked. `ClaimRevisionRegistry`, `ClaimRevisionResolver`, `AcceptedRevisionState`, `RelationTypeRegistry`, `ProvenanceGraph`, `EvidenceIndependence` and `claim_identity::classify` are all implemented. |
 | E2E | 100% not started | **False.** `brain-cli` runs ingestion → extraction → normalization → staging → `compile` → proof → context assembly → adapter delivery. `crates/brain-cli/tests/e2e_full_chain.rs` asserts the whole chain including the persisted snapshot and the refusal notice. One test, 3.6 s, passes. |
 
@@ -743,11 +743,22 @@ implementation at all is now:
    fields, each tracked: GAP-12 (canonical commit), GAP-13 (participant
    admission, external and tripartite), GAP-14 (store lifecycle plus the other
    two).
-2. **BMCP transport and server.** No `TcpListener`, no `hyper`, no `axum`
-   anywhere in `crates/`. Frozen by H, so dispatching it produces unmergeable
-   work.
-3. **`dm2_06`'s authorization type state.** Blocked by `B-P2-XO-01` and by §8's
-   prohibition on inferring authorization.
+2. **BMCP wire mapping, then the 21 parsers.** §9 originally said "no
+   `TcpListener` anywhere in `crates/`". That is false as of `61b9d743`:
+   `crates/bmcp-server/src/lib.rs:4` imports `std::net::{SocketAddr, TcpListener,
+   TcpStream}` and the crate is a workspace member. See GAP-16 for the measured
+   correction. What remains true is narrower and more useful: the listener
+   implements one JSON-RPC method (`initialize`) and never reaches the parser —
+   its only `bmcp_protocol` reference is a `#[allow(dead_code)]` formatter
+   "available for a future evidence-validation call site". Framing, session and
+   handshake are still frozen by H, so building on the existing JSON-RPC/TCP
+   choice would build on an undocumented premise. The 21 parsers and the
+   wire-to-parser route are not frozen by anything and can proceed.
+3. **`dm2_06`'s authorization type state.** §9 originally filed this under
+   `B-P2-XO-01`. It does not belong there — see
+   `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001`, which separates "is this
+   authorization genuine" (I's question, still open) from "is one present at
+   all" (a type-state question, now decided).
 
 That is the honest frontier: one decision-gated disposition, one
 transport-frozen binary, one owner-gated type state. Not six percentages.
@@ -787,3 +798,86 @@ inventory audited at a pinned base; whether it is *authoritative* for the
 message-type namespace, or merely a report about it, has not been decided.
 
 Both are recorded in #564. Neither is fixed by this document.
+
+## 10. Errata for §9, measured at `61b9d743` (2026-11-22 13:30 +08:00)
+
+§9 is not edited above. Two of its statements were wrong when written, and one
+became wrong when `main` moved. They are corrected here rather than in place,
+because a frontier document whose measurements are silently rewritten cannot be
+audited — the next reader cannot tell a correction from an original claim.
+
+### 10.1 `bmcp-server` exists, and §9 said it did not
+
+§9 §2 said:
+
+> No `TcpListener`, no `hyper`, no `axum` anywhere in `crates/`.
+
+False at `61b9d743`. `crates/bmcp-server` is a workspace member — 723-line
+`lib.rs`, 67-line `main.rs`, 166-line `rt_scenarios.rs` — and its fourth line is:
+
+```rust
+use std::net::{SocketAddr, TcpListener, TcpStream};
+```
+
+The error is worth naming because it is the same class §9 exists to diagnose: an
+absence reported without checking for the artifact. I measured `crates/` from a
+tree that predated the crate.
+
+### 10.2 The corrected BMCP finding is narrower and more useful
+
+What is actually true is not "transport absent" and not "transport present":
+
+- 22 unique `message_type` values are declared across 32 schemas, and the index
+  checker passes (`unique_message_types=22`, `missing=0`, `extra=0`).
+- Exactly **one** has a Rust parser: `parse_and_validate` returns
+  `AppliedDeliveryEvidence` by name, and the `message_type` check is a constant
+  comparison (`lib.rs:892-903`), so any other type yields `WrongConst`.
+- `bmcp-server` implements one JSON-RPC method (`initialize`) and returns
+  `-32601 Method not found` for everything else.
+- `bmcp-server` never reaches the parser. Its only `bmcp_protocol` reference in
+  the whole crate is:
+
+```rust
+// lib.rs:718-723
+// This local formatter is available for a future evidence-validation call site.
+#[allow(dead_code)]
+fn describe(error: &bmcp_protocol::validate::EvidenceError) -> String {
+```
+
+`#[allow(dead_code)]`, "for a future call site", zero call sites.
+
+So: **a listener exists, and zero of the 22 message types reach a parser.** That
+is a routing gap plus 21 missing parsers, not a missing binary. The 21 parsers
+are transcription against existing JSON Schema and are not frozen by anything.
+Framing, session and handshake remain frozen by H — `TECH-REALITY-001-C/README.md:70`
+still reads *"H wire mapping remains NOT FROZEN"* — so building on the existing
+JSON-RPC/TCP choice would build on an undocumented premise.
+
+Full measurement: GAP-16.
+
+### 10.3 §9 filed `dm2_06` under the wrong owner
+
+§9 §3 said `dm2_06` was "blocked by `B-P2-XO-01` and by §8's prohibition on
+inferring authorization". The second half is right; the first is a conflation.
+
+`B-P2-XO-01` asks *is this authorization genuine?* — I's question, still open.
+`dm2_06` asks *is one present at all?* — a type-state question.
+`FactRevision::initial` takes `AuthorizationDecisionRef` as a **required,
+non-`Option`** parameter (`memory-domain/src/lib.rs:831`) and the type is a unit
+struct whose only constructor is `pending_i() -> Self(())`, so no value of it can
+mean "absent". That is why the negative case could not be written, and it needs
+nothing from I.
+
+Decided in `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001`: three states
+(`Absent` / `Placeholder` / `Issued`), only `Absent` blocks, and the type must
+not be nameable as proof.
+
+### 10.4 What survives §9 unchanged
+
+The four falsified percentages, the `503 / 0 / 1` measurement, the
+`13-engineering-decisions` 58-of-77 attribution, and the ruling that the two
+`NO_AUTHORITATIVE_SOURCE` scopes are retirements rather than promotions. §9's
+central claim — that the six percentages are the wrong frame — is strengthened
+by these corrections, not weakened: three different errors of the same class
+(reporting a state without re-measuring it) appeared inside the document that
+argues against that class.

@@ -635,7 +635,7 @@ $ cargo fmt --all -- --check                              # clean
 | Memory Compiler | 85% 未实现 | `compile` 已通过生产版 `AdmissionPublicationAuthority` 从 `brain-cli` 可达。66 个测试。五个阶段都有入口。`Published` 仍不可达，原因有三个且都已具名（GAP-12/13/14），其中没有一条是"编译器还有 85% 没写"。 |
 | Memory Context | 80% 未实现 | 77 行覆盖图的计数未变（9 已实现 / 42 部分 / 26 缺失），但该 crate 现在跑 **82 单测 + 17 集成 = 99 个测试**，此前是 68+9。覆盖图自代码移动后未重新归属；应视为行数过期，而非测试过期。 |
 | Agent Integration | 90% 未实现 | **错。** 该 crate 现在运行时依赖 `memory-context` **与** `memory-domain`，`brain-cli` 已消费它（`crates/brain-cli/Cargo.toml:13`），并跑 36 单测 + 21 集成测试，其中 `context_snapshot_delivery.rs` 携带真实 `ContextSnapshot` 跨 crate 边界。#525 的前提已死。 |
-| BMCP | 60% 未实现 | 协议产物充实；`bmcp-protocol` 有 44 单测 + 4 一致性测试。传输与服务端仍缺失——那是一个二进制，不是一个百分比。与 §1.4 相同。 |
+| BMCP | 60% 未实现 | 协议产物充实；`bmcp-protocol` 有 44 单测 + 4 一致性测试。**在 `61b9d743` 修正：** 传输监听器确实存在（`crates/bmcp-server`，`lib.rs` 723 行，`:4` 处 `TcpListener`），所以"传输/服务端缺失"是错的。仍然成立的是：schema 声明 22 个 `message_type`，Rust 解析器 1 个，且监听器一个都触达不到——它唯一的 `bmcp_protocol` 引用是 `#[allow(dead_code)]`。见 GAP-16。 |
 | Phase 2 领域模型 | 100% 未启动 | **错。** 70 单测 + 20 验收测试，1 条 ignore（`dm2_06`），决策阻塞。`ClaimRevisionRegistry`、`ClaimRevisionResolver`、`AcceptedRevisionState`、`RelationTypeRegistry`、`ProvenanceGraph`、`EvidenceIndependence` 与 `claim_identity::classify` 均已实现。 |
 | 端到端 | 100% 未启动 | **错。** `brain-cli` 跑通 摄取 → 抽取 → 规范化 → 暂存 → `compile` → 取证明 → 上下文装配 → 适配器投递。`crates/brain-cli/tests/e2e_full_chain.rs` 断言了整条链，含持久化快照与拒绝通告。一个测试，3.6 秒，通过。 |
 
@@ -649,11 +649,21 @@ $ cargo fmt --all -- --check                              # clean
 1. **一次成功的 `Published` 处置。** 被三个无签发者的证明字段阻塞，各自已立项：
    GAP-12（canonical commit）、GAP-13（参与者准入，外部且三方）、
    GAP-14（存储生命周期加上另外两个）。
-2. **BMCP 传输与服务端。** `crates/` 里没有 `TcpListener`、没有 `hyper`、没有 `axum`。
-   由 H 冻结，因此派发它只会产出无法合并的工作。
-3. **`dm2_06` 的授权类型状态。** 被 `B-P2-XO-01` 与 §8 的禁止推断授权阻塞。
+2. **BMCP 线映射，然后是 21 个解析器。** §9 原本写"`crates/` 里没有
+   `TcpListener`"。这句话在 `61b9d743` 上已不成立：`crates/bmcp-server/src/lib.rs:4`
+   正是 `use std::net::{SocketAddr, TcpListener, TcpStream};`，且该 crate 是
+   workspace 成员。测量修正见 GAP-16。仍然成立的是更窄、也更有用的部分：
+   该监听器只实现了一个 JSON-RPC 方法（`initialize`），且从不触达解析器——
+   它整个 crate 里唯一的 `bmcp_protocol` 引用是一个 `#[allow(dead_code)]`
+   格式化函数，注释写着"留给未来的证据校验调用点"。framing、session、handshake
+   仍由 H 冻结，因此在现有 JSON-RPC/TCP 选择之上继续搭建，等于搭建在
+   一个未记录的premise上。21 个解析器与"线到解析器"的路由不被任何决策冻结，
+   可以推进。
+3. **`dm2_06` 的授权类型状态。** §9 原本把它归入 `B-P2-XO-01`。它不属于那里——
+   见 `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001`，该裁定把"这份授权是否真实"
+   （I 的问题，仍然开放）与"是否存在一份授权"（类型状态问题，已裁定）分开。
 
-这才是诚实的前沿：一个决策阻塞的处置、一个传输冻结的二进制、一个所有者阻塞的
+这才是诚实的前沿：一个决策阻塞的处置、一个未冻结的线映射、一个已裁定的
 类型状态。不是六个百分比。
 
 ### 9.4 `13-engineering-decisions` 的双语缺口仍占基线 75%
@@ -687,3 +697,78 @@ bilingual baseline: 77 frozen, 0 new gaps
 它对 message-type 命名空间究竟是**权威**，还是只是**关于**它的报告，尚未决定。
 
 两条都记录在 #564。本文档不修复其中任何一条。
+
+## 10. §9 的勘误，在 `61b9d743` 处实测（2026-11-22 13:30 +08:00）
+
+上文 §9 未被编辑。它有两处陈述在写下时就是错的，另有一处在 `main` 前进后变错。
+它们在此更正而非就地改写，因为一份测量值被静默重写的治理文档无法审计——
+下一位读者分不清哪句是更正、哪句是原始断言。
+
+### 10.1 `bmcp-server` 存在，而 §9 说它不存在
+
+§9 第 2 条写道：
+
+> `crates/` 里没有 `TcpListener`、没有 `hyper`、没有 `axum`。
+
+在 `61b9d743` 上不成立。`crates/bmcp-server` 是 workspace 成员——`lib.rs` 723 行、
+`main.rs` 67 行、`rt_scenarios.rs` 166 行——而它第四行就是：
+
+```rust
+use std::net::{SocketAddr, TcpListener, TcpStream};
+```
+
+这个错误的性质值得点名，因为它正是 §9 要诊断的那一类：**在未检查工件的情况下
+报告缺失**。我当时是从一棵早于该 crate 的树上测量的 `crates/`。
+
+### 10.2 修正后的 BMCP 结论更窄，也更有用
+
+真实情况既不是"传输缺失"，也不是"传输已就绪"：
+
+- 32 个 schema 声明了 22 个唯一 `message_type`，索引检查器通过
+  （`unique_message_types=22`、`missing=0`、`extra=0`）。
+- 其中**恰好一个**有 Rust 解析器：`parse_and_validate` 的返回类型点名
+  `AppliedDeliveryEvidence`，而 `message_type` 检查是常量比较
+  （`lib.rs:892-903`），任何其他类型都会得到 `WrongConst`。
+- `bmcp-server` 只实现一个 JSON-RPC 方法（`initialize`），其余一律
+  `-32601 Method not found`。
+- `bmcp-server` 从不触达解析器。它整个 crate 里唯一的 `bmcp_protocol` 引用是：
+
+```rust
+// lib.rs:718-723
+// This local formatter is available for a future evidence-validation call site.
+#[allow(dead_code)]
+fn describe(error: &bmcp_protocol::validate::EvidenceError) -> String {
+```
+
+`#[allow(dead_code)]`、"留给未来的调用点"、零个调用点。
+
+所以：**监听器存在，而 22 个消息类型一个都到不了解析器。** 这是一个路由缺口
+加上 21 个缺失解析器，不是一个缺失的二进制。21 个解析器是针对既有 JSON Schema
+的转写，不被任何决策冻结。framing、session、handshake 仍由 H 冻结——
+`TECH-REALITY-001-C/README.md:70` 仍写着 *"H wire mapping remains NOT FROZEN"*——
+所以在现有 JSON-RPC/TCP 选择之上继续搭建，等于搭建在一个未记录的前提上。
+
+完整测量见 GAP-16。
+
+### 10.3 §9 把 `dm2_06` 归错了所有者
+
+§9 第 3 条说 `dm2_06` "被 `B-P2-XO-01` 与 §8 的禁止推断授权阻塞"。后半句对，
+前半句是混淆。
+
+`B-P2-XO-01` 问的是*这份授权是否真实*——I 的问题，仍然开放。
+`dm2_06` 问的是*是否存在一份授权*——类型状态问题。
+`FactRevision::initial` 把 `AuthorizationDecisionRef` 作为**必填、非 `Option`**
+参数（`memory-domain/src/lib.rs:831`），而该类型是单元结构体，唯一构造器是
+`pending_i() -> Self(())`，因此它的任何值都不可能表示"缺失"。这就是负例写不出来
+的原因，而它不需要 I 提供任何东西。
+
+已由 `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001` 裁定：三态
+（`Absent` / `Placeholder` / `Issued`），只有 `Absent` 阻断，且该类型不得被命名为
+"证明"。
+
+### 10.4 §9 中未变的部分
+
+四项被证伪的百分比、`503 / 0 / 1` 的测量、`13-engineering-decisions` 占 77 行中的
+58 行、以及两个 `NO_AUTHORITATIVE_SOURCE` scope 属"退役"而非"提升"的裁定，全部不变。
+§9 的核心主张——六个百分比是错误框架——被这些更正加强而非削弱：同一类错误
+（报告状态而不重新测量）在同一份反对该错误的文档里出现了三次。
