@@ -66,10 +66,8 @@ fn rt_04_initialize_handshake() {
         RequestOutcome::Responded { body } => {
             assert!(body.contains("\"protocolVersion\":\"2024-11-05\""));
             assert!(body.contains("\"id\":1"));
-            // A capability this server cannot serve must not be claimed: tools/list
-            // is answered with -32601 below, so advertising tools would be a lie.
-            assert!(body.contains("\"capabilities\":{}"));
-            assert!(!body.contains("\"tools\""));
+            // tools/list and tools/call are served, so the capability is claimed.
+            assert!(body.contains("\"capabilities\":{\"tools\":{\"listChanged\":false}}"));
         }
         other => panic!("expected initialize response, got: {other:?}"),
     }

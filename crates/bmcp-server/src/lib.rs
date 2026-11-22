@@ -286,25 +286,189 @@ fn handle_request_body_with_deadline(body: &[u8], request_deadline_ms: u64) -> R
 
     let id = request.id_raw.unwrap_or_else(|| "null".to_owned());
 
-    if method == "initialize" {
-        RequestOutcome::Responded {
+    match method.as_str() {
+        "initialize" => RequestOutcome::Responded {
             body: format!(
-                "{{\"jsonrpc\":\"2.0\",\"id\":{id},\"result\":{{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{{}},\"serverInfo\":{{\"name\":\"bmcp-server\",\"version\":\"0.1.0\"}}}}}}"
+                "{{\"jsonrpc\":\"2.0\",\"id\":{id},\"result\":{{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{{\"tools\":{{\"listChanged\":false}}}},\"serverInfo\":{{\"name\":\"bmcp-server\",\"version\":\"0.1.0\"}}}}}}"
             ),
-        }
-    } else {
-        RequestOutcome::Responded {
+        },
+        "tools/list" => RequestOutcome::Responded {
+            body: format!(
+                "{{\"jsonrpc\":\"2.0\",\"id\":{id},\"result\":{{\"tools\":[{}]}}}}",
+                tools_catalog()
+            ),
+        },
+        "tools/call" => handle_tool_call(&id, request.params_range.map(|(s, e)| &body[s..e])),
+        _ => RequestOutcome::Responded {
             body: format!(
                 "{{\"jsonrpc\":\"2.0\",\"id\":{id},\"error\":{{\"code\":-32601,\"message\":\"Method not found\"}}}}"
             ),
+        },
+    }
+}
+
+const VALIDATE_TOOL: &str = "validate_applied_delivery_evidence";
+const DIGEST_TOOL: &str = "digest_applied_delivery_evidence";
+
+const EVIDENCE_INPUT_SCHEMA: &str =
+    r#"{"type":"object","properties":{"evidence":{"type":"object"}},"required":["evidence"]}"#;
+
+fn tools_catalog() -> String {
+    format!(
+        concat!(
+            r#"{{"name":"{}","description":"Parse and validate an AppliedDeliveryEvidence record; returns validity and its p0 digest.","inputSchema":{}}}"#,
+            ",{{\"name\":\"{}\",\"description\":\"Compute the p0 digest of a valid AppliedDeliveryEvidence record.\",\"inputSchema\":{}}}"
+        ),
+        VALIDATE_TOOL, EVIDENCE_INPUT_SCHEMA, DIGEST_TOOL, EVIDENCE_INPUT_SCHEMA
+    )
+}
+
+fn handle_tool_call(id: &str, params: Option<&[u8]>) -> RequestOutcome {
+    let params = match params {
+        Some(params) => params,
+        None => return invalid_params(id, "tools/call requires params"),
+    };
+
+    let name = match object_value(params, "name").and_then(json_string) {
+        Some(name) => name,
+        None => return invalid_params(id, "tools/call requires a string name"),
+    };
+
+    // `evidence` is handed over as raw bytes: `parse_strict` rejects duplicate
+    // keys, and re-encoding a parsed object would erase them.
+    let evidence =
+        object_value(params, "arguments").and_then(|arguments| object_value(arguments, "evidence"));
+
+    let evidence = match evidence {
+        Some(evidence) => evidence,
+        None => return invalid_params(id, "tools/call requires arguments.evidence"),
+    };
+
+    match name.as_str() {
+        VALIDATE_TOOL => match bmcp_protocol::parse_and_validate(evidence) {
+            Ok(parsed) => match bmcp_protocol::digest::p0_digest(&parsed) {
+                Ok(digest) => {
+                    tool_result(id, &format!("{{\"valid\":true,\"digest\":\"{digest}\"}}"))
+                }
+                Err(error) => tool_result(
+                    id,
+                    &format!(
+                        "{{\"valid\":false,\"error\":\"{}\"}}",
+                        json_escape(&describe(&error))
+                    ),
+                ),
+            },
+            Err(error) => tool_result(
+                id,
+                &format!(
+                    "{{\"valid\":false,\"error\":\"{}\"}}",
+                    json_escape(&describe(&error))
+                ),
+            ),
+        },
+        DIGEST_TOOL => match bmcp_protocol::parse_and_validate(evidence) {
+            Ok(parsed) => match bmcp_protocol::digest::p0_digest(&parsed) {
+                Ok(digest) => tool_result(id, &format!("{{\"digest\":\"{digest}\"}}")),
+                Err(error) => invalid_params(id, &describe(&error)),
+            },
+            Err(error) => invalid_params(id, &describe(&error)),
+        },
+        other => invalid_params(id, &format!("unknown tool: {other}")),
+    }
+}
+
+fn tool_result(id: &str, result: &str) -> RequestOutcome {
+    RequestOutcome::Responded {
+        body: format!("{{\"jsonrpc\":\"2.0\",\"id\":{id},\"result\":{result}}}"),
+    }
+}
+
+fn invalid_params(id: &str, message: &str) -> RequestOutcome {
+    RequestOutcome::Responded {
+        body: format!(
+            "{{\"jsonrpc\":\"2.0\",\"id\":{id},\"error\":{{\"code\":-32602,\"message\":\"{}\"}}}}",
+            json_escape(message)
+        ),
+    }
+}
+
+/// Returns the raw byte slice of `key`'s value inside a JSON object.
+fn object_value<'a>(object: &'a [u8], key: &str) -> Option<&'a [u8]> {
+    let mut parser = JsonParser::new(object);
+    parser.skip_whitespace();
+
+    if parser.peek() != Some(b'{') {
+        return None;
+    }
+
+    parser.position += 1;
+    parser.skip_whitespace();
+
+    if parser.peek() == Some(b'}') {
+        return None;
+    }
+
+    loop {
+        parser.skip_whitespace();
+        let current = parser.parse_string().ok()?;
+        parser.skip_whitespace();
+        parser.expect(b':').ok()?;
+        parser.skip_whitespace();
+
+        let start = parser.position;
+        parser.skip_value().ok()?;
+        let end = parser.position;
+
+        if current == key {
+            return Some(&object[start..end]);
+        }
+
+        parser.skip_whitespace();
+
+        match parser.peek() {
+            Some(b',') => parser.position += 1,
+            _ => return None,
         }
     }
+}
+
+/// Decodes a raw JSON string slice into a `String`.
+fn json_string(raw: &[u8]) -> Option<String> {
+    let mut parser = JsonParser::new(raw);
+    parser.parse_string().ok()
+}
+
+fn json_escape(value: &str) -> String {
+    let mut output = String::with_capacity(value.len());
+
+    for character in value.chars() {
+        match character {
+            '"' => output.push_str("\\\""),
+            '\\' => output.push_str("\\\\"),
+            '\n' => output.push_str("\\n"),
+            '\r' => output.push_str("\\r"),
+            '\t' => output.push_str("\\t"),
+            c if (c as u32) < 0x20 => {
+                use std::fmt::Write;
+                let _ = write!(output, "\\u{:04x}", c as u32);
+            }
+            c => output.push(c),
+        }
+    }
+
+    output
 }
 
 struct ParsedRequest {
     id_raw: Option<String>,
     method: Option<String>,
     deadline_probe_ms: Option<u64>,
+    /// Byte range of the raw `params` value inside the request body.
+    ///
+    /// `tools/call` hands the `evidence` sub-slice straight to
+    /// `parse_and_validate`, so duplicate-key rejection still works; rebuilding
+    /// the object through a `Value` would silently drop duplicates.
+    params_range: Option<(usize, usize)>,
 }
 
 fn parse_request(body: &[u8]) -> Result<ParsedRequest, String> {
@@ -321,6 +485,7 @@ fn parse_request(body: &[u8]) -> Result<ParsedRequest, String> {
         id_raw: None,
         method: None,
         deadline_probe_ms: None,
+        params_range: None,
     };
 
     parser.skip_whitespace();
@@ -353,6 +518,7 @@ fn parse_request(body: &[u8]) -> Result<ParsedRequest, String> {
                     let value_end = parser.position;
                     request.deadline_probe_ms =
                         parse_deadline_probe(&body[value_start..value_end])?;
+                    request.params_range = Some((value_start, value_end));
                 }
                 _ => parser.skip_value()?,
             }
@@ -716,8 +882,6 @@ impl<'a> JsonParser<'a> {
 }
 
 // EvidenceError's Display/Error implementations are intentionally not assumed.
-// This local formatter is available for a future evidence-validation call site.
-#[allow(dead_code)]
 fn describe(error: &bmcp_protocol::validate::EvidenceError) -> String {
     format!("{error:?}")
 }
