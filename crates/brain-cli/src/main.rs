@@ -379,14 +379,17 @@ fn run_compiler_stage(request: CompilerStageRequest<'_>) -> Result<CompilerStage
 /// Deliver a validated Brain context snapshot to the local Agent adapter.
 ///
 /// Independent of compiler publication authorization: the adapter receives the
-/// context snapshot, not the publication decision.
-fn deliver_snapshot(snapshot: &memory_context::ContextSnapshot) -> Result<u64, String> {
+/// context snapshot, not the publication decision. The adapter is injected so
+/// the caller owns its lifetime and persistence.
+fn deliver_snapshot(
+    adapter: &mut dyn ContextDeliveryAdapter,
+    session_id: &str,
+    snapshot: &memory_context::ContextSnapshot,
+) -> Result<u64, String> {
     let payload = DeliveryPayload::from_snapshot(snapshot)
         .map_err(|error| format!("cannot construct delivery payload: {error:?}"))?;
 
     let expected_version = snapshot.context_version;
-    let session_id = "brain-cli-session";
-    let mut adapter = InMemoryContextDeliveryAdapter::default();
 
     match adapter
         .apply(session_id, payload)
@@ -409,6 +412,20 @@ fn deliver_snapshot(snapshot: &memory_context::ContextSnapshot) -> Result<u64, S
     Ok(applied.version())
 }
 
+/// Select the delivery adapter for this process.
+///
+/// ponytail: `FileContextDeliveryAdapter` is not on `main` yet (parallel task).
+/// Until it lands this falls back to the in-memory adapter and says so; the
+/// switch is a one-line change here.
+fn delivery_adapter(delivery_root: Option<&Path>) -> Box<dyn ContextDeliveryAdapter> {
+    if delivery_root.is_some() {
+        eprintln!(
+            "warning: --delivery-root ignored, no persistent adapter available in this build"
+        );
+    }
+    Box::new(InMemoryContextDeliveryAdapter::default())
+}
+
 fn run() -> Result<(), String> {
     let mut args = std::env::args().skip(1);
     let Some(command) = args.next() else {
@@ -421,6 +438,7 @@ fn run() -> Result<(), String> {
     let mut input_path = None;
     let mut output_path = None;
     let mut event_store_path: Option<PathBuf> = None;
+    let mut delivery_root: Option<PathBuf> = None;
     let mut verbose = false;
     let mut issue_canonical_commit = false;
 
@@ -432,6 +450,13 @@ fn run() -> Result<(), String> {
                 event_store_path = Some(
                     args.next()
                         .ok_or_else(|| "--event-store requires a path".to_owned())?
+                        .into(),
+                );
+            }
+            "--delivery-root" => {
+                delivery_root = Some(
+                    args.next()
+                        .ok_or_else(|| "--delivery-root requires a path".to_owned())?
                         .into(),
                 );
             }
@@ -721,9 +746,11 @@ fn run() -> Result<(), String> {
 
     // Context delivery is independent of the compiler publication gate.
     // Delivery failures are observable but must not change CLI success.
-    match deliver_snapshot(&snapshot) {
+    let session_id = "brain-cli-session";
+    let mut adapter = delivery_adapter(delivery_root.as_deref());
+    match deliver_snapshot(adapter.as_mut(), session_id, &snapshot) {
         Ok(version) => {
-            eprintln!("delivery applied: session=brain-cli-session version={version}");
+            eprintln!("delivery applied: session={session_id} version={version}");
         }
         Err(reason) => {
             eprintln!("delivery failed: {reason}");
