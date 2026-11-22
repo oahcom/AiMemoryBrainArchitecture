@@ -44,7 +44,7 @@ impl RelationTypeRegistry {
         }
 
         if self.definitions.contains_key(&definition.relation_type) {
-            return Err(DomainError::InvalidRelationEndpoint);
+            return Err(DomainError::DuplicateRelationType);
         }
 
         self.definitions.insert(
@@ -89,7 +89,7 @@ impl RelationTypeRegistry {
     ) -> Result<(), DomainError> {
         let definition = self
             .lookup(relation_type)
-            .ok_or(DomainError::InvalidRelationEndpoint)?;
+            .ok_or(DomainError::UnregisteredRelationType)?;
 
         extension.validate(definition)
     }
