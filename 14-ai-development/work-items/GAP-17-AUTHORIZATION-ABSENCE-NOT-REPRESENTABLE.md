@@ -1,7 +1,29 @@
-# GAP-17 — missing authorization is not representable, and two DECIDED contracts disagree on how to make it so
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
 
-**Status:** Open · **Severity:** Tier 2 (blocks the last `#[ignore]` in the workspace; no live exploit) · **Owner:** I (decision), E (implementation)
-**Measured at:** `origin/main @ 709914f5`, `2026-11-22`
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+
+    evidence_verification:
+      verification_status: Unverified
+
+    usage_status: Active
+    modification_status: Modified
+
+  authority:
+    canonical_status: Non-Canonical
+    normative_status: Informative
+    canonical_conflict_status: None
+---
+
+# GAP-17 — missing authorization is not representable: ruling recorded, implementation owed
+
+**Status:** Open — contract resolved, implementation owed · **Severity:** Tier 2 (blocks the last `#[ignore]` in the workspace; no live exploit) · **Owner:** E (implementation); ruling by team-lead
+**Measured at:** `origin/main @ 709914f5`, `2026-11-22`. Every count below names its commit; `main` advances during the day and a count without a commit is not reproducible.
 **Related:** `dm2_06`, ADR `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001`, `I-OWNER-DECISION-AUTHORIZATION-DECISION-001`, GAP-14, `B-P2-XO-01`
 
 ## 1. What is actually blocked
@@ -28,9 +50,11 @@ There is therefore **no value of `AuthorizationDecisionRef` that means "absent"*
 path to `FactRevision` that omits it. A test cannot express the precondition of DM2-06, so it cannot
 assert the conclusion. This is not a missing assertion; it is a missing state.
 
-## 2. The two DECIDED contracts disagree
+## 2. The two DECIDED contracts, and what the ruling made of them
 
-Both documents are on `main` and both are marked DECIDED. They specify incompatible repairs.
+Both documents are on `main` and both are marked DECIDED. The four-dimension table in §2.3 is the
+measurement that produced this gap. It stays as evidence. What follows it is the ruling: most of the
+apparent conflict is two different gates at two different layers, and only two clauses genuinely collide.
 
 ### 2.1 `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001` (ADR, committed `986c42bc`, 13:41 +0800)
 
@@ -53,11 +77,7 @@ nothing from `memory-compiler`.
   not `Ok(false)`. **The field is required and non-optional; there is no `None` state.**"
 - **§6 closure item 12:** E must delete the `#[ignore]` and assert the propagated authority `Err`.
 
-Under this contract, `dm2_06`'s assertion lives in the **compiler's** AdmissionStore validator. The test
-at `phase2_acceptance.rs:606` is in `memory-domain`, which has no dependency on `memory-compiler`.
-The path §4.3 names is **unreachable from where the test lives**.
-
-### 2.3 Why this is a real conflict, not a wording difference
+### 2.3 The four-dimension measurement
 
 | question | ADR-001 | I-001 |
 |---|---|---|
@@ -66,45 +86,69 @@ The path §4.3 names is **unreachable from where the test lives**.
 | what does `dm2_06` assert? | `validate()` returns `Err` | a propagated authority `Err` from the compiler |
 | is `pending_i()` rejected by `validate()`? | no — `Placeholder` passes the presence gate | yes — "reject Pending" |
 
-The two cannot both be implemented. They disagree on the state set, on the enforcement layer, and on
-what the test asserts.
+## 3. The ruling: what coexists, what is superseded
 
-## 3. What this document does not do
+**Ruled by team-lead on 2026-11-22, after this gap was filed.** The ruling is recorded here rather than
+left as an open question, because the question it answers is a coordination decision, not a measurement.
 
-It does not choose between them. Both are DECIDED, both are owner-authored, and choosing would
-substitute this measurement for a decision that is I's to make. It records the conflict and the two
-exact repairs so the next reader does not have to rediscover that a "DECIDED" contract and a
-"DECIDED" ADR contradict each other.
+### 3.1 These coexist — they are two gates at two layers, not rivals
 
-It also does not implement either. The `#[ignore]` stays, with a reason that now names both repairs.
+- **I-001 §3.3** puts the *authenticity* validator in `memory-compiler` behind `AdmissionStore`.
+  **ADR-001 D6** puts the *presence* gate in domain `validate()`. "Was this authorization real?" and
+  "was any authorization recorded at all?" are different questions, and ADR-001 §1 argues that
+  separation explicitly. Both gates stand.
+- **I-001 §4.2's** three outcomes (`Ok(true)` / `Ok(false)` for subject mismatch / `Err` for missing
+  authority) stand unchanged. ADR-001 §5 deliberately leaves stricter publication-time rejection open.
 
-## 4. Unblocking, stated as two alternatives
+Read this way, the third and fourth rows of §2.3 are not contradictions: they describe different gates.
 
-**(1) ADR-001 path.** `FactRevision::initial` gains an `Option<AuthorizationDecisionRef>` overload (or a
-second constructor that takes none); `validate()` returns a named error for `None` +
-`FactOutcome::Attested`. The test constructs a fact with absent authorization and asserts that error.
-Scope: `memory-domain` only. `dm2_06` becomes a real assertion.
+### 3.2 These are superseded — ADR-001 governs, on two points only
 
-**(2) I-001 path.** `AuthorizationDecisionRef` gains `Pending` / `Issued`; the AdmissionStore validator
-is implemented in `memory-compiler`; `dm2_06` moves out of `memory-domain` into a compiler-side
-integration test that can reach the validator, and asserts the propagated `Err`. Scope:
-`memory-domain` + `memory-compiler` + a new test location. The test at `phase2_acceptance.rs:606`
-cannot hold the assertion under this contract.
+1. **Type shape.** I-001 §2.2's two-state enum `{ Pending, Issued }` cannot express absence. **ADR-001 D2's
+   three states govern.** ADR-001 is 47 minutes later and the type state is its explicit subject.
+2. **What `dm2_06` asserts, and where.** I-001 §4.3 requires `dm2_06` to assert a compiler-layer
+   propagated `Err`. **That requirement is not hard — it is unreachable.** The test sits at
+   `crates/memory-domain/tests/phase2_acceptance.rs:605`, and `crates/memory-domain/Cargo.toml` does not
+   depend on `memory-compiler`; the dependency direction is the reverse. A requirement that cannot exist
+   where it is specified is a defect in the document, not an obligation on the implementer.
+   **ADR-001 §4 governs:** `dm2_06` becomes two domain-layer assertions.
 
-Either way, one of the two documents must be amended so the repository has one answer.
+### 3.3 The residual obligation, stated plainly
+
+I-001's compiler-layer **authenticity validator is still required.** It is not `dm2_06` and must never
+be counted as `dm2_06`. It needs its **own** test at a location that can reach `memory-compiler`.
+Closing `dm2_06` does not close it, and a green `dm2_06` is not evidence that it exists.
+
+## 4. Resolution, and what remains owed
+
+**`dm2_06` is blocked on implementation of ADR-001 D2/D6, not on an undecided contract.** The contract
+question is closed by §3. What remains is code:
+
+- `FactRevision` gains the three-state authorization field (D2).
+- `FactRevision::initial` gains a constructor that takes no authorization, keeping the required-argument
+  one (D5).
+- `validate()` rejects `Absent` + `FactOutcome::Attested` with a named error (D6).
+- `dm2_06` then becomes two assertions: absent + `Attested` is rejected; `Placeholder` still validates
+  (ADR-001 §4 — the second assertion is what keeps the gate honest about checking presence, not authenticity).
+
+Scope: `memory-domain` only. An implementation PR is in flight.
+
+**Separately owed:** the compiler-layer authenticity validator from I-001 §3.3/§4.2, with its own test
+that can reach `memory-compiler`. Tracked, not started, not `dm2_06`.
 
 ## 5. Interaction with GAP-14
 
 `fact_with_placeholder_attestor_validates_today` (`lib.rs:2196`) pins that a placeholder passes
 `validate()` today. GAP-14's repair (reject placeholders in `validate()`) would flip it. The ADR path
-above keeps it passing for `Placeholder` and only rejects `Absent`; the I-001 path rejects `Pending`
-in domain validation and therefore **contradicts** that Round 4 test. The three documents cannot be
-reconciled without one of them changing.
+keeps it passing for `Placeholder` and rejects only `Absent`, so ADR-001 and GAP-14 are compatible as
+written. The tension that remains is that ADR-001 §5 leaves "should `Placeholder` be rejected at
+publication time" open — GAP-14 is one place that door could close.
 
 ## 6. Closure criteria
 
-1. Exactly one of the two repairs is implemented.
+1. ADR-001 D2/D5/D6 are implemented in `memory-domain`.
 2. `dm2_06` has a real body and is no longer `#[ignore]`.
 3. `cargo test --workspace --all-targets -- --list --ignored` is empty.
-4. The losing document is amended to point at the winning one, so no future reader finds two
-   DECIDED answers to one question.
+4. I-001's compiler-layer authenticity validator has its own test, separate from `dm2_06`, at a location
+   that can reach `memory-compiler`.
+
