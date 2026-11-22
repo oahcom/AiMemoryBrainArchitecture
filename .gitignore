@@ -7,3 +7,6 @@ target/
 
 # Installed Node dependencies (the manifests that pin them are committed).
 node_modules/
+
+# Cargo lockfile is generated locally; the workspace is not published.
+Cargo.lock
