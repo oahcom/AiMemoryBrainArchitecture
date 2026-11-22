@@ -147,6 +147,12 @@ python3 scripts/ci/gate_ratchet.py \
 * **`cargo clippy` 与 `cargo test` 需要 C 工具链**（用于 `libsqlite3-sys`）。它们在 runner 上
   可以构建；没有 `cc1` 的本地 Windows 主机无法运行。其失效形态是一条 `cc1` 错误而非代码缺陷，
   Job 会原样报出而不是掩盖它。
+* **磁盘是这台 runner 的硬约束。** 在 `run 44992270090` 实测：39G 总量，已用 32G，**只剩 5.6G**，
+  内存 3.6G，4 核。11 个 crate 且含一个 C 依赖的工作区构建，写出的 `target/` 装不下。写满磁盘会
+  拖垮仓库里所有其他工作流，因为只有一个 runner。因此 `rust` Job 带一道**磁盘预检**，在可用空间
+  低于 `GATES_MIN_FREE_GB`（默认 10）时拒绝启动并报出剩余空间。这个阈值是下限而不是目标：
+  只能调高，绝不能为了跑绿而调低。这也是 `rust` 可能因非代码缺陷的原因在这台 runner 上变红的原因
+  ——Job 会明确说出来，而不是在 `cargo` 内部某处失败。
 * **`check_bilingual_docs_full.py` 读取工作树**，而不是 `git ls-files`。未跟踪的构建产物会
   改变它在本地的答案。CI 是干净检出，因此 CI 的答案是可复现的；本地答案未必是。
 * **棘轮的诚实度取决于评审者。** 回归会失败，过期基线也会失败，但没有东西能阻止有人从一棵更差的
@@ -170,3 +176,104 @@ python3 scripts/ci/gate_ratchet.py \
 
 这是对工作流所运行命令的本地执行，且在与工作流相同的提交上。它是关于门禁的证据，不是关于工作流
 执行的证据。§7 记录工作流自身做了什么。
+
+## 7. 实际观测到什么
+
+### 7.1 runner 会接活，标签也对得上
+
+对 `main` 派发 `ubuntu-worker-diagnostics.yml`，得到 **run 44992270090**（`success`）：
+
+```
+job: diagnostics | completed success
+  runner_name: 'zesu-x64'
+  labels: ['self-hosted', 'linux', 'x64']
+  started: 2026-11-22T06:06:59Z -> completed: 2026-11-22T06:07:25Z
+  steps: 4 —— Set up job、Set up runner、Read-only host diagnostics、Complete job
+```
+
+所以 `runs-on: [self-hosted, linux, x64]` 是正确的选择器：这样写的 Job 会被接纳并执行。它报告的
+环境：
+
+| 事实 | 值 |
+|---|---|
+| OS / 内核 | Ubuntu 26.04 / Linux 7.0.0-30-generic，x86_64 |
+| CPU / 内存 | 4 核 / 3.6Gi |
+| `/` 磁盘 | 39G 总量，已用 32G，**只剩 5.6G** |
+| runner 账号 | `ubuntu`，属于 `sudo` 组 |
+| L1 钩子 | 已安装；`guard.log` 存在，末行 `ALLOW ref=refs/heads/main event=workflow_dispatch` |
+
+### 7.2 L1 确实会拒绝非 `main` 的 ref（负向测试）
+
+同一个工作流，以 `ref=feat/t22-ci-gates` 派发，得到 **run 44992485707**（`failure`）。日志：
+
+```
+##[group]Run '/home/ubuntu/actions-runner/hooks/job-started-guard.sh'
+runner admission guard: DENY reason=ref_not_default_branch
+```
+
+钩子在第一个用户步骤之前就拒绝了该 Job。这就是 `gates.yml` 不能带 `pull_request` 触发器的原因，
+而且这是实测而非推断。
+
+### 7.3 L2 确实会拒绝一个「PR 设卡版」所需的形态
+
+`scripts/ci/audit_runner_admission.py` 对 `gates.yml`：**审计 6 个自托管 Job，0 违规，退出 0**
+（这里 5 个加上既有的 diagnostics）。对一个故意写错的探针工作流，它报出的正是预期的两条违规，退出 1：
+
+```
+::error::.github/workflows/zz-probe.yml:probe: untrusted trigger 'pull_request' is not permitted for self-hosted jobs
+::error::.github/workflows/zz-probe.yml:probe: on.push.branches includes non-main branch 'feat/t22-ci-gates'
+```
+
+### 7.4 步骤体是被执行过的，不只是被解析过
+
+`gates.yml` 里每一个 `run:` 块都被抽出来，在 Linux（Ubuntu 24.04、python 3.12、cargo 1.95.0、
+node 22）上以 `bash --noprofile --norc -e -o pipefail` 执行，并按 runner 的方式设置了
+`RUNNER_TEMP`。结果：
+
+| Job | 步骤 | 结果 |
+|---|---|---|
+| `protocol-index` | 协议索引 | 退出 0，`missing=0 extra=0 duplicate_types=0 invalid_rows=0`，`PASS` |
+| `conformance` | venv 依赖安装（真实脚本） | 退出 0，`using venv at /tmp/rt/gates-venv`，venv 满足 `jsonschema`/`rfc8785`/`cryptography` |
+| `conformance` | 通过该 venv 跑完整套件 | 退出 0，`Ran 585 tests`，`OK (skipped=27)` |
+| `schema-nonempty` | 棘轮 | 退出 0，`baseline=5506 current=5506 regressions=0 fixed=0` |
+| `bilingual` | 棘轮 | 退出 0，`baseline=81 current=81 regressions=0 fixed=0` |
+| `rust` | 磁盘预检 | 在 721G 可用的主机上退出 0（拒绝路径见 §7.5） |
+| `rust` | 工具链存在性 | 退出 0，`cargo 1.95.0`、`rustc 1.95.0`、`rustfmt 1.9.0-stable`、`clippy 0.1.95` |
+| `rust` | `cargo fmt --all --check` | 退出 0 |
+| `rust` | `cargo clippy --workspace --all-targets -- -D warnings` | 退出 0 |
+| `rust` | `cargo test --workspace` | 退出 0，`passed=508 failed=0 ignored=1` |
+
+其中两项值得单独点出，因为它们是唯一可能被伪造的部分。venv 脚本是按原文执行的，并在一个系统 python
+受 PEP-668 外部管理的主机上产出了具备三个固定导入的可用解释器——也就是「直接 `pip install` 会失败」
+的那个场景。而 conformance 套件是**通过那个 venv** 跑的，不是通过碰巧已安装的东西跑的，所以 585 这个
+结果是该 Job 会得到的结果。
+
+### 7.5 磁盘预检会拒绝，这是故意的
+
+预检对三种模拟文件系统做过实测：
+
+| 可用空间 | 结果 |
+|---|---|
+| 5.6G（runner 的实测值） | `::error::only 5G free, below the 6G floor…`，退出 1 |
+| 8G | `::warning::only 8G free…`，退出 0 |
+| 20G | 静默，退出 0 |
+
+所以在**今天的**这台 runner 上，`rust` Job 会在磁盘检查处变红，根本碰不到 `cargo`。这是预期行为，
+也是诚实的结果：5.6G 装不下 11 个 crate 且含一个 C 依赖的工作区构建，而写满这台唯一 runner 的磁盘
+会拖垮仓库里所有其他工作流。解法是运维回收空间，而不是修改本文件。
+
+### 7.6 仍然未被观测到的
+
+`gates.yml` 自身**在任何分支上都还没有 check run**，而且它无法从功能分支按需触发：GitHub 会针对
+**默认分支**解析 `POST /actions/workflows/gates.yml/dispatches`，而 `gates.yml` 不在 `main` 上。
+实测：
+
+```
+gates.yml@feat/t22-ci-gates -> HTTP 404 (Not Found)
+ubuntu-worker-diagnostics.yml@feat/t22-ci-gates -> HTTP 204 (accepted)
+```
+
+第二行是对照：对一个**确实在** `main` 上的工作流，派发是成功的。因此这五个 Job 的首次运行，发生在本
+分支合并后第一次推送到 `main` 之时——或者，若有推送 `main` 权限的人把该文件 cherry-pick 过去，则立即
+发生。在那之前，§7.4 的证据是「对精确步骤体的执行」，不是「对工作流的执行」，本文也不把它当作一次
+绿色的 check run 来呈现。

@@ -198,6 +198,43 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # DISK PREFLIGHT. Measured on this runner (run 44992270090, 2026-11-22):
+      # 39G total, 32G used, **5.6G free**, 3.6G RAM, 4 CPUs.
+      #
+      # A `cargo clippy --workspace --all-targets` plus `cargo test --workspace`
+      # over 11 crates, one of which (`libsqlite3-sys`) compiles C, writes a
+      # `target/` measured in gigabytes. Whether 5.6G is enough is NOT known --
+      # no workspace build has been run on this host -- and guessing is exactly
+      # what this step exists to avoid. Filling the filesystem would break every
+      # other workflow in the repository, because there is exactly one runner.
+      #
+      # So: warn below 12G (the comfortable figure), REFUSE below 6G.
+      # `GATES_MIN_FREE_GB` is a floor, not a target. Raise it, never lower it to
+      # make a run go green -- a green produced by ignoring the disk is the same
+      # defect as a gate nobody runs.
+      #
+      # CONSEQUENCE TODAY: 5.6G < 6G, so this job is RED on this runner until an
+      # operator reclaims space. That is a genuine infrastructure blocker being
+      # reported, not a workaround failing. It clears itself when the space is
+      # there; nothing in this file needs editing.
+      - name: Check free disk before building
+        shell: bash
+        run: |
+          set -euo pipefail
+          min_gb="${GATES_MIN_FREE_GB:-6}"
+          warn_gb="${GATES_WARN_FREE_GB:-12}"
+          avail_kb=$(df -Pk . | awk 'NR==2 {print $4}')
+          avail_gb=$(( avail_kb / 1024 / 1024 ))
+          echo "free_disk_gb=$avail_gb refuse_below_gb=$min_gb warn_below_gb=$warn_gb"
+          df -h .
+          if [ "$avail_gb" -lt "$min_gb" ]; then
+            echo "::error::only ${avail_gb}G free, below the ${min_gb}G floor for a workspace build. Refusing to risk the shared runner's filesystem. Reclaim space (stale _work dirs, an old target/) and re-run; do not lower GATES_MIN_FREE_GB to get a green."
+            exit 1
+          fi
+          if [ "$avail_gb" -lt "$warn_gb" ]; then
+            echo "::warning::only ${avail_gb}G free; a workspace build may exhaust the disk. Deleting target/ is safe and is the expected remedy."
+          fi
+
       # NO TOOLCHAIN INSTALL STEP. This runner is a shared, operator-managed
       # host; a workflow that runs `rustup` would mutate the toolchain every
       # other job on this machine sees. Use the installed one and say so if it

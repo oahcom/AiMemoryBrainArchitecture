@@ -178,6 +178,16 @@ regression or a stale baseline; the offending items are printed as
   They build on the runner; a local Windows host without `cc1` cannot run them.
   The failure mode is a `cc1` error, not a code defect, and the job reports it
   verbatim rather than masking it.
+* **Disk is the binding constraint on this runner.** Measured at
+  `run 44992270090`: 39G total, 32G used, **5.6G free**, 3.6G RAM, 4 CPUs. A
+  workspace build of 11 crates with a C dependency writes a `target/` that does
+  not fit. Filling the disk would break every other workflow in the repository,
+  because there is one runner. The `rust` job therefore has a **disk preflight**
+  that refuses to start below `GATES_MIN_FREE_GB` (default 10) and reports the
+  free space. The threshold is a floor, not a target: raise it, never lower it to
+  make a run go green. This is why `rust` may be red on this runner for a reason
+  that is not a code defect — the job says so explicitly instead of failing
+  somewhere inside `cargo`.
 * **`check_bilingual_docs_full.py` reads the working tree**, not `git ls-files`.
   Untracked build output can change its answer locally. CI checks out clean, so
   the CI answer is reproducible; a local answer may not be.
@@ -204,3 +214,117 @@ Recorded on `6de4e38c` (the commit this work is based on):
 This is local execution of the commands the workflow runs, on the same commit the
 workflow is based on. It is evidence about the gates, not about the workflow's
 execution. §7 records what the workflow itself has done.
+
+## 7. What was actually observed running
+
+### 7.1 The runner accepts work, and the labels match
+
+`workflow_dispatch` of `ubuntu-worker-diagnostics.yml` on `main` produced
+**run 44992270090** (`success`):
+
+```
+job: diagnostics | completed success
+  runner_name: 'zesu-x64'
+  labels: ['self-hosted', 'linux', 'x64']
+  started: 2026-11-22T06:06:59Z -> completed: 2026-11-22T06:07:25Z
+  steps: 4 — Set up job, Set up runner, Read-only host diagnostics, Complete job
+```
+
+So `runs-on: [self-hosted, linux, x64]` is the correct selector: a job written
+that way is admitted and executes. The environment it reported:
+
+| Fact | Value |
+|---|---|
+| OS / kernel | Ubuntu 26.04 / Linux 7.0.0-30-generic, x86_64 |
+| CPU / RAM | 4 / 3.6Gi |
+| Disk on `/` | 39G total, 32G used, **5.6G free** |
+| Runner account | `ubuntu`, member of `sudo` |
+| L1 hook | installed; `guard.log` present, last line `ALLOW ref=refs/heads/main event=workflow_dispatch` |
+
+### 7.2 L1 really does deny a non-`main` ref (negative test)
+
+The same workflow, dispatched at `ref=feat/t22-ci-gates`, produced **run
+44992485707** (`failure`). Its log:
+
+```
+##[group]Run '/home/ubuntu/actions-runner/hooks/job-started-guard.sh'
+runner admission guard: DENY reason=ref_not_default_branch
+```
+
+The guard refused the job before the first user step. This is why `gates.yml`
+cannot carry a `pull_request` trigger, and it is measured rather than inferred.
+
+### 7.3 L2 really does reject the shape a PR-gating version would need
+
+`scripts/ci/audit_runner_admission.py` against `gates.yml`: **6 self-hosted jobs
+audited, 0 violations, exit 0** (5 here plus the pre-existing diagnostics job).
+Against a deliberately wrong probe workflow it reported exactly the two
+violations expected, exit 1:
+
+```
+::error::.github/workflows/zz-probe.yml:probe: untrusted trigger 'pull_request' is not permitted for self-hosted jobs
+::error::.github/workflows/zz-probe.yml:probe: on.push.branches includes non-main branch 'feat/t22-ci-gates'
+```
+
+### 7.4 The step bodies were executed, not just parsed
+
+Every `run:` block was extracted from `gates.yml` and executed with
+`bash --noprofile --norc -e -o pipefail` on Linux (Ubuntu 24.04, python 3.12,
+cargo 1.95.0, node 22), with `RUNNER_TEMP` set as the runner sets it. Results:
+
+| Job | Step | Result |
+|---|---|---|
+| `protocol-index` | protocol index | exit 0, `missing=0 extra=0 duplicate_types=0 invalid_rows=0`, `PASS` |
+| `conformance` | venv dependency install (the real script) | exit 0, `using venv at /tmp/rt/gates-venv`, venv satisfies `jsonschema`/`rfc8785`/`cryptography` |
+| `conformance` | full suite, run through that venv | exit 0, `Ran 585 tests`, `OK (skipped=27)` |
+| `schema-nonempty` | ratchet | exit 0, `baseline=5506 current=5506 regressions=0 fixed=0` |
+| `bilingual` | ratchet | exit 0, `baseline=81 current=81 regressions=0 fixed=0` |
+| `rust` | disk preflight | exit 0 on a host with 721G free (see §7.5 for the refusal path) |
+| `rust` | toolchain presence | exit 0, `cargo 1.95.0`, `rustc 1.95.0`, `rustfmt 1.9.0-stable`, `clippy 0.1.95` |
+| `rust` | `cargo fmt --all --check` | exit 0 |
+| `rust` | `cargo clippy --workspace --all-targets -- -D warnings` | exit 0 |
+| `rust` | `cargo test --workspace` | exit 0, `passed=508 failed=0 ignored=1` |
+
+Two of these are worth calling out because they are the ones that could have been
+fake. The venv script was executed as written and produced a working interpreter
+with all three pinned imports — on a host whose system python is PEP-668
+externally managed, i.e. exactly the situation where "just `pip install`" fails.
+And the conformance suite was run *through that venv*, not through whatever
+happened to be installed, so the 585-test result is the result the job would get.
+
+### 7.5 The disk preflight refuses, on purpose
+
+The preflight was exercised against three simulated filesystems:
+
+| Free space | Outcome |
+|---|---|
+| 5.6G (the runner's measured value) | `::error::only 5G free, below the 6G floor…`, exit 1 |
+| 8G | `::warning::only 8G free…`, exit 0 |
+| 20G | silent, exit 0 |
+
+So on this runner **as it stands today the `rust` job will be red**, at the disk
+check, before it touches `cargo`. That is the intended behaviour and it is the
+honest outcome: 5.6G cannot hold a workspace build of 11 crates including a C
+dependency, and filling the one runner's disk would take down every other
+workflow in the repository. The remedy is an operator reclaiming space, not an
+edit to this file.
+
+### 7.6 What is still NOT observed
+
+`gates.yml` itself has **no check run on any branch yet**, and it cannot be
+triggered on demand from a feature branch: GitHub resolves
+`POST /actions/workflows/gates.yml/dispatches` against the **default branch**, and
+`gates.yml` does not exist on `main`. Measured:
+
+```
+gates.yml@feat/t22-ci-gates -> HTTP 404 (Not Found)
+ubuntu-worker-diagnostics.yml@feat/t22-ci-gates -> HTTP 204 (accepted)
+```
+
+The second line is the control: dispatch works for a workflow that *is* on
+`main`. So the first run of these five jobs happens on the first push to `main`
+after this branch merges — or immediately if someone with push rights to `main`
+cherry-picks the file there. Until then, the evidence in §7.4 is execution of the
+exact step bodies, not of the workflow, and this document does not present it as
+a green check run.
+
