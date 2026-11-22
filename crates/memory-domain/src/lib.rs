@@ -1302,7 +1302,32 @@ pub struct EvidenceExtension {
 impl EvidenceExtension {
     /// Scope is not validated here: §8 defines `scope_refs` as an `Evidence`
     /// field, so `Evidence::validate()` is its only authority.
+    ///
+    /// Every reference is re-validated even though the constructors reject
+    /// empty values, because serde derives `Deserialize` for these types and
+    /// bypasses the constructors: a payload can carry `""` straight into a
+    /// field that no constructor would ever have produced.
     pub fn validate(&self) -> Result<(), DomainError> {
+        self.evidence_ref.validate()?;
+
+        match &self.source_ref {
+            EvidenceSourceRef::Event(reference) => reference.validate()?,
+            EvidenceSourceRef::Memory(reference) => reference.validate()?,
+            EvidenceSourceRef::External(reference) => reference.validate()?,
+        }
+
+        if self.collector.actor_id.as_str().is_empty() {
+            return Err(DomainError::EmptyId);
+        }
+
+        if self
+            .source_reliability_ref
+            .as_ref()
+            .is_some_and(|reference| reference.as_str().is_empty())
+        {
+            return Err(DomainError::EmptyId);
+        }
+
         if self
             .integrity_digest
             .as_deref()

@@ -4,6 +4,8 @@
 //! Each test asserts an externally observable behavior that must fail if the
 //! corresponding invariant is removed or reverted.
 
+use serde_json::json;
+
 use memory_compiler::evidence::{
     AttachmentDecision, EvidenceEntry, EvidenceRegistry, EvidenceRejection, RegistrationOutcome,
 };
@@ -337,4 +339,156 @@ fn evidence_scope_is_validated_on_the_domain_record() {
         "scope validation belongs to Evidence, not an independent registry filter"
     );
     assert_eq!(registry.evidence_count(), 0);
+}
+
+// ---------------------------------------------------------------------------
+// Deserialization bypasses the constructors
+
+/// `OpaqueId` and the `ref_ctor!` types derive `Deserialize`, so a payload can
+/// put `""` into a field no constructor would have accepted. Every reference is
+/// therefore re-validated rather than trusted because "the constructor rejects
+/// empty".
+#[test]
+fn extension_rejects_empty_evidence_ref_that_serde_let_through() {
+    let mut record = available("ev-1");
+    record.extension.evidence_ref = serde_json::from_value(json!("")).unwrap();
+
+    assert_eq!(
+        record.extension.validate(),
+        Err(DomainError::EmptyId),
+        "an empty evidence_ref cannot be caught by the constructor alone"
+    );
+}
+
+#[test]
+fn extension_rejects_empty_source_reference_that_serde_let_through() {
+    for source_ref in [
+        json!({"Event": ""}),
+        json!({"Memory": ""}),
+        json!({"External": ""}),
+    ] {
+        let mut record = available("ev-1");
+        record.extension.source_ref = serde_json::from_value(source_ref.clone()).unwrap();
+
+        assert_eq!(
+            record.extension.validate(),
+            Err(DomainError::EmptyId),
+            "source_ref {source_ref} must be refused, not trusted"
+        );
+    }
+}
+
+#[test]
+fn extension_rejects_empty_collector_that_serde_let_through() {
+    let mut record = available("ev-1");
+    record.extension.collector = serde_json::from_value(json!({"actor_id": ""})).unwrap();
+
+    assert_eq!(
+        record.extension.validate(),
+        Err(DomainError::EmptyId),
+        "a collector with no identity is not a collector"
+    );
+}
+
+#[test]
+fn extension_rejects_blank_reliability_reference_that_serde_let_through() {
+    let mut record = available("ev-1");
+    record.extension.source_reliability_ref = serde_json::from_value(json!("")).unwrap();
+
+    assert_eq!(
+        record.extension.validate(),
+        Err(DomainError::EmptyId),
+        "Some(\"\") is not a reliability reference; None is"
+    );
+}
+
+#[test]
+fn registry_refuses_an_extension_whose_reference_is_invalid() {
+    // The domain check exists; this proves the registry actually runs it.
+    let mut registry = EvidenceRegistry::new();
+    let mut record = available("ev-1");
+    record.extension.collector = serde_json::from_value(json!({"actor_id": ""})).unwrap();
+
+    assert_eq!(
+        register(&mut registry, record),
+        RegistrationOutcome::Rejected(EvidenceRejection::InvalidRecord(DomainError::EmptyId)),
+        "an invalid extension must not enter the registry"
+    );
+    assert_eq!(registry.evidence_count(), 0);
+}
+
+#[test]
+fn registry_refuses_an_evidence_whose_scope_ref_is_invalid() {
+    // Non-empty scope list, but one entry is invalid: the per-item check must
+    // run on the registry path too, not only in the domain unit test.
+    let mut registry = EvidenceRegistry::new();
+    let mut record = available("ev-1");
+    record.evidence.scope_refs[0].namespace_key.clear();
+
+    assert_eq!(
+        register(&mut registry, record),
+        RegistrationOutcome::Rejected(EvidenceRejection::InvalidRecord(
+            DomainError::EmptyRequiredField("namespace_key")
+        )),
+        "a scope set with an invalid member is not a valid scope set"
+    );
+    assert_eq!(registry.evidence_count(), 0);
+}
+
+// ---------------------------------------------------------------------------
+// Identity conflict covers the whole record, not just the extension
+
+#[test]
+fn same_identity_with_a_different_role_is_a_conflict() {
+    let mut registry = EvidenceRegistry::new();
+    assert_eq!(
+        register(&mut registry, available("ev-1")),
+        RegistrationOutcome::Registered
+    );
+
+    let mut conflicting = available("ev-1");
+    conflicting.evidence.role = EvidenceRole::Refutes;
+
+    assert_eq!(
+        register(&mut registry, conflicting),
+        RegistrationOutcome::Rejected(EvidenceRejection::IdentityConflict {
+            evidence_id: oid("ev-1"),
+        }),
+        "role is part of the record; changing it changes the record"
+    );
+
+    let stored = registry.get_evidence(&oid("ev-1")).unwrap();
+    assert_eq!(
+        stored.evidence.role,
+        EvidenceRole::Supports,
+        "the original role must survive"
+    );
+    assert_eq!(registry.evidence_count(), 1);
+}
+
+#[test]
+fn same_identity_with_different_scopes_is_a_conflict() {
+    let mut registry = EvidenceRegistry::new();
+    assert_eq!(
+        register(&mut registry, available("ev-1")),
+        RegistrationOutcome::Registered
+    );
+
+    let mut conflicting = available("ev-1");
+    conflicting.evidence.scope_refs = vec![scope("user-2")];
+
+    assert_eq!(
+        register(&mut registry, conflicting),
+        RegistrationOutcome::Rejected(EvidenceRejection::IdentityConflict {
+            evidence_id: oid("ev-1"),
+        }),
+        "scope is part of the record; a different scope is a different record"
+    );
+
+    let stored = registry.get_evidence(&oid("ev-1")).unwrap();
+    assert_eq!(
+        stored.evidence.scope_refs,
+        vec![scope("user-1")],
+        "the original scope must survive"
+    );
 }

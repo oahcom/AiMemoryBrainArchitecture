@@ -143,8 +143,11 @@ impl EvidenceRegistry {
             EvidenceAvailability::Unavailable => AttachmentDecision::Defer {
                 reason: "unavailable: source payload is not retained".into(),
             },
+            // No scope comparison happens here: this function is given only an
+            // evidence id, so claiming the evidence is narrower than the citing
+            // Claim would assert something it never checked.
             EvidenceAvailability::Restricted => AttachmentDecision::Defer {
-                reason: "restricted: visibility is narrower than the citing claim".into(),
+                reason: "restricted: evidence is not currently attachable".into(),
             },
             EvidenceAvailability::Forgotten => AttachmentDecision::Defer {
                 reason: "forgotten: source was erased under a forget fence".into(),
