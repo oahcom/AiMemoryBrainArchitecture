@@ -1327,7 +1327,8 @@ impl AdmissionStore {
 
                 let identical = stored.issuer_id == issuer.as_str()
                     && stored.subject_digest == subject_digest.as_str()
-                    && stored.issued_at == issued_at;
+                    && stored.issued_at == issued_at
+                    && stored.signature.is_empty();
 
                 if !identical {
                     return Err(AdmissionError::IdempotencyConflict);
@@ -1374,6 +1375,15 @@ impl AdmissionStore {
         }
 
         if !is_sha256_hex(&stored.subject_digest) || !is_rfc3339_utc(&stored.issued_at) {
+            return Err(AttestationValidationError::RecordMalformed);
+        }
+
+        // The dev baseline declares `signature` to be the empty string. A row
+        // that carries anything else was not written by `issue_attestation`,
+        // which has no other writer. It is therefore not a record this baseline
+        // can vouch for, and saying so is cheaper than pretending the column is
+        // not part of the row.
+        if !stored.signature.is_empty() {
             return Err(AttestationValidationError::RecordMalformed);
         }
 
@@ -1600,10 +1610,24 @@ impl std::fmt::Display for AttestationValidationError {
 impl std::error::Error for AttestationValidationError {}
 
 /// One decoded `i_attestations` row.
+///
+/// `signature` is read even though the dev baseline never writes anything but
+/// `''` into it. Leaving the column unread made the validator's claim weaker
+/// than it reads: a row whose `signature` had been changed still matched on
+/// every field the reader bothered to fetch, so "the durable record agrees"
+/// excluded one of the five columns. Reading it costs a fourth `row.get` and
+/// lets the empty-string invariant this baseline declares be enforced instead of
+/// assumed.
+///
+/// ponytail: the ceiling is that `''` is the only acceptable value. When a real
+/// attestor signature producer lands, replace the emptiness check in
+/// `validate_attestation` with verification — not before, or this validates a
+/// scheme nothing produces.
 struct StoredAttestation {
     issuer_id: String,
     subject_digest: String,
     issued_at: String,
+    signature: String,
 }
 
 /// Reads an attestation by primary key.
@@ -1615,13 +1639,14 @@ fn read_attestation(
     attestation_id: &OpaqueId,
 ) -> Result<StoredAttestation, rusqlite::Error> {
     connection.query_row(
-        "SELECT issuer_id,subject_digest,issued_at FROM i_attestations WHERE attestation_id=?1",
+        "SELECT issuer_id,subject_digest,issued_at,signature FROM i_attestations WHERE attestation_id=?1",
         [attestation_id.as_str()],
         |row| {
             Ok(StoredAttestation {
                 issuer_id: row.get(0)?,
                 subject_digest: row.get(1)?,
                 issued_at: row.get(2)?,
+                signature: row.get(3)?,
             })
         },
     )
@@ -2636,5 +2661,47 @@ mod tests {
         }"#;
         let request: ProducerRegistrationRequest = decode(legacy).unwrap();
         assert!(request.canonical_commit_ref.is_pending());
+    }
+
+    /// A row whose `signature` was changed after the writer committed it.
+    ///
+    /// This is the case that made the earlier version of `validate_attestation`
+    /// wrong: the reader did not fetch `signature`, so every field it did fetch
+    /// agreed and the validator returned `Ok(true)` for a row the writer never
+    /// produced. Mutation needs raw SQL, which is why this lives in-crate rather
+    /// than in `tests/`.
+    #[test]
+    fn a_row_with_a_non_empty_signature_is_malformed_not_valid() {
+        let mut store = AdmissionStore::in_memory().unwrap();
+        let attestation_id = id("attestation-tampered");
+        let issuer = IssuerId::new(memory_domain::I_DEV_BASELINE_ATTESTOR).unwrap();
+        let subject = id(&"a".repeat(64));
+
+        let reference = store
+            .issue_attestation(&attestation_id, &issuer, &subject, "2026-11-22T00:00:00Z")
+            .unwrap();
+        assert_eq!(store.validate_attestation(&reference, &subject), Ok(true));
+
+        store
+            .connection
+            .execute(
+                "UPDATE i_attestations SET signature='forged' WHERE attestation_id=?1",
+                [attestation_id.as_str()],
+            )
+            .unwrap();
+
+        assert_eq!(
+            store.validate_attestation(&reference, &subject),
+            Err(AttestationValidationError::RecordMalformed),
+            "a forged signature must not read as a valid attestation"
+        );
+
+        // And the same row must not accept a byte-identical replay as idempotent.
+        let replay =
+            store.issue_attestation(&attestation_id, &issuer, &subject, "2026-11-22T00:00:00Z");
+        assert!(
+            matches!(replay, Err(AdmissionError::IdempotencyConflict)),
+            "a replay against a forged row must conflict, got {replay:?}"
+        );
     }
 }
