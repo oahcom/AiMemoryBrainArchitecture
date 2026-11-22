@@ -43,9 +43,13 @@ grep -n "pub struct Fact\b\|pub struct FactRevision\|pub enum EntityIdentityStat
 686: pub struct EvidenceExtension {
 ```
 
-`crates/memory-domain` 运行 36 个单元测试加 11 个验收测试，其中 9 个被 `#[ignore]` 并各自写明缺失的 API（无 `ClaimRevisionRegistry`、无 `classify_claim_change`、无 `RelationTypeRegistry`、无 `ProvenanceGraph` 等）。
+`crates/memory-domain` 的 Claim 身份分类器已由 PR #545 实现，公开函数为
+`claim_identity::classify`。其余被 ignore 的验收测试仍指向其他缺失能力，
+例如 `ClaimRevisionRegistry`、`RelationTypeRegistry` 和 `ProvenanceGraph`；
+`classify_claim_change` 并不是实际 API 名称，不得继续计为缺失符号。
 
-所以 Phase 2 大致是"类型与不变量已完成，注册表与分类器缺失"。Phase 3 是另一个问题，本文不涉及。
+因此 Phase 2 的现状是"类型、不变量和 Claim 身份分类已实现；部分注册表与图能力仍缺失"。
+Phase 3 是另一个问题，本文不涉及。
 
 ### 1.3 Memory Context 已有 77 行实测覆盖表
 
@@ -132,9 +136,19 @@ BMCP 传输 + 服务端   <-- 不存在；同时也卡住 Agent Integration
 
 ### 第二层 — 已解锁但范围较窄
 
-**T2.1 — Phase 2 注册表与分类器**
+**T2.1 — Phase 2 注册表与剩余图能力**
 
-9 个 `#[ignore]` 的验收测试各自写明了缺失 API。实现 `ClaimRevisionRegistry`、`classify_claim_change`（CI-01..CI-13）、`RelationTypeRegistry`、`ProvenanceGraph` 与 `EvidenceIndependence::validate`，可把这 9 个 ignore 转成真实测试，并完成 DM2-01..DM2-14。
+Claim 身份分类器已由 PR #545 实现，函数名是
+`claim_identity::classify`，不是 `classify_claim_change`。本工作项将
+`dm2_03` 改为真实验收测试，使用 `ClaimRevision::initial` /
+`ClaimRevision::successor` 构造输入，覆盖 10 条可达向量：CI-01..CI-04、
+CI-07..CI-11 和 CI-13。CI-05、CI-06、CI-12 因 `ClaimRevision` 没有
+quantifier、modality、confidence 字段而不可达，不得计为已覆盖。
+
+其余被 ignore 的验收测试针对其他缺失 API，包括 `ClaimRevisionRegistry`、
+`RelationTypeRegistry`、`ProvenanceGraph` 和
+`EvidenceIndependence::validate`。这些能力与已经存在的 Claim 身份分类器
+是不同缺口。
 
 **T2.2 — 给现有闸门接 CI**
 
@@ -167,7 +181,7 @@ GAP-08 与 GAP-09 都是在红灯状态下进入 `main` 的，因为 PR 上只�
 | Memory Context | 80% 未实现 | 77 行表：9 已实现 / 43 部分 / 25 缺失。19 行可本地做，40 行等 D |
 | Agent Integration | 90% 未实现 | 对运行时而言准确；但阻塞来自 H/D/I，而非努力不足。RT-01..RT-09 全部 NOT RUN |
 | BMCP | 60% 未实现 | 产物可观（32 schema、545 一致性测试）。传输/服务端完全缺失——那是一个二进制，不是一个百分比 |
-| Phase 2 领域 | 100% 未启动 | **不成立。** 类型与不变量已实现，36 单元 + 11 验收测试；9 个因缺失注册表而 ignore |
+| Phase 2 领域 | 100% 未启动 | **不成立。** 类型、不变量和 `claim_identity::classify` 已实现；`dm2_03` 覆盖 10 条可达 CI 向量。CI-05/06/12 因 `ClaimRevision` 类型形状不可达；其他注册表/图能力仍有缺口 |
 | 端到端 | 100% 未启动 | 部分不成立。`brain-cli` 已端到端跑通摄取 → 存储 → 上下文，止于编译器跳过（GAP-07） |
 
 ## 6. 在 `b29278a8` 上的重测（2026-11-22 02:05 +08:00）
@@ -305,54 +319,31 @@ TOTAL passed=438 failed=0 ignored=9
 本表统计的目标集合不同——`--all-targets` 包含集成二进制，而 §6.1 的数字与
 只跑 `--lib` 一致。
 
-### 7.2 一条 `#[ignore]` 理由现在是假的，而测试本身没变
+### 7.2 dm2_03 已改为覆盖现有分类器的真实验收测试
 
-`#545`（444deef1）新增了 `crates/memory-domain/src/claim_identity.rs`，经
-`lib.rs:7` 的 `pub use claim_identity::*` 再导出。它提供的正是 `dm2_03` 声称
-不存在的那套 API：
+PR #545（合并提交 `444deef1`）新增了
+`crates/memory-domain/src/claim_identity.rs`，并通过公开导出提供
+`claim_identity::classify`。分类器不是缺失 API，本工作项不修改其实现。
 
-```rust
-pub fn classify(prior: &ClaimRevision, candidate: &ClaimRevision) -> ClaimIdentityDecision
+当前 `dm2_03_ci_classification_vectors` 已处于启用状态，但此前版本使用
+JSON 修改辅助函数，未通过规范构造器完整覆盖可达 CI。本工作项改用真实的
+`ClaimRevision::initial` / `ClaimRevision::successor`，断言 CI-01、CI-02、
+CI-03、CI-04、CI-07、CI-08、CI-09、CI-10、CI-11、CI-13（可达维度 10/10）。
+
+CI-05、CI-06、CI-12 不伪装成通过测试。`ClaimRevision` 结构体没有
+quantifier、modality 或 confidence 字段。字段形状检查命令：
+
+```sh
+sed -n '/^pub struct ClaimRevision {/,/^}/p' crates/memory-domain/src/lib.rs | grep -En '\\b(quantifier|modality|confidence)\\b'
 ```
 
-`phase2_acceptance.rs:160` 的 ignore 理由仍写着：
+预期结果：无输出；由于结构体内不存在这些字段，`grep` 退出码为 1。
+这三条是当前类型下不可达，而不是已覆盖。
 
-> `blocked: memory_domain 当前没有 classify_claim_change / CI-01..CI-13 classifier 函数`
-
-实测：
-
-```
-$ cargo test -p memory-domain --lib claim_identity
-test result: ok. 19 passed; 0 failed; 0 ignored
-```
-
-19 个测试覆盖 CI-01、CI-02、CI-03、CI-04、CI-07、CI-08、CI-09、CI-10、CI-11、
-CI-13，加上 label-only、qualifier 歧义、多维度歧义、scope 歧义、跨 Claim、
-禁止回落、确定性。CI-05 / CI-06 / CI-12 在模块头被记录为**不可达**而非缺失：
-`ClaimRevision` 没有 quantifier、modality、confidence 字段，分类器无法被问到
-那个问题。
-
-所以 `dm2_03` 不是被阻塞，是**过期**。它的 `unimplemented!()` 函数体若去掉
-ignore 会失败，所以不能简单删掉 ignore——测试体本身从未针对 `classify()`
-写过。这是验收文件里的缺陷，不是领域 crate 的缺陷。
-
-其余 9 条逐条重新探测，**8 条仍然成立**：
-
-| 测试 | 探测的符号 | `crates/` 内命中 |
-|---|---|---|
-| dm2_01 | `ClaimRevisionRegistry`、`register_revision` | 0 |
-| dm2_02 | `AcceptedRevisionState` | 0 |
-| dm2_04 | `ClaimRevisionResolver`、`resolve_claim_head` | 0 |
-| dm2_06 | 已验证状态的 `AuthorizationDecisionRef` | 只有 `pending_i()` |
-| dm2_08 | `RelationTypeRegistry`、`contains_relation_type` | 0 |
-| dm2_09 | `RelationExtension.scope_refs` | 结构体无此字段 |
-| dm2_11 | `Provenance::validate`、`parent_provenance_refs`、`unavailable_reason` | 0 |
-| dm2_12 | `ProvenanceGraph`、`DerivationEdge`、`validate_independent` | 0 |
-
-`memory-domain/src/lib.rs` 的 `RelationExtension` 带 `valid_time`、
-`epistemic_status`、`lifecycle_state`，没有 `scope_refs`；`Provenance` 带
-`provenance_id`、`source_refs`、`derivation_kind`、`actor_ref`、`created_at`，
-没有 lineage 或 unavailable-reason 字段。两条理由都是准确的。
+分类器将任何 qualifier 变化都归为
+`QualifierSubstantivenessUnprovable`，必须显式进入治理决策，不得猜测为
+`NewClaim` 或 `NewRevision`。测试还验证规范化后仅显示标签变化时结果为
+`NewRevision/LabelOnly`。
 
 ### 7.3 GAP-07 的缺口陈述现在是假的；它的闭环条件只满足一半
 
