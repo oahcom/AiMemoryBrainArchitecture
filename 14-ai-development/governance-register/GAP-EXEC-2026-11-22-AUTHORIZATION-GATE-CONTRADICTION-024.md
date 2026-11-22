@@ -115,7 +115,14 @@ PR #623 实现的是 D3 的反面：
 
 本次修订做的正是这件事：§3 现在承载裁决而非 specificity 论证，§4 记录裁决所测量的那项回归。§1、§2 与 §4 的测量内容未变，因为它们本来就是对的。
 
-本次修订也说明裁决剩余要求目前的落点。`GAP-18-AUTHORIZATION-VALIDATOR-REMAINDER` §3 Step 3 就是那项要求，且尚未满足：`dm2_06` 在 `memory-domain` 里证明的是存在性，而 `crates/memory-compiler/tests/` 中没有任何测试断言被传播的权威 `Err`。本文不复述那份工作单；它只记录裁决 §5 第 4 步仍未闭合，以免读者看完上文 §3 就以为裁决已经把它关掉了。
+本次修订也记录裁决剩余要求的落点。`GAP-18-AUTHORIZATION-VALIDATOR-REMAINDER` §3 Step 3 就是那项要求，它已由 PR #671 于 `2026-11-22T10:41:51Z` 满足，早于本次修订合并。`crates/memory-compiler/tests/authorization_authority.rs` 现在直接断言被传播的权威 `Err`：
+
+| 测试 | 断言 |
+|---|---|
+| `pending_reference_propagates_authority_validation_error` | `Err(AuthorizationDecisionValidationError::PendingReference)` |
+| `issued_reference_without_durable_row_propagates_record_missing` | `Err(AuthorizationDecisionValidationError::RecordMissing)` |
+
+两者都是 `Err` 而非 `Ok(false)`，且都具名到具体变体而非接受任意错误 —— 这正是裁决 §5 第 4 步与工作单 §3 Step 3 各自称为承重的三点性质。`dm2_06` 仍在 `memory-domain` 中断言结构层的 `Err`，而这一现状是正确的、不再是缺口：裁决 §2 说结构层拒绝与被传播的权威拒绝是不同层次上的不同错误，每一层的测试断言自己那一层的错误。
 
 ## 6. 裁决刻意没有决定的事
 
