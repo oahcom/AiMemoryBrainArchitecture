@@ -1349,11 +1349,6 @@ impl AdmissionStore {
 
         // Compare every reference field after validating the stored row's
         // shape. The primary key is included even though it selected the row.
-        if stored.decision_id != data.decision_id.as_str() {
-            return Err(AuthorizationDecisionValidationError::RecordMismatch(
-                "decision_id",
-            ));
-        }
         if stored.issuer_id != data.issuer.as_str() {
             return Err(AuthorizationDecisionValidationError::RecordMismatch(
                 "issuer",
@@ -1403,11 +1398,6 @@ impl AdmissionStore {
 
         let stored_kind = validate_stored_authorization_decision(&stored)?;
 
-        if stored.decision_id != data.decision_id.as_str() {
-            return Err(AuthorizationDecisionValidationError::RecordMismatch(
-                "decision_id",
-            ));
-        }
         if stored.issuer_id != data.issuer.as_str() {
             return Err(AuthorizationDecisionValidationError::RecordMismatch(
                 "issuer",
@@ -2472,6 +2462,122 @@ mod tests {
     }
 
     #[test]
+    fn i_authorization_rejects_a_stored_unsupported_issuer() {
+        let mut db = AdmissionStore::in_memory().unwrap();
+        let subject = "a".repeat(64);
+        let data = authorization_decision_data(
+            "decision-unsupported-issuer",
+            &subject,
+            AuthorizationDecisionKind::Approved,
+        );
+        let reference = db.record_authorization_decision(&data).unwrap();
+
+        db.connection
+            .execute(
+                "UPDATE authorization_decisions SET issuer_id='someone-else'
+                 WHERE decision_id=?1",
+                [data.decision_id.as_str()],
+            )
+            .unwrap();
+
+        assert_eq!(
+            db.validate_authorization_decision(&reference, &id(&subject)),
+            Err(AuthorizationDecisionValidationError::UnsupportedIssuer)
+        );
+        assert_eq!(
+            db.authorization_decision_kind(&reference),
+            Err(AuthorizationDecisionValidationError::UnsupportedIssuer)
+        );
+    }
+
+    #[test]
+    fn i_authorization_rejects_a_malformed_stored_decision_kind() {
+        let mut db = AdmissionStore::in_memory().unwrap();
+        let subject = "b".repeat(64);
+        let data = authorization_decision_data(
+            "decision-malformed-kind",
+            &subject,
+            AuthorizationDecisionKind::Approved,
+        );
+        let reference = db.record_authorization_decision(&data).unwrap();
+
+        db.connection
+            .execute(
+                "UPDATE authorization_decisions SET decision_kind='not-a-kind'
+                 WHERE decision_id=?1",
+                [data.decision_id.as_str()],
+            )
+            .unwrap();
+
+        assert_eq!(
+            db.validate_authorization_decision(&reference, &id(&subject)),
+            Err(AuthorizationDecisionValidationError::RecordMalformed)
+        );
+        assert_eq!(
+            db.authorization_decision_kind(&reference),
+            Err(AuthorizationDecisionValidationError::RecordMalformed)
+        );
+    }
+
+    #[test]
+    fn i_authorization_rejects_a_record_that_disagrees_with_its_reference() {
+        let mut db = AdmissionStore::in_memory().unwrap();
+        let subject = "c".repeat(64);
+        let data = authorization_decision_data(
+            "decision-record-mismatch",
+            &subject,
+            AuthorizationDecisionKind::Approved,
+        );
+        let reference = db.record_authorization_decision(&data).unwrap();
+
+        db.connection
+            .execute(
+                "UPDATE authorization_decisions SET subject_digest=?2
+                 WHERE decision_id=?1",
+                params![data.decision_id.as_str(), "d".repeat(64)],
+            )
+            .unwrap();
+
+        assert_eq!(
+            db.validate_authorization_decision(&reference, &id(&subject)),
+            Err(AuthorizationDecisionValidationError::RecordMismatch(
+                "subject_digest"
+            ))
+        );
+        assert_eq!(
+            db.authorization_decision_kind(&reference),
+            Err(AuthorizationDecisionValidationError::RecordMismatch(
+                "subject_digest"
+            ))
+        );
+    }
+
+    #[test]
+    fn i_authorization_reports_an_unreadable_database() {
+        let mut db = AdmissionStore::in_memory().unwrap();
+        let subject = "e".repeat(64);
+        let data = authorization_decision_data(
+            "decision-unreadable",
+            &subject,
+            AuthorizationDecisionKind::Approved,
+        );
+        let reference = db.record_authorization_decision(&data).unwrap();
+
+        db.connection
+            .execute_batch("DROP TABLE authorization_decisions;")
+            .unwrap();
+
+        assert_eq!(
+            db.validate_authorization_decision(&reference, &id(&subject)),
+            Err(AuthorizationDecisionValidationError::ReadFailed)
+        );
+        assert_eq!(
+            db.authorization_decision_kind(&reference),
+            Err(AuthorizationDecisionValidationError::ReadFailed)
+        );
+    }
+
+    #[test]
     fn i_attestor_record_is_validated_against_its_durable_row() {
         let mut db = AdmissionStore::in_memory().unwrap();
         let subject = "e".repeat(64);
@@ -2489,6 +2595,80 @@ mod tests {
                 "expected_subject_digest"
             ))
         );
+    }
+
+    #[test]
+    fn i_attestor_rejects_malformed_stored_rows() {
+        // Invalid subject digest.
+        let mut db = AdmissionStore::in_memory().unwrap();
+        let subject = "f".repeat(64);
+        let data = attestor_data("attestation-malformed-digest", &subject);
+        let reference = db.record_attestation(&data).unwrap();
+        db.connection
+            .execute(
+                "UPDATE i_attestations SET subject_digest='not-a-digest'
+                 WHERE attestation_id=?1",
+                [data.attestation_id.as_str()],
+            )
+            .unwrap();
+        assert_eq!(
+            db.validate_attestor(&reference, &id(&subject)),
+            Err(AttestorValidationError::RecordMalformed)
+        );
+
+        // Invalid timestamp.
+        let mut db = AdmissionStore::in_memory().unwrap();
+        let data = attestor_data("attestation-malformed-time", &subject);
+        let reference = db.record_attestation(&data).unwrap();
+        db.connection
+            .execute(
+                "UPDATE i_attestations SET issued_at='yesterday'
+                 WHERE attestation_id=?1",
+                [data.attestation_id.as_str()],
+            )
+            .unwrap();
+        assert_eq!(
+            db.validate_attestor(&reference, &id(&subject)),
+            Err(AttestorValidationError::RecordMalformed)
+        );
+
+        // Dev-baseline rows must have an empty signature.
+        let mut db = AdmissionStore::in_memory().unwrap();
+        let data = attestor_data("attestation-malformed-signature", &subject);
+        let reference = db.record_attestation(&data).unwrap();
+        db.connection
+            .execute(
+                "UPDATE i_attestations SET signature='non-empty'
+                 WHERE attestation_id=?1",
+                [data.attestation_id.as_str()],
+            )
+            .unwrap();
+        assert_eq!(
+            db.validate_attestor(&reference, &id(&subject)),
+            Err(AttestorValidationError::RecordMalformed)
+        );
+    }
+
+    #[test]
+    fn i_attestor_replay_conflicts_when_the_stored_signature_differs() {
+        let mut db = AdmissionStore::in_memory().unwrap();
+        let data = attestor_data("attestation-signature-conflict", &"1".repeat(64));
+
+        // Ordering is intentional: insert the normal row first, corrupt its
+        // signature, then replay the exact same input.
+        db.record_attestation(&data).unwrap();
+        db.connection
+            .execute(
+                "UPDATE i_attestations SET signature='non-empty'
+                 WHERE attestation_id=?1",
+                [data.attestation_id.as_str()],
+            )
+            .unwrap();
+
+        assert!(matches!(
+            db.record_attestation(&data),
+            Err(AdmissionError::IdempotencyConflict)
+        ));
     }
 
     #[test]
