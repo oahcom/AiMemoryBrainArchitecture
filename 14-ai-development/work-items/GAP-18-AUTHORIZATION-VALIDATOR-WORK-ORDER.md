@@ -5,9 +5,8 @@ document_metadata:
 
   lifecycle:
     approval:
-      decision_status: Approved
-      approver: "Project Owner delegate under standing instruction"
-      decision_date: "2026-11-22"
+      decision_status: Draft
+      approver: null
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-22"
@@ -26,7 +25,7 @@ document_metadata:
 
 # GAP-18 — The authorization validator: a work order with a template already in the tree
 
-**Status:** Open — ready to implement
+**Status:** Open — ready to implement; not itself an approval of anything
 **Area:** memory-compiler / memory-domain
 **Measured at:** `main @ c9036544`, `2026-11-22T16:10Z`
 **Authority:** `OWNER-RULING-AUTHORIZATION-PRESENCE-GATE-025`, `I-OWNER-DECISION-AUTHORIZATION-DECISION-001` §3.1, §4.1, §4.2
