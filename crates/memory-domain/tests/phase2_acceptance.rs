@@ -602,7 +602,7 @@ fn dm2_05_fact_revision_accepts_multiple_exact_claim_revision_pins() {
 // ---------------------------------------------------------------- DM2-06
 
 #[test]
-#[ignore = "blocked: FactRevision::initial 强制要求 AuthorizationDecisionRef，但当前唯一公开构造是 AuthorizationDecisionRef::pending_i()；类型没有 absent/validated-I-issued 状态，无法证明缺失授权被拒绝。Round 4 的 fact_with_placeholder_attestor_validates_today 固定了当前占位符可通过的事实"]
+#[ignore = "blocked, owner I: 缺失授权不可表达。AuthorizationDecisionRef 是单元结构体 (lib.rs:531)，唯一公开构造 pending_i() 恒为「有值」；FactRevision::initial / successor 的 authorization_decision_ref 参数为非 Option (lib.rs:837 / :873)；validate() 完全不检查该字段 (lib.rs:961-1012)。故不存在能表示「无授权」的值，测试无法断言缺失被拒。解阻塞需二者之一：(1) FactRevision::initial 增加 Option<AuthorizationDecisionRef> 重载，且 validate() 对 None + FactOutcome::Attested 返回具名错误；或 (2) AuthorizationDecisionRef 增加 NotIssued 变体，validate() 拒绝它。两份已 DECIDED 文档对此互相冲突且均未实现：ADR OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001 要求域层 Absent 态并由 validate() 拒绝；I-OWNER-DECISION-AUTHORIZATION-DECISION-001 §4.3 明确「there is no None state」并要求由 memory-compiler 的 AdmissionStore 校验器返回 authority Err，而该路径本测试不可达（memory-domain 不依赖 memory-compiler）。冲突与解阻塞条件见 GAP-17"]
 fn dm2_06_missing_authorization_ref_blocks_fact_publication() {
     unimplemented!()
 }
