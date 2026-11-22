@@ -10,7 +10,7 @@ document_metadata:
       decision_date: "2026-11-22"
       approved_version:
         scheme: git
-        value: "da15eeb6cbc546992db094c6b3ec924953042630"
+        value: "c90365442fe29c67f015dee6533a026ea585abc0"
       approval_scope:
         type: Full-document
         included_sections: []
