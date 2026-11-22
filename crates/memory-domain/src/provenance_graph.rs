@@ -266,6 +266,10 @@ mod tests {
                 actor_id: OpaqueId::new("actor-test").unwrap(),
             },
             created_at: "2026-01-01T00:00:00Z".into(),
+            source_version_refs: vec![],
+            parent_provenance_refs: vec![],
+            unavailable_reason: None,
+            method_version: None,
         }
     }
 

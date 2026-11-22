@@ -49,6 +49,8 @@ pub enum DomainError {
     MissingRevisionReason,
     MissingIdentityLineage,
     InvalidRelationEndpoint,
+    UnregisteredRelationType,
+    DuplicateRelationType,
     InvalidMergeState,
     DuplicateClaimRevisionRef,
     UnknownClaimRevision,
