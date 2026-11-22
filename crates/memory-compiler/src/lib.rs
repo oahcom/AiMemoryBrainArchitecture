@@ -5,6 +5,7 @@
 
 #[cfg(feature = "sqlite")]
 pub mod admission;
+pub mod evidence;
 #[cfg(feature = "sqlite")]
 pub mod publication_authority;
 

@@ -834,6 +834,9 @@ fn dm2_10_evidence_role_is_closed_to_four_allowed_values() {
 
 #[test]
 fn dm2_10_evidence_availability_and_scope_enforced_independently() {
+    // §8 puts `scope_refs` on Evidence and `availability` on the extension, so
+    // the two dimensions are checked by different records — which is exactly
+    // what "independently" means here.
     let base = EvidenceExtension {
         evidence_ref: EvidenceRef::new("ev-1").unwrap(),
         kind: EvidenceKind::Document,
@@ -843,11 +846,13 @@ fn dm2_10_evidence_availability_and_scope_enforced_independently() {
         collector: ActorRef {
             actor_id: id("collector"),
         },
-        integrity_digest: "sha256:abc".into(),
+        integrity_digest: Some("sha256:abc".into()),
+        source_reliability_ref: None,
         availability: EvidenceAvailability::Available,
-        scope_refs: vec![scope("s1")],
     };
     assert!(base.validate().is_ok());
+
+    // Availability does not affect scope validity and vice versa.
     let restricted = EvidenceExtension {
         availability: EvidenceAvailability::Restricted,
         ..base.clone()
@@ -857,13 +862,59 @@ fn dm2_10_evidence_availability_and_scope_enforced_independently() {
         ..base.clone()
     };
     assert_ne!(restricted.availability, forgotten.availability);
-    let no_scope = EvidenceExtension {
+
+    // §8: integrity_digest is nullable, so its absence is not a defect.
+    let no_digest = EvidenceExtension {
+        integrity_digest: None,
+        ..base.clone()
+    };
+    assert!(no_digest.validate().is_ok(), "digest is nullable in §8");
+
+    // A present-but-blank digest is still refused.
+    let blank_digest = EvidenceExtension {
+        integrity_digest: Some("   ".into()),
+        ..base.clone()
+    };
+    assert_eq!(
+        blank_digest.validate(),
+        Err(DomainError::EmptyRequiredField("integrity_digest"))
+    );
+
+    let evidence = Evidence {
+        evidence_id: id("ev-1"),
+        source_ref: id("source-1"),
+        recorded_at: "2026-01-01T00:00:00Z".into(),
+        scope_refs: vec![scope("s1")],
+        role: EvidenceRole::Supports,
+    };
+    assert!(evidence.validate().is_ok());
+    assert!(
+        evidence.validate_against(&base).is_ok(),
+        "matching identities form a valid pair"
+    );
+
+    let no_scope = Evidence {
         scope_refs: vec![],
-        ..base
+        ..evidence.clone()
     };
     assert_eq!(
         no_scope.validate(),
         Err(DomainError::EmptyRequiredField("scope_refs"))
+    );
+
+    // Scope validity is independent of availability: the extension is still
+    // valid while the Evidence half is refused.
+    assert!(base.validate().is_ok());
+    assert!(no_scope.validate().is_err());
+
+    // A pair whose halves name different identities is not one Evidence.
+    let mismatched = EvidenceExtension {
+        evidence_ref: EvidenceRef::new("ev-2").unwrap(),
+        ..base
+    };
+    assert_eq!(
+        evidence.validate_against(&mismatched),
+        Err(DomainError::InvalidParent)
     );
 }
 
@@ -892,18 +943,44 @@ fn dm2_11_provenance_lineage_or_unavailable_reason_mandatory() {
         .validate()
         .is_ok());
 
-    // 无谱系时必须有显式不可用原因，二者皆无则拒绝。
+    // 无谱系但有明确不可用原因 → 通过。
     let no_lineage = provenance_with("parent_provenance_refs", json!([]));
-    assert!(no_lineage.validate().is_ok());
     let mut orphan = serde_json::to_value(&no_lineage).unwrap();
     orphan["unavailable_reason"] = json!("upstream source purged");
     let orphan: Provenance = serde_json::from_value(orphan).unwrap();
     assert!(orphan.validate().is_ok());
 
+    // 无谱系且无不可用原因 → 拒绝。这是 DM2-11 的核心反例：
+    // 上一版此处断言 is_ok()，与它自己的注释「二者皆无则拒绝」矛盾，
+    // 等于把违反契约的行为固定成了正确行为。
+    assert_eq!(
+        no_lineage.validate(),
+        Err(DomainError::IncompleteProvenanceLineage)
+    );
+
     // 空白的不可用原因不是原因。
     let blank_reason = provenance_with("unavailable_reason", json!(""));
     assert_eq!(
         blank_reason.validate(),
+        Err(DomainError::EmptyRequiredField("unavailable_reason"))
+    );
+
+    // 纯空白同样不算原因（不只是空字符串）。
+    let mut whitespace = serde_json::to_value(&no_lineage).unwrap();
+    whitespace["unavailable_reason"] = json!("   \t\n ");
+    let whitespace: Provenance = serde_json::from_value(whitespace).unwrap();
+    assert_eq!(
+        whitespace.validate(),
+        Err(DomainError::EmptyRequiredField("unavailable_reason"))
+    );
+
+    // 空白原因即使有谱系也无效：避免误以为该字段只在无谱系时才校验。
+    let mut blank_with_lineage =
+        serde_json::to_value(provenance_with("method_version", json!(null))).unwrap();
+    blank_with_lineage["unavailable_reason"] = json!("   ");
+    let blank_with_lineage: Provenance = serde_json::from_value(blank_with_lineage).unwrap();
+    assert_eq!(
+        blank_with_lineage.validate(),
         Err(DomainError::EmptyRequiredField("unavailable_reason"))
     );
 
@@ -949,17 +1026,26 @@ fn dm2_11_provenance_lineage_or_unavailable_reason_mandatory() {
 fn dm2_12_shared_ancestry_not_independent_evidence() {
     let mut graph = ProvenanceGraph::new();
 
-    let provenance = |name: &str| Provenance {
+    // Lineage lives in the record itself — the graph takes no second opinion.
+    let provenance = |name: &str, parents: &[&str]| Provenance {
         provenance_id: id(name),
-        source_refs: vec![],
+        source_refs: vec![id("source-1")],
         derivation_kind: "test".into(),
         actor_ref: ActorRef {
             actor_id: id("actor-dm2-12"),
         },
         created_at: "2026-01-01T00:00:00Z".into(),
         source_version_refs: vec![],
-        parent_provenance_refs: vec![],
-        unavailable_reason: None,
+        parent_provenance_refs: parents
+            .iter()
+            .map(|parent| ProvenanceRef::new(*parent).unwrap())
+            .collect(),
+        // A root has no lineage, so it must say why (DM2-11).
+        unavailable_reason: if parents.is_empty() {
+            Some("independent root provenance".into())
+        } else {
+            None
+        },
         method_version: None,
     };
 
@@ -969,15 +1055,11 @@ fn dm2_12_shared_ancestry_not_independent_evidence() {
     //       /    \
     //    LEFT    RIGHT
     //
-    graph.add(provenance("ROOT"), &[]).unwrap();
+    graph.add(provenance("ROOT", &[])).unwrap();
 
-    graph
-        .add(provenance("LEFT"), &[ProvenanceRef::new("ROOT").unwrap()])
-        .unwrap();
+    graph.add(provenance("LEFT", &["ROOT"])).unwrap();
 
-    graph
-        .add(provenance("RIGHT"), &[ProvenanceRef::new("ROOT").unwrap()])
-        .unwrap();
+    graph.add(provenance("RIGHT", &["ROOT"])).unwrap();
 
     assert_eq!(
         EvidenceIndependence::validate_independent(
@@ -992,9 +1074,9 @@ fn dm2_12_shared_ancestry_not_independent_evidence() {
     //
     //   INDEPENDENT_A    INDEPENDENT_B
     //
-    graph.add(provenance("INDEPENDENT_A"), &[]).unwrap();
+    graph.add(provenance("INDEPENDENT_A", &[])).unwrap();
 
-    graph.add(provenance("INDEPENDENT_B"), &[]).unwrap();
+    graph.add(provenance("INDEPENDENT_B", &[])).unwrap();
 
     assert_eq!(
         EvidenceIndependence::validate_independent(
