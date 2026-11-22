@@ -38,15 +38,7 @@ impl OpaqueId {
 
 /// Shared issuer identity for the D and I owner contracts.
 #[derive(
-    serde::Serialize,
-    serde::Deserialize,
-    Clone,
-    Debug,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
+    serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd,
 )]
 #[serde(transparent)]
 pub struct IssuerId(OpaqueId);
@@ -92,7 +84,6 @@ impl std::fmt::Display for DomainError {
 }
 
 impl std::error::Error for DomainError {}
-
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct ScopeRef {
@@ -676,7 +667,9 @@ fn valid_rfc3339_utc(value: &str) -> bool {
     if bytes.len() < 20
         || bytes.get(4) != Some(&b'-')
         || bytes.get(7) != Some(&b'-')
-        || bytes.get(10).map_or(true, |byte| *byte != b'T' && *byte != b't')
+        || bytes
+            .get(10)
+            .map_or(true, |byte| *byte != b'T' && *byte != b't')
         || bytes.get(13) != Some(&b':')
         || bytes.get(16) != Some(&b':')
     {
@@ -717,21 +710,14 @@ fn valid_rfc3339_utc(value: &str) -> bool {
         _ => return false,
     };
 
-    if day == 0
-        || day > days_in_month
-        || hour > 23
-        || minute > 59
-        || second > 60
-    {
+    if day == 0 || day > days_in_month || hour > 23 || minute > 59 || second > 60 {
         return false;
     }
 
     let mut suffix_start = 19;
     if bytes.get(19) == Some(&b'.') {
         suffix_start = 20;
-        while suffix_start < bytes.len()
-            && bytes[suffix_start].is_ascii_digit()
-        {
+        while suffix_start < bytes.len() && bytes[suffix_start].is_ascii_digit() {
             suffix_start += 1;
         }
         if suffix_start == 20 {
@@ -844,17 +830,15 @@ impl<'de> serde::Deserialize<'de> for AuthorizationDecisionRef {
     where
         D: serde::Deserializer<'de>,
     {
-        let wire =
-            <Option<AuthorizationDecisionDataWire> as serde::Deserialize>::deserialize(
-                deserializer,
-            )?;
+        let wire = <Option<AuthorizationDecisionDataWire> as serde::Deserialize>::deserialize(
+            deserializer,
+        )?;
 
         match wire {
             None => Ok(Self::pending_i()),
             Some(wire) => {
                 let data = AuthorizationDecisionData::from(wire);
-                validate_authorization_decision_data(&data)
-                    .map_err(serde::de::Error::custom)?;
+                validate_authorization_decision_data(&data).map_err(serde::de::Error::custom)?;
                 Ok(Self {
                     state: AuthorizationDecisionRefState::Issued(data),
                 })
@@ -870,9 +854,7 @@ impl serde::Serialize for AttestorRef {
     {
         match &self.state {
             AttestorRefState::Pending => serializer.serialize_unit_struct("AttestorRef"),
-            AttestorRefState::Issued(data) => {
-                serde::Serialize::serialize(data, serializer)
-            }
+            AttestorRefState::Issued(data) => serde::Serialize::serialize(data, serializer),
         }
     }
 }
@@ -882,8 +864,7 @@ impl<'de> serde::Deserialize<'de> for AttestorRef {
     where
         D: serde::Deserializer<'de>,
     {
-        let wire =
-            <Option<AttestorDataWire> as serde::Deserialize>::deserialize(deserializer)?;
+        let wire = <Option<AttestorDataWire> as serde::Deserialize>::deserialize(deserializer)?;
 
         match wire {
             None => Ok(Self::pending_i()),
@@ -1340,7 +1321,9 @@ impl FactRevision {
         if self.authorization_decision_ref.is_pending() {
             // ponytail: reuses EmptyRequiredField to avoid a new variant this round;
             // rename when the variant set is next revised.
-            return Err(DomainError::EmptyRequiredField("authorization_decision_ref"));
+            return Err(DomainError::EmptyRequiredField(
+                "authorization_decision_ref",
+            ));
         }
         for (n, v) in [
             ("attestation_method_id", &self.attestation_method_id),
@@ -2427,26 +2410,19 @@ mod tests {
             &serde_json::json!("Approved")
         );
         assert_eq!(
-            serde_json::from_value::<AuthorizationDecisionRef>(
-                authorization_json.clone()
-            )
-            .unwrap(),
+            serde_json::from_value::<AuthorizationDecisionRef>(authorization_json.clone()).unwrap(),
             authorization
         );
 
         let mut malformed_authorization = authorization_json.clone();
         malformed_authorization["subject_digest"] = serde_json::json!("ABC");
         assert!(
-            serde_json::from_value::<AuthorizationDecisionRef>(malformed_authorization)
-                .is_err()
+            serde_json::from_value::<AuthorizationDecisionRef>(malformed_authorization).is_err()
         );
 
         let mut unknown_authorization = authorization_json;
         unknown_authorization["unexpected"] = serde_json::json!(true);
-        assert!(
-            serde_json::from_value::<AuthorizationDecisionRef>(unknown_authorization)
-                .is_err()
-        );
+        assert!(serde_json::from_value::<AuthorizationDecisionRef>(unknown_authorization).is_err());
 
         let attestor = AttestorRef::from_issued_data(AttestorData {
             attestation_id: OpaqueId::new("attestation-serde").unwrap(),
@@ -2663,7 +2639,9 @@ mod tests {
         );
         assert_eq!(
             revision.validate(),
-            Err(DomainError::EmptyRequiredField("authorization_decision_ref"))
+            Err(DomainError::EmptyRequiredField(
+                "authorization_decision_ref"
+            ))
         );
     }
 

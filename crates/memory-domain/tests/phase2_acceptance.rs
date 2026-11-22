@@ -620,7 +620,9 @@ fn dm2_06_missing_authorization_ref_blocks_fact_publication() {
     let pending: FactRevision = serde_json::from_value(wire).unwrap();
     assert_eq!(
         pending.validate(),
-        Err(DomainError::EmptyRequiredField("authorization_decision_ref"))
+        Err(DomainError::EmptyRequiredField(
+            "authorization_decision_ref"
+        ))
     );
 }
 
