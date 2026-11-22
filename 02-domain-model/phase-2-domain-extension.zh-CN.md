@@ -87,7 +87,7 @@ BMCP 契约中的 ProducerWork Registration Ledger Namespace 和 ForgetFence Cur
 
 **与 Phase 1 的关系：** 两种类型均为新增，不替换 Claim 或 Evidence。
 
-**已裁定语义决策——固定 ClaimRevision 被撤回后的处理（参见 `domain-model-overview.md` §3.16、`OWNER-DECISION-FACT-RETRACTION-001`）：** 当前规范来源尚未决定：当 FactRevision 固定的某个精确 ClaimRevision 后续被标记为 `Retracted` 时，该 FactRevision 应如何处置。`epistemic-and-temporal-semantics.md` §2、§9 规定 Claim 状态变更采用追加式历史并保留历史断言；`domain-model-overview.md` §3.15 和 `OWNER-DECISION-FACT-CLAIM-001` §2、§5 要求 Fact 固定精确、不可变的 ClaimRevision，但没有规定该撤回状态如何影响 Fact。**已选定候选方案 3**：原 FactRevision 保持不变，追加一条后继 FactRevision，其 `outcome` 为 `FactOutcome::Revoked`，并记录非空的 `correction_or_revocation_reason`。该方案**不需要新增任何类型**——`FactOutcome::Revoked`、`parent_revision_ref` 与 `correction_or_revocation_reason` 均已存在，且 `FactRevision::successor()` 已强制父级同属一个 `FactRef`。候选 1 被 §8.1 第 3 条排除：Fact 的可见性本就对所有已披露依赖取合取。候选 2 被本节自身「不得新增 `retracted` 字段」的禁令以及追加式修订不变式排除。撤回不等于 Forget：被撤回的 FactRevision 仍可历史读取，而被遗忘的 Memory 变为不可读。传播不是自动发生的。仍未定义：触发者、作用范围（一条还是全部固定的 ClaimRevision）、混合依赖的处理方式、以及读取路径行为。
+**已裁定语义决策——固定 ClaimRevision 被撤回后的处理（参见 `domain-model-overview.md` §3.16、`OWNER-DECISION-FACT-RETRACTION-001`）：** 在本裁定之前，规范来源未决定：当 FactRevision 固定的某个精确 ClaimRevision 后续被标记为 `Retracted` 时，该 FactRevision 应如何处置。`epistemic-and-temporal-semantics.md` §2、§9 规定 Claim 状态变更采用追加式历史并保留历史断言；`domain-model-overview.md` §3.15 和 `OWNER-DECISION-FACT-CLAIM-001` §2、§5 要求 Fact 固定精确、不可变的 ClaimRevision，但此前未规定该撤回状态如何影响 Fact。**已选定候选方案 3**：原 FactRevision 保持不变，追加一条后继 FactRevision，其 `outcome` 为 `FactOutcome::Revoked`，并记录非空的 `correction_or_revocation_reason`。该方案**不需要新增任何类型**——`FactOutcome::Revoked`、`parent_revision_ref` 与 `correction_or_revocation_reason` 均已存在，且 `FactRevision::successor()` 已强制父级同属一个 `FactRef`。候选 1 被 §8.1 第 3 条排除：Fact 的可见性本就对所有已披露依赖取合取。候选 2 被本节自身「不得新增 `retracted` 字段」的禁令以及追加式修订不变式排除。撤回不等于 Forget：被撤回的 FactRevision 仍可历史读取，而被遗忘的 Memory 变为不可读。传播不是自动发生的。仍未定义：触发者、作用范围（一条还是全部固定的 ClaimRevision）、混合依赖的处理方式、以及读取路径行为。
 
 **PENDING CROSS-OWNER DECISION：** I 必须定义/批准 Attestor 主体身份、授权决定语义，以及授权引用的安全含义。D 必须确认 Fact/FactRevision 的规范提交、Revision 和 Forget/依赖语义。在两个决策绑定到同一精确契约版本之前，这些字段仅是语义占位引用；实现不得自行推断授权或规范接收结果。
 
@@ -186,17 +186,17 @@ MemorySource 是 MemoryVersion/派生资产与一个来源之间的类型化关�
 
 ### 3.16 已裁定：固定 ClaimRevision 撤回后向 FactRevision 的传播
 
-**状态：OPEN / PENDING——尚未授权选择任何语义。**
+**状态：已由 `OWNER-DECISION-FACT-RETRACTION-001` 裁定 —— 选定候选方案 3（追加一条抑制性修订）。**
 
-FactRevision 固定精确的 ClaimRevisionRef。规范领域文档和 PR #446 的 `DECIDED FOR CONVERGENCE` 部分均未裁决：当被固定的 ClaimRevision 后续被标记为 `Retracted` 时，应如何处置 FactRevision。不得将 Retraction 等同于 Forget；此处不定义传播行为。
+裁定出处：GitHub Issue #265，评论 7064801226 — https://github.com/oahcom/AiMemoryBrainArchitecture/issues/265#issuecomment-7064801226
 
-以下候选语义仍未解决：
+FactRevision 固定精确的 ClaimRevisionRef。当被固定的 ClaimRevision 后续被赋予 `Retracted` 时，不得修改或删除该 FactRevision，也不得改写其固定的 `ClaimRevisionRef` 值。受治理的响应方式是：追加一条后继 FactRevision，其 `outcome = FactOutcome::Revoked`，`parent_revision_ref` 指向先前修订，且 `correction_or_revocation_reason` 非空。该方案不需要新增任何类型：`FactOutcome::Revoked`、`parent_revision_ref` 与 `correction_or_revocation_reason` 均已存在，且 `FactRevision::successor()` 已强制父级同属一个 `FactRef`。
 
-1. **继续可见：** FactRevision 继续可见并保留其精确历史引用。这保留了 attestation 历史，但可能暴露一个其支撑 Claim 已不再被接受的事实。
-2. **标记失效：** FactRevision 仍被存储，但在披露或使用时视为失效。这需要定义失效状态以及下游消费者规则。
-3. **追加抑制修订：** 追加新的 FactRevision 记录抑制/撤销，同时保留此前不可变的修订。这保留追加式历史，但需要定义抑制修订的 attestation 与授权路径。
+候选 1（继续可见）被 `domain-model-overview.md` §8.1 第 3 条排除：Fact 的可见性本就对每一项已披露依赖取合取。候选 2（标记失效）被本节禁止新增可变 `retracted` 字段的规定、以及 §3.15 与 `epistemic-and-temporal-semantics.md` §2、§9 的追加式修订不变式排除。
 
-**不选择任何候选语义。在明确的领域裁决解决此项之前，实现 MUST NOT 选择、推断或增加撤回传播行为。** 特别是，不得向 FactRevision 添加 `retracted` 字段，也不得依据实现本地策略静默地使 Fact 失效或继续保留其效力。
+撤回不等于 Forget：被撤回的 FactRevision 仍可历史读取与审计，而被遗忘的 Memory 变为不可读。传播不是自动的；任何实现都不得仅凭 ClaimRevision 变为 `Retracted` 就推断出处置结果，必须有一次显式授权的调用。
+
+仍刻意未定义：触发者（由哪个主体或进程传播、依据何种授权）、作用范围（一条还是全部固定的 ClaimRevision）、混合依赖的处理方式、读取路径行为。实现 MUST NOT 向 FactRevision 新增 `retracted` 字段，MUST NOT 改写既有 FactRevision 来表示撤回，也 MUST NOT 在本地自行选择或推断上述四项。
 
 ## 4. Phase 2 排除项与 Owner 边界
 
