@@ -50,6 +50,7 @@ pub enum DomainError {
     MissingFactEvidence,
     MissingFactProvenance,
     MissingAuthorizationDecision,
+    InvalidAuthorizationDecisionField(&'static str),
     MissingRevisionReason,
     MissingIdentityLineage,
     InvalidRelationEndpoint,
@@ -529,10 +530,43 @@ impl AttestorRef {
         Self(())
     }
 }
-/// NOT DEFINED: awaiting I. Presence only; no variant asserts that a decision was actually
-/// issued by I. `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001` requires absence to be
-/// representable before presence can mean anything, so these states are structural, not
-/// cryptographic. `pending_i()` stays public, so no value here proves issuance.
+/// The single issuer identity admitted by the I dev baseline
+/// (`I-OWNER-DECISION-AUTHORIZATION-DECISION-001` §2.2). Owner-specific: D's
+/// allowlist holds a different literal, and neither trusts the other.
+pub const I_DEV_BASELINE_ISSUER: &str = "i-owner-proxy/dev-baseline-v1";
+
+/// Terminal disposition of a recorded decision (§2.1). `Conditional` is not a
+/// permission to carry an unbound mutable condition list; the constraints are
+/// already inside the digested subject.
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
+#[serde(rename_all = "snake_case")]
+pub enum AuthorizationDecisionKind {
+    Approved,
+    Denied,
+    Conditional,
+}
+
+/// The immutable content a recorded decision carries (§2.1).
+///
+/// A reference holding this is still only a *candidate*: nothing here proves I
+/// issued it. Only the durable `authorization_decisions` row read by
+/// `AdmissionStore` can do that, which is why this type lives in the domain
+/// crate and the validator does not.
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct AuthorizationDecisionData {
+    pub decision_id: OpaqueId,
+    pub issuer: IssuerId,
+    pub subject_digest: OpaqueId,
+    pub issued_at: String,
+    pub decision_kind: AuthorizationDecisionKind,
+}
+
+/// `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001` D2/D3: absence must be
+/// representable, or `pending_i()` silently asserts an authorization nobody
+/// issued. Three states, and only `Absent` blocks the presence gate.
+///
+/// `PendingI` is `Placeholder` under D2's naming; the wire name is kept so
+/// existing records keep deserializing.
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum AuthorizationDecisionRef {
@@ -542,7 +576,7 @@ pub enum AuthorizationDecisionRef {
     PendingI,
     /// A caller-claimed I-issued reference. Authenticity is not asserted; whether it is
     /// genuine is I's contract and `B-P2-XO-01`'s question.
-    Issued(OpaqueId),
+    Issued(AuthorizationDecisionData),
 }
 impl AuthorizationDecisionRef {
     /// Explicit absence. `FactRevision::validate` rejects a fact carrying this.
@@ -555,9 +589,11 @@ impl AuthorizationDecisionRef {
         Self::PendingI
     }
 
-    /// A claimed I-issued reference. Carries no proof of issuance.
-    pub fn issued(decision_id: OpaqueId) -> Self {
-        Self::Issued(decision_id)
+    /// Construct a candidate reference after validating its fields. This issues
+    /// nothing; the matching durable row is still required (§4.2).
+    pub fn from_issued_data(data: AuthorizationDecisionData) -> Result<Self, DomainError> {
+        validate_authorization_decision_data(&data)?;
+        Ok(Self::Issued(data))
     }
 
     pub const fn is_absent(&self) -> bool {
@@ -567,6 +603,38 @@ impl AuthorizationDecisionRef {
     pub const fn is_pending(&self) -> bool {
         matches!(self, Self::PendingI)
     }
+
+    /// The claimed content, or `None` when nothing was recorded or only a
+    /// placeholder was. Never evidence on its own.
+    pub fn data(&self) -> Option<&AuthorizationDecisionData> {
+        match self {
+            Self::Issued(data) => Some(data),
+            Self::Absent | Self::PendingI => None,
+        }
+    }
+}
+
+/// §2.2 field validation. Rejects empty IDs, an issuer outside the I allowlist, a
+/// digest that is not exactly 64 lowercase hex characters, and a timestamp that
+/// is not RFC 3339 UTC.
+fn validate_authorization_decision_data(
+    data: &AuthorizationDecisionData,
+) -> Result<(), DomainError> {
+    if data.decision_id.as_str().trim().is_empty() {
+        return Err(DomainError::EmptyId);
+    }
+    if data.issuer.as_str() != I_DEV_BASELINE_ISSUER {
+        return Err(DomainError::InvalidAuthorizationDecisionField("issuer"));
+    }
+    if !is_sha256_hex(data.subject_digest.as_str()) {
+        return Err(DomainError::InvalidAuthorizationDecisionField(
+            "subject_digest",
+        ));
+    }
+    if !is_rfc3339_utc(&data.issued_at) {
+        return Err(DomainError::InvalidAuthorizationDecisionField("issued_at"));
+    }
+    Ok(())
 }
 /// The canonical commit reference is defined by `D-OWNER-DECISION-CANONICAL-COMMIT-001`
 /// and lives in [`canonical_commit`]. A reference is a candidate only: it confers no

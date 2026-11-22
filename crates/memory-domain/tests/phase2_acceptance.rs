@@ -636,7 +636,17 @@ fn dm2_06_missing_authorization_ref_blocks_fact_publication() {
     assert!(placeholder.validate().is_ok());
 
     // 3. A claimed I-issued reference also passes presence. This is not proof of issuance.
-    let issued = with_decision(AuthorizationDecisionRef::issued(id("ad-1"))).unwrap();
+    let issued = with_decision(
+        AuthorizationDecisionRef::from_issued_data(AuthorizationDecisionData {
+            decision_id: id("ad-1"),
+            issuer: IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap(),
+            subject_digest: id(&"a".repeat(64)),
+            issued_at: "2026-11-22T00:00:00Z".into(),
+            decision_kind: AuthorizationDecisionKind::Approved,
+        })
+        .unwrap(),
+    )
+    .unwrap();
     assert!(issued.validate().is_ok());
 
     // 4. A revision that already exists cannot be edited into absence: deserializing the
@@ -657,6 +667,49 @@ fn dm2_06_missing_authorization_ref_blocks_fact_publication() {
     assert!(round.is_absent());
     assert!(AuthorizationDecisionRef::pending_i().is_pending());
     assert!(!AuthorizationDecisionRef::pending_i().is_absent());
+}
+
+/// Criterion 4: an issued reference round-trips with its content intact, and
+/// malformed issued content fails closed instead of degrading to `PendingI`.
+/// A silent downgrade would turn "this record is corrupt" into "no decision was
+/// recorded", which are different facts with different consequences.
+#[test]
+fn dm2_06_issued_reference_keeps_its_content_or_fails_closed() {
+    let reference = AuthorizationDecisionRef::from_issued_data(AuthorizationDecisionData {
+        decision_id: id("ad-roundtrip"),
+        issuer: IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap(),
+        subject_digest: id(&"e".repeat(64)),
+        issued_at: "2026-11-22T00:00:00Z".into(),
+        decision_kind: AuthorizationDecisionKind::Conditional,
+    })
+    .unwrap();
+
+    let wire = serde_json::to_string(&reference).unwrap();
+    let round: AuthorizationDecisionRef = serde_json::from_str(&wire).unwrap();
+    assert_eq!(round, reference);
+    assert_eq!(
+        round.data().map(|d| &d.decision_kind),
+        Some(&AuthorizationDecisionKind::Conditional)
+    );
+
+    // A digest that is not 64 lowercase hex characters is rejected at construction.
+    assert_eq!(
+        AuthorizationDecisionRef::from_issued_data(AuthorizationDecisionData {
+            decision_id: id("ad-bad"),
+            issuer: IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap(),
+            subject_digest: id("not-a-digest"),
+            issued_at: "2026-11-22T00:00:00Z".into(),
+            decision_kind: AuthorizationDecisionKind::Approved,
+        }),
+        Err(DomainError::InvalidAuthorizationDecisionField(
+            "subject_digest"
+        ))
+    );
+
+    // And it cannot be smuggled in through the wire form either.
+    let mut tampered: serde_json::Value = serde_json::from_str(&wire).unwrap();
+    tampered["subject_digest"] = json!("not-a-digest");
+    assert!(serde_json::from_value::<AuthorizationDecisionRef>(tampered).is_err());
 }
 
 // ---------------------------------------------------------------- DM2-07
