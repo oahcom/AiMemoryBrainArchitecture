@@ -108,7 +108,7 @@ The Rust crate remains private/staged. Round 6 added a pure in-memory `ChangeSet
 | Local lifecycle, producer/derivative, queue, recall, Context and restore states | phase-3.7 §1–§8 | PARTIAL — ChangeSet/reconcile reference pieces exist; no durable producer/queue/recall/restore ledgers | D |
 | Producer registration before queue/lease/source dereference | phase-3.7 §2, §10.1 | NOT IMPLEMENTED — no D producer registry receipt or queue admission | D |
 | Derivative dependency registration before visibility | phase-3.7 §3, §10.1 | NOT IMPLEMENTED — no dependency receipt or publication gate | D |
-| Delivery queue attempt identity, retries and ACK separation | phase-3.7 §4 | NOT IMPLEMENTED — no durable DeliveryId/Attempt ledger | 本线程可做 |
+| Delivery queue attempt identity, retries and ACK separation | phase-3.7 §4 | PARTIAL — `DeliveryLedger` in `crates/memory-context/src/delivery_ledger.rs` types `DeliveryId`/`DeliveryAttemptId`, attempt retry chains and ACK-to-delivery separation; no durable persistence, no ACK consumer, no production caller | 本线程可做 |
 | Recall candidate canonical validation and sufficiency | phase-3.7 §5 | PARTIAL — candidate validation in Rust and reconciliation model; no F watermark vector or live D/I revalidation | D |
 | Context and Applied lifecycle separation | phase-3.7 §6 | PARTIAL — model separates Context version and Applied ledger; no integrated lifecycle state machine | 本线程可做 |
 | Restore/reconnect quarantine and current-state reconciliation | phase-3.7 §7 | NOT IMPLEMENTED — no restore fence, ledger replay or Adapter reconnect | D |
