@@ -210,9 +210,7 @@ impl SqliteEventStore {
     /// This is a read-only snapshot. Reading does not consume, delete, or mark
     /// any intent. Callers may read the same intent again after compilation
     /// fails.
-    pub fn pending_compile_intents(
-        &self,
-    ) -> Result<Vec<PendingCompileIntent>, EventStoreError> {
+    pub fn pending_compile_intents(&self) -> Result<Vec<PendingCompileIntent>, EventStoreError> {
         let mut statement = self
             .connection
             .prepare(
@@ -408,7 +406,6 @@ mod tests {
         let _ = std::fs::remove_file(path.with_extension("sqlite-wal"));
         let _ = std::fs::remove_file(path.with_extension("sqlite-shm"));
     }
-
 
     #[test]
     fn pending_compile_intents_is_empty_on_a_fresh_store() {

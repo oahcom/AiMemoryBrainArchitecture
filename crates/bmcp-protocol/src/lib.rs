@@ -97,54 +97,150 @@ pub mod evidence {
     }
 
     impl AppliedDeliveryEvidence {
-        pub fn schema_artifact_revision(&self) -> &str { &self.schema_artifact_revision }
-        pub fn message_type(&self) -> &str { &self.message_type }
-        pub fn issuer_ref(&self) -> &str { &self.issuer_ref }
-        pub fn sender_authority_ref(&self) -> &str { &self.sender_authority_ref }
-        pub fn sender_subject_ref(&self) -> &str { &self.sender_subject_ref }
-        pub fn audience(&self) -> &str { &self.audience }
-        pub fn message_id(&self) -> &str { &self.message_id }
-        pub fn message_nonce(&self) -> &str { &self.message_nonce }
-        pub fn signing_sequence_namespace_ref(&self) -> &str { &self.signing_sequence_namespace_ref }
-        pub fn signing_record_sequence(&self) -> &str { &self.signing_record_sequence }
-        pub fn signature_profile_id(&self) -> &str { &self.signature_profile_id }
-        pub fn key_id_ref(&self) -> &str { &self.key_id_ref }
-        pub fn key_version(&self) -> &str { &self.key_version }
-        pub fn adapter_instance_ref(&self) -> &str { &self.adapter_instance_ref }
-        pub fn runtime_session_ref(&self) -> &str { &self.runtime_session_ref }
-        pub fn delivery_id(&self) -> &str { &self.delivery_id }
-        pub fn delivery_attempt_id(&self) -> &str { &self.delivery_attempt_id }
-        pub fn inference_request_id(&self) -> &str { &self.inference_request_id }
-        pub fn final_request_boundary_id(&self) -> &str { &self.final_request_boundary_id }
-        pub fn adapter_capability_epoch(&self) -> &str { &self.adapter_capability_epoch }
-        pub fn evidence_kind(&self) -> EvidenceKind { self.evidence_kind }
-        pub fn evidence_tier(&self) -> EvidenceTier { self.evidence_tier }
-        pub fn adapter_ref(&self) -> &str { &self.adapter_ref }
-        pub fn runtime_instance_ref(&self) -> &str { &self.runtime_instance_ref }
-        pub fn context_id(&self) -> &str { &self.context_id }
-        pub fn context_version(&self) -> &str { &self.context_version }
-        pub fn materialized_context_version(&self) -> &str { &self.materialized_context_version }
-        pub fn final_request_boundary_type(&self) -> &str { &self.final_request_boundary_type }
-        pub fn managed_region_id(&self) -> &str { &self.managed_region_id }
-        pub fn managed_region_revision(&self) -> &str { &self.managed_region_revision }
-        pub fn managed_region_inventory_digest(&self) -> &str { &self.managed_region_inventory_digest }
-        pub fn managed_region_coverage(&self) -> ManagedRegionCoverage { self.managed_region_coverage }
-        pub fn managed_region_digest(&self) -> &str { &self.managed_region_digest }
-        pub fn digest_profile(&self) -> &str { &self.digest_profile }
-        pub fn evidence_issuer_ref(&self) -> &str { &self.evidence_issuer_ref }
-        pub fn evidence_schema_version(&self) -> &str { &self.evidence_schema_version }
-        pub fn submission_observed_at(&self) -> &str { &self.submission_observed_at }
-        pub fn submission_monotonic_sequence(&self) -> Option<&str> { self.submission_monotonic_sequence.as_deref() }
-        pub fn correlation_ref(&self) -> &str { &self.correlation_ref }
-        pub fn causation_ref(&self) -> &str { &self.causation_ref }
-        pub fn audit_ref(&self) -> &str { &self.audit_ref }
-        pub fn c_submit_outcome_ref(&self) -> &str { &self.c_submit_outcome_ref }
-        pub fn c_outcome_record_ref(&self) -> &str { &self.c_outcome_record_ref }
-        pub fn c_outcome_record_sequence(&self) -> &str { &self.c_outcome_record_sequence }
-        pub fn c_outcome_payload_digest(&self) -> &str { &self.c_outcome_payload_digest }
-        pub fn payload_digest(&self) -> &str { &self.payload_digest }
-        pub fn signature(&self) -> &str { &self.signature }
-        pub fn integrity_proof_ref(&self) -> &str { &self.integrity_proof_ref }
+        pub fn schema_artifact_revision(&self) -> &str {
+            &self.schema_artifact_revision
+        }
+        pub fn message_type(&self) -> &str {
+            &self.message_type
+        }
+        pub fn issuer_ref(&self) -> &str {
+            &self.issuer_ref
+        }
+        pub fn sender_authority_ref(&self) -> &str {
+            &self.sender_authority_ref
+        }
+        pub fn sender_subject_ref(&self) -> &str {
+            &self.sender_subject_ref
+        }
+        pub fn audience(&self) -> &str {
+            &self.audience
+        }
+        pub fn message_id(&self) -> &str {
+            &self.message_id
+        }
+        pub fn message_nonce(&self) -> &str {
+            &self.message_nonce
+        }
+        pub fn signing_sequence_namespace_ref(&self) -> &str {
+            &self.signing_sequence_namespace_ref
+        }
+        pub fn signing_record_sequence(&self) -> &str {
+            &self.signing_record_sequence
+        }
+        pub fn signature_profile_id(&self) -> &str {
+            &self.signature_profile_id
+        }
+        pub fn key_id_ref(&self) -> &str {
+            &self.key_id_ref
+        }
+        pub fn key_version(&self) -> &str {
+            &self.key_version
+        }
+        pub fn adapter_instance_ref(&self) -> &str {
+            &self.adapter_instance_ref
+        }
+        pub fn runtime_session_ref(&self) -> &str {
+            &self.runtime_session_ref
+        }
+        pub fn delivery_id(&self) -> &str {
+            &self.delivery_id
+        }
+        pub fn delivery_attempt_id(&self) -> &str {
+            &self.delivery_attempt_id
+        }
+        pub fn inference_request_id(&self) -> &str {
+            &self.inference_request_id
+        }
+        pub fn final_request_boundary_id(&self) -> &str {
+            &self.final_request_boundary_id
+        }
+        pub fn adapter_capability_epoch(&self) -> &str {
+            &self.adapter_capability_epoch
+        }
+        pub fn evidence_kind(&self) -> EvidenceKind {
+            self.evidence_kind
+        }
+        pub fn evidence_tier(&self) -> EvidenceTier {
+            self.evidence_tier
+        }
+        pub fn adapter_ref(&self) -> &str {
+            &self.adapter_ref
+        }
+        pub fn runtime_instance_ref(&self) -> &str {
+            &self.runtime_instance_ref
+        }
+        pub fn context_id(&self) -> &str {
+            &self.context_id
+        }
+        pub fn context_version(&self) -> &str {
+            &self.context_version
+        }
+        pub fn materialized_context_version(&self) -> &str {
+            &self.materialized_context_version
+        }
+        pub fn final_request_boundary_type(&self) -> &str {
+            &self.final_request_boundary_type
+        }
+        pub fn managed_region_id(&self) -> &str {
+            &self.managed_region_id
+        }
+        pub fn managed_region_revision(&self) -> &str {
+            &self.managed_region_revision
+        }
+        pub fn managed_region_inventory_digest(&self) -> &str {
+            &self.managed_region_inventory_digest
+        }
+        pub fn managed_region_coverage(&self) -> ManagedRegionCoverage {
+            self.managed_region_coverage
+        }
+        pub fn managed_region_digest(&self) -> &str {
+            &self.managed_region_digest
+        }
+        pub fn digest_profile(&self) -> &str {
+            &self.digest_profile
+        }
+        pub fn evidence_issuer_ref(&self) -> &str {
+            &self.evidence_issuer_ref
+        }
+        pub fn evidence_schema_version(&self) -> &str {
+            &self.evidence_schema_version
+        }
+        pub fn submission_observed_at(&self) -> &str {
+            &self.submission_observed_at
+        }
+        pub fn submission_monotonic_sequence(&self) -> Option<&str> {
+            self.submission_monotonic_sequence.as_deref()
+        }
+        pub fn correlation_ref(&self) -> &str {
+            &self.correlation_ref
+        }
+        pub fn causation_ref(&self) -> &str {
+            &self.causation_ref
+        }
+        pub fn audit_ref(&self) -> &str {
+            &self.audit_ref
+        }
+        pub fn c_submit_outcome_ref(&self) -> &str {
+            &self.c_submit_outcome_ref
+        }
+        pub fn c_outcome_record_ref(&self) -> &str {
+            &self.c_outcome_record_ref
+        }
+        pub fn c_outcome_record_sequence(&self) -> &str {
+            &self.c_outcome_record_sequence
+        }
+        pub fn c_outcome_payload_digest(&self) -> &str {
+            &self.c_outcome_payload_digest
+        }
+        pub fn payload_digest(&self) -> &str {
+            &self.payload_digest
+        }
+        pub fn signature(&self) -> &str {
+            &self.signature
+        }
+        pub fn integrity_proof_ref(&self) -> &str {
+            &self.integrity_proof_ref
+        }
     }
 }
 
