@@ -56,9 +56,10 @@ class ChangedPathTests(unittest.TestCase):
                 contextlib.redirect_stderr(errors),
             ):
                 code = GATE.main()
-            self.assertEqual(code, 2, output.getvalue() + errors.getvalue())
-            self.assertIn("NOT_APPLICABLE", errors.getvalue())
-            self.assertNotIn("PASS", output.getvalue() + errors.getvalue())
+            combined = output.getvalue() + errors.getvalue()
+            self.assertEqual(code, 2, combined)
+            self.assertIn("NOT_APPLICABLE", combined)
+            self.assertNotIn("PASS", combined)
 
     def test_invalid_base_fails_closed(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -74,8 +75,9 @@ class ChangedPathTests(unittest.TestCase):
                 contextlib.redirect_stderr(errors),
             ):
                 code = GATE.main()
-            self.assertEqual(code, 2, output.getvalue() + errors.getvalue())
-            self.assertIn("Unable to determine changed paths", errors.getvalue())
+            combined = output.getvalue() + errors.getvalue()
+            self.assertEqual(code, 2, combined)
+            self.assertIn("Unable to determine changed paths", combined)
 
     def test_nonempty_code_only_change_is_not_empty(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
