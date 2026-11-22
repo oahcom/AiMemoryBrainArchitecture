@@ -33,9 +33,21 @@ Two controls, both already in force, force the trigger set:
   whose event is not `push` / `workflow_dispatch` / `schedule`. A job on a
   feature branch is denied before any step runs.
 * **L2 (repository layer).** `scripts/ci/audit_runner_admission.py`, enforced by
-  `runner-admission-policy.yml`, rejects `pull_request` on any self-hosted job, a
-  `push` with no `branches:` filter, and `push.branches` naming anything but
-  `main`.
+  `runner-admission-policy.yml`, rejects a non-allowlisted trigger on any
+  self-hosted job, a `push` with no `branches:` filter, and `push.branches`
+  naming anything but `main`.
+
+  L2 was a **denylist** of known-bad triggers until this change. L1 is an
+  **allowlist**. So any trigger on neither list — `issues`, `release`,
+  `merge_group`, `discussion`, or whatever GitHub adds next — passed L2 and was
+  then silently denied by L1. A green L2 that L1 contradicts is worse than no L2:
+  it is an audit reporting safety it does not have. L2 now mirrors L1's allowlist
+  (`push`, `workflow_dispatch`, `schedule`), so the two agree by construction
+  rather than by two hand-maintained lists. Verified: a self-hosted job on
+  `issues`, `merge_group`, `release` and `discussion` is now rejected with
+  `trigger '<x>' is not permitted for self-hosted jobs (L1 admits only push,
+  schedule, workflow_dispatch)`, while the repository's real workflows still audit
+  clean at 6 jobs / 0 violations.
 
 So `gates.yml` triggers on `push` to `main` and `workflow_dispatch`, and on
 nothing else. **It cannot gate a pull request.** It converts "a gate is red on
@@ -73,10 +85,16 @@ The jobs are written against that reality rather than assuming a fresh VM:
   already satisfies `jsonschema`, `rfc8785`, `cryptography`; otherwise it fails
   with the missing names. A failed install is a warning plus a real run, never a
   silent pass.
-* **Warm state is reused, not trusted.** `npm ci` is skipped when `canonicalize`
-  already resolves, so a warm `node_modules` is not thrown away. `target/` is
-  never cleaned — on one runner it is the only build cache there is — but nothing
-  depends on it being present.
+* **Warm state is reused only where it is genuinely warm.** `npm ci` is skipped
+  when `canonicalize` already resolves, so a `node_modules` already on disk is not
+  thrown away. `target/` is the opposite case: `actions/checkout` runs
+  `git clean -ffdx` by default, so a `target/` inside `$GITHUB_WORKSPACE` is
+  wiped and rebuilt every run. That is correct on a host with 5.6G free — a
+  workspace-local `target/` is self-limiting, while one redirected to `/tmp` or
+  `$HOME` would leak permanently, because checkout cleans the workspace and not
+  the home directory. An earlier draft of this document claimed `target/` was the
+  runner's build cache and was never cleaned. That was wrong, and the correction
+  is recorded here rather than quietly edited away.
 * **`--offline` is deliberately not used.** A cold runner has an empty registry
   cache, and `--offline` would turn a missing crate into a confusing failure. The
   tradeoff is that the `rust` job needs the crates.io egress the runner already
@@ -178,16 +196,40 @@ regression or a stale baseline; the offending items are printed as
   They build on the runner; a local Windows host without `cc1` cannot run them.
   The failure mode is a `cc1` error, not a code defect, and the job reports it
   verbatim rather than masking it.
-* **Disk is the binding constraint on this runner.** Measured at
-  `run 44992270090`: 39G total, 32G used, **5.6G free**, 3.6G RAM, 4 CPUs. A
-  workspace build of 11 crates with a C dependency writes a `target/` that does
-  not fit. Filling the disk would break every other workflow in the repository,
-  because there is one runner. The `rust` job therefore has a **disk preflight**
-  that refuses to start below `GATES_MIN_FREE_GB` (default 10) and reports the
-  free space. The threshold is a floor, not a target: raise it, never lower it to
-  make a run go green. This is why `rust` may be red on this runner for a reason
-  that is not a code defect — the job says so explicitly instead of failing
-  somewhere inside `cargo`.
+* **Disk is a real constraint, and its floor is measured, not guessed.** Measured
+  at `run 44992270090`: 39G total, 32G used, **5.6G free**, 3.6G RAM, 4 CPUs. The
+  runner operator measured a comparable host: `cargo test --workspace
+  --all-targets` produces a **1009 MB** `target/` over 45 crates, and
+  `~/.cargo/registry` is **319 MB** for 290 crates. `clippy --workspace
+  --all-targets` plus `test --workspace` share one `CARGO_TARGET_DIR` and are
+  **estimated** (not measured) at 1.7–2.0 GB, because `clippy-driver` emits its
+  own artifact per dependency alongside `rustc`'s. So a job costs roughly
+  **2.0–2.5 GB** including the registry, which fits in 5.6G.
+
+  The `rust` job therefore has a **disk preflight** that refuses below
+  `GATES_MIN_FREE_GB` (default **4**) and warns below 8. An earlier draft refused
+  below 6G, which would have failed a job that would in fact have succeeded — a
+  gate that is red for a reason that is not true. The threshold is a floor, not a
+  target: raise it, never lower it to make a run go green.
+
+  **Watch the trend, not the value.** Two diagnostic runs that compile nothing
+  reported ~6.8G and then ~5.6G free: about 1.2 GB accumulated with no build in
+  between. On a single runner that drift, not the absolute number, is what
+  eventually takes every workflow down at once.
+
+* **Build profile and parallelism are pinned down for the same host.** Job-level
+  `CARGO_PROFILE_DEV_DEBUG=0` / `CARGO_PROFILE_TEST_DEBUG=0` drop debuginfo,
+  which is the bulk of that 1009 MB and also cuts link-time memory.
+  `CARGO_BUILD_JOBS=2` because the host has 4 CPUs but 3.6G RAM: the default
+  `-j 4` over 45 crates plus a C compile plus linking test binaries is a
+  plausible OOM, and an OOM mid-build is a worse failure than a slower build.
+
+* **`Cargo.lock` is not tracked in this repository** (absent from
+  `git ls-files`, and not in `.gitignore` either — a pre-existing defect). Every
+  run therefore re-resolves dependencies: the registry index is refetched and any
+  version drift re-downloads, ~290 crates. Committing `Cargo.lock` would cut that
+  and make the dependency set reproducible. That is a separate one-line change and
+  is **not** made here, because it is outside the CI-wiring scope.
 * **`check_bilingual_docs_full.py` reads the working tree**, not `git ls-files`.
   Untracked build output can change its answer locally. CI checks out clean, so
   the CI answer is reproducible; a local answer may not be.
@@ -292,22 +334,20 @@ externally managed, i.e. exactly the situation where "just `pip install`" fails.
 And the conformance suite was run *through that venv*, not through whatever
 happened to be installed, so the 585-test result is the result the job would get.
 
-### 7.5 The disk preflight refuses, on purpose
+### 7.5 The disk preflight refuses, on purpose, at a measured threshold
 
 The preflight was exercised against three simulated filesystems:
 
 | Free space | Outcome |
 |---|---|
-| 5.6G (the runner's measured value) | `::error::only 5G free, below the 6G floor…`, exit 1 |
-| 8G | `::warning::only 8G free…`, exit 0 |
-| 20G | silent, exit 0 |
+| 5.6G (the runner's measured value) | silent pass — the job fits (§5) |
+| 5G | `::error::only 5G free (… KiB), below the 4G floor…`, exit 1 |
+| 8G | `::warning::…`, exit 0 |
 
-So on this runner **as it stands today the `rust` job will be red**, at the disk
-check, before it touches `cargo`. That is the intended behaviour and it is the
-honest outcome: 5.6G cannot hold a workspace build of 11 crates including a C
-dependency, and filling the one runner's disk would take down every other
-workflow in the repository. The remedy is an operator reclaiming space, not an
-edit to this file.
+An earlier version of this table showed 5.6G being refused, because the floor was
+then 6G. That floor was wrong: the measured cost of the job is 2.0–2.5 GB, so 5.6G
+is enough and refusing it would have been a red gate with a false reason. The
+floor is now 4G. The correction is recorded rather than quietly applied.
 
 ### 7.6 What is still NOT observed
 

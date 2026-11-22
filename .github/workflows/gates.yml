@@ -195,69 +195,112 @@ jobs:
     name: Rust fmt + clippy + test (hard gate)
     runs-on: [self-hosted, linux, x64]
     timeout-minutes: 45
+    # Job-level, not per-step: clippy and test must build the SAME profile or
+    # they each pay the full build cost and each hold their own artifacts.
+    env:
+      CARGO_PROFILE_DEV_DEBUG: "0"
+      CARGO_PROFILE_TEST_DEBUG: "0"
+      CARGO_BUILD_JOBS: "2"
     steps:
       - uses: actions/checkout@v4
 
       # DISK PREFLIGHT. Measured on this runner (run 44992270090, 2026-11-22):
       # 39G total, 32G used, **5.6G free**, 3.6G RAM, 4 CPUs.
       #
-      # A `cargo clippy --workspace --all-targets` plus `cargo test --workspace`
-      # over 11 crates, one of which (`libsqlite3-sys`) compiles C, writes a
-      # `target/` measured in gigabytes. Whether 5.6G is enough is NOT known --
-      # no workspace build has been run on this host -- and guessing is exactly
-      # what this step exists to avoid. Filling the filesystem would break every
-      # other workflow in the repository, because there is exactly one runner.
+      # What a build of this workspace actually costs, measured by the runner
+      # operator on a comparable host: `cargo test --workspace --all-targets`
+      # produces a 1009 MB `target/` over 45 crates, and `~/.cargo/registry` is
+      # 319 MB for 290 crates. `clippy --workspace --all-targets` plus
+      # `test --workspace` share one CARGO_TARGET_DIR and are ESTIMATED (not
+      # measured) at 1.7-2.0 GB, because clippy-driver emits its own artifact
+      # per dependency alongside rustc's. So a job costs roughly 2.0-2.5 GB
+      # including the registry, which fits in 5.6G with room to spare.
       #
-      # So: warn below 12G (the comfortable figure), REFUSE below 6G.
-      # `GATES_MIN_FREE_GB` is a floor, not a target. Raise it, never lower it to
-      # make a run go green -- a green produced by ignoring the disk is the same
-      # defect as a gate nobody runs.
+      # The floor is therefore 4 GiB, not a comfortable-looking round number.
+      # An earlier draft of this file refused below 6G, which would have failed
+      # a job that would in fact have succeeded -- a gate that is red for a
+      # reason that is not true is exactly the kind of noise this repository
+      # already has too much of.
       #
-      # CONSEQUENCE TODAY: 5.6G < 6G, so this job is RED on this runner until an
-      # operator reclaims space. That is a genuine infrastructure blocker being
-      # reported, not a workaround failing. It clears itself when the space is
-      # there; nothing in this file needs editing.
+      # `GATES_MIN_FREE_GB` is a floor, not a target. Raise it, never lower it
+      # to make a run go green.
+      #
+      # WATCH THE TREND, NOT THE VALUE. Two diagnostic runs that compile nothing
+      # reported ~6.8G free and then ~5.6G free: about 1.2 GB accumulated with
+      # no build in between. On a single runner that drift, not the absolute
+      # number, is what eventually takes every workflow down at once.
       - name: Check free disk before building
         shell: bash
         run: |
           set -euo pipefail
-          min_gb="${GATES_MIN_FREE_GB:-6}"
-          warn_gb="${GATES_WARN_FREE_GB:-12}"
+          min_gb="${GATES_MIN_FREE_GB:-4}"
+          warn_gb="${GATES_WARN_FREE_GB:-8}"
           avail_kb=$(df -Pk . | awk 'NR==2 {print $4}')
           avail_gb=$(( avail_kb / 1024 / 1024 ))
-          echo "free_disk_gb=$avail_gb refuse_below_gb=$min_gb warn_below_gb=$warn_gb"
+          echo "free_disk_kb=$avail_kb free_disk_gb=$avail_gb refuse_below_gb=$min_gb warn_below_gb=$warn_gb"
           df -h .
           if [ "$avail_gb" -lt "$min_gb" ]; then
-            echo "::error::only ${avail_gb}G free, below the ${min_gb}G floor for a workspace build. Refusing to risk the shared runner's filesystem. Reclaim space (stale _work dirs, an old target/) and re-run; do not lower GATES_MIN_FREE_GB to get a green."
+            echo "::error::only ${avail_gb}G free (${avail_kb} KiB), below the ${min_gb}G floor. A workspace build costs ~2.0-2.5G and this is the repository's only runner. Reclaim space and re-run; do not lower GATES_MIN_FREE_GB to get a green."
             exit 1
           fi
           if [ "$avail_gb" -lt "$warn_gb" ]; then
-            echo "::warning::only ${avail_gb}G free; a workspace build may exhaust the disk. Deleting target/ is safe and is the expected remedy."
+            echo "::warning::only ${avail_gb}G free; free space on this runner has been shrinking between runs that build nothing. Investigate the leak, do not just re-run."
           fi
 
       # NO TOOLCHAIN INSTALL STEP. This runner is a shared, operator-managed
       # host; a workflow that runs `rustup` would mutate the toolchain every
-      # other job on this machine sees. Use the installed one and say so if it
-      # is missing, rather than silently installing a different compiler than
-      # the one the operator provisioned.
-      - name: Check the Rust toolchain is present
+      # other job on this machine sees. `actions/checkout` cleans
+      # `$GITHUB_WORKSPACE` but not `$HOME`, so `~/.cargo` and `~/.rustup` would
+      # persist and every later job's result would depend on which job ran
+      # first -- irreproducible and very hard to diagnose. A half-finished
+      # rustup install would also leave a broken `~/.rustup` that breaks every
+      # subsequent Rust job silently. Failing here is diagnosable; mutating the
+      # host is not.
+      #
+      # `cc` is checked too: `libsqlite3-sys` compiles C, and discovering a
+      # missing compiler 40 crates into a build wastes the whole job.
+      - name: Require the host Rust toolchain
         shell: bash
         run: |
           set -euo pipefail
-          command -v cargo >/dev/null || { echo "::error::cargo is not on PATH on this runner"; exit 1; }
+          missing=""
+          for c in cargo rustc cargo-clippy rustfmt cc; do
+            if command -v "$c" >/dev/null 2>&1; then
+              echo "$c=$(command -v "$c")"
+            else
+              echo "$c=MISSING"
+              missing="$missing $c"
+            fi
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::zesu-x64 lacks:$missing -- install on the host out of band (see AI-RUN-002-RUNBOOK), do not install it in this workflow"
+            exit 1
+          fi
           cargo --version
           rustc --version
           cargo fmt --version
           cargo clippy --version
 
-      # CACHE POLICY, both directions:
-      #   * `target/` is left in place between runs. It is untracked, `checkout`
-      #     does not touch it, and on a single runner it is the only build cache
-      #     there is. Never `cargo clean` here.
-      #   * `--offline` is NOT used. A cold runner has an empty registry cache,
-      #     and `--offline` would turn a missing crate into a confusing failure.
-      #     The tradeoff is that this job needs the crates.io egress the runner
-      #     already has for its other Rust work.
+      # CACHE AND MEMORY POLICY.
+      #
+      # `target/` stays at its default location inside `$GITHUB_WORKSPACE` and is
+      # NOT redirected to `/tmp` or `$HOME`. `actions/checkout` runs
+      # `git clean -ffdx` by default, so a `target/` inside the workspace is
+      # self-limiting -- wiped and rebuilt each run -- while one outside it would
+      # be a permanent leak on a host with 5.6G free. Correcting an earlier
+      # comment in this file: `target/` is NOT preserved between runs, and this
+      # job does not depend on it being preserved.
+      #
+      # `CARGO_PROFILE_DEV_DEBUG=0` / `CARGO_PROFILE_TEST_DEBUG=0` drop
+      # debuginfo, which is the bulk of the 1009 MB measured above. Cheapest
+      # single reduction available, and it lowers link-time memory too.
+      #
+      # `CARGO_BUILD_JOBS=2`: the host has 4 CPUs but only 3.6G RAM. The default
+      # `-j 4` over 45 crates plus a C compile plus linking test binaries is a
+      # plausible OOM, and an OOM mid-build is a worse failure than a slower one.
+      #
+      # `--offline` is NOT used. A cold runner has an empty registry cache, and
+      # `--offline` would turn a missing crate into a confusing failure.
       - name: cargo fmt --all --check
         shell: bash
         run: |

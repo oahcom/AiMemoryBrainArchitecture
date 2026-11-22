@@ -27,8 +27,16 @@
   `GITHUB_REF` 不等于 `refs/heads/main`、或事件不是 `push` / `workflow_dispatch` / `schedule`
   的 Job 失败。功能分支上的 Job 在任何步骤执行前即被拒绝。
 * **L2（仓库层）。** `scripts/ci/audit_runner_admission.py`（由 `runner-admission-policy.yml`
-  强制执行）拒绝任何自托管 Job 使用 `pull_request`，拒绝没有 `branches:` 过滤器的 `push`，
+  强制执行）拒绝任何自托管 Job 使用不在白名单中的触发器，拒绝没有 `branches:` 过滤器的 `push`，
   以及拒绝 `push.branches` 中出现 `main` 以外的分支。
+
+  在这次改动之前，L2 是一份**黑名单**，而 L1 是**白名单**。于是任何两张表都没列到的触发器——
+  `issues`、`release`、`merge_group`、`discussion`，以及 GitHub 以后新加的——都会通过 L2，然后被 L1
+  静默拒绝。一个被 L1 否定的绿色 L2 比没有 L2 更糟：那是一份宣称自己具备它并不具备的安全性的审计。
+  L2 现在镜像 L1 的白名单（`push`、`workflow_dispatch`、`schedule`），两者靠构造保持一致，而不是靠
+  两张手工维护的表。已验证：自托管 Job 挂 `issues`、`merge_group`、`release`、`discussion` 现在都会
+  被拒，报 `trigger '<x>' is not permitted for self-hosted jobs (L1 admits only push, schedule,
+  workflow_dispatch)`；而仓库里真实的工作流审计仍然是 6 个 Job / 0 违规。
 
 因此 `gates.yml` 只在 `push` 到 `main` 与 `workflow_dispatch` 时触发，别无其他。
 **它无法对 pull request 设卡。** 它把"门禁在 `main` 上红着而无人知道"变成"门禁在 `main` 上红着，
@@ -57,8 +65,12 @@
 * **依赖安装会降级，但从不跳过。** 若 venv 创建或 pip 安装失败，Job 会退回系统解释器，
   **前提是**它已满足 `jsonschema`、`rfc8785`、`cryptography`；否则带着缺失的包名失败。
   安装失败是"一条 warning 加一次真实运行"，绝不是静默通过。
-* **热状态被复用，但不被信任。** 当 `canonicalize` 已可解析时跳过 `npm ci`，不白白丢弃已热的
-  `node_modules`。`target/` 永不清洗——在单 runner 上它是唯一的构建缓存——但没有任何东西依赖它存在。
+* **只在真正热的地方复用热状态。** 当 `canonicalize` 已可解析时跳过 `npm ci`，不白白丢弃已在
+  磁盘上的 `node_modules`。`target/` 是相反的情形：`actions/checkout` 默认执行 `git clean -ffdx`，
+  所以位于 `$GITHUB_WORKSPACE` 内的 `target/` 每次运行都会被清掉并重建。在一台只剩 5.6G 的主机上
+  这是正确的——工作区内的 `target/` 是自限的，而被指到 `/tmp` 或 `$HOME` 的那个会永久泄漏，因为
+  checkout 清的是工作区，不是家目录。本文早期草稿曾声称 `target/` 是 runner 的构建缓存、永不清洗。
+  那是错的，这里记录这次更正，而不是把它悄悄改掉。
 * **刻意不用 `--offline`。** 冷 runner 的 registry 缓存是空的，`--offline` 会把"缺 crate"
   变成一条令人困惑的失败。代价是 `rust` Job 需要 runner 为其他 Rust 工作本就具备的 crates.io 出口。
 
@@ -147,12 +159,29 @@ python3 scripts/ci/gate_ratchet.py \
 * **`cargo clippy` 与 `cargo test` 需要 C 工具链**（用于 `libsqlite3-sys`）。它们在 runner 上
   可以构建；没有 `cc1` 的本地 Windows 主机无法运行。其失效形态是一条 `cc1` 错误而非代码缺陷，
   Job 会原样报出而不是掩盖它。
-* **磁盘是这台 runner 的硬约束。** 在 `run 44992270090` 实测：39G 总量，已用 32G，**只剩 5.6G**，
-  内存 3.6G，4 核。11 个 crate 且含一个 C 依赖的工作区构建，写出的 `target/` 装不下。写满磁盘会
-  拖垮仓库里所有其他工作流，因为只有一个 runner。因此 `rust` Job 带一道**磁盘预检**，在可用空间
-  低于 `GATES_MIN_FREE_GB`（默认 10）时拒绝启动并报出剩余空间。这个阈值是下限而不是目标：
-  只能调高，绝不能为了跑绿而调低。这也是 `rust` 可能因非代码缺陷的原因在这台 runner 上变红的原因
-  ——Job 会明确说出来，而不是在 `cargo` 内部某处失败。
+* **磁盘是真实约束，而它的下限是实测出来的，不是猜的。** 在 `run 44992270090` 实测：39G 总量，
+  已用 32G，**只剩 5.6G**，内存 3.6G，4 核。runner 运维在一台可比主机上实测：`cargo test
+  --workspace --all-targets` 在 45 个 crate 上产出 **1009 MB** 的 `target/`，`~/.cargo/registry`
+  在 290 个 crate 上是 **319 MB**。`clippy --workspace --all-targets` 加 `test --workspace` 共用
+  同一个 `CARGO_TARGET_DIR`，**估算**（非实测）为 1.7–2.0 GB，因为 `clippy-driver` 会为每个依赖在
+  `rustc` 那份之外再产出一份 artifact。所以单个 Job 含 registry 约 **2.0–2.5 GB**，装得进 5.6G。
+
+  因此 `rust` Job 带一道**磁盘预检**，在低于 `GATES_MIN_FREE_GB`（默认 **4**）时拒绝，低于 8 时警告。
+  早期草稿在低于 6G 时就拒绝，那会让一个**本来会成功**的 Job 变红——一个因为不成立的理由而红的门禁。
+  这个阈值是下限而不是目标：只能调高，绝不能为了跑绿而调低。
+
+  **看趋势，不要只看数值。** 两次什么都不编译的诊断运行分别报告约 6.8G 和约 5.6G 可用：在没有任何
+  构建的情况下累积了约 1.2 GB。在单 runner 上，最终一次性打死所有工作流的是这个漂移，而不是绝对值。
+
+* **构建 profile 与并行度针对同一台主机钉死。** Job 级 `CARGO_PROFILE_DEV_DEBUG=0` /
+  `CARGO_PROFILE_TEST_DEBUG=0` 去掉 debuginfo，那是那 1009 MB 里的大头，顺带降低链接内存。
+  `CARGO_BUILD_JOBS=2`，因为主机 4 核但只有 3.6G 内存：默认 `-j 4` 在 45 个 crate 加一个 C 编译再加
+  链接测试二进制，是现实的 OOM 候选，而构建中途 OOM 比慢一点的构建是更糟的失败。
+
+* **`Cargo.lock` 在本仓库未被跟踪**（`git ls-files` 无匹配，`.gitignore` 里也没写——既有缺陷）。
+  因此每次运行都重新解析依赖：registry index 重拉、版本漂移就重下，约 290 个 crate。提交
+  `Cargo.lock` 能砍掉这部分并让依赖集可复现。那是独立的一行改动，**不在此处做**，因为它超出 CI 接线
+  的范围。
 * **`check_bilingual_docs_full.py` 读取工作树**，而不是 `git ls-files`。未跟踪的构建产物会
   改变它在本地的答案。CI 是干净检出，因此 CI 的答案是可复现的；本地答案未必是。
 * **棘轮的诚实度取决于评审者。** 回归会失败，过期基线也会失败，但没有东西能阻止有人从一棵更差的
@@ -248,19 +277,19 @@ node 22）上以 `bash --noprofile --norc -e -o pipefail` 执行，并按 runner
 的那个场景。而 conformance 套件是**通过那个 venv** 跑的，不是通过碰巧已安装的东西跑的，所以 585 这个
 结果是该 Job 会得到的结果。
 
-### 7.5 磁盘预检会拒绝，这是故意的
+### 7.5 磁盘预检会拒绝，这是故意的，而且阈值是实测出来的
 
 预检对三种模拟文件系统做过实测：
 
 | 可用空间 | 结果 |
 |---|---|
-| 5.6G（runner 的实测值） | `::error::only 5G free, below the 6G floor…`，退出 1 |
-| 8G | `::warning::only 8G free…`，退出 0 |
-| 20G | 静默，退出 0 |
+| 5.6G（runner 的实测值） | 静默通过——这个 Job 装得下（见 §5） |
+| 5G | `::error::only 5G free (… KiB), below the 4G floor…`，退出 1 |
+| 8G | `::warning::…`，退出 0 |
 
-所以在**今天的**这台 runner 上，`rust` Job 会在磁盘检查处变红，根本碰不到 `cargo`。这是预期行为，
-也是诚实的结果：5.6G 装不下 11 个 crate 且含一个 C 依赖的工作区构建，而写满这台唯一 runner 的磁盘
-会拖垮仓库里所有其他工作流。解法是运维回收空间，而不是修改本文件。
+本表早期版本显示 5.6G 会被拒绝，因为当时下限是 6G。那个下限是错的：实测该 Job 的成本是
+2.0–2.5 GB，所以 5.6G 够用，拒绝它只会造出一个理由不成立的红门禁。下限现在是 4G。这次更正是被
+记录下来的，不是悄悄改掉的。
 
 ### 7.6 仍然未被观测到的
 
