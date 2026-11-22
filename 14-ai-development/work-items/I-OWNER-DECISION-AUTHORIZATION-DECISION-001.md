@@ -3,7 +3,7 @@
 **Status:** DECIDED (owner-proxy decision, development baseline)  
 **Decided by:** Owner I acting as owner proxy under the standing instruction to decide blocking development-baseline contracts rather than leave them open  
 **Decision date:** 2026-11-21  
-**Baseline:** `main` at supplied/reviewed baseline `b093b59f`  
+**Baseline:** PR base snapshot `main` at `b47bd97cc40a80cd1f50674838fad04590f740b1`; the supplied source fact pack was measured at `b093b59f`  
 **Scope:** Phase 2 authorization evidence; `FactRevision.authorization_decision_ref` and the paired I-owned attestor reference
 
 ## 1. Decision
