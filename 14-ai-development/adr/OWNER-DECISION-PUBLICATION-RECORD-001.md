@@ -165,16 +165,39 @@ silent.
 
 ## What would reopen this decision
 
-- If D's fence/admission authority turns out to be a different component than
-  `AdmissionStore` — i.e. if `AdmissionStore` is meant to be a local test double
-  rather than the D-side ledger. Evidence to check: whether any other crate is
-  designated as the producer registry in `07-agent-integration` or `01-system-architecture`.
-  Nothing in the tree currently contradicts treating it as authoritative; nothing
-  explicitly confirms it either, which is itself recorded here as a residual risk.
-- If `canonical_commit_confirmed` gains a producer (the `admission_canonical_commit_cursor`
-  field suggests one was intended).
+### `AdmissionStore` is not the D ledger — settled, not open
+
+The first bullet that stood here recorded a residual risk: that `AdmissionStore`
+might be a local test double rather than the D-side ledger, with nothing in the
+tree either confirming or contradicting its authority. That risk does not exist.
+The module states its own scope, in its own doc comment
+(`crates/memory-compiler/src/admission.rs:3-5`):
+
+```
+//! This crate implements the E-side lifecycle and a local SQLite admission
+//! ledger. It does not claim to be the D-authoritative producer ledger or to
+//! provide a cross-service D/Storage visibility transaction.
+```
+
+`AdmissionStore` is an E-side local ledger. It is **not** the D-authoritative
+producer ledger, and it is not a test double either — it is the durable record E
+keeps for itself. The question the bullet left open was answered by the file it
+was asking about.
+
+The consequence for D1: the durable publication record named there is a record of
+**E's local view**, not a cross-service D/Storage transaction. A future claim that
+`publication_receipts` is D-authoritative would contradict the module's own doc
+comment; that is a defect in the module documentation to be fixed, not a reading
+of it to be adopted.
+
+### What remains open
+
 - If a later spec revision assigns E an independent visibility authority, which
   §8 currently forbids.
+
+The second original bullet — `canonical_commit_confirmed` gaining a producer — is
+resolved. It is deleted here and recorded in Amendment D8 below, which names the
+producer.
 
 ## Amendment — D6, taken 2026-11-22 02:35 +08:00, after #552 and #545 landed
 
@@ -358,3 +381,63 @@ The unresolved concerns remain, and are tracked separately under
 
 The original wording is preserved above rather than rewritten, because a decision
 record whose stated premise is silently edited cannot be audited.
+
+## Amendment — D8, taken 2026-11-22, after GAP-12 step 3 landed
+
+Three corrections, all read off `main` at `4a7624da` (the merge of #622, head
+`0b446492`).
+
+### D8.1 — `AdmissionStore` is E's ledger, and D1 is read that way
+
+`crates/memory-compiler/src/admission.rs:3-5`:
+
+```
+//! This crate implements the E-side lifecycle and a local SQLite admission
+//! ledger. It does not claim to be the D-authoritative producer ledger or to
+//! provide a cross-service D/Storage visibility transaction.
+```
+
+D1's record is therefore E's local view of what it admitted and published, joined
+with the storage `PreparedHidden` row. It is not a cross-service D/Storage
+visibility transaction and this ADR does not claim it is. The residual risk under
+"What would reopen this decision" is withdrawn: it was not an open question, it
+was a settled negative that had not been read.
+
+### D8.2 — `canonical_commit_confirmed` has a producer
+
+`D-OWNER-DECISION-CANONICAL-COMMIT-001` froze the contract; #622 implemented it.
+The chain, at `4a7624da`:
+
+| step | location |
+|---|---|
+| issue the record | `AdmissionStore::issue_canonical_commit`, `admission.rs:996` |
+| validate it, three outcomes | `AdmissionStore::validate_canonical_commit`, `admission.rs:1069` |
+| read it into the flag | `AdmissionPublicationAuthority::canonical_commit_confirmed`, `publication_authority.rs:56-73` |
+| report it | `canonical_commit_confirmed,` at `publication_authority.rs:132`, replacing the literal `false` D3 required |
+
+The second bullet under "What would reopen this decision" is deleted rather than
+left stale: its condition occurred, and this subsection is where it went. D6.1's
+hold is released by the contract it was waiting for — a constructible,
+content-bearing reference and a validator for it.
+
+One scope fact belongs with that, because the record is not a production identity:
+the issuer is the dev-baseline issuer (`d-owner-proxy/dev-baseline-v1`), described
+by its own decision as "an explicit development trust anchor, not a production
+cryptographic identity". The flag confirms a dev-baseline record.
+
+### D8.3 — `Published` is still unreachable
+
+`publication_authority.rs:133-139` still reports, D3's comment intact:
+
+```rust
+publication_participant_admitted: false,
+protected_visibility_authorized: false,
+```
+
+`PublicationGate::run` maps either one to `Suppressed` (`lib.rs:646-650`), so a run
+with a valid canonical-commit record reports `Suppressed`, never `Published`. The
+reason is D7 and D3, unchanged: no Storage signing, no COC quorum, no I terminal
+decision, and no E visibility authority.
+
+That is the converged statement after D8: one of the three unsourced flags is
+sourced, two are not, and `Published` still requires all eight.
