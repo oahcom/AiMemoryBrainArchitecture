@@ -1,5 +1,5 @@
 use bmcp_server::{handle_request_body, RequestOutcome, RunningServer, ServerConfig, StartError};
-use std::io::{BufRead, BufReader, Read, Write};
+use std::io::{BufReader, Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::process::{Command, Stdio};
 use std::thread;
@@ -21,47 +21,211 @@ fn send_request(address: std::net::SocketAddr, request: &str) -> String {
     response
 }
 
+struct ChildGuard {
+    child: std::process::Child,
+}
+
+impl ChildGuard {
+    fn new(child: std::process::Child) -> Self {
+        Self { child }
+    }
+
+    fn child_mut(&mut self) -> &mut std::process::Child {
+        &mut self.child
+    }
+}
+
+impl Drop for ChildGuard {
+    fn drop(&mut self) {
+        let _ = self.child.kill();
+        let _ = self.child.wait();
+    }
+}
+
 #[test]
 fn rt_01_readiness_only_after_bind() {
+    use std::sync::{mpsc, Arc, Mutex};
+
     // Exercise the actual binary, not just RunningServer::start().
-    let mut child = Command::new(env!("CARGO_BIN_EXE_bmcp-server"))
+    let child = Command::new(env!("CARGO_BIN_EXE_bmcp-server"))
         .args(["--bind", "127.0.0.1:0"])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()
         .expect("spawn bmcp-server binary");
 
-    let stdout = child.stdout.take().expect("capture child stdout");
-    let mut reader = BufReader::new(stdout);
-    let mut line = String::new();
+    let mut child = ChildGuard::new(child);
+    let started = Instant::now();
+    let deadline = started
+        .checked_add(Duration::from_secs(10))
+        .expect("readiness deadline should be representable");
 
-    let read_result = reader
-        .read_line(&mut line)
-        .expect("read readiness line from child");
+    let stdout = child
+        .child_mut()
+        .stdout
+        .take()
+        .expect("capture child stdout");
+    let stderr = child
+        .child_mut()
+        .stderr
+        .take()
+        .expect("capture child stderr");
 
-    assert_ne!(read_result, 0, "server exited without readiness output");
+    // Drain stdout in a dedicated thread and forward chunks to the test.
+    // The main test thread can therefore enforce a deadline without relying
+    // on platform-specific nonblocking pipe behavior.
+    let (stdout_tx, stdout_rx) = mpsc::channel();
+    thread::spawn(move || {
+        let mut reader = BufReader::new(stdout);
+        let mut buffer = [0_u8; 1024];
+
+        loop {
+            match reader.read(&mut buffer) {
+                Ok(0) => {
+                    let _ = stdout_tx.send(Ok(Vec::new()));
+                    break;
+                }
+                Ok(count) => {
+                    if stdout_tx.send(Ok(buffer[..count].to_vec())).is_err() {
+                        break;
+                    }
+                }
+                Err(error) => {
+                    let _ = stdout_tx.send(Err(error.to_string()));
+                    break;
+                }
+            }
+        }
+    });
+
+    // Continuously drain stderr so a verbose child cannot block while
+    // writing to a full pipe. Keep its output for failure diagnostics.
+    let stderr_output = Arc::new(Mutex::new(String::new()));
+    let stderr_capture = Arc::clone(&stderr_output);
+
+    thread::spawn(move || {
+        let mut stderr = stderr;
+        let mut buffer = [0_u8; 1024];
+
+        loop {
+            match stderr.read(&mut buffer) {
+                Ok(0) | Err(_) => break,
+                Ok(count) => {
+                    let chunk = String::from_utf8_lossy(&buffer[..count]);
+                    let mut output = stderr_capture
+                        .lock()
+                        .unwrap_or_else(|poisoned| poisoned.into_inner());
+                    output.push_str(&chunk);
+                }
+            }
+        }
+    });
+
+    let diagnostics = |child: &mut std::process::Child,
+                       stdout: &str,
+                       stderr: &Arc<Mutex<String>>,
+                       started: Instant| {
+        let exit_status = match child.try_wait() {
+            Ok(Some(status)) => format!("{status:?}"),
+            Ok(None) => "still running".to_owned(),
+            Err(error) => format!("try_wait failed: {error}"),
+        };
+        let stderr = stderr
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+
+        format!(
+            "stdout: {stdout:?}, stderr: {stderr:?}, \
+             child exit status: {exit_status}, elapsed: {:?}",
+            started.elapsed()
+        )
+    };
+
+    let mut stdout_text = String::new();
+    let mut stdout_eof = false;
+    let mut stdout_error = None;
+    let mut timed_out = false;
+
+    while !stdout_text.contains('\n') && !stdout_eof {
+        let remaining = deadline.saturating_duration_since(Instant::now());
+
+        if remaining.is_zero() {
+            timed_out = true;
+            break;
+        }
+
+        match stdout_rx.recv_timeout(remaining) {
+            Ok(Ok(chunk)) if chunk.is_empty() => stdout_eof = true,
+            Ok(Ok(chunk)) => stdout_text.push_str(&String::from_utf8_lossy(&chunk)),
+            Ok(Err(error)) => {
+                stdout_error = Some(error);
+                break;
+            }
+            Err(mpsc::RecvTimeoutError::Timeout) => {
+                timed_out = true;
+                break;
+            }
+            Err(mpsc::RecvTimeoutError::Disconnected) => stdout_eof = true,
+        }
+    }
+
+    if timed_out {
+        panic!(
+            "timed out waiting 10 seconds for readiness output; {}",
+            diagnostics(child.child_mut(), &stdout_text, &stderr_output, started)
+        );
+    }
+
+    if let Some(error) = stdout_error {
+        panic!(
+            "failed reading child stdout: {error}; {}",
+            diagnostics(child.child_mut(), &stdout_text, &stderr_output, started)
+        );
+    }
+
+    let readiness_line = stdout_text
+        .split_once('\n')
+        .map(|(line, _)| line.trim_end_matches('\r'))
+        .unwrap_or(stdout_text.as_str());
+
     assert!(
-        line.starts_with("listening on "),
-        "unexpected readiness output: {line:?}"
+        !readiness_line.is_empty(),
+        "server exited or closed stdout without readiness output; {}",
+        diagnostics(child.child_mut(), &stdout_text, &stderr_output, started)
     );
 
-    let address_text = line
-        .trim()
+    assert!(
+        readiness_line.starts_with("listening on "),
+        "unexpected readiness output; {}",
+        diagnostics(child.child_mut(), &stdout_text, &stderr_output, started)
+    );
+
+    let address_text = readiness_line
         .strip_prefix("listening on ")
-        .expect("readiness line must contain the bound address");
+        .expect("readiness prefix was asserted above");
 
-    let address: std::net::SocketAddr = address_text
-        .parse()
-        .expect("readiness output must contain a socket address");
+    let address: std::net::SocketAddr = match address_text.parse() {
+        Ok(address) => address,
+        Err(error) => panic!(
+            "readiness output did not contain a valid socket address ({error}); {}",
+            diagnostics(child.child_mut(), &stdout_text, &stderr_output, started)
+        ),
+    };
 
-    assert_ne!(address.port(), 0, "ephemeral bind must use a real port");
+    assert_ne!(
+        address.port(),
+        0,
+        "ephemeral bind must use a real port; {}",
+        diagnostics(child.child_mut(), &stdout_text, &stderr_output, started)
+    );
 
     // The address printed by the process must already be connectable.
-    TcpStream::connect_timeout(&address, Duration::from_secs(2))
-        .expect("printed readiness address must already accept connections");
-
-    let _ = child.kill();
-    let _ = child.wait();
+    if let Err(error) = TcpStream::connect_timeout(&address, Duration::from_secs(2)) {
+        panic!(
+            "printed readiness address must already accept connections ({error}); {}",
+            diagnostics(child.child_mut(), &stdout_text, &stderr_output, started)
+        );
+    }
 }
 
 #[test]
