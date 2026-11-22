@@ -1,6 +1,6 @@
 # GAP-14 · 生产发布权威与 MemoryStore 发布生命周期
 
-**状态**：未关闭 — A 开放、B 受阻于 D3、C 未验证
+**状态**：未关闭 — A 已解除阻塞（B 已裁决）、C 未验证
 **领域**：memory-store / memory-compiler / memory-storage-sqlite
 **归属线**：Owner D（发布）+ Owner I（授权）
 **拆分自**：GAP-07，2026-11-22 仅就生产可达性关闭
@@ -63,7 +63,19 @@ forget_memory, forget_version
 
 ## GAP-14-B — 三个发布标志没有权威签发者
 
-**状态**：受阻 — 需要 D3 决策
+**状态**：已裁决 — 三个标志均有权威签发者裁定；其中两个在当前契约下永久为 `false`
+
+下列三个问题已全部回答。答案是决策，不是代码：
+
+| 标志 | 决策 | 裁定 |
+|---|---|---|
+| `canonical_commit_confirmed` | `D-OWNER-DECISION-CANONICAL-COMMIT-001` | 由 D owner-proxy 开发基线签发者签发，以追加式 `canonical_commits` 记录为依据，配备记录支撑的三态验证器 |
+| `publication_participant_admitted` | `D-OWNER-DECISION-PARTICIPANT-ADMISSION-001` | 永久 `false`。§8 的「D authoritative Fence/Admission」不等于 `AdmissionStore`；COC quorum、Storage 签名、I 终裁在本地均不存在 |
+| `protected_visibility_authorized` | `D-OWNER-DECISION-PROTECTED-VISIBILITY-001` | 永久 `false`。§8 将「Storage 与适用的 D/I 授权」定为联合权威；任何单一本地组件均不得替代 |
+
+**直言后果：**在当前契约下，`Published` 在 production 不可达。`canonical_commit_confirmed` *并非*永久为假——D 已授权开发基线签发者与记录支撑验证器，该标志在两者落地后即可为真。但 `crates/memory-compiler/src/lib.rs:603` 要求 `publication_participant_admitted`，而该标志因其证据来自外部（COC quorum、Storage 签名、I 终裁）被裁定永久 `false`。`protected_visibility_authorized` 同样永久 `false`。因此即使 canonical-commit 工作落地，`Published` 仍不可达。这不是 bug，也不是待办件——它是契约已裁定的状态，直到新的跨 Owner 决策建立起外部签发者为止。
+
+原开放问题保留于下方作为背景。
 
 `PublicationProof` 携带八个标志。`brain-cli` 按闸门求值顺序报告为假的那几个：
 

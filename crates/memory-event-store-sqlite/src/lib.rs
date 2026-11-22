@@ -55,13 +55,43 @@ pub struct SqliteEventStore {
 /// is the same work this read path exists to remove.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct PendingCompileIntent {
-    pub outbox_row: i64,
-    pub event_row: i64,
-    pub intent_kind: String,
-    pub created_at: String,
-    pub receipt: AcceptedReceipt,
-    pub envelope: EventEnvelope,
-    pub payload_bytes: Vec<u8>,
+    outbox_row: i64,
+    event_row: i64,
+    intent_kind: String,
+    created_at: String,
+    receipt: AcceptedReceipt,
+    envelope: EventEnvelope,
+    payload_bytes: Vec<u8>,
+}
+
+impl PendingCompileIntent {
+    pub fn outbox_row(&self) -> i64 {
+        self.outbox_row
+    }
+
+    pub fn event_row(&self) -> i64 {
+        self.event_row
+    }
+
+    pub fn intent_kind(&self) -> &str {
+        &self.intent_kind
+    }
+
+    pub fn created_at(&self) -> &str {
+        &self.created_at
+    }
+
+    pub fn receipt(&self) -> &AcceptedReceipt {
+        &self.receipt
+    }
+
+    pub fn envelope(&self) -> &EventEnvelope {
+        &self.envelope
+    }
+
+    pub fn payload_bytes(&self) -> Vec<u8> {
+        self.payload_bytes.clone()
+    }
 }
 
 impl SqliteEventStore {
@@ -538,6 +568,31 @@ mod tests {
         assert_eq!(first_read, second_read);
         assert_eq!(count_before, count_after);
         assert_eq!(count_after, 2);
+    }
+
+    #[test]
+    fn pending_compile_intents_fails_closed_when_stored_bytes_are_tampered() {
+        let mut store = SqliteEventStore::in_memory().unwrap();
+        let payload = b"Original accepted payload.";
+
+        let receipt = store
+            .accept_with_payload(envelope_with_payload("op-1", payload), payload, &[scope()])
+            .unwrap();
+
+        let event_row = SqliteEventStore::row_id(&receipt.event_id).unwrap();
+
+        store
+            .connection
+            .execute(
+                "UPDATE event_payloads SET payload_bytes = ?1 WHERE event_row = ?2",
+                params![b"Tampered accepted payload.".to_vec(), event_row],
+            )
+            .unwrap();
+
+        assert_eq!(
+            store.pending_compile_intents(),
+            Err(EventStoreError::PayloadIntegrityMismatch),
+        );
     }
 
     #[test]

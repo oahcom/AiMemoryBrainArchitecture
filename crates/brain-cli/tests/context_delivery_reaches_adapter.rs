@@ -8,7 +8,7 @@ const COMPILER_BLOCKED_NOTICE: &str = "compiler stage blocked: publication not a
      blocking flag: canonical_commit_confirmed; false flags: [canonical_commit_confirmed, \
      publication_participant_admitted, protected_visibility_authorized]";
 
-const DELIVERY_PREFIX: &str = "delivery applied: session=brain-cli-session version=";
+const DELIVERY_PREFIX: &str = "delivery applied: session=session-demo-001 version=";
 
 static NEXT_TEST_ID: AtomicU64 = AtomicU64::new(0);
 

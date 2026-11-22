@@ -58,13 +58,13 @@ Rust crate 仍停留在 private/staged 阶段。Round 6 新增纯内存 `ChangeS
 | Context、Entry、Delivery 生命周期分离 | context-architecture.md §7 | PARTIAL — `non_active_non_consolidated_lifecycles_are_rejected` 验证候选生命周期准入；Context/Entry/Delivery 仍缺少各自独立状态机 | 本线程可做 |
 | Forget/撤权 Tombstone 阻断活动及待处理投影 | context-architecture.md §8 | PARTIAL — Snapshot 内可序列化的 `ContextTombstone`；`remove_tombstone_is_visible_to_later_reconcile` 验证被移除成员不会通过 Reconcile 静默复活；仍无持久化 Tombstone-first 投影或待发送 Delivery 失效机制 | D |
 | Adapter 按 Session 清除状态及 Reconnect | context-architecture.md §8 | NOT IMPLEMENTED — 无 Adapter/Session Runtime | 不在范围 |
-| Budget 是向量而不是单一 Top-K | context-budget-and-sufficiency.md §1–§2 | PARTIAL — `ContextBudget` 检查 Entry 数和渲染字节；`entry_budget_error_reports_actual_candidate_count`、`byte_budget_error_reports_accumulated_rendered_bytes`、`exact_entry_and_byte_budget_boundaries_succeed` 覆盖溢出与精确边界；缺 Token、Fan-out、来源深度、延迟、CPU、Tier 预留 | 本线程可做 |
+| Budget 是向量而不是单一 Top-K | context-budget-and-sufficiency.md §1–§2 | IMPLEMENTED — `ContextBudget` 保留条目与渲染字节限制（`entry_budget_error_reports_actual_candidate_count`、`byte_budget_error_reports_accumulated_rendered_bytes`、`exact_entry_and_byte_budget_boundaries_succeed`），`budget.rs` 的 `BudgetVector` 补齐其余六个维度：`tokens`、`relation_fan_out`、`provenance_depth`、`latency_micros`、`cpu_micros`、`tier_entries`。每次越界都是带 `actual`/`limit` 的类型化 `BudgetVectorError`；`None` 表示无界，`Some(0)` 表示已耗尽，未列出的分层无界。10 个测试含 `dimensions_are_independent_so_satisfying_one_does_not_mask_another_overflow`、`an_exhausted_budget_of_zero_is_not_unbounded`、`unlisted_tier_is_unbounded_while_a_listed_tier_is_capped` | 本线程可做 |
 | 任务特定 Sufficiency 覆盖十个维度 | context-budget-and-sufficiency.md §3 | PARTIAL — 已有 `SufficiencyRequirement`/`SufficiencyDimension` 和 `assess_sufficiency`；当前快照字段可测量 Evidence 与 Environment，其余八个维度会正确返回 Unknown；仍无 Requirement Graph 或语义证据模型 | D |
 | 规划保留必需锚点、证据、冲突和不确定性 | context-budget-and-sufficiency.md §4 | PARTIAL — 有候选准入和稳定排序；无 Requirement Graph 优化器或冲突覆盖测试 | D |
-| 在向量约束下优化候选集边际覆盖 | context-budget-and-sufficiency.md §5 | NOT IMPLEMENTED — Sufficiency 评估器已落地，但尚无候选集优化器或边际覆盖选择器 | 本线程可做 |
+| 在向量约束下优化候选集边际覆盖 | context-budget-and-sufficiency.md §5 | IMPLEMENTED — `selector.rs` 的 `select_candidates` 在排序前过滤硬约束（授权、Forget、时间有效性、环境匹配、必需证据），不满足者进入 `excluded` 并带首个未满足约束名，且不消耗预算；每次选择只对尚未覆盖的维度计分，并对冗余、字节成本、不确定性计罚，最优边际分不为正时停止。15 个测试含 `hard_constraint_violation_excludes_candidate_before_ranking`、`excluded_candidates_consume_no_budget`、`subsequent_selection_scores_only_new_dimensions`、`selection_is_deterministic_across_repeated_calls` | 本线程可做 |
 | Compaction 保留 Lineage、限定和冲突 | context-budget-and-sufficiency.md §5、§9.3 | NOT IMPLEMENTED — Sufficiency 评估器已落地；仍无 Compaction 模型或 Fidelity Validator | D |
 | Sufficiency 结果和安全溢出降级 | context-budget-and-sufficiency.md §6–§7 | PARTIAL — 四种互斥结果及 Mandatory/Advisory/Unknown 判定规则已可执行；仍无 Overflow Planner 或预算降级工作流 | 本线程可做 |
-| Budget/Sufficiency 可观测性 | context-budget-and-sufficiency.md §8–§9.4 | NOT IMPLEMENTED — 无 Metrics/Report 模型 | 本线程可做 |
+| Budget/Sufficiency 可观测性 | context-budget-and-sufficiency.md §8–§9.4 | IMPLEMENTED — `observability.rs` 的 `build_budget_sufficiency_report` 把既有评估投影为 `BudgetSufficiencyReport`（各已测量维度的利用率、按维度的遗漏、以首个未满足约束为键的排除计数、精确的 ContextVersion、按分区的水位向量、结果分类）。它是投影：不重跑选择、不复制渲染内容。按 §9.4 的隐私要求：需求画像归约为 SHA-256 摘要，需求 id 与 `Unknown { reason }` 文本被丢弃，被排除候选只贡献标签与计数、绝不贡献 id，调用方提供的 `Unknown(name)` 维度被脱敏。测试 `exclusion_counts_sum_to_the_number_of_excluded_candidates`、`the_report_carries_no_memory_content_requirement_ids_or_unknown_dimension_names`、`the_report_is_identical_across_two_runs_over_the_same_inputs` | 本线程可做 |
 | ChangeSet 公共封套、前置条件和全有或全无暂存 | context-edit-operations.md §1 | IMPLEMENTED — `ChangeSet`/`apply_change_set` 绑定 `base_version`，拒绝过期 Snapshot，并在私有克隆上应用；测试 `stale_base_is_rejected_without_changing_snapshot`、`any_failing_operation_discards_the_entire_staged_set`、`change_set_rejects_duplicate_operation_ids`；仅内存，持久化 T1 单独核算 | 本线程可做 |
 | Add 精确 Canonical Ref、Lineage 和重复防护 | context-edit-operations.md §2 Add | PARTIAL — 候选准入仍验证 Lineage 和重复成员；无专门 Add 操作或 Canonical Ref Adapter（Reconcile 可通过无前驱的 Replace 物化期望的新成员） | D |
 | Update 仅修改 Context 元数据/渲染，不修改 Canonical Memory | context-edit-operations.md §2 Update | IMPLEMENTED — `ChangeSetOperation::Update` 只修改 Context Entry，并拒绝更改 Entry/Memory/Version 身份；测试 `update_preserves_memory_version_and_rejects_version_changes` | 本线程可做 |
@@ -83,7 +83,7 @@ Rust crate 仍停留在 private/staged 阶段。Round 6 新增纯内存 `ChangeS
 | T4 Reconciliation 是可恢复 Saga | context-manager.md §4、§6 | PARTIAL — 只有单条目分类，无持久化 Saga Journal | D |
 | F 协作：候选是提案，不完整不等于不存在 | context-manager.md §5 | PARTIAL — 有候选输入；无 F 接口/Watermark 向量 | 不在范围 |
 | 故障行为和错误分类 | context-manager.md §6、§8 | PARTIAL — 有部分 Fail-Closed 错误；缺少完整错误目录和隐私安全投影 | I |
-| 状态所有权与可观测性 | context-manager.md §7、§9 | NOT IMPLEMENTED — 无生产 Metrics/Traces | D |
+| 状态所有权与可观测性 | context-manager.md §7、§9 | IMPLEMENTED — `summarize_delivery_lifecycle` 返回 `DeliveryLifecycleReport`，把五种投递状态分轴计数，另加 `unknown_deliveries` 与 `late_acks`，因此 Context、Entry、Delivery 三条生命周期保持独立、不被折叠进同一个计数器。只有计数：任何投递标识都不进入报告，这正是 §9 对指标标签的要求。测试 `delivery_states_are_tallied_on_separate_axes_and_never_folded_together`、`an_observed_delivery_without_a_record_is_reported_unknown_not_guessed`、`the_delivery_report_carries_counts_only_and_no_delivery_identifiers` | 本线程可做 |
 | Reconciliation 触发器和权威信号归属 | context-reconciliation.md §1–§2 | NOT IMPLEMENTED — 所引用的 `ContextLedger`/`reconcile_entry` 参考模型不在本次核验的 mainline。本地 `ChangeSet` 编辑器确实存在（`apply_change_set`/`commit_change_set`）；缺失的是权威触发器与信号归属模型——即由它来决定何时执行 Reconcile。 | D |
 | Stale/ReconcileRequired/Reconciled/Blocked/Closed 区分 | context-reconciliation.md §3 | PARTIAL — 有 Entry 分类；无 Context/Run 状态机 | 本线程可做 |
 | Reconciliation 算法：触发、精确 Context、先 Tombstone、加载、授权、Canonical 校验、水位比较、分类、补偿、CAS、Delivery、审计 | context-reconciliation.md §4 | PARTIAL — 本地 Tombstone-aware Reconcile 和 Base-Version 暂存已实现；权威触发、重新授权、Canonical/Watermark 校验、持久化 Saga、Delivery 和审计仍缺失 | D |
@@ -94,7 +94,7 @@ Rust crate 仍停留在 private/staged 阶段。Round 6 新增纯内存 `ChangeS
 | Context/Entry/Delivery/Applied 对象分离 | context-versioning.md §5–§6 | PARTIAL — 有 Snapshot 和 DeliveryIntent；`delivery_intent_targets_snapshot_context_version` 验证目标版本绑定；无持久化 Context/Applied 对象 | 本线程可做 |
 | Snapshot/Delta 语义及精确 Base 应用 | context-versioning.md §7 | PARTIAL — `apply_change_set` 针对精确 Base-Version 应用并暂存新 Snapshot；测试 `stale_base_is_rejected_without_changing_snapshot` 和 `any_failing_operation_discards_the_entire_staged_set`；仍无持久化 Delta 历史/Replay | D |
 | CAS、幂等、原子 ChangeSet、禁止隐式合并 | context-versioning.md §8 | PARTIAL — `commit_change_set` 有内存 Base-Version CAS/幂等，`apply_change_set` 拒绝过期 Base 且不隐式合并；仍无持久化 Context 原子提交或持久化幂等记录 | I |
-| Delivery 生命周期、迟到 ACK 和 Supersession | context-versioning.md §9 | NOT IMPLEMENTED — 无 Attempt Ledger/ACK 消费者 | 本线程可做 |
+| Delivery 生命周期、迟到 ACK 和 Supersession | context-versioning.md §9 | PARTIAL — `crates/memory-context/src/delivery_lifecycle.rs` 中的 `DeliveryLifecycle` 是五态状态机（Pending/Delivered/Acknowledged/Superseded/Abandoned），终态拒绝一切转换；ACK 消费方区分已接受、重复、迟到（已 supersede）、旧尝试、未知 delivery 五类，并逐类记录而非丢弃；无持久化、无 supersession 级联、无生产调用方 | 本线程可做 |
 | Rollback、补偿和 Replay | context-versioning.md §10 | PARTIAL — 有 Tombstone 和内存历史；无持久化 Replay/Rebuild | D |
 | Full/Partial/Bypassed/Unknown 覆盖语义 | context-versioning.md §11、§14.3 | PARTIAL — Applied Ledger 要求调用方 Gate 全部为真；无完整 Region 提取或 Coverage Proof | D |
 | Typed Cursor 分离和 Producer Admission | context-versioning.md §13.1–§13.2 | NOT IMPLEMENTED — 无 D 注册或 Typed Cursor Validator | D |
@@ -108,7 +108,7 @@ Rust crate 仍停留在 private/staged 阶段。Round 6 新增纯内存 `ChangeS
 | Local Lifecycle、Producer/Derivative、Queue、Recall、Context、Restore 状态 | phase-3.7 §1–§8 | PARTIAL — ChangeSet/Reconcile 参考部分存在；无持久化 Producer/Queue/Recall/Restore Ledger | D |
 | 入队/租约/读取受保护源之前完成 Producer Registration | phase-3.7 §2、§10.1 | NOT IMPLEMENTED — 无 D Producer Registry Receipt 或 Queue Admission | D |
 | 可见前完成 Derivative Dependency Registration | phase-3.7 §3、§10.1 | NOT IMPLEMENTED — 无 Dependency Receipt 或 Publication Gate | D |
-| Delivery Queue Attempt 身份、重试和 ACK 分离 | phase-3.7 §4 | NOT IMPLEMENTED — 无持久化 DeliveryId/Attempt Ledger | 本线程可做 |
+| Delivery Queue Attempt 身份、重试和 ACK 分离 | phase-3.7 §4 | PARTIAL — `crates/memory-context/src/delivery_ledger.rs` 中的 `DeliveryLedger` 已建模 `DeliveryId`/`DeliveryAttemptId`、重试链与 ACK 到 delivery 的分离；无持久化、无 ACK consumer、无生产调用方 | 本线程可做 |
 | Recall 候选 Canonical 校验和 Sufficiency | phase-3.7 §5 | PARTIAL — Rust 候选校验和 Reconciliation 模型存在；无 F Watermark 向量或实时 D/I 重验证 | D |
 | Context 与 Applied 生命周期分离 | phase-3.7 §6 | PARTIAL — 模型区分 Context Version 与 Applied Ledger；无集成状态机 | 本线程可做 |
 | Restore/Reconnect 隔离及当前状态协调 | phase-3.7 §7 | NOT IMPLEMENTED — 无 Restore Fence、Ledger Replay 或 Adapter Reconnect | D |

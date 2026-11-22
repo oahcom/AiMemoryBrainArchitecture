@@ -1,19 +1,24 @@
 use agent_integration::{
-    ApplyOutcome, ContextDeliveryAdapter, DeliveryPayload, InMemoryContextDeliveryAdapter,
+    ApplyOutcome, ContextDeliveryAdapter, DeliveryPayload, FileContextDeliveryAdapter,
+    InMemoryContextDeliveryAdapter,
 };
 use memory_compiler::admission::{
-    AdmissionStore, DependencyRegistrationRequest, ProducerRegistrationRequest,
+    rfc3339_utc_now, AdmissionStore, DependencyRegistrationRequest, ProducerRegistrationRequest,
 };
 use memory_compiler::publication_authority::AdmissionPublicationAuthority;
 use memory_compiler::{
-    accepted_event_from, ExtractionStage, Identity, IngestionStage, MemoryCompiler,
-    NormalizationStage, ProducerWorkItemId, PublicationAuthority, PublicationDisposition,
-    PublicationProof, StagingInput, WorkerLease, COMPILER_VERSION,
+    accepted_event_from, canonical_subject_digest, ExtractionStage, Identity, IngestionStage,
+    MemoryCompiler, NormalizationStage, ProducerWorkItemId, PublicationAuthority,
+    PublicationDisposition, PublicationProof, StagingInput, StagingStage, WorkerLease,
+    COMPILER_VERSION,
 };
 use memory_context::{
     build_context, ContextBudget, ContextCandidate, ContextIdentity, ContextTier,
 };
-use memory_domain::{Claim, Event, Memory, MemoryLifecycle, MemoryVersion, OpaqueId, ScopeRef};
+use memory_domain::{
+    CanonicalCommitRef, Claim, Event, IssuerId, Memory, MemoryLifecycle, MemoryVersion, OpaqueId,
+    ScopeRef, DEV_BASELINE_ISSUER,
+};
 use memory_event_store::{EventClassification, EventEnvelope};
 use memory_event_store_sqlite::{PayloadEventStoreExt, SqliteEventStore};
 use memory_storage::{MemoryStorage, PrepareRequest};
@@ -108,6 +113,10 @@ struct CompilerStageRequest<'a> {
     publication_id: &'a str,
     storage_path: &'a Path,
     admission_path: &'a Path,
+    /// Issue a durable dev-baseline canonical commit record for this run's
+    /// derivative. Off by default so the ordinary path keeps the legacy pending
+    /// reference and the unchanged `blocked` disposition.
+    issue_canonical_commit: bool,
 }
 
 struct CompilerStageOutcome {
@@ -193,6 +202,17 @@ fn identifier(value: impl Into<String>) -> Result<OpaqueId, String> {
 /// This seeds the local admission ledger and stages the derivative hidden, then
 /// lets `MemoryCompiler::compile` decide. Publication itself is expected to be
 /// refused: the adapter may not authorize what no issuer has authorized.
+///
+/// Storage and admission are process-scoped. `storage_path` and `admission_path`
+/// are supplied by the caller as `TemporaryDatabase` files, which are removed in
+/// `Drop`, so every compile result in this binary is deliberately ephemeral. The
+/// durable boundary here is event acceptance and outbox delivery, not the
+/// compiler's output; persisting a compile result is outside this binary's
+/// contract. An Owner ruling on 2026-11-22 settled this: no cursor table, no
+/// `compiled_at` column, and no durable storage flags are required, and the
+/// "who owns compile progress" question is not applicable to `brain-cli`.
+///
+/// `Blocked` is therefore the normal outcome, not an unfinished hook.
 fn run_compiler_stage(request: CompilerStageRequest<'_>) -> Result<CompilerStageOutcome, String> {
     let event_id = request.event_id.as_str();
     let work_item_id = ProducerWorkItemId::new(identifier(format!("work:{event_id}"))?);
@@ -220,6 +240,68 @@ fn run_compiler_stage(request: CompilerStageRequest<'_>) -> Result<CompilerStage
 
     let mut admission = AdmissionStore::open(request.admission_path)
         .map_err(|error| format!("cannot open admission ledger: {error}"))?;
+    // Built from the outbox row, not assembled here. Before this the CLI
+    // computed its own digest and hard-coded `compile_intent_durable: true`,
+    // which meant `IngestionStage::run`'s durable-intent guard could never fire
+    // on the production path.
+    let accepted = accepted_event_from(request.intent)
+        .map_err(|error| format!("invalid pending compile intent: {error:?}"))?;
+    let normalized = {
+        let ingested = IngestionStage::run(accepted.clone(), COMPILER_GENERATION)
+            .map_err(|error| format!("ingestion stage failed: {error:?}"))?;
+        let extracted = ExtractionStage::run(ingested, COMPILER_GENERATION)
+            .map_err(|error| format!("extraction stage failed: {error:?}"))?;
+        NormalizationStage::run(extracted, COMPILER_GENERATION)
+            .map_err(|error| format!("normalization stage failed: {error:?}"))?
+    };
+    let staging = StagingInput {
+        normalized,
+        derivative_id: Identity(format!("derivative:{event_id}")),
+        publication_id: Identity(request.publication_id.to_owned()),
+        // Admission booleans and dependency ids are derived from the durable
+        // ledger inside `compile`; these placeholders are overwritten there.
+        dependency_ids: Vec::new(),
+        dependency_closure_complete: false,
+        producer_admitted: false,
+        canonical_commit_cursor_recorded: false,
+    };
+    // The dev-baseline issuer writes one durable record for exactly the
+    // derivative this run stages. Staging is deterministic, so the preview below
+    // produces the same provenance `compile` re-derives; the record commits
+    // before the reference is handed to the request. Without the flag the run
+    // carries the legacy pending reference, which never validates.
+    let (cursor, reference) = if request.issue_canonical_commit {
+        let preview = StagingStage::run(
+            StagingInput {
+                dependency_ids: vec![Identity(request.source_ref.as_str().to_owned())],
+                dependency_closure_complete: true,
+                producer_admitted: true,
+                canonical_commit_cursor_recorded: true,
+                ..staging.clone()
+            },
+            COMPILER_GENERATION,
+        )
+        .map_err(|error| format!("staging preview failed: {error:?}"))?;
+        let subject = canonical_subject_digest(&preview.provenance)
+            .map_err(|error| format!("cannot derive canonical subject digest: {error:?}"))?;
+        let commit_id = identifier(format!("canonical-commit:{event_id}"))?;
+        let issued = admission
+            .issue_canonical_commit(
+                &commit_id,
+                &IssuerId::new(DEV_BASELINE_ISSUER)
+                    .map_err(|error| format!("invalid issuer: {error:?}"))?,
+                &subject,
+                &rfc3339_utc_now(),
+            )
+            .map_err(|error| format!("issue_canonical_commit failed: {error}"))?;
+        (commit_id, issued)
+    } else {
+        (
+            identifier(format!("canonical-commit:{event_id}"))?,
+            CanonicalCommitRef::pending_d(),
+        )
+    };
+
     admission
         .register_producer(&producer_identity, "brain-cli-registry-digest")
         .map_err(|error| format!("register_producer failed: {error}"))?;
@@ -234,9 +316,8 @@ fn run_compiler_stage(request: CompilerStageRequest<'_>) -> Result<CompilerStage
             operation_id: identifier(format!("operation:{event_id}"))?,
             correlation_id: identifier(format!("correlation:{event_id}"))?,
             causation_id: None,
-            admission_canonical_commit_cursor: Some(identifier(format!(
-                "canonical-commit:{event_id}"
-            ))?),
+            admission_canonical_commit_cursor: Some(cursor),
+            canonical_commit_ref: reference,
             observed_fence_cursor: identifier("fence:0")?,
             permission_epoch: identifier("permission-epoch:1")?,
             request_digest: format!("producer-request:{event_id}"),
@@ -266,31 +347,6 @@ fn run_compiler_stage(request: CompilerStageRequest<'_>) -> Result<CompilerStage
     let authority =
         AdmissionPublicationAuthority::new(authority_admission, &storage, work_item_id.clone());
 
-    // Built from the outbox row, not assembled here. Before this the CLI
-    // computed its own digest and hard-coded `compile_intent_durable: true`,
-    // which meant `IngestionStage::run`'s durable-intent guard could never fire
-    // on the production path.
-    let accepted = accepted_event_from(request.intent)
-        .map_err(|error| format!("invalid pending compile intent: {error:?}"))?;
-    let normalized = {
-        let ingested = IngestionStage::run(accepted.clone(), COMPILER_GENERATION)
-            .map_err(|error| format!("ingestion stage failed: {error:?}"))?;
-        let extracted = ExtractionStage::run(ingested, COMPILER_GENERATION)
-            .map_err(|error| format!("extraction stage failed: {error:?}"))?;
-        NormalizationStage::run(extracted, COMPILER_GENERATION)
-            .map_err(|error| format!("normalization stage failed: {error:?}"))?
-    };
-    let staging = StagingInput {
-        normalized,
-        derivative_id: Identity(format!("derivative:{event_id}")),
-        publication_id: Identity(request.publication_id.to_owned()),
-        // Admission booleans and dependency ids are derived from the durable
-        // ledger inside `compile`; these placeholders are overwritten there.
-        dependency_ids: Vec::new(),
-        dependency_closure_complete: false,
-        producer_admitted: false,
-        canonical_commit_cursor_recorded: false,
-    };
     let lease = WorkerLease {
         operation_id: Identity(format!("operation:{event_id}")),
         worker_id: Identity("brain-cli-worker".into()),
@@ -324,14 +380,17 @@ fn run_compiler_stage(request: CompilerStageRequest<'_>) -> Result<CompilerStage
 /// Deliver a validated Brain context snapshot to the local Agent adapter.
 ///
 /// Independent of compiler publication authorization: the adapter receives the
-/// context snapshot, not the publication decision.
-fn deliver_snapshot(snapshot: &memory_context::ContextSnapshot) -> Result<u64, String> {
+/// context snapshot, not the publication decision. The adapter is injected so
+/// the caller owns its lifetime and persistence.
+fn deliver_snapshot(
+    adapter: &mut dyn ContextDeliveryAdapter,
+    session_id: &str,
+    snapshot: &memory_context::ContextSnapshot,
+) -> Result<u64, String> {
     let payload = DeliveryPayload::from_snapshot(snapshot)
         .map_err(|error| format!("cannot construct delivery payload: {error:?}"))?;
 
     let expected_version = snapshot.context_version;
-    let session_id = "brain-cli-session";
-    let mut adapter = InMemoryContextDeliveryAdapter::default();
 
     match adapter
         .apply(session_id, payload)
@@ -354,19 +413,41 @@ fn deliver_snapshot(snapshot: &memory_context::ContextSnapshot) -> Result<u64, S
     Ok(applied.version())
 }
 
+/// Select the delivery adapter for this process.
+///
+/// A `--delivery-root` selects the file-backed adapter, so an applied delivery
+/// survives the process; without one the run stays in memory.
+fn delivery_adapter(
+    delivery_root: Option<&Path>,
+) -> Result<Box<dyn ContextDeliveryAdapter>, String> {
+    match delivery_root {
+        Some(root) => FileContextDeliveryAdapter::open(root)
+            .map(|adapter| Box::new(adapter) as Box<dyn ContextDeliveryAdapter>)
+            .map_err(|error| format!("cannot open delivery root {}: {error:?}", root.display())),
+        None => Ok(Box::new(InMemoryContextDeliveryAdapter::default())),
+    }
+}
+
 fn run() -> Result<(), String> {
     let mut args = std::env::args().skip(1);
     let Some(command) = args.next() else {
         return Err(usage());
     };
-    if command != "compile" {
-        return Err(usage());
+    match command.as_str() {
+        "compile" => run_compile(args),
+        "forget" => run_forget(args),
+        _ => Err(usage()),
     }
+}
 
+/// The `compile` verb: build a ContextSnapshot from one event envelope.
+fn run_compile(mut args: impl Iterator<Item = String>) -> Result<(), String> {
     let mut input_path = None;
     let mut output_path = None;
     let mut event_store_path: Option<PathBuf> = None;
+    let mut delivery_root: Option<PathBuf> = None;
     let mut verbose = false;
+    let mut issue_canonical_commit = false;
 
     while let Some(argument) = args.next() {
         match argument.as_str() {
@@ -379,7 +460,17 @@ fn run() -> Result<(), String> {
                         .into(),
                 );
             }
+            "--delivery-root" => {
+                delivery_root = Some(
+                    args.next()
+                        .ok_or_else(|| "--delivery-root requires a path".to_owned())?
+                        .into(),
+                );
+            }
             "--verbose" => verbose = true,
+            // Dev-baseline issuance. Without it the run keeps the legacy pending
+            // reference and the unchanged `blocked` disposition.
+            "--canonical-commit" => issue_canonical_commit = true,
             _ => return Err(format!("unknown argument: {argument}\n{}", usage())),
         }
     }
@@ -479,7 +570,7 @@ fn run() -> Result<(), String> {
         .map_err(|error| format!("cannot read compile outbox: {error:?}"))?;
     let pending_intent = pending
         .iter()
-        .find(|intent| intent.receipt.receipt_id == accepted_receipt.receipt_id)
+        .find(|intent| intent.receipt().receipt_id == accepted_receipt.receipt_id)
         .ok_or_else(|| {
             format!(
                 "accepted receipt {} has no pending compile intent",
@@ -491,7 +582,7 @@ fn run() -> Result<(), String> {
         eprintln!(
             "accepted receipt: {} (outbox row {})",
             accepted_receipt.receipt_id.as_str(),
-            pending_intent.outbox_row
+            pending_intent.outbox_row()
         );
     }
 
@@ -645,6 +736,7 @@ fn run() -> Result<(), String> {
         publication_id: &publication_id,
         storage_path: database.path(),
         admission_path: admission_database.path(),
+        issue_canonical_commit,
     })?;
     let notice = stage.notice();
 
@@ -661,9 +753,12 @@ fn run() -> Result<(), String> {
 
     // Context delivery is independent of the compiler publication gate.
     // Delivery failures are observable but must not change CLI success.
-    match deliver_snapshot(&snapshot) {
+    let session_id = snapshot.identity.session_id.as_str();
+    let delivery = delivery_adapter(delivery_root.as_deref())
+        .and_then(|mut adapter| deliver_snapshot(adapter.as_mut(), session_id, &snapshot));
+    match delivery {
         Ok(version) => {
-            eprintln!("delivery applied: session=brain-cli-session version={version}");
+            eprintln!("delivery applied: session={session_id} version={version}");
         }
         Err(reason) => {
             eprintln!("delivery failed: {reason}");
@@ -694,6 +789,90 @@ fn run() -> Result<(), String> {
     Ok(())
 }
 
+/// The `forget` verb: record the canonical forget fence for one Memory, or for
+/// one of its versions, in an existing memory database.
+///
+/// This is the production caller the forget facade was missing: every caller of
+/// `MemoryStore::forget_*` used to live inside `#[cfg(test)]`, so no executable
+/// path could forget anything. It writes the same `canonical_forget_fences` row
+/// the read gate already consults, so a forgotten Memory reads as `Ok(None)`
+/// afterwards. It adds no second fence and does not touch the event store's
+/// namespace fence, whose reconciliation with the target fence is still an open
+/// architecture question (GAP-06 / GAP-11).
+fn run_forget(mut args: impl Iterator<Item = String>) -> Result<(), String> {
+    let mut store_path: Option<PathBuf> = None;
+    let mut scope_path: Option<PathBuf> = None;
+    let mut memory_id: Option<String> = None;
+    let mut version_id: Option<String> = None;
+    let mut reason_digest: Option<String> = None;
+
+    while let Some(argument) = args.next() {
+        match argument.as_str() {
+            "--store" => {
+                store_path = Some(
+                    args.next()
+                        .ok_or_else(|| "--store requires a path".to_owned())?
+                        .into(),
+                );
+            }
+            "--scope" => {
+                scope_path = Some(
+                    args.next()
+                        .ok_or_else(|| "--scope requires a path".to_owned())?
+                        .into(),
+                );
+            }
+            "--forget" => memory_id = args.next(),
+            "--forget-version" => version_id = args.next(),
+            "--forget-reason" => reason_digest = args.next(),
+            _ => return Err(format!("unknown argument: {argument}\n{}", usage())),
+        }
+    }
+
+    let store_path = store_path.ok_or_else(usage)?;
+    let scope_path = scope_path.ok_or_else(usage)?;
+    let memory_id = identifier(memory_id.ok_or_else(usage)?)?;
+    let reason_digest = reason_digest.ok_or_else(usage)?;
+    if reason_digest.trim().is_empty() {
+        return Err("--forget-reason must not be empty".to_owned());
+    }
+    let scope_bytes = fs::read(&scope_path)
+        .map_err(|error| format!("cannot read scope {}: {error}", scope_path.display()))?;
+    let scope: Vec<ScopeRef> = serde_json::from_slice(&scope_bytes)
+        .map_err(|error| format!("invalid scope JSON: {error}"))?;
+
+    let sqlite = SqliteMemoryStorage::open(&store_path)
+        .map_err(|error| format!("cannot open SQLite storage: {error:?}"))?;
+    let mut store = MemoryStore::new(sqlite);
+
+    let (target, detail, fence_sequence) = match version_id {
+        Some(version_id) => {
+            let version_id = identifier(version_id)?;
+            let sequence = store
+                .forget_version(&memory_id, &version_id, &reason_digest, &scope)
+                .map_err(|error| format!("forget_version failed: {error:?}"))?;
+            (
+                "Version",
+                format!(
+                    "memory={} version={}",
+                    memory_id.as_str(),
+                    version_id.as_str()
+                ),
+                sequence,
+            )
+        }
+        None => {
+            let sequence = store
+                .forget_memory(&memory_id, &reason_digest, &scope)
+                .map_err(|error| format!("forget_memory failed: {error:?}"))?;
+            ("Memory", format!("memory={}", memory_id.as_str()), sequence)
+        }
+    };
+
+    println!("forget applied: target={target} {detail} fence_sequence={fence_sequence}");
+    Ok(())
+}
+
 fn sha256_hex(bytes: &[u8]) -> String {
     const HEX: &[u8; 16] = b"0123456789abcdef";
     let digest = Sha256::digest(bytes);
@@ -706,7 +885,12 @@ fn sha256_hex(bytes: &[u8]) -> String {
 }
 
 fn usage() -> String {
-    "usage: brain compile --input <event.json> --out <context.json> [--verbose]".to_owned()
+    concat!(
+        "usage: brain compile --input <event.json> --out <context.json> [--verbose]\n",
+        "usage: brain forget --store <memory.sqlite> --scope <scope.json> ",
+        "--forget <memory_id> --forget-reason <digest> [--forget-version <version_id>]"
+    )
+    .to_owned()
 }
 
 #[cfg(test)]

@@ -11,6 +11,9 @@ use memory_domain::{
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashMap, HashSet};
 
+mod selector;
+pub use selector::*;
+
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ContextBudget {
     pub max_entries: usize,
@@ -4425,3 +4428,24 @@ mod pr433_tests {
         assert_eq!(s.rendered_bytes, 4);
     }
 }
+
+pub mod delivery_ledger;
+
+pub use delivery_ledger::{
+    AckDisposition, DeliveryAck, DeliveryAttempt, DeliveryAttemptId, DeliveryId, DeliveryLedger,
+};
+
+pub mod delivery_lifecycle;
+
+pub use delivery_lifecycle::{AckOutcome, DeliveryLifecycle, DeliveryRecord, DeliveryState};
+
+mod budget;
+pub use budget::*;
+
+pub mod observability;
+
+pub use observability::{
+    build_budget_sufficiency_report, summarize_delivery_lifecycle, BudgetSufficiencyReport,
+    BudgetUtilization, DeliveryLifecycleReport, DimensionOmission, ExclusionCount,
+    SufficiencyOutcomeKind,
+};

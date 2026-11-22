@@ -6,6 +6,7 @@ on:
       - "Cargo.toml"
       - "Cargo.lock"
       - "crates/**"
+      - "scripts/check_fmt.py"
       - ".github/workflows/rust-phase1.yml"
   push:
     branches:
@@ -21,4 +22,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - run: python3 scripts/check_fmt.py --expect "$(git rev-parse HEAD)"
+      - run: cargo clippy --workspace --all-targets -- -D warnings
       - run: cargo test --workspace --all-targets

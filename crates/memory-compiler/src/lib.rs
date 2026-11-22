@@ -2,6 +2,11 @@
 //! Deterministic five-stage reference pipeline with a local SQLite admission ledger.
 //! Production D/Storage authority integrations are provided by the
 //! `publication_authority` adapter.
+//!
+//! Without the `sqlite` feature the crate exposes the five pure stages, the
+//! domain types, and `PublicationAuthority`. `MemoryCompiler`, the admission
+//! ledger, and `accepted_event_from` require the feature because the only
+//! admission store is SQLite-backed.
 
 #[cfg(feature = "sqlite")]
 pub mod admission;
@@ -50,7 +55,6 @@ fn raw_payload_digest(payload: &str) -> String {
 
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub struct Identity(pub String);
-
 impl Identity {
     pub fn new(value: impl Into<String>) -> Result<Self, CompilerError> {
         let value = value.into();
@@ -73,6 +77,47 @@ pub struct Provenance {
     pub parameter_digest: String,
     pub stage_name: StageName,
     pub attempt_generation: u64,
+}
+
+/// The subject digest of a staged derivative: SHA-256 over the one shared
+/// `CanonicalCommitSubjectV1` encoding (`D-OWNER-DECISION-CANONICAL-COMMIT-001`
+/// §2.1). Issuance and validation both call this function; neither reimplements
+/// the encoding, and JSON object ordering is never involved.
+pub fn canonical_subject_digest(provenance: &Provenance) -> Result<OpaqueId, CompilerError> {
+    let stage_name = match provenance.stage_name {
+        StageName::Ingestion => "Ingestion",
+        StageName::Extraction => "Extraction",
+        StageName::Normalization => "Normalization",
+        StageName::Staging => "Staging",
+        StageName::PublicationGate => "PublicationGate",
+    };
+    // Length-prefixed, fixed order. The generator is local so the temporary
+    // string lives long enough for the borrow.
+    let generation = provenance.attempt_generation.to_string();
+    let mut payload = String::new();
+    for field in [
+        provenance.source_payload_digest.as_str(),
+        provenance.payload_digest_algorithm.as_str(),
+        provenance.canonicalization_version.as_str(),
+        provenance.compiler_version.as_str(),
+        provenance.parameter_digest.as_str(),
+        stage_name,
+        generation.as_str(),
+    ] {
+        payload.push_str(&format!("{}:{}", field.len(), field));
+    }
+    for upstream in &provenance.upstream_outputs {
+        payload.push_str(&format!("{}:{}", upstream.0.len(), upstream.0));
+    }
+    let subject = memory_domain::CanonicalCommitSubjectV1::from_parts(
+        "compiler-derivative",
+        provenance.stage_output_id.0.as_str(),
+        provenance.source_event_id.0.as_str(),
+        payload.as_bytes(),
+    )
+    .map_err(|_| CompilerError::InvalidIdentity)?;
+    OpaqueId::new(format!("{:x}", Sha256::digest(subject.as_bytes())))
+        .map_err(|_| CompilerError::InvalidIdentity)
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -107,6 +152,10 @@ pub enum CompilerError {
     IllegalStateTransition,
     LeaseExpired,
     AdmissionStoreFailure,
+    /// Canonical commit authority could not be established. Carried unchanged
+    /// from the validator so the gate never sees it as a disposition.
+    #[cfg(feature = "sqlite")]
+    CanonicalCommitNotEstablished(crate::admission::CanonicalCommitValidationError),
     /// The stored payload is not valid UTF-8. Kept distinct from
     /// `PayloadDigestMismatch` because no digest can be computed at all: the
     /// bytes never become the `String` the pipeline digests.
@@ -237,33 +286,33 @@ pub struct AcceptedEvent {
 /// `receipt.payload_digest` without recomputing would pass a tampered payload
 /// straight into compilation.
 ///
-/// ponytail: this checks the bytes, not the provenance. `PendingCompileIntent`
-/// has public fields, so any caller can build one by hand and get
-/// `compile_intent_durable: true`. Closing that needs a private constructor or
-/// a witness type in the event-store crate, which is a change to that crate's
-/// public surface; until then the guarantee is "this adapter never launders bad
-/// bytes", not "no one can forge a flag".
+/// The struct is sealed: its fields are private, and its only source is a
+/// store-backed row returned by `SqliteEventStore::pending_compile_intents()`.
+/// Callers cannot construct a forged intent with
+/// `compile_intent_durable: true`. The remaining guarantee boundary is that
+/// the payload bytes are re-digested by this adapter rather than trusted from
+/// the stored receipt or envelope.
 #[cfg(feature = "sqlite")]
 pub fn accepted_event_from(
     intent: &memory_event_store_sqlite::PendingCompileIntent,
 ) -> Result<AcceptedEvent, CompilerError> {
-    let event_id = Identity::new(intent.receipt.event_id.as_str().to_owned())?;
-    let receipt_id = Identity::new(intent.receipt.receipt_id.as_str().to_owned())?;
+    let event_id = Identity::new(intent.receipt().event_id.as_str().to_owned())?;
+    let receipt_id = Identity::new(intent.receipt().receipt_id.as_str().to_owned())?;
 
     // Lossy decoding would silently change the bytes whose digest was accepted.
-    let payload = String::from_utf8(intent.payload_bytes.clone())
+    let payload = String::from_utf8(intent.payload_bytes())
         .map_err(|_| CompilerError::InvalidPayloadEncoding)?;
 
     let computed_digest = raw_payload_digest(&payload);
-    if intent.receipt.payload_digest != computed_digest {
+    if intent.receipt().payload_digest != computed_digest {
         return Err(CompilerError::PayloadDigestMismatch {
-            declared: intent.receipt.payload_digest.clone(),
+            declared: intent.receipt().payload_digest.clone(),
             computed: computed_digest,
         });
     }
-    if intent.envelope.payload_digest != computed_digest {
+    if intent.envelope().payload_digest != computed_digest {
         return Err(CompilerError::PayloadDigestMismatch {
-            declared: intent.envelope.payload_digest.clone(),
+            declared: intent.envelope().payload_digest.clone(),
             computed: computed_digest,
         });
     }
@@ -618,6 +667,7 @@ impl PublicationGate {
     }
 }
 
+#[cfg(feature = "sqlite")]
 pub(crate) fn map_admission_error(error: admission::AdmissionError) -> CompilerError {
     match error {
         admission::AdmissionError::NotFound => CompilerError::MissingProducerAdmission,
@@ -627,11 +677,13 @@ pub(crate) fn map_admission_error(error: admission::AdmissionError) -> CompilerE
 
 /// Reference pipeline: five explicit typed stages.
 /// External authorities remain injected through PublicationAuthority.
+#[cfg(feature = "sqlite")]
 pub struct MemoryCompiler<A> {
     pub authority: A,
     pub admission: admission::AdmissionStore,
 }
 
+#[cfg(feature = "sqlite")]
 impl<A: PublicationAuthority> MemoryCompiler<A> {
     /// Compile only after the caller has durably registered producer work and
     /// every dependency in the local AdmissionStore. A receipt proves only that
@@ -1187,10 +1239,12 @@ mod tests {
         assert_eq!(result.derivative.visibility, Visibility::Hidden);
     }
 
+    #[cfg(feature = "sqlite")]
     fn oid(value: &str) -> OpaqueId {
         OpaqueId::new(value).unwrap()
     }
 
+    #[cfg(feature = "sqlite")]
     fn admission_scope() -> memory_domain::ScopeRef {
         memory_domain::ScopeRef {
             scope_id: oid("scope-1"),
@@ -1199,6 +1253,7 @@ mod tests {
         }
     }
 
+    #[cfg(feature = "sqlite")]
     fn register_compile_inputs(store: &mut admission::AdmissionStore) -> ProducerWorkItemId {
         let producer_id = oid("producer-identity");
         if !store.is_producer_registered(&producer_id).unwrap() {
@@ -1219,6 +1274,7 @@ mod tests {
                 correlation_id: oid("correlation-1"),
                 causation_id: Some(oid("cause-1")),
                 admission_canonical_commit_cursor: Some(oid("canonical-commit-1")),
+                canonical_commit_ref: memory_domain::CanonicalCommitRef::pending_d(),
                 observed_fence_cursor: oid("fence-observation-0"),
                 permission_epoch: oid("permission-epoch-1"),
                 request_digest: "producer-request-1".into(),
@@ -1246,6 +1302,7 @@ mod tests {
         ProducerWorkItemId::new(work_id)
     }
 
+    #[cfg(feature = "sqlite")]
     #[test]
     fn compile_persists_admission_and_publication_receipts_before_returning_visible_derivative() {
         let mut store = admission::AdmissionStore::in_memory().unwrap();
@@ -1281,6 +1338,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "sqlite")]
     #[test]
     fn compile_requires_preexisting_producer_receipt_and_succeeds_after_registration() {
         let mut compiler = MemoryCompiler {
@@ -1308,6 +1366,7 @@ mod tests {
         assert_eq!(result.disposition, PublicationDisposition::Published);
     }
 
+    #[cfg(feature = "sqlite")]
     #[test]
     fn compile_preserves_terminal_suppression_without_persisting_publication_receipt() {
         let mut store = admission::AdmissionStore::in_memory().unwrap();
@@ -1326,6 +1385,7 @@ mod tests {
         assert_eq!(compiler.admission.publication_receipt_count().unwrap(), 0);
     }
 
+    #[cfg(feature = "sqlite")]
     #[test]
     fn compile_returns_typed_error_when_publication_receipt_write_fails() {
         let mut store = admission::AdmissionStore::in_memory().unwrap();
@@ -1392,6 +1452,7 @@ mod state_tests {
         }
     }
 
+    #[cfg(feature = "sqlite")]
     fn normalized() -> NormalizedIR {
         let payload = "A deterministic recovery test.".to_owned();
         let event = AcceptedEvent {
@@ -1406,6 +1467,7 @@ mod state_tests {
         NormalizationStage::run(extracted, 1).unwrap()
     }
 
+    #[cfg(feature = "sqlite")]
     fn staging_input() -> StagingInput {
         StagingInput {
             normalized: normalized(),
@@ -1418,10 +1480,12 @@ mod state_tests {
         }
     }
 
+    #[cfg(feature = "sqlite")]
     struct RecoveryAuthority {
         calls: usize,
     }
 
+    #[cfg(feature = "sqlite")]
     impl PublicationAuthority for RecoveryAuthority {
         fn obtain_proof(
             &mut self,
@@ -1559,6 +1623,7 @@ mod state_tests {
         assert!(!execution.lease_is_current(5));
     }
 
+    #[cfg(feature = "sqlite")]
     #[test]
     fn resume_rejects_terminal_state() {
         let mut compiler = MemoryCompiler {
@@ -1576,6 +1641,7 @@ mod state_tests {
         assert_eq!(compiler.authority.calls, 0);
     }
 
+    #[cfg(feature = "sqlite")]
     #[test]
     fn resume_rejects_stale_lease() {
         let mut compiler = MemoryCompiler {
@@ -1592,6 +1658,7 @@ mod state_tests {
         assert_eq!(compiler.authority.calls, 0);
     }
 
+    #[cfg(feature = "sqlite")]
     #[test]
     fn resume_from_last_durable_stage_skips_completed_work() {
         let mut compiler = MemoryCompiler {
@@ -2016,6 +2083,23 @@ mod outbox_adapter_tests {
         }
     }
 
+    fn envelope_with_raw_payload_digest(payload: &[u8]) -> EventEnvelope {
+        EventEnvelope {
+            event_kind: "observation".into(),
+            source_type: "compiler-test".into(),
+            source_id: id("source-1"),
+            producer_actor_ref: id("actor-1"),
+            scope_refs: vec![scope()],
+            event_time: None,
+            payload_ref: "payload://source-1".into(),
+            payload_digest: format!("sha256:{:x}", Sha256::digest(payload)),
+            classification: EventClassification::Observed,
+            idempotency_key: "compile-test-1".into(),
+            retention_class: "default".into(),
+            correlation_id: id("correlation-1"),
+        }
+    }
+
     /// The positive path: accept, read the outbox, adapt, ingest. Every digest
     /// the compiler sees must be the one the store issued, not one computed
     /// alongside it.
@@ -2044,53 +2128,27 @@ mod outbox_adapter_tests {
         assert_eq!(ingested.payload_digest, receipt.payload_digest);
     }
 
-    /// The negative path that makes the flag mean something: a tampered
-    /// snapshot must not reach `IngestionStage`, and must not come back with
-    /// `compile_intent_durable: true` attached to bytes the store never
-    /// verified.
-    #[test]
-    fn outbox_adapter_rejects_tampered_payload_bytes() {
-        let mut store = SqliteEventStore::in_memory().expect("store should open");
-        let payload = b"Original accepted payload.";
-
-        store
-            .accept_with_payload(envelope(payload), payload, &[scope()])
-            .expect("accept should succeed");
-
-        let pending = store
-            .pending_compile_intents()
-            .expect("outbox read should succeed");
-        let mut tampered = pending[0].clone();
-        tampered.payload_bytes[0] ^= 0x01;
-
-        match accepted_event_from(&tampered) {
-            Err(CompilerError::PayloadDigestMismatch { declared, computed }) => {
-                assert_eq!(declared, tampered.receipt.payload_digest);
-                assert_ne!(declared, computed);
-            }
-            other => panic!("expected PayloadDigestMismatch, got {other:?}"),
-        }
-    }
-
-    /// Non-UTF-8 bytes get their own error rather than being lossily decoded
-    /// into a different payload than the one the store accepted.
+    /// Genuinely non-UTF-8 bytes can be accepted and retrieved intact, but
+    /// the compiler adapter rejects them rather than decoding them lossily.
     #[test]
     fn outbox_adapter_rejects_non_utf8_payload() {
         let mut store = SqliteEventStore::in_memory().expect("store should open");
-        let payload = b"valid start";
+        let payload = &[0xff, 0xfe];
 
         store
-            .accept_with_payload(envelope(payload), payload, &[scope()])
+            .accept_with_payload(
+                envelope_with_raw_payload_digest(payload),
+                payload,
+                &[scope()],
+            )
             .expect("accept should succeed");
 
         let pending = store
             .pending_compile_intents()
             .expect("outbox read should succeed");
-        let mut broken = pending[0].clone();
-        broken.payload_bytes = vec![0xff, 0xfe];
 
         assert_eq!(
-            accepted_event_from(&broken),
+            accepted_event_from(&pending[0]),
             Err(CompilerError::InvalidPayloadEncoding)
         );
     }

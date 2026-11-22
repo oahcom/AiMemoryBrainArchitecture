@@ -4,7 +4,11 @@
 //! ledger. It does not claim to be the D-authoritative producer ledger or to
 //! provide a cross-service D/Storage visibility transaction.
 
-use memory_domain::{OpaqueId, ScopeRef};
+use memory_domain::{
+    is_rfc3339_utc, is_sha256_hex, AuthorizationDecisionData, AuthorizationDecisionKind,
+    AuthorizationDecisionRef, CanonicalCommitData, CanonicalCommitRef, IssuerId, OpaqueId,
+    ScopeRef, DEV_BASELINE_ISSUER, I_DEV_BASELINE_ISSUER,
+};
 use rusqlite::{params, Connection, OptionalExtension, Transaction, TransactionBehavior};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -65,15 +69,33 @@ pub enum AdmissionError {
     Sqlite(rusqlite::Error),
     Serialization(serde_json::Error),
     InvalidInput(&'static str),
-    InvalidTransition { from: WorkState, to: WorkState },
+    InvalidTransition {
+        from: WorkState,
+        to: WorkState,
+    },
     IdempotencyConflict,
     ProducerAlreadyRegistered,
-    ProducerNotRegistered { producer_id: String },
+    ProducerNotRegistered {
+        producer_id: String,
+    },
     NotFound,
     DependencySetIncomplete,
-    StaleFence { expected: u64, actual: u64 },
-    StaleProtocol { expected: u64, actual: u64 },
+    StaleFence {
+        expected: u64,
+        actual: u64,
+    },
+    StaleProtocol {
+        expected: u64,
+        actual: u64,
+    },
     ReceiptMismatch,
+    /// Canonical commit validation could not establish authority. §4.2 of
+    /// `D-OWNER-DECISION-CANONICAL-COMMIT-001`: a missing or unreadable record
+    /// is an authority failure, never `Ok(false)`.
+    CanonicalCommit(CanonicalCommitValidationError),
+    /// Authorization decision validation could not establish a matching
+    /// durable I record.
+    AuthorizationDecision(AuthorizationDecisionValidationError),
 }
 
 impl std::fmt::Display for AdmissionError {
@@ -106,6 +128,10 @@ impl std::fmt::Display for AdmissionError {
                 f,
                 "dependency receipt set does not match the registered artifact"
             ),
+            Self::CanonicalCommit(e) => write!(f, "canonical commit not established: {e}"),
+            Self::AuthorizationDecision(e) => {
+                write!(f, "authorization decision not established: {e}")
+            }
         }
     }
 }
@@ -137,6 +163,11 @@ pub struct ProducerRegistrationRequest {
     /// Caller-supplied cursor, persisted without validation. Its presence is not
     /// evidence that a canonical commit was confirmed (D6.3).
     pub admission_canonical_commit_cursor: Option<OpaqueId>,
+    /// The reference the cursor selects. Only an issued reference can validate,
+    /// and only against the durable `canonical_commits` row. Rows written before
+    /// this field existed decode as `pending_d()`, which never validates (§6).
+    #[serde(default = "pending_canonical_commit_ref")]
+    pub canonical_commit_ref: CanonicalCommitRef,
     pub observed_fence_cursor: OpaqueId,
     pub permission_epoch: OpaqueId,
     pub request_digest: String,
@@ -205,6 +236,94 @@ pub struct PublicationGateRequest {
     pub scope_refs: Vec<ScopeRef>,
     pub request_digest: String,
 }
+
+/// Why a canonical commit could not be established (§4.2 of
+/// `D-OWNER-DECISION-CANONICAL-COMMIT-001`).
+///
+/// Every variant maps to `Err` at the validator boundary. `Ok(false)` is
+/// reserved for exactly one case: a readable record whose subject digest does
+/// not equal the expected one.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub enum CanonicalCommitValidationError {
+    /// The reference is `pending_d()`; it carries no commit evidence.
+    PendingReference,
+    /// The cursor is a lookup selector and must name the reference's commit.
+    CursorMismatch,
+    /// No durable `canonical_commits` row exists for the commit id.
+    RecordMissing,
+    /// The stored row exists but is not a well-formed record.
+    RecordMalformed,
+    /// A stored field differs from the reference it is supposed to back.
+    RecordMismatch(&'static str),
+    /// The issuer is not the dev-baseline trust anchor.
+    UnsupportedIssuer,
+    /// The database could not be read.
+    ReadFailed,
+}
+
+impl std::fmt::Display for CanonicalCommitValidationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::PendingReference => write!(f, "reference is pending"),
+            Self::CursorMismatch => write!(f, "cursor does not select the reference's commit"),
+            Self::RecordMissing => write!(f, "no durable canonical commit record"),
+            Self::RecordMalformed => write!(f, "canonical commit record is malformed"),
+            Self::RecordMismatch(field) => {
+                write!(f, "canonical commit record disagrees on {field}")
+            }
+            Self::UnsupportedIssuer => write!(f, "issuer is not on the dev-baseline allowlist"),
+            Self::ReadFailed => write!(f, "canonical commit record is unreadable"),
+        }
+    }
+}
+
+impl std::error::Error for CanonicalCommitValidationError {}
+
+/// Why a durable authorization decision could not be validated.
+///
+/// Missing and unreadable records are errors, never `Ok(false)`.
+/// `Ok(false)` is reserved exclusively for a matching record whose
+/// subject digest differs from the expected digest.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum AuthorizationDecisionValidationError {
+    /// The reference does not carry issued decision data.
+    PendingReference,
+    /// No durable authorization decision row exists.
+    RecordMissing,
+    /// The stored row is not a well-formed record.
+    RecordMalformed,
+    /// A stored field differs from the issued reference.
+    RecordMismatch(&'static str),
+    /// The issuer is not the I dev-baseline trust anchor.
+    UnsupportedIssuer,
+    /// The database could not be read.
+    ReadFailed,
+}
+
+impl std::fmt::Display for AuthorizationDecisionValidationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::PendingReference => write!(f, "reference is pending"),
+            Self::RecordMissing => {
+                write!(f, "no durable authorization decision record")
+            }
+            Self::RecordMalformed => {
+                write!(f, "authorization decision record is malformed")
+            }
+            Self::RecordMismatch(field) => {
+                write!(f, "authorization decision record disagrees on {field}")
+            }
+            Self::UnsupportedIssuer => {
+                write!(f, "issuer is not on the I dev-baseline allowlist")
+            }
+            Self::ReadFailed => {
+                write!(f, "authorization decision record is unreadable")
+            }
+        }
+    }
+}
+
+impl std::error::Error for AuthorizationDecisionValidationError {}
 
 /// Durable publication decision bound to the exact artifact, dependencies,
 /// fence generation and permission epoch, per §4.3.
@@ -297,6 +416,28 @@ impl AdmissionStore {
                 artifact_version TEXT NOT NULL,
                 request_digest TEXT NOT NULL,
                 receipt_json TEXT NOT NULL
+             );
+             CREATE TABLE IF NOT EXISTS canonical_commits (
+                commit_id       TEXT PRIMARY KEY NOT NULL,
+                issuer_id       TEXT NOT NULL,
+                subject_digest  TEXT NOT NULL,
+                issued_at       TEXT NOT NULL,
+                signature       TEXT NOT NULL
+             );
+             CREATE TABLE IF NOT EXISTS authorization_decisions (
+                decision_id      TEXT PRIMARY KEY NOT NULL,
+                issuer_id        TEXT NOT NULL,
+                subject_digest   TEXT NOT NULL,
+                issued_at        TEXT NOT NULL,
+                decision_kind    TEXT NOT NULL,
+                signature        TEXT NOT NULL
+             );
+             CREATE TABLE IF NOT EXISTS i_attestations (
+                attestation_id   TEXT PRIMARY KEY NOT NULL,
+                issuer_id        TEXT NOT NULL,
+                subject_digest   TEXT NOT NULL,
+                issued_at        TEXT NOT NULL,
+                signature        TEXT NOT NULL
              );"
         )?;
         Ok(())
@@ -908,6 +1049,392 @@ impl AdmissionStore {
         let bytes = serde_json::to_vec(request)?;
         Ok(format!("{:x}", Sha256::digest(bytes)))
     }
+
+    /// Insert one immutable `canonical_commits` row and return the reference that
+    /// names it (`D-OWNER-DECISION-CANONICAL-COMMIT-001` §3).
+    ///
+    /// The row is written before the reference escapes, in a single transaction
+    /// with `synchronous=FULL`, so a returned reference always names a committed
+    /// row. A byte-identical replay is idempotent; the same `commit_id` with any
+    /// differing field is an integrity conflict. There is no update or delete.
+    ///
+    /// Dev baseline only: `signature` is the empty string (see §7). This is the
+    /// issuer's write path, not the compiler's; the publication authority never
+    /// calls it.
+    pub fn issue_canonical_commit(
+        &mut self,
+        commit_id: &OpaqueId,
+        issuer: &IssuerId,
+        subject_digest: &OpaqueId,
+        issued_at: &str,
+    ) -> Result<CanonicalCommitRef, AdmissionError> {
+        if issuer.as_str() != DEV_BASELINE_ISSUER {
+            return Err(AdmissionError::InvalidInput(
+                "issuer is not on the dev-baseline allowlist",
+            ));
+        }
+        if !is_sha256_hex(subject_digest.as_str()) || !is_rfc3339_utc(issued_at) {
+            return Err(AdmissionError::InvalidInput(
+                "subject digest or issued_at is not in canonical form",
+            ));
+        }
+        let data = CanonicalCommitData {
+            commit_id: commit_id.clone(),
+            issuer: issuer.clone(),
+            subject_digest: subject_digest.clone(),
+            issued_at: issued_at.to_owned(),
+        };
+        let reference = CanonicalCommitRef::from_issued_data(data)
+            .map_err(|_| AdmissionError::InvalidInput("canonical commit fields"))?;
+
+        let tx = self
+            .connection
+            .transaction_with_behavior(TransactionBehavior::Immediate)?;
+        let inserted = tx.execute(
+            "INSERT INTO canonical_commits(commit_id,issuer_id,subject_digest,issued_at,signature)
+             VALUES(?1,?2,?3,?4,'')",
+            params![
+                commit_id.as_str(),
+                issuer.as_str(),
+                subject_digest.as_str(),
+                issued_at
+            ],
+        );
+        match inserted {
+            Ok(_) => {}
+            Err(rusqlite::Error::SqliteFailure(ref code, _))
+                if code.code == rusqlite::ErrorCode::ConstraintViolation =>
+            {
+                // A duplicate primary key is either an idempotent replay or an
+                // integrity conflict; only byte-identical fields are a replay.
+                let stored = read_canonical_commit(&tx, commit_id)?;
+                let identical = stored.issuer_id == issuer.as_str()
+                    && stored.subject_digest == subject_digest.as_str()
+                    && stored.issued_at == issued_at;
+                if !identical {
+                    return Err(AdmissionError::IdempotencyConflict);
+                }
+            }
+            Err(error) => return Err(AdmissionError::Sqlite(error)),
+        }
+        tx.commit()?;
+        Ok(reference)
+    }
+
+    /// Record-backed, three-outcome canonical commit validation (§4).
+    ///
+    /// `Ok(true)` — issued reference, cursor equal to its `commit_id`, a readable
+    /// row whose commit id, issuer, digest and timestamp match the reference, an
+    /// allowlisted issuer, and a stored digest equal to
+    /// `expected_subject_digest`.
+    ///
+    /// `Ok(false)` — the row exists and is readable and every reference field
+    /// matches it, but the stored subject digest differs from the expected one.
+    ///
+    /// `Err(..)` — everything else, including a missing row. A missing record is
+    /// never `Ok(false)`: authority failures stay errors
+    /// (`memory-compiler/src/lib.rs`, publication gate contract).
+    pub fn validate_canonical_commit(
+        &self,
+        cursor: &OpaqueId,
+        reference: &CanonicalCommitRef,
+        expected_subject_digest: &OpaqueId,
+    ) -> Result<bool, CanonicalCommitValidationError> {
+        let data = reference
+            .data()
+            .ok_or(CanonicalCommitValidationError::PendingReference)?;
+        if cursor != &data.commit_id {
+            return Err(CanonicalCommitValidationError::CursorMismatch);
+        }
+
+        let stored =
+            read_canonical_commit(&self.connection, &data.commit_id).map_err(
+                |error| match error {
+                    rusqlite::Error::QueryReturnedNoRows => {
+                        CanonicalCommitValidationError::RecordMissing
+                    }
+                    _ => CanonicalCommitValidationError::ReadFailed,
+                },
+            )?;
+
+        // Shape first: a corrupt row is malformed whatever the reference repeats,
+        // and a non-allowlisted issuer is never trustworthy. `from_issued_data`
+        // pins the reference's issuer to the allowlist, so this also covers an
+        // issuer disagreement.
+        if stored.issuer_id != DEV_BASELINE_ISSUER {
+            return Err(CanonicalCommitValidationError::UnsupportedIssuer);
+        }
+        if !is_sha256_hex(&stored.subject_digest) || !is_rfc3339_utc(&stored.issued_at) {
+            return Err(CanonicalCommitValidationError::RecordMalformed);
+        }
+        if stored.subject_digest != data.subject_digest.as_str() {
+            return Err(CanonicalCommitValidationError::RecordMismatch(
+                "subject_digest",
+            ));
+        }
+        if stored.issued_at != data.issued_at {
+            return Err(CanonicalCommitValidationError::RecordMismatch("issued_at"));
+        }
+
+        Ok(stored.subject_digest == expected_subject_digest.as_str())
+    }
+
+    /// Insert one immutable authorization decision and return its
+    /// content-bearing reference.
+    ///
+    /// The durable row is committed before the reference escapes.
+    /// Byte-identical replay is idempotent; conflicting reuse of the
+    /// decision ID is rejected.
+    ///
+    /// Dev baseline only: signature is the empty string.
+    pub fn issue_authorization_decision(
+        &mut self,
+        decision_id: &OpaqueId,
+        issuer: &IssuerId,
+        subject_digest: &OpaqueId,
+        issued_at: &str,
+        decision_kind: AuthorizationDecisionKind,
+    ) -> Result<AuthorizationDecisionRef, AdmissionError> {
+        if issuer.as_str() != I_DEV_BASELINE_ISSUER {
+            return Err(AdmissionError::InvalidInput(
+                "issuer is not on the I dev-baseline allowlist",
+            ));
+        }
+
+        if !is_sha256_hex(subject_digest.as_str()) || !is_rfc3339_utc(issued_at) {
+            return Err(AdmissionError::InvalidInput(
+                "subject digest or issued_at is not in canonical form",
+            ));
+        }
+
+        let data = AuthorizationDecisionData {
+            decision_id: decision_id.clone(),
+            issuer: issuer.clone(),
+            subject_digest: subject_digest.clone(),
+            issued_at: issued_at.to_owned(),
+            decision_kind,
+        };
+
+        let reference = AuthorizationDecisionRef::from_issued_data(data);
+
+        let kind = authorization_decision_kind_str(decision_kind);
+
+        let tx = self
+            .connection
+            .transaction_with_behavior(TransactionBehavior::Immediate)?;
+
+        let inserted = tx.execute(
+            "INSERT INTO authorization_decisions(
+                decision_id,issuer_id,subject_digest,issued_at,decision_kind,signature
+             )
+             VALUES(?1,?2,?3,?4,?5,'')",
+            params![
+                decision_id.as_str(),
+                issuer.as_str(),
+                subject_digest.as_str(),
+                issued_at,
+                kind,
+            ],
+        );
+
+        match inserted {
+            Ok(_) => {}
+            Err(rusqlite::Error::SqliteFailure(ref code, _))
+                if code.code == rusqlite::ErrorCode::ConstraintViolation =>
+            {
+                let stored = read_authorization_decision(&tx, decision_id)?;
+
+                let identical = stored.issuer_id == issuer.as_str()
+                    && stored.subject_digest == subject_digest.as_str()
+                    && stored.issued_at == issued_at
+                    && stored.decision_kind == kind;
+
+                if !identical {
+                    return Err(AdmissionError::IdempotencyConflict);
+                }
+            }
+            Err(error) => return Err(AdmissionError::Sqlite(error)),
+        }
+
+        tx.commit()?;
+        Ok(reference)
+    }
+
+    /// Record-backed authorization decision validation.
+    ///
+    /// Ok(true): all reference fields match the readable durable record,
+    /// the issuer is allowlisted, and the digest matches the expected digest.
+    ///
+    /// Ok(false): all reference fields match the readable durable record,
+    /// but the stored digest differs from the expected digest.
+    ///
+    /// Err(..): every other case, including a missing or unreadable row.
+    ///
+    /// Decision kind is deliberately not an authorization policy check.
+    /// A valid Denied or Conditional decision is still a valid recorded
+    /// decision.
+    pub fn validate_authorization_decision(
+        &self,
+        reference: &AuthorizationDecisionRef,
+        expected_subject_digest: &OpaqueId,
+    ) -> Result<bool, AuthorizationDecisionValidationError> {
+        let data = reference
+            .data()
+            .ok_or(AuthorizationDecisionValidationError::PendingReference)?;
+
+        let stored =
+            read_authorization_decision(&self.connection, &data.decision_id).map_err(|error| {
+                match error {
+                    rusqlite::Error::QueryReturnedNoRows => {
+                        AuthorizationDecisionValidationError::RecordMissing
+                    }
+                    _ => AuthorizationDecisionValidationError::ReadFailed,
+                }
+            })?;
+
+        // Authority check precedes content comparison.
+        if stored.issuer_id != I_DEV_BASELINE_ISSUER {
+            return Err(AuthorizationDecisionValidationError::UnsupportedIssuer);
+        }
+
+        if !is_sha256_hex(&stored.subject_digest)
+            || !is_rfc3339_utc(&stored.issued_at)
+            || !matches!(
+                stored.decision_kind.as_str(),
+                "approved" | "denied" | "conditional"
+            )
+        {
+            return Err(AuthorizationDecisionValidationError::RecordMalformed);
+        }
+
+        if stored.issuer_id != data.issuer.as_str() {
+            return Err(AuthorizationDecisionValidationError::RecordMismatch(
+                "issuer",
+            ));
+        }
+
+        if stored.subject_digest != data.subject_digest.as_str() {
+            return Err(AuthorizationDecisionValidationError::RecordMismatch(
+                "subject_digest",
+            ));
+        }
+
+        if stored.issued_at != data.issued_at {
+            return Err(AuthorizationDecisionValidationError::RecordMismatch(
+                "issued_at",
+            ));
+        }
+
+        let reference_kind = authorization_decision_kind_str(data.decision_kind);
+
+        if stored.decision_kind != reference_kind {
+            return Err(AuthorizationDecisionValidationError::RecordMismatch(
+                "decision_kind",
+            ));
+        }
+
+        Ok(stored.subject_digest == expected_subject_digest.as_str())
+    }
+
+    /// Read the recorded decision kind.
+    ///
+    /// This is a record-reading operation, not an authorization check.
+    /// Denied and Conditional are valid stored decision kinds.
+    pub fn authorization_decision_kind(
+        &self,
+        reference: &AuthorizationDecisionRef,
+    ) -> Result<AuthorizationDecisionKind, AuthorizationDecisionValidationError> {
+        let data = reference
+            .data()
+            .ok_or(AuthorizationDecisionValidationError::PendingReference)?;
+
+        let stored =
+            read_authorization_decision(&self.connection, &data.decision_id).map_err(|error| {
+                match error {
+                    rusqlite::Error::QueryReturnedNoRows => {
+                        AuthorizationDecisionValidationError::RecordMissing
+                    }
+                    _ => AuthorizationDecisionValidationError::ReadFailed,
+                }
+            })?;
+
+        parse_authorization_decision_kind(&stored.decision_kind)
+            .ok_or(AuthorizationDecisionValidationError::RecordMalformed)
+    }
+}
+
+/// One decoded authorization_decisions row.
+struct StoredAuthorizationDecision {
+    issuer_id: String,
+    subject_digest: String,
+    issued_at: String,
+    decision_kind: String,
+}
+
+/// Reads an authorization decision by primary key.
+///
+/// QueryReturnedNoRows is preserved so the caller can distinguish
+/// a missing record from an unreadable database.
+fn read_authorization_decision(
+    connection: &Connection,
+    decision_id: &OpaqueId,
+) -> Result<StoredAuthorizationDecision, rusqlite::Error> {
+    connection.query_row(
+        "SELECT issuer_id,subject_digest,issued_at,decision_kind
+         FROM authorization_decisions
+         WHERE decision_id=?1",
+        [decision_id.as_str()],
+        |row| {
+            Ok(StoredAuthorizationDecision {
+                issuer_id: row.get(0)?,
+                subject_digest: row.get(1)?,
+                issued_at: row.get(2)?,
+                decision_kind: row.get(3)?,
+            })
+        },
+    )
+}
+
+fn authorization_decision_kind_str(kind: AuthorizationDecisionKind) -> &'static str {
+    match kind {
+        AuthorizationDecisionKind::Approved => "approved",
+        AuthorizationDecisionKind::Denied => "denied",
+        AuthorizationDecisionKind::Conditional => "conditional",
+    }
+}
+
+fn parse_authorization_decision_kind(value: &str) -> Option<AuthorizationDecisionKind> {
+    match value {
+        "approved" => Some(AuthorizationDecisionKind::Approved),
+        "denied" => Some(AuthorizationDecisionKind::Denied),
+        "conditional" => Some(AuthorizationDecisionKind::Conditional),
+        _ => None,
+    }
+}
+/// One decoded `canonical_commits` row.
+struct StoredCanonicalCommit {
+    issuer_id: String,
+    subject_digest: String,
+    issued_at: String,
+}
+
+/// Reads a row by primary key. `QueryReturnedNoRows` is preserved so the caller
+/// can distinguish a missing record from an unreadable one.
+fn read_canonical_commit(
+    connection: &Connection,
+    commit_id: &OpaqueId,
+) -> Result<StoredCanonicalCommit, rusqlite::Error> {
+    connection.query_row(
+        "SELECT issuer_id,subject_digest,issued_at FROM canonical_commits WHERE commit_id=?1",
+        [commit_id.as_str()],
+        |row| {
+            Ok(StoredCanonicalCommit {
+                issuer_id: row.get(0)?,
+                subject_digest: row.get(1)?,
+                issued_at: row.get(2)?,
+            })
+        },
+    )
 }
 
 fn read_meta(tx: &Transaction<'_>) -> Result<FenceInstallReceipt, AdmissionError> {
@@ -926,6 +1453,12 @@ fn read_meta(tx: &Transaction<'_>) -> Result<FenceInstallReceipt, AdmissionError
 
 fn encode<T: Serialize>(value: &T) -> Result<String, AdmissionError> {
     Ok(serde_json::to_string(value)?)
+}
+
+/// §6 migration: a persisted request written before the reference existed
+/// decodes as the legacy pending marker, which never validates.
+fn pending_canonical_commit_ref() -> CanonicalCommitRef {
+    CanonicalCommitRef::pending_d()
 }
 fn decode<T: DeserializeOwned>(value: &str) -> Result<T, AdmissionError> {
     Ok(serde_json::from_str(value)?)
@@ -981,6 +1514,35 @@ pub fn timestamp_unix_nanos() -> u128 {
         .as_nanos()
 }
 
+/// The dev-baseline issuer's clock, formatted as RFC 3339 UTC.
+///
+/// Validation checks syntax and equality only; it never decides freshness, so a
+/// small civil-date conversion is enough and no time-zone database is involved.
+pub fn rfc3339_utc_now() -> String {
+    let seconds = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+    let days = (seconds / 86_400) as i64;
+    let of_day = seconds % 86_400;
+    // Howard Hinnant's civil_from_days: shift the epoch to 0000-03-01.
+    let z = days + 719_468;
+    let era = z.div_euclid(146_097);
+    let doe = z.rem_euclid(146_097);
+    let yoe = (doe - doe / 1460 + doe / 36_524 - doe / 146_096) / 365;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    let mp = (5 * doy + 2) / 153;
+    let day = doy - (153 * mp + 2) / 5 + 1;
+    let month = if mp < 10 { mp + 3 } else { mp - 9 };
+    let year = yoe + era * 400 + i64::from(month <= 2);
+    format!(
+        "{year:04}-{month:02}-{day:02}T{:02}:{:02}:{:02}Z",
+        of_day / 3600,
+        (of_day % 3600) / 60,
+        of_day % 60
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1021,6 +1583,7 @@ mod tests {
             correlation_id: id("correlation-1"),
             causation_id: Some(id("cause-1")),
             admission_canonical_commit_cursor: None,
+            canonical_commit_ref: CanonicalCommitRef::pending_d(),
             observed_fence_cursor: id("fence-observation-0"),
             permission_epoch: id("permission-epoch-1"),
             request_digest: "request-digest-1".into(),
@@ -1393,5 +1956,470 @@ mod tests {
         let _ = std::fs::remove_file(&path);
         let _ = std::fs::remove_file(path.with_extension("sqlite-wal"));
         let _ = std::fs::remove_file(path.with_extension("sqlite-shm"));
+    }
+
+    // ---- canonical commit record and validator (§3, §4, §8 criterion 7) ----
+
+    fn issued_store() -> (AdmissionStore, OpaqueId, CanonicalCommitRef, OpaqueId) {
+        let mut db = AdmissionStore::in_memory().unwrap();
+        let commit_id = id("commit-1");
+        let subject = OpaqueId::new("b".repeat(64)).unwrap();
+        let reference = db
+            .issue_canonical_commit(
+                &commit_id,
+                &IssuerId::new(DEV_BASELINE_ISSUER).unwrap(),
+                &subject,
+                "2026-11-22T00:00:00Z",
+            )
+            .unwrap();
+        (db, commit_id, reference, subject)
+    }
+
+    #[test]
+    fn validator_confirms_a_matching_record() {
+        let (db, cursor, reference, subject) = issued_store();
+        assert_eq!(
+            db.validate_canonical_commit(&cursor, &reference, &subject),
+            Ok(true)
+        );
+    }
+
+    #[test]
+    fn validator_reports_false_for_a_subject_digest_mismatch() {
+        let (db, cursor, reference, _) = issued_store();
+        let other = OpaqueId::new("c".repeat(64)).unwrap();
+        assert_eq!(
+            db.validate_canonical_commit(&cursor, &reference, &other),
+            Ok(false),
+            "a readable, matching record with a different subject is a content mismatch"
+        );
+    }
+
+    #[test]
+    fn validator_reports_a_missing_record_as_an_error_not_false() {
+        let (db, cursor, reference, subject) = issued_store();
+        let absent = id("commit-never-issued");
+        let forged = CanonicalCommitRef::from_issued_data(CanonicalCommitData {
+            commit_id: absent.clone(),
+            issuer: IssuerId::new(DEV_BASELINE_ISSUER).unwrap(),
+            subject_digest: subject.clone(),
+            issued_at: "2026-11-22T00:00:00Z".into(),
+        })
+        .unwrap();
+        assert_eq!(
+            db.validate_canonical_commit(&absent, &forged, &subject),
+            Err(CanonicalCommitValidationError::RecordMissing)
+        );
+        // The issued row still validates; the forged one did not disturb it.
+        assert_eq!(
+            db.validate_canonical_commit(&cursor, &reference, &subject),
+            Ok(true)
+        );
+    }
+
+    #[test]
+    fn validator_rejects_a_pending_reference() {
+        let (db, cursor, _, subject) = issued_store();
+        assert_eq!(
+            db.validate_canonical_commit(&cursor, &CanonicalCommitRef::pending_d(), &subject),
+            Err(CanonicalCommitValidationError::PendingReference)
+        );
+    }
+
+    #[test]
+    fn validator_rejects_a_cursor_that_does_not_select_the_reference() {
+        let (db, _, reference, subject) = issued_store();
+        assert_eq!(
+            db.validate_canonical_commit(&id("commit-other"), &reference, &subject),
+            Err(CanonicalCommitValidationError::CursorMismatch)
+        );
+    }
+
+    #[test]
+    fn validator_rejects_an_issuer_mismatch_as_an_authority_failure() {
+        let (db, cursor, reference, subject) = issued_store();
+        db.connection
+            .execute(
+                "UPDATE canonical_commits SET issuer_id='someone-else' WHERE commit_id=?1",
+                [cursor.as_str()],
+            )
+            .unwrap();
+        assert_eq!(
+            db.validate_canonical_commit(&cursor, &reference, &subject),
+            Err(CanonicalCommitValidationError::UnsupportedIssuer)
+        );
+    }
+
+    #[test]
+    fn issuance_refuses_an_issuer_outside_the_allowlist() {
+        let mut db = AdmissionStore::in_memory().unwrap();
+        assert!(matches!(
+            db.issue_canonical_commit(
+                &id("commit-rogue"),
+                &IssuerId::new("someone-else").unwrap(),
+                &OpaqueId::new("d".repeat(64)).unwrap(),
+                "2026-11-22T00:00:00Z"
+            ),
+            Err(AdmissionError::InvalidInput(_))
+        ));
+        // Nothing was written.
+        assert_eq!(
+            db.validate_canonical_commit(
+                &id("commit-rogue"),
+                &CanonicalCommitRef::pending_d(),
+                &OpaqueId::new("d".repeat(64)).unwrap()
+            ),
+            Err(CanonicalCommitValidationError::PendingReference)
+        );
+    }
+
+    #[test]
+    fn validator_rejects_a_record_that_disagrees_with_the_reference() {
+        let (db, cursor, reference, subject) = issued_store();
+        db.connection
+            .execute(
+                "UPDATE canonical_commits SET subject_digest=?2 WHERE commit_id=?1",
+                params![cursor.as_str(), "9".repeat(64)],
+            )
+            .unwrap();
+        assert_eq!(
+            db.validate_canonical_commit(&cursor, &reference, &subject),
+            Err(CanonicalCommitValidationError::RecordMismatch(
+                "subject_digest"
+            ))
+        );
+
+        let (db, cursor, reference, subject) = issued_store();
+        db.connection
+            .execute(
+                "UPDATE canonical_commits SET issued_at='2026-11-23T00:00:00Z' WHERE commit_id=?1",
+                [cursor.as_str()],
+            )
+            .unwrap();
+        assert_eq!(
+            db.validate_canonical_commit(&cursor, &reference, &subject),
+            Err(CanonicalCommitValidationError::RecordMismatch("issued_at"))
+        );
+    }
+
+    #[test]
+    fn validator_rejects_a_malformed_record() {
+        let (db, cursor, reference, subject) = issued_store();
+        db.connection
+            .execute(
+                "UPDATE canonical_commits SET subject_digest='not-a-digest' WHERE commit_id=?1",
+                [cursor.as_str()],
+            )
+            .unwrap();
+        assert_eq!(
+            db.validate_canonical_commit(&cursor, &reference, &subject),
+            Err(CanonicalCommitValidationError::RecordMalformed)
+        );
+
+        let (db, cursor, reference, subject) = issued_store();
+        db.connection
+            .execute(
+                "UPDATE canonical_commits SET issued_at='yesterday' WHERE commit_id=?1",
+                [cursor.as_str()],
+            )
+            .unwrap();
+        assert_eq!(
+            db.validate_canonical_commit(&cursor, &reference, &subject),
+            Err(CanonicalCommitValidationError::RecordMalformed)
+        );
+    }
+
+    #[test]
+    fn validator_reports_an_unreadable_database_as_an_error() {
+        let (db, cursor, reference, subject) = issued_store();
+        db.connection
+            .execute_batch("DROP TABLE canonical_commits;")
+            .unwrap();
+        assert_eq!(
+            db.validate_canonical_commit(&cursor, &reference, &subject),
+            Err(CanonicalCommitValidationError::ReadFailed)
+        );
+    }
+
+    #[test]
+    fn issuance_is_idempotent_only_for_byte_identical_rows() {
+        let mut db = AdmissionStore::in_memory().unwrap();
+        let commit_id = id("commit-1");
+        let issuer = IssuerId::new(DEV_BASELINE_ISSUER).unwrap();
+        let subject = OpaqueId::new("e".repeat(64)).unwrap();
+        let first = db
+            .issue_canonical_commit(&commit_id, &issuer, &subject, "2026-11-22T00:00:00Z")
+            .unwrap();
+        let replay = db
+            .issue_canonical_commit(&commit_id, &issuer, &subject, "2026-11-22T00:00:00Z")
+            .unwrap();
+        assert_eq!(first, replay);
+        assert!(matches!(
+            db.issue_canonical_commit(&commit_id, &issuer, &subject, "2026-11-23T00:00:00Z"),
+            Err(AdmissionError::IdempotencyConflict)
+        ));
+    }
+
+    // ---- authorization decision record and validator ----
+
+    fn issued_authorization_store(
+        kind: AuthorizationDecisionKind,
+    ) -> (AdmissionStore, AuthorizationDecisionRef, OpaqueId) {
+        let mut db = AdmissionStore::in_memory().unwrap();
+
+        let decision_id = id("authorization-decision-1");
+        let subject = OpaqueId::new("a".repeat(64)).unwrap();
+
+        let reference = db
+            .issue_authorization_decision(
+                &decision_id,
+                &IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap(),
+                &subject,
+                "2026-11-22T00:00:00Z",
+                kind,
+            )
+            .unwrap();
+
+        (db, reference, subject)
+    }
+
+    #[test]
+    fn authorization_validator_accepts_approved_decision() {
+        let (db, reference, subject) =
+            issued_authorization_store(AuthorizationDecisionKind::Approved);
+
+        assert_eq!(
+            db.validate_authorization_decision(&reference, &subject),
+            Ok(true)
+        );
+    }
+
+    #[test]
+    fn authorization_validator_accepts_denied_decision() {
+        let (db, reference, subject) =
+            issued_authorization_store(AuthorizationDecisionKind::Denied);
+
+        assert_eq!(
+            db.validate_authorization_decision(&reference, &subject),
+            Ok(true)
+        );
+    }
+
+    #[test]
+    fn authorization_validator_accepts_conditional_decision() {
+        let (db, reference, subject) =
+            issued_authorization_store(AuthorizationDecisionKind::Conditional);
+
+        assert_eq!(
+            db.validate_authorization_decision(&reference, &subject),
+            Ok(true)
+        );
+    }
+
+    #[test]
+    fn authorization_validator_reports_missing_record_as_error() {
+        let (db, reference, subject) =
+            issued_authorization_store(AuthorizationDecisionKind::Approved);
+
+        let mut data = reference.data().unwrap().clone();
+        data.decision_id = id("authorization-decision-never-issued");
+
+        let missing = AuthorizationDecisionRef::from_issued_data(data);
+
+        assert_eq!(
+            db.validate_authorization_decision(&missing, &subject),
+            Err(AuthorizationDecisionValidationError::RecordMissing)
+        );
+    }
+
+    #[test]
+    fn authorization_validator_rejects_unsupported_issuer() {
+        let (db, reference, subject) =
+            issued_authorization_store(AuthorizationDecisionKind::Approved);
+
+        let decision_id = reference.data().unwrap().decision_id.clone();
+
+        db.connection
+            .execute(
+                "UPDATE authorization_decisions
+                 SET issuer_id='someone-else'
+                 WHERE decision_id=?1",
+                [decision_id.as_str()],
+            )
+            .unwrap();
+
+        assert_eq!(
+            db.validate_authorization_decision(&reference, &subject),
+            Err(AuthorizationDecisionValidationError::UnsupportedIssuer)
+        );
+    }
+
+    #[test]
+    fn authorization_validator_rejects_subject_digest_reference_mismatch() {
+        let (db, reference, subject) =
+            issued_authorization_store(AuthorizationDecisionKind::Approved);
+
+        let decision_id = reference.data().unwrap().decision_id.clone();
+
+        db.connection
+            .execute(
+                "UPDATE authorization_decisions
+                 SET subject_digest=?2
+                 WHERE decision_id=?1",
+                params![decision_id.as_str(), "9".repeat(64)],
+            )
+            .unwrap();
+
+        assert_eq!(
+            db.validate_authorization_decision(&reference, &subject),
+            Err(AuthorizationDecisionValidationError::RecordMismatch(
+                "subject_digest"
+            ))
+        );
+    }
+
+    #[test]
+    fn authorization_validator_rejects_issued_at_reference_mismatch() {
+        let (db, reference, subject) =
+            issued_authorization_store(AuthorizationDecisionKind::Approved);
+
+        let decision_id = reference.data().unwrap().decision_id.clone();
+
+        db.connection
+            .execute(
+                "UPDATE authorization_decisions
+                 SET issued_at='2026-11-23T00:00:00Z'
+                 WHERE decision_id=?1",
+                [decision_id.as_str()],
+            )
+            .unwrap();
+
+        assert_eq!(
+            db.validate_authorization_decision(&reference, &subject),
+            Err(AuthorizationDecisionValidationError::RecordMismatch(
+                "issued_at"
+            ))
+        );
+    }
+
+    #[test]
+    fn authorization_validator_rejects_decision_kind_reference_mismatch() {
+        let (db, reference, subject) =
+            issued_authorization_store(AuthorizationDecisionKind::Approved);
+
+        let decision_id = reference.data().unwrap().decision_id.clone();
+
+        db.connection
+            .execute(
+                "UPDATE authorization_decisions
+                 SET decision_kind='denied'
+                 WHERE decision_id=?1",
+                [decision_id.as_str()],
+            )
+            .unwrap();
+
+        assert_eq!(
+            db.validate_authorization_decision(&reference, &subject),
+            Err(AuthorizationDecisionValidationError::RecordMismatch(
+                "decision_kind"
+            ))
+        );
+    }
+
+    #[test]
+    fn authorization_validator_reports_dropped_table_as_read_failed() {
+        let (db, reference, subject) =
+            issued_authorization_store(AuthorizationDecisionKind::Approved);
+
+        db.connection
+            .execute_batch("DROP TABLE authorization_decisions;")
+            .unwrap();
+
+        assert_eq!(
+            db.validate_authorization_decision(&reference, &subject),
+            Err(AuthorizationDecisionValidationError::ReadFailed)
+        );
+    }
+
+    #[test]
+    fn authorization_decision_kind_returns_denied_without_rejecting_it() {
+        let (db, reference, _) = issued_authorization_store(AuthorizationDecisionKind::Denied);
+
+        assert_eq!(
+            db.authorization_decision_kind(&reference),
+            Ok(AuthorizationDecisionKind::Denied)
+        );
+    }
+
+    #[test]
+    fn authorization_validator_returns_false_only_for_expected_digest_mismatch() {
+        let (db, reference, _) = issued_authorization_store(AuthorizationDecisionKind::Approved);
+
+        let other = OpaqueId::new("c".repeat(64)).unwrap();
+
+        assert_eq!(
+            db.validate_authorization_decision(&reference, &other),
+            Ok(false)
+        );
+    }
+
+    #[test]
+    fn authorization_issuance_is_idempotent_only_for_identical_rows() {
+        let mut db = AdmissionStore::in_memory().unwrap();
+
+        let decision_id = id("authorization-decision-replay");
+        let issuer = IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap();
+        let subject = OpaqueId::new("d".repeat(64)).unwrap();
+
+        let first = db
+            .issue_authorization_decision(
+                &decision_id,
+                &issuer,
+                &subject,
+                "2026-11-22T00:00:00Z",
+                AuthorizationDecisionKind::Approved,
+            )
+            .unwrap();
+
+        let replay = db
+            .issue_authorization_decision(
+                &decision_id,
+                &issuer,
+                &subject,
+                "2026-11-22T00:00:00Z",
+                AuthorizationDecisionKind::Approved,
+            )
+            .unwrap();
+
+        assert_eq!(first, replay);
+
+        assert!(matches!(
+            db.issue_authorization_decision(
+                &decision_id,
+                &issuer,
+                &subject,
+                "2026-11-22T00:00:00Z",
+                AuthorizationDecisionKind::Denied,
+            ),
+            Err(AdmissionError::IdempotencyConflict)
+        ));
+    }
+
+    #[test]
+    fn a_request_row_written_before_the_reference_existed_decodes_as_pending() {
+        // §6: the field is additive and defaults to the legacy marker, which
+        // never validates. The stored JSON below is the pre-change shape.
+        let legacy = r#"{
+            "producer_work_item_id":"work-1","producer_class":"compiler",
+            "producer_identity":"producer-identity","source_refs":["event-1"],
+            "source_lineage_digest":"lineage-1",
+            "scope_refs":[{"scope_id":"scope-1","scope_kind":"User","namespace_key":"user:scope-1"}],
+            "operation_id":"operation-1","correlation_id":"correlation-1","causation_id":null,
+            "admission_canonical_commit_cursor":"cursor-1",
+            "observed_fence_cursor":"fence-observation-0","permission_epoch":"permission-epoch-1",
+            "request_digest":"request-digest-1","producer_schema_version":"v1"
+        }"#;
+        let request: ProducerRegistrationRequest = decode(legacy).unwrap();
+        assert!(request.canonical_commit_ref.is_pending());
     }
 }

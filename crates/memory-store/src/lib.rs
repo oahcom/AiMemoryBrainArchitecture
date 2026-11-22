@@ -2,7 +2,10 @@
 //! 仅负责领域校验、Scope 边界与 Storage Port 编排；不拥有持久化实现。
 
 use memory_domain::{Memory, MemoryVersion, OpaqueId, ScopeRef};
-use memory_storage::{CommitReceipt, CommitRequest, MemoryStorage, StorageError};
+use memory_storage::{
+    CommitReceipt, CommitRequest, MemoryStorage, PrepareRequest, PreparedCommitReceipt,
+    PublicationState, StorageError,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MemoryStoreError {
@@ -102,6 +105,59 @@ impl<S: MemoryStorage> MemoryStore<S> {
             },
             scope,
         )?)
+    }
+
+    /// Stage a revision as hidden.
+    ///
+    /// The version becomes durable but is neither the current pointer nor
+    /// readable through `read_revision` until `publish_prepared` authorizes it.
+    /// `PrepareRequest` keeps together everything that must survive the staging
+    /// window: the expected current version (a stale value yields
+    /// `StaleVersion`), the `idempotency_key`/`request_digest` pair, and the
+    /// publication identity (`publication_id`, `generation`) that
+    /// `publish_prepared` and `publication_state` address afterwards.
+    pub fn prepare_version(
+        &mut self,
+        request: PrepareRequest,
+        scope: &[ScopeRef],
+    ) -> Result<PreparedCommitReceipt, MemoryStoreError> {
+        validate_scope(scope)?;
+        Ok(self.storage.prepare_version(request, scope)?)
+    }
+
+    /// Publish a prepared revision.
+    ///
+    /// `expected_current_version` is the concurrency fence, not a hint: it must
+    /// equal both the value captured at prepare time and the memory's current
+    /// pointer, otherwise `StaleVersion` is returned. Passing a wrong value here
+    /// would turn a stale-version conflict into a silent overwrite, so the
+    /// storage re-validates the parent at publish time as well.
+    pub fn publish_prepared(
+        &mut self,
+        publication_id: &str,
+        expected_current_version: Option<OpaqueId>,
+        scope: &[ScopeRef],
+    ) -> Result<CommitReceipt, MemoryStoreError> {
+        validate_scope(scope)?;
+        Ok(self
+            .storage
+            .publish_prepared(publication_id, expected_current_version, scope)?)
+    }
+
+    /// The persisted publication state of one publication.
+    ///
+    /// Authoritative for callers outside the storage layer: it reads the stored
+    /// preparation row rather than a local view, so a `Published` answer means
+    /// the canonical commit already happened. Visibility follows `read_current`:
+    /// absent or forgotten yields `Ok(None)`, non-intersecting scope yields
+    /// `ScopeMismatch`.
+    pub fn publication_state(
+        &self,
+        publication_id: &str,
+        scope: &[ScopeRef],
+    ) -> Result<Option<PublicationState>, MemoryStoreError> {
+        validate_scope(scope)?;
+        Ok(self.storage.publication_state(publication_id, scope)?)
     }
 
     pub fn resolve_idempotency(

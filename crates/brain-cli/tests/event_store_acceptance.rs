@@ -80,6 +80,68 @@ fn execute(input: &Path, output: &Path, event_database: Option<&Path>) -> Output
     command.output().expect("spawn brain CLI")
 }
 
+/// The Owner ruling of 2026-11-22 made compile results deliberately ephemeral:
+/// `run_compiler_stage` gets `storage_path` and `admission_path` from
+/// `TemporaryDatabase`, which deletes both in `Drop`, so the only durable
+/// artifact a compile leaves behind is the accepted event and its outbox row.
+///
+/// This test pins the part of that contract that is observable from outside the
+/// binary. If someone adds a `--storage` flag or starts persisting a result, the
+/// outbox count or the snapshot will move, and the change has to be argued for
+/// instead of slipping in.
+///
+/// ponytail: this checks the outbox and the output, not the schema. A table
+/// named something unexpected would pass. Checking `sqlite_master` would mean
+/// adding `rusqlite` as a `brain-cli` dev-dependency to read a file this crate
+/// does not otherwise open; when a durable result actually appears, that is the
+/// moment to pay for it, not now.
+#[test]
+fn compile_leaves_no_durable_result_behind() {
+    let directory = TestDirectory::new();
+    let input = TestDirectory::fixture();
+    let database = directory.event_database();
+    let first = directory.output();
+    let second = directory.path.join("context-second.json");
+
+    assert_success(&execute(&input, &first, Some(&database)));
+
+    let store = SqliteEventStore::open(&database).expect("open event store");
+    let intents_after_first = store
+        .pending_compile_intents()
+        .expect("read pending compile intents");
+    drop(store);
+
+    assert_success(&execute(&input, &second, Some(&database)));
+
+    let store = SqliteEventStore::open(&database).expect("open event store");
+    let intents_after_second = store
+        .pending_compile_intents()
+        .expect("read pending compile intents");
+    drop(store);
+
+    // A second compile must not enqueue a second intent. `compile_outbox.event_row`
+    // is UNIQUE, so a growing count would mean someone added a second row per
+    // attempt, which is the first half of "a compile result became durable".
+    assert_eq!(
+        intents_after_first.len(),
+        1,
+        "one accepted event must produce exactly one compile intent"
+    );
+    assert_eq!(
+        intents_after_second.len(),
+        1,
+        "a re-run must re-read the same intent, not enqueue another"
+    );
+
+    // And both runs must agree. They can only agree if neither wrote a result
+    // the other one read.
+    assert_eq!(
+        fs::read(&first).expect("read first snapshot"),
+        fs::read(&second).expect("read second snapshot"),
+        "two runs of the same event must produce the same snapshot"
+    );
+}
+
 fn receipt_id(stderr: &str) -> String {
     stderr
         .lines()
@@ -206,35 +268,35 @@ fn repeated_processes_reuse_receipt_and_create_only_one_compile_intent() {
     let second_intent = &second_snapshot[0];
 
     // The accepted work must be a compile intent with the exact fixture payload.
-    assert_eq!(first_intent.intent_kind, "compile");
+    assert_eq!(first_intent.intent_kind(), "compile");
     assert_eq!(
-        first_intent.payload_bytes,
+        first_intent.payload_bytes(),
         b"The project uses a governed memory context."
     );
 
     // Acceptance is durable, but compilation has not been acknowledged.
     assert_eq!(
-        first_intent.receipt.processing_state,
+        first_intent.receipt().processing_state,
         ProcessingState::Pending
     );
 
     // Both persisted row identities must remain stable across the retry.
-    assert_eq!(first_intent.outbox_row, second_intent.outbox_row);
-    assert_eq!(first_intent.event_row, second_intent.event_row);
+    assert_eq!(first_intent.outbox_row(), second_intent.outbox_row());
+    assert_eq!(first_intent.event_row(), second_intent.event_row());
 
     // The receipt and payload must remain unchanged across the retry.
-    assert_eq!(first_intent.receipt, second_intent.receipt);
-    assert_eq!(first_intent.payload_bytes, second_intent.payload_bytes);
+    assert_eq!(first_intent.receipt(), second_intent.receipt());
+    assert_eq!(first_intent.payload_bytes(), second_intent.payload_bytes());
 
     // EventStore status must agree with the persisted receipt.
     let status = store
         .status(
-            &second_intent.receipt.event_id,
-            &second_intent.envelope.scope_refs,
+            &second_intent.receipt().event_id,
+            &second_intent.envelope().scope_refs,
         )
         .expect("read EventStore status for accepted event");
 
-    assert_eq!(status, Some(second_intent.receipt.clone()));
+    assert_eq!(status, Some((*second_intent.receipt()).clone()));
 
     // Both processes must produce valid snapshots with an observable compiler block.
     assert_snapshot(&first_output);

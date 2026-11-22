@@ -1,3 +1,5 @@
+#![cfg(feature = "sqlite")]
+
 use memory_compiler::{AcceptedEvent, Identity, IngestionStage};
 use memory_domain::{OpaqueId, ScopeKind, ScopeRef};
 use memory_event_store::{EventClassification, EventEnvelope};

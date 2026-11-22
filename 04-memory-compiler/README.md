@@ -8,14 +8,11 @@ document_metadata:
     evidence_verification:
       verification_status: Unverified
       last_verified_date: null
-      last_verification_note: "Owner authorized this root source/mirror topology in PR #429 comment 7061562608; content acceptance, bilingual semantic parity, independent review and CI remain pending."
+      last_verification_note: "Source/mirror topology was authorized by PR #429 comment 7061562608; the later Owner decision in Issue #564 comment 7074302216 keeps this reading guide Informative / Non-Canonical. Content acceptance, bilingual semantic parity, independent review and CI remain pending."
     usage_status: Active
     modification_status: Modified
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "Memory Compiler reading guide"
-    canonical_scope_id: memory-compiler/reading-guide
-    canonical_scope_keywords: []
     canonical_conflict_status: None
     normative_status: Informative
   bilingual_counterpart:

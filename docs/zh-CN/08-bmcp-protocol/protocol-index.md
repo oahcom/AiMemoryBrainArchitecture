@@ -10,10 +10,11 @@ document_metadata:
     usage_status: Active
     modification_status: Modified
   authority:
-    canonical_status: Candidate
-    canonical_scope_id: protocol/bmcp-message-type-index
+    canonical_status: Non-Canonical
     normative_status: Informative
     canonical_conflict_status: None
+  bilingual_counterpart:
+    source: "08-bmcp-protocol/protocol-index.md"
 ---
 
 # BMCP 协议消息类型索引

@@ -1,0 +1,106 @@
+work_item_id: AID-2026-048
+title: Implement the delivery lifecycle and ACK consumer for Memory Context
+
+class: DOMAIN/TEST/DOC
+risk: R1
+risk_rationale: "Bounded additive state machine in one crate plus a bilingual coverage-row correction. No persistence, no transport, no public API change to existing types, no dependency change, no architecture decision."
+
+security_scope: "In-memory delivery lifecycle bookkeeping only. No credential, network or storage surface."
+
+status: PR_OPEN
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+implementing_ai_session: "Current ChatGPT delivery session; platform session identifier NOT_EXPOSED"
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 1fd6f01895544c5a107d908ef04bd1b3c543c5ce
+
+tracking_issue: "NONE — task is tracked by this AID manifest and its delivery PR; no new Issue requested"
+
+created_at: 2026-11-22
+updated_at: 2026-11-22
+
+prompt_id: AID-2026-048-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-048/prompt-v1.md
+prompt_status: FROZEN
+prompt_sha256: 29753984ab017a3e21894653440452b5a98e8b45cb8715afd2102581052b6a9f
+prompt_bytes: 3389
+
+prompt_provenance_tier: T1
+prompt_provenance_note: "Frozen from the user-provided task dispatch in this ChatGPT conversation. Raw platform payload bytes and session identifier are not exposed; SHA-256 identifies the committed prompt-v1.md bytes."
+
+dependency_refs:
+  - crates/memory-context/src/delivery_ledger.rs
+  - crates/memory-context/src/lib.rs
+  - 06-memory-context/context-versioning.md
+  - 06-memory-context/context-implementation-coverage.md
+  - 06-memory-context/context-implementation-coverage.zh-CN.md
+  - 14-ai-development/work-items/AID-2026-044/manifest.yaml
+
+deliverables:
+  - "DeliveryLifecycle is a five-state machine whose terminal states reject every outgoing transition."
+  - "consume_ack distinguishes accepted, duplicate, late (superseded), stale-attempt and unknown-delivery ACKs, recording each rather than dropping it."
+  - "Recording the attempt that reaches max_attempts moves the delivery to Abandoned, so the terminal state is reachable through the normal path rather than only by test construction."
+  - "Row 97 of the English and Chinese coverage tables moves from NOT IMPLEMENTED to PARTIAL with the residual gaps named."
+
+independent_reviewer: NOT_ASSIGNED
+integration_reviewer: NOT_ASSIGNED
+
+review:
+  status: NOT_ASSIGNED
+  report_ref: ""
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+implementation:
+  status: PR_OPEN
+  branch: feat/context-delivery-lifecycle-2026-11-22
+  pull_request: PENDING
+  pull_request_url: PENDING
+  implementation_commit_sha: PENDING
+  merge_commit_sha: NOT_MERGED
+
+authorization:
+  registration_write: "USER-PRINCIPAL-DELEGATED (limited to this AID registration package)"
+  implementation_write: "USER-PRINCIPAL-DELEGATED (limited to crates/memory-context and the two coverage rows)"
+  index_update: "USER-PRINCIPAL-DELEGATED (limited to the single AID-2026-048 row)"
+  persistence_implementation: NOT_GRANTED
+  transport_implementation: NOT_GRANTED
+  supersession_cascade: NOT_GRANTED
+  architecture_acceptance: NOT_GRANTED
+  production_authorization: NOT_GRANTED
+
+governance:
+  aid_assignment: REGISTERED
+  aid_status: REGISTERED
+  registration_authorization: "USER-PRINCIPAL-DELEGATED (limited to this work item)"
+  development_start_authorization: "USER-PRINCIPAL-DELEGATED (limited to this implementation scope)"
+  architecture_status: NOT_APPLICABLE
+  g8_status: NOT_APPLICABLE
+  quota_change: NONE
+
+verification:
+  status: RUN
+  environment: "Windows natively, no WSL. Zig toolchain as CC/AR, CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0."
+  commands:
+    - "cargo fmt --all -- --check; echo FMT_EXIT=$?  -> EXIT 0"
+    - "cargo clippy --workspace --all-targets -- -D warnings; echo CLIPPY_EXIT=$?  -> EXIT 0"
+    - "cargo test --workspace --all-targets  -> 595 passed, 0 failed, 1 ignored"
+    - "cargo test -p memory-context --test delivery_lifecycle  -> 19 passed, 0 failed, 0 ignored"
+    - "scripts/check_bilingual_docs.py with PR_BODY=BILINGUAL-MANIFEST: COMPLETE  -> PASS"
+  evidence_refs:
+    - "The single workspace ignore is dm2_06, blocked by the cross-owner decision B-P2-XO-01 and unrelated to this work item."
+
+findings:
+  - id: AID-2026-048-F1
+    severity: P2
+    feedback_destination: "Delivery PR conversation. The first delivered revision made Abandoned unreachable: can_retry required attempt_count < max_attempts while record_attempt only abandoned on attempt_count > max_attempts, so no caller could ever enter the branch. Caught by the retry-exhaustion test before merge; fixed by treating max_attempts as the maximum number of attempts, first counted."
+  - id: AID-2026-048-F2
+    severity: P3
+    feedback_destination: "Delivery PR conversation. AckOutcome carries both Late with superseded_by and StaleAttempt. The specification says only 'late ACK'; the two are genuinely different (the delivery object changed versus the attempt of the same delivery is obsolete), and StaleAttempt was not requested. Recorded as a design judgement rather than a silent addition."
