@@ -543,6 +543,28 @@ pub mod validate {
             field: &'static str,
             value: String,
         },
+        OutOfRange {
+            field: &'static str,
+            value: u64,
+            min: u64,
+            max: u64,
+        },
+        InvalidInteger {
+            field: &'static str,
+            value: String,
+        },
+        InvalidDigitString {
+            field: &'static str,
+            value: String,
+        },
+        InvalidLsn {
+            field: &'static str,
+            value: String,
+        },
+        InvalidString {
+            field: &'static str,
+            value: String,
+        },
         Tier1RequiresCompleteCoverage,
         FinalRequestRequiresMonotonicSequence,
         Tier1RequiresMaterializedVersionMatch {
@@ -982,6 +1004,507 @@ pub mod validate {
 
         Ok(())
     }
+
+    // Storage.PreparedParticipantReceipt validation.
+    //
+    // These field lists deliberately remain separate from ALL_FIELDS:
+    // AppliedDeliveryEvidence and PreparedParticipantReceipt are different
+    // protocol messages with different schemas.
+
+    const RECEIPT_FIELDS: &[&str] = &[
+        "schema_id",
+        "schema_version",
+        "message_type",
+        "message_id",
+        "message_nonce",
+        "signature_envelope",
+        "payload",
+    ];
+
+    const ENVELOPE_FIELDS: &[&str] = &[
+        "payload_type",
+        "schema_version",
+        "issuer_principal_ref",
+        "subject_ref",
+        "owner_authority_ref",
+        "audience_ref",
+        "target_environment_ref",
+        "purpose",
+        "key_id",
+        "key_version",
+        "algorithm_profile_ref",
+        "canonicalization_profile_ref",
+        "digest_profile_ref",
+        "issued_at",
+        "trust_status_evidence_ref",
+        "payload_digest",
+        "signature",
+    ];
+
+    const PAYLOAD_FIELDS: &[&str] = &[
+        "prepared_participant_ref",
+        "prepared_transaction_gid",
+        "postgresql_native_xid",
+        "canonical_authority_db_ref",
+        "database_incarnation_ref",
+        "postgresql_system_identifier",
+        "postgresql_database_oid",
+        "original_prepare_timeline",
+        "original_prepare_lsn",
+        "publication_operation_id",
+        "request_digest",
+        "participant_tuple_digest",
+        "owner_boundary_ref",
+        "causal_order_domain_ref",
+        "policy_domain_ref",
+        "coc_prepare_intent_position",
+        "coc_prepare_intent_digest",
+        "prepare_attempt_ref",
+        "prepare_attempt_generation",
+        "participant_ledger_ref",
+        "participant_ledger_version",
+        "prepared_state",
+        "prepared_observation_source",
+        "prepared_observed_at",
+    ];
+
+    const ENVELOPE_REQUIRED: &[&str] = ENVELOPE_FIELDS;
+
+    const PAYLOAD_REQUIRED: &[&str] = &[
+        "prepared_participant_ref",
+        "prepared_transaction_gid",
+        "postgresql_native_xid",
+        "canonical_authority_db_ref",
+        "database_incarnation_ref",
+        "postgresql_system_identifier",
+        "postgresql_database_oid",
+        "original_prepare_timeline",
+        "original_prepare_lsn",
+        "publication_operation_id",
+        "request_digest",
+        "participant_tuple_digest",
+        "owner_boundary_ref",
+        "causal_order_domain_ref",
+        "policy_domain_ref",
+        "coc_prepare_intent_position",
+        "coc_prepare_intent_digest",
+        "prepare_attempt_ref",
+        "prepare_attempt_generation",
+        "participant_ledger_ref",
+        "participant_ledger_version",
+        "prepared_state",
+        "prepared_observation_source",
+        "prepared_observed_at",
+    ];
+
+    fn reject_unknown_fields(
+        object: &serde_json::Map<String, Value>,
+        allowed: &[&str],
+    ) -> Result<(), EvidenceError> {
+        for key in object.keys() {
+            if !allowed.contains(&key.as_str()) {
+                return Err(EvidenceError::UnknownField(key.clone()));
+            }
+        }
+        Ok(())
+    }
+
+    fn require_fields(value: &Value, fields: &[&'static str]) -> Result<(), EvidenceError> {
+        for field in fields {
+            if value.get(field).is_none() {
+                return Err(EvidenceError::MissingField(field));
+            }
+        }
+        Ok(())
+    }
+
+    fn receipt_string<'a>(value: &'a Value, field: &'static str) -> Result<&'a str, EvidenceError> {
+        value
+            .get(field)
+            .and_then(Value::as_str)
+            .filter(|s| !s.is_empty())
+            .ok_or(EvidenceError::MissingField(field))
+    }
+
+    fn digit_string(
+        value: &str,
+        field: &'static str,
+        max_length: usize,
+    ) -> Result<(), EvidenceError> {
+        if value.is_empty()
+            || value.len() > max_length
+            || !value.bytes().all(|b| b.is_ascii_digit())
+        {
+            return Err(EvidenceError::InvalidDigitString {
+                field,
+                value: value.to_owned(),
+            });
+        }
+        Ok(())
+    }
+
+    fn receipt_lsn(value: &str) -> bool {
+        let bytes = value.as_bytes();
+
+        (3..=32).contains(&bytes.len())
+            && bytes.iter().filter(|&&b| b == b'/').count() == 1
+            && bytes
+                .iter()
+                .all(|&b| b == b'/' || b.is_ascii_digit() || (b'A'..=b'F').contains(&b))
+            && bytes.first() != Some(&b'/')
+            && bytes.last() != Some(&b'/')
+    }
+
+    fn receipt_integer(
+        value: &Value,
+        field: &'static str,
+        min: u64,
+        max: u64,
+    ) -> Result<u64, EvidenceError> {
+        let number = value.get(field).and_then(Value::as_u64).ok_or_else(|| {
+            EvidenceError::InvalidInteger {
+                field,
+                value: value
+                    .get(field)
+                    .map(Value::to_string)
+                    .unwrap_or_else(|| "null".to_owned()),
+            }
+        })?;
+
+        if number < min || number > max {
+            return Err(EvidenceError::OutOfRange {
+                field,
+                value: number,
+                min,
+                max,
+            });
+        }
+
+        Ok(number)
+    }
+
+    fn validate_opaque_ref(value: &Value, field: &'static str) -> Result<(), EvidenceError> {
+        let actual = receipt_string(value, field)?;
+        if actual.len() > 512 {
+            return Err(EvidenceError::InvalidString {
+                field,
+                value: actual.to_owned(),
+            });
+        }
+        Ok(())
+    }
+
+    fn validate_receipt_digest(value: &Value, field: &'static str) -> Result<(), EvidenceError> {
+        let actual = receipt_string(value, field)?;
+        if !hex64(actual) {
+            return Err(EvidenceError::InvalidHex64 {
+                field,
+                value: actual.to_owned(),
+            });
+        }
+        Ok(())
+    }
+
+    fn validate_receipt_datetime(value: &Value, field: &'static str) -> Result<(), EvidenceError> {
+        let actual = receipt_string(value, field)?;
+        if !datetime(actual) {
+            return Err(EvidenceError::InvalidDateTime {
+                field,
+                value: actual.to_owned(),
+            });
+        }
+        Ok(())
+    }
+
+    pub(super) fn validate_storage_receipt_value(value: &Value) -> Result<(), EvidenceError> {
+        let root = value
+            .as_object()
+            .ok_or(EvidenceError::MissingField("object"))?;
+
+        reject_unknown_fields(root, RECEIPT_FIELDS)?;
+        require_fields(value, RECEIPT_FIELDS)?;
+
+        let consts = [
+            ("schema_id", "bmcp.storage-prepared-participant-proof"),
+            ("schema_version", "1.0.0"),
+            ("message_type", "Storage.PreparedParticipantReceipt"),
+        ];
+
+        for (field, expected) in consts {
+            let actual = receipt_string(value, field)?;
+            if actual != expected {
+                return Err(EvidenceError::WrongConst {
+                    field,
+                    expected,
+                    actual: actual.to_owned(),
+                });
+            }
+        }
+
+        for field in ["message_id", "message_nonce"] {
+            validate_opaque_ref(value, field)?;
+        }
+
+        let envelope = value
+            .get("signature_envelope")
+            .ok_or(EvidenceError::MissingField("signature_envelope"))?;
+
+        let envelope_object = envelope
+            .as_object()
+            .ok_or(EvidenceError::MissingField("signature_envelope"))?;
+
+        reject_unknown_fields(envelope_object, ENVELOPE_FIELDS)?;
+        require_fields(envelope, ENVELOPE_REQUIRED)?;
+
+        let payload = value
+            .get("payload")
+            .ok_or(EvidenceError::MissingField("payload"))?;
+
+        let payload_object = payload
+            .as_object()
+            .ok_or(EvidenceError::MissingField("payload"))?;
+
+        // The payload is the union of commonPayload and
+        // preparedReceiptPayload properties. This enforces
+        // unevaluatedProperties: false after both schemas are applied.
+        reject_unknown_fields(payload_object, PAYLOAD_FIELDS)?;
+        require_fields(payload, PAYLOAD_REQUIRED)?;
+
+        // Signature envelope consts and conditional binding.
+        let envelope_schema_version = receipt_string(envelope, "schema_version")?;
+
+        if envelope_schema_version != "1.0.0" {
+            return Err(EvidenceError::WrongConst {
+                field: "signature_envelope.schema_version",
+                expected: "1.0.0",
+                actual: envelope_schema_version.to_owned(),
+            });
+        }
+
+        let payload_type = receipt_string(envelope, "payload_type")?;
+
+        if ![
+            "Storage.PreparedParticipantReceipt",
+            "Storage.StorageResolutionProof",
+        ]
+        .contains(&payload_type)
+        {
+            return Err(EvidenceError::InvalidEnum {
+                field: "signature_envelope.payload_type",
+                value: payload_type.to_owned(),
+            });
+        }
+
+        // JSON Schema if/then binding:
+        // message_type == Storage.PreparedParticipantReceipt
+        // implies signature_envelope.payload_type ==
+        // Storage.PreparedParticipantReceipt.
+        if payload_type != "Storage.PreparedParticipantReceipt" {
+            return Err(EvidenceError::WrongConst {
+                field: "signature_envelope.payload_type",
+                expected: "Storage.PreparedParticipantReceipt",
+                actual: payload_type.to_owned(),
+            });
+        }
+
+        for field in [
+            "issuer_principal_ref",
+            "subject_ref",
+            "owner_authority_ref",
+            "audience_ref",
+            "target_environment_ref",
+            "key_id",
+            "key_version",
+            "algorithm_profile_ref",
+            "canonicalization_profile_ref",
+            "digest_profile_ref",
+            "trust_status_evidence_ref",
+        ] {
+            validate_opaque_ref(envelope, field)?;
+        }
+
+        let purpose = receipt_string(envelope, "purpose")?;
+        if purpose.len() > 128 {
+            return Err(EvidenceError::InvalidString {
+                field: "signature_envelope.purpose",
+                value: purpose.to_owned(),
+            });
+        }
+
+        validate_receipt_datetime(envelope, "issued_at")?;
+        validate_receipt_digest(envelope, "payload_digest")?;
+
+        let signature = receipt_string(envelope, "signature")?;
+        if signature.len() > 16384
+            || !signature
+                .bytes()
+                .all(|b| b.is_ascii_alphanumeric() || b == b'_' || b == b'-')
+        {
+            return Err(EvidenceError::InvalidString {
+                field: "signature_envelope.signature",
+                value: signature.to_owned(),
+            });
+        }
+
+        // preparedReceiptPayload consts.
+        for (field, expected) in [
+            ("prepared_state", "PREPARED"),
+            (
+                "prepared_observation_source",
+                "AUTHORITATIVE_WRITABLE_PRIMARY_READBACK",
+            ),
+        ] {
+            let actual = receipt_string(payload, field)?;
+            if actual != expected {
+                return Err(EvidenceError::WrongConst {
+                    field,
+                    expected,
+                    actual: actual.to_owned(),
+                });
+            }
+        }
+
+        for field in [
+            "prepared_participant_ref",
+            "canonical_authority_db_ref",
+            "database_incarnation_ref",
+            "publication_operation_id",
+            "owner_boundary_ref",
+            "causal_order_domain_ref",
+            "policy_domain_ref",
+            "coc_prepare_intent_position",
+            "prepare_attempt_ref",
+            "participant_ledger_ref",
+        ] {
+            validate_opaque_ref(payload, field)?;
+        }
+
+        let gid = receipt_string(payload, "prepared_transaction_gid")?;
+        if gid.len() > 200
+            || !gid
+                .bytes()
+                .all(|b| b.is_ascii_alphanumeric() || b == b'_' || b == b'-')
+        {
+            return Err(EvidenceError::InvalidString {
+                field: "prepared_transaction_gid",
+                value: gid.to_owned(),
+            });
+        }
+
+        // Integer bounds.
+        receipt_integer(payload, "postgresql_native_xid", 0, u32::MAX as u64)?;
+        receipt_integer(payload, "original_prepare_timeline", 1, u32::MAX as u64)?;
+
+        receipt_integer(
+            payload,
+            "prepare_attempt_generation",
+            1,
+            9_007_199_254_740_991,
+        )?;
+
+        receipt_integer(
+            payload,
+            "participant_ledger_version",
+            1,
+            9_007_199_254_740_991,
+        )?;
+
+        // These are digit strings, not canonical decimal numbers.
+        // Leading zeroes are intentionally permitted.
+        digit_string(
+            receipt_string(payload, "postgresql_system_identifier")?,
+            "postgresql_system_identifier",
+            20,
+        )?;
+
+        digit_string(
+            receipt_string(payload, "postgresql_database_oid")?,
+            "postgresql_database_oid",
+            10,
+        )?;
+
+        let lsn = receipt_string(payload, "original_prepare_lsn")?;
+        if !receipt_lsn(lsn) {
+            return Err(EvidenceError::InvalidLsn {
+                field: "original_prepare_lsn",
+                value: lsn.to_owned(),
+            });
+        }
+
+        for field in [
+            "request_digest",
+            "participant_tuple_digest",
+            "coc_prepare_intent_digest",
+        ] {
+            validate_receipt_digest(payload, field)?;
+        }
+
+        validate_receipt_datetime(payload, "prepared_observed_at")?;
+
+        Ok(())
+    }
+}
+
+pub mod storage_receipt {
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    pub struct SignatureEnvelope {
+        pub(super) payload_type: String,
+        pub(super) schema_version: String,
+        pub(super) issuer_principal_ref: String,
+        pub(super) subject_ref: String,
+        pub(super) owner_authority_ref: String,
+        pub(super) audience_ref: String,
+        pub(super) target_environment_ref: String,
+        pub(super) purpose: String,
+        pub(super) key_id: String,
+        pub(super) key_version: String,
+        pub(super) algorithm_profile_ref: String,
+        pub(super) canonicalization_profile_ref: String,
+        pub(super) digest_profile_ref: String,
+        pub(super) issued_at: String,
+        pub(super) trust_status_evidence_ref: String,
+        pub(super) payload_digest: String,
+        pub(super) signature: String,
+    }
+
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    pub struct PreparedReceiptPayload {
+        pub(super) prepared_participant_ref: String,
+        pub(super) prepared_transaction_gid: String,
+        pub(super) postgresql_native_xid: u32,
+        pub(super) canonical_authority_db_ref: String,
+        pub(super) database_incarnation_ref: String,
+        pub(super) postgresql_system_identifier: String,
+        pub(super) postgresql_database_oid: String,
+        pub(super) original_prepare_timeline: u32,
+        pub(super) original_prepare_lsn: String,
+        pub(super) publication_operation_id: String,
+        pub(super) request_digest: String,
+        pub(super) participant_tuple_digest: String,
+        pub(super) owner_boundary_ref: String,
+        pub(super) causal_order_domain_ref: String,
+        pub(super) policy_domain_ref: String,
+        pub(super) coc_prepare_intent_position: String,
+        pub(super) coc_prepare_intent_digest: String,
+        pub(super) prepare_attempt_ref: String,
+        pub(super) prepare_attempt_generation: u64,
+        pub(super) participant_ledger_ref: String,
+        pub(super) participant_ledger_version: u64,
+        pub(super) prepared_state: String,
+        pub(super) prepared_observation_source: String,
+        pub(super) prepared_observed_at: String,
+    }
+
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    pub struct PreparedParticipantReceipt {
+        pub(super) schema_id: String,
+        pub(super) schema_version: String,
+        pub(super) message_type: String,
+        pub(super) message_id: String,
+        pub(super) message_nonce: String,
+        pub(super) signature_envelope: SignatureEnvelope,
+        pub(super) payload: PreparedReceiptPayload,
+    }
 }
 
 pub mod digest {
@@ -1035,6 +1558,83 @@ pub fn parse_and_validate(
 ) -> Result<evidence::AppliedDeliveryEvidence, validate::EvidenceError> {
     let value = strict_json::parse_strict(raw).map_err(validate::EvidenceError::InvalidJson)?;
     validate::from_strict_value(&value)
+}
+
+/// Parse and validate a Storage.PreparedParticipantReceipt.
+///
+/// Duplicate JSON keys are rejected by strict_json before semantic validation.
+pub fn parse_storage_receipt(
+    raw: &[u8],
+) -> Result<storage_receipt::PreparedParticipantReceipt, validate::EvidenceError> {
+    let value = strict_json::parse_strict(raw).map_err(validate::EvidenceError::InvalidJson)?;
+
+    validate::validate_storage_receipt_value(&value)?;
+
+    use serde_json::Value;
+    use storage_receipt::{PreparedParticipantReceipt, PreparedReceiptPayload, SignatureEnvelope};
+
+    let envelope = &value["signature_envelope"];
+    let payload = &value["payload"];
+
+    let string =
+        |object: &Value, field: &str| -> String { object[field].as_str().unwrap().to_owned() };
+
+    let integer = |object: &Value, field: &str| -> u64 { object[field].as_u64().unwrap() };
+
+    Ok(PreparedParticipantReceipt {
+        schema_id: string(&value, "schema_id"),
+        schema_version: string(&value, "schema_version"),
+        message_type: string(&value, "message_type"),
+        message_id: string(&value, "message_id"),
+        message_nonce: string(&value, "message_nonce"),
+
+        signature_envelope: SignatureEnvelope {
+            payload_type: string(envelope, "payload_type"),
+            schema_version: string(envelope, "schema_version"),
+            issuer_principal_ref: string(envelope, "issuer_principal_ref"),
+            subject_ref: string(envelope, "subject_ref"),
+            owner_authority_ref: string(envelope, "owner_authority_ref"),
+            audience_ref: string(envelope, "audience_ref"),
+            target_environment_ref: string(envelope, "target_environment_ref"),
+            purpose: string(envelope, "purpose"),
+            key_id: string(envelope, "key_id"),
+            key_version: string(envelope, "key_version"),
+            algorithm_profile_ref: string(envelope, "algorithm_profile_ref"),
+            canonicalization_profile_ref: string(envelope, "canonicalization_profile_ref"),
+            digest_profile_ref: string(envelope, "digest_profile_ref"),
+            issued_at: string(envelope, "issued_at"),
+            trust_status_evidence_ref: string(envelope, "trust_status_evidence_ref"),
+            payload_digest: string(envelope, "payload_digest"),
+            signature: string(envelope, "signature"),
+        },
+
+        payload: PreparedReceiptPayload {
+            prepared_participant_ref: string(payload, "prepared_participant_ref"),
+            prepared_transaction_gid: string(payload, "prepared_transaction_gid"),
+            postgresql_native_xid: integer(payload, "postgresql_native_xid") as u32,
+            canonical_authority_db_ref: string(payload, "canonical_authority_db_ref"),
+            database_incarnation_ref: string(payload, "database_incarnation_ref"),
+            postgresql_system_identifier: string(payload, "postgresql_system_identifier"),
+            postgresql_database_oid: string(payload, "postgresql_database_oid"),
+            original_prepare_timeline: integer(payload, "original_prepare_timeline") as u32,
+            original_prepare_lsn: string(payload, "original_prepare_lsn"),
+            publication_operation_id: string(payload, "publication_operation_id"),
+            request_digest: string(payload, "request_digest"),
+            participant_tuple_digest: string(payload, "participant_tuple_digest"),
+            owner_boundary_ref: string(payload, "owner_boundary_ref"),
+            causal_order_domain_ref: string(payload, "causal_order_domain_ref"),
+            policy_domain_ref: string(payload, "policy_domain_ref"),
+            coc_prepare_intent_position: string(payload, "coc_prepare_intent_position"),
+            coc_prepare_intent_digest: string(payload, "coc_prepare_intent_digest"),
+            prepare_attempt_ref: string(payload, "prepare_attempt_ref"),
+            prepare_attempt_generation: integer(payload, "prepare_attempt_generation"),
+            participant_ledger_ref: string(payload, "participant_ledger_ref"),
+            participant_ledger_version: integer(payload, "participant_ledger_version"),
+            prepared_state: string(payload, "prepared_state"),
+            prepared_observation_source: string(payload, "prepared_observation_source"),
+            prepared_observed_at: string(payload, "prepared_observed_at"),
+        },
+    })
 }
 
 #[cfg(test)]
@@ -1545,5 +2145,222 @@ mod tests {
         let digest = p0_digest_of_value(&value).unwrap();
         value["payload_digest"] = json!(digest);
         assert!(from_strict_value(&value).is_ok());
+    }
+
+    fn valid_storage_receipt_value() -> Value {
+        json!({
+            "schema_id": "bmcp.storage-prepared-participant-proof",
+            "schema_version": "1.0.0",
+            "message_type": "Storage.PreparedParticipantReceipt",
+            "message_id": "message-1",
+            "message_nonce": "nonce-1",
+            "signature_envelope": {
+                "payload_type": "Storage.PreparedParticipantReceipt",
+                "schema_version": "1.0.0",
+                "issuer_principal_ref": "issuer",
+                "subject_ref": "subject",
+                "owner_authority_ref": "authority",
+                "audience_ref": "audience",
+                "target_environment_ref": "environment",
+                "purpose": "prepared-receipt",
+                "key_id": "key",
+                "key_version": "1",
+                "algorithm_profile_ref": "algorithm",
+                "canonicalization_profile_ref": "canonicalization",
+                "digest_profile_ref": "digest-profile",
+                "issued_at": "2026-11-21T12:00:00Z",
+                "trust_status_evidence_ref": "trust-evidence",
+                "payload_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "signature": "AbCd_123-"
+            },
+            "payload": {
+                "prepared_participant_ref": "participant",
+                "prepared_transaction_gid": "GID_123",
+                "postgresql_native_xid": 0,
+                "canonical_authority_db_ref": "authority-db",
+                "database_incarnation_ref": "incarnation",
+                "postgresql_system_identifier": "0123456789",
+                "postgresql_database_oid": "00042",
+                "original_prepare_timeline": 1,
+                "original_prepare_lsn": "A/BC",
+                "publication_operation_id": "operation",
+                "request_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "participant_tuple_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                "owner_boundary_ref": "boundary",
+                "causal_order_domain_ref": "causal-domain",
+                "policy_domain_ref": "policy-domain",
+                "coc_prepare_intent_position": "position",
+                "coc_prepare_intent_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+                "prepare_attempt_ref": "attempt",
+                "prepare_attempt_generation": 1,
+                "participant_ledger_ref": "ledger",
+                "participant_ledger_version": 1,
+                "prepared_state": "PREPARED",
+                "prepared_observation_source": "AUTHORITATIVE_WRITABLE_PRIMARY_READBACK",
+                "prepared_observed_at": "2026-11-21T12:00:00Z"
+            }
+        })
+    }
+
+    #[test]
+    fn storage_receipt_accepts_leading_zero_system_identifier() {
+        let value = valid_storage_receipt_value();
+        assert_eq!(
+            value["payload"]["postgresql_system_identifier"],
+            "0123456789"
+        );
+        assert!(
+            super::parse_storage_receipt(serde_json::to_string(&value).unwrap().as_bytes()).is_ok()
+        );
+    }
+
+    #[test]
+    fn storage_receipt_accepts_native_xid_zero() {
+        let value = valid_storage_receipt_value();
+        assert_eq!(value["payload"]["postgresql_native_xid"], 0);
+        assert!(
+            super::parse_storage_receipt(serde_json::to_string(&value).unwrap().as_bytes()).is_ok()
+        );
+    }
+
+    #[test]
+    fn storage_receipt_rejects_native_xid_above_u32() {
+        let mut value = valid_storage_receipt_value();
+        value["payload"]["postgresql_native_xid"] = json!(4294967296u64);
+
+        assert!(matches!(
+            super::parse_storage_receipt(serde_json::to_string(&value).unwrap().as_bytes()),
+            Err(EvidenceError::OutOfRange {
+                field: "postgresql_native_xid",
+                ..
+            })
+        ));
+    }
+
+    #[test]
+    fn storage_receipt_rejects_zero_prepare_attempt_generation() {
+        let mut value = valid_storage_receipt_value();
+        value["payload"]["prepare_attempt_generation"] = json!(0);
+
+        assert!(matches!(
+            super::parse_storage_receipt(serde_json::to_string(&value).unwrap().as_bytes()),
+            Err(EvidenceError::OutOfRange {
+                field: "prepare_attempt_generation",
+                ..
+            })
+        ));
+    }
+
+    #[test]
+    fn storage_receipt_rejects_lowercase_lsn() {
+        let mut value = valid_storage_receipt_value();
+        value["payload"]["original_prepare_lsn"] = json!("a/BC");
+
+        assert!(matches!(
+            super::parse_storage_receipt(serde_json::to_string(&value).unwrap().as_bytes()),
+            Err(EvidenceError::InvalidLsn {
+                field: "original_prepare_lsn",
+                ..
+            })
+        ));
+    }
+
+    #[test]
+    fn storage_receipt_rejects_wrong_message_type_const() {
+        let mut value = valid_storage_receipt_value();
+        value["message_type"] = json!("Storage.OtherMessage");
+
+        assert!(matches!(
+            super::parse_storage_receipt(serde_json::to_string(&value).unwrap().as_bytes()),
+            Err(EvidenceError::WrongConst {
+                field: "message_type",
+                ..
+            })
+        ));
+    }
+
+    #[test]
+    fn storage_receipt_rejects_unknown_root_field() {
+        let mut value = valid_storage_receipt_value();
+        value["unexpected"] = json!("value");
+
+        assert!(matches!(
+            super::parse_storage_receipt(
+                serde_json::to_string(&value).unwrap().as_bytes()
+            ),
+            Err(EvidenceError::UnknownField(field))
+                if field == "unexpected"
+        ));
+    }
+
+    #[test]
+    fn storage_receipt_rejects_missing_required_field() {
+        let mut value = valid_storage_receipt_value();
+        value["payload"]
+            .as_object_mut()
+            .unwrap()
+            .remove("prepared_participant_ref");
+
+        assert!(matches!(
+            super::parse_storage_receipt(serde_json::to_string(&value).unwrap().as_bytes()),
+            Err(EvidenceError::MissingField("prepared_participant_ref"))
+        ));
+    }
+
+    #[test]
+    fn storage_receipt_rejects_payload_type_mismatch() {
+        let mut value = valid_storage_receipt_value();
+        value["signature_envelope"]["payload_type"] = json!("Storage.StorageResolutionProof");
+
+        assert!(matches!(
+            super::parse_storage_receipt(serde_json::to_string(&value).unwrap().as_bytes()),
+            Err(EvidenceError::WrongConst {
+                field: "signature_envelope.payload_type",
+                ..
+            })
+        ));
+    }
+
+    #[test]
+    fn storage_receipt_rejects_non_hex_digest() {
+        let mut value = valid_storage_receipt_value();
+        value["payload"]["request_digest"] =
+            json!("gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg");
+
+        assert!(matches!(
+            super::parse_storage_receipt(serde_json::to_string(&value).unwrap().as_bytes()),
+            Err(EvidenceError::InvalidHex64 {
+                field: "request_digest",
+                ..
+            })
+        ));
+    }
+
+    #[test]
+    fn storage_receipt_rejects_unknown_nested_fields() {
+        let mut value = valid_storage_receipt_value();
+        value["payload"]["unexpected"] = json!("value");
+
+        assert!(matches!(
+            super::parse_storage_receipt(
+                serde_json::to_string(&value).unwrap().as_bytes()
+            ),
+            Err(EvidenceError::UnknownField(field))
+                if field == "unexpected"
+        ));
+    }
+
+    #[test]
+    fn storage_receipt_rejects_non_integer_xid() {
+        let mut value = valid_storage_receipt_value();
+        value["payload"]["postgresql_native_xid"] = json!(1.5);
+
+        assert!(matches!(
+            super::parse_storage_receipt(serde_json::to_string(&value).unwrap().as_bytes()),
+            Err(EvidenceError::InvalidInteger {
+                field: "postgresql_native_xid",
+                ..
+            })
+        ));
     }
 }
