@@ -12,7 +12,7 @@ document_metadata:
       last_verified_date: "2026-11-22"
       last_verification_note: "Re-read from main @ 550bb864ed: validate_authorization_decision at admission.rs:1276 has the two-parameter signature, Issued carries AuthorizationDecisionData at lib.rs:566, and memory-compiler/tests holds one file. Each claim is a blob read, not a commit message."
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Modified
     supersession:
       supersedes: []
       supersession_reason: null
@@ -25,7 +25,7 @@ document_metadata:
 
 # GAP-18 (continued) — one step left, and it is not the one that was blocked
 
-**Status:** Open — one step remains · **Companion to:** `GAP-18-AUTHORIZATION-VALIDATOR-WORK-ORDER.md`
+**Status:** Closed — the five steps and the attestor half have all shipped (evidence in §6 and §8) · **Companion to:** `GAP-18-AUTHORIZATION-VALIDATOR-WORK-ORDER.md`
 **Measured at:** `main` @ `550bb864ed` (§8 measured at `f1365f97`)
 **Author:** owner delegate under standing instruction (Issue #564, comment 7074302216)
 
@@ -137,12 +137,12 @@ A test file with only the `Err` case would leave `Ok(false)` unreachable by any 
 
 ## 6. Definition of done
 
-- [ ] `crates/memory-compiler/tests/authorization_authority.rs` exists.
-- [ ] `Err(RecordMissing)` for an unbacked `issued()` reference.
-- [ ] `Ok(true)` after a real issue-then-validate round trip.
-- [ ] `Ok(false)` when the expected subject digest differs from the stored one.
-- [ ] `dm2_06` unchanged.
-- [ ] `cargo test --workspace --all-targets` reports `ignored = 0`.
+- [x] `crates/memory-compiler/tests/authorization_authority.rs` exists.
+- [x] `Err(RecordMissing)` for an unbacked `issued()` reference — `authorization_authority.rs:52`.
+- [x] `Ok(true)` after a real issue-then-validate round trip — `authorization_authority.rs:62`.
+- [x] `Ok(false)` when the expected subject digest differs from the stored one — `authorization_authority.rs:94`.
+- [x] `dm2_06` unchanged — `memory-domain/src/lib.rs:1701`, no `#[ignore]`.
+- [x] `cargo test --workspace --all-targets` reports `ignored = 0` — no `#[ignore]` attribute remains in `crates/`; the step passed in run 45027564643.
 
 ## 7. Why this is a work order and not a patch
 
