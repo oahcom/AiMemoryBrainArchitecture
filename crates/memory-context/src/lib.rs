@@ -4441,3 +4441,11 @@ pub use delivery_lifecycle::{AckOutcome, DeliveryLifecycle, DeliveryRecord, Deli
 
 mod budget;
 pub use budget::*;
+
+pub mod observability;
+
+pub use observability::{
+    build_budget_sufficiency_report, summarize_delivery_lifecycle, BudgetSufficiencyReport,
+    BudgetUtilization, DeliveryLifecycleReport, DimensionOmission, ExclusionCount,
+    SufficiencyOutcomeKind,
+};
