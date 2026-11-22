@@ -875,11 +875,67 @@ fn dm2_11_provenance_lineage_or_unavailable_reason_mandatory() {
 // ---------------------------------------------------------------- DM2-12
 
 #[test]
-#[ignore = "blocked: 当前无 ProvenanceGraph / DerivationEdge 类型，也无 EvidenceIndependence::validate_independent 或 ancestry traversal API；不能判定两条 Evidence 是否共享祖先"]
 fn dm2_12_shared_ancestry_not_independent_evidence() {
-    unimplemented!()
-}
+    let mut graph = ProvenanceGraph::new();
 
+    let provenance = |name: &str| Provenance {
+        provenance_id: id(name),
+        source_refs: vec![],
+        derivation_kind: "test".into(),
+        actor_ref: ActorRef {
+            actor_id: id("actor-dm2-12"),
+        },
+        created_at: "2026-01-01T00:00:00Z".into(),
+    };
+
+    // Shared lineage:
+    //
+    //        ROOT
+    //       /    \
+    //    LEFT    RIGHT
+    //
+    graph
+        .add(provenance("ROOT"), &[])
+        .unwrap();
+
+    graph
+        .add(provenance("LEFT"), &[ProvenanceRef::new("ROOT").unwrap()])
+        .unwrap();
+
+    graph
+        .add(provenance("RIGHT"), &[ProvenanceRef::new("ROOT").unwrap()])
+        .unwrap();
+
+    assert_eq!(
+        EvidenceIndependence::validate_independent(
+            &graph,
+            &ProvenanceRef::new("LEFT").unwrap(),
+            &ProvenanceRef::new("RIGHT").unwrap(),
+        ),
+        Err(DomainError::InvalidParent)
+    );
+
+    // Independent lineage:
+    //
+    //   INDEPENDENT_A    INDEPENDENT_B
+    //
+    graph
+        .add(provenance("INDEPENDENT_A"), &[])
+        .unwrap();
+
+    graph
+        .add(provenance("INDEPENDENT_B"), &[])
+        .unwrap();
+
+    assert_eq!(
+        EvidenceIndependence::validate_independent(
+            &graph,
+            &ProvenanceRef::new("INDEPENDENT_A").unwrap(),
+            &ProvenanceRef::new("INDEPENDENT_B").unwrap(),
+        ),
+        Ok(())
+    );
+}
 // ---------------------------------------------------------------- DM2-13
 
 #[test]
