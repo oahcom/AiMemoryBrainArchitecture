@@ -1771,6 +1771,10 @@ impl DispatchMessage {
 
     /// True only when the message has received no message-specific structural
     /// or semantic validation.
+    ///
+    /// A `false` result does not imply semantic validation. Use
+    /// [`Self::validation_state`] to distinguish structural parsing from
+    /// complete semantic validation.
     pub const fn is_structurally_unvalidated(&self) -> bool {
         matches!(
             self.validation_state(),
@@ -1798,14 +1802,18 @@ pub enum DispatchError {
 /// discriminator for the message types handled here is read from the root
 /// instance object's `message_type` member.
 ///
-/// APPLIED_DELIVERY_EVIDENCE_RECORDED continues through the existing strict
-/// evidence validator. The other 21 known message types are parsed as strict
-/// JSON and returned as explicitly structurally-unvalidated values.
+/// APPLIED_DELIVERY_EVIDENCE_RECORDED continues through the existing
+/// semantic evidence validator.
 ///
-/// In particular, non-evidence messages are not passed through
-/// `validate::from_strict_value`, `validate::ALL_FIELDS`, or the P0 digest
-/// allowlist. This preserves fields such as `envelope` without pretending
-/// that they have been schema-validated.
+/// Storage.PreparedParticipantReceipt is passed to its existing
+/// message-specific structural parser.
+///
+/// The remaining 20 known message types are strictly parsed as JSON but only
+/// their root `message_type` discriminator is recognized.
+///
+/// Those 20 messages are not passed through message-specific schema or
+/// semantic validation. Their complete root objects are preserved without
+/// claiming that their payloads have been validated.
 pub fn parse_dispatch(raw: &[u8]) -> Result<DispatchMessage, DispatchError> {
     let value = strict_json::parse_strict(raw).map_err(DispatchError::InvalidJson)?;
 
