@@ -5,9 +5,9 @@
 //! provide a cross-service D/Storage visibility transaction.
 
 use memory_domain::{
-    is_rfc3339_utc, is_sha256_hex, AuthorizationDecisionData, AuthorizationDecisionKind,
-    AuthorizationDecisionRef, CanonicalCommitData, CanonicalCommitRef, IssuerId, OpaqueId,
-    ScopeRef, DEV_BASELINE_ISSUER, I_DEV_BASELINE_ISSUER,
+    is_rfc3339_utc, is_sha256_hex, AttestorData, AttestorRef, AuthorizationDecisionData,
+    AuthorizationDecisionKind, AuthorizationDecisionRef, CanonicalCommitData, CanonicalCommitRef,
+    IssuerId, OpaqueId, ScopeRef, DEV_BASELINE_ISSUER, I_DEV_BASELINE_ISSUER,
 };
 use rusqlite::{params, Connection, OptionalExtension, Transaction, TransactionBehavior};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -324,6 +324,50 @@ impl std::fmt::Display for AuthorizationDecisionValidationError {
 }
 
 impl std::error::Error for AuthorizationDecisionValidationError {}
+
+/// Why an attestor could not be established from its durable I-side record.
+///
+/// A subject digest mismatch is an authority error here, not a boolean
+/// disposition: unlike an authorization decision, an attestation has no
+/// `Ok(false)` outcome.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum AttestorValidationError {
+    /// The reference does not carry issued attestation data.
+    PendingReference,
+    /// No durable attestation row exists.
+    RecordMissing,
+    /// The stored row is not a well-formed record.
+    RecordMalformed,
+    /// A stored field differs from the issued reference, or from the expected
+    /// subject digest.
+    RecordMismatch(&'static str),
+    /// The issuer is not the I dev-baseline trust anchor.
+    UnsupportedIssuer,
+    /// The database could not be read.
+    ReadFailed,
+}
+
+impl std::fmt::Display for AttestorValidationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::PendingReference => write!(f, "attestor reference is pending"),
+            Self::RecordMissing => write!(f, "no durable attestation record"),
+            Self::RecordMalformed => write!(f, "attestation record is malformed"),
+            Self::RecordMismatch(field) => {
+                write!(f, "attestation record disagrees on {field}")
+            }
+            Self::UnsupportedIssuer => {
+                write!(
+                    f,
+                    "attestation issuer is not on the I dev-baseline allowlist"
+                )
+            }
+            Self::ReadFailed => write!(f, "attestation record is unreadable"),
+        }
+    }
+}
+
+impl std::error::Error for AttestorValidationError {}
 
 /// Durable publication decision bound to the exact artifact, dependencies,
 /// fence generation and permission epoch, per §4.3.
@@ -1215,7 +1259,8 @@ impl AdmissionStore {
             decision_kind,
         };
 
-        let reference = AuthorizationDecisionRef::from_issued_data(data);
+        let reference = AuthorizationDecisionRef::from_issued_data(data)
+            .map_err(|_| AdmissionError::InvalidInput("authorization decision fields"))?;
 
         let kind = authorization_decision_kind_str(decision_kind);
 
@@ -1292,20 +1337,7 @@ impl AdmissionStore {
                 }
             })?;
 
-        // Authority check precedes content comparison.
-        if stored.issuer_id != I_DEV_BASELINE_ISSUER {
-            return Err(AuthorizationDecisionValidationError::UnsupportedIssuer);
-        }
-
-        if !is_sha256_hex(&stored.subject_digest)
-            || !is_rfc3339_utc(&stored.issued_at)
-            || !matches!(
-                stored.decision_kind.as_str(),
-                "approved" | "denied" | "conditional"
-            )
-        {
-            return Err(AuthorizationDecisionValidationError::RecordMalformed);
-        }
+        let stored_kind = validate_stored_authorization_decision(&stored)?;
 
         if stored.issuer_id != data.issuer.as_str() {
             return Err(AuthorizationDecisionValidationError::RecordMismatch(
@@ -1325,9 +1357,7 @@ impl AdmissionStore {
             ));
         }
 
-        let reference_kind = authorization_decision_kind_str(data.decision_kind);
-
-        if stored.decision_kind != reference_kind {
+        if stored_kind != data.decision_kind {
             return Err(AuthorizationDecisionValidationError::RecordMismatch(
                 "decision_kind",
             ));
@@ -1338,8 +1368,11 @@ impl AdmissionStore {
 
     /// Read the recorded decision kind.
     ///
-    /// This is a record-reading operation, not an authorization check.
-    /// Denied and Conditional are valid stored decision kinds.
+    /// This is a record-reading operation, not an authorization check: it does
+    /// not decide whether the kind permits a transition, and Denied and
+    /// Conditional are valid stored kinds. It does verify that the durable row
+    /// is the one this reference names, so a caller cannot read a kind that is
+    /// not backed by the reference it holds.
     pub fn authorization_decision_kind(
         &self,
         reference: &AuthorizationDecisionRef,
@@ -1358,8 +1391,162 @@ impl AdmissionStore {
                 }
             })?;
 
-        parse_authorization_decision_kind(&stored.decision_kind)
-            .ok_or(AuthorizationDecisionValidationError::RecordMalformed)
+        let stored_kind = validate_stored_authorization_decision(&stored)?;
+
+        if stored.issuer_id != data.issuer.as_str() {
+            return Err(AuthorizationDecisionValidationError::RecordMismatch(
+                "issuer",
+            ));
+        }
+
+        if stored.subject_digest != data.subject_digest.as_str() {
+            return Err(AuthorizationDecisionValidationError::RecordMismatch(
+                "subject_digest",
+            ));
+        }
+
+        if stored.issued_at != data.issued_at {
+            return Err(AuthorizationDecisionValidationError::RecordMismatch(
+                "issued_at",
+            ));
+        }
+
+        if stored_kind != data.decision_kind {
+            return Err(AuthorizationDecisionValidationError::RecordMismatch(
+                "decision_kind",
+            ));
+        }
+
+        Ok(stored_kind)
+    }
+
+    /// Insert one immutable attestation record and return its content-bearing
+    /// reference.
+    ///
+    /// A duplicate ID is idempotent only when every stored column is identical.
+    /// The reference escapes only after the transaction commits.
+    ///
+    /// Dev baseline only: the signature is the empty string.
+    pub fn issue_attestation(
+        &mut self,
+        attestation_id: &OpaqueId,
+        issuer: &IssuerId,
+        subject_digest: &OpaqueId,
+        issued_at: &str,
+    ) -> Result<AttestorRef, AdmissionError> {
+        if issuer.as_str() != I_DEV_BASELINE_ISSUER {
+            return Err(AdmissionError::InvalidInput(
+                "attestor issuer is not on the I dev-baseline allowlist",
+            ));
+        }
+
+        if !is_sha256_hex(subject_digest.as_str()) || !is_rfc3339_utc(issued_at) {
+            return Err(AdmissionError::InvalidInput(
+                "attestor subject digest or issued_at is not in canonical form",
+            ));
+        }
+
+        let reference = AttestorRef::from_issued_data(AttestorData {
+            attestation_id: attestation_id.clone(),
+            issuer: issuer.clone(),
+            subject_digest: subject_digest.clone(),
+            issued_at: issued_at.to_owned(),
+        })
+        .map_err(|_| AdmissionError::InvalidInput("attestor fields"))?;
+
+        let tx = self
+            .connection
+            .transaction_with_behavior(TransactionBehavior::Immediate)?;
+
+        let inserted = tx.execute(
+            "INSERT INTO i_attestations(
+                attestation_id,issuer_id,subject_digest,issued_at,signature
+             )
+             VALUES(?1,?2,?3,?4,'')",
+            params![
+                attestation_id.as_str(),
+                issuer.as_str(),
+                subject_digest.as_str(),
+                issued_at,
+            ],
+        );
+
+        match inserted {
+            Ok(_) => {}
+            Err(rusqlite::Error::SqliteFailure(ref code, _))
+                if code.code == rusqlite::ErrorCode::ConstraintViolation =>
+            {
+                let stored = read_attestation(&tx, attestation_id)?;
+                let identical = stored.issuer_id == issuer.as_str()
+                    && stored.subject_digest == subject_digest.as_str()
+                    && stored.issued_at == issued_at
+                    && stored.signature.is_empty();
+
+                if !identical {
+                    return Err(AdmissionError::IdempotencyConflict);
+                }
+            }
+            Err(error) => return Err(AdmissionError::Sqlite(error)),
+        }
+
+        tx.commit()?;
+        Ok(reference)
+    }
+
+    /// Validate an issued attestor against its durable row and the expected
+    /// subject digest.
+    ///
+    /// A subject mismatch is an authority error, never a successful validation:
+    /// unlike an authorization decision, an attestation has no boolean
+    /// disposition to return.
+    pub fn validate_attestor(
+        &self,
+        reference: &AttestorRef,
+        expected_subject_digest: &OpaqueId,
+    ) -> Result<(), AttestorValidationError> {
+        let data = reference
+            .data()
+            .ok_or(AttestorValidationError::PendingReference)?;
+
+        let stored =
+            read_attestation(&self.connection, &data.attestation_id).map_err(
+                |error| match error {
+                    rusqlite::Error::QueryReturnedNoRows => AttestorValidationError::RecordMissing,
+                    _ => AttestorValidationError::ReadFailed,
+                },
+            )?;
+
+        // Authority first, then stored-row shape, then reference equality.
+        if stored.issuer_id != I_DEV_BASELINE_ISSUER {
+            return Err(AttestorValidationError::UnsupportedIssuer);
+        }
+
+        if !is_sha256_hex(&stored.subject_digest)
+            || !is_rfc3339_utc(&stored.issued_at)
+            || !stored.signature.is_empty()
+        {
+            return Err(AttestorValidationError::RecordMalformed);
+        }
+
+        if stored.issuer_id != data.issuer.as_str() {
+            return Err(AttestorValidationError::RecordMismatch("issuer"));
+        }
+
+        if stored.subject_digest != data.subject_digest.as_str() {
+            return Err(AttestorValidationError::RecordMismatch("subject_digest"));
+        }
+
+        if stored.issued_at != data.issued_at {
+            return Err(AttestorValidationError::RecordMismatch("issued_at"));
+        }
+
+        if stored.subject_digest != expected_subject_digest.as_str() {
+            return Err(AttestorValidationError::RecordMismatch(
+                "expected_subject_digest",
+            ));
+        }
+
+        Ok(())
     }
 }
 
@@ -1395,19 +1582,78 @@ fn read_authorization_decision(
     )
 }
 
+/// Checks a stored authorization decision row for authority and shape, then
+/// decodes its kind.
+///
+/// Shared by the reference validator and the kind accessor so both reject the
+/// same rows. Authority is checked before shape: an untrusted issuer is reported
+/// as such even if its row is also malformed.
+fn validate_stored_authorization_decision(
+    stored: &StoredAuthorizationDecision,
+) -> Result<AuthorizationDecisionKind, AuthorizationDecisionValidationError> {
+    if stored.issuer_id != I_DEV_BASELINE_ISSUER {
+        return Err(AuthorizationDecisionValidationError::UnsupportedIssuer);
+    }
+
+    if !is_sha256_hex(&stored.subject_digest)
+        || !is_rfc3339_utc(&stored.issued_at)
+        || !matches!(
+            stored.decision_kind.as_str(),
+            "Approved" | "Denied" | "Conditional"
+        )
+    {
+        return Err(AuthorizationDecisionValidationError::RecordMalformed);
+    }
+
+    parse_authorization_decision_kind(&stored.decision_kind)
+        .ok_or(AuthorizationDecisionValidationError::RecordMalformed)
+}
+
+/// One decoded i_attestations row.
+struct StoredAttestation {
+    issuer_id: String,
+    subject_digest: String,
+    issued_at: String,
+    signature: String,
+}
+
+/// Reads an attestation by primary key.
+///
+/// QueryReturnedNoRows is preserved so the caller can distinguish
+/// a missing record from an unreadable database.
+fn read_attestation(
+    connection: &Connection,
+    attestation_id: &OpaqueId,
+) -> Result<StoredAttestation, rusqlite::Error> {
+    connection.query_row(
+        "SELECT issuer_id,subject_digest,issued_at,signature
+         FROM i_attestations
+         WHERE attestation_id=?1",
+        [attestation_id.as_str()],
+        |row| {
+            Ok(StoredAttestation {
+                issuer_id: row.get(0)?,
+                subject_digest: row.get(1)?,
+                issued_at: row.get(2)?,
+                signature: row.get(3)?,
+            })
+        },
+    )
+}
+
 fn authorization_decision_kind_str(kind: AuthorizationDecisionKind) -> &'static str {
     match kind {
-        AuthorizationDecisionKind::Approved => "approved",
-        AuthorizationDecisionKind::Denied => "denied",
-        AuthorizationDecisionKind::Conditional => "conditional",
+        AuthorizationDecisionKind::Approved => "Approved",
+        AuthorizationDecisionKind::Denied => "Denied",
+        AuthorizationDecisionKind::Conditional => "Conditional",
     }
 }
 
 fn parse_authorization_decision_kind(value: &str) -> Option<AuthorizationDecisionKind> {
     match value {
-        "approved" => Some(AuthorizationDecisionKind::Approved),
-        "denied" => Some(AuthorizationDecisionKind::Denied),
-        "conditional" => Some(AuthorizationDecisionKind::Conditional),
+        "Approved" => Some(AuthorizationDecisionKind::Approved),
+        "Denied" => Some(AuthorizationDecisionKind::Denied),
+        "Conditional" => Some(AuthorizationDecisionKind::Conditional),
         _ => None,
     }
 }
@@ -2224,7 +2470,7 @@ mod tests {
         let mut data = reference.data().unwrap().clone();
         data.decision_id = id("authorization-decision-never-issued");
 
-        let missing = AuthorizationDecisionRef::from_issued_data(data);
+        let missing = AuthorizationDecisionRef::from_issued_data(data).unwrap();
 
         assert_eq!(
             db.validate_authorization_decision(&missing, &subject),
@@ -2312,7 +2558,7 @@ mod tests {
         db.connection
             .execute(
                 "UPDATE authorization_decisions
-                 SET decision_kind='denied'
+                 SET decision_kind='Denied'
                  WHERE decision_id=?1",
                 [decision_id.as_str()],
             )
