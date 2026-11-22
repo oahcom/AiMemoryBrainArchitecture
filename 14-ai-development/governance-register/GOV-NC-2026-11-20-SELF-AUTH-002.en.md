@@ -1,3 +1,36 @@
+---
+document_metadata:
+  domain: security-governance
+  role: review-report
+
+  lifecycle:
+    approval:
+      # Draft, and deliberately so: nothing in this repository records an approval
+      # decision for this register entry, and DM-03 would require an approver and a
+      # 40-hex approved_version to claim otherwise. `Draft` here describes the
+      # document's own approval state, not the defect it records, which is still
+      # OPEN / NOT_REMEDIATED and unchanged by this classification.
+      decision_status: Draft
+      approver: null
+    evidence_verification:
+      # Unverified: this change corrects one inference in the body and does not
+      # re-verify the citations it rests on. Claiming Verified would assert a
+      # re-check that did not happen.
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: null
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Informative
+---
+
 # GOV-NC-2026-11-20-SELF-AUTH-002 — Register of Authority-Chain and Acceptance-Authority Defects
 
 **Chinese primary**: [`GOV-NC-2026-11-20-SELF-AUTH-002.md`](GOV-NC-2026-11-20-SELF-AUTH-002.md)
