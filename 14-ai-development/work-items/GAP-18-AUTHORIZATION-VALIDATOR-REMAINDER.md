@@ -12,12 +12,10 @@ document_metadata:
       last_verified_date: "2026-11-22"
       last_verification_note: "Re-read from main @ 550bb864ed: validate_authorization_decision at admission.rs:1276 has the two-parameter signature, Issued carries AuthorizationDecisionData at lib.rs:566, and memory-compiler/tests holds one file. Each claim is a blob read, not a commit message."
     usage_status: Active
-    modification_status: Modified
+    modification_status: Unchanged
     supersession:
-      supersedes:
-        - 14-ai-development/work-items/GAP-18-AUTHORIZATION-VALIDATOR-REMAINDER.md
-      supersession_reason: "The superseded version said three steps remained; #662 shipped two of them within the hour, leaving one. Keeping the old text would make the record misleading on read, which is the defect it was written to prevent."
-    modification_note: "Rewritten to reflect #662. Same file path so the two versions do not both appear in the work-items index."
+      supersedes: []
+      supersession_reason: null
 
   authority:
     canonical_status: Non-Canonical
