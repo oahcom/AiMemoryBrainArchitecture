@@ -14,6 +14,10 @@ document_metadata:
     canonical_scope_id: protocol/bmcp-message-type-index
     normative_status: Informative
     canonical_conflict_status: None
+  bilingual_counterpart:
+    source: null
+    en: "docs/en/08-bmcp-protocol/protocol-index.md"
+    zh-CN: "docs/zh-CN/08-bmcp-protocol/protocol-index.md"
 ---
 
 # BMCP Protocol Message Index
