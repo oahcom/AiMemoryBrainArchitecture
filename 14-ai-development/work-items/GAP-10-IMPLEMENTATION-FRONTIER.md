@@ -56,12 +56,15 @@ grep -n "pub struct Fact\b\|pub struct FactRevision\|pub enum EntityIdentityStat
 686: pub struct EvidenceExtension {
 ```
 
-`crates/memory-domain` runs 36 unit tests plus 11 acceptance tests, of which 9
-are `#[ignore]`d with a named missing API each (no `ClaimRevisionRegistry`, no
-`classify_claim_change`, no `RelationTypeRegistry`, no `ProvenanceGraph`, etc.).
+`crates/memory-domain` has implemented the Claim identity classifier in
+`claim_identity::classify` (PR #545). The remaining ignored acceptance tests
+name other missing capabilities such as `ClaimRevisionRegistry`,
+`RelationTypeRegistry` and `ProvenanceGraph`; `classify_claim_change` is
+not the API name and must not be counted as a missing symbol.
 
-So Phase 2 is roughly "types and invariants done, registries and classifiers
-absent". Phase 3 is a different question and is not addressed here.
+So Phase 2 is "types, invariants and Claim identity classification implemented;
+some registries and graph capabilities remain absent". Phase 3 is a different
+question and is not addressed here.
 
 ### 1.3 Memory Context has a measured 77-row coverage map
 
@@ -174,12 +177,20 @@ These need no external authority and are independently testable.
 
 ### Tier 2 — unblocked but narrower
 
-**T2.1 — Phase 2 registries and classifiers**
+**T2.1 — Phase 2 registries and remaining graph capabilities**
 
-The 9 `#[ignore]`d acceptance tests each name the missing API. Implementing
-`ClaimRevisionRegistry`, `classify_claim_change` (CI-01..CI-13),
-`RelationTypeRegistry`, `ProvenanceGraph` and `EvidenceIndependence::validate`
-would convert 9 ignored tests into real ones and complete DM2-01..DM2-14.
+The Claim identity classifier is already implemented by PR #545 as
+`claim_identity::classify`; the public function is named `classify`, not
+`classify_claim_change`. This work item makes `dm2_03` a real acceptance
+test using `ClaimRevision::initial` / `successor` and covers the 10 reachable
+vectors: CI-01..CI-04, CI-07..CI-11 and CI-13. CI-05, CI-06 and CI-12 are
+unreachable because `ClaimRevision` has no quantifier, modality or confidence
+field; they are explicitly not counted as covered.
+
+The remaining ignored acceptance tests concern other missing APIs, including
+`ClaimRevisionRegistry`, `RelationTypeRegistry`, `ProvenanceGraph` and
+`EvidenceIndependence::validate`. Implementing those capabilities is separate
+from the already-present Claim identity classifier.
 
 **T2.2 — CI wiring for the existing gates**
 
@@ -222,7 +233,7 @@ settle, because it is the single gate in front of the largest block of work.
 | Memory Context | 80% unimplemented | 77-row map: 9 implemented / 43 partial / 25 absent. 19 rows locally doable, 40 waiting on D |
 | Agent Integration | 90% unimplemented | Accurate for runtime; but blocked by H/D/I, not by absence of effort. RT-01..RT-09 all NOT RUN |
 | BMCP | 60% unimplemented | Artifacts substantial (32 schemas, 545 conformance tests). Transport/server entirely absent — a binary, not a percentage |
-| Phase 2 domain | 100% not started | **False.** Types + invariants implemented, 36 unit + 11 acceptance tests; 9 ignored for named missing registries |
+| Phase 2 domain | 100% not started | **False.** Types, invariants and `claim_identity::classify` are implemented; `dm2_03` now exercises 10 reachable CI vectors. CI-05/06/12 are unreachable from the current `ClaimRevision` shape; other registry/graph gaps remain |
 | E2E | 100% not started | Partially false. `brain-cli` runs ingestion → storage → context end to end. It stops at the compiler skip (GAP-07) |
 
 ## 6. Re-measurement at `b29278a8` (2026-11-22 02:05 +08:00)
@@ -366,56 +377,34 @@ now certain is that the §6.1 table counted a different target set than this one
 `--all-targets` includes integration binaries, and the §6.1 numbers match the
 `--lib`-only runs.
 
-### 7.2 One `#[ignore]` reason is now false, and the test did not change
+### 7.2 dm2_03 now exercises the implemented classifier
 
-`#545` (444deef1) added `crates/memory-domain/src/claim_identity.rs`, re-exported
-via `pub use claim_identity::*` at `lib.rs:7`. It provides exactly the API that
-`dm2_03` says does not exist:
+PR #545 (merge `444deef1`) added `crates/memory-domain/src/claim_identity.rs`
+and publicly re-exported `claim_identity::classify`. That implementation is
+not a missing API and is not changed by this work item.
 
-```rust
-pub fn classify(prior: &ClaimRevision, candidate: &ClaimRevision) -> ClaimIdentityDecision
+The current `dm2_03_ci_classification_vectors` acceptance test is active, but
+its earlier form used JSON mutation helpers and did not exercise the full
+reachable CI set with the canonical constructors. This work item replaces those
+vectors with real `ClaimRevision::initial` / `ClaimRevision::successor`
+values and asserts CI-01, CI-02, CI-03, CI-04, CI-07, CI-08, CI-09, CI-10,
+CI-11 and CI-13 (10/10 reachable dimensions).
+
+CI-05, CI-06 and CI-12 are not fabricated as passing tests. The
+`ClaimRevision` struct has no quantifier, modality or confidence field. The
+source-shape check is:
+
+```sh
+sed -n '/^pub struct ClaimRevision {/,/^}/p' crates/memory-domain/src/lib.rs | grep -En '\\b(quantifier|modality|confidence)\\b'
 ```
 
-The ignore reason at `phase2_acceptance.rs:160` still reads:
+Expected result: no output; `grep` exits 1 because none of those fields occurs
+inside the struct. These three vectors are unreachable, not covered.
 
-> `blocked: memory_domain 当前没有 classify_claim_change / CI-01..CI-13 classifier 函数`
-
-Measured:
-
-```
-$ cargo test -p memory-domain --lib claim_identity
-test result: ok. 19 passed; 0 failed; 0 ignored
-```
-
-19 tests cover CI-01, CI-02, CI-03, CI-04, CI-07, CI-08, CI-09, CI-10, CI-11,
-CI-13 plus label-only, qualifier ambiguity, multi-dimension ambiguity, scope
-ambiguity, cross-claim, no-fallback, and determinism. CI-05 / CI-06 / CI-12 are
-documented in the module header as **unreachable**, not missing: `ClaimRevision`
-has no quantifier, modality or confidence field, so the classifier cannot be
-asked the question.
-
-So `dm2_03` is not blocked. It is **stale**. The `unimplemented!()` body would
-fail if un-ignored, so the ignore cannot simply be dropped — the test body itself
-was never written against `classify()`. This is a defect in the acceptance file,
-not in the domain crate.
-
-The 9 remaining ignores were re-probed one by one; **8 still hold**:
-
-| test | probed symbol | hits in `crates/` |
-|---|---|---|
-| dm2_01 | `ClaimRevisionRegistry`, `register_revision` | 0 |
-| dm2_02 | `AcceptedRevisionState` | 0 |
-| dm2_04 | `ClaimRevisionResolver`, `resolve_claim_head` | 0 |
-| dm2_06 | validated `AuthorizationDecisionRef` | only `pending_i()` |
-| dm2_08 | `RelationTypeRegistry`, `contains_relation_type` | 0 |
-| dm2_09 | `RelationExtension.scope_refs` | struct has no such field |
-| dm2_11 | `Provenance::validate`, `parent_provenance_refs`, `unavailable_reason` | 0 |
-| dm2_12 | `ProvenanceGraph`, `DerivationEdge`, `validate_independent` | 0 |
-
-`RelationExtension` at `memory-domain/src/lib.rs` carries `valid_time`,
-`epistemic_status`, `lifecycle_state` and no `scope_refs`; `Provenance` carries
-`provenance_id`, `source_refs`, `derivation_kind`, `actor_ref`, `created_at` and
-no lineage or unavailable-reason field. Both reasons are accurate.
+The classifier treats every qualifier change as
+`QualifierSubstantivenessUnprovable`; this remains an explicit governed
+decision, never a guessed `NewClaim` or `NewRevision`. The test also checks
+that a normalized label-only subject change is `NewRevision/LabelOnly`.
 
 ### 7.3 GAP-07's gap statement is now false; its closure criteria are half met
 

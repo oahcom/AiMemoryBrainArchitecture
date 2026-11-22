@@ -1,0 +1,113 @@
+work_item_id: AID-2026-043
+title: Make dm2_03 claim identity classification a real acceptance test
+
+class: TEST/DOC
+risk: R1
+risk_rationale: >-
+  This is a bounded acceptance-test and bilingual frontier-document correction.
+  It does not change the classifier implementation, production behavior,
+  persistence, public APIs, dependencies, or architecture decisions.
+
+security_scope: Test-only ClaimRevision construction and GAP-10 documentation updates.
+
+status: PR_OPEN
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+implementing_ai_session: Current ChatGPT delivery session; platform session identifier NOT_EXPOSED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 87d503baa45918e494ac331aca3b9c103892cd01
+
+tracking_issue: "NONE — task is tracked by this AID manifest and its delivery PR; no new Issue requested"
+
+created_at: 2026-11-21
+updated_at: 2026-11-21
+
+prompt_id: AID-2026-043-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-043/prompt-v1.md
+prompt_status: FROZEN
+prompt_sha256: 3c63b7180552ee9a317d149c3fbff2b58c0537abf7ff59c6df5398947523a861
+prompt_bytes: 1994
+prompt_file_blob_sha: 9753da086c4d213cf0b8895358bbb465984313f6
+prompt_file_commit_sha: 8aa359dfbcd12876d297f9794007f83959fd258e
+
+prompt_provenance_tier: T1
+prompt_provenance_note: >-
+  Frozen from the user-provided task dispatch in this ChatGPT conversation.
+  Raw platform payload bytes and session identifier are not exposed; SHA-256
+  identifies the committed prompt-v1.md bytes.
+
+dependency_refs:
+  - crates/memory-domain/src/claim_identity.rs
+  - crates/memory-domain/src/lib.rs
+  - crates/memory-domain/tests/phase2_acceptance.rs
+  - 02-domain-model/domain-model-overview.md
+  - 14-ai-development/work-items/GAP-10-IMPLEMENTATION-FRONTIER.md
+  - 14-ai-development/work-items/GAP-10-IMPLEMENTATION-FRONTIER.zh-CN.md
+  - scripts/check_bilingual_docs.py
+
+deliverables:
+  - Replace the dm2_03 JSON-mutation vectors with ClaimRevision::initial/successor-based vectors for the 10 reachable CI dimensions.
+  - Explicitly document CI-05, CI-06 and CI-12 as unreachable from the current ClaimRevision field set, with source-inspection command evidence.
+  - Assert qualifier changes require a governed decision and do not fall back to NewRevision; assert LabelOnly remains NewRevision.
+  - Synchronize stale classifier-missing statements in the English and Chinese GAP-10 documents.
+  - Register AID-2026-043 and add its INDEX row.
+
+independent_reviewer: NOT_ASSIGNED
+integration_reviewer: NOT_ASSIGNED
+
+review:
+  status: NOT_ASSIGNED
+  report_ref: ""
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)
+
+implementation:
+  status: PR_OPEN
+  branch: fix/dm2-03-claim-identity-acceptance-2026-11-21
+  pull_request: 567
+  pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/567
+  implementation_commit_sha: 61bc67e857a92d2f287c2afd546019eb676a283c
+  merge_commit_sha: NOT_MERGED
+
+authorization:
+  registration_write: USER-PRINCIPAL-DELEGATED (limited to this AID registration package)
+  implementation_write: USER-PRINCIPAL-DELEGATED (limited to the dm2_03 acceptance test and two GAP-10 language files)
+  index_update: USER-PRINCIPAL-DELEGATED (limited to the single AID-2026-043 row)
+  classifier_implementation: NOT_AUTHORIZED
+  runtime_implementation: NOT_GRANTED
+  architecture_acceptance: NOT_GRANTED
+  production_authorization: NOT_GRANTED
+
+governance:
+  aid_assignment: REGISTERED
+  aid_status: REGISTERED
+  registration_authorization: USER-PRINCIPAL-DELEGATED (limited to this work item)
+  development_start_authorization: USER-PRINCIPAL-DELEGATED (limited to this implementation scope)
+  architecture_status: NOT_APPLICABLE
+  g8_status: NOT_APPLICABLE
+  quota_change: NONE
+
+verification:
+  status: NOT_RUN
+  environment: "Ubuntu remote device was online but Desktop Commander execution quota was exhausted; no command was run."
+  commands:
+    - "PR_BODY='BILINGUAL-MANIFEST: COMPLETE' python3 scripts/check_bilingual_docs.py; echo GATE_EXIT=$?"
+    - "unset CARGO_NET_OFFLINE; cargo test -p memory-domain --test phase2_acceptance"
+    - "cargo test -p memory-domain"
+    - "cargo test --workspace"
+    - "cargo clippy --workspace --all-targets -- -D warnings"
+    - "cargo fmt --all -- --check"
+  evidence_refs:
+    - "NOT RUN — remote execution unavailable; no PASS is claimed."
+
+findings:
+  - id: F-DM2-03-ACCEPTANCE-001
+    severity: P2
+    feedback_destination: "Delivery PR conversation; verify all 10 reachable CI vectors, unreachable-field evidence, qualifier no-fallback behavior and exact-head verification before closure."
