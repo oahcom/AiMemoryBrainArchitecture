@@ -117,9 +117,41 @@ fn dm2_01_stable_claim_ref_across_revisions() {
 }
 
 #[test]
-#[ignore = "blocked: 当前无 ClaimRevisionRegistry、register_revision 或 uniqueness-check API；ClaimRevision::validate 只校验单个值，不能检测跨 revision 的重复 ID"]
 fn dm2_01_claim_revision_ref_uniqueness_enforced() {
-    unimplemented!()
+    let first = claim_revision("cr-1", "claim-1", &["ev-1"]);
+    let duplicate = claim_revision_json_with(&first, "object", json!("rejected"));
+
+    let mut registry = ClaimRevisionRegistry::default();
+
+    // 相同 ClaimRevisionRef 必须拒绝注册，并保留第一次注册的值。
+    assert!(registry.register(first.clone()).is_ok());
+    assert_eq!(
+        registry.register(duplicate),
+        Err(DomainError::DuplicateClaimRevisionRef)
+    );
+    assert_eq!(
+        registry.revision(first.revision_ref()).unwrap().object(),
+        "blue"
+    );
+
+    // 唯一性约束针对 ClaimRevisionRef，不针对 ClaimRef。
+    let second = claim_revision("cr-2", "claim-1", &["ev-2"]);
+    let third = claim_revision("cr-3", "claim-1", &["ev-3"]);
+
+    assert!(registry.register(second.clone()).is_ok());
+    assert!(registry.register(third.clone()).is_ok());
+
+    assert_eq!(
+        registry
+            .revision(second.revision_ref())
+            .unwrap()
+            .claim_ref(),
+        first.claim_ref()
+    );
+    assert_eq!(
+        registry.revision(third.revision_ref()).unwrap().claim_ref(),
+        first.claim_ref()
+    );
 }
 
 // ---------------------------------------------------------------- DM2-02
@@ -149,9 +181,59 @@ fn dm2_02_revision_parent_mismatch_rejected() {
 }
 
 #[test]
-#[ignore = "blocked: ClaimRevision 没有 AcceptedRevisionState / acceptance transition API；私有字段与无 setter 只证明不可变值，不能验证被接受状态的 append-only 转移"]
 fn dm2_02_accepted_revision_is_append_only() {
-    unimplemented!()
+    let parent = claim_revision("cr-parent", "claim-1", &["ev-1"]);
+    let child = ClaimRevision::successor(
+        ClaimRevisionRef::new("cr-child").unwrap(),
+        parent.claim_ref().clone(),
+        &parent,
+        "subject".into(),
+        "has_value".into(),
+        "green".into(),
+        "affirm".into(),
+        vec![],
+        EpistemicStatus::Observed,
+        TimeValue::Unknown,
+        vec![EvidenceRef::new("ev-2").unwrap()],
+        vec![ProvenanceRef::new("prov-2").unwrap()],
+        "2026-01-02T00:00:00Z".into(),
+        "correction".into(),
+        vec![scope("s1")],
+    )
+    .unwrap();
+
+    let parent_ref = parent.revision_ref().clone();
+    let child_ref = child.revision_ref().clone();
+    let unknown_ref = ClaimRevisionRef::new("cr-unregistered").unwrap();
+    let claim_ref = parent.claim_ref().clone();
+
+    let mut registry = ClaimRevisionRegistry::default();
+    registry.register(parent).unwrap();
+    registry.register(child).unwrap();
+
+    // 子 revision 必须等待父 revision 被接受。
+    assert_eq!(registry.accept(&child_ref), Err(DomainError::InvalidParent));
+    assert!(!registry.is_accepted(&child_ref));
+
+    // 接受父 revision 后才能接受子 revision。
+    assert_eq!(registry.accept(&parent_ref), Ok(()));
+    assert_eq!(registry.accept(&child_ref), Ok(()));
+
+    // 重复接受父 revision 必须幂等，不能覆盖子 revision 的 head。
+    assert_eq!(
+        registry.resolve_head(&claim_ref).unwrap().revision_ref(),
+        &child_ref
+    );
+    assert_eq!(registry.accept(&parent_ref), Ok(()));
+    assert_eq!(
+        registry.resolve_head(&claim_ref).unwrap().revision_ref(),
+        &child_ref
+    );
+
+    // 只有这两个已接受的 revision 返回 true。
+    assert!(registry.is_accepted(&parent_ref));
+    assert!(registry.is_accepted(&child_ref));
+    assert!(!registry.is_accepted(&unknown_ref));
 }
 
 // ---------------------------------------------------------------- DM2-03
@@ -269,9 +351,65 @@ fn dm2_04_fact_pins_exact_claim_revision_not_head() {
     assert_eq!(broken.validate(), Err(DomainError::EmptyId));
 }
 #[test]
-#[ignore = "blocked: memory_domain 当前没有 ClaimRevisionResolver trait、resolve_claim_head 或 resolve_revision API；只能验证 FactRevision 保存精确 ClaimRevisionRef，不能验证 resolver 拒绝 head substitution"]
 fn dm2_04_resolution_rejects_claim_head_substitution() {
-    unimplemented!()
+    let parent = claim_revision("cr-1", "claim-1", &["ev-1"]);
+    let child = ClaimRevision::successor(
+        ClaimRevisionRef::new("cr-2").unwrap(),
+        parent.claim_ref().clone(),
+        &parent,
+        "subject".into(),
+        "has_value".into(),
+        "green".into(),
+        "affirm".into(),
+        vec![],
+        EpistemicStatus::Observed,
+        TimeValue::Unknown,
+        vec![EvidenceRef::new("ev-2").unwrap()],
+        vec![ProvenanceRef::new("prov-2").unwrap()],
+        "2026-01-02T00:00:00Z".into(),
+        "correction".into(),
+        vec![scope("s1")],
+    )
+    .unwrap();
+
+    let parent_ref = parent.revision_ref().clone();
+    let child_ref = child.revision_ref().clone();
+    let unknown_ref = ClaimRevisionRef::new("cr-unregistered").unwrap();
+    let claim_ref = parent.claim_ref().clone();
+
+    let mut registry = ClaimRevisionRegistry::default();
+    registry.register(parent).unwrap();
+    registry.register(child).unwrap();
+
+    registry.accept(&parent_ref).unwrap();
+    registry.accept(&child_ref).unwrap();
+
+    // 当前 head 是 cr-2，但精确解析 cr-1 必须仍然返回 cr-1。
+    assert_eq!(
+        registry.resolve_head(&claim_ref).unwrap().revision_ref(),
+        &child_ref
+    );
+    assert_eq!(
+        registry.resolve_exact(&parent_ref).unwrap().revision_ref(),
+        &parent_ref
+    );
+
+    // 即使 claim 已有 head，未注册的精确引用也不得回退到 head。
+    assert!(registry.resolve_exact(&unknown_ref).is_none());
+
+    // FactRevision 的 pin 必须通过 resolver 精确解析，不能替换为 head。
+    let fact = fact_revision_with_pin(parent_ref.as_str());
+    assert!(fact.validate().is_ok());
+    assert_eq!(
+        fact.claim_revision_refs(),
+        std::slice::from_ref(&parent_ref)
+    );
+    assert_eq!(
+        ClaimRevisionResolver::resolve_exact(&registry, &fact.claim_revision_refs()[0])
+            .unwrap()
+            .revision_ref(),
+        &parent_ref
+    );
 }
 
 // ---------------------------------------------------------------- DM2-05
