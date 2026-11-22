@@ -27,30 +27,36 @@ impl ProvenanceGraph {
         Self::default()
     }
 
-    /// Registers a provenance node and its explicitly declared parents.
+    /// Registers a provenance node, taking its lineage from the record itself.
     ///
-    /// `parents` is the sole source of derivation edges.
-    /// `Provenance::source_refs` is intentionally not interpreted as lineage.
+    /// `Provenance::parent_provenance_refs` is the sole source of derivation
+    /// edges; `Provenance::source_refs` is intentionally not interpreted as
+    /// lineage. Taking parents as a second argument would let a caller declare
+    /// one lineage on the record and a different one on the graph.
+    ///
+    /// The record is validated first, so an unexplainable record (no parents,
+    /// no unavailable reason) cannot enter the graph at all.
     ///
     /// The operation is atomic: if cycle detection fails, the original graph
     /// remains unchanged.
-    pub fn add(
-        &mut self,
-        provenance: Provenance,
-        parents: &[ProvenanceRef],
-    ) -> Result<(), DomainError> {
+    pub fn add(&mut self, provenance: Provenance) -> Result<(), DomainError> {
+        provenance.validate()?;
+
         let node_id = provenance.provenance_id.as_str().to_owned();
 
         if self.nodes.contains_key(&node_id) {
             return Err(DomainError::InvalidParent);
         }
 
+        // The only authoritative source of lineage is the record itself.
+        let parents = provenance.parent_provenance_refs.clone();
+
         // Work on a candidate graph so every failure leaves `self` unchanged.
         let mut candidate = self.clone();
 
         candidate.nodes.insert(node_id.clone(), provenance);
 
-        for parent in parents {
+        for parent in &parents {
             let parent_id = parent.as_str().to_owned();
 
             if candidate.nodes.contains_key(&parent_id) {
@@ -257,18 +263,23 @@ mod tests {
     use super::*;
     use crate::{ActorRef, OpaqueId};
 
-    fn provenance(id: &str) -> Provenance {
+    fn provenance_with(id: &str, parents: &[&str]) -> Provenance {
         Provenance {
             provenance_id: OpaqueId::new(id).unwrap(),
-            source_refs: Vec::new(),
+            source_refs: vec![OpaqueId::new("source-test").unwrap()],
             derivation_kind: "test".into(),
             actor_ref: ActorRef {
                 actor_id: OpaqueId::new("actor-test").unwrap(),
             },
             created_at: "2026-01-01T00:00:00Z".into(),
             source_version_refs: vec![],
-            parent_provenance_refs: vec![],
-            unavailable_reason: None,
+            parent_provenance_refs: parents.iter().map(|id| reference(id)).collect(),
+            // A root has no lineage, so it must say why (DM2-11).
+            unavailable_reason: if parents.is_empty() {
+                Some("test root has no upstream provenance".into())
+            } else {
+                None
+            },
             method_version: None,
         }
     }
@@ -278,9 +289,7 @@ mod tests {
     }
 
     fn add(graph: &mut ProvenanceGraph, id: &str, parents: &[&str]) -> Result<(), DomainError> {
-        let parents: Vec<ProvenanceRef> = parents.iter().map(|id| reference(id)).collect();
-
-        graph.add(provenance(id), &parents)
+        graph.add(provenance_with(id, parents))
     }
 
     fn ancestor_ids(graph: &ProvenanceGraph, id: &str) -> Vec<String> {
@@ -316,6 +325,56 @@ mod tests {
         assert_eq!(
             ancestor_ids(&graph, "C"),
             vec!["A".to_owned(), "B".to_owned()]
+        );
+    }
+
+    // 2b. A record with neither lineage nor an unavailable reason must never
+    // enter the graph, and a rejected add must leave no partial state.
+    //
+    // Without this test, deleting `provenance.validate()?` from `add` keeps the
+    // whole suite green — the DM2-11 rule would hold for records checked
+    // directly but not for records entering through the graph.
+    #[test]
+    fn unexplainable_provenance_is_refused_without_partial_state() {
+        let mut graph = ProvenanceGraph::new();
+
+        let mut orphan = provenance_with("ORPHAN", &[]);
+        orphan.unavailable_reason = None;
+
+        assert_eq!(
+            graph.add(orphan),
+            Err(DomainError::IncompleteProvenanceLineage)
+        );
+
+        // Prove nothing was registered: re-adding the same identity would fail
+        // with InvalidParent if it were present, and succeed if it is absent.
+        let mut explainable = provenance_with("ORPHAN", &[]);
+        explainable.unavailable_reason = Some("source never captured".into());
+        graph
+            .add(explainable)
+            .expect("a refused record must not occupy the identity");
+
+        // The graph is still usable afterwards.
+        add(&mut graph, "ROOT", &[]).unwrap();
+        add(&mut graph, "CHILD", &["ROOT"]).unwrap();
+        assert_eq!(ancestor_ids(&graph, "CHILD"), vec!["ROOT".to_owned()]);
+    }
+
+    // 2c. Lineage comes from the record, not from a second caller-supplied
+    // list: a record declaring no parents is a root even if the caller wishes
+    // otherwise, because there is no other argument to wish with.
+    #[test]
+    fn lineage_is_taken_from_the_record_only() {
+        let mut graph = ProvenanceGraph::new();
+
+        add(&mut graph, "ROOT", &[]).unwrap();
+        add(&mut graph, "CHILD", &["ROOT"]).unwrap();
+
+        assert_eq!(ancestor_ids(&graph, "CHILD"), vec!["ROOT".to_owned()]);
+        assert_eq!(
+            ancestor_ids(&graph, "ROOT"),
+            Vec::<String>::new(),
+            "the root's own record declares no parents, so it has no ancestors"
         );
     }
 

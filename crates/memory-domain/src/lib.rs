@@ -48,6 +48,10 @@ pub enum DomainError {
     MissingFactProvenance,
     MissingRevisionReason,
     MissingIdentityLineage,
+    /// §3.6: a derived record must name its lineage or say why it cannot.
+    /// A cross-field invariant, not a missing required field — the parent list
+    /// is legitimately allowed to be empty when a reason is given.
+    IncompleteProvenanceLineage,
     InvalidRelationEndpoint,
     UnregisteredRelationType,
     DuplicateRelationType,
@@ -305,8 +309,17 @@ impl Provenance {
         if self.source_refs.is_empty() {
             return Err(DomainError::EmptyRequiredField("source_refs"));
         }
-        if self.unavailable_reason.as_deref() == Some("") {
+        // An explicitly supplied reason must contain meaningful text.
+        if self
+            .unavailable_reason
+            .as_deref()
+            .is_some_and(|reason| reason.trim().is_empty())
+        {
             return Err(DomainError::EmptyRequiredField("unavailable_reason"));
+        }
+        // Either lineage or an explicit explanation of its absence is mandatory.
+        if self.parent_provenance_refs.is_empty() && self.unavailable_reason.is_none() {
+            return Err(DomainError::IncompleteProvenanceLineage);
         }
         if !self.source_version_refs.is_empty()
             && self.source_version_refs.len() != self.source_refs.len()
