@@ -8,8 +8,7 @@ const COMPILER_BLOCKED_NOTICE: &str = "compiler stage blocked: publication not a
      blocking flag: canonical_commit_confirmed; false flags: [canonical_commit_confirmed, \
      publication_participant_admitted, protected_visibility_authorized]";
 
-const DELIVERY_PREFIX: &str =
-    "delivery applied: session=brain-cli-session version=";
+const DELIVERY_PREFIX: &str = "delivery applied: session=brain-cli-session version=";
 
 static NEXT_TEST_ID: AtomicU64 = AtomicU64::new(0);
 
@@ -78,8 +77,7 @@ fn context_snapshot_reaches_agent_adapter_and_preserves_compiler_contract() {
     );
 
     // 2. Read the exact ContextSnapshot produced by the CLI.
-    let snapshot_bytes =
-        fs::read(&output_path).expect("ContextSnapshot output must exist");
+    let snapshot_bytes = fs::read(&output_path).expect("ContextSnapshot output must exist");
 
     let snapshot: Value =
         serde_json::from_slice(&snapshot_bytes).expect("valid ContextSnapshot JSON");
@@ -108,8 +106,7 @@ fn context_snapshot_reaches_agent_adapter_and_preserves_compiler_contract() {
 
     // 4. The adapter must have applied the same snapshot version.
     assert_eq!(
-        delivered_version,
-        snapshot_version,
+        delivered_version, snapshot_version,
         "adapter applied version must match ContextSnapshot.context_version"
     );
 
@@ -126,8 +123,7 @@ fn context_snapshot_reaches_agent_adapter_and_preserves_compiler_contract() {
     // 6. Delivery must not contaminate the compiler-only sidecar.
     let sidecar_path = TestDirectory::sidecar_path(&output_path);
 
-    let sidecar =
-        fs::read_to_string(&sidecar_path).expect("compiler status sidecar must exist");
+    let sidecar = fs::read_to_string(&sidecar_path).expect("compiler status sidecar must exist");
 
     assert_eq!(
         sidecar,
