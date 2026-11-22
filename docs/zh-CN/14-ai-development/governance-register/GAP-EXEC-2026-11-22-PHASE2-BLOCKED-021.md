@@ -2,9 +2,60 @@
 
 **登记编号**：GAP-EXEC-2026-11-22-PHASE2-BLOCKED-021
 **性质**：MEASUREMENT_ONLY / TEST_DRAFT_ONLY / NO_IMPLEMENTATION / REQUIRES_INDEPENDENT_REVIEW
-**测量点**：`main = dba34a35`（`CC=zigcc AR=zigar cargo test --workspace --all-targets` → 438 passed / 0 failed / 9 ignored）
+**测量点**：`main = dba34a35`（初版）→ `main = fe9e25a5`（v2 复测）
 **登记时间**：2026-11-22
 **作者**：协调会话（非独立审查者）
+**版本**：v2 — §0.1 记录初版发布后 3 小时内被并行实现关闭 7 条
+
+---
+
+## 0.1 初版发布后被并行实现关闭的 7 条
+
+初版在 `dba34a35` 测得 **9 条 ignore**。发布后 3 小时内，并行会话合入四个 PR：
+
+| 条目 | 关闭者 | 提交 |
+|---|---|---|
+| `dm2_01` / `dm2_02` / `dm2_04` | #570 `ClaimRevisionRegistry`（同时提供 `ClaimRevisionResolver` trait，精确解析与 head 解析分开） | `5c50b910` |
+| `dm2_03` | 测试体按初版 §4.1 草案改写为 `claim_revision_successor` 构造 | 见 `phase2_acceptance.rs:295` |
+| `dm2_08` / `dm2_09` | `0c640a17` + #581 `a0d4f7d7`（`RelationTypeRegistry` + `RelationExtension::scope_refs`，并区分失败模式） | `0c640a17` |
+| `dm2_12` | #582 `ProvenanceGraph` + `EvidenceIndependence::validate_independent` | `fe9e25a5` |
+
+复测：
+
+```
+$ CC=zigcc AR=zigar cargo test --workspace --all-targets   # main = fe9e25a5
+binaries: 30
+passed=499  failed=0  ignored=2
+```
+
+`dba34a35` 时为 438 / 0 / 9。**净增 61 个通过测试，ignore 从 9 降到 2。**
+
+剩下 2 条：
+
+| 条目 | 阻塞者 | 是否我判断错了 |
+|---|---|---|
+| `dm2_06` | 权威 I（`AuthorizationDecisionRef` 契约） | **没判断错**。初版 §3 就写明这是唯一硬阻塞条目 |
+| `dm2_11` | 待合 PR #583（`Provenance` lineage 字段） | 判断没错，但**当时未记录有一个 open PR 正在做这件事** |
+
+### 0.1.1 这次更正推翻的我自己的一条方法论
+
+初版 §2 把 9 条都写成「缺口」，并按「是否有外部决定阻塞」排序。这个排序是**对的**，
+但漏了一个维度：**是否有并行会话已经在做**。
+
+`dm2_11` 的初版条目说「依赖：无」，这是真的；但它同时被 #583 在做，而我没查开放 PR
+就写了「可立即做」。结论没错，可执行性判断错了——对一个正在被别人的分支解决的条目
+说「可以立即做」，等于建议重复劳动。
+
+修正后的判据应有三档，不是两档：
+
+| 档 | 判据 | 处置 |
+|---|---|---|
+| A | 无外部决定，且无开放 PR 在做 | 可立即派工 |
+| B | 无外部决定，但有开放 PR 在做 | **不派工**，等那个 PR 落地后复测 |
+| C | 被外部决定阻塞 | 不派工，等决定 |
+
+初版只有 A 和 C，缺 B。这个缺陷在 §3 的依赖顺序里直接体现为「7 of 8 不需要任何外部
+决定」这句话——它数字上对，可执行性上误导。
 
 ---
 
@@ -176,31 +227,43 @@ Provenance { provenance_id, source_refs, derivation_kind, actor_ref, created_at 
 
 ---
 
-## 3. 依赖顺序
+## 3. 依赖顺序（v2 修订）
+
+初版在此处写「**8 条里 7 条不需要任何外部决定**」。数字仍对，但按 §0.1.1 的三档判据
+重排后，可派工范围小得多：
 
 ```
-G2-03  (无依赖，纯测试修复)      ← 可立即做，不阻塞任何人
-G2-01  (无依赖)
-G2-02  (无依赖)
-G2-08  (无依赖)
-G2-09  (无依赖，但 breaking)
-G2-11  (无依赖)
-   └─> G2-12  (需要 G2-11 的 parent 边)
-G2-04  (需要 G2-01)
-G2-06  (被 I 权威阻塞)          ← 唯一硬阻塞
+【A 档 — 无外部决定，无开放 PR，可立即派工】
+（空）
+
+【B 档 — 无外部决定，但已有开放 PR 在做，等落地后复测】
+G2-11  <- #583 feat/provenance-lineage-fields (open)
+
+【C 档 — 被外部决定阻塞，不派工】
+G2-06  <- 权威 I
 ```
 
-**8 条里 7 条不需要任何外部决定。** 只有 `G2-06` 需要 I 签发
-`AuthorizationDecisionRef` 契约。这再次说明「Phase 2 未启动」是错的框架：可做的
-部分占 7/8。
+初版列为 A 档的 G2-01、G2-02、G2-04、G2-08、G2-09、G2-12 **全部已被合入**（§0.1 表），
+G2-03 同理。所以 A 档现在是空的，而这不是坏消息——它意味着 Phase 2 的实现缺口在
+`fe9e25a5` 上只剩 2 条，其中 1 条有 PR 在做、1 条等权威。
+
+**这是本登记最有价值的一行结论**：「Phase 2/3 领域模型 100% 未启动」在
+`dba34a35` 就已经是错的（11 个维度通过），在 `fe9e25a5` 上错得更彻底（13 个维度通过、
+2 个待办）。这个方向从来不是「未启动」，而是「已在收尾」。
 
 ---
 
-## 4. 测试草案
+## 4. 测试草案（v2：已落地部分的草案转为实现记录）
 
 草案只写**判据**与**最小构造**，不写实现。实现方落地 API 后可直接采用。
 
-### 4.1 G2-03（唯一可立即执行的草案）
+### 4.1 G2-03（已落地，草案被采纳）
+
+初版草案提示「字段若私有，需改为通过 `successor()` 构造」。实际实现正是这样做的
+（`phase2_acceptance.rs:281` 新增 `claim_revision_successor` helper，用闭包改草稿
+再 `successor()`）。这是草案里唯一一处前瞻判断被验证的地方。
+
+### 4.2 G2-03 草案原文（已被采纳）
 
 ```rust
 #[test]
@@ -243,7 +306,11 @@ fn dm2_03_ci_classification_vectors() {
 **说明**：字段赋值是否可行取决于 `ClaimRevision` 字段可见性。若字段私有，草案需
 改为通过 `successor()` 构造。这是实现方落地时要解决的细节，不是判据问题。
 
-### 4.2 G2-01
+### 4.3 G2-01 草案原文（已落地，见 `5c50b910`）
+
+初版草案要求「拒绝后注册表必须仍是原状态」。实现的 `ClaimRevisionRegistry` 满足
+这一点，且额外把精确解析与 head 解析拆成两个方法（`ClaimRevisionResolver` trait），
+比我草案里隐含的「一个 resolve」更严——从类型上杜绝了 pin 被静默升级为 head。
 
 ```rust
 #[test]
@@ -264,7 +331,7 @@ fn dm2_01_claim_revision_ref_uniqueness_enforced() {
 
 最后一行是**关键断言**：拒绝之后注册表必须仍是原状态，否则拒绝是假的。
 
-### 4.3 G2-02
+### 4.4 G2-02 草案原文（已落地，见 `5c50b910`）
 
 ```rust
 #[test]
@@ -282,7 +349,7 @@ fn dm2_02_accepted_revision_is_append_only() {
 }
 ```
 
-### 4.4 G2-04
+### 4.5 G2-04 草案原文（已落地，见 `5c50b910`）
 
 ```rust
 #[test]
@@ -299,7 +366,7 @@ fn dm2_04_resolution_rejects_claim_head_substitution() {
 }
 ```
 
-### 4.5 G2-08
+### 4.6 G2-08 草案原文（已落地，见 `0c640a17` / #581）
 
 ```rust
 #[test]
@@ -315,7 +382,7 @@ fn dm2_08_unregistered_relation_type_rejected() {
 }
 ```
 
-### 4.6 G2-09
+### 4.7 G2-09 草案原文（已落地，见 `0c640a17`）
 
 ```rust
 #[test]
@@ -345,7 +412,7 @@ fn dm2_09_relation_time_scope_lifecycle_independent() {
 
 三组断言必须**都**存在。只断言一组是常见造假方式：证明「能改」不等于证明「独立」。
 
-### 4.7 G2-11
+### 4.8 G2-11 草案原文（**未落地**，等 #583）
 
 ```rust
 #[test]
@@ -372,7 +439,7 @@ fn dm2_11_provenance_lineage_or_unavailable_reason_mandatory() {
 }
 ```
 
-### 4.8 G2-12
+### 4.9 G2-12 草案原文（已落地，见 `fe9e25a5`）
 
 ```rust
 #[test]

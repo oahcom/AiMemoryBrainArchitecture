@@ -2,9 +2,64 @@
 
 **Register**: GAP-EXEC-2026-11-22-PHASE2-BLOCKED-021
 **Nature**: MEASUREMENT_ONLY / TEST_DRAFT_ONLY / NO_IMPLEMENTATION / REQUIRES_INDEPENDENT_REVIEW
-**Measured at**: `main = dba34a35` (`CC=zigcc AR=zigar cargo test --workspace --all-targets` → 438 passed / 0 failed / 9 ignored)
+**Measured at**: `main = dba34a35` (first version) -> `main = fe9e25a5` (v2 re-measurement)
 **Date**: 2026-11-22
 **Author**: coordination session (not an independent reviewer)
+**Version**: v2 — §0.1 records 7 of 9 entries closed by parallel implementation within 3 hours of publication
+
+---
+
+## 0.1 Seven entries closed by parallel implementation after publication
+
+The first version measured **9 ignores** at `dba34a35`. Within 3 hours, parallel
+sessions merged four PRs:
+
+| entry | closed by | commit |
+|---|---|---|
+| `dm2_01` / `dm2_02` / `dm2_04` | #570 `ClaimRevisionRegistry` (also supplies the `ClaimRevisionResolver` trait, with exact and head resolution as separate methods) | `5c50b910` |
+| `dm2_03` | test body rewritten per the §4.1 draft, constructing via `claim_revision_successor` | see `phase2_acceptance.rs:295` |
+| `dm2_08` / `dm2_09` | `0c640a17` + #581 `a0d4f7d7` (`RelationTypeRegistry` + `RelationExtension::scope_refs`, with distinguishable failure modes) | `0c640a17` |
+| `dm2_12` | #582 `ProvenanceGraph` + `EvidenceIndependence::validate_independent` | `fe9e25a5` |
+
+Re-measured:
+
+```
+$ CC=zigcc AR=zigar cargo test --workspace --all-targets   # main = fe9e25a5
+binaries: 30
+passed=499  failed=0  ignored=2
+```
+
+At `dba34a35` it was 438 / 0 / 9. **Net +61 passing tests, ignores down from 9 to 2.**
+
+Two remain:
+
+| entry | blocked by | was my judgement wrong |
+|---|---|---|
+| `dm2_06` | authority I (the `AuthorizationDecisionRef` contract) | **No.** §3 of the first version already named it as the only hard block |
+| `dm2_11` | PR #583 pending (`Provenance` lineage fields) | The judgement was right, but **I did not record that an open PR was already doing it** |
+
+### 0.1.1 What this correction overturns in my own method
+
+§2 of the first version wrote all 9 as "gaps" and ordered them by "is an external
+decision blocking this". That ordering was **correct** but missed a dimension:
+**is a parallel session already doing it**.
+
+`dm2_11`'s first-version entry said "dependency: none", which is true; but #583 was
+already working on it, and I wrote "do it now" without checking open PRs. The
+conclusion was right, the actionability judgement was wrong — telling someone to
+do work that another branch is already doing produces duplicate effort.
+
+The corrected criterion has three tiers, not two:
+
+| tier | criterion | disposition |
+|---|---|---|
+| A | no external decision, and no open PR | dispatch now |
+| B | no external decision, but an open PR exists | **do not dispatch**; re-measure after that PR lands |
+| C | blocked by an external decision | do not dispatch; wait for the decision |
+
+The first version had only A and C, and lacked B. The defect shows up directly in
+§3's "7 of 8 need no external decision" — numerically true, misleading for
+actionability.
 
 ---
 
@@ -202,32 +257,50 @@ Each gives: **gap ID / required capability / criterion / refusal condition / dep
 
 ---
 
-## 3. Dependency order
+## 3. Dependency order (v2)
+
+The first version wrote "**7 of 8 need no external decision at all**" here. The
+number is still right, but re-sorted under §0.1.1's three tiers the dispatchable
+set is far smaller:
 
 ```
-G2-03  (no dependency, test-only repair)   <- do now, blocks nobody
-G2-01  (no dependency)
-G2-02  (no dependency)
-G2-08  (no dependency)
-G2-09  (no dependency, but breaking)
-G2-11  (no dependency)
-   +-> G2-12  (needs G2-11's parent edges)
-G2-04  (needs G2-01)
-G2-06  (blocked by authority I)            <- the only hard block
+[tier A -- no external decision, no open PR, dispatch now]
+(empty)
+
+[tier B -- no external decision, but an open PR is doing it; re-measure after it lands]
+G2-11  <- #583 feat/provenance-lineage-fields (open)
+
+[tier C -- blocked by an external decision; do not dispatch]
+G2-06  <- authority I
 ```
 
-**7 of 8 need no external decision at all.** Only `G2-06` needs I to issue the
-`AuthorizationDecisionRef` contract. This is the second reason "Phase 2 not started"
-is the wrong frame: the doable part is 7/8.
+Every entry the first version listed as tier A — G2-01, G2-02, G2-04, G2-08, G2-09,
+G2-12 — has already been merged (see the §0.1 table), as has G2-03. So tier A is now
+empty, and that is not bad news: it means the Phase 2 implementation gap at
+`fe9e25a5` is down to 2 entries, one with a PR in flight and one waiting on an
+authority.
+
+**This is the most valuable line in this register**: "Phase 2/3 domain model 100% not
+started" was already false at `dba34a35` (11 dimensions passing) and is more
+thoroughly false at `fe9e25a5` (13 passing, 2 pending). This area was never
+"not started" — it is closing out.
 
 ---
 
-## 4. Test drafts
+## 4. Test drafts (v2: drafts for landed entries become implementation records)
 
 The drafts state **criteria** and **minimum construction**, not implementation.
 Once the API lands, the implementer can adopt them directly.
 
-### 4.1 G2-03 (the only draft executable today)
+### 4.1 G2-03 (landed; the draft was adopted)
+
+The first draft warned "if the fields are private, construct via `successor()`
+instead". The implementation did exactly that (`phase2_acceptance.rs:281` adds a
+`claim_revision_successor` helper that mutates a draft through a closure and then
+calls `successor()`). This is the one place where the draft's forward-looking
+judgement was validated.
+
+### 4.2 G2-03 draft text (as adopted)
 
 ```rust
 #[test]
@@ -271,7 +344,13 @@ fn dm2_03_ci_classification_vectors() {
 visibility. If the fields are private, the draft must be rewritten to construct via
 `successor()`. That is an implementation detail, not a criterion question.
 
-### 4.2 G2-01
+### 4.3 G2-01 draft text (landed, see `5c50b910`)
+
+The first draft required "after a refusal the registry must still be in its prior
+state". The shipped `ClaimRevisionRegistry` satisfies that, and additionally splits
+exact resolution from head resolution into two methods on a
+`ClaimRevisionResolver` trait — stricter than the single `resolve` my draft implied,
+because it makes a pin silently becoming the head impossible by type.
 
 ```rust
 #[test]
@@ -293,7 +372,7 @@ fn dm2_01_claim_revision_ref_uniqueness_enforced() {
 The last line is the **critical assertion**: after a refusal the registry must still
 be in its prior state, otherwise the refusal is cosmetic.
 
-### 4.3 G2-02
+### 4.4 G2-02 draft text (landed, see `5c50b910`)
 
 ```rust
 #[test]
@@ -311,7 +390,7 @@ fn dm2_02_accepted_revision_is_append_only() {
 }
 ```
 
-### 4.4 G2-04
+### 4.5 G2-04 draft text (landed, see `5c50b910`)
 
 ```rust
 #[test]
@@ -328,7 +407,7 @@ fn dm2_04_resolution_rejects_claim_head_substitution() {
 }
 ```
 
-### 4.5 G2-08
+### 4.6 G2-08 draft text (landed, see `0c640a17` / #581)
 
 ```rust
 #[test]
@@ -344,7 +423,7 @@ fn dm2_08_unregistered_relation_type_rejected() {
 }
 ```
 
-### 4.6 G2-09
+### 4.7 G2-09 draft text (landed, see `0c640a17`)
 
 ```rust
 #[test]
@@ -375,7 +454,7 @@ fn dm2_09_relation_time_scope_lifecycle_independent() {
 All three assertion groups must be present. Asserting one is the usual way to fake
 this: proving "it can change" is not proving "it is independent".
 
-### 4.7 G2-11
+### 4.8 G2-11 draft text (**not landed**; waiting on #583)
 
 ```rust
 #[test]
@@ -402,7 +481,7 @@ fn dm2_11_provenance_lineage_or_unavailable_reason_mandatory() {
 }
 ```
 
-### 4.8 G2-12
+### 4.9 G2-12 draft text (landed, see `fe9e25a5`)
 
 ```rust
 #[test]
