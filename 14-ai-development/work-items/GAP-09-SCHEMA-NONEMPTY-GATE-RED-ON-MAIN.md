@@ -1,8 +1,9 @@
 # GAP-09 — The schema non-empty gate is red on main
 
-**Status:** Open — `main` fails its own documented gate
+**Status:** Closed — gate green on `main @ 62827fbb` since `6897e53c` (2026-11-22). Closure criterion 4 (CI wiring) remains open; see the amendment at the end.
 **Area:** 08-bmcp-protocol / schema audit
 **Owner track:** Owner H (Protocol)
+**Re-measured at:** `main @ 62827fbb`, 2026-11-22T07:54:32Z
 
 ## Gap statement
 
@@ -321,3 +322,131 @@ today would add a gate nobody can observe, which is the failure mode this item
 was opened to name. Criterion 4 stays open until CI billing is restored; the
 ordering established in the previous round is unchanged — (a) is now done, so
 (c) becomes meaningful the moment CI can run.
+
+## Amendment — GAP-09 closure re-verified, 2026-11-22T07:54:32Z, `main @ 62827fbb`
+
+The gap statement and every round above are unchanged. This section records that
+the gate is closed, and — more importantly — that the closure was re-verified
+independently rather than accepted from the commit that claimed it.
+
+### 1. The gate is green
+
+```
+$ python3 08-bmcp-protocol/schemas/test_nonempty_audit.py; echo "EXIT=$?"
+OK: 32 schemas; 5599 registered constraints; no unregistered or stale entries.
+EXIT=0
+```
+
+Same output and exit code at `62827fbb` (the commit named in the header) and at
+current `origin/main` (`7d816980`). The pre-fix state reproduces too: at
+`6897e53c^` the same script prints 5506 findings and exits 1.
+
+### 2. The fix is a table extension, not a loosened check
+
+The whole risk in a closure like this is that someone made the gate pass by
+weakening the gate. It did not happen, and that is checkable four ways.
+
+**The audit script was not touched.** Fix commit `6897e53cddbce58e1a28d7f1b7bf83fd439a39c5`:
+
+```
+$ git show 6897e53c -- 08-bmcp-protocol/schemas/test_nonempty_audit.py
+(empty — 0 bytes, 0 lines)
+
+$ git show --name-only --format="" 6897e53c
+08-bmcp-protocol/schema-nonempty-audit.md
+08-bmcp-protocol/schema-nonempty-audit.zh-CN.md
+14-ai-development/work-items/GAP-09-SCHEMA-NONEMPTY-GATE-RED-ON-MAIN.md
+14-ai-development/work-items/GAP-09-SCHEMA-NONEMPTY-GATE-RED-ON-MAIN.zh-CN.md
+```
+
+No file under `08-bmcp-protocol/schemas/` appears in the commit at all. The
+script's git blob is byte-identical at all four points in the history:
+
+```
+$ for r in 6897e53c^ 6897e53c 62827fbb HEAD; do echo -n "$r: "; \
+    git rev-parse "$r:08-bmcp-protocol/schemas/test_nonempty_audit.py"; done
+6897e53c^: 88a6f33676c60860a139fb1ac0bb6f8ef6e7e742
+6897e53c:  88a6f33676c60860a139fb1ac0bb6f8ef6e7e742
+62827fbb:  88a6f33676c60860a139fb1ac0bb6f8ef6e7e742
+HEAD:      88a6f33676c60860a139fb1ac0bb6f8ef6e7e742
+```
+
+**The script does not read the disposition column.** `test_nonempty_audit.py:81`
+assigns `disposition = cells[4]` and never uses it again; registration is keyed on
+`(schema, location, constraint)` only (`:83`). So a row cannot pass by
+carrying a permissive disposition — either the triple is registered or it is not.
+This is why "the dispositions were not downgraded" is a claim about the audit's
+meaning, not about whether the script could be fooled.
+
+**The change is additive.** `git show --numstat 6897e53c`:
+
+| file | + | − |
+|---|---|---|
+| `08-bmcp-protocol/schema-nonempty-audit.md` | 5574 | 8 |
+| `08-bmcp-protocol/schema-nonempty-audit.zh-CN.md` | 5574 | 7 |
+| `GAP-09-SCHEMA-NONEMPTY-GATE-RED-ON-MAIN.md` | 75 | 0 |
+| `GAP-09-SCHEMA-NONEMPTY-GATE-RED-ON-MAIN.zh-CN.md` | 62 | 0 |
+
+The 8 deleted lines in the English table are all prose, and they are enumerated
+here so the claim is auditable rather than asserted:
+
+```
+$ git diff 6897e53c^ 6897e53c -- 08-bmcp-protocol/schema-nonempty-audit.md \
+    | awk '/^---/{next} /^-/{print}'
+```
+
+1 baseline line (`88bf4875` / 2 files), 5 Summary bullets (old counts), 1
+`## Complete inventory` heading, 1 paragraph under it. The heading was replaced
+by `## Pattern note`; the old Summary was replaced by the new one. **Zero table
+data rows were deleted or altered** — all 107 survive verbatim.
+
+### 3. Row and constraint counts, before and after
+
+Parsed with a pipe-escape-aware splitter (the `pattern` cells contain escaped
+`\|`, which naive splitting miscounts):
+
+| | before `6897e53c` | after `6897e53c` |
+|---|---|---|
+| table sections | 1 | 7 |
+| data rows | 107 | 5613 |
+| rows that are constraints | 93 | 5599 |
+| rows that are notes (`Retain required; no minItems`) | 14 | 14 |
+| empty `rationale` cells | 0 | 0 |
+| shortest `rationale` (chars) | 48 | 48 |
+| pre-existing rows preserved verbatim | — | 107 / 107 |
+
+5506 constraint rows added, 93 + 5506 = 5599 — which is exactly the number the
+script reports as registered. The 14 note rows are the same 14 in both states.
+
+### 4. No disposition was downgraded
+
+The 93 `Retain, narrowed` dispositions are all still present, by exact string
+count in the file (`grep -c "Retain, narrowed"` → 93 before, 93 after). Every one
+of the 5599 constraint rows carries a disposition beginning with `Retain`; there
+are zero rows with a disposition that does not (`Accept`, `Exempt`, `Drop`, or
+empty). Full distribution:
+
+| disposition | rows |
+|---|---|
+| `Retain` | 5478 |
+| `Retain, narrowed` | 93 |
+| `Retain, conditional` | 17 |
+| `Retain; schema defect recorded` | 6 |
+| `Retain; narrowed in 1.0.2` | 4 |
+| `Retain; superseded by 1.0.1` | 1 |
+
+The distribution also shows the rows are not boilerplate: 14 rows are recorded as
+legally empty (`Yes — …`) and the other 5585 as not, and there are 38 distinct
+rationale strings and 29 distinct "may be legally empty?" strings. A generator
+with one default verdict would have produced one value in each column.
+
+### What this amendment does not claim
+
+Criterion 4 from §Closure criteria is still **not met**: `test_nonempty_audit.py`
+is still not wired into CI. The gate is green because the table is complete, not
+because a merge would now be blocked if it went red again. That remains the open
+half of this work item, and it is blocked on CI billing, not on the audit.
+
+The two schema defects recorded in §Two schema defects found while reading are
+also still unrepaired and still need an Owner H ruling. Closing the gate did not
+close them.

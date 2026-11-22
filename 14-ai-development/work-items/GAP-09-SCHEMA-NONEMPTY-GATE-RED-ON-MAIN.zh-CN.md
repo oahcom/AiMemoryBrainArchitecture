@@ -1,8 +1,9 @@
 # GAP-09 · schema 非空闸门在 main 上是红的
 
-**状态**：未关闭 — `main` 无法通过自己的既定闸门
+**状态**：已关闭 — 自 `6897e53c`（2026-11-22）起，闸门在 `main @ 62827fbb` 上为绿。关闭标准 4（接入 CI）仍然开放，见文末修订。
 **领域**：08-bmcp-protocol / schema audit
 **归属线**：Owner H（协议）
+**复测于**：`main @ 62827fbb`，2026-11-22T07:54:32Z
 
 ## 缺口陈述
 
@@ -284,3 +285,116 @@ CI 仍无法执行：本仓库每个 check run 都带着上文引用的计费提
 `test_nonempty_audit.py` 接入 workflow，只会增加一个无人能观察的门禁，而这正是本工作项要
 指出的失效模式。判据 4 保持开放，直到 CI 计费恢复；上一轮确立的顺序不变——(a) 已完成，
 故一旦 CI 可运行，(c) 立即具有意义。
+
+## 修订 — GAP-09 关闭经复验，2026-11-22T07:54:32Z，`main @ 62827fbb`
+
+缺口陈述与上文各轮均未改动。本节记录闸门已关闭，并且——更重要的是——这次关闭是
+独立复验过的，而非直接采信做出该声明的那个提交。
+
+### 1. 闸门为绿
+
+```
+$ python3 08-bmcp-protocol/schemas/test_nonempty_audit.py; echo "EXIT=$?"
+OK: 32 schemas; 5599 registered constraints; no unregistered or stale entries.
+EXIT=0
+```
+
+在 `62827fbb`（头部所指提交）与当前 `origin/main`（`7d816980`）上输出与退出码一致。
+修复前状态同样可复现：在 `6897e53c^` 上同一脚本输出 5506 条发现并退出 1。
+
+### 2. 修复是表格扩充，不是放宽检查
+
+此类关闭的全部风险在于：有人靠削弱闸门让它通过。此事没有发生，且可从四个角度核查。
+
+**审计脚本未被改动。** 修复提交 `6897e53cddbce58e1a28d7f1b7bf83fd439a39c5`：
+
+```
+$ git show 6897e53c -- 08-bmcp-protocol/schemas/test_nonempty_audit.py
+（空 —— 0 字节，0 行）
+
+$ git show --name-only --format="" 6897e53c
+08-bmcp-protocol/schema-nonempty-audit.md
+08-bmcp-protocol/schema-nonempty-audit.zh-CN.md
+14-ai-development/work-items/GAP-09-SCHEMA-NONEMPTY-GATE-RED-ON-MAIN.md
+14-ai-development/work-items/GAP-09-SCHEMA-NONEMPTY-GATE-RED-ON-MAIN.zh-CN.md
+```
+
+该提交中完全没有出现 `08-bmcp-protocol/schemas/` 下的任何文件。脚本的 git blob 在历史
+四个点上逐字节相同：
+
+```
+$ for r in 6897e53c^ 6897e53c 62827fbb HEAD; do echo -n "$r: "; \
+    git rev-parse "$r:08-bmcp-protocol/schemas/test_nonempty_audit.py"; done
+6897e53c^: 88a6f33676c60860a139fb1ac0bb6f8ef6e7e742
+6897e53c:  88a6f33676c60860a139fb1ac0bb6f8ef6e7e742
+62827fbb:  88a6f33676c60860a139fb1ac0bb6f8ef6e7e742
+HEAD:      88a6f33676c60860a139fb1ac0bb6f8ef6e7e742
+```
+
+**脚本不读取 disposition 列。** `test_nonempty_audit.py:81` 把 `disposition = cells[4]`
+赋值后不再使用；注册仅以 `(schema, location, constraint)` 为键（`:83`）。故一行无法靠
+填写宽松处置通过——三元组要么已注册，要么没有。这正是为何“处置未被降级”是关于审计
+含义的断言，而非关于脚本能否被蒙混的断言。
+
+**改动是纯增量的。** `git show --numstat 6897e53c`：
+
+| 文件 | + | − |
+|---|---|---|
+| `08-bmcp-protocol/schema-nonempty-audit.md` | 5574 | 8 |
+| `08-bmcp-protocol/schema-nonempty-audit.zh-CN.md` | 5574 | 7 |
+| `GAP-09-SCHEMA-NONEMPTY-GATE-RED-ON-MAIN.md` | 75 | 0 |
+| `GAP-09-SCHEMA-NONEMPTY-GATE-RED-ON-MAIN.zh-CN.md` | 62 | 0 |
+
+英文表中被删的 8 行全部是说明性文字，此处逐一列出，使该断言可核查而非仅有声明：
+
+```
+$ git diff 6897e53c^ 6897e53c -- 08-bmcp-protocol/schema-nonempty-audit.md \
+    | awk '/^---/{next} /^-/{print}'
+```
+
+1 行基线（`88bf4875` / 2 文件）、5 条 Summary 项目符号（旧计数）、1 个
+`## Complete inventory` 标题、其下 1 段正文。该标题被 `## Pattern note` 取代，旧 Summary
+被新 Summary 取代。**表格数据行零删除、零改写** — 107 行全部逐字保留。
+
+### 3. 前后行数与约束数
+
+用能识别转义竖线的切分器解析（`pattern` 单元格含转义 `\|`，朴素切分会误计）：
+
+| | `6897e53c` 之前 | `6897e53c` 之后 |
+|---|---|---|
+| 表格分节数 | 1 | 7 |
+| 数据行 | 107 | 5613 |
+| 其中约束行 | 93 | 5599 |
+| 其中注记行（`Retain required; no minItems`） | 14 | 14 |
+| `rationale` 为空的单元格 | 0 | 0 |
+| 最短 `rationale`（字符） | 48 | 48 |
+| 原有行逐字保留 | — | 107 / 107 |
+
+新增约束行 5506 条，93 + 5506 = 5599——正是脚本报告的已注册数。14 条注记行前后相同。
+
+### 4. 没有任何处置被降级
+
+93 条 `Retain, narrowed` 全部仍在，按精确字符串计数（`grep -c "Retain, narrowed"`
+→ 修复前 93，修复后 93）。5599 条约束行每一条的处置都以 `Retain` 开头；不存在以其他
+值开头的行（`Accept`、`Exempt`、`Drop` 或空）。完整分布：
+
+| 处置 | 行数 |
+|---|---|
+| `Retain` | 5478 |
+| `Retain, narrowed` | 93 |
+| `Retain, conditional` | 17 |
+| `Retain; schema defect recorded` | 6 |
+| `Retain; narrowed in 1.0.2` | 4 |
+| `Retain; superseded by 1.0.1` | 1 |
+
+该分布同时说明这些行不是套模板：14 行判定为可合法为空（`Yes — …`），其余 5585 行判定
+为不可；`rationale` 有 38 种不同取值，「是否可合法为空」列有 29 种不同取值。一个只给
+单一默认结论的生成器，每列只会产出一个值。
+
+### 本节不主张的内容
+
+§关闭标准 中的判据 4 仍然**未满足**：`test_nonempty_audit.py` 仍未接入 CI。闸门为绿是
+因为表格已完整，而不是因为再变红时会阻断合并。这仍是本工作项开放的一半，且卡在 CI
+计费上，而非卡在审计上。
+
+§读 schema 时发现的两处缺陷 仍未修复，仍待 Owner H 裁定。关闭闸门并未关闭它们。
