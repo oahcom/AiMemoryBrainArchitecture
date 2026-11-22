@@ -106,8 +106,8 @@ backlog:
     #
     # 数量只出现一次，即上面的 `documents:`。不在本注释里，也不在理由里：
     # 门禁会拒绝复述数量的理由，因为事实的两份副本就是两个可能互相矛盾的东西。
-    reason: "Backlog of architecture documents under docs/ outside the mirrors and the individually governed gap record. They remain subject to GOV-DOC-002 scanning and classification; this entry is not an exemption. Most remain unclassified; classified entries stay in the backlog until the directory is fully migrated. The prose deliberately does not restate the count: `documents:` is the only place a count may appear."
-    reason_zh: "docs/ 下镜像与单独受治理的缺口记录之外的架构文档积压。它们仍受 GOV-DOC-002 扫描和分类要求约束；列入此处不构成豁免。其中大多数仍未分类；已分类条目在整个目录完成迁移前仍保留在积压中。此处刻意不复述数量：`documents:` 是唯一允许出现数量的位置。"
+    reason: "Backlog of architecture documents under docs/ outside the mirrors and the individually governed gap record. They remain subject to GOV-DOC-002 scanning and classification; this entry is not an exemption. Some entries may already carry metadata; they remain in the backlog until the directory is fully migrated. The prose deliberately does not restate the count: `documents:` is the only place a count may appear."
+    reason_zh: "docs/ 下镜像与单独受治理的缺口记录之外的架构文档积压。它们仍受 GOV-DOC-002 扫描和分类要求约束；列入此处不构成豁免。其中部分条目可能已经带有元数据；在整个目录完成迁移前，它们仍保留在积压中。此处刻意不复述数量：`documents:` 是唯一允许出现数量的位置。"
 
 excluded:
 
