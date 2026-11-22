@@ -46,8 +46,6 @@ pub enum DomainError {
     MissingRevisionReason,
     MissingIdentityLineage,
     InvalidRelationEndpoint,
-    UnregisteredRelationType,
-    DuplicateRelationType,
     InvalidMergeState,
     DuplicateClaimRevisionRef,
     UnknownClaimRevision,
@@ -275,6 +273,43 @@ pub struct Provenance {
     pub derivation_kind: String,
     pub actor_ref: ActorRef,
     pub created_at: String,
+    pub source_version_refs: Vec<OpaqueId>,
+    pub parent_provenance_refs: Vec<ProvenanceRef>,
+    pub unavailable_reason: Option<String>,
+    pub method_version: Option<String>,
+}
+
+impl Provenance {
+    /// A derived record must either name its lineage or say why it cannot.
+    ///
+    /// `source_version_refs` is positional over `source_refs`: when present it
+    /// must be complete, because a partial list cannot identify "the exact
+    /// version of each versioned source" (phase-2-domain-extension.md §3.6).
+    pub fn validate(&self) -> Result<(), DomainError> {
+        if self.provenance_id.as_str().is_empty() {
+            return Err(DomainError::EmptyId);
+        }
+        for (field, value) in [
+            ("derivation_kind", &self.derivation_kind),
+            ("created_at", &self.created_at),
+        ] {
+            if value.is_empty() {
+                return Err(DomainError::EmptyRequiredField(field));
+            }
+        }
+        if self.source_refs.is_empty() {
+            return Err(DomainError::EmptyRequiredField("source_refs"));
+        }
+        if self.unavailable_reason.as_deref() == Some("") {
+            return Err(DomainError::EmptyRequiredField("unavailable_reason"));
+        }
+        if !self.source_version_refs.is_empty()
+            && self.source_version_refs.len() != self.source_refs.len()
+        {
+            return Err(DomainError::InvalidVersionNumber);
+        }
+        Ok(())
+    }
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -1765,6 +1800,10 @@ mod tests {
                 actor_id: id("actor"),
             },
             created_at: "now".into(),
+            source_version_refs: vec![],
+            parent_provenance_refs: vec![],
+            unavailable_reason: None,
+            method_version: None,
         };
         assert_eq!(p.source_refs.len(), 1);
     }
