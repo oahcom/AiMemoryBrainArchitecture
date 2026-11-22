@@ -95,6 +95,57 @@ pub mod evidence {
         pub(super) signature: String,
         pub(super) integrity_proof_ref: String,
     }
+
+    impl AppliedDeliveryEvidence {
+        pub fn schema_artifact_revision(&self) -> &str { &self.schema_artifact_revision }
+        pub fn message_type(&self) -> &str { &self.message_type }
+        pub fn issuer_ref(&self) -> &str { &self.issuer_ref }
+        pub fn sender_authority_ref(&self) -> &str { &self.sender_authority_ref }
+        pub fn sender_subject_ref(&self) -> &str { &self.sender_subject_ref }
+        pub fn audience(&self) -> &str { &self.audience }
+        pub fn message_id(&self) -> &str { &self.message_id }
+        pub fn message_nonce(&self) -> &str { &self.message_nonce }
+        pub fn signing_sequence_namespace_ref(&self) -> &str { &self.signing_sequence_namespace_ref }
+        pub fn signing_record_sequence(&self) -> &str { &self.signing_record_sequence }
+        pub fn signature_profile_id(&self) -> &str { &self.signature_profile_id }
+        pub fn key_id_ref(&self) -> &str { &self.key_id_ref }
+        pub fn key_version(&self) -> &str { &self.key_version }
+        pub fn adapter_instance_ref(&self) -> &str { &self.adapter_instance_ref }
+        pub fn runtime_session_ref(&self) -> &str { &self.runtime_session_ref }
+        pub fn delivery_id(&self) -> &str { &self.delivery_id }
+        pub fn delivery_attempt_id(&self) -> &str { &self.delivery_attempt_id }
+        pub fn inference_request_id(&self) -> &str { &self.inference_request_id }
+        pub fn final_request_boundary_id(&self) -> &str { &self.final_request_boundary_id }
+        pub fn adapter_capability_epoch(&self) -> &str { &self.adapter_capability_epoch }
+        pub fn evidence_kind(&self) -> EvidenceKind { self.evidence_kind }
+        pub fn evidence_tier(&self) -> EvidenceTier { self.evidence_tier }
+        pub fn adapter_ref(&self) -> &str { &self.adapter_ref }
+        pub fn runtime_instance_ref(&self) -> &str { &self.runtime_instance_ref }
+        pub fn context_id(&self) -> &str { &self.context_id }
+        pub fn context_version(&self) -> &str { &self.context_version }
+        pub fn materialized_context_version(&self) -> &str { &self.materialized_context_version }
+        pub fn final_request_boundary_type(&self) -> &str { &self.final_request_boundary_type }
+        pub fn managed_region_id(&self) -> &str { &self.managed_region_id }
+        pub fn managed_region_revision(&self) -> &str { &self.managed_region_revision }
+        pub fn managed_region_inventory_digest(&self) -> &str { &self.managed_region_inventory_digest }
+        pub fn managed_region_coverage(&self) -> ManagedRegionCoverage { self.managed_region_coverage }
+        pub fn managed_region_digest(&self) -> &str { &self.managed_region_digest }
+        pub fn digest_profile(&self) -> &str { &self.digest_profile }
+        pub fn evidence_issuer_ref(&self) -> &str { &self.evidence_issuer_ref }
+        pub fn evidence_schema_version(&self) -> &str { &self.evidence_schema_version }
+        pub fn submission_observed_at(&self) -> &str { &self.submission_observed_at }
+        pub fn submission_monotonic_sequence(&self) -> Option<&str> { self.submission_monotonic_sequence.as_deref() }
+        pub fn correlation_ref(&self) -> &str { &self.correlation_ref }
+        pub fn causation_ref(&self) -> &str { &self.causation_ref }
+        pub fn audit_ref(&self) -> &str { &self.audit_ref }
+        pub fn c_submit_outcome_ref(&self) -> &str { &self.c_submit_outcome_ref }
+        pub fn c_outcome_record_ref(&self) -> &str { &self.c_outcome_record_ref }
+        pub fn c_outcome_record_sequence(&self) -> &str { &self.c_outcome_record_sequence }
+        pub fn c_outcome_payload_digest(&self) -> &str { &self.c_outcome_payload_digest }
+        pub fn payload_digest(&self) -> &str { &self.payload_digest }
+        pub fn signature(&self) -> &str { &self.signature }
+        pub fn integrity_proof_ref(&self) -> &str { &self.integrity_proof_ref }
+    }
 }
 
 pub mod strict_json {
@@ -1181,6 +1232,35 @@ mod tests {
     ///
     /// 用 `Serialize` 往返证明序列化是可用的，同时证明往返**必须**经过
     /// `from_strict_value` 才能拿回值——不存在 `Deserialize` 捷径。
+    #[test]
+    fn applied_delivery_evidence_accessors_return_the_validated_values() {
+        let evidence = valid_evidence();
+
+        assert_eq!(evidence.schema_artifact_revision(), "1.0.0");
+        assert_eq!(
+            evidence.message_type(),
+            "APPLIED_DELIVERY_EVIDENCE_RECORDED"
+        );
+        assert_eq!(evidence.issuer_ref(), "issuer");
+        assert_eq!(evidence.sender_authority_ref(), "authority");
+        assert_eq!(evidence.sender_subject_ref(), "subject");
+        assert_eq!(evidence.audience(), "audience");
+        assert_eq!(evidence.message_id(), "message");
+        assert_eq!(evidence.message_nonce(), "nonce");
+    }
+
+    #[test]
+    fn applied_delivery_evidence_optional_sequence_is_none_when_absent() {
+        let mut value = valid_value();
+        value
+            .as_object_mut()
+            .unwrap()
+            .remove("submission_monotonic_sequence");
+
+        let evidence = from_strict_value(&value).unwrap();
+        assert_eq!(evidence.submission_monotonic_sequence(), None);
+    }
+
     #[test]
     fn evidence_round_trip_must_go_through_strict_validation() {
         let evidence = valid_evidence();
