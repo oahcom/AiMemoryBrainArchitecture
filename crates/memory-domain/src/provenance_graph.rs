@@ -54,13 +54,9 @@ impl ProvenanceGraph {
             let parent_id = parent.as_str().to_owned();
 
             if candidate.nodes.contains_key(&parent_id) {
-                candidate
-                    .edges
-                    .insert((parent_id, node_id.clone()));
+                candidate.edges.insert((parent_id, node_id.clone()));
             } else {
-                candidate
-                    .dangling
-                    .insert((parent_id, node_id.clone()));
+                candidate.dangling.insert((parent_id, node_id.clone()));
             }
         }
 
@@ -95,10 +91,7 @@ impl ProvenanceGraph {
     ///
     /// The result excludes `of` itself and is sorted lexicographically
     /// by ProvenanceRef::as_str().
-    pub fn ancestors(
-        &self,
-        of: &ProvenanceRef,
-    ) -> Result<Vec<ProvenanceRef>, DomainError> {
+    pub fn ancestors(&self, of: &ProvenanceRef) -> Result<Vec<ProvenanceRef>, DomainError> {
         // Empty graphs have no known ancestry.
         if self.nodes.is_empty() {
             return Ok(Vec::new());
@@ -127,8 +120,7 @@ impl ProvenanceGraph {
         let mut result: Vec<ProvenanceRef> = visited
             .into_iter()
             .map(|id| {
-                ProvenanceRef::new(id)
-                    .expect("registered provenance identifiers are non-empty")
+                ProvenanceRef::new(id).expect("registered provenance identifiers are non-empty")
             })
             .collect();
 
@@ -154,15 +146,9 @@ impl ProvenanceGraph {
         let left_ancestors = self.ancestors(left)?;
         let right_ancestors = self.ancestors(right)?;
 
-        let left_ids: HashSet<&str> = left_ancestors
-            .iter()
-            .map(ProvenanceRef::as_str)
-            .collect();
+        let left_ids: HashSet<&str> = left_ancestors.iter().map(ProvenanceRef::as_str).collect();
 
-        let right_ids: HashSet<&str> = right_ancestors
-            .iter()
-            .map(ProvenanceRef::as_str)
-            .collect();
+        let right_ids: HashSet<&str> = right_ancestors.iter().map(ProvenanceRef::as_str).collect();
 
         // Strict ancestor-set intersection.
         if left_ids.iter().any(|id| right_ids.contains(id)) {
@@ -170,9 +156,7 @@ impl ProvenanceGraph {
         }
 
         // Include direct and transitive ancestor/descendant relationships.
-        if left_ids.contains(right.as_str())
-            || right_ids.contains(left.as_str())
-        {
+        if left_ids.contains(right.as_str()) || right_ids.contains(left.as_str()) {
             return Ok(true);
         }
 
@@ -195,10 +179,7 @@ impl ProvenanceGraph {
         }
 
         for (from, to) in &self.edges {
-            adjacency
-                .entry(from.clone())
-                .or_default()
-                .push(to.clone());
+            adjacency.entry(from.clone()).or_default().push(to.clone());
         }
 
         for children in adjacency.values_mut() {
@@ -292,21 +273,13 @@ mod tests {
         ProvenanceRef::new(id).unwrap()
     }
 
-    fn add(
-        graph: &mut ProvenanceGraph,
-        id: &str,
-        parents: &[&str],
-    ) -> Result<(), DomainError> {
-        let parents: Vec<ProvenanceRef> =
-            parents.iter().map(|id| reference(id)).collect();
+    fn add(graph: &mut ProvenanceGraph, id: &str, parents: &[&str]) -> Result<(), DomainError> {
+        let parents: Vec<ProvenanceRef> = parents.iter().map(|id| reference(id)).collect();
 
         graph.add(provenance(id), &parents)
     }
 
-    fn ancestor_ids(
-        graph: &ProvenanceGraph,
-        id: &str,
-    ) -> Vec<String> {
+    fn ancestor_ids(graph: &ProvenanceGraph, id: &str) -> Vec<String> {
         graph
             .ancestors(&reference(id))
             .unwrap()
@@ -356,15 +329,10 @@ mod tests {
 
         assert_eq!(
             ancestors,
-            vec![
-                "A".to_owned(),
-                "B".to_owned(),
-                "C".to_owned()
-            ]
+            vec!["A".to_owned(), "B".to_owned(), "C".to_owned()]
         );
 
-        let unique: HashSet<&str> =
-            ancestors.iter().map(String::as_str).collect();
+        let unique: HashSet<&str> = ancestors.iter().map(String::as_str).collect();
 
         assert_eq!(unique.len(), ancestors.len());
     }
@@ -409,10 +377,7 @@ mod tests {
         // No dangling state was introduced by the failed operation.
         assert!(graph.dangling.is_empty());
 
-        assert_eq!(
-            ancestor_ids(&graph, "B"),
-            vec!["A".to_owned()]
-        );
+        assert_eq!(ancestor_ids(&graph, "B"), vec!["A".to_owned()]);
     }
 
     // 6. An unresolved parent is resolved when it is registered later.
@@ -430,10 +395,7 @@ mod tests {
 
         add(&mut graph, "B", &[]).unwrap();
 
-        assert_eq!(
-            ancestor_ids(&graph, "A"),
-            vec!["B".to_owned()]
-        );
+        assert_eq!(ancestor_ids(&graph, "A"), vec!["B".to_owned()]);
 
         assert!(graph.dangling.is_empty());
 
@@ -482,11 +444,7 @@ mod tests {
         add(&mut graph, "A", &[]).unwrap();
 
         assert_eq!(
-            EvidenceIndependence::validate_independent(
-                &graph,
-                &reference("A"),
-                &reference("A"),
-            ),
+            EvidenceIndependence::validate_independent(&graph, &reference("A"), &reference("A"),),
             Err(DomainError::InvalidParent)
         );
     }
@@ -505,11 +463,7 @@ mod tests {
         );
 
         assert_eq!(
-            EvidenceIndependence::validate_independent(
-                &graph,
-                &reference("A"),
-                &reference("B"),
-            ),
+            EvidenceIndependence::validate_independent(&graph, &reference("A"), &reference("B"),),
             Err(DomainError::InvalidParent)
         );
     }
@@ -521,10 +475,7 @@ mod tests {
 
         add(&mut graph, "A", &[]).unwrap();
 
-        assert_eq!(
-            add(&mut graph, "A", &[]),
-            Err(DomainError::InvalidParent)
-        );
+        assert_eq!(add(&mut graph, "A", &[]), Err(DomainError::InvalidParent));
 
         assert_eq!(graph.nodes.len(), 1);
         assert!(graph.edges.is_empty());

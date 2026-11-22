@@ -894,9 +894,7 @@ fn dm2_12_shared_ancestry_not_independent_evidence() {
     //       /    \
     //    LEFT    RIGHT
     //
-    graph
-        .add(provenance("ROOT"), &[])
-        .unwrap();
+    graph.add(provenance("ROOT"), &[]).unwrap();
 
     graph
         .add(provenance("LEFT"), &[ProvenanceRef::new("ROOT").unwrap()])
@@ -919,13 +917,9 @@ fn dm2_12_shared_ancestry_not_independent_evidence() {
     //
     //   INDEPENDENT_A    INDEPENDENT_B
     //
-    graph
-        .add(provenance("INDEPENDENT_A"), &[])
-        .unwrap();
+    graph.add(provenance("INDEPENDENT_A"), &[]).unwrap();
 
-    graph
-        .add(provenance("INDEPENDENT_B"), &[])
-        .unwrap();
+    graph.add(provenance("INDEPENDENT_B"), &[]).unwrap();
 
     assert_eq!(
         EvidenceIndependence::validate_independent(
