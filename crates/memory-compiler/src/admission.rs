@@ -2668,4 +2668,328 @@ mod tests {
         let request: ProducerRegistrationRequest = decode(legacy).unwrap();
         assert!(request.canonical_commit_ref.is_pending());
     }
+    // ---- attestor record and validator ----
+
+    fn issued_attestor_store() -> (AdmissionStore, AttestorRef, OpaqueId) {
+        let mut db = AdmissionStore::in_memory().unwrap();
+
+        let attestation_id = id("attestation-1");
+        let subject = OpaqueId::new("a".repeat(64)).unwrap();
+
+        let reference = db
+            .issue_attestation(
+                &attestation_id,
+                &IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap(),
+                &subject,
+                "2026-11-22T00:00:00Z",
+            )
+            .unwrap();
+
+        (db, reference, subject)
+    }
+
+    #[test]
+    fn attestor_validator_accepts_issued_attestation() {
+        let (db, reference, subject) = issued_attestor_store();
+
+        assert_eq!(db.validate_attestor(&reference, &subject), Ok(()));
+    }
+
+    #[test]
+    fn attestor_validator_rejects_pending_reference() {
+        let db = AdmissionStore::in_memory().unwrap();
+        let subject = OpaqueId::new("a".repeat(64)).unwrap();
+
+        assert_eq!(
+            db.validate_attestor(&AttestorRef::pending_i(), &subject),
+            Err(AttestorValidationError::PendingReference)
+        );
+    }
+
+    #[test]
+    fn attestor_validator_reports_missing_record() {
+        let (db, reference, subject) = issued_attestor_store();
+
+        let mut data = reference.data().unwrap().clone();
+        data.attestation_id = id("attestation-never-issued");
+
+        let missing = AttestorRef::from_issued_data(data).unwrap();
+
+        assert_eq!(
+            db.validate_attestor(&missing, &subject),
+            Err(AttestorValidationError::RecordMissing)
+        );
+    }
+
+    #[test]
+    fn attestor_validator_rejects_unsupported_issuer() {
+        let (db, reference, subject) = issued_attestor_store();
+        let attestation_id = reference.data().unwrap().attestation_id.as_str();
+
+        db.connection
+            .execute(
+                "UPDATE i_attestations
+                 SET issuer_id='someone-else'
+                 WHERE attestation_id=?1",
+                [attestation_id],
+            )
+            .unwrap();
+
+        assert_eq!(
+            db.validate_attestor(&reference, &subject),
+            Err(AttestorValidationError::UnsupportedIssuer)
+        );
+    }
+
+    #[test]
+    fn attestor_validator_rejects_malformed_subject_digest() {
+        let (db, reference, subject) = issued_attestor_store();
+        let attestation_id = reference.data().unwrap().attestation_id.as_str();
+
+        db.connection
+            .execute(
+                "UPDATE i_attestations
+                 SET subject_digest='not-a-digest'
+                 WHERE attestation_id=?1",
+                [attestation_id],
+            )
+            .unwrap();
+
+        assert_eq!(
+            db.validate_attestor(&reference, &subject),
+            Err(AttestorValidationError::RecordMalformed)
+        );
+    }
+
+    #[test]
+    fn attestor_validator_rejects_malformed_issued_at() {
+        let (db, reference, subject) = issued_attestor_store();
+        let attestation_id = reference.data().unwrap().attestation_id.as_str();
+
+        db.connection
+            .execute(
+                "UPDATE i_attestations
+                 SET issued_at='yesterday'
+                 WHERE attestation_id=?1",
+                [attestation_id],
+            )
+            .unwrap();
+
+        assert_eq!(
+            db.validate_attestor(&reference, &subject),
+            Err(AttestorValidationError::RecordMalformed)
+        );
+    }
+
+    #[test]
+    fn attestor_validator_rejects_nonempty_signature() {
+        let (db, reference, subject) = issued_attestor_store();
+        let attestation_id = reference.data().unwrap().attestation_id.as_str();
+
+        db.connection
+            .execute(
+                "UPDATE i_attestations
+                 SET signature='non-empty'
+                 WHERE attestation_id=?1",
+                [attestation_id],
+            )
+            .unwrap();
+
+        assert_eq!(
+            db.validate_attestor(&reference, &subject),
+            Err(AttestorValidationError::RecordMalformed)
+        );
+    }
+
+    #[test]
+    fn attestor_validator_rejects_subject_digest_reference_mismatch() {
+        let (db, reference, subject) = issued_attestor_store();
+        let attestation_id = reference.data().unwrap().attestation_id.as_str();
+        let other_digest = "b".repeat(64);
+
+        db.connection
+            .execute(
+                "UPDATE i_attestations
+                 SET subject_digest=?1
+                 WHERE attestation_id=?2",
+                params![other_digest, attestation_id],
+            )
+            .unwrap();
+
+        assert_eq!(
+            db.validate_attestor(&reference, &subject),
+            Err(AttestorValidationError::RecordMismatch("subject_digest"))
+        );
+    }
+
+    #[test]
+    fn attestor_validator_rejects_issued_at_reference_mismatch() {
+        let (db, reference, subject) = issued_attestor_store();
+        let attestation_id = reference.data().unwrap().attestation_id.as_str();
+
+        db.connection
+            .execute(
+                "UPDATE i_attestations
+                 SET issued_at='2026-11-23T00:00:00Z'
+                 WHERE attestation_id=?1",
+                [attestation_id],
+            )
+            .unwrap();
+
+        assert_eq!(
+            db.validate_attestor(&reference, &subject),
+            Err(AttestorValidationError::RecordMismatch("issued_at"))
+        );
+    }
+
+    #[test]
+    fn attestor_validator_rejects_expected_subject_digest_mismatch() {
+        let (db, reference, _) = issued_attestor_store();
+        let other_digest = OpaqueId::new("c".repeat(64)).unwrap();
+
+        assert_eq!(
+            db.validate_attestor(&reference, &other_digest),
+            Err(AttestorValidationError::RecordMismatch(
+                "expected_subject_digest"
+            ))
+        );
+    }
+
+    #[test]
+    fn attestor_validator_reports_read_failure() {
+        let (db, reference, subject) = issued_attestor_store();
+
+        db.connection
+            .execute_batch("DROP TABLE i_attestations")
+            .unwrap();
+
+        assert_eq!(
+            db.validate_attestor(&reference, &subject),
+            Err(AttestorValidationError::ReadFailed)
+        );
+    }
+
+    #[test]
+    fn attestor_issuance_rejects_replay_with_different_digest() {
+        let mut db = AdmissionStore::in_memory().unwrap();
+        let attestation_id = id("attestation-replay-digest");
+        let issuer = IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap();
+        let subject = OpaqueId::new("a".repeat(64)).unwrap();
+        let other_subject = OpaqueId::new("b".repeat(64)).unwrap();
+
+        db.issue_attestation(&attestation_id, &issuer, &subject, "2026-11-22T00:00:00Z")
+            .unwrap();
+
+        assert!(matches!(
+            db.issue_attestation(
+                &attestation_id,
+                &issuer,
+                &other_subject,
+                "2026-11-22T00:00:00Z",
+            ),
+            Err(AdmissionError::IdempotencyConflict)
+        ));
+    }
+
+    #[test]
+    fn attestor_issuance_rejects_replay_with_different_issued_at() {
+        let mut db = AdmissionStore::in_memory().unwrap();
+        let attestation_id = id("attestation-replay-issued-at");
+        let issuer = IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap();
+        let subject = OpaqueId::new("a".repeat(64)).unwrap();
+
+        db.issue_attestation(&attestation_id, &issuer, &subject, "2026-11-22T00:00:00Z")
+            .unwrap();
+
+        assert!(matches!(
+            db.issue_attestation(&attestation_id, &issuer, &subject, "2026-11-23T00:00:00Z",),
+            Err(AdmissionError::IdempotencyConflict)
+        ));
+    }
+
+    #[test]
+    fn attestor_issuance_rejects_replay_when_stored_signature_changed() {
+        let mut db = AdmissionStore::in_memory().unwrap();
+        let attestation_id = id("attestation-replay-signature");
+        let issuer = IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap();
+        let subject = OpaqueId::new("a".repeat(64)).unwrap();
+
+        db.issue_attestation(&attestation_id, &issuer, &subject, "2026-11-22T00:00:00Z")
+            .unwrap();
+
+        db.connection
+            .execute(
+                "UPDATE i_attestations
+                 SET signature='x'
+                 WHERE attestation_id=?1",
+                [attestation_id.as_str()],
+            )
+            .unwrap();
+
+        assert!(matches!(
+            db.issue_attestation(&attestation_id, &issuer, &subject, "2026-11-22T00:00:00Z",),
+            Err(AdmissionError::IdempotencyConflict)
+        ));
+    }
+
+    #[test]
+    fn attestor_issuance_rejects_unsupported_issuer_input() {
+        let mut db = AdmissionStore::in_memory().unwrap();
+        let attestation_id = id("attestation-invalid-issuer");
+        let issuer = IssuerId::new("someone-else").unwrap();
+        let subject = OpaqueId::new("a".repeat(64)).unwrap();
+
+        assert!(matches!(
+            db.issue_attestation(&attestation_id, &issuer, &subject, "2026-11-22T00:00:00Z",),
+            Err(AdmissionError::InvalidInput(_))
+        ));
+    }
+
+    #[test]
+    fn attestor_issuance_rejects_non_hex_subject_digest_input() {
+        let mut db = AdmissionStore::in_memory().unwrap();
+        let attestation_id = id("attestation-invalid-digest");
+        let issuer = IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap();
+        let subject = id("not-a-digest");
+
+        assert!(matches!(
+            db.issue_attestation(&attestation_id, &issuer, &subject, "2026-11-22T00:00:00Z",),
+            Err(AdmissionError::InvalidInput(_))
+        ));
+    }
+
+    #[test]
+    fn attestor_issuance_rejects_non_rfc3339_issued_at_input() {
+        let mut db = AdmissionStore::in_memory().unwrap();
+        let attestation_id = id("attestation-invalid-issued-at");
+        let issuer = IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap();
+        let subject = OpaqueId::new("a".repeat(64)).unwrap();
+
+        assert!(matches!(
+            db.issue_attestation(&attestation_id, &issuer, &subject, "yesterday",),
+            Err(AdmissionError::InvalidInput(_))
+        ));
+    }
+
+    #[test]
+    fn authorization_decision_kind_rejects_reference_kind_mismatch() {
+        let (db, reference, _) = issued_authorization_store(AuthorizationDecisionKind::Approved);
+        let decision_id = reference.data().unwrap().decision_id.as_str();
+
+        db.connection
+            .execute(
+                "UPDATE authorization_decisions
+                 SET decision_kind='Denied'
+                 WHERE decision_id=?1",
+                [decision_id],
+            )
+            .unwrap();
+
+        assert_eq!(
+            db.authorization_decision_kind(&reference),
+            Err(AuthorizationDecisionValidationError::RecordMismatch(
+                "decision_kind"
+            ))
+        );
+    }
 }

@@ -371,3 +371,65 @@ impl<'de> serde::Deserialize<'de> for AttestorRef {
         deserializer.deserialize_any(AttestorRefVisitor)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn valid_attestor_data() -> AttestorData {
+        AttestorData {
+            attestation_id: OpaqueId::new("attestation-domain-test").unwrap(),
+            issuer: IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap(),
+            subject_digest: OpaqueId::new("a".repeat(64)).unwrap(),
+            issued_at: "2026-11-22T00:00:00Z".to_owned(),
+        }
+    }
+
+    #[test]
+    fn attestor_data_accepts_valid_issued_data() {
+        assert!(validate_attestor_data(&valid_attestor_data()).is_ok());
+    }
+
+    #[test]
+    fn attestor_data_rejects_empty_attestation_id() {
+        // OpaqueId's derived Deserialize does not validate, so decoding an empty
+        // string lets this reach the validator instead of failing earlier.
+        let mut data = valid_attestor_data();
+        data.attestation_id = serde_json::from_str("\"\"").unwrap();
+
+        assert_eq!(validate_attestor_data(&data), Err(DomainError::EmptyId));
+    }
+
+    #[test]
+    fn attestor_data_rejects_unsupported_issuer() {
+        let mut data = valid_attestor_data();
+        data.issuer = IssuerId::new("someone-else").unwrap();
+
+        assert_eq!(
+            validate_attestor_data(&data),
+            Err(DomainError::InvalidCanonicalCommitField("issuer"))
+        );
+    }
+
+    #[test]
+    fn attestor_data_rejects_non_hex_subject_digest() {
+        let mut data = valid_attestor_data();
+        data.subject_digest = OpaqueId::new("not-a-digest").unwrap();
+
+        assert_eq!(
+            validate_attestor_data(&data),
+            Err(DomainError::InvalidCanonicalCommitField("subject_digest"))
+        );
+    }
+
+    #[test]
+    fn attestor_data_rejects_non_rfc3339_issued_at() {
+        let mut data = valid_attestor_data();
+        data.issued_at = "yesterday".to_owned();
+
+        assert_eq!(
+            validate_attestor_data(&data),
+            Err(DomainError::InvalidCanonicalCommitField("issued_at"))
+        );
+    }
+}
