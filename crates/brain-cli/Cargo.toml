@@ -10,6 +10,7 @@ name = "brain"
 path = "src/main.rs"
 
 [dependencies]
+agent-integration = { path = "../agent-integration" }
 memory-domain = { path = "../memory-domain" }
 memory-storage = { path = "../memory-storage" }
 memory-storage-sqlite = { path = "../memory-storage-sqlite" }

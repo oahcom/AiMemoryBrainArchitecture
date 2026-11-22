@@ -1,3 +1,6 @@
+use agent_integration::{
+    ApplyOutcome, ContextDeliveryAdapter, DeliveryPayload, InMemoryContextDeliveryAdapter,
+};
 use memory_compiler::admission::{
     AdmissionStore, DependencyRegistrationRequest, ProducerRegistrationRequest,
 };
@@ -319,6 +322,39 @@ fn run_compiler_stage(request: CompilerStageRequest<'_>) -> Result<CompilerStage
     })
 }
 
+/// Deliver a validated Brain context snapshot to the local Agent adapter.
+///
+/// Independent of compiler publication authorization: the adapter receives the
+/// context snapshot, not the publication decision.
+fn deliver_snapshot(snapshot: &memory_context::ContextSnapshot) -> Result<u64, String> {
+    let payload = DeliveryPayload::from_snapshot(snapshot)
+        .map_err(|error| format!("cannot construct delivery payload: {error:?}"))?;
+
+    let expected_version = snapshot.context_version;
+    let session_id = "brain-cli-session";
+    let mut adapter = InMemoryContextDeliveryAdapter::default();
+
+    match adapter
+        .apply(session_id, payload)
+        .map_err(|error| format!("adapter apply failed: {error:?}"))?
+    {
+        ApplyOutcome::Applied | ApplyOutcome::AlreadyApplied => {}
+    }
+
+    let applied = adapter
+        .applied_snapshot(session_id)
+        .ok_or_else(|| "adapter has no applied snapshot after apply".to_owned())?;
+
+    if applied.version() != expected_version {
+        return Err(format!(
+            "adapter version mismatch: expected {expected_version}, got {}",
+            applied.version()
+        ));
+    }
+
+    Ok(applied.version())
+}
+
 fn run() -> Result<(), String> {
     let mut args = std::env::args().skip(1);
     let Some(command) = args.next() else {
@@ -606,6 +642,17 @@ fn run() -> Result<(), String> {
         .map_err(|error| format!("cannot serialize ContextSnapshot: {error:?}"))?;
     fs::write(&output_path, &output)
         .map_err(|error| format!("cannot write output {}: {error}", output_path))?;
+
+    // Context delivery is independent of the compiler publication gate.
+    // Delivery failures are observable but must not change CLI success.
+    match deliver_snapshot(&snapshot) {
+        Ok(version) => {
+            eprintln!("delivery applied: session=brain-cli-session version={version}");
+        }
+        Err(reason) => {
+            eprintln!("delivery failed: {reason}");
+        }
+    }
     if let Err(error) = fs::write(&sidecar_path, sidecar_content.as_bytes()) {
         let _ = fs::remove_file(&output_path);
         return Err(format!(
