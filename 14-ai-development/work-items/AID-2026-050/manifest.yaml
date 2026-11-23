@@ -1,0 +1,108 @@
+work_item_id: AID-2026-050
+title: Add the validate_bmcp_message tool and report the validation state each arm actually reached
+
+class: PROTOCOL/CODE/TEST
+risk: R1
+risk_rationale: "One additive MCP tool in bmcp-server plus tests. No new dependency, no schema engine, no change to the two existing tools, no transport work, no persistence, no architecture decision (the binding was already ruled in OWNER-DECISION-BMCP-MCP-DISPATCH-001). The only public surface it adds is one tool name and one required response field."
+
+security_scope: "Message validation only. The tool returns a validity verdict and the type it was given; it returns no payload fields, no digests and no cross-message linkage. It must not become a way to read a message body back out through the tool surface."
+
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+implementing_ai_session: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 6212ec754a4e718595e677f03e41594c478644f6
+
+tracking_issue: "NONE — task is tracked by this AID manifest and its delivery PR; no new Issue requested"
+
+created_at: 2026-11-23
+updated_at: 2026-11-23
+
+prompt_id: AID-2026-050-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-050/prompt-v1.md
+prompt_status: FROZEN
+prompt_sha256: aa964075ae38fbc91efee54ffefb74df3c582d9b9f7d1391194633aa8fde098d
+prompt_bytes: 8497
+
+prompt_provenance_tier: T1
+prompt_provenance_note: "Frozen from the owner-proxy session that measured GAP-16 at 6212ec75 and authored OWNER-DECISION-BMCP-MCP-DISPATCH-001. The SHA-256 identifies the committed prompt-v1.md bytes exactly; the prompt is the file, and the file is what the delivery session reads."
+
+dependency_refs:
+  - crates/bmcp-protocol/src/lib.rs
+  - crates/bmcp-server/src/lib.rs
+  - 14-ai-development/adr/OWNER-DECISION-BMCP-MCP-DISPATCH-001.md
+  - 14-ai-development/work-items/GAP-16-DISPATCH-LANDED-TOOLS-ABSENT.md
+  - 08-bmcp-protocol/protocol-index.md
+  - 08-bmcp-protocol/schemas/
+
+deliverables:
+  - "A third MCP tool, validate_bmcp_message, arguments {\"message\": <object>}, dispatching on the message_type string carried inside that object. Wired to bmcp_protocol::parse_dispatch."
+  - "Every success response carries validation_state, read from DispatchValidationState rather than inferred: semantically_validated, structurally_parsed, or root_discriminator_only. The third value must not be omitted or rounded up to a bare true."
+  - "All 20 RootDiscriminatorOnly types return {\"valid\":true,\"validation_state\":\"root_discriminator_only\"} for a strictly-parsing instance, and each of the 20 is covered by a named test case rather than by a loop that silently covers 19."
+  - "No case returns -32601. Absent, non-string and unknown message_type are message problems, reported as isError:true with valid:false."
+  - "validate_applied_delivery_evidence and digest_applied_delivery_evidence are unchanged, proven by a test that compares against their 6212ec75 behaviour."
+  - "No jsonschema dependency is added. The 20 arms stay unvalidated by schema, because the schemas are the text that is not frozen."
+
+independent_reviewer: NOT_ASSIGNED
+integration_reviewer: NOT_ASSIGNED
+
+review:
+  status: NOT_ASSIGNED
+  report_ref: ""
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+implementation:
+  status: NOT_STARTED
+  branch: PENDING
+  pull_request: PENDING
+  pull_request_url: PENDING
+  implementation_commit_sha: PENDING
+  merge_commit_sha: NOT_MERGED
+
+authorization:
+  registration_write: "USER-PRINCIPAL-DELEGATED (limited to this AID registration package)"
+  implementation_write: "USER-PRINCIPAL-DELEGATED (limited to crates/bmcp-server and crates/bmcp-protocol tests)"
+  index_update: "USER-PRINCIPAL-DELEGATED (limited to the single AID-2026-050 row)"
+  schema_engine_addition: NOT_GRANTED
+  transport_implementation: NOT_GRANTED
+  persistence_implementation: NOT_GRANTED
+  existing_tool_modification: NOT_GRANTED
+  architecture_acceptance: NOT_GRANTED
+  production_authorization: NOT_GRANTED
+
+governance:
+  aid_assignment: REGISTERED
+  aid_status: REGISTERED
+  registration_authorization: "USER-PRINCIPAL-DELEGATED (limited to this work item)"
+  development_start_authorization: "USER-PRINCIPAL-DELEGATED (limited to this implementation scope)"
+  architecture_status: NOT_APPLICABLE
+  g8_status: NOT_APPLICABLE
+  quota_change: NONE
+
+verification:
+  status: NOT_RUN
+  environment: "NOT RUN — this manifest registers a dispatch, it does not report an implementation. The owner-proxy session does not write code, so no build, clippy or test output exists for this work item yet."
+  commands: []
+  evidence_refs:
+    - "Baseline measured at 6212ec75 in this session: parse_dispatch exists with 22 match arms; arms backed by semantic validation = 1; arms backed by a structural parser = 1; arms that recognise only the root discriminator = 20; validate_bmcp_message occurrences in crates/bmcp-server/src/lib.rs = 0; MCP tools exposed = 2."
+    - "The 22 types and their schema files are reproducible with 08-bmcp-protocol/scripts/check_protocol_index.py, which passes at this commit."
+
+findings:
+  - id: AID-2026-050-F1
+    severity: P1
+    feedback_destination: "Delivery PR conversation. GAP-15 §4 recorded 19 unparsed message types at fb37a44b. At 021f5a3f the count of types with no Rust recognition is 0, because parse_dispatch landed via 6007782b, which is an ancestor of main but not an ancestor of fb37a44b. Any session that trusts the stale figure will re-implement merged work. GAP-16 exists to prevent that recurrence."
+  - id: AID-2026-050-F2
+    severity: P2
+    feedback_destination: "Delivery PR conversation. OWNER-DECISION-BMCP-MCP-DISPATCH-001 §3.2 specified {\"valid\":true,\"message_type\":...} for the success envelope before DispatchValidationState existed in its current three-state form. Applied literally, that envelope lets a RootDiscriminatorOnly message be reported as valid without qualification. GAP-16 §7 criterion 3 and this prompt both require validation_state on every success, which preserves the ruling's intent while refusing to let the tool claim more than the arm established."
+  - id: AID-2026-050-F3
+    severity: P2
+    feedback_destination: "Delivery PR conversation. The obvious way to satisfy criterion 4 is a loop over the 20 type strings. A loop is acceptable only if it is driven from a list that is itself checked against parse_dispatch's match arms, otherwise the test and the implementation can drift together and still pass. Prefer an explicit case per type, or a list plus a test that asserts the list length equals the arm count."
