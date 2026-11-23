@@ -52,7 +52,7 @@ document_metadata:
 | 登记编号 | GOV-NC-2026-11-23-PROVENANCE-GRAPH-ADD-SIGNATURE-028 |
 | 登记日期 | 2026-11-23 |
 | 类别 | PUBLIC_API_BREAKING_CHANGE |
-| 状态 | OPEN |
+| 状态 | CLOSED-BY-RULING（`OWNER-DECISION-RELEASE-BOUNDARY-001`）；残留见 §7 |
 | 严重性 | DOWNSTREAM COMPILE BREAK |
 | 影响组件 | `memory-domain`（`ProvenanceGraph::add`） |
 | 关联登记 | GOV-NC-2026-11-22-PROVENANCE-REFERENCE-REVALIDATION-027 |
@@ -110,3 +110,26 @@ GOV-NC-2026-11-22-PROVENANCE-REFERENCE-REVALIDATION-027。
 
 本登记的变更**已存在于 PR #707 的代码中**（提交 `bbd214f`）。
 本登记不主张该变更已被授权；它记录的是「变更已发生、授权待定」这一状态。
+
+---
+
+## 7. 裁定结论（2026-11-23）
+
+裁定文书：`OWNER-DECISION-RELEASE-BOUNDARY-001`。§5 三个问题全部作答，§1 关闭条件因此成立。
+
+| 问题 | 结论 | 依据 |
+|---|---|---|
+| 1. 是否在当前发布边界内获得授权 | 问题尚无对象 —— 不存在发布边界，因此无需授权 | 12 个 crate 中 11 个 `publish = false`，全部 `0.1.0`，0 个 tag，无 CHANGELOG，工作区内部依赖全部无版本号 |
+| 2. 是否需要兼容层或弃用过渡期 | **否** | 外部调用方为 0；兼容层会把 §3 所述「第二套 lineage 来源」缺陷原样装回来 |
+| 3. 须附带何种迁移通告 | 对外：无。对内：已由函数文档与 `65fa040f` commit message 履行两次 | 同上 |
+
+**分类与严重性需要更正。** 本登记 §1 自记为 `PUBLIC_API_BREAKING_CHANGE` / `DOWNSTREAM COMPILE BREAK`。两个标签都预设了已发布的表面，而该表面从未存在。正确分类为 **in-repo signature change**。原值保留于此，不就地改写。
+
+**§2 两处引证经实测不成立，记录于此而不回改原文：**
+
+- 「变更后（PR #707，提交 `bbd214f`）」：`bbd214f` 是 PR #707 的 head，只触及 8 个 markdown 文件，`.rs` 改动为 0。签名变更是 `65fa040f`（2026-11-22 13:36:00 +0800），在同一个 PR 内是 `bbd214f` 的祖先。
+- 「变更前（基线 6418e9c）」：`6418e9c` 的签名确为双参数，样本有效；但其日期 2026-11-22 18:35 **晚于** `65fa040f` 的 13:36，它来自尚未见到 PR #707 的另一条 lineage。准确表述是「双参数形态在 `65fa040f^` 成立」。
+
+**残留（不属于兼容性问题，不得随本登记一并关闭）：** `crates/bmcp-server/Cargo.toml` 既无 `publish` 也无 `license`，与其余十一个 crate 不一致。缺省 `publish` 的语义是「可发布」，今日仅因依赖无版本号而偶然不可发布。裁定 D4 要求补齐。
+
+**未新增登记。** PR #707 以 0 次 review、3671 行新增承载了 bmcp 路由 + Evidence 字段集变更 + MC-03 注册表删除 + 本处破坏性签名变更，标题只提到第一项。该证据归属 `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` 与 `GOV-NC-2026-11-21-ZERO-REVIEW-GATE-008`；依 `GAP-27-THE-BACKLOG-IS-NOT-ONE-BACKLOG`，不为同一机制重复编号。
