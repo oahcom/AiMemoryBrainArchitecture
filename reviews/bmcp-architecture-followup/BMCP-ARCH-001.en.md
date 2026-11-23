@@ -498,11 +498,38 @@ Every row is a future Runtime requirement. No test below was executed by this wo
 
 ### 8.1 Existing conformance evidence — bounded, not full-protocol PASS
 
-- Main `c138654c942dc93b5a36eccb2ff0e41452156429`: `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v` — **30 passed, 0 failed**, exit 0. This is the Applied Delivery Evidence conformance suite only.
+- Current main `6c5597a62ada7f56d1956b9c60409f329d2819c5`, test file blob `903764ab08a7d3dd17ba13f5c40e8c4129958bb5`: `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v` — **38 passed, 0 failed**, exit 0, reproduced on a clean clone. This is the Applied Delivery Evidence conformance suite only. The earlier `30 passed` figure was measured against test file blob `98242cc193a77b27d58b39353ccc031201992614` at `c138654c…` and `713774c3…`; it is superseded, not contradicted.
 - PR #436 (merged at `02f61194fd4e12993b4c83f7fac8382eee20f5d8`), source head `1ffed9ed127df98b2f823a66ec80ea43d08cb9dc`: `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/provider_outcome -p 'test_*.py' -v` — **10 run; 5 passed; 5 skipped; 0 failed**, exit 0. Skipped CPO-02/04/05/09/10 explicitly require Owner C's authoritative semantic validator. This is structural schema conformance only; it does not validate C semantics or cryptographic signatures.
 - PR #436's bilingual protocol index and provider_outcome test are now integrated into main. Its index still marks RecoveryJoin 1.0.2 schema/validator/test as not delivered; five semantic test methods remain skipped pending C's authoritative validator.
 - These results do not establish full BMCP conformance. The strict JSON parser is a reference model, not production transport. `tests/protocol_test.rs` and `crates/bmcp` are absent.
 - AT-01..AT-20 remain **PLANNED_NOT_RUN**. No Runtime repository/authorization exists in this architecture phase.
+
+The following Acceptance Tests (AT-01 through AT-20) define the expected behavioral coverage, ownership, preconditions, verification methods, dependencies, and current acceptance blockers. They are specification-level acceptance criteria, not evidence of completed test execution.
+
+| ID / Scenario | OWNER | PRECONDITION | EXPECTED_RESULT | TEST_METHOD | DEPENDENCY | ACCEPTANCE_STATUS |
+|---|---|---|---|---|---|---|
+| AT-01 | Valid request parse | H + BMCP | H decodes and authenticates the Envelope; version is supported; Operation is registered | One normalized Request; Parse has no side effects | Golden Envelope + Operation Schema | H Envelope/Registry | BLOCKED_BY_H_CONTRACT |
+| AT-02 | Invalid request parse | H | Envelope format is invalid / required fields are missing | Rejected before Execute; stable, redacted Error | Negative Envelope Vector | H Validator | BLOCKED_BY_H_CONTRACT |
+| AT-03 | Unsupported version | H | No common major version | VERSION_UNSUPPORTED; no downgrade or dispatch | Version Negotiation Matrix | H Version Contract | BLOCKED_BY_H_CONTRACT |
+| AT-04 | Missing parameters | H + Operation Owner | Required Payload fields are missing | Validation rejection; Service is not invoked | Per-Operation negative Schema Vector | H + Domain Schema | BLOCKED_BY_H_CONTRACT |
+| AT-05 | Unknown Operation | H | Family/Operation is not registered | Rejected before side effects | Negative Registry tests / Fuzz | H Registry | BLOCKED_BY_H_CONTRACT |
+| AT-06 | Unauthorized request | I + H | The authenticated Principal is denied by the current I Policy | Deny; protected services are not invoked; no cross-Scope information is disclosed | Negative Authorization integration tests | I API/Epoch + H Binding | BLOCKED_BY_OWNER_CONTRACT |
+| AT-07 | Request/Response correlation | H | Request has message_id/correlation_id | Response Causation references the Request; Correlation is preserved | Multi-message Round-trip | H Request Identity | BLOCKED_BY_H_CONTRACT |
+| AT-08 | Successful execution | Domain Owner + BMCP | Parse/validation/authorization pass; Owner returns a successful Receipt | Response contains the exact Owner Result; ACK remains independent | Service Contract integration tests | E/D/G API | BLOCKED_BY_OWNER_CONTRACT |
+| AT-09 | Failed execution | Domain Owner + H | Owner returns a definitive failure | Failure is preserved; success is not fabricated | Injected Service Fault | Owner Error + H Mapping | BLOCKED_BY_H_CONTRACT |
+| AT-10 | Timeout | Owner + H | Timeout occurs potentially before or after side effects | UNKNOWN until Owner Reconciliation; same Key is used | Crash/Timeout at each boundary | Owner Lookup/Reconcile | BLOCKED_BY_OWNER_CONTRACT |
+| AT-11 | ACK Receipt | H | A valid ACK is received for a declared boundary | Only that boundary is recorded; execution/persistence is not inferred | ACK Schema/Consumer | H ACK | BLOCKED_BY_H_CONTRACT |
+| AT-12 | Lost ACK | H + Owner | Side effects may have completed; ACK/Response is lost | UNKNOWN; Reconcile using the same identity; no blind retry | Network Fault + Journal Reconcile | H ACK + Owner Idempotency | BLOCKED_BY_H_CONTRACT |
+| AT-13 | Duplicate Request | Owner + H | Same idempotency identity and digest | Original result is returned; no duplicate side effects | Concurrent Duplicate/Replay | Owner Idempotency | BLOCKED_BY_OWNER_CONTRACT |
+| AT-14 | Duplicate ACK | H + Consumer | Same ACK ID/Digest, followed by the same ID with a different Digest | Replay is idempotent; changed digest causes Conflict; state is not changed | ACK Replay/Mutation Vector | H ACK + D/G/I Mapping | BLOCKED_BY_H_CONTRACT |
+| AT-15 | Validator rejection | H + Owner | Envelope/Schema/Critical Extension is invalid | Rejected at the correct layer; does not enter subsequent stages | Layered negative test suite | H Validator + Domain Schema | BLOCKED_BY_H_CONTRACT |
+| AT-16 | Forget Fence conflict | D + I + H | D Fence or I Epoch is Stale/Unknown | Fail-closed; protected Apply/Commit is not executed; suppression is preserved | Both Race orderings + authoritative service failure | D/I Currentness API | BLOCKED_BY_OWNER_CONTRACT |
+| AT-17 | Canonical Identity conflict | D (Fact/Claim additionally depends on B ADR) | Payload Ref does not match D Identity, or Fact/Claim remains unresolved | Reject/Quarantine; no identity is issued or converted | Forged/Mismatch Identity Vector | D API; B ADR | BLOCKED_BY_OWNER_CONTRACT |
+| AT-18 | Serialization stability | H | Exact Schema/Profile/Version | Semantically equivalent objects produce approved Canonical Bytes/Digest | Cross-language Golden Vector | H Canonicalization/Signature | BLOCKED_BY_H_CONTRACT |
+| AT-19 | Unicode | H | Valid/invalid UTF-8, supplementary characters, normalization boundaries, duplicate Keys | Valid Unicode is preserved according to the Profile; invalid/ambiguous forms are rejected | Cross-language Unicode/malformed-byte tests | H Wire Decode/Canonicalization | BLOCKED_BY_H_CONTRACT |
+| AT-20 | Request/Response consistency | H + Domain Owner | Request ID/Correlation/Operation/Idempotency are fixed | Response correlates to the exact Request and returns only the Owner Result | End-to-end Trace assertions | H Correlation + Owner Result | BLOCKED_BY_H_CONTRACT |
+
+BLOCKED_BY_H_CONTRACT means that an H-owned Wire/Transport/ACK/Validator decision or exact mapping is missing. BLOCKED_BY_OWNER_CONTRACT means that an authoritative Owner domain contract/API or ADR decision is missing. All tests remain NOT RUN until runtime authorization and an exact Build are available. Dependency labels are not test results.
 
 
 ## 9. Runtime engineering handoff / Issue #7 entry conditions

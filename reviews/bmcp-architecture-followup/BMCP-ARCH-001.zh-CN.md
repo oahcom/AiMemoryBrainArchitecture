@@ -497,7 +497,7 @@ H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体
 
 ### 8.1 现有符合性证据——范围受限，不代表完整协议 PASS
 
-- Main `713774c381effbbe9e70693f88a7fa99a33a040d`：`python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v`——**30 passed，0 failed**，退出码 0。该结果只覆盖 Applied Delivery Evidence 符合性套件。
+- 当前 main `6c5597a62ada7f56d1956b9c60409f329d2819c5`，测试文件 blob `903764ab08a7d3dd17ba13f5c40e8c4129958bb5`：`python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v`——**38 passed，0 failed**，退出码 0，已在干净克隆上复现。该结果只覆盖 Applied Delivery Evidence 符合性套件。此前的「30 passed」是针对测试文件 blob `98242cc193a77b27d58b39353ccc031201992614`、在 `c138654c…` 与 `713774c3…` 上测得；它已被取代，而非被推翻。
 - PR #436（已于 `02f61194fd4e12993b4c83f7fac8382eee20f5d8` 合并），源 Head `1ffed9ed127df98b2f823a66ec80ea43d08cb9dc`：`python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/provider_outcome -p 'test_*.py' -v`——**运行 10 项；5 passed；5 skipped；0 failed**，退出码 0。跳过的 CPO-02/04/05/09/10 明确需要 Owner C 权威语义 Validator。该结果仅验证 Schema 结构，不验证 C 语义或密码学签名。
 - PR #436 的双语协议索引和 provider_outcome 测试现已合入 Main。其索引仍将 RecoveryJoin 1.0.2 的 Schema/Validator/Test 标记为未交付；五个语义测试方法仍需等待 C 的权威 Validator。
 - 这些结果不构成完整 BMCP 符合性。Strict JSON Parser 是参考模型，不是生产 Transport。当前不存在 `tests/protocol_test.rs` 和 `crates/bmcp`。
@@ -540,9 +540,9 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 1. BMCP 语义契约获责任架构权威接受；未决语义明确列出。
 2. H 冻结版本化 Wire、Transport、ACK、Validator 契约，包括 Error/Conformance Mapping。
 3. H/C/E/D/I/G 按需接受跨模块 Request/Response/Receipt/ACK 映射。
-4. Owner 已批准 Fact/Claim Option A + I1 语义；精确消费者映射仍为 Candidate，直至 D/I/Storage/H 契约完成版本 Pin 和审查；E Candidate IR 和 Receipt API 精确固定。
+4. Owner Option A + I1 语义已获批准。精确消费者映射在 B/D/E/F/G/H/I/Storage 契约完成版本固定和审查之前仍保持 Candidate；E Candidate IR 和 Receipt APIs 必须精确固定。
 5. C 通过 Issue #449 发布、H 审查 Agent Integration / MCP-to-BMCP Mapping；MCP 不得替代协议。
-6. D/I 发布 Identity/Lifecycle、Forget Fence、Authorization、PermissionEpoch Currentness 的精确可调用接口。
+6. D/I 发布 Identity/Lifecycle、Forget Fence、Authorization 和 PermissionEpoch Currentness 的精确可调用接口。其权威边界已经决定；API/IDL/Schema 仍保持开放。
 7. 指定 Canonical Runtime 仓库/分支（或授权新仓库）、责任工程 Owner/维护者、Build、CI、测试命令和产物来源。
 8. 相关权威记录 Deployment Topology、持久化、队列、Recipient Adapter、Observability、Recovery 和 Operator 职责。
 9. 完整验收套件在不可变 Runtime Commit 上执行并保留可复现原始证据；UNKNOWN/Recovery/Race 均 fail-closed。
@@ -550,15 +550,15 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 
 | 工作流 | 下一项工件 | 责任权威 | 进入状态 |
 |---|---|---|---|
-| H | 冻结 Envelope/Version、Wire Decode、ACK、Validator、Error/Conformance | H | BLOCKED_BY_H_CONTRACT |
-| B / Governance | 将已批准 Owner 决策映射到精确消费者契约；Schema 仍为 Candidate | B + D/E/F/G/H/I | BLOCKED_BY_OWNER_CONTRACT |
-| D | Canonical Identity/Lifecycle/Fence API 和 Receipt | D | BLOCKED_BY_OWNER_CONTRACT |
-| I | Authorization/PermissionEpoch/Revocation API | I | BLOCKED_BY_OWNER_CONTRACT |
-| E | Candidate IR、AcceptedReceipt、Service 边界 | E | BLOCKED_BY_OWNER_CONTRACT |
-| C | Agent/MCP Adapter-to-BMCP Mapping | C + H | BLOCKED_BY_OWNER_CONTRACT |
-| G | ContextVersion/Delivery/Applied/ACK Mapping | G + H | BLOCKED_BY_OWNER_CONTRACT |
+| H | Versioned Envelope/Version、Wire Decode、ACK、Validator 和 Error/Conformance | H | PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN |
+| B / Governance | 将已批准的语义决策协调进精确消费者契约；Schema 仍为 Candidate | B + D/E/F/G/H/I | SEMANTIC_ACCEPTED / SOURCE_RECONCILIATION_AND_SCHEMA_GATE_OPEN |
+| D | Canonical Identity/Lifecycle/Fence API 和 Receipt | D | AUTHORITY_BOUNDARY_DECIDED / CALLABLE_API_IDL_OPEN |
+| I | Authorization/PermissionEpoch/Revocation API | I | AUTHORITY_BOUNDARY_DECIDED / CALLABLE_API_IDL_OPEN |
+| E | Candidate IR、AcceptedReceipt 和 Service 边界；仅包含五阶段 Rust 参考流水线 | E | INTEGRATED_DOCS_AND_CONSUMER_GATE_OPEN |
+| C | Agent/MCP Adapter-to-BMCP Mapping | C + H | PENDING_C_MAPPING_ISSUE_449 |
+| G | ContextVersion/Delivery/Applied/ACK Mapping | G + H | OWNER_CONSUMER_MAPPING_PENDING |
 | Engineering Leadership | Canonical Runtime Repo/Team/CI/Deployment 权限 | Engineering Leadership | DEFERRED_TO_ENGINEERING_PHASE |
-| BMCP 架构集成 | Owner 回复后刷新来源 Pin | BMCP 架构负责人 | NOT STARTED |
+| BMCP 架构集成 | 刷新来源 Pin 并纳入 B/D/I/H/C 决议 | BMCP 架构负责人 | IN_PROGRESS |
 
 ## 10. 治理与验证
 
