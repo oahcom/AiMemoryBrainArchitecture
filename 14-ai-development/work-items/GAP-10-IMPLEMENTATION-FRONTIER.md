@@ -1,3 +1,30 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-23"
+      last_verification_note: "§11 was produced by the commands in §11.6 on bea1c2b in this session. §1-§10 are retained as written at their own stated commits and are corrected, not re-measured, by §11."
+    usage_status: Active
+    modification_status: Modified
+
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Informative
+
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
+---
+
 # GAP-10 — Implementation frontier: what actually blocks each domain
 
 **Status:** Open — this is a map, not a defect

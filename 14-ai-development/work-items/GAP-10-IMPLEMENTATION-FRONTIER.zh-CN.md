@@ -1,3 +1,30 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-23"
+      last_verification_note: "§11 由 §11.6 中的命令在 bea1c2b 上于本会话产出。§1–§10 保留其各自声明提交上的原文，由 §11 更正而非重测。"
+    usage_status: Active
+    modification_status: Modified
+
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Informative
+
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
+---
+
 # GAP-10 · 实现前沿：每个领域究竟卡在什么上
 
 **状态**：未关闭 — 本文是地图，不是缺陷
@@ -764,3 +791,184 @@ fn describe(error: &bmcp_protocol::validate::EvidenceError) -> String {
 （报告状态而不重新测量）在同一份反对该错误的文档里出现了三次。
 
 **阅读指南权威性更正：** §9.5 中“阅读指南已被裁定为 `Canonical / Informative`”的说法，已被 Issue #564 评论 `7074302216` 取代。当前 Owner 裁定是不提升该文档：`04-memory-compiler/README.md` 继续保持 `canonical_status: Non-Canonical` 与 `normative_status: Informative`。#564 评论 `7074470193` 和 `7074777892` 对第 2/3 条的后续执行说明，不会反转第 1 条“不提升”的裁定。`protocol-index.md` 继续保持 `Candidate`，其规范当前版本仍为 `NOT DECLARED`。
+
+## 11. §9 与 §10 的勘误，在 `bea1c2b` 处实测（2026-11-23 11:35 +08:00）
+
+§9 与 §10 上文不做修改，理由与 §10 自己给出的一致：一份测量值被悄悄改写的
+前沿文档无法审计。更正一律追加在此处。
+
+以下每个数字都在本树、本提交上实测得出。与 §9/§10 不一致的地方，产生新数字的
+命令写在 §11.6，因此不必相信本节即可复算。
+
+### 11.1 §9.2 的测试计数已过时 2–3 倍，行数分布也动了
+
+§9.2 测量于 `d89fd5fa8`。其中每个测试数字此后都已被超越，而 Memory Context 的
+77 行分布在两个方向上同时移动（实现增加、缺失减少）——这正是 §9.2 未预料到的方向。
+
+| crate | §9.2 数字 | `bea1c2b` 实测 |
+|---|---:|---:|
+| `memory-context` | 82 单测 + 17 集成 = 99 | **183** |
+| `memory-compiler` | 66 | **124** |
+| `agent-integration` | 36 单测 + 21 集成 = 57 | **63** |
+| `bmcp-protocol` | 44 单测 + 4 一致性 = 48 | **60** |
+| `bmcp-server` | §9.2 未记 | **34** |
+| `memory-domain` | 70 单测 + 20 验收 = 90 | **105** |
+| `brain-cli` | §9.2 未记 | **21** |
+| **整个工作区** | 718（§1） | **724** |
+
+77 行覆盖表同样移动了，而且不只是改了标签：
+
+| 状态 | §9.2 | `bea1c2b` 实测 |
+|---|---:|---:|
+| IMPLEMENTED | 9 | **12** |
+| PARTIAL | 42 | **44** |
+| NOT IMPLEMENTED | 26 | **21** |
+
+因此 §9.2 自己那句"行数过时，测试没过时"的补充说明，后半句现在也错了：两者都过时，
+而且有三行已关闭。
+
+### 11.2 §10.2 的 BMCP 结论在它自己的提交上成立，在 `4ce12cc7` 上不成立
+
+§10.2 断言：
+
+> `bmcp-server` 只实现一个 JSON-RPC 方法（`initialize`），其余一律返回
+> `-32601 Method not found`。
+>
+> `bmcp-server` 从不触达解析器。整个 crate 里唯一的 `bmcp_protocol` 引用是
+> [...] `#[allow(dead_code)]` 的"供将来调用点使用"，零调用点。
+
+这两句在 `61b9d743` 上为真，而 `61b9d743` 正是 §10 自称的测量点。它们在
+`54ea397`（*feat(bmcp): expose validate/digest as MCP tools instead of an empty
+capability set*，2026-11-22 13:48 +08:00）之后不再成立——该提交晚于 §10 的测量、
+早于 `4ce12cc7`。
+
+在 `bea1c2b` 的 `crates/bmcp-server/src/lib.rs` 中：
+
+- 分发 **三个**方法而不是一个：`initialize`（第 334 行）、`tools/list`（339）、
+  `tools/call`（345），`-32601` 只作为兜底分支（348）；
+- 从 **两个** tool 分支调用 `bmcp_protocol::parse_and_validate`——`VALIDATE_TOOL`
+  （392 行）与 `DIGEST_TOOL`（403 行）；
+- `bmcp_protocol` 引用 **8 处**，不是 1 处；
+- 整个 crate **没有** 任何 `#[allow(dead_code)]`；第 938 行的 `describe()` 在第
+  419 行被调用。
+
+这不止是记账问题。§10.2 与 GAP-16 都把"从线上字节到解析器无路可走"当作
+*那 21 个解析器是最大可增量* 这一结论的承重事实。实际上一种消息类型的通路是
+端到端存在的（线上 → `tools/call` → `parse_and_validate` → 摘要）。缺的是另外
+21 种类型，而不是通路本身。
+
+计数本身未变且已复算确认：**声明 22 种消息类型，`crates/` 中任何形式识别 3 种，
+19 种在 Rust 里完全没有识别。**
+
+### 11.3 `describe()` 的引用行号来自一份 723 行的文件
+
+§10.2 引用 `lib.rs:718-723` 作为那个 `#[allow(dead_code)]` 格式化函数的位置。
+在 `61b9d743`，`lib.rs` 恰好 723 行，718–723 行确实是该函数。在 `4ce12cc7`，
+同一文件 940 行，718–723 行是 JSON 字符串转义表（`b'"' => output.push('"')` 等）。
+
+这条引用在写下时是正确的，但随后变得不可复现且未作声明。之所以记录在此，是因为
+§10 开篇即以"可审计性"作为勘误追加而非就地改写的理由——一个不再能解析的行号引用
+属于同一类缺陷。
+
+### 11.4 GAP-15 §4 把 §10.2 的陈旧事实当作新测量重新发布
+
+`GAP-15-IMPLEMENTATION-PERCENTAGES-STALE` 标注测量于 `4ce12cc7`，其 §4 写道：
+
+> `bmcp-server` 如今完全不触达解析器（`describe()` 位于 `lib.rs:718-723`，
+> 带 `#[allow(dead_code)]`，零调用点）。
+
+在 `4ce12cc7`——GAP-15 自己的测量提交——`tools/call` 已经存在（`54ea397` 是
+`4ce12cc7` 的祖先），`parse_and_validate` 已从两个分支被调用，整个 crate 里没有
+`#[allow(dead_code)]`。
+
+GAP-15 的论点是：六个百分比是化石，因为它们"在某个更早的提交上成立"，而后被
+不加复测地重新陈述。它自己的 §4 对 §10.2 的 BMCP 段落做的正是这件事。GAP-15 其余
+测量可复现；这一条不可，而它恰恰是 GAP-15 用来论证 21 个解析器被冻结在触及范围之外
+的那一条。
+
+### 11.5 §9.3 第三项已关闭，第一项未变
+
+§9.3 列出三项真正缺失的东西。第三项是 `dm2_06` 的授权类型状态。它已关闭：
+`dm2_06_missing_authorization_ref_blocks_fact_publication` 是
+`crates/memory-domain/tests/phase2_acceptance.rs:608` 上的活跃 `#[test]`，
+`CanonicalCommitRefState { Pending, Issued(CanonicalCommitData) }` 已在
+`crates/memory-domain/src/canonical_commit.rs:33` 实现。整个工作区 `#[ignore]`
+计数为 **0**。
+
+第一项，一次成功的 `Published` 处置，未变，仍是唯一被非代码依赖卡住的一项。
+`publication_authority.rs:138-139` 把 `publication_participant_admitted: false` 与
+`protected_visibility_authorized: false` 作为字面常量返回，这正是
+`D-OWNER-DECISION-PARTICIPANT-ADMISSION-001` §1 与
+`D-OWNER-DECISION-PROTECTED-VISIBILITY-001` §1 的要求，不是疏漏。
+
+第二项，BMCP 传输，现在比 §9.3 所述更窄：传输已存在，一种消息类型已端到端打通，
+残余是 19 种未解析类型加上被冻结的帧格式（§11.2）。
+
+### 11.6 复现
+
+平台：WSL Ubuntu，`cargo 1.100.0`，`rustc 1.95.0`。构建需 `-j 1`：WSL 主机只有
+5.8 GB，并行 codegen 会在 `libsqlite3-sys` 上 OOM。
+
+```sh
+git log -1 --format='%h %ci %s'                    # bea1c2b
+cargo test --workspace --all-targets --offline -j 1 --no-fail-fast
+# PASSED=724 FAILED=0 IGNORED=0
+
+grep -rn '^#\[ignore' --include=*.rs crates/ | wc -l   # 0
+grep -rn 'todo!\|unimplemented!' --include=*.rs crates/ | wc -l   # 0
+```
+
+按 crate 统计（§11.1）：
+
+```sh
+for c in memory-compiler memory-context agent-integration bmcp-protocol \
+         bmcp-server memory-domain brain-cli; do
+  printf '%-20s ' "$c"
+  cargo test -p "$c" --all-targets --offline -j 1 2>/dev/null \
+    | grep -E '^test result' | awk -F'[ ;]' '{p+=$4} END {print p}'
+done
+```
+
+77 行分布（§11.1）由 `06-memory-context/context-implementation-coverage.md` 中
+`## 3. Row-by-row concern mapping` 与 `## 4. Scope and test evidence` 之间的表
+按第三列首词分组统计。
+
+BMCP 通路与覆盖（§11.2），全部针对 `crates/bmcp-server/src/lib.rs`：
+
+```sh
+grep -n '"initialize"\|"tools/list"\|"tools/call"\|32601' crates/bmcp-server/src/lib.rs
+grep -n 'parse_and_validate' crates/bmcp-server/src/lib.rs
+grep -rn 'allow(dead_code)' crates/bmcp-server/src/ | wc -l    # 0
+grep -rn 'bmcp_protocol' crates/bmcp-server/src/ | wc -l       # 8
+```
+
+19 种未解析类型，从索引表导出而非手抄：
+
+```sh
+python3 08-bmcp-protocol/scripts/check_protocol_index.py   # unique_message_types=22 PASS
+python3 - <<'PY'
+import re
+txt = open('08-bmcp-protocol/PROTOCOL-INDEX.md', encoding='utf-8').read()
+seg = txt[txt.index('## Message types'):txt.index('## Complete Schema inventory')]
+types = re.findall(r'^\|\s*`([^`]+)`\s*\|', seg, re.M)
+assert len(types) == 22, len(types)
+open('/tmp/types.txt', 'w').write('\n'.join(types) + '\n')
+PY
+while IFS= read -r t; do
+  n=$(grep -rl -- "$t" crates/ 2>/dev/null | wc -l)
+  printf '%s %s\n' "$n" "$t"
+done < /tmp/types.txt | sort -n
+# 3 个类型有命中；19 个为 0
+```
+
+关于最后一个循环的一句提醒：Windows 上的 Python 写出的 `PROTOCOL-INDEX.md` 带 CRLF，
+而用 `while read` 遍历 CRLF 列表会静默匹配不到任何东西——每个类型都报 0。在相信
+这些计数之前先 `tr -d '\r'`，否则会以错误的理由复现出 GAP-15 的结论。
+
+### 11.7 本勘误不做什么
+
+- 不就地修改 §9、§10 或 GAP-15。
+- 不更换任何百分比，因为百分比这一框架在 §9 中已被退役；用更好的百分比替换它们
+  等于复活那个框架。
+- 不复测 GAP-15 其余五行。它们在 `bea1c2b` 上可复现，§11.4 所列除外。
+- 不声称独立评审。由执行该测量的同一会话撰写。
