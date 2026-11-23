@@ -1,8 +1,10 @@
+> **RETIRED — 2026-11-23.** Owner decision: this server no longer runs GitHub Actions self-hosted runners. CI uses GitHub-hosted `ubuntu-latest` runners. This file is retained as historical evidence only; do not use it to install, start, or restore a server runner.
+
 # Ubuntu Self-Hosted Runner Bootstrap Runbook
 
 **Document:** AI-RUN-002-RUNBOOK  
 **Version:** 1.1 (revised 2026-11-17)  
-**Deployment status:** ACTIVE / operator-executed. **Security acceptance:** BLOCKED / pending independent infrastructure-security Owner decision. v1.1 records the deployed state; it does not establish security acceptance.  
+**Deployment status:** RETIRED 2026-11-23. **Security acceptance:** historical record only.
 **Target:** `[HOST IDENTIFIER WITHHELD]`, runner name `[RUNNER IDENTIFIER WITHHELD]`  
 **Tracking:** [Issue #26](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/26)  
 **Normative architecture statement:** DOC-OPS-001, `docs/zh-CN/14-ai-development/ci-runner-operations.md` and `docs/en/14-ai-development/ci-runner-operations.md`. That pair states the deployed shape, the security boundary, and the admission policy bilingually. This file is the execution procedure.  
