@@ -1154,7 +1154,8 @@ impl AdmissionStore {
                 let stored = read_canonical_commit(&tx, commit_id)?;
                 let identical = stored.issuer_id == issuer.as_str()
                     && stored.subject_digest == subject_digest.as_str()
-                    && stored.issued_at == issued_at;
+                    && stored.issued_at == issued_at
+                    && stored.signature.is_empty();
                 if !identical {
                     return Err(AdmissionError::IdempotencyConflict);
                 }
@@ -1209,6 +1210,11 @@ impl AdmissionStore {
             return Err(CanonicalCommitValidationError::UnsupportedIssuer);
         }
         if !is_sha256_hex(&stored.subject_digest) || !is_rfc3339_utc(&stored.issued_at) {
+            return Err(CanonicalCommitValidationError::RecordMalformed);
+        }
+        // The dev baseline declares `signature` empty; a row carrying anything
+        // else was not written by `issue_canonical_commit`.
+        if !stored.signature.is_empty() {
             return Err(CanonicalCommitValidationError::RecordMalformed);
         }
         if stored.subject_digest != data.subject_digest.as_str() {
@@ -1292,7 +1298,8 @@ impl AdmissionStore {
                 let identical = stored.issuer_id == issuer.as_str()
                     && stored.subject_digest == subject_digest.as_str()
                     && stored.issued_at == issued_at
-                    && stored.decision_kind == kind;
+                    && stored.decision_kind == kind
+                    && stored.signature.is_empty();
 
                 if !identical {
                     return Err(AdmissionError::IdempotencyConflict);
@@ -1577,6 +1584,7 @@ struct StoredAuthorizationDecision {
     subject_digest: String,
     issued_at: String,
     decision_kind: String,
+    signature: String,
 }
 
 /// Reads an authorization decision by primary key.
@@ -1588,7 +1596,7 @@ fn read_authorization_decision(
     decision_id: &OpaqueId,
 ) -> Result<StoredAuthorizationDecision, rusqlite::Error> {
     connection.query_row(
-        "SELECT issuer_id,subject_digest,issued_at,decision_kind
+        "SELECT issuer_id,subject_digest,issued_at,decision_kind,signature
          FROM authorization_decisions
          WHERE decision_id=?1",
         [decision_id.as_str()],
@@ -1598,6 +1606,7 @@ fn read_authorization_decision(
                 subject_digest: row.get(1)?,
                 issued_at: row.get(2)?,
                 decision_kind: row.get(3)?,
+                signature: row.get(4)?,
             })
         },
     )
@@ -1618,6 +1627,7 @@ fn validate_stored_authorization_decision(
 
     if !is_sha256_hex(&stored.subject_digest)
         || !is_rfc3339_utc(&stored.issued_at)
+        || !stored.signature.is_empty()
         || !matches!(
             stored.decision_kind.as_str(),
             "Approved" | "Denied" | "Conditional"
@@ -1711,6 +1721,7 @@ struct StoredCanonicalCommit {
     issuer_id: String,
     subject_digest: String,
     issued_at: String,
+    signature: String,
 }
 
 /// Reads a row by primary key. `QueryReturnedNoRows` is preserved so the caller
@@ -1720,13 +1731,14 @@ fn read_canonical_commit(
     commit_id: &OpaqueId,
 ) -> Result<StoredCanonicalCommit, rusqlite::Error> {
     connection.query_row(
-        "SELECT issuer_id,subject_digest,issued_at FROM canonical_commits WHERE commit_id=?1",
+        "SELECT issuer_id,subject_digest,issued_at,signature FROM canonical_commits WHERE commit_id=?1",
         [commit_id.as_str()],
         |row| {
             Ok(StoredCanonicalCommit {
                 issuer_id: row.get(0)?,
                 subject_digest: row.get(1)?,
                 issued_at: row.get(2)?,
+                signature: row.get(3)?,
             })
         },
     )
@@ -3086,6 +3098,104 @@ mod tests {
         assert_eq!(
             db.validate_authorization_decision(&decision, &subject),
             Ok(true)
+        );
+    }
+
+    /// The same forgery, on the two tables that had stopped reading `signature`.
+    ///
+    /// `canonical_commits` and `authorization_decisions` declared the column,
+    /// wrote `''` into it, and never fetched it back, so a row whose signature
+    /// had been changed satisfied every check the validators performed. Both are
+    /// older than the attestation path and neither had a test that could tell
+    /// the difference; these two are that test.
+    #[test]
+    fn a_forged_signature_is_malformed_on_canonical_commits() {
+        let mut store = AdmissionStore::in_memory().unwrap();
+        let commit_id = id("commit-forged");
+        let issuer = IssuerId::new(memory_domain::DEV_BASELINE_ISSUER).unwrap();
+        let subject = id(&"a".repeat(64));
+
+        let reference = store
+            .issue_canonical_commit(&commit_id, &issuer, &subject, "2026-11-22T00:00:00Z")
+            .unwrap();
+        assert_eq!(
+            store.validate_canonical_commit(&commit_id, &reference, &subject),
+            Ok(true)
+        );
+
+        store
+            .connection
+            .execute(
+                "UPDATE canonical_commits SET signature='forged' WHERE commit_id=?1",
+                [commit_id.as_str()],
+            )
+            .unwrap();
+
+        assert!(
+            matches!(
+                store.validate_canonical_commit(&commit_id, &reference, &subject),
+                Err(CanonicalCommitValidationError::RecordMalformed)
+            ),
+            "a forged canonical commit must not validate"
+        );
+        assert!(
+            matches!(
+                store.issue_canonical_commit(&commit_id, &issuer, &subject, "2026-11-22T00:00:00Z"),
+                Err(AdmissionError::IdempotencyConflict)
+            ),
+            "a replay against a forged canonical commit must conflict"
+        );
+    }
+
+    #[test]
+    fn a_forged_signature_is_malformed_on_authorization_decisions() {
+        let mut store = AdmissionStore::in_memory().unwrap();
+        let decision_id = id("decision-forged");
+        let issuer = IssuerId::new(memory_domain::I_DEV_BASELINE_ISSUER).unwrap();
+        let subject = id(&"a".repeat(64));
+        let kind = AuthorizationDecisionKind::Approved;
+
+        let reference = store
+            .issue_authorization_decision(
+                &decision_id,
+                &issuer,
+                &subject,
+                "2026-11-22T00:00:00Z",
+                kind,
+            )
+            .unwrap();
+        assert_eq!(
+            store.validate_authorization_decision(&reference, &subject),
+            Ok(true)
+        );
+
+        store
+            .connection
+            .execute(
+                "UPDATE authorization_decisions SET signature='forged' WHERE decision_id=?1",
+                [decision_id.as_str()],
+            )
+            .unwrap();
+
+        assert!(
+            matches!(
+                store.validate_authorization_decision(&reference, &subject),
+                Err(AuthorizationDecisionValidationError::RecordMalformed)
+            ),
+            "a forged authorization decision must not validate"
+        );
+        assert!(
+            matches!(
+                store.issue_authorization_decision(
+                    &decision_id,
+                    &issuer,
+                    &subject,
+                    "2026-11-22T00:00:00Z",
+                    kind
+                ),
+                Err(AdmissionError::IdempotencyConflict)
+            ),
+            "a replay against a forged decision must conflict"
         );
     }
 }
