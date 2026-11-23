@@ -1,6 +1,51 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-23"
+      last_verification_note: "All four gap counts in §9 (77 / 77 / 11 / 11) were measured on 2026-11-23 in a throwaway worktree at 880e6a78, calling current_bilingual_gaps() after each variant. The dual-heading counts in §9.1 come from reading all 58 files, not a sample."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "14-ai-development/governance-register/GOV-NC-2026-11-21-EMBEDDED-ROOT-015.md"
+    en: null
+    zh-CN: "docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-21-EMBEDDED-ROOT-015.md"
+---
+
 # GOV-NC-2026-11-21-EMBEDDED-ROOT-015
 
-**Status:** OPEN — MEASUREMENT ONLY
+**Status:** `RULED` — §6 branch 3 is true (see §9); dispatched as `AID-2026-054`. Independent review remains `NOT_ASSIGNED`.
 **Nature:** `REGISTER_ONLY / NO_IMPLEMENTATION / NO_GATE_CHANGE / REQUIRES_INDEPENDENT_REVIEW`
 **Measured at:** `main = 67074d2ff7`; re-verified at `8a2ce1b` with identical counts
 **Extends:** `GOV-NC-2026-11-21-SPLIT-DOMAIN-011.md`, `...-PAIRING-RESIDUAL-013.md`, `...-CWD-SPLIT-014.md`
@@ -203,3 +248,69 @@ CJK ratio per file requires only reading the file; no gate involvement.
 - It does not assign an independent review seat. That seat remains `NOT_ASSIGNED`.
 
 **Blocking chain unchanged:** independent review `NOT_ASSIGNED`, implementation authorisation `NOT_AUTHORISED`, sponsor / accountable owner `NOT_ASSIGNED`.
+
+---
+
+## 9. Ruling: §6 branch 3 is the true one (2026-11-23)
+
+The body of this register and its three-way §6 question are **not changed**. §6 says "I cannot distinguish these three from the repository. **That is the finding.**" This section decides that finding and supplies the measurement §6 could not get.
+
+Ruling: `OWNER-DECISION-EMBEDDED-BILINGUAL-001` (`14-ai-development/adr/`). Work order: `AID-2026-054`.
+
+| §6 branch | Verdict |
+|---|---|
+| 1. `13-engineering-decisions` was deliberately excluded, and the decision is recorded | **False.** No such decision exists. Checked `00-governance/bilingual-documentation-policy.md`, the root's own parity audit, `EMBEDDED_BILINGUAL_SOURCES` and its history, and the root's git history. |
+| 2. The 58 files are not actually embedded bilingual; the audit table is wrong | **False for 57 of 58.** See §9.1. |
+| 3. Shape 3 should be root-agnostic and `source.startswith("14-ai-development/")` is a leftover | **True.** |
+
+### 9.1 The 58 files are embedded bilingual, on stronger evidence than §1 used
+
+§1 used CJK ratio (≥5% → 52 files). A ratio is weak evidence: an appendix of Chinese notes lifts it. This section uses whether **headings place both languages on one line** (`# Agent Integration Boundary / Agent 集成边界`), because that is the parity shape policy §3 describes.
+
+| Measure | Files |
+|---|---|
+| Both languages in ≥50% of headings | **42** |
+| Both languages in at least one heading | **57** |
+| Zero dual-language headings | **1** |
+
+The exception is `13-engineering-decisions/technology-architecture-blueprint.md`: 56 headings, **0 CJK characters in 49,666 bytes**. It is genuinely single-language and is the one entry that must survive as a gap — it is the control that proves the new predicate is not simply accepting everything.
+
+### 9.2 Correction to §3.1 and §6: the guard measured zero because it never ran
+
+§3.1 recorded mutation M5: delete the root-name guard, measure `77 → 77`, conclude the guard "has no payload today".
+
+That inference is wrong, and wrong somewhere reproducible. Shape 3's condition is **two** clauses: `source.startswith("14-ai-development/")` **and** `english.is_file()`. The 58 files fail the **second** — they have no `docs/en` mirror. The guarded branch was never reached, so deleting the guard measured zero change regardless of the guard.
+
+Three variants were measured on a throwaway worktree at `880e6a78`, each calling `current_bilingual_gaps()`:
+
+| Variant | Change | Gaps |
+|---|---|---|
+| — | `main` as-is | **77** |
+| A | remove the root guard only; keep `english.is_file()` | **77** |
+| B | remove both; predicate stays `_carries_chinese()` | **11** |
+| C (ruled) | remove both; predicate requires `cjk >= 100` **and** `latin >= 1000` in the same file | **11** |
+
+Variant A reproduces M5's `77 → 77` exactly. M5's number was right; its conclusion was not. **A branch that never executes measures zero either way.** That is also why the M5 mutant survived unnoticed.
+
+**B and C measure the same 11 today and are not equivalent.** B accepts a file with 100 CJK characters and no English — the same one-sided-predicate defect as 013 §3.1, moved to the embedded shape. Only C survives a Chinese-only document committed tomorrow. The identical measurement is recorded as identical, not as agreement.
+
+### 9.3 Gaps 77 → 11, resolved 66, new 0
+
+| | |
+|---|---|
+| gaps after | **11** |
+| resolved from the baseline | **66** |
+| new gaps | **0** |
+| by root | `06-memory-context` 7, `08-bmcp-protocol` 2, `00-governance` 1, `13-engineering-decisions` 1 |
+
+The one remaining `13-engineering-decisions` entry is `technology-architecture-blueprint.md`, as expected. The 9 resolutions outside that root were verified individually: every one places both languages in one file (lowest 105 CJK / 2,107 Latin letters). They had been failing the mirror precondition, not a language requirement.
+
+**A wrong prediction is recorded, not quietly replaced.** This section's first draft computed "77 → 20, delta −57" from the file count. The measurement is 11, because removing the mirror precondition also resolves 9 entries outside the 13 root. The prediction counted one root; the measurement counts the tree.
+
+### 9.4 Status and residue
+
+`OPEN` → `RULED — branch 3; dispatched as AID-2026-054; independent review still NOT_ASSIGNED`.
+
+Not `CLOSED`: the ruling changes a gate predicate, and a session that writes the predicate cannot supply independence for it; and the baseline shrink in §9.3 is practically irreversible — once 66 entries leave the baseline, nothing records that they were ever considered gaps, and re-adding any of them is a ratchet error. So this change carries more verification weight than usual and cannot be self-certified by the side that dispatched it.
+
+Out of scope here: whether `technology-architecture-blueprint.md` should be translated, mirrored, or moved out of `NORMATIVE_ROOTS`. All three leave it a gap; choosing is the document owner's call.
