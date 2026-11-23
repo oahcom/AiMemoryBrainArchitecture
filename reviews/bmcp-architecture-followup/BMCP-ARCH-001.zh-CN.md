@@ -12,9 +12,9 @@
 
 **ARCHITECTURE_PARTIAL。** 本文是候选语义整合和工程交接，不是协议冻结。
 
-H 实时分支包含候选 Envelope、版本、规范化、错误分类、Delivery/ACK、Forget/重连、Strict JSON Parser 参考和符合性材料。这些文件仍归 H 所有；文件存在不等于批准或冻结。H 生命周期交接明确标记 Wire Schema NOT FROZEN；符合性矩阵是候选测试规范，不是 Runtime 证据。
+H 实时分支包含候选 Envelope、版本、规范化、错误分类、Delivery/ACK、Forget/重连、Strict JSON Parser 参考和符合性材料。这些文件仍归 H 所有；这些文件的存在不构成批准或冻结。H 生命周期交接明确标记 Wire Schema NOT FROZEN；符合性矩阵是候选测试规范，不是 Runtime 证据。
 
-Owner 已合并批准 Fact/Claim 语义决策（Option A + I1）；精确 Compiler/Domain 消费者映射仍为 Candidate。BMCP MUST NOT 冻结规范 Fact/Claim Wire Payload 字段。D 拥有 Canonical Identity/Lifecycle 和 D Forget Fence；I 拥有授权和 PermissionEpoch。BMCP 消费这些权威，不得创建替代机制。
+Owner 已合并批准 Fact/Claim 语义决策（Option A + I1）；精确 Compiler/Domain 消费者映射仍为 Candidate。BMCP MUST NOT 冻结规范 Fact/Claim Wire Payload 字段。B 拥有语义词汇与认识论含义。D 拥有规范 ID 分配、修订提交与当前性、生命周期、谱系、ConflictSet，以及 D ForgetOperation/Fence。I 拥有 Principal/Actor 授权、attestor 授权、PermissionEpoch、撤销、保留策略/法律保全/备份，以及全局 Forget 策略与评估。BMCP/H/C 必须消费由 Owner 签发的不透明引用（opaque owner-issued refs），且 MUST NOT 创建替代物。
 
 Issue #7 的记录保持 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE。根据 Owner 阶段关闭裁决，GitHub 当前报告 Issue #7 为 CLOSED / not_planned；本工作不重开或修改它。延期不等于 Runtime 授权。
 
@@ -96,7 +96,7 @@ Issue #7 的记录保持 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE。
 | I Authorization / PermissionEpoch | I | 只读 | 不修改 Principal/Permission/Global Forget |
 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | 本 BMCP 架构工作项 | 新建 | 仅候选整合/交接 |
 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | 同上 | 新建 | 语义对应版本 |
-| docs/governance/translation-status.md | Governance Register | 仅元数据 | 登记 Review Pair；保留 H 核心规范状态 |
+| docs/governance/translation-status.md | Governance Register | 仅允许元数据变更 | 登记 Review Pair；保留 H 核心规范状态 |
 
 不涉及 Rust 源码、测试、JSON Schema、Transport/Validator 实现或生产配置。
 
@@ -543,7 +543,7 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 2. H 冻结版本化 Wire、Transport、ACK、Validator 契约，包括 Error/Conformance Mapping。
 3. H/C/E/D/I/G 按需接受跨模块 Request/Response/Receipt/ACK 映射。
 4. Owner Option A + I1 语义已获批准。精确消费者映射在 B/D/E/F/G/H/I/Storage 契约完成版本固定和审查之前仍保持 Candidate；E Candidate IR 和 Receipt APIs 必须精确固定。
-5. C 通过 Issue #449 发布、H 审查 Agent Integration / MCP-to-BMCP Mapping；MCP 不得替代协议。
+5. C 通过 Issue #449 发布、H 审查 Agent Integration / MCP-to-BMCP Mapping；MCP 不得替代 BMCP。
 6. D/I 发布 Identity/Lifecycle、Forget Fence、Authorization 和 PermissionEpoch Currentness 的精确可调用接口。其权威边界已经决定；API/IDL/Schema 仍保持开放。
 7. 指定 Canonical Runtime 仓库/分支（或授权新仓库）、责任工程 Owner/维护者、Build、CI、测试命令和产物来源。
 8. 相关权威记录 Deployment Topology、持久化、队列、Recipient Adapter、Observability、Recovery 和 Operator 职责。
@@ -714,9 +714,9 @@ C588 快照的门禁注册表包含 21 条 embedded-bilingual 源记录：18 条
 
 | 文档 / 版本 | 英文路径 | 中文路径 | 来源版本 | 一致性 |
 |---|---|---|---|---|
-| BMCP-ARCH-001 / 0.2.2 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main c58878fce24528a0842b4f8887c93ddbf465b566；H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74 | 作者准备双语 Pair；独立一致性审查 PENDING |
+| BMCP-ARCH-001 / 0.2.2 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main c58878fce24528a0842b4f8887c93ddbf465b566；H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74；§2/§7 中的 B/D/I Owner 固定版本引用 | 已进行 Owner-delegate 语义审查；不声称已进行独立一致性审查 |
 
-Coverage Register 仅将此登记为 Review/Handoff Pair，不改变 “BMCP Protocol detailed contracts (7 core specifications)” 条目；双语规范核心文档覆盖仍为 NOT STARTED。结构配对不等于语义双语一致性审查。
+Coverage Register 仅将此登记为 Review/Handoff Pair，不改变 “BMCP Protocol detailed contracts (7 core specifications)” 条目；双语规范核心文档覆盖仍为 NOT STARTED。
 
 ## 12. 最终状态
 
