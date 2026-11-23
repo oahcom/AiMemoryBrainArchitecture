@@ -72,11 +72,11 @@ name: Existing gates
 # a directory of exemptions.
 #
 # ---------------------------------------------------------------------------
-# ONE RUNNER MEANS SERIALISATION. The single `concurrency` group below is not
-# about cancelling superseded runs; it exists so two runs cannot interleave on a
-# runner that can only hold one job. Jobs inside a run queue on the runner by
-# themselves. Every job also carries a `timeout-minutes`, because a wedged job on
-# a one-runner repository blocks every other workflow in the repository.
+# ONE RUNNER MEANS SERIALISATION. This repository has one self-hosted runner;
+# GitHub may schedule eligible jobs concurrently, but only one can execute at
+# a time and the rest wait for runner capacity. No workflow-level concurrency
+# group is needed for that serialization. Every job carries timeout-minutes:
+# a wedged job on the sole runner otherwise blocks every other workflow.
 
 on:
   push:
@@ -85,14 +85,6 @@ on:
 
 permissions:
   contents: read
-
-concurrency:
-  # Fixed group name: runs queue behind each other instead of overlapping on the
-  # single runner. GitHub keeps one pending run per group and cancels older
-  # pending ones, so a burst of pushes collapses to "the current run plus the
-  # newest one".
-  group: existing-gates-self-hosted
-  cancel-in-progress: false
 
 jobs:
   protocol-index:
