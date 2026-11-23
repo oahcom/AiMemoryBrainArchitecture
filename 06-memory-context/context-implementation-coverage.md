@@ -1,3 +1,30 @@
+---
+document_metadata:
+  domain: memory-context
+  role: work-record
+
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-23"
+      last_verification_note: "Row 67 was re-measured on 13c6d95: `cargo test -p memory-context --all-targets` is 11 targets / 187 passed / 0 failed, and `grep` over `observability.rs` now returns the §9.4 groups 4-7 fields that were previously absent."
+    usage_status: Active
+    modification_status: Modified
+
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Informative
+
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
+---
+
 # Memory Context Implementation Coverage
 
 - Work Item: GAP-02 / GAP-BASELINE-001
@@ -64,7 +91,7 @@ The Rust crate remains private/staged. Round 6 added a pure in-memory `ChangeSet
 | Candidate-set selection optimizes marginal coverage under vector constraints | context-budget-and-sufficiency.md §5 | IMPLEMENTED — `select_candidates` in `selector.rs` filters hard constraints (authorization, Forget, temporal validity, environment match, required evidence) before ranking, so a failing candidate lands in `excluded` with the name of the first unmet constraint and consumes no budget; each pick scores only dimensions not already covered, with penalties for redundancy, byte cost and uncertainty, and selection stops when the best marginal score is not positive. 15 tests including `hard_constraint_violation_excludes_candidate_before_ranking`, `excluded_candidates_consume_no_budget`, `subsequent_selection_scores_only_new_dimensions`, `selection_is_deterministic_across_repeated_calls` | 本线程可做 |
 | Compaction preserves lineage, qualifiers and conflicts | context-budget-and-sufficiency.md §5, §9.3 | NOT IMPLEMENTED — the sufficiency evaluator landed; no Compaction model or fidelity validator exists | D |
 | Sufficiency outcomes and safe overflow degradation | context-budget-and-sufficiency.md §6–§7 | PARTIAL — four exclusive outcomes and mandatory/advisory/Unknown decision rule are executable; no overflow planner or budget degradation workflow | 本线程可做 |
-| Budget/sufficiency observability | context-budget-and-sufficiency.md §8–§9.4 | PARTIAL — `build_budget_sufficiency_report` in `observability.rs` projects the existing assessment into `BudgetSufficiencyReport` (utilization, per-dimension omissions, exclusion counts keyed by the first unmet constraint, the exact ContextVersion, the per-partition watermark vector and the outcome classification), and is privacy-reduced as §9.4 asks (requirement profile to a SHA-256 digest; requirement ids and `Unknown { reason }` text dropped; excluded candidates contribute a label and a count, never an id). **Four of the seven §9.4 fields are still absent and this row was previously recorded as IMPLEMENTED in error:** §9.4 requires the report to also carry (4) canonical commit/fence references and the current PermissionEpoch decision, (5) the budget vector — token estimate and profile, bytes, entries, relation/provenance bounds, latency and CPU — (6) compacted source membership with validation and digest profiles, and (7) blocked/deferred refs without leaking unauthorized existence or counts. `grep` over `observability.rs` for `canonical_commit`, `fence`, `permission_epoch`, `token`, `compacted`, `validation_profile`, `digest_profile`, `blocked` and `deferred` returns only one hit, and it is a comment quoting §9.4. `sufficiency_report.rs` supplies these four as data fields (`canonical_commit_ref`, `forget_fence_ref`, `permission_epoch`, `budget`+`budget_usage`+`token_estimate_profile`, `rendered_bytes`, `entries`, `compacted_sources`, `validation_profile`, `digest_profile`, `blocked`, `deferred`); what remains is wiring the projection to consume them. Tests `the_report_carries_the_four_fields_observability_does_not_model`, `the_report_is_identical_across_two_runs_over_the_same_inputs`, `exclusion_counts_sum_to_the_number_of_excluded_candidates` | 本线程可做 |
+| Budget/sufficiency observability | context-budget-and-sufficiency.md §8–§9.4 | IMPLEMENTED — `build_budget_sufficiency_report` in `observability.rs` consumes the domain `SufficiencyReport` together with the budget, usage, exclusions, assessment and watermark vector, and projects them into `BudgetSufficiencyReport` carrying all seven §9.4 groups: (1) utilization and per-dimension omissions keyed by the first unmet constraint, (2) the exact ContextVersion and the requirement-profile digest, (3) exclusion counts by constraint, (4) `canonical_commit_ref`, `forget_fence_ref` and `permission_epoch`, (5) `budget` + `budget_usage` + `token_estimate_profile` + `rendered_bytes` + `entries`, (6) `compacted_sources` + `validation_profile` + `digest_profile`, and (7) `blocked` / `deferred` as `BlockedRefs`. Privacy reduction holds as §9.4 asks: the requirement profile is reduced to a SHA-256 digest, requirement ids and `Unknown { reason }` text are dropped, excluded candidates contribute a label and a count and never an id, `BlockedRefs` exposes no total-count accessor (only `visible()`, `has_redactions()` and `disclosed_count()`), and each unmeasured dimension keeps `None` rather than being defaulted to zero — `budget: None` means no vector was supplied, `budget_usage: None` means not measured, and `sufficiency_currentness_established` defaults `false` so "not established" is never reported as "established absence". Tests `the_report_carries_all_four_section_9_4_field_groups`, `blocked_and_deferred_never_disclose_unauthorized_counts`, `budget_usage_none_is_distinct_from_measured_zero`, `unestablished_currentness_is_not_reported_as_established_absence`, `the_report_is_identical_across_two_runs_over_the_same_inputs`, `exclusion_counts_sum_to_the_number_of_excluded_candidates` | 本线程可做 |
 | ChangeSet common envelope, preconditions and all-or-nothing staging | context-edit-operations.md §1 | IMPLEMENTED — `ChangeSet`/`apply_change_set` bind `base_version`, reject stale snapshots and apply to a private clone; tests `stale_base_is_rejected_without_changing_snapshot`, `any_failing_operation_discards_the_entire_staged_set`, `change_set_rejects_duplicate_operation_ids`; in-memory only, durable T1 is separate | 本线程可做 |
 | Add exact canonical reference with lineage and duplicate prevention | context-edit-operations.md §2 Add | PARTIAL — candidate intake still validates lineage and duplicate membership; no dedicated Add operation or canonical-reference adapter (Reconcile can materialize a desired new membership through Replace without a predecessor) | D |
 | Update only Context metadata/rendering, not canonical Memory | context-edit-operations.md §2 Update | IMPLEMENTED — `ChangeSetOperation::Update` changes the Context entry only and rejects entry/memory/version identity changes; test `update_preserves_memory_version_and_rejects_version_changes` | 本线程可做 |
