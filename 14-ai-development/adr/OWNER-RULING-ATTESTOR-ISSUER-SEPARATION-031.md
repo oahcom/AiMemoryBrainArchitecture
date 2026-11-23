@@ -268,6 +268,52 @@ That implementation is **not** being reverted, and it is **not** being declared
 normatively confirmed. It stands pending the resolution in §7.4. No code change
 is authorised by this section.
 
+### 7.3a The implementation is already coupled, and that is not an approval
+
+Reverting the `:1549` guard from `I_DEV_BASELINE_ATTESTOR` to
+`I_DEV_BASELINE_ISSUER` fails nine existing tests. Measured on `5283e98e` with
+that one line changed, `cargo test -p memory-compiler --lib`:
+
+```text
+test result: FAILED. 110 passed; 9 failed; 0 ignored; 0 measured; 0 filtered out
+```
+
+```text
+admission::tests::attestor_and_decision_ids_are_separate_namespaces
+admission::tests::attestor_issuance_accepts_an_identical_replay
+admission::tests::attestor_validator_accepts_issued_attestation
+admission::tests::attestor_validator_rejects_expected_subject_digest_mismatch
+admission::tests::attestor_validator_rejects_issued_at_reference_mismatch
+admission::tests::attestor_validator_rejects_malformed_issued_at
+admission::tests::attestor_validator_rejects_malformed_subject_digest
+admission::tests::attestor_validator_rejects_nonempty_signature
+admission::tests::attestor_validator_rejects_subject_digest_reference_mismatch
+```
+
+These failures are valid fixtures being rejected by the changed guard,
+demonstrating that the guard's position is indirectly constrained by existing
+test coverage. This is evidence of implementation coupling, not evidence of I
+Owner approval or resolution of the canonical conflict.
+
+The distinction is worth stating because it is the one this document is most
+likely to be misread on:
+
+| | What it shows |
+|---|---|
+| nine tests fail on the revert | the current position is load-bearing for existing fixtures |
+| **does not show** | that the position was ever approved, or that the conflict is settled |
+
+An implementation that is expensive to reverse is still an unapproved
+implementation. Recording the cost of reversal is not a reason to accept it; it
+is a reason not to reverse it casually while §7.4 is open.
+
+The reverse does not hold either. Nine tests passing under the current guard does
+not mean the guard is right — `attestor_validator_rejects_unsupported_issuer`
+(`admission.rs:2839`) writes `'someone-else'` into the row, which **either**
+baseline constant refuses, so it cannot distinguish which constant the guard
+compares against. `#767` adds the test that closes that gap; it is held under
+§7.4 for the same reason this section exists.
+
 ### 7.4 The open question, and who answers it
 
 A layered reading has been proposed — that `same I issuer allowlist` names the
