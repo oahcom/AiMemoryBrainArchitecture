@@ -2107,8 +2107,8 @@ def main() -> int:
             changed_paths(root, args.require_changed) if incremental else (set(), set())
         )
     except ValueError as exc:
-        print(f"NOT_APPLICABLE: incremental changed-path selection failed: {exc}", file=sys.stderr)
-        return 2
+        print(f"ERROR: incremental changed-path selection failed: {exc}", file=sys.stderr)
+        return 1
     # The emptiness test uses every diff status, including deletions. A PR that
     # only deletes files did change something, so the increment ran and gets a
     # verdict; only a genuinely empty diff (same-HEAD ref) is NOT_APPLICABLE.
@@ -2118,7 +2118,9 @@ def main() -> int:
             "no incremental verification was performed",
             file=sys.stderr,
         )
-        return 2
+        # Exit 3 is reserved for a genuinely empty increment. Exit 2 remains
+        # the whole-tree INCOMPLETE verdict; selection failures return 1 above.
+        return 3
     # A non-empty diff whose paths all fall outside `requirable` (deletions, or
     # renames out of the governed set) is a real, passed increment. It must not
     # borrow the ordinary PASS wording, or the vacuous case would be invisible.
