@@ -909,9 +909,25 @@ def run_changed_paths() -> None:
         readme.write_text("# Updated README\n", encoding="utf-8")
         _git(root, "add", "-A")
         _git(root, "commit", "-q", "-m", "delete output and modify README")
-        expect_gate(
+        import contextlib
+        import io
+
+        captured_stdout = io.StringIO()
+        captured_stderr = io.StringIO()
+        with contextlib.redirect_stdout(captured_stdout), contextlib.redirect_stderr(captured_stderr):
+            code = run_gate(root, "--require-changed", base)
+
+        output = captured_stdout.getvalue() + captured_stderr.getvalue()
+        deletion_only_message = "the increment contained only deletions"
+
+        record(
             "T77 deletion plus Markdown modification remains applicable",
-            root, 0, "--require-changed", base,
+            code == 0 and deletion_only_message not in output,
+            (
+                f"  gate returned {code}, expected 0; "
+                f"deletion-only message present: "
+                f"{deletion_only_message in output}"
+            ),
         )
 
     # T78: a deletion combined with a code-only modification is not
@@ -933,9 +949,25 @@ def run_changed_paths() -> None:
         code.write_text("// modified\n", encoding="utf-8")
         _git(root, "add", "-A")
         _git(root, "commit", "-q", "-m", "delete output and modify code")
-        expect_gate(
+        import contextlib
+        import io
+
+        captured_stdout = io.StringIO()
+        captured_stderr = io.StringIO()
+        with contextlib.redirect_stdout(captured_stdout), contextlib.redirect_stderr(captured_stderr):
+            code = run_gate(root, "--require-changed", base)
+
+        output = captured_stdout.getvalue() + captured_stderr.getvalue()
+        deletion_only_message = "the increment contained only deletions"
+
+        record(
             "T78 deletion plus code-only modification remains applicable",
-            root, 0, "--require-changed", base,
+            code == 0 and deletion_only_message not in output,
+            (
+                f"  gate returned {code}, expected 0; "
+                f"deletion-only message present: "
+                f"{deletion_only_message in output}"
+            ),
         )
 
     # T80: a deletion must not let a newly added unclassified governed
@@ -961,16 +993,27 @@ def run_changed_paths() -> None:
         _git(root, "add", "-A")
         _git(root, "commit", "-q", "-m", "delete scratch and add unclassified document")
 
+        import contextlib
+        import io
+
         captured_stdout = io.StringIO()
         captured_stderr = io.StringIO()
         with contextlib.redirect_stdout(captured_stdout), contextlib.redirect_stderr(captured_stderr):
             code = run_gate(root, "--require-changed", base)
 
         output = captured_stdout.getvalue() + captured_stderr.getvalue()
+        expected_error = (
+            "DM-01 missing document_metadata block: "
+            "00-governance/unclassified-new.md"
+        )
         record(
             "T80 deletion plus unclassified governed document still fails DM-01",
-            code == 1 and "DM-01" in output,
-            f"  gate returned {code}, expected 1; DM-01 present: {'DM-01' in output}",
+            code == 1 and expected_error in output,
+            (
+                f"  gate returned {code}, expected 1; "
+                f"expected DM-01 diagnostic present: "
+                f"{expected_error in output}"
+            ),
         )
 
 
