@@ -24,7 +24,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-23"
-      last_verification_note: "Measured on main @ 82e9da113e on 2026-11-23: I_DEV_BASELINE_ATTESTOR remains present and #747 remains merged. The controlling issuer-policy interpretation is the I Owner-proxy Answer 2 in Issue #763 comment #7097007415: two distinct identifiers under one I-controlled trust-authorization policy. The earlier reliance on GAP-18 §5 as authority for issuer separation is withdrawn; §8 is retained as implementation reasoning, not as the source of the issuer-policy decision. The §2.3 dated clarification remains pending its document PR."
+      last_verification_note: "Verified on 2026-11-23: the dated §2.3 clarification was merged in PR #802 (merge commit 3046c8488ae8); the original 2026-11-21 decision text and date remain unchanged."
     usage_status: Active
     modification_status: Pending-Reapproval
     supersession:
@@ -332,13 +332,15 @@ The ruling is that distinct issuer identifiers are permitted under one I-control
 
 The earlier characterization in this section that the layered reading was “plausible and unapproved” is withdrawn. The layered reading is now authorized by the I Owner-proxy ruling cited above. The prior statement that only the I Owner may answer the question is also no longer operative: the question has been answered in that ruling.
 
-The I Owner-proxy ruling does not amend the text of `I-OWNER-DECISION-001 §2.3` by comment. That document must retain its original 2026-11-21 decision text and receive a dated clarification beneath the existing §2.3 paragraph. The clarification must cite Issue #763 comment #7097007415. Until that document amendment merges, §2.3 remains textually unamended; the interpretation governing this decision is the one recorded in the cited Owner-proxy ruling.
+The I Owner-proxy ruling does not amend the text of `I-OWNER-DECISION-001 §2.3` by comment. That document must retain its original 2026-11-21 decision text and receive a dated clarification beneath the existing §2.3 paragraph. The clarification must cite Issue #763 comment #7097007415. At the time this ruling was recorded, the §2.3 amendment had not yet merged and §2.3 remained textually unamended. That condition was satisfied when PR #802 merged as `3046c8488ae8` on 2026-11-23; the dated clarification was verified in the merged document.
 
 This is a section-scoped amendment to the application of `OWNER-DECISION-001 §2.3`, not supersession of the entire Owner Decision document. The relationship is recorded here in the decision text. The `supersedes` metadata remains empty because DM-13 treats each `supersedes` entry as a repository-relative file path and therefore cannot represent a section-level target without declaring the entire source document superseded.
 
+The controlling issuer-policy decision is recorded in `14-ai-development/work-items/I-OWNER-DECISION-AUTHORIZATION-DECISION-001.md`, §2.3, dated 2026-11-21; this ruling records the narrower implementation invariant and does not supersede or amend that decision.
+
 | Item | State |
 |---|---|
-| `canonical_conflict_status` | `Under-Review` until the dated §2.3 clarification merges and is verified |
+| `canonical_conflict_status` | `Resolved` — the dated §2.3 clarification was merged and verified in PR #802 (`3046c8488ae8`) on 2026-11-23 |
 | `#747` implementation | stands, normatively confirmed by the I Owner-proxy ruling in Issue #763 comment #7097007415 |
 | `OWNER-DECISION-001 §2.3` | original 2026-11-21 text retained; dated clarification required by the 2026-11-23 ruling |
 | New issuer identifiers or allowlist members | exactly two identifiers are authorized, one per record family; no third identifier, per-call-site substitute, or expanded allowlist without a new ruling |
