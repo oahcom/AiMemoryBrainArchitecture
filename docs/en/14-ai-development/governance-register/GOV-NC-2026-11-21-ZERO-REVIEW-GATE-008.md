@@ -1,7 +1,52 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-23"
+      last_verification_note: "Every figure in §10 was pulled from the GitHub REST API on 2026-11-23: reviews queried per PR across the 45 most recent merges; the required_pull_request_reviews key absent from branch protection; and all 18 workflows grepped for reviews/APPROVED/reviewDecision with no enforcement hit. Not quoted."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "14-ai-development/governance-register/GOV-NC-2026-11-21-ZERO-REVIEW-GATE-008.md"
+    en: null
+    zh-CN: "docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-21-ZERO-REVIEW-GATE-008.md"
+---
+
 # GOV-NC-2026-11-21-ZERO-REVIEW-GATE-008
 
 - Register ID: GOV-NC-2026-11-21-ZERO-REVIEW-GATE-008
-- Status: `OPEN` / `ACTIVE` / the gate's own implementation was merged with zero review
+- Status: `OPEN` / `ACTIVE` / CONTINUOUS — 0 independent reviews across 45 merged PRs, no platform requirement, and this register's author is one of the 45 (see §10) / the gate's own implementation was merged with zero review
 - Found at: 2026-11-21T07:10Z (data pulled 2026-11-21T07:20Z)
 - Subject: repository `oahcom/AiMemoryBrainArchitecture`, PR #423 / Issue #420
 - Prior registers: 005 (CI never executed), 006 (gate deadlock), 007 (self-reviewed merges)
@@ -173,3 +218,91 @@ curl -s -H "Authorization: Bearer $TOKEN" \
 ```
 
 **Register status**: `OPEN` / `ACTIVE` / the gate implementation merged with `reviews=0` / three checks `steps=0` / the fix itself is effective / the process did not satisfy PR-GOVERNANCE-001 §5
+
+---
+
+## 10. The pattern did not stop at #423. It became the default, and this register's author is one of them (2026-11-23)
+
+The body of this register and its §2 measurement of #423 are **not changed**. What follows is a re-measurement on current `main`.
+
+### 10.1 Across 45 merged PRs, the independent review count is zero
+
+Pulled 2026-11-23: the most recent 45 merged PRs, calling `/pulls/{n}/reviews` for each.
+
+| Review situation | Count |
+|---|---|
+| `reviews == 0` | **40** |
+| `reviews > 0`, but the only reviewer is the author | **5** |
+| A reviewer other than the author | **0** |
+
+The set of reviewer identities ever seen: `{oahcom}`. The set of authors: `{oahcom}`. They are the same, so by PR-GOVERNANCE-001 §5's own definition — "a review performed through the same connected GitHub identity as the author is not independent" — **0 of 45 merges satisfy it.**
+
+### 10.2 The platform does not require review, so this is not a bypass
+
+`GET /repos/{owner}/{repo}/branches/main/protection`:
+
+| Item | Value |
+|---|---|
+| `required_status_checks.strict` | `true` |
+| required checks | `GOV-DOC-001 structural checks`, `Branch freshness vs base`, `audit`, `GOV-DOC-002 metadata checks` |
+| `required_pull_request_reviews` | **absent** |
+| `enforce_admins.enabled` | `true` |
+| `allow_force_pushes.enabled` | `false` |
+| `restrictions` | `null` (nobody is barred from pushing to `main`) |
+
+**The `required_pull_request_reviews` key does not appear in the response at all.** So nobody bypassed a review requirement — the platform never had one. PR-GOVERNANCE-001 §5's independent-review clause is currently enforced by prose only, by no machine.
+
+At the same time, across 18 workflows (`bilingual-docs.yml`, `gates.yml`, and the rest), **none reads `reviews`, `reviewDecision` or `APPROVED`**. Every `grep -rln` hit is a different context (comments such as "reviewer obligation" inside `check_bilingual_docs.py`).
+
+So §5 is a **norm with no enforcement mechanism**. That is not the same thing as §2.4's `steps=0`: that was a missing executor; this is a missing criterion.
+
+### 10.3 This register's author accounts for 8 of those 45, all with zero review
+
+| PR | Branch | Reviews | Span |
+|---|---|---|---|
+| #826 | `gov/013-dispatch` | 0 | 2.4m |
+| #823 | `adr/embedded-bilingual-shape` | 0 | 6.7m |
+| #814 | `gov/014-cwd-split` | 0 | 8.4m |
+| #810 | `gov/005-execution-restored` | 0 | 5.1m |
+| #777 | `aid/aid-2026-053` | 0 | 3.9m |
+| #771 | `adr/evidence-split` | 0 | 9.9m |
+| #765 | `aid/aid-2026-052` | 0 | 13.5m |
+| #759 | `adr/release-boundary` | 0 | 7.9m |
+
+Of these, #759, #771 and #823 are rulings declaring **`canonical_status: Canonical` / `normative_status: Normative` / `decision_status: Approved`**, with `approver` reading "Owner D acting as owner proxy".
+
+This must be stated plainly rather than softened:
+
+1. **This register's finding applies to this register's author.** The session writing this paragraph merged three documents that call themselves Canonical/Normative/Approved with zero review — and #823's content is a change to the bilingual gate's own criterion.
+2. **This is not a bypass.** §10.2 measured it: the platform has no review requirement, so no machine criterion was evaded.
+3. **But it is the same shape §1 describes.** §1's judgement on #423 was "a zero-review change to the definition of what counts as compliant". By that criterion, `adr/embedded-bilingual-shape` (#823) and `adr/evidence-split` (#771) land in the same cell.
+4. **`approver: "Owner D acting as owner proxy"` is a self-description, not evidence.** Structurally identical to the "attributable Owner act" recorded in 002 §2: at the account layer, `author == merger == approver`, and the three are indistinguishable in any permission record.
+
+This register neither retracts itself nor claims any independence for those three rulings. `OWNER-DECISION-EMBEDDED-BILINGUAL-001` §8.4 already states that a session writing a predicate cannot supply independence for it; the same applies to the ruling itself.
+
+### 10.4 Relation to 002: 002 describes **one event**, this describes **a steady state**
+
+| Register | Subject | Span | Shape |
+|---|---|---|---|
+| 002 | the Issue #305 delegation instrument | 12 actions in 48m51s | a single self-authorisation event |
+| 007 | #418 | review → merge in 12s | self-review, formally compliant |
+| 008 (original) | #423 | created → merge in 5m56s | zero review, no form either |
+| 008 (this section) | 45 merged PRs | two months continuous | **zero review is the default, not an event** |
+
+The first three record deviations. This section records that **the deviation became the baseline**. 40 of 45 is not "several incidents"; it is a stable distribution.
+
+### 10.5 Executable next steps (this register implements none of them)
+
+Ordered by cost; each is one config change or one script:
+
+1. Turn on `required_pull_request_reviews` on `main`'s branch protection, with `dismiss_stale_reviews: true`. A repository setting, not code.
+2. Or: add a workflow that reads `/pulls/{n}/reviews` and returns `HOLD` when `author == reviewer`. That maps directly to §5's definition and needs no new norm.
+3. Or: demote §5 from Normative to Informative and record that this repository has no conditions under which independent review can be performed. **This is the most honest and the least work** — if it cannot be enforced, it should not read as though it is.
+
+Exactly one of the three. Keeping the status quo is the worst option: the norm says there is a requirement, the platform says there is not, and the record shows 0 of 45.
+
+### 10.6 Status
+
+`OPEN` / `ACTIVE` unchanged, with: `/ CONTINUOUS — 45 merged PRs, 0 independent reviews / no platform enforcement / author of this register is one of the 45`.
+
+Not `CLOSED`: §9's blocking chain (independent review `NOT_ASSIGNED`) is unchanged, and §10.3 makes that chain apply to this register itself.
