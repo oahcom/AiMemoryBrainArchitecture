@@ -34,11 +34,26 @@ document_metadata:
       supersession_reason: null
 
   authority:
-    canonical_status: Candidate
-    canonical_scope: null
+    canonical_status: Canonical
+    canonical_scope: "The I Owner-proxy authorization contract governing authorization-decision and attestor references, including the two permitted development-baseline issuer identifiers and the separate deterministic encodings, records, and validators for the two record families."
     canonical_scope_id: domain-model/authorization-decision-and-attestor-reference-contract
-    canonical_scope_keywords: []
-    canonical_conflict_status: Under-Review
+    canonical_scope_keywords:
+      - authorization-decision
+      - attestor-reference
+      - attestation-subject-v1
+      - issuer-allowlist
+      - i-owner-proxy
+      - i-attestor-proxy
+    canonical_conflict_status: Resolved
+    canonical_conflict_resolution:
+      resolution_decision_id: GOV-CANON-2026-002
+      resolved_date: "2026-11-23"
+      selected_document: "14-ai-development/work-items/I-OWNER-DECISION-AUTHORIZATION-DECISION-001.md"
+      resolution_evidence:
+        - "Owner Decision #001 §2.3, original decision dated 2026-11-21: separate AttestationSubjectV1 encoding, record, and validator; same I issuer allowlist."
+        - "I Owner-proxy ruling, Issue #763 comment #7097007415: i-owner-proxy/dev-baseline-v1 for authorization-decision records and i-attestor-proxy/dev-baseline-v1 for attestation records."
+        - "PR #802 / merge commit 3046c848: dated clarification appended to §2.3 without replacing the original wording or changing the original decision date."
+        - "RULING-031 §7.4: explicitly records that the Owner-proxy interpretation controls and that the section-scoped amendment does not supersede the entire Owner Decision."
     normative_status: Normative
 ---
 
