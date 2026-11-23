@@ -280,12 +280,12 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 **H-CONFIRM-001 — Envelope / Request Identity**
 - MODULE：BMCP / H
 - ISSUE_OR_ADR：H message-envelope-and-versioning.md；protocol-overview.md
-- DECISION_REQUIRED：BMCP 规范全称；message_id 是否就是 Request Identity 或需独立 request_id；精确 Response Correlation；Version/Type/Payload Schema/Idempotency 必填性；Operation Registry 和未知操作行为。
-- CURRENT_FACTS：H Envelope 为 CANDIDATE；规范术语表已确定为 “Brain Memory Context Protocol”；初始派发中的 “Brain Memory Control Protocol” 已纠正为非规范写法。
+- DECISION_REQUIRED：message_id 是否就是 Request Identity，还是需要独立 request_id；精确 Response Correlation；Version/Type/Payload Schema/Idempotency 的必填性；Operation Registry 和未知操作行为。
+- CURRENT_FACTS：`00-governance/terminology.md` 已确定 BMCP 的规范全称为 Brain Memory Context Protocol。H Envelope 仍为 CANDIDATE；当前候选方案使用 message_id，尚未定义独立 request_id。
 - H_OWNED_CONTRACTS：Envelope、Versioning 和 Wire 字段名归 H。
 - CROSS_MODULE_CONFLICT：C Request/Attempt ID、H Message ID、领域 Operation ID 不可互换。
-- OPTIONS：保留当前全称和 message_id；或发布独立 Command ID 及显式映射。
-- RECOMMENDED_OPTION：保留 H 现有权属；ID 保持区分；冻结前发布映射。
+- OPTIONS：(A) 使用 message_id 作为 Request Identity，并将 Response Causation 绑定到该 ID；(B) 引入独立的 request_id/Command Identity，并明确其与 message_id 的映射。
+- RECOMMENDED_OPTION：逻辑身份概念已决定保持区分：message_id、correlation_id、causation_id 和操作级幂等性（operation-level idempotency）。Operation Registry、各 Operation Family 的字段必填性，以及精确 Request/Response Schema 仍为 OPEN。H 继续负责其规范权属范围内的 Envelope 契约，并在冻结前发布明确映射。
 - MEMORY_COMPILER_IMPACT：E Receipt/Idempotency Identity 保持独立。
 - AGENT_INTEGRATION_IMPACT：C Request/Attempt Mapping 必须明确。
 - D_I_IMPACT：权威不变；Identity Claims 仍由 D/I 校验。
@@ -299,7 +299,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - MODULE：BMCP / H
 - ISSUE_OR_ADR：H Envelope 和 Strict JSON Reference
 - DECISION_REQUIRED：Transport Framing、Byte Decode、Canonicalization/Integrity 与 Decode 后 Protocol Parse 的精确拆分；重复 Key、无效 UTF-8/Unicode、深度/大小、Critical Extension 规则。
-- CURRENT_FACTS：Strict Parser 是参考模型，不是生产 Transport；本文 Semantic Parse 仅接受解码认证 Envelope。
+- CURRENT_FACTS：RFC 8785 JCS 已选定为逻辑 JSON Canonicalization 基础。精确 Signed-object Bytes、Digest Exclusion、Signature Suite、Key Lifecycle 和 I Crypto-profile Acceptance 仍为 OPEN。Strict Parser 是参考模型，不是生产 Transport；本文 Semantic Parse 仅接受已经解码且经过认证的 Envelope。
 - H_OWNED_CONTRACTS：原始 Wire Decode 和 Envelope 结构校验。
 - CROSS_MODULE_CONFLICT：H 字节解码/Transport 职责不得转入 BMCP 语义层。
 - OPTIONS：H 管原始字节和 Envelope 校验；BMCP 管 Operation Resolution/Request Normalization。
@@ -317,7 +317,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - MODULE：BMCP / H
 - ISSUE_OR_ADR：H Delivery/ACK 和 Forget ACK 契约
 - DECISION_REQUIRED：ACK Family、精确 Evidence Boundary、持久化点、Correlation Tuple、重复/Replay 处理、Retry Horizon 和 Consumer。
-- CURRENT_FACTS：H 区分 Delivery Lifecycle、Forget Action ACK、Applied；ACK 丢失在 Reconciliation 前为 Unknown。
+- CURRENT_FACTS：ACK Evidence 必须在发送之前被持久记录，并支持幂等重放；缺失 ACK 保持 UNKNOWN。H 区分 Delivery Lifecycle、Forget Action ACK 和 Applied。物理持久化拓扑/Adapter 及 Storage Acceptance 仍为 OPEN。
 - H_OWNED_CONTRACTS：ACK Wire/Transport 编码和重传行为。
 - CROSS_MODULE_CONFLICT：通用 ACK 不得暗示执行、持久化提交、Applied 或 Forget 完成。
 - OPTIONS：保留独立 ACK Family，每个只表示一个有限观察。
@@ -335,7 +335,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - MODULE：BMCP / H
 - ISSUE_OR_ADR：H Envelope 和 Conformance Matrix
 - DECISION_REQUIRED：Validator 分层、规范 Error Enum、Response Schema、Retryability/脱敏；映射十二类语义错误，不能合并 Authentication/Authorization/Validation/Conflict/Unknown。
-- CURRENT_FACTS：H Taxonomy 是候选；请求通用名称并非 H Code 全部现有值。
+- CURRENT_FACTS：Fail-closed Validation Order 和不同逻辑 Error Classes 已决定。精确 Enum 拼写、Wire Schema、Retry Profile 和 Owner-specific Mapping 仍为 OPEN；当前 H Taxonomy 在 Wire 层面仍为 CANDIDATE。请求中使用的通用错误名称并不意味着这些名称已经全部成为 H 当前存在的 Wire Code。
 - H_OWNED_CONTRACTS：Wire/Protocol Validator 和 Error Serialization。
 - CROSS_MODULE_CONFLICT：领域 Validator 和 I Authorization 必须保持 Owner 所有。
 - OPTIONS：保留 H 具体 Code；仅在版本化映射无损时添加 Alias。
@@ -403,7 +403,7 @@ H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体
 - H-CONFIRM-003：ACK Evidence 必须先持久记录再发送，并支持幂等重放；缺失 ACK 保持 UNKNOWN；物理持久化拓扑/Adapter 和 Storage Acceptance 仍 OPEN。
 - H-CONFIRM-004：Fail-closed Validation Order 和不同逻辑 Error Class 已决定；精确 Enum 拼写、Wire Schema、Retry Profile 和 Owner-specific Mapping 仍 OPEN。
 
-这些逻辑决议不冻结 Schema、Crypto Profile、Persistence Topology、Error Enum，也不证明 H 七份规范核心文件完成、跨 Owner Consumer Acceptance 或 Runtime/Conformance 闭合。
+此前较宽泛的接受性表述，现已由本次范围澄清取代。H 仍然是精确规范性 Wire 工件的 Owner；本节不冻结任何 Schema、Crypto Profile、Persistence Topology 或 Error Enum。
 
 ### 7.2 Owner 决议请求
 
