@@ -20,7 +20,7 @@ document_metadata:
       last_verified_date: null
       last_verification_note: "This work record documents a Provenance reference-validation gap; no approval or independent verification is claimed."
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Modified
     supersession:
       supersedes: []
       supersession_reason: null
