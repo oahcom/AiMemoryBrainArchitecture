@@ -472,7 +472,7 @@ The earlier broad acceptance wording is superseded by this scope correction. H r
 | Fact/Claim semantics | RESOLVED — Option A + I1 | Merged Owner decision PR #446; Blob `d59756a8eb454480804c482ca03c68345ab5abf2` |
 | Fact/Claim field/wire schema | CANDIDATE / NOT FROZEN | B/D/E/F/G/H/I consumer artifacts must be version-pinned and reviewed; no payload fields approved |
 | H-CONFIRM-001..004 | PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN | Logical semantics decided with INDEPENDENCE_UNVERIFIABLE; exact registry/schema/crypto/Storage/error artifacts remain open |
-| BMCP-DR-002 | DECIDED_AT_AUTHORITY_BOUNDARY / CALLABLE_API_IDL_DEFERRED | D/I are authoritative; exact callable API/IDL/currentness vocabulary remains D/I-owned and open |
+| BMCP-DR-002 | DECIDED_AT_AUTHORITY_BOUNDARY / CALLABLE_API_IDL_SCHEMA_DEFERRED | D/I are authoritative; exact callable API/IDL/Schema/Crypto/Storage/Wire Mapping remains D/I/H-owned and open |
 | BMCP-DR-003 / MCP mapping | PARTIALLY_DECIDED — Issue #449 | MCP is C-owned Agent Adapter/Gateway; exact C/H operation mapping remains open |
 | BMCP Runtime / AT-01..AT-20 | NOT AUTHORIZED / NOT RUN | Issue #7 implementation binding remains deferred |
 
@@ -498,11 +498,38 @@ Every row is a future Runtime requirement. No test below was executed by this wo
 
 ### 8.1 Existing conformance evidence — bounded, not full-protocol PASS
 
-- Main `c138654c942dc93b5a36eccb2ff0e41452156429`: `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v` — **30 passed, 0 failed**, exit 0. This is the Applied Delivery Evidence conformance suite only.
+- Current main `6c5597a62ada7f56d1956b9c60409f329d2819c5`, test file blob `903764ab08a7d3dd17ba13f5c40e8c4129958bb5`: `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v` — **38 passed, 0 failed**, exit 0, reproduced on a clean clone. This is the Applied Delivery Evidence conformance suite only. The earlier `30 passed` figure was measured against test file blob `98242cc193a77b27d58b39353ccc031201992614` at `c138654c…` and `713774c3…`; it is superseded, not contradicted.
 - PR #436 (merged at `02f61194fd4e12993b4c83f7fac8382eee20f5d8`), source head `1ffed9ed127df98b2f823a66ec80ea43d08cb9dc`: `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/provider_outcome -p 'test_*.py' -v` — **10 run; 5 passed; 5 skipped; 0 failed**, exit 0. Skipped CPO-02/04/05/09/10 explicitly require Owner C's authoritative semantic validator. This is structural schema conformance only; it does not validate C semantics or cryptographic signatures.
 - PR #436's bilingual protocol index and provider_outcome test are now integrated into main. Its index still marks RecoveryJoin 1.0.2 schema/validator/test as not delivered; five semantic test methods remain skipped pending C's authoritative validator.
 - These results do not establish full BMCP conformance. The strict JSON parser is a reference model, not production transport. `tests/protocol_test.rs` and `crates/bmcp` are absent.
 - AT-01..AT-20 remain **PLANNED_NOT_RUN**. No Runtime repository/authorization exists in this architecture phase.
+
+The following Acceptance Tests (AT-01 through AT-20) define the expected behavioral coverage, ownership, preconditions, verification methods, dependencies, and current acceptance blockers. They are specification-level acceptance criteria, not evidence of completed test execution.
+
+| ID / Scenario | OWNER | PRECONDITION | EXPECTED_RESULT | TEST_METHOD | DEPENDENCY | ACCEPTANCE_STATUS |
+|---|---|---|---|---|---|---|
+| AT-01 | Valid request parse | H + BMCP | H decodes and authenticates the Envelope; version is supported; Operation is registered | One normalized Request; Parse has no side effects | Golden Envelope + Operation Schema | H Envelope/Registry | BLOCKED_BY_H_CONTRACT |
+| AT-02 | Invalid request parse | H | Envelope format is invalid / required fields are missing | Rejected before Execute; stable, redacted Error | Negative Envelope Vector | H Validator | BLOCKED_BY_H_CONTRACT |
+| AT-03 | Unsupported version | H | No common major version | VERSION_UNSUPPORTED; no downgrade or dispatch | Version Negotiation Matrix | H Version Contract | BLOCKED_BY_H_CONTRACT |
+| AT-04 | Missing parameters | H + Operation Owner | Required Payload fields are missing | Validation rejection; Service is not invoked | Per-Operation negative Schema Vector | H + Domain Schema | BLOCKED_BY_H_CONTRACT |
+| AT-05 | Unknown Operation | H | Family/Operation is not registered | Rejected before side effects | Negative Registry tests / Fuzz | H Registry | BLOCKED_BY_H_CONTRACT |
+| AT-06 | Unauthorized request | I + H | The authenticated Principal is denied by the current I Policy | Deny; protected services are not invoked; no cross-Scope information is disclosed | Negative Authorization integration tests | I API/Epoch + H Binding | BLOCKED_BY_OWNER_CONTRACT |
+| AT-07 | Request/Response correlation | H | Request has message_id/correlation_id | Response Causation references the Request; Correlation is preserved | Multi-message Round-trip | H Request Identity | BLOCKED_BY_H_CONTRACT |
+| AT-08 | Successful execution | Domain Owner + BMCP | Parse/validation/authorization pass; Owner returns a successful Receipt | Response contains the exact Owner Result; ACK remains independent | Service Contract integration tests | E/D/G API | BLOCKED_BY_OWNER_CONTRACT |
+| AT-09 | Failed execution | Domain Owner + H | Owner returns a definitive failure | Failure is preserved; success is not fabricated | Injected Service Fault | Owner Error + H Mapping | BLOCKED_BY_H_CONTRACT |
+| AT-10 | Timeout | Owner + H | Timeout occurs potentially before or after side effects | UNKNOWN until Owner Reconciliation; same Key is used | Crash/Timeout at each boundary | Owner Lookup/Reconcile | BLOCKED_BY_OWNER_CONTRACT |
+| AT-11 | ACK Receipt | H | A valid ACK is received for a declared boundary | Only that boundary is recorded; execution/persistence is not inferred | ACK Schema/Consumer | H ACK | BLOCKED_BY_H_CONTRACT |
+| AT-12 | Lost ACK | H + Owner | Side effects may have completed; ACK/Response is lost | UNKNOWN; Reconcile using the same identity; no blind retry | Network Fault + Journal Reconcile | H ACK + Owner Idempotency | BLOCKED_BY_H_CONTRACT |
+| AT-13 | Duplicate Request | Owner + H | Same idempotency identity and digest | Original result is returned; no duplicate side effects | Concurrent Duplicate/Replay | Owner Idempotency | BLOCKED_BY_OWNER_CONTRACT |
+| AT-14 | Duplicate ACK | H + Consumer | Same ACK ID/Digest, followed by the same ID with a different Digest | Replay is idempotent; changed digest causes Conflict; state is not changed | ACK Replay/Mutation Vector | H ACK + D/G/I Mapping | BLOCKED_BY_H_CONTRACT |
+| AT-15 | Validator rejection | H + Owner | Envelope/Schema/Critical Extension is invalid | Rejected at the correct layer; does not enter subsequent stages | Layered negative test suite | H Validator + Domain Schema | BLOCKED_BY_H_CONTRACT |
+| AT-16 | Forget Fence conflict | D + I + H | D Fence or I Epoch is Stale/Unknown | Fail-closed; protected Apply/Commit is not executed; suppression is preserved | Both Race orderings + authoritative service failure | D/I Currentness API | BLOCKED_BY_OWNER_CONTRACT |
+| AT-17 | Canonical Identity conflict | D (Fact/Claim additionally depends on B ADR) | Payload Ref does not match D Identity, or Fact/Claim remains unresolved | Reject/Quarantine; no identity is issued or converted | Forged/Mismatch Identity Vector | D API; B ADR | BLOCKED_BY_OWNER_CONTRACT |
+| AT-18 | Serialization stability | H | Exact Schema/Profile/Version | Semantically equivalent objects produce approved Canonical Bytes/Digest | Cross-language Golden Vector | H Canonicalization/Signature | BLOCKED_BY_H_CONTRACT |
+| AT-19 | Unicode | H | Valid/invalid UTF-8, supplementary characters, normalization boundaries, duplicate Keys | Valid Unicode is preserved according to the Profile; invalid/ambiguous forms are rejected | Cross-language Unicode/malformed-byte tests | H Wire Decode/Canonicalization | BLOCKED_BY_H_CONTRACT |
+| AT-20 | Request/Response consistency | H + Domain Owner | Request ID/Correlation/Operation/Idempotency are fixed | Response correlates to the exact Request and returns only the Owner Result | End-to-end Trace assertions | H Correlation + Owner Result | BLOCKED_BY_H_CONTRACT |
+
+BLOCKED_BY_H_CONTRACT means that an H-owned Wire/Transport/ACK/Validator decision or exact mapping is missing. BLOCKED_BY_OWNER_CONTRACT means that an authoritative Owner domain contract/API or ADR decision is missing. All tests remain NOT RUN until runtime authorization and an exact Build are available. Dependency labels are not test results.
 
 
 ## 9. Runtime engineering handoff / Issue #7 entry conditions
@@ -680,14 +707,14 @@ The 81 mirror findings and registration-history results are separate dimensions.
 - `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/recovery_cutoff -p 'test_*.py' -v`: FAIL, 31 run / 28 passed / 3 failed; exit 1. Failures: duplicate-member parser test expects the specific duplicate-key detail but validator returns generic `invalid JSON: ValueError`; schema/index test cannot find the exact `message_type` entry in protocol-index; valid full-message fixture fails six non-empty object constraints. These are current-main RecoveryJoin artifacts, not modified by this PR.
 - `python3 -m unittest discover -s 06-memory-context/reference-model -p 'test_g_applied_ledger.py' -v`: PASS, 8/8; exit 0.
 - `cargo test --offline -p memory-context --test e2e_negative_paths`: NOT COMPLETED; compilation failed with `Disk quota exceeded` / LLVM output-stream I/O errors; exit 101. No Rust G E2E PASS is claimed.
-- Independent semantic/bilingual review remains PENDING. The 20-row AT matrix is still itemized only in ZH; EN records aggregate `PLANNED_NOT_RUN`. This asymmetry is explicitly disclosed, not represented as parity.
+- Separate-session semantic/bilingual review has since been completed; prompt-pairing provenance remains unverified (`SESSION_SEPARATION_RECORDED_PROMPT_UNVERIFIED`). The 20-row AT matrix is still itemized only in ZH; EN records aggregate `PLANNED_NOT_RUN`. This asymmetry is explicitly disclosed, not represented as parity.
 - No H-owned normative file, G implementation, C/D/I authority file, governance gate, schema or baseline registry was modified. PR scope remains exactly three files.
 
 ## 11. Bilingual change manifest
 
 | Document / version | English path | Chinese path | Source revision | Parity |
 |---|---|---|---|---|
-| BMCP-ARCH-001 / 0.2.2 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main c58878fce24528a0842b4f8887c93ddbf465b566; H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74; B/D/I owner pins in §2/§7 | Owner-delegate semantic review; independent parity review not claimed |
+| BMCP-ARCH-001 / 0.2.2 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main c58878fce24528a0842b4f8887c93ddbf465b566; H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74; B/D/I owner pins in §2/§7 | Separate-session semantic/bilingual review completed; prompt-pairing provenance not verified (SESSION_SEPARATION_RECORDED_PROMPT_UNVERIFIED) |
 
 The coverage register records this as a review/handoff pair only. It does not change “BMCP Protocol detailed contracts (7 core specifications)”; bilingual normative core-spec coverage remains NOT STARTED.
 
@@ -702,6 +729,9 @@ The coverage register records this as a review/handoff pair only. It does not ch
 - OWNER_DECISIONS_REQUIRED: BMCP-DR-001 semantic direction RESOLVED / consumer-schema gate OPEN; BMCP-DR-002 authority boundary DECIDED / callable API- IDL deferred; BMCP-DR-003 MCP adapter boundary PARTIALLY DECIDED / exact C mapping OPEN under Issue #449.
 - ISSUE_7_STATUS: `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`; GitHub CLOSED / not_planned; unchanged.
 - RUNTIME_IMPLEMENTATION_STATUS: NOT AUTHORIZED / NOT STARTED
-- PR / Commit: PR #453 was merged into the pinned validation branch `bmcp-validation-base-c588` at merge commit `7c7801db396b92c57ad37020fe170f65f25e43ce`; this snapshot merge is not a merge to live `main`. Independent semantic/bilingual review remains pending; the artifact remains `ARCHITECTURE_PARTIAL` and does not freeze protocol/schema or authorize Runtime.
+- PR / Commit: PR #453 was merged into the pinned validation branch `bmcp-validation-base-c588` at merge commit `7c7801db396b92c57ad37020fe170f65f25e43ce`; this snapshot merge is not a merge to live `main`. Separate-session semantic/bilingual review has been completed; prompt-pairing provenance remains unverified (SESSION_SEPARATION_RECORDED_PROMPT_UNVERIFIED). The artifact remains ARCHITECTURE_PARTIAL and does not freeze protocol/schema or authorize Runtime.
+- OPEN — ENGLISH-SIDE ERROR-CLASS INVENTORY RECONCILIATION
+
+  EN §7.1 H-CONFIRM-004 DECISION_REQUIRED requires mapping twelve requested error classes. EN §7.1.1 H-CONFIRM-004 currently enumerates Authentication, Authorization, Validation, Unsupported, Conflict, Expired, RateLimited/ResourceExhausted, Internal and Unknown (nine grouped entries, or ten if RateLimited and ResourceExhausted are counted separately). The English source does not establish how the §7.1.1 inventory accounts for all twelve requested classes. The authoritative twelve-class inventory and its mapping to the §7.1.1 taxonomy require an explicit Owner decision. Until that decision is recorded, the discrepancy remains OPEN.
 
 **Next action:** B/D/I reconcile their existing source/mirror documents and refresh pins; H publishes versioned normative wire artifacts and closes the remaining registry/schema/crypto/Storage/error sub-items; C publishes exact Agent/MCP-to-BMCP mapping under Issue #449; E integrates the five-stage Rust compiler docs and consumer boundaries; BMCP refreshes the bilingual handoff. Runtime remains deferred until every engineering-entry condition is evidenced.
