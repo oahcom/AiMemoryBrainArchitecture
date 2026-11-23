@@ -83,7 +83,7 @@ class CheckFmtWorktreeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root, head, env, log = self.make_repo(Path(tmp) / "repo")
             cargo = Path(env["PATH"].split(os.pathsep, 1)[0]) / "cargo"
-            cargo.write_text("#!/bin/sh\nexit 1\n", encoding="utf-8")
+            cargo.write_text("#!/bin/sh\nprintf 'invoked\\n' >> \"$CARGO_LOG\"\nexit 1\n", encoding="utf-8")
             cargo.chmod(0o755)
             result = self.run_checker(root, head, env)
             self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
