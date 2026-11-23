@@ -5,12 +5,24 @@ document_metadata:
 
   lifecycle:
     approval:
-      decision_status: Draft
-      approver: null
+      decision_status: Approved
+      approver: "Project Owner (repository owner), converging under standing instruction (Issue #751)"
+      decision_date: "2026-11-23"
+      approved_version:
+        scheme: content-hash
+        value: "67793326476f5b3288f8388bba0ea9e1c1790a6de5d72e7c9fdc5bcde811df66"
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Applicable-To-Current-Version
+      evidence_reference:
+        - "Issue #751 comment 7097692424"
+      revocation: null
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-23"
-      last_verification_note: "Every figure in §2 and §3 was measured at main 13c6d95d in this session: the four contract types were searched for a definition with git grep over crates/; the two EvidenceKinds were read from crates/memory-domain/src/lib.rs and crates/bmcp-protocol/src/lib.rs; the absence of a dependency from bmcp-protocol on memory-domain was read from its Cargo.toml; and every construction site of the four non-contract EvidenceKind values was enumerated repo-wide, returning none."
+      last_verification_note: "The four contract types and EvidenceKind construction sites were measured at main 13c6d95d. Instant has 44 occurrences in 9 files across bmcp-server (28), memory-storage-sqlite (8), memory-domain (6) and memory-event-store-sqlite (2): 38 std::time::Instant and 6 TimeValue::Instant(String). Comparing 13c6d95d..1c47002 shows no changes in those four crates, so the count remains current at main 1c47002. The BMCP enum and Cargo dependency boundary were read directly; no construction site of the four removed EvidenceKind values exists outside tests."
     usage_status: Active
     modification_status: Unchanged
 
@@ -63,14 +75,14 @@ That is the error. WP-A and WP-B fail for different reasons, at different depths
 
 §8 of `02-domain-model/core-entities.md` types Evidence's fields with four names beyond the ones the implementation already has: `TypedObjectRef`, `Locator`, `ContentRef`, `Instant`.
 
-Measured at `13c6d95d`, searching `crates/` for a definition of each:
+Measured at `13c6d95d`, searching `crates/` for a definition of each; the Instant occurrence inventory was revalidated against current `main @ 1c47002` (the intervening commits changed none of the four affected crates):
 
 | contract type | defined anywhere in `crates/`? | occurrences |
 |---|---|---|
 | `TypedObjectRef` | **no** | 0 |
 | `Locator` | **no** | 0 |
 | `ContentRef` | **no** | 0 |
-| `Instant` | **no** | 12, all of them `std::time::Instant` in `bmcp-server` — unrelated |
+| `Instant` | **no** | 44 across 9 files in 4 crates (38 `std::time::Instant`; 6 domain `TimeValue::Instant(String)`) — unrelated to the contract type |
 
 `TypedObjectRef` has since been ruled — `OWNER-DECISION-TYPED-OBJECT-REF-001` freezes it at the §14 candidate shape. The other three have **no definition and no ruling**. The contract uses them, §8 depends on them for five of its thirteen fields, and nothing anywhere says what they are:
 
