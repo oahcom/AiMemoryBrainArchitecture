@@ -2,6 +2,8 @@
 name = "bmcp-server"
 version = "0.1.0"
 edition = "2021"
+license = "UNLICENSED"
+publish = false
 
 [dependencies]
 bmcp-protocol = { path = "../bmcp-protocol" }
