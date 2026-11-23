@@ -869,7 +869,7 @@ Framing, session and handshake remain frozen by H — `TECH-REALITY-001-C/README
 still reads *"H wire mapping remains NOT FROZEN"* — so building on the existing
 JSON-RPC/TCP choice would build on an undocumented premise.
 
-Full measurement: GAP-16.
+Full measurement: GAP-32.
 
 ### 10.3 §9 filed `dm2_06` under the wrong owner
 
@@ -1023,7 +1023,7 @@ stale before the branch was pushed.
 
 Re-measured at `9544ebf` (main, after `#736` and `#737`): arms 22, tag-only 20,
 `parse_dispatch` call sites outside `crates/bmcp-protocol/` **0**. Two
-independent landings agree with that split — `GAP-16` §2 records 1 semantically
+independent landings agree with that split — `GAP-32` §2 records 1 semantically
 validated / 1 structurally parsed / 20 discriminator-only, and
 `AID-2026-050/manifest.yaml` records the same four numbers as its baseline.
 Three measurements, three authors, same figures, which is the only evidence that
@@ -1046,7 +1046,7 @@ so. It is recorded here because §10's own opening paragraph makes auditability
 the reason errata are appended rather than inlined — a line-number citation that
 no longer resolves is the same class of defect.
 
-### 11.4 GAP-15 §4 republishes §10.2's stale fact as a fresh measurement
+### 11.4 GAP-31 §4 republishes §10.2's stale fact as a fresh measurement
 
 `GAP-31-IMPLEMENTATION-PERCENTAGES-STALE` is dated at `4ce12cc7` and states in
 §4:
@@ -1054,14 +1054,14 @@ no longer resolves is the same class of defect.
 > `bmcp-server` reaches no parser at all today (`describe()` in `lib.rs:718-723`
 > is `#[allow(dead_code)]` with zero call sites).
 
-At `4ce12cc7` — GAP-15's own measurement commit — `tools/call` already existed
+At `4ce12cc7` — GAP-31's own measurement commit — `tools/call` already existed
 (`54ea397` is an ancestor of `4ce12cc7`), `parse_and_validate` was already
 called from two arms, and there was no `#[allow(dead_code)]` in the crate.
 
-GAP-15's thesis is that the six percentages are fossils because each "was true
+GAP-31's thesis is that the six percentages are fossils because each "was true
 at some earlier commit" and was re-stated without re-measuring. Its §4 does
-exactly that with §10.2's BMCP paragraph. The rest of GAP-15's measurements
-reproduce; this one does not, and it is the one GAP-15 uses to argue the 21
+exactly that with §10.2's BMCP paragraph. The rest of GAP-31's measurements
+reproduce; this one does not, and it is the one GAP-31 uses to argue the 21
 parsers are frozen out of reach.
 
 ### 11.5 §9.3's third item is closed, and §9.3's first item is unchanged
@@ -1186,7 +1186,7 @@ One caution on that last loop: the file the loop *reads* is a list written by
 Python on Windows, and Python's default text mode turns `\n` into `\r\n`. A
 `while read` over a CRLF list silently matches nothing — every type reports 0.
 Strip `\r` (`tr -d '\r'`) before trusting the counts, or the measurement
-reproduces GAP-15's conclusion for the wrong reason.
+reproduces GAP-31's conclusion for the wrong reason.
 
 This caution was itself wrong on first draft, and the correction matters more
 than the caution. It said `PROTOCOL-INDEX.md` carries CRLF. It does not:
@@ -1214,10 +1214,16 @@ origin/main types 22  hits 22  misses 0
 
 ### 11.7 What this errata does not do
 
-- Does not edit §9, §10 or GAP-15 in place.
+- Does not edit §9, §10 or GAP-31 in place.
 - Does not change any percentage, because the percentages were already retired
   as a frame in §9; replacing them with better percentages would restore the
   frame.
-- Does not re-measure GAP-15's other five rows. They reproduce at `bea1c2b`
+- Does not re-measure GAP-31's other five rows. They reproduce at `bea1c2b`
   except as noted in §11.4.
 - Does not assert independent review. Written from the session that measured it.
+
+On names: `GAP-15-IMPLEMENTATION-PERCENTAGES-STALE` and
+`GAP-16-DISPATCH-LANDED-TOOLS-ABSENT` were renumbered to
+`GAP-31-…` / `GAP-32-…` by `#740`, which also rewrote one reference in §11.4 and
+left the rest stale. Every reference in §11 is updated here. Cite the new names;
+the old ones still resolve in history but not in the tree.
