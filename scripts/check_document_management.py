@@ -2004,8 +2004,22 @@ def check_scope_registry(root: Path) -> list[str]:
     return errors
 
 
-def changed_paths(root: Path, ref: str) -> set[str]:
-    """Repository-relative paths added, modified, renamed or type-changed.
+def changed_paths(root: Path, ref: str) -> tuple[set[str], set[str]]:
+    """Two changed-path sets, answering two different questions.
+
+    Returns `(all_changed, requirable)`. They are deliberately not one set:
+    collapsing them conflated "the diff was empty" with "nothing in the diff
+    needed classifying", so a deletion-only pull request -- a real increment --
+    was reported NOT_APPLICABLE and failed CI on every such PR forever.
+
+    `all_changed` is every path any diff status touched, plus untracked paths.
+    It answers the emptiness test. If it is empty the increment genuinely did
+    not happen (a same-HEAD ref) and no verdict is possible.
+
+    `requirable` is the subset this gate can require metadata on: added,
+    modified, renamed, type-changed and copied. Deletions are excluded from it
+    because a removed file has nothing to classify -- but they stay in
+    `all_changed`, so their presence still proves the increment ran.
 
     NUL-separated, so a filename containing spaces stays one path. Splitting on
     whitespace would let `00-governance/new policy.md` dodge the requirement.
@@ -2014,9 +2028,8 @@ def changed_paths(root: Path, ref: str) -> set[str]:
     symlink with a regular file, changes what the gate reads without changing
     the path. `--diff-filter=AMR` skipped exactly that, so the increment could
     report PASS while a governed path had become a link to somewhere else.
-    Deletions stay excluded: a removed file has nothing to classify. Copies are
-    included: with `diff.renames=copies` a new path can arrive as C, and a
-    copied governed document is still a governed document.
+    Copies are included: with `diff.renames=copies` a new path can arrive as C,
+    and a copied governed document is still a governed document.
     """
     # A ref must identify a commit, not a pathspec. Without this check,
     # `git diff <ref>` can interpret a directory such as "docs" as a path
@@ -2026,24 +2039,34 @@ def changed_paths(root: Path, ref: str) -> set[str]:
     )
     if resolved is None:
         raise ValueError(f"{ref!r} does not resolve to a commit")
-    filter_arg = "--diff-filter=AMRTC"
-    diff = git(
-        root, "diff", "--name-only", "-z", filter_arg,
-        f"{resolved}...HEAD", nul=True,
-    )
-    if diff is None:
-        # Do not fall back to a two-dot diff: it answers a different question.
-        raise ValueError(
-            f"cannot compute {resolved}...HEAD; refusing a semantically different diff"
+    def names(*extra: str) -> set[str]:
+        diff = git(
+            root, "diff", "--name-only", "-z", *extra,
+            f"{resolved}...HEAD", nul=True,
         )
-    names = {p for p in diff.split("\0") if p}
+        if diff is None:
+            # Do not fall back to a two-dot diff: it answers a different
+            # question, and a wrong answer about the changed set is worse
+            # than no answer.
+            raise ValueError(
+                f"cannot compute {resolved}...HEAD; refusing a semantically different diff"
+            )
+        return {p for p in diff.split("\0") if p}
+
+    # Every status, including D: this is the emptiness test.
+    all_changed = names()
+    # Only the statuses that leave a file in place to classify.
+    requirable = names("--diff-filter=AMRTC")
     untracked = git(
         root, "ls-files", "-z", "--others", "--exclude-standard", nul=True
     )
     if untracked is None:
         raise ValueError("cannot enumerate untracked paths")
-    names.update(p for p in untracked.split("\0") if p)
-    return names
+    new_untracked = {p for p in untracked.split("\0") if p}
+    # An untracked path is an addition: it counts in both sets.
+    all_changed.update(new_untracked)
+    requirable.update(new_untracked)
+    return all_changed, requirable
 
 
 def main() -> int:
@@ -2080,17 +2103,26 @@ def main() -> int:
         parser.error("--require-changed and --strict are different verdicts; pick one")
     targets, walk_problems = collect_governed(root)
     try:
-        required = changed_paths(root, args.require_changed) if incremental else set()
+        all_changed, required = (
+            changed_paths(root, args.require_changed) if incremental else (set(), set())
+        )
     except ValueError as exc:
         print(f"NOT_APPLICABLE: incremental changed-path selection failed: {exc}", file=sys.stderr)
         return 2
-    if incremental and not required:
+    # The emptiness test uses every diff status, including deletions. A PR that
+    # only deletes files did change something, so the increment ran and gets a
+    # verdict; only a genuinely empty diff (same-HEAD ref) is NOT_APPLICABLE.
+    if incremental and not all_changed:
         print(
             "NOT_APPLICABLE: --require-changed resolved to zero changed or untracked paths; "
             "no incremental verification was performed",
             file=sys.stderr,
         )
         return 2
+    # A non-empty diff whose paths all fall outside `requirable` (deletions, or
+    # renames out of the governed set) is a real, passed increment. It must not
+    # borrow the ordinary PASS wording, or the vacuous case would be invisible.
+    deletions_only = incremental and bool(all_changed) and not required
     is_git = git(root, "rev-parse", "--git-dir") is not None
 
     # Problems the walk itself found -- symlinks, unreadable roots -- are
@@ -2213,6 +2245,11 @@ def main() -> int:
         f"PASS ({scope}): no GOV-DOC-002 violations; "
         f"{len(docs)} classified, {len(unclassified)} unclassified"
     )
+    if deletions_only:
+        print(
+            "  the increment contained only deletions or renames-out; "
+            "no path required classification."
+        )
     if incremental:
         print(
             "  Incremental verdict only: files outside the changed set were not "
