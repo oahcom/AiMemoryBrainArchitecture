@@ -59,7 +59,8 @@ document_metadata:
 | `GOV-NC-2026-11-20-AC-UNMET-CLOSURE-004` | 验收条件未满足即关闭 | High | `OPEN` / `NOT_REMEDIATED` | 1 个 Issue（#384），4/10 条 AC 不满足 |
 | `GOV-NC-CONVERGENCE-2026-11-20` | 治理收敛定义与执行边界 | — | `ACTIVE` / `RECORDED_NOT_PREVENTED` | 3 个层次 |
 | `GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026` | Evidence 领域契约符合性 | High | `OPEN` / `NOT_AUTHORIZED` | 1 个实体，2 个工作包 |
-| `GOV-NC-2026-11-22-PROVENANCE-REVALIDATION-027` | Provenance 引用重验 | High | `OPEN` / `NOT_AUTHORIZED` | 4 类引用字段 |
+| `GOV-NC-2026-11-22-PROVENANCE-REFERENCE-REVALIDATION-027` | Provenance 引用重验 | High | `OPEN` / `NOT_AUTHORIZED` | 4 类引用字段 |
+| `GOV-NC-2026-11-23-PROVENANCE-GRAPH-ADD-SIGNATURE-028` | `ProvenanceGraph::add` 公开签名变更 | High | `OPEN` / `OWNER DECISION REQUIRED` | 1 个公开签名 |
 
 ## 证据
 
