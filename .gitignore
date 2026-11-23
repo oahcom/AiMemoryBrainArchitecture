@@ -7,3 +7,7 @@ target/
 
 # Installed Node dependencies (the manifests that pin them are committed).
 node_modules/
+
+# Scratch output from ad-hoc gate runs. Exact path only: other root-level
+# .txt files (VERIFICATION.txt) are repository content.
+/_dm.txt
