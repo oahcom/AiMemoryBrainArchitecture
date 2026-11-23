@@ -5,12 +5,24 @@ document_metadata:
 
   lifecycle:
     approval:
-      decision_status: Draft
-      approver: null
+      decision_status: Approved
+      approver: "Owner D acting as owner proxy, under the standing instruction that a blocking decision with no human available is to be taken and recorded rather than left open."
+      decision_date: "2026-11-23"
+      approved_version:
+        scheme: content-hash
+        value: "fccec060d5bb948d91feccd4c0f7b8dbcb31fe3db3ac49a8f4b293ade0723dd0"
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/adr/OWNER-DECISION-EVIDENCE-CONTRACT-001.md — the DECIDED line in this document names the decider and the date"
+      revocation: null
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-23"
-      last_verification_note: "Every figure in §2 and §3 was measured at main 13c6d95d in this session: the four contract types were searched for a definition with git grep over crates/; the two EvidenceKinds were read from crates/memory-domain/src/lib.rs and crates/bmcp-protocol/src/lib.rs; the absence of a dependency from bmcp-protocol on memory-domain was read from its Cargo.toml; and every construction site of the four non-contract EvidenceKind values was enumerated repo-wide, returning none."
+      last_verification_note: "Every figure in §2 and §3 was measured at main 13c6d95d in this session: the four contract types were searched for a definition with git grep over crates/; the two EvidenceKinds were read from crates/memory-domain/src/lib.rs and crates/bmcp-protocol/src/lib.rs; the absence of a dependency from bmcp-protocol on memory-domain was read from its Cargo.toml; and every construction site of the four non-contract EvidenceKind values was enumerated repo-wide, returning none. The `Instant` row in §2 was re-measured at 13c6d95d in this revision, and the earlier count was wrong: it said 12 occurrences, all `std::time::Instant` in `bmcp-server`, when the measured figure is 44 occurrences in 9 files across 4 crates, 38 of them `std::time::Instant` and 6 `TimeValue::Instant(String)`."
     usage_status: Active
     modification_status: Modified
 
@@ -70,7 +82,9 @@ Measured at `13c6d95d`, searching `crates/` for a definition of each:
 | `TypedObjectRef` | **no** | 0 |
 | `Locator` | **no** | 0 |
 | `ContentRef` | **no** | 0 |
-| `Instant` | **no** | 12, all of them `std::time::Instant` in `bmcp-server` — unrelated |
+| `Instant` | **no** | 44, in 9 files across 4 crates: `bmcp-server` 28, `memory-storage-sqlite` 8, `memory-domain` 6, `memory-event-store-sqlite` 2 — 38 are `std::time::Instant`, 6 are `TimeValue::Instant(String)` |
+
+Those six `TimeValue::Instant(String)` sites — declared at `memory-domain/src/lib.rs:217`, reached at `claim_identity.rs:370` and `phase2_acceptance.rs:348`, `1147` and `1159`, and named in a comment at `phase2_acceptance.rs:1151` — are why `Instant` cannot be typed: the domain already represents an instant as a string, and fixing its shape is the §14 "timestamp precision" OPEN decision, not a refactor.
 
 `TypedObjectRef` has since been ruled — `OWNER-DECISION-TYPED-OBJECT-REF-001` freezes it at the §14 candidate shape. The other three have **no definition and no ruling**. The contract uses them, §8 depends on them for five of its thirteen fields, and nothing anywhere says what they are:
 
