@@ -879,3 +879,199 @@ reading guide had been ruled `Canonical / Informative` is superseded by Issue
 `7074470193` and `7074777892` clarify clauses 2/3; they do not reverse clause 1.
 The protocol index remains `Candidate` with canonical current version
 `NOT DECLARED`.
+
+## 11. Errata for §9 and §10, measured at `bea1c2b` (2026-11-23 11:35 +08:00)
+
+§9 and §10 are not edited above, for the reason §10 gives: a frontier document
+whose measurements are silently rewritten cannot be audited. Corrections are
+appended here instead.
+
+Everything below was measured on this tree, at this commit. Where a figure
+differs from §9/§10, the command that produces the new figure is in §11.6 so it
+can be re-run without trusting this section.
+
+### 11.1 §9.2's test counts are stale by 2–3×, and the row counts moved
+
+§9.2 was measured at `d89fd5fa8`. Every test figure in it has since been
+superseded, and the Memory Context row counts have moved in both directions
+(implemented up, absent down) — which is the one direction §9.2 did not predict.
+
+| crate | §9.2 figure | measured at `bea1c2b` |
+|---|---:|---:|
+| `memory-context` | 82 unit + 17 integration = 99 | **183** |
+| `memory-compiler` | 66 | **124** |
+| `agent-integration` | 36 unit + 21 integration = 57 | **63** |
+| `bmcp-protocol` | 44 unit + 4 conformance = 48 | **60** |
+| `bmcp-server` | not stated in §9.2 | **34** |
+| `memory-domain` | 70 unit + 20 acceptance = 90 | **105** |
+| `brain-cli` | not stated in §9.2 | **21** |
+| **workspace** | 718 (§1) | **724** |
+
+The 77-row Memory Context map has also moved, and not only by relabelling:
+
+| status | §9.2 | measured at `bea1c2b` |
+|---|---:|---:|
+| IMPLEMENTED | 9 | **12** |
+| PARTIAL | 42 | **44** |
+| NOT IMPLEMENTED | 26 | **21** |
+
+So §9.2's own hedge — "treat the row counts as stale, not the tests" — is now
+wrong in the second half too. Both are stale, and three rows closed.
+
+### 11.2 §10.2's BMCP finding is correct at its own commit and false at `4ce12cc7`
+
+§10.2 states:
+
+> `bmcp-server` implements one JSON-RPC method (`initialize`) and returns
+> `-32601 Method not found` for everything else.
+>
+> `bmcp-server` never reaches the parser. Its only `bmcp_protocol` reference in
+> the whole crate is [...] `#[allow(dead_code)]` "for a future call site", zero
+> call sites.
+
+Both sentences were true at `61b9d743`, which is the commit §10 names. They
+stopped being true at `54ea397` (*feat(bmcp): expose validate/digest as MCP
+tools instead of an empty capability set*, 2026-11-22 13:48 +08:00), which
+landed **after** §10's measurement and **before** `4ce12cc7`.
+
+At `bea1c2b`, `crates/bmcp-server/src/lib.rs`:
+
+- dispatches **three** methods, not one: `initialize` (line 334), `tools/list`
+  (339), `tools/call` (345), with `-32601` only as the fallback arm (348);
+- calls `bmcp_protocol::parse_and_validate` from **two** tool arms — `VALIDATE_TOOL`
+  (line 392) and `DIGEST_TOOL` (line 403);
+- has **eight** `bmcp_protocol` references, not one;
+- has **no** `#[allow(dead_code)]` anywhere in the crate, and `describe()` at
+  line 938 is called at line 419.
+
+This matters beyond bookkeeping. §10.2 and GAP-16 both use "no route from wire
+to parser" as the load-bearing fact for the conclusion *the 21 parsers are the
+largest available increment*. The route exists for one message type end to end
+(wire → `tools/call` → `parse_and_validate` → digest). What is absent is the
+other 21 types, not the route.
+
+The count itself is unchanged and re-confirmed: **22 declared message types, 3
+recognised anywhere in `crates/`, 19 with no Rust recognition at all.**
+
+### 11.3 The `describe()` citation is a line number from a 723-line file
+
+§10.2 cites `lib.rs:718-723` for the `#[allow(dead_code)]` formatter. At
+`61b9d743`, `lib.rs` is exactly 723 lines and lines 718–723 do contain that
+function. At `4ce12cc7` the same file is 940 lines and lines 718–723 contain the
+JSON string-escape table (`b'"' => output.push('"')`, and so on).
+
+The citation was correct when written and became unreproducible without saying
+so. It is recorded here because §10's own opening paragraph makes auditability
+the reason errata are appended rather than inlined — a line-number citation that
+no longer resolves is the same class of defect.
+
+### 11.4 GAP-15 §4 republishes §10.2's stale fact as a fresh measurement
+
+`GAP-15-IMPLEMENTATION-PERCENTAGES-STALE` is dated at `4ce12cc7` and states in
+§4:
+
+> `bmcp-server` reaches no parser at all today (`describe()` in `lib.rs:718-723`
+> is `#[allow(dead_code)]` with zero call sites).
+
+At `4ce12cc7` — GAP-15's own measurement commit — `tools/call` already existed
+(`54ea397` is an ancestor of `4ce12cc7`), `parse_and_validate` was already
+called from two arms, and there was no `#[allow(dead_code)]` in the crate.
+
+GAP-15's thesis is that the six percentages are fossils because each "was true
+at some earlier commit" and was re-stated without re-measuring. Its §4 does
+exactly that with §10.2's BMCP paragraph. The rest of GAP-15's measurements
+reproduce; this one does not, and it is the one GAP-15 uses to argue the 21
+parsers are frozen out of reach.
+
+### 11.5 §9.3's third item is closed, and §9.3's first item is unchanged
+
+§9.3 lists three genuinely-absent things. Item 3 was `dm2_06`'s authorization
+type state. It is closed: `dm2_06_missing_authorization_ref_blocks_fact_publication`
+is a live `#[test]` in `crates/memory-domain/tests/phase2_acceptance.rs:608`, and
+`CanonicalCommitRefState { Pending, Issued(CanonicalCommitData) }` is implemented
+at `crates/memory-domain/src/canonical_commit.rs:33`. Workspace `#[ignore]`
+count is **0**.
+
+Item 1, a successful `Published` disposition, is unchanged and still the only
+item blocked by a non-code dependency. `publication_authority.rs:138-139`
+returns `publication_participant_admitted: false` and
+`protected_visibility_authorized: false` as literal constants, which is what
+`D-OWNER-DECISION-PARTICIPANT-ADMISSION-001` §1 and
+`D-OWNER-DECISION-PROTECTED-VISIBILITY-001` §1 require — not an oversight.
+
+Item 2, BMCP transport, is now narrower than §9.3 states: transport exists, one
+message type is routed end to end, and the residue is 19 unparsed types plus
+frozen framing (§11.2).
+
+### 11.6 Reproduction
+
+Platform: WSL Ubuntu, `cargo 1.100.0`, `rustc 1.95.0`. Built with `-j 1`: the
+WSL host has 5.8 GB and parallel codegen OOMs `libsqlite3-sys`.
+
+```sh
+git log -1 --format='%h %ci %s'                    # bea1c2b
+cargo test --workspace --all-targets --offline -j 1 --no-fail-fast
+# PASSED=724 FAILED=0 IGNORED=0
+
+grep -rn '^#\[ignore' --include=*.rs crates/ | wc -l   # 0
+grep -rn 'todo!\|unimplemented!' --include=*.rs crates/ | wc -l   # 0
+```
+
+Per-crate totals (§11.1):
+
+```sh
+for c in memory-compiler memory-context agent-integration bmcp-protocol \
+         bmcp-server memory-domain brain-cli; do
+  printf '%-20s ' "$c"
+  cargo test -p "$c" --all-targets --offline -j 1 2>/dev/null \
+    | grep -E '^test result' | awk -F'[ ;]' '{p+=$4} END {print p}'
+done
+```
+
+The 77-row map (§11.1) is counted from the table between
+`## 3. Row-by-row concern mapping` and `## 4. Scope and test evidence` in
+`06-memory-context/context-implementation-coverage.md`, grouping the third
+column by its leading status word.
+
+BMCP route and coverage (§11.2), all on `crates/bmcp-server/src/lib.rs`:
+
+```sh
+grep -n '"initialize"\|"tools/list"\|"tools/call"\|32601' crates/bmcp-server/src/lib.rs
+grep -n 'parse_and_validate' crates/bmcp-server/src/lib.rs
+grep -rn 'allow(dead_code)' crates/bmcp-server/src/ | wc -l    # 0
+grep -rn 'bmcp_protocol' crates/bmcp-server/src/ | wc -l       # 8
+```
+
+The 19 unparsed types, derived from the index table rather than retyped:
+
+```sh
+python3 08-bmcp-protocol/scripts/check_protocol_index.py   # unique_message_types=22 PASS
+python3 - <<'PY'
+import re
+txt = open('08-bmcp-protocol/PROTOCOL-INDEX.md', encoding='utf-8').read()
+seg = txt[txt.index('## Message types'):txt.index('## Complete Schema inventory')]
+types = re.findall(r'^\|\s*`([^`]+)`\s*\|', seg, re.M)
+assert len(types) == 22, len(types)
+open('/tmp/types.txt', 'w').write('\n'.join(types) + '\n')
+PY
+while IFS= read -r t; do
+  n=$(grep -rl -- "$t" crates/ 2>/dev/null | wc -l)
+  printf '%s %s\n' "$n" "$t"
+done < /tmp/types.txt | sort -n
+# 3 types with hits; 19 with none
+```
+
+One caution on that last loop: `PROTOCOL-INDEX.md` written by Python on Windows
+carries CRLF, and a `while read` over a CRLF list silently matches nothing —
+every type reports 0. Strip `\r` (`tr -d '\r'`) before trusting the counts, or
+the measurement reproduces GAP-15's conclusion for the wrong reason.
+
+### 11.7 What this errata does not do
+
+- Does not edit §9, §10 or GAP-15 in place.
+- Does not change any percentage, because the percentages were already retired
+  as a frame in §9; replacing them with better percentages would restore the
+  frame.
+- Does not re-measure GAP-15's other five rows. They reproduce at `bea1c2b`
+  except as noted in §11.4.
+- Does not assert independent review. Written from the session that measured it.
