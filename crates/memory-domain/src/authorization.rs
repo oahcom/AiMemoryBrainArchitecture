@@ -476,7 +476,7 @@ mod tests {
 
     #[test]
     fn authorization_decision_kind_serde_rejects_lowercase_values() {
-        for legacy_json in [r#"\"approved\""#, r#"\"denied\""#, r#"\"conditional\""#] {
+        for legacy_json in [r#""approved""#, r#""denied""#, r#""conditional""#] {
             let result = serde_json::from_str::<AuthorizationDecisionKind>(legacy_json);
 
             assert!(
