@@ -471,7 +471,7 @@ H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体
 | Fact/Claim 语义 | 已解决——Option A + I1 | 已合并 Owner 决策 PR #446；Blob `d59756a8eb454480804c482ca03c68345ab5abf2` |
 | Fact/Claim 字段/Wire Schema | CANDIDATE / NOT FROZEN | B/D/E/F/G/H/I 消费者工件须完成版本 Pin 和审查；未批准任何 Payload 字段 |
 | H-CONFIRM-001..004 | PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN | 逻辑层选择按 PR #428 comments 7060351041 / 7060264372；INDEPENDENCE_UNVERIFIABLE；精确 Registry/Schema/Crypto/Persistence/Error/Consumer Artifact 仍 OPEN |
-| BMCP-DR-002 | DECIDED_AT_AUTHORITY_BOUNDARY / CALLABLE_API_IDL_SCHEMA_DEFERRED | D/I 权威边界已决定；精确 Callable API/IDL/Schema/Crypto/Storage/Wire Mapping 仍由 D/I/H 发布并保持 OPEN |
+| BMCP-DR-002 | DECIDED_AT_AUTHORITY_BOUNDARY / CALLABLE_API_IDL_SCHEMA_DEFERRED | D/I 保有权威边界；精确 Callable API/IDL/Schema/Crypto/Storage/Wire Mapping 仍由 D/I/H 发布并保持 OPEN |
 | BMCP-DR-003 / MCP Mapping | PARTIALLY_DECIDED——Issue #449 | MCP 为 C 北向 Agent Adapter/Gateway；BMCP 为 C Adapter 经 H 到 Brain；Family Routing 已由 PR #430 comment 7060351480 决定；精确 C/H Operation Mapping 仍 OPEN |
 | BMCP Runtime / AT-01..AT-20 | NOT AUTHORIZED / NOT RUN | Issue #7 实施绑定继续延期 |
 
@@ -504,6 +504,8 @@ H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体
 - AT-01..AT-20 仍为 **PLANNED_NOT_RUN**。本架构阶段不存在 Runtime 仓库/实施授权。
 
 
+
+以下验收测试（AT-01 至 AT-20）定义预期行为覆盖范围、责任归属、前置条件、验证方法、依赖项及当前验收阻塞项。这些是规范级验收标准，不构成测试已经执行的证据。
 
 | ID / 场景 | OWNER | PRECONDITION | EXPECTED_RESULT | TEST_METHOD | DEPENDENCY | ACCEPTANCE_STATUS |
 |---|---|---|---|---|---|---|

@@ -472,7 +472,7 @@ The earlier broad acceptance wording is superseded by this scope correction. H r
 | Fact/Claim semantics | RESOLVED — Option A + I1 | Merged Owner decision PR #446; Blob `d59756a8eb454480804c482ca03c68345ab5abf2` |
 | Fact/Claim field/wire schema | CANDIDATE / NOT FROZEN | B/D/E/F/G/H/I consumer artifacts must be version-pinned and reviewed; no payload fields approved |
 | H-CONFIRM-001..004 | PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN | Logical semantics decided with INDEPENDENCE_UNVERIFIABLE; exact registry/schema/crypto/Storage/error artifacts remain open |
-| BMCP-DR-002 | DECIDED_AT_AUTHORITY_BOUNDARY / CALLABLE_API_IDL_DEFERRED | D/I are authoritative; exact callable API/IDL/currentness vocabulary remains D/I-owned and open |
+| BMCP-DR-002 | DECIDED_AT_AUTHORITY_BOUNDARY / CALLABLE_API_IDL_SCHEMA_DEFERRED | D/I are authoritative; exact callable API/IDL/Schema/Crypto/Storage/Wire Mapping remains D/I/H-owned and open |
 | BMCP-DR-003 / MCP mapping | PARTIALLY_DECIDED — Issue #449 | MCP is C-owned Agent Adapter/Gateway; exact C/H operation mapping remains open |
 | BMCP Runtime / AT-01..AT-20 | NOT AUTHORIZED / NOT RUN | Issue #7 implementation binding remains deferred |
 
