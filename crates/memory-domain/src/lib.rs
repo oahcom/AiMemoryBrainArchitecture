@@ -635,7 +635,7 @@ pub const I_DEV_BASELINE_ISSUER: &str = "i-owner-proxy/dev-baseline-v1";
 
 /// Terminal disposition of a recorded authorization decision (§2.1).
 #[derive(serde::Serialize, serde::Deserialize, Clone, Copy, Debug, Eq, PartialEq)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "PascalCase")]
 pub enum AuthorizationDecisionKind {
     Approved,
     Denied,
@@ -2329,5 +2329,40 @@ mod tests {
         assert_eq!(EventRef::new(""), Err(DomainError::EmptyId));
         assert_eq!(ExternalSourceRef::new(""), Err(DomainError::EmptyId));
         assert_eq!(MemoryRef::new(""), Err(DomainError::EmptyId));
+    }
+}
+
+#[cfg(test)]
+mod authorization_decision_kind_serde_contract_tests {
+    use super::AuthorizationDecisionKind;
+
+    #[test]
+    fn authorization_decision_kind_serde_uses_canonical_pascal_case() {
+        let cases = [
+            (AuthorizationDecisionKind::Approved, "\"Approved\""),
+            (AuthorizationDecisionKind::Denied, "\"Denied\""),
+            (AuthorizationDecisionKind::Conditional, "\"Conditional\""),
+        ];
+
+        for (kind, expected_json) in cases {
+            assert_eq!(serde_json::to_string(&kind).unwrap(), expected_json);
+
+            assert_eq!(
+                serde_json::from_str::<AuthorizationDecisionKind>(expected_json).unwrap(),
+                kind
+            );
+        }
+    }
+
+    #[test]
+    fn authorization_decision_kind_serde_rejects_lowercase_values() {
+        for value in ["approved", "denied", "conditional"] {
+            let json = format!("\"{value}\"");
+
+            assert!(
+                serde_json::from_str::<AuthorizationDecisionKind>(&json).is_err(),
+                "lowercase authorization decision kind must be rejected: {value}"
+            );
+        }
     }
 }

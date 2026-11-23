@@ -1432,7 +1432,7 @@ impl AdmissionStore {
             || !is_rfc3339_utc(&stored.issued_at)
             || !matches!(
                 stored.decision_kind.as_str(),
-                "approved" | "denied" | "conditional"
+                "Approved" | "Denied" | "Conditional"
             )
         {
             return Err(AuthorizationDecisionValidationError::RecordMalformed);
@@ -1528,17 +1528,17 @@ fn read_authorization_decision(
 
 fn authorization_decision_kind_str(kind: AuthorizationDecisionKind) -> &'static str {
     match kind {
-        AuthorizationDecisionKind::Approved => "approved",
-        AuthorizationDecisionKind::Denied => "denied",
-        AuthorizationDecisionKind::Conditional => "conditional",
+        AuthorizationDecisionKind::Approved => "Approved",
+        AuthorizationDecisionKind::Denied => "Denied",
+        AuthorizationDecisionKind::Conditional => "Conditional",
     }
 }
 
 fn parse_authorization_decision_kind(value: &str) -> Option<AuthorizationDecisionKind> {
     match value {
-        "approved" => Some(AuthorizationDecisionKind::Approved),
-        "denied" => Some(AuthorizationDecisionKind::Denied),
-        "conditional" => Some(AuthorizationDecisionKind::Conditional),
+        "Approved" => Some(AuthorizationDecisionKind::Approved),
+        "Denied" => Some(AuthorizationDecisionKind::Denied),
+        "Conditional" => Some(AuthorizationDecisionKind::Conditional),
         _ => None,
     }
 }
@@ -2527,7 +2527,7 @@ mod tests {
         db.connection
             .execute(
                 "UPDATE authorization_decisions
-                 SET decision_kind='denied'
+                 SET decision_kind='Denied'
                  WHERE decision_id=?1",
                 [decision_id.as_str()],
             )
@@ -2538,6 +2538,67 @@ mod tests {
             Err(AuthorizationDecisionValidationError::RecordMismatch(
                 "decision_kind"
             ))
+        );
+    }
+
+    #[test]
+    fn authorization_decision_writer_persists_canonical_pascal_case_kinds() {
+        let cases = [
+            (AuthorizationDecisionKind::Approved, "Approved"),
+            (AuthorizationDecisionKind::Denied, "Denied"),
+            (AuthorizationDecisionKind::Conditional, "Conditional"),
+        ];
+
+        for (kind, expected_wire_value) in cases {
+            let (db, reference, subject) = issued_authorization_store(kind);
+            let decision_id = reference.data().unwrap().decision_id.clone();
+
+            let stored_kind: String = db
+                .connection
+                .query_row(
+                    "SELECT decision_kind
+                     FROM authorization_decisions
+                     WHERE decision_id=?1",
+                    [decision_id.as_str()],
+                    |row| row.get(0),
+                )
+                .unwrap();
+
+            assert_eq!(stored_kind, expected_wire_value);
+
+            assert_eq!(
+                db.validate_authorization_decision(&reference, &subject),
+                Ok(true)
+            );
+
+            assert_eq!(db.authorization_decision_kind(&reference), Ok(kind));
+        }
+    }
+
+    #[test]
+    fn authorization_decision_validator_rejects_legacy_lowercase_kind() {
+        let (db, reference, subject) =
+            issued_authorization_store(AuthorizationDecisionKind::Approved);
+
+        let decision_id = reference.data().unwrap().decision_id.clone();
+
+        db.connection
+            .execute(
+                "UPDATE authorization_decisions
+                 SET decision_kind='denied'
+                 WHERE decision_id=?1",
+                [decision_id.as_str()],
+            )
+            .unwrap();
+
+        assert_eq!(
+            db.validate_authorization_decision(&reference, &subject),
+            Err(AuthorizationDecisionValidationError::RecordMalformed)
+        );
+
+        assert_eq!(
+            db.authorization_decision_kind(&reference),
+            Err(AuthorizationDecisionValidationError::RecordMalformed)
         );
     }
 
