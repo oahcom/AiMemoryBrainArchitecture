@@ -697,6 +697,59 @@ def run_changed_paths() -> None:
             root, 0, "--require-changed", base,
         )
 
+    # A deletion-only increment is a real increment. The diff is non-empty, the
+    # verification ran, and no surviving path needed classifying -- so it
+    # passes. It must NOT be reported as NOT_APPLICABLE: that verdict means "no
+    # diff to inspect", and reusing it here failed CI on every PR that only
+    # removed files, forever. This is the regression that made the distinction
+    # necessary; keep it pinned.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "seed")
+        scratch = root / "tools" / "scratch-output.txt"
+        scratch.write_text("captured tool output\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "add scratch file")
+        # Base is taken AFTER the file exists, so base...HEAD is purely the
+        # deletion. Basing before the addition would make add+delete cancel to
+        # an empty diff and test the same-HEAD case instead of this one.
+        base = _git(root, "rev-parse", "HEAD")
+        scratch.unlink()
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "drop scratch file")
+        expect_gate(
+            "T75 deletion-only increment is verified, not NOT_APPLICABLE",
+            root, 0, "--require-changed", base,
+        )
+
+    # Deleting a governed, classified document. Recorded decision, not an
+    # accident: a deleted path is not in `requirable`, so this gate does not
+    # require metadata on it and does not block the removal. That is a KNOWN
+    # HOLE -- removing a governed document escapes classification review via
+    # this gate -- and it is deliberately NOT changed here. Pinned so that
+    # changing it later is a visible decision rather than a silent drift.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        victim = root / "00-governance" / "classified-then-removed.md"
+        victim.write_text(doc(BASE), encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "seed")
+        base = _git(root, "rev-parse", "HEAD")
+        victim.unlink()
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "remove governed document")
+        expect_gate(
+            "T76 deleting a governed classified document is not blocked by this gate",
+            root, 0, "--require-changed", base,
+        )
+
 
 def run_path_safety() -> None:
     """T14/T15: a path reference is validated, never silently rewritten.
