@@ -324,6 +324,15 @@ def run_resolver() -> None:
         }
         return meta
 
+    def resolves_to_nothing(docs: dict, target_scope: str) -> bool:
+        try:
+            return (
+                resolve_canonical(docs, target_scope)
+                == NO_AUTHORITATIVE_SOURCE
+            )
+        except Exception:
+            return False
+
     # 1. No conflict record: the unique Canonical resolves.
     one = {"a.md": fresh()}
     record(
@@ -350,14 +359,20 @@ def run_resolver() -> None:
     )
 
     # 4. A selected member that is not Canonical must fail closed.
-    noncanonical = resolved_meta()
+    canonical_selecting_candidate = resolved_meta(selected="b.md")
+
+    noncanonical = fresh()
     noncanonical["authority"]["canonical_status"] = "Candidate"
+
     record(
-        "Resolved selection of a non-Canonical member resolves to nothing",
-        resolve_canonical(
-            {"a.md": noncanonical},
+        "Resolved record selecting an in-scope non-Canonical member resolves to nothing",
+        resolves_to_nothing(
+            {
+                "a.md": canonical_selecting_candidate,
+                "b.md": noncanonical,
+            },
             scope_id,
-        ) == NO_AUTHORITATIVE_SOURCE,
+        ),
     )
 
     # 5. Resolved without the resolution block must fail closed.
@@ -366,10 +381,10 @@ def run_resolver() -> None:
     missing_block["authority"].pop("canonical_conflict_resolution", None)
     record(
         "Resolved without a resolution block resolves to nothing",
-        resolve_canonical(
+        resolves_to_nothing(
             {"a.md": missing_block},
             scope_id,
-        ) == NO_AUTHORITATIVE_SOURCE,
+        ),
     )
 
     # 6. Under-Review remains unresolved.
@@ -379,6 +394,19 @@ def run_resolver() -> None:
         "Under-Review resolves to nothing",
         resolve_canonical(
             {"a.md": under_review},
+            scope_id,
+        ) == NO_AUTHORITATIVE_SOURCE,
+    )
+
+    under_review_with_valid_resolution = resolved_meta()
+    under_review_with_valid_resolution["authority"][
+        "canonical_conflict_status"
+    ] = "Under-Review"
+
+    record(
+        "Under-Review with a valid resolution block resolves to nothing",
+        resolve_canonical(
+            {"a.md": under_review_with_valid_resolution},
             scope_id,
         ) == NO_AUTHORITATIVE_SOURCE,
     )
@@ -398,22 +426,24 @@ def run_resolver() -> None:
     # 8. No Canonical member must fail closed.
     no_canonical = fresh()
     no_canonical["authority"]["canonical_status"] = "Candidate"
+
     record(
         "zero Canonical documents resolve to nothing",
-        resolve_canonical(
+        resolves_to_nothing(
             {"a.md": no_canonical},
             scope_id,
-        ) == NO_AUTHORITATIVE_SOURCE,
+        ),
     )
 
     # 9. Multiple Canonical members must fail closed.
     second_canonical = fresh()
+
     record(
         "multiple Canonical documents resolve to nothing",
-        resolve_canonical(
+        resolves_to_nothing(
             {"a.md": fresh(), "b.md": second_canonical},
             scope_id,
-        ) == NO_AUTHORITATIVE_SOURCE,
+        ),
     )
 
     # 10. The policy's own section 5.1 example: a Resolved record carrying
@@ -437,17 +467,16 @@ def run_resolver() -> None:
     )
 
     # 12. A resolution block that is not a mapping must fail closed.
-    not_a_mapping = fresh()
-    not_a_mapping["authority"]["canonical_conflict_status"] = "Resolved"
-    not_a_mapping["authority"]["canonical_conflict_resolution"] = (
-        "GOV-CONF-2026-002"
-    )
+    invalid_resolution = fresh()
+    invalid_resolution["authority"]["canonical_conflict_status"] = "Resolved"
+    invalid_resolution["authority"]["canonical_conflict_resolution"] = None
+
     record(
         "Resolved with a non-mapping resolution block resolves to nothing",
-        resolve_canonical(
-            {"a.md": not_a_mapping},
+        resolves_to_nothing(
+            {"a.md": invalid_resolution},
             scope_id,
-        ) == NO_AUTHORITATIVE_SOURCE,
+        ),
     )
 
     # 13. A resolution naming no document must fail closed.
@@ -466,8 +495,7 @@ def run_resolver() -> None:
     # 14. The original unknown-scope guard remains covered.
     record(
         "unknown scope resolves to nothing",
-        resolve_canonical(one, "architecture/unknown-scope")
-        == NO_AUTHORITATIVE_SOURCE,
+        resolves_to_nothing(one, "architecture/unknown-scope"),
     )
 
 # --------------------------------------------------------------------------
