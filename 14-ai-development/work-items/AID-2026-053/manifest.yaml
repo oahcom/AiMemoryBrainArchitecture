@@ -1,0 +1,123 @@
+work_item_id: AID-2026-053
+title: Make the two Evidence enums match §8, and delete the four values nothing constructs
+
+class: DOMAIN/CODE/TEST
+risk: R2
+risk_rationale: "Deletes four enum variants and renames the serde representation of both enums, which is a wire-format change. It is R2 rather than R3 only because the blast radius was measured to be one construction site and zero persisted bytes: no storage crate names EvidenceExtension, there are no tracked .db or .sqlite files, and there are no *.sql migrations. The risk is not in the change; it is in the measurement being wrong. Acceptance criterion 9 and hard constraint #0 exist so that a wrong measurement surfaces as a scope violation rather than as silent field drift."
+
+security_scope: "None. No authorization path, no Forget path, no storage engine, no transport. The change is exhaustive-match and serde-rename over two enums in memory-domain, plus the one match arm in memory-compiler that consumes them."
+
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+implementing_ai_session: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 82e9da113ea9712e66f1044c235036420a85d16a
+
+tracking_issue: "NONE - tracked by GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026 §7 and §8, and by this AID manifest"
+
+created_at: 2026-11-23
+updated_at: 2026-11-23
+
+prompt_id: AID-2026-053-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-053/prompt-v1.md
+prompt_status: FROZEN
+prompt_sha256: a093cd103896b4d7dbf00e66ed0bec8638044779f0ae2c15cc6f9b9ad9f90879
+prompt_bytes: 9938
+
+prompt_provenance_tier: T1
+prompt_provenance_note: "Frozen from the owner-proxy session that enumerated every construction site of both enums repo-wide at 86c66ec4 with git grep, read the single non-test match over availability in full, and established that no storage crate names EvidenceExtension. The SHA-256 identifies the committed prompt-v1.md bytes exactly. The prompt's header states 86c66ec4 because that is where the measurements were taken; the manifest's base_commit_sha is 82e9da11 because that is where the dispatch was registered. Both are recorded rather than collapsed."
+
+dependency_refs:
+  - 14-ai-development/adr/OWNER-DECISION-EVIDENCE-CONTRACT-001.md
+  - 14-ai-development/governance-register/GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026.md
+  - crates/memory-domain/src/lib.rs
+  - crates/memory-compiler/src/evidence.rs
+  - crates/memory-compiler/tests/evidence.rs
+
+deliverables:
+  - "EvidenceKind reduced to exactly the seven contract values of §8 - source_span, user_statement, document, observation, tool_result, attestation, derived_excerpt - with Message, Record, Dataset and Other(String) deleted rather than remapped."
+  - "EvidenceAvailability reduced to exactly the five contract values - available, restricted, expired, forgotten, external_unavailable - with Unavailable deleted, not renamed to either of the two states it was standing in for."
+  - "#[serde(rename_all = \"snake_case\")] on both enums, so the serialized form is the contract's own spelling rather than the variant identifier."
+  - "attachment_decision covers all five availability values with reasons that stay distinct: Expired says the source aged out, ExternalUnavailable says it was never reachable."
+  - "The one construction site of Unavailable - the test unavailable_evidence_defers_attachment_with_its_reason at memory-compiler/tests/evidence.rs:236 - rewritten to name the state it actually means, with the choice and its justification in the commit message."
+  - "A negative test per removed value: deserializing \"Unavailable\", \"Message\", \"Record\", \"Dataset\" and an Other payload fails, and the test asserts the failure rather than asserting the absence of a panic."
+  - "Round-trip test over all 7 and all 5 values, asserting the exact contract string in both directions."
+  - "cargo test -p memory-domain and cargo test -p memory-compiler only, with counts reported. The workspace suite belongs to CI; a local multi-gigabyte target directory is not a contribution."
+  - "No field of Evidence or EvidenceExtension touched, and nothing under crates/bmcp-protocol/ touched."
+
+independent_reviewer: NOT_ASSIGNED
+integration_reviewer: NOT_ASSIGNED
+
+review:
+  status: NOT_ASSIGNED
+  report_ref: ""
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+implementation:
+  status: NOT_STARTED
+  branch: PENDING
+  pull_request: PENDING
+  pull_request_url: PENDING
+  implementation_commit_sha: PENDING
+  merge_commit_sha: NOT_MERGED
+
+authorization:
+  registration_write: "USER-PRINCIPAL-DELEGATED (limited to this AID registration package)"
+  implementation_write: "USER-PRINCIPAL-DELEGATED (limited to crates/memory-domain/src/lib.rs and crates/memory-compiler/src/evidence.rs plus their tests)"
+  variant_removal: "USER-PRINCIPAL-DELEGATED (limited to the four non-contract EvidenceKind values and Unavailable)"
+  serialization_contract_change: "USER-PRINCIPAL-DELEGATED (limited to the two Evidence enums, and only because no persisted Evidence exists)"
+  field_type_change: NOT_GRANTED
+  evidence_contract_change: NOT_GRANTED
+  bmcp_protocol_change: NOT_GRANTED
+  register_closure: NOT_GRANTED
+  production_authorization: NOT_GRANTED
+
+governance:
+  aid_assignment: REGISTERED
+  aid_status: REGISTERED
+  registration_authorization: "USER-PRINCIPAL-DELEGATED (limited to this work item)"
+  development_start_authorization: "USER-PRINCIPAL-DELEGATED (limited to WP-B of register 026)"
+  architecture_status: NOT_APPLICABLE
+  g8_status: NOT_APPLICABLE
+  quota_change: NONE
+
+verification:
+  status: RUN
+  environment: "Windows, static inspection only. No cargo, no compilation: verification of the change belongs to CI."
+  commands:
+    - "git grep over crates/ for each of EvidenceKind::Message, ::Record, ::Dataset, ::Other  -> zero construction sites for all four"
+    - "git grep over crates/ for EvidenceKind::Document  -> three sites: memory-domain/src/lib.rs:1700, memory-compiler/tests/evidence.rs:48, memory-domain/tests/phase2_acceptance.rs:894"
+    - "git grep over crates/ for EvidenceAvailability::Unavailable  -> one site: memory-compiler/tests/evidence.rs:243"
+    - "read crates/memory-compiler/src/evidence.rs:142-155  -> one match over availability, five arms, one of which is the catch-all"
+    - "git grep EvidenceExtension over crates/  -> no storage crate names it; no tracked .db/.sqlite; no *.sql migrations"
+    - "read crates/bmcp-protocol/src/evidence.rs  -> its EvidenceKind is four delivery classes in pub mod evidence; the crate does not depend on memory-domain and no conversion exists"
+  evidence_refs:
+    - "The construction-site table in the prompt's §2 is the measurement, printed as a table rather than summarised, so an implementer can check it against the tree instead of trusting it."
+    - "The ruling on Unavailable is quoted as five numbered points in the prompt's §3, so the implementer is not asked to re-decide a decision already made in OWNER-DECISION-EVIDENCE-CONTRACT-001 §4."
+
+findings:
+  - id: AID-2026-053-F1
+    severity: P1
+    feedback_destination: "Delivery PR conversation. Register 026 §7 item 4 asks the implementer to 'verify the BMCP protocol mapping'. There is no mapping. crates/bmcp-protocol has its own EvidenceKind with four delivery-class values inside pub mod evidence; that crate has no dependency on memory-domain, nothing outside it references the type, and no From/Into or conversion of any kind exists between the two. A session that reads the register and then looks for a mapping will either report a false negative or, worse, build the mapping the register assumed existed. Hard constraint #1 forbids touching the crate and the prompt tells the implementer the correct output is a written statement that the item measures nothing."
+  - id: AID-2026-053-F2
+    severity: P1
+    feedback_destination: "Delivery PR conversation. The serde rename to snake_case is a wire-format change, and nothing in register 026 authorises a wire-format change - it authorises the enum values. It is safe here only because the corpus of persisted Evidence is empty, which is a measurement about this tree at this commit rather than a property of the design. If a store appears later, the rename becomes a migration and this AID is not the instrument for it. That is recorded here rather than assumed away, because the next reader of the enum will not see the measurement."
+  - id: AID-2026-053-F3
+    severity: P2
+    feedback_destination: "Delivery PR conversation. Removing Unavailable is a strictly lossy move: any consumer that treated it as 'deferred for some reason I do not model' now has to pick a reason. The ruling in OWNER-DECISION-EVIDENCE-CONTRACT-001 §4 chose removal because splitting it would have meant inventing the distinction between expired and external_unavailable inside a variant whose only reason string distinguishes neither. The cost is real and is recorded here rather than presented as a pure win."
+  - id: AID-2026-053-F4
+    severity: P2
+    feedback_destination: "Delivery PR conversation. WP-B does not close register 026, and an implementer who completes every acceptance criterion in this prompt should not expect the register row to change. §6 of the prompt says so explicitly. The register's closing condition 10 requires formal implementation authorization, and a dispatch is not an authorization; condition 12 requires WP-A, which is blocked on Instant, Locator and ContentRef having no definition in the tree at all."
+
+notes:
+  - "The four non-contract EvidenceKind values are removed, not remapped. Message is not mapped to source_span on name similarity: register 026 §5.4 forbids it, and the two mean different things even though both are about utterances."
+  - "Existing fixtures that construct EvidenceKind::Document or EvidenceAvailability::Available are valid under both the old and the new spelling of the variant identifier; only the serialized form changes, so those fixtures are edited only where they assert a string literal."
