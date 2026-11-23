@@ -1,0 +1,68 @@
+# Line endings are a repository property, not an author property.
+#
+# Every text file this repository governs is LF in the object database, so a
+# diff shows the change and not the host that produced it. Without this file a
+# CRLF checkout commits CRLF blobs and the next one-line edit renders as a
+# whole-file diff (see #766: +349/-349 for a 10-line change).
+#
+# `text=auto` normalises on add. The explicit per-type lines are redundant for
+# the object database but make the intent readable and survive `text=auto`
+# being turned off for a path by a later rule.
+
+* text=auto
+
+*.rs   text eol=lf
+*.md   text eol=lf
+*.py   text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.sh   text eol=lf
+*.json text eol=lf
+*.css  text eol=lf
+*.js   text eol=lf
+*.ts   text eol=lf
+*.html text eol=lf
+
+# Frozen prompt artifacts are evidence, and their byte count and SHA-256 are
+# pinned in the registration record:
+#   AID-2026-049/manifest.yaml: prompt_sha256 c4be14e2…, prompt_bytes 31989
+# Those values are the raw CRLF blob on purpose. Renormalising this file would
+# change it to 31034 bytes / 55045521… and silently invalidate a FROZEN prompt
+# pin. It is therefore declared binary so neither Git nor the gate rewrites or
+# flags it.
+14-ai-development/work-items/AID-2026-049/prompt-v1.md -text
+
+# --- Accepted CRLF, with a removal condition ---------------------------------
+#
+# These 14 Markdown files are still CRLF and are declared `-text` so that Git
+# leaves them byte-identical and the line-ending gate does not flag them. They
+# are NOT exempt because CRLF is acceptable in a document. They are blocked:
+#
+#   DM-01 in `scripts/check_document_management.py` fires on any *changed*
+#   governed document that lacks a `document_metadata` block, and these 14 have
+#   never had one. Measured: appending a single HTML comment to
+#   `docs/governance/ARCHITECTURE_AUDIT_REPORT.md` on `main` fails the gate with
+#   `DM-01 missing document_metadata block`, before any line-ending change.
+#
+# So renormalising one of them is indistinguishable, to the gate, from editing
+# its content — and supplying the metadata is a classification decision (role,
+# approval, normative status), which ruling 72 forbids doing in bulk.
+#
+# Removal condition: delete the line for a file once it carries a real
+# `document_metadata` block. The gate then covers it. Tracked in #836.
+
+08-bmcp-protocol/owner-snapshot-namespace-and-fence-currentness-contract.md -text
+14-ai-development/governance-register/GOV-NC-2026-11-21-DEV-PR-GATE-010.md -text
+14-ai-development/governance-register/GOV-NC-2026-11-21-SUFFIX-SCOPE-017.md -text
+14-ai-development/governance-register/GOV-REV-2026-11-21-GATE-MUTANTS-016.md -text
+14-ai-development/governance-register/SPEC-2026-11-21-PAIRING-001.md -text
+14-ai-development/work-items/D-OWNER-DECISION-PROTECTED-VISIBILITY-001.md -text
+14-ai-development/work-items/D-OWNER-DECISION-PROTECTED-VISIBILITY-001.zh-CN.md -text
+docs/en/14-ai-development/governance-register/GOV-REV-2026-11-21-GATE-MUTANTS-016.md -text
+docs/en/14-ai-development/governance-register/SPEC-2026-11-21-PAIRING-001.md -text
+docs/governance/ARCHITECTURE_AUDIT_REPORT.md -text
+docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-21-DEV-PR-GATE-010.md -text
+docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-21-SUFFIX-SCOPE-017.md -text
+docs/zh-CN/14-ai-development/governance-register/GOV-REV-2026-11-21-GATE-MUTANTS-016.md -text
+docs/zh-CN/14-ai-development/governance-register/SPEC-2026-11-21-PAIRING-001.md -text
