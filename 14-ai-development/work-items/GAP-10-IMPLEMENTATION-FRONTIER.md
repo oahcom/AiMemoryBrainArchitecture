@@ -869,7 +869,7 @@ Framing, session and handshake remain frozen by H — `TECH-REALITY-001-C/README
 still reads *"H wire mapping remains NOT FROZEN"* — so building on the existing
 JSON-RPC/TCP choice would build on an undocumented premise.
 
-Full measurement: GAP-16.
+Full measurement: GAP-32.
 
 ### 10.3 §9 filed `dm2_06` under the wrong owner
 
@@ -971,14 +971,68 @@ At `bea1c2b`, `crates/bmcp-server/src/lib.rs`:
 - has **no** `#[allow(dead_code)]` anywhere in the crate, and `describe()` at
   line 938 is called at line 419.
 
-This matters beyond bookkeeping. §10.2 and GAP-16 both use "no route from wire
-to parser" as the load-bearing fact for the conclusion *the 21 parsers are the
-largest available increment*. The route exists for one message type end to end
-(wire → `tools/call` → `parse_and_validate` → digest). What is absent is the
-other 21 types, not the route.
+So the route from wire to parser exists end to end for one message type. What
+is absent is the other 21 types, not the route.
 
-The count itself is unchanged and re-confirmed: **22 declared message types, 3
-recognised anywhere in `crates/`, 19 with no Rust recognition at all.**
+### 11.2a The message-type count inverted four minutes after this section was measured
+
+The paragraph above was measured at `bea1c2b` (2026-11-23 11:21:59 +08:00) and
+was accurate there. `#707` (`f82b636`, *route Storage.PreparedParticipantReceipt
+through its structural parser*) merged at **11:25:25 +08:00**, four minutes
+later, and added `parse_dispatch` — a router with one arm per declared message
+type. Measured at `021f5a3f` (main at the time of writing):
+
+| element | `bea1c2b` | `021f5a3f` |
+|---|---:|---:|
+| declared message types | 22 | 22 |
+| types recognised anywhere in `crates/` | 3 | **22** |
+| `parse_dispatch` arms | 0 (router did not exist) | **22** |
+| arms that validate semantically (`SemanticallyValidated`) | 2 | **1** |
+| arms that parse structurally (`StructurallyParsed`) | 0 | **1** |
+| arms that only recognise the root discriminator (`RootDiscriminatorOnly`) | 20 | **20** |
+| production callers of `parse_dispatch` outside `bmcp-protocol` | 0 | **0** |
+
+Two corrections to that table, both against my own first reading and against a
+reviewer's:
+
+- The validating-arm count went **down**, not up. At `bea1c2b` two named
+  functions validated: `parse_and_validate` (→ `AppliedDeliveryEvidence`) and
+  `parse_storage_receipt` (→ `Storage.PreparedParticipantReceipt`). The router
+  kept both, but labels them differently: `APPLIED_DELIVERY_EVIDENCE_RECORDED` is
+  `SemanticallyValidated` (line 1761), `Storage.PreparedParticipantReceipt` is
+  only `StructurallyParsed` (line 1765). So it is **1 + 1**, not 2 validated,
+  and not the "5 validate / 17 tag-only" split a reviewer proposed — that split
+  does not reproduce: the arms are 22, of which exactly 2 do more than read the
+  discriminator.
+- `is_structurally_unvalidated()` (line 1774) returns true for
+  `RootDiscriminatorOnly` only, so the 20 tag-only arms are precisely the ones
+  the type itself calls unvalidated. The enum documents the distinction at
+  lines 1654–1668; nothing needs to be inferred.
+
+The conclusion §11.2 defends survives and gets stronger. "The 21 parsers are the
+largest available increment" was never really about recognition — it is about
+validation, and 20 of 22 arms validate nothing. `bmcp-server` still calls
+`parse_and_validate` twice by name and never calls `parse_dispatch` at all
+(`grep -rn parse_dispatch crates/bmcp-server/` → 0).
+
+What does **not** survive is the sentence as originally written, which said
+*recognised*. By that word the count is 22 of 22, not 3 of 22. This section is
+left standing as a second instance of the defect the whole document is about:
+`bea1c2b` was accurate, `#707` landed four minutes later, and the figure was
+stale before the branch was pushed.
+
+Re-measured at `9544ebf` (main, after `#736` and `#737`): arms 22, tag-only 20,
+`parse_dispatch` call sites outside `crates/bmcp-protocol/` **0**. Two
+independent landings agree with that split — `GAP-32` §2 records 1 semantically
+validated / 1 structurally parsed / 20 discriminator-only, and
+`AID-2026-050/manifest.yaml` records the same four numbers as its baseline.
+Three measurements, three authors, same figures, which is the only evidence that
+a number in this repository is load-bearing rather than decorative.
+
+The 0-caller figure is now a tracked work item rather than a finding:
+`AID-2026-050` specifies `validate_bmcp_message` as a third MCP tool wired to
+`parse_dispatch`. When that lands, this paragraph expires and the residue moves
+from "no consumer" to "20 of 22 arms still validate nothing".
 
 ### 11.3 The `describe()` citation is a line number from a 723-line file
 
@@ -992,22 +1046,22 @@ so. It is recorded here because §10's own opening paragraph makes auditability
 the reason errata are appended rather than inlined — a line-number citation that
 no longer resolves is the same class of defect.
 
-### 11.4 GAP-15 §4 republishes §10.2's stale fact as a fresh measurement
+### 11.4 GAP-31 §4 republishes §10.2's stale fact as a fresh measurement
 
-`GAP-15-IMPLEMENTATION-PERCENTAGES-STALE` is dated at `4ce12cc7` and states in
+`GAP-31-IMPLEMENTATION-PERCENTAGES-STALE` is dated at `4ce12cc7` and states in
 §4:
 
 > `bmcp-server` reaches no parser at all today (`describe()` in `lib.rs:718-723`
 > is `#[allow(dead_code)]` with zero call sites).
 
-At `4ce12cc7` — GAP-15's own measurement commit — `tools/call` already existed
+At `4ce12cc7` — GAP-31's own measurement commit — `tools/call` already existed
 (`54ea397` is an ancestor of `4ce12cc7`), `parse_and_validate` was already
 called from two arms, and there was no `#[allow(dead_code)]` in the crate.
 
-GAP-15's thesis is that the six percentages are fossils because each "was true
+GAP-31's thesis is that the six percentages are fossils because each "was true
 at some earlier commit" and was re-stated without re-measuring. Its §4 does
-exactly that with §10.2's BMCP paragraph. The rest of GAP-15's measurements
-reproduce; this one does not, and it is the one GAP-15 uses to argue the 21
+exactly that with §10.2's BMCP paragraph. The rest of GAP-31's measurements
+reproduce; this one does not, and it is the one GAP-31 uses to argue the 21
 parsers are frozen out of reach.
 
 ### 11.5 §9.3's third item is closed, and §9.3's first item is unchanged
@@ -1026,9 +1080,11 @@ returns `publication_participant_admitted: false` and
 `D-OWNER-DECISION-PARTICIPANT-ADMISSION-001` §1 and
 `D-OWNER-DECISION-PROTECTED-VISIBILITY-001` §1 require — not an oversight.
 
-Item 2, BMCP transport, is now narrower than §9.3 states: transport exists, one
-message type is routed end to end, and the residue is 19 unparsed types plus
-frozen framing (§11.2).
+Item 2, BMCP transport, is now narrower than §9.3 states, and narrower again
+after `#707`: transport exists, all 22 message types are recognised by a router,
+but only 2 of the 22 arms do more than read the discriminator and no production
+caller outside `bmcp-protocol` reaches it (§11.2, §11.2a). The residue is
+validation, not recognition, plus framing which is still frozen by H.
 
 ### 11.6 Reproduction
 
@@ -1069,36 +1125,105 @@ grep -rn 'allow(dead_code)' crates/bmcp-server/src/ | wc -l    # 0
 grep -rn 'bmcp_protocol' crates/bmcp-server/src/ | wc -l       # 8
 ```
 
-The 19 unparsed types, derived from the index table rather than retyped:
+Router arms and their validation strength (§11.2a), counted per arm rather than
+by eye:
+
+```sh
+python3 - <<'PY'
+import re, subprocess
+src = subprocess.run(
+    ['git', 'show', 'origin/main:crates/bmcp-protocol/src/lib.rs'],
+    capture_output=True, text=True,
+).stdout
+seg = src[src.index('match message_type {', src.index('pub fn parse_dispatch')):]
+pos = [m for m in re.finditer(r'^\s+"([A-Za-z][A-Za-z0-9_.]+)"\s*=>', seg, re.M)]
+tag = []
+for i, m in enumerate(pos):
+    body = seg[m.end():pos[i + 1].start() if i + 1 < len(pos) else len(seg)]
+    if 'StructurallyUnvalidated' in body:
+        tag.append(m.group(1))
+print('arms', len(pos), 'tag_only', len(tag))
+PY
+# arms 22 tag_only 20
+grep -n 'fn validation_state' -A14 crates/bmcp-protocol/src/lib.rs
+grep -rn 'parse_dispatch' crates/bmcp-server/ | wc -l    # 0
+```
+
+Split the 2 non-tag arms by the state the type itself assigns them, not by
+whether the arm looks like it validates: `Storage.PreparedParticipantReceipt`
+calls `parse_storage_receipt` yet reports `StructurallyParsed`, not
+`SemanticallyValidated`.
+
+
+The per-type recognition loop, derived from the index table rather than
+retyped. Note what this loop measures: whether a type's name appears in `crates/`
+at all. It is the wrong instrument after `#707` — every type now has a router arm,
+so the expected result is 22 hits and 0 misses, and a 3/19 result means the loop
+is reading a pre-`#707` tree (§11.2a):
 
 ```sh
 python3 08-bmcp-protocol/scripts/check_protocol_index.py   # unique_message_types=22 PASS
+# COMMIT is whichever tree you are measuring; the path is lower-case.
+COMMIT=bea1c2b
+git show $COMMIT:08-bmcp-protocol/protocol-index.md > protocol-index.tmp
 python3 - <<'PY'
-import re
-txt = open('08-bmcp-protocol/PROTOCOL-INDEX.md', encoding='utf-8').read()
+import re, io
+txt = io.open('protocol-index.tmp', encoding='utf-8', newline='').read()
 seg = txt[txt.index('## Message types'):txt.index('## Complete Schema inventory')]
 types = re.findall(r'^\|\s*`([^`]+)`\s*\|', seg, re.M)
 assert len(types) == 22, len(types)
-open('/tmp/types.txt', 'w').write('\n'.join(types) + '\n')
+io.open('types.tmp', 'w', encoding='utf-8', newline='\n').write('\n'.join(types) + '\n')
 PY
 while IFS= read -r t; do
-  n=$(grep -rl -- "$t" crates/ 2>/dev/null | wc -l)
+  n=$(git grep -l -- "$t" $COMMIT -- crates/ </dev/null 2>/dev/null | wc -l)
   printf '%s %s\n' "$n" "$t"
-done < /tmp/types.txt | sort -n
-# 3 types with hits; 19 with none
+done < types.tmp | sort -n
+# bea1c2b:     3 types with hits; 19 with none
+# origin/main: 22 types with hits;  0 with none   (#707 added the router)
 ```
 
-One caution on that last loop: `PROTOCOL-INDEX.md` written by Python on Windows
-carries CRLF, and a `while read` over a CRLF list silently matches nothing —
-every type reports 0. Strip `\r` (`tr -d '\r'`) before trusting the counts, or
-the measurement reproduces GAP-15's conclusion for the wrong reason.
+One caution on that last loop: the file the loop *reads* is a list written by
+Python on Windows, and Python's default text mode turns `\n` into `\r\n`. A
+`while read` over a CRLF list silently matches nothing — every type reports 0.
+Strip `\r` (`tr -d '\r'`) before trusting the counts, or the measurement
+reproduces GAP-31's conclusion for the wrong reason.
+
+This caution was itself wrong on first draft, and the correction matters more
+than the caution. It said `PROTOCOL-INDEX.md` carries CRLF. It does not:
+`git show bea1c2b:08-bmcp-protocol/protocol-index.md | grep -c $'\r'` → **0**,
+and the same at `origin/main`. The CRLF came from the intermediate
+`types.txt` this script writes, not from the index. A reviewer asked whether the
+19 had been produced by the buggy loop; the answer is no, and the index's line
+endings are how that is proved rather than asserted. Writing the caution against
+the wrong file would have sent the next reader to check something that was never
+broken.
+
+Applied here: I hit the bug on the first attempt and got 0 recognised for all 22
+types, which reads as "22 absent" and would have been a stronger and completely
+false version of the §11.2 finding. The 3-of-22 figure came from the `tr -d
+'\r'` run. Recorded rather than quietly fixed, because the bug produces the
+conclusion the document already expected.
+
+Re-measured on both commits after the review, with the loop reading the index
+through `git show` and writing the list with `newline='\n'`:
+
+```
+bea1c2b     types 22  hits 3   misses 19
+origin/main types 22  hits 22  misses 0
+```
 
 ### 11.7 What this errata does not do
 
-- Does not edit §9, §10 or GAP-15 in place.
+- Does not edit §9, §10 or GAP-31 in place.
 - Does not change any percentage, because the percentages were already retired
   as a frame in §9; replacing them with better percentages would restore the
   frame.
-- Does not re-measure GAP-15's other five rows. They reproduce at `bea1c2b`
+- Does not re-measure GAP-31's other five rows. They reproduce at `bea1c2b`
   except as noted in §11.4.
 - Does not assert independent review. Written from the session that measured it.
+
+On names: `GAP-15-IMPLEMENTATION-PERCENTAGES-STALE` and
+`GAP-16-DISPATCH-LANDED-TOOLS-ABSENT` were renumbered to
+`GAP-31-…` / `GAP-32-…` by `#740`, which also rewrote one reference in §11.4 and
+left the rest stale. Every reference in §11 is updated here. Cite the new names;
+the old ones still resolve in history but not in the tree.

@@ -49,7 +49,7 @@ document_metadata:
 
 | Field | Value |
 |---|---|
-| Registration ID | GOV-NC-2026-11-22-PROVENANCE-REVALIDATION-027 |
+| Registration ID | GOV-NC-2026-11-22-PROVENANCE-REFERENCE-REVALIDATION-027 |
 | Registration date | 2026-11-22 |
 | Category | VALIDATION_GAP / DOMAIN_TYPE_INTEGRITY |
 | Status | OPEN |
@@ -122,5 +122,6 @@ This registration is independent of the Evidence dual `source_ref` semantics iss
 It does not define or imply equivalence between `Evidence.source_ref` and
 `EvidenceExtension.source_ref`.
 
-This registration is **not** included in PR #707. PR #707 does not modify
-`Provenance::validate()` or `ProvenanceGraph::add()`.
+This registration document is added by PR #707; however, the Provenance per-reference revalidation work specified in this registration is outside that PR's implementation scope.
+
+PR #707 does modify `ProvenanceGraph::add()` and `Provenance::validate()`: the public signature of the former changes from `add(provenance, parents)` to `add(provenance)`, and lineage is now taken from `Provenance.parent_provenance_refs`; the latter replaces the empty-string check on `unavailable_reason` with a whitespace-trimmed check and adds an `IncompleteProvenanceLineage` rejection path when no parents and no `unavailable_reason` are supplied. However, PR #707 does not implement the per-element revalidation required by Section 3 of this registration for the four reference fields: `source_refs`, `source_version_refs`, `actor_ref.actor_id`, and `parent_provenance_refs`.

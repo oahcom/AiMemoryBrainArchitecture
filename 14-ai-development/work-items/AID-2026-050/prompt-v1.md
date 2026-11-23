@@ -35,7 +35,7 @@ reaches it.
 ## 1. Hard constraints
 
 **#0 — Do not write a JSON Schema validator, and do not add a `jsonschema` dependency.**
-`crates/bmcp-protocol/Cargo.toml` has none, and `GAP-16` §6 explains why that is deliberate, not
+`crates/bmcp-protocol/Cargo.toml` has none, and `GAP-32` §6 explains why that is deliberate, not
 an oversight. Adding one makes 20 message types conform to schema text that
 `TECH-REALITY-001-C/README.md:70` records as **not frozen**. That work is unmergeable by
 construction. If you find yourself reaching for a schema engine, stop and re-read this line.
@@ -136,7 +136,7 @@ authoritative one. Use the one in the message.
 
 | tempting move | why it is wrong |
 |---|---|
-| add `jsonschema` and validate all 22 | the schemas are the unfrozen text (`GAP-16` §6) |
+| add `jsonschema` and validate all 22 | the schemas are the unfrozen text (`GAP-32` §6) |
 | return `{"valid":true}` without `validation_state` | flattens three states into a boolean; hides that 20 are unvalidated |
 | return `{"valid":true}` for `root_discriminator_only` | claims schema conformance that was never established |
 | add `digest_bmcp_message` for symmetry | `p0_digest` is defined for one type; 19 canonicalisation profiles do not exist |
@@ -156,7 +156,7 @@ The task is done when all of these hold and you have shown the command and its o
    `validation_state: "structurally_parsed"`.
 4. **Each of the 20 remaining types**, given a message that strictly parses and carries a known
    `message_type`, returns `{"valid":true, "validation_state":"root_discriminator_only"}`. All 20
-   are named in `GAP-16` §2 and in `parse_dispatch`'s match arms; a test that covers 19 of them and
+   are named in `GAP-32` §2 and in `parse_dispatch`'s match arms; a test that covers 19 of them and
    claims 20 is the specific failure this criterion exists to catch.
 5. A message whose `message_type` is absent, non-string or unknown returns `isError: true`,
    `valid:false`, and never `-32601`.
@@ -183,7 +183,7 @@ The task is done when all of these hold and you have shown the command and its o
 
 ## 7. Provenance
 
-Dispatched by the owner-proxy session that measured `GAP-16` at `6212ec75` and authored
+Dispatched by the owner-proxy session that measured `GAP-32` at `6212ec75` and authored
 `OWNER-DECISION-BMCP-MCP-DISPATCH-001` (#733, merged `9b95e8bb`). This prompt is a task
 description, not a decision: the decision is already merged. If this prompt and the ruling
 disagree, **the ruling wins** and the discrepancy is a finding to report, not a choice to make.
