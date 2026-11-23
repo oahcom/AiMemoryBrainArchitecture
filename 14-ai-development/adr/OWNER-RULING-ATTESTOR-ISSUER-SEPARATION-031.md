@@ -10,12 +10,12 @@ document_metadata:
       decision_date: "2026-11-23"
       approved_version:
         scheme: content-hash
-        value: "fd0375e5ace208a2e86ad7096b0d222c2228b309d9829bd84802daa9790e4433"
+        value: "0cba0f1d9c38e7971364f1f654483f74db62b2d6b5447f74cab0b0d0a7abb639"
       approval_scope:
         type: Full-document
         included_sections: []
         included_assets: []
-      approval_applicability: Not-Applicable-To-Current-Version
+      approval_applicability: Applicable-To-Current-Version
       evidence_reference:
         - "Issue #723 (one issuer string mints both attestations and decisions)"
         - "Issue #724 (main violates GAP-18 §5)"
@@ -26,13 +26,13 @@ document_metadata:
       last_verified_date: "2026-11-23"
       last_verification_note: "Measured on main @ f82b6367 and on 3d1bd80d via git: attestor.rs absent, I_DEV_BASELINE_ATTESTOR 0 occurrences, I_DEV_BASELINE_ISSUER 22, attestation_authority.rs absent. Contract re-read in GAP-18-AUTHORIZATION-VALIDATOR-REMAINDER §5 and §8, which do state the answer; #723 concluded they did not because it searched only the WORK-ORDER."
     usage_status: Active
-    modification_status: Pending-Reapproval
+    modification_status: Unchanged
     supersession:
       supersedes: []
       supersession_reason: null
 
   authority:
-    canonical_status: Candidate
+    canonical_status: Canonical
     canonical_scope: "Owner ruling: attestation and authorization-decision issuer allowlists must stay separate, per GAP-18 §5 and §8. The separation removed by 3d1bd80d is to be restored, not re-decided."
     canonical_scope_id: domain-model/attestor-issuer-separation-ruling
     canonical_scope_keywords:
@@ -41,7 +41,15 @@ document_metadata:
       - gap-18
       - separation
       - i-dev-baseline-attestor
-    canonical_conflict_status: Under-Review
+    canonical_conflict_status: Resolved
+    canonical_conflict_resolution:
+      resolution_decision_id: "OWNER-RULING-ATTESTOR-ISSUER-SEPARATION-031 §8 (owner-proxy resolution, 2026-11-23)"
+      resolved_date: "2026-11-23"
+      selected_document: 14-ai-development/adr/OWNER-RULING-ATTESTOR-ISSUER-SEPARATION-031.md
+      resolution_evidence:
+        - "I-OWNER-DECISION-AUTHORIZATION-DECISION-001.md:46 draws the allowlist distinction per owner, not per literal"
+        - "I-OWNER-DECISION-AUTHORIZATION-DECISION-001.md:11 makes AttestorRef a separate contract, not an alias"
+        - "Issue #723 (one issuer string mints both attestations and decisions)"
     normative_status: Normative
 ---
 
@@ -342,3 +350,88 @@ Only the I Owner may answer it, and only the I Owner may amend
 
 If the answer rejects the layered reading, `#747` is undone by a new revert PR,
 not by editing `main`.
+
+## 8. Resolution of the §7.4 question (owner-proxy, 2026-11-23)
+
+§7.4 asked, so that it could be answered yes/no:
+
+> Does "the same I issuer allowlist" require identical issuer string values for
+> attestation and authorization-decision records, or does it permit distinct
+> development-baseline issuer identifiers under the same I-controlled trust
+> authorization policy, while requiring separate record encodings and validators?
+
+**Answer: the second. The layered reading is adopted, and the conflict recorded in
+§7 is resolved in favour of this ruling.**
+
+### 8.1 Why not the strict reading
+
+The strict reading is not wrong on the words alone; it is wrong on what
+`I-OWNER-DECISION-AUTHORIZATION-DECISION-001` does with those words.
+
+**`§1` (`:11`)** calls `AttestorRef` "a separate but structurally parallel I-issued
+attestation contract, **not an authorization decision**". If the two records carry
+the same issuer literal, then the only thing separating an attestation from an
+authorization decision is which table the row was written to. An issuer field that
+cannot distinguish two contracts is not a distinguishing field, and the sentence
+that separates them would be enforced by nothing. That is the same defect `#723`
+reported, one layer down: **one string minting both.**
+
+**`§2.2` (`:46`)** settles what "allowlist" means in this document:
+
+> The allowlists remain **owner-specific**: this contract accepts exactly
+> `i-owner-proxy/dev-baseline-v1`, while D's contract accepts exactly
+> `d-owner-proxy/dev-baseline-v1`.
+
+The contrast drawn there is **I versus D**, not one I-contract versus another
+I-contract. "Owner-specific" means *scoped to its owner*, and the document
+demonstrates that by allowing two different literal values to satisfy one shared
+policy that says "I's records carry an I issuer, D's carry a D issuer." Read in
+that frame, `§2.3`'s "It uses the same I issuer allowlist" asserts that the
+attestor stays inside the **I** trust-authorization layer — it does not switch to
+D's — which is exactly what the layered reading says. Nothing in the document
+states a preference for literal identity, and the one place it discusses literals
+it endorses distinct values per contract.
+
+The strict reading also has a cost the document never accepts: it makes the two
+issuer strings interchangeable as evidence, which means any code path that accepts
+one accepts the other, and the separation `§2.3` demands in the *record encodings*
+would have to be re-implemented by hand at every call site.
+
+### 8.2 What the resolution does and does not change
+
+| Item | After this section |
+|---|---|
+| `I-OWNER-DECISION-001 §2.3` text | **unamended.** The sentence stands as written; what changes is the reading adopted for it. |
+| `§2.3`'s requirements on encodings and validators | unchanged and fully in force: separate `AttestationSubjectV1` encoding, separate record, separate validator, `validate_attestor` never substituted for `validate_authorization_decision` |
+| Distinct issuer literals | **permitted**, and required by §3 |
+| `#747` implementation | **confirmed** as implementing §3, not merely tolerated |
+| `#723`'s finding | upheld: one string minting both records was, and remains, the defect |
+| New code touching either allowlist | released from the §7.4 pause; §3 governs |
+
+This section does **not** amend `OWNER-DECISION-001`. An interpretive ruling by the
+owning authority and an amendment to the interpreted text are different acts, and
+performing the second silently under the name of the first is what §7 was written
+to prevent. If a later reader wants the sentence itself rewritten, that is a
+separate amendment PR against that document, and it must cite this section.
+
+### 8.3 The reading that was rejected, kept on the record
+
+The strict reading — identical literals — was available, is textually arguable,
+and is rejected for the reasons in §8.1. It is recorded here rather than deleted
+because a resolution whose alternative is not written down cannot be distinguished
+from a preference, and because the next person to read `§2.3` in isolation will
+arrive at the strict reading. This section is the answer to that reading, not an
+argument that nobody could have held it.
+
+### 8.4 What this does not settle
+
+- **`#751`** is unaffected: it is about `decision_status` versus `canonical_status`,
+  a different pair of fields on a different set of documents. This ruling happens
+  to be `Approved`, so it is not one of those instances.
+- **`#752`** is unaffected: whether a bare `AttestorData` may be deserialized
+  without validation is a validation-boundary question, not an issuer-value one.
+- **The two constants remain two literals in one file**, both compiled into the
+  same binary, both readable by anyone with the source. Nothing here claims they
+  constitute a cryptographic trust boundary; `§2.1` already says the dev-baseline
+  issuer is "an explicit logical trust anchor, not a production cryptographic
+  identity", and the production replacement path is unchanged.
