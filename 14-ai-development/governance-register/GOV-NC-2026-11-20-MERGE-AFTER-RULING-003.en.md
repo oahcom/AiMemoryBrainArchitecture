@@ -397,4 +397,22 @@ The #707 incident is not counted toward the previously frozen total of four zero
 
 ---
 
+### 13.8 PR #750: Governance-Standard Integration Without Formal Review and a Post-Merge Discovery
+
+PR #750 (`docs(governance): lock merges while a blocking review disposition stands`) was merged at 2026-11-23T05:48:21Z as commit `9de6a34ecde46e07cc50fed99135c089cc6f383b`. The merge was a squash merge with a single parent.
+
+The GitHub formal review API returned an empty array; inline review comments were also empty. Accordingly, no formal review record establishes that the final candidate Head received independent review confirmation.
+
+At the time PR #750 was merged and when this event was first recorded, the root-level `_dm.txt` file was present in `main`. It was subsequently removed by commit `694a56e71` (`chore: remove _dm.txt from the repository root (#750 follow-up)`) at 2026-11-23T08:28:29Z; that change was later incorporated into `main` by merge commit `bf5497390` through PR #762. The cleanup commit also added four lines to `.gitignore` for the exact root path `/_dm.txt`, so the resulting change was not deletion-only.
+
+All four CI checks were successful before the merge. However, the relevant document-management gate scans only `.md` files; `.txt` files are outside its scan set. Those successful results therefore do not establish that `_dm.txt` was inspected or that the file was appropriate for repository inclusion.
+
+Comment `#7092757924` was posted at 2026-11-23T05:49:05Z, 44 seconds after the merge. It identified `_dm.txt` as a gate-output snapshot and requested its removal. This was a post-merge discovery and must not be described as a finding raised or resolved before the merge.
+
+This section records only verifiable PR, commit, review, check, and file facts. It does not infer the identity or responsibility of the actual operator from commit author or committer fields, nor does it use a retrospective entry to claim that PR #750 received formal independent review.
+
+This event does not alter the counting ruling for PR #707 in §13.7 and is not added to the previously frozen count of four zero-review merge instances. It is recorded separately as a governance-standard integration PR that lacked formal independent review, whose corrective commit introduced an additional file that the existing gates did not scan.
+
+---
+
 **Registration status update**: `OPEN` / `NOT_REMEDIATED` / instance count **4 (frozen, unchanged)** / new fact: **first occurrence of "blocking review disposition issued, correction not landed, merge proceeded", 27-second interval, check green at merge; recorded separately and excluded from the zero-review merge count**
