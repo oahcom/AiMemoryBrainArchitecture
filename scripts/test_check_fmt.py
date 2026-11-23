@@ -42,7 +42,7 @@ class CheckFmtWorktreeTests(unittest.TestCase):
         git(root, "commit", "-q", "-m", "seed")
         head = git(root, "rev-parse", "HEAD")
 
-        bin_dir = root / "bin"
+        bin_dir = root.parent / "bin"
         bin_dir.mkdir()
         cargo = bin_dir / "cargo"
         cargo.write_text(
@@ -50,7 +50,7 @@ class CheckFmtWorktreeTests(unittest.TestCase):
             encoding="utf-8",
         )
         cargo.chmod(0o755)
-        log = root / "cargo.log"
+        log = root.parent / "cargo.log"
         env = os.environ.copy()
         env["PATH"] = str(bin_dir) + os.pathsep + env.get("PATH", "")
         env["CARGO_LOG"] = str(log)
@@ -71,7 +71,7 @@ class CheckFmtWorktreeTests(unittest.TestCase):
 
     def test_clean_tree_runs_fmt_and_reports_commit(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            root, head, env, log = self.make_repo(Path(tmp))
+            root, head, env, log = self.make_repo(Path(tmp) / "repo")
             result = self.run_checker(root, head, env)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertIn("WORKTREE_RESULT=CLEAN", result.stdout)
@@ -81,7 +81,7 @@ class CheckFmtWorktreeTests(unittest.TestCase):
 
     def assert_dirty_refused(self, mutation: str) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            root, head, env, log = self.make_repo(Path(tmp))
+            root, head, env, log = self.make_repo(Path(tmp) / "repo")
             if mutation == "modified":
                 (root / "src" / "lib.rs").write_text("pub fn changed() {}\n", encoding="utf-8")
             elif mutation == "staged":
