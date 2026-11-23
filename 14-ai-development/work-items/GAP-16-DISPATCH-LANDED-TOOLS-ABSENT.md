@@ -12,7 +12,7 @@ document_metadata:
       last_verified_date: "2026-11-23"
       last_verification_note: "Every figure in §2 was measured at main 021f5a3f in this session, and each is given with the command that produced it. The three figures GAP-15 recorded at fb37a44b are reproduced and their expiry is explained in §3 rather than quietly overwritten."
     usage_status: Active
-    modification_status: New
+    modification_status: Unchanged
 
   authority:
     canonical_status: Non-Canonical
