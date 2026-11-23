@@ -30,9 +30,9 @@
 //!   per-partition vector rather than one collapsed maximum.
 
 use crate::{
-    sha256_hex, CanonicalWatermark, ContextBudget, ContextCandidate, DeliveryId, DeliveryLifecycle,
-    DeliveryState, SelectionBudgetUsage, SufficiencyAssessment, SufficiencyDimension,
-    SufficiencyOutcome,
+    sha256_hex, BlockedRefs, BudgetUsage, BudgetVector, CanonicalWatermark, ContextBudget,
+    ContextCandidate, DeliveryId, DeliveryLifecycle, DeliveryState, SelectionBudgetUsage,
+    SufficiencyAssessment, SufficiencyDimension, SufficiencyOutcome, SufficiencyReport,
 };
 use std::collections::{BTreeMap, HashSet};
 
@@ -108,6 +108,40 @@ pub struct BudgetSufficiencyReport {
     pub omissions: Vec<DimensionOmission>,
     /// Per-index/per-partition watermarks, in the caller's order.
     pub watermarks: Vec<CanonicalWatermark>,
+
+    /// §9.4 item 4: canonical commit/fence references and the PermissionEpoch
+    /// decision. `None` means the domain report did not carry it.
+    pub canonical_commit_ref: Option<String>,
+    pub forget_fence_ref: Option<String>,
+    pub permission_epoch: Option<u64>,
+
+    /// §9.4 item 5: the budget vector alongside measured usage.
+    ///
+    /// `None` means no vector was supplied / nothing was measured. That is not
+    /// zero, so neither field may be folded into a default.
+    pub budget: Option<BudgetVector>,
+    pub budget_usage: Option<BudgetUsage>,
+    pub token_estimate_profile: Option<String>,
+    pub rendered_bytes: Option<usize>,
+    pub entries: Option<usize>,
+
+    /// §9.4 item 6: compacted source membership and the profiles used to
+    /// validate and digest it.
+    pub compacted_sources: Vec<String>,
+    pub validation_profile: Option<String>,
+    pub digest_profile: Option<String>,
+
+    /// §9.4 item 7: disclosure-controlled references.
+    ///
+    /// Carried as the domain type rather than flattened into a list plus a
+    /// count, so the "no undisclosed total" guarantee stays a property of the
+    /// type instead of a rule this module promises to follow.
+    pub blocked: BlockedRefs,
+    pub deferred: BlockedRefs,
+
+    /// False means the optional/empty fields above cannot be read as
+    /// established negatives.
+    pub sufficiency_currentness_established: bool,
 }
 
 /// Project the selection and sufficiency results into a report.
@@ -116,8 +150,7 @@ pub struct BudgetSufficiencyReport {
 /// come from the selector, `assessment` from `assess_sufficiency`. Nothing is
 /// recomputed, so the report cannot disagree with the decision it describes.
 pub fn build_budget_sufficiency_report(
-    context_version: u64,
-    requirement_profile: &str,
+    sufficiency: &SufficiencyReport,
     budget: &ContextBudget,
     usage: &SelectionBudgetUsage,
     excluded: &[(&ContextCandidate, &'static str)],
@@ -160,10 +193,10 @@ pub fn build_budget_sufficiency_report(
         .collect();
 
     BudgetSufficiencyReport {
-        context_version,
+        context_version: sufficiency.context_version(),
         requirement_profile_digest: format!(
             "sha256:{}",
-            sha256_hex(requirement_profile.as_bytes())
+            sha256_hex(sufficiency.requirement_profile_version().as_bytes())
         ),
         outcome: SufficiencyOutcomeKind::from(&assessment.outcome),
         evaluated_requirements: assessment.evaluated_requirements,
@@ -177,6 +210,25 @@ pub fn build_budget_sufficiency_report(
         exclusions,
         omissions,
         watermarks: watermarks.to_vec(),
+
+        canonical_commit_ref: sufficiency.canonical_commit_ref.clone(),
+        forget_fence_ref: sufficiency.forget_fence_ref.clone(),
+        permission_epoch: sufficiency.permission_epoch,
+
+        budget: sufficiency.budget.clone(),
+        budget_usage: sufficiency.budget_usage.clone(),
+        token_estimate_profile: sufficiency.token_estimate_profile.clone(),
+        rendered_bytes: sufficiency.rendered_bytes,
+        entries: sufficiency.entries,
+
+        compacted_sources: sufficiency.compacted_sources.clone(),
+        validation_profile: sufficiency.validation_profile.clone(),
+        digest_profile: sufficiency.digest_profile.clone(),
+
+        blocked: sufficiency.blocked.clone(),
+        deferred: sufficiency.deferred.clone(),
+
+        sufficiency_currentness_established: sufficiency.currentness_established(),
     }
 }
 
