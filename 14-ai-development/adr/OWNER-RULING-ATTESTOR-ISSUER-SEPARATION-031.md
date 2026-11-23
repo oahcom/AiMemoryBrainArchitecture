@@ -32,16 +32,26 @@ document_metadata:
       supersession_reason: null
 
   authority:
-    canonical_status: Candidate
-    canonical_scope: "Owner ruling: exactly two distinct I development-baseline issuer identifiers are admitted under one I-controlled trust-authorization policy: i-owner-proxy/dev-baseline-v1 for authorization decisions and i-attestor-proxy/dev-baseline-v1 for attestations. The two record families retain separate encodings, records, and validators, per Issue #763 comment #7097007415."
+    canonical_status: Canonical
+    canonical_scope: "The implementation and validation invariant that attestation and authorization-decision records use distinct issuer identifiers, subject to the controlling I Owner-proxy trust-authorization policy."
     canonical_scope_id: domain-model/attestor-issuer-separation-ruling
     canonical_scope_keywords:
       - attestor-issuer
-      - i-attestations
-      - gap-18
-      - separation
+      - authorization-decision-issuer
+      - issuer-separation
       - i-dev-baseline-attestor
-    canonical_conflict_status: Under-Review
+      - i-owner-proxy
+      - stored-row-validation
+    canonical_conflict_status: Resolved
+    canonical_conflict_resolution:
+      resolution_decision_id: GOV-CANON-2026-001
+      resolved_date: "2026-11-23"
+      selected_document: "14-ai-development/adr/OWNER-RULING-ATTESTOR-ISSUER-SEPARATION-031.md"
+      resolution_evidence:
+        - "I Owner-proxy ruling, Issue #763 comment #7097007415: exactly two distinct development-baseline issuer identifiers under one I-controlled trust-authorization policy."
+        - "RULING-031 §7.4: the earlier interpretation relying on GAP-18 §5 is withdrawn; I_DEV_BASELINE_ATTESTOR stays and PR #747 stands."
+        - "PR #789 / merge commit 5ba3cc74df57: §7.4 records the section-scoped amendment and compile-time issuer-separation invariants."
+        - "PR #802 / merge commit 3046c848: Owner Decision §2.3 dated clarification is merged, preserving the original decision date and text."
     normative_status: Normative
 ---
 
