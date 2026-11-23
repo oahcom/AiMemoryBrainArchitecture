@@ -971,14 +971,55 @@ At `bea1c2b`, `crates/bmcp-server/src/lib.rs`:
 - has **no** `#[allow(dead_code)]` anywhere in the crate, and `describe()` at
   line 938 is called at line 419.
 
-This matters beyond bookkeeping. §10.2 and GAP-16 both use "no route from wire
-to parser" as the load-bearing fact for the conclusion *the 21 parsers are the
-largest available increment*. The route exists for one message type end to end
-(wire → `tools/call` → `parse_and_validate` → digest). What is absent is the
-other 21 types, not the route.
+So the route from wire to parser exists end to end for one message type. What
+is absent is the other 21 types, not the route.
 
-The count itself is unchanged and re-confirmed: **22 declared message types, 3
-recognised anywhere in `crates/`, 19 with no Rust recognition at all.**
+### 11.2a The message-type count inverted four minutes after this section was measured
+
+The paragraph above was measured at `bea1c2b` (2026-11-23 11:21:59 +08:00) and
+was accurate there. `#707` (`f82b636`, *route Storage.PreparedParticipantReceipt
+through its structural parser*) merged at **11:25:25 +08:00**, four minutes
+later, and added `parse_dispatch` — a router with one arm per declared message
+type. Measured at `021f5a3f` (main at the time of writing):
+
+| element | `bea1c2b` | `021f5a3f` |
+|---|---:|---:|
+| declared message types | 22 | 22 |
+| types recognised anywhere in `crates/` | 3 | **22** |
+| `parse_dispatch` arms | 0 (router did not exist) | **22** |
+| arms that validate semantically (`SemanticallyValidated`) | 2 | **1** |
+| arms that parse structurally (`StructurallyParsed`) | 0 | **1** |
+| arms that only recognise the root discriminator (`RootDiscriminatorOnly`) | 20 | **20** |
+| production callers of `parse_dispatch` outside `bmcp-protocol` | 0 | **0** |
+
+Two corrections to that table, both against my own first reading and against a
+reviewer's:
+
+- The validating-arm count went **down**, not up. At `bea1c2b` two named
+  functions validated: `parse_and_validate` (→ `AppliedDeliveryEvidence`) and
+  `parse_storage_receipt` (→ `Storage.PreparedParticipantReceipt`). The router
+  kept both, but labels them differently: `APPLIED_DELIVERY_EVIDENCE_RECORDED` is
+  `SemanticallyValidated` (line 1761), `Storage.PreparedParticipantReceipt` is
+  only `StructurallyParsed` (line 1765). So it is **1 + 1**, not 2 validated,
+  and not the "5 validate / 17 tag-only" split a reviewer proposed — that split
+  does not reproduce: the arms are 22, of which exactly 2 do more than read the
+  discriminator.
+- `is_structurally_unvalidated()` (line 1774) returns true for
+  `RootDiscriminatorOnly` only, so the 20 tag-only arms are precisely the ones
+  the type itself calls unvalidated. The enum documents the distinction at
+  lines 1654–1668; nothing needs to be inferred.
+
+The conclusion §11.2 defends survives and gets stronger. "The 21 parsers are the
+largest available increment" was never really about recognition — it is about
+validation, and 20 of 22 arms validate nothing. `bmcp-server` still calls
+`parse_and_validate` twice by name and never calls `parse_dispatch` at all
+(`grep -rn parse_dispatch crates/bmcp-server/` → 0).
+
+What does **not** survive is the sentence as originally written, which said
+*recognised*. By that word the count is 22 of 22, not 3 of 22. This section is
+left standing as a second instance of the defect the whole document is about:
+`bea1c2b` was accurate, `#707` landed four minutes later, and the figure was
+stale before the branch was pushed.
 
 ### 11.3 The `describe()` citation is a line number from a 723-line file
 
@@ -1026,9 +1067,11 @@ returns `publication_participant_admitted: false` and
 `D-OWNER-DECISION-PARTICIPANT-ADMISSION-001` §1 and
 `D-OWNER-DECISION-PROTECTED-VISIBILITY-001` §1 require — not an oversight.
 
-Item 2, BMCP transport, is now narrower than §9.3 states: transport exists, one
-message type is routed end to end, and the residue is 19 unparsed types plus
-frozen framing (§11.2).
+Item 2, BMCP transport, is now narrower than §9.3 states, and narrower again
+after `#707`: transport exists, all 22 message types are recognised by a router,
+but only 2 of the 22 arms do more than read the discriminator and no production
+caller outside `bmcp-protocol` reaches it (§11.2, §11.2a). The residue is
+validation, not recognition, plus framing which is still frozen by H.
 
 ### 11.6 Reproduction
 
@@ -1069,6 +1112,36 @@ grep -rn 'allow(dead_code)' crates/bmcp-server/src/ | wc -l    # 0
 grep -rn 'bmcp_protocol' crates/bmcp-server/src/ | wc -l       # 8
 ```
 
+Router arms and their validation strength (§11.2a), counted per arm rather than
+by eye:
+
+```sh
+python3 - <<'PY'
+import re, subprocess
+src = subprocess.run(
+    ['git', 'show', 'origin/main:crates/bmcp-protocol/src/lib.rs'],
+    capture_output=True, text=True,
+).stdout
+seg = src[src.index('match message_type {', src.index('pub fn parse_dispatch')):]
+pos = [m for m in re.finditer(r'^\s+"([A-Za-z][A-Za-z0-9_.]+)"\s*=>', seg, re.M)]
+tag = []
+for i, m in enumerate(pos):
+    body = seg[m.end():pos[i + 1].start() if i + 1 < len(pos) else len(seg)]
+    if 'StructurallyUnvalidated' in body:
+        tag.append(m.group(1))
+print('arms', len(pos), 'tag_only', len(tag))
+PY
+# arms 22 tag_only 20
+grep -n 'fn validation_state' -A14 crates/bmcp-protocol/src/lib.rs
+grep -rn 'parse_dispatch' crates/bmcp-server/ | wc -l    # 0
+```
+
+Split the 2 non-tag arms by the state the type itself assigns them, not by
+whether the arm looks like it validates: `Storage.PreparedParticipantReceipt`
+calls `parse_storage_receipt` yet reports `StructurallyParsed`, not
+`SemanticallyValidated`.
+
+
 The 19 unparsed types, derived from the index table rather than retyped:
 
 ```sh
@@ -1092,6 +1165,12 @@ One caution on that last loop: `PROTOCOL-INDEX.md` written by Python on Windows
 carries CRLF, and a `while read` over a CRLF list silently matches nothing —
 every type reports 0. Strip `\r` (`tr -d '\r'`) before trusting the counts, or
 the measurement reproduces GAP-15's conclusion for the wrong reason.
+
+Applied here: I hit that bug on the first attempt and got 0 recognised for all
+22 types, which reads as "22 absent" and would have been a stronger and
+completely false version of the §11.2 finding. The 3-of-22 figure came from the
+`tr -d '\r'` run. Recorded rather than quietly fixed, because the bug produces
+the conclusion the document already expected.
 
 ### 11.7 What this errata does not do
 
