@@ -40,7 +40,13 @@ jobs:
             REF="$PUSH_BEFORE"
           fi
           if [ -n "$REF" ]; then
-            python3 scripts/check_document_management.py --require-changed "$REF"
+            python3 scripts/check_document_management.py --require-changed "$REF" || {
+              status=$?
+              # Exit 3 is only an empty increment (no paths to verify). A REF
+              # selection error is exit 1 and must remain a failed check.
+              [ "$status" -eq 3 ] && { echo "::notice::incremental verification not applicable: no changed paths to inspect"; exit 0; }
+              exit "$status"
+            }
           else
             # No base to diff against (first push of a branch). Whole-tree scan.
             # It now exits 2 (INCOMPLETE) while backlog remains, so this step

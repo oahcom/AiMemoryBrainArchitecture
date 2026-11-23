@@ -481,7 +481,7 @@ The four root documents remain the normative C-owned source baseline. The guide 
 
 D and I exact semantic decisions are pinned to Issue #429 comments 7060243632 and 7060259541 respectively. H logical decision and scope clarification are pinned to PR #428 comments 7060190878 and 7060264372. Those decisions do not freeze the C-H operation registry, exact field schemas, transport or Runtime.
 
-PR #453 is an open Draft BMCP architecture-review PR and is not a substitute for H's versioned normative wire/operation artifacts. PR #430 remains a separate open Draft architecture proposal and its three-copy document shape is not canonicalized here.
+PR #453 is closed/merged into the dedicated `bmcp-validation-base-c588` snapshot branch at merge commit `7c7801db396b92c57ad37020fe170f65f25e43ce`, not into live `main`; its `ARCHITECTURE_PARTIAL / NOT ACCEPTED` review artifact is not a substitute for H's versioned normative wire/operation artifacts. PR #430 is merged into `main` at `0cce40aae5c642f30fabef7b844ac8397322684b`; its three working-copy documents remain Non-Canonical / Informative and do not create a second canonical authority.
 ### 21.4 Historical 13-section handoff source (input only)
 
 The separately reported 13-section source was recovered from the local Git object store and restored without changing its commit onto `recovery/agent-integration-13-section-source-b5658b0`. GitHub now resolves that recovery branch to commit `b5658b088fade8a15dc78ca9dbde19d2f6753564`. Its three exact source Blobs are:

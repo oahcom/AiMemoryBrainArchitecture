@@ -1,3 +1,20 @@
+---
+document_metadata:
+  domain: ai-development
+  role: reference
+  lifecycle:
+    approval:
+      decision_status: Draft
+    evidence_verification:
+      verification_status: Unverified
+    usage_status: Active
+    modification_status: Modified
+  authority:
+    canonical_status: Non-Canonical
+    normative_status: Informative
+    canonical_conflict_status: None
+---
+
 # AI Work Item and Prompt Record Template
 # AI 任务与提示词记录模板
 
@@ -28,6 +45,13 @@ dependency_refs: []
 prompt_id: ""
 prompt_version: "v1"
 prompt_sha256: ""
+# Exact payload sent to this session after composing baseline + task-specific instructions.
+executed_prompt_snapshot_file: ""
+executed_prompt_sha256: ""
+executed_prompt_bytes: null
+executed_prompt_provenance: "VERIFIED | NOT_VERIFIED | NOT_AVAILABLE"
+session_reference_status: "RECORDED | NOT_AVAILABLE | NOT_RECORDED"
+session_evidence_ref: ""
 created_at: ""
 updated_at: ""
 implementation_branch: ""
@@ -178,6 +202,16 @@ Stop and report if:
 - Record which version was actually used by each AI run.
 - Never overwrite a prompt version that has already been executed.
 - If a run used an unrecorded conversational clarification, append it as a dated run addendum and assess whether a new prompt version is required.
+
+## 3.1 Executed prompt capture / 实际执行提示词留存
+
+The reusable global/Owner prompt is a baseline, not necessarily the complete payload sent to a ChatGPT session. Before execution, preserve the exact task-specific payload actually supplied to the session as `executed_prompt_snapshot_file`. This snapshot MUST include the effective instructions after applicable baseline prompts and task-specific additions/clarifications have been composed. Do not reconstruct it from a summary or infer missing text.
+
+Record its exact-byte SHA-256 and byte count in the manifest. Bind it to `implementing_ai_session` (or the relevant reviewer/session role) and `session_evidence_ref`. If the platform does not expose a stable session reference, use `session_reference_status: NOT_AVAILABLE` and explain the limitation in the evidence record; do not invent an identifier. If the original payload bytes cannot be recovered, use `executed_prompt_provenance: NOT_VERIFIED` or `NOT_AVAILABLE` and do not claim the prompt was captured.
+
+可复用的全局/Owner 提示词是基线，不一定等于实际发送给 ChatGPT 会话的完整提示词。在执行前，必须将实际提供给会话的任务专属完整 payload 保存为 `executed_prompt_snapshot_file`。该快照必须包含适用基线提示词与任务专属补充/澄清组合后的有效指令。不得从摘要重建，也不得推测缺失文本。
+
+在 manifest 中记录其原始字节 SHA-256 和字节数，并将其绑定到 `implementing_ai_session`（或相应审查者/会话角色）及 `session_evidence_ref`。如果平台不提供稳定会话引用，使用 `session_reference_status: NOT_AVAILABLE`，并在证据记录中说明限制；不得编造标识。如果无法恢复原始 payload 字节，使用 `executed_prompt_provenance: NOT_VERIFIED` 或 `NOT_AVAILABLE`，不得声称提示词已留存。
 
 ## 4. Required evidence bundle / 必需证据包
 

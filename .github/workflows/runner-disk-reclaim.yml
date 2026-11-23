@@ -21,9 +21,8 @@ name: Runner disk reclaim (manual)
 # WHY `cancel-in-progress: false`:
 # A reclaim is a sequence of measure / delete / measure. Cancelling it halfway
 # leaves the disk partially reclaimed and the report wrong, and the next
-# observer cannot tell which deletions landed. Two reclaims queued back to back
-# are harmless; one interrupted reclaim is not. This is the opposite of the
-# `gates.yml` concurrency group, which exists to drop superseded runs.
+# observer cannot tell which deletions landed. An interrupted reclaim is not
+# equivalent to a completed reclaim; preserve an in-progress operation.
 #
 # WHAT IT DELETES, AND WHAT IT WILL NOT:
 # Only things that are re-creatable from the network without a decision:

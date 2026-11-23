@@ -57,7 +57,7 @@ document_metadata:
 | 权威契约 | `02-domain-model/core-entities.md` §8 |
 | 影响组件 | `memory-domain`、`memory-compiler`、`bmcp-protocol` 及其测试 |
 | 关联登记 | GOV-NC-2026-11-22-ENUM-BOUNDARY-021；GOV-NC-2026-11-22-PHASE2-RESIDUAL-022 |
-| 实施授权 | NOT AUTHORIZED |
+| 实施授权 | WP-B 已派发 — `AID-2026-053`（见 §11）；WP-A 未获授权且当前不可实施 |
 | 关闭条件 | WP-A 与 WP-B 全部满足，并完成独立验证 |
 
 本登记记录 Evidence 领域实体的实现与权威领域契约之间的系统性符合性缺口。
@@ -106,6 +106,8 @@ document_metadata:
 - 不将本登记标记为已完成。
 - 不把缺乏迁移依据的旧值静默映射为新值。
 - 不将本登记的目标结构解释为已经获得实施授权。
+
+上述禁止以「获得独立实施授权之前」为前提。WP-B 已于 2026-11-23 按 §11 派发，该授权仅及于 §11 表格所列范围；WP-A 与其他条目继续有效。
 
 ## 4. 问题概述
 
@@ -502,3 +504,26 @@ Evidence 当前实现与权威领域契约之间存在结构性符合性缺口�
 在正式授权、完成历史数据盘点及迁移方案审批之前，既有实现保持不变。
 
 **最终状态：OPEN — EVIDENCE DOMAIN CONTRACT CONFORMANCE DEBT.**
+
+## 11. 实施派发（2026-11-23）
+
+| 项目 | 内容 |
+|---|---|
+| 工作令 | `AID-2026-053`（`14-ai-development/work-items/AID-2026-053/`） |
+| 派发依据 | 本登记 §2 WP-B、§7 WP-B、§8 WP-B；裁定 `OWNER-DECISION-EVIDENCE-CONTRACT-001` §8 |
+| 实施范围 | `crates/memory-domain/src/lib.rs` 的两个枚举声明，`crates/memory-compiler/src/evidence.rs` 的 `attachment_decision`，及两侧测试 |
+| 明确不授权 | WP-A、`Evidence` 与 `EvidenceExtension` 的任何字段变更、`crates/bmcp-protocol/` 的任何改动、本登记关闭 |
+
+**本次只派发 WP-B，因为 WP-B 与 WP-A 的阻塞性质不同。** WP-A 不是「未获授权」，而是**当前不可实施**：`Instant`、`Locator`、`ContentRef` 三个契约类型在全仓 `crates/` 下出现次数为零，`Instant` 另受本登记 §14 的「时间戳精度」未决项约束。授权无法解除这个阻塞，定义才能。
+
+**§7 WP-B 第 4 项测量不到任何对象。** 该项要求「验证 BMCP 协议映射」。`crates/bmcp-protocol/` 确有一个同名 `EvidenceKind`，但它是 `pub mod evidence` 下的四个投递类别（`FINAL_REQUEST_SUBMITTED`、`APPLIED_CONTEXT_OBSERVED`、`EXECUTION_STARTED`、`RECONCILIATION_OBSERVED`）；该 crate 不依赖 `memory-domain`，包外无任何引用，两侧不存在任何转换实现。两个枚举只共享一个名字。因此该项的正确产出是「无映射可验证」这一结论本身，而不是新建一个映射。派发已把该结论写进工作令的硬约束 #1。
+
+**§6.3 与实测的直接冲突，以及它的解决方式。** §6.3 开头称「目前没有充分证据证明所有历史持久化数据均不包含旧枚举值」，并要求实施前独立盘点。实测结果是：`EvidenceExtension` 不出现在任何存储 crate 中，仓库内无 `.db`/`.sqlite` 文件，无 `*.sql` 迁移，两个枚举的四个非契约 `EvidenceKind` 值与 `Unavailable` 的构造点合计一处且位于测试内。所以本仓库不存在需要盘点的旧数据。
+
+但这句话不能靠「我搜过了」来成立，因此本次采用 §6.3 第 4 项自己给出的另一条分支：**无法建立可靠映射时，拒绝加载**。`Unavailable` 不静默转成 `Expired`，也不静默转成 `ExternalUnavailable`，而是让 serde 反序列化失败。这样一来，本登记 §9 第 6 项要求的「经过批准的迁移或拒绝加载策略」以拒绝加载的形态被满足，而 §6.3 第 1、2、3、5 项在实现层不可能被违反——不存在能把旧值带进新值域的路径。
+
+**§3 的禁止项在 WP-B 范围内解除。** §3 的禁止以「获得独立实施授权之前」为前提。本次派发即该授权，但仅及于上表所列范围。§3 的下列条目在 WP-B 范围内不再适用：不修改既有 `crates/` 文件、不修改现有公共枚举、不删除任何现有枚举变体、不修改序列化行为。其余条目继续有效，特别是「不修改 BMCP 协议 schema」「不将本登记标记为已完成」。
+
+**为什么状态不是 CLOSED。** §9 第 10 项要求「正式实施授权和必要审批」，派发不是授权；第 1、3、5 项属于 WP-A，仍全部未满足；第 9 项要求独立审查与 §8 比对，而派发会话不能为自己的产物提供独立证据。这与 `AID-2026-052` 派发本登记 027 时的推理一致。
+
+**残留风险，记录而非掩盖。** `#[serde(rename_all = "snake_case")]` 是线格式变更，本登记正文并未授权线格式变更，授权的是值域。它在此安全，仅因为持久化语料为空——这是对 `86c66ec4` 这一棵树在某一次提交上的测量结论，不是设计的性质。一旦将来出现存储实现，该改名即降级为一次迁移，而 `AID-2026-053` 不是执行该迁移的工具。

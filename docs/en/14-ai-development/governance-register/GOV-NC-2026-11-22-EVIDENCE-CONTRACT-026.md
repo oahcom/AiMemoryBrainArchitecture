@@ -57,7 +57,7 @@ document_metadata:
 | Authoritative Contract | `02-domain-model/core-entities.md` §8 |
 | Affected Components | `memory-domain`, `memory-compiler`, `bmcp-protocol`, and their tests |
 | Related Registrations | GOV-NC-2026-11-22-ENUM-BOUNDARY-021; GOV-NC-2026-11-22-PHASE2-RESIDUAL-022 |
-| Implementation Authorization | NOT AUTHORIZED |
+| Implementation Authorization | WP-B dispatched — `AID-2026-053` (see §11); WP-A unauthorized and not writable |
 | Closure Requirement | Both WP-A and WP-B must satisfy all requirements and pass independent verification |
 
 This registration records systematic conformance gaps between the Evidence domain implementation and its authoritative domain contract.
@@ -106,6 +106,8 @@ Until separate implementation authorization is granted:
 - Do not mark this registration as completed.
 - Do not silently map legacy values without migration evidence.
 - Do not interpret the target model in this registration as implementation authorization.
+
+The prohibitions above are premised on "until separate implementation authorization is granted". WP-B was dispatched on 2026-11-23 under §11, and that authorization extends only to the scope listed in the §11 table; WP-A and the remaining entries stay in force.
 
 ## 4. Problem Overview
 
@@ -503,3 +505,26 @@ This registration does not authorize destructive migration.
 The existing implementation must remain unchanged until formal authorization is granted, historical data is inventoried, and the migration plan is approved.
 
 **Final Status: OPEN — EVIDENCE DOMAIN CONTRACT CONFORMANCE DEBT.**
+
+## 11. Implementation Dispatch (2026-11-23)
+
+| Item | Content |
+|---|---|
+| Work order | `AID-2026-053` (`14-ai-development/work-items/AID-2026-053/`) |
+| Dispatch basis | §2 WP-B, §7 WP-B and §8 WP-B of this registration; ruling `OWNER-DECISION-EVIDENCE-CONTRACT-001` §8 |
+| Implementation scope | The two enum declarations in `crates/memory-domain/src/lib.rs`, `attachment_decision` in `crates/memory-compiler/src/evidence.rs`, and the tests beside both |
+| Explicitly not authorized | WP-A, any field change to `Evidence` or `EvidenceExtension`, any change under `crates/bmcp-protocol/`, closure of this registration |
+
+**Only WP-B is dispatched here, because WP-A and WP-B are blocked in different ways.** WP-A is not "unauthorized" — it is **not writable**. Three contract types, `Instant`, `Locator` and `ContentRef`, occur zero times anywhere under `crates/`, and `Instant` is additionally constrained by the open timestamp-precision item in §14 of this registration. Authorization cannot lift that obstruction; a definition can.
+
+**§7 WP-B item 4 measures no object.** That item requires "verify the BMCP protocol mapping". `crates/bmcp-protocol/` does have a same-named `EvidenceKind`, but it is four delivery classes under `pub mod evidence` (`FINAL_REQUEST_SUBMITTED`, `APPLIED_CONTEXT_OBSERVED`, `EXECUTION_STARTED`, `RECONCILIATION_OBSERVED`); that crate does not depend on `memory-domain`, nothing outside it references the type, and no conversion exists on either side. The two enums share a name and nothing else. The correct output for that item is therefore the finding itself — that there is no mapping to verify — not a newly built mapping. The dispatch writes that finding into hard constraint #1 of the work order.
+
+**The direct conflict between §6.3 and the measurements, and how it is resolved.** §6.3 opens by stating that there is currently insufficient evidence to establish that all historical persistent data is free of legacy enum values, and requires an independent inventory before implementation. The measurement is: `EvidenceExtension` appears in no storage crate, the repository tracks no `.db` or `.sqlite` files, there are no `*.sql` migrations, and the construction sites of the four non-contract `EvidenceKind` values plus `Unavailable` total one, inside a test. So this repository holds no legacy data to inventory.
+
+That sentence cannot rest on "I searched", so the dispatch takes the other branch §6.3 itself provides, in item 4: **where a reliable mapping cannot be established, reject the load.** `Unavailable` is not silently converted to `Expired` and not silently converted to `ExternalUnavailable`; serde deserialization fails instead. Closure condition 6 of §9 — "an approved migration or reject-on-load policy" — is thus satisfied in the reject-on-load form, while §6.3 items 1, 2, 3 and 5 become impossible to violate at the implementation layer, because no path exists that carries a legacy value into the new value set.
+
+**§3's prohibitions are lifted within WP-B scope.** §3's prohibitions are premised on "before independent implementation authorization is granted". This dispatch is that authorization, but only to the extent of the table above. The following §3 entries no longer apply within WP-B scope: not modifying existing `crates/` files, not modifying existing public enums, not deleting any existing enum variant, not modifying serialization behavior. The remaining entries stay in force, in particular "do not modify the BMCP protocol schema" and "do not mark this registration complete".
+
+**Why the status is not CLOSED.** §9 item 10 requires formal implementation authorization and the necessary approvals, and a dispatch is not an authorization; items 1, 3 and 5 belong to WP-A and remain wholly unsatisfied; item 9 requires independent review against §8, and a dispatching session cannot supply independence for its own product. This is the same reasoning by which the dispatch of `AID-2026-052` advanced register 027 without closing it.
+
+**Residual risk, recorded rather than papered over.** `#[serde(rename_all = "snake_case")]` is a wire-format change, and this registration's body authorizes value sets, not wire formats. It is safe here only because the persisted corpus is empty — a measurement about this tree at `86c66ec4`, not a property of the design. If a storage implementation appears later, the rename degrades into a migration, and `AID-2026-053` is not the instrument for that migration.

@@ -1,3 +1,20 @@
+---
+document_metadata:
+  domain: ai-development
+  role: reference
+  lifecycle:
+    approval:
+      decision_status: Draft
+    evidence_verification:
+      verification_status: Unverified
+    usage_status: Active
+    modification_status: Modified
+  authority:
+    canonical_status: Non-Canonical
+    normative_status: Informative
+    canonical_conflict_status: None
+---
+
 # AI Prompt Authoring Standard
 # AI 提示词编写规范
 
@@ -139,6 +156,9 @@ For a scheduled prompt, additionally include:
 - Store exact approved prompt bytes in a versioned repository file.
 - SHA-256 is calculated over the exact committed file bytes, with UTF-8 encoding and no implicit newline, whitespace, Unicode or line-ending normalization.
 - Record path, byte length, digest, blob SHA, commit SHA and execution reference.
+- Distinguish the reusable global/Owner baseline from the complete task-specific payload actually sent to a ChatGPT session. Before execution, preserve the effective dispatched payload as an immutable run snapshot after composing the applicable baseline prompts and all task-specific instructions/addenda.
+- Bind each run snapshot to the actual session role and session/evidence reference in the Work Item manifest. A reusable baseline prompt or a task prompt authored for dispatch is not, by itself, proof of the exact payload executed.
+- If the platform does not expose a stable session reference or the original payload bytes cannot be recovered, record `NOT_AVAILABLE` / `NOT_VERIFIED` with a reason. Never reconstruct missing prompt bytes from summaries or fabricate a session identifier or digest.
 - Any change to objective, scope, authority, source baseline, acceptance, verification, stop conditions or scheduled behavior creates a new prompt version.
 - Run-specific clarifications/addenda are separately stored and hashed; if they materially alter instructions, create a new prompt version before proceeding.
 - Executed prompt versions are immutable.
@@ -162,6 +182,8 @@ A prompt is PROMPT_READY only if all applicable checks pass:
 - [ ] Git branch/commit/PR/evidence steps are explicit.
 - [ ] Idempotency and repeated execution behavior are defined.
 - [ ] Hash and immutable version record are present.
+- [ ] The exact effective payload dispatched to each relevant ChatGPT session is snapshotted and hashed, or explicitly marked `NOT_VERIFIED` / `NOT_AVAILABLE` with a reason.
+- [ ] The Work Item manifest binds the executed-prompt snapshot to the actual session role and session/evidence reference, or records why that reference is unavailable.
 - [ ] Required Owner/specialist approvals are recorded.
 
 Any failed mandatory item keeps the Work Item out of READY.
@@ -201,6 +223,9 @@ This document is PROPOSED and becomes normative only after the project's governa
 - 跨 Owner 任务必须拆分责任边界；每个 Owner 只批准自己的领域。I 和 Testing/Quality 按安全风险和验证风险参与审查。
 - 定时任务提示词还必须写明 Owner key、automation ID、频率、时区、Issue/PR 查询规则、每次运行的工作上限、幂等行为、无任务时的行为、权限预检和升级路径。
 - SHA-256 对仓库中实际提交的提示词文件字节计算；UTF-8，不做换行、空白或 Unicode 归一化。记录文件路径、字节数、摘要、Blob SHA 和 Commit SHA。
+- 必须区分可复用的全局/Owner 基线提示词与实际发送给 ChatGPT 会话的完整任务 payload。执行前，将适用基线与全部任务专属指令/补充组合后的有效 payload 保存为不可变的单次执行快照。
+- 每份执行快照必须在 Work Item manifest 中关联实际会话角色及会话/证据引用。可复用基线提示词或为派发而编写的任务提示词，本身不能证明实际执行时发送的完整 payload。
+- 如果平台不提供稳定会话引用，或无法恢复原始 payload 字节，必须记录 `NOT_AVAILABLE` / `NOT_VERIFIED` 及原因。不得从摘要重建缺失的提示词字节，也不得编造会话标识或摘要。
 - 任何影响目标、范围、授权、基线、验收、测试或定时行为的修改都必须产生新版本；已执行版本不可覆盖。
 - 缺少来源、审批、权限、可验证条件或安全保障时，提示词不得进入 READY；AI 必须停止并报告阻塞，不能自行补造决议。
 - 每份执行提示词必须采用 AI-STD-001 §5.1 规定的七个结构章节；本规范 §4 的十二项要求仍全部是强制内容，但不再要求十二个独立标题。十二项内容必须按 §4 映射纳入七章节；结构以 AI-STD-001 §5.1 为准，十二项内容义务以本规范 §4 为准。两者均须满足；若映射会造成要求丢失，提示词不得进入 READY，必须升级解决，不能通过增加额外强制顶层标题规避。定时提示词的附加要求仍为有条件的强制内容，放入相关七章节。

@@ -479,7 +479,7 @@ Reconnect 时，先处理当前 I Authorization/PermissionEpoch 和 D ForgetFenc
 
 D/I 精确语义决议分别固定于 Issue #429 comments 7060243632、7060259541。H Logical Decision 和 Scope Clarification 固定于 PR #428 comments 7060190878、7060264372。这些决议不冻结 C-H Operation Registry、精确字段 Schema、Transport 或 Runtime。
 
-PR #453 是 Open Draft BMCP Architecture Review PR，不能替代 H 版本化规范 Wire/Operation 工件。PR #430 是另一个独立 Open Draft Architecture Proposal；本文不把它的三份拷贝结构认定为 Canonical。
+PR #453 已关闭并合并到专用快照分支 `bmcp-validation-base-c588`，Merge Commit 为 `7c7801db396b92c57ad37020fe170f65f25e43ce`，并未合并到 live `main`；其 `ARCHITECTURE_PARTIAL / NOT ACCEPTED` 审查材料不能替代 H 的版本化规范 Wire/Operation 工件。PR #430 已于 `0cce40aae5c642f30fabef7b844ac8397322684b` 合并到 `main`；其中三份工作副本仍为 Non-Canonical / Informative，不构成第二个 Canonical 权威来源。
 ### 21.4 历史 13 节交接材料（仅作为输入）
 
 此前单独报告的 13 节材料已从本地 Git 对象库恢复，并在不改写原 commit 的情况下恢复到分支 `recovery/agent-integration-13-section-source-b5658b0`。GitHub 现已将该恢复分支解析到 commit `b5658b088fade8a15dc78ca9dbde19d2f6753564`。三个源文件 Blob 精确如下：

@@ -5,8 +5,20 @@ document_metadata:
 
   lifecycle:
     approval:
-      decision_status: Draft
-      approver: null
+      decision_status: Approved
+      approver: "Owner H acting as owner proxy, under the standing instruction that a blocking decision with no human available is to be taken and recorded rather than left open."
+      decision_date: "2026-11-23"
+      approved_version:
+        scheme: content-hash
+        value: "b121682f2084fe89346d254288de4f8202311ff4b18a2744a407aaff2fb0d137"
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/adr/OWNER-DECISION-BMCP-MCP-DISPATCH-001.md — the DECIDED line in this document names the decider and the date"
+      revocation: null
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-23"
