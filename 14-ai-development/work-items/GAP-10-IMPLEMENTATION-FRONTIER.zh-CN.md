@@ -872,7 +872,7 @@ capability set*，2026-11-22 13:48 +08:00）之后不再成立——该提交晚
 
 ### 11.4 GAP-15 §4 把 §10.2 的陈旧事实当作新测量重新发布
 
-`GAP-15-IMPLEMENTATION-PERCENTAGES-STALE` 标注测量于 `4ce12cc7`，其 §4 写道：
+`GAP-31-IMPLEMENTATION-PERCENTAGES-STALE` 标注测量于 `4ce12cc7`，其 §4 写道：
 
 > `bmcp-server` 如今完全不触达解析器（`describe()` 位于 `lib.rs:718-723`，
 > 带 `#[allow(dead_code)]`，零调用点）。

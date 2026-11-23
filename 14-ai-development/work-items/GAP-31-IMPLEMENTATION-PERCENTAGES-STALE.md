@@ -25,7 +25,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# GAP-15 — the six implementation percentages are fossils, and two of them invert the dispatch decision
+# GAP-31 — the six implementation percentages are fossils, and two of them invert the dispatch decision
 
 **Status:** measurement only · **Severity:** Tier 1 (misroutes work) · **Owner:** none required to read; the one dispatchable gap is named in §4
 **Measured at:** `4ce12cc7` (2026-11-23, re-verified after `fb37a44b`) · **Supersedes:** §9.2 and §10.2 of `GAP-10-IMPLEMENTATION-FRONTIER`, both now stale
@@ -38,7 +38,7 @@ document_metadata:
 | Memory Compiler **85% unimplemented** | `compile` reachable from `brain-cli` through a production adapter; `canonical_commit_confirmed` now resolved from the durable `canonical_commits` row (`publication_authority.rs:123`); whole workspace green | **wrong, and the residue is not code** |
 | Memory Context **80% unimplemented** | crate present, budget/sufficiency/observability modules landed, tests green | **wrong** |
 | Agent Integration **90% unimplemented** | crate consumed by `brain-cli`; `context_snapshot_reaches_agent_adapter_and_preserves_compiler_contract` passes across the crate boundary | **wrong** |
-| BMCP **60% unimplemented** | 22 message types indexed, `PASS`; 3 recognised in Rust, 2 public parsers, **19 unparsed** | **right in spirit, wrong by 2** — and **the row itself has since expired; see `GAP-16`** |
+| BMCP **60% unimplemented** | 22 message types indexed, `PASS`; 3 recognised in Rust, 2 public parsers, **19 unparsed** | **right in spirit, wrong by 2** — and **the row itself has since expired; see `GAP-32`** |
 | Phase 2 domain **100% not started** | `#[ignore]` in the whole workspace: **0**. `dm2_06` exists and is not ignored. `CanonicalCommitRefState { Pending, Issued }` is implemented | **wrong, and it inverts the dispatch** |
 | E2E **100% not started** | full chain passes; 8 test binaries under `crates/brain-cli/tests/`, including `e2e_full_chain` and `e2e_full_pipeline` | **wrong, and it inverts the dispatch** |
 
@@ -70,7 +70,7 @@ Everything else in the six rows is code that exists.
 
 ## 4. The one dispatchable gap, and why I did not dispatch it
 
-> **This section expired at `main` `021f5a3f`.** `parse_dispatch` now exists in `crates/bmcp-protocol/src/lib.rs` with all 22 arms; the figures below were measured at `fb37a44b`, which is an ancestor of `main` but not an ancestor of the commit that added dispatch (`6007782b`), so it could not see it. The current state is in `GAP-16`. This section is kept unedited because the reasoning about *why* dispatching parsers against an unfrozen mapping is a bet still holds, and because deleting a wrong measurement is how the same measurement gets made again.
+> **This section expired at `main` `021f5a3f`.** `parse_dispatch` now exists in `crates/bmcp-protocol/src/lib.rs` with all 22 arms; the figures below were measured at `fb37a44b`, which is an ancestor of `main` but not an ancestor of the commit that added dispatch (`6007782b`), so it could not see it. The current state is in `GAP-32`. This section is kept unedited because the reasoning about *why* dispatching parsers against an unfrozen mapping is a bet still holds, and because deleting a wrong measurement is how the same measurement gets made again.
 
 The BMCP residue is precise, and worth recording even though it cannot proceed:
 
@@ -104,6 +104,29 @@ It looks attractive — the schemas are present, the pointers are indexed — bu
 19 artifacts whose conformance criterion is the schema's current text, which is the very thing not
 yet frozen, and it would do so without any call site that consumes them. `bmcp-server` reaches no
 parser at all today (`describe()` in `lib.rs:718-723` is `#[allow(dead_code)]` with zero call sites).
+
+> **Erratum, appended 2026-11-23.** The line-number citation above does not resolve. At this file's
+> own measurement commit `4ce12cc7`, `crates/bmcp-protocol/src/lib.rs` is **2366 lines** and lines
+> 718–723 are the date-component parser (`let year = number(0, 4);` through
+> `let second = number(17, 19);`) — not `describe()`, and not the escape table either. `describe()`
+> does not exist in that file at any line. The citation was lifted from `GAP-10` §10.2, where it was
+> correct at `61b9d743`; `GAP-10` §11.3 records the defect against §10.2 and §11.4 records that this
+> section republished it. (§11.3's own replacement figure of "940 lines" does not reproduce either —
+> the measured count is 2366. Recorded here rather than corrected there, because §11.3 is another
+> session's erratum and an owner-proxy session should not edit it silently.)
+>
+> Two things were wrong, and only one is about line numbers. The citation is stale. Worse, the
+> sentence it supports — "`bmcp-server` reaches no parser at all" — was already false at `4ce12cc7`:
+> `parse_and_validate` is defined at line 1556 and reached from two arms, and the crate contains zero
+> `#[allow(dead_code)]`. So this section did the exact thing the rest of the file criticises: it
+> re-stated an earlier commit's fact as a fresh measurement. The conclusion it was used to support —
+> that the parsers had no consumer — was right for a different reason, and being right for the wrong
+> reason is how a correct conclusion survives past the point where it stops being true.
+>
+> Corrected state: `GAP-32` measures the consumer gap directly at `021f5a3f` and finds
+> `parse_dispatch` present with 22 arms and zero call sites outside its own tests. The original text
+> is left standing above because deleting a wrong measurement is how the same measurement gets made
+> a third time.
 Producing parsers with no consumer, against an unfrozen mapping, is not progress; it is inventory.
 
 ## 5. Why `Published` is not a code gap, and cannot be made one from here

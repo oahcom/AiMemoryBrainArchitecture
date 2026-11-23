@@ -994,7 +994,7 @@ no longer resolves is the same class of defect.
 
 ### 11.4 GAP-15 §4 republishes §10.2's stale fact as a fresh measurement
 
-`GAP-15-IMPLEMENTATION-PERCENTAGES-STALE` is dated at `4ce12cc7` and states in
+`GAP-31-IMPLEMENTATION-PERCENTAGES-STALE` is dated at `4ce12cc7` and states in
 §4:
 
 > `bmcp-server` reaches no parser at all today (`describe()` in `lib.rs:718-723`
