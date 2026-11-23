@@ -1,3 +1,44 @@
+---
+document_metadata:
+  domain: ai-development
+  role: index
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "This file is an index of governance-register entries; it does not independently approve or establish the authority of indexed records."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+---
+
 # Governance Defect Registers
 
 **Chinese primary**: [`README.md`](README.md)
@@ -17,6 +58,7 @@ It is **not** a place to record acceptance, approval, or review conclusions. Not
 | `GOV-NC-2026-11-20-AC-UNMET-CLOSURE-004` | Issue closed with unmet acceptance criteria | High | `OPEN` / `NOT_REMEDIATED` | 1 Issue (#384), 4/10 ACs unmet |
 | `GOV-NC-CONVERGENCE-2026-11-20` | Governance convergence definition and execution boundary | — | `ACTIVE` / `RECORDED_NOT_PREVENTED` | 3 levels |
 | `GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026` | Evidence domain contract conformance | High | `OPEN` / `NOT_AUTHORIZED` | 1 entity, 2 work packages |
+| `GOV-NC-2026-11-22-PROVENANCE-REVALIDATION-027` | Provenance reference revalidation | High | `OPEN` / `NOT_AUTHORIZED` | 4 reference field groups |
 
 ## Evidence
 

@@ -1,3 +1,48 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "This work record documents Evidence contract conformance findings and proposed work packages; no approval or independent verification is claimed."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "14-ai-development/governance-register/GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026.md"
+    en: null
+    zh-CN: "docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026.md"
+---
+
 # GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026 — Evidence Domain Contract Conformance
 
 ## 1. Registration Information
@@ -334,6 +379,31 @@ Whether `#[serde(rename_all = "snake_case")]` is adopted must be verified agains
 Historical JSON representations must not be inferred solely from current Rust variant names.
 
 Struct field renaming, merging, type changes, and identity ownership changes also create serialization compatibility risks and must be included in the migration plan.
+
+### 6.5 Evidence dual `source_ref` semantics: registered gap retained
+
+This section records the ruling verbatim; it complements §5.3. The ruling establishes no
+equivalence, so no equality check is added.
+
+**Status:** OPEN / NOT_AUTHORIZED
+
+`Evidence.source_ref` (`OpaqueId`) and
+`EvidenceExtension.source_ref` (`EvidenceSourceRef`) are distinct representations.
+The current contract does not establish that they have equivalent semantics.
+`EvidenceSourceRef` classification capability is not evidence of equivalence to
+the contract's `TypedObjectRef`.
+
+Do not add an equality check or conversion-based equivalence assertion between
+these fields until the authoritative representation and its mapping semantics
+are explicitly defined.
+
+The existing `validate_against` check between `evidence_id` and
+`extension.evidence_ref` remains unchanged. This does not close the dual
+`source_ref` gap.
+
+**Required resolution:** define the authoritative `source_ref` representation,
+its contract-level semantics, and any permitted mapping to legacy or extension
+representations before implementing cross-field validation.
 
 ## 7. Implementation Requirements
 

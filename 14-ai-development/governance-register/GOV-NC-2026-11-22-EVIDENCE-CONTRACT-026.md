@@ -1,3 +1,48 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "This work record documents Evidence contract conformance findings and proposed work packages; no approval or independent verification is claimed."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: "docs/en/14-ai-development/governance-register/GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026.md"
+    zh-CN: "docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026.md"
+---
+
 # GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026 — Evidence Domain Contract Conformance
 
 ## 1. 登记信息
@@ -334,6 +379,30 @@ WP-A 与 WP-B 共同构成一个 Evidence 实体符合性问题。
 不能只根据当前 Rust 变体名称推断历史 JSON 的实际表示。
 
 结构体字段的改名、合并、类型变更和身份归属调整同样属于序列化兼容性风险，必须纳入迁移计划。
+
+### 6.5 Evidence 双 `source_ref` 语义：维持登记缺口
+
+本节记录裁定原文，与 §5.3 互补。裁定结果是不建立等价关系，因此不添加相等校验。
+
+**Status:** OPEN / NOT_AUTHORIZED
+
+`Evidence.source_ref` (`OpaqueId`) and
+`EvidenceExtension.source_ref` (`EvidenceSourceRef`) are distinct representations.
+The current contract does not establish that they have equivalent semantics.
+`EvidenceSourceRef` classification capability is not evidence of equivalence to
+the contract's `TypedObjectRef`.
+
+Do not add an equality check or conversion-based equivalence assertion between
+these fields until the authoritative representation and its mapping semantics
+are explicitly defined.
+
+The existing `validate_against` check between `evidence_id` and
+`extension.evidence_ref` remains unchanged. This does not close the dual
+`source_ref` gap.
+
+**Required resolution:** define the authoritative `source_ref` representation,
+its contract-level semantics, and any permitted mapping to legacy or extension
+representations before implementing cross-field validation.
 
 ## 7. 实施要求
 
