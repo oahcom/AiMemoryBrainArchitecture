@@ -938,6 +938,41 @@ def run_changed_paths() -> None:
             root, 0, "--require-changed", base,
         )
 
+    # T80: a deletion must not let a newly added unclassified governed
+    # document escape validation in the same increment.
+    with tempfile.TemporaryDirectory() as tmp:
+        import contextlib
+        import io
+
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+
+        scratch = root / "tools" / "scratch-output.txt"
+        scratch.write_text("captured tool output\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "seed deletion target")
+        base = _git(root, "rev-parse", "HEAD")
+
+        scratch.unlink()
+        unclassified = root / "00-governance" / "unclassified-new.md"
+        unclassified.write_text("# no metadata\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "delete scratch and add unclassified document")
+
+        captured_stdout = io.StringIO()
+        captured_stderr = io.StringIO()
+        with contextlib.redirect_stdout(captured_stdout), contextlib.redirect_stderr(captured_stderr):
+            code = run_gate(root, "--require-changed", base)
+
+        output = captured_stdout.getvalue() + captured_stderr.getvalue()
+        record(
+            "T80 deletion plus unclassified governed document still fails DM-01",
+            code == 1 and "DM-01" in output,
+            f"  gate returned {code}, expected 1; DM-01 present: {'DM-01' in output}",
+        )
+
 
 def run_path_safety() -> None:
     """T14/T15: a path reference is validated, never silently rewritten.
