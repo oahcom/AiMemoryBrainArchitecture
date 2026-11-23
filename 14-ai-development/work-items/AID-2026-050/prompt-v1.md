@@ -1,3 +1,30 @@
+---
+document_metadata:
+  domain: protocol
+  role: work-record
+
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-23"
+      last_verification_note: "Every claim in §2 was measured at main 6212ec75 in this session: parse_dispatch has 22 match arms, 1 semantically validated, 1 structurally parsed, 20 root-discriminator-only, and validate_bmcp_message appears 0 times in crates/bmcp-server/src/lib.rs."
+    usage_status: Active
+    modification_status: Unchanged
+
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Informative
+
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
+---
+
 # TASK — add `validate_bmcp_message`, and do not let it lie
 
 `main` is at `6212ec75`. Everything you need already exists; what is missing is one tool that

@@ -1,3 +1,35 @@
+---
+document_metadata:
+  domain: ai-development
+  role: index
+
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-23"
+      last_verification_note: "Only the AID-2026-050 row was added. Every pre-existing row is untouched, including rows whose Status cells may be stale against their carriers; refreshing those is a separate authorization and is not claimed here."
+    usage_status: Active
+    modification_status: Modified
+
+  authority:
+    canonical_status: Canonical
+    canonical_scope: "Registry of AI work items, and the rule that binds Status/Review/Acceptance cells to refresh on carrier merge or close."
+    canonical_scope_id: ai-development/work-items-index
+    canonical_scope_keywords:
+      - work-item-registry
+      - aid-index
+    canonical_conflict_status: None
+    normative_status: Normative
+
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
+---
+
 # AI Work Items Index
 
 This index is the entry point for all governed AI development tasks.
@@ -6,7 +38,7 @@ Two kinds of content in this table age differently, and the difference is normat
 
 | Work Item ID | Title | Owner | Class/Risk | Status | Prompt | Implementation | Review | Acceptance |
 |---|---|---|---|---|---|---|---|---|
-| [AID-2026-050](AID-2026-050/manifest.yaml) | Add the `validate_bmcp_message` tool and report the validation state each arm actually reached | USER-PRINCIPAL-DELEGATED | PROTOCOL/CODE/TEST / R1 | DISPATCHED — registration only; no implementation exists yet | AID-2026-050-PROMPT v1; Owner-proxy dispatch, implements `OWNER-DECISION-BMCP-MCP-DISPATCH-001` (#733); SHA-256 `7fe0b1e9e985cf03834affbcdcde6245f28edfe79589d97c1acfb79ac99d18bd`; 7713 bytes | NOT_STARTED — one additive MCP tool wired to the existing `parse_dispatch`; every success must carry `validation_state` so the 20 `RootDiscriminatorOnly` arms are never reported as validated; no schema engine, no change to the two existing tools | NOT_ASSIGNED — independent review not recorded | PENDING — no acceptance decision asserted |
+| [AID-2026-050](AID-2026-050/manifest.yaml) | Add the `validate_bmcp_message` tool and report the validation state each arm actually reached | USER-PRINCIPAL-DELEGATED | PROTOCOL/CODE/TEST / R1 | DISPATCHED — registration only; no implementation exists yet | AID-2026-050-PROMPT v1; Owner-proxy dispatch, implements `OWNER-DECISION-BMCP-MCP-DISPATCH-001` (#733); SHA-256 `aa964075ae38fbc91efee54ffefb74df3c582d9b9f7d1391194633aa8fde098d`; 8497 bytes | NOT_STARTED — one additive MCP tool wired to the existing `parse_dispatch`; every success must carry `validation_state` so the 20 `RootDiscriminatorOnly` arms are never reported as validated; no schema engine, no change to the two existing tools | NOT_ASSIGNED — independent review not recorded | PENDING — no acceptance decision asserted |
 | [AID-2026-049](AID-2026-049/manifest.yaml) | Carry the four §9.4 sufficiency-report fields the observability projection does not model | USER-PRINCIPAL-DELEGATED | DOMAIN/TEST/DOC / R1 | PR OPEN — implementation and registration submitted; runtime verification RUN | AID-2026-049-PROMPT v1; Owner dispatch; SHA-256 `c4be14e26f2aa7a64edcae1b12ebcb896382865a83ced0987ec00e1e584c096a`; 31989 bytes; raw platform payload bytes/session ID NOT_EXPOSED | `SufficiencyReport` carries `canonical_commit_ref`/`forget_fence_ref`/`permission_epoch`, `budget`+`budget_usage`+`token_estimate_profile`+`rendered_bytes`+`entries`, `compacted_sources`+`validation_profile`+`digest_profile`, `blocked`+`deferred`; consumes `budget::BudgetVector`/`BudgetUsage` instead of redefining them; `IndexWatermark` deleted in favour of `CanonicalWatermark`+`PartitionState`; coverage row 67 IMPLEMENTED → PARTIAL in both languages | NOT_ASSIGNED — independent review not recorded | PENDING — no acceptance decision asserted |
 | [AID-2026-048](AID-2026-048/manifest.yaml) | Implement the delivery lifecycle and ACK consumer for Memory Context | USER-PRINCIPAL-DELEGATED | DOMAIN/TEST/DOC / R1 | PR OPEN — implementation and registration submitted; runtime verification RUN | AID-2026-048-PROMPT v1; user dispatch; SHA-256 `29753984ab017a3e21894653440452b5a98e8b45cb8715afd2102581052b6a9f`; raw platform payload bytes/session ID NOT_EXPOSED | `DeliveryLifecycle` five-state machine with terminal-state rejection; `consume_ack` total over Accepted/Duplicate/Late/StaleAttempt/UnknownDelivery; coverage row 97 NOT IMPLEMENTED → PARTIAL in both languages | NOT_ASSIGNED — independent review not recorded | PENDING — no acceptance decision asserted |
 | [AID-2026-046](AID-2026-046/manifest.yaml) | Add the missing key-status False rejection test | USER-PRINCIPAL-DELEGATED | TEST/R1 | [Issue #628](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/628); [PR #625 MERGED](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/625) — registered; follow-up implementation NOT_STARTED | AID-2026-046-PROMPT v1; #616 post-merge finding + Issue #628; SHA-256 `0deb2a9b5f8475171ee4264cbff0ef576054c837e1bf94a2bcb5a22135034bae`; 3282 bytes; original author prompt unavailable | #348: test `verify_key_status=False -> INVALID`; preserve `None -> UNKNOWN`; no validator implementation change | SESSION_SEPARATION_RECORDED_PROMPT_UNVERIFIED — PR #616 review comment 7075204689 | PENDING — no acceptance decision asserted |

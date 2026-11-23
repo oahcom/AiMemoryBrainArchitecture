@@ -26,8 +26,8 @@ prompt_id: AID-2026-050-PROMPT
 prompt_version: v1
 prompt_file: 14-ai-development/work-items/AID-2026-050/prompt-v1.md
 prompt_status: FROZEN
-prompt_sha256: 7fe0b1e9e985cf03834affbcdcde6245f28edfe79589d97c1acfb79ac99d18bd
-prompt_bytes: 7713
+prompt_sha256: aa964075ae38fbc91efee54ffefb74df3c582d9b9f7d1391194633aa8fde098d
+prompt_bytes: 8497
 
 prompt_provenance_tier: T1
 prompt_provenance_note: "Frozen from the owner-proxy session that measured GAP-16 at 6212ec75 and authored OWNER-DECISION-BMCP-MCP-DISPATCH-001. The SHA-256 identifies the committed prompt-v1.md bytes exactly; the prompt is the file, and the file is what the delivery session reads."
