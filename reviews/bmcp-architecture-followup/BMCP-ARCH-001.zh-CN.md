@@ -138,7 +138,7 @@ H 候选 Envelope 命名 protocol、protocol_version、message_id、message_type
 
 语义边界要求 Message Identity、已协商 Version、已注册 Operation 和类型化 Payload。多消息/异步操作要求 Correlation。状态变更/可重试操作要求 Idempotency。Scope、Environment、PermissionEpoch、ForgetFence、ContextVersion 和 CapabilityEpoch 由操作 Owner 决定条件性必填；不得虚构通配默认值。Causation 和命名空间化非关键扩展可选。未知关键字段/枚举/操作按 H 最终兼容契约 fail-closed。
 
-Parse 失败：已解码 Envelope 格式错误；缺少必填字段；不支持版本；未知操作；不支持关键扩展；参数结构无效；请求过期。Parse MUST NOT 调用记忆服务、授权副作用、签发身份或改变领域状态。
+Parse 失败：已解码 Envelope 格式错误；缺少必填字段；不支持版本；未知操作；不支持关键扩展；参数结构无效；请求过期。Parse MUST NOT 调用记忆服务、批准或授权任何副作用、签发身份或改变领域状态。
 
 H 候选协商禁止静默主版本降级。精确 major/minor/patch 和 Payload Schema 协商归 H 所有。
 
@@ -152,7 +152,7 @@ Execute 仅在 Parse 成功后开始。这是语义分派契约，不是 Runtime
 2. 使用受保护认证身份，向 I 批准接口请求当前授权和 PermissionEpoch。Payload Principal/Actor/Producer/Scope 声明不能自我认证。
 3. 调用操作 Owner Validator。H 校验协议/Wire 结构，不裁定领域真值或业务权限。
 4. 规范 Memory 操作使用 D 所有的 Identity/Lifecycle/Revision 操作。BMCP 不签发 CanonicalRef、不选择 Lifecycle Transition、不分配 Canonical Cursor。
-5. 在 D/I 要求的每个受保护边界重新校验 D Forget Fence 和 I Authorization/PermissionEpoch，包括不可逆/可见性改变前。Stale、不可用、不可比较或 Unknown 均阻止操作。D Fence 与 I PermissionEpoch 是不同类型命名空间，禁止比较/转换/替代。
+5. 在 D/I 要求的每个受保护边界重新校验 D Forget Fence 和 I Authorization/PermissionEpoch，包括在执行不可逆操作或改变可见性之前紧邻该操作进行重新校验。Stale、不可用、不可比较或 Unknown 均阻止操作。D Fence 与 I PermissionEpoch 是不同类型命名空间，禁止比较/转换/替代。
 6. 调用所属 Service（如 E Ingress/Receipt、D Canonical Lifecycle、G Context/Delivery）。BMCP 不直接写规范存储或实现 Service 状态机。
 7. 相同 Owner 范围 Idempotency Key + 相同语义摘要返回原 Operation/Receipt，不重复副作用。相同 Key + 不同摘要为 Conflict。用同一 Key 和权威查询解决不确定提交；不得创建新 Key 逃避 UNKNOWN。
 8. Timeout、响应丢失、进程丢失或持久化结果不确定时保持 UNKNOWN，直到 Owner Reconciliation。Timeout 不证明失败/Abort/成功/未调用。不得盲目重试非幂等副作用。
@@ -244,7 +244,7 @@ H 当前 Envelope 候选列出 ENVELOPE_INVALID、VERSION_UNSUPPORTED、MESSAGE_
 
 BMCP 不是 Memory Compiler。E 拥有 Candidate IR 和 Compiler Pipeline。BMCP 只能按 E 当前 Schema/Receipt 契约携带 E 所有的 Ingress/Candidate 对象。必须区分：Transport Receipt/Delivery；E 持久化 AcceptedReceipt；Compiler Execution/Candidate；D Producer Admission/Canonical Commit；Dependency Registration/Final Publication；F Indexing/G Context Activation。
 
-合并的 Owner 决策已选择 Option A + I1 作为 Fact/Claim 语义方向。本决策不批准 Fact/Claim Discriminator、Canonical Wire Identity、Schema、DDL 或 Payload 字段。精确消费者映射仍为 Candidate，直至责任工件完成版本 Pin 和审查；相关 Payload 保持不透明，或只使用已批准的中立候选引用。
+合并的 Owner 决策已为 Fact/Claim 语义选择 Option A + I1。本决策不批准 Fact/Claim Discriminator、Canonical Wire Identity、Schema、DDL 或 Payload 字段。精确消费者映射仍为 Candidate，直至责任工件完成版本 Pin 和审查；相关 Payload 保持不透明，或只使用已批准的中立候选引用。
 
 ### 6.2 Agent Integration / MCP
 
