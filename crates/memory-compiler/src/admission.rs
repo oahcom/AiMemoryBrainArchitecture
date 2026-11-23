@@ -2855,6 +2855,29 @@ mod tests {
         );
     }
 
+    /// The sibling test above rewrites the issuer to `'someone-else'`, which is
+    /// refused by either baseline constant, so it cannot tell which one the
+    /// stored-row guard compares against. This one writes the decision issuer
+    /// into the row: if the guard ever drifts back to `I_DEV_BASELINE_ISSUER`,
+    /// the row becomes valid and this test fails.
+    #[test]
+    fn attestor_validator_rejects_decision_issuer_on_stored_row() {
+        let (db, reference, subject) = issued_attestor_store();
+        let attestation_id = reference.data().unwrap().attestation_id.as_str();
+
+        db.connection
+            .execute(
+                "UPDATE i_attestations SET issuer_id=?1 WHERE attestation_id=?2",
+                [I_DEV_BASELINE_ISSUER, attestation_id],
+            )
+            .unwrap();
+
+        assert_eq!(
+            db.validate_attestor(&reference, &subject),
+            Err(AttestorValidationError::UnsupportedIssuer)
+        );
+    }
+
     #[test]
     fn attestor_validator_rejects_malformed_subject_digest() {
         let (db, reference, subject) = issued_attestor_store();
