@@ -17,6 +17,7 @@ document_metadata:
         included_assets: []
       approval_applicability: Applicable-To-Current-Version
       evidence_reference:
+        - "Issue #751 comment 7097692424 — owner ruling that the five DECIDED records must agree with their own bodies"
         - "14-ai-development/adr/OWNER-DECISION-RELEASE-BOUNDARY-001.md — the DECIDED line in this document names the decider and the date"
       revocation: null
     evidence_verification:
