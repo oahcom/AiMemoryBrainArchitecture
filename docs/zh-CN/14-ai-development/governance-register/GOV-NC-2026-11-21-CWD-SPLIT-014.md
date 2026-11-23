@@ -1,3 +1,48 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-23"
+      last_verification_note: "§7 的两组数字（77 与 120）均在 2026-11-23 于 origin/main 的干净 worktree 上实测：原样写基线得 77，仅把第 170 行改回 `ROOT = Path.cwd()` 得 120。两套测试在修复态与缺陷态的失败集合逐字相同，该结论由 `diff` 得出。 本文件与中文正本逐字节相同，这是既有状态，在此声明而非掩盖。"
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "14-ai-development/governance-register/GOV-NC-2026-11-21-CWD-SPLIT-014.md"
+    en: "docs/en/14-ai-development/governance-register/GOV-NC-2026-11-21-CWD-SPLIT-014.md"
+    zh-CN: null
+---
+
 # GOV-NC-2026-11-21-CWD-SPLIT-014
 
 **Status:** OPEN — MEASUREMENT ONLY

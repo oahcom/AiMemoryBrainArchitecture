@@ -1,6 +1,51 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-23"
+      last_verification_note: "Both §7 figures (77 and 120) were measured on 2026-11-23 in a clean worktree at origin/main: the baseline writes 77 as-is, and 120 when only line 170 is reverted to `ROOT = Path.cwd()`. The claim that both suites fail identically in the fixed and broken states was established by `diff`, not by inspection. The body of this file was byte-identical to the Chinese canonical before this change (md5 a0de7b67913b48f4ed5409804d50771e for all three carriers), so it is a copy of the Chinese text, not an English translation; §7 is the first English prose in it. That pre-existing condition is declared here rather than hidden, and it is not repaired by this change."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "14-ai-development/governance-register/GOV-NC-2026-11-21-CWD-SPLIT-014.md"
+    en: null
+    zh-CN: "docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-21-CWD-SPLIT-014.md"
+---
+
 # GOV-NC-2026-11-21-CWD-SPLIT-014
 
-**Status:** OPEN — MEASUREMENT ONLY
+**Status:** `FIXED-UNGUARDED` — the defect is fixed on main (see §7); it has no regression test. Independent review remains `NOT_ASSIGNED`.
 **Nature:** `REGISTER_ONLY / NO_IMPLEMENTATION / NO_GATE_CHANGE / REQUIRES_INDEPENDENT_REVIEW`
 **Measured at:** `main = 67074d2ff7`
 **Extends:** `GOV-NC-2026-11-21-SPLIT-DOMAIN-011.md`, `GOV-NC-2026-11-21-PAIRING-RESIDUAL-013.md`
@@ -226,3 +271,69 @@ No network access, no CI, no API quota required.
 - It does not assign an independent review seat. That seat remains `NOT_ASSIGNED`.
 
 **Blocking chain unchanged:** independent review `NOT_ASSIGNED`, implementation authorisation `NOT_AUTHORISED`, sponsor / accountable owner `NOT_ASSIGNED`.
+
+---
+
+## 7. Measured: the defect is fixed, and there is no regression test (2026-11-23)
+
+The body of this register and its §5 reproduction steps are **not changed**. The mechanism in §1 and §2 was real at `67074d2` and the record stands. What follows is measured on current `main`.
+
+### 7.1 The fix has landed
+
+| Item | Value |
+|---|---|
+| Fix commit | `8ab40fb4`, 2026-11-22 10:37:32 +0800, `fix(gate): enumerate tracked files and refuse baseline writes on a dirty tree` |
+| Current `main` | `8365716a`; `8ab40fb4` is an ancestor |
+| Change | `ROOT = Path.cwd()` → `ROOT = REPO_ROOT` (line 170), and every `subprocess` call switched from `cwd=ROOT` to `cwd=REPO_ROOT` |
+| Residue | `grep -c 'Path.cwd()' scripts/check_bilingual_docs.py` → **0** |
+
+The two anchors §1 describes are now one. `current_bilingual_gaps()`, `side_by_side_partner()` and `_has_any_chinese()` read the same root.
+
+### 7.2 Behavioural verification, not just reading the code
+
+On a clean worktree at `origin/main`, running `--write-baseline` from outside the repository:
+
+| Tree state | Result |
+|---|---|
+| `main` as-is (`ROOT = REPO_ROOT`) | **77** entries |
+| The same tree with line 170 reverted to `ROOT = Path.cwd()` | **120** entries |
+
+The 43-entry difference is exactly what §2 describes: every real pair frozen as a gap. §2 measured 117 at `67074d2`; the figure here is 120. That difference is two days of new pairs, not a change in mechanism.
+
+`8ab40fb4` also added a dirty-tree write refusal, and it holds:
+
+```
+$ echo x > 02-domain-model/untracked-probe.md
+$ python scripts/check_bilingual_docs.py --write-baseline
+baseline write refused: working tree is not clean; git status --porcelain --untracked-files=all:
+?? 02-domain-model/untracked-probe.md
+```
+
+So §2.1's "both ratchet directions are silent" path now has a precondition in front of it: a dirty tree cannot write a baseline at all.
+
+### 7.3 The fix has no regression test — this is the section's main finding
+
+With line 170 reverted to `ROOT = Path.cwd()`, the failure sets of both suites are **identical, line for line**:
+
+| Suite | Fixed | Broken |
+|---|---|---|
+| `scripts/test_check_bilingual_docs.py` | `Ran 3 tests` / `OK` | `Ran 3 tests` / `OK` |
+| `scripts/governance/evidence/test_gate_normative_roots.py` | `Ran 52 tests` / `FAILED (failures=3, errors=21)` | the same 24 failures, `diff` empty |
+
+Those 24 failures are a pre-existing Windows temp-path problem (`run([...], cwd=WindowsPath('C:/Users/ADMINI~1/...'))` assertions that do not match), unrelated to this defect and identical in both states.
+
+Consequence: **this defect can return exactly as it was, and neither suite will make a sound.** The only way to observe the difference is to run the gate from outside the repository and write a baseline — and no test does that. The six `os.chdir()` calls in `test_gate_normative_roots.py` all set the cwd **into** the repository, the opposite direction.
+
+That gap between "fixed" and "cannot regress" is what this section records, not something it papers over.
+
+### 7.4 The fix does not point back at this register
+
+`8ab40fb4`'s commit message does not mention `014`; it registers the boundary in `GOV-NC-2026-11-22-ENUM-BOUNDARY-021`, created by that same commit, whose §4 and T07 cover this defect. A repo-wide `grep CWD-SPLIT-014` hits only the `Extends:` lines of 015 and 017.
+
+So this register's status line, `OPEN — MEASUREMENT ONLY`, is still literally accurate — nobody has declared it closed — while reading as though the defect is live. §7 is for that reader.
+
+### 7.5 Status
+
+`OPEN` → `FIXED-UNGUARDED — defect fixed on main, no regression test; independent review still NOT_ASSIGNED`.
+
+Not `CLOSED`, for two reasons: §6's blocking chain includes independent review, and a session that writes this measurement cannot supply independence for it; and §7.3 shows the fix has no guard, and an unguarded fix should not be booked as resolved. §3's zero-byte question belongs to register 013; it was re-measured on 2026-11-23 and is still open (a zero-byte partner is accepted by `_side_by_side_bilingual()`), and it is out of scope here.
