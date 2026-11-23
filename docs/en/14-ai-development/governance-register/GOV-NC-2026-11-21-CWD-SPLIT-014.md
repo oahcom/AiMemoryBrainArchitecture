@@ -320,7 +320,7 @@ With line 170 reverted to `ROOT = Path.cwd()`, the failure sets of both suites a
 | `scripts/test_check_bilingual_docs.py` | `Ran 3 tests` / `OK` | `Ran 3 tests` / `OK` |
 | `scripts/governance/evidence/test_gate_normative_roots.py` | `Ran 52 tests` / `FAILED (failures=3, errors=21)` | the same 24 failures, `diff` empty |
 
-Those 24 failures are a pre-existing Windows temp-path problem (`run([...], cwd=WindowsPath('C:/Users/ADMINI~1/...'))` assertions that do not match), unrelated to this defect and identical in both states.
+Those 24 failures are identical in both states — that part holds. But attributing them to "a pre-existing Windows temp-path problem, unrelated to this defect" is **wrong**; see §8: this fix introduced them. Before `8ab40fb4` the suite was `Ran 52 tests` / `OK`; after it, `FAILED (failures=3, errors=21)`; and between the two, only `8ab40fb4` touched the gate or that test file. Of the 24, only 1 is a `WindowsPath` assertion; 10 are `current_bilingual_gaps()`'s `git ls-files` exiting 128, 11 are other, and 2 are file-creation identity unavailable.
 
 Consequence: **this defect can return exactly as it was, and neither suite will make a sound.** The only way to observe the difference is to run the gate from outside the repository and write a baseline — and no test does that. The six `os.chdir()` calls in `test_gate_normative_roots.py` all set the cwd **into** the repository, the opposite direction.
 
@@ -337,3 +337,23 @@ So this register's status line, `OPEN — MEASUREMENT ONLY`, is still literally 
 `OPEN` → `FIXED-UNGUARDED — defect fixed on main, no regression test; independent review still NOT_ASSIGNED`.
 
 Not `CLOSED`, for two reasons: §6's blocking chain includes independent review, and a session that writes this measurement cannot supply independence for it; and §7.3 shows the fix has no guard, and an unguarded fix should not be booked as resolved. §3's zero-byte question belongs to register 013; it was re-measured on 2026-11-23 and is still open (a zero-byte partner is accepted by `_side_by_side_bilingual()`), and it is out of scope here.
+
+---
+
+## 8. Correcting §7.3's attribution (2026-11-23)
+
+§7.3's **main conclusion is unchanged**: this register's defect can return with neither suite making a sound, because `scripts/test_check_bilingual_docs.py` — the only one CI runs, 3 tests — is `OK` in both the fixed and the broken state.
+
+But §7.3's causal explanation of those 24 failures is wrong. Corrected:
+
+| | §7.3 as written | Measured |
+|---|---|---|
+| Pre-existing? | "pre-existing" | **No.** `9944d07e` → `Ran 52 tests` / `OK`; `8ab40fb4` → `FAILED (failures=3, errors=21)` |
+| Related to this defect? | "unrelated" | **Directly.** The `cwd=ROOT` → `cwd=REPO_ROOT` step — this register's fix itself — is what broke the test helper |
+| Attribution | "a Windows temp-path problem" | **1 of 24.** 10 are `current_bilingual_gaps()`'s `git ls-files` exiting 128, 11 other, 2 file-creation identity unavailable |
+
+The mechanism: `load_gate()` points `mod.ROOT` at a temp repo but leaves `mod.REPO_ROOT` alone; after `8ab40fb4` made `changed_status()` read `REPO_ROOT`, the helper's temp repo is never consulted, so `git diff A...B` runs in the real repository against two SHAs that exist only in the temp one, and exits 128.
+
+The full measurement, timeline and reproduction steps are in `GOV-NC-2026-11-23-UNREACHABLE-GUARD-030`.
+
+**This correction does not change this register's `FIXED-UNGUARDED` status.** It changes what a reader takes "those 24 are historical noise" to mean — they are not noise; they are this fix's own product.
