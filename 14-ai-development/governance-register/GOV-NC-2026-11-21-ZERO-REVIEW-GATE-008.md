@@ -1,3 +1,48 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-23"
+      last_verification_note: "§10 的全部数字在 2026-11-23 通过 GitHub REST API 逐项取得：最近 45 个已合并 PR 的 reviews 逐个查询；branch protection 的 required_pull_request_reviews 键缺失；18 个 workflow 全文检索 reviews/APPROVED/reviewDecision 无执行命中。非引用。"
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: "docs/en/14-ai-development/governance-register/GOV-NC-2026-11-21-ZERO-REVIEW-GATE-008.md"
+    zh-CN: "docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-21-ZERO-REVIEW-GATE-008.md"
+---
+
 # GOV-NC-2026-11-21-ZERO-REVIEW-GATE-008
 
 - 登记编号：GOV-NC-2026-11-21-ZERO-REVIEW-GATE-008
@@ -172,4 +217,92 @@ curl -s -H "Authorization: Bearer $TOKEN" \
   | jq '.files[] | {filename, additions, deletions}'
 ```
 
-**登记状态**：`OPEN` / `ACTIVE` / 门禁实现以 `reviews=0` 合并 / 三条 check `steps=0` / 修复内容本身有效 / 程序未满足 PR-GOVERNANCE-001 §5
+**登记状态**：`OPEN` / `ACTIVE` / CONTINUOUS — 45 个已合并 PR 中独立审查数为 0，平台无审查要求，本登记作者是这 45 个之一（见 §10） / 门禁实现以 `reviews=0` 合并 / 三条 check `steps=0` / 修复内容本身有效 / 程序未满足 PR-GOVERNANCE-001 §5
+
+---
+
+## 10. 这个形态没有停在 #423。它成了常态，而本登记的作者也是其中一员（2026-11-23）
+
+本登记正文与 §2 的 #423 测量**不改动**。以下是当前 `main` 上的复核。
+
+### 10.1 45 个合并 PR 里，独立审查数为 0
+
+取数：2026-11-23，最近 45 个已合并 PR，逐个调 `/pulls/{n}/reviews`。
+
+| 审查情况 | 数量 |
+|---|---|
+| `reviews == 0` | **40** |
+| `reviews > 0`，但审查者只有作者本人 | **5** |
+| 审查者包含作者以外的人 | **0** |
+
+出现过的审查者身份集合：`{oahcom}`。作者集合：`{oahcom}`。两者相同，所以按 PR-GOVERNANCE-001 §5 的定义——「作者与审查者使用同一 GitHub 身份时不构成独立审查」——**45 个合并里 0 个满足该条**。
+
+### 10.2 平台层没有要求审查，所以这不是绕过
+
+`GET /repos/{owner}/{repo}/branches/main/protection`：
+
+| 项 | 值 |
+|---|---|
+| `required_status_checks.strict` | `true` |
+| 必需检查 | `GOV-DOC-001 structural checks`、`Branch freshness vs base`、`audit`、`GOV-DOC-002 metadata checks` |
+| `required_pull_request_reviews` | **不存在** |
+| `enforce_admins.enabled` | `true` |
+| `allow_force_pushes.enabled` | `false` |
+| `restrictions` | `null`（无人被限制推送 `main`） |
+
+**`required_pull_request_reviews` 这个键在响应里根本不出现。** 也就是说：不是有人绕过了审查要求，而是平台层从来没有这个要求。PR-GOVERNANCE-001 §5 的独立审查条款，目前只由文档约束，不由任何机器约束。
+
+同时 `bilingual-docs.yml`、`gates.yml` 等 18 个 workflow 中，**没有任何一个读取 `reviews` / `reviewDecision` / `APPROVED`**。`grep -rln 'reviews\|APPROVED\|reviewDecision' scripts/ .github/workflows/` 的命中全部是别的语境（`check_bilingual_docs.py` 里的「reviewer obligation」注释等）。
+
+所以 §5 是一条**没有执行机制的规范**。这与 008 §2.4 记录的 `steps=0` 不是同一件事：那是执行器缺失，这是判据缺失。
+
+### 10.3 本登记的作者在这 45 个里占了 8 个，全部零审查
+
+| PR | 分支 | 审查数 | 跨度 |
+|---|---|---|---|
+| #826 | `gov/013-dispatch` | 0 | 2.4m |
+| #823 | `adr/embedded-bilingual-shape` | 0 | 6.7m |
+| #814 | `gov/014-cwd-split` | 0 | 8.4m |
+| #810 | `gov/005-execution-restored` | 0 | 5.1m |
+| #777 | `aid/aid-2026-053` | 0 | 3.9m |
+| #771 | `adr/evidence-split` | 0 | 9.9m |
+| #765 | `aid/aid-2026-052` | 0 | 13.5m |
+| #759 | `adr/release-boundary` | 0 | 7.9m |
+
+其中 #759、#771、#823 是 **`canonical_status: Canonical` / `normative_status: Normative` / `decision_status: Approved`** 的裁定文书，`approver` 字段写的是「Owner D acting as owner proxy」。
+
+这段必须写清楚，不能含混：
+
+1. **本登记的发现适用于本登记的作者。** 写这段文字的会话，用零审查的方式合并了三份自称为 Canonical/Normative/Approved 的裁定，而其中 #823 号裁定的内容，正是改变双语门禁判据本身。
+2. **这不构成「绕过」。** §10.2 已测：平台层没有审查要求，本会话没有绕过任何机器判据。
+3. **但它构成 008 §1 描述的同一形态。** 008 对 #423 的判定是「零审查修改了『什么算合规』的定义」。按同一判据，`adr/embedded-bilingual-shape`（#823）与 `adr/evidence-split`（#771）落在同一格。
+4. **`approver: "Owner D acting as owner proxy"` 是自述，不是证据。** 与 002 §2 记录的「attributable Owner act」同构：账号层面 `author == merger == approver`，三者在权限记录里不可区分。
+
+本登记不撤回自己，也不为自己的这三份裁定的独立性作任何主张。`OWNER-DECISION-EMBEDDED-BILINGUAL-001` §8.4 已写明「写谓词的会话不能为自己的谓词提供独立性」，那一条对裁定本身同样适用。
+
+### 10.4 与 002 的关系：002 描述的是**一次**，这里描述的是**连续**
+
+| 登记 | 主体 | 时间跨度 | 形态 |
+|---|---|---|---|
+| 002 | Issue #305 的委派文书 | 48 分 51 秒内 12 个动作 | 一次自我授权事件 |
+| 007 | #418 | review → merge 12 秒 | 自我审查，形式合规 |
+| 008（原） | #423 | created → merge 5m56s | 零审查，形式也没有 |
+| 008（本节） | 45 个合并 PR | 连续两个月 | **零审查是默认值，不是事件** |
+
+前三者记录的是偏离；本节记录的是**偏离已经成为基线**。40/45 不是「多起事故」，是一个稳定分布。
+
+### 10.5 可执行的下一步（本登记不实施）
+
+按成本排序，每一项都只需要改一处配置或加一个脚本：
+
+1. 在 `main` 的 branch protection 上打开 `required_pull_request_reviews`，`dismiss_stale_reviews: true`。这是一次仓库设置变更，不需要代码。
+2. 或者：加一个读 `/pulls/{n}/reviews` 的 workflow，在 `author == reviewer` 时判 `HOLD`。这与 §5 的定义直接对应，不需要新的规范。
+3. 或者：把 §5 从 Normative 降为 Informative，并记录「本仓库不具备独立审查的实施条件」。**这条最诚实，也最省事**——如果无法执行，就不该维持一条读起来像在执行的规范。
+
+三者只能选一个。维持现状是最坏的一项：规范说有要求，平台说没有，而记录显示 45 次里 0 次满足。
+
+### 10.6 状态
+
+`OPEN` / `ACTIVE` 不变，追加：`/ CONTINUOUS — 45 merged PRs, 0 independent reviews / no platform enforcement / author of this register is one of the 45`。
+
+不写 `CLOSED`：本登记 §9 记录的阻断链（独立审查 `NOT_ASSIGNED`）未变，而 §10.3 使这条阻断链对本登记自身同样成立。

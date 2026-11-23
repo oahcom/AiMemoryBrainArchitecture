@@ -1,6 +1,51 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-23"
+      last_verification_note: "§8 的结论在 2026-11-23 于 main f39dfb7b 实测：384 个 normative_changes 候选中非 .md 为 0；把 717dfbf0 那一行改回去可在干净 worktree 上复现 §0 记录的错误；套件在 9944d07e 为 52 个全过、在 8ab40fb4 为 24 个问题。全部为本会话实跑，非引用。"
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: "docs/en/14-ai-development/governance-register/GOV-NC-2026-11-21-SUFFIX-SCOPE-017.md"
+    zh-CN: "docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-21-SUFFIX-SCOPE-017.md"
+---
+
 # GOV-NC-2026-11-21-SUFFIX-SCOPE-017
 
-**Status:** OPEN — MEASUREMENT ONLY
+**Status:** `FIXED-CLOSED-BY-OTHER` — fixed in `717dfbf0` (#527) by a different route than §5 branch 3, behaviourally verified (see §8). Its three shipped tests are broken and no workflow runs them. Independent review remains `NOT_ASSIGNED`.
 **Nature:** `REGISTER_ONLY / NO_IMPLEMENTATION / NO_GATE_CHANGE / REQUIRES_INDEPENDENT_REVIEW`
 **Measured at:** `main = d647e7d5ef`
 **Extends:** `...-SPLIT-DOMAIN-011.md`, `...-PAIRING-RESIDUAL-013.md`, `...-CWD-SPLIT-014.md`, `...-EMBEDDED-ROOT-015.md`
@@ -226,3 +271,73 @@ No CI, no API quota beyond reading the PR.
 - It does not assign an independent review seat. That seat remains `NOT_ASSIGNED`.
 
 **Blocking chain unchanged:** independent review `NOT_ASSIGNED`, implementation authorisation `NOT_AUTHORISED`, sponsor / accountable owner `NOT_ASSIGNED`.
+
+---
+
+## 8. 实测：本登记的缺陷已被修复，修法与本登记 §5 第 3 分支不同（2026-11-23）
+
+本登记正文与 §2 的 PR 矩阵**不改动**。那些数字测于 `d647e7d5`，记录保留。以下是当前 `main` 上的实测。
+
+### 8.1 修复已落地，比本登记被登记早 80 分钟
+
+| 项 | 值 |
+|---|---|
+| 修复 commit | `717dfbf0`，2026-11-21 22:09:16 +0800，`fix(bilingual): stop treating data files as documents requiring counterparts`（PR #527） |
+| 本登记测量点 | `d647e7d5`，2026-11-21 20:48:30 +0800 |
+| 本登记入库 | `d9c29a1c`，2026-11-21 23:21:05 +0800（PR #494） |
+| 变更 | 一行：`suffix in {".md",".yaml",".yml",".json",".toml",".proto"}` → `suffix == ".md"`，`+1 −1` |
+| 同 commit 附带 | `scripts/governance/evidence/test_gate_normative_roots.py` `+71`，3 个测试 |
+
+修复早于本登记入库 72 分钟、早于本登记测量点 80 分钟。**该 commit 的提交信息没有提到 017**，全仓 `grep SUFFIX-SCOPE-017` 除本登记自身外零命中——与本登记 §2.2a 记录 #507 时的情形同构：证据都在，只是没有连起来。
+
+### 8.2 修法不是 §5 的第 3 分支，而差别是实质的
+
+§5 第 3 分支是「后缀过滤器本应 root-agnostic」。**该分支的诊断为真**（§3 的推理成立），但实际的修法不是移走过滤器，而是把**上游**收窄成只收 `.md`：
+
+```python
+normative_changes = []
+for path in sorted(changed):
+    parts = Path(path).parts
+    if len(parts) >= 2 and parts[0] in NORMATIVE_ROOTS:
+        if Path(path).suffix.lower() in EXEMPT_SUFFIXES:
+            continue
+        if Path(path).suffix.lower() == ".md":      # <-- 这里，不是第 1031 行
+            normative_changes.append(path)
+```
+
+后果：`check_normative_pairing()` 永远收不到非 `.md` 文件，第 1031 行的 `PAIR_ENFORCED_SUFFIXES` 守卫再也不可能触发。按 `main` 的构造逻辑重放全树 552 个 normative 路径：**384 个候选，其中非 `.md` 为 0**。
+
+`PAIR_ENFORCED_SUFFIXES = {".md"}` 仍在第 41 行声明、仍被第 1031 行读取，但已是恒真判断。代码读起来是「只对 Markdown 要求配对」，实际执行的是「只有 Markdown 会到这里」。
+
+### 8.3 行为验证：缺陷态可复现，不是只读代码
+
+在 `origin/main` 的干净 worktree 上，只改一个 `.json` schema 一个字符：
+
+| 树状态 | 结果 |
+|---|---|
+| `main` 原样 | `PASS (1 changed paths inspected)` |
+| 把 `717dfbf0` 那一行改回去 | `FAIL` — `::error::08-bmcp-protocol/schemas/bmcp.applied-delivery-evidence-1.0.0.schema.json requires all counterparts changed in this PR: ..., docs/en/..., docs/zh-CN/...` |
+
+这正是本登记 §0 记录的错误形态。所以缺陷是真的，修复也是真的。
+
+### 8.4 代价：167 个文件退出配对检查，其中 0 个曾有过镜像
+
+`.json` 59、`.py` 54、`.yaml` 47、`.mjs` 4、其他 4。`docs/en/` 与 `docs/zh-CN/` 下的非 `.md` 文件数：**0**。
+
+§5 的判断——要求 JSON schema 提供 Markdown 译文是**不满足的**——在修复后依然成立；修复只是把「不满足」改成「不检查」。结果上这是对的。本节不主张回退。
+
+但 `.py`（54 个）与 `.json`（59 个）共享同一豁免这件事没有记录：一个 schema 与一个校验器在「是否需要中文说明」上不是同一类问题。
+
+### 8.5 修复自带的 3 个测试在 `main` 上全部失效
+
+`717dfbf0` 加的 3 个测试（`test_schema_json_change_does_not_require_counterpart`、`test_markdown_still_requires_counterpart`、`test_governance_markdown_still_requires_counterpart`）都走 `_run_real_git_gate_for_change()`。它们在 `9944d07e`（`#534`，补 `sys.argv`）时全绿，在 `8ab40fb4`（登记 014 的修复，把 `changed_status()` 的 `cwd=ROOT` 改成 `cwd=REPO_ROOT`）之后全部失效——因为 `load_gate()` 只改了 `mod.ROOT`，没改 `mod.REPO_ROOT`。
+
+而且这个套件**没有任何 workflow 运行**：`grep -rn 'test_gate_normative_roots' .github/` 零命中。所以这 3 个测试既不再通过，也不会在 CI 变红。
+
+完整测量与时间线见 `GOV-NC-2026-11-23-UNREACHABLE-GUARD-030`。
+
+### 8.6 状态
+
+`OPEN` → `FIXED-CLOSED-BY-OTHER` — 缺陷已由 `717dfbf0` 修复并经行为验证；修法与 §5 第 3 分支不同（§8.2）；其自带的 3 个测试已失效且无 workflow 运行（§8.5）。独立审查仍 `NOT_ASSIGNED`。
+
+不写 `CLOSED`：§6 的阻断链包含独立审查，而写这段文字的会话不能为自己的测量提供独立性；且 §8.2、§8.5 各自留下一个未决项，都由 030 承接。

@@ -320,7 +320,7 @@ baseline write refused: working tree is not clean; git status --porcelain --untr
 | `scripts/test_check_bilingual_docs.py` | `Ran 3 tests` / `OK` | `Ran 3 tests` / `OK` |
 | `scripts/governance/evidence/test_gate_normative_roots.py` | `Ran 52 tests` / `FAILED (failures=3, errors=21)` | 同一组 24 个失败，`diff` 为空 |
 
-那 24 个失败是既有的 Windows 临时路径问题（`run([...], cwd=WindowsPath('C:/Users/ADMINI~1/...'))` 断言匹配不上），与本缺陷无关，且在两种状态下完全一致。
+那 24 个失败在两种状态下完全一致——这一点成立。但把它们归因为「既有的 Windows 临时路径问题、与本缺陷无关」是**错的**，更正见 §8：它们是本次修复引入的。`8ab40fb4` 之前该套件 `Ran 52 tests` / `OK`，之后 `FAILED (failures=3, errors=21)`，而两者之间只有 `8ab40fb4` 一个 commit 触碰过闸门或该测试文件。24 个里只有 1 个是 `WindowsPath` 断言；10 个是 `current_bilingual_gaps()` 的 `git ls-files` 退出 128，11 个其他，2 个文件创建身份不可识别。
 
 结论：**这个缺陷可以原样回来，而两套测试都不会响。** 唯一能观察到差异的方式是从仓库外目录跑闸门并写基线——没有任何测试这么做。`test_gate_normative_roots.py` 里 6 处 `os.chdir()` 都是把 cwd 设**进**仓库，方向恰好相反。
 
@@ -337,3 +337,23 @@ baseline write refused: working tree is not clean; git status --porcelain --untr
 `OPEN` → `FIXED-UNGUARDED — 缺陷已修复，无回归测试；独立审查仍 NOT_ASSIGNED`。
 
 不写 `CLOSED` 的理由：本登记 §6 的阻断链包含独立审查，而写这段文字的会话不能为自己的测量提供独立性；且 §7.3 说明修复缺护栏，一个缺护栏的修复不宜按「已解决」结案。§3 的零字节问题属于登记 013，本次复测仍为开放（0 字节伙伴被 `_side_by_side_bilingual()` 接受），不在本登记范围内。
+
+---
+
+## 8. 更正 §7.3 的归因（2026-11-23）
+
+§7.3 的**主结论不变**：本登记的缺陷可以在两套测试都不响的情况下回来，因为 CI 唯一运行的 `scripts/test_check_bilingual_docs.py`（3 个测试）在修复态与缺陷态都是 `OK`。
+
+但 §7.3 对那 24 个失败的因果解释是错的，更正如下：
+
+| | §7.3 原写法 | 实测 |
+|---|---|---|
+| 是否既有 | 「既有的」 | **否**。`9944d07e` 上 `Ran 52 tests` / `OK`；`8ab40fb4` 上 `FAILED (failures=3, errors=21)` |
+| 与本缺陷是否相关 | 「与本缺陷无关」 | **直接相关**。正是 `cwd=ROOT` → `cwd=REPO_ROOT` 这一步（本登记修复的本体）让测试 helper 失效 |
+| 归因 | 「Windows 临时路径问题」 | **只占 1/24**。10 个是 `current_bilingual_gaps()` 的 `git ls-files` 退出 128，11 个其他，2 个文件创建身份不可识别 |
+
+机制：`load_gate()` 只把 `mod.ROOT` 指向临时仓库，没有改 `mod.REPO_ROOT`；`8ab40fb4` 把 `changed_status()` 改成读 `REPO_ROOT` 之后，helper 建的临时仓库再也不被读取，`git diff A...B` 于是在真实仓库里跑两个只在临时仓库存在的 SHA，退出 128。
+
+完整测量、时间线与复现步骤见 `GOV-NC-2026-11-23-UNREACHABLE-GUARD-030`。
+
+**这条更正不改变本登记的 `FIXED-UNGUARDED` 状态**，只改变读者对「那 24 个是历史噪音」的印象——它们不是噪音，它们是本次修复的产物。

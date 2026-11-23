@@ -1,6 +1,51 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-23"
+      last_verification_note: "§8's conclusions were measured on 2026-11-23 at main f39dfb7b: 0 of 384 normative_changes candidates are non-.md; reverting the one line from 717dfbf0 reproduces §0's error on a clean worktree; the suite is 52 green at 9944d07e and 24 problems at 8ab40fb4. All run in this session, not quoted."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "14-ai-development/governance-register/GOV-NC-2026-11-21-SUFFIX-SCOPE-017.md"
+    en: null
+    zh-CN: "docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-21-SUFFIX-SCOPE-017.md"
+---
+
 # GOV-NC-2026-11-21-SUFFIX-SCOPE-017
 
-**Status:** OPEN — MEASUREMENT ONLY
+**Status:** `FIXED-CLOSED-BY-OTHER` — fixed in `717dfbf0` (#527) by a different route than §5 branch 3, behaviourally verified (see §8). Its three shipped tests are broken and no workflow runs them. Independent review remains `NOT_ASSIGNED`.
 **Nature:** `REGISTER_ONLY / NO_IMPLEMENTATION / NO_GATE_CHANGE / REQUIRES_INDEPENDENT_REVIEW`
 **Measured at:** `main = d647e7d5ef`
 **Extends:** `...-SPLIT-DOMAIN-011.md`, `...-PAIRING-RESIDUAL-013.md`, `...-CWD-SPLIT-014.md`, `...-EMBEDDED-ROOT-015.md`
@@ -235,3 +280,73 @@ No CI, no API quota beyond reading the PR.
 - It does not assign an independent review seat. That seat remains `NOT_ASSIGNED`.
 
 **Blocking chain unchanged:** independent review `NOT_ASSIGNED`, implementation authorisation `NOT_AUTHORISED`, sponsor / accountable owner `NOT_ASSIGNED`.
+
+---
+
+## 8. Measured: the defect is fixed, by a different route than §5 branch 3 (2026-11-23)
+
+The body of this register and its §2 PR matrix are **not changed**. Those figures were measured at `d647e7d5` and the record stands. What follows is measured on current `main`.
+
+### 8.1 The fix landed 80 minutes before this register was measured
+
+| Item | Value |
+|---|---|
+| Fix commit | `717dfbf0`, 2026-11-21 22:09:16 +0800, `fix(bilingual): stop treating data files as documents requiring counterparts` (PR #527) |
+| This register's measurement point | `d647e7d5`, 2026-11-21 20:48:30 +0800 |
+| This register committed | `d9c29a1c`, 2026-11-21 23:21:05 +0800 (PR #494) |
+| Change | one line: `suffix in {".md",".yaml",".yml",".json",".toml",".proto"}` → `suffix == ".md"`, `+1 −1` |
+| Shipped in the same commit | `scripts/governance/evidence/test_gate_normative_roots.py` `+71`, three tests |
+
+The fix predates this register's commit by 72 minutes and its measurement point by 80. **The commit message does not mention 017**, and a repo-wide `grep SUFFIX-SCOPE-017` hits nothing outside this register — structurally the same as §2.2a's finding about #507: the evidence was all present, just never connected.
+
+### 8.2 The fix is not §5 branch 3, and the difference is substantive
+
+§5 branch 3 was "the suffix filter should be root-agnostic". **That diagnosis is correct** — §3's reasoning holds — but the fix does not move the filter. It narrows the **upstream** set to `.md` only:
+
+```python
+normative_changes = []
+for path in sorted(changed):
+    parts = Path(path).parts
+    if len(parts) >= 2 and parts[0] in NORMATIVE_ROOTS:
+        if Path(path).suffix.lower() in EXEMPT_SUFFIXES:
+            continue
+        if Path(path).suffix.lower() == ".md":      # <-- here, not line 1031
+            normative_changes.append(path)
+```
+
+Consequence: `check_normative_pairing()` can never receive a non-`.md` file, so the `PAIR_ENFORCED_SUFFIXES` guard at line 1031 can never fire. Replaying `main`'s construction over all 552 tracked normative paths gives **384 candidates, 0 non-`.md`**.
+
+`PAIR_ENFORCED_SUFFIXES = {".md"}` is still declared at line 41 and still read at line 1031, and is now a tautology. The code reads as "pairing is required only for Markdown"; what executes is "only Markdown gets here".
+
+### 8.3 Behavioural verification: the broken state reproduces, so this is not a reading of the code
+
+On a clean worktree at `origin/main`, changing one character in a `.json` schema:
+
+| Tree state | Result |
+|---|---|
+| `main` as-is | `PASS (1 changed paths inspected)` |
+| the one line from `717dfbf0` reverted | `FAIL` — `::error::08-bmcp-protocol/schemas/bmcp.applied-delivery-evidence-1.0.0.schema.json requires all counterparts changed in this PR: ..., docs/en/..., docs/zh-CN/...` |
+
+That is exactly the error shape §0 records. The defect was real and the fix is real.
+
+### 8.4 Cost: 167 files leave pairing, and 0 of them ever had a mirror
+
+`.json` 59, `.py` 54, `.yaml` 47, `.mjs` 4, other 4. Non-`.md` files under `docs/en/` and `docs/zh-CN/`: **0**.
+
+§5's judgement — that demanding a Markdown translation of a JSON schema is **unsatisfiable** — still holds after the fix; the fix changed "unsatisfiable" into "not checked". That is the right outcome. This section does not argue for reverting it.
+
+What is not recorded is that `.py` (54) and `.json` (59) now share one exemption: a schema and a validator are not the same question when it comes to "does this need Chinese prose".
+
+### 8.5 All three tests the fix shipped with are broken on `main`
+
+The three tests added in `717dfbf0` (`test_schema_json_change_does_not_require_counterpart`, `test_markdown_still_requires_counterpart`, `test_governance_markdown_still_requires_counterpart`) all run through `_run_real_git_gate_for_change()`. They were green at `9944d07e` (#534, `sys.argv` patched) and broke at `8ab40fb4` — register 014's fix, which changed `changed_status()` from `cwd=ROOT` to `cwd=REPO_ROOT` while `load_gate()` still patches only `mod.ROOT`, never `mod.REPO_ROOT`.
+
+And **no workflow runs this suite**: `grep -rn 'test_gate_normative_roots' .github/` returns nothing. So those three tests neither pass nor turn anything red.
+
+The full measurement and timeline are in `GOV-NC-2026-11-23-UNREACHABLE-GUARD-030`.
+
+### 8.6 Status
+
+`OPEN` → `FIXED-CLOSED-BY-OTHER` — the defect was fixed by `717dfbf0` and behaviourally verified; the route differs from §5 branch 3 (§8.2); the three tests it shipped with are broken and unrun by CI (§8.5). Independent review remains `NOT_ASSIGNED`.
+
+Not `CLOSED`: §6's blocking chain includes independent review, and a session that writes this measurement cannot supply independence for it; and §8.2 and §8.5 each leave an open item, both taken up by 030.
