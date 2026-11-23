@@ -105,15 +105,36 @@ It looks attractive — the schemas are present, the pointers are indexed — bu
 yet frozen, and it would do so without any call site that consumes them. `bmcp-server` reaches no
 parser at all today (`describe()` in `lib.rs:718-723` is `#[allow(dead_code)]` with zero call sites).
 
-> **Erratum, appended 2026-11-23.** The line-number citation above does not resolve. At this file's
-> own measurement commit `4ce12cc7`, `crates/bmcp-protocol/src/lib.rs` is **2366 lines** and lines
-> 718–723 are the date-component parser (`let year = number(0, 4);` through
-> `let second = number(17, 19);`) — not `describe()`, and not the escape table either. `describe()`
-> does not exist in that file at any line. The citation was lifted from `GAP-10` §10.2, where it was
-> correct at `61b9d743`; `GAP-10` §11.3 records the defect against §10.2 and §11.4 records that this
-> section republished it. (§11.3's own replacement figure of "940 lines" does not reproduce either —
-> the measured count is 2366. Recorded here rather than corrected there, because §11.3 is another
-> session's erratum and an owner-proxy session should not edit it silently.)
+> **Erratum, appended 2026-11-23. Corrected in place: the first version of this erratum measured
+> the wrong file.** The correction is stated first and the superseded wording is kept below it, for
+> the same reason the original text above is kept.
+>
+> The citation `lib.rs:718-723` above names no crate, and two crates carry a file at that path. At
+> `4ce12cc7` the two files do not measure the same:
+>
+> - `crates/bmcp-server/src/lib.rs` is **940 lines**. Lines 718–723 are the JSON string-escape table
+>   (`b'"' => output.push('"')` through `b'f' => output.push('\u{000c}')`). `describe()` is defined
+>   at line 938 and called from `invalid_evidence_result()` at line 419, and the crate contains zero
+>   `#[allow(dead_code)]`.
+> - `crates/bmcp-protocol/src/lib.rs` is **2366 lines**. Lines 718–723 are the date-component parser
+>   (`let year = number(0, 4);` through `let second = number(17, 19);`), and `describe()` does not
+>   exist in that file at any line.
+>
+> The first version of this erratum reported that "940 lines" does not reproduce and that the
+> measured count is 2366. Both numbers are real, and they are counts of two different files: 940
+> belongs to `bmcp-server`, 2366 to `bmcp-protocol`. `GAP-10` §11.3 is about `bmcp-server`, so §11.3
+> reproduces exactly — 940 lines, and 718–723 the escape table — and **§11.3 needs no correction**.
+> The parenthetical that called §11.3's 940 unreproducible is withdrawn; it was the same defect it
+> was correcting, namely a citation that does not say which crate it means.
+>
+> The one thing that genuinely does not reproduce is the citation itself, because it conflates two
+> same-named files. It was written against `crates/bmcp-server/src/lib.rs` at `61b9d743`, where the
+> file is 723 lines and 718–723 hold the `#[allow(dead_code)]` formatter. In
+> `crates/bmcp-protocol/src/lib.rs` those same line numbers are the date parser. On the file the
+> citation meant, `describe()` has by `4ce12cc7` moved to line 938 and lost its `#[allow(dead_code)]`;
+> on the file it did not mean, `describe()` never existed at any line. The citation was lifted from
+> `GAP-10` §10.2, where it was correct at `61b9d743`; `GAP-10` §11.3 records the defect against §10.2
+> and §11.4 records that this section republished it.
 >
 > Two things were wrong, and only one is about line numbers. The citation is stale. Worse, the
 > sentence it supports — "`bmcp-server` reaches no parser at all" — was already false at `4ce12cc7`:
