@@ -15,6 +15,7 @@ Exit codes:
     4  Formatting check timed out.
     5  Invalid arguments or expected SHA mismatch.
     6  Other execution or internal error.
+    7  Refused because the Git working tree is dirty.
 """
 
 from __future__ import annotations
@@ -36,6 +37,7 @@ EXIT_CARGO_NOT_FOUND = 3
 EXIT_TIMEOUT = 4
 EXIT_EXPECTATION_FAILED = 5
 EXIT_ERROR = 6
+EXIT_DIRTY_WORKTREE = 7
 
 DEFAULT_TIMEOUT_SECONDS = 300
 
@@ -167,6 +169,52 @@ def check_expected_sha(actual_sha: str, expected_sha: str | None) -> None:
         )
 
 
+def require_clean_worktree(root: Path) -> None:
+    """Refuse to attribute a formatting result to HEAD when the tree is dirty."""
+
+    try:
+        result = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(root),
+                "status",
+                "--porcelain",
+                "--untracked-files=all",
+            ],
+            cwd=str(root),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=False,
+            timeout=15,
+        )
+    except FileNotFoundError:
+        fail("git executable not found; cannot establish working-tree cleanliness.", EXIT_UNKNOWN_COMMIT)
+    except subprocess.TimeoutExpired:
+        fail("Timed out while checking working-tree cleanliness.", EXIT_UNKNOWN_COMMIT)
+    except OSError as exc:
+        fail(f"Unable to check working-tree cleanliness: {exc}", EXIT_UNKNOWN_COMMIT)
+
+    if result.returncode != 0:
+        detail = result.stderr.strip()
+        fail(
+            "Unable to establish working-tree cleanliness"
+            + (f": {detail}" if detail else "."),
+            EXIT_UNKNOWN_COMMIT,
+        )
+
+    if result.stdout:
+        print("WORKTREE_RESULT=DIRTY")
+        print("Uncommitted paths:")
+        print(result.stdout, end="" if result.stdout.endswith("\n") else "\n")
+        fail(
+            "Working tree is not clean; refusing to attribute a formatting verdict to HEAD.",
+            EXIT_DIRTY_WORKTREE,
+        )
+
+    print("WORKTREE_RESULT=CLEAN")
+
 def run_fmt(root: Path, timeout: float) -> int:
     cargo = shutil.which("cargo")
 
@@ -245,6 +293,7 @@ def main() -> int:
     head_sha = get_head_sha(root)
 
     check_expected_sha(head_sha, args.expect)
+    require_clean_worktree(root)
 
     print(f"CHECKED_HEAD_SHA={head_sha}")
 
