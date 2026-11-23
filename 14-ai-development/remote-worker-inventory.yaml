@@ -27,11 +27,14 @@ runner:
   retired_date: "2026-11-23"
   repository: "oahcom/AiMemoryBrainArchitecture"
   previous_name: "zesu-x64"
+  previous_id: 21
   previous_labels: ["self-hosted", "linux", "x64"]
-  service_status: "DISABLED"
-  registration_status: "DEREGISTERED"
-  install_directory_status: "RETAINED_PENDING_SEPARATE_CLEANUP_DECISION"
-  note: "No repository workflow may target a server-side runner. The installation directory is retained temporarily for auditability; it is not an active service."
+  service_status: "DISABLED_INACTIVE"
+  service_unit_status: "DISABLED_NOT_MASKED"
+  registration_status: "REGISTERED_OFFLINE_UNVERIFIED"
+  local_auth_material_status: "REMOVED"
+  install_directory_status: "RETAINED_FOR_AUDIT"
+  note: "The systemd service is disabled and inactive, no Runner processes remain, and local .credentials/.credentials_rsaparams files were removed. GitHub registration id 21 has not been confirmed deregistered; remove it through repository Settings > Actions > Runners. The local installation directory and non-secret .runner metadata are retained for auditability. No repository workflow may target a server-side runner."
 runtime:
   deployment_status: "DEVELOPMENT_HOST_ONLY"
   runner_status: "RETIRED"
