@@ -945,6 +945,18 @@ The 77-row Memory Context map has also moved, and not only by relabelling:
 So §9.2's own hedge — "treat the row counts as stale, not the tests" — is now
 wrong in the second half too. Both are stale, and three rows closed.
 
+**Counting methodology — static test declarations versus runtime test-result output**
+
+The static source count is 722 `#[test]` declarations. The workspace runtime aggregation reported 724 passed tests because the aggregation also counted two child-process `test result` lines emitted by tests in `memory-storage-sqlite`.
+
+The two additional lines originate from `tests::abrupt_exit_worker` and `tests::multi_process_cas_worker`, which spawn the current test executable through `std::process::Command::new(std::env::current_exe().unwrap())` at `crates/memory-storage-sqlite/src/lib.rs:1494` and `:2757`, respectively, and invoke the worker tests using `--exact`.
+
+These are additional runtime result lines, not two additional statically declared test cases. The two worker test declarations are already included in the static source count. The discrepancy is therefore an aggregation artifact: 722 statically declared tests versus 724 counted runtime result lines.
+
+Running with `--test-threads=1` does not eliminate the two additional lines, confirming that their origin is child-process execution rather than parallel test execution.
+
+The runtime total of 724 is retained as the historical workspace aggregation result; it must not be presented as an independently verified count of 724 distinct statically declared test cases.
+
 ### 11.2 §10.2's BMCP finding is correct at its own commit and false at `4ce12cc7`
 
 §10.2 states:
@@ -967,7 +979,7 @@ At `bea1c2b`, `crates/bmcp-server/src/lib.rs`:
   (339), `tools/call` (345), with `-32601` only as the fallback arm (348);
 - calls `bmcp_protocol::parse_and_validate` from **two** tool arms — `VALIDATE_TOOL`
   (line 392) and `DIGEST_TOOL` (line 403);
-- has **eight** `bmcp_protocol` references, not one;
+- has **six** `bmcp_protocol` references, not one;
 - has **no** `#[allow(dead_code)]` anywhere in the crate, and `describe()` at
   line 938 is called at line 419.
 
@@ -1074,7 +1086,8 @@ at `crates/memory-domain/src/canonical_commit.rs:33`. Workspace `#[ignore]`
 count is **0**.
 
 Item 1, a successful `Published` disposition, is unchanged and still the only
-item blocked by a non-code dependency. `publication_authority.rs:138-139`
+item blocked by a non-code dependency.
+`crates/memory-compiler/src/publication_authority.rs:138-139`
 returns `publication_participant_admitted: false` and
 `protected_visibility_authorized: false` as literal constants, which is what
 `D-OWNER-DECISION-PARTICIPANT-ADMISSION-001` §1 and
@@ -1122,7 +1135,7 @@ BMCP route and coverage (§11.2), all on `crates/bmcp-server/src/lib.rs`:
 grep -n '"initialize"\|"tools/list"\|"tools/call"\|32601' crates/bmcp-server/src/lib.rs
 grep -n 'parse_and_validate' crates/bmcp-server/src/lib.rs
 grep -rn 'allow(dead_code)' crates/bmcp-server/src/ | wc -l    # 0
-grep -rn 'bmcp_protocol' crates/bmcp-server/src/ | wc -l       # 8
+grep -rn 'bmcp_protocol' crates/bmcp-server/src/ | wc -l       # 6
 ```
 
 Router arms and their validation strength (§11.2a), counted per arm rather than

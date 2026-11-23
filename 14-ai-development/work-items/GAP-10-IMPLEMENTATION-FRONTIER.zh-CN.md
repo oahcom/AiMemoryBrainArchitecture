@@ -827,6 +827,18 @@ fn describe(error: &bmcp_protocol::validate::EvidenceError) -> String {
 因此 §9.2 自己那句"行数过时，测试没过时"的补充说明，后半句现在也错了：两者都过时，
 而且有三行已关闭。
 
+**计数方法——静态测试声明与运行时测试结果输出**
+
+源码静态计数为 722 个 `#[test]` 声明。Workspace 运行时汇总报告了 724 个通过的测试，因为该汇总还计入了 `memory-storage-sqlite` 中的测试所输出的两条子进程 `test result` 行。
+
+这两条额外输出分别来自 `tests::abrupt_exit_worker` 和 `tests::multi_process_cas_worker`。这两个测试通过 `std::process::Command::new(std::env::current_exe().unwrap())` 启动当前测试可执行文件，源码位置分别为 `crates/memory-storage-sqlite/src/lib.rs:1494` 和 `:2757`，并通过 `--exact` 参数运行对应的 worker 测试。
+
+这两条是额外的运行时结果输出，并非两个额外的静态测试用例。两个 worker 测试的声明已经包含在源码静态计数中。因此，差额来自汇总口径：722 个静态声明的测试，对应 724 条被汇总的运行时测试结果行。
+
+使用 `--test-threads=1` 运行不会消除这两条额外输出，证实其来源是子进程执行，而不是并行测试执行。
+
+保留 724 作为历史 workspace 运行时汇总结果；不得将其表述为已经独立验证的 724 个不同的静态测试声明。
+
 ### 11.2 §10.2 的 BMCP 结论在它自己的提交上成立，在 `4ce12cc7` 上不成立
 
 §10.2 断言：
@@ -848,7 +860,7 @@ capability set*，2026-11-22 13:48 +08:00）之后不再成立——该提交晚
   `tools/call`（345），`-32601` 只作为兜底分支（348）；
 - 从 **两个** tool 分支调用 `bmcp_protocol::parse_and_validate`——`VALIDATE_TOOL`
   （392 行）与 `DIGEST_TOOL`（403 行）；
-- `bmcp_protocol` 引用 **8 处**，不是 1 处；
+- `bmcp_protocol` 引用 **6 处**，不是 1 处；
 - 整个 crate **没有** 任何 `#[allow(dead_code)]`；第 938 行的 `describe()` 在第
   419 行被调用。
 
@@ -940,7 +952,8 @@ GAP-31 的论点是：六个百分比是化石，因为它们"在某个更早的
 计数为 **0**。
 
 第一项，一次成功的 `Published` 处置，未变，仍是唯一被非代码依赖卡住的一项。
-`publication_authority.rs:138-139` 把 `publication_participant_admitted: false` 与
+`crates/memory-compiler/src/publication_authority.rs:138-139`
+把 `publication_participant_admitted: false` 与
 `protected_visibility_authorized: false` 作为字面常量返回，这正是
 `D-OWNER-DECISION-PARTICIPANT-ADMISSION-001` §1 与
 `D-OWNER-DECISION-PROTECTED-VISIBILITY-001` §1 的要求，不是疏漏。
@@ -985,7 +998,7 @@ BMCP 通路与覆盖（§11.2），全部针对 `crates/bmcp-server/src/lib.rs`�
 grep -n '"initialize"\|"tools/list"\|"tools/call"\|32601' crates/bmcp-server/src/lib.rs
 grep -n 'parse_and_validate' crates/bmcp-server/src/lib.rs
 grep -rn 'allow(dead_code)' crates/bmcp-server/src/ | wc -l    # 0
-grep -rn 'bmcp_protocol' crates/bmcp-server/src/ | wc -l       # 8
+grep -rn 'bmcp_protocol' crates/bmcp-server/src/ | wc -l       # 6
 ```
 
 路由器 arm 及其验证强度（§11.2a），逐 arm 计数而非目测：
