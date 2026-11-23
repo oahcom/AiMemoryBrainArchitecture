@@ -1006,7 +1006,9 @@ grep -rn 'parse_dispatch' crates/bmcp-server/ | wc -l    # 0
 `StructurallyParsed`，而不是 `SemanticallyValidated`。
 
 
-19 种未解析类型，从索引表导出而非手抄：
+逐类型识别循环，从索引表导出而非手抄。注意这个循环测的是什么：某个类型的名字有没有
+出现在 `crates/` 里。`#707` 之后它已是错的仪器——每个类型现在都有一个路由 arm，所以
+预期结果是 22 命中 0 缺失，出现 3/19 就是说这个循环在读 `#707` 之前的树（§11.2a）：
 
 ```sh
 python3 08-bmcp-protocol/scripts/check_protocol_index.py   # unique_message_types=22 PASS
@@ -1022,7 +1024,8 @@ while IFS= read -r t; do
   n=$(grep -rl -- "$t" crates/ 2>/dev/null | wc -l)
   printf '%s %s\n' "$n" "$t"
 done < /tmp/types.txt | sort -n
-# 3 个类型有命中；19 个为 0
+# bea1c2b:  3 个类型有命中；19 个为 0
+# 021f5a3f: 22 个类型有命中；0 个为 0   （#707 加了路由）
 ```
 
 关于最后一个循环的一句提醒：Windows 上的 Python 写出的 `PROTOCOL-INDEX.md` 带 CRLF，

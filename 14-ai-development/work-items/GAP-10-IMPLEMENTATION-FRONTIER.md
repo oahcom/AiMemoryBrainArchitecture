@@ -1142,7 +1142,11 @@ calls `parse_storage_receipt` yet reports `StructurallyParsed`, not
 `SemanticallyValidated`.
 
 
-The 19 unparsed types, derived from the index table rather than retyped:
+The per-type recognition loop, derived from the index table rather than
+retyped. Note what this loop measures: whether a type's name appears in `crates/`
+at all. It is the wrong instrument after `#707` — every type now has a router arm,
+so the expected result is 22 hits and 0 misses, and a 3/19 result means the loop
+is reading a pre-`#707` tree (§11.2a):
 
 ```sh
 python3 08-bmcp-protocol/scripts/check_protocol_index.py   # unique_message_types=22 PASS
@@ -1158,7 +1162,8 @@ while IFS= read -r t; do
   n=$(grep -rl -- "$t" crates/ 2>/dev/null | wc -l)
   printf '%s %s\n' "$n" "$t"
 done < /tmp/types.txt | sort -n
-# 3 types with hits; 19 with none
+# bea1c2b:  3 types with hits; 19 with none
+# 021f5a3f: 22 types with hits;  0 with none   (#707 added the router)
 ```
 
 One caution on that last loop: `PROTOCOL-INDEX.md` written by Python on Windows
