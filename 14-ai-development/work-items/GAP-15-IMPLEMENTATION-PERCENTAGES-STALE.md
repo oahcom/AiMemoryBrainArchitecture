@@ -38,7 +38,7 @@ document_metadata:
 | Memory Compiler **85% unimplemented** | `compile` reachable from `brain-cli` through a production adapter; `canonical_commit_confirmed` now resolved from the durable `canonical_commits` row (`publication_authority.rs:123`); whole workspace green | **wrong, and the residue is not code** |
 | Memory Context **80% unimplemented** | crate present, budget/sufficiency/observability modules landed, tests green | **wrong** |
 | Agent Integration **90% unimplemented** | crate consumed by `brain-cli`; `context_snapshot_reaches_agent_adapter_and_preserves_compiler_contract` passes across the crate boundary | **wrong** |
-| BMCP **60% unimplemented** | 22 message types indexed, `PASS`; 3 recognised in Rust, 2 public parsers, **19 unparsed** | **right in spirit, wrong by 2** |
+| BMCP **60% unimplemented** | 22 message types indexed, `PASS`; 3 recognised in Rust, 2 public parsers, **19 unparsed** | **right in spirit, wrong by 2** — and **the row itself has since expired; see `GAP-16`** |
 | Phase 2 domain **100% not started** | `#[ignore]` in the whole workspace: **0**. `dm2_06` exists and is not ignored. `CanonicalCommitRefState { Pending, Issued }` is implemented | **wrong, and it inverts the dispatch** |
 | E2E **100% not started** | full chain passes; 8 test binaries under `crates/brain-cli/tests/`, including `e2e_full_chain` and `e2e_full_pipeline` | **wrong, and it inverts the dispatch** |
 
@@ -69,6 +69,8 @@ Everything else in the six rows is code that exists.
 3. ~~`dm2_06`'s authorization type state.~~ **Closed.** The three-state ref exists; the ignore is gone. GAP-10 §9.3 still lists this as blocked, and that listing is stale as of this measurement.
 
 ## 4. The one dispatchable gap, and why I did not dispatch it
+
+> **This section expired at `main` `021f5a3f`.** `parse_dispatch` now exists in `crates/bmcp-protocol/src/lib.rs` with all 22 arms; the figures below were measured at `fb37a44b`, which is an ancestor of `main` but not an ancestor of the commit that added dispatch (`6007782b`), so it could not see it. The current state is in `GAP-16`. This section is kept unedited because the reasoning about *why* dispatching parsers against an unfrozen mapping is a bet still holds, and because deleting a wrong measurement is how the same measurement gets made again.
 
 The BMCP residue is precise, and worth recording even though it cannot proceed:
 
