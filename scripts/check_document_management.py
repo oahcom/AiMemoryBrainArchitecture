@@ -1141,13 +1141,11 @@ def resolve_canonical(docs: dict[str, dict], scope_id: str) -> str:
         rel for rel, meta in docs.items()
         if dig(meta, "authority", "canonical_scope_id") == scope_id
     ]
-    if not scope:
-        return NO_AUTHORITATIVE_SOURCE
-
     canonical = [
         rel for rel in scope
         if dig(docs[rel], "authority", "canonical_status") == "Canonical"
     ]
+    # An empty scope produces zero Canonical members and is rejected below.
     if len(canonical) != 1:
         return NO_AUTHORITATIVE_SOURCE
     selected_canonical = canonical[0]
