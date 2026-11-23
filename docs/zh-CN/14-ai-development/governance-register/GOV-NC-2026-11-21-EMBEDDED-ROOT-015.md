@@ -1,6 +1,51 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-23"
+      last_verification_note: "§9 的四组缺口数（77 / 77 / 11 / 11）在 2026-11-23 于 880e6a78 的临时 worktree 上逐个实测，每组改动后调用 current_bilingual_gaps()。§9.1 的标题并置统计通过读取全部 58 个文件得出，非抽样。"
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "14-ai-development/governance-register/GOV-NC-2026-11-21-EMBEDDED-ROOT-015.md"
+    en: "docs/en/14-ai-development/governance-register/GOV-NC-2026-11-21-EMBEDDED-ROOT-015.md"
+    zh-CN: null
+---
+
 # GOV-NC-2026-11-21-EMBEDDED-ROOT-015
 
-**Status:** OPEN — MEASUREMENT ONLY
+**Status:** `RULED` — §6 branch 3 is true (see §9); dispatched as `AID-2026-054`. Independent review remains `NOT_ASSIGNED`.
 **Nature:** `REGISTER_ONLY / NO_IMPLEMENTATION / NO_GATE_CHANGE / REQUIRES_INDEPENDENT_REVIEW`
 **Measured at:** `main = 67074d2ff7`; re-verified at `8a2ce1b` with the same counts
 **Extends:** `GOV-NC-2026-11-21-SPLIT-DOMAIN-011.md`, `...-PAIRING-RESIDUAL-013.md`, `...-CWD-SPLIT-014.md`
@@ -203,3 +248,69 @@ CJK ratio per file requires only reading the file; no gate involvement.
 - It does not assign an independent review seat. That seat remains `NOT_ASSIGNED`.
 
 **Blocking chain unchanged:** independent review `NOT_ASSIGNED`, implementation authorisation `NOT_AUTHORISED`, sponsor / accountable owner `NOT_ASSIGNED`.
+
+---
+
+## 9. 裁定：§6 的第 3 个分支为真（2026-11-23）
+
+本登记正文与 §6 的三问**不改动**。§6 说「我无法从仓库里区分这三个分支，**这才是发现**」。本节的职责就是替这个发现做决定，并给出它当时拿不到的那个测量。
+
+裁定文书：`OWNER-DECISION-EMBEDDED-BILINGUAL-001`（`14-ai-development/adr/`）。工作令：`AID-2026-054`。
+
+| §6 分支 | 判定 |
+|---|---|
+| 1. `13-engineering-decisions` 被有意排除，且该决定有记录 | **假**。不存在这个决定。查过 `00-governance/bilingual-documentation-policy.md`、该根自己的 parity audit、`EMBEDDED_BILINGUAL_SOURCES` 及其历史、该根的 git 历史。 |
+| 2. 这 58 个文件其实不是内嵌双语，audit 表是错的 | **对 57/58 为假**。见 §9.1。 |
+| 3. Shape 3 本应 root-agnostic，`source.startswith("14-ai-development/")` 是遗留 | **真**。 |
+
+### 9.1 58 个文件确实是内嵌双语，而且比 §1 的证据更强
+
+§1 用的是 CJK 占比（≥5% → 52 个）。占比是个弱证据：一段中文附录也能把比例拉上去。本节改用**标题是否在同一行并置两种语言**（`# Agent Integration Boundary / Agent 集成边界`），因为这才是 policy §3 要求的 parity 形态。
+
+| 度量 | 文件数 |
+|---|---|
+| 在 ≥50% 的标题里并置两种语言 | **42** |
+| 至少一个标题并置两种语言 | **57** |
+| 零个双语标题 | **1** |
+
+唯一例外是 `13-engineering-decisions/technology-architecture-blueprint.md`：56 个标题，**49,666 字节里 0 个 CJK 字符**。它是真的单语文件，也是本裁定下唯一应当保留为缺口的证据——留着它，才能证明新谓词不是「什么都放过」。
+
+### 9.2 §3.2 与 §6 的关键更正：删掉守卫测得零变化，是因为守卫根本没被执行
+
+§3.1 记录了 M5 变异：删掉根名守卫，实测 `77 → 77`，因此断言「这个守卫今天没有载荷」。
+
+这个推断错了，而且错在一个可以直接复现的地方。Shape 3 的条件是**两个**：`source.startswith("14-ai-development/")` **且** `english.is_file()`。那 58 个文件失败的是**第二个**——它们没有 `docs/en` 镜像。所以守卫所在的分支从来没被走到，删掉它测到的零变化，与守卫是否存在无关。
+
+本节实测了三个变体，全部在 `880e6a78` 的临时 worktree 上跑 `current_bilingual_gaps()`：
+
+| 变体 | 改动 | 缺口 |
+|---|---|---|
+| — | `main` 原样 | **77** |
+| A | 只删根名守卫，保留 `english.is_file()` | **77** |
+| B | 删两者，谓词仍是 `_carries_chinese()` | **11** |
+| C（裁定采用） | 删两者，谓词改为「同文件内 CJK ≥ 100 且拉丁字母 ≥ 1000」 | **11** |
+
+变体 A 精确复现了 M5 的 `77 → 77`。所以 M5 的数字是对的，结论是错的：**一个从未被执行的分支，在不在都是零。** 这也解释了为什么 §3.1 那个变异体能存活而无人察觉。
+
+**B 与 C 今天测得同一个 11，但它们不等价。** B 会把「100 个 CJK 字符、零英文」的文件判为双语——这正是 013 §3.1 那个单侧谓词缺陷，只是搬到了内嵌形态上。只有 C 在明天有人提交一份纯中文文档时还成立。两者测得相同，记录为「相同」，不记录为「一致」。
+
+### 9.3 缺口 77 → 11，resolved 66，new 0
+
+| | |
+|---|---|
+| 变更后缺口 | **11** |
+| 从基线中消解 | **66** |
+| 新增缺口 | **0** |
+| 按根分布 | `06-memory-context` 7、`08-bmcp-protocol` 2、`00-governance` 1、`13-engineering-decisions` 1 |
+
+13 根剩下的那一条是 `technology-architecture-blueprint.md`，符合预期。另 9 条与 13 根无关的消解项已逐条核验，每一条都确实并置了两种语言（最低 105 CJK / 2,107 拉丁字母），它们此前失败的是镜像前置条件，不是语言要求。
+
+**记录一次预测错误，而不是悄悄替换**：本节初稿按文件数推算「77 → 20，减 57」。实测是 11，因为移除镜像前置条件还顺带消解了 13 根之外的 9 条。推算只算了根内，测量覆盖全树。以测量为准。
+
+### 9.4 状态与残留
+
+`OPEN` → `RULED — 分支 3；已派发 AID-2026-054；独立审查仍 NOT_ASSIGNED`。
+
+不写 `CLOSED`：裁定改变了门禁谓词，而写谓词的会话不能为自己的谓词提供独立性；且 §9.3 的基线收缩在实际效果上不可逆——66 条离开基线后，没有任何地方还记录它们曾经被视为缺口，而重新加回任何一条都是棘轮错误。所以这个变更的验证责任比通常更重，不能由派发方自证完成。
+
+不在本登记范围内：`technology-architecture-blueprint.md` 该翻译、该加镜像、还是该移出 `NORMATIVE_ROOTS`——三者都让它继续是缺口，选哪个是文档所有者的决定。
