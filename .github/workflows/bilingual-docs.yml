@@ -18,6 +18,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Self-check changed-path fail-closed behavior
+        run: python3 scripts/test_check_bilingual_docs.py
+
       - name: Check paired documentation and PR manifest
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}

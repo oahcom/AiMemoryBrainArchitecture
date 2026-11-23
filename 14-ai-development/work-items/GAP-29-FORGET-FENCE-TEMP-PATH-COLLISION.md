@@ -9,8 +9,8 @@ document_metadata:
       approver: null
     evidence_verification:
       verification_status: Verified
-      last_verified_date: "2026-11-22"
-      last_verification_note: "Reproduced deterministically: the temp() body copied verbatim into a standalone program, 8 threads x 200 calls with the shared name 'fixture', produced 21 and 24 duplicate paths in two runs; back-to-back SystemTime::now() returned identical nanoseconds in 75,881/100,000 and 76,081/100,000 pairs. Source at forget_fence.rs:9 and the single call-site name at :44 confirmed by reading the file at main 22a1f30f."
+      last_verified_date: "2026-11-23"
+      last_verification_note: "Unsafe is proved; frequency is measured and low. temp() copied verbatim, 8 threads x 200 calls sharing the name 'fixture' behind a barrier, gave 21 and 24 duplicate paths per 1600 - but the barrier manufactures the collision, so that is not the suite's failure rate. Against the real binary: 60/60 direct runs and 15/15 cargo runs passed, and the full workspace at fb37a44b was 718 passed / 0 failed across 53 test binaries. Clock tick measured at 100ns (smallest non-zero delta over 200,000 samples), giving identical back-to-back values in 75.4% of pairs. Source at forget_fence.rs:9 and the shared call-site name at :44, re-read at main fb37a44b."
     usage_status: Active
     modification_status: Unchanged
     supersession:
@@ -28,7 +28,7 @@ document_metadata:
 **Status:** Open — not repaired here
 **Area:** test harness, not production code
 **Found at:** a full-workspace run on `feat/context-sufficiency-report-fields-2026-11-22`
-**Confirmed at:** `main` @ `22a1f30f`
+**Confirmed at:** `main` @ `22a1f30f`, re-checked at `fb37a44b` (still unfixed)
 **Renumbered:** filed as GAP-27 in #690; `GAP-27-THE-BACKLOG-IS-NOT-ONE-BACKLOG.md` landed first (#686, 20:02) and the two numbers collided. The #690 commit message still says `gap-27`.
 
 ---
@@ -72,18 +72,21 @@ Uniqueness rests on `as_nanos()` alone, and two facts break that:
 and it is the only name any test uses to build a database. The path therefore
 reduces to `pid + nanos`; the `name` segment contributes nothing.
 
-**(b) The clock has ~13ms resolution here, not nanoseconds.** Two back-to-back
-`SystemTime::now()` calls returned the *identical* nanosecond value in
-**75,881 of 100,000** and **76,081 of 100,000** pairs across two runs.
+**(b) The clock ticks in 100ns steps here, not nanoseconds.** The smallest
+non-zero delta between two `SystemTime::now()` calls measured 100 ns over
+200,000 samples; within one tick the returned value is identical. Two
+back-to-back calls therefore returned the *same* nanosecond value in **75.4%**
+of pairs (377,157/500,000), and in 75,881/100,000 and 76,081/100,000 across two
+earlier runs.
 
 `pid` is also shared, because `cargo test` runs a binary's test functions as
 threads in one process.
 
-## 3. The reproduction
+## 3. The reproduction, and its limits
 
 I copied `temp()` verbatim into a standalone program, spawned 8 threads that
-each called `temp("fixture")` 200 times after a barrier, and counted distinct
-paths:
+each called `temp("fixture")` 200 times **after a barrier**, and counted
+distinct paths:
 
 ```
 paths generated : 1600      paths generated : 1600
@@ -91,17 +94,35 @@ distinct paths  : 1579      distinct paths  : 1576
 collisions      : 21        collisions      : 24
 ```
 
-21–24 duplicate paths per 1,600 calls, twice. This is not a rare race — it is
-the expected behaviour of a millisecond-resolution clock under a scheme that
-assumes nanoseconds. The failure needs only two tests to request a fixture in
-the same tick.
+This proves the function is not injective. It does **not** measure how often
+the real suite fails, and I first wrote it as if it did. The barrier is the
+whole result: it forces every thread into `temp()` in the same tick, which is
+precisely the condition the real suite does not create. `libtest` starts test
+threads staggered, and `temp()` is only the first statement of `fixture()` — the
+create-dirs / schema / copy work that follows takes milliseconds, so two threads
+rarely enter the same 100 ns window.
 
-One correction worth recording: my first version of this proof gave each thread
-a distinct name (`t{t}-r{r}`) and produced **zero** collisions. That result was
-an artefact of the experiment, not evidence of safety — with distinct names the
-path is unique regardless of the clock. The real caller uses one shared name,
-which is what makes the clock matter. The first experiment measured the wrong
-thing and would have closed this as a non-issue.
+Measured against the real binary, the failure rate is low:
+
+| run | result |
+|---|---|
+| `forget_fence` binary directly, 60 consecutive runs | 60/60 passed |
+| `cargo test -p memory-event-store-sqlite --test forget_fence`, 15 runs | 15/15 passed |
+| full workspace at `fb37a44b`, 53 test binaries | 718 passed, 0 failed |
+
+So the honest statement is: **the path scheme is provably unsafe, and the
+observed failure rate is roughly one in a few hundred suite runs** — not
+"expected on every busy machine", which is what I wrote first. One failure did
+occur (the exit 101 in §1), so the rate is not zero, but 75 consecutive clean
+runs is the number a reader should weigh it against.
+
+Two corrections, in opposite directions, both mine. The first proof gave each
+thread a distinct name (`t{t}-r{r}`) and reported **zero** collisions — an
+artefact, because a distinct name makes the path unique whatever the clock does,
+so it measured nothing and would have closed this as a non-issue. The second
+over-corrected: the barrier inflated the collision count into what read like a
+routine failure. Both are recorded because the mistake is the same each time —
+reporting a number without asking what the setup made inevitable.
 
 ## 4. Not a regression from #678
 

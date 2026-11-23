@@ -35,6 +35,17 @@ permissions:
   contents: read
 
 concurrency:
+  # Own group, NOT gates.yml's. #712 tried the shared group #700 item 1 asked
+  # for, and it does not serialise - it deletes. GitHub keeps one running and
+  # one pending run per group, so with both workflows in one group a push that
+  # triggers both leaves only one survivor: run 45038164281 (this workflow) was
+  # cancelled at creation with zero jobs, and 45038090599 (gates) the same way.
+  # cancel-in-progress: false does not help; it only protects a run that has
+  # started, and a pending run is replaced regardless.
+  #
+  # A dropped Rust run is worse than two concurrent builds. The disk churn has
+  # to be solved on the host (#700 item 2) or by chaining the workflows, not by
+  # sharing a queue slot.
   group: rust-self-hosted
   cancel-in-progress: true
 

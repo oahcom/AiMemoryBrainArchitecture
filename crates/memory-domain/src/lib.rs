@@ -11,8 +11,8 @@ pub use claim_revision_registry::*;
 mod canonical_commit;
 pub use canonical_commit::*;
 
-mod attestor;
-pub use attestor::*;
+mod authorization;
+pub use authorization::*;
 
 mod relation_registry;
 pub use relation_registry::*;
@@ -535,91 +535,6 @@ ref_ctor!(EntityRef, EventRef, ExternalSourceRef, MemoryRef);
 /// `pending_i()` is public and any caller can create this placeholder. It is not proof of
 /// an attestor identity. This known temporary construction window closes only when I
 /// defines the contract and the placeholder is replaced by a validated, non-forgeable ref.
-#[doc = r#"The tuple field is private; external callers cannot forge the placeholder directly.
-```compile_fail
-use memory_domain::{AttestorRef, AuthorizationDecisionRef};
-let _ = AttestorRef(());
-let _ = AuthorizationDecisionRef(());
-let _ = AuthorizationDecisionRef::new("");
-```"#]
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct AttestorRef(());
-impl AttestorRef {
-    pub const fn pending_i() -> Self {
-        Self(())
-    }
-}
-/// Authorization decision presence and issued content.
-///
-/// Presence stays three-state: `Absent` blocks publication, `PendingI` satisfies
-/// the presence gate, and `Issued` carries the five fields `§4.2` needs to compare
-/// against a durable record. No variant independently establishes authority:
-/// `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001` requires absence to be
-/// representable before presence can mean anything, so these states are
-/// structural, not cryptographic.
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
-#[serde(rename_all = "snake_case")]
-pub enum AuthorizationDecisionRef {
-    /// No authorization decision was recorded. This is the only state that blocks publication.
-    Absent,
-    /// The known unvalidated placeholder: a value exists, nothing is proven.
-    PendingI,
-    /// A caller-claimed I-issued decision carrying its contract fields. Authenticity is
-    /// not asserted; whether it is genuine is I's contract and `B-P2-XO-01`'s question.
-    Issued(AuthorizationDecisionData),
-}
-impl AuthorizationDecisionRef {
-    /// Explicit absence. `FactRevision::validate` rejects a fact carrying this.
-    pub const fn absent() -> Self {
-        Self::Absent
-    }
-
-    /// Legacy placeholder. Public, and therefore never proof of an I-issued decision.
-    pub const fn pending_i() -> Self {
-        Self::PendingI
-    }
-
-    /// A claimed I-issued reference when only an id is at hand.
-    ///
-    /// The remaining fields are explicit sentinels: a zero digest, the epoch, and
-    /// `Conditional` (the weakest kind). This is deliberately NOT valid issued data
-    /// — `validate_authorization_decision` will not match it against any row, and
-    /// no row can be written from it. Use `from_issued_data` to carry real content.
-    pub fn issued(decision_id: OpaqueId) -> Self {
-        Self::Issued(AuthorizationDecisionData {
-            decision_id,
-            issuer: IssuerId(
-                OpaqueId::new("i-owner-proxy/dev-baseline-v1")
-                    .expect("dev-baseline issuer literal is a valid opaque id"),
-            ),
-            subject_digest: OpaqueId::new("0".repeat(64))
-                .expect("64 hex zeroes is a valid opaque id"),
-            issued_at: "1970-01-01T00:00:00Z".to_owned(),
-            decision_kind: AuthorizationDecisionKind::Conditional,
-        })
-    }
-
-    /// Construct a candidate from complete issued data. Confers no authority.
-    pub fn from_issued_data(data: AuthorizationDecisionData) -> Self {
-        Self::Issued(data)
-    }
-
-    pub const fn is_absent(&self) -> bool {
-        matches!(self, Self::Absent)
-    }
-
-    pub const fn is_pending(&self) -> bool {
-        matches!(self, Self::PendingI)
-    }
-
-    /// The issued content, if this reference carries any.
-    pub fn data(&self) -> Option<&AuthorizationDecisionData> {
-        match self {
-            Self::Absent | Self::PendingI => None,
-            Self::Issued(data) => Some(data),
-        }
-    }
-}
 /// The canonical commit reference is defined by `D-OWNER-DECISION-CANONICAL-COMMIT-001`
 /// and lives in [`canonical_commit`]. A reference is a candidate only: it confers no
 /// authority and cannot validate without the durable `canonical_commits` record.
@@ -629,28 +544,6 @@ use memory_domain::CanonicalCommitRef;
 let _ = CanonicalCommitRef { state: () };
 ```"#]
 pub use canonical_commit::CanonicalCommitRef;
-
-/// I-owner-proxy dev-baseline trust anchor (`I-OWNER-DECISION-AUTHORIZATION-DECISION-001` §2.2).
-pub const I_DEV_BASELINE_ISSUER: &str = "i-owner-proxy/dev-baseline-v1";
-
-/// Terminal disposition of a recorded authorization decision (§2.1).
-#[derive(serde::Serialize, serde::Deserialize, Clone, Copy, Debug, Eq, PartialEq)]
-#[serde(rename_all = "snake_case")]
-pub enum AuthorizationDecisionKind {
-    Approved,
-    Denied,
-    Conditional,
-}
-
-/// The content an issued authorization decision carries (§2.1).
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct AuthorizationDecisionData {
-    pub decision_id: OpaqueId,
-    pub issuer: IssuerId,
-    pub subject_digest: OpaqueId,
-    pub issued_at: String,
-    pub decision_kind: AuthorizationDecisionKind,
-}
 
 #[doc = r#"Immutable revision fields are private; corrections append successors.
 ```compile_fail

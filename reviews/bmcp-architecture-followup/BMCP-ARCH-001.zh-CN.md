@@ -383,7 +383,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - Delivered 仅证明传输端点已收到。只有具备 G 所有的 context／application 语义，以及 C 推理边界所要求的证据时，才接受 Applied。H 负责传输／验证证据，但不得签发 G 的 Applied。
 - Forget ACK 与 Applied 分开处理。适配器本地状态 SUPPRESSED、LOCAL_BUFFER_CLEARED、LOCAL_CACHE_PURGED、QUEUED_DELIVERY_CANCELLED、FAILED、UNKNOWN 和 UNSUPPORTED，仅能证明所声明的 target／region／session／capability 范围。只有 I 负责评估全局 target 是否满足，以及 PolicyException。
 - 对同一个已完成操作，ACK identity／evidence digest 必须保持稳定；重传时复用该身份。Transport attempt identity 可以变化。相同 operation key 加相同 target digest 属于幂等操作；相同 key 加不同 digest 属于冲突。本地操作成功后若缺少 ACK，在通过查询／协调确认之前仍保持 Unknown。
-- 任何 ACK 都不意味着模型已关注、理解，也不意味着 provider 已删除、数据已物理擦除或全局 Forget 已完成。
+- 任何 ACK 都不意味着模型已注意到相关内容或已经理解，也不证明 provider 侧已完成删除、数据已被物理擦除，或全局 Forget 已完成。
 
 #### H-CONFIRM-004 —— Validator 层级／错误映射：PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN
 
@@ -485,7 +485,7 @@ H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体
 
 ### 7.4 B/D/I Owner 决议（委派角色；不声称存在独立人类签署）
 
-- **B — PR #429 comment 7060251435：** 接受 Option A + I1。Claim 是一条可归属的命题线程；ClaimRevision 不可变；Fact 是独立的受治理 attest；FactRevision 绑定精确的 ClaimRevisionRef、Evidence／Provenance，以及经授权的 attestor／method 上下文。B 负责语义词汇；D 负责规范身份；I 负责授权。
+- **B — PR #429 comment 7060251435：** 接受 Option A + I1。Claim 是一条可归属的命题线程；ClaimRevision 不可变；Fact 是独立于 Claim 的、单独受治理的证明记录（attestation）；FactRevision 绑定一个或多个精确的 ClaimRevisionRef，以及 Evidence／Provenance 和经授权的 attestor／method 上下文。B 负责语义词汇；D 负责规范身份；I 负责授权。
 - **D — PR #429 comment 7060243632：** 接受 Option A + I1 作为规范领域输入。D 负责 ClaimRef／ClaimRevisionRef 和 FactRef／FactRevisionRef 的分配、revision commit／currentness、生命周期、lineage、ConflictSet 以及 ForgetOperation／ForgetFence。精确的不可变 revision 事务／currentness、schema、迁移／兼容性、consumer acceptance 和符合性仍为 OPEN。
 - **I — PR #429 comment 7060259541：** 接受 Option A + I1 作为安全策略输入。Fact 创建／修订属于受保护操作，必须具备经过认证的 Principal／Actor 绑定、精确的 attestor 授权，以及在最终授权／提交时仍有效的由 I 签发的 PermissionEpoch。缓存的 ALLOW／session／lease／ACK 不得作为可复用授权。I 负责 attestor 授权、撤销、保留／法律保全／备份，以及全局 Forget 评估。精确的策略划分、issuer／registry 绑定和 consumer 映射仍为 OPEN。
 
@@ -719,14 +719,14 @@ Coverage Register 仅将此登记为 Review/Handoff Pair，不改变 “BMCP Pro
 ## 12. 最终状态
 
 - ARCHITECTURE_DELIVERABLE_STATUS：**ARCHITECTURE_PARTIAL**
-- PARSE_CONTRACT_STATUS：候选语义边界已说明；H Wire/Decode Mapping 待定
-- EXECUTE_CONTRACT_STATUS：CANDIDATE；D/I 可调用接口和 C/H Mapping 待定；Fact/Claim 语义已批准
-- RESPOND_CONTRACT_STATUS：CANDIDATE；H Response Envelope/Correlation Mapping 待定
+- PARSE_CONTRACT_STATUS：逻辑边界已确定；JCS 基础已选定；精确签名字节/密码学配置及 H Wire 映射仍待确定。
+- EXECUTE_CONTRACT_STATUS：CANDIDATE；已选定 Option A + I1；D/I 权限边界已确定；可调用 API/IDL/Schema 延后由 D/I 契约定义；C 映射仍待确定。
+- RESPOND_CONTRACT_STATUS：CANDIDATE；逻辑 ACK/Response 区分已确定；精确 H Envelope/字段映射及 Storage 持久化拓扑仍待确定。
 - H_DEPENDENCY_STATUS：**PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN**；INDEPENDENCE_UNVERIFIABLE
-- CROSS_MODULE_DEPENDENCIES：H、B、C、D、E、G、I
-- OWNER_DECISIONS_REQUIRED：BMCP-DR-001 语义已批准 / Consumer-Schema Gate OPEN；BMCP-DR-002 Authority Boundary DECIDED / Callable API-IDL-Schema-Crypto-Storage-Wire Mapping OPEN；BMCP-DR-003 Family Routing PARTIALLY DECIDED / Exact C-H Mapping OPEN under Issue #449
+- CROSS_MODULE_DEPENDENCIES：H、B、C、D、E、G、I、Storage
+- OWNER_DECISIONS_REQUIRED：BMCP-DR-001 语义方向 RESOLVED / Consumer-Schema Gate OPEN；BMCP-DR-002 Authority Boundary DECIDED / 可调用 API/IDL 延后由 D/I 契约定义；BMCP-DR-003 MCP Adapter Boundary PARTIALLY DECIDED / 精确 C 映射 OPEN under Issue #449
 - ISSUE_7_STATUS：IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE；GitHub CLOSED / not_planned；未改变
 - RUNTIME_IMPLEMENTATION_STATUS：NOT AUTHORIZED / NOT STARTED
-- PR / Commit：仅在 Push 和 PR 成功后填写；不授权 Merge
+- PR / Commit：PR #453 已合并至固定的验证分支 `bmcp-validation-base-c588`，合并提交为 `7c7801db396b92c57ad37020fe170f65f25e43ce`；这是快照验证分支合并，不是合并到实时 `main`。独立语义/双语审查仍待完成；该工件仍为 `ARCHITECTURE_PARTIAL`，不冻结协议/Schema，也不授权 Runtime。
 
-**下一步：** H 根据已接受的 H-CONFIRM-001..004 更新并版本化规范双语 Wire/Envelope/ACK/Validator 工件。B/D/E/F/G/H/I 完成精确消费者工件版本 Pin 与审查；D/I 发布精确权威接口；C 通过 Issue #449 发布 MCP-to-BMCP 映射。随后 BMCP 架构集成刷新精确 Pin。所有工程进入前置条件均有证据前，Runtime 继续延期。
+**下一步：** B/D/I 对齐现有源文档/镜像文档并刷新版本 Pin；H 发布带版本的规范 Wire 工件，并关闭剩余 Registry/Schema/Crypto/Storage/Error 子项；C 根据 Issue #449 发布精确的 Agent/MCP-to-BMCP 映射；E 集成五阶段 Rust Compiler 文档及消费者边界；BMCP 刷新双语交接文档。只有在所有工程进入条件均有证据后，Runtime 才可解除延期。

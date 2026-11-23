@@ -2018,15 +2018,30 @@ def changed_paths(root: Path, ref: str) -> set[str]:
     included: with `diff.renames=copies` a new path can arrive as C, and a
     copied governed document is still a governed document.
     """
-    names: set[str] = set()
+    # A ref must identify a commit, not a pathspec. Without this check,
+    # `git diff <ref>` can interpret a directory such as "docs" as a path
+    # filter after the three-dot diff fails, producing a false empty result.
+    resolved = git(
+        root, "rev-parse", "--verify", "--end-of-options", f"{ref}^{{commit}}"
+    )
+    if resolved is None:
+        raise ValueError(f"{ref!r} does not resolve to a commit")
     filter_arg = "--diff-filter=AMRTC"
-    diff = git(root, "diff", "--name-only", "-z", filter_arg, f"{ref}...HEAD", nul=True)
+    diff = git(
+        root, "diff", "--name-only", "-z", filter_arg,
+        f"{resolved}...HEAD", nul=True,
+    )
     if diff is None:
-        diff = git(root, "diff", "--name-only", "-z", filter_arg, ref, nul=True)
-    if diff is None:
-        raise SystemExit(f"cannot diff against {ref!r}; is this a git work tree?")
-    names.update(p for p in diff.split("\0") if p)
-    untracked = git(root, "ls-files", "-z", "--others", "--exclude-standard", nul=True) or ""
+        # Do not fall back to a two-dot diff: it answers a different question.
+        raise ValueError(
+            f"cannot compute {resolved}...HEAD; refusing a semantically different diff"
+        )
+    names = {p for p in diff.split("\0") if p}
+    untracked = git(
+        root, "ls-files", "-z", "--others", "--exclude-standard", nul=True
+    )
+    if untracked is None:
+        raise ValueError("cannot enumerate untracked paths")
     names.update(p for p in untracked.split("\0") if p)
     return names
 
@@ -2064,7 +2079,18 @@ def main() -> int:
     if incremental and args.strict:
         parser.error("--require-changed and --strict are different verdicts; pick one")
     targets, walk_problems = collect_governed(root)
-    required = changed_paths(root, args.require_changed) if args.require_changed else set()
+    try:
+        required = changed_paths(root, args.require_changed) if incremental else set()
+    except ValueError as exc:
+        print(f"NOT_APPLICABLE: incremental changed-path selection failed: {exc}", file=sys.stderr)
+        return 2
+    if incremental and not required:
+        print(
+            "NOT_APPLICABLE: --require-changed resolved to zero changed or untracked paths; "
+            "no incremental verification was performed",
+            file=sys.stderr,
+        )
+        return 2
     is_git = git(root, "rev-parse", "--git-dir") is not None
 
     # Problems the walk itself found -- symlinks, unreadable roots -- are
