@@ -18,7 +18,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-23"
-      last_verification_note: "§7 的两组数字（77 与 120）均在 2026-11-23 于 origin/main 的干净 worktree 上实测：原样写基线得 77，仅把第 170 行改回 `ROOT = Path.cwd()` 得 120。两套测试在修复态与缺陷态的失败集合逐字相同，该结论由 `diff` 得出。 本文件与中文正本逐字节相同，这是既有状态，在此声明而非掩盖。"
+      last_verification_note: "§7 的两组数字（77 与 120）均在 2026-11-23 于 origin/main 的干净 worktree 上实测：原样写基线得 77，仅把第 170 行改回 `ROOT = Path.cwd()` 得 120。两套测试在修复态与缺陷态的失败集合逐字相同，该结论由 `diff` 得出。"
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -45,7 +45,7 @@ document_metadata:
 
 # GOV-NC-2026-11-21-CWD-SPLIT-014
 
-**Status:** OPEN — MEASUREMENT ONLY
+**Status:** `FIXED-UNGUARDED` — the defect is fixed on main (see §7); it has no regression test. Independent review remains `NOT_ASSIGNED`.
 **Nature:** `REGISTER_ONLY / NO_IMPLEMENTATION / NO_GATE_CHANGE / REQUIRES_INDEPENDENT_REVIEW`
 **Measured at:** `main = 67074d2ff7`
 **Extends:** `GOV-NC-2026-11-21-SPLIT-DOMAIN-011.md`, `GOV-NC-2026-11-21-PAIRING-RESIDUAL-013.md`
@@ -271,3 +271,89 @@ No network access, no CI, no API quota required.
 - It does not assign an independent review seat. That seat remains `NOT_ASSIGNED`.
 
 **Blocking chain unchanged:** independent review `NOT_ASSIGNED`, implementation authorisation `NOT_AUTHORISED`, sponsor / accountable owner `NOT_ASSIGNED`.
+
+---
+
+## 7. 实测：本登记的缺陷已被修复，但没有回归测试（2026-11-23）
+
+本登记正文与 §5 复现步骤**不改动**。§1、§2 描述的机制在 `67074d2` 上为真，记录保留。以下是当前 `main` 上的实测结果。
+
+### 7.1 修复已落地
+
+| 项 | 值 |
+|---|---|
+| 修复 commit | `8ab40fb4`，2026-11-22 10:37:32 +0800，标题 `fix(gate): enumerate tracked files and refuse baseline writes on a dirty tree` |
+| 当前 `main` | `8365716a`，`8ab40fb4` 是其祖先 |
+| 变更 | `ROOT = Path.cwd()` → `ROOT = REPO_ROOT`（第 170 行），并把 `subprocess` 的 `cwd=ROOT` 全部改为 `cwd=REPO_ROOT` |
+| 残留 | `grep -c 'Path.cwd()' scripts/check_bilingual_docs.py` → **0** |
+
+§1 描述的两个锚点已经合一。`current_bilingual_gaps()`、`side_by_side_partner()`、`_has_any_chinese()` 现在读同一个根。
+
+### 7.2 行为验证，而不只是读代码
+
+在 `origin/main` 的干净 worktree 上，从仓库外目录执行 `--write-baseline`：
+
+| 树状态 | 结果 |
+|---|---|
+| `main` 原样（`ROOT = REPO_ROOT`） | **77** 条 |
+| 同一棵树，仅把第 170 行改回 `ROOT = Path.cwd()` | **120** 条 |
+
+43 条差值就是 §2 描述的「每个真实配对都被冻结成缺口」。§2 在 `67074d2` 上测得 117，此处测得 120，差异来自两天里新增的配对，不来自机制变化。
+
+`8ab40fb4` 同时加了脏树写保护，实测有效：
+
+```
+$ echo x > 02-domain-model/untracked-probe.md
+$ python scripts/check_bilingual_docs.py --write-baseline
+baseline write refused: working tree is not clean; git status --porcelain --untracked-files=all:
+?? 02-domain-model/untracked-probe.md
+```
+
+所以 §2.1 那条「棘轮两个方向都沉默」的路径现在多了一道前置拒绝：脏树根本写不出基线。
+
+### 7.3 修复没有回归测试，这是本节的主要发现
+
+把第 170 行改回 `ROOT = Path.cwd()` 之后，两个测试套件的失败集合**逐字相同**：
+
+| 套件 | 修复态 | 缺陷态 |
+|---|---|---|
+| `scripts/test_check_bilingual_docs.py` | `Ran 3 tests` / `OK` | `Ran 3 tests` / `OK` |
+| `scripts/governance/evidence/test_gate_normative_roots.py` | `Ran 52 tests` / `FAILED (failures=3, errors=21)` | 同一组 24 个失败，`diff` 为空 |
+
+那 24 个失败在两种状态下完全一致——这一点成立。但把它们归因为「既有的 Windows 临时路径问题、与本缺陷无关」是**错的**，更正见 §8：它们是本次修复引入的。`8ab40fb4` 之前该套件 `Ran 52 tests` / `OK`，之后 `FAILED (failures=3, errors=21)`，而两者之间只有 `8ab40fb4` 一个 commit 触碰过闸门或该测试文件。24 个里只有 1 个是 `WindowsPath` 断言；10 个是 `current_bilingual_gaps()` 的 `git ls-files` 退出 128，11 个其他，2 个文件创建身份不可识别。
+
+结论：**这个缺陷可以原样回来，而两套测试都不会响。** 唯一能观察到差异的方式是从仓库外目录跑闸门并写基线——没有任何测试这么做。`test_gate_normative_roots.py` 里 6 处 `os.chdir()` 都是把 cwd 设**进**仓库，方向恰好相反。
+
+这是「已修复」与「不会退化」之间的差距，本登记记录它，不掩盖它。
+
+### 7.4 修复没有回指本登记
+
+`8ab40fb4` 的提交信息没有提到 `014`，它把边界登记在 `GOV-NC-2026-11-22-ENUM-BOUNDARY-021` 里（该文件由同一个 commit 创建，§4 与 T07 覆盖本缺陷）。全仓 `grep CWD-SPLIT-014` 只命中 015 与 017 的 `Extends:` 行。
+
+因此本登记的状态行「`OPEN` — MEASUREMENT ONLY」在语义上仍然准确（没人声明它关闭），但读者会以为缺陷还在。§7 就是给这个读者的。
+
+### 7.5 状态
+
+`OPEN` → `FIXED-UNGUARDED — 缺陷已修复，无回归测试；独立审查仍 NOT_ASSIGNED`。
+
+不写 `CLOSED` 的理由：本登记 §6 的阻断链包含独立审查，而写这段文字的会话不能为自己的测量提供独立性；且 §7.3 说明修复缺护栏，一个缺护栏的修复不宜按「已解决」结案。§3 的零字节问题属于登记 013，本次复测仍为开放（0 字节伙伴被 `_side_by_side_bilingual()` 接受），不在本登记范围内。
+
+---
+
+## 8. 更正 §7.3 的归因（2026-11-23）
+
+§7.3 的**主结论不变**：本登记的缺陷可以在两套测试都不响的情况下回来，因为 CI 唯一运行的 `scripts/test_check_bilingual_docs.py`（3 个测试）在修复态与缺陷态都是 `OK`。
+
+但 §7.3 对那 24 个失败的因果解释是错的，更正如下：
+
+| | §7.3 原写法 | 实测 |
+|---|---|---|
+| 是否既有 | 「既有的」 | **否**。`9944d07e` 上 `Ran 52 tests` / `OK`；`8ab40fb4` 上 `FAILED (failures=3, errors=21)` |
+| 与本缺陷是否相关 | 「与本缺陷无关」 | **直接相关**。正是 `cwd=ROOT` → `cwd=REPO_ROOT` 这一步（本登记修复的本体）让测试 helper 失效 |
+| 归因 | 「Windows 临时路径问题」 | **只占 1/24**。10 个是 `current_bilingual_gaps()` 的 `git ls-files` 退出 128，11 个其他，2 个文件创建身份不可识别 |
+
+机制：`load_gate()` 只把 `mod.ROOT` 指向临时仓库，没有改 `mod.REPO_ROOT`；`8ab40fb4` 把 `changed_status()` 改成读 `REPO_ROOT` 之后，helper 建的临时仓库再也不被读取，`git diff A...B` 于是在真实仓库里跑两个只在临时仓库存在的 SHA，退出 128。
+
+完整测量、时间线与复现步骤见 `GOV-NC-2026-11-23-UNREACHABLE-GUARD-030`。
+
+**这条更正不改变本登记的 `FIXED-UNGUARDED` 状态**，只改变读者对「那 24 个是历史噪音」的印象——它们不是噪音，它们是本次修复的产物。
