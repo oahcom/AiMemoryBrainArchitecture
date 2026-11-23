@@ -54,7 +54,7 @@ But there is already a running binding in the tree, and it is narrower than "tra
 - `validate_applied_delivery_evidence`
 - `digest_applied_delivery_evidence`
 
-Both call `bmcp_protocol::parse_and_validate`. There is no second consumer of any parser, and `describe()` at `lib.rs:718-723` is `#[allow(dead_code)]` with the comment "available for a future evidence-validation call site".
+Both call `bmcp_protocol::parse_and_validate`. There is no second consumer of any parser. `describe()` is also live, not dead: it is defined at `lib.rs:938`, and `invalid_evidence_result()` calls it at `lib.rs:419` to render an `EvidenceError` into the `error` string of a `{"valid":false,"error":"…"}` payload. It carries no `#[allow(dead_code)]`, and nothing else in the crate does either.
 
 So the open question worth deciding is not framing. It is: **when a message of any other type arrives, what is it called and what comes back.** That is a naming and dispatch question, and it is small.
 
@@ -112,7 +112,7 @@ The one thing it does choose is *one tool instead of nineteen*, and §3.1 gives 
 - **19 parsers.** Transcription against the 22 schemas. This decision removes the objection that they would have no consumer; it does not write them. Dispatchable to a delivery session with acceptance criteria, not by the owner.
 - **Transport framing, session, handshake, ACK, replay.** Still `DEPENDENCY_NOT_FROZEN`. Unchanged by this decision, and still blocking RT-01..RT-09 for the parts that need them.
 - **C/H COutcomeRecord mapping.** Still `NOT ACCEPTED`. Unchanged.
-- **`describe()`.** Gains its call site when the 19 parsers land. Until then it stays dead code, correctly labelled.
+- **`describe()`.** Not dead code and not waiting on the 19 parsers: `invalid_evidence_result()` already calls it on the error path, rendering an `EvidenceError` into the `error` field of a `valid:false` payload. Landing the 19 parsers widens its coverage, not its first call site. This decision does not change its behaviour or its output format.
 
 ## 6. Acceptance criteria for whoever implements this
 
