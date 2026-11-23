@@ -18,12 +18,12 @@ document_metadata:
       evidence_reference:
         - "Issue #130 comment #6962523529"
         - "PR #144 merge commit 3754d049db840b049728afd814faac968bf10749"
-        - "Owner ruling 2026-11-23: §6.1 review disposition lock included in the approved scope"
+        - "PR #750 comment #7092567630 (owner-proxy ratification: §6.1 review disposition lock included in the approved scope)"
       revocation: null
     evidence_verification:
       verification_status: Unverified
       last_verified_date: null
-      last_verification_note: "Owner-directed adoption is recorded in Issue #130 comment #6962523529. §6.1 was approved as part of the standard on 2026-11-23. This metadata does not assert that GitHub platform enforcement is enabled."
+      last_verification_note: "v1.0 adoption is recorded in Issue #130 comment #6962523529. The §6.1 inclusion is recorded separately in PR #750 comment #7092567630, because the #130 comment predates §6.1 by six days and cannot carry it. This metadata does not assert that GitHub platform enforcement is enabled."
     usage_status: Active
     modification_status: Unchanged
     supersession:
