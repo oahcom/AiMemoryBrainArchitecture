@@ -1,6 +1,51 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-23"
+      last_verification_note: "The four figures in §8.1 (86 pairs, 1,364-character shortest side, 0 zero-byte partners, 0 byte-identical pairs) were enumerated over the whole tree at 880e6a78 on 2026-11-23, not sampled. §8.4's correction of the CI premise rests on first-execution run ids recorded in GOV-NC-2026-11-23-EXECUTION-RESTORED-029."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "14-ai-development/governance-register/GOV-NC-2026-11-21-PAIRING-RESIDUAL-013.md"
+    en: null
+    zh-CN: "docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-21-PAIRING-RESIDUAL-013.md"
+---
+
 # GOV-NC-2026-11-21-PAIRING-RESIDUAL-013
 
-**Status:** OPEN — MEASUREMENT ONLY
+**Status:** `DISPATCHED` — §3.1–§3.3 authorised as `AID-2026-054` (see §8); §1 and §2 out of scope. Independent review remains `NOT_ASSIGNED`.
 **Nature:** `REGISTER_ONLY / NO_IMPLEMENTATION / NO_GATE_CHANGE / REQUIRES_INDEPENDENT_REVIEW`
 **Measured at:** `main = f687346cd0` (also reproduced at `e236193824`)
 **Supersedes:** nothing. **Extends:** `GOV-NC-2026-11-21-SPLIT-DOMAIN-011.md`.
@@ -221,3 +266,51 @@ Every table above is produced by that invocation plus file creation; no step req
 - It does not assert CI ran. CI still returns `steps=0` for every job (register 005).
 
 **Status of the blocking chain is unchanged:** independent review `NOT_ASSIGNED`, implementation authorisation `NOT_AUTHORISED`, sponsor / accountable owner `NOT_ASSIGNED`.
+
+---
+
+## 8. Implementation dispatch: §3's three defects are now authorised (2026-11-23)
+
+The body of this register and the three measurements in §3 are **not changed**. §3.1, §3.2 and §3.3 were true at `f687346c` and the record stands.
+
+| Item | Content |
+|---|---|
+| Work order | `AID-2026-054` (`14-ai-development/work-items/AID-2026-054/`) |
+| Dispatch basis | §3.1, §3.2, §3.3 of this register; ruling `OWNER-DECISION-EMBEDDED-BILINGUAL-001` §4 |
+| Implementation scope | `_side_by_side_bilingual()` and `side_by_side_partner()` in `scripts/check_bilingual_docs.py`, and `scripts/bilingual-baseline.txt` as the change requires |
+| Explicitly not authorized | §1's five blocked pairs (register 011), §2's diff-domain policy, closure of this register |
+
+### 8.1 The §3.1 and §3.2 threshold is calibrated, not chosen
+
+§3.1 measured that one CJK character suffices; §3.2 measured that a zero-byte partner suffices. Both need fixing, but **how strictly** is not a matter of preference:
+
+| Measure | Value |
+|---|---|
+| Accepted side-by-side pairs in the tree | **86** |
+| Shortest side of the smallest pair | **1,364 characters** |
+| Pairs with a zero-byte partner | **0** |
+| Pairs byte-identical to each other | **0** |
+
+Every real pair has a shorter side of at least 1,364 characters; the ten shortest run 1,364–2,214. So **any threshold from 1 to 400 breaks none of the 86.** The ruling takes 100 for one reason: `_carries_chinese()` already uses 100 for the same purpose.
+
+Both scripts must also be present in quantity (`cjk >= 100` and `latin >= 1000`). Counting CJK alone would accept a purely Chinese file — the same one-sided-predicate defect as §3.1, just moved.
+
+### 8.2 §3.3 is a latent defect, and still gets fixed
+
+§3.3's three-file asymmetry (`partner(partner(x)) != x`) is currently **not reachable**: measured across the tree, 0 sources have both `.en.md` and `.zh-CN.md`. It is authorised anyway, because "not reachable" is true only today — the moment someone adds an `.en.md` beside an existing `.zh-CN.md` it becomes reachable. Fixing an unreachable path costs less than asking later why three files all report themselves as paired.
+
+### 8.3 Why the status is not CLOSED
+
+§3 is three **content-predicate** defects; fixing them does not change §1 or §2:
+
+- §1's five blocked pairs belong to register 011's diff-domain policy, not to the predate, and are not touched.
+- §2's finding — the baseline can be inflated by a foreign anchor — was measured fixed and unguarded in register 014 §7, and is a different defect.
+- §7 explicitly assigns no independent review seat, that seat remains `NOT_ASSIGNED`, and a session that writes the predicate cannot supply independence for it.
+
+`OPEN` → `DISPATCHED — §3 authorised (AID-2026-054); §1 and §2 out of scope; independent review still NOT_ASSIGNED`.
+
+### 8.4 One correction: §7 rests on a premise that has expired
+
+The last bullet of §7 says "CI still returns `steps=0` for every job (register 005)". **That is out of date.** The first real executions were measured on 2026-11-22; see `GOV-NC-2026-11-23-EXECUTION-RESTORED-029`.
+
+This changes none of this register's figures — every one in §3 came from running `python scripts/check_bilingual_docs.py` locally and never depended on CI. What it changes is the **meaning of that restriction**: it used to mean "CI does not execute, so local measurement is the only evidence"; it now means "CI executes, but executed is not trustworthy". The latter is a weaker restriction and must not be cited as the former.
