@@ -22,7 +22,7 @@ Issue #7 的记录保持 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE。
 
 ## 2. 精确来源登记
 
-当前 Main 来源 Pin 来自 origin/main @ c58878fce24528a0842b4f8887c93ddbf465b566；历史决议/测试证据另按其原始 Commit 标注。H Pin 来自 session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74。
+当前 Main 来源 Pin 来自已获取的 origin/main @ c58878fce24528a0842b4f8887c93ddbf465b566；历史决议/测试证据在适用情况下另按其原始 Commit 标注。H Pin 来自 H 分支 session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74。
 
 | 来源 | Ref | Blob SHA | 状态 / 用途 |
 |---|---|---|---|
@@ -47,7 +47,7 @@ Issue #7 的记录保持 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE。
 | docs/en/03-memory-brain/forget-fence-and-completion-contract.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | c791895333ab6140f035f4f622d5dee9325d422d | D/I Forget 边界 |
 | docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 9c054932994bb078e2834df8bd66f73895aa04f5 | D Lifecycle/Fence |
 | 13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593 | 历史 ADR；语义决策已被取代；消费者映射仍为 Candidate |
-| 14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566`（批准来源 `c138654c942dc93b5a36eccb2ff0e41452156429`） | d59756a8eb454480804c482ca03c68345ab5abf2 | 当前来源 Pin；Owner 语义批准是历史证据（Option A + I1），不冻结 Schema |
+| 14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566`（批准来源 `c138654c942dc93b5a36eccb2ff0e41452156429`） | Blob `d59756a8eb454480804c482ca03c68345ab5abf2` | 当前来源 Pin；Owner 语义批准是历史证据（Option A + I1），不冻结 Schema |
 | docs/en/03-memory-brain/memory-versioning.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 4efbd26db9586f6fcf1897f42ffba287d625b903 | D Revision / Consumer Freeze 边界 |
 | docs/en/03-memory-brain/commit-cursor-semantics.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 2de7fe35229372ae5b06093e5e031c2c243fbd7c | D Cursor 语义 |
 | docs/en/09-security-governance/security-governance-guide.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 061c5847b3df879eeaf3c71e5eae0bfa162b276a | I Principal / Authorization / PermissionEpoch |
@@ -67,7 +67,7 @@ Issue #7 的记录保持 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE。
 | crates/memory-domain/src/lib.rs | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | b96cb2f74c56ab8a28da7e3ceffcf4adcb1b98d4 | 规范 Claim/Fact Revision 领域类型 |
 | 00-governance/terminology.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | b8770fbb58e4fac087698043c40a57531b1d244d | BMCP 规范名称 / 术语权威 |
 | C Family Boundary 决策 | PR #430 comment 7060351480；Issue #449 comment 7060126722 | Owner-delegate 决议；不声称独立人工 C 签名 | Family 方向已决定；精确 H Operation Registry / C-H Mapping 仍 OPEN |
-| H Confirmation 范围澄清 | PR #428 comment 7060351041；H Scope Correction comment 7060264372 | 仅接受 Owner-delegate 逻辑选择；INDEPENDENCE_UNVERIFIABLE | H-CONFIRM-001..004 各自均为 PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN |
+| H Confirmation 范围澄清 | PR #428 comment 7060351041；H Scope Correction comment 7060264372 | 仅限 Owner-delegate 作出的逻辑选择；INDEPENDENCE_UNVERIFIABLE | H-CONFIRM-001..004 各自均为 PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN |
 | B domain-model-overview.md | B 分支 `session-b-domain-model-phase3 @ 840202a98cf40a0b3f194afb84bed4d5f3326658` | Blob `4d1debc0ec19b3917f9e76d04bb66da4df4cd346` | B 接受 Option A + I1；来源对齐仍待完成 |
 | D memory-versioning.md | D 分支 `session-d-memory-brain-2026-11-16 @ b525e1f8fee2471a131e4a38efda99804045e424` | Blob `af747f339d03bdd4684b6ed60fca05957dc8e1fb` | D Identity/Revision/ConflictSet 边界；Schema/Currentness Gate 开放 |
 | D forget-fence-and-completion-contract.md | 同一 D ref | Blob `1f0391bc49d007c44ec74165bd33d37412cc7990` | D ForgetOperation/Fence 权威 |
