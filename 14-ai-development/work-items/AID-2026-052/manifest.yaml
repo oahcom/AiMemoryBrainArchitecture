@@ -1,0 +1,114 @@
+work_item_id: AID-2026-052
+title: Revalidate the four Provenance reference fields so a deserialized record cannot bypass the constructor
+
+class: DOMAIN/CODE/TEST
+risk: R1
+risk_rationale: "Adds validation to one method and tests beside it. No field type changes, no serialization contract change, no new dependency, no architecture decision. The one semantic widening - records that used to validate and now do not - can only reject values that no constructor could produce, which is the point."
+
+security_scope: "Domain validation only. No authorization, no deletion/Forget path, no storage, no wire format. This change makes Provenance reject more inputs and accepts nothing it currently rejects."
+
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+implementing_ai_session: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 13c6d95dbb4f750ea7f002307344b9024e7d2e96
+
+tracking_issue: "NONE - tracked by GOV-NC-2026-11-22-PROVENANCE-REFERENCE-REVALIDATION-027 §3 and §4, and by this AID manifest"
+
+created_at: 2026-11-23
+updated_at: 2026-11-23
+
+prompt_id: AID-2026-052-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-052/prompt-v1.md
+prompt_status: FROZEN
+prompt_sha256: 71ca16e0ff318520a6be60b7e3bfcf90a9c1b82b1a070972ed956f09f5ecad5b
+prompt_bytes: 10838
+
+prompt_provenance_tier: T1
+prompt_provenance_note: "Frozen from the owner-proxy session that read Provenance::validate() in full at 13c6d95d and confirmed all four reference groups are unchecked. The SHA-256 identifies the committed prompt-v1.md bytes exactly."
+
+dependency_refs:
+  - 14-ai-development/governance-register/GOV-NC-2026-11-22-PROVENANCE-REFERENCE-REVALIDATION-027.md
+  - 14-ai-development/adr/OWNER-DECISION-TYPED-OBJECT-REF-001.md
+  - crates/memory-domain/src/lib.rs
+  - crates/memory-domain/src/provenance_graph.rs
+  - crates/memory-domain/tests/phase2_acceptance.rs
+
+deliverables:
+  - "Provenance::validate() revalidates every element of source_refs, source_version_refs and parent_provenance_refs, plus actor_ref.actor_id, in the same idiom EvidenceExtension::validate() already uses two hundred lines away."
+  - "No change to OpaqueId's derived Deserialize, and no change to any Provenance field type or order. A strict Deserialize would fix the symptom by rewriting the serialization contract for every type in the crate."
+  - "Four rejection tests, one per reference group, each constructing its illegal value through serde_json rather than a constructor: a struct literal cannot reach an empty OpaqueId without a helper that may itself validate, and then the test is testing the helper."
+  - "Each illegal value is rejected by both Provenance::validate() and ProvenanceGraph::add, because the graph is the entry point that matters and it delegates."
+  - "One graph-integrity test: a refused add leaves the graph unchanged, proven by re-inserting the same identity successfully and comparing ancestors()."
+  - "dm2_11's eight mutations unchanged and still passing; existing valid fixtures unedited."
+  - "cargo test -p memory-domain only. The workspace suite belongs to CI; a local multi-gigabyte target directory is not a contribution."
+
+independent_reviewer: NOT_ASSIGNED
+integration_reviewer: NOT_ASSIGNED
+
+review:
+  status: NOT_ASSIGNED
+  report_ref: ""
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+implementation:
+  status: NOT_STARTED
+  branch: PENDING
+  pull_request: PENDING
+  pull_request_url: PENDING
+  implementation_commit_sha: PENDING
+  merge_commit_sha: NOT_MERGED
+
+authorization:
+  registration_write: "USER-PRINCIPAL-DELEGATED (limited to this AID registration package)"
+  implementation_write: "USER-PRINCIPAL-DELEGATED (limited to crates/memory-domain/src/lib.rs and crates/memory-domain/tests/phase2_acceptance.rs)"
+  field_type_change: NOT_GRANTED
+  serialization_contract_change: NOT_GRANTED
+  evidence_contract_change: NOT_GRANTED
+  register_closure: NOT_GRANTED
+  production_authorization: NOT_GRANTED
+
+governance:
+  aid_assignment: REGISTERED
+  aid_status: REGISTERED
+  registration_authorization: "USER-PRINCIPAL-DELEGATED (limited to this work item)"
+  development_start_authorization: "USER-PRINCIPAL-DELEGATED (limited to the Provenance validation scope)"
+  architecture_status: NOT_APPLICABLE
+  g8_status: NOT_APPLICABLE
+  quota_change: NONE
+
+verification:
+  status: RUN
+  environment: "Windows, static inspection only. No cargo, no compilation: verification of the change belongs to CI."
+  commands:
+    - "read Provenance struct and validate() body in crates/memory-domain/src/lib.rs  -> nine fields; source_refs checked for vector emptiness only; source_version_refs checked for length agreement only; no element inspected anywhere"
+    - "read OpaqueId  -> tuple struct with derived Serialize/Deserialize; new() rejects empty; Deserialize does not call new()"
+    - "read ref_ctor! macro  -> generates validate() for ProvenanceRef and five siblings; field 4 already has a per-element validator"
+    - "read EvidenceExtension::validate()  -> revalidates every reference element by element, with a comment naming the serde bypass as the reason"
+    - "read phase2_acceptance.rs:977  -> provenance_with(field, replacement) already injects arbitrary fields through serde_json"
+  evidence_refs:
+    - "The four unchecked groups and the two checked-for-length groups are quoted verbatim in the prompt's §2, so the implementer does not have to re-derive them and cannot mistake which groups are in scope."
+    - "The existence of the serde-injection helper was established by reading dm2_11 in full, not by assuming a helper would be needed."
+
+findings:
+  - id: AID-2026-052-F1
+    severity: P1
+    feedback_destination: "Delivery PR conversation. The register describes four reference groups but they are not one problem. parent_provenance_refs already has a generated validate() (ref_ctor!), so field 4 is a one-line call. source_refs, source_version_refs and actor_ref.actor_id are bare OpaqueId with no validator at all, so those three need inline emptiness checks, exactly as EvidenceExtension already does for collector.actor_id. An implementer who treats all four as the same shape will either add a validate() to OpaqueId - which changes the type for every user in the crate - or miss that field 4 is already covered."
+  - id: AID-2026-052-F2
+    severity: P1
+    feedback_destination: "Delivery PR conversation. The cheapest way to make an empty reference impossible is a custom Deserialize on OpaqueId that rejects it. That would close this register and break the serialization contract for every type in the crate, including the fixtures that dm2_11 and the other phase-2 tests deserialize. The prompt forbids it explicitly, because 'reject at the boundary' and 'reject at the point of use' are different decisions and the register did not make the first one."
+  - id: AID-2026-052-F3
+    severity: P2
+    feedback_destination: "Delivery PR conversation. GOV-NC-2026-11-22-PROVENANCE-REFERENCE-REVALIDATION-027 says it is independent of GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026 §6.5 and does not imply equivalence between the two source_ref fields. That independence is real and this dispatch respects it, but it means a reader will find two open registers both about source references with no cross-reference explaining why fixing one does not fix the other. This AID adds no such cross-reference, because doing so would be a write to 026's scope."
+  - id: AID-2026-052-F4
+    severity: P2
+    feedback_destination: "Delivery PR conversation. The closing condition asks for the serde-bypass test to pass, which this work delivers, and for the group-by-group revalidation, which it also delivers. It does not ask for independent evidence. But an implementation that writes its own acceptance tests and declares them sufficient is the pattern the repository's rulings prohibit elsewhere, so the register stays OPEN after merge on the same reasoning recorded in AID-2026-051-F3."
