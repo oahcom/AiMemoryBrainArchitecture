@@ -10,7 +10,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-23"
-      last_verification_note: "§1-§10 carry their own measurement commits and were verified when written. §11 is the errata for §9 and §10, measured at bea1c2b in this session; every number in it came from a command recorded in that section."
+      last_verification_note: "§11 was produced by the commands in §11.6 on bea1c2b in this session. §1-§10 are retained as written at their own stated commits and are corrected, not re-measured, by §11."
     usage_status: Active
     modification_status: Modified
 
