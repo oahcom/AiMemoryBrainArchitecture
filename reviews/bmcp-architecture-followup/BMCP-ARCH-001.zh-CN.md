@@ -233,7 +233,7 @@ H 当前 Envelope 候选列出 ENVELOPE_INVALID、VERSION_UNSUPPORTED、MESSAGE_
 |---|---|---|---|
 | H | Wire Envelope/Version、Transport、ACK 编码、Validator、协议符合性 | 认证解码 Envelope；Family Registry；Response/ACK 序列化 | 精确 Wire/Transport/ACK/Validator 仍 CANDIDATE / NOT FROZEN |
 | E | Ingress 接受、Candidate IR、Compiler 阶段/Lineage、AcceptedReceipt | 类型化 Ingress Operation；原样返回 E Receipt/Result | 可调用 API 和 Wire 映射；AcceptedReceipt 不等于 Canonical Commit |
-| B | Fact/Claim 含义和规范领域决策 | 仅携带 Owner 批准的类型化 Ref/Payload | Owner 已批准 Option A + I1；精确消费者映射仍为 Candidate |
+| B | Fact/Claim 含义和规范领域决策 | 仅携带 Owner 批准的类型化 Ref/Payload | Owner 决策已选择 Option A + I1；精确消费者映射仍为 Candidate |
 | D | Canonical Identity、Lifecycle、Canonical Commit/Revision、Forget Fence | 传递类型化 Ref 并消费 D Receipt/Currentness | 精确 Runtime API 绑定 |
 | I | Principal Trust、Authorization、PermissionEpoch、Revocation、Global Forget Policy | 受保护 Principal Context 和当前授权决策 | 精确批准接口/Profile |
 | C | Agent/Adapter 边界、Telemetry、Final Inference Request | C Adapter 将 Agent Request 映射到注册 BMCP Operation | MCP/Adapter Mapping 和 Request Identity |
@@ -524,7 +524,7 @@ H 范围澄清记录于 PR #428 comment 7060264372。四项请求**尚未完全�
 | AT-13 重复 Request | Owner + H | 相同幂等身份和摘要 | 返回原结果；不重复副作用 | 并发 Duplicate/Replay | Owner Idempotency | BLOCKED_BY_OWNER_CONTRACT |
 | AT-14 重复 ACK | H + Consumer | 相同 ACK ID/Digest，再相同 ID/不同 Digest | Replay 幂等；摘要改变 Conflict；不变更状态 | ACK Replay/Mutation Vector | H ACK + D/G/I Mapping | BLOCKED_BY_H_CONTRACT |
 | AT-15 Validator 拒绝 | H + Owner | Envelope/Schema/Critical Extension 无效 | 在正确层拒绝；不进入后续阶段 | 分层负向套件 | H Validator + Domain Schema | BLOCKED_BY_H_CONTRACT |
-| AT-16 Forget Fence 冲突 | D + I + H | D Fence 或 I Epoch Stale/Unknown | Fail-closed；不执行受保护 Apply/Commit；保留抑制 | 两种 Race 顺序 + 权威故障 | D/I Currentness API | BLOCKED_BY_OWNER_CONTRACT |
+| AT-16 Forget Fence 冲突 | D + I + H | D Fence 或 I Epoch Stale/Unknown | Fail-closed；不执行受保护 Apply/Commit；保留抑制 | 两种 Race 顺序 + 权威服务故障 | D/I Currentness API | BLOCKED_BY_OWNER_CONTRACT |
 | AT-17 Canonical Identity 冲突 | D（Fact/Claim 另依赖 B ADR） | Payload Ref 与 D Identity 不匹配或 Fact/Claim 未决 | Reject/Quarantine；不签发/转换身份 | Forged/Mismatch Identity Vector | D API；B ADR | BLOCKED_BY_OWNER_CONTRACT |
 | AT-18 序列化稳定性 | H | 精确 Schema/Profile/Version | 同语义对象产生获批 Canonical Bytes/Digest | 跨语言 Golden Vector | H Canonicalization/Signature | BLOCKED_BY_H_CONTRACT |
 | AT-19 Unicode | H | 有效/无效 UTF-8、补充字符、规范化边界、重复 Key | 按 Profile 保留有效 Unicode；拒绝无效/歧义形式 | 跨语言 Unicode/畸形字节 | H Wire Decode/Canonicalization | BLOCKED_BY_H_CONTRACT |
@@ -541,14 +541,14 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 **以下条件全部满足才可进入：**
 1. BMCP 语义契约获责任架构权威接受；未决语义明确列出。
 2. H 冻结版本化 Wire、Transport、ACK、Validator 契约，包括 Error/Conformance Mapping。
-3. H/C/E/D/I/G 按需接受跨模块 Request/Response/Receipt/ACK 映射。
+3. H/C/E/D/I/G 接受所需的跨模块 Request/Response/Receipt/ACK 映射。
 4. Owner Option A + I1 语义已获批准。精确消费者映射在 B/D/E/F/G/H/I/Storage 契约完成版本固定和审查之前仍保持 Candidate；E Candidate IR 和 Receipt APIs 必须精确固定。
 5. C 通过 Issue #449 发布、H 审查 Agent Integration / MCP-to-BMCP Mapping；MCP 不得替代 BMCP。
 6. D/I 发布 Identity/Lifecycle、Forget Fence、Authorization 和 PermissionEpoch Currentness 的精确可调用接口。其权威边界已经决定；API/IDL/Schema 仍保持开放。
 7. 指定 Canonical Runtime 仓库/分支（或授权新仓库）、责任工程 Owner/维护者、Build、CI、测试命令和产物来源。
 8. 相关权威记录 Deployment Topology、持久化、队列、Recipient Adapter、Observability、Recovery 和 Operator 职责。
 9. 完整验收套件在不可变 Runtime Commit 上执行并保留可复现原始证据；UNKNOWN/Recovery/Race 均 fail-closed。
-10. 独立安全/领域审查和所需 Owner 验收完成。不隐含生产激活授权。
+10. 独立安全/领域审查和所需 Owner 验收完成。不意味着生产环境激活。
 
 | 工作流 | 下一项工件 | 责任权威 | 进入状态 |
 |---|---|---|---|
@@ -568,7 +568,7 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 - §2 Main 来源登记已从 `c58878fce24528a0842b4f8887c93ddbf465b566` 刷新；所有 Main Blob Pin 均针对该精确 Commit 解析。H 来源分支已重新读取：`session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74`；八个 H Blob Pin 已重新获取且匹配。EN/ZH 来源登记 SHA 集合一致。
 - 已纳入依赖核验的 Main 变更：#472 G ContextVersion/ChangeSet/CAS 文档和实现；`crates/memory-context/tests/e2e_negative_paths.rs`（SQLite Store→Context 负向路径覆盖）；规范 Claim/Fact Revision 类型；BMCP RecoveryJoin 1.0.2 Schema、索引、结构 Validator 和符合性 Fixture/Tests。RecoveryJoin Validator 的 Schema-only 成功状态为 `STRUCTURALLY_VALID`，Proof/Currentness 需注入 D 权威回调；缺少回调时结果为 `UNKNOWN`，不是 VALID。它不冻结 H Wire/Transport，也不替代 D 权威。G E2E 测试覆盖跨 Scope 拒绝、Candidate Lifecycle 拒绝、过期 Revision 拒绝、Budget 溢出和文件型 SQLite 重启；未覆盖 Forget/Tombstone 公共操作、H ACK 绑定或 C Final-request Applied 证据。
 - BMCP-DR-002 仍仅在 D/I 权威边界层面 DECIDED。BMCP-DR-003 仍为 PARTIALLY_DECIDED；精确 C-H Operation Registry/Mapping 仍 OPEN。H-CONFIRM-001..004 仍为 PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN；保留 `INDEPENDENCE_UNVERIFIABLE`。AT-01..AT-20 仍为 **PLANNED_NOT_RUN**；Provider Outcome 的五项 C 语义跳过仍未解决。
-- Issue #7 仍为 CLOSED / not_planned，正文保留 `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`。未冻结 Wire/Schema/API，未授权 Runtime、Transport 实施、部署、生产激活或修改 Issue #7。
+- Issue #7 仍为 CLOSED / not_planned，正文保留 `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`。未进行 Wire/Schema/API 冻结，未运行 Runtime，未实施 Transport，未进行部署或生产激活，也未修改 Issue #7。
 - `git diff --check c58878fce24528a0842b4f8887c93ddbf465b566...HEAD`：PASS，退出码 0（最终 Commit 后重跑）。
 - `python3 scripts/check_document_management.py --require-changed c58878fce24528a0842b4f8887c93ddbf465b566`：FAIL，退出码 1；两个基线 DM-06 错误位于 `08-bmcp-protocol/protocol-index.md` 和 `.zh-CN.md`（`Canonical` 缺少 `authority.canonical_scope_id`）。PR 未修改两个索引文件。报告清点：501 governed documents，18 classified / 483 unclassified。未进行范围外元数据修改。
 
