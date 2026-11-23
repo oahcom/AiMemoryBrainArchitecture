@@ -455,4 +455,34 @@ mod tests {
         assert!(wire.starts_with("{\"attestation_id\""), "got {wire}");
         assert_eq!(serde_json::from_str::<AttestorRef>(&wire).unwrap(), issued);
     }
+
+    #[test]
+    fn authorization_decision_kind_serde_uses_canonical_pascal_case() {
+        let cases = [
+            (AuthorizationDecisionKind::Approved, "\"Approved\""),
+            (AuthorizationDecisionKind::Denied, "\"Denied\""),
+            (AuthorizationDecisionKind::Conditional, "\"Conditional\""),
+        ];
+
+        for (kind, expected_json) in cases {
+            let serialized = serde_json::to_string(&kind).unwrap();
+
+            assert_eq!(
+                serialized, expected_json,
+                "Serde must serialize the canonical decision-kind literal"
+            );
+        }
+    }
+
+    #[test]
+    fn authorization_decision_kind_serde_rejects_lowercase_values() {
+        for legacy_json in [r#"\"approved\""#, r#"\"denied\""#, r#"\"conditional\""#] {
+            let result = serde_json::from_str::<AuthorizationDecisionKind>(legacy_json);
+
+            assert!(
+                result.is_err(),
+                "Serde must reject legacy lowercase value {legacy_json}"
+            );
+        }
+    }
 }
