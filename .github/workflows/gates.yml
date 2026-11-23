@@ -4,21 +4,44 @@ name: Existing gates
 # CI, so a gate cannot reach main red without anybody noticing.
 #
 # ---------------------------------------------------------------------------
-# RUNNER: `[self-hosted, linux, x64]`, deliberately.
+# RUNNER: `ubuntu-latest`, on measurement, not on preference.
 #
-# `GET /repos/oahcom/AiMemoryBrainArchitecture/actions/runners` returns
-# `total_count: 1` -- one runner, `zesu-x64`, labels `self-hosted, Linux, X64`.
-# GitHub-hosted minutes are blocked by a billing failure on this account, so a
-# job written `runs-on: ubuntu-latest` is allocated no runner at all and dies
-# with an empty `steps` array (observed on main, 2026-11-22T04:29:56Z, on the
-# `GOV-DOC-002 metadata checks` and `audit` jobs). Writing `ubuntu-latest` here
-# would make every job below dead on arrival. So every job targets the one
-# runner that exists.
+# This file used to target `[self-hosted, linux, x64]` (runner `zesu-x64`)
+# because GitHub-hosted minutes were blocked by a billing failure on this
+# account, and a `runs-on: ubuntu-latest` job was allocated no runner at all.
+# That is no longer the state of the world, and the two paths have swapped
+# roles:
+#
+#   * `self-hosted` is now the broken path FOR THIS WORKFLOW, and it has never
+#     worked once. `GET /actions/workflows/426721518/runs` returns 31 runs, 0
+#     successes: every one failed or was cancelled, and not one of them was a
+#     real gate failure. The error is identical on all of them, and it comes
+#     from the runner host's egress proxy, not from the code and not from disk:
+#         fatal: unable to access 'https://github.com/oahcom/...':
+#         GnuTLS, handshake failed: The TLS connection was non-properly terminated.
+#     It dies inside `actions/checkout`, whose 3 retries span ~31s -- shorter
+#     than the flap. PR #708 / GAP-30 measured the same egress at
+#     `ECONNREFUSED ... after 0 ms`. A gate that cannot fetch the repository
+#     cannot report on the repository, so those 31 runs carried no information
+#     about the gates at all.
+#
+#   * `ubuntu-latest` is now the reliable path, measured. `rust-phase1.yml` is
+#     hosted and succeeded on 5 consecutive runs (26d2c9bc, 9b35878d, 99c3130b,
+#     1d300d7c, 38c3c975); run 45038988160 ran 6 steps green on `GitHub Actions
+#     1000005220`, including `cargo clippy --workspace --all-targets -- -D
+#     warnings` and `cargo test --workspace --all-targets`.
+#     `document-management.yml` is hosted and green (run 45039213359), as are
+#     `bilingual-docs.yml` and `runner-admission-policy.yml`.
+#
+# So every job below runs on `ubuntu-latest`. The gates themselves are
+# unchanged: same commands, same baselines, same hard-gate/ratchet split. Only
+# the substrate moved.
 #
 # ---------------------------------------------------------------------------
 # TRIGGERS: `push` to main and `workflow_dispatch`. Not `pull_request`.
 #
-# Two independent controls force this, both already in force in this repo:
+# Deliberately unchanged by the runner migration. This trigger used to be forced
+# by two controls that only bite self-hosted jobs:
 #   L1 (runner job-started hook, AI-RUN-002-RUNBOOK 4.1) denies every job whose
 #      GITHUB_REF is not exactly `refs/heads/main`, or whose event is not
 #      push / workflow_dispatch / schedule.
@@ -27,12 +50,16 @@ name: Existing gates
 #      job, a `push` without a `branches:` filter, and `push.branches` naming
 #      anything but `main`.
 #
-# CONSEQUENCE, STATED PLAINLY: this workflow cannot gate a pull request. It is a
-# post-merge detector on main, plus `workflow_dispatch` for on-demand runs. A red
-# gate on main becomes visible within minutes instead of never, which is the
-# GAP-10 defect. It is not a pre-merge gate and this file does not pretend to be
-# one. Pre-merge gating needs one of: GitHub-hosted minutes restored, a second
-# runner, or a relaxed L1/L2 policy -- each an Owner decision, not an edit here.
+# Both apply only to self-hosted jobs, and no job in this file is self-hosted
+# any more: the admission audit's self-hosted count drops by the 5 jobs here, so
+# this file is out of L1/L2's reach. The trigger is still left exactly as it
+# was, because moving the substrate is not a licence to widen scope. Making this
+# a pre-merge gate by adding `pull_request` is a separate Owner decision, not a
+# side effect of a `runs-on` edit. Until that decision, this remains a
+# post-merge detector on main plus `workflow_dispatch` -- which is precisely the
+# GAP-10 defect it was written to close: a red gate on main becomes visible
+# within minutes instead of never. It is not a pre-merge gate and this file does
+# not pretend to be one.
 #
 # ---------------------------------------------------------------------------
 # TWO KINDS OF JOB, and the difference is deliberate:
@@ -72,11 +99,27 @@ name: Existing gates
 # a directory of exemptions.
 #
 # ---------------------------------------------------------------------------
-# ONE RUNNER MEANS SERIALISATION. The single `concurrency` group below is not
-# about cancelling superseded runs; it exists so two runs cannot interleave on a
-# runner that can only hold one job. Jobs inside a run queue on the runner by
-# themselves. Every job also carries a `timeout-minutes`, because a wedged job on
-# a one-runner repository blocks every other workflow in the repository.
+# NO `concurrency` BLOCK, AND WHY. There was one: group
+# `existing-gates-self-hosted`, `cancel-in-progress: false`. Its only purpose
+# was to stop two runs from interleaving on a host that can hold one job. A
+# hosted runner is allocated per job and runs jobs in parallel, so that reason is
+# gone and the block went with it. On a runner that can run these five jobs
+# concurrently, serialising whole runs would only add latency.
+#
+# Removing it cannot reproduce #712. #712 put this workflow and
+# `rust-self-hosted.yml` in ONE group and got both runs cancelled within a minute
+# (45038090599 and 45038164281, cancelled at creation with zero jobs): a group
+# holds one running plus one pending run, the second arrival replaces the
+# pending one, and `cancel-in-progress: false` does not protect a run that has
+# not started. Every workflow in this repository now owns a distinct group
+# (`rust-self-hosted`, `runner-disk-reclaim`, `ubuntu-worker-diagnostics`,
+# `ai-owner-worker-...`), and nothing else referenced
+# `existing-gates-self-hosted` -- so deleting the block removes the last
+# reference to a shared queue slot rather than creating one.
+#
+# Every job keeps an explicit `timeout-minutes`. A hosted job's default timeout
+# is 6 hours; a hung job that sits there burning minutes and reporting nothing is
+# worse than a fast red.
 
 on:
   push:
@@ -86,18 +129,10 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  # Fixed group name: runs queue behind each other instead of overlapping on the
-  # single runner. GitHub keeps one pending run per group and cancels older
-  # pending ones, so a burst of pushes collapses to "the current run plus the
-  # newest one".
-  group: existing-gates-self-hosted
-  cancel-in-progress: false
-
 jobs:
   protocol-index:
     name: BMCP protocol index (hard gate)
-    runs-on: [self-hosted, linux, x64]
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -113,15 +148,18 @@ jobs:
 
   conformance:
     name: BMCP conformance suite (hard gate)
-    runs-on: [self-hosted, linux, x64]
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
-      # Self-hosted is not a clean container and `sudo` is not assumed. The
-      # pinned dependencies go into a throwaway venv under $RUNNER_TEMP, which
-      # the runner wipes between jobs, so nothing is installed into the host
-      # interpreter and no state leaks into the next job.
+      # A throwaway venv under $RUNNER_TEMP, not the system interpreter. The
+      # reason is no longer "the host is dirty and `sudo` is not assumed" -- a
+      # hosted runner is a fresh VM. It is that `requirements.txt` IS the pinned
+      # set this suite is validated against, and an ambient image Python would
+      # silently exercise some other version of `jsonschema`, `rfc8785` and
+      # `cryptography`. `$RUNNER_TEMP` is discarded with the VM, so nothing leaks
+      # into the next job either way.
       #
       # DEGRADATION: if the venv cannot be built or the install cannot reach an
       # index, fall back to the system interpreter *only if* it already
@@ -145,8 +183,10 @@ jobs:
       # The cross-language vectors shell out to `node` and import the pinned
       # `canonicalize` package. Without it three tests error out with
       # ERR_MODULE_NOT_FOUND -- a missing dependency, not a red gate. The
-      # install is skipped when the module already resolves, so a warm
-      # `node_modules` left on the runner is not thrown away for nothing.
+      # skip-when-already-resolvable guard is kept because it costs one `node -e`
+      # and it is what lets the same step work on a host with a warm
+      # `node_modules`; on a hosted runner it is effectively always false, since
+      # the checkout starts with no `node_modules` at all.
       - name: Install conformance Node dependencies
         shell: bash
         run: |
@@ -171,7 +211,7 @@ jobs:
 
   schema-nonempty:
     name: Schema non-empty audit (hard gate)
-    runs-on: [self-hosted, linux, x64]
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -193,7 +233,7 @@ jobs:
 
   bilingual:
     name: Bilingual docs coverage (ratchet)
-    runs-on: [self-hosted, linux, x64]
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -208,35 +248,44 @@ jobs:
             --format paths \
             --command "python3 scripts/check_bilingual_docs_full.py"
 
-  # CLIPPY ONLY, AND WHY. `rust-self-hosted.yml` on main already runs
-  # `cargo test --workspace --all-targets --no-fail-fast` and
-  # `python3 scripts/check_fmt.py --expect "$(git rev-parse HEAD)"`. Running
-  # either of them here too is actively harmful:
+  # CLIPPY ONLY, AND WHY.
   #
-  #   * `cargo test --workspace` without `--all-targets` does not run doctests,
-  #     and `--all-targets` does. Measured on the same tree: `--all-targets` ->
-  #     passed=546, plain `--workspace` -> passed=551. The 5-test gap is
-  #     doctests. GAP-10 section 7.1 records this exact trap at 371 vs 385. Two
-  #     workflows reporting different test counts for the same commit make
-  #     neither number trustworthy, and the one that is wrong is the one that
-  #     looks green.
-  #   * Two workflows compiling this 45-crate workspace on the repository's only
-  #     runner doubles the disk churn on a host whose free space has been
-  #     shrinking between runs that build nothing (6.8G -> 5.6G, ~1.2 GB with no
-  #     build in between). Doubling the writes to save nothing is a bad trade.
+  # The overlap with the other Rust workflows, stated plainly so nobody has to
+  # rediscover it: `rust-phase1.yml` (hosted, 5 consecutive green runs) runs
+  # `cargo clippy --workspace --all-targets -- -D warnings` AND
+  # `cargo test --workspace --all-targets`, but only on `pull_request`, and on
+  # `push` to main only when its `paths:` filter matches (`Cargo.toml`,
+  # `Cargo.lock`, `crates/**`, `scripts/check_fmt.py`, itself).
+  # `rust-self-hosted.yml` runs `cargo test --workspace --all-targets
+  # --no-fail-fast` and `python3 scripts/check_fmt.py --expect "$(git rev-parse
+  # HEAD)"` on `[self-hosted, linux, x64]`.
   #
-  # So this job keeps only the gate that main does NOT run anywhere that
-  # executes: `cargo clippy --workspace --all-targets -- -D warnings`.
-  # `rust-phase1.yml` has clippy, but it is `runs-on: ubuntu-latest`, which on
-  # this account is allocated no runner at all, so it has never executed. Clippy
-  # is genuinely uncovered and is the independent value of this job.
+  # So clippy here is NOT "uncovered everywhere else" -- correcting this file's
+  # earlier claim that `rust-phase1.yml` "has never executed": it has, repeatedly
+  # and green, including its clippy step. What IS uncovered is clippy on a push
+  # to main that matches none of `rust-phase1.yml`'s `paths:` filters, because
+  # THIS workflow has no path filter and runs on every push to main. That
+  # conditional coverage is the independent value of this job, and the reason it
+  # is kept rather than merged or deleted in this change. De-duplicating the two
+  # is a separate decision: dropping this job without widening
+  # `rust-phase1.yml`'s trigger would lose clippy on every non-Rust push to main.
+  #
+  # `cargo test` and `rustfmt` are deliberately NOT run here.
+  # `rust-self-hosted.yml` runs both on main, and a second test run here would be
+  # actively harmful: `cargo test --workspace` without `--all-targets` does not
+  # run doctests, and `--all-targets` does. Measured on the same tree:
+  # `--all-targets` -> passed=546, plain `--workspace` -> passed=551. The 5-test
+  # gap is doctests. GAP-10 section 7.1 records this exact trap at 371 vs 385.
+  # Two workflows reporting different test counts for the same commit make
+  # neither number trustworthy, and the one that is wrong is the one that looks
+  # green.
   #
   # Consequence: rustfmt and the test suite are NOT gated here. They are gated
   # by `rust-self-hosted.yml` on main. If that workflow is ever deleted, this
   # job must grow them back -- with `--all-targets`.
   clippy:
     name: Rust clippy (hard gate)
-    runs-on: [self-hosted, linux, x64]
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     # Job-level, not per-step: clippy lints both the dev profile and the test
     # profile under `--all-targets`, so both debug levels matter.
@@ -247,15 +296,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # DISK PREFLIGHT. Measured on this runner (run 44992270090, 2026-11-22):
-      # 39G total, 32G used, **5.6G free**, 3.6G RAM, 4 CPUs.
+      # DISK PREFLIGHT. Kept; its rationale corrected.
+      #
+      # The measurement this check was written against was of the self-hosted
+      # host (run 44992270090, 2026-11-22: 39G total, 32G used, 5.6G free, 3.6G
+      # RAM, 4 CPUs). That host is no longer the runner, so what follows is a
+      # statement about the BUILD, not about the machine.
       #
       # What a build of this workspace actually costs, measured by the runner
-      # operator on a comparable host: `cargo test --workspace --all-targets`
-      # produces a 1009 MB `target/` over 45 crates, and `~/.cargo/registry` is
-      # 319 MB for 290 crates. Clippy-only is the same compilation with a
-      # different driver and no test binaries linked, so ~1.0-1.3 GB including
-      # the registry.
+      # operator: `cargo test --workspace --all-targets` produces a 1009 MB
+      # `target/` over 45 crates, and `~/.cargo/registry` is 319 MB for 290
+      # crates. Clippy-only is the same compilation with a different driver and
+      # no test binaries linked, so ~1.0-1.3 GB including the registry.
+      #
+      # A standard hosted `ubuntu-latest` runner has a 14 GB SSD, so 1.0-1.3 GB
+      # is not tight. It is still worth a floor: a build that suddenly wants
+      # several GB is a real defect, and failing here names it, while the
+      # alternative is an opaque "No space left on device" several steps later
+      # pointing at whatever happened to write last.
       #
       # The floor is 3 GiB. It was 4 GiB when this job also ran `cargo test` and
       # shared one CARGO_TARGET_DIR with clippy (an estimated 1.7-2.0 GB); with
@@ -266,10 +324,9 @@ jobs:
       # `GATES_MIN_FREE_GB` is a floor, not a target. Raise it, never lower it
       # to make a run go green.
       #
-      # WATCH THE TREND, NOT THE VALUE. Two diagnostic runs that compile nothing
-      # reported ~6.8G free and then ~5.6G free: about 1.2 GB accumulated with
-      # no build in between. On a single runner that drift, not the absolute
-      # number, is what eventually takes every workflow down at once.
+      # A hosted runner starts from a clean image every run, so this check can no
+      # longer catch slow drift -- there is nothing left to drift. What it catches
+      # now is a build whose footprint has outgrown what the job is budgeted for.
       - name: Check free disk before building
         shell: bash
         run: |
@@ -281,24 +338,26 @@ jobs:
           echo "free_disk_kb=$avail_kb free_disk_gb=$avail_gb refuse_below_gb=$min_gb warn_below_gb=$warn_gb"
           df -h .
           if [ "$avail_gb" -lt "$min_gb" ]; then
-            echo "::error::only ${avail_gb}G free (${avail_kb} KiB), below the ${min_gb}G floor. A clippy build costs ~1.0-1.3G and this is the repository's only runner. Reclaim space and re-run; do not lower GATES_MIN_FREE_GB to get a green."
+            echo "::error::only ${avail_gb}G free (${avail_kb} KiB), below the ${min_gb}G floor. A clippy build of this workspace costs ~1.0-1.3G and the hosted image provides a 14G disk, so something before this step is consuming it. Investigate the footprint; do not lower GATES_MIN_FREE_GB to get a green."
             exit 1
           fi
           if [ "$avail_gb" -lt "$warn_gb" ]; then
-            echo "::warning::only ${avail_gb}G free; free space on this runner has been shrinking between runs that build nothing. Investigate the leak, do not just re-run."
+            echo "::warning::only ${avail_gb}G free, below the ${warn_gb}G comfort threshold on a freshly imaged runner; the build footprint is larger than expected. Check what grew, do not just re-run."
           fi
 
-      # TOOLCHAIN. This job used to require cargo/rustc/cargo-clippy on the
-      # host and hard-fail otherwise; run 45013278749 measured all three
-      # MISSING on zesu-x64, so every push failed for a reason unrelated to the
-      # code. `rust-self-hosted.yml` installs Rust in-workflow on the same
-      # runner and succeeds (run 45013113393), so this job now does the same.
-      # The install is skipped when cargo is already on PATH, so provisioning
-      # the host properly later silently takes over instead of reinstalling.
+      # TOOLCHAIN. A hosted `ubuntu-latest` image ships stable Rust with the
+      # clippy component, so on that runner this step is a no-op: `command -v
+      # cargo` succeeds and nothing is installed. It is kept because it is what
+      # makes the same job work on a self-hosted host too -- run 45013278749
+      # measured cargo, rustc and cargo-clippy all MISSING on zesu-x64, so every
+      # push failed for a reason unrelated to the code.
       #
-      # `--component clippy` is load-bearing: `--profile minimal` omits it, and
-      # without it the install "succeeds" while the clippy step dies on
-      # `cargo-clippy: command not found`.
+      # The install is skipped when cargo is already on PATH, so provisioning a
+      # host properly later silently takes over instead of reinstalling.
+      #
+      # `--component clippy` is load-bearing for the install branch:
+      # `--profile minimal` omits it, and without it the install "succeeds" while
+      # the clippy step dies on `cargo-clippy: command not found`.
       - name: Toolchain
         shell: bash
         run: |
@@ -321,10 +380,11 @@ jobs:
           rustc --version
           cargo clippy --version
 
-      # A report, not a gate. `cargo=/home/runner/.cargo/bin/cargo` in the log
-      # is the evidence the step above took effect. `cc` stays in the list
-      # because clippy needs a linker and a missing `cc` is a real signal -- it
-      # just must not be fatal when rustup can provide the rest.
+      # A report, not a gate. The log line naming each resolved binary is the
+      # evidence the step above took effect; on the hosted image all four should
+      # already resolve before any install runs. `cc` stays in the list because
+      # clippy needs a linker and a missing `cc` is a real signal -- it just must
+      # not be fatal when rustup can provide the rest.
       - name: Report the toolchain source
         shell: bash
         run: |
@@ -339,18 +399,23 @@ jobs:
       # `target/` stays at its default location inside `$GITHUB_WORKSPACE` and is
       # NOT redirected to `/tmp` or `$HOME`. `actions/checkout` runs
       # `git clean -ffdx` by default, so a `target/` inside the workspace is
-      # self-limiting -- wiped and rebuilt each run -- while one outside it would
-      # be a permanent leak on a host with 5.6G free. Correcting an earlier
+      # self-limiting -- wiped and rebuilt each run. Correcting an earlier
       # comment in this file: `target/` is NOT preserved between runs, and this
-      # job does not depend on it being preserved.
+      # job does not depend on it being preserved. On a hosted runner that is
+      # doubly true, because the VM itself is discarded, so the only thing the
+      # location decides is which disk budget the 1.0-1.3 GB is charged against.
       #
       # `CARGO_PROFILE_DEV_DEBUG=0` / `CARGO_PROFILE_TEST_DEBUG=0` drop
       # debuginfo, which is the bulk of the 1009 MB measured above. Cheapest
       # single reduction available, and it lowers link-time memory too.
       #
-      # `CARGO_BUILD_JOBS=2`: the host has 4 CPUs but only 3.6G RAM. The default
-      # `-j 4` over 45 crates plus a C compile is a plausible OOM, and an OOM
-      # mid-build is a worse failure than a slower one.
+      # `CARGO_BUILD_JOBS=2` was chosen for a 4-CPU / 3.6G-RAM host where the
+      # default `-j 4` over 45 crates plus a C compile was a plausible OOM, and
+      # an OOM mid-build is a worse failure than a slower one. That host is no
+      # longer the runner; a standard hosted runner provides 4 vCPU and at least
+      # 8 GB RAM, so the cap is conservative rather than necessary now. Left
+      # alone on purpose: it is a cap, it cannot change correctness, and this
+      # change is a substrate migration, not a performance tune.
       #
       # `--offline` is NOT used. A cold runner has an empty registry cache, and
       # `--offline` would turn a missing crate into a confusing failure.
