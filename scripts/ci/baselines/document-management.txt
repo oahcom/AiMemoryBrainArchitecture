@@ -159,8 +159,6 @@
 14-ai-development/governance-register/GOV-NC-2026-11-20-DIRECT-MAIN-001.md
 14-ai-development/governance-register/GOV-NC-2026-11-20-MERGE-AFTER-RULING-003.en.md
 14-ai-development/governance-register/GOV-NC-2026-11-20-MERGE-AFTER-RULING-003.md
-14-ai-development/governance-register/GOV-NC-2026-11-20-SELF-AUTH-002.en.md
-14-ai-development/governance-register/GOV-NC-2026-11-20-SELF-AUTH-002.md
 14-ai-development/governance-register/GOV-NC-2026-11-21-CWD-SPLIT-014.md
 14-ai-development/governance-register/GOV-NC-2026-11-21-DEV-PR-GATE-010.md
 14-ai-development/governance-register/GOV-NC-2026-11-21-EMBEDDED-ROOT-015.md

@@ -42,7 +42,7 @@ name: Existing gates
 #
 #   * RATCHETS fail only when the failure set gets WORSE than the recorded
 #     baseline: `bilingual`, `docs-management`. These gates are already red on
-#     main (GAP-08, and 567 DM-01 errors respectively). Making them hard gates
+#     main (GAP-08, and 565 DM-01 errors respectively). Making them hard gates
 #     today would paint every run red and teach everyone to ignore the check,
 #     which is exactly how they reached main red in the first place. A ratchet
 #     converts "permanently red and ignored" into "cannot get worse, and gets
@@ -93,6 +93,14 @@ concurrency:
   # single runner. GitHub keeps one pending run per group and cancels older
   # pending ones, so a burst of pushes collapses to "the current run plus the
   # newest one".
+  #
+  # The group is workflow-wide, so it also serialises `docs-management`, which
+  # no longer runs on the self-hosted runner. That is a known, accepted cost of
+  # keeping this job in this file rather than giving it its own workflow: it
+  # still queues behind a previous run of `Existing gates`. Splitting it out is
+  # a reasonable follow-up if that delay is ever observed to matter; it is not
+  # done here, because a second workflow file would duplicate the header
+  # reasoning this file exists to hold in one place.
   group: existing-gates-self-hosted
   cancel-in-progress: false
 
@@ -210,33 +218,73 @@ jobs:
             --format paths \
             --command "python3 scripts/check_bilingual_docs_full.py"
 
-  # DOCUMENT-MANAGEMENT: the gate that never ran. `.github/workflows/
-  # document-management.yml` is `runs-on: ubuntu-latest`, which on this account
-  # is allocated no runner at all: 794 runs, every one with `steps: 0`, no
-  # `runner_name`, dead in 2-4 seconds. So nobody has ever seen
-  # `scripts/check_document_management.py` run in CI. Pointed at a real runner
-  # it reports FAIL: 567 error(s) on main, all DM-01 (567 of 625 governed
-  # documents carry no `document_metadata` block). A gate that has never
-  # executed is not a gate; this job executes it, and ratchets it because 567
-  # red on the first run is information nobody reads.
+  # DOCUMENT-MANAGEMENT: the gate that never ran, and the runner it must not
+  # run on. `.github/workflows/document-management.yml` already runs
+  # `scripts/check_document_management.py`, on `ubuntu-latest`, and it is green
+  # (run 45039213359, runner `GitHub Actions 1000005224`, six of six steps). So
+  # the gate is executed today; what main lacks is a RATCHET around it, because
+  # the gate is currently red on main and a red gate that nobody reads is not a
+  # gate. It reports FAIL: 565 error(s), all DM-01 (565 of 625 governed
+  # documents carry no `document_metadata` block).
+  #
+  # WHY `ubuntu-latest` HERE, AND NOT THE SELF-HOSTED RUNNER THIS FILE PINS
+  # EVERYWHERE ELSE. This is the one job in this workflow that is deliberately
+  # off the self-hosted runner, for three reasons, all measured:
+  #
+  #   1. GITHUB-HOSTED RUNNERS WORK ON THIS ACCOUNT NOW. The header of this file
+  #      says hosted minutes are blocked by a billing failure, and a job written
+  #      `ubuntu-latest` is allocated no runner at all. That was true when it
+  #      was written; it is not true now. `rust-phase1.yml` is `ubuntu-latest`
+  #      and has five consecutive successes (`26d2c9bc`, `9b35878d`, `99c3130b`,
+  #      `1d300d7c`, `38c3c975`); its job in run 45038988160 landed on
+  #      `GitHub Actions 1000005220` and ran six steps green, including
+  #      `cargo clippy --workspace --all-targets -- -D warnings` and
+  #      `cargo test --workspace --all-targets`. `document-management.yml`,
+  #      `bilingual-docs.yml` and `runner-admission-policy.yml` are all
+  #      `ubuntu-latest` and all green as well. The billing-failure claim in the
+  #      header is stale, and is left there only because the five jobs below it
+  #      still make the choice it describes; a job added today does not have to
+  #      inherit it.
+  #
+  #   2. THE SELF-HOSTED RUNNER IS THE CURRENTLY BROKEN THING. The five
+  #      self-hosted jobs in this file are the only red jobs left: `Existing
+  #      gates` has 31 runs and zero successes, and every failure is the same
+  #      line, before any gate runs --
+  #        fatal: unable to access https://github.com/...:
+  #        GnuTLS, handshake failed: The TLS connection was non-properly
+  #        terminated.
+  #      That is the `zesu-x64` host losing TLS to github.com when its local
+  #      egress proxy flaps (PR #708, GAP-30). It is not a code defect and not a
+  #      disk defect. Adding a sixth job to that runner would add a sixth
+  #      victim; the ratchet would go red for a reason that has nothing to do
+  #      with document metadata, which is exactly the failure mode a ratchet
+  #      exists to prevent.
+  #
+  #   3. IT DOES NOT NEED THE SELF-HOSTED RUNNER, AND IT MUST NOT TAKE ITS SLOT.
+  #      Nothing here compiles, links or downloads -- it reads markdown and
+  #      shells out to `git`, so there is no `target/`, no crate registry, no
+  #      `CARGO_*` tuning and no disk preflight to make: this job cannot be the
+  #      thing that fills the runner's 5.6G. Meanwhile `gates.yml` serialises
+  #      every self-hosted job onto one runner (see the concurrency comment
+  #      above), so a self-hosted placement would put a ~1s metadata check in
+  #      the same queue as a full clippy build. Hosted placement costs nothing
+  #      and removes a queueing dependency.
+  #
+  # The five existing jobs are left pinned to `[self-hosted, linux, x64]`.
+  # Whether they should also move to hosted runners is a real question, but it
+  # is a separate change with its own measurement; it is not smuggled in here.
   #
   # `document-management.yml` is deliberately left in place and untouched here:
   # whether to delete it is a separate decision, and deleting it in the same
   # change would make this job's history uncomparable.
   #
-  # DISK AND MEMORY: none of the `clippy` job's policy applies, on purpose.
-  # Nothing here compiles, links or downloads -- it reads markdown and shells
-  # out to `git`, so there is no `target/`, no crate registry and no `CARGO_*`
-  # tuning to make, and no disk preflight, because this job cannot be the thing
-  # that fills the runner's 5.6G. The one real cost is `fetch-depth: 0`; the
-  # full history of this repository is an 18.8 MiB pack, not gigabytes.
-  #
-  # Measured on the working copy: the gate self-test runs 225 tests in ~0.9s and
+  # Measured on the working copy: the gate self-test runs 229 tests in ~0.9s and
   # the gate itself takes ~0.2s, so `timeout-minutes: 10` is slack, not a
-  # budget.
+  # budget; the one real cost is `fetch-depth: 0`, and the full history of this
+  # repository is an 18.8 MiB pack, not gigabytes.
   docs-management:
     name: Document metadata (ratchet)
-    runs-on: [self-hosted, linux, x64]
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       # `fetch-depth: 0` IS LOAD-BEARING, not tidiness. DM-10 compares a
@@ -260,7 +308,7 @@ jobs:
           python3 --version
           python3 scripts/test_check_document_management.py
 
-      # The baseline records the exact 567 paths, not a count. A 568th failing
+      # The baseline records the exact 565 paths, not a count. A 566th failing
       # document fails the run; fixing one fails the run until the baseline is
       # lowered in the same change. There is no "close enough".
       - name: Ratchet the document-management gate
