@@ -7,7 +7,8 @@
 use memory_domain::{
     is_rfc3339_utc, is_sha256_hex, AttestorData, AttestorRef, AuthorizationDecisionData,
     AuthorizationDecisionKind, AuthorizationDecisionRef, CanonicalCommitData, CanonicalCommitRef,
-    IssuerId, OpaqueId, ScopeRef, DEV_BASELINE_ISSUER, I_DEV_BASELINE_ISSUER,
+    IssuerId, OpaqueId, ScopeRef, DEV_BASELINE_ISSUER, I_DEV_BASELINE_ATTESTOR,
+    I_DEV_BASELINE_ISSUER,
 };
 use rusqlite::{params, Connection, OptionalExtension, Transaction, TransactionBehavior};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -1462,7 +1463,7 @@ impl AdmissionStore {
         subject_digest: &OpaqueId,
         issued_at: &str,
     ) -> Result<AttestorRef, AdmissionError> {
-        if issuer.as_str() != I_DEV_BASELINE_ISSUER {
+        if issuer.as_str() != I_DEV_BASELINE_ATTESTOR {
             return Err(AdmissionError::InvalidInput(
                 "attestor issuer is not on the I dev-baseline allowlist",
             ));
@@ -1545,7 +1546,7 @@ impl AdmissionStore {
             )?;
 
         // Authority first, then stored-row shape, then reference equality.
-        if stored.issuer_id != I_DEV_BASELINE_ISSUER {
+        if stored.issuer_id != I_DEV_BASELINE_ATTESTOR {
             return Err(AttestorValidationError::UnsupportedIssuer);
         }
 
@@ -2792,7 +2793,7 @@ mod tests {
         let reference = db
             .issue_attestation(
                 &attestation_id,
-                &IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap(),
+                &IssuerId::new(I_DEV_BASELINE_ATTESTOR).unwrap(),
                 &subject,
                 "2026-11-22T00:00:00Z",
             )
@@ -2986,7 +2987,7 @@ mod tests {
     fn attestor_issuance_rejects_replay_with_different_digest() {
         let mut db = AdmissionStore::in_memory().unwrap();
         let attestation_id = id("attestation-replay-digest");
-        let issuer = IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap();
+        let issuer = IssuerId::new(I_DEV_BASELINE_ATTESTOR).unwrap();
         let subject = OpaqueId::new("a".repeat(64)).unwrap();
         let other_subject = OpaqueId::new("b".repeat(64)).unwrap();
 
@@ -3008,7 +3009,7 @@ mod tests {
     fn attestor_issuance_rejects_replay_with_different_issued_at() {
         let mut db = AdmissionStore::in_memory().unwrap();
         let attestation_id = id("attestation-replay-issued-at");
-        let issuer = IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap();
+        let issuer = IssuerId::new(I_DEV_BASELINE_ATTESTOR).unwrap();
         let subject = OpaqueId::new("a".repeat(64)).unwrap();
 
         db.issue_attestation(&attestation_id, &issuer, &subject, "2026-11-22T00:00:00Z")
@@ -3024,7 +3025,7 @@ mod tests {
     fn attestor_issuance_rejects_replay_when_stored_signature_changed() {
         let mut db = AdmissionStore::in_memory().unwrap();
         let attestation_id = id("attestation-replay-signature");
-        let issuer = IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap();
+        let issuer = IssuerId::new(I_DEV_BASELINE_ATTESTOR).unwrap();
         let subject = OpaqueId::new("a".repeat(64)).unwrap();
 
         db.issue_attestation(&attestation_id, &issuer, &subject, "2026-11-22T00:00:00Z")
@@ -3059,10 +3060,31 @@ mod tests {
     }
 
     #[test]
+    fn attestor_issuance_rejects_decision_issuer() {
+        let mut db = AdmissionStore::in_memory().unwrap();
+        let attestation_id = id("attestation-decision-issuer");
+        let issuer = IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap();
+        let subject = OpaqueId::new("a".repeat(64)).unwrap();
+
+        let error = db
+            .issue_attestation(&attestation_id, &issuer, &subject, "2026-11-22T00:00:00Z")
+            .expect_err("the decision issuer must be refused on the attestor path");
+
+        assert!(
+            matches!(
+                &error,
+                AdmissionError::InvalidInput(m)
+                    if *m == "attestor issuer is not on the I dev-baseline allowlist"
+            ),
+            "expected the writer's allowlist refusal, got {error:?}"
+        );
+    }
+
+    #[test]
     fn attestor_issuance_rejects_non_hex_subject_digest_input() {
         let mut db = AdmissionStore::in_memory().unwrap();
         let attestation_id = id("attestation-invalid-digest");
-        let issuer = IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap();
+        let issuer = IssuerId::new(I_DEV_BASELINE_ATTESTOR).unwrap();
         let subject = id("not-a-digest");
 
         assert!(matches!(
@@ -3075,7 +3097,7 @@ mod tests {
     fn attestor_issuance_rejects_non_rfc3339_issued_at_input() {
         let mut db = AdmissionStore::in_memory().unwrap();
         let attestation_id = id("attestation-invalid-issued-at");
-        let issuer = IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap();
+        let issuer = IssuerId::new(I_DEV_BASELINE_ATTESTOR).unwrap();
         let subject = OpaqueId::new("a".repeat(64)).unwrap();
 
         assert!(matches!(
@@ -3109,7 +3131,7 @@ mod tests {
     fn attestor_issuance_accepts_an_identical_replay() {
         let mut db = AdmissionStore::in_memory().unwrap();
         let attestation_id = id("attestation-replay-identical");
-        let issuer = IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap();
+        let issuer = IssuerId::new(I_DEV_BASELINE_ATTESTOR).unwrap();
         let subject = OpaqueId::new("a".repeat(64)).unwrap();
 
         let first = db
@@ -3130,16 +3152,17 @@ mod tests {
     fn attestor_and_decision_ids_are_separate_namespaces() {
         let mut db = AdmissionStore::in_memory().unwrap();
         let shared = id("same-id-both-tables");
-        let issuer = IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap();
+        let attestor_issuer = IssuerId::new(I_DEV_BASELINE_ATTESTOR).unwrap();
+        let decision_issuer = IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap();
         let subject = OpaqueId::new("a".repeat(64)).unwrap();
 
         let attestation = db
-            .issue_attestation(&shared, &issuer, &subject, "2026-11-22T00:00:00Z")
+            .issue_attestation(&shared, &attestor_issuer, &subject, "2026-11-22T00:00:00Z")
             .unwrap();
         let decision = db
             .issue_authorization_decision(
                 &shared,
-                &issuer,
+                &decision_issuer,
                 &subject,
                 "2026-11-22T00:00:00Z",
                 AuthorizationDecisionKind::Approved,

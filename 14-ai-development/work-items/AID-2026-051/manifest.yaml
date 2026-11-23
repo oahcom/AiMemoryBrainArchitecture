@@ -1,0 +1,109 @@
+work_item_id: AID-2026-051
+title: Write the nine enumeration-boundary and baseline-write tests GOV-NC-2026-11-22-ENUM-BOUNDARY-021 requires
+
+class: TEST/GOVERNANCE
+risk: R1
+risk_rationale: "Adds tests only. No production code, no gate behaviour change, no dependency, no architecture decision. The tests touch governed directories transiently and must leave the worktree clean, which is the one operational risk and is addressed by constraint #2."
+
+security_scope: "Test code only. The tests create and delete probe files inside governed directories; they must not persist, must not stage anything at the end, and must not write the frozen baseline except in T05/T06 where restoration is asserted."
+
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+implementing_ai_session: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 063113f0291d7ba26ff8b7fb6c6c9b0dd1a8cf16
+
+tracking_issue: "NONE — tracked by GOV-NC-2026-11-22-ENUM-BOUNDARY-021 §6 and this AID manifest"
+
+created_at: 2026-11-23
+updated_at: 2026-11-23
+
+prompt_id: AID-2026-051-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-051/prompt-v1.md
+prompt_status: FROZEN
+prompt_sha256: 00d76f9419fcdc98bdd1f8876663841298b82a4803792f54328ef7b9244945b7
+prompt_bytes: 7042
+
+prompt_provenance_tier: T1
+prompt_provenance_note: "Frozen from the owner-proxy session that re-measured GOV-NC-2026-11-22-ENUM-BOUNDARY-021 at 063113f0 and found both defects fixed with the required tests absent. The SHA-256 identifies the committed prompt-v1.md bytes exactly."
+
+dependency_refs:
+  - 14-ai-development/governance-register/GOV-NC-2026-11-22-ENUM-BOUNDARY-021.md
+  - scripts/check_bilingual_docs.py
+  - scripts/bilingual-baseline.txt
+  - tests/test_check_bilingual_docs_full.py
+  - scripts/test_check_bilingual_docs.py
+  - scripts/governance/bilingual/test_bilingual_scripts.py
+
+deliverables:
+  - "Nine tests named test_t01_* through test_t09_*, one per §6 of the register, so the register can be checked against the suite mechanically rather than by reading prose."
+  - "T04 written first and observed failing for the right reason before the absence tests are added: it is the only test that asserts the gate still fails when it should, and three passing absence tests are equally consistent with a gate neutered into never reporting anything."
+  - "T05 compares baseline bytes and SHA-256 before and after, not only the exit code, because a write that refuses after truncating satisfies a naive exit-code assertion while destroying governance state."
+  - "Every test leaves the worktree clean, with teardown that runs on assertion failure. The suite is run twice in a row to prove it."
+  - "Tests needing a detached worktree skip with a stated reason when one cannot be created, rather than failing."
+  - "No behavioural change to scripts/check_bilingual_docs.py; git diff on that file is empty."
+
+independent_reviewer: NOT_ASSIGNED
+integration_reviewer: NOT_ASSIGNED
+
+review:
+  status: NOT_ASSIGNED
+  report_ref: ""
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+implementation:
+  status: NOT_STARTED
+  branch: PENDING
+  pull_request: PENDING
+  pull_request_url: PENDING
+  implementation_commit_sha: PENDING
+  merge_commit_sha: NOT_MERGED
+
+authorization:
+  registration_write: "USER-PRINCIPAL-DELEGATED (limited to this AID registration package)"
+  implementation_write: "USER-PRINCIPAL-DELEGATED (limited to test files under tests/ and scripts/)"
+  gate_behaviour_change: NOT_GRANTED
+  baseline_content_change: NOT_GRANTED
+  register_closure: NOT_GRANTED
+  production_authorization: NOT_GRANTED
+
+governance:
+  aid_assignment: REGISTERED
+  aid_status: REGISTERED
+  registration_authorization: "USER-PRINCIPAL-DELEGATED (limited to this work item)"
+  development_start_authorization: "USER-PRINCIPAL-DELEGATED (limited to this test scope)"
+  architecture_status: NOT_APPLICABLE
+  g8_status: NOT_APPLICABLE
+  quota_change: NONE
+
+verification:
+  status: RUN
+  environment: "Windows, Python 3.13 via the WorkBuddy toolchain. Static inspection and pytest only; no cargo, no compilation."
+  commands:
+    - "python -m pytest tests/test_check_bilingual_docs_full.py scripts/test_check_bilingual_docs.py -q  -> 8 passed, 3 warnings in 1.56s"
+    - "grep -cE 'def test' on the three bilingual test files  -> 13, 3, 5; none named T01-T09"
+    - "printf '# probe' > 06-memory-context/_probe-untracked.md; current_bilingual_gaps()  -> gap count 77, probe present: False"
+    - "printf '# probe' > 06-memory-context/_probe2.md; write_baseline()  -> returned 2, 'baseline write refused: working tree is not clean', baseline unmodified"
+  evidence_refs:
+    - "The two probe experiments above are the §2.2 and §5.3 controlled experiments re-run at 063113f0. Both now behave as the register requires, which is why this AID is tests-only."
+    - "The absence of T01-T09 was established by enumerating every `def test_` name in all three files, not by assuming."
+
+findings:
+  - id: AID-2026-051-F1
+    severity: P1
+    feedback_destination: "Delivery PR conversation. Both defects in GOV-NC-2026-11-22-ENUM-BOUNDARY-021 are already fixed at 063113f0: current_bilingual_gaps() enumerates via `git ls-files` and write_baseline() refuses on a dirty tree. But the register still carries status OPEN, and closing condition 5 requires seven new tests of which zero exist. A reader who sees OPEN and the words 'Awaiting implementation' will implement the fix a second time. The correct state is 'implementation complete, tests outstanding', and this AID records that."
+  - id: AID-2026-051-F2
+    severity: P2
+    feedback_destination: "Delivery PR conversation. The register asks for 'seven new tests' in closing condition 5 while §6 specifies nine (T01-T09). Seven and nine cannot both be the requirement. This prompt asks for nine, because §6 is the specification and the closing condition is a summary of it; the discrepancy is recorded here rather than resolved silently in either direction."
+  - id: AID-2026-051-F3
+    severity: P1
+    feedback_destination: "Delivery PR conversation. Closing condition 16 requires independent acceptance evidence. A session that writes the tests cannot supply independence for its own work. Writing the nine tests therefore advances the register without closing it, and the register must stay OPEN after merge. Marking it closed on the strength of this delivery alone would be the exact self-authorization the repository's rulings prohibit."
