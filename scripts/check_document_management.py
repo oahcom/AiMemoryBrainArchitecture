@@ -1329,7 +1329,11 @@ def check_scope_and_relations(root: Path, docs: dict[str, dict]) -> list[str]:
                         f"({canonical or 'none holds Canonical'})"
                     )
 
-        # DM-10 conflict visibility: an unresolved conflict must not resolve.
+        # Canonical authority visibility (non-fatal diagnostic).
+        # A scope without an authoritative source is reported for visibility.
+        # This is intentionally not added to `errors`: incomplete canonical
+        # adoption is tracked by the adoption backlog and does not, by itself,
+        # fail this document-management gate.
         if resolve_canonical(docs, scope_id) == NO_AUTHORITATIVE_SOURCE:
             conflicted = [
                 rel for rel in owners

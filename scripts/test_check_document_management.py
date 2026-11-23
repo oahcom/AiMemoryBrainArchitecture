@@ -305,29 +305,172 @@ def run_fields() -> None:
 
 def run_resolver() -> None:
     print("resolve_canonical")
-    one = {"a.md": read_metadata(doc(CANONICAL))}
-    record("unique Canonical resolves", resolve_canonical(one, "architecture/data-model-design") == "a.md")
 
-    second = read_metadata(doc(CANONICAL))
-    two = {"a.md": read_metadata(doc(CANONICAL)), "b.md": second}
+    scope_id = "architecture/data-model-design"
+
+    def fresh() -> dict:
+        return read_metadata(doc(CANONICAL))
+
+    def resolved_meta(
+        selected: str = "a.md",
+        decision_id: str = "GOV-CANON-TEST-001",
+        resolved_date: str = "2026-11-23",
+    ) -> dict:
+        meta = fresh()
+        authority = meta["authority"]
+        authority["canonical_conflict_status"] = "Resolved"
+        authority["canonical_conflict_resolution"] = {
+            "resolution_decision_id": decision_id,
+            "resolved_date": resolved_date,
+            "selected_document": selected,
+            "resolution_evidence": ["resolver regression fixture"],
+        }
+        return meta
+
+    # 1. No conflict record: the unique Canonical resolves.
+    one = {"a.md": fresh()}
     record(
-        "two Canonical documents resolve to nothing",
-        resolve_canonical(two, "architecture/data-model-design") == NO_AUTHORITATIVE_SOURCE,
+        "unique Canonical without conflict resolves",
+        resolve_canonical(one, scope_id) == "a.md",
     )
 
-    conflicted = read_metadata(doc(CANONICAL))
-    conflicted["authority"]["canonical_conflict_status"] = "Under-Review"
-    conflicted["authority"]["canonical_status"] = "Candidate"
+    # 2. Resolved record selecting the unique Canonical: resolves.
     record(
-        "unresolved conflict resolves to nothing",
-        resolve_canonical({"a.md": conflicted}, "architecture/data-model-design")
-        == NO_AUTHORITATIVE_SOURCE,
+        "Resolved conflict selecting the unique Canonical resolves",
+        resolve_canonical(
+            {"a.md": resolved_meta()},
+            scope_id,
+        ) == "a.md",
     )
+
+    # 3. A selected document outside this scope must fail closed.
+    record(
+        "Resolved selection outside scope resolves to nothing",
+        resolve_canonical(
+            {"a.md": resolved_meta("outside.md")},
+            scope_id,
+        ) == NO_AUTHORITATIVE_SOURCE,
+    )
+
+    # 4. A selected member that is not Canonical must fail closed.
+    noncanonical = resolved_meta()
+    noncanonical["authority"]["canonical_status"] = "Candidate"
+    record(
+        "Resolved selection of a non-Canonical member resolves to nothing",
+        resolve_canonical(
+            {"a.md": noncanonical},
+            scope_id,
+        ) == NO_AUTHORITATIVE_SOURCE,
+    )
+
+    # 5. Resolved without the resolution block must fail closed.
+    missing_block = fresh()
+    missing_block["authority"]["canonical_conflict_status"] = "Resolved"
+    missing_block["authority"].pop("canonical_conflict_resolution", None)
+    record(
+        "Resolved without a resolution block resolves to nothing",
+        resolve_canonical(
+            {"a.md": missing_block},
+            scope_id,
+        ) == NO_AUTHORITATIVE_SOURCE,
+    )
+
+    # 6. Under-Review remains unresolved.
+    under_review = fresh()
+    under_review["authority"]["canonical_conflict_status"] = "Under-Review"
+    record(
+        "Under-Review resolves to nothing",
+        resolve_canonical(
+            {"a.md": under_review},
+            scope_id,
+        ) == NO_AUTHORITATIVE_SOURCE,
+    )
+
+    # 7. Unknown states fail closed. This is a pure resolver test;
+    # it intentionally bypasses DM-01 frontmatter enum validation.
+    unknown = fresh()
+    unknown["authority"]["canonical_conflict_status"] = "Disputed"
+    record(
+        "unknown conflict state resolves to nothing",
+        resolve_canonical(
+            {"a.md": unknown},
+            scope_id,
+        ) == NO_AUTHORITATIVE_SOURCE,
+    )
+
+    # 8. No Canonical member must fail closed.
+    no_canonical = fresh()
+    no_canonical["authority"]["canonical_status"] = "Candidate"
+    record(
+        "zero Canonical documents resolve to nothing",
+        resolve_canonical(
+            {"a.md": no_canonical},
+            scope_id,
+        ) == NO_AUTHORITATIVE_SOURCE,
+    )
+
+    # 9. Multiple Canonical members must fail closed.
+    second_canonical = fresh()
+    record(
+        "multiple Canonical documents resolve to nothing",
+        resolve_canonical(
+            {"a.md": fresh(), "b.md": second_canonical},
+            scope_id,
+        ) == NO_AUTHORITATIVE_SOURCE,
+    )
+
+    # 10. Two Resolved records selecting the same Canonical but
+    # carrying different decision IDs must fail closed.
+    record(
+        "multiple Resolved records with different decision IDs resolve to nothing",
+        resolve_canonical(
+            {
+                "a.md": resolved_meta(
+                    decision_id="GOV-CANON-TEST-001",
+                ),
+                "b.md": resolved_meta(
+                    decision_id="GOV-CANON-TEST-002",
+                ),
+            },
+            scope_id,
+        ) == NO_AUTHORITATIVE_SOURCE,
+    )
+
+    # 11. Two Resolved records selecting the same Canonical but
+    # carrying different resolution dates must fail closed.
+    record(
+        "multiple Resolved records with different dates resolve to nothing",
+        resolve_canonical(
+            {
+                "a.md": resolved_meta(
+                    resolved_date="2026-11-23",
+                ),
+                "b.md": resolved_meta(
+                    resolved_date="2026-11-24",
+                ),
+            },
+            scope_id,
+        ) == NO_AUTHORITATIVE_SOURCE,
+    )
+
+    missing_selected = resolved_meta()
+    missing_selected["authority"]["canonical_conflict_resolution"].pop(
+        "selected_document"
+    )
+    record(
+        "Resolved without selected_document resolves to nothing",
+        resolve_canonical(
+            {"a.md": missing_selected},
+            scope_id,
+        ) == NO_AUTHORITATIVE_SOURCE,
+    )
+
+    # 12. The original unknown-scope guard remains covered.
     record(
         "unknown scope resolves to nothing",
-        resolve_canonical(one, "architecture/unknown-scope") == NO_AUTHORITATIVE_SOURCE,
+        resolve_canonical(one, "architecture/unknown-scope")
+        == NO_AUTHORITATIVE_SOURCE,
     )
-
 
 # --------------------------------------------------------------------------
 # 4. Repository-wide rules
