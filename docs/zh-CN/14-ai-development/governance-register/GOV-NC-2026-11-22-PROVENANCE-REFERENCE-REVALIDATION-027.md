@@ -49,7 +49,7 @@ document_metadata:
 
 | 项目 | 内容 |
 |---|---|
-| 登记编号 | GOV-NC-2026-11-22-PROVENANCE-REVALIDATION-027 |
+| 登记编号 | GOV-NC-2026-11-22-PROVENANCE-REFERENCE-REVALIDATION-027 |
 | 登记日期 | 2026-11-22 |
 | 类别 | VALIDATION_GAP / DOMAIN_TYPE_INTEGRITY |
 | 状态 | OPEN |
@@ -113,5 +113,6 @@ Serde 反序列化可以在不经过领域构造器的情况下构造这些值�
 （GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026 §6.5）。
 它不定义、也不暗示 `Evidence.source_ref` 与 `EvidenceExtension.source_ref` 之间存在等价关系。
 
-本登记**未**包含在 PR #707 中。PR #707 不修改 `Provenance::validate()`，
-也不修改 `ProvenanceGraph::add()`。
+本登记文档随 PR #707 新增；但本登记所列的 Provenance 引用逐项重验整改不属于该 PR 的实施范围。
+
+PR #707 确实修改了 `ProvenanceGraph::add()` 与 `Provenance::validate()`：前者公开签名由 `add(provenance, parents)` 改为 `add(provenance)`，lineage 改由 `Provenance.parent_provenance_refs` 提供；后者将 `unavailable_reason` 的判空改为去空白后判定，并新增 lineage 缺失（无 parents 且无 unavailable_reason）时的 `IncompleteProvenanceLineage` 拒绝路径。但是，PR #707 未实施本登记第 3 节要求的四类引用逐项重验：`source_refs`、`source_version_refs`、`actor_ref.actor_id` 和 `parent_provenance_refs`。
