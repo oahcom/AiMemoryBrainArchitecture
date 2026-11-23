@@ -2659,6 +2659,58 @@ mod tests {
     }
 
     #[test]
+    fn authorization_decision_writer_persists_canonical_pascal_case_kinds() {
+        let cases = [
+            (AuthorizationDecisionKind::Approved, "Approved"),
+            (AuthorizationDecisionKind::Denied, "Denied"),
+            (AuthorizationDecisionKind::Conditional, "Conditional"),
+        ];
+
+        for (kind, expected) in cases {
+            let (db, reference, _) = issued_authorization_store(kind);
+            let decision_id = reference.data().unwrap().decision_id.as_str();
+
+            let stored: String = db
+                .connection
+                .query_row(
+                    "SELECT decision_kind
+                     FROM authorization_decisions
+                     WHERE decision_id = ?1",
+                    [decision_id],
+                    |row| row.get(0),
+                )
+                .unwrap();
+
+            assert_eq!(
+                stored, expected,
+                "writer must persist the canonical decision_kind literal"
+            );
+        }
+    }
+
+    #[test]
+    fn authorization_decision_validator_rejects_legacy_lowercase_kind() {
+        let (db, reference, subject) =
+            issued_authorization_store(AuthorizationDecisionKind::Denied);
+
+        let decision_id = reference.data().unwrap().decision_id.as_str();
+
+        db.connection
+            .execute(
+                "UPDATE authorization_decisions
+                 SET decision_kind = 'denied'
+                 WHERE decision_id = ?1",
+                [decision_id],
+            )
+            .unwrap();
+
+        assert_eq!(
+            db.validate_authorization_decision(&reference, &subject),
+            Err(AuthorizationDecisionValidationError::RecordMalformed)
+        );
+    }
+
+    #[test]
     fn authorization_validator_returns_false_only_for_expected_digest_mismatch() {
         let (db, reference, _) = issued_authorization_store(AuthorizationDecisionKind::Approved);
 
