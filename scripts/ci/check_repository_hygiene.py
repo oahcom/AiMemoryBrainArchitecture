@@ -1,103 +1,290 @@
 #!/usr/bin/env python3
-"""Reject prohibited generated artifacts committed to the repository tree."""
+"""Check committed repository hygiene and PR new-file admission."""
 
+import argparse
+import re
 import subprocess
 import sys
+from pathlib import PurePosixPath
 
 
-# Repository hygiene policy.
-#
-# Entries are repository-root-relative paths, written with a leading slash.
-# Adding a prohibited path requires explicit evidence of the artifact and
-# an intentional policy update here.
+CHECK_VERSION = "2026-11-23.1"
+
+# Repository-root-relative paths, written with a leading slash.
 PROHIBITED_PATHS = (
     "/_dm.txt",
 )
+
+# Fixed source-code allowlist. Do not infer this set from the base tree.
+ALLOWED_SOURCE_SUFFIXES = frozenset({
+    ".py",
+    ".sh",
+    ".bash",
+    ".js",
+    ".jsx",
+    ".ts",
+    ".tsx",
+    ".mjs",
+    ".cjs",
+    ".go",
+    ".rs",
+    ".java",
+    ".kt",
+    ".kts",
+    ".rb",
+    ".pl",
+    ".sql",
+    ".html",
+    ".css",
+    ".scss",
+})
+
+ALLOWED_DOCUMENT_SUFFIXES = frozenset({
+    ".md",
+    ".rst",
+    ".adoc",
+})
+
+# Exact configuration filenames. JSON is intentionally limited to named
+# configuration files; arbitrary JSON data and snapshots are not admitted.
+ALLOWED_CONFIG_PATHS = frozenset({
+    ".editorconfig",
+    ".gitattributes",
+    ".gitignore",
+    "Cargo.toml",
+    "Dockerfile",
+    "Makefile",
+    "package.json",
+    "pyproject.toml",
+    "pytest.ini",
+    "setup.cfg",
+    "tox.ini",
+    "tsconfig.json",
+})
+
+REQUIREMENTS_FILE_RE = re.compile(r"requirements(?:-[A-Za-z0-9_.-]+)?\.txt\Z")
+FULL_SHA_RE = re.compile(r"[0-9a-fA-F]{40}\Z")
 
 
 def error(message):
     print(f"::error::{message}", file=sys.stderr)
 
 
-def committed_paths():
-    """Return paths in the committed HEAD tree, not the working tree."""
+def run_git(args, *, cwd=None):
     try:
-        root_result = subprocess.run(
-            ["git", "rev-parse", "--show-toplevel"],
+        result = subprocess.run(
+            ["git", *args],
+            cwd=cwd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             check=False,
-            text=True,
         )
     except OSError as exc:
-        raise RuntimeError(
-            f"cannot execute git: {exc}"
-        ) from exc
+        raise RuntimeError(f"cannot execute git: {exc}") from exc
 
-    if root_result.returncode != 0:
+    if result.returncode != 0:
+        detail = result.stderr.decode("utf-8", errors="replace").strip()
         raise RuntimeError(
-            "cannot determine repository root: "
-            "git rev-parse --show-toplevel failed"
+            f"git {' '.join(args)} failed"
+            + (f": {detail}" if detail else "")
         )
 
-    root = root_result.stdout.strip()
+    return result.stdout
+
+
+def repository_root():
+    output = run_git(["rev-parse", "--show-toplevel"])
+    root = output.decode("utf-8", errors="strict").strip()
     if not root:
         raise RuntimeError("git returned an empty repository root")
+    return root
 
-    try:
-        tree_result = subprocess.run(
-            [
-                "git",
-                "-C",
-                root,
-                "ls-tree",
-                "-r",
-                "-z",
-                "--name-only",
-                "HEAD",
-            ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            check=False,
-        )
-    except OSError as exc:
-        raise RuntimeError(
-            f"cannot inspect committed repository tree: {exc}"
-        ) from exc
 
-    if tree_result.returncode != 0:
+def resolve_commit(root, sha, label):
+    if not FULL_SHA_RE.fullmatch(sha):
         raise RuntimeError(
-            "cannot inspect committed repository tree: "
-            "git ls-tree failed for HEAD"
+            f"{label} must be a full 40-character commit SHA"
         )
 
-    return set(tree_result.stdout.split(b"\0")) - {b""}
+    resolved = run_git(
+        ["-C", root, "rev-parse", "--verify", f"{sha}^{{commit}}"]
+    ).decode("ascii").strip()
+
+    if resolved.lower() != sha.lower():
+        raise RuntimeError(
+            f"{label} did not resolve to the supplied commit SHA"
+        )
+
+    return resolved
+
+
+def tree_paths(root, commit):
+    """Return UTF-8 repository-relative paths from a committed Git tree."""
+    raw = run_git([
+        "-C",
+        root,
+        "ls-tree",
+        "-r",
+        "-z",
+        "--full-tree",
+        "--name-only",
+        commit,
+    ])
+
+    paths = set()
+    for entry in raw.split(b"\0"):
+        if not entry:
+            continue
+        try:
+            paths.add(entry.decode("utf-8", errors="strict"))
+        except UnicodeDecodeError as exc:
+            raise RuntimeError(
+                "tree contains a path that is not valid UTF-8; "
+                "cannot apply the admission policy safely"
+            ) from exc
+
+    return paths
+
+
+def is_allowed_new_path(path):
+    """Apply the fixed, positive admission policy to one new tree path."""
+    pure = PurePosixPath(path)
+    name = pure.name
+    suffix = pure.suffix.lower()
+
+    if suffix in ALLOWED_DOCUMENT_SUFFIXES:
+        return True
+
+    if suffix in ALLOWED_SOURCE_SUFFIXES:
+        return True
+
+    if path in ALLOWED_CONFIG_PATHS:
+        return True
+
+    if (
+        pure.parent == PurePosixPath(".")
+        and REQUIREMENTS_FILE_RE.fullmatch(name)
+    ):
+        return True
+
+    if (
+        path.startswith(".github/workflows/")
+        and suffix in {".yml", ".yaml"}
+    ):
+        return True
+
+    if (
+        path.startswith(".github/actions/")
+        and name in {"action.yml", "action.yaml"}
+    ):
+        return True
+
+    return False
+
+
+def check_prohibited_head_paths(head_paths):
+    violations = []
+    for prohibited_path in PROHIBITED_PATHS:
+        tree_path = prohibited_path.lstrip("/")
+        if tree_path in head_paths:
+            violations.append(prohibited_path)
+    return violations
+
+
+def check_new_paths(root, base_sha, head_sha):
+    """Check new paths in head tree relative to the merge-base tree."""
+    base = resolve_commit(root, base_sha, "base SHA")
+    head = resolve_commit(root, head_sha, "head SHA")
+
+    merge_base = run_git([
+        "-C",
+        root,
+        "merge-base",
+        base,
+        head,
+    ]).decode("ascii").strip()
+
+    if not FULL_SHA_RE.fullmatch(merge_base):
+        raise RuntimeError("git merge-base returned an invalid commit SHA")
+
+    baseline_paths = tree_paths(root, merge_base)
+    head_paths = tree_paths(root, head)
+    new_paths = sorted(head_paths - baseline_paths)
+
+    rejected = [
+        path for path in new_paths
+        if not is_allowed_new_path(path)
+    ]
+
+    print(
+        "Repository new-file admission "
+        f"version={CHECK_VERSION} "
+        f"base={base} "
+        f"head={head} "
+        f"merge_base={merge_base}"
+    )
+
+    if rejected:
+        for path in rejected:
+            error(
+                "new-file admission violation: "
+                f"no allowlist rule for '{path}'"
+            )
+        return 1
+
+    print(
+        "Repository new-file admission passed: "
+        f"{len(new_paths)} new path(s) checked."
+    )
+    return 0
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--base", help="full base commit SHA")
+    parser.add_argument("--head", help="full final head commit SHA")
+    args = parser.parse_args()
+
+    if bool(args.base) != bool(args.head):
+        parser.error("--base and --head must be supplied together")
+
+    return args
 
 
 def main():
+    args = parse_args()
+
     try:
-        paths = committed_paths()
+        root = repository_root()
+
+        # The original committed-HEAD denylist remains active on PR and push.
+        head_for_denylist = (
+            resolve_commit(root, args.head, "head SHA")
+            if args.head
+            else "HEAD"
+        )
+        head_paths = tree_paths(root, head_for_denylist)
+        prohibited = check_prohibited_head_paths(head_paths)
+
+        if prohibited:
+            for path in prohibited:
+                error(
+                    "repository hygiene violation: "
+                    f"prohibited committed file '{path}'"
+                )
+            return 1
+
+        if args.base and args.head:
+            return check_new_paths(root, args.base, args.head)
+
     except RuntimeError as exc:
         error(f"repository hygiene cannot be determined: {exc}")
         return 2
 
-    violations = []
-
-    for prohibited_path in PROHIBITED_PATHS:
-        git_path = prohibited_path.lstrip("/").encode("utf-8")
-
-        if git_path in paths:
-            violations.append(prohibited_path)
-
-    if violations:
-        for path in violations:
-            error(
-                "repository hygiene violation: "
-                f"prohibited committed file '{path}'"
-            )
-        return 1
-
-    print("Repository hygiene check passed.")
+    print(
+        "Repository hygiene check passed "
+        f"(version={CHECK_VERSION})."
+    )
     return 0
 
 
