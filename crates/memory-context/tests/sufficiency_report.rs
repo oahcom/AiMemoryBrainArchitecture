@@ -313,7 +313,7 @@ fn report_consumes_the_crate_budget_vector() {
 }
 
 #[test]
-fn the_report_carries_the_four_fields_observability_does_not_model() {
+fn the_domain_report_preserves_the_four_section_9_4_field_groups() {
     let mut report = complete_report();
     report.canonical_commit_ref = Some("commit-abc".to_string());
     report.forget_fence_ref = Some("fence-7".to_string());
