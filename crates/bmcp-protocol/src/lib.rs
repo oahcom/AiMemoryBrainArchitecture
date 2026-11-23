@@ -1637,6 +1637,696 @@ pub fn parse_storage_receipt(
     })
 }
 
+/// A message whose discriminator is known, but whose payload has not been
+/// validated against its JSON Schema or any message-specific semantic rules.
+///
+/// The contained value is the complete root JSON object. Its fields are
+/// deliberately preserved without applying the APPLIED_DELIVERY_EVIDENCE
+/// field allowlist.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct StructurallyUnvalidatedMessage {
+    pub message_type: &'static str,
+    pub value: serde_json::Value,
+}
+
+/// The strongest validation capability established for a dispatched message.
+///
+/// The three states are mutually exclusive. `StructurallyParsed` means a
+/// message-specific structural parser accepted the message; it does not claim
+/// complete semantic validation.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DispatchValidationState {
+    /// The message passed its complete message-specific semantic validator.
+    SemanticallyValidated,
+
+    /// The message passed its message-specific structural parser, but complete
+    /// semantic validation is not established.
+    StructurallyParsed,
+
+    /// Only the root `message_type` discriminator was recognized.
+    RootDiscriminatorOnly,
+}
+
+/// Result of dispatching a strictly parsed BMCP message.
+///
+/// `AppliedDeliveryEvidenceRecorded` is the only variant backed by complete
+/// semantic validation. `StoragePreparedParticipantReceipt` is backed by its
+/// message-specific structural parser. Every other variant is an explicitly
+/// structurally-unvalidated value.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum DispatchMessage {
+    AppliedDeliveryEvidenceRecorded(Box<evidence::AppliedDeliveryEvidence>),
+
+    CocParticipantManifestStructurallyUnvalidated(StructurallyUnvalidatedMessage),
+    CocRecoveryCutoffBatchStructurallyUnvalidated(StructurallyUnvalidatedMessage),
+    CProviderOutcomeRecordedStructurallyUnvalidated(StructurallyUnvalidatedMessage),
+    IJf10TerminalDecisionObservedStructurallyUnvalidated(StructurallyUnvalidatedMessage),
+    Jf10BridgeReconciliationRecordedStructurallyUnvalidated(StructurallyUnvalidatedMessage),
+    Jf10ITerminalDecisionObservedStructurallyUnvalidated(StructurallyUnvalidatedMessage),
+    Jf10PreparedParticipantRegisteredStructurallyUnvalidated(StructurallyUnvalidatedMessage),
+    Jf10PrepareIntentRegisteredStructurallyUnvalidated(StructurallyUnvalidatedMessage),
+    Jf10StorageParticipantResolvedStructurallyUnvalidated(StructurallyUnvalidatedMessage),
+    OwnerAdmissionEntryStructurallyUnvalidated(StructurallyUnvalidatedMessage),
+    OwnerAdmissionSnapshotAttestationStructurallyUnvalidated(StructurallyUnvalidatedMessage),
+    OwnerGateReleaseAttestationStructurallyUnvalidated(StructurallyUnvalidatedMessage),
+    OwnerLocalGateReleaseStructurallyUnvalidated(StructurallyUnvalidatedMessage),
+    OwnerLocalPendingGateStructurallyUnvalidated(StructurallyUnvalidatedMessage),
+    ParticipantSetReconciliationStructurallyUnvalidated(StructurallyUnvalidatedMessage),
+    RecoveryCutoffBatchStructurallyUnvalidated(StructurallyUnvalidatedMessage),
+    RecoveryEpochCompletedStructurallyUnvalidated(StructurallyUnvalidatedMessage),
+    RecoveryJoinProofStructurallyUnvalidated(StructurallyUnvalidatedMessage),
+    StorageJf10ParticipantResolvedStructurallyUnvalidated(StructurallyUnvalidatedMessage),
+    // Structural parser exists; complete semantic validation is not claimed.
+    StoragePreparedParticipantReceipt(Box<storage_receipt::PreparedParticipantReceipt>),
+    StorageStorageResolutionProofStructurallyUnvalidated(StructurallyUnvalidatedMessage),
+}
+
+impl DispatchMessage {
+    /// Returns the schema-declared discriminator for this result.
+    pub const fn message_type(&self) -> &'static str {
+        match self {
+            Self::AppliedDeliveryEvidenceRecorded(_) => "APPLIED_DELIVERY_EVIDENCE_RECORDED",
+            Self::CocParticipantManifestStructurallyUnvalidated(_) => "COC_PARTICIPANT_MANIFEST",
+            Self::CocRecoveryCutoffBatchStructurallyUnvalidated(_) => "COC_RECOVERY_CUTOFF_BATCH",
+            Self::CProviderOutcomeRecordedStructurallyUnvalidated(_) => {
+                "C_PROVIDER_OUTCOME_RECORDED"
+            }
+            Self::IJf10TerminalDecisionObservedStructurallyUnvalidated(_) => {
+                "I_JF10_TERMINAL_DECISION_OBSERVED"
+            }
+            Self::Jf10BridgeReconciliationRecordedStructurallyUnvalidated(_) => {
+                "JF10_BRIDGE_RECONCILIATION_RECORDED"
+            }
+            Self::Jf10ITerminalDecisionObservedStructurallyUnvalidated(_) => {
+                "JF10_I_TERMINAL_DECISION_OBSERVED"
+            }
+            Self::Jf10PreparedParticipantRegisteredStructurallyUnvalidated(_) => {
+                "JF10_PREPARED_PARTICIPANT_REGISTERED"
+            }
+            Self::Jf10PrepareIntentRegisteredStructurallyUnvalidated(_) => {
+                "JF10_PREPARE_INTENT_REGISTERED"
+            }
+            Self::Jf10StorageParticipantResolvedStructurallyUnvalidated(_) => {
+                "JF10_STORAGE_PARTICIPANT_RESOLVED"
+            }
+            Self::OwnerAdmissionEntryStructurallyUnvalidated(_) => "OWNER_ADMISSION_ENTRY",
+            Self::OwnerAdmissionSnapshotAttestationStructurallyUnvalidated(_) => {
+                "OWNER_ADMISSION_SNAPSHOT_ATTESTATION"
+            }
+            Self::OwnerGateReleaseAttestationStructurallyUnvalidated(_) => {
+                "OWNER_GATE_RELEASE_ATTESTATION"
+            }
+            Self::OwnerLocalGateReleaseStructurallyUnvalidated(_) => "OWNER_LOCAL_GATE_RELEASE",
+            Self::OwnerLocalPendingGateStructurallyUnvalidated(_) => "OWNER_LOCAL_PENDING_GATE",
+            Self::ParticipantSetReconciliationStructurallyUnvalidated(_) => {
+                "PARTICIPANT_SET_RECONCILIATION"
+            }
+            Self::RecoveryCutoffBatchStructurallyUnvalidated(_) => "RECOVERY_CUTOFF_BATCH",
+            Self::RecoveryEpochCompletedStructurallyUnvalidated(_) => "RECOVERY_EPOCH_COMPLETED",
+            Self::RecoveryJoinProofStructurallyUnvalidated(_) => "RECOVERY_JOIN_PROOF",
+            Self::StorageJf10ParticipantResolvedStructurallyUnvalidated(_) => {
+                "STORAGE_JF10_PARTICIPANT_RESOLVED"
+            }
+            Self::StoragePreparedParticipantReceipt(_) => "Storage.PreparedParticipantReceipt",
+            Self::StorageStorageResolutionProofStructurallyUnvalidated(_) => {
+                "Storage.StorageResolutionProof"
+            }
+        }
+    }
+
+    /// Reports the strongest validation capability established for this message.
+    pub const fn validation_state(&self) -> DispatchValidationState {
+        match self {
+            Self::AppliedDeliveryEvidenceRecorded(_) => {
+                DispatchValidationState::SemanticallyValidated
+            }
+
+            Self::StoragePreparedParticipantReceipt(_) => {
+                DispatchValidationState::StructurallyParsed
+            }
+
+            _ => DispatchValidationState::RootDiscriminatorOnly,
+        }
+    }
+
+    /// True only when the message has received no message-specific structural
+    /// or semantic validation.
+    ///
+    /// A `false` result does not imply semantic validation. Use
+    /// [`Self::validation_state`] to distinguish structural parsing from
+    /// complete semantic validation.
+    pub const fn is_structurally_unvalidated(&self) -> bool {
+        matches!(
+            self.validation_state(),
+            DispatchValidationState::RootDiscriminatorOnly
+        )
+    }
+}
+
+/// Errors produced while strictly parsing and dispatching a BMCP message.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum DispatchError {
+    InvalidJson(strict_json::StrictJsonError),
+    RootNotObject,
+    MissingMessageType,
+    MessageTypeNotString,
+    UnknownMessageType(String),
+    InvalidEvidence(validate::EvidenceError),
+    InvalidStorageReceipt(validate::EvidenceError),
+}
+
+/// Strictly parse a root-level BMCP message and dispatch on its `message_type`.
+///
+/// The schema JSON Pointers identifying `oneOf` branches and `$defs` are
+/// pointers into schema documents. They are not instance paths. The message
+/// discriminator for the message types handled here is read from the root
+/// instance object's `message_type` member.
+///
+/// APPLIED_DELIVERY_EVIDENCE_RECORDED continues through the existing
+/// semantic evidence validator.
+///
+/// Storage.PreparedParticipantReceipt is passed to its existing
+/// message-specific structural parser.
+///
+/// The remaining 20 known message types are strictly parsed as JSON but only
+/// their root `message_type` discriminator is recognized.
+///
+/// Those 20 messages are not passed through message-specific schema or
+/// semantic validation. Their complete root objects are preserved without
+/// claiming that their payloads have been validated.
+pub fn parse_dispatch(raw: &[u8]) -> Result<DispatchMessage, DispatchError> {
+    let value = strict_json::parse_strict(raw).map_err(DispatchError::InvalidJson)?;
+
+    let object = value.as_object().ok_or(DispatchError::RootNotObject)?;
+
+    let message_type = object
+        .get("message_type")
+        .ok_or(DispatchError::MissingMessageType)?
+        .as_str()
+        .ok_or(DispatchError::MessageTypeNotString)?;
+
+    match message_type {
+        "APPLIED_DELIVERY_EVIDENCE_RECORDED" => {
+            let evidence =
+                validate::from_strict_value(&value).map_err(DispatchError::InvalidEvidence)?;
+            Ok(DispatchMessage::AppliedDeliveryEvidenceRecorded(Box::new(
+                evidence,
+            )))
+        }
+
+        "COC_PARTICIPANT_MANIFEST" => Ok(
+            DispatchMessage::CocParticipantManifestStructurallyUnvalidated(
+                StructurallyUnvalidatedMessage {
+                    message_type: "COC_PARTICIPANT_MANIFEST",
+                    value,
+                },
+            ),
+        ),
+        "COC_RECOVERY_CUTOFF_BATCH" => Ok(
+            DispatchMessage::CocRecoveryCutoffBatchStructurallyUnvalidated(
+                StructurallyUnvalidatedMessage {
+                    message_type: "COC_RECOVERY_CUTOFF_BATCH",
+                    value,
+                },
+            ),
+        ),
+        "C_PROVIDER_OUTCOME_RECORDED" => Ok(
+            DispatchMessage::CProviderOutcomeRecordedStructurallyUnvalidated(
+                StructurallyUnvalidatedMessage {
+                    message_type: "C_PROVIDER_OUTCOME_RECORDED",
+                    value,
+                },
+            ),
+        ),
+        "I_JF10_TERMINAL_DECISION_OBSERVED" => Ok(
+            DispatchMessage::IJf10TerminalDecisionObservedStructurallyUnvalidated(
+                StructurallyUnvalidatedMessage {
+                    message_type: "I_JF10_TERMINAL_DECISION_OBSERVED",
+                    value,
+                },
+            ),
+        ),
+        "JF10_BRIDGE_RECONCILIATION_RECORDED" => Ok(
+            DispatchMessage::Jf10BridgeReconciliationRecordedStructurallyUnvalidated(
+                StructurallyUnvalidatedMessage {
+                    message_type: "JF10_BRIDGE_RECONCILIATION_RECORDED",
+                    value,
+                },
+            ),
+        ),
+        "JF10_I_TERMINAL_DECISION_OBSERVED" => Ok(
+            DispatchMessage::Jf10ITerminalDecisionObservedStructurallyUnvalidated(
+                StructurallyUnvalidatedMessage {
+                    message_type: "JF10_I_TERMINAL_DECISION_OBSERVED",
+                    value,
+                },
+            ),
+        ),
+        "JF10_PREPARED_PARTICIPANT_REGISTERED" => Ok(
+            DispatchMessage::Jf10PreparedParticipantRegisteredStructurallyUnvalidated(
+                StructurallyUnvalidatedMessage {
+                    message_type: "JF10_PREPARED_PARTICIPANT_REGISTERED",
+                    value,
+                },
+            ),
+        ),
+        "JF10_PREPARE_INTENT_REGISTERED" => Ok(
+            DispatchMessage::Jf10PrepareIntentRegisteredStructurallyUnvalidated(
+                StructurallyUnvalidatedMessage {
+                    message_type: "JF10_PREPARE_INTENT_REGISTERED",
+                    value,
+                },
+            ),
+        ),
+        "JF10_STORAGE_PARTICIPANT_RESOLVED" => Ok(
+            DispatchMessage::Jf10StorageParticipantResolvedStructurallyUnvalidated(
+                StructurallyUnvalidatedMessage {
+                    message_type: "JF10_STORAGE_PARTICIPANT_RESOLVED",
+                    value,
+                },
+            ),
+        ),
+        "OWNER_ADMISSION_ENTRY" => Ok(DispatchMessage::OwnerAdmissionEntryStructurallyUnvalidated(
+            StructurallyUnvalidatedMessage {
+                message_type: "OWNER_ADMISSION_ENTRY",
+                value,
+            },
+        )),
+        "OWNER_ADMISSION_SNAPSHOT_ATTESTATION" => Ok(
+            DispatchMessage::OwnerAdmissionSnapshotAttestationStructurallyUnvalidated(
+                StructurallyUnvalidatedMessage {
+                    message_type: "OWNER_ADMISSION_SNAPSHOT_ATTESTATION",
+                    value,
+                },
+            ),
+        ),
+        "OWNER_GATE_RELEASE_ATTESTATION" => Ok(
+            DispatchMessage::OwnerGateReleaseAttestationStructurallyUnvalidated(
+                StructurallyUnvalidatedMessage {
+                    message_type: "OWNER_GATE_RELEASE_ATTESTATION",
+                    value,
+                },
+            ),
+        ),
+        "OWNER_LOCAL_GATE_RELEASE" => Ok(
+            DispatchMessage::OwnerLocalGateReleaseStructurallyUnvalidated(
+                StructurallyUnvalidatedMessage {
+                    message_type: "OWNER_LOCAL_GATE_RELEASE",
+                    value,
+                },
+            ),
+        ),
+        "OWNER_LOCAL_PENDING_GATE" => Ok(
+            DispatchMessage::OwnerLocalPendingGateStructurallyUnvalidated(
+                StructurallyUnvalidatedMessage {
+                    message_type: "OWNER_LOCAL_PENDING_GATE",
+                    value,
+                },
+            ),
+        ),
+        "PARTICIPANT_SET_RECONCILIATION" => Ok(
+            DispatchMessage::ParticipantSetReconciliationStructurallyUnvalidated(
+                StructurallyUnvalidatedMessage {
+                    message_type: "PARTICIPANT_SET_RECONCILIATION",
+                    value,
+                },
+            ),
+        ),
+        "RECOVERY_CUTOFF_BATCH" => Ok(DispatchMessage::RecoveryCutoffBatchStructurallyUnvalidated(
+            StructurallyUnvalidatedMessage {
+                message_type: "RECOVERY_CUTOFF_BATCH",
+                value,
+            },
+        )),
+        "RECOVERY_EPOCH_COMPLETED" => Ok(
+            DispatchMessage::RecoveryEpochCompletedStructurallyUnvalidated(
+                StructurallyUnvalidatedMessage {
+                    message_type: "RECOVERY_EPOCH_COMPLETED",
+                    value,
+                },
+            ),
+        ),
+        "RECOVERY_JOIN_PROOF" => Ok(DispatchMessage::RecoveryJoinProofStructurallyUnvalidated(
+            StructurallyUnvalidatedMessage {
+                message_type: "RECOVERY_JOIN_PROOF",
+                value,
+            },
+        )),
+        "STORAGE_JF10_PARTICIPANT_RESOLVED" => Ok(
+            DispatchMessage::StorageJf10ParticipantResolvedStructurallyUnvalidated(
+                StructurallyUnvalidatedMessage {
+                    message_type: "STORAGE_JF10_PARTICIPANT_RESOLVED",
+                    value,
+                },
+            ),
+        ),
+        "Storage.PreparedParticipantReceipt" => {
+            let receipt =
+                parse_storage_receipt(raw).map_err(DispatchError::InvalidStorageReceipt)?;
+
+            Ok(DispatchMessage::StoragePreparedParticipantReceipt(
+                Box::new(receipt),
+            ))
+        }
+        "Storage.StorageResolutionProof" => Ok(
+            DispatchMessage::StorageStorageResolutionProofStructurallyUnvalidated(
+                StructurallyUnvalidatedMessage {
+                    message_type: "Storage.StorageResolutionProof",
+                    value,
+                },
+            ),
+        ),
+
+        other => Err(DispatchError::UnknownMessageType(other.to_owned())),
+    }
+}
+
+#[cfg(test)]
+mod dispatch_tests {
+    use super::{parse_dispatch, DispatchError, DispatchMessage, DispatchValidationState};
+    use crate::strict_json::StrictJsonError;
+    use serde_json::json;
+
+    fn raw_message(message_type: &str) -> Vec<u8> {
+        serde_json::to_vec(&json!({
+            "message_type": message_type,
+            "envelope": {
+                "preserved": true
+            }
+        }))
+        .unwrap()
+    }
+
+    fn assert_unvalidated(raw: &[u8], expected_type: &str) {
+        let message = parse_dispatch(raw).expect("dispatch should succeed");
+
+        assert!(message.is_structurally_unvalidated());
+        assert_eq!(
+            message.validation_state(),
+            DispatchValidationState::RootDiscriminatorOnly
+        );
+        assert_eq!(message.message_type(), expected_type);
+
+        let preserved_value = match message {
+            DispatchMessage::CocParticipantManifestStructurallyUnvalidated(value)
+            | DispatchMessage::CocRecoveryCutoffBatchStructurallyUnvalidated(value)
+            | DispatchMessage::CProviderOutcomeRecordedStructurallyUnvalidated(value)
+            | DispatchMessage::IJf10TerminalDecisionObservedStructurallyUnvalidated(value)
+            | DispatchMessage::Jf10BridgeReconciliationRecordedStructurallyUnvalidated(value)
+            | DispatchMessage::Jf10ITerminalDecisionObservedStructurallyUnvalidated(value)
+            | DispatchMessage::Jf10PreparedParticipantRegisteredStructurallyUnvalidated(value)
+            | DispatchMessage::Jf10PrepareIntentRegisteredStructurallyUnvalidated(value)
+            | DispatchMessage::Jf10StorageParticipantResolvedStructurallyUnvalidated(value)
+            | DispatchMessage::OwnerAdmissionEntryStructurallyUnvalidated(value)
+            | DispatchMessage::OwnerAdmissionSnapshotAttestationStructurallyUnvalidated(value)
+            | DispatchMessage::OwnerGateReleaseAttestationStructurallyUnvalidated(value)
+            | DispatchMessage::OwnerLocalGateReleaseStructurallyUnvalidated(value)
+            | DispatchMessage::OwnerLocalPendingGateStructurallyUnvalidated(value)
+            | DispatchMessage::ParticipantSetReconciliationStructurallyUnvalidated(value)
+            | DispatchMessage::RecoveryCutoffBatchStructurallyUnvalidated(value)
+            | DispatchMessage::RecoveryEpochCompletedStructurallyUnvalidated(value)
+            | DispatchMessage::RecoveryJoinProofStructurallyUnvalidated(value)
+            | DispatchMessage::StorageJf10ParticipantResolvedStructurallyUnvalidated(value)
+            | DispatchMessage::StorageStorageResolutionProofStructurallyUnvalidated(value) => {
+                value.value
+            }
+            DispatchMessage::AppliedDeliveryEvidenceRecorded(_)
+            | DispatchMessage::StoragePreparedParticipantReceipt(_) => {
+                panic!("expected root-discriminator-only message")
+            }
+        };
+
+        assert_eq!(
+            preserved_value["envelope"]["preserved"],
+            serde_json::Value::Bool(true)
+        );
+    }
+
+    #[test]
+    fn dispatch_applied_delivery_evidence_uses_existing_validator() {
+        let raw = br#"{"message_type":"APPLIED_DELIVERY_EVIDENCE_RECORDED"}"#;
+
+        assert!(matches!(
+            parse_dispatch(raw),
+            Err(DispatchError::InvalidEvidence(_))
+        ));
+    }
+
+    #[test]
+    fn dispatch_coc_participant_manifest() {
+        assert_unvalidated(
+            &raw_message("COC_PARTICIPANT_MANIFEST"),
+            "COC_PARTICIPANT_MANIFEST",
+        );
+    }
+
+    #[test]
+    fn dispatch_coc_recovery_cutoff_batch() {
+        assert_unvalidated(
+            &raw_message("COC_RECOVERY_CUTOFF_BATCH"),
+            "COC_RECOVERY_CUTOFF_BATCH",
+        );
+    }
+
+    #[test]
+    fn dispatch_c_provider_outcome_recorded() {
+        assert_unvalidated(
+            &raw_message("C_PROVIDER_OUTCOME_RECORDED"),
+            "C_PROVIDER_OUTCOME_RECORDED",
+        );
+    }
+
+    #[test]
+    fn dispatch_i_jf10_terminal_decision_observed() {
+        assert_unvalidated(
+            &raw_message("I_JF10_TERMINAL_DECISION_OBSERVED"),
+            "I_JF10_TERMINAL_DECISION_OBSERVED",
+        );
+    }
+
+    #[test]
+    fn dispatch_jf10_bridge_reconciliation_recorded() {
+        assert_unvalidated(
+            &raw_message("JF10_BRIDGE_RECONCILIATION_RECORDED"),
+            "JF10_BRIDGE_RECONCILIATION_RECORDED",
+        );
+    }
+
+    #[test]
+    fn dispatch_jf10_i_terminal_decision_observed() {
+        assert_unvalidated(
+            &raw_message("JF10_I_TERMINAL_DECISION_OBSERVED"),
+            "JF10_I_TERMINAL_DECISION_OBSERVED",
+        );
+    }
+
+    #[test]
+    fn dispatch_jf10_prepared_participant_registered() {
+        assert_unvalidated(
+            &raw_message("JF10_PREPARED_PARTICIPANT_REGISTERED"),
+            "JF10_PREPARED_PARTICIPANT_REGISTERED",
+        );
+    }
+
+    #[test]
+    fn dispatch_jf10_prepare_intent_registered() {
+        assert_unvalidated(
+            &raw_message("JF10_PREPARE_INTENT_REGISTERED"),
+            "JF10_PREPARE_INTENT_REGISTERED",
+        );
+    }
+
+    #[test]
+    fn dispatch_jf10_storage_participant_resolved() {
+        assert_unvalidated(
+            &raw_message("JF10_STORAGE_PARTICIPANT_RESOLVED"),
+            "JF10_STORAGE_PARTICIPANT_RESOLVED",
+        );
+    }
+
+    #[test]
+    fn dispatch_owner_admission_entry() {
+        assert_unvalidated(
+            &raw_message("OWNER_ADMISSION_ENTRY"),
+            "OWNER_ADMISSION_ENTRY",
+        );
+    }
+
+    #[test]
+    fn dispatch_owner_admission_snapshot_attestation() {
+        assert_unvalidated(
+            &raw_message("OWNER_ADMISSION_SNAPSHOT_ATTESTATION"),
+            "OWNER_ADMISSION_SNAPSHOT_ATTESTATION",
+        );
+    }
+
+    #[test]
+    fn dispatch_owner_gate_release_attestation() {
+        assert_unvalidated(
+            &raw_message("OWNER_GATE_RELEASE_ATTESTATION"),
+            "OWNER_GATE_RELEASE_ATTESTATION",
+        );
+    }
+
+    #[test]
+    fn dispatch_owner_local_gate_release() {
+        assert_unvalidated(
+            &raw_message("OWNER_LOCAL_GATE_RELEASE"),
+            "OWNER_LOCAL_GATE_RELEASE",
+        );
+    }
+
+    #[test]
+    fn dispatch_owner_local_pending_gate() {
+        assert_unvalidated(
+            &raw_message("OWNER_LOCAL_PENDING_GATE"),
+            "OWNER_LOCAL_PENDING_GATE",
+        );
+    }
+
+    #[test]
+    fn dispatch_participant_set_reconciliation() {
+        assert_unvalidated(
+            &raw_message("PARTICIPANT_SET_RECONCILIATION"),
+            "PARTICIPANT_SET_RECONCILIATION",
+        );
+    }
+
+    #[test]
+    fn dispatch_recovery_cutoff_batch() {
+        assert_unvalidated(
+            &raw_message("RECOVERY_CUTOFF_BATCH"),
+            "RECOVERY_CUTOFF_BATCH",
+        );
+    }
+
+    #[test]
+    fn dispatch_recovery_epoch_completed() {
+        assert_unvalidated(
+            &raw_message("RECOVERY_EPOCH_COMPLETED"),
+            "RECOVERY_EPOCH_COMPLETED",
+        );
+    }
+
+    #[test]
+    fn dispatch_recovery_join_proof() {
+        assert_unvalidated(&raw_message("RECOVERY_JOIN_PROOF"), "RECOVERY_JOIN_PROOF");
+    }
+
+    #[test]
+    fn dispatch_storage_jf10_participant_resolved() {
+        assert_unvalidated(
+            &raw_message("STORAGE_JF10_PARTICIPANT_RESOLVED"),
+            "STORAGE_JF10_PARTICIPANT_RESOLVED",
+        );
+    }
+
+    #[test]
+    fn dispatch_storage_prepared_participant_receipt_uses_existing_parser() {
+        let value = super::tests::valid_storage_receipt_value();
+        let raw = serde_json::to_vec(&value).unwrap();
+
+        let message = parse_dispatch(&raw).expect("valid storage receipt should dispatch");
+
+        assert_eq!(message.message_type(), "Storage.PreparedParticipantReceipt");
+        assert_eq!(
+            message.validation_state(),
+            DispatchValidationState::StructurallyParsed
+        );
+        assert!(!message.is_structurally_unvalidated());
+
+        assert!(matches!(
+            message,
+            DispatchMessage::StoragePreparedParticipantReceipt(_)
+        ));
+    }
+
+    #[test]
+    fn dispatch_storage_prepared_participant_receipt_rejects_invalid_structure() {
+        let raw = raw_message("Storage.PreparedParticipantReceipt");
+
+        assert!(matches!(
+            parse_dispatch(&raw),
+            Err(DispatchError::InvalidStorageReceipt(_))
+        ));
+    }
+
+    #[test]
+    fn dispatch_storage_storage_resolution_proof() {
+        assert_unvalidated(
+            &raw_message("Storage.StorageResolutionProof"),
+            "Storage.StorageResolutionProof",
+        );
+    }
+
+    #[test]
+    fn dispatch_rejects_unknown_message_type() {
+        let raw = br#"{"message_type":"UNKNOWN_MESSAGE_TYPE"}"#;
+
+        assert_eq!(
+            parse_dispatch(raw),
+            Err(DispatchError::UnknownMessageType(
+                "UNKNOWN_MESSAGE_TYPE".to_owned()
+            ))
+        );
+    }
+
+    #[test]
+    fn dispatch_rejects_missing_message_type() {
+        let raw = br#"{"other":"value"}"#;
+
+        assert_eq!(parse_dispatch(raw), Err(DispatchError::MissingMessageType));
+    }
+
+    #[test]
+    fn dispatch_rejects_non_string_message_type() {
+        let raw = br#"{"message_type":42}"#;
+
+        assert_eq!(
+            parse_dispatch(raw),
+            Err(DispatchError::MessageTypeNotString)
+        );
+    }
+
+    #[test]
+    fn dispatch_rejects_non_object_root() {
+        let raw = br#"[]"#;
+
+        assert_eq!(parse_dispatch(raw), Err(DispatchError::RootNotObject));
+    }
+
+    #[test]
+    fn dispatch_preserves_strict_duplicate_key_rejection() {
+        let raw = br#"{"message_type":"COC_PARTICIPANT_MANIFEST","nested":{"x":1,"x":2}}"#;
+
+        assert!(matches!(
+            parse_dispatch(raw),
+            Err(DispatchError::InvalidJson(
+                StrictJsonError::DuplicateKey { key, .. }
+            )) if key == "x"
+        ));
+    }
+
+    #[test]
+    fn dispatch_applied_delivery_evidence_is_not_structurally_unvalidated() {
+        let value = super::tests::valid_value();
+        let raw = serde_json::to_vec(&value).unwrap();
+
+        let message = parse_dispatch(&raw).expect("valid evidence should dispatch");
+
+        assert!(matches!(
+            &message,
+            DispatchMessage::AppliedDeliveryEvidenceRecorded(_)
+        ));
+        assert!(!message.is_structurally_unvalidated());
+        assert_eq!(
+            message.validation_state(),
+            DispatchValidationState::SemanticallyValidated
+        );
+        assert_eq!(message.message_type(), "APPLIED_DELIVERY_EVIDENCE_RECORDED");
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::digest::{p0_digest, p0_digest_of_value};
@@ -1646,7 +2336,7 @@ mod tests {
     use super::validate::{from_strict_value, validate_evidence, EvidenceError};
     use serde_json::{json, Value};
 
-    fn valid_value() -> Value {
+    pub(super) fn valid_value() -> Value {
         let mut value = json!({
             "schema_artifact_revision":"1.0.0",
             "message_type":"APPLIED_DELIVERY_EVIDENCE_RECORDED",
@@ -2147,7 +2837,7 @@ mod tests {
         assert!(from_strict_value(&value).is_ok());
     }
 
-    fn valid_storage_receipt_value() -> Value {
+    pub(super) fn valid_storage_receipt_value() -> Value {
         json!({
             "schema_id": "bmcp.storage-prepared-participant-proof",
             "schema_version": "1.0.0",

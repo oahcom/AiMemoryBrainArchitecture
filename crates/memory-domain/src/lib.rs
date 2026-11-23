@@ -55,6 +55,10 @@ pub enum DomainError {
     MissingAuthorizationDecision,
     MissingRevisionReason,
     MissingIdentityLineage,
+    /// §3.6: a derived record must name its lineage or say why it cannot.
+    /// A cross-field invariant, not a missing required field — the parent list
+    /// is legitimately allowed to be empty when a reason is given.
+    IncompleteProvenanceLineage,
     InvalidRelationEndpoint,
     UnregisteredRelationType,
     DuplicateRelationType,
@@ -296,6 +300,41 @@ pub enum EvidenceRole {
     ContextOnly,
 }
 
+impl Evidence {
+    /// §3.5 / §8: every Evidence has one stable identity, one typed source
+    /// reference, at least one ScopeRef and a recorded-at value.
+    pub fn validate(&self) -> Result<(), DomainError> {
+        if self.evidence_id.as_str().is_empty() {
+            return Err(DomainError::EmptyId);
+        }
+        if self.source_ref.as_str().is_empty() {
+            return Err(DomainError::EmptyId);
+        }
+        if self.recorded_at.trim().is_empty() {
+            return Err(DomainError::EmptyRequiredField("recorded_at"));
+        }
+        if self.scope_refs.is_empty() {
+            return Err(DomainError::EmptyRequiredField("scope_refs"));
+        }
+        self.scope_refs.iter().try_for_each(ScopeRef::validate)
+    }
+
+    /// The domain enforcement point for the Evidence/extension pair.
+    ///
+    /// The two records model one identity in two halves, so a pair whose
+    /// identities disagree would let one object claim to be two Evidence
+    /// records. `InvalidParent` is reused rather than adding a variant that
+    /// only this check would ever construct.
+    pub fn validate_against(&self, extension: &EvidenceExtension) -> Result<(), DomainError> {
+        self.validate()?;
+        extension.validate()?;
+        if self.evidence_id.as_str() != extension.evidence_ref.as_str() {
+            return Err(DomainError::InvalidParent);
+        }
+        Ok(())
+    }
+}
+
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct Provenance {
     pub provenance_id: OpaqueId,
@@ -330,8 +369,17 @@ impl Provenance {
         if self.source_refs.is_empty() {
             return Err(DomainError::EmptyRequiredField("source_refs"));
         }
-        if self.unavailable_reason.as_deref() == Some("") {
+        // An explicitly supplied reason must contain meaningful text.
+        if self
+            .unavailable_reason
+            .as_deref()
+            .is_some_and(|reason| reason.trim().is_empty())
+        {
             return Err(DomainError::EmptyRequiredField("unavailable_reason"));
+        }
+        // Either lineage or an explicit explanation of its absence is mandatory.
+        if self.parent_provenance_refs.is_empty() && self.unavailable_reason.is_none() {
+            return Err(DomainError::IncompleteProvenanceLineage);
         }
         if !self.source_version_refs.is_empty()
             && self.source_version_refs.len() != self.source_refs.len()
@@ -1243,19 +1291,52 @@ pub struct EvidenceExtension {
     pub locator: Option<String>,
     pub observed_at: Option<TimeValue>,
     pub collector: ActorRef,
-    pub integrity_digest: String,
+    /// §8 `integrity_digest`: `String, nullable`. `None` means no digest is
+    /// available; it is never a reason to fabricate one.
+    pub integrity_digest: Option<String>,
+    /// §8 `source_reliability_ref`: `OpaqueId, nullable` — a reference to a
+    /// *separate* source assessment. It is not a score and says nothing about
+    /// whether the evidence is true.
+    pub source_reliability_ref: Option<OpaqueId>,
     pub availability: EvidenceAvailability,
-    pub scope_refs: Vec<ScopeRef>,
 }
 impl EvidenceExtension {
+    /// Scope is not validated here: §8 defines `scope_refs` as an `Evidence`
+    /// field, so `Evidence::validate()` is its only authority.
+    ///
+    /// Every reference is re-validated even though the constructors reject
+    /// empty values, because serde derives `Deserialize` for these types and
+    /// bypasses the constructors: a payload can carry `""` straight into a
+    /// field that no constructor would ever have produced.
     pub fn validate(&self) -> Result<(), DomainError> {
-        if self.integrity_digest.is_empty() {
+        self.evidence_ref.validate()?;
+
+        match &self.source_ref {
+            EvidenceSourceRef::Event(reference) => reference.validate()?,
+            EvidenceSourceRef::Memory(reference) => reference.validate()?,
+            EvidenceSourceRef::External(reference) => reference.validate()?,
+        }
+
+        if self.collector.actor_id.as_str().is_empty() {
+            return Err(DomainError::EmptyId);
+        }
+
+        if self
+            .source_reliability_ref
+            .as_ref()
+            .is_some_and(|reference| reference.as_str().is_empty())
+        {
+            return Err(DomainError::EmptyId);
+        }
+
+        if self
+            .integrity_digest
+            .as_deref()
+            .is_some_and(|digest| digest.trim().is_empty())
+        {
             return Err(DomainError::EmptyRequiredField("integrity_digest"));
         }
-        if self.scope_refs.is_empty() {
-            return Err(DomainError::EmptyRequiredField("scope_refs"));
-        }
-        self.scope_refs.iter().try_for_each(ScopeRef::validate)
+        Ok(())
     }
 }
 
@@ -1612,6 +1693,8 @@ mod tests {
     }
     #[test]
     fn dm2_07_evidence_extension_requires_integrity_and_scope() {
+        // §8 splits the two dimensions: digest lives on the extension (nullable),
+        // scope lives on Evidence (required). Each half is checked on its own.
         let e = EvidenceExtension {
             evidence_ref: EvidenceRef::new("e").unwrap(),
             kind: EvidenceKind::Document,
@@ -1621,16 +1704,40 @@ mod tests {
             collector: ActorRef {
                 actor_id: id("collector"),
             },
-            integrity_digest: "sha256:x".into(),
+            integrity_digest: Some("sha256:x".into()),
+            source_reliability_ref: None,
             availability: EvidenceAvailability::Available,
-            scope_refs: vec![scope("s")],
         };
         assert!(e.validate().is_ok());
-        let mut invalid = e.clone();
-        invalid.integrity_digest.clear();
+
+        // Nullable digest: absence is legal and must not be treated as a defect.
+        let mut without_digest = e.clone();
+        without_digest.integrity_digest = None;
+        assert_eq!(without_digest.validate(), Ok(()));
+
+        // Present but blank is not a digest.
+        let mut blank = e.clone();
+        blank.integrity_digest = Some(String::new());
         assert_eq!(
-            invalid.validate(),
+            blank.validate(),
             Err(DomainError::EmptyRequiredField("integrity_digest"))
+        );
+
+        let evidence = Evidence {
+            evidence_id: id("e"),
+            source_ref: id("ev"),
+            recorded_at: "2026-01-01T00:00:00Z".into(),
+            scope_refs: vec![scope("s")],
+            role: EvidenceRole::Supports,
+        };
+        assert!(evidence.validate().is_ok());
+        let no_scope = Evidence {
+            scope_refs: vec![],
+            ..evidence
+        };
+        assert_eq!(
+            no_scope.validate(),
+            Err(DomainError::EmptyRequiredField("scope_refs"))
         );
     }
     #[test]
