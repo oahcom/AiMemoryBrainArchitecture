@@ -52,7 +52,7 @@ document_metadata:
 | Registration ID | GOV-NC-2026-11-23-PROVENANCE-GRAPH-ADD-SIGNATURE-028 |
 | Registration date | 2026-11-23 |
 | Category | PUBLIC_API_BREAKING_CHANGE |
-| Status | OPEN |
+| Status | CLOSED-BY-RULING (`OWNER-DECISION-RELEASE-BOUNDARY-001`); residue in §7 |
 | Severity | DOWNSTREAM COMPILE BREAK |
 | Affected component | `memory-domain` (`ProvenanceGraph::add`) |
 | Related registration | GOV-NC-2026-11-22-PROVENANCE-REFERENCE-REVALIDATION-027 |
@@ -110,3 +110,26 @@ They are independent and neither absorbs the other.
 
 The change recorded here **is already present in the code of PR #707** (commit `bbd214f`).
 This registration does not claim the change is authorized; it records the state "change has occurred, authorization pending."
+
+---
+
+## 7. Ruling (2026-11-23)
+
+Decision record: `OWNER-DECISION-RELEASE-BOUNDARY-001`. All three questions in §5 are answered, so the §1 closure condition holds.
+
+| Question | Answer | Basis |
+|---|---|---|
+| 1. Authorized within the current release boundary? | The question has no subject yet — there is no release boundary, so no authorization was required | 11 of 12 crates are `publish = false`, all are `0.1.0`, there are 0 tags, no CHANGELOG, and every intra-workspace dependency is versionless |
+| 2. Compatibility layer or deprecation period? | **No** | Zero external callers; a shim would reintroduce the second-lineage-source defect described in §3 |
+| 3. What migration notice? | External: none. Internal: already discharged twice, by the function docs and by `65fa040f`'s commit message | As above |
+
+**Category and severity require correction.** §1 records this as `PUBLIC_API_BREAKING_CHANGE` / `DOWNSTREAM COMPILE BREAK`. Both labels presuppose a published surface that has never existed. The correct classification is **in-repo signature change**. The original values are preserved here rather than rewritten in place.
+
+**Two citations in §2 do not survive measurement. They are recorded here, not applied to the original text:**
+
+- "After (PR #707, commit `bbd214f`)": `bbd214f` is PR #707's head and touches eight markdown files with zero `.rs` changes. The signature change is `65fa040f` (2026-11-22 13:36:00 +0800), an ancestor of `bbd214f` within the same PR.
+- "Before (base 6418e9c)": the signature at `6418e9c` is indeed the two-parameter form, so the sample is valid — but its date, 2026-11-22 18:35, is **later** than `65fa040f`'s 13:36, because it arrived on the other lineage, which had not yet seen PR #707. The accurate statement is that the two-parameter form holds at `65fa040f^`.
+
+**Residue, not a compatibility question, and not to be closed with this registration:** `crates/bmcp-server/Cargo.toml` declares neither `publish` nor `license`, unlike the other eleven crates. An absent `publish` means publishable; it is blocked today only incidentally, because its only sibling dependency is versionless. D4 requires it to be corrected.
+
+**No new registration.** PR #707 carried a bmcp route, an Evidence field-set change, the deletion of the MC-03 registry and this breaking signature change in 3671 added lines with **0 reviews**, under a title naming only the first. That evidence belongs to `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` and `GOV-NC-2026-11-21-ZERO-REVIEW-GATE-008`; per `GAP-27-THE-BACKLOG-IS-NOT-ONE-BACKLOG`, one mechanism does not get a second number.
