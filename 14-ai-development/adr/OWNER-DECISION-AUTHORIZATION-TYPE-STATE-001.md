@@ -5,8 +5,20 @@ document_metadata:
 
   lifecycle:
     approval:
-      decision_status: Draft
-      approver: null
+      decision_status: Approved
+      approver: "Project Owner (repository owner), converging under standing instruction (Issue #751)"
+      decision_date: "2026-11-22"
+      approved_version:
+        scheme: content-hash
+        value: "3375f59e78a2960c700b9800593c857f263bc3c94438358561d45ceafce2ddc0"
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Applicable-To-Current-Version
+      evidence_reference:
+        - "Issue #751 comment 7097692424"
+      revocation: null
     evidence_verification:
       verification_status: Unverified
     usage_status: Active
