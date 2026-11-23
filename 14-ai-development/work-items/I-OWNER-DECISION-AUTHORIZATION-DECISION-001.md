@@ -1,3 +1,47 @@
+---
+document_metadata:
+  domain: domain-model
+  role: decision-record
+
+  lifecycle:
+    approval:
+      decision_status: Approved
+      approver: "Owner I acting as owner proxy under the standing instruction to decide blocking development-baseline contracts rather than leave them open"
+      decision_date: "2026-11-21"
+      approved_version:
+        scheme: git
+        value: "c9a6394d738f7cbc25d93c116a724080e6444ee3"
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "PR #595 / commit c9a6394d738f7cbc25d93c116a724080e6444ee3"
+        - "Issue #763 comment #7097007415"
+      revocation: null
+
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: null
+
+    usage_status: Active
+    modification_status: Pending-Reapproval
+
+    supersession:
+      supersedes: []
+      supersession_reason: null
+
+  authority:
+    canonical_status: Candidate
+    canonical_scope: null
+    canonical_scope_id: domain-model/authorization-decision-and-attestor-reference-contract
+    canonical_scope_keywords: []
+    canonical_conflict_status: Under-Review
+    normative_status: Normative
+---
+
 # I-OWNER-DECISION-AUTHORIZATION-DECISION-001 — Authorization decision reference, record and validation
 
 **Status:** DECIDED (owner-proxy decision, development baseline)  
@@ -137,6 +181,8 @@ impl AttestorRef {
 ```
 
 Attestor data uses a separately named deterministic `AttestationSubjectV1` encoding and its own record/validator. It uses the same I issuer allowlist. E must not substitute `validate_attestor` for `validate_authorization_decision`.
+
+**Dated clarification — 2026-11-23 (I Owner-proxy ruling, Issue #763 comment #7097007415).** For purposes of this section, “the same I issuer allowlist” means one I-controlled trust-authorization policy that admits exactly two development-baseline issuer identifiers: `i-owner-proxy/dev-baseline-v1` for authorization-decision records and `i-attestor-proxy/dev-baseline-v1` for attestation records. The identifiers are distinct; each record family retains its own separately named deterministic encoding, record, and validator. “Same” refers to the controlling I authorization policy, not to equality of the issuer strings. This dated clarification supplements the decision dated 2026-11-21 and does not change that original decision date.
 
 ### 2.4 Serialization is part of the contract
 
