@@ -891,6 +891,53 @@ def run_changed_paths() -> None:
             root, 0, "--require-changed", base,
         )
 
+    # T77: a deletion combined with a Markdown modification is not
+    # deletion-only; it remains an ordinary applicable increment.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        victim = root / "_dm.txt"
+        victim.write_text("temporary gate output\n", encoding="utf-8")
+        readme = root / "README.md"
+        readme.write_text("# Original README\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "seed")
+        base = _git(root, "rev-parse", "HEAD")
+        victim.unlink()
+        readme.write_text("# Updated README\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "delete output and modify README")
+        expect_gate(
+            "T77 deletion plus Markdown modification remains applicable",
+            root, 0, "--require-changed", base,
+        )
+
+    # T78: a deletion combined with a code-only modification is not
+    # deletion-only; the existing code-only incremental behavior is preserved.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        victim = root / "_dm.txt"
+        victim.write_text("temporary gate output\n", encoding="utf-8")
+        code = root / "tools" / "only.rs"
+        code.parent.mkdir(parents=True, exist_ok=True)
+        code.write_text("// original\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "seed")
+        base = _git(root, "rev-parse", "HEAD")
+        victim.unlink()
+        code.write_text("// modified\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "delete output and modify code")
+        expect_gate(
+            "T78 deletion plus code-only modification remains applicable",
+            root, 0, "--require-changed", base,
+        )
+
 
 def run_path_safety() -> None:
     """T14/T15: a path reference is validated, never silently rewritten.
