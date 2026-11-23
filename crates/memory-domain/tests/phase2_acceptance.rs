@@ -1240,3 +1240,58 @@ fn dm2_15_legacy_pending_canonical_commit_keeps_its_unit_representation() {
     )
     .is_err());
 }
+
+/// §5 regression for the I-side references
+/// (`I-OWNER-DECISION-AUTHORIZATION-DECISION-001` §2.4).
+///
+/// Both references are placeholders that must keep the legacy unit/`null` wire
+/// value. §2.4 forbids the derived enum representation by name, so this asserts
+/// the absent marker too: `"absent"` is a string, never a tagged object, and
+/// `Pending` is never `"pending_i"`.
+#[test]
+fn dm2_16_i_side_references_keep_their_legacy_placeholder_wire_form() {
+    assert_eq!(
+        serde_json::to_string(&AttestorRef::pending_i()).unwrap(),
+        "null"
+    );
+    assert_eq!(
+        serde_json::to_string(&AuthorizationDecisionRef::pending_i()).unwrap(),
+        "null"
+    );
+
+    assert_eq!(
+        serde_json::to_string(&AuthorizationDecisionRef::absent()).unwrap(),
+        "\"absent\""
+    );
+
+    let revision = fact_revision();
+    let wire: serde_json::Value = serde_json::from_str(&serde_json::to_string(&revision).unwrap())
+        .expect("FactRevision serializes to JSON");
+
+    assert_eq!(
+        wire.get("attestor_ref"),
+        Some(&serde_json::Value::Null),
+        "the pending attestor must stay the legacy unit value"
+    );
+    assert_eq!(
+        wire.get("authorization_decision_ref"),
+        Some(&serde_json::Value::Null),
+        "the pending authorization decision must stay the legacy unit value"
+    );
+
+    // Reading the previous derived representation stays possible; writing it never happens.
+    assert!(serde_json::from_str::<AuthorizationDecisionRef>("\"pending_i\"").is_ok());
+
+    // An issued reference is a flat object, not a tagged enum variant.
+    let issued = serde_json::to_string(&AuthorizationDecisionRef::issued(id("authz-1"))).unwrap();
+    assert!(
+        issued.starts_with("{\"decision_id\""),
+        "issued wire must be flat, got {issued}"
+    );
+
+    // A malformed issued object fails closed rather than degrading to pending.
+    assert!(serde_json::from_str::<AttestorRef>(
+        r#"{"attestation_id":"a","issuer":"i-owner-proxy/dev-baseline-v1","subject_digest":"short","issued_at":"2026-11-22T00:00:00Z"}"#
+    )
+    .is_err());
+}
