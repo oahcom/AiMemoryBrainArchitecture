@@ -26,13 +26,13 @@ document_metadata:
       last_verified_date: "2026-11-23"
       last_verification_note: "Measured on main @ f82b6367 and on 3d1bd80d via git: attestor.rs absent, I_DEV_BASELINE_ATTESTOR 0 occurrences, I_DEV_BASELINE_ISSUER 22, attestation_authority.rs absent. Contract re-read in GAP-18-AUTHORIZATION-VALIDATOR-REMAINDER §5 and §8, which do state the answer; #723 concluded they did not because it searched only the WORK-ORDER."
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Pending-Reapproval
     supersession:
       supersedes: []
       supersession_reason: null
 
   authority:
-    canonical_status: Canonical
+    canonical_status: Candidate
     canonical_scope: "Owner ruling: attestation and authorization-decision issuer allowlists must stay separate, per GAP-18 §5 and §8. The separation removed by 3d1bd80d is to be restored, not re-decided."
     canonical_scope_id: domain-model/attestor-issuer-separation-ruling
     canonical_scope_keywords:
@@ -41,7 +41,7 @@ document_metadata:
       - gap-18
       - separation
       - i-dev-baseline-attestor
-    canonical_conflict_status: None
+    canonical_conflict_status: Under-Review
     normative_status: Normative
 ---
 
@@ -177,3 +177,122 @@ into one sentence.
    the assertion `the_decision_issuer_is_refused` made before deletion.
 4. `cargo test --workspace --all-targets --no-fail-fast` stays green.
 5. #723 and #724 close against this ruling rather than against a PR comment.
+
+## 7. Canonical conflict, recorded after this ruling was published
+
+Two further metadata values follow from the same fact, both forced by
+`scripts/check_document_management.py` rather than chosen:
+
+- `canonical_status: Candidate` — DM-11 forbids a document under canonical
+  conflict from being `Canonical`.
+- `modification_status: Pending-Reapproval` — DM-10 requires it once content
+  changes after `approved_version`.
+
+Neither downgrades the ruling's history. §1-§6 remain the approved text; what
+changed is that the document now declares itself awaiting re-approval instead of
+presenting as settled.
+
+`canonical_conflict_status` is set to `Under-Review`, which is the schema's term
+for "conflict recorded, resolution pending"
+(`00-governance/architecture-document-metadata.schema.yaml:227-233`; the enum is
+`None | Resolved | Under-Review`, so there is no `Conflict` value to use).
+
+This section was added later. Sections 1-6 stand exactly as approved; nothing
+above was rewritten. The body records a conflict that was not known when this
+ruling was written.
+
+### 7.1 The two statements
+
+**`I-OWNER-DECISION-AUTHORIZATION-DECISION-001.md:139`** — `Status: DECIDED
+(owner-proxy decision, development baseline)`, decision date 2026-11-21:
+
+> Attestor data uses a separately named deterministic `AttestationSubjectV1`
+> encoding and its own record/validator. **It uses the same I issuer
+> allowlist.** E must not substitute `validate_attestor` for
+> `validate_authorization_decision`.
+
+**This ruling, §3:**
+
+> Attestation and authorization-decision issuers stay separate.
+> `I_DEV_BASELINE_ATTESTOR` is restored, with a value distinct from
+> `I_DEV_BASELINE_ISSUER`, and attestation validation compares against it.
+
+`same I issuer allowlist` and `separate issuers` are not the same statement.
+
+### 7.2 Why this ruling did not notice it
+
+Not a judgement call — a coverage gap, and it is measurable:
+
+```text
+F=14-ai-development/adr/OWNER-RULING-ATTESTOR-ISSUER-SEPARATION-031.md
+$ git show 021f5a3f:$F | grep -c "I-OWNER-DECISION-AUTHORIZATION-DECISION-001"
+0
+$ git show 021f5a3f:$F | grep -oE "OWNER-[A-Z0-9-]+\.md|GAP-18[A-Z-]+\.md" | sort -u
+GAP-18-AUTHORIZATION-VALIDATOR-REMAINDER.md
+GAP-18-AUTHORIZATION-VALIDATOR-WORK-ORDER.md
+```
+
+`021f5a3f` is `#731`, the commit that introduced this ruling. The count is taken
+there deliberately: run against the file as it stands now, `grep -c` returns 2,
+because this section names the contract it is reporting the absence of.
+
+§1 of this ruling criticises `#723` for searching only the WORK-ORDER and
+missing the other half of the pair. This ruling then did the same thing against
+a different pair: it read the two GAP-18 work items and never opened the owner
+contract that governs the same two records.
+
+Both cited sources are implementation records, not owner decisions:
+
+```text
+$ git log -1 --format="%h %an %ci" 57c918bf   # introduced §5's "do not reuse"
+57c918bf oahcom 2026-11-22 18:26:47 +0800
+$ git log -1 --format="%h %an %ci" 5b9ac68d   # introduced §8's separate-constant line
+5b9ac68d owner-proxy 2026-11-22 21:35:39 +0800
+```
+
+Both postdate `OWNER-DECISION-001` (2026-11-21). An implementation log cannot
+overrule an owner decision.
+
+§5's sentence is also narrower than it was read as being: `Do not reuse
+DEV_BASELINE_ISSUER for **decisions**` takes *decisions* as its subject. Reading
+it as a rule about attestations is the same over-extension this ruling already
+withdrew once, on `#717`.
+
+### 7.3 Status of the current implementation
+
+`cf8b88fb` (`#747`) implements §3 of this ruling and is merged. `I_DEV_BASELINE_ATTESTOR`
+exists at `crates/memory-domain/src/authorization.rs:11`; the three guards and
+`the_decision_issuer_is_refused` (`:421`) are live.
+
+That implementation is **not** being reverted, and it is **not** being declared
+normatively confirmed. It stands pending the resolution in §7.4. No code change
+is authorised by this section.
+
+### 7.4 The open question, and who answers it
+
+A layered reading has been proposed — that `same I issuer allowlist` names the
+trust-authorisation layer, while the string value belongs to the implementation
+identifier layer, so distinct strings under one I-controlled policy satisfy both
+texts. That reading is **plausible and unapproved**. It has not been adopted
+here, because a layer distinction that neither document states in writing cannot
+be inferred into existence by the implementer.
+
+The question, stated so it can be answered yes/no:
+
+> Does "the same I issuer allowlist" require identical issuer string values for
+> attestation and authorization-decision records, or does it permit distinct
+> development-baseline issuer identifiers under the same I-controlled trust
+> authorization policy, while requiring separate record encodings and validators?
+
+Only the I Owner may answer it, and only the I Owner may amend
+`OWNER-DECISION-001 §2.3`. Until then:
+
+| Item | State |
+|---|---|
+| `canonical_conflict_status` | `Under-Review` |
+| `#747` implementation | stands, unconfirmed |
+| `OWNER-DECISION-001 §2.3` | unamended, still operative as written |
+| New code touching either allowlist | paused |
+
+If the answer rejects the layered reading, `#747` is undone by a new revert PR,
+not by editing `main`.

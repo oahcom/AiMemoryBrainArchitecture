@@ -43,7 +43,7 @@ document_metadata:
 
 **中文正本**：本文件
 **英文对照**：[`README.en.md`](README.en.md)
-**状态**：`OPEN` — 本目录下所有登记均未解决。
+**状态**：`OPEN` — 本目录下除 `-028` 外的登记均未解决。`-028` 已由 `OWNER-DECISION-RELEASE-BOUNDARY-001` 裁定关闭，残留移交裁定文书 §8。
 
 本目录存放持续跟踪的治理缺陷登记。登记是一个被跟踪的缺陷，不是一次性报告。观察到符合性问题时开立，随证据积累更新，仅当纠正措施被验证后才关闭。
 
@@ -60,7 +60,7 @@ document_metadata:
 | `GOV-NC-CONVERGENCE-2026-11-20` | 治理收敛定义与执行边界 | — | `ACTIVE` / `RECORDED_NOT_PREVENTED` | 3 个层次 |
 | `GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026` | Evidence 领域契约符合性 | High | `OPEN` / `NOT_AUTHORIZED` | 1 个实体，2 个工作包 |
 | `GOV-NC-2026-11-22-PROVENANCE-REFERENCE-REVALIDATION-027` | Provenance 引用重验 | High | `OPEN` / `NOT_AUTHORIZED` | 4 类引用字段 |
-| `GOV-NC-2026-11-23-PROVENANCE-GRAPH-ADD-SIGNATURE-028` | `ProvenanceGraph::add` 公开签名变更 | High | `OPEN` / `OWNER DECISION REQUIRED` | 1 个公开签名 |
+| `GOV-NC-2026-11-23-PROVENANCE-GRAPH-ADD-SIGNATURE-028` | `ProvenanceGraph::add` 公开签名变更 | High | `CLOSED-BY-RULING` / 分类已更正 | 1 个公开签名，2 处引证勘误 |
 
 ## 证据
 

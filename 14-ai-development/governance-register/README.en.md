@@ -42,7 +42,7 @@ document_metadata:
 # Governance Defect Registers
 
 **Chinese primary**: [`README.md`](README.md)
-**Status**: `OPEN` — all registers in this directory are unresolved.
+**Status**: `OPEN` — all registers in this directory are unresolved except `-028`, which `OWNER-DECISION-RELEASE-BOUNDARY-001` closed by ruling; its residue is handed to that record's §8.
 
 This directory holds persistent governance defect registers. A register is a tracked defect, not a one-off report. It is opened when a conformance failure is observed, updated as evidence accumulates, and closed only when the correction is verified.
 
@@ -59,7 +59,7 @@ It is **not** a place to record acceptance, approval, or review conclusions. Not
 | `GOV-NC-CONVERGENCE-2026-11-20` | Governance convergence definition and execution boundary | — | `ACTIVE` / `RECORDED_NOT_PREVENTED` | 3 levels |
 | `GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026` | Evidence domain contract conformance | High | `OPEN` / `NOT_AUTHORIZED` | 1 entity, 2 work packages |
 | `GOV-NC-2026-11-22-PROVENANCE-REFERENCE-REVALIDATION-027` | Provenance reference revalidation | High | `OPEN` / `NOT_AUTHORIZED` | 4 reference field groups |
-| `GOV-NC-2026-11-23-PROVENANCE-GRAPH-ADD-SIGNATURE-028` | `ProvenanceGraph::add` public signature change | High | `OPEN` / `OWNER DECISION REQUIRED` | 1 public signature |
+| `GOV-NC-2026-11-23-PROVENANCE-GRAPH-ADD-SIGNATURE-028` | `ProvenanceGraph::add` public signature change | High | `CLOSED-BY-RULING` / classification corrected | 1 public signature, 2 citation errata |
 
 ## Evidence
 
