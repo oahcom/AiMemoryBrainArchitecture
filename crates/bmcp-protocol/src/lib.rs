@@ -521,6 +521,11 @@ pub mod validate {
     pub enum EvidenceError {
         InvalidJson(crate::strict_json::StrictJsonError),
         MissingField(&'static str),
+        /// The `message_type` is well formed but this build has no parser for
+        /// it. Its own variant so a caller can tell "unsupported type" apart
+        /// from "malformed message", which is what the two per-type entry
+        /// points could never say.
+        UnknownMessageType(String),
         UnknownField(String),
         WrongConst {
             field: &'static str,
@@ -1570,6 +1575,18 @@ pub fn parse_storage_receipt(
 
     validate::validate_storage_receipt_value(&value)?;
 
+    storage_receipt_from_value(&value)
+}
+
+/// Build the typed receipt from a value that has already been validated.
+///
+/// Split out of [`parse_storage_receipt`] so the router can reach the same
+/// build step without parsing the bytes a second time. The `unwrap()`s below
+/// are safe only because `validate_storage_receipt_value` has already proven
+/// every shape this function reads.
+fn storage_receipt_from_value(
+    value: &serde_json::Value,
+) -> Result<storage_receipt::PreparedParticipantReceipt, validate::EvidenceError> {
     use serde_json::Value;
     use storage_receipt::{PreparedParticipantReceipt, PreparedReceiptPayload, SignatureEnvelope};
 
@@ -1582,11 +1599,11 @@ pub fn parse_storage_receipt(
     let integer = |object: &Value, field: &str| -> u64 { object[field].as_u64().unwrap() };
 
     Ok(PreparedParticipantReceipt {
-        schema_id: string(&value, "schema_id"),
-        schema_version: string(&value, "schema_version"),
-        message_type: string(&value, "message_type"),
-        message_id: string(&value, "message_id"),
-        message_nonce: string(&value, "message_nonce"),
+        schema_id: string(value, "schema_id"),
+        schema_version: string(value, "schema_version"),
+        message_type: string(value, "message_type"),
+        message_id: string(value, "message_id"),
+        message_nonce: string(value, "message_nonce"),
 
         signature_envelope: SignatureEnvelope {
             payload_type: string(envelope, "payload_type"),
@@ -1635,6 +1652,48 @@ pub fn parse_storage_receipt(
             prepared_observed_at: string(payload, "prepared_observed_at"),
         },
     })
+}
+
+/// A wire message whose type was read from the message rather than known by
+/// the caller.
+///
+/// Two arms here is the point: each further type is one arm plus one
+/// `*_from_value` extraction, reviewable and mutation-testable on its own.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum BmcpMessage {
+    AppliedDeliveryEvidence(evidence::AppliedDeliveryEvidence),
+    PreparedParticipantReceipt(storage_receipt::PreparedParticipantReceipt),
+}
+
+/// Parse untrusted wire bytes whose `message_type` the caller does not know.
+///
+/// `strict_json` runs first and rejects duplicate keys, so `message_type`
+/// cannot be redefined after dispatch reads it.
+///
+/// A type this build has no parser for returns
+/// [`validate::EvidenceError::UnknownMessageType`] carrying the declared
+/// string — not `MissingField`, and not `WrongConst`.
+pub fn parse_message(raw: &[u8]) -> Result<BmcpMessage, validate::EvidenceError> {
+    let value = strict_json::parse_strict(raw).map_err(validate::EvidenceError::InvalidJson)?;
+
+    // `to_owned()` is deliberate: the declared name must outlive the borrow of
+    // `value` so the `UnknownMessageType` arm can move it into the error.
+    let declared = value
+        .get("message_type")
+        .and_then(|v| v.as_str())
+        .ok_or(validate::EvidenceError::MissingField("message_type"))?
+        .to_owned();
+
+    match declared.as_str() {
+        "APPLIED_DELIVERY_EVIDENCE_RECORDED" => {
+            validate::from_strict_value(&value).map(BmcpMessage::AppliedDeliveryEvidence)
+        }
+        "Storage.PreparedParticipantReceipt" => {
+            validate::validate_storage_receipt_value(&value)?;
+            storage_receipt_from_value(&value).map(BmcpMessage::PreparedParticipantReceipt)
+        }
+        _ => Err(validate::EvidenceError::UnknownMessageType(declared)),
+    }
 }
 
 #[cfg(test)]
@@ -2221,6 +2280,85 @@ mod tests {
         assert!(
             super::parse_storage_receipt(serde_json::to_string(&value).unwrap().as_bytes()).is_ok()
         );
+    }
+
+    // ---- GAP-22: the wire-to-parser router ----------------------------------
+    //
+    // Before `parse_message` the caller had to know the type before it could
+    // parse, so an unsupported type had no way to say so: it surfaced as an
+    // unknown-field or wrong-const error. These tests pin the distinction.
+
+    #[test]
+    fn parse_message_dispatches_applied_delivery_evidence() {
+        let value = valid_value();
+        let raw = serde_json::to_string(&value).unwrap();
+        let routed = super::parse_message(raw.as_bytes()).unwrap();
+
+        // Same value the per-type entry point produces, reached by dispatch.
+        assert_eq!(
+            routed,
+            super::BmcpMessage::AppliedDeliveryEvidence(from_strict_value(&value).unwrap())
+        );
+    }
+
+    #[test]
+    fn parse_message_dispatches_storage_receipt() {
+        let value = valid_storage_receipt_value();
+        let raw = serde_json::to_string(&value).unwrap();
+        let routed = super::parse_message(raw.as_bytes()).unwrap();
+
+        assert_eq!(
+            routed,
+            super::BmcpMessage::PreparedParticipantReceipt(
+                super::parse_storage_receipt(raw.as_bytes()).unwrap()
+            )
+        );
+    }
+
+    #[test]
+    fn parse_message_reports_unknown_type_as_unknown_type() {
+        // The whole point of the change. A receipt-shaped message of an
+        // unsupported type must not be reported as a malformed receipt.
+        let mut value = valid_storage_receipt_value();
+        value["message_type"] = json!("Storage.SomeFutureReceipt");
+
+        match super::parse_message(serde_json::to_string(&value).unwrap().as_bytes()) {
+            Err(EvidenceError::UnknownMessageType(declared)) => {
+                assert_eq!(declared, "Storage.SomeFutureReceipt")
+            }
+            other => panic!("expected UnknownMessageType, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn parse_message_missing_type_is_missing_field_not_unknown_type() {
+        let mut value = valid_storage_receipt_value();
+        value.as_object_mut().unwrap().remove("message_type");
+
+        match super::parse_message(serde_json::to_string(&value).unwrap().as_bytes()) {
+            Err(EvidenceError::MissingField("message_type")) => {}
+            other => panic!("expected MissingField(message_type), got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn parse_message_rejects_duplicate_type_before_dispatch() {
+        // Dispatch reads `message_type`, so the duplicate must be rejected by
+        // strict_json first -- otherwise the second occurrence could win.
+        let value = valid_storage_receipt_value();
+        let raw = serde_json::to_string(&value).unwrap();
+        let doubled = raw.replacen(
+            r#""message_type":"Storage.PreparedParticipantReceipt","#,
+            r#""message_type":"Storage.PreparedParticipantReceipt","message_type":"APPLIED_DELIVERY_EVIDENCE_RECORDED","#,
+            1,
+        );
+
+        match super::parse_message(doubled.as_bytes()) {
+            Err(EvidenceError::InvalidJson(StrictJsonError::DuplicateKey { key, .. })) => {
+                assert_eq!(key, "message_type")
+            }
+            other => panic!("expected DuplicateKey(message_type), got {other:?}"),
+        }
     }
 
     #[test]
