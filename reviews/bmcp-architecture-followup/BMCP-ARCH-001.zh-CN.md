@@ -12,7 +12,7 @@
 
 **ARCHITECTURE_PARTIAL。** 本文是候选语义整合和工程交接，不是协议冻结。
 
-H 实时分支包含候选 Envelope、版本、规范化、错误分类、Delivery/ACK、Forget/重连、Strict JSON Parser 参考和符合性材料。这些文件仍归 H 所有；这些文件的存在不构成批准或冻结。H 生命周期交接明确标记 Wire Schema NOT FROZEN；符合性矩阵是候选测试规范，不是 Runtime 证据。
+H 的活动分支包含候选 Envelope、版本、规范化、错误分类、Delivery/ACK、Forget/重连、Strict JSON Parser 参考和符合性材料。这些文件仍归 H 所有；这些文件的存在不构成批准或冻结。H 生命周期交接明确标记 Wire Schema NOT FROZEN；符合性矩阵是候选测试规范，不是 Runtime 证据。
 
 Owner 已合并批准 Fact/Claim 语义决策（Option A + I1）；精确 Compiler/Domain 消费者映射仍为 Candidate。BMCP MUST NOT 冻结规范 Fact/Claim Wire Payload 字段。B 拥有语义词汇与认识论含义。D 拥有规范 ID 分配、修订提交与当前性、生命周期、谱系、ConflictSet，以及 D ForgetOperation/Fence。I 拥有 Principal/Actor 授权、attestor 授权、PermissionEpoch、撤销、保留策略/法律保全/备份，以及全局 Forget 策略与评估。BMCP/H/C 必须消费由 Owner 签发的不透明引用（opaque owner-issued refs），且 MUST NOT 创建替代物。
 
