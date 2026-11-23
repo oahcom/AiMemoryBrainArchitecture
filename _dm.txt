@@ -1,0 +1,33 @@
+INCOMPLETE: no rule violations in 86 classified documents, but 556 governed documents are still unclassified
+  This is not a whole-tree pass. Run with --strict for that verdict, or --require-changed REF for an incremental one.
+GOV-DOC-002: 642 governed documents, 86 classified, 556 unclassified
+  00-governance: 5/15 classified
+  01-system-architecture: 0/7 classified
+  02-domain-model: 0/12 classified
+  04-memory-compiler: 3/5 classified
+  06-memory-context: 0/21 classified
+  07-agent-integration: 4/7 classified
+  08-bmcp-protocol: 2/8 classified
+  13-engineering-decisions: 0/58 classified
+  14-ai-development: 42/244 classified
+  docs: 30/265 classified
+  adoption backlog: 00-governance/bilingual-documentation-policy.md, 00-governance/bilingual-governance-migration-register.md, 00-governance/drafts/GOV-DOC-001-v1.2-DRAFT.md, 00-governance/reports/bilingual-baseline-remediation-report.md, 00-governance/reports/f06-object-reconciliation.md, ... (+551)
+  authority: agent-integration/canonical-architecture -> 07-agent-integration/agent-integration-overview.md
+  authority: ai-development/aid-2026-045-prompt -> 14-ai-development/work-items/AID-2026-048/prompt-v1.md
+  authority: ai-development/gap-baseline-measurement-record -> 14-ai-development/work-items/GAP-BASELINE-001.md
+  authority: ai-development/pr-governance-001 -> 14-ai-development/PR-GOVERNANCE-001.md
+  authority: ai-development/work-items-index -> 14-ai-development/work-items/INDEX.md
+  authority: architecture/canonical-terminology -> 00-governance/terminology.md
+  authority: architecture/design-principles -> 00-governance/design-principles.md
+  authority: architecture/system-invariants -> 00-governance/architecture-invariants.md
+  authority: domain-model/attestor-issuer-separation-ruling -> 14-ai-development/adr/OWNER-RULING-ATTESTOR-ISSUER-SEPARATION-031.md
+  authority: domain-model/authorization-decision-ref-type-state -> 14-ai-development/adr/OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001.md
+  authority: domain-model/authorization-presence-gate-ruling -> 14-ai-development/adr/OWNER-RULING-AUTHORIZATION-PRESENCE-GATE-025.md
+  authority: domain-model/fact-claim-identity -> 14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md
+  authority: domain-model/typed-object-ref -> 14-ai-development/adr/OWNER-DECISION-TYPED-OBJECT-REF-001.md
+  authority: memory-compiler/compiler-overview -> 04-memory-compiler/compiler-overview.md
+  authority: memory-compiler/extraction-normalization -> 04-memory-compiler/extraction-and-normalization.md
+  authority: protocol/bmcp-mcp-dispatch-binding -> 14-ai-development/adr/OWNER-DECISION-BMCP-MCP-DISPATCH-001.md
+  authority: security-governance/document-management-policy -> 00-governance/architecture-document-management-policy.md
+  manual controls (not machine-verified, policy 9.2): M-01 Whether two `Canonical` scopes genuinely overlap; M-02 Whether an `Approved` decision is real; M-03 Whether `evidence_verification` evidence supports the decision; M-04 Whether the `Selected-sections` chosen are substantively sufficient; M-05 Semantic parity of a bilingual mirror; M-06 Whether an exclusion reason is honest; M-07 Whether a declared backlog is acceptable to ship; M-08 Whether external consumers obey `resolve_canonical()`; M-09 Whether the normalisation equivalence is appropriate for a document's semantics; M-10 Whether the `_unclassified` citation ban is respected
+  note: DM-10 14-ai-development/adr/OWNER-RULING-ATTESTOR-ISSUER-SEPARATION-031.md: text is unchanged since approved_version, but approval_applicability says otherwise (conservative, allowed)
