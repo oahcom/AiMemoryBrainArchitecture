@@ -311,19 +311,16 @@ def run_resolver() -> None:
     def fresh() -> dict:
         return read_metadata(doc(CANONICAL))
 
-    def resolved_meta(
-        selected: str = "a.md",
-        decision_id: str = "GOV-CANON-TEST-001",
-        resolved_date: str = "2026-11-23",
-    ) -> dict:
+    def resolved_meta(selected: str = "a.md") -> dict:
         meta = fresh()
         authority = meta["authority"]
         authority["canonical_conflict_status"] = "Resolved"
         authority["canonical_conflict_resolution"] = {
-            "resolution_decision_id": decision_id,
-            "resolved_date": resolved_date,
+            "resolution_decision_id": "GOV-CONF-2026-002",
+            "resolved_date": "2026-05-10",
             "selected_document": selected,
-            "resolution_evidence": ["resolver regression fixture"],
+            # Empty on purpose: this is the policy's own section 5.1 example.
+            "resolution_evidence": [],
         }
         return meta
 
@@ -419,40 +416,41 @@ def run_resolver() -> None:
         ) == NO_AUTHORITATIVE_SOURCE,
     )
 
-    # 10. Two Resolved records selecting the same Canonical but
-    # carrying different decision IDs must fail closed.
+    # 10. The policy's own section 5.1 example: a Resolved record carrying
+    # `resolution_evidence: []` and selecting the sole Canonical must resolve.
+    # Record completeness is DM-11's rule; the resolver only resolves authority.
     record(
-        "multiple Resolved records with different decision IDs resolve to nothing",
+        "Resolved with empty evidence selecting the sole Canonical resolves",
         resolve_canonical(
-            {
-                "a.md": resolved_meta(
-                    decision_id="GOV-CANON-TEST-001",
-                ),
-                "b.md": resolved_meta(
-                    decision_id="GOV-CANON-TEST-002",
-                ),
-            },
+            {"a.md": resolved_meta()},
+            scope_id,
+        ) == "a.md",
+    )
+
+    # 11. A Resolved record cannot make a second Canonical legitimate.
+    record(
+        "two Canonical members with a Resolved record resolve to nothing",
+        resolve_canonical(
+            {"a.md": resolved_meta(), "b.md": fresh()},
             scope_id,
         ) == NO_AUTHORITATIVE_SOURCE,
     )
 
-    # 11. Two Resolved records selecting the same Canonical but
-    # carrying different resolution dates must fail closed.
+    # 12. A resolution block that is not a mapping must fail closed.
+    not_a_mapping = fresh()
+    not_a_mapping["authority"]["canonical_conflict_status"] = "Resolved"
+    not_a_mapping["authority"]["canonical_conflict_resolution"] = (
+        "GOV-CONF-2026-002"
+    )
     record(
-        "multiple Resolved records with different dates resolve to nothing",
+        "Resolved with a non-mapping resolution block resolves to nothing",
         resolve_canonical(
-            {
-                "a.md": resolved_meta(
-                    resolved_date="2026-11-23",
-                ),
-                "b.md": resolved_meta(
-                    resolved_date="2026-11-24",
-                ),
-            },
+            {"a.md": not_a_mapping},
             scope_id,
         ) == NO_AUTHORITATIVE_SOURCE,
     )
 
+    # 13. A resolution naming no document must fail closed.
     missing_selected = resolved_meta()
     missing_selected["authority"]["canonical_conflict_resolution"].pop(
         "selected_document"
@@ -465,7 +463,7 @@ def run_resolver() -> None:
         ) == NO_AUTHORITATIVE_SOURCE,
     )
 
-    # 12. The original unknown-scope guard remains covered.
+    # 14. The original unknown-scope guard remains covered.
     record(
         "unknown scope resolves to nothing",
         resolve_canonical(one, "architecture/unknown-scope")

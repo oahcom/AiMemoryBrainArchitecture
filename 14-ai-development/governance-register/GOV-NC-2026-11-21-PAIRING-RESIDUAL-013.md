@@ -1,6 +1,51 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-23"
+      last_verification_note: "§8.1 的四个数字（86 个配对、最短一侧 1364 字符、0 个零字节伙伴、0 个逐字节相同配对）均在 2026-11-23 于 880e6a78 全树枚举得出，非抽样。§8.4 的 CI 前提更正依据首次真实执行的 run id，见 GOV-NC-2026-11-23-EXECUTION-RESTORED-029。"
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: "docs/en/14-ai-development/governance-register/GOV-NC-2026-11-21-PAIRING-RESIDUAL-013.md"
+    zh-CN: "docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-21-PAIRING-RESIDUAL-013.md"
+---
+
 # GOV-NC-2026-11-21-PAIRING-RESIDUAL-013
 
-**Status:** OPEN — MEASUREMENT ONLY
+**Status:** `DISPATCHED` — §3.1–§3.3 authorised as `AID-2026-054` (see §8); §1 and §2 out of scope. Independent review remains `NOT_ASSIGNED`.
 **Nature:** `REGISTER_ONLY / NO_IMPLEMENTATION / NO_GATE_CHANGE / REQUIRES_INDEPENDENT_REVIEW`
 **Measured at:** `main = f687346cd0` (also reproduced at `e236193824`)
 **Supersedes:** nothing. **Extends:** `GOV-NC-2026-11-21-SPLIT-DOMAIN-011.md`.
@@ -221,3 +266,51 @@ Every table above is produced by that invocation plus file creation; no step req
 - It does not assert CI ran. CI still returns `steps=0` for every job (register 005).
 
 **Status of the blocking chain is unchanged:** independent review `NOT_ASSIGNED`, implementation authorisation `NOT_AUTHORISED`, sponsor / accountable owner `NOT_ASSIGNED`.
+
+---
+
+## 8. 实施派发：§3 的三个缺陷已授权修复（2026-11-23）
+
+本登记正文与 §3 的三条实测**不改动**。§3.1、§3.2、§3.3 在 `f687346c` 上为真，记录保留。
+
+| 项目 | 内容 |
+|---|---|
+| 工作令 | `AID-2026-054`（`14-ai-development/work-items/AID-2026-054/`） |
+| 派发依据 | 本登记 §3.1、§3.2、§3.3；裁定 `OWNER-DECISION-EMBEDDED-BILINGUAL-001` §4 |
+| 实施范围 | `scripts/check_bilingual_docs.py` 的 `_side_by_side_bilingual()` 与 `side_by_side_partner()`，以及由改动决定的 `scripts/bilingual-baseline.txt` |
+| 明确不授权 | §1 的 5 个被阻断配对（属登记 011）、§2 的 diff 域策略、本登记关闭 |
+
+### 8.1 §3.1 与 §3.2 的修复阈值是标定出来的，不是选出来的
+
+本登记 §3.1 测到「任意一个 CJK 字符即通过」，§3.2 测到「0 字节伙伴即通过」。两处都需修，但**修多严**不是偏好问题：
+
+| 度量 | 值 |
+|---|---|
+| 树中已被接受的并排配对 | **86** |
+| 最小配对中较短一侧的字符数 | **1,364** |
+| 伙伴为 0 字节的配对 | **0** |
+| 两侧逐字节相同的配对 | **0** |
+
+全部 86 个真实配对的较短一侧都在 1,364 字符以上，最短的十个落在 1,364–2,214。所以 **1 到 400 之间任何阈值都不会误伤这 86 个**。裁定取 100，理由只有一个：`_carries_chinese()` 已经在用 100 做同一件事。
+
+同时要求两种文字都有实质内容（`cjk >= 100` 且 `latin >= 1000`）。只数 CJK 会放过一份纯中文文件，那是本登记 §3.1 的同一个单侧缺陷，只是换了位置。
+
+### 8.2 §3.3 是不成立的潜伏缺陷，仍然要修
+
+§3.3 的三文件不对称（`partner(partner(x)) != x`）当前**不可触发**：实测全树 0 个源文件同时存在 `.en.md` 与 `.zh-CN.md`。它仍然被纳入授权，因为不可触发只在今天成立——有人在一个已有 `.zh-CN.md` 的文件旁边加一个 `.en.md`，它立刻可触发。修一条永远走不到的路径成本低于在它被走到之后再去查为什么三个文件都说自己配对了。
+
+### 8.3 为什么状态不是 CLOSED
+
+§3 是三个**内容谓词**缺陷，修完它们不改变 §1 与 §2：
+
+- §1 的 5 个被阻断配对属于登记 011 的 diff 域策略，与谓词无关，本次不动。
+- §2 的 143 行结论（基线可被外来锚点膨胀）已由登记 014 §7 实测为已修复且无护栏，与本登记不同。
+- 本登记 §7 明确不指派独立审查席位，该席位仍为 `NOT_ASSIGNED`；写谓词的会话不能为自己的谓词提供独立性。
+
+`OPEN` → `DISPATCHED — §3 已授权（AID-2026-054）；§1、§2 不在范围内；独立审查仍 NOT_ASSIGNED`。
+
+### 8.4 一处必须更正：§7 依赖了一个已失效的前提
+
+§7 末条写着「CI 仍对每个 Job 返回 `steps=0`（登记 005）」。**这句话已经过期。** 实测首次真实执行为 2026-11-22，详见 `GOV-NC-2026-11-23-EXECUTION-RESTORED-029`。
+
+这不改变本登记的任何数字——§3 的每条都是本地 `python scripts/check_bilingual_docs.py` 测出来的，不依赖 CI。但它改变**这条限制的含义**：当时的意思是「CI 不执行，所以本地测量是唯一证据」；现在的意思是「CI 会执行，但执行了不等于可信」。后者的限制更弱，不应再被引用为前者的依据。
