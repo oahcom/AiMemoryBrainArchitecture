@@ -417,52 +417,47 @@ This event does not alter the counting ruling for PR #707 in §13.7 and is not a
 
 **Registration status update**: `OPEN` / `NOT_REMEDIATED` / instance count **4 (frozen, unchanged)** / new fact: **first occurrence of "blocking review disposition issued, correction not landed, merge proceeded", 27-second interval, check green at merge; recorded separately and excluded from the zero-review merge count**
 
-### 13.9 Follow-on occurrence: PR #821 and PR #825 merged without formal review records
+### 13.9 Follow-on occurrence: PR #821 and PR #825 were zero-formal-review merges
 
-**Observed: 2026-11-23 UTC**
+**Observed: 2026-11-23 UTC. Every field below is a GitHub API value at that time.**
 
-Two pull requests were merged into `main` without formal pull-request review records:
+Both pull requests were merged with no formal review record of any kind: `reviews = []`, `review_comments = 0`.
 
-| PR | Independent review disposition | Merge result |
-|---|---|---|
-| #821 | `REQUEST_CHANGES` | Merged at 13:14:07Z; merge head `3ea55bb` |
-| #825 | `HOLD` | Merged at 13:31:23Z; merge head `726e1bb` |
+| PR | Merged at (UTC) | Head at merge | `main` after merge |
+|---|---|---|---|
+| #821 | 13:14:07Z | `3ea55bb` | `0a713548` |
+| #825 | 13:24:15Z | `726e1bba` | `be54daca` |
 
-The PR review records were empty (`reviews = []`).
+`merged_by` is `oahcom` for both merges.
 
-The merge was not performed by the coordinator who received the independent review dispositions.
+**The independent review arrived only after the merge**
 
-The rejected and held versions were merged without the requested test-strengthening changes. The coordinator subsequently created PR #830 to restore the required assertions.
+- #821: the PR has a single issue comment, `7103660499`, posted at 14:13:06Z — **59 minutes** after the merge. It is a post-merge mutation-test analysis, not a review disposition.
+- #825: comment `7102656429`, titled `OWNER REVIEW VERDICT: REQUEST_CHANGES`, was posted at 13:31:23Z — **7 minutes** after the merge.
+- Both PRs also received a mutation-test analysis comment around 14:13Z; that is likewise not a review disposition.
 
-**Control observation**
+At neither merge time was there a blocking disposition that could have been stood against or ignored: both merges happened with no review record, and the independent review followed. This section records the **zero-formal-review merge** class; it is not the "disposition issued, correction not landed, merge proceeded" class recorded in §13.1.
 
-The repository's measured branch-protection configuration had:
+**Relation to §13.7**
+
+§13.7 froze the zero-review merge count at 4. This section **does not change** that count and does not add #821 or #825 to §13.1's class.
+
+**Control configuration (measured when this record was written)**
+
+`GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection` returns:
 
 - `required_pull_request_reviews = None`
-- `strict = False`
+- `required_status_checks.strict = true`, with contexts `GOV-DOC-001 structural checks`, `Branch freshness vs base`, `audit`, `GOV-DOC-002 metadata checks`
+- `enforce_admins.enabled = true`
 
-The absence of a required-review configuration is consistent with the observed ability to merge these PRs without formal review records.
+The configuration enforces status checks and branch freshness against the base, administrators included; it contains **no required-review gate at all**, so any PR with green checks can merge with no reviewer. These are the values measured when this record was written; this section does not claim the configuration was the same at any earlier time. This is also where it differs from #750 (§13.8): there the distinguishing fact was an extra file discovered after the merge; here it is this configuration.
 
-`strict = False` is recorded as a separate branch-freshness setting and is not, by itself, evidence that review requirements were disabled.
+**Correction**
 
-**Impact**
+PR #830 (head `fcfdcf29`) was merged at 2026-11-23T13:47:09Z as commit `c61782ad`, restoring the assertions the independent review found missing.
 
-The repository did not enforce the independent review dispositions as merge prerequisites. A `REQUEST_CHANGES` or `HOLD` disposition therefore did not prevent the corresponding PR from entering `main`.
+**Non-claims**
 
-The resulting test-coverage deficiencies required a subsequent corrective PR (#830).
-
-**Scope and non-claims**
-
-This occurrence documents a merge-control enforcement failure. It does not establish that the merged production implementation was defective, that the CI results were falsified, or that the known T76 behavior was changed.
-
-PR #830 is the corrective test-only change for the findings identified in the independent review.
-
-The previously documented governance finding remains open until an enforceable merge policy prevents merges that do not satisfy the required review conditions.
-
-**Evidence**
-
-- PR #821 head `1b06f15`; merge head `3ea55bb`.
-- PR #825 head `f255aa8`; merge head `726e1bb`.
-- PR review records: empty for both PRs.
-- Main after both merges: `dc9248f`.
-- Corrective PR #830 head: `fcfdcf2`.
+- This does not establish that the merged tests were wrong, or that they broke anything.
+- No judgement is made about anyone's intent.
+- The configuration measured now is not offered as evidence of the configuration at merge time.
