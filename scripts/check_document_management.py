@@ -1128,12 +1128,12 @@ NO_AUTHORITATIVE_SOURCE = "NO_AUTHORITATIVE_SOURCE"
 
 
 def resolve_canonical(docs: dict[str, dict], scope_id: str) -> str:
-    """The only sanctioned way to resolve authority for a scope.
+    """Resolve one authoritative document for a canonical scope.
 
-    Never guesses. Returns NO_AUTHORITATIVE_SOURCE when the scope has no
-    document, has an unresolved conflict, or has more than one Canonical.
-    There is deliberately no fallback to approval dates: an earlier approval
-    is not evidence of authority, and a silent fallback hides the conflict.
+    A Resolved conflict is historical evidence, not an active veto. It permits
+    resolution only when every resolution record selects the sole Canonical
+    member of this scope. Ambiguous, incomplete, or inconsistent records fail
+    closed.
     """
     scope = [
         rel for rel, meta in docs.items()
@@ -1141,17 +1141,56 @@ def resolve_canonical(docs: dict[str, dict], scope_id: str) -> str:
     ]
     if not scope:
         return NO_AUTHORITATIVE_SOURCE
-    if any(
-        dig(docs[rel], "authority", "canonical_conflict_status") not in (None, "None")
-        for rel in scope
-    ):
-        return NO_AUTHORITATIVE_SOURCE
+
     canonical = [
         rel for rel in scope
         if dig(docs[rel], "authority", "canonical_status") == "Canonical"
     ]
-    return canonical[0] if len(canonical) == 1 else NO_AUTHORITATIVE_SOURCE
+    if len(canonical) != 1:
+        return NO_AUTHORITATIVE_SOURCE
 
+    selected_canonical = canonical[0]
+    resolved_records = []
+
+    for rel in scope:
+        authority = docs[rel].get("authority") or {}
+        status = authority.get("canonical_conflict_status")
+
+        if status in (None, "None"):
+            continue
+
+        if status != "Resolved":
+            # Under-Review and unknown states both fail closed.
+            return NO_AUTHORITATIVE_SOURCE
+
+        resolution = authority.get("canonical_conflict_resolution")
+        if not isinstance(resolution, dict):
+            return NO_AUTHORITATIVE_SOURCE
+
+        decision_id = resolution.get("resolution_decision_id")
+        resolved_date = resolution.get("resolved_date")
+        selected_document = resolution.get("selected_document")
+        evidence = resolution.get("resolution_evidence")
+
+        if not all((decision_id, resolved_date, selected_document)):
+            return NO_AUTHORITATIVE_SOURCE
+        if not isinstance(evidence, list) or not evidence:
+            return NO_AUTHORITATIVE_SOURCE
+        if selected_document not in scope:
+            return NO_AUTHORITATIVE_SOURCE
+        if selected_document != selected_canonical:
+            return NO_AUTHORITATIVE_SOURCE
+
+        resolved_records.append(
+            (decision_id, resolved_date, selected_document)
+        )
+
+    # Multiple Resolved records in one scope must describe the same
+    # resolution, not competing decisions.
+    if resolved_records and len(set(resolved_records)) != 1:
+        return NO_AUTHORITATIVE_SOURCE
+
+    return selected_canonical
 
 def git(root: Path, *args: str, nul: bool = False, raw: bool = False) -> str | None:
     """Run git, returning stdout or None when unavailable/failing.
