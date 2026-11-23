@@ -126,4 +126,4 @@ jobs:
         run: |
           set -euo pipefail
           if [ -f "$HOME/.cargo/env" ]; then . "$HOME/.cargo/env"; fi
-          python3 scripts/check_fmt.py --expect "$(git rev-parse HEAD)"
+          python3 scripts/check_fmt.py --expect "$GITHUB_SHA"

@@ -7,6 +7,24 @@ This checker runs:
 
 It never runs cargo fmt without --check and never modifies Rust files.
 
+Commit identity and --expect semantics:
+    pull_request:
+        GitHub Actions checks out the synthetic PR merge commit. --expect
+        must be GITHUB_SHA, which identifies that checked-out merge commit.
+        The event payload supplies pull_request.head.sha and
+        pull_request.base.sha. When all three identities are established,
+        the checker reports CHECKED_MERGE_SHA, CHECKED_PR_HEAD_SHA, and
+        CHECKED_BASE_SHA.
+
+    push:
+        GITHUB_SHA identifies the pushed commit checked out by the workflow.
+        --expect must be GITHUB_SHA. The checker reports CHECKED_COMMIT_SHA.
+
+    local or any other non-pull_request event:
+        --expect, when supplied, is compared with the checked-out Git HEAD.
+        The checker reports that single identity as CHECKED_COMMIT_SHA.
+        No PR-specific fields are reported.
+
 Exit codes:
     0  Formatting check passed.
     1  Formatting violations found.
@@ -21,6 +39,7 @@ Exit codes:
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import re
 import shutil
@@ -56,7 +75,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--expect",
         metavar="SHA",
-        help="Require the checked Git HEAD to equal this full 40-character SHA.",
+        help=(
+            "Require the checked Git HEAD to equal this full 40-character SHA. "
+            "In pull_request Actions runs use GITHUB_SHA (the synthetic merge "
+            "commit); in push runs use GITHUB_SHA (the pushed commit). "
+            "For local and other non-PR runs, this is compared with HEAD."
+        ),
     )
     parser.add_argument(
         "--timeout",
@@ -154,6 +178,59 @@ def get_head_sha(root: Path) -> str:
     return sha.lower()
 
 
+def get_pull_request_shas() -> tuple[str, str] | None:
+    """Read and validate PR head/base SHAs only for pull_request events.
+
+    Returns None for every non-pull_request event. For pull_request events,
+    failure to read or validate either SHA makes commit identity unknown.
+    """
+
+    if os.environ.get("GITHUB_EVENT_NAME") != "pull_request":
+        return None
+
+    event_path = os.environ.get("GITHUB_EVENT_PATH")
+
+    if not event_path:
+        fail(
+            "GITHUB_EVENT_PATH is required for pull_request commit identity.",
+            EXIT_UNKNOWN_COMMIT,
+        )
+
+    try:
+        with Path(event_path).open("r", encoding="utf-8") as event_file:
+            event = json.load(event_file)
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        fail(
+            f"Unable to read GitHub pull_request event payload: {exc}",
+            EXIT_UNKNOWN_COMMIT,
+        )
+
+    try:
+        pull_request = event["pull_request"]
+        head_sha = pull_request["head"]["sha"]
+        base_sha = pull_request["base"]["sha"]
+    except (KeyError, TypeError):
+        fail(
+            "GitHub pull_request event payload is missing pull_request.head.sha "
+            "or pull_request.base.sha.",
+            EXIT_UNKNOWN_COMMIT,
+        )
+
+    if not isinstance(head_sha, str) or not FULL_SHA_RE.fullmatch(head_sha):
+        fail(
+            f"GitHub event contains an invalid pull_request.head.sha: {head_sha!r}",
+            EXIT_UNKNOWN_COMMIT,
+        )
+
+    if not isinstance(base_sha, str) or not FULL_SHA_RE.fullmatch(base_sha):
+        fail(
+            f"GitHub event contains an invalid pull_request.base.sha: {base_sha!r}",
+            EXIT_UNKNOWN_COMMIT,
+        )
+
+    return head_sha.lower(), base_sha.lower()
+
+
 def check_expected_sha(actual_sha: str, expected_sha: str | None) -> None:
     if expected_sha is None:
         return
@@ -215,6 +292,7 @@ def require_clean_worktree(root: Path) -> None:
 
     print("WORKTREE_RESULT=CLEAN")
 
+
 def run_fmt(root: Path, timeout: float) -> int:
     cargo = shutil.which("cargo")
 
@@ -233,7 +311,7 @@ def run_fmt(root: Path, timeout: float) -> int:
     ]
 
     print(f"Repository root: {root}")
-    print(f"Command: cargo fmt --all -- --check")
+    print("Command: cargo fmt --all -- --check")
     print()
 
     try:
@@ -288,14 +366,23 @@ def main() -> int:
 
     root = find_repository_root()
 
-    # Establish the identity before checking formatting.
+    # Establish the checked-out commit identity before checking formatting.
     # Never use a parent repository's HEAD as a fallback.
     head_sha = get_head_sha(root)
+
+    # This function is deliberately a no-op outside pull_request events.
+    pull_request_shas = get_pull_request_shas()
 
     check_expected_sha(head_sha, args.expect)
     require_clean_worktree(root)
 
-    print(f"CHECKED_HEAD_SHA={head_sha}")
+    if pull_request_shas is None:
+        print(f"CHECKED_COMMIT_SHA={head_sha}")
+    else:
+        pr_head_sha, base_sha = pull_request_shas
+        print(f"CHECKED_MERGE_SHA={head_sha}")
+        print(f"CHECKED_PR_HEAD_SHA={pr_head_sha}")
+        print(f"CHECKED_BASE_SHA={base_sha}")
 
     result = run_fmt(root, args.timeout)
 
