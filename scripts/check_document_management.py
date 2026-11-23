@@ -2004,8 +2004,8 @@ def check_scope_registry(root: Path) -> list[str]:
     return errors
 
 
-def changed_paths(root: Path, ref: str) -> set[str]:
-    """Repository-relative paths added, modified, renamed or type-changed.
+def changed_paths(root: Path, ref: str) -> tuple[set[str], bool, bool]:
+    """Return classifiable paths, whether changes exist, and whether they are deletion-only.
 
     NUL-separated, so a filename containing spaces stays one path. Splitting on
     whitespace would let `00-governance/new policy.md` dodge the requirement.
@@ -2014,9 +2014,15 @@ def changed_paths(root: Path, ref: str) -> set[str]:
     symlink with a regular file, changes what the gate reads without changing
     the path. `--diff-filter=AMR` skipped exactly that, so the increment could
     report PASS while a governed path had become a link to somewhere else.
-    Deletions stay excluded: a removed file has nothing to classify. Copies are
-    included: with `diff.renames=copies` a new path can arrive as C, and a
-    copied governed document is still a governed document.
+    Deletions stay excluded from classification: a removed file has nothing
+    to classify. Copies are included: with `diff.renames=copies` a new path can
+    arrive as C, and a copied governed document is still a governed document.
+
+    The second return value distinguishes a genuinely empty increment from an
+    increment whose paths were excluded from classification. The third is true
+    only when every tracked change is a deletion and there are no untracked
+    paths. This prevents an empty classifiable set from being mistaken for a
+    deletion-only increment.
     """
     # A ref must identify a commit, not a pathspec. Without this check,
     # `git diff <ref>` can interpret a directory such as "docs" as a path
@@ -2026,24 +2032,59 @@ def changed_paths(root: Path, ref: str) -> set[str]:
     )
     if resolved is None:
         raise ValueError(f"{ref!r} does not resolve to a commit")
+
+    revision_range = f"{resolved}...HEAD"
+
+    # Keep the full tracked diff separate from the paths that require
+    # document classification. A deletion is a real change even though it
+    # has nothing left to classify.
+    all_diff = git(
+        root, "diff", "--name-only", "-z", revision_range, nul=True,
+    )
+    if all_diff is None:
+        # Do not fall back to a two-dot diff: it answers a different question.
+        raise ValueError(
+            f"cannot compute {revision_range}; refusing a semantically different diff"
+        )
+    all_tracked_names = {p for p in all_diff.split("\0") if p}
+
     filter_arg = "--diff-filter=AMRTC"
     diff = git(
         root, "diff", "--name-only", "-z", filter_arg,
-        f"{resolved}...HEAD", nul=True,
+        revision_range, nul=True,
     )
     if diff is None:
-        # Do not fall back to a two-dot diff: it answers a different question.
         raise ValueError(
-            f"cannot compute {resolved}...HEAD; refusing a semantically different diff"
+            f"cannot compute classifiable paths for {revision_range}"
         )
     names = {p for p in diff.split("\0") if p}
+
+    deleted_diff = git(
+        root, "diff", "--name-only", "-z", "--diff-filter=D",
+        revision_range, nul=True,
+    )
+    if deleted_diff is None:
+        raise ValueError(
+            f"cannot compute deleted paths for {revision_range}"
+        )
+    deleted_names = {p for p in deleted_diff.split("\0") if p}
+
     untracked = git(
         root, "ls-files", "-z", "--others", "--exclude-standard", nul=True
     )
     if untracked is None:
         raise ValueError("cannot enumerate untracked paths")
-    names.update(p for p in untracked.split("\0") if p)
-    return names
+    untracked_names = {p for p in untracked.split("\0") if p}
+    names.update(untracked_names)
+
+    has_changes = bool(all_tracked_names or untracked_names)
+    deletion_only = (
+        bool(all_tracked_names)
+        and all_tracked_names == deleted_names
+        and not untracked_names
+    )
+
+    return names, has_changes, deletion_only
 
 
 def main() -> int:
@@ -2080,17 +2121,41 @@ def main() -> int:
         parser.error("--require-changed and --strict are different verdicts; pick one")
     targets, walk_problems = collect_governed(root)
     try:
-        required = changed_paths(root, args.require_changed) if incremental else set()
+        if incremental:
+            required, has_changes, deletion_only = changed_paths(
+                root, args.require_changed
+            )
+        else:
+            required = set()
+            has_changes = False
+            deletion_only = False
     except ValueError as exc:
-        print(f"NOT_APPLICABLE: incremental changed-path selection failed: {exc}", file=sys.stderr)
-        return 2
-    if incremental and not required:
         print(
-            "NOT_APPLICABLE: --require-changed resolved to zero changed or untracked paths; "
-            "no incremental verification was performed",
+            f"NOT_APPLICABLE: incremental changed-path selection failed: {exc}",
             file=sys.stderr,
         )
         return 2
+
+    if incremental and not has_changes:
+        print(
+            "NOT_APPLICABLE: --require-changed resolved to zero changed or "
+            "untracked paths; no incremental verification was performed",
+            file=sys.stderr,
+        )
+        return 2
+
+    deletion_only_increment = False
+    if incremental and not required:
+        if deletion_only:
+            deletion_only_increment = True
+        else:
+            print(
+                "NOT_APPLICABLE: the increment has no classifiable paths "
+                "but is not a deletion-only increment",
+                file=sys.stderr,
+            )
+            return 2
+
     is_git = git(root, "rev-parse", "--git-dir") is not None
 
     # Problems the walk itself found -- symlinks, unreadable roots -- are
@@ -2207,6 +2272,9 @@ def main() -> int:
             file=sys.stderr,
         )
         return 2
+
+    if deletion_only_increment:
+        print("  Increment contains only deletions; nothing to classify.")
 
     scope = "incremental" if incremental else "whole tree"
     print(

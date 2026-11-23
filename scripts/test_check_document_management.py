@@ -663,6 +663,111 @@ def run_changed_paths() -> None:
             root, 2, "--require-changed", head,
         )
 
+    # T75: a deletion-only increment containing a governed Markdown file
+    # is a real increment, but the deleted file has nothing to classify.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        victim = root / "00-governance" / "deleted.md"
+        victim.write_text(doc(BASE), encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "seed")
+        base = _git(root, "rev-parse", "HEAD")
+        victim.unlink()
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "delete governed Markdown")
+        expect_gate(
+            "T75 deletion-only governed Markdown increment passes",
+            root, 0, "--require-changed", base,
+        )
+
+    # T76: a deletion-only increment containing a non-Markdown file must
+    # also be recognized as a real deletion-only increment.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        victim = root / "_dm.txt"
+        victim.write_text("temporary gate output\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "seed")
+        base = _git(root, "rev-parse", "HEAD")
+        victim.unlink()
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "delete gate output")
+        expect_gate(
+            "T76 deletion-only non-Markdown increment passes",
+            root, 0, "--require-changed", base,
+        )
+
+    # T77: a deletion combined with a Markdown modification is not
+    # deletion-only; it remains an ordinary applicable increment.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        victim = root / "_dm.txt"
+        victim.write_text("temporary gate output\n", encoding="utf-8")
+        readme = root / "README.md"
+        readme.write_text("# Original README\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "seed")
+        base = _git(root, "rev-parse", "HEAD")
+        victim.unlink()
+        readme.write_text("# Updated README\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "delete output and modify README")
+        expect_gate(
+            "T77 deletion plus Markdown modification remains applicable",
+            root, 0, "--require-changed", base,
+        )
+
+    # T78: a deletion combined with a code-only modification is not
+    # deletion-only; the existing code-only incremental behavior is preserved.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        victim = root / "_dm.txt"
+        victim.write_text("temporary gate output\n", encoding="utf-8")
+        code = root / "tools" / "only.rs"
+        code.parent.mkdir(parents=True, exist_ok=True)
+        code.write_text("// original\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "seed")
+        base = _git(root, "rev-parse", "HEAD")
+        victim.unlink()
+        code.write_text("// modified\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "delete output and modify code")
+        expect_gate(
+            "T78 deletion plus code-only modification remains applicable",
+            root, 0, "--require-changed", base,
+        )
+
+    # T79: whole-tree INCOMPLETE remains exit 2. This is deliberately a
+    # non-incremental invocation: --require-changed and --strict/whole-tree
+    # verdicts are separate modes, and the incremental empty-diff early
+    # return must not change the whole-tree backlog verdict.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "seed")
+        unclassified = root / "00-governance" / "unclassified.md"
+        unclassified.write_text("# Deliberately unclassified\n", encoding="utf-8")
+        expect_gate(
+            "T79 whole-tree unclassified backlog remains INCOMPLETE",
+            root, 2,
+        )
+
     # A pathspec is not a commit ref. It must be rejected before diffing;
     # otherwise the old two-dot fallback interprets it as a path filter.
     for bad_ref, label in (("docs", "path-like ref"), ("deadbeef", "invalid ref")):
