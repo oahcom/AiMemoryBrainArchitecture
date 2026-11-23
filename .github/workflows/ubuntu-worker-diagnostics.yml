@@ -46,11 +46,93 @@ jobs:
           # host whose gcc is a lone binary with no cc1 behind it, and the build
           # then fails inside libsqlite3-sys instead of at the toolchain check.
           echo "=== Build toolchain ==="
+          # Discover rustup's bin directory without sourcing ~/.cargo/env:
+          # sourcing would mutate PATH and contaminate subsequent probes.
+          declare -a cargo_candidate_dirs=()
+
+          add_cargo_candidate_dir() {
+            local dir="$1"
+            local existing
+            [[ -n "$dir" ]] || return 0
+            for existing in "${cargo_candidate_dirs[@]}"; do
+              [[ "$existing" == "$dir" ]] && return 0
+            done
+            cargo_candidate_dirs+=("$dir")
+          }
+
+          # CARGO_HOME is authoritative when set; otherwise use Cargo's
+          # default. Check this even when ~/.cargo/env does not exist.
+          cargo_home="${CARGO_HOME:-$HOME/.cargo}"
+          add_cargo_candidate_dir "$cargo_home/bin"
+
+          # Parse only PATH-prepending assignments containing $PATH.
+          # Do not execute this shell script.
+          if [ -f "$HOME/.cargo/env" ]; then
+            while IFS= read -r line; do
+              case "$line" in
+                *PATH=*) ;;
+                *) continue ;;
+              esac
+              case "$line" in
+                *'$PATH'*) ;;
+                *) continue ;;
+              esac
+
+              # Extract the directory prefix before the existing PATH.
+              rhs="${line#*PATH=}"
+              rhs="${rhs%%'$PATH'*}"
+              rhs="${rhs%:}"
+              rhs="${rhs#\"}"
+              rhs="${rhs%\"}"
+              rhs="${rhs#\'}"
+              rhs="${rhs%\'}"
+
+              IFS=: read -r -a parsed_dirs <<< "$rhs"
+              for dir in "${parsed_dirs[@]}"; do
+                # Expand only the variable forms used by rustup's
+                # generated PATH assignment. Never eval shell input.
+                case "$dir" in
+                  '$HOME'/*)
+                    dir="$HOME/${dir#'$HOME'/}"
+                    ;;
+                  '${HOME}'/*)
+                    dir="$HOME/${dir#'${HOME}'/}"
+                    ;;
+                  '$CARGO_HOME'/*)
+                    dir="$cargo_home/${dir#'$CARGO_HOME'/}"
+                    ;;
+                  '${CARGO_HOME}'/*)
+                    dir="$cargo_home/${dir#'${CARGO_HOME}'/}"
+                    ;;
+                  /*)
+                    ;;
+                  *)
+                    continue
+                    ;;
+                esac
+                add_cargo_candidate_dir "$dir"
+              done
+            done < "$HOME/.cargo/env"
+          fi
+
           for t in cc gcc clang cargo rustc pkg-config make; do
             if command -v "$t" >/dev/null 2>&1; then
               printf '%-12s PRESENT %s\n' "$t" "$("$t" --version 2>&1 | head -1)"
             else
-              printf '%-12s ABSENT\n' "$t"
+              off_path=""
+              for dir in "${cargo_candidate_dirs[@]}"; do
+                if [ -x "$dir/$t" ] && [ ! -d "$dir/$t" ]; then
+                  off_path="$dir/$t"
+                  break
+                fi
+              done
+
+              if [ -n "$off_path" ]; then
+                version=$("$off_path" --version 2>&1 | head -1 || true)
+                printf '%-12s PRESENT_OFF_PATH %s\n' "$t" "$version"
+              else
+                printf '%-12s ABSENT\n' "$t"
+              fi
             fi
           done
           # Compile and link one translation unit. Diagnostics must not fail the
