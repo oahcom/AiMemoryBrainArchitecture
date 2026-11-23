@@ -10,6 +10,71 @@ pub const I_DEV_BASELINE_ISSUER: &str = "i-owner-proxy/dev-baseline-v1";
 /// where the namespace alone cannot.
 pub const I_DEV_BASELINE_ATTESTOR: &str = "i-attestor-proxy/dev-baseline-v1";
 
+const fn issuer_str_eq(left: &str, right: &str) -> bool {
+    let left = left.as_bytes();
+    let right = right.as_bytes();
+
+    if left.len() != right.len() {
+        return false;
+    }
+
+    let mut i = 0;
+    while i < left.len() {
+        if left[i] != right[i] {
+            return false;
+        }
+        i += 1;
+    }
+
+    true
+}
+
+const fn issuer_has_prefix(value: &str, prefix: &str) -> bool {
+    let value = value.as_bytes();
+    let prefix = prefix.as_bytes();
+
+    if prefix.len() > value.len() {
+        return false;
+    }
+
+    let mut i = 0;
+    while i < prefix.len() {
+        if value[i] != prefix[i] {
+            return false;
+        }
+        i += 1;
+    }
+
+    true
+}
+
+const _: () = {
+    assert!(
+        !issuer_str_eq(I_DEV_BASELINE_ISSUER, I_DEV_BASELINE_ATTESTOR),
+        "I decision and attestor issuer identifiers must be distinct"
+    );
+
+    assert!(
+        issuer_has_prefix(I_DEV_BASELINE_ISSUER, "i-owner-proxy/"),
+        "I decision issuer must use the i-owner-proxy/ prefix"
+    );
+
+    assert!(
+        issuer_has_prefix(I_DEV_BASELINE_ATTESTOR, "i-attestor-proxy/"),
+        "I attestor issuer must use the i-attestor-proxy/ prefix"
+    );
+
+    assert!(
+        !issuer_has_prefix(I_DEV_BASELINE_ISSUER, "i-attestor-proxy/"),
+        "I decision issuer must not use the attestor issuer prefix"
+    );
+
+    assert!(
+        !issuer_has_prefix(I_DEV_BASELINE_ATTESTOR, "i-owner-proxy/"),
+        "I attestor issuer must not use the decision issuer prefix"
+    );
+};
+
 // ---------------------------------------------------------------------------
 // Authorization decision
 // ---------------------------------------------------------------------------
