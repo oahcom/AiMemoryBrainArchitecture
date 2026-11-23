@@ -1,7 +1,53 @@
+---
+document_metadata:
+  domain: domain-model
+  role: work-record
+
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-23"
+      last_verification_note: "§6 criteria 1-5 re-measured at bea1c2b5 on 2026-11-23; each is cited to a line or a test in the closure note. §1 retained unedited because it describes 444deef1."
+    usage_status: Active
+    modification_status: Modified
+
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Informative
+
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
+---
+
 # GAP-12 — the compiler asserts a canonical commit its own domain refuses to define
 
-**Status:** open · **Severity:** Tier 1 (blocks `Published`) · **Owner:** D (contract), E (stop asserting)
-**Measured at:** `444deef1` · **Related:** ADR `OWNER-DECISION-PUBLICATION-RECORD-001` (D3, D6), GAP-07, #552
+**Status:** CLOSED for steps 1–4 · steps 2/4/5 recorded outstanding with named owners · **Severity:** Tier 1 (blocks `Published`) · **Owner:** D (contract), E (stop asserting)
+**Measured at:** `444deef1` · **Re-measured:** `bea1c2b5` (2026-11-23) · **Related:** ADR `OWNER-DECISION-PUBLICATION-RECORD-001` (D3, D6), GAP-07, #552
+
+> **Closure note (2026-11-23, measured at `bea1c2b5`).** §6 criteria 1–5 are now
+> satisfied by code, and each was re-measured rather than assumed:
+>
+> | §6 | criterion | measured |
+> |---|---|---|
+> | 1 | no line names the cursor as confirmation | `lib.rs:749-752` — presence records only a caller-supplied cursor, explicitly "does not establish that a commit was confirmed" |
+> | 2 | no `StagingInput` field named `canonical_commit_confirmed` | renamed to `canonical_commit_cursor_recorded` (`lib.rs:543`) |
+> | 3 | a test fails if a cursor alone can confirm | `pending_reference_still_blocks_publication` asserts `BLOCKED` with no issued record |
+> | 4 | `pending_d()` on no path feeding the gate | `publication_authority.rs:60-62` returns `Ok(false)` for a pending ref and never consults the validator |
+> | 5 | `compile()` still `Blocked`, `brain-cli` still exits 0 | both asserted in `canonical_commit_record.rs` |
+>
+> Criterion 6 is the reason the status above reads "CLOSED for steps 1–4" rather
+> than "CLOSED": steps 2/4/5 are recorded outstanding with named owners, and this
+> document is not closed by step 1 alone — which is exactly what criterion 6
+> demands be stated rather than glossed.
+>
+> §1 below is retained unedited. It describes `444deef1` and is false at
+> `bea1c2b5`; rewriting it would erase the record of what was repaired.
 
 ## 1. One sentence
 
