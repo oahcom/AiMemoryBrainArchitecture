@@ -1021,6 +1021,19 @@ left standing as a second instance of the defect the whole document is about:
 `bea1c2b` was accurate, `#707` landed four minutes later, and the figure was
 stale before the branch was pushed.
 
+Re-measured at `9544ebf` (main, after `#736` and `#737`): arms 22, tag-only 20,
+`parse_dispatch` call sites outside `crates/bmcp-protocol/` **0**. Two
+independent landings agree with that split — `GAP-16` §2 records 1 semantically
+validated / 1 structurally parsed / 20 discriminator-only, and
+`AID-2026-050/manifest.yaml` records the same four numbers as its baseline.
+Three measurements, three authors, same figures, which is the only evidence that
+a number in this repository is load-bearing rather than decorative.
+
+The 0-caller figure is now a tracked work item rather than a finding:
+`AID-2026-050` specifies `validate_bmcp_message` as a third MCP tool wired to
+`parse_dispatch`. When that lands, this paragraph expires and the residue moves
+from "no consumer" to "20 of 22 arms still validate nothing".
+
 ### 11.3 The `describe()` citation is a line number from a 723-line file
 
 §10.2 cites `lib.rs:718-723` for the `#[allow(dead_code)]` formatter. At
