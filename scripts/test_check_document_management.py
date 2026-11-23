@@ -328,6 +328,171 @@ def run_resolver() -> None:
         resolve_canonical(one, "architecture/unknown-scope") == NO_AUTHORITATIVE_SOURCE,
     )
 
+    # T77/T78: a Resolved conflict is historical evidence, not a veto -- but
+    # only when its record is complete and unambiguous. T77 is the mutation
+    # case: at bdc51b4f any conflict status other than None short-circuits to
+    # NO_AUTHORITATIVE_SOURCE, so it fails there and passes only once the
+    # resolver actually consumes the record. T78 pins, one case per fixture,
+    # every way the record can be missing, malformed, or contradictory.
+    scope = "architecture/data-model-design"
+
+    def member(status: str = "Non-Canonical") -> dict:
+        """One scope member, built from the same frontmatter the gate reads."""
+        meta = read_metadata(doc(CANONICAL))
+        meta["authority"]["canonical_status"] = status
+        return meta
+
+    def resolved(status: str = "Canonical") -> dict:
+        """A scope member carrying a complete, self-selecting Resolved record.
+
+        Callers damage the copy they get; this helper only builds the shape the
+        policy permits, so each T78 case changes exactly one thing.
+        """
+        meta = member(status)
+        meta["authority"]["canonical_conflict_status"] = "Resolved"
+        meta["authority"]["canonical_conflict_resolution"] = {
+            "resolution_decision_id": "GOV-CONF-2026-002",
+            "resolved_date": "2026-05-10",
+            "selected_document": "a.md",
+            "resolution_evidence": ["PR #813 review"],
+        }
+        return meta
+
+    # T77: the permitted case. Written as frontmatter, not as a hand-built
+    # dict, because the resolver only ever sees what the parser produced --
+    # a fixture that skips the parser cannot show the documented form loads.
+    documented = read_metadata(doc(CANONICAL.replace(
+        "    canonical_conflict_status: None\n",
+        "    canonical_conflict_status: Resolved\n"
+        "    canonical_conflict_resolution:\n"
+        "      resolution_decision_id: \"GOV-CONF-2026-002\"\n"
+        "      resolved_date: \"2026-05-10\"\n"
+        "      selected_document: \"a.md\"\n"
+        "      resolution_evidence:\n"
+        "        - \"PR #813 review\"\n",
+    )))
+    record(
+        "T77 the documented Resolved record parses into its four fields",
+        (documented or {}).get("authority", {}).get(
+            "canonical_conflict_resolution"
+        ) == {
+            "resolution_decision_id": "GOV-CONF-2026-002",
+            "resolved_date": "2026-05-10",
+            "selected_document": "a.md",
+            "resolution_evidence": ["PR #813 review"],
+        },
+    )
+    record(
+        "T77 a complete Resolved record permits the sole Canonical",
+        resolve_canonical({"a.md": documented, "b.md": member()}, scope) == "a.md",
+    )
+
+    # T78.1: the old behaviour must survive -- Under-Review still vetoes, even
+    # when the member it sits on is itself the Canonical.
+    under_review = member("Canonical")
+    under_review["authority"]["canonical_conflict_status"] = "Under-Review"
+    record(
+        "T78 Under-Review in the scope still resolves to nothing",
+        resolve_canonical({"a.md": under_review}, scope) == NO_AUTHORITATIVE_SOURCE,
+    )
+
+    # T78.2: Resolved with no record, or with one that is not a mapping.
+    no_record = member("Canonical")
+    no_record["authority"]["canonical_conflict_status"] = "Resolved"
+    record(
+        "T78 Resolved without canonical_conflict_resolution resolves to nothing",
+        resolve_canonical({"a.md": no_record}, scope) == NO_AUTHORITATIVE_SOURCE,
+    )
+    scalar_record = member("Canonical")
+    scalar_record["authority"]["canonical_conflict_status"] = "Resolved"
+    scalar_record["authority"]["canonical_conflict_resolution"] = "GOV-CONF-2026-002"
+    record(
+        "T78 Resolved whose record is not a mapping resolves to nothing",
+        resolve_canonical({"a.md": scalar_record}, scope) == NO_AUTHORITATIVE_SOURCE,
+    )
+
+    # T78.3: any one of the three required fields missing.
+    for field in ("resolution_decision_id", "resolved_date", "selected_document"):
+        damaged = resolved()
+        damaged["authority"]["canonical_conflict_resolution"].pop(field)
+        record(
+            f"T78 Resolved without {field} resolves to nothing",
+            resolve_canonical({"a.md": damaged}, scope) == NO_AUTHORITATIVE_SOURCE,
+        )
+
+    # T78.4: evidence absent, not a list, or empty.
+    no_evidence = resolved()
+    no_evidence["authority"]["canonical_conflict_resolution"].pop("resolution_evidence")
+    record(
+        "T78 Resolved without resolution_evidence resolves to nothing",
+        resolve_canonical({"a.md": no_evidence}, scope) == NO_AUTHORITATIVE_SOURCE,
+    )
+    scalar_evidence = resolved()
+    scalar_evidence["authority"]["canonical_conflict_resolution"][
+        "resolution_evidence"
+    ] = "PR #813 review"
+    record(
+        "T78 Resolved whose resolution_evidence is not a list resolves to nothing",
+        resolve_canonical({"a.md": scalar_evidence}, scope) == NO_AUTHORITATIVE_SOURCE,
+    )
+    empty_evidence = resolved()
+    empty_evidence["authority"]["canonical_conflict_resolution"]["resolution_evidence"] = []
+    record(
+        "T78 Resolved whose resolution_evidence is empty resolves to nothing",
+        resolve_canonical({"a.md": empty_evidence}, scope) == NO_AUTHORITATIVE_SOURCE,
+    )
+
+    # T78.5: selects a document that never declared this scope.
+    outside = resolved()
+    outside["authority"]["canonical_conflict_resolution"]["selected_document"] = "c.md"
+    record(
+        "T78 Resolved selecting a document outside the scope resolves to nothing",
+        resolve_canonical({"a.md": outside}, scope) == NO_AUTHORITATIVE_SOURCE,
+    )
+
+    # T78.6: selects an in-scope member that does not hold Canonical.
+    off_target = resolved("Non-Canonical")
+    off_target["authority"]["canonical_conflict_resolution"]["selected_document"] = "b.md"
+    record(
+        "T78 Resolved selecting an in-scope non-Canonical member resolves to nothing",
+        resolve_canonical({"a.md": member("Canonical"), "b.md": off_target}, scope)
+        == NO_AUTHORITATIVE_SOURCE,
+    )
+
+    # T78.7a: two records that name different decisions. Both select the sole
+    # Canonical, so this reaches the consistency check rather than an earlier
+    # guard.
+    competing_id = resolved("Non-Canonical")
+    competing_id["authority"]["canonical_conflict_resolution"][
+        "resolution_decision_id"
+    ] = "GOV-CONF-2026-003"
+    record(
+        "T78 two Resolved records with different decision ids resolve to nothing",
+        resolve_canonical({"a.md": resolved(), "b.md": competing_id}, scope)
+        == NO_AUTHORITATIVE_SOURCE,
+    )
+
+    # T78.7b: two records that name different documents. The outcome is what is
+    # pinned, not which guard fires first: with a sole Canonical, a record that
+    # selects the other member is already out of bounds, and that is still a
+    # fail-closed answer, which is the property this case is about.
+    competing_selection = resolved("Non-Canonical")
+    competing_selection["authority"]["canonical_conflict_resolution"][
+        "selected_document"
+    ] = "b.md"
+    record(
+        "T78 two Resolved records selecting different documents resolve to nothing",
+        resolve_canonical({"a.md": resolved(), "b.md": competing_selection}, scope)
+        == NO_AUTHORITATIVE_SOURCE,
+    )
+
+    # T78.8: a resolution record does not cure an ambiguity in the metadata.
+    record(
+        "T78 a Resolved record does not cure two Canonical members",
+        resolve_canonical({"a.md": resolved(), "b.md": member("Canonical")}, scope)
+        == NO_AUTHORITATIVE_SOURCE,
+    )
+
 
 # --------------------------------------------------------------------------
 # 4. Repository-wide rules
