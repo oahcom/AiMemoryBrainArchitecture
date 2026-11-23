@@ -4,6 +4,12 @@ use crate::{is_rfc3339_utc, is_sha256_hex, DomainError, IssuerId, OpaqueId};
 /// (`I-OWNER-DECISION-AUTHORIZATION-DECISION-001` §2.2).
 pub const I_DEV_BASELINE_ISSUER: &str = "i-owner-proxy/dev-baseline-v1";
 
+/// Deliberately distinct from [`I_DEV_BASELINE_ISSUER`]. The two tables have
+/// separate primary-key namespaces so an attestation id cannot be mistaken for
+/// a decision id; separate issuer strings close the same gap one layer up,
+/// where the namespace alone cannot.
+pub const I_DEV_BASELINE_ATTESTOR: &str = "i-attestor-proxy/dev-baseline-v1";
+
 // ---------------------------------------------------------------------------
 // Authorization decision
 // ---------------------------------------------------------------------------
@@ -284,7 +290,7 @@ fn validate_attestor_data(data: &AttestorData) -> Result<(), DomainError> {
     if data.attestation_id.as_str().trim().is_empty() {
         return Err(DomainError::EmptyId);
     }
-    if data.issuer.as_str() != I_DEV_BASELINE_ISSUER {
+    if data.issuer.as_str() != I_DEV_BASELINE_ATTESTOR {
         return Err(DomainError::InvalidCanonicalCommitField("issuer"));
     }
     if !is_sha256_hex(data.subject_digest.as_str()) {
@@ -379,7 +385,7 @@ mod tests {
     fn valid_attestor_data() -> AttestorData {
         AttestorData {
             attestation_id: OpaqueId::new("attestation-domain-test").unwrap(),
-            issuer: IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap(),
+            issuer: IssuerId::new(I_DEV_BASELINE_ATTESTOR).unwrap(),
             subject_digest: OpaqueId::new("a".repeat(64)).unwrap(),
             issued_at: "2026-11-22T00:00:00Z".to_owned(),
         }
@@ -408,6 +414,16 @@ mod tests {
         assert_eq!(
             validate_attestor_data(&data),
             Err(DomainError::InvalidCanonicalCommitField("issuer"))
+        );
+    }
+
+    #[test]
+    fn the_decision_issuer_is_refused() {
+        let mut data = valid_attestor_data();
+        data.issuer = IssuerId::new(I_DEV_BASELINE_ISSUER).unwrap();
+        assert_eq!(
+            validate_attestor_data(&data).unwrap_err(),
+            DomainError::InvalidCanonicalCommitField("issuer")
         );
     }
 
