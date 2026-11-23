@@ -765,7 +765,7 @@ fn describe(error: &bmcp_protocol::validate::EvidenceError) -> String {
 `TECH-REALITY-001-C/README.md:70` 仍写着 *"H wire mapping remains NOT FROZEN"*——
 所以在现有 JSON-RPC/TCP 选择之上继续搭建，等于搭建在一个未记录的前提上。
 
-完整测量见 GAP-16。
+完整测量见 GAP-32。
 
 ### 10.3 §9 把 `dm2_06` 归错了所有者
 
@@ -852,13 +852,57 @@ capability set*，2026-11-22 13:48 +08:00）之后不再成立——该提交晚
 - 整个 crate **没有** 任何 `#[allow(dead_code)]`；第 938 行的 `describe()` 在第
   419 行被调用。
 
-这不止是记账问题。§10.2 与 GAP-16 都把"从线上字节到解析器无路可走"当作
-*那 21 个解析器是最大可增量* 这一结论的承重事实。实际上一种消息类型的通路是
-端到端存在的（线上 → `tools/call` → `parse_and_validate` → 摘要）。缺的是另外
+因此，对一种消息类型而言，从线上字节到解析器的通路是端到端存在的。缺的是另外
 21 种类型，而不是通路本身。
 
-计数本身未变且已复算确认：**声明 22 种消息类型，`crates/` 中任何形式识别 3 种，
-19 种在 Rust 里完全没有识别。**
+### 11.2a 消息类型计数在本节测量后四分钟即被反转
+
+上一段测量于 `bea1c2b`（2026-11-23 11:21:59 +08:00），在该提交上准确。`#707`
+（`f82b636`，*route Storage.PreparedParticipantReceipt through its structural
+parser*）于 **11:25:25 +08:00** 合并，比它晚四分钟，并加入了 `parse_dispatch`
+——一个按声明类型逐一开 arm 的路由器。在写本文时的 main `021f5a3f` 上实测：
+
+| 元素 | `bea1c2b` | `021f5a3f` |
+|---|---:|---:|
+| 声明的消息类型 | 22 | 22 |
+| `crates/` 中任何形式识别的类型 | 3 | **22** |
+| `parse_dispatch` 的 arm | 0（路由器尚不存在） | **22** |
+| 做语义验证的 arm（`SemanticallyValidated`） | 2 | **1** |
+| 做结构解析的 arm（`StructurallyParsed`） | 0 | **1** |
+| 仅识别根判别符的 arm（`RootDiscriminatorOnly`） | 20 | **20** |
+| `bmcp-protocol` 之外 `parse_dispatch` 的生产调用点 | 0 | **0** |
+
+对上表的两处更正，既针对我自己的第一版读数，也针对一位评审的说法：
+
+- 做验证的 arm 数是**下降**的，不是上升。在 `bea1c2b`，两个具名函数在做验证：
+  `parse_and_validate`（→ `AppliedDeliveryEvidence`）与 `parse_storage_receipt`
+  （→ `Storage.PreparedParticipantReceipt`）。路由器保留了这两者，但标注不同：
+  `APPLIED_DELIVERY_EVIDENCE_RECORDED` 是 `SemanticallyValidated`（1761 行），
+  `Storage.PreparedParticipantReceipt` 只是 `StructurallyParsed`（1765 行）。
+  所以是 **1 + 1**，不是 2 个已验证；也不是某位评审提出的"5 验证 / 17 仅标记"
+  ——该划分无法复现：arm 共 22 个，其中恰好 2 个做的比读判别符更多。
+- `is_structurally_unvalidated()`（1774 行）只对 `RootDiscriminatorOnly` 返回
+  true，所以那 20 个仅标记的 arm 正是类型自己称为未验证的那些。枚举在
+  1654–1668 行写明该区分，无需推断。
+
+§11.2 所捍卫的结论依然成立，且更强了。"那 21 个解析器是最大可增量"从来不是
+关于识别的问题——它是关于验证的，而 22 个 arm 里有 20 个什么都不验证。
+`bmcp-server` 仍按名字调用 `parse_and_validate` 两次，且完全不调用
+`parse_dispatch`（`grep -rn parse_dispatch crates/bmcp-server/` → 0）。
+
+不成立的是原文那句话，它写的是*识别*。按该词的通常含义，计数是 22 之 22，
+不是 3 之 22。本节原样保留，作为整份文档所诊断缺陷的第二个实例：`bea1c2b` 当时
+准确，`#707` 四分钟后落地，而该数字在分支推送前就已陈旧。
+
+在 `9544ebf`（`#736`、`#737` 之后的 main）复测：arm 22、仅标记 20、
+`crates/bmcp-protocol/` 之外的 `parse_dispatch` 调用点 **0**。两次独立落地与这个
+切分一致——`GAP-32` §2 记的是 1 语义验证 / 1 结构解析 / 20 仅识别判别式，
+`AID-2026-050/manifest.yaml` 把同样四个数字记为基线。三次测量、三个作者、同样的
+数字，这才是一个数字在本仓库里"承重"而非装饰的唯一证据。
+
+0 调用点这一条现在是有编号的工作项而不是发现：`AID-2026-050` 规定把
+`validate_bmcp_message` 作为第三个 MCP 工具接到 `parse_dispatch`。它落地时本段即
+过期，残留从"没有消费方"变为"22 个 arm 里仍有 20 个什么都不验证"。
 
 ### 11.3 `describe()` 的引用行号来自一份 723 行的文件
 
@@ -870,20 +914,20 @@ capability set*，2026-11-22 13:48 +08:00）之后不再成立——该提交晚
 §10 开篇即以"可审计性"作为勘误追加而非就地改写的理由——一个不再能解析的行号引用
 属于同一类缺陷。
 
-### 11.4 GAP-15 §4 把 §10.2 的陈旧事实当作新测量重新发布
+### 11.4 GAP-31 §4 把 §10.2 的陈旧事实当作新测量重新发布
 
 `GAP-31-IMPLEMENTATION-PERCENTAGES-STALE` 标注测量于 `4ce12cc7`，其 §4 写道：
 
 > `bmcp-server` 如今完全不触达解析器（`describe()` 位于 `lib.rs:718-723`，
 > 带 `#[allow(dead_code)]`，零调用点）。
 
-在 `4ce12cc7`——GAP-15 自己的测量提交——`tools/call` 已经存在（`54ea397` 是
+在 `4ce12cc7`——GAP-31 自己的测量提交——`tools/call` 已经存在（`54ea397` 是
 `4ce12cc7` 的祖先），`parse_and_validate` 已从两个分支被调用，整个 crate 里没有
 `#[allow(dead_code)]`。
 
-GAP-15 的论点是：六个百分比是化石，因为它们"在某个更早的提交上成立"，而后被
-不加复测地重新陈述。它自己的 §4 对 §10.2 的 BMCP 段落做的正是这件事。GAP-15 其余
-测量可复现；这一条不可，而它恰恰是 GAP-15 用来论证 21 个解析器被冻结在触及范围之外
+GAP-31 的论点是：六个百分比是化石，因为它们"在某个更早的提交上成立"，而后被
+不加复测地重新陈述。它自己的 §4 对 §10.2 的 BMCP 段落做的正是这件事。GAP-31 其余
+测量可复现；这一条不可，而它恰恰是 GAP-31 用来论证 21 个解析器被冻结在触及范围之外
 的那一条。
 
 ### 11.5 §9.3 第三项已关闭，第一项未变
@@ -901,8 +945,10 @@ GAP-15 的论点是：六个百分比是化石，因为它们"在某个更早的
 `D-OWNER-DECISION-PARTICIPANT-ADMISSION-001` §1 与
 `D-OWNER-DECISION-PROTECTED-VISIBILITY-001` §1 的要求，不是疏漏。
 
-第二项，BMCP 传输，现在比 §9.3 所述更窄：传输已存在，一种消息类型已端到端打通，
-残余是 19 种未解析类型加上被冻结的帧格式（§11.2）。
+第二项，BMCP 传输，现在比 §9.3 所述更窄，且在 `#707` 之后更窄：传输已存在，22 种
+消息类型全部被一个路由器识别，但 22 个 arm 中只有 2 个做的比读判别符更多，且
+`bmcp-protocol` 之外没有任何生产调用点触达它（§11.2、§11.2a）。残余在验证而非
+识别，另加仍被 H 冻结的帧格式。
 
 ### 11.6 复现
 
@@ -942,33 +988,91 @@ grep -rn 'allow(dead_code)' crates/bmcp-server/src/ | wc -l    # 0
 grep -rn 'bmcp_protocol' crates/bmcp-server/src/ | wc -l       # 8
 ```
 
-19 种未解析类型，从索引表导出而非手抄：
+路由器 arm 及其验证强度（§11.2a），逐 arm 计数而非目测：
+
+```sh
+python3 - <<'PY'
+import re, subprocess
+src = subprocess.run(
+    ['git', 'show', 'origin/main:crates/bmcp-protocol/src/lib.rs'],
+    capture_output=True, text=True,
+).stdout
+seg = src[src.index('match message_type {', src.index('pub fn parse_dispatch')):]
+pos = [m for m in re.finditer(r'^\s+"([A-Za-z][A-Za-z0-9_.]+)"\s*=>', seg, re.M)]
+tag = []
+for i, m in enumerate(pos):
+    body = seg[m.end():pos[i + 1].start() if i + 1 < len(pos) else len(seg)]
+    if 'StructurallyUnvalidated' in body:
+        tag.append(m.group(1))
+print('arms', len(pos), 'tag_only', len(tag))
+PY
+# arms 22 tag_only 20
+grep -n 'fn validation_state' -A14 crates/bmcp-protocol/src/lib.rs
+grep -rn 'parse_dispatch' crates/bmcp-server/ | wc -l    # 0
+```
+
+非标记的 2 个 arm 要按类型自己赋予的状态区分，而不是按 arm 看起来像不像在验证：
+`Storage.PreparedParticipantReceipt` 调用了 `parse_storage_receipt`，但报告的是
+`StructurallyParsed`，而不是 `SemanticallyValidated`。
+
+
+逐类型识别循环，从索引表导出而非手抄。注意这个循环测的是什么：某个类型的名字有没有
+出现在 `crates/` 里。`#707` 之后它已是错的仪器——每个类型现在都有一个路由 arm，所以
+预期结果是 22 命中 0 缺失，出现 3/19 就是说这个循环在读 `#707` 之前的树（§11.2a）：
 
 ```sh
 python3 08-bmcp-protocol/scripts/check_protocol_index.py   # unique_message_types=22 PASS
+# COMMIT 是你要测的那棵树；路径是小写的。
+COMMIT=bea1c2b
+git show $COMMIT:08-bmcp-protocol/protocol-index.md > protocol-index.tmp
 python3 - <<'PY'
-import re
-txt = open('08-bmcp-protocol/PROTOCOL-INDEX.md', encoding='utf-8').read()
+import re, io
+txt = io.open('protocol-index.tmp', encoding='utf-8', newline='').read()
 seg = txt[txt.index('## Message types'):txt.index('## Complete Schema inventory')]
 types = re.findall(r'^\|\s*`([^`]+)`\s*\|', seg, re.M)
 assert len(types) == 22, len(types)
-open('/tmp/types.txt', 'w').write('\n'.join(types) + '\n')
+io.open('types.tmp', 'w', encoding='utf-8', newline='\n').write('\n'.join(types) + '\n')
 PY
 while IFS= read -r t; do
-  n=$(grep -rl -- "$t" crates/ 2>/dev/null | wc -l)
+  n=$(git grep -l -- "$t" $COMMIT -- crates/ </dev/null 2>/dev/null | wc -l)
   printf '%s %s\n' "$n" "$t"
-done < /tmp/types.txt | sort -n
-# 3 个类型有命中；19 个为 0
+done < types.tmp | sort -n
+# bea1c2b:     3 个类型有命中；19 个为 0
+# origin/main: 22 个类型有命中；0 个为 0   （#707 加了路由）
 ```
 
-关于最后一个循环的一句提醒：Windows 上的 Python 写出的 `PROTOCOL-INDEX.md` 带 CRLF，
-而用 `while read` 遍历 CRLF 列表会静默匹配不到任何东西——每个类型都报 0。在相信
-这些计数之前先 `tr -d '\r'`，否则会以错误的理由复现出 GAP-15 的结论。
+关于最后一个循环的一句提醒：这个循环*读*的文件是 Windows 上的 Python 写出的列表，
+而 Python 的文本模式默认把 `\n` 变成 `\r\n`。用 `while read` 遍历 CRLF 列表会静默
+匹配不到任何东西——每个类型都报 0。在相信这些计数之前先 `tr -d '\r'`，否则会以错误
+的理由复现出 GAP-31 的结论。
+
+这条提醒本身初稿就写错了，而更正比提醒本身更重要。初稿说的是
+`PROTOCOL-INDEX.md` 带 CRLF。它不带：
+`git show bea1c2b:08-bmcp-protocol/protocol-index.md | grep -c $'\r'` → **0**，
+`origin/main` 同样。CRLF 来自这个脚本写出的中间文件 `types.txt`，不是索引。
+评审问那 19 是否由带 bug 的循环产出；答案是否，而索引的换行就是"证明"而非"断言"
+的依据。把提醒写错文件，会让下一个读者去检查一个从来没坏过的东西。
+
+本次即如此：我第一次就踩了这个 bug，22 个类型全部报 0 识别，读起来是"22 个缺失"，
+那会是 §11.2 结论的一个更强且完全错误的版本。3 之 22 这个数字来自 `tr -d '\r'`
+那一次运行。把它记下来而不是悄悄修掉，因为这个 bug 恰好产出文档本来预期的结论。
+
+评审之后在两个提交上复测，循环经 `git show` 读索引、列表以 `newline='\n'` 写出：
+
+```
+bea1c2b     types 22  hits 3   misses 19
+origin/main types 22  hits 22  misses 0
+```
 
 ### 11.7 本勘误不做什么
 
-- 不就地修改 §9、§10 或 GAP-15。
+- 不就地修改 §9、§10 或 GAP-31。
 - 不更换任何百分比，因为百分比这一框架在 §9 中已被退役；用更好的百分比替换它们
   等于复活那个框架。
-- 不复测 GAP-15 其余五行。它们在 `bea1c2b` 上可复现，§11.4 所列除外。
+- 不复测 GAP-31 其余五行。它们在 `bea1c2b` 上可复现，§11.4 所列除外。
 - 不声称独立评审。由执行该测量的同一会话撰写。
+
+关于名称：`GAP-15-IMPLEMENTATION-PERCENTAGES-STALE` 与
+`GAP-16-DISPATCH-LANDED-TOOLS-ABSENT` 已被 `#740` 重编号为 `GAP-31-…` / `GAP-32-…`，
+该提交只改写了 §11.4 中的一处引用，其余保持陈旧。§11 内的所有引用在此一并更新。
+请引用新名；旧名在历史中仍可解析，在当前树中不可。
