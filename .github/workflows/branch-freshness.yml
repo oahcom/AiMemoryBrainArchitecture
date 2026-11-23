@@ -28,6 +28,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Self-check the branch freshness gate
+        run: python3 scripts/ci/test_check_branch_freshness.py
+
       - name: Check the branch contains its base
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
