@@ -1,0 +1,128 @@
+work_item_id: AID-2026-054
+title: Make Shape 3 root-agnostic, and give both bilingual predicates a floor
+
+class: GATE/CODE/TEST
+risk: R2
+risk_rationale: "Changes the predicate a repository-wide gate uses to decide whether a document is bilingual, and regenerates the frozen baseline from 77 to 11. The baseline is a shrink-only ratchet, so a wrong predicate does not fail loudly - it either freezes entries that should be enforced, or resolves entries that are not actually bilingual and removes them from enforcement forever. The risk is not in the edit; it is in the predicate being subtly one-sided. Acceptance criteria 3 through 7 exist so that each one-sided case is asserted against rather than merely not observed."
+
+security_scope: "None. No authorization path, no Forget path, no storage engine, no transport, no Rust. The change is two predicates and one guard condition in scripts/check_bilingual_docs.py, plus the baseline that follows from them."
+
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+implementing_ai_session: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 880e6a7806bdc93bea3c70d01304fa6c29ee385f
+
+tracking_issue: "NONE - tracked by GOV-NC-2026-11-21-EMBEDDED-ROOT-015 and GOV-NC-2026-11-21-PAIRING-RESIDUAL-013, and by this AID manifest"
+
+created_at: 2026-11-23
+updated_at: 2026-11-23
+
+prompt_id: AID-2026-054-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-054/prompt-v1.md
+prompt_status: FROZEN
+prompt_sha256: 18b12deec0716b5bc20e8400095c89ed125fd514ed333880814001907ee168ae
+prompt_bytes: 9222
+
+prompt_provenance_tier: T1
+prompt_provenance_note: "Frozen from the owner-proxy session that read all 58 files in 13-engineering-decisions in full, patched three variants into a throwaway worktree and measured current_bilingual_gaps() for each, and enumerated all 86 accepted side-by-side pairs to calibrate the floor. The measured figures are stated in the prompt so the implementer can check them against the tree instead of trusting them. The dispatch session's first prediction for the baseline delta was 20 and the measured figure is 11; the prompt carries the measured one and the ruling records the correction."
+
+dependency_refs:
+  - 14-ai-development/adr/OWNER-DECISION-EMBEDDED-BILINGUAL-001.md
+  - 14-ai-development/governance-register/GOV-NC-2026-11-21-EMBEDDED-ROOT-015.md
+  - 14-ai-development/governance-register/GOV-NC-2026-11-21-PAIRING-RESIDUAL-013.md
+  - 00-governance/bilingual-documentation-policy.md
+  - scripts/check_bilingual_docs.py
+  - scripts/bilingual-baseline.txt
+
+deliverables:
+  - "Shape 3 no longer scoped to 14-ai-development, and no longer gated on docs/en existing - embedded bilingual is a single-file shape and has no mirror by definition."
+  - "A predicate that requires both scripts in quantity in one file: cjk >= 100 and latin >= 1000, counted as ASCII alphabetic characters only. _carries_chinese() is kept, because the mirror shape still uses it."
+  - "The side-by-side predicate gets the same floor: neither file empty, the pair not the same file twice, and cjk >= 100 and latin >= 1000 across the pair rather than in each file."
+  - "side_by_side_partner() made symmetric, with the three-file case resolved deterministically and the choice written down in the source."
+  - "The baseline regenerated from 77 to 11 entries in the same commit, as 66 removals and 0 additions. 13-engineering-decisions/technology-architecture-blueprint.md stays in it."
+  - "One test per one-sided case: CJK-only file rejected, Latin-only file rejected, zero-byte partner rejected, pair of two English files each carrying one CJK character rejected, partner() symmetry asserted including the three-file case."
+  - "The count of 86 accepted pairs asserted rather than sampled, so a floor set too high fails loudly instead of quietly dropping real pairs."
+  - "python -m unittest scripts.test_check_bilingual_docs only. The 3 failures and 21 errors already present in test_gate_normative_roots.py at main must neither grow nor be fixed - they are Windows temp-path assertions, unrelated, and out of scope."
+
+independent_reviewer: NOT_ASSIGNED
+integration_reviewer: NOT_ASSIGNED
+
+review:
+  status: NOT_ASSIGNED
+  report_ref: ""
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+implementation:
+  status: NOT_STARTED
+  branch: PENDING
+  pull_request: PENDING
+  pull_request_url: PENDING
+  implementation_commit_sha: PENDING
+  merge_commit_sha: NOT_MERGED
+
+authorization:
+  registration_write: "USER-PRINCIPAL-DELEGATED (limited to this AID registration package)"
+  implementation_write: "USER-PRINCIPAL-DELEGATED (limited to scripts/check_bilingual_docs.py and scripts/bilingual-baseline.txt)"
+  shape3_root_scope_removal: "USER-PRINCIPAL-DELEGATED (limited to the startswith guard and the english.is_file() precondition in shape 3)"
+  predicate_floor: "USER-PRINCIPAL-DELEGATED (limited to cjk >= 100 and latin >= 1000, calibrated against all 86 accepted pairs)"
+  baseline_regeneration: "USER-PRINCIPAL-DELEGATED (limited to the shrink from 77 to the measured post-change count)"
+  allowlist_change: NOT_GRANTED
+  root_membership_change: NOT_GRANTED
+  workflow_change: NOT_GRANTED
+  register_closure: NOT_GRANTED
+  production_authorization: NOT_GRANTED
+
+governance:
+  aid_assignment: REGISTERED
+  aid_status: REGISTERED
+  registration_authorization: "USER-PRINCIPAL-DELEGATED (limited to this work item)"
+  development_start_authorization: "USER-PRINCIPAL-DELEGATED (limited to the three changes in the ruling's §5)"
+  architecture_status: NOT_APPLICABLE
+  g8_status: NOT_APPLICABLE
+  quota_change: NONE
+
+verification:
+  status: RUN
+  environment: "Windows, static inspection plus gate execution. No cargo: this work order touches no Rust."
+  commands:
+    - "git ls-files over 13-engineering-decisions/*.md  -> 58 files; read each in full, counting CJK and ASCII-alphabetic characters"
+    - "paired-heading count per file  -> 42 files pair both languages in >= 50% of headings, 57 in at least one, 1 has zero"
+    - "patch variant A (remove root guard, keep english.is_file()) into a throwaway worktree  -> gaps 77, unchanged"
+    - "patch variant B (remove both, predicate stays _carries_chinese())  -> gaps 11, resolved 66, new 0"
+    - "patch variant C (remove both, predicate requires cjk >= 100 and latin >= 1000)  -> gaps 11, resolved 66, new 0"
+    - "inspect the 9 entries variant C resolves outside the 13 root  -> every one carries both scripts, lowest 105 CJK / 2107 Latin"
+    - "enumerate all 86 accepted side-by-side pairs  -> shortest side 1364 chars; 0 zero-byte partners; 0 byte-identical pairs; 0 sources with both .en.md and .zh-CN.md"
+  evidence_refs:
+    - "The ruling's §3 table states all four measurements (77 / 77 / 11 / 11) rather than only the chosen one, so the implementer can reproduce the discrimination instead of accepting the conclusion."
+    - "The ruling's §4 floor table is the calibration: every real pair has a shorter side of at least 1364 characters, so a floor anywhere from 1 to 400 rejects none of the 86."
+
+findings:
+  - id: AID-2026-054-F1
+    severity: P1
+    feedback_destination: "Delivery PR conversation. Register 015's M5 mutation deleted the root-name guard alone and measured 77 -> 77, from which it concluded the guard has no payload. The conclusion was wrong in a way that is easy to reproduce and easy to miss: the 58 files fail the english.is_file() precondition, not the root name, so the guarded branch is never reached. A guard that is never reached measures zero whether it is present or absent. The prompt states both variants so the implementer does not repeat the inference."
+  - id: AID-2026-054-F2
+    severity: P1
+    feedback_destination: "Delivery PR conversation. Variant B and variant C both measure 11, so the tree cannot distinguish them today. They are not equivalent: B accepts a file with 100 CJK characters and no English as bilingual, which is the same one-sided-predicate defect as register 013 §3.1 applied to the embedded shape. Only C survives a Chinese-only document being committed tomorrow. The identical measurement is recorded as identical rather than presented as agreement, because 'two predicates score the same on today's data' is a statement about the data."
+  - id: AID-2026-054-F3
+    severity: P1
+    feedback_destination: "Delivery PR conversation. The baseline shrink is irreversible in practice. After 66 entries leave scripts/bilingual-baseline.txt, nothing records that they were once considered gaps, and re-adding any of them is an error under the ratchet. A predicate that is wrong in the permissive direction would permanently stop enforcing 66 documents, and the ratchet would read that as success. Acceptance criterion 2 (technology-architecture-blueprint.md must remain a gap) and criterion 8 (all 86 pairs still accepted) are the two edge controls that make a wrong predicate visible."
+  - id: AID-2026-054-F4
+    severity: P2
+    feedback_destination: "Delivery PR conversation. Whether 13-engineering-decisions belongs in NORMATIVE_ROOTS at all is not decided by this work order. The ruling keeps it there and makes the gate recognise its files; if the root is later moved out of scope, those 57 entries become irrelevant rather than resolved, and the baseline shrink recorded here would look like an improvement that never happened. The membership question is the document owner's, per the ruling's §6."
+  - id: AID-2026-054-F5
+    severity: P2
+    feedback_destination: "Delivery PR conversation. test_gate_normative_roots.py fails 3 tests and errors on 21 at main, before this change. They are Windows temp-path assertion mismatches and are unrelated, but they mean the gate's own regression suite is not green, so a new failure in that suite would be hard to attribute. Hard constraint 5 forbids touching them and requires reporting any change in the count. The bilingual gate therefore has no trustworthy end-to-end regression net today; that gap is real and is not created by this work order."
+
+notes:
+  - "The floor of 100 CJK / 1000 Latin is calibrated, not preferred. All 86 accepted pairs clear it by a factor of at least four, and a Chinese-only or English-only document fails it. The number matters less than the fact that it is two-sided."
+  - "13-engineering-decisions/technology-architecture-blueprint.md is 0 CJK in 49666 bytes. It is the only file in its root that is genuinely single-language, and it is the control that proves the predicate is not simply accepting everything."
