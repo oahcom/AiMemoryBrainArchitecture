@@ -26,17 +26,17 @@ prompt_id: AID-2026-050-PROMPT
 prompt_version: v1
 prompt_file: 14-ai-development/work-items/AID-2026-050/prompt-v1.md
 prompt_status: FROZEN
-prompt_sha256: aa964075ae38fbc91efee54ffefb74df3c582d9b9f7d1391194633aa8fde098d
+prompt_sha256: bdbcd3d2000aca753dcc9ab8a21bbec11270cc7d6c079b740c2244ff94ada338
 prompt_bytes: 8497
 
 prompt_provenance_tier: T1
-prompt_provenance_note: "Frozen from the owner-proxy session that measured GAP-16 at 6212ec75 and authored OWNER-DECISION-BMCP-MCP-DISPATCH-001. The SHA-256 identifies the committed prompt-v1.md bytes exactly; the prompt is the file, and the file is what the delivery session reads."
+prompt_provenance_note: "Frozen from the owner-proxy session that measured GAP-32 at 6212ec75 and authored OWNER-DECISION-BMCP-MCP-DISPATCH-001. The SHA-256 identifies the committed prompt-v1.md bytes exactly; the prompt is the file, and the file is what the delivery session reads."
 
 dependency_refs:
   - crates/bmcp-protocol/src/lib.rs
   - crates/bmcp-server/src/lib.rs
   - 14-ai-development/adr/OWNER-DECISION-BMCP-MCP-DISPATCH-001.md
-  - 14-ai-development/work-items/GAP-16-DISPATCH-LANDED-TOOLS-ABSENT.md
+  - 14-ai-development/work-items/GAP-32-DISPATCH-LANDED-TOOLS-ABSENT.md
   - 08-bmcp-protocol/protocol-index.md
   - 08-bmcp-protocol/schemas/
 
@@ -99,10 +99,10 @@ verification:
 findings:
   - id: AID-2026-050-F1
     severity: P1
-    feedback_destination: "Delivery PR conversation. GAP-15 §4 recorded 19 unparsed message types at fb37a44b. At 021f5a3f the count of types with no Rust recognition is 0, because parse_dispatch landed via 6007782b, which is an ancestor of main but not an ancestor of fb37a44b. Any session that trusts the stale figure will re-implement merged work. GAP-16 exists to prevent that recurrence."
+    feedback_destination: "Delivery PR conversation. GAP-31 §4 recorded 19 unparsed message types at fb37a44b. At 021f5a3f the count of types with no Rust recognition is 0, because parse_dispatch landed via 6007782b, which is an ancestor of main but not an ancestor of fb37a44b. Any session that trusts the stale figure will re-implement merged work. GAP-32 exists to prevent that recurrence."
   - id: AID-2026-050-F2
     severity: P2
-    feedback_destination: "Delivery PR conversation. OWNER-DECISION-BMCP-MCP-DISPATCH-001 §3.2 specified {\"valid\":true,\"message_type\":...} for the success envelope before DispatchValidationState existed in its current three-state form. Applied literally, that envelope lets a RootDiscriminatorOnly message be reported as valid without qualification. GAP-16 §7 criterion 3 and this prompt both require validation_state on every success, which preserves the ruling's intent while refusing to let the tool claim more than the arm established."
+    feedback_destination: "Delivery PR conversation. OWNER-DECISION-BMCP-MCP-DISPATCH-001 §3.2 specified {\"valid\":true,\"message_type\":...} for the success envelope before DispatchValidationState existed in its current three-state form. Applied literally, that envelope lets a RootDiscriminatorOnly message be reported as valid without qualification. GAP-32 §7 criterion 3 and this prompt both require validation_state on every success, which preserves the ruling's intent while refusing to let the tool claim more than the arm established."
   - id: AID-2026-050-F3
     severity: P2
     feedback_destination: "Delivery PR conversation. The obvious way to satisfy criterion 4 is a loop over the 20 type strings. A loop is acceptable only if it is driven from a list that is itself checked against parse_dispatch's match arms, otherwise the test and the implementation can drift together and still pass. Prefer an explicit case per type, or a list plus a test that asserts the list length equals the arm count."

@@ -10,7 +10,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-23"
-      last_verification_note: "Every figure in §2 was measured at main 021f5a3f in this session, and each is given with the command that produced it. The three figures GAP-15 recorded at fb37a44b are reproduced and their expiry is explained in §3 rather than quietly overwritten."
+      last_verification_note: "Every figure in §2 was measured at main 021f5a3f in this session, and each is given with the command that produced it. The three figures GAP-31 recorded at fb37a44b are reproduced and their expiry is explained in §3 rather than quietly overwritten."
     usage_status: Active
     modification_status: Unchanged
 
@@ -25,18 +25,18 @@ document_metadata:
     zh-CN: null
 ---
 
-# GAP-16 — the dispatch landed; the tool that would consume it did not
+# GAP-32 — the dispatch landed; the tool that would consume it did not
 
 **Status:** open · **Severity:** Tier 2 (blocks no gate; blocks every consumer) · **Owner:** H (binding, already ruled), delivery session (implementation)
-**Measured at:** `021f5a3f` · **Supersedes the BMCP figures in:** `GAP-15` §4 · **Implements:** `OWNER-DECISION-BMCP-MCP-DISPATCH-001`
+**Measured at:** `021f5a3f` · **Supersedes the BMCP figures in:** `GAP-31` §4 · **Implements:** `OWNER-DECISION-BMCP-MCP-DISPATCH-001`
 
 ---
 
 ## 1. Why this file exists
 
-`GAP-15` recorded, at `fb37a44b`, that 19 of the 22 BMCP message types had no Rust recognition, and that 2 public parsers existed. Those figures were correct at that commit. They are no longer correct, and the reason is not a mistake in the measurement — it is that `main` is not a line.
+`GAP-31` recorded, at `fb37a44b`, that 19 of the 22 BMCP message types had no Rust recognition, and that 2 public parsers existed. Those figures were correct at that commit. They are no longer correct, and the reason is not a mistake in the measurement — it is that `main` is not a line.
 
-`fb37a44b` and `6007782b` are both ancestors of `main` and neither is an ancestor of the other; their merge base is `b47bd97c`. Measuring at `fb37a44b` therefore cannot see `6007782b`, and a reader who takes a stale figure for a current one will dispatch work that is already merged. That is the failure `GAP-15` was written to prevent, so this file prevents it again rather than letting the correction live in a PR description.
+`fb37a44b` and `6007782b` are both ancestors of `main` and neither is an ancestor of the other; their merge base is `b47bd97c`. Measuring at `fb37a44b` therefore cannot see `6007782b`, and a reader who takes a stale figure for a current one will dispatch work that is already merged. That is the failure `GAP-31` was written to prevent, so this file prevents it again rather than letting the correction live in a PR description.
 
 ## 2. Measured state at `021f5a3f`
 
@@ -72,7 +72,7 @@ This is the correct design for an unfrozen wire mapping: it makes the un-validat
 
 `parse_dispatch` is `pub`. Nothing in the workspace calls it. `bmcp-server` exposes two tools, both hardwired to `APPLIED_DELIVERY_EVIDENCE_RECORDED` via `parse_and_validate`, and reaches no dispatch path at all.
 
-This is the same shape `GAP-15` §4 described — a parser with no consumer — one layer up. The owner ruling removed the *contract* objection (what the tool is called, what it returns, what it must never return). It did not remove the *implementation* gap, and §6 of that ruling says so explicitly.
+This is the same shape `GAP-31` §4 described — a parser with no consumer — one layer up. The owner ruling removed the *contract* objection (what the tool is called, what it returns, what it must never return). It did not remove the *implementation* gap, and §6 of that ruling says so explicitly.
 
 ## 5. What is genuinely left
 
