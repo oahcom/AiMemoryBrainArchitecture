@@ -5,10 +5,16 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   audit:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Audit self-hosted runner admission
+      - name: Enforce GitHub-hosted runner policy
         run: python3 scripts/ci/audit_runner_admission.py
+      - name: Test runner policy auditor
+        run: python3 scripts/ci/test_audit_runner_admission.py

@@ -1,95 +1,55 @@
 # Remote worker inventory — non-secret metadata only.
-# Never add passwords, private keys, PATs, runner registration tokens,
-# webhook secrets, or model-provider credentials to this file.
+# The machine remains available for authorized development/operations tasks.
+# GitHub Actions self-hosted runner duties are retired as of 2026-11-23.
 
-schema_version: "1.1"
+schema_version: "1.2"
 worker_id: null
-display_name: "User-managed remote worker (details withheld)"
+display_name: "User-managed development server (details withheld)"
 provider: "user-managed-remote-host"
 endpoint:
-  host: null # Redacted from public repository; keep endpoint in an access-controlled operations record.
+  host: null
   port: null
   username: null
   transport: "ssh"
   host_key_fingerprint_status: "NOT_VERIFIED"
   host_key_fingerprint: null
   tailscale:
-    device_name: null # Redacted from public repository.
-    ipv4: null # Redacted from public repository.
+    device_name: null
+    ipv4: null
     daemon_enabled: true
     daemon_active: true
-    evidence: "User-provided server-console output; not independently queried by deployment controller."
+    evidence: "Existing host configuration; not a statement of CI runner availability."
 purpose:
-  - "GitHub Actions self-hosted runner"
-  - "Future event-driven A-I Owner worker execution substrate"
+  - "Authorized project development and repository work"
+  - "Future event-driven A-I Owner worker execution substrate, only after separate approval"
 runner:
-  name: "REDACTED — see access-controlled operations record"
-  version: "2.338.2"
-  architecture: "linux-x64"
-  labels: ["self-hosted", "linux", "x64"]
-  custom_label_status: "DEFERRED — adding ai-worker requires re-registration with a one-time token; see AI-RUN-002-RUNBOOK 4.2"
-  install_path: "WITHHELD — see access-controlled operations record"
-  work_folder: "_work"
-  service_unit: "WITHHELD — see access-controlled operations record"
-  drop_ins:
-    - "proxy.conf (host-specific proxy endpoint and service dependencies withheld)"
-    - "guard.conf (ACTIONS_RUNNER_HOOK_JOB_STARTED)"
-  egress_chain: "REDACTED — operational network topology is maintained in an access-controlled operations record"
+  deployment_status: "RETIRED"
+  retired_date: "2026-11-23"
+  repository: "oahcom/AiMemoryBrainArchitecture"
+  previous_name: "zesu-x64"
+  previous_id: 21
+  previous_labels: ["self-hosted", "linux", "x64"]
+  service_status: "DISABLED_INACTIVE"
+  service_unit_status: "DISABLED_NOT_MASKED"
+  registration_status: "REGISTERED_OFFLINE_UNVERIFIED"
+  local_auth_material_status: "REMOVED"
+  install_directory_status: "RETAINED_FOR_AUDIT"
+  note: "The systemd service is disabled and inactive, no Runner processes remain, and local .credentials/.credentials_rsaparams files were removed. GitHub registration id 21 has not been confirmed deregistered; remove it through repository Settings > Actions > Runners. The local installation directory and non-secret .runner metadata are retained for auditability. No repository workflow may target a server-side runner."
 runtime:
-  deployment_status: "DEPLOYED"
-  runner_status: "REGISTERED — live status withheld from public inventory"
-  persistent_service_status: "WITHHELD — see access-controlled operations record"
-  runner_evidence: "Execution evidence is retained in GitHub Actions; exact operational correlation is withheld from this public inventory."
-  diagnostic_workflow_status: "NOT_RUN — no exact workflow_dispatch run evidenced"
-  reboot_recovery_status: "NOT_VERIFIED"
-  reboot_recovery_note: "Boot recovery has not been physically tested; host-specific service topology is withheld."
-  runner_admission_selftest_status: "SUCCEEDED — tested on main push and one feature-branch negative case"
-  untrusted_pr_isolation_status: "L1_HOOK_NEGATIVE_CASE_TESTED; INDEPENDENT_REVIEW_PENDING"
-  untrusted_pr_isolation_evidence: "Run 44050069421 denied one feature-branch push before workflow steps. This is a single negative-path test, not proof of complete isolation or sudo containment."
-  runner_admission_selftest_evidence: "Runs 44049832708 and 44050467500 succeeded on main push; run 44050069421 denied one feature-branch push before workflow steps. This is bounded L1 hook evidence, not complete isolation proof."
+  deployment_status: "DEVELOPMENT_HOST_ONLY"
+  runner_status: "RETIRED"
+  persistent_runner_service_status: "DISABLED"
   owner_workers_status: "NOT_DEPLOYED"
 credentials:
   password: "DO_NOT_STORE"
   ssh_private_key: "EXTERNAL_SECRET_STORE_ONLY"
-  github_runner_registration_token: "GENERATE_JUST_IN_TIME"
+  github_runner_registration_token: "GENERATE_JUST_IN_TIME_IF_A_FUTURE_OWNER_DECISION_REVERSES_RETIREMENT"
   llm_provider_credentials: "EXTERNAL_SECRET_STORE_ONLY"
 security:
-  require_password_rotation_before_bootstrap: true
-  require_out_of_band_host_fingerprint_verification: true
-  require_least_privilege_service_account: true
-  least_privilege_service_account_status: "OWNER_REVIEW_REQUIRED"
-  require_untrusted_pr_isolation: true
   prohibit_secrets_in_git: true
-  admission_control:
-    policy: "Only refs/heads/main is admitted, and only for push, workflow_dispatch, or schedule."
-    service_layer:
-      status: "ENFORCED"
-      mechanism: "ACTIONS_RUNNER_HOOK_JOB_STARTED -> host-local admission hook (path withheld from public inventory)"
-      log: "host-local guard log (path withheld from public inventory)"
-      rollback_switch: "host-local emergency observe flag (path withheld from public inventory)"
-    repository_layer:
-      status: "AVAILABLE_NOT_BINDING"
-      mechanism: ".github/workflows/runner-admission-policy.yml + scripts/ci/audit_runner_admission.py"
-      note: "Preventive only; binding once the check is required on main."
-    organization_layer:
-      status: "NOT_ENABLED"
-      controls: ["branch protection on main", "environments with required approval", "repository-scoped runner group"]
-      note: "The hook observed GITHUB_REF_PROTECTED=false on 2026-11-17."
-deviations:
-  - id: "run-identity"
-    accepted_on: "2026-11-17"
-    planned: "Dedicated actions-runner account under /opt/actions-runner without sudo."
-    actual: "Existing general-purpose account with passwordless sudo; account name and installation path withheld."
-    decision_source: "DOC-OPS-001 section 4; AI-RUN-002-RUNBOOK 0.1"
-    residual_risk: "An admitted workflow can sudo. Containment needs NoNewPrivileges or a separate account."
+  future_runner_redeployment_requires_explicit_owner_decision: true
 governance:
   tracking_issue: 26
-  architecture_document: "14-ai-development/continuous-owner-runtime-architecture.en.md (zh pair: continuous-owner-runtime-architecture.zh-CN.md)"
-  runner_runbook: "14-ai-development/ubuntu-self-hosted-runner-bootstrap.en.md (AI-RUN-002-RUNBOOK v1.1; zh pair: ubuntu-self-hosted-runner-bootstrap.zh-CN.md)"
-  operations_design: "docs/zh-CN/14-ai-development/ci-runner-operations.md and docs/en/14-ai-development/ci-runner-operations.md (DOC-OPS-001)"
-  status_claims:
-    tailscale_connected: null # Connectivity state is withheld from the public inventory.
-    runner_online: true
-    runner_executed_real_job: true
-    worker_runtime_online: false
-    continuous_a_i_operation: false
+  historical_runner_runbook: "14-ai-development/ubuntu-self-hosted-runner-bootstrap.en.md (retired 2026-11-23; Chinese pair alongside)"
+  ci_policy: ".github/workflows/runner-admission-policy.yml + scripts/ci/audit_runner_admission.py"
+  current_ci_policy: "All workflow jobs must use GitHub-hosted ubuntu-latest; enforced by the runner policy workflow."

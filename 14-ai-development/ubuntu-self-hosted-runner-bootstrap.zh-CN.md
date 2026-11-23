@@ -1,8 +1,37 @@
+---
+document_metadata:
+  domain: ai-development
+  role: guide
+  lifecycle:
+    approval:
+      decision_status: Draft
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-23"
+      last_verification_note: "Owner 已决定退役服务器端 GitHub Actions Runner；当前 CI 统一使用 GitHub 托管的 ubuntu-latest Runner。"
+    usage_status: Deprecated
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: "服务器端 GitHub Actions Runner 已退役。本引导流程仅保留为历史证据，不得用于安装或恢复服务器 Runner。"
+      effective_date: "2026-11-23"
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Informative
+---
+
+> **已退役 — 2026-11-23。** Owner 已决定服务器不再运行 GitHub Actions 自托管 Runner；CI 统一使用 GitHub 托管的 `ubuntu-latest` Runner。本文件仅保留为历史记录，不得据此安装、启动或恢复服务器 Runner。
+
 # Ubuntu 自托管运行器引导运维手册 / Ubuntu Self-Hosted Runner Bootstrap Runbook
 
 **Document:** AI-RUN-002-RUNBOOK  
 **Version:** 1.1 (revised 2026-11-17)  
-**Deployment status:** ACTIVE / 由操作人员执行。**Security acceptance:** BLOCKED / 等待独立基础设施安全 Owner 作出决定。v1.1 记录的是已部署状态；它不构成安全验收。  
+**Deployment status:** RETIRED 2026-11-23. **Security acceptance:** historical record only.
 **Target:** `[HOST IDENTIFIER WITHHELD]`, runner name `[RUNNER IDENTIFIER WITHHELD]`  
 **Tracking:** [Issue #26](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/26)  
 **Normative architecture statement:** DOC-OPS-001、`docs/zh-CN/14-ai-development/ci-runner-operations.md` 和 `docs/en/14-ai-development/ci-runner-operations.md`。这一对文档以双语形式说明了已部署的形态、安全边界和准入策略。本文件是执行流程。  

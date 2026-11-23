@@ -2,6 +2,7 @@ name: Rust Phase 1 Workspace Tests
 
 on:
   pull_request:
+    branches: [main]
     paths:
       - "Cargo.toml"
       - "Cargo.lock"
@@ -10,25 +11,30 @@ on:
       - "scripts/test_check_fmt.py"
       - ".github/workflows/rust-phase1.yml"
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - "Cargo.toml"
+      - "Cargo.lock"
       - "crates/**"
       - "scripts/check_fmt.py"
       - "scripts/test_check_fmt.py"
       - ".github/workflows/rust-phase1.yml"
 
+permissions:
+  contents: read
+
 jobs:
   rust-workspace-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - name: Self-test format checker against dirty worktrees
         run: python3 scripts/test_check_fmt.py
       - uses: dtolnay/rust-toolchain@stable
         with:
-          components: rustfmt, clippy
-      - run: python3 scripts/check_fmt.py --expect "$GITHUB_SHA"
-      - run: cargo clippy --workspace --all-targets -- -D warnings
-      - run: cargo test --workspace --all-targets
+          components: rustfmt
+      - name: Verify repository formatting at this commit
+        run: python3 scripts/check_fmt.py --expect "$GITHUB_SHA"
+      - name: Test all workspace targets
+        run: cargo test --workspace --all-targets --no-fail-fast

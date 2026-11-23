@@ -4,10 +4,8 @@ name: Branch freshness
 # branch shows changes it did not make and hides changes main made that it
 # re-implements. The diff cannot report its own staleness; the commit graph can.
 #
-# Hosted runner, deliberately. `pull_request` on a self-hosted job is rejected
-# by the runner's job-started hook (§4.1 L1, `ref_not_default_branch`) and by
-# scripts/ci/audit_runner_admission.py (L2), and this job only needs the commit
-# graph, not a toolchain. It is cheap enough for hosted minutes.
+# GitHub-hosted runner. Server-side/self-hosted Actions runners are retired;
+# the repository policy workflow rejects any non-ubuntu-latest job.
 #
 # `fetch-depth: 0` is load-bearing: a shallow clone does not contain the merge
 # base, and the gate exits 2 rather than guessing.

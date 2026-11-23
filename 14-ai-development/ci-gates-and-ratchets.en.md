@@ -42,6 +42,8 @@ document_metadata:
     en: null
     zh-CN: null
 ---
+> **CI runner update — 2026-11-23:** All active workflow jobs now use GitHub-hosted `ubuntu-latest` runners. Any self-hosted runner topology, admission-hook, disk-reclaim, or runner-queue descriptions below are historical and must not be used as current operational instructions. The active policy is enforced by `.github/workflows/runner-admission-policy.yml`.
+
 
 # CI gates and ratchets
 
@@ -514,4 +516,3 @@ after this branch merges — or immediately if someone with push rights to `main
 cherry-picks the file there. Until then, the evidence in §7.4 is execution of the
 exact step bodies, not of the workflow, and this document does not present it as
 a green check run.
-

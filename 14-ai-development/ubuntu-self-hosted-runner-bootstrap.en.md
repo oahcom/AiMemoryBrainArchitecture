@@ -1,8 +1,37 @@
+---
+document_metadata:
+  domain: ai-development
+  role: guide
+  lifecycle:
+    approval:
+      decision_status: Draft
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-23"
+      last_verification_note: "The server-side GitHub Actions Runner was retired by Owner decision; active CI now uses GitHub-hosted ubuntu-latest runners."
+    usage_status: Deprecated
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: "The server-side GitHub Actions Runner is retired. This bootstrap procedure is retained only as historical evidence and must not be used to install or restore a server runner."
+      effective_date: "2026-11-23"
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Informative
+---
+
+> **RETIRED — 2026-11-23.** Owner decision: this server no longer runs GitHub Actions self-hosted runners. CI uses GitHub-hosted `ubuntu-latest` runners. This file is retained as historical evidence only; do not use it to install, start, or restore a server runner.
+
 # Ubuntu Self-Hosted Runner Bootstrap Runbook
 
 **Document:** AI-RUN-002-RUNBOOK  
 **Version:** 1.1 (revised 2026-11-17)  
-**Deployment status:** ACTIVE / operator-executed. **Security acceptance:** BLOCKED / pending independent infrastructure-security Owner decision. v1.1 records the deployed state; it does not establish security acceptance.  
+**Deployment status:** RETIRED 2026-11-23. **Security acceptance:** historical record only.
 **Target:** `[HOST IDENTIFIER WITHHELD]`, runner name `[RUNNER IDENTIFIER WITHHELD]`  
 **Tracking:** [Issue #26](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/26)  
 **Normative architecture statement:** DOC-OPS-001, `docs/zh-CN/14-ai-development/ci-runner-operations.md` and `docs/en/14-ai-development/ci-runner-operations.md`. That pair states the deployed shape, the security boundary, and the admission policy bilingually. This file is the execution procedure.  

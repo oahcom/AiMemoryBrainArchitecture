@@ -42,6 +42,8 @@ document_metadata:
     en: null
     zh-CN: null
 ---
+> **CI Runner 更新 — 2026-11-23：** 所有活动工作流现统一使用 GitHub 托管的 `ubuntu-latest` Runner。下文涉及自托管 Runner 拓扑、准入 Hook、磁盘回收或 Runner 队列的描述均为历史记录，不得作为当前运维指令。当前策略由 `.github/workflows/runner-admission-policy.yml` 强制检查。
+
 
 # CI 门禁与棘轮
 
