@@ -180,3 +180,20 @@ BASE_SHA=<base> HEAD_SHA=<head> PR_BODY="$(cat pr_body.txt)" \
 **Register status**: `ACCEPTED` / `CI_NOT_EXECUTED` / gate logic actually executed in 36 hours: **0** / merges in the same window: **85** / of which `APPROVED`: **0**
 
 Owner ruling (2026-11-21): the statistics, the boundary and the `NOT_EXECUTED` classification are accepted. It also states explicitly that **this register may stand as a governance fact but must not be used to claim the repository's gate itself passes or fails**; #419's local exact-head run is compensating evidence, not CI execution evidence.
+
+---
+
+## 11. The execution side was restored on 2026-11-22 (note added 2026-11-23)
+
+The body and the counts of this register are **not changed**. It records facts about the 36-hour window that began at 2026-11-19T16:12Z, and those facts have not changed.
+
+But this register's status line is present tense ("the execution side is entirely absent"), and the execution side has been restored. First real executions:
+
+| | first `cargo test --workspace --all-targets` | run | head | runner |
+|---|---|---|---|---|
+| self-hosted | 2026-11-22T10:17:02Z | `45011672799` | `550bb864` | `zesu-x64` |
+| GitHub-hosted | 2026-11-22T15:15:13Z | `45037267638` | `38c3c975` | `GitHub Actions 1000005167` |
+
+Consequence: this register's restriction — that it "must not be used to claim the repository's gate itself passes or fails" — **remains in force** (executed is not trustworthy). But the reading "CI does not execute in this repository" **has expired**. Anyone citing this register as the basis for that premise must cite `GOV-NC-2026-11-23-EXECUTION-RESTORED-029` instead.
+
+This note was added by an owner-proxy session. It is not an independent review, and it does not change this register's `ACCEPTED` status — that status is a ruling about **the counts within the window**, not a judgement about present capability.

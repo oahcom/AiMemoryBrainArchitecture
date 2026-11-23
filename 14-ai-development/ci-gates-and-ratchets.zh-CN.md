@@ -130,9 +130,20 @@ schema 里的全部 5599 条约束。现在该审计在 `main` 上退出 0。
   而这台主机的可用空间在**不构建**的运行之间都在缩（见 §5）。花两倍代价去换一个和另一个 Job
   互相矛盾的数字，是严格亏本的交易。
 
-保留 `cargo clippy --workspace --all-targets -- -D warnings`，因为它是真正无人覆盖的：
-`rust-phase1.yml` 里有 clippy，但它是 `runs-on: ubuntu-latest`，在本账户下根本分配不到 runner，
-因此从未执行过。clippy 就是这个 Job 的独立价值。
+保留 `cargo clippy --workspace --all-targets -- -D warnings`，曾因为它是真正无人覆盖的：
+`rust-phase1.yml` 里有 clippy，但它是 `runs-on: ubuntu-latest`，在本账户下当时根本分配不到
+runner，因此从未执行过。clippy 曾是这个 Job 的独立价值。
+
+**该前提已于 2026-11-22 失效。** 托管分钟恢复后，`rust-phase1.yml` 现在对每个触及 `crates/**`
+的 `pull_request` 执行 clippy——首次观测为 run `45037267638`，`2026-11-22T15:15:13Z`，head
+`38c3c975`，runner `GitHub Actions 1000005167`。它还会与本 Job 在**同一提交**上同时执行：
+`d238dd4a` 与 `0dc8f5a2` 在本工作流与 `rust-phase1.yml` 中均为 clippy `success`。
+
+因此这个 Job 现在是**刻意的冗余，而不是唯一覆盖**。两者不等价，差别是实测出来的：在
+`6b97a659` 上，本 Job 在 `actions/checkout` 失败后 clippy 步骤为 `skipped`，而同一提交的
+`rust-phase1.yml` clippy 为 `success`。删掉本 Job，clippy 结论就只剩一条依赖计费状态的工作流，
+而计费状态在 2026-11-22 刚刚失败过一次。是否为两条腿付账是取舍决定，不是改注释能解决的。
+测量见 `GOV-NC-2026-11-23-EXECUTION-RESTORED-029`。
 
 后果已写进工作流本身：rustfmt 与测试套件**不**由 `gates.yml` 设卡，它们由 `rust-self-hosted.yml`
 设卡。若那个工作流被删除，`clippy` Job 必须把它们加回来——并且要带 `--all-targets`。

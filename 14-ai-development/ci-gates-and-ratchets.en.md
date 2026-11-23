@@ -166,10 +166,26 @@ either here is worse than doing nothing:
   (§5). Paying that twice to obtain a number that contradicts the other job's
   number is a strictly bad trade.
 
-`cargo clippy --workspace --all-targets -- -D warnings` is kept because it is
-genuinely uncovered: `rust-phase1.yml` has clippy, but it is
-`runs-on: ubuntu-latest`, which on this account is allocated no runner at all, so
-it has never executed. Clippy is the independent value of this job.
+`cargo clippy --workspace --all-targets -- -D warnings` was kept because it was
+genuinely uncovered: `rust-phase1.yml` had clippy, but it is `runs-on:
+ubuntu-latest`, which on this account was allocated no runner at all, so it had
+never executed. Clippy was the independent value of this job.
+
+**That premise expired on 2026-11-22.** Hosted minutes were restored, and
+`rust-phase1.yml` now executes clippy on every `pull_request` that touches
+`crates/**` — first observed at run `45037267638`, `2026-11-22T15:15:13Z`, head
+`38c3c975`, on runner `GitHub Actions 1000005167`. It also runs on the same
+commits as this job: `d238dd4a` and `0dc8f5a2` both show clippy `success` in
+this workflow and in `rust-phase1.yml`.
+
+The job is therefore **deliberate redundancy, not unique coverage**. The two are
+not interchangeable, and the difference is measured: on `6b97a659` this job's
+clippy step was `skipped` after `actions/checkout` failed, while
+`rust-phase1.yml`'s clippy on the same commit was `success`. Deleting this job
+would leave the clippy verdict resting on one workflow whose availability
+depends on billing status, which failed as recently as 2026-11-22. Whether to
+pay for two is a trade-off decision, not a comment edit.
+`GOV-NC-2026-11-23-EXECUTION-RESTORED-029` records the measurements.
 
 The consequence is stated in the workflow itself: rustfmt and the test suite are
 **not** gated by `gates.yml`. They are gated by `rust-self-hosted.yml`. If that

@@ -60,6 +60,7 @@ It is **not** a place to record acceptance, approval, or review conclusions. Not
 | `GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026` | Evidence domain contract conformance | High | `OPEN` / `WP-B DISPATCHED` (`AID-2026-053`); WP-A not writable | 1 entity, 2 work packages; WP-A lacks three contract type definitions |
 | `GOV-NC-2026-11-22-PROVENANCE-REFERENCE-REVALIDATION-027` | Provenance reference revalidation | High | `OPEN` / `DISPATCHED` (`AID-2026-052`) | 4 reference field groups, differing shapes |
 | `GOV-NC-2026-11-23-PROVENANCE-GRAPH-ADD-SIGNATURE-028` | `ProvenanceGraph::add` public signature change | High | `CLOSED-BY-RULING` / classification corrected | 1 public signature, 2 citation errata |
+| `GOV-NC-2026-11-23-EXECUTION-RESTORED-029` | Execution side restored; 005's present-tense claims no longer hold | High | `OPEN` / `MEASUREMENT_ONLY` | 2 first executions, 3 refuted present-tense claims |
 
 ## Evidence
 
