@@ -99,3 +99,5 @@ Terms in this document are normative within this repository. A subsystem specifi
 - **Permission** answers “who may perform which operation?”
 
 <!-- negative-control probe for #727; this PR is closed unmerged -->
+
+<!-- probe line 2: forces a synchronize event -->
