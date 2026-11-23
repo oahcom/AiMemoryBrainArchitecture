@@ -17,6 +17,7 @@ document_metadata:
         included_assets: []
       approval_applicability: Applicable-To-Current-Version
       evidence_reference:
+        - "Issue #751 comment 7097692424 — owner ruling that the five DECIDED records must agree with their own bodies"
         - "14-ai-development/adr/OWNER-DECISION-EVIDENCE-CONTRACT-001.md — the DECIDED line in this document names the decider and the date"
       revocation: null
     evidence_verification:
@@ -24,7 +25,7 @@ document_metadata:
       last_verified_date: "2026-11-23"
       last_verification_note: "Every figure in §2 and §3 was measured at main 13c6d95d in this session: the four contract types were searched for a definition with git grep over crates/; the two EvidenceKinds were read from crates/memory-domain/src/lib.rs and crates/bmcp-protocol/src/lib.rs; the absence of a dependency from bmcp-protocol on memory-domain was read from its Cargo.toml; and every construction site of the four non-contract EvidenceKind values was enumerated repo-wide, returning none. The `Instant` row in §2 was re-measured at 13c6d95d in this revision, and the earlier count was wrong: it said 12 occurrences, all `std::time::Instant` in `bmcp-server`, when the measured figure is 44 occurrences in 9 files across 4 crates, 38 of them `std::time::Instant` and 6 `TimeValue::Instant(String)`."
     usage_status: Active
-    modification_status: Modified
+    modification_status: Unchanged
 
   authority:
     canonical_status: Canonical
@@ -201,91 +202,3 @@ Recorded here so the dispatch does not have to re-derive it, and so a reader can
 5. `bmcp-protocol` is untouched, and the dispatch says so explicitly.
 6. Every removed variant is removed because it has zero construction sites — verified, not assumed.
 7. No change to `Evidence`'s fields. That is WP-A, and WP-A is blocked.
-
-## 9. Corrections measured after this ruling was merged
-
-Three figures in §3 and one conclusion in §6 do not survive re-measurement at main `1c47002c`. They are recorded here rather than edited in place, so the record shows both what was ruled and what was later found. Nothing in this section re-decides anything: D1, D2 and D3 stand, and §9.4 states exactly how far the corrections reach.
-
-### 9.1 `Instant` is not a count of twelve, and it is not confined to `bmcp-server`
-
-§3's table says:
-
-> | `Instant` | **no** | 12, all of them `std::time::Instant` in `bmcp-server` — unrelated |
-
-Measured at `1c47002c`:
-
-```
-$ grep -rn "Instant" --include=*.rs crates/ | wc -l
-44
-$ grep -rl "Instant" --include=*.rs crates/ | wc -l
-9
-$ grep -rn "std::time::Instant" --include=*.rs crates/ | wc -l
-11
-```
-
-Per file:
-
-```
-15  crates/bmcp-server/src/response_writer.rs
- 9  crates/bmcp-server/tests/rt_scenarios.rs
- 5  crates/memory-storage-sqlite/src/lib.rs
- 4  crates/memory-domain/tests/phase2_acceptance.rs
- 4  crates/bmcp-server/src/lib.rs
- 3  crates/memory-storage-sqlite/examples/commit_hot_path.rs
- 2  crates/memory-event-store-sqlite/src/lib.rs
- 1  crates/memory-domain/src/lib.rs
- 1  crates/memory-domain/src/claim_identity.rs
-```
-
-Most of those are still `std::time::Instant`, so the table's conclusion — the monotonic wall-clock type is unrelated to §8 — holds. Its count and its location do not: the count is 44, not 12, and it is not confined to one crate.
-
-### 9.2 An instant can be typed today, so "cannot be typed at all" is not the blocker
-
-§3 concludes:
-
-> Until it is decided, `Instant` cannot be typed, and `recorded_at` and `observed_at` cannot move off `String`.
-
-`observed_at` has already moved. `crates/memory-domain/src/lib.rs:216` defines:
-
-```rust
-pub enum TimeValue {
-    Instant(String),
-    Interval { start: String, end: String },
-    Unknown,
-}
-```
-
-`EvidenceExtension.observed_at` is `Option<TimeValue>` (`lib.rs:1292`), and `Event.occurred_at` is `Option<TimeValue>` (`lib.rs:235`). `TimeValue::Instant` is constructed at `claim_identity.rs:370` and exercised in `tests/phase2_acceptance.rs:348`, `:1147` and `:1159`.
-
-So there is a type that models an instant, it is already wired into the entity §8 talks about, and it is test-covered. What remains unresolved is narrower than the ruling states:
-
-- `TimeValue::Instant(String)` carries an untyped string. Whether it satisfies §8's `Instant` depends on the precision decision §14 leaves OPEN, which this ruling was right not to pre-empt.
-- Moving `Evidence.recorded_at` onto it would replace `String` with `String` inside a variant. Whether that is conformance or renaming depends on the same OPEN decision.
-
-**D1 stands; its stated ground does not.** WP-A is blocked because §8's `Instant` has no agreed contract — not because the workspace cannot name an instant. The operative consequence is unchanged: no dispatch is owed until §14 is decided. The difference matters for the next reader, who will open `memory-domain/src/lib.rs`, find `TimeValue::Instant`, and conclude this ruling was wrong about the facts. It was, in that one sentence, and this is the correction.
-
-### 9.3 There are three `EvidenceKind::Document` construction sites, not one
-
-§3's row reads:
-
-> | `EvidenceKind` construction sites in the workspace | **1** — `EvidenceKind::Document` at `memory-domain/src/lib.rs:1700`, `memory-compiler/tests/evidence.rs:48` and `phase2_acceptance.rs:894` |
-
-The count contradicts its own list, and §6 repeats the count ("one construction site, five match arms"). Measured:
-
-```
-$ grep -rn "EvidenceKind::Document" --include=*.rs crates/
-crates/memory-domain/src/lib.rs:1700
-crates/memory-compiler/tests/evidence.rs:48
-crates/memory-domain/tests/phase2_acceptance.rs:894
-```
-
-Three, all `Document`. The zero rows are correct and reproducible: `Message`, `Record`, `Dataset` and `Other(..)` each return no construction site. So does `Observation`, which §3 does not list — it is kept by §8 item 1, and it has never been constructed.
-
-Measured `EvidenceKind::` occurrences in total: 8 across 4 files, of which 5 belong to the unrelated `bmcp_protocol::evidence::EvidenceKind` that §5 identifies. WP-B's real surface is those 3 sites plus the enum's own variants, not 1.
-
-### 9.4 What this section does not change
-
-- **D1 stands.** WP-A stays blocked, no dispatch owed, §14's precision decision remains the gate.
-- **D2 and D3 stand.** `Unavailable` is still the value that must be split, and `bmcp-protocol` is still not a consumer.
-- **WP-B remains authorizable now.** Its dispatch conditions in §8 are unaffected; §8 item 6's "zero construction sites" is measured and correct for every variant it removes.
-- **The register stays OPEN.** Conditions 9 and 10 remain unmet.

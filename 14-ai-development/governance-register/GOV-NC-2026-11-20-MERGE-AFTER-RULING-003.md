@@ -390,4 +390,22 @@ PR #403 合并后，`main` 上随即出现：
 
 ---
 
+### 13.8 PR #750：规范落地 PR 未获正式审查及合并后发现的额外文件
+
+PR #750（`docs(governance): lock merges while a blocking review disposition stands`）于 2026-11-23T05:48:21Z 合并，合并提交为 `9de6a34ecde46e07cc50fed99135c089cc6f383b`。该提交为 squash merge，只有一个父提交。
+
+GitHub 正式 review API 返回空数组；inline review comments 亦为空。因此，没有正式 review 记录证明最终候选 Head 曾获得独立审查确认。
+
+在 PR #750 合并时及本事件首次记录时，根目录的 `_dm.txt` 文件仍存在于 `main`。该文件随后由提交 `694a56e71`（`chore: remove _dm.txt from the repository root (#750 follow-up)`）于 2026-11-23T08:28:29Z 删除；该变更之后通过 PR #762 的合并提交 `bf5497390` 纳入 `main`。此次清理提交还向 `.gitignore` 添加了针对根目录精确路径 `/_dm.txt` 的四行规则，因此最终变更并非纯删除。
+
+合并前四项 CI 检查均为 success。但相关文档门禁仅扫描 `.md` 文件；`.txt` 不在其扫描集合内。因此，这些成功结果不能证明 `_dm.txt` 已经过检查，也不能证明该文件适合提交到仓库。
+
+评论 `#7092757924` 于 2026-11-23T05:49:05Z 发布，比合并时间晚 44 秒，指出 `_dm.txt` 是门禁 stdout 快照并要求删除。该评论是合并后发现，不得将其描述为合并前已提出或已解决的 review finding。
+
+本节只记录可核验的 PR、commit、review、check 和文件事实。不根据 commit author 或 committer 字段推断实际操作人的身份或责任，也不以事后补充记录声称 PR #750 曾获得正式独立审查。
+
+本事件不改变 §13.7 对 PR #707 的统计裁定，也不计入此前冻结的四次零审查合并实例数。它作为规范落地 PR 未获正式独立审查、修正提交引入额外文件且该文件未被既有门禁扫描的独立事实记录。
+
+---
+
 **登记状态更新**：`OPEN` / `NOT_REMEDIATED` / 实例计数 **4（冻结，不变）** / 新增事实：**首次出现「阻断性审查处置已发出、修正未落地即合并」，间隔 27 秒，合并时 check 为 success；该事件单独记录，不计入零审查合并数**
