@@ -659,8 +659,8 @@ def run_changed_paths() -> None:
         _git(root, "commit", "-q", "-m", "seed")
         head = _git(root, "rev-parse", "HEAD")
         expect_gate(
-            "T72 same-HEAD increment is NOT_APPLICABLE, never PASS",
-            root, 2, "--require-changed", head,
+            "T72 same-HEAD increment is NOT_APPLICABLE (exit 3), never PASS",
+            root, 3, "--require-changed", head,
         )
 
     # A pathspec is not a commit ref. It must be rejected before diffing;
@@ -674,8 +674,8 @@ def run_changed_paths() -> None:
             _git(root, "add", "-A")
             _git(root, "commit", "-q", "-m", "seed")
             expect_gate(
-                f"T73 {label} is rejected before diff",
-                root, 2, "--require-changed", bad_ref,
+                f"T73 {label} is rejected before diff (ERROR, exit 1)",
+                root, 1, "--require-changed", bad_ref,
             )
 
     # A real non-empty code-only change remains a valid incremental run. The
