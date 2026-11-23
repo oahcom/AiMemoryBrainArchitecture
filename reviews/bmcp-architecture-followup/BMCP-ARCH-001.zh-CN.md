@@ -285,7 +285,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - H_OWNED_CONTRACTS：Envelope、Versioning 和 Wire 字段名归 H。
 - CROSS_MODULE_CONFLICT：C Request/Attempt ID、H Message ID、领域 Operation ID 不可互换。
 - OPTIONS：(A) 使用 message_id 作为 Request Identity，并将 Response Causation 绑定到该 ID；(B) 引入独立的 request_id/Command Identity，并明确其与 message_id 的映射。
-- RECOMMENDED_OPTION：逻辑身份概念已决定保持区分：message_id、correlation_id、causation_id 和操作级幂等性（operation-level idempotency）。Operation Registry、各 Operation Family 的字段必填性，以及精确 Request/Response Schema 仍为 OPEN。H 继续负责其规范权属范围内的 Envelope 契约，并在冻结前发布明确映射。
+- RECOMMENDED_OPTION：逻辑身份概念已决定保持区分：message_id、correlation_id、causation_id 和操作级幂等性（operation-level idempotency）。Operation Registry、各 Operation Family 的字段必填性，以及精确 Request/Response Schema 仍为 OPEN。
 - MEMORY_COMPILER_IMPACT：E Receipt/Idempotency Identity 保持独立。
 - AGENT_INTEGRATION_IMPACT：C Request/Attempt Mapping 必须明确。
 - D_I_IMPACT：权威不变；Identity Claims 仍由 D/I 校验。
@@ -335,7 +335,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - MODULE：BMCP / H
 - ISSUE_OR_ADR：H Envelope 和 Conformance Matrix
 - DECISION_REQUIRED：Validator 分层、规范 Error Enum、Response Schema、Retryability/脱敏；映射十二类语义错误，不能合并 Authentication/Authorization/Validation/Conflict/Unknown。
-- CURRENT_FACTS：Fail-closed Validation Order 和不同逻辑 Error Classes 已决定。精确 Enum 拼写、Wire Schema、Retry Profile 和 Owner-specific Mapping 仍为 OPEN；当前 H Taxonomy 在 Wire 层面仍为 CANDIDATE。请求中使用的通用错误名称并不意味着这些名称已经全部成为 H 当前存在的 Wire Code。
+- CURRENT_FACTS：Fail-closed Validation Order 和不同逻辑 Error Classes 已决定。精确 Enum 拼写、Wire Schema、Retry Profile 和 Owner-specific Mapping 仍为 OPEN；当前 H Taxonomy 在 Wire 层面仍为 CANDIDATE。
 - H_OWNED_CONTRACTS：Wire/Protocol Validator 和 Error Serialization。
 - CROSS_MODULE_CONFLICT：领域 Validator 和 I Authorization 必须保持 Owner 所有。
 - OPTIONS：保留 H 具体 Code；仅在版本化映射无损时添加 Alias。
@@ -397,7 +397,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 
 ### 7.1.2 H 范围澄清——逻辑决议与精确工件状态
 
-H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体标记为关闭；当前每项状态统一为 `PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN`，并保留 `INDEPENDENCE_UNVERIFIABLE`：
+H 范围澄清记录于 PR #428 comment 7060264372。四项请求**尚未完全关闭**：
 - H-CONFIRM-001：逻辑 Message Identity、Workflow Correlation、Immediate Causation 和 Operation Idempotency 的区分已决定；Operation Family Registry、各 Family 字段必填性、精确 Request/Response Schema、Wire Name/Type 仍 OPEN。
 - H-CONFIRM-002：RFC 8785 JCS 已选为逻辑 Canonicalization 基础；Signed-object Bytes、Digest Exclusion、Signature Suite、Key Lifecycle 和 I Crypto-profile Acceptance 仍 OPEN。
 - H-CONFIRM-003：ACK Evidence 必须先持久记录再发送，并支持幂等重放；缺失 ACK 保持 UNKNOWN；物理持久化拓扑/Adapter 和 Storage Acceptance 仍 OPEN。
