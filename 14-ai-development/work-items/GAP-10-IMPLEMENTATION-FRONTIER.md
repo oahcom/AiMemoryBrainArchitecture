@@ -1163,32 +1163,54 @@ is reading a pre-`#707` tree (§11.2a):
 
 ```sh
 python3 08-bmcp-protocol/scripts/check_protocol_index.py   # unique_message_types=22 PASS
+# COMMIT is whichever tree you are measuring; the path is lower-case.
+COMMIT=bea1c2b
+git show $COMMIT:08-bmcp-protocol/protocol-index.md > protocol-index.tmp
 python3 - <<'PY'
-import re
-txt = open('08-bmcp-protocol/PROTOCOL-INDEX.md', encoding='utf-8').read()
+import re, io
+txt = io.open('protocol-index.tmp', encoding='utf-8', newline='').read()
 seg = txt[txt.index('## Message types'):txt.index('## Complete Schema inventory')]
 types = re.findall(r'^\|\s*`([^`]+)`\s*\|', seg, re.M)
 assert len(types) == 22, len(types)
-open('/tmp/types.txt', 'w').write('\n'.join(types) + '\n')
+io.open('types.tmp', 'w', encoding='utf-8', newline='\n').write('\n'.join(types) + '\n')
 PY
 while IFS= read -r t; do
-  n=$(grep -rl -- "$t" crates/ 2>/dev/null | wc -l)
+  n=$(git grep -l -- "$t" $COMMIT -- crates/ </dev/null 2>/dev/null | wc -l)
   printf '%s %s\n' "$n" "$t"
-done < /tmp/types.txt | sort -n
-# bea1c2b:  3 types with hits; 19 with none
-# 021f5a3f: 22 types with hits;  0 with none   (#707 added the router)
+done < types.tmp | sort -n
+# bea1c2b:     3 types with hits; 19 with none
+# origin/main: 22 types with hits;  0 with none   (#707 added the router)
 ```
 
-One caution on that last loop: `PROTOCOL-INDEX.md` written by Python on Windows
-carries CRLF, and a `while read` over a CRLF list silently matches nothing —
-every type reports 0. Strip `\r` (`tr -d '\r'`) before trusting the counts, or
-the measurement reproduces GAP-15's conclusion for the wrong reason.
+One caution on that last loop: the file the loop *reads* is a list written by
+Python on Windows, and Python's default text mode turns `\n` into `\r\n`. A
+`while read` over a CRLF list silently matches nothing — every type reports 0.
+Strip `\r` (`tr -d '\r'`) before trusting the counts, or the measurement
+reproduces GAP-15's conclusion for the wrong reason.
 
-Applied here: I hit that bug on the first attempt and got 0 recognised for all
-22 types, which reads as "22 absent" and would have been a stronger and
-completely false version of the §11.2 finding. The 3-of-22 figure came from the
-`tr -d '\r'` run. Recorded rather than quietly fixed, because the bug produces
-the conclusion the document already expected.
+This caution was itself wrong on first draft, and the correction matters more
+than the caution. It said `PROTOCOL-INDEX.md` carries CRLF. It does not:
+`git show bea1c2b:08-bmcp-protocol/protocol-index.md | grep -c $'\r'` → **0**,
+and the same at `origin/main`. The CRLF came from the intermediate
+`types.txt` this script writes, not from the index. A reviewer asked whether the
+19 had been produced by the buggy loop; the answer is no, and the index's line
+endings are how that is proved rather than asserted. Writing the caution against
+the wrong file would have sent the next reader to check something that was never
+broken.
+
+Applied here: I hit the bug on the first attempt and got 0 recognised for all 22
+types, which reads as "22 absent" and would have been a stronger and completely
+false version of the §11.2 finding. The 3-of-22 figure came from the `tr -d
+'\r'` run. Recorded rather than quietly fixed, because the bug produces the
+conclusion the document already expected.
+
+Re-measured on both commits after the review, with the loop reading the index
+through `git show` and writing the list with `newline='\n'`:
+
+```
+bea1c2b     types 22  hits 3   misses 19
+origin/main types 22  hits 22  misses 0
+```
 
 ### 11.7 What this errata does not do
 

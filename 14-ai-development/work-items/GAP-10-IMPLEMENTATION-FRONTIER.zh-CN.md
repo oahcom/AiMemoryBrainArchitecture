@@ -1022,29 +1022,47 @@ grep -rn 'parse_dispatch' crates/bmcp-server/ | wc -l    # 0
 
 ```sh
 python3 08-bmcp-protocol/scripts/check_protocol_index.py   # unique_message_types=22 PASS
+# COMMIT 是你要测的那棵树；路径是小写的。
+COMMIT=bea1c2b
+git show $COMMIT:08-bmcp-protocol/protocol-index.md > protocol-index.tmp
 python3 - <<'PY'
-import re
-txt = open('08-bmcp-protocol/PROTOCOL-INDEX.md', encoding='utf-8').read()
+import re, io
+txt = io.open('protocol-index.tmp', encoding='utf-8', newline='').read()
 seg = txt[txt.index('## Message types'):txt.index('## Complete Schema inventory')]
 types = re.findall(r'^\|\s*`([^`]+)`\s*\|', seg, re.M)
 assert len(types) == 22, len(types)
-open('/tmp/types.txt', 'w').write('\n'.join(types) + '\n')
+io.open('types.tmp', 'w', encoding='utf-8', newline='\n').write('\n'.join(types) + '\n')
 PY
 while IFS= read -r t; do
-  n=$(grep -rl -- "$t" crates/ 2>/dev/null | wc -l)
+  n=$(git grep -l -- "$t" $COMMIT -- crates/ </dev/null 2>/dev/null | wc -l)
   printf '%s %s\n' "$n" "$t"
-done < /tmp/types.txt | sort -n
-# bea1c2b:  3 个类型有命中；19 个为 0
-# 021f5a3f: 22 个类型有命中；0 个为 0   （#707 加了路由）
+done < types.tmp | sort -n
+# bea1c2b:     3 个类型有命中；19 个为 0
+# origin/main: 22 个类型有命中；0 个为 0   （#707 加了路由）
 ```
 
-关于最后一个循环的一句提醒：Windows 上的 Python 写出的 `PROTOCOL-INDEX.md` 带 CRLF，
-而用 `while read` 遍历 CRLF 列表会静默匹配不到任何东西——每个类型都报 0。在相信
-这些计数之前先 `tr -d '\r'`，否则会以错误的理由复现出 GAP-15 的结论。
+关于最后一个循环的一句提醒：这个循环*读*的文件是 Windows 上的 Python 写出的列表，
+而 Python 的文本模式默认把 `\n` 变成 `\r\n`。用 `while read` 遍历 CRLF 列表会静默
+匹配不到任何东西——每个类型都报 0。在相信这些计数之前先 `tr -d '\r'`，否则会以错误
+的理由复现出 GAP-15 的结论。
+
+这条提醒本身初稿就写错了，而更正比提醒本身更重要。初稿说的是
+`PROTOCOL-INDEX.md` 带 CRLF。它不带：
+`git show bea1c2b:08-bmcp-protocol/protocol-index.md | grep -c $'\r'` → **0**，
+`origin/main` 同样。CRLF 来自这个脚本写出的中间文件 `types.txt`，不是索引。
+评审问那 19 是否由带 bug 的循环产出；答案是否，而索引的换行就是"证明"而非"断言"
+的依据。把提醒写错文件，会让下一个读者去检查一个从来没坏过的东西。
 
 本次即如此：我第一次就踩了这个 bug，22 个类型全部报 0 识别，读起来是"22 个缺失"，
 那会是 §11.2 结论的一个更强且完全错误的版本。3 之 22 这个数字来自 `tr -d '\r'`
 那一次运行。把它记下来而不是悄悄修掉，因为这个 bug 恰好产出文档本来预期的结论。
+
+评审之后在两个提交上复测，循环经 `git show` 读索引、列表以 `newline='\n'` 写出：
+
+```
+bea1c2b     types 22  hits 3   misses 19
+origin/main types 22  hits 22  misses 0
+```
 
 ### 11.7 本勘误不做什么
 
