@@ -1,3 +1,53 @@
+---
+document_metadata:
+  domain: ai-development
+  role: normative-standard
+  lifecycle:
+    approval:
+      decision_status: Approved
+      approver: Integration Owner
+      decision_date: "2026-11-23"
+      approved_version:
+        scheme: content-hash
+        value: "879834b271e71985a96af9458e13567b091ac4819ea596dc9e64bbcc33b67734"
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Applicable-To-Current-Version
+      evidence_reference:
+        - "Issue #130 comment #6962523529"
+        - "PR #144 merge commit 3754d049db840b049728afd814faac968bf10749"
+        - "PR #750 comment #7092567630 (owner-proxy ratification: §6.1 review disposition lock included in the approved scope)"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "v1.0 adoption is recorded in Issue #130 comment #6962523529. The §6.1 inclusion is recorded separately in PR #750 comment #7092567630, because the #130 comment predates §6.1 by six days and cannot carry it. This metadata does not assert that GitHub platform enforcement is enabled."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Canonical
+    canonical_scope: "Pull-request admission, exact-Head verification, independent review, merge dispositions, and integration into main in this repository."
+    canonical_scope_id: ai-development/pr-governance-001
+    canonical_scope_keywords:
+      - pull-request-admission
+      - exact-head-verification
+      - independent-review
+      - merge-disposition
+      - main-branch-integration
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Normative
+---
 # PR-GOVERNANCE-001 — Pull Request Governance, Consolidation & Immediate Integration Standard
 # PR 治理、反堆积与验证即合入规范
 
@@ -108,6 +158,54 @@ Use exactly one of these dispositions:
 Once a PR meets MERGE criteria, integrate it promptly; do not leave verified, independent, conflict-free work idle merely to accumulate more review cycles. Use the repository's permitted merge method and an expected Head SHA. After merge, read back the target branch and record the actual merge commit SHA.
 
 PR 满足 MERGE 条件后应及时合入，不得为了堆积审查轮次而搁置已验证、独立且无冲突的工作。使用仓库允许的合并方式并传入预期 Head SHA。合并后必须从目标分支回读，并记录真实 merge commit SHA。
+
+### 6.1 Review disposition lock / 审查处置锁
+
+A pull request MUST NOT be merged while any formal review is in `REQUEST_CHANGES` state, or while any material blocking review finding remains unresolved and unverified.
+
+当任一正式审查处于 `REQUEST_CHANGES` 状态，或任一实质阻断性审查发现仍未解决且未验证时，PR **不得**合并。
+
+When a formal `REQUEST_CHANGES` review or an authorized blocking disposition is recorded:
+
+1. The PR disposition MUST become `HOLD`.
+2. Every blocking finding MUST have an explicit recorded disposition.
+3. A finding requiring correction MUST NOT be considered resolved merely because a new commit was pushed, a comment says "fixed", or CI passes.
+4. Resolution MUST identify the corrective commit and relevant verification evidence on the current exact Head.
+5. The reviewer MUST re-check the corrected exact Head and confirm resolution, unless the authorized acceptance authority explicitly records a permitted risk acceptance.
+6. Immediately before merging, the merge authority MUST verify the current Head, review state, unresolved findings, required checks, and dependencies.
+
+记录到正式 `REQUEST_CHANGES` 审查或经授权的阻断处置后：
+
+1. PR 处置状态必须改为 `HOLD`。
+2. 每一项阻断性发现必须有明确记录在案的处置。
+3. 需要修正的发现，不得仅因推送了新提交、评论声称"已修复"或 CI 通过就视为已解决。
+4. 解决记录必须指明修正提交，以及在**当前精确 Head** 上的相关验证证据。
+5. 审查方必须复核修正后的精确 Head 并确认解决；除非经授权的验收权威明确记录了允许的风险接受。
+6. 合并前一刻，合并权威必须核对当前 Head、审查状态、未解决发现、必需检查与依赖。
+
+An active `REQUEST_CHANGES` review MUST block merging. An unresolved material blocking finding MUST also block merging, even if no formal `REQUEST_CHANGES` review was submitted.
+
+处于活动状态的 `REQUEST_CHANGES` 审查必须阻断合并。即使未提交正式 `REQUEST_CHANGES` 审查，未解决的实质阻断性发现同样必须阻断合并。
+
+Any exception requires an explicit decision by the authorized acceptance authority, recording the finding, rationale, accepted risk, scope, and decision evidence. Such an exception MUST NOT override mandatory security, domain-owner, or release-authority approval.
+
+任何例外均需经授权的验收权威明确裁定，并记录该发现、理由、接受的风险、范围与决策证据。此类例外不得覆盖强制性的安全、领域负责人或发布权威审批。
+
+This is a process requirement. It MUST NOT be described as a platform-enforced merge block unless the repository's live GitHub configuration has been verified to enforce it (see §7).
+
+本条为流程要求。除非仓库的实时 GitHub 配置经核实确实强制执行，否则不得表述为平台强制的合并阻断（见 §7）。
+
+#### 6.1.1 What does not trigger the lock / 不触发处置锁的情形
+
+Ordinary discussion comments, non-blocking suggestions, and review comments that do not assert a material blocking finding do not lock the PR. The lock attaches only to a formal `REQUEST_CHANGES` review, or to a material blocking finding / `HOLD` disposition explicitly recorded by a reviewer with that authority. Without this boundary, routine commentary could hold a PR open indefinitely.
+
+普通讨论评论、非阻断性建议，以及未主张实质阻断性发现的审查评论，均不触发该锁。该锁仅附着于正式 `REQUEST_CHANGES` 审查，或由具备该权限的审查方明确记录的实质阻断性发现 / `HOLD` 处置。缺少这一边界，日常评论即可无限期锁住 PR。
+
+#### 6.1.2 Origin / 来源
+
+This clause exists because a review disposition and a merge happened 27 seconds apart, with the correction landing on an already-merged branch 18 minutes later and never reaching the target branch. The interval is the evidence, not the rule: the rule exists because the review disposition state and the merge permission had no enforced relationship. See `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` §13 for the instance record.
+
+本条的由来：一次审查处置与一次合并相隔 27 秒，修正 18 分钟后落在已合并分支上，从未进入目标分支。时间间隔是证据而非规则本身：规则之所以存在，是因为审查处置状态与合并权限之间缺少强制关系。实例记录见 `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` §13。
 
 ## 7. Platform enforcement is separate from process policy / 平台强制执行与流程规范分离
 

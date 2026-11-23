@@ -1,4 +1,44 @@
-# GOV-NC-2026-11-20-MERGE-AFTER-RULING-003 — 裁定后 37 分钟无审查合并登记
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "This work record documents historical PR merge-gate bypass incidents and their evidence. It does not constitute an approval or a normative standard."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+---
+# GOV-NC-2026-11-20-MERGE-AFTER-RULING-003 — PR 合并门禁绕过与过早合并登记
 
 **状态**：`OPEN` / `NOT_REMEDIATED`
 **缺陷类别**：Governance Conformance — Review Gate Bypass
@@ -289,3 +329,65 @@ PR #403 合并后，`main` 上随即出现：
 ---
 
 **登记状态更新**：`OPEN` / `NOT_REMEDIATED` / 实例计数 **4（冻结）** / 新增事实：**首次出现「自我审查后合并」，审查者与合并者同一账号，间隔 15 秒，合并时 check 仍为 failure**
+
+## 13. 2026-11-23：审查处置已发出、修正未落地，合并仍发生
+
+本节记录一起同类事件的新形态。与前 12 节不同，这次**不是没有审查**，而是审查意见已经发出、且其中包含明确的阻断项，合并仍然发生在修正进入合并候选 head 之前。
+
+### 13.1 时间线（全部为 GitHub 可核验字段）
+
+| 时刻 (UTC) | 事件 | 证据 |
+|---|---|---|
+| 03:24:59 | 审查处置评论发布到 PR #707 | `issuecomment-7090724822` |
+| 03:25:26 | PR #707 合并，merge commit `f82b636` | `merged_at` |
+| 03:25:26 | 合并时 head 为 `bbd214f` | `head.sha` |
+| 03:43 | 修正提交 `e36fb9b` 推到 `owner-phase-a` | 分支已合并，落空 |
+
+间隔 **27 秒**。
+
+### 13.2 合并时未落地的阻断项
+
+审查处置包含三项阻断性发现：
+
+1. 027 §5 有两句与事实矛盾：称该登记不随 PR #707 新增，且称该 PR 不修改 `Provenance::validate()` 与 `ProvenanceGraph::add()`。二者均假。
+2. 027 登记编号在 5 处写成 `PROVENANCE-REVALIDATION-027`，与文件名、H1、双语路径的 `PROVENANCE-REFERENCE-REVALIDATION-027` 不一致。
+3. `ProvenanceGraph::add()` 的公开签名由双参改单参，属对外破坏性变更，无任何登记。
+
+三项全部随合并进入 `main`。
+
+### 13.3 修正的落地路径
+
+修正无法随 #707 进入主干，只能另开 PR。`e36fb9b` cherry-pick 到新分支，rebase 到当时的 `main`，得 PR #734（`1225fa8`），于 2026-11-23 合并。
+
+也就是说：**阻断项在合并后 18 分钟才被修正，且需要一次额外的完整 PR 周期。**
+
+### 13.4 与前 12 节的差别
+
+| | 前 4 次（#390/#394/#395/#402） | 本次（#707） |
+|---|---|---|
+| 合并前有无审查 | 无 | **有，且含阻断项** |
+| 合并时 check | failure | success |
+| 阻断项是否已解决 | 不适用 | **否** |
+| 失败模式 | 未经审查即合并 | **审查处置与合并权限无强制关系** |
+
+本次的 check 是绿的、审查也做了——这两个通常被视为「可以合并」的信号同时成立，而阻断项仍未解决。这说明既有的「必须审查」「必须过 check」两条要求，都不足以阻止这一类合并。
+
+### 13.5 由此产生的规则
+
+`PR-GOVERNANCE-001` §6.1 新增 **Review disposition lock**：正式 `REQUEST_CHANGES` 或经授权的阻断性发现存在时，PR 必须为 `HOLD`；修正不得因「推了新提交」「评论说已修复」「CI 通过」而被视为已解决，必须在当前精确 Head 上重新验证。
+
+### 13.6 明确不作出的判断
+
+- 不判断合并者的主观意图。
+- 不把 27 秒本身当作规则成立的理由——它只是本次的时序证据。
+- 不声称 GitHub 已强制执行该规则。§6.1 是流程要求；平台强制需另行核实配置，见 `PR-GOVERNANCE-001` §7。
+
+---
+
+### 13.7 实例计数裁定
+
+本次 #707 事件不计入此前冻结的 4 次零审查合并实例数。该计数保持不变。#707 单独记录为审查处置未落地即合并的另一种门禁失效形态，不得将其与零审查合并实例混为同一统计口径。
+
+---
+
+**登记状态更新**：`OPEN` / `NOT_REMEDIATED` / 实例计数 **4（冻结，不变）** / 新增事实：**首次出现「阻断性审查处置已发出、修正未落地即合并」，间隔 27 秒，合并时 check 为 success；该事件单独记录，不计入零审查合并数**

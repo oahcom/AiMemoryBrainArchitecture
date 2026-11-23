@@ -1,4 +1,44 @@
-# GOV-NC-2026-11-20-MERGE-AFTER-RULING-003 — Merge 37 Minutes After a Hold Ruling
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "This work record documents historical PR merge-gate bypass incidents and their evidence. It does not constitute an approval or a normative standard."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+---
+# GOV-NC-2026-11-20-MERGE-AFTER-RULING-003 — PR Merge-Gate Bypass and Premature Merge Register
 
 **Status**: `OPEN` / `NOT_REMEDIATED`
 **Defect class**: Governance Conformance — Review Gate Bypass
@@ -296,3 +336,65 @@ Five minutes after the reviewed merge, two direct pushes landed — one of them 
 ---
 
 **Register conclusion**: The content of PR #390 is compliant; its manner of entry is not. Until M-3 is addressed, any PR can be merged without review regardless of whether its author states "do not merge". The subsequent merges of #394 and #395 show this was not a one-off. M-3 has now been shown to be non-executable under the current plan; the only available substitutes are a plan upgrade or making the repository public, both Owner-level decisions.
+
+## 13. 2026-11-23: review disposition issued, correction not landed, merge still happened
+
+This section records a new shape of the same class of event. Unlike sections 1-12, this was **not a merge without review**. A review disposition had been issued and it contained explicit blocking findings; the merge still happened before the correction reached the merge-candidate head.
+
+### 13.1 Timeline (all fields verifiable on GitHub)
+
+| Time (UTC) | Event | Evidence |
+|---|---|---|
+| 03:24:59 | Review disposition comment posted to PR #707 | `issuecomment-7090724822` |
+| 03:25:26 | PR #707 merged, merge commit `f82b636` | `merged_at` |
+| 03:25:26 | Head at merge was `bbd214f` | `head.sha` |
+| 03:43 | Correction commit `e36fb9b` pushed to `owner-phase-a` | branch already merged; landed nowhere |
+
+Interval: **27 seconds**.
+
+### 13.2 Blocking findings unresolved at merge
+
+The review disposition carried three blocking findings:
+
+1. 027 §5 contained two statements contradicted by fact: that the registration was not added by PR #707, and that the PR modified neither `Provenance::validate()` nor `ProvenanceGraph::add()`. Both are false.
+2. The 027 registration ID appeared five times as `PROVENANCE-REVALIDATION-027`, inconsistent with the filename, H1 and bilingual paths, which use `PROVENANCE-REFERENCE-REVALIDATION-027`.
+3. `ProvenanceGraph::add()`'s public signature changed from two arguments to one — a breaking change for downstream consumers — with no registration.
+
+All three entered `main` with the merge.
+
+### 13.3 How the correction eventually landed
+
+The correction could not travel with #707. It had to be delivered as a separate PR: `e36fb9b` cherry-picked onto a new branch, rebased onto `main` as it then stood, producing PR #734 (`1225fa8`), merged 2026-11-23.
+
+In other words: **the blocking findings were fixed 18 minutes after the merge, and the fix required a second full PR cycle.**
+
+### 13.4 How this differs from sections 1-12
+
+| | First 4 (#390/#394/#395/#402) | This one (#707) |
+|---|---|---|
+| Review before merge | none | **yes, with blocking findings** |
+| Check state at merge | failure | success |
+| Blocking findings resolved | n/a | **no** |
+| Failure mode | merged without review | **review disposition had no enforced link to merge permission** |
+
+Here the check was green and the review had happened — the two signals normally read as "safe to merge" — while blocking findings were still open. Neither "must be reviewed" nor "must pass checks" was sufficient to prevent this merge.
+
+### 13.5 Rule produced
+
+`PR-GOVERNANCE-001` §6.1 adds a **Review disposition lock**: while a formal `REQUEST_CHANGES` or an authorized blocking finding stands, the PR must be `HOLD`; a correction is not resolved merely because a commit was pushed, a comment says "fixed", or CI passes — it must be re-verified on the current exact head.
+
+### 13.6 Judgements deliberately not made
+
+- No judgement about the merger's intent.
+- The 27 seconds are not the reason the rule holds; they are this instance's timing evidence.
+- No claim that GitHub enforces the rule. §6.1 is a process requirement; platform enforcement requires separate verification of configuration, per `PR-GOVERNANCE-001` §7.
+
+---
+
+### 13.7 Instance-count ruling
+
+The #707 incident is not counted toward the previously frozen total of four zero-review merges. That count remains unchanged. #707 is recorded separately as a distinct merge-gate failure in which a review disposition had not been completed before merge. It must not be conflated with the zero-review merge count.
+
+---
+
+**Registration status update**: `OPEN` / `NOT_REMEDIATED` / instance count **4 (frozen, unchanged)** / new fact: **first occurrence of "blocking review disposition issued, correction not landed, merge proceeded", 27-second interval, check green at merge; recorded separately and excluded from the zero-review merge count**
