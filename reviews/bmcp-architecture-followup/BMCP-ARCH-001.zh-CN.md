@@ -411,7 +411,7 @@ H 范围澄清记录于 PR #428 comment 7060264372。四项请求**尚未完全�
 - MODULE：BMCP
 - ISSUE_OR_ADR：B-ADR-FACT-CLAIM-001（13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md）
 - DECISION_REQUIRED：使 B-ADR-FACT-CLAIM-001 与 Owner 语义选择对齐，并完成消费者映射/验收；在此之前不得冻结 Canonical Schema 或 Wire 字段。
-- CURRENT_FACTS：合并的 Owner 决议记录 `OWNER-DECISION-FACT-CLAIM-001`（main Blob `d59756a8eb454480804c482ca03c68345ab5abf2`；PR #446 merge commit `ad5ca81a32b413aef3f9b5bccd06030aabde8275`）选择 Option A（Fact 独立 Attestation、Claim 表示命题）及 I1（稳定 Claim identity 加不可变 ClaimRevision）。该决议取代 B ADR，成为当前有效的语义决策请求。精确消费者实现映射、迁移/兼容和符合性仍为 Candidate，直至责任工件完成版本 Pin 和审查；没有任何 Wire 字段获批。
+- CURRENT_FACTS：合并的 Owner 决议记录 `OWNER-DECISION-FACT-CLAIM-001`（main Blob `d59756a8eb454480804c482ca03c68345ab5abf2`；PR #446 merge commit `ad5ca81a32b413aef3f9b5bccd06030aabde8275`）选择 Option A（Fact 独立 Attestation、Claim 表示命题）及 I1（稳定 Claim identity 加不可变 ClaimRevision）。该决议取代 B ADR，成为当前有效的语义决策请求；B ADR 保留为历史证据。精确消费者实现映射、迁移/兼容和符合性仍为 Candidate，直至责任工件完成版本 Pin 和审查；没有任何 Wire 字段获批。
 - H_OWNED_CONTRACTS：未来 Wire 字段/Schema Mapping 归 H 所有且未冻结；本语义选择不批准任何 Wire 字段。
 - CROSS_MODULE_CONFLICT：语义方向已选择，但 E Candidate IR、D Identity/Lifecycle、I Authorization/Attestor Policy 和 H Payload Mapping 仍需精确消费者验收和来源 Pin，之后才能冻结共享 Schema。
 - OPTIONS：(A) 保留已选 Option A + I1 语义方向，在 消费者契约验收 门禁完成前继续保持 Payload 字段不透明；(B) 只有通过后续替代 Owner 决策才重新打开语义选择。
