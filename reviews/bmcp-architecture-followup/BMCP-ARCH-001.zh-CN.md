@@ -707,14 +707,14 @@ C588 快照的门禁注册表包含 21 条 embedded-bilingual 源记录：18 条
 - `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/recovery_cutoff -p 'test_*.py' -v`：FAIL，31 run / 28 passed / 3 failed；退出码 1。失败项：重复 JSON Member 测试要求具体重复键错误详情，但 Validator 返回通用 `invalid JSON: ValueError`；Schema/Index 测试找不到 protocol-index 中精确 `message_type` 条目；合法完整消息 Fixture 有六个对象违反 non-empty 约束。这些是当前 Main RecoveryJoin 工件问题，本 PR 未修改相关文件。
 - `python3 -m unittest discover -s 06-memory-context/reference-model -p 'test_g_applied_ledger.py' -v`：PASS，8/8；退出码 0。
 - `cargo test --offline -p memory-context --test e2e_negative_paths`：未完成；编译因 `Disk quota exceeded` / LLVM 输出流 I/O 错误失败；退出码 101。不声称 Rust G E2E PASS。
-- 独立语义/双语复审仍 PENDING。20 行 AT 矩阵仍仅在 ZH 逐项列出；EN 仅记录汇总 `PLANNED_NOT_RUN`。已披露此不对称，不表述为双语一致。
+- 分会话语义/双语审查此后已完成；提示词配对来源仍未核实（`SESSION_SEPARATION_RECORDED_PROMPT_UNVERIFIED`）。20 行 AT 矩阵仍仅在 ZH 逐项列出；EN 仅记录汇总 `PLANNED_NOT_RUN`。已披露此不对称，不表述为双语一致。
 - 未修改 H 所有规范文件、G 实现、C/D/I 权威文件、治理门禁、Schema 或 Baseline Registry。PR 范围仍严格为三个文件。
 
 ## 11. 双语变更清单
 
 | 文档 / 版本 | 英文路径 | 中文路径 | 来源版本 | 一致性 |
 |---|---|---|---|---|
-| BMCP-ARCH-001 / 0.2.2 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main c58878fce24528a0842b4f8887c93ddbf465b566；H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74；§2/§7 中的 B/D/I Owner 固定版本引用 | 已进行 Owner-delegate 语义审查；不声称已进行独立一致性审查 |
+| BMCP-ARCH-001 / 0.2.2 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main c58878fce24528a0842b4f8887c93ddbf465b566；H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74；§2/§7 中的 B/D/I Owner 固定版本引用 | 已完成分会话语义/双语审查；提示词配对来源尚未核实（SESSION_SEPARATION_RECORDED_PROMPT_UNVERIFIED） |
 
 Coverage Register 仅将此登记为 Review/Handoff Pair，不改变 “BMCP Protocol detailed contracts (7 core specifications)” 条目；双语规范核心文档覆盖仍为 NOT STARTED。
 
@@ -729,6 +729,9 @@ Coverage Register 仅将此登记为 Review/Handoff Pair，不改变 “BMCP Pro
 - OWNER_DECISIONS_REQUIRED：BMCP-DR-001 语义方向 RESOLVED / Consumer-Schema Gate OPEN；BMCP-DR-002 Authority Boundary DECIDED / 可调用 API/IDL 延后由 D/I 契约定义；BMCP-DR-003 MCP Adapter Boundary PARTIALLY DECIDED / 精确 C 映射 OPEN under Issue #449
 - ISSUE_7_STATUS：IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE；GitHub CLOSED / not_planned；未改变
 - RUNTIME_IMPLEMENTATION_STATUS：NOT AUTHORIZED / NOT STARTED
-- PR / Commit：PR #453 已合并至固定的验证分支 `bmcp-validation-base-c588`，合并提交为 `7c7801db396b92c57ad37020fe170f65f25e43ce`；这是快照验证分支合并，不是合并到实时 `main`。独立语义/双语审查仍待完成；该工件仍为 `ARCHITECTURE_PARTIAL`，不冻结协议/Schema，也不授权 Runtime。
+- PR / Commit：PR #453 已合并至固定的验证分支 `bmcp-validation-base-c588`，合并提交为 `7c7801db396b92c57ad37020fe170f65f25e43ce`；这是快照验证分支合并，不是合并到实时 `main`。分会话语义/双语审查已完成；提示词配对来源仍未核实（SESSION_SEPARATION_RECORDED_PROMPT_UNVERIFIED）。该工件仍为 ARCHITECTURE_PARTIAL，不冻结协议/Schema，也不授权 Runtime。
+- OPEN — 英文源文错误类别清单对账
+
+  EN §7.1 H-CONFIRM-004 DECISION_REQUIRED 要求映射十二个请求的错误类别。EN §7.1.1 H-CONFIRM-004 当前列出 Authentication、Authorization、Validation、Unsupported、Conflict、Expired、RateLimited/ResourceExhausted、Internal 和 Unknown（九个分组条目；若将 RateLimited 与 ResourceExhausted 分开计数，则为十个）。英文源文未明确说明 §7.1.1 中的清单如何涵盖全部十二个请求的错误类别。权威的十二类别清单及其与 §7.1.1 分类体系之间的映射关系，必须由 Owner 明确裁定。在该裁定正式记录之前，此项差异保持 OPEN。
 
 **下一步：** B/D/I 对齐现有源文档/镜像文档并刷新版本 Pin；H 发布带版本的规范 Wire 工件，并关闭剩余 Registry/Schema/Crypto/Storage/Error 子项；C 根据 Issue #449 发布精确的 Agent/MCP-to-BMCP 映射；E 集成五阶段 Rust Compiler 文档及消费者边界；BMCP 刷新双语交接文档。只有在所有工程进入条件均有证据后，Runtime 才可解除延期。

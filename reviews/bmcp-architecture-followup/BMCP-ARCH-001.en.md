@@ -707,14 +707,14 @@ The 81 mirror findings and registration-history results are separate dimensions.
 - `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/recovery_cutoff -p 'test_*.py' -v`: FAIL, 31 run / 28 passed / 3 failed; exit 1. Failures: duplicate-member parser test expects the specific duplicate-key detail but validator returns generic `invalid JSON: ValueError`; schema/index test cannot find the exact `message_type` entry in protocol-index; valid full-message fixture fails six non-empty object constraints. These are current-main RecoveryJoin artifacts, not modified by this PR.
 - `python3 -m unittest discover -s 06-memory-context/reference-model -p 'test_g_applied_ledger.py' -v`: PASS, 8/8; exit 0.
 - `cargo test --offline -p memory-context --test e2e_negative_paths`: NOT COMPLETED; compilation failed with `Disk quota exceeded` / LLVM output-stream I/O errors; exit 101. No Rust G E2E PASS is claimed.
-- Independent semantic/bilingual review remains PENDING. The 20-row AT matrix is still itemized only in ZH; EN records aggregate `PLANNED_NOT_RUN`. This asymmetry is explicitly disclosed, not represented as parity.
+- Separate-session semantic/bilingual review has since been completed; prompt-pairing provenance remains unverified (`SESSION_SEPARATION_RECORDED_PROMPT_UNVERIFIED`). The 20-row AT matrix is still itemized only in ZH; EN records aggregate `PLANNED_NOT_RUN`. This asymmetry is explicitly disclosed, not represented as parity.
 - No H-owned normative file, G implementation, C/D/I authority file, governance gate, schema or baseline registry was modified. PR scope remains exactly three files.
 
 ## 11. Bilingual change manifest
 
 | Document / version | English path | Chinese path | Source revision | Parity |
 |---|---|---|---|---|
-| BMCP-ARCH-001 / 0.2.2 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main c58878fce24528a0842b4f8887c93ddbf465b566; H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74; B/D/I owner pins in §2/§7 | Owner-delegate semantic review; independent parity review not claimed |
+| BMCP-ARCH-001 / 0.2.2 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main c58878fce24528a0842b4f8887c93ddbf465b566; H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74; B/D/I owner pins in §2/§7 | Separate-session semantic/bilingual review completed; prompt-pairing provenance not verified (SESSION_SEPARATION_RECORDED_PROMPT_UNVERIFIED) |
 
 The coverage register records this as a review/handoff pair only. It does not change “BMCP Protocol detailed contracts (7 core specifications)”; bilingual normative core-spec coverage remains NOT STARTED.
 
@@ -729,6 +729,9 @@ The coverage register records this as a review/handoff pair only. It does not ch
 - OWNER_DECISIONS_REQUIRED: BMCP-DR-001 semantic direction RESOLVED / consumer-schema gate OPEN; BMCP-DR-002 authority boundary DECIDED / callable API- IDL deferred; BMCP-DR-003 MCP adapter boundary PARTIALLY DECIDED / exact C mapping OPEN under Issue #449.
 - ISSUE_7_STATUS: `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`; GitHub CLOSED / not_planned; unchanged.
 - RUNTIME_IMPLEMENTATION_STATUS: NOT AUTHORIZED / NOT STARTED
-- PR / Commit: PR #453 was merged into the pinned validation branch `bmcp-validation-base-c588` at merge commit `7c7801db396b92c57ad37020fe170f65f25e43ce`; this snapshot merge is not a merge to live `main`. Independent semantic/bilingual review remains pending; the artifact remains `ARCHITECTURE_PARTIAL` and does not freeze protocol/schema or authorize Runtime.
+- PR / Commit: PR #453 was merged into the pinned validation branch `bmcp-validation-base-c588` at merge commit `7c7801db396b92c57ad37020fe170f65f25e43ce`; this snapshot merge is not a merge to live `main`. Separate-session semantic/bilingual review has been completed; prompt-pairing provenance remains unverified (SESSION_SEPARATION_RECORDED_PROMPT_UNVERIFIED). The artifact remains ARCHITECTURE_PARTIAL and does not freeze protocol/schema or authorize Runtime.
+- OPEN — ENGLISH-SIDE ERROR-CLASS INVENTORY RECONCILIATION
+
+  EN §7.1 H-CONFIRM-004 DECISION_REQUIRED requires mapping twelve requested error classes. EN §7.1.1 H-CONFIRM-004 currently enumerates Authentication, Authorization, Validation, Unsupported, Conflict, Expired, RateLimited/ResourceExhausted, Internal and Unknown (nine grouped entries, or ten if RateLimited and ResourceExhausted are counted separately). The English source does not establish how the §7.1.1 inventory accounts for all twelve requested classes. The authoritative twelve-class inventory and its mapping to the §7.1.1 taxonomy require an explicit Owner decision. Until that decision is recorded, the discrepancy remains OPEN.
 
 **Next action:** B/D/I reconcile their existing source/mirror documents and refresh pins; H publishes versioned normative wire artifacts and closes the remaining registry/schema/crypto/Storage/error sub-items; C publishes exact Agent/MCP-to-BMCP mapping under Issue #449; E integrates the five-stage Rust compiler docs and consumer boundaries; BMCP refreshes the bilingual handoff. Runtime remains deferred until every engineering-entry condition is evidenced.
