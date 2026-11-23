@@ -97,3 +97,5 @@ Terms in this document are normative within this repository. A subsystem specifi
 - **Relevance** answers “how useful is this memory for this task now?”
 - **Scope** answers “where does this asset belong?”
 - **Permission** answers “who may perform which operation?”
+
+<!-- negative-control probe for #727; this PR is closed unmerged -->
