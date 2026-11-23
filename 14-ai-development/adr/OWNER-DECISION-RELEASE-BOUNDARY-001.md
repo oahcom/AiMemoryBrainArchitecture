@@ -5,8 +5,21 @@ document_metadata:
 
   lifecycle:
     approval:
-      decision_status: Draft
-      approver: null
+      decision_status: Approved
+      approver: "Owner D acting as owner proxy, under the standing instruction that a blocking decision with no human available is to be taken and recorded rather than left open."
+      decision_date: "2026-11-23"
+      approved_version:
+        scheme: content-hash
+        value: "0f2e0ef7977269e0d84d682b5b5a1aee8036cc02d4b70263b15468249c9e5d73"
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Applicable-To-Current-Version
+      evidence_reference:
+        - "Issue #751 comment 7097692424 — owner ruling that the five DECIDED records must agree with their own bodies"
+        - "14-ai-development/adr/OWNER-DECISION-RELEASE-BOUNDARY-001.md — the DECIDED line in this document names the decider and the date"
+      revocation: null
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-23"
