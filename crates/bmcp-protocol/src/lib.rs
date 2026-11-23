@@ -496,8 +496,26 @@ pub mod strict_json {
         }
     }
 
+    #[cfg(test)]
+    thread_local! {
+        static PARSE_STRICT_CALLS: std::cell::Cell<usize> =
+            const { std::cell::Cell::new(0) };
+    }
+
+    #[cfg(test)]
+    pub(super) fn parse_strict_call_count() -> usize {
+        PARSE_STRICT_CALLS.with(std::cell::Cell::get)
+    }
+
+    #[cfg(test)]
+    pub(super) fn reset_parse_strict_calls() {
+        PARSE_STRICT_CALLS.with(|calls| calls.set(0));
+    }
+
     pub fn parse_strict(input: &[u8]) -> Result<Value, StrictJsonError> {
         std::str::from_utf8(input).map_err(|_| StrictJsonError::InvalidUtf8)?;
+        #[cfg(test)]
+        PARSE_STRICT_CALLS.with(|calls| calls.set(calls.get() + 1));
         let mut parser = Parser { input, pos: 0 };
         parser.whitespace();
         let value = parser.value("$", 0)?;
@@ -1570,6 +1588,12 @@ pub fn parse_storage_receipt(
 
     validate::validate_storage_receipt_value(&value)?;
 
+    Ok(storage_receipt_from_value(&value))
+}
+
+fn storage_receipt_from_value(
+    value: &serde_json::Value,
+) -> storage_receipt::PreparedParticipantReceipt {
     use serde_json::Value;
     use storage_receipt::{PreparedParticipantReceipt, PreparedReceiptPayload, SignatureEnvelope};
 
@@ -1581,12 +1605,12 @@ pub fn parse_storage_receipt(
 
     let integer = |object: &Value, field: &str| -> u64 { object[field].as_u64().unwrap() };
 
-    Ok(PreparedParticipantReceipt {
-        schema_id: string(&value, "schema_id"),
-        schema_version: string(&value, "schema_version"),
-        message_type: string(&value, "message_type"),
-        message_id: string(&value, "message_id"),
-        message_nonce: string(&value, "message_nonce"),
+    PreparedParticipantReceipt {
+        schema_id: string(value, "schema_id"),
+        schema_version: string(value, "schema_version"),
+        message_type: string(value, "message_type"),
+        message_id: string(value, "message_id"),
+        message_nonce: string(value, "message_nonce"),
 
         signature_envelope: SignatureEnvelope {
             payload_type: string(envelope, "payload_type"),
@@ -1634,7 +1658,7 @@ pub fn parse_storage_receipt(
             prepared_observation_source: string(payload, "prepared_observation_source"),
             prepared_observed_at: string(payload, "prepared_observed_at"),
         },
-    })
+    }
 }
 
 /// A message whose discriminator is known, but whose payload has not been
@@ -1981,8 +2005,10 @@ pub fn parse_dispatch(raw: &[u8]) -> Result<DispatchMessage, DispatchError> {
             ),
         ),
         "Storage.PreparedParticipantReceipt" => {
-            let receipt =
-                parse_storage_receipt(raw).map_err(DispatchError::InvalidStorageReceipt)?;
+            validate::validate_storage_receipt_value(&value)
+                .map_err(DispatchError::InvalidStorageReceipt)?;
+
+            let receipt = storage_receipt_from_value(&value);
 
             Ok(DispatchMessage::StoragePreparedParticipantReceipt(
                 Box::new(receipt),
@@ -2004,7 +2030,7 @@ pub fn parse_dispatch(raw: &[u8]) -> Result<DispatchMessage, DispatchError> {
 #[cfg(test)]
 mod dispatch_tests {
     use super::{parse_dispatch, DispatchError, DispatchMessage, DispatchValidationState};
-    use crate::strict_json::StrictJsonError;
+    use crate::strict_json::{self, StrictJsonError};
     use serde_json::json;
 
     fn raw_message(message_type: &str) -> Vec<u8> {
@@ -2239,6 +2265,22 @@ mod dispatch_tests {
             message,
             DispatchMessage::StoragePreparedParticipantReceipt(_)
         ));
+    }
+
+    #[test]
+    fn dispatch_storage_prepared_participant_receipt_parses_json_once() {
+        strict_json::reset_parse_strict_calls();
+
+        let value = super::tests::valid_storage_receipt_value();
+        let raw = serde_json::to_vec(&value).unwrap();
+
+        let _message = parse_dispatch(&raw).expect("valid storage receipt should dispatch");
+
+        assert_eq!(
+            strict_json::parse_strict_call_count(),
+            1,
+            "the dispatch arm must reuse the value it already parsed"
+        );
     }
 
     #[test]
