@@ -56,7 +56,7 @@ document_metadata:
 | 严重性 | REFERENCE INTEGRITY — SERDE BYPASS |
 | 影响组件 | `memory-domain`（`Provenance`、`ProvenanceGraph`） |
 | 关联登记 | GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026 |
-| 实施授权 | NOT AUTHORIZED |
+| 实施授权 | DISPATCHED — `AID-2026-052`（见 §6）；关闭仍需独立证据 |
 | 关闭条件 | 四类引用字段全部逐项重验，且 Serde 绕过测试通过 |
 
 **编号说明。** 编号 `027` 由「当前已占用最大编号 026 加一」推导，不是由登记流程发放。
@@ -116,3 +116,25 @@ Serde 反序列化可以在不经过领域构造器的情况下构造这些值�
 本登记文档随 PR #707 新增；但本登记所列的 Provenance 引用逐项重验整改不属于该 PR 的实施范围。
 
 PR #707 确实修改了 `ProvenanceGraph::add()` 与 `Provenance::validate()`：前者公开签名由 `add(provenance, parents)` 改为 `add(provenance)`，lineage 改由 `Provenance.parent_provenance_refs` 提供；后者将 `unavailable_reason` 的判空改为去空白后判定，并新增 lineage 缺失（无 parents 且无 unavailable_reason）时的 `IncompleteProvenanceLineage` 拒绝路径。但是，PR #707 未实施本登记第 3 节要求的四类引用逐项重验：`source_refs`、`source_version_refs`、`actor_ref.actor_id` 和 `parent_provenance_refs`。
+
+---
+
+## 6. 实施派发（2026-11-23）
+
+| 项目 | 内容 |
+|---|---|
+| 工作令 | `AID-2026-052`（`14-ai-development/work-items/AID-2026-052/`） |
+| 派发依据 | 本登记 §3、§4；Owner-proxy 在 `13c6d95d` 逐行读取 `Provenance::validate()` |
+| 实施范围 | 仅 `crates/memory-domain/src/lib.rs` 与 `crates/memory-domain/tests/phase2_acceptance.rs` |
+| 明确不授权 | 字段类型变更、`OpaqueId` 的 `Deserialize` 变更、序列化契约变更、本登记关闭 |
+
+**§3 的四类引用并非同一形态，这是派发时的主要发现：**
+
+- `parent_provenance_refs` 已经由 `ref_ctor!` 宏生成了 `validate()`（与 `ClaimRef`、`EvidenceRef` 等共用），因此第四类只需一次调用。
+- `source_refs`、`source_version_refs`、`actor_ref.actor_id` 都是裸 `OpaqueId`，全仓没有校验器；它们需要内联判空，正如 `EvidenceExtension::validate()` 对 `collector.actor_id` 所做的那样。
+
+把四类当作同一形态的实现者，要么会给 `OpaqueId` 增加 `validate()`（改变该 crate 内每个使用者的类型面），要么会漏掉第四类已经被覆盖。
+
+**为什么不在 `OpaqueId` 的 `Deserialize` 上收口。** 那会让本登记立刻关闭，同时改写该 crate 内所有类型的序列化契约，包括 `dm2_11` 与其余 phase-2 测试所反序列化的 fixture。「在边界拒绝」与「在使用点拒绝」是两个不同的决定，本登记没有做出前一个。
+
+**为什么状态不是 CLOSED。** 本登记要求 serde 绕过测试通过。编写该测试的会话无法为自己的产物提供独立证据。这与 `AID-2026-051-F3` 是同一推理：本次派发推进本登记，但不关闭它。

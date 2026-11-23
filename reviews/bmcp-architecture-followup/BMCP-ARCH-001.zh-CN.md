@@ -12,9 +12,9 @@
 
 **ARCHITECTURE_PARTIAL。** 本文是候选语义整合和工程交接，不是协议冻结。
 
-H 实时分支包含候选 Envelope、版本、规范化、错误分类、Delivery/ACK、Forget/重连、Strict JSON Parser 参考和符合性材料。这些文件仍归 H 所有；文件存在不等于批准或冻结。H 生命周期交接明确标记 Wire Schema NOT FROZEN；符合性矩阵是候选测试规范，不是 Runtime 证据。
+H 的活动分支包含候选 Envelope、版本、规范化、错误分类、Delivery/ACK、Forget/重连、Strict JSON Parser 参考和符合性材料。这些文件仍归 H 所有；这些文件的存在不构成批准或冻结。H 生命周期交接明确标记 Wire Schema NOT FROZEN；符合性矩阵是候选测试规范，不是 Runtime 证据。
 
-Owner 已合并批准 Fact/Claim 语义决策（Option A + I1）；精确 Compiler/Domain 消费者映射仍为 Candidate。BMCP MUST NOT 冻结规范 Fact/Claim Wire Payload 字段。D 拥有 Canonical Identity/Lifecycle 和 D Forget Fence；I 拥有授权和 PermissionEpoch。BMCP 消费这些权威，不得创建替代机制。
+Owner 已合并批准 Fact/Claim 语义决策（Option A + I1）；精确 Compiler/Domain 消费者映射仍为 Candidate。BMCP MUST NOT 冻结规范 Fact/Claim Wire Payload 字段。B 拥有语义词汇与认识论含义。D 拥有规范 ID 分配、修订提交与当前性、生命周期、谱系、ConflictSet，以及 D ForgetOperation/Fence。I 拥有 Principal/Actor 授权、attestor 授权、PermissionEpoch、撤销、保留策略/法律保全/备份，以及全局 Forget 策略与评估。BMCP/H/C 必须消费由 Owner 签发的不透明引用（opaque owner-issued refs），且 MUST NOT 创建替代物。
 
 Issue #7 的记录保持 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE。根据 Owner 阶段关闭裁决，GitHub 当前报告 Issue #7 为 CLOSED / not_planned；本工作不重开或修改它。延期不等于 Runtime 授权。
 
@@ -22,7 +22,7 @@ Issue #7 的记录保持 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE。
 
 ## 2. 精确来源登记
 
-当前 Main 来源 Pin 来自 origin/main @ c58878fce24528a0842b4f8887c93ddbf465b566；历史决议/测试证据另按其原始 Commit 标注。H Pin 来自 session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74。
+当前 Main 来源 Pin 来自已获取的 origin/main @ c58878fce24528a0842b4f8887c93ddbf465b566；历史决议/测试证据在适用情况下另按其原始 Commit 标注。H Pin 来自 H 分支 session-h-bmcp-protocol @ 3e8b33df18b9e6fc757ca84ff07a12faebc78e74。
 
 | 来源 | Ref | Blob SHA | 状态 / 用途 |
 |---|---|---|---|
@@ -47,7 +47,7 @@ Issue #7 的记录保持 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE。
 | docs/en/03-memory-brain/forget-fence-and-completion-contract.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | c791895333ab6140f035f4f622d5dee9325d422d | D/I Forget 边界 |
 | docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 9c054932994bb078e2834df8bd66f73895aa04f5 | D Lifecycle/Fence |
 | 13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593 | 历史 ADR；语义决策已被取代；消费者映射仍为 Candidate |
-| 14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566`（批准来源 `c138654c942dc93b5a36eccb2ff0e41452156429`） | d59756a8eb454480804c482ca03c68345ab5abf2 | 当前来源 Pin；Owner 语义批准是历史证据（Option A + I1），不冻结 Schema |
+| 14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566`（批准来源 `c138654c942dc93b5a36eccb2ff0e41452156429`） | Blob `d59756a8eb454480804c482ca03c68345ab5abf2` | 当前来源 Pin；Owner 语义批准是历史证据（Option A + I1），不冻结 Schema |
 | docs/en/03-memory-brain/memory-versioning.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 4efbd26db9586f6fcf1897f42ffba287d625b903 | D Revision / Consumer Freeze 边界 |
 | docs/en/03-memory-brain/commit-cursor-semantics.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 2de7fe35229372ae5b06093e5e031c2c243fbd7c | D Cursor 语义 |
 | docs/en/09-security-governance/security-governance-guide.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | 061c5847b3df879eeaf3c71e5eae0bfa162b276a | I Principal / Authorization / PermissionEpoch |
@@ -67,7 +67,7 @@ Issue #7 的记录保持 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE。
 | crates/memory-domain/src/lib.rs | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | b96cb2f74c56ab8a28da7e3ceffcf4adcb1b98d4 | 规范 Claim/Fact Revision 领域类型 |
 | 00-governance/terminology.md | main @ `c58878fce24528a0842b4f8887c93ddbf465b566` | b8770fbb58e4fac087698043c40a57531b1d244d | BMCP 规范名称 / 术语权威 |
 | C Family Boundary 决策 | PR #430 comment 7060351480；Issue #449 comment 7060126722 | Owner-delegate 决议；不声称独立人工 C 签名 | Family 方向已决定；精确 H Operation Registry / C-H Mapping 仍 OPEN |
-| H Confirmation 范围澄清 | PR #428 comment 7060351041；H Scope Correction comment 7060264372 | 仅接受 Owner-delegate 逻辑选择；INDEPENDENCE_UNVERIFIABLE | H-CONFIRM-001..004 各自均为 PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN |
+| H Confirmation 范围澄清 | PR #428 comment 7060351041；H Scope Correction comment 7060264372 | 仅限 Owner-delegate 作出的逻辑选择；INDEPENDENCE_UNVERIFIABLE | H-CONFIRM-001..004 各自均为 PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN |
 | B domain-model-overview.md | B 分支 `session-b-domain-model-phase3 @ 840202a98cf40a0b3f194afb84bed4d5f3326658` | Blob `4d1debc0ec19b3917f9e76d04bb66da4df4cd346` | B 接受 Option A + I1；来源对齐仍待完成 |
 | D memory-versioning.md | D 分支 `session-d-memory-brain-2026-11-16 @ b525e1f8fee2471a131e4a38efda99804045e424` | Blob `af747f339d03bdd4684b6ed60fca05957dc8e1fb` | D Identity/Revision/ConflictSet 边界；Schema/Currentness Gate 开放 |
 | D forget-fence-and-completion-contract.md | 同一 D ref | Blob `1f0391bc49d007c44ec74165bd33d37412cc7990` | D ForgetOperation/Fence 权威 |
@@ -96,7 +96,7 @@ Issue #7 的记录保持 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE。
 | I Authorization / PermissionEpoch | I | 只读 | 不修改 Principal/Permission/Global Forget |
 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | 本 BMCP 架构工作项 | 新建 | 仅候选整合/交接 |
 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | 同上 | 新建 | 语义对应版本 |
-| docs/governance/translation-status.md | Governance Register | 仅元数据 | 登记 Review Pair；保留 H 核心规范状态 |
+| docs/governance/translation-status.md | Governance Register | 仅允许元数据变更 | 登记 Review Pair；保留 H 核心规范状态 |
 
 不涉及 Rust 源码、测试、JSON Schema、Transport/Validator 实现或生产配置。
 
@@ -138,7 +138,7 @@ H 候选 Envelope 命名 protocol、protocol_version、message_id、message_type
 
 语义边界要求 Message Identity、已协商 Version、已注册 Operation 和类型化 Payload。多消息/异步操作要求 Correlation。状态变更/可重试操作要求 Idempotency。Scope、Environment、PermissionEpoch、ForgetFence、ContextVersion 和 CapabilityEpoch 由操作 Owner 决定条件性必填；不得虚构通配默认值。Causation 和命名空间化非关键扩展可选。未知关键字段/枚举/操作按 H 最终兼容契约 fail-closed。
 
-Parse 失败：已解码 Envelope 格式错误；缺少必填字段；不支持版本；未知操作；不支持关键扩展；参数结构无效；请求过期。Parse MUST NOT 调用记忆服务、授权副作用、签发身份或改变领域状态。
+Parse 失败：已解码 Envelope 格式错误；缺少必填字段；不支持版本；未知操作；不支持关键扩展；参数结构无效；请求过期。Parse MUST NOT 调用记忆服务、批准或授权任何副作用、签发身份或改变领域状态。
 
 H 候选协商禁止静默主版本降级。精确 major/minor/patch 和 Payload Schema 协商归 H 所有。
 
@@ -152,7 +152,7 @@ Execute 仅在 Parse 成功后开始。这是语义分派契约，不是 Runtime
 2. 使用受保护认证身份，向 I 批准接口请求当前授权和 PermissionEpoch。Payload Principal/Actor/Producer/Scope 声明不能自我认证。
 3. 调用操作 Owner Validator。H 校验协议/Wire 结构，不裁定领域真值或业务权限。
 4. 规范 Memory 操作使用 D 所有的 Identity/Lifecycle/Revision 操作。BMCP 不签发 CanonicalRef、不选择 Lifecycle Transition、不分配 Canonical Cursor。
-5. 在 D/I 要求的每个受保护边界重新校验 D Forget Fence 和 I Authorization/PermissionEpoch，包括不可逆/可见性改变前。Stale、不可用、不可比较或 Unknown 均阻止操作。D Fence 与 I PermissionEpoch 是不同类型命名空间，禁止比较/转换/替代。
+5. 在 D/I 要求的每个受保护边界重新校验 D Forget Fence 和 I Authorization/PermissionEpoch，包括在执行不可逆操作或改变可见性之前紧邻该操作进行重新校验。Stale、不可用、不可比较或 Unknown 均阻止操作。D Fence 与 I PermissionEpoch 是不同类型命名空间，禁止比较/转换/替代。
 6. 调用所属 Service（如 E Ingress/Receipt、D Canonical Lifecycle、G Context/Delivery）。BMCP 不直接写规范存储或实现 Service 状态机。
 7. 相同 Owner 范围 Idempotency Key + 相同语义摘要返回原 Operation/Receipt，不重复副作用。相同 Key + 不同摘要为 Conflict。用同一 Key 和权威查询解决不确定提交；不得创建新 Key 逃避 UNKNOWN。
 8. Timeout、响应丢失、进程丢失或持久化结果不确定时保持 UNKNOWN，直到 Owner Reconciliation。Timeout 不证明失败/Abort/成功/未调用。不得盲目重试非幂等副作用。
@@ -244,7 +244,7 @@ H 当前 Envelope 候选列出 ENVELOPE_INVALID、VERSION_UNSUPPORTED、MESSAGE_
 
 BMCP 不是 Memory Compiler。E 拥有 Candidate IR 和 Compiler Pipeline。BMCP 只能按 E 当前 Schema/Receipt 契约携带 E 所有的 Ingress/Candidate 对象。必须区分：Transport Receipt/Delivery；E 持久化 AcceptedReceipt；Compiler Execution/Candidate；D Producer Admission/Canonical Commit；Dependency Registration/Final Publication；F Indexing/G Context Activation。
 
-合并的 Owner 决策已选择 Option A + I1 作为 Fact/Claim 语义方向。本决策不批准 Fact/Claim Discriminator、Canonical Wire Identity、Schema、DDL 或 Payload 字段。精确消费者映射仍为 Candidate，直至责任工件完成版本 Pin 和审查；相关 Payload 保持不透明，或只使用已批准的中立候选引用。
+合并的 Owner 决策已为 Fact/Claim 语义选择 Option A + I1。本决策不批准 Fact/Claim Discriminator、Canonical Wire Identity、Schema、DDL 或 Payload 字段。精确消费者映射仍为 Candidate，直至责任工件完成版本 Pin 和审查；相关 Payload 保持不透明，或只使用已批准的中立候选引用。
 
 ### 6.2 Agent Integration / MCP
 
@@ -280,18 +280,18 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 **H-CONFIRM-001 — Envelope / Request Identity**
 - MODULE：BMCP / H
 - ISSUE_OR_ADR：H message-envelope-and-versioning.md；protocol-overview.md
-- DECISION_REQUIRED：BMCP 规范全称；message_id 是否就是 Request Identity 或需独立 request_id；精确 Response Correlation；Version/Type/Payload Schema/Idempotency 必填性；Operation Registry 和未知操作行为。
-- CURRENT_FACTS：H Envelope 为 CANDIDATE；规范术语表已确定为 “Brain Memory Context Protocol”；初始派发中的 “Brain Memory Control Protocol” 已纠正为非规范写法。
+- DECISION_REQUIRED：message_id 是否就是 Request Identity，还是需要独立 request_id；精确 Response Correlation；Version/Type/Payload Schema/Idempotency 的必填性；Operation Registry 和未知操作行为。
+- CURRENT_FACTS：`00-governance/terminology.md` 已确定 BMCP 的规范全称为 Brain Memory Context Protocol。H Envelope 仍为 CANDIDATE；当前候选方案使用 message_id，尚未定义独立 request_id。
 - H_OWNED_CONTRACTS：Envelope、Versioning 和 Wire 字段名归 H。
 - CROSS_MODULE_CONFLICT：C Request/Attempt ID、H Message ID、领域 Operation ID 不可互换。
-- OPTIONS：保留当前全称和 message_id；或发布独立 Command ID 及显式映射。
-- RECOMMENDED_OPTION：保留 H 现有权属；ID 保持区分；冻结前发布映射。
+- OPTIONS：(A) 使用 message_id 作为 Request Identity，并将 Response Causation 绑定到该 ID；(B) 引入独立的 request_id/Command Identity，并明确其与 message_id 的映射。
+- RECOMMENDED_OPTION：逻辑身份概念已决定保持区分：message_id、correlation_id、causation_id 和操作级幂等性（operation-level idempotency）。Operation Registry、各 Operation Family 的字段必填性，以及精确 Request/Response Schema 仍为 OPEN。
 - MEMORY_COMPILER_IMPACT：E Receipt/Idempotency Identity 保持独立。
 - AGENT_INTEGRATION_IMPACT：C Request/Attempt Mapping 必须明确。
 - D_I_IMPACT：权威不变；Identity Claims 仍由 D/I 校验。
 - RUNTIME_IMPLEMENTATION_IMPACT：Request/Response Correlation 等待 H 映射。
 - REQUIRED_AUTHORITY：H，C/E/G 消费者复审。
-- OWNER_DECISION：PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN；INDEPENDENCE_UNVERIFIABLE；NOT_WIRE_FROZEN
+- OWNER_DECISION：PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN；INDEPENDENCE_UNVERIFIABLE
 - EVIDENCE：`00-governance/terminology.md` Blob b8770fbb58e4fac087698043c40a57531b1d244d；H Envelope Blob 5547ecd78d118bd63e571e5daad87194d9b694e4。
 - FOLLOW_UP_ACTIONS：H 发布版本化映射；消费者复审。
 
@@ -299,7 +299,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - MODULE：BMCP / H
 - ISSUE_OR_ADR：H Envelope 和 Strict JSON Reference
 - DECISION_REQUIRED：Transport Framing、Byte Decode、Canonicalization/Integrity 与 Decode 后 Protocol Parse 的精确拆分；重复 Key、无效 UTF-8/Unicode、深度/大小、Critical Extension 规则。
-- CURRENT_FACTS：Strict Parser 是参考模型，不是生产 Transport；本文 Semantic Parse 仅接受解码认证 Envelope。
+- CURRENT_FACTS：RFC 8785 JCS 已选定为逻辑 JSON Canonicalization 基础。精确 Signed-object Bytes、Digest Exclusion、Signature Suite、Key Lifecycle 和 I Crypto-profile Acceptance 仍为 OPEN。Strict Parser 是参考模型，不是生产 Transport；本文 Semantic Parse 仅接受已经解码且经过认证的 Envelope。
 - H_OWNED_CONTRACTS：原始 Wire Decode 和 Envelope 结构校验。
 - CROSS_MODULE_CONFLICT：H 字节解码/Transport 职责不得转入 BMCP 语义层。
 - OPTIONS：H 管原始字节和 Envelope 校验；BMCP 管 Operation Resolution/Request Normalization。
@@ -309,7 +309,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - D_I_IMPACT：权威不变。
 - RUNTIME_IMPLEMENTATION_IMPACT：原始字节不得进入 Semantic Parser。
 - REQUIRED_AUTHORITY：H。
-- OWNER_DECISION：PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN；INDEPENDENCE_UNVERIFIABLE；NOT_WIRE_FROZEN
+- OWNER_DECISION：PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN；INDEPENDENCE_UNVERIFIABLE
 - EVIDENCE：Strict Parser Blob 3b9b3da645448c773c95a9dcd3c57c8c109bb2da。
 - FOLLOW_UP_ACTIONS：H 发布阶段契约和测试向量。
 
@@ -317,7 +317,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - MODULE：BMCP / H
 - ISSUE_OR_ADR：H Delivery/ACK 和 Forget ACK 契约
 - DECISION_REQUIRED：ACK Family、精确 Evidence Boundary、持久化点、Correlation Tuple、重复/Replay 处理、Retry Horizon 和 Consumer。
-- CURRENT_FACTS：H 区分 Delivery Lifecycle、Forget Action ACK、Applied；ACK 丢失在 Reconciliation 前为 Unknown。
+- CURRENT_FACTS：ACK Evidence 必须在发送之前被持久记录，并支持幂等重放；缺失 ACK 保持 UNKNOWN。H 区分 Delivery Lifecycle、Forget Action ACK 和 Applied。物理持久化拓扑/Adapter 及 Storage Acceptance 仍为 OPEN。
 - H_OWNED_CONTRACTS：ACK Wire/Transport 编码和重传行为。
 - CROSS_MODULE_CONFLICT：通用 ACK 不得暗示执行、持久化提交、Applied 或 Forget 完成。
 - OPTIONS：保留独立 ACK Family，每个只表示一个有限观察。
@@ -327,7 +327,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - D_I_IMPACT：D/I 独立判断 Fence/Target 满足情况。
 - RUNTIME_IMPLEMENTATION_IMPACT：ACK 实现等待 H 和消费者验收。
 - REQUIRED_AUTHORITY：H；D/I/G/E 复审各自消费语义。
-- OWNER_DECISION：PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN；INDEPENDENCE_UNVERIFIABLE；NOT_WIRE_FROZEN
+- OWNER_DECISION：PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN；INDEPENDENCE_UNVERIFIABLE
 - EVIDENCE：H ACK Blob 5e2b33898cbc6a9c95e271ecd1d8a092d04c67f8。
 - FOLLOW_UP_ACTIONS：H 发布 ACK-to-consumer 矩阵。
 
@@ -335,7 +335,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - MODULE：BMCP / H
 - ISSUE_OR_ADR：H Envelope 和 Conformance Matrix
 - DECISION_REQUIRED：Validator 分层、规范 Error Enum、Response Schema、Retryability/脱敏；映射十二类语义错误，不能合并 Authentication/Authorization/Validation/Conflict/Unknown。
-- CURRENT_FACTS：H Taxonomy 是候选；请求通用名称并非 H Code 全部现有值。
+- CURRENT_FACTS：Fail-closed Validation Order 和不同逻辑 Error Classes 已决定。精确 Enum 拼写、Wire Schema、Retry Profile 和 Owner-specific Mapping 仍为 OPEN；当前 H Taxonomy 在 Wire 层面仍为 CANDIDATE。
 - H_OWNED_CONTRACTS：Wire/Protocol Validator 和 Error Serialization。
 - CROSS_MODULE_CONFLICT：领域 Validator 和 I Authorization 必须保持 Owner 所有。
 - OPTIONS：保留 H 具体 Code；仅在版本化映射无损时添加 Alias。
@@ -345,7 +345,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 - D_I_IMPACT：D/I 决策仍具权威性。
 - RUNTIME_IMPLEMENTATION_IMPACT：H 契约前 Error Mapping 阻塞。
 - REQUIRED_AUTHORITY：H；领域 Owner 批准各自结果。
-- OWNER_DECISION：PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN；INDEPENDENCE_UNVERIFIABLE；NOT_WIRE_FROZEN
+- OWNER_DECISION：PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN；INDEPENDENCE_UNVERIFIABLE
 - EVIDENCE：H Envelope Blob 5547ecd78d118bd63e571e5daad87194d9b694e4。
 - FOLLOW_UP_ACTIONS：H 发布 Taxonomy 和测试向量。
 
@@ -397,13 +397,13 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 
 ### 7.1.2 H 范围澄清——逻辑决议与精确工件状态
 
-H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体标记为关闭；当前每项状态统一为 `PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN`，并保留 `INDEPENDENCE_UNVERIFIABLE`：
+H 范围澄清记录于 PR #428 comment 7060264372。四项请求**尚未完全关闭**：
 - H-CONFIRM-001：逻辑 Message Identity、Workflow Correlation、Immediate Causation 和 Operation Idempotency 的区分已决定；Operation Family Registry、各 Family 字段必填性、精确 Request/Response Schema、Wire Name/Type 仍 OPEN。
 - H-CONFIRM-002：RFC 8785 JCS 已选为逻辑 Canonicalization 基础；Signed-object Bytes、Digest Exclusion、Signature Suite、Key Lifecycle 和 I Crypto-profile Acceptance 仍 OPEN。
 - H-CONFIRM-003：ACK Evidence 必须先持久记录再发送，并支持幂等重放；缺失 ACK 保持 UNKNOWN；物理持久化拓扑/Adapter 和 Storage Acceptance 仍 OPEN。
 - H-CONFIRM-004：Fail-closed Validation Order 和不同逻辑 Error Class 已决定；精确 Enum 拼写、Wire Schema、Retry Profile 和 Owner-specific Mapping 仍 OPEN。
 
-这些逻辑决议不冻结 Schema、Crypto Profile、Persistence Topology、Error Enum，也不证明 H 七份规范核心文件完成、跨 Owner Consumer Acceptance 或 Runtime/Conformance 闭合。
+此前较宽泛的接受性表述，现已由本次范围澄清取代。H 仍然是精确规范性 Wire 工件的 Owner；本节不冻结任何 Schema、Crypto Profile、Persistence Topology 或 Error Enum。
 
 ### 7.2 Owner 决议请求
 
@@ -411,7 +411,7 @@ H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体
 - MODULE：BMCP
 - ISSUE_OR_ADR：B-ADR-FACT-CLAIM-001（13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md）
 - DECISION_REQUIRED：使 B-ADR-FACT-CLAIM-001 与 Owner 语义选择对齐，并完成消费者映射/验收；在此之前不得冻结 Canonical Schema 或 Wire 字段。
-- CURRENT_FACTS：合并的 `OWNER-DECISION-FACT-CLAIM-001` 已选择 Option A（Fact 独立 Attestation、Claim 表示命题）及 I1（稳定 Claim Identity + 不可变 ClaimRevision），并取代 B ADR 作为当前语义决策请求。精确消费者实现映射、迁移/兼容和符合性仍为 Candidate，直至责任工件完成版本 Pin 和审查；没有任何 Wire 字段获批。
+- CURRENT_FACTS：合并的 Owner 决议记录 `OWNER-DECISION-FACT-CLAIM-001`（main Blob `d59756a8eb454480804c482ca03c68345ab5abf2`；PR #446 merge commit `ad5ca81a32b413aef3f9b5bccd06030aabde8275`）选择 Option A（Fact 独立 Attestation、Claim 表示命题）及 I1（稳定 Claim identity 加不可变 ClaimRevision）。该决议取代 B ADR，成为当前有效的语义决策请求。精确消费者实现映射、迁移/兼容和符合性仍为 Candidate，直至责任工件完成版本 Pin 和审查；没有任何 Wire 字段获批。
 - H_OWNED_CONTRACTS：未来 Wire 字段/Schema Mapping 归 H 所有且未冻结；本语义选择不批准任何 Wire 字段。
 - CROSS_MODULE_CONFLICT：语义方向已选择，但 E Candidate IR、D Identity/Lifecycle、I Authorization/Attestor Policy 和 H Payload Mapping 仍需精确消费者验收和来源 Pin，之后才能冻结共享 Schema。
 - OPTIONS：(A) 保留已选 Option A + I1 语义方向，在 消费者契约验收 门禁完成前继续保持 Payload 字段不透明；(B) 只有通过后续替代 Owner 决策才重新打开语义选择。
@@ -420,10 +420,10 @@ H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体
 - AGENT_INTEGRATION_IMPACT：C 只携带不透明的已批准 Ref。
 - D_I_IMPACT：D/I 语义不变；B 决议后审查消费者。
 - RUNTIME_IMPLEMENTATION_IMPACT：决议前不能实现最终 Fact/Claim Payload/Schema/Migration。
-- REQUIRED_AUTHORITY：Owner 语义选择记录于 PR #446 (merged)；Schema 冻结仍需 B/D/E/F/G/H/I 消费者映射和验收。
+- REQUIRED_AUTHORITY：Owner 语义选择已根据持续有效的 Owner 指令记录于 PR #446 (merged)；Schema 冻结仍需 B/D/E/F/G/H/I 消费者映射和验收。
 - OWNER_DECISION：SEMANTIC_DIRECTION_APPROVED_OPTION_A_I1；WIRE_SCHEMA_MAPPING_CANDIDATE
 - EVIDENCE：`OWNER-DECISION-FACT-CLAIM-001` PR #446 (merged) @ `ad5ca81a32b413aef3f9b5bccd06030aabde8275`；B ADR Blob 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593。
-- FOLLOW_UP_ACTIONS：B 更新 ADR 状态/来源 Pin；D/E/F/G/H/I 记录精确消费者映射和验收；补齐迁移/兼容计划及符合性场景；所有 §8 条件满足前 Payload 保持不透明。
+- FOLLOW_UP_ACTIONS：B 更新 ADR 状态/来源 Pin；D/E/F/G/H/I 记录精确消费者映射和验收；发布迁移/兼容计划及符合性场景；在责任消费者工件完成版本 Pin 并经过审查之前，Payload 始终保持不透明。
 
 **DECISION_REQUEST_ID: BMCP-DR-002**
 - MODULE：BMCP
@@ -433,15 +433,15 @@ H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体
 - H_OWNED_CONTRACTS：D/I 发布后 H 映射为 Wire 字段。
 - CROSS_MODULE_CONFLICT：权属明确；Mainline 指南未建立精确可调用跨边界接口和 Error Mapping。
 - OPTIONS：(A) 发布版本化 D/I Service Contract + H Mapping；(B) 暂时保持引用不透明。
-- RECOMMENDED_OPTION：当前选择 B；Runtime 进入前必须完成 A。
+- RECOMMENDED_OPTION：D/I 权威边界已经 DECIDED；精确可调用 API/IDL/Currentness 词汇仍为 OPEN，必须由 D/I 发布。在此之前，BMCP 只携带权威方签发的不透明 Ref，并采用 Fail-closed 行为；H/BMCP/C MUST NOT invent authority APIs。
 - MEMORY_COMPILER_IMPACT：E 消费 D/I 语义，不复制权威。
 - AGENT_INTEGRATION_IMPACT：MCP/Adapter 不得绕过 D/I。
 - D_I_IMPACT：不改变权威；仅请求精确接口发布和消费者审查。
 - RUNTIME_IMPLEMENTATION_IMPACT：接口/Currentness 证据前受保护 Handler 阻塞。
 - REQUIRED_AUTHORITY：D、I；之后 H 确认 Wire Mapping。
 - OWNER_DECISION：DECIDED_AT_AUTHORITY_BOUNDARY；EXACT_CALLABLE_API_IDL_SCHEMA_DEFERRED_TO_D_I_VERSIONED_CONTRACTS；H/BMCP/C MUST NOT INVENT AUTHORITY API OR CURRENTNESS SEMANTICS
-- EVIDENCE：D/I authority boundary is decided by PR #429 comments 7060243632 and 7060259541; D owns canonical identity/revision/currentness/lifecycle/ConflictSet/ForgetOperation/ForgetFence; I owns Principal/Actor and attestor authorization, PermissionEpoch, revocation, retention and global Forget policy/evaluation. Exact callable API/IDL/schema/crypto/storage/wire mapping remain OPEN. H Overview Blob b88ef3a6fd3be293e7c2e77d9652f386b169bc47；D Forget Blob c791895333ab6140f035f4f622d5dee9325d422d。
-- FOLLOW_UP_ACTIONS：D/I 发布接口/向量；H 映射；BMCP 更新对照表。
+- EVIDENCE：H Overview Blob b88ef3a6fd3be293e7c2e77d9652f386b169bc47；D Forget Blob c791895333ab6140f035f4f622d5dee9325d422d。
+- FOLLOW_UP_ACTIONS：D/I 对齐并协调其现有 Source/Mirrors，发布版本化可调用契约/IDL/Currentness Vectors；H 仅在发布后进行映射；BMCP 消费精确的权威方签发 Ref 并更新其对照表。
 
 **DECISION_REQUEST_ID: BMCP-DR-003**
 - MODULE：BMCP
@@ -470,8 +470,8 @@ H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体
 | BMCP 规范名称 | 已解决——Brain Memory Context Protocol | Main terminology Blob `b8770fbb58e4fac087698043c40a57531b1d244d`；“Brain Memory Control Protocol”不是规范名称 |
 | Fact/Claim 语义 | 已解决——Option A + I1 | 已合并 Owner 决策 PR #446；Blob `d59756a8eb454480804c482ca03c68345ab5abf2` |
 | Fact/Claim 字段/Wire Schema | CANDIDATE / NOT FROZEN | B/D/E/F/G/H/I 消费者工件须完成版本 Pin 和审查；未批准任何 Payload 字段 |
-| H-CONFIRM-001..004 | PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN | 逻辑层选择按 PR #428 comments 7060351041 / 7060264372；INDEPENDENCE_UNVERIFIABLE；精确 Registry/Schema/Crypto/Persistence/Error/Consumer Artifact 仍 OPEN |
-| BMCP-DR-002 | DECIDED_AT_AUTHORITY_BOUNDARY / CALLABLE_API_IDL_SCHEMA_DEFERRED | D/I 权威边界已决定；精确 Callable API/IDL/Schema/Crypto/Storage/Wire Mapping 仍由 D/I/H 发布并保持 OPEN |
+| H-CONFIRM-001..004 | PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN | 逻辑语义已决定，状态为 INDEPENDENCE_UNVERIFIABLE；精确 Registry/Schema/Crypto/Storage/Error 工件仍保持 OPEN |
+| BMCP-DR-002 | DECIDED_AT_AUTHORITY_BOUNDARY / CALLABLE_API_IDL_SCHEMA_DEFERRED | D/I 是权威方；精确 Callable API/IDL/Schema/Crypto/Storage/Wire Mapping 仍归 D/I/H 所有并保持 OPEN |
 | BMCP-DR-003 / MCP Mapping | PARTIALLY_DECIDED——Issue #449 | MCP 为 C 北向 Agent Adapter/Gateway；BMCP 为 C Adapter 经 H 到 Brain；Family Routing 已由 PR #430 comment 7060351480 决定；精确 C/H Operation Mapping 仍 OPEN |
 | BMCP Runtime / AT-01..AT-20 | NOT AUTHORIZED / NOT RUN | Issue #7 实施绑定继续延期 |
 
@@ -479,7 +479,7 @@ H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体
 - D：`docs/en/03-memory-brain/forget-fence-and-completion-contract.md` Blob `c791895333ab6140f035f4f622d5dee9325d422d`；`forget-fence-operation-and-publication-gate.md` Blob `9c054932994bb078e2834df8bd66f73895aa04f5`；`memory-versioning.md` Blob `4efbd26db9586f6fcf1897f42ffba287d625b903`；`commit-cursor-semantics.md` Blob `2de7fe35229372ae5b06093e5e031c2c243fbd7c`。
 - I：`docs/en/09-security-governance/security-governance-guide.md` Blob `061c5847b3df879eeaf3c71e5eae0bfa162b276a`；中文镜像 Blob `372d27c79dc79d09bcdb0f142c979efdba1c2b6e`。
 - 这些来源定义领域语义和操作名称，不是完整可调用 API/IDL，也没有冻结 Wire 表示。D 定义 RegisterProducerWork、InstallForgetFence、PublishDerivedIfFenceCurrent、CompleteProducerWork、ResolveProducerWork、ReconcileForgetBarrier 等操作。I 定义 PermissionEpoch、AuthorizationDecisionRef、撤销/Currentness 和证据接受语义；没有冻结的公共 authorize() Endpoint/Schema。
-- 裁决：D 仍是 Canonical ForgetOperation/Fence 和 Producer-barrier 语义的唯一权威；I 仍是 Principal Authorization、PermissionEpoch、撤销和 Global Forget Policy 的唯一权威。BMCP 只携带 Owner 签发的不透明 Ref/Epoch，并在接口发布后调用对应权威的 Validation/Currentness 操作。PermissionEpoch 与 ForgetFence 是不同名义类型。缺失/过期/不可用/不确定证据必须 Fail-closed。
+- 裁决：D/I Owner comments 7060243632 和 7060259541 已 DECIDE 此权威边界。D 仍是 canonical ID/revision/currentness、lifecycle、ConflictSet、ForgetOperation/Fence 和 producer-barrier 语义的唯一权威；I 仍是 Principal/Actor/attestor authorization、PermissionEpoch、revocation、retention/legal-hold/backup 以及 global Forget policy/evaluation 的唯一权威。BMCP 只携带权威方签发的不透明 Ref/Epoch，并且仅在接口发布后调用对应权威的 Validation/Currentness 操作。PermissionEpoch 与 ForgetFence 是不同名义类型。缺失/过期/不可用/不确定的证据必须 Fail-closed。精确可调用 API/IDL/Schema 仍为 OPEN，必须由 D/I 发布。
 
 **C Mapping 边界：**PR #430 comment 7060351480 已决定 Family-level Routing；[Issue #449](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/449) 仍 OPEN，跟踪精确 H Operation ID/Schema、C Tool/Resource Name、C-H Consumer Acceptance。MCP 是 Agent Host ↔ C 北向接口；BMCP 是 C Adapter ↔ Brain 经 H 的协议边界。C 的 AgentRequestId 仅可作为本地 Workflow Correlation 输入，不得新增 H request_id；H 每条 Message 有独立 message_id，correlation_id/causation_id 分别表示 Workflow/直接父事件。Event Ingress/Telemetry/Forget/Admin 必须经过注册 H Operation 和 Owner Authorization；Context Snapshot/Delta/Delivery 为入站；Acknowledgement 仅是 Adapter Evidence，不是 MCP Success 或 G Applied。Recall/Search 归 F，当前不是 BMCP Family，不得发明 Search。
 
@@ -497,13 +497,15 @@ H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体
 
 ### 8.1 现有符合性证据——范围受限，不代表完整协议 PASS
 
-- Main `713774c381effbbe9e70693f88a7fa99a33a040d`：`python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v`——**30 passed，0 failed**，退出码 0。该结果只覆盖 Applied Delivery Evidence 符合性套件。
+- 当前 main `6c5597a62ada7f56d1956b9c60409f329d2819c5`，测试文件 blob `903764ab08a7d3dd17ba13f5c40e8c4129958bb5`：`python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v`——**38 passed，0 failed**，退出码 0，已在干净克隆上复现。该结果只覆盖 Applied Delivery Evidence 符合性套件。此前的「30 passed」是针对测试文件 blob `98242cc193a77b27d58b39353ccc031201992614`、在 `c138654c…` 与 `713774c3…` 上测得；它已被取代，而非被推翻。
 - PR #436（已于 `02f61194fd4e12993b4c83f7fac8382eee20f5d8` 合并），源 Head `1ffed9ed127df98b2f823a66ec80ea43d08cb9dc`：`python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/provider_outcome -p 'test_*.py' -v`——**运行 10 项；5 passed；5 skipped；0 failed**，退出码 0。跳过的 CPO-02/04/05/09/10 明确需要 Owner C 权威语义 Validator。该结果仅验证 Schema 结构，不验证 C 语义或密码学签名。
 - PR #436 的双语协议索引和 provider_outcome 测试现已合入 Main。其索引仍将 RecoveryJoin 1.0.2 的 Schema/Validator/Test 标记为未交付；五个语义测试方法仍需等待 C 的权威 Validator。
 - 这些结果不构成完整 BMCP 符合性。Strict JSON Parser 是参考模型，不是生产 Transport。当前不存在 `tests/protocol_test.rs` 和 `crates/bmcp`。
 - AT-01..AT-20 仍为 **PLANNED_NOT_RUN**。本架构阶段不存在 Runtime 仓库/实施授权。
 
 
+
+以下验收测试（AT-01 至 AT-20）定义预期行为覆盖范围、责任归属、前置条件、验证方法、依赖项及当前验收阻塞项。这些是规范级验收标准，不构成测试已经执行的证据。
 
 | ID / 场景 | OWNER | PRECONDITION | EXPECTED_RESULT | TEST_METHOD | DEPENDENCY | ACCEPTANCE_STATUS |
 |---|---|---|---|---|---|---|
@@ -540,9 +542,9 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 1. BMCP 语义契约获责任架构权威接受；未决语义明确列出。
 2. H 冻结版本化 Wire、Transport、ACK、Validator 契约，包括 Error/Conformance Mapping。
 3. H/C/E/D/I/G 按需接受跨模块 Request/Response/Receipt/ACK 映射。
-4. Owner 已批准 Fact/Claim Option A + I1 语义；精确消费者映射仍为 Candidate，直至 D/I/Storage/H 契约完成版本 Pin 和审查；E Candidate IR 和 Receipt API 精确固定。
-5. C 通过 Issue #449 发布、H 审查 Agent Integration / MCP-to-BMCP Mapping；MCP 不得替代协议。
-6. D/I 发布 Identity/Lifecycle、Forget Fence、Authorization、PermissionEpoch Currentness 的精确可调用接口。
+4. Owner Option A + I1 语义已获批准。精确消费者映射在 B/D/E/F/G/H/I/Storage 契约完成版本固定和审查之前仍保持 Candidate；E Candidate IR 和 Receipt APIs 必须精确固定。
+5. C 通过 Issue #449 发布、H 审查 Agent Integration / MCP-to-BMCP Mapping；MCP 不得替代 BMCP。
+6. D/I 发布 Identity/Lifecycle、Forget Fence、Authorization 和 PermissionEpoch Currentness 的精确可调用接口。其权威边界已经决定；API/IDL/Schema 仍保持开放。
 7. 指定 Canonical Runtime 仓库/分支（或授权新仓库）、责任工程 Owner/维护者、Build、CI、测试命令和产物来源。
 8. 相关权威记录 Deployment Topology、持久化、队列、Recipient Adapter、Observability、Recovery 和 Operator 职责。
 9. 完整验收套件在不可变 Runtime Commit 上执行并保留可复现原始证据；UNKNOWN/Recovery/Race 均 fail-closed。
@@ -550,15 +552,15 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 
 | 工作流 | 下一项工件 | 责任权威 | 进入状态 |
 |---|---|---|---|
-| H | 冻结 Envelope/Version、Wire Decode、ACK、Validator、Error/Conformance | H | BLOCKED_BY_H_CONTRACT |
-| B / Governance | 将已批准 Owner 决策映射到精确消费者契约；Schema 仍为 Candidate | B + D/E/F/G/H/I | BLOCKED_BY_OWNER_CONTRACT |
-| D | Canonical Identity/Lifecycle/Fence API 和 Receipt | D | BLOCKED_BY_OWNER_CONTRACT |
-| I | Authorization/PermissionEpoch/Revocation API | I | BLOCKED_BY_OWNER_CONTRACT |
-| E | Candidate IR、AcceptedReceipt、Service 边界 | E | BLOCKED_BY_OWNER_CONTRACT |
-| C | Agent/MCP Adapter-to-BMCP Mapping | C + H | BLOCKED_BY_OWNER_CONTRACT |
-| G | ContextVersion/Delivery/Applied/ACK Mapping | G + H | BLOCKED_BY_OWNER_CONTRACT |
+| H | Versioned Envelope/Version、Wire Decode、ACK、Validator 和 Error/Conformance | H | PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN |
+| B / Governance | 将已批准的语义决策协调进精确消费者契约；Schema 仍为 Candidate | B + D/E/F/G/H/I | SEMANTIC_ACCEPTED / SOURCE_RECONCILIATION_AND_SCHEMA_GATE_OPEN |
+| D | Canonical Identity/Lifecycle/Fence API 和 Receipt | D | AUTHORITY_BOUNDARY_DECIDED / CALLABLE_API_IDL_OPEN |
+| I | Authorization/PermissionEpoch/Revocation API | I | AUTHORITY_BOUNDARY_DECIDED / CALLABLE_API_IDL_OPEN |
+| E | Candidate IR、AcceptedReceipt 和 Service 边界；仅包含五阶段 Rust 参考流水线 | E | INTEGRATED_DOCS_AND_CONSUMER_GATE_OPEN |
+| C | Agent/MCP Adapter-to-BMCP Mapping | C + H | PENDING_C_MAPPING_ISSUE_449 |
+| G | ContextVersion/Delivery/Applied/ACK Mapping | G + H | OWNER_CONSUMER_MAPPING_PENDING |
 | Engineering Leadership | Canonical Runtime Repo/Team/CI/Deployment 权限 | Engineering Leadership | DEFERRED_TO_ENGINEERING_PHASE |
-| BMCP 架构集成 | Owner 回复后刷新来源 Pin | BMCP 架构负责人 | NOT STARTED |
+| BMCP 架构集成 | 刷新来源 Pin 并纳入 B/D/I/H/C 决议 | BMCP 架构负责人 | IN_PROGRESS |
 
 ## 10. 治理与验证
 
@@ -571,7 +573,7 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 - `python3 scripts/check_document_management.py --require-changed c58878fce24528a0842b4f8887c93ddbf465b566`：FAIL，退出码 1；两个基线 DM-06 错误位于 `08-bmcp-protocol/protocol-index.md` 和 `.zh-CN.md`（`Canonical` 缺少 `authority.canonical_scope_id`）。PR 未修改两个索引文件。报告清点：501 governed documents，18 classified / 483 unclassified。未进行范围外元数据修改。
 
 
-**独立基线缺项——明确排除在 #453 之外：** Owner 独立核验 `08-bmcp-protocol/protocol-index.md`（Blob `a5b64941cdc783b385348de1b22e0eaace2c003d`）和 `08-bmcp-protocol/protocol-index.zh-CN.md`（Blob `2fe06d9424821eb96eb006dbb391914c1375afae`）。两个 Front Matter 均包含 `authority.canonical_status`、`authority.normative_status`、`authority.canonical_conflict_status`，但缺少 `authority.canonical_scope_id`（DM-06）。中文文件实际路径是仓库根目录下的 `08-bmcp-protocol/protocol-index.zh-CN.md`，不是 `docs/zh-CN/`。两个文件均不属于 #453 三个修改路径。Owner 原则上授权独立 H-owned 双语修复载体，但仓库开放 PR 数超过配额，暂不创建。不得猜测 Scope ID 或弱化 DM-06；这不是 #453 的修复范围。
+**独立基线缺项——明确排除在 #453 之外：** Owner 在经 Owner 核验的 main 快照上独立核验了 `08-bmcp-protocol/protocol-index.md`（Blob `a5b64941cdc783b385348de1b22e0eaace2c003d`）和 `08-bmcp-protocol/protocol-index.zh-CN.md`（Blob `2fe06d9424821eb96eb006dbb391914c1375afae`）。两个 Front Matter 均包含 `authority.canonical_status`、`authority.normative_status`、`authority.canonical_conflict_status`，但缺少 `authority.canonical_scope_id`（DM-06）。中文文件实际路径是仓库根目录下的 `08-bmcp-protocol/protocol-index.zh-CN.md`，不是 `docs/zh-CN/`。两个文件均不属于 #453 三个修改路径。Owner 原则上授权独立 H-owned 双语修复载体，但仓库开放 PR 数超过配额，暂不创建。不得猜测 Scope ID 或弱化 DM-06；这不是 #453 的修复范围。
 - `python3 scripts/ci/audit_runner_admission.py`：PASS；审计 1 个 self-hosted job / 0 violations；退出码 0。
 - `BASE_SHA=c58878fce24528a0842b4f8887c93ddbf465b566 HEAD_SHA=$(git rev-parse HEAD) PR_BODY='BILINGUAL-MANIFEST: COMPLETE' python3 scripts/check_bilingual_docs.py`：PASS；77 frozen / 0 new gaps / 21 exemptions；注册历史重新枚举：21 条注册源（18 条晚于创建、3 条精确历史 allowlist），0 个错误；退出码 0。三个变更 Markdown 路径位于 `NORMATIVE_ROOTS` 外，门禁明确未执行配对检查。门禁仍保留 same-commit registration-history 规则；旧的 21 条错误未在本快照重现。
 - `python3 scripts/check_bilingual_docs_full.py --source-revision c58878fce24528a0842b4f8887c93ddbf465b566`：FAIL；467 个范围内 Markdown / 112 exempt / 81 violations；退出码 1。逐路径分类如下。
@@ -582,91 +584,91 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 
 ### 81 条 GOV-DOC-001 冻结快照逐路径分类
 
-以下每个源文件均存在于冻结基线 `c58878fce24528a0842b4f8887c93ddbf465b566`，因此 81 条均为 Stage A 基线既有项。前 77 条属于 NORMATIVE_ROOTS 镜像缺项（预期的 `docs/en/<source>` 与 `docs/zh-CN/<source>` 两个路径均缺失）；最后 4 条属于 Phase-0 报告配对缺项（缺少 side-by-side `.en.md`/`.zh-CN.md` Pair 或所需的 `docs/en/14-ai-development` 镜像）。Owner 标签是按路径/领域作的路由分类，不构成新的 Canonical Owner 指派。全部排除在 #453 范围之外；处置为各 Owner 分别登记，不进行整体清扫。
+以下每个源文件均存在于冻结基线 `c58878fce24528a0842b4f8887c93ddbf465b566`，因此 81 条均为 Stage A 基线既有项。前 77 条属于 NORMATIVE_ROOTS 镜像缺项（预期的 `docs/en/<source>` 与 `docs/zh-CN/<source>` 两个路径均缺失）；最后 4 条属于 Phase-0 报告配对缺项（缺少 side-by-side `.en.md`/`.zh-CN.md` Pair 或所需的 `docs/en/14-ai-development` 镜像）。Owner 标签是按路径/领域作的路由分类，不构成新的 Canonical Owner 指派。全部排除在 #453 范围之外；处置方式为按 Owner 划分范围进行待办积压分诊，不进行批量清理。
 
 | # | 精确源路径 | Owner / 路由 | 规则 | C588 基线 | 处置 |
 |---:|---|---|---|---|---|
-| 01 | `00-governance/architecture-document-management-policy.md` | Repository Governance（仓库治理） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 02 | `00-governance/reports/gov-doc-001-full-scan-2026-11-20.md` | Repository Governance（仓库治理） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 03 | `00-governance/templates/document-metadata-template.md` | Repository Governance（仓库治理） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 04 | `02-domain-model/phase-2-domain-extension.md` | B — Domain Model（领域模型） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 05 | `02-domain-model/phase-2-domain-extension.zh-CN.md` | B — Domain Model（领域模型） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 06 | `06-memory-context/context-architecture.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 07 | `06-memory-context/context-budget-and-sufficiency.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 08 | `06-memory-context/context-edit-operations.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 09 | `06-memory-context/context-implementation-coverage.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 10 | `06-memory-context/context-implementation-coverage.zh-CN.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 11 | `06-memory-context/context-manager.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 12 | `06-memory-context/context-reconciliation.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 13 | `06-memory-context/context-versioning.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 14 | `06-memory-context/phase-3.7-g-local-lifecycle-producer-derivative-queue-recall-context-restore.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 15 | `06-memory-context/phase-3.8.4-g-c-provider-outcome-consumer-review.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 16 | `06-memory-context/phase-3.8.5-g-storage-logical-serialization-topology-impact-review.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 17 | `06-memory-context/phase-3.8.6-g-review-storage-serialization-anchor.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 18 | `07-agent-integration/adapter-capability-tiers.md` | C — Agent Integration（Agent 集成） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 19 | `07-agent-integration/adapter-capability-tiers.zh-CN.md` | C — Agent Integration（Agent 集成） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 20 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/README.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 21 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/baseline-currentness-and-owner-source-audit.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 22 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/baseline-owner-branch-snapshot-errata.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 23 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/bilingual-parity-audit.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 24 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-entity-inventory.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 25 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-glossary.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 26 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-invariants.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 27 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-model.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 28 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-relationships.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 29 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-identity-semantics.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 30 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-state-semantics.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 31 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-temporal-evidence-semantics.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 32 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/cross-owner-canonical-semantics-matrix.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 33 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-model-complexity-assessment.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 34 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-model-decision-record.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 35 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-semantics-conflict-register.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 36 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/evidence/README.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 37 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/evidence/official-reference-validation.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 38 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/existing-domain-model-baseline.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 39 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 40 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/latest-cross-owner-source-reconciliation.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 41 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/mature-domain-model-research.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 42 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/post-merge-currentness-and-governance-reconciliation.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 43 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/validation/README.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 44 | `13-engineering-decisions/technology-architecture-blueprint.md` | Architecture / Engineering Leadership（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 45 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/README.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 46 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/architecture-complexity-audit.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 47 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/baseline/architecture-baseline.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 48 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/deployment-topology-comparison.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 49 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/independent-review-handoff.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 50 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/mature-project-research.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 51 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/open-questions.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 52 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-dependency-register.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 53 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-remediation/CGH-APPLIED-REVIEW-001.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 54 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-remediation/OWNER-REMEDIATION-001.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 55 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-technology-review-synthesis.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 56 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/research-evidence-register.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 57 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/rust-ecosystem-assessment.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 58 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/technology-capability-matrix.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 59 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/technology-recommendation.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 60 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/workload-model.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 61 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/README.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 62 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-boundary.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 63 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-canonical-contract.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 64 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-conflict-register.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 65 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-cross-owner-contract-matrix.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 66 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-decision-record.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 67 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-failure-semantics.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 68 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-technology-assessment.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 69 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-telemetry.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 70 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-validation-plan.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 71 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/evidence/README.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 72 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/existing-integration-baseline.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 73 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/inference-boundary-and-trust-model.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 74 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/provider-integration-research.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 75 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/provider-outcome-and-execution-evidence.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 76 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/tool-execution-boundary.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 77 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/validation/README.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 78 | `14-ai-development/research/phase-0/SESSION-1-GITHUB-WORKFLOW-REPORT.md` | Engineering Governance / Phase-0 operations（工程治理 / Phase-0 运维） | GOV-DOC-001 Phase-0 报告：side-by-side Pair / docs/en 镜像缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 79 | `14-ai-development/research/phase-0/SESSION-2-PROMPT-RUN-PROVENANCE-REPORT.md` | Engineering Governance / Phase-0 operations（工程治理 / Phase-0 运维） | GOV-DOC-001 Phase-0 报告：side-by-side Pair / docs/en 镜像缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 80 | `14-ai-development/research/phase-0/SESSION-3-QUALITY-REVIEW-DEFECT-REPORT.md` | Engineering Governance / Phase-0 operations（工程治理 / Phase-0 运维） | GOV-DOC-001 Phase-0 报告：side-by-side Pair / docs/en 镜像缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
-| 81 | `14-ai-development/research/phase-0/SESSION-4-ADOPTION-ISOLATION-REPORT.md` | Engineering Governance / Phase-0 operations（工程治理 / Phase-0 运维） | GOV-DOC-001 Phase-0 报告：side-by-side Pair / docs/en 镜像缺失 | 基线既有 | 排除 #453；各 Owner 分别登记，不整体清扫 |
+| 01 | `00-governance/architecture-document-management-policy.md` | Repository Governance（仓库治理） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 02 | `00-governance/reports/gov-doc-001-full-scan-2026-11-20.md` | Repository Governance（仓库治理） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 03 | `00-governance/templates/document-metadata-template.md` | Repository Governance（仓库治理） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 04 | `02-domain-model/phase-2-domain-extension.md` | B — Domain Model（领域模型） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 05 | `02-domain-model/phase-2-domain-extension.zh-CN.md` | B — Domain Model（领域模型） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 06 | `06-memory-context/context-architecture.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 07 | `06-memory-context/context-budget-and-sufficiency.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 08 | `06-memory-context/context-edit-operations.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 09 | `06-memory-context/context-implementation-coverage.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 10 | `06-memory-context/context-implementation-coverage.zh-CN.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 11 | `06-memory-context/context-manager.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 12 | `06-memory-context/context-reconciliation.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 13 | `06-memory-context/context-versioning.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 14 | `06-memory-context/phase-3.7-g-local-lifecycle-producer-derivative-queue-recall-context-restore.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 15 | `06-memory-context/phase-3.8.4-g-c-provider-outcome-consumer-review.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 16 | `06-memory-context/phase-3.8.5-g-storage-logical-serialization-topology-impact-review.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 17 | `06-memory-context/phase-3.8.6-g-review-storage-serialization-anchor.md` | G — Memory Context（记忆上下文） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 18 | `07-agent-integration/adapter-capability-tiers.md` | C — Agent Integration（Agent 集成） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 19 | `07-agent-integration/adapter-capability-tiers.zh-CN.md` | C — Agent Integration（Agent 集成） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 20 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/README.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 21 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/baseline-currentness-and-owner-source-audit.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 22 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/baseline-owner-branch-snapshot-errata.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 23 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/bilingual-parity-audit.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 24 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-entity-inventory.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 25 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-glossary.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 26 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-invariants.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 27 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-model.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 28 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-domain-relationships.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 29 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-identity-semantics.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 30 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-state-semantics.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 31 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-temporal-evidence-semantics.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 32 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/cross-owner-canonical-semantics-matrix.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 33 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-model-complexity-assessment.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 34 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-model-decision-record.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 35 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/domain-semantics-conflict-register.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 36 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/evidence/README.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 37 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/evidence/official-reference-validation.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 38 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/existing-domain-model-baseline.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 39 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 40 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/latest-cross-owner-source-reconciliation.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 41 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/mature-domain-model-research.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 42 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/post-merge-currentness-and-governance-reconciliation.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 43 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/validation/README.md` | B — Domain Model research（领域模型研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 44 | `13-engineering-decisions/technology-architecture-blueprint.md` | Architecture / Engineering Leadership（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 45 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/README.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 46 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/architecture-complexity-audit.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 47 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/baseline/architecture-baseline.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 48 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/deployment-topology-comparison.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 49 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/independent-review-handoff.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 50 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/mature-project-research.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 51 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/open-questions.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 52 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-dependency-register.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 53 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-remediation/CGH-APPLIED-REVIEW-001.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 54 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-remediation/OWNER-REMEDIATION-001.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 55 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-technology-review-synthesis.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 56 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/research-evidence-register.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 57 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/rust-ecosystem-assessment.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 58 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/technology-capability-matrix.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 59 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/technology-recommendation.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 60 | `13-engineering-decisions/technology-research/TECH-REALITY-001-A/workload-model.md` | Architecture / Technology research（本次扫描未解析具体 Owner） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 61 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/README.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 62 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-boundary.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 63 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-canonical-contract.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 64 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-conflict-register.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 65 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-cross-owner-contract-matrix.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 66 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-decision-record.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 67 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-failure-semantics.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 68 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-technology-assessment.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 69 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-telemetry.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 70 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/agent-integration-validation-plan.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 71 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/evidence/README.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 72 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/existing-integration-baseline.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 73 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/inference-boundary-and-trust-model.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 74 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/provider-integration-research.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 75 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/provider-outcome-and-execution-evidence.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 76 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/tool-execution-boundary.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 77 | `13-engineering-decisions/technology-research/TECH-REALITY-001-C/validation/README.md` | C — Agent Integration research（Agent 集成研究） | GOV-DOC-001 NORMATIVE_ROOTS：双语镜像均缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 78 | `14-ai-development/research/phase-0/SESSION-1-GITHUB-WORKFLOW-REPORT.md` | Engineering Governance / Phase-0 operations（工程治理 / Phase-0 运维） | GOV-DOC-001 Phase-0 报告：side-by-side Pair / docs/en 镜像缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 79 | `14-ai-development/research/phase-0/SESSION-2-PROMPT-RUN-PROVENANCE-REPORT.md` | Engineering Governance / Phase-0 operations（工程治理 / Phase-0 运维） | GOV-DOC-001 Phase-0 报告：side-by-side Pair / docs/en 镜像缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 80 | `14-ai-development/research/phase-0/SESSION-3-QUALITY-REVIEW-DEFECT-REPORT.md` | Engineering Governance / Phase-0 operations（工程治理 / Phase-0 运维） | GOV-DOC-001 Phase-0 报告：side-by-side Pair / docs/en 镜像缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
+| 81 | `14-ai-development/research/phase-0/SESSION-4-ADOPTION-ISOLATION-REPORT.md` | Engineering Governance / Phase-0 operations（工程治理 / Phase-0 运维） | GOV-DOC-001 Phase-0 报告：side-by-side Pair / docs/en 镜像缺失 | 基线既有 | 排除 #453；按 Owner 划分范围进行待办积压分诊，不进行批量清理 |
 
 ### 冻结快照的 embedded-bilingual 注册历史重新枚举
 
@@ -705,16 +707,16 @@ C588 快照的门禁注册表包含 21 条 embedded-bilingual 源记录：18 条
 - `python3 -m unittest discover -s 08-bmcp-protocol/tests/conformance/recovery_cutoff -p 'test_*.py' -v`：FAIL，31 run / 28 passed / 3 failed；退出码 1。失败项：重复 JSON Member 测试要求具体重复键错误详情，但 Validator 返回通用 `invalid JSON: ValueError`；Schema/Index 测试找不到 protocol-index 中精确 `message_type` 条目；合法完整消息 Fixture 有六个对象违反 non-empty 约束。这些是当前 Main RecoveryJoin 工件问题，本 PR 未修改相关文件。
 - `python3 -m unittest discover -s 06-memory-context/reference-model -p 'test_g_applied_ledger.py' -v`：PASS，8/8；退出码 0。
 - `cargo test --offline -p memory-context --test e2e_negative_paths`：未完成；编译因 `Disk quota exceeded` / LLVM 输出流 I/O 错误失败；退出码 101。不声称 Rust G E2E PASS。
-- 独立语义/双语复审仍 PENDING。20 行 AT 矩阵仍仅在 ZH 逐项列出；EN 仅记录汇总 `PLANNED_NOT_RUN`。已披露此不对称，不表述为双语一致。
+- 分会话语义/双语审查此后已完成；提示词配对来源仍未核实（`SESSION_SEPARATION_RECORDED_PROMPT_UNVERIFIED`）。20 行 AT 矩阵仍仅在 ZH 逐项列出；EN 仅记录汇总 `PLANNED_NOT_RUN`。已披露此不对称，不表述为双语一致。
 - 未修改 H 所有规范文件、G 实现、C/D/I 权威文件、治理门禁、Schema 或 Baseline Registry。PR 范围仍严格为三个文件。
 
 ## 11. 双语变更清单
 
 | 文档 / 版本 | 英文路径 | 中文路径 | 来源版本 | 一致性 |
 |---|---|---|---|---|
-| BMCP-ARCH-001 / 0.2.2 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main c58878fce24528a0842b4f8887c93ddbf465b566；H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74 | 作者准备双语 Pair；独立一致性审查 PENDING |
+| BMCP-ARCH-001 / 0.2.2 | reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md | reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md | main c58878fce24528a0842b4f8887c93ddbf465b566；H 3e8b33df18b9e6fc757ca84ff07a12faebc78e74；§2/§7 中的 B/D/I Owner 固定版本引用 | 已完成分会话语义/双语审查；提示词配对来源尚未核实（SESSION_SEPARATION_RECORDED_PROMPT_UNVERIFIED） |
 
-Coverage Register 仅将此登记为 Review/Handoff Pair，不改变 “BMCP Protocol detailed contracts (7 core specifications)” 条目；双语规范核心文档覆盖仍为 NOT STARTED。结构配对不等于语义双语一致性审查。
+Coverage Register 仅将此登记为 Review/Handoff Pair，不改变 “BMCP Protocol detailed contracts (7 core specifications)” 条目；双语规范核心文档覆盖仍为 NOT STARTED。
 
 ## 12. 最终状态
 
@@ -727,6 +729,9 @@ Coverage Register 仅将此登记为 Review/Handoff Pair，不改变 “BMCP Pro
 - OWNER_DECISIONS_REQUIRED：BMCP-DR-001 语义方向 RESOLVED / Consumer-Schema Gate OPEN；BMCP-DR-002 Authority Boundary DECIDED / 可调用 API/IDL 延后由 D/I 契约定义；BMCP-DR-003 MCP Adapter Boundary PARTIALLY DECIDED / 精确 C 映射 OPEN under Issue #449
 - ISSUE_7_STATUS：IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE；GitHub CLOSED / not_planned；未改变
 - RUNTIME_IMPLEMENTATION_STATUS：NOT AUTHORIZED / NOT STARTED
-- PR / Commit：PR #453 已合并至固定的验证分支 `bmcp-validation-base-c588`，合并提交为 `7c7801db396b92c57ad37020fe170f65f25e43ce`；这是快照验证分支合并，不是合并到实时 `main`。独立语义/双语审查仍待完成；该工件仍为 `ARCHITECTURE_PARTIAL`，不冻结协议/Schema，也不授权 Runtime。
+- PR / Commit：PR #453 已合并至固定的验证分支 `bmcp-validation-base-c588`，合并提交为 `7c7801db396b92c57ad37020fe170f65f25e43ce`；这是快照验证分支合并，不是合并到实时 `main`。分会话语义/双语审查已完成；提示词配对来源仍未核实（SESSION_SEPARATION_RECORDED_PROMPT_UNVERIFIED）。该工件仍为 ARCHITECTURE_PARTIAL，不冻结协议/Schema，也不授权 Runtime。
+- OPEN — 英文源文错误类别清单对账
+
+  EN §7.1 H-CONFIRM-004 DECISION_REQUIRED 要求映射十二个请求的错误类别。EN §7.1.1 H-CONFIRM-004 当前列出 Authentication、Authorization、Validation、Unsupported、Conflict、Expired、RateLimited/ResourceExhausted、Internal 和 Unknown（九个分组条目；若将 RateLimited 与 ResourceExhausted 分开计数，则为十个）。英文源文未明确说明 §7.1.1 中的清单如何涵盖全部十二个请求的错误类别。权威的十二类别清单及其与 §7.1.1 分类体系之间的映射关系，必须由 Owner 明确裁定。在该裁定正式记录之前，此项差异保持 OPEN。
 
 **下一步：** B/D/I 对齐现有源文档/镜像文档并刷新版本 Pin；H 发布带版本的规范 Wire 工件，并关闭剩余 Registry/Schema/Crypto/Storage/Error 子项；C 根据 Issue #449 发布精确的 Agent/MCP-to-BMCP 映射；E 集成五阶段 Rust Compiler 文档及消费者边界；BMCP 刷新双语交接文档。只有在所有工程进入条件均有证据后，Runtime 才可解除延期。
