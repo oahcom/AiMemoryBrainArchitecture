@@ -24,7 +24,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-23"
-      last_verification_note: "Measured on main @ f82b6367 and on 3d1bd80d via git: attestor.rs absent, I_DEV_BASELINE_ATTESTOR 0 occurrences, I_DEV_BASELINE_ISSUER 22, attestation_authority.rs absent. Contract re-read in GAP-18-AUTHORIZATION-VALIDATOR-REMAINDER §5 and §8, which do state the answer; #723 concluded they did not because it searched only the WORK-ORDER."
+      last_verification_note: "Measured on main @ 82e9da113e on 2026-11-23: I_DEV_BASELINE_ATTESTOR remains present and #747 remains merged. The controlling issuer-policy interpretation is the I Owner-proxy Answer 2 in Issue #763 comment #7097007415: two distinct identifiers under one I-controlled trust-authorization policy. The earlier reliance on GAP-18 §5 as authority for issuer separation is withdrawn; §8 is retained as implementation reasoning, not as the source of the issuer-policy decision. The §2.3 dated clarification remains pending its document PR."
     usage_status: Active
     modification_status: Pending-Reapproval
     supersession:
@@ -33,7 +33,7 @@ document_metadata:
 
   authority:
     canonical_status: Candidate
-    canonical_scope: "Owner ruling: attestation and authorization-decision issuer allowlists must stay separate, per GAP-18 §5 and §8. The separation removed by 3d1bd80d is to be restored, not re-decided."
+    canonical_scope: "Owner ruling: exactly two distinct I development-baseline issuer identifiers are admitted under one I-controlled trust-authorization policy: i-owner-proxy/dev-baseline-v1 for authorization decisions and i-attestor-proxy/dev-baseline-v1 for attestations. The two record families retain separate encodings, records, and validators, per Issue #763 comment #7097007415."
     canonical_scope_id: domain-model/attestor-issuer-separation-ruling
     canonical_scope_keywords:
       - attestor-issuer
@@ -314,31 +314,28 @@ baseline constant refuses, so it cannot distinguish which constant the guard
 compares against. `#767` adds the test that closes that gap; it is held under
 §7.4 for the same reason this section exists.
 
-### 7.4 The open question, and who answers it
+### 7.4 Owner ruling and the required document amendment
 
-A layered reading has been proposed — that `same I issuer allowlist` names the
-trust-authorisation layer, while the string value belongs to the implementation
-identifier layer, so distinct strings under one I-controlled policy satisfy both
-texts. That reading is **plausible and unapproved**. It has not been adopted
-here, because a layer distinction that neither document states in writing cannot
-be inferred into existence by the implementer.
+The I Owner-proxy answered the issuer-allowlist question on 2026-11-23 in Issue #763, comment #7097007415.
 
-The question, stated so it can be answered yes/no:
+The ruling is that distinct issuer identifiers are permitted under one I-controlled trust-authorization policy. The policy admits exactly two development-baseline identifiers: `i-owner-proxy/dev-baseline-v1` for authorization-decision records and `i-attestor-proxy/dev-baseline-v1` for attestation records. The two record families retain separate deterministic encodings, records, and validators. `I_DEV_BASELINE_ATTESTOR` stays, and PR #747 stands.
 
-> Does "the same I issuer allowlist" require identical issuer string values for
-> attestation and authorization-decision records, or does it permit distinct
-> development-baseline issuer identifiers under the same I-controlled trust
-> authorization policy, while requiring separate record encodings and validators?
+The earlier characterization in this section that the layered reading was “plausible and unapproved” is withdrawn. The layered reading is now authorized by the I Owner-proxy ruling cited above. The prior statement that only the I Owner may answer the question is also no longer operative: the question has been answered in that ruling.
 
-Only the I Owner may answer it, and only the I Owner may amend
-`OWNER-DECISION-001 §2.3`. Until then:
+The I Owner-proxy ruling does not amend the text of `I-OWNER-DECISION-001 §2.3` by comment. That document must retain its original 2026-11-21 decision text and receive a dated clarification beneath the existing §2.3 paragraph. The clarification must cite Issue #763 comment #7097007415. Until that document amendment merges, §2.3 remains textually unamended; the interpretation governing this decision is the one recorded in the cited Owner-proxy ruling.
+
+This is a section-scoped amendment to the application of `OWNER-DECISION-001 §2.3`, not supersession of the entire Owner Decision document. The relationship is recorded here in the decision text. The `supersedes` metadata remains empty because DM-13 treats each `supersedes` entry as a repository-relative file path and therefore cannot represent a section-level target without declaring the entire source document superseded.
 
 | Item | State |
 |---|---|
-| `canonical_conflict_status` | `Under-Review` |
-| `#747` implementation | stands, unconfirmed |
-| `OWNER-DECISION-001 §2.3` | unamended, still operative as written |
-| New code touching either allowlist | paused |
+| `canonical_conflict_status` | `Under-Review` until the dated §2.3 clarification merges and is verified |
+| `#747` implementation | stands, normatively confirmed by the I Owner-proxy ruling in Issue #763 comment #7097007415 |
+| `OWNER-DECISION-001 §2.3` | original 2026-11-21 text retained; dated clarification required by the 2026-11-23 ruling |
+| New issuer identifiers or allowlist members | exactly two identifiers are authorized, one per record family; no third identifier, per-call-site substitute, or expanded allowlist without a new ruling |
 
-If the answer rejects the layered reading, `#747` is undone by a new revert PR,
-not by editing `main`.
+The two authorized identifiers remain:
+
+- `i-owner-proxy/dev-baseline-v1` — authorization-decision records
+- `i-attestor-proxy/dev-baseline-v1` — attestation records
+
+A future proposal to introduce a third issuer identifier requires a new ruling. The first test for such a proposal must follow the stored-row shape of `attestor_validator_rejects_decision_issuer_on_stored_row` (`admission.rs:2864`): write the proposed issuer into a stored row and assert that the validator refuses it.
