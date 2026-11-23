@@ -15,7 +15,7 @@ document_metadata:
         type: Full-document
         included_sections: []
         included_assets: []
-      approval_applicability: Applicable-To-Current-Version
+      approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "14-ai-development/adr/OWNER-DECISION-EVIDENCE-CONTRACT-001.md — the DECIDED line in this document names the decider and the date"
       revocation: null
@@ -24,7 +24,7 @@ document_metadata:
       last_verified_date: "2026-11-23"
       last_verification_note: "Every figure in §2 and §3 was measured at main 13c6d95d in this session: the four contract types were searched for a definition with git grep over crates/; the two EvidenceKinds were read from crates/memory-domain/src/lib.rs and crates/bmcp-protocol/src/lib.rs; the absence of a dependency from bmcp-protocol on memory-domain was read from its Cargo.toml; and every construction site of the four non-contract EvidenceKind values was enumerated repo-wide, returning none. The `Instant` row in §2 was re-measured at 13c6d95d in this revision, and the earlier count was wrong: it said 12 occurrences, all `std::time::Instant` in `bmcp-server`, when the measured figure is 44 occurrences in 9 files across 4 crates, 38 of them `std::time::Instant` and 6 `TimeValue::Instant(String)`."
     usage_status: Active
-    modification_status: Modified
+    modification_status: Pending-Reapproval
 
   authority:
     canonical_status: Canonical
