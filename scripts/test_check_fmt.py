@@ -79,6 +79,20 @@ class CheckFmtWorktreeTests(unittest.TestCase):
             self.assertIn("CHECK_RESULT=PASS", result.stdout)
             self.assertTrue(log.is_file(), "cargo must run on a clean tree")
 
+    def test_format_failure_on_clean_tree_remains_distinct(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root, head, env, log = self.make_repo(Path(tmp) / "repo")
+            cargo = Path(env["PATH"].split(os.pathsep, 1)[0]) / "cargo"
+            cargo.write_text("#!/bin/sh\nexit 1\n", encoding="utf-8")
+            cargo.chmod(0o755)
+            result = self.run_checker(root, head, env)
+            self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+            self.assertIn("WORKTREE_RESULT=CLEAN", result.stdout)
+            self.assertIn("FMT_RESULT=FAIL", result.stdout)
+            self.assertIn("CHECK_RESULT=FAIL", result.stdout)
+            self.assertNotIn("WORKTREE_RESULT=DIRTY", result.stdout)
+            self.assertTrue(log.is_file(), "cargo must run on a clean tree even when fmt fails")
+
     def assert_dirty_refused(self, mutation: str) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root, head, env, log = self.make_repo(Path(tmp) / "repo")
