@@ -9,7 +9,7 @@ document_metadata:
       decision_date: "2026-11-23"
       approved_version:
         scheme: content-hash
-        value: "879834b271e71985a96af9458e13567b091ac4819ea596dc9e64bbcc33b67734"
+        value: "5d5c2268576e8273f0432c2645b154e0f3006318899e747e904ef2b92a64b7a7"
       approval_scope:
         type: Full-document
         included_sections: []
@@ -206,6 +206,32 @@ Ordinary discussion comments, non-blocking suggestions, and review comments that
 This clause exists because a review disposition and a merge happened 27 seconds apart, with the correction landing on an already-merged branch 18 minutes later and never reaching the target branch. The interval is the evidence, not the rule: the rule exists because the review disposition state and the merge permission had no enforced relationship. See `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` §13 for the instance record.
 
 本条的由来：一次审查处置与一次合并相隔 27 秒，修正 18 分钟后落在已合并分支上，从未进入目标分支。时间间隔是证据而非规则本身：规则之所以存在，是因为审查处置状态与合并权限之间缺少强制关系。实例记录见 `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` §13。
+
+#### 6.1.3 Re-review of Corrective Commits and the Final Head / 修正提交与最终 Head 的重新审查
+
+When one or more corrective commits are pushed to address a blocking finding, a review disposition issued against the previous Head MUST NOT automatically be treated as review or approval of the new Head.
+
+An authorized reviewer MUST inspect the final exact Head proposed for merge. The re-review MUST confirm all of the following:
+
+1. Whether every previously recorded blocking finding has been resolved on that Head;
+2. Whether the corrective commits, individually and in combination with the pre-existing changes, introduce any new material issue;
+3. Whether the final Head continues to satisfy all applicable architecture, governance, security, testing, and other mandatory requirements.
+
+Even when a corrective commit addresses only one known finding, the reviewer MUST NOT limit the re-review to that finding's local diff while ignoring the complete change set of the final Head.
+
+Any subsequent commit that changes the Head after the re-review invalidates the re-review conclusion for the previous Head; the final Head MUST be checked again before merge. Passing CI, an author statement that the issue has been fixed, or approval of an earlier Head cannot substitute for this re-review.
+
+每当为解决阻断性发现而推送一个或多个修正提交时，先前针对旧 Head 的审查结论不得自动视为对新 Head 的审查或批准。
+
+有权审查者 MUST 检查合并候选的最终精确 Head。该复核 MUST 同时确认：
+
+1. 此前记录的每一项阻断性发现是否已在该 Head 上得到解决；
+2. 修正提交及其与原有变更的组合是否引入新的实质性问题；
+3. 最终 Head 是否仍满足适用的架构、治理、安全、测试及其他强制要求。
+
+即使修正提交只针对一个已知 finding，审查方也不得将复核范围限制为该 finding 的局部差异，而忽略最终 Head 的完整变更集合。
+
+任何在复核后再次改变 Head 的提交，均使此前针对旧 Head 的复核结论失效；合并前必须重新核对最终 Head。CI 通过、作者声明修复完成或旧 Head 已获批准，均不能替代该复核。
 
 ## 7. Platform enforcement is separate from process policy / 平台强制执行与流程规范分离
 
