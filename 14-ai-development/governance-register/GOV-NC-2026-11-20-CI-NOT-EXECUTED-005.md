@@ -1,3 +1,48 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-23"
+      last_verification_note: "The body and every count are unchanged from the original measurement. The addendum added on 2026-11-23 cites two first-execution runs (45011672799 self-hosted, 45037267638 hosted) read from the GitHub Actions REST API in this session."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: "docs/en/14-ai-development/governance-register/GOV-NC-2026-11-20-CI-NOT-EXECUTED-005.md"
+    zh-CN: "docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-20-CI-NOT-EXECUTED-005.md"
+---
+
 # GOV-NC-2026-11-20-CI-NOT-EXECUTED-005 — 门禁连续 36 小时零执行登记
 
 - 登记编号：GOV-NC-2026-11-20-CI-NOT-EXECUTED-005
@@ -180,3 +225,20 @@ BASE_SHA=<base> HEAD_SHA=<head> PR_BODY="$(cat pr_body.txt)" \
 **登记状态**：`ACCEPTED` / `CI_NOT_EXECUTED` / 36 小时内门禁逻辑实际执行 **0 次** / 期间合并 **85 次** / 其中 `APPROVED` **0** 次
 
 Owner 裁定（2026-11-21）：接受本登记的统计边界与 `NOT_EXECUTED` 归类。同时明确——**本登记可以作为治理事实登记，但不得据此声称仓库门禁本身通过或失败**；#419 的本地 exact-head 实测是补偿性证据，不是 CI 执行证据。
+
+---
+
+## 11. 执行侧于 2026-11-22 恢复（2026-11-23 附注）
+
+本登记的正文与计数**不改动**。它记录的是 2026-11-19T16:12Z 起 36 小时窗口内的事实，那些事实没有变。
+
+但本登记的状态行是现在时（「执行侧完全缺失」），而执行侧已经恢复。首次真实执行：
+
+| | 首次执行 `cargo test --workspace --all-targets` | run | head | runner |
+|---|---|---|---|---|
+| 自托管 | 2026-11-22T10:17:02Z | `45011672799` | `550bb864` | `zesu-x64` |
+| GitHub 托管 | 2026-11-22T15:15:13Z | `45037267638` | `38c3c975` | `GitHub Actions 1000005167` |
+
+后果：本登记「不得据此声称仓库门禁通过或失败」的限制**仍然有效**（执行了不等于可信），但「CI 在本仓库中不会执行」这一读法**已经失效**。凡引用本登记作为该前提的依据者，必须改引 `GOV-NC-2026-11-23-EXECUTION-RESTORED-029`。
+
+本附注由 owner-proxy 会话添加，不是独立审查，也不改变本登记的 `ACCEPTED` 状态——那个状态是对**窗口内统计**的裁定，不是对现在的能力判断。

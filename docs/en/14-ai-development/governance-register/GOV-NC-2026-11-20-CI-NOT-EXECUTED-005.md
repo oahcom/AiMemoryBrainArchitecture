@@ -1,3 +1,48 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-23"
+      last_verification_note: "The body and every count are unchanged from the original measurement. The addendum added on 2026-11-23 cites two first-execution runs (45011672799 self-hosted, 45037267638 hosted) read from the GitHub Actions REST API in this session."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "14-ai-development/governance-register/GOV-NC-2026-11-20-CI-NOT-EXECUTED-005.md"
+    en: null
+    zh-CN: "docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-20-CI-NOT-EXECUTED-005.md"
+---
+
 # GOV-NC-2026-11-20-CI-NOT-EXECUTED-005 — Register of 36 consecutive hours with zero gate executions
 
 - Register ID: GOV-NC-2026-11-20-CI-NOT-EXECUTED-005
@@ -180,3 +225,20 @@ BASE_SHA=<base> HEAD_SHA=<head> PR_BODY="$(cat pr_body.txt)" \
 **Register status**: `ACCEPTED` / `CI_NOT_EXECUTED` / gate logic actually executed in 36 hours: **0** / merges in the same window: **85** / of which `APPROVED`: **0**
 
 Owner ruling (2026-11-21): the statistics, the boundary and the `NOT_EXECUTED` classification are accepted. It also states explicitly that **this register may stand as a governance fact but must not be used to claim the repository's gate itself passes or fails**; #419's local exact-head run is compensating evidence, not CI execution evidence.
+
+---
+
+## 11. The execution side was restored on 2026-11-22 (note added 2026-11-23)
+
+The body and the counts of this register are **not changed**. It records facts about the 36-hour window that began at 2026-11-19T16:12Z, and those facts have not changed.
+
+But this register's status line is present tense ("the execution side is entirely absent"), and the execution side has been restored. First real executions:
+
+| | first `cargo test --workspace --all-targets` | run | head | runner |
+|---|---|---|---|---|
+| self-hosted | 2026-11-22T10:17:02Z | `45011672799` | `550bb864` | `zesu-x64` |
+| GitHub-hosted | 2026-11-22T15:15:13Z | `45037267638` | `38c3c975` | `GitHub Actions 1000005167` |
+
+Consequence: this register's restriction — that it "must not be used to claim the repository's gate itself passes or fails" — **remains in force** (executed is not trustworthy). But the reading "CI does not execute in this repository" **has expired**. Anyone citing this register as the basis for that premise must cite `GOV-NC-2026-11-23-EXECUTION-RESTORED-029` instead.
+
+This note was added by an owner-proxy session. It is not an independent review, and it does not change this register's `ACCEPTED` status — that status is a ruling about **the counts within the window**, not a judgement about present capability.
