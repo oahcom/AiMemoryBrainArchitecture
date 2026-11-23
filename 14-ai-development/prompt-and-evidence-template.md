@@ -1,3 +1,20 @@
+---
+document_metadata:
+  domain: ai-development
+  role: reference
+  lifecycle:
+    approval:
+      decision_status: Draft
+    evidence_verification:
+      verification_status: Unverified
+    usage_status: Active
+    modification_status: Modified
+  authority:
+    canonical_status: Non-Canonical
+    normative_status: Informative
+    canonical_conflict_status: None
+---
+
 # AI Work Item and Prompt Record Template
 # AI 任务与提示词记录模板
 
