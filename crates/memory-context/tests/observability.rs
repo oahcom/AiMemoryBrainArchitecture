@@ -2,9 +2,10 @@
 
 use memory_context::{
     build_budget_sufficiency_report, summarize_delivery_lifecycle, BudgetSufficiencyReport,
-    CanonicalWatermark, ContextBudget, ContextCandidate, ContextTier, DeliveryAck, DeliveryAttempt,
-    DeliveryAttemptId, DeliveryId, DeliveryLifecycle, SelectionBudgetUsage, SufficiencyAssessment,
-    SufficiencyDimension, SufficiencyOutcome, SufficiencyOutcomeKind, SufficiencyRequirement,
+    BudgetUsage, BudgetVector, CanonicalWatermark, ContextBudget, ContextCandidate, ContextTier,
+    DeliveryAck, DeliveryAttempt, DeliveryAttemptId, DeliveryId, DeliveryLifecycle,
+    SelectionBudgetUsage, SufficiencyAssessment, SufficiencyDimension, SufficiencyOutcome,
+    SufficiencyOutcomeKind, SufficiencyReport, SufficiencyRequirement,
 };
 use memory_domain::{MemoryLifecycle, OpaqueId, ScopeKind, ScopeRef};
 
@@ -59,13 +60,19 @@ fn requirement(dimension: SufficiencyDimension, mandatory: bool) -> SufficiencyR
     }
 }
 
-fn report(
+fn sufficiency() -> SufficiencyReport {
+    let mut report = SufficiencyReport::new(7, format!("profile-{SECRET}"));
+    report.mark_currentness_established();
+    report
+}
+
+fn report_with_sufficiency(
+    sufficiency: &SufficiencyReport,
     excluded: &[(&ContextCandidate, &'static str)],
     assessment: &SufficiencyAssessment,
 ) -> BudgetSufficiencyReport {
     build_budget_sufficiency_report(
-        7,
-        &format!("profile-{SECRET}"),
+        sufficiency,
         &budget(),
         &usage(),
         excluded,
@@ -76,6 +83,13 @@ fn report(
             revision: 11,
         }],
     )
+}
+
+fn report(
+    excluded: &[(&ContextCandidate, &'static str)],
+    assessment: &SufficiencyAssessment,
+) -> BudgetSufficiencyReport {
+    report_with_sufficiency(&sufficiency(), excluded, assessment)
 }
 
 fn sufficient() -> SufficiencyAssessment {
@@ -318,4 +332,119 @@ fn the_delivery_report_carries_counts_only_and_no_delivery_identifiers() {
         !debug.contains(SECRET),
         "report leaked a delivery id: {debug}"
     );
+}
+
+#[test]
+fn the_report_carries_all_four_section_9_4_field_groups() {
+    let mut sufficiency = sufficiency();
+    sufficiency.canonical_commit_ref = Some("commit-abc".into());
+    sufficiency.forget_fence_ref = Some("fence-7".into());
+    sufficiency.permission_epoch = Some(12);
+    sufficiency.budget = Some(BudgetVector {
+        tokens: Some(4096),
+        relation_fan_out: Some(32),
+        provenance_depth: Some(8),
+        latency_micros: Some(1000),
+        cpu_micros: Some(500),
+        tier_entries: vec![(ContextTier::P1, 4)],
+    });
+    sufficiency.budget_usage = Some(BudgetUsage {
+        tokens: 1024,
+        relation_fan_out: 8,
+        provenance_depth: 3,
+        latency_micros: 200,
+        cpu_micros: 100,
+        tier_entries: vec![(ContextTier::P1, 2)],
+    });
+    sufficiency.token_estimate_profile = Some("cl100k_base".into());
+    sufficiency.rendered_bytes = Some(2048);
+    sufficiency.entries = Some(4);
+    sufficiency.compacted_sources = vec!["context-v3".into(), "context-v4".into()];
+    sufficiency.validation_profile = Some("fidelity-v1".into());
+    sufficiency.digest_profile = Some("sha256".into());
+    sufficiency.blocked.record_visible("memory:visible".into());
+    sufficiency.blocked.record_redacted();
+    sufficiency.deferred.record_visible("source:visible".into());
+    sufficiency.deferred.record_redacted();
+
+    let report = report_with_sufficiency(&sufficiency, &[], &sufficient());
+
+    assert_eq!(report.canonical_commit_ref.as_deref(), Some("commit-abc"));
+    assert_eq!(report.forget_fence_ref.as_deref(), Some("fence-7"));
+    assert_eq!(report.permission_epoch, Some(12));
+    assert_eq!(report.budget.as_ref().unwrap().tokens, Some(4096));
+    assert_eq!(report.budget_usage.as_ref().unwrap().tokens, 1024);
+    assert_eq!(
+        report.token_estimate_profile.as_deref(),
+        Some("cl100k_base")
+    );
+    assert_eq!(report.rendered_bytes, Some(2048));
+    assert_eq!(report.entries, Some(4));
+    assert_eq!(
+        report.compacted_sources,
+        vec!["context-v3".to_string(), "context-v4".to_string()]
+    );
+    assert_eq!(report.validation_profile.as_deref(), Some("fidelity-v1"));
+    assert_eq!(report.digest_profile.as_deref(), Some("sha256"));
+    assert_eq!(report.blocked.visible(), ["memory:visible"]);
+    assert_eq!(report.deferred.visible(), ["source:visible"]);
+    assert!(report.blocked.has_redactions());
+    assert!(report.deferred.has_redactions());
+    assert!(report.sufficiency_currentness_established);
+}
+
+#[test]
+fn blocked_and_deferred_never_disclose_unauthorized_counts() {
+    let mut sufficiency = sufficiency();
+    sufficiency
+        .blocked
+        .record_visible("authorized-blocked".into());
+    sufficiency.blocked.record_redacted();
+    sufficiency
+        .deferred
+        .record_visible("authorized-deferred".into());
+    sufficiency.deferred.record_redacted();
+
+    let report = report_with_sufficiency(&sufficiency, &[], &sufficient());
+
+    assert_eq!(report.blocked.visible(), ["authorized-blocked"]);
+    assert_eq!(report.deferred.visible(), ["authorized-deferred"]);
+    assert_eq!(report.blocked.disclosed_count(), None);
+    assert_eq!(report.deferred.disclosed_count(), None);
+    assert!(report.blocked.has_redactions());
+    assert!(report.deferred.has_redactions());
+
+    // The type has no total-count accessor to leak through; the only count it
+    // can report is the disclosed one, and that stays None above.
+    let debug = format!("{report:?}");
+    assert!(!debug.contains(SECRET));
+}
+
+#[test]
+fn budget_usage_none_is_distinct_from_measured_zero() {
+    let mut unmeasured = sufficiency();
+    unmeasured.budget_usage = None;
+    let unmeasured_report = report_with_sufficiency(&unmeasured, &[], &sufficient());
+
+    let mut measured_zero = sufficiency();
+    measured_zero.budget_usage = Some(BudgetUsage::default());
+    let zero_report = report_with_sufficiency(&measured_zero, &[], &sufficient());
+
+    assert_eq!(unmeasured_report.budget_usage, None);
+    assert_eq!(zero_report.budget_usage, Some(BudgetUsage::default()));
+    assert_ne!(
+        unmeasured_report.budget_usage, zero_report.budget_usage,
+        "not measured must not collapse into measured zero"
+    );
+}
+
+#[test]
+fn unestablished_currentness_is_not_reported_as_established_absence() {
+    let sufficiency = SufficiencyReport::new(7, format!("profile-{SECRET}"));
+
+    let report = report_with_sufficiency(&sufficiency, &[], &sufficient());
+
+    assert!(!report.sufficiency_currentness_established);
+    assert!(report.compacted_sources.is_empty());
+    assert_eq!(report.budget_usage, None);
 }

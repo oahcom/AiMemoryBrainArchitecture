@@ -311,6 +311,16 @@ impl SufficiencyReport {
         &self.requirement_profile_version
     }
 
+    /// Whether currentness was explicitly established by the producer.
+    ///
+    /// Crate-private on purpose: `observability` needs to preserve the
+    /// difference between "established absence" and "not established", but
+    /// the public domain API should not gain a flag callers could read as a
+    /// completeness verdict.
+    pub(crate) fn currentness_established(&self) -> bool {
+        self.currentness_established
+    }
+
     /// Looks up coverage by its existing sufficiency dimension.
     pub fn dimension_coverage(
         &self,
