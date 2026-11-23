@@ -264,5 +264,15 @@ class AppliedDeliveryEvidenceTests(unittest.TestCase):
         self.assertEqual(result["status"],"UNKNOWN")
         self.assertIn("profile registration verifier result is indeterminate",result["unknown"])
 
+    def test_39_key_status_rejection(self):
+        c=checks(); c.verify_key_status=lambda e: False
+        result=self.validate(fixture(),c)
+        self.assertEqual(result["status"],"INVALID")
+        self.assertEqual(result["errors"],["key status verifier rejected evidence"])
+        control=checks(); control.verify_key_status=lambda e: None
+        control_result=self.validate(fixture(),control)
+        self.assertEqual(control_result["status"],"UNKNOWN")
+        self.assertEqual(control_result["unknown"],["key status verifier result is indeterminate"])
+
 if __name__ == "__main__":
     unittest.main()
