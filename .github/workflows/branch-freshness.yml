@@ -1,0 +1,37 @@
+name: Branch freshness
+
+# #719: a PR's diff is computed from merge-base(base, head) to head, so a stale
+# branch shows changes it did not make and hides changes main made that it
+# re-implements. The diff cannot report its own staleness; the commit graph can.
+#
+# Hosted runner, deliberately. `pull_request` on a self-hosted job is rejected
+# by the runner's job-started hook (§4.1 L1, `ref_not_default_branch`) and by
+# scripts/ci/audit_runner_admission.py (L2), and this job only needs the commit
+# graph, not a toolchain. It is cheap enough for hosted minutes.
+#
+# `fetch-depth: 0` is load-bearing: a shallow clone does not contain the merge
+# base, and the gate exits 2 rather than guessing.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  freshness:
+    name: Branch freshness vs base
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout pull request with full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check the branch contains its base
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: python3 scripts/ci/check_branch_freshness.py
