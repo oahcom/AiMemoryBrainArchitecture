@@ -411,7 +411,7 @@ H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体
 - MODULE：BMCP
 - ISSUE_OR_ADR：B-ADR-FACT-CLAIM-001（13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md）
 - DECISION_REQUIRED：使 B-ADR-FACT-CLAIM-001 与 Owner 语义选择对齐，并完成消费者映射/验收；在此之前不得冻结 Canonical Schema 或 Wire 字段。
-- CURRENT_FACTS：合并的 `OWNER-DECISION-FACT-CLAIM-001` 已选择 Option A（Fact 独立 Attestation、Claim 表示命题）及 I1（稳定 Claim Identity + 不可变 ClaimRevision），并取代 B ADR 作为当前语义决策请求。精确消费者实现映射、迁移/兼容和符合性仍为 Candidate，直至责任工件完成版本 Pin 和审查；没有任何 Wire 字段获批。
+- CURRENT_FACTS：合并的 Owner 决议记录 `OWNER-DECISION-FACT-CLAIM-001`（main Blob `d59756a8eb454480804c482ca03c68345ab5abf2`；PR #446 merge commit `ad5ca81a32b413aef3f9b5bccd06030aabde8275`）选择 Option A（Fact 独立 Attestation、Claim 表示命题）及 I1（稳定 Claim identity 加不可变 ClaimRevision）。该决议取代 B ADR，成为当前有效的语义决策请求。精确消费者实现映射、迁移/兼容和符合性仍为 Candidate，直至责任工件完成版本 Pin 和审查；没有任何 Wire 字段获批。
 - H_OWNED_CONTRACTS：未来 Wire 字段/Schema Mapping 归 H 所有且未冻结；本语义选择不批准任何 Wire 字段。
 - CROSS_MODULE_CONFLICT：语义方向已选择，但 E Candidate IR、D Identity/Lifecycle、I Authorization/Attestor Policy 和 H Payload Mapping 仍需精确消费者验收和来源 Pin，之后才能冻结共享 Schema。
 - OPTIONS：(A) 保留已选 Option A + I1 语义方向，在 消费者契约验收 门禁完成前继续保持 Payload 字段不透明；(B) 只有通过后续替代 Owner 决策才重新打开语义选择。
@@ -420,10 +420,10 @@ H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体
 - AGENT_INTEGRATION_IMPACT：C 只携带不透明的已批准 Ref。
 - D_I_IMPACT：D/I 语义不变；B 决议后审查消费者。
 - RUNTIME_IMPLEMENTATION_IMPACT：决议前不能实现最终 Fact/Claim Payload/Schema/Migration。
-- REQUIRED_AUTHORITY：Owner 语义选择记录于 PR #446 (merged)；Schema 冻结仍需 B/D/E/F/G/H/I 消费者映射和验收。
+- REQUIRED_AUTHORITY：Owner 语义选择已根据持续有效的 Owner 指令记录于 PR #446 (merged)；Schema 冻结仍需 B/D/E/F/G/H/I 消费者映射和验收。
 - OWNER_DECISION：SEMANTIC_DIRECTION_APPROVED_OPTION_A_I1；WIRE_SCHEMA_MAPPING_CANDIDATE
 - EVIDENCE：`OWNER-DECISION-FACT-CLAIM-001` PR #446 (merged) @ `ad5ca81a32b413aef3f9b5bccd06030aabde8275`；B ADR Blob 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593。
-- FOLLOW_UP_ACTIONS：B 更新 ADR 状态/来源 Pin；D/E/F/G/H/I 记录精确消费者映射和验收；补齐迁移/兼容计划及符合性场景；所有 §8 条件满足前 Payload 保持不透明。
+- FOLLOW_UP_ACTIONS：B 更新 ADR 状态/来源 Pin；D/E/F/G/H/I 记录精确消费者映射和验收；发布迁移/兼容计划及符合性场景；在责任消费者工件完成版本 Pin 并经过审查之前，Payload 始终保持不透明。
 
 **DECISION_REQUEST_ID: BMCP-DR-002**
 - MODULE：BMCP
@@ -433,15 +433,15 @@ H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体
 - H_OWNED_CONTRACTS：D/I 发布后 H 映射为 Wire 字段。
 - CROSS_MODULE_CONFLICT：权属明确；Mainline 指南未建立精确可调用跨边界接口和 Error Mapping。
 - OPTIONS：(A) 发布版本化 D/I Service Contract + H Mapping；(B) 暂时保持引用不透明。
-- RECOMMENDED_OPTION：当前选择 B；Runtime 进入前必须完成 A。
+- RECOMMENDED_OPTION：D/I 权威边界已经 DECIDED；精确可调用 API/IDL/Currentness 词汇仍为 OPEN，必须由 D/I 发布。在此之前，BMCP 只携带权威方签发的不透明 Ref，并采用 Fail-closed 行为；H/BMCP/C MUST NOT invent authority APIs。
 - MEMORY_COMPILER_IMPACT：E 消费 D/I 语义，不复制权威。
 - AGENT_INTEGRATION_IMPACT：MCP/Adapter 不得绕过 D/I。
 - D_I_IMPACT：不改变权威；仅请求精确接口发布和消费者审查。
 - RUNTIME_IMPLEMENTATION_IMPACT：接口/Currentness 证据前受保护 Handler 阻塞。
 - REQUIRED_AUTHORITY：D、I；之后 H 确认 Wire Mapping。
 - OWNER_DECISION：DECIDED_AT_AUTHORITY_BOUNDARY；EXACT_CALLABLE_API_IDL_SCHEMA_DEFERRED_TO_D_I_VERSIONED_CONTRACTS；H/BMCP/C MUST NOT INVENT AUTHORITY API OR CURRENTNESS SEMANTICS
-- EVIDENCE：D/I authority boundary is decided by PR #429 comments 7060243632 and 7060259541; D owns canonical identity/revision/currentness/lifecycle/ConflictSet/ForgetOperation/ForgetFence; I owns Principal/Actor and attestor authorization, PermissionEpoch, revocation, retention and global Forget policy/evaluation. Exact callable API/IDL/schema/crypto/storage/wire mapping remain OPEN. H Overview Blob b88ef3a6fd3be293e7c2e77d9652f386b169bc47；D Forget Blob c791895333ab6140f035f4f622d5dee9325d422d。
-- FOLLOW_UP_ACTIONS：D/I 发布接口/向量；H 映射；BMCP 更新对照表。
+- EVIDENCE：H Overview Blob b88ef3a6fd3be293e7c2e77d9652f386b169bc47；D Forget Blob c791895333ab6140f035f4f622d5dee9325d422d。
+- FOLLOW_UP_ACTIONS：D/I 对齐并协调其现有 Source/Mirrors，发布版本化可调用契约/IDL/Currentness Vectors；H 仅在发布后进行映射；BMCP 消费精确的权威方签发 Ref 并更新其对照表。
 
 **DECISION_REQUEST_ID: BMCP-DR-003**
 - MODULE：BMCP
@@ -470,8 +470,8 @@ H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体
 | BMCP 规范名称 | 已解决——Brain Memory Context Protocol | Main terminology Blob `b8770fbb58e4fac087698043c40a57531b1d244d`；“Brain Memory Control Protocol”不是规范名称 |
 | Fact/Claim 语义 | 已解决——Option A + I1 | 已合并 Owner 决策 PR #446；Blob `d59756a8eb454480804c482ca03c68345ab5abf2` |
 | Fact/Claim 字段/Wire Schema | CANDIDATE / NOT FROZEN | B/D/E/F/G/H/I 消费者工件须完成版本 Pin 和审查；未批准任何 Payload 字段 |
-| H-CONFIRM-001..004 | PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN | 逻辑层选择按 PR #428 comments 7060351041 / 7060264372；INDEPENDENCE_UNVERIFIABLE；精确 Registry/Schema/Crypto/Persistence/Error/Consumer Artifact 仍 OPEN |
-| BMCP-DR-002 | DECIDED_AT_AUTHORITY_BOUNDARY / CALLABLE_API_IDL_SCHEMA_DEFERRED | D/I 保有权威边界；精确 Callable API/IDL/Schema/Crypto/Storage/Wire Mapping 仍由 D/I/H 发布并保持 OPEN |
+| H-CONFIRM-001..004 | PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN | 逻辑语义已决定，状态为 INDEPENDENCE_UNVERIFIABLE；精确 Registry/Schema/Crypto/Storage/Error 工件仍保持 OPEN |
+| BMCP-DR-002 | DECIDED_AT_AUTHORITY_BOUNDARY / CALLABLE_API_IDL_SCHEMA_DEFERRED | D/I 是权威方；精确 Callable API/IDL/Schema/Crypto/Storage/Wire Mapping 仍归 D/I/H 所有并保持 OPEN |
 | BMCP-DR-003 / MCP Mapping | PARTIALLY_DECIDED——Issue #449 | MCP 为 C 北向 Agent Adapter/Gateway；BMCP 为 C Adapter 经 H 到 Brain；Family Routing 已由 PR #430 comment 7060351480 决定；精确 C/H Operation Mapping 仍 OPEN |
 | BMCP Runtime / AT-01..AT-20 | NOT AUTHORIZED / NOT RUN | Issue #7 实施绑定继续延期 |
 
@@ -479,7 +479,7 @@ H 范围澄清记录于 PR #428 comment 7060264372。四项确认均不得整体
 - D：`docs/en/03-memory-brain/forget-fence-and-completion-contract.md` Blob `c791895333ab6140f035f4f622d5dee9325d422d`；`forget-fence-operation-and-publication-gate.md` Blob `9c054932994bb078e2834df8bd66f73895aa04f5`；`memory-versioning.md` Blob `4efbd26db9586f6fcf1897f42ffba287d625b903`；`commit-cursor-semantics.md` Blob `2de7fe35229372ae5b06093e5e031c2c243fbd7c`。
 - I：`docs/en/09-security-governance/security-governance-guide.md` Blob `061c5847b3df879eeaf3c71e5eae0bfa162b276a`；中文镜像 Blob `372d27c79dc79d09bcdb0f142c979efdba1c2b6e`。
 - 这些来源定义领域语义和操作名称，不是完整可调用 API/IDL，也没有冻结 Wire 表示。D 定义 RegisterProducerWork、InstallForgetFence、PublishDerivedIfFenceCurrent、CompleteProducerWork、ResolveProducerWork、ReconcileForgetBarrier 等操作。I 定义 PermissionEpoch、AuthorizationDecisionRef、撤销/Currentness 和证据接受语义；没有冻结的公共 authorize() Endpoint/Schema。
-- 裁决：D 仍是 Canonical ForgetOperation/Fence 和 Producer-barrier 语义的唯一权威；I 仍是 Principal Authorization、PermissionEpoch、撤销和 Global Forget Policy 的唯一权威。BMCP 只携带 Owner 签发的不透明 Ref/Epoch，并在接口发布后调用对应权威的 Validation/Currentness 操作。PermissionEpoch 与 ForgetFence 是不同名义类型。缺失/过期/不可用/不确定证据必须 Fail-closed。
+- 裁决：D/I Owner comments 7060243632 和 7060259541 已 DECIDE 此权威边界。D 仍是 canonical ID/revision/currentness、lifecycle、ConflictSet、ForgetOperation/Fence 和 producer-barrier 语义的唯一权威；I 仍是 Principal/Actor/attestor authorization、PermissionEpoch、revocation、retention/legal-hold/backup 以及 global Forget policy/evaluation 的唯一权威。BMCP 只携带权威方签发的不透明 Ref/Epoch，并且仅在接口发布后调用对应权威的 Validation/Currentness 操作。PermissionEpoch 与 ForgetFence 是不同名义类型。缺失/过期/不可用/不确定的证据必须 Fail-closed。精确可调用 API/IDL/Schema 仍为 OPEN，必须由 D/I 发布。
 
 **C Mapping 边界：**PR #430 comment 7060351480 已决定 Family-level Routing；[Issue #449](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/449) 仍 OPEN，跟踪精确 H Operation ID/Schema、C Tool/Resource Name、C-H Consumer Acceptance。MCP 是 Agent Host ↔ C 北向接口；BMCP 是 C Adapter ↔ Brain 经 H 的协议边界。C 的 AgentRequestId 仅可作为本地 Workflow Correlation 输入，不得新增 H request_id；H 每条 Message 有独立 message_id，correlation_id/causation_id 分别表示 Workflow/直接父事件。Event Ingress/Telemetry/Forget/Admin 必须经过注册 H Operation 和 Owner Authorization；Context Snapshot/Delta/Delivery 为入站；Acknowledgement 仅是 Adapter Evidence，不是 MCP Success 或 G Applied。Recall/Search 归 F，当前不是 BMCP Family，不得发明 Search。
 
