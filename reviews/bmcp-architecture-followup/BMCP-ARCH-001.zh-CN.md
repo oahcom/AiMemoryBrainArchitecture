@@ -334,7 +334,7 @@ H 所有事项先交 H 确认，不伪装成 Owner 决议。
 **H-CONFIRM-004 — Validator / Error Mapping**
 - MODULE：BMCP / H
 - ISSUE_OR_ADR：H Envelope 和 Conformance Matrix
-- DECISION_REQUIRED：Validator 分层、规范 Error Enum、Response Schema、Retryability/脱敏；映射十二类语义错误，不能合并 Authentication/Authorization/Validation/Conflict/Unknown。
+- DECISION_REQUIRED：Validator 分层、规范 Error Enum、Response Schema、Retryability/脱敏；映射十个逻辑错误类别，不能合并 Authentication/Authorization/Validation/Conflict/Unknown。
 - CURRENT_FACTS：Fail-closed Validation Order 和不同逻辑 Error Classes 已决定。精确 Enum 拼写、Wire Schema、Retry Profile 和 Owner-specific Mapping 仍为 OPEN；当前 H Taxonomy 在 Wire 层面仍为 CANDIDATE。
 - H_OWNED_CONTRACTS：Wire/Protocol Validator 和 Error Serialization。
 - CROSS_MODULE_CONFLICT：领域 Validator 和 I Authorization 必须保持 Owner 所有。
@@ -730,8 +730,6 @@ Coverage Register 仅将此登记为 Review/Handoff Pair，不改变 “BMCP Pro
 - ISSUE_7_STATUS：IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE；GitHub CLOSED / not_planned；未改变
 - RUNTIME_IMPLEMENTATION_STATUS：NOT AUTHORIZED / NOT STARTED
 - PR / Commit：PR #453 已合并至固定的验证分支 `bmcp-validation-base-c588`，合并提交为 `7c7801db396b92c57ad37020fe170f65f25e43ce`；这是快照验证分支合并，不是合并到实时 `main`。分会话语义/双语审查已完成；提示词配对来源仍未核实（SESSION_SEPARATION_RECORDED_PROMPT_UNVERIFIED）。该工件仍为 ARCHITECTURE_PARTIAL，不冻结协议/Schema，也不授权 Runtime。
-- OPEN — 英文源文错误类别清单对账
-
-  EN §7.1 H-CONFIRM-004 DECISION_REQUIRED 要求映射十二个请求的错误类别。EN §7.1.1 H-CONFIRM-004 当前列出 Authentication、Authorization、Validation、Unsupported、Conflict、Expired、RateLimited/ResourceExhausted、Internal 和 Unknown（九个分组条目；若将 RateLimited 与 ResourceExhausted 分开计数，则为十个）。英文源文未明确说明 §7.1.1 中的清单如何涵盖全部十二个请求的错误类别。权威的十二类别清单及其与 §7.1.1 分类体系之间的映射关系，必须由 Owner 明确裁定。在该裁定正式记录之前，此项差异保持 OPEN。
+- DECIDED — 英文侧错误类别清单对账：Owner 决策 `BMCP-ARCH-001-OWNER-DECISION-H-CONFIRM-004-ERROR-INVENTORY-001` 确立了一个包含十个逻辑错误类别的权威清单，顺序如下：Authentication、Authorization、Validation、Unsupported、Conflict、Expired、RateLimited、ResourceExhausted、Internal 和 Unknown。§7.1.1 taxonomy 已分别表示其中八个类别；RateLimited 和 ResourceExhausted 由现有的 `RateLimited/ResourceExhausted` 条目共同表示，本决策将它们区分为两个逻辑类别。未确立任何额外类别。因此，§7.1 H-CONFIRM-004 DECISION_REQUIRED 中缺乏依据的 `twelve requested classes` 表述修正为 `ten logical error classes`。本决策采纳记录中的 RECOMMENDED_OPTION，即保留具体类别并发布分层验证与映射；对于不存在权威名称或定义的类别，不予臆造。本决策后，H-CONFIRM-004 仍保持 `PARTIALLY_DECIDED / EXACT_ARTIFACT_MAPPING_OPEN`，且仍为 `INDEPENDENCE_UNVERIFIABLE`。精确枚举名称及拼写、wire 响应 Schema、版本规则、重试配置、脱敏、分层验证器到错误类别的映射、各 Owner 特定的结果映射及领域 Owner 批准、消费者映射及验收，以及 H 单独进行的有版本号的 wire contract 审查，均仍为 OPEN。本决策不冻结协议或 Schema，不授权 Runtime，不提升 `ARCHITECTURE_PARTIAL` 状态，不改变 `MAINLINE_DELIVERABLE=NOT_AVAILABLE`，也不构成独立的人类 H 签署。
 
 **下一步：** B/D/I 对齐现有源文档/镜像文档并刷新版本 Pin；H 发布带版本的规范 Wire 工件，并关闭剩余 Registry/Schema/Crypto/Storage/Error 子项；C 根据 Issue #449 发布精确的 Agent/MCP-to-BMCP 映射；E 集成五阶段 Rust Compiler 文档及消费者边界；BMCP 刷新双语交接文档。只有在所有工程进入条件均有证据后，Runtime 才可解除延期。
