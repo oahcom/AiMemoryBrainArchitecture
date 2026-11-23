@@ -647,6 +647,56 @@ def run_changed_paths() -> None:
             root, 1, "--require-changed", base,
         )
 
+    # Empty increments are not successful verification. Use a complete Git
+    # fixture with no unrelated DM-10 failures so the assertion tests only the
+    # changed-set behavior.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "seed")
+        head = _git(root, "rev-parse", "HEAD")
+        expect_gate(
+            "T72 same-HEAD increment is NOT_APPLICABLE, never PASS",
+            root, 2, "--require-changed", head,
+        )
+
+    # A pathspec is not a commit ref. It must be rejected before diffing;
+    # otherwise the old two-dot fallback interprets it as a path filter.
+    for bad_ref, label in (("docs", "path-like ref"), ("deadbeef", "invalid ref")):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = _repo(tmp)
+            _git(root, "init", "-q")
+            _git(root, "config", "user.email", "gate@example.invalid")
+            _git(root, "config", "user.name", "gate")
+            _git(root, "add", "-A")
+            _git(root, "commit", "-q", "-m", "seed")
+            expect_gate(
+                f"T73 {label} is rejected before diff",
+                root, 2, "--require-changed", bad_ref,
+            )
+
+    # A real non-empty code-only change remains a valid incremental run. The
+    # gate must distinguish it from an empty diff rather than rejecting every
+    # change set that contains no governed Markdown.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "seed")
+        base = _git(root, "rev-parse", "HEAD")
+        (root / "tools" / "only.rs").write_text("// code-only change\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "code only")
+        expect_gate(
+            "T74 non-empty code-only increment remains applicable",
+            root, 0, "--require-changed", base,
+        )
+
 
 def run_path_safety() -> None:
     """T14/T15: a path reference is validated, never silently rewritten.
