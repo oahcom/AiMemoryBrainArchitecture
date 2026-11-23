@@ -417,52 +417,50 @@ This event does not alter the counting ruling for PR #707 in §13.7 and is not a
 
 **Registration status update**: `OPEN` / `NOT_REMEDIATED` / instance count **4 (frozen, unchanged)** / new fact: **first occurrence of "blocking review disposition issued, correction not landed, merge proceeded", 27-second interval, check green at merge; recorded separately and excluded from the zero-review merge count**
 
-### 13.9 Follow-on occurrence: PR #821 and PR #825 merged without formal review records
+### 13.9 Follow-on occurrence: PR #821 and PR #825 merged as squashes without formal review records
 
 **Observed: 2026-11-23 UTC**
 
-Two pull requests were merged into `main` without formal pull-request review records:
+Two pull requests entered `main` without any formal pull-request review record:
 
-| PR | Independent review disposition | Merge result |
-|---|---|---|
-| #821 | `REQUEST_CHANGES` | Merged at 13:14:07Z; merge head `3ea55bb` |
-| #825 | `HOLD` | Merged at 13:31:23Z; merge head `726e1bb` |
+| PR | Independent review disposition | Merged at | Merge commit | Commit shape |
+|---|---|---|---|---|
+| #821 | `REQUEST_CHANGES` (issued 13:15:26Z) | 13:14:07Z | `0a7135487` | squash, single parent |
+| #825 | `HOLD` (in force from 13:15:26Z) | 13:24:15Z | `be54dacaf` | squash, single parent |
 
-The PR review records were empty (`reviews = []`).
+Both PRs have empty GitHub review records (`reviews = []`). All four required checks were `success` at merge time.
 
-The merge was not performed by the coordinator who received the independent review dispositions.
+**Timing, stated so that it cannot be misread**
 
-The rejected and held versions were merged without the requested test-strengthening changes. The coordinator subsequently created PR #830 to restore the required assertions.
+- #821 merged at **13:14:07Z**, which is **79 seconds before** the independent review issued `REQUEST_CHANGES` at **13:15:26Z**. For #821 the merge therefore preceded the disposition; it is not a case of merging over a standing rejection.
+- #825 merged at **13:24:15Z**, **529 seconds after** `HOLD` came into force, and its review record is empty. This is the case that matches "merged without the hold being lifted".
+- #830 merged at **13:47:09Z** as a two-parent commit, **126 seconds after** the independent review returned `APPROVE` at **13:45:03Z**, and its review record is likewise empty, so the approval was not a precondition of its merge.
 
-**Control observation**
+**Control observation (measured; differs from the first written record)**
 
-The repository's measured branch-protection configuration had:
+Branch protection on `main`, measured:
 
-- `required_pull_request_reviews = None`
-- `strict = False`
+- `required_pull_request_reviews` - **not configured** (the key is absent from the response)
+- `required_status_checks.strict` - **`true`**
+- Required contexts: `GOV-DOC-001 structural checks`, `GOV-DOC-002 metadata checks`, `Branch freshness vs base`, `audit`
+- `enforce_admins` - `true`
 
-The absence of a required-review configuration is consistent with the observed ability to merge these PRs without formal review records.
+So the protection **requires** those four checks and requires the branch to be up to date with its base; it **does not require** any human review. That is consistent with two PRs entering `main` with empty review records.
 
-`strict = False` is recorded as a separate branch-freshness setting and is not, by itself, evidence that review requirements were disabled.
+One correction to the earlier draft of this section: `strict` measures as `true`, not `False`. `strict` governs re-validation after the base advances; it is a separate setting from the review requirement, and neither one establishes the state of the other.
 
 **Impact**
 
-The repository did not enforce the independent review dispositions as merge prerequisites. A `REQUEST_CHANGES` or `HOLD` disposition therefore did not prevent the corresponding PR from entering `main`.
-
-The resulting test-coverage deficiencies required a subsequent corrective PR (#830).
+A review disposition is not a merge precondition in this repository: a `HOLD` did not stop #825 from entering `main`, and `APPROVE` was not necessary for #830 to enter it. The test-coverage gap was closed by #830, but #830's own merge also preceded its approval record.
 
 **Scope and non-claims**
 
-This occurrence documents a merge-control enforcement failure. It does not establish that the merged production implementation was defective, that the CI results were falsified, or that the known T76 behavior was changed.
-
-PR #830 is the corrective test-only change for the findings identified in the independent review.
-
-The previously documented governance finding remains open until an enforceable merge policy prevents merges that do not satisfy the required review conditions.
+This instance records verifiable merge-control facts. It does not claim that the merged implementation is defective, that CI results were falsified, or that the existing T76 behaviour changed. It does not infer operators from commit author or committer fields.
 
 **Evidence**
 
-- PR #821 head `1b06f15`; merge head `3ea55bb`.
-- PR #825 head `f255aa8`; merge head `726e1bb`.
-- PR review records: empty for both PRs.
-- Main after both merges: `dc9248f`.
-- Corrective PR #830 head: `fcfdcf2`.
+- #821: head `3ea55bb`, merge commit `0a71354` (squash, one parent), `merged_at` `2026-11-23T13:14:07Z`, `reviews = []`.
+- #825: head `726e1bb`, merge commit `be54dac` (squash, one parent), `merged_at` `2026-11-23T13:24:15Z`, `reviews = []`.
+- #830: head `fcfdcf2`, merge commit `c61782a` (two parents), `merged_at` `2026-11-23T13:47:09Z`, `reviews = []`.
+- `main` after the merges: `dc9248f` (after #825), `c61782a` (after #830).
+- Branch protection: `GET /repos/{owner}/{repo}/branches/main/protection`.
