@@ -1,3 +1,30 @@
+---
+document_metadata:
+  domain: domain-model
+  role: work-record
+
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-23"
+      last_verification_note: "§6 criteria 1-5 re-measured at bea1c2b5 on 2026-11-23; each is cited to a line or a test in the closure note. §1 retained unedited because it describes 444deef1."
+    usage_status: Active
+    modification_status: Modified
+
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Informative
+
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
+---
+
 # GAP-12 — the compiler asserts a canonical commit its own domain refuses to define
 
 **Status:** CLOSED for steps 1–4 · steps 2/4/5 recorded outstanding with named owners · **Severity:** Tier 1 (blocks `Published`) · **Owner:** D (contract), E (stop asserting)
