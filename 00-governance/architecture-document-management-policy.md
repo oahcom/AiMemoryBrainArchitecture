@@ -238,9 +238,9 @@ Two **independent** attributes. Neither implies the other.
 
 **规则 A1 — 范围冲突**：任何时刻，每个 `canonical_scope_id` 最多允许一份 `Canonical` 文档。冲突状态禁止与权威叠加：当 `canonical_conflict_status` 为 `Under-Review` 时，每份冲突文档 MUST 声明 `canonical_status: Candidate`。同一范围内两份文档同时声称 `Canonical` 属门禁错误，而不是文档可以长期停留的状态。
 
-**Rule A2 — conflict consumption / 冲突期消费规则**: consumers MUST resolve authority through `resolve_canonical(documents, scope_id)`, the single sanctioned resolver. It returns `NO_AUTHORITATIVE_SOURCE` whenever the scope is empty, has more than one `Canonical`, or carries any conflict status other than `None`. There is NO fallback heuristic: an earlier approval date is not evidence of authority, and guessing hides the conflict.
+**Rule A2 — conflict consumption / 冲突期消费规则**: consumers MUST resolve authority through `resolve_canonical(documents, scope_id)`, the single sanctioned resolver. It returns `NO_AUTHORITATIVE_SOURCE` whenever the scope is empty or has more than one `Canonical`, and whenever any member carries a conflict status other than `None` or `Resolved` — `Under-Review` included. A scope whose conflicts are all `Resolved` resolves to its sole `Canonical` member when every resolution record selects that member; any record naming another document returns `NO_AUTHORITATIVE_SOURCE`. There is NO fallback heuristic: an earlier approval date is not evidence of authority, and guessing hides the conflict.
 
-**规则 A2 — 冲突期消费规则**：消费者 MUST 通过唯一受认可的解析接口 `resolve_canonical(documents, scope_id)` 解析权威。当范围为空、存在多份 `Canonical`，或存在 `None` 以外的冲突状态时，该接口返回 `NO_AUTHORITATIVE_SOURCE`。禁止任何回退启发式：更早的审批日期不是权威证据，猜测只会掩盖冲突。
+**规则 A2 — 冲突期消费规则**：消费者 MUST 通过唯一受认可的解析接口 `resolve_canonical(documents, scope_id)` 解析权威。当范围为空、存在多份 `Canonical`，或任一文档带有 `None`、`Resolved` 以外的冲突状态（含 `Under-Review`）时，该接口返回 `NO_AUTHORITATIVE_SOURCE`。若范围内冲突全部为 `Resolved`，且每份决议记录都选中那份唯一的 `Canonical`，则该接口解析为那份文档；任一记录选中其他文档时，仍返回 `NO_AUTHORITATIVE_SOURCE`。禁止任何回退启发式：更早的审批日期不是权威证据，猜测只会掩盖冲突。
 
 Interface contract / 接口契约: `resolve_canonical` accepts a document set that has already passed DM-01..DM-13 across the whole governed tree. It resolves authority; it does not certify that the set is complete or valid. A caller that feeds it a partial or unvalidated set gets a wrong answer, and the gate's own run is the only place that guarantee is established.
 
