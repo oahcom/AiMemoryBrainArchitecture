@@ -9,7 +9,7 @@ document_metadata:
       decision_date: "2026-11-23"
       approved_version:
         scheme: content-hash
-        value: "5d5c2268576e8273f0432c2645b154e0f3006318899e747e904ef2b92a64b7a7"
+        value: "41243e916e67c2704ab93f05f190e07f2015b3e546b50f6f778d7e5f0caa1cfe"
       approval_scope:
         type: Full-document
         included_sections: []
@@ -232,6 +232,10 @@ Any subsequent commit that changes the Head after the re-review invalidates the 
 即使修正提交只针对一个已知 finding，审查方也不得将复核范围限制为该 finding 的局部差异，而忽略最终 Head 的完整变更集合。
 
 任何在复核后再次改变 Head 的提交，均使此前针对旧 Head 的复核结论失效；合并前必须重新核对最终 Head。CI 通过、作者声明修复完成或旧 Head 已获批准，均不能替代该复核。
+
+A review and its associated CI results apply only to the exact merge candidate that was checked. If the base branch advances after review or validation, the resulting base-and-Head combination MUST be revalidated against all applicable required checks before merge. A passing result for the PR Head against an earlier base, and a passing result for the earlier base by itself, do not establish that their later combination is valid. If the merge candidate changes after this revalidation, the affected checks MUST be rerun before merge. Where the changed candidate affects the reviewed content or its material context, the independent review MUST also be renewed.
+
+审查及其关联 CI 结果仅适用于实际接受检查的精确合并候选版本。若审查或验证后 base 分支前进，则在合并前 MUST 针对由更新后的 base 与 PR Head 组成的合并候选版本，重新运行所有适用的必需检查。PR Head 相对于较早 base 的通过结果，以及较早 base 自身的通过结果，均不能证明两者之后的组合仍然有效。若该次重新验证后合并候选版本再次发生变化，则合并前 MUST 重新运行受影响的检查。若候选版本变化影响已审查的内容或其重要上下文，还 MUST 重新进行独立审查。
 
 ## 7. Platform enforcement is separate from process policy / 平台强制执行与流程规范分离
 
