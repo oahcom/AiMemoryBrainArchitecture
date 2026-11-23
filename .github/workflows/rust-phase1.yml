@@ -29,6 +29,6 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
-      - run: python3 scripts/check_fmt.py --expect "$(git rev-parse HEAD)"
+      - run: python3 scripts/check_fmt.py --expect "$GITHUB_SHA"
       - run: cargo clippy --workspace --all-targets -- -D warnings
       - run: cargo test --workspace --all-targets
