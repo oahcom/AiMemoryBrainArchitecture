@@ -75,6 +75,37 @@ owner_decisions:
     constraints:
       - "Do not mix it into #893 or AID-2026-055."
 
+  - id: R5
+    question: "The D groups D7, D17, D19, D20 were recorded as undecided. Have they been ruled?"
+    ruling: "Yes. All four are admitted, each by an exact path shape, and the five paths they cover have already entered main. A and B remained OPEN at that point: a classification record is not an admission ruling."
+    constraints:
+      - "D3 stays refused: the 11 legacy work-item manifests are frozen history."
+      - "D7 is the exact provider_outcome requirements path; the root-only requirements rule is not widened."
+      - "D17 is the two conformance-root package files only; a child suite's package file stays refused."
+      - "D19 is a .source.txt directly inside an AID-YYYY-NNN directory."
+      - "D20 is reference-model/.gitignore directly inside an AID-YYYY-NNN directory."
+
+  - id: R6
+    question: "Are the A and B groups A1, A2, A4, A5, A6, A8, B9, B10, B11, B12 admitted?"
+    ruling: "Yes. All ten groups are admitted, 78 paths in total, each by the complete path shape below and no extension-level widening. Every regex is applied with fullmatch() to a repository-root-relative POSIX path; search() must not be used, and no permission may be derived from the base tree."
+    constraints:
+      - "A1 08-bmcp-protocol/schemas/[^/]+\\.schema\\.json -- 32 paths."
+      - "A2 08-bmcp-protocol/tests/conformance/(?:[^/]+/)*(?!package(?:-lock)?\\.json\\Z)[^/]+\\.json -- 16 paths."
+      - "A4 crates/[^/]+/Cargo\\.toml -- 12 paths."
+      - "A5 14-ai-development/governance-register/evidence/[^/]+\\.json -- 9 paths."
+      - "A6 crates/[^/]+/VERIFICATION\\.txt -- 3 paths."
+      - "A8 (?:scripts/bilingual-baseline\\.txt|scripts/ci/baselines/[^/]+\\.txt) -- 2 paths."
+      - "B9 .governance/GOV-DOC-001-inheritance\\.json -- 1 path."
+      - "B10 00-governance/architecture-document-metadata\\.schema\\.yaml -- 1 path."
+      - "B11 00-governance/document-scope-registry\\.yaml -- 1 path."
+      - "B12 14-ai-development/remote-worker-inventory\\.yaml -- 1 path."
+      - "A2 may not be simplified to conformance/**/*.json. The negative lookahead is what keeps package.json and package-lock.json out of the vector rule."
+      - "A/B must be independent of the four D rules; D rules must not be merged or widened to implement A/B."
+      - "No global suffix rule for .json, .yaml, .toml, or .txt may be added."
+      - "C 19 and D3 11 stay refused."
+      - "CHECK_VERSION must be 2026-11-24.4 when A/B lands."
+      - "This ruling governs admission policy, not merge authorisation."
+
 # ---------------------------------------------------------------------------
 # The classification, as measured. These are the buckets the implementer works
 # from. The prompt carries the per-group evidence; this block carries the counts
@@ -227,21 +258,23 @@ acceptance_criteria:
     criterion: "CHECK_VERSION differs from 2026-11-24.1 and prints."
     measurement: "Grep the workflow log for the new version string."
   - id: AC8
-    criterion: "The rule set is not wider than the inventory."
-    measurement: "Re-run the classifier: newly-admitted set equals A union B (78 paths), and no more."
+    criterion: "The rule set is not wider than the inventory, measured against the whole candidate set."
+    measurement: "Re-run the classifier with the pre-patch predicate as the inventory definition. Confirm four things: (1) the 78 A union B paths are all admitted; (2) the five already-landed D paths are still admitted; (3) no path outside the 113 was newly admitted; (4) the candidate set closes at 83 admitted and 30 refused."
+    baseline_revision: "Revised by Owner ruling R6. The original wrote the expected admitted total as 78, which was the A union B count taken while D was still undecided. Since D7, D17, D19 and D20 were ruled and their five paths entered main, the total for the original 113 is 83 admitted and 30 refused. The refused 30 are C 19 plus D3 11."
   - id: AC9
     criterion: "The inventory closes."
-    measurement: "Re-run the bucketing classifier and confirm A+B+C+D equals the refused total."
+    measurement: "Re-run the bucketing classifier and confirm A+B+C+D equals the refused total: 74 + 4 + 19 + 16 = 113."
+    baseline_revision: "Unchanged by R6. The historical classification is not rewritten because D was later ruled; the D bucket still counts 16, of which 5 are now admitted and 11 (D3) remain refused."
 
 # ---------------------------------------------------------------------------
 # Execution state.
 # ---------------------------------------------------------------------------
 
 implementation:
-  status: NOT_STARTED
-  branch: null
+  status: DELIVERED
+  branch: "policy/ab-admission-24.4"
   pr: null
-  note: "No rule has been added. The gate still refuses all 113 paths. This registration records a classification and a specification; it does not change admission behaviour."
+  note: "Ten A/B rules and four D rules are now in the gate at CHECK_VERSION 2026-11-24.4. Measured over the original 113-path candidate inventory: 83 admitted, 30 refused. The refused 30 are C 19 plus D3 11, both ruled closed. AC8 and AC9 were re-measured against the whole inventory rather than against the intended paths only."
 
 findings:
 
