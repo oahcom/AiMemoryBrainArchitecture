@@ -65,7 +65,7 @@ scope:
 
 out_of_scope:
   - Modifying repository files (review session is read-only)
-  - Claiming independent GitHub identity (P-independence platform limit, disclosed per D-2026-1120-02)
+  - Issuing a GitHub APPROVE (the platform forbids approving one's own PR; disclosed per D-2026-1120-02). Independence itself is session-level and is NOT out of scope.
   - Schema freeze, DDL approval, production key/Trust Root approval
   - Production implementation or runtime conformance
 
