@@ -38,3 +38,5 @@ jobs:
         run: python3 scripts/check_fmt.py --expect "$GITHUB_SHA"
       - name: Test all workspace targets
         run: cargo test --workspace --all-targets --no-fail-fast
+      - name: Test workspace doctests
+        run: cargo test --workspace --doc --no-fail-fast
