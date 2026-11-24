@@ -262,7 +262,7 @@ def run_fields() -> None:
     expect("Approved without version rejected", doc(APPROVED.replace(
         '      approved_version:\n        scheme: git\n        value: "deadbeef"\n', ""
     )), "DM-03")
-    expect("Selected-sections without sections rejected", doc(APPROVED.replace(
+    expect("narrow approval scope rejected", doc(APPROVED.replace(
         "type: Full-document", "type: Selected-sections"
     )), "DM-03")
     expect("Revoked without decision id rejected", doc(BASE.replace(
@@ -774,6 +774,93 @@ def run_approval_binding() -> None:
         moving = honest.replace(f'"{sha}"', '"main"')
         target.write_text(moving, encoding="utf-8")
         expect_gate("T11 mutable ref as approved_version fails", root, 1)
+
+
+# --------------------------------------------------------------------------
+# 5a. Approval scope (issue #833): the declared scope must be one the gate
+#     honours. `Selected-sections` and `Selected-assets` were declarable for
+#     months and never read: DM-10 hashed the whole body either way, so an edit
+#     outside the "selected" part failed (pretending the scope held) and a
+#     section list naming nothing was accepted (pretending the scope held).
+#     Both directions were silent, so these cases bind the declaration itself.
+# --------------------------------------------------------------------------
+
+def run_approval_scope() -> None:
+    print("approval scope (#833)")
+
+    # (a) A value the gate cannot honour is refused by name, so it cannot be
+    # read as a narrower approval than the one DM-10 checks.
+    for scope in ("Selected-sections", "Selected-assets"):
+        expect(
+            f"T86 {scope} scope is refused, not reinterpreted",
+            doc(APPROVED.replace("type: Full-document", f"type: {scope}")),
+            "not implemented",
+        )
+        # Reverting the gate to the old enumeration makes the case above record
+        # a failure: `expect()` sees no error at all.
+    record(
+        "T86 a refused scope names only Full-document as honoured",
+        "Only 'Full-document' is honoured" in "".join(
+            check_document(FILE, doc(APPROVED.replace(
+                "type: Full-document", "type: Selected-sections")))[0]
+        ),
+        "  the diagnostic does not say what is honoured",
+    )
+
+    # (b) The lists that only described those scopes are dead. A non-empty one
+    # is a claim no rule reads; the empty placeholder every document already
+    # carries claims nothing and stays valid.
+    for field in ("included_sections", "included_assets"):
+        expect(
+            f"T87 non-empty {field} is refused by name",
+            doc(APPROVED.replace(
+                "        type: Full-document\n",
+                f"        type: Full-document\n"
+                f"        {field}:\n          - nowhere.md\n",
+            )),
+            field,
+        )
+    expect(
+        "T87 the empty placeholder the template writes is still accepted",
+        doc(APPROVED.replace(
+            "        type: Full-document\n",
+            "        type: Full-document\n"
+            "        included_sections: []\n"
+            "        included_assets: []\n",
+        )),
+        expect_clean=True,
+    )
+
+    # (c) Control: `Full-document` behaves exactly as before. An unchanged body
+    # passes; an edited body still fails DM-10, and fails with DM-10 rather than
+    # with a scope diagnostic.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        target = root / "00-governance" / "a.md"
+        body = "body: approved text"
+        template = doc(APPROVED.replace('"deadbeef"', '"SHA"'))
+        target.write_text(template.replace("# Title", body), encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "approved")
+        sha = _git(root, "rev-parse", "HEAD")
+        recorded = template.replace('"SHA"', f'"{sha}"')
+        target.write_text(recorded.replace("# Title", body), encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "record approval")
+        expect_gate("T88 Full-document with an unchanged body still passes",
+                    root, 0)
+        target.write_text(recorded.replace("# Title", "edited text"),
+                          encoding="utf-8")
+        code, out, err = _run_capture(root)
+        output = out + err
+        record("T88 Full-document with an edited body still fails DM-10",
+               code == 1 and "DM-10 content changed after approved_version" in output,
+               f"  exit {code}, DM-10 present: "
+               f"{'DM-10 content changed after approved_version' in output}")
+
 
 # --------------------------------------------------------------------------
 # 5b. DM-10 scope: an incremental run blames only the documents it touched
@@ -2005,7 +2092,7 @@ GOLDEN = [
         "    normative_status: Informative\n"
         "    canonical_conflict_status: None\n",
         False,
-        "included_assets",
+        "Selected-assets' is not implemented",
     ),
     (
         "selected-sections scope without sections is rejected",
@@ -2029,7 +2116,7 @@ GOLDEN = [
         "    normative_status: Informative\n"
         "    canonical_conflict_status: None\n",
         False,
-        "included_sections",
+        "Selected-sections' is not implemented",
     ),
 ]
 
@@ -3300,6 +3387,7 @@ def main() -> int:
     run_resolver()
     run_repository_rules()
     run_approval_binding()
+    run_approval_scope()
     run_dm10_scope()
     run_shallow_history()
     run_changed_paths()
