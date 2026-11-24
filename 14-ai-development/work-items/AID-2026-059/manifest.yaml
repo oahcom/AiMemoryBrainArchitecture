@@ -19,7 +19,7 @@ base_commit_sha: 176244a6fefc84b64e99a39f7f223ba9a64de139
 tracking_issue: "Issue #799 - Require AI session evidence in Issues and PRs, with CI existence checks. This work item implements deliverable A only. Deliverable B, the independent trusted verifier on pull_request_target with an out-of-repository policy, remains tracked by #859 and is not started here."
 
 created_at: 2026-11-24
-updated_at: 2026-11-24
+updated_at: 2026-11-25
 
 # No prompt snapshot is frozen for this work item. The implementation was
 # produced across a session that iterated against mutation results rather than
@@ -94,6 +94,10 @@ findings:
     measured_at: "176244a6"
     severity: informational
   - id: F4
-    statement: "Final mutation sweep: 14 of 14 mutants killed (compare truncation, 300-file limit, git-tree truncation, provenance enum, path-not-in-tree, absolute path, SHA-256 comparison, byte count, blob type, git mode, empty size, backslash, percent encoding, URL scheme). The number that matters is not the test count but that no survivor remained."
-    measured_at: "176244a6"
+    statement: "Mutation sweep, re-measured rather than carried forward: 16 of 16 mutants killed, no survivor (compare truncation, 300-file limit, git-tree truncation, provenance enum, path-not-in-tree, absolute path, SHA-256 comparison, byte count, blob type, git mode, empty size, backslash, percent encoding, URL scheme, absent AI-assisted work value, non-YES/NO AI-assisted work value). The last two were previously unrecorded and are now covered: the absent-field mutant is killed by test_missing_pr_declaration_is_reported and the enum mutant by test_invalid_pr_declaration_value_is_reported. The earlier '14 of 14' figure was not reproducible as written."
+    measured_at: "4d6a8255"
+    severity: informational
+  - id: F5
+    statement: "The previously reported surviving mutant, the second PR-level 'YES requires evidence references' clause in check_02_pr_declaration_and_references, was not a test gap but unreachable code. check_01_pr_fields_and_issue_references raises the same condition first and, in this revision, the two copies carried different messages ('PR: YES requires evidence references' versus 'PR: YES requires at least one evidence path'). Because check_01 always raised first, deleting check_02's copy left the suite green and no test could have distinguished the two. The duplicate was deleted so the PR-level policy has one owner; a mutant at that location no longer exists to survive. test_yes_requires_refs was rewritten to a world whose only defect is the missing PR evidence — with check_01's guard removed the validator reports PRESENT — and it asserts the exact message rather than a nonzero exit."
+    measured_at: "4d6a8255"
     severity: informational
