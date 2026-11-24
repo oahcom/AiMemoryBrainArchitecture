@@ -7,7 +7,7 @@ risk_rationale: "Changes the predicate a required repository-wide gate uses to d
 
 security_scope: "None. No Rust, no transport, no authorization path, no storage. One pairing predicate and one embedded-bilingual predicate in scripts/check_bilingual_docs_full.py, the baseline that follows from them, one workflow comment, and the tests for the two predicates."
 
-status: DISPATCHED
+status: BLOCKED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -80,29 +80,34 @@ deliverables:
 
 acceptance_criteria:
   - id: AC1
-    text: "python3 scripts/check_bilingual_docs_full.py reports exactly 9 violations, and the reported set equals the nine paths listed in prompt section 2. Set equality, not an approximate count."
+    text: "python3 scripts/check_bilingual_docs_full.py reports exactly 11 violations, and the reported set equals the eleven paths enumerated in ERRATUM-01.md section 2. Set equality, not an approximate count. (Restated by ERRATUM-01, then by independent review REVIEW-01 finding B2: the prompt's 9 was measured at d40d4e09 before #910 taught the scan to see 08-bmcp-protocol, which added two paths. Re-measured at 8e489ec1: 77 violations total, 11 of them real.)"
   - id: AC2
-    text: "The baseline diff is 72 removals and 0 additions, and the removed set is exactly the union of the 6 side-by-side entries and the 66 embedded-bilingual entries. An addition, or a removal outside those two classes, fails this criterion."
+    text: "The baseline diff is 66 removals and 0 additions, and the removed set is exactly the 66 embedded-bilingual entries. An addition, or a removal outside that class, fails this criterion. (Was '72 removals = 6 side-by-side + 66 embedded'. Review REVIEW-01 finding B2: none of the six side-by-side paths is in the baseline at 8e489ec1, so they cannot be removed from it; 77-72=5 matches neither the old 9 nor the corrected 11. ERRATUM-01 AC2' says 66; that is the only figure consistent with AC1.)"
   - id: AC3
-    text: "The three mirror paths 02-domain-model/phase-2-domain-extension.zh-CN.md, 06-memory-context/context-implementation-coverage.zh-CN.md and 07-agent-integration/adapter-capability-tiers.zh-CN.md are no longer violations, and a .zh-CN.md mirror created in a test fixture is not asked for a mirror of itself."
+    text: "The three mirror paths 02-domain-model/phase-2-domain-extension.zh-CN.md, 06-memory-context/context-implementation-coverage.zh-CN.md and 07-agent-integration/adapter-capability-tiers.zh-CN.md are no longer violations, and a .zh-CN.md mirror created in a test fixture is not asked for a mirror of itself. (Already true at 8e489ec1 — #910 made all 64 mirrors outside 14-ai-development pair. This criterion is a regression guard, not a task; it cannot distinguish 'done' from 'never needed doing'.)"
   - id: AC4
-    text: "13-engineering-decisions/technology-architecture-blueprint.md (0 CJK, 49666 bytes) is still reported as a violation. A predicate that resolves it is a predicate that accepts anything."
+    text: "13-engineering-decisions/technology-architecture-blueprint.md (0 CJK, 50488 bytes at 8e489ec1) is still reported as a violation. A predicate that resolves it is a predicate that accepts anything. (Byte count corrected from 49666 per REVIEW-01 finding M1; 49666 matches no version of the file in git history.)"
   - id: AC5
-    text: "A file with cjk = 99 and latin = 5000 is still a violation, and a file with cjk = 100 and latin = 999 is still a violation. Both asserted in tests, because an inclusive floor fails silently on one side."
+    text: "Four assertions, not two. Negative side: a file with cjk = 99 and latin = 5000 is still a violation, and a file with cjk = 100 and latin = 999 is still a violation. Positive side: a file with cjk = 100 and latin = 1000 exactly is resolved, and a file with cjk = 101 and latin = 1001 is resolved. All four asserted in tests, because an inclusive floor fails silently on either side. (Review REVIEW-01 finding B3: the original listed only the two negative cases while claiming both sides, so a predicate that resolves nothing passed it in full. The predicate does not exist at 8e489ec1 — grep for 1000 in either script returns nothing — which is why the positive side could be omitted without any test failing.)"
   - id: AC6
-    text: "NORMATIVE_ROOTS is unchanged: same 15 entries, the 7 non-existent roots still listed, 08-bmcp-protocol still absent. Verified by diffing that hunk against the base commit. GAP-26 is a different work item."
+    text: "WITHDRAWN, not deferred. See AC6a/AC6b. (Original text required NORMATIVE_ROOTS to keep 'same 15 entries, the 7 non-existent roots still listed, 08-bmcp-protocol still absent'. Measured at 8e489ec1: 9 entries, 0 missing, 08-bmcp-protocol present. #910 removed the seven phantom roots. Obeying the original literally means reintroducing a defect; the criterion is unsatisfiable in the only direction that matters.)"
+  - id: AC6a
+    text: "This work item does not modify NORMATIVE_ROOTS. The derived-root guard introduced by #910 still exits 0."
+  - id: AC6b
+    text: "Withdrawing AC6 grants no authority to change NORMATIVE_ROOTS. The pre-#910 value is not restored, and nothing here widens this work item's file scope. If the roots need changing, that is a different work item with its own authorisation."
   - id: AC7
-    text: "scripts/ci/gate_ratchet.py with this baseline and this command exits 0 and prints regressions=0 fixed=0. A green ratchet over a stale baseline does not satisfy AC1."
+    text: "scripts/ci/gate_ratchet.py with this baseline and this command exits 0 and prints baseline=11 current=11 regressions=0 fixed=0. A green ratchet over a stale baseline does not satisfy AC1. NOTE the floor this criterion does not cover, from review REVIEW-01 finding M4: gate_ratchet.py treats an empty baseline as a pass even when the command crashes (measured: empty baseline + a command that exits 9 -> regressions=0 fixed=0 PASS exit 0). Since this work item regenerates that baseline, an empty output would leave the required check permanently green. The implementer must assert the regenerated baseline is non-empty and has exactly 11 lines."
   - id: AC8
-    text: "python3 -m unittest scripts.test_check_bilingual_docs_full passes and gains at least one test per deliverable clause. The five pre-existing tests mention neither NORMATIVE_ROOTS nor .zh-CN.md siblings, which is why the defects survived."
+    text: "python3 -m unittest tests.test_check_bilingual_docs_full passes and gains at least one test per deliverable clause, covering the eleven AC1 paths including the two 08-bmcp-protocol records. (Module path corrected by REVIEW-01 finding B4: the original said scripts.test_check_bilingual_docs_full, which does not exist — the file is tests/test_check_bilingual_docs_full.py and the command raised ModuleNotFoundError. Also: the pre-existing tests mention neither NORMATIVE_ROOTS nor .zh-CN.md siblings, which is why the defects survived.)"
   - id: AC9
     text: "python3 scripts/check_bilingual_docs.py still prints '77 frozen, 0 new gaps' with BASE_SHA and HEAD_SHA set. Gate A is not touched by this work item."
 
-independent_reviewer: NOT_ASSIGNED
+independent_reviewer: REQ-05-INDEPENDENT-REVIEW-SESSION-01
 integration_reviewer: NOT_ASSIGNED
 
 review:
-  status: NOT_ASSIGNED
+  status: CHANGES_REQUESTED
+  report_ref: "14-ai-development/work-items/AID-2026-056/REVIEW-01-INDEPENDENT.md"
   report_ref: ""
 
 acceptance:
@@ -123,7 +128,7 @@ errata:
     raised_at: 2026-11-24
     raised_by: owner-proxy session that dispatched this work order
     measured_at: "ac0f0dfd (this work item was written at d40d4e09)"
-    status: UNAPPLIED — the implementer must read it before starting
+    status: APPLIED-TO-THIS-FILE 2026-11-24 — all six items (A)-(F) are now reflected in acceptance_criteria AC1, AC2, AC4, AC5, AC6a/AC6b and AC8, and in risk_rationale and owner_decisions[OD-18]. Previously recorded as UNAPPLIED, which meant this manifest and its own erratum shipped mutually exclusive instructions under status DISPATCHED; that is the defect independent review REVIEW-01 finding M2 raised.
     summary: "Six measured corrections, all caused by 150fb45e (#910) landing between the prompt being written and the work item being merged. (A) The 81-entry split is now 77 = 66 embedded + 11 real. (B) The nine real paths became eleven: two 08-bmcp-protocol records entered the set once #910 taught the scan to see that root. (C) Section 3's three mirror-of-a-mirror paths are no longer violations; all 64 .zh-CN.md mirrors outside 14-ai-development now pair. (D) Section 4 change 3 (reuse side_by_side_partner) was not followed — the pairing was written inline — and the two implementations agree on 932 files today, which is agreement by coincidence, not by construction. (E) Section 5's first hard constraint and AC6 are now false and unsatisfiable: NORMATIVE_ROOTS went from 15 roots with 7 missing to 9 roots with 0 missing, so 'byte-identical to its pre-change value' would require reintroducing a defect. AC6 withdrawn. (F) Section 2's control file and AC4/AC5/AC9 stand unchanged."
     corrects_in_this_file:
       - "owner_decisions[OD-18].constraints[3]: 'The remaining 9 are the real backlog' — the remaining count is 11 at ac0f0dfd."
@@ -132,4 +137,46 @@ errata:
     does_not_change: "The prompt's SHA-256, prompt_status FROZEN, the ruling, the floor values 100/1000, the technology-architecture-blueprint.md control, and the instruction not to touch scripts/check_bilingual_docs.py or scripts/bilingual-baseline.txt."
     scope_decision: "AC6 is withdrawn, not deferred. Satisfying it literally is impossible without reintroducing the seven non-existent roots that #910 removed."
 
-findings: []
+findings:
+  - id: F1
+    severity: blocking
+    raised_by: independent review session (REVIEW-01, finding B1)
+    measured_at: "8e489ec1"
+    statement: "AC6 required the pre-#910 state of NORMATIVE_ROOTS, which #910 removed. Measured 9 entries / 0 missing / 08-bmcp-protocol present, against a criterion demanding 15 / 7 missing / 08 absent."
+    resolution: "AC6 withdrawn, replaced by AC6a and AC6b. An implementer can no longer satisfy it by reintroducing seven non-existent roots."
+  - id: F2
+    severity: blocking
+    raised_by: independent review session (REVIEW-01, finding B2)
+    measured_at: "8e489ec1"
+    statement: "AC1 said exactly 9 violations; measured 11. AC2 said 72 removals made of 6 side-by-side + 66 embedded; none of the six side-by-side paths is in the baseline, so 77-72=5 matches neither 9 nor 11. Two criteria in one manifest could not be satisfied together."
+    resolution: "AC1 restated as 11 with set equality against the erratum list. AC2 restated as 66 removals, which is the only figure consistent with both."
+  - id: F3
+    severity: blocking
+    raised_by: independent review session (REVIEW-01, finding B3)
+    measured_at: "8e489ec1"
+    statement: "AC5 claimed to assert an inclusive floor from both sides while asserting only the two negative cases. A predicate that resolves nothing would have passed it in full. Confirmed structurally: grep for the literal 1000 in either bilingual script returns no match, so the predicate is absent, so no test could fail."
+    resolution: "AC5 now has four assertions: cjk=99/latin=5000 and cjk=100/latin=999 stay violations; cjk=100/latin=1000 and cjk=101/latin=1001 must resolve."
+  - id: F4
+    severity: blocking
+    raised_by: independent review session (REVIEW-01, finding B4)
+    measured_at: "8e489ec1"
+    statement: "AC8 named scripts.test_check_bilingual_docs_full, which does not exist; the file is tests/test_check_bilingual_docs_full.py. The command had never run and raised ModuleNotFoundError. Prompt section 4's self-description ('three edits, all in scripts/check_bilingual_docs_full.py') is also narrower than the actual deliverable set, which includes tests and a gates.yml comment."
+    resolution: "AC8 path corrected. The scope-description mismatch is recorded here rather than fixed, because changing prompt text would break prompt_sha256 and prompt_status FROZEN; the implementer reads deliverables, which list all six items."
+  - id: F5
+    severity: material
+    raised_by: independent review session (REVIEW-01, finding M4)
+    measured_at: "8e489ec1"
+    statement: "gate_ratchet.py carries a comment claiming a crashing command is caught as a stale baseline and never passes. That holds only for a non-empty baseline. Measured: empty baseline + a command exiting 9 produces regressions=0 fixed=0 PASS exit 0, indistinguishable from a clean run. This work item regenerates that baseline, so an empty output would leave the required check permanently green."
+    resolution: "Recorded in AC7 as a floor the criterion does not otherwise cover. Not fixed here: patching gate_ratchet.py is outside this work item's file scope and would be a separate authorisation."
+  - id: F6
+    severity: material
+    raised_by: independent review session (REVIEW-01, finding M5)
+    measured_at: "8e489ec1"
+    statement: "OD-18, OD-22(a) and OD-23 are quoted in this manifest and the erratum in the grammar of rulings, but no original exists in the repository. grep for 'OD-22' across the tree matches only the erratum that cites it. Their content is consistent across quotations but unverifiable against a source."
+    resolution: "Unresolved, and recorded as unresolved. If the rulings live only in Issue #266, they should be linked by comment id so a reader can reach the thing being cited."
+  - id: F7
+    severity: material
+    raised_by: independent review session (REVIEW-01, finding M1)
+    measured_at: "8e489ec1"
+    statement: "base_commit_sha is d40d4e09, which was 103 commits behind at re-measurement (the reviewer measured 74 earlier the same hour). Two commits after the base touch the files this work item names. Every figure anchored to that base drifted with it: 81 violations became 77, 638/199/81 became 656/205/77, blueprint 49666 became 50488."
+    resolution: "Not changed here. Rebasing base_commit_sha would invalidate prompt_sha256's provenance note; the figures are restated in the acceptance criteria with the commit they were measured at, which is the part an implementer acts on. The staleness itself is GAP-29's subject."

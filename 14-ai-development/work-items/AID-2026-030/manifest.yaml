@@ -23,8 +23,16 @@ deliverables:
   - scripts/verification/sqlite_process_conformance.py
 implementation:
   branch: ai/AID-2026-030/req01-f09-sqlite-process-probe
-  pull_request: 372 (open; exact Head in PR metadata)
-  head_sha: PENDING
+  pull_request: 372
+  pr_state: MERGED
+  pr_merged_at: 2026-11-20T15:33:59Z
+  head_sha: 7c61e17a7b86feb0a36d82bd323cae4a6bb8be65
+  merge_commit_sha: b074b672fbe691b9a5a28c9c2a7f62afbded51e4
+  note: >-
+    pr_state and head_sha replace the earlier "open" and PENDING values, which
+    were expectations rather than facts. head_sha is the PR source-branch head;
+    merge_commit_sha is the commit that landed on main. They are not
+    interchangeable.
 verification:
   command: python3 scripts/verification/sqlite_process_conformance.py
   exit_code: 0
