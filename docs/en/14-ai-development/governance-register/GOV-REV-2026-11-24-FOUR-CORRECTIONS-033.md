@@ -18,7 +18,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-24"
-      last_verification_note: "§1-§4 and §6-§7 measured at main 2059c8105; §8 re-measured at main 84bbe9241; §5 re-measured at main 1259f1a on 2026-11-24 18:32:42. Every §8 row is one real invocation of scripts/check_bilingual_docs.py on a worktree reset to origin/main before the single commit under test, with the exit code recorded. Cases F and G exit 0, which is the evidence that no code reads docs/zh-CN content. Cases D, H, I exit non-zero, which refutes the inference that deleting a Chinese mirror goes unannounced. The baseline is 80 lines = 3 comments + 77 entries; none of the 7 content defects appears among those 77 entries. The pair count moved 123 -> 124 between the two measurement points because main gained files. §5 was re-measured because its original two assertions were taken at 2059c8105, ten minutes before #893 added WORK_ITEM_MANIFEST_RE; AID-2026-055 (#896, 84bbe9241) and AID-2026-056 (#908, 5d83b3c) have since been registered through that rule."
+      last_verification_note: "§1-§4 and §6-§7 measured at main 2059c8105; §8 re-measured at main 84bbe9241; §5 re-measured at main 01a3014 on 2026-11-24 19:39:28. Every §8 row is one real invocation of scripts/check_bilingual_docs.py on a worktree reset to origin/main before the single commit under test, with the exit code recorded. Cases F and G exit 0, which is the evidence that no code reads docs/zh-CN content. Cases D, H, I exit non-zero, which refutes the inference that deleting a Chinese mirror goes unannounced. The baseline is 80 lines = 3 comments + 77 entries; none of the 7 content defects appears among those 77 entries. The pair count moved 123 -> 124 between the two measurement points because main gained files. §5 was re-measured because its original two assertions were taken at 2059c8105, ten minutes before #893 added WORK_ITEM_MANIFEST_RE; AID-2026-055 (#896, 84bbe9241) through AID-2026-058 (01a3014) have since been registered through that rule. The count in §5.2 is a snapshot at that measurement point, not a standing number: 057 and 058 landed during this revision, which is the section's own argument happening to the section."
     usage_status: Active
     modification_status: Unchanged
     supersession:
@@ -47,7 +47,7 @@ document_metadata:
 
 **Status:** `OPEN` / `MEASUREMENT_ONLY` / `NO_IMPLEMENTATION` / §8 added 2026-11-24
 **Nature:** `REGISTER_ONLY / NO_GATE_CHANGE / REQUIRES_INDEPENDENT_REVIEW`
-**Measured at:** `main = 2059c8105` (§4), `main = 84bbe9241` (§8), `main = 1259f1a` (§5, re-measured 2026-11-24 18:32:42 after #893 opened the admission channel)
+**Measured at:** `main = 2059c8105` (§4), `main = 84bbe9241` (§8), `main = 01a3014` (§5, re-measured 2026-11-24 19:39 after #893 opened the admission channel)
 **Register author:** orchestrator session acting as owner-proxy. **Not** an independent reviewer, **not** the accountable owner.
 
 ---
@@ -63,7 +63,7 @@ This file is written within an hour of `REGISTER-INDEX-031` and `DISPATCH-CHANNE
 | 3 | 032 §6: preserve that work order for when the widening lands | the work is already done; the order has no object | **what I preserved is void** |
 | 4 | GAP-24: the zh-CN mirror is the English file | 2 of 123 pairs are byte-identical, **in opposite directions** | **GAP-24 undercounts and describes one direction only** |
 
-032 §1–§5 (the dispatch channel is closed) **is no longer unaffected**: `#893` opened the channel at 2026-11-24 14:13:58, and `AID-2026-055` (`#896`) and `AID-2026-056` (`#908`) have already used it. Section-by-section re-judgement in §5.3.
+032 §1–§5 (the dispatch channel is closed) **is no longer unaffected**: `#893` opened the channel at 2026-11-24 14:13:58, and `AID-2026-055` through `AID-2026-058` have already used it. Section-by-section re-judgement in §5.3.
 
 ---
 
@@ -162,11 +162,11 @@ The `if WORK_ITEM_MANIFEST_RE.fullmatch(path): return True` at `:197` was added 
 
 **Before and after, same command, two measurement points:**
 
-| # | Location | Before: `main = 2059c8105` (2026-11-24 14:03:58) | After: `main = 1259f1a` (2026-11-24 18:32:42) |
+| # | Location | Before: `main = 2059c8105` (2026-11-24 14:03:58) | After: `main = 01a3014` (2026-11-24 19:39:28) |
 |---|---|---|---|
 | 1 | code block line 1 of this section | `is_allowed_new_path('14-ai-development/work-items/AID-2026-099/manifest.yaml')` → **`False`** | → **`True`** |
 | 2 | code block line 2 of this section | `is_allowed_new_path('14-ai-development/governance-register/X.md')` → **`True`** | → **`True`** (value unchanged, meaning changed: no longer "only `.md` gets through", but "`.md` and work-item manifests both get through") |
-| 3 | the conclusion of this section | "no new work order can be registered" still holds; "no work order now wants registering" | **both false**: `AID-2026-055` and `AID-2026-056` are both registered |
+| 3 | the conclusion of this section | "no new work order can be registered" still holds; "no work order now wants registering" | **both false**: `AID-2026-055` through `AID-2026-058`, four items, are all registered |
 
 Reproduction commands (both import the real script and call the real function; neither reads the code):
 
@@ -179,7 +179,7 @@ $ cd /tmp/hyg2059t && python3 -c "import check_repository_hygiene as h; \
 False
 True
 
-# after: import directly on a checkout of 1259f1a
+# after: import directly on a checkout of 01a3014
 $ python3 -c "import sys; sys.path.insert(0,'scripts/ci'); import check_repository_hygiene as h; \
     print(h.is_allowed_new_path('14-ai-development/work-items/AID-2026-099/manifest.yaml')); \
     print(h.is_allowed_new_path('14-ai-development/governance-register/X.md'))"
@@ -192,19 +192,25 @@ $ python3 -c "import re; R=re.compile(r'14-ai-development/work-items/AID-\d{4}-\
 True
 ```
 
-### 5.2 The channel is not merely open; it has been used twice
+### 5.2 The channel is not merely open; it has been used four times
 
 | Work item | Registration commit | Time (+0800) | Evidence |
 |---|---|---|---|
 | `AID-2026-055` | `#896`, merge `84bbe9241` (head `5585d95`) | 2026-11-24 14:51:52 | adds `14-ai-development/work-items/AID-2026-055/manifest.yaml` + `prompt-v1.md`, and modifies `INDEX.md` |
 | `AID-2026-056` | `5d83b3c` (`#908`) | 2026-11-24 17:03:50 | adds `14-ai-development/work-items/AID-2026-056/manifest.yaml` |
+| `AID-2026-057` | `b3a65e5` | 2026-11-24 18:38:00 | adds `AID-2026-057/manifest.yaml` + `prompt-v1.md` |
+| `AID-2026-058` | `01a3014` | 2026-11-24 19:39:28 | adds `AID-2026-058/manifest.yaml` + `prompt-v1.md` |
+
+**These four numbers are also just a snapshot at one measurement point.** `057` and `058` merged during this very revision — the first draft of §5 measured two at 18:32, and the re-measurement at 19:39 found four. That is the section's own argument happening to the section while it was being written; so it says "four as of `main = 01a3014`", not "four".
 
 The first line of `AID-2026-055`'s `manifest.yaml` is `work_item_id: AID-2026-055`; `AID-2026-056`'s is `work_item_id: AID-2026-056`. Both carry a full `class` / `risk` / `risk_rationale` / `status: DISPATCHED` / `base_commit_sha`; neither is a placeholder directory:
 
 ```
-$ git ls-tree --name-only origin/main 14-ai-development/work-items/ | grep -E 'AID-2026-05[56]'
+$ git ls-tree --name-only origin/main 14-ai-development/work-items/ | grep -E 'AID-2026-05[5-8]'
 14-ai-development/work-items/AID-2026-055
 14-ai-development/work-items/AID-2026-056
+14-ai-development/work-items/AID-2026-057
+14-ai-development/work-items/AID-2026-058
 $ git show origin/main:14-ai-development/work-items/AID-2026-055/manifest.yaml | head -1
 work_item_id: AID-2026-055
 $ git show origin/main:14-ai-development/work-items/AID-2026-056/manifest.yaml | head -1
@@ -219,7 +225,7 @@ work_item_id: AID-2026-056
 
 | 032 section | What it says | Now |
 |---|---|---|
-| §1 | "since `cfcafc98a`, no new AID work order can be registered" | **Does not hold.** `#893` added the `WORK_ITEM_MANIFEST_RE` rule; `AID-2026-055` (#896) and `AID-2026-056` (#908) are registered. |
+| §1 | "since `cfcafc98a`, no new AID work order can be registered" | **Does not hold.** `#893` added the `WORK_ITEM_MANIFEST_RE` rule; `AID-2026-055` (#896), `AID-2026-056` (#908), `AID-2026-057` and `AID-2026-058` are registered. |
 | §2 | timeline: 054 manifest `a3c6280aa` (11-23) / whitelist `cfcafc98a` (11-24) / attempt to register 055 | **The facts hold** — all three dates and commits are unchanged. But their role was to witness §1, whose conclusion is now refuted, so the table now proves only "the whitelist is a day later than 054", not "the channel is closed". |
 | §3 | the whitelist admits "five classes"; "`manifest.yaml` is in none of them" | **The table is no longer complete**: there is now a sixth rule. The descriptions of the first five are still accurate one by one, and `ALLOWED_DOCUMENT_SUFFIXES` / `ALLOWED_SOURCE_SUFFIXES` / `ALLOWED_CONFIG_PATHS` were not touched by `#893` (its PR body says explicitly "No global `.yaml` suffix"). |
 | §4 | why this session did not widen that line itself | **Holds as a decision record**: it did refuse to change gate source from the position of the party that needs it, and the reason (the only party that wants the door open is the only party with an incentive to open it wider than needed) is valid independently of the conclusion. Its "the change needed is one line" was in fact done by `#893` and then tightened by `#915`; the wait for "one minute after the widening lands" is over. |
