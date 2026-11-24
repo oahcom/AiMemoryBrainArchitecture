@@ -48,7 +48,7 @@ class ChangedPathTests(unittest.TestCase):
             head = make_repo(root)
             output, errors = io.StringIO(), io.StringIO()
             with (
-                patch.object(GATE, "REPO_ROOT", root),
+                patch.object(GATE, "ROOT", root),
                 patch.object(GATE, "_require_full_git_history"),
                 patch.dict(os.environ, {"BASE_SHA": head, "HEAD_SHA": head}),
                 patch.object(sys, "argv", ["check_bilingual_docs.py"]),
@@ -67,7 +67,7 @@ class ChangedPathTests(unittest.TestCase):
             head = make_repo(root)
             output, errors = io.StringIO(), io.StringIO()
             with (
-                patch.object(GATE, "REPO_ROOT", root),
+                patch.object(GATE, "ROOT", root),
                 patch.object(GATE, "_require_full_git_history"),
                 patch.dict(os.environ, {"BASE_SHA": "deadbeef", "HEAD_SHA": head}),
                 patch.object(sys, "argv", ["check_bilingual_docs.py"]),
@@ -89,7 +89,7 @@ class ChangedPathTests(unittest.TestCase):
             git(root, "commit", "-q", "-m", "code-only")
             head = git(root, "rev-parse", "HEAD")
             with (
-                patch.object(GATE, "REPO_ROOT", root),
+                patch.object(GATE, "ROOT", root),
                 patch.dict(os.environ, {"BASE_SHA": base, "HEAD_SHA": head}),
             ):
                 self.assertEqual(GATE.changed_status(), {"src/only.rs": "A"})
