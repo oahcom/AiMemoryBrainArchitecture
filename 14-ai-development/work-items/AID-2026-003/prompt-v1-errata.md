@@ -1,3 +1,23 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+    evidence_verification:
+      verification_status: Unverified
+    usage_status: Active
+    modification_status: Unchanged
+
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Informative
+---
+
 # AID-2026-003-PROMPT v1 — retrospective correction addendum
 
 - Record type: immutable-prompt companion / errata (not a replacement of prompt-v1.md)
