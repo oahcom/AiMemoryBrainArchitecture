@@ -821,13 +821,14 @@ def test_incremental_in_scope_stale_pin_still_fails() -> None:
         _git(root, "add", "-A")
         _git(root, "commit", "-q", "-m", "touch a")
         code, out, err = _run_capture(root, "--require-changed", base)
-        output = out + err
         in_scope = f"00-governance/a.md: {DM10_ERROR}"
+        # Errors go to stderr; checking the merged stream could not tell a
+        # refusal from a note about the same document.
+        refused = in_scope in err
         record(
             "T81 incremental run still fails a stale pin on a document it changed",
-            code == 1 and in_scope in output,
-            f"  gate returned {code}, expected 1; in-scope diagnostic present: "
-            f"{in_scope in output}",
+            code == 1 and refused,
+            f"  gate returned {code}, expected 1; in-scope diagnostic on stderr: {refused}",
         )
 
 def test_incremental_out_of_scope_stale_pin_is_counted_not_failed() -> None:
@@ -837,26 +838,31 @@ def test_incremental_out_of_scope_stale_pin_is_counted_not_failed() -> None:
         _git(root, "add", "-A")
         _git(root, "commit", "-q", "-m", "touch nothing governed")
         code, out, err = _run_capture(root, "--require-changed", base)
-        output = out + err
-        counted = DM10_COUNT_ONE in output.splitlines()
+        # The ruling asks for two things joined by "and": a note naming the
+        # document, and a counted line. A number alone says how many, not which.
+        leaked = f"00-governance/b.md: {DM10_ERROR}" in err
+        noted = any(
+            line.startswith("  note: DM-10 out-of-scope 00-governance/b.md:")
+            for line in out.splitlines()
+        )
+        counted = DM10_COUNT_ONE in out.splitlines()
         record(
             "T82 incremental run counts an out-of-scope stale pin instead of failing it",
-            code == 0 and counted and DM10_ERROR not in output,
+            code == 0 and counted and noted and not leaked,
             f"  gate returned {code}, expected 0; count line exact: {counted}; "
-            f"DM-10 error leaked into output: {DM10_ERROR in output}",
+            f"note names the document: {noted}; DM-10 error on stderr: {leaked}",
         )
 
 def test_whole_tree_run_still_reports_every_stale_pin() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root, _ = _dm10_repo(tmp)
         code, out, err = _run_capture(root)
-        output = out + err
         reported = f"00-governance/b.md: {DM10_ERROR}"
         record(
             "T83 whole-tree run still reports every stale pin",
-            code == 1 and reported in output,
-            f"  gate returned {code}, expected 1; b.md diagnostic present: "
-            f"{reported in output}",
+            code == 1 and reported in err,
+            f"  gate returned {code}, expected 1; b.md diagnostic on stderr: "
+            f"{reported in err}",
         )
 
 def test_incremental_one_in_scope_one_out_of_scope() -> None:
@@ -867,15 +873,19 @@ def test_incremental_one_in_scope_one_out_of_scope() -> None:
         _git(root, "add", "-A")
         _git(root, "commit", "-q", "-m", "touch a only")
         code, out, err = _run_capture(root, "--require-changed", base)
-        output = out + err
-        in_scope = f"00-governance/a.md: {DM10_ERROR}" in output
-        out_of_scope = f"00-governance/b.md: {DM10_ERROR}" in output
-        counted = DM10_COUNT_ONE in output.splitlines()
+        in_scope = f"00-governance/a.md: {DM10_ERROR}" in err
+        out_of_scope = f"00-governance/b.md: {DM10_ERROR}" in err
+        noted = any(
+            line.startswith("  note: DM-10 out-of-scope 00-governance/b.md:")
+            for line in out.splitlines()
+        )
+        counted = DM10_COUNT_ONE in out.splitlines()
         record(
             "T84 one in-scope and one out-of-scope stale pin are classified per document",
-            code == 1 and in_scope and not out_of_scope and counted,
-            f"  gate returned {code}, expected 1; a.md reported: {in_scope}; "
-            f"b.md reported: {out_of_scope}; count line exactly 1: {counted}",
+            code == 1 and in_scope and not out_of_scope and noted and counted,
+            f"  gate returned {code}, expected 1; a.md on stderr: {in_scope}; "
+            f"b.md on stderr: {out_of_scope}; b.md noted: {noted}; "
+            f"count line exactly 1: {counted}",
         )
 
 def test_incremental_zero_out_of_scope_still_prints_the_count() -> None:
@@ -901,6 +911,36 @@ def test_incremental_zero_out_of_scope_still_prints_the_count() -> None:
             f"{zero in (out + err).splitlines()}",
         )
 
+def test_out_of_scope_stale_pin_emits_both_a_note_and_a_count() -> None:
+    """The ruling's sentence joins two things with "and"; assert both.
+
+    #862 shipped the counted line alone. A suite that asserts only the count
+    stays green when the note disappears, which is exactly how that happened.
+    This case is the regression gate for the half nobody was watching: the
+    note must exist, it must name the document, and it must never be an error.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        root, base = _dm10_repo(tmp)
+        (root / "notes.txt").write_text("unrelated change\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "touch nothing governed")
+        code, out, err = _run_capture(root, "--require-changed", base)
+        note_lines = [
+            line for line in out.splitlines()
+            if line.startswith("  note: DM-10 out-of-scope 00-governance/b.md:")
+        ]
+        count_lines = [line for line in out.splitlines() if line == DM10_COUNT_ONE]
+        # The error form puts the sentence on stderr. The note must not appear
+        # there: a note that also fails the run is the bug this issue fixes.
+        on_stderr = "DM-10 out-of-scope" in err
+        record(
+            "T86 an out-of-scope stale pin is both noted and counted, never failed",
+            code == 0 and len(note_lines) == 1 and len(count_lines) == 1
+            and not on_stderr,
+            f"  gate returned {code}, expected 0; note lines: {len(note_lines)}; "
+            f"count lines: {len(count_lines)}; on stderr: {on_stderr}",
+        )
+
 def run_dm10_scope() -> None:
     print("DM-10 scope (issue #808)")
     test_incremental_in_scope_stale_pin_still_fails()
@@ -908,6 +948,99 @@ def run_dm10_scope() -> None:
     test_whole_tree_run_still_reports_every_stale_pin()
     test_incremental_one_in_scope_one_out_of_scope()
     test_incremental_zero_out_of_scope_still_prints_the_count()
+    test_out_of_scope_stale_pin_emits_both_a_note_and_a_count()
+
+
+def run_shallow_history() -> None:
+    """T70: an unanswerable question from a shallow clone is not a violation."""
+    print("shallow history (exit 2, never a fabricated DM-10)")
+    import check_document_management as gate
+
+    real_git = gate.git
+
+    def pretending_shallow(root_arg, *args, **kwargs):
+        if args[:2] == ("rev-parse", "--is-shallow-repository"):
+            return "true\n"
+        return real_git(root_arg, *args, **kwargs)
+
+    def pretending_garbage(root_arg, *args, **kwargs):
+        if args[:2] == ("rev-parse", "--is-shallow-repository"):
+            return "perhaps\n"
+        return real_git(root_arg, *args, **kwargs)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        target = root / "00-governance" / "a.md"
+        body = "body: approved text"
+        template = doc(APPROVED.replace('"deadbeef"', '"SHA"'))
+        target.write_text(template.replace("# Title", body), encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "approved")
+        sha = _git(root, "rev-parse", "HEAD")
+        target.write_text(
+            template.replace('"SHA"', f'"{sha}"').replace("# Title", body),
+            encoding="utf-8",
+        )
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "record approval")
+
+        import contextlib
+        import io
+
+        def capture(*extra: str) -> tuple[int, str]:
+            out, err = io.StringIO(), io.StringIO()
+            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+                code = run_gate(root, *extra)
+            return code, out.getvalue() + err.getvalue()
+
+        try:
+            # Benign shallow: history is truncated but every pin resolves, so
+            # the gate's verdict is exactly its full-clone verdict. Refusing
+            # here would be a capability regression, not a safety win.
+            gate.git = pretending_shallow
+            code, output = capture()
+            record("T70 benign shallow clone still produces its normal verdict",
+                   code == 0, f"  gate returned {code}: {output.strip()[:200]}")
+
+            code, output = capture("--require-changed", "no-such-ref")
+            record("T70 shallow clone does not call an upstream ref a bad ref",
+                   code == 2 and "does not resolve to a commit" not in output
+                   and "shallow" in output,
+                   f"  gate returned {code}: {output.strip()[:200]}")
+
+            # The defect: a pin that cannot resolve because history is cut off.
+            fabricated = (
+                target.read_text(encoding="utf-8")
+                .replace(f'"{sha}"', '"0000000000000000000000000000000000000000"')
+            )
+            target.write_text(fabricated, encoding="utf-8")
+
+            code, output = capture()
+            record("T70 unresolvable pin on a shallow clone exits 2 (INCOMPLETE)",
+                   code == 2, f"  gate returned {code}")
+            record("T70 shallow clone reports no fabricated DM-10 violation",
+                   "is not a commit in this repository" not in output,
+                   f"  output: {output.strip()[:200]}")
+            record("T70 shallow clone names the condition and the remedy",
+                   "shallow" in output and "git fetch --unshallow" in output,
+                   f"  output: {output.strip()[:200]}")
+
+            gate.git = pretending_garbage
+            code, output = capture()
+            record("T70 undeterminable history fails closed at 2", code == 2,
+                   f"  gate returned {code}")
+        finally:
+            gate.git = real_git
+
+        # Control: complete history still rejects the same fabricated pin.
+        # The guard must not have weakened DM-10.
+        code, output = capture()
+        record("T70 full history still rejects a fabricated approved_version",
+               code == 1 and "is not a commit in this repository" in output,
+               f"  gate returned {code}: {output.strip()[:200]}")
 
 
 def run_changed_paths() -> None:
@@ -3209,6 +3342,7 @@ def main() -> int:
     run_repository_rules()
     run_approval_binding()
     run_dm10_scope()
+    run_shallow_history()
     run_changed_paths()
     run_path_safety()
     run_body_hash_equivalence()

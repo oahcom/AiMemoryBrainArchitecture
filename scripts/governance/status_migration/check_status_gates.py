@@ -180,11 +180,11 @@ def _verify_sidecar_anchor(root, sidecar_path=SIDECAR_PATH):
     """Enforce the committed integrity anchor for the validator itself.
 
     The sidecar records git blob SHA-1s of protected source files.  The most
-    recent commit touching the sidecar must embed sha256(sidecar bytes) in
-    its message.  Silent local edits to a protected file or to the sidecar
-    break the recorded values; updating both still forces a fresh commit
-    whose message must carry a matching anchor, so any bypass leaves a
-    visible, auditable commit in history rather than silent tampering.
+    recent commit touching the sidecar must embed sha256(committed sidecar
+    bytes) in its message.  Silent local edits to a protected file or to the
+    sidecar break the recorded values; updating both still forces a fresh
+    commit whose message must carry a matching anchor, so any bypass leaves
+    a visible, auditable commit in history rather than silent tampering.
     """
     message = subprocess.run(
         ["git", "-C", str(root), "log", "-1", "--format=%B", "--", sidecar_path],
@@ -193,10 +193,26 @@ def _verify_sidecar_anchor(root, sidecar_path=SIDECAR_PATH):
     if match is None:
         raise ValueError("sidecar commit message lacks a sha256 anchor")
     expected = match.group(0)
-    sidecar = root / sidecar_path
-    actual = hashlib.sha256(sidecar.read_bytes()).hexdigest()
+
+    # Verify the anchor against authoritative committed bytes.
+    committed = subprocess.run(
+        ["git", "-C", str(root), "cat-file", "blob", f"HEAD:{sidecar_path}"],
+        check=True, capture_output=True).stdout
+    actual = hashlib.sha256(committed).hexdigest()
     if actual != expected:
         raise ValueError("sidecar sha256 does not match its commit anchor")
+
+    # Also reject local edits, comparing clean-filtered Git object IDs.
+    committed_blob = subprocess.run(
+        ["git", "-C", str(root), "rev-parse", f"HEAD:{sidecar_path}"],
+        check=True, capture_output=True, text=True).stdout.strip()
+    working_blob = subprocess.run(
+        ["git", "-C", str(root), "hash-object", str(root / sidecar_path)],
+        check=True, capture_output=True, text=True).stdout.strip()
+    if working_blob != committed_blob:
+        raise ValueError("sidecar sha256 does not match its commit anchor")
+
+    sidecar = root / sidecar_path
     for line in sidecar.read_text(encoding="utf-8").splitlines():
         parts = line.split()
         if len(parts) != 3 or parts[0] != "git-blob-sha1":
@@ -208,7 +224,6 @@ def _verify_sidecar_anchor(root, sidecar_path=SIDECAR_PATH):
         if blob != recorded:
             raise ValueError("protected file does not match sidecar blob: " + relative)
     return True
-
 
 def _identity_token(value):
     if not isinstance(value, str) or not value.strip():
