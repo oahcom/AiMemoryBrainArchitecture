@@ -359,10 +359,42 @@ N/A
         self.assertIn("Issue #101", output)
 
     def test_yes_requires_refs(self):
-        body = make_pr_body(status="YES", refs=[], issue_refs=[])
+        # The PR declaration is the only defect: with this guard removed
+        # the validator reports PRESENT, so no other clause can satisfy
+        # this test.
+        body = make_pr_body(
+            status="YES",
+            refs=[],
+            issue_status="YES",
+            issue_refs=[EVIDENCE_A],
+        )
+        self.make_valid_world(pr_body=body)
+        result, output = self.capture_validator()
+        self.assertEqual(result, 1)
+        self.assertIn("PR: YES requires evidence references", output)
+
+    def test_missing_pr_declaration_is_reported(self):
+        body = make_pr_body().replace(
+            "## AI-assisted work\n\nYES\n\n", ""
+        )
+        self.assertNotIn("## AI-assisted work", body)
         world = make_valid_world(pr_body=body)
         self.install_world(world)
-        self.assertNotEqual(run_validator(), 0)
+        result, output = self.capture_validator()
+        self.assertEqual(result, 1)
+        self.assertIn(
+            "PR: missing AI-assisted work declaration",
+            output,
+        )
+
+    def test_invalid_pr_declaration_value_is_reported(self):
+        world = make_valid_world(
+            pr_body=make_pr_body(status="MAYBE"),
+        )
+        self.install_world(world)
+        result, output = self.capture_validator()
+        self.assertEqual(result, 1)
+        self.assertIn("PR: AI-assisted work must be YES or NO", output)
 
     def test_no_requires_na(self):
         body = make_pr_body(

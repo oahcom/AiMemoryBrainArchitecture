@@ -1330,16 +1330,9 @@ def check_02_pr_declaration_and_references(
         "PR",
     )
 
-    if status == "YES" and not refs:
-        raise ValidationError(
-            "PR: YES requires at least one evidence path"
-        )
-
-    if status == "NO" and refs:
-        raise ValidationError(
-            "PR: NO requires N/A"
-        )
-
+    # Policy for PR-level YES/NO lives in check_01, which runs first.
+    # Duplicating it here made these branches unreachable and gave the
+    # same condition two different messages.
     return status, refs
 
 
