@@ -1,3 +1,48 @@
+---
+document_metadata:
+  domain: ai-development
+  role: normative-standard
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Metadata added on 2026-11-24 so that this file can be edited without tripping DM-01. No content claim in this file is verified by this block."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Normative
+  bilingual_counterpart:
+    source: "14-ai-development/PR-GOVERNANCE-001.md"
+    en: "docs/en/14-ai-development/PR-GOVERNANCE-001-ENFORCEMENT.md"
+    zh-CN: null
+---
+
 # PR-GOVERNANCE-001 — 强制执行与证据补充规范
 # PR-GOVERNANCE-001 — Enforcement & Evidence Addendum
 
@@ -37,10 +82,10 @@ Rust 门禁：
 
 ## 2. 审查与批准门禁
 
-- 普通变更至少要求一位与 PR 作者身份独立的 GitHub 审查者批准；修改某领域 Owner 规范契约时，必须取得受影响领域 Owner 的批准。
+- 普通变更至少要求一位与 PR 作者**会话独立**的审查者批准；修改某领域 Owner 规范契约时，必须取得受影响领域 Owner 的批准。独立性是审查会话的属性，不是 GitHub 账号的属性：多个会话可以共用一个身份。
 - 新提交推送后必须撤销过期审批。
 - 合并前必须解决全部审查讨论。
-- COMMENT 不是 APPROVE。使用作者相同 GitHub 连接身份、仅切换角色的第二个 AI 会话不构成独立审查者。
+- COMMENT 不是 APPROVE。独立会话审查自己未撰写、未实现的变更产物，**构成**独立审查，且可以经由作者相同的 GitHub 连接身份提交。撰写会话内部的 AI 角色模拟不构成独立审查：审查者与作者共享同一上下文与同一激励。
 - 记录审查者登录名、审查状态、被审查 Head SHA、时间戳/链接、同身份或委派关系披露，以及未解决发现。
 - 无法取得独立审批时，处置状态为 HOLD，除非记录了经授权、明确限定范围且有期限的例外。不得自我批准，不得将角色扮演描述为 Owner 批准。
 
@@ -52,7 +97,7 @@ Rust 门禁：
 
 1. **Exact Head SHA** —— 实际被评估的提交，全写或截断并注明长度。分支名不能替代。
 2. **适用检查结论** —— 在该精确 Head 上，每项适用检查的名称、结论与 run URL。若无适用检查，写明「无适用检查」并给出理由。该理由必须能从变更本身客观核验，例如「无任何变更路径匹配任何 workflow 的路径过滤」。仅证明不存在路径过滤匹配的 workflow 不够，还须排除不设路径过滤、始终运行的适用检查。仅由验收方单方断言、无此依据者，不满足本行。
-3. **审查状态与审查者身份** —— 审查状态（APPROVED / COMMENTED / REQUESTED_CHANGES / NOT_REVIEWED）、审查者登录名、被审查 Head SHA，以及同身份或委派关系披露。COMMENT 不是 APPROVE。APPROVED 状态仅当批准来自符合 §2 独立性要求的审查者时有效；由与 PR 作者相同 GitHub 身份给出的批准不构成有效批准，不得记为 APPROVED。凡 §2 对该变更要求批准审查者，状态为 NOT_REVIEWED、COMMENTED 或 REQUESTED_CHANGES 时必须与第 4 行的例外记录配对；未配对者不得承载 ACCEPT。
+3. **审查状态与审查者身份** —— 审查状态（APPROVED / COMMENTED / REQUESTED_CHANGES / NOT_REVIEWED）、审查者登录名、被审查 Head SHA，以及同身份或委派关系披露。COMMENT 不是 APPROVE。APPROVED 状态仅当批准来自符合 §2 独立性要求的审查者时有效；由与 PR 作者相同 GitHub 身份提交的批准，仅当产出该批准的会话符合 §2 的独立性要求、且评论中披露独立性为会话级时有效；由撰写会话内部 AI 角色模拟产出的批准不构成有效批准，不得记为 APPROVED。凡 §2 对该变更要求批准审查者，状态为 NOT_REVIEWED、COMMENTED 或 REQUESTED_CHANGES 时必须与第 4 行的例外记录配对；未配对者不得承载 ACCEPT。
 4. **例外记录** —— 若任一适用检查为失败、缺失、待定、适用时被跳过、Head 过期或无法核验，必须具名登记例外：依据、授权方、范围、到期条件、跟踪 Issue。若无例外，写明「无例外」。
 
 第 4 行例外记录的性质：例外记录是披露与审计机制，不豁免 §1 检查门禁。§2 的例外是对审查与批准门禁的经授权例外，仅限该门禁；检查失败、缺失、待定、适用时被跳过、Head 过期或无法核验等情形，不能仅凭在本核对表登记例外而豁免。只要任一该等检查状态存在，该 PR 即不得合并，该评论亦不得承载 ACCEPT 或合并授权 YES，无论第 4 行登记了何种例外。

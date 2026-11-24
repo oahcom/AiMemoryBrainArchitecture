@@ -70,9 +70,11 @@ number_allocation:
     does not cover deleted branches, tags, forks, or future allocations. It is
     a point-in-time allocation scan, not a permanent reservation.
   registration_state: >-
-    Registration PR #354 is OPEN and NOT MERGED. Branch-side readback of all
-    eight files was completed byte-for-byte; main-side readback has NOT been
-    performed and must not be claimed.
+    Registration PR #354 is MERGED; merge commit
+    8215ec57260b5841df1b9f9aad5a7f26d3073bac, merged at
+    2026-11-20T12:51:10Z. Branch-side readback of all eight files was
+    completed byte-for-byte; main-side readback is NOT_PERFORMED and must
+    not be claimed.
   allocation_conclusion: VERIFIED_UNIQUE_325_BRANCH_DUAL_DOMAIN_SCAN
 prompt_id: AID-2026-026-PROMPT
 prompt_version: v2

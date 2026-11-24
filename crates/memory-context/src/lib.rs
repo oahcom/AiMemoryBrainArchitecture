@@ -11,9 +11,6 @@ use memory_domain::{
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashMap, HashSet};
 
-mod selector;
-pub use selector::*;
-
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ContextBudget {
     pub max_entries: usize,
@@ -1291,11 +1288,25 @@ fn candidate_coverage_units(
 /// Higher tiers cannot be displaced by lower tiers. Remaining capacity is
 /// passed to the next tier without reserving a fixed quota.
 ///
+/// A candidate that does not fit the remaining rendered-byte budget is dropped
+/// and selection continues, so one oversized candidate cannot block a smaller
+/// one that still fits.
+///
+/// Each pick scores only coverage units not already covered: a candidate whose
+/// every unit is already covered has zero marginal gain, is dropped with
+/// [`SelectionDropReason::ZeroMarginalGain`], and never consumes budget.
+///
+/// Admission is limited to `ContextCandidate::validate_for`: lifecycle,
+/// scope containment and lineage. This function performs no authorization,
+/// Forget, temporal-validity or environment-match filtering; those facts live
+/// in the layer above and must be resolved before candidates reach here.
+///
 /// The function is pure: it performs no storage, clock, random, or external
 /// model operations. Equal logical inputs produce equal serialized outputs.
 ///
-/// The caller may pass `selected` to `build_context`. The behavior of
-/// `build_context` itself is intentionally unchanged.
+/// The caller may pass `selected` to `build_context`. `build_context` also
+/// calls this function itself whenever the candidate set exceeds
+/// `budget.max_entries`, so both entry points choose the same subset.
 pub fn select_within_budget(
     identity: &ContextIdentity,
     budget: &ContextBudget,
@@ -1524,19 +1535,20 @@ pub fn build_context(
         }
     }
 
+    // A candidate set larger than the entry budget is reduced, not refused.
+    // `select_within_budget` is the crate's own selector and the helper
+    // `brain-cli` already calls, so delegating here makes both entry points
+    // choose the same subset for the same input.
+    if candidates.len() > budget.max_entries {
+        candidates = select_within_budget(&identity, &budget, candidates)?.selected;
+    }
+
     candidates.sort_by(|left, right| {
         left.tier
             .cmp(&right.tier)
             .then_with(|| right.priority.cmp(&left.priority))
             .then_with(|| left.entry_id.cmp(&right.entry_id))
     });
-
-    if candidates.len() > budget.max_entries {
-        return Err(ContextError::EntryBudgetExceeded {
-            actual: candidates.len(),
-            limit: budget.max_entries,
-        });
-    }
 
     let mut rendered_bytes = 0usize;
     let mut entries = Vec::with_capacity(candidates.len());
@@ -2523,27 +2535,115 @@ mod tests {
     }
 
     #[test]
-    fn entry_budget_error_reports_actual_candidate_count() {
-        let result = build_context(
+    fn over_entry_budget_selects_the_same_subset_as_select_within_budget() {
+        // Coverage and priority disagree, and input order matches neither, so a
+        // truncation or priority-order shortcut picks a different subset than
+        // `select_within_budget` and this test fails.
+        let with_coverage = |entry: &str, priority: i32, sources: &[&str]| {
+            let mut item = candidate(entry, ContextTier::P0, priority, entry);
+            item.source_refs = sources.iter().map(|source| id(source)).collect();
+            item
+        };
+        let candidates = vec![
+            with_coverage("a", 5, &["s1"]),
+            with_coverage("b", 1, &["s1", "s2", "s3", "s4"]),
+            with_coverage("c", 2, &["s5", "s6", "s7"]),
+            with_coverage("d", 3, &["s8", "s9"]),
+            with_coverage("e", 4, &["s10"]),
+        ];
+        let limited = ContextBudget {
+            max_entries: 2,
+            max_rendered_bytes: 100,
+        };
+
+        let snapshot = build_context(identity(), 1, limited.clone(), candidates.clone()).unwrap();
+        let expected = select_within_budget(&identity(), &limited, candidates).unwrap();
+
+        let mut selected: Vec<_> = snapshot
+            .entries
+            .iter()
+            .map(|entry| entry.entry_id.as_str().to_owned())
+            .collect();
+        let mut expected: Vec<_> = expected
+            .selected
+            .iter()
+            .map(|candidate| candidate.entry_id.as_str().to_owned())
+            .collect();
+        selected.sort();
+        expected.sort();
+
+        assert_eq!(snapshot.entries.len(), limited.max_entries);
+        assert_eq!(selected, expected);
+        // Pinned independently of the selector: the two highest-coverage P0
+        // candidates, which is neither the input prefix nor the priority order.
+        assert_eq!(selected, vec!["b", "c"]);
+    }
+
+    #[test]
+    fn entry_budget_exhaustion_ends_in_selection_not_entry_budget_exceeded() {
+        // Behaviour change: an over-budget candidate set used to end in
+        // `ContextError::EntryBudgetExceeded`. It now ends in a selected
+        // subset whose size is the entry budget.
+        let candidates = vec![
+            candidate("a", ContextTier::P0, 1, "a"),
+            candidate("b", ContextTier::P0, 1, "b"),
+            candidate("c", ContextTier::P1, 1, "c"),
+        ];
+
+        let snapshot = build_context(
             identity(),
             1,
             ContextBudget {
                 max_entries: 2,
                 max_rendered_bytes: 100,
             },
+            candidates,
+        )
+        .expect("an over-budget candidate set is selected, not refused");
+
+        assert_eq!(snapshot.entries.len(), 2);
+        assert_eq!(snapshot.rendered_bytes, 2);
+    }
+
+    #[test]
+    fn under_entry_budget_keeps_every_candidate() {
+        let snapshot = build_context(
+            identity(),
+            1,
+            budget(),
             vec![
-                candidate("a", ContextTier::P0, 1, "a"),
-                candidate("b", ContextTier::P1, 1, "b"),
-                candidate("c", ContextTier::P2, 1, "c"),
+                candidate("z", ContextTier::P1, 10, "one"),
+                candidate("b", ContextTier::P0, 1, "two"),
+                candidate("a", ContextTier::P1, 10, "three"),
             ],
-        );
+        )
+        .unwrap();
+
         assert_eq!(
-            result.unwrap_err(),
-            ContextError::EntryBudgetExceeded {
-                actual: 3,
-                limit: 2
-            }
+            snapshot
+                .entries
+                .iter()
+                .map(|entry| entry.entry_id.as_str().to_owned())
+                .collect::<Vec<_>>(),
+            vec!["b", "a", "z"]
         );
+    }
+
+    #[test]
+    fn over_entry_budget_selection_is_deterministic_across_repeated_calls() {
+        let candidates: Vec<_> = ["a", "b", "c", "d"]
+            .iter()
+            .map(|entry| candidate(entry, ContextTier::P1, 3, entry))
+            .collect();
+        let limited = ContextBudget {
+            max_entries: 2,
+            max_rendered_bytes: 100,
+        };
+
+        let first = build_context(identity(), 1, limited.clone(), candidates.clone()).unwrap();
+        let second = build_context(identity(), 1, limited, candidates).unwrap();
+
+        assert_eq!(first.entries, second.entries);
     }
 
     #[test]

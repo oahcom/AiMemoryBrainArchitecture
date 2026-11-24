@@ -8,7 +8,7 @@ import sys
 from pathlib import PurePosixPath
 
 
-CHECK_VERSION = "2026-11-24.2"
+CHECK_VERSION = "2026-11-24.4"
 
 # Repository-root-relative paths, written with a leading slash.
 PROHIBITED_PATHS = (
@@ -79,6 +79,72 @@ FULL_SHA_RE = re.compile(r"[0-9a-fA-F]{40}\Z")
 WORK_ITEM_MANIFEST_RE = re.compile(
     r"14-ai-development/work-items/AID-\d{4}-\d{3}/manifest\.yaml"
 )
+
+# D7: one explicitly approved nested conformance dependency pin.
+# Do not merge this into REQUIREMENTS_FILE_RE: that rule remains root-only.
+CONFORMANCE_PROVIDER_REQUIREMENTS_RE = re.compile(
+    r"08-bmcp-protocol/tests/conformance/provider_outcome/requirements\.txt"
+)
+
+# D17: the conformance harness has its own package manifest and lockfile.
+# Keep both exact paths under the conformance directory; this is not a
+# general nested package.json or package-lock.json admission rule.
+CONFORMANCE_PACKAGE_FILES_RE = re.compile(
+    r"08-bmcp-protocol/tests/conformance/package(?:-lock)?\.json"
+)
+
+# D19: source snapshots are admitted only directly inside an AID work-item
+# directory. The filename must end in .source.txt; nested directories and
+# other work-item ID families are not admitted.
+AID_SOURCE_SNAPSHOT_RE = re.compile(
+    r"14-ai-development/work-items/AID-[0-9]{4}-[0-9]{3}/[^/]+\.source\.txt"
+)
+
+# D20: only the reference-model .gitignore directly under an AID work item
+# is admitted. No other nested .gitignore path is covered.
+AID_REFERENCE_MODEL_GITIGNORE_RE = re.compile(
+    r"14-ai-development/work-items/AID-[0-9]{4}-[0-9]{3}/reference-model/\.gitignore"
+)
+
+# A1: protocol schema files live directly under schemas/. One level only;
+# schemas/<sub>/x.schema.json is not admitted.
+PROTOCOL_SCHEMA_RE = re.compile(r"08-bmcp-protocol/schemas/[^/]+\.schema\.json")
+
+# A2: conformance vectors are JSON anywhere below the conformance root, with
+# one carve-out. package.json and package-lock.json belong to D17 only at the
+# conformance root; the same names one level down stay refused. The negative
+# lookahead is load-bearing -- dropping it turns this into conformance/**/*.json
+# and silently admits the nested package files D17 deliberately excluded.
+CONFORMANCE_VECTOR_RE = re.compile(
+    r"08-bmcp-protocol/tests/conformance/(?:[^/]+/)*(?!package(?:-lock)?\.json\Z)[^/]+\.json"
+)
+
+# A4: each crate owns exactly one manifest at crates/<name>/Cargo.toml.
+# Workspace members are flat, so no deeper Cargo.toml is admitted.
+CRATE_MANIFEST_RE = re.compile(r"crates/[^/]+/Cargo\.toml")
+
+# A5: governance-register evidence captures, flat under evidence/.
+GOVERNANCE_EVIDENCE_RE = re.compile(
+    r"14-ai-development/governance-register/evidence/[^/]+\.json"
+)
+
+# A6: each crate's VERIFICATION.txt sits beside its Cargo.toml, not deeper.
+CRATE_VERIFICATION_RE = re.compile(r"crates/[^/]+/VERIFICATION\.txt")
+
+# A8: two baselines with two shapes -- the root bilingual baseline and the
+# per-check baselines directory. Both branches are exercised by tests.
+BASELINE_FILE_RE = re.compile(
+    r"(?:scripts/bilingual-baseline\.txt|scripts/ci/baselines/[^/]+\.txt)"
+)
+
+# B9-B12: four singleton governance files. Each is an exact path, not a
+# pattern; a sibling with a different name must stay refused.
+GOV_DOC_001_INHERITANCE_RE = re.compile(r"\.governance/GOV-DOC-001-inheritance\.json")
+ARCHITECTURE_METADATA_SCHEMA_RE = re.compile(
+    r"00-governance/architecture-document-metadata\.schema\.yaml"
+)
+DOCUMENT_SCOPE_REGISTRY_RE = re.compile(r"00-governance/document-scope-registry\.yaml")
+REMOTE_WORKER_INVENTORY_RE = re.compile(r"14-ai-development/remote-worker-inventory\.yaml")
 
 
 def error(message):
@@ -197,6 +263,48 @@ def is_allowed_new_path(path):
     if WORK_ITEM_MANIFEST_RE.fullmatch(path):
         return True
 
+    if CONFORMANCE_PROVIDER_REQUIREMENTS_RE.fullmatch(path):
+        return True
+
+    if CONFORMANCE_PACKAGE_FILES_RE.fullmatch(path):
+        return True
+
+    if AID_SOURCE_SNAPSHOT_RE.fullmatch(path):
+        return True
+
+    if AID_REFERENCE_MODEL_GITIGNORE_RE.fullmatch(path):
+        return True
+
+    if PROTOCOL_SCHEMA_RE.fullmatch(path):
+        return True
+
+    if CONFORMANCE_VECTOR_RE.fullmatch(path):
+        return True
+
+    if CRATE_MANIFEST_RE.fullmatch(path):
+        return True
+
+    if GOVERNANCE_EVIDENCE_RE.fullmatch(path):
+        return True
+
+    if CRATE_VERIFICATION_RE.fullmatch(path):
+        return True
+
+    if BASELINE_FILE_RE.fullmatch(path):
+        return True
+
+    if GOV_DOC_001_INHERITANCE_RE.fullmatch(path):
+        return True
+
+    if ARCHITECTURE_METADATA_SCHEMA_RE.fullmatch(path):
+        return True
+
+    if DOCUMENT_SCOPE_REGISTRY_RE.fullmatch(path):
+        return True
+
+    if REMOTE_WORKER_INVENTORY_RE.fullmatch(path):
+        return True
+
     return False
 
 
@@ -257,6 +365,97 @@ def check_new_paths(root, base_sha, head_sha):
     return 0
 
 
+WORK_ITEMS_DIR = "14-ai-development/work-items"
+WORK_ITEMS_INDEX = "14-ai-development/work-items/INDEX.md"
+LOCAL_LINK_RE = re.compile(r"\]\(([^)#?\s]+)")
+
+def work_item_directories(head_paths):
+    """Names of the directories directly under work-items/, from the tree."""
+    names = set()
+    for path in head_paths:
+        if not path.startswith(WORK_ITEMS_DIR + "/"):
+            continue
+        name, sep, _ = path[len(WORK_ITEMS_DIR) + 1:].partition("/")
+        if sep and name:
+            names.add(name)
+    return names
+
+def index_entry_directories(text):
+    """First path segment of every repository-relative link in the index."""
+    names = set()
+    for target in LOCAL_LINK_RE.findall(text):
+        if target.startswith(("http://", "https://", "mailto:")):
+            continue
+        name, sep, _ = target.partition("/")
+        if sep and name not in {".", ".."}:
+            names.add(name)
+    return names
+
+def check_index_membership(root, commit, head_paths):
+    """Require one index entry per work-item directory, and the converse.
+
+    #858 is the standing evidence that a hand-kept list drifts: the directory
+    is the fact and the index is the claim about it. Both directions are
+    checked, so a deleted row and a deleted directory each fail. The set of
+    directories is read from the committed tree, like the denylist above, so a
+    working-copy edit cannot launder a missing entry.
+
+    What this deliberately does NOT verify: membership only. It does not check
+    that a row's Status/Review/Acceptance text agrees with the item's own
+    manifest. That is a different relation and it is not cheap here: measured
+    on main at b40463cd, a naive `status:`-prefixes-cell comparison fails on
+    24 of 46 rows. Cells carry dated activity assertions (`PR OPEN`,
+    `MERGED 2026-11-19T18:11:20Z`) while manifests carry lifecycle states
+    (`VERIFIED`, `REMEDIATION_IN_PROGRESS`), and ten indexed items have no
+    `manifest.yaml` at all -- a fix item's `authorization-manifest.yaml` is a
+    different document. A gate that red on half the registry the day it landed
+    would be switched off, so this one does not pretend to cover it.
+    """
+    directories = work_item_directories(head_paths)
+    if not directories:
+        return []
+
+    if WORK_ITEMS_INDEX not in head_paths:
+        # Deliberate ceiling: membership is a relation between the tree and the
+        # index, so with no index there is no relation here to falsify. Taking
+        # the index away is a governance act of its own (it is a Canonical
+        # document) and is not a membership defect; this check does not pretend
+        # to catch it.
+        return []
+
+    try:
+        text = run_git(
+            ["-C", root, "show", f"{commit}:{WORK_ITEMS_INDEX}"]
+        ).decode("utf-8", errors="strict")
+    except UnicodeDecodeError as exc:
+        raise RuntimeError(
+            f"'{WORK_ITEMS_INDEX}' is not valid UTF-8"
+        ) from exc
+    except RuntimeError as exc:
+        raise RuntimeError(f"cannot read '{WORK_ITEMS_INDEX}': {exc}") from exc
+
+    entries = index_entry_directories(text)
+
+    violations = [
+        f"index membership violation: directory present, no index entry: "
+        f"{WORK_ITEMS_DIR}/{name}"
+        for name in sorted(directories - entries)
+    ]
+    violations += [
+        f"index membership violation: index entry present, no directory: "
+        f"{WORK_ITEMS_DIR}/{name}"
+        for name in sorted(entries - directories)
+    ]
+
+    print(
+        "Work-item index membership "
+        f"version={CHECK_VERSION} "
+        f"directories={len(directories)} "
+        f"linked={len(entries)}"
+    )
+
+    return violations
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--base", help="full base commit SHA")
@@ -290,6 +489,12 @@ def main():
                     "repository hygiene violation: "
                     f"prohibited committed file '{path}'"
                 )
+            return 1
+
+        membership = check_index_membership(root, head_for_denylist, head_paths)
+        if membership:
+            for violation in membership:
+                error(violation)
             return 1
 
         if args.base and args.head:
