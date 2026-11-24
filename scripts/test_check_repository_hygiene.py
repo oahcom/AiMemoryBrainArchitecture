@@ -398,6 +398,110 @@ class RepositoryHygieneTests(unittest.TestCase):
 
         self.assert_admission_passes(base, head)
 
+    # D7: the specifically approved provider-outcome conformance pin is
+    # admitted. This does not widen the root-only requirements rule.
+    def test_provider_outcome_requirements_file_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "08-bmcp-protocol/tests/conformance/provider_outcome/requirements.txt":
+                "jsonschema>=4.23,<5\n",
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # D17: both exact conformance harness package files are admitted.
+    # This is deliberately not a general nested package.json rule.
+    def test_conformance_package_files_are_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "08-bmcp-protocol/tests/conformance/package.json":
+                '{"private": true}\n',
+            "08-bmcp-protocol/tests/conformance/package-lock.json":
+                '{"lockfileVersion": 3}\n',
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # D19: an immutable source snapshot directly inside an AID work item
+    # is admitted. Nested snapshots are not covered by this rule.
+    def test_aid_source_snapshot_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/work-items/AID-2026-003/"
+            "t2-snapshot-fix-prompt.source.txt":
+                "source snapshot\n",
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # D20: the reference-model .gitignore directly under an AID work item
+    # is admitted. Other nested .gitignore paths remain outside the rule.
+    def test_aid_reference_model_gitignore_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/work-items/AID-2026-001/"
+            "reference-model/.gitignore":
+                "__pycache__/\n*.pyc\n",
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # D7: requirements.txt in a sibling conformance suite is not the
+    # specifically approved provider_outcome path.
+    def test_recovery_cutoff_requirements_file_is_rejected(self):
+        base = self.seed_base()
+        path = (
+            "08-bmcp-protocol/tests/conformance/"
+            "recovery_cutoff/requirements.txt"
+        )
+        head = self.commit({
+            path: "example==1.0\n",
+        })
+
+        self.assert_admission_fails(base, head, path)
+
+    # D17: package.json under a child suite is not the conformance
+    # directory's own package manifest.
+    def test_nested_conformance_package_file_is_rejected(self):
+        base = self.seed_base()
+        path = (
+            "08-bmcp-protocol/tests/conformance/"
+            "provider_outcome/package.json"
+        )
+        head = self.commit({
+            path: '{"private": true}\n',
+        })
+
+        self.assert_admission_fails(base, head, path)
+
+    # D19: the source snapshot rule admits one filename directly under the
+    # AID directory, not a snapshot nested one additional directory deep.
+    def test_nested_aid_source_snapshot_is_rejected(self):
+        base = self.seed_base()
+        path = (
+            "14-ai-development/work-items/AID-2026-003/"
+            "nested/x.source.txt"
+        )
+        head = self.commit({
+            path: "source snapshot\n",
+        })
+
+        self.assert_admission_fails(base, head, path)
+
+    # D20: only reference-model/.gitignore at the exact approved depth is
+    # admitted; a child directory's .gitignore is not.
+    def test_nested_reference_model_gitignore_is_rejected(self):
+        base = self.seed_base()
+        path = (
+            "14-ai-development/work-items/AID-2026-001/"
+            "reference-model/sub/.gitignore"
+        )
+        head = self.commit({
+            path: "*.pyc\n",
+        })
+
+        self.assert_admission_fails(base, head, path)
+
     # M21: the same directory, a different YAML filename, is not the registry
     # file. A prefix rule would admit this; the anchored shape does not.
     def test_other_yaml_in_work_item_directory_is_rejected(self):
