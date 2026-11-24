@@ -83,7 +83,7 @@ that existed.
 > **Historical.** This subsection records why `gates.yml` used to be
 > `push`-only. The billing block was lifted on 2026-11-22 and the self-hosted
 > runner was retired by #839 on 2026-11-23; the workflow now carries a
-> `pull_request` trigger (§7.7). Nothing below is current behaviour.
+> `pull_request` trigger (§1). Nothing below is current behaviour.
 
 Two controls, both in force at the time, forced the trigger set:
 
@@ -343,7 +343,10 @@ regression or a stale baseline; the offending items are printed as
   runner; a local Windows host without `cc1` cannot run it. The failure mode is a
   `cc1` error, not a code defect, and the job reports it verbatim rather than
   masking it.
-* **Disk is a real constraint, and its floor is measured, not guessed.** Measured
+* **Disk was a real constraint on the self-hosted runner, and its floor was
+  measured, not guessed.** #839 removed both the runner and the `clippy` disk
+  preflight, so the numbers below are the record of why that guard existed, not a
+  description of the current job. Measured
   at `run 44992270090`: 39G total, 32G used, **5.6G free**, 3.6G RAM, 4 CPUs. The
   runner operator measured a comparable host: `cargo test --workspace
   --all-targets` produces a **1009 MB** `target/` over 45 crates, and
@@ -351,13 +354,14 @@ regression or a stale baseline; the offending items are printed as
   compilation with a different driver and no test binaries linked, so roughly
   **1.0–1.3 GB** including the registry.
 
-  The `clippy` job therefore has a **disk preflight** that refuses below
-  `GATES_MIN_FREE_GB` (default **3**) and warns below 6. The floor was 4 when the
+  The `clippy` job therefore carried a **disk preflight** that refused below
+  `GATES_MIN_FREE_GB` (default **3**) and warned below 6. The floor was 4 when the
   job also ran `cargo test` and shared one `CARGO_TARGET_DIR` with clippy (an
   estimated 1.7–2.0 GB); it dropped with the test step, because a floor that no
   longer matches the job is a number that lies. Lowering a floor to make a run go
   green is forbidden; lowering it because the job genuinely got smaller is just
-  bookkeeping.
+  bookkeeping. None of this is current: the hosted `clippy` job has no preflight
+  step.
 
   **Watch the trend, not the value.** Two diagnostic runs that compile nothing
   reported ~6.8G and then ~5.6G free: about 1.2 GB accumulated with no build in
@@ -519,18 +523,22 @@ externally managed, i.e. exactly the situation where "just `pip install`" fails.
 And the conformance suite was run *through that venv*, not through whatever
 happened to be installed, so the 585-test result is the result the job would get.
 
-The `clippy` rows are from the earlier, larger job (fmt + clippy + test). The fmt
-and test steps were removed afterwards (§2.3), so only the disk preflight,
-toolchain probe and clippy rows still describe a step that exists. The measured
+The `clippy` rows are from the earlier, larger job (disk preflight + fmt + clippy +
+test). The fmt and test steps were removed afterwards (§2.3), and #839 removed the
+disk preflight with the self-hosted runner, so only the toolchain probe and clippy
+rows still describe a step that exists. The measured
 result of the clippy step is unchanged — it is the same command against the same
 tree.
 
-### 7.5 The disk preflight refuses, on purpose, at a measured threshold
+### 7.5 The disk preflight refused, on purpose, at a measured threshold
 
-The preflight was exercised against simulated filesystems at both floors it has
-carried. The floor is 3G now; the warn threshold is 6G:
+> **Historical.** #839 removed this preflight; the hosted `clippy` job has no
+> such step. The table records how the guard behaved, not current behaviour.
 
-| Free space | Floor 3, warn 6 (current) |
+The preflight was exercised against simulated filesystems at both floors it had
+carried. At the end its floor was 3G and its warn threshold 6G:
+
+| Free space | Floor 3, warn 6 (final) |
 |---|---|
 | 2G | exit 1 — `::error::only 2G free (2597152 KiB), below the 3G floor.` |
 | 3G | exit 0 — `::warning::only 3G free; shrinking between runs that build nothing.` |
