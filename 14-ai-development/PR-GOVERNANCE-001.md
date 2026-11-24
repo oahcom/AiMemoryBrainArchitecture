@@ -251,7 +251,7 @@ If the current GitHub plan/visibility does not support required controls for thi
 
 如果当前 GitHub 套餐/可见性不支持本仓库所需的控制，必须记录为 BLOCKED，并升级给仓库管理员选择真正可强制执行的套餐/配置。PR 模板、Workflow 注释、Label、评论或 AI 自审均不得冒充硬合并门禁。未经明确安全/隐私决策，不得通过公开仓库来规避限制。
 
-**Measured platform state, `2026-11-24`, from `GET /repos/oahcom/AiMemoryBrainArchitecture` and `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection` (HTTP 200).** This is a dated measurement, not a standing assertion; re-read it before relying on it. The repository reports `private: false`, `visibility: public`, so the "private repository" premise above no longer describes this repository and the plan/visibility limitation is not available as a ground for BLOCKED.
+**Measured platform state, `2026-11-24`, from `GET /repos/oahcom/AiMemoryBrainArchitecture` and `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection` (HTTP 200).** This is a dated measurement, not a standing assertion; re-read it before relying on it. The repository reports `private: false`, `visibility: public`, so the plan/visibility limitation above is moot here and is not available as a ground for BLOCKED.
 
 - **Status checks — enforced.** 12 required contexts, `strict: true`, `enforce_admins: {enabled: true}`, `allow_force_pushes: {enabled: false}`, `allow_deletions: {enabled: false}`. A required check that fails or is absent on the exact Head cannot merge through the normal path. The twelve names are declared below so that each must still be produced by a workflow in this tree:
 
@@ -274,7 +274,7 @@ Rust doctests (hard gate)
 - **Pull-request reviews — not enforced.** `required_pull_request_reviews` is absent from the protection payload (the key is not present, not `null`). This is not an unset flag waiting to be flipped: the repository has one write identity, so `author == merger == approver` at the account layer, and requiring an approving review would deadlock every PR. `required_conversation_resolution` is also `{enabled: false}`. No PR body, workflow comment, label or AI self-review may be read as a review gate this repository does not have; §6.1 remains a process requirement only.
 - **The deliberately-failing-head experiment — not run, so that half is unproven.** The 12-context payload proves the configuration, not the behaviour under a failing Head. Until that experiment is executed and recorded, "a deliberately failing required check cannot merge" MUST NOT be recorded as satisfied.
 
-**`2026-11-24` 实测平台状态**，取自 `GET /repos/oahcom/AiMemoryBrainArchitecture` 与 `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection`（HTTP 200）。这是带日期的实测，不是常驻断言；依赖前须重新读取。仓库报告 `private: false`、`visibility: public`，因此上文的「私有仓库」前提已不再描述本仓库，套餐/可见性限制不可再作为 BLOCKED 的依据。
+**`2026-11-24` 实测平台状态**，取自 `GET /repos/oahcom/AiMemoryBrainArchitecture` 与 `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection`（HTTP 200）。这是带日期的实测，不是常驻断言；依赖前须重新读取。仓库报告 `private: false`、`visibility: public`，因此上文的套餐/可见性限制在本仓库不成立，不可作为 BLOCKED 的依据。
 
 - **状态检查——已强制。** 12 条必需上下文、`strict: true`、`enforce_admins: {enabled: true}`、`allow_force_pushes: {enabled: false}`、`allow_deletions: {enabled: false}`。在准确 Head 上失败或缺失的必需检查无法经正常路径合并。
 - **Pull Request 审查——未强制。** 保护载荷中不存在 `required_pull_request_reviews`（键缺失，不是 `null`）。这不是一个等待开启的开关：本仓库只有一个写入身份，即账号层面的 `作者 == 合并者 == 批准者`，强制批准审查会使每个 PR 死锁。`required_conversation_resolution` 同为 `{enabled: false}`。任何 PR 正文、Workflow 注释、Label 或 AI 自审都不得被读作本仓库并不存在的审查门禁；§6.1 仅为流程要求。
