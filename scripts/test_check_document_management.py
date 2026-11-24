@@ -910,6 +910,98 @@ def run_dm10_scope() -> None:
     test_incremental_zero_out_of_scope_still_prints_the_count()
 
 
+def run_shallow_history() -> None:
+    """T70: an unanswerable question from a shallow clone is not a violation."""
+    print("shallow history (exit 2, never a fabricated DM-10)")
+    import check_document_management as gate
+
+    real_git = gate.git
+
+    def pretending_shallow(root_arg, *args, **kwargs):
+        if args[:2] == ("rev-parse", "--is-shallow-repository"):
+            return "true\n"
+        return real_git(root_arg, *args, **kwargs)
+
+    def pretending_garbage(root_arg, *args, **kwargs):
+        if args[:2] == ("rev-parse", "--is-shallow-repository"):
+            return "perhaps\n"
+        return real_git(root_arg, *args, **kwargs)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        target = root / "00-governance" / "a.md"
+        body = "body: approved text"
+        template = doc(APPROVED.replace('"deadbeef"', '"SHA"'))
+        target.write_text(template.replace("# Title", body), encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "approved")
+        sha = _git(root, "rev-parse", "HEAD")
+        target.write_text(
+            template.replace('"SHA"', f'"{sha}"').replace("# Title", body),
+            encoding="utf-8",
+        )
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "record approval")
+
+        import contextlib
+        import io
+
+        def capture(*extra: str) -> tuple[int, str]:
+            out, err = io.StringIO(), io.StringIO()
+            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+                code = run_gate(root, *extra)
+            return code, out.getvalue() + err.getvalue()
+
+        try:
+            # Benign shallow: history is truncated but every pin resolves, so
+            # the gate's verdict is exactly its full-clone verdict. Refusing
+            # here would be a capability regression, not a safety win.
+            gate.git = pretending_shallow
+            code, output = capture()
+            record("T70 benign shallow clone still produces its normal verdict",
+                   code == 0, f"  gate returned {code}: {output.strip()[:200]}")
+
+            code, output = capture("--require-changed", "no-such-ref")
+            record("T70 shallow clone does not call an upstream ref a bad ref",
+                   code == 2 and "does not resolve to a commit" not in output
+                   and "shallow" in output,
+                   f"  gate returned {code}: {output.strip()[:200]}")
+
+            # The defect: a pin that cannot resolve because history is cut off.
+            fabricated = (
+                target.read_text(encoding="utf-8")
+                .replace(f'"{sha}"', '"0000000000000000000000000000000000000000"')
+            )
+            target.write_text(fabricated, encoding="utf-8")
+
+            code, output = capture()
+            record("T70 unresolvable pin on a shallow clone exits 2 (INCOMPLETE)",
+                   code == 2, f"  gate returned {code}")
+            record("T70 shallow clone reports no fabricated DM-10 violation",
+                   "is not a commit in this repository" not in output,
+                   f"  output: {output.strip()[:200]}")
+            record("T70 shallow clone names the condition and the remedy",
+                   "shallow" in output and "git fetch --unshallow" in output,
+                   f"  output: {output.strip()[:200]}")
+
+            gate.git = pretending_garbage
+            code, output = capture()
+            record("T70 undeterminable history fails closed at 2", code == 2,
+                   f"  gate returned {code}")
+        finally:
+            gate.git = real_git
+
+        # Control: complete history still rejects the same fabricated pin.
+        # The guard must not have weakened DM-10.
+        code, output = capture()
+        record("T70 full history still rejects a fabricated approved_version",
+               code == 1 and "is not a commit in this repository" in output,
+               f"  gate returned {code}: {output.strip()[:200]}")
+
+
 def run_changed_paths() -> None:
     """T01: a filename with a space must not dodge --require-changed."""
     print("changed-path parsing")
@@ -3209,6 +3301,7 @@ def main() -> int:
     run_repository_rules()
     run_approval_binding()
     run_dm10_scope()
+    run_shallow_history()
     run_changed_paths()
     run_path_safety()
     run_body_hash_equivalence()
