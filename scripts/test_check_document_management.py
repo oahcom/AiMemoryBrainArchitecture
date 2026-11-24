@@ -790,10 +790,7 @@ DM10_STALE = (
     .replace('"deadbeef"', '"' + "0" * 64 + '"')
     .replace("modification_status: Unchanged", "modification_status: Pending-Reapproval")
 )
-DM10_COUNT_ONE = (
-    "DM-10 out-of-scope stale bindings: 1 "
-    "(documents untouched by this increment; not counted as failures)"
-)
+DM10_COUNT_ONE = "DM-10 out-of-scope stale bindings: 1"
 DM10_ERROR = "DM-10 content changed after approved_version"
 
 def _dm10_repo(tmp: str) -> tuple[Path, str]:
@@ -841,7 +838,7 @@ def test_incremental_out_of_scope_stale_pin_is_counted_not_failed() -> None:
         _git(root, "commit", "-q", "-m", "touch nothing governed")
         code, out, err = _run_capture(root, "--require-changed", base)
         output = out + err
-        counted = DM10_COUNT_ONE in err.splitlines()
+        counted = DM10_COUNT_ONE in output.splitlines()
         record(
             "T82 incremental run counts an out-of-scope stale pin instead of failing it",
             code == 0 and counted and DM10_ERROR not in output,
@@ -873,12 +870,35 @@ def test_incremental_one_in_scope_one_out_of_scope() -> None:
         output = out + err
         in_scope = f"00-governance/a.md: {DM10_ERROR}" in output
         out_of_scope = f"00-governance/b.md: {DM10_ERROR}" in output
-        counted = DM10_COUNT_ONE in err.splitlines()
+        counted = DM10_COUNT_ONE in output.splitlines()
         record(
             "T84 one in-scope and one out-of-scope stale pin are classified per document",
             code == 1 and in_scope and not out_of_scope and counted,
             f"  gate returned {code}, expected 1; a.md reported: {in_scope}; "
             f"b.md reported: {out_of_scope}; count line exactly 1: {counted}",
+        )
+
+def test_incremental_zero_out_of_scope_still_prints_the_count() -> None:
+    """A missing line cannot be told apart from a run that never looked."""
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        (root / "00-governance" / "b.md").write_text(doc(BASE), encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "seed, no approvals")
+        base = _git(root, "rev-parse", "HEAD")
+        (root / "notes.txt").write_text("unrelated change\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "touch nothing governed")
+        code, out, err = _run_capture(root, "--require-changed", base)
+        zero = "DM-10 out-of-scope stale bindings: 0"
+        record(
+            "T85 incremental run with no out-of-scope stale pin prints the zero count",
+            code == 0 and zero in (out + err).splitlines(),
+            f"  gate returned {code}, expected 0; zero count line present: "
+            f"{zero in (out + err).splitlines()}",
         )
 
 def run_dm10_scope() -> None:
@@ -887,6 +907,99 @@ def run_dm10_scope() -> None:
     test_incremental_out_of_scope_stale_pin_is_counted_not_failed()
     test_whole_tree_run_still_reports_every_stale_pin()
     test_incremental_one_in_scope_one_out_of_scope()
+    test_incremental_zero_out_of_scope_still_prints_the_count()
+
+
+def run_shallow_history() -> None:
+    """T70: an unanswerable question from a shallow clone is not a violation."""
+    print("shallow history (exit 2, never a fabricated DM-10)")
+    import check_document_management as gate
+
+    real_git = gate.git
+
+    def pretending_shallow(root_arg, *args, **kwargs):
+        if args[:2] == ("rev-parse", "--is-shallow-repository"):
+            return "true\n"
+        return real_git(root_arg, *args, **kwargs)
+
+    def pretending_garbage(root_arg, *args, **kwargs):
+        if args[:2] == ("rev-parse", "--is-shallow-repository"):
+            return "perhaps\n"
+        return real_git(root_arg, *args, **kwargs)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        target = root / "00-governance" / "a.md"
+        body = "body: approved text"
+        template = doc(APPROVED.replace('"deadbeef"', '"SHA"'))
+        target.write_text(template.replace("# Title", body), encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "approved")
+        sha = _git(root, "rev-parse", "HEAD")
+        target.write_text(
+            template.replace('"SHA"', f'"{sha}"').replace("# Title", body),
+            encoding="utf-8",
+        )
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "record approval")
+
+        import contextlib
+        import io
+
+        def capture(*extra: str) -> tuple[int, str]:
+            out, err = io.StringIO(), io.StringIO()
+            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+                code = run_gate(root, *extra)
+            return code, out.getvalue() + err.getvalue()
+
+        try:
+            # Benign shallow: history is truncated but every pin resolves, so
+            # the gate's verdict is exactly its full-clone verdict. Refusing
+            # here would be a capability regression, not a safety win.
+            gate.git = pretending_shallow
+            code, output = capture()
+            record("T70 benign shallow clone still produces its normal verdict",
+                   code == 0, f"  gate returned {code}: {output.strip()[:200]}")
+
+            code, output = capture("--require-changed", "no-such-ref")
+            record("T70 shallow clone does not call an upstream ref a bad ref",
+                   code == 2 and "does not resolve to a commit" not in output
+                   and "shallow" in output,
+                   f"  gate returned {code}: {output.strip()[:200]}")
+
+            # The defect: a pin that cannot resolve because history is cut off.
+            fabricated = (
+                target.read_text(encoding="utf-8")
+                .replace(f'"{sha}"', '"0000000000000000000000000000000000000000"')
+            )
+            target.write_text(fabricated, encoding="utf-8")
+
+            code, output = capture()
+            record("T70 unresolvable pin on a shallow clone exits 2 (INCOMPLETE)",
+                   code == 2, f"  gate returned {code}")
+            record("T70 shallow clone reports no fabricated DM-10 violation",
+                   "is not a commit in this repository" not in output,
+                   f"  output: {output.strip()[:200]}")
+            record("T70 shallow clone names the condition and the remedy",
+                   "shallow" in output and "git fetch --unshallow" in output,
+                   f"  output: {output.strip()[:200]}")
+
+            gate.git = pretending_garbage
+            code, output = capture()
+            record("T70 undeterminable history fails closed at 2", code == 2,
+                   f"  gate returned {code}")
+        finally:
+            gate.git = real_git
+
+        # Control: complete history still rejects the same fabricated pin.
+        # The guard must not have weakened DM-10.
+        code, output = capture()
+        record("T70 full history still rejects a fabricated approved_version",
+               code == 1 and "is not a commit in this repository" in output,
+               f"  gate returned {code}: {output.strip()[:200]}")
 
 
 def run_changed_paths() -> None:
@@ -3188,6 +3301,7 @@ def main() -> int:
     run_repository_rules()
     run_approval_binding()
     run_dm10_scope()
+    run_shallow_history()
     run_changed_paths()
     run_path_safety()
     run_body_hash_equivalence()

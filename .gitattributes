@@ -33,41 +33,23 @@
 # flags it.
 14-ai-development/work-items/AID-2026-049/prompt-v1.md -text
 
-# --- Accepted CRLF, with a removal condition ---------------------------------
+# --- Remaining CRLF exemption, with a removal condition ---------------------
 #
-# The 14 Markdown paths listed below were originally excluded from text
-# normalisation and the line-ending gate. On the current main, 12 still
-# contain CRLF. The source and zh-CN mirror of
-# GOV-NC-2026-11-21-SUFFIX-SCOPE-017 already have real `document_metadata`
-# blocks and LF endings; their `-text` entries are stale and can be removed.
+# One path is left. The 14 paths this block used to list were excluded from
+# text normalisation and the line-ending gate; #836 classified them, gave them
+# LF, and removed their entries (main had already removed the two stale
+# SUFFIX-SCOPE entries). The frozen prompt pin above is a separate reason.
 #
-# These exclusions are not a declaration that CRLF is acceptable. For a
-# governed document, DM-01 rejects a changed document without a
-# `document_metadata` block. A line-ending-only renormalisation is still a
-# change, so classification must be supplied before or in the same PR.
+# This is not a declaration that CRLF is acceptable. It records that one file
+# is blocked by a rule other than DM-01:
 #
-# Metadata alone is not sufficient for every document. GOV-DOC-001 also
-# enforces applicable bilingual-counterpart requirements. Before removing
-# an entry, the PR must satisfy the document's counterpart obligation:
-# required counterparts must be included meaningfully in the same change,
-# or the applicable approved exception or embedded-source policy must be
-# in place. A document with missing required counterparts cannot be
-# unblocked merely by adding metadata.
+#   `08-bmcp-protocol/owner-snapshot-...md` has no `docs/en/` or `docs/zh-CN/`
+#   mirror and no side-by-side pair, so any change makes
+#   `scripts/check_bilingual_docs.py` demand counterparts that do not exist
+#   (measured: FAIL, "requires all counterparts changed in this PR").
 #
-# Removal condition: delete a path's `-text` entry only when both its
-# document-management classification requirement and its applicable
-# bilingual-counterpart requirement are satisfied. The line-ending gate
-# will then cover the path. Tracked in #836.
+# Removal condition: delete the line once the file has a registered
+# counterpart (or an approved bilingual exception) and a `document_metadata`
+# block. Tracked in #836.
 
 08-bmcp-protocol/owner-snapshot-namespace-and-fence-currentness-contract.md -text
-14-ai-development/governance-register/GOV-NC-2026-11-21-DEV-PR-GATE-010.md -text
-14-ai-development/governance-register/GOV-REV-2026-11-21-GATE-MUTANTS-016.md -text
-14-ai-development/governance-register/SPEC-2026-11-21-PAIRING-001.md -text
-14-ai-development/work-items/D-OWNER-DECISION-PROTECTED-VISIBILITY-001.md -text
-14-ai-development/work-items/D-OWNER-DECISION-PROTECTED-VISIBILITY-001.zh-CN.md -text
-docs/en/14-ai-development/governance-register/GOV-REV-2026-11-21-GATE-MUTANTS-016.md -text
-docs/en/14-ai-development/governance-register/SPEC-2026-11-21-PAIRING-001.md -text
-docs/governance/ARCHITECTURE_AUDIT_REPORT.md -text
-docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-21-DEV-PR-GATE-010.md -text
-docs/zh-CN/14-ai-development/governance-register/GOV-REV-2026-11-21-GATE-MUTANTS-016.md -text
-docs/zh-CN/14-ai-development/governance-register/SPEC-2026-11-21-PAIRING-001.md -text

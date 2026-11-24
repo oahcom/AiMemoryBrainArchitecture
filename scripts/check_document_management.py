@@ -1185,18 +1185,55 @@ def git(root: Path, *args: str, nul: bool = False, raw: bool = False) -> str | N
     return out.stdout if (nul or raw) else out.stdout.strip()
 
 
+SHALLOW_HISTORY_ERROR = (
+    "cannot verify approval binding on a shallow clone; "
+    "run git fetch --unshallow"
+)
+
+
+def _git_history_is_shallow(root: Path) -> bool:
+    """Whether this clone holds truncated history. Fails closed if unknowable.
+
+    Shallow history is not itself a defect: a clone deep enough to contain
+    every approval pin answers DM-10 correctly. It only matters once a pin
+    fails to resolve, because then "absent here" and "never existed" become
+    indistinguishable. This is probed once at startup; the per-pin decision
+    in check_approval_binding needs no further git call.
+    """
+    if git(root, "rev-parse", "--git-dir") is None:
+        # No work tree at all: DM-10 already reports binding NOT VERIFIED.
+        return False
+    answer = git(root, "rev-parse", "--is-shallow-repository", raw=True)
+    shallow = (answer or "").strip().lower()
+    if shallow == "true":
+        return True
+    if shallow == "false":
+        return False
+    raise RuntimeError(
+        "Unable to determine whether the Git repository has complete history: "
+        f"unexpected rev-parse output {answer!r}"
+    )
+
+
 def check_approval_binding(root: Path, rel: str, text: str, meta: dict,
-                           is_git: bool) -> tuple[list[str], list[str]]:
-    """DM-10: an Approved decision binds to a version, and must go stale."""
+                           is_git: bool,
+                           shallow: bool = False) -> tuple[list[str], list[str], list[str]]:
+    """DM-10: an Approved decision binds to a version, and must go stale.
+
+    `unanswerable` is a third outcome beside errors and notes: a pin that does
+    not resolve on truncated history. It is not a violation and not a pass, so
+    the caller turns it into exit 2 (INCOMPLETE), never exit 1.
+    """
     errors: list[str] = []
     notes: list[str] = []
+    unanswerable: list[str] = []
     approval = dig(meta, "lifecycle", "approval") or {}
     if approval.get("decision_status") != "Approved":
-        return errors, notes
+        return errors, notes, unanswerable
     scheme = dig(approval, "approved_version", "scheme")
     value = dig(approval, "approved_version", "value")
     if not scheme or not value:
-        return errors, notes  # DM-03 already reported it.
+        return errors, notes, unanswerable  # DM-03 already reported it.
     current = body_hash(text)
 
     if scheme == "content-hash":
@@ -1208,7 +1245,7 @@ def check_approval_binding(root: Path, rel: str, text: str, meta: dict,
                 f"DM-10 {rel}: approval binding NOT VERIFIED (no git work tree); "
                 "run the gate inside the repository"
             )
-            return errors, notes
+            return errors, notes, unanswerable
         # Pin to an immutable commit id. A branch or tag name can move, which
         # would silently re-point the approval at different content.
         if not COMMIT_RE.match(str(value).strip()):
@@ -1216,20 +1253,26 @@ def check_approval_binding(root: Path, rel: str, text: str, meta: dict,
                 f"DM-10 approved_version {value!r} must be a full 40-hex commit id, "
                 "not a branch, tag or abbreviated reference"
             )
-            return errors, notes
+            return errors, notes, unanswerable
         commit = git(root, "rev-parse", "--verify", "--quiet", f"{value}^{{commit}}")
         if not commit:
-            errors.append(
-                f"DM-10 approved_version {value!r} is not a commit in this repository"
-            )
-            return errors, notes
+            # "Absent from this clone" and "never existed" are indistinguishable
+            # on truncated history. Only the second is a policy violation, so
+            # the first must never wear the second's message.
+            if shallow:
+                unanswerable.append(f"DM-10 {rel}: {SHALLOW_HISTORY_ERROR}")
+            else:
+                errors.append(
+                    f"DM-10 approved_version {value!r} is not a commit in this repository"
+                )
+            return errors, notes, unanswerable
         historical = git(root, "show", f"{commit}:{rel}", raw=True)
         if historical is None:
             errors.append(
                 f"DM-10 {rel} did not exist at approved_version {value[:12]}; "
                 "the approval cannot be bound to that version"
             )
-            return errors, notes
+            return errors, notes, unanswerable
         stale = body_hash(historical) != current
 
     if not stale:
@@ -1238,7 +1281,7 @@ def check_approval_binding(root: Path, rel: str, text: str, meta: dict,
                 f"DM-10 {rel}: text is unchanged since approved_version, but "
                 "approval_applicability says otherwise (conservative, allowed)"
             )
-        return errors, notes
+        return errors, notes, unanswerable
 
     if dig(meta, "lifecycle", "modification_status") != "Pending-Reapproval":        errors.append(
             "DM-10 content changed after approved_version: "
@@ -1250,7 +1293,7 @@ def check_approval_binding(root: Path, rel: str, text: str, meta: dict,
             "MUST be Not-Applicable-To-Current-Version (a stale approval MUST NOT "
             "be presented as current)"
         )
-    return errors, notes
+    return errors, notes, unanswerable
 
 
 def check_scope_and_relations(root: Path, docs: dict[str, dict]) -> list[str]:
@@ -2117,12 +2160,32 @@ def main() -> int:
     incremental = args.require_changed is not None
     if incremental and args.strict:
         parser.error("--require-changed and --strict are different verdicts; pick one")
+
+    # Ask once whether history is truncated. A shallow clone is refused only
+    # where it actually makes the question unanswerable (an unresolvable pin,
+    # an unresolvable --require-changed REF). Refusing every shallow checkout
+    # would turn currently-correct verdicts at 500+ commits into a refusal.
+    try:
+        shallow = _git_history_is_shallow(root)
+    except (OSError, subprocess.CalledProcessError, RuntimeError) as exc:
+        print(
+            f"::error::Unable to determine Git history completeness: {exc}",
+            file=sys.stderr,
+        )
+        return 2
+
     targets, walk_problems = collect_governed(root)
     try:
         all_changed, required = (
             changed_paths(root, args.require_changed) if incremental else (set(), set())
         )
     except ValueError as exc:
+        if shallow:
+            # The REF may exist upstream and simply lie below this clone's
+            # horizon; calling it "does not resolve to a commit" would be a
+            # fabrication, so this is INCOMPLETE (2), not a selection error (1).
+            print(f"::error::{SHALLOW_HISTORY_ERROR}", file=sys.stderr)
+            return 2
         print(f"ERROR: incremental changed-path selection failed: {exc}", file=sys.stderr)
         return 1
     # The emptiness test uses every diff status, including deletions. A PR that
@@ -2148,6 +2211,7 @@ def main() -> int:
     # no path can produce a shorter list without a diagnostic.
     errors: list[str] = list(walk_problems)
     notes: list[str] = []
+    unanswerable: list[str] = []
     docs: dict[str, dict] = {}
     unclassified: list[str] = []
     out_of_scope_dm10: list[str] = []
@@ -2179,7 +2243,9 @@ def main() -> int:
             continue
         bucket[0] += 1
         docs[rel] = meta
-        bound_errors, bound_notes = check_approval_binding(root, rel, text, meta, is_git)
+        bound_errors, bound_notes, bound_unanswerable = check_approval_binding(
+            root, rel, text, meta, is_git, shallow
+        )
         # DM-10 binds an approval to the bytes of ONE document. In an incremental
         # run a stale pin on a document this increment did not touch is out of
         # scope: reporting it here charged one file's debt to every unrelated
@@ -2188,23 +2254,15 @@ def main() -> int:
         # change that did not cause it. A whole-tree run (no --require-changed)
         # still reports every DM-10 error, because there the whole tree IS the
         # subject of the verdict.
-        if incremental and rel not in required:
+        if incremental and rel not in all_changed:
             out_of_scope_dm10.extend(bound_errors)
         else:
             errors.extend(f"{rel}: {err}" for err in bound_errors)
         notes.extend(bound_notes)
+        unanswerable.extend(bound_unanswerable)
 
     errors.extend(check_scope_and_relations(root, docs))
     errors.extend(check_scope_registry(root))
-
-    # Not an error, and deliberately not silent. A number that nobody can see is
-    # the same as no number; a number that fails the run is the bug this fixes.
-    if out_of_scope_dm10:
-        print(
-            f"DM-10 out-of-scope stale bindings: {len(out_of_scope_dm10)} "
-            "(documents untouched by this increment; not counted as failures)",
-            file=sys.stderr,
-        )
 
     # DM-04 uniqueness of revocation decision ids across the repository.
     revocations: dict[str, str] = {}
@@ -2223,6 +2281,9 @@ def main() -> int:
         f"GOV-DOC-002: {total} governed documents, {len(docs)} classified, "
         f"{len(unclassified)} unclassified"
     )
+    # Printed whether or not it is zero: an absent line cannot be told apart from
+    # a build that never looked (issue #808).
+    print(f"DM-10 out-of-scope stale bindings: {len(out_of_scope_dm10)}")
     # Accounting identity: every governed file is either classified or listed
     # as backlog. Printed so "403 unclassified" is a number you can check
     # against the file system, not a claim. If this ever fails to balance, the
@@ -2258,6 +2319,19 @@ def main() -> int:
 
     if not is_git:
         print("  note: no git work tree here, approval binding NOT VERIFIED")
+
+    if unanswerable:
+        # Exit 2 even when real errors also exist: the run is incomplete, and
+        # an incomplete run must never read as a definitive FAIL either.
+        print(f"INCOMPLETE: {len(unanswerable)} approval pin(s) unverifiable",
+              file=sys.stderr)
+        for line in unanswerable:
+            print(f"  {line}", file=sys.stderr)
+        if errors:
+            print(f"FAIL: {len(errors)} error(s)", file=sys.stderr)
+            for err in errors:
+                print(f"  {err}", file=sys.stderr)
+        return 2
 
     if errors:
         print(f"FAIL: {len(errors)} error(s)", file=sys.stderr)
