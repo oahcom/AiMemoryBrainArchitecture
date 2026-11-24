@@ -117,5 +117,19 @@ implementation:
   pull_request_url: PENDING
   implementation_commit_sha: PENDING
 
-errata: []
+errata:
+  - id: AID-2026-056-ERRATUM-01
+    file: 14-ai-development/work-items/AID-2026-056/ERRATUM-01.md
+    raised_at: 2026-11-24
+    raised_by: owner-proxy session that dispatched this work order
+    measured_at: "ac0f0dfd (this work item was written at d40d4e09)"
+    status: UNAPPLIED — the implementer must read it before starting
+    summary: "Six measured corrections, all caused by 150fb45e (#910) landing between the prompt being written and the work item being merged. (A) The 81-entry split is now 77 = 66 embedded + 11 real. (B) The nine real paths became eleven: two 08-bmcp-protocol records entered the set once #910 taught the scan to see that root. (C) Section 3's three mirror-of-a-mirror paths are no longer violations; all 64 .zh-CN.md mirrors outside 14-ai-development now pair. (D) Section 4 change 3 (reuse side_by_side_partner) was not followed — the pairing was written inline — and the two implementations agree on 932 files today, which is agreement by coincidence, not by construction. (E) Section 5's first hard constraint and AC6 are now false and unsatisfiable: NORMATIVE_ROOTS went from 15 roots with 7 missing to 9 roots with 0 missing, so 'byte-identical to its pre-change value' would require reintroducing a defect. AC6 withdrawn. (F) Section 2's control file and AC4/AC5/AC9 stand unchanged."
+    corrects_in_this_file:
+      - "owner_decisions[OD-18].constraints[3]: 'The remaining 9 are the real backlog' — the remaining count is 11 at ac0f0dfd."
+      - "risk_rationale: 'shrinks its frozen baseline from 81 to 9' — the baseline is already 77 and will shrink to 11, not from 81 to 9."
+      - "base_commit_sha / created_at: the work item is 13 commits behind, two of which touch the files it names."
+    does_not_change: "The prompt's SHA-256, prompt_status FROZEN, the ruling, the floor values 100/1000, the technology-architecture-blueprint.md control, and the instruction not to touch scripts/check_bilingual_docs.py or scripts/bilingual-baseline.txt."
+    scope_decision: "AC6 is withdrawn, not deferred. Satisfying it literally is impossible without reintroducing the seven non-existent roots that #910 removed."
+
 findings: []
