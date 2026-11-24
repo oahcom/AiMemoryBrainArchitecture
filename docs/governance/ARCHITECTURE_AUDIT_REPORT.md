@@ -1,3 +1,25 @@
+---
+document_metadata:
+  domain: architecture
+  role: review-report
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: NOT_RECORDED
+      decision_date: NOT_RECORDED
+      approved_version: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "No formal approval record, approver identity or decision date exists in this repository; recorded as NOT_RECORDED rather than inferred."
+    usage_status: Active
+    modification_status: Unchanged
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Informative
+---
+
 # Architecture Documentation Audit Report
 # 架构文档审计报告
 

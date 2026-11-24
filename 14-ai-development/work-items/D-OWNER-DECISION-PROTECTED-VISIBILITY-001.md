@@ -1,3 +1,25 @@
+---
+document_metadata:
+  domain: ai-development
+  role: decision-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: NOT_RECORDED
+      decision_date: NOT_RECORDED
+      approved_version: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "No formal approval record, approver identity or decision date exists in this repository; recorded as NOT_RECORDED rather than inferred."
+    usage_status: Active
+    modification_status: Unchanged
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Informative
+---
+
 # D-OWNER-DECISION-PROTECTED-VISIBILITY-001 — Protected visibility authorization issuer
 
 **Status:** DECIDED (owner-proxy decision; development-baseline and current repository contract)  

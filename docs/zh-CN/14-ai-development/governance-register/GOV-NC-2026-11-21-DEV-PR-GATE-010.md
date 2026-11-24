@@ -1,3 +1,29 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: NOT_RECORDED
+      decision_date: NOT_RECORDED
+      approved_version: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "No formal approval record, approver identity or decision date exists in this repository; recorded as NOT_RECORDED rather than inferred."
+    usage_status: Active
+    modification_status: Unchanged
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "14-ai-development/governance-register/GOV-NC-2026-11-21-DEV-PR-GATE-010.md"
+    en: "docs/en/14-ai-development/governance-register/GOV-NC-2026-11-21-DEV-PR-GATE-010.md"
+    zh-CN: null
+---
+
 # GOV-NC-2026-11-21-DEV-PR-GATE-010 — 九个开发 PR 中四个无法通过门禁，原因相同
 
 ## 0. 摘要
