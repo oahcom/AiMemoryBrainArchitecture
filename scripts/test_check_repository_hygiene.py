@@ -9,6 +9,12 @@ import unittest
 from pathlib import Path
 
 
+EMPTY_SCHEMA_REGISTRY = (
+    'schema_registry_version: "1"\n'
+    "excluded_records:\n"
+)
+
+
 CHECKER = (
     Path(__file__).resolve().parent
     / "ci"
@@ -40,7 +46,16 @@ class RepositoryHygieneTests(unittest.TestCase):
     def tearDown(self):
         self.tempdir.cleanup()
 
-    def commit(self, files):
+    def commit(self, files, *, with_registry=True):
+        files = dict(files)
+        # The schema registry is a policy input the checker requires, so every
+        # fixture tree carries one unless a test is specifically about its
+        # absence. A test that wants a different registry passes its own value.
+        if with_registry:
+            files.setdefault(
+                "14-ai-development/work-items/manifest-schema-registry.yaml",
+                EMPTY_SCHEMA_REGISTRY,
+            )
         for name, content in files.items():
             path = self.repo / name
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -961,8 +976,9 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args()
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-24.6 "
-            "manifests=1 recognized=1 unrecognized=0 violations=0",
+            "Work-item manifest consistency version=2026-11-24.7 "
+            "manifests=1 in_scope=1 excluded_by_record_type=0 "
+            "unrecognized=0 violations=0",
             result.stdout,
         )
 
@@ -1003,8 +1019,9 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args()
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-24.6 "
-            "manifests=1 recognized=1 unrecognized=0 violations=0",
+            "Work-item manifest consistency version=2026-11-24.7 "
+            "manifests=1 in_scope=1 excluded_by_record_type=0 "
+            "unrecognized=0 violations=0",
             result.stdout,
         )
 
@@ -1030,7 +1047,8 @@ class RepositoryHygieneTests(unittest.TestCase):
             msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
         )
         self.assertIn(
-            "manifests=1 recognized=1 unrecognized=0 violations=0",
+            "manifests=1 in_scope=1 excluded_by_record_type=0 "
+            "unrecognized=0 violations=0",
             result.stdout,
         )
 
@@ -1048,8 +1066,9 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args()
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-24.6 "
-            "manifests=1 recognized=1 unrecognized=0 violations=0",
+            "Work-item manifest consistency version=2026-11-24.7 "
+            "manifests=1 in_scope=1 excluded_by_record_type=0 "
+            "unrecognized=0 violations=0",
             result.stdout,
         )
 
@@ -1077,7 +1096,8 @@ class RepositoryHygieneTests(unittest.TestCase):
             msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
         )
         self.assertIn(
-            "manifests=1 recognized=1 unrecognized=0 violations=0",
+            "manifests=1 in_scope=1 excluded_by_record_type=0 "
+            "unrecognized=0 violations=0",
             result.stdout,
         )
 
@@ -1121,9 +1141,232 @@ class RepositoryHygieneTests(unittest.TestCase):
             msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
         )
         self.assertIn(
-            "manifests=1 recognized=0 unrecognized=1 violations=0",
+            "manifests=1 in_scope=0 excluded_by_record_type=0 "
+            "unrecognized=1 violations=0",
             result.stdout,
         )
+    # S1: a record that declares a different record_type is a different kind
+    # of record living at a manifest path, not a manifest with missing fields.
+    # Exclusion needs the exact path+record_type pair, and once excluded the
+    # gate must not read its fields at all.
+    def registry_fixture(self, entries, manifests):
+        index = "".join(
+            f"| [{name}]({name}/manifest.yaml) |\n"
+            for name in sorted(manifests)
+        )
+        registry = 'schema_registry_version: "1"\nexcluded_records:\n'
+        for path, record_type in entries:
+            registry += (
+                f'  - path: "{path}"\n'
+                f'    record_type: "{record_type}"\n'
+                '    disposition: "EXCLUDED_FROM_MANIFEST_CONSISTENCY_GATE"\n'
+                '    rationale: "test fixture"\n'
+            )
+        files = {
+            "14-ai-development/work-items/INDEX.md": index,
+            "14-ai-development/work-items/manifest-schema-registry.yaml":
+                registry,
+        }
+        for name, text in manifests.items():
+            files[f"14-ai-development/work-items/{name}/manifest.yaml"] = text
+        return self.commit(files)
+
+    def test_registry_exact_pair_excludes_record(self):
+        self.registry_fixture(
+            [(
+                "14-ai-development/work-items/AID-2026-001/manifest.yaml",
+                "STAGE_0_WORK_ITEM_REGISTRATION",
+            )],
+            {"AID-2026-001":
+                'record_type: "STAGE_0_WORK_ITEM_REGISTRATION"\n'},
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn(
+            "manifests=1 in_scope=0 excluded_by_record_type=1 "
+            "unrecognized=0 violations=0",
+            result.stdout,
+        )
+        self.assertNotIn("unrecognized shape", result.stderr)
+
+    # The path alone is not a decision. When the registry names the path but
+    # the file declares a different record_type, the record stays in
+    # unrecognized: a registry that no longer matches the file must not
+    # silently keep excluding it.
+    def test_registry_path_with_wrong_record_type_does_not_exclude(self):
+        self.registry_fixture(
+            [(
+                "14-ai-development/work-items/AID-2026-001/manifest.yaml",
+                "STAGE_0_WORK_ITEM_REGISTRATION",
+            )],
+            {"AID-2026-001": 'record_type: "SOMETHING_ELSE"\n'},
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        self.assertIn(
+            "manifests=1 in_scope=0 excluded_by_record_type=0 "
+            "unrecognized=1 violations=0",
+            result.stdout,
+        )
+        self.assertIn("unrecognized shape", result.stderr)
+
+    # And the record_type alone is not a decision either: a second file with
+    # the same type at a path nobody registered does not inherit the first
+    # file's exclusion.
+    def test_registry_record_type_does_not_exclude_another_path(self):
+        self.registry_fixture(
+            [(
+                "14-ai-development/work-items/AID-2026-001/manifest.yaml",
+                "STAGE_0_WORK_ITEM_REGISTRATION",
+            )],
+            {
+                "AID-2026-001":
+                    'record_type: "STAGE_0_WORK_ITEM_REGISTRATION"\n',
+                "AID-2026-002":
+                    'record_type: "STAGE_0_WORK_ITEM_REGISTRATION"\n',
+            },
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        self.assertIn(
+            "manifests=2 in_scope=0 excluded_by_record_type=1 "
+            "unrecognized=1 violations=0",
+            result.stdout,
+        )
+        self.assertIn("AID-2026-002/manifest.yaml", result.stderr)
+
+    # The three buckets must add up. One in_scope item, one excluded, one
+    # unrecognized: if any bucket double-counts, the totals stop matching.
+    def test_registry_buckets_sum_to_the_manifest_count(self):
+        self.registry_fixture(
+            [(
+                "14-ai-development/work-items/AID-2026-002/manifest.yaml",
+                "STAGE_0_WORK_ITEM_REGISTRATION",
+            )],
+            {
+                "AID-2026-001": (
+                    "work_item_id: AID-2026-001\n"
+                    "status: DISPATCHED\n"
+                    "implementation:\n"
+                    "  status: NOT_STARTED\n"
+                    "  merge_commit_sha: NOT_MERGED\n"
+                ),
+                "AID-2026-002":
+                    'record_type: "STAGE_0_WORK_ITEM_REGISTRATION"\n',
+                "AID-2026-003": 'record_type: "UNREGISTERED_TYPE"\n',
+            },
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        self.assertIn(
+            "manifests=3 in_scope=1 excluded_by_record_type=1 "
+            "unrecognized=1 violations=0",
+            result.stdout,
+        )
+
+    # A registry naming the same path twice is a contradiction about one
+    # record, so it fails rather than picking one.
+    def test_registry_duplicate_path_fails(self):
+        self.registry_fixture(
+            [
+                (
+                    "14-ai-development/work-items/AID-2026-001/manifest.yaml",
+                    "STAGE_0_WORK_ITEM_REGISTRATION",
+                ),
+                (
+                    "14-ai-development/work-items/AID-2026-001/manifest.yaml",
+                    "STAGE_0_WORK_ITEM_REGISTRATION",
+                ),
+            ],
+            {"AID-2026-001":
+                'record_type: "STAGE_0_WORK_ITEM_REGISTRATION"\n'},
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(result.returncode, 2, msg=result.stdout)
+        self.assertIn("registered twice", result.stderr)
+
+    # The same path registered with two different types is a conflict, not a
+    # duplicate: one of the two entries is simply wrong.
+    def test_registry_conflicting_record_types_fail(self):
+        self.registry_fixture(
+            [
+                (
+                    "14-ai-development/work-items/AID-2026-001/manifest.yaml",
+                    "STAGE_0_WORK_ITEM_REGISTRATION",
+                ),
+                (
+                    "14-ai-development/work-items/AID-2026-001/manifest.yaml",
+                    "SOMETHING_ELSE",
+                ),
+            ],
+            {"AID-2026-001":
+                'record_type: "STAGE_0_WORK_ITEM_REGISTRATION"\n'},
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(result.returncode, 2, msg=result.stdout)
+        self.assertIn("two different record_type values", result.stderr)
+
+    # A registry that excludes a path this commit does not contain is stale.
+    # Silently excluding nothing would hide an entry that stopped applying.
+    def test_registry_entry_for_absent_path_fails(self):
+        self.registry_fixture(
+            [(
+                "14-ai-development/work-items/AID-2026-009/manifest.yaml",
+                "STAGE_0_WORK_ITEM_REGISTRATION",
+            )],
+            {"AID-2026-001": "work_item_id: AID-2026-001\nstatus: DISPATCHED\n"},
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(result.returncode, 2, msg=result.stdout)
+        self.assertIn("absent from this commit", result.stderr)
+
+    # A disposition this gate does not implement must fail rather than be
+    # ignored: otherwise a typo turns an exclusion into a no-op.
+    def test_registry_unknown_disposition_fails(self):
+        registry = (
+            'schema_registry_version: "1"\n'
+            "excluded_records:\n"
+            '  - path: "14-ai-development/work-items/AID-2026-001/manifest.yaml"\n'
+            '    record_type: "STAGE_0_WORK_ITEM_REGISTRATION"\n'
+            '    disposition: "WAIVED_FOREVER"\n'
+        )
+        self.commit({
+            "14-ai-development/work-items/INDEX.md":
+                "| [AID-2026-001](AID-2026-001/manifest.yaml) |\n",
+            "14-ai-development/work-items/manifest-schema-registry.yaml":
+                registry,
+            "14-ai-development/work-items/AID-2026-001/manifest.yaml":
+                'record_type: "STAGE_0_WORK_ITEM_REGISTRATION"\n',
+        })
+
+        result = self.run_checker_args()
+        self.assertEqual(result.returncode, 2, msg=result.stdout)
+        self.assertIn("does not implement", result.stderr)
+
+    # A missing registry is an error, not an empty registry. "No policy
+    # declared" and "policy unreadable" must not print the same thing.
+    def test_missing_registry_fails_instead_of_excluding_nothing(self):
+        self.commit({
+            "14-ai-development/work-items/INDEX.md":
+                "| [AID-2026-001](AID-2026-001/manifest.yaml) |\n",
+            "14-ai-development/work-items/AID-2026-001/manifest.yaml":
+                "work_item_id: AID-2026-001\nstatus: DISPATCHED\n",
+        }, with_registry=False)
+
+        result = self.run_checker_args()
+        self.assertEqual(result.returncode, 2, msg=result.stdout)
+        self.assertIn("manifest-schema-registry.yaml", result.stderr)
 
 
 if __name__ == "__main__":
