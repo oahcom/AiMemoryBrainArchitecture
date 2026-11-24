@@ -24,7 +24,7 @@ registration:
   registration_owner_role: Integration Owner
   required_persistence:
     - work-items/AID-2026-008/manifest.yaml
-    - work-items/INDEX.md entry
+    - 14-ai-development/work-items/INDEX.md entry
     - Issue #263 Work Item association comment
   completion_condition: >-
     All three registration records must be persisted and independently
