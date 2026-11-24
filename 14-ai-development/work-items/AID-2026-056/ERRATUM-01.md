@@ -129,7 +129,7 @@ These replace §6. Each is checkable without trusting this file.
 - **AC5** — unchanged; both floor boundaries asserted from both sides.
 - **AC6′** — Withdrawn. Replaced by two separate assertions:
   - **AC6a** — this work item does not modify `NORMATIVE_ROOTS`. The derived-root guard from #910 still exits 0.
-  - **AC6b** — withdrawing AC6 grants **no** authority to change `NORMATIVE_ROOTS`. The pre-#910 value is not restored, and nothing here widens this work item's file scope. Owner ruling OD-22(a): *"撤回错误绑定历史字节值的 AC6，不等于授予修改根目录的权限"*. If the roots need changing, that is a different work item with its own authorisation.
+  - **AC6b** — withdrawing AC6 grants **no** authority to change `NORMATIVE_ROOTS`. The pre-#910 value is not restored, and nothing here widens this work item's file scope. Owner ruling OD-22(a) (Issue #266, comment 7130775717, 2026-11-24T11:57:44Z) — *撤回 AC6 对；但撤回≠授权改根目录*. If the roots need changing, that is a different work item with its own authorisation.
 
   The distinction matters because both ways of satisfying the old AC6 fail: keeping the pre-change value requires reintroducing seven non-existent roots, and writing the current value into the criterion would freeze another implementation detail as if it were a requirement.
 - **AC7** — unchanged in form, new numbers: after change 1 and the baseline regeneration, `gate_ratchet.py` exits 0 with `baseline=11 current=11 regressions=0 fixed=0`.
