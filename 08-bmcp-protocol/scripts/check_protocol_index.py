@@ -125,7 +125,7 @@ def audit_repository(repository_root: Path) -> dict[str, Any]:
         try:
             schema = json.loads(schema_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:
-            errors.append(f"schema {schema_path.relative_to(repository_root)}: {exc}")
+            errors.append(f"schema {schema_path.relative_to(repository_root).as_posix()}: {exc}")
             continue
         extracted = extract_message_type_definitions(schema)
         for message_type, pointers in extracted.items():
