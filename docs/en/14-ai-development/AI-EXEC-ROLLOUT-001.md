@@ -80,7 +80,7 @@ In this project, the ecosystem loop is the **complete operation of AI-PROC-001 S
 
 ### L5 Review Loop (Strict NR-001 Execution) ⭐ Breakpoint ⑥
 
-- For R2/R3: review in a **new independent ChatGPT conversation**; classify findings as `BLOCKER/P0–P3` and dispositions as `PASS/CONDITIONAL PASS/FAIL/NOT REVIEWABLE`; `COMMENT` ≠ `APPROVE`, the same GitHub identity is not independent, and role-play must not impersonate approval (verbatim PR-GOVERNANCE §5).
+- For R2/R3: review in a **new independent ChatGPT conversation**; classify findings as `BLOCKER/P0–P3` and dispositions as `PASS/CONDITIONAL PASS/FAIL/NOT REVIEWABLE`; `COMMENT` ≠ `APPROVE`; independence is a property of the reviewing session, not of the GitHub account (role-play inside the authoring session is not independent); and role-play must not impersonate approval (PR-GOVERNANCE §5, as amended 2026-11-24).
 - Exceptions are limited to time-bounded R2/R3 waivers, explicitly recorded and counted (≤ 2 per iteration); for R0/R1, distinguishing author from reviewer is sufficient.
 
 ### L6 Feedback Loop ⭐ Breakpoint ⑦

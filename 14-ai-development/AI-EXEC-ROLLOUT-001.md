@@ -75,7 +75,7 @@
 - Closeout 八项∪九项∪双语结果（AI-EXEC-002 §6 模板）随 Issue/PR 发布。
 
 ### L5 审查环（NR-001 严格执行）⭐ 断点⑥
-- R2/R3：**新建独立 ChatGPT 对话**审查，finding 分级 `BLOCKER/P0–P3`，处置 `PASS/CONDITIONAL PASS/FAIL/NOT REVIEWABLE`；COMMENT ≠ APPROVE、同 GitHub 身份不独立、角色扮演不冒充批准（PR-GOVERNANCE §5 原文）。
+- R2/R3：**新建独立 ChatGPT 对话**审查，finding 分级 `BLOCKER/P0–P3`，处置 `PASS/CONDITIONAL PASS/FAIL/NOT REVIEWABLE`；COMMENT ≠ APPROVE、独立性是审查会话的属性而非 GitHub 账号的属性（撰写会话内的角色扮演不独立）、角色扮演不冒充批准（PR-GOVERNANCE §5 原文，2026-11-24 修订后）。
 - 例外仅 R2/R3 时效豁免、显式记录 + 计数（每迭代 ≤ 2）；R0/R1 作者/审查者区分即可。
 
 ### L6 反馈回流环 ⭐ 断点⑦
