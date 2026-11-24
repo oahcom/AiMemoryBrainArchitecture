@@ -106,6 +106,46 @@ AID_REFERENCE_MODEL_GITIGNORE_RE = re.compile(
     r"14-ai-development/work-items/AID-[0-9]{4}-[0-9]{3}/reference-model/\.gitignore"
 )
 
+# A1: protocol schema files live directly under schemas/. One level only;
+# schemas/<sub>/x.schema.json is not admitted.
+PROTOCOL_SCHEMA_RE = re.compile(r"08-bmcp-protocol/schemas/[^/]+\.schema\.json")
+
+# A2: conformance vectors are JSON anywhere below the conformance root, with
+# one carve-out. package.json and package-lock.json belong to D17 only at the
+# conformance root; the same names one level down stay refused. The negative
+# lookahead is load-bearing -- dropping it turns this into conformance/**/*.json
+# and silently admits the nested package files D17 deliberately excluded.
+CONFORMANCE_VECTOR_RE = re.compile(
+    r"08-bmcp-protocol/tests/conformance/(?:[^/]+/)*(?!package(?:-lock)?\.json\Z)[^/]+\.json"
+)
+
+# A4: each crate owns exactly one manifest at crates/<name>/Cargo.toml.
+# Workspace members are flat, so no deeper Cargo.toml is admitted.
+CRATE_MANIFEST_RE = re.compile(r"crates/[^/]+/Cargo\.toml")
+
+# A5: governance-register evidence captures, flat under evidence/.
+GOVERNANCE_EVIDENCE_RE = re.compile(
+    r"14-ai-development/governance-register/evidence/[^/]+\.json"
+)
+
+# A6: each crate's VERIFICATION.txt sits beside its Cargo.toml, not deeper.
+CRATE_VERIFICATION_RE = re.compile(r"crates/[^/]+/VERIFICATION\.txt")
+
+# A8: two baselines with two shapes -- the root bilingual baseline and the
+# per-check baselines directory. Both branches are exercised by tests.
+BASELINE_FILE_RE = re.compile(
+    r"(?:scripts/bilingual-baseline\.txt|scripts/ci/baselines/[^/]+\.txt)"
+)
+
+# B9-B12: four singleton governance files. Each is an exact path, not a
+# pattern; a sibling with a different name must stay refused.
+GOV_DOC_001_INHERITANCE_RE = re.compile(r"\.governance/GOV-DOC-001-inheritance\.json")
+ARCHITECTURE_METADATA_SCHEMA_RE = re.compile(
+    r"00-governance/architecture-document-metadata\.schema\.yaml"
+)
+DOCUMENT_SCOPE_REGISTRY_RE = re.compile(r"00-governance/document-scope-registry\.yaml")
+REMOTE_WORKER_INVENTORY_RE = re.compile(r"14-ai-development/remote-worker-inventory\.yaml")
+
 
 def error(message):
     print(f"::error::{message}", file=sys.stderr)
@@ -235,6 +275,36 @@ def is_allowed_new_path(path):
     if AID_REFERENCE_MODEL_GITIGNORE_RE.fullmatch(path):
         return True
 
+    if PROTOCOL_SCHEMA_RE.fullmatch(path):
+        return True
+
+    if CONFORMANCE_VECTOR_RE.fullmatch(path):
+        return True
+
+    if CRATE_MANIFEST_RE.fullmatch(path):
+        return True
+
+    if GOVERNANCE_EVIDENCE_RE.fullmatch(path):
+        return True
+
+    if CRATE_VERIFICATION_RE.fullmatch(path):
+        return True
+
+    if BASELINE_FILE_RE.fullmatch(path):
+        return True
+
+    if GOV_DOC_001_INHERITANCE_RE.fullmatch(path):
+        return True
+
+    if ARCHITECTURE_METADATA_SCHEMA_RE.fullmatch(path):
+        return True
+
+    if DOCUMENT_SCOPE_REGISTRY_RE.fullmatch(path):
+        return True
+
+    if REMOTE_WORKER_INVENTORY_RE.fullmatch(path):
+        return True
+
     return False
 
 
@@ -333,12 +403,13 @@ def check_index_membership(root, commit, head_paths):
     What this deliberately does NOT verify: membership only. It does not check
     that a row's Status/Review/Acceptance text agrees with the item's own
     manifest. That is a different relation and it is not cheap here: measured
-    on main, a naive `status:`-equals-cell comparison disagrees on a large
-    majority of rows, because cells carry dated activity assertions
-    (`MERGED 2026-11-19T18:11:20Z`, `PR OPEN`) while manifests carry lifecycle
-    states (`VERIFIED`, `REMEDIATION_IN_PROGRESS`), and some indexed items
-    have no manifest at all. A gate that fails on all of those would be
-    switched off, so this one does not pretend to cover it.
+    on main at b40463cd, a naive `status:`-prefixes-cell comparison fails on
+    24 of 46 rows. Cells carry dated activity assertions (`PR OPEN`,
+    `MERGED 2026-11-19T18:11:20Z`) while manifests carry lifecycle states
+    (`VERIFIED`, `REMEDIATION_IN_PROGRESS`), and ten indexed items have no
+    `manifest.yaml` at all -- a fix item's `authorization-manifest.yaml` is a
+    different document. A gate that red on half the registry the day it landed
+    would be switched off, so this one does not pretend to cover it.
     """
     directories = work_item_directories(head_paths)
     if not directories:
