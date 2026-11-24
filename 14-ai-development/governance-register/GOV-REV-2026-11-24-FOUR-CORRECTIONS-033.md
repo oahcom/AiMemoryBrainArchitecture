@@ -63,7 +63,7 @@ document_metadata:
 | 3 | 032 §6：把该工单保留待放行 | 工作已完成，工单内容作废 | **我保留的东西已无对象** |
 | 4 | GAP-24：zh-CN 镜像是英文文件 | 123 对里 2 对逐字节相同，**方向相反** | **GAP-24 少算且只描述了一个方向** |
 
-032 §1–§5（发派通道关闭）**不受影响这句话不再成立**：`#893` 在 2026-11-24 14:13:58 打开了通道，`AID-2026-055`（`#896`）与 `AID-2026-056`（`#908`）已经用上了。逐节重判见 §5.3。
+032 §1–§5（发派通道关闭）**不受影响这句话不再成立**：`#893` 在 2026-11-24 14:13:58 打开了通道，`AID-2026-055` 至 `AID-2026-058` 已经用上了。逐节重判见 §5.3。
 
 ---
 
@@ -166,7 +166,7 @@ WORK_ITEM_MANIFEST_RE = re.compile(
 |---|---|---|---|
 | 1 | 本节代码块第 1 行 | `is_allowed_new_path('14-ai-development/work-items/AID-2026-099/manifest.yaml')` → **`False`** | → **`True`** |
 | 2 | 本节代码块第 2 行 | `is_allowed_new_path('14-ai-development/governance-register/X.md')` → **`True`** | → **`True`**（值未变，含义变了：不再是「只有 `.md` 能过」，而是 `.md` 与 work-item manifest 都能过） |
-| 3 | 本节结论句 | 「新的工作单无法登记」仍然成立；「现在没有工作单想被登记」 | **两句都不成立**：`AID-2026-055` 与 `AID-2026-056` 都已登记 |
+| 3 | 本节结论句 | 「新的工作单无法登记」仍然成立；「现在没有工作单想被登记」 | **两句都不成立**：`AID-2026-055` 至 `AID-2026-058` 都已登记 |
 
 复现命令（两次都是导入真实脚本、调用真实函数，不是读代码）：
 
@@ -192,19 +192,25 @@ $ python3 -c "import re; R=re.compile(r'14-ai-development/work-items/AID-\d{4}-\
 True
 ```
 
-### 5.2 通道不只是开着，已经被用过两次
+### 5.2 通道不只是开着，已经被用过四次
 
 | 工作项 | 登记提交 | 时刻（+0800） | 证据 |
 |---|---|---|---|
 | `AID-2026-055` | `#896`，merge `84bbe9241`（head `5585d95`） | 2026-11-24 14:51:52 | 新增 `14-ai-development/work-items/AID-2026-055/manifest.yaml` + `prompt-v1.md`，并改 `INDEX.md` |
 | `AID-2026-056` | `5d83b3c`（`#908`） | 2026-11-24 17:03:50 | 新增 `14-ai-development/work-items/AID-2026-056/manifest.yaml` |
+| `AID-2026-057` | `b3a65e5` | 2026-11-24 18:38:00 | 新增 `AID-2026-057/manifest.yaml` + `prompt-v1.md` |
+| `AID-2026-058` | `01a3014` | 2026-11-24 19:39:28 | 新增 `AID-2026-058/manifest.yaml` + `prompt-v1.md` |
+
+**前两行是 `main = 1259f1a` 上的快照，后两行是 `main = 01a3014` 上的。** `057` 与 `058` 在本节写完之后才合入——本节第一稿测到两件，再读时已是四件。这不是抓到了新缺陷，而是本节所论证的那件事在论证过程中又发生了一次：所以这里给的是四个带时刻的行，不是「共四件」这样一个会立刻过期的数。
 
 `AID-2026-055` 的 `manifest.yaml` 首行是 `work_item_id: AID-2026-055`，`AID-2026-056` 是 `work_item_id: AID-2026-056`；两者都带完整的 `class` / `risk` / `risk_rationale` / `status: DISPATCHED` / `base_commit_sha`，不是占位目录：
 
 ```
-$ git ls-tree --name-only origin/main 14-ai-development/work-items/ | grep -E 'AID-2026-05[56]'
+$ git ls-tree --name-only origin/main 14-ai-development/work-items/ | grep -E 'AID-2026-05[5-8]'
 14-ai-development/work-items/AID-2026-055
 14-ai-development/work-items/AID-2026-056
+14-ai-development/work-items/AID-2026-057
+14-ai-development/work-items/AID-2026-058
 $ git show origin/main:14-ai-development/work-items/AID-2026-055/manifest.yaml | head -1
 work_item_id: AID-2026-055
 $ git show origin/main:14-ai-development/work-items/AID-2026-056/manifest.yaml | head -1
@@ -219,7 +225,7 @@ work_item_id: AID-2026-056
 
 | 032 节 | 它说什么 | 现在 |
 |---|---|---|
-| §1 | 「自 `cfcafc98a` 起，任何新的 AID 工作单都无法登记」 | **不成立。** `#893` 加了 `WORK_ITEM_MANIFEST_RE` 这一条规则；`AID-2026-055`（#896）与 `AID-2026-056`（#908）已实际登记。 |
+| §1 | 「自 `cfcafc98a` 起，任何新的 AID 工作单都无法登记」 | **不成立。** `#893` 加了 `WORK_ITEM_MANIFEST_RE` 这一条规则；`AID-2026-055`（#896）、`AID-2026-056`（#908）、`AID-2026-057`、`AID-2026-058` 已实际登记。 |
 | §2 | 时间线：054 manifest `a3c6280aa`（11-23）/ 白名单 `cfcafc98a`（11-24）/ 尝试登记 055 | **事实成立**，三个日期与提交都没变。但它的作用是为 §1 做证，而 §1 的结论已反，所以这张表现在证明的是「白名单比 054 晚一天」这一件事，不再证明「通道关闭」。 |
 | §3 | 白名单「五类」，「`manifest.yaml` 不在任何一类」 | **表格不再完整**：现在有第六条规则。前五类的描述仍逐条准确，`ALLOWED_DOCUMENT_SUFFIXES` / `ALLOWED_SOURCE_SUFFIXES` / `ALLOWED_CONFIG_PATHS` 都没被 `#893` 改动（`#893` 的 PR 说明明确写「No global `.yaml` suffix」）。 |
 | §4 | 为什么本会话不自行放宽那一行 | **作为决策记录成立**：当时确实拒绝以需要者身份改闸门源码，理由（唯一想要门开的主体正是唯一有动机开得过宽的主体）与结论无关地仍然有效。其中「需要的改动是一行」现在由 `#893` 完成，`#915` 再收紧；「等放宽落地后一分钟内即可登记」的等待已结束。 |

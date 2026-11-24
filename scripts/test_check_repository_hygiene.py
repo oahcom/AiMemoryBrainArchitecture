@@ -502,6 +502,235 @@ class RepositoryHygieneTests(unittest.TestCase):
 
         self.assert_admission_fails(base, head, path)
 
+    # A1: protocol schemas live flat under schemas/. Positive.
+    def test_protocol_schema_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "08-bmcp-protocol/schemas/1.2.18.schema.json":
+                '{"$schema": "https://json-schema.org/draft/2020-12/schema"}\n',
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # A1: a schema one directory deeper is not the flat shape.
+    def test_nested_protocol_schema_is_rejected(self):
+        base = self.seed_base()
+        path = "08-bmcp-protocol/schemas/sub/1.2.18.schema.json"
+        head = self.commit({
+            path: '{"$schema": "https://json-schema.org/draft/2020-12/schema"}\n',
+        })
+
+        self.assert_admission_fails(base, head, path)
+
+    # A2: conformance vectors are admitted at any depth below the conformance
+    # root. This covers both the zero-level family root and a nested fixture.
+    def test_conformance_vectors_are_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "08-bmcp-protocol/tests/conformance/new-vector.json":
+                '{"vector": "family-root"}\n',
+            "08-bmcp-protocol/tests/conformance/provider_outcome/fixtures/"
+            "new-vector.json":
+                '{"vector": "nested"}\n',
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # A2: the negative lookahead is what keeps a child suite's package.json
+    # out. Without it this path would be admitted as a plain vector.
+    def test_a2_does_not_admit_child_suite_package_json(self):
+        base = self.seed_base()
+        path = (
+            "08-bmcp-protocol/tests/conformance/"
+            "provider_outcome/package.json"
+        )
+        head = self.commit({
+            path: '{"private": true}\n',
+        })
+
+        self.assert_admission_fails(base, head, path)
+
+    # A2: the same carve-out covers the -lock spelling, so a nested lockfile
+    # is not smuggled in through the vector rule.
+    def test_a2_does_not_admit_child_suite_package_lock(self):
+        base = self.seed_base()
+        path = (
+            "08-bmcp-protocol/tests/conformance/"
+            "recovery_cutoff/package-lock.json"
+        )
+        head = self.commit({
+            path: '{"lockfileVersion": 3}\n',
+        })
+
+        self.assert_admission_fails(base, head, path)
+
+    # A4: each crate owns one manifest directly under crates/<name>/.
+    def test_crate_manifest_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "crates/new-crate/Cargo.toml":
+                '[package]\nname = "new-crate"\nversion = "0.1.0"\n',
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # A4: workspace members are flat, so a nested manifest is not admitted.
+    def test_nested_crate_manifest_is_rejected(self):
+        base = self.seed_base()
+        path = "crates/new-crate/sub/Cargo.toml"
+        head = self.commit({
+            path: '[package]\nname = "sub"\n',
+        })
+
+        self.assert_admission_fails(base, head, path)
+
+    # A5: evidence captures are flat under governance-register/evidence/.
+    def test_governance_evidence_capture_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/governance-register/evidence/"
+            "new-capture.json":
+                '{"captured_at": "2026-11-24T00:00:00Z"}\n',
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # A5: a nested capture directory is outside the flat evidence shape.
+    def test_nested_governance_evidence_capture_is_rejected(self):
+        base = self.seed_base()
+        path = (
+            "14-ai-development/governance-register/evidence/"
+            "sub/new-capture.json"
+        )
+        head = self.commit({
+            path: '{"captured_at": "2026-11-24T00:00:00Z"}\n',
+        })
+
+        self.assert_admission_fails(base, head, path)
+
+    # A6: each crate's verification note sits beside its manifest.
+    def test_crate_verification_note_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "crates/new-crate/VERIFICATION.txt":
+                "cargo test: 12 passed\n",
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # A6: a verification note one level deeper is not the crate-level shape.
+    def test_nested_crate_verification_note_is_rejected(self):
+        base = self.seed_base()
+        path = "crates/new-crate/sub/VERIFICATION.txt"
+        head = self.commit({
+            path: "cargo test: 3 passed\n",
+        })
+
+        self.assert_admission_fails(base, head, path)
+
+    # A8: both alternation branches are exercised. The baselines directory
+    # branch and the root bilingual baseline branch are separate shapes.
+    def test_baseline_files_are_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "scripts/ci/baselines/new-baseline.txt": "frozen\n",
+            "scripts/bilingual-baseline.txt": "frozen\n",
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # A8: a baseline nested under the baselines directory is not the shape;
+    # that directory is flat by design.
+    def test_nested_baseline_file_is_rejected(self):
+        base = self.seed_base()
+        path = "scripts/ci/baselines/sub/new-baseline.txt"
+        head = self.commit({
+            path: "frozen\n",
+        })
+
+        self.assert_admission_fails(base, head, path)
+
+    # B9: the GOV-DOC-001 inheritance file is a singleton exact path.
+    def test_gov_doc_001_inheritance_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            ".governance/GOV-DOC-001-inheritance.json":
+                '{"inherits": []}\n',
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # B9: a sibling inheritance file with a different check ID is a different
+    # document and was not ruled in. A prefix rule would admit this.
+    def test_gov_doc_002_inheritance_is_rejected(self):
+        base = self.seed_base()
+        path = ".governance/GOV-DOC-002-inheritance.json"
+        head = self.commit({
+            path: '{"inherits": []}\n',
+        })
+
+        self.assert_admission_fails(base, head, path)
+
+    # B10: the architecture document-metadata schema is a singleton path.
+    def test_architecture_metadata_schema_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "00-governance/architecture-document-metadata.schema.yaml":
+                "type: object\n",
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # B10: another schema in the same directory is not this document.
+    def test_other_governance_schema_is_rejected(self):
+        base = self.seed_base()
+        path = "00-governance/other-metadata.schema.yaml"
+        head = self.commit({
+            path: "type: object\n",
+        })
+
+        self.assert_admission_fails(base, head, path)
+
+    # B11: the document scope registry is a singleton path.
+    def test_document_scope_registry_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "00-governance/document-scope-registry.yaml":
+                "scopes: []\n",
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # B11: a differently named registry is not the registered document.
+    def test_other_scope_registry_is_rejected(self):
+        base = self.seed_base()
+        path = "00-governance/other-scope-registry.yaml"
+        head = self.commit({
+            path: "scopes: []\n",
+        })
+
+        self.assert_admission_fails(base, head, path)
+
+    # B12: the remote worker inventory is a singleton path.
+    def test_remote_worker_inventory_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/remote-worker-inventory.yaml":
+                "workers: []\n",
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # B12: a sibling inventory file is not the registered document.
+    def test_other_worker_inventory_is_rejected(self):
+        base = self.seed_base()
+        path = "14-ai-development/other-worker-inventory.yaml"
+        head = self.commit({
+            path: "workers: []\n",
+        })
+
+        self.assert_admission_fails(base, head, path)
+
     # M21: the same directory, a different YAML filename, is not the registry
     # file. A prefix rule would admit this; the anchored shape does not.
     def test_other_yaml_in_work_item_directory_is_rejected(self):
