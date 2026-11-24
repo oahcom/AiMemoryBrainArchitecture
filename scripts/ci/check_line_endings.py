@@ -8,9 +8,14 @@ one ``git cat-file --batch`` process.
 
 All committed blobs are considered, regardless of filename or extension.
 The effective Git ``text`` attribute determines eligibility: paths whose
-value is ``unset`` are skipped; all other values are inspected.
-The only exemption mechanism is ``-text`` in ``.gitattributes``.
-No path or extension exemption list is maintained by this checker.
+value is ``unset`` are skipped; all other values are inspected. A candidate
+whose content carries a NUL byte in the first 8000 bytes is binary by Git's
+own heuristic (convert.c) and is skipped as well, which is what keeps
+``text=auto`` honest for assets committed alongside source.
+
+The exemption mechanisms are the ones Git already understands: ``-text`` or
+``binary`` in ``.gitattributes``. No path or extension exemption list is
+maintained by this checker.
 
 Exit codes:
     0: HEAD contains no violations.
@@ -22,6 +27,9 @@ from __future__ import annotations
 
 import subprocess
 import sys
+
+# Git's binary heuristic (see convert.c): a NUL in the first 8000 bytes.
+BINARY_SNIFF_BYTES = 8000
 
 
 class InspectionError(Exception):
@@ -67,7 +75,7 @@ def committed_blobs() -> list[tuple[bytes, bytes]]:
 
         try:
             metadata, path = record.split(b"\t", 1)
-            mode, object_type, object_id = metadata.split(b" ", 2)
+            _mode, object_type, object_id = metadata.split(b" ", 2)
         except ValueError as exc:
             raise InspectionError(
                 "git ls-tree returned an invalid tree entry"
@@ -187,6 +195,11 @@ def blob_contents(object_ids: list[bytes]) -> dict[bytes, bytes]:
     return result
 
 
+def looks_binary(contents: bytes) -> bool:
+    """Apply Git's binary heuristic: a NUL in the leading bytes."""
+    return b"\0" in contents[:BINARY_SNIFF_BYTES]
+
+
 def line_count(contents: bytes) -> int:
     """Count logical lines, including a final unterminated line."""
     if not contents:
@@ -201,14 +214,19 @@ def main() -> int:
     try:
         entries = committed_blobs()
 
+        if not entries:
+            raise InspectionError("HEAD tree contains no blobs to inspect")
+
         paths = [path for _, path in entries]
 
         text_attributes = attribute_values(paths, b"text")
+        binary_attributes = attribute_values(paths, b"binary")
 
         eligible = [
             (object_id, path)
             for object_id, path in entries
             if text_attributes[path] != b"unset"
+            and binary_attributes[path] != b"set"
         ]
 
         contents_by_id = blob_contents(
@@ -221,12 +239,18 @@ def main() -> int:
 
     violations = 0
     inspected = 0
+    binary_skipped = 0
 
     for object_id, path in eligible:
         contents = contents_by_id[object_id]
-        crlf_count = contents.count(b"\r\n")
+
+        if looks_binary(contents):
+            binary_skipped += 1
+            continue
 
         inspected += 1
+
+        crlf_count = contents.count(b"\r\n")
 
         if crlf_count == 0:
             continue
@@ -240,9 +264,16 @@ def main() -> int:
             f"{line_count(contents)} total lines"
         )
 
+    if inspected == 0:
+        error(
+            "line-ending inspection incomplete: no text blobs were "
+            f"inspected ({len(entries)} tracked blobs)"
+        )
+        return 2
+
     print(
         f"Line-ending check: {inspected} files inspected, "
-        f"{violations} violations."
+        f"{binary_skipped} binary skipped, {violations} violations."
     )
 
     return 1 if violations else 0
