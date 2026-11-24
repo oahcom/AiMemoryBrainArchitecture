@@ -467,65 +467,86 @@ def check_index_membership(root, commit, head_paths):
 
     return violations
 
-def _manifest_scalar(lines, key, *, start=0, end=None):
-    """Return one simple YAML scalar from a mapping block, if present."""
-    if end is None:
-        end = len(lines)
-
+def _mapping_scalar(lines, key, indent):
+    """Return a scalar only when key is a direct child at the exact indent."""
     pattern = re.compile(
-        rf"^(\s*){re.escape(key)}:[ \t]*(.*?)[ \t]*$"
+        rf"^{{0}}{re.escape(key)}\s*:\s*(.*?)\s*$".format(" " * indent)
     )
 
-    for line in lines[start:end]:
-        match = pattern.fullmatch(line)
-        if not match:
-            continue
-
-        value = match.group(2)
-        if " #" in value:
-            value = value.split(" #", 1)[0].rstrip()
-        return value
+    for line in lines:
+        match = pattern.match(line)
+        if match:
+            return _strip_yaml_scalar(match.group(1))
 
     return None
 
 
-def _unquote_manifest_scalar(value):
-    """Remove one matching pair of YAML scalar quotes."""
-    if (
-        value is not None
-        and len(value) >= 2
-        and value[0] == value[-1]
-        and value[0] in {"'", '"'}
-    ):
-        return value[1:-1]
-    return value
+def _strip_yaml_scalar(value):
+    """Strip a simple YAML comment and matching scalar quotes."""
+    value = value.strip()
 
-
-def _implementation_status(lines):
-    """Read implementation.status from the implementation mapping."""
-    implementation_start = None
-
-    for index, line in enumerate(lines):
-        if re.fullmatch(r"implementation:[ \t]*(?:#.*)?", line):
-            implementation_start = index + 1
-            break
-
-    if implementation_start is None:
+    if not value:
         return None
 
-    implementation_end = len(lines)
-    for index in range(implementation_start, len(lines)):
-        line = lines[index]
-        if line and not line[0].isspace() and not line.startswith("#"):
-            implementation_end = index
+    if value.startswith("'") and value.endswith("'") and len(value) >= 2:
+        return value[1:-1]
+
+    if value.startswith('"') and value.endswith('"') and len(value) >= 2:
+        return value[1:-1]
+
+    # Comments are only recognized when preceded by whitespace.
+    value = re.split(r"\s+#", value, maxsplit=1)[0].strip()
+    return value or None
+
+
+def _implementation_mapping(lines):
+    """Return direct scalar children of the top-level implementation mapping."""
+    implementation_indent = 0
+    implementation_line = None
+
+    for index, line in enumerate(lines):
+        if re.match(r"^implementation\s*:\s*(?:#.*)?$", line):
+            implementation_line = index
             break
 
-    for line in lines[implementation_start:implementation_end]:
-        match = re.fullmatch(r"([ \t]+)status:[ \t]*(.*?)[ \t]*", line)
-        if match:
-            return _unquote_manifest_scalar(match.group(2))
+    if implementation_line is None:
+        return None
 
-    return None
+    block = []
+    for line in lines[implementation_line + 1:]:
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+
+        indent = len(line) - len(line.lstrip(" "))
+        if indent <= implementation_indent:
+            break
+
+        block.append((indent, line))
+
+    if not block:
+        return {}
+
+    # Direct children use the minimum indentation in this mapping.
+    child_indent = min(indent for indent, _ in block)
+
+    direct_lines = [
+        line[child_indent:]
+        for indent, line in block
+        if indent == child_indent
+    ]
+
+    return {
+        "status": _mapping_scalar(direct_lines, "status", 0),
+        "pull_request": _mapping_scalar(direct_lines, "pull_request", 0),
+        "merge_commit_sha": _mapping_scalar(
+            direct_lines, "merge_commit_sha", 0
+        ),
+    }
+
+
+def _top_level_manifest_scalar(lines, key):
+    """Read a scalar from a top-level YAML mapping key only."""
+    return _mapping_scalar(lines, key, 0)
 
 
 def check_work_item_manifest_consistency(root, commit, head_paths):
@@ -534,6 +555,17 @@ def check_work_item_manifest_consistency(root, commit, head_paths):
     This is deliberately a static, repository-local check. It does not verify
     that a PR exists, that a SHA exists in Git, or that a SHA is reachable
     from a target branch.
+
+    Reading is scoped, not global: the top-level `status` is taken only from
+    an unindented key, and `status` / `pull_request` / `merge_commit_sha` are
+    taken only from direct children of the top-level `implementation` mapping.
+    A first-match-wins scan over the whole file would let a nested cell such
+    as `status: "FROZEN"` impersonate the lifecycle status; two manifests in
+    this repository have exactly that shape.
+
+    A manifest whose lifecycle fields cannot be located is counted as
+    unrecognized and printed in the summary. Unrecognized is not a pass: it
+    means this rule set did not read the item, not that the item is correct.
     """
     manifest_paths = sorted(
         path for path in head_paths
@@ -541,6 +573,8 @@ def check_work_item_manifest_consistency(root, commit, head_paths):
     )
 
     violations = []
+    recognized = 0
+    unrecognized = []
 
     for path in manifest_paths:
         try:
@@ -557,24 +591,30 @@ def check_work_item_manifest_consistency(root, commit, head_paths):
 
         lines = text.splitlines()
 
-        top_status = _unquote_manifest_scalar(
-            _manifest_scalar(lines, "status")
-        )
-        implementation_status = _implementation_status(lines)
-        pull_request = _manifest_scalar(lines, "pull_request")
-        merge_commit_sha = _unquote_manifest_scalar(
-            _manifest_scalar(lines, "merge_commit_sha")
+        top_status = _top_level_manifest_scalar(lines, "status")
+        implementation = _implementation_mapping(lines) or {}
+        implementation_status = implementation.get("status")
+        implementation_pull_request = implementation.get("pull_request")
+        implementation_merge_commit_sha = implementation.get(
+            "merge_commit_sha"
         )
 
+        if top_status is None and implementation_status is None:
+            unrecognized.append(path)
+        else:
+            recognized += 1
+
         # R20-01: either PR_OPEN lifecycle field requires a positive,
-        # unquoted YAML integer in pull_request.
+        # unquoted YAML integer in implementation.pull_request.
         if (
             top_status == "PR_OPEN"
             or implementation_status == "PR_OPEN"
         ):
             if (
-                pull_request is None
-                or not re.fullmatch(r"[1-9][0-9]*", pull_request)
+                implementation_pull_request is None
+                or not re.fullmatch(
+                    r"[1-9][0-9]*", implementation_pull_request
+                )
             ):
                 violations.append(
                     "manifest consistency violation: "
@@ -584,7 +624,7 @@ def check_work_item_manifest_consistency(root, commit, head_paths):
 
         # R20-02: NOT_MERGED cannot coexist with a lifecycle state that
         # asserts implementation has already merged or been verified.
-        if merge_commit_sha == "NOT_MERGED":
+        if implementation_merge_commit_sha == "NOT_MERGED":
             if (
                 top_status in {"MERGED", "VERIFIED"}
                 or implementation_status == "MERGED"
@@ -600,8 +640,8 @@ def check_work_item_manifest_consistency(root, commit, head_paths):
         # is performed here.
         if (
             implementation_status == "NOT_STARTED"
-            and merge_commit_sha is not None
-            and FULL_SHA_RE.fullmatch(merge_commit_sha)
+            and implementation_merge_commit_sha is not None
+            and FULL_SHA_RE.fullmatch(implementation_merge_commit_sha)
         ):
             violations.append(
                 "manifest consistency violation: "
@@ -613,8 +653,17 @@ def check_work_item_manifest_consistency(root, commit, head_paths):
         "Work-item manifest consistency "
         f"version={CHECK_VERSION} "
         f"manifests={len(manifest_paths)} "
+        f"recognized={recognized} "
+        f"unrecognized={len(unrecognized)} "
         f"violations={len(violations)}"
     )
+
+    for path in unrecognized:
+        print(
+            "Work-item manifest consistency unrecognized shape: "
+            f"{path}",
+            file=sys.stderr,
+        )
 
     return violations
 

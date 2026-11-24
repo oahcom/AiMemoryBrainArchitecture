@@ -926,14 +926,14 @@ class RepositoryHygieneTests(unittest.TestCase):
         })
 
     # R20-01 positive: implementation.status PR_OPEN without a valid
-    # positive integer pull_request must fail.
+    # positive integer implementation.pull_request must fail.
     def test_manifest_pr_open_requires_positive_pull_request(self):
         self.manifest_consistency_fixture(
             "work_item_id: AID-2026-001\n"
             "status: DISPATCHED\n"
-            "pull_request: PENDING\n"
             "implementation:\n"
             "  status: PR_OPEN\n"
+            "  pull_request: PENDING\n"
         )
 
         result = self.run_checker_args()
@@ -946,34 +946,36 @@ class RepositoryHygieneTests(unittest.TestCase):
         )
 
     # R20-01 negative: PR_OPEN with a positive integer PR number passes.
+    # The number lives under `implementation:`, which is where the real
+    # manifests put it; a top-level pull_request is a different field.
     def test_manifest_pr_open_with_positive_pull_request_passes(self):
         self.manifest_consistency_fixture(
             "work_item_id: AID-2026-001\n"
             "status: PR_OPEN\n"
-            "pull_request: 567\n"
-            "merge_commit_sha: NOT_MERGED\n"
             "implementation:\n"
             "  status: PR_OPEN\n"
+            "  pull_request: 567\n"
+            "  merge_commit_sha: NOT_MERGED\n"
         )
 
         result = self.run_checker_args()
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
             "Work-item manifest consistency version=2026-11-24.6 "
-            "manifests=1 violations=0",
+            "manifests=1 recognized=1 unrecognized=0 violations=0",
             result.stdout,
         )
 
     # R20-02 positive: VERIFIED is a completed lifecycle assertion and
-    # cannot coexist with merge_commit_sha NOT_MERGED.
+    # cannot coexist with implementation.merge_commit_sha NOT_MERGED.
     def test_manifest_not_merged_conflicts_with_verified_status(self):
         self.manifest_consistency_fixture(
             "work_item_id: AID-2026-001\n"
             "status: VERIFIED\n"
-            "pull_request: 521\n"
-            "merge_commit_sha: NOT_MERGED\n"
             "implementation:\n"
             "  status: MERGED\n"
+            "  pull_request: 521\n"
+            "  merge_commit_sha: NOT_MERGED\n"
         )
 
         result = self.run_checker_args()
@@ -992,17 +994,17 @@ class RepositoryHygieneTests(unittest.TestCase):
         self.manifest_consistency_fixture(
             "work_item_id: AID-2026-001\n"
             "status: DISPATCHED\n"
-            "pull_request: PENDING\n"
-            "merge_commit_sha: NOT_MERGED\n"
             "implementation:\n"
             "  status: NOT_STARTED\n"
+            "  pull_request: PENDING\n"
+            "  merge_commit_sha: NOT_MERGED\n"
         )
 
         result = self.run_checker_args()
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
             "Work-item manifest consistency version=2026-11-24.6 "
-            "manifests=1 violations=0",
+            "manifests=1 recognized=1 unrecognized=0 violations=0",
             result.stdout,
         )
 
@@ -1012,11 +1014,11 @@ class RepositoryHygieneTests(unittest.TestCase):
         self.manifest_consistency_fixture(
             "work_item_id: AID-2026-001\n"
             "status: DISPATCHED\n"
-            "pull_request: 737\n"
-            "merge_commit_sha: "
-            "0123456789abcdef0123456789abcdef01234567\n"
             "implementation:\n"
             "  status: NOT_STARTED\n"
+            "  pull_request: 737\n"
+            "  merge_commit_sha: "
+            "0123456789abcdef0123456789abcdef01234567\n"
         )
 
         result = self.run_checker_args()
@@ -1029,23 +1031,94 @@ class RepositoryHygieneTests(unittest.TestCase):
             result.stderr,
         )
 
-    # R20-03 negative: NOT_STARTED with NOT_MERGED is valid. A merged
-    # implementation with a full SHA is also valid.
+    # R20-03 negative: NOT_STARTED with NOT_MERGED is the dispatched shape.
     def test_manifest_not_started_with_not_merged_passes(self):
         self.manifest_consistency_fixture(
             "work_item_id: AID-2026-001\n"
             "status: DISPATCHED\n"
-            "pull_request: PENDING\n"
-            "merge_commit_sha: NOT_MERGED\n"
             "implementation:\n"
             "  status: NOT_STARTED\n"
+            "  pull_request: PENDING\n"
+            "  merge_commit_sha: NOT_MERGED\n"
         )
 
         result = self.run_checker_args()
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
             "Work-item manifest consistency version=2026-11-24.6 "
-            "manifests=1 violations=0",
+            "manifests=1 recognized=1 unrecognized=0 violations=0",
+            result.stdout,
+        )
+
+    # Scope: a nested `status:` cell must not stand in for the top-level
+    # lifecycle status. A first-match-wins scan over the whole file would
+    # read "MERGED" here and red on R20-02; the top-level value is
+    # DISPATCHED, and the item is legitimately not merged.
+    def test_nested_status_does_not_impersonate_top_level_status(self):
+        self.manifest_consistency_fixture(
+            "work_item_id: AID-2026-001\n"
+            "evidence:\n"
+            "  table:\n"
+            '    status: "MERGED"\n'
+            "status: DISPATCHED\n"
+            "implementation:\n"
+            "  status: NOT_STARTED\n"
+            "  pull_request: PENDING\n"
+            "  merge_commit_sha: NOT_MERGED\n"
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn(
+            "manifests=1 recognized=1 unrecognized=0 violations=0",
+            result.stdout,
+        )
+
+    # Scope: the mirror case. implementation.merge_commit_sha must come from
+    # the implementation mapping, not from a same-named key elsewhere. A
+    # top-level merge_commit_sha of NOT_MERGED must not satisfy R20-03's
+    # negative side nor fire R20-02 for a VERIFIED item, because that field
+    # is outside the implementation mapping.
+    def test_same_named_key_outside_implementation_is_not_read(self):
+        self.manifest_consistency_fixture(
+            "work_item_id: AID-2026-001\n"
+            "status: VERIFIED\n"
+            "merge_commit_sha: NOT_MERGED\n"
+            "implementation:\n"
+            "  status: MERGED\n"
+            "  pull_request: 521\n"
+            "  merge_commit_sha: 1a5342421a9d8314dc1ecc2d050a8f75452c3fc3\n"
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+
+    # A manifest whose lifecycle fields this rule set cannot locate is
+    # counted, not silently passed. Two real manifests use flat keys
+    # (`registration_status`, `implementation_status`) instead of a
+    # top-level `status` plus an `implementation:` mapping.
+    def test_manifest_without_lifecycle_fields_is_counted_unrecognized(self):
+        self.manifest_consistency_fixture(
+            "work_item_id: AID-2026-001\n"
+            'registration_status: "PENDING_FORMAL_REGISTRATION"\n'
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn(
+            "manifests=1 recognized=0 unrecognized=1 violations=0",
             result.stdout,
         )
 
