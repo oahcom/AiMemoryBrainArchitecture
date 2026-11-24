@@ -1,3 +1,47 @@
+---
+document_metadata:
+  domain: ai-development
+  role: normative-standard
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-24"
+      last_verification_note: "This file has no front-matter approval record. Its body header states v1.2 PENDING ADOPTION, with v1.1 adopted via PR #256 merge 48a556491506d25e78be47957276bf3821797a0a and v1.0 via PR #230 merge 53aae842c390eac6d54f937af6cd2744dbe8d09d. Those adoption events are recorded here as prose evidence only; this metadata does not assert them as a machine-verifiable approval binding."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Normative
+  bilingual_counterpart:
+    source: "14-ai-development/AI-EXEC-002.md"
+    en: null
+    zh-CN: null
+---
 # AI-EXEC-002 — AI Prompt Execution Rules
 # AI Development Prompt Execution Details
 
