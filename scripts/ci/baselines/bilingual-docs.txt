@@ -1,13 +1,7 @@
-00-governance/architecture-document-management-policy.md
 00-governance/reports/gov-doc-001-full-scan-2026-11-20.md
-00-governance/templates/document-metadata-template.md
-02-domain-model/phase-2-domain-extension.md
-02-domain-model/phase-2-domain-extension.zh-CN.md
 06-memory-context/context-architecture.md
 06-memory-context/context-budget-and-sufficiency.md
 06-memory-context/context-edit-operations.md
-06-memory-context/context-implementation-coverage.md
-06-memory-context/context-implementation-coverage.zh-CN.md
 06-memory-context/context-manager.md
 06-memory-context/context-reconciliation.md
 06-memory-context/context-versioning.md
@@ -15,8 +9,10 @@
 06-memory-context/phase-3.8.4-g-c-provider-outcome-consumer-review.md
 06-memory-context/phase-3.8.5-g-storage-logical-serialization-topology-impact-review.md
 06-memory-context/phase-3.8.6-g-review-storage-serialization-anchor.md
-07-agent-integration/adapter-capability-tiers.md
-07-agent-integration/adapter-capability-tiers.zh-CN.md
+08-bmcp-protocol/owner-snapshot-namespace-and-fence-currentness-contract.md
+08-bmcp-protocol/phase-3.8-h-rj-hw-01-typed-watermark-and-fence-binding-contract.md
+08-bmcp-protocol/phase-3.8.25-h-applied-delivery-evidence-hardening-addendum.md
+08-bmcp-protocol/phase-3.8.26-h-applied-delivery-evidence-csubmitoutcome-join-addendum.md
 13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/README.md
 13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/baseline-currentness-and-owner-source-audit.md
 13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/baseline-owner-branch-snapshot-errata.md

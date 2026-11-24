@@ -136,15 +136,40 @@ class LineEndingTests(unittest.TestCase):
         self.assert_result(result, 0)
         self.assert_no_error_annotation(result)
 
-    def test_irrelevant_extension_is_ignored(self):
+    def test_unlisted_extension_is_inspected(self):
         self.commit({
             "evidence.txt": b"first line\r\nsecond line\r\n",
         })
 
         result = self.run_checker()
 
-        self.assert_result(result, 0)
-        self.assert_no_error_annotation(result)
+        self.assert_result(result, 1)
+        self.assert_output_contains(
+            result,
+            "::error::CRLF line endings in committed file 'evidence.txt'",
+        )
+        self.assert_output_contains(
+            result,
+            "2 CRLF sequences, 2 total lines",
+        )
+
+    def test_extensionless_text_blob_is_inspected(self):
+        self.commit({
+            "extensionless": b"first line\r\nsecond line\r\n",
+        })
+
+        result = self.run_checker()
+
+        self.assert_result(result, 1)
+        self.assert_output_contains(
+            result,
+            "::error::CRLF line endings in committed file 'extensionless'",
+        )
+        self.assert_output_contains(
+            result,
+            "2 CRLF sequences, 2 total lines",
+        )
+
 
     def test_untracked_crlf_file_is_ignored(self):
         self.commit({
