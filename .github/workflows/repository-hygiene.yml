@@ -77,3 +77,13 @@ jobs:
             cd experiments/req08-portable-exchange-fixture
             python3 -m unittest test_portable_exchange
           )
+
+      # Run from this directory because test_status_migration imports sibling modules by bare name.
+      # Probe for PyYAML first because the bare CI interpreter does not otherwise guarantee that dependency.
+      - name: Self-check the status-migration gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -c "import yaml" || python3 -m pip install --quiet --disable-pip-version-check pyyaml
+          cd scripts/governance/status_migration
+          python3 -m unittest test_status_migration

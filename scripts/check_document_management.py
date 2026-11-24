@@ -2269,7 +2269,12 @@ def main() -> int:
         # still reports every DM-10 error, because there the whole tree IS the
         # subject of the verdict.
         if incremental and rel not in all_changed:
+            # A note, not an error: the document is not what this increment
+            # changed, so its debt is not this change's to pay (issue #808).
+            # The note keeps WHICH document visible; the count line below keeps
+            # HOW MANY visible. A bare number is not actionable on its own.
             out_of_scope_dm10.extend(bound_errors)
+            notes.extend(f"DM-10 out-of-scope {rel}: {err}" for err in bound_errors)
         else:
             errors.extend(f"{rel}: {err}" for err in bound_errors)
         notes.extend(bound_notes)

@@ -42,7 +42,7 @@ document_metadata:
     en: null
     zh-CN: null
 ---
-> **CI Runner 更新 — 2026-11-23：** 所有活动工作流现统一使用 GitHub 托管的 `ubuntu-latest` Runner。下文涉及自托管 Runner 拓扑、准入 Hook、磁盘回收或 Runner 队列的描述均为历史记录，不得作为当前运维指令。当前策略由 `.github/workflows/runner-admission-policy.yml` 强制检查。
+> **CI Runner 更新 — 2026-11-23：** 所有活动工作流现统一使用 GitHub 托管的 `ubuntu-latest` Runner。下文涉及自托管 Runner 拓扑、准入 Hook、磁盘回收或 Runner 队列的描述均为历史记录，不得作为当前运维指令。具体而言：自 #839 起，`gates.yml` 带 `main` 上的 `pull_request` 触发器，`scripts/ci/audit_runner_admission.py` 输出 `GitHub-hosted runner policy: 20 job(s) audited, 0 violation(s)` 并以退出码 0 结束。当前策略由 `.github/workflows/runner-admission-policy.yml` 强制检查。
 
 
 # CI 门禁与棘轮
@@ -56,53 +56,78 @@ document_metadata:
 
 ## 1. 这些 Job 在哪里运行，以及代价是什么
 
-`gates.yml` 中每个 Job 都固定在 `runs-on: [self-hosted, linux, x64]`。
+**当前状态（2026-11-23，#839）。** `gates.yml` 在 `main` 上由 `pull_request` 触发，也在 `push` 到
+`main` 时触发，另加 `workflow_dispatch`；其五个 Job 全部为 `runs-on: ubuntu-latest`。它是合并前门禁。
+以下段落描述的是它所替换掉的自托管拓扑；保留这些内容是因为它们解释了工作流为什么写成现在这样，而不是
+因为它们描述着任何正在运行的东西。
 
-这不是偏好问题。`GET /repos/oahcom/AiMemoryBrainArchitecture/actions/runners` 返回
+本节其余部分是历史记录。在那套拓扑下，`gates.yml` 中每个 Job 都固定在
+`runs-on: [self-hosted, linux, x64]`，而且这不是偏好问题。
+`GET /repos/oahcom/AiMemoryBrainArchitecture/actions/runners` 当时返回
 `total_count: 1`：只有一个 runner，名为 `zesu-x64`，标签为 `self-hosted, Linux, X64`。
-本账户的 GitHub 托管分钟数因账单失败被阻断，所以写成 `runs-on: ubuntu-latest` 的 Job
+本账户的 GitHub 托管分钟数曾因账单失败被阻断，所以写成 `runs-on: ubuntu-latest` 的 Job
 **根本分配不到 runner**，并且以**空的 `steps` 数组**失败——它连第一步都到不了。2026-11-22T04:29:56Z
 在 `main` 上的 `GOV-DOC-002 metadata checks` 与 `audit` 两个 Job 即为实例：都是 `failure`，
-都是零步骤执行。本仓库 13 个工作流里有 12 个处于这个状态。在这里用 `ubuntu-latest` 编写的门禁
-是死胎，因此这些 Job 指向唯一存在的那个 runner。
+都是零步骤执行。本仓库 13 个工作流里有 12 个当时处于这个状态。在这里用 `ubuntu-latest` 编写的门禁
+当时是死胎，因此那些 Job 指向唯一存在的那个 runner。
 
-### 1.1 代价：这是合并后探测器，不是合并前门禁
+### 1.1 代价：它是合并后探测器，不是合并前门禁
 
-两条已经生效的控制共同限定了触发条件：
+> **历史。** 本小节记录的是 `gates.yml` 过去只由 `push` 触发的原因。账单阻断于 2026-11-22 解除，
+> 自托管 runner 于 2026-11-23 由 #839 退役；该工作流现在带 `pull_request` 触发器（见 §1）。
+> 以下内容均非当前行为。
+
+两条当时生效的控制共同限定了触发条件：
 
 * **L1（服务层）。** runner 的 job-started 钩子（`AI-RUN-002-RUNBOOK` §4.1）会让任何
   `GITHUB_REF` 不等于 `refs/heads/main`、或事件不是 `push` / `workflow_dispatch` / `schedule`
   的 Job 失败。功能分支上的 Job 在任何步骤执行前即被拒绝。
 * **L2（仓库层）。** `scripts/ci/audit_runner_admission.py`（由 `runner-admission-policy.yml`
-  强制执行）拒绝任何自托管 Job 使用不在白名单中的触发器，拒绝没有 `branches:` 过滤器的 `push`，
+  强制执行）当时拒绝任何自托管 Job 使用不在白名单中的触发器，拒绝没有 `branches:` 过滤器的 `push`，
   以及拒绝 `push.branches` 中出现 `main` 以外的分支。
 
   在这次改动之前，L2 是一份**黑名单**，而 L1 是**白名单**。于是任何两张表都没列到的触发器——
   `issues`、`release`、`merge_group`、`discussion`，以及 GitHub 以后新加的——都会通过 L2，然后被 L1
   静默拒绝。一个被 L1 否定的绿色 L2 比没有 L2 更糟：那是一份宣称自己具备它并不具备的安全性的审计。
-  L2 现在镜像 L1 的白名单（`push`、`workflow_dispatch`、`schedule`），两者靠构造保持一致，而不是靠
-  两张手工维护的表。已验证：自托管 Job 挂 `issues`、`merge_group`、`release`、`discussion` 现在都会
-  被拒，报 `trigger '<x>' is not permitted for self-hosted jobs (L1 admits only push, schedule,
-  workflow_dispatch)`；而仓库里真实的工作流审计仍然是 7 个 Job / 0 违规。
+  L2 随后镜像了 L1 的白名单（`push`、`workflow_dispatch`、`schedule`），两者靠构造保持一致，而不是靠
+  两张手工维护的表。当时已验证：自托管 Job 挂 `issues`、`merge_group`、`release`、`discussion` 都会被
+  拒，报 `trigger '<x>' is not permitted for self-hosted jobs (L1 admits only push, schedule,
+  workflow_dispatch)`；而仓库里真实的工作流审计是 7 个 Job / 0 违规。
 
-因此 `gates.yml` 只在 `push` 到 `main` 与 `workflow_dispatch` 时触发，别无其他。
+  **#839 替换了那个脚本。** 自托管 runner 已不存在，触发器白名单没有东西可保护，所以
+  `audit_runner_admission.py` 现在只检查一件事：每个工作流里的每个 Job 都是
+  `runs-on: ubuntu-latest`（字面量，不是动态值，也不是含 `self-hosted` 的标签列表）。它在当前
+  `main` 上打印 `GitHub-hosted runner policy: 20 job(s) audited, 0 violation(s)` 并退出 0。
+  `trigger '<x>' is not permitted` 这条消息已不存在。
+
+因此 `gates.yml` 当时只在 `push` 到 `main` 与 `workflow_dispatch` 时触发，别无其他。
 **它无法对 pull request 设卡。** 它把"门禁在 `main` 上红着而无人知道"变成"门禁在 `main` 上红着，
 并且几分钟内就有 check run 说出来"。这就是 GAP-10 的缺陷，也正是本工作流修掉的东西。
-它不是合并前门禁，本文也不宣称它是。
+它当时不是合并前门禁，本文当时也不宣称它是。
 
-合并前设卡需要以下三者之一，且都是 Owner 决策，而不是对本工作流的一次编辑：
+当时合并前设卡需要以下三者之一，且都是 Owner 决策，而不是对本工作流的一次编辑：
 
 1. GitHub 托管分钟数恢复（账单清除），或
 2. 第二个 runner，使第一个不再是工作唯一可落地的位置，或
 3. 放宽 L1/L2 策略，接受在一台具备 sudo 能力的主机上运行不可信 PR 代码的风险。
 
-### 1.2 一个 runner 意味着串行化
+选项 1 已于 2026-11-22 发生，而 #839 据此行动：自托管 runner 已退役，`gates.yml` 在托管 runner 上
+对 pull request 设卡。上面那个三选一的取舍已经关闭，不再悬而未决。
+
+### 1.2 一个 runner 当时意味着串行化
+
+> **历史。** 托管 runner 不是单一队列，所以这里描述的 `concurrency` 组已不再适用：#738 已将它移除，
+> #839 随后退役了 runner。`gates.yml` 现在完全没有 `concurrency` 键。
 
 单一 `concurrency` 组 `existing-gates-self-hosted`，配 `cancel-in-progress: false`，使多次运行
 排队而不是重叠。同一次运行内的 Job 会自行在 runner 上排队。每个 Job 还带 `timeout-minutes`，
 因为在一个单 runner 仓库里，一个卡死的 Job 阻塞的是整个仓库的每一个工作流，而不只是这一个。
+`timeout-minutes` 这一限制在托管 runner 上保留；它当初补偿的那个队列已经不存在了。
 
 ### 1.3 自托管不是干净容器
+
+> **历史。** 托管 Job 从全新的临时虚拟机启动，所以下面的绕行做法不再承重。它们被保留，是因为其中
+> 好几条现在只是双保险，而不是必需的。
 
 这些 Job 是针对这一现实写的，而不是假设一台全新虚拟机：
 
@@ -163,10 +188,11 @@ schema 里的全部 5599 条约束。现在该审计在 `main` 上退出 0。
 
 ### 2.3 为什么 `clippy` 不跑格式和测试
 
-`main` 上的 `rust-self-hosted.yml` 已经在跑
+`main` 上的 `rust-phase1.yml` 已经在跑
 `cargo test --workspace --all-targets --no-fail-fast` 与
-`python3 scripts/check_fmt.py --expect "$(git rev-parse HEAD)"`。在这里重复其中任何一项，都比
-什么都不做更糟：
+`python3 scripts/check_fmt.py --expect "$GITHUB_SHA"`。本小节写作时该工作流是
+`rust-self-hosted.yml`；#839 删除了那个文件，同样的两条命令留在 `rust-phase1.yml` 里。
+在这里重复其中任何一项，都比什么都不做更糟：
 
 * **两边的测试数会对不上，而且看起来绿的那个是错的。**
   `cargo test --workspace` 不跑 doctest，`--all-targets` 会跑。在同一棵树上实测：`--all-targets`
@@ -192,7 +218,7 @@ runner，因此从未执行过。clippy 曾是这个 Job 的独立价值。
 而计费状态在 2026-11-22 刚刚失败过一次。是否为两条腿付账是取舍决定，不是改注释能解决的。
 测量见 `GOV-NC-2026-11-23-EXECUTION-RESTORED-029`。
 
-后果已写进工作流本身：rustfmt 与测试套件**不**由 `gates.yml` 设卡，它们由 `rust-self-hosted.yml`
+后果已写进工作流本身：rustfmt 与测试套件**不**由 `gates.yml` 设卡，它们由 `rust-phase1.yml`
 设卡。若那个工作流被删除，`clippy` Job 必须把它们加回来——并且要带 `--all-targets`。
 
 ## 3. 棘轮是什么，不是什么
@@ -250,20 +276,23 @@ python3 scripts/ci/gate_ratchet.py \
 * **没有 `rust-toolchain.toml`，也没有 `rustfmt.toml`。** `clippy` Job 使用 runner 上已安装的
   `cargo` / `cargo-clippy`，并打印它实际找到的版本。lint 是移动靶：某个 clippy 版本新增一条 lint
   就可能在没有代码改动的情况下让该 Job 变红。这一点被记录而不是被隐藏。格式不在此处设卡
-  （见 §2.3），它由 `rust-self-hosted.yml` 的 `scripts/check_fmt.py` 设卡，后者会钉住它期望被
+  （见 §2.3），它由 `rust-phase1.yml` 的 `scripts/check_fmt.py` 设卡，后者会钉住它期望被
   格式化的那个提交 SHA。在仓库内固定工具链可以同时消除两者的锋利边缘，是显而易见的下一步。
 * **`cargo clippy` 需要 C 工具链**（用于 `libsqlite3-sys`）。它在 runner 上可以构建；没有 `cc1`
   的本地 Windows 主机无法运行。其失效形态是一条 `cc1` 错误而非代码缺陷，Job 会原样报出而不是掩盖它。
-* **磁盘是真实约束，而它的下限是实测出来的，不是猜的。** 在 `run 44992270090` 实测：39G 总量，
+* **磁盘在自托管 runner 上曾是真实约束，而它的下限是实测出来的，不是猜的。** #839 同时移除了该
+  runner 与 `clippy` 的磁盘预检，所以下面的数字是「那道防线为什么存在」的记录，不是对当前 Job 的
+  描述。在 `run 44992270090` 实测：39G 总量，
   已用 32G，**只剩 5.6G**，内存 3.6G，4 核。runner 运维在一台可比主机上实测：`cargo test
   --workspace --all-targets` 在 45 个 crate 上产出 **1009 MB** 的 `target/`，`~/.cargo/registry`
   在 290 个 crate 上是 **319 MB**。只跑 clippy 是同一批编译换一个 driver、且不链接测试二进制，
   含 registry 约 **1.0–1.3 GB**。
 
-  因此 `clippy` Job 带一道**磁盘预检**，在低于 `GATES_MIN_FREE_GB`（默认 **3**）时拒绝，低于 6 时
+  因此 `clippy` Job 当时带一道**磁盘预检**，在低于 `GATES_MIN_FREE_GB`（默认 **3**）时拒绝，低于 6 时
   警告。该下限曾是 4，因为那时 Job 还跑 `cargo test` 并与 clippy 共用同一个 `CARGO_TARGET_DIR`
   （估算 1.7–2.0 GB）；测试步骤删掉后下限也随之下降——一个与 Job 不再匹配的下限是一个说谎的数字。
-  为了跑绿而调低下限是禁止的；因为 Job 确实变小而调低，只是把账记对。
+  为了跑绿而调低下限是禁止的；因为 Job 确实变小而调低，只是把账记对。这些都不是当前状态：托管上的
+  `clippy` Job 没有预检步骤。
 
   **看趋势，不要只看数值。** 两次什么都不编译的诊断运行分别报告约 6.8G 和约 5.6G 可用：在没有任何
   构建的情况下累积了约 1.2 GB。在单 runner 上，最终一次性打死所有工作流的是这个漂移，而不是绝对值。
@@ -303,25 +332,31 @@ python3 scripts/ci/gate_ratchet.py \
 
 ### 6.1 在 rebase 后的树上重新实测
 
-本分支打开期间 `main` 前进过（`6897e53c` 关闭了 GAP-09；`#627` 加入了 `rust-self-hosted.yml`；
-`7d816980` 给 `rust-phase1.yml` 加了 fmt+clippy）。§2.2 与 §2.3 的两个阻塞项都来自这次前进。
-rebase 后重新实测：
+本分支打开期间 `main` 前进过（`6897e53c` 关闭了 GAP-09；`#627` 加入了 `rust-self-hosted.yml`——
+该文件后来由 #839 删除；`7d816980` 给 `rust-phase1.yml` 加了 fmt+clippy）。§2.2 与 §2.3 的两个
+阻塞项都来自这次前进。rebase 后重新实测：
 
 | 命令 | 结果 |
 |---|---|
 | `python3 08-bmcp-protocol/schemas/test_nonempty_audit.py` | 退出 0 —— `OK: 32 schemas; 5599 registered constraints; no unregistered or stale entries.` |
 | `gate_ratchet.py --baseline .../bilingual-docs.txt` | 退出 0 —— `baseline=81 current=81 regressions=0 fixed=0`，`PASS` |
-| `audit_runner_admission.py` | 退出 0 —— `7 self-hosted job(s) audited, 0 violation(s)` |
+| `audit_runner_admission.py`（rebase 当时） | 退出 0 —— `7 self-hosted job(s) audited, 0 violation(s)` |
 | `cargo test --workspace --all-targets`（在 `main` 上） | `passed=546 failed=0 ignored=1` |
 | `cargo test --workspace`（在 `main` 上） | `passed=551 failed=0 ignored=1` |
 
 最后两行就是 §2.3 的全部论据：同一提交、同一 workspace、五个不同的测试，而两条命令里只有一条是
-`main` 真正在跑的那条。
+`main` 真正在跑的那条。审计那一行是 rebase 当时（2026-11-22）的输出；在当前 `main` 上，同一个脚本
+打印 `GitHub-hosted runner policy: 20 job(s) audited, 0 violation(s)` 并退出 0。
 
 这是对工作流所运行命令的本地执行。它是关于门禁的证据，不是关于工作流执行的证据。
 §7 记录工作流自身做了什么。
 
 ## 7. 实际观测到什么
+
+> **历史记录（2026-11-22）。** 本节所有观测都是在 #839 于 2026-11-23 退役自托管 runner **之前**、
+> 针对那个 runner 做的。run id、标签与主机参数都是那套拓扑的真实记录；其中没有任何一条描述当前的
+> GitHub 托管环境。当前的实测输出是 `GitHub-hosted runner policy: 20 job(s) audited, 0 violation(s)`，
+> 退出 0（见 §1）。
 
 ### 7.1 runner 会接活，标签也对得上
 
@@ -335,8 +370,8 @@ job: diagnostics | completed success
   steps: 4 —— Set up job、Set up runner、Read-only host diagnostics、Complete job
 ```
 
-所以 `runs-on: [self-hosted, linux, x64]` 是正确的选择器：这样写的 Job 会被接纳并执行。它报告的
-环境：
+当时 `runs-on: [self-hosted, linux, x64]` 是正确的选择器：这样写的 Job 会被接纳并执行。它报告的
+环境（该自托管 runner 已不存在，这些数值仅作历史记录）：
 
 | 事实 | 值 |
 |---|---|
@@ -355,19 +390,27 @@ job: diagnostics | completed success
 runner admission guard: DENY reason=ref_not_default_branch
 ```
 
-钩子在第一个用户步骤之前就拒绝了该 Job。这就是 `gates.yml` 不能带 `pull_request` 触发器的原因，
-而且这是实测而非推断。
+钩子在第一个用户步骤之前就拒绝了该 Job。这正是 `gates.yml` 在自托管 runner 存在期间不带
+`pull_request` 触发器的原因，而且当时这是实测而非推断。它不是当前状态：#839 退役了该 runner，
+`gates.yml` 现在带 `main` 上的 `pull_request` 触发器（见 §1）。
 
 ### 7.3 L2 确实会拒绝一个「PR 设卡版」所需的形态
 
 `scripts/ci/audit_runner_admission.py` 对 `gates.yml`：**审计 7 个自托管 Job，0 违规，退出 0**
-（这里 5 个加上 `rust-self-hosted.yml` 和既有的 diagnostics）。对一个故意写错的探针工作流，
-它报出的正是预期的两条违规，退出 1：
+（当时是这里 5 个加上已被 #839 删除的 `rust-self-hosted.yml` 与既有的 diagnostics Job）。
+在 `c65fbd0f`（2026-11-23，#839 的前一个提交）上，该审计器对一个故意写错的探针工作流报出的正是
+预期的两条违规并退出 1，原文如下：
 
 ```
 ::error::.github/workflows/zz-probe.yml:probe: untrusted trigger 'pull_request' is not permitted for self-hosted jobs
 ::error::.github/workflows/zz-probe.yml:probe: on.push.branches includes non-main branch 'feat/t22-ci-gates'
 ```
+
+该脚本此后由 #839 改写：自托管 Job 已不存在，白名单审批无从谈起，当前脚本只断言每个工作流里的每个 Job
+都是字面量 `runs-on: ubuntu-latest`（缺失或动态值同样算违规），并在当前 `main` 上打印
+`GitHub-hosted runner policy: 20 job(s) audited, 0 violation(s)`、退出 0。它**无法**输出上面那两条
+字符串——`untrusted trigger` 与 `non-main branch` 在当前文件里一次都不出现——所以那份探针记录是
+#839 之前的产物，不是可复现的结果。
 
 ### 7.4 步骤体是被执行过的，不只是被解析过
 
@@ -391,15 +434,19 @@ node 22）上以 `bash --noprofile --norc -e -o pipefail` 执行，并按 runner
 的那个场景。而 conformance 套件是**通过那个 venv** 跑的，不是通过碰巧已安装的东西跑的，所以 585 这个
 结果是该 Job 会得到的结果。
 
-`clippy` 这几行来自更早那个更大的 Job（fmt + clippy + test）。fmt 与 test 步骤随后被删除（§2.3），
-所以只有磁盘预检、工具链探测和 clippy 这三行仍然描述着实际存在的步骤。clippy 步骤的实测结果没有变化
+`clippy` 这几行来自更早那个更大的 Job（磁盘预检 + fmt + clippy + test）。fmt 与 test 步骤随后被
+删除（§2.3），磁盘预检也在 #839 中随自托管 runner 一并移除，所以只有工具链探测和 clippy 这两行仍然
+描述着实际存在的步骤。clippy 步骤的实测结果没有变化
 ——同一棵树上的同一条命令。
 
-### 7.5 磁盘预检会拒绝，这是故意的，而且阈值是实测出来的
+### 7.5 磁盘预检当时会拒绝，这是故意的，而且阈值是实测出来的
 
-预检对模拟文件系统做过实测。当前下限 3G，警告线 6G：
+> **历史。** #839 已移除该预检；托管上的 `clippy` Job 没有这一步骤。下表记录的是那道防线当时的
+> 行为，不是当前行为。
 
-| 可用空间 | 下限 3、警告 6（当前） |
+预检对模拟文件系统做过实测。到后期它的下限是 3G，警告线是 6G：
+
+| 可用空间 | 下限 3、警告 6（最终） |
 |---|---|
 | 2G | 退出 1 —— `::error::only 2G free (2597152 KiB), below the 3G floor.` |
 | 3G | 退出 0 —— `::warning::only 3G free; shrinking between runs that build nothing.` |
@@ -415,18 +462,23 @@ node 22）上以 `bash --noprofile --norc -e -o pipefail` 执行，并按 runner
 成 5，低于 6G 的警告线。两种情况都是退出 0。保留这种截断而不向上取整是刻意的——一个朝宽松方向取整的
 下限比较，就是下限不再是下限的开始。
 
-### 7.6 仍然未被观测到的
+### 7.6 写作时仍未被观测到的
 
-`gates.yml` 自身**在任何分支上都还没有 check run**，而且它无法从功能分支按需触发：GitHub 会针对
-**默认分支**解析 `POST /actions/workflows/gates.yml/dispatches`，而 `gates.yml` 不在 `main` 上。
-实测：
+> **历史（2026-11-22）。** 本小节记录的是一个已不再成立的状态。`gates.yml` 自 `9f30610f`（#669）起
+> 就已在 `main` 上，而该提交是本分支的祖先；#839 随后给它加上了 `pull_request` 触发器，所以这里
+> 残留的问题已经关闭。下面两行探针保留下来，作为「派发解析是如何被实测的」记录；其中被点名的
+> `ubuntu-worker-diagnostics.yml` 已被 #839 删除，现在根本无法派发。
+
+写作当时，`gates.yml` 自身**在任何分支上都还没有 check run**，而且它无法从功能分支按需触发：GitHub 会针对
+**默认分支**解析 `POST /actions/workflows/gates.yml/dispatches`，而当时 `gates.yml` 还不在 `main` 上。
+当时实测：
 
 ```
 gates.yml@feat/t22-ci-gates -> HTTP 404 (Not Found)
 ubuntu-worker-diagnostics.yml@feat/t22-ci-gates -> HTTP 204 (accepted)
 ```
 
-第二行是对照：对一个**确实在** `main` 上的工作流，派发是成功的。因此这五个 Job 的首次运行，发生在本
-分支合并后第一次推送到 `main` 之时——或者，若有推送 `main` 权限的人把该文件 cherry-pick 过去，则立即
-发生。在那之前，§7.4 的证据是「对精确步骤体的执行」，不是「对工作流的执行」，本文也不把它当作一次
-绿色的 check run 来呈现。
+第二行当时是对照：对一个**确实在** `main` 上的工作流，派发是成功的。因此这五个 Job 的首次运行取决于
+该文件能否到达 `main`，而这由 #669 完成；#839 随后把同一批 Job 迁到托管 runner，并加上了
+`pull_request` 触发器。§7.4 的证据仍然是「对精确步骤体的执行」，
+而不是一条被引用出来的绿色 check run，本文也不把它当作那样来呈现。
