@@ -63,7 +63,7 @@ It is **not** a place to record acceptance, approval, or review conclusions. Not
 | `GOV-NC-2026-11-23-UNREACHABLE-GUARD-030` | 017 is fixed but its guard is now dead code, and 014's fix broke 24 tests in that suite | High | `OPEN` / `MEASUREMENT_ONLY` | 1 tautological guard, 167 files out of pairing, 24 broken and unrun by CI |
 | `GOV-NC-2026-11-23-EXECUTION-RESTORED-029` | Execution side restored; 005's present-tense claims no longer hold | High | `OPEN` / `MEASUREMENT_ONLY` | 2 first executions, 3 refuted present-tense claims |
 | `EX-20261123-01` | §5 independent review unavailable (retrospective exception record) | High | `HOLD` / over quota, escalated to the repository administrator (Issue #134) | 0 independent reviews across 675 merged PRs; the repository's first exception record |
-| `OWNER-DECISION-REVIEW-INDEPENDENCE-001` | None of 008 §10.5's three remedies is available; the correct disposition for §5 is BLOCKED | High | `Draft` / explicitly not claiming Approved | All 675 PRs re-walked; 0 APPROVED; 1 writable identity |
+| `OWNER-DECISION-REVIEW-INDEPENDENCE-001` | Only one of the three remedies is still unavailable; §5 has since been amended by the third route (§9 erratum, 2026-11-25) | High | `Draft` / explicitly not claiming Approved | All 675 PRs re-walked; 0 APPROVED; 1 writable identity |
 
 ## Evidence
 
