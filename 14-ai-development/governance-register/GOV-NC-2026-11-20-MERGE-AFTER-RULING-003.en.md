@@ -514,3 +514,39 @@ PR #830 (head `fcfdcf29`) was merged at 2026-11-23T13:47:09Z as commit `c61782ad
 - This does not establish that the merged tests were wrong, or that they broke anything.
 - No judgement is made about anyone's intent.
 - The configuration measured now is not offered as evidence of the configuration at merge time.
+
+### 13.10 PR #848: merged after being closed, with the blob a disposition had refused
+
+**Observed: 2026-11-24 UTC. Every field below is a GitHub API value.**
+
+| field | value |
+|---|---|
+| `created_at` | `02:25:06Z` |
+| `closed_at` | `02:44:43Z` |
+| `merged_at` | `02:48:01Z` |
+| merge commit | `942489210afe`, parents `98aa54b` and `7113cc11` |
+| head at merge | `7113cc11`, `.gitattributes` blob `98c27224`, 3809 B, CR 73 |
+| `reviews` / `review_comments` | `0` / `0` |
+
+On an ordinary merge `closed_at` equals `merged_at`. Here they differ by 3 m 18 s. Neither `/timeline` nor `/events` contains a `reopened` event; both return `closed 02:44:43Z` followed directly by `merged 02:48:01Z`.
+
+**Disposition 1** (`7120353579`, `02:39:14Z`) authorised a specific replacement of the block's opening sentences, quoted verbatim in the comment, and committed to three steps: apply the wording, merge as squash, post the exact-Head evidence. None of the three occurred. The merged blob does not contain the authorised text and still contains the sentence the disposition identified as wrong. The head moved from `24067c27` to `7113cc11` at `02:43:57Z`, but `.gitattributes` is byte-identical across both and the merge commit, so the correction never entered the branch. The merge commit has two parents, so it is not a squash. No post-merge comment exists on the PR.
+
+**Disposition 2** (`7120438511`, `02:44:42Z`) closed the PR and gave a two-clause reopen condition: `.gitattributes` at `CR 0`, and a diff of exactly `-2` content lines with no other hunks. The merged content fails both: CR 73, and `+20/−15` against `98aa54b` (`ca2be015`, 3542 B, CR 0, LF 68).
+
+That disposition accounted for the diff as "only two lines of content actually change … the other 71 added lines are identical text with a CR appended". Measured, `+73/−68` is `+20/−13` for the comment-block rewrite, `+0/−2` for the two `-text` deletions, and 53 CR-only duplicate lines — twenty content lines, not two. The wrong number is why the reopen condition reads as satisfiable: a `+0/−2` diff requires reverting the block rewrite that disposition 1 had authorised four minutes earlier, so the two dispositions cannot both be satisfied. The merged tree satisfies neither.
+
+**Class**
+
+This is the first entry in this register where `closed_at` precedes `merged_at`, and the first that belongs to two existing classes at once: a **zero-formal-review merge** (§13.9) and a **disposition-issued, correction-not-landed merge** (§13.1). Every earlier entry is one or the other.
+
+**Relation to §13.7**
+
+§13.7 froze the zero-review merge count at 4. This section does not change that count and does not add #848 to it; it is recorded as a separate fact, as §13.9 was.
+
+**Non-claims**
+
+- No judgement about the merger's intent.
+- The 3 m 18 s interval is this instance's timing evidence, not the reason the rule holds.
+- This does not establish how a closed pull request came to be merged. It records that `closed_at` precedes `merged_at` and that no recorded event explains the transition.
+- Nothing here asserts whether the block text that merged is correct; that is #836's subject.

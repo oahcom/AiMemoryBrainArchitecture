@@ -10,12 +10,14 @@ root, so every input outside the declared subset must fail, not degrade.
 from __future__ import annotations
 
 import ast
+import io
 import os
 import re
 import shutil
 import subprocess
 import sys
 import tempfile
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -144,13 +146,34 @@ def skip(name: str, why: str) -> None:
         UNEXPECTED_SKIPS.append(f"{name}: skip reason {why!r} is not the registered one")
 
 
-def expect(name: str, text: str, needle: str = "", expect_clean: bool = False) -> None:
+def expect(
+    name: str,
+    text: str,
+    needle: str = "",
+    expect_clean: bool = False,
+    *,
+    msg: str = "",
+) -> None:
+    if needle and msg:
+        raise ValueError("expect() accepts either needle or msg, not both")
+
     errors, _ = check_document(FILE, text)
+
     if expect_clean:
         record(name, not errors, f"  unexpected: {errors}")
         return
-    ok = any(needle in e for e in errors) if needle else bool(errors)
-    record(name, ok, f"  expected {needle!r}, got {errors}")
+
+    if msg:
+        ok = any(error.startswith(msg) for error in errors)
+        expected = f"message prefix {msg!r}"
+    elif needle:
+        ok = any(needle in error for error in errors)
+        expected = f"rule-id needle {needle!r}"
+    else:
+        ok = bool(errors)
+        expected = "at least one error"
+
+    record(name, ok, f"  expected {expected}, got {errors}")
 
 
 def run_gate(root: Path, *extra: str) -> int:
@@ -162,9 +185,38 @@ def run_gate(root: Path, *extra: str) -> int:
         sys.argv = argv
 
 
-def expect_gate(name: str, root: Path, want: int, *extra: str) -> None:
-    code = run_gate(root, *extra)
-    record(name, code == want, f"  gate returned {code}, expected {want}")
+def expect_gate(
+    name: str,
+    root: Path,
+    want: int,
+    *extra: str,
+    msg: str = "",
+) -> None:
+    if not msg:
+        code = run_gate(root, *extra)
+        record(name, code == want, f"  gate returned {code}, expected {want}")
+        return
+
+    stdout = io.StringIO()
+    stderr = io.StringIO()
+
+    with redirect_stdout(stdout), redirect_stderr(stderr):
+        code = run_gate(root, *extra)
+
+    output = stdout.getvalue() + stderr.getvalue()
+    message_found = any(
+        line.strip().startswith(msg)
+        for line in output.splitlines()
+    )
+
+    ok = code == want and message_found
+
+    record(
+        name,
+        ok,
+        f"  gate returned {code}, expected {want}; "
+        f"expected message prefix {msg!r}; output: {output!r}",
+    )
 
 
 # --------------------------------------------------------------------------
@@ -262,9 +314,17 @@ def run_fields() -> None:
     expect("Approved without version rejected", doc(APPROVED.replace(
         '      approved_version:\n        scheme: git\n        value: "deadbeef"\n', ""
     )), "DM-03")
-    expect("Selected-sections without sections rejected", doc(APPROVED.replace(
+    expect("narrow approval scope rejected", doc(APPROVED.replace(
         "type: Full-document", "type: Selected-sections"
     )), "DM-03")
+    expect(
+        "Approved without approval_scope.type rejected",
+        doc(APPROVED.replace(
+            "        type: Full-document\n",
+            "",
+        )),
+        msg="DM-03 Approved requires approval.approval_scope.type",
+    )
     expect("Revoked without decision id rejected", doc(BASE.replace(
         "decision_status: Draft", "decision_status: Revoked\n      revocation: null"
     )), "DM-04")
@@ -599,7 +659,15 @@ def run_repository_rules() -> None:
             "    supersession:\n      supersedes:\n        - 00-governance/gone.md\n"
             "    approval:\n      decision_status: Draft",
         )), encoding="utf-8")
-        expect_gate("DM-13 missing supersedes target fails", root, 1)
+        expect_gate(
+            "DM-13 missing supersedes target fails",
+            root,
+            1,
+            msg=(
+                "DM-13 00-governance/a.md: "
+                "supersedes target does not exist: 00-governance/gone.md"
+            ),
+        )
 
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
@@ -775,6 +843,93 @@ def run_approval_binding() -> None:
         target.write_text(moving, encoding="utf-8")
         expect_gate("T11 mutable ref as approved_version fails", root, 1)
 
+
+# --------------------------------------------------------------------------
+# 5a. Approval scope (issue #833): the declared scope must be one the gate
+#     honours. `Selected-sections` and `Selected-assets` were declarable for
+#     months and never read: DM-10 hashed the whole body either way, so an edit
+#     outside the "selected" part failed (pretending the scope held) and a
+#     section list naming nothing was accepted (pretending the scope held).
+#     Both directions were silent, so these cases bind the declaration itself.
+# --------------------------------------------------------------------------
+
+def run_approval_scope() -> None:
+    print("approval scope (#833)")
+
+    # (a) A value the gate cannot honour is refused by name, so it cannot be
+    # read as a narrower approval than the one DM-10 checks.
+    for scope in ("Selected-sections", "Selected-assets"):
+        expect(
+            f"T86 {scope} scope is refused, not reinterpreted",
+            doc(APPROVED.replace("type: Full-document", f"type: {scope}")),
+            "not implemented",
+        )
+        # Reverting the gate to the old enumeration makes the case above record
+        # a failure: `expect()` sees no error at all.
+    record(
+        "T86 a refused scope names only Full-document as honoured",
+        "Only 'Full-document' is honoured" in "".join(
+            check_document(FILE, doc(APPROVED.replace(
+                "type: Full-document", "type: Selected-sections")))[0]
+        ),
+        "  the diagnostic does not say what is honoured",
+    )
+
+    # (b) The lists that only described those scopes are dead. A non-empty one
+    # is a claim no rule reads; the empty placeholder every document already
+    # carries claims nothing and stays valid.
+    for field in ("included_sections", "included_assets"):
+        expect(
+            f"T87 non-empty {field} is refused by name",
+            doc(APPROVED.replace(
+                "        type: Full-document\n",
+                f"        type: Full-document\n"
+                f"        {field}:\n          - nowhere.md\n",
+            )),
+            field,
+        )
+    expect(
+        "T87 the empty placeholder the template writes is still accepted",
+        doc(APPROVED.replace(
+            "        type: Full-document\n",
+            "        type: Full-document\n"
+            "        included_sections: []\n"
+            "        included_assets: []\n",
+        )),
+        expect_clean=True,
+    )
+
+    # (c) Control: `Full-document` behaves exactly as before. An unchanged body
+    # passes; an edited body still fails DM-10, and fails with DM-10 rather than
+    # with a scope diagnostic.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        target = root / "00-governance" / "a.md"
+        body = "body: approved text"
+        template = doc(APPROVED.replace('"deadbeef"', '"SHA"'))
+        target.write_text(template.replace("# Title", body), encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "approved")
+        sha = _git(root, "rev-parse", "HEAD")
+        recorded = template.replace('"SHA"', f'"{sha}"')
+        target.write_text(recorded.replace("# Title", body), encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "record approval")
+        expect_gate("T88 Full-document with an unchanged body still passes",
+                    root, 0)
+        target.write_text(recorded.replace("# Title", "edited text"),
+                          encoding="utf-8")
+        code, out, err = _run_capture(root)
+        output = out + err
+        record("T88 Full-document with an edited body still fails DM-10",
+               code == 1 and "DM-10 content changed after approved_version" in output,
+               f"  exit {code}, DM-10 present: "
+               f"{'DM-10 content changed after approved_version' in output}")
+
+
 # --------------------------------------------------------------------------
 # 5b. DM-10 scope: an incremental run blames only the documents it touched
 #     (issue #808). A stale pin on an untouched document is counted, not
@@ -840,17 +995,25 @@ def test_incremental_out_of_scope_stale_pin_is_counted_not_failed() -> None:
         code, out, err = _run_capture(root, "--require-changed", base)
         # The ruling asks for two things joined by "and": a note naming the
         # document, and a counted line. A number alone says how many, not which.
-        leaked = f"00-governance/b.md: {DM10_ERROR}" in err
-        noted = any(
-            line.startswith("  note: DM-10 out-of-scope 00-governance/b.md:")
-            for line in out.splitlines()
-        )
+        # The count is asserted exactly: one stale pin must yield exactly one
+        # note. "a note exists" would also pass if the collector swallowed every
+        # governed document, which is the mistake T84's sibling catches.
+        # Filtered on the note prefix, not on "DM-10 out-of-scope" anywhere: the
+        # count line is itself "DM-10 out-of-scope stale bindings: N", so a
+        # substring match counts it as a note and every run reports two. The
+        # trailing space is deliberate too: the "approval binding NOT VERIFIED"
+        # note is f"DM-10 {rel}: ...", which would match this prefix for a
+        # document under an `out-of-scope/` directory.
+        dm10_notes = [l for l in out.splitlines() if l.startswith("  note: DM-10 out-of-scope ")]
+        noted = len(dm10_notes) == 1 and "00-governance/b.md" in dm10_notes[0]
         counted = DM10_COUNT_ONE in out.splitlines()
+        leaked = f"00-governance/b.md: {DM10_ERROR}" in err
         record(
             "T82 incremental run counts an out-of-scope stale pin instead of failing it",
             code == 0 and counted and noted and not leaked,
             f"  gate returned {code}, expected 0; count line exact: {counted}; "
-            f"note names the document: {noted}; DM-10 error on stderr: {leaked}",
+            f"out-of-scope notes: {len(dm10_notes)} (want 1, naming b.md); "
+            f"DM-10 error on stderr: {leaked}",
         )
 
 def test_whole_tree_run_still_reports_every_stale_pin() -> None:
@@ -875,17 +1038,19 @@ def test_incremental_one_in_scope_one_out_of_scope() -> None:
         code, out, err = _run_capture(root, "--require-changed", base)
         in_scope = f"00-governance/a.md: {DM10_ERROR}" in err
         out_of_scope = f"00-governance/b.md: {DM10_ERROR}" in err
-        noted = any(
-            line.startswith("  note: DM-10 out-of-scope 00-governance/b.md:")
-            for line in out.splitlines()
-        )
+        # Exactly one note, and it belongs to the untouched document: an
+        # implementation that noted both documents, or neither, or duplicated
+        # the line, all keep "some note exists" true while being wrong. Same
+        # prefix rule as T82 -- see the comment there for the two traps.
+        dm10_notes = [l for l in out.splitlines() if l.startswith("  note: DM-10 out-of-scope ")]
+        noted = len(dm10_notes) == 1 and "00-governance/b.md" in dm10_notes[0]
         counted = DM10_COUNT_ONE in out.splitlines()
         record(
             "T84 one in-scope and one out-of-scope stale pin are classified per document",
             code == 1 and in_scope and not out_of_scope and noted and counted,
             f"  gate returned {code}, expected 1; a.md on stderr: {in_scope}; "
-            f"b.md on stderr: {out_of_scope}; b.md noted: {noted}; "
-            f"count line exactly 1: {counted}",
+            f"b.md on stderr: {out_of_scope}; out-of-scope notes: {len(dm10_notes)} "
+            f"(want 1, naming b.md only); count line exactly 1: {counted}",
         )
 
 def test_incremental_zero_out_of_scope_still_prints_the_count() -> None:
@@ -949,6 +1114,119 @@ def run_dm10_scope() -> None:
     test_incremental_one_in_scope_one_out_of_scope()
     test_incremental_zero_out_of_scope_still_prints_the_count()
     test_out_of_scope_stale_pin_emits_both_a_note_and_a_count()
+
+def run_prose_status_census() -> None:
+    print("prose-only document status (issue #481)")
+    test_prose_only_work_item_status_is_counted_not_blocking()
+    test_frontmatter_clears_the_prose_only_count()
+    test_prose_only_status_counts_files_outside_work_items()
+
+def test_prose_only_work_item_status_is_counted_not_blocking() -> None:
+    """A prose-only status is counted, never failed.
+
+    The defect is that DM-02 is structurally blind to these files, not that 89
+    of them are "wrong". Reporting them as errors would turn the gate red for
+    every unrelated change, so the count must arrive as a notice, and an
+    increment that does not touch the file must still pass.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        work = root / "14-ai-development" / "work-items"
+        work.mkdir(parents=True, exist_ok=True)
+        work_item = work / "AID-X.md"
+        work_item.write_text(
+            "# AID-X\n\n- Status: PROPOSED — pending owner adoption\n", encoding="utf-8"
+        )
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "seed with a prose-only work item")
+        base = _git(root, "rev-parse", "HEAD")
+        (root / "notes.txt").write_text("unrelated change\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "touch nothing governed")
+        code_with, out, err = _run_capture(root, "--require-changed", base)
+        work_item.unlink()
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "drop the work item")
+        code_without, out_zero, _ = _run_capture(root, "--require-changed", base)
+        counted = any(
+            line.startswith("::notice::advisory (non-blocking): 1 governed document(s)")
+            for line in out.splitlines()
+        )
+        zero = any(
+            line.startswith("::notice::advisory (non-blocking): 0 governed document(s)")
+            for line in out_zero.splitlines()
+        )
+        named = any(
+            "x1 PROPOSED — pending owner adoption" in line for line in out.splitlines()
+        )
+        on_stderr = "advisory" in err
+        record(
+            "T87 prose-only work-item status is counted as advisory, never failed",
+            code_with == 0 and code_without == 0 and counted and zero and named
+            and not on_stderr,
+            f"  exit with={code_with} without={code_without}, expected 0 both; "
+            f"count line: {counted}; zero line when absent: {zero}; "
+            f"value printed: {named}; on stderr: {on_stderr}",
+        )
+
+def test_frontmatter_clears_the_prose_only_count() -> None:
+    """The ratchet can go down only by conversion, so conversion must count.
+
+    A file that carries both a metadata block and the original prose line is no
+    longer prose-only: the human record stays, and DM-02 now sees the status.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        work = root / "14-ai-development" / "work-items"
+        work.mkdir(parents=True, exist_ok=True)
+        (work / "AID-Y.md").write_text(
+            doc(BASE) + "\n- Status: PROPOSED — pending owner adoption\n",
+            encoding="utf-8",
+        )
+        _code, out, _err = _run_capture(root)
+        zero = any(
+            line.startswith("::notice::advisory (non-blocking): 0 governed document(s)")
+            for line in out.splitlines()
+        )
+        no_values = not any("x1 PROPOSED" in line for line in out.splitlines())
+        record(
+            "T88 front-matter plus the original prose line is no longer prose-only",
+            zero and no_values,
+            f"  zero count line: {zero}; value lines absent: {no_values}",
+        )
+
+def test_prose_only_status_counts_files_outside_work_items() -> None:
+    """The population is the governed set, not one directory (issue #481).
+
+    A census that only walked `14-ai-development/work-items/` reported 5 files
+    while the same class sat in `14-ai-development/adr/` and at the top level
+    of `14-ai-development/`. The count claims to measure "files DM-02 cannot
+    see", so it must cover exactly the files DM-02 is applied to.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        adr = root / "14-ai-development" / "adr"
+        adr.mkdir(parents=True, exist_ok=True)
+        (adr / "ADR-X.en.md").write_text(
+            "# ADR-X\n\n- Status: PROPOSED — decision pending\n", encoding="utf-8"
+        )
+        (root / "14-ai-development" / "TOP-LEVEL.md").write_text(
+            "# TOP-LEVEL\n\n- Status: PROPOSED — decision pending\n", encoding="utf-8"
+        )
+        _code, out, _err = _run_capture(root)
+        counted = any(
+            line.startswith("::notice::advisory (non-blocking): 2 governed document(s)")
+            for line in out.splitlines()
+        )
+        record(
+            "T89 prose-only status outside work-items is counted too",
+            counted,
+            f"  expected '2 governed document(s)', got: "
+            f"{[l for l in out.splitlines() if 'governed document(s)' in l]}",
+        )
 
 
 def run_shallow_history() -> None:
@@ -2046,7 +2324,7 @@ GOLDEN = [
         "    normative_status: Informative\n"
         "    canonical_conflict_status: None\n",
         False,
-        "included_assets",
+        "Selected-assets' is not implemented",
     ),
     (
         "selected-sections scope without sections is rejected",
@@ -2070,7 +2348,7 @@ GOLDEN = [
         "    normative_status: Informative\n"
         "    canonical_conflict_status: None\n",
         False,
-        "included_sections",
+        "Selected-sections' is not implemented",
     ),
 ]
 
@@ -3341,7 +3619,9 @@ def main() -> int:
     run_resolver()
     run_repository_rules()
     run_approval_binding()
+    run_approval_scope()
     run_dm10_scope()
+    run_prose_status_census()
     run_shallow_history()
     run_changed_paths()
     run_path_safety()

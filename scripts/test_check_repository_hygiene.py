@@ -386,6 +386,189 @@ class RepositoryHygieneTests(unittest.TestCase):
 
         self.assert_admission_passes(base, head)
 
+    # M20: a work-item manifest is the one YAML shape the registry needs.
+    # Every other YAML shape stays rejected, so this rule cannot be widened
+    # into a general .yaml admission by a later edit that nobody notices.
+    def test_work_item_manifest_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/work-items/AID-2026-055/manifest.yaml":
+                "work_item_id: AID-2026-055\n",
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # M21: the same directory, a different YAML filename, is not the registry
+    # file. A prefix rule would admit this; the anchored shape does not.
+    def test_other_yaml_in_work_item_directory_is_rejected(self):
+        base = self.seed_base()
+        path = "14-ai-development/work-items/AID-2026-055/notes.yaml"
+        head = self.commit({path: "note: value\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    # M22: nesting is not the registry shape. work-items/<ID>/nested/ is one
+    # directory deeper than a manifest may live.
+    def test_nested_work_item_manifest_is_rejected(self):
+        base = self.seed_base()
+        path = "14-ai-development/work-items/AID-2026-055/nested/manifest.yaml"
+        head = self.commit({path: "work_item_id: AID-2026-055\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    # M23: the AID- segment is required, so an arbitrary directory under
+    # work-items/ cannot carry a manifest through this rule.
+    def test_non_aid_directory_manifest_is_rejected(self):
+        base = self.seed_base()
+        path = "14-ai-development/work-items/not-AID/manifest.yaml"
+        head = self.commit({path: "work_item_id: not-AID\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    # M24: the rule is rooted at 14-ai-development/work-items/, not at any
+    # path that happens to end in manifest.yaml.
+    def test_manifest_outside_work_items_is_rejected(self):
+        base = self.seed_base()
+        path = "14-ai-development/other/manifest.yaml"
+        head = self.commit({path: "work_item_id: other\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    # M25: the anchored shape is case-sensitive, like the configuration
+    # filenames. Manifest.YAML is not manifest.yaml.
+    def test_case_changed_manifest_filename_is_rejected(self):
+        base = self.seed_base()
+        path = "14-ai-development/work-items/AID-2026-055/Manifest.YAML"
+        head = self.commit({path: "work_item_id: AID-2026-055\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    # M26: a bare manifest.yaml at the repository root is not the registry
+    # file and must not be admitted by a loose suffix-shaped rule.
+    def test_root_manifest_is_rejected(self):
+        base = self.seed_base()
+        path = "manifest.yaml"
+        head = self.commit({path: "work_item_id: root\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    # M27: admitting the work-item manifest must not have opened .yaml
+    # anywhere else. This is the regression that matters most, because a
+    # future edit widening the rule would otherwise pass silently.
+    def test_yaml_outside_the_registry_shape_is_still_rejected(self):
+        base = self.seed_base()
+        path = "00-governance/unreviewed-policy.yaml"
+        head = self.commit({path: "policy: value\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    # M28: the ID segment is not an arbitrary alnum run. A directory the
+    # registry cannot allocate must not carry a manifest through this rule,
+    # or the index step gets an entry it cannot resolve.
+    def test_non_numeric_work_item_id_is_rejected(self):
+        base = self.seed_base()
+        path = "14-ai-development/work-items/AID-foo/manifest.yaml"
+        head = self.commit({path: "work_item_id: AID-foo\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    # M29: the sequence is three digits. Two digits is a different ID.
+    def test_two_digit_sequence_is_rejected(self):
+        base = self.seed_base()
+        path = "14-ai-development/work-items/AID-2026-55/manifest.yaml"
+        head = self.commit({path: "work_item_id: AID-2026-55\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    # M30: the year is four digits. A two-digit year is a different ID.
+    def test_two_digit_year_is_rejected(self):
+        base = self.seed_base()
+        path = "14-ai-development/work-items/AID-26-055/manifest.yaml"
+        head = self.commit({path: "work_item_id: AID-26-055\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    # M31: the sequence is exactly three digits. Four is a different ID.
+    def test_four_digit_sequence_is_rejected(self):
+        base = self.seed_base()
+        path = "14-ai-development/work-items/AID-2026-0555/manifest.yaml"
+        head = self.commit({path: "work_item_id: AID-2026-0555\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    # M32: the year is a shape, not a constant. Pinning it to the year the
+    # rule was written would reject next year's first work item, and nobody
+    # would remember to edit the rule. A different four-digit year must pass.
+    def test_next_year_work_item_id_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/work-items/AID-2027-001/manifest.yaml":
+                "work_item_id: AID-2027-001\n",
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # #891: the index is Canonical, so its membership must be falsifiable.
+    # Every directory under work-items/ needs an entry, and every entry that
+    # names a directory needs that directory. These three cases pin both
+    # directions plus the clean state.
+    def index_fixture(self, index_text, directories):
+        files = {
+            "14-ai-development/work-items/INDEX.md": index_text,
+        }
+        for name in directories:
+            files[f"14-ai-development/work-items/{name}/manifest.yaml"] = (
+                f"work_item_id: {name}\n"
+            )
+        return self.commit(files)
+
+    def test_index_membership_passes_when_every_directory_is_listed(self):
+        self.index_fixture(
+            "| [AID-2026-001](AID-2026-001/manifest.yaml) |\n"
+            "| [AID-2026-002](AID-2026-002/manifest.yaml) |\n",
+            ["AID-2026-001", "AID-2026-002"],
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        # A pass that compared nothing would look identical to a real pass, so
+        # the counts are asserted: two directories on disk, two linked paths.
+        # A zero here means the sets were empty and the check bound nothing.
+        self.assertIn("directories=2 linked=2", result.stdout)
+
+    def test_index_membership_fails_on_a_directory_with_no_entry(self):
+        self.index_fixture(
+            "| [AID-2026-001](AID-2026-001/manifest.yaml) |\n",
+            ["AID-2026-001", "AID-2026-002"],
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(result.returncode, 1, msg=result.stderr)
+        self.assertIn(
+            "::error::index membership violation: work-item directory "
+            "'14-ai-development/work-items/AID-2026-002' has no entry",
+            result.stderr,
+        )
+
+    def test_index_membership_fails_on_an_entry_with_no_directory(self):
+        self.index_fixture(
+            "| [AID-2026-001](AID-2026-001/manifest.yaml) |\n"
+            "| [AID-2026-009](AID-2026-009/manifest.yaml) |\n",
+            ["AID-2026-001"],
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(result.returncode, 1, msg=result.stderr)
+        self.assertIn(
+            "::error::index membership violation: "
+            "'14-ai-development/work-items/INDEX.md' links 'AID-2026-009/'",
+            result.stderr,
+        )
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

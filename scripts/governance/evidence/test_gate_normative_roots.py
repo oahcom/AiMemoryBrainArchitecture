@@ -63,6 +63,12 @@ class GateRootsTest(unittest.TestCase):
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
         self.root = Path(self._tmp.name)
+        # `current_bilingual_gaps()` enumerates from the Git index, so the
+        # fixture must be a repository: a directory of files on disk is not a
+        # candidate set.
+        self.git(self.root, "init", "-q")
+        self.git(self.root, "config", "user.email", "tests@example.invalid")
+        self.git(self.root, "config", "user.name", "Bilingual gate fixture")
         self.gate = load_gate(self.root)
 
     def tearDown(self):
@@ -72,6 +78,7 @@ class GateRootsTest(unittest.TestCase):
         p = self.root / rel
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(text, encoding="utf-8")
+        self.git(self.root, "add", "--", rel)
 
     def _run_real_git_gate_for_change(self, rel: str):
         """Run main's production normative-file selection against a real git diff."""
@@ -184,7 +191,7 @@ class GateRootsTest(unittest.TestCase):
         # A pair of English-only files must not satisfy the root-Chinese shape.
         self.write("14-ai-development/english-only-probe.md", "English only.\n")
         self.write("docs/en/14-ai-development/english-only-probe.md", "English only.\n")
-        self.gate.REPO_ROOT = self.root
+        self.gate.ROOT = self.root
         self.assertIn("14-ai-development/english-only-probe.md", self.gate.current_bilingual_gaps())
 
         # The two other legal shapes remain accepted by the structural inventory.
@@ -245,7 +252,7 @@ class GateRootsTest(unittest.TestCase):
         )
 
     def test_all_21_embedded_provenance_pairs_match_full_history_snapshot(self):
-        self.gate.ROOT = self.gate.REPO_ROOT
+        self.gate.ROOT = GATE.parents[1]
         self.assertEqual(
             set(self.gate.EMBEDDED_BILINGUAL_SOURCES),
             set(EMBEDDED_PROVENANCE_SHA_SNAPSHOT),
@@ -603,7 +610,7 @@ class GateRootsTest(unittest.TestCase):
 
     def inventory_02(self):
         self.gate.ROOT = self.root
-        self.gate.REPO_ROOT = self.root
+        self.gate.ROOT = self.root
         self.gate.NORMATIVE_ROOTS = {"02-domain-model"}
         (self.root / "02-domain-model").mkdir(parents=True, exist_ok=True)
         return self.gate.current_bilingual_gaps()

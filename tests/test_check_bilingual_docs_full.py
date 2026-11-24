@@ -37,6 +37,31 @@ class FullRepositoryCheckerTests(unittest.TestCase):
             "14-ai-development/example.en.md",
         )
 
+    def test_side_by_side_pair_outside_ai_development(self):
+        # The incremental gate accepts a side-by-side pair in every normative
+        # root; the full scan only accepted it under 14-ai-development, so the
+        # two required contexts called the same two files clean and dirty at once.
+        files = {
+            "08-bmcp-protocol/protocol-index.md",
+            "08-bmcp-protocol/protocol-index.zh-CN.md",
+        }
+        self.assertEqual(
+            checker.counterpart("08-bmcp-protocol/protocol-index.md", files),
+            "08-bmcp-protocol/protocol-index.zh-CN.md",
+        )
+        self.assertEqual(
+            checker.counterpart("08-bmcp-protocol/protocol-index.zh-CN.md", files),
+            "08-bmcp-protocol/protocol-index.md",
+        )
+
+    def test_root_set_matches_the_authority(self):
+        # One authority for "what is normative": the required incremental gate.
+        # A second literal is how seven phantom roots came to be listed.
+        import check_bilingual_docs
+
+        self.assertEqual(checker.NORMATIVE_ROOTS, check_bilingual_docs.NORMATIVE_ROOTS)
+        self.assertEqual(checker.ROOT, check_bilingual_docs.ROOT)
+
     def test_operational_subtrees_are_explicitly_exempt(self):
         files = {"14-ai-development/work-items/AID-1/prompt.md"}
         self.assertIn(

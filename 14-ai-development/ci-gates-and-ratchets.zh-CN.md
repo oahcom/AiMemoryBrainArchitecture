@@ -249,7 +249,7 @@ runner，因此从未执行过。clippy 曾是这个 Job 的独立价值。
 
 | 文件 | 项数 | 含义 |
 |---|---|---|
-| `scripts/ci/baselines/bilingual-docs.txt` | 81 | 缺少 `en` / `zh-CN` 对应件的规范路径 |
+| `scripts/ci/baselines/bilingual-docs.txt` | 77 | 缺少 `en` / `zh-CN` 对应件的规范路径 |
 
 仅在失败集合确实发生变化时重新生成基线：
 

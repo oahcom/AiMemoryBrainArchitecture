@@ -587,15 +587,17 @@ ref_ctor!(EntityRef, EventRef, ExternalSourceRef, MemoryRef);
 /// and lives in [`canonical_commit`]. A reference is a candidate only: it confers no
 /// authority and cannot validate without the durable `canonical_commits` record.
 #[doc = r#"The state field is private; external callers cannot fabricate an issued reference.
+`!` coerces to `CanonicalCommitRefState`, so the literal fails on field privacy (E0451),
+not on an argument-type mismatch.
 ```compile_fail
 use memory_domain::CanonicalCommitRef;
-let _ = CanonicalCommitRef { state: () };
+let _ = CanonicalCommitRef { state: unreachable!() };
 ```"#]
 pub use canonical_commit::CanonicalCommitRef;
 
 #[doc = r#"Immutable revision fields are private; corrections append successors.
 ```compile_fail
-use memory_domain::{ClaimRevision, ClaimRef, ClaimRevisionRef, EpistemicStatus, TimeValue};
+use memory_domain::{ClaimRevision, ClaimRef, ClaimRevisionRef, EpistemicStatus, OpaqueId, ScopeKind, ScopeRef, TimeValue};
 let mut r=ClaimRevision::initial(ClaimRevisionRef::new("r").unwrap(),ClaimRef::new("c").unwrap(),"s".into(),"p".into(),"o".into(),"+".into(),vec![],EpistemicStatus::Observed,TimeValue::Unknown,vec![],vec![],"t".into(),"initial".into(),vec![ScopeRef { scope_id: OpaqueId::new("s").unwrap(), scope_kind: ScopeKind::User, namespace_key: "user:s".into() }]).unwrap();
 r.predicate=String::from("mutated");
 ```"#]
@@ -815,7 +817,7 @@ impl ClaimRevision {
     }
 }
 
-#[doc = "Confidence or Verified status alone cannot create a Fact; an attested initial revision is required.\n```compile_fail\nuse memory_domain::{Fact, FactRef, EpistemicStatus};\nlet _ = Fact::new(FactRef::new(\"f\").unwrap(), EpistemicStatus::Verified);\n```"]
+#[doc = "Confidence or Verified status alone cannot create a Fact; an attested initial revision is required. A `compile_fail` doctest cannot express this: the rule is a returned `Err`, asserted by `fact_rejects_a_revision_that_already_has_a_parent`."]
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct Fact {
     fact_ref: FactRef,
@@ -1469,6 +1471,49 @@ mod tests {
         assert_eq!(fact.initial_revision().claim_revision_refs(), &[pinned]);
         assert_eq!(fact.initial_revision().evidence_refs(), &[evidence]);
         assert_eq!(fact.initial_revision().provenance_refs(), &[provenance]);
+    }
+    #[test]
+    fn fact_rejects_a_revision_that_already_has_a_parent() {
+        let fact_ref = FactRef::new("f").unwrap();
+        let initial = FactRevision::initial(
+            fact_ref.clone(),
+            FactRevisionRef::new("fr1").unwrap(),
+            vec![ClaimRevisionRef::new("cr1").unwrap()],
+            vec![EvidenceRef::new("e1").unwrap()],
+            vec![ProvenanceRef::new("p1").unwrap()],
+            scope("s"),
+            AttestorRef::pending_i(),
+            AuthorizationDecisionRef::pending_i(),
+            "method".into(),
+            "v1".into(),
+            FactOutcome::Attested,
+            "initial".into(),
+            CanonicalCommitRef::pending_d(),
+            None,
+        )
+        .unwrap();
+        let successor = FactRevision::successor(
+            fact_ref.clone(),
+            FactRevisionRef::new("fr2").unwrap(),
+            &initial,
+            vec![ClaimRevisionRef::new("cr1").unwrap()],
+            vec![EvidenceRef::new("e2").unwrap()],
+            vec![ProvenanceRef::new("p2").unwrap()],
+            scope("s"),
+            AttestorRef::pending_i(),
+            AuthorizationDecisionRef::pending_i(),
+            "method".into(),
+            "v1".into(),
+            FactOutcome::Corrected,
+            "corrected".into(),
+            CanonicalCommitRef::pending_d(),
+            Some("correction".into()),
+        )
+        .unwrap();
+        assert_eq!(
+            Fact::new(fact_ref, successor).unwrap_err(),
+            DomainError::InvalidParent
+        );
     }
     #[test]
     fn dm2_09_fact_pinning_does_not_follow_claim_head_after_append() {

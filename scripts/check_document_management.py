@@ -83,6 +83,19 @@ REGISTRY_VERSION = "2"
 STRUCTURAL_EXCEPTIONS = {".git", "target", ".pytest_cache", "__pycache__"}
 SCOPE_REGISTRY = "00-governance/document-scope-registry.yaml"
 
+# Issue #481. Governed documents may record their status as a body list item
+# (`- Status:`) instead of front-matter, and DM-02's closed enumeration then
+# never sees it: the rule is structurally inapplicable to them, not satisfied.
+# Converting the whole backlog in one change is unreviewable and would collide
+# with every open PR, so the remaining gap is reported as a count instead of
+# being invisible. It is ADVISORY: a gate that turns red over ~90 untouched
+# files is a blockade, and a blocker nobody can clear in one change gets
+# disabled, not obeyed.
+PROSE_STATUS_LINE = re.compile(r"^- Status:[ \t]*(.+?)[ \t]*$", re.MULTILINE)
+# The total is the number that matters and is never truncated; this caps only
+# the per-value listing so the notice stays readable in a PR log.
+PROSE_VALUES_SHOWN = 10
+
 # The controls a machine cannot perform. **This tuple is the authority**: policy
 # section 9.2 is generated from it and T69 fails when the table and the
 # derivation differ, so the table is a rendering, not a second opinion.
@@ -103,8 +116,8 @@ MANUAL_CONTROLS = (
     ("M-03", "Whether `evidence_verification` evidence supports the decision",
      "The gate proves a verification status and a reference exist. Whether the reference supports the claim is an argument, not a field",
      "Reviewer"),
-    ("M-04", "Whether the `Selected-sections` chosen are substantively sufficient",
-     "The gate proves the declared sections exist, that the identifiers resolve and that the scope is non-empty. Whether that selection is *adequate* for the document is a judgement",
+    ("M-04", "Whether a whole-document approval is the scope the approver intended",
+     "DM-10 hashes the whole body, so the gate proves that nothing changed after `approved_version`, not that the approver meant all of it. No narrower scope is declarable: a partial approval and a whole-document one are the same record",
      "Approver"),
     ("M-05", "Semantic parity of a bilingual mirror",
      "GOV-DOC-001 requires that the two versions say the same thing. The gate proves both exist, point at each other, and agree on metadata — not that the prose agrees",
@@ -150,7 +163,11 @@ MODIFICATION_STATUSES = {
 APPLICABILITY = {
     "Applicable-To-Current-Version", "Not-Applicable-To-Current-Version",
 }
-SCOPE_TYPES = {"Full-document", "Selected-sections", "Selected-assets"}
+# Only the scopes DM-10 can honour. `Selected-sections` and `Selected-assets`
+# were listed here until #833 and never honoured: the gate hashed the whole body
+# either way, so declaring a narrower scope produced the same verdict as
+# `Full-document` and the narrowing existed only in the reader's assumption.
+SCOPE_TYPES = {"Full-document"}
 VERSION_SCHEMES = {"git", "content-hash"}
 
 # Unknown keys are errors. A misspelled governance field is otherwise invisible.
@@ -986,28 +1003,38 @@ def check_document(path: Path, text: str, root: Path | None = None) -> tuple[lis
     errors += unknown_keys(version, VERSION_KEYS, "approved_version")
     _enum(errors, version.get("scheme"), VERSION_SCHEMES, "approved_version.scheme")
     errors += unknown_keys(scope, SCOPE_KEYS, "approval_scope")
-    _enum(errors, scope.get("type"), SCOPE_TYPES, "approval_scope.type")
+    scope_type = scope.get("type")
+    if scope_type in {"Selected-sections", "Selected-assets"}:
+        # Both were declarable until #833 and neither was ever read: DM-10
+        # compares the whole body, so an edit outside the "selected" part still
+        # failed (no wider than declared) and a selectable scope was silently a
+        # whole-document one (narrower than declared). A value that cannot be
+        # honoured is refused by name instead of being reinterpreted.
+        errors.append(
+            f"DM-03 approval_scope.type {scope_type!r} is not implemented: "
+            "DM-10 compares the whole body, so this approval would be silently "
+            "narrower than the gate checks. Only 'Full-document' is honoured"
+        )
+    else:
+        _enum(errors, scope_type, SCOPE_TYPES, "approval_scope.type")
     if decision == "Approved":
         if not version.get("value"):
             errors.append("DM-03 Approved requires approval.approved_version.value")
-        if not scope.get("type"):
+        if not scope_type:
             errors.append("DM-03 Approved requires approval.approval_scope.type")
         if not applicability:
             errors.append("DM-03 Approved requires approval.approval_applicability")
-    if scope.get("type") == "Selected-sections":
-        sections = scope.get("included_sections")
-        if not sections or not isinstance(sections, list):
+
+    # The section and asset lists described the two scopes above and nothing
+    # else, so nothing reads them. An empty list is the template's placeholder
+    # and claims nothing (every approved document carries one); a non-empty list
+    # is a claim no rule verifies, so it is refused and named.
+    for field in ("included_sections", "included_assets"):
+        if scope.get(field):
             errors.append(
-                "DM-03 Selected-sections requires a non-empty included_sections list"
-            )
-    if scope.get("type") == "Selected-assets":
-        # Symmetric with Selected-sections. The scope type existed in the
-        # enumeration and required nothing: declaring it and listing no asset
-        # was accepted, which made the type a label rather than a scope.
-        assets = scope.get("included_assets")
-        if not assets or not isinstance(assets, list):
-            errors.append(
-                "DM-03 Selected-assets requires a non-empty included_assets list"
+                f"DM-03 approval_scope.{field} is not honoured: only "
+                "'Full-document' is checked, so a non-empty list would claim a "
+                "boundary the gate never verifies. Remove it"
             )
 
     # DM-04 Revoked must carry a unique revocation decision id.
@@ -1832,6 +1859,39 @@ def governed_files(root: Path) -> list[Path]:
     files, _ = collect_governed(root)
     return files
 
+def prose_only_status(paths: list[Path]) -> tuple[int, dict[str, int]]:
+    """Documents whose status is prose-only (issue #481).
+
+    "Prose-only" is precise: the file has at least one body `- Status:` line
+    and no metadata block at all, so DM-02 has nothing to read. A file that
+    carries both is no longer prose-only -- its status is machine-readable, and
+    the body line is then a human record, which the policy does not forbid.
+
+    The population is the gate's own governed set (`collect_governed`), not a
+    second hard-coded root. The defect is "DM-02 cannot see this file", and the
+    files DM-02 is applied to are exactly the governed set; a narrower root
+    under-reported the class by six files, three of them with no metadata block
+    at all (adr/ and the 14-ai-development top level).
+
+    Returns (file count, value -> occurrence count). Never a verdict.
+    """
+    files = 0
+    values: dict[str, int] = {}
+    for path in paths:
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            # Unreadable is the walk's problem, reported there. A census that
+            # guessed would be worse than one that undercounts.
+            continue
+        found = PROSE_STATUS_LINE.findall(text)
+        if not found or read_metadata(text) is not None:
+            continue
+        files += 1
+        for value in found:
+            values[value] = values.get(value, 0) + 1
+    return files, values
+
 def check_scope_registry(root: Path) -> list[str]:
     """Prove the scan set is the declared set, and that nothing was left out.
 
@@ -2289,6 +2349,33 @@ def main() -> int:
     # Printed whether or not it is zero: an absent line cannot be told apart from
     # a build that never looked (issue #808).
     print(f"DM-10 out-of-scope stale bindings: {len(out_of_scope_dm10)}")
+    # Issue #481, advisory only. Printed even at zero: an absent line cannot be
+    # told apart from a run that never looked (the same reason the DM-10 count
+    # above is unconditional). The population is the governed set the gate
+    # already walked, because "DM-02 cannot see this file" is a statement about
+    # exactly that set; the total is never truncated, only the value breakdown.
+    prose_files, prose_values = prose_only_status(targets)
+    print(
+        f"::notice::advisory (non-blocking): {prose_files} governed document(s) "
+        f"carry a body '- Status:' line and no front-matter equivalent; "
+        f"DM-02 cannot see them (issue #481)"
+    )
+    if prose_values:
+        print(
+            f"::notice::advisory (non-blocking):   "
+            f"{len(prose_values)} distinct prose status value(s), "
+            f"{sum(prose_values.values())} occurrence(s):"
+        )
+        for value, count in sorted(
+            prose_values.items(), key=lambda item: (-item[1], item[0])
+        )[:PROSE_VALUES_SHOWN]:
+            print(f"::notice::advisory (non-blocking):   x{count} {value}")
+        hidden = len(prose_values) - PROSE_VALUES_SHOWN
+        if hidden > 0:
+            print(
+                f"::notice::advisory (non-blocking):   "
+                f"(+{hidden} more distinct value(s) not shown)"
+            )
     # Accounting identity: every governed file is either classified or listed
     # as backlog. Printed so "403 unclassified" is a number you can check
     # against the file system, not a claim. If this ever fails to balance, the
