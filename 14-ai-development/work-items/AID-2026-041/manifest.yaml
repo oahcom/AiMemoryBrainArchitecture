@@ -69,7 +69,7 @@ implementation:
   pull_request: 521
   pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/521
   implementation_commit_sha: c2162667b1424ad74dcb34ab0ff1ab640ac35a46
-  merge_commit_sha: NOT_MERGED
+  merge_commit_sha: 1a5342421a9d8314dc1ecc2d050a8f75452c3fc3
 
 authorization:
   registration_write: USER-PRINCIPAL-DELEGATED (limited to this AID registration package)
