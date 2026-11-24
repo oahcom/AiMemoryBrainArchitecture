@@ -8,7 +8,7 @@ import sys
 from pathlib import PurePosixPath
 
 
-CHECK_VERSION = "2026-11-23.1"
+CHECK_VERSION = "2026-11-24.1"
 
 # Repository-root-relative paths, written with a leading slash.
 PROHIBITED_PATHS = (
@@ -64,6 +64,13 @@ ALLOWED_CONFIG_PATHS = frozenset({
 
 REQUIREMENTS_FILE_RE = re.compile(r"requirements(?:-[A-Za-z0-9_.-]+)?\.txt\Z")
 FULL_SHA_RE = re.compile(r"[0-9a-fA-F]{40}\Z")
+# Work-item manifests are YAML, so no suffix rule can admit them without
+# widening .yaml globally. This anchored path shape admits exactly the
+# registry's own file and nothing else: one AID-<id> directory level under
+# work-items/, the literal name manifest.yaml, no nesting, no case variants.
+WORK_ITEM_MANIFEST_RE = re.compile(
+    r"14-ai-development/work-items/AID-[A-Za-z0-9][A-Za-z0-9._-]*/manifest\.yaml"
+)
 
 
 def error(message):
@@ -177,6 +184,9 @@ def is_allowed_new_path(path):
         path.startswith(".github/actions/")
         and name in {"action.yml", "action.yaml"}
     ):
+        return True
+
+    if WORK_ITEM_MANIFEST_RE.fullmatch(path):
         return True
 
     return False
