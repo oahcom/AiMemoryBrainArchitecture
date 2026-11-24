@@ -45,9 +45,9 @@ document_metadata:
 
 # GOV-REV-2026-11-24-CONVERGENCE-CEILING-034
 
-**Status:** `OPEN` / `MEASUREMENT_ONLY` / `NO_IMPLEMENTATION`
+**Status:** `OPEN` / `MEASUREMENT_ONLY` / `NO_IMPLEMENTATION` / §2 **WITHDRAWN** by §9
 **Nature:** `REGISTER_ONLY / NO_GATE_CHANGE / REQUIRES_INDEPENDENT_REVIEW`
-**Measured at:** `main = 3026b319b`, GitHub REST as of 2026-11-24T08:5xZ
+**Measured at:** `main = 3026b319b` (§1-§8); §9 erratum at `main = 1259f1af`
 **Register author:** orchestrator session acting as owner-proxy. **Not** an independent reviewer.
 
 ---
@@ -309,3 +309,42 @@ Not that the README sentence was wrong when written. Not that the PUT would now 
 ## 8. Reproduction
 
 Same six read-only requests as the Chinese section: collaborators, invitations, repo visibility, the parent protection payload, the required-review sub-resource, rulesets, and the review lists for four merged PRs.
+---
+
+## 9. 勘误（2026-11-24）：§2 的推论被所有者基线推翻
+
+所有者给出的基线是：
+
+> **独立审查只需要独立会话，不要求独立账号。**
+
+**§2 的结论「结构上无法由第二个人做」是错的。** 不是测错了——`collaborators = 1` 与 `invitations = []` 仍然成立，重测依旧是这两个数。错的是**从那个事实推到「无法审查」的那一步**：那一步默认了独立审查需要一个第二账号，而这个前提从未被验证，我把它当成了不证自明。
+
+这是本会话第四次同类错误：**把某一层的事实，当作另一层的结论**。前三次是 `EXIT` 取错管道、`PARTIAL_SIDE_BY_SIDE_PAIRS` 只按谓词推断可达性、「删除镜像无告警」只评估两套机制之一。这次是**把身份层的计数，当作审查层的可行性**。
+
+### 9.1 按基线重读，本文件哪些判断失效
+
+| 本文件原判断 | 在基线下 |
+|---|---|
+| §2 独立审查「结构上无法由第二个人做」 | **假**。可由另一会话做 |
+| §5「21 个 `NOT_ASSIGNED` 是一个待办重复 21 次」 | **假**。是 21 个可执行但未执行的待办 |
+| §5「出口只有两条」 | **假**。还有第三条：**开一个新会话做审查** |
+| §7「关闭 `BLOCKED`」 | **假**。未被阻断，是**未被履行** |
+
+这个区别重要：不可抗力不产生责任，未履行产生责任。本文件把性质写错了，且写错的方向是**替未履行找了不可抗力的理由**。
+
+### 9.2 仍然成立的部分
+
+**全部实测数字不动**：`collaborators = 1`、`invitations = []`、分支保护两视图矛盾、4 次零审批自合并、README 的 403 依据已过期、14 份文件复述它。这些与独立性定义无关，§3、§4、§6 的测量继续有效。
+
+### 9.3 载体已按基线修订
+
+`PR-GOVERNANCE-001.md` §5 与 `PR-GOVERNANCE-001-ENFORCEMENT.md` §2、§2.1 中共六处把独立性绑在 GitHub 账号上的条款，已按所有者指令改为**会话级**。修订本身记录在 `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`。
+
+**所以本文件与现行文本的冲突已经消除**：不是本文件被改对，是文本被改成了基线。§2 的原句作为历史记录保留在正文中，本节声明它不再成立。
+
+### 9.4 本勘误不主张什么
+
+- 不主张 034 应当删除。事实层有效，且以勘误方式更正正是 034 §7 自己声明的做法。
+- 不主张会话级独立审查足够强。它强于同会话角色模拟，弱于人类审查；同一模型驱动的两个会话仍共享训练偏差。这一点在 036 中写明。
+- 不主张「21 个待办」现在会被执行。可执行不等于已执行。
+
