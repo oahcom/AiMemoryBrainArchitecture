@@ -136,7 +136,8 @@ trade-off above is closed, not pending.
 ### 1.2 One runner meant serialisation
 
 > **Historical.** Hosted runners are not a single queue, so the `concurrency`
-> group described here was removed with the runner in #839.
+> group described here no longer applies: #738 dropped it, and #839 retired the
+> runner. `gates.yml` carries no `concurrency` key at all now.
 
 A single `concurrency` group, `existing-gates-self-hosted`, with
 `cancel-in-progress: false`, made runs queue rather than overlap. Jobs inside a
@@ -485,8 +486,9 @@ measured rather than inferred. It is not current: #839 retired the runner and
 
 `scripts/ci/audit_runner_admission.py` against `gates.yml`: **7 self-hosted jobs
 audited, 0 violations, exit 0** (5 here plus the then-existing `rust-self-hosted.yml`
-and the diagnostics job, both deleted by #839). Against a deliberately wrong probe
-workflow it reported exactly the two violations expected, exit 1:
+and the diagnostics job, both deleted by #839). At `c65fbd0f` (2026-11-23, the
+commit before #839) that auditor, run against a deliberately wrong probe workflow,
+emitted, verbatim, the two violations expected and exited 1:
 
 ```
 ::error::.github/workflows/zz-probe.yml:probe: untrusted trigger 'pull_request' is not permitted for self-hosted jobs
@@ -494,10 +496,12 @@ workflow it reported exactly the two violations expected, exit 1:
 ```
 
 #839 has since replaced that script. With no self-hosted job left, trigger
-allowlisting has nothing to protect, so it now checks only that every job in every
-workflow is `runs-on: ubuntu-latest`: 20 jobs audited, 0 violations, exit 0 on
-current `main`. The probe output above is what the pre-#839 script did, not what
-the current one would print.
+allowlisting has nothing to protect, so the current one asserts only that every
+job in every workflow is literally `runs-on: ubuntu-latest` (a missing or dynamic
+value is a violation too). It prints `GitHub-hosted runner policy: 20 job(s)
+audited, 0 violation(s)` and exits 0 on current `main`. It **cannot** emit the two
+strings above — `untrusted trigger` and `non-main branch` appear nowhere in the
+current file — so the transcript is a pre-#839 record, not a reproducible result.
 
 ### 7.4 The step bodies were executed, not just parsed
 
@@ -561,16 +565,17 @@ direction is how a floor stops being a floor.
 ### 7.6 What was NOT observed at the time of writing
 
 > **Historical (2026-11-22).** This subsection records a state that no longer
-> holds: `gates.yml` now lives on `main` (merged in #839) and triggers on
-> `pull_request`, so the residue described here is closed. The two probe lines
-> below are kept as a record of how dispatch resolution was measured; one of the
-> two workflows they name, `ubuntu-worker-diagnostics.yml`, was deleted by #839
-> and cannot be dispatched at all now.
+> holds. `gates.yml` has been on `main` since `9f30610f` (#669), an ancestor of
+> this branch, and #839 then gave it a `pull_request` trigger, so the residue
+> described here is closed. The two probe lines below are kept as a record of how
+> dispatch resolution was measured; one of the two workflows they name,
+> `ubuntu-worker-diagnostics.yml`, was deleted by #839 and cannot be dispatched at
+> all now.
 
 At the time of writing, `gates.yml` itself had **no check run on any branch**, and
 it could not be triggered on demand from a feature branch: GitHub resolves
 `POST /actions/workflows/gates.yml/dispatches` against the **default branch**, and
-`gates.yml` did not exist on `main`. Measured then:
+`gates.yml` was not on `main` yet. Measured then:
 
 ```
 gates.yml@feat/t22-ci-gates -> HTTP 404 (Not Found)
@@ -579,6 +584,7 @@ ubuntu-worker-diagnostics.yml@feat/t22-ci-gates -> HTTP 204 (accepted)
 
 The second line was the control: dispatch works for a workflow that *was* on
 `main`. The first run of these five jobs therefore depended on the file reaching
-`main` — which #839 did by merging it. The evidence in §7.4 remains execution of
-the exact step bodies rather than a quoted green check run, and this document does
-not present it as one.
+`main`, which #669 did; #839 later moved the same jobs to hosted runners and added
+the `pull_request` trigger. The evidence in §7.4 remains execution of the exact
+step bodies rather than a quoted green check run, and this document does not
+present it as one.

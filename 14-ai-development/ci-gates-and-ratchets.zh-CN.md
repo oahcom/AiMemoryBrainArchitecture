@@ -116,7 +116,8 @@ document_metadata:
 
 ### 1.2 一个 runner 当时意味着串行化
 
-> **历史。** 托管 runner 不是单一队列，所以这里描述的 `concurrency` 组已随 runner 在 #839 中移除。
+> **历史。** 托管 runner 不是单一队列，所以这里描述的 `concurrency` 组已不再适用：#738 已将它移除，
+> #839 随后退役了 runner。`gates.yml` 现在完全没有 `concurrency` 键。
 
 单一 `concurrency` 组 `existing-gates-self-hosted`，配 `cancel-in-progress: false`，使多次运行
 排队而不是重叠。同一次运行内的 Job 会自行在 runner 上排队。每个 Job 还带 `timeout-minutes`，
@@ -397,16 +398,19 @@ runner admission guard: DENY reason=ref_not_default_branch
 
 `scripts/ci/audit_runner_admission.py` 对 `gates.yml`：**审计 7 个自托管 Job，0 违规，退出 0**
 （当时是这里 5 个加上已被 #839 删除的 `rust-self-hosted.yml` 与既有的 diagnostics Job）。
-对一个故意写错的探针工作流，它报出的正是预期的两条违规，退出 1：
+在 `c65fbd0f`（2026-11-23，#839 的前一个提交）上，该审计器对一个故意写错的探针工作流报出的正是
+预期的两条违规并退出 1，原文如下：
 
 ```
 ::error::.github/workflows/zz-probe.yml:probe: untrusted trigger 'pull_request' is not permitted for self-hosted jobs
 ::error::.github/workflows/zz-probe.yml:probe: on.push.branches includes non-main branch 'feat/t22-ci-gates'
 ```
 
-该脚本此后由 #839 改写：自托管 Job 已不存在，白名单审批无从谈起，它现在只检查每个工作流里的每个 Job
-都是 `runs-on: ubuntu-latest`，在当前 `main` 上审计 20 个 Job、0 违规并退出 0。上面的探针输出是
-改写前脚本的行为记录，不是当前脚本会输出的内容。
+该脚本此后由 #839 改写：自托管 Job 已不存在，白名单审批无从谈起，当前脚本只断言每个工作流里的每个 Job
+都是字面量 `runs-on: ubuntu-latest`（缺失或动态值同样算违规），并在当前 `main` 上打印
+`GitHub-hosted runner policy: 20 job(s) audited, 0 violation(s)`、退出 0。它**无法**输出上面那两条
+字符串——`untrusted trigger` 与 `non-main branch` 在当前文件里一次都不出现——所以那份探针记录是
+#839 之前的产物，不是可复现的结果。
 
 ### 7.4 步骤体是被执行过的，不只是被解析过
 
@@ -460,13 +464,13 @@ node 22）上以 `bash --noprofile --norc -e -o pipefail` 执行，并按 runner
 
 ### 7.6 写作时仍未被观测到的
 
-> **历史（2026-11-22）。** 本小节记录的是一个已不再成立的状态：`gates.yml` 现已在 `main` 上
-> （#839 合并），并带 `pull_request` 触发器，所以这里残留的问题已经关闭。下面两行探针保留下来，
-> 作为「派发解析是如何被实测的」记录；其中被点名的 `ubuntu-worker-diagnostics.yml` 已被 #839 删除，
-> 现在根本无法派发。
+> **历史（2026-11-22）。** 本小节记录的是一个已不再成立的状态。`gates.yml` 自 `9f30610f`（#669）起
+> 就已在 `main` 上，而该提交是本分支的祖先；#839 随后给它加上了 `pull_request` 触发器，所以这里
+> 残留的问题已经关闭。下面两行探针保留下来，作为「派发解析是如何被实测的」记录；其中被点名的
+> `ubuntu-worker-diagnostics.yml` 已被 #839 删除，现在根本无法派发。
 
 写作当时，`gates.yml` 自身**在任何分支上都还没有 check run**，而且它无法从功能分支按需触发：GitHub 会针对
-**默认分支**解析 `POST /actions/workflows/gates.yml/dispatches`，而当时 `gates.yml` 不在 `main` 上。
+**默认分支**解析 `POST /actions/workflows/gates.yml/dispatches`，而当时 `gates.yml` 还不在 `main` 上。
 当时实测：
 
 ```
@@ -475,5 +479,6 @@ ubuntu-worker-diagnostics.yml@feat/t22-ci-gates -> HTTP 204 (accepted)
 ```
 
 第二行当时是对照：对一个**确实在** `main` 上的工作流，派发是成功的。因此这五个 Job 的首次运行取决于
-该文件能否到达 `main`——#839 通过把它合并进去做到了这一点。§7.4 的证据仍然是「对精确步骤体的执行」，
+该文件能否到达 `main`，而这由 #669 完成；#839 随后把同一批 Job 迁到托管 runner，并加上了
+`pull_request` 触发器。§7.4 的证据仍然是「对精确步骤体的执行」，
 而不是一条被引用出来的绿色 check run，本文也不把它当作那样来呈现。
