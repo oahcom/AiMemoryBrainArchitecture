@@ -1,7 +1,52 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-24"
+      last_verification_note: "Section 12 added on 2026-11-24 at main 5c64e560: main's 9 check-runs were read from the API (0 non-green); the gap set was compared to the frozen baseline in-process (77 == 77); GAP-BASELINE-001.md was tested for gap membership, baseline membership and PAIR_EXEMPT_PREFIXES; the empty-diff message was produced by running the gate with BASE_SHA == HEAD_SHA. Every figure came from a run. No figure is carried over from another register."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "14-ai-development/governance-register/GOV-NC-2026-11-21-REGRESSION-009.md"
+    en: null
+    zh-CN: "docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-21-REGRESSION-009.md"
+---
+
 # GOV-NC-2026-11-21-REGRESSION-009
 
 - Register ID: GOV-NC-2026-11-21-REGRESSION-009
-- Status: `OPEN` / `ACTIVE` / main went red again **45 minutes after** the deadlock was lifted
+- Status: `OPEN` (procedural findings only) / the technical findings are **overturned by §12**: main is green, and the empty-diff `EXIT=2` now has a different cause
 - Found at: 2026-11-21T07:35Z
 - Subject: repository `oahcom/AiMemoryBrainArchitecture`, main `277daec7d0c6`
 - Prior registers: 006 (deadlock, lifted), 007 (self-review), 008 (gate merged with zero review)
@@ -510,3 +555,117 @@ This does not contradict section 9.6; it strengthens it. Fix quality and procedu
 Section 9 treated "#440 must go through" as the only path, so it framed the blockage as "waiting for a reviewer". The actual solution was **finding two criteria out of sync** — which needs no reviewer, only someone reading the script.
 
 That does not make section 9's ruling wrong (holding section 5 was procedurally right). It means: **when every path points at "we are missing a person", it is worth checking whether the problem was defined too narrowly.** Here, I defined it too narrowly.
+
+---
+
+## 12. Re-measured 2026-11-24: the headline technical claims no longer hold, the procedural ones do
+
+**Measured at:** `main = 5c64e560eb415af513c98a6d02d0322081ef92b9` (2026-11-24T03:22Z)
+
+### 12.1 main is fully green now
+
+All 9 check-runs on that commit — **zero non-green**:
+
+| check | conclusion |
+|---|---|
+| Repository hygiene (hard gate) | success |
+| GOV-DOC-002 metadata checks | success |
+| Bilingual docs coverage (ratchet) | success |
+| Rust format (hard gate) | success |
+| Rust clippy (hard gate) | success |
+| BMCP conformance suite (hard gate) | success |
+| BMCP protocol index (hard gate) | success |
+| Schema non-empty audit (hard gate) | success |
+| audit | success |
+
+The finding in `008` §5 — that a green gate is sustained by zero-review merges — is unaffected, but the concrete fact "main is red" no longer holds, so "went red again" in the title is stale.
+
+### 12.2 The gap set equals the frozen baseline, element for element
+
+```
+$ python -c "..."
+baseline size : 77
+gap set size  : 77
+gap set == baseline: True
+
+GAP-BASELINE-001.md exists on disk : True
+  in gap set     : False
+  in baseline    : False
+  pair-exempt    : True
+```
+
+The file that triggered `::error::New bilingual gap outside frozen baseline` in section 1's reproduction, `14-ai-development/work-items/GAP-BASELINE-001.md`, is **not in the gap set** and not in the baseline — it falls inside `PAIR_EXEMPT_PREFIXES`, which both criteria now honour. The "1→3 worsening" of §10.5 is **0** today.
+
+### 12.3 The empty diff still exits `EXIT=2`, but for a different reason
+
+The same command today:
+
+```
+$ BASE_SHA=$S HEAD_SHA=$S PR_BODY="BILINGUAL-MANIFEST: COMPLETE" python scripts/check_bilingual_docs.py
+::error::NOT_APPLICABLE: BASE_SHA...HEAD_SHA contains zero changed paths; no bilingual incremental verification was performed.
+EXIT=2
+```
+
+Same exit code as section 1, different message. Section 1's message was `New bilingual gap outside frozen baseline: ...`; today's is `NOT_APPLICABLE`.
+
+The cause is `a82659a1` (2026-11-22 23:19:56 +0800, `fix(gov-doc-001): reject empty changed-path verification`), **+7 −0** to `scripts/check_bilingual_docs.py`, adding only `if not changed: ... return 2`. It landed **after** this register's measurement point `c138654c94` (2026-11-21 16:26:23), so the `PASS (0 changed paths inspected). EXIT=0` recorded in §11.1 was true when written and was then changed by that guard.
+
+The difference is substantive:
+
+| | section 1's `EXIT=2` | today's `EXIT=2` |
+|---|---|---|
+| Trigger | the gate **believed** an unpaired normative document existed | the gate **refuses to judge an empty increment** |
+| Object | repository content | invocation shape |
+| Fixable by editing the repo | yes | no, only by changing the call |
+| Fail-closed | no (a false alarm) | **yes (correct)** |
+
+### 12.4 A real PR cannot hit this guard
+
+`.github/workflows/bilingual-docs.yml` passes `github.event.pull_request.base.sha` and `head.sha`. A real PR's base and head necessarily differ, so `git diff --name-status base...head` is non-empty and the guard never fires. The only shape that triggers it is **calling the gate twice with the same SHA** — which is the reproduction method used in section 1 and §11.1.
+
+So §8.4's closure claim (main red ⇒ every PR returns `EXIT=2`) **still holds mechanically, but today has neither the premise (main is green) nor a trigger path (a real PR's increment is non-empty)**.
+
+### 12.5 Which parts of this register still hold
+
+| Claim | Today |
+|---|---|
+| §1 "main went red again 45 minutes later" | **does not hold**: main is green, gaps are 0 |
+| §10.5 "gaps worsened 1→3" | **does not hold**: gaps are 0 |
+| §11.1 "main restored to `EXIT=0`" | **true when written**; today that command returns `EXIT=2` (`NOT_APPLICABLE`) |
+| §11.5 "the unblocking merge was self-reviewed; the next two merges had zero review" | **holds**, unaffected |
+| §11.7 "the problem was defined too narrowly" | **holds**, and this section is its second confirmation |
+
+The technical claims are updated per this section; the procedural claims (who reviewed, how many reviewed, why that counts as self-review) are **unchanged in every particular**, so the status stays `OPEN` and only the technical assertions are marked overturned.
+
+### 12.6 Reproduction
+
+```
+repo:    oahcom/AiMemoryBrainArchitecture
+commit:  5c64e560
+
+# 1. main is green
+gh api repos/:owner/:repo/commits/5c64e560/check-runs \
+  --jq '[.check_runs[] | select(.conclusion != "success" and .conclusion != "skipped")] | length'
+-> 0
+
+# 2. gap set == baseline
+python -c "
+import sys,os;sys.path.insert(0,os.path.join(os.getcwd(),'scripts'));sys.argv=['x']
+import check_bilingual_docs as g
+bs=set(g.read_baseline()); gs=set(g.current_bilingual_gaps())
+print(len(bs), len(gs), gs==bs)"
+-> 77 77 True
+
+# 3. the empty-diff message
+S=$(git rev-parse HEAD)
+BASE_SHA=$S HEAD_SHA=$S PR_BODY="BILINGUAL-MANIFEST: COMPLETE" \
+  python scripts/check_bilingual_docs.py; echo "EXIT=$?"
+-> ::error::NOT_APPLICABLE: ... zero changed paths ...
+-> EXIT=2
+```
+
+### 12.7 Why this correction is worth writing
+
+Because it is a case of **the same exit code carrying the opposite meaning**. Anyone judging by `EXIT=2` alone would conclude 009 still holds; what actually happened is that the original defect was fixed and the same exit code was taken over by a **correct** fail-closed guard. The only way to tell them apart is to read the message, not the exit code.
+
+§11.7 says: "when every path points at a missing person, it is worth checking whether the problem was defined too narrowly." This is its dual: **when every piece of evidence points at the same number, it is worth checking whether that number is saying the same thing.**
