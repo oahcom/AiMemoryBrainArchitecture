@@ -35,12 +35,16 @@
 
 # --- Remaining CRLF exemption, with a removal condition ---------------------
 #
-# One path is left. The 14 paths this block used to list were excluded from
-# text normalisation and the line-ending gate; #836 classified them, gave them
-# LF, and removed their entries (main had already removed the two stale
-# SUFFIX-SCOPE entries). The frozen prompt pin above is a separate reason.
+# `-text` entries: 13 -> 2. #861 deleted 11 after each was classified and its
+# GOV-DOC-001 obligation was met: 3 registrar sources + the 5 docs/en and
+# docs/zh-CN entries that mirrored them + the
+# `D-OWNER-DECISION-PROTECTED-VISIBILITY-001` side-by-side pair (2) +
+# `docs/governance/ARCHITECTURE_AUDIT_REPORT.md` (1; a backlog path, which
+# carries no counterpart obligation) = 11. All 11 are CR=0 in main, so the
+# line-ending gate covers them now. The other survivor is the frozen prompt pin
+# above: a separate reason, not a debt.
 #
-# This is not a declaration that CRLF is acceptable. It records that one file
+# This is not a declaration that CRLF is acceptable. It records that this file
 # is blocked by a rule other than DM-01:
 #
 #   `08-bmcp-protocol/owner-snapshot-...md` has no `docs/en/` or `docs/zh-CN/`
@@ -48,8 +52,9 @@
 #   `scripts/check_bilingual_docs.py` demand counterparts that do not exist
 #   (measured: FAIL, "requires all counterparts changed in this PR").
 #
-# Removal condition: delete the line once the file has a registered
-# counterpart (or an approved bilingual exception) and a `document_metadata`
-# block. Tracked in #836.
+# Removal condition: delete the line only when the file has a registered
+# counterpart (or an Owner-approved explicit exception). Adding a
+# `document_metadata` block is NOT sufficient — GOV-DOC-001 fails first.
+# Tracked in #836.
 
 08-bmcp-protocol/owner-snapshot-namespace-and-fence-currentness-contract.md -text
