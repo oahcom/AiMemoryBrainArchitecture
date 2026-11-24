@@ -18,7 +18,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-24"
-      last_verification_note: "§1-§7 measured at main 2059c8105; §8 re-measured at main 84bbe9241. Every §8 row is one real invocation of scripts/check_bilingual_docs.py on a worktree reset to origin/main before the single commit under test, with the exit code recorded. Cases F and G exit 0, which is the evidence that no code reads docs/zh-CN content. Cases D, H, I exit non-zero, which refutes the inference that deleting a Chinese mirror goes unannounced. The baseline is 80 lines = 3 comments + 77 entries; none of the 7 content defects appears among those 77 entries. The pair count moved 123 -> 124 between the two measurement points because main gained files."
+      last_verification_note: "§1-§7 measured at main 2059c8105; §8 re-measured at main 84bbe9241. Every §8 row is one real invocation of scripts/check_bilingual_docs.py on a worktree reset to origin/main before the single commit under test, with the exit code recorded. Cases F and G exit 0, which is the evidence that no code reads docs/zh-CN content. Cases D, H, I exit non-zero, which refutes the inference that deleting a Chinese mirror goes unannounced. The baseline is 80 lines = 3 comments + 77 entries; none of the 7 content defects appears among those 77 entries. The pair count moved 123 -> 124 between the two measurement points because main gained files. §5 was corrected 2026-11-24 15:52 +0800 after #893 (e894865) and #896 (84bbe924) were found: the admission function returns True for work-item manifests at merge point 3026b31, and #896 used that channel to register AID-2026-055. Every §5 figure was re-run at that merge point; the suite figures and the two mutation results were re-run too and reproduced exactly."
     usage_status: Active
     modification_status: Unchanged
     supersession:
@@ -47,7 +47,7 @@ document_metadata:
 
 **Status:** `OPEN` / `MEASUREMENT_ONLY` / `NO_IMPLEMENTATION` / §8 added 2026-11-24
 **Nature:** `REGISTER_ONLY / NO_GATE_CHANGE / REQUIRES_INDEPENDENT_REVIEW`
-**Measured at:** `main = 2059c8105` (§4) and `main = 84bbe9241` (§8)
+**Measured at:** `main = 2059c8105` (§1–§4), `main = 84bbe9241` (§8), `main = 3026b31` (§5, re-measured 2026-11-24 15:52 +0800)
 **Register author:** orchestrator session acting as owner-proxy. **Not** an independent reviewer, **not** the accountable owner.
 
 ---
@@ -63,7 +63,7 @@ document_metadata:
 | 3 | 032 §6：把该工单保留待放行 | 工作已完成，工单内容作废 | **我保留的东西已无对象** |
 | 4 | GAP-24：zh-CN 镜像是英文文件 | 123 对里 2 对逐字节相同，**方向相反** | **GAP-24 少算且只描述了一个方向** |
 
-032 §1–§5（发派通道关闭）不受影响，§3 重新验证仍在。
+032 §1–§5（发派通道关闭）**不再成立**：§5 的更正显示准入通道自 `#893` 起已打开，`#896` 已用它登记了 `AID-2026-055`。032 §1/§3 由此失效，详见 §5.3。
 
 ---
 
@@ -135,16 +135,82 @@ document_metadata:
 
 ---
 
-## 5. 032 §1–§5 不受影响，已重新验证
+## 5. 032 §1–§5 的前提被 `#893` 拆掉：准入通道已打开，不是关着
 
-#892 没有碰准入白名单：`scripts/ci/check_repository_hygiene.py` 最近两次改动仍是 `cfcafc98a`（#844）与 `e798b1a72`。在当前主干上直接调用该函数：
+本节原标题是「032 §1–§5 不受影响，已重新验证」。**这个结论是错的**，错在两处：漏了一次提交，以及把我测量时刻为真当成了合并点仍为真。
+
+### 5.1 我漏掉的第三次提交
+
+我写「最近两次改动仍是 `cfcafc98a`（#844）与 `e798b1a72`」时测的是 `main 2059c8105`。在那个树上这句话**是准确的**，重跑确认：
 
 ```
-is_allowed_new_path('14-ai-development/work-items/AID-2026-099/manifest.yaml')  -> False
+$ git log --oneline 2059c8105 -- scripts/ci/check_repository_hygiene.py
+cfcafc9 ci(hygiene): admit new files through an explicit whitelist (#844)
+e798b1a ci(hygiene): gate prohibited generated artifacts in the committed tree (#778)
+```
+
+但 2059c8105 之后主干又动了一次，而这次正好落在本节断言的对象上：
+
+```
+$ git log --oneline 3026b31 -- scripts/ci/check_repository_hygiene.py
+e894865 fix(hygiene): admit work-item manifests by anchored path shape, not by suffix   <- 我漏掉的第三次
+cfcafc9 ci(hygiene): admit new files through an explicit whitelist (#844)
+e798b1a ci(hygiene): gate prohibited generated artifacts in the committed tree (#778)
+```
+
+`e894865`（#893，2026-11-24 14:13:58 +0800）在 `is_allowed_new_path()` 里加了第六类规则。正则原文（**合并点上的形态**）：
+
+```python
+WORK_ITEM_MANIFEST_RE = re.compile(
+    r"14-ai-development/work-items/AID-[A-Za-z0-9][A-Za-z0-9._-]*/manifest\.yaml"
+)
+```
+
+在合并点 `main 3026b31` 上直接调用该函数：
+
+```
+is_allowed_new_path('14-ai-development/work-items/AID-2026-099/manifest.yaml')  -> True
+is_allowed_new_path('14-ai-development/work-items/AID-anything/manifest.yaml')   -> True
 is_allowed_new_path('14-ai-development/governance-register/X.md')                -> True
 ```
 
-所以「新的工作单无法登记」仍然成立，只是**现在没有工作单想被登记**。这两件事同时为真并不矛盾——通道关着，而最后一件想走通道的活儿刚被别人用另一条路做完了。
+原文写的 `-> False` 在 `2059c8105` 上确实为真（重跑同样得到 False：那个树的模块里没有 `WORK_ITEM_MANIFEST_RE`），但**它不是合并点的事实**。
+
+### 5.2 通道不只是开着，它已经被用过一次
+
+`#896`（合并 `84bbe924`，2026-11-24 14:51:51 +0800）就是走这条通道登记的：
+
+| 文件 | 改动 |
+|---|---|
+| `14-ai-development/work-items/AID-2026-055/manifest.yaml` | +188 |
+| `14-ai-development/work-items/AID-2026-055/prompt-v1.md` | +145 |
+| `14-ai-development/work-items/INDEX.md` | +2 / -1 |
+
+PR head `5585d95` 的 11 项检查全部 success。用含 `#893` 的闸门直接复核这次登记：
+
+```
+$ python scripts/ci/check_repository_hygiene.py \
+    --base e8948654f941c8192579cf8861f54cef0b4993e1 \
+    --head 84bbe9241aef748b406a969da321e7d3fcda2dc1
+Repository new-file admission version=2026-11-24.1 ...
+Repository new-file admission passed: 2 new path(s) checked.
+-> rc=0
+```
+
+所以原文两句都已被推翻：**通道关着**——假，`#893` 起开着；**现在没有工作单想被登记**——假，`AID-2026-055` 已经登记进去了，就在写那句话的同一小时内。
+
+### 5.3 032 的哪一部分因此失效
+
+- **032 §1 失效。** 它的结论是「自 `cfcafc98a` 起，任何新的 AID 工作单都无法登记」。这句在 `cfcafc98a`..`e894865` 之间为真，自 `e894865` 起为假。今天登记一个新工作单是可行的，`#896` 就是证据。
+- **032 §3 的规则表失效。** 它列「五类之外一律拒绝」，现在有第六类 `WORK_ITEM_MANIFEST_RE`。
+- **032 §4 的推理不受影响，但它的对象消失了。**「由需要者自行放宽，正是缺的那道检查」这个论证仍然成立——它只是不再有一个需要它的人：`#893` 由另一个会话按「锚定路径形态」实施，不是由 032 的作者破例。
+- **032 §6 已在 §2 声明作废**，与本更正一致。
+
+**因此「032 §1–§5 不受影响」这句话本身作废。** 不是「部分受影响」，是它的核心结论（通道关着）已经不成立。032 文件我不改——它记录了当时的判断，而判断在当时是对的；本文件声明它失效。
+
+### 5.4 引用这个正则时要带上时间点
+
+合并点的 `AID-[A-Za-z0-9][A-Za-z0-9._-]*` 很宽：`AID-anything` 也通过。更晚的主干把它收紧为 `AID-\d{4}-\d{3}`（`5822e52`），`AID-anything` 在最新 main 上不再通过。本节贴的是**合并点**上的形态，因为要证明的是合并点的事实；引用时请连同时间点一起引。
 
 ---
 
@@ -186,9 +252,14 @@ grep -n 'test_gate_normative_roots' .github/workflows/bilingual-docs.yml
 -> 123 pairs; IDENTICAL 2, ZH_EMPTY 2, ZH_THIN 3, REAL 116
 #    两对逐字节相同的 CJK 计数分别是 0 与 1057
 
-# 5. 准入仍拒绝工作单
-python -c "import check_repository_hygiene as h; print(h.is_allowed_new_path('14-ai-development/work-items/AID-2026-099/manifest.yaml'))"
--> False
+# 5. 准入已放行工作单（2026-11-24 15:52 +0800 于 main 3026b31 重测，见 §5）
+python -c "import sys; sys.path.insert(0,'scripts/ci'); import check_repository_hygiene as h\
+; print(h.is_allowed_new_path('14-ai-development/work-items/AID-2026-099/manifest.yaml'))"
+-> True
+#    同一命令在 main 2059c8105 上为 False —— 差异来自 #893 的 WORK_ITEM_MANIFEST_RE
+python scripts/ci/check_repository_hygiene.py --base e8948654f941c8192579cf8861f54cef0b4993e1 \
+    --head 84bbe9241aef748b406a969da321e7d3fcda2dc1
+-> Repository new-file admission passed: 2 new path(s) checked.  rc=0
 ```
 
 ---

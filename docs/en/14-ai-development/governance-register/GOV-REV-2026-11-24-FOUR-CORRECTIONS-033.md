@@ -18,7 +18,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-24"
-      last_verification_note: "§1-§7 measured at main 2059c8105; §8 re-measured at main 84bbe9241. Every §8 row is one real invocation of scripts/check_bilingual_docs.py on a worktree reset to origin/main before the single commit under test, with the exit code recorded. Cases F and G exit 0, which is the evidence that no code reads docs/zh-CN content. Cases D, H, I exit non-zero, which refutes the inference that deleting a Chinese mirror goes unannounced. The baseline is 80 lines = 3 comments + 77 entries; none of the 7 content defects appears among those 77 entries. The pair count moved 123 -> 124 between the two measurement points because main gained files."
+      last_verification_note: "§1-§7 measured at main 2059c8105; §8 re-measured at main 84bbe9241. Every §8 row is one real invocation of scripts/check_bilingual_docs.py on a worktree reset to origin/main before the single commit under test, with the exit code recorded. Cases F and G exit 0, which is the evidence that no code reads docs/zh-CN content. Cases D, H, I exit non-zero, which refutes the inference that deleting a Chinese mirror goes unannounced. The baseline is 80 lines = 3 comments + 77 entries; none of the 7 content defects appears among those 77 entries. The pair count moved 123 -> 124 between the two measurement points because main gained files. §5 was corrected 2026-11-24 15:52 +0800 after #893 (e894865) and #896 (84bbe924) were found: the admission function returns True for work-item manifests at merge point 3026b31, and #896 used that channel to register AID-2026-055. Every §5 figure was re-run at that merge point; the suite figures and the two mutation results were re-run too and reproduced exactly."
     usage_status: Active
     modification_status: Unchanged
     supersession:
@@ -47,7 +47,7 @@ document_metadata:
 
 **Status:** `OPEN` / `MEASUREMENT_ONLY` / `NO_IMPLEMENTATION` / §8 added 2026-11-24
 **Nature:** `REGISTER_ONLY / NO_GATE_CHANGE / REQUIRES_INDEPENDENT_REVIEW`
-**Measured at:** `main = 2059c8105` (§4) and `main = 84bbe9241` (§8)
+**Measured at:** `main = 2059c8105` (§1–§4), `main = 84bbe9241` (§8), `main = 3026b31` (§5, re-measured 2026-11-24 15:52 +0800)
 **Register author:** orchestrator session acting as owner-proxy. **Not** an independent reviewer, **not** the accountable owner.
 
 ---
@@ -63,7 +63,7 @@ This file is written within an hour of `REGISTER-INDEX-031` and `DISPATCH-CHANNE
 | 3 | 032 §6: preserve that work order for when the widening lands | the work is already done; the order has no object | **what I preserved is void** |
 | 4 | GAP-24: the zh-CN mirror is the English file | 2 of 123 pairs are byte-identical, **in opposite directions** | **GAP-24 undercounts and describes one direction only** |
 
-032 §1–§5 (the dispatch channel is closed) is unaffected and re-verified in §5.
+032 §1–§5 (the dispatch channel is closed) **no longer holds**: the correction in §5 shows the admission channel has been open since `#893`, and `#896` used it to register `AID-2026-055`. 032 §1/§3 therefore fail; see §5.3.
 
 ---
 
@@ -135,16 +135,82 @@ The consequence: GAP-24 §3's check (a) (`md5(zh-CN) == md5(source)` is an error
 
 ---
 
-## 5. 032 §1–§5 is unaffected, and re-verified
+## 5. `#893` removed 032 §1–§5's premise: the admission channel is open, not shut
 
-#892 did not touch the admission whitelist: the two most recent changes to `scripts/ci/check_repository_hygiene.py` are still `cfcafc98a` (#844) and `e798b1a72`. Calling the function directly on the current tree:
+This section's original title was "032 §1–§5 is unaffected, and re-verified". **That conclusion was wrong**, wrong in two ways: I missed one commit, and I mistook "true at my measurement point" for "still true at the merge point".
+
+### 5.1 The third commit I missed
+
+When I wrote "the two most recent changes are still `cfcafc98a` (#844) and `e798b1a72`", I was measuring `main 2059c8105`. On that tree the sentence **was accurate**. Re-running confirms it:
 
 ```
-is_allowed_new_path('14-ai-development/work-items/AID-2026-099/manifest.yaml')  -> False
+$ git log --oneline 2059c8105 -- scripts/ci/check_repository_hygiene.py
+cfcafc9 ci(hygiene): admit new files through an explicit whitelist (#844)
+e798b1a ci(hygiene): gate prohibited generated artifacts in the committed tree (#778)
+```
+
+But main moved once more after 2059c8105, and that move landed exactly on the object of this section's assertion:
+
+```
+$ git log --oneline 3026b31 -- scripts/ci/check_repository_hygiene.py
+e894865 fix(hygiene): admit work-item manifests by anchored path shape, not by suffix   <- the third commit I missed
+cfcafc9 ci(hygiene): admit new files through an explicit whitelist (#844)
+e798b1a ci(hygiene): gate prohibited generated artifacts in the committed tree (#778)
+```
+
+`e894865` (#893, 2026-11-24 14:13:58 +0800) added a sixth rule to `is_allowed_new_path()`. The regex as written (**its shape at the merge point**):
+
+```python
+WORK_ITEM_MANIFEST_RE = re.compile(
+    r"14-ai-development/work-items/AID-[A-Za-z0-9][A-Za-z0-9._-]*/manifest\.yaml"
+)
+```
+
+Calling the function directly at the merge point, `main 3026b31`:
+
+```
+is_allowed_new_path('14-ai-development/work-items/AID-2026-099/manifest.yaml')  -> True
+is_allowed_new_path('14-ai-development/work-items/AID-anything/manifest.yaml')   -> True
 is_allowed_new_path('14-ai-development/governance-register/X.md')                -> True
 ```
 
-So "no new work order can be registered" still holds — it is simply that **no work order now wants registering**. Both facts are true at once: the channel is shut, and the last thing that wanted it was finished by someone else down a different road.
+The `-> False` in the original is genuinely true on `2059c8105` (re-running gives False too: that tree's module has no `WORK_ITEM_MANIFEST_RE`), but **it is not the merge point's fact**.
+
+### 5.2 The channel is not merely open; it has already been used once
+
+`#896` (merge `84bbe924`, 2026-11-24 14:51:51 +0800) is a registration that went through it:
+
+| File | Change |
+|---|---|
+| `14-ai-development/work-items/AID-2026-055/manifest.yaml` | +188 |
+| `14-ai-development/work-items/AID-2026-055/prompt-v1.md` | +145 |
+| `14-ai-development/work-items/INDEX.md` | +2 / -1 |
+
+All 11 checks on PR head `5585d95` were success. Re-checking that registration with the gate that contains `#893`:
+
+```
+$ python scripts/ci/check_repository_hygiene.py \
+    --base e8948654f941c8192579cf8861f54cef0b4993e1 \
+    --head 84bbe9241aef748b406a969da321e7d3fcda2dc1
+Repository new-file admission version=2026-11-24.1 ...
+Repository new-file admission passed: 2 new path(s) checked.
+-> rc=0
+```
+
+So both sentences in the original are refuted: **the channel is shut** — false, open since `#893`; **no work order now wants registering** — false, `AID-2026-055` was registered inside the same hour that sentence was written.
+
+### 5.3 Which part of 032 therefore fails
+
+- **032 §1 fails.** Its conclusion is "since `cfcafc98a`, no new AID work order can be registered". That was true between `cfcafc98a` and `e894865`, and false from `e894865` on. Registering a new work order is possible today; `#896` is the evidence.
+- **032 §3's rule table fails.** It lists "anything outside the five classes is refused"; there is now a sixth, `WORK_ITEM_MANIFEST_RE`.
+- **032 §4's reasoning is unaffected, but its object is gone.** The argument "the one who needs the widening is the one who must not grant it" still holds — it simply no longer has a claimant: `#893` was implemented by a different session as an anchored path shape, not as 032's author making an exception for itself.
+- **032 §6 was already declared void in §2**, consistent with this correction.
+
+**So the sentence "032 §1–§5 is unaffected" is itself void.** Not "partly affected" — its central conclusion (the channel is shut) no longer holds. I do not edit 032: it records what was judged at the time, and the judgement was right at the time. This file declares it void instead.
+
+### 5.4 Cite this regex with its timestamp
+
+At the merge point `AID-[A-Za-z0-9][A-Za-z0-9._-]*` is loose: `AID-anything` passes. A later main tightened it to `AID-\d{4}-\d{3}` (`5822e52`), and `AID-anything` no longer passes on current main. This section quotes the **merge-point** shape because what it has to prove is a merge-point fact; quote it together with the timestamp.
 
 ---
 
@@ -186,9 +252,14 @@ grep -n 'test_gate_normative_roots' .github/workflows/bilingual-docs.yml
 -> 123 pairs; IDENTICAL 2, ZH_EMPTY 2, ZH_THIN 3, REAL 116
 #    the two byte-identical pairs have CJK counts of 0 and 1057
 
-# 5. admission still refuses work orders
-python -c "import check_repository_hygiene as h; print(h.is_allowed_new_path('14-ai-development/work-items/AID-2026-099/manifest.yaml'))"
--> False
+# 5. admission now admits work orders (re-measured at main 3026b31, 2026-11-24 15:52 +0800, see §5)
+python -c "import sys; sys.path.insert(0,'scripts/ci'); import check_repository_hygiene as h\
+; print(h.is_allowed_new_path('14-ai-development/work-items/AID-2026-099/manifest.yaml'))"
+-> True
+#    the same call returns False on main 2059c8105 — the difference is #893's WORK_ITEM_MANIFEST_RE
+python scripts/ci/check_repository_hygiene.py --base e8948654f941c8192579cf8861f54cef0b4993e1 \
+    --head 84bbe9241aef748b406a969da321e7d3fcda2dc1
+-> Repository new-file admission passed: 2 new path(s) checked.  rc=0
 ```
 
 ---
