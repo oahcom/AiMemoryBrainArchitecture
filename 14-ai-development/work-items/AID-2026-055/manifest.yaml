@@ -1,0 +1,179 @@
+work_item_id: AID-2026-055
+title: Require formal review on main, and prove the requirement by being refused
+
+class: GATE/CONFIG/TEST
+risk: R2
+risk_rationale: "Changes the branch protection state of main, which is the mechanism every other gate depends on. A misconfiguration does not fail loudly: it either leaves the repository exactly as unprotected as before while appearing to be fixed, or it locks main so that no change can land at all. Both outcomes are invisible to the check suite, because the check suite does not read branch protection. The verification is therefore not 'the setting was written' but 'a non-compliant merge was refused and the refusal body recorded'. Criterion 6 is a negative test for exactly that reason: the only acceptable evidence of a review requirement is a merge that the platform would not perform."
+
+security_scope: "None. No Rust, no transport, no authorization path, no storage. The change is branch protection configuration on oahcom/AiMemoryBrainArchitecture, one CODEOWNERS file if absent, and one negative-test record."
+
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+implementing_ai_session: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: a8c367def34e5a3082ab777a7afedf7e82f38aa0
+
+tracking_issue: "NONE - tracked by GOV-NC-2026-11-20-MERGE-AFTER-RULING-003 (frozen zero-review count), GOV-NC-2026-11-24-MERGE-FORM-DEVIATION-031 (post-freeze instance #875), and by this AID manifest"
+
+created_at: 2026-11-24
+updated_at: 2026-11-24
+
+prompt_id: AID-2026-055-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-055/prompt-v1.md
+prompt_status: FROZEN
+prompt_sha256: 085933f335b32007f0aa05223b4c65d8e5f08a6867d4939727e54b1d82826c13
+prompt_bytes: 6116
+
+prompt_provenance_tier: T1
+prompt_provenance_note: "Frozen from the owner-proxy session that measured the live branch protection state, measured the reviews endpoints of the merges this work item is about, and read the four rulings the Owner issued in round 20. Every figure in the prompt is a value returned by the GitHub REST API in that session, not an inference from repository files."
+
+dependency_refs:
+  - 14-ai-development/governance-register/GOV-NC-2026-11-20-MERGE-AFTER-RULING-003.md
+  - 14-ai-development/governance-register/GOV-NC-2026-11-24-MERGE-FORM-DEVIATION-031.md
+  - 14-ai-development/PR-GOVERNANCE-001.md
+  - 14-ai-development/adr/OWNER-DECISION-EVENT-TIMESTAMP-PROVENANCE-001.md
+
+# ---------------------------------------------------------------------------
+# The four decisions the Owner issued in round 20. These are rulings, not
+# options for the implementer to re-litigate. Each is restated with the
+# constraint the Owner attached to it.
+# ---------------------------------------------------------------------------
+
+owner_decisions:
+
+  - id: D1
+    question: "Is formal review required?"
+    ruling: "Yes. At least one formal review with state Approved, from an account that is not the PR author."
+    constraints:
+      - "The PR author's own review does not count as an independent approval."
+      - "A formal review means a record in GET /pulls/{n}/reviews. It does not mean a comment, and it does not mean review_comments > 0. The two are different resources and must never be reported as one."
+
+  - id: D2
+    question: "Is Code Owner review required?"
+    ruling: "Yes, but scoped to paths covered by CODEOWNERS. When a PR touches a governed path, at least one corresponding Code Owner must approve."
+    constraints:
+      - "Verify that Code Owner approval is actually required, not merely that a CODEOWNERS file exists. A file with no matching rule protects nothing."
+      - "If CODEOWNERS is absent, its creation is in scope only if needed to make D2 testable. Which paths must have owners is the document owner's decision and is NOT granted here."
+
+  - id: D3
+    question: "May administrators bypass?"
+    ruling: "No. Administrators must satisfy the review requirement and the required checks like any other actor."
+    constraints:
+      - "enforce_admins.enabled must be true after the change, and must be verified by API read, not assumed from the write succeeding."
+      - "This decision does not address direct pushes to main. That is a separate vector and stays OPEN."
+
+  - id: D4
+    question: "How is the change verified?"
+    ruling: "Read the protection rule back from the API, and perform a zero-review negative test confirming GitHub refuses the merge. Do not actually merge a non-compliant PR in order to test."
+    constraints:
+      - "The negative test records: the API request, the response status, the response body, the PR head SHA, and the required-check state at the time of the request."
+      - "The negative test must not produce a merge. If it would, the test design is wrong, not the gate."
+
+# ---------------------------------------------------------------------------
+# Deliverables. Each one is a claim that must be checkable by a reader who
+# does not trust this manifest.
+# ---------------------------------------------------------------------------
+
+deliverables:
+  - "Branch protection on main updated so required_pull_request_reviews is present, with required_approving_review_count >= 1 and require_code_owner_reviews = true if D2 is testable."
+  - "dismiss_stale_reviews = true, so a new commit invalidates an existing approval rather than letting it stand against code it never saw."
+  - "enforce_admins.enabled = true, confirmed by API read after the write."
+  - "A CODEOWNERS file covering the governed roots, or a recorded finding that D2 is NOT testable because no ownership mapping is authorized by this work item."
+  - "A negative-test record containing the five fields D4 requires, showing a non-compliant merge was refused and nothing was merged."
+  - "A before/after table of the full protection object, field by field, so a reader can see exactly which fields changed and which were already correct."
+  - "The post-freeze zero-review instance line for PR #875, added to MERGE-FORM-DEVIATION-031 if not already present, without touching the frozen count in §13.7 of MERGE-AFTER-RULING-003."
+
+acceptance_criteria:
+  - id: AC1
+    text: "GET /branches/main/protection returns required_pull_request_reviews with required_approving_review_count >= 1. Recorded with the raw response body, not a summary."
+  - id: AC2
+    text: "The same response shows dismiss_stale_reviews = true and enforce_admins.enabled = true. If the platform does not expose one of these, that fact is recorded rather than the field being reported as passing."
+  - id: AC3
+    text: "The required-check context list is unchanged from its pre-change value of 11 contexts, and strict remains true. This work item must not weaken any existing check in order to add review."
+  - id: AC4
+    text: "If CODEOWNERS exists and covers a governed path, a PR touching that path is refused when the Code Owner has not approved. If CODEOWNERS is not authorized, a finding records D2 as NOT_VERIFIABLE with the reason, and D2 is not reported as satisfied."
+  - id: AC5
+    text: "The negative test shows a refused merge with the response body recorded verbatim. A test that merges, or that relies on a client-side pre-check instead of the platform refusal, does not satisfy this criterion."
+  - id: AC6
+    text: "No formal review is fabricated anywhere in the record. The negative test uses an account that legitimately cannot self-approve, and the record states which account and why."
+  - id: AC7
+    text: "The frozen zero-review count in MERGE-AFTER-RULING-003 §13.7 is unchanged by this work item. Verified by diffing that file against the base commit."
+
+independent_reviewer: NOT_ASSIGNED
+integration_reviewer: NOT_ASSIGNED
+
+review:
+  status: NOT_ASSIGNED
+  report_ref: ""
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+implementation:
+  status: NOT_STARTED
+  branch: PENDING
+  pull_request: PENDING
+  pull_request_url: PENDING
+  implementation_commit_sha: PENDING
+  merge_commit_sha: NOT_MERGED
+
+authorization:
+  branch_protection_write: "USER-PRINCIPAL-DELEGATED (limited to the four fields named in deliverables: required_pull_request_reviews, dismiss_stale_reviews, require_code_owner_reviews, enforce_admins)"
+  codeowners_creation: "USER-PRINCIPAL-DELEGATED (limited to a CODEOWNERS file that makes D2 testable; the ownership mapping itself is NOT granted)"
+  negative_test_execution: "USER-PRINCIPAL-DELEGATED (limited to a test that is refused; no merge may result)"
+  register_write: "USER-PRINCIPAL-DELEGATED (limited to the negative-test record and the #875 instance line)"
+  required_check_change: NOT_GRANTED
+  frozen_count_change: NOT_GRANTED
+  direct_push_vector: NOT_GRANTED
+  production_authorization: NOT_GRANTED
+
+governance:
+  aid_assignment: REGISTERED
+  aid_status: REGISTERED
+  registration_authorization: "USER-PRINCIPAL-DELEGATED (limited to this work item)"
+  development_start_authorization: "USER-PRINCIPAL-DELEGATED (limited to the four Owner decisions D1-D4)"
+  architecture_status: NOT_APPLICABLE
+  g8_status: NOT_APPLICABLE
+  quota_change: NONE
+
+verification:
+  status: RUN
+  environment: "Windows, GitHub REST API reads and writes, git. No cargo: this work order touches no Rust."
+  commands:
+    - "GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection -> required_pull_request_reviews: null; required_status_checks.strict: true; contexts: 11; enforce_admins.enabled: true; allow_force_pushes.enabled: false"
+    - "GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/707/reviews -> []"
+    - "GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/875/reviews -> []"
+    - "GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/875 -> merged true, merge_commit_sha a8c367d, commits 3, additions 106, deletions 0"
+    - "GET /repos/oahcom/AiMemoryBrainArchitecture -> allow_merge_commit true, allow_squash_merge true, allow_rebase_merge true"
+  evidence_refs:
+    - "The measured protection object is the 'before' column of the required before/after table. It is stated here so the implementer can reproduce it rather than being told the conclusion."
+    - "Two zero-review merges were measured directly (#707, #875), each by reading the reviews endpoint rather than inferring from comments. Both returned an empty array."
+
+findings:
+  - id: AID-2026-055-F1
+    severity: P1
+    feedback_destination: "Delivery PR conversation. required_pull_request_reviews is absent from main's protection today, which is why both #707 and #875 merged with zero formal reviews. The absence is the whole defect: the required-check list is 11 contexts and every one of them was green on #875, so check coverage cannot substitute for review coverage. A repository can be fully check-gated and still merge unreviewed code indefinitely."
+  - id: AID-2026-055-F2
+    severity: P1
+    feedback_destination: "Delivery PR conversation. enforce_admins is already true, and it does NOT prevent a direct push to main. Conflating the two is the mistake this work item must avoid in its own write-up: the branch protection API controls merges through the PR path, while a direct push is a different vector that stays OPEN after this change."
+  - id: AID-2026-055-F3
+    severity: P1
+    feedback_destination: "Delivery PR conversation. There is exactly one account in use for both authoring and merging. D1 requires an approver who is not the PR author, and with one account that approver does not exist. The implementer must record this as the blocking constraint rather than solving it by counting the author's own review, or by creating a second identity to approve the first. Whether a second accountable human exists is the Owner's answer to give, not the implementer's to assume."
+  - id: AID-2026-055-F4
+    severity: P2
+    feedback_destination: "Delivery PR conversation. Turning on required review without a second approver available would deadlock main: every PR would be unmergeable, including the PR that fixes the deadlock. The change order matters. The negative test should be run in a way that can be reverted, and the manifest should state the revert path before the setting is written, not after."
+  - id: AID-2026-055-F5
+    severity: P2
+    feedback_destination: "Delivery PR conversation. The required-check list must not be disturbed. A protection PUT that omits required_status_checks replaces the whole object, and would silently drop all 11 contexts. The write must send the complete object, and AC3 exists to catch a write that quietly reduced check coverage while appearing to add review."
+
+notes:
+  - "The four decisions D1-D4 are the Owner's, issued in round 20. The implementer may not soften D1 to 'review recommended' or D3 to 'admins may bypass with justification'. If a decision proves unimplementable, that is a finding, not a renegotiation."
+  - "This work item does not close the risk. Risk 2 closes only when the protection rule is configured, the API state is verified, and the zero-review negative test is refused. Until all three hold, the risk stays OPEN regardless of how much of this manifest is complete."
+  - "F3 is the load-bearing finding. Everything else in this work item is configuration; F3 is the question of whether the requirement can be satisfied at all by the actors who exist."
