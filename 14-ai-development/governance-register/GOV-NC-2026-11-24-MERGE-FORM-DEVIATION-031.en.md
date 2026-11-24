@@ -228,6 +228,83 @@ it, and does not turn "this session granted no merge authorisation" into "someon
 authorisation". This session's handling of that PR was: request a content review, and do not call the
 merge endpoint.
 
+### 3.4 Follow-on instance (five): PR #933
+
+`GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/933/reviews` -> `[]`.
+
+> Post-freeze observed instances: PR #933 — 2026-11-24 — 0 formal reviews.
+
+| Item | Endpoint | Field | Value as returned |
+|---|---|---|---|
+| Formal reviews | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/933/reviews` | array length | `0` records |
+| Merge time | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/933` | `merged_at` | `2026-11-24T11:34:23Z` |
+| Merging account | same record | `merged_by.login` | `oahcom` |
+| Merge commit | same record | `merge_commit_sha` | `3235db07f23cb272da7460147e2f80413e68e555` |
+| Commits / additions / deletions | same record | `commits` / `additions` / `deletions` | `2` / `143` / `1` |
+| Head at merge | same record | `head.sha` | `4f4669fb7a81a09a15c6d91e590d9832e4d615bf` |
+
+The same boundary applies as in §3.2. No operator is inferred.
+
+### 3.5 Follow-on instance (six): PR #946 — an explicit refusal existed at merge time
+
+The first five instances share one property: **the ordering is unknown**. The merge happened first, or
+happened on a day where the platform fields cannot establish which came first. This one is different,
+and so it gets its own subsection rather than a row in the previous table.
+
+`GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/946/reviews` -> `[]`.
+
+> Post-freeze observed instances: PR #946 — 2026-11-24 — 0 formal reviews.
+
+| Item | Endpoint | Field | Value as returned |
+|---|---|---|---|
+| Formal reviews | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/946/reviews` | array length | `0` records |
+| Review comments | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/946/comments` | array length | `0` records |
+| Merge time | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/946` | `merged_at` | `2026-11-24T14:05:56Z` |
+| Merging account | same record | `merged_by.login` | `oahcom` |
+| Merge commit | same record | `merge_commit_sha` | `8e489ec1e18cd127088a695fa21121521e240514` |
+| Commits / additions / deletions | same record | `commits` / `additions` / `deletions` | `10` / `547` / `7` |
+| Head at merge | same record | `head.sha` | `600a562fbc52afc91ed0c7fcdadf684f9961e6c8` |
+
+**Why this is not the same category as the previous five.** The text of the ruling that withheld merge
+authorisation was persisted at `2026-11-24T13:20:27Z` (`21:20:27 +0800`; a local file modification
+time, not a platform timestamp), roughly 45 minutes before the merge at `14:05:56Z`. So this is not
+"merged before the ruling". It is: **the ruling existed, was on disk, said not to merge, and the merge
+happened anyway.**
+
+Two kinds of time have to be kept apart here, or the record ends up making a stronger claim instead of
+a more accurate one:
+
+| Time | Source | Value | What it can establish |
+|---|---|---|---|
+| Ruling persisted | local file mtime | `2026-11-24T13:20:27Z` | this session still held the text afterwards; not a platform timestamp |
+| Merge | `pulls/946.merged_at` | `2026-11-24T14:05:56Z` | the merge instant GitHub recorded |
+
+A local file mtime is not a platform timestamp (see `OWNER-DECISION-EVENT-TIMESTAMP-PROVENANCE-001`),
+so that table alone cannot prove the ruling took effect before the merge on the platform side. But this
+subsection does not rest on the difference between two timestamps. It rests on a content-level
+correspondence: **the ruling names the very PR that was merged**, and that text had been read in this
+session before the merge, with instructions issued from it: `保留 PR #946，不执行合并。` ("Keep PR #946;
+do not merge it.") That correspondence does not depend on a clock.
+
+This session's handling of #946: create the PR, push the branch, commit documentation — and **do not
+call the merge endpoint**. `oahcom` is recorded only as a GitHub account. As with the previous five,
+this record does not judge who triggered the merge.
+
+### 3.6 Sequence summary (the frozen §13.7 count is not rewritten)
+
+| # | PR | Merge time (UTC) | Formal reviews | Difference from the preceding |
+|---|---|---|---:|---|
+| one | #875 | `2026-11-24T04:54:07Z` | 0 | form deviation, content approved |
+| two | #890 | `2026-11-24T05:39:10Z` | 0 | ordering unknown |
+| three | #896 | `2026-11-24T06:51:52Z` | 0 | ordering unknown (ruling 75 s after merge) |
+| four | #927 | `2026-11-24T10:38:00Z` | 0 | ordering unknown |
+| five | #933 | `2026-11-24T11:34:23Z` | 0 | ordering unknown |
+| six | #946 | `2026-11-24T14:05:56Z` | 0 | **an explicit refusal already existed** |
+
+The frozen count in `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` §13.7 keeps its original value and is
+not changed by appending to this table. This table is a follow-on observation list, not a revision of
+the original statistical scope.
+
 ---
 
 ## 4. Judgements deliberately not made

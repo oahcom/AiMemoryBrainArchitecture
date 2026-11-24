@@ -27,7 +27,7 @@ document_metadata:
 
 # AID-2026-057 — round-26 acceptance evidence
 
-Verbatim output of the two verifiers, captured at `main = 026dca6` with the
+Verbatim output of the two verifiers, captured at `main = 95c1261` with the
 candidate inventory defined by the pre-patch predicate (`2026-11-24.2`) over the
 pre-patch tree. Kept unedited so a reader can re-derive every number in the PR
 body without trusting the prose.
@@ -39,11 +39,11 @@ Verifiers:
 ## AC8 — measure_ab.py
 
 ```
-versions: pre=2026-11-24.2  d=2026-11-24.3  ab=2026-11-24.4
+versions: pre=2026-11-24.2  d=2026-11-24.3  ab=2026-11-24.5
 inventory (pre-patch refused set) = 113
 
 after D only (v24.3):  admitted 5 / refused 108
-after A/B  (v24.4):  admitted 83 / refused 30
+after A/B  (v24.5):  admitted 83 / refused 30
 
 === newly admitted BY A/B, i.e. admitted now but not by D (78) ===
   .governance/GOV-DOC-001-inheritance.json
