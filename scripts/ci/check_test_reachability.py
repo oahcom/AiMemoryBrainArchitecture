@@ -5,8 +5,8 @@ Reachability is decided by `unittest discover` roots and by explicit
 references inside `.github/workflows/*.yml`. This is a structural check, not a
 YAML or shell interpreter: it never executes a workflow.
 
-The repository has 56 `test_*.py` files and all 56 are reachable today. That
-number is the point. `repository-hygiene.yml` executes twelve of them from a
+The repository has 57 `test_*.py` files and all 57 are reachable today. That
+number is the point. `repository-hygiene.yml` executes some of them from a
 hand-written list, which is an instance of the coverage; this script is the
 rule, so a new test file that no workflow runs fails the required gate instead
 of appearing green.
@@ -95,6 +95,19 @@ def discovery_rules(workflows, root, directories):
     return rules
 
 
+def stem_collisions(tests, root):
+    """Return {stem: [paths]} for every stem shared by two or more test files.
+
+    Rule B below is substring matching, so it is sound only while no two test
+    files share a stem. This turns that precondition into a check: a collision
+    makes the gate fail closed instead of reporting the shadowed file reachable.
+    """
+    by_stem = {}
+    for test in tests:
+        by_stem.setdefault(test.stem, []).append(test.relative_to(root).as_posix())
+    return {stem: paths for stem, paths in by_stem.items() if len(paths) > 1}
+
+
 def is_reachable(test, root, workflow_text, rules):
     for discovery_root, pattern in rules:
         if (
@@ -107,8 +120,9 @@ def is_reachable(test, root, workflow_text, rules):
     # not — scripts/ci/test_check_fmt.py is hidden by scripts/test_check_fmt.
     # That is the deliberate trade: the alternative is parsing every `run:`
     # block, and a basename-only matcher was already the wrong answer twice
-    # (#834 nearly reported two wired files as residual). Upgrade path: parse
-    # `run:` blocks and match whole arguments.
+    # (#834 nearly reported two wired files as residual). The trade is bounded
+    # by stem_collisions() above, which fails closed before this runs. Upgrade
+    # path: parse `run:` blocks and match whole arguments.
     relative = test.relative_to(root)
     return any(
         reference in workflow_text
@@ -138,6 +152,18 @@ def main(argv):
         workflows = read_workflows(root)
         text = "\n".join(path.read_text(encoding="utf-8") for path in workflows)
         directories, tests = walk(root)
+
+        collisions = stem_collisions(tests, root)
+        if collisions:
+            for stem, paths in sorted(collisions.items()):
+                print(
+                    "::error::Test file stem %r is shared by %s. Rule B matches "
+                    "by substring, so it cannot tell them apart and would report "
+                    "the unreferenced one reachable." % (stem, " and ".join(paths)),
+                    file=sys.stderr,
+                )
+            return 1
+
         rules = discovery_rules(workflows, root, directories)
 
         unreachable = [

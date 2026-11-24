@@ -10,12 +10,14 @@ root, so every input outside the declared subset must fail, not degrade.
 from __future__ import annotations
 
 import ast
+import io
 import os
 import re
 import shutil
 import subprocess
 import sys
 import tempfile
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -144,13 +146,34 @@ def skip(name: str, why: str) -> None:
         UNEXPECTED_SKIPS.append(f"{name}: skip reason {why!r} is not the registered one")
 
 
-def expect(name: str, text: str, needle: str = "", expect_clean: bool = False) -> None:
+def expect(
+    name: str,
+    text: str,
+    needle: str = "",
+    expect_clean: bool = False,
+    *,
+    msg: str = "",
+) -> None:
+    if needle and msg:
+        raise ValueError("expect() accepts either needle or msg, not both")
+
     errors, _ = check_document(FILE, text)
+
     if expect_clean:
         record(name, not errors, f"  unexpected: {errors}")
         return
-    ok = any(needle in e for e in errors) if needle else bool(errors)
-    record(name, ok, f"  expected {needle!r}, got {errors}")
+
+    if msg:
+        ok = any(error.startswith(msg) for error in errors)
+        expected = f"message prefix {msg!r}"
+    elif needle:
+        ok = any(needle in error for error in errors)
+        expected = f"rule-id needle {needle!r}"
+    else:
+        ok = bool(errors)
+        expected = "at least one error"
+
+    record(name, ok, f"  expected {expected}, got {errors}")
 
 
 def run_gate(root: Path, *extra: str) -> int:
@@ -162,9 +185,38 @@ def run_gate(root: Path, *extra: str) -> int:
         sys.argv = argv
 
 
-def expect_gate(name: str, root: Path, want: int, *extra: str) -> None:
-    code = run_gate(root, *extra)
-    record(name, code == want, f"  gate returned {code}, expected {want}")
+def expect_gate(
+    name: str,
+    root: Path,
+    want: int,
+    *extra: str,
+    msg: str = "",
+) -> None:
+    if not msg:
+        code = run_gate(root, *extra)
+        record(name, code == want, f"  gate returned {code}, expected {want}")
+        return
+
+    stdout = io.StringIO()
+    stderr = io.StringIO()
+
+    with redirect_stdout(stdout), redirect_stderr(stderr):
+        code = run_gate(root, *extra)
+
+    output = stdout.getvalue() + stderr.getvalue()
+    message_found = any(
+        line.strip().startswith(msg)
+        for line in output.splitlines()
+    )
+
+    ok = code == want and message_found
+
+    record(
+        name,
+        ok,
+        f"  gate returned {code}, expected {want}; "
+        f"expected message prefix {msg!r}; output: {output!r}",
+    )
 
 
 # --------------------------------------------------------------------------
@@ -265,6 +317,14 @@ def run_fields() -> None:
     expect("narrow approval scope rejected", doc(APPROVED.replace(
         "type: Full-document", "type: Selected-sections"
     )), "DM-03")
+    expect(
+        "Approved without approval_scope.type rejected",
+        doc(APPROVED.replace(
+            "        type: Full-document\n",
+            "",
+        )),
+        msg="DM-03 Approved requires approval.approval_scope.type",
+    )
     expect("Revoked without decision id rejected", doc(BASE.replace(
         "decision_status: Draft", "decision_status: Revoked\n      revocation: null"
     )), "DM-04")
@@ -599,7 +659,15 @@ def run_repository_rules() -> None:
             "    supersession:\n      supersedes:\n        - 00-governance/gone.md\n"
             "    approval:\n      decision_status: Draft",
         )), encoding="utf-8")
-        expect_gate("DM-13 missing supersedes target fails", root, 1)
+        expect_gate(
+            "DM-13 missing supersedes target fails",
+            root,
+            1,
+            msg=(
+                "DM-13 00-governance/a.md: "
+                "supersedes target does not exist: 00-governance/gone.md"
+            ),
+        )
 
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
@@ -1046,6 +1114,119 @@ def run_dm10_scope() -> None:
     test_incremental_one_in_scope_one_out_of_scope()
     test_incremental_zero_out_of_scope_still_prints_the_count()
     test_out_of_scope_stale_pin_emits_both_a_note_and_a_count()
+
+def run_prose_status_census() -> None:
+    print("prose-only document status (issue #481)")
+    test_prose_only_work_item_status_is_counted_not_blocking()
+    test_frontmatter_clears_the_prose_only_count()
+    test_prose_only_status_counts_files_outside_work_items()
+
+def test_prose_only_work_item_status_is_counted_not_blocking() -> None:
+    """A prose-only status is counted, never failed.
+
+    The defect is that DM-02 is structurally blind to these files, not that 89
+    of them are "wrong". Reporting them as errors would turn the gate red for
+    every unrelated change, so the count must arrive as a notice, and an
+    increment that does not touch the file must still pass.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        work = root / "14-ai-development" / "work-items"
+        work.mkdir(parents=True, exist_ok=True)
+        work_item = work / "AID-X.md"
+        work_item.write_text(
+            "# AID-X\n\n- Status: PROPOSED — pending owner adoption\n", encoding="utf-8"
+        )
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "seed with a prose-only work item")
+        base = _git(root, "rev-parse", "HEAD")
+        (root / "notes.txt").write_text("unrelated change\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "touch nothing governed")
+        code_with, out, err = _run_capture(root, "--require-changed", base)
+        work_item.unlink()
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "drop the work item")
+        code_without, out_zero, _ = _run_capture(root, "--require-changed", base)
+        counted = any(
+            line.startswith("::notice::advisory (non-blocking): 1 governed document(s)")
+            for line in out.splitlines()
+        )
+        zero = any(
+            line.startswith("::notice::advisory (non-blocking): 0 governed document(s)")
+            for line in out_zero.splitlines()
+        )
+        named = any(
+            "x1 PROPOSED — pending owner adoption" in line for line in out.splitlines()
+        )
+        on_stderr = "advisory" in err
+        record(
+            "T87 prose-only work-item status is counted as advisory, never failed",
+            code_with == 0 and code_without == 0 and counted and zero and named
+            and not on_stderr,
+            f"  exit with={code_with} without={code_without}, expected 0 both; "
+            f"count line: {counted}; zero line when absent: {zero}; "
+            f"value printed: {named}; on stderr: {on_stderr}",
+        )
+
+def test_frontmatter_clears_the_prose_only_count() -> None:
+    """The ratchet can go down only by conversion, so conversion must count.
+
+    A file that carries both a metadata block and the original prose line is no
+    longer prose-only: the human record stays, and DM-02 now sees the status.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        work = root / "14-ai-development" / "work-items"
+        work.mkdir(parents=True, exist_ok=True)
+        (work / "AID-Y.md").write_text(
+            doc(BASE) + "\n- Status: PROPOSED — pending owner adoption\n",
+            encoding="utf-8",
+        )
+        _code, out, _err = _run_capture(root)
+        zero = any(
+            line.startswith("::notice::advisory (non-blocking): 0 governed document(s)")
+            for line in out.splitlines()
+        )
+        no_values = not any("x1 PROPOSED" in line for line in out.splitlines())
+        record(
+            "T88 front-matter plus the original prose line is no longer prose-only",
+            zero and no_values,
+            f"  zero count line: {zero}; value lines absent: {no_values}",
+        )
+
+def test_prose_only_status_counts_files_outside_work_items() -> None:
+    """The population is the governed set, not one directory (issue #481).
+
+    A census that only walked `14-ai-development/work-items/` reported 5 files
+    while the same class sat in `14-ai-development/adr/` and at the top level
+    of `14-ai-development/`. The count claims to measure "files DM-02 cannot
+    see", so it must cover exactly the files DM-02 is applied to.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        adr = root / "14-ai-development" / "adr"
+        adr.mkdir(parents=True, exist_ok=True)
+        (adr / "ADR-X.en.md").write_text(
+            "# ADR-X\n\n- Status: PROPOSED — decision pending\n", encoding="utf-8"
+        )
+        (root / "14-ai-development" / "TOP-LEVEL.md").write_text(
+            "# TOP-LEVEL\n\n- Status: PROPOSED — decision pending\n", encoding="utf-8"
+        )
+        _code, out, _err = _run_capture(root)
+        counted = any(
+            line.startswith("::notice::advisory (non-blocking): 2 governed document(s)")
+            for line in out.splitlines()
+        )
+        record(
+            "T89 prose-only status outside work-items is counted too",
+            counted,
+            f"  expected '2 governed document(s)', got: "
+            f"{[l for l in out.splitlines() if 'governed document(s)' in l]}",
+        )
 
 
 def run_shallow_history() -> None:
@@ -3440,6 +3621,7 @@ def main() -> int:
     run_approval_binding()
     run_approval_scope()
     run_dm10_scope()
+    run_prose_status_census()
     run_shallow_history()
     run_changed_paths()
     run_path_safety()

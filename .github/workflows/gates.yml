@@ -8,7 +8,8 @@ name: Existing gates
 # TWO KINDS OF JOB, and the difference is deliberate:
 #
 #   * HARD GATES fail on any deviation. The gate is green today and must stay
-#     green: `protocol-index`, `conformance`, `schema-nonempty`, `clippy`, `fmt`.
+#     green: `protocol-index`, `conformance`, `schema-nonempty`, `clippy`, `fmt`,
+#     `doctest`.
 #
 #   * RATCHETS fail only when the failure set gets WORSE than the recorded
 #     baseline: `bilingual`. This gate is already red on main (GAP-08). Making it
@@ -203,6 +204,32 @@ jobs:
           # has no ~/.cargo/env and an unguarded source aborts under `set -e`.
           if [ -f "$HOME/.cargo/env" ]; then . "$HOME/.cargo/env"; fi
           cargo clippy --workspace --all-targets -- -D warnings
+
+  # `--all-targets` covers --lib/--bins/--tests/--benches/--examples and
+  # explicitly excludes doctests; only `--doc` runs them. `rust-phase1.yml`
+  # already passes `--doc`, but it is path-filtered and is not a required
+  # context, so a doctest regression can merge green (issue #704). This job has
+  # no path filter, so the `compile_fail` blocks in `memory-domain` are checked
+  # on every pull request.
+  doctest:
+    name: Rust doctests (hard gate)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CARGO_PROFILE_DEV_DEBUG: "0"
+      CARGO_PROFILE_TEST_DEBUG: "0"
+      CARGO_BUILD_JOBS: "2"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: cargo test --workspace --doc
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f "$HOME/.cargo/env" ]; then . "$HOME/.cargo/env"; fi
+          cargo test --workspace --doc --no-fail-fast
 
   # `rust-phase1.yml` already runs this check, but it has a `paths:` filter and
   # is not a required status context, so a formatting regression could merge

@@ -1,0 +1,262 @@
+work_item_id: AID-2026-057
+title: Classify the 113 paths the admission gate would refuse, and admit none of them by extension
+
+class: GATE/POLICY
+risk: R2
+risk_rationale: "Changes which new files can enter the repository. The gate is the only control that distinguishes an intentional new file from a stray artefact, and it works by refusing everything not positively named. A rule written one level too wide does not fail loudly: it admits a class of file nobody examined, and the gate keeps reporting PASS with a version string that no longer describes the policy actually enforced. The failure is silent by construction. This is why AC8 measures the newly-admitted set against the inventory rather than merely checking that the intended paths pass, and why AC9 requires the buckets to reconcile to the refused total: a dropped path and an over-wide rule are both invisible to a test that only checks the paths the author thought of."
+
+security_scope: "None. No Rust, no transport, no authorization path, no storage. The change is the positive allowlist in scripts/ci/check_repository_hygiene.py plus its tests."
+
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+implementing_ai_session: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: a23e6cc036f8ba22de758aaf6059cb8639849d6f
+
+tracking_issue: "NONE - tracked by GOV-NC-2026-11-24-MERGE-FORM-DEVIATION-031 and by this AID manifest. The Owner required this to be a separate work item, not part of AID-2026-055 or #893."
+
+created_at: 2026-11-24
+updated_at: 2026-11-24
+
+prompt_id: AID-2026-057-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-057/prompt-v1.md
+prompt_status: FROZEN
+prompt_sha256: 4af2b314e0a2e552bd5ebb033680e92deae7617bdcbae21400bd9c471341cc54
+prompt_bytes: 13096
+
+prompt_provenance_tier: T1
+prompt_provenance_note: "Frozen from the owner-proxy session that imported the gate's own is_allowed_new_path() predicate and ran it over git ls-tree -r --name-only at main a23e6cc, then opened representative files in every group before assigning a category. Every count is the output of that run. The first draft of the prompt did not reconcile: four paths fell outside every bucket. They were read, assigned to A2 / D3 / D20, and the totals recomputed until A+B+C+D equalled the refused total. That failure and its repair are recorded in the prompt's verification note because a classification that does not close is exactly the defect this work item exists to prevent."
+
+dependency_refs:
+  - 14-ai-development/governance-register/GOV-NC-2026-11-24-MERGE-FORM-DEVIATION-031.md
+  - scripts/ci/check_repository_hygiene.py
+  - scripts/test_check_repository_hygiene.py
+  - 00-governance/architecture-document-management-policy.md
+
+# ---------------------------------------------------------------------------
+# The Owner's round-22 ruling. Restated with its constraints, not as options.
+# ---------------------------------------------------------------------------
+
+owner_decisions:
+
+  - id: R1
+    question: "Should the 113 refused paths justify a blanket allowlist expansion?"
+    ruling: "No. No global suffix additions. No blanket admission of .json, .yaml, .toml, .txt, or the remaining eight extensions. Preserve the fixed allowlist and reject-by-default behavior."
+    constraints:
+      - "The 113-file count is a candidate inventory, not a list of 113 files to admit."
+      - "A file existing in the base tree does not prove that a new file of the same extension or category should be admitted."
+      - "Classify each candidate by its intended repository role and the exact future path shape it should permit."
+
+  - id: R2
+    question: "What evidence must each proposed admission rule carry?"
+    ruling: "Every proposed admission rule must include at least one positive and one negative test through the real tree-diff path."
+    constraints:
+      - "Calling is_allowed_new_path() in isolation is not the real tree-diff path."
+      - "The negative case must be a near-miss of the same shape, not an unrelated path."
+      - "The 13 pre-existing rejection tests are the fence around the AID-* rule and must all still pass."
+
+  - id: R3
+    question: "How should the five remaining YAML paths be handled?"
+    ruling: "Assess each individually as an exact governance / registry / inventory / legacy work-item path. Do not widen the AID rule to cover them."
+    constraints:
+      - "00-governance/architecture-document-metadata.schema.yaml -> exact governance-schema path."
+      - "00-governance/document-scope-registry.yaml -> exact governance-registry path."
+      - "14-ai-development/remote-worker-inventory.yaml -> exact inventory path."
+      - "The two work-items/FIX-2026-P1-T3/ YAML files -> legacy FIX work-item paths, assessed separately."
+
+  - id: R4
+    question: "May this work be folded into #893 or AID-2026-055?"
+    ruling: "No. This must be a separate work item."
+    constraints:
+      - "Do not mix it into #893 or AID-2026-055."
+
+# ---------------------------------------------------------------------------
+# The classification, as measured. These are the buckets the implementer works
+# from. The prompt carries the per-group evidence; this block carries the counts
+# so a reader can check reconciliation without opening the prompt.
+# ---------------------------------------------------------------------------
+
+classification:
+  measured_at: "main = a23e6cc"
+  tracked_total: 1286
+  refused_total: 113
+  refused_ratio: "8.8%"
+  reconciliation: "A 74 + B 4 + C 19 + D 16 = 113. A union B = 78 paths are candidates for admission."
+
+  buckets:
+    - id: A
+      meaning: "repeatable path shape deserving a narrow rule"
+      count: 74
+      groups:
+        - id: A1
+          shape: "08-bmcp-protocol/schemas/*.schema.json"
+          count: 32
+          evidence: "Versioned JSON Schema documents, versions 1.0.0 through 1.2.17. A new protocol version adds files."
+        - id: A2
+          shape: "08-bmcp-protocol/tests/conformance/**/*.json excluding package.json and package-lock.json"
+          count: 16
+          evidence: "10 under provider_outcome/fixtures, 4 under recovery_cutoff/fixtures, 2 at family root (i_crypto_profile_vector.json, wire_interop_vectors.json). The two root files were opened and are test vectors with the same role as the fixtures."
+        - id: A4
+          shape: "crates/*/Cargo.toml"
+          count: 12
+          evidence: "One Rust crate manifest per crate. A new crate necessarily adds one."
+        - id: A5
+          shape: "14-ai-development/governance-register/evidence/*.json"
+          count: 9
+          evidence: "Machine-written evidence captures from API reads: attribution, direct-commit filesets, issue closures, merge-gate evidence."
+        - id: A6
+          shape: "crates/*/VERIFICATION.txt"
+          count: 3
+          evidence: "Per-crate verification records (Clippy baselines, source pins), one per crate."
+        - id: A8
+          shape: "scripts/bilingual-baseline.txt and scripts/ci/baselines/*.txt"
+          count: 2
+          evidence: "Ratchet baselines consumed by the gates themselves: check_bilingual_docs.py:170 and gate_ratchet.py. Adding a baseline is how a ratchet is raised."
+
+    - id: B
+      meaning: "exact singleton file deserving an exact-path rule"
+      count: 4
+      groups:
+        - id: B9
+          shape: ".governance/GOV-DOC-001-inheritance.json"
+          count: 1
+          evidence: "Machine-read declaration consumed by tests/test_policy_inheritance.py:30."
+        - id: B10
+          shape: "00-governance/architecture-document-metadata.schema.yaml"
+          count: 1
+          evidence: "The metadata schema itself, parsed by the gate's own parser and compared against the gate's constants by T19 (architecture-document-management-policy.md:54). Also one of the 21 EMBEDDED_BILINGUAL_SOURCES."
+        - id: B11
+          shape: "00-governance/document-scope-registry.yaml"
+          count: 1
+          evidence: "Consumed by scripts/check_document_management.py:84 as SCOPE_REGISTRY."
+        - id: B12
+          shape: "14-ai-development/remote-worker-inventory.yaml"
+          count: 1
+          evidence: "Live inventory of remote workers, referenced by the runbook pair and touched by ordinary commits."
+
+    - id: C
+      meaning: "historical or obsolete, stays inadmissible as new"
+      count: 19
+      groups:
+        - id: C13
+          shape: "14-ai-development/work-items/FIX-2026-P1-T3/tier-*.yaml"
+          count: 2
+          evidence: "Machine-generated proposals marked PROPOSAL_PENDING_HUMAN_CONFIRMATION, generated against a pinned baseline_commit. Regenerable."
+        - id: C14
+          shape: "*.json under benchmarks/, reviews/, crates/*/fixtures/"
+          count: 9
+          evidence: "Benchmark outputs, review-pilot corpus, crate test fixtures. One-shot, tied to a measurement that already happened."
+        - id: C15
+          shape: "Cargo.lock"
+          count: 1
+          evidence: "Generated by cargo."
+        - id: C16
+          shape: "VERIFICATION.txt at root"
+          count: 1
+          evidence: "The 2026-11-21 Clippy-baseline record, superseded by the per-crate versions."
+        - id: C18
+          shape: "recovery/PR-RECOVERY-002-INVENTORY.csv, *.sha256, *.cfg, *.tla, *.jsonl, *.log"
+          count: 6
+          evidence: "One-shot inventory, hash manifest, model-checker inputs, corpus, test log."
+
+    - id: D
+      meaning: "unclear, needs an Owner decision"
+      count: 16
+      groups:
+        - id: D3
+          shape: "14-ai-development/work-items/*/{manifest,authorization-manifest}.yaml where the ID is not AID-YYYY-NNN"
+          count: 11
+          question: "Are the legacy ID families (FIX-2026-P1-*, P2-T2-*, ADOPTION-EVIDENCE-*) still live, so a new one may be created?"
+          if_yes: "The rule must name those families explicitly, and the wildcard stays refused."
+          if_no: "They stay inadmissible and the 11 are frozen history."
+        - id: D7
+          shape: "requirements.txt under 08-bmcp-protocol/tests/conformance/*/"
+          count: 1
+          question: "Should the root-only requirements*.txt rule extend to nested test-harness pins?"
+          if_yes: "Rule is the exact conformance path; the root-only rule stays."
+          if_no: "The nested pin is refused and the harness must be pinned another way."
+        - id: D17
+          shape: "08-bmcp-protocol/tests/conformance/package.json and package-lock.json"
+          count: 2
+          question: "The allowlist admits root package.json but not this one. Intentional, or an oversight?"
+          if_yes: "Only the root Node project is sanctioned; state it and keep refusing."
+          if_no: "Rule is the exact conformance path."
+        - id: D19
+          shape: "14-ai-development/work-items/AID-2026-003/t2-snapshot-fix-prompt.source.txt"
+          count: 1
+          question: "Is a prompt source snapshot a repeatable artefact, given hashes are pinned against such files?"
+          if_yes: "Rule is 14-ai-development/work-items/*/*.source.txt."
+          if_no: "It is a one-off and stays refused."
+        - id: D20
+          shape: "14-ai-development/work-items/AID-2026-001/reference-model/.gitignore"
+          count: 1
+          question: "Only the root .gitignore is admitted. Should a nested .gitignore inside a work item reference model be admitted?"
+          if_yes: "Rule is the work-item reference-model shape."
+          if_no: "It stays refused and the reference model must not carry one."
+
+# ---------------------------------------------------------------------------
+# Acceptance criteria. AC8 and AC9 are the two that catch the silent failures.
+# ---------------------------------------------------------------------------
+
+acceptance_criteria:
+
+  - id: AC1
+    criterion: "Every A and B shape has a rule and is admitted."
+    measurement: "Positive test per shape, real git tree, exit 0."
+  - id: AC2
+    criterion: "Every admitted shape has a near-miss negative test."
+    measurement: "Negative test per shape, real git tree, exit 1 with the exact no-allowlist-rule diagnostic."
+  - id: AC3
+    criterion: "The 13 pre-existing rejection tests still pass."
+    measurement: "python -m unittest scripts.test_check_repository_hygiene, full suite green."
+  - id: AC4
+    criterion: "No extension-only rule exists."
+    measurement: "Read the diff: every added pattern constrains a directory or exact path."
+  - id: AC5
+    criterion: "Category C stays refused."
+    measurement: "A table listing each C path with the gate's refusal on it."
+  - id: AC6
+    criterion: "Category D is stated, not decided."
+    measurement: "One subsection per D group with the question and both candidate answers."
+  - id: AC7
+    criterion: "CHECK_VERSION differs from 2026-11-24.1 and prints."
+    measurement: "Grep the workflow log for the new version string."
+  - id: AC8
+    criterion: "The rule set is not wider than the inventory."
+    measurement: "Re-run the classifier: newly-admitted set equals A union B (78 paths), and no more."
+  - id: AC9
+    criterion: "The inventory closes."
+    measurement: "Re-run the bucketing classifier and confirm A+B+C+D equals the refused total."
+
+# ---------------------------------------------------------------------------
+# Execution state.
+# ---------------------------------------------------------------------------
+
+implementation:
+  status: NOT_STARTED
+  branch: null
+  pr: null
+  note: "No rule has been added. The gate still refuses all 113 paths. This registration records a classification and a specification; it does not change admission behaviour."
+
+findings:
+
+  - id: AID-2026-057-F1
+    severity: P1
+    feedback_destination: "Delivery PR conversation. AC8 is the only criterion that catches an over-wide rule. A rule that admits the 78 intended paths and also one path nobody examined passes AC1 and AC2 and fails only AC8. If AC8 is dropped for being 'redundant with the positive tests', the work item loses its only guard against the silent failure it exists to prevent."
+
+  - id: AID-2026-057-F2
+    severity: P1
+    feedback_destination: "Delivery PR conversation. AC9 is not ceremony. The first draft of this prompt did not reconcile: four paths fell outside every bucket and the totals summed to 109 against a refused total of 113. The gap was found by reconciliation, not by review. A classification that does not sum to the measured total has silently dropped paths, and a dropped path is one the implementer will never write a rule for."
+
+  - id: AID-2026-057-F3
+    severity: P2
+    feedback_destination: "Delivery PR conversation. A2 must not be written as conformance/**/*.json. That pattern admits package.json and package-lock.json, which are D17 and are supposed to be an open Owner question. Either exclude them in the pattern or split the rule so the exclusion is visible in the diff."
+
+  - id: AID-2026-057-F4
+    severity: P2
+    feedback_destination: "Delivery PR conversation. D17 is a live inconsistency in the current allowlist, not only a question about these two files: root package.json is admitted and a nested one is not. Whatever the Owner rules, the asymmetry should be stated in the rule's comment so the next reader does not 'fix' it by widening."

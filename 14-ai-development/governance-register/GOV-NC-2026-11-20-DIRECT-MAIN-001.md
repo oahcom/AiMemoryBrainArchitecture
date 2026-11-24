@@ -1,3 +1,43 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "This work record documents direct pushes to main and their measured provenance. It is not an approval and does not grant authority. Section 15 states its own measurement basis and the fields that could not be recovered."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+---
 # GOV-NC-2026-11-20-DIRECT-MAIN-001 — 直接推送 main 治理缺陷登记
 
 **登记依据**：协调会话裁决（`6b00735c-1a10-3e03-8b46-3c8eb4b06a5`，2026-11-20）Q2，要求建立一条统一缺陷记录，禁止拆散为 33 个互不相关的部门问题。
@@ -658,3 +698,197 @@ token 持有 `admin: true`，因此 403 不是权限问题。
 ---
 
 **登记状态更新**：`OPEN` / `NOT_REMEDIATED` / **规模 62** / **性质由「流程疏漏」升级为「已知规则下的主动选择并书面合理化」**，第三轮追加：**在多身份并行下持续，并出现无法归属账号的提交身份**；第四轮追加：**C-3 纠正措施被证明在当前平台计划下不可执行**；第五轮追加：**门禁实现本身被直推改写，直推的存在被写入工作流注释作为降低检查强度的理由**
+
+---
+
+## 15. 单提交溯源记录：`54ea3977`（Issue #638）
+
+**记录日期**：2026-11-24
+**承载 Issue**：[#638](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/638) — "[REQ-03 P1] Recover direct-main authorization and provenance for commit 54ea3977"
+**载体**：本 PR。本节是本登记册对单个直推提交的溯源条目，不新增独立登记文件。
+**测量基准**：`main` @ `882ed439f639853d311348d67038bf9e4ef02d8e`（API 实测 main head，2026-11-24T10:24:16Z）
+
+### 15.1 为什么记在这一节而不是新开登记
+
+§1–§14 记录的是**规模与模式**（45 → 53 → 62 个直推）。本节记录的是**单个提交的可恢复边界**，因为 #638 要求的不是「再多记一个 commit」，而是「这个 commit 的授权到底能不能被证明」。
+
+本登记册已有判定方法（§1：调 `/commits/{sha}/pulls`，空数组即直推），但普查区间截止 2026-11-20T14:20Z。`54ea3977` 的提交时间晚于该区间 **2 天**，因此它从未进入本登记册的任何一轮计数——这一点本身是覆盖缺口，见 §15.7。
+
+### 15.2 可恢复的提交事实（全部为 API 实测，非推算）
+
+| 字段 | 值 | 来源 |
+|---|---|---|
+| commit SHA | `54ea39771af33c2e68d94515ca159cd74b18287f` | `GET /repos/{repo}/commits/{sha}` |
+| 父提交 SHA | `968a81db5ba83b767713e29655ad0af439f87e29`（单亲，非合并提交） | 同上 `parents[].sha`；`git rev-list --parents -n1` |
+| 提交标题 | `feat(bmcp): expose validate/digest as MCP tools instead of an empty capability set` | 同上 `commit.message` |
+| 作者身份 | `ChatGPT Automation <automation@users.noreply.github.com>` | 同上 `commit.author` |
+| 提交者身份 | `ChatGPT Automation <automation@users.noreply.github.com>` | 同上 `commit.committer` |
+| 署名状态 | `verified: false`，`reason: unsigned` | 同上 `commit.verification` |
+| 提交/提交者时间 | `2026-11-22T13:48:07+08:00` = `2026-11-22T05:48:07Z` | 同上；`git log --format=%aI/%cI` |
+| 变更文件 | 3 个，`+344 / −12` | 同上 `files[]`、`stats` |
+| 是否为 `main` 祖先 | 是；`compare/main...54ea3977` → `status: behind`、`ahead_by 0`、`behind_by 343` | `GET /repos/{repo}/compare/main...54ea3977` |
+
+逐文件（`GET /repos/{repo}/commits/{sha}` 的 `files[]`）：
+
+| 路径 | 状态 | ±行 | blob SHA |
+|---|---|---|---|
+| `crates/bmcp-server/src/lib.rs` | modified | +172 / −8 | `8ce8593bcc1f24a509bb08bd81e7e799aa2425cf` |
+| `crates/bmcp-server/tests/rt_scenarios.rs` | modified | +2 / −4 | `9c58364dea9012470346242f140f1e831af58366` |
+| `crates/bmcp-server/tests/tool_dispatch.rs` | added | +170 / −0 | `111b89555243081b89755518b7df3013c7899c19` |
+
+该 SHA 在第一父链上的位置：`origin/main` 第一父链第 203 条（`git rev-list --first-parent origin/main` 中行号 203），即它是一条线性直推，不是经合并进入。
+
+### 15.3 不可恢复的字段（逐项，附原因）
+
+不做推测。以下字段在任何可查载体中都不存在，记为**不可用**：
+
+| 字段 | 状态 | 原因与检索范围 |
+|---|---|---|
+| 产出该提交的 ChatGPT 会话 ID | **UNAVAILABLE** | 仓库内无记录；`grep -r` 该 SHA 在整棵树中 **0 命中**（`Grep 54ea3977` → no files）。Issue #638 正文亦未提供会话 ID |
+| 执行提示词版本 / 哈希 | **UNAVAILABLE** | 同上。无 prompt 文件、无 manifest、无 `WORK_ITEM` 关联。`14-ai-development/work-items/` 下无任何条目引用该 SHA |
+| 允许直推 `main` 的 Owner / 委派授权 | **UNAVAILABLE** | 提交消息不含 `Authorized by:` 段（对比 §`DIRECT-PUSH-RATIFICATION-ffc44c31` 的同类提交，其消息携带授权句）。仓库内无授权文书、无 Issue 评论、无 ADR 指向该写入 |
+| 授权范围与时效 | **UNAVAILABLE** | 无授权载体，故无从界定范围或起止 |
+| 独立审查（不同会话 + 不同提示词） | **ABSENT** | 见 §15.4。不是「未找到」，是「不存在审查载体」 |
+| 合并事件 / 合并者 | **NOT APPLICABLE** | 无 PR，故无合并事件。`pulls` 为 `[]`，不存在 `merged_by`/`merged_at` |
+| 提交时的 exact-Head 检查 | **NOT EXECUTED** | 见 §15.5 |
+
+### 15.4 审查：不存在，且不是「暂未找到」
+
+| 检索路径 | 返回值 | 含义 |
+|---|---|---|
+| `GET /repos/{repo}/commits/{sha}/pulls` | `[]` | 无 PR 载体 → 无 PR review、无 review comment、无 review 状态 |
+| `GET /repos/{repo}/commits/{sha}/comments` | `0` 条 | 无 commit 级评论 |
+| `GET /repos/{repo}/commits/{sha}/check-runs` | 3 个，全部 `failure` | 见 §15.5 |
+| `GET /repos/{repo}/commits/{sha}/status` | `state: pending`，`total_count: 0` | 无 commit status |
+| `GET /search/issues?q=repo:{repo} 54ea3977` | 4 条：`#638`(issue)、`#348`(issue)、`#611`(PR, closed)、`#264`(issue) | 4 条中 3 条只是正文提到该 SHA；`#611` 是搜索匹配，与本提交无载体关系（其 head 为 `d95cb4eb`，base 为 `1effc423`，两者皆非本 SHA） |
+| `GET /search/issues?q=repo:{repo} "expose validate/digest as MCP tools"` | 3 条：`#638`、`#732`(PR, closed)、`#264` | `#732` 是 gap-10 勘误，head `eeff8507`、base `021f5a3f`，与本 SHA 无关 |
+
+排除项也需要记录：`#611`（2026-11-22T05:40:34Z 建立，06:17:12Z 合并）与 `#732` 均在检索中命中，但两者的 head/base SHA 都不包含 `54ea3977`，且 `reviews` 均为 `0`。**不能**把任何一个当作本提交的审查载体。
+
+唯一提到本提交缺陷的上位载体是 Issue **#617**（`bmcp-server: return MCP CallToolResult for tools/call`），其中一句为：
+
+> Main commit `54ea39771af33c2e68d94515ca159cd74b18287f` added `tools/list` and `tools/call` to `bmcp-server`. The current `tools/call` response shape is not compliant with the declared MCP protocol version `2024-11-05`.
+
+**这不是对本次提交的审查。** 它是缺陷发现，发布于提交之后，且作者为 `oahcom`（与本记录撰写者同一身份）。按 `PR-GOVERNANCE-001` §5「作者与审查者使用同一 GitHub 身份时，不构成独立审查」，它不满足 #638 正文「different session plus different prompt」的独立基线。本记录不将其计为审查。
+
+### 15.5 提交时的检查状态：`NOT_EXECUTED`
+
+三个 check run 均为 push 触发，均在提交后 1–2 分钟内创建：
+
+| check | conclusion | started (Z) | completed (Z) | job id | `runner_name` | `runner_id` | `steps` |
+|---|---|---|---|---|---|---|---|
+| `rust-workspace-test` | `failure` | 05:49:49 | 05:49:56 | `137112019738` | `""` | `0` | `0` |
+| `audit` | `failure` | 05:49:49 | 05:49:51 | `137112019710` | `""` | `0` | `0` |
+| `GOV-DOC-002 metadata checks` | `failure` | 05:49:49 | 05:49:51 | `137112019454` | `""` | `0` | `0` |
+
+`runner_name == ""`、`runner_id == 0`、`steps == []` 三项同时成立，按本登记册 §3 与 `MERGE-AFTER-RULING-003` §2 的既定判定（`steps==0 && runner_name==""` → `NOT_EXECUTED`），这三个结果是**未执行**，既非 PASS 亦非实质 FAIL。
+
+因此更准确的表述是：该提交**没有**经过任何已执行的检查，`failure` 只是「未启动」的表面值。这也说明 Actions 机制不是该提交的产出者——它只是事后尝试检查，且未启动。
+
+补充一项时序事实（可用于界定「当时是否有门禁」）：`54ea3977` 的树中 **不存在** `.github/workflows/gates.yml`（`git cat-file -e 54ea3977:.github/workflows/gates.yml` → ABSENT）；该文件首次出现于 `9f30610f`（`ci: wire the existing gates into CI and ratchet the two that are already red (#669)`，2026-11-22T18:36:31+08:00），比本提交晚 **4 小时 48 分**。当时存在的 workflow 为 13 个（`git ls-tree 54ea3977:.github/workflows/`）。
+
+### 15.6 载体例外是否被授权
+
+`PR-GOVERNANCE-001` §3 给出的例外只有一条：合并目标为非 `main` 分支。`54ea3977` 的合并目标（直接写入目标）是 `main`，**不落入该例外**。
+
+该规范中是否存在其他可据以授权直推 `main` 的条款：
+
+| 条款 | 内容 | 是否适用于本提交 |
+|---|---|---|
+| §3 第 2 段 | 目标为非 `main` 时不需要 PR | 否（目标是 `main`） |
+| §7 | 平台强制执行与流程规范分离 | 否（说明平台能力，不授权写入） |
+| Enforcement addendum §7 | 紧急绕过：须记录授权主体、事由、精确 SHA、跳过的检查、风险接受、时间窗，以及事后的强制独立审查 | 否（无一被记录；且该条款 2026-11-23 才随 #750 进入 `main`，晚于本提交） |
+
+**结论**：`54ea3977` 的直推载体**没有**任何可查的授权依据。不是「授权范围超出」，是「授权记录不存在」。
+
+### 15.7 处置
+
+```
+PROVENANCE_UNRECOVERABLE — 54ea3977
+  facts recoverable : sha, parent 968a81db, 3 paths (+344/-12), unsigned, no PR
+  authorization     : not recorded anywhere; unrecoverable after the fact
+  review            : absent (no PR carrier; #617 is a defect finding, not a review)
+  carrier exception : not authorized under PR-GOVERNANCE-001 §3
+  residual risk     : accepted, bounded to bmcp validate/digest MCP tool exposure
+```
+
+**处置依据的边界**：
+
+1. 上列四项事实全部可复现，不受授权缺失影响。**内容存在**与**进入方式合规**是两件事，本记录只否定后者。
+2. 不 invent PR，不 invent reviewer，不把 `#611`/`#732`/`#617` 追认为审查。任何一条都会使记录比事实更宽。
+3. 残留风险的范围按改动内容界定：该提交以 `validate`、`digest` 两个只读工具替换空 capability 集，未移除授权检查、未新增写入路径。未经授权的版本其影响是「原本返回空的 capability 现在返回内容」，不是「边界被移动」。此界定沿用 #638 评论 `7125721934` 的裁定，本记录复核后同意。
+4. 该提交的 `tools/call` 响应形状缺陷由 **#617** 单独跟踪，**本节不声称其已修复**，也不把溯源结论读作对该缺陷的处置。
+
+### 15.8 纠正措施（本节提出，均未执行）
+
+| # | 措施 | 状态 |
+|---|---|---|
+| P-1 | 让 §1 的判定方法从一次性普查变为持续检查：`push` 到 `main` 时对每个新提交调 `/commits/{sha}/pulls`，空数组则产生 failing check 或必须归档的记录 | 未执行。承载于 #134。注意策略文本已存在于 `document-management.yml` 的 `push` 分支，但该 workflow 不检查 PR 归属 |
+| P-2 | 把本登记册的覆盖区间从「最近 100 个 commit @ `0b6cebdf`」改为可重跑的滚动区间，使 `54ea3977` 及 2026-11-20 之后的直推不再落在区间外 | 未执行。本次实测：`grep -c 54ea3977` 于本登记册修订前为 **0** |
+| P-3 | 为 `ChatGPT Automation` 这一合成身份建立逐提交清单。实测该身份在 `main` 上有 **15** 个提交，其中 **9** 个 `pulls == []`、**2** 个为合并提交（携带 1 个 PR）、**4** 个携带 PR | 部分完成：§15.9 给出该清单，使 `54ea3977` 有对应行 |
+
+### 15.9 同一合成身份的全部 15 个提交（逐条 API 实测）
+
+判定方法：对每个 SHA 调 `/commits/{sha}/pulls`；`parents` 数 > 1 即为合并提交。采集时间 2026-11-24。
+
+| # | commit | 时间 (Z) | parents | 关联 PR | 判定 |
+|---|---|---|---|---|---|
+| 1 | `7228c886` | 2026-11-21T09:56:40 | 1 | #463 | via PR |
+| 2 | `46c4b677` | 2026-11-21T10:49:48 | 1 | #483 | via PR |
+| 3 | `cdd76a56` | 2026-11-21T10:58:47 | 1 | #483 | via PR |
+| 4 | `2651e226` | 2026-11-21T13:38:15 | 1 | `[]` | **direct** |
+| 5 | `c553aeeb` | 2026-11-21T18:12:09 | 1 | #536 | via PR |
+| 6 | `cf460ba4` | 2026-11-21T19:02:28 | 2 | #433 | merge commit |
+| 7 | `6e9214dc` | 2026-11-22T02:34:56 | 1 | `[]` | **direct** |
+| 8 | `87d503ba` | 2026-11-22T02:36:28 | 1 | `[]` | **direct** |
+| 9 | `4eacb5b4` | 2026-11-22T04:24:56 | 1 | `[]` | **direct** |
+| 10 | `d89fd5fa` | 2026-11-22T04:28:15 | 1 | `[]` | **direct** |
+| 11 | `6897e53c` | 2026-11-22T05:12:19 | 1 | `[]` | **direct** |
+| 12 | **`54ea3977`** | 2026-11-22T05:48:07 | 1 | `[]` | **direct — 本条记录的对象** |
+| 13 | `71499e76` | 2026-11-22T06:05:18 | 1 | `[]` | **direct** |
+| 14 | `001248d4` | 2026-11-22T07:17:31 | 1 | `[]` | **direct** |
+| 15 | `8a4be6d2` | 2026-11-22T10:14:55 | 2 | #659 | merge commit |
+
+**该身份的合计数：15 个提交中 9 个无 PR 载体、2 个为合并提交、4 个经 PR。** 全部 15 个 `verified: false`（`reason: unsigned`）。
+
+这张表的用途是把比例摆出来，而不是把 9 条都当成 1 条来处置：`54ea3977` 是这 9 条之一，另外 8 条**没有**各自的溯源记录。本登记册不声称这 8 条已被本条覆盖。
+
+### 15.10 本节明确不作出的判断
+
+- **不判断** `ChatGPT Automation` 背后是哪一个自然人、哪一个会话、哪一个工具。该 email 对应 GitHub 上的一个真实用户账号 `automation`（id `289953`，2010-05-28 注册）；账号是公开的，但它作为 `users.noreply.github.com` 形式的提交身份，不指向本仓库的任何协作者。本仓库 `collaborators` 实测为 **1**（`oahcom`，`admin: true`），因此该账号即使存在也不能向本仓库写入。这条事实与「谁执行了提交」是两回事，本节不据此推断执行者。
+- **不判断**该提交的技术内容是否正确或是否合意。#617 跟踪其缺陷，本节不重复也不预判其结论。
+- **不 revert** 该提交，不重写历史，不重新署名。
+- **不把** `PROVENANCE_UNRECOVERABLE` 读作「授权曾被授予但已丢失」。它的含义只有一条：**这个写入在设计上不产生授权记录**——合成身份 + 未签名 + 无 PR，三者叠加使事后追溯在结构上不可行，而非检索不够努力。
+- **不把** 本节的结论外推到 §15.9 中其余 8 条直推。
+
+### 15.11 本节可复现命令
+
+```bash
+# 提交元数据
+git log -1 --format='%H%n%P%n%an <%ae>%n%cn <%ce>%n%aI%n%cI%n%G?' 54ea3977
+git show --name-status --format='' 54ea3977
+
+# 包含关系
+git merge-base --is-ancestor 54ea3977 origin/main && echo ancestor
+git rev-list --first-parent origin/main | grep -n 54ea3977
+
+# 载体
+curl -s -H "Authorization: token $TOKEN" \
+  https://api.github.com/repos/oahcom/AiMemoryBrainArchitecture/commits/54ea3977/pulls
+# -> []
+
+# 检查是否为未执行
+curl -s -H "Authorization: token $TOKEN" \
+  https://api.github.com/repos/oahcom/AiMemoryBrainArchitecture/commits/54ea3977/check-runs
+# -> 3 check_runs, all conclusion=failure; job detail: runner_name="", runner_id=0, steps=[]
+
+# 该 SHA 是否被树内任何文件引用
+grep -rn 54ea3977 --include='*.md' --include='*.json' --include='*.yaml' .
+# -> 0 matches
+
+# 当时是否存在 gates.yml
+git cat-file -e 54ea3977:.github/workflows/gates.yml   # -> ABSENT
+```
+
+---
+

@@ -1,3 +1,48 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Metadata added on 2026-11-24 so that this file can be edited without tripping DM-01. No content claim in this file is verified by this block."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
+---
+
 # AI-EXEC-INDEPENDENCE-RULING-001
 # Session Independence, Platform Identity and R3 Expert Review / 会话独立、平台身份与 R3 专家审查裁定
 
@@ -32,17 +77,17 @@ NR-001 / OPTION A 允许真正新建的独立 ChatGPT 对话在满足控制条�
 **Ruling / 裁定.**
 1. Session/review-behavior independence (S-independence) means a genuinely new conversation distinct from authoring/implementation, supplied with frozen inputs, independently reading repository sources, performing adversarial review and recording findings, with NR-001 disclosure that conversation isolation is not model/provider/statistical independence.
 2. Platform-identity/review-event independence (P-independence) means the review event is attributable to a GitHub identity distinct from the author's connected GitHub identity.
-3. S-independence can satisfy the NR-001 independent ChatGPT session element in AI-EXEC-001 R2 and the session-separation part of §5. It never establishes P-independence, creates a second GitHub actor, or produces Owner approval.
-4. Under the repository's stated ChatGPT-native model where sessions share oahcom, a fresh session can satisfy NR-001 session review but cannot satisfy §5 platform-identity independence. A different prompt, role, model label or conversation context does not change the GitHub actor.
-5. AI-EXEC-001 R2 maps independent ChatGPT session to S-independence; affected Owner explicit contract approval is separate. R3 requires independent review, security/domain expert review, reproducible tests and explicit Acceptance Authority approval. PR-GOVERNANCE-001 §5 governs P-independence and affected Owner approval. None substitutes for another.
-6. For §5-covered changes (security, identity, authorization, Forget, lifecycle, canonical persistence, recovery, cross-owner contracts, production operations), S-independence alone is insufficient for MERGE. Without a qualifying distinct-identity reviewer, disposition remains HOLD, or REMEDIATE/REJECT as justified.
+3. S-independence satisfies the independence requirement of `PR-GOVERNANCE-001` §5 in full, as amended 2026-11-24 to make independence a property of the reviewing session. It does not create a second GitHub actor and does not produce Owner approval; neither is required for independence.
+4. Under the repository's stated ChatGPT-native model where sessions share oahcom, a fresh session satisfies §5 independence. The shared GitHub actor is the carrier of the review event, not the measure of its independence; what §5 now asks is whether the reviewing context is the authoring context, and for a fresh session it is not.
+5. AI-EXEC-001 R2 maps independent ChatGPT session to S-independence, which is now the §5 requirement itself. Affected Owner explicit contract approval is separate and still required. R3 additionally requires security/domain expert review, reproducible tests and explicit Acceptance Authority approval. Those remain non-substitutable; P-independence no longer exists as a separate bar.
+6. For §5-covered changes (security, identity, authorization, Forget, lifecycle, canonical persistence, recovery, cross-owner contracts, production operations), a qualifying independent session is sufficient for the independence element of MERGE. High-risk changes additionally require the affected Owner's explicit approval, which no session supplies. Absent that approval, disposition remains HOLD, or REMEDIATE/REJECT as justified.
 
 1. 会话/审查行为独立性（S 独立性）指真正新建、区别于作者/实现会话的对话，取得冻结输入，独立读取仓库源文件，开展对抗性审查并记录 findings，同时按 NR-001 披露对话隔离不代表模型/服务商/统计独立。
 2. 平台身份/审查事件独立性（P 独立性）指审查事件归属于不同于作者所用连接身份的 GitHub 身份。
-3. S 独立性可满足 AI-EXEC-001 R2 的 NR-001 独立 ChatGPT 会话要素及 §5 中会话分离部分；但永远不能证明 P 独立性、创建第二个 GitHub 操作者或产生 Owner 批准。
-4. 在本仓库所有会话共享 oahcom 的 ChatGPT-native 模式下，新会话可满足 NR-001 会话审查，但不能满足 §5 平台身份独立性。不同提示词、角色、模型标签或对话上下文不会改变 GitHub 操作者。
-5. AI-EXEC-001 R2 的独立 ChatGPT 会话对应 S 独立性；受影响 Owner 明确批准契约是独立门禁。R3 另要求独立审查、安全/领域专家审查、可复现测试和 Acceptance Authority 明确批准。PR-GOVERNANCE-001 §5 管辖 P 独立性和受影响 Owner 批准。任何一项都不可替代另一项。
-6. 对 §5 覆盖的变更，仅有 S 独立性不足以 MERGE。没有合格的不同身份审查者时必须 HOLD，或按事实 REMEDIATE/REJECT。
+3. S 独立性完整满足 `PR-GOVERNANCE-001` §5 的独立性要求——该条已于 2026-11-24 修订为「独立性是审查会话的属性」。它不创建第二个 GitHub 操作者，也不产生 Owner 批准；而这两者都不是独立性的必要条件。
+4. 在本仓库所有会话共享 oahcom 的 ChatGPT-native 模式下，新会话即满足 §5 独立性。共享的 GitHub 操作者是审查事件的载体，不是其独立性的度量；§5 现在问的是「审查上下文是否为撰写上下文」，而对新会话而言它不是。
+5. AI-EXEC-001 R2 的独立 ChatGPT 会话对应 S 独立性，而它现在就是 §5 的要求本身。受影响 Owner 明确批准契约是独立门禁，仍然必需。R3 另要求安全/领域专家审查、可复现测试和 Acceptance Authority 明确批准；这些仍不可替代。P 独立性不再作为独立门槛存在。
+6. 对 §5 覆盖的变更，合格的独立会话足以满足 MERGE 的独立性要素。高风险变更另需受影响 Owner 的明确批准，而这不由任何会话提供。无该批准时仍须 HOLD，或按事实 REMEDIATE/REJECT。
 
 **Boundaries / 边界.** No model independence, multi-model consensus, human expertise, platform enforcement or independent GitHub actor is claimed. Role separation is not actor separation. A same-identity review must never be relabeled independent.
 
@@ -197,7 +242,7 @@ All three retain their existing platform state; no GitHub APPROVE is issued or i
 | Term | Definition |
 |---|---|
 | S-independence | NR-001 fresh-session review; not model/provider/statistical independence. |
-| P-independence | Review event attributed to GitHub identity different from author's connected identity. |
+| P-independence | **Retired 2026-11-24.** Was: review event attributed to a GitHub identity different from the author's. No longer an independence bar; see `INDEPENDENCE-IS-SESSION-LEVEL-036`. |
 | Owner approval | Explicit attributable approval by actual accountable authority for its normative boundary. |
 | Expert review | Additional review by verifiable competent independent human; never a ChatGPT role. |
 | Exception | Time-bounded unavailability record for escalation/HOLD/REMEDIATE/REJECT; never waiver. |
@@ -218,4 +263,25 @@ The authoring session checked both languages for the same independence axes, non
 - Baseline: main@6b5db2918cffc2281deb22fd9858a37dbaeec726 as stated in PR #258 quota-closeout evidence; direct branch-ref HEAD query unavailable, not represented as a fresh HEAD response.
 - Verification: policy/documentation only; runtime tests NOT RUN / NOT APPLICABLE; independent GOV-DOC-001 check NOT RUN.
 - Findings: F-AID005-01 [BLOCKER] → Issue #130; F-AID005-02 [P1] → Issue #130.
+---
+
+## Amendment record / 修订记录（2026-11-24）
+
+**本文件的 RULING-04 第 3、4、5、6 项已按所有者基线修改**，术语表的 P-independence 条目标记为退役。
+
+原因：`PR-GOVERNANCE-001` §5 于 2026-11-24 修订，独立性改为**会话级**属性。RULING-04 原判定
+「S 独立性不能替代 P 独立性、§5 要求 P 独立性」因此失去依据——它所解释的那条文本已不存在。
+
+**保留不变**：S 独立性仍然不是模型/服务商/统计独立；同会话内角色模拟仍然不构成独立审查；
+受影响 Owner 的明确批准仍然独立必需；五态处置、例外字段、R3 专家审查要求均不变。
+
+**这不是本文件自我采用。** 本文件状态仍为 `PROPOSED`。本次修改的是它与现行 §5 不一致的部分，
+若不改，它会持续引用一条已被替换的条款。采用与否仍由所有者决定。
+
+Revision of this file's RULING-04 items 3–6 follows the owner baseline and the §5 amendment of
+2026-11-24. What is preserved: S-independence is still not model/provider/statistical independence;
+role simulation within the authoring session still does not count; affected Owner approval is still
+separately required; the five dispositions, exception fields and R3 expert-review requirements are
+untouched. This file remains `PROPOSED`; the change only removes its reference to a clause that no
+longer exists.
 

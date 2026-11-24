@@ -398,6 +398,110 @@ class RepositoryHygieneTests(unittest.TestCase):
 
         self.assert_admission_passes(base, head)
 
+    # D7: the specifically approved provider-outcome conformance pin is
+    # admitted. This does not widen the root-only requirements rule.
+    def test_provider_outcome_requirements_file_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "08-bmcp-protocol/tests/conformance/provider_outcome/requirements.txt":
+                "jsonschema>=4.23,<5\n",
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # D17: both exact conformance harness package files are admitted.
+    # This is deliberately not a general nested package.json rule.
+    def test_conformance_package_files_are_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "08-bmcp-protocol/tests/conformance/package.json":
+                '{"private": true}\n',
+            "08-bmcp-protocol/tests/conformance/package-lock.json":
+                '{"lockfileVersion": 3}\n',
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # D19: an immutable source snapshot directly inside an AID work item
+    # is admitted. Nested snapshots are not covered by this rule.
+    def test_aid_source_snapshot_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/work-items/AID-2026-003/"
+            "t2-snapshot-fix-prompt.source.txt":
+                "source snapshot\n",
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # D20: the reference-model .gitignore directly under an AID work item
+    # is admitted. Other nested .gitignore paths remain outside the rule.
+    def test_aid_reference_model_gitignore_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/work-items/AID-2026-001/"
+            "reference-model/.gitignore":
+                "__pycache__/\n*.pyc\n",
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # D7: requirements.txt in a sibling conformance suite is not the
+    # specifically approved provider_outcome path.
+    def test_recovery_cutoff_requirements_file_is_rejected(self):
+        base = self.seed_base()
+        path = (
+            "08-bmcp-protocol/tests/conformance/"
+            "recovery_cutoff/requirements.txt"
+        )
+        head = self.commit({
+            path: "example==1.0\n",
+        })
+
+        self.assert_admission_fails(base, head, path)
+
+    # D17: package.json under a child suite is not the conformance
+    # directory's own package manifest.
+    def test_nested_conformance_package_file_is_rejected(self):
+        base = self.seed_base()
+        path = (
+            "08-bmcp-protocol/tests/conformance/"
+            "provider_outcome/package.json"
+        )
+        head = self.commit({
+            path: '{"private": true}\n',
+        })
+
+        self.assert_admission_fails(base, head, path)
+
+    # D19: the source snapshot rule admits one filename directly under the
+    # AID directory, not a snapshot nested one additional directory deep.
+    def test_nested_aid_source_snapshot_is_rejected(self):
+        base = self.seed_base()
+        path = (
+            "14-ai-development/work-items/AID-2026-003/"
+            "nested/x.source.txt"
+        )
+        head = self.commit({
+            path: "source snapshot\n",
+        })
+
+        self.assert_admission_fails(base, head, path)
+
+    # D20: only reference-model/.gitignore at the exact approved depth is
+    # admitted; a child directory's .gitignore is not.
+    def test_nested_reference_model_gitignore_is_rejected(self):
+        base = self.seed_base()
+        path = (
+            "14-ai-development/work-items/AID-2026-001/"
+            "reference-model/sub/.gitignore"
+        )
+        head = self.commit({
+            path: "*.pyc\n",
+        })
+
+        self.assert_admission_fails(base, head, path)
+
     # M21: the same directory, a different YAML filename, is not the registry
     # file. A prefix rule would admit this; the anchored shape does not.
     def test_other_yaml_in_work_item_directory_is_rejected(self):
@@ -461,6 +565,113 @@ class RepositoryHygieneTests(unittest.TestCase):
         head = self.commit({path: "policy: value\n"})
 
         self.assert_admission_fails(base, head, path)
+
+    # M28: the ID segment is not an arbitrary alnum run. A directory the
+    # registry cannot allocate must not carry a manifest through this rule,
+    # or the index step gets an entry it cannot resolve.
+    def test_non_numeric_work_item_id_is_rejected(self):
+        base = self.seed_base()
+        path = "14-ai-development/work-items/AID-foo/manifest.yaml"
+        head = self.commit({path: "work_item_id: AID-foo\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    # M29: the sequence is three digits. Two digits is a different ID.
+    def test_two_digit_sequence_is_rejected(self):
+        base = self.seed_base()
+        path = "14-ai-development/work-items/AID-2026-55/manifest.yaml"
+        head = self.commit({path: "work_item_id: AID-2026-55\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    # M30: the year is four digits. A two-digit year is a different ID.
+    def test_two_digit_year_is_rejected(self):
+        base = self.seed_base()
+        path = "14-ai-development/work-items/AID-26-055/manifest.yaml"
+        head = self.commit({path: "work_item_id: AID-26-055\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    # M31: the sequence is exactly three digits. Four is a different ID.
+    def test_four_digit_sequence_is_rejected(self):
+        base = self.seed_base()
+        path = "14-ai-development/work-items/AID-2026-0555/manifest.yaml"
+        head = self.commit({path: "work_item_id: AID-2026-0555\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    # M32: the year is a shape, not a constant. Pinning it to the year the
+    # rule was written would reject next year's first work item, and nobody
+    # would remember to edit the rule. A different four-digit year must pass.
+    def test_next_year_work_item_id_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/work-items/AID-2027-001/manifest.yaml":
+                "work_item_id: AID-2027-001\n",
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # #891: the index is Canonical, so its membership must be falsifiable.
+    # Every directory under work-items/ needs an entry, and every entry that
+    # names a directory needs that directory. These three cases pin both
+    # directions plus the clean state.
+    def index_fixture(self, index_text, directories):
+        files = {
+            "14-ai-development/work-items/INDEX.md": index_text,
+        }
+        for name in directories:
+            files[f"14-ai-development/work-items/{name}/manifest.yaml"] = (
+                f"work_item_id: {name}\n"
+            )
+        return self.commit(files)
+
+    def test_index_membership_passes_when_every_directory_is_listed(self):
+        self.index_fixture(
+            "| [AID-2026-001](AID-2026-001/manifest.yaml) |\n"
+            "| [AID-2026-002](AID-2026-002/manifest.yaml) |\n",
+            ["AID-2026-001", "AID-2026-002"],
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        # A pass that compared nothing would look identical to a real pass, so
+        # the counts are asserted: two directories on disk, two linked paths.
+        # A zero here means the sets were empty and the check bound nothing.
+        self.assertIn("directories=2 linked=2", result.stdout)
+
+    def test_index_membership_fails_on_a_directory_with_no_entry(self):
+        self.index_fixture(
+            "| [AID-2026-001](AID-2026-001/manifest.yaml) |\n",
+            ["AID-2026-001", "AID-2026-002"],
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(result.returncode, 1, msg=result.stderr)
+        self.assertIn(
+            "::error::index membership violation: work-item directory "
+            "'14-ai-development/work-items/AID-2026-002' has no entry",
+            result.stderr,
+        )
+
+    def test_index_membership_fails_on_an_entry_with_no_directory(self):
+        self.index_fixture(
+            "| [AID-2026-001](AID-2026-001/manifest.yaml) |\n"
+            "| [AID-2026-009](AID-2026-009/manifest.yaml) |\n",
+            ["AID-2026-001"],
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(result.returncode, 1, msg=result.stderr)
+        self.assertIn(
+            "::error::index membership violation: "
+            "'14-ai-development/work-items/INDEX.md' links 'AID-2026-009/'",
+            result.stderr,
+        )
 
 
 if __name__ == "__main__":

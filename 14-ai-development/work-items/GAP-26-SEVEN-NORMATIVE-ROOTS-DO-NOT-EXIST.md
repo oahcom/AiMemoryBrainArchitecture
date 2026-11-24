@@ -9,10 +9,10 @@ document_metadata:
       approver: null
     evidence_verification:
       verification_status: Verified
-      last_verified_date: "2026-11-22"
-      last_verification_note: "The fifteen roots are quoted from check_bilingual_docs_full.py:14 at main @ 1a7e3cddae and compared against the same tree's top-level directories. The sixteen unscanned files are counted with find under 08-bmcp-protocol and the two docs mirrors."
+      last_verified_date: "2026-11-24"
+      last_verification_note: "The fifteen roots are quoted from check_bilingual_docs_full.py:14 at main @ 1a7e3cddae and compared against the same tree's top-level directories. The sixteen unscanned files are counted with find under 08-bmcp-protocol and the two docs mirrors. Section 5a and the four-file table in 5b were added on 2026-11-24: the per-file pairing verdicts were produced by calling check_bilingual_docs.side_by_side_partner() at d40d4e09 and testing for the two docs mirrors, and the 4-of-8 split is that measurement rather than an estimate."
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Modified
     supersession:
       supersedes: []
       supersession_reason: null
@@ -25,9 +25,15 @@ document_metadata:
 
 # GAP-26 — Seven of fifteen normative roots do not exist, so a whole domain was never scanned
 
-**Status:** Open · **Area:** `scripts/check_bilingual_docs_full.py`
-**Measured at:** `main` @ `1a7e3cddae`
+**Status:** **Resolved** by `150fb45e` (#910) · **Area:** `scripts/check_bilingual_docs_full.py`
+**Measured at:** `main` @ `1a7e3cddae`; resolution verified at `ac0f0dfd`
 **Author:** owner delegate under standing instruction (Issue #564, comment 7074302216)
+
+> **Resolution note (2026-11-24, `ac0f0dfd`).** The scan no longer keeps its own root list. It imports `NORMATIVE_ROOTS` from `check_bilingual_docs.py`, which holds 9 roots, all of which exist, and which includes `08-bmcp-protocol`. #910 also added a derived-root guard that exits 2 when the literal and the directory listing disagree, so the literal cannot drift in silence again.
+>
+> Measured after the fix: `NORMATIVE_ROOTS` = 9, missing on disk = 0, `08-bmcp-protocol` present, scan covers 647 in-scope files (was 626) and reports 77 violations (was 81). The four `08-bmcp-protocol` records this document said were never scanned are now in the set.
+>
+> The reasoning in this document stands as the record of what was wrong and why it mattered. Only the Status is superseded. Do not re-fix the roots — that would undo #910.
 
 ---
 
@@ -134,6 +140,66 @@ The honest sequence is:
 3. Measure what the wider scan reports, and ratchet that number rather than expecting zero.
 
 Applying (a) alone produces a red gate with no baseline, which is how a real finding gets reverted.
+
+## 5a. Implementation precondition — the root fix must not land before `AID-2026-056`
+
+**Owner ruling OD-21 (Issue #266, 2026-11-24).** This is a precondition on *when* the
+root fix may be applied, not a decision that the root fix is authorised.
+
+`08-protocols` → `08-bmcp-protocol` does not only correct a spelling. It changes the
+scan's coverage, and the newly covered directory is not empty:
+
+```
+08-bmcp-protocol/              8 Markdown files
+  already paired (side-by-side) 2 files + their 2 .zh-CN.md siblings
+  no counterpart, no docs mirror     4 files   ← never scanned, will become violations
+```
+
+Those four are already in **gate A**'s frozen baseline (`scripts/bilingual-baseline.txt`,
+77 entries) because `check_bilingual_docs.py` has always named `08-bmcp-protocol`
+correctly. Gate B has never seen them. The two baselines overlap on 73 paths: gate A
+alone has 4 (all under `08-bmcp-protocol`), gate B alone has 8.
+
+So applying the root fix makes gate B report **13** rather than 9 violations:
+
+```
+AID-2026-056 predicate, current roots    ->  9
+AID-2026-056 predicate, corrected roots  -> 13   (+4, all 08-bmcp-protocol)
+```
+
+**Constraint.** The root correction must not be implemented before `AID-2026-056` is
+merged. That work item's AC1 requires the violation set to equal exactly nine paths and
+AC6 requires `NORMATIVE_ROOTS` to be byte-identical to its pre-change value, so it
+neither can nor should absorb this change.
+
+After `AID-2026-056` merges, the four newly exposed paths need their own impact
+assessment, ownership and authorisation before the root fix lands. **Satisfying the
+precondition is not the same as being authorised to implement the fix** — this section
+adds an ordering constraint, it does not grant permission.
+
+The failure this prevents is specific and has already happened once in this repository's
+records: a fix that makes a gate red for reasons predating it gets reverted, and the
+reason it went red gets attributed to whatever changed most recently. Here that would be
+the new predicate, which would be blamed for four files it never touched.
+
+## 5b. Why the number is 4 and not "some files will fail"
+
+Measured at `d40d4e09`, by calling `check_bilingual_docs.side_by_side_partner()` and
+testing for `docs/en/<path>` plus `docs/zh-CN/<path>` on every `08-bmcp-protocol/*.md`:
+
+| file | partner | docs mirror |
+|---|---|---|
+| `owner-snapshot-namespace-and-fence-currentness-contract.md` | None | absent |
+| `phase-3.8-h-rj-hw-01-typed-watermark-and-fence-binding-contract.md` | None | absent |
+| `phase-3.8.25-h-applied-delivery-evidence-hardening-addendum.md` | None | absent |
+| `phase-3.8.26-h-applied-delivery-evidence-csubmitoutcome-join-addendum.md` | None | absent |
+| `protocol-index.md` | `protocol-index.zh-CN.md` | present |
+| `protocol-index.zh-CN.md` | `protocol-index.md` | absent (mirror, correctly) |
+| `schema-nonempty-audit.md` | `schema-nonempty-audit.zh-CN.md` | absent |
+| `schema-nonempty-audit.zh-CN.md` | `schema-nonempty-audit.md` | absent |
+
+Four violate under the current predicate; four do not. The count is exact because the
+predicate is mechanical, not because anyone estimated it.
 
 ## 6. What this does not claim
 

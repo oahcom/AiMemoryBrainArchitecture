@@ -25,10 +25,18 @@ document_metadata:
 
 # GAP-28 (corrected) — Two bilingual checks, one baseline, and a full scan that covers less than the repository
 
-**Status:** Open
-**Measured at:** `main` @ `f292257a98`, on a real git work tree
+**Status:** **Resolved** by `150fb45e` (#910)
+**Measured at:** `main` @ `f292257a98`, on a real git work tree; resolution verified at `ac0f0dfd`
 **Supersedes:** the first version of this document, whose central claim was wrong — see §1
 **Author:** owner delegate under standing instruction (Issue #564, comment 7074302216)
+
+> **Resolution note (2026-11-24, `ac0f0dfd`).** The two checks no longer hold divergent scope. `check_bilingual_docs_full.py` imports `NORMATIVE_ROOTS`, `EMBEDDED_BILINGUAL_SOURCES` and `PAIR_EXEMPT_PREFIXES` from the authority instead of copying them.
+>
+> Measured after the fix: gate A freezes 77 paths, gate B reports 77, and the two baselines are **byte-identical** — the 12-entry divergence this document measured is gone. Gate B's baseline moved 81 → 77: 8 false positives left (6 side-by-side, 2 exempt-but-unlisted) and 4 true positives entered (the unpaired `08-bmcp-protocol` records).
+>
+> One thing this document got right and #910 confirmed: the fix was never "lower the baseline". Lowering it alone was measured to produce `regressions=66`. The constants had to converge first.
+>
+> Only the Status is superseded. Do not re-fix the scope — that would undo #910.
 
 ---
 
