@@ -86,9 +86,10 @@ fn execute(input: &Path, output: &Path, event_database: Option<&Path>) -> Output
 /// artifact a compile leaves behind is the accepted event and its outbox row.
 ///
 /// This test pins the part of that contract that is observable from outside the
-/// binary. If someone adds a `--storage` flag or starts persisting a result, the
+/// binary. If someone starts persisting a result without being asked, the
 /// outbox count or the snapshot will move, and the change has to be argued for
-/// instead of slipping in.
+/// instead of slipping in. (`--store` names where the memory database lives and
+/// is not a durable compile result: this test does not pass it.)
 ///
 /// ponytail: this checks the outbox and the output, not the schema. A table
 /// named something unexpected would pass. Checking `sqlite_master` would mean
