@@ -386,6 +386,82 @@ class RepositoryHygieneTests(unittest.TestCase):
 
         self.assert_admission_passes(base, head)
 
+    # M20: a work-item manifest is the one YAML shape the registry needs.
+    # Every other YAML shape stays rejected, so this rule cannot be widened
+    # into a general .yaml admission by a later edit that nobody notices.
+    def test_work_item_manifest_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/work-items/AID-2026-055/manifest.yaml":
+                "work_item_id: AID-2026-055\n",
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # M21: the same directory, a different YAML filename, is not the registry
+    # file. A prefix rule would admit this; the anchored shape does not.
+    def test_other_yaml_in_work_item_directory_is_rejected(self):
+        base = self.seed_base()
+        path = "14-ai-development/work-items/AID-2026-055/notes.yaml"
+        head = self.commit({path: "note: value\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    # M22: nesting is not the registry shape. work-items/<ID>/nested/ is one
+    # directory deeper than a manifest may live.
+    def test_nested_work_item_manifest_is_rejected(self):
+        base = self.seed_base()
+        path = "14-ai-development/work-items/AID-2026-055/nested/manifest.yaml"
+        head = self.commit({path: "work_item_id: AID-2026-055\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    # M23: the AID- segment is required, so an arbitrary directory under
+    # work-items/ cannot carry a manifest through this rule.
+    def test_non_aid_directory_manifest_is_rejected(self):
+        base = self.seed_base()
+        path = "14-ai-development/work-items/not-AID/manifest.yaml"
+        head = self.commit({path: "work_item_id: not-AID\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    # M24: the rule is rooted at 14-ai-development/work-items/, not at any
+    # path that happens to end in manifest.yaml.
+    def test_manifest_outside_work_items_is_rejected(self):
+        base = self.seed_base()
+        path = "14-ai-development/other/manifest.yaml"
+        head = self.commit({path: "work_item_id: other\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    # M25: the anchored shape is case-sensitive, like the configuration
+    # filenames. Manifest.YAML is not manifest.yaml.
+    def test_case_changed_manifest_filename_is_rejected(self):
+        base = self.seed_base()
+        path = "14-ai-development/work-items/AID-2026-055/Manifest.YAML"
+        head = self.commit({path: "work_item_id: AID-2026-055\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    # M26: a bare manifest.yaml at the repository root is not the registry
+    # file and must not be admitted by a loose suffix-shaped rule.
+    def test_root_manifest_is_rejected(self):
+        base = self.seed_base()
+        path = "manifest.yaml"
+        head = self.commit({path: "work_item_id: root\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    # M27: admitting the work-item manifest must not have opened .yaml
+    # anywhere else. This is the regression that matters most, because a
+    # future edit widening the rule would otherwise pass silently.
+    def test_yaml_outside_the_registry_shape_is_still_rejected(self):
+        base = self.seed_base()
+        path = "00-governance/unreviewed-policy.yaml"
+        head = self.commit({path: "policy: value\n"})
+
+        self.assert_admission_fails(base, head, path)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
