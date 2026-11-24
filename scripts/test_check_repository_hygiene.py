@@ -653,8 +653,8 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args()
         self.assertEqual(result.returncode, 1, msg=result.stderr)
         self.assertIn(
-            "::error::index membership violation: work-item directory "
-            "'14-ai-development/work-items/AID-2026-002' has no entry",
+            "::error::index membership violation: directory present, "
+            "no index entry: 14-ai-development/work-items/AID-2026-002",
             result.stderr,
         )
 
@@ -668,8 +668,8 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args()
         self.assertEqual(result.returncode, 1, msg=result.stderr)
         self.assertIn(
-            "::error::index membership violation: "
-            "'14-ai-development/work-items/INDEX.md' links 'AID-2026-009/'",
+            "::error::index membership violation: index entry present, "
+            "no directory: 14-ai-development/work-items/AID-2026-009",
             result.stderr,
         )
 

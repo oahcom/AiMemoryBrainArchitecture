@@ -8,7 +8,7 @@ import sys
 from pathlib import PurePosixPath
 
 
-CHECK_VERSION = "2026-11-24.3"
+CHECK_VERSION = "2026-11-24.4"
 
 # Repository-root-relative paths, written with a leading slash.
 PROHIBITED_PATHS = (
@@ -329,6 +329,16 @@ def check_index_membership(root, commit, head_paths):
     checked, so a deleted row and a deleted directory each fail. The set of
     directories is read from the committed tree, like the denylist above, so a
     working-copy edit cannot launder a missing entry.
+
+    What this deliberately does NOT verify: membership only. It does not check
+    that a row's Status/Review/Acceptance text agrees with the item's own
+    manifest. That is a different relation and it is not cheap here: measured
+    on main, a naive `status:`-equals-cell comparison disagrees on a large
+    majority of rows, because cells carry dated activity assertions
+    (`MERGED 2026-11-19T18:11:20Z`, `PR OPEN`) while manifests carry lifecycle
+    states (`VERIFIED`, `REMEDIATION_IN_PROGRESS`), and some indexed items
+    have no manifest at all. A gate that fails on all of those would be
+    switched off, so this one does not pretend to cover it.
     """
     directories = work_item_directories(head_paths)
     if not directories:
@@ -356,13 +366,13 @@ def check_index_membership(root, commit, head_paths):
     entries = index_entry_directories(text)
 
     violations = [
-        f"index membership violation: work-item directory "
-        f"'{WORK_ITEMS_DIR}/{name}' has no entry in '{WORK_ITEMS_INDEX}'"
+        f"index membership violation: directory present, no index entry: "
+        f"{WORK_ITEMS_DIR}/{name}"
         for name in sorted(directories - entries)
     ]
     violations += [
-        f"index membership violation: '{WORK_ITEMS_INDEX}' links "
-        f"'{name}/' but '{WORK_ITEMS_DIR}/{name}' does not exist"
+        f"index membership violation: index entry present, no directory: "
+        f"{WORK_ITEMS_DIR}/{name}"
         for name in sorted(entries - directories)
     ]
 
