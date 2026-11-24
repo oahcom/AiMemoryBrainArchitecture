@@ -106,6 +106,46 @@ AID_REFERENCE_MODEL_GITIGNORE_RE = re.compile(
     r"14-ai-development/work-items/AID-[0-9]{4}-[0-9]{3}/reference-model/\.gitignore"
 )
 
+# A1: protocol schema files live directly under schemas/. One level only;
+# schemas/<sub>/x.schema.json is not admitted.
+PROTOCOL_SCHEMA_RE = re.compile(r"08-bmcp-protocol/schemas/[^/]+\.schema\.json")
+
+# A2: conformance vectors are JSON anywhere below the conformance root, with
+# one carve-out. package.json and package-lock.json belong to D17 only at the
+# conformance root; the same names one level down stay refused. The negative
+# lookahead is load-bearing -- dropping it turns this into conformance/**/*.json
+# and silently admits the nested package files D17 deliberately excluded.
+CONFORMANCE_VECTOR_RE = re.compile(
+    r"08-bmcp-protocol/tests/conformance/(?:[^/]+/)*(?!package(?:-lock)?\.json\Z)[^/]+\.json"
+)
+
+# A4: each crate owns exactly one manifest at crates/<name>/Cargo.toml.
+# Workspace members are flat, so no deeper Cargo.toml is admitted.
+CRATE_MANIFEST_RE = re.compile(r"crates/[^/]+/Cargo\.toml")
+
+# A5: governance-register evidence captures, flat under evidence/.
+GOVERNANCE_EVIDENCE_RE = re.compile(
+    r"14-ai-development/governance-register/evidence/[^/]+\.json"
+)
+
+# A6: each crate's VERIFICATION.txt sits beside its Cargo.toml, not deeper.
+CRATE_VERIFICATION_RE = re.compile(r"crates/[^/]+/VERIFICATION\.txt")
+
+# A8: two baselines with two shapes -- the root bilingual baseline and the
+# per-check baselines directory. Both branches are exercised by tests.
+BASELINE_FILE_RE = re.compile(
+    r"(?:scripts/bilingual-baseline\.txt|scripts/ci/baselines/[^/]+\.txt)"
+)
+
+# B9-B12: four singleton governance files. Each is an exact path, not a
+# pattern; a sibling with a different name must stay refused.
+GOV_DOC_001_INHERITANCE_RE = re.compile(r"\.governance/GOV-DOC-001-inheritance\.json")
+ARCHITECTURE_METADATA_SCHEMA_RE = re.compile(
+    r"00-governance/architecture-document-metadata\.schema\.yaml"
+)
+DOCUMENT_SCOPE_REGISTRY_RE = re.compile(r"00-governance/document-scope-registry\.yaml")
+REMOTE_WORKER_INVENTORY_RE = re.compile(r"14-ai-development/remote-worker-inventory\.yaml")
+
 
 def error(message):
     print(f"::error::{message}", file=sys.stderr)
@@ -233,6 +273,36 @@ def is_allowed_new_path(path):
         return True
 
     if AID_REFERENCE_MODEL_GITIGNORE_RE.fullmatch(path):
+        return True
+
+    if PROTOCOL_SCHEMA_RE.fullmatch(path):
+        return True
+
+    if CONFORMANCE_VECTOR_RE.fullmatch(path):
+        return True
+
+    if CRATE_MANIFEST_RE.fullmatch(path):
+        return True
+
+    if GOVERNANCE_EVIDENCE_RE.fullmatch(path):
+        return True
+
+    if CRATE_VERIFICATION_RE.fullmatch(path):
+        return True
+
+    if BASELINE_FILE_RE.fullmatch(path):
+        return True
+
+    if GOV_DOC_001_INHERITANCE_RE.fullmatch(path):
+        return True
+
+    if ARCHITECTURE_METADATA_SCHEMA_RE.fullmatch(path):
+        return True
+
+    if DOCUMENT_SCOPE_REGISTRY_RE.fullmatch(path):
+        return True
+
+    if REMOTE_WORKER_INVENTORY_RE.fullmatch(path):
         return True
 
     return False
