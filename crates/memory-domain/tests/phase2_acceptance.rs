@@ -1372,8 +1372,22 @@ fn dm2_16_i_side_references_keep_their_legacy_placeholder_wire_form() {
     );
 
     // A malformed issued object fails closed rather than degrading to pending.
-    assert!(serde_json::from_str::<AttestorRef>(
-        r#"{"attestation_id":"a","issuer":"i-owner-proxy/dev-baseline-v1","subject_digest":"short","issued_at":"2026-11-22T00:00:00Z"}"#
+    //
+    // The point is the `subject_digest` branch at the serde boundary, and
+    // `validate_attestor_data` checks `issuer` *before* `subject_digest`. The
+    // payload therefore carries the accepted attestor issuer: with any other
+    // issuer the decode would fail on `issuer` and the digest check would never
+    // run, leaving this assertion green even if the digest check were deleted.
+    // Asserting the field name pins the branch that fired, so a reordering of
+    // the checks breaks this test instead of silently re-vacuuming it.
+    let error = serde_json::from_str::<AttestorRef>(
+        r#"{"attestation_id":"a","issuer":"i-attestor-proxy/dev-baseline-v1","subject_digest":"short","issued_at":"2026-11-22T00:00:00Z"}"#
     )
-    .is_err());
+    .expect_err("a non-hex subject_digest must fail the serde boundary");
+    assert!(
+        error
+            .to_string()
+            .contains(r#"InvalidCanonicalCommitField("subject_digest")"#),
+        "must fail on subject_digest, got {error}"
+    );
 }

@@ -372,6 +372,59 @@ PR #403 合并后，`main` 上随即出现：
 
 本次的 check 是绿的、审查也做了——这两个通常被视为「可以合并」的信号同时成立，而阻断项仍未解决。这说明既有的「必须审查」「必须过 check」两条要求，都不足以阻止这一类合并。
 
+#### Historical evidence correction / 历史证据更正
+
+**Correction recorded: 2026-11-23**
+
+The statement above that "review before merge = yes" was based on
+`issuecomment-7090724822`. That resource is an Issue comment, not a
+submitted pull-request review. Its `created_at` field establishes only
+the comment creation time; it does not establish that a formal review
+was submitted before the merge.
+
+The relevant review record source is
+`GET /repos/{owner}/{repo}/pulls/707/reviews`. No formal review record
+for PR #707 was identified in the evidence checked for this correction.
+Accordingly, the historical claim that a review was submitted before
+merge is **not established by the cited evidence**. This correction
+does not assert that a review definitely did not occur; it records that
+the original cited source cannot prove it.
+
+The original statement is retained as a record of the earlier
+assessment. It must not be treated as independently verified evidence
+of a submitted review.
+
+**中文**
+
+**更正记录日期：2026-11-23**
+
+上文“合并前审查 = 是”的判断依据为
+`issuecomment-7090724822`。该资源是 Issue 评论，而不是已提交的
+Pull Request Review。其 `created_at` 字段只能证明评论创建时间，
+不能证明合并前提交过正式审查。
+
+相关 Review 记录来源为
+`GET /repos/{owner}/{repo}/pulls/707/reviews`。在本次更正所核查的
+证据中，未发现 PR #707 的正式 Review 记录。因此，原有“合并前已提交
+审查”的历史主张**无法由所引用的证据确立**。本更正不声称审查绝对
+没有发生；它只记录原先引用的来源不足以证明该事实。
+
+保留原句，是为了记录此前的判断；不得将其视为正式 Review 已提交的
+独立核实证据。
+
+**Measured evidence for this correction / 本次更正的核查证据**
+
+| Item | Endpoint | Field | Value as returned |
+|---|---|---|---|
+| 正式 Review 记录 / formal reviews on #707 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/707/reviews` | array length | `0` records |
+| 被引用的评论 / the cited comment | `GET /repos/oahcom/AiMemoryBrainArchitecture/issues/comments/7090724822` | `created_at` | `2026-11-23T03:24:59Z` |
+| 同一评论的更新时间 / same comment | same record | `updated_at` | `2026-11-23T03:24:59Z` |
+| 同一评论的作者 / same comment | same record | `user.login` | `oahcom` |
+| PR #707 合并时间 / merge time | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/707` | `merged_at` | `2026-11-23T03:25:26Z` |
+| PR #707 合并提交 / merge commit | same record | `merge_commit_sha` | `f82b636732fef3f8ff728d59d2d04c3e221614fc` |
+
+All values are UTC as returned by the API; no conversion was applied. The comment precedes the merge by 27 seconds, which is consistent with a comment having been posted before the merge. It is not evidence that a formal review was submitted, and `pulls/707/reviews` contains no record that it was.
+
 ### 13.5 由此产生的规则
 
 `PR-GOVERNANCE-001` §6.1 新增 **Review disposition lock**：正式 `REQUEST_CHANGES` 或经授权的阻断性发现存在时，PR 必须为 `HOLD`；修正不得因「推了新提交」「评论说已修复」「CI 通过」而被视为已解决，必须在当前精确 Head 上重新验证。
@@ -454,3 +507,39 @@ PR #830（head `fcfdcf29`）于 2026-11-23T13:47:09Z 合并，合并提交 `c617
 - 不主张被合并的测试是错误的，也不主张它们造成了破坏。
 - 不对任何人的意图作出判断。
 - 不把本记录形成时的配置回溯为合并当时的配置证据。
+
+### 13.10 PR #848：关闭之后仍被合并，且合并的 blob 正是某项处置所拒绝的
+
+**观测时间：2026-11-24 UTC。下列字段均为 GitHub API 返回值。**
+
+| 字段 | 值 |
+|---|---|
+| `created_at` | `02:25:06Z` |
+| `closed_at` | `02:44:43Z` |
+| `merged_at` | `02:48:01Z` |
+| 合并提交 | `942489210afe`，父提交 `98aa54b` 与 `7113cc11` |
+| 合并时 head | `7113cc11`，`.gitattributes` blob `98c27224`，3809 B，CR 73 |
+| `reviews` / `review_comments` | `0` / `0` |
+
+常规合并中 `closed_at` 与 `merged_at` 相同。此处两者相差 3 分 18 秒。`/timeline` 与 `/events` 均不含 `reopened` 事件；两者返回的序列都是 `closed 02:44:43Z` 紧接 `merged 02:48:01Z`。
+
+**处置一**（`7120353579`，`02:39:14Z`）逐字授权了区块开头两句的替换文本，并列出三项后续：应用该文本、以 squash 合并、公布精确 Head 证据。三项均未发生。合并后的 blob 不含授权文本，仍含该处置认定为错误的那一句。head 于 `02:43:57Z` 由 `24067c27` 变为 `7113cc11`，但该文件在两者及合并提交中逐字节相同，故修正从未进入分支。合并提交有两个父提交，故不是 squash。该 PR 在合并后没有任何评论。
+
+**处置二**（`7120438511`，`02:44:42Z`）关闭该 PR，并给出两项重开条件：`.gitattributes` 为 `CR 0`，且 diff 恰为 `-2` 行内容、无其他 hunk。合并内容两项均不满足：CR 73，且相对 `98aa54b`（`ca2be015`，3542 B，CR 0，LF 68）为 `+20/−15`。
+
+该处置将 diff 记为「只有两行内容真正改变，其余 71 个新增行只是追加了 CR 的相同文本」。实测 `+73/−68` 为：注释区块重写 `+20/−13`、两处 `-text` 删除 `+0/−2`、纯 CR 重复行 53 行 —— 内容是二十行，不是两行。正是这个错误数字使重开条件看似可满足：`+0/−2` 的 diff 需要撤销四分钟前处置一所授权的区块重写，故两项处置无法同时满足。合并后的树两项都不满足。
+
+**类别**
+
+本条目是本记录中首个 `closed_at` 早于 `merged_at` 的条目，也是首个同时属于两个既有类别的条目：既是**零正式审查合并**（§13.9），又是**处置已发出、修正未落地即合并**（§13.1）。此前每一条只属于其中之一。
+
+**与 §13.7 的关系**
+
+§13.7 已将零审查合并数冻结为 4。本节不改变该计数，也不把 #848 并入该计数；与 §13.9 一样，本节将其作为独立事实记录。
+
+**不作出的判断**
+
+- 不对合并操作者的意图作出判断。
+- 3 分 18 秒是本实例的时序证据，不是该规则成立的理由。
+- 本节不确立已关闭的 PR 是如何被合并的。本书记录的是 `closed_at` 早于 `merged_at`，且无任何已记录事件解释该状态转移。
+- 本节不对合并进去的区块文本是否正确作出判断；那是 #836 的议题。

@@ -379,6 +379,59 @@ In other words: **the blocking findings were fixed 18 minutes after the merge, a
 
 Here the check was green and the review had happened — the two signals normally read as "safe to merge" — while blocking findings were still open. Neither "must be reviewed" nor "must pass checks" was sufficient to prevent this merge.
 
+#### Historical evidence correction / 历史证据更正
+
+**Correction recorded: 2026-11-23**
+
+The statement above that "review before merge = yes" was based on
+`issuecomment-7090724822`. That resource is an Issue comment, not a
+submitted pull-request review. Its `created_at` field establishes only
+the comment creation time; it does not establish that a formal review
+was submitted before the merge.
+
+The relevant review record source is
+`GET /repos/{owner}/{repo}/pulls/707/reviews`. No formal review record
+for PR #707 was identified in the evidence checked for this correction.
+Accordingly, the historical claim that a review was submitted before
+merge is **not established by the cited evidence**. This correction
+does not assert that a review definitely did not occur; it records that
+the original cited source cannot prove it.
+
+The original statement is retained as a record of the earlier
+assessment. It must not be treated as independently verified evidence
+of a submitted review.
+
+**中文**
+
+**更正记录日期：2026-11-23**
+
+上文“合并前审查 = 是”的判断依据为
+`issuecomment-7090724822`。该资源是 Issue 评论，而不是已提交的
+Pull Request Review。其 `created_at` 字段只能证明评论创建时间，
+不能证明合并前提交过正式审查。
+
+相关 Review 记录来源为
+`GET /repos/{owner}/{repo}/pulls/707/reviews`。在本次更正所核查的
+证据中，未发现 PR #707 的正式 Review 记录。因此，原有“合并前已提交
+审查”的历史主张**无法由所引用的证据确立**。本更正不声称审查绝对
+没有发生；它只记录原先引用的来源不足以证明该事实。
+
+保留原句，是为了记录此前的判断；不得将其视为正式 Review 已提交的
+独立核实证据。
+
+**Measured evidence for this correction / 本次更正的核查证据**
+
+| Item | Endpoint | Field | Value as returned |
+|---|---|---|---|
+| 正式 Review 记录 / formal reviews on #707 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/707/reviews` | array length | `0` records |
+| 被引用的评论 / the cited comment | `GET /repos/oahcom/AiMemoryBrainArchitecture/issues/comments/7090724822` | `created_at` | `2026-11-23T03:24:59Z` |
+| 同一评论的更新时间 / same comment | same record | `updated_at` | `2026-11-23T03:24:59Z` |
+| 同一评论的作者 / same comment | same record | `user.login` | `oahcom` |
+| PR #707 合并时间 / merge time | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/707` | `merged_at` | `2026-11-23T03:25:26Z` |
+| PR #707 合并提交 / merge commit | same record | `merge_commit_sha` | `f82b636732fef3f8ff728d59d2d04c3e221614fc` |
+
+All values are UTC as returned by the API; no conversion was applied. The comment precedes the merge by 27 seconds, which is consistent with a comment having been posted before the merge. It is not evidence that a formal review was submitted, and `pulls/707/reviews` contains no record that it was.
+
 ### 13.5 Rule produced
 
 `PR-GOVERNANCE-001` §6.1 adds a **Review disposition lock**: while a formal `REQUEST_CHANGES` or an authorized blocking finding stands, the PR must be `HOLD`; a correction is not resolved merely because a commit was pushed, a comment says "fixed", or CI passes — it must be re-verified on the current exact head.
@@ -461,3 +514,39 @@ PR #830 (head `fcfdcf29`) was merged at 2026-11-23T13:47:09Z as commit `c61782ad
 - This does not establish that the merged tests were wrong, or that they broke anything.
 - No judgement is made about anyone's intent.
 - The configuration measured now is not offered as evidence of the configuration at merge time.
+
+### 13.10 PR #848: merged after being closed, with the blob a disposition had refused
+
+**Observed: 2026-11-24 UTC. Every field below is a GitHub API value.**
+
+| field | value |
+|---|---|
+| `created_at` | `02:25:06Z` |
+| `closed_at` | `02:44:43Z` |
+| `merged_at` | `02:48:01Z` |
+| merge commit | `942489210afe`, parents `98aa54b` and `7113cc11` |
+| head at merge | `7113cc11`, `.gitattributes` blob `98c27224`, 3809 B, CR 73 |
+| `reviews` / `review_comments` | `0` / `0` |
+
+On an ordinary merge `closed_at` equals `merged_at`. Here they differ by 3 m 18 s. Neither `/timeline` nor `/events` contains a `reopened` event; both return `closed 02:44:43Z` followed directly by `merged 02:48:01Z`.
+
+**Disposition 1** (`7120353579`, `02:39:14Z`) authorised a specific replacement of the block's opening sentences, quoted verbatim in the comment, and committed to three steps: apply the wording, merge as squash, post the exact-Head evidence. None of the three occurred. The merged blob does not contain the authorised text and still contains the sentence the disposition identified as wrong. The head moved from `24067c27` to `7113cc11` at `02:43:57Z`, but `.gitattributes` is byte-identical across both and the merge commit, so the correction never entered the branch. The merge commit has two parents, so it is not a squash. No post-merge comment exists on the PR.
+
+**Disposition 2** (`7120438511`, `02:44:42Z`) closed the PR and gave a two-clause reopen condition: `.gitattributes` at `CR 0`, and a diff of exactly `-2` content lines with no other hunks. The merged content fails both: CR 73, and `+20/−15` against `98aa54b` (`ca2be015`, 3542 B, CR 0, LF 68).
+
+That disposition accounted for the diff as "only two lines of content actually change … the other 71 added lines are identical text with a CR appended". Measured, `+73/−68` is `+20/−13` for the comment-block rewrite, `+0/−2` for the two `-text` deletions, and 53 CR-only duplicate lines — twenty content lines, not two. The wrong number is why the reopen condition reads as satisfiable: a `+0/−2` diff requires reverting the block rewrite that disposition 1 had authorised four minutes earlier, so the two dispositions cannot both be satisfied. The merged tree satisfies neither.
+
+**Class**
+
+This is the first entry in this register where `closed_at` precedes `merged_at`, and the first that belongs to two existing classes at once: a **zero-formal-review merge** (§13.9) and a **disposition-issued, correction-not-landed merge** (§13.1). Every earlier entry is one or the other.
+
+**Relation to §13.7**
+
+§13.7 froze the zero-review merge count at 4. This section does not change that count and does not add #848 to it; it is recorded as a separate fact, as §13.9 was.
+
+**Non-claims**
+
+- No judgement about the merger's intent.
+- The 3 m 18 s interval is this instance's timing evidence, not the reason the rule holds.
+- This does not establish how a closed pull request came to be merged. It records that `closed_at` precedes `merged_at` and that no recorded event explains the transition.
+- Nothing here asserts whether the block text that merged is correct; that is #836's subject.
