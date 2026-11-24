@@ -1,3 +1,23 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+    evidence_verification:
+      verification_status: Unverified
+    usage_status: Active
+    modification_status: Unchanged
+
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Informative
+---
+
 # AID-2026-001 — Joined Forget / Memory Lifecycle Contract Proposal v1
 # AID-2026-001 — Forget / Memory 生命周期联合契约提案 v1
 
