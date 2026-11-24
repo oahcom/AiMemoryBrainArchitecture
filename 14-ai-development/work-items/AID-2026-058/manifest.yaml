@@ -7,7 +7,7 @@ risk_rationale: "One script's failure path plus two data files it already reads.
 
 security_scope: "None. A JSON registry index, a four-line path baseline, and the branch in check_traceability.py that decides what to print when REGISTRY_PATH cannot be read."
 
-status: DISPATCHED
+status: BLOCKED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -74,12 +74,34 @@ acceptance:
   record_ref: ""
   acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
 
-independent_reviewer: NOT_ASSIGNED
+# This block did not exist in the first version: the criteria lived only in
+# prompt-v1.md, which is FROZEN and cannot be edited without breaking its hash.
+# Independent review (REVIEW-01) found AC1 and AC3 unsatisfiable, so the
+# superseding text is recorded here and the prompt is left as the historical
+# statement. Where they differ, this block governs.
+
+acceptance_criteria:
+  - id: AC1
+    text: "On a clean checkout of the merged result, `python scripts/check_traceability.py` exits 0 with 0 errors, and `grep -c 'AID-2026-02[3456]' 14-ai-development/work-items/INDEX.md` returns 1 for each of the four. The criterion is the involution of the original: the four paths were fixed after this work item was written, so asserting that they still fail would require un-fixing them. What is asserted instead is that the fix stays fixed and the checker does not regress to reporting them. (Original text, superseded: 'exits 1 with 4 errors and the four errors are exactly AID-2026-023/024/025/026 not appearing in INDEX.md'. Review REVIEW-01 finding B1.)"
+  - id: AC2
+    text: "With REGISTRY_PATH temporarily renamed, the process exits non-zero and its combined stdout+stderr contains no line matching `^(PASS|FAIL|INCOMPLETE) TRACEABILITY:` — anchored at line start and requiring the full token, not a substring search. The literal list 'PASS / FAIL / INCOMPLETE / 0 requirements / 0 work items / 0 errors' from the original is not used: as substrings they match legitimate diagnostic text such as 'FAILED TO READ', and they do not cover a line of the form 'TRACEABILITY: cannot read registry'. (Review REVIEW-01 finding M1.)"
+  - id: AC3
+    text: "`gate_ratchet.py --baseline scripts/ci/baselines/traceability.txt --format paths --command 'python scripts/check_traceability.py'` exits 0 with regressions=0. fixed=0 is NOT required. (Original required fixed=0. Measured at 8e489ec1: baseline=4 current=0 regressions=0 fixed=4, exit 1, 'FAIL - lower the baseline by 4 fixed item(s)'. The four baseline entries stopped failing, and a shrink-only ratchet reports that as stale by design. Requiring fixed=0 together with AC4's byte-unchanged baseline made the criterion unsatisfiable: the only ways to reach fixed=0 were to empty the baseline, which baseline_content_change forbids, or to make the four paths fail again, which AC1 forbids. Review REVIEW-01 finding B2.)"
+  - id: AC4
+    text: "The baseline is brought to 0 entries, as a removal-only edit, in the same commit that lands the two inputs. This is authorised here and by nothing else: `baseline_content_change` moves from NOT_GRANTED to GRANTED-FOR-SHRINK-ONLY for this criterion, because the four entries it currently holds are no longer failing and a stale baseline fails the ratchet. The original text asserted the baseline stayed byte-identical, which contradicted AC3. (Review REVIEW-01 finding B2.)"
+  - id: AC5
+    text: "The existing suite in scripts/test_check_traceability.py passes, EXCEPT test_missing_registry_is_fail_not_zero_error_incomplete (lines 507-515), whose assertion AC2 necessarily changes: it currently requires the output to contain 'FAIL TRACEABILITY: 0 requirements / 0 work items / 1 errors', which AC2 forbids. That one assertion is updated, not deleted, so the error-vs-indeterminate split #926 introduced stays covered. (Original said 'unmodified'; review REVIEW-01 finding B4.)"
+  - id: AC6
+    text: "The exit code is in {1, 2}, not 0, in the AC2 condition. Either is acceptable; the choice must be stated in the PR body rather than left to be inferred. Measured at 8e489ec1: exit 1. Unchanged."
+  - id: AC7
+    text: "Both baseline and registry are tracked by git after the change: `git ls-files` returns both paths. This is the work item's actual reason to exist and is not covered by any criterion above. Measured at 8e489ec1: both are untracked (`git cat-file -e origin/main:<path>` returns 128)."
+
+independent_reviewer: REQ-05-INDEPENDENT-REVIEW-SESSION-01
 integration_reviewer: NOT_ASSIGNED
 
 review:
-  status: NOT_ASSIGNED
-  report_ref: ""
+  status: CHANGES_REQUESTED
+  report_ref: "14-ai-development/work-items/AID-2026-058/REVIEW-01-INDEPENDENT.md"
 
 implementation:
   status: NOT_STARTED
@@ -95,12 +117,12 @@ findings:
     measured_at: "1259f1af"
     severity: informational
   - id: F2
-    statement: "The four errors the checker reports on a clean tree are AID-2026-023, AID-2026-024, AID-2026-025 and AID-2026-026, all 'not in INDEX.md'. This is the check working, not a defect in it. AC1 asserts these four by path, and section 5 forbids refreshing the baseline to hide them."
-    measured_at: "1259f1af"
-    severity: informational
+    statement: "RETRACTED at 8e489ec1, kept as record. At b3a65e54 the checker reported AID-2026-023/024/025/026 as not in INDEX.md. All four were subsequently added to INDEX.md (lines 82-85) and the checker now reports 0 errors, exit 0. The original statement continued: 'This is the check working, not a defect in it. AC1 asserts these four by path, and section 5 forbids refreshing the baseline to hide them.' That reasoning made AC1 depend on four defects remaining unfixed, so that fixing them turns the acceptance criterion into a failure. AC1 has been restated (see acceptance criteria) to assert the involution instead: the checker must reach 0 errors and must not regress to reporting them."
+    measured_at: "b3a65e54, re-measured 8e489ec1"
+    severity: material
   - id: F3
-    statement: "#926's commit message says 'It is a repository defect ... so it is now an error: exit 1, one error, and the summary word and count agree.' Measured on the merged tree, a missing registry still produces 'INCOMPLETE TRACEABILITY: 0 requirements / 0 work items / 0 errors / 1 warnings' with exit 2. The message describes the intent of the diff, not its behaviour: reporter.error() is reached only when (root / REGISTRY_PATH).is_file() is false, and in the measured empty directory it is false, yet the unknown() branch is what runs. Either the guard does not fire as written or the message was written before the final shape. Recorded because a reader who trusts the commit message would conclude this work item is already done."
-    measured_at: "1259f1af"
+    statement: "RETRACTED at 8e489ec1 — this finding was wrong. It claimed #926's commit message described intent rather than behaviour, citing 'INCOMPLETE TRACEABILITY: 0 requirements / 0 work items / 0 errors / 1 warnings' with exit 2. Independent review (REVIEW-01 finding B3) could not reproduce it and neither could I. Running the script blob at 1259f1af in a directory with no registry prints 'ERROR required registry unavailable: ...' and 'FAIL TRACEABILITY: 0 requirements / 0 work items / 1 errors / 0 warnings', exit 1 — which is what #926's message says. The INCOMPLETE/0-errors/exit-2 output belongs to a23e6cc0 (#899), the parent commit. The measurement was taken on the wrong revision and the conclusion drawn from it does not hold. The work item's premise survives independently: the verdict-shaped line '0 requirements / 0 work items' is still printed over inputs that were never read, and that is what change (B) removes."
+    measured_at: "1259f1af, re-measured 8e489ec1"
     severity: material
   - id: F4
     statement: "This work item was first written as AID-2026-057 and renumbered after a concurrent session claimed that ID for an unrelated work item. The number was taken within minutes of this session choosing it. Two manifests under one ID is the hazard; renumbering is the fix."
