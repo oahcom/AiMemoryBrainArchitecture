@@ -911,6 +911,36 @@ def test_incremental_zero_out_of_scope_still_prints_the_count() -> None:
             f"{zero in (out + err).splitlines()}",
         )
 
+def test_out_of_scope_stale_pin_emits_both_a_note_and_a_count() -> None:
+    """The ruling's sentence joins two things with "and"; assert both.
+
+    #862 shipped the counted line alone. A suite that asserts only the count
+    stays green when the note disappears, which is exactly how that happened.
+    This case is the regression gate for the half nobody was watching: the
+    note must exist, it must name the document, and it must never be an error.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        root, base = _dm10_repo(tmp)
+        (root / "notes.txt").write_text("unrelated change\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "touch nothing governed")
+        code, out, err = _run_capture(root, "--require-changed", base)
+        note_lines = [
+            line for line in out.splitlines()
+            if line.startswith("  note: DM-10 out-of-scope 00-governance/b.md:")
+        ]
+        count_lines = [line for line in out.splitlines() if line == DM10_COUNT_ONE]
+        # The error form puts the sentence on stderr. The note must not appear
+        # there: a note that also fails the run is the bug this issue fixes.
+        on_stderr = "DM-10 out-of-scope" in err
+        record(
+            "T86 an out-of-scope stale pin is both noted and counted, never failed",
+            code == 0 and len(note_lines) == 1 and len(count_lines) == 1
+            and not on_stderr,
+            f"  gate returned {code}, expected 0; note lines: {len(note_lines)}; "
+            f"count lines: {len(count_lines)}; on stderr: {on_stderr}",
+        )
+
 def run_dm10_scope() -> None:
     print("DM-10 scope (issue #808)")
     test_incremental_in_scope_stale_pin_still_fails()
@@ -918,6 +948,7 @@ def run_dm10_scope() -> None:
     test_whole_tree_run_still_reports_every_stale_pin()
     test_incremental_one_in_scope_one_out_of_scope()
     test_incremental_zero_out_of_scope_still_prints_the_count()
+    test_out_of_scope_stale_pin_emits_both_a_note_and_a_count()
 
 
 def run_shallow_history() -> None:
