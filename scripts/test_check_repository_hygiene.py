@@ -538,7 +538,7 @@ class RepositoryHygieneTests(unittest.TestCase):
         # A pass that compared nothing would look identical to a real pass, so
         # the counts are asserted: two directories on disk, two linked paths.
         # A zero here means the sets were empty and the check bound nothing.
-        self.assertIn("directories=2 entries=2", result.stdout)
+        self.assertIn("directories=2 linked=2", result.stdout)
 
     def test_index_membership_fails_on_a_directory_with_no_entry(self):
         self.index_fixture(
