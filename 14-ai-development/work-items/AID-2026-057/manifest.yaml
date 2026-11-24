@@ -103,7 +103,7 @@ owner_decisions:
       - "A/B must be independent of the four D rules; D rules must not be merged or widened to implement A/B."
       - "No global suffix rule for .json, .yaml, .toml, or .txt may be added."
       - "C 19 and D3 11 stay refused."
-      - "CHECK_VERSION must be 2026-11-24.4 when A/B lands."
+      - "CHECK_VERSION must be 2026-11-24.5 when A/B lands: #891 reached main first and took 2026-11-24.4 for the index-membership check, so two distinct policies must not share a version string."
       - "This ruling governs admission policy, not merge authorisation."
 
   - id: R7
@@ -287,7 +287,7 @@ implementation:
   branch: "policy/ab-admission-24.4"
   pr: 946
   merge_authorisation: "NOT AUTHORISED (Owner ruling, round 26). Technical acceptance passed; D1 remains unsatisfied and no workaround is permitted."
-  note: "Ten A/B rules and four D rules are now in the gate at CHECK_VERSION 2026-11-24.4. Measured over the original 113-path candidate inventory: 83 admitted, 30 refused. The refused 30 are C 19 plus D3 11, both ruled closed. AC8 and AC9 were re-measured against the whole inventory rather than against the intended paths only."
+  note: "Ten A/B rules and four D rules are now in the gate at CHECK_VERSION 2026-11-24.5. Measured over the original 113-path candidate inventory: 83 admitted, 30 refused. The refused 30 are C 19 plus D3 11, both ruled closed. AC8 and AC9 were re-measured against the whole inventory rather than against the intended paths only."
 
 findings:
 
