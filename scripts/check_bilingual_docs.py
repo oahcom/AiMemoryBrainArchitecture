@@ -21,8 +21,8 @@ NORMATIVE_ROOTS = {
     "04-memory-compiler", "06-memory-context", "07-agent-integration",
     "08-bmcp-protocol", "13-engineering-decisions", "14-ai-development",
 }
-REPO_ROOT = Path(__file__).resolve().parents[1]
-_missing_roots = sorted(r for r in NORMATIVE_ROOTS if not (REPO_ROOT / r).is_dir())
+ROOT = Path(__file__).resolve().parents[1]
+_missing_roots = sorted(r for r in NORMATIVE_ROOTS if not (ROOT / r).is_dir())
 if _missing_roots:
     sys.stderr.write(
         "NORMATIVE_ROOTS references non-existent directories: "
@@ -156,7 +156,7 @@ EMBEDDED_BILINGUAL_SOURCES: dict[str, str] = {
     ),
 }
 for _source, _reason in EMBEDDED_BILINGUAL_SOURCES.items():
-    if not (REPO_ROOT / _source).is_file():
+    if not (ROOT / _source).is_file():
         sys.stderr.write(
             f"EMBEDDED_BILINGUAL_SOURCES references missing file: {_source}\n"
         )
@@ -167,14 +167,13 @@ for _source, _reason in EMBEDDED_BILINGUAL_SOURCES.items():
         )
         sys.exit(2)
 
-ROOT = REPO_ROOT
-BASELINE_PATH = REPO_ROOT / "scripts" / "bilingual-baseline.txt"
+BASELINE_PATH = ROOT / "scripts" / "bilingual-baseline.txt"
 
 
 def _git_log_output(*args: str) -> str:
     """Read repository history for registration provenance checks."""
     result = subprocess.run(
-        ["git", *args], cwd=REPO_ROOT, check=True, capture_output=True, text=True
+        ["git", *args], cwd=ROOT, check=True, capture_output=True, text=True
     )
     return result.stdout.strip()
 
@@ -193,7 +192,7 @@ def _require_full_git_history() -> None:
     """Fail closed before deriving provenance from a potentially shallow log."""
     result = subprocess.run(
         ["git", "rev-parse", "--is-shallow-repository"],
-        cwd=REPO_ROOT,
+        cwd=ROOT,
         check=True,
         capture_output=True,
         text=True,
@@ -339,7 +338,7 @@ def current_bilingual_gaps() -> set[str]:
     """
     result = subprocess.run(
         ["git", "ls-files", "-z", "--", "*.md"],
-        cwd=REPO_ROOT,
+        cwd=ROOT,
         check=True,
         capture_output=True,
     )
@@ -363,8 +362,8 @@ def current_bilingual_gaps() -> set[str]:
         # Inventory and changed-path gates must share prefixes or pair-exempt paths become permanent gaps.
         if source.startswith(PAIR_EXEMPT_PREFIXES):
             continue
-        english = REPO_ROOT / "docs" / "en" / source
-        chinese = REPO_ROOT / "docs" / "zh-CN" / source
+        english = ROOT / "docs" / "en" / source
+        chinese = ROOT / "docs" / "zh-CN" / source
         mirrored = english.is_file() and chinese.is_file()
         side_by_side = side_by_side_partner(source)
         partial_side_by_side = (
@@ -389,7 +388,7 @@ def write_baseline() -> int:
     try:
         status_result = subprocess.run(
             ["git", "status", "--porcelain", "--untracked-files=all"],
-            cwd=REPO_ROOT,
+            cwd=ROOT,
             check=True,
             capture_output=True,
             text=True,
@@ -462,7 +461,7 @@ def write_baseline() -> int:
 
 def read_baseline() -> set[str] | None:
     if not BASELINE_PATH.is_file():
-        print(f"::error::Required bilingual baseline is missing: {BASELINE_PATH.relative_to(REPO_ROOT)}")
+        print(f"::error::Required bilingual baseline is missing: {BASELINE_PATH.relative_to(ROOT)}")
         return None
     return {
         line.strip()
@@ -479,7 +478,7 @@ def changed_status() -> dict[str, str]:
         raise RuntimeError("BASE_SHA and HEAD_SHA are required")
     raw = subprocess.check_output(
         ["git", "diff", "--name-status", "--no-renames", f"{base}...{head}"],
-        cwd=REPO_ROOT,
+        cwd=ROOT,
         text=True,
     )
     result: dict[str, str] = {}
@@ -539,7 +538,7 @@ def _blob_at(revision: str, path: str) -> str | None:
     try:
         return subprocess.check_output(
             ["git", "rev-parse", "--verify", f"{revision}:{path}"],
-            cwd=REPO_ROOT,
+            cwd=ROOT,
             text=True,
             stderr=subprocess.DEVNULL,
         ).strip() or None
@@ -682,7 +681,7 @@ def check_normative_root_departures(exception: bool) -> list[str]:
         raise RuntimeError("BASE_SHA and HEAD_SHA are required")
     raw = subprocess.check_output(
         ["git", "diff", "--name-status", "-M", f"{base}...{head}"],
-        cwd=REPO_ROOT,
+        cwd=ROOT,
         text=True,
     )
     errors: list[str] = []
