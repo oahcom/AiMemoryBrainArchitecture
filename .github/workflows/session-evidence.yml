@@ -1,0 +1,58 @@
+name: Session Evidence Gate
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
+env:
+  AI_SESSION_EVIDENCE_EFFECTIVE_AT_UTC: "2026-12-01T00:00:00Z"
+
+jobs:
+  session-evidence:
+    name: Session Evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout trusted base revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+
+      - name: Self-test the validator
+        run: python3 -m unittest discover -s tests/session_evidence -p "test_*.py"
+
+      - name: Validate session evidence
+        id: validate
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set +e
+          python3 -m scripts.governance.session_evidence.validate
+          result=$?
+          if [ "$result" -eq 0 ]; then
+            echo "validation_result=success" >> "$GITHUB_OUTPUT"
+          else
+            echo "validation_result=failure" >> "$GITHUB_OUTPUT"
+          fi
+          exit "$result"
+
+      - name: Ensure job summary contains a verdict
+        if: always()
+        env:
+          VALIDATION_OUTCOME: ${{ steps.validate.outcome }}
+        run: |
+          if ! grep -q '^AI-SESSION-EVIDENCE: ' "$GITHUB_STEP_SUMMARY" 2>/dev/null; then
+            if [ "$VALIDATION_OUTCOME" = "success" ]; then
+              echo "AI-SESSION-EVIDENCE: PRESENT" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "AI-SESSION-EVIDENCE: MISSING" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          fi
