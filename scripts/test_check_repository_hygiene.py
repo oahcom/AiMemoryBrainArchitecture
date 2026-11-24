@@ -45,7 +45,6 @@ class RepositoryHygieneTests(unittest.TestCase):
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(content, encoding="utf-8")
 
-        # -f is intentional: tests must be able to commit ignored fixtures.
         git(self.repo, "add", "-f", "-A")
         git(self.repo, "commit", "-q", "-m", "test fixture")
         return git(self.repo, "rev-parse", "HEAD")
@@ -72,12 +71,26 @@ class RepositoryHygieneTests(unittest.TestCase):
             text=True,
         )
 
+    def run_checker_args(self, *args):
+        return subprocess.run(
+            [sys.executable, str(CHECKER), *args],
+            cwd=self.repo,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+            text=True,
+        )
+
     def assert_admission_passes(self, base, head):
         result = self.run_checker(base, head)
         self.assertEqual(
             result.returncode,
             0,
             msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn(
+            "Repository new-file admission passed:",
+            result.stdout,
         )
 
     def assert_admission_fails(self, base, head, path):
@@ -87,7 +100,11 @@ class RepositoryHygieneTests(unittest.TestCase):
             1,
             msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
         )
-        self.assertIn(path, result.stderr)
+        expected = (
+            "::error::new-file admission violation: "
+            f"no allowlist rule for '{path}'"
+        )
+        self.assertIn(expected, result.stderr)
 
     def test_new_allowed_source_file_passes(self):
         base = self.seed_base()
@@ -114,7 +131,13 @@ class RepositoryHygieneTests(unittest.TestCase):
             "_dm.txt": "generated output\n",
         })
 
-        self.assert_admission_fails(base, head, "_dm.txt")
+        result = self.run_checker(base, head)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn(
+            "::error::repository hygiene violation: "
+            "prohibited committed file '/_dm.txt'",
+            result.stderr,
+        )
 
     def test_gitignored_but_forced_committed_dm_txt_fails(self):
         base = self.seed_base()
@@ -123,7 +146,12 @@ class RepositoryHygieneTests(unittest.TestCase):
             "_dm.txt": "forced committed output\n",
         })
 
-        self.assert_admission_fails(base, head, "_dm.txt")
+        result = self.run_checker(base, head)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn(
+            "prohibited committed file '/_dm.txt'",
+            result.stderr,
+        )
 
     def test_new_gate_output_log_fails(self):
         base = self.seed_base()
@@ -139,7 +167,9 @@ class RepositoryHygieneTests(unittest.TestCase):
             "tests/snapshots/result.json": '{"snapshot": true}\n',
         })
 
-        self.assert_admission_fails(base, head, "result.json")
+        self.assert_admission_fails(
+            base, head, "tests/snapshots/result.json"
+        )
 
     def test_modifying_existing_unapproved_extension_is_not_new_file(self):
         base = self.commit({
@@ -181,19 +211,175 @@ class RepositoryHygieneTests(unittest.TestCase):
         self.commit({
             "_dm.txt": "prohibited\n",
         })
-        head = git(self.repo, "rev-parse", "HEAD")
 
-        result = subprocess.run(
-            [sys.executable, str(CHECKER)],
-            cwd=self.repo,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            check=False,
-            text=True,
-        )
+        result = self.run_checker_args()
 
         self.assertEqual(result.returncode, 1)
-        self.assertIn("/_dm.txt", result.stderr)
+        self.assertIn(
+            "prohibited committed file '/_dm.txt'",
+            result.stderr,
+        )
+
+    # M11: denylist must remain active in admission mode.
+    def test_admission_mode_still_checks_prohibited_head_paths(self):
+        base = self.seed_base()
+        head = self.commit({
+            "_dm.txt": "prohibited\n",
+            "allowed.py": "print('hello')\n",
+        })
+
+        result = self.run_checker(base, head)
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn(
+            "::error::repository hygiene violation: "
+            "prohibited committed file '/_dm.txt'",
+            result.stderr,
+        )
+
+    # M01: committed tree contents, not ignore rules, determine admission.
+    def test_gitignored_forced_committed_unapproved_file_fails_admission(self):
+        base = self.seed_base()
+        head = self.commit({
+            ".gitignore": "*.bin\n",
+            "artifacts/build-output.bin": "binary fixture\n",
+        })
+
+        self.assertIn(
+            "artifacts/build-output.bin",
+            git(self.repo, "ls-files"),
+        )
+        self.assert_admission_fails(
+            base, head, "artifacts/build-output.bin"
+        )
+
+    # M08: the supplied --head, not the checkout's HEAD, is authoritative.
+    def test_admission_uses_supplied_head_not_checkout_head(self):
+        base = self.seed_base()
+        head = self.commit({
+            "artifacts/build-output.bin": "binary fixture\n",
+        })
+
+        git(self.repo, "checkout", "--detach", base)
+        self.assertEqual(git(self.repo, "rev-parse", "HEAD"), base)
+
+        self.assert_admission_fails(
+            base, head, "artifacts/build-output.bin"
+        )
+
+    # M16: a Git failure must never be converted into a successful result.
+    def test_unresolvable_base_returns_error_not_success(self):
+        base = self.seed_base()
+        head = self.commit({
+            "allowed.py": "print('hello')\n",
+        })
+
+        missing = "0" * 40
+        result = self.run_checker(missing, head)
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn(
+            "::error::repository hygiene cannot be determined:",
+            result.stderr,
+        )
+        self.assertIn("rev-parse", result.stderr)
+
+    # M18: the CLI requires both range arguments together.
+    def test_base_without_head_is_rejected(self):
+        self.seed_base()
+
+        result = self.run_checker_args(
+            "--base", "0" * 40
+        )
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn(
+            "--base and --head must be supplied together",
+            result.stderr,
+        )
+
+    def test_head_without_base_is_rejected(self):
+        self.seed_base()
+
+        result = self.run_checker_args(
+            "--head", "0" * 40
+        )
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn(
+            "--base and --head must be supplied together",
+            result.stderr,
+        )
+
+    # M12: source suffix matching is intentionally case-insensitive.
+    def test_uppercase_source_suffix_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "scripts/new_gate.PY": "print('hello')\n",
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # M13: configuration paths are intentionally exact and case-sensitive.
+    def test_case_changed_configuration_filename_is_rejected(self):
+        base = self.seed_base()
+        head = self.commit({
+            "PyProject.toml": "[tool.example]\n",
+        })
+
+        self.assert_admission_fails(
+            base, head, "PyProject.toml"
+        )
+
+    # M14: workflow metadata is admitted only beneath root .github.
+    def test_nested_github_workflow_directory_is_rejected(self):
+        base = self.seed_base()
+        head = self.commit({
+            "nested/.github/workflows/check.yml": (
+                "name: Nested workflow\n"
+            ),
+        })
+
+        self.assert_admission_fails(
+            base,
+            head,
+            "nested/.github/workflows/check.yml",
+        )
+
+    # M17: requirements files are admitted only at repository root.
+    def test_nested_requirements_file_is_rejected(self):
+        base = self.seed_base()
+        head = self.commit({
+            "nested/requirements-dev.txt": "example==1.0\n",
+        })
+
+        self.assert_admission_fails(
+            base, head, "nested/requirements-dev.txt"
+        )
+
+    # M19: the prohibited path is exact, not a suffix-based denylist.
+    def test_nested_dm_txt_does_not_match_root_denylist(self):
+        self.commit({
+            "nested/_dm.txt": "nested fixture\n",
+        })
+
+        result = self.run_checker_args()
+
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+
+    # M09: Git tree paths are NUL-delimited, not newline-delimited.
+    def test_newline_in_allowed_filename_is_handled_as_one_path(self):
+        base = self.seed_base()
+        path = "scripts/strange\nname.py"
+        head = self.commit({
+            path: "print('hello')\n",
+        })
+
+        self.assert_admission_passes(base, head)
 
 
 if __name__ == "__main__":
