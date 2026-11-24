@@ -69,7 +69,7 @@ Basis: AI-EXEC-001 v1.1 and AI-EXEC-002 v1.1 are ADOPTED via PR #256 merge 48a55
 
 ## RULING-04 — Two non-substitutable independence dimensions
 
-**Conflict.** NR-001 / OPTION A permits a genuinely new independent ChatGPT conversation to satisfy the independent-session requirement subject to controls. PR-GOVERNANCE-001 §5 says a review through the same connected GitHub identity as the author is not independent, even if the session adopts a different role. AI-EXEC-001 v1.1 §6 and AI-EXEC-002 §5 preserve both.
+**Conflict.** NR-001 / OPTION A permits a genuinely new independent ChatGPT conversation to satisfy the independent-session requirement subject to controls. PR-GOVERNANCE-001 §5 as amended 2026-11-24 makes independence a property of the reviewing session: a review through the same connected GitHub identity as the author **is** independent when the reviewing session is not the authoring session. Before that amendment §5 required a distinct GitHub actor, which NR-001 / OPTION A could not supply. AI-EXEC-001 v1.1 §6 and AI-EXEC-002 §5 preserve both requirements; the amendment removes the conflict rather than choosing a side.
 
 **Ruling.**
 1. Session/review-behavior independence (S-independence) means a genuinely new conversation distinct from authoring/implementation, supplied with frozen inputs, independently reading repository sources, performing adversarial review and recording findings, with NR-001 disclosure that conversation isolation is not model/provider/statistical independence.
@@ -79,7 +79,7 @@ Basis: AI-EXEC-001 v1.1 and AI-EXEC-002 v1.1 are ADOPTED via PR #256 merge 48a55
 5. AI-EXEC-001 R2 maps independent ChatGPT session to S-independence, which is now the §5 requirement itself. Affected Owner explicit contract approval is separate and still required. R3 additionally requires security/domain expert review, reproducible tests and explicit Acceptance Authority approval. Those remain non-substitutable; P-independence no longer exists as a separate bar.
 6. For §5-covered changes (security, identity, authorization, Forget, lifecycle, canonical persistence, recovery, cross-owner contracts, production operations), a qualifying independent session is sufficient for the independence element of MERGE. High-risk changes additionally require the affected Owner's explicit approval, which no session supplies. Absent that approval, disposition remains HOLD, or REMEDIATE/REJECT as justified.
 
-**Boundaries.** No model independence, multi-model consensus, human expertise, platform enforcement or independent GitHub actor is claimed. Role separation is not actor separation. A same-identity review must never be relabeled independent.
+**Boundaries.** No model independence, multi-model consensus, human expertise, platform enforcement or independent GitHub actor is claimed. Role separation is not actor separation. Role simulation inside the authoring session must never be relabeled independent; a **separate session** under the same identity already is independent and needs no relabeling.
 
 **Effective scope.** Prospective interpretation after adoption. Review by 2026-12-02.
 
@@ -99,9 +99,9 @@ Basis: AI-EXEC-001 v1.1 and AI-EXEC-002 v1.1 are ADOPTED via PR #256 merge 48a55
 
 **Owner approval protocol.** The actual accountable Owner (or a delegate with documented authority) must issue a direct, attributable, explicit written decision identifying PR/Work Item, exact Head or immutable contract version/blob, clauses/fields, ACCEPT / REJECT / ACCEPT WITH AMENDMENTS, conditions, identity/role and timestamp. Use an existing Issue/PR comment or link a verifiable Owner-authored artifact. If GitHub actor is shared oahcom, disclose it; do not represent it as a distinct platform identity or GitHub APPROVE. Verify attribution through an authorized Owner channel. If attribution cannot be verified, Owner gate remains OPEN.
 
-Never issue or claim GitHub APPROVE as a workaround for same-identity restrictions. Owner written decision may satisfy only the Owner contract-approval gate when attribution and scope are verified; it cannot satisfy §5 reviewer identity independence. If platform cannot supply an independent identity, HOLD and escalate to Project Owner/repository administrator.
+Never issue or claim GitHub APPROVE as a workaround for the platform's self-approval prohibition. Owner written decision may satisfy only the Owner contract-approval gate when attribution and scope are verified; it is not §5 independence and cannot substitute for it. Independence is supplied by a separate reviewing session, which this repository can always open; where even that is unavailable, HOLD and escalate to Project Owner/repository administrator.
 
-**Boundaries.** No combination of same-identity COMMENT, role simulation, Owner narrative, exception entry or green CI manufactures an independent reviewer. Exception alone never changes HOLD to MERGE.
+**Boundaries.** No combination of authoring-session COMMENT, role simulation, Owner narrative, exception entry or green CI manufactures an independent reviewer. Exception alone never changes HOLD to MERGE.
 
 **Effective scope.** All five-state decisions after adoption. Review by 2026-12-02.
 
