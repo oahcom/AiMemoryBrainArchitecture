@@ -917,6 +917,137 @@ class RepositoryHygieneTests(unittest.TestCase):
             "no directory: 14-ai-development/work-items/AID-2026-009",
             result.stderr,
         )
+    def manifest_consistency_fixture(self, manifest_text):
+        return self.commit({
+            "14-ai-development/work-items/INDEX.md":
+                "| [AID-2026-001](AID-2026-001/manifest.yaml) |\n",
+            "14-ai-development/work-items/AID-2026-001/manifest.yaml":
+                manifest_text,
+        })
+
+    # R20-01 positive: implementation.status PR_OPEN without a valid
+    # positive integer pull_request must fail.
+    def test_manifest_pr_open_requires_positive_pull_request(self):
+        self.manifest_consistency_fixture(
+            "work_item_id: AID-2026-001\n"
+            "status: DISPATCHED\n"
+            "pull_request: PENDING\n"
+            "implementation:\n"
+            "  status: PR_OPEN\n"
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(result.returncode, 1, msg=result.stderr)
+        self.assertIn(
+            "::error::manifest consistency violation: "
+            "'14-ai-development/work-items/AID-2026-001/manifest.yaml': "
+            "PR_OPEN requires pull_request to be a positive integer",
+            result.stderr,
+        )
+
+    # R20-01 negative: PR_OPEN with a positive integer PR number passes.
+    def test_manifest_pr_open_with_positive_pull_request_passes(self):
+        self.manifest_consistency_fixture(
+            "work_item_id: AID-2026-001\n"
+            "status: PR_OPEN\n"
+            "pull_request: 567\n"
+            "merge_commit_sha: NOT_MERGED\n"
+            "implementation:\n"
+            "  status: PR_OPEN\n"
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        self.assertIn(
+            "Work-item manifest consistency version=2026-11-24.6 "
+            "manifests=1 violations=0",
+            result.stdout,
+        )
+
+    # R20-02 positive: VERIFIED is a completed lifecycle assertion and
+    # cannot coexist with merge_commit_sha NOT_MERGED.
+    def test_manifest_not_merged_conflicts_with_verified_status(self):
+        self.manifest_consistency_fixture(
+            "work_item_id: AID-2026-001\n"
+            "status: VERIFIED\n"
+            "pull_request: 521\n"
+            "merge_commit_sha: NOT_MERGED\n"
+            "implementation:\n"
+            "  status: MERGED\n"
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(result.returncode, 1, msg=result.stderr)
+        self.assertIn(
+            "::error::manifest consistency violation: "
+            "'14-ai-development/work-items/AID-2026-001/manifest.yaml': "
+            "merge_commit_sha is NOT_MERGED while the lifecycle status "
+            "asserts merged implementation",
+            result.stderr,
+        )
+
+    # R20-02 negative: NOT_MERGED is consistent with a dispatched,
+    # not-yet-implemented work item.
+    def test_manifest_not_merged_with_not_started_passes(self):
+        self.manifest_consistency_fixture(
+            "work_item_id: AID-2026-001\n"
+            "status: DISPATCHED\n"
+            "pull_request: PENDING\n"
+            "merge_commit_sha: NOT_MERGED\n"
+            "implementation:\n"
+            "  status: NOT_STARTED\n"
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        self.assertIn(
+            "Work-item manifest consistency version=2026-11-24.6 "
+            "manifests=1 violations=0",
+            result.stdout,
+        )
+
+    # R20-03 positive: NOT_STARTED cannot coexist with a full SHA.
+    # This fixture tests only internal consistency, not SHA existence.
+    def test_manifest_not_started_conflicts_with_full_merge_sha(self):
+        self.manifest_consistency_fixture(
+            "work_item_id: AID-2026-001\n"
+            "status: DISPATCHED\n"
+            "pull_request: 737\n"
+            "merge_commit_sha: "
+            "0123456789abcdef0123456789abcdef01234567\n"
+            "implementation:\n"
+            "  status: NOT_STARTED\n"
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(result.returncode, 1, msg=result.stderr)
+        self.assertIn(
+            "::error::manifest consistency violation: "
+            "'14-ai-development/work-items/AID-2026-001/manifest.yaml': "
+            "implementation.status is NOT_STARTED while "
+            "merge_commit_sha contains a full SHA",
+            result.stderr,
+        )
+
+    # R20-03 negative: NOT_STARTED with NOT_MERGED is valid. A merged
+    # implementation with a full SHA is also valid.
+    def test_manifest_not_started_with_not_merged_passes(self):
+        self.manifest_consistency_fixture(
+            "work_item_id: AID-2026-001\n"
+            "status: DISPATCHED\n"
+            "pull_request: PENDING\n"
+            "merge_commit_sha: NOT_MERGED\n"
+            "implementation:\n"
+            "  status: NOT_STARTED\n"
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        self.assertIn(
+            "Work-item manifest consistency version=2026-11-24.6 "
+            "manifests=1 violations=0",
+            result.stdout,
+        )
 
 
 if __name__ == "__main__":

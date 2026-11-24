@@ -8,7 +8,7 @@ import sys
 from pathlib import PurePosixPath
 
 
-CHECK_VERSION = "2026-11-24.5"
+CHECK_VERSION = "2026-11-24.6"
 
 # Repository-root-relative paths, written with a leading slash.
 PROHIBITED_PATHS = (
@@ -416,6 +416,11 @@ def check_index_membership(root, commit, head_paths):
     `manifest.yaml` at all -- a fix item's `authorization-manifest.yaml` is a
     different document. A gate that red on half the registry the day it landed
     would be switched off, so this one does not pretend to cover it.
+
+    The separate manifest-consistency check verifies only internal lifecycle
+    field combinations in work-item manifests. It does not compare INDEX.md
+    Status cells with manifest lifecycle fields, and does not verify external
+    PR or GitHub state.
     """
     directories = work_item_directories(head_paths)
     if not directories:
@@ -462,6 +467,158 @@ def check_index_membership(root, commit, head_paths):
 
     return violations
 
+def _manifest_scalar(lines, key, *, start=0, end=None):
+    """Return one simple YAML scalar from a mapping block, if present."""
+    if end is None:
+        end = len(lines)
+
+    pattern = re.compile(
+        rf"^(\s*){re.escape(key)}:[ \t]*(.*?)[ \t]*$"
+    )
+
+    for line in lines[start:end]:
+        match = pattern.fullmatch(line)
+        if not match:
+            continue
+
+        value = match.group(2)
+        if " #" in value:
+            value = value.split(" #", 1)[0].rstrip()
+        return value
+
+    return None
+
+
+def _unquote_manifest_scalar(value):
+    """Remove one matching pair of YAML scalar quotes."""
+    if (
+        value is not None
+        and len(value) >= 2
+        and value[0] == value[-1]
+        and value[0] in {"'", '"'}
+    ):
+        return value[1:-1]
+    return value
+
+
+def _implementation_status(lines):
+    """Read implementation.status from the implementation mapping."""
+    implementation_start = None
+
+    for index, line in enumerate(lines):
+        if re.fullmatch(r"implementation:[ \t]*(?:#.*)?", line):
+            implementation_start = index + 1
+            break
+
+    if implementation_start is None:
+        return None
+
+    implementation_end = len(lines)
+    for index in range(implementation_start, len(lines)):
+        line = lines[index]
+        if line and not line[0].isspace() and not line.startswith("#"):
+            implementation_end = index
+            break
+
+    for line in lines[implementation_start:implementation_end]:
+        match = re.fullmatch(r"([ \t]+)status:[ \t]*(.*?)[ \t]*", line)
+        if match:
+            return _unquote_manifest_scalar(match.group(2))
+
+    return None
+
+
+def check_work_item_manifest_consistency(root, commit, head_paths):
+    """Check internal lifecycle consistency in committed work-item manifests.
+
+    This is deliberately a static, repository-local check. It does not verify
+    that a PR exists, that a SHA exists in Git, or that a SHA is reachable
+    from a target branch.
+    """
+    manifest_paths = sorted(
+        path for path in head_paths
+        if WORK_ITEM_MANIFEST_RE.fullmatch(path)
+    )
+
+    violations = []
+
+    for path in manifest_paths:
+        try:
+            raw = run_git(["-C", root, "show", f"{commit}:{path}"])
+            text = raw.decode("utf-8", errors="strict")
+        except UnicodeDecodeError as exc:
+            raise RuntimeError(
+                f"'{path}' is not valid UTF-8"
+            ) from exc
+        except RuntimeError as exc:
+            raise RuntimeError(
+                f"cannot read '{path}': {exc}"
+            ) from exc
+
+        lines = text.splitlines()
+
+        top_status = _unquote_manifest_scalar(
+            _manifest_scalar(lines, "status")
+        )
+        implementation_status = _implementation_status(lines)
+        pull_request = _manifest_scalar(lines, "pull_request")
+        merge_commit_sha = _unquote_manifest_scalar(
+            _manifest_scalar(lines, "merge_commit_sha")
+        )
+
+        # R20-01: either PR_OPEN lifecycle field requires a positive,
+        # unquoted YAML integer in pull_request.
+        if (
+            top_status == "PR_OPEN"
+            or implementation_status == "PR_OPEN"
+        ):
+            if (
+                pull_request is None
+                or not re.fullmatch(r"[1-9][0-9]*", pull_request)
+            ):
+                violations.append(
+                    "manifest consistency violation: "
+                    f"'{path}': PR_OPEN requires pull_request to be "
+                    "a positive integer"
+                )
+
+        # R20-02: NOT_MERGED cannot coexist with a lifecycle state that
+        # asserts implementation has already merged or been verified.
+        if merge_commit_sha == "NOT_MERGED":
+            if (
+                top_status in {"MERGED", "VERIFIED"}
+                or implementation_status == "MERGED"
+            ):
+                violations.append(
+                    "manifest consistency violation: "
+                    f"'{path}': merge_commit_sha is NOT_MERGED while "
+                    "the lifecycle status asserts merged implementation"
+                )
+
+        # R20-03: NOT_STARTED cannot coexist with a syntactically real
+        # implementation merge SHA. No Git-object or reachability check
+        # is performed here.
+        if (
+            implementation_status == "NOT_STARTED"
+            and merge_commit_sha is not None
+            and FULL_SHA_RE.fullmatch(merge_commit_sha)
+        ):
+            violations.append(
+                "manifest consistency violation: "
+                f"'{path}': implementation.status is NOT_STARTED "
+                "while merge_commit_sha contains a full SHA"
+            )
+
+    print(
+        "Work-item manifest consistency "
+        f"version={CHECK_VERSION} "
+        f"manifests={len(manifest_paths)} "
+        f"violations={len(violations)}"
+    )
+
+    return violations
+
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--base", help="full base commit SHA")
@@ -500,6 +657,16 @@ def main():
         membership = check_index_membership(root, head_for_denylist, head_paths)
         if membership:
             for violation in membership:
+                error(violation)
+            return 1
+
+        manifest_consistency = check_work_item_manifest_consistency(
+            root,
+            head_for_denylist,
+            head_paths,
+        )
+        if manifest_consistency:
+            for violation in manifest_consistency:
                 error(violation)
             return 1
 
