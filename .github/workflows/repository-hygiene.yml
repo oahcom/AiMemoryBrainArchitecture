@@ -105,3 +105,19 @@ jobs:
           set -euo pipefail
           cd scripts
           python3 -m unittest test_check_traceability
+
+      # PR-GOVERNANCE-001 §7 declares the required check contexts on `main`.
+      # Renaming a job leaves the document claiming a context nothing produces;
+      # this holds the declaration to the tree. Exit 2 (INCOMPLETE) is a failure
+      # here too: an unreadable condition must never read as green.
+      - name: Check declared check contexts are produced by a job
+        run: python3 scripts/check_declared_check_contexts.py
+
+      # Run from this directory because test_check_declared_check_contexts
+      # imports its checker by bare name.
+      - name: Self-check the declared-check-contexts gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd scripts
+          python3 -m unittest test_check_declared_check_contexts
