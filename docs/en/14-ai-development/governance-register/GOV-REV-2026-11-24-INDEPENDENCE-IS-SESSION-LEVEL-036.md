@@ -188,6 +188,20 @@ Line 136 was not vague. It named the session dimension and denied it: *"A review
 
 The correct statement: session-level independence was **already in use in many places**, but no governance clause had made it **the §5 test** — it was one step inside the NR-001 review flow, never §5 independence itself. The change therefore **promotes an already-used test into the clause's criterion**; it does not introduce a concept the repository had never seen. That distinction matters for traceability: the former can cite six months of practice, the latter cannot.
 
+Reproduction command (this section's first version omitted it too; added 2026-11-25):
+
+```
+for t in "independent session" "独立会话" "separate session" "different session"; do
+  printf '%-20s ' "$t"; git grep -il "$t" 1259f1af -- "*.md" | wc -l
+done
+-> independent session  8
+   独立会话             10
+   separate session     11
+   different session    6
+```
+
+`-i` is not optional. Without it the counts are 6 / 10 / 10 / 5, because variants such as `Independent Session` and `Separate sessions` are skipped. Neither result is false, but only the case-insensitive one matches the four numbers this section states — a reader checking the section as first written would find the numbers did not add up, and would be right to suspect that the erratum itself was fabricated. That is the defect class §2 exists to fix, so the command belongs in the text.
+
 ## 3. The new clause's exact boundaries
 
 Still not allowed: **role simulation inside the authoring session** (the boundary of the baseline, not a weakening of it — reviewer and author would share one context and one incentive); `COMMENT` is still not `APPROVE`; exceptions must still be recorded explicitly.
