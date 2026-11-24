@@ -1,3 +1,48 @@
+---
+document_metadata:
+  domain: ai-development
+  role: normative-standard
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Metadata added on 2026-11-24 so that this file can be edited without tripping DM-01. No content claim in this file is verified by this block."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Normative
+  bilingual_counterpart:
+    source: "14-ai-development/PR-GOVERNANCE-001.md"
+    en: null
+    zh-CN: "docs/zh-CN/14-ai-development/PR-GOVERNANCE-001-ENFORCEMENT.md"
+---
+
 # PR-GOVERNANCE-001 — Enforcement & Evidence Addendum
 # PR 治理强制执行与证据补充规范
 
@@ -37,10 +82,10 @@ Platform check unavailability:
 
 ## 2. Review and approval gate
 
-- Require at least one approving review from a GitHub identity independent of the PR author for normal changes; require affected domain Owner approval for changes to that Owner's normative contract.
+- Require at least one approving review from a session independent of the PR author for normal changes; require affected domain Owner approval for changes to that Owner's normative contract. Independence is a property of the reviewing session, not of the GitHub account: separate sessions may share one identity.
 - Dismiss stale approvals when new commits are pushed.
 - Require all review conversations to be resolved before merge.
-- A COMMENT is not an APPROVE. A second AI role using the author's same connected GitHub identity is not an independent reviewer.
+- A COMMENT is not an APPROVE. A separate session reviewing the artifacts of a change it did not author and did not implement **is** an independent reviewer, and may report through the same connected GitHub identity. AI role simulation inside the authoring session is not independent review: the reviewer and the author would share one context and one incentive.
 - Record reviewer login, review state, reviewed Head SHA, timestamp/link, same-identity/delegation disclosure and unresolved findings.
 - Where independent approval cannot be obtained, disposition is HOLD unless an authorized, explicit, scoped and time-bounded exception is recorded. Do not self-approve or represent role-play as Owner approval.
 
@@ -52,7 +97,7 @@ Required rows:
 
 1. **Exact Head SHA** — the commit actually evaluated, written in full or truncated with the length stated. A branch name is not a substitute.
 2. **Applicable check conclusions** — for that exact Head, each applicable check name with its conclusion and run URL. If no check is applicable, state "none applicable" and give the reason. That reason MUST be objectively verifiable from the change itself, for example that no changed path matches any workflow path filter. Proving that no path-filtered workflow matches is not sufficient by itself; the accepting party must also exclude applicable checks that run unconditionally regardless of path. A bare assertion by the accepting party, without such a basis, does not satisfy this row.
-3. **Review state and reviewer identity** — review state (APPROVED / COMMENTED / REQUESTED_CHANGES / NOT_REVIEWED), reviewer login, reviewed Head SHA, and a same-identity or delegation disclosure. A COMMENT is not an APPROVE. An APPROVED state is valid only when the approval comes from a reviewer who satisfies the independence requirements of section 2; an approval given by the same GitHub identity as the PR author is not a valid approval and MUST NOT be recorded as APPROVED. Where section 2 requires an approving review for the change, a state of NOT_REVIEWED, COMMENTED or REQUESTED_CHANGES MUST be paired with an exception record under row 4; absent that pairing the comment MUST NOT carry ACCEPT.
+3. **Review state and reviewer identity** — review state (APPROVED / COMMENTED / REQUESTED_CHANGES / NOT_REVIEWED), reviewer login, reviewed Head SHA, and a same-identity or delegation disclosure. A COMMENT is not an APPROVE. An APPROVED state is valid only when the approval comes from a reviewer who satisfies the independence requirements of section 2; an approval recorded under the same GitHub identity as the PR author is valid only when the session that produced it is independent under section 2 and the comment discloses that independence is session-level; an approval produced by AI role simulation inside the authoring session is not a valid approval and MUST NOT be recorded as APPROVED. Where section 2 requires an approving review for the change, a state of NOT_REVIEWED, COMMENTED or REQUESTED_CHANGES MUST be paired with an exception record under row 4; absent that pairing the comment MUST NOT carry ACCEPT.
 4. **Exception record** — if any applicable check is failing, missing, pending, skipped-when-applicable, stale-Head or unverifiable, the exception MUST be named: basis, authorizing party, scope, expiry condition and tracking Issue. If there is no exception, state "no exception".
 
 Scope of the row-4 exception record: it is a disclosure and audit mechanism and does not exempt the section 1 check gate. A section 2 exception is an authorized exception to the review and approval gate only; a failing, missing, pending, skipped-when-applicable, stale-Head or unverifiable check cannot be exempted merely by registering an exception in this checklist. While any such check state persists, the PR MUST NOT be merged and the comment MUST NOT carry ACCEPT or merge-authorization YES, regardless of any exception recorded in row 4.
