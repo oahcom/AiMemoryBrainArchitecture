@@ -26,11 +26,10 @@ jobs:
       - name: Check committed repository hygiene
         run: python3 scripts/ci/check_repository_hygiene.py
 
-      - name: Check pull-request new-file admission
-        if: github.event_name == 'pull_request'
+      - name: Check new-file admission
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
         run: |
           python3 scripts/ci/check_repository_hygiene.py \
             --base "$BASE_SHA" \
@@ -44,3 +43,37 @@ jobs:
       # .gitattributes as `-text`; the gate asks Git rather than keeping a list.
       - name: Check committed line endings
         run: python3 scripts/ci/check_line_endings.py
+
+      # Each listed file is unreachable by unittest discover; discovery here would silently run
+      # nothing. The explicit list is the defect tracked by #834.
+      - name: Run unreachable self-checks from the repository root
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in \
+            08-bmcp-protocol/tests/test_protocol_index_consistency.py \
+            13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-remediation/reference-model/test_i_authorization_security.py \
+            reviews/architecture-breakthrough/memory-ir-compiler/prototype/test_shadow_corpus.py \
+            reviews/req06-evaluation-pilot/test_evaluate.py \
+            scripts/governance/bilingual/test_bilingual_scripts.py \
+            scripts/governance/evidence/test_evidence_tiering.py \
+            scripts/governance/evidence/test_template_example_executable.py \
+            scripts/test_precheck_delivery.py \
+            tests/test_check_bilingual_docs_full.py \
+            tests/test_policy_inheritance.py; do
+            echo "Running $f"
+            python3 -m unittest "$f"
+          done
+
+      - name: Run unreachable self-checks that require their own directory
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            cd experiments/req08-local-agent-exchange-proof
+            python3 -m unittest test_exchange_demo
+          )
+          (
+            cd experiments/req08-portable-exchange-fixture
+            python3 -m unittest test_portable_exchange
+          )

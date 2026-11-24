@@ -46,7 +46,7 @@ document_metadata:
 # GOV-NC-2026-11-21-ZERO-REVIEW-GATE-008
 
 - Register ID: GOV-NC-2026-11-21-ZERO-REVIEW-GATE-008
-- Status: `OPEN` / `ACTIVE` / CONTINUOUS — 0 independent reviews across 45 merged PRs, no platform requirement, and this register's author is one of the 45 (see §10) / the gate's own implementation was merged with zero review
+- Status: `OPEN` / `ACTIVE` / CONTINUOUS — 0 independent reviews across 45 merged PRs, no platform requirement, and this register's author is one of the 45 (see §10); now BLOCKED under PR-GOVERNANCE-001 §7, escalated to the repository administrator (Issue #134) per §11 / the gate's own implementation was merged with zero review
 - Found at: 2026-11-21T07:10Z (data pulled 2026-11-21T07:20Z)
 - Subject: repository `oahcom/AiMemoryBrainArchitecture`, PR #423 / Issue #420
 - Prior registers: 005 (CI never executed), 006 (gate deadlock), 007 (self-reviewed merges)
@@ -306,3 +306,87 @@ Exactly one of the three. Keeping the status quo is the worst option: the norm s
 `OPEN` / `ACTIVE` unchanged, with: `/ CONTINUOUS — 45 merged PRs, 0 independent reviews / no platform enforcement / author of this register is one of the 45`.
 
 Not `CLOSED`: §9's blocking chain (independent review `NOT_ASSIGNED`) is unchanged, and §10.3 makes that chain apply to this register itself.
+
+---
+
+## 11. None of §10.5's three remedies is available; the correct disposition is §7's `BLOCKED` (2026-11-23)
+
+The body of this register, §2, and §10.1–§10.4 are **not changed**. §10.5's three-way choice is **not withdrawn**, but its premise was wrong: it assumed all three were executable and differed only in honesty and cost. Measured, two deadlock and the third is self-referential.
+
+Ruling: `OWNER-DECISION-REVIEW-INDEPENDENCE-001`. Exception record: `EX-20261123-01`.
+
+### 11.1 Full sweep: not 0 of 45, but 0 of 675
+
+§10.1 sampled the 45 most recent merged PRs. This section walks **all** 675, fetching `/pulls/{n}/reviews` for each:
+
+| | |
+|---|---|
+| PRs walked | **675** (all pages, not a sample) |
+| Review states ever recorded | `{COMMENTED: 169}` |
+| `APPROVED` | **0** |
+| `REQUEST_CHANGES` | **0** |
+| PR authors, all history | `{oahcom}` — 1 |
+| Reviewers, all history | `{oahcom}` — 1 |
+
+§5 has **never once been satisfied** in this repository, in any period. This is not a recent regression.
+
+### 11.2 Exactly one identity can write
+
+| | |
+|---|---|
+| collaborators | **1** — `oahcom`, `{admin, maintain, push, triage, pull}` |
+| `oahcom0831-design` permission | **`read`** — `{admin: false, push: false, pull: true}` |
+| PRs opened by `oahcom0831-design`, all history | **0** |
+
+A second account exists and has pushed commits (4 of the last 100), but it cannot merge, and its approvals would not count toward a required review — that mechanism counts only reviewers with write access.
+
+### 11.3 Remedies 1 and 2 make `main` permanently unmergeable
+
+§5's last sentence: a review through the same connected identity as the author is not independent. GitHub separately forbids approving one's own PR. Combined with §11.2:
+
+- **Remedy 1** (enable `required_pull_request_reviews`): the required approval cannot exist, so every PR is permanently unmergeable. And `enforce_admins: true` means that freeze binds the only identity that could lift it.
+- **Remedy 2** (`author == reviewer` returns `HOLD`): all 675 PRs hit it, and so would the 676th.
+
+Neither is a repair. Each is `GOV-NC-2026-11-21-GATE-DEADLOCK-006` reproduced deliberately. 006 is itself part of the evidence: it was resolved `RESOLVED_ON_MAIN` / "released by a self-review merge" (§12, §14) — the previous deadlock was opened by exactly the act §5 forbids. A second gate of the same shape would open the same way.
+
+### 11.4 Remedy 3 is self-referential
+
+Remedy 3 edits a clause of `PR-GOVERNANCE-001`, which is `canonical_status: Canonical` / `normative_status: Normative` / `decision_status: Approved`, and whose §9 states: "Changes to this standard require a bilingual semantic-parity update and an exact-Head governance review."
+
+The governance review §9 requires is the independent review §5 cannot supply. **Demoting §5 requires violating §5.** §10.5 called this one "the most honest and the least work" — neither holds: it is the one that most resembles a decision while being a violation of the standard it edits.
+
+### 11.5 The fourth route, already written in `PR-GOVERNANCE-001` §7
+
+§7 is titled "Platform enforcement is separate from process policy" and says:
+
+> "If the current GitHub plan/visibility does not support required controls for this private repository, record the limitation as BLOCKED and escalate to the repository administrator to select a genuinely enforceable plan/configuration."
+>
+> "Issue #134 remains OPEN until the platform confirms enforcement and a deliberately failing required check is proven unable to merge through the normal path."
+
+That is the disposition: **`BLOCKED`, escalated to the repository administrator, carried by Issue #134** — open for exactly this since inception.
+
+§10.5 framed the problem as a policy choice. It is not. It is missing a precondition, and §7 already says what to do about a missing precondition.
+
+### 11.6 One act is available to a session, and it has been skipped 675 times
+
+§5's final sentence requires: "Record exceptions explicitly; do not silently waive the requirement."
+
+Measured: 675 PRs, **0 exception records**, no `EX-` file of any kind under `governance-register/`. So the violation is not "no independent reviewer exists" — that is structural and nobody's fault. The violation is that **the waiver was silent**, which §5 explicitly forbids and which was always avoidable.
+
+`EX-20261123-01` is what that sentence asks for. It waives nothing, changes no PR's disposition, and converts no `HOLD` into `MERGE`.
+
+### 11.7 The quota trigger is the only lawful amendment path
+
+`AI-EXEC-001` v1.1 is **ADOPTED** (PR #256, merge `48a55649`), and its §6 says: "at most 2 exceptions per iteration; exceeding the quota in 2 consecutive iterations triggers a daily governance window for rule revision."
+
+That is the difference between remedy 3 and a lawful amendment: remedy 3 changes §5 by violating §9; the quota clause is **the mechanism the standard itself provides for a control that cannot be satisfied and keeps generating exceptions.**
+
+Measured: the repository is at **675 exceptions, not 2**. Read as a continuous blocked interval it is 1 record — but the interval is **still open** (the second identity still does not exist). Both readings point at one act: **open the window.** The trigger has never fired because in a repository that never records exceptions the quota can never overflow — at a count of zero the clause has no input.
+
+So the order is fixed: record (done) → count (675 vs 2) → open the window (accountable Owner, not done) → amend §5 (Integration Owner, blocked on the window) or supply a second write identity (repository administrator, blocked on a human).
+
+### 11.8 Status
+
+`OPEN` / `ACTIVE` / `CONTINUOUS` unchanged, appending: `/ BLOCKED — PR-GOVERNANCE-001 §7, escalated to the repository administrator (Issue #134) / EX-20261123-01 records 675 PRs and 0 independent reviews / the three remedies were ruled unavailable`.
+
+Not `CLOSED`: §9's blocking chain (independent review `NOT_ASSIGNED`) is unchanged, §10.3 makes it apply to this register itself, and this section's ruling document is `Draft` rather than `Approved` — it claims nothing it cannot show.
