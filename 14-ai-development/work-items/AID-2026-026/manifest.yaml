@@ -52,7 +52,10 @@ number_allocation:
       observation: Returned NOT_FOUND on the inspected default branch.
   scan_scope:
     main_work_item_tree: SCANNED
-    main_index: 14-ai-development/work-items/INDEX.md @ main blob 96619d9c8e3e771a168891c4aa3b83a69f76e189 (71122 bytes, 18 work-item rows, 0 strategic-requirement rows)
+    main_index: 14-ai-development/work-items/INDEX.md
+    main_index_note: >-
+      Unpinned on purpose. A pinned revision is stale the moment any work item is registered,
+      and the previous pin (blob 96619d9c, 71122 bytes) contained no AID-2026-02x rows at all.
     active_branches: 325 branches, paginated 100 per page, full enumeration
     method: >-
       For every branch, GET /repos/.../git/trees/{branch_head_sha}?recursive=1
