@@ -203,14 +203,16 @@ fn identifier(value: impl Into<String>) -> Result<OpaqueId, String> {
 /// lets `MemoryCompiler::compile` decide. Publication itself is expected to be
 /// refused: the adapter may not authorize what no issuer has authorized.
 ///
-/// Storage and admission are process-scoped. `storage_path` and `admission_path`
-/// are supplied by the caller as `TemporaryDatabase` files, which are removed in
-/// `Drop`, so every compile result in this binary is deliberately ephemeral. The
-/// durable boundary here is event acceptance and outbox delivery, not the
-/// compiler's output; persisting a compile result is outside this binary's
-/// contract. An Owner ruling on 2026-11-22 settled this: no cursor table, no
-/// `compiled_at` column, and no durable storage flags are required, and the
-/// "who owns compile progress" question is not applicable to `brain-cli`.
+/// Storage and admission are process-scoped by default. `storage_path` is the
+/// caller's `--store` path when one was given, otherwise a `TemporaryDatabase`
+/// file removed in `Drop`; `admission_path` is always temporary. The durable
+/// boundary here is event acceptance and outbox delivery, not the compiler's
+/// output. An Owner ruling on 2026-11-22 settled that: no cursor table, no
+/// `compiled_at` column, and no compile-progress storage flags are required,
+/// and the "who owns compile progress" question is not applicable to
+/// `brain-cli`. `--store` is not a compile-progress flag; it names where the
+/// memory database lives, which is what lets a later process read or forget it
+/// (#860).
 ///
 /// `Blocked` is therefore the normal outcome, not an unfinished hook.
 fn run_compiler_stage(request: CompilerStageRequest<'_>) -> Result<CompilerStageOutcome, String> {
@@ -445,6 +447,7 @@ fn run_compile(mut args: impl Iterator<Item = String>) -> Result<(), String> {
     let mut input_path = None;
     let mut output_path = None;
     let mut event_store_path: Option<PathBuf> = None;
+    let mut store_path: Option<PathBuf> = None;
     let mut delivery_root: Option<PathBuf> = None;
     let mut verbose = false;
     let mut issue_canonical_commit = false;
@@ -457,6 +460,16 @@ fn run_compile(mut args: impl Iterator<Item = String>) -> Result<(), String> {
                 event_store_path = Some(
                     args.next()
                         .ok_or_else(|| "--event-store requires a path".to_owned())?
+                        .into(),
+                );
+            }
+            // Memory storage is process-scoped unless the caller names a path.
+            // A named path is durable and is what makes the memory reachable
+            // from a later process (`brain forget --store <path>`).
+            "--store" => {
+                store_path = Some(
+                    args.next()
+                        .ok_or_else(|| "--store requires a path".to_owned())?
                         .into(),
                 );
             }
@@ -654,9 +667,27 @@ fn run_compile(mut args: impl Iterator<Item = String>) -> Result<(), String> {
         .validate()
         .map_err(|error| format!("invalid memory version: {error:?}"))?;
 
-    let database = TemporaryDatabase::new("storage");
+    // Memory storage is process-scoped by default, exactly like the event
+    // store above: an unnamed run leaves no trace. `--store` names a caller-
+    // owned path that this process never deletes, so a later process can open
+    // the same memory. Same rule as `--event-store`, same rule as
+    // `brain forget --store`.
+    let temporary_storage_database = if store_path.is_none() {
+        Some(TemporaryDatabase::new("storage"))
+    } else {
+        None
+    };
+    let storage_database_path = store_path
+        .as_deref()
+        .or_else(|| {
+            temporary_storage_database
+                .as_ref()
+                .map(TemporaryDatabase::path)
+        })
+        .expect("one memory storage database path must be selected");
+
     let snapshot = {
-        let sqlite = SqliteMemoryStorage::open(database.path())
+        let sqlite = SqliteMemoryStorage::open(storage_database_path)
             .map_err(|error| format!("cannot open SQLite storage: {error:?}"))?;
         let mut store = MemoryStore::new(sqlite);
 
@@ -725,6 +756,12 @@ fn run_compile(mut args: impl Iterator<Item = String>) -> Result<(), String> {
         .map_err(|error| format!("build_context failed: {error:?}"))?
     };
 
+    // The admission ledger is per-run scratch, not a durable artifact: every
+    // row it holds is keyed by this event (`work:{event_id}`,
+    // `dependency:{event_id}`, `operation:{event_id}`), and no other verb reads
+    // it. Making it durable would make the second compile of the same event
+    // fail on a unique key rather than re-decide admission. So it stays
+    // temporary; only the memory store is what a later process needs.
     let admission_database = TemporaryDatabase::new("admission");
     let stage = run_compiler_stage(CompilerStageRequest {
         intent: pending_intent,
@@ -734,7 +771,7 @@ fn run_compile(mut args: impl Iterator<Item = String>) -> Result<(), String> {
         source_version_id: &source_version_id,
         derivative_version,
         publication_id: &publication_id,
-        storage_path: database.path(),
+        storage_path: storage_database_path,
         admission_path: admission_database.path(),
         issue_canonical_commit,
     })?;
@@ -776,7 +813,14 @@ fn run_compile(mut args: impl Iterator<Item = String>) -> Result<(), String> {
 
     if verbose {
         eprintln!("memory-domain: Event, Memory, Claim and MemoryVersion validated");
-        eprintln!("memory-storage-sqlite: persisted revision to a temporary SQLite database");
+        if store_path.is_some() {
+            eprintln!(
+                "memory-storage-sqlite: persisted revision to {} (caller-owned, kept)",
+                storage_database_path.display()
+            );
+        } else {
+            eprintln!("memory-storage-sqlite: persisted revision to a temporary SQLite database");
+        }
         eprintln!("memory-store: create_memory -> write_revision -> read_current succeeded");
         eprintln!(
             "memory-context: build_context produced {} entr(y/ies)",
@@ -887,6 +931,9 @@ fn sha256_hex(bytes: &[u8]) -> String {
 fn usage() -> String {
     concat!(
         "usage: brain compile --input <event.json> --out <context.json> [--verbose]\n",
+        "       [--store <memory.sqlite>] [--event-store <events.sqlite>]\n",
+        "         --store       write the memory database to this path and keep it.\n",
+        "                       Without it the database is temporary and removed on exit.\n",
         "usage: brain forget --store <memory.sqlite> --scope <scope.json> ",
         "--forget <memory_id> --forget-reason <digest> [--forget-version <version_id>]"
     )
