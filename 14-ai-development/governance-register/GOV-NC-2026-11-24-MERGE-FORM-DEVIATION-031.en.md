@@ -137,6 +137,59 @@ Per the Owner's ruling:
 
 **The frozen historical count in `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` §13.7 must not be rewritten or extended.** The frozen count represents the historical observation range it originally defined; adding later instances to that number would change the statistical basis and the historical baseline. This record appends one line after it and leaves the original number untouched.
 
+### 3.1 Follow-on instance (two): PR #890
+
+`GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/890/reviews` -> `[]`.
+
+> Post-freeze observed instances: PR #890 — 2026-11-24 — 0 formal reviews.
+
+Verified evidence, read item by item when this entry was added. No figure is carried over from another register:
+
+| Item | Endpoint | Field | Value as returned |
+|---|---|---|---|
+| Formal reviews | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/890/reviews` | array length | `0` records |
+| Merge time | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/890` | `merged_at` | `2026-11-24T05:39:10Z` |
+| Merging account | same record | `merged_by.login` | `oahcom` |
+| Merge commit | same record | `merge_commit_sha` | `0f32d46c34cb086e52de38fa49b33ca8a3bf5cd3` |
+| Inline review comments | same record | `review_comments` | `0` |
+| Commits / additions / deletions | same record | `commits` / `additions` / `deletions` | `1` / `306` / `0` |
+| Title | same record | `title` | `docs(register): record the #875 merge-form deviation` |
+
+The two timestamps are labelled by source and are not interchanged:
+
+| Event | Time | Source of the time |
+|---|---|---|
+| This session ruled that no merge authorisation was granted | no later than `2026-11-24T05:36:33Z` (`13:36:33 +0800`) | Local modification time of the file holding the ruling text. **This is not** a platform-issued timestamp. It is used only to establish ordering inside this session, and it is not used as evidence about the merge itself. |
+| #890 merged | `2026-11-24T05:39:10Z` | GitHub REST API `merged_at` |
+
+The two are at most 2 minutes 37 seconds apart. The times are used to establish order only. The time of one event is not used to prove that another event did or did not happen.
+
+What this record states: **#890 was merged after this session had explicitly withheld merge authorisation, and it was merged with zero formal reviews.** This is a documented governance-control failure, not merely an unenforced policy.
+
+What this record does not state: no attribution of `merged_by: oahcom` to a particular natural person. That field identifies a GitHub account, not necessarily the person operating it.
+
+### 3.2 Follow-on instance (three): PR #896
+
+`GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/896/reviews` -> `[]`.
+
+> Post-freeze observed instances: PR #896 — 2026-11-24 — 0 formal reviews.
+
+| Item | Endpoint | Field | Value as returned |
+|---|---|---|---|
+| Formal reviews | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/896/reviews` | array length | `0` records |
+| Merge time | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/896` | `merged_at` | `2026-11-24T06:51:52Z` |
+| Merging account | same record | `merged_by.login` | `oahcom` |
+| Merge commit | same record | `merge_commit_sha` | `84bbe9241aef748b406a969da321e7d3fcda2dc1` |
+| Commits / additions / deletions | same record | `commits` / `additions` / `deletions` | `1` / `335` / `1` |
+| Head at merge | same record | `head.sha` | `5585d95ffd5705fe7a636f475b295162737585e9` |
+
+**This subsection records one measurable state. It records no causation and no attribution.**
+
+- Established: at merge time the formal-review record for this PR was `0` records. The D1 requirement — one `Approved` formal review from an account that is not the author — therefore did not exist at that moment.
+- Not established: the ordering of this merge against any ruling. The text of the ruling on #896 was persisted in this session at `2026-11-24T06:53:07Z` (`14:53:07 +0800`; again a local file modification time, not a platform timestamp), which is about 75 seconds after the merge at `2026-11-24T06:51:52Z`.
+
+This subsection therefore does **not** say "merged in violation of a ruling". Writing an event of unknown order as an out-of-order event would contradict `OWNER-DECISION-EVENT-TIMESTAMP-PROVENANCE-001` directly. It records one fact only: **after D1 had been established, another merge occurred with zero formal reviews at merge time.** Whether this merge constituted a violation of a specific ruling is a question that requires the platform-side event sequence, and this record does not answer it.
+
 ---
 
 ## 4. Judgements deliberately not made
