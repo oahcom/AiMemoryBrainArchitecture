@@ -188,8 +188,9 @@ baseline_evidence:
         allocations. This is an allocation scan, not a permanent reservation.
     allocation_conclusion: "VERIFIED_UNIQUE_325_BRANCH_DUAL_DOMAIN_SCAN"
     registration_state: >-
-      Registration PR #354 is OPEN and NOT MERGED. Branch-side readback
-      completed byte-for-byte; main-side readback NOT performed.
+      Registration PR #354 is MERGED; merge commit
+      8215ec57260b5841df1b9f9aad5a7f26d3073bac, merged at 2026-11-20T12:51:10Z.
+      Branch-side readback completed byte-for-byte; main-side readback is NOT_PERFORMED and must not be claimed.
 
 dependencies:
   - id: "REQ-07"
