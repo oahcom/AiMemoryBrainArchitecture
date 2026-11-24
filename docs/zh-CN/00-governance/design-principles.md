@@ -55,7 +55,7 @@ document_metadata:
 - 文档 ID：GOV-PRINCIPLES-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../00-governance/design-principles.md)
-- 源版本：192e6ba6e9287792a02b679dda0d391844270228
+- 源版本：9792e189d63fbbc3694ab891fc4aeba5143b3b1c
 - 对应英文：[Design Principles](../../en/00-governance/design-principles.md)
 - 状态：DECIDED（已决议基线）
 

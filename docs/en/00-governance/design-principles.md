@@ -55,7 +55,7 @@ document_metadata:
 - Document ID: GOV-PRINCIPLES-001
 - Version: 1.0
 - Source: [Normative source specification](../../../00-governance/design-principles.md)
-- Source revision: 192e6ba6e9287792a02b679dda0d391844270228
+- Source revision: 9792e189d63fbbc3694ab891fc4aeba5143b3b1c
 - Chinese counterpart: [设计原则](../../zh-CN/00-governance/design-principles.md)
 - Status: DECIDED baseline
 
