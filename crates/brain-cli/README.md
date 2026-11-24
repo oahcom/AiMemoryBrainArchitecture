@@ -26,12 +26,26 @@ memories are eligible for a ContextCandidate.
 
 1. Deserialize and validate the existing domain Event and Claim types.
 2. Construct and validate Memory and MemoryVersion.
-3. Persist through `SqliteMemoryStorage` in a temporary file-backed SQLite database.
+3. Persist through `SqliteMemoryStorage` in a file-backed SQLite database —
+   temporary by default, or the caller's `--store` path.
 4. Call `MemoryStore::create_memory`, `write_revision`, and `read_current`.
 5. Build a ContextSnapshot with `memory_context::build_context` and serialize it to `--out`.
 6. Write a compiler-status sidecar recording that the compiler stage was skipped.
 
-The temporary database is removed after the command. The JSON output contains no runtime
+Without `--store` the temporary database is removed after the command. With
+`--store <path>` the database is written to that path and kept, so a later
+process can open the same memory:
+
+```sh
+cargo run -p brain-cli --offline -- compile \
+  --input crates/brain-cli/fixtures/event.json \
+  --out /tmp/ctx.json --store /tmp/m.sqlite
+cargo run -p brain-cli --offline -- forget \
+  --store /tmp/m.sqlite --scope /tmp/scope.json \
+  --forget memory-demo-001 --forget-reason sha256:example
+```
+
+The JSON output contains no runtime
 timestamps or generated random identifiers, so identical input produces identical output.
 
 The ContextSnapshot JSON serialization contract is unchanged. The compiler status
