@@ -42,7 +42,7 @@ document_metadata:
     en: null
     zh-CN: null
 ---
-> **CI runner update — 2026-11-23:** All active workflow jobs now use GitHub-hosted `ubuntu-latest` runners. Any self-hosted runner topology, admission-hook, disk-reclaim, or runner-queue descriptions below are historical and must not be used as current operational instructions. The active policy is enforced by `.github/workflows/runner-admission-policy.yml`.
+> **CI runner update — 2026-11-23:** All active workflow jobs now use GitHub-hosted `ubuntu-latest` runners. Any self-hosted runner topology, admission-hook, disk-reclaim, or runner-queue descriptions below are historical and must not be used as current operational instructions. Concretely, since #839 `gates.yml` carries a `pull_request` trigger on `main`, and `scripts/ci/audit_runner_admission.py` reports `GitHub-hosted runner policy: 20 job(s) audited, 0 violation(s)` at exit 0. The active policy is enforced by `.github/workflows/runner-admission-policy.yml`.
 
 
 # CI gates and ratchets
@@ -58,29 +58,41 @@ are ratchets, and what a ratchet baseline means. The workflow is
 
 ## 1. Where these jobs run, and what that costs
 
-Every job in `gates.yml` is pinned to `runs-on: [self-hosted, linux, x64]`.
+**Current state (2026-11-23, #839).** `gates.yml` triggers on `pull_request` to
+`main`, on `push` to `main`, and on `workflow_dispatch`, and every one of its
+five jobs is `runs-on: ubuntu-latest`. It is a pre-merge gate. The paragraphs
+below describe the self-hosted topology it replaced, and they are kept because
+they are why the workflow is written the way it is, not because they describe
+anything that is running now.
 
-That is not a preference. `GET /repos/oahcom/AiMemoryBrainArchitecture/actions/runners`
-returns `total_count: 1`: a single runner, `zesu-x64`, labels
-`self-hosted, Linux, X64`. GitHub-hosted minutes are blocked by a billing failure
-on this account, so a job written `runs-on: ubuntu-latest` is allocated no runner
-at all and fails with an **empty `steps` array** — it never reaches the first
+The rest of this section is a historical record. In that topology, every job in
+`gates.yml` was pinned to `runs-on: [self-hosted, linux, x64]`, and that was not
+a preference. `GET /repos/oahcom/AiMemoryBrainArchitecture/actions/runners`
+returned `total_count: 1`: a single runner, `zesu-x64`, labels
+`self-hosted, Linux, X64`. GitHub-hosted minutes were blocked by a billing failure
+on this account, so a job written `runs-on: ubuntu-latest` was allocated no runner
+at all and failed with an **empty `steps` array** — it never reached the first
 step. Observed on `main`, 2026-11-22T04:29:56Z, on `GOV-DOC-002 metadata checks`
 and `audit`: both `failure`, both with zero steps executed. Twelve of the
-thirteen workflows in this repository are in that state. A gate authored on
-`ubuntu-latest` here is dead on arrival, so these jobs target the one runner that
-exists.
+thirteen workflows in this repository were in that state. A gate authored on
+`ubuntu-latest` here was dead on arrival, so those jobs targeted the one runner
+that existed.
 
-### 1.1 What that costs: this is a post-merge detector, not a pre-merge gate
+### 1.1 What that cost: a post-merge detector, not a pre-merge gate
 
-Two controls, both already in force, force the trigger set:
+> **Historical.** This subsection records why `gates.yml` used to be
+> `push`-only. The billing block was lifted on 2026-11-22 and the self-hosted
+> runner was retired by #839 on 2026-11-23; the workflow now carries a
+> `pull_request` trigger (§7.7). Nothing below is current behaviour.
+
+Two controls, both in force at the time, forced the trigger set:
 
 * **L1 (service layer).** The runner's job-started hook (`AI-RUN-002-RUNBOOK`
   §4.1) fails any job whose `GITHUB_REF` is not exactly `refs/heads/main`, or
   whose event is not `push` / `workflow_dispatch` / `schedule`. A job on a
   feature branch is denied before any step runs.
 * **L2 (repository layer).** `scripts/ci/audit_runner_admission.py`, enforced by
-  `runner-admission-policy.yml`, rejects a non-allowlisted trigger on any
+  `runner-admission-policy.yml`, rejected a non-allowlisted trigger on any
   self-hosted job, a `push` with no `branches:` filter, and `push.branches`
   naming anything but `main`.
 
@@ -88,39 +100,58 @@ Two controls, both already in force, force the trigger set:
   **allowlist**. So any trigger on neither list — `issues`, `release`,
   `merge_group`, `discussion`, or whatever GitHub adds next — passed L2 and was
   then silently denied by L1. A green L2 that L1 contradicts is worse than no L2:
-  it is an audit reporting safety it does not have. L2 now mirrors L1's allowlist
-  (`push`, `workflow_dispatch`, `schedule`), so the two agree by construction
-  rather than by two hand-maintained lists. Verified: a self-hosted job on
-  `issues`, `merge_group`, `release` and `discussion` is now rejected with
+  it is an audit reporting safety it does not have. L2 then mirrored L1's allowlist
+  (`push`, `workflow_dispatch`, `schedule`), so the two agreed by construction
+  rather than by two hand-maintained lists. Verified at the time: a self-hosted job
+  on `issues`, `merge_group`, `release` and `discussion` was rejected with
   `trigger '<x>' is not permitted for self-hosted jobs (L1 admits only push,
-  schedule, workflow_dispatch)`, while the repository's real workflows still audit
+  schedule, workflow_dispatch)`, while the repository's real workflows audited
   clean at 7 jobs / 0 violations.
 
-So `gates.yml` triggers on `push` to `main` and `workflow_dispatch`, and on
-nothing else. **It cannot gate a pull request.** It converts "a gate is red on
+  **#839 replaced that script.** With no self-hosted runner left, trigger
+  allowlisting has nothing to protect, so `audit_runner_admission.py` now checks
+  exactly one thing: every job in every workflow is `runs-on: ubuntu-latest`
+  (literal, not dynamic, not a label list containing `self-hosted`). It prints
+  `GitHub-hosted runner policy: 20 job(s) audited, 0 violation(s)` and exits 0 on
+  current `main`. The `trigger '<x>' is not permitted` message no longer exists.
+
+So `gates.yml` triggered on `push` to `main` and `workflow_dispatch`, and on
+nothing else. **It could not gate a pull request.** It converted "a gate is red on
 `main` and nobody knows" into "a gate is red on `main` and a check run says so
 within minutes". That is the GAP-10 defect and it is what this workflow fixes. It
-is not a pre-merge gate, and this document does not claim it is one.
+was not a pre-merge gate, and this document did not claim it was one.
 
-Pre-merge gating needs one of three things, each an Owner decision rather than an
-edit to this workflow:
+Pre-merge gating then needed one of three things, each an Owner decision rather
+than an edit to this workflow:
 
 1. GitHub-hosted minutes restored (billing cleared), or
 2. a second runner, so the first is not the only place work can land, or
 3. a relaxed L1/L2 policy accepting the risk of running untrusted PR code on a
    sudo-capable host.
 
-### 1.2 One runner means serialisation
+Option 1 happened on 2026-11-22, and #839 acted on it: the self-hosted runner is
+retired and `gates.yml` gates pull requests on hosted runners. The three-way
+trade-off above is closed, not pending.
+
+### 1.2 One runner meant serialisation
+
+> **Historical.** Hosted runners are not a single queue, so the `concurrency`
+> group described here was removed with the runner in #839.
 
 A single `concurrency` group, `existing-gates-self-hosted`, with
-`cancel-in-progress: false`, makes runs queue rather than overlap. Jobs inside a
-run queue on the runner by themselves. Every job also carries `timeout-minutes`,
-because a wedged job on a one-runner repository blocks every other workflow in
-the repository, not just this one.
+`cancel-in-progress: false`, made runs queue rather than overlap. Jobs inside a
+run queued on the runner by themselves. Every job also carried `timeout-minutes`,
+because a wedged job on a one-runner repository blocked every other workflow in
+the repository, not just this one. The `timeout-minutes` bound is kept on hosted
+runners; the queue it was compensating for is gone.
 
 ### 1.3 Self-hosted is not a clean container
 
-The jobs are written against that reality rather than assuming a fresh VM:
+> **Historical.** Hosted jobs start from a fresh ephemeral VM, so the workarounds
+> below are no longer load-bearing. They are kept because several of them are now
+> belt-and-braces rather than necessary.
+
+The jobs were written against that reality rather than assuming a fresh VM:
 
 * **No `sudo`, no host mutation.** Python dependencies go into a throwaway venv
   under `$RUNNER_TEMP`, which the runner wipes between jobs. Nothing is installed
@@ -196,10 +227,12 @@ outlives its red is an exemption with a schedule attached.
 
 ### 2.3 Why `clippy` does not run fmt or tests
 
-`rust-self-hosted.yml` on `main` already runs
+`rust-phase1.yml` on `main` already runs
 `cargo test --workspace --all-targets --no-fail-fast` and
-`python3 scripts/check_fmt.py --expect "$(git rev-parse HEAD)"`. Duplicating
-either here is worse than doing nothing:
+`python3 scripts/check_fmt.py --expect "$GITHUB_SHA"`. At the time this section
+was written that workflow was `rust-self-hosted.yml`; #839 deleted that file and
+left the same two commands in `rust-phase1.yml`. Duplicating either here would
+be worse than doing nothing:
 
 * **The test counts disagree, and the wrong one looks green.**
   `cargo test --workspace` does not run doctests; `--all-targets` does. Measured
@@ -235,8 +268,8 @@ pay for two is a trade-off decision, not a comment edit.
 `GOV-NC-2026-11-23-EXECUTION-RESTORED-029` records the measurements.
 
 The consequence is stated in the workflow itself: rustfmt and the test suite are
-**not** gated by `gates.yml`. They are gated by `rust-self-hosted.yml`. If that
-workflow is ever deleted, the `clippy` job must grow them back — with
+**not** gated by `gates.yml`. They are gated by `rust-phase1.yml`. If that
+workflow were ever deleted, the `clippy` job must grow them back — with
 `--all-targets`.
 
 ## 3. What a ratchet is, and what it is not
@@ -303,7 +336,7 @@ regression or a stale baseline; the offending items are printed as
   versions it found. Lints are a moving target: a clippy release that adds a lint
   can turn the job red without any code change. This is recorded rather than
   hidden. Formatting is not gated here (see §2.3); it is gated by
-  `rust-self-hosted.yml`'s `scripts/check_fmt.py`, which pins the commit SHA it
+  `rust-phase1.yml`'s `scripts/check_fmt.py`, which pins the commit SHA it
   expects to be formatted. Pinning the toolchain in-repo would remove the sharp
   edge for both and is the obvious next step.
 * **`cargo clippy` needs a C toolchain** for `libsqlite3-sys`. It builds on the
@@ -374,25 +407,35 @@ workflow looks like now.
 ### 6.1 Re-measured on the rebased tree
 
 `main` moved while this branch was open (`6897e53c` closed GAP-09; `#627` added
-`rust-self-hosted.yml`; `7d816980` added fmt+clippy to `rust-phase1.yml`). Both
-blockers in §2.2 and §2.3 come from that move. Re-measured after rebasing:
+`rust-self-hosted.yml`, deleted later by #839; `7d816980` added fmt+clippy to
+`rust-phase1.yml`). Both blockers in §2.2 and §2.3 come from that move.
+Re-measured after rebasing:
 
 | Command | Result |
 |---|---|
 | `python3 08-bmcp-protocol/schemas/test_nonempty_audit.py` | exit 0 — `OK: 32 schemas; 5599 registered constraints; no unregistered or stale entries.` |
 | `gate_ratchet.py --baseline .../bilingual-docs.txt` | exit 0 — `baseline=81 current=81 regressions=0 fixed=0`, `PASS` |
-| `audit_runner_admission.py` | exit 0 — `7 self-hosted job(s) audited, 0 violation(s)` |
+| `audit_runner_admission.py` (at rebase time) | exit 0 — `7 self-hosted job(s) audited, 0 violation(s)` |
 | `cargo test --workspace --all-targets` (on `main`) | `passed=546 failed=0 ignored=1` |
 | `cargo test --workspace` (on `main`) | `passed=551 failed=0 ignored=1` |
 
 The last two rows are the whole argument for §2.3: same commit, same workspace,
-five different tests, and only one of the two commands is the one `main` runs.
+five different tests, and only one of the two commands is the one `main` runs. The
+audit row is the output at rebase time (2026-11-22); on current `main` the same
+script prints `GitHub-hosted runner policy: 20 job(s) audited, 0 violation(s)` and
+exits 0.
 
 This is local execution of the commands the workflow runs. It is evidence about
 the gates, not about the workflow's execution. §7 records what the workflow
 itself has done.
 
 ## 7. What was actually observed running
+
+> **Historical record (2026-11-22).** Everything in this section was observed on
+> the self-hosted runner **before** #839 retired it on 2026-11-23. The run ids,
+> labels and host facts are true records of that topology; none of them describes
+> the current GitHub-hosted environment. The current measured output is
+> `GitHub-hosted runner policy: 20 job(s) audited, 0 violation(s)`, exit 0 (§1).
 
 ### 7.1 The runner accepts work, and the labels match
 
@@ -407,8 +450,9 @@ job: diagnostics | completed success
   steps: 4 — Set up job, Set up runner, Read-only host diagnostics, Complete job
 ```
 
-So `runs-on: [self-hosted, linux, x64]` is the correct selector: a job written
-that way is admitted and executes. The environment it reported:
+So `runs-on: [self-hosted, linux, x64]` was the correct selector at the time: a
+job written that way was admitted and executed. The environment it reported (the
+runner no longer exists; these values are a historical record):
 
 | Fact | Value |
 |---|---|
@@ -428,20 +472,28 @@ The same workflow, dispatched at `ref=feat/t22-ci-gates`, produced **run
 runner admission guard: DENY reason=ref_not_default_branch
 ```
 
-The guard refused the job before the first user step. This is why `gates.yml`
-cannot carry a `pull_request` trigger, and it is measured rather than inferred.
+The guard refused the job before the first user step. That is why `gates.yml`
+carried no `pull_request` trigger while the self-hosted runner existed, and it was
+measured rather than inferred. It is not current: #839 retired the runner and
+`gates.yml` now triggers on `pull_request` to `main` (§1).
 
 ### 7.3 L2 really does reject the shape a PR-gating version would need
 
 `scripts/ci/audit_runner_admission.py` against `gates.yml`: **7 self-hosted jobs
-audited, 0 violations, exit 0** (5 here plus `rust-self-hosted.yml` and the
-pre-existing diagnostics job). Against a deliberately wrong probe workflow it
-reported exactly the two violations expected, exit 1:
+audited, 0 violations, exit 0** (5 here plus the then-existing `rust-self-hosted.yml`
+and the diagnostics job, both deleted by #839). Against a deliberately wrong probe
+workflow it reported exactly the two violations expected, exit 1:
 
 ```
 ::error::.github/workflows/zz-probe.yml:probe: untrusted trigger 'pull_request' is not permitted for self-hosted jobs
 ::error::.github/workflows/zz-probe.yml:probe: on.push.branches includes non-main branch 'feat/t22-ci-gates'
 ```
+
+#839 has since replaced that script. With no self-hosted job left, trigger
+allowlisting has nothing to protect, so it now checks only that every job in every
+workflow is `runs-on: ubuntu-latest`: 20 jobs audited, 0 violations, exit 0 on
+current `main`. The probe output above is what the pre-#839 script did, not what
+the current one would print.
 
 ### 7.4 The step bodies were executed, not just parsed
 
@@ -498,21 +550,27 @@ the 6G warn line. It exits 0 either way. Leaving the truncation in rather than
 rounding up is deliberate — a floor comparison that rounds in the permissive
 direction is how a floor stops being a floor.
 
-### 7.6 What is still NOT observed
+### 7.6 What was NOT observed at the time of writing
 
-`gates.yml` itself has **no check run on any branch yet**, and it cannot be
-triggered on demand from a feature branch: GitHub resolves
+> **Historical (2026-11-22).** This subsection records a state that no longer
+> holds: `gates.yml` now lives on `main` (merged in #839) and triggers on
+> `pull_request`, so the residue described here is closed. The two probe lines
+> below are kept as a record of how dispatch resolution was measured; one of the
+> two workflows they name, `ubuntu-worker-diagnostics.yml`, was deleted by #839
+> and cannot be dispatched at all now.
+
+At the time of writing, `gates.yml` itself had **no check run on any branch**, and
+it could not be triggered on demand from a feature branch: GitHub resolves
 `POST /actions/workflows/gates.yml/dispatches` against the **default branch**, and
-`gates.yml` does not exist on `main`. Measured:
+`gates.yml` did not exist on `main`. Measured then:
 
 ```
 gates.yml@feat/t22-ci-gates -> HTTP 404 (Not Found)
 ubuntu-worker-diagnostics.yml@feat/t22-ci-gates -> HTTP 204 (accepted)
 ```
 
-The second line is the control: dispatch works for a workflow that *is* on
-`main`. So the first run of these five jobs happens on the first push to `main`
-after this branch merges — or immediately if someone with push rights to `main`
-cherry-picks the file there. Until then, the evidence in §7.4 is execution of the
-exact step bodies, not of the workflow, and this document does not present it as
-a green check run.
+The second line was the control: dispatch works for a workflow that *was* on
+`main`. The first run of these five jobs therefore depended on the file reaching
+`main` — which #839 did by merging it. The evidence in §7.4 remains execution of
+the exact step bodies rather than a quoted green check run, and this document does
+not present it as one.
