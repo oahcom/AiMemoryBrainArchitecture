@@ -372,6 +372,56 @@ class RepositoryHygieneTests(unittest.TestCase):
             msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
         )
 
+    # M20: work-item manifests are an established convention and are admitted
+    # at exactly AID-2026-NNN/manifest.yaml, never more broadly.
+    def test_new_work_item_manifest_passes(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/work-items/AID-2026-055/manifest.yaml": (
+                "id: AID-2026-055\n"
+            ),
+        })
+
+        self.assert_admission_passes(base, head)
+
+    def test_work_item_manifest_with_yml_suffix_fails(self):
+        base = self.seed_base()
+        path = "14-ai-development/work-items/AID-2026-055/manifest.yml"
+        head = self.commit({path: "id: AID-2026-055\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    def test_work_item_manifest_backup_suffix_fails(self):
+        base = self.seed_base()
+        path = "14-ai-development/work-items/AID-2026-055/manifest.yaml.bak"
+        head = self.commit({path: "id: AID-2026-055\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    def test_work_item_other_yaml_fails(self):
+        base = self.seed_base()
+        path = "14-ai-development/work-items/AID-2026-055/notes.yaml"
+        head = self.commit({path: "notes: true\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    def test_work_item_manifest_without_id_segment_fails(self):
+        base = self.seed_base()
+        path = "14-ai-development/work-items/manifest.yaml"
+        head = self.commit({path: "work_items: []\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    def test_work_item_manifest_beneath_extra_segment_fails(self):
+        base = self.seed_base()
+        path = (
+            "14-ai-development/work-items/evil/"
+            "AID-2026-055/manifest.yaml"
+        )
+        head = self.commit({path: "id: AID-2026-055\n"})
+
+        self.assert_admission_fails(base, head, path)
+
     # M09: Git tree paths are NUL-delimited, not newline-delimited.
     @unittest.skipUnless(
         os.name == "posix",

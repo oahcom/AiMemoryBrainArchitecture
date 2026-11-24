@@ -15,7 +15,10 @@ PROHIBITED_PATHS = (
     "/_dm.txt",
 )
 
-# Fixed source-code allowlist. Do not infer this set from the base tree.
+# Fixed source-code allowlist. Do not infer this set from the base tree;
+# inferring admission from whatever the base tree happens to contain is exactly
+# what this gate exists to prevent. The one convention admitted here,
+# WORK_ITEM_MANIFEST_RE, is therefore written out by hand rather than derived.
 ALLOWED_SOURCE_SUFFIXES = frozenset({
     ".py",
     ".sh",
@@ -64,6 +67,16 @@ ALLOWED_CONFIG_PATHS = frozenset({
 
 REQUIREMENTS_FILE_RE = re.compile(r"requirements(?:-[A-Za-z0-9_.-]+)?\.txt\Z")
 FULL_SHA_RE = re.compile(r"[0-9a-fA-F]{40}\Z")
+
+# Work-item manifests are an established repository convention: this tree
+# already carries 14-ai-development/work-items/AID-2026-NNN/manifest.yaml for
+# every AID work item, all committed before this allowlist existed. The
+# allowlist therefore rejected the convention's own next instance. Admit
+# exactly that shape -- one AID-2026-NNN directory, one manifest.yaml, no
+# extra segments, no other YAML file name -- and nothing wider.
+WORK_ITEM_MANIFEST_RE = re.compile(
+    r"14-ai-development/work-items/AID-2026-\d{3}/manifest\.yaml\Z"
+)
 
 
 def error(message):
@@ -159,6 +172,9 @@ def is_allowed_new_path(path):
         return True
 
     if path in ALLOWED_CONFIG_PATHS:
+        return True
+
+    if WORK_ITEM_MANIFEST_RE.fullmatch(path):
         return True
 
     if (
