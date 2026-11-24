@@ -25,9 +25,15 @@ document_metadata:
 
 # GAP-26 — Seven of fifteen normative roots do not exist, so a whole domain was never scanned
 
-**Status:** Open · **Area:** `scripts/check_bilingual_docs_full.py`
-**Measured at:** `main` @ `1a7e3cddae`
+**Status:** **Resolved** by `150fb45e` (#910) · **Area:** `scripts/check_bilingual_docs_full.py`
+**Measured at:** `main` @ `1a7e3cddae`; resolution verified at `ac0f0dfd`
 **Author:** owner delegate under standing instruction (Issue #564, comment 7074302216)
+
+> **Resolution note (2026-11-24, `ac0f0dfd`).** The scan no longer keeps its own root list. It imports `NORMATIVE_ROOTS` from `check_bilingual_docs.py`, which holds 9 roots, all of which exist, and which includes `08-bmcp-protocol`. #910 also added a derived-root guard that exits 2 when the literal and the directory listing disagree, so the literal cannot drift in silence again.
+>
+> Measured after the fix: `NORMATIVE_ROOTS` = 9, missing on disk = 0, `08-bmcp-protocol` present, scan covers 647 in-scope files (was 626) and reports 77 violations (was 81). The four `08-bmcp-protocol` records this document said were never scanned are now in the set.
+>
+> The reasoning in this document stands as the record of what was wrong and why it mattered. Only the Status is superseded. Do not re-fix the roots — that would undo #910.
 
 ---
 
