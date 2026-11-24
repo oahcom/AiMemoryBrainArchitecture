@@ -20,7 +20,7 @@ document_metadata:
       last_verified_date: null
       last_verification_note: "This work record documents direct pushes to main and their measured provenance. It is not an approval and does not grant authority. Section 15 states its own measurement basis and the fields that could not be recovered."
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Modified
     supersession:
       supersedes: []
       supersession_reason: null
