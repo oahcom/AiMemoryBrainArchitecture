@@ -1,3 +1,48 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-24"
+      last_verification_note: "Section 7 added on 2026-11-24 at main 5c64e560: the floor from AID-2026-054 Change 3 was patched into a throwaway worktree and the predicate was evaluated on two constructed pairs (a 1-line English fixture, and a full-English + partial-Chinese pair); the four register/branch configurations were evaluated in both trees; and the 43-pair / 86-file calibration was enumerated at 880e6a78 and again at 5c64e560. Every figure came from a run."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: "docs/en/14-ai-development/governance-register/GOV-REV-2026-11-21-PARTIAL-SCOPE-019.md"
+    zh-CN: "docs/zh-CN/14-ai-development/governance-register/GOV-REV-2026-11-21-PARTIAL-SCOPE-019.md"
+---
+
 # GOV-REV-2026-11-21-PARTIAL-SCOPE-019
 
 **Status:** OPEN — MEASUREMENT ONLY, §7 added 2026-11-24

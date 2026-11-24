@@ -1,3 +1,48 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-24"
+      last_verification_note: "Section 12 added on 2026-11-24 at main 5c64e560: main's 9 check-runs were read from the API (0 non-green); the gap set was compared to the frozen baseline in-process (77 == 77); GAP-BASELINE-001.md was tested for gap membership, baseline membership and PAIR_EXEMPT_PREFIXES; the empty-diff message was produced by running the gate with BASE_SHA == HEAD_SHA. Every figure came from a run. No figure is carried over from another register."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: "docs/en/14-ai-development/governance-register/GOV-NC-2026-11-21-REGRESSION-009.md"
+    zh-CN: "docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-21-REGRESSION-009.md"
+---
+
 # GOV-NC-2026-11-21-REGRESSION-009
 
 - 登记编号：GOV-NC-2026-11-21-REGRESSION-009
