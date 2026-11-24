@@ -873,6 +873,22 @@ class RepositoryHygieneTests(unittest.TestCase):
         # A zero here means the sets were empty and the check bound nothing.
         self.assertIn("directories=2 linked=2", result.stdout)
 
+    # A summary line with equal counts cannot distinguish two counters from one
+    # counter printed twice: `directories={n} linked={n}` passes either way. The
+    # counts must therefore be asserted somewhere they differ, or the assertion
+    # proves only that some number was printed. Three directories, two linked.
+    def test_membership_summary_counts_the_two_sets_separately(self):
+        self.index_fixture(
+            "| [AID-2026-001](AID-2026-001/manifest.yaml) |\n"
+            "| [AID-2026-002](AID-2026-002/manifest.yaml) |\n",
+            ["AID-2026-001", "AID-2026-002", "AID-2026-003"],
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(result.returncode, 1, msg=result.stderr)
+        self.assertIn("directories=3 linked=2", result.stdout)
+        self.assertNotIn("directories=3 linked=3", result.stdout)
+
     def test_index_membership_fails_on_a_directory_with_no_entry(self):
         self.index_fixture(
             "| [AID-2026-001](AID-2026-001/manifest.yaml) |\n",
@@ -882,8 +898,8 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args()
         self.assertEqual(result.returncode, 1, msg=result.stderr)
         self.assertIn(
-            "::error::index membership violation: work-item directory "
-            "'14-ai-development/work-items/AID-2026-002' has no entry",
+            "::error::index membership violation: directory present, "
+            "no index entry: 14-ai-development/work-items/AID-2026-002",
             result.stderr,
         )
 
@@ -897,8 +913,8 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args()
         self.assertEqual(result.returncode, 1, msg=result.stderr)
         self.assertIn(
-            "::error::index membership violation: "
-            "'14-ai-development/work-items/INDEX.md' links 'AID-2026-009/'",
+            "::error::index membership violation: index entry present, "
+            "no directory: 14-ai-development/work-items/AID-2026-009",
             result.stderr,
         )
 

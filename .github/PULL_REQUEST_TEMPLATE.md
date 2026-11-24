@@ -41,12 +41,12 @@
 - Independent reviewer GitHub login:
 - Review state: APPROVED | COMMENTED | REQUESTED_CHANGES | NOT_REVIEWED
 - Review commit SHA:
-- Same-author / same-connected-identity / delegated role disclosure:
+- Same-session / delegated-role disclosure (independence is session-level; identity is only the carrier):
 - Owner approvals required and exact evidence:
 - Unresolved review conversations / blocking findings:
 
-A COMMENT is not an APPROVE. Review by the same GitHub identity as the author is not independent. AI role simulation is not Owner approval.
-COMMENT 不是 APPROVE。作者与审查者使用同一 GitHub 身份时不构成独立审查。AI 角色模拟不构成 Owner 批准。
+A COMMENT is not an APPROVE. Independence is a property of the reviewing session, not of the GitHub account: a separate session reviewing a change it did not author is independent and may report through the same identity. AI role simulation inside the authoring session is not independent review and is not Owner approval.
+COMMENT 不是 APPROVE。独立性是审查会话的属性，不是 GitHub 账号的属性：未撰写该变更的另一个会话即构成独立审查，可沿用同一身份报告。在撰写会话内做 AI 角色模拟不构成独立审查，也不构成 Owner 批准。
 
 ## Bilingual documentation / 双语文档
 - Chinese paths:

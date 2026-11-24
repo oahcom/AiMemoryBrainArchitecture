@@ -390,3 +390,54 @@ So the order is fixed: record (done) → count (675 vs 2) → open the window (a
 `OPEN` / `ACTIVE` / `CONTINUOUS` unchanged, appending: `/ BLOCKED — PR-GOVERNANCE-001 §7, escalated to the repository administrator (Issue #134) / EX-20261123-01 records 675 PRs and 0 independent reviews / the three remedies were ruled unavailable`.
 
 Not `CLOSED`: §9's blocking chain (independent review `NOT_ASSIGNED`) is unchanged, §10.3 makes it apply to this register itself, and this section's ruling document is `Draft` rather than `Approved` — it claims nothing it cannot show.
+
+## 12. Erratum: §11's central inference does not hold, because it treated an identity-layer fact as a review-layer conclusion (2026-11-24)
+
+**Register status:** `OPEN` / `MEASUREMENT_ONLY` / `NO_IMPLEMENTATION` / the conclusions of §11.3, §11.4, §11.7 and §11.8 are **withdrawn by this section**.
+
+### 12.1 What is withdrawn
+
+§11 began from a correct set of measurements and arrived at an incorrect conclusion.
+
+The measurements all stand; this section changes no number: all 675 PRs walked, `APPROVED = 0`, `collaborators = 1`, `oahcom0831-design` permission `read`, the `required_pull_request_reviews` key absent, `enforce_admins: true`. These are verbatim `GET` responses, re-confirmed unchanged on 2026-11-24.
+
+The error was the next step:
+
+> §11.2 measured **how many GitHub accounts can write**; §11.3 read it as **how many reviewers can exist**.
+
+Those are not the same quantity. Before 2026-11-24, §5 defined independence as a property of the GitHub identity, so under that definition "only one identity" did entail "independent review is impossible". But that was not a finding of the measurement — it was **the definition under test being used as the premise of the test**, i.e. one clause being used to prove that the same clause cannot be satisfied.
+
+The clause has been amended on the Owner's baseline (`GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`): independence is a property of the **reviewing session**, not of the GitHub account that carries it. Under the amended definition the same measurement reads differently:
+
+| §11's conclusion | Actual state under the session-level definition |
+|---|---|
+| §11.3 "remedies 1 and 2 make `main` permanently unmergeable" | No. The required approval can be supplied by **another session**; the platform's self-approval prohibition binds the account, not the session. |
+| §11.3 "the only identity that can lift the freeze is the one it freezes" | Still true, but it constrains only `required_pull_request_reviews`, a **platform** mechanism. It does not constrain the §5 process requirement. §7 already separates the two. |
+| §11.4 "remedy 3 is self-referential — demoting §5 requires violating §5" | No. Amending §5 requires an **independent-session review**, and this repository can always open such a session. The self-reference was manufactured by the old definition, not by the clause's structure. |
+| §11.7 "the quota trigger is the only lawful amendment path" | No. A second path exists: amend the clause through the §9 bilingual + exact-Head governance review. It was never attempted — not because it is unavailable, but because nobody opened that session. |
+| §11.8 "`BLOCKED` — escalated to the repository administrator" | Now **`UNFULFILLED`**. Not blocked by force majeure; executable and unexecuted. |
+
+### 12.2 The nature and direction of the error
+
+This is the fourth error of one kind in this session, and all four point the same way: **a fact at one layer used to underwrite a conclusion at another**.
+
+- First: "the gate passed" taken as "the content is correct".
+- Second: "the baseline froze 77 entries" taken as "those 77 are the whole defect set".
+- Third: "baseline 77 and content defects 7 do not overlap" taken as "shrinking the baseline repairs the defects".
+- Fourth (this section): "there is only one identity" taken as "independent review is impossible".
+
+All four insert an **unexamined equivalence** between evidence and conclusion. The first three were repaired by taking more measurements; this one was repaired by changing the definition — because the two things equated here (account / session) were never at the same layer.
+
+The direction deserves its own note: §11's error **supplied a force-majeure reason for non-performance**. It rewrote "675 things not done" as "things that cannot be done", and on that basis recommended demoting the standard and escalating to an administrator. That class of error is harder to catch than a missing measurement, because its output reads like the most responsible conclusion available.
+
+### 12.3 Why §11 is kept, not deleted
+
+This section deletes none of §11's text, for the same reason as `GOV-REV-2026-11-24-CONVERGENCE-CEILING-034` §9: a record that can rewrite its own conclusions on demand is not a record. §11's measurements are a reusable asset; §11's inference is this register's error. Both must stay where they are.
+
+When citing this register from now on: **cite §11.1/§11.2 for the measurements, §12 for the conclusion**.
+
+### 12.4 The work this actually creates
+
+Under the session-level definition, §9's blocking chain (independent review `NOT_ASSIGNED`) is no longer a blocked state but an **executable backlog**: of the 675 merged PRs, how many should have satisfied §5; of those, which are still worth registering as historical defects; and how the next PR onward will comply. All three are session-work — no second account, no administrator.
+
+This register does not claim those three are done. It withdraws only the claim that they cannot be done.

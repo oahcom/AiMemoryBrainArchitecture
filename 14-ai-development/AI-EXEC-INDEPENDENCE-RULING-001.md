@@ -70,13 +70,13 @@ Basis: AI-EXEC-001 v1.1 and AI-EXEC-002 v1.1 are ADOPTED via PR #256 merge 48a55
 
 ## RULING-04 — Two non-substitutable independence dimensions / 裁定四——两种不可替代的独立性
 
-**Conflict / 冲突点.** NR-001 / OPTION A permits a genuinely new independent ChatGPT conversation to satisfy the independent-session requirement subject to controls. PR-GOVERNANCE-001 §5 says a review through the same connected GitHub identity as the author is not independent, even if the session adopts a different role. AI-EXEC-001 v1.1 §6 and AI-EXEC-002 §5 preserve both.
+**Conflict / 冲突点.** NR-001 / OPTION A permits a genuinely new independent ChatGPT conversation to satisfy the independent-session requirement subject to controls. PR-GOVERNANCE-001 §5 as amended 2026-11-24 makes independence a property of the reviewing session: a review through the same connected GitHub identity as the author **is** independent when the reviewing session is not the authoring session. Before that amendment §5 required a distinct GitHub actor, which NR-001 / OPTION A could not supply. AI-EXEC-001 v1.1 §6 and AI-EXEC-002 §5 preserve both requirements; the amendment removes the conflict rather than choosing a side.
 
-NR-001 / OPTION A 允许真正新建的独立 ChatGPT 对话在满足控制条件时满足独立会话要求。PR-GOVERNANCE-001 §5 规定作者与审查者使用同一已连接 GitHub 身份时不构成独立，即使会话扮演不同角色。AI-EXEC-001 v1.1 §6 和 AI-EXEC-002 §5 同时保留两项要求。
+NR-001 / OPTION A 允许真正新建的独立 ChatGPT 对话在满足控制条件时满足独立会话要求。PR-GOVERNANCE-001 §5 经 2026-11-24 修订后，把独立性定义为审查会话的属性：只要审查会话不是撰写会话，即使沿用作者所用的同一已连接 GitHub 身份，**仍**构成独立。修订前的 §5 要求独立的 GitHub 操作者，而 NR-001 / OPTION A 无法提供，这才是原先的冲突所在。AI-EXEC-001 v1.1 §6 和 AI-EXEC-002 §5 同时保留两项要求；本次修订是消除冲突，不是在其中选边。
 
 **Ruling / 裁定.**
 1. Session/review-behavior independence (S-independence) means a genuinely new conversation distinct from authoring/implementation, supplied with frozen inputs, independently reading repository sources, performing adversarial review and recording findings, with NR-001 disclosure that conversation isolation is not model/provider/statistical independence.
-2. Platform-identity/review-event independence (P-independence) means the review event is attributable to a GitHub identity distinct from the author's connected GitHub identity.
+2. Platform-identity/review-event independence (P-independence) — **retired 2026-11-24.** Was defined as: the review event is attributable to a GitHub identity distinct from the author's connected GitHub identity. Item 5 records why it no longer stands as a bar; it is kept here so that rulings written against it remain readable.
 3. S-independence satisfies the independence requirement of `PR-GOVERNANCE-001` §5 in full, as amended 2026-11-24 to make independence a property of the reviewing session. It does not create a second GitHub actor and does not produce Owner approval; neither is required for independence.
 4. Under the repository's stated ChatGPT-native model where sessions share oahcom, a fresh session satisfies §5 independence. The shared GitHub actor is the carrier of the review event, not the measure of its independence; what §5 now asks is whether the reviewing context is the authoring context, and for a fresh session it is not.
 5. AI-EXEC-001 R2 maps independent ChatGPT session to S-independence, which is now the §5 requirement itself. Affected Owner explicit contract approval is separate and still required. R3 additionally requires security/domain expert review, reproducible tests and explicit Acceptance Authority approval. Those remain non-substitutable; P-independence no longer exists as a separate bar.
@@ -89,9 +89,9 @@ NR-001 / OPTION A 允许真正新建的独立 ChatGPT 对话在满足控制条�
 5. AI-EXEC-001 R2 的独立 ChatGPT 会话对应 S 独立性，而它现在就是 §5 的要求本身。受影响 Owner 明确批准契约是独立门禁，仍然必需。R3 另要求安全/领域专家审查、可复现测试和 Acceptance Authority 明确批准；这些仍不可替代。P 独立性不再作为独立门槛存在。
 6. 对 §5 覆盖的变更，合格的独立会话足以满足 MERGE 的独立性要素。高风险变更另需受影响 Owner 的明确批准，而这不由任何会话提供。无该批准时仍须 HOLD，或按事实 REMEDIATE/REJECT。
 
-**Boundaries / 边界.** No model independence, multi-model consensus, human expertise, platform enforcement or independent GitHub actor is claimed. Role separation is not actor separation. A same-identity review must never be relabeled independent.
+**Boundaries / 边界.** No model independence, multi-model consensus, human expertise, platform enforcement or independent GitHub actor is claimed. Role separation is not actor separation. Role simulation inside the authoring session must never be relabeled independent; a separate session under the same identity already is independent.
 
-不宣称模型独立、多模型共识、真人专家身份、平台强制控制或独立 GitHub 操作者。角色分离不等于操作者分离；同身份审查不得重新标记为独立。
+不宣称模型独立、多模型共识、真人专家身份、平台强制控制或独立 GitHub 操作者。角色分离不等于操作者分离；在撰写会话内做的角色扮演不得重新标记为独立。同一身份下的**另一个会话**本就是独立，无需重新标记。
 
 **Effective scope / 生效范围.** Prospective interpretation after adoption. Review by 2026-12-02. / 采用后向前适用。复核期限 2026-12-02。
 
@@ -104,14 +104,14 @@ NR-001 / OPTION A 允许真正新建的独立 ChatGPT 对话在满足控制条�
 NR-001 审查 + Owner 评论 + 例外 + exact-Head 检查可能被误读为足以绕过 §5 合并，从而把例外登记变成豁免。
 
 **Ruling / 裁定.** Preserve exactly MERGE / HOLD / REMEDIATE / SUPERSEDED / REJECT:
-- MERGE only if every applicable exact-Head check passes; distinct-identity §5 review exists where applicable; NR-001 review exists where required; every affected authority Owner explicitly approves the exact normative contract boundary; R3 additionally has qualified independent expert review, reproducible test evidence and Acceptance Authority approval; dependencies are satisfied; no blocking finding remains; and the PR is mergeable.
+- MERGE only if every applicable exact-Head check passes; an independent-session §5 review exists where applicable; NR-001 review exists where required; every affected authority Owner explicitly approves the exact normative contract boundary; R3 additionally has qualified independent expert review, reproducible test evidence and Acceptance Authority approval; dependencies are satisfied; no blocking finding remains; and the PR is mergeable.
 - HOLD if any required review, Owner approval, expert review, exact-Head check, reproducible evidence or dependency is missing, pending, NOT RUN, NOT VERIFIED or attributable only to the shared identity.
 - REMEDIATE for a concrete defect/evidence gap repairable on the same coherent carrier; re-review the changed exact Head.
 - SUPERSEDED only when an actual replacement fully supersedes the carrier; preserve unique evidence. It is not a shortcut around missing approval.
 - REJECT when the proposal is invalid or conflicts with accepted authority; preserve rationale and evidence.
 
 严格保留 MERGE / HOLD / REMEDIATE / SUPERSEDED / REJECT 五态：
-- MERGE 仅在所有适用 exact-Head 检查通过；适用时有不同身份 §5 审查；需要时有 NR-001 审查；每个受影响权威 Owner 明确批准准确规范契约边界；R3 另有合格独立专家审查、可复现测试和 Acceptance Authority 批准；依赖满足；无阻断 finding；PR 可合并时成立。
+- MERGE 仅在所有适用 exact-Head 检查通过；适用时有独立会话 §5 审查；需要时有 NR-001 审查；每个受影响权威 Owner 明确批准准确规范契约边界；R3 另有合格独立专家审查、可复现测试和 Acceptance Authority 批准；依赖满足；无阻断 finding；PR 可合并时成立。
 - 任一必需审查、Owner 批准、专家审查、exact-Head 检查、可复现证据或依赖缺失、待定、NOT RUN、NOT VERIFIED，或仅归属于共享身份时，必须 HOLD。
 - REMEDIATE 用于可在同一连贯载体修复的具体缺陷/证据缺口；变更后重新审查新 exact Head。
 - SUPERSEDED 仅在真实替代项完整取代载体时使用，并保留独有证据；不得绕过批准缺失。
@@ -121,9 +121,9 @@ NR-001 审查 + Owner 评论 + 例外 + exact-Head 检查可能被误读为足�
 
 实际 accountable Owner（或具备书面授权的代理人）必须直接作出可归属、明确的书面决定，标明 PR/Work Item、准确 Head 或不可变契约版本/Blob、条款/字段、ACCEPT / REJECT / ACCEPT WITH AMENDMENTS、条件、身份/角色和时间戳。记录放在既有 Issue/PR 评论，或链接可核验的 Owner 署名工件。若 GitHub 操作者为共享 oahcom，必须披露，不得将其描述为不同平台身份或 GitHub APPROVE。必须通过获授权的 Owner 渠道核验归属；无法核验时 Owner 门禁保持 OPEN。
 
-Never issue or claim GitHub APPROVE as a workaround for same-identity restrictions. Owner written decision may satisfy only the Owner contract-approval gate when attribution and scope are verified; it cannot satisfy §5 reviewer identity independence. If platform cannot supply an independent identity, HOLD and escalate to Project Owner/repository administrator.
+Never issue or claim GitHub APPROVE as a workaround for the platform's self-approval prohibition. Owner written decision may satisfy only the Owner contract-approval gate when attribution and scope are verified; it is not §5 independence and cannot substitute for it. Independence is supplied by a separate reviewing session, which this repository can always open; where even that is unavailable, HOLD and escalate to Project Owner/repository administrator.
 
-绝不得将 GitHub APPROVE 作为同身份限制的变通方式。Owner 书面决定只有在归属和范围可核验时才满足 Owner 契约批准门禁，不能满足 §5 独立审查者身份门禁。平台无法提供独立身份时必须 HOLD 并升级给项目 Owner/仓库管理员。
+绝不得将 GitHub APPROVE 作为平台自审禁令的变通方式。Owner 书面决定只有在归属和范围可核验时才满足 Owner 契约批准门禁，它本身不是 §5 独立性，也不能替代独立性。独立性由另一个审查会话提供，而本仓库始终可以开启这样的会话；连这一步都不可得时才 HOLD 并升级给项目 Owner/仓库管理员。
 
 **Boundaries / 边界.** No combination of same-identity COMMENT, role simulation, Owner narrative, exception entry or green CI manufactures an independent reviewer. Exception alone never changes HOLD to MERGE. / 同身份 COMMENT、角色模拟、Owner 叙述、例外登记或绿色 CI 的任何组合都不能制造独立审查者；例外本身绝不能将 HOLD 变为 MERGE。
 
@@ -217,15 +217,15 @@ Rules-only application. No PR state, branch or metadata is changed. / 仅作规�
 
 | PR | Present rule conclusion | Required gates before MERGE |
 |---|---|---|
-| #251 RFC-IDE-001 | Cross-owner identity/Scope/idempotency contract; §5 applies. Exact Head/CI not recorded in INDEX; required Owner decisions not evidenced complete. **HOLD.** | Fresh NR-001 review; distinct-identity §5 review; attributable Domain Model/Producer Identity, Scope/Security and Event Store Owner decisions against exact contract version; exact-Head checks; resolve or explicitly exclude TTL, cleanup, ProducerIdentity composition and digest CANDIDATE/TO_VALIDATE items; no BLOCKER. |
-| #252 D/E/I/Storage convergence | Cross-owner normative interfaces and security/authorization/recovery boundaries; §5 applies. Successor pins recorded, but exact-Head checks and all D/E/I/Storage Owner decisions not evidenced complete. **HOLD.** | Fresh NR-001 review; distinct-identity §5 review; D, E, I and Storage decisions against exact successor Blobs; close D-HW-01/H-RJ-HW-01 or keep outside accepted scope; applicable exact-Head checks; physical conformance and production authorization remain separate. |
-| #253 acceptance matrix | Cross-owner acceptance authority/evidence boundary; §5 applies. Exact Head/CI and Owner adoption/approval not recorded complete. **HOLD.** | Fresh NR-001 review; distinct-identity §5 review; Project Owner/authorized governance adoption and affected Owner approvals for normative responsibility boundaries; exact-Head GOV-DOC/bilingual checks; no logical acceptance represented as physical conformance or production approval. |
+| #251 RFC-IDE-001 | Cross-owner identity/Scope/idempotency contract; §5 applies. Exact Head/CI not recorded in INDEX; required Owner decisions not evidenced complete. **HOLD.** | Fresh NR-001 review; independent-session §5 review; attributable Domain Model/Producer Identity, Scope/Security and Event Store Owner decisions against exact contract version; exact-Head checks; resolve or explicitly exclude TTL, cleanup, ProducerIdentity composition and digest CANDIDATE/TO_VALIDATE items; no BLOCKER. |
+| #252 D/E/I/Storage convergence | Cross-owner normative interfaces and security/authorization/recovery boundaries; §5 applies. Successor pins recorded, but exact-Head checks and all D/E/I/Storage Owner decisions not evidenced complete. **HOLD.** | Fresh NR-001 review; independent-session §5 review; D, E, I and Storage decisions against exact successor Blobs; close D-HW-01/H-RJ-HW-01 or keep outside accepted scope; applicable exact-Head checks; physical conformance and production authorization remain separate. |
+| #253 acceptance matrix | Cross-owner acceptance authority/evidence boundary; §5 applies. Exact Head/CI and Owner adoption/approval not recorded complete. **HOLD.** | Fresh NR-001 review; independent-session §5 review; Project Owner/authorized governance adoption and affected Owner approvals for normative responsibility boundaries; exact-Head GOV-DOC/bilingual checks; no logical acceptance represented as physical conformance or production approval. |
 
 | PR | 当前规则结论 | MERGE 前门禁 |
 |---|---|---|
-| #251 RFC-IDE-001 | 跨 Owner 身份/Scope/幂等契约，适用 §5。INDEX 未记录准确 Head/CI；必需 Owner 决定未证明齐全。**HOLD。** | 新 NR-001 审查；不同身份 §5 审查；Domain Model/Producer Identity、Scope/Security、Event Store Owner 对准确契约版本作可归属决定；exact-Head 检查；解决或明确排除 TTL、清理、ProducerIdentity 组合和 digest 的 CANDIDATE/TO_VALIDATE 项；无 BLOCKER。 |
-| #252 D/E/I/Storage 收敛 | 跨 Owner 规范接口及安全/授权/恢复边界，适用 §5。已记录 successor pins，但未证明准确 Head 检查和 D/E/I/Storage 全部 Owner 决定完成。**HOLD。** | 新 NR-001 审查；不同身份 §5 审查；D、E、I、Storage 对准确 successor Blobs 作决定；关闭 D-HW-01/H-RJ-HW-01 或明确保留在验收范围外；适用 exact-Head 检查；物理符合性和生产授权仍为独立门禁。 |
-| #253 验收矩阵 | 跨 Owner 验收权威/证据边界，适用 §5。准确 Head/CI 和 Owner 采用/批准未记录为完成。**HOLD。** | 新 NR-001 审查；不同身份 §5 审查；Project Owner/授权治理者采用及受影响 Owner 对规范责任边界批准；exact-Head GOV-DOC/双语检查；不得把逻辑验收表述为物理符合性或生产批准。 |
+| #251 RFC-IDE-001 | 跨 Owner 身份/Scope/幂等契约，适用 §5。INDEX 未记录准确 Head/CI；必需 Owner 决定未证明齐全。**HOLD。** | 新 NR-001 审查；独立会话 §5 审查；Domain Model/Producer Identity、Scope/Security、Event Store Owner 对准确契约版本作可归属决定；exact-Head 检查；解决或明确排除 TTL、清理、ProducerIdentity 组合和 digest 的 CANDIDATE/TO_VALIDATE 项；无 BLOCKER。 |
+| #252 D/E/I/Storage 收敛 | 跨 Owner 规范接口及安全/授权/恢复边界，适用 §5。已记录 successor pins，但未证明准确 Head 检查和 D/E/I/Storage 全部 Owner 决定完成。**HOLD。** | 新 NR-001 审查；独立会话 §5 审查；D、E、I、Storage 对准确 successor Blobs 作决定；关闭 D-HW-01/H-RJ-HW-01 或明确保留在验收范围外；适用 exact-Head 检查；物理符合性和生产授权仍为独立门禁。 |
+| #253 验收矩阵 | 跨 Owner 验收权威/证据边界，适用 §5。准确 Head/CI 和 Owner 采用/批准未记录为完成。**HOLD。** | 新 NR-001 审查；独立会话 §5 审查；Project Owner/授权治理者采用及受影响 Owner 对规范责任边界批准；exact-Head GOV-DOC/双语检查；不得把逻辑验收表述为物理符合性或生产批准。 |
 
 All three retain their existing platform state; no GitHub APPROVE is issued or inferred. New findings must be recorded in existing Issue/PR comments with ID + severity + return destination. No new Issue is opened.
 
