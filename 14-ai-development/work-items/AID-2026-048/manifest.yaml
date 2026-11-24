@@ -7,7 +7,7 @@ risk_rationale: "Bounded additive state machine in one crate plus a bilingual co
 
 security_scope: "In-memory delivery lifecycle bookkeeping only. No credential, network or storage surface."
 
-status: PR_OPEN
+status: MERGED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -59,12 +59,12 @@ acceptance:
   acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
 
 implementation:
-  status: PR_OPEN
+  status: MERGED
   branch: feat/context-delivery-lifecycle-2026-11-22
-  pull_request: PENDING
-  pull_request_url: PENDING
+  pull_request: 636
+  pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/636
   implementation_commit_sha: PENDING
-  merge_commit_sha: NOT_MERGED
+  merge_commit_sha: da15eeb6cbc546992db094c6b3ec924953042630
 
 authorization:
   registration_write: "USER-PRINCIPAL-DELEGATED (limited to this AID registration package)"

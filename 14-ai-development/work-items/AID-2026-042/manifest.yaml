@@ -64,12 +64,12 @@ acceptance:
   acceptance_authority: USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)
 
 implementation:
-  status: PR_OPEN
+  status: MERGED
   branch: fix/AID-2026-042/sys-argv-gate-tests
   pull_request: 534
   pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/534
   implementation_commit_sha: 0a5070b94b72dbc2ca1aba3a2285642cd3699363
-  merge_commit_sha: NOT_MERGED
+  merge_commit_sha: 9944d07ebabdebab48779d9aa6b70e8fc17f61b9
 
 authorization:
   registration_write: USER-PRINCIPAL-DELEGATED (limited to this AID registration package)
