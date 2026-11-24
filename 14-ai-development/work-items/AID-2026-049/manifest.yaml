@@ -7,7 +7,7 @@ risk_rationale: "Bounded additive data carrier in one crate plus a bilingual cov
 
 security_scope: "In-memory report fields only. BlockedRefs keeps an API-level disclosure boundary and deliberately exposes no total-count accessor, not even a crate-private one."
 
-status: PR_OPEN
+status: MERGED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -61,12 +61,12 @@ acceptance:
   acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
 
 implementation:
-  status: PR_OPEN
+  status: MERGED
   branch: feat/context-sufficiency-report-fields-2026-11-22
-  pull_request: PENDING
-  pull_request_url: PENDING
+  pull_request: 678
+  pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/678
   implementation_commit_sha: PENDING
-  merge_commit_sha: NOT_MERGED
+  merge_commit_sha: 8a599491ffbd09b8efc3ff5f201c2831ed660d2c
 
 authorization:
   registration_write: "USER-PRINCIPAL-DELEGATED (limited to this AID registration package)"
