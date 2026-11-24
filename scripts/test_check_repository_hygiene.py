@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Tests for the repository hygiene and new-file admission gates."""
 
+import os
 import subprocess
 import sys
 import tempfile
@@ -372,6 +373,10 @@ class RepositoryHygieneTests(unittest.TestCase):
         )
 
     # M09: Git tree paths are NUL-delimited, not newline-delimited.
+    @unittest.skipUnless(
+        os.name == "posix",
+        "requires newline-capable filenames",
+    )
     def test_newline_in_allowed_filename_is_handled_as_one_path(self):
         base = self.seed_base()
         path = "scripts/strange\nname.py"
