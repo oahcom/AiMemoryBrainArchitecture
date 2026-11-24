@@ -232,6 +232,8 @@ This directory records dozens of defects that "cannot converge", attributing eac
 
 So the independent review §5 requires is not unwanted — it is **structurally impossible for a second person to perform**. Every `NOT_ASSIGNED` seat is not a to-do item; it is a slot that the current identity topology cannot fill. That explains why 21 of 37 registers carry the same word and none has been genuinely closed in six months.
 
+> **Withdrawn by §9 (2026-11-24).** The measurement above stands unchanged. The inference does not: §5 does not require a second *person*, it requires a second *session*, and this repository can always open one. §9 records the error and, more usefully, its direction — it turned “675 things not done” into “things that cannot be done”.
+
 ## 2. Identity topology
 
 ```

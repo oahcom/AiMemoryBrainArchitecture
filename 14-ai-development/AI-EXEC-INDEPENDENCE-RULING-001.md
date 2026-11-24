@@ -83,7 +83,7 @@ NR-001 / OPTION A 允许真正新建的独立 ChatGPT 对话在满足控制条�
 6. For §5-covered changes (security, identity, authorization, Forget, lifecycle, canonical persistence, recovery, cross-owner contracts, production operations), a qualifying independent session is sufficient for the independence element of MERGE. High-risk changes additionally require the affected Owner's explicit approval, which no session supplies. Absent that approval, disposition remains HOLD, or REMEDIATE/REJECT as justified.
 
 1. 会话/审查行为独立性（S 独立性）指真正新建、区别于作者/实现会话的对话，取得冻结输入，独立读取仓库源文件，开展对抗性审查并记录 findings，同时按 NR-001 披露对话隔离不代表模型/服务商/统计独立。
-2. 平台身份/审查事件独立性（P 独立性）指审查事件归属于不同于作者所用连接身份的 GitHub 身份。
+2. 平台身份/审查事件独立性（P 独立性）——**2026-11-24 退役。** 原定义为：审查事件归属于不同于作者所用连接身份的 GitHub 身份。第 5 项记录它为何不再作为门槛；保留在此是为了让针对它写下的裁定仍然可读。
 3. S 独立性完整满足 `PR-GOVERNANCE-001` §5 的独立性要求——该条已于 2026-11-24 修订为「独立性是审查会话的属性」。它不创建第二个 GitHub 操作者，也不产生 Owner 批准；而这两者都不是独立性的必要条件。
 4. 在本仓库所有会话共享 oahcom 的 ChatGPT-native 模式下，新会话即满足 §5 独立性。共享的 GitHub 操作者是审查事件的载体，不是其独立性的度量；§5 现在问的是「审查上下文是否为撰写上下文」，而对新会话而言它不是。
 5. AI-EXEC-001 R2 的独立 ChatGPT 会话对应 S 独立性，而它现在就是 §5 的要求本身。受影响 Owner 明确批准契约是独立门禁，仍然必需。R3 另要求安全/领域专家审查、可复现测试和 Acceptance Authority 明确批准；这些仍不可替代。P 独立性不再作为独立门槛存在。

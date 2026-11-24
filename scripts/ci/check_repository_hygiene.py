@@ -8,7 +8,7 @@ import sys
 from pathlib import PurePosixPath
 
 
-CHECK_VERSION = "2026-11-24.4"
+CHECK_VERSION = "2026-11-24.5"
 
 # Repository-root-relative paths, written with a leading slash.
 PROHIBITED_PATHS = (
@@ -108,6 +108,12 @@ AID_REFERENCE_MODEL_GITIGNORE_RE = re.compile(
 
 # A1: protocol schema files live directly under schemas/. One level only;
 # schemas/<sub>/x.schema.json is not admitted.
+#
+# Version note: this rule set is 2026-11-24.5, not .4. #891 reached main first
+# and took .4 for the work-item index membership check, which is a different
+# policy change. Two different policies must not share a version string: the
+# whole point of printing it in the log is that a reader can say which rules
+# produced a given PASS, and a shared number makes that unanswerable.
 PROTOCOL_SCHEMA_RE = re.compile(r"08-bmcp-protocol/schemas/[^/]+\.schema\.json")
 
 # A2: conformance vectors are JSON anywhere below the conformance root, with
