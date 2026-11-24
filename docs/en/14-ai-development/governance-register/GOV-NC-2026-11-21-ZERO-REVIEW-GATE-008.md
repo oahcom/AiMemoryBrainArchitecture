@@ -237,6 +237,8 @@ Pulled 2026-11-23: the most recent 45 merged PRs, calling `/pulls/{n}/reviews` f
 
 The set of reviewer identities ever seen: `{oahcom}`. The set of authors: `{oahcom}`. They are the same, so by PR-GOVERNANCE-001 §5's own definition — "a review performed through the same connected GitHub identity as the author is not independent" — **0 of 45 merges satisfy it.**
 
+> **Citation currency (added 2026-11-25).** The §5 text quoted above was retired on 2026-11-24; the same identity is no longer by itself a disqualification. **The conclusion stands; the reason has changed.** 40 of the 45 had `reviews == 0` — there was no review at all, and no version of §5 requires one to exist; the other 5 were reviewed only by the author, i.e. by the session that wrote the change, which is not independent under the current clause either. The difference is that the current clause tests the *session*, not the *identity*, so using identity as the test will miscount the next batch.
+
 ### 10.2 The platform does not require review, so this is not a bypass
 
 `GET /repos/{owner}/{repo}/branches/main/protection`:
@@ -342,7 +344,7 @@ A second account exists and has pushed commits (4 of the last 100), but it canno
 
 ### 11.3 Remedies 1 and 2 make `main` permanently unmergeable
 
-§5's last sentence: a review through the same connected identity as the author is not independent. GitHub separately forbids approving one's own PR. Combined with §11.2:
+§5's last sentence **at the time this section was written** — a review through the same connected identity as the author is not independent, retired 2026-11-24; see §12 — plus a fact that did not change: GitHub forbids approving one's own PR. Combined with §11.2:
 
 - **Remedy 1** (enable `required_pull_request_reviews`): the required approval cannot exist, so every PR is permanently unmergeable. And `enforce_admins: true` means that freeze binds the only identity that could lift it.
 - **Remedy 2** (`author == reviewer` returns `HOLD`): all 675 PRs hit it, and so would the 676th.
@@ -371,7 +373,9 @@ That is the disposition: **`BLOCKED`, escalated to the repository administrator,
 
 §5's final sentence requires: "Record exceptions explicitly; do not silently waive the requirement."
 
-Measured: 675 PRs, **0 exception records**, no `EX-` file of any kind under `governance-register/`. So the violation is not "no independent reviewer exists" — that is structural and nobody's fault. The violation is that **the waiver was silent**, which §5 explicitly forbids and which was always avoidable.
+Measured: 675 PRs, **0 exception records**, no `EX-` file of any kind under `governance-register/`. The violation is that **the waiver was silent**, which §5 explicitly forbids and which was always avoidable.
+
+> **Corrected 2026-11-25.** The first version inserted, between those two sentences, "So the violation is not 'no independent reviewer exists' — that is structural and nobody's fault." That is the same error a third time: writing "nobody opened an independent session" as "no independent session can be opened". §12.4 records that under the current §5 it is an executable backlog, not force majeure. Removing the clause makes this section's conclusion harder, not weaker: if an independent session was always openable, a silent waiver has even less excuse.
 
 `EX-20261123-01` is what that sentence asks for. It waives nothing, changes no PR's disposition, and converts no `HOLD` into `MERGE`.
 
