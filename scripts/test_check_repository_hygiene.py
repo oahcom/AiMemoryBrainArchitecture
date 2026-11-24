@@ -1367,6 +1367,48 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args()
         self.assertEqual(result.returncode, 2, msg=result.stdout)
         self.assertIn("manifest-schema-registry.yaml", result.stderr)
+    # The registry rule is an exact path, and "exact" has to hold in the
+    # calling form, not just in the pattern. A suffix after the name must not
+    # ride in on the prefix, and neither must a directory prefix.
+    def test_schema_registry_filename_variant_is_rejected(self):
+        base = self.seed_base()
+        for path in (
+            "14-ai-development/work-items/manifest-schema-registry.yaml.bak",
+            "14-ai-development/work-items/manifest-schema-registry.yml",
+            "nested/14-ai-development/work-items/"
+            "manifest-schema-registry.yaml",
+        ):
+            head = self.commit({path: 'schema_registry_version: "1"\n'})
+            self.assert_admission_fails(base, head, path)
+
+    # An empty registry is a policy: it declares that nothing is excluded.
+    # A missing registry is not a policy. These two states must be
+    # distinguishable, so the empty one gets its own passing case rather than
+    # only appearing as the default no test looks at.
+    def test_explicit_empty_registry_is_a_valid_policy(self):
+        self.commit({
+            "14-ai-development/work-items/INDEX.md":
+                "| [AID-2026-001](AID-2026-001/manifest.yaml) |\n",
+            "14-ai-development/work-items/manifest-schema-registry.yaml":
+                EMPTY_SCHEMA_REGISTRY,
+            "14-ai-development/work-items/AID-2026-001/manifest.yaml":
+                "work_item_id: AID-2026-001\nstatus: DISPATCHED\n"
+                "implementation:\n"
+                "  status: NOT_STARTED\n"
+                "  merge_commit_sha: NOT_MERGED\n",
+        })
+
+        result = self.run_checker_args()
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn(
+            "manifests=1 in_scope=1 excluded_by_record_type=0 "
+            "unrecognized=0 violations=0",
+            result.stdout,
+        )
 
 
 if __name__ == "__main__":
