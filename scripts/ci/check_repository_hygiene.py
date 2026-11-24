@@ -66,10 +66,18 @@ REQUIREMENTS_FILE_RE = re.compile(r"requirements(?:-[A-Za-z0-9_.-]+)?\.txt\Z")
 FULL_SHA_RE = re.compile(r"[0-9a-fA-F]{40}\Z")
 # Work-item manifests are YAML, so no suffix rule can admit them without
 # widening .yaml globally. This anchored path shape admits exactly the
-# registry's own file and nothing else: one AID-<id> directory level under
-# work-items/, the literal name manifest.yaml, no nesting, no case variants.
+# registry's own file and nothing else: one AID-YYYY-NNN directory level
+# under work-items/, the literal name manifest.yaml, no nesting, no case
+# variants.
+#
+# The ID segment is a four-digit year, a hyphen, and a three-digit sequence.
+# It is not an arbitrary alnum run: AID-<anything> would admit spellings the
+# registry cannot allocate, so a typo in a directory name would create a work
+# item the index step then cannot resolve. The year is a shape, not a
+# constant -- pinning it to one value would reject next year's first item,
+# which is a rule nobody would remember to edit.
 WORK_ITEM_MANIFEST_RE = re.compile(
-    r"14-ai-development/work-items/AID-[A-Za-z0-9][A-Za-z0-9._-]*/manifest\.yaml"
+    r"14-ai-development/work-items/AID-\d{4}-\d{3}/manifest\.yaml"
 )
 
 

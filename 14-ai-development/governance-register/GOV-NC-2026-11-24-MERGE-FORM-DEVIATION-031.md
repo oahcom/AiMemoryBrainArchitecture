@@ -135,6 +135,59 @@ subject: docs(register): record the #707 review-source correction in §13.4
 
 **不得回写或扩大 `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` §13.7 已冻结的历史计数。** 冻结计数代表其原本定义的历史观察范围；把后续实例追加入原数字会改变统计口径与历史基线。本记录只在其后另列一句，不动原数字。
 
+### 3.1 后续实例（二）：PR #890
+
+`GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/890/reviews` → `[]`。
+
+> Post-freeze observed instances: PR #890 — 2026-11-24 — 0 formal reviews.
+
+核查证据（新增本条目时逐项读取，未沿用任何其他登记簿的数字）：
+
+| 项目 | 端点 | 字段 | 返回值 |
+|---|---|---|---|
+| 正式 Review 记录 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/890/reviews` | 数组长度 | `0` 条 |
+| 合并时间 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/890` | `merged_at` | `2026-11-24T05:39:10Z` |
+| 合并账号 | 同上 | `merged_by.login` | `oahcom` |
+| 合并提交 | 同上 | `merge_commit_sha` | `0f32d46c34cb086e52de38fa49b33ca8a3bf5cd3` |
+| 行内 review 评论数 | 同上 | `review_comments` | `0` |
+| 提交数 / 增 / 删 | 同上 | `commits` / `additions` / `deletions` | `1` / `306` / `0` |
+| 标题 | 同上 | `title` | `docs(register): record the #875 merge-form deviation` |
+
+时间关系按来源分别标注，不混用：
+
+| 事件 | 时间 | 时间来源 |
+|---|---|---|
+| 本会话作出「不签发合并授权」的裁定 | 不晚于 `2026-11-24T05:36:33Z`（`13:36:33 +0800`） | 裁定文本落盘文件的本地修改时间。**这不是**平台签发的时间戳，只用于说明本会话内部的先后顺序，不用于证明合并行为本身。 |
+| #890 合并 | `2026-11-24T05:39:10Z` | GitHub REST API `merged_at` |
+
+两者相隔不超过 2 分 37 秒。此处只用时间说明先后，不用一个事件的时间去证明另一个事件的发生或不发生。
+
+本记录陈述的事实：**#890 是在本会话已明确不签发合并授权之后被合并的，且合并时零正式 Review。** 这是已记录在案的治理控制失效，不只是尚未强制执行的策略。
+
+本记录不陈述的事实：不把 `merged_by: oahcom` 归属到某个具体自然人。该字段标识的是一个 GitHub 账号，不必然是操作该账号的人。
+
+### 3.2 后续实例（三）：PR #896
+
+`GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/896/reviews` → `[]`。
+
+> Post-freeze observed instances: PR #896 — 2026-11-24 — 0 formal reviews.
+
+| 项目 | 端点 | 字段 | 返回值 |
+|---|---|---|---|
+| 正式 Review 记录 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/896/reviews` | 数组长度 | `0` 条 |
+| 合并时间 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/896` | `merged_at` | `2026-11-24T06:51:52Z` |
+| 合并账号 | 同上 | `merged_by.login` | `oahcom` |
+| 合并提交 | 同上 | `merge_commit_sha` | `84bbe9241aef748b406a969da321e7d3fcda2dc1` |
+| 提交数 / 增 / 删 | 同上 | `commits` / `additions` / `deletions` | `1` / `335` / `1` |
+| 合并时的 head | 同上 | `head.sha` | `5585d95ffd5705fe7a636f475b295162737585e9` |
+
+**本条只记录一项可测量的状态，不记录因果或归责：**
+
+- 可确证：合并时该 PR 的正式 Review 记录为 `0` 条，即 D1 所要求的「非作者的 `Approved` 正式 Review」在该时刻并不存在。
+- 不可确证：该合并与任何一次裁定的先后关系。本会话记录 #896 裁定的文本落盘时间为 `2026-11-24T06:53:07Z`（`14:53:07 +0800`，同为本地文件修改时间，非平台时间戳），晚于合并时间 `2026-11-24T06:51:52Z` 约 75 秒。
+
+因此本条**不写**「违反裁定后合并」之类的表述。把先后顺序未知的事件写成违序，会与 `OWNER-DECISION-EVENT-TIMESTAMP-PROVENANCE-001` 直接冲突。此处只登记一个事实：**在 D1 已被确立之后，又发生了一次合并时零正式 Review 的合并。** 本次合并是否构成对某一次具体裁定的违反，需要平台侧事件序列才能回答，本记录不作判断。
+
 ---
 
 ## 4. 明确不作出的判断

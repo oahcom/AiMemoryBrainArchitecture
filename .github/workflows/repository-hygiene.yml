@@ -97,3 +97,11 @@ jobs:
           python3 -c "import yaml" || python3 -m pip install --quiet --disable-pip-version-check pyyaml
           cd scripts/governance/status_migration
           python3 -m unittest test_status_migration
+
+      # Run from this directory because test_check_traceability imports its checker by bare name.
+      - name: Self-check the traceability gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd scripts
+          python3 -m unittest test_check_traceability
