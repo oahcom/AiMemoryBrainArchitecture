@@ -45,16 +45,34 @@
 # above: a separate reason, not a debt.
 #
 # This is not a declaration that CRLF is acceptable. It records that this file
-# is blocked by a rule other than DM-01:
+# is blocked by content addressability, and secondarily by DM-01:
 #
-#   `08-bmcp-protocol/owner-snapshot-...md` has no `docs/en/` or `docs/zh-CN/`
-#   mirror and no side-by-side pair, so any change makes
-#   `scripts/check_bilingual_docs.py` demand counterparts that do not exist
-#   (measured: FAIL, "requires all counterparts changed in this PR").
+#   `08-bmcp-protocol/owner-snapshot-namespace-and-fence-currentness-contract.md`
+#   587 CR / 587 LF, 48073 bytes, blob `d83cde77e98db2e74cf6827d874b0babb4157304`.
+#   That exact blob is cited as "Version 1.3.0 CANDIDATE" in three places:
+#     07-agent-integration/agent-integration-overview.md:472
+#     docs/en/07-agent-integration/agent-integration-overview.md:470
+#     docs/zh-CN/07-agent-integration/agent-integration-overview.md:470
+#   Normalising it to LF changes the bytes to 47486 and the blob to
+#   `9b87ed14993d0985953e47cfa3da714aa3d18261`, which silently invalidates all
+#   three citations. That, not the missing mirror, is why the line cannot simply
+#   be deleted.
 #
-# Removal condition: delete the line only when the file has a registered
-# counterpart (or an Owner-approved explicit exception). Adding a
-# `document_metadata` block is NOT sufficient — GOV-DOC-001 fails first.
-# Tracked in #836.
+#   Separately, the file is frozen in both bilingual baselines
+#   (`scripts/bilingual-baseline.txt`, `scripts/ci/baselines/bilingual-docs.txt`),
+#   and `check_normative_pairing` in `scripts/check_bilingual_docs.py` demands
+#   changed counterparts for any changed normative source regardless of baseline
+#   membership. So a change to this file also fails GOV-DOC-001 until it is
+#   paired — a second obstacle, not the binding one.
+#
+# Removal condition: normalise the file and re-pin all three overview entries to
+# the new blob **in the same change**, or record an explicit Owner decision that
+# the v1.3.0 CANDIDATE designation is no longer content-addressed.
+#
+# Adding a counterpart does NOT by itself permit deletion. A session that pairs
+# the file first, gets GOV-DOC-001 green, and then normalises it will find the
+# three pins broken and the line still required — for a reason stated here and
+# nowhere else. Pair first if the pairing is wanted; it is a separate change.
+# Tracked in #836, #911.
 
 08-bmcp-protocol/owner-snapshot-namespace-and-fence-currentness-contract.md -text

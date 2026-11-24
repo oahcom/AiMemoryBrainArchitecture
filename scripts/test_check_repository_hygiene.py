@@ -462,6 +462,52 @@ class RepositoryHygieneTests(unittest.TestCase):
 
         self.assert_admission_fails(base, head, path)
 
+    # M28: the ID segment is not an arbitrary alnum run. A directory the
+    # registry cannot allocate must not carry a manifest through this rule,
+    # or the index step gets an entry it cannot resolve.
+    def test_non_numeric_work_item_id_is_rejected(self):
+        base = self.seed_base()
+        path = "14-ai-development/work-items/AID-foo/manifest.yaml"
+        head = self.commit({path: "work_item_id: AID-foo\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    # M29: the sequence is three digits. Two digits is a different ID.
+    def test_two_digit_sequence_is_rejected(self):
+        base = self.seed_base()
+        path = "14-ai-development/work-items/AID-2026-55/manifest.yaml"
+        head = self.commit({path: "work_item_id: AID-2026-55\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    # M30: the year is four digits. A two-digit year is a different ID.
+    def test_two_digit_year_is_rejected(self):
+        base = self.seed_base()
+        path = "14-ai-development/work-items/AID-26-055/manifest.yaml"
+        head = self.commit({path: "work_item_id: AID-26-055\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    # M31: the sequence is exactly three digits. Four is a different ID.
+    def test_four_digit_sequence_is_rejected(self):
+        base = self.seed_base()
+        path = "14-ai-development/work-items/AID-2026-0555/manifest.yaml"
+        head = self.commit({path: "work_item_id: AID-2026-0555\n"})
+
+        self.assert_admission_fails(base, head, path)
+
+    # M32: the year is a shape, not a constant. Pinning it to the year the
+    # rule was written would reject next year's first work item, and nobody
+    # would remember to edit the rule. A different four-digit year must pass.
+    def test_next_year_work_item_id_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/work-items/AID-2027-001/manifest.yaml":
+                "work_item_id: AID-2027-001\n",
+        })
+
+        self.assert_admission_passes(base, head)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
