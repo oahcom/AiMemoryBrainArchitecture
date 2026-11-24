@@ -1,3 +1,47 @@
+---
+document_metadata:
+  domain: ai-development
+  role: guide
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-24"
+      last_verification_note: "This file has no front-matter approval record. Its body header states ADOPTED with an owner-directed adoption in Issue #218 comment #6971736655. That is recorded here as prose evidence only; this metadata does not assert a machine-verifiable approval binding."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: "docs/en/14-ai-development/AI-EXEC-ROLLOUT-001.md"
+    zh-CN: null
+---
 # AI-EXEC-ROLLOUT-001 — AI Development Ecosystem Loop Rollout Plan
 # AI 开发生态循环先行方案 —— 先闭环，后加强
 
@@ -75,7 +119,7 @@
 - Closeout 八项∪九项∪双语结果（AI-EXEC-002 §6 模板）随 Issue/PR 发布。
 
 ### L5 审查环（NR-001 严格执行）⭐ 断点⑥
-- R2/R3：**新建独立 ChatGPT 对话**审查，finding 分级 `BLOCKER/P0–P3`，处置 `PASS/CONDITIONAL PASS/FAIL/NOT REVIEWABLE`；COMMENT ≠ APPROVE、同 GitHub 身份不独立、角色扮演不冒充批准（PR-GOVERNANCE §5 原文）。
+- R2/R3：**新建独立 ChatGPT 对话**审查，finding 分级 `BLOCKER/P0–P3`，处置 `PASS/CONDITIONAL PASS/FAIL/NOT REVIEWABLE`；COMMENT ≠ APPROVE、独立性是审查会话的属性而非 GitHub 账号的属性（撰写会话内的角色扮演不独立）、角色扮演不冒充批准（PR-GOVERNANCE §5 原文，2026-11-24 修订后）。
 - 例外仅 R2/R3 时效豁免、显式记录 + 计数（每迭代 ≤ 2）；R0/R1 作者/审查者区分即可。
 
 ### L6 反馈回流环 ⭐ 断点⑦
