@@ -21,7 +21,7 @@ document_metadata:
       last_verified_date: "2026-11-24"
       last_verification_note: "Every figure in §2 was re-read from the GitHub REST API on 2026-11-24 over the complete PR history (690 records), not sampled, plus GET /branches/main/protection and GET /collaborators. The scope classification in §2.4 was computed by fetching GET /pulls/{n}/files for the 69 merged PRs with the greatest merged_at, and the canonical/normative check by fetching each changed .md file at that PR's merge_commit_sha. Each figure states its query and read date. The figures this note attested for 2026-11-23 did not all survive re-measurement and have been replaced in §2.1, §2.3 and §2.4; the correction record is the event comment on PR #849."
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Modified
     supersession:
       supersedes: []
       supersession_reason: null
@@ -125,6 +125,8 @@ The figures this paragraph replaces were internally impossible: the table report
 
 ## 3. Remedy 1 and remedy 2 both deadlock the repository
 
+> **Partly withdrawn by §9 (2026-11-25).** Remedy 1 still deadlocks, for a reason the amendment did not touch: GitHub forbids approving your own PR and counts *users*, and there is one user. Remedy 2 no longer does — under §5 as amended, `author == reviewer` is a *session* comparison, and a second session is not the authoring session. What survives against remedy 2 is narrower and is a fact about the tool, not the clause: a GitHub workflow can only compare accounts, so it cannot observe the new test.
+
 §5's last sentence: "A review performed through the same connected GitHub identity as the author is not independent." GitHub separately forbids approving one's own pull request.
 
 Combine those with §2.2: the only identity that can approve is the only identity that authors, and it cannot approve its own work. So:
@@ -139,6 +141,8 @@ Neither is a repair. Each is `GOV-NC-2026-11-21-GATE-DEADLOCK-006` reproduced de
 The same protection payload quoted in §2.3 forecloses the §7 escape route as well: it reports 11 required contexts in force with `enforce_admins: true`, and no `required_pull_request_reviews`. Enforcement is present; independent approval is not. §7 describes a repository where the platform cannot enforce at all, which is not this one.
 
 ## 4. Remedy 3 is circular, and its own change-control clause says so
+
+> **Withdrawn by §9 (2026-11-25).** The circularity was real only while independence required a second GitHub identity. Under the amended §5 the governance review §9 demands can be performed by a separate session, so remedy 3 was never structurally unavailable — and on 2026-11-24 it was *executed*: PR #935 amended §5 through this route.
 
 Remedy 3 means editing a clause of `PR-GOVERNANCE-001`, which is:
 
@@ -205,6 +209,8 @@ Recording first is not bureaucracy. Until the count exists, the trigger has no i
 
 ## 6. The one thing a session can actually do, and why this document is `Draft`
 
+> **Partly withdrawn by §9 (2026-11-25).** The sentence "that is structural and nobody's fault" is the error §9 records: it turned "nobody opened an independent session" into "no independent session can be opened". The obligation to record the exception is unaffected and remains the one act a session can take.
+
 There is exactly one compliance act available to a session, and it is the one §5 asks for in its own last sentence: **"Record exceptions explicitly; do not silently waive the requirement."**
 
 Measured: across all 690 PRs the register held **0** exception records before this ruling. `14-ai-development/governance-register/` contained no `EX-` file of any kind; `EX-20261123-01`, added with this ruling, is the first. So the violation is not "no independent reviewer exists" — that is structural and nobody's fault. The violation is that **the waiver was silent**, which §5 explicitly forbids and which was always avoidable.
@@ -231,6 +237,94 @@ Which is why this document is `Draft`. Every sibling `OWNER-DECISION-*.md` in th
 
 ## 8. Residual risk, stated plainly
 
+> **Withdrawn by §9 (2026-11-25).** This paragraph required a second write-capable *identity* before any merge could be compliant. A second *session* supplies the independence element; the Owner-approval element still requires an accountable human and is unchanged.
+
 Everything above is a measurement about the repository's past and present. None of it makes a future merge compliant. Until a second write-capable identity exists, or the Project Owner records an attributable adoption of the PROPOSED ruling, **every merge into `main` continues to be a §5 violation** — and the only improvement this document achieves is that the violation now has a record with a date on it, which is the difference between a silent waiver and a recorded one.
 
 That difference is small. It is also the only difference available from inside the repository.
+
+## 9. Erratum: one of the three remedies was available, and was used (2026-11-25)
+
+`PR-GOVERNANCE-001` §5 was amended on 2026-11-24
+(`GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`, PR #935). Independence
+is now a property of the **reviewing session**, not of the GitHub account that
+carries it. This document's measurements were all taken before that and none of
+them changes; what changes is what they support.
+
+### 9.1 What is withdrawn
+
+| Claim | Where | Status |
+|---|---|---|
+| "Remedy 3 is circular … demoting §5 requires disobeying §5" | §4, §7 ruling 1 | **False.** The §9 governance review is supplied by a separate session. Remedy 3 was executable all along; it was executed. |
+| "Remedies 1 and 2 are unavailable until a second write-capable identity exists" | §3, §7 ruling 2 | **Half false.** Remedy 1 is unavailable — GitHub counts *users* and forbids self-approval, and that is a platform fact §5 does not touch. Remedy 2 as *specified in §1* is a workflow returning `HOLD` when `author == reviewer`; a workflow reads accounts, not sessions, so that mechanism still cannot distinguish the case it was meant to catch. The *rule* is now satisfiable; the *instrument* named here still is not. |
+| "Every merge continues to be a §5 violation until a second write-capable identity exists" | §8 | **False.** A second session supplies the independence element. The Owner-approval element for §5-scope changes still requires an accountable human. |
+| "That is structural and nobody's fault" | §6 | **False, and it was doing work** — see §9.3. |
+
+### 9.2 Why §4 was wrong, specifically
+
+§4 read: "The governance review §9 requires is the independent review §5 cannot
+supply. Demoting §5 requires disobeying §5."
+
+Both sentences were true under the definition then in force, and the second one
+made the argument look airtight: the standard could not be amended without an
+act the standard forbade. But it was a definition being used to prove that the
+definition could not be changed. Once independence is a session property, §9's
+review requirement is satisfiable by opening a session — no second account, no
+administrator, no human.
+
+That is not a hypothetical. PR #935 amended §5 on 2026-11-24 through exactly
+this route: bilingual parity, exact-Head governance review, no second identity
+involved. The remedy this document declared unavailable was used **the next day**:
+this document is `DECIDED — 2026-11-23`, and #935 merged 2026-11-24.
+
+### 9.3 The error's direction, which is the useful part
+
+§6 said the missing independent reviewer was "structural and nobody's fault",
+and §8 closed by saying the only improvement possible from inside the repository
+was a dated record. A day later the same route produced a governed amendment.
+The claim was not falsified by a new fact about the world; it was falsified by
+the repository doing what the document said could not be done.
+
+This is the fourth instance in this session of one error shape: **a fact at one
+layer read as a conclusion at another.**
+
+- "the gate passed" read as "the content is correct";
+- "the baseline froze 77 entries" read as "those 77 are the whole defect set";
+- "the baseline and the content defects do not overlap" read as "shrinking the
+  baseline repairs the defects";
+- and here, "one GitHub account can write" read as "one review context can exist".
+
+The first three were repaired by measuring again. This one needed no new
+measurement: §2.2's numbers are all correct. It needed the distinction between
+the account that **carries** a review and the session that **performs** it, which
+the document had collapsed into a single word, "identity".
+
+### 9.4 What still stands
+
+Almost everything. Specifically:
+
+- **§2's measurements**, unchanged and re-verifiable: 690 PRs walked,
+  `APPROVED = 0`, `collaborators = 1`, `oahcom0831-design` read-only,
+  `required_pull_request_reviews` absent, `enforce_admins: true`, 17 of 33
+  docs-only PRs touching a Canonical or Normative document.
+- **Remedy 1's deadlock.** The platform constraint is real and the amendment does
+  not lift it. Anyone proposing remedy 1 should read this and expect `main` to
+  freeze.
+- **The obligation to record exceptions.** Unchanged, and now the only thing this
+  document's §6 gets right. 675+ merges were silent waivers; §5 forbids the
+  silence, not the waiver.
+- **The refusal to claim independence for this document or its eight
+  predecessors.** Unchanged for a new reason: they were written by a session, and
+  a session cannot independently review itself.
+
+### 9.5 What this creates
+
+Not a decision. §7's ruling that "008 §10.5's choice is not available to any
+session" is withdrawn — two of the three are available. Choosing among them is
+the Owner's, and this document declines to make that choice on the Owner's
+behalf, which is the one thing in §7 that does not need correcting.
+
+What this document can say without exceeding its role: the reason it gave for
+refusing to choose was that no choice existed. That reason is gone. The choice
+exists, it is the Owner's, and it is now the only thing standing between the
+repository and a compliant process.
