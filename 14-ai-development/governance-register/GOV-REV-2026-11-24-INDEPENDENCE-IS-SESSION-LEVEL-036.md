@@ -8,8 +8,8 @@ document_metadata:
       approver: "Project Owner, standing instruction in session 2026-11-24"
       decision_date: "2026-11-24"
       approved_version:
-        scheme: git
-        value: "15cc61577c174c94ee6d0148bd4b1b471dbfe225"
+        scheme: content-hash
+        value: "898b0d7f4a45667a22632b778dba0a29d40df1be9ecaa6ccf5cd223d054667c4"
       approval_scope:
         type: Full-document
         included_sections: []
