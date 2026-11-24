@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
-"""Reject CRLF line endings in eligible blobs committed to HEAD.
+"""Reject CRLF line endings in committed blobs Git identifies as text.
 
 The verdict is based exclusively on the committed HEAD tree, never on
 working-tree files. Paths are enumerated with ``git ls-tree -r -z HEAD``,
 their attributes are obtained from Git, and blob contents are read through
 one ``git cat-file --batch`` process.
 
-Only files with the extensions .rs, .md, .py, .yml, .yaml, .toml, .sh,
-.json, .css, .js, .ts, and .html are inspected. Other files are ignored.
-
+All committed blobs are considered, regardless of filename or extension.
+The effective Git ``text`` attribute determines eligibility: paths whose
+value is ``unset`` are skipped; all other values are inspected.
 The only exemption mechanism is ``-text`` in ``.gitattributes``.
-The gate asks Git for the effective ``text`` attribute and skips paths
-whose value is ``unset``. It also skips paths whose ``binary`` attribute
-is ``set``. No path exemption list is maintained by this checker.
+No path or extension exemption list is maintained by this checker.
 
 Exit codes:
     0: HEAD contains no violations.
@@ -24,22 +22,6 @@ from __future__ import annotations
 
 import subprocess
 import sys
-
-
-TEXT_EXTENSIONS = {
-    b".rs",
-    b".md",
-    b".py",
-    b".yml",
-    b".yaml",
-    b".toml",
-    b".sh",
-    b".json",
-    b".css",
-    b".js",
-    b".ts",
-    b".html",
-}
 
 
 class InspectionError(Exception):
@@ -92,9 +74,6 @@ def committed_blobs() -> list[tuple[bytes, bytes]]:
             ) from exc
 
         if object_type != b"blob":
-            continue
-
-        if not any(path.endswith(ext) for ext in TEXT_EXTENSIONS):
             continue
 
         entries.append((object_id, path))
@@ -225,13 +204,11 @@ def main() -> int:
         paths = [path for _, path in entries]
 
         text_attributes = attribute_values(paths, b"text")
-        binary_attributes = attribute_values(paths, b"binary")
 
         eligible = [
             (object_id, path)
             for object_id, path in entries
             if text_attributes[path] != b"unset"
-            and binary_attributes[path] != b"set"
         ]
 
         contents_by_id = blob_contents(
