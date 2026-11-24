@@ -332,7 +332,7 @@ def check_index_membership(root, commit, head_paths):
         "Work-item index membership "
         f"version={CHECK_VERSION} "
         f"directories={len(directories)} "
-        f"entries={len(entries)}"
+        f"linked={len(entries)}"
     )
 
     return violations
