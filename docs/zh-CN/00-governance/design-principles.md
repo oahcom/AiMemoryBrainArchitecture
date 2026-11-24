@@ -14,7 +14,7 @@ document_metadata:
         type: Full-document
         included_sections: []
         included_assets: []
-      approval_applicability: Applicable-To-Current-Version
+      approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "00-governance/design-principles.md"
       revocation: null
@@ -23,7 +23,7 @@ document_metadata:
       last_verified_date: null
       last_verification_note: "通常用于描述约束子系统设计的原则"
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Pending-Reapproval
     supersession:
       supersedes: []
       supersession_reason: null
