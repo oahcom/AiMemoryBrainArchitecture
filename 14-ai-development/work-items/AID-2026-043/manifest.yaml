@@ -10,7 +10,7 @@ risk_rationale: >-
 
 security_scope: Test-only ClaimRevision construction and GAP-10 documentation updates.
 
-status: PR_OPEN
+status: MERGED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -69,12 +69,12 @@ acceptance:
   acceptance_authority: USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)
 
 implementation:
-  status: PR_OPEN
+  status: MERGED
   branch: fix/dm2-03-claim-identity-acceptance-2026-11-21
   pull_request: 567
   pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/567
   implementation_commit_sha: 61bc67e857a92d2f287c2afd546019eb676a283c
-  merge_commit_sha: NOT_MERGED
+  merge_commit_sha: caa37a7e6502e1c3a9287d5c497c4aad2e8bb9a5
 
 authorization:
   registration_write: USER-PRINCIPAL-DELEGATED (limited to this AID registration package)
