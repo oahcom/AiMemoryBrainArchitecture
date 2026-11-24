@@ -11,9 +11,6 @@ use memory_domain::{
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashMap, HashSet};
 
-mod selector;
-pub use selector::*;
-
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ContextBudget {
     pub max_entries: usize,
@@ -1290,6 +1287,19 @@ fn candidate_coverage_units(
 ///
 /// Higher tiers cannot be displaced by lower tiers. Remaining capacity is
 /// passed to the next tier without reserving a fixed quota.
+///
+/// A candidate that does not fit the remaining rendered-byte budget is dropped
+/// and selection continues, so one oversized candidate cannot block a smaller
+/// one that still fits.
+///
+/// Each pick scores only coverage units not already covered: a candidate whose
+/// every unit is already covered has zero marginal gain, is dropped with
+/// [`SelectionDropReason::ZeroMarginalGain`], and never consumes budget.
+///
+/// Admission is limited to `ContextCandidate::validate_for`: lifecycle,
+/// scope containment and lineage. This function performs no authorization,
+/// Forget, temporal-validity or environment-match filtering; those facts live
+/// in the layer above and must be resolved before candidates reach here.
 ///
 /// The function is pure: it performs no storage, clock, random, or external
 /// model operations. Equal logical inputs produce equal serialized outputs.
