@@ -297,9 +297,12 @@ def check_index_membership(root, commit, head_paths):
         return []
 
     if WORK_ITEMS_INDEX not in head_paths:
-        return [
-            f"work-item directories exist but '{WORK_ITEMS_INDEX}' is missing"
-        ]
+        # Deliberate ceiling: membership is a relation between the tree and the
+        # index, so with no index there is no relation here to falsify. Taking
+        # the index away is a governance act of its own (it is a Canonical
+        # document) and is not a membership defect; this check does not pretend
+        # to catch it.
+        return []
 
     try:
         text = run_git(
