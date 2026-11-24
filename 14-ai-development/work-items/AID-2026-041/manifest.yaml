@@ -64,7 +64,7 @@ acceptance:
   acceptance_authority: USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)
 
 implementation:
-  status: PR_OPEN
+  status: MERGED
   branch: ai/AID-2026-041/IO-bilingual-legacy
   pull_request: 521
   pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/521

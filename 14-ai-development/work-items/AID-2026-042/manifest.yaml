@@ -64,7 +64,7 @@ acceptance:
   acceptance_authority: USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)
 
 implementation:
-  status: PR_OPEN
+  status: MERGED
   branch: fix/AID-2026-042/sys-argv-gate-tests
   pull_request: 534
   pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/534
