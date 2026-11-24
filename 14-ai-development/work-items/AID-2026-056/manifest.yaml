@@ -3,11 +3,70 @@ title: Make the full bilingual scan agree with the ruling that already governs i
 
 class: GATE/CODE/TEST
 risk: R2
-risk_rationale: "Changes the predicate a required repository-wide gate uses to decide whether a document has a counterpart, and shrinks its frozen baseline from 81 to 9. The baseline is a shrink-only ratchet, so a wrong predicate does not fail loudly: it either freezes entries that should be enforced, or resolves entries that are not bilingual and removes them from enforcement permanently. Acceptance criteria AC5 and AC2 exist so the floor is asserted from both sides and a predicate that resolves everything cannot pass. The predicted 9 is falsifiable on purpose."
+risk_rationale: "Changes the predicate a required repository-wide gate uses to decide whether a document has a counterpart, and shrinks its frozen baseline from 77 to 11. The baseline is a shrink-only ratchet, so a wrong predicate does not fail loudly: it either freezes entries that should be enforced, or resolves entries that are not bilingual and removes them from enforcement permanently. Acceptance criteria AC5 and AC2 exist so the floor is asserted from both sides and a predicate that resolves everything cannot pass. The predicted 11 is falsifiable on purpose. Restated at 8e489ec1: the 77-entry baseline splits into 66 embedded (cjk>=100 and latin>=1000) and 11 real, so AC1 and AC2 are complementary rather than two independent guesses."
 
 security_scope: "None. No Rust, no transport, no authorization path, no storage. One pairing predicate and one embedded-bilingual predicate in scripts/check_bilingual_docs_full.py, the baseline that follows from them, one workflow comment, and the tests for the two predicates."
 
-status: BLOCKED
+# security_scope answers "what can be attacked". It does not answer "does this
+# need independent review". Reviewer finding (M3): the two were being conflated.
+# This work item's risk is check silence, not compromise -- its own
+# risk_rationale says "a wrong predicate does not fail loudly", which is a
+# statement about a required gate shrinking without a signal, not about an
+# attacker. security_scope: None is therefore correct and is not a reason to
+# skip independent review; the reason review was required is R2 plus the
+# shrink-only ratchet, and independent_reviewer below records that it happened.
+
+
+# Machine-readable authorisation. Added because independent review (REVIEW-01
+# finding B5) found the write boundary existed only as prose inside
+# security_scope, which describes attack surface and cannot be checked.
+
+authorization:
+  implementation_write: "NOT_GRANTED - this manifest registers the work; no file has been committed by the registering session"
+  gate_behaviour_change: "GRANTED by OD-18 - the pairing predicate and the embedded-bilingual predicate in scripts/check_bilingual_docs_full.py are the subject of this work item"
+  baseline_content_change: "GRANTED-FOR-SHRINK-ONLY - AC2 authorises exactly 66 removals and 0 additions. A regenerated baseline with an addition, or with a removal outside the embedded-bilingual class, fails AC2."
+  allowlist_change: "NOT_APPLICABLE"
+  root_membership_change: "NOT_GRANTED - AC6a asserts NORMATIVE_ROOTS is not modified; AC6b states that withdrawing AC6 grants no authority to change it. GAP-26 is a different work item."
+  workflow_comment_change: "GRANTED - deliverable 5 replaces the gates.yml comment that still says 81 normative paths lack a counterpart. The comment is prose for readers, not a gate input; if it ever becomes one, this permission does not cover that."
+
+scope:
+  files_to_create: []
+  files_to_modify:
+    - scripts/check_bilingual_docs_full.py
+    - scripts/ci/baselines/bilingual-docs.txt
+    - tests/test_check_bilingual_docs_full.py
+    - .github/workflows/gates.yml
+  files_not_to_touch:
+    - scripts/check_bilingual_docs.py
+    - scripts/bilingual-baseline.txt
+
+# prompt-v1.md is FROZEN and cannot be edited without breaking prompt_sha256.
+# Its acceptance criteria are therefore superseded here rather than rewritten
+# there. Reviewer finding: the prompt is the instruction set an implementer
+# actually reads, so a manifest that contradicts it silently is not a fix.
+
+prompt_supersession:
+  governing_block: "acceptance_criteria in this file"
+  reason: "prompt_status is FROZEN; editing the prompt would invalidate prompt_sha256 and the provenance note that records what was measured when it was written. The criteria below were re-measured at 8e489ec1 and at ac0f0dfd; the prompt was written at d40d4e09 and #910 changed the ground under it."
+  superseded:
+    - prompt_item: "prompt-v1.md AC1 (exactly 9 violations)"
+      replaced_by: "AC1 (exactly 11 violations, set equality against the eleven real paths)"
+      why: "#910 taught the scan to see 08-bmcp-protocol, adding two paths that could not previously be observed."
+    - prompt_item: "prompt-v1.md AC2 (72 removals = 6 side-by-side + 66 embedded)"
+      replaced_by: "AC2 (66 removals = the 66 embedded)"
+      why: "None of the six side-by-side paths is in the baseline, so they cannot be removed from it. 77-72=5 is consistent with neither 9 nor 11."
+    - prompt_item: "prompt-v1.md AC5 (two negative assertions)"
+      replaced_by: "AC5 (four assertions, two each side)"
+      why: "A predicate that resolves nothing passed the original in full."
+    - prompt_item: "prompt-v1.md AC6 (NORMATIVE_ROOTS keeps 15 entries and the seven non-existent roots), together with section 5's first bullet, which rests on that state and cites an '81 to 9 prediction'"
+      replaced_by: "AC6a and AC6b; AC6 withdrawn, section 5's prohibition kept"
+      why: "#910 removed those seven roots and taught the scan to see 08-bmcp-protocol. Obeying AC6 literally means reintroducing a defect, which is the opposite of what it was written to protect. Section 5's prohibition -- do not touch NORMATIVE_ROOTS in this change -- is unchanged and is carried by AC6a; only its rationale moved, from 81 to 9 to 77 to 11."
+    - prompt_item: "prompt-v1.md AC8 (python3 -m unittest scripts.test_check_bilingual_docs_full)"
+      replaced_by: "AC8 (python3 -m unittest tests.test_check_bilingual_docs_full)"
+      why: "No such module as scripts.test_check_bilingual_docs_full; the file is under tests/. The original command raised ModuleNotFoundError and had never been run."
+  not_superseded: "The ruling in owner_decisions, the floor values 100/1000, the technology-architecture-blueprint.md control, AC3, AC4 and AC9 stand as written in the prompt. AC7 also stands; it is strengthened rather than replaced, by naming the counts (baseline=11 current=11) and by requiring that the regenerated baseline be asserted non-empty, because the original could not distinguish a passing ratchet from one reading an empty file. The 49666 byte figure that prompt AC4 is stated against lives in the prompt's section 2 rather than in AC4, and is corrected in AC4 of this file."
+
+status: DISPATCHED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -55,7 +114,7 @@ owner_decisions:
       - "AID-2026-054 is limited to scripts/check_bilingual_docs.py and scripts/bilingual-baseline.txt. That limit is not an implicit authorisation for a second script and a second baseline."
       - "AID-2026-051 is not a source of authority either; its gate_behaviour_change is NOT_GRANTED."
       - "The 81 must not be lowered to 15 directly. The predicate changes first; the baseline follows from what the predicate actually produces."
-      - "The 66 embedded documents must stop being counted as gaps. The 6 already-paired sidebar paths must not be double-counted. The remaining 9 are the real backlog."
+      - "The 66 embedded documents must stop being counted as gaps. The 6 already-paired sidebar paths must not be double-counted. The remaining 9 are the real backlog. (Re-measured at 8e489ec1: the remaining count is 11, not 9. Two 08-bmcp-protocol paths entered the set once #910 taught the scan to see that root, which the ruling could not have counted when it was written. The constraint's intent is unchanged — the embedded class must stop being counted as debt — only its number moved.)"
       - "The gates.yml comment saying '81 normative paths lack an en/zh-CN counterpart' is no longer accurate and must be replaced with what the check actually measures."
 
   - id: OD-19
@@ -86,7 +145,7 @@ acceptance_criteria:
   - id: AC3
     text: "The three mirror paths 02-domain-model/phase-2-domain-extension.zh-CN.md, 06-memory-context/context-implementation-coverage.zh-CN.md and 07-agent-integration/adapter-capability-tiers.zh-CN.md are no longer violations, and a .zh-CN.md mirror created in a test fixture is not asked for a mirror of itself. (Already true at 8e489ec1 — #910 made all 64 mirrors outside 14-ai-development pair. This criterion is a regression guard, not a task; it cannot distinguish 'done' from 'never needed doing'.)"
   - id: AC4
-    text: "13-engineering-decisions/technology-architecture-blueprint.md (0 CJK, 50488 bytes at 8e489ec1) is still reported as a violation. A predicate that resolves it is a predicate that accepts anything. (Byte count corrected from 49666 per REVIEW-01 finding M1; 49666 matches no version of the file in git history.)"
+    text: "13-engineering-decisions/technology-architecture-blueprint.md (0 CJK, 49758 bytes as a git blob at 8e489ec1, LF line endings) is still reported as a violation. A predicate that resolves it is a predicate that accepts anything. (Byte count corrected twice. 49666 from the prompt matches no version in git history; 50488, which the first review substituted, is the same blob checked out with CRLF — 49758 + 730 line terminators. A byte count that changes with a checkout setting is not a reproducible anchor, so the criterion now names the blob size and the line-ending convention it was measured with.)"
   - id: AC5
     text: "Four assertions, not two. Negative side: a file with cjk = 99 and latin = 5000 is still a violation, and a file with cjk = 100 and latin = 999 is still a violation. Positive side: a file with cjk = 100 and latin = 1000 exactly is resolved, and a file with cjk = 101 and latin = 1001 is resolved. All four asserted in tests, because an inclusive floor fails silently on either side. (Review REVIEW-01 finding B3: the original listed only the two negative cases while claiming both sides, so a predicate that resolves nothing passed it in full. The predicate does not exist at 8e489ec1 — grep for 1000 in either script returns nothing — which is why the positive side could be omitted without any test failing.)"
   - id: AC6a
@@ -127,9 +186,19 @@ independent_reviewer: REQ-05-INDEPENDENT-REVIEW-SESSION-01
 integration_reviewer: NOT_ASSIGNED
 
 review:
-  status: CHANGES_REQUESTED
-  report_ref: "14-ai-development/work-items/AID-2026-056/REVIEW-01-INDEPENDENT.md"
-  report_ref: ""
+  status: CHANGES_APPLIED_AWAITING_RE_REVIEW
+  prior_status: CHANGES_REQUESTED
+  # Latest round first. report_ref is the report a reader should open; the
+  # first round is kept because the status above is only meaningful against it.
+  report_ref: "14-ai-development/work-items/AID-2026-056/REVIEW-02-INDEPENDENT.md"
+  prior_report_ref: "14-ai-development/work-items/AID-2026-056/REVIEW-01-INDEPENDENT.md"
+  rounds_completed: 2
+  # OD-26 directed that this work item stay DISPATCHED and this status stay
+  # CHANGES_APPLIED_AWAITING_RE_REVIEW until an independent reviewer confirms
+  # every blocking finding closed. The author's own conformance checks, a green
+  # PR, and the correction log below are not that confirmation and are not
+  # recorded as if they were. APPROVED is reachable only by that reviewer.
+  approval_source: "independent reviewer confirmation (OD-26 (a)); none received yet"
 
 acceptance:
   status: NOT_ASSIGNED
@@ -149,7 +218,7 @@ errata:
     raised_at: 2026-11-24
     raised_by: owner-proxy session that dispatched this work order
     measured_at: "ac0f0dfd (this work item was written at d40d4e09)"
-    status: APPLIED-TO-THIS-FILE 2026-11-24 — all six items (A)-(F) are now reflected in acceptance_criteria AC1, AC2, AC4, AC5, AC6a/AC6b and AC8, in withdrawn_acceptance_criteria[AC6] for item (E), which retires AC6 instead of restating it as executable, and in risk_rationale and owner_decisions[OD-18]. Previously recorded as UNAPPLIED, which meant this manifest and its own erratum shipped mutually exclusive instructions under status DISPATCHED; that is the defect independent review REVIEW-01 finding M2 raised.
+    status: "APPLIED-TO-THIS-FILE 2026-11-24 — items (A), (B), (C), (E), (F) are reflected in acceptance_criteria AC1, AC2, AC4, AC5, AC6a/AC6b and AC8, in withdrawn_acceptance_criteria[AC6] for item (E), which retires AC6 instead of restating it as executable, and in risk_rationale and owner_decisions[OD-18]. Previously recorded as UNAPPLIED, which meant this manifest and its own erratum shipped mutually exclusive instructions under status DISPATCHED; that is the defect independent review REVIEW-01 finding M2 raised. Item (D) is reflected as a recorded deviation rather than as a change to a deliverable: the instruction to reuse side_by_side_partner() was not followed when the predicate was written, and the 932-file agreement between the two implementations is coincidence, not construction. See findings[F8]. Corrected again at the second review, which found this status line claiming all six when two were still unconverted."
     summary: "Six measured corrections, all caused by 150fb45e (#910) landing between the prompt being written and the work item being merged. (A) The 81-entry split is now 77 = 66 embedded + 11 real. (B) The nine real paths became eleven: two 08-bmcp-protocol records entered the set once #910 taught the scan to see that root. (C) Section 3's three mirror-of-a-mirror paths are no longer violations; all 64 .zh-CN.md mirrors outside 14-ai-development now pair. (D) Section 4 change 3 (reuse side_by_side_partner) was not followed — the pairing was written inline — and the two implementations agree on 932 files today, which is agreement by coincidence, not by construction. (E) Section 5's first hard constraint and AC6 are now false and unsatisfiable: NORMATIVE_ROOTS went from 15 roots with 7 missing to 9 roots with 0 missing, so 'byte-identical to its pre-change value' would require reintroducing a defect. AC6 withdrawn. (F) Section 2's control file and AC4/AC5/AC9 stand unchanged."
     corrects_in_this_file:
       - "owner_decisions[OD-18].constraints[3]: 'The remaining 9 are the real backlog' — the remaining count is 11 at ac0f0dfd."
@@ -159,6 +228,12 @@ errata:
     scope_decision: "AC6 is withdrawn, not deferred. Satisfying it literally is impossible without reintroducing the seven non-existent roots that #910 removed."
 
 findings:
+  - id: F8
+    severity: material
+    raised_by: independent re-review (second pass, OD-26)
+    measured_at: "8e489ec1"
+    statement: "Erratum item (D) recorded that deliverable 3's instruction to reuse side_by_side_partner() was not followed — the pairing was written inline in check_bilingual_docs_full.py instead — and that the two implementations agree on 932 files today. That deviation was recorded in the erratum but never carried into this manifest, so a reader of the manifest alone sees a deliverable that appears satisfied."
+    resolution: "Recorded here as a deviation, not repaired. The agreement is real but is coincidence rather than construction: nothing makes the inline copy track future changes to the original. Deliverable 3 stands as written for any future change to that predicate; the current agreement does not satisfy it."
   - id: F1
     severity: blocking
     raised_by: independent review session (REVIEW-01, finding B1)
@@ -199,5 +274,5 @@ findings:
     severity: material
     raised_by: independent review session (REVIEW-01, finding M1)
     measured_at: "8e489ec1"
-    statement: "base_commit_sha is d40d4e09, which was 103 commits behind at re-measurement (the reviewer measured 74 earlier the same hour). Two commits after the base touch the files this work item names. Every figure anchored to that base drifted with it: 81 violations became 77, 638/199/81 became 656/205/77, blueprint 49666 became 50488."
+    statement: "base_commit_sha is d40d4e09, which was 103 commits behind at re-measurement (the reviewer measured 74 earlier the same hour). Two commits after the base touch the files this work item names. Every figure anchored to that base drifted with it: 81 violations became 77, 638/199/81 became 656/205/77, blueprint 49758 as a blob (49666 in the prompt, 50488 under a CRLF checkout)."
     resolution: "Not changed here. Rebasing base_commit_sha would invalidate prompt_sha256's provenance note; the figures are restated in the acceptance criteria with the commit they were measured at, which is the part an implementer acts on. The staleness itself is GAP-29's subject."
