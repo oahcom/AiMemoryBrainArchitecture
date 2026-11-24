@@ -838,19 +838,19 @@ def test_incremental_out_of_scope_stale_pin_is_counted_not_failed() -> None:
         _git(root, "add", "-A")
         _git(root, "commit", "-q", "-m", "touch nothing governed")
         code, out, err = _run_capture(root, "--require-changed", base)
-        # The ruling asks for two things joined by "and": a note naming the
-        # document, and a counted line. A number alone says how many, not which.
+        # The ruling asks for two things joined by "and": the document is
+        # named, and the total is counted. A number alone says how many, not
+        # which. Asserting len == 1 also refuses an implementation that dumps
+        # every stale pin into the counter, which would pass a total-only check.
         leaked = f"00-governance/b.md: {DM10_ERROR}" in err
-        noted = any(
-            line.startswith("  note: DM-10 out-of-scope 00-governance/b.md:")
-            for line in out.splitlines()
-        )
         counted = DM10_COUNT_ONE in out.splitlines()
+        details = [l for l in out.splitlines() if l.strip().startswith("out-of-scope:")]
         record(
             "T82 incremental run counts an out-of-scope stale pin instead of failing it",
-            code == 0 and counted and noted and not leaked,
+            code == 0 and counted and len(details) == 1
+            and "00-governance/b.md" in details[0] and not leaked,
             f"  gate returned {code}, expected 0; count line exact: {counted}; "
-            f"note names the document: {noted}; DM-10 error on stderr: {leaked}",
+            f"detail lines: {details}; DM-10 error on stderr: {leaked}",
         )
 
 def test_whole_tree_run_still_reports_every_stale_pin() -> None:
@@ -875,17 +875,16 @@ def test_incremental_one_in_scope_one_out_of_scope() -> None:
         code, out, err = _run_capture(root, "--require-changed", base)
         in_scope = f"00-governance/a.md: {DM10_ERROR}" in err
         out_of_scope = f"00-governance/b.md: {DM10_ERROR}" in err
-        noted = any(
-            line.startswith("  note: DM-10 out-of-scope 00-governance/b.md:")
-            for line in out.splitlines()
-        )
         counted = DM10_COUNT_ONE in out.splitlines()
+        details = [l for l in out.splitlines() if l.strip().startswith("out-of-scope:")]
+        ok = (code == 1 and in_scope and not out_of_scope and counted
+              and len(details) == 1 and "00-governance/b.md" in details[0])
         record(
             "T84 one in-scope and one out-of-scope stale pin are classified per document",
-            code == 1 and in_scope and not out_of_scope and noted and counted,
+            ok,
             f"  gate returned {code}, expected 1; a.md on stderr: {in_scope}; "
-            f"b.md on stderr: {out_of_scope}; b.md noted: {noted}; "
-            f"count line exactly 1: {counted}",
+            f"b.md on stderr: {out_of_scope}; count line exactly 1: {counted}; "
+            f"detail lines: {details}",
         )
 
 def test_incremental_zero_out_of_scope_still_prints_the_count() -> None:
