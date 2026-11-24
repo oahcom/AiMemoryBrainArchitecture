@@ -62,8 +62,8 @@ It is **not** a place to record acceptance, approval, or review conclusions. Not
 | `GOV-NC-2026-11-23-PROVENANCE-GRAPH-ADD-SIGNATURE-028` | `ProvenanceGraph::add` public signature change | High | `CLOSED-BY-RULING` / classification corrected | 1 public signature, 2 citation errata |
 | `GOV-NC-2026-11-23-UNREACHABLE-GUARD-030` | 017 is fixed but its guard is now dead code, and 014's fix broke 24 tests in that suite | High | `OPEN` / `MEASUREMENT_ONLY` | 1 tautological guard, 167 files out of pairing, 24 broken and unrun by CI |
 | `GOV-NC-2026-11-23-EXECUTION-RESTORED-029` | Execution side restored; 005's present-tense claims no longer hold | High | `OPEN` / `MEASUREMENT_ONLY` | 2 first executions, 3 refuted present-tense claims |
-| `EX-20261123-01` | §5 independent review unavailable (retrospective exception record) | High | `HOLD` / over quota, escalated to the repository administrator (Issue #134) | 0 independent reviews across 675 merged PRs; the repository's first exception record |
-| `OWNER-DECISION-REVIEW-INDEPENDENCE-001` | None of 008 §10.5's three remedies is available; the correct disposition for §5 is BLOCKED | High | `Draft` / explicitly not claiming Approved | All 675 PRs re-walked; 0 APPROVED; 1 writable identity |
+| `EX-20261123-01` | §5 independent review unavailable (retrospective exception record) | High | `HOLD` / over quota, escalated to the repository administrator (Issue #134) | 0 independent reviews across 582 merged PRs of 690; the repository's first exception record |
+| `OWNER-DECISION-REVIEW-INDEPENDENCE-001` | None of 008 §10.5's three remedies is available; the correct disposition for §5 is BLOCKED | High | `Draft` / explicitly not claiming Approved | All 690 PRs re-walked; 0 APPROVED; 1 writable identity |
 
 ## Evidence
 

@@ -315,13 +315,14 @@ The body of this register, §2, and §10.1–§10.4 are **not changed**. §10.5'
 
 Ruling: `OWNER-DECISION-REVIEW-INDEPENDENCE-001`. Exception record: `EX-20261123-01`.
 
-### 11.1 Full sweep: not 0 of 45, but 0 of 675
+### 11.1 Full sweep: not 0 of 45, but 0 of 690
 
-§10.1 sampled the 45 most recent merged PRs. This section walks **all** 675, fetching `/pulls/{n}/reviews` for each:
+§10.1 sampled the 45 most recent merged PRs. This section walks **all** 690 (`GET /search/issues?q=repo:oahcom/AiMemoryBrainArchitecture+is:pr`, read at `2026-11-24T03:43:37Z`), fetching `/pulls/{n}/reviews` for each:
 
 | | |
 |---|---|
-| PRs walked | **675** (all pages, not a sample) |
+| PRs walked | **690** (all pages, not a sample) |
+| of which merged | **582** (`+is:merged`, same instant) |
 | Review states ever recorded | `{COMMENTED: 169}` |
 | `APPROVED` | **0** |
 | `REQUEST_CHANGES` | **0** |
@@ -345,7 +346,7 @@ A second account exists and has pushed commits (4 of the last 100), but it canno
 §5's last sentence: a review through the same connected identity as the author is not independent. GitHub separately forbids approving one's own PR. Combined with §11.2:
 
 - **Remedy 1** (enable `required_pull_request_reviews`): the required approval cannot exist, so every PR is permanently unmergeable. And `enforce_admins: true` means that freeze binds the only identity that could lift it.
-- **Remedy 2** (`author == reviewer` returns `HOLD`): all 675 PRs hit it, and so would the 676th.
+- **Remedy 2** (`author == reviewer` returns `HOLD`): every PR in the walk hits it, and so would the next one.
 
 Neither is a repair. Each is `GOV-NC-2026-11-21-GATE-DEADLOCK-006` reproduced deliberately. 006 is itself part of the evidence: it was resolved `RESOLVED_ON_MAIN` / "released by a self-review merge" (§12, §14) — the previous deadlock was opened by exactly the act §5 forbids. A second gate of the same shape would open the same way.
 
@@ -363,15 +364,15 @@ The governance review §9 requires is the independent review §5 cannot supply. 
 >
 > "Issue #134 remains OPEN until the platform confirms enforcement and a deliberately failing required check is proven unable to merge through the normal path."
 
-That is the disposition: **`BLOCKED`, escalated to the repository administrator, carried by Issue #134** — open for exactly this since inception.
+That is the disposition: **`BLOCKED`, escalated to the repository administrator, carried by Issue #134**. That issue was closed `completed` at `2026-11-19T17:28:27Z` and reopened at `2026-11-24T03:04:21Z`; it is `open` (`state_reason: reopened`) now, so for five days this disposition had no carrier and "open since inception" does not hold.
 
 §10.5 framed the problem as a policy choice. It is not. It is missing a precondition, and §7 already says what to do about a missing precondition.
 
-### 11.6 One act is available to a session, and it has been skipped 675 times
+### 11.6 One act is available to a session, and it has been skipped 582 times
 
 §5's final sentence requires: "Record exceptions explicitly; do not silently waive the requirement."
 
-Measured: 675 PRs, **0 exception records**, no `EX-` file of any kind under `governance-register/`. So the violation is not "no independent reviewer exists" — that is structural and nobody's fault. The violation is that **the waiver was silent**, which §5 explicitly forbids and which was always avoidable.
+Measured: 690 PRs (582 merged), **0 exception records**, no `EX-` file of any kind under `governance-register/`. So the violation is not "no independent reviewer exists" — that is structural and nobody's fault. The violation is that **the waiver was silent**, which §5 explicitly forbids and which was always avoidable.
 
 `EX-20261123-01` is what that sentence asks for. It waives nothing, changes no PR's disposition, and converts no `HOLD` into `MERGE`.
 
@@ -381,12 +382,12 @@ Measured: 675 PRs, **0 exception records**, no `EX-` file of any kind under `gov
 
 That is the difference between remedy 3 and a lawful amendment: remedy 3 changes §5 by violating §9; the quota clause is **the mechanism the standard itself provides for a control that cannot be satisfied and keeps generating exceptions.**
 
-Measured: the repository is at **675 exceptions, not 2**. Read as a continuous blocked interval it is 1 record — but the interval is **still open** (the second identity still does not exist). Both readings point at one act: **open the window.** The trigger has never fired because in a repository that never records exceptions the quota can never overflow — at a count of zero the clause has no input.
+Measured: the repository is at **582 exceptions, not 2**. Read as a continuous blocked interval it is 1 record — but the interval is **still open** (the second identity still does not exist). Both readings point at one act: **open the window.** The trigger has never fired because in a repository that never records exceptions the quota can never overflow — at a count of zero the clause has no input.
 
-So the order is fixed: record (done) → count (675 vs 2) → open the window (accountable Owner, not done) → amend §5 (Integration Owner, blocked on the window) or supply a second write identity (repository administrator, blocked on a human).
+So the order is fixed: record (done) → count (582 vs 2) → open the window (accountable Owner, not done) → amend §5 (Integration Owner, blocked on the window) or supply a second write identity (repository administrator, blocked on a human).
 
 ### 11.8 Status
 
-`OPEN` / `ACTIVE` / `CONTINUOUS` unchanged, appending: `/ BLOCKED — PR-GOVERNANCE-001 §7, escalated to the repository administrator (Issue #134) / EX-20261123-01 records 675 PRs and 0 independent reviews / the three remedies were ruled unavailable`.
+`OPEN` / `ACTIVE` / `CONTINUOUS` unchanged, appending: `/ BLOCKED — PR-GOVERNANCE-001 §7, escalated to the repository administrator (Issue #134) / EX-20261123-01 records 690 PRs and 0 independent reviews / the three remedies were ruled unavailable`.
 
 Not `CLOSED`: §9's blocking chain (independent review `NOT_ASSIGNED`) is unchanged, §10.3 makes it apply to this register itself, and this section's ruling document is `Draft` rather than `Approved` — it claims nothing it cannot show.
