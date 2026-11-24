@@ -1008,27 +1008,30 @@ class RepositoryHygieneTests(unittest.TestCase):
             result.stdout,
         )
 
-    # R20-03 positive: NOT_STARTED cannot coexist with a full SHA.
-    # This fixture tests only internal consistency, not SHA existence.
-    def test_manifest_not_started_conflicts_with_full_merge_sha(self):
+    # Reverse regression: a full SHA under implementation.merge_commit_sha
+    # is not by itself evidence that implementation.status must be MERGED.
+    # The checker must not read NOT_STARTED + full SHA as a contradiction;
+    # see the docstring for why the rule was withdrawn rather than narrowed.
+    def test_manifest_not_started_with_full_merge_sha_is_not_a_violation(self):
         self.manifest_consistency_fixture(
             "work_item_id: AID-2026-001\n"
-            "status: DISPATCHED\n"
+            "status: REGISTERED\n"
             "implementation:\n"
             "  status: NOT_STARTED\n"
             "  pull_request: 737\n"
             "  merge_commit_sha: "
-            "0123456789abcdef0123456789abcdef01234567\n"
+            "776f04fb694140f8663a87d593be1da2957673a4\n"
         )
 
         result = self.run_checker_args()
-        self.assertEqual(result.returncode, 1, msg=result.stderr)
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
         self.assertIn(
-            "::error::manifest consistency violation: "
-            "'14-ai-development/work-items/AID-2026-001/manifest.yaml': "
-            "implementation.status is NOT_STARTED while "
-            "merge_commit_sha contains a full SHA",
-            result.stderr,
+            "manifests=1 recognized=1 unrecognized=0 violations=0",
+            result.stdout,
         )
 
     # R20-03 negative: NOT_STARTED with NOT_MERGED is the dispatched shape.

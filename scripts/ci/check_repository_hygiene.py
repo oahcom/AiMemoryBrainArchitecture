@@ -566,6 +566,17 @@ def check_work_item_manifest_consistency(root, commit, head_paths):
     A manifest whose lifecycle fields cannot be located is counted as
     unrecognized and printed in the summary. Unrecognized is not a pass: it
     means this rule set did not read the item, not that the item is correct.
+
+    What this deliberately does NOT check, and why: a full SHA in
+    `implementation.merge_commit_sha` is not by itself evidence that
+    `implementation.status` must be MERGED. From the manifest alone the same
+    pair of fields cannot distinguish an implementation merge from a merged
+    registration or measurement package, and at least one work item records
+    the latter under `implementation.merge_commit_sha` with an Owner-
+    authorised revision entry behind it. Rejecting NOT_STARTED solely because
+    a SHA is present would therefore reject a recorded fact, so that rule is
+    withdrawn rather than narrowed. A replacement needs an independently
+    established field contract, not a stronger guess.
     """
     manifest_paths = sorted(
         path for path in head_paths
@@ -635,19 +646,10 @@ def check_work_item_manifest_consistency(root, commit, head_paths):
                     "the lifecycle status asserts merged implementation"
                 )
 
-        # R20-03: NOT_STARTED cannot coexist with a syntactically real
-        # implementation merge SHA. No Git-object or reachability check
-        # is performed here.
-        if (
-            implementation_status == "NOT_STARTED"
-            and implementation_merge_commit_sha is not None
-            and FULL_SHA_RE.fullmatch(implementation_merge_commit_sha)
-        ):
-            violations.append(
-                "manifest consistency violation: "
-                f"'{path}': implementation.status is NOT_STARTED "
-                "while merge_commit_sha contains a full SHA"
-            )
+        # R20-03 is withdrawn, not narrowed. See the docstring: a full SHA
+        # in implementation.merge_commit_sha does not prove that
+        # implementation.status must be MERGED, and this check must not
+        # reject NOT_STARTED on the strength of that field alone.
 
     print(
         "Work-item manifest consistency "
