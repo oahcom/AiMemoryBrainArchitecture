@@ -106,6 +106,20 @@ verification:
     - "The ruling's §3 table states all four measurements (77 / 77 / 11 / 11) rather than only the chosen one, so the implementer can reproduce the discrimination instead of accepting the conclusion."
     - "The ruling's §4 floor table is the calibration: every real pair has a shorter side of at least 1364 characters, so a floor anywhere from 1 to 400 rejects none of the 86."
 
+errata:
+  - id: AID-2026-054-ERRATUM-01
+    file: 14-ai-development/work-items/AID-2026-054/ERRATUM-01.md
+    raised_at: 2026-11-24
+    raised_by: owner-proxy session that dispatched this work order
+    measured_at: "880e6a78 and 5c64e560"
+    status: UNAPPLIED — the implementer must read it before starting
+    summary: "Three measured corrections. (A) The figure 86 counts FILES; there are 43 pairs, so criterion 8's 'assert the count' is ambiguous and must assert both. (B) The '10 shortest run 1,364-2,214' claim is wrong: the tenth is 4,412 and 2,214 is the second. (C) The work order does not mention PARTIAL_SIDE_BY_SIDE_PAIRS at all, and its floor makes that register's only regression test tautological — measured, 2 outcome vectors before the floor and 1 after. Adds criterion 11 and hard constraint 8."
+    corrects_in_this_file:
+      - "commands[7]: 'enumerate all 86 accepted side-by-side pairs' — 86 is the file count, 43 is the pair count."
+      - "evidence_refs[1]: 'a floor anywhere from 1 to 400 rejects none of the 86' — the 86 is files, not pairs. The floor still rejects none of them; only the noun is wrong."
+    does_not_change: "The prompt's SHA-256, the ruling, the floor value, the baseline shrink 77 -> 11, and the Shape 3 change."
+
+
 findings:
   - id: AID-2026-054-F1
     severity: P1
