@@ -775,6 +775,119 @@ def run_approval_binding() -> None:
         target.write_text(moving, encoding="utf-8")
         expect_gate("T11 mutable ref as approved_version fails", root, 1)
 
+# --------------------------------------------------------------------------
+# 5b. DM-10 scope: an incremental run blames only the documents it touched
+#     (issue #808). A stale pin on an untouched document is counted, not
+#     charged to whichever pull request happens to run the gate.
+# --------------------------------------------------------------------------
+
+# Exactly ONE DM-10 error per document: stale (the recorded content-hash is not
+# the body's), honest about the modification, but still presenting the approval
+# as applicable. The count assertions below are per-error, so a fixture that
+# emitted two errors per document would make "1" pass for the wrong reason.
+DM10_STALE = (
+    APPROVED.replace("scheme: git", "scheme: content-hash")
+    .replace('"deadbeef"', '"' + "0" * 64 + '"')
+    .replace("modification_status: Unchanged", "modification_status: Pending-Reapproval")
+)
+DM10_COUNT_ONE = (
+    "DM-10 out-of-scope stale bindings: 1 "
+    "(documents untouched by this increment; not counted as failures)"
+)
+DM10_ERROR = "DM-10 content changed after approved_version"
+
+def _dm10_repo(tmp: str) -> tuple[Path, str]:
+    """A repository whose out-of-scope document `b.md` already carries a stale pin."""
+    root = _repo(tmp)
+    _git(root, "init", "-q")
+    _git(root, "config", "user.email", "gate@example.invalid")
+    _git(root, "config", "user.name", "gate")
+    (root / "00-governance" / "b.md").write_text(doc(DM10_STALE), encoding="utf-8")
+    _git(root, "add", "-A")
+    _git(root, "commit", "-q", "-m", "seed with a stale pin")
+    return root, _git(root, "rev-parse", "HEAD")
+
+def _run_capture(root: Path, *extra: str) -> tuple[int, str, str]:
+    import contextlib
+    import io
+
+    out, err = io.StringIO(), io.StringIO()
+    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+        code = run_gate(root, *extra)
+    return code, out.getvalue(), err.getvalue()
+
+def test_incremental_in_scope_stale_pin_still_fails() -> None:
+    """The verdict narrows the scope; it does not switch the gate off."""
+    with tempfile.TemporaryDirectory() as tmp:
+        root, base = _dm10_repo(tmp)
+        (root / "00-governance" / "a.md").write_text(doc(DM10_STALE), encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "touch a")
+        code, out, err = _run_capture(root, "--require-changed", base)
+        output = out + err
+        in_scope = f"00-governance/a.md: {DM10_ERROR}"
+        record(
+            "T81 incremental run still fails a stale pin on a document it changed",
+            code == 1 and in_scope in output,
+            f"  gate returned {code}, expected 1; in-scope diagnostic present: "
+            f"{in_scope in output}",
+        )
+
+def test_incremental_out_of_scope_stale_pin_is_counted_not_failed() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root, base = _dm10_repo(tmp)
+        (root / "notes.txt").write_text("unrelated change\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "touch nothing governed")
+        code, out, err = _run_capture(root, "--require-changed", base)
+        output = out + err
+        counted = DM10_COUNT_ONE in err.splitlines()
+        record(
+            "T82 incremental run counts an out-of-scope stale pin instead of failing it",
+            code == 0 and counted and DM10_ERROR not in output,
+            f"  gate returned {code}, expected 0; count line exact: {counted}; "
+            f"DM-10 error leaked into output: {DM10_ERROR in output}",
+        )
+
+def test_whole_tree_run_still_reports_every_stale_pin() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root, _ = _dm10_repo(tmp)
+        code, out, err = _run_capture(root)
+        output = out + err
+        reported = f"00-governance/b.md: {DM10_ERROR}"
+        record(
+            "T83 whole-tree run still reports every stale pin",
+            code == 1 and reported in output,
+            f"  gate returned {code}, expected 1; b.md diagnostic present: "
+            f"{reported in output}",
+        )
+
+def test_incremental_one_in_scope_one_out_of_scope() -> None:
+    """Classified per document, not as one global either/or."""
+    with tempfile.TemporaryDirectory() as tmp:
+        root, base = _dm10_repo(tmp)
+        (root / "00-governance" / "a.md").write_text(doc(DM10_STALE), encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "touch a only")
+        code, out, err = _run_capture(root, "--require-changed", base)
+        output = out + err
+        in_scope = f"00-governance/a.md: {DM10_ERROR}" in output
+        out_of_scope = f"00-governance/b.md: {DM10_ERROR}" in output
+        counted = DM10_COUNT_ONE in err.splitlines()
+        record(
+            "T84 one in-scope and one out-of-scope stale pin are classified per document",
+            code == 1 and in_scope and not out_of_scope and counted,
+            f"  gate returned {code}, expected 1; a.md reported: {in_scope}; "
+            f"b.md reported: {out_of_scope}; count line exactly 1: {counted}",
+        )
+
+def run_dm10_scope() -> None:
+    print("DM-10 scope (issue #808)")
+    test_incremental_in_scope_stale_pin_still_fails()
+    test_incremental_out_of_scope_stale_pin_is_counted_not_failed()
+    test_whole_tree_run_still_reports_every_stale_pin()
+    test_incremental_one_in_scope_one_out_of_scope()
+
 
 def run_changed_paths() -> None:
     """T01: a filename with a space must not dodge --require-changed."""
@@ -3074,6 +3187,7 @@ def main() -> int:
     run_resolver()
     run_repository_rules()
     run_approval_binding()
+    run_dm10_scope()
     run_changed_paths()
     run_path_safety()
     run_body_hash_equivalence()
