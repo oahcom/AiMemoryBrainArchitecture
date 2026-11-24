@@ -9,8 +9,8 @@ document_metadata:
       approver: null
     evidence_verification:
       verification_status: Verified
-      last_verified_date: "2026-11-23"
-      last_verification_note: "Only the AID-2026-055 row was added in this change; the AID-2026-054 row is untouched. Every pre-existing row is untouched, including rows whose Status cells may be stale against their carriers; refreshing those is a separate authorization and is not claimed here."
+      last_verified_date: "2026-11-24"
+      last_verification_note: "Membership re-derived, not asserted: the committed tree was enumerated (46 work-item directories) and compared against the table links in this file (46 linked, 0 absent in either direction), which is what scripts/ci/check_repository_hygiene.py now enforces. The registration criterion was amended in the same change so that an existence row and a registration are no longer confused. What is NOT verified here: no Status, Review or Acceptance cell was re-checked against its carrier, and no manifest field was re-read for accuracy; those remain separate authorizations."
     usage_status: Active
     modification_status: Modified
 
