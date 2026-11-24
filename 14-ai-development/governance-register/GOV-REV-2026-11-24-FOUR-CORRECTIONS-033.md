@@ -18,7 +18,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-24"
-      last_verification_note: "Every figure came from a run in this session at main 2059c8105. The suite figures are the unittest summary lines before and after, run in a throwaway worktree C:/tmp/w900. The two mutation results are the same suite after patching scripts/check_bilingual_docs.py in that worktree, restored and re-run afterwards to confirm OK. The mirror audit enumerated every docs/en path against docs/zh-CN with git ls-tree and compared git show blobs byte for byte. The admission result is is_allowed_new_path() called directly on that tree."
+      last_verification_note: "§1-§7 measured at main 2059c8105; §8 re-measured at main 84bbe9241. Every §8 row is one real invocation of scripts/check_bilingual_docs.py on a worktree reset to origin/main before the single commit under test, with the exit code recorded. Cases F and G exit 0, which is the evidence that no code reads docs/zh-CN content. Cases D, H, I exit non-zero, which refutes the inference that deleting a Chinese mirror goes unannounced. The baseline is 80 lines = 3 comments + 77 entries; none of the 7 content defects appears among those 77 entries. The pair count moved 123 -> 124 between the two measurement points because main gained files."
     usage_status: Active
     modification_status: Unchanged
     supersession:
@@ -45,9 +45,9 @@ document_metadata:
 
 # GOV-REV-2026-11-24-FOUR-CORRECTIONS-033
 
-**Status:** `OPEN` / `MEASUREMENT_ONLY` / `NO_IMPLEMENTATION`
+**Status:** `OPEN` / `MEASUREMENT_ONLY` / `NO_IMPLEMENTATION` / §8 added 2026-11-24
 **Nature:** `REGISTER_ONLY / NO_GATE_CHANGE / REQUIRES_INDEPENDENT_REVIEW`
-**Measured at:** `main = 2059c8105`
+**Measured at:** `main = 2059c8105` (§4) and `main = 84bbe9241` (§8)
 **Register author:** orchestrator session acting as owner-proxy. **Not** an independent reviewer, **not** the accountable owner.
 
 ---
@@ -190,3 +190,65 @@ grep -n 'test_gate_normative_roots' .github/workflows/bilingual-docs.yml
 python -c "import check_repository_hygiene as h; print(h.is_allowed_new_path('14-ai-development/work-items/AID-2026-099/manifest.yaml'))"
 -> False
 ```
+
+---
+
+## 8. 闸门不读内容——这次是跑出来的，不是读出来的
+
+§4 对「只查存在性」的判断是**读源码**得出的。本节把它跑起来。方法：在 `origin/main` 的独立 worktree 上，每个用例 `git reset --hard origin/main` 后只提交一次，用真实的 `BASE_SHA` / `HEAD_SHA` 调用 `scripts/check_bilingual_docs.py`，记录退出码与全部 `::error::` 行。
+
+### 8.1 八个用例
+
+| # | 变异 | 改动文件数 | 退出码 | 拦截者 |
+|---|---|---|---|---|
+| 对照 | 不做任何改动 | 0 | **2** | `NOT_APPLICABLE`（零改动路径） |
+| A | 删除某个 REAL 配对的 `docs/zh-CN/` | 1 | **1** | `changed without paired change` |
+| B | 把 `docs/zh-CN/` 覆盖为英文原文 | 1 | **1** | `changed without paired change` |
+| C | 删除 `023` 的 `docs/zh-CN/`（根 CJK 0） | 1 | **2** | `New bilingual gap outside frozen baseline` |
+| D | 删除 `PR425-001` 的 `docs/zh-CN/`（根 CJK 1057） | 1 | **1** | `changed without paired change` |
+| **F** | 改根 + `docs/en/` + `docs/zh-CN/`，且 `zh-CN` 变成英文逐字节副本 | 3 | **0** | **无** |
+| **G** | 同上，但把 `zh-CN` 里每一个 CJK 字符替换成 `X` | 3 | **0** | **无** |
+| H | 改根**并且**删除 `PR425-001` 的 `docs/zh-CN/` | 2 | **1** | `requires all counterparts changed` |
+| I | 改根**并且**删除 `023` 的 `docs/zh-CN/` | 2 | **2** | `New bilingual gap outside frozen baseline` |
+
+### 8.2 F 与 G 是结论
+
+F 和 G 把一份真中文镜像改成完全不含中文（G 连一个 CJK 字符都不剩），**闸门以 0 退出**。这不是「漏检一个边界情况」，而是：**没有任何一行代码读 `docs/zh-CN/` 的内容**。§4 说的「存在性即合格」在这里有了可执行的证据，而不是源码推断。
+
+注意 F/G 与 B 的区别。B 被抓到，不是因为内容变了，而是因为**只有一侧变了**。把 B 改成 F（两侧都改），同样的内容破坏就不再被拦。所以拦住 B 的是配对规则，不是内容判断。这个区分很重要：它意味着「镜像被换成英文」这件事，只要同一次提交里也碰一下根文件，就完全隐形。
+
+### 8.3 「删掉中文镜像反而无告警」是错的
+
+§4 之后的并行测量给出过一个推论：`023`（根 CJK 0）删掉 `zh-CN` 会报 gap，而 `PR425-001`（根 CJK 1057）删掉 `zh-CN` 不报——「删中文镜像反而无告警」。**实测否定它**：D 和 H 都以非零退出码失败。
+
+那个推论只评估了 **gap 谓词**，而闸门有**两套**独立机制：gap 谓词，和「改动路径必须有配对改动」。`PR425-001` 的删除被后者拦住。把两套机制中的一个当作全部，就会得出「无告警」这种结论——这类错误在本会话里已经出现过两次（`EXIT` 取错管道、`PARTIAL_SIDE_BY_SIDE_PAIRS` 只按谓词推断可达性）。所以本节的做法是：**每个结论对应一次真实调用，退出码写在表里。**
+
+### 8.4 两个互不相交的总体
+
+`scripts/bilingual-baseline.txt` 共 80 行：3 行注释 + **77 条**冻结条目，与闸门打印的 `77 frozen` 一致，也解释了 033 §4 里 77 与 80 两个数字的关系。
+
+关键点：**77 条基线里没有一条是那 7 个内容缺陷。**
+
+| 总体 | 判据 | 数量 | 与对方的重叠 |
+|---|---|---|---|
+| 基线（冻结） | 某一侧**不存在** | 77 | — |
+| 内容缺陷 | 两侧**都存在**，但 `zh-CN` 不是翻译 | 7 | **0** |
+
+两者在定义上不可能相交：基线登记的是「缺一侧」，缺陷是「两侧都在、内容不对」。因此 `AID-2026-054` 把基线从 77 压到 11 的努力，**对那 7 个文件不起任何作用**——它清理的是另一个总体。这不是 054 的错误，054 的目标本来就不是内容；但它说明「基线清空」不等于「双语合格」，而目前的任何指标都不会同时看这两件事。
+
+### 8.5 绝对计数有时效，本次是 124 不是 123
+
+033 §4 写的是 123 对。本节重测为 **124 对**，因为两次测量之间主干合入了新的双语文件（本文件自己就是一对）。在 124 对里：`en` 侧 `>=100` CJK 的仍是 **1** 个（`PR425-001`），`en` 侧 `1..99` CJK 的 **56** 个，**两侧都零 CJK** 的 **3** 个（`018`、`023`、`019`）。
+
+那 56 个不是缺陷：英文文档里出现少量中文术语/引用是正常的。列出来是为了说明「`en` 侧有中文」这个信号本身不能当判据，只有 `>=100` 才有意义——与 `_carries_chinese()` 的阈值一致。
+
+**所以本文件不主张任何一对一的绝对数字是长期有效的。** 每个数字都对应 `main` 上的一次枚举，枚举命令在 §7；复核时重跑，不要引用本文件的行号。
+
+### 8.6 本节的结论
+
+1. 闸门从不读 `docs/zh-CN/` 内容。F、G 证明。
+2. 删除镜像**会**被拦，靠的是配对规则，不是内容规则。D、H、I 证明。
+3. 内容破坏只要与根文件改动同时发生，就**不被拦**。F、G 证明。
+4. 77 条基线与 7 个内容缺陷是两个不相交总体，压基线不能修内容。
+5. 因此 GAP-24 §3 提的检查 (a) 若实施，补的正是第 3 条这个洞；它不替代基线，也不被基线替代。
+
