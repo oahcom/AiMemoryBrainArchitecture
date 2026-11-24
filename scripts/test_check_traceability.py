@@ -496,16 +496,23 @@ class TraceabilityTests(unittest.TestCase):
         self.assertNotIn("PASS", output)
         self.assertIn("FAIL TRACEABILITY: 1 requirements", output)
 
-    def test_summary_word_is_incomplete_on_check_failure(self) -> None:
-        # A missing registry raises CheckFailure: the check could not run,
-        # which is exit 2 and must not borrow the PASS wording.
+    def test_missing_registry_is_fail_not_zero_error_incomplete(self) -> None:
+        # The fixture is self-contained: setUp writes its own minimal registry
+        # into this temporary repository, and this test removes it. A required
+        # input missing is a repository defect: exit 1 and an error count of 1,
+        # never a summary that reads "0 errors" beside a failing exit code.
         (
             self.root / "00-governance/requirements-registry.yaml"
         ).unlink()
         code, output = self.check()
-        self.assertEqual(code, 2, output)
+        self.assertEqual(code, 1, output)
         self.assertNotIn("PASS", output)
-        self.assertIn("INCOMPLETE TRACEABILITY:", output)
+        self.assertNotIn("INCOMPLETE TRACEABILITY:", output)
+        self.assertIn("ERROR required registry unavailable:", output)
+        self.assertIn(
+            "FAIL TRACEABILITY: 0 requirements / 0 work items / 1 errors",
+            output,
+        )
 
     def test_summary_word_is_pass_when_no_errors(self) -> None:
         code, output = self.check()
