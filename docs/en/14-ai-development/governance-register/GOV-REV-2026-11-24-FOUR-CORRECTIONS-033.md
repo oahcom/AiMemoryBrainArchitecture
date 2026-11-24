@@ -18,7 +18,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-24"
-      last_verification_note: "Every figure came from a run in this session at main 2059c8105. The suite figures are the unittest summary lines before and after, run in a throwaway worktree C:/tmp/w900. The two mutation results are the same suite after patching scripts/check_bilingual_docs.py in that worktree, restored and re-run afterwards to confirm OK. The mirror audit enumerated every docs/en path against docs/zh-CN with git ls-tree and compared git show blobs byte for byte. The admission result is is_allowed_new_path() called directly on that tree."
+      last_verification_note: "§1-§7 measured at main 2059c8105; §8 re-measured at main 84bbe9241. Every §8 row is one real invocation of scripts/check_bilingual_docs.py on a worktree reset to origin/main before the single commit under test, with the exit code recorded. Cases F and G exit 0, which is the evidence that no code reads docs/zh-CN content. Cases D, H, I exit non-zero, which refutes the inference that deleting a Chinese mirror goes unannounced. The baseline is 80 lines = 3 comments + 77 entries; none of the 7 content defects appears among those 77 entries. The pair count moved 123 -> 124 between the two measurement points because main gained files."
     usage_status: Active
     modification_status: Unchanged
     supersession:
@@ -45,9 +45,9 @@ document_metadata:
 
 # GOV-REV-2026-11-24-FOUR-CORRECTIONS-033
 
-**Status:** `OPEN` / `MEASUREMENT_ONLY` / `NO_IMPLEMENTATION`
+**Status:** `OPEN` / `MEASUREMENT_ONLY` / `NO_IMPLEMENTATION` / §8 added 2026-11-24
 **Nature:** `REGISTER_ONLY / NO_GATE_CHANGE / REQUIRES_INDEPENDENT_REVIEW`
-**Measured at:** `main = 2059c8105`
+**Measured at:** `main = 2059c8105` (§4) and `main = 84bbe9241` (§8)
 **Register author:** orchestrator session acting as owner-proxy. **Not** an independent reviewer, **not** the accountable owner.
 
 ---
@@ -190,3 +190,65 @@ grep -n 'test_gate_normative_roots' .github/workflows/bilingual-docs.yml
 python -c "import check_repository_hygiene as h; print(h.is_allowed_new_path('14-ai-development/work-items/AID-2026-099/manifest.yaml'))"
 -> False
 ```
+
+---
+
+## 8. The gate does not read content — this time it was run, not read
+
+The "it only checks existence" judgement in §4 came from **reading the source**. This section runs it. Method: on a separate worktree of `origin/main`, each case does `git reset --hard origin/main`, makes exactly one commit, and calls `scripts/check_bilingual_docs.py` with real `BASE_SHA` / `HEAD_SHA`, recording the exit code and every `::error::` line.
+
+### 8.1 Eight cases
+
+| # | Mutation | Files changed | Exit | What stopped it |
+|---|---|---|---|---|
+| control | no change at all | 0 | **2** | `NOT_APPLICABLE` (zero changed paths) |
+| A | delete `docs/zh-CN/` of a REAL pair | 1 | **1** | `changed without paired change` |
+| B | overwrite `docs/zh-CN/` with the English text | 1 | **1** | `changed without paired change` |
+| C | delete `docs/zh-CN/` of `023` (source CJK 0) | 1 | **2** | `New bilingual gap outside frozen baseline` |
+| D | delete `docs/zh-CN/` of `PR425-001` (source CJK 1057) | 1 | **1** | `changed without paired change` |
+| **F** | edit source + `docs/en/` + `docs/zh-CN/`, and make `zh-CN` a byte-identical copy of the English file | 3 | **0** | **nothing** |
+| **G** | same, but replace every CJK character in `zh-CN` with `X` | 3 | **0** | **nothing** |
+| H | edit the source **and** delete `docs/zh-CN/` of `PR425-001` | 2 | **1** | `requires all counterparts changed` |
+| I | edit the source **and** delete `docs/zh-CN/` of `023` | 2 | **2** | `New bilingual gap outside frozen baseline` |
+
+### 8.2 F and G are the conclusion
+
+F and G turn a genuine Chinese mirror into text containing no Chinese at all (G leaves not one CJK character), and the gate **exits 0**. This is not "one edge case was missed": **no line of code reads the content of `docs/zh-CN/`.** What §4 called "existence is the whole criterion" now has executable evidence rather than a source-reading inference.
+
+Note the difference between F/G and B. B is caught, not because its content changed, but because **only one side changed**. Turn B into F by touching both sides and the same content destruction stops being intercepted. The rule that catches B is the pairing rule, not a content judgement. That distinction matters: replacing a mirror with English text is completely invisible as long as the same commit also touches the source file.
+
+### 8.3 "Deleting the Chinese mirror goes unannounced" is false
+
+A parallel measurement after §4 produced this inference: `023` (source CJK 0) reports a gap when its `zh-CN` is deleted, while `PR425-001` (source CJK 1057) does not — "deleting the Chinese mirror produces no warning". **Measurement refutes it**: D and H both fail with a non-zero exit.
+
+That inference evaluated only the **gap predicate**, while the gate has **two** independent mechanisms: the gap predicate, and "a changed path must have a paired change". The `PR425-001` deletion is stopped by the second. Treating one of two mechanisms as the whole produces exactly that kind of "no warning" conclusion — an error that has already occurred twice in this session (reading the wrong process's `EXIT`, and inferring `PARTIAL_SIDE_BY_SIDE_PAIRS` reachability from the predicate alone). Hence this section's method: **one real invocation per conclusion, with the exit code written into the table.**
+
+### 8.4 Two disjoint populations
+
+`scripts/bilingual-baseline.txt` holds 80 lines: 3 comment lines plus **77** frozen entries, matching the `77 frozen` the gate prints, and explaining the 77-versus-80 pair of numbers in §4.
+
+The point: **not one of those 77 baseline entries is among the 7 content defects.**
+
+| Population | Criterion | Count | Overlap |
+|---|---|---|---|
+| Baseline (frozen) | one side **does not exist** | 77 | — |
+| Content defect | both sides **exist**, but `zh-CN` is not a translation | 7 | **0** |
+
+The two cannot intersect by construction: the baseline records a missing side, a defect is a present-but-wrong side. So `AID-2026-054`'s effort to drive the baseline from 77 down to 11 **has no effect whatsoever on those 7 files** — it is cleaning a different population. That is not a fault in 054, whose goal was never content; but it shows that "baseline emptied" does not mean "bilingual is sound", and no current metric looks at both at once.
+
+### 8.5 Absolute counts expire; this one is 124, not 123
+
+§4 recorded 123 pairs. Re-measuring gives **124**, because main gained new bilingual files between the two measurements (this file is itself a pair). Of the 124: `en` side with `>=100` CJK is still **1** (`PR425-001`), `en` side with `1..99` CJK is **56**, and **both sides zero CJK** is **3** (`018`, `023`, `019`).
+
+Those 56 are not defects: a few Chinese terms or citations inside an English document is normal. They are listed to show that "the `en` side contains Chinese" is not by itself a usable signal — only `>=100` is, which is the threshold `_carries_chinese()` already uses.
+
+**So this file claims no absolute number is durable.** Every figure corresponds to one enumeration on `main`; the commands are in §7. Re-run them rather than quoting line numbers from this file.
+
+### 8.6 What this section establishes
+
+1. The gate never reads the content of `docs/zh-CN/`. Proven by F and G.
+2. Deleting a mirror **is** intercepted, by the pairing rule rather than a content rule. Proven by D, H, I.
+3. Content destruction is **not** intercepted when it happens alongside a source-file edit. Proven by F and G.
+4. The 77 baseline entries and the 7 content defects are disjoint populations; shrinking the baseline cannot fix content.
+5. Therefore check (a) proposed in GAP-24 §3, if implemented, fills exactly the hole in item 3; it neither replaces the baseline nor is replaced by it.
+
