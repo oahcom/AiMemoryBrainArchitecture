@@ -14,7 +14,7 @@ document_metadata:
         type: Full-document
         included_sections: []
         included_assets: []
-      approval_applicability: Applicable-To-Current-Version
+      approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "Issue #130 comment #6962523529"
         - "PR #144 merge commit 3754d049db840b049728afd814faac968bf10749"
@@ -22,10 +22,10 @@ document_metadata:
       revocation: null
     evidence_verification:
       verification_status: Unverified
-      last_verified_date: null
+      last_verified_date: "2026-11-24"
       last_verification_note: "v1.0 adoption is recorded in Issue #130 comment #6962523529. The §6.1 inclusion is recorded separately in PR #750 comment #7092567630, because the #130 comment predates §6.1 by six days and cannot carry it. This metadata does not assert that GitHub platform enforcement is enabled."
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Pending-Reapproval
     supersession:
       supersedes: []
       supersession_reason: null
@@ -47,6 +47,10 @@ document_metadata:
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Normative
+  bilingual_counterpart:
+    source: null
+    en: "docs/en/14-ai-development/PR-GOVERNANCE-001-ENFORCEMENT.md"
+    zh-CN: "docs/zh-CN/14-ai-development/PR-GOVERNANCE-001-ENFORCEMENT.md"
 ---
 # PR-GOVERNANCE-001 — Pull Request Governance, Consolidation & Immediate Integration Standard
 # PR 治理、反堆积与验证即合入规范
@@ -133,9 +137,9 @@ For changes affecting security, identity, authorization, Forget, lifecycle, cano
 
 涉及安全、身份、授权、Forget、生命周期、规范持久化、恢复、跨 Owner 契约或生产运维的变更，必须由独立于作者和实现会话的审查者审查。若变更修改或验收某 Owner 的规范契约，必须取得对应 Owner 的明确批准。
 
-A COMMENT review is technical commentary, not an APPROVE review. A review performed through the same connected GitHub identity as the author is not independent, even if the session adopts a different role. AI role simulation is not Owner approval. Record exceptions explicitly; do not silently waive the requirement.
+A COMMENT review is technical commentary, not an APPROVE review. **Independence is a property of the reviewing session, not of the GitHub account that carries it.** A review is independent when it is performed by a session that did not author the change and did not implement it, and that reaches its conclusion from the artifacts rather than from the author's account of them. Separate sessions may share one GitHub identity; the identity is the carrier, and independence is decided by whether the context is shared, not by whether the account differs. Where the platform enforces required approvals, GitHub additionally forbids approving one's own pull request; that is a platform constraint on the carrier and does not raise the independence bar above the session level. **AI role simulation inside the authoring session is not independent review**, because the reviewer and the author share one context and one incentive; a separate session that does not share that context is. Record exceptions explicitly; do not silently waive the requirement.
 
-COMMENT 是技术评论，不是 APPROVE。作者与审查者使用同一 GitHub 身份时，不构成独立审查，即使会话扮演不同角色也一样。AI 角色模拟不构成 Owner 批准。任何例外都必须显式记录，不得默默豁免。
+COMMENT 是技术评论，不是 APPROVE。**独立性是审查会话的属性，不是承载它的 GitHub 账号的属性。** 当一次审查由未撰写、未实现该变更的会话执行，且其结论来自产物本身而非作者对产物的陈述时，该审查即为独立。多个会话可以共用一个 GitHub 身份；身份是载体，独立性由上下文是否共享决定，而不由账号是否相异决定。平台强制审批时，GitHub 另禁止批准自己的 PR；那是施加于载体的平台约束，不把独立性的门槛抬到会话之上。**在撰写会话内部做 AI 角色模拟不构成独立审查**，因为审查者与作者共享同一上下文与同一激励；不共享该上下文的另一会话构成独立审查。任何例外都必须显式记录，不得默默豁免。
 
 ## 6. Merge decision and immediate integration / 合并决策与及时集成
 
