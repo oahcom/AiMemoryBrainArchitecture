@@ -83,6 +83,19 @@ REGISTRY_VERSION = "2"
 STRUCTURAL_EXCEPTIONS = {".git", "target", ".pytest_cache", "__pycache__"}
 SCOPE_REGISTRY = "00-governance/document-scope-registry.yaml"
 
+# Issue #481. Governed documents may record their status as a body list item
+# (`- Status:`) instead of front-matter, and DM-02's closed enumeration then
+# never sees it: the rule is structurally inapplicable to them, not satisfied.
+# Converting the whole backlog in one change is unreviewable and would collide
+# with every open PR, so the remaining gap is reported as a count instead of
+# being invisible. It is ADVISORY: a gate that turns red over ~90 untouched
+# files is a blockade, and a blocker nobody can clear in one change gets
+# disabled, not obeyed.
+PROSE_STATUS_LINE = re.compile(r"^- Status:[ \t]*(.+?)[ \t]*$", re.MULTILINE)
+# The total is the number that matters and is never truncated; this caps only
+# the per-value listing so the notice stays readable in a PR log.
+PROSE_VALUES_SHOWN = 10
+
 # The controls a machine cannot perform. **This tuple is the authority**: policy
 # section 9.2 is generated from it and T69 fails when the table and the
 # derivation differ, so the table is a rendering, not a second opinion.
@@ -1832,6 +1845,39 @@ def governed_files(root: Path) -> list[Path]:
     files, _ = collect_governed(root)
     return files
 
+def prose_only_status(paths: list[Path]) -> tuple[int, dict[str, int]]:
+    """Documents whose status is prose-only (issue #481).
+
+    "Prose-only" is precise: the file has at least one body `- Status:` line
+    and no metadata block at all, so DM-02 has nothing to read. A file that
+    carries both is no longer prose-only -- its status is machine-readable, and
+    the body line is then a human record, which the policy does not forbid.
+
+    The population is the gate's own governed set (`collect_governed`), not a
+    second hard-coded root. The defect is "DM-02 cannot see this file", and the
+    files DM-02 is applied to are exactly the governed set; a narrower root
+    under-reported the class by six files, three of them with no metadata block
+    at all (adr/ and the 14-ai-development top level).
+
+    Returns (file count, value -> occurrence count). Never a verdict.
+    """
+    files = 0
+    values: dict[str, int] = {}
+    for path in paths:
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            # Unreadable is the walk's problem, reported there. A census that
+            # guessed would be worse than one that undercounts.
+            continue
+        found = PROSE_STATUS_LINE.findall(text)
+        if not found or read_metadata(text) is not None:
+            continue
+        files += 1
+        for value in found:
+            values[value] = values.get(value, 0) + 1
+    return files, values
+
 def check_scope_registry(root: Path) -> list[str]:
     """Prove the scan set is the declared set, and that nothing was left out.
 
@@ -2289,6 +2335,33 @@ def main() -> int:
     # Printed whether or not it is zero: an absent line cannot be told apart from
     # a build that never looked (issue #808).
     print(f"DM-10 out-of-scope stale bindings: {len(out_of_scope_dm10)}")
+    # Issue #481, advisory only. Printed even at zero: an absent line cannot be
+    # told apart from a run that never looked (the same reason the DM-10 count
+    # above is unconditional). The population is the governed set the gate
+    # already walked, because "DM-02 cannot see this file" is a statement about
+    # exactly that set; the total is never truncated, only the value breakdown.
+    prose_files, prose_values = prose_only_status(targets)
+    print(
+        f"::notice::advisory (non-blocking): {prose_files} governed document(s) "
+        f"carry a body '- Status:' line and no front-matter equivalent; "
+        f"DM-02 cannot see them (issue #481)"
+    )
+    if prose_values:
+        print(
+            f"::notice::advisory (non-blocking):   "
+            f"{len(prose_values)} distinct prose status value(s), "
+            f"{sum(prose_values.values())} occurrence(s):"
+        )
+        for value, count in sorted(
+            prose_values.items(), key=lambda item: (-item[1], item[0])
+        )[:PROSE_VALUES_SHOWN]:
+            print(f"::notice::advisory (non-blocking):   x{count} {value}")
+        hidden = len(prose_values) - PROSE_VALUES_SHOWN
+        if hidden > 0:
+            print(
+                f"::notice::advisory (non-blocking):   "
+                f"(+{hidden} more distinct value(s) not shown)"
+            )
     # Accounting identity: every governed file is either classified or listed
     # as backlog. Printed so "403 unclassified" is a number you can check
     # against the file system, not a claim. If this ever fails to balance, the

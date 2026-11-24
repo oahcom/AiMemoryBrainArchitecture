@@ -1,3 +1,23 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+
+  lifecycle:
+    approval:
+      decision_status: Under-Review
+      approver: null
+    evidence_verification:
+      verification_status: Unverified
+    usage_status: Active
+    modification_status: Unchanged
+
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Informative
+---
+
 # Direct-Push Ratification Record — `ffc44c31`
 
 - Document ID: AID-2026-009-RATIFY-ffc44c31
