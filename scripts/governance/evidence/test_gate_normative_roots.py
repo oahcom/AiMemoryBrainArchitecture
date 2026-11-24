@@ -63,6 +63,25 @@ class GateRootsTest(unittest.TestCase):
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
         self.root = Path(self._tmp.name)
+        # A fixture is only a fixture if the machine cannot change its verdict.
+        # Inheriting the developer's global config makes the suite red for
+        # reasons that are not in this repository: `commit.gpgsign=true` alone
+        # fails 13 of these tests, and `core.hooksPath`, `commit.template` and
+        # `init.defaultBranch` are the same class of hazard. Suppress every
+        # ambient config source; the repository-local identity below is the
+        # only configuration these tests are allowed to depend on.
+        empty_config = self.root / "empty.gitconfig"
+        empty_config.write_text("", encoding="utf-8")
+        self._env = patch.dict(
+            os.environ,
+            {
+                "GIT_CONFIG_GLOBAL": str(empty_config),
+                "GIT_CONFIG_SYSTEM": os.devnull,
+                "GIT_CONFIG_NOSYSTEM": "1",
+            },
+        )
+        self._env.start()
+        self.addCleanup(self._env.stop)
         # `current_bilingual_gaps()` enumerates from the Git index, so the
         # fixture must be a repository: a directory of files on disk is not a
         # candidate set.
