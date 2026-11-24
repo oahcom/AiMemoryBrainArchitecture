@@ -2189,7 +2189,12 @@ def main() -> int:
         # still reports every DM-10 error, because there the whole tree IS the
         # subject of the verdict.
         if incremental and rel not in all_changed:
-            out_of_scope_dm10.extend(bound_errors)
+            # Keep the rel prefix. `check_approval_binding` returns the sentence
+            # without it; only this loop adds it. Storing the bare sentence left
+            # a total with no names: the author learns that debt exists but not
+            # whose, and finding out would mean the whole-tree run this change
+            # exists to avoid.
+            out_of_scope_dm10.extend(f"{rel}: {err}" for err in bound_errors)
         else:
             errors.extend(f"{rel}: {err}" for err in bound_errors)
         notes.extend(bound_notes)
@@ -2217,6 +2222,10 @@ def main() -> int:
     # Printed whether or not it is zero: an absent line cannot be told apart from
     # a build that never looked (issue #808).
     print(f"DM-10 out-of-scope stale bindings: {len(out_of_scope_dm10)}")
+    # The total says debt exists; the detail says whose. One line each, so a
+    # reviewer can act without re-running the gate over the whole tree.
+    for item in out_of_scope_dm10:
+        print(f"  out-of-scope: {item}")
     # Accounting identity: every governed file is either classified or listed
     # as backlog. Printed so "403 unclassified" is a number you can check
     # against the file system, not a claim. If this ever fails to balance, the
