@@ -307,7 +307,7 @@ Baselines are files under `scripts/ci/baselines/`, one failing item per line,
 
 | File | Items | Meaning |
 |---|---|---|
-| `scripts/ci/baselines/bilingual-docs.txt` | 81 | normative paths with no `en` / `zh-CN` counterpart |
+| `scripts/ci/baselines/bilingual-docs.txt` | 77 | normative paths with no `en` / `zh-CN` counterpart |
 
 Regenerate a baseline only when the failure set legitimately changed:
 
