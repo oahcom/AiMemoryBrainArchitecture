@@ -212,6 +212,67 @@ subject: docs(register): record the #707 review-source correction in §13.4
 
 适用与 §3.2 相同的边界：D1 在本次合并之前已生效，因此合并时的正式 Review 要求存在而未被满足；本记录不据此推断具体操作者，也不把「本会话未签发合并授权」写成「有人违反了授权」。本会话对该 PR 的处理是：提交内容审查请求，未调用合并接口。
 
+### 3.4 后续实例（五）：PR #933
+
+`GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/933/reviews` → `[]`。
+
+> Post-freeze observed instances: PR #933 — 2026-11-24 — 0 formal reviews.
+
+| 项目 | 端点 | 字段 | 返回值 |
+|---|---|---|---|
+| 正式 Review 记录 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/933/reviews` | 数组长度 | `0` 条 |
+| 合并时间 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/933` | `merged_at` | `2026-11-24T11:34:23Z` |
+| 合并账号 | 同上 | `merged_by.login` | `oahcom` |
+| 合并提交 | 同上 | `merge_commit_sha` | `3235db07f23cb272da7460147e2f80413e68e555` |
+| 提交数 / 增 / 删 | 同上 | `commits` / `additions` / `deletions` | `2` / `143` / `1` |
+| 合并时的 head | 同上 | `head.sha` | `4f4669fb7a81a09a15c6d91e590d9832e4d615bf` |
+
+适用与 §3.2 相同的边界，不作操作者推断。
+
+### 3.5 后续实例（六）：PR #946 — 合并时已存在明确的拒绝
+
+前五个实例的共同点是**顺序不明**：合并先发生，或与裁定同日而无法从平台字段判定先后。本节不同，因此单独成节而不是并入上表。
+
+`GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/946/reviews` → `[]`。
+
+> Post-freeze observed instances: PR #946 — 2026-11-24 — 0 formal reviews.
+
+| 项目 | 端点 | 字段 | 返回值 |
+|---|---|---|---|
+| 正式 Review 记录 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/946/reviews` | 数组长度 | `0` 条 |
+| Review 评论数 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/946/comments` | 数组长度 | `0` 条 |
+| 合并时间 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/946` | `merged_at` | `2026-11-24T14:05:56Z` |
+| 合并账号 | 同上 | `merged_by.login` | `oahcom` |
+| 合并提交 | 同上 | `merge_commit_sha` | `8e489ec1e18cd127088a695fa21121521e240514` |
+| 提交数 / 增 / 删 | 同上 | `commits` / `additions` / `deletions` | `10` / `547` / `7` |
+| 合并时的 head | 同上 | `head.sha` | `600a562fbc52afc91ed0c7fcdadf684f9961e6c8` |
+
+**为什么这一条与前五条不是同一类。** 拒绝合并授权的裁定文本，其落盘时间（本地文件修改时间，`2026-11-24T13:20:27Z`，即 `21:20:27 +0800`）早于合并时间 `14:05:56Z` 约 45 分钟。也就是说，这不是「合并先于裁定」，而是**裁定已经存在、已经落盘、且明确写着不合并，合并仍然发生**。
+
+这里必须把两种时间分开，否则会写出一个更强的断言而非更准确的断言：
+
+| 时间 | 来源 | 值 | 能证明什么 |
+|---|---|---|---|
+| 裁定落盘 | 本地文件修改时间 | `2026-11-24T13:20:27Z` | 本会话在其后仍持有该文本；不是平台时间戳 |
+| 合并 | `pulls/946.merged_at` | `2026-11-24T14:05:56Z` | GitHub 记录的合并时刻 |
+
+本地文件修改时间不是平台时间戳（见 `OWNER-DECISION-EVENT-TIMESTAMP-PROVENANCE-001`），所以上表不能单独证明「裁定在平台侧先于合并生效」。但本节所依据的不是两个时间戳的差值，而是**裁定内容本身引用被合并的那个 PR 编号**、且该文本在本会话中于合并前已被读取并据此发出过指令：`保留 PR #946，不执行合并。` 这是一个内容层面的对应关系，不依赖时钟。
+
+本会话对 #946 的处理：创建 PR、推送分支、提交文档，**未调用合并接口**。`oahcom` 只能记为 GitHub 账号，不据此认定具体操作人。与前五条一样，本记录不判断谁触发了合并。
+
+### 3.6 序列汇总（不改写 §13.7 冻结计数）
+
+| 序 | PR | 合并时间（UTC） | 正式 Review | 与前序的差别 |
+|---|---|---|---:|---|
+| 一 | #875 | `2026-11-24T04:54:07Z` | 0 | 形态偏差，内容已批准 |
+| 二 | #890 | `2026-11-24T05:39:10Z` | 0 | 顺序不明 |
+| 三 | #896 | `2026-11-24T06:51:52Z` | 0 | 顺序不明（裁定晚于合并 75 秒） |
+| 四 | #927 | `2026-11-24T10:38:00Z` | 0 | 顺序不明 |
+| 五 | #933 | `2026-11-24T11:34:23Z` | 0 | 顺序不明 |
+| 六 | #946 | `2026-11-24T14:05:56Z` | 0 | **合并时已有明确拒绝** |
+
+`GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` §13.7 的冻结计数保持原值，不因本表追加而改变。本表只是一个后续观察清单，不是对原统计口径的修订。
+
 ---
 
 ## 4. 明确不作出的判断
