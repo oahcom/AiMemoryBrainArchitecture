@@ -8,7 +8,7 @@ import sys
 from pathlib import PurePosixPath
 
 
-CHECK_VERSION = "2026-11-24.5"
+CHECK_VERSION = "2026-11-24.6"
 
 # Repository-root-relative paths, written with a leading slash.
 PROHIBITED_PATHS = (
@@ -416,6 +416,11 @@ def check_index_membership(root, commit, head_paths):
     `manifest.yaml` at all -- a fix item's `authorization-manifest.yaml` is a
     different document. A gate that red on half the registry the day it landed
     would be switched off, so this one does not pretend to cover it.
+
+    The separate manifest-consistency check verifies only internal lifecycle
+    field combinations in work-item manifests. It does not compare INDEX.md
+    Status cells with manifest lifecycle fields, and does not verify external
+    PR or GitHub state.
     """
     directories = work_item_directories(head_paths)
     if not directories:
@@ -462,6 +467,209 @@ def check_index_membership(root, commit, head_paths):
 
     return violations
 
+def _mapping_scalar(lines, key, indent):
+    """Return a scalar only when key is a direct child at the exact indent."""
+    pattern = re.compile(
+        rf"^{{0}}{re.escape(key)}\s*:\s*(.*?)\s*$".format(" " * indent)
+    )
+
+    for line in lines:
+        match = pattern.match(line)
+        if match:
+            return _strip_yaml_scalar(match.group(1))
+
+    return None
+
+
+def _strip_yaml_scalar(value):
+    """Strip a simple YAML comment and matching scalar quotes."""
+    value = value.strip()
+
+    if not value:
+        return None
+
+    if value.startswith("'") and value.endswith("'") and len(value) >= 2:
+        return value[1:-1]
+
+    if value.startswith('"') and value.endswith('"') and len(value) >= 2:
+        return value[1:-1]
+
+    # Comments are only recognized when preceded by whitespace.
+    value = re.split(r"\s+#", value, maxsplit=1)[0].strip()
+    return value or None
+
+
+def _implementation_mapping(lines):
+    """Return direct scalar children of the top-level implementation mapping."""
+    implementation_indent = 0
+    implementation_line = None
+
+    for index, line in enumerate(lines):
+        if re.match(r"^implementation\s*:\s*(?:#.*)?$", line):
+            implementation_line = index
+            break
+
+    if implementation_line is None:
+        return None
+
+    block = []
+    for line in lines[implementation_line + 1:]:
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+
+        indent = len(line) - len(line.lstrip(" "))
+        if indent <= implementation_indent:
+            break
+
+        block.append((indent, line))
+
+    if not block:
+        return {}
+
+    # Direct children use the minimum indentation in this mapping.
+    child_indent = min(indent for indent, _ in block)
+
+    direct_lines = [
+        line[child_indent:]
+        for indent, line in block
+        if indent == child_indent
+    ]
+
+    return {
+        "status": _mapping_scalar(direct_lines, "status", 0),
+        "pull_request": _mapping_scalar(direct_lines, "pull_request", 0),
+        "merge_commit_sha": _mapping_scalar(
+            direct_lines, "merge_commit_sha", 0
+        ),
+    }
+
+
+def _top_level_manifest_scalar(lines, key):
+    """Read a scalar from a top-level YAML mapping key only."""
+    return _mapping_scalar(lines, key, 0)
+
+
+def check_work_item_manifest_consistency(root, commit, head_paths):
+    """Check internal lifecycle consistency in committed work-item manifests.
+
+    This is deliberately a static, repository-local check. It does not verify
+    that a PR exists, that a SHA exists in Git, or that a SHA is reachable
+    from a target branch.
+
+    Reading is scoped, not global: the top-level `status` is taken only from
+    an unindented key, and `status` / `pull_request` / `merge_commit_sha` are
+    taken only from direct children of the top-level `implementation` mapping.
+    A first-match-wins scan over the whole file would let a nested cell such
+    as `status: "FROZEN"` impersonate the lifecycle status; two manifests in
+    this repository have exactly that shape.
+
+    A manifest whose lifecycle fields cannot be located is counted as
+    unrecognized and printed in the summary. Unrecognized is not a pass: it
+    means this rule set did not read the item, not that the item is correct.
+
+    What this deliberately does NOT check, and why: a full SHA in
+    `implementation.merge_commit_sha` is not by itself evidence that
+    `implementation.status` must be MERGED. From the manifest alone the same
+    pair of fields cannot distinguish an implementation merge from a merged
+    registration or measurement package, and at least one work item records
+    the latter under `implementation.merge_commit_sha` with an Owner-
+    authorised revision entry behind it. Rejecting NOT_STARTED solely because
+    a SHA is present would therefore reject a recorded fact, so that rule is
+    withdrawn rather than narrowed. A replacement needs an independently
+    established field contract, not a stronger guess.
+    """
+    manifest_paths = sorted(
+        path for path in head_paths
+        if WORK_ITEM_MANIFEST_RE.fullmatch(path)
+    )
+
+    violations = []
+    recognized = 0
+    unrecognized = []
+
+    for path in manifest_paths:
+        try:
+            raw = run_git(["-C", root, "show", f"{commit}:{path}"])
+            text = raw.decode("utf-8", errors="strict")
+        except UnicodeDecodeError as exc:
+            raise RuntimeError(
+                f"'{path}' is not valid UTF-8"
+            ) from exc
+        except RuntimeError as exc:
+            raise RuntimeError(
+                f"cannot read '{path}': {exc}"
+            ) from exc
+
+        lines = text.splitlines()
+
+        top_status = _top_level_manifest_scalar(lines, "status")
+        implementation = _implementation_mapping(lines) or {}
+        implementation_status = implementation.get("status")
+        implementation_pull_request = implementation.get("pull_request")
+        implementation_merge_commit_sha = implementation.get(
+            "merge_commit_sha"
+        )
+
+        if top_status is None and implementation_status is None:
+            unrecognized.append(path)
+        else:
+            recognized += 1
+
+        # R20-01: either PR_OPEN lifecycle field requires a positive,
+        # unquoted YAML integer in implementation.pull_request.
+        if (
+            top_status == "PR_OPEN"
+            or implementation_status == "PR_OPEN"
+        ):
+            if (
+                implementation_pull_request is None
+                or not re.fullmatch(
+                    r"[1-9][0-9]*", implementation_pull_request
+                )
+            ):
+                violations.append(
+                    "manifest consistency violation: "
+                    f"'{path}': PR_OPEN requires pull_request to be "
+                    "a positive integer"
+                )
+
+        # R20-02: NOT_MERGED cannot coexist with a lifecycle state that
+        # asserts implementation has already merged or been verified.
+        if implementation_merge_commit_sha == "NOT_MERGED":
+            if (
+                top_status in {"MERGED", "VERIFIED"}
+                or implementation_status == "MERGED"
+            ):
+                violations.append(
+                    "manifest consistency violation: "
+                    f"'{path}': merge_commit_sha is NOT_MERGED while "
+                    "the lifecycle status asserts merged implementation"
+                )
+
+        # R20-03 is withdrawn, not narrowed. See the docstring: a full SHA
+        # in implementation.merge_commit_sha does not prove that
+        # implementation.status must be MERGED, and this check must not
+        # reject NOT_STARTED on the strength of that field alone.
+
+    print(
+        "Work-item manifest consistency "
+        f"version={CHECK_VERSION} "
+        f"manifests={len(manifest_paths)} "
+        f"recognized={recognized} "
+        f"unrecognized={len(unrecognized)} "
+        f"violations={len(violations)}"
+    )
+
+    for path in unrecognized:
+        print(
+            "Work-item manifest consistency unrecognized shape: "
+            f"{path}",
+            file=sys.stderr,
+        )
+
+    return violations
+
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--base", help="full base commit SHA")
@@ -500,6 +708,16 @@ def main():
         membership = check_index_membership(root, head_for_denylist, head_paths)
         if membership:
             for violation in membership:
+                error(violation)
+            return 1
+
+        manifest_consistency = check_work_item_manifest_consistency(
+            root,
+            head_for_denylist,
+            head_paths,
+        )
+        if manifest_consistency:
+            for violation in manifest_consistency:
                 error(violation)
             return 1
 
