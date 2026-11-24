@@ -18,6 +18,7 @@ values with test-only parameters.
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -102,6 +103,98 @@ class PolicyInheritanceTests(unittest.TestCase):
         result = self.run_checker(missing)
         self.assertEqual(result.returncode, 1)
         self.assertIn("missing", result.stderr)
+
+    def make_repo(self, *, shallow: bool) -> Path:
+        """A tiny repo where the pinned source commit genuinely cannot resolve.
+
+        `shallow=True` yields a depth-1 clone, so "absent here" no longer means
+        "never existed"; `shallow=False` keeps complete history, where the same
+        unresolvable pin is a real failure.
+        """
+        tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, tmp, True)
+        origin = tmp / "origin"
+        origin.mkdir()
+        subprocess.run(["git", "init", "-q"], cwd=origin, check=True)
+        subprocess.run(["git", "config", "user.email", "t@example.invalid"],
+                       cwd=origin, check=True)
+        subprocess.run(["git", "config", "user.name", "t"], cwd=origin, check=True)
+        subprocess.run(["git", "commit", "--allow-empty", "-qm", "only"],
+                       cwd=origin, check=True)
+        target = tmp / "target"
+        if shallow:
+            subprocess.run(
+                ["git", "clone", "--depth", "1", f"file://{origin.as_posix()}",
+                 str(target)],
+                check=True, capture_output=True,
+            )
+        else:
+            subprocess.run(
+                ["git", "clone", "--no-local", f"file://{origin.as_posix()}",
+                 str(target)],
+                check=True, capture_output=True,
+            )
+        return target
+
+    def test_shallow_clone_reports_incomplete_not_a_violation(self) -> None:
+        repo = self.make_repo(shallow=True)
+        result = subprocess.run(
+            [sys.executable, str(CHECKER), "--repo", str(repo),
+             "--declaration", str(DECLARATION)],
+            text=True, capture_output=True, check=False,
+        )
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("shallow", result.stderr)
+        self.assertIn("git fetch --unshallow", result.stderr)
+        self.assertNotIn("POLICY INHERITANCE: FAIL", result.stdout)
+
+    def make_shallow_repo_at_pin(self) -> Path:
+        """A depth-1 clone whose single commit IS the pinned source.
+
+        Truncated history is not itself a defect: the pin resolves here, so the
+        gate must return its normal verdict instead of INCOMPLETE.
+        """
+        tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, tmp, True)
+        origin = tmp / "origin"
+        subprocess.run(
+            ["git", "clone", "-q", "-s", "--no-checkout",
+             str(REPO_ROOT), str(origin)],
+            check=True, capture_output=True,
+        )
+        pin = json.loads(DECLARATION.read_text(encoding="utf-8"))["source_commit"]
+        subprocess.run(
+            ["git", "-C", str(origin), "branch", f"pin/{pin}", pin],
+            check=True, capture_output=True,
+        )
+        subprocess.run(
+            ["git", "clone", "-q", "--depth", "1", "--branch", f"pin/{pin}",
+             f"file://{origin.as_posix()}", str(tmp / "target")],
+            check=True, capture_output=True,
+        )
+        return tmp / "target"
+
+    def test_shallow_clone_with_resolvable_pin_keeps_normal_verdict(self) -> None:
+        repo = self.make_shallow_repo_at_pin()
+        result = subprocess.run(
+            [sys.executable, str(CHECKER), "--repo", str(repo),
+             "--declaration", str(DECLARATION)],
+            text=True, capture_output=True, check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("POLICY INHERITANCE: PASS", result.stdout)
+        self.assertNotIn("INCOMPLETE", result.stderr)
+
+    def test_complete_history_unresolvable_pin_still_fails(self) -> None:
+        repo = self.make_repo(shallow=False)
+        result = subprocess.run(
+            [sys.executable, str(CHECKER), "--repo", str(repo),
+             "--declaration", str(DECLARATION)],
+            text=True, capture_output=True, check=False,
+        )
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("Git verification failed", result.stderr)
+        self.assertIn("POLICY INHERITANCE: FAIL", result.stdout)
 
 
 if __name__ == "__main__":

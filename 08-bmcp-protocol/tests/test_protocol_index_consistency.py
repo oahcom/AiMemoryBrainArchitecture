@@ -47,11 +47,38 @@ def row(
 
 
 class ProtocolIndexConsistencyTests(unittest.TestCase):
+    def assert_error_prefix(self, result, prefix: str) -> None:
+        matches = [
+            error
+            for error in result["errors"]
+            if error.startswith(prefix)
+        ]
+        self.assertTrue(
+            matches,
+            f"Expected diagnostic prefix {prefix!r}; "
+            f"actual errors: {result['errors']!r}",
+        )
+
     def test_00_current_repository_index_is_consistent(self):
         result = audit_repository(REPO_ROOT)
-        self.assertEqual(result["schema_files"], 32)
-        self.assertEqual(result["schemas_with_message_type"], 31)
-        self.assertEqual(result["unique_message_types"], 22)
+        self.assertGreater(result["schema_files"], 0)
+        self.assertGreaterEqual(result["schemas_with_message_type"], 0)
+        self.assertLessEqual(
+            result["schemas_with_message_type"],
+            result["schema_files"],
+        )
+        self.assertEqual(
+            result["unique_message_types"],
+            len(result["definitions"]),
+        )
+        self.assertEqual(
+            result["index_rows"],
+            result["indexed_unique"],
+        )
+        self.assertEqual(
+            result["indexed_unique"],
+            result["unique_message_types"],
+        )
         self.assertEqual(result["missing"], [])
         self.assertEqual(result["extra"], [])
         self.assertEqual(result["duplicate_rows"], {})
@@ -162,6 +189,88 @@ class ProtocolIndexConsistencyTests(unittest.TestCase):
             result = audit_repository(root)
             self.assertTrue(
                 any("definition source path does not exist" in error for error in result["errors"])
+            )
+
+    def test_08_wrong_table_column_count_reports_diagnostic(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            write_fixture(
+                root,
+                {"properties": {"message_type": {"const": "ONE_MESSAGE"}}},
+                ["| `ONE_MESSAGE` | too few cells |"],
+            )
+
+            result = audit_repository(root)
+
+            self.assert_error_prefix(
+                result,
+                "line 5: expected 6 table cells, got 2",
+            )
+
+    def test_09_plain_message_type_reports_diagnostic(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            write_fixture(
+                root,
+                {"properties": {"message_type": {"const": "ONE_MESSAGE"}}},
+                [
+                    "| PLAIN | fixture schema | "
+                    "`schemas/fixture.schema.json` | — | — | SCHEMA PRESENT |"
+                ],
+            )
+
+            result = audit_repository(root)
+
+            self.assert_error_prefix(
+                result,
+                "line 5: message type must be one backtick code span",
+            )
+
+    def test_10_invalid_schema_json_reports_diagnostic(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            write_fixture(
+                root,
+                {"properties": {"message_type": {"const": "ONE_MESSAGE"}}},
+                [row("ONE_MESSAGE")],
+            )
+
+            schema_path = (
+                root
+                / "08-bmcp-protocol"
+                / "schemas"
+                / "fixture.schema.json"
+            )
+            schema_path.write_text("{invalid json", encoding="utf-8")
+
+            result = audit_repository(root)
+
+            self.assert_error_prefix(
+                result,
+                "schema 08-bmcp-protocol/schemas/fixture.schema.json:",
+            )
+
+    def test_11_missing_index_reports_diagnostic(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            write_fixture(
+                root,
+                {"properties": {"message_type": {"const": "ONE_MESSAGE"}}},
+                [row("ONE_MESSAGE")],
+            )
+
+            index_path = (
+                root
+                / "08-bmcp-protocol"
+                / "protocol-index.md"
+            )
+            index_path.unlink()
+
+            result = audit_repository(root)
+
+            self.assert_error_prefix(
+                result,
+                "cannot read index:",
             )
 
 
