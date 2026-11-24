@@ -2188,7 +2188,7 @@ def main() -> int:
         # change that did not cause it. A whole-tree run (no --require-changed)
         # still reports every DM-10 error, because there the whole tree IS the
         # subject of the verdict.
-        if incremental and rel not in required:
+        if incremental and rel not in all_changed:
             out_of_scope_dm10.extend(bound_errors)
         else:
             errors.extend(f"{rel}: {err}" for err in bound_errors)
@@ -2196,15 +2196,6 @@ def main() -> int:
 
     errors.extend(check_scope_and_relations(root, docs))
     errors.extend(check_scope_registry(root))
-
-    # Not an error, and deliberately not silent. A number that nobody can see is
-    # the same as no number; a number that fails the run is the bug this fixes.
-    if out_of_scope_dm10:
-        print(
-            f"DM-10 out-of-scope stale bindings: {len(out_of_scope_dm10)} "
-            "(documents untouched by this increment; not counted as failures)",
-            file=sys.stderr,
-        )
 
     # DM-04 uniqueness of revocation decision ids across the repository.
     revocations: dict[str, str] = {}
@@ -2223,6 +2214,9 @@ def main() -> int:
         f"GOV-DOC-002: {total} governed documents, {len(docs)} classified, "
         f"{len(unclassified)} unclassified"
     )
+    # Printed whether or not it is zero: an absent line cannot be told apart from
+    # a build that never looked (issue #808).
+    print(f"DM-10 out-of-scope stale bindings: {len(out_of_scope_dm10)}")
     # Accounting identity: every governed file is either classified or listed
     # as backlog. Printed so "403 unclassified" is a number you can check
     # against the file system, not a claim. If this ever fails to balance, the

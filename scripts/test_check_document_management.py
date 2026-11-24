@@ -790,10 +790,7 @@ DM10_STALE = (
     .replace('"deadbeef"', '"' + "0" * 64 + '"')
     .replace("modification_status: Unchanged", "modification_status: Pending-Reapproval")
 )
-DM10_COUNT_ONE = (
-    "DM-10 out-of-scope stale bindings: 1 "
-    "(documents untouched by this increment; not counted as failures)"
-)
+DM10_COUNT_ONE = "DM-10 out-of-scope stale bindings: 1"
 DM10_ERROR = "DM-10 content changed after approved_version"
 
 def _dm10_repo(tmp: str) -> tuple[Path, str]:
@@ -841,7 +838,7 @@ def test_incremental_out_of_scope_stale_pin_is_counted_not_failed() -> None:
         _git(root, "commit", "-q", "-m", "touch nothing governed")
         code, out, err = _run_capture(root, "--require-changed", base)
         output = out + err
-        counted = DM10_COUNT_ONE in err.splitlines()
+        counted = DM10_COUNT_ONE in output.splitlines()
         record(
             "T82 incremental run counts an out-of-scope stale pin instead of failing it",
             code == 0 and counted and DM10_ERROR not in output,
@@ -873,12 +870,35 @@ def test_incremental_one_in_scope_one_out_of_scope() -> None:
         output = out + err
         in_scope = f"00-governance/a.md: {DM10_ERROR}" in output
         out_of_scope = f"00-governance/b.md: {DM10_ERROR}" in output
-        counted = DM10_COUNT_ONE in err.splitlines()
+        counted = DM10_COUNT_ONE in output.splitlines()
         record(
             "T84 one in-scope and one out-of-scope stale pin are classified per document",
             code == 1 and in_scope and not out_of_scope and counted,
             f"  gate returned {code}, expected 1; a.md reported: {in_scope}; "
             f"b.md reported: {out_of_scope}; count line exactly 1: {counted}",
+        )
+
+def test_incremental_zero_out_of_scope_still_prints_the_count() -> None:
+    """A missing line cannot be told apart from a run that never looked."""
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        (root / "00-governance" / "b.md").write_text(doc(BASE), encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "seed, no approvals")
+        base = _git(root, "rev-parse", "HEAD")
+        (root / "notes.txt").write_text("unrelated change\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "touch nothing governed")
+        code, out, err = _run_capture(root, "--require-changed", base)
+        zero = "DM-10 out-of-scope stale bindings: 0"
+        record(
+            "T85 incremental run with no out-of-scope stale pin prints the zero count",
+            code == 0 and zero in (out + err).splitlines(),
+            f"  gate returned {code}, expected 0; zero count line present: "
+            f"{zero in (out + err).splitlines()}",
         )
 
 def run_dm10_scope() -> None:
@@ -887,6 +907,7 @@ def run_dm10_scope() -> None:
     test_incremental_out_of_scope_stale_pin_is_counted_not_failed()
     test_whole_tree_run_still_reports_every_stale_pin()
     test_incremental_one_in_scope_one_out_of_scope()
+    test_incremental_zero_out_of_scope_still_prints_the_count()
 
 
 def run_changed_paths() -> None:
