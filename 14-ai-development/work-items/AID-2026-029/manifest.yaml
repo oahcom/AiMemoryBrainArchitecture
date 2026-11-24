@@ -165,7 +165,7 @@ issue_closeout:
   closed_at: 2026-11-20T15:18:04Z
   reopened_at: 2026-11-21T09:14:13Z
   reopen_evidence: "Issue #264 state=open, state_reason=reopened; last reopen event closed_at -> reopened."
-  disposition: A_CLOSE_ALL_NINE_ACCEPTANCE_CRITERIA_SATISFIED_AT_CLOSE
+  disposition: A_CLOSE_ALL_NINE_ACCEPTANCE_CRITERIA_SATISFIED
   disposition_scope: >-
     The nine acceptance criteria were satisfied at the 2026-11-20T15:18:04Z
     closeout. That closeout is a historical event and remains valid. Because
