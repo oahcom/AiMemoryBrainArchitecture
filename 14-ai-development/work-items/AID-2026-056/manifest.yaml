@@ -3,11 +3,11 @@ title: Make the full bilingual scan agree with the ruling that already governs i
 
 class: GATE/CODE/TEST
 risk: R2
-risk_rationale: "Changes the predicate a required repository-wide gate uses to decide whether a document has a counterpart, and shrinks its frozen baseline from 81 to 9. The baseline is a shrink-only ratchet, so a wrong predicate does not fail loudly: it either freezes entries that should be enforced, or resolves entries that are not bilingual and removes them from enforcement permanently. Acceptance criteria AC5 and AC2 exist so the floor is asserted from both sides and a predicate that resolves everything cannot pass. The predicted 9 is falsifiable on purpose."
+risk_rationale: "Changes the predicate a required repository-wide gate uses to decide whether a document has a counterpart, and shrinks its frozen baseline from 77 to 11. The baseline is a shrink-only ratchet, so a wrong predicate does not fail loudly: it either freezes entries that should be enforced, or resolves entries that are not bilingual and removes them from enforcement permanently. Acceptance criteria AC5 and AC2 exist so the floor is asserted from both sides and a predicate that resolves everything cannot pass. The predicted 11 is falsifiable on purpose. Restated at 8e489ec1: the 77-entry baseline splits into 66 embedded (cjk>=100 and latin>=1000) and 11 real, so AC1 and AC2 are complementary rather than two independent guesses."
 
 security_scope: "None. No Rust, no transport, no authorization path, no storage. One pairing predicate and one embedded-bilingual predicate in scripts/check_bilingual_docs_full.py, the baseline that follows from them, one workflow comment, and the tests for the two predicates."
 
-status: BLOCKED
+status: DISPATCHED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -127,7 +127,8 @@ independent_reviewer: REQ-05-INDEPENDENT-REVIEW-SESSION-01
 integration_reviewer: NOT_ASSIGNED
 
 review:
-  status: CHANGES_REQUESTED
+  status: CHANGES_APPLIED_AWAITING_RE_REVIEW
+  prior_status: CHANGES_REQUESTED
   report_ref: "14-ai-development/work-items/AID-2026-056/REVIEW-01-INDEPENDENT.md"
 
 acceptance:

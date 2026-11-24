@@ -3,11 +3,11 @@ title: Commit the traceability checker's two input files, and stop it printing a
 
 class: GATE/CODE/TEST
 risk: R1
-risk_rationale: "One script's failure path plus two data files it already reads. No Rust, no transport, no authorization, no storage. The risk is not damage but silence: the current failure path prints '0 requirements / 0 work items / 0 errors' over unreadable inputs, so a wrong implementation looks identical to a correct one that found nothing. AC2 asserts the absence of six literal strings rather than the presence of an error, because the presence of an error is already true today."
+risk_rationale: "One script's failure path plus two data files it already reads. No Rust, no transport, no authorization, no storage. The risk is not damage but silence: the current failure path prints '0 requirements / 0 work items / 0 errors' over unreadable inputs, so a wrong implementation looks identical to a correct one that found nothing. AC2 asserts the absence of a verdict-shaped line rather than the presence of an error, because the presence of an error is already true today; the check is whether the counts stop being printed over inputs that were never read."
 
 security_scope: "None. A JSON registry index, a four-line path baseline, and the branch in check_traceability.py that decides what to print when REGISTRY_PATH cannot be read."
 
-status: BLOCKED
+status: DISPATCHED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -100,7 +100,8 @@ independent_reviewer: REQ-05-INDEPENDENT-REVIEW-SESSION-01
 integration_reviewer: NOT_ASSIGNED
 
 review:
-  status: CHANGES_REQUESTED
+  status: CHANGES_APPLIED_AWAITING_RE_REVIEW
+  prior_status: CHANGES_REQUESTED
   report_ref: "14-ai-development/work-items/AID-2026-058/REVIEW-01-INDEPENDENT.md"
 
 implementation:
