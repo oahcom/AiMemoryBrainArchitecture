@@ -129,7 +129,6 @@ integration_reviewer: NOT_ASSIGNED
 review:
   status: CHANGES_REQUESTED
   report_ref: "14-ai-development/work-items/AID-2026-056/REVIEW-01-INDEPENDENT.md"
-  report_ref: ""
 
 acceptance:
   status: NOT_ASSIGNED
