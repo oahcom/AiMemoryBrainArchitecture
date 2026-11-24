@@ -840,17 +840,22 @@ def test_incremental_out_of_scope_stale_pin_is_counted_not_failed() -> None:
         code, out, err = _run_capture(root, "--require-changed", base)
         # The ruling asks for two things joined by "and": a note naming the
         # document, and a counted line. A number alone says how many, not which.
-        leaked = f"00-governance/b.md: {DM10_ERROR}" in err
-        noted = any(
-            line.startswith("  note: DM-10 out-of-scope 00-governance/b.md:")
-            for line in out.splitlines()
-        )
+        # The count is asserted exactly: one stale pin must yield exactly one
+        # note. "a note exists" would also pass if the collector swallowed every
+        # governed document, which is the mistake T84's sibling catches.
+        # Matched on the note prefix, not on "DM-10 out-of-scope" anywhere: the
+        # count line is itself "DM-10 out-of-scope stale bindings: N" and would
+        # be counted as a note by a looser filter (it was, on the first run).
+        dm10_notes = [l for l in out.splitlines() if l.startswith("  note: DM-10 out-of-scope")]
+        noted = len(dm10_notes) == 1 and "00-governance/b.md" in dm10_notes[0]
         counted = DM10_COUNT_ONE in out.splitlines()
+        leaked = f"00-governance/b.md: {DM10_ERROR}" in err
         record(
             "T82 incremental run counts an out-of-scope stale pin instead of failing it",
             code == 0 and counted and noted and not leaked,
             f"  gate returned {code}, expected 0; count line exact: {counted}; "
-            f"note names the document: {noted}; DM-10 error on stderr: {leaked}",
+            f"out-of-scope notes: {len(dm10_notes)} (want 1, naming b.md); "
+            f"DM-10 error on stderr: {leaked}",
         )
 
 def test_whole_tree_run_still_reports_every_stale_pin() -> None:
@@ -875,17 +880,18 @@ def test_incremental_one_in_scope_one_out_of_scope() -> None:
         code, out, err = _run_capture(root, "--require-changed", base)
         in_scope = f"00-governance/a.md: {DM10_ERROR}" in err
         out_of_scope = f"00-governance/b.md: {DM10_ERROR}" in err
-        noted = any(
-            line.startswith("  note: DM-10 out-of-scope 00-governance/b.md:")
-            for line in out.splitlines()
-        )
+        # Exactly one note, and it belongs to the untouched document: an
+        # implementation that noted both documents, or neither, or duplicated
+        # the line, all keep "some note exists" true while being wrong.
+        dm10_notes = [l for l in out.splitlines() if l.startswith("  note: DM-10 out-of-scope")]
+        noted = len(dm10_notes) == 1 and "00-governance/b.md" in dm10_notes[0]
         counted = DM10_COUNT_ONE in out.splitlines()
         record(
             "T84 one in-scope and one out-of-scope stale pin are classified per document",
             code == 1 and in_scope and not out_of_scope and noted and counted,
             f"  gate returned {code}, expected 1; a.md on stderr: {in_scope}; "
-            f"b.md on stderr: {out_of_scope}; b.md noted: {noted}; "
-            f"count line exactly 1: {counted}",
+            f"b.md on stderr: {out_of_scope}; out-of-scope notes: {len(dm10_notes)} "
+            f"(want 1, naming b.md only); count line exactly 1: {counted}",
         )
 
 def test_incremental_zero_out_of_scope_still_prints_the_count() -> None:
