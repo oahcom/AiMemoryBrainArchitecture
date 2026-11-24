@@ -121,10 +121,22 @@ fields:
             fields:
               type:
                 kind: string
+                # Only what DM-10 honours. `Selected-sections` and
+                # `Selected-assets` were published here until #833 and never
+                # implemented: the gate hashed the whole body either way, so
+                # declaring one narrowed nothing. DM-03 now refuses both by
+                # name rather than accepting a scope no rule reads.
+                # 仅保留 DM-10 能兑现的取值。#833 之前此处还发布过
+                # `Selected-sections` / `Selected-assets`，但门禁从不实现它们：
+                # 两种情况都比较整篇正文，声明并未收窄任何东西。现在 DM-03 会
+                # 指名拒绝这两个值，而不是接受一个没有规则读取的范围。
                 enum:
                   - Full-document
-                  - Selected-assets
-                  - Selected-sections
+              # Declared because every approved document carries an empty list.
+              # A non-empty list is a DM-03 error: it would claim a boundary
+              # DM-10 does not check.
+              # 声明它们是因为所有已批准文档都带一个空列表。非空列表会被 DM-03
+              # 拒绝：它声明了一个 DM-10 并不检查的边界。
               included_sections:
                 kind: sequence
                 items: string
