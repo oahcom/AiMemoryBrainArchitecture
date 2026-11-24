@@ -8,7 +8,7 @@ name: Existing gates
 # TWO KINDS OF JOB, and the difference is deliberate:
 #
 #   * HARD GATES fail on any deviation. The gate is green today and must stay
-#     green: `protocol-index`, `conformance`, `schema-nonempty`, `clippy`.
+#     green: `protocol-index`, `conformance`, `schema-nonempty`, `clippy`, `fmt`.
 #
 #   * RATCHETS fail only when the failure set gets WORSE than the recorded
 #     baseline: `bilingual`. This gate is already red on main (GAP-08). Making it
@@ -203,3 +203,27 @@ jobs:
           # has no ~/.cargo/env and an unguarded source aborts under `set -e`.
           if [ -f "$HOME/.cargo/env" ]; then . "$HOME/.cargo/env"; fi
           cargo clippy --workspace --all-targets -- -D warnings
+
+  # `rust-phase1.yml` already runs this check, but it has a `paths:` filter and
+  # is not a required status context, so a formatting regression could merge
+  # green (issue #645). A required check cannot itself be path-filtered: on a
+  # PR that touches no Rust file it would stay "Expected" forever and block the
+  # merge. This job therefore runs on every pull request and is cheap enough to
+  # do so -- the workspace is small and only formatting is checked.
+  fmt:
+    name: Rust format (hard gate)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      # `check_fmt.py` never rewrites files and refuses a dirty work tree, so a
+      # pass here means the committed tree is formatted, not that a checkout
+      # was cleaned up afterwards.
+      - name: Verify repository formatting at this commit
+        shell: bash
+        run: python3 scripts/check_fmt.py --expect "$GITHUB_SHA"

@@ -35,26 +35,32 @@
 
 # --- Accepted CRLF, with a removal condition ---------------------------------
 #
-# These 14 Markdown files are still CRLF and are declared `-text` so that Git
-# leaves them byte-identical and the line-ending gate does not flag them. They
-# are NOT exempt because CRLF is acceptable in a document. They are blocked:
+# The 14 Markdown paths listed below were originally excluded from text
+# normalisation and the line-ending gate. On the current main, 12 still
+# contain CRLF. The source and zh-CN mirror of
+# GOV-NC-2026-11-21-SUFFIX-SCOPE-017 already have real `document_metadata`
+# blocks and LF endings; their `-text` entries are stale and can be removed.
 #
-#   DM-01 in `scripts/check_document_management.py` fires on any *changed*
-#   governed document that lacks a `document_metadata` block, and these 14 have
-#   never had one. Measured: appending a single HTML comment to
-#   `docs/governance/ARCHITECTURE_AUDIT_REPORT.md` on `main` fails the gate with
-#   `DM-01 missing document_metadata block`, before any line-ending change.
+# These exclusions are not a declaration that CRLF is acceptable. For a
+# governed document, DM-01 rejects a changed document without a
+# `document_metadata` block. A line-ending-only renormalisation is still a
+# change, so classification must be supplied before or in the same PR.
 #
-# So renormalising one of them is indistinguishable, to the gate, from editing
-# its content — and supplying the metadata is a classification decision (role,
-# approval, normative status), which ruling 72 forbids doing in bulk.
+# Metadata alone is not sufficient for every document. GOV-DOC-001 also
+# enforces applicable bilingual-counterpart requirements. Before removing
+# an entry, the PR must satisfy the document's counterpart obligation:
+# required counterparts must be included meaningfully in the same change,
+# or the applicable approved exception or embedded-source policy must be
+# in place. A document with missing required counterparts cannot be
+# unblocked merely by adding metadata.
 #
-# Removal condition: delete the line for a file once it carries a real
-# `document_metadata` block. The gate then covers it. Tracked in #836.
+# Removal condition: delete a path's `-text` entry only when both its
+# document-management classification requirement and its applicable
+# bilingual-counterpart requirement are satisfied. The line-ending gate
+# will then cover the path. Tracked in #836.
 
 08-bmcp-protocol/owner-snapshot-namespace-and-fence-currentness-contract.md -text
 14-ai-development/governance-register/GOV-NC-2026-11-21-DEV-PR-GATE-010.md -text
-14-ai-development/governance-register/GOV-NC-2026-11-21-SUFFIX-SCOPE-017.md -text
 14-ai-development/governance-register/GOV-REV-2026-11-21-GATE-MUTANTS-016.md -text
 14-ai-development/governance-register/SPEC-2026-11-21-PAIRING-001.md -text
 14-ai-development/work-items/D-OWNER-DECISION-PROTECTED-VISIBILITY-001.md -text
@@ -63,6 +69,5 @@ docs/en/14-ai-development/governance-register/GOV-REV-2026-11-21-GATE-MUTANTS-01
 docs/en/14-ai-development/governance-register/SPEC-2026-11-21-PAIRING-001.md -text
 docs/governance/ARCHITECTURE_AUDIT_REPORT.md -text
 docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-21-DEV-PR-GATE-010.md -text
-docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-21-SUFFIX-SCOPE-017.md -text
 docs/zh-CN/14-ai-development/governance-register/GOV-REV-2026-11-21-GATE-MUTANTS-016.md -text
 docs/zh-CN/14-ai-development/governance-register/SPEC-2026-11-21-PAIRING-001.md -text
