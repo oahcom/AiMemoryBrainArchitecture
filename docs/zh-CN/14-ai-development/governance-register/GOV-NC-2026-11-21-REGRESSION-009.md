@@ -39,7 +39,7 @@ document_metadata:
     normative_status: Informative
   bilingual_counterpart:
     source: "14-ai-development/governance-register/GOV-NC-2026-11-21-REGRESSION-009.md"
-    en: "docs/en/docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-21-REGRESSION-009.md"
+    en: "docs/en/14-ai-development/governance-register/GOV-NC-2026-11-21-REGRESSION-009.md"
     zh-CN: null
 ---
 

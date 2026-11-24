@@ -40,7 +40,7 @@ document_metadata:
   bilingual_counterpart:
     source: "14-ai-development/governance-register/GOV-REV-2026-11-21-PARTIAL-SCOPE-019.md"
     en: null
-    zh-CN: "docs/zh-CN/docs/en/14-ai-development/governance-register/GOV-REV-2026-11-21-PARTIAL-SCOPE-019.md"
+    zh-CN: "docs/zh-CN/14-ai-development/governance-register/GOV-REV-2026-11-21-PARTIAL-SCOPE-019.md"
 ---
 
 # GOV-REV-2026-11-21-PARTIAL-SCOPE-019
