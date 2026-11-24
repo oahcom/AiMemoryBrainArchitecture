@@ -1,0 +1,121 @@
+work_item_id: AID-2026-056
+title: Make the full bilingual scan agree with the ruling that already governs its contents
+
+class: GATE/CODE/TEST
+risk: R2
+risk_rationale: "Changes the predicate a required repository-wide gate uses to decide whether a document has a counterpart, and shrinks its frozen baseline from 81 to 9. The baseline is a shrink-only ratchet, so a wrong predicate does not fail loudly: it either freezes entries that should be enforced, or resolves entries that are not bilingual and removes them from enforcement permanently. Acceptance criteria AC5 and AC2 exist so the floor is asserted from both sides and a predicate that resolves everything cannot pass. The predicted 9 is falsifiable on purpose."
+
+security_scope: "None. No Rust, no transport, no authorization path, no storage. One pairing predicate and one embedded-bilingual predicate in scripts/check_bilingual_docs_full.py, the baseline that follows from them, one workflow comment, and the tests for the two predicates."
+
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+implementing_ai_session: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: d40d4e095fc830cc22e7a7b5196268cecf41597e
+
+tracking_issue: "Issue #266 - REQ-05 documentation governance. Raised there as OD-18 after the required check 'Bilingual docs coverage (ratchet)' was measured to still count all 81 baseline paths as missing counterparts, while OWNER-DECISION-EMBEDDED-BILINGUAL-001 had already ruled 72 of them are not documentation debt. Owner ruling OD-18 selected: open a new AID rather than widen AID-2026-054."
+
+created_at: 2026-11-24
+updated_at: 2026-11-24
+
+prompt_id: AID-2026-056-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-056/prompt-v1.md
+prompt_status: FROZEN
+prompt_sha256: 325f567c669b046f4b0ccfd58515ad01c4b83377179fdb744502f6c1dc56d2e4
+prompt_bytes: 10114
+
+prompt_provenance_tier: T1
+prompt_provenance_note: "Frozen from the REQ-05 session that split the 81-entry baseline by calling the repository's own side_by_side_partner() and counting CJK/latin characters per file at main d40d4e09, enumerated the three mirror-of-mirror paths from counterpart()'s own return values, and produced the predicted 9 by re-running the split with the intended predicate against the current violation list. The prediction is stated so the implementer can falsify it; the session that wrote this prompt is not an independent reviewer of it."
+
+dependency_refs:
+  - 14-ai-development/adr/OWNER-DECISION-EMBEDDED-BILINGUAL-001.md
+  - 14-ai-development/work-items/AID-2026-054/manifest.yaml
+  - 14-ai-development/work-items/GAP-26-SEVEN-NORMATIVE-ROOTS-DO-NOT-EXIST.md
+  - 14-ai-development/work-items/GAP-28-TWO-CHECKS-ONE-BASELINE.md
+  - 00-governance/bilingual-documentation-policy.md
+  - scripts/check_bilingual_docs_full.py
+  - scripts/ci/baselines/bilingual-docs.txt
+
+# ---------------------------------------------------------------------------
+# Owner rulings this work item implements. These are decisions, not options
+# for the implementer to re-litigate. Each is restated with its constraint.
+# ---------------------------------------------------------------------------
+
+owner_decisions:
+
+  - id: OD-18
+    question: "Who is authorised to make the approved embedded-bilingual ruling reach the gate it describes?"
+    ruling: "A new AID, not a widening of AID-2026-054."
+    constraints:
+      - "AID-2026-054 is limited to scripts/check_bilingual_docs.py and scripts/bilingual-baseline.txt. That limit is not an implicit authorisation for a second script and a second baseline."
+      - "AID-2026-051 is not a source of authority either; its gate_behaviour_change is NOT_GRANTED."
+      - "The 81 must not be lowered to 15 directly. The predicate changes first; the baseline follows from what the predicate actually produces."
+      - "The 66 embedded documents must stop being counted as gaps. The 6 already-paired sidebar paths must not be double-counted. The remaining 9 are the real backlog."
+      - "The gates.yml comment saying '81 normative paths lack an en/zh-CN counterpart' is no longer accurate and must be replaced with what the check actually measures."
+
+  - id: OD-19
+    question: "How are the three .zh-CN.md mirrors that are asked for a Chinese mirror of themselves handled?"
+    ruling: "Fix counterpart(). Do not exempt them."
+    constraints:
+      - "An exemption list freezes a wrong predicate's output as an exception list."
+      - "Gate A's side_by_side_partner() already treats these as paired; gate B must agree by correcting its own recognition, not by being told to skip them."
+      - "The fix belongs in this work item's scope, with a regression test naming all three paths plus the fourth mirror."
+
+# ---------------------------------------------------------------------------
+# Deliverables. Each is a claim a reader can check without trusting this file.
+# ---------------------------------------------------------------------------
+
+deliverables:
+  - "counterpart() identifies a path that is itself a language mirror before entering the NORMATIVE_ROOTS branch, and resolves it to its sibling rather than to docs/<lang>/<path>."
+  - "An embedded-bilingual predicate recognising cjk >= 100 and latin >= 1000 in one file, identical to the floor AID-2026-054 adopts. No second floor value is invented."
+  - "Side-by-side pairing reuses side_by_side_partner() from scripts/check_bilingual_docs.py rather than a second pairing implementation."
+  - "The baseline regenerated from 81 to the number the new predicate actually produces, as removals only and 0 additions, in the same commit."
+  - "The gates.yml comment replaced with what the check now measures, instead of '81 normative paths lack an en/zh-CN counterpart'."
+  - "At least one test per clause: mirror-not-asked-for-mirror, embedded floor inclusive at both boundaries, side-by-side recognised, and the 9 still reported."
+
+acceptance_criteria:
+  - id: AC1
+    text: "python3 scripts/check_bilingual_docs_full.py reports exactly 9 violations, and the reported set equals the nine paths listed in prompt section 2. Set equality, not an approximate count."
+  - id: AC2
+    text: "The baseline diff is 72 removals and 0 additions, and the removed set is exactly the union of the 6 side-by-side entries and the 66 embedded-bilingual entries. An addition, or a removal outside those two classes, fails this criterion."
+  - id: AC3
+    text: "The three mirror paths 02-domain-model/phase-2-domain-extension.zh-CN.md, 06-memory-context/context-implementation-coverage.zh-CN.md and 07-agent-integration/adapter-capability-tiers.zh-CN.md are no longer violations, and a .zh-CN.md mirror created in a test fixture is not asked for a mirror of itself."
+  - id: AC4
+    text: "13-engineering-decisions/technology-architecture-blueprint.md (0 CJK, 49666 bytes) is still reported as a violation. A predicate that resolves it is a predicate that accepts anything."
+  - id: AC5
+    text: "A file with cjk = 99 and latin = 5000 is still a violation, and a file with cjk = 100 and latin = 999 is still a violation. Both asserted in tests, because an inclusive floor fails silently on one side."
+  - id: AC6
+    text: "NORMATIVE_ROOTS is unchanged: same 15 entries, the 7 non-existent roots still listed, 08-bmcp-protocol still absent. Verified by diffing that hunk against the base commit. GAP-26 is a different work item."
+  - id: AC7
+    text: "scripts/ci/gate_ratchet.py with this baseline and this command exits 0 and prints regressions=0 fixed=0. A green ratchet over a stale baseline does not satisfy AC1."
+  - id: AC8
+    text: "python3 -m unittest scripts.test_check_bilingual_docs_full passes and gains at least one test per deliverable clause. The five pre-existing tests mention neither NORMATIVE_ROOTS nor .zh-CN.md siblings, which is why the defects survived."
+  - id: AC9
+    text: "python3 scripts/check_bilingual_docs.py still prints '77 frozen, 0 new gaps' with BASE_SHA and HEAD_SHA set. Gate A is not touched by this work item."
+
+independent_reviewer: NOT_ASSIGNED
+integration_reviewer: NOT_ASSIGNED
+
+review:
+  status: NOT_ASSIGNED
+  report_ref: ""
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+implementation:
+  status: NOT_STARTED
+  branch: PENDING
+  pull_request: PENDING
+  pull_request_url: PENDING
+  implementation_commit_sha: PENDING
+
+errata: []
+findings: []

@@ -11,40 +11,38 @@ import subprocess
 import sys
 from pathlib import Path
 
-NORMATIVE_ROOTS = {
-    "00-governance", "01-system-architecture", "02-domain-model",
-    "03-memory-brain", "04-memory-compiler", "05-memory-runtime",
-    "06-memory-context", "07-agent-integration", "08-protocols",
-    "09-storage-and-index", "10-security-and-governance",
-    "11-consistency-and-recovery", "12-testing-and-acceptance",
-    "13-engineering-decisions", "14-ai-development",
-}
-EMBEDDED_BILINGUAL = {
-    "00-governance/bilingual-documentation-policy.md",
-    "00-governance/drafts/GOV-DOC-001-v1.2-DRAFT.md",
-    "00-governance/bilingual-governance-migration-register.md",
-    "00-governance/templates/bilingual-issue-template.md",
-    "00-governance/templates/bilingual-umbrella-requirement-template.md",
-    "00-governance/templates/bilingual-commit-message.md",
-    "00-governance/templates/repository-policy-inheritance.md",
-    "00-governance/reports/bilingual-baseline-remediation-report.md",
-    "00-governance/reports/f06-object-reconciliation.md",
-    "14-ai-development/ai-development-standard.md",
-    "14-ai-development/AI-EXEC-UNIFICATION-RULING-001.md",
-    "14-ai-development/AI-EXEC-INDEPENDENCE-RULING-001.md",
-    "14-ai-development/PR-GOVERNANCE-001.md",
-    "14-ai-development/prompt-and-evidence-template.md",
-    "14-ai-development/prompt-authoring-standard.md",
-    "14-ai-development/iteration-lifecycle.md",
-    "14-ai-development/owner-automation-operating-model.md",
-    "14-ai-development/README.md",
-}
-OPERATIONAL_EXEMPT_PREFIXES = (
-    "14-ai-development/work-items/",
-    "14-ai-development/prompts/",
-    "14-ai-development/adr/",
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+# GOV-DOC-001 has exactly one authority for "what is normative" and "what is
+# exempt": the incremental, required gate. This file is a whole-repository
+# inventory over that authority, so it reads the constants instead of keeping
+# copies. The copies are why the two scripts disagreed about the same bytes:
+# this one named seven directories that do not exist (03-memory-brain,
+# 05-memory-runtime, 08-protocols, 09-storage-and-index,
+# 10-security-and-governance, 11-consistency-and-recovery,
+# 12-testing-and-acceptance), omitted the real 08-bmcp-protocol root, and
+# carried an 18-entry exemption list against the authority's 21.
+from check_bilingual_docs import (
+    EMBEDDED_BILINGUAL_SOURCES,
+    NORMATIVE_ROOTS,
+    PAIR_EXEMPT_PREFIXES,
 )
-ASSET_SUFFIXES = {".png", ".jpg", ".jpeg", ".svg", ".drawio"}
+
+ROOT = Path(__file__).resolve().parents[1]
+
+# The authority keeps NORMATIVE_ROOTS as a literal, so the literal can still
+# drift from the tree in silence. Deriving the set from disk turns that drift
+# into a gate failure instead of a wrong verdict.
+_DERIVED_ROOTS = {
+    path.name
+    for path in ROOT.iterdir()
+    if path.is_dir() and path.name[:2].isdigit() and path.name[2:3] == "-"
+}
+if _DERIVED_ROOTS != NORMATIVE_ROOTS:
+    sys.stderr.write(
+        "GOV-DOC-001 root sets disagree: check_bilingual_docs.NORMATIVE_ROOTS="
+        f"{sorted(NORMATIVE_ROOTS)} but the tree has {sorted(_DERIVED_ROOTS)}\n"
+    )
+    sys.exit(2)
 
 
 def tracked_paths(paths_file: str | None) -> set[str]:
@@ -69,7 +67,7 @@ def in_scope(path: str) -> bool:
 
 
 def counterpart(path: str, files: set[str]) -> str | None:
-    if path.startswith(OPERATIONAL_EXEMPT_PREFIXES):
+    if path.startswith(PAIR_EXEMPT_PREFIXES):
         return "EXEMPT: operational record/template subtree"
     if (
         path.startswith("14-ai-development/")
@@ -113,6 +111,35 @@ def counterpart(path: str, files: set[str]) -> str | None:
         zh = "docs/zh-CN/" + path
         if en in files and zh in files:
             return f"{en} + {zh}"
+        # Side-by-side pairing applies to every normative root, not only
+        # 14-ai-development. Without this branch the full scan called every
+        # side-by-side pair outside 14-ai-development a violation while the
+        # incremental gate called the same file clean, so the two required
+        # contexts disagreed about the same bytes.
+        if path.endswith(".en.md"):
+            stem = path[:-6]
+            return next(
+                (
+                    candidate
+                    for candidate in (stem + ".zh-CN.md", stem + ".md")
+                    if candidate != path and candidate in files
+                ),
+                None,
+            )
+        if path.endswith(".zh-CN.md"):
+            stem = path[:-9]
+            return next(
+                (
+                    candidate
+                    for candidate in (stem + ".en.md", stem + ".md")
+                    if candidate != path and candidate in files
+                ),
+                None,
+            )
+        stem = path[:-3]
+        for candidate in (stem + ".en.md", stem + ".zh-CN.md"):
+            if candidate != path and candidate in files:
+                return candidate
         return None
     return "EXEMPT: outside normative roots"
 
@@ -140,7 +167,9 @@ def main() -> int:
     violations: list[tuple[str, str]] = []
     excluded = 0
     for path in docs:
-        if path in EMBEDDED_BILINGUAL or Path(path).suffix.lower() in ASSET_SUFFIXES:
+        # `docs` is already Markdown-only, so the authority's asset suffixes
+        # cannot match here and are not consulted.
+        if path in EMBEDDED_BILINGUAL_SOURCES:
             excluded += 1
             continue
         expected = counterpart(path, files)
@@ -177,7 +206,7 @@ def main() -> int:
             "|---:|---|---|",
         ]
         lines += [
-            f"| {i} | \`{src}\` | \`{want}\` |"
+            f"| {i} | `{src}` | `{want}` |"
             for i, (src, want) in enumerate(violations, 1)
         ]
     else:

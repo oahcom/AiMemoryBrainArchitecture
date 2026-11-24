@@ -41,6 +41,45 @@ class ValidationError(Exception):
     """Raised when inheritance evidence is invalid."""
 
 
+SHALLOW_HISTORY_ERROR = (
+    "cannot verify policy inheritance provenance on a shallow clone; "
+    "run git fetch --unshallow"
+)
+
+
+class ShallowRepositoryError(RuntimeError):
+    """Raised when a pin cannot resolve because history is truncated."""
+
+
+def git_history_is_shallow(repo: Path) -> bool:
+    """Whether this clone holds truncated history. Fails closed if unknowable.
+
+    Shallow history is not itself a defect: a clone deep enough to contain the
+    pinned source commit answers correctly. It only matters once the pin fails
+    to resolve, because then "absent here" and "never existed" are
+    indistinguishable -- and calling that a content violation is a fabrication.
+    """
+    result = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "--is-shallow-repository"],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(
+            "git rev-parse --is-shallow-repository failed: "
+            f"{result.stderr.strip() or 'no diagnostic'}"
+        )
+    answer = result.stdout.strip().lower()
+    if answer == "true":
+        return True
+    if answer == "false":
+        return False
+    raise RuntimeError(
+        "Unable to determine whether the Git repository has complete history: "
+        f"unexpected rev-parse output {result.stdout!r}"
+    )
+
+
 def git(repo: Path, *args: str) -> str:
     try:
         result = subprocess.run(
@@ -60,6 +99,7 @@ def git(repo: Path, *args: str) -> str:
 def validate_declaration(
     declaration: dict,
     repo: Path,
+    shallow: bool = False,
 ) -> list[str]:
     errors: list[str] = []
 
@@ -98,12 +138,20 @@ def validate_declaration(
         return errors
 
     try:
-        actual_commit = git(
-            repo,
-            "rev-parse",
-            "--verify",
-            f"{SOURCE_COMMIT}^{{commit}}",
-        )
+        try:
+            actual_commit = git(
+                repo,
+                "rev-parse",
+                "--verify",
+                f"{SOURCE_COMMIT}^{{commit}}",
+            )
+        except ValidationError:
+            # The pin may exist upstream and simply lie below this clone's
+            # horizon. Calling that a content violation would be a
+            # fabrication, so truncated history is INCOMPLETE, not a failure.
+            if shallow:
+                raise ShallowRepositoryError(SHALLOW_HISTORY_ERROR) from None
+            raise
 
         if actual_commit != SOURCE_COMMIT:
             errors.append(
@@ -173,6 +221,15 @@ def main() -> int:
         return 1
 
     try:
+        shallow = git_history_is_shallow(repo)
+    except RuntimeError as exc:
+        print(
+            f"::error::Unable to determine Git history completeness: {exc}",
+            file=sys.stderr,
+        )
+        return 2
+
+    try:
         declaration = json.loads(
             declaration_path.read_text(encoding="utf-8")
         )
@@ -180,7 +237,12 @@ def main() -> int:
         errors = validate_declaration(
             declaration,
             repo,
+            shallow,
         )
+
+    except ShallowRepositoryError as exc:
+        print(f"INCOMPLETE: {exc}", file=sys.stderr)
+        return 2
 
     except (OSError, json.JSONDecodeError, ValidationError) as exc:
         print(f"FAIL: {exc}", file=sys.stderr)
