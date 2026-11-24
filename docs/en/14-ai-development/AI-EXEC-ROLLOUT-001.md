@@ -1,3 +1,47 @@
+---
+document_metadata:
+  domain: ai-development
+  role: guide
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-24"
+      last_verification_note: "This file has no front-matter approval record. Its body header states ADOPTED with an owner-directed adoption in Issue #218 comment #6971736655. That is recorded here as prose evidence only; this metadata does not assert a machine-verifiable approval binding."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "14-ai-development/AI-EXEC-ROLLOUT-001.md"
+    en: null
+    zh-CN: null
+---
 # AI-EXEC-ROLLOUT-001 — AI Development Ecosystem Loop Rollout Plan
 # AI Development Ecosystem Loop Pilot Plan — Close the Loop First, Then Harden
 
@@ -80,7 +124,7 @@ In this project, the ecosystem loop is the **complete operation of AI-PROC-001 S
 
 ### L5 Review Loop (Strict NR-001 Execution) ⭐ Breakpoint ⑥
 
-- For R2/R3: review in a **new independent ChatGPT conversation**; classify findings as `BLOCKER/P0–P3` and dispositions as `PASS/CONDITIONAL PASS/FAIL/NOT REVIEWABLE`; `COMMENT` ≠ `APPROVE`, the same GitHub identity is not independent, and role-play must not impersonate approval (verbatim PR-GOVERNANCE §5).
+- For R2/R3: review in a **new independent ChatGPT conversation**; classify findings as `BLOCKER/P0–P3` and dispositions as `PASS/CONDITIONAL PASS/FAIL/NOT REVIEWABLE`; `COMMENT` ≠ `APPROVE`; independence is a property of the reviewing session, not of the GitHub account (role-play inside the authoring session is not independent); and role-play must not impersonate approval (PR-GOVERNANCE §5, as amended 2026-11-24).
 - Exceptions are limited to time-bounded R2/R3 waivers, explicitly recorded and counted (≤ 2 per iteration); for R0/R1, distinguishing author from reviewer is sufficient.
 
 ### L6 Feedback Loop ⭐ Breakpoint ⑦
