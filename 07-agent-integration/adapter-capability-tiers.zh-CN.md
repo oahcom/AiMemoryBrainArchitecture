@@ -13,7 +13,8 @@ document_metadata:
         included_sections: []
         included_assets: []
       approval_applicability: Not-Applicable-To-Current-Version
-      evidence_reference: []
+      evidence_reference:
+        - "07-agent-integration/adapter-capability-tiers.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
