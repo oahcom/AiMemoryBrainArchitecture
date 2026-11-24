@@ -1,3 +1,43 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "This work record documents direct pushes to main and their measured provenance. It is not an approval and does not grant authority. Section 15 states its own measurement basis and the fields that could not be recovered."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+---
 # GOV-NC-2026-11-20-DIRECT-MAIN-001 — Register of Direct Pushes to `main`
 
 **Chinese primary**: [`GOV-NC-2026-11-20-DIRECT-MAIN-001.md`](GOV-NC-2026-11-20-DIRECT-MAIN-001.md) (this file's counterpart; the Chinese version is authoritative for wording, this version for English readers)
@@ -657,3 +697,197 @@ Until a decision is made, no technical measure changes this register's `OPEN` st
 ---
 
 **Status**: `OPEN` / `NOT_REMEDIATED` / **scale 53** / **nature escalated from "process slip" to "deliberate choice under a known rule, rationalised in writing"**; round three adds: **continues across parallel identities, and now includes a commit identity that cannot be attributed to any account**; round four adds: **corrective measure C-3 proven non-executable under the current platform plan**
+
+---
+
+## 15. Single-commit provenance record: `54ea3977` (Issue #638)
+
+**Record date**: 2026-11-24
+**Owning Issue**: [#638](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/638) — "[REQ-03 P1] Recover direct-main authorization and provenance for commit 54ea3977"
+**Carrier**: this PR. This section is the register's provenance entry for a single direct-push commit; it does not open a separate register file.
+**Measurement baseline**: `main` @ `882ed439f639853d311348d67038bf9e4ef02d8e` (live API `main` head, 2026-11-24T10:24:16Z)
+
+### 15.1 Why this section rather than a new register
+
+Sections 1–14 record **scale and pattern** (45 → 53 → 62 direct pushes). This section records **one commit's recoverability boundary**, because #638 does not ask for "one more commit on the list" — it asks whether this commit's authorization can be proven at all.
+
+The register already defines the determination method (§1: call `/commits/{sha}/pulls`; an empty array means direct push), but its census window closed at 2026-11-20T14:20Z. `54ea3977` was committed **two days later**, so it never entered any round of this register's count — that gap is itself a coverage defect, recorded in §15.8 as P-2.
+
+### 15.2 Recoverable commit facts (all API-measured, none inferred)
+
+| Field | Value | Source |
+|---|---|---|
+| commit SHA | `54ea39771af33c2e68d94515ca159cd74b18287f` | `GET /repos/{repo}/commits/{sha}` |
+| parent SHA | `968a81db5ba83b767713e29655ad0af439f87e29` (single parent, not a merge) | same, `parents[].sha`; `git rev-list --parents -n1` |
+| subject | `feat(bmcp): expose validate/digest as MCP tools instead of an empty capability set` | same, `commit.message` |
+| author identity | `ChatGPT Automation <automation@users.noreply.github.com>` | same, `commit.author` |
+| committer identity | `ChatGPT Automation <automation@users.noreply.github.com>` | same, `commit.committer` |
+| signature | `verified: false`, `reason: unsigned` | same, `commit.verification` |
+| author/committer time | `2026-11-22T13:48:07+08:00` = `2026-11-22T05:48:07Z` | same; `git log --format=%aI/%cI` |
+| changed files | 3 files, `+344 / −12` | same, `files[]`, `stats` |
+| ancestor of `main` | yes; `compare/main...54ea3977` → `status: behind`, `ahead_by 0`, `behind_by 343` | `GET /repos/{repo}/compare/main...54ea3977` |
+
+Per file (from `files[]`):
+
+| Path | Status | ±lines | blob SHA |
+|---|---|---|---|
+| `crates/bmcp-server/src/lib.rs` | modified | +172 / −8 | `8ce8593bcc1f24a509bb08bd81e7e799aa2425cf` |
+| `crates/bmcp-server/tests/rt_scenarios.rs` | modified | +2 / −4 | `9c58364dea9012470346242f140f1e831af58366` |
+| `crates/bmcp-server/tests/tool_dispatch.rs` | added | +170 / −0 | `111b89555243081b89755518b7df3013c7899c19` |
+
+Position on the first-parent chain: entry 203 of `git rev-list --first-parent origin/main`, i.e. a linear direct push, not a merge.
+
+### 15.3 Fields that cannot be recovered (each with its reason)
+
+No inference. The following fields exist in no queryable carrier and are recorded as **unavailable**:
+
+| Field | Status | Reason and search scope |
+|---|---|---|
+| producing ChatGPT session ID | **UNAVAILABLE** | No in-repo record; `grep -r` for this SHA over the whole tree returns **0 matches**. The #638 body supplies none |
+| execution prompt version / hash | **UNAVAILABLE** | Same. No prompt file, no manifest, no Work Item link. Nothing under `14-ai-development/work-items/` references this SHA |
+| Owner / delegation authorizing the direct write to `main` | **UNAVAILABLE** | The commit message carries no `Authorized by:` segment (contrast `DIRECT-PUSH-RATIFICATION-ffc44c31`, whose message does). No instrument, issue comment or ADR in the repository points at this write |
+| authorization scope and validity window | **UNAVAILABLE** | No authorizing carrier exists, so neither scope nor start/end can be bounded |
+| independent review (different session, different prompt) | **ABSENT** | See §15.4. Not "not found" — no review carrier exists |
+| merge event / merger | **NOT APPLICABLE** | No PR, therefore no merge event. `pulls` is `[]`; there is no `merged_by` / `merged_at` |
+| exact-Head checks at commit time | **NOT EXECUTED** | See §15.5 |
+
+### 15.4 Review: absent, and not merely "not found yet"
+
+| Retrieval path | Returned | Meaning |
+|---|---|---|
+| `GET /repos/{repo}/commits/{sha}/pulls` | `[]` | no PR carrier → no PR review, no review comment, no review state |
+| `GET /repos/{repo}/commits/{sha}/comments` | `0` records | no commit-level comments |
+| `GET /repos/{repo}/commits/{sha}/check-runs` | 3, all `failure` | see §15.5 |
+| `GET /repos/{repo}/commits/{sha}/status` | `state: pending`, `total_count: 0` | no commit statuses |
+| `GET /search/issues?q=repo:{repo} 54ea3977` | 4 hits: `#638` (issue), `#348` (issue), `#611` (PR, closed), `#264` (issue) | three only mention the SHA in prose; `#611` is a search match with no carrier relationship (its head is `d95cb4eb`, base `1effc423`, neither of which is this SHA) |
+| `GET /search/issues?q=repo:{repo} "expose validate/digest as MCP tools"` | 3 hits: `#638`, `#732` (PR, closed), `#264` | `#732` is a gap-10 errata with head `eeff8507` and base `021f5a3f`, unrelated to this SHA |
+
+Recording the exclusions matters too: `#611` (opened 2026-11-22T05:40:34Z, merged 06:17:12Z) and `#732` both appear in the search, but neither head nor base SHA contains `54ea3977`, and both report `reviews: 0`. **Neither** may be cited as a review carrier for this commit.
+
+The only upstream carrier that mentions the defect in this commit is Issue **#617** (`bmcp-server: return MCP CallToolResult for tools/call`), which states:
+
+> Main commit `54ea39771af33c2e68d94515ca159cd74b18287f` added `tools/list` and `tools/call` to `bmcp-server`. The current `tools/call` response shape is not compliant with the declared MCP protocol version `2024-11-05`.
+
+**This is not a review of this commit.** It is a defect finding, filed after the commit, by `oahcom` (the same identity that wrote this record). Under `PR-GOVERNANCE-001` §5, "a review performed through the same connected GitHub identity as the author is not independent", and it does not satisfy #638's independence baseline of "different session plus different prompt". This record does not count it as a review.
+
+### 15.5 Check state at commit time: `NOT_EXECUTED`
+
+All three check runs are push-triggered and were created 1–2 minutes after the commit:
+
+| check | conclusion | started (Z) | completed (Z) | job id | `runner_name` | `runner_id` | `steps` |
+|---|---|---|---|---|---|---|---|
+| `rust-workspace-test` | `failure` | 05:49:49 | 05:49:56 | `137112019738` | `""` | `0` | `0` |
+| `audit` | `failure` | 05:49:49 | 05:49:51 | `137112019710` | `""` | `0` | `0` |
+| `GOV-DOC-002 metadata checks` | `failure` | 05:49:49 | 05:49:51 | `137112019454` | `""` | `0` | `0` |
+
+With `runner_name == ""`, `runner_id == 0` and `steps == []` all holding, the register's established rule (§3 here and `MERGE-AFTER-RULING-003` §2: `steps==0 && runner_name==""` → `NOT_EXECUTED`) applies: these three results are **not executed**, neither PASS nor substantive FAIL.
+
+The accurate statement is therefore that the commit passed through **no executed check**; `failure` is only the surface value of "never started". This also shows Actions was not the producer of the commit — it merely attempted to check it afterwards, and did not start.
+
+One timing fact, useful for bounding "was there a gate at the time": the tree at `54ea3977` does **not** contain `.github/workflows/gates.yml` (`git cat-file -e 54ea3977:.github/workflows/gates.yml` → ABSENT). That file first appears in `9f30610f` (`ci: wire the existing gates into CI and ratchet the two that are already red (#669)`, 2026-11-22T18:36:31+08:00), **4 h 48 min later**. Thirteen workflows existed at the time (`git ls-tree 54ea3977:.github/workflows/`).
+
+### 15.6 Was the carrier exception authorized?
+
+`PR-GOVERNANCE-001` §3 gives exactly one exception: when the merge target is a non-`main` branch. `54ea3977`'s target (its direct write target) is `main`, so it does **not** fall under that exception.
+
+Does the standard contain any other clause that could authorize a direct write to `main`:
+
+| Clause | Content | Applies here |
+|---|---|---|
+| §3 paragraph 2 | a non-`main` target needs no PR | No (target is `main`) |
+| §7 | platform enforcement is separate from process policy | No (describes platform capability, authorizes no write) |
+| Enforcement addendum §7 | emergency bypass must record authorizing actor, reason, exact SHA, skipped checks, risk acceptance, time window, and a mandatory post-event independent review | No (none recorded; and the clause only entered `main` with #750 on 2026-11-23, after this commit) |
+
+**Conclusion**: the direct-push carrier for `54ea3977` has **no** discoverable authorization basis. This is not "the authorization exceeded its scope"; it is "no authorization record exists".
+
+### 15.7 Disposition
+
+```
+PROVENANCE_UNRECOVERABLE — 54ea3977
+  facts recoverable : sha, parent 968a81db, 3 paths (+344/-12), unsigned, no PR
+  authorization     : not recorded anywhere; unrecoverable after the fact
+  review            : absent (no PR carrier; #617 is a defect finding, not a review)
+  carrier exception : not authorized under PR-GOVERNANCE-001 §3
+  residual risk     : accepted, bounded to bmcp validate/digest MCP tool exposure
+```
+
+**Boundaries of this disposition**:
+
+1. All four facts above are reproducible and unaffected by the missing authorization. **The content exists** and **the entry path was compliant** are two different claims; this record denies only the second.
+2. No PR is invented, no reviewer is invented, and `#611` / `#732` / `#617` are not retroactively promoted to reviews. Any of those would make the record wider than the facts.
+3. Residual risk is bounded by the change's content: the commit replaces an empty capability set with two read-only tools, `validate` and `digest`, removes no authorization check and adds no write path. The effect of an unauthorized version of this change is "a capability that returned nothing now returns something", not "a boundary moved". This bound follows the #638 ruling in comment `7125721934`, which this record re-checked and agrees with.
+4. The `tools/call` response-shape defect is tracked separately by **#617**. **This section does not claim it is fixed**, and the provenance conclusion must not be read as a disposition of that defect.
+
+### 15.8 Corrective actions (proposed here; none executed)
+
+| # | Action | Status |
+|---|---|---|
+| P-1 | Turn §1's determination method from a one-off census into a continuous check: on `push` to `main`, call `/commits/{sha}/pulls` for each new commit, and emit a failing check or a record that must be archived when the array is empty | Not executed. Carried by #134. Note the policy text already exists on the `push` branch of `document-management.yml`, but that workflow does not check PR membership |
+| P-2 | Replace this register's window ("most recent 100 commits @ `0b6cebdf`") with a re-runnable rolling window, so `54ea3977` and post-2026-11-20 direct pushes stop falling outside it | Not executed. Measured here: `grep -c 54ea3977` on this register was **0** before this revision |
+| P-3 | Maintain a per-commit list for the synthetic identity `ChatGPT Automation`. Measured: **15** commits on `main`, of which **9** have `pulls == []`, **2** are merge commits (each carrying 1 PR) and **4** carry a PR | Partly done: §15.9 publishes that list, so `54ea3977` has a corresponding row |
+
+### 15.9 All 15 commits by that synthetic identity (each API-measured)
+
+Method: call `/commits/{sha}/pulls` per SHA; `parents` > 1 marks a merge commit. Captured 2026-11-24.
+
+| # | commit | time (Z) | parents | associated PR | verdict |
+|---|---|---|---|---|---|
+| 1 | `7228c886` | 2026-11-21T09:56:40 | 1 | #463 | via PR |
+| 2 | `46c4b677` | 2026-11-21T10:49:48 | 1 | #483 | via PR |
+| 3 | `cdd76a56` | 2026-11-21T10:58:47 | 1 | #483 | via PR |
+| 4 | `2651e226` | 2026-11-21T13:38:15 | 1 | `[]` | **direct** |
+| 5 | `c553aeeb` | 2026-11-21T18:12:09 | 1 | #536 | via PR |
+| 6 | `cf460ba4` | 2026-11-21T19:02:28 | 2 | #433 | merge commit |
+| 7 | `6e9214dc` | 2026-11-22T02:34:56 | 1 | `[]` | **direct** |
+| 8 | `87d503ba` | 2026-11-22T02:36:28 | 1 | `[]` | **direct** |
+| 9 | `4eacb5b4` | 2026-11-22T04:24:56 | 1 | `[]` | **direct** |
+| 10 | `d89fd5fa` | 2026-11-22T04:28:15 | 1 | `[]` | **direct** |
+| 11 | `6897e53c` | 2026-11-22T05:12:19 | 1 | `[]` | **direct** |
+| 12 | **`54ea3977`** | 2026-11-22T05:48:07 | 1 | `[]` | **direct — the subject of this record** |
+| 13 | `71499e76` | 2026-11-22T06:05:18 | 1 | `[]` | **direct** |
+| 14 | `001248d4` | 2026-11-22T07:17:31 | 1 | `[]` | **direct** |
+| 15 | `8a4be6d2` | 2026-11-22T10:14:55 | 2 | #659 | merge commit |
+
+**Totals for this identity: of 15 commits, 9 have no PR carrier, 2 are merge commits and 4 went via PR.** All 15 are `verified: false` (`reason: unsigned`).
+
+The purpose of this table is to make the proportion visible, not to fold nine cases into one disposition: `54ea3977` is one of those 9, and the other 8 have **no** provenance record of their own. This register does not claim those 8 are covered by this section.
+
+### 15.10 What this section deliberately does not decide
+
+- **It does not determine** which natural person, session or tool stands behind `ChatGPT Automation`. That email resolves to a real GitHub user account `automation` (id `289953`, registered 2010-05-28); the account is public, but as a `users.noreply.github.com`-style commit identity it points at no collaborator of this repository. Measured `collaborators` for this repository is **1** (`oahcom`, `admin: true`), so even an existing account cannot write here. That fact and "who executed the commit" are separate questions; this section infers no executor from it.
+- **It does not judge** whether the commit's technical content is correct or desirable. #617 tracks its defect; this section neither duplicates nor prejudges that.
+- **It does not revert** the commit, rewrite history, or re-attribute it.
+- **It does not read** `PROVENANCE_UNRECOVERABLE` as "authorization was granted and then lost". It has exactly one meaning: **this write does not produce an authorization record by design** — synthetic identity, unsigned, no PR — and those three together make after-the-fact recovery structurally infeasible, not merely under-attempted.
+- **It does not extend** this section's conclusion to the other 8 direct pushes in §15.9.
+
+### 15.11 Reproduction commands for this section
+
+```bash
+# commit metadata
+git log -1 --format='%H%n%P%n%an <%ae>%n%cn <%ce>%n%aI%n%cI%n%G?' 54ea3977
+git show --name-status --format='' 54ea3977
+
+# containment
+git merge-base --is-ancestor 54ea3977 origin/main && echo ancestor
+git rev-list --first-parent origin/main | grep -n 54ea3977
+
+# carrier
+curl -s -H "Authorization: token $TOKEN" \
+  https://api.github.com/repos/oahcom/AiMemoryBrainArchitecture/commits/54ea3977/pulls
+# -> []
+
+# were the checks executed
+curl -s -H "Authorization: token $TOKEN" \
+  https://api.github.com/repos/oahcom/AiMemoryBrainArchitecture/commits/54ea3977/check-runs
+# -> 3 check_runs, all conclusion=failure; job detail: runner_name="", runner_id=0, steps=[]
+
+# is the SHA cited by any file in the tree
+grep -rn 54ea3977 --include='*.md' --include='*.json' --include='*.yaml' .
+# -> 0 matches
+
+# did gates.yml exist at that commit
+git cat-file -e 54ea3977:.github/workflows/gates.yml   # -> ABSENT
+```
+
+---
+
