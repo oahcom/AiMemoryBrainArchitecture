@@ -106,6 +106,15 @@ owner_decisions:
       - "CHECK_VERSION must be 2026-11-24.4 when A/B lands."
       - "This ruling governs admission policy, not merge authorisation."
 
+  - id: R7
+    question: "Are the legacy work-item ID families still live, so a new one may be created?"
+    ruling: "No. D3 is closed as legacy history. The FIX-*, P2-T2-* and ADOPTION-EVIDENCE-* families are retired."
+    constraints:
+      - "Existing records are preserved permanently; the historical D3 classification is not rewritten."
+      - "Creating a new ID in these families, or a new manifest under one, is prohibited."
+      - "The 11 paths remain refused and no D3 admission rule may be written."
+      - "Closure means the question is no longer open. It does not make any of the 11 admissible."
+
 # ---------------------------------------------------------------------------
 # The classification, as measured. These are the buckets the implementer works
 # from. The prompt carries the per-group evidence; this block carries the counts
@@ -202,9 +211,11 @@ classification:
         - id: D3
           shape: "14-ai-development/work-items/*/{manifest,authorization-manifest}.yaml where the ID is not AID-YYYY-NNN"
           count: 11
+          status: "CLOSED AS LEGACY HISTORY (Owner ruling R7)"
           question: "Are the legacy ID families (FIX-2026-P1-*, P2-T2-*, ADOPTION-EVIDENCE-*) still live, so a new one may be created?"
           if_yes: "The rule must name those families explicitly, and the wildcard stays refused."
           if_no: "They stay inadmissible and the 11 are frozen history."
+          ruling: "Closed as legacy history. The families FIX-*, P2-T2-* and ADOPTION-EVIDENCE-* are retired. Existing records and the D3 classification are preserved permanently; creating a new ID of these families, or a new manifest under one, is prohibited; the 11 paths stay refused and no D3 admission rule may be written. Closure means the question is no longer open, not that the paths became admissible."
         - id: D7
           shape: "requirements.txt under 08-bmcp-protocol/tests/conformance/*/"
           count: 1
@@ -254,6 +265,7 @@ acceptance_criteria:
   - id: AC6
     criterion: "Category D is stated, not decided."
     measurement: "One subsection per D group with the question and both candidate answers."
+    baseline_revision: "Superseded by rulings R5 and R7. D7, D17, D19 and D20 were decided and admitted; D3 was closed as legacy history without becoming admissible. The original criterion is kept because it describes what this registration had to deliver at the time, and the D groups still carry both candidate answers."
   - id: AC7
     criterion: "CHECK_VERSION differs from 2026-11-24.1 and prints."
     measurement: "Grep the workflow log for the new version string."
@@ -273,7 +285,8 @@ acceptance_criteria:
 implementation:
   status: DELIVERED
   branch: "policy/ab-admission-24.4"
-  pr: null
+  pr: 946
+  merge_authorisation: "NOT AUTHORISED (Owner ruling, round 26). Technical acceptance passed; D1 remains unsatisfied and no workaround is permitted."
   note: "Ten A/B rules and four D rules are now in the gate at CHECK_VERSION 2026-11-24.4. Measured over the original 113-path candidate inventory: 83 admitted, 30 refused. The refused 30 are C 19 plus D3 11, both ruled closed. AC8 and AC9 were re-measured against the whole inventory rather than against the intended paths only."
 
 findings:
