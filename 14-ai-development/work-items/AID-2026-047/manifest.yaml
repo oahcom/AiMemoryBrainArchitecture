@@ -61,7 +61,7 @@ implementation:
   branch: feat/context-delivery-attempt-ledger-2026-11-22
   pull_request: 629
   pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/629
-  implementation_commit_sha: PENDING
+  implementation_commit_sha: c26c11e37f698c0e7f853a43b0d32b3eb9c81df8
   merge_commit_sha: 9a71aaa631b3f2ac6fc570bc6f0820700d0b5e43
 
 authorization:
