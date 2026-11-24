@@ -255,7 +255,7 @@ them changes; what changes is what they support.
 
 | Claim | Where | Status |
 |---|---|---|
-| "Remedy 3 is circular … demoting §5 requires disobeying §5" | §4, §7 ruling 1 | **False.** The §9 governance review is supplied by a separate session. Remedy 3 was executable all along; it was executed. |
+| "Remedy 3 is circular … demoting §5 requires disobeying §5" | §4, §7 ruling 1 | **False.** The §9 governance review is supplied by a separate session, so the route was open all along — #935 used it on 2026-11-24. Note what that did and did not do: it amended the criterion; it did not demote §5. See §9.2. |
 | "Remedies 1 and 2 are unavailable until a second write-capable identity exists" | §3, §7 ruling 2 | **Half false.** Remedy 1 is unavailable — GitHub counts *users* and forbids self-approval, and that is a platform fact §5 does not touch. Remedy 2 as *specified in §1* is a workflow returning `HOLD` when `author == reviewer`; a workflow reads accounts, not sessions, so that mechanism still cannot distinguish the case it was meant to catch. The *rule* is now satisfiable; the *instrument* named here still is not. |
 | "Every merge continues to be a §5 violation until a second write-capable identity exists" | §8 | **False.** A second session supplies the independence element. The Owner-approval element for §5-scope changes still requires an accountable human. |
 | "That is structural and nobody's fault" | §6 | **False, and it was doing work** — see §9.3. |
@@ -274,8 +274,17 @@ administrator, no human.
 
 That is not a hypothetical. PR #935 amended §5 on 2026-11-24 through exactly
 this route: bilingual parity, exact-Head governance review, no second identity
-involved. The remedy this document declared unavailable was used **the next day**:
-this document is `DECIDED — 2026-11-23`, and #935 merged 2026-11-24.
+involved. The *route* §4 declared closed was open **the next day** — this
+document is `DECIDED — 2026-11-23`, and #935 merged 2026-11-24.
+
+**Precision, because the distinction is the whole point.** Remedy 3 as 008 §10.5
+worded it is *demote §5 from Normative to Informative*. #935 did not do that. It
+**amended the criterion** and left §5 Normative. So what #935 proves is that the
+§9 route is available — which is the proposition §4 denied — not that remedy 3
+has been carried out. Calling the amendment "remedy 3 executed" would be the same
+error one level up: a shared route taken for a shared act. As of this erratum,
+§5 is still Normative, still in force, and the demotion 008 §10.5 offered is still
+an unmade decision.
 
 ### 9.3 The error's direction, which is the useful part
 
@@ -320,9 +329,18 @@ Almost everything. Specifically:
 ### 9.5 What this creates
 
 Not a decision. §7's ruling that "008 §10.5's choice is not available to any
-session" is withdrawn — two of the three are available. Choosing among them is
-the Owner's, and this document declines to make that choice on the Owner's
-behalf, which is the one thing in §7 that does not need correcting.
+session" is withdrawn. The accurate state is narrower than "two of the three are
+available":
+
+| Remedy | State after the amendment |
+|---|---|
+| 1 — enable `required_pull_request_reviews` | **Still unavailable.** GitHub counts *users*, forbids self-approval, and there is one user. |
+| 2 — `HOLD` when `author == reviewer` | **Available as a rule, not as the named instrument.** A workflow reads accounts; the new test is per-session. It would need to be specified differently to mean what it says. |
+| 3 — demote §5 | **Available.** §9's review requirement is satisfiable by a separate session, and #935 proved it by using that route. Not done: §5 is still Normative. |
+
+Choosing among them is the Owner's, and this document declines to make that
+choice on the Owner's behalf, which is the one thing in §7 that does not need
+correcting.
 
 What this document can say without exceeding its role: the reason it gave for
 refusing to choose was that no choice existed. That reason is gone. The choice
