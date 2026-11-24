@@ -54,6 +54,16 @@ prompt_provenance_note: >-
   is authored by the REQ-04 managing session (#265 7034222133 item 4); file
   assembly and routing metadata by L0-MAIN-WRITER-01. This is not evidence of
   any historical T1.
+prompt_amendment_note: >-
+  prompt-v1.md line 61 says the session must not claim an independent GitHub
+  identity (platform_identity_independence: NOT_ESTABLISHED). That remains
+  correct as a statement about a second ACCOUNT and is NOT amended here: the
+  2026-11-24 baseline change (GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036)
+  makes independence a property of the reviewing session, so this session's
+  review counts as independent without any second account. The prompt itself is
+  FROZEN at sha256 a212497f...; editing it would invalidate the pin and the
+  bytes actually dispatched. Read line 61 as: no second account is claimed and
+  none is needed.
 
 historical_t1_status: NOT_FOUND
 

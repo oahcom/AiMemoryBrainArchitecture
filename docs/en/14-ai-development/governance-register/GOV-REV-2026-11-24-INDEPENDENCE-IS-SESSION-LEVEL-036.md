@@ -154,9 +154,11 @@ document_metadata:
 grep -n "property of the reviewing session" 14-ai-development/PR-GOVERNANCE-001.md
 grep -n "审查会话的属性" 14-ai-development/PR-GOVERNANCE-001.md
 
-# 2. 六处已无身份级措辞
-git grep -n "even if the session adopts a different role" -- "*.md"
--> (无输出)
+# 2. 六处已无身份级措辞。注意：在包含本文件的树上，下面第一条命令必然命中
+#    本文件 §2 引文、§4 存档与本节自身，这是预期的。
+#    判定标准是"本文件之外零命中"，不是"零输出"。
+git grep -n "even if the session adopts a different role" -- "*.md" ':!*INDEPENDENCE-IS-SESSION-LEVEL-036*'
+-> (无输出)   # 排除本文件后的真实结果
 git grep -n "作者相同 GitHub 连接身份、仅切换角色的第二个 AI 会话不构成独立审查者" -- "*.md"
 -> (无输出)
 
@@ -180,7 +182,11 @@ The owner's instruction: *independent review requires only an independent sessio
 
 ## 2. Why the old text had to change, not be reinterpreted
 
-Line 136 was not vague. It named the session dimension and denied it: *"A review performed through the same connected GitHub identity as the author is not independent, even if the session adopts a different role."* The Chinese counterpart said the same. That sentence closes the very path the baseline permits, so the baseline **replaces** it rather than reinterpreting it. And no document in this repository ever defined independence at session level: a search over every `.md` on main for `independent session`, `独立会话`, `separate session`, `different session` returns nothing. The old text was the only side, and it stood opposite the baseline.
+Line 136 was not vague. It named the session dimension and denied it: *"A review performed through the same connected GitHub identity as the author is not independent, even if the session adopts a different role."* The Chinese counterpart said the same. That sentence closes the very path the baseline permits, so the baseline **replaces** it rather than reinterpreting it.
+
+**The first version of this section got one thing wrong, corrected 2026-11-24.** It claimed that no document ever defined independence at session level, on the strength of a search for `independent session` / `独立会话` / `separate session` / `different session` returning nothing. That search result was false: on the pre-change baseline `1259f1af` those four terms hit 8 / 10 / 11 / 6 files respectively — e.g. `AI-EXEC-001.md` §15's "NR-001 independent session", `chatgpt-native-execution-model.zh-CN.md` §170's "satisfies the independent-session requirement", and `AI-EXEC-ROLLOUT-001.md`'s "NR-001 independent-session review".
+
+The correct statement: session-level independence was **already in use in many places**, but no governance clause had made it **the §5 test** — it was one step inside the NR-001 review flow, never §5 independence itself. The change therefore **promotes an already-used test into the clause's criterion**; it does not introduce a concept the repository had never seen. That distinction matters for traceability: the former can cite six months of practice, the latter cannot.
 
 ## 3. The new clause's exact boundaries
 
@@ -205,3 +211,21 @@ Session-level independence is stronger than role simulation inside one session a
 Not that session-level independence adequately covers high-risk changes — it covers the tier the baseline names, nothing more. Not that the 21 `NOT_ASSIGNED` entries will now be executed; executable is not executed. Not that the old clauses were wrong when written on 2026-11-18 — the intent changed. Not that an owner-proxy may unilaterally amend governance clauses: this was a direct owner instruction, and this file records it rather than asserting the power.
 
 **Blocking chain under the new baseline:** session-level independent review `AVAILABLE` → `UNFULFILLED` (not `BLOCKED`) → the 21 `NOT_ASSIGNED` entries are pending review tasks → the textual conflict is resolved.
+
+## 8. Reproduction
+
+```
+# 1. The clause is now session-level (run on the merge commit; on base this line
+#    does not exist yet, so an empty result is expected there)
+grep -n "property of the reviewing session" 14-ai-development/PR-GOVERNANCE-001.md
+grep -n "审查会话的属性" 14-ai-development/PR-GOVERNANCE-001.md
+
+# 2. No identity-level wording outside this file. The exclusion matcher is
+#    required: without it the command necessarily hits this file's own
+#    section 2 quotation, section 4 archive and this block. The test is
+#    "zero hits outside this file", not "zero output".
+git grep -n "even if the session adopts a different role" -- "*.md" ':!*INDEPENDENCE-IS-SESSION-LEVEL-036*'
+-> (no output)
+
+# 3. The original wording is preserved in section 4 of this file.
+```

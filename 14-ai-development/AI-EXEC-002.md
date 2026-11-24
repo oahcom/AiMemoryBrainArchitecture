@@ -135,7 +135,7 @@ document_metadata:
 1. **独立审查 = 新建一个 ChatGPT 对话**，从 GitHub 读取冻结输入（批准的提示词版本、任务记录与验收标准、base/implementation SHA、diff、测试证据、契约文档）；必须读 `prompts/global-architecture-reviewer.md`。
 2. 审查者不得只复述作者报告，须主动找反例、缺失负例、竞态窗口、范围泄漏、陈旧状态行为、兼容性破坏（AI-PROC-001 Stage 6）。
 3. **finding 用项目分级**：`BLOCKER / P0 / P1 / P2 / P3`；**处置**：`PASS / CONDITIONAL PASS / FAIL / NOT REVIEWABLE`。每条 finding 有 ID、证据、owner、严重级、状态、关闭条件；CONDITIONAL PASS 必须列限制项，不得当全量验收（AI-STD-001 §9）。**最低登记线（v1.1，与 [AI-EXEC-001](AI-EXEC-001.md) §4 对齐）**：ID + 严重级 + **回流去向**（关闭条件 + 回流落点：Issue #N / RW-YYYYMMDD / Closeout 项 k）三要素缺一即未登记；审查输出的每条 `F-n` 必须写明回流去向，反馈流才能取数。
-4. **红线（PR-GOVERNANCE-001 §5 原文，2026-11-24 修订后）**：`COMMENT` 是技术评论不是 `APPROVE`；独立性是**审查会话**的属性，不是承载它的 GitHub 账号的属性——只要审查会话不是撰写会话，即使沿用同一已连接身份，仍构成独立；在撰写会话内做 AI 角色扮演不是独立审查，也不是 Owner 批准；例外必须显式记录，不得默默豁免。
+4. **红线（转述 PR-GOVERNANCE-001 §5，2026-11-24 修订后；为缩写，非原文）**：`COMMENT` 是技术评论不是 `APPROVE`；独立性是**审查会话**的属性，不是承载它的 GitHub 账号的属性——只要审查会话不是撰写会话，即使沿用同一已连接身份，仍构成独立；在撰写会话内做 AI 角色扮演不是独立审查，也不是 Owner 批准；例外必须显式记录，不得默默豁免。
 5. **披露义务（NR-001）**：审查记录必须写明"独立 ChatGPT 对话只提供上下文/对话隔离，不是模型/统计独立，不得称多模型共识"；R3 仍须独立安全/领域专家审查 + 可复现测试证据。
 
 ## 6. 结项（Closeout）——会话的证据出口

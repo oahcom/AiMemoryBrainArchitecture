@@ -80,7 +80,11 @@ document_metadata:
 
 > 作者与审查者使用同一 GitHub 身份时，不构成独立审查，**即使会话扮演不同角色也一样**。
 
-这句话堵死的正是基线允许的那条路。所以基线不是"对旧文本的另一种解释"，而是**替换它**。同时，仓库内**没有任何文档**把独立性定义为会话级（对 main 全部 `.md` 搜 `independent session` / `独立会话` / `separate session` / `different session`，零命中），所以旧文本是唯一一侧，且站在基线的对面。
+这句话堵死的正是基线允许的那条路。所以基线不是"对旧文本的另一种解释"，而是**替换它**。
+
+**本节第一版在这里写错了一件事，2026-11-24 修正。** 第一版称「仓库内没有任何文档把独立性定义为会话级（搜 `independent session` / `独立会话` / `separate session` / `different session`，零命中）」。该搜索结论是错的：在改动前的基线 `1259f1af` 上，这四个词分别命中 8 / 10 / 11 / 6 个文件，例如 `AI-EXEC-001.md` §15 的「NR-001 独立会话」、`chatgpt-native-execution-model.zh-CN.md` §170 的「满足独立会话要求」、`AI-EXEC-ROLLOUT-001.md` 的「NR-001 独立会话审查」。
+
+正确的表述是：会话级独立性**早已在多处被使用**，但没有任何一份治理条款把它**定义为 §5 的判据**——它一直是 NR-001 审查流程里的一个环节，而不是 §5 独立性本身。因此本次改动的性质是**把已在使用的口径提升为条款判据**，而不是「引入一个仓库里从未有过的概念」。这个区别影响可追溯性：前者有六个月的实践先例可引用，后者没有。
 
 ## 3. 新版条款的准确边界
 
@@ -154,9 +158,13 @@ document_metadata:
 grep -n "property of the reviewing session" 14-ai-development/PR-GOVERNANCE-001.md
 grep -n "审查会话的属性" 14-ai-development/PR-GOVERNANCE-001.md
 
-# 2. 六处已无身份级措辞
+# 2. 六处已无身份级措辞。注意：下面两条命令在"包含本文件"的树上必然命中
+#    本文件 §4 的存档引用（3 处）与本节自身（1 处），这是预期的。
+#    判定标准是"本文件之外零命中"，不是"零输出"。
 git grep -n "even if the session adopts a different role" -- "*.md"
--> (无输出)
+-> 仅命中本文件（§2 引文、§4 存档、§8 自身）；其他文件零命中
+git grep -n "even if the session adopts a different role" -- "*.md" ':!*INDEPENDENCE-IS-SESSION-LEVEL-036*'
+-> (无输出)   # 排除本文件后的真实结果
 git grep -n "作者相同 GitHub 连接身份、仅切换角色的第二个 AI 会话不构成独立审查者" -- "*.md"
 -> (无输出)
 
