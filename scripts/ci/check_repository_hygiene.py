@@ -8,7 +8,7 @@ import sys
 from pathlib import PurePosixPath
 
 
-CHECK_VERSION = "2026-11-24.5"
+CHECK_VERSION = "2026-11-24.7"
 
 # Repository-root-relative paths, written with a leading slash.
 PROHIBITED_PATHS = (
@@ -78,6 +78,14 @@ FULL_SHA_RE = re.compile(r"[0-9a-fA-F]{40}\Z")
 # which is a rule nobody would remember to edit.
 WORK_ITEM_MANIFEST_RE = re.compile(
     r"14-ai-development/work-items/AID-\d{4}-\d{3}/manifest\.yaml"
+)
+
+# The schema registry is the one file directly under work-items/ that is not a
+# work-item directory. The path is exact: the exclusion list has to stay a
+# single file a reviewer can read in one diff, not a directory of fragments
+# that accumulate without anyone seeing the whole policy.
+MANIFEST_SCHEMA_REGISTRY_RE = re.compile(
+    r"14-ai-development/work-items/manifest-schema-registry\.yaml"
 )
 
 # D7: one explicitly approved nested conformance dependency pin.
@@ -269,6 +277,9 @@ def is_allowed_new_path(path):
     if WORK_ITEM_MANIFEST_RE.fullmatch(path):
         return True
 
+    if MANIFEST_SCHEMA_REGISTRY_RE.fullmatch(path):
+        return True
+
     if CONFORMANCE_PROVIDER_REQUIREMENTS_RE.fullmatch(path):
         return True
 
@@ -373,6 +384,14 @@ def check_new_paths(root, base_sha, head_sha):
 
 WORK_ITEMS_DIR = "14-ai-development/work-items"
 WORK_ITEMS_INDEX = "14-ai-development/work-items/INDEX.md"
+MANIFEST_SCHEMA_REGISTRY = (
+    "14-ai-development/work-items/manifest-schema-registry.yaml"
+)
+SCHEMA_REGISTRY_VERSION = "1"
+SCHEMA_REGISTRY_DISPOSITION = "EXCLUDED_FROM_MANIFEST_CONSISTENCY_GATE"
+SCHEMA_REGISTRY_FIELDS = frozenset(
+    {"path", "record_type", "disposition", "rationale"}
+)
 LOCAL_LINK_RE = re.compile(r"\]\(([^)#?\s]+)")
 
 def work_item_directories(head_paths):
@@ -416,6 +435,11 @@ def check_index_membership(root, commit, head_paths):
     `manifest.yaml` at all -- a fix item's `authorization-manifest.yaml` is a
     different document. A gate that red on half the registry the day it landed
     would be switched off, so this one does not pretend to cover it.
+
+    The separate manifest-consistency check verifies only internal lifecycle
+    field combinations in work-item manifests. It does not compare INDEX.md
+    Status cells with manifest lifecycle fields, and does not verify external
+    PR or GitHub state.
     """
     directories = work_item_directories(head_paths)
     if not directories:
@@ -462,6 +486,383 @@ def check_index_membership(root, commit, head_paths):
 
     return violations
 
+def _mapping_scalar(lines, key, indent):
+    """Return a scalar only when key is a direct child at the exact indent."""
+    pattern = re.compile(
+        rf"^{{0}}{re.escape(key)}\s*:\s*(.*?)\s*$".format(" " * indent)
+    )
+
+    for line in lines:
+        match = pattern.match(line)
+        if match:
+            return _strip_yaml_scalar(match.group(1))
+
+    return None
+
+
+def _strip_yaml_scalar(value):
+    """Strip a simple YAML comment and matching scalar quotes."""
+    value = value.strip()
+
+    if not value:
+        return None
+
+    if value.startswith("'") and value.endswith("'") and len(value) >= 2:
+        return value[1:-1]
+
+    if value.startswith('"') and value.endswith('"') and len(value) >= 2:
+        return value[1:-1]
+
+    # Comments are only recognized when preceded by whitespace.
+    value = re.split(r"\s+#", value, maxsplit=1)[0].strip()
+    return value or None
+
+
+def _implementation_mapping(lines):
+    """Return direct scalar children of the top-level implementation mapping."""
+    implementation_indent = 0
+    implementation_line = None
+
+    for index, line in enumerate(lines):
+        if re.match(r"^implementation\s*:\s*(?:#.*)?$", line):
+            implementation_line = index
+            break
+
+    if implementation_line is None:
+        return None
+
+    block = []
+    for line in lines[implementation_line + 1:]:
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+
+        indent = len(line) - len(line.lstrip(" "))
+        if indent <= implementation_indent:
+            break
+
+        block.append((indent, line))
+
+    if not block:
+        return {}
+
+    # Direct children use the minimum indentation in this mapping.
+    child_indent = min(indent for indent, _ in block)
+
+    direct_lines = [
+        line[child_indent:]
+        for indent, line in block
+        if indent == child_indent
+    ]
+
+    return {
+        "status": _mapping_scalar(direct_lines, "status", 0),
+        "pull_request": _mapping_scalar(direct_lines, "pull_request", 0),
+        "merge_commit_sha": _mapping_scalar(
+            direct_lines, "merge_commit_sha", 0
+        ),
+    }
+
+
+def _top_level_manifest_scalar(lines, key):
+    """Read a scalar from a top-level YAML mapping key only."""
+    return _mapping_scalar(lines, key, 0)
+
+
+def load_manifest_schema_registry(root, commit):
+    """Return {path: record_type} of records explicitly excluded from the gate.
+
+    Exact pairs only. A record_type on its own excludes nothing: otherwise a
+    future manifest could opt out of the gate simply by declaring a type, and
+    the registry would become a naming convention rather than a decision.
+    Wildcards, directory-level exemptions and filename prefixes are not
+    implemented, for the same reason.
+
+    The registry is read from the same committed tree as the manifests, so a
+    working-copy edit cannot widen the exclusion set.
+
+    A missing or malformed registry is an error, not an empty registry. "No
+    policy declared" and "policy unreadable" must not produce the same output:
+    only one of them means the gate legitimately has nothing to exclude.
+    """
+    try:
+        raw = run_git(
+            ["-C", root, "show", f"{commit}:{MANIFEST_SCHEMA_REGISTRY}"]
+        )
+    except RuntimeError as exc:
+        raise RuntimeError(
+            f"cannot read '{MANIFEST_SCHEMA_REGISTRY}': {exc}"
+        ) from exc
+
+    try:
+        text = raw.decode("utf-8", errors="strict")
+    except UnicodeDecodeError as exc:
+        raise RuntimeError(
+            f"'{MANIFEST_SCHEMA_REGISTRY}' is not valid UTF-8"
+        ) from exc
+
+    version = None
+    entries = []
+    current = None
+    in_records = False
+    dash_indent = None
+
+    for lineno, line in enumerate(text.splitlines(), 1):
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+
+        where = f"'{MANIFEST_SCHEMA_REGISTRY}' line {lineno}"
+
+        if not line[0].isspace():
+            key, _, value = line.partition(":")
+            key = key.strip()
+            value = value.strip()
+            current = None
+            if key == "schema_registry_version":
+                version = _strip_yaml_scalar(value)
+                in_records = False
+                continue
+            if key == "excluded_records":
+                if value:
+                    raise RuntimeError(
+                        f"{where}: 'excluded_records' must be a block "
+                        "sequence, not an inline value"
+                    )
+                in_records = True
+                continue
+            raise RuntimeError(
+                f"{where}: unexpected top-level key '{key}'"
+            )
+
+        if not in_records:
+            raise RuntimeError(
+                f"{where}: indented content outside 'excluded_records'"
+            )
+
+        stripped = line.lstrip()
+        indent = len(line) - len(stripped)
+
+        if stripped.startswith("- "):
+            dash_indent = indent
+            current = {}
+            entries.append(current)
+            stripped = stripped[2:].strip()
+            if not stripped:
+                continue
+        elif current is None or dash_indent is None or indent <= dash_indent:
+            raise RuntimeError(
+                f"{where}: entry field is not indented under a list item"
+            )
+
+        key, _, value = stripped.partition(":")
+        key = key.strip()
+        if key not in SCHEMA_REGISTRY_FIELDS:
+            raise RuntimeError(f"{where}: unexpected entry field '{key}'")
+        if key in current:
+            raise RuntimeError(f"{where}: duplicate entry field '{key}'")
+        current[key] = _strip_yaml_scalar(value)
+
+    if version != SCHEMA_REGISTRY_VERSION:
+        raise RuntimeError(
+            f"'{MANIFEST_SCHEMA_REGISTRY}': schema_registry_version must be "
+            f"'{SCHEMA_REGISTRY_VERSION}', found {version!r}"
+        )
+
+    if not in_records:
+        raise RuntimeError(
+            f"'{MANIFEST_SCHEMA_REGISTRY}': 'excluded_records' is missing"
+        )
+
+    exclusions = {}
+    for entry in entries:
+        path = entry.get("path")
+        record_type = entry.get("record_type")
+        disposition = entry.get("disposition")
+
+        if not path or not record_type or not disposition:
+            raise RuntimeError(
+                f"'{MANIFEST_SCHEMA_REGISTRY}': every entry needs path, "
+                "record_type and disposition"
+            )
+
+        if disposition != SCHEMA_REGISTRY_DISPOSITION:
+            raise RuntimeError(
+                f"'{MANIFEST_SCHEMA_REGISTRY}': '{path}' has disposition "
+                f"'{disposition}', which this gate does not implement"
+            )
+
+        if not WORK_ITEM_MANIFEST_RE.fullmatch(path):
+            raise RuntimeError(
+                f"'{MANIFEST_SCHEMA_REGISTRY}': '{path}' is not a path this "
+                "gate inspects, so excluding it would have no effect"
+            )
+
+        if path in exclusions:
+            if exclusions[path] == record_type:
+                raise RuntimeError(
+                    f"'{MANIFEST_SCHEMA_REGISTRY}': '{path}' is registered "
+                    "twice with the same record_type"
+                )
+            raise RuntimeError(
+                f"'{MANIFEST_SCHEMA_REGISTRY}': '{path}' is registered with "
+                f"two different record_type values ('{exclusions[path]}' and "
+                f"'{record_type}'); a record has one type"
+            )
+
+        exclusions[path] = record_type
+
+    return exclusions
+
+
+def check_work_item_manifest_consistency(root, commit, head_paths):
+    """Check internal lifecycle consistency in committed work-item manifests.
+
+    This is deliberately a static, repository-local check. It does not verify
+    that a PR exists, that a SHA exists in Git, or that a SHA is reachable
+    from a target branch.
+
+    Reading is scoped, not global: the top-level `status` is taken only from
+    an unindented key, and `status` / `pull_request` / `merge_commit_sha` are
+    taken only from direct children of the top-level `implementation` mapping.
+    A first-match-wins scan over the whole file would let a nested cell such
+    as `status: "FROZEN"` impersonate the lifecycle status; two manifests in
+    this repository have exactly that shape.
+
+    Each manifest lands in exactly one of three buckets. `in_scope` items are
+    checked. `excluded_by_record_type` items match a registered path and
+    record_type pair exactly, and are a different record type living at a
+    manifest path, not a manifest with missing fields. `unrecognized` items
+    are neither, and are reported by path: not a pass, just not read.
+
+    What this deliberately does NOT check, and why: a full SHA in
+    `implementation.merge_commit_sha` is not by itself evidence that
+    `implementation.status` must be MERGED. From the manifest alone the same
+    pair of fields cannot distinguish an implementation merge from a merged
+    registration or measurement package, and at least one work item records
+    the latter under `implementation.merge_commit_sha` with an Owner-
+    authorised revision entry behind it. Rejecting NOT_STARTED solely because
+    a SHA is present would therefore reject a recorded fact, so that rule is
+    withdrawn rather than narrowed. A replacement needs an independently
+    established field contract, not a stronger guess.
+    """
+    manifest_paths = sorted(
+        path for path in head_paths
+        if WORK_ITEM_MANIFEST_RE.fullmatch(path)
+    )
+
+    exclusions = load_manifest_schema_registry(root, commit)
+
+    stale = sorted(set(exclusions) - set(manifest_paths))
+    if stale:
+        raise RuntimeError(
+            f"'{MANIFEST_SCHEMA_REGISTRY}' excludes "
+            f"{len(stale)} path(s) absent from this commit: "
+            + ", ".join(stale)
+        )
+
+    violations = []
+    in_scope = 0
+    excluded = 0
+    unrecognized = []
+
+    for path in manifest_paths:
+        try:
+            raw = run_git(["-C", root, "show", f"{commit}:{path}"])
+            text = raw.decode("utf-8", errors="strict")
+        except UnicodeDecodeError as exc:
+            raise RuntimeError(
+                f"'{path}' is not valid UTF-8"
+            ) from exc
+        except RuntimeError as exc:
+            raise RuntimeError(
+                f"cannot read '{path}': {exc}"
+            ) from exc
+
+        lines = text.splitlines()
+
+        record_type = _top_level_manifest_scalar(lines, "record_type")
+        registered = exclusions.get(path)
+        if registered is not None and registered == record_type:
+            excluded += 1
+            continue
+
+        top_status = _top_level_manifest_scalar(lines, "status")
+        implementation = _implementation_mapping(lines) or {}
+        implementation_status = implementation.get("status")
+        implementation_pull_request = implementation.get("pull_request")
+        implementation_merge_commit_sha = implementation.get(
+            "merge_commit_sha"
+        )
+
+        if top_status is None and implementation_status is None:
+            unrecognized.append(path)
+            continue
+
+        in_scope += 1
+
+        # R20-01: either PR_OPEN lifecycle field requires a positive,
+        # unquoted YAML integer in implementation.pull_request.
+        if (
+            top_status == "PR_OPEN"
+            or implementation_status == "PR_OPEN"
+        ):
+            if (
+                implementation_pull_request is None
+                or not re.fullmatch(
+                    r"[1-9][0-9]*", implementation_pull_request
+                )
+            ):
+                violations.append(
+                    "manifest consistency violation: "
+                    f"'{path}': PR_OPEN requires pull_request to be "
+                    "a positive integer"
+                )
+
+        # R20-02: NOT_MERGED cannot coexist with a lifecycle state that
+        # asserts implementation has already merged or been verified.
+        if implementation_merge_commit_sha == "NOT_MERGED":
+            if (
+                top_status in {"MERGED", "VERIFIED"}
+                or implementation_status == "MERGED"
+            ):
+                violations.append(
+                    "manifest consistency violation: "
+                    f"'{path}': merge_commit_sha is NOT_MERGED while "
+                    "the lifecycle status asserts merged implementation"
+                )
+
+        # R20-03 is withdrawn, not narrowed. See the docstring: a full SHA
+        # in implementation.merge_commit_sha does not prove that
+        # implementation.status must be MERGED, and this check must not
+        # reject NOT_STARTED on the strength of that field alone.
+
+    if len(manifest_paths) != in_scope + excluded + len(unrecognized):
+        raise RuntimeError(
+            "manifest consistency accounting is broken: "
+            f"{len(manifest_paths)} manifests but "
+            f"in_scope={in_scope} excluded={excluded} "
+            f"unrecognized={len(unrecognized)}"
+        )
+
+    print(
+        "Work-item manifest consistency "
+        f"version={CHECK_VERSION} "
+        f"manifests={len(manifest_paths)} "
+        f"in_scope={in_scope} "
+        f"excluded_by_record_type={excluded} "
+        f"unrecognized={len(unrecognized)} "
+        f"violations={len(violations)}"
+    )
+
+    for path in unrecognized:
+        print(
+            "Work-item manifest consistency unrecognized shape: "
+            f"{path}",
+            file=sys.stderr,
+        )
+
+    return violations
+
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--base", help="full base commit SHA")
@@ -500,6 +901,16 @@ def main():
         membership = check_index_membership(root, head_for_denylist, head_paths)
         if membership:
             for violation in membership:
+                error(violation)
+            return 1
+
+        manifest_consistency = check_work_item_manifest_consistency(
+            root,
+            head_for_denylist,
+            head_paths,
+        )
+        if manifest_consistency:
+            for violation in manifest_consistency:
                 error(violation)
             return 1
 
