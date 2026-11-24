@@ -898,9 +898,15 @@ def run_check(
         )
 
     except CheckFailure as exc:
-        reporter.unknown(
-            "cannot complete traceability check: {}".format(exc)
-        )
+        message = "cannot complete traceability check: {}".format(exc)
+        if not (root / REGISTRY_PATH).is_file():
+            # The registry is a required input. Its absence is a repo defect,
+            # not an environment that could not be read: report it as an error
+            # so the summary line cannot say "0 errors" while the exit code
+            # says failure. Text and status must agree here too.
+            reporter.error("required registry unavailable: {}".format(exc))
+        else:
+            reporter.unknown(message)
         return summarize(reporter, 0, 0)
 
     except OSError as exc:

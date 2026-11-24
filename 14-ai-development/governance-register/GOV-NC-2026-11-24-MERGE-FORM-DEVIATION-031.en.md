@@ -185,10 +185,48 @@ What this record does not state: no attribution of `merged_by: oahcom` to a part
 
 **This subsection records one measurable state. It records no causation and no attribution.**
 
-- Established: at merge time the formal-review record for this PR was `0` records. The D1 requirement — one `Approved` formal review from an account that is not the author — therefore did not exist at that moment.
+- Established: at merge time the formal-review record for this PR was `0` records.
+  `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/896/reviews` returned `[]`.
+
+**Two things that must be kept apart: event time and the time a rule took effect.** An earlier draft
+of this subsection said "the D1 requirement therefore did not exist at that moment". That was wrong
+and has been corrected. The accurate statement is:
+
+> PR #896 was merged at `2026-11-24T06:51:52Z` and the formal-review API returned `[]`. The merge
+> precedes the persistence of the Round 22 ruling that withheld merge authorisation for #896, so it
+> cannot be treated as a violation of that Round 22 ruling. But the D1 formal-review requirement was
+> issued in Round 20; this zero-review merge is still inconsistent with that pre-existing requirement.
+> The available evidence does not support further attribution to a specific operator.
+
+That is: **D1 was already in force before the merge, so the requirement did exist at merge time — it
+was simply not satisfied.** It cannot be said that the requirement did not exist then. Nor can the
+merge be back-dated into a violation of the Round 22 withholding, whose text had not yet been
+persisted. Both time boundaries are preserved.
+
 - Not established: the ordering of this merge against any ruling. The text of the ruling on #896 was persisted in this session at `2026-11-24T06:53:07Z` (`14:53:07 +0800`; again a local file modification time, not a platform timestamp), which is about 75 seconds after the merge at `2026-11-24T06:51:52Z`.
 
 This subsection therefore does **not** say "merged in violation of a ruling". Writing an event of unknown order as an out-of-order event would contradict `OWNER-DECISION-EVENT-TIMESTAMP-PROVENANCE-001` directly. It records one fact only: **after D1 had been established, another merge occurred with zero formal reviews at merge time.** Whether this merge constituted a violation of a specific ruling is a question that requires the platform-side event sequence, and this record does not answer it.
+
+### 3.3 Follow-on instance (four): PR #927
+
+`GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/927/reviews` -> `[]`.
+
+> Post-freeze observed instances: PR #927 — 2026-11-24 — 0 formal reviews.
+
+| Item | Endpoint | Field | Value as returned |
+|---|---|---|---|
+| Formal reviews | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/927/reviews` | array length | `0` records |
+| Merge time | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/927` | `merged_at` | `2026-11-24T10:38:00Z` |
+| Merging account | same record | `merged_by.login` | `oahcom` |
+| Merge commit | same record | `merge_commit_sha` | `b3a65e54b0b0380430cc4cf8b187d3e0c9edb7a3` |
+| Commits / additions / deletions | same record | `commits` / `additions` / `deletions` | `2` / `462` / `0` |
+| Head at merge | same record | `head.sha` | `5e0a93d6301a7b04b1ee5e1a3031ece1068c1dfa` |
+
+The same boundary applies as in §3.2: D1 was in force before this merge, so the formal-review
+requirement existed at merge time and was not satisfied. This record does not infer an operator from
+it, and does not turn "this session granted no merge authorisation" into "someone violated an
+authorisation". This session's handling of that PR was: request a content review, and do not call the
+merge endpoint.
 
 ---
 

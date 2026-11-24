@@ -1,0 +1,108 @@
+work_item_id: AID-2026-058
+title: Commit the traceability checker's two input files, and stop it printing a verdict over inputs it never read
+
+class: GATE/CODE/TEST
+risk: R1
+risk_rationale: "One script's failure path plus two data files it already reads. No Rust, no transport, no authorization, no storage. The risk is not damage but silence: the current failure path prints '0 requirements / 0 work items / 0 errors' over unreadable inputs, so a wrong implementation looks identical to a correct one that found nothing. AC2 asserts the absence of six literal strings rather than the presence of an error, because the presence of an error is already true today."
+
+security_scope: "None. A JSON registry index, a four-line path baseline, and the branch in check_traceability.py that decides what to print when REGISTRY_PATH cannot be read."
+
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+implementing_ai_session: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: b3a65e54b0b0380430cc4cf8b187d3e0c9edb7a3
+tracking_issue: "Issue #266 - REQ-05 documentation governance. Raised as OD-23 after #899 was merged as a23e6cc0 with scripts/check_traceability.py but without 00-governance/requirements-registry.yaml or scripts/ci/baselines/traceability.txt. Owner ruling OD-23 selected (c) both changes, with the boundary that they must be carried by a registered work item rather than applied from the ruling itself. #926 (1259f1af) has since implemented part of (B): a missing registry is now an error-classified indeterminate rather than a silent zero. The verdict-shaped summary line remains."
+
+created_at: 2026-11-24
+updated_at: 2026-11-24
+
+prompt_id: AID-2026-058-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-058/prompt-v1.md
+prompt_status: FROZEN
+prompt_sha256: 62fb366b8733daecab0dac662e6736b722a53e3b85df7d3c20a164dcd2a68d9b
+prompt_bytes: 8328
+
+prompt_provenance_tier: T1
+prompt_provenance_note: "Frozen from the REQ-05 session that measured both missing paths with git cat-file -e origin/main, produced the degraded output by running the merged script in a directory with no registry, and read the #926 diff from git diff 882ed439..2914c32f. The four-error result was measured on a clean tree at the same commit. The session that wrote this prompt is not an independent reviewer of it."
+
+dependency_refs:
+  - scripts/check_traceability.py
+  - scripts/test_check_traceability.py
+  - 00-governance/requirements-registry.yaml
+  - scripts/ci/baselines/traceability.txt
+  - 14-ai-development/work-items/GAP-25-DEGRADED-CHECK-LOOKS-LIKE-A-PASS.md
+
+# ---------------------------------------------------------------------------
+# Owner rulings this work item implements. These are decisions, not options
+# for the implementer to re-litigate. Each is restated with its constraint.
+# ---------------------------------------------------------------------------
+
+owner_decisions:
+
+  - id: OD-23
+    question: "#899 merged the traceability checker but not the two files it reads. Commit them, make the failure path refuse to print a verdict, or both?"
+    ruling: "(c) Both. Neither substitutes for the other."
+    constraints:
+      - "Committing the inputs fixes a normal repository run; refusing to print a verdict fixes the next time an input goes missing, or a path is wrong, or the environment is incomplete."
+      - "A degraded run may say why it could not check. It may not say what it checked. 'INCOMPLETE TRACEABILITY: 0 requirements / 0 work items / 0 errors' is a verdict over unread inputs and must not be printed."
+      - "The change must be carried by a registered work item. OD-23 authorises the decision, not the commit: '不能仅凭本轮裁定直接修改仓库'."
+      - "Do not refresh the baseline to make the four errors disappear. They are the check working."
+
+authorization:
+  implementation_write: "NOT_GRANTED - this manifest registers the work; no file has been committed by the registering session"
+  gate_behaviour_change: "DECIDED by OD-23, PARTIALLY IMPLEMENTED by #926 - change (B) removes the remaining verdict line"
+  baseline_content_change: "NOT_GRANTED - AC4 asserts the baseline is byte-unchanged"
+  allowlist_change: "NOT_APPLICABLE"
+  root_membership_change: "NOT_APPLICABLE"
+
+scope:
+  files_to_create:
+    - 00-governance/requirements-registry.yaml
+    - scripts/ci/baselines/traceability.txt
+  files_to_modify:
+    - scripts/check_traceability.py
+    - scripts/test_check_traceability.py
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+independent_reviewer: NOT_ASSIGNED
+integration_reviewer: NOT_ASSIGNED
+
+review:
+  status: NOT_ASSIGNED
+  report_ref: ""
+
+implementation:
+  status: NOT_STARTED
+  branch: PENDING
+  pull_request: PENDING
+  pull_request_url: PENDING
+  implementation_commit_sha: PENDING
+
+errata: []
+findings:
+  - id: F1
+    statement: "00-governance/requirements-registry.yaml has a .yaml extension but JSON content, and scripts/check_traceability.py parses it with json.loads. The mismatch is pre-existing and harmless while both sides agree. Recorded so that an implementer does not 'fix' the extension or rewrite the file as YAML, either of which would break the parser."
+    measured_at: "1259f1af"
+    severity: informational
+  - id: F2
+    statement: "The four errors the checker reports on a clean tree are AID-2026-023, AID-2026-024, AID-2026-025 and AID-2026-026, all 'not in INDEX.md'. This is the check working, not a defect in it. AC1 asserts these four by path, and section 5 forbids refreshing the baseline to hide them."
+    measured_at: "1259f1af"
+    severity: informational
+  - id: F3
+    statement: "#926's commit message says 'It is a repository defect ... so it is now an error: exit 1, one error, and the summary word and count agree.' Measured on the merged tree, a missing registry still produces 'INCOMPLETE TRACEABILITY: 0 requirements / 0 work items / 0 errors / 1 warnings' with exit 2. The message describes the intent of the diff, not its behaviour: reporter.error() is reached only when (root / REGISTRY_PATH).is_file() is false, and in the measured empty directory it is false, yet the unknown() branch is what runs. Either the guard does not fire as written or the message was written before the final shape. Recorded because a reader who trusts the commit message would conclude this work item is already done."
+    measured_at: "1259f1af"
+    severity: material
+  - id: F4
+    statement: "This work item was first written as AID-2026-057 and renumbered after a concurrent session claimed that ID for an unrelated work item. The number was taken within minutes of this session choosing it. Two manifests under one ID is the hazard; renumbering is the fix."
+    measured_at: "b3a65e54"
+    severity: informational
