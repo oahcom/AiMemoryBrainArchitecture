@@ -1,3 +1,47 @@
+---
+document_metadata:
+  domain: ai-development
+  role: normative-standard
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-24"
+      last_verification_note: "This file has no front-matter approval record. Its body header states v1.2 PENDING ADOPTION, with v1.1 adopted via PR #256 merge 48a556491506d25e78be47957276bf3821797a0a and v1.0 via PR #230 merge 53aae842c390eac6d54f937af6cd2744dbe8d09d. Those adoption events are recorded here as prose evidence only; this metadata does not assert them as a machine-verifiable approval binding."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Normative
+  bilingual_counterpart:
+    source: "14-ai-development/AI-EXEC-002.md"
+    en: null
+    zh-CN: null
+---
 # AI-EXEC-002 — AI Prompt Execution Rules
 # AI Development Prompt Execution Details
 
@@ -94,7 +138,7 @@ Prompt approval continues to follow its Step 6 (A drafts cross-Owner tasks; the 
 1. **Independent review = a new ChatGPT conversation**, reviewing frozen inputs read from GitHub (approved prompt version, task record and acceptance criteria, base/implementation SHA, diff, test evidence, contract documents); the reviewer must read `prompts/global-architecture-reviewer.md`.
 2. Reviewers must not merely repeat the author's report; they must actively seek counterexamples, missing negative cases, race windows, scope leakage, stale-state behavior, and compatibility breaks (AI-PROC-001 Stage 6).
 3. **Finding classification**: project severity levels are `BLOCKER / P0 / P1 / P2 / P3`; **dispositions** are `PASS / CONDITIONAL PASS / FAIL / NOT REVIEWABLE`. Every finding must include ID, evidence, owner, severity, status, and closure condition; CONDITIONAL PASS must list limitations and must not be treated as full acceptance (AI-STD-001 §9). **Minimum registration threshold (v1.1, aligned with [AI-EXEC-001](AI-EXEC-001.md) §4)**: ID + severity + **feedback destination** (closure condition + feedback landing point: Issue #N / RW-YYYYMMDD / Closeout item k); if any of these three is missing, the finding is not registered. This enables the feedback flow to consume it.
-4. **Red lines (verbatim PR-GOVERNANCE-001 §5)**: `COMMENT` is a technical comment, not `APPROVE`; review by the same GitHub identity is not independent (even when the role changes); AI role-play is not Owner approval; exceptions must be explicitly recorded and never silently waived.
+4. **Red lines (verbatim PR-GOVERNANCE-001 §5, as amended 2026-11-24)**: `COMMENT` is a technical comment, not `APPROVE`; independence is a property of the **reviewing session**, not of the GitHub account that carries it — a review performed by a session that did not author the change is independent even when it reports through the same connected identity; AI role-play inside the authoring session is neither independent review nor Owner approval; exceptions must be explicitly recorded and never silently waived.
 5. **Disclosure obligation (NR-001)**: the review record must state: "An independent ChatGPT conversation provides context/conversation isolation only; it is not model/statistical independence and must not be called multi-model consensus." R3 still requires independent security/domain-expert review + reproducible test evidence.
 
 ## 6. Closeout — Evidence Exit for a Session
