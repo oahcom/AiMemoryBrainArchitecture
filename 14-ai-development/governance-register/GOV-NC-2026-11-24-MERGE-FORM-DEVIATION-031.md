@@ -183,10 +183,34 @@ subject: docs(register): record the #707 review-source correction in §13.4
 
 **本条只记录一项可测量的状态，不记录因果或归责：**
 
-- 可确证：合并时该 PR 的正式 Review 记录为 `0` 条，即 D1 所要求的「非作者的 `Approved` 正式 Review」在该时刻并不存在。
+- 可确证：合并时该 PR 的正式 Review 记录为 `0` 条。`GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/896/reviews` 返回 `[]`。
+
+**一个必须分开的两件事：事件时间与规范生效时间。** 早先草稿在此处写「D1 所要求的内容在该时刻并不存在」，这是错的，已更正。正确的陈述是：
+
+> PR #896 在 `2026-11-24T06:51:52Z` 合并，正式 Review API 返回 `[]`。该合并早于 Round 22 针对 #896 的拒绝授权文本持久化，因此不能认定为违反该项 Round 22 拒绝授权。但 D1 的正式 Review 要求已在 Round 20 作出；本次零 Review 合并仍与该既有要求不一致。现有证据不支持对具体操作者作进一步归因。
+
+即：**D1 在合并之前就已经生效，所以合并时的要求存在，只是未被满足。** 不能说「要求在当时不存在」。也不能因此把该合并倒推成违反 Round 22 的那项拒绝授权——那项文本当时尚未落盘。两个时间边界都要保留。
+
 - 不可确证：该合并与任何一次裁定的先后关系。本会话记录 #896 裁定的文本落盘时间为 `2026-11-24T06:53:07Z`（`14:53:07 +0800`，同为本地文件修改时间，非平台时间戳），晚于合并时间 `2026-11-24T06:51:52Z` 约 75 秒。
 
 因此本条**不写**「违反裁定后合并」之类的表述。把先后顺序未知的事件写成违序，会与 `OWNER-DECISION-EVENT-TIMESTAMP-PROVENANCE-001` 直接冲突。此处只登记一个事实：**在 D1 已被确立之后，又发生了一次合并时零正式 Review 的合并。** 本次合并是否构成对某一次具体裁定的违反，需要平台侧事件序列才能回答，本记录不作判断。
+
+### 3.3 后续实例（四）：PR #927
+
+`GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/927/reviews` → `[]`。
+
+> Post-freeze observed instances: PR #927 — 2026-11-24 — 0 formal reviews.
+
+| 项目 | 端点 | 字段 | 返回值 |
+|---|---|---|---|
+| 正式 Review 记录 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/927/reviews` | 数组长度 | `0` 条 |
+| 合并时间 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/927` | `merged_at` | `2026-11-24T10:38:00Z` |
+| 合并账号 | 同上 | `merged_by.login` | `oahcom` |
+| 合并提交 | 同上 | `merge_commit_sha` | `b3a65e54b0b0380430cc4cf8b187d3e0c9edb7a3` |
+| 提交数 / 增 / 删 | 同上 | `commits` / `additions` / `deletions` | `2` / `462` / `0` |
+| 合并时的 head | 同上 | `head.sha` | `5e0a93d6301a7b04b1ee5e1a3031ece1068c1dfa` |
+
+适用与 §3.2 相同的边界：D1 在本次合并之前已生效，因此合并时的正式 Review 要求存在而未被满足；本记录不据此推断具体操作者，也不把「本会话未签发合并授权」写成「有人违反了授权」。本会话对该 PR 的处理是：提交内容审查请求，未调用合并接口。
 
 ---
 
