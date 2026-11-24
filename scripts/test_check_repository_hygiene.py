@@ -508,6 +508,67 @@ class RepositoryHygieneTests(unittest.TestCase):
 
         self.assert_admission_passes(base, head)
 
+    # #891: the index is Canonical, so its membership must be falsifiable.
+    # Every directory under work-items/ needs an entry, and every entry that
+    # names a directory needs that directory. These three cases pin both
+    # directions plus the clean state.
+    def index_fixture(self, index_text, directories):
+        files = {
+            "14-ai-development/work-items/INDEX.md": index_text,
+        }
+        for name in directories:
+            files[f"14-ai-development/work-items/{name}/manifest.yaml"] = (
+                f"work_item_id: {name}\n"
+            )
+        return self.commit(files)
+
+    def test_index_membership_passes_when_every_directory_is_listed(self):
+        self.index_fixture(
+            "| [AID-2026-001](AID-2026-001/manifest.yaml) |\n"
+            "| [AID-2026-002](AID-2026-002/manifest.yaml) |\n",
+            ["AID-2026-001", "AID-2026-002"],
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        # A pass that compared nothing would look identical to a real pass, so
+        # the counts are asserted: two directories on disk, two linked paths.
+        # A zero here means the sets were empty and the check bound nothing.
+        self.assertIn("directories=2 linked=2", result.stdout)
+
+    def test_index_membership_fails_on_a_directory_with_no_entry(self):
+        self.index_fixture(
+            "| [AID-2026-001](AID-2026-001/manifest.yaml) |\n",
+            ["AID-2026-001", "AID-2026-002"],
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(result.returncode, 1, msg=result.stderr)
+        self.assertIn(
+            "::error::index membership violation: work-item directory "
+            "'14-ai-development/work-items/AID-2026-002' has no entry",
+            result.stderr,
+        )
+
+    def test_index_membership_fails_on_an_entry_with_no_directory(self):
+        self.index_fixture(
+            "| [AID-2026-001](AID-2026-001/manifest.yaml) |\n"
+            "| [AID-2026-009](AID-2026-009/manifest.yaml) |\n",
+            ["AID-2026-001"],
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(result.returncode, 1, msg=result.stderr)
+        self.assertIn(
+            "::error::index membership violation: "
+            "'14-ai-development/work-items/INDEX.md' links 'AID-2026-009/'",
+            result.stderr,
+        )
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
