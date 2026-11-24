@@ -26,11 +26,10 @@ jobs:
       - name: Check committed repository hygiene
         run: python3 scripts/ci/check_repository_hygiene.py
 
-      - name: Check pull-request new-file admission
-        if: github.event_name == 'pull_request'
+      - name: Check new-file admission
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
         run: |
           python3 scripts/ci/check_repository_hygiene.py \
             --base "$BASE_SHA" \
