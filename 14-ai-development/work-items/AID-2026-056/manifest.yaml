@@ -20,7 +20,7 @@ base_commit_sha: d40d4e095fc830cc22e7a7b5196268cecf41597e
 tracking_issue: "Issue #266 - REQ-05 documentation governance. Raised there as OD-18 after the required check 'Bilingual docs coverage (ratchet)' was measured to still count all 81 baseline paths as missing counterparts, while OWNER-DECISION-EMBEDDED-BILINGUAL-001 had already ruled 72 of them are not documentation debt. Owner ruling OD-18 selected: open a new AID rather than widen AID-2026-054."
 
 created_at: 2026-11-24
-updated_at: 2026-11-24
+updated_at: 2026-11-25
 
 prompt_id: AID-2026-056-PROMPT
 prompt_version: v1
@@ -89,8 +89,6 @@ acceptance_criteria:
     text: "13-engineering-decisions/technology-architecture-blueprint.md (0 CJK, 50488 bytes at 8e489ec1) is still reported as a violation. A predicate that resolves it is a predicate that accepts anything. (Byte count corrected from 49666 per REVIEW-01 finding M1; 49666 matches no version of the file in git history.)"
   - id: AC5
     text: "Four assertions, not two. Negative side: a file with cjk = 99 and latin = 5000 is still a violation, and a file with cjk = 100 and latin = 999 is still a violation. Positive side: a file with cjk = 100 and latin = 1000 exactly is resolved, and a file with cjk = 101 and latin = 1001 is resolved. All four asserted in tests, because an inclusive floor fails silently on either side. (Review REVIEW-01 finding B3: the original listed only the two negative cases while claiming both sides, so a predicate that resolves nothing passed it in full. The predicate does not exist at 8e489ec1 — grep for 1000 in either script returns nothing — which is why the positive side could be omitted without any test failing.)"
-  - id: AC6
-    text: "WITHDRAWN, not deferred. See AC6a/AC6b. (Original text required NORMATIVE_ROOTS to keep 'same 15 entries, the 7 non-existent roots still listed, 08-bmcp-protocol still absent'. Measured at 8e489ec1: 9 entries, 0 missing, 08-bmcp-protocol present. #910 removed the seven phantom roots. Obeying the original literally means reintroducing a defect; the criterion is unsatisfiable in the only direction that matters.)"
   - id: AC6a
     text: "This work item does not modify NORMATIVE_ROOTS. The derived-root guard introduced by #910 still exits 0."
   - id: AC6b
@@ -101,6 +99,29 @@ acceptance_criteria:
     text: "python3 -m unittest tests.test_check_bilingual_docs_full passes and gains at least one test per deliverable clause, covering the eleven AC1 paths including the two 08-bmcp-protocol records. (Module path corrected by REVIEW-01 finding B4: the original said scripts.test_check_bilingual_docs_full, which does not exist — the file is tests/test_check_bilingual_docs_full.py and the command raised ModuleNotFoundError. Also: the pre-existing tests mention neither NORMATIVE_ROOTS nor .zh-CN.md siblings, which is why the defects survived.)"
   - id: AC9
     text: "python3 scripts/check_bilingual_docs.py still prints '77 frozen, 0 new gaps' with BASE_SHA and HEAD_SHA set. Gate A is not touched by this work item."
+
+# ---------------------------------------------------------------------------
+# Criteria withdrawn before implementation. Kept here rather than deleted, so
+# the reason a requirement is missing from acceptance_criteria is auditable
+# instead of inferred. Nothing in this section is executable: no gate, script
+# or workflow reads acceptance_criteria[].text at all (grep for the key over
+# scripts/, .github/ and tools/ returns no match), so this block serves
+# readers, not checks.
+# ---------------------------------------------------------------------------
+
+withdrawn_acceptance_criteria:
+  - id: AC6
+    status: WITHDRAWN
+    disposition: "Not deferred. Superseded by AC6a and AC6b, which are the executable assertions."
+    withdrawn_at: 2026-11-25
+    withdrawn_by: "ERRATUM-01 item (E); REVIEW-01-INDEPENDENT.md finding B1/F1"
+    original_text: "NORMATIVE_ROOTS is unchanged: same 15 entries, the 7 non-existent roots still listed, 08-bmcp-protocol still absent. Verified by diffing that hunk against the base commit. GAP-26 is a different work item."
+    reason: "Unsatisfiable, not merely stale. The pre-state it demands no longer exists: #910 (150fb45e) deleted the seven non-existent roots and added 08-bmcp-protocol. The only way to satisfy it literally is to reintroduce the defect #910 removed."
+    replacement_measurement: "NORMATIVE_ROOTS = 9 entries, 0 missing, 08-bmcp-protocol present. Measured at aeebcbee by importing scripts/check_bilingual_docs.py and testing each of its NORMATIVE_ROOTS entries with Path.is_dir(); the module's own derived-root guard exits 0 at that commit."
+    superseded_by:
+      - AC6a
+      - AC6b
+    still_readable_elsewhere: "prompt-v1.md §5 hard constraint 1 and its AC6 line still state the pre-#910 requirement. The prompt is FROZEN with prompt_sha256 anchored in this manifest, so it is not rewritten here; ERRATUM-01 (E) is the reader-facing correction and this entry is its manifest-side record."
 
 independent_reviewer: REQ-05-INDEPENDENT-REVIEW-SESSION-01
 integration_reviewer: NOT_ASSIGNED
@@ -128,7 +149,7 @@ errata:
     raised_at: 2026-11-24
     raised_by: owner-proxy session that dispatched this work order
     measured_at: "ac0f0dfd (this work item was written at d40d4e09)"
-    status: APPLIED-TO-THIS-FILE 2026-11-24 — all six items (A)-(F) are now reflected in acceptance_criteria AC1, AC2, AC4, AC5, AC6a/AC6b and AC8, and in risk_rationale and owner_decisions[OD-18]. Previously recorded as UNAPPLIED, which meant this manifest and its own erratum shipped mutually exclusive instructions under status DISPATCHED; that is the defect independent review REVIEW-01 finding M2 raised.
+    status: APPLIED-TO-THIS-FILE 2026-11-24 — all six items (A)-(F) are now reflected in acceptance_criteria AC1, AC2, AC4, AC5, AC6a/AC6b and AC8, in withdrawn_acceptance_criteria[AC6] for item (E), which retires AC6 instead of restating it as executable, and in risk_rationale and owner_decisions[OD-18]. Previously recorded as UNAPPLIED, which meant this manifest and its own erratum shipped mutually exclusive instructions under status DISPATCHED; that is the defect independent review REVIEW-01 finding M2 raised.
     summary: "Six measured corrections, all caused by 150fb45e (#910) landing between the prompt being written and the work item being merged. (A) The 81-entry split is now 77 = 66 embedded + 11 real. (B) The nine real paths became eleven: two 08-bmcp-protocol records entered the set once #910 taught the scan to see that root. (C) Section 3's three mirror-of-a-mirror paths are no longer violations; all 64 .zh-CN.md mirrors outside 14-ai-development now pair. (D) Section 4 change 3 (reuse side_by_side_partner) was not followed — the pairing was written inline — and the two implementations agree on 932 files today, which is agreement by coincidence, not by construction. (E) Section 5's first hard constraint and AC6 are now false and unsatisfiable: NORMATIVE_ROOTS went from 15 roots with 7 missing to 9 roots with 0 missing, so 'byte-identical to its pre-change value' would require reintroducing a defect. AC6 withdrawn. (F) Section 2's control file and AC4/AC5/AC9 stand unchanged."
     corrects_in_this_file:
       - "owner_decisions[OD-18].constraints[3]: 'The remaining 9 are the real backlog' — the remaining count is 11 at ac0f0dfd."
