@@ -3,11 +3,11 @@ title: Commit the traceability checker's two input files, and stop it printing a
 
 class: GATE/CODE/TEST
 risk: R1
-risk_rationale: "One script's failure path plus two data files it already reads. No Rust, no transport, no authorization, no storage. The risk is not damage but silence: the current failure path prints '0 requirements / 0 work items / 0 errors' over unreadable inputs, so a wrong implementation looks identical to a correct one that found nothing. AC2 asserts the absence of six literal strings rather than the presence of an error, because the presence of an error is already true today."
+risk_rationale: "One script's failure path plus two data files it already reads. No Rust, no transport, no authorization, no storage. The risk is not damage but silence: the current failure path prints '0 requirements / 0 work items / 0 errors' over unreadable inputs, so a wrong implementation looks identical to a correct one that found nothing. AC2 asserts the absence of a verdict-shaped line rather than the presence of an error, because the presence of an error is already true today; the check is whether the counts stop being printed over inputs that were never read."
 
 security_scope: "None. A JSON registry index, a four-line path baseline, and the branch in check_traceability.py that decides what to print when REGISTRY_PATH cannot be read."
 
-status: BLOCKED
+status: DISPATCHED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -30,6 +30,37 @@ prompt_bytes: 8328
 
 prompt_provenance_tier: T1
 prompt_provenance_note: "Frozen from the REQ-05 session that measured both missing paths with git cat-file -e origin/main, produced the degraded output by running the merged script in a directory with no registry, and read the #926 diff from git diff 882ed439..2914c32f. The four-error result was measured on a clean tree at the same commit. The session that wrote this prompt is not an independent reviewer of it."
+
+# prompt-v1.md is FROZEN and cannot be edited without breaking prompt_sha256.
+# Its acceptance criteria and its authorisation section are therefore superseded
+# here rather than rewritten there. Same correction as AID-2026-056, applied here
+# because a reader who opens the prompt is reading the instruction set, and a
+# manifest that contradicts it silently is not a correction.
+
+prompt_supersession:
+  governing_block: "acceptance_criteria and authorization in this file"
+  reason: "prompt_status is FROZEN; editing the prompt would invalidate prompt_sha256 and the provenance note recording what was measured when it was written. The prompt was written at b3a65e54, before 35f2b078 added the four INDEX rows its AC1 required to be missing and before f640ba50 changed the classification its AC5 depended on. A prompt that still orders the opposite of AC1 cannot govern."
+  superseded:
+    - prompt_item: "prompt-v1.md AC1 (exits 1 with 4 errors; the four paths are missing from INDEX.md)"
+      replaced_by: "AC1 (exits 0 with 0 errors; the four rows exist and stay)"
+      why: "35f2b078 fixed the four rows after the prompt was written. Obeying AC1 literally means un-fixing them, which is the damage REVIEW-01 finding B1 was about."
+    - prompt_item: "prompt-v1.md AC2 (grep the output for the literal list PASS / FAIL / INCOMPLETE / 0 requirements / 0 work items / 0 errors)"
+      replaced_by: "AC2 (no occurrence of the token TRACEABILITY: anywhere in the line)"
+      why: "The literal list matches legitimate diagnostic text such as 'FAILED TO READ', and it misses 'TRACEABILITY: cannot read registry'. An anchored (PASS|FAIL|INCOMPLETE) form misses that string and misses leading whitespace; forbidding the token covers both."
+    - prompt_item: "prompt-v1.md AC3 (exits 0 with regressions=0 fixed=0)"
+      replaced_by: "AC3 (regressions=0 plus a required injected-failure check)"
+      why: "fixed=0 was unsatisfiable together with AC4 as originally written, and after AC4 empties the baseline a regressions=0 that is never exercised is true for a checker that does nothing."
+    - prompt_item: "prompt-v1.md AC4 (the four baseline entries are the four AC1 paths, byte-identical)"
+      replaced_by: "AC4 (the baseline is brought to 0 entries, removal-only, in the same commit that lands the two inputs)"
+      why: "The four entries stopped failing at 35f2b078. A shrink-only ratchet fails a stale baseline by design, and AC3's original fixed=0 then made both states fail."
+    - prompt_item: "prompt-v1.md AC5 (the existing suite in scripts/test_check_traceability.py passes unmodified)"
+      replaced_by: "AC5 (one named assertion in test_missing_registry_is_fail_not_zero_error_incomplete is updated, not deleted)"
+      why: "'Unmodified' is false: that assertion requires the output to contain 'FAIL TRACEABILITY: ...', which AC2 forbids. Naming the test keeps the error-versus-indeterminate split #926 introduced covered."
+    - prompt_item: "prompt-v1.md section 6 (baseline_content_change: NOT_GRANTED, because AC4 asserts the baseline is unchanged)"
+      replaced_by: "authorization.baseline_content_change in this file (GRANTED-FOR-SHRINK-ONLY)"
+      why: "The prompt's authorisation was derived from its AC4. With AC4 now requiring the baseline to be emptied, the authorisation it implied forbids the criterion it accompanies. Additions remain NOT_GRANTED."
+  not_superseded: "AC6 (exit code in {1, 2}, not 0), section 5's four prohibitions, the OD-23 boundary quoted in section 7, findings F1 and F4, and the dependency on scripts/check_traceability.py stand as written in the prompt."
+
 
 dependency_refs:
   - scripts/check_traceability.py
@@ -57,7 +88,7 @@ owner_decisions:
 authorization:
   implementation_write: "NOT_GRANTED - this manifest registers the work; no file has been committed by the registering session"
   gate_behaviour_change: "DECIDED by OD-23, PARTIALLY IMPLEMENTED by #926 - change (B) removes the remaining verdict line"
-  baseline_content_change: "NOT_GRANTED - AC4 asserts the baseline is byte-unchanged"
+  baseline_content_change: "GRANTED-FOR-SHRINK-ONLY - the four entries the baseline currently holds stopped failing (measured: baseline=4 current=0 fixed=4), and a stale baseline fails gate_ratchet by design. AC4 therefore authorises emptying it, removal-only, in the same commit that lands the two inputs. Additions remain NOT_GRANTED: a refreshed baseline that matches a changed result would hide exactly what this checker exists to report. Was NOT_GRANTED while AC4 still asserted the baseline stayed byte-identical; that version of AC4 could not coexist with AC3."
   allowlist_change: "NOT_APPLICABLE"
   root_membership_change: "NOT_APPLICABLE"
 
@@ -82,15 +113,15 @@ acceptance:
 
 acceptance_criteria:
   - id: AC1
-    text: "On a clean checkout of the merged result, `python scripts/check_traceability.py` exits 0 with 0 errors, and `grep -c 'AID-2026-02[3456]' 14-ai-development/work-items/INDEX.md` returns 1 for each of the four. The criterion is the involution of the original: the four paths were fixed after this work item was written, so asserting that they still fail would require un-fixing them. What is asserted instead is that the fix stays fixed and the checker does not regress to reporting them. (Original text, superseded: 'exits 1 with 4 errors and the four errors are exactly AID-2026-023/024/025/026 not appearing in INDEX.md'. Review REVIEW-01 finding B1.)"
+    text: "On a clean checkout of the merged result, `python scripts/check_traceability.py` exits 0 with 0 errors, and `grep -cE '^\\| \\[AID-2026-02[3456]\\]' 14-ai-development/work-items/INDEX.md` returns 1 for each of the four. The anchor is required: an unanchored `grep -c 'AID-2026-023'` returns 2, because AID-2026-026's title cites AID-2026-023, and satisfying that count would mean deleting a cross-reference from another work item's title — the same damage B1 was about, one level down. The criterion is the involution of the original: the four paths were fixed after this work item was written, so asserting that they still fail would require un-fixing them. What is asserted instead is that the fix stays fixed and the checker does not regress to reporting them. (Original text, superseded: 'exits 1 with 4 errors and the four errors are exactly AID-2026-023/024/025/026 not appearing in INDEX.md'. Review REVIEW-01 finding B1.)"
   - id: AC2
-    text: "With REGISTRY_PATH temporarily renamed, the process exits non-zero and its combined stdout+stderr contains no line matching `^(PASS|FAIL|INCOMPLETE) TRACEABILITY:` — anchored at line start and requiring the full token, not a substring search. The literal list 'PASS / FAIL / INCOMPLETE / 0 requirements / 0 work items / 0 errors' from the original is not used: as substrings they match legitimate diagnostic text such as 'FAILED TO READ', and they do not cover a line of the form 'TRACEABILITY: cannot read registry'. (Review REVIEW-01 finding M1.)"
+    text: "With REGISTRY_PATH temporarily renamed, the process exits non-zero and its combined stdout+stderr contains no line matching `TRACEABILITY:` at all, anywhere in the line, case-sensitive. The token is the verdict-shaped prefix; forbidding it outright covers the three word forms and any fourth one added later, and is stricter than enumerating PASS/FAIL/INCOMPLETE. Measured against the first review's counterexample: the earlier anchored form `^(PASS|FAIL|INCOMPLETE) TRACEABILITY:` did not match `TRACEABILITY: cannot read registry` and did not match a line with leading whitespace, so a verdict-shaped summary could still be printed in those two shapes. The literal list 'PASS / FAIL / INCOMPLETE / 0 requirements / 0 work items / 0 errors' from the original is not used: as substrings they match legitimate diagnostic text such as 'FAILED TO READ', and they do not cover a line of the form 'TRACEABILITY: cannot read registry'. (Review REVIEW-01 finding M1.)"
   - id: AC3
-    text: "`gate_ratchet.py --baseline scripts/ci/baselines/traceability.txt --format paths --command 'python scripts/check_traceability.py'` exits 0 with regressions=0. fixed=0 is NOT required. (Original required fixed=0. Measured at 8e489ec1: baseline=4 current=0 regressions=0 fixed=4, exit 1, 'FAIL - lower the baseline by 4 fixed item(s)'. The four baseline entries stopped failing, and a shrink-only ratchet reports that as stale by design. Requiring fixed=0 together with AC4's byte-unchanged baseline made the criterion unsatisfiable: the only ways to reach fixed=0 were to empty the baseline, which baseline_content_change forbids, or to make the four paths fail again, which AC1 forbids. Review REVIEW-01 finding B2.)"
+    text: "`gate_ratchet.py --baseline scripts/ci/baselines/traceability.txt --format paths --command 'python scripts/check_traceability.py'` exits 0 with regressions=0, **and** a deliberately injected failure is caught: with one path temporarily removed from INDEX.md, the same command must exit non-zero with regressions=1, and the path restored afterwards. fixed=0 is NOT required. The injection is required because AC4 empties the baseline, and an empty baseline makes `regressions=0` true for a correct checker, a broken checker and a checker that was never built — measured: empty baseline plus a command exiting 9 gives regressions=0 fixed=0 PASS. Without the injection AC3 would pass on a checker that does nothing, which is the defect 056's AC7 documents one level up. (Original required fixed=0. Measured at 8e489ec1: baseline=4 current=0 regressions=0 fixed=4, exit 1, 'FAIL - lower the baseline by 4 fixed item(s)'. The four baseline entries stopped failing, and a shrink-only ratchet reports that as stale by design. Requiring fixed=0 together with AC4's byte-unchanged baseline made the criterion unsatisfiable: at the time this criterion was written the only ways to reach fixed=0 were to empty the baseline, which baseline_content_change then forbade, or to make the four paths fail again, which AC1 forbids. baseline_content_change has since been narrowed to GRANTED-FOR-SHRINK-ONLY so that emptying a stale baseline is authorised, and fixed=0 stopped being required. Review REVIEW-01 finding B2.)"
   - id: AC4
     text: "The baseline is brought to 0 entries, as a removal-only edit, in the same commit that lands the two inputs. This is authorised here and by nothing else: `baseline_content_change` moves from NOT_GRANTED to GRANTED-FOR-SHRINK-ONLY for this criterion, because the four entries it currently holds are no longer failing and a stale baseline fails the ratchet. The original text asserted the baseline stayed byte-identical, which contradicted AC3. (Review REVIEW-01 finding B2.)"
   - id: AC5
-    text: "The existing suite in scripts/test_check_traceability.py passes, EXCEPT test_missing_registry_is_fail_not_zero_error_incomplete (lines 507-515), whose assertion AC2 necessarily changes: it currently requires the output to contain 'FAIL TRACEABILITY: 0 requirements / 0 work items / 1 errors', which AC2 forbids. That one assertion is updated, not deleted, so the error-vs-indeterminate split #926 introduced stays covered. (Original said 'unmodified'; review REVIEW-01 finding B4.)"
+    text: "The existing suite in scripts/test_check_traceability.py passes, EXCEPT test_missing_registry_is_fail_not_zero_error_incomplete (definition at line 499, assertion at 513), whose assertion AC2 necessarily changes: it currently requires the output to contain 'FAIL TRACEABILITY: 0 requirements / 0 work items / 1 errors', which AC2 forbids. That one assertion is updated, not deleted, so the error-vs-indeterminate split #926 introduced stays covered. (Original said 'unmodified'; review REVIEW-01 finding B4.)"
   - id: AC6
     text: "The exit code is in {1, 2}, not 0, in the AC2 condition. Either is acceptable; the choice must be stated in the PR body rather than left to be inferred. Measured at 8e489ec1: exit 1. Unchanged."
   - id: AC7
@@ -100,8 +131,19 @@ independent_reviewer: REQ-05-INDEPENDENT-REVIEW-SESSION-01
 integration_reviewer: NOT_ASSIGNED
 
 review:
-  status: CHANGES_REQUESTED
-  report_ref: "14-ai-development/work-items/AID-2026-058/REVIEW-01-INDEPENDENT.md"
+  status: CHANGES_APPLIED_AWAITING_RE_REVIEW
+  prior_status: CHANGES_REQUESTED
+  # Latest round first. report_ref is the report a reader should open; the
+  # first round is kept because the status above is only meaningful against it.
+  report_ref: "14-ai-development/work-items/AID-2026-058/REVIEW-02-INDEPENDENT.md"
+  prior_report_ref: "14-ai-development/work-items/AID-2026-058/REVIEW-01-INDEPENDENT.md"
+  rounds_completed: 2
+  # OD-26 directed that this work item stay DISPATCHED and this status stay
+  # CHANGES_APPLIED_AWAITING_RE_REVIEW until an independent reviewer confirms
+  # every blocking finding closed. The author's own conformance checks and a
+  # green PR are not that confirmation. APPROVED is reachable only by that
+  # reviewer.
+  approval_source: "independent reviewer confirmation (OD-26 (a)); none received yet"
 
 implementation:
   status: NOT_STARTED
@@ -112,6 +154,13 @@ implementation:
 
 errata: []
 findings:
+  - id: F5
+    severity: material
+    raised_by: independent re-review (second pass, OD-26)
+    measured_at: "2fc4a2ff"
+    statement: "base_commit_sha is b3a65e54, which is 70 commits behind the current main. Two of the commits after it are the ones that falsify the original criteria: 35f2b078 added the four INDEX rows AC1 used to require to be missing, and f640ba50 changed the checker's error classification that the retracted F3 misread. The work item is therefore not merely stale — it is stale in exactly the two places its acceptance criteria depended on."
+    resolution: "Not re-anchored. Re-anchoring would invalidate the frozen prompt's provenance note, and the criteria now state the commit each measurement belongs to, which is what an implementer acts on. Recorded here because 056 had an equivalent finding (F7) and 058 had none, so a reader could conclude 058's base was current."
+
   - id: F1
     statement: "00-governance/requirements-registry.yaml has a .yaml extension but JSON content, and scripts/check_traceability.py parses it with json.loads. The mismatch is pre-existing and harmless while both sides agree. Recorded so that an implementer does not 'fix' the extension or rewrite the file as YAML, either of which would break the parser."
     measured_at: "1259f1af"

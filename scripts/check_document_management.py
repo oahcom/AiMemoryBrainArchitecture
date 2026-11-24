@@ -702,8 +702,6 @@ def schema(root: Path | None = None) -> dict:
             loaded = parse_yaml_subset(text)
         except ParseError as exc:
             raise SystemExit(f"cannot load {SCHEMA_FILE}: {exc}")
-        if not isinstance(loaded, dict):
-            raise SystemExit(f"{SCHEMA_FILE} is not a mapping")
         # The version is the only statement that gate and contract are the same
         # generation. It was published and never compared, so a schema written
         # for a different rule set loaded silently.
@@ -1602,8 +1600,6 @@ def registry(root: Path) -> dict:
             loaded = parse_yaml_subset(text)
         except ParseError as exc:
             raise SystemExit(f"cannot read scope registry {SCOPE_REGISTRY}: {exc}")
-        if not isinstance(loaded, dict):
-            raise SystemExit(f"{SCOPE_REGISTRY} is not a mapping")
         _REGISTRY[key] = loaded
     return _REGISTRY[key]
 
@@ -1838,9 +1834,8 @@ def collect_governed(root: Path) -> tuple[list[Path], list[str]]:
             add(root / rel)
         else:
             problems.append(
-                f"DM-14 collect_governed: governed file {rel} is not a "
-                f"regular file inside the repository "
-                f"(missing, a symlink, or reached through one)"
+                f"DM-14 governed file {rel} is not a regular file inside the "
+                f"repository (missing, a symlink, or reached through one)"
             )
 
     return list(seen.values()), problems
@@ -1915,9 +1910,6 @@ def check_scope_registry(root: Path) -> list[str]:
         registry = parse_yaml_subset(path.read_text(encoding="utf-8"))
     except (OSError, ParseError) as exc:
         return [f"DM-14 cannot read scope registry {SCOPE_REGISTRY}: {exc}"]
-
-    if not isinstance(registry, dict):
-        return [f"DM-14 {SCOPE_REGISTRY} must be a mapping"]
 
     # A published version that nothing compares is decoration. If the registry
     # is written for another generation, its `backlog:`/`excluded:` semantics

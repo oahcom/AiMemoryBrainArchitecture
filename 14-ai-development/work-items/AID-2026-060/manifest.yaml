@@ -1,0 +1,111 @@
+work_item_id: AID-2026-060
+title: Make gate_ratchet.py reject an empty baseline and honour the command's exit code
+
+class: GATE/CODE/TEST
+risk: R2
+risk_rationale: "One standard-library script and its tests. No Rust, no transport, no authorization, no storage. The risk is not damage but false assurance: the ratchet is the mechanism that keeps ~20 shrink-only baselines honest, and it currently reports PASS over an empty baseline even when the command it ran exited non-zero. Measured at b80e5a40. A gate that cannot tell 'never ran' from 'ran and found nothing' converts every baseline it guards into a decoration. R2 rather than R1 because changing the failure path of a gate used across the repository can turn currently-green checks red if any caller depends on the pass-through behaviour."
+
+security_scope: "None. No credentials, no network, no subprocess beyond the command it already invokes, no file writes outside its own output."
+
+status: PROPOSED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+implementing_ai_session: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: b80e5a4059e7503136697d89935ce8dddc6c87f9
+tracking_issue: "Issue #266 - REQ-05 documentation governance. Raised as OD-26 after independent review of AID-2026-056 (REVIEW-01 finding M4) found the empty-baseline pass while checking whether that work item's AC7 floor was sufficient. Owner ruling OD-26 approved a separate work item and made it a precondition for treating AID-2026-056's regenerated baseline as trustworthy evidence."
+
+created_at: 2026-11-25
+updated_at: 2026-11-25
+
+prompt_id: AID-2026-060-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-060/prompt-v1.md
+prompt_status: FROZEN
+prompt_sha256: f9a01079c017cfbd1487ea09f3efe148c564d646b24ca55d5226967bb51ec5e9
+prompt_bytes: 7797
+
+prompt_provenance_tier: T1
+prompt_provenance_note: "Frozen from the REQ-05 session that reproduced the empty-baseline pass at b80e5a40 by running gate_ratchet.py with an empty baseline and a command exiting 9 (regressions=0 fixed=0 PASS exit 0), and reproduced the fail-closed behaviour of the non-empty case on the same tree (fixed=77 FAIL). The quoting of the file's own comment is verbatim, not paraphrased. The session that wrote this prompt is not an independent reviewer of it."
+
+owner_decisions:
+
+  - id: OD-26
+    question: "Should the empty-baseline defect be absorbed into AID-2026-056's acceptance criteria, or carried by its own work item?"
+    ruling: "Its own work item. And it must land before AID-2026-056's regenerated baseline is treated as trustworthy evidence."
+    constraints:
+      - "Not inside AID-2026-056: gate_ratchet.py is outside that work item's file authorisation, and widening the scope to include it would be the same defect the review had just finished finding."
+      - "AID-2026-056's AC7 stays as written. It protects this one generation; this work item protects every future one."
+      - "AID-2026-056 may continue through independent review, but may not close on a regenerated baseline whose emptiness would be invisible."
+      - "AID-2026-058 does not depend on baseline generation and is not paused by this ordering."
+
+# ---------------------------------------------------------------------------
+# Deliverables. Each is a claim a reader can check without trusting this file.
+# ---------------------------------------------------------------------------
+
+deliverables:
+  - "gate_ratchet.py rejects a baseline file that exists but contains zero entries, naming the path and exiting non-zero, instead of treating it as a valid zero-item baseline."
+  - "gate_ratchet.py fails when the command it runs exits non-zero, regardless of the baseline's content. Today that exit code is discarded under --format paths."
+  - "PASS is emitted only when all four hold: command exit 0, baseline read and non-empty, current set computed, diff obeys the ratchet rule."
+  - "The comment at the top of gate_ratchet.py is rewritten to state what the tests enforce, including what remains outside the guarantee. The current comment claims 'never as a pass', which is false for an empty baseline."
+  - "Tests cover the four cases in AC1-AC4, and each test is mutation-verified: the manifest states which guard removal makes which test fail."
+
+acceptance_criteria:
+  - id: AC1
+    text: "Empty baseline, command exits 0: non-zero exit, message names the baseline path, no PASS on stdout. Measured today: PASS, exit 0. The empty case is treated as a valid zero-item baseline."
+  - id: AC2
+    text: "Empty baseline, command exits 9: non-zero exit, no PASS. Measured today: regressions=0 fixed=0 PASS exit 0 — the exact case this work item exists for."
+  - id: AC3
+    text: "Non-empty baseline, command exits 9: non-zero exit, no PASS. Already true today (fixed=77 FAIL exit 1); asserted so the change does not regress a property that currently holds."
+  - id: AC4
+    text: "Non-empty baseline, command exits 0, output set matches the baseline exactly: PASS, exit 0. The happy path must survive the guard, or the guard will be removed by whoever it blocks."
+  - id: AC5
+    text: "Tests exist for AC1-AC4, and each is mutation-verified rather than counted. For every test, the manifest names the specific guard whose removal makes that test fail; a test that passes with the guard removed is not evidence and does not satisfy this criterion."
+  - id: AC6
+    text: "The comment inside gate_ratchet.py no longer claims a guarantee the code does not provide. It states the four PASS conditions and names the input classes that remain undetectable, if any."
+  - id: AC7
+    text: "Both existing callers still pass: the bilingual-docs ratchet (77 entries) and, once AID-2026-058 lands, the traceability ratchet. Neither baseline becomes empty as a side effect. If a caller currently relies on the pass-through behaviour this work item removes, that caller is named in the manifest rather than silently adjusted."
+
+independent_reviewer: NOT_ASSIGNED
+integration_reviewer: NOT_ASSIGNED
+
+review:
+  status: NOT_ASSIGNED
+  report_ref: ""
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+implementation:
+  status: NOT_STARTED
+  branch: PENDING
+  pull_request: PENDING
+  pull_request_url: PENDING
+  implementation_commit_sha: PENDING
+
+errata: []
+
+findings:
+  - id: F1
+    severity: material
+    raised_by: owner ruling OD-26
+    measured_at: "b80e5a40"
+    statement: "The defect is larger than the empty baseline. Under --format paths the ratchet compares path sets only and discards the command's exit code, so 'the check was never run' and 'the check ran and found nothing' produce the same empty current-set. The empty baseline is the case where this is most visible, not the whole condition."
+    resolution: "AC2 and the second deliverable key the fix on the exit code, not only on baseline emptiness. A fix that special-cases empty files would leave the general condition in place."
+  - id: F2
+    severity: informational
+    raised_by: review of AID-2026-056 (REVIEW-01 finding M4)
+    measured_at: "8e489ec1"
+    statement: "This is the same shape as the defect AID-2026-058 exists to fix: a checker reporting a clean result over inputs it never read. Under #926 the traceability checker now prints FAIL with 1 error in that situation, so the word agrees with the exit code, but the verdict-shaped line is still printed over an empty read."
+    resolution: "Recorded as context, not as scope. This work item does not fix check_traceability.py."
+  - id: F3
+    severity: informational
+    raised_by: this session
+    measured_at: "b80e5a40"
+    statement: "Numbered 060, not 059. AID-2026-059 exists as an untracked work item in a concurrent session's working tree, implementing the AI session evidence gate for Issue #799. It was not in origin/main when this ID was chosen, so a check against main alone would have collided."
+    resolution: "Renumbered rather than contested. Two manifests under one ID is the hazard; the working tree, not the index, is where the collision would have happened."
