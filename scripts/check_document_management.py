@@ -2150,6 +2150,7 @@ def main() -> int:
     notes: list[str] = []
     docs: dict[str, dict] = {}
     unclassified: list[str] = []
+    out_of_scope_dm10: list[str] = []
     per_root: dict[str, list[int]] = {}
 
     for path in targets:
@@ -2179,11 +2180,31 @@ def main() -> int:
         bucket[0] += 1
         docs[rel] = meta
         bound_errors, bound_notes = check_approval_binding(root, rel, text, meta, is_git)
-        errors.extend(f"{rel}: {err}" for err in bound_errors)
+        # DM-10 binds an approval to the bytes of ONE document. In an incremental
+        # run a stale pin on a document this increment did not touch is out of
+        # scope: reporting it here charged one file's debt to every unrelated
+        # pull request (issue #808), which trains reviewers to ignore the gate.
+        # Count it instead, so the debt stays visible without being blamed on a
+        # change that did not cause it. A whole-tree run (no --require-changed)
+        # still reports every DM-10 error, because there the whole tree IS the
+        # subject of the verdict.
+        if incremental and rel not in required:
+            out_of_scope_dm10.extend(bound_errors)
+        else:
+            errors.extend(f"{rel}: {err}" for err in bound_errors)
         notes.extend(bound_notes)
 
     errors.extend(check_scope_and_relations(root, docs))
     errors.extend(check_scope_registry(root))
+
+    # Not an error, and deliberately not silent. A number that nobody can see is
+    # the same as no number; a number that fails the run is the bug this fixes.
+    if out_of_scope_dm10:
+        print(
+            f"DM-10 out-of-scope stale bindings: {len(out_of_scope_dm10)} "
+            "(documents untouched by this increment; not counted as failures)",
+            file=sys.stderr,
+        )
 
     # DM-04 uniqueness of revocation decision ids across the repository.
     revocations: dict[str, str] = {}
