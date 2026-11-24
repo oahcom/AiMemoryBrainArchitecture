@@ -411,7 +411,8 @@ The clause has been amended on the Owner's baseline (`GOV-REV-2026-11-24-INDEPEN
 
 | §11's conclusion | Actual state under the session-level definition |
 |---|---|
-| §11.3 "remedies 1 and 2 make `main` permanently unmergeable" | No. The required approval can be supplied by **another session**; the platform's self-approval prohibition binds the account, not the session. |
+| §11.3 "remedy 1 makes `main` permanently unmergeable" | **Stands, and this section was earlier wrong to deny it.** `required_pull_request_reviews` counts **users** with write access and forbids approving your own PR; another session under the same account is the **same user**, so the platform approval genuinely cannot be supplied by a session. Remedy 1 still freezes the platform. |
+| §11.3 "remedy 2 makes `main` permanently unmergeable" | No. Remedy 2's test is `author == reviewer`, which under the new definition is a **session** comparison: another session is not the authoring session, so it no longer returns HOLD for every PR. |
 | §11.3 "the only identity that can lift the freeze is the one it freezes" | Still true, but it constrains only `required_pull_request_reviews`, a **platform** mechanism. It does not constrain the §5 process requirement. §7 already separates the two. |
 | §11.4 "remedy 3 is self-referential — demoting §5 requires violating §5" | No. Amending §5 requires an **independent-session review**, and this repository can always open such a session. The self-reference was manufactured by the old definition, not by the clause's structure. |
 | §11.7 "the quota trigger is the only lawful amendment path" | No. A second path exists: amend the clause through the §9 bilingual + exact-Head governance review. It was never attempted — not because it is unavailable, but because nobody opened that session. |
@@ -441,3 +442,15 @@ When citing this register from now on: **cite §11.1/§11.2 for the measurements
 Under the session-level definition, §9's blocking chain (independent review `NOT_ASSIGNED`) is no longer a blocked state but an **executable backlog**: of the 675 merged PRs, how many should have satisfied §5; of those, which are still worth registering as historical defects; and how the next PR onward will comply. All three are session-work — no second account, no administrator.
 
 This register does not claim those three are done. It withdraws only the claim that they cannot be done.
+
+### 12.5 This section's first version was wrong (corrected same day)
+
+The first version of §12 withdrew the whole of §11.3 on the grounds that "the required approval can be supplied by another session". **That withdrawal was itself wrong and has been reverted.**
+
+`required_pull_request_reviews` counts **users** with write access and the platform forbids approving your own pull request. Another session under the same account is the **same user**, not a second user. The session-level definition therefore changes §5's **process** test; it does not change the platform's **approval count**. Remedy 1 still freezes the platform, and §11.3 was right about that.
+
+The error is the same kind §12 is criticising: §12 used the new session-level definition to overturn a **platform-layer** fact. Session-level independence redefines who counts as an independent reviewer; it does not redefine how GitHub counts approvals. Both layers are called "independence", but one is a process test and the other a platform mechanism — §7 separates them, and this section's first version merged them.
+
+What does survive is the correction to **remedy 2**: under the new definition `author == reviewer` is a session comparison, another session is not the authoring session, so it no longer returns `HOLD` for every PR. That is what the session-level definition actually changes, and the only thing it changes.
+
+Recorded here rather than quietly edited, for the reason given in §12.3: an erratum that can silently correct itself is the same class of problem as the thing it is correcting.
