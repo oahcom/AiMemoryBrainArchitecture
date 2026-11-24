@@ -8,7 +8,7 @@ import sys
 from pathlib import PurePosixPath
 
 
-CHECK_VERSION = "2026-11-24.2"
+CHECK_VERSION = "2026-11-24.3"
 
 # Repository-root-relative paths, written with a leading slash.
 PROHIBITED_PATHS = (
@@ -78,6 +78,32 @@ FULL_SHA_RE = re.compile(r"[0-9a-fA-F]{40}\Z")
 # which is a rule nobody would remember to edit.
 WORK_ITEM_MANIFEST_RE = re.compile(
     r"14-ai-development/work-items/AID-\d{4}-\d{3}/manifest\.yaml"
+)
+
+# D7: one explicitly approved nested conformance dependency pin.
+# Do not merge this into REQUIREMENTS_FILE_RE: that rule remains root-only.
+CONFORMANCE_PROVIDER_REQUIREMENTS_RE = re.compile(
+    r"08-bmcp-protocol/tests/conformance/provider_outcome/requirements\.txt"
+)
+
+# D17: the conformance harness has its own package manifest and lockfile.
+# Keep both exact paths under the conformance directory; this is not a
+# general nested package.json or package-lock.json admission rule.
+CONFORMANCE_PACKAGE_FILES_RE = re.compile(
+    r"08-bmcp-protocol/tests/conformance/package(?:-lock)?\.json"
+)
+
+# D19: source snapshots are admitted only directly inside an AID work-item
+# directory. The filename must end in .source.txt; nested directories and
+# other work-item ID families are not admitted.
+AID_SOURCE_SNAPSHOT_RE = re.compile(
+    r"14-ai-development/work-items/AID-[0-9]{4}-[0-9]{3}/[^/]+\.source\.txt"
+)
+
+# D20: only the reference-model .gitignore directly under an AID work item
+# is admitted. No other nested .gitignore path is covered.
+AID_REFERENCE_MODEL_GITIGNORE_RE = re.compile(
+    r"14-ai-development/work-items/AID-[0-9]{4}-[0-9]{3}/reference-model/\.gitignore"
 )
 
 
@@ -195,6 +221,18 @@ def is_allowed_new_path(path):
         return True
 
     if WORK_ITEM_MANIFEST_RE.fullmatch(path):
+        return True
+
+    if CONFORMANCE_PROVIDER_REQUIREMENTS_RE.fullmatch(path):
+        return True
+
+    if CONFORMANCE_PACKAGE_FILES_RE.fullmatch(path):
+        return True
+
+    if AID_SOURCE_SNAPSHOT_RE.fullmatch(path):
+        return True
+
+    if AID_REFERENCE_MODEL_GITIGNORE_RE.fullmatch(path):
         return True
 
     return False
