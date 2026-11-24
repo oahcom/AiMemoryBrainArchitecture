@@ -44,6 +44,16 @@ jobs:
       - name: Check committed line endings
         run: python3 scripts/ci/check_line_endings.py
 
+      # The hand-written list below is an instance of test coverage; this pair
+      # is the rule, so a new test_*.py cannot land without a workflow running
+      # it. The gate's own self-check runs first: a gate nobody executes is the
+      # defect it exists to catch.
+      - name: Self-check the test-reachability gate
+        run: python3 scripts/ci/test_check_test_reachability.py
+
+      - name: Check that every test file is reachable from a workflow
+        run: python3 scripts/ci/check_test_reachability.py
+
       # Each listed file is unreachable by unittest discover; discovery here would silently run
       # nothing. The explicit list is the defect tracked by #834.
       - name: Run unreachable self-checks from the repository root
@@ -77,3 +87,13 @@ jobs:
             cd experiments/req08-portable-exchange-fixture
             python3 -m unittest test_portable_exchange
           )
+
+      # Run from this directory because test_status_migration imports sibling modules by bare name.
+      # Probe for PyYAML first because the bare CI interpreter does not otherwise guarantee that dependency.
+      - name: Self-check the status-migration gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -c "import yaml" || python3 -m pip install --quiet --disable-pip-version-check pyyaml
+          cd scripts/governance/status_migration
+          python3 -m unittest test_status_migration

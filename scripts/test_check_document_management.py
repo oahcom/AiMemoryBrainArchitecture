@@ -262,7 +262,7 @@ def run_fields() -> None:
     expect("Approved without version rejected", doc(APPROVED.replace(
         '      approved_version:\n        scheme: git\n        value: "deadbeef"\n', ""
     )), "DM-03")
-    expect("Selected-sections without sections rejected", doc(APPROVED.replace(
+    expect("narrow approval scope rejected", doc(APPROVED.replace(
         "type: Full-document", "type: Selected-sections"
     )), "DM-03")
     expect("Revoked without decision id rejected", doc(BASE.replace(
@@ -775,6 +775,93 @@ def run_approval_binding() -> None:
         target.write_text(moving, encoding="utf-8")
         expect_gate("T11 mutable ref as approved_version fails", root, 1)
 
+
+# --------------------------------------------------------------------------
+# 5a. Approval scope (issue #833): the declared scope must be one the gate
+#     honours. `Selected-sections` and `Selected-assets` were declarable for
+#     months and never read: DM-10 hashed the whole body either way, so an edit
+#     outside the "selected" part failed (pretending the scope held) and a
+#     section list naming nothing was accepted (pretending the scope held).
+#     Both directions were silent, so these cases bind the declaration itself.
+# --------------------------------------------------------------------------
+
+def run_approval_scope() -> None:
+    print("approval scope (#833)")
+
+    # (a) A value the gate cannot honour is refused by name, so it cannot be
+    # read as a narrower approval than the one DM-10 checks.
+    for scope in ("Selected-sections", "Selected-assets"):
+        expect(
+            f"T86 {scope} scope is refused, not reinterpreted",
+            doc(APPROVED.replace("type: Full-document", f"type: {scope}")),
+            "not implemented",
+        )
+        # Reverting the gate to the old enumeration makes the case above record
+        # a failure: `expect()` sees no error at all.
+    record(
+        "T86 a refused scope names only Full-document as honoured",
+        "Only 'Full-document' is honoured" in "".join(
+            check_document(FILE, doc(APPROVED.replace(
+                "type: Full-document", "type: Selected-sections")))[0]
+        ),
+        "  the diagnostic does not say what is honoured",
+    )
+
+    # (b) The lists that only described those scopes are dead. A non-empty one
+    # is a claim no rule reads; the empty placeholder every document already
+    # carries claims nothing and stays valid.
+    for field in ("included_sections", "included_assets"):
+        expect(
+            f"T87 non-empty {field} is refused by name",
+            doc(APPROVED.replace(
+                "        type: Full-document\n",
+                f"        type: Full-document\n"
+                f"        {field}:\n          - nowhere.md\n",
+            )),
+            field,
+        )
+    expect(
+        "T87 the empty placeholder the template writes is still accepted",
+        doc(APPROVED.replace(
+            "        type: Full-document\n",
+            "        type: Full-document\n"
+            "        included_sections: []\n"
+            "        included_assets: []\n",
+        )),
+        expect_clean=True,
+    )
+
+    # (c) Control: `Full-document` behaves exactly as before. An unchanged body
+    # passes; an edited body still fails DM-10, and fails with DM-10 rather than
+    # with a scope diagnostic.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        target = root / "00-governance" / "a.md"
+        body = "body: approved text"
+        template = doc(APPROVED.replace('"deadbeef"', '"SHA"'))
+        target.write_text(template.replace("# Title", body), encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "approved")
+        sha = _git(root, "rev-parse", "HEAD")
+        recorded = template.replace('"SHA"', f'"{sha}"')
+        target.write_text(recorded.replace("# Title", body), encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "record approval")
+        expect_gate("T88 Full-document with an unchanged body still passes",
+                    root, 0)
+        target.write_text(recorded.replace("# Title", "edited text"),
+                          encoding="utf-8")
+        code, out, err = _run_capture(root)
+        output = out + err
+        record("T88 Full-document with an edited body still fails DM-10",
+               code == 1 and "DM-10 content changed after approved_version" in output,
+               f"  exit {code}, DM-10 present: "
+               f"{'DM-10 content changed after approved_version' in output}")
+
+
 # --------------------------------------------------------------------------
 # 5b. DM-10 scope: an incremental run blames only the documents it touched
 #     (issue #808). A stale pin on an untouched document is counted, not
@@ -821,13 +908,14 @@ def test_incremental_in_scope_stale_pin_still_fails() -> None:
         _git(root, "add", "-A")
         _git(root, "commit", "-q", "-m", "touch a")
         code, out, err = _run_capture(root, "--require-changed", base)
-        output = out + err
         in_scope = f"00-governance/a.md: {DM10_ERROR}"
+        # Errors go to stderr; checking the merged stream could not tell a
+        # refusal from a note about the same document.
+        refused = in_scope in err
         record(
             "T81 incremental run still fails a stale pin on a document it changed",
-            code == 1 and in_scope in output,
-            f"  gate returned {code}, expected 1; in-scope diagnostic present: "
-            f"{in_scope in output}",
+            code == 1 and refused,
+            f"  gate returned {code}, expected 1; in-scope diagnostic on stderr: {refused}",
         )
 
 def test_incremental_out_of_scope_stale_pin_is_counted_not_failed() -> None:
@@ -837,26 +925,39 @@ def test_incremental_out_of_scope_stale_pin_is_counted_not_failed() -> None:
         _git(root, "add", "-A")
         _git(root, "commit", "-q", "-m", "touch nothing governed")
         code, out, err = _run_capture(root, "--require-changed", base)
-        output = out + err
-        counted = DM10_COUNT_ONE in output.splitlines()
+        # The ruling asks for two things joined by "and": a note naming the
+        # document, and a counted line. A number alone says how many, not which.
+        # The count is asserted exactly: one stale pin must yield exactly one
+        # note. "a note exists" would also pass if the collector swallowed every
+        # governed document, which is the mistake T84's sibling catches.
+        # Filtered on the note prefix, not on "DM-10 out-of-scope" anywhere: the
+        # count line is itself "DM-10 out-of-scope stale bindings: N", so a
+        # substring match counts it as a note and every run reports two. The
+        # trailing space is deliberate too: the "approval binding NOT VERIFIED"
+        # note is f"DM-10 {rel}: ...", which would match this prefix for a
+        # document under an `out-of-scope/` directory.
+        dm10_notes = [l for l in out.splitlines() if l.startswith("  note: DM-10 out-of-scope ")]
+        noted = len(dm10_notes) == 1 and "00-governance/b.md" in dm10_notes[0]
+        counted = DM10_COUNT_ONE in out.splitlines()
+        leaked = f"00-governance/b.md: {DM10_ERROR}" in err
         record(
             "T82 incremental run counts an out-of-scope stale pin instead of failing it",
-            code == 0 and counted and DM10_ERROR not in output,
+            code == 0 and counted and noted and not leaked,
             f"  gate returned {code}, expected 0; count line exact: {counted}; "
-            f"DM-10 error leaked into output: {DM10_ERROR in output}",
+            f"out-of-scope notes: {len(dm10_notes)} (want 1, naming b.md); "
+            f"DM-10 error on stderr: {leaked}",
         )
 
 def test_whole_tree_run_still_reports_every_stale_pin() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root, _ = _dm10_repo(tmp)
         code, out, err = _run_capture(root)
-        output = out + err
         reported = f"00-governance/b.md: {DM10_ERROR}"
         record(
             "T83 whole-tree run still reports every stale pin",
-            code == 1 and reported in output,
-            f"  gate returned {code}, expected 1; b.md diagnostic present: "
-            f"{reported in output}",
+            code == 1 and reported in err,
+            f"  gate returned {code}, expected 1; b.md diagnostic on stderr: "
+            f"{reported in err}",
         )
 
 def test_incremental_one_in_scope_one_out_of_scope() -> None:
@@ -867,15 +968,21 @@ def test_incremental_one_in_scope_one_out_of_scope() -> None:
         _git(root, "add", "-A")
         _git(root, "commit", "-q", "-m", "touch a only")
         code, out, err = _run_capture(root, "--require-changed", base)
-        output = out + err
-        in_scope = f"00-governance/a.md: {DM10_ERROR}" in output
-        out_of_scope = f"00-governance/b.md: {DM10_ERROR}" in output
-        counted = DM10_COUNT_ONE in output.splitlines()
+        in_scope = f"00-governance/a.md: {DM10_ERROR}" in err
+        out_of_scope = f"00-governance/b.md: {DM10_ERROR}" in err
+        # Exactly one note, and it belongs to the untouched document: an
+        # implementation that noted both documents, or neither, or duplicated
+        # the line, all keep "some note exists" true while being wrong. Same
+        # prefix rule as T82 -- see the comment there for the two traps.
+        dm10_notes = [l for l in out.splitlines() if l.startswith("  note: DM-10 out-of-scope ")]
+        noted = len(dm10_notes) == 1 and "00-governance/b.md" in dm10_notes[0]
+        counted = DM10_COUNT_ONE in out.splitlines()
         record(
             "T84 one in-scope and one out-of-scope stale pin are classified per document",
-            code == 1 and in_scope and not out_of_scope and counted,
-            f"  gate returned {code}, expected 1; a.md reported: {in_scope}; "
-            f"b.md reported: {out_of_scope}; count line exactly 1: {counted}",
+            code == 1 and in_scope and not out_of_scope and noted and counted,
+            f"  gate returned {code}, expected 1; a.md on stderr: {in_scope}; "
+            f"b.md on stderr: {out_of_scope}; out-of-scope notes: {len(dm10_notes)} "
+            f"(want 1, naming b.md only); count line exactly 1: {counted}",
         )
 
 def test_incremental_zero_out_of_scope_still_prints_the_count() -> None:
@@ -901,6 +1008,36 @@ def test_incremental_zero_out_of_scope_still_prints_the_count() -> None:
             f"{zero in (out + err).splitlines()}",
         )
 
+def test_out_of_scope_stale_pin_emits_both_a_note_and_a_count() -> None:
+    """The ruling's sentence joins two things with "and"; assert both.
+
+    #862 shipped the counted line alone. A suite that asserts only the count
+    stays green when the note disappears, which is exactly how that happened.
+    This case is the regression gate for the half nobody was watching: the
+    note must exist, it must name the document, and it must never be an error.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        root, base = _dm10_repo(tmp)
+        (root / "notes.txt").write_text("unrelated change\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "touch nothing governed")
+        code, out, err = _run_capture(root, "--require-changed", base)
+        note_lines = [
+            line for line in out.splitlines()
+            if line.startswith("  note: DM-10 out-of-scope 00-governance/b.md:")
+        ]
+        count_lines = [line for line in out.splitlines() if line == DM10_COUNT_ONE]
+        # The error form puts the sentence on stderr. The note must not appear
+        # there: a note that also fails the run is the bug this issue fixes.
+        on_stderr = "DM-10 out-of-scope" in err
+        record(
+            "T86 an out-of-scope stale pin is both noted and counted, never failed",
+            code == 0 and len(note_lines) == 1 and len(count_lines) == 1
+            and not on_stderr,
+            f"  gate returned {code}, expected 0; note lines: {len(note_lines)}; "
+            f"count lines: {len(count_lines)}; on stderr: {on_stderr}",
+        )
+
 def run_dm10_scope() -> None:
     print("DM-10 scope (issue #808)")
     test_incremental_in_scope_stale_pin_still_fails()
@@ -908,6 +1045,7 @@ def run_dm10_scope() -> None:
     test_whole_tree_run_still_reports_every_stale_pin()
     test_incremental_one_in_scope_one_out_of_scope()
     test_incremental_zero_out_of_scope_still_prints_the_count()
+    test_out_of_scope_stale_pin_emits_both_a_note_and_a_count()
 
 
 def run_shallow_history() -> None:
@@ -2005,7 +2143,7 @@ GOLDEN = [
         "    normative_status: Informative\n"
         "    canonical_conflict_status: None\n",
         False,
-        "included_assets",
+        "Selected-assets' is not implemented",
     ),
     (
         "selected-sections scope without sections is rejected",
@@ -2029,7 +2167,7 @@ GOLDEN = [
         "    normative_status: Informative\n"
         "    canonical_conflict_status: None\n",
         False,
-        "included_sections",
+        "Selected-sections' is not implemented",
     ),
 ]
 
@@ -3300,6 +3438,7 @@ def main() -> int:
     run_resolver()
     run_repository_rules()
     run_approval_binding()
+    run_approval_scope()
     run_dm10_scope()
     run_shallow_history()
     run_changed_paths()

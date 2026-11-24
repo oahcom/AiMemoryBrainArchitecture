@@ -1,3 +1,47 @@
+---
+document_metadata:
+  domain: agent-integration
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Under-Review
+      approver: "Pending Owner review"
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Unverified; the paired zh-CN translation is a complete draft awaiting independent semantic review and Owner confirmation."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Agent Adapter capability tier specification"
+    canonical_scope_id: null
+    canonical_scope_keywords:
+      - agent-adapter
+      - capability-tier
+      - inference-boundary
+      - active-recall
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Normative
+---
 # Agent Adapter Capability Tiers
 
 **Status:** DECIDED tier intent and guarantee boundaries; CANDIDATE conformance details  

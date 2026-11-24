@@ -103,8 +103,8 @@ MANUAL_CONTROLS = (
     ("M-03", "Whether `evidence_verification` evidence supports the decision",
      "The gate proves a verification status and a reference exist. Whether the reference supports the claim is an argument, not a field",
      "Reviewer"),
-    ("M-04", "Whether the `Selected-sections` chosen are substantively sufficient",
-     "The gate proves the declared sections exist, that the identifiers resolve and that the scope is non-empty. Whether that selection is *adequate* for the document is a judgement",
+    ("M-04", "Whether a whole-document approval is the scope the approver intended",
+     "DM-10 hashes the whole body, so the gate proves that nothing changed after `approved_version`, not that the approver meant all of it. No narrower scope is declarable: a partial approval and a whole-document one are the same record",
      "Approver"),
     ("M-05", "Semantic parity of a bilingual mirror",
      "GOV-DOC-001 requires that the two versions say the same thing. The gate proves both exist, point at each other, and agree on metadata — not that the prose agrees",
@@ -150,7 +150,11 @@ MODIFICATION_STATUSES = {
 APPLICABILITY = {
     "Applicable-To-Current-Version", "Not-Applicable-To-Current-Version",
 }
-SCOPE_TYPES = {"Full-document", "Selected-sections", "Selected-assets"}
+# Only the scopes DM-10 can honour. `Selected-sections` and `Selected-assets`
+# were listed here until #833 and never honoured: the gate hashed the whole body
+# either way, so declaring a narrower scope produced the same verdict as
+# `Full-document` and the narrowing existed only in the reader's assumption.
+SCOPE_TYPES = {"Full-document"}
 VERSION_SCHEMES = {"git", "content-hash"}
 
 # Unknown keys are errors. A misspelled governance field is otherwise invisible.
@@ -986,28 +990,38 @@ def check_document(path: Path, text: str, root: Path | None = None) -> tuple[lis
     errors += unknown_keys(version, VERSION_KEYS, "approved_version")
     _enum(errors, version.get("scheme"), VERSION_SCHEMES, "approved_version.scheme")
     errors += unknown_keys(scope, SCOPE_KEYS, "approval_scope")
-    _enum(errors, scope.get("type"), SCOPE_TYPES, "approval_scope.type")
+    scope_type = scope.get("type")
+    if scope_type in {"Selected-sections", "Selected-assets"}:
+        # Both were declarable until #833 and neither was ever read: DM-10
+        # compares the whole body, so an edit outside the "selected" part still
+        # failed (no wider than declared) and a selectable scope was silently a
+        # whole-document one (narrower than declared). A value that cannot be
+        # honoured is refused by name instead of being reinterpreted.
+        errors.append(
+            f"DM-03 approval_scope.type {scope_type!r} is not implemented: "
+            "DM-10 compares the whole body, so this approval would be silently "
+            "narrower than the gate checks. Only 'Full-document' is honoured"
+        )
+    else:
+        _enum(errors, scope_type, SCOPE_TYPES, "approval_scope.type")
     if decision == "Approved":
         if not version.get("value"):
             errors.append("DM-03 Approved requires approval.approved_version.value")
-        if not scope.get("type"):
+        if not scope_type:
             errors.append("DM-03 Approved requires approval.approval_scope.type")
         if not applicability:
             errors.append("DM-03 Approved requires approval.approval_applicability")
-    if scope.get("type") == "Selected-sections":
-        sections = scope.get("included_sections")
-        if not sections or not isinstance(sections, list):
+
+    # The section and asset lists described the two scopes above and nothing
+    # else, so nothing reads them. An empty list is the template's placeholder
+    # and claims nothing (every approved document carries one); a non-empty list
+    # is a claim no rule verifies, so it is refused and named.
+    for field in ("included_sections", "included_assets"):
+        if scope.get(field):
             errors.append(
-                "DM-03 Selected-sections requires a non-empty included_sections list"
-            )
-    if scope.get("type") == "Selected-assets":
-        # Symmetric with Selected-sections. The scope type existed in the
-        # enumeration and required nothing: declaring it and listing no asset
-        # was accepted, which made the type a label rather than a scope.
-        assets = scope.get("included_assets")
-        if not assets or not isinstance(assets, list):
-            errors.append(
-                "DM-03 Selected-assets requires a non-empty included_assets list"
+                f"DM-03 approval_scope.{field} is not honoured: only "
+                "'Full-document' is checked, so a non-empty list would claim a "
+                "boundary the gate never verifies. Remove it"
             )
 
     # DM-04 Revoked must carry a unique revocation decision id.
@@ -2255,7 +2269,12 @@ def main() -> int:
         # still reports every DM-10 error, because there the whole tree IS the
         # subject of the verdict.
         if incremental and rel not in all_changed:
+            # A note, not an error: the document is not what this increment
+            # changed, so its debt is not this change's to pay (issue #808).
+            # The note keeps WHICH document visible; the count line below keeps
+            # HOW MANY visible. A bare number is not actionable on its own.
             out_of_scope_dm10.extend(bound_errors)
+            notes.extend(f"DM-10 out-of-scope {rel}: {err}" for err in bound_errors)
         else:
             errors.extend(f"{rel}: {err}" for err in bound_errors)
         notes.extend(bound_notes)

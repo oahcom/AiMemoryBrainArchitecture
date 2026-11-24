@@ -45,7 +45,7 @@ document_metadata:
         scheme: git                 # git | content-hash
         value: null
       approval_scope:
-        type: Full-document         # Full-document | Selected-sections | Selected-assets
+        type: Full-document         # the only value DM-10 honours
         included_sections: []
         included_assets: []
       approval_applicability: Applicable-To-Current-Version

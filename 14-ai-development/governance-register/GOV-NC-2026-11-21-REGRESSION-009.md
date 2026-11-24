@@ -1,7 +1,52 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-24"
+      last_verification_note: "Section 12 added on 2026-11-24 at main 5c64e560: main's 9 check-runs were read from the API (0 non-green); the gap set was compared to the frozen baseline in-process (77 == 77); GAP-BASELINE-001.md was tested for gap membership, baseline membership and PAIR_EXEMPT_PREFIXES; the empty-diff message was produced by running the gate with BASE_SHA == HEAD_SHA. Every figure came from a run. No figure is carried over from another register."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: "docs/en/14-ai-development/governance-register/GOV-NC-2026-11-21-REGRESSION-009.md"
+    zh-CN: "docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-21-REGRESSION-009.md"
+---
+
 # GOV-NC-2026-11-21-REGRESSION-009
 
 - 登记编号：GOV-NC-2026-11-21-REGRESSION-009
-- 状态：`OPEN` / `ACTIVE` / main 在解除 45 分钟后**再次红**
+- 状态：`OPEN`（仅程序性结论）/ 技术性结论**已被 §12 推翻**：main 全绿，空 diff 的 `EXIT=2` 换了原因
 - 发现时间：2026-11-21T07:35Z
 - 观测对象：仓库 `oahcom/AiMemoryBrainArchitecture`，main `277daec7d0c6`
 - 前置登记：006（死锁，已解除）、007（自我审查）、008（门禁零审查合并）
@@ -512,3 +557,117 @@ PAIR_EXEMPT_PREFIXES = (
 本登记 §9 把「修复必须走 #440」当成唯一路径，于是把阻塞描述成「等一个审查者」。实际解法是**发现两个判据不同步**——这不需要审查者，只需要有人读懂脚本。
 
 这不是说 §9 的裁定错了（维持 §5 的判断在程序上是对的），而是说：**当所有路径都指向「缺人」时，值得再查一遍是不是自己把问题定义窄了。** 本次是我定义窄了。
+
+---
+
+## 12. 2026-11-24 复核：标题性的技术断言已不成立，程序性结论仍然成立
+
+**测量点：** `main = 5c64e560eb415af513c98a6d02d0322081ef92b9`（2026-11-24T03:22Z）
+
+### 12.1 main 现在是全绿的
+
+`main` 该 commit 的 9 个 check-run，**非绿数量为 0**：
+
+| check | conclusion |
+|---|---|
+| Repository hygiene (hard gate) | success |
+| GOV-DOC-002 metadata checks | success |
+| Bilingual docs coverage (ratchet) | success |
+| Rust format (hard gate) | success |
+| Rust clippy (hard gate) | success |
+| BMCP conformance suite (hard gate) | success |
+| BMCP protocol index (hard gate) | success |
+| Schema non-empty audit (hard gate) | success |
+| audit | success |
+
+`008` §5 那条「门禁全绿靠零审查合并维持」的判断不受影响——但「main 红」这个具体事实已经不成立，标题里的「再次红」因此过期。
+
+### 12.2 缺口集与冻结基线逐元素相等
+
+```
+$ python -c "..."
+baseline size : 77
+gap set size  : 77
+gap set == baseline: True
+
+GAP-BASELINE-001.md exists on disk : True
+  in gap set     : False
+  in baseline    : False
+  pair-exempt    : True
+```
+
+§1 复现里那个触发 `::error::New bilingual gap outside frozen baseline` 的文件 `14-ai-development/work-items/GAP-BASELINE-001.md`，**不在缺口集里**，也不在基线里——它落在 `PAIR_EXEMPT_PREFIXES` 内，两个判据都已豁免。§10.5 的「缺口 1→3」在今天是 **0**。
+
+### 12.3 空 diff 仍然 `EXIT=2`，但原因换了
+
+同一条命令，今天：
+
+```
+$ BASE_SHA=$S HEAD_SHA=$S PR_BODY="BILINGUAL-MANIFEST: COMPLETE" python scripts/check_bilingual_docs.py
+::error::NOT_APPLICABLE: BASE_SHA...HEAD_SHA contains zero changed paths; no bilingual incremental verification was performed.
+EXIT=2
+```
+
+退出码与 §1 相同，报文不同。§1 的报文是 `New bilingual gap outside frozen baseline: ...`；今天是 `NOT_APPLICABLE`。
+
+引入者是 `a82659a1`（2026-11-22 23:19:56 +0800，`fix(gov-doc-001): reject empty changed-path verification`），对 `scripts/check_bilingual_docs.py` **+7 −0**，只加了 `if not changed: ... return 2` 这一段。它**晚于**本登记的测量点 `c138654c94`（2026-11-21 16:26:23），所以 §11.1 记录的 `PASS (0 changed paths inspected). EXIT=0` 在当时为真，之后被这条守卫改掉。
+
+区别是实质的：
+
+| | §1 的 `EXIT=2` | 今天的 `EXIT=2` |
+|---|---|---|
+| 触发 | 门禁**认为**有未配对规范文档 | 门禁**拒绝在空增量上作判断** |
+| 对象 | 仓库内容 | 调用方式 |
+| 能否靠改仓库修掉 | 能 | 不能，只能改调用 |
+| 是否 fail-closed | 否（是误报） | **是（是对的）** |
+
+### 12.4 真实 PR 不会命中这条守卫
+
+`.github/workflows/bilingual-docs.yml` 传的是 `github.event.pull_request.base.sha` 与 `head.sha`。真实 PR 的 base 与 head 必然不同，`git diff --name-status base...head` 必非空，守卫不触发。它会触发的唯一形态是**手工用同一个 SHA 调两次**——也就是本登记 §1 与 §11.1 用的那种复现方式。
+
+所以 §8.4 的闭合性结论（main 红则所有 PR 恒 `EXIT=2`）**机制仍在，但今天既无前提（main 绿）也无触发路径（真实 PR 增量非空）**。
+
+### 12.5 本登记的哪一部分仍然成立
+
+| 断言 | 今天 |
+|---|---|
+| §1「main 在解除 45 分钟后再次红」 | **不成立**：main 全绿，缺口 0 |
+| §10.5「缺口 1→3 恶化」 | **不成立**：缺口 0 |
+| §11.1「main 已恢复 `EXIT=0`」 | **当时为真**，今天该命令返回 `EXIT=2`（`NOT_APPLICABLE`） |
+| §11.5「解除阻塞的合并是自我审查；随后两次合并零审查」 | **成立**，不受影响 |
+| §11.7「把问题定义窄了」 | **成立**，且本条是它第二次生效的证据 |
+
+技术性结论按 §12 更新；程序性结论（谁审的、审了几个、为什么这算自我审查）**一条都没变**，因此状态保留 `OPEN`，只把技术断言标为已被本条推翻。
+
+### 12.6 复现
+
+```
+repo:    oahcom/AiMemoryBrainArchitecture
+commit:  5c64e560
+
+# 1. main 全绿
+gh api repos/:owner/:repo/commits/5c64e560/check-runs \
+  --jq '[.check_runs[] | select(.conclusion != "success" and .conclusion != "skipped")] | length'
+-> 0
+
+# 2. 缺口集 == 基线
+python -c "
+import sys,os;sys.path.insert(0,os.path.join(os.getcwd(),'scripts'));sys.argv=['x']
+import check_bilingual_docs as g
+bs=set(g.read_baseline()); gs=set(g.current_bilingual_gaps())
+print(len(bs), len(gs), gs==bs)"
+-> 77 77 True
+
+# 3. 空 diff 的报文
+S=$(git rev-parse HEAD)
+BASE_SHA=$S HEAD_SHA=$S PR_BODY="BILINGUAL-MANIFEST: COMPLETE" \
+  python scripts/check_bilingual_docs.py; echo "EXIT=$?"
+-> ::error::NOT_APPLICABLE: ... zero changed paths ...
+-> EXIT=2
+```
+
+### 12.7 这条更正为什么值得写
+
+因为它是一个**退出码相同、语义相反**的例子。任何人只按 `EXIT=2` 判断，会得到「009 的结论仍然成立」的结论；而实际发生的是：原来的缺陷被修掉了，同一个退出码被一条**正确的** fail-closed 守卫接手。区分二者的唯一办法是读报文，不是读退出码。
+
+`§11.7` 说「当所有路径都指向缺人时，值得再查一遍是不是自己把问题定义窄了」。这条是它的对偶：**当所有证据都指向同一个数字时，值得再查一遍这个数字是不是在说同一件事。**
