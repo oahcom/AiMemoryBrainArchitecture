@@ -1838,8 +1838,9 @@ def collect_governed(root: Path) -> tuple[list[Path], list[str]]:
             add(root / rel)
         else:
             problems.append(
-                f"DM-14 governed file {rel} is not a regular file inside the "
-                f"repository (missing, a symlink, or reached through one)"
+                f"DM-14 collect_governed: governed file {rel} is not a "
+                f"regular file inside the repository "
+                f"(missing, a symlink, or reached through one)"
             )
 
     return list(seen.values()), problems
