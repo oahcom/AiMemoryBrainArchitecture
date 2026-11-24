@@ -459,7 +459,7 @@ fn stale_revision_is_rejected_and_current_version_remains_n_plus_one() {
 }
 
 #[test]
-fn entry_budget_overflow_reports_actual_and_limit_after_store_reads() {
+fn entry_budget_overflow_selects_a_subset_after_store_reads() {
     let visible_scope = scope("budget");
     let mut store = MemoryStore::new(SqliteMemoryStorage::in_memory().unwrap());
     let mut candidates = Vec::new();
@@ -494,20 +494,14 @@ fn entry_budget_overflow_reports_actual_and_limit_after_store_reads() {
         ));
     }
 
-    let error = build_context(
+    let snapshot = build_context(
         identity(visible_scope, "budget"),
         1,
         default_budget(1),
         candidates,
     )
-    .expect_err("two persisted candidates must exceed a one-entry budget");
-    assert_eq!(
-        error,
-        ContextError::EntryBudgetExceeded {
-            actual: 2,
-            limit: 1,
-        }
-    );
+    .expect("two persisted candidates are reduced to a one-entry budget");
+    assert_eq!(snapshot.entries.len(), 1);
 }
 
 #[test]
