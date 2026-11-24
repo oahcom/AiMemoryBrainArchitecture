@@ -21,6 +21,11 @@ jobs:
       - name: Self-check changed-path fail-closed behavior
         run: python3 scripts/test_check_bilingual_docs.py
 
+      # Builds fixture repositories under a temporary ROOT, so it must run
+      # before the real gate below and does not read this checkout's index.
+      - name: Self-check the pairing and root-departure rules
+        run: python3 -m unittest scripts.governance.evidence.test_gate_normative_roots
+
       - name: Check paired documentation and PR manifest
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
