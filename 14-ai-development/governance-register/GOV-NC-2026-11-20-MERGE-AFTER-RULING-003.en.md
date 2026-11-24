@@ -379,6 +379,59 @@ In other words: **the blocking findings were fixed 18 minutes after the merge, a
 
 Here the check was green and the review had happened — the two signals normally read as "safe to merge" — while blocking findings were still open. Neither "must be reviewed" nor "must pass checks" was sufficient to prevent this merge.
 
+#### Historical evidence correction / 历史证据更正
+
+**Correction recorded: 2026-11-23**
+
+The statement above that "review before merge = yes" was based on
+`issuecomment-7090724822`. That resource is an Issue comment, not a
+submitted pull-request review. Its `created_at` field establishes only
+the comment creation time; it does not establish that a formal review
+was submitted before the merge.
+
+The relevant review record source is
+`GET /repos/{owner}/{repo}/pulls/707/reviews`. No formal review record
+for PR #707 was identified in the evidence checked for this correction.
+Accordingly, the historical claim that a review was submitted before
+merge is **not established by the cited evidence**. This correction
+does not assert that a review definitely did not occur; it records that
+the original cited source cannot prove it.
+
+The original statement is retained as a record of the earlier
+assessment. It must not be treated as independently verified evidence
+of a submitted review.
+
+**中文**
+
+**更正记录日期：2026-11-23**
+
+上文“合并前审查 = 是”的判断依据为
+`issuecomment-7090724822`。该资源是 Issue 评论，而不是已提交的
+Pull Request Review。其 `created_at` 字段只能证明评论创建时间，
+不能证明合并前提交过正式审查。
+
+相关 Review 记录来源为
+`GET /repos/{owner}/{repo}/pulls/707/reviews`。在本次更正所核查的
+证据中，未发现 PR #707 的正式 Review 记录。因此，原有“合并前已提交
+审查”的历史主张**无法由所引用的证据确立**。本更正不声称审查绝对
+没有发生；它只记录原先引用的来源不足以证明该事实。
+
+保留原句，是为了记录此前的判断；不得将其视为正式 Review 已提交的
+独立核实证据。
+
+**Measured evidence for this correction / 本次更正的核查证据**
+
+| Item | Endpoint | Field | Value as returned |
+|---|---|---|---|
+| 正式 Review 记录 / formal reviews on #707 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/707/reviews` | array length | `0` records |
+| 被引用的评论 / the cited comment | `GET /repos/oahcom/AiMemoryBrainArchitecture/issues/comments/7090724822` | `created_at` | `2026-11-23T03:24:59Z` |
+| 同一评论的更新时间 / same comment | same record | `updated_at` | `2026-11-23T03:24:59Z` |
+| 同一评论的作者 / same comment | same record | `user.login` | `oahcom` |
+| PR #707 合并时间 / merge time | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/707` | `merged_at` | `2026-11-23T03:25:26Z` |
+| PR #707 合并提交 / merge commit | same record | `merge_commit_sha` | `f82b636732fef3f8ff728d59d2d04c3e221614fc` |
+
+All values are UTC as returned by the API; no conversion was applied. The comment precedes the merge by 27 seconds, which is consistent with a comment having been posted before the merge. It is not evidence that a formal review was submitted, and `pulls/707/reviews` contains no record that it was.
+
 ### 13.5 Rule produced
 
 `PR-GOVERNANCE-001` §6.1 adds a **Review disposition lock**: while a formal `REQUEST_CHANGES` or an authorized blocking finding stands, the PR must be `HOLD`; a correction is not resolved merely because a commit was pushed, a comment says "fixed", or CI passes — it must be re-verified on the current exact head.
