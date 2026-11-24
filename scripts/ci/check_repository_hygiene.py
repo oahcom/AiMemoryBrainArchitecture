@@ -403,12 +403,13 @@ def check_index_membership(root, commit, head_paths):
     What this deliberately does NOT verify: membership only. It does not check
     that a row's Status/Review/Acceptance text agrees with the item's own
     manifest. That is a different relation and it is not cheap here: measured
-    on main, a naive `status:`-equals-cell comparison disagrees on a large
-    majority of rows, because cells carry dated activity assertions
-    (`MERGED 2026-11-19T18:11:20Z`, `PR OPEN`) while manifests carry lifecycle
-    states (`VERIFIED`, `REMEDIATION_IN_PROGRESS`), and some indexed items
-    have no manifest at all. A gate that fails on all of those would be
-    switched off, so this one does not pretend to cover it.
+    on main at b40463cd, a naive `status:`-prefixes-cell comparison fails on
+    24 of 46 rows. Cells carry dated activity assertions (`PR OPEN`,
+    `MERGED 2026-11-19T18:11:20Z`) while manifests carry lifecycle states
+    (`VERIFIED`, `REMEDIATION_IN_PROGRESS`), and ten indexed items have no
+    `manifest.yaml` at all -- a fix item's `authorization-manifest.yaml` is a
+    different document. A gate that red on half the registry the day it landed
+    would be switched off, so this one does not pretend to cover it.
     """
     directories = work_item_directories(head_paths)
     if not directories:
