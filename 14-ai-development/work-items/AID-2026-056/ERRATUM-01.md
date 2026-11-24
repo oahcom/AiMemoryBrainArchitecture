@@ -1,23 +1,46 @@
 ---
 document_metadata:
   domain: ai-development
-  role: work-item-erratum
+  role: work-record
   lifecycle:
     approval:
       decision_status: Draft
       approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-24"
-      last_verification_note: "Every figure here is re-measured at main ac0f0dfd in the working checkout, not carried over from the prompt. #910 (150fb45e) is the commit that changed the ground the prompt stands on; the numbers before and after are both stated with the commit they belong to."
+      last_verification_note: "Every figure here is re-measured at main ac0f0dfd in the working checkout, not carried over from the prompt. #910 (150fb45e) is the commit that changed the ground the prompt stands on; the numbers before and after are both stated with the commit they belong to. The 77-path split was produced by reading check_bilingual_docs_full.py's own violation list and counting CJK and latin characters per file; the mirror count by calling counterpart() over all 64 .zh-CN.md paths outside 14-ai-development; the pairing comparison by calling side_by_side_partner() and counterpart() over all 932 tracked Markdown files; the absence of the floor by grepping both scripts for the literal 1000."
     usage_status: Active
     modification_status: Unchanged
     supersession:
       supersedes: []
       supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
   authority:
     canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
     normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
 ---
 
 # AID-2026-056 — ERRATUM-01
