@@ -10,12 +10,14 @@ root, so every input outside the declared subset must fail, not degrade.
 from __future__ import annotations
 
 import ast
+import io
 import os
 import re
 import shutil
 import subprocess
 import sys
 import tempfile
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -144,13 +146,34 @@ def skip(name: str, why: str) -> None:
         UNEXPECTED_SKIPS.append(f"{name}: skip reason {why!r} is not the registered one")
 
 
-def expect(name: str, text: str, needle: str = "", expect_clean: bool = False) -> None:
+def expect(
+    name: str,
+    text: str,
+    needle: str = "",
+    expect_clean: bool = False,
+    *,
+    msg: str = "",
+) -> None:
+    if needle and msg:
+        raise ValueError("expect() accepts either needle or msg, not both")
+
     errors, _ = check_document(FILE, text)
+
     if expect_clean:
         record(name, not errors, f"  unexpected: {errors}")
         return
-    ok = any(needle in e for e in errors) if needle else bool(errors)
-    record(name, ok, f"  expected {needle!r}, got {errors}")
+
+    if msg:
+        ok = any(error.startswith(msg) for error in errors)
+        expected = f"message prefix {msg!r}"
+    elif needle:
+        ok = any(needle in error for error in errors)
+        expected = f"rule-id needle {needle!r}"
+    else:
+        ok = bool(errors)
+        expected = "at least one error"
+
+    record(name, ok, f"  expected {expected}, got {errors}")
 
 
 def run_gate(root: Path, *extra: str) -> int:
@@ -162,9 +185,38 @@ def run_gate(root: Path, *extra: str) -> int:
         sys.argv = argv
 
 
-def expect_gate(name: str, root: Path, want: int, *extra: str) -> None:
-    code = run_gate(root, *extra)
-    record(name, code == want, f"  gate returned {code}, expected {want}")
+def expect_gate(
+    name: str,
+    root: Path,
+    want: int,
+    *extra: str,
+    msg: str = "",
+) -> None:
+    if not msg:
+        code = run_gate(root, *extra)
+        record(name, code == want, f"  gate returned {code}, expected {want}")
+        return
+
+    stdout = io.StringIO()
+    stderr = io.StringIO()
+
+    with redirect_stdout(stdout), redirect_stderr(stderr):
+        code = run_gate(root, *extra)
+
+    output = stdout.getvalue() + stderr.getvalue()
+    message_found = any(
+        line.strip().startswith(msg)
+        for line in output.splitlines()
+    )
+
+    ok = code == want and message_found
+
+    record(
+        name,
+        ok,
+        f"  gate returned {code}, expected {want}; "
+        f"expected message prefix {msg!r}; output: {output!r}",
+    )
 
 
 # --------------------------------------------------------------------------
@@ -265,6 +317,14 @@ def run_fields() -> None:
     expect("narrow approval scope rejected", doc(APPROVED.replace(
         "type: Full-document", "type: Selected-sections"
     )), "DM-03")
+    expect(
+        "Approved without approval_scope.type rejected",
+        doc(APPROVED.replace(
+            "        type: Full-document\n",
+            "",
+        )),
+        msg="DM-03 Approved requires approval.approval_scope.type",
+    )
     expect("Revoked without decision id rejected", doc(BASE.replace(
         "decision_status: Draft", "decision_status: Revoked\n      revocation: null"
     )), "DM-04")
@@ -599,7 +659,15 @@ def run_repository_rules() -> None:
             "    supersession:\n      supersedes:\n        - 00-governance/gone.md\n"
             "    approval:\n      decision_status: Draft",
         )), encoding="utf-8")
-        expect_gate("DM-13 missing supersedes target fails", root, 1)
+        expect_gate(
+            "DM-13 missing supersedes target fails",
+            root,
+            1,
+            msg=(
+                "DM-13 00-governance/a.md: "
+                "supersedes target does not exist: 00-governance/gone.md"
+            ),
+        )
 
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
