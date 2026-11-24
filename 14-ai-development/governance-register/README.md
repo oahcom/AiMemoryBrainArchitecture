@@ -64,7 +64,7 @@ document_metadata:
 | `GOV-NC-2026-11-23-UNREACHABLE-GUARD-030` | 017 已修但其守卫变为死代码，且 014 的修复使该套件 24 项失效 | High | `OPEN` / `MEASUREMENT_ONLY` | 1 个恒真守卫，167 个文件退出配对，24 项失效且无 workflow 运行 |
 | `GOV-NC-2026-11-23-EXECUTION-RESTORED-029` | 执行侧恢复，005 的现在时断言失效 | High | `OPEN` / `MEASUREMENT_ONLY` | 2 条首次执行，3 条被反证的现在时断言 |
 | `EX-20261123-01` | §5 独立审查不可用（追溯例外登记） | High | `HOLD` / 超配额，升级至仓库管理员（Issue #134） | 675 个合并 PR 中 0 次独立审查；本仓库首条例外记录 |
-| `OWNER-DECISION-REVIEW-INDEPENDENCE-001` | 008 §10.5 的三条补救均不可行；§5 的正确处置是 BLOCKED | High | `Draft` / 明确不声称 Approved | 675 个 PR 全量复核；0 条 APPROVED；1 个可写身份 |
+| `OWNER-DECISION-REVIEW-INDEPENDENCE-001` | 三条补救里只余一条不可行；§5 已按第 3 条路径修订（§9 勘误，2026-11-25） | High | `Draft` / 明确不声称 Approved | 675 个 PR 全量复核；0 条 APPROVED；1 个可写身份 |
 
 ## 证据
 
