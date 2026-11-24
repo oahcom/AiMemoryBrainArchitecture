@@ -14,7 +14,7 @@ document_metadata:
         type: Full-document
         included_sections: []
         included_assets: []
-      approval_applicability: Applicable-To-Current-Version
+      approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference: []
       revocation: null
     evidence_verification:
@@ -22,7 +22,7 @@ document_metadata:
       last_verified_date: "2026-11-24"
       last_verification_note: "The six amended clauses are line 136 of 14-ai-development/PR-GOVERNANCE-001.md, lines 40/43/55 of docs/en/.../PR-GOVERNANCE-001-ENFORCEMENT.md and the same three of docs/zh-CN/... . Each replacement was asserted present before substitution (string equality, not fuzzy matching), so no clause was silently skipped. The prior wording of all six is preserved verbatim in section 4 below. The baseline itself is an owner instruction given in session on 2026-11-24; it is authority, not a measurement, and is recorded as such."
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Pending-Reapproval
     supersession:
       supersedes: []
       supersession_reason: null
