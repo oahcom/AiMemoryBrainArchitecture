@@ -35,11 +35,12 @@
 
 # --- Accepted CRLF, with a removal condition ---------------------------------
 #
-# The 14 Markdown paths listed below were originally excluded from text
-# normalisation and the line-ending gate. On the current main, 12 still
-# contain CRLF. The source and zh-CN mirror of
-# GOV-NC-2026-11-21-SUFFIX-SCOPE-017 already have real `document_metadata`
-# blocks and LF endings; their `-text` entries are stale and can be removed.
+# The 12 Markdown paths listed below are excluded from text normalisation
+# and from the line-ending gate, and all 12 still contain CRLF. Two further
+# paths were excluded here until `#848`: the source and zh-CN mirror of
+# GOV-NC-2026-11-21-SUFFIX-SCOPE-017. Both had acquired real
+# `document_metadata` blocks and LF endings, so their `-text` entries were
+# removed and the gate now covers them.
 #
 # These exclusions are not a declaration that CRLF is acceptable. For a
 # governed document, DM-01 rejects a changed document without a
