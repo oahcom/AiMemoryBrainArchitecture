@@ -1,0 +1,99 @@
+work_item_id: AID-2026-059
+title: Implement the AI session evidence gate specified by Issue #799, without adding it to required contexts
+
+class: GATE/CI/TEST
+risk: R1
+risk_rationale: "One workflow file, one standard-library Python validator, and its unittest suite. No Rust, no transport, no storage, no credentials beyond the read-only GITHUB_TOKEN the runner already carries. The risk is not damage but false confidence: a gate that reports PRESENT over evidence it never actually read is indistinguishable from a gate that works, which is why the acceptance criteria are stated as mutation results rather than test counts."
+
+security_scope: "None beyond a read-only repository token. The workflow declares contents/pull-requests/issues read, runs no untrusted PR code (it checks out the base revision), and reads the policy effective time from one workflow-file constant rather than from any file a reviewed PR can modify."
+
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+implementing_ai_session: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 176244a6fefc84b64e99a39f7f223ba9a64de139
+tracking_issue: "Issue #799 - Require AI session evidence in Issues and PRs, with CI existence checks. This work item implements deliverable A only. Deliverable B, the independent trusted verifier on pull_request_target with an out-of-repository policy, remains tracked by #859 and is not started here."
+
+created_at: 2026-11-24
+updated_at: 2026-11-24
+
+# No prompt snapshot is frozen for this work item. The implementation was
+# produced across a session that iterated against mutation results rather than
+# against a single frozen prompt, so no prompt-v1.md exists and no sha256/bytes
+# pin is asserted. Recording a hash that was computed after the fact would
+# misrepresent it as a frozen input.
+prompt_id: NOT_FROZEN
+prompt_status: NOT_RECORDED
+
+dependency_refs:
+  - .github/workflows/session-evidence.yml
+  - scripts/governance/session_evidence/validate.py
+  - tests/session_evidence/support.py
+  - tests/session_evidence/test_validate.py
+  - scripts/ci/check_test_reachability.py
+  - scripts/ci/check_repository_hygiene.py
+
+# ---------------------------------------------------------------------------
+# What this work item is allowed to change. Stated because the workflow it adds
+# is itself a governance surface: an implementer who "improves" the policy by
+# widening it past Issue #799 is changing the policy, not implementing it.
+# ---------------------------------------------------------------------------
+
+authorization:
+  implementation_write: "GRANTED - Owner delegated merge authority for this PR; the four files are written by this branch"
+  gate_behaviour_change: "BOUNDED by Issue #799 - the eleven checks are implemented as written; no additional mandatory condition was invented"
+  required_context_change: "NOT_GRANTED - Issue #799 withholds required-context status until the check has run on real pull requests and an Owner approves separately; this work item does not touch branch protection"
+  policy_effective_time_change: "NOT_GRANTED - 2026-12-01T00:00:00Z is recorded by the ruling in Issue #799 and is not re-chosen here"
+  allowlist_change: "NOT_APPLICABLE"
+  root_membership_change: "NOT_APPLICABLE"
+
+scope:
+  files_to_create:
+    - .github/workflows/session-evidence.yml
+    - scripts/governance/session_evidence/validate.py
+    - tests/session_evidence/support.py
+    - tests/session_evidence/test_validate.py
+  files_to_modify: []
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+independent_reviewer: NOT_ASSIGNED
+integration_reviewer: NOT_ASSIGNED
+
+review:
+  status: NOT_ASSIGNED
+  report_ref: ""
+
+implementation:
+  status: IN_PROGRESS
+  branch: feat/799-session-evidence-gate
+  pull_request: PENDING
+  pull_request_url: PENDING
+  implementation_commit_sha: PENDING
+
+errata: []
+
+findings:
+  - id: F1
+    statement: "An earlier revision of this delivery was written against pytest and reported 74 passed. It could not land: the repository has no pytest (55 of 58 test files use unittest, none import pytest, and no pyproject.toml/pytest.ini/setup.cfg/tox.ini exists), and scripts/ci/check_test_reachability.py fails a test_*.py that no workflow executes. The suite was migrated to unittest and the workflow gained a self-test step. The 74-vs-57 difference is parametrize expansion, not lost tests: an AST comparison confirmed the 52 function names and their order are identical."
+    measured_at: "176244a6"
+    severity: informational
+  - id: F2
+    statement: "The pytest revision passed all 74 tests while two of them never executed the branch they named. test_prompt_sha256_mismatch_fails and test_prompt_byte_count_mismatch_fails set world['blob_text'] to a lambda returning the manifest for every path, so the validator failed at the evidence-section check before reaching check_11. Both asserted only 'exit != 0', so any failure counted. Disabling the SHA-256 comparison with 'if False:' left the suite green. This was not introduced by the unittest migration; the pytest revision survives the same mutation."
+    measured_at: "176244a6"
+    severity: material
+  - id: F3
+    statement: "Combination mutation exposed three pieces of dead code that single-function mutation does not find. check_04 and check_05 had identical bodies differing only in a location string and were called consecutively over the same path list, so the second could never fire. check_08's mode guard was unreachable because _validate_regular_file raises first. _validate_reference_scopes carried a 'canonical not in ctx.tree_by_path' guard already covered by the checks that run before it. All three were deleted and the suite stayed green."
+    measured_at: "176244a6"
+    severity: informational
+  - id: F4
+    statement: "Final mutation sweep: 14 of 14 mutants killed (compare truncation, 300-file limit, git-tree truncation, provenance enum, path-not-in-tree, absolute path, SHA-256 comparison, byte count, blob type, git mode, empty size, backslash, percent encoding, URL scheme). The number that matters is not the test count but that no survivor remained."
+    measured_at: "176244a6"
+    severity: informational
