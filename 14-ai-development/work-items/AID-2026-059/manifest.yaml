@@ -11,8 +11,6 @@ status: DISPATCHED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
-implementing_ai_session: NOT_ASSIGNED
-
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
 base_commit_sha: 176244a6fefc84b64e99a39f7f223ba9a64de139
@@ -21,13 +19,16 @@ tracking_issue: "Issue #799 - Require AI session evidence in Issues and PRs, wit
 created_at: 2026-11-24
 updated_at: 2026-11-25
 
-# No prompt snapshot is frozen for this work item. The implementation was
-# produced across a session that iterated against mutation results rather than
-# against a single frozen prompt, so no prompt-v1.md exists and no sha256/bytes
-# pin is asserted. Recording a hash that was computed after the fact would
-# misrepresent it as a frozen input.
-prompt_id: NOT_FROZEN
-prompt_status: NOT_RECORDED
+# The prompt record was consolidated from the session's own prompt files after
+# the implementation ran, not frozen before it. It is therefore recorded but
+# not frozen: provenance is NOT_VERIFIED and the digest pins the bytes of the
+# recorded record, not an input that governed the work in advance.
+prompt_id: AID-2026-059-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-059/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 58db160e8d102c0fbf57bd77732f26d349ceb69d7ed04a4549e967667e714645
+prompt_bytes: 2527
 
 dependency_refs:
   - .github/workflows/session-evidence.yml
@@ -57,6 +58,8 @@ scope:
     - scripts/governance/session_evidence/validate.py
     - tests/session_evidence/support.py
     - tests/session_evidence/test_validate.py
+    - 14-ai-development/work-items/AID-2026-059/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-059/session-evidence-799.md
   files_to_modify: []
 
 acceptance:
@@ -101,3 +104,28 @@ findings:
     statement: "The previously reported surviving mutant, the second PR-level 'YES requires evidence references' clause in check_02_pr_declaration_and_references, was not a test gap but unreachable code. check_01_pr_fields_and_issue_references raises the same condition first and, in this revision, the two copies carried different messages ('PR: YES requires evidence references' versus 'PR: YES requires at least one evidence path'). Because check_01 always raised first, deleting check_02's copy left the suite green and no test could have distinguished the two. The duplicate was deleted so the PR-level policy has one owner; a mutant at that location no longer exists to survive. test_yes_requires_refs was rewritten to a world whose only defect is the missing PR evidence — with check_01's guard removed the validator reports PRESENT — and it asserts the exact message rather than a nonzero exit."
     measured_at: "4d6a8255"
     severity: informational
+
+# ---------------------------------------------------------------------------
+# Session evidence, in the canonical shape the delivered validator parses.
+#
+# issue_refs is empty on purpose. The only linked Issue, #799, predates the
+# policy and has no AI-assisted-work declaration, so its mapping row is
+# LEGACY_UNDECLARED. Attaching this entry to #799 would assert that the Issue
+# declared YES, which it did not. OD-A3 permits an entry whose evidence is
+# declared at PR scope with no Issue attribution, so this entry carries none.
+#
+# The prompt record was consolidated after the session rather than frozen
+# before it: provenance is NOT_VERIFIED, and the digest pins the recorded
+# bytes. Nothing here claims a frozen prompt.
+# ---------------------------------------------------------------------------
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+    implementing_ai_session: session-799-orchestrator
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-059/prompt-v1.md
+    executed_prompt_sha256: 58db160e8d102c0fbf57bd77732f26d349ceb69d7ed04a4549e967667e714645
+    executed_prompt_bytes: 2527
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-059/session-evidence-799.md
