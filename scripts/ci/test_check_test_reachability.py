@@ -97,14 +97,56 @@ class ReachabilityTest(unittest.TestCase):
         self.assertEqual(code, 0, out + err)
 
     def test_ambiguous_discovery_root_fails_closed(self):
+        # Distinct filenames: identical ones would trip the stem-collision rule
+        # first, and this case is about the ambiguous root, not about stems.
         for name in ("one", "two"):
             d = self.root / name / "same"
             d.mkdir(parents=True)
-            (d / "test_p.py").write_text("", encoding="utf-8")
+            (d / ("test_%s.py" % name)).write_text("", encoding="utf-8")
         self.workflow("      - run: python3 -m unittest discover -s same\n")
         code, out, err = run(self.root)
         self.assertEqual(code, 2)
         self.assertIn("ambiguous", err)
+
+    def test_shared_stem_fails_closed_with_both_paths(self):
+        # Rule B matches by substring, so `scripts/ci/test_check_fmt.py` is
+        # reported reachable whenever `scripts/test_check_fmt.py` is wired. The
+        # gate must refuse to answer rather than answer wrongly.
+        for parent in ("scripts", "scripts/ci"):
+            directory = self.root / parent
+            directory.mkdir(parents=True, exist_ok=True)
+            (directory / "test_check_fmt.py").write_text("", encoding="utf-8")
+        self.workflow("      - run: python3 scripts/test_check_fmt.py\n")
+        code, out, err = run(self.root)
+        self.assertEqual(code, 1, out + err)
+        self.assertIn("scripts/test_check_fmt.py", err)
+        self.assertIn("scripts/ci/test_check_fmt.py", err)
+        self.assertIn("shared", err)
+
+    def test_unique_stems_still_pass(self):
+        # The collision check must not fire on the ordinary case.
+        for parent, name in (("scripts", "test_a.py"), ("scripts/ci", "test_b.py")):
+            directory = self.root / parent
+            directory.mkdir(parents=True, exist_ok=True)
+            (directory / name).write_text("", encoding="utf-8")
+        self.workflow(
+            "      - run: python3 scripts/test_a.py\n"
+            "      - run: python3 scripts/ci/test_b.py\n"
+        )
+        code, out, err = run(self.root)
+        self.assertEqual(code, 0, out + err)
+
+    def test_real_repository_has_no_duplicate_stems(self):
+        """The precondition Rule B depends on, asserted against the real tree."""
+        stems = {}
+        for test in REPO.rglob("test_*.py"):
+            if ".git" in test.parts:
+                continue
+            stems.setdefault(test.stem, []).append(
+                test.relative_to(REPO).as_posix()
+            )
+        collisions = {k: v for k, v in stems.items() if len(v) > 1}
+        self.assertEqual(collisions, {})
 
     def test_escaping_discovery_root_fails_closed(self):
         (self.root / "pkg").mkdir()
