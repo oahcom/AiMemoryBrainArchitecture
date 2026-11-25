@@ -1,0 +1,154 @@
+manifest_version: "1.0"
+record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
+registration_stage: "STAGE_0"
+registration_status: "FORMAL_STAGE_0_REGISTERED_WITH_RECORDED_LIMITATIONS"
+work_item_id: "AID-2026-080"
+identifier_status: "ALLOCATED_AFTER_INDEX_AND_TREE_CHECK; GLOBAL_BRANCH_SCAN_NOT_EXHAUSTIVE"
+
+title: "SOURCE-RESTORE-02 — Restore normative-source candidates with exact provenance and governance registration"
+date: "2026-11-26"
+external_workflow_references:
+  - id: "AID-2026-11-26-SOURCE-RESTORE-02"
+    kind: "EXTERNAL_WORKFLOW_REFERENCE"
+    repository_work_item_id: false
+    note: "External workflow identifier retained only as evidence; AID-2026-080 is the repository-standard Work Item ID."
+  - id: "PR #1220"
+    kind: "CARRIER"
+  - id: "Issues #1177, #1179, #1202, #1203"
+    kind: "RELATED_ISSUES"
+
+repository:
+  name: "oahcom/AiMemoryBrainArchitecture"
+  url: "https://github.com/oahcom/AiMemoryBrainArchitecture"
+  baseline_branch: "main"
+  baseline_commit: "6314a65bd8be48c1a4bb0768e9960c4c808110ab"
+  implementation_branch: "impl/2026-11-26-normative-source-restore"
+  carrier: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1220"
+
+identifier_evidence:
+  checked_refs:
+    - "main"
+    - "impl/2026-11-26-normative-source-restore"
+    - "active branches returned by branch-name searches for AID-2026, work-item and stage0-registration"
+  checked_result:
+    main_work_item_index_max: "AID-2026-079"
+    target_directory_in_main: "NOT_FOUND"
+    target_directory_in_pr_head_before_allocation: "NOT_FOUND"
+    branch_name_collision_for_AID_2026_080: "NOT_FOUND"
+    branch_name_collision_for_AID_2026_081: "NOT_FOUND"
+  global_uniqueness: "NOT_FULLY_VERIFIED"
+  limitation: >-
+    The repository exposes more than 1,000 active branches. This allocation did not
+    complete a recursive work-item-directory scan of every branch. No collision was
+    found in main, the PR head, or the relevant branch-name search results; this is
+    a bounded allocation check, not a claim of exhaustive global uniqueness.
+
+authority:
+  authority_basis: >-
+    Explicit user instruction in this conversation asserting human Owner authority
+    for Stage 0 registration. The natural-person identity and domain Owner mapping
+    are not independently established by this record.
+  implementing_operator: "USER-AUTHORIZED DELEGATED OPERATOR (ChatGPT)"
+  sponsor: "HUMAN_OWNER_AUTHORIZATION_ASSERTED; IDENTITY_NOT_MAPPED"
+  accountable_owner: "CROSS-OWNER — D source contracts; Owner A / Governance registry integration"
+  acceptance_authority: "NOT_ASSIGNED"
+  independent_reviewer: "NOT_ASSIGNED"
+  implementation_authorization: "NO_NEW_IMPLEMENTATION_AUTHORIZATION"
+  merge_authorization: "NOT_GRANTED"
+  deployment_authorization: "NOT_GRANTED"
+  issue_closure_authorization: "NOT_GRANTED"
+
+scope:
+  objective: >-
+    Preserve and stage the exact D-owned Memory Brain source candidates and their
+    bilingual companions; register the 03-memory-brain governance root and source
+    index; retain F, I and H source findings as owner-specific blockers; maintain
+    exact source/blob provenance; and record the candidate disposition in PR #1220.
+  in_scope:
+    - "D: four exact source documents, bilingual companion pins, source index and evidence matrix."
+    - "GOV-DOC-002 registration of 03-memory-brain and GOV-DOC-001 NORMATIVE_ROOTS inclusion."
+    - "F/I/H source inventory and blocker evidence only; no source promotion without each Owner's exact-version acceptance."
+    - "Stage 0 work-item registration, traceability INDEX and manifest classification."
+  out_of_scope:
+    - "Runtime/product code, schemas, APIs, migrations, tests logic and production operations."
+    - "Mainline merge, deployment, issue closure, protocol freeze or normative promotion."
+    - "Any fabricated Owner approval, review, prompt provenance or global-uniqueness claim."
+  current_disposition: "PARTIAL — candidate artifacts staged in Draft PR; no mainline restoration or Owner acceptance claimed."
+
+baseline_and_source_evidence:
+  main_base: "6314a65bd8be48c1a4bb0768e9960c4c808110ab"
+  d_source_branch: "session-d-memory-brain-2026-11-16"
+  d_source_commit: "b525e1f8fee2471a131e4a38efda99804045e424"
+  d_source_blobs:
+    - "memory-brain-overview.md: b4ed712ac0626ab127cccfd205c50a9013df01fb"
+    - "canonical-memory-store.md: 6b37c91033fda21f072e2a3bde6f274663b1e76e"
+    - "memory-lifecycle-manager.md: 8b972035b449e1eab546aedc9cc5b30581600c65"
+    - "forget-fence-operation-and-publication-gate.md: 4da0b61ba3656a768ea56b4a2a24e09da4e21cd5"
+  evidence_matrix: "00-governance/implementation-evidence/2026-11-26-source-restore-matrix.md"
+
+prompt:
+  prompt_file: "14-ai-development/work-items/AID-2026-080/prompt-v1.md"
+  prompt_version: "v1"
+  prompt_status: "TASK_SPECIFIC_USER_INPUT_CAPTURED"
+  prompt_sha256: "4f8d445a19a48ba1a4fc36225c4cff9b88554ec7ce4185b9e114bdf2f5c3332b"
+  prompt_bytes: 693
+  prompt_provenance: "NOT_VERIFIED"
+  prompt_provenance_note: >-
+    The file preserves the exact task-specific user instruction supplied for this
+    registration turn. It is not a reconstruction of the complete effective model
+    payload or inherited system/Owner baseline prompts; completeness is NOT_VERIFIED.
+  session_reference_status: "NOT_AVAILABLE"
+
+session_evidence:
+  - role: "IMPLEMENTER_AND_REGISTRATION_COORDINATOR"
+    issue_refs:
+      - "#1177"
+      - "#1179"
+      - "#1202"
+      - "#1203"
+    implementing_ai_session: "ChatGPT session; stable session identifier NOT_AVAILABLE"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-080/prompt-v1.md"
+    executed_prompt_sha256: "4f8d445a19a48ba1a4fc36225c4cff9b88554ec7ce4185b9e114bdf2f5c3332b"
+    executed_prompt_bytes: 693
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_AVAILABLE"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-080/session-evidence-source-restore.md"
+
+formal_registration:
+  status: "COMPLETED_ON_CANDIDATE_BRANCH_WITH_BOUNDED_IDENTIFIER_SCAN"
+  index_entry_verified: "PENDING_READBACK"
+  identifier_allocation: "AID-2026-080"
+  retrospective_registration: true
+  note: >-
+    This registration records an already-existing candidate PR; it does not
+    retroactively authorize implementation, acceptance, merge or deployment.
+
+lifecycle:
+  current_stage: "STAGE_0"
+  stage_0: "REGISTERED_WITH_RECORDED_LIMITATIONS"
+  r1: "CI_EVIDENCE_AVAILABLE; INDEPENDENT_REVIEW_NOT_RECORDED"
+  r2: "NOT_ACCEPTED"
+  implementation: "CANDIDATE_ALREADY_PRESENT_IN_PR_1220"
+  independent_acceptance: "NOT_GRANTED"
+  merge: "NOT_AUTHORIZED"
+  deployment: "NOT_AUTHORIZED"
+
+acceptance_criteria:
+  stage_0:
+    - "Repository-standard ID allocated without reusing an ID found in the checked refs."
+    - "External workflow ID retained only as evidence reference."
+    - "Stage 0 manifest and evidence paths are committed on PR #1220 branch."
+    - "INDEX entry and manifest readback are verified."
+    - "Prompt capture limitations are explicit; no complete-prompt claim is made."
+    - "No Owner acceptance, normative promotion, merge or deployment is inferred."
+  stage_0_exit_status: "PENDING_READBACK"
+
+open_blockers:
+  - "Exhaustive identifier scan across every active branch is NOT_COMPLETED."
+  - "D Owner exact-final-Blob acceptance remains pending for all four D files."
+  - "Owner A / Governance acceptance of governance-root integration remains pending."
+  - "Relevant dependency Owner acceptance remains pending."
+  - "Canonical Memory Store INT-P0-01 ADR blocker remains open."
+  - "Forget Fence E/Storage/I enforcement and conformance remain open."
+  - "F/I/H source restoration remains separately blocked as recorded in the evidence matrix."
+  - "Independent review and semantic EN/ZH-CN parity review remain pending."
