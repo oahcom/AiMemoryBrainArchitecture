@@ -106,6 +106,20 @@ jobs:
           cd scripts
           python3 -m unittest test_check_traceability
 
+      # The self-check above proves the checker's rules on fixtures; until
+      # #1071 the checker itself was never run against this tree, so four
+      # properties INDEX.md states (no duplicate AID row, manifest identity,
+      # every INDEX row resolving, every manifest indexed) were asserted
+      # about nothing. The registry is absent (#266/OD-23) and a bare run must
+      # keep failing loudly on it (#926), so the narrowed mode is invoked: it
+      # evaluates the INDEX/manifest half, reports the requirement checks as
+      # NOT EVALUATED, and exits 0/1/2. Exit 2 is a failure here too: an
+      # unreadable condition must never read as green. This step runs inside
+      # the job that produces the required `Repository hygiene (hard gate)`
+      # context, so the assertions are actually required; no `|| true`.
+      - name: Check INDEX/manifest traceability against the tree
+        run: python3 scripts/check_traceability.py --index-manifest-only
+
       # PR-GOVERNANCE-001 §7 declares the required check contexts on `main`.
       # Renaming a job leaves the document claiming a context nothing produces;
       # this holds the declaration to the tree. Exit 2 (INCOMPLETE) is a failure

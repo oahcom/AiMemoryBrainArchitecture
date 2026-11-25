@@ -6,6 +6,7 @@ from __future__ import annotations
 import io
 import json
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -146,6 +147,25 @@ class TraceabilityTests(unittest.TestCase):
         output = io.StringIO()
         code = run_check(self.root, output)
         return code, output.getvalue()
+
+    def check_cli(self, *args: str) -> tuple[int, str]:
+        """Run the checker as a process from the tree root.
+
+        #1071: the assertions must bite on the real path, not only when a
+        test calls a function. This executes the checker the way
+        `.github/workflows/repository-hygiene.yml` does against this tree,
+        with the temporary repository as its working directory.
+        """
+        script = Path(__file__).with_name("check_traceability.py")
+        result = subprocess.run(
+            [sys.executable, str(script), *args],
+            cwd=self.root,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=False,
+        )
+        return result.returncode, result.stdout + result.stderr
 
     def add_unindexed_manifest(
         self,
@@ -518,6 +538,62 @@ class TraceabilityTests(unittest.TestCase):
         code, output = self.check()
         self.assertEqual(code, 0, output)
         self.assertIn("PASS TRACEABILITY: 1 requirements", output)
+
+    # Issue #1071: the checker's only execution was this file. These tests run
+    # it as a process, the way the workflow does, so the four INDEX/manifest
+    # properties are shown to bite on the real path rather than only when a
+    # test calls a function.
+
+    def test_1071_cli_runs_without_registry_and_reports_scope(self) -> None:
+        (
+            self.root / "00-governance/requirements-registry.yaml"
+        ).unlink()
+        code, output = self.check_cli("--index-manifest-only")
+        self.assertEqual(code, 0, output)
+        self.assertIn("NOT EVALUATED: requirement checks", output)
+        self.assertIn(
+            "PASS TRACEABILITY [INDEX/MANIFEST ONLY]: 0 requirements / "
+            "1 work items",
+            output,
+        )
+
+    def test_1071_cli_duplicate_index_entry_exits_nonzero(self) -> None:
+        index = self.root / "14-ai-development/work-items/INDEX.md"
+        with index.open("a", encoding="utf-8") as handle:
+            handle.write(
+                "| [{}]({}/manifest.yaml) | Example again |\n".format(AID, AID)
+            )
+        # Condition 3 (no registry) and condition 4 (registry supplied): the
+        # assertion, not the plumbing, is what these pin down.
+        for args in ((), ("--index-manifest-only",)):
+            with self.subTest(args=args):
+                code, output = self.check_cli(*args)
+                self.assertNotEqual(code, 0, output)
+                self.assertIn("duplicate INDEX entry {}".format(AID), output)
+
+    def test_1071_cli_manifest_identity_mismatch_exits_nonzero(self) -> None:
+        self.write_manifest(work_item_id="AID-2026-998")
+        for args in ((), ("--index-manifest-only",)):
+            with self.subTest(args=args):
+                code, output = self.check_cli(*args)
+                self.assertNotEqual(code, 0, output)
+                self.assertIn("does not match directory", output)
+
+    def test_1071_default_cli_still_fails_on_missing_registry(self) -> None:
+        (
+            self.root / "00-governance/requirements-registry.yaml"
+        ).unlink()
+        code, output = self.check_cli()
+        self.assertEqual(code, 1, output)
+        self.assertIn("ERROR required registry unavailable:", output)
+
+    def test_1071_narrowed_cli_missing_index_is_exit_one(self) -> None:
+        (
+            self.root / "14-ai-development/work-items/INDEX.md"
+        ).unlink()
+        code, output = self.check_cli("--index-manifest-only")
+        self.assertEqual(code, 1, output)
+        self.assertIn("required work item INDEX unavailable:", output)
 
 
 if __name__ == "__main__":

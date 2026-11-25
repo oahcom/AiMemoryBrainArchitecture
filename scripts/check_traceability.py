@@ -10,10 +10,21 @@ YAML subset. No PyYAML or third-party package is required.
 Manifest parsing is deliberately narrow: only selected top-level scalar
 values are read. Nested YAML is ignored. Unsupported or malformed input is
 reported as indeterminate rather than silently interpreted.
+
+Exit codes follow the repository vocabulary:
+    0  PASS        every condition this invocation evaluates holds
+    1  VIOLATION   a condition was evaluated and failed
+    2  INCOMPLETE  a condition could not be evaluated
+
+The default run requires the registry and fails loudly when it is absent
+(#926). `--index-manifest-only` narrows the invocation to the INDEX/manifest
+properties, which need no registry; the requirement checks are then reported
+as NOT EVALUATED rather than silently counted as clean (#1071).
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import re
@@ -862,13 +873,16 @@ def summarize(
     reporter: Reporter,
     requirement_count: int,
     work_item_count: int,
+    scope: str = "",
 ) -> int:
     word, code = verdict(reporter)
+    label = "TRACEABILITY" + (" [{}]".format(scope) if scope else "")
 
     reporter.warning_stream.write(
-        "{} TRACEABILITY: {} requirements / {} work items / {} errors / "
+        "{} {}: {} requirements / {} work items / {} errors / "
         "{} warnings\n".format(
             word,
+            label,
             requirement_count,
             work_item_count,
             reporter.errors,
@@ -883,8 +897,46 @@ def run_check(
     root: Path,
     stream: TextIO,
     warning_stream: Optional[TextIO] = None,
+    index_manifest_only: bool = False,
 ) -> int:
     reporter = Reporter(stream, warning_stream)
+
+    if index_manifest_only:
+        # The INDEX/manifest properties need no registry. Narrowing the
+        # invocation is a declared scope, not a failure to read an input, so
+        # the excluded requirement checks are named as NOT EVALUATED: the
+        # summary must never be readable as "every condition was checked".
+        reporter.warn(
+            "NOT EVALUATED: requirement checks (T-01/T-02/T-03/T-07/T-08) "
+            "need the registry and are out of scope of "
+            "--index-manifest-only; T-05 cannot compare a tracking_issue "
+            "against requirement authority and reports every reference as "
+            "unmapped (warning only, as in a full run)"
+        )
+        try:
+            work_item_count, _ = validate_index_and_manifests(
+                root, set(), reporter
+            )
+        except CheckFailure as exc:
+            # Mirrors the full run's treatment of the registry: an absent
+            # required input is a repository defect (ERROR, exit 1), while an
+            # input that exists but cannot be interpreted is INCOMPLETE (2).
+            if not (root / INDEX_PATH).is_file():
+                reporter.error(
+                    "required work item INDEX unavailable: {}".format(exc)
+                )
+            else:
+                reporter.unknown(
+                    "cannot complete index/manifest check: {}".format(exc)
+                )
+            return summarize(reporter, 0, 0, "INDEX/MANIFEST ONLY")
+        except OSError as exc:
+            reporter.unknown("I/O failure: {}".format(exc))
+            return summarize(reporter, 0, 0, "INDEX/MANIFEST ONLY")
+
+        return summarize(
+            reporter, 0, work_item_count, "INDEX/MANIFEST ONLY"
+        )
 
     try:
         requirements = parse_registry(root / REGISTRY_PATH)
@@ -916,8 +968,31 @@ def run_check(
     return summarize(reporter, len(requirements), work_item_count)
 
 
-def main() -> int:
-    return run_check(Path(os.getcwd()), sys.stdout, sys.stderr)
+def main(argv: Optional[List[str]] = None) -> int:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Structural requirement/work-item traceability checker. "
+            "A bare run requires the registry."
+        )
+    )
+    parser.add_argument(
+        "--index-manifest-only",
+        action="store_true",
+        help=(
+            "evaluate only the INDEX/manifest properties, which do not need "
+            "the requirements registry; requirement checks are reported as "
+            "NOT EVALUATED (exit codes unchanged: 0 PASS, 1 VIOLATION, "
+            "2 INCOMPLETE)"
+        ),
+    )
+    args = parser.parse_args(argv)
+
+    return run_check(
+        Path(os.getcwd()),
+        sys.stdout,
+        sys.stderr,
+        index_manifest_only=args.index_manifest_only,
+    )
 
 
 if __name__ == "__main__":
