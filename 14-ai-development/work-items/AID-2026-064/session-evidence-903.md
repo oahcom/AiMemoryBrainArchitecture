@@ -60,7 +60,7 @@ digest in `manifest.yaml`:
 
 | file | bytes | sha256 |
 |---|---:|---|
-| `14-ai-development/work-items/AID-2026-064/prompt-v1.md` | 7124 | `1a3ded69587f3e511f38c187f6e5fdf954e31f308e8b89126f04d765318c2d24` |
+| `14-ai-development/work-items/AID-2026-064/prompt-v1.md` | 8623 | `88d1eae165f7535fa608f847f2998930df3236ee77d596be440d3fc190054477` |
 
 It fixed the remedy (option 1), forbade two of the Issue's other options, named
 the three files to inspect, and required the measurements below. No follow-up
