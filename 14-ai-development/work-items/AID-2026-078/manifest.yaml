@@ -66,7 +66,10 @@ acceptance_criteria:
       found.
     measurement: >-
       A run over the real tree exits 0, and the printed count equals
-      `ls -d 14-ai-development/work-items/AID-*/ | wc -l`.
+      `ls 14-ai-development/work-items/*/manifest.yaml | wc -l`. The count is of
+      manifest files, not `AID-*` directories: `FIX-2026-P1-T1/manifest.yaml` is a
+      committed manifest and parses today, and excluding it would need a name-based
+      exclusion rule that R7 forbids.
   - id: AC2
     criterion: >-
       A duplicate key fails even where the default loader would accept the document, so that
@@ -151,8 +154,8 @@ findings:
       this rather than presenting the work as a single act.
 
 implementation:
-  status: NOT_STARTED
-  branch: PENDING
+  status: IMPLEMENTED_IN_BRANCH
+  branch: feat/078-manifest-gate
   pull_request: PENDING
   merge_commit_sha: NOT_MERGED
   note: >-
