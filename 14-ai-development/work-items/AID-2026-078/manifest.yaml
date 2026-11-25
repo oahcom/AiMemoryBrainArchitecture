@@ -1,0 +1,186 @@
+work_item_id: AID-2026-078
+title: Parse every work-item manifest, not one of them
+class: GATE/TEST
+risk: R2
+risk_rationale: >-
+  One read-only checker, its tests, and one workflow step. It parses committed manifests and
+  writes nothing. The risk it addresses is false assurance rather than damage: the repository's
+  only strict-parse job names a single hard-coded manifest, and the manifest rule inside
+  check_repository_hygiene.py is a regular expression over text that cannot fail on a document
+  no parser can load. Its own summary line, `manifests=50 violations=0`, has already been read
+  as parseability evidence once. A green run of the new check must not be able to be read the
+  same way, which is why the "does not verify" statement is an acceptance criterion and not a
+  comment.
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+implementing_ai_session: "REGISTERED_BY_MEASURING_SESSION (session identity: NOT_RECORDED)"
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 8f694edf
+tracking_issue: >-
+  NONE - registered from a measurement taken in this session, and from the deferral written
+  into commit b34c8e37, which names this work rather than an issue.
+
+prompt_id: AID-2026-078-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-078/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: c2ae6f744dbfc383ef1468516bc116744a7bf38a27566685c51c63a337d4b1a2
+prompt_bytes: 7533
+
+authorization:
+  implementation_write: >-
+    GRANTED for scripts/ci/check_manifest_parse.py, its test module, one workflow step, this
+    work item's own directory, and INDEX.md. NOT_GRANTED for any other path.
+  gate_behaviour_change: >-
+    GRANTED for adding one check. NOT_GRANTED for changing any existing rule in
+    check_repository_hygiene.py or any existing behaviour of
+    aid-2026-001-manifest-validation.yml for AID-2026-001.
+  schema_change: NOT_GRANTED - no manifest field is added, removed or retyped.
+  platform_state_change: >-
+    NOT_GRANTED for required status contexts. The new check runs in an existing workflow, so
+    no branch-protection payload is modified.
+  architecture_spec_change: NOT_GRANTED - no ADR and no canonical document is modified.
+
+scope:
+  files_to_create:
+    - scripts/ci/check_manifest_parse.py
+    - scripts/ci/test_check_manifest_parse.py
+    - 14-ai-development/work-items/AID-2026-078/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-078/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-078/session-evidence-266.md
+  files_to_modify:
+    - .github/workflows/repository-hygiene.yml
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope: >-
+    Every other path. In particular scripts/ci/check_repository_hygiene.py, whose text scan is
+    the subject of this work item and is not edited by it; and
+    .github/workflows/aid-2026-001-manifest-validation.yml, whose existing behaviour for
+    AID-2026-001 is left exactly as it is.
+
+acceptance_criteria:
+  - id: AC1
+    criterion: >-
+      A check in scripts/ci parses every committed work-item manifest and prints how many it
+      found.
+    measurement: >-
+      A run over the real tree exits 0, and the printed count equals
+      `ls -d 14-ai-development/work-items/AID-*/ | wc -l`.
+  - id: AC2
+    criterion: >-
+      A duplicate key fails even where the default loader would accept the document, so that
+      a record which silently loses a field cannot pass.
+    measurement: >-
+      A fixture declaring the same key twice is accepted by yaml.safe_load and rejected by the
+      check, which exits non-zero. Both halves are asserted.
+  - id: AC3
+    criterion: A syntax error in a manifest fails the check and names the offending path.
+    measurement: >-
+      A fixture with an unquoted scalar containing `": "` makes the check exit non-zero, and
+      that fixture's path appears in the output.
+  - id: AC4
+    criterion: The check runs on every pull request, rather than only when invoked by hand.
+    measurement: >-
+      The check is named in a workflow step with no `paths:` filter that excludes manifests,
+      and it appears in a pull request job log.
+  - id: AC5
+    criterion: >-
+      A passing run states what it did not verify, so green is not read as "the manifests are
+      semantically correct".
+    measurement: >-
+      The sentence is present in the stdout of a passing run, and a test asserts its presence
+      so that it cannot be deleted silently.
+  - id: AC6
+    criterion: >-
+      The four manifests repaired by b34c8e37 - AID-2026-023, -029, -040 and -055 - are
+      parse-checked at the landing commit of this work item.
+    measurement: >-
+      The check exits 0 over the real tree, and the four ids are named here so that a
+      reintroduction of the defect is a visible regression of this work item.
+
+findings:
+  - id: F1
+    severity: MEDIUM
+    statement: >-
+      The repository has one strict-parse job and it covers one manifest. Its trigger names
+      `14-ai-development/work-items/AID-2026-001/manifest.yaml` and the job body hard-codes the
+      same path, so the other 49 are parsed by nothing in CI.
+    evidence: >-
+      Measured at 68591920: 50 manifest files on disk, 50 parse under a duplicate-key-rejecting
+      loader, 1 is named in the workflow's `paths:` filter and in the job body.
+  - id: F2
+    severity: MEDIUM
+    statement: >-
+      The manifest rule in check_repository_hygiene.py reads text, not YAML, so a manifest that
+      cannot be loaded reports clean. Its `manifests=50 violations=0` line is evidence about a
+      regular expression.
+    evidence: >-
+      The file contains no `import yaml` and no `safe_load`; it extracts scalars with
+      `_top_level_manifest_scalar`, a per-line pattern over unindented lines.
+  - id: F3
+    severity: HIGH
+    statement: >-
+      The defect class is silent, not loud, which is what makes a strict loader necessary rather
+      than sufficient. AID-2026-029 declared related_prs twice; the default loader returned a
+      document with `related_prs: []` and discarded PR 356 without error.
+    evidence: >-
+      Recorded in b34c8e37: line 8 said `[356]` (added by d8fdf54, the closeout commit) and
+      line 9 said `[]` (added earlier by 84b1255). The project's line parser read the first and
+      PyYAML read the last.
+  - id: F4
+    severity: MEDIUM
+    statement: >-
+      This is the second time the class has been registered and the first time it has been
+      registered with a gate as its deliverable. FIX-2026-P1-MANIFEST-YAML-001 repaired four
+      manifests on 2026-11-19 without wiring a check, and its own audit record says so under
+      Limits.
+    evidence: >-
+      FIX-2026-P1-MANIFEST-YAML-001/audit-record.md section 4 records "No workflow wiring; the
+      evidence-tiering checker and the bilingual tiering script still run only when someone
+      runs them." b34c8e37 is the second such repair.
+  - id: F5
+    severity: LOW
+    statement: >-
+      The ordering is not clean and is recorded as it happened: the corpus was repaired by a
+      commit that deferred the gate, and the gate is a separate later work item. Two independent
+      sessions repaired the same four files before either knew of the other.
+    evidence: >-
+      b34c8e37 (repairs, on main at 68591920) and an unmerged, independently prepared repair in
+      this session that was dropped as redundant once origin/main was fetched. The prompt states
+      this rather than presenting the work as a single act.
+
+implementation:
+  status: NOT_STARTED
+  branch: PENDING
+  pull_request: PENDING
+  merge_commit_sha: NOT_MERGED
+  note: >-
+    Registration only. The checker, its test module and the workflow step are not written. The
+    four repairs this work item depends on were made by b34c8e37 and are not this work item's.
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    No independent review is recorded. This manifest was written by the session that measured
+    the gap, so an APPROVE from that same session would be self-review and is not claimed.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+session_evidence:
+  - role: MEASURER
+    issue_refs:
+      - "#266"
+    implementing_ai_session: "req05-convergence-session (session identity: NOT_RECORDED)"
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-078/prompt-v1.md
+    executed_prompt_sha256: c2ae6f744dbfc383ef1468516bc116744a7bf38a27566685c51c63a337d4b1a2
+    executed_prompt_bytes: 7533
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-078/session-evidence-266.md
