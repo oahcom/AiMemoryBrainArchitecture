@@ -142,11 +142,11 @@ independent_reviewer: REQ-05-INDEPENDENT-REVIEW-SESSION-01
 integration_reviewer: NOT_ASSIGNED
 
 review:
-  status: CHANGES_APPLIED_AWAITING_RE_REVIEW
-  prior_status: CHANGES_REQUESTED
-  report_ref: "14-ai-development/work-items/AID-2026-060/REVIEW-04-INDEPENDENT.md"
-  prior_report_ref: "14-ai-development/work-items/AID-2026-060/REVIEW-03-INDEPENDENT.md"
-  rounds_completed: 4
+  status: APPROVED
+  prior_status: CHANGES_APPLIED_AWAITING_RE_REVIEW
+  report_ref: "14-ai-development/work-items/AID-2026-060/REVIEW-05-INDEPENDENT.md"
+  prior_report_ref: "14-ai-development/work-items/AID-2026-060/REVIEW-04-INDEPENDENT.md"
+  rounds_completed: 5
   # Round 1 returned REQUEST-CHANGES with four blocking findings; round 2
   # returned APPROVE with none, after reproducing the defect and confirming the
   # 058 conflict is real rather than manufactured. Two non-blocking items (N1
@@ -185,12 +185,20 @@ review:
   # figure was off by a factor of twenty and it is the sentence R2 rests on.
   # Round 4's N1 is also applied: F5 cited gates.yml:165-168 while measured at
   # ba293506, where the step is at 161-164, so the two live citations now name
-  # the step instead of a line range that moves.
+  # the step instead of a line range that moves. Round 5's new N1 sharpened that
+  # further: 161-164 and 165-168 bound the invocation body, not the step, whose
+  # `- name:` line is 157 and 161 respectively, so the ranges now include it.
   # Round 4's N4 asked that the bytes be frozen before the next round. They were
   # not: the file changed three times during that review (30796 -> 31596 ->
   # 32278 bytes). This revision is committed before any further review, so a
   # round 5 would read one state rather than three.
-  approval_source: "REVIEW-02 returned APPROVE, no blocking item; REVIEW-03 and REVIEW-04 returned REQUEST-CHANGES and are applied here. APPROVED is not claimed for the current bytes: no reviewer has read them."
+  # Round 5 read the bytes that landed at ce6b65b7 and returned APPROVE with no
+  # blocking item: both round-4 blocking items (B1's coverage claim, B2's "~20
+  # baselines") are closed with measurements that reproduce, and the N1 citation
+  # now resolves at both commits it is attached to. APPROVED therefore describes
+  # bytes a reviewer has read, which is the first time that has been true for this
+  # work item since round 2.
+  approval_source: "REVIEW-02 returned APPROVE; REVIEW-03 and REVIEW-04 returned REQUEST-CHANGES and were applied; REVIEW-05 returned APPROVE on those applied bytes. APPROVED describes the state at ce6b65b7, not any implementation: implementation.status stays NOT_STARTED and AC3 remains unimplemented."
 
 acceptance:
   status: NOT_ASSIGNED
@@ -259,7 +267,7 @@ findings:
     severity: blocking
     raised_by: independent review round 1 (REVIEW-01 finding B1)
     measured_at: "ba293506"
-    statement: "The second deliverable and prompt section 4.2 required any non-zero command exit to fail the ratchet, 'regardless of the baseline's content'. The only caller in the repository is the step named 'Ratchet the GOV-DOC-001 full scan' in gates.yml (lines 161-164 at ba293506, the commit this finding is measured at; 165-168 at 767f2eaa), wrapping scripts/check_bilingual_docs_full.py, which exits 1 with 77 violations as its normal result and is ratcheted against a 77-entry baseline. Measured at ba293506: 77 violations, EXIT=1, and the ratchet correctly reports baseline=77 current=77 regressions=0 PASS exit 0. Implementing the deliverable literally turns the required check Bilingual docs coverage (ratchet) red on every run and keeps it red."
+    statement: "The second deliverable and prompt section 4.2 required any non-zero command exit to fail the ratchet, 'regardless of the baseline's content'. The only caller in the repository is the step named 'Ratchet the GOV-DOC-001 full scan' in gates.yml (lines 157-164 at ba293506, the commit this finding is measured at; 161-168 at 767f2eaa — both ranges include the step's `- name:` line, which is where the step begins), wrapping scripts/check_bilingual_docs_full.py, which exits 1 with 77 violations as its normal result and is ratcheted against a 77-entry baseline. Measured at ba293506: 77 violations, EXIT=1, and the ratchet correctly reports baseline=77 current=77 regressions=0 PASS exit 0. Implementing the deliverable literally turns the required check Bilingual docs coverage (ratchet) red on every run and keeps it red."
     resolution: "Deliverables[1] now requires agreement between status and set rather than a zero status. AC5 pins the bilingual caller as a test so that a future simplification in the other direction fails in the suite instead of in CI."
   - id: F6
     severity: blocking
