@@ -54,7 +54,7 @@ document_metadata:
 - 文档 ID：D-FORGET-GATE-001
 - 版本：1.0（拆分式双语伴随文档）
 - 源分支：session-d-memory-brain-2026-11-16
-- 源文件版本：d3ddfff9500d9138d643989e8496d99b8d9ed79e
+- 源文件版本：c6f343011a8be0fa0d4bae2659ecffc33d9557ac
 - 英文对应：[Forget Fence Operation and Publication Gate](../../en/03-memory-brain/forget-fence-operation-and-publication-gate.md)
 - 源规范：[D 规范源](../../../03-memory-brain/forget-fence-operation-and-publication-gate.md)（源提交 `b525e1f8fee2471a131e4a38efda99804045e424`；原始源 Blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5`）。
 - 状态：D 语义契约为 DECIDED；E/Storage 执行、I 授权新鲜度和跨模块 Conformance 仍为 OPEN
