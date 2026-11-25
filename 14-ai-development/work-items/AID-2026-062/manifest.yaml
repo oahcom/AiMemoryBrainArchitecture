@@ -2,7 +2,7 @@ work_item_id: AID-2026-062
 title: Declare the required-context set the platform actually enforces, as a dated measurement
 class: GATE/DOC/TEST
 risk: R1
-status: PR_OPEN
+status: MERGED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -49,9 +49,11 @@ acceptance:
   B6: "No other section of the document, and no other document, is modified by this change."
 
 implementation:
-  status: PR_OPEN
+  status: MERGED
   pull_request: 1033
-  merge_commit_sha: NOT_MERGED
+  pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1033
+  merge_commit_sha: 2570ba0c96ff0c3bf6694f2dda8d2527d73a2f24
+  merged_at: 2026-11-25T02:45:19Z
 
 review:
   status: NOT_ASSIGNED
