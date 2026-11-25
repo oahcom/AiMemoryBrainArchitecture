@@ -1,8 +1,8 @@
 # Forget Fence Atomicity — Part 4: JF-10 / COC Owner Decisions
 
 - Document ID: D-FORGET-GATE-001-P4
-- Source revision: DEREFERENCED — historical source blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5` retained; no current normative source path exists.
-- Source: DEREFERENCED — original normative path `03-memory-brain/forget-fence-operation-and-publication-gate.md` is absent from the current main tree; alternative: [surviving Chinese counterpart](../../zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate-part4.md) (blob `c8de4cd787f5368f0549dd392078745f81384634`; translation only, not an authoritative substitute).
+- Source revision: d3ddfff9500d9138d643989e8496d99b8d9ed79e
+- Source: [canonical D source](../../../03-memory-brain/forget-fence-operation-and-publication-gate.md) (source commit `b525e1f8fee2471a131e4a38efda99804045e424`; original source blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5`).
 - Chinese counterpart: [第 4 部分 — JF-10 / COC Owner 决议](../../zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate-part4.md)
 
 ## Phase 3.6.2 — D owner acceptance of revised JF-10 v2
