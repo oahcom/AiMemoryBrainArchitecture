@@ -522,6 +522,8 @@ def walk_paths(node, segments: list[str], path: str = ""):
     "this key must not appear at all" and wrong for "this *path* must not
     appear". DM-08 states paths, so it needs this.
     """
+    if not segments:
+        return
     head, rest = segments[0], segments[1:]
     if isinstance(node, dict):
         for key, value in node.items():
@@ -534,6 +536,18 @@ def walk_paths(node, segments: list[str], path: str = ""):
     elif isinstance(node, list):
         for index, value in enumerate(node):
             yield from walk_paths(value, segments, f"{path}[{index}]")
+
+
+def walk_keys(node, name: str, path: str = ""):
+    if isinstance(node, dict):
+        for key, value in node.items():
+            here = f"{path}.{key}" if path else key
+            if key == name:
+                yield here
+            yield from walk_keys(value, name, here)
+    elif isinstance(node, list):
+        for index, value in enumerate(node):
+            yield from walk_keys(value, name, f"{path}[{index}]")
 
 
 def rel_path(value, where: str, errors: list[str]) -> str | None:
@@ -646,6 +660,7 @@ def _kind_ok(value, kind: str) -> bool:
         return isinstance(value, list)
     if kind == "boolean":
         return isinstance(value, bool)
+    raise AssertionError(f"unreachable kind {kind!r}")
 
 _SCHEMA: dict[str, dict] = {}
 
@@ -734,6 +749,9 @@ def check_schema_keys(loaded: dict) -> list[str]:
     problems: list[str] = []
 
     def walk(node, prefix: str) -> None:
+        if not isinstance(node, dict):
+            problems.append(f"schema node {prefix or '<root>'} is not a mapping")
+            return
         for name, sub in node.items():
             here = f"{prefix}{name}"
             if not isinstance(sub, dict):
@@ -851,7 +869,13 @@ def check_kinds(node, spec: dict, errors: list[str], where: str = "") -> None:
     if not isinstance(node, dict):
         return
     for name, sub in (spec.get("fields") or {}).items():
+        if not isinstance(sub, dict):
+            errors.append(f"DM-01 schema field {where}{name} is not a mapping")
+            continue
         kind = sub.get("kind")
+        if kind not in KINDS:
+            errors.append(f"DM-01 schema field {where}{name} declares unknown kind {kind!r}")
+            continue
         if name not in node:
             # `required` is a constraint, not a comment. Skipping absent fields
             # made `approval_scope: required true` unenforceable while
@@ -872,6 +896,11 @@ def check_kinds(node, spec: dict, errors: list[str], where: str = "") -> None:
         elif isinstance(value, list):
             item_kind = sub.get("items")
             if item_kind is not None:
+                if item_kind not in KINDS:
+                    errors.append(
+                        f"DM-01 schema field {path} declares unknown items kind {item_kind!r}"
+                    )
+                    continue
                 for index, item in enumerate(value):
                     if not _kind_ok(item, item_kind):
                         errors.append(
