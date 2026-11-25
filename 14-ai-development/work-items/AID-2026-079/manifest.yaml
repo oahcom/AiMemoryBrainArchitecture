@@ -28,8 +28,13 @@ prompt_id: AID-2026-079-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-079/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 08f5e42efdef2c3380056fd8528cf057d6d2a7b25c366566a8599e2aff4df19a
-prompt_bytes: 9932
+prompt_sha256: 3e0fdfc7d70c2df8397eeee42c06ed48e9e836bec30aa9a279af3dc22b929224
+prompt_bytes: 11496
+prompt_amendment_note: >-
+  The pin was re-taken after the independent review's round 1 amended the clause. The earlier pin
+  (08f5e42e, 9932 bytes) described the bytes before that amendment and is not restated as if it
+  still held. The amended passage is appended to prompt-v1.md under "Amendment after independent
+  review", so the file records both what was instructed and what the review changed.
 
 # ---------------------------------------------------------------------------
 # Attribution, recorded where the change is, not only in the report that found
@@ -62,6 +67,7 @@ scope:
     - 14-ai-development/work-items/AID-2026-079/manifest.yaml
     - 14-ai-development/work-items/AID-2026-079/prompt-v1.md
     - 14-ai-development/work-items/AID-2026-079/session-evidence-1201.md
+    - 14-ai-development/work-items/AID-2026-079/REVIEW-01-INDEPENDENT.md
   files_to_modify:
     - 14-ai-development/PR-GOVERNANCE-001.md
     - 14-ai-development/work-items/AID-2026-071/manifest.yaml
@@ -95,17 +101,19 @@ acceptance_criteria:
       The corrected clause is satisfiable, demonstrated by a manifest that satisfies the clause
       and is accepted by the gate.
     measurement: >-
-      `parse_manifest_session_entries` accepts 20 of 54 manifests at the base commit, and each of
-      the 20 carries the three names in exactly one place: `sponsor` and `accountable_owner` at
-      top level, `implementing_ai_session` inside `session_evidence[0]`. The count is reported
-      with the command that produced it, not asserted.
+      `parse_manifest_session_entries` accepts 21 of 55 manifests at the branch tip (20 of 54 at
+      the base commit), and each of them carries the three names without declaring any of them in
+      both places: `sponsor` and `accountable_owner` at top level, `implementing_ai_session` inside
+      a `session_evidence` entry. The count is reported with the command that produced it, not
+      asserted. Round 1 of the review required the wording to say this about *locations* rather
+      than about a particular entry, because AID-2026-055 carries three.
   - id: C4
     criterion: The corrected clause is not vacuous.
     measurement: >-
       The same measurement reports the 7 manifests that name fewer than three principals - five
       carrying `accountable_owner` only (005, 006, 008, 009, 029) and two carrying none (024,
-      025) - and names them, so a future count of 54/54 conformant is a visible change rather
-      than an improvement.
+      025) - and names them, so a future count of 55/55 conformant is a visible change rather
+      than an improvement. Under the amended wording 48 of 55 satisfy the clause.
   - id: C5
     criterion: Nothing executable changes.
     measurement: >-
@@ -198,12 +206,23 @@ implementation:
     is updated from the review that reads that Head rather than predicted here.
 
 review:
-  status: NOT_ASSIGNED
+  status: "ROUND_1_ACCEPT_WITH_AMENDMENTS - the three blocking items are dispositioned; round 2 records its own Head"
+  record_ref: 14-ai-development/work-items/AID-2026-079/REVIEW-01-INDEPENDENT.md
+  round_1:
+    exact_head_reviewed: a538dbf289cb21fc04a03fb412c90482619187bc
+    reviewer_session: 6b07448b-ac9c-83ec-9115-f056a313f972
+    verdict: ACCEPT WITH AMENDMENTS
+    blocking_items: 3
+    disposition: "B1 applied as a location rule rather than by naming an entry, because AID-2026-055 carries three entries; B2 is REVIEW-01-INDEPENDENT.md; B3 re-run with a token and PASS."
   note: >-
     Section 9 requires an exact-Head governance review for changes to this standard, and section
     5's closing sentence says this paragraph is exemptible only by an exception record that names
-    it. No such record exists, so the review is required and is not claimed before it is obtained.
-    The session that writes the change cannot perform it.
+    it. No such record exists. Round 1 was performed by a separate ChatGPT session that read the
+    artifacts at the Head it names through its own connector, and the verdict reproduced in
+    REVIEW-01-INDEPENDENT.md is its text, not a summary of it. This is a session-level independent
+    review under section 5 and is not a human review; nothing here says otherwise. The status is
+    deliberately not `APPROVED`: round 1 returned ACCEPT WITH AMENDMENTS, and whether the
+    amendments close it is round 2's decision.
 
 acceptance:
   status: NOT_ASSIGNED

@@ -66,7 +66,9 @@ executable file, and why the checker that would enforce the paragraph remains un
 ## AI-visible output
 
 - Issue #1201 — the defect report, including both error strings and the full bucket table.
-- `14-ai-development/work-items/AID-2026-079/` — `manifest.yaml`, `prompt-v1.md`, this record.
+- `14-ai-development/work-items/AID-2026-079/` — `manifest.yaml`, `prompt-v1.md`, this record,
+  and `REVIEW-01-INDEPENDENT.md` holding the independent review's verbatim verdict and its
+  disposition.
 - `14-ai-development/PR-GOVERNANCE-001.md` §5 item (2) — one clause per language.
 - `AID-2026-071/manifest.yaml`, `AID-2026-075/manifest.yaml` — superseded annotations; 075's
   C2 corrected and a `prompt_supersession` entry added.
@@ -155,10 +157,12 @@ annotation names AID-2026-079:
 
 ## Limits of this record
 
-- **No independent review is recorded.** §9 requires an exact-Head governance review for
-  changes to this standard, and §5's closing sentence says this paragraph is exemptible only
-  by an exception record that names it. None exists. `review.status` stays `NOT_ASSIGNED`
-  until a session that did not write the change reads that exact Head.
+- **The independent review is round 1 only, and it returned `ACCEPT WITH AMENDMENTS`.** It was
+  performed by a separate ChatGPT session at Head `a538dbf2` and is reproduced verbatim in
+  `REVIEW-01-INDEPENDENT.md`. Its first blocking item — the clause did not say *which*
+  `session_evidence` entry — was accepted and applied, which changed the Head. Whether the
+  amendments close the review is round 2's decision, and round 2 has its own Head. No `APPROVED`
+  status is claimed here.
 - The reproduction in §2 was performed by a second agent session given the procedure and not
   the expected values. It reproduced all four bucket counts, the 0-of-54 figure and both
   error strings. That is a reproducibility check, not an independent review: the session that
