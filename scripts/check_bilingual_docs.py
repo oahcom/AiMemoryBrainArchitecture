@@ -1161,6 +1161,8 @@ def main() -> int:
         if len(parts) >= 2 and parts[0] in NORMATIVE_ROOTS:
             if Path(path).suffix.lower() in EXEMPT_SUFFIXES:
                 continue
+            if path.startswith(PAIR_EXEMPT_PREFIXES):
+                continue
             if Path(path).suffix.lower() == ".md":
                 normative_changes.append(path)
 
@@ -1168,7 +1170,8 @@ def main() -> int:
         errors.append(
             "Normative source files changed but PR body lacks "
             "'BILINGUAL-MANIFEST: COMPLETE' or a fully documented "
-            "'BILINGUAL-EXCEPTION: APPROVED'."
+            "'BILINGUAL-EXCEPTION: APPROVED': "
+            + ", ".join(normative_changes)
         )
 
     errors.extend(
