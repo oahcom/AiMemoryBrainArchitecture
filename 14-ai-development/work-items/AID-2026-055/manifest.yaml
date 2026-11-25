@@ -49,15 +49,29 @@ owner_decisions:
   - id: D1
     question: "Is formal review required?"
     ruling: "Yes. At least one formal review with state Approved, from an account that is not the PR author."
-    current_status: "REQUIRED BUT CURRENTLY UNSATISFIABLE"
-    current_status_wording: "D1 is a mandatory policy requirement, but is currently unsatisfiable because no second accountable human approver has been established. This is not a waiver, an optional recommendation, or evidence that review is unnecessary."
-    current_status_wording_zh: "D1 是强制政策要求，但由于目前尚未建立第二名问责人，现阶段无法满足。这不是豁免，不是可选建议，也不表示审查没有必要。"
+    current_status: "REQUIRED, UNSATISFIED; ENFORCEMENT FAILURE"
+    current_status_components:
+      - "Required: a formal Approved review from a non-author human."
+      - "Current satisfaction: NOT SATISFIED."
+      - "Enforcement: FAILED -- and the failure is not a recent regression. A full census of every merged PR (662 merged of 775 closed at 2026-11-24T18:47Z; every page; GET /pulls/{n}/reviews for each) found 170 review objects in total, all of state COMMENTED, all authored by oahcom, and zero of state APPROVED on any merged PR in the repository history. The merged count keeps rising (676 by 2026-11-24T20:35Z) while APPROVED stays 0. The repository has never once satisfied D1."
+      - "Zero-review merges since the freeze point (#875, 2026-11-24T04:54:07Z): 65 of the 70 that have merged. One of them, #946, merged after an explicit refusal naming that PR (POST-DENIAL-UNAUTHORISED-MERGE-001)."
+      - "Waiver: NOT AUTHORISED."
+      - "Remediation: an Owner-appointed independent human reviewer plus effective merge enforcement."
+    current_status_wording: "D1 is a mandatory policy requirement. It is currently unsatisfied because no second accountable human approver has been established, and its enforcement has failed: the requirement exists in policy but does not prevent the action it forbids. This is not a waiver, an optional recommendation, or evidence that review is unnecessary."
+    current_status_wording_zh: "D1 是强制政策要求。由于尚未建立第二名问责人，现阶段无法满足；且其执行已被证明失效——要求写在政策里，却无法阻止它所禁止的行为。这不是豁免，不是可选建议，也不表示审查没有必要。"
+    status_history:
+      - status: "REQUIRED BUT CURRENTLY UNSATISFIABLE"
+        superseded_by: "REQUIRED, UNSATISFIED; ENFORCEMENT FAILURE"
+        reason: "Accurate as a description of the approval gap, but insufficient once zero-review merges had accumulated. A requirement that cannot prevent its own violation is a different condition from one that merely cannot yet be met, and conflating the two understated the control failure. The full census later showed the stronger fact: no merged PR in the repository's history has ever carried an APPROVED review, so this is not a regression from a working state."
+        evidence: "POST-DENIAL-UNAUTHORISED-MERGE-001; GOV-NC-2026-11-24-MERGE-FORM-DEVIATION-031 section 3.6; full-history census in POST-DENIAL-UNAUTHORISED-MERGE-001 section 7.1"
     constraints:
       - "The PR author's own review does not count as an independent approval."
       - "A formal review means a record in GET /pulls/{n}/reviews. It does not mean a comment, and it does not mean review_comments > 0. The two are different resources and must never be reported as one."
       - "The only legitimate path out of this state is formally designating another real human accountable person and recording their identity, duties, approval authority and the mapping to their GitHub account. Until then D1 must not be marked executable, and no second identity may be created in order to make a PR pass."
       - "A ChatGPT session's review, a GitHub Actions identity, or any automated actor is not a second accountable human and cannot satisfy D1."
       - "No evidence in this repository establishes a second appointed maintainer, independent reviewer or integration reviewer. This records that no second accountable person is established for the governance system to rely on; it does not assert that no such person exists anywhere."
+      - "Recovery requires all four: a second human reviewer formally designated; independent approval actually executable; merge protection verified effective by a refused-merge test; and audit evidence that the control holds. Until then no PR depending on D1 may be authorised for merge."
+      - "Do not manufacture a second approver by promoting a read-only account to write. Whether such an account is a distinct accountable human is a fact the repository cannot establish, and creating the appearance of independence is exactly what D1 forbids."
 
   - id: D2
     question: "Is Code Owner review required?"
@@ -171,7 +185,7 @@ findings:
     feedback_destination: "Delivery PR conversation. enforce_admins is already true, and it does NOT prevent a direct push to main. Conflating the two is the mistake this work item must avoid in its own write-up: the branch protection API controls merges through the PR path, while a direct push is a different vector that stays OPEN after this change."
   - id: AID-2026-055-F3
     severity: P1
-    feedback_destination: "Delivery PR conversation. There is no second established accountable person. Every action in this repository is attributed to one account, and no record appoints a second maintainer, independent reviewer or integration reviewer. D1 therefore requires an approver who does not exist, and the work item must record D1 as REQUIRED BUT CURRENTLY UNSATISFIABLE rather than resolving it by counting the author's own review, minting a second identity, or softening the requirement. This is a finding about what the governance record establishes, not a claim about the world."
+    feedback_destination: "Delivery PR conversation. There is no second established accountable person. Every action in this repository is attributed to one account, and no record appoints a second maintainer, independent reviewer or integration reviewer. D1 therefore requires an approver who does not exist, and the work item must record D1 as REQUIRED, UNSATISFIED; ENFORCEMENT FAILURE rather than resolving it by counting the author's own review, minting a second identity, or softening the requirement. This is a finding about what the governance record establishes, not a claim about the world."
   - id: AID-2026-055-F4
     severity: P1
     feedback_destination: "Delivery PR conversation. The fixed new-file allowlist has no rule for any YAML path, so before PR #893 every new work item was unregistrable: a work item is `work-items/AID-<id>/manifest.yaml`, and admission refused it with `no allowlist rule`. PR #893 fixes that one shape by anchored regex. This manifest could not exist without it, which is why the gate fix is its own PR and this registration follows it."
