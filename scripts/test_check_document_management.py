@@ -319,9 +319,20 @@ def run_fields() -> None:
     print("field rules")
     expect("bad domain rejected", doc(BASE.replace("architecture", "misc")), "DM-02")
     # P0-01: a non-scalar must be an error, not an unhashable-type crash.
-    expect("list-valued domain is a DM-01 error", doc(BASE.replace(
-        "  domain: architecture", "  domain: []"
-    )), "DM-01")
+    expect(
+        "list-valued domain is a DM-01 error",
+        doc(BASE.replace(
+            "  domain: architecture", "  domain: []"
+        )),
+        msg="DM-01 domain must be a scalar, got list",
+    )
+    expect(
+        "approval as a scalar is a DM-01 error",
+        doc(BASE.replace(
+            "    approval:\n      decision_status: Draft\n", "    approval: 5\n"
+        )),
+        msg="DM-01 lifecycle.approval must be a mapping, got str",
+    )
     # P1-01: an empty shell must not pass just because the keys are present.
     expect("empty lifecycle/authority shell rejected", doc("""
   domain: architecture
@@ -338,12 +349,28 @@ def run_fields() -> None:
         "type: Full-document", "type: Selected-sections"
     )), "DM-03")
     expect(
+        "Approved without approval_applicability rejected",
+        doc(APPROVED.replace(
+            "      approval_applicability: Applicable-To-Current-Version\n",
+            "",
+        )),
+        msg="DM-03 Approved requires approval.approval_applicability",
+    )
+    expect(
         "Approved without approval_scope.type rejected",
         doc(APPROVED.replace(
             "        type: Full-document\n",
             "",
         )),
         msg="DM-03 Approved requires approval.approval_scope.type",
+    )
+    expect(
+        "Canonical without canonical_scope rejected",
+        doc(CANONICAL.replace(
+            '    canonical_scope: "Architecture: data model design"\n',
+            "",
+        )),
+        msg="DM-06 Canonical requires authority.canonical_scope",
     )
     expect("Revoked without decision id rejected", doc(BASE.replace(
         "decision_status: Draft", "decision_status: Revoked\n      revocation: null"
@@ -776,7 +803,35 @@ def run_repository_rules() -> None:
         root = _repo(tmp)
         write_group(root, source=source_block,
                     mirrors={"en": "", "zh-CN": mirror_block})
-        expect_gate("T10 counterpart not naming its source fails", root, 1)
+        expect_gate(
+            "T10 counterpart not naming its source fails",
+            root,
+            1,
+            msg=(
+                "DM-12 00-governance/a.md <-> docs/en/a.md: "
+                "the counterpart does not name 00-governance/a.md as its source"
+            ),
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        write_group(
+            root,
+            source=source_block,
+            mirrors={
+                "en": '    source: "00-governance/missing.md"',
+                "zh-CN": mirror_block,
+            },
+        )
+        expect_gate(
+            "DM-12 source not classified as governed fails",
+            root,
+            1,
+            msg=(
+                "DM-12 docs/en/a.md: names 00-governance/missing.md "
+                "as its source, but that file is not a classified governed document"
+            ),
+        )
 
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
@@ -841,7 +896,15 @@ def run_approval_binding() -> None:
             template.replace('"SHA"', f'"{sha}"').replace("# Title", "edited text"),
             encoding="utf-8",
         )
-        expect_gate("edited body invalidates approval", root, 1)
+        expect_gate(
+            "edited body invalidates approval",
+            root,
+            1,
+            msg=(
+                "00-governance/a.md: DM-10 content changed after "
+                "approved_version: modification_status MUST be Pending-Reapproval"
+            ),
+        )
 
         honest = (
             target.read_text(encoding="utf-8")
@@ -1968,8 +2031,15 @@ def run_scope_registry() -> None:
         (root / "00-governance" / "document-scope-registry.yaml").write_text(
             registry_text(governed + ["16-phantom"]), encoding="utf-8"
         )
-        (root / "16-phantom").mkdir()
-        expect_gate("T24 registry naming a root the gate does not scan fails", root, 1)
+        expect_gate(
+            "T24 registry naming a root the gate does not scan fails",
+            root,
+            1,
+            msg=(
+                "DM-14 00-governance/document-scope-registry.yaml "
+                "names directories that do not exist: ['16-phantom']"
+            ),
+        )
 
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
@@ -1977,6 +2047,16 @@ def run_scope_registry() -> None:
             registry_text(governed[1:]), encoding="utf-8"
         )
         expect_gate("T25 registry omitting a scanned root fails", root, 1)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        shutil.rmtree(root / "docs" / "en")
+        expect_gate(
+            "DM-14 missing English mirror directory fails",
+            root,
+            1,
+            msg="DM-14 bilingual mirror directory docs/en is missing",
+        )
 
     # A directory cannot be both governed and excluded.
     with tempfile.TemporaryDirectory() as tmp:
@@ -1994,7 +2074,15 @@ def run_scope_registry() -> None:
         root = _repo(tmp)
         for rel in GOVERNED_FILES:
             (root / rel).unlink()
-        expect_gate("T38 governed file that does not exist is an error", root, 1)
+        expect_gate(
+            "T38 governed file that does not exist is an error",
+            root,
+            1,
+            msg=(
+                f"DM-14 collect_governed: governed file {GOVERNED_FILES[0]} "
+                "is not a regular file inside the repository"
+            ),
+        )
 
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
@@ -2006,7 +2094,12 @@ def run_scope_registry() -> None:
         try:
             expect_gate(
                 "T39 governed file inside an already-governed root is an error",
-                root, 1,
+                root,
+                1,
+                msg=(
+                    "DM-14 governed file 00-governance/extra.md "
+                    "is already covered by root 00-governance; drop the individual entry"
+                ),
             )
         finally:
             gate_mod.GOVERNED_FILES = original
@@ -2068,10 +2161,10 @@ def run_kind_contract() -> None:
         "    normative_status: Informative\n"
     )
     errs, _ = check_document(FILE, null_mapping)
-    record(
+    expect(
         "T27 null where the schema declares mapping is a type error",
-        any("approval_scope must be mapping" in e for e in errs),
-        f"  got {errs}",
+        null_mapping,
+        msg="DM-01 lifecycle.approval.approval_scope must be mapping, got NoneType",
     )
 
     # bool inside a sequence of strings
@@ -3021,14 +3114,33 @@ def run_schema_of_schema() -> None:
     base = "  domain:\n    kind: string\n    required: true\n"
     record("T63 fixture anchor is present", base in src)
 
+    # Each case names the diagnostic that must carry it. `ok=True` on any
+    # SystemExit proved only that the loader refused *something*: a case could
+    # be satisfied by a neighbouring check, so removing its own emission went
+    # unnoticed.
     mutations = {
-        "required is a string": "  domain:\n    kind: string\n    required: \"false\"\n",
-        "items on a string kind": "  domain:\n    kind: string\n    items: string\n",
-        "unknown kind": "  domain:\n    kind: strng\n",
-        "enum on a boolean kind": "  domain:\n    kind: boolean\n    enum:\n      - x\n",
-        "neither kind nor fields": "  domain:\n    required: true\n",
+        "required is a string": (
+            "  domain:\n    kind: string\n    required: \"false\"\n",
+            "declares required: 'false', which is str, not a boolean",
+        ),
+        "items on a string kind": (
+            "  domain:\n    kind: string\n    items: string\n",
+            "declares items on kind 'string'; only a sequence has items",
+        ),
+        "unknown kind": (
+            "  domain:\n    kind: strng\n",
+            "declares unknown kind 'strng'; legal kinds are",
+        ),
+        "enum on a boolean kind": (
+            "  domain:\n    kind: boolean\n    enum:\n      - x\n",
+            "duplicate key 'enum'",
+        ),
+        "neither kind nor fields": (
+            "  domain:\n    required: true\n",
+            "declares no kind and no fields; the gate cannot type-check it",
+        ),
     }
-    for label, replacement in mutations.items():
+    for label, (replacement, expected) in mutations.items():
         mutated = src.replace(base, replacement, 1)
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -3038,7 +3150,33 @@ def run_schema_of_schema() -> None:
                 gate.schema(root)
                 record(f"T63 {label} is refused", False, "  schema loaded")
             except SystemExit as exc:
-                record(f"T63 {label} is refused", True, f"  {str(exc)[:90]}")
+                record(
+                    f"T63 {label} is refused",
+                    expected in str(exc),
+                    f"  expected {expected!r}, got {str(exc)[:160]}",
+                )
+
+    # The schema-of-schema aggregates its problems into one SystemExit, so two
+    # sites can speak in the same message. Each needs its own discriminator.
+    neither = (
+        "  domain:\n    required: true\n",
+        "declares enum on kind None, which cannot hold an enumerated value",
+    )
+    mutated = src.replace(base, neither[0], 1)
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "00-governance").mkdir()
+        (root / gate.SCHEMA_FILE).write_text(mutated, encoding="utf-8")
+        try:
+            gate.schema(root)
+            record("T63 a node with no kind and no fields reports its own problem",
+                   False, "  schema loaded")
+        except SystemExit as exc:
+            record(
+                "T63 a node with no kind and no fields reports its own problem",
+                neither[1] in str(exc),
+                f"  expected {neither[1]!r}, got {str(exc)[:160]}",
+            )
 
 
 
