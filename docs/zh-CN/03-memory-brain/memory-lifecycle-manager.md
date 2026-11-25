@@ -54,7 +54,7 @@ document_metadata:
 - 文档 ID：D-LIFECYCLE-001
 - 版本：1.0
 - 源分支：session-d-memory-brain-2026-11-16
-- 源文件版本：a644e6cb31d5674614f5edab9464cc03c2d7a077
+- 源文件版本：453d42592942d0508b00a4b8c5ed9320b9ced3f7
 - 审查时源分支 HEAD：6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
 - 源规范：[D 规范源](../../../03-memory-brain/memory-lifecycle-manager.md)（源提交 `b525e1f8fee2471a131e4a38efda99804045e424`；原始源 Blob `8b972035b449e1eab546aedc9cc5b30581600c65`）。
 - 对应英文：[Memory Lifecycle Manager](../../en/03-memory-brain/memory-lifecycle-manager.md)
