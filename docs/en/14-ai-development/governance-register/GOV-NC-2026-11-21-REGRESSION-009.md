@@ -404,6 +404,8 @@ Two of those `.md` files sit under `NORMATIVE_ROOTS` with no `docs/en` or `docs/
 
 Identical in shape to #423 in register 008: `reviews=0`, `steps=0`, author is merger, done in minutes.
 
+> **〔Added 2026-11-25〕** The sentence lists "author is merger" — an account-layer fact — as one of the elements of the "same shape" defect. Section 5 was amended on 2026-11-24 by `2eb4e352` (PR #935) to a session-level test (see `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`): a different session under the same GitHub identity is an independent review. `/pulls/{n}/reviews` returns only `user.login`, not the session, so the step "same identity ⇒ same session" cannot be verified from that payload. This should be read as **"account layer not independent; session layer not verified"**. **What survives is the other two elements**: `reviews=0` means no review of any kind was performed (true under any version of section 5), and `steps=0` means the checks never ran; together with "done in minutes" they already carry the "same shape". **What does not survive is** "author is merger" as evidence for that shape — it is an account-layer fact and no longer carries an independence conclusion.
+
 ### 10.4 #426 also had `reviews=0`
 
 | Item | Value |
@@ -536,13 +538,15 @@ That names a **desynchronisation between two criteria**: the same paths, exempt 
 |---|---|
 | #445 author | `oahcom` |
 | #445 reviews | 1 |
-| was that review from the author | **yes** (same shape as 007 §1) |
+| was that review from the author | **yes** (same shape as 007 §1) 〔Added 2026-11-25: the "yes" comes from `user.login` in `/pulls/445/reviews` matching the author — an account-layer fact, showing only that the account layer is not independent; the session layer is not verified. Original retained〕 |
 | #446 / #448 reviews | **0** |
 | #440 / #442 / #443 | closed with `reviews=0` |
 
 So: **the merge that lifted the blockage was still self-reviewed, and the next two were zero-review.**
 
 This does not contradict section 9.6; it strengthens it. Fix quality and procedural compliance are independent lines. #445's fix is technically correct (independently evidenced in 006 §13), and its review independence is identical to the six rows in 007.
+
+> **〔Added 2026-11-25〕** The sentence uses "that review came from the author" — the **account-layer** fact in the table cell above (`user.login` in `/pulls/445/reviews` matching the author) — as the basis for a **session-layer** conclusion, that its review independence is "identical" to the six rows in 007. Section 5 was amended on 2026-11-24 by `2eb4e352` (PR #935) to a session-level test (see `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`): a different session under the same GitHub identity is an independent review. `/pulls/{n}/reviews` returns only `user.login`, not the session, so the step "same identity ⇒ same session" cannot be verified from that payload. This should be read as "account layer not independent; session layer not verified". **What survives is the first half of the paragraph**: #445's fix is technically correct, independently evidenced in 006 §13 — a content-layer judgement that does not change with the version of section 5. **What does not survive is** the equivalence "review independence is identical": only the account layer is comparable (on both sides the author and the reviewer are one and the same `user.login`), and the session layer is unverified on both, so "identical" is neither proved nor disproved — it can only be recorded as both sides reading "account layer not independent; session layer not verified".
 
 ### 11.6 Effect on this register's conclusions
 

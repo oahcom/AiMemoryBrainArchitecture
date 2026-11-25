@@ -46,11 +46,13 @@ document_metadata:
 
 # OWNER-DECISION-REVIEW-INDEPENDENCE-001 — none of the three remedies is available
 
+> **〔2026-11-25 附注：引文时效〕** 标题里的「三条补救均不可用」建立在一个前提上：独立审查需要一个第二个 GitHub 账号。该前提已于 2026-11-24 由 `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`（PR #935）修订——独立性是**审查会话**的属性，不是承载它的账号的属性。标题所说的结论里，只有「补救 1 不可用」（GitHub 按**用户**计数并禁止自我批准）与「第四种处置：把例外显式记录下来」仍成立；「三条均不可用」不成立。见 §9。
+
 **DECIDED — 2026-11-23, owner-proxy session, as `Draft` and deliberately not as `Approved`.** §6 explains why this document does not claim the approval status its siblings claim.
 
 Answers the choice `GOV-NC-2026-11-21-ZERO-REVIEW-GATE-008` §10.5 demanded: "三者只能选一个" — one of three remedies must be chosen.
 
-**The answer is that no session can choose any of the three, and the two reasons are different.** One pair deadlocks the repository; the third is circular. Both are measured below. What emerges instead is a fourth disposition that needs no new mechanism, because `PR-GOVERNANCE-001` §5 states it in its own last sentence.
+**The answer is that no session can choose any of the three, and the two reasons are different.** One pair deadlocks the repository; the third is circular.〔2026-11-25 附注：本句假定独立性需要一个第二个 GitHub 账号。「没有任何会话能选这三条中的任何一条」已不成立——§5 于 2026-11-24 由 `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`（PR #935）改为按会话判定，故补救 3 可用，补救 2 作为规则也可用（§9.5）。「其中一对使仓库死锁」只对补救 1 成立；「第三个是循环的」不成立。本段其余部分——第四种处置不需要新机制，因为 §5 最后一句已经写明它——不变。〕 Both are measured below. What emerges instead is a fourth disposition that needs no new mechanism, because `PR-GOVERNANCE-001` §5 states it in its own last sentence.
 
 ## 1. The question, and the measurement that reframes it
 
@@ -60,7 +62,7 @@ Answers the choice `GOV-NC-2026-11-21-ZERO-REVIEW-GATE-008` §10.5 demanded: "�
 2. Add a workflow that returns `HOLD` when `author == reviewer`.
 3. Demote §5 from Normative to Informative and record that this repository has no conditions for independent review.
 
-It assumed all three were executable and differed only in honesty and cost. Two facts make that assumption false. Both are new measurements, taken over the **entire** PR history rather than the last 45.
+It assumed all three were executable and differed only in honesty and cost. Two facts make that assumption false.〔2026-11-25 附注：两个事实中只剩一个仍使该假定为假。第二个（§9 审查在当时的 §5 定义下无法取得）随 §5 于 2026-11-24 由 `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`（PR #935）修订而失效；第一个（没有第二个可写账号，且平台禁止自我批准）不变。「三条都从未被执行」仍成立；「三条都无法执行」不成立。〕 Both are new measurements, taken over the **entire** PR history rather than the last 45.
 
 ## 2. What the repository actually is
 
@@ -77,7 +79,7 @@ Walking all 690 pull requests (`GET /repos/oahcom/AiMemoryBrainArchitecture/pull
 | Distinct PR authors, all history | `{oahcom}` — **1** |
 | Distinct reviewers, all history | `{oahcom}` — **1** |
 
-008 §10.1 reported 0 of the 45 PRs it sampled. The figure over all history is 0 of 690. This is not a recent regression; it has never once happened. §5 has never been complied with in this repository, in any period.
+008 §10.1 reported 0 of the 45 PRs it sampled. The figure over all history is 0 of 690. This is not a recent regression; it has never once happened. §5 has never been complied with in this repository, in any period.〔2026-11-25 附注：`APPROVED = 0` 仍是 GitHub 上已记录批准数的测量，「不是近期回归」不变。「§5 在本仓库从未被遵守过，任何时期都没有」自 2026-11-24 起不能再直接断言：§5 经 `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`（PR #935）改为会话层判据后，§9.2 记载 #935 的治理审查是由另一个会话完成的；若该审查满足 §5 的会话判据，则至少存在一个合规实例。本文件未核验这一点，故该全称否定记为**未核实**，而非已解决。〕
 
 ### 2.2 Exactly one identity can write
 
@@ -127,16 +129,16 @@ The figures this paragraph replaces were internally impossible: the table report
 
 > **Partly withdrawn by §9 (2026-11-25).** Remedy 1 still deadlocks, for a reason the amendment did not touch: GitHub forbids approving your own PR and counts *users*, and there is one user. Remedy 2 no longer does — under §5 as amended, `author == reviewer` is a *session* comparison, and a second session is not the authoring session. What survives against remedy 2 is narrower and is a fact about the tool, not the clause: a GitHub workflow can only compare accounts, so it cannot observe the new test.
 
-§5's last sentence: "A review performed through the same connected GitHub identity as the author is not independent." GitHub separately forbids approving one's own pull request.
+§5's last sentence: "A review performed through the same connected GitHub identity as the author is not independent."〔2026-11-25 附注：这句引文是 2026-11-24 之前的 §5 文本，已由 `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`（PR #935）退役；现行 §5 的表述是「Independence 是审查会话的属性，不是承载它的 GitHub 账号的属性」，其最后一句是「把例外显式记录下来；不要静默豁免该要求」。因此下文推论只对平台强制的**必需批准**成立，不再推出「独立审查不可能」。〕 GitHub separately forbids approving one's own pull request.
 
 Combine those with §2.2: the only identity that can approve is the only identity that authors, and it cannot approve its own work. So:
 
 - **Remedy 1** would make every PR permanently unmergeable. The required approval cannot exist.
-- **Remedy 2** would return `HOLD` on 100% of PRs, because `author == reviewer` is true of every pull request this repository has produced and would be true of the next one whatever its number.
+- **Remedy 2** would return `HOLD` on 100% of PRs, because `author == reviewer` is true of every pull request this repository has produced and would be true of the next one whatever its number.〔2026-11-25 附注：本条不成立。2026-11-24 之后 `author == reviewer` 是**会话**比较（`GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`，PR #935）；另一个会话不是撰写会话，故它不会对 100% 的 PR 触发。仍然成立的更窄，且是关于工具的事实而非条款：GitHub workflow 只能比较账号，观察不到会话层判据。〕
 
 Neither is a repair. Each is `GOV-NC-2026-11-21-GATE-DEADLOCK-006` reproduced deliberately: a gate that refuses every input on `main`. 006 is the precedent, and its own resolution is part of the evidence — it was resolved `RESOLVED_ON_MAIN` by a **self-review merge** (§14, §12), which is to say the previous deadlock was closed by an act that §5 forbids. Adding a second gate of the same shape would close the same way.
 
-**So remedies 1 and 2 are not "expensive".** They are unavailable until a second write-capable identity exists, and creating one is an authority transfer to a human, not a configuration toggle.
+**So remedies 1 and 2 are not "expensive".** They are unavailable until a second write-capable identity exists, and creating one is an authority transfer to a human, not a configuration toggle.〔2026-11-25 附注：结论不变，依据换了——且只对补救 1。补救 1 仍因平台原因不可用（GitHub 按**用户**计数、禁止自我批准、`collaborators = 1`）；补救 2 不再需要第二个可写身份，因为另一个会话即可满足 §5 的会话判据（`GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`，PR #935）。「创建第二个身份是向人的权限转移，不是配置开关」对补救 1 仍成立。〕
 
 The same protection payload quoted in §2.3 forecloses the §7 escape route as well: it reports 11 required contexts in force with `enforce_admins: true`, and no `required_pull_request_reviews`. Enforcement is present; independent approval is not. §7 describes a repository where the platform cannot enforce at all, which is not this one.
 
