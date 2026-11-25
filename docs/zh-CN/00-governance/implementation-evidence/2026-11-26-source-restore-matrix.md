@@ -44,7 +44,7 @@ document_metadata:
   bilingual_counterpart:
     source: "00-governance/implementation-evidence/2026-11-26-source-restore-matrix.md"
     en: "docs/en/00-governance/implementation-evidence/2026-11-26-source-restore-matrix.md"
-    zh-CN: "docs/zh-CN/00-governance/implementation-evidence/2026-11-26-source-restore-matrix.md"
+    zh-CN: null
 ---
 
 - 源文件版本：a09ede9b70457b1dd0a42272b6e421557996ee8e
