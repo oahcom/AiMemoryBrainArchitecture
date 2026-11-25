@@ -13,7 +13,7 @@ env:
 
 jobs:
   self-test-trusted-base:
-    name: Session Evidence self-test (trusted base)
+    name: Session Evidence self-test (base)
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -26,14 +26,14 @@ jobs:
 
       - name: Self-test the trusted base validator
         run: |
-          if [ ! -d tests/session_evidence ]; then
-            echo "AI-SESSION-EVIDENCE-SELFTEST: NOT_APPLICABLE (base tree has no tests/session_evidence)"
-            exit 0
+          if [ -d tests/session_evidence ]; then
+            python3 -m unittest discover -s tests/session_evidence -p "test_*.py"
+          else
+            echo "AI-SESSION-EVIDENCE: NOT_APPLICABLE (base tree has no tests/session_evidence)"
           fi
-          python3 -m unittest discover -s tests/session_evidence -p "test_*.py"
 
   self-test-pr-head:
-    name: Session Evidence self-test (PR head)
+    name: Session Evidence self-test (head)
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -45,11 +45,11 @@ jobs:
 
       - name: Self-test the PR head validator
         run: |
-          if [ ! -d tests/session_evidence ]; then
-            echo "AI-SESSION-EVIDENCE-SELFTEST: NOT_APPLICABLE (PR tree has no tests/session_evidence)"
-            exit 0
+          if [ -d tests/session_evidence ]; then
+            python3 -m unittest discover -s tests/session_evidence -p "test_*.py"
+          else
+            echo "AI-SESSION-EVIDENCE: NOT_APPLICABLE (PR head tree has no tests/session_evidence)"
           fi
-          python3 -m unittest discover -s tests/session_evidence -p "test_*.py"
 
   validate:
     name: Session Evidence
