@@ -3,7 +3,7 @@
 - 文档 ID：DOC-BRAIN-001
 - 版本：1.0
 - Owner：D — Memory Brain
-- 源版本：D 分支 session-d-memory-brain-2026-11-16，包含 Forget Fence 和 Cursor 契约
+- 源文件版本：a157b0ed6fc8e45e66fe01a99e6b895f995fd20c
 - 对应英文：[Canonical Memory Brain Architecture Guide](../../en/03-memory-brain/memory-brain-guide.md)
 - 状态：解释性指南；跨模块执行和实现证据仍受集成门禁约束
 
