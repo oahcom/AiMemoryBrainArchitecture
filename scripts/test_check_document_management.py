@@ -3790,6 +3790,238 @@ def run_single_entry_callers() -> None:
            and "errors: list[str] = list(walk_problems)" in gate_src)
 
 
+def run_restored_guards() -> None:
+    """T93: the seven guards removed by #1070, checked at BOTH layers.
+
+    #1070 was merged with seven deletions whose safety rested on a measurement
+    that only ever drove the public CLI. `schema()` calls `check_schema_keys()`
+    before any document is checked, so an unknown kind is refused there and can
+    never reach `check_kinds()` at all: the CLI measurement was structurally
+    blind to every guard inside `check_kinds`. This function tests each restored
+    guard by calling it directly, and separately records what the CLI can and
+    cannot see, rather than presenting one as the other.
+    """
+    print("restored guards (T93, direct call)")
+    import check_document_management as gate
+
+    def call(fn, *args):
+        """Return ('ret', value) or ('exc', 'Type: message')."""
+        try:
+            value = fn(*args)
+            if hasattr(value, "__next__"):
+                value = list(value)
+            return ("ret", value)
+        except Exception as exc:  # noqa: BLE001 - the type is the assertion
+            return ("exc", f"{type(exc).__name__}: {exc}")
+
+    # --- 1/7 walk_paths: the empty-segments guard ---------------------------
+    kind, got = call(gate.walk_paths, {"a": {"b": 1}}, [])
+    record(
+        "T93a walk_paths with no segments yields nothing instead of raising",
+        kind == "ret" and got == [],
+        f"  expected ('ret', []), got ({kind!r}, {got!r})",
+    )
+    # A non-empty call must still work: restoring the guard must not break the
+    # only production use, which always passes a split dotted path.
+    kind, got = call(gate.walk_paths, {"a": {"b": 1}}, ["a", "b"])
+    record(
+        "T93a walk_paths still resolves a real path",
+        kind == "ret" and got == ["a.b"],
+        f"  expected ['a.b'], got ({kind!r}, {got!r})",
+    )
+
+    # --- 2/7 walk_keys: the removed helper --------------------------------
+    kind, got = call(lambda: hasattr(gate, "walk_keys"))
+    record(
+        "T93b walk_keys exists again",
+        kind == "ret" and got is True,
+        f"  expected True, got ({kind!r}, {got!r})",
+    )
+    kind, got = call(
+        lambda: list(gate.walk_keys({"a": {"b": 1}, "c": [{"b": 2}]}, "b"))
+    )
+    # Direct comparison, not "nothing calls it": the function has a contract and
+    # the contract is checkable whether or not a production caller uses it.
+    record(
+        "T93b walk_keys matches one segment at any depth",
+        kind == "ret" and got == ["a.b", "c[0].b"],
+        f"  expected ['a.b', 'c[0].b'], got ({kind!r}, {got!r})",
+    )
+
+    # --- 3/7 _kind_ok: the unreachable-kind assertion ----------------------
+    kind, got = call(gate._kind_ok, "x", "NOT_A_KIND")
+    record(
+        "T93c _kind_ok refuses a kind outside KINDS",
+        kind == "exc" and got.startswith("AssertionError:")
+        and "NOT_A_KIND" in got,
+        f"  expected AssertionError naming the kind, got ({kind!r}, {got!r})",
+    )
+    # The restored raise must not fire on the kinds that are legal, or it would
+    # turn every valid document into a crash.
+    for value, kind_name, want in (
+        ("x", "string", True),
+        (1, "boolean", False),
+        (None, "nullable-string", True),
+        ({"a": 1}, "mapping", True),
+        (["a"], "sequence", True),
+    ):
+        kind, got = call(gate._kind_ok, value, kind_name)
+        record(
+            f"T93c _kind_ok({kind_name}) still answers {want}",
+            kind == "ret" and got is want,
+            f"  expected {want}, got ({kind!r}, {got!r})",
+        )
+
+    # --- 4/7 check_kinds: the non-mapping spec guard -----------------------
+    errors: list[str] = []
+    kind, got = call(gate.check_kinds, {"k": "v"}, {"fields": {"k": "nope"}}, errors)
+    record(
+        "T93d a non-mapping schema field is a DM-01 error, not an AttributeError",
+        kind == "ret"
+        and errors == ["DM-01 schema field k is not a mapping"],
+        f"  expected the DM-01 diagnostic, got ({kind!r}, {got!r}, errors={errors})",
+    )
+
+    # --- 5/7 check_kinds: the unknown-kind guard ---------------------------
+    errors = []
+    kind, got = call(
+        gate.check_kinds, {"k": "v"}, {"fields": {"k": {"kind": "NOT_A_KIND"}}}, errors
+    )
+    record(
+        "T93e an unknown kind is reported as a schema defect",
+        kind == "ret"
+        and errors == ["DM-01 schema field k declares unknown kind 'NOT_A_KIND'"],
+        f"  got ({kind!r}, {got!r}, errors={errors})",
+    )
+    # The distinction that matters: without the guard the same input is reported
+    # against the *document* value ("k must be NOT_A_KIND"), which sends the
+    # reader to the wrong file.
+    record(
+        "T93e the unknown-kind diagnostic does not blame the document value",
+        not any(e.startswith("DM-01 k must be") for e in errors),
+        f"  got {errors}",
+    )
+
+    # --- 6/7 check_kinds: the unknown items-kind guard ---------------------
+    errors = []
+    kind, got = call(
+        gate.check_kinds,
+        {"k": ["a"]},
+        {"fields": {"k": {"kind": "sequence", "items": "NOT_A_KIND"}}},
+        errors,
+    )
+    record(
+        "T93f an unknown items kind is reported as a schema defect",
+        kind == "ret"
+        and errors
+        == ["DM-01 schema field k declares unknown items kind 'NOT_A_KIND'"],
+        f"  got ({kind!r}, {got!r}, errors={errors})",
+    )
+    record(
+        "T93f the unknown-items diagnostic does not blame the document element",
+        not any("k[0] must be" in e for e in errors),
+        f"  got {errors}",
+    )
+
+    # --- 7/7 check_schema_keys: the non-mapping node guard -----------------
+    for label, payload in (
+        ("a string", "not-a-mapping"),
+        ("a list", ["x"]),
+        ("None", None),
+    ):
+        kind, got = call(gate.check_schema_keys, {"fields": payload})
+        record(
+            f"T93g check_schema_keys reports a fields node that is {label}",
+            kind == "ret" and got == ["schema node <root> is not a mapping"],
+            f"  expected the not-a-mapping problem, got ({kind!r}, {got!r})",
+        )
+
+    # --- Which layer can see what -----------------------------------------
+    # R13 boundary 4. This is the fact that made the original measurement look
+    # green: `schema()` refuses an unknown kind before `check_kinds()` runs, so
+    # the CLI can only ever show the schema-of-schema message. Recording it as a
+    # test keeps the claim checkable instead of asserting it in prose.
+    #
+    # Driven through a temp repo, not the working tree: a test that edits this
+    # repository's own schema fails the run it is embedded in if it is killed
+    # mid-way, and leaves the checkout dirty.
+    def cli_with_schema(body: str) -> tuple[int, str]:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = _repo(tmp)
+            (root / "00-governance" / gate.SCHEMA_FILE.split("/")[-1]).write_text(
+                body, encoding="utf-8"
+            )
+            (root / "00-governance" / "a.md").write_text(doc(BASE), encoding="utf-8")
+            proc = subprocess.run(
+                [sys.executable,
+                 str(Path(__file__).resolve().parent / "check_document_management.py"),
+                 "--root", str(root)],
+                capture_output=True, text=True,
+            )
+            return proc.returncode, (proc.stdout + proc.stderr)
+
+    # A schema that keeps all four dimensions and the required leaves, so the
+    # run reaches check_schema_keys instead of stopping at "no longer declares".
+    mutated = (
+        'schema_version: "2"\n'
+        "fields:\n"
+        "  domain:\n    kind: NOT_A_KIND\n    required: true\n"
+        "  role:\n    kind: string\n    required: true\n"
+        "  lifecycle:\n    kind: mapping\n    required: true\n"
+        "    fields:\n"
+        "      approval:\n        kind: mapping\n"
+        "        fields:\n"
+        "          decision_status:\n            kind: string\n"
+        "  authority:\n    kind: mapping\n    required: true\n"
+        "    fields:\n"
+        "      canonical_status:\n        kind: string\n"
+        "      normative_status:\n        kind: string\n"
+    )
+    code, output = cli_with_schema(mutated)
+    record(
+        "T93h the CLI refuses an unknown kind at the schema layer",
+        code == 1
+        and f"{gate.SCHEMA_FILE}: schema field domain declares unknown kind 'NOT_A_KIND'"
+        in output,
+        f"  exit {code}, output {output[-400:]!r}",
+    )
+    # Stated, not implied: check_kinds' own diagnostic cannot appear here,
+    # because the schema-of-schema check runs first and raises SystemExit.
+    record(
+        "T93h the CLI never reaches check_kinds' unknown-kind branch",
+        "declares unknown kind 'NOT_A_KIND'" in output
+        and "DM-01 domain must be NOT_A_KIND" not in output,
+        f"  output {output[-400:]!r}",
+    )
+    record(
+        "T93h the CLI refusal is a message, not a traceback",
+        "Traceback (most recent call last)" not in output,
+        f"  output {output[-400:]!r}",
+    )
+
+    # The direct-call diagnostic from T93e is what a library caller sees for the
+    # same malformed spec. Both are recorded so the difference is a test result
+    # rather than a claim in a report.
+    errors = []
+    kind, got = call(
+        gate.check_kinds, {"domain": "architecture"},
+        {"fields": {"domain": {"kind": "NOT_A_KIND"}}}, errors
+    )
+    record(
+        "T93h the direct-call layer reports the same defect against the schema",
+        kind == "ret"
+        and errors == ["DM-01 schema field domain declares unknown kind 'NOT_A_KIND'"],
+        f"  got ({kind!r}, {got!r}, errors={errors})",
+    )
+    record(
+        "T93h the two layers disagree on where the defect is reported",
+        "declares unknown kind 'NOT_A_KIND'" in output
+        and any("declares unknown kind" in e for e in errors)
+        and not any("must be NOT_A_KIND" in e for e in errors),
+        f"  cli {output[-200:]!r}, direct {errors}",
+    )
+
+
 def main() -> int:
     print("check_document_management self-check")
     run_parser()
@@ -3807,6 +4039,7 @@ def main() -> int:
     run_bilingual_closure()
     run_scope_registry()
     run_kind_contract()
+    run_restored_guards()
     run_golden_corpus()
     run_schema_fail_closed()
     run_symlink_boundary()
