@@ -8,8 +8,8 @@
 - Repository: oahcom/AiMemoryBrainArchitecture
 - Target Branch: remediation/gov-doc-001-v1.2-bilingual-baseline
 - Pull Request: #271
-- Report Version: v2.9 / 文档版本：v2.9
-- Revision Date: 2026-11-20 / 修订日期：2026-11-20
+- Report Version: v2.10 / 文档版本：v2.10
+- Revision Date: 2026-11-25 / 修订日期：2026-11-25
 
 ## 0. Record boundary and snapshot policy / 记录边界与快照口径
 
@@ -457,13 +457,13 @@ F-02 has two distinct requirements:
    - The validator's `main()` calls `check_policy_inheritance(body, changed)` and emits its results as non-blocking notices; those results are not added to the gate's error set.
 - Rationale for advisory scope: the declaration requirement originates from the unadopted GOV-DOC-001 v1.2 draft, so a blocking check would impose an unapproved normative obligation through tooling. Enforcement is deferred until the requirement is formally adopted.
 
-2. **Requirement 2 — corresponding required check configured and enforced: NOT_VERIFIED / PLATFORM-LIMITED BLOCKER.**
-   - `GET /branches/main/protection` returned HTTP 403:
-     `{"message":"Upgrade to GitHub Pro or make this repository public to enable this feature."}`
-   - `GET /rulesets` returned the same HTTP 403 plan-limit response.
-   - These responses establish a GitHub plan/visibility limitation for this private repository, not a token-permission failure. Required-check configuration/enforcement and failure-blocking behavior therefore remain unverified.
+2. **Requirement 2 — corresponding required check configured and enforced: COMPLETE / VERIFIED.**
+   - Historical state, dated: at the 2026-11-20 readback both `GET /branches/main/protection` and `GET /rulesets` returned HTTP 403 — `{"message":"Upgrade to GitHub Pro or make this repository public to enable this feature."}` — because the repository was private under a plan without those settings. That reading is superseded on 2026-11-25 and is retained only as the record of the earlier blocker.
+   - Current readings (2026-11-25): the repository is public (`private: false`, `visibility: public`); `GET /branches/main/protection` returns HTTP 200 with `required_status_checks.strict: true`, `enforce_admins.enabled: true`, and 16 contexts, one of which is `GOV-DOC-001 structural checks`; `GET /rulesets` returns HTTP 200 with `[]`, so the enforcement is classic branch protection rather than a ruleset. `required_pull_request_reviews` is absent.
+   - Enforcement evidence, not inference: `PUT /pulls/1038/merge` on PR #1038 at head `b5cf4f25` was refused with HTTP 405 and the raw message `Required status check "rust-workspace-test" is failing.`, although `mergeable: true` had been reported immediately before. The platform therefore does block a merge on a failing required check. See §7.2.2.
+   - Scope: what is verified is that the workflow job `GOV-DOC-001 structural checks` is a required check and that the platform enforces required checks. The declaration step inside that job (`check_policy_inheritance`) remains advisory — the job is blocking; one of its steps remains advisory.
 
-**F-02 overall status: PARTIAL.** CI integration is verified; required-check enforcement is not verified, and the declaration check itself is advisory rather than blocking. Successful workflow execution must not be treated as proof that the platform enforces the check.
+**F-02 overall status: COMPLETE / VERIFIED** on both requirements. CI integration is verified, and required-check enforcement is measured rather than inferred. The advisory caveat is kept separate because collapsing it into the closure would be a new false claim: the declaration step `check_policy_inheritance` inside `scripts/check_bilingual_docs.py` is still non-blocking — the job is blocking; one of its steps remains advisory. A successful workflow run is still not proof of platform enforcement by itself; the proof here is the 2026-11-25 protection readback plus the PR #1038 merge rejection.
 
 **中文**
 
@@ -478,13 +478,13 @@ F-02 包含两个相互独立的要求：
    - 校验器的 `main()` 调用了 `check_policy_inheritance(body, changed)`，其结果以非阻断提示输出，不并入门禁错误集。
 - 非阻断的理由：声明要求源自尚未采纳的 GOV-DOC-001 v1.2 草案，若设为阻断即在工具层施加未获批准的规范义务；正式采纳前不予强制。
 
-2. **要求 2——对应 required check 已配置并强制执行：NOT_VERIFIED / PLATFORM-LIMITED BLOCKER（未验证/平台限制阻塞）。**
-   - `GET /branches/main/protection` 返回 HTTP 403：
-     `{"message":"Upgrade to GitHub Pro or make this repository public to enable this feature."}`
-   - `GET /rulesets` 返回相同的 HTTP 403 计划限制响应。
-   - 该响应证明当前私有仓库受到 GitHub 计划/可见性限制，并非 token 权限不足。因此 required check 的配置、强制执行及失败阻断行为仍未验证。
+2. **要求 2——对应 required check 已配置并强制执行：COMPLETE / VERIFIED（完成/已验证）。**
+   - 历史状态（带时点）：2026-11-20 读取时 `GET /branches/main/protection` 与 `GET /rulesets` 均返回 HTTP 403——`{"message":"Upgrade to GitHub Pro or make this repository public to enable this feature."}`——原因是当时仓库为私有且所处计划不支持该设置。该读数已于 2026-11-25 被取代，仅作为当时阻塞的记录保留。
+   - 当前读数（2026-11-25）：仓库已公开（`private: false`、`visibility: public`）；`GET /branches/main/protection` 返回 HTTP 200，`required_status_checks.strict: true`、`enforce_admins.enabled: true`、共 16 个 contexts，其中包含 `GOV-DOC-001 structural checks`；`GET /rulesets` 返回 HTTP 200，内容为 `[]`，故强制来自经典 branch protection 而非 ruleset。`required_pull_request_reviews` 缺失。
+   - 强制执行证据（实测而非推断）：PR #1038 在 head `b5cf4f25` 上的 `PUT /pulls/1038/merge` 被拒绝，HTTP 405，原始消息 `Required status check "rust-workspace-test" is failing.`；而此前一刻平台仍报告 `mergeable: true`。因此平台确实会以失败的 required check 阻断合并。见 §7.2.2。
+   - 适用范围：已验证的是 workflow job `GOV-DOC-001 structural checks` 属于 required check，且平台对 required check 强制执行。该 job 内的声明步骤（`check_policy_inheritance`）仍为非阻断——job 为阻断，其内部仍有一步为非阻断。
 
-**F-02 总体状态：PARTIAL（部分完成）。**CI 接入已验证；required check 强制执行尚未验证。Workflow 成功运行不得被当作平台已经强制执行该 check 的证明。
+**F-02 总体状态：COMPLETE / VERIFIED（完成/已验证）**，两项要求均已满足。CI 接入已验证，required check 强制执行已实测而非推断。advisory 的限定仍单列，因为把它并入关闭结论会构成新的错误陈述：`scripts/check_bilingual_docs.py` 内的声明步骤 `check_policy_inheritance` 仍为非阻断——job 为阻断；其内部仍有一步为非阻断。单次 workflow 成功运行本身仍不构成平台强制的证明；此处的证明是 2026-11-25 的 protection 读回与 PR #1038 的合并拒绝。
 
 ### 6.5 F-06 remediation requirements / F-06 修复条件
 
@@ -598,7 +598,7 @@ All three executions reported `Bilingual documentation and prompt-library gate: 
 
 The earlier structural CI failure run `44477435608` remains historical evidence and is not overwritten by these later successful runs.
 
-**Status:** Requirement 1 COMPLETE / VERIFIED (advisory, non-blocking); Requirement 2 NOT_VERIFIED; F-02 overall PARTIAL.
+**Status:** Requirement 1 COMPLETE / VERIFIED (advisory, non-blocking); Requirement 2 COMPLETE / VERIFIED (2026-11-25, §7.2.2); F-02 overall COMPLETE / VERIFIED.
 
 **中文**
 
@@ -624,7 +624,7 @@ Workflow 与校验器已完成接入：
 
 较早的结构 CI 失败运行 `44477435608` 保留为历史证据，不被后续成功运行覆盖。
 
-**状态：**要求 1 COMPLETE / VERIFIED（advisory，非阻断）；要求 2 NOT_VERIFIED；F-02 总体 PARTIAL。
+**状态：**要求 1 COMPLETE / VERIFIED（advisory，非阻断）；要求 2 COMPLETE / VERIFIED（2026-11-25，§7.2.2）；F-02 总体 COMPLETE / VERIFIED。
 
 ### 7.2 Actual gate behavior / 门禁实际行为
 
@@ -640,7 +640,7 @@ They do **not** establish:
 - A failing validator result is enforced by the platform as a merge blocker.
 - The required-check configuration can be administered under the repository's current private-repository plan.
 
-The branch-protection and ruleset API requests returned HTTP 403 with the GitHub plan-limit message recorded in §6.4. Accordingly, platform enforcement remains `NOT_VERIFIED` and is a platform-limited blocker. Do not mark F-02 COMPLETE.
+The branch-protection and ruleset API requests returned HTTP 403 with the GitHub plan-limit message recorded in §6.4 **at the 2026-11-20 readback**. That reading is historical: on 2026-11-25 both endpoints returned HTTP 200 — protection with `strict: true`, `enforce_admins.enabled: true` and 16 contexts including `GOV-DOC-001 structural checks`, and `/rulesets` with `[]` — and `PUT /pulls/1038/merge` was refused with 405 on a failing required check. Platform enforcement is therefore no longer `NOT_VERIFIED` and no longer a platform-limited blocker; see §7.2.2. The bullet list above still holds: workflow runs alone establish none of the three items.
 
 **中文**
 
@@ -654,7 +654,7 @@ The branch-protection and ruleset API requests returned HTTP 403 with the GitHub
 - 校验器失败时，平台会将其强制作为合并阻断条件；
 - 当前私有仓库计划允许管理员配置 required-check 强制规则。
 
-分支保护及 ruleset API 请求返回 §6.4 所记录的 GitHub 计划限制 HTTP 403。因此平台强制状态仍为 `NOT_VERIFIED`，并构成平台限制阻塞。不得将 F-02 标记为 COMPLETE。
+分支保护及 ruleset API 请求在 **2026-11-20 读取时**返回 §6.4 所记录的 GitHub 计划限制 HTTP 403。该读数为历史读数：2026-11-25 两个端点均返回 HTTP 200——protection 为 `strict: true`、`enforce_admins.enabled: true`、16 个 contexts 且含 `GOV-DOC-001 structural checks`，`/rulesets` 为 `[]`——且 `PUT /pulls/1038/merge` 因失败的 required check 被以 405 拒绝。因此平台强制状态不再是 `NOT_VERIFIED`，也不再构成平台限制阻塞；见 §7.2.2。上述三条「不能证明」仍成立：仅凭 workflow 运行无法建立其中任何一项。
 
 ### 7.2.1 Live platform recheck / 平台实时复核 (2026-11-20)
 
@@ -670,6 +670,8 @@ The branch object is direct evidence that branch-protection required checks are 
 
 **External dependency and verification path:** a repository administrator / plan owner must make branch-protection and ruleset state inspectable (integration permission for the branch-protection endpoint and an eligible GitHub plan/visibility for rulesets). Verify by successfully reading both endpoints, confirming the exact required check context is configured, then running a deliberately failing check and observing GitHub reject the merge. This paragraph records a limitation; it does not claim enforcement is enabled.
 
+**Superseded status (pointer):** the readings in this subsection are the state at the 2026-11-20 readback and are superseded by §7.2.2 (2026-11-25). The measurements above are not rewritten and remain bound to their readback.
+
 **中文**
 
 当前 main 分支对象读取基线为 `main@9546f78d364b5a1dd1fa2206b34255be9c7fb1a7`：
@@ -681,6 +683,36 @@ The branch object is direct evidence that branch-protection required checks are 
 分支对象直接证明本次读取时 branch-protection required checks 未启用。rulesets 端点不可读取，因此无法排除或确认 ruleset 强制规则。**F-02 要求 2 仍为 NOT_VERIFIED；F-02 总体仍为 PARTIAL。**本次未运行故意失败的 required-check 实验，也没有平台拒绝合并证据。不得把 workflow 成功运行当作平台强制的证明。
 
 **外部依赖与验证路径：**仓库管理员 / 计划负责人需使 branch-protection 与 rulesets 状态可读取（branch-protection 端点需具备集成读取权限，rulesets 需符合 GitHub 计划/可见性要求）。验证时先成功读取两个端点、确认精确 required-check context 已配置，再运行故意失败的 check 并观察 GitHub 拒绝合并。本段仅记录限制，不声称强制规则已经启用。
+
+**取代状态（指针）：**本小节的读数为 2026-11-20 读取时点的状态，已由 §7.2.2（2026-11-25）取代。上述测量不作改写，仍绑定于其读取时刻。
+
+### 7.2.2 Live platform recheck / 平台实时复核 (2026-11-25)
+
+**EN**
+
+The platform state was re-read on 2026-11-25 with the same `GET` requests recorded in §7.2.1:
+
+- `GET /repos/oahcom/AiMemoryBrainArchitecture` returned `private: false`, `visibility: public`.
+- `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection` returned HTTP 200: `required_status_checks.strict: true`; `required_status_checks.contexts` length **16**, containing `GOV-DOC-001 structural checks`; `enforce_admins.enabled: true`; the key `required_pull_request_reviews` absent.
+- `GET /repos/oahcom/AiMemoryBrainArchitecture/rulesets` returned HTTP 200 with body `[]`. Enforcement is therefore classic branch protection, not a ruleset.
+- The 16 contexts: `GOV-DOC-001 structural checks`, `Branch freshness vs base`, `audit`, `GOV-DOC-002 metadata checks`, `BMCP protocol index (hard gate)`, `BMCP conformance suite (hard gate)`, `Schema non-empty audit (hard gate)`, `Bilingual docs coverage (ratchet)`, `Rust clippy (hard gate)`, `Repository hygiene (hard gate)`, `Rust format (hard gate)`, `Rust doctests (hard gate)`, `Session Evidence`, `Session Evidence self-test (base)`, `Session Evidence self-test (head)`, `rust-workspace-test`.
+
+**Failure-blocking behaviour, measured rather than inferred.** PR #1038 at head `b5cf4f25` was reported `mergeable: true` and then refused by `PUT /pulls/1038/merge` with HTTP 405 and the raw message `Required status check "rust-workspace-test" is failing.`; the PR was closed unmerged. `14-ai-development/PR-GOVERNANCE-001.md:288` on main already records the same experiment as passed on 2026-11-25, including the 405 text and the `mergeable: true` observation immediately before the rejection. This is the deliberately failing experiment that §7.2.1 recorded as not having been run.
+
+**What this establishes, and what it does not.** The control exercises `rust-workspace-test`, so it demonstrates platform enforcement of required checks in general; that `GOV-DOC-001 structural checks` lies in the same required set is read from the contexts list, not from that single rejection. It does not establish review enforcement: `required_pull_request_reviews` is absent, so a merge needs the checks but not an approving review. Nor does it make the declaration step blocking — `check_policy_inheritance` inside `scripts/check_bilingual_docs.py` still emits notices only.
+
+**中文**
+
+2026-11-25 以 §7.2.1 所记录的同一组 `GET` 请求重新读取平台状态：
+
+- `GET /repos/oahcom/AiMemoryBrainArchitecture` 返回 `private: false`、`visibility: public`。
+- `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection` 返回 HTTP 200：`required_status_checks.strict: true`；`required_status_checks.contexts` 长度为 **16**，含 `GOV-DOC-001 structural checks`；`enforce_admins.enabled: true`；`required_pull_request_reviews` 键缺失。
+- `GET /repos/oahcom/AiMemoryBrainArchitecture/rulesets` 返回 HTTP 200，内容为 `[]`。故强制来自经典 branch protection，而非 ruleset。
+- 16 个 contexts 为：`GOV-DOC-001 structural checks`、`Branch freshness vs base`、`audit`、`GOV-DOC-002 metadata checks`、`BMCP protocol index (hard gate)`、`BMCP conformance suite (hard gate)`、`Schema non-empty audit (hard gate)`、`Bilingual docs coverage (ratchet)`、`Rust clippy (hard gate)`、`Repository hygiene (hard gate)`、`Rust format (hard gate)`、`Rust doctests (hard gate)`、`Session Evidence`、`Session Evidence self-test (base)`、`Session Evidence self-test (head)`、`rust-workspace-test`。
+
+**失败阻断行为：实测而非推断。**PR #1038 在 head `b5cf4f25` 上先被报告 `mergeable: true`，随后 `PUT /pulls/1038/merge` 被拒绝，HTTP 405，原始消息 `Required status check "rust-workspace-test" is failing.`；该 PR 以未合并状态关闭。main 上的 `14-ai-development/PR-GOVERNANCE-001.md:288` 已把同一实验记录为 2026-11-25 通过，含 405 原文以及拒绝前一刻的 `mergeable: true` 观测。这正是 §7.2.1 记为「尚未运行」的那次故意失败实验。
+
+**本小节建立了什么、没有建立什么。**该对照使用的是 `rust-workspace-test`，故它证明的是平台对 required check 的一般性强制执行；`GOV-DOC-001 structural checks` 与之处于同一 required 集合，这一点读自 contexts 列表，而非读自那一次拒绝。本小节不建立审查强制：`required_pull_request_reviews` 缺失，合并需要检查通过，但不需要批准审查。它也不使声明步骤变为阻断——`scripts/check_bilingual_docs.py` 内的 `check_policy_inheritance` 仍只输出提示。
 
 ### 7.3 Recommended remediation / 建议修复
 
@@ -838,7 +870,7 @@ Every finding raised against this deliverable appears here with a state and a ba
 | # | Severity | State | Basis and where it is maintained |
 |---|---|---|---|
 | F-01 | — | `CLOSED` | Accepted closure recorded by the R6 review (§6.3). No counter-evidence recorded since. / R6 审查记录的已接受关闭（§6.3）。 |
-| F-02 | P1 | `PARTIAL` | Requirement 1 `COMPLETE / VERIFIED` (workflow integration, §7.1); Requirement 2 `NOT_VERIFIED` (platform 403). Maintained in §9 P1 and §10. / 要求 1 已验证，要求 2 因平台 403 未验证。 |
+| F-02 | P1 | `COMPLETE / VERIFIED` (2026-11-25) | Requirement 1 `COMPLETE / VERIFIED` (workflow integration, §7.1). Requirement 2, re-derivable: object `GET /branches/main/protection`, expected HTTP `200` with `required_status_checks.contexts` containing `GOV-DOC-001 structural checks`, actual `200` with 16 contexts containing it (§7.2.2); negative control `PUT /pulls/1038/merge`, expected `405`, actual `405` with `Required status check "rust-workspace-test" is failing.` Scope, stated so the closure is not over-read: the declaration step inside the job is still advisory, and `required_pull_request_reviews` is absent, so this is required-check enforcement only. Maintained in §9 P1, §7.2.2 and §10. / 要求 1 与要求 2 均可复现验证：`/protection` 200 且 16 个 contexts 含 `GOV-DOC-001 structural checks`；反向对照 `PUT /pulls/1038/merge` 预期 405、实际 405。job 内声明步骤仍为非阻断，且无审查强制。 |
 | F-03 | — | `CLOSED (method-bound)` | The finding stated that partial remediation does not establish complete closure. That is a rule about method, not a defect with a patch. §0 and §9 now implement the distinction: remediation is recorded separately from state, and closure requires re-derivable evidence. **Basis proposed in this revision; requires this PR’s review to confirm.** Reopens if any revision records a `CLOSED` state whose basis is only a remediation artifact — check c9 below is the detector. / 该 finding 是方法性规则而非可补丁缺陷；依据本修订提出，待本 PR 审查确认；若任一修订将「仅以修复产物为依据」的状态记为 `CLOSED`，即重新开启（核对 c9 为检测器）。 |
 | F-04 | — | `CLOSED (method-bound)` | Same basis and same reopen condition as F-03, recorded separately because R6 listed it as a separate row. / 与 F-03 同依据、同重开条件；R6 列为独立行，故分列。 |
 | F-05 | — | `LIMITATION` | "Historical migration cannot be inferred" meets all three §0 conditions and the exclusion is enumerated rather than asserted. Paths examined: (1) infer migration from the 313-commit inventory — excluded, the inventory records message language, not whether content was migrated; (2) infer it from the 39-issue inventory — excluded, same reason; (3) re-run the historical sessions that produced the content — excluded, no such record carrier is available in this repository. No fourth path was identified. Confirming review: this PR. Recorded per §0 so it is neither closed silently nor left `OPEN` forever; re-evaluates if any condition fails or a fourth path is found. / 满足 §0 三条件，且排除是穷举而非声称：已排查①由 313 条 Commit 清单推得迁移（排除：清单只记录消息语种）、②由 39 条 Issue 清单推得（同因排除）、③重跑历史会话记录（排除：本仓库无此载体），未发现第四条路径；确认审查：本 PR。 |
@@ -893,8 +925,8 @@ c6–c9 首次执行。c6 清——十项依据逐一重读仍成立；c7 清—
 
 - Requirement 1 (validator integrated and invoked by CI): COMPLETE / VERIFIED, ADVISORY (non-blocking).
 - Enforcement scope (v2.4, R7 finding): the declaration check reports notices only. A blocking check would impose the unadopted v1.2 inheritance requirement through tooling; enforcement is deferred to adoption.
-- Requirement 2 (required check configured and enforced): NOT_VERIFIED — PLATFORM-LIMITED BLOCKER.
-- F-02 overall remains PARTIAL. Do not represent successful workflow runs as platform enforcement.
+- Requirement 2 (required check configured and enforced): COMPLETE / VERIFIED (2026-11-25, §7.2.2) — `GET /branches/main/protection` returns 200 with 16 contexts including `GOV-DOC-001 structural checks`, and `PUT /pulls/1038/merge` was refused with 405 on a failing required check.
+- F-02 overall: COMPLETE / VERIFIED on both requirements. The job is blocking; one of its steps (`check_policy_inheritance`) remains advisory, and `required_pull_request_reviews` is absent, so this does not claim review enforcement. A successful workflow run alone is still not platform enforcement; the evidence is the protection readback plus the merge rejection.
 
 **F-08 — stale baseline and manifest**
 
@@ -968,8 +1000,8 @@ Platform residual tracking: the required-check blocker and the branch-protection
 
 - 要求 1（校验器已接入并由 CI 调用）：COMPLETE / VERIFIED，ADVISORY（非阻断）。
 - 强制范围（v2.4，R7 发现）：声明校验仅输出提示。若设为阻断，即以工具施加尚未采纳的 v1.2 继承要求；强制执行推迟至规范采纳之后。
-- 要求 2（required check 已配置并强制执行）：NOT_VERIFIED——PLATFORM-LIMITED BLOCKER。
-- F-02 总体维持 PARTIAL。不得将 workflow 成功运行表述为平台强制执行。
+- 要求 2（required check 已配置并强制执行）：COMPLETE / VERIFIED（2026-11-25，§7.2.2）——`GET /branches/main/protection` 返回 200，16 个 contexts 含 `GOV-DOC-001 structural checks`；`PUT /pulls/1038/merge` 因失败的 required check 被以 405 拒绝。
+- F-02 总体：两项要求均 COMPLETE / VERIFIED。job 为阻断；其内部的 `check_policy_inheritance` 步骤仍为非阻断，且 `required_pull_request_reviews` 缺失，故不构成对审查强制的声称。单次 workflow 成功运行仍不等于平台强制；证据是 protection 读回与合并拒绝。
 
 **F-08——基线与 manifest 陈旧**
 
@@ -1352,3 +1384,23 @@ Register evidence: commit `d344f43ce0d4b8eb9bab19da8ca30e4a518f1117`, Blob `46ca
 - **F-06 在对象级对账范围内保持 CLOSED。**不代表历史双语迁移已完成，也不产生豁免。
 
 登记册证据：commit `d344f43ce0d4b8eb9bab19da8ca30e4a518f1117`，Blob `46cabb97f63597eb3e8623c60305ed58980355f7`。
+
+## D7 v2.10 Revision Note
+
+This revision changes one maintained state — F-02 Requirement 2, and with it F-02 overall. It changes no policy text, no normative status, no approval state and no adoption state.
+
+- **`NOT_VERIFIED / PLATFORM-LIMITED BLOCKER` → `COMPLETE / VERIFIED`; F-02 overall `PARTIAL` → `COMPLETE / VERIFIED`.** Live assertions edited, by section: §6.4 Requirement 2 heading and body and the closing F-02 line (EN and ZH); §7.1 status lines (EN and ZH); the §7.2 paragraph that told the reader not to mark F-02 COMPLETE (EN and ZH); the §9 finding registry row; the §9 P1 block (EN and ZH); a new §7.2.2; a superseded pointer appended to §7.2.1's EN and ZH paragraphs without altering its readings.
+- **The measurement (2026-11-25).** Repository `private: false`, `visibility: public`. `GET /branches/main/protection` → 200, `required_status_checks.strict: true`, `enforce_admins.enabled: true`, 16 contexts, `required_pull_request_reviews` absent. `GET /rulesets` → 200 `[]`, so this is classic branch protection rather than a ruleset. `GOV-DOC-001 structural checks` is one of the 16.
+- **The falsifiable control.** PR #1038 at head `b5cf4f25` was reported `mergeable: true` and then refused by `PUT /pulls/1038/merge` with 405 and the raw message `Required status check "rust-workspace-test" is failing.`; the PR was closed unmerged. This is the deliberately failing experiment that §7.2.1 recorded as not having been run.
+- **What did NOT change, stated so this revision cannot be over-read.** (i) The declaration step `check_policy_inheritance` inside `scripts/check_bilingual_docs.py` is still advisory: the job is blocking, one of its steps is not. (ii) `required_pull_request_reviews` is still absent, so this revision establishes required-check enforcement only, not review enforcement. (iii) The three workflow runs in §7.1 and the 2026-11-20 403 readings in §7.2.1 remain bound snapshots at their own timepoints; §7.2.1 carries a status pointer to §7.2.2 instead of being rewritten. (iv) No policy adoption and no Owner approval is implied — a merge rejection is platform behaviour, not a governance decision.
+- **Bound-snapshot status of this note.** Per §0, every revision note is a bound snapshot of its own revision; current finding states live in §9.
+
+## D7 v2.10 修订说明
+
+本修订只改变一项受维护状态——F-02 要求 2，以及随之而来的 F-02 总体。不改变任何政策文本、规范状态、批准状态与采纳状态。
+
+- **`NOT_VERIFIED / PLATFORM-LIMITED BLOCKER` → `COMPLETE / VERIFIED`；F-02 总体 `PARTIAL` → `COMPLETE / VERIFIED`。**按节列出被编辑的活动断言：§6.4 要求 2 的标题与正文、以及收尾的 F-02 行（中英）；§7.1 状态行（中英）；§7.2 中原本要求「不得将 F-02 标记为 COMPLETE」的段落（中英）；§9 finding 登记行；§9 P1 区块（中英）；新增 §7.2.2；在 §7.2.1 中英两段末尾各追加一行取代指针，其读数未被改写。
+- **测量（2026-11-25）。**仓库 `private: false`、`visibility: public`。`GET /branches/main/protection` → 200，`required_status_checks.strict: true`、`enforce_admins.enabled: true`、16 个 contexts、`required_pull_request_reviews` 缺失。`GET /rulesets` → 200、内容 `[]`，故为经典 branch protection 而非 ruleset。`GOV-DOC-001 structural checks` 是这 16 个之一。
+- **可证伪的反向对照。**PR #1038 在 head `b5cf4f25` 上先被报告 `mergeable: true`，随后 `PUT /pulls/1038/merge` 被以 405 拒绝，原始消息 `Required status check "rust-workspace-test" is failing.`；该 PR 以未合并状态关闭。这正是 §7.2.1 记为尚未运行的那次故意失败实验。
+- **未改变的部分（写明以免本修订被过度解读）：**（i）`scripts/check_bilingual_docs.py` 内的声明步骤 `check_policy_inheritance` 仍为非阻断：job 为阻断，其内部仍有一步不是。（ii）`required_pull_request_reviews` 仍缺失，故本修订只建立 required-check 强制，不建立审查强制。（iii）§7.1 的三次 workflow 运行与 §7.2.1 的 2026-11-20 403 读数仍为各自时点的绑定快照；§7.2.1 追加的是状态指针而非改写。（iv）不推定任何规范采纳或 Owner 批准——合并拒绝是平台行为，不是治理决定。
+- **本说明的快照地位。**按 §0，每份修订说明都是其所属修订的绑定快照；当前 finding 状态以 §9 为准。
