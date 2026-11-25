@@ -187,6 +187,7 @@ def make_valid_world(
     issue_created="2031-01-01T00:00:00Z",
     issue_body=None,
     pr_body=None,
+    pr_created="2030-01-01T00:00:00Z",
     extra_tree=None,
 ):
     entries = entries if entries is not None else [make_entry(number)]
@@ -226,6 +227,7 @@ def make_valid_world(
     pr = {
         "number": number,
         "body": pr_body,
+        "created_at": pr_created,
         "head": {
             "sha": HEAD_SHA,
             "repo": {"full_name": REPOSITORY},

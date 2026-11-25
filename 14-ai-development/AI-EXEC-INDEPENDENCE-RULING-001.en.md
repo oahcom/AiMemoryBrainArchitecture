@@ -92,7 +92,7 @@ Basis: AI-EXEC-001 v1.1 and AI-EXEC-002 v1.1 are ADOPTED via PR #256 merge 48a55
 **Ruling.** Preserve exactly MERGE / HOLD / REMEDIATE / SUPERSEDED / REJECT:
 
 - MERGE only if every applicable exact-Head check passes; an independent-session §5 review exists where applicable; NR-001 review exists where required; every affected authority Owner explicitly approves the exact normative contract boundary; R3 additionally has qualified independent expert review, reproducible test evidence and Acceptance Authority approval; dependencies are satisfied; no blocking finding remains; and the PR is mergeable.
-- HOLD if any required review, Owner approval, expert review, exact-Head check, reproducible evidence or dependency is missing, pending, NOT RUN, NOT VERIFIED or attributable only to the shared identity.
+- HOLD if any required review, Owner approval, expert review, exact-Head check, reproducible evidence or dependency is missing, pending, NOT RUN, NOT VERIFIED or attributable only to the shared identity〔added 2026-11-25: read this as "attributable only to the **authoring/implementing session**". After the `PR-GOVERNANCE-001` §5 amendment of 2026-11-24 (commit `2eb4e352`, PR #935) independence is a property of the reviewing session; a review carried by the shared identity but produced by another session is independent and does not trigger HOLD〕.
 - REMEDIATE for a concrete defect/evidence gap repairable on the same coherent carrier; re-review the changed exact Head.
 - SUPERSEDED only when an actual replacement fully supersedes the carrier; preserve unique evidence. It is not a shortcut around missing approval.
 - REJECT when the proposal is invalid or conflicts with accepted authority; preserve rationale and evidence.
@@ -102,6 +102,8 @@ Basis: AI-EXEC-001 v1.1 and AI-EXEC-002 v1.1 are ADOPTED via PR #256 merge 48a55
 Never issue or claim GitHub APPROVE as a workaround for the platform's self-approval prohibition. Owner written decision may satisfy only the Owner contract-approval gate when attribution and scope are verified; it is not §5 independence and cannot substitute for it. Independence is supplied by a separate reviewing session, which this repository can always open; where even that is unavailable, HOLD and escalate to Project Owner/repository administrator.
 
 **Boundaries.** No combination of authoring-session COMMENT, role simulation, Owner narrative, exception entry or green CI manufactures an independent reviewer. Exception alone never changes HOLD to MERGE.
+
+> **Added 2026-11-25 (citation currency).** This sentence read "same-identity COMMENT" — the pre-2026-11-24 §5 criterion, under which the same identity was never independent. `PR-GOVERNANCE-001` §5 as amended 2026-11-24 (commit `2eb4e352`, PR #935; `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`) keys independence on the reviewing **session**: a COMMENT from another session that shares the author's GitHub identity, did not write or implement the change and takes its conclusion from the artifact **can** be an independent review, and what cannot manufacture one is a COMMENT inside the authoring session. The sentence above has therefore been replaced with "authoring-session COMMENT", word-for-word identical to the same sentence in `AI-EXEC-INDEPENDENCE-RULING-001.md:128`. COMMENT is still not APPROVE, and platform `required_pull_request_reviews` still counts users. The other four items are unchanged.
 
 **Effective scope.** All five-state decisions after adoption. Review by 2026-12-02.
 
@@ -120,7 +122,7 @@ Never issue or claim GitHub APPROVE as a workaround for the platform's self-appr
 | Rule/control | Exact clause and missing review/evidence |
 | Risk/scope | R0–R3 and affected boundary |
 | Request time | Timezone timestamp + source link |
-| Missing resource | Independent GitHub reviewer, expert, Owner decision or test |
+| Missing resource | an independent reviewing session (any GitHub account, including the authoring one), an expert, an Owner decision or a test〔added 2026-11-25: replaces "Independent GitHub reviewer"; that account-level wording was retired by the §5 amendment of 2026-11-24〕 |
 | Attempts/source order | Recipients, requests, timestamps, responses; NR-001 first where applicable |
 | Reason | Factual unavailability; distinguish not-requested from no-response |
 | Disposition | HOLD / REMEDIATE / REJECT only |
