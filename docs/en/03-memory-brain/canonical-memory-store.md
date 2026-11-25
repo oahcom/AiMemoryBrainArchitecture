@@ -1,3 +1,54 @@
+---
+document_metadata:
+  domain: memory-brain
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version:
+        scheme: git
+        value: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Applicable-To-Current-Version
+      evidence_reference:
+        - "AID-2026-11-26-SOURCE-RESTORE-02"
+        - "Issue #1177"
+        - "source commit: b525e1f8fee2471a131e4a38efda99804045e424"
+        - "original source blob: 6b37c91033fda21f072e2a3bde6f274663b1e76e"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Existing translated companion body preserved; source pin refreshed; semantic parity review pending."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "03-memory-brain/canonical-memory-store.md"
+    en: "docs/en/03-memory-brain/canonical-memory-store.md"
+    zh-CN: "docs/zh-CN/03-memory-brain/canonical-memory-store.md"
+---
+
 # Canonical Memory Store
 
 - Document ID: D-CANONICAL-STORE-001
