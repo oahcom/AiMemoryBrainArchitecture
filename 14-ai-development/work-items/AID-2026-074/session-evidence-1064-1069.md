@@ -45,17 +45,58 @@ document_metadata:
     zh-CN: null
 ---
 
-# Session evidence — AID-2026-074 (#1064, #1069)
+# Session role / use case
 
-Work item: `AID-2026-074`
-Issues: #1064 (AID collisions are detected only by a merge conflict), #1069
-(`INDEX.md` conflicts on every concurrent registration)
-Session: `session-a1084`
-Base: `origin/main` at `073ffe3e`
-Prompt: `prompt-v1.md`, 4141 bytes, SHA-256
-`52a28e7d78ee3e7e3620017bf7fbec676f2b73176927a84a2fe555d222ce1961`,
-`RECORDED_NOT_FROZEN`, provenance `NOT_VERIFIED` (assembled after the session
-from the assignment actually executed).
+IMPLEMENTER. Issues #1064 and #1069 report two halves of one problem: `INDEX.md`
+conflicts on every concurrent registration, and a duplicate work-item ID is
+detected only by that conflict. This session added the union merge driver and
+the check that makes it safe, and nothing else.
+
+The two are one change because either alone is worse than neither. A union
+driver without the duplicate check turns a visible conflict into two rows
+claiming one `AID`; the duplicate check without the driver leaves the merge
+conflict that motivated #1069. This record exists to make that pairing
+reviewable, not to describe a broader change.
+
+# Actual AI input
+
+**Committed, byte-exact.** `prompt-v1.md` in this directory is the assignment
+this change was carried out against, pinned at
+`52a28e7d78ee3e7e3620017bf7fbec676f2b73176927a84a2fe555d222ce1961`, 4141 bytes.
+
+`executed_prompt_provenance` is `NOT_VERIFIED`: the digest proves the committed
+file has not changed since it was pinned, not that it is byte-for-byte what the
+session read. It was assembled after the session from the assignment actually
+executed, and that is stated rather than presented as a frozen snapshot.
+
+**Read before writing:**
+
+| input | what it settled |
+|---|---|
+| `14-ai-development/work-items/INDEX.md` | the table is one row per work item, no multi-line cells and no wrapping — the precondition for `merge=union` being safe at all (section "Step 0" below) |
+| `scripts/check_traceability.py` | `validate_index_and_manifests` reads only the tree; `run_check` calls `parse_registry` first inside the same `try`, which is why the four T-04 assertions were unreachable (#1071) |
+| `00-governance/requirements-registry.yaml` | absent from the repository — the reason the unreachability is total, not intermittent |
+| `.github/workflows/repository-hygiene.yml` | `Repository hygiene (hard gate)` is a required context; a step added there runs on every PR |
+| Issue #1064 body | the alternatives it lists (reservation registry, allocator); both were skipped in favour of a check on what already exists |
+| Issue #1069 body | the proposed `merge=union` mechanism, and that it is the smallest fix for the conflict |
+
+# What was added
+
+```
+.gitattributes                                          one rule + 30 lines of caveats
+.github/workflows/repository-hygiene.yml                one step, in the existing required job
+scripts/check_traceability.py                           --index-only entry point, 49 lines
+scripts/test_check_traceability.py                      tests for it, 72 lines
+14-ai-development/work-items/AID-2026-074/              manifest, prompt, this record
+14-ai-development/work-items/INDEX.md                   one row + the driver's caveat block
+```
+
+# AI-visible output
+
+The three measured outcomes are in the PR body verbatim: the union merge keeping
+both rows, the duplicate being refused with `ERROR T-04 duplicate INDEX entry
+AID-2026-073`, and the default path still exiting 1 without the registry. None of
+the three was asserted from reading the code; each was produced by running it.
 
 ## Why these are one change
 
