@@ -82,8 +82,17 @@ criteria are stated against them:
 
 **Verification actually run on this branch.**
 
-The branch is based on `0bbb35f1`; the code change is two files, plus three
-work-record files (`manifest.yaml`, this document, `prompt-1026-v1.md`).
+The branch is based on `ee4f81d9`, the merge base of the implementation
+commits with the merge commit `940a4cb3` (`git merge-base 0b7b9ba2^ 940a4cb3`).
+An earlier draft recorded `0bbb35f1`, which is `Merge pull request #1046` — an
+ancestor of the merge, but not this branch's base. That is why this note and
+the `AID-2026-064` record disagree about the base: `AID-2026-064` records
+`7a69f32b` (`Merge pull request #1039`), which is the base of *its* branch.
+Both values are real commits; they answer the question for different branches,
+and neither is a typo.
+
+The code change is two files, plus three work-record files (`manifest.yaml`,
+this document, `prompt-1026-v1.md`).
 
 ```
 python3 -m unittest tests.session_evidence.test_validate
@@ -161,5 +170,11 @@ effective time onwards. The condition is now date-bounded at both ends.
   requests.
 - No independent review exists for this change. `independent_reviewer` stays
   `NOT_ASSIGNED` in the work item.
-- The four new tests exercise the validator through its offline fixtures. They
-  do not exercise the GitHub API, the workflow file, or branch protection.
+- The six new tests exercise the validator through its offline fixtures:
+  `test_pre_effective_undeclared_pr_is_not_applicable`,
+  `test_pre_effective_pr_with_post_effective_issue_requires_declaration`,
+  `test_pre_effective_pr_volunteered_yes_with_missing_evidence_fails`,
+  `test_pre_effective_pr_volunteered_yes_with_valid_evidence_is_not_applicable`,
+  `test_pr_opened_before_the_effective_time_without_a_declaration_is_not_applicable`
+  and `test_pr_opened_after_the_effective_time_without_a_declaration_fails`.
+  They do not exercise the GitHub API, the workflow file, or branch protection.
