@@ -59,12 +59,10 @@ document_metadata:
 
 | File | Original source Blob | Candidate final Blob | Eligibility |
 |---|---|---|---|
-| `03-memory-brain/memory-brain-overview.md` | `b4ed712ac0626ab127cccfd205c50a9013df01fb` | `3965c1e6c0810ac1850b75a6c08fb966610828e0` | BLOCKED_OWNER_REVIEW |
-| `03-memory-brain/canonical-memory-store.md` | `6b37c91033fda21f072e2a3bde6f274663b1e76e` | `4d7d4db0585bb2e543881758bf27a8cbb0e323fa` | BLOCKED_OWNER_REVIEW |
-| `03-memory-brain/memory-lifecycle-manager.md` | `8b972035b449e1eab546aedc9cc5b30581600c65` | `a644e6cb31d5674614f5edab9464cc03c2d7a077` | BLOCKED_OWNER_REVIEW |
-| `03-memory-brain/forget-fence-operation-and-publication-gate.md` | `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5` | `d3ddfff9500d9138d643989e8496d99b8d9ed79e` | BLOCKED_OWNER_REVIEW |
-
-The four source bodies are preserved byte-for-byte, with GOV-DOC-002 metadata prepended. Original source Blob SHAs remain pinned in the metadata. Existing EN/ZH-CN companion prose is preserved; only metadata and source-revision pointers are updated. The Forget Fence source retains its four-part bilingual reading set.
+| `03-memory-brain/memory-brain-overview.md` | `b4ed712ac0626ab127cccfd205c50a9013df01fb` | `9ca153df403d09264a50add8ad78bb5a6111c7c0` | BLOCKED_OWNER_REVIEW |
+| `03-memory-brain/canonical-memory-store.md` | `6b37c91033fda21f072e2a3bde6f274663b1e76e` | `d47366d1ca04da37ff77f6edd31fe42efc93e0f9` | BLOCKED_OWNER_REVIEW |
+| `03-memory-brain/memory-lifecycle-manager.md` | `8b972035b449e1eab546aedc9cc5b30581600c65` | `453d42592942d0508b00a4b8c5ed9320b9ced3f7` | BLOCKED_OWNER_REVIEW |
+| `03-memory-brain/forget-fence-operation-and-publication-gate.md` | `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5` | `c6f343011a8be0fa0d4bae2659ecffc33d9557ac` | BLOCKED_OWNER_REVIEW |
 
 ## Governance
 
