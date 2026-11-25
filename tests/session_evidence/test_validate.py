@@ -289,6 +289,28 @@ Session evidence reference(s):
             [101, 102],
         )
 
+    def test_related_field_with_unresolved_issues_raises_the_precondition(self):
+        # Issue #1076: the defence that was supposed to protect the #1003
+        # guard compared parse_related_issues(ctx.body) against ctx.issues,
+        # and both come from the identical pr["body"] string, so it was
+        # X != X and could not fire. This pins a precondition that compares
+        # a fact the body carries (a non-empty Related field) against a
+        # fact the loader resolved (an empty Issue map). No black-box input
+        # reaches it -- _load_context either fills the map or raises -- so
+        # it is exercised here the way check_06 is: handed the context
+        # directly. Deleting the precondition makes exactly this test red.
+        ctx = make_context(self.make_valid_world())
+        self.assertIsNotNone(
+            validate._extract_field(ctx.body, "Related issue(s)")
+        )
+        ctx.issues.clear()
+        with self.assertRaises(validate.ValidationError) as caught:
+            validate._run_checks(ctx)
+        self.assertIn(
+            "declared Related issue(s) were not resolved",
+            str(caught.exception),
+        )
+
     def test_a_second_evidence_path_is_not_silently_dropped(self):
         # Every reference has to be validated one by one. While the field
         # value was its first line only, the second path never reached a

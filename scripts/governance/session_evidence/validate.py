@@ -2139,22 +2139,25 @@ def _not_applicable_verdict(ctx: ValidationContext) -> str:
 def _run_checks(ctx: ValidationContext) -> str:
     # Issue #1026: check_01 enforces the PR-body declaration, so the
     # historical guard below used to be unreachable for a PR that
-    # declares nothing. Resolve the linked Issues before enforcing
-    # anything: the guard must never run against an empty map, because
-    # it would then return False and the gate would validate nothing
-    # (the #1003 fail-open). _load_context already fills ctx.issues from
-    # this same call; parsing again keeps that precondition at the call
-    # site instead of relying on load order.
-    linked = parse_related_issues(ctx.body, ctx.repo)
+    # declares nothing. The guard must never run against an empty map,
+    # because it would then return False and the gate would validate
+    # nothing (the #1003 fail-open).
+    #
+    # Anti-fail-open precondition: the body declares Issues and
+    # ctx.issues is empty, so the resolution dropped what the body
+    # declared. #1076 deleted the previous check here because it
+    # compared parse_related_issues(ctx.body) against ctx.issues and
+    # both sides came from the identical pr["body"] string, making the
+    # condition X != X. This one compares a fact the body carries
+    # against a fact _load_context resolved, so it can fire. A field
+    # that is absent or blank is left to check_01, which rejects it as
+    # a declaration error rather than a resolution error.
+    related_field = _extract_field(ctx.body, "Related issue(s)")
 
-    # Anti-fail-open precondition: the guard below returns False on an
-    # empty map, so an unresolved Issue set would silently pass every
-    # PR. _load_context resolves the same references; this asserts the
-    # two resolutions agree rather than trusting call order.
-    if set(linked) != set(ctx.issues):
+    if related_field and related_field.strip() and not ctx.issues:
         raise ValidationError(
-            "Internal error: linked Issues were not resolved "
-            "before validation"
+            "Internal error: declared Related issue(s) were not "
+            "resolved before validation"
         )
 
     # Ceiling, from the #1026 ruling: only an *undeclared* body is
