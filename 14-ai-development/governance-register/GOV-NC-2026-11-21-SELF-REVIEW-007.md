@@ -1,3 +1,48 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-25"
+      last_verification_note: "正文与全部计数均未改动。2026-11-25 增补的附注只撤回 §5 的一处推论与 §7 的一格代价，不新增测量，不改动任何数字。"
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: "docs/en/14-ai-development/governance-register/GOV-NC-2026-11-21-SELF-REVIEW-007.md"
+    zh-CN: "docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-21-SELF-REVIEW-007.md"
+---
+
 # GOV-NC-2026-11-21-SELF-REVIEW-007 — 零审查合并的「修复」是同一账号自我审查
 
 - 登记编号：GOV-NC-2026-11-21-SELF-REVIEW-007
@@ -113,6 +158,14 @@
 ---
 
 ## 7. 可能的处置方向（均未执行）
+
+> **2026-11-25 附注（引文时效）。** 下表写于 2026-11-21，当时 §5 把独立性定义为 GitHub 身份的属性。2026-11-24 修订后，独立性是会话的属性，因此：
+>
+> - S-2 的代价不再是「需第二个身份」。一个独立会话即可；第二个身份是可选载体，不是前提。§7.1 的五条要求因此约束的是**载体**——谁把结论写在 PR 上——而不是独立性判据本身。
+> - S-2 也不再是「唯一在 M-3 不可用时的结构性方案」：按现行 §5，这项要求本身已能由会话满足，不需要引入任何新账号。
+> - S-1 与 S-3 的取舍不变。
+>
+> 表格原文保留，以便针对它写下的裁定仍然可读。
 
 | # | 做法 | 代价 | 说明 |
 |---|---|---|---|

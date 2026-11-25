@@ -201,6 +201,32 @@ class SessionEvidenceValidatorTests(unittest.TestCase):
         self.make_valid_world()
         self.assertEqual(run_validator(), 0)
 
+    def test_blob_content_wrapped_by_the_api_still_decodes(self):
+        # The REST API returns base64 wrapped at 60 characters. The fixtures
+        # did not, so a validator that rejected the newlines passed every test
+        # and failed on the first real pull request. This test is the only one
+        # that hands the validator the payload shape the API actually sends.
+        world = make_valid_world()
+        raw_api = world["api"]
+
+        def wrapped(path):
+            payload = raw_api(path)
+            content = payload.get("content")
+            if not content:
+                return payload
+            return {
+                **payload,
+                "content": "\n".join(
+                    content[at:at + 60]
+                    for at in range(0, len(content), 60)
+                ) + "\n",
+            }
+
+        self.patch_validate("gh_api", wrapped)
+        self.patch_validate("gh_tree", world["tree"])
+        self.patch_validate("gh_blob_text", world["blob_text"])
+        self.assertEqual(run_validator(), 0)
+
     def test_multiple_sessions_same_issue(self):
         entries = [make_entry(101, "a"), make_entry(101, "b")]
         refs = [EVIDENCE_A, EVIDENCE_B]

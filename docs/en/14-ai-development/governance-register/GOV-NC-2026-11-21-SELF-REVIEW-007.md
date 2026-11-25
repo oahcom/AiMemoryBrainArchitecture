@@ -1,3 +1,48 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-25"
+      last_verification_note: "The body and every count are unchanged from the original measurement. The addendum added on 2026-11-25 retracts one inference in section 5 and one cost cell in section 7; it adds no measurement and changes no number."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "14-ai-development/governance-register/GOV-NC-2026-11-21-SELF-REVIEW-007.md"
+    en: null
+    zh-CN: "docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-21-SELF-REVIEW-007.md"
+---
+
 # GOV-NC-2026-11-21-SELF-REVIEW-007 — The "fix" for zero-review merges is one account reviewing itself
 
 - Register ID: GOV-NC-2026-11-21-SELF-REVIEW-007
@@ -113,6 +158,14 @@ Inference (**not made**):
 ---
 
 ## 7. Possible directions (none executed)
+
+> **Added 2026-11-25 (citation currency).** The table below was written on 2026-11-21, when section 5 defined independence as a property of the GitHub identity. After the 2026-11-24 amendment independence is a property of the session, so:
+>
+> - S-2's cost is no longer "needs a second identity". One independent session suffices; a second identity is an optional carrier, not a precondition. The five requirements in section 7.1 therefore constrain the **carrier** — who writes the conclusion onto the PR — not the independence test itself.
+> - S-2 is also no longer "the only structural option while M-3 is unavailable": under the current section 5 the requirement is satisfiable by a session, with no new account introduced.
+> - The choice between S-1 and S-3 is unchanged.
+>
+> The original table is left in place so that rulings written against it stay readable.
 
 | # | Approach | Cost | Note |
 |---|---|---|---|

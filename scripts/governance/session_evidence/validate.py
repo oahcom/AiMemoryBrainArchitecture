@@ -253,8 +253,13 @@ def gh_blob_bytes(repo: str, sha: str, path: str) -> bytes:
         )
 
     try:
+        # The REST API wraps its base64 payload at 60 characters, so the
+        # content arrives with newlines in it. Stripping them is not leniency:
+        # the alphabet is still validated, and the alternative is that every
+        # file larger than one line fails to decode. The fixtures encoded
+        # short blobs, which is why this survived a green suite.
         raw = base64.b64decode(
-            response["content"],
+            "".join(response["content"].split()),
             validate=True,
         )
     except (KeyError, ValueError, TypeError) as exc:
