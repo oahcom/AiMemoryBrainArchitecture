@@ -2,7 +2,7 @@ work_item_id: AID-2026-063
 title: Run the deliberately-failing-head experiment and record the dated result in section 7
 class: GATE/TEST/EVIDENCE
 risk: R1
-status: PR_PENDING
+status: PR_OPEN
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -49,7 +49,8 @@ acceptance:
   C6: "The probe pull request is closed unmerged and its branch is kept, so the failing run stays auditable."
 
 implementation:
-  status: PR_PENDING
+  status: PR_OPEN
+  pull_request: 1040
   merge_commit_sha: NOT_MERGED
 
 review:
