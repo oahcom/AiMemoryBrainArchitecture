@@ -54,7 +54,7 @@ document_metadata:
 - Document ID: D-MEMORY-BRAIN-001
 - Version: 1.0
 - Source branch: session-d-memory-brain-2026-11-16
-- Source revision: 3965c1e6c0810ac1850b75a6c08fb966610828e0
+- Source revision: 9ca153df403d09264a50add8ad78bb5a6111c7c0
 - Source branch head audited: 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
 - Source: [canonical D source](../../../03-memory-brain/memory-brain-overview.md) (source commit `b525e1f8fee2471a131e4a38efda99804045e424`; original source blob `b4ed712ac0626ab127cccfd205c50a9013df01fb`).
 - Chinese counterpart: [Memory Brain 子系统架构](../../zh-CN/03-memory-brain/memory-brain-overview.md)
