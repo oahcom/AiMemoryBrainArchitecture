@@ -1,0 +1,89 @@
+work_item_id: AID-2026-068
+title: Make a prepared derivative publishable and readable in production, so Published, Blocked and Failed are falsifiable
+class: GATE/CODE/TEST
+risk: R2
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+
+prompt_id: AID-2026-068-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-068/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 7d55d2011f931207ec4d63a6d0a94715a82ab16365cef390cf7423f8e7ab5a31
+prompt_bytes: 6031
+
+# ---------------------------------------------------------------------------
+# WO-06 of the REQ-01 repair queue, registered against Issue #262 AC7.
+#
+# R26 §六.5 requires F6-B to prove a complete prepare -> authorize -> publish ->
+# read path observed in production. At a1533c67 the path stops at the first
+# arrow in the server: `publish` does not occur once in any .rs file under
+# crates/bmcp-server/, and `publish_prepared` has no production caller. A
+# disposition that no run can reach is not an assertion about behaviour.
+#
+# Order: after AID-2026-067. F6-A must land first, or the two literal `false`
+# flags make every lawful publication refuse and this work item cannot be
+# accepted.
+# ---------------------------------------------------------------------------
+
+authorization:
+  implementation_write: "NOT_GRANTED - this branch registers the work item; no file under crates/ is written by it"
+  gate_behaviour_change: "NOT_GRANTED - the publish path is the implementing change, not this branch"
+  trust_boundary_change: "NOT_GRANTED - the issuer constant and the empty signature column are identified, not authorised for change"
+  schema_change: "NOT_GRANTED - no serialized type and no database column is added"
+  architecture_spec_change: "NOT_GRANTED - no ADR, no BMCP specification and no canonical architecture document is modified"
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-068/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-068/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-068/session-evidence-r44.md
+    - crates/bmcp-server/ (the derivative read/publish entry point; the module path is the implementer's choice and is not fixed here)
+  files_to_modify:
+    - crates/memory-compiler/src/admission.rs
+    - crates/memory-storage-sqlite/src/lib.rs
+  files_out_of_scope: "Every other path. In particular: no change to crates/memory-compiler/src/publication_authority.rs (that is AID-2026-067's surface), no change to the storage error taxonomy (WO-02 / F8), no new workflow, and no INDEX row beyond the one this branch adds."
+
+acceptance:
+  C1: "The derivative lifecycle is reachable. Settled by `grep -rn 'publish_prepared' crates/bmcp-server crates/brain-cli --include=*.rs` returning at least one production call site, where the same command at a1533c67 returns none outside crates/memory-store tests."
+  C2: "Publication is what makes a version readable. Settled by a test that prepares, asserts read_version does not return the version, calls the production publish path, then asserts the state read back from the database is Published. The read-back is the observable, not the return value."
+  C3: "Published cannot be reached by writing the flag. Settled by a test attempting publish without a prepared row and failing on the guard at crates/memory-storage-sqlite/src/lib.rs:912 (`state != \"PreparedHidden\"`)."
+  C4: "Blocked and Failed are defined in production terms. Settled by this work item naming, for each of the three states, the production condition that produces it and the command that observes it. If a state remains unreachable the work item says so and does not claim it — none of the three is to be declared green by definition."
+  C5: "The server exposes the entry point. Settled by the `publish` occurrence count in crates/bmcp-server .rs files rising from 0 at a1533c67 to at least 1, with a server-level test exercising it end to end."
+  C6: "The issuer and validator are not test-only. Settled by the call site at crates/brain-cli/src/main.rs:291 and the definition at crates/memory-compiler/src/admission.rs:1109 both sitting outside `#[cfg(test)]`, plus `cargo test -p memory-compiler` passing."
+  C7: "The misplaced doc block at crates/memory-compiler/src/admission.rs:1708-1720 is resolved, so the struct at :1721 carries documentation that describes itself."
+
+implementation:
+  status: NOT_STARTED
+  pull_request: NONE
+  merge_commit_sha: NOT_MERGED
+  note: "Registration only. The two existing files in scope are unchanged at this branch's head, and the bmcp-server entry point does not exist yet."
+
+review:
+  status: NOT_ASSIGNED
+  note: "Independent review has not been recorded. A trust-boundary claim evaluated by the session that writes it is not independent, and this manifest does not claim it is."
+
+# ---------------------------------------------------------------------------
+# AC7 of Issue #262 requires every remediation to be an accountable work item.
+# This entry names the Issue; it does not claim the Issue's declaration state.
+#
+# Recorded limit: reaching Published in production does not by itself show the
+# publication was authorised. `signature` is still inserted as '' at
+# admission.rs:1139-1140 and the issuer constant is still shared between issuer
+# and validator. C4 states the definition work; it does not discharge the
+# trust-boundary question.
+# ---------------------------------------------------------------------------
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#262"
+    implementing_ai_session: session-r44-reg-b
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-068/prompt-v1.md
+    executed_prompt_sha256: 7d55d2011f931207ec4d63a6d0a94715a82ab16365cef390cf7423f8e7ab5a31
+    executed_prompt_bytes: 6031
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-068/session-evidence-r44.md
