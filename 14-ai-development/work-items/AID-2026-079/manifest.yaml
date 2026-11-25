@@ -1,0 +1,223 @@
+work_item_id: AID-2026-079
+title: Make section 5 item (2) satisfiable by removing the manifest field location requirement it should never have carried
+class: GATE/POLICY
+risk: R2
+risk_rationale: >-
+  One normative paragraph, in both languages, in one document. No executable file, no required
+  context, no branch protection, no schema. The risk is not damage but silent contradiction: the
+  clause as written mandates a manifest shape the Session Evidence gate rejects, so the standard
+  and the gate disagree and the standard is the newer of the two. Every session that reads only
+  the standard writes a manifest the gate refuses; every session that reads only the gate writes
+  one the standard calls non-compliant. 0 of 54 manifests on main satisfy both, which is what an
+  unsatisfiable rule looks like when nobody has counted. The correction is a deletion of five
+  words per language plus the invariant that replaces them; the risk that matters is that the
+  replacement is written loosely enough to permit two homes for one field, which is exactly what
+  the gate forbids and therefore what C3 has to demonstrate rather than assert.
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 1f5ba824aa8b2e350a8d70874b0a45720fa4a441
+tracking_issue: "#1201 - the defect report this work item answers. It is also linked from #262, whose AC2 the clause was written to serve."
+
+prompt_id: AID-2026-079-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-079/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 08f5e42efdef2c3380056fd8528cf057d6d2a7b25c366566a8599e2aff4df19a
+prompt_bytes: 9932
+
+# ---------------------------------------------------------------------------
+# Attribution, recorded where the change is, not only in the report that found
+# it. The `top-level` requirement was added by the same session that corrected a
+# different defect in this paragraph (PR #1091): the earlier text used role
+# separation as evidence of principal independence, and that correction was
+# right. The location requirement was added in the same sentence and was never
+# asked for. Issue #262 comment 7153428650, which the clause is derived from,
+# says the registrations "carry" the three fields and states no location: it
+# contains 0 occurrences of `top-level`, 0 of `顶层`, and 0 of `assessor` /
+# `assessed_version` / `evidence_baseline`.
+# ---------------------------------------------------------------------------
+
+authorization:
+  implementation_write: >-
+    GRANTED for 14-ai-development/PR-GOVERNANCE-001.md section 5 item (2) only, for the three
+    superseded annotations named in `scope.files_to_modify`, for this work item's own directory,
+    and for one INDEX.md row plus one INDEX.md cell annotation. NOT_GRANTED for any other path.
+  gate_behaviour_change: >-
+    NOT_GRANTED - no validator, workflow or required status context changes. The correction
+    aligns the clause with the gate; it does not move the gate.
+  schema_change: NOT_GRANTED - no manifest field is added, removed, retyped or relocated.
+  platform_state_change: NOT_GRANTED - no required context and no branch-protection payload is modified.
+  architecture_spec_change: >-
+    GRANTED for section 5 item (2) of PR-GOVERNANCE-001.md only - no ADR, no BMCP specification
+    and no other canonical document is modified.
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-079/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-079/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-079/session-evidence-1201.md
+  files_to_modify:
+    - 14-ai-development/PR-GOVERNANCE-001.md
+    - 14-ai-development/work-items/AID-2026-071/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-075/manifest.yaml
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope: >-
+    Every other path. In particular: scripts/governance/session_evidence/validate.py, whose
+    exclusion rule is correct and is the reason the clause is wrong; AID-2026-075/prompt-v1.md,
+    a recorded snapshot whose pinned digest is left intact and whose superseded passage is named
+    from its manifest instead; the approval block of PR-GOVERNANCE-001.md, whose decision_status
+    and approved_version are not refreshed by the session that writes the change; and the second
+    defect in the same paragraph, the principal-identity requirement that no registry in this
+    repository can settle.
+
+acceptance_criteria:
+  - id: C1
+    criterion: >-
+      The location requirement is absent from both languages, and the invariant that replaces it
+      is stated in both.
+    measurement: >-
+      `git diff -U0` on PR-GOVERNANCE-001.md shows exactly one changed line per language, and
+      both changed lines state that each of the three fields appears in exactly one place.
+  - id: C2
+    criterion: No other sentence of section 5 changes, and the paragraph's non-exemption sentence is byte-identical.
+    measurement: >-
+      The diff is two changed lines and zero added or deleted lines; the closing sentence
+      beginning "Exceptions follow the closing sentence of §5" and its Chinese counterpart are
+      compared before and after with `cmp` on the extracted text.
+  - id: C3
+    criterion: >-
+      The corrected clause is satisfiable, demonstrated by a manifest that satisfies the clause
+      and is accepted by the gate.
+    measurement: >-
+      `parse_manifest_session_entries` accepts 20 of 54 manifests at the base commit, and each of
+      the 20 carries the three names in exactly one place: `sponsor` and `accountable_owner` at
+      top level, `implementing_ai_session` inside `session_evidence[0]`. The count is reported
+      with the command that produced it, not asserted.
+  - id: C4
+    criterion: The corrected clause is not vacuous.
+    measurement: >-
+      The same measurement reports the 7 manifests that name fewer than three principals - five
+      carrying `accountable_owner` only (005, 006, 008, 009, 029) and two carrying none (024,
+      025) - and names them, so a future count of 54/54 conformant is a visible change rather
+      than an improvement.
+  - id: C5
+    criterion: Nothing executable changes.
+    measurement: >-
+      `git diff --name-only` against the base contains no path under scripts/, .github/, tests/
+      or crates/.
+  - id: C6
+    criterion: >-
+      Every statement the correction retires is annotated rather than deleted, and each
+      annotation names this work item.
+    measurement: >-
+      AID-2026-071/manifest.yaml, AID-2026-075/manifest.yaml and the AID-2026-071 row of INDEX.md
+      each carry a dated superseded clause naming AID-2026-079; AID-2026-075/prompt-v1.md is
+      unmodified, and its manifest carries a `prompt_supersession` entry naming the superseded
+      passage and the digest pin that no longer matches it.
+  - id: C7
+    criterion: The review is at the exact Head and at the session level.
+    measurement: >-
+      The review names the Head SHA it read and the session that performed it, and claims no
+      account-level approval. Section 9 requires an exact-Head governance review for changes to
+      this standard; section 5's closing sentence says this paragraph is exemptible only by an
+      exception record that names it, and none exists.
+
+findings:
+  - id: F1
+    severity: HIGH
+    statement: >-
+      Section 5 item (2) required `implementing_ai_session` as a top-level field while the
+      Session Evidence gate rejects every top-level `MANIFEST_FIELDS` key when a
+      `session_evidence` block is present. The two rules cannot both be satisfied, and the clause
+      was merged after the gate.
+    evidence: >-
+      Measured at 1f5ba824 by importing `parse_manifest_session_entries` from
+      scripts/governance/session_evidence/validate.py and running it over all 54 manifests: 27
+      satisfy the clause and are rejected, 20 are accepted and violate the clause, 0 satisfy
+      both. Reproduced independently by a second session with the same counts and the same two
+      error strings. Reported as Issue #1201.
+  - id: F2
+    severity: MEDIUM
+    statement: >-
+      The requirement is not in the source the clause cites. It was introduced by this session
+      when composing section 5 in PR #1091, in the same sentence as a correction that was itself
+      correct.
+    evidence: >-
+      Issue #262 comment 7153428650: `sponsor` 1 occurrence, `accountable_owner` 1,
+      `implementing_ai_session` 1, `top-level` 0, `顶层` 0, `assessor` 0, `assessed_version` 0,
+      `evidence_baseline` 0. The one sentence carrying the three names says the registrations
+      "carry" them and says nothing about where.
+  - id: F3
+    severity: HIGH
+    statement: >-
+      AID-2026-075 criterion C2 inherited the defect as an instruction. It directs the observer
+      to read top-level fields and to report a nested-only `implementing_ai_session` as
+      non-compliant, which would have reported 20 of 54 conformant manifests as violations on the
+      authority of an unsatisfiable clause.
+    evidence: >-
+      AID-2026-075/manifest.yaml C2: "The check reads the top-level sponsor, accountable_owner and
+      implementing_ai_session fields from each in-scope manifest. A nested-only
+      implementing_ai_session does not satisfy the top-level field requirement."
+  - id: F4
+    severity: MEDIUM
+    statement: >-
+      Three records disclose the deviation without naming it a defect in the clause, so the
+      deviation reads as each record's own shortfall rather than as an unsatisfiable rule.
+      AID-2026-071 and AID-2026-075 both say "Known deviation, stated rather than repaired", and
+      the INDEX row says the manifest does not satisfy the clause; none says the clause cannot be
+      satisfied.
+    evidence: >-
+      AID-2026-071/manifest.yaml comment block above `authorization:`; the equivalent block in
+      AID-2026-075/manifest.yaml; the AID-2026-071 row of 14-ai-development/work-items/INDEX.md.
+  - id: F5
+    severity: LOW
+    statement: >-
+      Ordering, recorded as it happened: the correction merged first (PR #1091), the
+      unsatisfiability was measured afterwards in the same session while checking something else,
+      and the report preceded this work item. The clause was live and wrong for zero further
+      merges only because the next registration (AID-2026-078) happened to use the gate's shape.
+    evidence: >-
+      PR #1091 merge commit dd3b7662; Issue #262 comment 7170740216 reporting the measurement;
+      AID-2026-078 registered at 1f5ba824 with `implementing_ai_session` inside
+      `session_evidence[0]` only.
+
+implementation:
+  status: NOT_STARTED
+  branch: gov/aid-079-s5-location
+  pull_request: PENDING
+  merge_commit_sha: NOT_MERGED
+  note: >-
+    Registration only at the time this file was written. The paragraph edit, the three
+    annotations and the INDEX row follow on the branch named above, and the review status below
+    is updated from the review that reads that Head rather than predicted here.
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    Section 9 requires an exact-Head governance review for changes to this standard, and section
+    5's closing sentence says this paragraph is exemptible only by an exception record that names
+    it. No such record exists, so the review is required and is not claimed before it is obtained.
+    The session that writes the change cannot perform it.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1201"
+    implementing_ai_session: req05-convergence-session-identity-not-recorded
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-079/prompt-v1.md
+    executed_prompt_sha256: 08f5e42efdef2c3380056fd8528cf057d6d2a7b25c366566a8599e2aff4df19a
+    executed_prompt_bytes: 9932
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-079/session-evidence-1201.md
