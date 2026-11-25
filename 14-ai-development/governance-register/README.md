@@ -20,7 +20,7 @@ document_metadata:
       last_verified_date: null
       last_verification_note: "This file is an index of governance-register entries; it does not independently approve or establish the authority of indexed records."
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Modified
     supersession:
       supersedes: []
       supersession_reason: null
@@ -63,7 +63,7 @@ document_metadata:
 | `GOV-NC-2026-11-23-PROVENANCE-GRAPH-ADD-SIGNATURE-028` | `ProvenanceGraph::add` 公开签名变更 | High | `CLOSED-BY-RULING` / 分类已更正 | 1 个公开签名，2 处引证勘误 |
 | `GOV-NC-2026-11-23-UNREACHABLE-GUARD-030` | 017 已修但其守卫变为死代码，且 014 的修复使该套件 24 项失效 | High | `OPEN` / `MEASUREMENT_ONLY` | 1 个恒真守卫，167 个文件退出配对，24 项失效且无 workflow 运行 |
 | `GOV-NC-2026-11-23-EXECUTION-RESTORED-029` | 执行侧恢复，005 的现在时断言失效 | High | `OPEN` / `MEASUREMENT_ONLY` | 2 条首次执行，3 条被反证的现在时断言 |
-| `EX-20261123-01` | §5 独立审查不可用（追溯例外登记） | High | `HOLD` / 超配额，升级至仓库管理员（Issue #134） | 675 个合并 PR 中 0 次独立审查；本仓库首条例外记录 |
+| `EX-20261123-01` | §5 独立审查未取得（追溯例外登记；例外理由已由 2026-11-25 附注收窄，不再写作「需第二个身份」） | High | `HOLD` / 超配额，升级至仓库管理员（Issue #134） | 675 个合并 PR 中 0 次独立审查；本仓库首条例外记录 |
 | `OWNER-DECISION-REVIEW-INDEPENDENCE-001` | 第 3 条补救的路径确实可走（§9 审查已由 #935 走过）；§5 本身仍是 Normative，降级未做（§9 勘误，2026-11-25） | High | `Draft` / 明确不声称 Approved | 675 个 PR 全量复核；0 条 APPROVED；1 个可写身份 |
 
 ## 证据
