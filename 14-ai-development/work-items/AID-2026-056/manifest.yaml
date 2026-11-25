@@ -137,7 +137,7 @@ deliverables:
 
 acceptance_criteria:
   - id: AC1
-    text: "python3 scripts/check_bilingual_docs_full.py reports exactly 11 violations, and the reported set equals these eleven paths, listed in full because a criterion that points at a list it does not contain is not a criterion: 00-governance/reports/gov-doc-001-full-scan-2026-11-20.md; 06-memory-context/context-architecture.md; 06-memory-context/context-budget-and-sufficiency.md; 06-memory-context/context-edit-operations.md; 06-memory-context/context-manager.md; 06-memory-context/context-reconciliation.md; 06-memory-context/context-versioning.md; 06-memory-context/phase-3.8.6-g-review-storage-serialization-anchor.md; 08-bmcp-protocol/phase-3.8.25-h-applied-delivery-evidence-hardening-addendum.md; 08-bmcp-protocol/phase-3.8.26-h-applied-delivery-evidence-csubmitoutcome-join-addendum.md; 13-engineering-decisions/technology-architecture-blueprint.md. Set equality, not an approximate count. Measured at ebadbe84 by diffing the scan's 77 reported paths against the embedded-bilingual predicate (cjk >= 100 and latin >= 1000): 66 embedded, these 11 real, 66 + 11 = 77. (Restated by ERRATUM-01, then by independent review REVIEW-01 finding B2: the prompt's 9 was measured at d40d4e09 before #910 taught the scan to see 08-bmcp-protocol, which added two paths. Corrected again at REVIEW-03 finding D3: this criterion previously anchored on 'the eleven paths enumerated in ERRATUM-01.md section 2', and ERRATUM-01 section 2 enumerates two of them, so the set equality was uncheckable as written.)"
+    text: "python3 scripts/check_bilingual_docs_full.py reports exactly 11 violations, and the reported set equals these eleven paths, listed in full because a criterion that points at a list it does not contain is not a criterion: 00-governance/reports/gov-doc-001-full-scan-2026-11-20.md; 06-memory-context/context-architecture.md; 06-memory-context/context-budget-and-sufficiency.md; 06-memory-context/context-edit-operations.md; 06-memory-context/context-manager.md; 06-memory-context/context-reconciliation.md; 06-memory-context/context-versioning.md; 06-memory-context/phase-3.8.6-g-review-storage-serialization-anchor.md; 08-bmcp-protocol/phase-3.8.25-h-applied-delivery-evidence-hardening-addendum.md; 08-bmcp-protocol/phase-3.8.26-h-applied-delivery-evidence-csubmitoutcome-join-addendum.md; 13-engineering-decisions/technology-architecture-blueprint.md. Set equality, not an approximate count. This is a post-change requirement, not a statement about the dispatching commit: at 21279d3b the scan reports 77 because the predicate it needs does not exist yet, so a reviewer who runs this criterion literally at the reviewed commit sees exit 1 and 77 violations — that is the input to the work, not a failure of it. Measured at ebadbe84 by diffing the scan's 77 reported paths against the embedded-bilingual predicate (cjk >= 100 and latin >= 1000): 66 embedded, these 11 real, 66 + 11 = 77. (Restated by ERRATUM-01, then by independent review REVIEW-01 finding B2: the prompt's 9 was measured at d40d4e09 before #910 taught the scan to see 08-bmcp-protocol, which added two paths. Corrected again at REVIEW-03 finding D3: this criterion previously anchored on 'the eleven paths enumerated in ERRATUM-01.md section 2', and ERRATUM-01 section 2 enumerates two of them, so the set equality was uncheckable as written.)"
   - id: AC2
     text: "The baseline diff is 66 removals and 0 additions, and the removed set is exactly the 66 embedded-bilingual entries. An addition, or a removal outside that class, fails this criterion. (Was '72 removals = 6 side-by-side + 66 embedded'. Review REVIEW-01 finding B2: none of the six side-by-side paths is in the baseline at 8e489ec1, so they cannot be removed from it; 77-72=5 matches neither the old 9 nor the corrected 11. ERRATUM-01 AC2' says 66; that is the only figure consistent with AC1.)"
   - id: AC3
@@ -188,9 +188,9 @@ review:
   prior_status: CHANGES_REQUESTED
   # Latest round first. report_ref is the report a reader should open; the
   # first round is kept because the status above is only meaningful against it.
-  report_ref: "14-ai-development/work-items/AID-2026-056/REVIEW-03-INDEPENDENT.md"
-  prior_report_ref: "14-ai-development/work-items/AID-2026-056/REVIEW-02-INDEPENDENT.md"
-  rounds_completed: 3
+  report_ref: "14-ai-development/work-items/AID-2026-056/REVIEW-04-INDEPENDENT.md"
+  prior_report_ref: "14-ai-development/work-items/AID-2026-056/REVIEW-03-INDEPENDENT.md"
+  rounds_completed: 4
   # Round 3 re-measured all eight findings: F1-F4 closed, F5-F8 still open
   # (F5 floor AC7 records but does not cover; F6 unresolved; F7 stale base,
   # GAP-29; F8 deviation, not repaired), and returned REQUEST-CHANGES on
@@ -205,7 +205,12 @@ review:
   # every blocking finding closed. The author's own conformance checks, a green
   # PR, and the correction log below are not that confirmation and are not
   # recorded as if they were. APPROVED is reachable only by that reviewer.
-  approval_source: "independent reviewer confirmation (OD-26 (a)); none received yet"
+  # Round 4 did return APPROVE, with no blocking item. It is not converted into
+  # APPROVED here for one reason: the two non-blocking items it raised (F6's
+  # enumeration omitting OD-26, and AC1 not saying it binds the landing commit)
+  # were applied *after* that verdict, so the APPROVE describes bytes that no
+  # longer exist. A verdict belongs to the artifact it read.
+  approval_source: "REVIEW-04 returned APPROVE, no blocking item; applied after that verdict: F6 enumeration and AC1's post-change note. Re-review of those two edits is outstanding."
 
 acceptance:
   status: NOT_ASSIGNED
@@ -275,7 +280,7 @@ findings:
     severity: material
     raised_by: independent review session (REVIEW-01, finding M5)
     measured_at: "8e489ec1"
-    statement: "OD-18, OD-22(a) and OD-23 are quoted in this manifest and the erratum in the grammar of rulings, but no original exists in the repository. grep for 'OD-22' across the tree matches only the erratum that cites it. Their content is consistent across quotations but unverifiable against a source."
+    statement: "OD-18, OD-22(a), OD-23 and OD-26 are quoted in this manifest and the erratum in the grammar of rulings, but no original exists in the repository. grep for 'OD-22' across the tree matches only the erratum that cites it. Their content is consistent across quotations but unverifiable against a source. Corrected at REVIEW-04: this enumeration listed OD-18, OD-22(a) and OD-23 only, and OD-26 is the most consequential of the four — it is the authority for this file's status and for approval_source — so leaving it out hid the citation that matters most."
     resolution: "Unresolved, and recorded as unresolved. If the rulings live only in Issue #266, they should be linked by comment id so a reader can reach the thing being cited."
   - id: F7
     severity: material
@@ -284,8 +289,8 @@ findings:
     statement: "base_commit_sha is d40d4e09, which was 103 commits behind at re-measurement (the reviewer measured 74 earlier the same hour). Two commits after the base touch the files this work item names. Every figure anchored to that base drifted with it: 81 violations became 77, 638/199/81 became 656/205/77, blueprint 49758 as a blob (49666 in the prompt, 50488 under a CRLF checkout)."
     resolution: "Not changed here. Rebasing base_commit_sha would invalidate prompt_sha256's provenance note; the figures are restated in the acceptance criteria with the commit they were measured at, which is the part an implementer acts on. The staleness itself is GAP-29's subject."
 
-# Canonical session evidence (#775 shape, one entry per session). This entry
-# records the session that applied the Issue #266 review corrections to this
+# Canonical session evidence (#775 shape, one entry per session). These entries
+# record the sessions that applied the Issue #266 review corrections to this
 # file, not the implementer of AC1-AC9, which is still NOT_STARTED.
 # issue_refs is empty by design: Issue #266 predates 2026-12-01, carries no
 # "AI-assisted work" declaration, and so cannot map to YES; OD-A3 lets an
@@ -300,3 +305,15 @@ session_evidence:
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-056/session-evidence-266.md
+  # Second entry: the round-4 session, which applied REVIEW-04's two
+  # non-blocking items and committed the three review reports as evidence.
+  # Same prompt digest, same NOT_VERIFIED provenance, different session.
+  - role: DOCUMENTATION-CORRECTION
+    issue_refs:
+    implementing_ai_session: session-266-056-round4
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-056/prompt-v1.md
+    executed_prompt_sha256: 325f567c669b046f4b0ccfd58515ad01c4b83377179fdb744502f6c1dc56d2e4
+    executed_prompt_bytes: 10114
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-056/session-evidence-266-round4.md
