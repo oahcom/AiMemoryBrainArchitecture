@@ -171,7 +171,7 @@ done
 ### 5.2 清扫覆盖的三条轴，以及不覆盖什么
 
 1. **树内**：工作树全树检索身份词族（`second account` / `collaborators = 1` / `one writable identity` / `same account` / `self-approv` / `sole reviewer` / `APPROVED = 0`），再检索**结论**词族（`不构成独立审查` / `does not constitute independent` / `not independent because` / `cannot be performed`）。第二遍是必要的：只搜身份词会漏掉那些已把「同一身份」抽象成「结构上不可能」的句子。
-2. **镜像**：对每个命中的登记，比较三副本的注记计数。**这是唯一能发现单侧漂移的方法** —— 本轮两次抓到真实缺陷：`docs/zh-CN/…RULING-001` 曾比 root 少 7 条（单向漂移），修完后 root 又比 zh 少 1 条（反向漂移，§7 裁定第 4 项）。两次都是门禁之外的缺陷，任何单侧检索都不会发现。
+2. **镜像**：对每个命中的登记，比较三副本的注记计数，并**逐字节比较正文**。**这是唯一能发现单侧漂移的方法** —— 本轮三次抓到真实缺陷：`docs/zh-CN/…RULING-001` 曾比 root 少 7 条（单向漂移）；修完后 root 又比 zh 少 1 条（反向漂移，§7 裁定第 4 项）；最后，**本文件的 `docs/en` 中文段仍是旧版**，仍带着 §2 在 2026-11-24 已明确撤回的那句「仓库内没有任何文档把独立性定义为会话级，零命中」——英文段在 2026-11-24 已改，中文段没有，而三份文件的注记计数当时都是 2 / 4 / 2，不构成任何提示。前两者靠计数发现，第三者只能靠**正文比对**发现：计数是症状，正文是事实。三次都是门禁之外的缺陷，任何单侧检索都不会发现。
 3. **历史**：本仓库**非 shallow**（7410 个提交），故「未搜 Git 历史」的免责条款本轮已撤销。全历史 `git log --all -p -- '*.md'` 逐增行检索「独立性结论 + 账号层事实」同句出现：去重后 8 条，其中 7 条是上表的注记本身，1 条是 `034` §9 的勘误正文，1 条是无关的 work-item 表格行。**历史轴零残留。**
 
 不覆盖：`branch-protection` 的 audit log（API 不暴露）；仓库外的引用（agent 提示词、下游工具）；`docs/en` 与 `docs/zh-CN` 的**语义**一致性 —— 那是政策 §9.1 右列的 `M-05`，不是机器可验证项。
@@ -184,6 +184,7 @@ done
 - **4 个 `docs/zh-CN/` 文件是英文正文**（`PARTIAL-SCOPE-019`、`MEASUREMENT-REPRODUCIBILITY-023`、`PAIRING-RESIDUAL-013`、`GAP-EXEC-2026-11-21-018`，其中 `023` 与 `docs/en` 逐字节相同）：`check_bilingual_docs.py` 的 `mirrored = english.is_file() and chinese.is_file()` 只验**存在性**，政策 §9.1 把「语义一致」明确列在右列并指派给 `M-05`。门禁的行为与它声明的契约一致，不是漏洞。翻译这 4 份是内容工作，不是治理修复。
 
 ---
+
 
 ## 6. 必须写明的弱点
 
@@ -205,7 +206,7 @@ done
 ## 8. 复现
 
 ```
-# 1. 现行条款已是会话级
+# 1. 现行条款已是会话级（在合并本改动的提交上执行；在 base 上该行尚不存在，返回空是预期的）
 grep -n "property of the reviewing session" 14-ai-development/PR-GOVERNANCE-001.md
 grep -n "审查会话的属性" 14-ai-development/PR-GOVERNANCE-001.md
 
