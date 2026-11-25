@@ -156,7 +156,7 @@ review:
   # describes: implementation.status is still NOT_STARTED. The only bytes changed
   # after round 5's verdict are this block's two status fields and the report
   # pointers, which the verdict does not depend on.
-  approval_source: "REVIEW-05 returned APPROVE, no blocking item, reviewing the increment applied after round 4. Nothing substantive changed after it."
+  approval_source: "REVIEW-05 returned APPROVE, no blocking item, reviewing the increment applied after round 4. After it, this commit also rewrote `risk_rationale` to quote the failure output as measured (`1 errors`, not `0 errors`) and marked the OD-23 quotation as quoted rather than prescribed; no acceptance criterion, finding or owner decision changed."
 
 implementation:
   status: NOT_STARTED
