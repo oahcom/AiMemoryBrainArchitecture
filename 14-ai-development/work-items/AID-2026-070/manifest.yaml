@@ -1,0 +1,86 @@
+work_item_id: AID-2026-070
+title: Make a second compile against the same store reach Context construction and Delivery
+class: GATE/CODE/TEST
+risk: R2
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+
+prompt_id: AID-2026-070-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-070/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: b0013ed25ebdf4c5a0cc200551d9e89edf6993138828527abb2fab137fda024a
+prompt_bytes: 6371
+
+# ---------------------------------------------------------------------------
+# WO-03 of the REQ-01 repair queue, registered against Issue #262 AC7.
+#
+# E2 is the reachability defect: `crates/brain-cli/src/main.rs:694-696` creates
+# the memory unconditionally on every run, and `memories.memory_id` is a primary
+# key, so the second compile of the same event dies at the first write and never
+# reaches `build_context` (:747) or `deliver_snapshot` (:795).
+#
+# `crates/brain-cli/tests/compile_persists_store.rs:271-334` currently asserts
+# that the second run fails, so "the second run succeeds" cannot be shown
+# without editing that test. Editing it is the work, not a side effect of it.
+#
+# Order: AID-2026-069 (F8) before this. Without a variant that means "already
+# exists", this work order can only be implemented by matching a message string.
+# ---------------------------------------------------------------------------
+
+authorization:
+  implementation_write: "NOT_GRANTED - this branch registers the work item; no file under crates/ is written by it"
+  gate_behaviour_change: "NOT_GRANTED - the read-back behaviour is the implementing change, not this branch"
+  schema_change: "NOT_GRANTED - no table, no column and no migration; the duplicate row is avoided, not accommodated"
+  platform_state_change: "NOT_GRANTED - no required context, workflow or protection payload is modified"
+  architecture_spec_change: "NOT_GRANTED - no ADR, no BMCP specification and no canonical architecture document is modified"
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-070/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-070/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-070/session-evidence-r45.md
+  files_to_modify:
+    - crates/brain-cli/src/main.rs
+    - crates/brain-cli/tests/compile_persists_store.rs
+    - crates/memory-store/src/lib.rs
+  files_out_of_scope: "Every other path. In particular the literal `1` passed to build_context at crates/brain-cli/src/main.rs:749, which belongs to the F7 work order (AID-2026-066) and is not changed here; and any change to memory-context, memory-compiler, agent-integration or bmcp-server. The third file in scope gains a read-back path only if C3's named rule needs one on the store facade; if the CLI can express the rule without touching the facade, that file stays unchanged and this manifest is the record of the choice."
+
+acceptance:
+  C1: "The second compile against the same --store exits 0, and the other two tests in compile_persists_store.rs (:144, :212) still exit 0. Settled by the three tests, not by a manual run."
+  C2: "The second run is shown to arrive at Context construction and Delivery, not merely to survive the first write. Settled by its stderr carrying all three stage lines printed at crates/brain-cli/src/main.rs:824, :825-827 and :830, and by the --out file it names existing and being non-empty."
+  C3: "The read-back or reuse semantics for an existing memory is written down as one named rule and asserted by a test that would fail under a different rule. Settled by the rule having a name in the tree and by that test existing; a rule implicit in the code path does not settle it."
+  C4: "The store does not accumulate duplicate memory rows. Settled by the set of memory_id values in memories being exactly the one identity after two compiles of the same event, read through the test's own helper rather than through the implementation's return value."
+  C5: "A genuine storage failure still fails. Settled by :275-299 unchanged (an unreadable input exits non-zero and creates no --store file) and by the post-condition at :319-333 still holding."
+  C6: "The existing assertion is inverted, not deleted. Settled by the string 're-compiling the same memory into the same store must fail' and the `create_memory failed` expectation at :308-317 being replaced by the asserted success, because a passing test that pins the defect is the failure mode the Round 25 principle names."
+  C7: "No schema migration, and no change to crates/memory-storage-sqlite/src/lib.rs:82-136. Settled by that range being byte-identical at the acceptance head and by no `.sql` file being added."
+  C8: "Nothing here claims that a version was advanced. Settled by crates/brain-cli/src/main.rs:749 still passing the literal `1`, and by no acceptance criterion above asserting a version number."
+
+implementation:
+  status: NOT_STARTED
+  pull_request: NONE
+  merge_commit_sha: NOT_MERGED
+  note: "Registration only. The files in scope are unchanged at this branch's head."
+
+review:
+  status: NOT_ASSIGNED
+  note: "Independent review has not been recorded. Same-session review of a self-authored fix cannot supply independence, so none is claimed."
+
+# ---------------------------------------------------------------------------
+# AC7 of Issue #262 requires every remediation to be an accountable work item.
+# This entry names the Issue; it does not claim the Issue's declaration state.
+# ---------------------------------------------------------------------------
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#262"
+    implementing_ai_session: session-r45-coordinator
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-070/prompt-v1.md
+    executed_prompt_sha256: b0013ed25ebdf4c5a0cc200551d9e89edf6993138828527abb2fab137fda024a
+    executed_prompt_bytes: 6371
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-070/session-evidence-r45.md

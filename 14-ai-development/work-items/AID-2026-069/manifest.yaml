@@ -1,0 +1,82 @@
+work_item_id: AID-2026-069
+title: Let a duplicate creation and an invalid reference stop arriving at the caller as one value
+class: GATE/CODE/TEST
+risk: R2
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+
+prompt_id: AID-2026-069-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-069/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 360c3273a8e6b28cefe583aabe9c5f3d119e94212735c2fae626bbad72816db6
+prompt_bytes: 6062
+
+# ---------------------------------------------------------------------------
+# WO-02 of the REQ-01 repair queue, registered against Issue #262 AC7.
+#
+# F8 is the identity-level defect: a caller that is refused a write has exactly
+# one value to branch on. `crates/memory-storage-sqlite/src/lib.rs:317` reports
+# a primary-key conflict through `InvalidReference`, and the string
+# `AlreadyExists` occurs 0 times anywhere under `crates/`, so "the same memory
+# is already stored" and "this reference is wrong" arrive as the same value.
+#
+# Order: F8 (this work item) before E2 (AID-2026-070). Without the distinction,
+# E2 can only be implemented by matching on a message string.
+# ---------------------------------------------------------------------------
+
+authorization:
+  implementation_write: "NOT_GRANTED - this branch registers the work item; no file under crates/ is written by it"
+  gate_behaviour_change: "NOT_GRANTED - the storage contract change is the implementing change, not this branch"
+  schema_change: "NOT_GRANTED - no table, no column and no migration; a Rust enum variant is not a serialized database schema"
+  platform_state_change: "NOT_GRANTED - no required context, workflow or protection payload is modified"
+  architecture_spec_change: "NOT_GRANTED - no ADR, no BMCP specification and no canonical architecture document is modified"
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-069/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-069/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-069/session-evidence-r45.md
+  files_to_modify:
+    - crates/memory-storage/src/lib.rs
+    - crates/memory-storage-sqlite/src/lib.rs
+    - crates/memory-store/src/lib.rs
+    - crates/memory-store/tests/cross_crate_contract.rs
+  files_out_of_scope: "Every other path. In particular crates/brain-cli/src/main.rs:694-696, whose use of the new variant belongs to WO-03 (AID-2026-070) and is verified here only as a regression; the other 83 `map_err(|_| ...)` occurrences in crates/memory-storage-sqlite/src/lib.rs; and crates/memory-storage-sqlite/src/lib.rs:82-136, which holds the DDL and does not change."
+
+acceptance:
+  C1: "The contract gains a variant that means 'this identity already exists', and InvalidReference keeps meaning 'the reference does not resolve'. Settled by both names existing in the enum at crates/memory-storage/src/lib.rs:7-21, and by neither being inferred from a message string."
+  C2: "The three fold sites stop discarding the SQLite cause. Settled by no `.map_err(|_| StorageError::InvalidReference)` remaining at crates/memory-storage-sqlite/src/lib.rs:317, :555 and :793, with a primary-key violation classified as the new variant and anything else keeping a classified mapping."
+  C3: "Both implementations agree. Settled by the SQLite adapter and the in-memory implementation at crates/memory-store/src/lib.rs:279 returning the same variant for the same duplicate-creation input."
+  C4: "Both directions are asserted in cross_crate_contract.rs. Settled by duplicate creation yielding the new variant and a memory_id mismatch yielding InvalidReference. The measure is set equality over the variants that file asserts, not a count of tests; the assertion at :269 pins today's conflation and must become two assertions, not one assertion plus a deletion."
+  C5: "No caller turns a real reference error into a success. Settled by crates/brain-cli still exiting non-zero and naming InvalidReference for a memory_id mismatch, and by it not naming the new variant for that input."
+  C6: "No DDL change, no migration, no new table. Settled by the `CREATE TABLE IF NOT EXISTS` set in crates/memory-storage-sqlite/src/lib.rs:82-136 being unchanged and by no `.sql` file being added to the tree."
+
+implementation:
+  status: NOT_STARTED
+  pull_request: NONE
+  merge_commit_sha: NOT_MERGED
+  note: "Registration only. The four files in scope are unchanged at this branch's head."
+
+review:
+  status: NOT_ASSIGNED
+  note: "Independent review has not been recorded. Same-session review of a self-authored fix cannot supply independence, so none is claimed."
+
+# ---------------------------------------------------------------------------
+# AC7 of Issue #262 requires every remediation to be an accountable work item.
+# This entry names the Issue; it does not claim the Issue's declaration state.
+# ---------------------------------------------------------------------------
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#262"
+    implementing_ai_session: session-r45-coordinator
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-069/prompt-v1.md
+    executed_prompt_sha256: 360c3273a8e6b28cefe583aabe9c5f3d119e94212735c2fae626bbad72816db6
+    executed_prompt_bytes: 6062
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-069/session-evidence-r45.md
