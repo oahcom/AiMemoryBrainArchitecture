@@ -1978,7 +1978,51 @@ def _validate_reference_scopes(
         )
 
 
+def _not_applicable_verdict(ctx: ValidationContext) -> str:
+    number = min(ctx.issues)
+    return (
+        "AI-SESSION-EVIDENCE: NOT_APPLICABLE "
+        f"(linked issue #{number} predates "
+        f"{os.environ['AI_SESSION_EVIDENCE_EFFECTIVE_AT_UTC']})"
+    )
+
+
 def _run_checks(ctx: ValidationContext) -> str:
+    # Issue #1026: check_01 enforces the PR-body declaration, so the
+    # historical guard below used to be unreachable for a PR that
+    # declares nothing. Resolve the linked Issues before enforcing
+    # anything: the guard must never run against an empty map, because
+    # it would then return False and the gate would validate nothing
+    # (the #1003 fail-open). _load_context already fills ctx.issues from
+    # this same call; parsing again keeps that precondition at the call
+    # site instead of relying on load order.
+    linked = parse_related_issues(ctx.body, ctx.repo)
+
+    # Anti-fail-open precondition: the guard below returns False on an
+    # empty map, so an unresolved Issue set would silently pass every
+    # PR. _load_context resolves the same references; this asserts the
+    # two resolutions agree rather than trusting call order.
+    if set(linked) != set(ctx.issues):
+        raise ValidationError(
+            "Internal error: linked Issues were not resolved "
+            "before validation"
+        )
+
+    # Ceiling, from the #1026 ruling: only an *undeclared* body is
+    # exempted. A pre-effective PR that volunteers a declaration still
+    # runs every check below, so "move the Issue before the effective
+    # time" cannot make an unverifiable YES pass. Widening this to skip
+    # the body checks for every pre-effective PR was rejected; do not
+    # retry it without a test that pins the volunteering case.
+    if (
+        _historical_not_applicable(ctx)
+        and _extract_field(ctx.body, "AI-assisted work") is None
+        and _extract_field(
+            ctx.body, "Session evidence reference(s)"
+        ) is None
+    ):
+        return _not_applicable_verdict(ctx)
+
     related = check_01_pr_fields_and_issue_references(ctx)
     pr_status, pr_paths = check_02_pr_declaration_and_references(ctx)
 
@@ -2024,12 +2068,7 @@ def _run_checks(ctx: ValidationContext) -> str:
                 pr_paths,
             )
 
-        number = min(ctx.issues)
-        return (
-            "AI-SESSION-EVIDENCE: NOT_APPLICABLE "
-            f"(linked issue #{number} predates "
-            f"{os.environ['AI_SESSION_EVIDENCE_EFFECTIVE_AT_UTC']})"
-        )
+        return _not_applicable_verdict(ctx)
 
     # File existence/type checks may operate over the concatenated
     # references because they do not impose cross-scope uniqueness.

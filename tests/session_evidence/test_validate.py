@@ -521,6 +521,135 @@ YES
         self.install_world(world)
         self.assertEqual(run_validator(), 0)
 
+    def test_pre_effective_undeclared_pr_is_not_applicable(self):
+        # Issue #1026: with no declaration at all, the historical guard
+        # used to be unreachable because check_01 ran first and raised.
+        world = make_valid_world(
+            issue_created="2020-01-01T00:00:00Z",
+            issue_body=ISSUE_BODY_UNDECLARED,
+            pr_body="Related issue(s): #101\n",
+        )
+        self.install_world(world)
+        result, output = self.capture_validator()
+        self.assertEqual(result, 0)
+        self.assertIn("AI-SESSION-EVIDENCE: NOT_APPLICABLE", output)
+
+    def test_pre_effective_pr_with_post_effective_issue_requires_declaration(
+        self,
+    ):
+        # One linked Issue postdates the effective time, so the exemption
+        # does not apply and the missing declaration must still fail. This
+        # is what stops the #1026 fix from becoming a blanket skip.
+        entries = [make_entry(101, "a"), make_entry(102, "b")]
+        world = make_valid_world(
+            entries=entries,
+            issue_created="2020-01-01T00:00:00Z",
+            issue_body=ISSUE_BODY_UNDECLARED,
+            pr_body="Related issue(s): #101, #102\n",
+        )
+        original_api = world["api"]
+
+        def api(path):
+            if path == f"/repos/{REPOSITORY}/issues/102":
+                return {
+                    "number": 102,
+                    "html_url": issue_url(102),
+                    "created_at": "2100-01-01T00:00:00Z",
+                    "body": ISSUE_BODY_UNDECLARED,
+                }
+            return original_api(path)
+
+        self.install_world(world)
+        self.patch_validate("gh_api", api)
+        result, output = self.capture_validator()
+        self.assertEqual(result, 1)
+        self.assertIn(
+            "PR: missing AI-assisted work declaration",
+            output,
+        )
+
+    def test_pre_effective_pr_volunteered_yes_with_missing_evidence_fails(
+        self,
+    ):
+        # A pre-effective PR that volunteers a YES declaration is not
+        # exempt: it must still prove the reference exists. Skipping the
+        # body checks for every pre-effective PR would let this pass.
+        # The Issue is historical and undeclared, so the guard is True and
+        # an unconditional early exit would return 0 here.
+        missing = (
+            "14-ai-development/work-items/AID-2026-001/"
+            "evidence/session-missing.md"
+        )
+        body = f"""## Work Item
+
+AID-2026-001
+
+## Related issue(s)
+
+#101
+
+## AI-assisted work
+
+YES
+
+## Session evidence reference(s)
+
+{missing}
+
+| Related Issue | Issue AI-assisted work | Evidence refs for this Issue |
+| --- | --- | --- |
+| {issue_url(101)} | LEGACY_UNDECLARED | N/A |
+"""
+        world = make_valid_world(
+            issue_created="2020-01-01T00:00:00Z",
+            issue_body=ISSUE_BODY_UNDECLARED,
+            pr_body=body,
+        )
+        self.install_world(world)
+        result, output = self.capture_validator()
+        self.assertEqual(result, 1)
+        self.assertIn(
+            "path does not exist in PR Head Git tree",
+            output,
+        )
+
+    def test_pre_effective_pr_volunteered_yes_with_valid_evidence_is_not_applicable(
+        self,
+    ):
+        # The declared case must keep its old behaviour: the declaration is
+        # still validated, then the historical verdict is returned. The
+        # verdict string is pinned here; the sibling test above pins only
+        # the exit code for the same world.
+        body = f"""## Work Item
+
+AID-2026-001
+
+## Related issue(s)
+
+#101
+
+## AI-assisted work
+
+YES
+
+## Session evidence reference(s)
+
+{EVIDENCE_A}
+
+| Related Issue | Issue AI-assisted work | Evidence refs for this Issue |
+| --- | --- | --- |
+| {issue_url(101)} | LEGACY_UNDECLARED | N/A |
+"""
+        world = make_valid_world(
+            issue_created="2020-01-01T00:00:00Z",
+            issue_body=ISSUE_BODY_UNDECLARED,
+            pr_body=body,
+        )
+        self.install_world(world)
+        result, output = self.capture_validator()
+        self.assertEqual(result, 0)
+        self.assertIn("AI-SESSION-EVIDENCE: NOT_APPLICABLE", output)
+
     def test_entry_cannot_attribute_evidence_to_an_issue_that_declares_no(
         self,
     ):
@@ -550,6 +679,7 @@ YES
         self.assertIn("Issue #101", output)
         self.assertIn("maps to NO", output)
         self.assertIn("declares YES", output)
+
 
     def test_post_policy_missing_declaration_is_missing_and_failed(self):
         world = make_valid_world(issue_body=ISSUE_BODY_UNDECLARED)
