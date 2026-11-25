@@ -2,7 +2,7 @@ work_item_id: AID-2026-064
 title: Remove the fixture-name collision that makes cargo test --workspace fail intermittently on coarse-clock hosts
 class: TEST/ISOLATION
 risk: R1
-status: IN_PROGRESS
+status: PR_OPEN
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -50,8 +50,8 @@ acceptance:
   A6: "No dependency is added and no assertion about forget/restore behaviour changes."
 
 implementation:
-  status: IN_PROGRESS
-  pull_request: NOT_OPEN
+  status: PR_OPEN
+  pull_request: 1057
   merge_commit_sha: NOT_MERGED
 
 review:
