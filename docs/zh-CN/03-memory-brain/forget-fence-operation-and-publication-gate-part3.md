@@ -1,10 +1,10 @@
 # Forget Fence 原子性 — 第 3 部分：Phase 3.6 线性化与证明矩阵
 
 - 文档 ID：D-FORGET-GATE-001-P3
-- 源文件版本：d3ddfff9500d9138d643989e8496d99b8d9ed79e
+- 源文件版本：DEREFERENCED — 保留历史源 Blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5`；当前仓库不存在可解析的规范性源文件。
 - 源分支：session-d-memory-brain-2026-11-16
 - 对应英文：[Part 3 — Phase 3.6 Linearization and Proof Matrix](../../en/03-memory-brain/forget-fence-operation-and-publication-gate-part3.md)
-- 源规范：[D 规范源](../../../03-memory-brain/forget-fence-operation-and-publication-gate.md)（源提交 `b525e1f8fee2471a131e4a38efda99804045e424`；原始源 Blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5`）。
+- 源规范：DEREFERENCED — 原规范源路径 `03-memory-brain/forget-fence-operation-and-publication-gate.md` 在当前 main tree 中不存在；替代物：[英文对照版](../../en/03-memory-brain/forget-fence-operation-and-publication-gate-part3.md)（Blob `93b9485c21f83e9072f1771df993cff90b4b55a0`；仅为对照文本，不是规范性替代源）。
 
 **Owner：** Session D — Memory Brain Principal Architect  
 **状态：** D 拥有的领域语义为 DECIDED；E/Storage 执行、I 授权新鲜度和跨模块一致性为 OPEN。  
