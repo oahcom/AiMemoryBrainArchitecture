@@ -621,7 +621,7 @@ YES
             "14-ai-development/work-items/AID-2026-001/"
             "evidence/session-missing.md"
         )
-        body = f"""## Work Item
+        body = f"""## Work Item ID
 
 AID-2026-001
 
@@ -661,7 +661,7 @@ YES
         # still validated, then the historical verdict is returned. The
         # verdict string is pinned here; the sibling test above pins only
         # the exit code for the same world.
-        body = f"""## Work Item
+        body = f"""## Work Item ID
 
 AID-2026-001
 
