@@ -193,11 +193,12 @@ review:
   report_ref: "14-ai-development/work-items/AID-2026-056/REVIEW-03-INDEPENDENT.md"
   prior_report_ref: "14-ai-development/work-items/AID-2026-056/REVIEW-02-INDEPENDENT.md"
   rounds_completed: 3
-  # Round 3 confirmed every REVIEW-01 and REVIEW-02 finding closed by
-  # re-measurement, and returned REQUEST-CHANGES on three defects of the same
-  # class: prose in `deliverables` and in AC1 still described the state the
-  # criteria had replaced. Those three (D1, D2, D3) and the erratum's
-  # "byte-identical" claim (D4) are applied in this revision.
+  # Round 3 re-measured all eight findings: F1-F4 closed, F5-F8 still open
+  # (F5 floor AC7 records but does not cover; F6 unresolved; F7 stale base,
+  # GAP-29; F8 deviation, not repaired), and returned REQUEST-CHANGES on
+  # three defects of one class: prose in `deliverables` and in AC1 still
+  # described the state the criteria had replaced. Those three (D1, D2, D3)
+  # and the erratum's "byte-identical" claim (D4) are applied in this revision.
   # OD-26 directed that this work item stay DISPATCHED and this status stay
   # CHANGES_APPLIED_AWAITING_RE_REVIEW until an independent reviewer confirms
   # every blocking finding closed. The author's own conformance checks, a green
