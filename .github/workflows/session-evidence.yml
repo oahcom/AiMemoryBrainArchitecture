@@ -12,8 +12,8 @@ env:
   AI_SESSION_EVIDENCE_EFFECTIVE_AT_UTC: "2026-12-01T00:00:00Z"
 
 jobs:
-  session-evidence:
-    name: Session Evidence
+  self-test-trusted-base:
+    name: Session Evidence self-test (trusted base)
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -24,8 +24,44 @@ jobs:
           ref: ${{ github.event.pull_request.base.sha }}
           persist-credentials: false
 
-      - name: Self-test the validator
-        run: python3 -m unittest discover -s tests/session_evidence -p "test_*.py"
+      - name: Self-test the trusted base validator
+        run: |
+          if [ ! -d tests/session_evidence ]; then
+            echo "AI-SESSION-EVIDENCE-SELFTEST: NOT_APPLICABLE (base tree has no tests/session_evidence)"
+            exit 0
+          fi
+          python3 -m unittest discover -s tests/session_evidence -p "test_*.py"
+
+  self-test-pr-head:
+    name: Session Evidence self-test (PR head)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Self-test the PR head validator
+        run: |
+          if [ ! -d tests/session_evidence ]; then
+            echo "AI-SESSION-EVIDENCE-SELFTEST: NOT_APPLICABLE (PR tree has no tests/session_evidence)"
+            exit 0
+          fi
+          python3 -m unittest discover -s tests/session_evidence -p "test_*.py"
+
+  validate:
+    name: Session Evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout trusted base revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
 
       - name: Validate session evidence
         id: validate
