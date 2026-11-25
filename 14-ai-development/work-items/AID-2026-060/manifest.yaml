@@ -3,7 +3,7 @@ title: Make gate_ratchet.py fail when the command's exit status and its parsed f
 
 class: GATE/CODE/TEST
 risk: R2
-risk_rationale: "One standard-library script and its tests. No Rust, no transport, no authorization, no storage. The risk is not damage but false assurance: the ratchet is the mechanism that keeps ~20 shrink-only baselines honest, and it currently reports PASS over an empty baseline even when the command it ran exited non-zero. Measured at b80e5a40. A gate that cannot tell 'never ran' from 'ran and found nothing' converts every baseline it guards into a decoration. R2 rather than R1 because changing the failure path of a gate used across the repository can turn currently-green checks red if any caller depends on the pass-through behaviour."
+risk_rationale: "One standard-library script and its tests. No Rust, no transport, no authorization, no storage. The risk is not damage but false assurance: the ratchet is the mechanism that keeps a shrink-only baseline honest, and at b80e5a40 it reported PASS over an empty baseline even when the command it ran exited non-zero. Measured at 767f2eaa, exactly one baseline exists in the tree (scripts/ci/baselines/bilingual-docs.txt) and exactly two have ever existed (the other, document-management.txt, was retired); gates.yml:41-42 says so in prose. A gate that cannot tell 'never ran' from 'ran and found nothing' converts the baseline it guards into a decoration. R2 rather than R1 because changing the failure path of a gate used across the repository can turn currently-green checks red if any caller depends on the pass-through behaviour. Two of the three shapes are now closed by c6602739 (#1031); the third — a zero status over a non-empty set — is open at 767f2eaa, and the residual indistinguishability AC4 accepts is named in AC7 rather than left implied."
 
 security_scope: "None. No credentials, no network, no subprocess beyond the command it already invokes, no file writes outside its own output."
 
@@ -20,10 +20,15 @@ authorization:
   root_membership_change: "NOT_APPLICABLE"
 
 scope:
-  files_to_create:
-    - scripts/ci/test_gate_ratchet.py
+  # files_to_create is empty at 767f2eaa. It named
+  # scripts/ci/test_gate_ratchet.py until c6602739 (#1031) added that file with
+  # six cases; a scope entry that asks for a file which already exists invites
+  # an implementer to overwrite it. The remaining work is one guard inside an
+  # existing file, plus its test.
+  files_to_create: []
   files_to_modify:
     - scripts/ci/gate_ratchet.py
+    - scripts/ci/test_gate_ratchet.py
   files_not_to_touch:
     - .github/workflows/gates.yml
     - scripts/ci/baselines/bilingual-docs.txt
@@ -44,19 +49,28 @@ prompt_supersession:
       why: "AID-2026-058's AC4 brings scripts/ci/baselines/traceability.txt to zero entries in the same commit that lands its inputs, and its AC3 requires this script over that baseline to exit 0. OD-26 lands 060 first, so the literal prompt makes 058 unimplementable. The hole the rejection aimed at is closed by AC1-AC3, which key the guard on exit-code and set agreement instead of on baseline emptiness."
     - prompt_item: "prompt-v1.md section 4.2 (a non-zero exit from the command fails the ratchet, independently of the baseline's content) and deliverable 2 as first written"
       replaced_by: "AC1, AC2 and AC5, which distinguish a status outside {0,1}, a status that contradicts an empty set, and the live caller that exits 1 by design"
-      why: "The only caller in the repository is gates.yml:161-164 wrapping scripts/check_bilingual_docs_full.py, which exits 1 with 77 violations as its normal result and is ratcheted against a 77-entry baseline. Failing on any non-zero exit turns the required check Bilingual docs coverage (ratchet) permanently red."
+      why: "The only caller in the repository is the step named 'Ratchet the GOV-DOC-001 full scan' in gates.yml, wrapping scripts/check_bilingual_docs_full.py, which exits 1 with 77 violations as its normal result and is ratcheted against a 77-entry baseline. Failing on any non-zero exit turns the required check Bilingual docs coverage (ratchet) permanently red."
     - prompt_item: "prompt-v1.md section 4.3 (PASS requires the command to have exited 0, the baseline to be read and non-empty, the set to be computed, and the diff to obey the rule)"
       replaced_by: "AC4 and AC5 (PASS requires a readable baseline and an agreeing exit-status/set pair; baseline emptiness is not a PASS condition)"
       why: "The non-empty clause is the same rejection in a second place. An empty baseline with an agreeing pair is a legitimate no-op, which is exactly what 058 needs."
     - prompt_item: "prompt-v1.md AC3 (non-empty baseline plus a command exiting 9 must exit non-zero), described there as already true and asserted only so it does not regress"
       replaced_by: "AC1 (any status outside {0,1} fails, for every baseline)"
-      why: "It is not already true. Measured: a 77-entry baseline whose command prints exactly the baseline set and then exits 9 gives regressions=0 fixed=0 PASS exit 0, because proc.returncode is never read. The criterion was a miscategorised new requirement rather than a regression guard."
+      why: "It was not already true at b80e5a40, the commit this work item was dispatched against. Measured there: a 77-entry baseline whose command printed exactly the baseline set and then exited 9 gave regressions=0 fixed=0 PASS exit 0, because proc.returncode was never read. c6602739 (#1031) has since added that guard, so at 767f2eaa the case fails correctly; the criterion is now a regression guard over a guard that exists, which is what prompt AC3 said it was. The measurement that justified superseding it remains true of the commit it was taken at."
     - prompt_item: "prompt-v1.md AC7 (every existing caller still passes; neither baseline may become empty) read together with section 4.1"
       replaced_by: "AC8 (both callers named with their exit status and baseline shape, including the one that exits 1 by design)"
       why: "The original AC7 names the callers but not their exit statuses, so it promises an outcome its own section 4.1 forbids. Naming them with their statuses is what makes it checkable."
   not_superseded: "prompt section 5's prohibitions, AC2 (empty baseline plus a command exiting 9 must fail), AC4 (the happy path survives), AC5 (mutation-verified tests), AC6 (the comment must match the code) and the OD-26 ruling stand as written in the prompt. AC2 and AC4 are re-stated here only where the rule behind them changed."
 
 status: DISPATCHED
+
+# PARTIALLY SATISFIED is not a status value here, and DISPATCHED is kept
+# deliberately. Two of the three shapes AC1-AC3 require were implemented by a
+# different work item's commit (c6602739 / #1031) before this one was picked up,
+# so the remaining scope is one guard and the comment. That is a fact about the
+# scope, not a change of lifecycle: implementation.status stays NOT_STARTED
+# because no session has been assigned this work, and a reader who needs to know
+# how much of it is already done reads AC1-AC3, each of which names the commit it
+# is measured at.
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -96,27 +110,27 @@ owner_decisions:
 # ---------------------------------------------------------------------------
 
 deliverables:
-  - "gate_ratchet.py reads the command's exit status and fails when that status disagrees with the parsed failure set: a status outside {0, 1}; a non-zero status with an empty set; a zero status with a non-empty set. It does not reject an empty baseline, because an empty baseline whose status and set agree is a legitimate no-op and AID-2026-058 requires exactly that."
-  - "An empty baseline plus a command exiting non-zero fails. Measured at b80e5a40: regressions=0 fixed=0 PASS exit 0."
+  - "gate_ratchet.py reads the command's exit status and fails when that status disagrees with the parsed failure set: a status outside {0, 1}; a non-zero status with an empty set; a zero status with a non-empty set. It does not reject an empty baseline, because an empty baseline whose status and set agree is a legitimate no-op and AID-2026-058 requires exactly that. At 767f2eaa the first two shapes are implemented (gate_ratchet.py:117 and :122, added by c6602739 / #1031); the third is not, and is the whole of the remaining work."
+  - "An empty baseline plus a command exiting non-zero fails. This was the defect at b80e5a40, where the same case gave regressions=0 fixed=0 PASS exit 0; at 767f2eaa it gives FAIL exit 1, so the deliverable is now a regression guard rather than a repair."
   - "PASS is emitted only when the baseline is readable, the exit-status and parsed-set pair agrees, and the diff obeys the shrink-only rule. Baseline emptiness is not a PASS condition."
-  - "The comment at the top of gate_ratchet.py is rewritten to state what the tests enforce, including what remains outside the guarantee. The current comment claims 'a crash yields zero items and is caught below as a stale baseline (fail-closed), never as a pass', which holds only while the baseline is non-empty."
-  - "Tests cover AC1-AC5 at scripts/ci/test_gate_ratchet.py, and each is mutation-verified by the reviewer, not self-certified: the reviewer removes the guard, re-runs, and records which test fails. The manifest does not assert this about itself."
+  - "The comment inside gate_ratchet.py states what the tests enforce, including what remains outside the guarantee. #1031 already rewrote the inline comment that stood at b80e5a40 ('a crash yields zero items and is caught below as a stale baseline (fail-closed), never as a pass', which held only while the baseline was non-empty) into one that says a non-zero exit printing no item is checked below because an empty set minus an empty baseline would otherwise be a pass, and the module docstring gained AC2's shape in its exit-code line. What does not follow is AC1's shape: the docstring still says nothing about a status outside {0, 1}, so a reader of it alone would not know that a wrapped command exiting 2 is rejected. This deliverable is therefore narrowed to that one gap. It is not 'the comment is stale', which is no longer true, and a reader who checks it against the b80e5a40 wording will find that wording already gone."
+  - "Tests cover AC1-AC5 at scripts/ci/test_gate_ratchet.py, and each is mutation-verified by the reviewer, not self-certified: the reviewer removes the guard, re-runs, and records which test fails. The manifest does not assert this about itself. The file exists at 767f2eaa with six cases added by c6602739; AC3 has no test, because the guard it would test does not exist yet."
 
 acceptance_criteria:
   - id: AC1
-    text: "A command exit status outside {0, 1} fails the ratchet, whatever the parsed set and whatever the baseline contains: non-zero exit, no PASS, and the observed status named in the message. Tested with both an empty and a non-empty baseline. Measured at b80e5a40: empty baseline plus a command exiting 9 gives regressions=0 fixed=0 PASS exit 0, so this criterion fails today."
+    text: "A command exit status outside {0, 1} fails the ratchet, whatever the parsed set and whatever the baseline contains: non-zero exit, no PASS, and the observed status named in the message. Satisfied at 767f2eaa by c6602739 (#1031), which added the guard at gate_ratchet.py:117; measured there: empty baseline plus a command exiting 9 gives regressions=0 fixed=0 and then FAIL exit 1. It was NOT satisfied at b80e5a40, the commit this work item was dispatched against, where the same case gave PASS exit 0. The criterion is therefore a regression guard for a guard that now exists, not a description of work still to do; the reviewer verifies it by deleting gate_ratchet.py:117-120 and re-running the suite. Coverage caveat, measured: the suite's only status-outside-{0,1} case is test_exit_status_outside_zero_one_is_not_comparable, which uses the non-empty baseline 'a.md'; the two empty-baseline tests use exit 1 and exit 0. The guard is not baseline-dependent, so the case is pinned, but the pair 'empty baseline plus status 2' is not itself exercised by any test, and this criterion does not claim otherwise."
   - id: AC2
-    text: "A non-zero status with an empty parsed set fails: the command reported failure and listed nothing, so there is no set to compare and the baseline cannot be ratcheted. Today this is caught only incidentally, and only when the baseline is non-empty, where every entry becomes 'fixed' and the failure reads as a stale baseline rather than as an untrustworthy run."
+    text: "A non-zero status with an empty parsed set fails: the command reported failure and listed nothing, so there is no set to compare and the baseline cannot be ratcheted. Satisfied at 767f2eaa by c6602739 (#1031), which added the guard at gate_ratchet.py:122; measured there: a command exiting 1 with no output gives FAIL exit 1 with 'without printing any item; a crash is not a clean run', and a command exiting 9 with no output is caught earlier by gate_ratchet.py:117 as a status outside {0, 1}, so this guard is the one that carries the status-1 case. At b80e5a40 the same case was caught only incidentally, and only when the baseline was non-empty, where every entry became 'fixed' and the failure read as a stale baseline rather than as an untrustworthy run. The difference matters for the empty baseline, where there was no incidental catch at all."
   - id: AC3
-    text: "A zero status with a non-empty parsed set fails: the command reported success while listing failures. Today that comparison passes whenever the set equals the baseline, which is how a checker that always exits 0 and always prints the same items would ratchet itself into permanence."
+    text: "A zero status with a non-empty parsed set fails: the command reported success while listing failures. This is the one criterion of AC1-AC5 that #1031 did NOT implement, and it is the whole of the remaining work. Measured at 767f2eaa: a command that prints three items and exits 0 gives regressions=0 fixed=0 PASS exit 0, so a checker that always exits 0 and always prints the same items ratchets itself into permanence. gate_ratchet.py:117 rejects a status outside {0,1} and :122 rejects a non-zero status with no items, but nothing compares a zero status against a non-empty set, so this shape reaches the PASS line."
   - id: AC4
     text: "An empty baseline with a zero status and an empty parsed set exits 0 and prints PASS. This is required, not tolerated: AID-2026-058's AC4 brings scripts/ci/baselines/traceability.txt to zero entries in the same commit that lands its inputs, and its AC3 requires this script over that baseline to exit 0. Rejecting empty baselines makes 058 unimplementable, which is why the guard is keyed on status and set agreement rather than on baseline emptiness."
   - id: AC5
-    text: "A non-empty baseline with status 1 and a parsed set equal to the baseline exits 0 and prints PASS. This is the live caller: gates.yml:161-164 wraps scripts/check_bilingual_docs_full.py, which exits 1 with 77 violations as its normal result. A rule reading 'any non-zero status fails' turns the required check Bilingual docs coverage (ratchet) permanently red, so this criterion exists to make that outcome a test failure rather than a CI discovery."
+    text: "A non-empty baseline with status 1 and a parsed set equal to the baseline exits 0 and prints PASS. This is the live caller: the step named 'Ratchet the GOV-DOC-001 full scan' in gates.yml wraps scripts/check_bilingual_docs_full.py, which exits 1 with 77 violations as its normal result. A rule reading 'any non-zero status fails' turns the required check Bilingual docs coverage (ratchet) permanently red, so this criterion exists to make that outcome a test failure rather than a CI discovery."
   - id: AC6
-    text: "Tests exist at scripts/ci/test_gate_ratchet.py for AC1-AC5, and each is mutation-verified by the reviewer: the guard under test is deleted, the suite is re-run, and the failing test is recorded. A test that passes with its guard removed is not evidence and does not satisfy this criterion. The author does not certify this about their own suite."
+    text: "Tests exist at scripts/ci/test_gate_ratchet.py for AC1-AC5, and each is mutation-verified by the reviewer: the guard under test is deleted, the suite is re-run, and the failing test is recorded. A test that passes with its guard removed is not evidence and does not satisfy this criterion. The author does not certify this about their own suite. The file exists at 767f2eaa, added by c6602739 (#1031) with six cases; the reviewer's job is therefore to establish which of AC1-AC5 those six actually pin and which are unpinned, not to accept the count as coverage. Measured at 767f2eaa: AC1, AC2, AC4 and AC5 are pinned by named tests; AC3 has no test, because the guard it would test does not exist yet. Deleted-guard results measured in this session: removing gate_ratchet.py:117-120 fails test_exit_status_outside_zero_one_is_not_comparable; removing :122-125 fails test_empty_baseline_with_nonzero_exit_and_no_output_fails; rejecting empty baselines outright fails test_empty_baseline_with_clean_exit_and_no_output_passes and the preceding test; turning :117 into 'any non-zero status fails' fails test_exact_match_with_nonzero_exit_still_passes among others. AC1-AC2 and AC4-AC5 are therefore pinned; AC3 is the sole gap."
   - id: AC7
-    text: "The comment inside gate_ratchet.py no longer claims a guarantee the code does not provide. It states the PASS conditions as implemented, and it names the input class that remains undetectable, if any survives the change. One class does survive, and AC7 names it rather than leaving risk_rationale's 'never ran versus ran and found nothing' sentence reading as discharged: status 0 with an empty parsed set over an empty baseline is indistinguishable from a command that does nothing, and AC4 accepts it deliberately because AID-2026-058 requires it. AC1-AC3 close every other shape of that indistinguishability, but not this one, and a reader who tests the work item against its own rationale will find it short unless the residual is written down."
+    text: "The comment inside gate_ratchet.py no longer claims a guarantee the code does not provide. It states the PASS conditions as implemented, and it names the input class that remains undetectable, if any survives the change. One class does survive, and AC7 names it rather than leaving risk_rationale's 'never ran versus ran and found nothing' sentence reading as discharged: status 0 with an empty parsed set over an empty baseline is indistinguishable from a command that does nothing, and AC4 accepts it deliberately because AID-2026-058 requires it. Measured at 767f2eaa, this residual is real and exactly as described: an empty baseline with a command that prints nothing and exits 0 produces byte-identical output to the same baseline with a command that exits 0 immediately, both PASS exit 0. AC1-AC3 close every other shape of that indistinguishability, but not this one, and a reader who tests the work item against its own rationale will find it short unless the residual is written down. The docstring at 767f2eaa reads 'a wrapped command that exited non-zero without reporting an item', which #1031 added and which describes AC2's shape only; it omits the status-outside-{0,1} guard that the same commit added at line 117, and the two shapes are different conditions. Completing the docstring is part of this criterion, not already done."
   - id: AC8
     text: "Both callers are named and still pass: (a) scripts/ci/baselines/bilingual-docs.txt, 77 entries, command status 1, parsed set equal to the baseline; (b) scripts/ci/baselines/traceability.txt, 0 entries, command status 0, empty set, once AID-2026-058 lands. Neither baseline changes shape as a side effect of this work item, and no workflow file is edited to make either pass."
 
@@ -130,17 +144,53 @@ integration_reviewer: NOT_ASSIGNED
 review:
   status: CHANGES_APPLIED_AWAITING_RE_REVIEW
   prior_status: CHANGES_REQUESTED
-  report_ref: "14-ai-development/work-items/AID-2026-060/REVIEW-02-INDEPENDENT.md"
-  prior_report_ref: "14-ai-development/work-items/AID-2026-060/REVIEW-01-INDEPENDENT.md"
-  rounds_completed: 2
+  report_ref: "14-ai-development/work-items/AID-2026-060/REVIEW-04-INDEPENDENT.md"
+  prior_report_ref: "14-ai-development/work-items/AID-2026-060/REVIEW-03-INDEPENDENT.md"
+  rounds_completed: 4
   # Round 1 returned REQUEST-CHANGES with four blocking findings; round 2
   # returned APPROVE with none, after reproducing the defect and confirming the
   # 058 conflict is real rather than manufactured. Two non-blocking items (N1
   # the F7 resolution citing AC5 for a status-9 case AC5 does not assert, N2
   # the residual indistinguishability AC4 accepts) were applied after that
-  # verdict, so it does not cover the current bytes. The corrections are the
+  # verdict, so it does not cover the current bytes.
+  # Round 3 then returned REQUEST-CHANGES on one blocking item that outranks
+  # everything above it: c6602739 (#1031) had already landed two of the three
+  # guards this work item was written to add, and the manifest still asserted
+  # the premise in the present tense. That finding is applied in this revision:
+  # AC1-AC3 name the commit each is measured at, F1 and deliverables 1-2 are
+  # split into the state at b80e5a40 and the state at 767f2eaa, and the scope
+  # is restated as one guard (AC3) plus the comment. The corrections are the
   # author's, which is not a confirmation.
-  approval_source: "REVIEW-02 returned APPROVE, no blocking item; N1 and N2 applied after that verdict. APPROVED is not claimed here: a verdict belongs to the artifact it read."
+  # Four further corrections were applied after REVIEW-03 was written, and none
+  # of them has been read by any reviewer:
+  #   AC2 quoted a message that only the status-1 path emits while giving a
+  #   status-9 input (measured: status 9 is caught at :117, never reaching
+  #   :122); AC6 now records which test each deleted guard fails, measured by
+  #   mutation in this session; AC7 records that the module docstring at
+  #   767f2eaa still omits the status-outside-{0,1} condition, so that
+  #   deliverable is open rather than done; implementation.remaining_scope
+  #   states that AC3 is the whole of the remaining work.
+  # The lifecycle field below is therefore deliberately unchanged: the work is
+  # not started, four of five criteria already hold because of #1031, and one
+  # does not.
+  # Round 4 returned REQUEST-CHANGES on two present-tense falsehoods, both
+  # reproduced here before repair. (B1) AC1 claimed "tested with both an empty
+  # and a non-empty baseline"; the suite's only status-outside-{0,1} case uses
+  # the non-empty baseline 'a.md', and the two empty-baseline tests use exit 1
+  # and exit 0. The sentence is replaced by the measured coverage caveat rather
+  # than by adding a test, which would be implementation. (B2) risk_rationale
+  # said the ratchet "keeps ~20 shrink-only baselines honest"; measured, one
+  # baseline exists (bilingual-docs.txt) and two have ever existed
+  # (document-management.txt was retired), and gates.yml:41-42 says so. That
+  # figure was off by a factor of twenty and it is the sentence R2 rests on.
+  # Round 4's N1 is also applied: F5 cited gates.yml:165-168 while measured at
+  # ba293506, where the step is at 161-164, so the two live citations now name
+  # the step instead of a line range that moves.
+  # Round 4's N4 asked that the bytes be frozen before the next round. They were
+  # not: the file changed three times during that review (30796 -> 31596 ->
+  # 32278 bytes). This revision is committed before any further review, so a
+  # round 5 would read one state rather than three.
+  approval_source: "REVIEW-02 returned APPROVE, no blocking item; REVIEW-03 and REVIEW-04 returned REQUEST-CHANGES and are applied here. APPROVED is not claimed for the current bytes: no reviewer has read them."
 
 acceptance:
   status: NOT_ASSIGNED
@@ -149,6 +199,16 @@ acceptance:
 
 implementation:
   status: NOT_STARTED
+  # NOT_STARTED is the correct lifecycle value for this work item, but it now
+  # understates the position and must not be read as "nothing exists". Four of
+  # the five behavioural criteria (AC1, AC2, AC4, AC5) were implemented by
+  # c6602739 (#1031), a commit that landed before this work item was registered
+  # and did not know about it. AC3 - a zero status with a non-empty parsed set
+  # must fail - is unimplemented, has no test, and is the whole of the remaining
+  # work. The criteria were therefore rewritten from "this must start working"
+  # to "this must keep working", and AC3 stayed a forward requirement. A
+  # reader who reads only the lifecycle field will overestimate the work.
+  remaining_scope: "AC3 only: gate_ratchet.py must fail when the wrapped command exits 0 while printing items, and the residual undetectable class AC7 names must be documented in the module docstring"
   branch: PENDING
   pull_request: PENDING
   pull_request_url: PENDING
@@ -168,14 +228,14 @@ errata:
       - "deliverables[1]: failed on any non-zero command exit, which turns the bilingual ratchet permanently red."
       - "acceptance_criteria[AC1]: withdrawn and renamed AC1-ORIGINAL; the AC1 that remains is a different criterion."
       - "acceptance_criteria[AC3]: described as an already-true regression guard. Measured, it is false; promoted to AC1 as a new requirement."
-      - "findings[F1]: attributed the discarded exit code to --format paths. proc.returncode is never read, in any format."
+      - "findings[F1]: attributed the discarded exit code to --format paths. At b80e5a40, proc.returncode was never read, in any format; c6602739 (#1031) has since added the two guards, so the clause is historical rather than current."
 
 findings:
   - id: F1
     severity: material
     raised_by: owner ruling OD-26
     measured_at: "b80e5a40"
-    statement: "The defect is larger than the empty baseline, and its cause is not the one first written here. proc.returncode is never read, in any format: the only reference to the completed process is current = normalize(proc.stdout.splitlines(), args.format) at line 105. The first version of this finding said the exit code is discarded 'under --format paths'; the default schema format discards it identically (measured: empty baseline plus a command exiting 9 gives PASS exit 0 with no --format argument at all). A fix written to that diagnosis would have guarded one branch and passed every criterion in the first version of this manifest."
+    statement: "The defect is larger than the empty baseline, and its cause is not the one first written here. As measured at b80e5a40, proc.returncode was never read, in any format: the only reference to the completed process was current = normalize(proc.stdout.splitlines(), args.format) at line 105. The first version of this finding said the exit code is discarded 'under --format paths'; the default schema format discarded it identically (measured: empty baseline plus a command exiting 9 gave PASS exit 0 with no --format argument at all). A fix written to that diagnosis would have guarded one branch and passed every criterion in the first version of this manifest. Corrected at REVIEW-03: c6602739 (#1031) has since landed two guards (gate_ratchet.py:117 for a status outside {0,1}, :122 for a non-zero status with no items), so the present-tense form of the first sentence is false at 767f2eaa. Three of the four shapes are closed; the fourth — a zero status with a non-empty parsed set — is what AC3 still requires and is the only one left."
     resolution: "AC1, AC2 and AC3 key the fix on the status itself, not on the format, and they cover the three ways the status and the parsed set can disagree. The empty baseline remains visible as the case where the disagreement is cheapest to reach, but it is no longer the only case named."
   - id: F2
     severity: informational
@@ -199,7 +259,7 @@ findings:
     severity: blocking
     raised_by: independent review round 1 (REVIEW-01 finding B1)
     measured_at: "ba293506"
-    statement: "The second deliverable and prompt section 4.2 required any non-zero command exit to fail the ratchet, 'regardless of the baseline's content'. The only caller in the repository is gates.yml:161-164, wrapping scripts/check_bilingual_docs_full.py, which exits 1 with 77 violations as its normal result and is ratcheted against a 77-entry baseline. Measured at ba293506: 77 violations, EXIT=1, and the ratchet correctly reports baseline=77 current=77 regressions=0 PASS exit 0. Implementing the deliverable literally turns the required check Bilingual docs coverage (ratchet) red on every run and keeps it red."
+    statement: "The second deliverable and prompt section 4.2 required any non-zero command exit to fail the ratchet, 'regardless of the baseline's content'. The only caller in the repository is the step named 'Ratchet the GOV-DOC-001 full scan' in gates.yml (lines 161-164 at ba293506, the commit this finding is measured at; 165-168 at 767f2eaa), wrapping scripts/check_bilingual_docs_full.py, which exits 1 with 77 violations as its normal result and is ratcheted against a 77-entry baseline. Measured at ba293506: 77 violations, EXIT=1, and the ratchet correctly reports baseline=77 current=77 regressions=0 PASS exit 0. Implementing the deliverable literally turns the required check Bilingual docs coverage (ratchet) red on every run and keeps it red."
     resolution: "Deliverables[1] now requires agreement between status and set rather than a zero status. AC5 pins the bilingual caller as a test so that a future simplification in the other direction fails in the suite instead of in CI."
   - id: F6
     severity: blocking
@@ -218,4 +278,4 @@ findings:
     raised_by: independent review round 1 (REVIEW-01 finding M4)
     measured_at: "ba293506"
     statement: "No test module path appeared anywhere in the manifest or the prompt, so AC5 was not checkable. The repository convention for a script under scripts/ci/ is a sibling scripts/ci/test_*.py, of which there are three."
-    resolution: "scripts/ci/test_gate_ratchet.py is named in scope.files_to_create and in AC6."
+    resolution: "scripts/ci/test_gate_ratchet.py is named in AC6. It was named in scope.files_to_create when this finding was written; c6602739 (#1031) has since created it, so it is now named in scope.files_to_modify instead."

@@ -184,13 +184,13 @@ independent_reviewer: REQ-05-INDEPENDENT-REVIEW-SESSION-01
 integration_reviewer: NOT_ASSIGNED
 
 review:
-  status: CHANGES_APPLIED_AWAITING_RE_REVIEW
-  prior_status: CHANGES_REQUESTED
+  status: APPROVED
+  prior_status: CHANGES_APPLIED_AWAITING_RE_REVIEW
   # Latest round first. report_ref is the report a reader should open; the
   # first round is kept because the status above is only meaningful against it.
-  report_ref: "14-ai-development/work-items/AID-2026-056/REVIEW-04-INDEPENDENT.md"
-  prior_report_ref: "14-ai-development/work-items/AID-2026-056/REVIEW-03-INDEPENDENT.md"
-  rounds_completed: 4
+  report_ref: "14-ai-development/work-items/AID-2026-056/REVIEW-05-INDEPENDENT.md"
+  prior_report_ref: "14-ai-development/work-items/AID-2026-056/REVIEW-04-INDEPENDENT.md"
+  rounds_completed: 5
   # Round 3 re-measured all eight findings: F1-F4 closed, F5-F8 still open
   # (F5 floor AC7 records but does not cover; F6 unresolved; F7 stale base,
   # GAP-29; F8 deviation, not repaired), and returned REQUEST-CHANGES on
@@ -205,12 +205,18 @@ review:
   # every blocking finding closed. The author's own conformance checks, a green
   # PR, and the correction log below are not that confirmation and are not
   # recorded as if they were. APPROVED is reachable only by that reviewer.
-  # Round 4 did return APPROVE, with no blocking item. It is not converted into
-  # APPROVED here for one reason: the two non-blocking items it raised (F6's
-  # enumeration omitting OD-26, and AC1 not saying it binds the landing commit)
-  # were applied *after* that verdict, so the APPROVE describes bytes that no
-  # longer exist. A verdict belongs to the artifact it read.
-  approval_source: "REVIEW-04 returned APPROVE, no blocking item; applied after that verdict: F6 enumeration and AC1's post-change note. Re-review of those two edits is outstanding."
+  # Round 4 did return APPROVE, with no blocking item, but the two non-blocking
+  # items it raised (F6's enumeration omitting OD-26, and AC1 not saying it binds
+  # the landing commit) were applied *after* that verdict, so the APPROVE
+  # described bytes that no longer exist. A verdict belongs to the artifact it
+  # read, which is why round 5 exists.
+  # Round 5 read those two edits specifically and returned APPROVE with no
+  # blocking item. That APPROVE is of this file's content, not of the work it
+  # describes: implementation.status is still NOT_STARTED and nothing here may
+  # be cited as evidence that the bilingual scan was fixed. The only bytes
+  # changed after round 5's verdict are this block's two status fields and the
+  # report pointers, which the verdict does not depend on.
+  approval_source: "REVIEW-05 returned APPROVE, no blocking item, reviewing the increment applied after round 4. Nothing substantive changed after it."
 
 acceptance:
   status: NOT_ASSIGNED
@@ -317,3 +323,16 @@ session_evidence:
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-056/session-evidence-266-round4.md
+  # Third entry: the round-5 session, which committed the three round-5 review
+  # reports, re-read the edits they reviewed, and moved review.status to
+  # APPROVED for this work item and for AID-2026-058. Same prompt digest, same
+  # NOT_VERIFIED provenance, different session.
+  - role: DOCUMENTATION-CORRECTION
+    issue_refs:
+    implementing_ai_session: session-266-056-round5
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-056/prompt-v1.md
+    executed_prompt_sha256: 325f567c669b046f4b0ccfd58515ad01c4b83377179fdb744502f6c1dc56d2e4
+    executed_prompt_bytes: 10114
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-056/session-evidence-266-round5.md
