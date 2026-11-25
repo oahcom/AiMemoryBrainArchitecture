@@ -120,8 +120,8 @@ python3 scripts/ci/check_repository_hygiene.py --base <merge-base> --head <head>
 ```
 
 The declared-context count in that output is twelve because this branch does not
-touch §7. Twelve is also what §7 says on `main`, and it is **not** what the
-platform requires. That gap is measured under "Limitations".
+touch §7. Twelve is what §7 said at that head; the current count is whatever §7
+declares, and this record does not restate it.
 
 One check result was observed on the pull request rather than asserted:
 
