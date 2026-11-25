@@ -54,7 +54,7 @@ document_metadata:
 - Document ID: D-LIFECYCLE-001
 - Version: 1.0
 - Source branch: session-d-memory-brain-2026-11-16
-- Source revision: a644e6cb31d5674614f5edab9464cc03c2d7a077
+- Source revision: 453d42592942d0508b00a4b8c5ed9320b9ced3f7
 - Source branch head audited: 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
 - Source: [canonical D source](../../../03-memory-brain/memory-lifecycle-manager.md) (source commit `b525e1f8fee2471a131e4a38efda99804045e424`; original source blob `8b972035b449e1eab546aedc9cc5b30581600c65`).
 - Chinese counterpart: [Memory Lifecycle Manager](../../zh-CN/03-memory-brain/memory-lifecycle-manager.md)
