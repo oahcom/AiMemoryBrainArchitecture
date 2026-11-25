@@ -22,15 +22,17 @@ word, and the three states are three distinct claims:
   redacted because of sensitive information; the redaction scope and reason
   must be stated.
 
-The gate enforces the enum, and that every state word is accompanied by an
-explanation of what could not be obtained and why; ``REDACTED`` must
-additionally state its scope and reason. The gate does not adjudicate which
-state is factually correct -- only the author can know whether the platform
-withheld the content or the author failed to record it. The three are
-therefore distinct as claims and indistinguishable only in that the gate
-cannot verify the claim. The two spellings ``NOT_AVAILABLE`` and
-``NOT_RECORDED`` are kept because the Work Item manifest already uses them
-for ``executed_prompt_provenance`` and ``session_reference_status``.
+The gate enforces the enum, and that every state word is accompanied by a
+non-empty explanation of what could not be obtained and why. ``REDACTED``
+additionally owes its scope and reason; this document records that obligation
+but, beyond the same non-emptiness, the gate does not machine-check it. The
+gate does not adjudicate which state is factually correct -- only the author
+can know whether the platform withheld the content or the author failed to
+record it. The three are therefore distinct as claims and indistinguishable
+only in that the gate cannot verify the claim. The two spellings
+``NOT_AVAILABLE`` and ``NOT_RECORDED`` are kept because the Work Item manifest
+already uses them for ``executed_prompt_provenance`` and
+``session_reference_status``.
 """
 
 from __future__ import annotations
