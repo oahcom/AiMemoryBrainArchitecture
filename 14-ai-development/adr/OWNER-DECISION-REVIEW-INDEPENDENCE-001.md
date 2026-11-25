@@ -46,11 +46,13 @@ document_metadata:
 
 # OWNER-DECISION-REVIEW-INDEPENDENCE-001 — none of the three remedies is available
 
+> **Added 2026-11-25 (citation currency).** The title's "none of the three remedies is available" rested on the premise that independent review requires a second GitHub account. That premise was amended on 2026-11-24 by `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036` (PR #935): independence is a property of the reviewing session, not of the account that carries it. Of the conclusion the title states, only "remedy 1 is unavailable" (GitHub counts *users* and forbids self-approval) and "the fourth disposition: record the exception explicitly" survive; "none of the three is available" does not. See §9.
+
 **DECIDED — 2026-11-23, owner-proxy session, as `Draft` and deliberately not as `Approved`.** §6 explains why this document does not claim the approval status its siblings claim.
 
 Answers the choice `GOV-NC-2026-11-21-ZERO-REVIEW-GATE-008` §10.5 demanded: "三者只能选一个" — one of three remedies must be chosen.
 
-**The answer is that no session can choose any of the three, and the two reasons are different.** One pair deadlocks the repository; the third is circular. Both are measured below. What emerges instead is a fourth disposition that needs no new mechanism, because `PR-GOVERNANCE-001` §5 states it in its own last sentence.
+**The answer is that no session can choose any of the three, and the two reasons are different.** One pair deadlocks the repository; the third is circular.[Added 2026-11-25: this sentence assumed independence requires a second GitHub account. "No session can choose any of the three" no longer holds — §5 was amended on 2026-11-24 by `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036` (PR #935) to a per-session test, so remedy 3 is available and remedy 2 is available as a rule (§9.5). "One pair deadlocks the repository" survives only for remedy 1; "the third is circular" does not. The rest of the paragraph — a fourth disposition needing no new mechanism, because §5's last sentence already states it — is unchanged.] Both are measured below. What emerges instead is a fourth disposition that needs no new mechanism, because `PR-GOVERNANCE-001` §5 states it in its own last sentence.
 
 ## 1. The question, and the measurement that reframes it
 
@@ -60,7 +62,7 @@ Answers the choice `GOV-NC-2026-11-21-ZERO-REVIEW-GATE-008` §10.5 demanded: "�
 2. Add a workflow that returns `HOLD` when `author == reviewer`.
 3. Demote §5 from Normative to Informative and record that this repository has no conditions for independent review.
 
-It assumed all three were executable and differed only in honesty and cost. Two facts make that assumption false. Both are new measurements, taken over the **entire** PR history rather than the last 45.
+It assumed all three were executable and differed only in honesty and cost. Two facts make that assumption false.[Added 2026-11-25: only one of the two facts still makes the assumption false. The second (the §9 review was unobtainable under the §5 definition then in force) lapsed when §5 was amended on 2026-11-24 by `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036` (PR #935); the first (no second write-capable account, and the platform forbids self-approval) is unchanged. "All three were never executed" still holds; "all three were unexecutable" does not.] Both are new measurements, taken over the **entire** PR history rather than the last 45.
 
 ## 2. What the repository actually is
 
@@ -77,7 +79,7 @@ Walking all 690 pull requests (`GET /repos/oahcom/AiMemoryBrainArchitecture/pull
 | Distinct PR authors, all history | `{oahcom}` — **1** |
 | Distinct reviewers, all history | `{oahcom}` — **1** |
 
-008 §10.1 reported 0 of the 45 PRs it sampled. The figure over all history is 0 of 690. This is not a recent regression; it has never once happened. §5 has never been complied with in this repository, in any period.
+008 §10.1 reported 0 of the 45 PRs it sampled. The figure over all history is 0 of 690. This is not a recent regression; it has never once happened. §5 has never been complied with in this repository, in any period.[Added 2026-11-25: `APPROVED = 0` is still a measurement of the approvals recorded on GitHub, and "not a recent regression" is unchanged. "§5 has never been complied with, in any period" can no longer be asserted directly from 2026-11-24: after §5 was amended by `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036` (PR #935) to a session-level test, §9.2 states that #935's governance review was performed by a separate session; if that review satisfies §5's session test, at least one compliant instance exists. This document has not verified that, so the universal negative is marked unverified rather than resolved.]
 
 ### 2.2 Exactly one identity can write
 
@@ -127,22 +129,22 @@ The figures this paragraph replaces were internally impossible: the table report
 
 > **Partly withdrawn by §9 (2026-11-25).** Remedy 1 still deadlocks, for a reason the amendment did not touch: GitHub forbids approving your own PR and counts *users*, and there is one user. Remedy 2 no longer does — under §5 as amended, `author == reviewer` is a *session* comparison, and a second session is not the authoring session. What survives against remedy 2 is narrower and is a fact about the tool, not the clause: a GitHub workflow can only compare accounts, so it cannot observe the new test.
 
-§5's last sentence: "A review performed through the same connected GitHub identity as the author is not independent." GitHub separately forbids approving one's own pull request.
+§5's last sentence: "A review performed through the same connected GitHub identity as the author is not independent." [Added 2026-11-25: this quotation is pre-2026-11-24 §5 text, retired by `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036` (PR #935); the live §5 wording is "Independence is a property of the reviewing session, not of the GitHub account that carries it", and its last sentence is "Record exceptions explicitly; do not silently waive the requirement." The inference that follows therefore holds only for platform-enforced *required approval*; it no longer yields "independent review is impossible".] GitHub separately forbids approving one's own pull request.
 
 Combine those with §2.2: the only identity that can approve is the only identity that authors, and it cannot approve its own work. So:
 
 - **Remedy 1** would make every PR permanently unmergeable. The required approval cannot exist.
-- **Remedy 2** would return `HOLD` on 100% of PRs, because `author == reviewer` is true of every pull request this repository has produced and would be true of the next one whatever its number.
+- **Remedy 2** would return `HOLD` on 100% of PRs, because `author == reviewer` is true of every pull request this repository has produced and would be true of the next one whatever its number.[Added 2026-11-25: this bullet does not hold. `author == reviewer` is a *session* comparison after 2026-11-24 (`GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`, PR #935); a second session is not the authoring session, so this would not fire on 100% of PRs. What survives is narrower and is a fact about the tool, not the clause: a GitHub workflow can only compare accounts, so it cannot observe the session-level test.]
 
 Neither is a repair. Each is `GOV-NC-2026-11-21-GATE-DEADLOCK-006` reproduced deliberately: a gate that refuses every input on `main`. 006 is the precedent, and its own resolution is part of the evidence — it was resolved `RESOLVED_ON_MAIN` by a **self-review merge** (§14, §12), which is to say the previous deadlock was closed by an act that §5 forbids. Adding a second gate of the same shape would close the same way.
 
-**So remedies 1 and 2 are not "expensive".** They are unavailable until a second write-capable identity exists, and creating one is an authority transfer to a human, not a configuration toggle.
+**So remedies 1 and 2 are not "expensive".** They are unavailable until a second write-capable identity exists, and creating one is an authority transfer to a human, not a configuration toggle.[Added 2026-11-25: conclusion unchanged, ground changed — and only for remedy 1. Remedy 1 remains unavailable on platform grounds (GitHub counts *users*, forbids self-approval, `collaborators = 1`); remedy 2 no longer needs a second write-capable identity, because a separate session satisfies §5's session test (`GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`, PR #935). "Creating a second identity is an authority transfer to a human, not a configuration toggle" still holds for remedy 1.]
 
 The same protection payload quoted in §2.3 forecloses the §7 escape route as well: it reports 11 required contexts in force with `enforce_admins: true`, and no `required_pull_request_reviews`. Enforcement is present; independent approval is not. §7 describes a repository where the platform cannot enforce at all, which is not this one.
 
 ## 4. Remedy 3 is circular, and its own change-control clause says so
 
-> **Withdrawn by §9 (2026-11-25).** The circularity was real only while independence required a second GitHub identity. Under the amended §5 the governance review §9 demands can be performed by a separate session, so remedy 3 was never structurally unavailable — and on 2026-11-24 it was *executed*: PR #935 amended §5 through this route.
+> **Withdrawn by §9 (2026-11-25).** The circularity was real only while independence required a second GitHub identity. Under the amended §5 the governance review §9 demands can be performed by a separate session, so remedy 3 was never structurally unavailable — and on 2026-11-24 it was *executed*: PR #935 amended §5 through this route. [Added 2026-11-25 (correcting this banner's last clause): "was *executed*" conflicts with §9.2, and §9.2 governs — PR #935 used the §9 route ("the route was used"); it did not carry out remedy 3 ("the remedy was not"): §5 is still Normative, and the demotion 008 §10.5 offered has still not been made. The amendment itself was made on 2026-11-24 under `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036` / PR #935. The judgment that the circularity does not hold is unchanged; what changes is the distinction between "route used" and "remedy performed".]
 
 Remedy 3 means editing a clause of `PR-GOVERNANCE-001`, which is:
 
@@ -155,9 +157,9 @@ approver: Integration Owner
 
 Its §9 states: "Changes to this standard require a bilingual semantic-parity update and an exact-Head governance review."
 
-The governance review §9 requires is the independent review §5 cannot supply. **Demoting §5 requires disobeying §5.** The remedy is not merely awkward; it is unavailable through its own text.
+The governance review §9 requires is the independent review §5 cannot supply. **Demoting §5 requires disobeying §5.** The remedy is not merely awkward; it is unavailable through its own text.[Added 2026-11-25: these three sentences are withdrawn by §9.2 and are preserved here. §9's governance review can be performed by a session that did not author and did not implement the change, so §5 can satisfy §9; PR #935 amended §5 on 2026-11-24 by exactly that route under `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`. "Unavailable through its own text" does not hold. What still holds: §5 has not been demoted, and #935 amended the criterion without demoting §5.]
 
-008 §10.5 called remedy 3 "最诚实，也最省事". It is neither. It is the one remedy that would look like a decision while being a violation of the standard it edits.
+008 §10.5 called remedy 3 "最诚实，也最省事". It is neither. It is the one remedy that would look like a decision while being a violation of the standard it edits.[Added 2026-11-25: this judgment rested on §4's circularity argument, which lapsed when §5 was amended on 2026-11-24 by `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036` (PR #935): §9's governance review can be supplied by a separate session, so demoting §5 is not necessarily a violation of §5. "Would look like a decision while being a violation" still holds for an edit that has not obtained §9's review; it does not hold for one that has.]
 
 ## 5. The fourth disposition, which already exists
 
@@ -177,13 +179,15 @@ That is the disposition. Not one of the three. **The exception is recorded, expl
 
 Platform enforcement exists here. A disposition naming an absent platform capability would be a false statement about this repository, so this document does not use one.
 
-**The identity problem is separate, and §7 never addressed it.** Independent review is unsatisfiable at `collaborators = 1` with GitHub forbidding self-approval (§2.2, §3). That is a fact about who may write, not about what the plan or the visibility permits; changing either would not produce a second reviewer.
+**The identity problem is separate, and §7 never addressed it.** Independent review is unsatisfiable at `collaborators = 1` with GitHub forbidding self-approval (§2.2, §3).[Added 2026-11-25: conclusion unchanged, ground changed, and the scope narrows to the platform-approval layer. GitHub counts *users* and forbids self-approval, so `collaborators = 1` makes *required approval* unobtainable — that platform fact is unchanged, and §5's amendment (`GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`, PR #935) does not touch it. "Independent review itself is unsatisfiable" does not hold: §5 now defines independence at the session level, so another session can supply it without a second account.] That is a fact about who may write, not about what the plan or the visibility permits; changing either would not produce a second reviewer.
 
 **What the merges were.** §5 forbids the *silence*, not the waiver. Every merge counted in §2.1 was a waiver that should have been recorded and was not. Recording it is what `EX-20261123-01` does, and the count it produces is what arms the `AI-EXEC-001` §6 rule-revision trigger (§5.1).
 
 **What Issue #134 carries now, and what it did not.** #134 was closed `completed` at `2026-11-19T17:28:27Z`; its two remediation items were dispositioned `PLATFORM-LIMITED` on the ground that protection and rulesets both return `403` for a private repository on the free plan. That ground is false: `GET /repos/oahcom/AiMemoryBrainArchitecture` returns `private=false` / `visibility=public`, and `GET /branches/main/protection` returns `200` with 11 required contexts, `strict: true` and `enforce_admins: true`. Because the ground is false, #134 carries a `reopened` event at `2026-11-24T03:04:21Z`; before it, a `closed` event at `2026-11-19T17:28:27Z` with `state_reason: completed`. It now tracks a narrower question: whether the status-check enforcement and the change of repository visibility were authorized. Independent approval — `required_pull_request_reviews` is absent from that same payload — remains the subject of this record and not of #134. An earlier version of this paragraph asserted that the issue had been open continuously; it had in fact been closed for most of the interval.
 
 ### 5.1 The rule-revision trigger is armed, and it is the one legitimate way to change §5
+
+> **Added 2026-11-25 (citation currency).** "The one legitimate way" has been overtaken by fact: §5 was amended on 2026-11-24 through §9's own exact-Head governance review path under `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036` (PR #935), without this quota trigger. The trigger remains a legitimate route, but not the only one; the ordering conclusion (record, then count, then amend) is unchanged. "Remedy 3 edits §5 by disobeying §9" in the same section also lapsed with §4's circularity argument: an edit that has obtained §9's review does not violate §9.
 
 `AI-EXEC-001` v1.1 is **ADOPTED** (PR #256, merge `48a55649`), so its §6 quota clause binds:
 
@@ -206,6 +210,8 @@ So the sequence is ordered, and each step is someone's:
 | Or supply a second write identity | repository administrator | blocked on a human |
 
 Recording first is not bureaucracy. Until the count exists, the trigger has no input, and the standard has no lawful route to amend itself.
+
+> **Added 2026-11-25 (citation currency).** The table's last row, "Or supply a second write identity", presents a second write-capable identity as a route to compliance. Since 2026-11-24 (`GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`, PR #935) independence is decided by session rather than by account, so a second identity is no longer required for independent review; it remains required only for remedy 1 (platform-enforced required approval). The other rows are unchanged.
 
 ## 6. The one thing a session can actually do, and why this document is `Draft`
 
