@@ -1,0 +1,85 @@
+work_item_id: AID-2026-073
+title: Test the two workflow-shape guard defects, so a revert of either fix fails the suite
+class: GATE/TEST
+risk: R1
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+
+prompt_id: AID-2026-073-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-073/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 08eb2369f7f6228adbbb4dfc4df88b6ceaf9381be1a5d4bf90ad61ec32145c1a
+prompt_bytes: 5089
+
+# ---------------------------------------------------------------------------
+# Tests for the two behavioural fixes in a316ff69, which is the commit that
+# carries them and says in its own message that "the tests and the work-item
+# registration are NOT yet written".
+#
+# Both defects are the same failure mode: the guard printed PASS over a shape it
+# forbids, or named a line that was already correct. A gate that is wrong in
+# either direction is worse than no gate, because the PASS is read as evidence.
+#
+# Neither defect was reachable by the suite as it stood. `test_validate_needs_is_
+# a_violation` used the flow form only, and no test asserted which line the
+# `ref:` message quotes. The fix is therefore untested until this work item
+# lands, and a revert of it would be silent.
+# ---------------------------------------------------------------------------
+
+authorization:
+  implementation_write: "GRANTED for scripts/test_check_session_evidence_workflow_shape.py and 14-ai-development/work-items/AID-2026-073/ only. No file under crates/ is touched."
+  gate_behaviour_change: "NOT_GRANTED - scripts/check_session_evidence_workflow_shape.py is not modified. The behaviour is fixed at a316ff69 and verified; this work item only adds tests that pin it."
+  schema_change: "NOT_GRANTED - no serialized type, no database column, no manifest field is introduced"
+  platform_state_change: "NOT_GRANTED - no required context, workflow or protection payload is modified"
+  architecture_spec_change: "NOT_GRANTED - no ADR, no BMCP specification and no canonical architecture document is modified"
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-073/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-073/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-073/session-evidence-1045.md
+  files_to_modify:
+    - scripts/test_check_session_evidence_workflow_shape.py
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope: "Every other path. In particular scripts/check_session_evidence_workflow_shape.py, which is the fix under test and is not edited by this change even where the test would be easier if it were; and .github/workflows/session-evidence.yml, which the guard is held to as it stands."
+
+acceptance:
+  C1: "The block-form test fails with AssertionError, not a traceback and not an ImportError, when NEEDS_KEY_RE is reverted to `^    needs:\\s*\\S`. Settled by the revert being made in isolation and the single test being run against it."
+  C2: "The block-form test asserts exit 1, the `needs:` key, and the line number of the `needs:` line. Settled by the assertion naming the computed line of the `needs:` line and by a companion negative assertion that the job id's line is not the one quoted, so a message that named the job instead cannot satisfy it."
+  C3: "The ref test fails with AssertionError, not a traceback and not an ImportError, when _checkout_refs is reverted to quoting the `uses:` line. Settled the same way, against the pre-fix body of that function."
+  C4: "The ref test asserts the message contains the `ref:` text and does not contain the `uses:` text. Settled by the negative assertion being present: the bare token `ref:` appears in the message's prose, so the positive assertion alone held under the defect."
+  C5: "The ref test also fails against a partial fix that quotes the right line without the line number, because the fix carries `first_line` and the number is what locates the offending key. Settled by that revert being run as a third case."
+  C6: "The ten tests already in the file are not weakened, renamed or deleted, and all pass unmodified. Settled by the suite running twelve tests with the same names plus two."
+  C7: "scripts/check_session_evidence_workflow_shape.py is byte-identical to a316ff69 at the head of this branch. Settled by `git diff` against that commit showing no change to that path."
+
+implementation:
+  status: IMPLEMENTED_IN_BRANCH
+  pull_request: ASSIGNED_AT_OPEN
+  merge_commit_sha: NOT_MERGED
+  note: "The tests land in this branch. The pull request number cannot be written into the commit that opens it, so the INDEX row carries the merge commit once one exists."
+
+review:
+  status: NOT_ASSIGNED
+  note: "Independent review has not been recorded. A same-session review of a self-authored test cannot supply independence, so none is claimed. The reverse-verification is the evidence that the tests bind the behaviour, and it is reproducible by anyone reading the record."
+
+# ---------------------------------------------------------------------------
+# #1045 is closed and #1058 is open. This entry names both; it does not claim
+# that either Issue's acceptance is met, and it does not claim the second hole
+# in #1058 -- REQUIRED_JOB_IDS membership is still bound by no test.
+# ---------------------------------------------------------------------------
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1045"
+      - "#1058"
+    implementing_ai_session: session-w1081-tests
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-073/prompt-v1.md
+    executed_prompt_sha256: 08eb2369f7f6228adbbb4dfc4df88b6ceaf9381be1a5d4bf90ad61ec32145c1a
+    executed_prompt_bytes: 5089
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-073/session-evidence-1045.md
