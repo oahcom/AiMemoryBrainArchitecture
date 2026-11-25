@@ -56,12 +56,12 @@ document_metadata:
 | `GOV-NC-2026-11-20-DIRECT-MAIN-001` | 直接推送 `main` | High | `OPEN` / `NOT_REMEDIATED` | 53 个 commit |
 | `GOV-NC-2026-11-20-SELF-AUTH-002` | 授权链 / 自我发布委派 | Critical | `OPEN` / `NOT_REMEDIATED` | 1 份文书、7 次关闭 |
 | `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` | 裁定后无审查合并 | High | `OPEN` / `NOT_REMEDIATED` | 4 个 PR（#390 / #394 / #395 / #402） |
-| `GOV-NC-2026-11-20-AC-UNMET-CLOSURE-004` | 验收条件未满足即关闭 | High | `OPEN` / `NOT_REMEDIATED` | 1 个 Issue（#384），4/10 条 AC 不满足 |
+| `GOV-NC-2026-11-20-AC-UNMET-CLOSURE-004` | 验收条件未满足即关闭 | High | `OPEN` / `NOT_REMEDIATED` | 1 个 Issue（#384），10 条 AC 中 5 条满足／2 条部分满足／3 条不满足（见该登记 §4 与 §11.1） |
 | `GOV-NC-CONVERGENCE-2026-11-20` | 治理收敛定义与执行边界 | — | `ACTIVE` / `RECORDED_NOT_PREVENTED` | 3 个层次 |
 | `GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026` | Evidence 领域契约符合性 | High | `OPEN` / `WP-B DISPATCHED`（`AID-2026-053`）；WP-A 不可实施 | 1 个实体，2 个工作包；WP-A 缺三个契约类型定义 |
 | `GOV-NC-2026-11-22-PROVENANCE-REFERENCE-REVALIDATION-027` | Provenance 引用重验 | High | `OPEN` / `DISPATCHED`（`AID-2026-052`） | 4 类引用字段，形态不同 |
 | `GOV-NC-2026-11-23-PROVENANCE-GRAPH-ADD-SIGNATURE-028` | `ProvenanceGraph::add` 公开签名变更 | High | `CLOSED-BY-RULING` / 分类已更正 | 1 个公开签名，2 处引证勘误 |
-| `GOV-NC-2026-11-23-UNREACHABLE-GUARD-030` | 017 已修但其守卫变为死代码，且 014 的修复使该套件 24 项失效 | High | `OPEN` / `MEASUREMENT_ONLY` | 1 个恒真守卫，167 个文件退出配对，24 项失效且无 workflow 运行 |
+| `GOV-NC-2026-11-23-UNREACHABLE-GUARD-030` | 017 已修但其守卫变为死代码，且 014 的修复使该套件 24 项失效 | High | `OPEN` / `MEASUREMENT_ONLY` | 1 个恒真守卫，167 个文件退出配对；24 项失效是 `ef7266db` 上的本地测量，已由 `aaf6da966`（#892）修复，该套件现由 `GOV-DOC-001 structural checks` job 在每次 PR 上运行（`GOV-REV-2026-11-24-FOUR-CORRECTIONS-033` §2） |
 | `GOV-NC-2026-11-23-EXECUTION-RESTORED-029` | 执行侧恢复，005 的现在时断言失效 | High | `OPEN` / `MEASUREMENT_ONLY` | 2 条首次执行，3 条被反证的现在时断言 |
 | `EX-20261123-01` | §5 独立审查不可用（追溯例外登记） | High | `HOLD` / 超配额，升级至仓库管理员（Issue #134） | 675 个合并 PR 中 0 次独立审查；本仓库首条例外记录 |
 | `OWNER-DECISION-REVIEW-INDEPENDENCE-001` | 第 3 条补救的路径确实可走（§9 审查已由 #935 走过）；§5 本身仍是 Normative，降级未做（§9 勘误，2026-11-25） | High | `Draft` / 明确不声称 Approved | 675 个 PR 全量复核；0 条 APPROVED；1 个可写身份 |
@@ -78,7 +78,7 @@ document_metadata:
 | `evidence/direct-commit-filesets.json` | 第三/四轮新增直推 commit 的逐 commit 文件集 | `main @ 1a0dc911` |
 | `evidence/attribution-1491856051.json` | author email `1491856051` 全部 20 个 commit 及 PR 归属 | `main @ 1a0dc911` |
 | `evidence/merge-gate-evidence.json` | PR #390 / #394 / #395 的门禁字段（reviews、checks、耗时） | 2026-11-21T03:00Z |
-| `evidence/number-domain-scan.json` | AID 编号在 `main` 与 346 个分支上的占用情况 | `main @ a7d12fe983` |
+| `evidence/number-domain-scan.json` | AID 编号在 `main` 与扫描时 346 个分支上的占用情况（346 是该文件内的分支集合大小，非当前仓库分支数；分支数为易变量，2026-11-25T01:43Z 实测 `refs/heads/` 共 869 个） | `main @ a7d12fe983` |
 | `evidence/issue-closures.json` | Issue #345–#351 的关闭评论 | 2026-11-20T17:00Z |
 | `evidence/main-paths.json` | `main` 全部 803 个 blob 路径，用于白名单比对 | `main @ a7d12fe983` |
 
@@ -128,7 +128,7 @@ PUT /repos/.../branches/main/protection -> 403
 
 ## 相关
 
-- [Issue #384](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/384) — 双语门禁白名单错配。**已重开**，收窄至 AC-1 / AC-4 / AC-5 / AC-9
+- [Issue #384](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/384) — 双语门禁白名单错配。已于 2026-11-20T20:06:50Z 关闭（第三次关闭，`state=CLOSED`／`stateReason=COMPLETED`），见 `GOV-NC-2026-11-20-AC-UNMET-CLOSURE-004` §11.4
 - [Issue #400](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/400) — `EMBEDDED_BILINGUAL_SOURCES` 未审计的豁免面
 - [Issue #401](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/401) — AC-5 旁路检测修复任务
 - [Issue #283](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/283) — 平台层 required-check 强制（`PLATFORM-RESIDUAL`）
