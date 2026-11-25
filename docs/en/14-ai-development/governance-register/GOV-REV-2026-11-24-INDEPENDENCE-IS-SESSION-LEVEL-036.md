@@ -80,7 +80,25 @@ document_metadata:
 
 > 作者与审查者使用同一 GitHub 身份时，不构成独立审查，**即使会话扮演不同角色也一样**。
 
-这句话堵死的正是基线允许的那条路。所以基线不是"对旧文本的另一种解释"，而是**替换它**。同时，仓库内**没有任何文档**把独立性定义为会话级（对 main 全部 `.md` 搜 `independent session` / `独立会话` / `separate session` / `different session`，零命中），所以旧文本是唯一一侧，且站在基线的对面。
+这句话堵死的正是基线允许的那条路。所以基线不是"对旧文本的另一种解释"，而是**替换它**。
+
+**本节第一版在这里写错了一件事，2026-11-24 修正。** 第一版称「仓库内没有任何文档把独立性定义为会话级（搜 `independent session` / `独立会话` / `separate session` / `different session`，零命中）」。该搜索结论是错的：在改动前的基线 `1259f1af` 上，这四个词分别命中 8 / 10 / 11 / 6 个文件，例如 `AI-EXEC-001.md` §15 的「NR-001 独立会话」、`chatgpt-native-execution-model.zh-CN.md` §170 的「满足独立会话要求」、`AI-EXEC-ROLLOUT-001.md` 的「NR-001 独立会话审查」。
+
+正确的表述是：会话级独立性**早已在多处被使用**，但没有任何一份治理条款把它**定义为 §5 的判据**——它一直是 NR-001 审查流程里的一个环节，而不是 §5 独立性本身。因此本次改动的性质是**把已在使用的口径提升为条款判据**，而不是「引入一个仓库里从未有过的概念」。这个区别影响可追溯性：前者有六个月的实践先例可引用，后者没有。
+
+复现命令（本节第一版又漏了它，2026-11-25 补上）：
+
+```
+for t in "independent session" "独立会话" "separate session" "different session"; do
+  printf '%-20s ' "$t"; git grep -il "$t" 1259f1af -- "*.md" | wc -l
+done
+-> independent session  8
+   独立会话             10
+   separate session     11
+   different session    6
+```
+
+`-i` 不是可选的。去掉它得到的是 6 / 10 / 10 / 5，因为 `Independent Session`、`Separate sessions` 这类大小写变体被跳过。两个结果都不假，但只有带 `-i` 的才对得上本节写下的四个数字——也就是说，一个读者照本节原来的措辞去核对，会得到"数额不符"的结论，并合理地怀疑这份勘误本身又是编的。这正是 §2 要修的那类错误，所以命令必须写出来。
 
 ## 3. 新版条款的准确边界
 
@@ -130,6 +148,44 @@ document_metadata:
 
 本文件不替它们改状态。那是各自登记的事。
 
+### 5.1 清扫已落地：实测清单（2026-11-25）
+
+上节的「等」不是修辞，是当时未清点的余额。清点结果：**11 个文件**，其中 9 个是三副本布局、2 个是 `.md` / `.en.md` 配对布局（后者按 `MERGE-AFTER-RULING-003` 的先例不声明 `bilingual_counterpart`）。
+
+| 文件 | 注记数 root / en / zh-CN | 主要被替换的依据 |
+|---|---|---|
+| `OWNER-DECISION-REVIEW-INDEPENDENCE-001` | 20 / 20 / 20 | 「独立性需要第二个 GitHub 账号」的 7 处推论 |
+| `GOV-NC-2026-11-21-SELF-REVIEW-007` | 12 / 12 / 12 | 标题、`reviews >= 1` 计数、§8 判定程序（明写「不能再用作门禁」） |
+| `GOV-NC-2026-11-21-GATE-DEADLOCK-006` | 7 / 7 / 7 | §12.3、§14.1 两格、§14.2 代码块周围的推理 |
+| `GOV-NC-2026-11-21-REGRESSION-009` | 7 / 7 / 7 | §10「作者即合并者」要素、§11.5 表格格 |
+| `GOV-NC-2026-11-21-ZERO-REVIEW-GATE-008` | 7 / 7 / 7 | §11.8 状态串的「0 次独立审查」是账号层计数 |
+| `GOV-REV-2026-11-24-CONVERGENCE-CEILING-034` | 5 / 9 / 5 | §7 两处（双语文件，`docs/en` 内含中英两段，故不对称） |
+| `GOV-REV-2026-11-21-PR425-001` | 2 / 2 / 2 | §0 唯一的**正向**用法：身份相异既非充分也非必要 |
+| `GOV-NC-2026-11-24-REGISTER-INDEX-031` | 1 / 1 / 1 | — |
+| `GOV-NC-2026-11-24-DISPATCH-CHANNEL-CLOSED-032` | 1 / 1 / 1 | 结论改为「自我签发的放宽由构造即未经第二方核对」 |
+| `GOV-NC-2026-11-20-AC-UNMET-CLOSURE-004` | 2 / — | 「不存在任何角色分离」→「未发生」不等于「不可能」 |
+| `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` | 1 / — | 结论改依本项自带的 `COMMENTED` ≠ `APPROVE` |
+
+**状态未改。** 上表只加注，不把任何登记从 `OPEN` / `DISPATCHED` 推进到别处；推进仍是各自登记的事。
+
+### 5.2 清扫覆盖的三条轴，以及不覆盖什么
+
+1. **树内**：工作树全树检索身份词族（`second account` / `collaborators = 1` / `one writable identity` / `same account` / `self-approv` / `sole reviewer` / `APPROVED = 0`），再检索**结论**词族（`不构成独立审查` / `does not constitute independent` / `not independent because` / `cannot be performed`）。第二遍是必要的：只搜身份词会漏掉那些已把「同一身份」抽象成「结构上不可能」的句子。
+2. **镜像**：对每个命中的登记，比较三副本的注记计数，并**逐字节比较正文**。**这是唯一能发现单侧漂移的方法** —— 本轮三次抓到真实缺陷：`docs/zh-CN/…RULING-001` 曾比 root 少 7 条（单向漂移）；修完后 root 又比 zh 少 1 条（反向漂移，§7 裁定第 4 项）；最后，**本文件的 `docs/en` 中文段仍是旧版**，仍带着 §2 在 2026-11-24 已明确撤回的那句「仓库内没有任何文档把独立性定义为会话级，零命中」——英文段在 2026-11-24 已改，中文段没有，而三份文件的注记计数当时都是 2 / 4 / 2，不构成任何提示。前两者靠计数发现，第三者只能靠**正文比对**发现：计数是症状，正文是事实。三次都是门禁之外的缺陷，任何单侧检索都不会发现。
+3. **历史**：本仓库**非 shallow**（7410 个提交），故「未搜 Git 历史」的免责条款本轮已撤销。全历史 `git log --all -p -- '*.md'` 逐增行检索「独立性结论 + 账号层事实」同句出现：去重后 8 条，其中 7 条是上表的注记本身，1 条是 `034` §9 的勘误正文，1 条是无关的 work-item 表格行。**历史轴零残留。**
+
+不覆盖：`branch-protection` 的 audit log（API 不暴露）；仓库外的引用（agent 提示词、下游工具）；`docs/en` 与 `docs/zh-CN` 的**语义**一致性 —— 那是政策 §9.1 右列的 `M-05`，不是机器可验证项。
+
+### 5.3 两条曾被误记为缺陷、实为设计态的事项
+
+清扫过程中有两项被初步记为「known defect」，复核后撤回。记在这里，是为了防止后续会话把它们当工作项重开：
+
+- **`485 unclassified`**：全树 `check_document_management.py` 报 `INCOMPLETE`（退出 2）。这是政策 §8 明文允许的**渐进采纳积压** —— 「积压可以继续未分类，但禁止增长」，而 `--require-changed` 保证它不增长。`INCOMPLETE` 刻意不等于 PASS。不是缺陷。
+- **4 个 `docs/zh-CN/` 文件是英文正文**（`PARTIAL-SCOPE-019`、`MEASUREMENT-REPRODUCIBILITY-023`、`PAIRING-RESIDUAL-013`、`GAP-EXEC-2026-11-21-018`，其中 `023` 与 `docs/en` 逐字节相同）：`check_bilingual_docs.py` 的 `mirrored = english.is_file() and chinese.is_file()` 只验**存在性**，政策 §9.1 把「语义一致」明确列在右列并指派给 `M-05`。门禁的行为与它声明的契约一致，不是漏洞。翻译这 4 份是内容工作，不是治理修复。
+
+---
+
+
 ## 6. 必须写明的弱点
 
 会话级独立审查比"同会话换角色"强，但比人类审查弱：**两个会话可能由同一模型、同一提供方驱动，共享训练偏差。** 这一点不是可以含糊过去的。
@@ -150,13 +206,15 @@ document_metadata:
 ## 8. 复现
 
 ```
-# 1. 现行条款已是会话级
+# 1. 现行条款已是会话级（在合并本改动的提交上执行；在 base 上该行尚不存在，返回空是预期的）
 grep -n "property of the reviewing session" 14-ai-development/PR-GOVERNANCE-001.md
 grep -n "审查会话的属性" 14-ai-development/PR-GOVERNANCE-001.md
 
-# 2. 六处已无身份级措辞。注意：在包含本文件的树上，下面第一条命令必然命中
-#    本文件 §2 引文、§4 存档与本节自身，这是预期的。
+# 2. 六处已无身份级措辞。注意：下面两条命令在"包含本文件"的树上必然命中
+#    本文件 §4 的存档引用（3 处）与本节自身（1 处），这是预期的。
 #    判定标准是"本文件之外零命中"，不是"零输出"。
+git grep -n "even if the session adopts a different role" -- "*.md"
+-> 仅命中本文件（§2 引文、§4 存档、§8 自身）；其他文件零命中
 git grep -n "even if the session adopts a different role" -- "*.md" ':!*INDEPENDENCE-IS-SESSION-LEVEL-036*'
 -> (无输出)   # 排除本文件后的真实结果
 git grep -n "作者相同 GitHub 连接身份、仅切换角色的第二个 AI 会话不构成独立审查者" -- "*.md"
@@ -164,8 +222,6 @@ git grep -n "作者相同 GitHub 连接身份、仅切换角色的第二个 AI �
 
 # 3. 原文保存在本文件 §4
 ```
-
----
 
 ## 1. What changed
 
@@ -215,6 +271,43 @@ Kept so that a rollback or comparison needs no git archaeology. **This is replac
 ## 5. What this invalidates
 
 `CONVERGENCE-CEILING-034` §2, §5 and §7 — the impossibility, `BLOCKED`, and no-exit judgements — are withdrawn, recorded in its §9 erratum. Registers about zero-review merges (`ZERO-REVIEW-GATE-008`, `SELF-REVIEW-007`, `PR425-001`) keep their **facts** (zero-review merges did happen) but their **attribution** must be re-read: previously blamed on "the platform cannot enforce plus there is only one identity", now attributable to **not opening an independent session**. This file does not change their status; that is each register's own business.
+
+### 5.1 The sweep has landed: the measured inventory (2026-11-25)
+
+The "etc." in section 5 was not rhetoric -- it was a balance nobody had counted. The count: **11 files**, of which 9 use the three-copy layout and 2 use the `.md` / `.en.md` pairing layout (the latter declare no `bilingual_counterpart`, following the `MERGE-AFTER-RULING-003` precedent).
+
+| File | Annotations root / en / zh-CN | Grounds chiefly replaced |
+|---|---|---|
+| `OWNER-DECISION-REVIEW-INDEPENDENCE-001` | 20 / 20 / 20 | The seven inferences drawn from "independence needs a second GitHub account" |
+| `GOV-NC-2026-11-21-SELF-REVIEW-007` | 12 / 12 / 12 | The title, the `reviews >= 1` count, the section 8 decision procedure (now marked "cannot be used as a gate") |
+| `GOV-NC-2026-11-21-GATE-DEADLOCK-006` | 7 / 7 / 7 | Section 12.3, the two cells in section 14.1, the reasoning around the section 14.2 code block |
+| `GOV-NC-2026-11-21-REGRESSION-009` | 7 / 7 / 7 | The section 10 "author is the merger" element, the section 11.5 table cell |
+| `GOV-NC-2026-11-21-ZERO-REVIEW-GATE-008` | 7 / 7 / 7 | The section 11.8 status string's "0 independent reviews" is an account-layer count |
+| `GOV-REV-2026-11-24-CONVERGENCE-CEILING-034` | 5 / 9 / 5 | Two places in section 7 (a bilingual file -- `docs/en` carries both languages, so the asymmetry is intended) |
+| `GOV-REV-2026-11-21-PR425-001` | 2 / 2 / 2 | Section 0, the only **positive** use: differing identities is neither sufficient nor necessary |
+| `GOV-NC-2026-11-24-REGISTER-INDEX-031` | 1 / 1 / 1 | -- |
+| `GOV-NC-2026-11-24-DISPATCH-CHANNEL-CLOSED-032` | 1 / 1 / 1 | Conclusion re-grounded: a self-issued widening is, by construction, unseconded |
+| `GOV-NC-2026-11-20-AC-UNMET-CLOSURE-004` | 2 / -- | "No role separation exists" becomes "did not happen" is not "cannot happen" |
+| `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` | 1 / -- | Conclusion now rests on the register's own `COMMENTED` is not `APPROVE` |
+
+**No status was changed.** The table adds annotations only; it does not move any register out of `OPEN` / `DISPATCHED`. Promotion remains each register's own business.
+
+### 5.2 The three axes the sweep covered, and what it does not cover
+
+1. **The tree**: a whole-tree search for the identity vocabulary (`second account` / `collaborators = 1` / `one writable identity` / `same account` / `self-approv` / `sole reviewer` / `APPROVED = 0`), then a second search for the **conclusion** vocabulary (`does not constitute independent` / `not independent because` / `cannot be performed` / the Chinese equivalents). The second pass is not optional: an identity-only search misses the sentences that have already abstracted "one identity" into "structurally impossible".
+2. **The mirrors**: for every hit, compare annotation counts across the three copies **and diff the bodies byte for byte**. **This is the only method that finds one-sided drift** -- it caught three real defects in this round: `docs/zh-CN/...RULING-001` once carried seven fewer annotations than root (drift in one direction); after that was fixed root carried one fewer than zh (drift in the other -- section 7 ruling item 4); and finally **this file's own `docs/en` Chinese segment was still the old version**, still carrying the sentence section 2 had explicitly retracted on 2026-11-24 -- that no document in the repository defines independence at the session level, zero hits. The English segment had been corrected on 2026-11-24 and the Chinese one had not, and at that moment the three copies sat at 2 / 4 / 2 annotations, which gave no hint at all. The first two were found by counting; the third only by **comparing bodies**: counts are a symptom, bodies are the fact. None of the three was visible to any single-sided search.
+3. **History**: this repository is **not shallow** (7,410 commits), so the "Git history not searched" caveat is withdrawn. A full `git log --all -p -- '*.md'` over every added line for "independence conclusion + account-layer fact" in one sentence yields 8 unique lines after deduplication: 7 are the annotations in the table above, 1 is the section 9 erratum text in `034`, 1 is an unrelated work-item table row. **Zero residual on the history axis.**
+
+Not covered: the branch-protection audit log (the API does not expose it); references outside the repository (agent prompts, downstream tools); and **semantic** agreement between `docs/en` and `docs/zh-CN` -- that is `M-05` in the right-hand column of policy section 9.1, and it is not a machine-verifiable item.
+
+### 5.3 Two items initially recorded as defects, withdrawn after review
+
+Two items were provisionally logged as "known defects" during the sweep and then withdrawn. They are recorded here so a later session does not reopen them as work items:
+
+- **`485 unclassified`**: a whole-tree `check_document_management.py` run reports `INCOMPLETE` (exit 2). This is the **progressive-adoption backlog** policy section 8 permits in so many words -- "the backlog may stay unclassified; it may not grow" -- and `--require-changed` is what stops it growing. `INCOMPLETE` is deliberately not PASS. Not a defect.
+- **Four `docs/zh-CN/` files carrying English bodies** (`PARTIAL-SCOPE-019`, `MEASUREMENT-REPRODUCIBILITY-023`, `PAIRING-RESIDUAL-013`, `GAP-EXEC-2026-11-21-018`; `023` is byte-identical to its `docs/en` twin): `check_bilingual_docs.py` computes `mirrored = english.is_file() and chinese.is_file()` -- existence only -- and policy section 9.1 lists "semantic parity" in the right-hand column, assigned to `M-05`. The gate behaves as its declared contract says it does. Translating those four is content work, not governance repair.
+
+---
 
 ## 6. The weakness that must be stated
 
