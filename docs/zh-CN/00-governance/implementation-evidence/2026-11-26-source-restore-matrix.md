@@ -47,8 +47,8 @@ document_metadata:
     zh-CN: null
 ---
 
-- 源文件版本：a09ede9b70457b1dd0a42272b6e421557996ee8e
-- 源规范：[规范证据记录](../../../../00-governance/implementation-evidence/2026-11-26-source-restore-matrix.md)（源 Blob `a09ede9b70457b1dd0a42272b6e421557996ee8e`）。
+- 源文件版本：2ffc9c0689b5d3d99f23a21d7b28764233a38a36
+- 源规范：[规范证据记录](../../../../00-governance/implementation-evidence/2026-11-26-source-restore-matrix.md)（源 Blob `2ffc9c0689b5d3d99f23a21d7b28764233a38a36`）。
 
 # AID-2026-11-26-SOURCE-RESTORE-02 — 规范源恢复证据矩阵
 
