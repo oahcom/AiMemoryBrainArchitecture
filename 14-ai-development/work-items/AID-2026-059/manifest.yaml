@@ -147,3 +147,18 @@ session_evidence:
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-059/session-evidence-1015.md
+
+  # Issue #1026: the historical exemption was unreachable behind check_01's
+  # declaration enforcement. The linked Issue predates the policy and maps to
+  # LEGACY_UNDECLARED; attribution to such a row is permitted (the declaration
+  # and the attribution are separate facts), so this entry names it.
+  - role: IMPLEMENTER
+    issue_refs:
+      - "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1026"
+    implementing_ai_session: session-1026-validate-ordering
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-059/prompt-1026-v1.md
+    executed_prompt_sha256: 25058389340c796a557746ae5ed90cf73cada98998e62da1692bb5ce4a3e4bd9
+    executed_prompt_bytes: 4811
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-059/session-evidence-1026.md
