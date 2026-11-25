@@ -1,3 +1,50 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version:
+        scheme: content-hash
+        value: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-25"
+      last_verification_note: "This record states the state round 4 actually examined: 767f2eaa plus the author's working-tree rewrite, snapshot md5 fbafaf89da84eb8cf8adbabf1ec558be at 32278 bytes. Round 4 returned REQUEST-CHANGES on two present-tense claims. Both are corrected in the bytes that follow this report, which no reviewer has read."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
+---
+
 # REVIEW-04-060 — independent review of AID-2026-060 manifest (round 4)
 
 ## Provenance

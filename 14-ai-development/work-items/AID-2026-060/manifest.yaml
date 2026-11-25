@@ -144,9 +144,9 @@ integration_reviewer: NOT_ASSIGNED
 review:
   status: CHANGES_APPLIED_AWAITING_RE_REVIEW
   prior_status: CHANGES_REQUESTED
-  report_ref: "14-ai-development/work-items/AID-2026-060/REVIEW-03-INDEPENDENT.md"
-  prior_report_ref: "14-ai-development/work-items/AID-2026-060/REVIEW-02-INDEPENDENT.md"
-  rounds_completed: 3
+  report_ref: "14-ai-development/work-items/AID-2026-060/REVIEW-04-INDEPENDENT.md"
+  prior_report_ref: "14-ai-development/work-items/AID-2026-060/REVIEW-03-INDEPENDENT.md"
+  rounds_completed: 4
   # Round 1 returned REQUEST-CHANGES with four blocking findings; round 2
   # returned APPROVE with none, after reproducing the defect and confirming the
   # 058 conflict is real rather than manufactured. Two non-blocking items (N1
@@ -173,7 +173,24 @@ review:
   # The lifecycle field below is therefore deliberately unchanged: the work is
   # not started, four of five criteria already hold because of #1031, and one
   # does not.
-  approval_source: "REVIEW-02 returned APPROVE, no blocking item; REVIEW-03 returned REQUEST-CHANGES and is applied here. APPROVED is not claimed for the current bytes: no reviewer has read them."
+  # Round 4 returned REQUEST-CHANGES on two present-tense falsehoods, both
+  # reproduced here before repair. (B1) AC1 claimed "tested with both an empty
+  # and a non-empty baseline"; the suite's only status-outside-{0,1} case uses
+  # the non-empty baseline 'a.md', and the two empty-baseline tests use exit 1
+  # and exit 0. The sentence is replaced by the measured coverage caveat rather
+  # than by adding a test, which would be implementation. (B2) risk_rationale
+  # said the ratchet "keeps ~20 shrink-only baselines honest"; measured, one
+  # baseline exists (bilingual-docs.txt) and two have ever existed
+  # (document-management.txt was retired), and gates.yml:41-42 says so. That
+  # figure was off by a factor of twenty and it is the sentence R2 rests on.
+  # Round 4's N1 is also applied: F5 cited gates.yml:165-168 while measured at
+  # ba293506, where the step is at 161-164, so the two live citations now name
+  # the step instead of a line range that moves.
+  # Round 4's N4 asked that the bytes be frozen before the next round. They were
+  # not: the file changed three times during that review (30796 -> 31596 ->
+  # 32278 bytes). This revision is committed before any further review, so a
+  # round 5 would read one state rather than three.
+  approval_source: "REVIEW-02 returned APPROVE, no blocking item; REVIEW-03 and REVIEW-04 returned REQUEST-CHANGES and are applied here. APPROVED is not claimed for the current bytes: no reviewer has read them."
 
 acceptance:
   status: NOT_ASSIGNED
