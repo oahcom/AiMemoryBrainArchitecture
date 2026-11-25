@@ -46,7 +46,7 @@ document_metadata:
   bilingual_counterpart:
     source: "03-memory-brain/memory-brain-overview.md"
     en: "docs/en/03-memory-brain/memory-brain-overview.md"
-    zh-CN: "docs/zh-CN/03-memory-brain/memory-brain-overview.md"
+    zh-CN: null
 ---
 
 # Memory Brain — 子系统架构
