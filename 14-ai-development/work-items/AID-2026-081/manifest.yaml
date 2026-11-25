@@ -1,0 +1,98 @@
+manifest_version: "1.0"
+record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
+registration_stage: "STAGE_0"
+registration_status: "PENDING_SCOPE_CONFIRMATION"
+work_item_id: "AID-2026-081"
+identifier_status: "ALLOCATED_AFTER_INDEX_AND_TREE_CHECK; GLOBAL_BRANCH_SCAN_NOT_EXHAUSTIVE"
+
+title: "DECISION-ACCEPTANCE-03 — decision acceptance workstream (scope not yet specified)"
+date: "2026-11-26"
+external_workflow_references:
+  - id: "AID-2026-11-26-DECISION-ACCEPTANCE-03"
+    kind: "EXTERNAL_WORKFLOW_REFERENCE"
+    repository_work_item_id: false
+    note: "External workflow identifier only; AID-2026-081 is the proposed repository-standard ID."
+
+repository:
+  name: "oahcom/AiMemoryBrainArchitecture"
+  url: "https://github.com/oahcom/AiMemoryBrainArchitecture"
+  baseline_branch: "main"
+  baseline_commit: "6314a65bd8be48c1a4bb0768e9960c4c808110ab"
+  implementation_branch: "impl/2026-11-26-normative-source-restore"
+  carrier: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1220"
+
+identifier_evidence:
+  checked_refs:
+    - "main"
+    - "impl/2026-11-26-normative-source-restore"
+    - "active branches returned by branch-name searches for AID-2026, work-item and stage0-registration"
+  checked_result:
+    main_work_item_index_max: "AID-2026-079"
+    target_directory_in_main: "NOT_FOUND"
+    target_directory_in_pr_head_before_allocation: "NOT_FOUND"
+  global_uniqueness: "NOT_FULLY_VERIFIED"
+  limitation: >-
+    Recursive work-item-directory scan of every active branch was not completed.
+    No collision was found in main or the PR head; no exhaustive global uniqueness
+    claim is made.
+
+authority:
+  authority_basis: "User requested a Stage 0 registration; detailed decision scope is not present in the retrieved record."
+  sponsor: "HUMAN_OWNER_AUTHORIZATION_ASSERTED; IDENTITY_NOT_MAPPED"
+  accountable_owner: "NOT_ASSIGNED"
+  acceptance_authority: "NOT_ASSIGNED"
+  independent_reviewer: "NOT_ASSIGNED"
+  implementation_authorization: "NOT_GRANTED"
+  decision_acceptance_authorization: "NOT_GRANTED"
+  merge_authorization: "NOT_GRANTED"
+  deployment_authorization: "NOT_GRANTED"
+
+scope:
+  objective: "NOT_SPECIFIED — DECISION-ACCEPTANCE-03 objective and decision subjects have not been provided in retrievable context."
+  scope_status: "PENDING_USER_SUPPLIED_DEFINITION"
+  in_scope: []
+  out_of_scope:
+    - "No decision is accepted, ratified, rejected or closed by this Stage 0 record."
+    - "No decision subject, clause, Owner, Issue, PR or acceptance criterion is inferred from the workstream name."
+    - "No implementation, merge, deployment or Issue closure is authorized."
+  resume_condition: >-
+    User supplies the exact decision records/subjects, scope, accountable Owner,
+    acceptance authority, related carriers and objective acceptance criteria.
+
+prompt:
+  prompt_file: "NOT_AVAILABLE"
+  prompt_version: "NOT_RECORDED"
+  prompt_status: "NOT_PROVIDED"
+  prompt_sha256: "NOT_AVAILABLE"
+  prompt_bytes: null
+  prompt_provenance: "NOT_AVAILABLE"
+
+formal_registration:
+  status: "PENDING_SCOPE_CONFIRMATION"
+  index_entry_verified: "PENDING_READBACK"
+  identifier_allocation: "AID-2026-081"
+  registration_is_complete: false
+
+lifecycle:
+  current_stage: "STAGE_0"
+  stage_0: "PENDING_SCOPE_CONFIRMATION"
+  substantive_execution: "NOT_STARTED"
+  decision_acceptance: "NOT_GRANTED"
+  implementation: "NOT_AUTHORIZED"
+  merge: "NOT_AUTHORIZED"
+  deployment: "NOT_AUTHORIZED"
+
+acceptance_criteria:
+  stage_0:
+    - "Decision subjects and exact source records are supplied."
+    - "Accountable Owner and acceptance authority are identified."
+    - "Scope, exclusions, dependencies and acceptance criteria are recorded."
+    - "Prompt snapshot and provenance are recorded or explicitly marked unavailable."
+    - "Identifier uniqueness is verified to the required allocation standard."
+  stage_0_exit_status: "PENDING_SCOPE_CONFIRMATION"
+
+open_blockers:
+  - "DECISION-ACCEPTANCE-03 exact objective and decision subjects are not available in retrieved context."
+  - "Accountable Owner and acceptance authority are not assigned."
+  - "Prompt snapshot is not supplied."
+  - "Exhaustive identifier scan across every active branch is NOT_COMPLETED."
