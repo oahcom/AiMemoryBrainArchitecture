@@ -3,7 +3,7 @@
 - Document ID: DOC-BRAIN-001
 - Version: 1.0
 - Owner: D — Memory Brain
-- Source revision: a157b0ed6fc8e45e66fe01a99e6b895f995fd20c
+- Source revision: D branch session-d-memory-brain-2026-11-16, including Forget Fence and cursor contracts
 - Chinese counterpart: [权威记忆大脑架构指南](../../zh-CN/03-memory-brain/memory-brain-guide.md)
 - Status: Explanatory guide; cross-module execution and implementation evidence remain subject to integration gates
 
