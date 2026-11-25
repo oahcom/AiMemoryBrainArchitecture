@@ -54,7 +54,7 @@ document_metadata:
 - Document ID: D-CANONICAL-STORE-001
 - Version: 1.0
 - Source branch: session-d-memory-brain-2026-11-16
-- Source revision: 4d7d4db0585bb2e543881758bf27a8cbb0e323fa
+- Source revision: d47366d1ca04da37ff77f6edd31fe42efc93e0f9
 - Source branch head audited: 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
 - Source: [canonical D source](../../../03-memory-brain/canonical-memory-store.md) (source commit `b525e1f8fee2471a131e4a38efda99804045e424`; original source blob `6b37c91033fda21f072e2a3bde6f274663b1e76e`).
 - Chinese counterpart: [Canonical Memory Store](../../zh-CN/03-memory-brain/canonical-memory-store.md)
