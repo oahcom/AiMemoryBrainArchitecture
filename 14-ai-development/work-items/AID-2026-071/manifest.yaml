@@ -2,7 +2,7 @@ work_item_id: AID-2026-071
 title: Require a REQ-level risk assessment to be signed by a session independent of what it assesses
 class: GATE/POLICY
 risk: R2
-status: DISPATCHED
+status: MERGED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -21,11 +21,21 @@ prompt_bytes: 4303
 # named, and no text in the standard said an assessment must be signed at all.
 # The second is fixed here; the first by the record that cites this change.
 #
-# The clause is not invented for this work item. Owner accepted its wording in
-# Issue #262 comment 7153428650 as the landing target; what this branch decides
-# is only the boundary question the owner deferred — whether the exception
-# instrument can cover it — and the answer is written into the clause as a
-# non-exemption sentence rather than left to interpretation.
+# The clause is derived from the five requirements gaps Owner accepted in
+# Issue #262 comment 7153428650; that comment specified the missing requirements,
+# not the wording of the clause itself. The four-part clause recorded here was
+# subsequently drafted to express those accepted requirements and the boundary
+# decision concerning the exception instrument. It is derived from the accepted
+# requirements, not reproduced verbatim.
+#
+# Known deviation, stated rather than repaired: this manifest does not satisfy
+# the top-level field requirement the corrected clause adds. `sponsor` and
+# `accountable_owner` are top-level; `implementing_ai_session` exists only at
+# session_evidence[0].implementing_ai_session, below. Adding a top-level copy
+# would establish a string, and the clause states that a textual difference does
+# not establish that accountable_owner and implementing_ai_session are different
+# principals. The deviation is disclosed in the pull request and is not claimed
+# as compliance.
 # ---------------------------------------------------------------------------
 
 authorization:
@@ -54,10 +64,10 @@ acceptance:
   C6: "Any review recorded for this change is stated at the session level. Settled by the review naming the reviewing session and not asserting an account-level approval; `EX-20261123-01` records that zero APPROVED reviews exist in this repository."
 
 implementation:
-  status: IMPLEMENTED_IN_BRANCH
-  pull_request: ASSIGNED_AT_OPEN
-  merge_commit_sha: NOT_MERGED
-  note: "The clause lands in this branch. The pull request number cannot be written into the commit that opens it, so the INDEX row carries the merge commit once one exists."
+  status: MERGED
+  pull_request: 1073
+  merge_commit_sha: edbc36329fbae924a7e91e46bb196efdc92e59a0
+  note: "Merged via PR #1073 (head 77d29627) at 2026-11-25T07:20:12Z. This records integration only; merge status does not establish acceptance. Issue #262 AC2 remains PARTIAL because the named assessment-signature enforcement attachment point is not yet implemented."
 
 review:
   status: NOT_ASSIGNED
