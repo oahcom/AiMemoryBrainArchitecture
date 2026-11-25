@@ -90,6 +90,8 @@ attempt 3: 200  {"merged": true, "sha": "a8c367def34e5a3082ab777a7afedf7e82f38aa
                  "message": "Pull Request successfully merged"}
 ```
 
+> The quotation stands as written: `11 of 11` is the platform's response at that moment, not this record's statement about the present. The required-context count has changed since; see the re-read row in `POST-DENIAL-UNAUTHORISED-MERGE-001` section 7.
+
 ### 2.3 Shape of the landed commit
 
 ```

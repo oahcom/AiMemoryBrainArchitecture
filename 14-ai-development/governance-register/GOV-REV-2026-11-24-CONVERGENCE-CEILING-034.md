@@ -20,7 +20,7 @@ document_metadata:
       last_verified_date: "2026-11-24"
       last_verification_note: "All figures from live GitHub REST reads at main 84bbe9241/3026b319 and one local enumeration. Collaborators, invitations, branch-protection payload, required-review sub-resource, repo visibility and per-PR review counts are direct API responses, quoted verbatim. No PUT was issued against branch protection: writing it as a non-owner would reproduce SELF-AUTH-002. The register census read every root register and classified by the first Status line in the first 70 lines."
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Modified
     supersession:
       supersedes: []
       supersession_reason: null
@@ -167,11 +167,14 @@ GET /repos/oahcom/AiMemoryBrainArchitecture
 
 把三件事连起来：
 
-1. §5 的审查要求需要一个**第二身份**；
+1. §5 的审查要求需要一个**第二身份**〔2026-11-25 附注：此前提已失效，见本节末〕；
 2. 仓库只有**一个身份**且无邀请在途；
 3. 唯一的补救（平台强制）所依赖的前提**已经变化，但记录没有更新**。
 
 所以 37 个登记里 21 个 `NOT_ASSIGNED` 不是 21 个待办，是**同一个待办**：拿到第二个可写身份，或者由唯一身份的所有者明确裁定「放弃独立审查」。这两条路都不是写代码，也都不是我作为 owner-proxy 能自己给的——前者需要一个真实的人，后者需要所有者撤回 `PR-GOVERNANCE-001` §5。
+
+> **2026-11-25 附注（引文时效）。** 本节第 1 条与上一段把「独立审查」写成需要一个**第二身份**、需要「一个真实的人」，默认独立性以 GitHub 账号为门槛。该默认已不成立：`PR-GOVERNANCE-001` §5 于 2026-11-24 由 commit `2eb4e352`（PR #935）修订，现行文本（`14-ai-development/PR-GOVERNANCE-001.md` 的 §5 正文）规定**独立性是审查会话的属性，不是承载它的 GitHub 账号的属性**；修订记录见 `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`。「拿到第二个可写身份」由此不再是 §5 推出的唯一出路——开一个不共享上下文的会话即可，§9.1 已把「出口只有两条」判为假并给出第三条出口。
+> **仍然成立的部分**：本节的**上限结论**（收敛卡住、新增登记只让 §6 计数 +1）不因本附注改变。被撤销的只是「因为没有第二个 GitHub 身份，所以这个上限是结构性的」这一句**理由**；上游事实（`collaborators = 1`、`invitations = 0`）仍成立，见 §9.2。原文保留，未改写。
 
 **在这个裁决作出之前，任何新增登记都不会改变状态。** 它只会让 §6 的计数再 +1。
 

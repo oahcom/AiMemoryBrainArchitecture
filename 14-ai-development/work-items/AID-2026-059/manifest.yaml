@@ -138,3 +138,12 @@ session_evidence:
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-059/session-evidence-799.md
+  - role: IMPLEMENTER
+    issue_refs:
+    implementing_ai_session: session-1015-workflow-shape-guard
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-059/prompt-1015.md
+    executed_prompt_sha256: 245dbfc39ca8b20cec30bba392c4b2f5e0db383b404eb4e8e10a8f7cee899f46
+    executed_prompt_bytes: 7986
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-059/session-evidence-1015.md
