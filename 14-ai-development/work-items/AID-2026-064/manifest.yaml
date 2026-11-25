@@ -1,0 +1,102 @@
+work_item_id: AID-2026-064
+title: Re-verify and correct the AID-2026-004 bilingual registration for Issue #955 — six drifted blob SHAs, one pair found diverged
+class: DOC
+risk: R1
+risk_rationale: >-
+  Manifest accuracy only. No runtime code, no security boundary, no translation content,
+  no gate behaviour. The risk this work item addresses is the opposite of damage: a
+  field that asserts present alignment keeps being read after it has stopped being true.
+  R1 because the change is a record correction whose worst failure is a wrong record,
+  not a wrong behaviour.
+security_scope: >-
+  None. Repository-local Git object reads, three markdown files, and one YAML manifest.
+  No network, no credentials, no subprocess beyond git.
+
+status: PR_OPEN
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+
+created_at: 2026-11-25
+updated_at: 2026-11-25
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 350be84b547d040d3a689ffe24fb75cca6bc10c7
+tracking_issue: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/955
+related_record: 14-ai-development/work-items/AID-2026-004/manifest.yaml
+
+implementation:
+  status: PR_OPEN
+  pull_request: 1046
+  merge_commit_sha: NOT_MERGED
+
+task_scope:
+  - Re-measure all six registered blob SHAs against the current blobs and record both values
+  - Diff each registered blob against its current blob and decide, per pair, whether the translation covers the paragraphs the source gained
+  - Write the honest value of AID-2026-004's bilingual_status from the three-way enum, keeping the six original SHAs as the record of where alignment last held
+
+non_goals:
+  - Retranslating the AI-EXEC-001 Appendix B bullet that the F-006 revision did not reach. That is a separate change under AI-EXEC-001 and is named in the PR body instead.
+  - Editing any of the six documents.
+  - Adding an automated drift check. Issue #955 scopes this out explicitly; the PR body may say one is needed and stops there.
+
+findings:
+  - id: F1
+    severity: material
+    statement: >-
+      AI-EXEC-001 is not merely stale, it is asymmetric. Commit 4c38ae25 (PR #273, the
+      F-006 fix) revised the Chinese Appendix B bullet to the seven-sections framing and
+      did not revise the English bullet, which still reads "prompts are unified to 15
+      items". The English document therefore states the pre-F-006 framing in Appendix B
+      and the post-F-006 framing in its summary. Information is recoverable from the
+      document, so this is a missing paragraph revision rather than lost content; it is
+      recorded as DIVERGED because the field asserts alignment of the documents as they
+      stand.
+    measured_at: "350be84b"
+  - id: F2
+    severity: informational
+    statement: >-
+      AID-2026-004's manifest carries a top-level implementing_ai_session. The Session
+      Evidence validator treats a top-level field whose name is one of its seven manifest
+      field names as a second source of truth and rejects the manifest once a canonical
+      session_evidence block is added. Converting AID-2026-004 to canonical entries would
+      therefore require either dropping that historical field or fabricating prompt
+      digest evidence for a 2026-11-18 session that has none. Neither is done; the
+      re-verification is registered as its own work item instead and AID-2026-004 keeps
+      its original implementing session untouched.
+    measured_at: "350be84b"
+
+verification_summary: >-
+  Six current blob SHAs and six registered blob SHAs measured in this session; per-pair
+  numstat deltas measured; each pair's diff read hunk by hunk; heading and table-row
+  counts compared per pair (001 14/14 and 33/33, 002 15/15 and 5/5, ROLLOUT 18/18 and
+  47/47). SHA-256 of the six documents NOT_VERIFIED — not needed, Git blob SHAs are exact.
+  Runtime and test suites NOT RUN (documentation-only task).
+
+prompt_id: AID-2026-064-PROMPT
+prompt_version: v1
+prompt_provenance_tier: T2 (coordinator-supplied task assignment, reproduced in prompt-v1.md)
+prompt_sha256: NOT_VERIFIED
+prompt_bytes: NOT_VERIFIED
+prompt_provenance_note: >-
+  The assignment was supplied as a message in this session. A stable permalink and an
+  immutable pre-execution snapshot are not available; prompt-v1.md was written after the
+  session from the assignment as received, and its digest pins those bytes only.
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+    implementing_ai_session: a955
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-064/prompt-v1.md
+    executed_prompt_sha256: 57decec9de8752e099d6a72588fcdd00904bffbe4cecb614ddf9c34a441fdbb8
+    executed_prompt_bytes: 7188
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-064/session-evidence-955.md
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+independent_reviewer: NOT_ASSIGNED
+integration_reviewer: NOT_ASSIGNED
