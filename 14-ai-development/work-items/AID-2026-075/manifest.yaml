@@ -1,0 +1,110 @@
+work_item_id: AID-2026-075
+title: Establish an observation-only attachment point for REQ-level assessment signature compliance
+class: GATE/CI/TEST
+risk: R2
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+
+# ---------------------------------------------------------------------------
+# This manifest does not satisfy the top-level field requirement it registers.
+# `implementing_ai_session` appears only at session_evidence[0], below, and not
+# as a top-level key. That is the exact shape C2 requires the observer to report,
+# so this record is a first test case for its own checker rather than an example
+# of compliance. It is stated here instead of repaired because adding a top-level
+# copy would establish a string, and the corrected clause says a string does not
+# establish that accountable_owner and implementing_ai_session are different
+# principals. AID-2026-071 carries the same deviation, and the pull request that
+# introduced this work item discloses both.
+# ---------------------------------------------------------------------------
+
+prompt_id: AID-2026-075-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-075/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: e85f9ae067792717fbe989322dfee804091c776b2ad4317a03f2a95970ee4d83
+prompt_bytes: 4961
+
+# ---------------------------------------------------------------------------
+# This is the fifth and last item AC2 of Issue #262 was held open on. The other
+# four -- role, isolation, signature and accountability -- are normative text in
+# section 5 of PR-GOVERNANCE-001.md and are merged. What is missing is the
+# attachment point: no executable reads `assessor`, `assessed_version` or
+# `evidence_baseline` anywhere in this repository, so a requirement with no
+# reader is a requirement nobody can be found in breach of.
+#
+# The staging is the whole point of this work item. Stage one observes only: it
+# reports, it does not block. Stage two remediates the records that the observer
+# finds. Stage three would make the result blocking, and it needs its own
+# authorization -- this work item does not carry it, and the manifest says so in
+# `gate_behaviour_change` rather than leaving it to be inferred from a workflow
+# file that happens not to fail.
+#
+# The order is not negotiable and it is not caution for its own sake. Turning the
+# check on as a required context first would put the repository in the shape
+# `rust-workspace-test` was in: a required context that fails on the commit that
+# introduces it, with nothing but a revert available. Observing first produces
+# the list of records that must be remediated before the check can be blocking,
+# and that list is the input to stage two.
+# ---------------------------------------------------------------------------
+
+authorization:
+  implementation_write: "GRANTED for AID-2026-075 observation-only checker, its tests, non-blocking CI invocation and its own evidence records, within the explicitly listed files."
+  gate_behaviour_change: "NOT_GRANTED - no blocking enforcement, required context or branch protection modification."
+  schema_change: "NOT_GRANTED - no serialized type, database column or manifest schema migration is authorized."
+  platform_state_change: "NOT_GRANTED - no required context, workflow protection or repository protection payload change is authorized."
+  architecture_spec_change: "NOT_GRANTED - no additional normative specification change is authorized by this work item."
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-075/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-075/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-075/session-evidence-262.md
+  files_to_modify:
+    - scripts/ci/
+    - tests/
+    - .github/workflows/
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope: "Every other path. In particular the branch protection payload and the required-context list, which stage three would need and this work item is not authorized to touch; and the assessment records themselves, which stage two remediates and which stage one only reports on. The directory list above is the planned range and not a grant over the whole of each directory: the implementing session names its actual files in the pull request, and adding a required context is outside every one of them."
+
+acceptance:
+  C1: "A named CI check for REQ-level assessment signature compliance is present and runs on the authorized pull-request scope. PASS requires the check to execute on the exact tested commit; a missing or skipped execution fails."
+  C2: "The check reads the top-level sponsor, accountable_owner and implementing_ai_session fields from each in-scope manifest. A nested-only implementing_ai_session does not satisfy the top-level field requirement."
+  C3: "The check evaluates principal identity rather than raw string inequality. Identical sponsor and accountable_owner principals are accepted, while identical accountable_owner and implementing_ai_session principals are reported as violations."
+  C4: "The check detects missing assessor, assessed_version and evidence_baseline fields in in-scope assessment records, and reports each missing field separately."
+  C5: "The check validates that assessed_version is a full 40-character commit SHA and reports invalid or incomplete values."
+  C6: "The check produces deterministic, actionable observation findings identifying the affected record, violated requirement and observed value; repeated execution over unchanged inputs produces the same findings."
+  C7: "The observation-mode check does not fail the pull request solely because of the reported compliance findings, and does not become a required blocking context."
+  C8: "Historical assessments are distinguishable from assessments governed by the corrected clause's applicability boundary; the observer does not retroactively invalidate previously accepted assessments."
+  C9: "Automated tests cover compliant records, missing fields, nested-only fields, same-principal sponsor/accountable_owner, same-principal accountable_owner/implementing_ai_session, misleading string differences, malformed commit SHAs and historical applicability boundaries."
+  C10: "No validator, workflow, protection rule or required context is changed to block merging based on these findings. Any such behavior requires separate authorization."
+
+implementation:
+  status: NOT_STARTED
+  pull_request: NOT_OPENED
+  merge_commit_sha: NOT_MERGED
+  note: "Registered, not implemented. The manifest is the authorization record stage one runs under; nothing in scripts/ci, tests/ or .github/workflows is written yet, and the observation-mode check does not exist."
+
+review:
+  status: NOT_ASSIGNED
+  note: "Independent review has not been recorded. Section 9 of the standard requires an exact-Head governance review for changes to it; this change does not modify the standard, so that requirement is not what is owed here. What is owed is a review of the checker's behaviour once it exists, and none is claimed."
+
+# ---------------------------------------------------------------------------
+# AC2 of Issue #262 is the only acceptance criterion still open on that Issue.
+# This entry names the Issue; it does not claim that AC2 is met, and the fact
+# that the other four requirements are merged is recorded elsewhere, in
+# AID-2026-071, not asserted here.
+# ---------------------------------------------------------------------------
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#262"
+    implementing_ai_session: session-wo01-r47-coordinator
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-075/prompt-v1.md
+    executed_prompt_sha256: e85f9ae067792717fbe989322dfee804091c776b2ad4317a03f2a95970ee4d83
+    executed_prompt_bytes: 4961
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-075/session-evidence-262.md
