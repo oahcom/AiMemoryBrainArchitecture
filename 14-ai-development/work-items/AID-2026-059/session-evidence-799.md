@@ -97,16 +97,16 @@ Four files, all merged to `main` as `ebadbe84`:
 
 ```
 .github/workflows/session-evidence.yml                     58 lines
-scripts/governance/session_evidence/validate.py          2033 lines
+scripts/governance/session_evidence/validate.py          2038 lines
 tests/session_evidence/support.py                         278 lines
-tests/session_evidence/test_validate.py                   945 lines
+tests/session_evidence/test_validate.py                   971 lines
 ```
 
 Verification actually run on this branch:
 
 ```
 python3 -m unittest discover -s tests/session_evidence -p "test_*.py"
-    Ran 59 tests in 0.29s
+    Ran 60 tests in 0.29s
     OK
 
 mutation sweep, 16 mutants, survivors: none
@@ -127,10 +127,21 @@ discover:
    until the pull request merges. `#965` merged with `Session Evidence` red for
    that reason, documented in the ruling on that pull request rather than repaired
    by making the check report success over a validator it never ran.
-2. **This pull request is the first one the gate actually reads.** Its base
+2. **The first real run found a defect the suite could not see.** With the gate
+   merged, this pull request's run reached `Validate session evidence` and failed
+   with `MISSING: Cannot decode blob bytes: .../manifest.yaml`. The REST API wraps
+   its base64 payload at 60 characters; `gh_blob_bytes` passed the wrapped string
+   to `base64.b64decode(..., validate=True)`, which rejects newlines. Every real
+   file larger than one line therefore failed to decode, while the fixtures —
+   which encoded short blobs with no wrapping — passed. Fixed by stripping the
+   whitespace before decoding, with one test that hands the validator the payload
+   shape the API actually sends; reverting the fix fails that test and no other.
+   This is why Issue #799 requires calibration on a real pull request instead of
+   accepting a green suite as evidence.
+3. **This pull request is the first one the gate reads end to end.** Its base
    contains the validator, so the self-test runs for real here, and the verdict it
    prints is produced by the delivered code rather than asserted by the author.
-3. **The gate only proves structure and presence.** It does not prove that this
+4. **The gate only proves structure and presence.** It does not prove that this
    record was not edited afterwards, that the content is complete, or that the
    model identity is real. Those are reviewer judgements, and this file is written
    to be usable as material for that judgement: what was asked, what came back,

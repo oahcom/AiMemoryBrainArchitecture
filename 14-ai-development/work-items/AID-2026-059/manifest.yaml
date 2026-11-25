@@ -63,7 +63,10 @@ scope:
     - tests/session_evidence/test_validate.py
     - 14-ai-development/work-items/AID-2026-059/prompt-v1.md
     - 14-ai-development/work-items/AID-2026-059/session-evidence-799.md
-  files_to_modify: []
+  files_to_modify:
+    - scripts/governance/session_evidence/validate.py
+    - tests/session_evidence/test_validate.py
+    - 14-ai-development/work-items/INDEX.md
 
 acceptance:
   status: NOT_ASSIGNED
@@ -110,6 +113,10 @@ findings:
   - id: F6
     statement: "The frozen contract requires every session_evidence entry to carry non-empty issue_refs, and check_09 requires every Issue named in issue_refs to map to a PR row whose status is YES. An Issue created before the policy effective time cannot map to YES: check_03 forces LEGACY_UNDECLARED with N/A. Together those two rules make a canonical entry impossible for any work item whose tracking Issue predates 2026-12-01T00:00:00Z, which is every work item that exists today. The validator already permits the resolution -- OD-A3 keeps PR-level evidence in its own scope and allows issue_refs to be empty -- and this manifest uses it: the entry below attributes its evidence at PR scope, and the Issue row stays LEGACY_UNDECLARED. Recorded rather than silently resolved because it is a gap between the frozen contract and the shipped validator, not a choice this work item is authorised to make."
     measured_at: "ebadbe84"
+    severity: material
+  - id: F7
+    statement: "The first real pull request run returned 'MISSING: Cannot decode blob bytes: 14-ai-development/work-items/AID-2026-059/manifest.yaml'. gh_blob_bytes passed the API payload straight to base64.b64decode(..., validate=True), but the REST API wraps its base64 at 60 characters, so the content arrives containing newlines and validate=True rejects them. Consequence: every file larger than one line failed to decode, so the gate could never report PRESENT on any real pull request. The 59-test suite could not see it because support.make_blob encodes short fixtures with no wrapping -- the fixture never had the payload shape the API sends. Fixed by stripping whitespace before decoding, plus one test that wraps the payload at 60 characters, taken from the API response observed in the failing run. Reverting the fix fails that test and leaves the other 59 green, so the behaviour is pinned rather than incidentally covered. Found by the first real run, not by review: this is the calibration Issue #799 requires before required-context status is even proposed."
+    measured_at: a5482776
     severity: material
 
 # Canonical multi-session container (#775 seven fields, repeated). One entry,
