@@ -56,7 +56,7 @@ acceptance:
 
 implementation:
   status: PR_OPEN
-  pull_request: 1018
+  pull_request: 1027
   merge_commit_sha: NOT_MERGED
 
 review:
