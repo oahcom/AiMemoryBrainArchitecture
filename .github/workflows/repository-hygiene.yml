@@ -106,6 +106,21 @@ jobs:
           cd scripts
           python3 -m unittest test_check_traceability
 
+      # The four T-04 assertions (one row per AID, work_item_id equals its
+      # directory, every row resolves to a manifest, every manifest is
+      # indexed) read only the tree. They were unreachable because
+      # `run_check` called `parse_registry` first inside the same try, so the
+      # missing `00-governance/requirements-registry.yaml` took the whole run
+      # with it (#1071). This step runs that half alone.
+      #
+      # It is not `|| true` and it is not a new workflow: it is a step in the
+      # job that is already a required context. `merge=union` on
+      # `14-ai-development/work-items/INDEX.md` is only safe because this
+      # runs — union turns a visible conflict into a silent duplicate row,
+      # and this is what refuses the duplicate (#1064, #1069).
+      - name: Check INDEX rows against the work-item tree
+        run: python3 scripts/check_traceability.py --index-only
+
       # PR-GOVERNANCE-001 §7 declares the required check contexts on `main`.
       # Renaming a job leaves the document claiming a context nothing produces;
       # this holds the declaration to the tree. Exit 2 (INCOMPLETE) is a failure

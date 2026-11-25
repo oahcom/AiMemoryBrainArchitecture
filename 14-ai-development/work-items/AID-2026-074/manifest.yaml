@@ -1,0 +1,94 @@
+work_item_id: AID-2026-074
+title: Make the INDEX table merge without a conflict, and make a duplicate work-item ID fail a gate before merge
+class: GATE/CONFIG/TEST
+risk: R1
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+
+prompt_id: AID-2026-074-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-074/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 52a28e7d78ee3e7e3620017bf7fbec676f2b73176927a84a2fe555d222ce1961
+prompt_bytes: 4141
+
+# ---------------------------------------------------------------------------
+# One change, because either half alone is worse than both (#1064, #1069).
+#
+# #1069 asks for `merge=union` on the INDEX table. A union driver keeps both
+# sides' appended rows, which removes the false conflict — and also removes the
+# last accidental duplicate-ID detector, because today a duplicate ID produces
+# an add/add conflict on the work-item directory. So the driver must ship with
+# an assertion that refuses the duplicate, or the next collision merges cleanly
+# as two rows claiming one number.
+#
+# #1064 asks for a gate that fails a duplicate AID. The assertion already
+# exists: `check_traceability.py:730` T-04. It has never run, because
+# `run_check` parses `00-governance/requirements-registry.yaml` first inside the
+# same try and that file does not exist, so the manifest half is dead code
+# (#1071). The fix is therefore not a new detector but a caller for the one
+# that exists — which is what the Owner ruling on #1064 says, and what the
+# disposition on #1071 prescribes ("prefer the split").
+#
+# Deliberately not built, per #1064's "explicitly rejected shortcut": no ID
+# reservation service, no allocator, no registry of taken-but-unmerged IDs, no
+# `next_id` cell. All of those need coordination this repository does not have,
+# and a `next_id` cell would turn an append conflict into a same-cell conflict,
+# raising the conflict rate.
+# ---------------------------------------------------------------------------
+
+authorization:
+  implementation_write: "GRANTED for this work item's own files, `.gitattributes`, `.github/workflows/repository-hygiene.yml`, `scripts/check_traceability.py`, `scripts/test_check_traceability.py`, and the merge-driver paragraph in `14-ai-development/work-items/INDEX.md`. No file under `crates/` is touched."
+  gate_behaviour_change: "GRANTED - one step is added to the existing `Repository hygiene (hard gate)` job. No new workflow, no new required context, no branch-protection change."
+  schema_change: "NOT_GRANTED - no serialized type, database column or manifest field is introduced"
+  platform_state_change: "NOT_GRANTED - no required context, workflow permission or protection payload is modified"
+  architecture_spec_change: "NOT_GRANTED - no ADR, BMCP specification or other canonical document is modified"
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-074/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-074/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-074/session-evidence-1064-1069.md
+  files_to_modify:
+    - .gitattributes
+    - .github/workflows/repository-hygiene.yml
+    - 14-ai-development/work-items/INDEX.md
+    - scripts/check_traceability.py
+    - scripts/test_check_traceability.py
+  files_out_of_scope: "Every other path. In particular `scripts/ci/check_repository_hygiene.py`, whose `index_entry_directories` returns a `set` and cannot see a second row for an existing ID (measured 55 -> 55 with a duplicate appended); that finding is #1069 comment 2's and is the reason the duplicate assertion belongs in `check_traceability.py`, not there. Also out of scope: `00-governance/requirements-registry.yaml`, which is AID-2026-058 / OD-23's content and must not be authored from this change; every existing work item's number, which is not renumbered; and `crates/`."
+
+acceptance:
+  C1: "`python3 scripts/check_traceability.py --index-only` exits 0 on the unmodified tree and prints a PASS line with a non-zero work-item count. Settled by running it, not by reading the code. A check that reports PASS while having enumerated nothing is the defect it exists to catch, so the count is asserted."
+  C2: "The default invocation is unchanged: `python3 scripts/check_traceability.py` with no registry still exits 1 with `ERROR required registry unavailable:`. Settled by running both forms on the same tree. `--index-only` narrows which half runs; it does not make the registry optional."
+  C3: "A duplicate `AID` row makes `--index-only` exit 1 naming `T-04 duplicate INDEX entry {aid}`, and reverting the duplicate makes it exit 0. Settled on the real tree, with the added row and its removal both shown."
+  C4: "`merge=union` resolves two concurrent registrations with no conflict and keeps both rows. Settled by the scenario run against this file's own 47-row table: two branches insert a different row at the same anchor, `git merge` exits 0 with no markers, and both rows are present."
+  C5: "The three shapes union does not resolve each end as one `AID` on two lines, so C3's assertion refuses them. Settled by running each shape: same ID appended twice; one row edited on both sides; a row deleted on one side while its neighbour is edited on the other. The third is the one a resolver will not look for, because the symptom is a row that came back."
+  C6: "The `.gitattributes` rule is path-scoped and does not widen. Settled by `git check-attr merge` returning `union` for `INDEX.md`, `unspecified` for another `.md`, and `scripts/ci/check_line_endings.py` still exiting 0 with the same file count — it asks Git via `check-attr --stdin` and never parses `.gitattributes` text."
+  C7: "The driver's contract is written in `INDEX.md` next to the table, not only in `.gitattributes`, and it states all three unresolved shapes and that the failure message cannot distinguish them. Settled by reading the paragraph; a reader who hits `T-04 duplicate INDEX entry` must be able to tell from the file that they are looking at a hand-resolution, not two registrations."
+  C8: "`scripts/test_check_traceability.py` fails if either half of the change is reverted. Settled by mutation: removing the `T-04 duplicate` call fails 2 tests; making `--index-only` a no-op fails 4. Both mutants restored, suite green."
+  C9: "No existing work item is renumbered, and `crates/` is untouched. Settled by `git diff --stat origin/main` showing no path under `crates/` and no `AID-*` directory renamed."
+
+implementation:
+  status: IMPLEMENTED_IN_BRANCH
+  pull_request: ASSIGNED_AT_OPEN
+  merge_commit_sha: NOT_MERGED
+  note: "All nine criteria are measured in this branch. The one thing this change does not do is detect a collision before either side has written its files: that needs the open-PR list and a `Work Item ID` field something reads, which is #1042's subject and is recorded here as the residual rather than claimed."
+
+review:
+  status: NOT_ASSIGNED
+  note: "Independent review has not been recorded. This change alters a hard gate and a Canonical registry, so it is a candidate for exact-Head review; not claimed here."
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1064"
+      - "#1069"
+    implementing_ai_session: session-a1084
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-074/prompt-v1.md
+    executed_prompt_sha256: 52a28e7d78ee3e7e3620017bf7fbec676f2b73176927a84a2fe555d222ce1961
+    executed_prompt_bytes: 4141
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-074/session-evidence-1064-1069.md
