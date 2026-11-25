@@ -951,4 +951,11 @@ mod tests {
             "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
         );
     }
+
+    // Deliberate failure used to measure whether a failing required check can
+    // block a merge. It is expected to fail and must never be merged.
+    #[test]
+    fn governance_negative_head_probe() {
+        panic!("WO-01 deliberate failing-head enforcement probe");
+    }
 }
