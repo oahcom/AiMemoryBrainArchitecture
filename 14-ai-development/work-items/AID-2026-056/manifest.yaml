@@ -216,7 +216,7 @@ review:
   # be cited as evidence that the bilingual scan was fixed. The only bytes
   # changed after round 5's verdict are this block's two status fields and the
   # report pointers, which the verdict does not depend on.
-  approval_source: "REVIEW-05 returned APPROVE, no blocking item, reviewing the increment applied after round 4. Nothing substantive changed after it."
+  approval_source: "REVIEW-05 returned APPROVE, no blocking item, reviewing the increment applied after round 4. After it, this commit also added the third `session_evidence` entry and its evidence document, and rewrote the comments above this field; the criteria, findings and deliverables were not touched."
 
 acceptance:
   status: NOT_ASSIGNED
