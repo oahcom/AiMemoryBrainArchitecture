@@ -1999,7 +1999,10 @@ def _run_checks(ctx: ValidationContext) -> str:
     )
 
     return "AI-SESSION-EVIDENCE: PRESENT"
-def main(argv: list[str] | None = None) -> int:
+def main(
+    argv: list[str] | None = None,
+    now: datetime | None = None,
+) -> int:
     del argv
 
     _TREE_CACHE.clear()
@@ -2007,8 +2010,45 @@ def main(argv: list[str] | None = None) -> int:
     _BLOB_BYTES_CACHE.clear()
 
     try:
-        ctx = _load_context()
-        verdict = _run_checks(ctx)
+        effective_text = os.environ.get(
+            "AI_SESSION_EVIDENCE_EFFECTIVE_AT_UTC",
+            "",
+        )
+        effective_at = parse_utc_timestamp(effective_text)
+        pre_effective = (
+            now or datetime.now(timezone.utc)
+        ) < effective_at
+
+        try:
+            verdict = _run_checks(_load_context())
+            failure = None
+        except ValidationError as exc:
+            verdict = None
+            failure = str(exc)
+
+        indicated = (
+            verdict if failure is None else f"MISSING: {failure}"
+        )
+
+        # A PR evaluated before the policy effective time is a pre-policy
+        # artifact: it must not be failed for fields the policy does not
+        # require yet. The checks still run, so the verdict the gate
+        # would have given is reported for calibration.
+        if pre_effective:
+            header = (
+                "AI-SESSION-EVIDENCE: NOT_APPLICABLE "
+                f"(pre-effective; policy effective {effective_text})"
+            )
+            print(header)
+            print(f"would-have-reported: {indicated}")
+            _write_summary(
+                f"{header}\nwould-have-reported: {indicated}"
+            )
+            return 0
+
+        if failure is not None:
+            raise ValidationError(failure)
+
         print(verdict)
         _write_summary(verdict)
         return 0

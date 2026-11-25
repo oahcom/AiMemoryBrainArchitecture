@@ -376,6 +376,59 @@ N/A
         self.assertNotIn("skipped", output.lower())
         self.assertNotIn("neutral", output.lower())
 
+    def test_pre_effective_policy_is_not_applicable_and_post_policy_fails(self):
+        future = "2099-01-01T00:00:00Z"
+        incomplete = "## Work Item\n\nAID-2026-001\n"
+        summary = os.path.join(
+            self.temporary_directory(), "incomplete.md"
+        )
+        self.make_valid_world(pr_body=incomplete)
+
+        with mock.patch.dict(
+            os.environ,
+            {
+                "GITHUB_STEP_SUMMARY": summary,
+                "AI_SESSION_EVIDENCE_EFFECTIVE_AT_UTC": future,
+            },
+        ):
+            result, output = self.capture_validator()
+
+        self.assertEqual(result, 0)
+        self.assertIn("NOT_APPLICABLE (pre-effective", output)
+        self.assertIn("missing Related issue(s)", output)
+        with open(summary, encoding="utf-8") as summary_file:
+            written = summary_file.read()
+        self.assertIn("NOT_APPLICABLE (pre-effective", written)
+        self.assertIn("missing Related issue(s)", written)
+
+        # A valid world also exits 0 before the policy is in effect, and
+        # the reported verdict is the successful one it would have given.
+        summary = os.path.join(self.temporary_directory(), "valid.md")
+        self.make_valid_world()
+        with mock.patch.dict(
+            os.environ,
+            {
+                "GITHUB_STEP_SUMMARY": summary,
+                "AI_SESSION_EVIDENCE_EFFECTIVE_AT_UTC": future,
+            },
+        ):
+            result, _ = self.capture_validator()
+
+        self.assertEqual(result, 0)
+        with open(summary, encoding="utf-8") as summary_file:
+            written = summary_file.read()
+        self.assertIn(
+            "would-have-reported: AI-SESSION-EVIDENCE: PRESENT",
+            written,
+        )
+        self.assertNotIn("MISSING", written)
+
+        # On and after the effective time the same body still fails.
+        self.make_valid_world(pr_body=incomplete)
+        result, output = self.capture_validator()
+        self.assertEqual(result, 1)
+        self.assertIn("missing Related issue(s)", output)
+
     def test_post_policy_missing_declaration_is_missing_and_failed(self):
         world = make_valid_world(issue_body=ISSUE_BODY_UNDECLARED)
         self.install_world(world)
