@@ -37,7 +37,7 @@ document_metadata:
   authority:
     canonical_status: Candidate
     canonical_scope: "Navigation index for D-owned Memory Brain source specifications"
-    canonical_scope_id: null
+    canonical_scope_id: "memory-brain/source-index"
     canonical_scope_keywords: []
     canonical_conflict_status: None
     canonical_conflict_resolution: null
