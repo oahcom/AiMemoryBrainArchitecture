@@ -1,0 +1,93 @@
+work_item_id: AID-2026-066
+title: Advance the context version from authoritative persisted state and deliver a forget as a tombstone in a successor snapshot
+class: GATE/CODE/TEST
+risk: R3
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+
+prompt_id: AID-2026-066-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-066/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 1ae516e747ae3417d9a34cc5fc870128da2efbd603d4d958fceaf18a3791c6ae
+prompt_bytes: 5921
+
+# ---------------------------------------------------------------------------
+# WO-04 of the REQ-01 repair queue, registered against Issue #262 AC7. AC7 is
+# unmeasurable for F7 because this work has no accountable item; this manifest
+# creates one and changes no code.
+#
+# Risk is R3 rather than R2 for one reason: the surface is a serialized
+# compatibility contract, not only a behaviour. `ContextSnapshot`,
+# `ContextEntry` and `ContextTombstone` are `serde` types, and the `--out` file
+# `crates/brain-cli/src/main.rs` writes is that same representation on disk. A
+# change here can break a reader that was never in this repository, and no test
+# in this repository can prove it did not. That is a different risk class from
+# "a function returns the wrong value", which is what R2 covers.
+#
+# The R29 closeout authorised a bounded schema change for this work item. That
+# Owner authorisation is not the authorisation of this branch: registration and
+# implementation are separate grants, and this branch holds only the first.
+# ---------------------------------------------------------------------------
+
+authorization:
+  implementation_write: "NOT_GRANTED - this branch registers the work item; no file under crates/ is written by it"
+  schema_change: "NOT_GRANTED - the compatibility surface is identified, not authorised; the R29 Q6 bounded authorisation is an Owner ruling for the implementing change, and this branch neither exercises nor extends it"
+  gate_behaviour_change: "NOT_GRANTED - no required context, workflow or protection payload is touched"
+  mutation_cluster: "NOT_GRANTED - D-3 remains frozen; no in-place modification API and no thaw is authorised by this registration"
+  design_decision: "NOT_MADE - B-4 (forget during a pending version) is stated as a question the implementer must answer, not decided here"
+  architecture_spec_change: "NOT_GRANTED - no ADR, no BMCP specification and no canonical architecture document is modified"
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-066/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-066/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-066/session-evidence-r44.md
+  files_to_modify:
+    - crates/memory-context/src/lib.rs
+    - crates/brain-cli/src/main.rs
+    - crates/memory-storage-sqlite/src/lib.rs
+    - crates/agent-integration/src/lib.rs
+    - crates/memory-context/tests/forget_excludes_from_context.rs
+    - crates/memory-context/tests/e2e_store_to_context.rs
+  files_out_of_scope: "Every other path. In particular: no migration under crates/memory-storage-sqlite/ outside src/lib.rs, no new crate, no workflow, no INDEX row beyond the one this branch adds, and no historical snapshot is rewritten in place."
+
+acceptance:
+  C1: "ContextEntry carries memory_lifecycle and it is populated from the authority. Settled by a test in crates/memory-context asserting that two entries built from identical content but different authoritative lifecycle differ in that field; `grep -c 'memory_lifecycle' crates/memory-context/src/lib.rs` at the acceptance head is greater than at a1533c67."
+  C2: "ContextSnapshot carries a non-empty authoritative_state_fingerprint on the production path, and a pre-change serialized fixture still deserializes. Settled by two assertions in one test, because an old file reading successfully does not show that a new file has a fingerprint."
+  C3: "A1 and A2: fixed authoritative state rebuilt twice yields an identical fingerprint; changed Claim content yields a different one. Settled by two assertions in the fingerprint test."
+  C4: "A3: a forgotten Active memory yields a successor snapshot with a tombstone, no entry for that memory, and a different fingerprint, through the real SQLite path. Settled by `cargo test -p memory-context --test forget_excludes_from_context`. A run that fails with `read_current returned no revision` does not satisfy this."
+  C5: "A4 and A5: a forget fence recorded in storage with no caller input change alters what the successor snapshot shows, and the old fingerprint is not reused. Settled by assertions that hold caller input fixed and vary only persisted state."
+  C6: "A6 and A7: Active to Consolidated and Consolidated to Active are each observable, in both directions. Settled by a pair of assertions, not one direction plus an implication."
+  C7: "Tombstone construction is not hardcoded. Settled by `grep -n 'tombstones: Vec::new()' crates/memory-context/src/lib.rs` returning no production match, with any test-module match reported explicitly rather than silently subtracted, plus C4 passing."
+  C8: "context_version no longer comes from a literal. Settled by `grep -n -A2 'build_context(' crates/brain-cli/src/main.rs` showing a computed argument, and by a test asserting that unchanged persisted state repeats the version while changed state advances it."
+  C9: "The serialized surface is enumerated, not assumed: the added fields on ContextSnapshot, ContextEntry and ContextTombstone and their effect on the `--out` file are listed, unknown-field and missing-field behaviour is stated, and `#[serde(default)]` covers every added field."
+
+implementation:
+  status: NOT_STARTED
+  pull_request: NONE
+  merge_commit_sha: NOT_MERGED
+  note: "Registration only. The six files in scope are unchanged at this branch's head."
+
+review:
+  status: NOT_ASSIGNED
+  note: "Independent review has not been recorded. A session that registers a work item cannot supply the independence its acceptance will need; that is a separate appointment."
+
+# ---------------------------------------------------------------------------
+# AC7 of Issue #262 requires every remediation to be an accountable work item.
+# This entry names the Issue; it does not claim the Issue's declaration state.
+# ---------------------------------------------------------------------------
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#262"
+    implementing_ai_session: session-r44-reg-b
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-066/prompt-v1.md
+    executed_prompt_sha256: 1ae516e747ae3417d9a34cc5fc870128da2efbd603d4d958fceaf18a3791c6ae
+    executed_prompt_bytes: 5921
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-066/session-evidence-r44.md

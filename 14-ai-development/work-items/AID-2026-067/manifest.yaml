@@ -1,0 +1,81 @@
+work_item_id: AID-2026-067
+title: Stop a refused publication from writing the memory and delivering the snapshot
+class: GATE/CODE/TEST
+risk: R2
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+
+prompt_id: AID-2026-067-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-067/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 07b49d7fa41ec6a5e9025dd3440e9f181654c8903288aa0d430d9324df5ac0da
+prompt_bytes: 5261
+
+# ---------------------------------------------------------------------------
+# WO-05 of the REQ-01 repair queue, registered against Issue #262 AC7.
+#
+# R26 §六.5 states F6 is green only when a refusal is shown to block the side
+# effects, observed from a real production path and not from a return value.
+# This work item is the refusal half; AID-2026-068 is the lawful-publication
+# half. Both must be green before F6 may be called fixed (R29 §7).
+#
+# Order: F6-A before F6-B. If the derivative lifecycle is made publishable while
+# the two flags at publication_authority.rs:138-139 are still literal `false`,
+# every lawful publication refuses and F6-B cannot be accepted.
+# ---------------------------------------------------------------------------
+
+authorization:
+  implementation_write: "NOT_GRANTED - this branch registers the work item; no file under crates/ is written by it"
+  gate_behaviour_change: "NOT_GRANTED - the production refusal path is the implementing change, not this branch"
+  schema_change: "NOT_GRANTED - no serialized type and no database column is added"
+  platform_state_change: "NOT_GRANTED - no required context, workflow or protection payload is modified"
+  architecture_spec_change: "NOT_GRANTED - no ADR, no BMCP specification and no canonical architecture document is modified"
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-067/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-067/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-067/session-evidence-r44.md
+  files_to_modify:
+    - crates/brain-cli/src/main.rs
+    - crates/memory-compiler/src/lib.rs
+    - crates/memory-compiler/src/publication_authority.rs
+  files_out_of_scope: "Every other path. In particular: no change to crates/memory-compiler/src/admission.rs, no change to the storage error taxonomy (that belongs to WO-02 / F8, which this branch does not register), no new workflow, and no INDEX row beyond the one this branch adds."
+
+acceptance:
+  C1: "A refused publication leaves no memory behind. Settled by a test whose authority refuses and then reads `SELECT COUNT(*) FROM memories` from the same SQLite file and gets 0. Asserting the returned disposition does not settle it; the database does."
+  C2: "A refused publication performs no delivery. Settled by the same test showing no delivery record and no snapshot output file for that run. Asserting an eprintln line does not settle it."
+  C3: "The refusal path is executable rather than a hardcoded false. Settled by no production `publication_participant_admitted: false` literal remaining at crates/memory-compiler/src/publication_authority.rs:138 (the value present at a1533c67), plus a test that builds a refusing authority explicitly."
+  C4: "A lawful publication still succeeds. Settled by a companion case where the authority admits, the disposition is Published, the row exists and delivery happened. A change that refuses everything fails this criterion."
+  C5: "Blocked, Suppressed and Failed remain distinguishable. Settled by three inputs producing three dispositions, with the existing assertions at crates/memory-compiler/src/lib.rs:1189, 1202 and 1215 still green — those three are the measured `Blocked` cases at a1533c67."
+  C6: "The two crates pass and the guard is load-bearing. Settled by `cargo test -p memory-compiler` and `cargo test -p brain-cli` at the acceptance head, plus one recorded mutation: moving the write back before the gate makes C1 fail."
+
+implementation:
+  status: NOT_STARTED
+  pull_request: NONE
+  merge_commit_sha: NOT_MERGED
+  note: "Registration only. The three files in scope are unchanged at this branch's head."
+
+review:
+  status: NOT_ASSIGNED
+  note: "Independent review has not been recorded. Same-session review of a self-authored fix cannot supply independence, so none is claimed."
+
+# ---------------------------------------------------------------------------
+# AC7 of Issue #262 requires every remediation to be an accountable work item.
+# This entry names the Issue; it does not claim the Issue's declaration state.
+# ---------------------------------------------------------------------------
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#262"
+    implementing_ai_session: session-r44-reg-b
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-067/prompt-v1.md
+    executed_prompt_sha256: 07b49d7fa41ec6a5e9025dd3440e9f181654c8903288aa0d430d9324df5ac0da
+    executed_prompt_bytes: 5261
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-067/session-evidence-r44.md
