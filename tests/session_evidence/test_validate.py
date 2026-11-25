@@ -7,6 +7,7 @@ import os
 import re
 import tempfile
 import unittest
+from datetime import timedelta
 from unittest import mock
 
 from scripts.governance.session_evidence import validate
@@ -1867,6 +1868,131 @@ evidence.md
         self.assertNotEqual(result, 0)
         self.assertIn("MISSING:", output)
         self.assertIn("unable to determine changed paths", output)
+
+
+REPO_ROOT = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+)
+WORKFLOW_PATH = os.path.join(
+    REPO_ROOT, ".github", "workflows", "session-evidence.yml"
+)
+
+# The production policy boundary. Nothing in this suite read the workflow's
+# value before #1063, so rewriting it to 1999-01-01T00:00:00Z left the whole
+# suite green while the gate silently started demanding evidence from PRs
+# opened decades earlier.
+PINNED_EFFECTIVE_AT = "2026-12-01T00:00:00Z"
+
+# Regex over raw text, like scripts/check_session_evidence_workflow_shape.py:
+# no YAML parser is installable in this tree, and none is added here (#1063 AC4).
+EFFECTIVE_TIME_KEY_RE = re.compile(
+    r"^\s*AI_SESSION_EVIDENCE_EFFECTIVE_AT_UTC:\s*"
+    r"\"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z)\"\s*$",
+    re.MULTILINE,
+)
+
+
+def read_production_effective_time():
+    """The workflow's AI_SESSION_EVIDENCE_EFFECTIVE_AT_UTC, as written."""
+    with open(WORKFLOW_PATH, encoding="utf-8") as handle:
+        found = EFFECTIVE_TIME_KEY_RE.findall(handle.read())
+    if len(found) != 1:
+        raise AssertionError(
+            f"expected exactly one AI_SESSION_EVIDENCE_EFFECTIVE_AT_UTC in "
+            f"{WORKFLOW_PATH}, found {len(found)}"
+        )
+    return found[0]
+
+
+class ProductionEffectiveTimeBoundaryTests(unittest.TestCase):
+    def test_workflow_effective_time_matches_the_pinned_policy_boundary(self):
+        found = read_production_effective_time()
+        self.assertEqual(
+            found,
+            PINNED_EFFECTIVE_AT,
+            msg=(
+                "AI_SESSION_EVIDENCE_EFFECTIVE_AT_UTC is "
+                f"{found!r}, not the pinned {PINNED_EFFECTIVE_AT!r}. That "
+                "literal decides which PRs must declare and the wording of "
+                "the exemption notice, so moving it inverts the verdict for a "
+                "whole class of PRs and fails in the silent-pass direction "
+                "(#1063)"
+            ),
+        )
+        # A literal the validator cannot parse would fail the gate closed on
+        # every PR, so pin the shape too.
+        validate.parse_utc_timestamp(found)
+
+    def test_verdict_flips_at_the_production_effective_time(self):
+        # Worlds are anchored on the pinned boundary, not on whatever the
+        # workflow currently says: a PR opened the day before it must be
+        # exempt, one opened the day after must declare. The validator reads
+        # its boundary from the workflow, so moving that literal moves the
+        # verdict and this test fails -- which is the point (#1063).
+        boundary = validate.parse_utc_timestamp(PINNED_EFFECTIVE_AT)
+        before = (boundary - timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        after = (boundary + timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        undeclared_pr = "## Related issue(s)\n\n#101\n"
+
+        def run_at(stamp):
+            world = make_valid_world(
+                issue_created=stamp,
+                pr_created=stamp,
+                issue_body=ISSUE_BODY_UNDECLARED,
+                pr_body=undeclared_pr,
+            )
+            for name, value in (
+                ("gh_api", world["api"]),
+                ("gh_tree", world["tree"]),
+                ("gh_blob_text", world["blob_text"]),
+            ):
+                patcher = mock.patch.object(validate, name, value)
+                patcher.start()
+                self.addCleanup(patcher.stop)
+            output = io.StringIO()
+            with mock.patch.dict(
+                os.environ,
+                {
+                    "AI_SESSION_EVIDENCE_EFFECTIVE_AT_UTC":
+                        read_production_effective_time(),
+                    "GITHUB_REPOSITORY": REPOSITORY,
+                    "PR_NUMBER": "101",
+                    "GITHUB_TOKEN": "offline-test-token",
+                },
+            ), contextlib.redirect_stdout(output):
+                result = validate.main([])
+            return result, output.getvalue()
+
+        result, output = run_at(before)
+        self.assertEqual(
+            result,
+            0,
+            msg=(
+                f"a PR opened {before} is before the effective time and must "
+                "be exempt, but AI_SESSION_EVIDENCE_EFFECTIVE_AT_UTC is "
+                f"{read_production_effective_time()!r} (pinned to "
+                f"{PINNED_EFFECTIVE_AT!r}); verdict was {output.strip()!r}"
+            ),
+        )
+        self.assertIn(
+            "AI-SESSION-EVIDENCE: NOT_APPLICABLE "
+            f"(linked issue #101 predates {read_production_effective_time()})",
+            output,
+        )
+
+        result, output = run_at(after)
+        self.assertNotEqual(
+            result,
+            0,
+            msg=(
+                f"a PR opened {after} is after the effective time and must "
+                "declare, but AI_SESSION_EVIDENCE_EFFECTIVE_AT_UTC is "
+                f"{read_production_effective_time()!r} (pinned to "
+                f"{PINNED_EFFECTIVE_AT!r})"
+            ),
+        )
+        self.assertIn("MISSING:", output)
+        self.assertNotIn("NOT_APPLICABLE", output)
 
 
 if __name__ == "__main__":
