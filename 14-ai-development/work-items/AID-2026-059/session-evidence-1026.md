@@ -78,47 +78,60 @@ criteria are stated against them:
   set and `ctx.issues` disagree; the historical guard now runs before
   `check_01`, but only an undeclared body is returned early. A body that
   declares either field falls through to the unchanged order.
-- `tests/session_evidence/test_validate.py`: four assertions added.
+- `tests/session_evidence/test_validate.py`: six test methods added.
 
 **Verification actually run on this branch.**
 
-The branch is based on `a1533c67`; the code change is two files, plus three work-record files (`manifest.yaml`, this document, `prompt-1026-v1.md`).
+The branch is based on `0bbb35f1`; the code change is two files, plus three
+work-record files (`manifest.yaml`, this document, `prompt-1026-v1.md`).
 
 ```
 python3 -m unittest tests.session_evidence.test_validate
-    Ran 83 tests ... OK
+    Ran 85 tests ... OK
 ```
 
 ```
 mutation 1: _historical_not_applicable -> return False unconditionally
     killed by test_pre_effective_undeclared_pr_is_not_applicable
-    AssertionError: 1 != 0   (assertEqual(result, 0))
+        AssertionError: 1 != 0   (assertEqual(result, 0))
+    also killed: test_pr_opened_before_the_effective_time_without_a_declaration_is_not_applicable,
+                 test_pre_effective_pr_volunteered_yes_with_valid_evidence_is_not_applicable,
+                 test_historical_issue_outputs_not_applicable_and_success
 
-mutation 2: early exit unconditional (declaration-presence check removed)
+mutation 2: early exit unconditional (declaration-presence check removed,
+            PR opening date still required)
     killed by test_pre_effective_pr_volunteered_yes_with_missing_evidence_fails
-    AssertionError: 0 != 1   (assertEqual(result, 1))
+        AssertionError: 0 != 1   (assertEqual(result, 1))
+    also killed: test_post_policy_missing_declaration_is_missing_and_failed,
+                 test_rejects_missing_post_policy_issue_declaration
+
+mutation 3: PR opening-date bound removed, rest of the condition intact
+    killed by test_pr_opened_after_the_effective_time_without_a_declaration_fails
+        AssertionError: 0 != 1   (assertEqual(result, 1))
 ```
 
-Both mutants were restored before the full suite was re-run, which reported
-`Ran 83 tests ... OK` again.
+The three mutants are not tight: mutants 1 and 2 each take down sibling tests as
+well, because every one of those tests needs the guard or the declaration check
+to exist. Each mutant was restored before the next was applied, and the full
+suite was re-run green after the last restoration.
 
 Gate conclusions read, not assumed:
 
 ```
 python3 scripts/ci/check_line_endings.py
-    1335 files inspected, 0 violations
+    Line-ending check: 1339 files inspected, 0 binary skipped, 0 violations.
 
-python3 scripts/ci/check_repository_hygiene.py --base <main> --head <branch>
-    Work-item index membership directories=51 linked=51
-    Work-item manifest consistency manifests=40 in_scope=38 violations=0
-    Repository new-file admission passed: 4 new path(s) checked
+python3 scripts/ci/check_repository_hygiene.py --base 0bbb35f1 --head 17f155e1
+    Work-item index membership version=2026-11-24.7 directories=52 linked=52
+    Work-item manifest consistency manifests=41 in_scope=39 excluded_by_record_type=2 unrecognized=0 violations=0
+    Repository new-file admission passed: 2 new path(s) checked
 
-python3 scripts/check_document_management.py --require-changed origin/main
-    PASS (incremental): no GOV-DOC-002 violations; 216 classified, 493 unclassified
+python3 scripts/check_document_management.py --require-changed 0bbb35f1
+    PASS (incremental): no GOV-DOC-002 violations; 219 classified, 493 unclassified
 
-BILINGUAL-MANIFEST: COMPLETE BASE_SHA..HEAD_SHA python3 scripts/check_bilingual_docs.py
+BASE_SHA=... HEAD_SHA=... PR_BODY=... python3 scripts/check_bilingual_docs.py
     bilingual baseline: 77 frozen, 0 new gaps
-    PASS (7 changed paths inspected)
+    Bilingual documentation and prompt-library gate: PASS (6 changed paths inspected)
 ```
 
 The first draft of assertion 3 used an Issue that declared YES, which made the
