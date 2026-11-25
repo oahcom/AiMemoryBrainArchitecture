@@ -147,3 +147,13 @@ session_evidence:
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-059/session-evidence-1015.md
+  - role: CALIBRATION
+    issue_refs:
+      - "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1034"
+    implementing_ai_session: session-799-calibration
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-059/prompt-calibration-v1.md
+    executed_prompt_sha256: dc79a1d7fd2eaf8e1b00eca724d3e6e3e0b5ba73367202cb38877cca8cea7dd7
+    executed_prompt_bytes: 4996
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-059/session-evidence-calibration-001.md
