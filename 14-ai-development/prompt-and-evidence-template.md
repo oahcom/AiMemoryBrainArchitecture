@@ -42,8 +42,12 @@ repository: "oahcom/AiMemoryBrainArchitecture"
 base_branch: ""
 base_commit_sha: ""
 dependency_refs: []
+# Non-normative and human-readable only; CI does not read this field. The
+# normative prompt digest is executed_prompt_sha256 in the session_evidence entry.
 prompt_id: ""
 prompt_version: "v1"
+# Non-normative and human-readable only; CI does not read this field or verify it
+# against the snapshot. Same value as executed_prompt_sha256 when both are set.
 prompt_sha256: ""
 # Exact payload sent to this session after composing baseline + task-specific instructions.
 executed_prompt_snapshot_file: ""
@@ -241,6 +245,8 @@ session_evidence:
 
 Enforcement lives in `scripts/governance/session_evidence/validate.py`: the validator, not this document, is the source of truth, and this section describes what it enforces.
 
+The top-level `prompt_id` / `prompt_sha256` pair in section 1 is non-normative: it is kept for human readability and for historical manifests, CI does not read it, and it is never the authoritative digest of the executed prompt. The authoritative value is `executed_prompt_sha256` inside a `session_evidence` entry.
+
 `session_evidence` 是规范表示，且是可重复列表：一个会话一个条目，即使只有一个会话也是如此。每个条目包含 `role`、`issue_refs` 以及第 1 节列出的全部七个字段，逐条独立校验，且不得与另一个条目共用同一个 `session_evidence_ref`。
 
 在单个条目内，七个字段保持单值。字段中不得用逗号、分号、加号或空白拼接多个值；多个会话应表达为多个条目，绝不能写成一个拼接字符串。（`executed_prompt_bytes` 是非负整数，不是字符串。）
@@ -252,6 +258,8 @@ Enforcement lives in `scripts/governance/session_evidence/validate.py`: the vali
 `issue_refs` 接受 `#number` 或本仓库的规范 URL `https://github.com/<owner>/<repo>/issues/<number>`，其中列出的每个 Issue 都必须同时出现在 pull request 的 Related Issues 中。条目可以为一个 Issue 归属证据，前提是它在 pull request 的逐 Issue 表中映射为 `YES` 或 `LEGACY_UNDECLARED`；条目不得指向 `NO` 行，因为证据不得归属于声明未使用 AI 的 Issue。`LEGACY_UNDECLARED` 表示该 Issue 早于策略生效时间因而没有声明，并不表示未使用 AI，这正是允许向其归属证据的原因。映射为 `YES` 的行仍必须至少由一个条目表示。当证据仅在 pull request 范围归属时，也可以携带空的 `issue_refs`（记录为决策 OD-A3），适用于其工作不属于任何单个关联 Issue 的会话。
 
 执行位于 `scripts/governance/session_evidence/validate.py`：事实来源是校验器而不是本文档，本节描述的是它所强制的内容。
+
+第 1 节的顶层 `prompt_id` / `prompt_sha256` 属于非规范性字段：仅为人类可读性与历史 manifest 保留，CI 不读取，也绝不代表实际执行提示词的权威摘要。权威值是指向 `session_evidence` 条目内的 `executed_prompt_sha256`。
 
 ## 3.3 Pull-request body contract — scope and effective date / 正文契约的适用范围与生效时间
 

@@ -109,7 +109,7 @@ class RepositoryHygieneTests(unittest.TestCase):
             result.stdout,
         )
 
-    def assert_admission_fails(self, base, head, path):
+    def assert_admission_fails(self, base, head, path, *, reason=None):
         result = self.run_checker(base, head)
         self.assertEqual(
             result.returncode,
@@ -118,7 +118,7 @@ class RepositoryHygieneTests(unittest.TestCase):
         )
         expected = (
             "::error::new-file admission violation: "
-            f"no allowlist rule for '{path}'"
+            + (reason or f"no allowlist rule for '{path}'")
         )
         self.assertIn(expected, result.stderr)
 
@@ -252,6 +252,94 @@ class RepositoryHygieneTests(unittest.TestCase):
             "prohibited committed file '/_dm.txt'",
             result.stderr,
         )
+
+    # #1048: a root-level underscore file is scratch, not repository content.
+    # `.md` is an admitted document suffix, so only the root rule can refuse
+    # this, and the message has to name that rule -- "a new file was rejected"
+    # cannot be told apart from a generic allowlist miss.
+    def test_new_root_underscore_file_is_rejected(self):
+        base = self.seed_base()
+        head = self.commit({
+            "_pr_body.md": "PR description draft\n",
+        })
+
+        result = self.run_checker(base, head)
+        self.assertEqual(
+            result.returncode,
+            1,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn(
+            "::error::new-file admission violation: '_pr_body.md' is a "
+            "root-level underscore/dot file; scratch files do not belong at "
+            "the repository root",
+            result.stderr,
+        )
+        self.assertNotIn("no allowlist rule", result.stderr)
+
+    # #1048: the dot half of the rule. `.py` is an admitted source suffix, so
+    # this too is refused only by the root shape.
+    def test_new_root_dot_file_is_rejected(self):
+        base = self.seed_base()
+        head = self.commit({
+            ".scratch.py": "print('scratch')\n",
+        })
+
+        result = self.run_checker(base, head)
+        self.assertEqual(
+            result.returncode,
+            1,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn(
+            "::error::new-file admission violation: '.scratch.py' is a "
+            "root-level underscore/dot file; scratch files do not belong at "
+            "the repository root",
+            result.stderr,
+        )
+
+    # #1048: the rule must not swallow legitimate root documents. A root
+    # .md without the underscore prefix stays admitted.
+    def test_new_root_markdown_file_is_admitted(self):
+        base = self.commit({})
+        head = self.commit({
+            "README.md": "Repository entry point\n",
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # #1048: the rule is root-scoped. A leading underscore in a subdirectory
+    # is ordinary, and asserting it here stops a later edit from widening the
+    # rule to the whole tree without a red test.
+    def test_new_underscore_file_in_subdirectory_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "scripts/_helper.py": "print('internal helper')\n",
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # #1048: /_dm.txt stays prohibited for its own reason. If the root rule
+    # were the only thing rejecting it, deleting the denylist entry would look
+    # harmless; this asserts the denylist still fires first.
+    def test_root_dm_txt_is_rejected_by_the_denylist(self):
+        base = self.seed_base()
+        head = self.commit({
+            "_dm.txt": "generated output\n",
+        })
+
+        result = self.run_checker(base, head)
+        self.assertEqual(
+            result.returncode,
+            1,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn(
+            "::error::repository hygiene violation: "
+            "prohibited committed file '/_dm.txt'",
+            result.stderr,
+        )
+        self.assertNotIn("root-level underscore/dot file", result.stderr)
 
     # M01: committed tree contents, not ignore rules, determine admission.
     def test_gitignored_forced_committed_unapproved_file_fails_admission(self):
@@ -976,7 +1064,7 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args()
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-24.7 "
+            "Work-item manifest consistency version=2026-11-24.8 "
             "manifests=1 in_scope=1 excluded_by_record_type=0 "
             "unrecognized=0 violations=0",
             result.stdout,
@@ -1019,7 +1107,7 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args()
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-24.7 "
+            "Work-item manifest consistency version=2026-11-24.8 "
             "manifests=1 in_scope=1 excluded_by_record_type=0 "
             "unrecognized=0 violations=0",
             result.stdout,
@@ -1066,7 +1154,7 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args()
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-24.7 "
+            "Work-item manifest consistency version=2026-11-24.8 "
             "manifests=1 in_scope=1 excluded_by_record_type=0 "
             "unrecognized=0 violations=0",
             result.stdout,

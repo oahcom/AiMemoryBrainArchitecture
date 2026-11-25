@@ -33,6 +33,46 @@ only in that the gate cannot verify the claim. The two spellings
 ``NOT_AVAILABLE`` and ``NOT_RECORDED`` are kept because the Work Item manifest
 already uses them for ``executed_prompt_provenance`` and
 ``session_reference_status``.
+
+Check numbering
+---------------
+
+Check numbers are stable historical identifiers, not a contiguous sequence,
+and no call site depends on the gaps. Issue #799 states its requirements in
+prose and numbers none of them, so this table names the requirement each
+check enforces instead of borrowing an ordinal that does not exist::
+
+    01  check_01_pr_fields_and_issue_references
+        PR body: AI-assisted work YES requires evidence references, NO
+        requires N/A; the Related Issues list is parsed.
+
+    02  check_02_pr_declaration_and_references
+        No independent requirement: re-parses the PR declaration whose
+        status and references the later checks scope their work by.
+
+    03  check_03_issue_policy_declarations
+        Every linked Issue carries a declaration matching its PR mapping
+        row; LEGACY_UNDECLARED only for an Issue created before the policy.
+
+    04  check_04_head_tree_evidence_paths
+        Every declared evidence path resolves to a regular, non-empty blob
+        in the PR head tree.
+
+    06  check_06_all_references_individually
+        Each reference uses the canonical evidence path form, is not a
+        duplicate within its own declaration scope, and resolves.
+
+    09  check_09_manifest_and_evidence_entries
+        Manifest session_evidence entries: issue_refs point at linked
+        Issues, each evidence document has the required shape, and the
+        OD-A2/OD-A3 mapping consistency holds.
+
+    11  check_11_prompt_snapshot_hashes
+        executed_prompt_sha256 and executed_prompt_bytes match the executed
+        prompt snapshot blob.
+
+``05`` and ``08`` were never written; ``07`` and ``10`` were deleted in
+#1031 as unreachable duplicates of rules the manifest parser still enforces.
 """
 
 from __future__ import annotations
@@ -1507,6 +1547,18 @@ def check_09_manifest_and_evidence_entries(
     pr_paths: list[str],
     changed_paths: set[str] | None = None,
 ) -> list[dict]:
+    """Validate the manifest's session_evidence entries.
+
+    ``changed_paths`` is the set of paths this pull request added or
+    modified; ``None`` means it could not be determined. It scopes the two
+    rules that ask "was this written by this pull request?": the legacy
+    manifest migration requirement, and the requirement that an entry's
+    ``issue_refs`` name only linked Issues. An entry whose
+    ``session_evidence_ref`` this pull request did not touch was written by
+    an earlier session and is not this author's to answer for -- a
+    cumulative manifest would otherwise demand that every later pull
+    request link every Issue any earlier session ever named.
+    """
     manifest_item = _validate_regular_file(
         manifest_path,
         ctx.tree_by_path,
@@ -1528,10 +1580,16 @@ def check_09_manifest_and_evidence_entries(
     )
     is_legacy_manifest = not has_canonical_entries
 
-    if changed_paths is None:
-        changed_paths = set()
+    def changed_by_this_pr(path: str) -> bool:
+        """Whether this pull request is the one that wrote ``path``.
 
-    if is_legacy_manifest and manifest_path in changed_paths:
+        An undetermined changed-path set means nothing is known to be an
+        earlier session's file, so every path counts as this pull
+        request's: not knowing must never widen an exemption.
+        """
+        return changed_paths is None or path in changed_paths
+
+    if is_legacy_manifest and changed_by_this_pr(manifest_path):
         raise ValidationError(
             f"{manifest_path}: updated manifest must use the canonical "
             "session_evidence entries"
@@ -1560,20 +1618,6 @@ def check_09_manifest_and_evidence_entries(
         refs = entry["issue_refs"]
         numbers = set()
 
-        for issue_ref in refs:
-            number = _normalise_issue_reference(
-                issue_ref,
-                ctx.repo,
-            )
-
-            if number not in linked_numbers:
-                raise ValidationError(
-                    f"{location}: issue_refs contains "
-                    f"unlinked Issue #{number}"
-                )
-
-            numbers.add(number)
-
         evidence_path = validate_canonical_evidence_path(
             entry["session_evidence_ref"],
             location,
@@ -1586,6 +1630,27 @@ def check_09_manifest_and_evidence_entries(
             )
 
         entry_paths.add(evidence_path)
+        entry_written_here = changed_by_this_pr(evidence_path)
+
+        for issue_ref in refs:
+            number = _normalise_issue_reference(
+                issue_ref,
+                ctx.repo,
+            )
+
+            # Only the pull request that wrote an entry must attribute it
+            # to an Issue it links. Entry #3 of a cumulative manifest may
+            # name an Issue from its own session; demanding that every
+            # later pull request link it again would grow the requirement
+            # by one Issue per session, forever.
+            if number not in linked_numbers and entry_written_here:
+                raise ValidationError(
+                    f"{location}: issue_refs contains "
+                    f"unlinked Issue #{number}"
+                )
+
+            numbers.add(number)
+
         entry_issue_numbers[evidence_path] = numbers
 
         evidence_item = _validate_regular_file(
@@ -1617,6 +1682,15 @@ def check_09_manifest_and_evidence_entries(
         # deliberately before it gains the right to be attributed.
         if not is_legacy_manifest:
             for number in numbers:
+                # An unchanged entry may name an Issue this pull request
+                # does not link (the scoped relaxation above), and such a
+                # number has no mapping row to judge. The NO rule below
+                # still applies to every Issue this pull request does link:
+                # it forbids attributing evidence to an Issue that
+                # declares no AI involvement, whoever wrote the entry.
+                if number not in mapping:
+                    continue
+
                 row_status, row_paths = mapping[number]
 
                 if row_status not in ("YES", "LEGACY_UNDECLARED"):
@@ -1745,19 +1819,92 @@ def check_11_prompt_snapshot_hashes(
 # Context loading and orchestration
 # ---------------------------------------------------------------------------
 
-def _manifest_path_from_pr(body: str) -> str:
-    match = re.search(
-        r"\bAID-\d{4}-\d{3}\b",
-        body,
-    )
-    if not match:
-        raise ValidationError(
-            "PR description: Work Item ID AID-YYYY-NNN is required"
+def _manifest_path_from_pr(body: str) -> str | None:
+    """Resolve the declared Work Item manifest path; None means NONE.
+
+    A declared Work Item ID field wins over every other AID-YYYY-NNN in
+    the body: prose that mentions another work item above the declaration
+    would otherwise validate the wrong manifest. That is the #1042 defect
+    this field exists to fix.
+
+    An absent field falls back to the first AID-YYYY-NNN in the body
+    instead of failing, because absence is still the common shape: 15 of
+    30 sampled merged pull requests carry no Work Item ID field, and every
+    one of them declares AI-assisted work. Making the field mandatory
+    would therefore be a retroactive requirement -- a policy change, not a
+    bug fix -- and #1042's repair point 2 only asks how "no work item" is
+    expressed, which is the NONE literal below. So absence is announced on
+    stdout and resolved, not refused: a repository-wide notice can be
+    tightened into a hard requirement later, as its own change, once those
+    bodies are corrected.
+    """
+    value = _extract_field(body, "Work Item ID")
+
+    if value is not None and value.strip():
+        identifier = value.strip().upper()
+
+        if identifier == "NONE":
+            # A pull request with no work item is legitimate -- a register
+            # correction opens none -- but only when it declares no
+            # AI-assisted work: a YES declaration owes a canonical
+            # session_evidence entry, and the manifest is where that entry
+            # is validated. check_01 has already enforced that NO carries
+            # N/A references.
+            if _parse_status(
+                _extract_field(body, "AI-assisted work"),
+                "PR",
+            ) != "NO":
+                raise ValidationError(
+                    "PR description: Work Item ID NONE is only valid when "
+                    "AI-assisted work is NO with N/A references; a pull "
+                    "request that declares AI-assisted work YES must name a "
+                    "work item, because its session evidence entry is "
+                    "validated against that work item's manifest"
+                )
+            return None
+
+        # Anything else in the field is a declaration that binds nothing,
+        # so it is refused rather than silently ignored: a typo here used
+        # to fall through to a prose mention and validate another work item.
+        if not re.fullmatch(r"AID-\d{4}-\d{3}", identifier):
+            raise ValidationError(
+                f"PR description: Work Item ID {value.strip()!r} is neither "
+                "AID-YYYY-NNN nor NONE"
+            )
+
+        return (
+            "14-ai-development/work-items/"
+            + identifier
+            + "/manifest.yaml"
         )
+
+    # Field absent (or present but empty): the pre-field shape. Search the
+    # whole body with the resolver's original pattern, which is
+    # case-sensitive on purpose -- the fallback reproduces the old
+    # behaviour exactly rather than widening what prose may bind.
+    match = re.search(r"\bAID-\d{4}-\d{3}\b", body)
+
+    if match is None:
+        raise ValidationError(
+            "PR description: missing Work Item ID field and no AID-YYYY-NNN "
+            "identifier anywhere in the body (use NONE when the pull request "
+            "has no work item)"
+        )
+
+    identifier = match.group(0).upper()
+
+    # Announced, not refused: the run continues against the identifier the
+    # prose supplied, so an old body keeps validating while the missing
+    # declaration stays visible in the job log.
+    print(
+        "::notice::PR description: missing Work Item ID field; using "
+        f"{identifier} found in the body. Add '- Work Item ID: {identifier}' "
+        "to declare it explicitly."
+    )
 
     return (
         "14-ai-development/work-items/"
-        + match.group(0)
+        + identifier
         + "/manifest.yaml"
     )
 
@@ -1800,17 +1947,19 @@ def _check_manifest_entries(
     mapping: dict,
     pr_paths: list[str],
 ) -> None:
-    """Run checks 09 and 11, scoping the legacy exemption to unchanged files."""
+    """Run checks 09 and 11, scoping the entry rules to this PR's changes."""
     changed_paths = _changed_paths_for_manifest(ctx, manifest_path)
     # An unknown base means "everything changed", so no legacy exemption
-    # is granted and the canonical structure is required.
-    manifest_changed = changed_paths is None or manifest_path in changed_paths
+    # is granted, the canonical structure is required, and every manifest
+    # entry counts as this pull request's to answer for. Passing the set
+    # whole -- not just {manifest_path} -- is what lets check_09 tell an
+    # entry this pull request wrote from one an earlier session wrote.
     entries = check_09_manifest_and_evidence_entries(
         ctx,
         manifest_path,
         mapping,
         pr_paths,
-        {manifest_path} if manifest_changed else set(),
+        changed_paths,
     )
     check_11_prompt_snapshot_hashes(ctx, entries)
 
@@ -2073,6 +2222,8 @@ def _run_checks(ctx: ValidationContext) -> str:
             manifest_path = _manifest_path_from_pr(
                 ctx.body
             )
+            # pr_status is YES here, and NONE with AI-assisted work YES is
+            # rejected by _manifest_path_from_pr, so a path always comes back.
             _check_manifest_entries(
                 ctx,
                 manifest_path,
@@ -2105,6 +2256,17 @@ def _run_checks(ctx: ValidationContext) -> str:
     manifest_path = _manifest_path_from_pr(
         ctx.body
     )
+
+    if manifest_path is None:
+        # The PR declares AI-assisted work NO with N/A references, which
+        # check_01 has already enforced, so there is no evidence reference
+        # and no session_evidence entry to validate. Nothing to read.
+        return (
+            "AI-SESSION-EVIDENCE: PRESENT "
+            "(no Work Item declared; manifest and session-evidence entry "
+            "checks not applicable)"
+        )
+
     _check_manifest_entries(
         ctx,
         manifest_path,
@@ -2113,6 +2275,8 @@ def _run_checks(ctx: ValidationContext) -> str:
     )
 
     return "AI-SESSION-EVIDENCE: PRESENT"
+
+
 def main(argv: list[str] | None = None) -> int:
     del argv
 
