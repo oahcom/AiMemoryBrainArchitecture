@@ -137,6 +137,18 @@ Per the Owner's ruling:
 
 **The frozen historical count in `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` §13.7 must not be rewritten or extended.** The frozen count represents the historical observation range it originally defined; adding later instances to that number would change the statistical basis and the historical baseline. This record appends one line after it and leaves the original number untouched.
 
+### 3.0 Three endpoints, three different things
+
+Every table in this section asks the same question: was this merge reviewed. Asking the wrong endpoint returns a constant that looks like evidence, so what each endpoint measures is stated first:
+
+| Endpoint | Measures | Does not contain |
+|---|---|---|
+| `GET /pulls/{n}/reviews` | **Formal review submissions** — the `APPROVE` / `REQUEST_CHANGES` / `COMMENT` actions that occupy the "Files changed" review pane | Anything said in the conversation thread |
+| `GET /pulls/{n}/comments` | **Inline diff comments** — comments attached to a line of the patch | The conversation thread, formal review state |
+| `GET /issues/{n}/comments` | **The conversation thread** — the PR discussion, in time order | Formal review state, inline comments |
+
+Two zeros side by side read as mutual corroboration, and can be the same absence counted twice — which is what `#966` shows happened here. The six instances below are therefore measured on all three endpoints, and formal reviews are recorded separately from reviews written in the conversation thread instead of being merged into a single `0`.
+
 ### 3.1 Follow-on instance (two): PR #890
 
 `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/890/reviews` -> `[]`.
@@ -148,6 +160,7 @@ Verified evidence, read item by item when this entry was added. No figure is car
 | Item | Endpoint | Field | Value as returned |
 |---|---|---|---|
 | Formal reviews | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/890/reviews` | array length | `0` records |
+| Conversation comments | `GET /repos/oahcom/AiMemoryBrainArchitecture/issues/890/comments` | array length | `0` records |
 | Merge time | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/890` | `merged_at` | `2026-11-24T05:39:10Z` |
 | Merging account | same record | `merged_by.login` | `oahcom` |
 | Merge commit | same record | `merge_commit_sha` | `0f32d46c34cb086e52de38fa49b33ca8a3bf5cd3` |
@@ -177,6 +190,7 @@ What this record does not state: no attribution of `merged_by: oahcom` to a part
 | Item | Endpoint | Field | Value as returned |
 |---|---|---|---|
 | Formal reviews | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/896/reviews` | array length | `0` records |
+| Conversation comments | `GET /repos/oahcom/AiMemoryBrainArchitecture/issues/896/comments` | array length | `0` records |
 | Merge time | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/896` | `merged_at` | `2026-11-24T06:51:52Z` |
 | Merging account | same record | `merged_by.login` | `oahcom` |
 | Merge commit | same record | `merge_commit_sha` | `84bbe9241aef748b406a969da321e7d3fcda2dc1` |
@@ -216,6 +230,7 @@ This subsection therefore does **not** say "merged in violation of a ruling". Wr
 | Item | Endpoint | Field | Value as returned |
 |---|---|---|---|
 | Formal reviews | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/927/reviews` | array length | `0` records |
+| Conversation comments | `GET /repos/oahcom/AiMemoryBrainArchitecture/issues/927/comments` | array length | `1` records |
 | Merge time | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/927` | `merged_at` | `2026-11-24T10:38:00Z` |
 | Merging account | same record | `merged_by.login` | `oahcom` |
 | Merge commit | same record | `merge_commit_sha` | `b3a65e54b0b0380430cc4cf8b187d3e0c9edb7a3` |
@@ -228,6 +243,10 @@ it, and does not turn "this session granted no merge authorisation" into "someon
 authorisation". This session's handling of that PR was: request a content review, and do not call the
 merge endpoint.
 
+**The conversation thread holds one review, written after the merge.** `GET /repos/oahcom/AiMemoryBrainArchitecture/issues/927/comments` -> `1` record, `created_at` `2026-11-24T11:16:18Z`, 38 minutes after `merged_at` `10:38:00Z`. Its first line is `## Ruling 86 — #927's classification reconciles exactly; the manifest is sound and should merge`.
+
+The accurate statement for this instance is therefore not "zero review" but **`0` formal reviews, `1` post-merge review**. Both instants come from the same API (`issues/{n}/comments.created_at` and `pulls/{n}.merged_at`), so the `+38` needs no local clock and the prohibition in `OWNER-DECISION-EVENT-TIMESTAMP-PROVENANCE-001` does not reach it. The review was written after the merge; it did not, and could not, gate it.
+
 ### 3.4 Follow-on instance (five): PR #933
 
 `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/933/reviews` -> `[]`.
@@ -237,6 +256,7 @@ merge endpoint.
 | Item | Endpoint | Field | Value as returned |
 |---|---|---|---|
 | Formal reviews | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/933/reviews` | array length | `0` records |
+| Conversation comments | `GET /repos/oahcom/AiMemoryBrainArchitecture/issues/933/comments` | array length | `0` records |
 | Merge time | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/933` | `merged_at` | `2026-11-24T11:34:23Z` |
 | Merging account | same record | `merged_by.login` | `oahcom` |
 | Merge commit | same record | `merge_commit_sha` | `3235db07f23cb272da7460147e2f80413e68e555` |
@@ -259,6 +279,7 @@ and so it gets its own subsection rather than a row in the previous table.
 |---|---|---|---|
 | Formal reviews | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/946/reviews` | array length | `0` records |
 | Review comments | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/946/comments` | array length | `0` records |
+| Conversation comments | `GET /repos/oahcom/AiMemoryBrainArchitecture/issues/946/comments` | array length | `1` records |
 | Merge time | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/946` | `merged_at` | `2026-11-24T14:05:56Z` |
 | Merging account | same record | `merged_by.login` | `oahcom` |
 | Merge commit | same record | `merge_commit_sha` | `8e489ec1e18cd127088a695fa21121521e240514` |
@@ -290,20 +311,31 @@ This session's handling of #946: create the PR, push the branch, commit document
 call the merge endpoint**. `oahcom` is recorded only as a GitHub account. As with the previous five,
 this record does not judge who triggered the merge.
 
+**Ninety minutes after the merge, one approval appears in the same PR's conversation thread.** `GET /repos/oahcom/AiMemoryBrainArchitecture/issues/946/comments` -> `1` record, `created_at` `2026-11-24T15:36:10Z`, 90 minutes after the merge at `14:05:56Z`. Its first line is `## Owner review — approved. The arithmetic reconciles, and the mutation is a genuine bound`.
+
+That approval is not in `pulls/946/reviews`: it is not a formal review submission but a comment in the conversation thread. Both instants are platform timestamps, so the `+90` minutes needs no local clock.
+
+**It does not retract this subsection's refusal finding; the two stand side by side.** An "approved / Merge it" written ninety minutes after the merge is a **ratification** of a merge that had already happened, not a **permission** for it — it did not, and could not, gate the merge. This subsection therefore records two facts, not one:
+
+1. An explicit refusal already existed at merge time (above; establishable from content).
+2. A ratifying approval appeared 90 minutes after the merge (this paragraph; establishable from platform timestamps).
+
+Writing the second as a mitigation of the first would quietly convert "the merge happened after an explicit refusal" into "somebody approved it later". The second neither mitigates nor aggravates; it only makes "zero review" an inaccurate description. The accurate one is: **`0` formal reviews, `1` post-merge ratification.**
+
 ### 3.6 Sequence summary (the frozen §13.7 count is not rewritten)
 
-| # | PR | Merge time (UTC) | Formal reviews | Difference from the preceding |
-|---|---|---|---:|---|
-| one | #875 | `2026-11-24T04:54:07Z` | 0 | form deviation, content approved |
-| two | #890 | `2026-11-24T05:39:10Z` | 0 | ordering unknown |
-| three | #896 | `2026-11-24T06:51:52Z` | 0 | ordering unknown (ruling 75 s after merge) |
-| four | #927 | `2026-11-24T10:38:00Z` | 0 | ordering unknown |
-| five | #933 | `2026-11-24T11:34:23Z` | 0 | ordering unknown |
-| six | #946 | `2026-11-24T14:05:56Z` | 0 | **an explicit refusal already existed** |
+| # | PR | Merge time (UTC) | Formal reviews | Conversation | Difference from the preceding |
+|---|---|---|---:|---|---|
+| one | #875 | `2026-11-24T04:54:07Z` | 0 | 0 | form deviation, content approved |
+| two | #890 | `2026-11-24T05:39:10Z` | 0 | 0 | ordering unknown |
+| three | #896 | `2026-11-24T06:51:52Z` | 0 | 0 | ordering unknown (ruling 75 s after merge) |
+| four | #927 | `2026-11-24T10:38:00Z` | 0 | 1 (merge +38 min) | ordering unknown |
+| five | #933 | `2026-11-24T11:34:23Z` | 0 | 0 | ordering unknown |
+| six | #946 | `2026-11-24T14:05:56Z` | 0 | 1 (merge +90 min) | **an explicit refusal already existed** |
 
 The frozen count in `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` §13.7 keeps its original value and is
 not changed by appending to this table. This table is a follow-on observation list, not a revision of
-the original statistical scope.
+the original statistical scope. The added Conversation column does not change it either: that column widens the **dimensions of the observed instance list**, not the base of the historical statistic.
 
 ---
 

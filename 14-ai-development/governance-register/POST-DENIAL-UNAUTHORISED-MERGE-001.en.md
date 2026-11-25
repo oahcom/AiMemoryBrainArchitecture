@@ -141,7 +141,7 @@ Three consequences, stated as measurement rather than inference:
 
 Together these explain why "the file says it is forbidden" never became "the system prevents it".
 
-### 7.1 Full-history census: the requirement has never once been met
+### 7.1 Full-history census: 556 merges carry no review object at all
 
 The table above measures the control plane. This one measures the outcome over the entire repository history, because "how many merges recently skipped review" is a weaker question than "has review ever happened at all".
 
@@ -163,11 +163,55 @@ The table above measures the control plane. This one measures the outcome over t
 
 **Cross-check, independent of the enumeration.** `GET /search/issues?q=repo:oahcom/AiMemoryBrainArchitecture+review:approved+is:pr` returned `total_count: 0`, and the same query restricted to `is:merged` also returned `0`. A different endpoint, a different index, the same answer.
 
-**What this establishes.** Not "seven merges skipped review". Not "enforcement recently failed". The state is that in 662 merged PRs the record contains **no formal approval at all** — every review object that exists is a `COMMENTED` state, which D1 explicitly excludes from counting as approval, and all 170 were written by the same account that authored the PRs. D1 has never been satisfied, in any period of this repository's history.
+**What this establishes.** Not "seven merges skipped review". Not "enforcement recently failed". The finding is two numbers: of 662 merged PRs, **556 carry no review object at all** — not "no approval", but the review-submission path never walked even once — and the other 106 carry 170 objects, all `COMMENTED`. Review existed in form 106 times, and in 556 merges it did not exist in any form.
+
+**`APPROVED = 0` is not a finding on the same level, and this record moves it out of the headline.** `GET /collaborators` returns `["oahcom"]`: exactly one collaborator. `GET /pulls?state=closed`, every page, returns 795 closed PRs, and `user.login` is `oahcom` for all of them (795 / 795). GitHub does not permit an account to approve a pull request it authored, so the number of `APPROVED` objects is not "currently zero" — it is **necessarily zero under this account topology, for every PR, forever, regardless of anyone's conduct**. Leading with it is reporting that a coin landed heads when the coin has one side: the number is true and carries no information.
+
+D1's classification therefore changes. Not `ENFORCEMENT FAILURE` — that names a conduct defect and implies a fix in behaviour — but **`REQUIRED BUT UNSATISFIABLE BY CONSTRUCTION`**, which names a specification defect and implies a fix in the rule. The earlier wording is preserved verbatim in `AID-2026-055`'s `status_history`, so the correction is auditable rather than overwritten. What independence can be expressed here is set out in §7.2.
 
 **What this does not establish.** It does not show that nobody ever reviewed the code, and it does not identify any person's intent. A `COMMENTED` review object is real review activity; what it is not is the record D1 requires. The finding is about the record, and about a control plane that was never configured to produce that record (`required_pull_request_reviews` is absent, §7).
 
-**Why the count "seven" is not used here.** Earlier drafts of this record counted a subset of post-freeze merges. A subset count invites the reading that the problem is bounded and recent. The census is neither bounded nor recent, so it is the figure that governs.
+
+
+### 7.2 The third endpoint: the conversation thread, and why "zero review" is itself inaccurate
+
+§7.1 measured `pulls/{n}/reviews`. That is one of three endpoints, and in this repository it is the only one structurally guaranteed to be near-empty. The three measure different things, and mixing them returns a constant that looks like evidence:
+
+| Endpoint | Measures | Does not contain |
+|---|---|---|
+| `GET /pulls/{n}/reviews` | Formal review submissions (`APPROVE` / `REQUEST_CHANGES` / `COMMENT`) | Anything said in the conversation thread |
+| `GET /pulls/{n}/comments` | Inline diff comments | The conversation thread, formal reviews |
+| `GET /issues/{n}/comments` | The conversation thread (the PR discussion in time order) | Formal review state, inline comments |
+
+`#966` establishes that the distinction is not pedantry. `GOV-NC-2026-11-24-MERGE-FORM-DEVIATION-031` §3.5 lists the two zeros from `pulls/946/reviews` and `pulls/946/comments` side by side, where they read as mutual corroboration while actually being one absence counted twice. The same PR's `issues/946/comments` returns `1` record, `created_at` `2026-11-24T15:36:10Z`, 90 minutes after the merge at `14:05:56Z`, first line `## Owner review — approved. The arithmetic reconciles, and the mutation is a genuine bound`.
+
+**Third-endpoint measurement over the whole history.** Same enumeration as §7.1, read at `2026-11-25T00:36Z`:
+
+| Quantity | Value |
+|---|---|
+| Closed PRs enumerated | 795 |
+| Merged PRs (`merged_at` non-null) | 681 |
+| All conversation comments in the repository (`GET /issues/comments`, every page) | 4577 |
+| Authors of those comments | `{oahcom: 4577}` |
+| Merged PRs with at least one conversation comment | 406 |
+| Of those, with a comment **before** the merge | 317 |
+| Of those, with a comment **after** the merge | 232 |
+| Formal review objects (the §7.1 endpoint, extended to all 681 merged PRs) | 170, all `COMMENTED`, all authored by `oahcom` |
+| Formal review objects in state `APPROVED` | **0** |
+
+**So one sentence in §7.1 needs correcting, and D1's conclusion does not change.** §7.1 measures only the formal-review endpoint, which invites the stronger reading "nobody ever looked", and that reading is false: 406 merged PRs have conversation comments, 317 of them before the merge. The accurate state is also the harder one to argue away:
+
+> Review activity exists, and written review exists: 406 merged PRs carry a conversation comment, 317 of them written before the merge. But all 4,577 comments and all 170 review objects were written by one account, that account authored all 795 closed PRs, and GitHub does not permit it to approve its own pull requests.
+
+So the question is not "did anyone review", and not "was the reviewer good enough". It is this: **defining independence as "a second GitHub account appears" is a specification defect that cannot be satisfied under this topology.**
+
+That is not lowering the standard. It is moving the standard to the dimension this repository can express. `#935` already supplied the answer: **independence is a property of the reviewing session, not of the GitHub account.** D1 must therefore be restated in a form GitHub can express — a required status check, produced by a check run, asserting a non-authoring reviewing session. A status check needs no second account, and that is exactly how `#704` turned doctests into a gate and how `#965` is turning session evidence into one.
+
+The converse must be stated as well: **`required_pull_request_reviews` can never be satisfied here, and must not be added.** Turning it on does not make `main` safer; it makes the next merge attempt impossible, because it requires an object this account topology cannot produce. §7 records it as absent — that is a statement of fact, not a repair instruction, and a later session that reads it as one will freeze the repository.
+
+**This does not retract the refusal finding in §3.** A ratifying approval written 90 minutes after the merge ratifies a merge that already happened; it is not a permission for it, and it neither mitigates nor aggravates the existing refusal. The two are recorded side by side in `GOV-NC-2026-11-24-MERGE-FORM-DEVIATION-031` §3.5.
+
+**This does not change the frozen basis in §7.1.** The historical count in `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` §13.7 keeps its original value; this section widens the observed dimension, not the statistical base.
 
 ---
 
@@ -175,5 +219,6 @@ The table above measures the control plane. This one measures the outcome over t
 
 - `GOV-NC-2026-11-24-MERGE-FORM-DEVIATION-031` §3.5 — the merge-form record for the same event.
 - `OWNER-DECISION-REVIEW-INDEPENDENCE-001` — the policy basis for D1, with the full 690-PR measurement.
+- `#966` — the Owner ruling on `GOV-NC-2026-11-24-MERGE-FORM-DEVIATION-031` §3: the three endpoints measure different things, and a post-merge review in the conversation thread must be recorded separately from a formal review. §7.2 is the result of applying it.
 - `EX-20261123-01` — the only registered exception record.
 - `AID-2026-057` — the work item whose implementation merged, including the AC8/AC9 acceptance evidence.
