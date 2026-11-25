@@ -312,13 +312,15 @@ independent review and acceptance of #422
 
 Release conditions, from the ruling:
 
-1. designate a reviewer distinct from #440's author and merger;
+1. designate a reviewer distinct from #440's author and merger [note of 2026-11-25: the "different account" part of that condition no longer holds; a separate session under the same account satisfies it, see the note at the end of this section];
 2. check the English source, the English mirror and the Chinese translation item by item;
 3. confirm the Chinese neither omits, alters nor widens the source's normative force;
 4. the reviewer states an independent conclusion;
 5. only then does the merge decision proceed.
 
-And explicitly: **S-2 being unassigned does not lower the independence standard** — but it also does not require waiting forever for one unnamed account; any real, authorised independent reviewer satisfying identity separation will do.
+And explicitly: **S-2 being unassigned does not lower the independence standard** [note of 2026-11-25: "satisfying identity separation" no longer requires a different account; the first clause is unchanged] — but it also does not require waiting forever for one unnamed account; any real, authorised independent reviewer satisfying identity separation will do.
+
+> **Added 2026-11-25 (citation currency).** Release condition 1 above ("designate a reviewer distinct from #440's author and merger") and "satisfying identity separation" in the closing sentence record the rule as the 2026-11-21 ruling stated it, and that rule has been retired. `PR-GOVERNANCE-001` §5 was amended on 2026-11-24 (commit `2eb4e352`, PR #935). Retired wording: "when the author and the reviewer use the same GitHub identity, this does not constitute independent review." Live rule: independence is a property of the reviewing **session**, not of the GitHub account; several sessions may share one identity; a session qualifies if it neither wrote nor implemented the change and takes its conclusion from the artifact. Recorded in `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`. What survives here: the **act** of designating a reviewer (condition 1) — what dies is the requirement that the designee be a different GitHub account, since a second session under the same account qualifies. "Does not lower the independence standard" survives; "satisfying identity separation" does not, and a shared identity is no longer an obstacle. Conditions 2–5 are unaffected. Section 12 of this register, the 2026-11-24 re-check, re-tested technical assertions only and says nothing about identity or independence — which is why these passages were never touched, and which means section 12 is not a blanket clearance of section 9.
 
 ### 9.4 The evidential weight of the local `EXIT=1` is bounded
 
@@ -345,6 +347,8 @@ So "verify the empty diff on the real main history after merge" cannot be skippe
 | S-2 second identity | `APPROVED_IN_PRINCIPLE / IDENTITY_NOT_ASSIGNED` |
 | Sponsor / Accountable Owner | `NOT_ASSIGNED` |
 | AID-2026-023/024/026 R2 | `NOT_AUTHORIZED` |
+
+> **Added 2026-11-25 (citation currency).** The row `S-2 second identity` — `APPROVED_IN_PRINCIPLE / IDENTITY_NOT_ASSIGNED` — is a status label dated 2026-11-21, not a count, and its value is unchanged; but `IDENTITY_NOT_ASSIGNED` cannot be read as "independence is blocked". `PR-GOVERNANCE-001` §5 was amended on 2026-11-24 (commit `2eb4e352`, PR #935), retiring "when the author and the reviewer use the same GitHub identity, this does not constitute independent review"; independence is now a property of the reviewing **session**, not the account, and a second session under the same identity qualifies (`GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`). What is missing is a designated reviewing session, not a second account.
 
 ### 9.6 What this ruling means on its own
 

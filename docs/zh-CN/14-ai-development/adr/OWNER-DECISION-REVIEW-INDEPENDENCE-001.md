@@ -155,9 +155,9 @@ approver: Integration Owner
 
 Its §9 states: "Changes to this standard require a bilingual semantic-parity update and an exact-Head governance review."
 
-The governance review §9 requires is the independent review §5 cannot supply. **Demoting §5 requires disobeying §5.** The remedy is not merely awkward; it is unavailable through its own text.
+The governance review §9 requires is the independent review §5 cannot supply. **Demoting §5 requires disobeying §5.** The remedy is not merely awkward; it is unavailable through its own text.[附注 2026-11-25：这三句已由 §9.2 撤回，此处保留原文。§9 要求的治理审查可由未撰写、未实现该变更的会话提供，因此 §5 能满足 §9，二者不冲突；PR #935 于 2026-11-24 正是经此路径按 `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036` 修订了 §5。"补救 3 在其自身文本下不可用"不成立；仍成立的是：§5 至今未被降级，且 #935 只改了判定标准、没有降级 §5。]
 
-008 §10.5 called remedy 3 "最诚实，也最省事". It is neither. It is the one remedy that would look like a decision while being a violation of the standard it edits.
+008 §10.5 called remedy 3 "最诚实，也最省事". It is neither. It is the one remedy that would look like a decision while being a violation of the standard it edits.[附注 2026-11-25：此判断以 §4 的循环论证为依据，该依据已由 `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`（PR #935，2026-11-24）修订 §5 时失效：§9 的治理审查可由另一会话提供，故降级 §5 不必然违反 §5。"降到 Informative 会像决策而实为违规"对未取得 §9 审查的编辑仍成立，对已取得该审查的编辑不成立。]
 
 ## 5. The fourth disposition, which already exists
 
@@ -177,13 +177,15 @@ That is the disposition. Not one of the three. **The exception is recorded, expl
 
 Platform enforcement exists here. A disposition naming an absent platform capability would be a false statement about this repository, so this document does not use one.
 
-**The identity problem is separate, and §7 never addressed it.** Independent review is unsatisfiable at `collaborators = 1` with GitHub forbidding self-approval (§2.2, §3). That is a fact about who may write, not about what the plan or the visibility permits; changing either would not produce a second reviewer.
+**The identity problem is separate, and §7 never addressed it.** Independent review is unsatisfiable at `collaborators = 1` with GitHub forbidding self-approval (§2.2, §3).[附注 2026-11-25：结论不变，依据换了，且适用范围被收窄到"平台强制审批"这一层。GitHub 按用户计数并禁止自批，`collaborators = 1` 使 *required approval* 无法取得——该平台事实不变，§5 的修订（`GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`，PR #935）也未触及它。"独立审查本身不可满足"不成立：§5 现已把独立性定为会话属性，另一个会话即可提供独立审查，无需第二个账号。] That is a fact about who may write, not about what the plan or the visibility permits; changing either would not produce a second reviewer.
 
 **What the merges were.** §5 forbids the *silence*, not the waiver. Every merge counted in §2.1 was a waiver that should have been recorded and was not. Recording it is what `EX-20261123-01` does, and the count it produces is what arms the `AI-EXEC-001` §6 rule-revision trigger (§5.1).
 
 **What Issue #134 carries now, and what it did not.** #134 was closed `completed` at `2026-11-19T17:28:27Z`; its two remediation items were dispositioned `PLATFORM-LIMITED` on the ground that protection and rulesets both return `403` for a private repository on the free plan. That ground is false: `GET /repos/oahcom/AiMemoryBrainArchitecture` returns `private=false` / `visibility=public`, and `GET /branches/main/protection` returns `200` with 11 required contexts, `strict: true` and `enforce_admins: true`. Because the ground is false, #134 carries a `reopened` event at `2026-11-24T03:04:21Z`; before it, a `closed` event at `2026-11-19T17:28:27Z` with `state_reason: completed`. It now tracks a narrower question: whether the status-check enforcement and the change of repository visibility were authorized. Independent approval — `required_pull_request_reviews` is absent from that same payload — remains the subject of this record and not of #134. An earlier version of this paragraph asserted that the issue had been open continuously; it had in fact been closed for most of the interval.
 
 ### 5.1 The rule-revision trigger is armed, and it is the one legitimate way to change §5
+
+> **2026-11-25 附注（引文时效）。** "唯一合法途径"已被事实推翻：§5 于 2026-11-24 经 `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`（PR #935）按 §9 自身的精确 Head 治理审查路径完成修订，未使用本条配额触发。配额触发仍是合法途径之一，但不是唯一；"先记录、再计数、后触发修订"的顺序结论不变。同节 "Remedy 3 edits §5 by disobeying §9" 亦随 §4 的循环论证失效：已取得 §9 审查的编辑不违反 §9。
 
 `AI-EXEC-001` v1.1 is **ADOPTED** (PR #256, merge `48a55649`), so its §6 quota clause binds:
 
@@ -207,6 +209,8 @@ So the sequence is ordered, and each step is someone's:
 
 Recording first is not bureaucracy. Until the count exists, the trigger has no input, and the standard has no lawful route to amend itself.
 
+> **2026-11-25 附注（引文时效）。** 上表末行 "Or supply a second write identity" 把"第二个可写身份"当作使合并合规的路径之一。自 2026-11-24 起（`GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`，PR #935），独立性由会话而非账号决定，因此第二个身份不再为独立审查所必需，它只对补救 1（平台强制的 required approval）仍然必需。上表其余各行不变。
+
 ## 6. The one thing a session can actually do, and why this document is `Draft`
 
 > **Partly withdrawn by §9 (2026-11-25).** The sentence "that is structural and nobody's fault" is the error §9 records: it turned "nobody opened an independent session" into "no independent session can be opened". The obligation to record the exception is unaffected and remains the one act a session can take.
@@ -223,10 +227,10 @@ Which is why this document is `Draft`. Every sibling `OWNER-DECISION-*.md` in th
 
 **Ruled.**
 
-1. 008 §10.5's choice is **not available to any session**. Remedies 1 and 2 require a second write-capable identity; remedy 3 requires the review it removes.
+1. 008 §10.5's choice is **not available to any session**. Remedies 1 and 2 require a second write-capable identity; remedy 3 requires the review it removes.[附注 2026-11-25：本项已由 §9.5 撤回，原文保留。前提"独立性需要第二个 GitHub 账号"已于 2026-11-24 被 `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`（PR #935）修订。撤回后：补救 1 仍不可用（平台按用户计数、禁止自批）；补救 2 作为规则可用、补救 3 可用（§9.5）。"选择权属于 Owner"这一点不变。]
 2. The correct disposition is a **recorded exception** under `PR-GOVERNANCE-001` §5, filed as `EX-20261123-01`. No platform-blocked status is claimed: §7's precondition — a plan or visibility that cannot enforce the controls — is false as measured on `2026-11-24`, so §7 is not available as a ground (§5). **Issue #134** stays open, tracking the narrower question §5 states: whether the status-check enforcement and the visibility change were authorized.
 3. The immediate, session-executable obligation is to **record the exception**, which has been skipped on every one of the 581 merges. `EX-20261123-01` is created with this ruling and covers the interval retrospectively. Per RULING-06's counting rule — one record per distinct blocked Work Item plus one missing control, where a continuous blocked interval counts once — one record covers the interval, not 581 records.
-4. §5 stays `Normative` **for now**. It is not demoted unilaterally, because its scope is real (§2.4) and removal by edit is not executable (§4). The lawful route is §5.1's quota trigger, which requires the count that `EX-20261123-01` supplies.
+4. §5 stays `Normative` **for now**. It is not demoted unilaterally, because its scope is real (§2.4) and removal by edit is not executable (§4).[附注 2026-11-25：结论不变，依据换了。"§5 仍为 Normative、未被单方面降级"不变；依据 "removal by edit is not executable (§4)" 已随 §5 于 2026-11-24 经 `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`（PR #935）修订而失效——按 §9 的精确 Head 治理审查路径可经另一会话完成，故该编辑是可执行的，只是尚未作出。"§5.1 的配额触发"作为途径之一仍成立，"唯一合法途径"的表述见 §5.1 附注。] The lawful route is §5.1's quota trigger, which requires the count that `EX-20261123-01` supplies.
 
 **Refused.**
 
@@ -244,6 +248,8 @@ Everything above is a measurement about the repository's past and present. None 
 That difference is small. It is also the only difference available from inside the repository.
 
 ## 9. Erratum: one of the three remedies was available, and was used (2026-11-25)
+
+> **2026-11-25 附注（引文时效）。** 标题中的 "was used" 指 §9 的路径被使用，不指补救 3 已执行。按本节 §9.2 自己的区分：PR #935（`GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`，2026-11-24）修订了独立性判定标准，但未把 §5 降级为 Informative。本附注只订正标题措辞，不涉及任何计数或测量值。
 
 `PR-GOVERNANCE-001` §5 was amended on 2026-11-24
 (`GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`, PR #935). Independence
