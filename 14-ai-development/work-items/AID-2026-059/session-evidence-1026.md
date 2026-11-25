@@ -130,10 +130,17 @@ Gate conclusions read, not assumed:
 python3 scripts/ci/check_line_endings.py
     Line-ending check: 1339 files inspected, 0 binary skipped, 0 violations.
 
-python3 scripts/ci/check_repository_hygiene.py --base 0bbb35f1 --head 17f155e1
-    Work-item index membership version=2026-11-24.7 directories=52 linked=52
-    Work-item manifest consistency manifests=41 in_scope=39 excluded_by_record_type=2 unrecognized=0 violations=0
-    Repository new-file admission passed: 2 new path(s) checked
+python3 scripts/ci/check_repository_hygiene.py --base 69cb05c9573f204821b25ee4bd199bc4c3b5dad6 --head ff8a33b2e0bcb68cfe4491d532eeea93790b411a
+    Work-item index membership version=2026-11-24.7 directories=55 linked=55
+    Work-item manifest consistency version=2026-11-24.7 manifests=44 in_scope=42 excluded_by_record_type=2 unrecognized=0 violations=0
+    Repository new-file admission version=2026-11-24.7 base=69cb05c9573f204821b25ee4bd199bc4c3b5dad6 head=ff8a33b2e0bcb68cfe4491d532eeea93790b411a merge_base=69cb05c9573f204821b25ee4bd199bc4c3b5dad6
+    Repository new-file admission passed: 0 new path(s) checked.
+    exit code 0
+
+  The head named above is the parent of the commit that carries this quotation;
+  quoting a commit inside itself is impossible, and the two differ only by this
+  block. The earlier draft quoted `--base 0bbb35f1 --head 17f155e1`, neither of
+  which is a base or head of the merged work.
 
 python3 scripts/check_document_management.py --require-changed 0bbb35f1
     PASS (incremental): no GOV-DOC-002 violations; 219 classified, 493 unclassified
