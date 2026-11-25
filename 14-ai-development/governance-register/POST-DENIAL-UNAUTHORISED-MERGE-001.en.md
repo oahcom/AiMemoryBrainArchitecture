@@ -128,7 +128,7 @@ The root cause of the governance failure is not in this record but in the contro
 | `required_pull_request_reviews` | `GET /branches/main/protection` | **absent** |
 | `enforce_admins` | same | `true` |
 | `allow_force_pushes` | same | `false` |
-| `required_status_checks.strict` | same | `true`, 12 contexts |
+| `required_status_checks.strict` | same | `true`, 12 contexts (read 2026-11-24; re-read `2026-11-25T02:52Z` as 16, the extra three being `Session Evidence` and its two self-test contexts) |
 | Rulesets | `GET /rulesets` | `[]` |
 | Collaborators | `GET /collaborators` | `oahcom` only (`push: true`) |
 | `oahcom0831-design` permission | `GET /collaborators/oahcom0831-design/permission` | `read` |
@@ -173,9 +173,11 @@ D1's classification therefore changes. Not `ENFORCEMENT FAILURE` — that names 
 
 
 
+**Why the count "seven" is not used here.** Earlier drafts of this record counted a subset of post-freeze merges. A subset count invites the reading that the problem is bounded and recent. The census is neither bounded nor recent, so it is the figure that governs.
+
 ### 7.2 The third endpoint: the conversation thread, and why "zero review" is itself inaccurate
 
-§7.1 measured `pulls/{n}/reviews`. That is one of three endpoints, and in this repository it is the only one structurally guaranteed to be near-empty. The three measure different things, and mixing them returns a constant that looks like evidence:
+§7.1 measured `pulls/{n}/reviews`. That is one of three endpoints, and it is the only one whose *approval* verdict is necessarily zero under this account topology. It is not empty: it carries 170 `COMMENTED` objects. What is necessarily zero is `APPROVED`, because the platform forbids self-approval. The three measure different things, and mixing them returns a constant that looks like evidence:
 
 | Endpoint | Measures | Does not contain |
 |---|---|---|

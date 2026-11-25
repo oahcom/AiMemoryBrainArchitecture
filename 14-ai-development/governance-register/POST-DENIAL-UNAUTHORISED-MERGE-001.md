@@ -128,7 +128,7 @@ document_metadata:
 | `required_pull_request_reviews` | `GET /branches/main/protection` | **不存在** |
 | `enforce_admins` | 同上 | `true` |
 | `allow_force_pushes` | 同上 | `false` |
-| `required_status_checks.strict` | 同上 | `true`，12 个 context |
+| `required_status_checks.strict` | 同上 | `true`，12 个 context（2026-11-24 实读；2026-11-25T02:52Z 复读为 16 项，多出的是 `Session Evidence` 与两个 self-test 上下文） |
 | Rulesets | `GET /rulesets` | `[]` |
 | Collaborators | `GET /collaborators` | 仅 `oahcom`（`push: true`） |
 | `oahcom0831-design` 权限 | `GET /collaborators/oahcom0831-design/permission` | `read` |
@@ -175,7 +175,7 @@ document_metadata:
 
 ### 7.2 第三个端点：会话线程，以及「零 Review」这个说法本身不准确
 
-§7.1 测的是 `pulls/{n}/reviews`。那只是三个端点中的一个，而且是本仓库里唯一一个结构性恒为空的那个。三者度量的东西不同，混用会得到一个看起来像证据的常量：
+§7.1 测的是 `pulls/{n}/reviews`。那只是三个端点中的一个，而且是本仓库里唯一一个「批准」在构造上必然为零的那个——它并不为空：它有 170 个 `COMMENTED` 对象，恒为零的是 `APPROVED`（自我批准被平台禁止）。三者度量的东西不同，混用会得到一个看起来像证据的常量：
 
 | 端点 | 度量的是 | 不含什么 |
 |---|---|---|

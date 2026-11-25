@@ -58,12 +58,15 @@ numbered rulings, verbatim:
 The output of the session was four edited documents and one new measurement. No
 repository code was changed.
 
-**Documents edited** — each bilingual pair edited in both languages, with the same
-six rows and the same two restatements:
+**Documents edited** — each bilingual pair edited in both languages. The per-instance
+tables in `GOV-NC-...-031` section 3 are **five** (`#890`, `#896`, `#927`, `#933`, `#946`);
+`#875` has no per-instance table, only a row in the section 3.6 summary, and that summary
+row carries the new column too. An earlier revision of this paragraph said "six rows",
+which was wrong about the per-instance tables.
 
 | Path | Change |
 |---|---|
-| `14-ai-development/governance-register/GOV-NC-2026-11-24-MERGE-FORM-DEVIATION-031.md` | new §3.0 (endpoint semantics); `会话评论数` row added to all six instances; §3.3 and §3.5 restated as `0` formal / `1` post-merge; §3.6 gains a `会话线程` column |
+| `14-ai-development/governance-register/GOV-NC-2026-11-24-MERGE-FORM-DEVIATION-031.md` | new §3.0 (endpoint semantics); `会话评论数` row added to the five per-instance tables and to the section 3.6 summary row; §3.3 and §3.5 restated as `0` formal / `1` post-merge; §3.6 gains a `会话线程` column |
 | `14-ai-development/governance-register/GOV-NC-2026-11-24-MERGE-FORM-DEVIATION-031.en.md` | the same four changes in English |
 | `14-ai-development/governance-register/POST-DENIAL-UNAUTHORISED-MERGE-001.md` | new §7.2 (third-endpoint census); §8 gains the `#966` reference |
 | `14-ai-development/governance-register/POST-DENIAL-UNAUTHORISED-MERGE-001.en.md` | the same two changes in English |
