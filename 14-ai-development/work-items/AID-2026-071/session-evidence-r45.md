@@ -65,9 +65,15 @@ change was carried out against, pinned at
 file has not changed since it was pinned, not that it is byte-for-byte what the
 session read.
 
-The clause text is not this session's composition. It is reproduced from Issue
-#262 comment `7153428650`, where Owner accepted it as the landing target. One
-sentence is added to it, and that sentence is the answer below.
+The clause text is this session's composition, drafted to express requirements
+Owner had already accepted. Issue #262 comment `7153428650` is the source of the
+requirements, not of the wording: it lists five requirements gaps and contains no
+clause text, no `assessor` / `assessed_version` / `evidence_baseline` field name
+and no three-way inequality. The four-part clause was written afterwards to
+express those five gaps. This sentence corrects an earlier version of this record
+that said the text was reproduced from that comment; the earlier wording was
+wrong, and the manifest's source description was corrected in the same pull
+request.
 
 # Boundary question 5 — answered, not deferred
 
