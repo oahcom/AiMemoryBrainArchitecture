@@ -1,0 +1,83 @@
+work_item_id: AID-2026-061
+title: Make the workspace test suite run on every pull request, so the context exists before it is required
+class: GATE/CI/TEST
+risk: R1
+status: PR_OPEN
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+
+prompt_id: AID-2026-061-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-061/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 7ea255ab98c081d797820fa48d7744d2209eb285c0bda17cee6c4f22d66f0b81
+prompt_bytes: 18776
+
+# ---------------------------------------------------------------------------
+# Two stages, deliberately split by an Owner close ruling on pull request
+# #1018. Stage A is this branch: the trigger change, no claim about
+# enforcement. Stage B is a separate change that can only be written after the
+# protection payload has been changed, because it has to state the measured
+# count with a date.
+#
+# The split is not cosmetic. A required context that is never scheduled is
+# permanently absent, not pending, so requiring rust-workspace-test before the
+# trigger change lands would deadlock every pull request that does not touch
+# crates/**.
+# ---------------------------------------------------------------------------
+
+authorization:
+  implementation_write: "GRANTED - Owner delegated merge authority for this pull request; one production file is written by this branch"
+  gate_behaviour_change: "BOUNDED - the pull_request.paths filter on rust-phase1.yml is removed; no job is renamed, no check is added to the required set, push.paths is unchanged"
+  required_context_change: "NOT_GRANTED - rust-workspace-test is still not required after this merge; the branch-protection PUT is a separate platform action"
+  branch_protection_change: "NOT_GRANTED - this branch does not read or write the protection payload"
+  document_claim_change: "NOT_IN_SCOPE - PR-GOVERNANCE-001 section 7 is untouched; the correction is stage B and must follow a dated measurement of the changed payload"
+  architecture_spec_change: "NOT_GRANTED - no ADR, no BMCP specification and no canonical architecture document is modified"
+  failing_head_experiment: "NOT_RUN - the deliberately-failing-head experiment needs a required context that fails, which this branch does not create"
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-061/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-061/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-061/session-evidence-wo01.md
+  files_to_modify:
+    - .github/workflows/rust-phase1.yml
+    - 14-ai-development/work-items/INDEX.md
+
+acceptance:
+  A1: "Every pull request targeting main produces a rust-workspace-test result; the trigger no longer filters on changed paths."
+  A2: "The job id is unchanged, so the produced check context is still rust-workspace-test."
+  A3: "The push trigger keeps its paths filter: the full workspace test does not run twice on every merge to main."
+  A4: "No document states or implies that the context is required. PR-GOVERNANCE-001 section 7 still declares twelve, which is what main declares today."
+  B1: "STAGE_B_DEFERRED - PR-GOVERNANCE-001 section 7 is corrected to the count the protection payload returns, recorded with a measurement date, only after that payload has been changed."
+  B2: "STAGE_B_DEFERRED - the payload before and after the protection change is quoted in the body of the change that reports the new count."
+  B3: "STAGE_B_DEFERRED - the deliberately-failing-head experiment is executed against a configuration that requires rust-workspace-test, and section 7's unproven half is replaced with the dated result."
+
+implementation:
+  status: PR_OPEN
+  pull_request: 1027
+  merge_commit_sha: NOT_MERGED
+
+review:
+  status: NOT_ASSIGNED
+  note: "Independent review has not been recorded. The change was produced in one session with the GitHub identity that opened the pull request; the Owner close ruling on the earlier version of this pull request is the only external check on its scope."
+
+# ---------------------------------------------------------------------------
+# issue_refs is empty by design. The linked Issue #262 predates the
+# 2026-12-01 policy effective time and carries no AI-assisted work
+# declaration, so it cannot be mapped to YES. OD-A3 permits a PR-scope
+# entry with empty issue_refs for exactly this case; see AID-2026-059 F6
+# for the same shape on the same policy.
+# ---------------------------------------------------------------------------
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+    implementing_ai_session: session-req01-r32
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-061/prompt-v1.md
+    executed_prompt_sha256: 7ea255ab98c081d797820fa48d7744d2209eb285c0bda17cee6c4f22d66f0b81
+    executed_prompt_bytes: 18776
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-061/session-evidence-wo01.md
