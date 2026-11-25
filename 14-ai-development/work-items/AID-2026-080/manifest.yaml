@@ -17,12 +17,13 @@ external_workflow_references:
   - id: "Issues #1177, #1179, #1202, #1203"
     kind: "RELATED_ISSUES"
 
+base_commit_sha: "6314a65bd8be48c1a4bb0768e9960c4c808110ab"
+
 repository:
   name: "oahcom/AiMemoryBrainArchitecture"
   url: "https://github.com/oahcom/AiMemoryBrainArchitecture"
   baseline_branch: "main"
   baseline_commit: "6314a65bd8be48c1a4bb0768e9960c4c808110ab"
-base_commit_sha: "6314a65bd8be48c1a4bb0768e9960c4c808110ab"
   implementation_branch: "impl/2026-11-26-normative-source-restore"
   carrier: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1220"
 
@@ -88,7 +89,7 @@ baseline_and_source_evidence:
   evidence_matrix: "00-governance/implementation-evidence/2026-11-26-source-restore-matrix.md"
 
 prompt:
-  prompt_file: "14-ai-development/work-items/AID-2026-080/prompt-v1.md"
+  prompt_file: "14-ai-development/work-items/AID-2026-080/prompt-v1.txt"
   prompt_version: "v1"
   prompt_status: "TASK_SPECIFIC_USER_INPUT_CAPTURED"
   prompt_sha256: "4f8d445a19a48ba1a4fc36225c4cff9b88554ec7ce4185b9e114bdf2f5c3332b"
@@ -107,8 +108,8 @@ session_evidence:
       - "#1179"
       - "#1202"
       - "#1203"
-    implementing_ai_session: "ChatGPT session; stable session identifier NOT_AVAILABLE"
-    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-080/prompt-v1.md"
+    implementing_ai_session: "chatgpt-session-id-not-available"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-080/prompt-v1.txt"
     executed_prompt_sha256: "4f8d445a19a48ba1a4fc36225c4cff9b88554ec7ce4185b9e114bdf2f5c3332b"
     executed_prompt_bytes: 693
     executed_prompt_provenance: "NOT_VERIFIED"
