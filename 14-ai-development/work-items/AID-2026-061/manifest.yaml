@@ -1,5 +1,5 @@
 work_item_id: AID-2026-061
-title: Make the workspace test suite and the session evidence gate required on every pull request
+title: Make the workspace test suite run on every pull request, so the context exists before it is required
 class: GATE/CI/TEST
 risk: R1
 status: PR_OPEN
@@ -15,20 +15,26 @@ prompt_sha256: 6bfb21ccb0fcce6aef5ce2c12c079142d381e6fa52a5390ff84f043416fa45c1
 prompt_bytes: 17378
 
 # ---------------------------------------------------------------------------
-# What this work item is allowed to change. The workflow edit and the §7
-# declaration are gate-behaviour changes and are authorized. The platform
-# branch-protection update is a separate act by a separate authority and is
-# NOT_GRANTED here, so nothing in this branch may be read as having made it.
+# Two stages, deliberately split by an Owner close ruling on pull request
+# #1018. Stage A is this branch: the trigger change, no claim about
+# enforcement. Stage B is a separate change that can only be written after the
+# protection payload has been changed, because it has to state the measured
+# count with a date.
+#
+# The split is not cosmetic. A required context that is never scheduled is
+# permanently absent, not pending, so requiring rust-workspace-test before the
+# trigger change lands would deadlock every pull request that does not touch
+# crates/**.
 # ---------------------------------------------------------------------------
 
 authorization:
-  implementation_write: "GRANTED - Owner delegated merge authority for this pull request; two production files are written by this branch"
-  gate_behaviour_change: "BOUNDED - the pull_request.paths filter on rust-phase1.yml is removed and two contexts are added to the §7 declaration; no job is renamed and no new check is invented"
-  required_context_change: "NOT_GRANTED - the declaration in §7 is repository text, not the platform setting; the branch-protection PUT is a separate platform action that follows this merge"
-  branch_protection_change: "NOT_GRANTED - the protection payload is recorded in this work item but is not applied by this branch"
+  implementation_write: "GRANTED - Owner delegated merge authority for this pull request; one production file is written by this branch"
+  gate_behaviour_change: "BOUNDED - the pull_request.paths filter on rust-phase1.yml is removed; no job is renamed, no check is added to the required set, push.paths is unchanged"
+  required_context_change: "NOT_GRANTED - rust-workspace-test is still not required after this merge; the branch-protection PUT is a separate platform action"
+  branch_protection_change: "NOT_GRANTED - this branch does not read or write the protection payload"
+  document_claim_change: "NOT_IN_SCOPE - PR-GOVERNANCE-001 section 7 is untouched; the correction is stage B and must follow a dated measurement of the changed payload"
   architecture_spec_change: "NOT_GRANTED - no ADR, no BMCP specification and no canonical architecture document is modified"
-  policy_effective_time_change: "NOT_GRANTED - 2026-12-01T00:00:00Z stays as recorded in Issue #799 and is not re-chosen here"
-  failing_head_experiment: "NOT_RUN_IN_THIS_BRANCH - the deliberately-failing-head experiment updates branch protection first and therefore cannot be sequenced before this merge"
+  failing_head_experiment: "NOT_RUN - the deliberately-failing-head experiment needs a required context that fails, which this branch does not create"
 
 scope:
   files_to_create:
@@ -37,16 +43,16 @@ scope:
     - 14-ai-development/work-items/AID-2026-061/session-evidence-wo01.md
   files_to_modify:
     - .github/workflows/rust-phase1.yml
-    - 14-ai-development/PR-GOVERNANCE-001.md
     - 14-ai-development/work-items/INDEX.md
 
 acceptance:
   A1: "Every pull request targeting main produces a rust-workspace-test result; the trigger no longer filters on changed paths."
-  A2: "The job id is unchanged, so the produced check context is still rust-workspace-test and the §7 declaration names a context that exists."
-  A3: "scripts/check_declared_check_contexts.py exits 0 with fourteen declared contexts, all produced by a job in .github/workflows."
-  A4: "The push trigger keeps its paths filter: the full workspace test does not run twice on every merge to main."
-  A5: "No other workflow, job name, required-check name or governance document is altered by this branch."
-  A6: "What this branch does NOT establish is stated in the same files: the context is not yet required by the platform, and a failing required check has still not been shown to block a merge."
+  A2: "The job id is unchanged, so the produced check context is still rust-workspace-test."
+  A3: "The push trigger keeps its paths filter: the full workspace test does not run twice on every merge to main."
+  A4: "No document states or implies that the context is required. PR-GOVERNANCE-001 section 7 still declares twelve, which is what main declares today."
+  B1: "STAGE_B_DEFERRED - PR-GOVERNANCE-001 section 7 is corrected to the count the protection payload returns, recorded with a measurement date, only after that payload has been changed."
+  B2: "STAGE_B_DEFERRED - the payload before and after the protection change is quoted in the body of the change that reports the new count."
+  B3: "STAGE_B_DEFERRED - the deliberately-failing-head experiment is executed against a configuration that requires rust-workspace-test, and section 7's unproven half is replaced with the dated result."
 
 implementation:
   status: PR_OPEN
@@ -55,7 +61,7 @@ implementation:
 
 review:
   status: NOT_ASSIGNED
-  note: "Independent review has not been recorded. The declaration-count change and the trigger change were produced in one session with the GitHub identity that opened the pull request."
+  note: "Independent review has not been recorded. The change was produced in one session with the GitHub identity that opened the pull request; the Owner close ruling on the earlier version of this pull request is the only external check on its scope."
 
 # ---------------------------------------------------------------------------
 # issue_refs is empty by design. The linked Issue #262 predates the
@@ -68,7 +74,7 @@ review:
 session_evidence:
   - role: IMPLEMENTER
     issue_refs:
-    implementing_ai_session: session-req01-r31
+    implementing_ai_session: session-req01-r32
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-061/prompt-v1.md
     executed_prompt_sha256: 6bfb21ccb0fcce6aef5ce2c12c079142d381e6fa52a5390ff84f043416fa45c1
     executed_prompt_bytes: 17378
