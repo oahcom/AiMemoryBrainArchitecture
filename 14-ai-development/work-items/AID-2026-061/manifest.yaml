@@ -34,7 +34,7 @@ authorization:
   branch_protection_change: "NOT_GRANTED - this branch does not read or write the protection payload"
   document_claim_change: "NOT_IN_SCOPE - this branch does not touch PR-GOVERNANCE-001 section 7; that correction was stage B and followed a dated measurement of the changed payload (see A4)"
   architecture_spec_change: "NOT_GRANTED - no ADR, no BMCP specification and no canonical architecture document is modified"
-  failing_head_experiment: "NOT_RUN_BY_THIS_BRANCH - the deliberately-failing-head experiment needs a required context that fails, which this branch does not create; it was executed under stage B on pull request #1038 (see B3)"
+  failing_head_experiment: "RUN - executed under stage B against the payload that requires rust-workspace-test, on pull request #1038 (branch governance/wo01c-failing-head, head b5cf4f25): the required check rust-workspace-test failed (check run 138943464904) and PUT /pulls/1038/merge returned 405 Required status check \"rust-workspace-test\" is failing, while GET on that pull request reported mergeable: true with mergeable_state: blocked - the boolean is a cache that does not include check outcomes. Recorded in PR-GOVERNANCE-001 section 7 by pull request #1040 (see B3)"
 
 scope:
   files_to_create:
@@ -49,10 +49,10 @@ acceptance:
   A1: "Every pull request targeting main produces a rust-workspace-test result; the trigger no longer filters on changed paths."
   A2: "The job id is unchanged, so the produced check context is still rust-workspace-test."
   A3: "The push trigger keeps its paths filter: the full workspace test does not run twice on every merge to main."
-  A4: "At merge time (2026-11-25, before stage B) no document stated or implied that the context was required: PR-GOVERNANCE-001 section 7 declared twelve, which is what main declared at merge commit 350be84b. Stage B has since landed. Section 7 now declares sixteen required contexts and lists all sixteen names, and this work item's own readback at 2026-11-25T03:41:03Z from GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection returned 16 required checks including Session Evidence, Session Evidence self-test (base), Session Evidence self-test (head) and rust-workspace-test, with strict: true and enforce_admins: {enabled: true}."
-  B1: "DONE - PR-GOVERNANCE-001 section 7 is corrected to the count the protection payload returns (sixteen, declared by name in the check-context block that follows the count), recorded with a measurement date, after that payload had been changed."
-  B2: "DONE_IN_PART - section 7 records both dated readings and states that the count rose from twelve to sixteen between the 2026-11-24 and 2026-11-25 readings, attributing the two increments separately. The two payloads are not quoted verbatim there; what stands is the dated count on each side, of which this work item's 2026-11-25T03:41:03Z readback is the second."
-  B3: "DONE - the deliberately-failing-head experiment was executed on 2026-11-25 against a configuration that requires rust-workspace-test: pull request #1038, head b5cf4f25, required check rust-workspace-test failed (check run 138943464904), and PUT /repos/oahcom/AiMemoryBrainArchitecture/pulls/1038/merge returned 405 Required status check \"rust-workspace-test\" is failing while the pre-attempt payload reported mergeable: true with mergeable_state: blocked. Section 7's previously unproven half now carries that dated result. The 405 text is quoted from section 7 as recorded there; it was NOT re-executed for this manifest, because the pull request is closed and the endpoint no longer returns the failing-check verdict."
+  A4: "At merge commit 350be84b (2026-11-25T02:30:13Z) PR-GOVERNANCE-001 section 7 said twelve required contexts, and rust-workspace-test was not among them - that is the sentence this criterion recorded, re-read from the file at that commit. It is no longer true of main. Section 7 now declares sixteen required contexts and lists all sixteen names, and GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection returned the same sixteen at 2026-11-25T03:52Z with strict: true, rust-workspace-test among them. Stage B made the document catch up; this criterion is a historical record of the merge-time state and is superseded by B1."
+  B1: "DONE - PR-GOVERNANCE-001 section 7 is corrected to the count the protection payload returns (sixteen, declared by name in the check-context block that follows the count), recorded with a measurement date, after that payload had been changed. Carried by pull request #1033, merge commit 2570ba0c96ff0c3bf6694f2dda8d2527d73a2f24, merged 2026-11-25T02:45:19Z."
+  B2: "DONE - the body of the change that reports the new count quotes the payload readback from both sides of the protection change: fifteen contexts before that change, sixteen after it. Carried by pull request #1033, merge commit 2570ba0c96ff0c3bf6694f2dda8d2527d73a2f24. The body states the two counts rather than echoing the two name lists; the names are declared in section 7 itself, where the gate reads them."
+  B3: "DONE - the deliberately-failing-head experiment was executed on 2026-11-25 against a configuration that requires rust-workspace-test: pull request #1038, branch governance/wo01c-failing-head at head b5cf4f25, required check rust-workspace-test failed (check run 138943464904), and PUT /repos/oahcom/AiMemoryBrainArchitecture/pulls/1038/merge returned 405 Required status check \"rust-workspace-test\" is failing while GET on the same pull request reported mergeable: true with mergeable_state: blocked. Section 7's previously unproven half now carries that dated result, carried by pull request #1040, merge commit 6358232963460e993ff3bf4f7cdeb71a3ede15bd, merged 2026-11-25T03:08:47Z. The 405 text is quoted from section 7 as recorded there; it was NOT re-executed for this manifest, because the pull request is closed and the endpoint no longer returns the failing-check verdict."
 
 implementation:
   status: MERGED
@@ -60,6 +60,7 @@ implementation:
   pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1027
   implementation_commit_sha: 8ef5ef90931b516f6730dfc4f826b2316774a351
   merge_commit_sha: 350be84b547d040d3a689ffe24fb75cca6bc10c7
+  merged_at: 2026-11-25T02:30:13Z
 
 review:
   status: NOT_ASSIGNED
