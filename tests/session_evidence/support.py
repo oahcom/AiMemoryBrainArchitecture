@@ -139,9 +139,7 @@ def make_pr_body(
     row_refs = "\n".join(issue_refs) if issue_refs else "N/A"
     related_text = ", ".join(f"#{item}" for item in related)
 
-    return f"""## Work Item
-
-AID-2026-001
+    return f"""- Work Item ID: AID-2026-001
 
 ## Owning Issue
 

@@ -118,7 +118,14 @@ def _checkout_refs(block: str) -> list[str]:
             continue
         if any(REF_KEY_RE.match(line) for line in step.splitlines()):
             offenders.append(next(
-                line.strip() for line in step.splitlines() if CHECKOUT_RE.match(line)
+                (
+                    line.strip() for line in step.splitlines()
+                    if REF_KEY_RE.match(line)
+                ),
+                next(
+                    line.strip() for line in step.splitlines()
+                    if CHECKOUT_RE.match(line)
+                ),
             ))
     return offenders
 
