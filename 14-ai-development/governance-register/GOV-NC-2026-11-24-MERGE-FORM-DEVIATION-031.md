@@ -135,6 +135,18 @@ subject: docs(register): record the #707 review-source correction in §13.4
 
 **不得回写或扩大 `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` §13.7 已冻结的历史计数。** 冻结计数代表其原本定义的历史观察范围；把后续实例追加入原数字会改变统计口径与历史基线。本记录只在其后另列一句，不动原数字。
 
+### 3.0 三个端点，三种不同的东西
+
+本节每一张表都在问同一个问题：这次合并有没有被审查过。用错端点会得到一个看起来像证据的常量，所以先把三个端点各自度量什么写清楚：
+
+| 端点 | 度量的是 | 不含什么 |
+|---|---|---|
+| `GET /pulls/{n}/reviews` | **正式提交的 Review**——`APPROVE` / `REQUEST_CHANGES` / `COMMENT` 三种动作，占用 "Files changed" 审查面板 | 会话线程中的任何发言 |
+| `GET /pulls/{n}/comments` | **行内 diff 评论**——挂在补丁某一行上的评论 | 会话线程、正式 Review 状态 |
+| `GET /issues/{n}/comments` | **会话线程**——PR 讨论区按时间排列的发言 | 正式 Review 状态、行内评论 |
+
+两个 `0` 并排出现会读起来像互相印证，实际可能只是同一种缺席被数了两次——`#966` 证明这两条在本仓库里恰好就是这种情况。因此下文六个实例三个端点都测，并把「正式 Review」与「会话线程中的审查」分开记，不再合并成一个 `0`。
+
 ### 3.1 后续实例（二）：PR #890
 
 `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/890/reviews` → `[]`。
@@ -146,6 +158,7 @@ subject: docs(register): record the #707 review-source correction in §13.4
 | 项目 | 端点 | 字段 | 返回值 |
 |---|---|---|---|
 | 正式 Review 记录 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/890/reviews` | 数组长度 | `0` 条 |
+| 会话评论数 | `GET /repos/oahcom/AiMemoryBrainArchitecture/issues/890/comments` | 数组长度 | `0` 条 |
 | 合并时间 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/890` | `merged_at` | `2026-11-24T05:39:10Z` |
 | 合并账号 | 同上 | `merged_by.login` | `oahcom` |
 | 合并提交 | 同上 | `merge_commit_sha` | `0f32d46c34cb086e52de38fa49b33ca8a3bf5cd3` |
@@ -175,6 +188,7 @@ subject: docs(register): record the #707 review-source correction in §13.4
 | 项目 | 端点 | 字段 | 返回值 |
 |---|---|---|---|
 | 正式 Review 记录 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/896/reviews` | 数组长度 | `0` 条 |
+| 会话评论数 | `GET /repos/oahcom/AiMemoryBrainArchitecture/issues/896/comments` | 数组长度 | `0` 条 |
 | 合并时间 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/896` | `merged_at` | `2026-11-24T06:51:52Z` |
 | 合并账号 | 同上 | `merged_by.login` | `oahcom` |
 | 合并提交 | 同上 | `merge_commit_sha` | `84bbe9241aef748b406a969da321e7d3fcda2dc1` |
@@ -204,6 +218,7 @@ subject: docs(register): record the #707 review-source correction in §13.4
 | 项目 | 端点 | 字段 | 返回值 |
 |---|---|---|---|
 | 正式 Review 记录 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/927/reviews` | 数组长度 | `0` 条 |
+| 会话评论数 | `GET /repos/oahcom/AiMemoryBrainArchitecture/issues/927/comments` | 数组长度 | `1` 条 |
 | 合并时间 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/927` | `merged_at` | `2026-11-24T10:38:00Z` |
 | 合并账号 | 同上 | `merged_by.login` | `oahcom` |
 | 合并提交 | 同上 | `merge_commit_sha` | `b3a65e54b0b0380430cc4cf8b187d3e0c9edb7a3` |
@@ -211,6 +226,10 @@ subject: docs(register): record the #707 review-source correction in §13.4
 | 合并时的 head | 同上 | `head.sha` | `5e0a93d6301a7b04b1ee5e1a3031ece1068c1dfa` |
 
 适用与 §3.2 相同的边界：D1 在本次合并之前已生效，因此合并时的正式 Review 要求存在而未被满足；本记录不据此推断具体操作者，也不把「本会话未签发合并授权」写成「有人违反了授权」。本会话对该 PR 的处理是：提交内容审查请求，未调用合并接口。
+
+**会话线程里有一条合并之后的审查。** `GET /repos/oahcom/AiMemoryBrainArchitecture/issues/927/comments` → `1` 条，`created_at` 为 `2026-11-24T11:16:18Z`，比 `merged_at` `10:38:00Z` 晚 38 分钟，首行是 `## Ruling 86 — #927's classification reconciles exactly; the manifest is sound and should merge`。
+
+因此本实例的准确表述不是「零审查」，而是 **`0` 条正式 Review，`1` 条合并后审查**。两个时间戳都出自同一个 API（`issues/{n}/comments.created_at` 与 `pulls/{n}.merged_at`），所以这个 `+38` 不需要任何本地时钟参与，`OWNER-DECISION-EVENT-TIMESTAMP-PROVENANCE-001` 所禁止的「本地 mtime 减平台时间戳」在这里不适用。这条审查写在合并之后，它没有、也不可能在合并之前拦住合并。
 
 ### 3.4 后续实例（五）：PR #933
 
@@ -221,6 +240,7 @@ subject: docs(register): record the #707 review-source correction in §13.4
 | 项目 | 端点 | 字段 | 返回值 |
 |---|---|---|---|
 | 正式 Review 记录 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/933/reviews` | 数组长度 | `0` 条 |
+| 会话评论数 | `GET /repos/oahcom/AiMemoryBrainArchitecture/issues/933/comments` | 数组长度 | `0` 条 |
 | 合并时间 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/933` | `merged_at` | `2026-11-24T11:34:23Z` |
 | 合并账号 | 同上 | `merged_by.login` | `oahcom` |
 | 合并提交 | 同上 | `merge_commit_sha` | `3235db07f23cb272da7460147e2f80413e68e555` |
@@ -241,6 +261,7 @@ subject: docs(register): record the #707 review-source correction in §13.4
 |---|---|---|---|
 | 正式 Review 记录 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/946/reviews` | 数组长度 | `0` 条 |
 | Review 评论数 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/946/comments` | 数组长度 | `0` 条 |
+| 会话评论数 | `GET /repos/oahcom/AiMemoryBrainArchitecture/issues/946/comments` | 数组长度 | `1` 条 |
 | 合并时间 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/946` | `merged_at` | `2026-11-24T14:05:56Z` |
 | 合并账号 | 同上 | `merged_by.login` | `oahcom` |
 | 合并提交 | 同上 | `merge_commit_sha` | `8e489ec1e18cd127088a695fa21121521e240514` |
@@ -260,18 +281,29 @@ subject: docs(register): record the #707 review-source correction in §13.4
 
 本会话对 #946 的处理：创建 PR、推送分支、提交文档，**未调用合并接口**。`oahcom` 只能记为 GitHub 账号，不据此认定具体操作人。与前五条一样，本记录不判断谁触发了合并。
 
+**合并之后 90 分钟，同一 PR 的会话线程里出现了一条批准。** `GET /repos/oahcom/AiMemoryBrainArchitecture/issues/946/comments` → `1` 条，`created_at` 为 `2026-11-24T15:36:10Z`，比合并时间 `14:05:56Z` 晚 90 分钟，首行是 `## Owner review — approved. The arithmetic reconciles, and the mutation is a genuine bound`。
+
+这条批准不在 `pulls/946/reviews` 里：它不是正式 Review 提交，是会话线程里的一次发言。两个时间都是平台时间戳，因此 `+90` 分钟不需要本地时钟参与。
+
+**它不撤回本节的拒绝结论，两者并列。** 一条在合并完成 90 分钟之后写下的「approved / Merge it」是对已经发生的合并的**追认**，不是对它的**许可**——它没有、也不可能在合并之前拦住合并。因此本节的事实是两条而不是一条：
+
+1. 合并时已有明确拒绝（上文，内容层面可确证）。
+2. 合并后 90 分钟出现追认性批准（本段，平台时间戳可确证）。
+
+把第 2 条写成对第 1 条的缓解，就会把「合并发生在明确拒绝之后」悄悄换读成「后来有人批准了」。第 2 条既不减轻也不加重；它只是让「零 Review」这个说法不再准确。准确的说法是：**`0` 条正式 Review，`1` 条合并后追认。**
+
 ### 3.6 序列汇总（不改写 §13.7 冻结计数）
 
-| 序 | PR | 合并时间（UTC） | 正式 Review | 与前序的差别 |
-|---|---|---|---:|---|
-| 一 | #875 | `2026-11-24T04:54:07Z` | 0 | 形态偏差，内容已批准 |
-| 二 | #890 | `2026-11-24T05:39:10Z` | 0 | 顺序不明 |
-| 三 | #896 | `2026-11-24T06:51:52Z` | 0 | 顺序不明（裁定晚于合并 75 秒） |
-| 四 | #927 | `2026-11-24T10:38:00Z` | 0 | 顺序不明 |
-| 五 | #933 | `2026-11-24T11:34:23Z` | 0 | 顺序不明 |
-| 六 | #946 | `2026-11-24T14:05:56Z` | 0 | **合并时已有明确拒绝** |
+| 序 | PR | 合并时间（UTC） | 正式 Review | 会话线程 | 与前序的差别 |
+|---|---|---|---:|---|---|
+| 一 | #875 | `2026-11-24T04:54:07Z` | 0 | 0 | 形态偏差，内容已批准 |
+| 二 | #890 | `2026-11-24T05:39:10Z` | 0 | 0 | 顺序不明 |
+| 三 | #896 | `2026-11-24T06:51:52Z` | 0 | 0 | 顺序不明（裁定晚于合并 75 秒） |
+| 四 | #927 | `2026-11-24T10:38:00Z` | 0 | 1（合并后 +38 分钟） | 顺序不明 |
+| 五 | #933 | `2026-11-24T11:34:23Z` | 0 | 0 | 顺序不明 |
+| 六 | #946 | `2026-11-24T14:05:56Z` | 0 | 1（合并后 +90 分钟） | **合并时已有明确拒绝** |
 
-`GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` §13.7 的冻结计数保持原值，不因本表追加而改变。本表只是一个后续观察清单，不是对原统计口径的修订。
+`GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` §13.7 的冻结计数保持原值，不因本表追加而改变。本表只是一个后续观察清单，不是对原统计口径的修订。新增的「会话线程」列同样不改变它：那一列扩大的是**观察实例的维度**，不是历史统计的基数。
 
 ---
 
