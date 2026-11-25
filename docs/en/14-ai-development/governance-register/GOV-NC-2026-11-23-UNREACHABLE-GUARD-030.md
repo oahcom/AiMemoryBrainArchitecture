@@ -162,15 +162,16 @@ Between them, only `8ab40fb4` touched `scripts/check_bilingual_docs.py` or that 
 - Directly related: it is precisely the `cwd=ROOT` → `cwd=REPO_ROOT` step — 014's fix itself — that broke the helper.
 - The attribution is incomplete: of the 24, only 1 is a `WindowsPath` assertion; 10 are `current_bilingual_gaps()`'s `git ls-files` exiting 128; 11 are other; 2 are file-creation identity unavailable.
 
-014 §7.3's **main conclusion still holds** — the defect can return with neither suite making a sound, because `scripts/test_check_bilingual_docs.py` (the only one CI runs, 3 tests) is `OK` in both the fixed and broken states. But the explanation under it needs correcting, or a reader will take those 24 for historical noise and conclude the tests were never really green.
+014 §7.3's **main conclusion still holds** — the defect can return with neither suite making a sound, because `scripts/test_check_bilingual_docs.py` (3 tests) is `OK` in both the fixed and broken states. But the explanation under it needs correcting, or a reader will take those 24 for historical noise and conclude the tests were never really green.
 
-## 6. No workflow runs this suite
+## 6. The `GOV-DOC-001 structural checks` job now runs this suite (corrected 2026-11-25)
 
-`grep -rn 'test_gate_normative_roots\|governance/evidence' .github/` → **zero hits**.
+This section was written on 2026-11-23 against main `f39dfb7b`: `grep -rn 'test_gate_normative_roots' .github/` then really returned nothing, and `.github/workflows/bilingual-docs.yml` ran only `scripts/test_check_bilingual_docs.py`. That observation was overturned the next day:
 
-`.github/workflows/bilingual-docs.yml` runs only `python3 scripts/test_check_bilingual_docs.py` (3 tests: `same_head`, `invalid_base`, `nonempty_code_only_change`), none of which touches the pairing predicates. The `unittest discover` in `gates.yml` runs only `08-bmcp-protocol/tests/conformance`.
+- `aaf6da96` (#892, 2026-11-24) added `python3 -m unittest scripts.governance.evidence.test_gate_normative_roots` to that same workflow, before the real gate. The job is named `GOV-DOC-001 structural checks`, one of the required contexts.
+- The same commit removed §4's double root (`ROOT` / `REPO_ROOT`). Re-measured 2026-11-25: at `8ab40fb4` the suite is still `Ran 52 tests` / `FAILED (failures=3, errors=21)`; at main `a3a62021` it is `Ran 52 tests` / **OK**.
 
-So §4's 24 failures **turn nothing red anywhere**. They are a local signal, and no convention says to look at it.
+So §4's 24 failures would turn this required context red. They no longer exist: the suite runs on every PR and is green.
 
 ## 7. What this register does not claim
 
