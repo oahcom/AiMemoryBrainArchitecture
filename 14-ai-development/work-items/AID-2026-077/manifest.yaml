@@ -1,4 +1,4 @@
-work_item_id: AID-2026-075
+work_item_id: AID-2026-077
 title: Make the INDEX table merge without a conflict, and make a duplicate work-item ID fail a gate before merge
 class: GATE/CONFIG/TEST
 risk: R1
@@ -7,14 +7,14 @@ status: DISPATCHED
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
 
-prompt_id: AID-2026-075-PROMPT
+prompt_id: AID-2026-077-PROMPT
 prompt_version: 1
-prompt_file: 14-ai-development/work-items/AID-2026-075/prompt-v1.md
+prompt_file: 14-ai-development/work-items/AID-2026-077/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 2c613d7d2e17f64cacbbe3e514fb436b8b7da743f4aafb64be8a03a9c92728fc
+prompt_sha256: 0339f07cd6bd5dbd5211b45066ee5c1bba78d4768d763beeac4ce24aa368a931
 prompt_bytes: 5621
 # The digest above was recomputed after the work item was renumbered from
-# AID-2026-074 to AID-2026-075. The number appears twice inside
+# AID-2026-074 to AID-2026-077. The number appears twice inside
 # `prompt-v1.md` itself, so the rename changed the snapshot bytes: the
 # pre-rename digest was 639355d3...fc941 at the same 5621 bytes, which is
 # how a rename can move a digest without changing a byte count. The
@@ -55,9 +55,9 @@ authorization:
 
 scope:
   files_to_create:
-    - 14-ai-development/work-items/AID-2026-075/manifest.yaml
-    - 14-ai-development/work-items/AID-2026-075/prompt-v1.md
-    - 14-ai-development/work-items/AID-2026-075/session-evidence-1064-1069.md
+    - 14-ai-development/work-items/AID-2026-077/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-077/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-077/session-evidence-1064-1069.md
   files_to_modify:
     - .gitattributes
     - .github/workflows/repository-hygiene.yml
@@ -93,9 +93,9 @@ session_evidence:
       - "#1064"
       - "#1069"
     implementing_ai_session: session-a1084
-    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-075/prompt-v1.md
-    executed_prompt_sha256: 2c613d7d2e17f64cacbbe3e514fb436b8b7da743f4aafb64be8a03a9c92728fc
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-077/prompt-v1.md
+    executed_prompt_sha256: 0339f07cd6bd5dbd5211b45066ee5c1bba78d4768d763beeac4ce24aa368a931
     executed_prompt_bytes: 5621
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
-    session_evidence_ref: 14-ai-development/work-items/AID-2026-075/session-evidence-1064-1069.md
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-077/session-evidence-1064-1069.md

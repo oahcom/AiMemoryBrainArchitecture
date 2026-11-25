@@ -87,7 +87,7 @@ executed, and that is stated rather than presented as a frozen snapshot.
 .github/workflows/repository-hygiene.yml                one step, in the existing required job
 scripts/check_traceability.py                           --index-only entry point, 49 lines
 scripts/test_check_traceability.py                      tests for it, 72 lines
-14-ai-development/work-items/AID-2026-075/              manifest, prompt, this record
+14-ai-development/work-items/AID-2026-077/              manifest, prompt, this record
 14-ai-development/work-items/INDEX.md                   one row + the driver's caveat block
 ```
 
