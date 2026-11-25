@@ -34,9 +34,9 @@ identifier_evidence:
     target_directory_in_pr_head_before_allocation: "NOT_FOUND"
   global_uniqueness: "NOT_FULLY_VERIFIED"
   limitation: >-
-    Recursive work-item-directory scan of every active branch was not completed.
-    No collision was found in main or the PR head; no exhaustive global uniqueness
-    claim is made.
+    The paginated branch listing returned 937 active branches. A recursive
+    work-item-directory scan of every active branch was not completed. No collision
+    was found in main or the PR head; no exhaustive global uniqueness claim is made.
 
 authority:
   authority_basis: "User requested a Stage 0 registration; detailed decision scope is not present in the retrieved record."
