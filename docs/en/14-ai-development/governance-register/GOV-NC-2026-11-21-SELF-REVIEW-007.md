@@ -114,6 +114,14 @@ Inference (**not made**):
 
 ## 7. Possible directions (none executed)
 
+> **Added 2026-11-25 (citation currency).** The table below was written on 2026-11-21, when section 5 defined independence as a property of the GitHub identity. After the 2026-11-24 amendment independence is a property of the session, so:
+>
+> - S-2's cost is no longer "needs a second identity". One independent session suffices; a second identity is an optional carrier, not a precondition. The five requirements in section 7.1 therefore constrain the **carrier** — who writes the conclusion onto the PR — not the independence test itself.
+> - S-2 is also no longer "the only structural option while M-3 is unavailable": under the current section 5 the requirement is satisfiable by a session, with no new account introduced.
+> - The choice between S-1 and S-3 is unchanged.
+>
+> The original table is left in place so that rulings written against it stay readable.
+
 | # | Approach | Cost | Note |
 |---|---|---|---|
 | S-1 | State in PR-GOVERNANCE-001 section 5 that a review where `reviewer == author` **does not count** toward section 5 | one paragraph | cheapest, but still a self-discipline clause with no platform enforcement |
