@@ -63,7 +63,7 @@ The operative input was one dispatch brief, recorded byte-exact at
 
 | file | bytes | sha256 |
 |---|---:|---|
-| `14-ai-development/work-items/AID-2026-059/prompt-1015.md` | 8159 | `260ee8a814f480ac880569073f471c18ae88c528653fd747690b87f9fff6368b` |
+| `14-ai-development/work-items/AID-2026-059/prompt-1015.md` | 7986 | `245dbfc39ca8b20cec30bba392c4b2f5e0db383b404eb4e8e10a8f7cee899f46` |
 
 `executed_prompt_provenance` is `NOT_VERIFIED`: the digest pins the committed bytes, not
 that they are byte-for-byte what any model received. The file is a transcription of the
@@ -138,11 +138,25 @@ not tell which property broke. It reports exactly one violation, naming the miss
 | `cd scripts && python3 -m unittest test_check_session_evidence_workflow_shape` | 9 tests, OK |
 | `python3 scripts/ci/check_test_reachability.py` | 61 test files, 61 reachable, 0 unreachable |
 | `python3 scripts/check_declared_check_contexts.py` | PASS, 12 contexts all produced |
+| `python3 scripts/ci/check_line_endings.py` | 1322 files inspected, 0 violations |
+| `python3 scripts/check_document_management.py --require-changed origin/main` | exit 0, no `DM-01` error |
+| `BASE_SHA=… HEAD_SHA=… PR_BODY=… python3 scripts/check_bilingual_docs.py` | PASS, 6 changed paths inspected |
 
 The reachability figure moved from 60 to 61 because the new self-check is referenced by the
 new `Self-check the session-evidence workflow shape gate` step; that gate's rule is that a
 `test_*.py` no workflow executes is an unreachable test, and the step is what keeps this one
 out of that set.
+
+**Two corrections were forced by gates, and both are recorded because the first attempt was
+wrong.** First, `GOV-DOC-002` rejected `prompt-1015.md` with `DM-01 missing document_metadata
+block`; the file now carries the same block as `prompt-v1.md`, which moved `14-ai-development`
+from 206 to 207 classified documents. Second, the digest first written into the manifest was
+computed over the working-tree file, which on this host had CRLF endings; `.gitattributes`
+normalises the committed blob to LF, so the pinned digest described bytes that were never
+committed. The manifest and this table now pin the committed blob
+(`git show HEAD:…/prompt-1015.md`), 7986 bytes, not the worktree copy. A digest that does not
+describe the committed object is the same class of false evidence the gate exists to prevent,
+which is why it is stated here rather than quietly fixed.
 
 ## What this record does not contain
 
