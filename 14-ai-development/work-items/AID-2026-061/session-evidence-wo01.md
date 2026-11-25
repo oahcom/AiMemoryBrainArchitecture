@@ -1,12 +1,13 @@
 # Session role / use case
 
-IMPLEMENTER. Implement WO-01 for REQ-01 / Issue #262: make `rust-workspace-test`
-run for every pull request targeting `main`, declare the two new required check
-contexts in `PR-GOVERNANCE-001` §7, and preserve every existing governance gate.
+IMPLEMENTER. Implement stage A of WO-01 for REQ-01 / Issue #262: make
+`rust-workspace-test` run on every pull request targeting `main`, so that the
+context exists on every Head before anyone makes it required.
 
-This work item does **not** perform the branch-protection update and does **not**
-run the deliberately-failing-head experiment. Both are separate platform actions
-that follow the merge of this pull request.
+This work item deliberately does **not** change `14-ai-development/PR-GOVERNANCE-001.md`,
+does **not** apply the branch-protection update, and does **not** run the
+deliberately-failing-head experiment. The first was in the original scope and was
+removed; see "Scope revision" below. The other two are separate platform actions.
 
 # Actual AI input
 
@@ -39,28 +40,41 @@ because the acceptance criteria are stated against them:
 
 # AI-visible output
 
-Two production files changed, both already on the pull request branch:
+One production file changed:
 
 ```
 .github/workflows/rust-phase1.yml              43 -> 38 lines
-14-ai-development/PR-GOVERNANCE-001.md         6 lines changed
 ```
 
-The workflow change removes `pull_request.paths` and keeps `push.paths`, so every
-pull request targeting `main` now produces a `rust-workspace-test` result. The
-job title is unchanged, so the check context name is still the job id.
+The `pull_request` trigger no longer filters on changed paths; `push.paths` is
+untouched; the job id is untouched, so the produced check context is still
+`rust-workspace-test`.
 
-The §7 change raises the declared required-context count from twelve to fourteen,
-appends `rust-workspace-test` and `Session Evidence` to the machine-read
-declaration block, and updates the English and Chinese prose in the same file.
+Two governance records are added, and one index row:
+
+```
+14-ai-development/work-items/AID-2026-061/manifest.yaml
+14-ai-development/work-items/AID-2026-061/prompt-v1.md
+14-ai-development/work-items/AID-2026-061/session-evidence-wo01.md
+14-ai-development/work-items/INDEX.md          one existence row
+```
 
 Verification actually run on the pull request branch, at the stated head:
 
 ```
 python3 scripts/check_declared_check_contexts.py
-    ::notice::14 declared check contexts, all produced by a job in .github/workflows
+    ::notice::12 declared check contexts, all produced by a job in .github/workflows
     DECLARED CHECK CONTEXTS: PASS
+
+python3 scripts/ci/check_repository_hygiene.py --base <merge-base> --head <head>
+    Work-item index membership version=2026-11-24.7 directories=49 linked=49
+    Work-item manifest consistency version=2026-11-24.7 ... violations=0
+    Repository new-file admission passed: 3 new path(s) checked.
 ```
+
+The declared-context count in that output is twelve because this branch does not
+touch §7. Twelve is also what §7 says on `main`, and it is **not** what the
+platform requires. That gap is measured under "Limitations".
 
 One check result was observed on the pull request rather than asserted:
 
@@ -68,25 +82,57 @@ One check result was observed on the pull request rather than asserted:
 rust-workspace-test   completed   success
 ```
 
-That result is evidence that the trigger change works. It is **not** evidence
-that the context is required, and it is **not** evidence that a failing required
-check blocks a merge. Both of those remain unproven until branch protection is
-updated and the deliberately-failing-head experiment has actually been run.
+That result is evidence that the trigger change works on this Head, which is one
+that touches `.github/workflows/rust-phase1.yml` and therefore matched the old
+filter as well. It is **not** evidence that the context is required, and it is
+**not** evidence that a failing required check blocks a merge.
+
+# Scope revision
+
+The original scope of this work item also rewrote `PR-GOVERNANCE-001` §7 from
+twelve declared contexts to fourteen. Pull request #1018 was closed unmerged at
+`2026-11-25T01:58:46Z` with an Owner ruling that the document half must not land
+before the platform half, on the ground that the document would then claim an
+enforcement the platform did not have.
+
+The close was accepted and the scope was narrowed to the workflow trigger alone.
+The reasons the narrowing is a split rather than an abandonment:
+
+1. The platform cannot safely gain `rust-workspace-test` first. On `2026-11-25`
+   the required set held fifteen contexts, and a merged docs-only pull request
+   (#1024, six markdown files, none under `crates/`) produced exactly those
+   fifteen check runs — `rust-workspace-test` was absent from its Head. Making
+   that context required before the trigger change lands would leave every
+   pull request that does not touch `crates/**` waiting forever on a check that
+   is never scheduled.
+2. The document half is not abandoned, only deferred. It is gated on a
+   measurement that can only be taken after the protection payload has been
+   changed, and it must state the measured count with a date.
+
+The consequence is recorded rather than hidden: `prompt-v1.md` still asks for the
+§7 edit, because it is a snapshot of what the ruling session was asked for and is
+not rewritten after the fact. The delivered change is narrower than the prompt.
+That divergence is this section.
 
 # Limitations
 
 The Session Evidence gate validates evidence structure and file integrity. It
 does not independently establish that this narrative is true or complete.
 
-Two properties of this delivery are stated here rather than left for a reader to
-discover:
+Three properties of this delivery are stated here rather than left for a reader
+to discover:
 
-1. **A checks-cannot-block claim is still outstanding.** `PR-GOVERNANCE-001` §7
-   records that the deliberately-failing-head experiment has not been run. This
-   work item does not run it either; it prepares the conditions under which it
-   can be run.
-2. **Configuration drift between the declaration and branch protection has no
+1. **`main` already understates the required set.** `PR-GOVERNANCE-001` §7
+   declares twelve required contexts. The live protection payload on
+   `2026-11-25` returned fifteen: the twelve plus `Session Evidence`,
+   `Session Evidence self-test (base)` and `Session Evidence self-test (head)`.
+   This work item does not fix that and does not claim it is fixed.
+2. **A checks-cannot-block claim is still outstanding.** §7 records that the
+   deliberately-failing-head experiment has not been run. This work item does not
+   run it either; it prepares the condition under which the context can be made
+   required without deadlocking pull requests.
+3. **Configuration drift between the declaration and branch protection has no
    machine gate.** `scripts/check_declared_check_contexts.py` checks that every
    declared context is produced by a job. It does not read branch protection, so
-   a declaration naming fourteen contexts while the platform requires twelve
-   would pass every automated check in this repository.
+   a declaration naming twelve contexts while the platform requires fifteen
+   passes every automated check in this repository.
