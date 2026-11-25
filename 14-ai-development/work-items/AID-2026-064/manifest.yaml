@@ -1,0 +1,78 @@
+work_item_id: AID-2026-064
+title: Remove the fixture-name collision that makes cargo test --workspace fail intermittently on coarse-clock hosts
+class: TEST/ISOLATION
+risk: R1
+status: IN_PROGRESS
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+
+prompt_id: AID-2026-064-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-064/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 1a3ded69587f3e511f38c187f6e5fdf954e31f308e8b89126f04d765318c2d24
+prompt_bytes: 7124
+
+# ---------------------------------------------------------------------------
+# Scope, stated because the Issue says this needs no work item and this record
+# exists anyway. It exists for one mechanical reason: the `Session Evidence`
+# gate resolves the Work Item ID in the pull-request body to a manifest and then
+# requires a matching canonical entry, so a pull request that declares
+# AI-assisted work must name one. Issue #903 authorises the code change; nothing
+# here authorises anything else. Same shape as AID-2026-061, which was created
+# for the same reason on a one-file CI change.
+# ---------------------------------------------------------------------------
+
+authorization:
+  implementation_write: "GRANTED - Issue #903 rules for option 1 (a per-process atomic counter appended to the fixture name) and names the files to inspect"
+  test_change: "BOUNDED - test-only helpers in memory-event-store-sqlite; no product code path is modified"
+  new_dependency: "NOT_GRANTED - Issue #903 rules out a `tempfile` dev-dependency; the fix adds none"
+  gate_behaviour_change: "NONE - no workflow, script or check is modified by this branch"
+  document_claim_change: "NONE - no governance document is modified except this work item's own index row"
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-064/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-064/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-064/session-evidence-903.md
+  files_to_modify:
+    - crates/memory-event-store-sqlite/src/forget_fence.rs
+    - crates/memory-event-store-sqlite/tests/forget_fence.rs
+    - 14-ai-development/work-items/INDEX.md
+
+acceptance:
+  A1: "Two tests calling `fixture()` at the same instant receive different directories, so `schema()` cannot see a table created by the other caller."
+  A2: "The uniqueness source is a per-process atomic counter, not the wall clock, so the property does not depend on the host's clock granularity."
+  A3: "The failure is reproduced on the unmodified tree before the change and not after it, with tallies recorded."
+  A4: "`cargo test -p memory-event-store-sqlite` and `cargo test --workspace --all-targets --no-fail-fast` pass in full."
+  A5: "A negative control (counter line removed) restores the failure, and the line is restored afterwards."
+  A6: "No dependency is added and no assertion about forget/restore behaviour changes."
+
+implementation:
+  status: IN_PROGRESS
+  pull_request: NOT_OPEN
+  merge_commit_sha: NOT_MERGED
+
+review:
+  status: NOT_ASSIGNED
+  note: "Independent review has not been recorded. The change was produced in one session with the GitHub identity that opened the pull request."
+
+# ---------------------------------------------------------------------------
+# issue_refs is empty by design. #903 was opened 2026-11-24, before the
+# 2026-12-01 policy effective time in .github/workflows/session-evidence.yml,
+# and carries no AI-assisted work declaration of its own, so it cannot map to
+# YES. OD-A3 permits a PR-scope entry with empty issue_refs for exactly this
+# case.
+# ---------------------------------------------------------------------------
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+    implementing_ai_session: session-903-fixture-collision
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-064/prompt-v1.md
+    executed_prompt_sha256: 1a3ded69587f3e511f38c187f6e5fdf954e31f308e8b89126f04d765318c2d24
+    executed_prompt_bytes: 7124
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-064/session-evidence-903.md
