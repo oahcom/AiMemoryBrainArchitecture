@@ -1,0 +1,76 @@
+work_item_id: AID-2026-062
+title: Declare the required-context set the platform actually enforces, as a dated measurement
+class: GATE/DOC/TEST
+risk: R1
+status: PR_OPEN
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+
+prompt_id: AID-2026-062-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-062/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 3f57662579cfe90c230585b7ab7ff87c10e0074df167ac1d6c79e5fe8b9766de
+prompt_bytes: 2927
+
+# ---------------------------------------------------------------------------
+# Stage B of WO-01, split from AID-2026-061 by an Owner close ruling on pull
+# request #1018: a document must not claim an enforcement the platform does not
+# have. Stage A (#1027, merged at 350be84b) made the workspace test run on every
+# pull request; only then could it become required without deadlocking every
+# pull request that does not touch crates/**.
+#
+# This stage reports a measurement. It does not change the platform.
+# ---------------------------------------------------------------------------
+
+authorization:
+  implementation_write: "GRANTED - Owner delegated merge authority for this pull request; one document is edited"
+  document_claim_change: "BOUNDED - section 7 only: the enforced-set count, the machine-read declaration block, the failing-head sentence count, the measurement date, and one attribution paragraph per language"
+  platform_state_change: "NOT_IN_SCOPE - the protection payload was changed before this document, not by it; the readback is quoted, not performed here"
+  architecture_spec_change: "NOT_GRANTED - no ADR, no BMCP specification and no canonical architecture document is modified"
+  failing_head_experiment: "NOT_RUN - a required context that fails is still not shown to block a merge; the sentence that says so is kept, with its count corrected"
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-062/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-062/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-062/session-evidence-wo01b.md
+  files_to_modify:
+    - 14-ai-development/PR-GOVERNANCE-001.md
+    - 14-ai-development/work-items/INDEX.md
+
+acceptance:
+  B1: "The declared count equals the live protection payload count at the stated measurement date: sixteen."
+  B2: "Every declared context is produced by a job id or a job name in .github/workflows, verified by check_declared_check_contexts.py rather than asserted."
+  B3: "The English and Chinese blocks of section 7 state the same count and the same attribution."
+  B4: "The increment is attributed rather than folded: the three session-evidence contexts were required before this document noticed them, and rust-workspace-test was added after #1027 removed the trigger filter, because a required context that is never scheduled is permanently absent."
+  B5: "The deliberately-failing-head sentence survives with its count corrected. Correcting a number is not evidence of the behaviour."
+  B6: "No other section of the document, and no other document, is modified by this change."
+
+implementation:
+  status: PR_OPEN
+  pull_request: 1033
+  merge_commit_sha: NOT_MERGED
+
+review:
+  status: NOT_ASSIGNED
+  note: "Independent review has not been recorded. The change was produced in one session with the GitHub identity that opens the pull request; the Owner close ruling on #1018 is the external constraint on its scope, not a review of this text."
+
+# ---------------------------------------------------------------------------
+# issue_refs is empty by design. The linked Issue #262 predates the
+# 2026-12-01 policy effective time and carries no AI-assisted work
+# declaration, so it cannot be mapped to YES. OD-A3 permits a PR-scope
+# entry with empty issue_refs for exactly this case; see AID-2026-059 F6.
+# ---------------------------------------------------------------------------
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+    implementing_ai_session: session-req01-r34
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-062/prompt-v1.md
+    executed_prompt_sha256: 3f57662579cfe90c230585b7ab7ff87c10e0074df167ac1d6c79e5fe8b9766de
+    executed_prompt_bytes: 2927
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-062/session-evidence-wo01b.md

@@ -251,9 +251,9 @@ If the current GitHub plan/visibility does not support required controls for thi
 
 如果当前 GitHub 套餐/可见性不支持本仓库所需的控制，必须记录为 BLOCKED，并升级给仓库管理员选择真正可强制执行的套餐/配置。PR 模板、Workflow 注释、Label、评论或 AI 自审均不得冒充硬合并门禁。未经明确安全/隐私决策，不得通过公开仓库来规避限制。
 
-**Measured platform state, `2026-11-24`, from `GET /repos/oahcom/AiMemoryBrainArchitecture` and `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection` (HTTP 200).** This is a dated measurement, not a standing assertion; re-read it before relying on it. The repository reports `private: false`, `visibility: public`, so the plan/visibility limitation above is moot here and is not available as a ground for BLOCKED.
+**Measured platform state, `2026-11-25`, from `GET /repos/oahcom/AiMemoryBrainArchitecture` and `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection` (HTTP 200).** This is a dated measurement, not a standing assertion; re-read it before relying on it. The repository reports `private: false`, `visibility: public`, so the plan/visibility limitation above is moot here and is not available as a ground for BLOCKED.
 
-- **Status checks — enforced.** 12 required contexts, `strict: true`, `enforce_admins: {enabled: true}`, `allow_force_pushes: {enabled: false}`, `allow_deletions: {enabled: false}`. A required check that fails or is absent on the exact Head cannot merge through the normal path. The twelve names are declared below so that each must still be produced by a workflow in this tree:
+- **Status checks — enforced.** 16 required contexts, `strict: true`, `enforce_admins: {enabled: true}`, `allow_force_pushes: {enabled: false}`, `allow_deletions: {enabled: false}`. A required check that fails or is absent on the exact Head cannot merge through the normal path. The sixteen names are declared below so that each must still be produced by a workflow in this tree:
 
 <!-- declared-check-contexts: read by scripts/check_declared_check_contexts.py -->
 ```text
@@ -269,16 +269,23 @@ Rust clippy (hard gate)
 Repository hygiene (hard gate)
 Rust format (hard gate)
 Rust doctests (hard gate)
+Session Evidence
+Session Evidence self-test (base)
+Session Evidence self-test (head)
+rust-workspace-test
 ```
 
 - **Pull-request reviews — not enforced.** `required_pull_request_reviews` is absent from the protection payload (the key is not present, not `null`). This is not an unset flag waiting to be flipped: the repository has one write identity, so `author == merger == approver` at the account layer, and requiring an approving review would deadlock every PR. `required_conversation_resolution` is also `{enabled: false}`. No PR body, workflow comment, label or AI self-review may be read as a review gate this repository does not have; §6.1 remains a process requirement only.
-- **The deliberately-failing-head experiment — not run, so that half is unproven.** The 12-context payload proves the configuration, not the behaviour under a failing Head. Until that experiment is executed and recorded, "a deliberately failing required check cannot merge" MUST NOT be recorded as satisfied.
+- **The deliberately-failing-head experiment — passed, `2026-11-25`, and the result is dated for a reason.** Pull request #1038 added one always-failing `#[test]` at head `b5cf4f25`, `cargo fmt --all -- --check` still exited 0, and the required `rust-workspace-test` failed with check run `138943464904`. The merge was attempted through the API rather than read off a page: `PUT /repos/oahcom/AiMemoryBrainArchitecture/pulls/1038/merge` returned `405 Required status check "rust-workspace-test" is failing`. Immediately before that attempt the same payload reported `mergeable: true` with `mergeable_state: blocked` — the boolean is a cache that does not include check outcomes, so a merge gated on it would have concluded this head was mergeable. The pull request was closed unmerged and the branch kept so the run stays reachable. What this proves is the normal path on this date with this payload; it does NOT prove that a bypass route, a renamed job or a later payload behaves the same, and it MUST be re-run after any material change to the protection configuration or to the workflows that produce these contexts.
 
-**`2026-11-24` 实测平台状态**，取自 `GET /repos/oahcom/AiMemoryBrainArchitecture` 与 `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection`（HTTP 200）。这是带日期的实测，不是常驻断言；依赖前须重新读取。仓库报告 `private: false`、`visibility: public`，因此上文的套餐/可见性限制在本仓库不成立，不可作为 BLOCKED 的依据。
+The count rose from twelve to sixteen between the `2026-11-24` and `2026-11-25` readings, and the two increments have different standing. `Session Evidence`, `Session Evidence self-test (base)` and `Session Evidence self-test (head)` were required by the session-evidence rollout before this measurement; this document previously understated the set. `rust-workspace-test` was added last, and only after #1027 removed the `pull_request.paths` filter from its workflow: a required context that is never scheduled is permanently absent, not pending, so requiring it first would have blocked every pull request that does not touch `crates/**`. The ordering is a condition of correctness, not a preference.
+**`2026-11-25` 实测平台状态**，取自 `GET /repos/oahcom/AiMemoryBrainArchitecture` 与 `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection`（HTTP 200）。这是带日期的实测，不是常驻断言；依赖前须重新读取。仓库报告 `private: false`、`visibility: public`，因此上文的套餐/可见性限制在本仓库不成立，不可作为 BLOCKED 的依据。
 
-- **状态检查——已强制。** 12 条必需上下文、`strict: true`、`enforce_admins: {enabled: true}`、`allow_force_pushes: {enabled: false}`、`allow_deletions: {enabled: false}`。在准确 Head 上失败或缺失的必需检查无法经正常路径合并。
+
+- **状态检查——已强制。** 16 条必需上下文、`strict: true`、`enforce_admins: {enabled: true}`、`allow_force_pushes: {enabled: false}`、`allow_deletions: {enabled: false}`。在准确 Head 上失败或缺失的必需检查无法经正常路径合并。
 - **Pull Request 审查——未强制。** 保护载荷中不存在 `required_pull_request_reviews`（键缺失，不是 `null`）。这不是一个等待开启的开关：本仓库只有一个写入身份，即账号层面的 `作者 == 合并者 == 批准者`，强制批准审查会使每个 PR 死锁。`required_conversation_resolution` 同为 `{enabled: false}`。任何 PR 正文、Workflow 注释、Label 或 AI 自审都不得被读作本仓库并不存在的审查门禁；§6.1 仅为流程要求。
-- **故意失败 Head 实验——未执行，故该半条件未获证明。** 12 条上下文的载荷证明的是配置，不是失败 Head 下的实际行为。在该实验被执行并记录之前，「故意失败的必需检查无法合并」MUST NOT 记为已满足。
+- **故意失败 Head 实验——已于 `2026-11-25` 通过，且结果必须带日期引用。** Pull Request #1038 在 Head `b5cf4f25` 加入一个恒定失败的 `#[test]`，`cargo fmt --all -- --check` 仍以 0 退出，必需的 `rust-workspace-test` 失败（check run `138943464904`）。合并不是看页面，而是实际经 API 发起：`PUT /repos/oahcom/AiMemoryBrainArchitecture/pulls/1038/merge` 返回 `405 Required status check "rust-workspace-test" is failing`。而在该次尝试之前，同一载荷报告 `mergeable: true`、`mergeable_state: blocked`——那个布尔字段是不含检查结果的缓存，以它作为合并依据会得出「本 Head 可合并」的错误结论。该 PR 已不合并关闭，分支保留以使这次运行仍可追溯。本条证明的是**当日、该载荷、正常路径**下的行为；它**不**证明绕过路径、改名后的 job 或后续载荷行为相同，保护配置或产出这些 context 的工作流发生实质变化后 MUST 重跑。
+条数在 `2026-11-24` 与 `2026-11-25` 两次读取之间由十二升到十六，两次增量性质不同。`Session Evidence`、`Session Evidence self-test (base)`、`Session Evidence self-test (head)` 在本节先前那次实测之前就已由 session-evidence 上线过程设为必需，是本文件此前低报了必需集合。`rust-workspace-test` 最后加入，且只在 #1027 移除其工作流的 `pull_request.paths` 过滤之后加入：一条永不被调度的必需上下文是**永久缺失**而非「等待中」，因此先要求它会使每个不触达 `crates/**` 的 Pull Request 全部卡死。这个顺序是正确性条件，不是偏好。
 
 Issue #134 carries this open question. The issue's state is not evidence of enforcement and is not a condition of this standard: a reader who needs the state reads the issue.
 

@@ -20,7 +20,7 @@ document_metadata:
       last_verified_date: "2026-11-24"
       last_verification_note: "All figures from live GitHub REST reads at main 84bbe9241/3026b319 and one local enumeration. Collaborators, invitations, branch-protection payload, required-review sub-resource, repo visibility and per-PR review counts are direct API responses, quoted verbatim. No PUT was issued against branch protection: writing it as a non-owner would reproduce SELF-AUTH-002. The register census read every root register and classified by the first Status line in the first 70 lines."
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Modified
     supersession:
       supersedes: []
       supersession_reason: null
@@ -59,6 +59,8 @@ document_metadata:
 **这个仓库只有一个可写身份。`collaborators = 1`，`pending invitations = 0`。**
 
 于是 §5 要求的「独立审查」不是没人愿意做，是**结构上无法由第二个人做**。所有 `NOT_ASSIGNED` 的席位都不是待办事项，是当前身份拓扑下不可能被填的槽位。这解释了为什么 37 个登记里 21 个写着同一个词，而六个月来没有一个被真正关闭。
+
+> **§9 已撤回本段推论（2026-11-24）。** 上面的测量不变。撤回的是推论：§5 要求的不是第二个**人**，是第二个**会话**，而本仓库随时可以开启一个。§9 记录了这处错误，也记录了它的方向——它把「675 件没做的事」写成了「做不了的事」。
 
 ---
 
@@ -165,11 +167,14 @@ GET /repos/oahcom/AiMemoryBrainArchitecture
 
 把三件事连起来：
 
-1. §5 的审查要求需要一个**第二身份**；
+1. §5 的审查要求需要一个**第二身份**〔2026-11-25 附注：此前提已失效，见本节末〕；
 2. 仓库只有**一个身份**且无邀请在途；
 3. 唯一的补救（平台强制）所依赖的前提**已经变化，但记录没有更新**。
 
 所以 37 个登记里 21 个 `NOT_ASSIGNED` 不是 21 个待办，是**同一个待办**：拿到第二个可写身份，或者由唯一身份的所有者明确裁定「放弃独立审查」。这两条路都不是写代码，也都不是我作为 owner-proxy 能自己给的——前者需要一个真实的人，后者需要所有者撤回 `PR-GOVERNANCE-001` §5。
+
+> **2026-11-25 附注（引文时效）。** 本节第 1 条与上一段把「独立审查」写成需要一个**第二身份**、需要「一个真实的人」，默认独立性以 GitHub 账号为门槛。该默认已不成立：`PR-GOVERNANCE-001` §5 于 2026-11-24 由 commit `2eb4e352`（PR #935）修订，现行文本（`14-ai-development/PR-GOVERNANCE-001.md` 的 §5 正文）规定**独立性是审查会话的属性，不是承载它的 GitHub 账号的属性**；修订记录见 `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`。「拿到第二个可写身份」由此不再是 §5 推出的唯一出路——开一个不共享上下文的会话即可，§9.1 已把「出口只有两条」判为假并给出第三条出口。
+> **仍然成立的部分**：本节的**上限结论**（收敛卡住、新增登记只让 §6 计数 +1）不因本附注改变。被撤销的只是「因为没有第二个 GitHub 身份，所以这个上限是结构性的」这一句**理由**；上游事实（`collaborators = 1`、`invitations = 0`）仍成立，见 §9.2。原文保留，未改写。
 
 **在这个裁决作出之前，任何新增登记都不会改变状态。** 它只会让 §6 的计数再 +1。
 
@@ -290,9 +295,12 @@ What can be claimed is weaker and certain: **the README's "private repository pl
 
 ## 5. So where does convergence actually stall
 
-Join the three: §5's review requirement needs a **second identity**; the repository has **one** with no invitation in flight; and the only remedy (platform enforcement) rests on a premise that **has changed while the record did not**.
+Join the three: §5's review requirement needs a **second identity** [Added 2026-11-25: this premise is superseded — see the note below]; the repository has **one** with no invitation in flight; and the only remedy (platform enforcement) rests on a premise that **has changed while the record did not**.
 
 So 21 `NOT_ASSIGNED` entries are not 21 to-dos. They are **one** to-do: obtain a second write identity, or have the sole owner explicitly rule that independent review is waived. Neither is code, and neither is something I as owner-proxy can supply — the first needs a real person, the second needs the owner to withdraw `PR-GOVERNANCE-001` §5.
+
+> **Added 2026-11-25 (citation currency).** The two paragraphs above present a **second identity**, and "a real person", as the precondition for independent review — i.e. they assume independence is gated on a GitHub account. That assumption no longer holds: `PR-GOVERNANCE-001` §5 was amended on 2026-11-24 by commit `2eb4e352` (PR #935), and the live text (`14-ai-development/PR-GOVERNANCE-001.md`, §5) makes independence a property of the reviewing **session**, not of the GitHub account that carries it; the amendment is recorded in `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`. "Obtain a second write identity" is therefore no longer the only exit from §5 — opening a session that does not share the authoring context suffices, which §9.1 already records as the third exit it added to the two listed above.
+> **What survives:** this section's **ceiling finding** — that convergence stalls, and that a new register only increments §6 by one — is not withdrawn by this note. What is withdrawn is the single sentence that gives "no second GitHub identity" as the reason the ceiling is structural. The upstream figures (`collaborators = 1`, `invitations = 0`) still hold (§9.2). The original text is retained, not reworded.
 
 **Until that ruling exists, no new register changes the state.** It only increments §6 by one.
 
