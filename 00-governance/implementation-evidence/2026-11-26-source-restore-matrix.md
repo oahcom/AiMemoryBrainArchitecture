@@ -36,7 +36,7 @@ document_metadata:
   authority:
     canonical_status: Candidate
     canonical_scope: "Evidence record for AID-2026-11-26-SOURCE-RESTORE-02"
-    canonical_scope_id: null
+    canonical_scope_id: "security-governance/source-restore-matrix"
     canonical_scope_keywords: []
     canonical_conflict_status: None
     canonical_conflict_resolution: null
@@ -68,16 +68,7 @@ All four source bodies were fetched at the exact D source commit and their origi
 
 ## D — Forget Fence bilingual section set
 
-The existing four-part EN/ZH-CN reading set is retained. Every part now points to the exact candidate source Blob `d3ddfff9500d9138d643989e8496d99b8d9ed79e`:
-
-| Part | EN companion Blob | ZH-CN companion Blob |
-|---|---|---|
-| part1 | `f78b0a7880928bc51394fb35381a4ad844615e75` | `afc5b30e42eb0522a05ffa1c2ae8e372a55e2e0f` |
-| part2 | `c652a3c1fb722c45b34f9468a43f910b346ac40e` | `5aa49ee75530bfc4d62ff3245ab3f38c89b56126` |
-| part3 | `eff0bb4e3b5164678a24e64bc415ca5cbd5ae233` | `ac5662eb2171813b48576233cf601c8929a33996` |
-| part4 | `43c5fcc92eb8d6f8ea894e91dfe668955e382252` | `e3f46487478d2e8cd86192f21cf1fd34d3a4af06` |
-
-The companion prose was not rewritten. Only source-revision/source links were refreshed; semantic parity remains a manual reviewer control and is not claimed as mechanically proven.
+The existing four-part EN/ZH-CN reading set remains unchanged. The primary EN/ZH-CN companion documents and D source index now point to the exact candidate source Blob `d3ddfff9500d9138d643989e8496d99b8d9ed79e`. The four split reading parts are retained as existing informational companions; their historical part-level source pointers are not promoted as independent mirror groups in this PR. Their prose is not rewritten.
 
 ## D — governance and index changes
 
@@ -86,7 +77,7 @@ The companion prose was not rewritten. Only source-revision/source links were re
 - `03-memory-brain/README.md`: add a source index with original and candidate final Blob pins.
 - `docs/en/03-memory-brain/README.md` and `docs/zh-CN/03-memory-brain/README.md`: update bilingual index companions and GOV-DOC-002 metadata.
 - GOV-DOC-002 metadata is added to the four root source documents and their four EN/ZH-CN companion pairs.
-- Existing Forget Fence part documents and the composite D reading guides receive exact source pointers to the new root source/index.
+- Existing Forget Fence part documents and composite D reading guides are preserved without content changes; primary source companions and the D index carry the exact candidate source pointers.
 
 All D source documents and mirrors remain `decision_status: Draft`, source `canonical_status: Candidate`, mirror `canonical_status: Non-Canonical`, and `normative_status: Informative`. This PR does not assert Owner acceptance or effective normative status.
 
