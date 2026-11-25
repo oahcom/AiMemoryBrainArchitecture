@@ -45,6 +45,8 @@ document_metadata:
 
 # GOV-NC-2026-11-21-SELF-REVIEW-007 — The "fix" for zero-review merges is one account reviewing itself
 
+> **〔Added 2026-11-25〕** The title names the defect by account identity ("one account reviewing itself"), i.e. it uses "author and reviewer are the same GitHub identity" as the reason for "the review is not independent". Section 5 was amended on 2026-11-24 by `2eb4e352` (PR #935) to a session-level test (see `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`): a different session under the same GitHub identity is an independent review. `/pulls/{n}/reviews` returns only `user.login`, not the session, so the step "same identity ⇒ same session" cannot be verified from that payload. This should be read as **"account layer not independent; session layer not verified"**. **What survives is the measured defect**: in all six merges the sole review was a `COMMENTED` from the same account, at 13–74 second intervals — that is unaffected by the version of section 5, because a `COMMENTED` review is not an `APPROVE` under any wording. **What does not survive is** the step "same account ⇒ same session". The title text is left unchanged because it has entered indexes and cross-references.
+
 - Register ID: GOV-NC-2026-11-21-SELF-REVIEW-007
 - Status: `ACCEPTED` / `SELF_REVIEW_IDENTIFIED` / S-2 `APPROVED_IN_PRINCIPLE / IDENTITY_NOT_ASSIGNED`
 - Defect class: Governance Conformance — Independence of Review
@@ -73,6 +75,8 @@ The four "zero-review merges" recorded in `MERGE-AFTER-RULING-003` share one obs
 All six satisfy `author == sole reviewer == merger`.
 
 This is not "insufficient review". It is **review reduced to a filled-in field**. The `reviews >= 1` metric can now be satisfied by a single account in a dozen seconds, while the independence section 5 requires has not increased by one unit.
+
+> **〔Added 2026-11-25〕** The second clause makes "a single account satisfies the count in a dozen seconds" the reason for "the independence section 5 requires has not increased", i.e. it grounds a review-layer conclusion in an account-layer fact. Section 5 was amended on 2026-11-24 by `2eb4e352` (PR #935) to a session-level test (see `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`): a different session under the same GitHub identity is an independent review. `/pulls/{n}/reviews` returns only `user.login`, not the session, so the step "same identity ⇒ same session" cannot be verified from that payload. This should be read as **"account layer not independent; session layer not verified"**. **What survives is the first clause's measurement**: `reviews >= 1` can be satisfied by a single account in a dozen seconds; that upper bound on the count has not moved. **What does not survive is** deriving "independence did not increase" directly from "a single account" — that step needs sessions to be distinguishable, and the payload does not provide them.
 
 ---
 
@@ -111,6 +115,8 @@ What followed: on every merge since, the Owner left a substantive evidence comme
 
 Same account, two channels, both containing an "Owner run report". **The times the review channel was chosen are exactly the times `reviews >= 1`.**
 
+> **〔Added 2026-11-25〕** The sentence uses "same account" as its skeleton to make the two carriers (issue comment and review) equivalent, attributing the review channel's effect on the count to account sameness. Section 5 was amended on 2026-11-24 by `2eb4e352` (PR #935) to a session-level test (see `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`): a different session under the same GitHub identity is an independent review. `/pulls/{n}/reviews` returns only `user.login`, not the session, so the step "same identity ⇒ same session" cannot be verified from that payload. This should be read as **"account layer not independent; session layer not verified"**. **What survives is** the relation between carrier and count: on `#414` the 5 issue comments and 3 reviews coexist and only the latter enter the `reviews` count — that carrier fact is independent of section 5. **What does not survive is** "same account" serving as the argument for "the two channels are equivalent": if the sessions differ, two reviews may come from different sessions, and account sameness proves nothing about that.
+
 This register does not find that this was intentional evasion. The evidence shows only that the ruling changed the carrier, the carrier changed the count, and the count changed the visibility of the violation.
 
 ---
@@ -138,6 +144,9 @@ So this register's conclusion must be precise: **the problem is not review quali
 
 - **MERGE-AFTER-RULING-003**: the count stays frozen at 4 per the Owner's ruling; this register **does not change that count**. What it records is that the observable feature the count was built on no longer holds, so "4" is no longer a number that covers the current state.
 - **CI-NOT-EXECUTED-005**: at all six merges the checks were `failure` / `NOT_EXECUTED`. The reviews say so honestly (#403: "this is not a CI PASS"). But reviewer and review-ee being the same person strips that statement of any external force.
+
+  > **〔Added 2026-11-25〕** The sentence uses "reviewer and review-ee being the same person" — an **account-layer** fact read from `user.login` in `/pulls/{n}/reviews` (all six rows of the §1 table show reviewer and author as `oahcom`) — as the reason for a **review-layer** conclusion, namely that the statement "loses its external force". Section 5 was amended on 2026-11-24 by `2eb4e352` (PR #935) to a session-level test (see `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`): a different session under the same GitHub identity is an independent review. `/pulls/{n}/reviews` returns only `user.login`, not the session, so the step "same identity ⇒ same session" cannot be verified from that payload. This should be read as "account layer not independent; session layer not verified". **What survives is the measurement the sentence rests on**: at all six merges the checks were `failure` / `NOT_EXECUTED`, and #403's review body itself says "this is not a CI PASS" — both the disclaimer and its object are recorded facts. **What does not survive is** deriving "the declaration has no external force" from account sameness: if that review came from a different session under the same account, the external force is already present, and the payload cannot rule that out.
+
 - **GATE-DEADLOCK-006**: the baseline `#408` introduced is one half of the deadlock's cause; `#414` fixed the gate's pair-move classification. Both were self-reviewed then merged, and the gate has since returned `EXIT=2` for **every** PR. The three stack: review not independent, gate not executed, gate permanently rejecting.
 
 ---
@@ -216,9 +225,13 @@ done
 
 Test: if `author == merger` and the only `user.login` among reviews is also `author`, section 5 independence does not hold.
 
+> **〔Added 2026-11-25〕** This is an executable decision procedure that uses "the only `user.login` among reviews equals `author`" — an account-layer fact — as the test for "section 5 independence does not hold". Section 5 was amended on 2026-11-24 by `2eb4e352` (PR #935) to a session-level test (see `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`): a different session under the same GitHub identity is an independent review. `/pulls/{n}/reviews` returns only `user.login`, not the session, so the step "same identity ⇒ same session" cannot be verified from that payload. This should be read as **"account layer not independent; session layer not verified"**. **The test is now undecidable from the review payload, so it cannot be used as a gate** — the session information it needs is not in that payload, and run as written it would reject an independent session under the same identity, a false negative outside section 5. **The half that survives is**: a `COMMENTED`-only review is not an approval; "the sole reviewer is the author and that review is `COMMENTED`" still shows no approval was obtained, but that conclusion now comes from `state` and the approval count, not from identity equality.
+
 ---
 
 **Register conclusion**: the failure mode recorded in `MERGE-AFTER-RULING-003` (zero review) has been replaced by a shape that conforms on the count and is equivalent on independence. Six measured instances all satisfy `author == sole reviewer == merger`, at intervals of 13–74 seconds. Review quality is high — `#414` even rejected itself — and that is precisely the point: the defence rests on voluntary restraint, not on structure. This register changes no existing count; it records that the feature that count depends on has lapsed.
+
+> **〔Added 2026-11-25〕** This paragraph uses "all six satisfy `author == sole reviewer == merger`" — an account-layer triple — as the reason for "equivalent on independence". Section 5 was amended on 2026-11-24 by `2eb4e352` (PR #935) to a session-level test (see `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`): a different session under the same GitHub identity is an independent review. `/pulls/{n}/reviews` returns only `user.login`, not the session, so the step "same identity ⇒ same session" cannot be verified from that payload. This should be read as **"account layer not independent; session layer not verified"**. **What survives is** the interval measurement for all six (13–74 seconds), the review state (`COMMENTED`, not an approval), and the content-layer fact that `#414` rejected itself; **what does not survive is** the clause "equivalent on independence" — equivalence needs sessions to be distinguishable, and this register contains no session measurement.
 
 **Owner ruling (2026-11-21)**: this register is accepted as a new failure mode, retained alongside 003, without rewriting 003's historical definition. Three prohibitions are stated: `reviews >= 1` must not be treated as sufficient for independent review; `COMMENTED` must not be treated as approval; M-3 is not a fix for this problem. S-2 is approved in principle, status `IDENTITY_NOT_ASSIGNED`.
 
