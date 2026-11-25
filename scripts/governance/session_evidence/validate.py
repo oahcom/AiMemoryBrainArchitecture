@@ -1547,6 +1547,18 @@ def check_09_manifest_and_evidence_entries(
     pr_paths: list[str],
     changed_paths: set[str] | None = None,
 ) -> list[dict]:
+    """Validate the manifest's session_evidence entries.
+
+    ``changed_paths`` is the set of paths this pull request added or
+    modified; ``None`` means it could not be determined. It scopes the two
+    rules that ask "was this written by this pull request?": the legacy
+    manifest migration requirement, and the requirement that an entry's
+    ``issue_refs`` name only linked Issues. An entry whose
+    ``session_evidence_ref`` this pull request did not touch was written by
+    an earlier session and is not this author's to answer for -- a
+    cumulative manifest would otherwise demand that every later pull
+    request link every Issue any earlier session ever named.
+    """
     manifest_item = _validate_regular_file(
         manifest_path,
         ctx.tree_by_path,
@@ -1568,10 +1580,16 @@ def check_09_manifest_and_evidence_entries(
     )
     is_legacy_manifest = not has_canonical_entries
 
-    if changed_paths is None:
-        changed_paths = set()
+    def changed_by_this_pr(path: str) -> bool:
+        """Whether this pull request is the one that wrote ``path``.
 
-    if is_legacy_manifest and manifest_path in changed_paths:
+        An undetermined changed-path set means nothing is known to be an
+        earlier session's file, so every path counts as this pull
+        request's: not knowing must never widen an exemption.
+        """
+        return changed_paths is None or path in changed_paths
+
+    if is_legacy_manifest and changed_by_this_pr(manifest_path):
         raise ValidationError(
             f"{manifest_path}: updated manifest must use the canonical "
             "session_evidence entries"
@@ -1600,20 +1618,6 @@ def check_09_manifest_and_evidence_entries(
         refs = entry["issue_refs"]
         numbers = set()
 
-        for issue_ref in refs:
-            number = _normalise_issue_reference(
-                issue_ref,
-                ctx.repo,
-            )
-
-            if number not in linked_numbers:
-                raise ValidationError(
-                    f"{location}: issue_refs contains "
-                    f"unlinked Issue #{number}"
-                )
-
-            numbers.add(number)
-
         evidence_path = validate_canonical_evidence_path(
             entry["session_evidence_ref"],
             location,
@@ -1626,6 +1630,27 @@ def check_09_manifest_and_evidence_entries(
             )
 
         entry_paths.add(evidence_path)
+        entry_written_here = changed_by_this_pr(evidence_path)
+
+        for issue_ref in refs:
+            number = _normalise_issue_reference(
+                issue_ref,
+                ctx.repo,
+            )
+
+            # Only the pull request that wrote an entry must attribute it
+            # to an Issue it links. Entry #3 of a cumulative manifest may
+            # name an Issue from its own session; demanding that every
+            # later pull request link it again would grow the requirement
+            # by one Issue per session, forever.
+            if number not in linked_numbers and entry_written_here:
+                raise ValidationError(
+                    f"{location}: issue_refs contains "
+                    f"unlinked Issue #{number}"
+                )
+
+            numbers.add(number)
+
         entry_issue_numbers[evidence_path] = numbers
 
         evidence_item = _validate_regular_file(
@@ -1657,6 +1682,15 @@ def check_09_manifest_and_evidence_entries(
         # deliberately before it gains the right to be attributed.
         if not is_legacy_manifest:
             for number in numbers:
+                # An unchanged entry may name an Issue this pull request
+                # does not link (the scoped relaxation above), and such a
+                # number has no mapping row to judge. The NO rule below
+                # still applies to every Issue this pull request does link:
+                # it forbids attributing evidence to an Issue that
+                # declares no AI involvement, whoever wrote the entry.
+                if number not in mapping:
+                    continue
+
                 row_status, row_paths = mapping[number]
 
                 if row_status not in ("YES", "LEGACY_UNDECLARED"):
@@ -1913,17 +1947,19 @@ def _check_manifest_entries(
     mapping: dict,
     pr_paths: list[str],
 ) -> None:
-    """Run checks 09 and 11, scoping the legacy exemption to unchanged files."""
+    """Run checks 09 and 11, scoping the entry rules to this PR's changes."""
     changed_paths = _changed_paths_for_manifest(ctx, manifest_path)
     # An unknown base means "everything changed", so no legacy exemption
-    # is granted and the canonical structure is required.
-    manifest_changed = changed_paths is None or manifest_path in changed_paths
+    # is granted, the canonical structure is required, and every manifest
+    # entry counts as this pull request's to answer for. Passing the set
+    # whole -- not just {manifest_path} -- is what lets check_09 tell an
+    # entry this pull request wrote from one an earlier session wrote.
     entries = check_09_manifest_and_evidence_entries(
         ctx,
         manifest_path,
         mapping,
         pr_paths,
-        {manifest_path} if manifest_changed else set(),
+        changed_paths,
     )
     check_11_prompt_snapshot_hashes(ctx, entries)
 

@@ -1245,6 +1245,54 @@ YES
         self.assertIn("missing Work Item ID field", output)
         self.assertNotIn("is required", output)
 
+    def test_preexisting_manifest_entry_does_not_require_linking_its_issue(self):
+        # A cumulative manifest: entry #1 was written by an earlier session
+        # and names an Issue this pull request does not link. Its evidence
+        # document is untouched here, so it is not this author's to answer
+        # for. The changed entry still names its own linked Issue.
+        old = make_entry(101, "a")
+        old["issue_refs"] = [issue_url(999)]
+        new = make_entry(101, "b")
+        body = make_pr_body(
+            refs=[EVIDENCE_B],
+            issue_refs=[EVIDENCE_B],
+            related=[101],
+        )
+        world = make_valid_world(entries=[old, new], pr_body=body)
+        world["pr"]["base"] = {"sha": "b" * 40}
+        self.install_world(world)
+        self.patch_validate(
+            "gh_compare_paths",
+            lambda repo, base_sha, head_sha: {MANIFEST, EVIDENCE_B},
+        )
+        result, output = self.capture_validator()
+        self.assertEqual(result, 0, output)
+        self.assertIn("AI-SESSION-EVIDENCE: PRESENT", output)
+
+    def test_changed_entry_still_requires_linking_its_issue(self):
+        # The relaxation is scoped: the entry this pull request wrote must
+        # still attribute only to Issues this pull request links. Without
+        # this fence the gate would be a hole, not a scoped exemption.
+        old = make_entry(101, "a")
+        old["issue_refs"] = [issue_url(999)]
+        new = make_entry(101, "b")
+        new["issue_refs"] = [issue_url(998)]
+        body = make_pr_body(
+            refs=[EVIDENCE_B],
+            issue_refs=[EVIDENCE_B],
+            related=[101],
+        )
+        world = make_valid_world(entries=[old, new], pr_body=body)
+        world["pr"]["base"] = {"sha": "b" * 40}
+        self.install_world(world)
+        self.patch_validate(
+            "gh_compare_paths",
+            lambda repo, base_sha, head_sha: {MANIFEST, EVIDENCE_B},
+        )
+        result, output = self.capture_validator()
+        self.assertEqual(result, 1, output)
+        self.assertIn("unlinked Issue #998", output)
+
     def test_missing_work_item_field_is_named_as_a_missing_field(self):
         # The issue's row 2: no declaration at all, but some other id in
         # prose. The message must name the missing field instead of
