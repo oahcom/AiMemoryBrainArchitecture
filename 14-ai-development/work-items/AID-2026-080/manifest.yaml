@@ -89,11 +89,11 @@ baseline_and_source_evidence:
   evidence_matrix: "00-governance/implementation-evidence/2026-11-26-source-restore-matrix.md"
 
 prompt:
-  prompt_file: "14-ai-development/work-items/AID-2026-080/prompt-v1.txt"
+  prompt_file: "14-ai-development/work-items/AID-2026-080/prompt-v1.md"
   prompt_version: "v1"
   prompt_status: "TASK_SPECIFIC_USER_INPUT_CAPTURED"
-  prompt_sha256: "4f8d445a19a48ba1a4fc36225c4cff9b88554ec7ce4185b9e114bdf2f5c3332b"
-  prompt_bytes: 693
+  prompt_sha256: "6f74f728dfa47141ebee108c462e7e853983f1700e91e25c8f98a7b47ec07a95"
+  prompt_bytes: 2130
   prompt_provenance: "NOT_VERIFIED"
   prompt_provenance_note: >-
     The file preserves the exact task-specific user instruction supplied for this
@@ -109,9 +109,9 @@ session_evidence:
       - "#1202"
       - "#1203"
     implementing_ai_session: "chatgpt-session-id-not-available"
-    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-080/prompt-v1.txt"
-    executed_prompt_sha256: "4f8d445a19a48ba1a4fc36225c4cff9b88554ec7ce4185b9e114bdf2f5c3332b"
-    executed_prompt_bytes: 693
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-080/prompt-v1.md"
+    executed_prompt_sha256: "6f74f728dfa47141ebee108c462e7e853983f1700e91e25c8f98a7b47ec07a95"
+    executed_prompt_bytes: 2130
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_AVAILABLE"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-080/session-evidence-source-restore.md"
