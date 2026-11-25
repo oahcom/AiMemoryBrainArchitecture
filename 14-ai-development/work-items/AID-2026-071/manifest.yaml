@@ -1,0 +1,81 @@
+work_item_id: AID-2026-071
+title: Require a REQ-level risk assessment to be signed by a session independent of what it assesses
+class: GATE/POLICY
+risk: R2
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+
+prompt_id: AID-2026-071-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-071/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 4c735edd42b80f43d04c26fdbbcc8e29662d96456394fbf5417a8386d88609c7
+prompt_bytes: 4303
+
+# ---------------------------------------------------------------------------
+# WO-AC2, registered against Issue #262 AC2.
+#
+# AC2 was PARTIAL for two reasons: the assessment had no responsible session
+# named, and no text in the standard said an assessment must be signed at all.
+# The second is fixed here; the first by the record that cites this change.
+#
+# The clause is not invented for this work item. Owner accepted its wording in
+# Issue #262 comment 7153428650 as the landing target; what this branch decides
+# is only the boundary question the owner deferred — whether the exception
+# instrument can cover it — and the answer is written into the clause as a
+# non-exemption sentence rather than left to interpretation.
+# ---------------------------------------------------------------------------
+
+authorization:
+  implementation_write: "GRANTED for this document - PR-GOVERNANCE-001.md section 5 only. No file under crates/ is touched."
+  gate_behaviour_change: "NOT_GRANTED - no validator, workflow or required context changes; the clause states an obligation, it does not add a check"
+  schema_change: "NOT_GRANTED - no serialized type, no database column, no manifest field is introduced"
+  platform_state_change: "NOT_GRANTED - no required context, workflow or protection payload is modified"
+  architecture_spec_change: "GRANTED for section 5 of PR-GOVERNANCE-001.md only - no ADR, no BMCP specification and no other canonical document is modified"
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-071/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-071/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-071/session-evidence-r45.md
+  files_to_modify:
+    - 14-ai-development/PR-GOVERNANCE-001.md
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope: "Every other path. In particular docs/en and docs/zh-CN PR-GOVERNANCE-001-ENFORCEMENT.md, which summarise section 5 at their line 85 and are a different document; the approval block of PR-GOVERNANCE-001.md, whose decision_status and approved_version are not refreshed by the session that writes the change; and the other four deferred boundary questions."
+
+acceptance:
+  C1: "Section 5 states all four items in English and in Chinese with semantic parity. Settled by reading the two paragraphs side by side, with the negative constraints checked one by one: 'neither wrote nor implemented', 'is not an independent assessment', 'is not rewritten'. A translation that softens any of the three fails this criterion."
+  C2: "The non-exemption sentence appears in both languages and names this paragraph as the unit an exception record must name. Settled by the sentence being present and by it being narrower than 'section 5', which is what makes the boundary answer enforceable."
+  C3: "No existing sentence in section 5 is deleted, reordered or reworded. Settled by `git diff -U0` showing an addition with no removal inside the section's existing paragraphs."
+  C4: "The approval metadata is not silently refreshed. Settled by `decision_status: Approved` and its `approved_version` value being byte-identical before and after, and by `modification_status` still reading `Pending-Reapproval`."
+  C5: "The enforcement addendum is not claimed to be in parity beyond what it already is. Settled by neither `docs/en` nor `docs/zh-CN` PR-GOVERNANCE-001-ENFORCEMENT.md being modified by this change, and by the pull request saying so."
+  C6: "Any review recorded for this change is stated at the session level. Settled by the review naming the reviewing session and not asserting an account-level approval; `EX-20261123-01` records that zero APPROVED reviews exist in this repository."
+
+implementation:
+  status: IMPLEMENTED_IN_BRANCH
+  pull_request: ASSIGNED_AT_OPEN
+  merge_commit_sha: NOT_MERGED
+  note: "The clause lands in this branch. The pull request number cannot be written into the commit that opens it, so the INDEX row carries the merge commit once one exists."
+
+review:
+  status: NOT_ASSIGNED
+  note: "Independent review has not been recorded. Section 9 of the standard requires an exact-Head governance review for changes to it; that review is the next action and is not claimed here."
+
+# ---------------------------------------------------------------------------
+# AC2 of Issue #262 requires the risk assessment itself to be answerable. This
+# entry names the Issue; it does not claim the Issue's declaration state.
+# ---------------------------------------------------------------------------
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#262"
+    implementing_ai_session: session-r45-coordinator
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-071/prompt-v1.md
+    executed_prompt_sha256: 4c735edd42b80f43d04c26fdbbcc8e29662d96456394fbf5417a8386d88609c7
+    executed_prompt_bytes: 4303
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-071/session-evidence-r45.md
