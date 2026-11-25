@@ -70,8 +70,6 @@ status: DISPATCHED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
-implementing_ai_session: NOT_ASSIGNED
-
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
 base_commit_sha: d40d4e095fc830cc22e7a7b5196268cecf41597e
@@ -285,3 +283,20 @@ findings:
     measured_at: "8e489ec1"
     statement: "base_commit_sha is d40d4e09, which was 103 commits behind at re-measurement (the reviewer measured 74 earlier the same hour). Two commits after the base touch the files this work item names. Every figure anchored to that base drifted with it: 81 violations became 77, 638/199/81 became 656/205/77, blueprint 49758 as a blob (49666 in the prompt, 50488 under a CRLF checkout)."
     resolution: "Not changed here. Rebasing base_commit_sha would invalidate prompt_sha256's provenance note; the figures are restated in the acceptance criteria with the commit they were measured at, which is the part an implementer acts on. The staleness itself is GAP-29's subject."
+
+# Canonical session evidence (#775 shape, one entry per session). This entry
+# records the session that applied the Issue #266 review corrections to this
+# file, not the implementer of AC1-AC9, which is still NOT_STARTED.
+# issue_refs is empty by design: Issue #266 predates 2026-12-01, carries no
+# "AI-assisted work" declaration, and so cannot map to YES; OD-A3 lets an
+# entry attribute its evidence at PR scope instead.
+session_evidence:
+  - role: DOCUMENTATION-CORRECTION
+    issue_refs:
+    implementing_ai_session: session-266-056-wording
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-056/prompt-v1.md
+    executed_prompt_sha256: 325f567c669b046f4b0ccfd58515ad01c4b83377179fdb744502f6c1dc56d2e4
+    executed_prompt_bytes: 10114
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-056/session-evidence-266.md
