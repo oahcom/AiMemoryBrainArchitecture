@@ -3,6 +3,20 @@
 The validator reads trusted workflow code from the PR base revision and
 resolves every evidence file exclusively against the PR head Git tree.
 It never checks out or executes PR-head code.
+
+Scope: this gate proves structure only. It proves that the declared fields
+exist, that each declared reference resolves to a non-empty regular file in
+the PR head tree, and that the recorded byte count and SHA-256 match that
+blob. It does not prove that the evidence is truthful, complete or
+sufficient, and it does not prove which model produced it. A
+``AI-SESSION-EVIDENCE: PRESENT`` verdict means "the files exist and their
+bytes are unchanged", nothing more.
+
+Evidence-state vocabulary: ``NOT_AVAILABLE`` and ``NOT_RECORDED`` are
+synonyms in this gate -- both mean "no content was recorded". The two
+spellings are kept because the Work Item manifest already uses them for
+``executed_prompt_provenance`` and ``session_reference_status``. Only
+``REDACTED`` carries an extra requirement (scope + reason).
 """
 
 from __future__ import annotations
@@ -315,11 +329,16 @@ FIELD_ALIASES = {
     "related issue(s)": "related issue(s)",
     "related issues": "related issue(s)",
     "owning issue": "related issue(s)",
+    # The PR template shipped this spelling; it names the same field.
+    "owning issue url": "related issue(s)",
 }
 
 
 def _normalise_label(value: str) -> str:
-    return re.sub(r"\s+", " ", value.strip().lower())
+    # A Markdown list marker is presentation, not part of the field name.
+    # The repository's own PR template writes every field as "- Label: value".
+    value = re.sub(r"^[-*+]\s+", "", value.strip())
+    return re.sub(r"\s+", " ", value.lower())
 
 
 def _field_value_from_lines(
