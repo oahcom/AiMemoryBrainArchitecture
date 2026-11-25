@@ -97,6 +97,14 @@ All D source documents and mirrors remain `decision_status: Draft`, source `cano
 
 No F/I/H source files are restored in this PR. The prior whole-branch merge prohibition remains in force.
 
+## Initial CI observations on candidate Head `5fa45e1e6944f95c3a1005715a9a598d4fbb0eaf`
+
+- Architecture document management gate, run `45706218102` / run #1857: **SUCCESS**. The changed D sources and metadata passed GOV-DOC-002 after the scope-ID and directional mirror fixes.
+- Existing gates, run `45706218053` / run #893: **SUCCESS**. Rust doctests, Rust clippy, Rust format, BMCP conformance, BMCP protocol index, bilingual coverage ratchet and schema non-empty audit all passed.
+- Bilingual documentation gate, run `45706218141` / run #2492: **FAIL at execution time** because the PR body still contained `BILINGUAL-MANIFEST: PENDING`. The PR body was subsequently updated to `BILINGUAL-MANIFEST: COMPLETE`; a new exact-Head run is required before any PASS claim.
+- Session Evidence gate, run `45706218102` / run #275: **FAIL** because the validator accepts only `AID-YYYY-NNN` or `NONE`, while this authorized workflow AID is `AID-2026-11-26-SOURCE-RESTORE-02`. This is retained as a blocker; no false standard ID or NO-AI declaration is substituted.
+- These workflow results are not local executions of the requested shell commands. Exact-Head local `git diff` / `git ls-tree` and Python checks remain NOT RUN in this session.
+
 ## Validation status
 
 No local shell/worktree was available. The following are **NOT RUN locally** and must be verified by PR CI or an independent checkout:
