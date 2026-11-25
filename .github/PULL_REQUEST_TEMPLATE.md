@@ -2,7 +2,9 @@
 
 ## Work item and traceability / 工作项与可追溯性
 - Work Item ID:
-- Owning Issue URL:
+- Related issue(s):
+- AI-assisted work: YES | NO
+- Session evidence reference(s): path list, or N/A when the answer above is NO
 - Related PR(s):
 - Session ID / Prompt ID + version + SHA-256:
 - Accountable Owner:
@@ -10,6 +12,14 @@
 - Independent reviewer (GitHub login):
 - Integration / Acceptance authority:
 - PR-GOVERNANCE-001 status / 标准状态: PROPOSED | ADOPTED | EXCEPTION
+
+### Per-Issue AI session evidence / 每个 Issue 的 AI 会话证据
+One row per Related Issue; the status must equal that Issue's own declaration. `LEGACY_UNDECLARED` is only for an Issue created before the gate's effective time that carries no declaration.
+每个 Related Issue 一行，状态须与该 Issue 自身的声明一致；仅对门禁生效时间之前创建且未声明的 Issue 使用 `LEGACY_UNDECLARED`。
+
+| Related Issue | Issue AI-assisted work | Evidence refs for this Issue |
+| --- | --- | --- |
+| #NNN | YES or NO | path, or N/A |
 
 ## Change / 变更
 - Objective / 目标:

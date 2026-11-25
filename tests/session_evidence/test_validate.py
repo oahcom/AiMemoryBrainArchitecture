@@ -4,6 +4,7 @@ import contextlib
 import hashlib
 import io
 import os
+import re
 import tempfile
 import unittest
 from unittest import mock
@@ -43,6 +44,49 @@ def assert_missing(test_case, output):
     test_case.assertTrue(
         output.startswith("MISSING:") or "MISSING:" in output
     )
+
+
+TEMPLATE_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+    ".github",
+    "PULL_REQUEST_TEMPLATE.md",
+)
+
+ISSUE_TEMPLATE_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+    ".github",
+    "ISSUE_TEMPLATE",
+    "session-evidence.md",
+)
+
+
+def fill_pull_request_template(number, refs):
+    """Fill the repository's own PR template, adding nothing to it.
+
+    Every value replaces the text the template already leaves after its own
+    label, and the per-Issue row replaces the template's placeholder row.
+    """
+    with open(TEMPLATE_PATH, encoding="utf-8") as handle:
+        lines = handle.read().splitlines()
+
+    values = {
+        "Work Item ID": "AID-2026-001",
+        "Related issue(s)": f"#{number}",
+        "AI-assisted work": "YES",
+        "Session evidence reference(s)": refs[0],
+    }
+
+    for index, line in enumerate(lines):
+        match = re.match(r"- ([^:]+):", line)
+        if match and match.group(1).strip() in values:
+            label = match.group(1).strip()
+            lines[index] = f"- {label}: {values[label]}"
+            continue
+
+        if line.strip().startswith("| #NNN |"):
+            lines[index] = f"| #{number} | YES | {refs[0]} |"
+
+    return "\n".join(lines) + "\n"
 
 
 def make_context(world):
@@ -599,6 +643,74 @@ session_evidence:
                 "Related issue(s): #101, #101",
                 REPOSITORY,
             )
+
+    def test_accepts_the_owning_issue_url_spelling(self):
+        # The template used to ask for "Owning Issue URL"; the gate read only
+        # "Owning Issue". Both spellings name the same field.
+        body = f"Owning Issue URL: {issue_url(101)}"
+        self.assertEqual(
+            validate._extract_field(body, "Related issue(s)"),
+            issue_url(101),
+        )
+        self.assertEqual(
+            validate.parse_related_issues(body, REPOSITORY),
+            [101],
+        )
+
+    def test_missing_issue_field_names_the_field_it_wanted(self):
+        with self.assertRaises(validate.ValidationError) as raised:
+            validate.parse_related_issues("Work Item ID: AID-2026-001", REPOSITORY)
+        self.assertEqual(
+            str(raised.exception),
+            "PR description: missing Related issue(s)",
+        )
+
+    def test_accepts_markdown_list_markers_on_every_read_field(self):
+        # Every field in .github/PULL_REQUEST_TEMPLATE.md is a "- Label: value"
+        # bullet; the list marker is presentation, not part of the label.
+        body = "\n".join(
+            [
+                "- Related issue(s): #101",
+                "- AI-assisted work: NO",
+                "- Session evidence reference(s): N/A",
+            ]
+        )
+        self.assertEqual(validate._extract_field(body, "AI-assisted work"), "NO")
+        self.assertEqual(
+            validate._extract_field(body, "Session evidence reference(s)"),
+            "N/A",
+        )
+        self.assertEqual(validate.parse_related_issues(body, REPOSITORY), [101])
+
+    def test_repository_pull_request_template_is_accepted(self):
+        # The whole point: a PR body filled in exactly as the repository's own
+        # template asks must pass. If the template and the gate ever drift
+        # apart again, this test names the field that drifted.
+        body = fill_pull_request_template(101, [EVIDENCE_A])
+        world = make_valid_world(pr_body=body)
+        self.install_world(world)
+        result, output = self.capture_validator()
+        self.assertEqual(result, 0, output)
+        self.assertIn("AI-SESSION-EVIDENCE: PRESENT", output)
+
+    def test_repository_issue_template_carries_a_parseable_declaration(self):
+        # The Issue side needs a distribution channel too: without one, every
+        # post-policy Issue linked by a PR fails check_03 for lack of a field
+        # nobody asked it to carry.
+        with open(ISSUE_TEMPLATE_PATH, encoding="utf-8") as handle:
+            text = handle.read()
+
+        body = text.replace("YES | NO", "YES", 1).replace(
+            "`path/to/session/evidence.md` — or `N/A` when the line above is `NO`",
+            f"`{EVIDENCE_A}`",
+            1,
+        )
+
+        self.assertEqual(
+            validate._parse_issue_declaration(body, 101),
+            ("YES", [EVIDENCE_A]),
+        )
+        self.assertIn("not a hard gate", body)
 
     def test_rejects_external_issue_url(self):
         with self.assertRaises(validate.ValidationError):
