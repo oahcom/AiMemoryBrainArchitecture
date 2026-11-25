@@ -115,7 +115,6 @@ owner_decisions:
         status check whose check run asserts a non-authoring reviewing session, not the
         `required_pull_request_reviews` object; AC4's second branch is the operative one and its
         trigger is "no ownership mapping is authorized", not "CODEOWNERS is not authorized".
-
       - lines 118-128, the §5 acceptance table: AC1 requires `required_pull_request_reviews.required_approving_review_count >= 1`,
         AC2 requires `dismiss_stale_reviews = true`, and AC3 requires that the contexts "still number 11".
         All three are superseded by this work item's AC1, AC2 and AC3, which forbid adding the
