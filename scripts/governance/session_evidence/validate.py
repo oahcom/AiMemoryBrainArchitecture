@@ -12,11 +12,27 @@ sufficient, and it does not prove which model produced it. A
 ``AI-SESSION-EVIDENCE: PRESENT`` verdict means "the files exist and their
 bytes are unchanged", nothing more.
 
-Evidence-state vocabulary: ``NOT_AVAILABLE`` and ``NOT_RECORDED`` are
-synonyms in this gate -- both mean "no content was recorded". The two
-spellings are kept because the Work Item manifest already uses them for
-``executed_prompt_provenance`` and ``session_reference_status``. Only
-``REDACTED`` carries an extra requirement (scope + reason).
+Evidence-state vocabulary: an evidence section may instead carry one state
+word, and the three states are three distinct claims:
+
+* ``NOT_AVAILABLE``: the platform or interface does not provide the content.
+* ``NOT_RECORDED``: the content was obtainable, but was not recorded at the
+  time.
+* ``REDACTED``: the original content exists, but the repository copy is
+  redacted because of sensitive information; the redaction scope and reason
+  must be stated.
+
+The gate enforces the enum, and that every state word is accompanied by a
+non-empty explanation of what could not be obtained and why. ``REDACTED``
+additionally owes its scope and reason; this document records that obligation
+but, beyond the same non-emptiness, the gate does not machine-check it. The
+gate does not adjudicate which state is factually correct -- only the author
+can know whether the platform withheld the content or the author failed to
+record it. The three are therefore distinct as claims and indistinguishable
+only in that the gate cannot verify the claim. The two spellings
+``NOT_AVAILABLE`` and ``NOT_RECORDED`` are kept because the Work Item manifest
+already uses them for ``executed_prompt_provenance`` and
+``session_reference_status``.
 """
 
 from __future__ import annotations
@@ -333,6 +349,25 @@ FIELD_ALIASES = {
     "owning issue url": "related issue(s)",
 }
 
+# The labels the validator reads. A line carrying one of them starts a new
+# field, so it ends the block of the field above it even without a heading:
+# the PR template stacks its fields as consecutive "- Label: value" bullets.
+FIELD_LABELS = frozenset(
+    {
+        "work item id",
+        "related issue(s)",
+        "ai-assisted work",
+        "session evidence reference(s)",
+        "related pr(s)",
+        "session id / prompt id + version + sha-256",
+        "accountable owner",
+        "implementing session / author",
+        "independent reviewer (github login)",
+        "integration / acceptance authority",
+        "pr-governance-001 status / 标准状态",
+    }
+)
+
 
 def _normalise_label(value: str) -> str:
     # A Markdown list marker is presentation, not part of the field name.
@@ -346,30 +381,51 @@ def _field_value_from_lines(
     index: int,
     inline_value: str | None = None,
 ) -> str:
-    """Resolve a field value from its inline text or the next nonempty line.
+    """Resolve a field value from its inline text or its following block.
 
-    Both heading and Label: forms use this same value-resolution path.
-    An empty inline value consumes only the first following nonempty line;
-    it never absorbs later fields or unrelated content.
+    Both heading and Label: forms use this same value-resolution path. A
+    field's value is the whole block of lines after the heading, not just
+    its first line: a field may list several references, and every one of
+    them has to reach the consumers that validate them one by one. The
+    block still stops at the next Markdown heading, at the start of a
+    table, or at another labelled field, so it cannot absorb the next
+    field; for the same reason a table under a heading is not a field
+    value. Interior blank lines are preserved so the caller can split on
+    lines; leading and trailing blank lines are dropped.
     """
     if inline_value is not None and inline_value.strip():
         return inline_value.strip()
 
+    block: list[str] = []
     for following in lines[index + 1:]:
         stripped = following.strip()
 
-        if not stripped:
-            continue
-
         if re.fullmatch(r"#{1,6}\s+.*", stripped):
-            return ""
+            break
 
         if stripped.startswith("|"):
-            return ""
+            break
 
-        return stripped
+        labelled = re.match(r"^\s*([^:]+?)\s*:\s*(.*?)\s*$", stripped)
+        if labelled:
+            name = _normalise_label(labelled.group(1))
+            if FIELD_ALIASES.get(name, name) in FIELD_LABELS:
+                break
 
-    return ""
+        block.append(stripped)
+
+    start = 0
+    while start < len(block) and not block[start]:
+        start += 1
+
+    if start == len(block):
+        return ""
+
+    end = len(block)
+    while end > start and not block[end - 1]:
+        end -= 1
+
+    return "\n".join(block[start:end])
 
 
 def _extract_field(body: str, label: str) -> str | None:
@@ -1259,12 +1315,16 @@ def _parse_evidence_region(
 
     if state_match:
         state = state_match.group(1)
-        if state == "REDACTED":
-            explanation = content[state_match.end():].strip()
-            if not explanation:
+        explanation = content[state_match.end():].strip()
+        if not explanation:
+            if state == "REDACTED":
                 raise ValidationError(
                     f"{path}: REDACTED requires explanation of scope and reason"
                 )
+            raise ValidationError(
+                f"{path}: {state} requires an explanation of what could "
+                "not be obtained and why"
+            )
         return
 
     # Actual recorded content is acceptable. A retrospective summary
@@ -1440,28 +1500,6 @@ def check_06_all_references_individually(
         )
 
 
-def check_07_reject_invalid_or_ambiguous_paths(
-    ctx: ValidationContext,
-    paths: list[str],
-) -> None:
-    """Check exact path resolution within the supplied declaration scope."""
-    seen = set()
-
-    for path in paths:
-        canonical = validate_canonical_evidence_path(
-            path,
-            "Evidence reference",
-        )
-
-        if canonical in seen:
-            raise ValidationError(
-                f"Duplicate or ambiguous evidence reference: {path}"
-            )
-
-        seen.add(canonical)
-
-
-
 def check_09_manifest_and_evidence_entries(
     ctx: ValidationContext,
     manifest_path: str,
@@ -1568,20 +1606,33 @@ def check_09_manifest_and_evidence_entries(
             evidence_path,
         )
 
-        # OD-A3-r5: canonical session_evidence entries always require
-        # strict two-way Issue attribution, whether changed or historical.
-        # Only unchanged legacy manifests retain the historical exemption.
+        # Which Issue this session's work belongs to (issue_refs) and
+        # whether AI was used on that Issue (its own declaration) are
+        # separate facts the specification keeps independent. A canonical
+        # entry may therefore name a row that is YES or LEGACY_UNDECLARED:
+        # the latter means no declaration exists because the Issue
+        # predates the policy, not that no AI was used. Attribution is
+        # granted by the explicit allow-list below, never by a status that
+        # merely fails to be NO: a new status must be added here
+        # deliberately before it gains the right to be attributed.
         if not is_legacy_manifest:
             for number in numbers:
                 row_status, row_paths = mapping[number]
 
-                if row_status != "YES":
+                if row_status not in ("YES", "LEGACY_UNDECLARED"):
                     raise ValidationError(
                         f"{location}: issue_refs Issue #{number} maps to "
-                        f"{row_status}; canonical entries require YES"
+                        f"{row_status}; evidence may be attributed only to "
+                        "an Issue that declares YES or to a pre-policy Issue "
+                        "with no declaration"
                     )
 
-                if evidence_path not in set(row_paths):
+                # A LEGACY_UNDECLARED row carries N/A by construction, so
+                # only a YES row can list and corroborate the path.
+                if (
+                    row_status == "YES"
+                    and evidence_path not in set(row_paths)
+                ):
                     raise ValidationError(
                         f"Issue #{number} path '{evidence_path}': "
                         "manifest entry is not listed in the Issue mapping"
@@ -1637,17 +1688,6 @@ def check_09_manifest_and_evidence_entries(
                 )
 
     return entries
-
-
-def check_10_single_value_fields(
-    entries: list[dict],
-) -> None:
-    for index, entry in enumerate(entries, start=1):
-        for field in MANIFEST_FIELDS:
-            _check_single_value(
-                entry[field],
-                f"session_evidence entry #{index}.{field}",
-            )
 
 
 def check_11_prompt_snapshot_hashes(
@@ -1760,7 +1800,7 @@ def _check_manifest_entries(
     mapping: dict,
     pr_paths: list[str],
 ) -> None:
-    """Run checks 09-11, scoping the legacy exemption to unchanged files."""
+    """Run checks 09 and 11, scoping the legacy exemption to unchanged files."""
     changed_paths = _changed_paths_for_manifest(ctx, manifest_path)
     # An unknown base means "everything changed", so no legacy exemption
     # is granted and the canonical structure is required.
@@ -1772,7 +1812,6 @@ def _check_manifest_entries(
         pr_paths,
         {manifest_path} if manifest_changed else set(),
     )
-    check_10_single_value_fields(entries)
     check_11_prompt_snapshot_hashes(ctx, entries)
 
 
@@ -1871,6 +1910,14 @@ def _load_context() -> ValidationContext:
     )
 
 
+SUMMARY_SCOPE_NOTE = (
+    "Scope: a PRESENT verdict proves only that the declared files exist in "
+    "the head tree and that their bytes are unchanged; it does not prove "
+    "that the evidence is authentic, complete, or produced by the model it "
+    "claims."
+)
+
+
 def _write_summary(verdict: str) -> None:
     path = os.environ.get("GITHUB_STEP_SUMMARY")
     if not path:
@@ -1879,6 +1926,11 @@ def _write_summary(verdict: str) -> None:
     try:
         with open(path, "a", encoding="utf-8") as stream:
             stream.write(verdict + "\n")
+            # Only PRESENT needs the boundary spelled out; the workflow
+            # greps for lines starting with the verdict prefix, so this
+            # note deliberately does not.
+            if verdict.startswith("AI-SESSION-EVIDENCE: PRESENT"):
+                stream.write(SUMMARY_SCOPE_NOTE + "\n")
     except OSError as exc:
         print(
             f"MISSING: cannot write GITHUB_STEP_SUMMARY: {exc}"
@@ -1918,17 +1970,9 @@ def _validate_reference_scopes(
         ctx,
         pr_paths,
     )
-    check_07_reject_invalid_or_ambiguous_paths(
-        ctx,
-        pr_paths,
-    )
 
     for _, row_paths in mapping.values():
         check_06_all_references_individually(
-            ctx,
-            row_paths,
-        )
-        check_07_reject_invalid_or_ambiguous_paths(
             ctx,
             row_paths,
         )

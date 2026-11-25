@@ -340,7 +340,7 @@ So "verify the empty diff on the real main history after merge" cannot be skippe
 | Item | State |
 |---|---|
 | #440 | `OPEN / PENDING_INDEPENDENT_REVIEW` |
-| #422 | `OPEN / BLOCKED_BY_BASE_REPAIR` |
+| #422 | `MERGED` (`merged_at` `2026-11-21T10:52:41Z`, the same timestamp as this register's landing). The original value `OPEN / BLOCKED_BY_BASE_REPAIR` recorded the state at ruling time and was not updated afterwards |
 | #419 | `CLOSED_UNMERGED` |
 | #423 | `MERGED / PROCEDURALLY_NONCOMPLIANT / AUDIT_PENDING` |
 | main bilingual gate | `BLOCKED_BY_GAP_BASELINE_001`, awaiting the real repair |
@@ -551,6 +551,7 @@ This does not contradict section 9.6; it strengthens it. Fix quality and procedu
 | §8.4 main red means every PR is `EXIT=2` | **mechanism holds**, precondition currently unmet (`0 new gaps`) |
 | §9.3 the blocked chain (#440 review → merge → repair) | **did not happen**; #440/#442/#443 all closed unmerged |
 | §9.5 `#440 OPEN / PENDING_INDEPENDENT_REVIEW` | stale: `#440 CLOSED_UNMERGED` |
+| §9.5 `#422 OPEN / BLOCKED_BY_BASE_REPAIR` | stale: `#422 MERGED`, `merged_at` `2026-11-21T10:52:41Z` |
 | §10.5 gaps 1→3 worsening | holds, and was then zeroed in one step by #445 |
 | The shapes in 007/008 | **unchanged**; #445/#446/#448 continue them |
 

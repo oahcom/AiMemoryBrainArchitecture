@@ -340,7 +340,7 @@ main 空 diff 验证
 | 项目 | 状态 |
 |---|---|
 | #440 | `OPEN / PENDING_INDEPENDENT_REVIEW` |
-| #422 | `OPEN / BLOCKED_BY_BASE_REPAIR` |
+| #422 | `MERGED`（`merged_at` `2026-11-21T10:52:41Z`，与本登记落地同一时间戳）。原值 `OPEN / BLOCKED_BY_BASE_REPAIR` 记录的是裁定当时的状态，此后未再更新 |
 | #419 | `CLOSED_UNMERGED` |
 | #423 | `MERGED / PROCEDURALLY_NONCOMPLIANT / AUDIT_PENDING` |
 | main 双语门禁 | `BLOCKED_BY_GAP_BASELINE_001`，等待真实修复 |
@@ -553,6 +553,7 @@ PAIR_EXEMPT_PREFIXES = (
 | §8.4 main 红则所有 PR 恒 `EXIT=2` | **机制成立**，但当前前提不满足（`0 new gaps`） |
 | §9.3 阻塞链（#440 审查 → 合并 → 修复） | **未发生**；#440/#442/#443 全部关闭未合并 |
 | §9.5 `#440 OPEN / PENDING_INDEPENDENT_REVIEW` | 已过期：`#440 CLOSED_UNMERGED` |
+| §9.5 `#422 OPEN / BLOCKED_BY_BASE_REPAIR` | 已过期：`#422 MERGED`，`merged_at` `2026-11-21T10:52:41Z` |
 | §10.5 缺口 1→3 恶化 | 成立，且随后被 #445 一次性归零 |
 | 007/008 的形态 | **不变**，#445/#446/#448 三例继续符合 |
 
