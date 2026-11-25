@@ -1,4 +1,4 @@
-work_item_id: AID-2026-074
+work_item_id: AID-2026-075
 title: Make the INDEX table merge without a conflict, and make a duplicate work-item ID fail a gate before merge
 class: GATE/CONFIG/TEST
 risk: R1
@@ -7,9 +7,9 @@ status: DISPATCHED
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
 
-prompt_id: AID-2026-074-PROMPT
+prompt_id: AID-2026-075-PROMPT
 prompt_version: 1
-prompt_file: 14-ai-development/work-items/AID-2026-074/prompt-v1.md
+prompt_file: 14-ai-development/work-items/AID-2026-075/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
 prompt_sha256: 639355d3fbba48bdd49b3913b17637cece389348ca4af421a7233d1d6e2fc941
 prompt_bytes: 5621
@@ -48,9 +48,9 @@ authorization:
 
 scope:
   files_to_create:
-    - 14-ai-development/work-items/AID-2026-074/manifest.yaml
-    - 14-ai-development/work-items/AID-2026-074/prompt-v1.md
-    - 14-ai-development/work-items/AID-2026-074/session-evidence-1064-1069.md
+    - 14-ai-development/work-items/AID-2026-075/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-075/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-075/session-evidence-1064-1069.md
   files_to_modify:
     - .gitattributes
     - .github/workflows/repository-hygiene.yml
@@ -86,9 +86,9 @@ session_evidence:
       - "#1064"
       - "#1069"
     implementing_ai_session: session-a1084
-    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-074/prompt-v1.md
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-075/prompt-v1.md
     executed_prompt_sha256: 639355d3fbba48bdd49b3913b17637cece389348ca4af421a7233d1d6e2fc941
     executed_prompt_bytes: 5621
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
-    session_evidence_ref: 14-ai-development/work-items/AID-2026-074/session-evidence-1064-1069.md
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-075/session-evidence-1064-1069.md

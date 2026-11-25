@@ -45,9 +45,9 @@ document_metadata:
     zh-CN: null
 ---
 
-# AID-2026-074 — Prompt v1
+# AID-2026-075 — Prompt v1
 
-Work item: `AID-2026-074`
+Work item: `AID-2026-075`
 Issues: #1064, #1069
 Class/Risk: GATE/CONFIG/TEST / R1
 Prompt status: `RECORDED_NOT_FROZEN` — assembled after the session from the
