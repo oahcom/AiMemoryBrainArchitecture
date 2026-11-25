@@ -1,0 +1,76 @@
+work_item_id: AID-2026-063
+title: Run the deliberately-failing-head experiment and record the dated result in section 7
+class: GATE/TEST/EVIDENCE
+risk: R1
+status: PR_OPEN
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+
+prompt_id: AID-2026-063-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-063/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 4cf341c81da42e332e7e352a47f6fa8eb9e82e2b266134dbe2497b874629efd8
+prompt_bytes: 2691
+
+# ---------------------------------------------------------------------------
+# Stage C of WO-01. Stages A (#1027) and B (#1033) made the workspace test run
+# everywhere and declared the sixteen contexts. This stage answers the question
+# the document has been carrying as unproven since the standard was written:
+# does a failing required check actually block a merge?
+#
+# It answers it by attempting a merge, not by reading `mergeable` - the probe
+# reported mergeable: true and the merge endpoint refused it.
+# ---------------------------------------------------------------------------
+
+authorization:
+  implementation_write: "GRANTED - Owner delegated merge authority for this pull request; one document is edited"
+  document_claim_change: "BOUNDED - one sentence per language in section 7: the unproven half becomes a dated, method-stated result with its own limits"
+  platform_state_change: "NOT_IN_SCOPE - the protection payload is unchanged by this stage"
+  workflow_change: "NOT_IN_SCOPE - no workflow is modified; the failing check is produced by an existing workflow"
+  probe_merge: "PROHIBITED - pull request #1038 is evidence, not a change; it was closed unmerged and the branch is kept so the failing run remains reachable"
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-063/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-063/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-063/session-evidence-wo01c.md
+  files_to_modify:
+    - 14-ai-development/PR-GOVERNANCE-001.md
+    - 14-ai-development/work-items/INDEX.md
+
+acceptance:
+  C1: "The experiment was executed rather than inferred: a probe head with one always-failing test, a real merge attempt, and a recorded status code."
+  C2: "The merge refusal names the failing required check. A refusal for some other reason such as staleness or a review requirement does not satisfy this criterion."
+  C3: "The recorded result states its date, the head, the check run, and the fact that mergeable reported true while the merge endpoint refused - because a later reader would otherwise trust the wrong field."
+  C4: "The recorded result states what it does NOT prove: normal path only, this payload, this date, and it must be re-run after a material change."
+  C5: "The English and Chinese sentences carry the same claim, the same date and the same limits."
+  C6: "The probe pull request is closed unmerged and its branch is kept, so the failing run stays auditable."
+
+implementation:
+  status: PR_OPEN
+  pull_request: 1040
+  merge_commit_sha: NOT_MERGED
+
+review:
+  status: NOT_ASSIGNED
+  note: "Independent review has not been recorded. The probe result is reproducible from #1038 and its check run, which is a stronger check than a review of this text."
+
+# ---------------------------------------------------------------------------
+# issue_refs is empty by design. The linked Issue #262 predates the
+# 2026-12-01 policy effective time and carries no AI-assisted work
+# declaration, so it cannot be mapped to YES. OD-A3 permits a PR-scope
+# entry with empty issue_refs for exactly this case; see AID-2026-059 F6.
+# ---------------------------------------------------------------------------
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+    implementing_ai_session: session-req01-r35
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-063/prompt-v1.md
+    executed_prompt_sha256: 4cf341c81da42e332e7e352a47f6fa8eb9e82e2b266134dbe2497b874629efd8
+    executed_prompt_bytes: 2691
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-063/session-evidence-wo01c.md
