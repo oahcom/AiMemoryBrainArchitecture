@@ -13,12 +13,13 @@ external_workflow_references:
     repository_work_item_id: false
     note: "External workflow identifier only; AID-2026-081 is the proposed repository-standard ID."
 
+base_commit_sha: "6314a65bd8be48c1a4bb0768e9960c4c808110ab"
+
 repository:
   name: "oahcom/AiMemoryBrainArchitecture"
   url: "https://github.com/oahcom/AiMemoryBrainArchitecture"
   baseline_branch: "main"
   baseline_commit: "6314a65bd8be48c1a4bb0768e9960c4c808110ab"
-base_commit_sha: "6314a65bd8be48c1a4bb0768e9960c4c808110ab"
   implementation_branch: "impl/2026-11-26-normative-source-restore"
   carrier: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1220"
 
