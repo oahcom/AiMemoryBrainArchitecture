@@ -156,6 +156,8 @@ PRs with `merged_at >= 2026-11-19T16:12:11Z`: **85** (#289 … #408, every one a
 
 **Not one review in this window came from a second account.** This is not "the review comments were weak"; in this interval the repository had no second reviewing subject at all.
 
+> **Added 2026-11-25 (citation currency).** The first sentence of the paragraph above is a measurement and cannot be taken back: not one of the 85 merges had a review from a second account. The second sentence is not a measurement. "The repository had no second reviewing subject at all" promotes "there was no second account" into "there was no second reviewing subject". Under section 5 as amended 2026-11-24 the reviewing subject is a session, and a second session was always openable; what this interval lacked was someone opening one, not a seat that did not exist. The conclusion stands — the window really did contain zero independent review — but the ground changed: that was not a structural vacancy, it was a to-do nobody claimed. For the full account of the same error see `GOV-NC-2026-11-21-ZERO-REVIEW-GATE-008` section 12.4 and `GOV-REV-2026-11-24-CONVERGENCE-CEILING-034` section 9.
+
 ## 6. This register's own first sample: PR #409 is red under the gate
 
 This is the one time in this round the gate really ran — executed by me locally against the exact Head, not in CI.
