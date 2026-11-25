@@ -46,7 +46,7 @@ document_metadata:
   bilingual_counterpart:
     source: "03-memory-brain/canonical-memory-store.md"
     en: "docs/en/03-memory-brain/canonical-memory-store.md"
-    zh-CN: "docs/zh-CN/03-memory-brain/canonical-memory-store.md"
+    zh-CN: null
 ---
 
 # Canonical Memory Store（权威记忆存储）
