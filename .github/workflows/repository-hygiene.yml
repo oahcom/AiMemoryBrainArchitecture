@@ -110,6 +110,13 @@ jobs:
       # Renaming a job leaves the document claiming a context nothing produces;
       # this holds the declaration to the tree. Exit 2 (INCOMPLETE) is a failure
       # here too: an unreadable condition must never read as green.
+      #
+      # This runs the declared -> produced half only. The reverse half
+      # (protected -> declared) reads branch protection, which needs admin
+      # access this workflow's `permissions: contents: read` token does not
+      # carry; run `python3 scripts/check_declared_check_contexts.py
+      # --protection` with such a token to exercise it. Do not read this step
+      # as evidence that the protected set matches the declaration.
       - name: Check declared check contexts are produced by a job
         run: python3 scripts/check_declared_check_contexts.py
 

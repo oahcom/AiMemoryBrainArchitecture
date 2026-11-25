@@ -120,8 +120,8 @@ python3 scripts/ci/check_repository_hygiene.py --base <merge-base> --head <head>
 ```
 
 The declared-context count in that output is twelve because this branch does not
-touch §7. Twelve is also what §7 says on `main`, and it is **not** what the
-platform requires. That gap is measured under "Limitations".
+touch §7. Twelve is what §7 said at that head; the current count is whatever §7
+declares, and this record does not restate it.
 
 One check result was observed on the pull request rather than asserted:
 
@@ -169,17 +169,17 @@ does not independently establish that this narrative is true or complete.
 Three properties of this delivery are stated here rather than left for a reader
 to discover:
 
-1. **`main` already understates the required set.** `PR-GOVERNANCE-001` §7
-   declares twelve required contexts. The live protection payload on
-   `2026-11-25` returned fifteen: the twelve plus `Session Evidence`,
-   `Session Evidence self-test (base)` and `Session Evidence self-test (head)`.
-   This work item does not fix that and does not claim it is fixed.
+1. **The declared required set lives in one place.** What `main` requires is
+   declared in `PR-GOVERNANCE-001` §7, and that declaration is the thing to
+   read; this work item does not restate it and does not claim to have changed
+   it. This work item does not fix any difference between the declaration and
+   the platform, and does not claim it is fixed.
 2. **A checks-cannot-block claim is still outstanding.** §7 records that the
    deliberately-failing-head experiment has not been run. This work item does not
    run it either; it prepares the condition under which the context can be made
    required without deadlocking pull requests.
-3. **Configuration drift between the declaration and branch protection has no
+3. **Configuration drift between the declaration and branch protection had no
    machine gate.** `scripts/check_declared_check_contexts.py` checks that every
-   declared context is produced by a job. It does not read branch protection, so
-   a declaration naming twelve contexts while the platform requires fifteen
-   passes every automated check in this repository.
+   declared context is produced by a job; that condition alone cannot see a
+   protection set that differs from the declaration. Issue #1029 tracks adding
+   the reverse read.
