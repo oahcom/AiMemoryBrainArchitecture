@@ -33,6 +33,46 @@ only in that the gate cannot verify the claim. The two spellings
 ``NOT_AVAILABLE`` and ``NOT_RECORDED`` are kept because the Work Item manifest
 already uses them for ``executed_prompt_provenance`` and
 ``session_reference_status``.
+
+Check numbering
+---------------
+
+Check numbers are stable historical identifiers, not a contiguous sequence,
+and no call site depends on the gaps. Issue #799 states its requirements in
+prose and numbers none of them, so this table names the requirement each
+check enforces instead of borrowing an ordinal that does not exist::
+
+    01  check_01_pr_fields_and_issue_references
+        PR body: AI-assisted work YES requires evidence references, NO
+        requires N/A; the Related Issues list is parsed.
+
+    02  check_02_pr_declaration_and_references
+        No independent requirement: re-parses the PR declaration whose
+        status and references the later checks scope their work by.
+
+    03  check_03_issue_policy_declarations
+        Every linked Issue carries a declaration matching its PR mapping
+        row; LEGACY_UNDECLARED only for an Issue created before the policy.
+
+    04  check_04_head_tree_evidence_paths
+        Every declared evidence path resolves to a regular, non-empty blob
+        in the PR head tree.
+
+    06  check_06_all_references_individually
+        Each reference uses the canonical evidence path form, is not a
+        duplicate within its own declaration scope, and resolves.
+
+    09  check_09_manifest_and_evidence_entries
+        Manifest session_evidence entries: issue_refs point at linked
+        Issues, each evidence document has the required shape, and the
+        OD-A2/OD-A3 mapping consistency holds.
+
+    11  check_11_prompt_snapshot_hashes
+        executed_prompt_sha256 and executed_prompt_bytes match the executed
+        prompt snapshot blob.
+
+``05`` and ``08`` were never written; ``07`` and ``10`` were deleted in
+#1031 as unreachable duplicates of rules the manifest parser still enforces.
 """
 
 from __future__ import annotations
