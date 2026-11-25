@@ -47,8 +47,8 @@ document_metadata:
     zh-CN: null
 ---
 
-- 源文件版本：2ffc9c0689b5d3d99f23a21d7b28764233a38a36
-- 源规范：[规范证据记录](../../../../00-governance/implementation-evidence/2026-11-26-source-restore-matrix.md)（源 Blob `2ffc9c0689b5d3d99f23a21d7b28764233a38a36`）。
+- 源文件版本：60376ecefa64adaf70b685e64d84e7a4551d8183
+- 源规范：[规范证据记录](../../../../00-governance/implementation-evidence/2026-11-26-source-restore-matrix.md)（源 Blob `60376ecefa64adaf70b685e64d84e7a4551d8183`）。
 
 # AID-2026-11-26-SOURCE-RESTORE-02 — 规范源恢复证据矩阵
 
@@ -71,6 +71,14 @@ document_metadata:
 ## 其他 Owner
 
 F 仍需 F Owner 解决候选问题、接受精确版本并提供连续 watermark 覆盖证明。I 仍受治理批准阻塞。H 仍需精确核心规范清单、H Owner 接受和跨 Owner 依赖审查。本 PR 不恢复 F/I/H 文件。
+
+## 候选 Head 的首次 CI 观察（`5fa45e1e6944f95c3a1005715a9a598d4fbb0eaf`）
+
+- Architecture document management gate，run #1857：**SUCCESS**。
+- Existing gates，run #893：**SUCCESS** — Rust doctests、clippy、format、BMCP conformance、protocol index、bilingual coverage ratchet 和 schema non-empty audit 均通过。
+- Bilingual documentation gate，run #2492：**执行时 FAILED**，原因是当时 PR 描述仍为 `BILINGUAL-MANIFEST: PENDING`。之后已将 PR 描述修订为 `BILINGUAL-MANIFEST: COMPLETE`；仍需针对新 Head 重新运行。
+- Session Evidence gate，run #275：**FAILED**，原因是仓库校验器只接受 `AID-YYYY-NNN` 或 `NONE`，不接受本工作流获授权的自定义 AID。没有伪造标准 ID，也没有虚报 AI-assisted work 为 NO。
+- 本地 Shell 命令及四项指定的本地 Python 门禁仍为 NOT RUN。
 
 ## 校验
 
