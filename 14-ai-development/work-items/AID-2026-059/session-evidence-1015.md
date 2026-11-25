@@ -63,7 +63,7 @@ The operative input was one dispatch brief, recorded byte-exact at
 
 | file | bytes | sha256 |
 |---|---:|---|
-| `14-ai-development/work-items/AID-2026-059/prompt-1015.md` | 6619 | `2ca99db03e238f1e8967c1cd71913e6633c56ccceecc3d25a780985c5e829b99` |
+| `14-ai-development/work-items/AID-2026-059/prompt-1015.md` | 8159 | `260ee8a814f480ac880569073f471c18ae88c528653fd747690b87f9fff6368b` |
 
 `executed_prompt_provenance` is `NOT_VERIFIED`: the digest pins the committed bytes, not
 that they are byte-for-byte what any model received. The file is a transcription of the
