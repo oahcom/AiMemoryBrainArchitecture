@@ -215,6 +215,18 @@ jobs:
         self.assertIn(f"(line {ref_line}: {ref})", message)
         self.assertNotIn("uses: actions/checkout@v4", message)
 
+    def test_deleting_the_validate_job_names_it_as_required(self):
+        # Hole 2: REQUIRED_JOB_IDS decides whether the verdict job must exist at
+        # all. Deleting "validate" from that constant must turn this red.
+        lines = WORKFLOW.splitlines()
+        start = next(
+            i for i, line in enumerate(lines) if line.startswith("  validate:")
+        )
+        self.write("\n".join(lines[:start]))
+        code, message = self.run_checker()
+        self.assertEqual(code, 1)
+        self.assertIn("job id 'validate' is missing", message)
+
     def test_ref_in_the_base_job_is_allowed(self):
         # The base job SHALL read the base revision; only the head job may not.
         self.write(WORKFLOW)
