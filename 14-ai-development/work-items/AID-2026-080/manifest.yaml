@@ -40,8 +40,8 @@ identifier_evidence:
     branch_name_collision_for_AID_2026_081: "NOT_FOUND"
   global_uniqueness: "NOT_FULLY_VERIFIED"
   limitation: >-
-    The repository exposes more than 1,000 active branches. This allocation did not
-    complete a recursive work-item-directory scan of every branch. No collision was
+    The paginated branch listing returned 937 active branches. This allocation did
+    not complete a recursive work-item-directory scan of every branch. No collision was
     found in main, the PR head, or the relevant branch-name search results; this is
     a bounded allocation check, not a claim of exhaustive global uniqueness.
 
