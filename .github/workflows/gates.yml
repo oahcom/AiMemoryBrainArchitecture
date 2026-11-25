@@ -152,6 +152,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      # A wrapped gate that crashes with an empty baseline used to be reported
+      # as PASS. This runs the wrapper's own tests, including that shape.
+      - name: Self-check the ratchet wrapper
+        run: python3 scripts/ci/test_gate_ratchet.py
       # GOV-DOC-001 full scan: 81 normative paths lack an en/zh-CN counterpart.
       # Red on main, so ratchet rather than gate.
       - name: Ratchet the GOV-DOC-001 full scan
