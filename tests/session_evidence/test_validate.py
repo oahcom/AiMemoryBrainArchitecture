@@ -717,8 +717,8 @@ YES
 
     def test_evidence_state_semantics(self):
         cases = [
-            ("NOT_AVAILABLE", "", True),
-            ("NOT_RECORDED", "", True),
+            ("NOT_AVAILABLE", "", False),
+            ("NOT_RECORDED", "", False),
             ("REDACTED", "Reason: credentials removed.", True),
             ("REDACTED", "", False),
         ]
@@ -734,6 +734,30 @@ YES
                         validate._parse_evidence_region(
                             text, "Actual AI input", "test.md"
                         )
+
+    def test_each_evidence_state_requires_a_named_explanation(self):
+        # The three states are three different claims -- the platform does
+        # not provide the content, the author did not record it, or the copy
+        # was redacted -- and silence is not one of them. A bare state word
+        # must fail, and the failure must name the state it rejected.
+        for state in ("NOT_AVAILABLE", "NOT_RECORDED", "REDACTED"):
+            with self.subTest(state=state, case="explained"):
+                text = (
+                    "# Actual AI input\n"
+                    f"{state}\n"
+                    "Reason: not obtainable for this session.\n"
+                )
+                validate._parse_evidence_region(
+                    text, "Actual AI input", "test.md"
+                )
+
+            with self.subTest(state=state, case="bare"):
+                text = f"# Actual AI input\n{state}\n"
+                with self.assertRaises(validate.ValidationError) as caught:
+                    validate._parse_evidence_region(
+                        text, "Actual AI input", "test.md"
+                    )
+                self.assertIn(state, str(caught.exception))
 
     def test_rejects_duplicate_related_issues(self):
         with self.assertRaises(validate.ValidationError):

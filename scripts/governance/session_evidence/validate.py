@@ -12,11 +12,25 @@ sufficient, and it does not prove which model produced it. A
 ``AI-SESSION-EVIDENCE: PRESENT`` verdict means "the files exist and their
 bytes are unchanged", nothing more.
 
-Evidence-state vocabulary: ``NOT_AVAILABLE`` and ``NOT_RECORDED`` are
-synonyms in this gate -- both mean "no content was recorded". The two
-spellings are kept because the Work Item manifest already uses them for
-``executed_prompt_provenance`` and ``session_reference_status``. Only
-``REDACTED`` carries an extra requirement (scope + reason).
+Evidence-state vocabulary: an evidence section may instead carry one state
+word, and the three states are three distinct claims:
+
+* ``NOT_AVAILABLE``: the platform or interface does not provide the content.
+* ``NOT_RECORDED``: the content was obtainable, but was not recorded at the
+  time.
+* ``REDACTED``: the original content exists, but the repository copy is
+  redacted because of sensitive information; the redaction scope and reason
+  must be stated.
+
+The gate enforces the enum, and that every state word is accompanied by an
+explanation of what could not be obtained and why; ``REDACTED`` must
+additionally state its scope and reason. The gate does not adjudicate which
+state is factually correct -- only the author can know whether the platform
+withheld the content or the author failed to record it. The three are
+therefore distinct as claims and indistinguishable only in that the gate
+cannot verify the claim. The two spellings ``NOT_AVAILABLE`` and
+``NOT_RECORDED`` are kept because the Work Item manifest already uses them
+for ``executed_prompt_provenance`` and ``session_reference_status``.
 """
 
 from __future__ import annotations
@@ -1259,12 +1273,16 @@ def _parse_evidence_region(
 
     if state_match:
         state = state_match.group(1)
-        if state == "REDACTED":
-            explanation = content[state_match.end():].strip()
-            if not explanation:
+        explanation = content[state_match.end():].strip()
+        if not explanation:
+            if state == "REDACTED":
                 raise ValidationError(
                     f"{path}: REDACTED requires explanation of scope and reason"
                 )
+            raise ValidationError(
+                f"{path}: {state} requires an explanation of what could "
+                "not be obtained and why"
+            )
         return
 
     # Actual recorded content is acceptable. A retrospective summary
