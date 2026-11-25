@@ -254,7 +254,7 @@ GET /repos/{repo}/pulls?state=closed&per_page=40
 -> distinct mergers  among last 40 closed PRs = []
 ```
 
-Three things hold at once: only one collaborator, with full permissions; no pending invitation, so no second identity is joining; and the merger field is empty across the last 40 closed PRs, meaning the merge action was not completed through a recorded review flow. The third is not "another person merged" — it is that the merger record is missing. That matches the direction of `SELF-REVIEW-007` (zero-review merges) but not its cause: 007 attributes it to review culture; this section attributes it to there being no second account.
+Three things hold at once: only one collaborator, with full permissions; no pending invitation, so no second identity is joining; and the merger field is empty across the last 40 closed PRs, meaning the merge action was not completed through a recorded review flow. The third is not "another person merged" — it is that the merger record is missing. That matches the direction of `SELF-REVIEW-007` (zero-review merges) but not its cause: 007 attributes it to review culture; this section attributes it to there being no second account〔added 2026-11-25: that attribution is the error §9 corrects. "No second account" is an account-layer fact and does not explain a missing merger record; what explains it is that the path was not walked at the time, not that it could not be walked. §9 already rules this section's conclusion false; the annotation marks the attribution only.〕
 
 ## 3. Two branch-protection views contradict each other; behaviour sides with neither
 

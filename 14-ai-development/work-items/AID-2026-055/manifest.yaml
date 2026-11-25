@@ -49,7 +49,10 @@ owner_decisions:
   - id: D1
     question: "Is formal review required?"
     ruling: "Yes. At least one review from a non-authoring reviewing session. Independence is a property of the reviewing session, not of the GitHub account (#935): this repository has one collaborator who authored every PR, and GitHub forbids an account from approving its own PR, so an account-based definition is unsatisfiable by construction rather than unmet."
-    current_status: "REQUIRED BUT UNSATISFIABLE BY CONSTRUCTION"
+    # 2026-11-25: the value below is kept verbatim and annotated in place,
+    # because it is this record's own claim and a record that edits its own
+    # claims is not a record. Read it as scoped to the account layer.
+    current_status: "REQUIRED BUT UNSATISFIABLE BY CONSTRUCTION〔2026-11-25 附注：「按构造不可满足」只对**账号层**的形式成立——GitHub 按用户计数并禁止自我批准，故 `collaborators = 1` 下不可能产生 `APPROVED` 对象。对本条 D1 自己写下的要求它不成立：2026-11-24 修订（#935）把独立性放在**会话**层，同一身份下的另一会话即可满足。合格会话尚未运行，所以状态仍不是 SATISFIED；「未运行」与「无法运行」是两件不同的事，D1 不得凭后者被标为可执行〕"
     current_status_components:
       - "Required: a review from a non-authoring reviewing session. Independence is a property of the reviewing session, not of the GitHub account (#935). The account-level form (a formal Approved object from a non-author human) is what the paragraph below measures as necessarily zero; it is recorded there as the reason the account-level form cannot be the requirement, not as the requirement."
       - "Current satisfaction: NOT SATISFIED."
