@@ -45,7 +45,7 @@ document_metadata:
   bilingual_counterpart:
     source: "03-memory-brain/README.md"
     en: "docs/en/03-memory-brain/README.md"
-    zh-CN: "docs/zh-CN/03-memory-brain/README.md"
+    zh-CN: null
 ---
 
 # Memory Brain — 阅读指南
