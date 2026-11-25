@@ -44,7 +44,7 @@ document_metadata:
     normative_status: Informative
   bilingual_counterpart:
     source: "03-memory-brain/README.md"
-    en: "docs/en/03-memory-brain/README.md"
+    en: null
     zh-CN: "docs/zh-CN/03-memory-brain/README.md"
 ---
 
