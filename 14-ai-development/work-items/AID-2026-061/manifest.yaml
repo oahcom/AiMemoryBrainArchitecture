@@ -2,7 +2,7 @@ work_item_id: AID-2026-061
 title: Make the workspace test suite run on every pull request, so the context exists before it is required
 class: GATE/CI/TEST
 risk: R1
-status: PR_OPEN
+status: MERGED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -30,11 +30,11 @@ prompt_bytes: 18776
 authorization:
   implementation_write: "GRANTED - Owner delegated merge authority for this pull request; one production file is written by this branch"
   gate_behaviour_change: "BOUNDED - the pull_request.paths filter on rust-phase1.yml is removed; no job is renamed, no check is added to the required set, push.paths is unchanged"
-  required_context_change: "NOT_GRANTED - rust-workspace-test is still not required after this merge; the branch-protection PUT is a separate platform action"
+  required_context_change: "NOT_GRANTED - this merge did not make rust-workspace-test required; the branch-protection PUT was a separate platform action, taken 2026-11-25 after it (stage B, see A4)"
   branch_protection_change: "NOT_GRANTED - this branch does not read or write the protection payload"
-  document_claim_change: "NOT_IN_SCOPE - PR-GOVERNANCE-001 section 7 is untouched; the correction is stage B and must follow a dated measurement of the changed payload"
+  document_claim_change: "NOT_IN_SCOPE - this branch does not touch PR-GOVERNANCE-001 section 7; that correction was stage B and followed a dated measurement of the changed payload (see A4)"
   architecture_spec_change: "NOT_GRANTED - no ADR, no BMCP specification and no canonical architecture document is modified"
-  failing_head_experiment: "NOT_RUN - the deliberately-failing-head experiment needs a required context that fails, which this branch does not create"
+  failing_head_experiment: "NOT_RUN_BY_THIS_BRANCH - the deliberately-failing-head experiment needs a required context that fails, which this branch does not create; it was executed under stage B on pull request #1038 (see B3)"
 
 scope:
   files_to_create:
@@ -49,15 +49,17 @@ acceptance:
   A1: "Every pull request targeting main produces a rust-workspace-test result; the trigger no longer filters on changed paths."
   A2: "The job id is unchanged, so the produced check context is still rust-workspace-test."
   A3: "The push trigger keeps its paths filter: the full workspace test does not run twice on every merge to main."
-  A4: "No document states or implies that the context is required. PR-GOVERNANCE-001 section 7 still declares twelve, which is what main declares today."
-  B1: "STAGE_B_DEFERRED - PR-GOVERNANCE-001 section 7 is corrected to the count the protection payload returns, recorded with a measurement date, only after that payload has been changed."
-  B2: "STAGE_B_DEFERRED - the payload before and after the protection change is quoted in the body of the change that reports the new count."
-  B3: "STAGE_B_DEFERRED - the deliberately-failing-head experiment is executed against a configuration that requires rust-workspace-test, and section 7's unproven half is replaced with the dated result."
+  A4: "At merge time (2026-11-25, before stage B) no document stated or implied that the context was required: PR-GOVERNANCE-001 section 7 declared twelve, which is what main declared at merge commit 350be84b. Stage B has since landed. Section 7 now declares sixteen required contexts and lists all sixteen names, and this work item's own readback at 2026-11-25T03:41:03Z from GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection returned 16 required checks including Session Evidence, Session Evidence self-test (base), Session Evidence self-test (head) and rust-workspace-test, with strict: true and enforce_admins: {enabled: true}."
+  B1: "DONE - PR-GOVERNANCE-001 section 7 is corrected to the count the protection payload returns (sixteen, declared by name in the check-context block that follows the count), recorded with a measurement date, after that payload had been changed."
+  B2: "DONE_IN_PART - section 7 records both dated readings and states that the count rose from twelve to sixteen between the 2026-11-24 and 2026-11-25 readings, attributing the two increments separately. The two payloads are not quoted verbatim there; what stands is the dated count on each side, of which this work item's 2026-11-25T03:41:03Z readback is the second."
+  B3: "DONE - the deliberately-failing-head experiment was executed on 2026-11-25 against a configuration that requires rust-workspace-test: pull request #1038, head b5cf4f25, required check rust-workspace-test failed (check run 138943464904), and PUT /repos/oahcom/AiMemoryBrainArchitecture/pulls/1038/merge returned 405 Required status check \"rust-workspace-test\" is failing while the pre-attempt payload reported mergeable: true with mergeable_state: blocked. Section 7's previously unproven half now carries that dated result. The 405 text is quoted from section 7 as recorded there; it was NOT re-executed for this manifest, because the pull request is closed and the endpoint no longer returns the failing-check verdict."
 
 implementation:
-  status: PR_OPEN
+  status: MERGED
   pull_request: 1027
-  merge_commit_sha: NOT_MERGED
+  pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1027
+  implementation_commit_sha: 8ef5ef90931b516f6730dfc4f826b2316774a351
+  merge_commit_sha: 350be84b547d040d3a689ffe24fb75cca6bc10c7
 
 review:
   status: NOT_ASSIGNED

@@ -253,6 +253,12 @@ Enforcement lives in `scripts/governance/session_evidence/validate.py`: the vali
 
 执行位于 `scripts/governance/session_evidence/validate.py`：事实来源是校验器而不是本文档，本节描述的是它所强制的内容。
 
+## 3.3 Pull-request body contract — scope and effective date / 正文契约的适用范围与生效时间
+
+The pull-request body contract — `Related issue(s)`, `AI-assisted work`, `Session evidence reference(s)` and the per-Issue table — applies to every pull request from the day `Session Evidence` became a required context, `2026-11-25`. That date is not the evidence-data effective time, `2026-12-01`. The two are separate events, so "the evidence policy has not started yet" is not a reason to leave the declaration out. A pull request with no AI involvement MUST declare it: `AI-assisted work: NO`, with `N/A` in `Session evidence reference(s)`. A blank body is not a pass, because it is read as `NOT_APPLICABLE`, which would make silence cheaper than declaring; a declaration is an attributable statement a reviewer can hold someone to, and silence is not.
+
+PR 正文契约——`Related issue(s)`、`AI-assisted work`、`Session evidence reference(s)` 与逐 Issue 表格——自 `Session Evidence` 成为必需上下文之日起（`2026-11-25`）适用于每一个 pull request。该日期不是证据数据的生效时间 `2026-12-01`；两者是独立事件，因此「证据策略尚未生效」不能作为省略声明的理由。没有任何 AI 参与的 pull request 必须显式声明：`AI-assisted work: NO`，并在 `Session evidence reference(s)` 中写 `N/A`。留空不算通过，因为空正文会被判为 `NOT_APPLICABLE`，那会让沉默比声明更便宜；声明是可追责、审查者可据以追问的陈述，沉默不是。
+
 ## 4. Required evidence bundle / 必需证据包
 
 Each completed implementation task should contain, as applicable:
