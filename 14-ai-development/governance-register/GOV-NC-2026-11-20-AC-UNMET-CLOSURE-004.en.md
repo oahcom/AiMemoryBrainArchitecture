@@ -1,3 +1,44 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-21"
+      last_verification_note: "All figures come from the GitHub REST API and from local reads on 2026-11-21; the 2026-11-25 annotation in section 7 records no new measurement and changes no number."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+---
+
 # GOV-NC-2026-11-20-AC-UNMET-CLOSURE-004 — Issue Closed With Unmet Acceptance Criteria
 
 **Status**: `OPEN` / `NOT_REMEDIATED`
@@ -239,6 +280,9 @@ That question is outside #384's AC set. It belongs to the existing backlog: see 
 | `MERGE-AFTER-RULING-003` | PR #394 merged in 14 seconds at `reviews=0` with check `failure`, then the Issue closed 2 seconds later |
 
 All four point at one root cause: **this repository currently has no role separation at all**. Implementation, review, ruling and closure are performed by the same account at second-scale intervals.
+
+> **〔Added 2026-11-25〕** This sentence turns "all four roles carry the login `oahcom`" — an **account-layer** fact — into the conclusion that no role separation exists. §5 was amended on 2026-11-24 by `2eb4e352` (PR #935) to a session-level test (see `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`): a separate session under the same GitHub identity suffices for independence. `/pulls/{n}/reviews` returns only `user.login`, never a session, so "same identity ⇒ same session" cannot be verified from that payload. Read it as "account layer not independent; session layer not verified".
+> **What survives:** every checkable field in the four rows above is independent of how identity is defined — `SELF-AUTH-002`'s closer is the sole account, PR #394 carried `reviews=0` with a `failure` check, the 14-second interval, and the second-scale timing itself. Those support "no third party took part in these four acts". They do not support "role separation is structurally absent". The difference is *did not happen* versus *cannot happen*, and the original sentence states the second.
 
 ---
 
