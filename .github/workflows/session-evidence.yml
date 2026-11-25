@@ -2,6 +2,11 @@ name: Session Evidence Gate
 
 on:
   pull_request:
+    # The validator reads the PR body live, so an `edited` event must schedule a
+    # run or a green verdict outlives the text it judged. The default set
+    # (opened, synchronize, reopened) omits `edited`; list all four explicitly
+    # so the behaviour is stated rather than inherited.
+    types: [opened, synchronize, reopened, edited]
 
 permissions:
   contents: read

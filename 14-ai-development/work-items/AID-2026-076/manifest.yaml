@@ -1,0 +1,90 @@
+work_item_id: AID-2026-076
+title: Make a PR body edit re-run the Session Evidence gate, and hold the trigger block to it
+class: GATE/TEST
+risk: R1
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+
+prompt_id: AID-2026-076-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-076/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 06ee5615ab9fc696afa769183141d637ec5287776b60cc0b06afd117a024f6b2
+prompt_bytes: 5525
+
+# ---------------------------------------------------------------------------
+# Issue #1074. `Session Evidence` is a required context and its verdict is
+# computed from `pr.body`, fetched live. The workflow declared `on:
+# pull_request:` with no `types:`, so `edited` was not a trigger, so a body edit
+# after a green run scheduled nothing and the green tick outlived the text it
+# judged. Measured by the Issue on #1054 (run completed 05:36:07Z, edit
+# 05:36:20Z, merged 05:37:29Z) and re-measured in its comments across 4 of 75
+# merges.
+#
+# The guard checked the job graph only. It contained zero references to `on:`,
+# `pull_request`, `types` or `trigger`, so one line added to the workflow was
+# revertible in silence -- the same failure mode #1045 and #1058 report one
+# layer down.
+#
+# What this does NOT close is stated in the prompt and the evidence: an edit
+# that lands after the last run and before the merge still races the merge.
+# ---------------------------------------------------------------------------
+
+authorization:
+  implementation_write: "GRANTED for .github/workflows/session-evidence.yml, scripts/check_session_evidence_workflow_shape.py, scripts/test_check_session_evidence_workflow_shape.py and 14-ai-development/work-items/AID-2026-076/ only. No file under crates/ is touched."
+  gate_behaviour_change: "GRANTED, scoped to the trigger block. The guard gains a fourth property -- the `pull_request:` trigger declares `edited` among its `types:` -- and the three existing properties are unchanged."
+  schema_change: "NOT_GRANTED - no serialized type, no database column, no manifest field is introduced"
+  platform_state_change: "NOT_GRANTED - no required context, no branch protection payload, no repository setting is modified. The workflow file is changed; nothing about which checks `main` requires is."
+  architecture_spec_change: "NOT_GRANTED - no ADR, no BMCP specification and no canonical architecture document is modified"
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-076/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-076/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-076/session-evidence-1074.md
+  files_to_modify:
+    - .github/workflows/session-evidence.yml
+    - scripts/check_session_evidence_workflow_shape.py
+    - scripts/test_check_session_evidence_workflow_shape.py
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope: "Every other path. In particular scripts/governance/session_evidence/validate.py, which reads the body live and is correct to do so -- the missing trigger is the defect, not the read; and crates/."
+
+acceptance:
+  C1: "`.github/workflows/session-evidence.yml` declares `types: [opened, synchronize, reopened, edited]` under `pull_request:`, with the full default set written out so the behaviour is stated rather than inherited. Settled by reading the committed file and by the guard exiting 0 on it."
+  C2: "Flow-form `types:` without `edited` is a violation. Settled by a throwaway tree built from the fixture with `edited` removed, asserting exit 1, a message naming `edited`, and the `types:` line number."
+  C3: "Flow-form `types:` with `edited` passes. Settled by the fixture itself, asserted exit 0 and no `::error::`."
+  C4: "Block-form `types:` with `edited` passes. Settled by rewriting the fixture's `types:` key into a `- item` list and asserting exit 0. This is the anti-regression test for #1045's bug class: a guard that accepts only the flow form would reject a correct file."
+  C5: "A missing `types:` key is a violation that names the key and `edited`. Settled by deleting the key from the fixture and asserting exit 1 with both strings in the message."
+  C6: "Each new test fails with `AssertionError`, not a traceback and not an `ImportError`, when its rule is reverted. Settled by three reverts applied in isolation, run, captured and restored."
+  C7: "The 12 tests already in the file are not weakened, renamed or deleted, and all pass unmodified. Settled by the suite running 16 tests with the same names plus four."
+  C8: "`python scripts/check_session_evidence_workflow_shape.py` exits 0 on the unmutated repository. Settled by running it with no path argument."
+
+implementation:
+  status: IMPLEMENTED_IN_BRANCH
+  pull_request: ASSIGNED_AT_OPEN
+  merge_commit_sha: NOT_MERGED
+  note: "The pull request number cannot be written into the commit that opens it, so the INDEX row carries it once a merge commits."
+
+review:
+  status: NOT_ASSIGNED
+  note: "Independent review has not been recorded. A same-session review of a self-authored guard and its tests cannot supply independence, so none is claimed. The three reverts are the evidence that the tests bind the behaviour, and they are reproducible from the record."
+
+# ---------------------------------------------------------------------------
+# #1074 stays open. Only the trigger half of its closing condition is met here;
+# the body digest is the other half and is not done. This entry does not claim
+# #1074's acceptance is met.
+# ---------------------------------------------------------------------------
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1074"
+    implementing_ai_session: session-w1088-edited-trigger
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-076/prompt-v1.md
+    executed_prompt_sha256: 06ee5615ab9fc696afa769183141d637ec5287776b60cc0b06afd117a024f6b2
+    executed_prompt_bytes: 5525
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-076/session-evidence-1074.md

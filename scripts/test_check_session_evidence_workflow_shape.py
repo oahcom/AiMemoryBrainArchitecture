@@ -27,6 +27,7 @@ WORKFLOW = """\
 name: Session Evidence Gate
 on:
   pull_request:
+    types: [opened, synchronize, reopened, edited]
 jobs:
   self-test-trusted-base:
     name: Session Evidence self-test (base)
@@ -222,6 +223,62 @@ jobs:
             WORKFLOW,
         )
         self.assertEqual(self.run_checker()[0], 0)
+
+    def test_trigger_without_edited_is_a_violation_naming_edited_and_its_line(self):
+        # #1074. The validator reads the PR body live, so a trigger that does not
+        # re-run on `edited` leaves a verdict describing text that no longer
+        # exists. The default set omits `edited`, so the key must say so.
+        mutated = WORKFLOW.replace(
+            "    types: [opened, synchronize, reopened, edited]\n",
+            "    types: [opened, synchronize, reopened]\n",
+        )
+        self.assertNotEqual(mutated, WORKFLOW)
+        self.write(mutated)
+        code, message = self.run_checker()
+        self.assertEqual(code, 1)
+        self.assertIn("edited", message)
+
+        types_line = next(
+            i for i, line in enumerate(mutated.splitlines(), 1)
+            if line.strip() == "types: [opened, synchronize, reopened]"
+        )
+        self.assertIn(f"(line {types_line}:", message)
+
+    def test_trigger_with_edited_in_flow_form_passes(self):
+        self.write(WORKFLOW)
+        self.assertIn("types: [opened, synchronize, reopened, edited]", WORKFLOW)
+        code, message = self.run_checker()
+        self.assertEqual(code, 0)
+        self.assertNotIn("::error::", message)
+
+    def test_trigger_with_edited_in_block_form_passes(self):
+        # The anti-regression case for #1045's bug class. A guard that reads only
+        # the flow form would reject this correct file, which is the failure the
+        # `needs:` regex already had once in this same script.
+        block = WORKFLOW.replace(
+            "    types: [opened, synchronize, reopened, edited]\n",
+            "    types:\n"
+            "      - opened\n"
+            "      - synchronize\n"
+            "      - reopened\n"
+            "      - edited\n",
+        )
+        self.assertNotEqual(block, WORKFLOW)
+        self.write(block)
+        code, message = self.run_checker()
+        self.assertEqual(code, 0)
+        self.assertNotIn("::error::", message)
+
+    def test_trigger_without_a_types_key_is_a_violation(self):
+        mutated = WORKFLOW.replace(
+            "    types: [opened, synchronize, reopened, edited]\n", ""
+        )
+        self.assertNotEqual(mutated, WORKFLOW)
+        self.write(mutated)
+        code, message = self.run_checker()
+        self.assertEqual(code, 1)
+        self.assertIn("no `types:` key", message)
+        self.assertIn("edited", message)
 
     def test_incomplete_when_the_workflow_is_absent(self):
         self.assertEqual(self.run_checker()[0], 2)
