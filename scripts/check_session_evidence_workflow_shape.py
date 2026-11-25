@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify the three-job shape of `.github/workflows/session-evidence.yml`.
+"""Verify the three-job shape and the `edited` trigger of the session-evidence workflow.
 
 PR #1014 split that workflow into three jobs because a single-job workflow had
 produced 18 consecutive failing runs: the `validate` verdict and the PR-head
@@ -8,7 +8,7 @@ the base tree was never tested as itself. Nothing now prevents the workflow
 from being collapsed back, and the collapse is silent -- the gate keeps
 reporting PASS while it has stopped being independent.
 
-The three properties, each a real failure mode:
+The properties, each a real failure mode:
 
   1. All three job ids exist: `self-test-trusted-base`, `self-test-pr-head`,
      `validate`. Merging them back is regression #1.
@@ -18,10 +18,15 @@ The three properties, each a real failure mode:
   3. `validate` has no `needs:`. A `needs:` there lets a PR suppress its own
      verdict by deleting a test, because a failed dependency skips the job and
      a skipped required context is not a failure.
+  4. The `pull_request:` trigger lists `edited` among its `types:`. The
+     validator reads the PR body live, so without `edited` a body edit after a
+     green run leaves a verdict describing text that no longer exists (#1074).
+     GitHub's default set is `opened, synchronize, reopened`, which omits it.
 
 Exit codes follow the repository vocabulary:
-    0  PASS        the workflow has the three-job shape
-    1  VIOLATION   a job is missing, or carries the key that re-creates a defect
+    0  PASS        the workflow has the three-job shape and the `edited` trigger
+    1  VIOLATION   a job is missing, carries the key that re-creates a defect, or
+                   the trigger does not declare `edited`
     2  INCOMPLETE  the workflow file or its `jobs:` mapping cannot be read
 
 The incomplete branch matters: a checker that treats "file not found" as "no
@@ -63,6 +68,16 @@ REF_KEY_RE = re.compile(r"^\s*(?:-\s*)?ref:\s*\S")
 # `needs:` alone) -- both are the dependency the guard forbids, so both match.
 NEEDS_KEY_RE = re.compile(r"^    needs:(\s*\S|\s*$)")
 
+# The trigger block. `on:` sits at column 0, `pull_request:` under it at 2-space
+# indent, and that trigger's `types:` at 4. `types:` takes two spellings and both
+# must be read: flow form `types: [a, b]` and block form `types:` followed by
+# `- item` lines. Accepting only one is #1045's bug class in a new place.
+ON_KEY_RE = re.compile(r"^on:\s*$")
+PULL_REQUEST_RE = re.compile(r"^  pull_request:\s*(.*)$")
+TYPES_FLOW_RE = re.compile(r"^    types:\s*\[(.*?)\]")
+TYPES_BLOCK_RE = re.compile(r"^    types:\s*$")
+TYPES_ITEM_RE = re.compile(r"^      -\s*(\S.*?)\s*$")
+
 
 class JobBlock(NamedTuple):
     """One job's raw lines, plus the 1-based file line its first line came from."""
@@ -76,6 +91,20 @@ class StepBlock(NamedTuple):
 
     text: str
     first_line: int
+
+
+class TriggerBlock(NamedTuple):
+    """The `pull_request:` trigger's raw lines, plus the 1-based line of that key."""
+
+    text: str
+    first_line: int
+
+
+class TypesDecl(NamedTuple):
+    """The trigger's `types:` entries, plus the 1-based line of the `types:` key."""
+
+    values: list[str]
+    line: int
 
 
 def job_blocks(text: str) -> dict[str, JobBlock] | None:
@@ -155,6 +184,90 @@ def _checkout_refs(block: JobBlock) -> list[str]:
     return offenders
 
 
+def trigger_block(text: str) -> TriggerBlock | None:
+    """The `pull_request:` trigger's raw block. None if no `on:` block is readable."""
+    lines = text.splitlines()
+    start = next((i for i, line in enumerate(lines) if ON_KEY_RE.match(line)), None)
+    if start is None:
+        return None
+
+    body: list[str] = []
+    body_start = 0
+    for offset, line in enumerate(lines[start + 1:], start=start + 2):
+        if line and not line[0].isspace() and not line.startswith("#"):
+            break  # a column-0 key ends the `on:` mapping
+        if not body and not line.strip():
+            continue
+        match = PULL_REQUEST_RE.match(line)
+        if match:
+            body = [line]
+            body_start = offset
+            continue
+        if body:
+            body.append(line)
+
+    if not body:
+        return None
+    return TriggerBlock("\n".join(body), body_start)
+
+
+def types_decl(block: TriggerBlock) -> TypesDecl | None:
+    """The trigger's `types:` entries in either spelling. None if the key is absent.
+
+    Flow form (`types: [a, b]`) puts the values on the key's line; block form
+    (`types:` then `- a` lines) puts them below it. Both are valid YAML and both
+    are accepted -- rejecting a correct block form is #1045's bug class.
+    """
+    lines = block.text.splitlines()
+    for index, line in enumerate(lines):
+        offset = block.first_line + index
+        flow = TYPES_FLOW_RE.match(line)
+        if flow:
+            values = [item.strip().strip("'\"") for item in flow.group(1).split(",")]
+            return TypesDecl([value for value in values if value], offset)
+        if TYPES_BLOCK_RE.match(line):
+            values = []
+            for follower in lines[index + 1:]:
+                item = TYPES_ITEM_RE.match(follower)
+                if not item:
+                    break
+                values.append(item.group(1).strip("'\""))
+            return TypesDecl(values, offset)
+    return None
+
+
+def _trigger_violations(text: str) -> list[str]:
+    """The `edited` trigger property, named specifically. Empty means conformant."""
+    block = trigger_block(text)
+    if block is None:
+        return [
+            f"no `pull_request:` trigger is readable under `on:` in {WORKFLOW_PATH}; "
+            "the trigger cannot be verified, so the `edited` activity type is not "
+            "known to be declared (#1074)"
+        ]
+
+    declared = types_decl(block)
+    if declared is None:
+        return [
+            f"the `pull_request:` trigger declares no `types:` key in "
+            f"{WORKFLOW_PATH} (trigger at line {block.first_line}); GitHub's "
+            "default set is `opened, synchronize, reopened`, which omits "
+            "`edited`, so a PR body edit after a green run leaves a verdict "
+            "describing text that no longer exists. Declare "
+            "`types: [opened, synchronize, reopened, edited]` (#1074)"
+        ]
+
+    if "edited" not in declared.values:
+        return [
+            f"the `pull_request:` trigger's `types:` omits `edited` "
+            f"(line {declared.line}: types: {', '.join(declared.values)}); the "
+            "validator reads the PR body live, so a body edit after a green run "
+            "leaves a verdict describing text that no longer exists. Add "
+            "`edited` to the list (#1074)"
+        ]
+    return []
+
+
 def violations(blocks: dict[str, JobBlock]) -> list[str]:
     """Every violated property, named specifically. Empty means conformant."""
     found: list[str] = []
@@ -203,7 +316,8 @@ def main(root: Path | None = None) -> int:
         )
         return 2
 
-    blocks = job_blocks(workflow.read_text(encoding="utf-8"))
+    text = workflow.read_text(encoding="utf-8")
+    blocks = job_blocks(text)
     if blocks is None:
         print(
             f"::error::INCOMPLETE: no `jobs:` mapping found in {WORKFLOW_PATH}; "
@@ -212,7 +326,7 @@ def main(root: Path | None = None) -> int:
         )
         return 2
 
-    found = violations(blocks)
+    found = violations(blocks) + _trigger_violations(text)
     if found:
         for message in found:
             print(f"::error::{message}", file=sys.stderr)
@@ -225,7 +339,8 @@ def main(root: Path | None = None) -> int:
     print(
         f"::notice::{WORKFLOW_PATH} has the three independent jobs "
         f"{', '.join(REQUIRED_JOB_IDS)}; the head job carries no `ref:`, "
-        "the verdict job carries no `needs:`",
+        "the verdict job carries no `needs:`, and the `pull_request:` trigger "
+        "declares `edited`",
         file=sys.stderr,
     )
     print("SESSION EVIDENCE WORKFLOW SHAPE: PASS", file=sys.stderr)
