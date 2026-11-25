@@ -72,7 +72,7 @@ document_metadata:
 
 Rust 门禁：
 - 修改 `Cargo.toml`、`Cargo.lock`、`crates/**` 或 Rust Workflow 时，必须取得准确 Head 上 Rust Workspace 测试结果，执行命令为 `cargo test --workspace --all-targets`。
-- 当前 Workflow 使用路径过滤。不得把文档专用 PR 中被跳过的 Rust 检查配置成全局必需检查。如果平台要求一个全局通用检查上下文，应先增加始终运行的聚合门禁：只有适用检查均已评估且成功时才报告 PASS；适用检查缺失或失败时必须失败。
+- 已测量现状：Rust Workflow 的 `pull_request` 触发不带 `paths` 过滤——#1027 已移除——且 `rust-workspace-test` 是 `main` 上十六个必需上下文之一（分支保护于 2026-11-25T06:12Z 回读：`strict: true`、`enforce_admins: {enabled: true}`）。仍然成立的规则是有条件的：若某项变更在必需检查所在的 Workflow 上重新引入 `paths` 过滤，该检查会在不匹配的 PR 上被跳过，因此在依赖该上下文作为必需检查之前，必须移除该过滤或增加始终运行的聚合门禁——聚合门禁只有在适用检查均已评估且成功时才报告 PASS，适用检查缺失或失败时必须失败。
 
 检查缺失、待定、适用时被跳过、失败、Head 过期或无法核验，均不得合并。其他 PR 或后续 main 提交上的运行不能替代本 PR 的精确 Head 证据。
 
@@ -146,7 +146,7 @@ PR #273，exact Head `5e0a919a9253b8747c59062b87d0a580cd204e54`，其上 `GOV-DO
 1. 在保持仓库机密性的前提下决定托管/套餐方案：将私有仓库所有者的 GitHub 套餐升级到支持私有仓库所需分支保护/Rulesets 的等级，或选择具备等效强制控制的其他私有托管配置。未经明确安全/隐私决策，不得仅为解锁功能而将私有仓库公开。
 2. 在 GitHub 仓库 Settings → Branches（或支持时使用 Rules → Rulesets）创建规则，目标分支必须精确为 `main`。
 3. 启用合并前必须通过 PR；至少要求一项审批；新提交后撤销过期审批；要求解决审查讨论；限制强制推送和分支删除；在平台支持时将管理员纳入规则并禁用绕过。如果无法禁用绕过，必须定义具名紧急操作人、原因、证据和事后审计。
-4. 要求 GitHub 在 PR 上实际显示的准确检查上下文。至少对受治理文档要求 `GOV-DOC-001 structural checks`。Rust 变更要求 Rust Workspace 测试；由于当前 Rust Workflow 使用路径过滤，应通过可靠聚合门禁实现条件要求，或先改为始终运行的聚合检查，再将其设为全局必需检查。不得猜测检查上下文名称；必须从真实 PR Head 附带的检查列表中选择。
+4. 要求 GitHub 在 PR 上实际显示的准确检查上下文。至少对受治理文档要求 `GOV-DOC-001 structural checks`。Rust 变更要求 Rust Workspace 测试：`rust-workspace-test` 已是十六个必需上下文之一（分支保护于 2026-11-25T06:12Z 回读：`strict: true`、`enforce_admins: {enabled: true}`），且自 #1027 起其 `pull_request` 触发不带 `paths` 过滤，因此对 `main` 的每个 PR（含纯文档 PR）都会运行。若未来某项变更在必需检查所在的 Workflow 上重新引入 `paths` 过滤，该检查将在不匹配的 PR 上被跳过；应在依赖该上下文作为必需检查之前，以始终运行的聚合门禁解决。不得猜测检查上下文名称；必须从真实 PR Head 附带的检查列表中选择。
 5. 保存规则后，通过 GitHub UI/API 回读分支/Ruleset 配置。将规则 ID/名称、目标、启用设置、绕过主体和时间戳记录到 Issue #134。读取返回 403/权限拒绝时，状态是 UNKNOWN，不是已强制执行的证明。
 
 **验证操作——Integration Owner（建议由独立于作者的集成负责人执行）：**
@@ -159,7 +159,7 @@ PR #273，exact Head `5e0a919a9253b8747c59062b87d0a580cd204e54`，其上 `GOV-DO
 **建议职责分配：**
 - Repository Owner/Admin（`oahcom`）：套餐/可见性决策、分支/Ruleset 配置、绕过策略。
 - Integration Owner：Workflow 检查上下文盘点、政策清单、精确 Head 证据、禁止合并负向测试和 Issue 结项。
-- Workflow Maintainer：确保 Workflow 触发条件/检查上下文稳定；如必需上下文受路径过滤影响，负责实现始终运行的聚合门禁。
+- Workflow Maintainer：确保 Workflow 触发条件/检查上下文稳定。截至 2026-11-25T06:12Z 的测量，没有任何必需上下文受路径过滤：`rust-workspace-test` 为必需检查，且自 #1027 起其 `pull_request` 触发不带 `paths` 过滤。若某项变更在必需上下文的 Workflow 上重新引入路径过滤，应移除该过滤或实现始终运行的聚合门禁，再依赖该上下文作为必需检查。
 - Independent Reviewer / Security Owner：审查平台控制设计和紧急绕过/审计策略。
 - 每个 AI 会话作者：提示词哈希、会话结项、准确 Commit 和 Run 证据。
 以上为角色建议，不代表相关人员已经接受指派。
