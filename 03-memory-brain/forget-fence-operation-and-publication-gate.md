@@ -39,7 +39,7 @@ document_metadata:
   authority:
     canonical_status: Candidate
     canonical_scope: "D-owned Memory Brain architecture source and bilingual reading companions"
-    canonical_scope_id: null
+    canonical_scope_id: "memory-brain/forget-fence-operation-and-publication-gate"
     canonical_scope_keywords: []
     canonical_conflict_status: None
     canonical_conflict_resolution: null
