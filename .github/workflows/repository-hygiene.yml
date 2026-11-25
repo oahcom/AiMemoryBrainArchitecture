@@ -121,3 +121,23 @@ jobs:
           set -euo pipefail
           cd scripts
           python3 -m unittest test_check_declared_check_contexts
+
+      # PR #1014 split session-evidence.yml into three jobs to fix a defect that
+      # survived 18 consecutive failing runs. Nothing stops it being collapsed
+      # back, and the collapse is silent: the gate keeps reporting PASS while it
+      # has stopped being independent. This holds the workflow to that shape.
+      # It lives here, not in tests/session_evidence/, because that directory is
+      # checked out from the base revision by design and so could never see a
+      # change to the workflow under test. Exit 2 (INCOMPLETE) is a failure here
+      # too: an unreadable condition must never read as green.
+      - name: Check the session-evidence workflow keeps its three-job shape
+        run: python3 scripts/check_session_evidence_workflow_shape.py
+
+      # Run from this directory because the self-check imports its checker by
+      # bare name.
+      - name: Self-check the session-evidence workflow shape gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd scripts
+          python3 -m unittest test_check_session_evidence_workflow_shape

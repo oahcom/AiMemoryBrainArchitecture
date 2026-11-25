@@ -167,6 +167,8 @@ Inference (**not made**):
 >
 > The original table is left in place so that rulings written against it stay readable.
 
+> **Added 2026-11-25 (correction to the note above).** The closing sentence of the note above, "the choice between S-1 and S-3 is unchanged", does not hold and is corrected here; that sentence is retained. **S-1** tests identity equality (`reviewer == author`), whereas the current section 5 tests the session: a different session under the same identity *is* an independent review. Implemented as written, S-1 would also exclude valid session reviews, so its test must be restated as "did this session author or implement the change", at a cost above the table's "one paragraph". **S-3**'s script can read only the account (`user.login`, `commit_id`), not the session, so "a review from an author other than the PR author" would judge an independent same-identity review non-conforming — a class of false negatives outside section 5. It is at best an account-level proxy and cannot certify section 5. **The only thing unchanged:** neither is executed by this register.
+
 | # | Approach | Cost | Note |
 |---|---|---|---|
 | S-1 | State in PR-GOVERNANCE-001 section 5 that a review where `reviewer == author` **does not count** toward section 5 | one paragraph | cheapest, but still a self-discipline clause with no platform enforcement |
@@ -185,7 +187,7 @@ In the ruling of 2026-11-21 the Owner approved S-2 in principle and set five min
 4. the reviewer must leave a traceable, substantive review conclusion;
 5. `COMMENTED`, `APPROVED` and similar states cannot by themselves establish independence — the identity relationship must be checked too.
 
-**But no second identity is appointed this round.** Sponsor and accountable_owner are still `NOT_ASSIGNED`; a GitHub account cannot be designated out of thin air, and the existence of another account cannot be presumed to carry authority, accountability and sustained participation.
+**But no second identity is appointed this round.**〔Added 2026-11-25: this sentence was written before the 2026-11-24 amendment, when "no second identity appointed" was read as "no independent review is obtainable". Under the current section 5 (`GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`, commit `2eb4e352`, PR #935) independence is decided by the **session**: a separate session may review independently under the same identity, so not appointing a second identity is **no longer** an obstacle. What survives is the rest of the sentence — no account may be designated out of thin air, and the existence of another account may not be presumed to carry authority, accountability and sustained participation.〕 Sponsor and accountable_owner are still `NOT_ASSIGNED`; a GitHub account cannot be designated out of thin air, and the existence of another account cannot be presumed to carry authority, accountability and sustained participation.
 
 So S-2's actual state is:
 
@@ -194,6 +196,9 @@ APPROVED_IN_PRINCIPLE / IDENTITY_NOT_ASSIGNED / NOT_YET_OPERATIONAL
 ```
 
 Until a second identity is formally designated and its accountability boundary established, **it must not be claimed that structural independent review exists**. The S-1/S-3 self-discipline clauses remain in force, but must not be described as a platform-enforced defence.
+
+> **Added 2026-11-25 (citation currency).** The precondition of this paragraph was written on 2026-11-21, when section 5 tied independence to the GitHub identity, so "structural independent review" was written as conditional on **appointing a second identity**. That premise was amended on 2026-11-24 by `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036` (commit `2eb4e352`, PR #935): the current section 5 (`14-ai-development/PR-GOVERNANCE-001.md`, §5) makes independence a property of the reviewing **session** — "a session that did not author the change and did not implement it, and that reaches its conclusion from the artifacts rather than from the author's account of them" — not the existence of a second identity. The **trigger** of this paragraph therefore becomes: until one review meeting that session condition has been obtained, no claim of structural independent review may be made.
+> **What survives:** the prohibition itself is unchanged — where independent review was not actually obtained it must not be claimed, and `COMMENTED`, or self-review inside the same context, must not be described as independent review. Only the fact that triggers it changes (from "no second identity appointed" to "no qualifying session review yet"). Original retained, not reworded.
 
 ---
 

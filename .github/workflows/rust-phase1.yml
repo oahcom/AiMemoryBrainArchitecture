@@ -3,13 +3,6 @@ name: Rust Phase 1 Workspace Tests
 on:
   pull_request:
     branches: [main]
-    paths:
-      - "Cargo.toml"
-      - "Cargo.lock"
-      - "crates/**"
-      - "scripts/check_fmt.py"
-      - "scripts/test_check_fmt.py"
-      - ".github/workflows/rust-phase1.yml"
   push:
     branches: [main]
     paths:

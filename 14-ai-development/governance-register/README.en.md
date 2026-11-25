@@ -20,7 +20,7 @@ document_metadata:
       last_verified_date: null
       last_verification_note: "This file is an index of governance-register entries; it does not independently approve or establish the authority of indexed records."
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Modified
     supersession:
       supersedes: []
       supersession_reason: null
@@ -62,7 +62,7 @@ It is **not** a place to record acceptance, approval, or review conclusions. Not
 | `GOV-NC-2026-11-23-PROVENANCE-GRAPH-ADD-SIGNATURE-028` | `ProvenanceGraph::add` public signature change | High | `CLOSED-BY-RULING` / classification corrected | 1 public signature, 2 citation errata |
 | `GOV-NC-2026-11-23-UNREACHABLE-GUARD-030` | 017 is fixed but its guard is now dead code, and 014's fix broke 24 tests in that suite | High | `OPEN` / `MEASUREMENT_ONLY` | 1 tautological guard, 167 files out of pairing; the 24 failures were a local measurement at `ef7266db` and were fixed by `aaf6da966` (#892); the suite now runs in the `GOV-DOC-001 structural checks` job on every PR (see `GOV-REV-2026-11-24-FOUR-CORRECTIONS-033` §2) |
 | `GOV-NC-2026-11-23-EXECUTION-RESTORED-029` | Execution side restored; 005's present-tense claims no longer hold | High | `OPEN` / `MEASUREMENT_ONLY` | 2 first executions, 3 refuted present-tense claims |
-| `EX-20261123-01` | §5 independent review unavailable (retrospective exception record) | High | `HOLD` / over quota, escalated to the repository administrator (Issue #134) | 0 independent reviews across 675 merged PRs; the repository's first exception record |
+| `EX-20261123-01` | §5 independent review not obtained (retrospective exception record; the exception's ground was narrowed by an added 2026-11-25 note and no longer reads "needs a second identity") | High | `HOLD` / over quota, escalated to the repository administrator (Issue #134) | 0 independent reviews across 675 merged PRs; the repository's first exception record |
 | `OWNER-DECISION-REVIEW-INDEPENDENCE-001` | Remedy 3's route is genuinely open (§9's review was performed by #935); §5 itself is still Normative and the demotion was not made (§9 erratum, 2026-11-25) | High | `Draft` / explicitly not claiming Approved | All 675 PRs re-walked; 0 APPROVED; 1 writable identity |
 
 ## Evidence

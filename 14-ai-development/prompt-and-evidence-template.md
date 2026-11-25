@@ -213,6 +213,46 @@ Record its exact-byte SHA-256 and byte count in the manifest. Bind it to `implem
 
 在 manifest 中记录其原始字节 SHA-256 和字节数，并将其绑定到 `implementing_ai_session`（或相应审查者/会话角色）及 `session_evidence_ref`。如果平台不提供稳定会话引用，使用 `session_reference_status: NOT_AVAILABLE`，并在证据记录中说明限制；不得编造标识。如果无法恢复原始 payload 字节，使用 `executed_prompt_provenance: NOT_VERIFIED` 或 `NOT_AVAILABLE`，不得声称提示词已留存。
 
+## 3.2 Canonical multi-session evidence container / 规范多会话证据容器
+
+`session_evidence` is the canonical representation, and it is a repeatable list: one entry per session, including when there is only one session. Each entry carries `role`, `issue_refs` and all seven fields listed in section 1, is validated on its own, and must not share its `session_evidence_ref` with another entry.
+
+Inside an entry the seven fields stay single-valued. A field must not join several values with a comma, semicolon, plus sign or whitespace; several sessions are expressed as several entries, never as one joined string. (`executed_prompt_bytes` is a nonnegative integer, not a string.)
+
+A manifest with no `session_evidence` block is read as at most one legacy entry built from the seven top-level fields, and all seven must be present. Historical manifests are not rewritten to satisfy the policy: an unchanged file keeps that read path, and only a manifest that a pull request changes must use the canonical entries.
+
+The two representations are mutually exclusive and fail-closed: a manifest that carries both top-level legacy fields and a `session_evidence` block is an error, never a merge, so the two can never become independently mutable sources of truth.
+
+```yaml
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#799"
+    implementing_ai_session: session-799-orchestrator
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-YYYY-NNN/prompt-v1.md
+    executed_prompt_sha256: "<64 hex>"
+    executed_prompt_bytes: 3866
+    executed_prompt_provenance: VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-YYYY-NNN/session-evidence-799.md
+```
+
+`issue_refs` accepts `#number` or a canonical `https://github.com/<owner>/<repo>/issues/<number>` URL for this repository, and every Issue named there must also appear in the pull request's Related Issues. An entry may name an Issue whose row in the pull request's per-Issue table is `YES` or `LEGACY_UNDECLARED`; it may not name a `NO` row, because evidence cannot be attributed to an Issue that declares no AI involvement. `LEGACY_UNDECLARED` means no declaration exists because the Issue predates the policy, not that no AI was used, which is why attribution to it is allowed. A row mapped `YES` must still be represented by at least one entry. An entry may also carry an empty `issue_refs` when its evidence is attributed at pull-request scope only (recorded decision OD-A3), for a session whose work does not belong to any single linked Issue.
+
+Enforcement lives in `scripts/governance/session_evidence/validate.py`: the validator, not this document, is the source of truth, and this section describes what it enforces.
+
+`session_evidence` 是规范表示，且是可重复列表：一个会话一个条目，即使只有一个会话也是如此。每个条目包含 `role`、`issue_refs` 以及第 1 节列出的全部七个字段，逐条独立校验，且不得与另一个条目共用同一个 `session_evidence_ref`。
+
+在单个条目内，七个字段保持单值。字段中不得用逗号、分号、加号或空白拼接多个值；多个会话应表达为多个条目，绝不能写成一个拼接字符串。（`executed_prompt_bytes` 是非负整数，不是字符串。）
+
+没有 `session_evidence` 块的 manifest 按至多一条旧式（legacy）条目读取，由七个顶层字段构成，且七个字段必须齐全。历史 manifest 不为满足本策略而重写：未变更的文件沿用该读取路径，只有被 pull request 修改的 manifest 才必须使用规范条目。
+
+两种表示互斥且失败关闭（fail-closed）：同时带有顶层旧式字段与 `session_evidence` 块的 manifest 属于错误，不做合并，二者因此不可能成为两个可独立变更的事实来源。
+
+`issue_refs` 接受 `#number` 或本仓库的规范 URL `https://github.com/<owner>/<repo>/issues/<number>`，其中列出的每个 Issue 都必须同时出现在 pull request 的 Related Issues 中。条目可以为一个 Issue 归属证据，前提是它在 pull request 的逐 Issue 表中映射为 `YES` 或 `LEGACY_UNDECLARED`；条目不得指向 `NO` 行，因为证据不得归属于声明未使用 AI 的 Issue。`LEGACY_UNDECLARED` 表示该 Issue 早于策略生效时间因而没有声明，并不表示未使用 AI，这正是允许向其归属证据的原因。映射为 `YES` 的行仍必须至少由一个条目表示。当证据仅在 pull request 范围归属时，也可以携带空的 `issue_refs`（记录为决策 OD-A3），适用于其工作不属于任何单个关联 Issue 的会话。
+
+执行位于 `scripts/governance/session_evidence/validate.py`：事实来源是校验器而不是本文档，本节描述的是它所强制的内容。
+
 ## 4. Required evidence bundle / 必需证据包
 
 Each completed implementation task should contain, as applicable:
