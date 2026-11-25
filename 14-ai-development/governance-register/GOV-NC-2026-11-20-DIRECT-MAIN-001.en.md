@@ -169,6 +169,12 @@ Semantic changes concentrate in `02-domain-model`:
 
 ## 6. Related matter: missing review / exact-Head on PR #354
 
+> **Added 2026-11-25 (citation currency).** This section originally quoted section 5's closing sentence, "when the author and the reviewer use the same GitHub identity, that is not an independent review", and judged by it. That sentence was amended on 2026-11-24: independence is a property of the reviewing **session**, not of the GitHub account (`GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`, PR #935). The quotation below is now annotated.
+>
+> This section's conclusion does not depend on that sentence. PR #354 has `reviews` = **0** and its head has `check-runs.total_count` = **0**: no review happened and no check-run was recorded. Neither fact depends on how independence is defined, and the amendment only makes the conclusion stronger — there is not even a same-identity review to argue about.
+>
+> "No check-run was recorded" covers `check-runs` only. This section did not read PR #354's head commit status (`/status`), so it does not claim `/status` was empty too.
+
 PR #354 is recorded separately and is not conflated with the 33 direct commits.
 
 | item | value |
@@ -187,7 +193,7 @@ Per §4:
 
 > A missing, pending, skipped or failed applicable check does not count as PASS.
 
-Per §5:
+Per §5's closing sentence (**the text in force when this section was written**, retired by the 2026-11-24 amendment; see this section's note):
 
 > When author and reviewer use the same GitHub identity, that is not an independent review.
 
@@ -768,7 +774,16 @@ The only upstream carrier that mentions the defect in this commit is Issue **#61
 
 > Main commit `54ea39771af33c2e68d94515ca159cd74b18287f` added `tools/list` and `tools/call` to `bmcp-server`. The current `tools/call` response shape is not compliant with the declared MCP protocol version `2024-11-05`.
 
-**This is not a review of this commit.** It is a defect finding, filed after the commit, by `oahcom` (the same identity that wrote this record). Under `PR-GOVERNANCE-001` §5, "a review performed through the same connected GitHub identity as the author is not independent", and it does not satisfy #638's independence baseline of "different session plus different prompt". This record does not count it as a review.
+**This is not a review of this commit.** It is a defect finding, filed after the commit, by `oahcom` (the same identity that wrote this record). Under `PR-GOVERNANCE-001` §5, "a review performed through the same connected GitHub identity as the author is not independent" (**the text in force when this paragraph was written**, retired by the 2026-11-24 amendment), and it does not satisfy #638's independence baseline of "different session plus different prompt". This record does not count it as a review.
+
+> **Added 2026-11-25 (ground narrowed).** The paragraph above keeps its conclusion; its ground changes. The section 5 sentence it cites has been retired: independence is a property of the reviewing **session**, and "same identity" is no longer a disqualifier in itself. The two grounds that remain are both checkable, and neither depends on how identity is defined:
+>
+> - **Time.** `54ea3977` was committed at `2026-11-22T05:48:07Z` (§15.2, measured via API). The sentence in #617 quotes this commit's full SHA, `54ea39771af33c2e68d94515ca159cd74b18287f`, and describes in the past tense what it "added"; a statement that can only become true after the commit was written to `main` cannot evidence that the commit was compliant when it ran. That sentence's own timestamp was not measured in this revision (API budget exhausted), so this record claims only "not earlier", not a specific instant.
+> - **Provenance.** #638's independence baseline is "different session plus different prompt". This statement was left by a GitHub account and nothing records which session produced it, so it **cannot be shown** to meet that baseline.
+>
+> The original clause "by `oahcom` (the same identity that wrote this record)" is still a checkable fact (see §15.2), but it no longer carries the exclusion — after #935, same identity is not a disqualifier in itself.
+>
+> The claim is narrowed, not widened: this record does not assert the sentence came from the same session (that is not provable from the API); it asserts only that the sentence has not been shown to come from a different one. That does not conflict with the §15.4 heading — "absent" there is about the **carrier** (no PR, no review object), while "not shown to come from a different session" here is about the **provenance of one statement**. Different levels.
 
 ### 15.5 Check state at commit time: `NOT_EXECUTED`
 
