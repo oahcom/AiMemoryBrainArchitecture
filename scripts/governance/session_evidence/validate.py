@@ -349,6 +349,25 @@ FIELD_ALIASES = {
     "owning issue url": "related issue(s)",
 }
 
+# The labels the validator reads. A line carrying one of them starts a new
+# field, so it ends the block of the field above it even without a heading:
+# the PR template stacks its fields as consecutive "- Label: value" bullets.
+FIELD_LABELS = frozenset(
+    {
+        "work item id",
+        "related issue(s)",
+        "ai-assisted work",
+        "session evidence reference(s)",
+        "related pr(s)",
+        "session id / prompt id + version + sha-256",
+        "accountable owner",
+        "implementing session / author",
+        "independent reviewer (github login)",
+        "integration / acceptance authority",
+        "pr-governance-001 status / 标准状态",
+    }
+)
+
 
 def _normalise_label(value: str) -> str:
     # A Markdown list marker is presentation, not part of the field name.
@@ -362,30 +381,51 @@ def _field_value_from_lines(
     index: int,
     inline_value: str | None = None,
 ) -> str:
-    """Resolve a field value from its inline text or the next nonempty line.
+    """Resolve a field value from its inline text or its following block.
 
-    Both heading and Label: forms use this same value-resolution path.
-    An empty inline value consumes only the first following nonempty line;
-    it never absorbs later fields or unrelated content.
+    Both heading and Label: forms use this same value-resolution path. A
+    field's value is the whole block of lines after the heading, not just
+    its first line: a field may list several references, and every one of
+    them has to reach the consumers that validate them one by one. The
+    block still stops at the next Markdown heading, at the start of a
+    table, or at another labelled field, so it cannot absorb the next
+    field; for the same reason a table under a heading is not a field
+    value. Interior blank lines are preserved so the caller can split on
+    lines; leading and trailing blank lines are dropped.
     """
     if inline_value is not None and inline_value.strip():
         return inline_value.strip()
 
+    block: list[str] = []
     for following in lines[index + 1:]:
         stripped = following.strip()
 
-        if not stripped:
-            continue
-
         if re.fullmatch(r"#{1,6}\s+.*", stripped):
-            return ""
+            break
 
         if stripped.startswith("|"):
-            return ""
+            break
 
-        return stripped
+        labelled = re.match(r"^\s*([^:]+?)\s*:\s*(.*?)\s*$", stripped)
+        if labelled:
+            name = _normalise_label(labelled.group(1))
+            if FIELD_ALIASES.get(name, name) in FIELD_LABELS:
+                break
 
-    return ""
+        block.append(stripped)
+
+    start = 0
+    while start < len(block) and not block[start]:
+        start += 1
+
+    if start == len(block):
+        return ""
+
+    end = len(block)
+    while end > start and not block[end - 1]:
+        end -= 1
+
+    return "\n".join(block[start:end])
 
 
 def _extract_field(body: str, label: str) -> str | None:

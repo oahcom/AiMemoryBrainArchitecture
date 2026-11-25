@@ -276,6 +276,76 @@ Session evidence reference(s):
         self.patch_validate("gh_api", api)
         self.assertEqual(run_validator(), 0)
 
+    def test_multi_line_related_issues_are_all_parsed(self):
+        body = f"""## Related issue(s)
+
+{issue_url(101)}
+{issue_url(102)}
+"""
+        self.assertEqual(
+            validate.parse_related_issues(body, REPOSITORY),
+            [101, 102],
+        )
+
+    def test_a_second_evidence_path_is_not_silently_dropped(self):
+        # Every reference has to be validated one by one. While the field
+        # value was its first line only, the second path never reached a
+        # check, so a declared file that does not exist passed the gate.
+        missing = "14-ai-development/work-items/AID-2026-099/does-not-exist.md"
+        body = f"""## Work Item
+
+AID-2026-001
+
+## Related issue(s)
+
+#101
+
+## AI-assisted work
+
+YES
+
+## Session evidence reference(s)
+
+{EVIDENCE_A}
+{missing}
+
+## Per-Issue AI session evidence
+
+| Related Issue | Issue AI-assisted work | Evidence refs for this Issue |
+| --- | --- | --- |
+| {issue_url(101)} | YES | {EVIDENCE_A} |
+"""
+        world = make_valid_world(pr_body=body)
+        self.install_world(world)
+        result, output = self.capture_validator()
+        self.assertEqual(result, 1, output)
+        self.assertIn(missing, output)
+
+    def test_multi_line_status_field_is_rejected(self):
+        with self.assertRaises(validate.ValidationError):
+            validate._parse_status(
+                validate._extract_field(
+                    "## AI-assisted work\n\nYES\nNO\n",
+                    "AI-assisted work",
+                ),
+                "test",
+            )
+
+    def test_an_empty_field_does_not_absorb_the_next_bullet_field(self):
+        # The template stacks its fields as consecutive bullets with no
+        # heading between them. An empty field must stop at the next label,
+        # or it would read an Issue URL out of a field the author filled in
+        # for another purpose and link an Issue this slot never declared.
+        body = "\n".join(
+            [
+                "- Related issue(s):",
+                "- AI-assisted work: NO",
+                f"- Related PR(s): {issue_url(101)}",
+            ]
+        )
+        with self.assertRaises(validate.ValidationError):
+            validate.parse_related_issues(body, REPOSITORY)
+
     def test_rejects_noncanonical_paths(self):
         # Retain the original traversal and malformed-path coverage.
         paths = [
