@@ -128,6 +128,27 @@ jobs:
         self.assertIn("self-test-pr-head", message)
         self.assertIn("ref:", message)
 
+    def test_head_job_checkout_with_ref_names_the_ref_line(self):
+        # The bare `ref:` token also appears in the prose of the message, so the
+        # assertion above held even when the parenthetical quoted the correct
+        # `uses:` line. Pin the value, not the token.
+        self.write(WORKFLOW.replace(
+            "      - name: Checkout PR head\n"
+            "        uses: actions/checkout@v4\n"
+            "        with:\n"
+            "          persist-credentials: false\n",
+            "      - name: Checkout PR head\n"
+            "        uses: actions/checkout@v4\n"
+            "        with:\n"
+            "          ref: ${{ github.event.pull_request.base.sha }}\n"
+            "          persist-credentials: false\n",
+        ))
+        code, message = self.run_checker()
+        self.assertEqual(code, 1)
+        self.assertIn(
+            "ref: ${{ github.event.pull_request.base.sha }}", message
+        )
+
     def test_validate_needs_is_a_violation(self):
         self.write(WORKFLOW.replace(
             "  validate:\n    name: Session Evidence\n",
