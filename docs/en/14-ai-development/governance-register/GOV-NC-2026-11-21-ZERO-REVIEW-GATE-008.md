@@ -397,6 +397,11 @@ So the order is fixed: record (done) → count (675 vs 2) → open the window (a
 
 `OPEN` / `ACTIVE` / `CONTINUOUS` unchanged, appending: `/ BLOCKED — PR-GOVERNANCE-001 §7, escalated to the repository administrator (Issue #134) / EX-20261123-01 records 675 PRs and 0 independent reviews / the three remedies were ruled unavailable`.
 
+> **〔Added 2026-11-25〕** Two things in that string have to be recorded separately:
+>
+> 1. "0 independent reviews" turns **account-layer** counts (`APPROVED = 0`, `collaborators = 1`) into the **review-layer** conclusion that independent review is zero. §5 was amended on 2026-11-24 by `2eb4e352` (PR #935) to a session-level test (see `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`): a separate session under the same GitHub identity suffices for independence. `/pulls/{n}/reviews` returns only `user.login`, never a session, so the step "same identity ⇒ same session" cannot be verified from that payload. Read it as "account layer not independent; session layer not verified" — "0 independent reviews" can only mean "0 non-author `user.login`", not "0 independent sessions". What survives is the counting itself: 675 PRs walked, `APPROVED = 0`, `collaborators = 1`, all verbatim `GET` responses.
+> 2. The status word `BLOCKED` conflicts with this file's own §12.1, which re-rules "§11.8 `BLOCKED` — escalated to the repository administrator" as **`UNFULFILLED`** ("not blocked by force majeure; executable and unexecuted"). This note **records the inconsistency and does not resolve it** — `BLOCKED` is left as written. Which word applies is the register owner's decision, not an annotator's; §12 already states the corrected word.
+
 Not `CLOSED`: §9's blocking chain (independent review `NOT_ASSIGNED`) is unchanged, §10.3 makes it apply to this register itself, and this section's ruling document is `Draft` rather than `Approved` — it claims nothing it cannot show.
 
 ## 12. Erratum: §11's central inference does not hold, because it treated an identity-layer fact as a review-layer conclusion (2026-11-24)

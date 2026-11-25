@@ -1,0 +1,87 @@
+work_item_id: AID-2026-074
+title: Make the declared required-context set answerable against the platform, in both directions
+class: GATE/CODE/TEST
+risk: R1
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+
+prompt_id: AID-2026-074-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-074/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 78044dfbc68873766fc6773768099a2a7b5b08d67594ca5bf09decbeb991a915
+prompt_bytes: 3967
+
+# ---------------------------------------------------------------------------
+# Issue #1029's second clause, the one #1033 did not touch.
+#
+# #1033 corrected §7's count. It did not make the count answerable, and the
+# checker that exists asserted `declared ⊆ produced` — a subset test, so
+# deleting a line from the document could only make it more true. Comment
+# 7151648238 of #1029 measured exactly that: three of four mutations of the
+# declared block still exited 0.
+#
+# The title's 12-vs-15 premise was removed by #1033 before this work started.
+# The measured count at afb0c6ce is 16 and §7 declares 16, so this work item
+# does not re-litigate the number; it makes the number unable to drift silently.
+# ---------------------------------------------------------------------------
+
+authorization:
+  implementation_write: "GRANTED for scripts/check_declared_check_contexts.py, its self-check, one workflow step comment/env, PR-GOVERNANCE-001.md section 7, AID-2026-059/manifest.yaml, AID-2026-061/session-evidence-wo01.md, this work item, and INDEX.md."
+  gate_behaviour_change: "GRANTED - the declared-check-contexts gate gains a second comparison and an INCOMPLETE path. It may now exit 1 or 2 in cases that previously exited 0."
+  schema_change: "NOT_GRANTED - no serialized type, database column or manifest field is introduced."
+  platform_state_change: "NOT_GRANTED - no required context, workflow trigger or protection payload is modified. This work changes what the repository says about the payload, not the payload."
+  architecture_spec_change: "GRANTED for section 7 of PR-GOVERNANCE-001.md only - no ADR, no BMCP specification and no other canonical document is modified."
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-074/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-074/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-074/session-evidence-1029.md
+  files_to_modify:
+    - scripts/check_declared_check_contexts.py
+    - scripts/test_check_declared_check_contexts.py
+    - .github/workflows/repository-hygiene.yml
+    - 14-ai-development/PR-GOVERNANCE-001.md
+    - 14-ai-development/work-items/AID-2026-059/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-061/session-evidence-wo01.md
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope: "Every other path. In particular: the ADR's dated eleven (a correct measurement for 2026-11-24, not a defect), the governance-register's verbatim `11 of 11` refusal string (rewriting it would falsify the record), AID-2026-055's and AID-2026-061's prompt snapshots (frozen executed prompts, not restated claims), and AID-2026-055/session-evidence-1013-fix.md's dated 15."
+
+acceptance:
+  C1: "One reproducible command measures the count, and §7 states what it returns. Settled by the command in the evidence record and by §7's declared block carrying the same sixteen names in the same order."
+  C2: "The checker fails when the declared set is a strict subset of the protected set, and when it is a strict superset. Settled by two self-check cases, one per direction, each asserting exit 1 and the offending name in the message."
+  C3: "An unreadable payload exits 2, never 0 and never skipped. Settled by a self-check that replaces the fetch with a raising stub and asserts 2, and by a run against a live rate limit."
+  C4: "An absent token does not skip the comparison. Settled by running the checker with GITHUB_TOKEN and GH_TOKEN unset against a local server that returns the payload: exit 0 when the sets match, exit 1 with the name printed when they do not."
+  C5: "No branch-protection write. Settled by the work item touching no endpoint that mutates protection, and by the protection payload being read-only in every path added."
+  C6: "The three carriers that contradicted the ratified state are amended without deleting their original sentences. Settled by `git diff` showing additions only in AID-2026-059/manifest.yaml, AID-2026-061/session-evidence-wo01.md and §7's authorisation paragraph."
+
+implementation:
+  status: IMPLEMENTED_IN_BRANCH
+  pull_request: ASSIGNED_AT_OPEN
+  merge_commit_sha: NOT_MERGED
+  note: "The pull request number cannot be written into the commit that opens it, so the INDEX row carries the merge commit once one exists."
+
+review:
+  status: NOT_ASSIGNED
+  note: "Independent review has not been recorded. Section 9 of the standard requires an exact-Head governance review for changes to it; that review is the next action and is not claimed here."
+
+# ---------------------------------------------------------------------------
+# Issue #1029 predates the 2026-12-01 policy effective time and carries no
+# AI-assisted work declaration, so it cannot be mapped to YES. OD-A3 permits a
+# PR-scope entry with empty issue_refs for exactly this case; see AID-2026-059
+# F6 and AID-2026-061 for the same shape on the same policy.
+# ---------------------------------------------------------------------------
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+    implementing_ai_session: session-1029-declared-vs-protected
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-074/prompt-v1.md
+    executed_prompt_sha256: 78044dfbc68873766fc6773768099a2a7b5b08d67594ca5bf09decbeb991a915
+    executed_prompt_bytes: 3967
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-074/session-evidence-1029.md
