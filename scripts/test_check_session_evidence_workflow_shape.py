@@ -11,6 +11,7 @@ find its input must say INCOMPLETE (2), never PASS (0).
 """
 
 import io
+import re
 import shutil
 import tempfile
 import unittest
@@ -27,6 +28,7 @@ WORKFLOW = """\
 name: Session Evidence Gate
 on:
   pull_request:
+    types: [opened, synchronize, reopened, edited]
 jobs:
   self-test-trusted-base:
     name: Session Evidence self-test (base)
@@ -233,6 +235,41 @@ jobs:
     def test_the_repository_itself_passes(self):
         # The shape is a claim about this tree; hold it to that.
         self.assertEqual(checker.main(REPO), 0)
+
+    def test_the_types_trigger_does_not_break_the_three_job_invariants(self):
+        # #1074 added `types:` under `pull_request:`. That is a nested mapping
+        # inside the `on:` block, so it must not be read as a job, and it must
+        # not smuggle a `ref:` or `needs:` into a job. The other cases in this
+        # class run against the same fixture, so they now also prove the
+        # invariants still hold with the trigger present; this one names it.
+        self.assertIn("    types: [opened, synchronize, reopened, edited]\n", WORKFLOW)
+        self.write(WORKFLOW)
+        code, message = self.run_checker()
+        self.assertEqual(code, 0)
+        self.assertNotIn("::error::", message)
+        self.assertIn("three independent jobs", message)
+
+    def test_the_repository_trigger_includes_edited(self):
+        # #1074: `edited` is not a GitHub default activity type, so without it
+        # a body edit after a run schedules nothing and the verdict keeps
+        # describing text that no longer exists. Removing it from the real
+        # workflow must fail here, not pass silently.
+        text = (REPO / WORKFLOW_PATH).read_text(encoding="utf-8")
+        self.assertIn("edited", self.pull_request_types(text))
+
+    @staticmethod
+    def pull_request_types(text):
+        """The activity types declared for the `pull_request` trigger.
+
+        Comment lines between the trigger key and `types:` are skipped, so the
+        pin still reads the real workflow where the rationale sits inline.
+        """
+        match = re.search(
+            r"^  pull_request:\s*$((?:\n[ \t]*(?:#[^\n]*)?)*?)\n[ \t]*types:\s*\[([^\]]*)\]",
+            text,
+            re.MULTILINE,
+        )
+        return [item.strip() for item in match.group(2).split(",")] if match else []
 
 
 if __name__ == "__main__":
