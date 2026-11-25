@@ -467,13 +467,40 @@ N/A
         self.assertIn("PR: AI-assisted work must be YES or NO", output)
 
     def test_no_requires_na(self):
+        # This world also violates the Issue-mapping rule, so a bare
+        # nonzero-exit assertion stayed green when the PR-scope guard was
+        # deleted. Pin the message to the guard under test.
         body = make_pr_body(
             status="NO", refs=[EVIDENCE_A],
             issue_status="NO", issue_refs=[]
         )
         world = make_valid_world(pr_body=body)
         self.install_world(world)
-        self.assertNotEqual(run_validator(), 0)
+        result, output = self.capture_validator()
+        self.assertEqual(result, 1)
+        self.assertIn("PR: NO requires N/A", output)
+
+    def test_pr_mapping_cannot_rewrite_issue_declaration(self):
+        # The Issue declares NO/N/A; the PR table claims YES with evidence.
+        # Without this rule a PR body can overwrite its own Issue's
+        # declaration and the gate still reports PRESENT.
+        body = make_pr_body(
+            status="YES",
+            refs=[EVIDENCE_A],
+            issue_status="YES",
+            issue_refs=[EVIDENCE_A],
+        )
+        world = make_valid_world(
+            pr_body=body,
+            issue_body=ISSUE_BODY_NO,
+        )
+        self.install_world(world)
+        result, output = self.capture_validator()
+        self.assertNotEqual(result, 0)
+        self.assertIn(
+            "PR mapping status differs from Issue declaration",
+            output,
+        )
 
     def test_issue_no_requires_na(self):
         body = make_pr_body(
@@ -642,6 +669,51 @@ session_evidence:
                 "AI-visible output",
                 "test.md",
             )
+
+    def test_evidence_document_requires_session_role_section(self):
+        # Everything else is legal; only the role heading is missing. The
+        # gate exists to prove a session role was recorded, so this guard
+        # must fail closed on its own.
+        world = make_valid_world()
+        _install_evidence_text(
+            world,
+            """# Actual AI input
+
+The actual prompt supplied to the AI:
+Review the implementation requirements and produce the requested work.
+
+# AI-visible output
+
+The actual output returned by the AI:
+The implementation was completed and the validation results were reported.
+""",
+        )
+        self.install_world(world)
+        result, output = self.capture_validator()
+        self.assertNotEqual(result, 0)
+        self.assertIn("missing Session role / use case", output)
+
+    def test_case_mismatched_path_is_rejected_with_every_other_rule_satisfied(self):
+        # Manifest, Issue declaration and both PR scopes all name the same
+        # wrong-case path; the tree holds only the lowercase one. A
+        # lowercase fallback in lookup would silently accept it.
+        wrong = EVIDENCE_A.replace("/evidence/", "/Evidence/")
+        self.assertNotEqual(wrong, EVIDENCE_A)
+        entry = make_entry(101)
+        entry["session_evidence_ref"] = wrong
+        issue_body = f"""## AI-assisted work
+
+YES
+
+## Session evidence reference(s)
+
+{wrong}
+"""
+        world = make_valid_world(entries=[entry], issue_body=issue_body)
+        self.install_world(world)
+        result, output = self.capture_validator()
+        self.assertNotEqual(result, 0)
+        self.assertIn(wrong, output)
 
     def test_evidence_state_semantics(self):
         cases = [
