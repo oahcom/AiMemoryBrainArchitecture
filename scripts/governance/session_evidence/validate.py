@@ -1553,11 +1553,11 @@ def check_09_manifest_and_evidence_entries(
     modified; ``None`` means it could not be determined. It scopes the two
     rules that ask "was this written by this pull request?": the legacy
     manifest migration requirement, and the requirement that an entry's
-    ``issue_refs`` name only linked Issues. An entry whose
-    ``session_evidence_ref`` this pull request did not touch was written by
-    an earlier session and is not this author's to answer for -- a
-    cumulative manifest would otherwise demand that every later pull
-    request link every Issue any earlier session ever named.
+    ``issue_refs`` name only linked Issues. The latter also applies to an
+    entry this pull request *cites*: an entry nobody touched and nobody
+    cited was written by an earlier session and is not this author's to
+    answer for -- a cumulative manifest would otherwise demand that every
+    later pull request link every Issue any earlier session ever named.
     """
     manifest_item = _validate_regular_file(
         manifest_path,
@@ -1610,6 +1610,13 @@ def check_09_manifest_and_evidence_entries(
         for number, row in mapping.items()
     }
 
+    # What this pull request cites: its PR-level references plus every
+    # Issue row's references. Naming a path here is a claim on it, even
+    # when the file itself is untouched.
+    cited_paths = set(pr_paths)
+    for row_paths in issue_paths_by_number.values():
+        cited_paths.update(row_paths)
+
     entry_issue_numbers: dict[str, set[int]] = {}
 
     for index, entry in enumerate(entries, start=1):
@@ -1631,6 +1638,7 @@ def check_09_manifest_and_evidence_entries(
 
         entry_paths.add(evidence_path)
         entry_written_here = changed_by_this_pr(evidence_path)
+        entry_cited_here = evidence_path in cited_paths
 
         for issue_ref in refs:
             number = _normalise_issue_reference(
@@ -1638,12 +1646,19 @@ def check_09_manifest_and_evidence_entries(
                 ctx.repo,
             )
 
-            # Only the pull request that wrote an entry must attribute it
-            # to an Issue it links. Entry #3 of a cumulative manifest may
-            # name an Issue from its own session; demanding that every
-            # later pull request link it again would grow the requirement
-            # by one Issue per session, forever.
-            if number not in linked_numbers and entry_written_here:
+            # An entry answers for its Issue links when this pull request
+            # wrote it *or* cited it -- the union, because each half alone
+            # leaves a hole. Write-only lets a pull request borrow another
+            # session's evidence document by citing it at PR level while
+            # linking none of the Issues that document is attributed to.
+            # Cite-only lets a pull request rewrite a historical entry's
+            # issue_refs to name an unlinked Issue without citing it. An
+            # entry that is neither written nor cited belongs to an earlier
+            # session; demanding every later pull request relink it would
+            # grow the requirement by one Issue per session, forever.
+            if number not in linked_numbers and (
+                entry_written_here or entry_cited_here
+            ):
                 raise ValidationError(
                     f"{location}: issue_refs contains "
                     f"unlinked Issue #{number}"

@@ -1293,6 +1293,89 @@ YES
         self.assertEqual(result, 1, output)
         self.assertIn("unlinked Issue #998", output)
 
+    def test_cited_preexisting_entry_still_requires_linking_its_issue(self):
+        # Write-keying alone left this open: a pull request can name
+        # another session's evidence document at PR level without writing
+        # it. OD-A3 then forces that document to be a manifest entry, so
+        # the pull request adopts a session about #999 as its own evidence
+        # while linking only #101. Citing is a claim, so it is in scope.
+        old = make_entry(101, "a")
+        old["issue_refs"] = [issue_url(999)]
+        new = make_entry(101, "b")
+        body = make_pr_body(
+            refs=[EVIDENCE_A, EVIDENCE_B],
+            issue_refs=[EVIDENCE_B],
+            related=[101],
+        )
+        world = make_valid_world(entries=[old, new], pr_body=body)
+        world["pr"]["base"] = {"sha": "b" * 40}
+        self.install_world(world)
+        self.patch_validate(
+            "gh_compare_paths",
+            lambda repo, base_sha, head_sha: {MANIFEST, EVIDENCE_B},
+        )
+        result, output = self.capture_validator()
+        self.assertEqual(result, 1, output)
+        self.assertIn("unlinked Issue #999", output)
+
+    def test_cited_entry_that_is_linked_passes(self):
+        # Citing an entry is not by itself a violation: the same shape as
+        # above passes once the pull request links the Issue the entry is
+        # attributed to. Without this, a cite-keyed rule could pass by
+        # treating every citation as a breach.
+        old = make_entry(101, "a")
+        old["issue_refs"] = [issue_url(999)]
+        new = make_entry(101, "b")
+        body = f"""- Work Item ID: AID-2026-001
+
+## Related issue(s)
+
+#101, #999
+
+## AI-assisted work
+
+YES
+
+## Session evidence reference(s)
+
+{EVIDENCE_A}
+{EVIDENCE_B}
+
+## Per-Issue AI session evidence
+
+| Related Issue | Issue AI-assisted work | Evidence refs for this Issue |
+| --- | --- | --- |
+| {issue_url(101)} | YES | {EVIDENCE_B} |
+| {issue_url(999)} | YES | {EVIDENCE_A} |
+"""
+        world = make_valid_world(entries=[old, new], pr_body=body)
+        world["pr"]["base"] = {"sha": "b" * 40}
+        original_api = world["api"]
+
+        def api(path):
+            if path == f"/repos/{REPOSITORY}/issues/999":
+                return {
+                    "number": 999,
+                    "html_url": issue_url(999),
+                    "created_at": "2031-01-03T00:00:00Z",
+                    "body": f"""AI-assisted work: YES
+
+Session evidence reference(s):
+{EVIDENCE_A}
+""",
+                }
+            return original_api(path)
+
+        self.install_world(world)
+        self.patch_validate("gh_api", api)
+        self.patch_validate(
+            "gh_compare_paths",
+            lambda repo, base_sha, head_sha: {MANIFEST, EVIDENCE_B},
+        )
+        result, output = self.capture_validator()
+        self.assertEqual(result, 0, output)
+        self.assertIn("AI-SESSION-EVIDENCE: PRESENT", output)
+
     def test_missing_work_item_field_is_named_as_a_missing_field(self):
         # The issue's row 2: no declaration at all, but some other id in
         # prose. The message must name the missing field instead of
