@@ -128,7 +128,7 @@ document_metadata:
 | `required_pull_request_reviews` | `GET /branches/main/protection` | **不存在** |
 | `enforce_admins` | 同上 | `true` |
 | `allow_force_pushes` | 同上 | `false` |
-| `required_status_checks.strict` | 同上 | `true`，12 个 context（2026-11-24 实读；2026-11-25T02:52Z 复读为 16 项，多出的是 `Session Evidence` 与两个 self-test 上下文） |
+| `required_status_checks.strict` | 同上 | `true`，12 个 context（2026-11-24 实读；2026-11-25T02:52Z 复读为 16 项，多出四项：`Session Evidence`、两个 self-test 上下文与 `rust-workspace-test`） |
 | Rulesets | `GET /rulesets` | `[]` |
 | Collaborators | `GET /collaborators` | 仅 `oahcom`（`push: true`） |
 | `oahcom0831-design` 权限 | `GET /collaborators/oahcom0831-design/permission` | `read` |
@@ -169,6 +169,8 @@ document_metadata:
 
 由此 D1 的定性改变：不是 `ENFORCEMENT FAILURE`（那是行为缺陷，暗示改行为），而是 **`REQUIRED BUT UNSATISFIABLE BY CONSTRUCTION`**（这是规格缺陷，暗示改规则）。原来的措辞完整保留在 `AID-2026-055` 的 `status_history` 里，使这次更正可审计而不是被覆盖。可被表达的独立性见 §7.2。
 
+> **这一条此后又被拆开（2026-11-25，`AID-2026-055`）。** `REQUIRED BUT UNSATISFIABLE BY CONSTRUCTION` 作为**单一状态**把要求与它取代的口径焊在了一起，有读者照字面接受，得出的结论是「独立性本身在这里不可能」。实际不可能的是账号级形式；会话级形式一直可用，只是从未被记录。现行做法是把两半分开记录在 `current_status_parts`（`D1-a` = 可满足、未满足；`D1-b` = 必然为零、且已不是要求），而 `current_status` 本身保持原样并由 #1059 的附注限定在账号层——因为一份改写自己断言的记录就不再是记录。上面这段保留原样，因为它是当时那次更正的记录，不是对现状的陈述。
+
 **这不确立什么。** 它不表明没有人看过代码，也不指认任何人的意图。`COMMENTED` 状态的 review 对象是真实的审查活动；它不是 D1 所要求的那个记录。这一发现是关于记录的，以及关于一个从未被配置成能产出该记录的控制面（`required_pull_request_reviews` 不存在，见 §7）。
 
 **为什么本文不使用「七次」这个计数。** 本记录的早期草稿统计的是冻结之后的一个子集。子集计数容易引导出「问题有限且近期」的读法。普查既不有限也不近期，因此以普查为准。
@@ -199,7 +201,7 @@ document_metadata:
 | 正式 Review 对象（§7.1 口径，增补至 681 个合并 PR） | 170，全部 `COMMENTED`，全部由 `oahcom` 发出 |
 | 状态为 `APPROVED` 的正式 Review 对象 | **0** |
 
-**因此 §7.1 的措辞需要一处更正，而 D1 的结论不变。** §7.1 只测正式 Review 端点，容易被读成「没有人看过代码」，而那是错的：406 个已合并 PR 有会话评论，317 个在合并之前就有。真正的状态更准确，也更难辩解：
+**因此 §7.1 的措辞需要一处更正，而 D1 的结论不变。**（该定性本身已于 2026-11-25 拆为 D1-a / D1-b，见 §7.1 的注释；此处「不变」指 D1 仍然成立、未被豁免。） §7.1 只测正式 Review 端点，容易被读成「没有人看过代码」，而那是错的：406 个已合并 PR 有会话评论，317 个在合并之前就有。真正的状态更准确，也更难辩解：
 
 > 审查活动是存在的，写下来的审查也是存在的：406 个已合并 PR 有会话评论，317 个在合并之前就有。但这 4577 条会话评论和 170 条 review 对象全部由同一个账号发出，而该账号同时是全部 795 个已关闭 PR 的作者，GitHub 也不允许它批准自己撰写的 PR。
 

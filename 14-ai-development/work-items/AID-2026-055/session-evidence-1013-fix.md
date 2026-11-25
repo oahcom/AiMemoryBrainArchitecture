@@ -10,7 +10,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-25"
-      last_verification_note: "The branch-protection payload quoted here was read at 2026-11-25T02:45Z; the merge timestamp, the ReadyForReviewEvent and the ruling timestamp were read from the pull request timeline at 2026-11-25T02:20Z. The claim that no code path requires a REVIEWER role was checked by reading MANIFEST_FIELDS and the role validation in scripts/governance/session_evidence/validate.py."
+      last_verification_note: "The branch-protection payload quoted here was read on 2026-11-25 before the #1033 commit 2570ba0 at 02:45:18Z, which declares the sixteen contexts a stage-B PUT had set, and returned 15 required contexts; the 16 is the later reading at 02:52Z, recorded in the manifest. The merge timestamp, the ReadyForReviewEvent and the ruling timestamp were read from the pull request timeline at 2026-11-25T02:20Z. The claim that no code path requires a REVIEWER role was checked by reading MANIFEST_FIELDS and the role validation in scripts/governance/session_evidence/validate.py."
     usage_status: Active
     modification_status: Unchanged
 
@@ -64,15 +64,18 @@ reviewing session, not of the account).
 | B3 | `remediation` prescribed a check-run attestation; three `constraints` demanded a second designated human with a GitHub account mapping | the three constraints restated at session level, with the self-review boundary preserved |
 | B4 | deliverable 1, AC1 and `branch_protection_write` all required `required_pull_request_reviews >= 1`, which `remediation` forbids | all three rewritten to the session-attestation check; the withdrawn deliverable is quoted verbatim with its withdrawal recorded, not deleted |
 | M1 | the English side lost the "why the count *seven* is not used" paragraph that the Chinese side keeps | restored from base `6c2b3ee` |
-| item 1 | `11 contexts` in four places | now states 11 at registration, 12 at `2026-11-24`, 15 at `2026-11-25T02:45Z`, and names the three additions |
+| item 1 | `11 contexts` in four places | now states 11 at registration, 12 at `2026-11-24`, 15 when read earlier on `2026-11-25`, and names the three additions. The count became 16 with the #1033 commit `2570ba0` at `2026-11-25T02:45:18Z`, which declares the sixteen contexts an earlier stage-B PUT had set and was re-read as 16 at `02:52Z`; `rust-workspace-test` is the fourth addition. This record keeps the 15 it measured before that merge; the manifest and `POST-DENIAL` §7 carry the 16 |
 | item 2 | `POST-DENIAL` §7 said 12, AC3 said 11, `GOV-031` §2.2 quotes `11 of 11` | the §2.2 quote is a verbatim platform response and stays; a note now says so and points at the re-read |
 | item 3 | `prompt_status: RECORDED_NOT_FROZEN` next to `prompt_provenance_note: "Frozen from …"` | note now begins "Recorded from" |
 | item 4 | the evidence table claimed rows added to "all six instances"; there are five per-instance tables | corrected to five plus the section 3.6 summary row, with the earlier wording named as wrong |
 
-Measurement performed for this pass (`GET /branches/main/protection`,
-`2026-11-25T02:45Z`): 15 required contexts, `strict: true`,
-`enforce_admins: true`, `allow_force_pushes: false`, `allow_deletions: false`,
-`required_pull_request_reviews` absent.
+Measurement performed for this pass (`GET /branches/main/protection`, read
+earlier on `2026-11-25` and quoted at the time as `02:45Z`):
+15 required contexts, `strict: true`, `enforce_admins: true`,
+`allow_force_pushes: false`, `allow_deletions: false`,
+`required_pull_request_reviews` absent. The count became 16 with the `#1033`
+commit `2570ba0` at `2026-11-25T02:45:18Z`, which declares the sixteen contexts a stage-B PUT had set; re-read as 16 at `02:52Z`; this record keeps the
+15 it measured before that commit, and the manifest carries the 16.
 
 ## What this record does not contain
 
