@@ -100,7 +100,11 @@ the headline position.
 
 Second: D1's status changed from `REQUIRED, UNSATISFIED; ENFORCEMENT FAILURE` to
 `REQUIRED BUT UNSATISFIABLE BY CONSTRUCTION`, with the previous wording preserved in
-`AID-2026-055` `status_history` rather than overwritten. §7.2 now states that the defect is in the
+`AID-2026-055` `status_history` rather than overwritten. That status was itself qualified on 2026-11-25: #1059 annotated it in place as
+scoped to the account layer, and `AID-2026-055` records the two parts separately in
+`current_status_parts` (`D1-a` satisfiable, not satisfied; `D1-b` necessarily zero, and not
+the requirement), because as a single unqualified string it made the requirement look
+impossible when only the superseded account-level form is. §7.2 now states that the defect is in the
 specification — defining independence as the appearance of a second GitHub account — and that the
 expressible form is a required status check asserting a non-authoring reviewing session. Adding
 `required_pull_request_reviews` is recorded as forbidden, because it can never be satisfied here

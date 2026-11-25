@@ -8,7 +8,7 @@ import sys
 from pathlib import PurePosixPath
 
 
-CHECK_VERSION = "2026-11-24.7"
+CHECK_VERSION = "2026-11-24.8"
 
 # Repository-root-relative paths, written with a leading slash.
 PROHIBITED_PATHS = (
@@ -325,6 +325,23 @@ def is_allowed_new_path(path):
     return False
 
 
+# A root-level underscore or dot file is a working-copy artifact, not
+# repository content: `_pr_body.md` and `_tmp_pr_create.py` reached main's
+# review queue that way. The rule is root-scoped on purpose -- a leading
+# underscore in a subdirectory is ordinary (a private module, an internal
+# fixture), and widening this to the whole tree would refuse both.
+ROOT_SCRATCH_PREFIXES = ("_", ".")
+
+
+def is_root_scratch_path(path):
+    """True for a new path directly at the repository root, _ or . prefixed."""
+    pure = PurePosixPath(path)
+    return (
+        pure.parent == PurePosixPath(".")
+        and pure.name.startswith(ROOT_SCRATCH_PREFIXES)
+    )
+
+
 def check_prohibited_head_paths(head_paths):
     violations = []
     for prohibited_path in PROHIBITED_PATHS:
@@ -354,10 +371,16 @@ def check_new_paths(root, base_sha, head_sha):
     head_paths = tree_paths(root, head)
     new_paths = sorted(head_paths - baseline_paths)
 
-    rejected = [
-        path for path in new_paths
-        if not is_allowed_new_path(path)
-    ]
+    rejected = []
+    for path in new_paths:
+        if is_root_scratch_path(path):
+            rejected.append((
+                path,
+                f"'{path}' is a root-level underscore/dot file; "
+                "scratch files do not belong at the repository root",
+            ))
+        elif not is_allowed_new_path(path):
+            rejected.append((path, f"no allowlist rule for '{path}'"))
 
     print(
         "Repository new-file admission "
@@ -368,11 +391,8 @@ def check_new_paths(root, base_sha, head_sha):
     )
 
     if rejected:
-        for path in rejected:
-            error(
-                "new-file admission violation: "
-                f"no allowlist rule for '{path}'"
-            )
+        for _, reason in rejected:
+            error(f"new-file admission violation: {reason}")
         return 1
 
     print(

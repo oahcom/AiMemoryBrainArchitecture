@@ -3,7 +3,7 @@ title: Commit the traceability checker's two input files, and stop it printing a
 
 class: GATE/CODE/TEST
 risk: R1
-risk_rationale: "One script's failure path plus two data files it already reads. No Rust, no transport, no authorization, no storage. The risk is not damage but silence: the current failure path prints '0 requirements / 0 work items / 0 errors' over unreadable inputs, so a wrong implementation looks identical to a correct one that found nothing. AC2 asserts the absence of a verdict-shaped line rather than the presence of an error, because the presence of an error is already true today; the check is whether the counts stop being printed over inputs that were never read."
+risk_rationale: "One script's failure path plus two data files it already reads. No Rust, no transport, no authorization, no storage. The risk is not damage but silence: the current failure path keeps printing a verdict-shaped summary over inputs it never read (measured at 767f2eaa: 'FAIL TRACEABILITY: 0 requirements / 0 work items / 1 errors / 0 warnings' followed by 'ERROR required registry unavailable'), so a wrong implementation looks identical to a correct one on the line a reader greps for, and the counts that stay at zero were never measured. AC2 asserts the absence of a verdict-shaped line rather than the presence of an error, because the presence of an error is already true today; the check is whether the counts stop being printed over inputs that were never read."
 
 security_scope: "None. A JSON registry index, a four-line path baseline, and the branch in check_traceability.py that decides what to print when REGISTRY_PATH cannot be read."
 
@@ -81,7 +81,7 @@ owner_decisions:
     ruling: "(c) Both. Neither substitutes for the other."
     constraints:
       - "Committing the inputs fixes a normal repository run; refusing to print a verdict fixes the next time an input goes missing, or a path is wrong, or the environment is incomplete."
-      - "A degraded run may say why it could not check. It may not say what it checked. 'INCOMPLETE TRACEABILITY: 0 requirements / 0 work items / 0 errors' is a verdict over unread inputs and must not be printed."
+      - "A degraded run may say why it could not check. It may not say what it checked. 'INCOMPLETE TRACEABILITY: 0 requirements / 0 work items / 0 errors' is a verdict over unread inputs and must not be printed. (That string is OD-23's own wording and is quoted, not prescribed: the shape OD-23 ruled against is the verdict prefix, not this exact sentence. Measured at 767f2eaa the missing-registry path prints 'FAIL TRACEABILITY: 0 requirements / 0 work items / 1 errors / 0 warnings', so an implementation that greps for the quoted '0 errors' text would not match the real output. AC2 is the binding form: no line containing the token TRACEABILITY: at all.)"
       - "The change must be carried by a registered work item. OD-23 authorises the decision, not the commit: '不能仅凭本轮裁定直接修改仓库'."
       - "Do not refresh the baseline to make the four errors disappear. They are the check working."
 
@@ -131,13 +131,13 @@ independent_reviewer: REQ-05-INDEPENDENT-REVIEW-SESSION-01
 integration_reviewer: NOT_ASSIGNED
 
 review:
-  status: CHANGES_APPLIED_AWAITING_RE_REVIEW
-  prior_status: CHANGES_REQUESTED
+  status: APPROVED
+  prior_status: CHANGES_APPLIED_AWAITING_RE_REVIEW
   # Latest round first. report_ref is the report a reader should open; the
   # first round is kept because the status above is only meaningful against it.
-  report_ref: "14-ai-development/work-items/AID-2026-058/REVIEW-03-INDEPENDENT.md"
-  prior_report_ref: "14-ai-development/work-items/AID-2026-058/REVIEW-02-INDEPENDENT.md"
-  rounds_completed: 3
+  report_ref: "14-ai-development/work-items/AID-2026-058/REVIEW-05-INDEPENDENT.md"
+  prior_report_ref: "14-ai-development/work-items/AID-2026-058/REVIEW-04-INDEPENDENT.md"
+  rounds_completed: 5
   # Round 3 re-measured every round-2 correction against the tree and found them
   # closed: the AC5 line numbers (499 / 513), the `grep -c` = 2 versus anchored
   # = 4 distinction, zero history hits for both input files, and the reproduced
@@ -147,10 +147,16 @@ review:
   # Both are applied in this revision.
   # OD-26 directed that this work item stay DISPATCHED and this status stay
   # CHANGES_APPLIED_AWAITING_RE_REVIEW until an independent reviewer confirms
-  # every blocking finding closed. The author's own conformance checks and a
-  # green PR are not that confirmation. APPROVED is reachable only by that
-  # reviewer.
-  approval_source: "independent reviewer confirmation (OD-26 (a)); none received yet"
+  # every blocking finding closed. OD-26 itself is not in this file's
+  # owner_decisions, which carry OD-23; the ruling is recorded in
+  # AID-2026-060's manifest, where it is the reason that work item exists.
+  # Round 4 returned APPROVE with no blocking item; its three notes were applied
+  # afterwards, so round 5 read those three edits specifically and returned
+  # APPROVE again. That APPROVE is of this file's content, not of the work it
+  # describes: implementation.status is still NOT_STARTED. The only bytes changed
+  # after round 5's verdict are this block's two status fields and the report
+  # pointers, which the verdict does not depend on.
+  approval_source: "REVIEW-05 returned APPROVE, no blocking item, reviewing the increment applied after round 4. After it, this commit also rewrote `risk_rationale` to quote the failure output as measured (`1 errors`, not `0 errors`) and marked the OD-23 quotation as quoted rather than prescribed; no acceptance criterion, finding or owner decision changed."
 
 implementation:
   status: NOT_STARTED
@@ -165,8 +171,8 @@ findings:
     severity: material
     raised_by: independent re-review (second pass, OD-26)
     measured_at: "2fc4a2ff"
-    statement: "base_commit_sha is b3a65e54, whose parent is 1259f1af (#926). It is 125 commits behind 2fc4a2ff, the commit this finding is measured at; the distance grows with every merge and is not restated here. The commit that falsifies AC1 is 35f2b078, which branched from the same parent and was merged to main afterwards: measured, the four INDEX rows AC1 required to be missing do not exist at b3a65e54 (git grep anchored on the table's first column returns 0) and are introduced by 35f2b078. So AC1 was true when written and false by the time the work item was reviewed. Corrected at REVIEW-03: this finding previously read '70 commits behind' and also blamed f640ba50, which is an ancestor of the base rather than a later commit, and therefore cannot have falsified anything the prompt was written against. 35f2b078 is the only falsifier, and it is sufficient."
-    resolution: "Not re-anchored. Re-anchoring would invalidate the frozen prompt's provenance note, and the criteria now state the commit each measurement belongs to, which is what an implementer acts on. Recorded because 056 had an equivalent finding (F7) and 058 had none, so a reader could conclude 058's base was current."
+    statement: "base_commit_sha is b3a65e54, whose parent is 1259f1af (#926). It is 125 commits behind 2fc4a2ff, the commit this finding is measured at — 40 by first-parent count, which is what a reviewer measuring a linear history sees; both figures were re-derived at REVIEW-04 rather than inherited. The distance grows with every merge and is not restated here. The commit that falsifies AC1 is 35f2b078, which branched from the same parent and was merged to main afterwards: measured, the four INDEX rows AC1 required to be missing do not exist at b3a65e54 (git grep anchored on the table's first column returns 0) and are introduced by 35f2b078. So AC1 was true when written and false by the time the work item was reviewed. Corrected at REVIEW-03: this finding previously read '70 commits behind' and also blamed f640ba50, which is an ancestor of the base rather than a later commit, and therefore cannot have falsified anything the prompt was written against. 35f2b078 is the only falsifier, and it is sufficient."
+    resolution: "Not re-anchored. Re-anchoring would invalidate the frozen prompt's provenance note, and the criteria now state the commit each measurement belongs to, which is what an implementer acts on. Recorded because 056 had an equivalent finding (AID-2026-056's F7) and 058 had none, so a reader could conclude 058's base was current."
 
   - id: F1
     statement: "00-governance/requirements-registry.yaml has a .yaml extension but JSON content, and scripts/check_traceability.py parses it with json.loads. The mismatch is pre-existing and harmless while both sides agree. Recorded so that an implementer does not 'fix' the extension or rewrite the file as YAML, either of which would break the parser."

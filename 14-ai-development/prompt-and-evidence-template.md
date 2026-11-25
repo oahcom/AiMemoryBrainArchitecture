@@ -42,8 +42,12 @@ repository: "oahcom/AiMemoryBrainArchitecture"
 base_branch: ""
 base_commit_sha: ""
 dependency_refs: []
+# Non-normative and human-readable only; CI does not read this field. The
+# normative prompt digest is executed_prompt_sha256 in the session_evidence entry.
 prompt_id: ""
 prompt_version: "v1"
+# Non-normative and human-readable only; CI does not read this field or verify it
+# against the snapshot. Same value as executed_prompt_sha256 when both are set.
 prompt_sha256: ""
 # Exact payload sent to this session after composing baseline + task-specific instructions.
 executed_prompt_snapshot_file: ""
@@ -241,6 +245,8 @@ session_evidence:
 
 Enforcement lives in `scripts/governance/session_evidence/validate.py`: the validator, not this document, is the source of truth, and this section describes what it enforces.
 
+The top-level `prompt_id` / `prompt_sha256` pair in section 1 is non-normative: it is kept for human readability and for historical manifests, CI does not read it, and it is never the authoritative digest of the executed prompt. The authoritative value is `executed_prompt_sha256` inside a `session_evidence` entry.
+
 `session_evidence` 是规范表示，且是可重复列表：一个会话一个条目，即使只有一个会话也是如此。每个条目包含 `role`、`issue_refs` 以及第 1 节列出的全部七个字段，逐条独立校验，且不得与另一个条目共用同一个 `session_evidence_ref`。
 
 在单个条目内，七个字段保持单值。字段中不得用逗号、分号、加号或空白拼接多个值；多个会话应表达为多个条目，绝不能写成一个拼接字符串。（`executed_prompt_bytes` 是非负整数，不是字符串。）
@@ -253,11 +259,13 @@ Enforcement lives in `scripts/governance/session_evidence/validate.py`: the vali
 
 执行位于 `scripts/governance/session_evidence/validate.py`：事实来源是校验器而不是本文档，本节描述的是它所强制的内容。
 
+第 1 节的顶层 `prompt_id` / `prompt_sha256` 属于非规范性字段：仅为人类可读性与历史 manifest 保留，CI 不读取，也绝不代表实际执行提示词的权威摘要。权威值是指向 `session_evidence` 条目内的 `executed_prompt_sha256`。
+
 ## 3.3 Pull-request body contract — scope and effective date / 正文契约的适用范围与生效时间
 
-The pull-request body contract applies to a pull request that carries an AI-authored change: it declares `AI-assisted work`, the per-Issue table, and the evidence behind the declaration. A pull request with no AI involvement is not exempt from declaring — it MUST say `AI-assisted work: NO` and put `N/A` in `Session evidence reference(s)`, because silence is indistinguishable from an undeclared AI contribution, and no gate can read an unexplained blank as a claim that none exists. This requirement is effective now: it follows `Session Evidence` becoming a required status check, not the evidence-data effective time. It is a different thing from `AI_SESSION_EVIDENCE_EFFECTIVE_AT_UTC = 2026-12-01T00:00:00Z`, which sets when the evidence *data* requirement begins; the body contract does not wait for it.
+The pull-request body contract applies to a pull request that carries an AI-authored change: it declares `AI-assisted work`, the per-Issue table, and the evidence behind the declaration. A pull request with no AI involvement is not exempt from declaring — it MUST say `AI-assisted work: NO` and put `N/A` in `Session evidence reference(s)`, because silence is indistinguishable from an undeclared AI contribution, and no gate can read an unexplained blank as a claim that none exists. For ordinary pull requests the contract is not gated on the evidence-data cutoff, which is `AI_SESSION_EVIDENCE_EFFECTIVE_AT_UTC = 2026-12-01T00:00:00Z` and sets only when the evidence *data* requirement begins. There is one bounded exemption: a pull request created before `2026-12-01T00:00:00Z` that links only Issues each predating that cutoff and carrying no declaration of their own, and that leaves both `AI-assisted work` and `Session evidence reference(s)` absent, validates as `NOT_APPLICABLE` — `scripts/governance/session_evidence/validate.py` returns that verdict before it reaches the body-field checks. The exemption does not extend past `2026-12-01T00:00:00Z`, and the date on which `Session Evidence` became a required status check is not recorded.
 
-PR 正文契约适用于承载 AI 编写改动的 pull request：它声明 `AI-assisted work`、逐 Issue 表格，以及声明背后的证据。没有任何 AI 参与的 pull request 并不因此免于声明——必须写 `AI-assisted work: NO`，并在 `Session evidence reference(s)` 中写 `N/A`，因为沉默与「未声明的 AI 参与」不可区分，也没有门禁能把一处无解释的空白读成「没有 AI 参与」的声明。本条**即刻生效**：它跟随的是 `Session Evidence` 成为必需状态检查，而不是证据数据的生效时间。这与 `AI_SESSION_EVIDENCE_EFFECTIVE_AT_UTC = 2026-12-01T00:00:00Z` 是两件事——后者设定证据**数据**要求的起点，正文契约不等它。
+PR 正文契约适用于承载 AI 编写改动的 pull request：它声明 `AI-assisted work`、逐 Issue 表格，以及声明背后的证据。没有任何 AI 参与的 pull request 并不因此免于声明——必须写 `AI-assisted work: NO`，并在 `Session evidence reference(s)` 中写 `N/A`，因为沉默与「未声明的 AI 参与」不可区分，也没有门禁能把一处无解释的空白读成「没有 AI 参与」的声明。对普通 pull request，契约并不以证据数据生效时间为门禁条件——该时间是 `AI_SESSION_EVIDENCE_EFFECTIVE_AT_UTC = 2026-12-01T00:00:00Z`，只设定证据**数据**要求的起点。存在一项有边界的豁免：在 `2026-12-01T00:00:00Z` 之前创建、只关联同样早于该截止时刻且自身未作任何声明的 Issue、且两个正文字段都留空的 pull request，会被判定为 `NOT_APPLICABLE`——`scripts/governance/session_evidence/validate.py` 在进入正文字段检查之前就返回该结论。该豁免不延伸到 `2026-12-01T00:00:00Z` 之后；`Session Evidence` 成为必需状态检查的日期没有被记录。
 
 ## 4. Required evidence bundle / 必需证据包
 

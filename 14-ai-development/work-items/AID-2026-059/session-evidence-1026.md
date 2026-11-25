@@ -82,8 +82,17 @@ criteria are stated against them:
 
 **Verification actually run on this branch.**
 
-The branch is based on `0bbb35f1`; the code change is two files, plus three
-work-record files (`manifest.yaml`, this document, `prompt-1026-v1.md`).
+The branch is based on `ee4f81d9`, the merge base of the implementation
+commits with the merge commit `940a4cb3` (`git merge-base 0b7b9ba2^ 940a4cb3`).
+An earlier draft recorded `0bbb35f1`, which is `Merge pull request #1046` — an
+ancestor of the merge, but not this branch's base. That is why this note and
+the `AID-2026-064` record disagree about the base: `AID-2026-064` records
+`7a69f32b` (`Merge pull request #1039`), which is the base of *its* branch.
+Both values are real commits; they answer the question for different branches,
+and neither is a typo.
+
+The code change is two files, plus three work-record files (`manifest.yaml`,
+this document, `prompt-1026-v1.md`).
 
 ```
 python3 -m unittest tests.session_evidence.test_validate
@@ -121,10 +130,17 @@ Gate conclusions read, not assumed:
 python3 scripts/ci/check_line_endings.py
     Line-ending check: 1339 files inspected, 0 binary skipped, 0 violations.
 
-python3 scripts/ci/check_repository_hygiene.py --base 0bbb35f1 --head 17f155e1
-    Work-item index membership version=2026-11-24.7 directories=52 linked=52
-    Work-item manifest consistency manifests=41 in_scope=39 excluded_by_record_type=2 unrecognized=0 violations=0
-    Repository new-file admission passed: 2 new path(s) checked
+python3 scripts/ci/check_repository_hygiene.py --base 69cb05c9573f204821b25ee4bd199bc4c3b5dad6 --head ff8a33b2e0bcb68cfe4491d532eeea93790b411a
+    Work-item index membership version=2026-11-24.7 directories=55 linked=55
+    Work-item manifest consistency version=2026-11-24.7 manifests=44 in_scope=42 excluded_by_record_type=2 unrecognized=0 violations=0
+    Repository new-file admission version=2026-11-24.7 base=69cb05c9573f204821b25ee4bd199bc4c3b5dad6 head=ff8a33b2e0bcb68cfe4491d532eeea93790b411a merge_base=69cb05c9573f204821b25ee4bd199bc4c3b5dad6
+    Repository new-file admission passed: 0 new path(s) checked.
+    exit code 0
+
+  The head named above is the parent of the commit that carries this quotation;
+  quoting a commit inside itself is impossible, and the two differ only by this
+  block. The earlier draft quoted `--base 0bbb35f1 --head 17f155e1`, neither of
+  which is a base or head of the merged work.
 
 python3 scripts/check_document_management.py --require-changed 0bbb35f1
     PASS (incremental): no GOV-DOC-002 violations; 219 classified, 493 unclassified
@@ -161,5 +177,11 @@ effective time onwards. The condition is now date-bounded at both ends.
   requests.
 - No independent review exists for this change. `independent_reviewer` stays
   `NOT_ASSIGNED` in the work item.
-- The four new tests exercise the validator through its offline fixtures. They
-  do not exercise the GitHub API, the workflow file, or branch protection.
+- The six new tests exercise the validator through its offline fixtures:
+  `test_pre_effective_undeclared_pr_is_not_applicable`,
+  `test_pre_effective_pr_with_post_effective_issue_requires_declaration`,
+  `test_pre_effective_pr_volunteered_yes_with_missing_evidence_fails`,
+  `test_pre_effective_pr_volunteered_yes_with_valid_evidence_is_not_applicable`,
+  `test_pr_opened_before_the_effective_time_without_a_declaration_is_not_applicable`
+  and `test_pr_opened_after_the_effective_time_without_a_declaration_fails`.
+  They do not exercise the GitHub API, the workflow file, or branch protection.

@@ -128,6 +128,27 @@ jobs:
         self.assertIn("self-test-pr-head", message)
         self.assertIn("ref:", message)
 
+    def test_head_job_checkout_with_ref_names_the_ref_line(self):
+        # The bare `ref:` token also appears in the prose of the message, so the
+        # assertion above held even when the parenthetical quoted the correct
+        # `uses:` line. Pin the value, not the token.
+        self.write(WORKFLOW.replace(
+            "      - name: Checkout PR head\n"
+            "        uses: actions/checkout@v4\n"
+            "        with:\n"
+            "          persist-credentials: false\n",
+            "      - name: Checkout PR head\n"
+            "        uses: actions/checkout@v4\n"
+            "        with:\n"
+            "          ref: ${{ github.event.pull_request.base.sha }}\n"
+            "          persist-credentials: false\n",
+        ))
+        code, message = self.run_checker()
+        self.assertEqual(code, 1)
+        self.assertIn(
+            "ref: ${{ github.event.pull_request.base.sha }}", message
+        )
+
     def test_validate_needs_is_a_violation(self):
         self.write(WORKFLOW.replace(
             "  validate:\n    name: Session Evidence\n",
@@ -137,6 +158,61 @@ jobs:
         self.assertEqual(code, 1)
         self.assertIn("validate", message)
         self.assertIn("needs:", message)
+
+    def test_validate_block_form_needs_is_a_violation_naming_the_needs_line(self):
+        # #1058. YAML block form puts the value on the following lines, so the
+        # key line ends at the colon. A regex that requires a token after the
+        # colon matches only the flow form and lets the block form through,
+        # silently -- the dependency it forbids is exactly as present.
+        block = WORKFLOW.replace(
+            "  validate:\n    name: Session Evidence\n",
+            "  validate:\n    name: Session Evidence\n"
+            "    needs:\n      - self-test-pr-head\n",
+        )
+        self.write(block)
+        code, message = self.run_checker()
+        self.assertEqual(code, 1)
+        self.assertIn("`needs:`", message)
+
+        needs_line = next(
+            i for i, line in enumerate(block.splitlines(), 1)
+            if line.strip() == "needs:"
+        )
+        job_line = next(
+            i for i, line in enumerate(block.splitlines(), 1)
+            if line.strip() == "validate:"
+        )
+        # The line number, not the job name, is what locates the offending key.
+        self.assertIn(f"(line {needs_line}: needs:)", message)
+        self.assertNotIn(f"(line {job_line}:", message)
+
+    def test_ref_violation_quotes_the_ref_line_and_not_the_uses_line(self):
+        # #1045. The step's `uses:` line is the one line in a checkout step that
+        # is already correct, so quoting it sends the reader to look for a
+        # `ref:` that is not there. The negative assertion is the direction:
+        # naming `ref:` in the prose of the message is not enough.
+        ref = "ref: ${{ github.event.pull_request.head.sha }}"
+        mutated = WORKFLOW.replace(
+            "      - name: Checkout PR head\n"
+            "        uses: actions/checkout@v4\n"
+            "        with:\n"
+            "          persist-credentials: false\n",
+            "      - name: Checkout PR head\n"
+            "        uses: actions/checkout@v4\n"
+            "        with:\n"
+            f"          {ref}\n"
+            "          persist-credentials: false\n",
+        )
+        self.write(mutated)
+        code, message = self.run_checker()
+        self.assertEqual(code, 1)
+
+        ref_line = next(
+            i for i, line in enumerate(mutated.splitlines(), 1)
+            if line.strip() == ref
+        )
+        self.assertIn(f"(line {ref_line}: {ref})", message)
+        self.assertNotIn("uses: actions/checkout@v4", message)
 
     def test_ref_in_the_base_job_is_allowed(self):
         # The base job SHALL read the base revision; only the head job may not.

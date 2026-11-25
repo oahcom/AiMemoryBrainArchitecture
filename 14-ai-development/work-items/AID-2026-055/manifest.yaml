@@ -19,7 +19,7 @@ base_commit_sha: a8c367def34e5a3082ab777a7afedf7e82f38aa0
 tracking_issue: "NONE - tracked by GOV-NC-2026-11-20-MERGE-AFTER-RULING-003 (frozen zero-review count), GOV-NC-2026-11-24-MERGE-FORM-DEVIATION-031 (post-freeze instance #875), and by this AID manifest"
 
 created_at: 2026-11-24
-updated_at: 2026-11-24
+updated_at: 2026-11-25
 
 prompt_id: AID-2026-055-PROMPT
 prompt_version: v1
@@ -28,6 +28,7 @@ prompt_status: RECORDED_NOT_FROZEN
 prompt_sha256: 50c952342eda213fb72eb78ecc38fd0ff7674d507734502951ac0479e5c16bee
 prompt_bytes: 7100
 prompt_amendment_note: "This record was FROZEN at 7094 bytes / 52ec33df. PR #982 amended prompt-v1.md (the D1 acceptance cell in the table) and did not update this pin, so the pin contradicted the file it named. The values above now describe the bytes on disk. The freeze claim is withdrawn rather than restated: a pin that moves cannot also be a freeze, and re-freezing a text after the session it describes has run would date the freeze falsely."
+prompt_currency_note: "The pinned bytes are the pre-split input and are deliberately left intact; the superseded passages are enumerated in the D1 block under `prompt_supersession`, which is the field an implementer should read before acting on the snapshot."
 
 prompt_provenance_tier: T1
 prompt_provenance_note: "Recorded from the owner-proxy session that measured the live branch protection state, measured the reviews endpoints of the merges this work item is about, and read the four rulings the Owner issued in round 20. Every figure in the prompt is a value returned by the GitHub REST API in that session, not an inference from repository files."
@@ -53,28 +54,37 @@ owner_decisions:
     # because it is this record's own claim and a record that edits its own
     # claims is not a record. Read it as scoped to the account layer.
     current_status: "REQUIRED BUT UNSATISFIABLE BY CONSTRUCTION〔2026-11-25 附注：「按构造不可满足」只对**账号层**的形式成立——GitHub 按用户计数并禁止自我批准，故 `collaborators = 1` 下不可能产生 `APPROVED` 对象。对本条 D1 自己写下的要求它不成立：2026-11-24 修订（#935）把独立性放在**会话**层，同一身份下的另一会话即可满足。合格会话尚未运行，所以状态仍不是 SATISFIED；「未运行」与「无法运行」是两件不同的事，D1 不得凭后者被标为可执行〕"
+    current_status_parts:
+      - id: D1-a
+        status: "SATISFIABLE, NOT SATISFIED"
+        text: "The requirement: a review from a non-authoring reviewing session. A separate session can produce that record, so the requirement is satisfiable; no such record exists, so it is not satisfied. This is the part that governs whether D1 has been met."
+      - id: D1-b
+        status: "NECESSARILY ZERO, AND NOT THE REQUIREMENT"
+        text: "The account-level formulation that D1-a replaced: a formal `Approved` object from an account other than the author. One collaborator authored all 795 closed PRs and GitHub forbids self-approval, so the zero is arithmetic, not conduct. Because it is no longer the requirement, that zero is not a control failure and must not be read as one."
     current_status_components:
-      - "Required: a review from a non-authoring reviewing session. Independence is a property of the reviewing session, not of the GitHub account (#935). The account-level form (a formal Approved object from a non-author human) is what the paragraph below measures as necessarily zero; it is recorded there as the reason the account-level form cannot be the requirement, not as the requirement."
-      - "Current satisfaction: NOT SATISFIED."
-      - "Unsatisfiable by construction, not enforcement failure. GET /collaborators returns [\"oahcom\"] -- one collaborator. GET /pulls?state=closed, every page, returns 795 closed PRs and user.login is oahcom for all 795. GitHub does not permit an account to approve a PR it authored, so the number of APPROVED review objects this repository can contain is not some-currently-zero: it is necessarily zero, for every PR, regardless of conduct. Reporting it as a governance measurement is reporting that a coin landed heads when the coin has one side."
+      - "D1-a -- the requirement, and it is satisfiable. Required: a review from a non-authoring reviewing session. Independence is a property of the reviewing session, not of the GitHub account (#935). The account-level form (a formal Approved object from an account other than the author) is what the paragraph below measures as necessarily zero; it is recorded there as the reason the account-level form cannot be the requirement, not as the requirement."
+      - "D1-a current satisfaction: NOT SATISFIED. D1-b is not a requirement, so it can be neither satisfied nor violated; it is a platform arithmetic fact about one retired formulation."
+      - "D1-b -- the retired account-level formulation. Unsatisfiable by construction, not enforcement failure. GET /collaborators returns [\"oahcom\"] -- one collaborator. GET /pulls?state=closed, every page, returns 795 closed PRs and user.login is oahcom for all 795. GitHub does not permit an account to approve a PR it authored, so the number of APPROVED review objects this repository can contain is not some-currently-zero: it is necessarily zero, for every PR, regardless of conduct. Reporting it as a governance measurement is reporting that a coin landed heads when the coin has one side."
       - "The finding that does carry information: of 662 merged PRs at 2026-11-24T18:47Z, 556 carry no review object at all -- the review-submission path was never walked, and a COMMENTED object was available throughout. 106 carry 170 objects, all COMMENTED, all by the authoring account. Review existed in form 106 times; in 556 merges it did not exist in any form."
       - "Third endpoint (issues/{n}/comments, POST-DENIAL-UNAUTHORISED-MERGE-001 section 7.2, issue #966), read at 2026-11-25T00:36Z over 681 merged of 795 closed: 4577 comments, all by oahcom, none by any other account; 406 merged PRs with a conversation comment, 317 of them before the merge, 232 after. Review activity is real and is not missing -- what is missing is any reviewer other than the author, in any channel."
       - "Zero-review merges since the freeze point (#875, 2026-11-24T04:54:07Z): 65 of the 70 that have merged. One of them, #946, merged after an explicit refusal naming that PR (POST-DENIAL-UNAUTHORISED-MERGE-001)."
-      - "Mechanism check, 2026-11-25T02:45Z: `GET /branches/main/protection` now lists 16 required contexts. Three are `Session Evidence`, `Session Evidence self-test (base)` and `Session Evidence self-test (head)`; a fourth, `rust-workspace-test`, was added only after #1027 removed its workflow's `pull_request.paths` filter, because a required context that is never scheduled is permanently absent rather than pending. The gap D1 named is therefore narrower than when this record was written: a session-attested required status check exists and is enforced. It does not yet satisfy D1, because what it attests is the *implementing* session -- `MANIFEST_FIELDS` in scripts/governance/session_evidence/validate.py begins with `implementing_ai_session`, `role` is free text, and no code path requires a `REVIEWER` role or a session distinct from the authoring one. A PR that declares only `role: IMPLEMENTER` passes. So the requirement is now \"REQUIRED, AND THE CARRIER EXISTS BUT DOES NOT YET ASSERT REVIEW\" rather than \"no carrier exists\"."
+      - "Mechanism check, 2026-11-25T02:52Z: `GET /branches/main/protection` now lists 16 required contexts. Three are `Session Evidence`, `Session Evidence self-test (base)` and `Session Evidence self-test (head)`; a fourth, `rust-workspace-test`, was added only after #1027 removed its workflow's `pull_request.paths` filter, because a required context that is never scheduled is permanently absent rather than pending. The gap D1 named is therefore narrower than when this record was written: a session-attested required status check exists and is enforced. It does not yet satisfy D1, because what it attests is the *implementing* session -- `MANIFEST_FIELDS` in scripts/governance/session_evidence/validate.py begins with `implementing_ai_session`, `role` is free text, and no code path requires a `REVIEWER` role or a session distinct from the authoring one. A PR that declares only `role: IMPLEMENTER` passes. So D1-a remains what `current_status_parts` says it is -- satisfiable and not satisfied -- and what has changed is only that a carrier now exists which does not yet assert review."
       - "Waiver: NOT AUTHORISED."
       - "Remediation: restate D1 as a required status check produced by a check run that asserts a non-authoring reviewing session (#935). Do NOT add required_pull_request_reviews: it requires an object this account topology cannot produce and would make every PR unmergeable, including the PR that would fix the deadlock."
-    current_status_wording: "D1 is a mandatory policy requirement, and as currently written it cannot be satisfied by construction: it requires approval from an account other than the author, this repository has one collaborator who authored every PR, and GitHub forbids self-approval. That is a specification defect, not a conduct defect. The requirement is not waived, not optional, and not evidence that review is unnecessary; it must be restated in a form this repository can express, namely a required status check asserting a non-authoring reviewing session."
-    current_status_wording_zh: "D1 是强制政策要求，但按当前措辞它在构造上就不可满足：它要求来自非作者的账号批准，而本仓库只有一名 collaborator 且全部 PR 都由该账号提交，GitHub 又禁止自我批准。这是规格缺陷，不是行为缺陷。该项要求未被豁免、不是可选建议、也不表示审查没有必要；它必须改写成本仓库能够表达的形式，即一个断言存在非作者审查会话的 required status check。"
+    current_status_wording: "D1 has two parts and they are not the same kind of claim. **D1-a** is the requirement: a review from a non-authoring reviewing session. It is satisfiable -- a separate session can produce that record -- and it is not satisfied. **D1-b** is the account-level formulation that D1-a replaced: a formal `Approved` object from an account other than the author. Under this topology it is necessarily zero, and because it is no longer the requirement, that number is arithmetic about a retired form rather than a control failure. The two are recorded separately in `current_status_parts`. `current_status` is left verbatim, with #1059's annotation scoping it to the account layer, because a record that edits its own claim is not a record; what a reader needs in order not to conclude that independence itself is impossible here is the two-part reading, and that is what `current_status_parts` carries. `current_status_components` records the measurements and the supporting arithmetic behind those two parts."
+    current_status_wording_zh: "D1 分为两半，而它们不是同一类断言。**D1-a** 才是要求：由未撰写该变更的审查会话作出审查。它可满足——另一个会话可以产出该记录——且尚未满足。**D1-b** 是被 D1-a 取代的账号级口径：来自非作者账号的正式 `Approved` 对象。在本拓扑下它必然为零，而由于它已不再是要求，那个零是关于一个已退役形式的算术，不是控制失效。两者分别记录在 `current_status_parts`。`current_status` 保持原样，并以 #1059 的附注将其限定在账号层——因为一份改写自己断言的记录就不再是记录；读者需要的、足以不推出「独立性本身在这里不可能」的，是这两半的读法，而那正是 `current_status_parts` 承载的内容。"
     status_history:
+      - status: "REQUIRED, UNSATISFIED; ENFORCEMENT FAILURE"
+        superseded_by: "REQUIRED BUT UNSATISFIABLE BY CONSTRUCTION"
+        superseded_by_note: "The last link terminates at `current_status`, which is this string plus the annotation #1059 appended. The comparison is a prefix comparison, not string equality; the annotation refines the claim, it does not replace it."
+        reason: "The status that named the gap as a conduct defect, retired because the enforcement wording implied a fix in behaviour while the measured topology shows the conduct reading was never available. It is recorded here rather than in `constraints` because it is a retired status, not a live constraint; keeping it in `constraints` put a historical record at index 0 of a list of live obligations, and left the preceding `status_history` entry pointing at a status that resolved outside the chain."
+        evidence: "POST-DENIAL-UNAUTHORISED-MERGE-001 sections 7.1 and 7.2; GOV-NC-2026-11-24-MERGE-FORM-DEVIATION-031 section 3.6"
       - status: "REQUIRED BUT CURRENTLY UNSATISFIABLE"
         superseded_by: "REQUIRED, UNSATISFIED; ENFORCEMENT FAILURE"
         reason: "Accurate as a description of the approval gap, but insufficient once zero-review merges had accumulated. A requirement that cannot prevent its own violation is a different condition from one that merely cannot yet be met, and conflating the two understated the control failure. The full census later showed the stronger fact: no merged PR in the repository's history has ever carried an APPROVED review, so this is not a regression from a working state."
         evidence: "POST-DENIAL-UNAUTHORISED-MERGE-001; GOV-NC-2026-11-24-MERGE-FORM-DEVIATION-031 section 3.6; full-history census in POST-DENIAL-UNAUTHORISED-MERGE-001 section 7.1"
     constraints:
-      - status: "REQUIRED, UNSATISFIED; ENFORCEMENT FAILURE"
-        superseded_by: "REQUIRED BUT UNSATISFIABLE BY CONSTRUCTION"
-        reason: "The enforcement wording named a conduct defect and implied a fix in behaviour. The measured topology shows that status was never reachable: one collaborator, who authored all 795 closed PRs, on a platform that forbids self-approval, makes APPROVED necessarily zero. The 556-of-662 zero-review-object figure is retained as the finding that carries information; APPROVED = 0 is arithmetic under this topology and is no longer the headline."
-        evidence: "GET /collaborators -> [oahcom]; GET /pulls?state=closed all pages -> 795 closed, 795 authored by oahcom; POST-DENIAL-UNAUTHORISED-MERGE-001 sections 7.1 and 7.2; issue #982 comment 3 (Owner ruling, 2026-11-24T21:11:01Z); issue #966"
+      - "D1 is not waived and is not satisfiable by the author's own review: the requirement is a review from a session other than the authoring one, recorded so that it can be inspected. Every retired formulation of D1, with its reason, is in `status_history`; none of them is a live obligation."
       - "The PR author's own review does not count as an independent approval."
       - "A formal review means a record in GET /pulls/{n}/reviews. It does not mean a comment, and it does not mean review_comments > 0. The two are different resources and must never be reported as one."
       - "The only legitimate path out of this state is establishing a reviewing session that is not the authoring session, and recording its identity, its scope of review, and the evidence that the review happened. Until then D1 must not be marked executable, and no second GitHub identity may be created in order to make a PR pass."
@@ -82,6 +92,43 @@ owner_decisions:
       - "No evidence in this repository establishes a second appointed maintainer, independent reviewer or integration reviewer. This records that no second accountable person is established for the governance system to rely on; it does not assert that no such person exists anywhere."
       - "Recovery requires all four: a non-authoring reviewing session formally designated; that review actually executable as a required status check; merge protection verified effective by a refused-merge test; and audit evidence that the control holds. Until then no PR depending on D1 may be authorised for merge."
       - "Do not manufacture a second approver by promoting a read-only account to write. Whether such an account is a distinct accountable human is a fact the repository cannot establish, and creating the appearance of independence is exactly what D1 forbids."
+    prompt_supersession: |
+      `prompt_file` names the executed-input snapshot, and that snapshot was never re-edited after the
+      D1 was restated in two parts. The passages that state the older single-formulation view are enumerated below
+      rather than quietly amended, because the file is evidence of what the sessions were given:
+
+      - line 68, the §2 table row: "at least one `Approved` review from an account that is not the PR
+        author. **Current status: REQUIRED, UNSATISFIED; ENFORCEMENT FAILURE**". The account-level
+        form is D1-b, which is necessarily zero and is no longer the requirement; the live
+        requirement is D1-a, recorded in `current_status_parts`. The status string is scoped to the
+        account layer by #1059's annotation and is left verbatim.
+      - line 77, the §3 blockquote: "D1 is a mandatory policy requirement, but is currently
+        unsatisfiable because no second accountable human approver has been established." This is
+        the sentence the split exists to retire. It is true of D1-b and false of D1-a.
+      - lines 95 and 97, §3: the prohibition on treating "a ChatGPT review, a GitHub Actions identity,
+        or any automated actor as the second human", and "**The only legitimate path out of this
+        state** is formally designating another real human accountable person". These are superseded
+        by `constraints`: a reviewing session need not be a human being and need not be a separate
+        GitHub account, and an automated actor may satisfy D1 by producing a recorded review.
+      - lines 102-104, §3: "Until then, AC1 can be configured and AC5 can be satisfied by a refusal",
+        and "AC4 cannot be satisfied by a real approver". Under this work item AC1 is the required
+        status check whose check run asserts a non-authoring reviewing session, not the
+        `required_pull_request_reviews` object; AC4's second branch is the operative one and its
+        trigger is "no ownership mapping is authorized", not "CODEOWNERS is not authorized".
+      - lines 118-128, the §5 acceptance table: AC1 requires `required_pull_request_reviews.required_approving_review_count >= 1`,
+        AC2 requires `dismiss_stale_reviews = true`, and AC3 requires that the contexts "still number 11".
+        All three are superseded by this work item's AC1, AC2 and AC3, which forbid adding the
+        `required_pull_request_reviews` object at all and state 16 contexts. The line just above the table,
+        on `required_status_checks` replacing the object "and silently drops all 11 contexts", is
+        superseded by AC3 in the same way.
+      Operative text is `current_status_parts` -- which states which part is the requirement -- together
+      with `current_status_components`, `constraints` and this work item's AC1-AC7. `current_status` is the
+      record's verbatim claim about the account layer, with #1059's annotation, and is not by itself a
+      statement of the live requirement. Where this
+      work item and the snapshot disagree, this work item governs and the snapshot is the historical
+      input. The alternative — rewriting the snapshot and re-pinning four digests so that three sessions
+      appear to have executed text they never saw — would make the pin true and the record false.
+
 
   - id: D2
     question: "Is Code Owner review required?"
@@ -111,7 +158,7 @@ owner_decisions:
 
 deliverables:
   - "A required status check on main whose check run asserts that a non-authoring reviewing session reviewed the exact head, and which is listed in required_status_checks.contexts so that a missing or failing assertion blocks the merge. (Superseded deliverable, withdrawn 2026-11-25: "Branch protection on main updated so required_pull_request_reviews is present, with required_approving_review_count >= 1". It is withdrawn because D1's remediation forbids that write and because the object it requires is necessarily zero under this topology; keeping it as a deliverable made this manifest simultaneously forbid and certify the same write. The withdrawal is recorded here rather than deleted so the correction is auditable.)"
-  - "dismiss_stale_reviews = true, so a new commit invalidates an existing approval rather than letting it stand against code it never saw."
+  - "dismiss_stale_reviews = true, so a new commit invalidates an existing approval rather than letting it stand against code it never saw. (Superseded deliverable, withdrawn 2026-11-25: `dismiss_stale_reviews` is a subfield of `required_pull_request_reviews`, which this work item's remediation forbids adding and which is absent from the payload, so this deliverable required a value that cannot exist. It is withdrawn for the same reason deliverable 1's branch-protection form was, and the staleness it guarded against does not arise here: with no approval object there is no stale approval to dismiss.)"
   - "enforce_admins.enabled = true, confirmed by API read after the write."
   - "A CODEOWNERS file covering the governed roots, or a recorded finding that D2 is NOT testable because no ownership mapping is authorized by this work item."
   - "A negative-test record containing the five fields D4 requires, showing a non-compliant merge was refused and nothing was merged."
@@ -122,11 +169,11 @@ acceptance_criteria:
   - id: AC1
     text: "GET /branches/main/protection lists the session-attestation check in required_status_checks.contexts, and a pull request whose head carries no passing attestation is refused. Recorded with the raw response body, not a summary. required_pull_request_reviews is NOT part of this criterion: it is necessarily unsatisfiable here and must not be added."
   - id: AC2
-    text: "The same response shows dismiss_stale_reviews = true and enforce_admins.enabled = true. If the platform does not expose one of these, that fact is recorded rather than the field being reported as passing."
+    text: "The same response shows enforce_admins.enabled = true. `dismiss_stale_reviews` is NOT part of this criterion: it is a subfield of `required_pull_request_reviews`, which is absent from the payload and must not be added, so requiring it would make this criterion unsatisfiable by the same construction that made AC1's original form unsatisfiable. If the platform does not expose `enforce_admins.enabled`, that fact is recorded rather than the field being reported as passing."
   - id: AC3
-    text: "No existing required check is removed or weakened by this work item, and strict remains true. The list read 11 contexts when this work item was registered, 12 at 2026-11-24, and 16 at 2026-11-25T02:52Z (the additions are Session Evidence and its two self-test contexts); the criterion is that the set only grows, never shrinks."
+    text: "No existing required check is removed or weakened by this work item, and strict remains true. The list read 11 contexts when this work item was registered, 12 at 2026-11-24, and 16 at 2026-11-25T02:52Z. The four additions are `Session Evidence`, `Session Evidence self-test (base)`, `Session Evidence self-test (head)` and `rust-workspace-test`; the criterion is that the set only grows, never shrinks."
   - id: AC4
-    text: "If CODEOWNERS exists and covers a governed path, a PR touching that path is refused when the Code Owner has not approved. If CODEOWNERS is not authorized, a finding records D2 as NOT_VERIFIABLE with the reason, and D2 is not reported as satisfied."
+    text: "If CODEOWNERS exists and covers a governed path, a PR touching that path is refused when the Code Owner has not approved. The first branch is not executable within this work item: refusing a PR for want of a Code Owner approval requires `required_pull_request_reviews.require_code_owner_reviews`, which `branch_protection_write` does not authorise. So the operative branch is the second: if no ownership mapping is authorized -- CODEOWNERS creation itself is authorised, the mapping is not -- a finding records D2 as NOT_VERIFIABLE with the reason, and D2 is not reported as satisfied."
   - id: AC5
     text: "The negative test shows a refused merge with the response body recorded verbatim. A test that merges, or that relies on a client-side pre-check instead of the platform refusal, does not satisfy this criterion."
   - id: AC6
@@ -195,7 +242,7 @@ findings:
     feedback_destination: "Delivery PR conversation. enforce_admins is already true, and it does NOT prevent a direct push to main. Conflating the two is the mistake this work item must avoid in its own write-up: the branch protection API controls merges through the PR path, while a direct push is a different vector that stays OPEN after this change."
   - id: AID-2026-055-F3
     severity: P1
-    feedback_destination: "Delivery PR conversation. There is no second established accountable person. Every action in this repository is attributed to one account, and no record appoints a second maintainer, independent reviewer or integration reviewer. D1 therefore requires an approver who does not exist, and the work item must record D1 as REQUIRED BUT UNSATISFIABLE BY CONSTRUCTION rather than resolving it by counting the author's own review, minting a second identity, or softening the requirement. The construct unsatisfiability is a property of the topology, not of anyone's conduct: one collaborator, author of all 795 closed PRs, on a platform that forbids self-approval. This is a finding about what the governance record establishes, not a claim about the world."
+    feedback_destination: "Delivery PR conversation. There is no second established accountable person. Every action in this repository is attributed to one account, and no record appoints a second maintainer, independent reviewer or integration reviewer. So the *account-level* formulation of D1 (D1-b) requires an approver who does not exist, and the work item must not resolve that by counting the author's own review, minting a second identity, or softening the requirement. The construct unsatisfiability is a property of the topology, not of anyone's conduct: one collaborator, author of all 795 closed PRs, on a platform that forbids self-approval. It does not extend to D1-a, the operative requirement: a non-authoring *session* can review and can record that it did, and no such record exists yet. This is a finding about what the governance record establishes, not a claim about the world."
   - id: AID-2026-055-F4
     severity: P1
     feedback_destination: "Delivery PR conversation. The fixed new-file allowlist has no rule for any YAML path, so before PR #893 every new work item was unregistrable: a work item is `work-items/AID-<id>/manifest.yaml`, and admission refused it with `no allowlist rule`. PR #893 fixes that one shape by anchored regex. This manifest could not exist without it, which is why the gate fix is its own PR and this registration follows it."
@@ -209,7 +256,7 @@ findings:
 notes:
   - "The four decisions D1-D4 are the Owner's, issued in round 20. The implementer may not soften D1 to 'review recommended' or D3 to 'admins may bypass with justification'. If a decision proves unimplementable, that is a finding, not a renegotiation."
   - "This work item does not close the risk. Risk 2 closes only when the protection rule is configured, the API state is verified, and the zero-review negative test is refused. Until all three hold, the risk stays OPEN regardless of how much of this manifest is complete."
-  - "F3 is the load-bearing finding. Everything else in this work item is configuration; F3 is the question of whether the requirement can be satisfied at all by the actors who exist."
+  - "F3 is the load-bearing finding. Everything else in this work item is configuration; F3 asked whether the requirement could be satisfied at all by the actors who exist. The answer is yes, and by a session rather than an account; the open question is now whether such a review has been recorded, and it has not."
 
 # Canonical session_evidence container. One entry, one session. issue_refs is
 # empty by design: the linked Issue #966 predates the policy and carries no
@@ -235,3 +282,13 @@ session_evidence:
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-055/session-evidence-1013-fix.md
+
+  - role: CORRECTOR
+    issue_refs:
+    implementing_ai_session: session-1012-d1-split
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-055/prompt-v1.md
+    executed_prompt_sha256: 50c952342eda213fb72eb78ecc38fd0ff7674d507734502951ac0479e5c16bee
+    executed_prompt_bytes: 7100
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-055/session-evidence-1012-d1-split.md

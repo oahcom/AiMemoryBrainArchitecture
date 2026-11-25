@@ -50,7 +50,7 @@ dependency_refs:
 authorization:
   implementation_write: "GRANTED - Owner delegated merge authority for this PR; the four files are written by this branch"
   gate_behaviour_change: "BOUNDED by Issue #799 - the eleven checks are implemented as written; no additional mandatory condition was invented"
-  required_context_change: "NOT_GRANTED - Issue #799 withholds required-context status until the check has run on real pull requests and an Owner approves separately; this work item does not touch branch protection"
+  required_context_change: "GRANTED - by the Owner-proxy ratification in Issue #1029 (comment 7153866597, 2026-11-25T05:32Z) from the enforcement window identified there, for the three session-evidence contexts and for no others; this work item still did not change branch protection, and the grant authorises the state, not an act. Superseded value, kept as the record it was: \"NOT_GRANTED - Issue #799 withholds required-context status until the check has run on real pull requests and an Owner approves separately; this work item does not touch branch protection\""
   policy_effective_time_change: "NOT_GRANTED - 2026-12-01T00:00:00Z is recorded by the ruling in Issue #799 and is not re-chosen here"
   allowlist_change: "NOT_APPLICABLE"
   root_membership_change: "NOT_APPLICABLE"
@@ -162,3 +162,21 @@ session_evidence:
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-059/session-evidence-1026.md
+
+  # Issues #1042 #1045 #1047 #1048: four residuals left open after #799's gate
+  # landed, repaired in one branch. Each Issue predates the 2026-12-01 policy
+  # effective time and declares nothing, so each maps to LEGACY_UNDECLARED and
+  # attribution to it is permitted (see the #1026 entry above).
+  - role: IMPLEMENTER
+    issue_refs:
+      - "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1042"
+      - "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1045"
+      - "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1047"
+      - "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1048"
+    implementing_ai_session: session-1042-1048-residuals
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-059/prompt-1042-1048-v1.md
+    executed_prompt_sha256: ceae6530d70c60803b58ba91a3f5ed28671a525bcc640c32aa8f020d3defaffd
+    executed_prompt_bytes: 6507
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-059/session-evidence-1042-1048.md
