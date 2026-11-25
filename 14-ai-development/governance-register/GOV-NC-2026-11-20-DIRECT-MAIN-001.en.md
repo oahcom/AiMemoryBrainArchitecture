@@ -169,6 +169,10 @@ Semantic changes concentrate in `02-domain-model`:
 
 ## 6. Related matter: missing review / exact-Head on PR #354
 
+> **Added 2026-11-25 (citation currency).** This section judged by section 5's original text, "when the author and the reviewer use the same GitHub identity, that is not an independent review". That text was amended on 2026-11-24: independence is a property of the reviewing **session**, not of the GitHub account (`GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`, PR #935).
+>
+> This section's conclusion does not depend on that sentence. PR #354 has `reviews` = **0** and its head has `check-runs.total_count` = **0**: no review happened and no check ran. Neither fact depends on how independence is defined, and the amendment only makes the conclusion harder — there is not even a same-identity review to argue about.
+
 PR #354 is recorded separately and is not conflated with the 33 direct commits.
 
 | item | value |
@@ -768,7 +772,12 @@ The only upstream carrier that mentions the defect in this commit is Issue **#61
 
 > Main commit `54ea39771af33c2e68d94515ca159cd74b18287f` added `tools/list` and `tools/call` to `bmcp-server`. The current `tools/call` response shape is not compliant with the declared MCP protocol version `2024-11-05`.
 
-**This is not a review of this commit.** It is a defect finding, filed after the commit, by `oahcom` (the same identity that wrote this record). Under `PR-GOVERNANCE-001` §5, "a review performed through the same connected GitHub identity as the author is not independent", and it does not satisfy #638's independence baseline of "different session plus different prompt". This record does not count it as a review.
+**This is not a review of this commit.** It is a defect finding. What excludes it is **time and provenance**, not identity:
+
+- **Time.** `54ea3977` was committed first; the sentence in Issue #617 came after. A statement written after a commit cannot be evidence that the commit was compliant when it merged.
+- **Provenance.** #638's independence baseline is "different session plus different prompt". This statement was left by a GitHub account and nothing records which session produced it, so it **cannot be shown** to meet that baseline. This record does not claim it came from the same session — that is not provable from the API. It claims only that it has not been shown to come from a different one.
+
+Under the current section 5 independence is a property of the session, and "same identity" is no longer a disqualifier in itself, so the retired sentence is no longer cited here. The conclusion is unchanged from before 2026-11-24; the ground is not.
 
 ### 15.5 Check state at commit time: `NOT_EXECUTED`
 

@@ -167,6 +167,10 @@ document_metadata:
 
 ## 6. 关联事项：PR #354 的 review / exact-Head 缺失
 
+> **2026-11-25 附注（引文时效）。** 本节按 §5 原文「作者与审查者使用同一 GitHub 身份时，不构成独立审查」作判断。该原文已于 2026-11-24 修订为：独立性是审查**会话**的属性，不是 GitHub 账号的属性（`GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`，PR #935）。
+>
+> 本节结论不依赖那句话。PR #354 的 `reviews` 为 **0**，该 Head 的 `check-runs.total_count` 为 **0**：没有任何审查发生过，也没有任何检查跑过。这两项与独立性如何定义无关，修订后只会更硬——连「同一身份的审查」都不存在，就谈不上它算不算独立审查。
+
 PR #354 独立记录，不与 33 个直推 commit 混同。
 
 | 项目 | 值 |
@@ -769,7 +773,12 @@ token 持有 `admin: true`，因此 403 不是权限问题。
 
 > Main commit `54ea39771af33c2e68d94515ca159cd74b18287f` added `tools/list` and `tools/call` to `bmcp-server`. The current `tools/call` response shape is not compliant with the declared MCP protocol version `2024-11-05`.
 
-**这不是对本次提交的审查。** 它是缺陷发现，发布于提交之后，且作者为 `oahcom`（与本记录撰写者同一身份）。按 `PR-GOVERNANCE-001` §5「作者与审查者使用同一 GitHub 身份时，不构成独立审查」，它不满足 #638 正文「different session plus different prompt」的独立基线。本记录不将其计为审查。
+**这不是对本次提交的审查。** 它是缺陷发现。排除它的依据是**时间与来源**，不是身份：
+
+- **时间。** `54ea3977` 的提交在前，Issue #617 的那句话在后。一条在提交之后写下的陈述，不能作为该提交在合并当时合规的证据。
+- **来源。** #638 正文要求的独立基线是「different session plus different prompt」。这条陈述是一个 GitHub 账号留下的，其会话来源没有任何记录可查，因此**无法证明**它满足该基线。本记录不主张它出自同一会话——那一点从 API 证明不了；本记录只主张：它没有被证明来自另一个会话。
+
+按现行 §5，独立性是会话的属性，「同一身份」本身不再是否决理由。所以这里不再引用那句已退役的原文。本记录不计其为审查，结论与 2026-11-24 之前相同，依据换了。
 
 ### 15.5 提交时的检查状态：`NOT_EXECUTED`
 
