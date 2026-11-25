@@ -6,7 +6,6 @@ acceptance_authority: NOT_ASSIGNED
 issue: 264
 related_issues: [264]
 related_prs: [356]
-related_prs: []
 task_class: DOC
 risk: R1
 risk_rationale: >-

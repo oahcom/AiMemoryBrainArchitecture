@@ -15,7 +15,7 @@ status: PENDING_FORMAL_REGISTRATION
 sponsor: NOT_ASSIGNED
 accountable_owner: NOT_ASSIGNED
 acceptance_authority: NOT_APPOINTED
-implementing_ai_session: CURRENT_DESIGN_SESSION (session identity: NOT_RECORDED)
+implementing_ai_session: 'CURRENT_DESIGN_SESSION (session identity: NOT_RECORDED)'
 
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
