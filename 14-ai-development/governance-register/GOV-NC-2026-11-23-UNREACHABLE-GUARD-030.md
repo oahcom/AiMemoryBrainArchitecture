@@ -162,15 +162,16 @@ fatal: Invalid symmetric difference expression edf87e7b...3d443bfb
 - 与本缺陷直接相关：正是「把 `cwd=ROOT` 改成 `cwd=REPO_ROOT`」这一步——014 的修复本体——让 helper 失效。
 - 归因不完整：24 个里只有 1 个是 `WindowsPath` 断言；10 个是 `current_bilingual_gaps()` 的 `git ls-files` 退出 128；11 个是其他；2 个是文件创建身份不可识别。
 
-014 §7.3 的**主结论仍然成立**——缺陷可以在两套测试都不响的情况下回来，因为 `scripts/test_check_bilingual_docs.py`（CI 唯一运行的那个，3 个测试）在修复态与缺陷态都是 `OK`。但支撑它的那段解释需要更正，否则读者会以为那 24 个是历史遗留噪音，从而认为「测试本来就不太绿」。
+014 §7.3 的**主结论仍然成立**——缺陷可以在两套测试都不响的情况下回来，因为 `scripts/test_check_bilingual_docs.py`（3 个测试）在修复态与缺陷态都是 `OK`。但支撑它的那段解释需要更正，否则读者会以为那 24 个是历史遗留噪音，从而认为「测试本来就不太绿」。
 
-## 6. 这个套件没有任何 workflow 运行
+## 6. 这个套件已由 `GOV-DOC-001 structural checks` 运行（2026-11-25 更正）
 
-`grep -rn 'test_gate_normative_roots\|governance/evidence' .github/` → **零命中**。
+本节原文写于 2026-11-23（main `f39dfb7b`）：当时 `grep -rn 'test_gate_normative_roots' .github/` 确实零命中，`.github/workflows/bilingual-docs.yml` 只跑 `scripts/test_check_bilingual_docs.py`。该观察次日被推翻：
 
-`.github/workflows/bilingual-docs.yml` 只跑 `python3 scripts/test_check_bilingual_docs.py`（3 个测试：`same_head`、`invalid_base`、`nonempty_code_only_change`），都不涉及配对谓词。`gates.yml` 的 `unittest discover` 只跑 `08-bmcp-protocol/tests/conformance`。
+- `aaf6da96`（#892，2026-11-24）在同一 workflow 新增一步 `python3 -m unittest scripts.governance.evidence.test_gate_normative_roots`，放在真实闸门之前；job 名为 `GOV-DOC-001 structural checks`，即必需 contexts 之一。
+- 同一提交修掉了 §4 的 helper 双根（`ROOT` / `REPO_ROOT`）。2026-11-25 复测：`8ab40fb4` 仍为 `Ran 52 tests` / `FAILED (failures=3, errors=21)`；main `a3a62021` 为 `Ran 52 tests` / **OK**。
 
-所以 §4 的 24 个失败**不会在任何地方变红**。它们是本地信号，而本地信号没有被约定要看。
+所以 §4 的 24 个失败会在该必需 context 变红。它们现已不存在：该套件每个 PR 都跑且为绿。
 
 ## 7. 本登记不主张什么
 
