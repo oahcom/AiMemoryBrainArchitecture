@@ -240,6 +240,9 @@ That question is outside #384's AC set. It belongs to the existing backlog: see 
 
 All four point at one root cause: **this repository currently has no role separation at all**. Implementation, review, ruling and closure are performed by the same account at second-scale intervals.
 
+> **〔Added 2026-11-25〕** This sentence turns "all four roles carry the login `oahcom`" — an **account-layer** fact — into the conclusion that no role separation exists. §5 was amended on 2026-11-24 by `2eb4e352` (PR #935) to a session-level test (see `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`): a separate session under the same GitHub identity suffices for independence. `/pulls/{n}/reviews` returns only `user.login`, never a session, so "same identity ⇒ same session" cannot be verified from that payload. Read it as "account layer not independent; session layer not verified".
+> **What survives:** every checkable field in the four rows above is independent of how identity is defined — `SELF-AUTH-002`'s closer is the sole account, PR #394 carried `reviews=0` with a `failure` check, the 14-second interval, and the second-scale timing itself. Those support "no third party took part in these four acts". They do not support "role separation is structurally absent". The difference is *did not happen* versus *cannot happen*, and the original sentence states the second.
+
 ---
 
 ## 8. Corrective measures (pending approval, not executed)
