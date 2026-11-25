@@ -1,0 +1,135 @@
+work_item_id: AID-2026-074
+title: Make an unparseable work-item manifest fail a gate instead of a text scan
+class: GATE/TEST
+risk: R2
+risk_rationale: >-
+  The change is one read-only checker plus its tests and one workflow step. It reads
+  committed manifests and parses them; it writes nothing, blocks nothing at runtime and
+  changes no product code. The risk it addresses is not damage but false assurance: the
+  repository's only manifest check is a regex over text, so a manifest that cannot be
+  loaded reports clean. Four manifests are in that state at the commit this was written
+  at, and one of them loses a provenance field silently rather than failing loudly.
+status: DISPATCHED
+sponsor: USER-PRINCIPAL-DELEGATED (human principal via the continuous instruction in this session)
+accountable_owner: USER-PRINCIPAL-DELEGATED (session-eligible under the same instruction)
+acceptance_authority: NOT_ASSIGNED
+implementing_ai_session: "REGISTERED_BY_MEASURING_SESSION (session identity: NOT_RECORDED)"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 30c7277e
+tracking_issue: NONE - measured in the session that registered it; no issue was opened
+
+prompt_id: AID-2026-074-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-074/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 132d4a94d8932a27a9b663f5526e8e21b31c0994ea874bb5473a910444bdeff8
+prompt_bytes: 3929
+
+authorization:
+  implementation_write: >-
+    GRANTED for the four manifest repairs named in the prompt and for the new checker, its
+    tests and one workflow step. NOT_GRANTED for any other path.
+  gate_behaviour_change: >-
+    GRANTED for adding one check. NOT_GRANTED for changing any existing rule in
+    check_repository_hygiene.py.
+  schema_change: NOT_GRANTED - no manifest field is added, removed or retyped.
+  platform_state_change: >-
+    NOT_GRANTED for required status contexts. The new check runs in an existing workflow, so
+    no protection payload changes.
+  architecture_spec_change: NOT_GRANTED - no ADR and no canonical document is modified.
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-074/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-074/prompt-v1.md
+    - scripts/ci/check_manifest_parse.py
+    - scripts/ci/test_check_manifest_parse.py
+  files_to_modify:
+    - .github/workflows/repository-hygiene.yml
+  files_out_of_scope: >-
+    Every other path. In particular check_repository_hygiene.py, whose text-scan behaviour is
+    the subject of this work item and not changed by it; and any manifest other than the four
+    the prompt names.
+
+acceptance_criteria:
+  - id: AC1
+    criterion: >-
+      A check in scripts/ci parses every committed work-item manifest with a loader that
+      rejects duplicate keys, and exits non-zero naming the path and the parser message on
+      any failure.
+    measurement: >-
+      Run it against a tree holding one intentionally broken manifest; exit is 1 and the
+      broken path appears in stderr.
+  - id: AC2
+    criterion: >-
+      A duplicate key fails even where the default loader would accept the document.
+    measurement: >-
+      A fixture with related_prs twice: yaml.safe_load returns a document, the check exits 1.
+  - id: AC3
+    criterion: The check runs on every pull request, not only when invoked by hand.
+    measurement: >-
+      The workflow names the check in a run step and the check appears in that job's log.
+  - id: AC4
+    criterion: The four manifests the prompt names parse under the new check at the landing commit.
+    measurement: The check exits 0 over the real tree.
+  - id: AC5
+    criterion: >-
+      The check states what it does not verify, so a green result is not read as "the
+      manifests are semantically correct".
+    measurement: >-
+      The module docstring names the excluded concerns; a reader can quote the limit without
+      reading the code.
+
+findings:
+  - id: AID-2026-074-F1
+    severity: P1
+    statement: >-
+      This is the second occurrence of the class, not the first. FIX-2026-P1-MANIFEST-YAML-001
+      repaired four instances on 2026-11-19 and its own audit record states that no workflow
+      wiring was added. The repair was correct and incomplete: nothing stopped the next four.
+    feedback_destination: Delivery PR conversation.
+
+  - id: AID-2026-074-F2
+    severity: P1
+    statement: >-
+      The dangerous shape is the silent one. AID-2026-029 parses successfully under the default
+      loader and drops related_prs: [356], the only record of the PR that carried its
+      implementation. A checker built on yaml.safe_load alone would have declared that file
+      correct.
+    feedback_destination: Delivery PR conversation.
+
+  - id: AID-2026-074-F3
+    severity: P2
+    statement: >-
+      check_repository_hygiene.py reports manifests=49 violations=0 while four of those 49 do
+      not load. The number is accurate about what it does; it is not evidence of parseability,
+      and it is read as if it were.
+    feedback_destination: Delivery PR conversation.
+
+  - id: AID-2026-074-F4
+    severity: P2
+    statement: >-
+      The four repairs were applied in the session that also registered this work item, before
+      the check existed. That order is recorded here rather than presented as a clean sequence.
+    feedback_destination: Delivery PR conversation.
+
+implementation:
+  status: NOT_STARTED
+  branch: PENDING
+  pull_request: PENDING
+  merge_commit_sha: NOT_MERGED
+  note: >-
+    Registration only. The four manifest repairs were applied in the registering session and
+    are recorded in this commit; the checker, its tests and the workflow step are not written.
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    No independent review is recorded. This manifest was written by the session that measured
+    the defect, so a same-session APPROVE would be self-review and is not claimed.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)
