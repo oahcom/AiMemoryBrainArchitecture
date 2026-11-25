@@ -60,10 +60,10 @@ This index identifies the four D-owned source artifacts restored from the exact 
 
 | Source document | Original source Blob SHA | Candidate final Blob SHA | Status boundary |
 |---|---|---|---|
-| [memory-brain-overview.md](./memory-brain-overview.md) | `b4ed712ac0626ab127cccfd205c50a9013df01fb` | `3965c1e6c0810ac1850b75a6c08fb966610828e0` | authority boundaries DECIDED; detailed contracts CANDIDATE/OPEN |
-| [canonical-memory-store.md](./canonical-memory-store.md) | `6b37c91033fda21f072e2a3bde6f274663b1e76e` | `4d7d4db0585bb2e543881758bf27a8cbb0e323fa` | INT-P0-01 ADR-blocked; detailed model CANDIDATE |
-| [memory-lifecycle-manager.md](./memory-lifecycle-manager.md) | `8b972035b449e1eab546aedc9cc5b30581600c65` | `a644e6cb31d5674614f5edab9464cc03c2d7a077` | state separation DECIDED; thresholds/transitions OPEN |
-| [forget-fence-operation-and-publication-gate.md](./forget-fence-operation-and-publication-gate.md) | `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5` | `d3ddfff9500d9138d643989e8496d99b8d9ed79e` | D semantics DECIDED; E/Storage/I enforcement OPEN |
+| [memory-brain-overview.md](./memory-brain-overview.md) | `b4ed712ac0626ab127cccfd205c50a9013df01fb` | `9ca153df403d09264a50add8ad78bb5a6111c7c0` | authority boundaries DECIDED; detailed contracts CANDIDATE/OPEN |
+| [canonical-memory-store.md](./canonical-memory-store.md) | `6b37c91033fda21f072e2a3bde6f274663b1e76e` | `d47366d1ca04da37ff77f6edd31fe42efc93e0f9` | INT-P0-01 ADR-blocked; detailed model CANDIDATE |
+| [memory-lifecycle-manager.md](./memory-lifecycle-manager.md) | `8b972035b449e1eab546aedc9cc5b30581600c65` | `453d42592942d0508b00a4b8c5ed9320b9ced3f7` | state separation DECIDED; thresholds/transitions OPEN |
+| [forget-fence-operation-and-publication-gate.md](./forget-fence-operation-and-publication-gate.md) | `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5` | `c6f343011a8be0fa0d4bae2659ecffc33d9557ac` | D semantics DECIDED; E/Storage/I enforcement OPEN |
 
 The source files preserve their original source bodies. GOV-DOC-002 metadata is prepended as a governance wrapper; the original Owner-branch Blob SHAs remain pinned in each document's `evidence_reference`.
 
