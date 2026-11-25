@@ -55,7 +55,7 @@ criteria are stated against them:
 
 ## AI-visible output
 
-### What was measured before changing anything
+**What was measured before changing anything.**
 
 - `_run_checks` at `validate.py:1946` begins with
   `check_01_pr_fields_and_issue_references`, which is where
@@ -71,7 +71,7 @@ criteria are stated against them:
   the guard.
 - Baseline suite on `origin/main` at `83c78647`: `Ran 68 tests ... OK`.
 
-### What changed
+**What changed.**
 
 - `scripts/governance/session_evidence/validate.py`: the linked Issues are
   parsed at the top of `_run_checks`; an agreement check fails closed if that
@@ -80,7 +80,7 @@ criteria are stated against them:
   declares either field falls through to the unchanged order.
 - `tests/session_evidence/test_validate.py`: four assertions added.
 
-### Verification actually run on this branch
+**Verification actually run on this branch.**
 
 The branch is based on `22c44b37`; four files changed.
 
@@ -131,7 +131,7 @@ canonical manifest entry may name a `LEGACY_UNDECLARED` row. The branch was
 rebased; the manifest entry for this session now names Issue #1026 rather than
 attributing its evidence at PR scope, because that attribution became legal.
 
-### What could not be verified
+**What could not be verified.**
 
 - The workflow job reads the validator from the **base** revision, so the first
   run of this pull request cannot exercise the repaired logic; it exercises the
