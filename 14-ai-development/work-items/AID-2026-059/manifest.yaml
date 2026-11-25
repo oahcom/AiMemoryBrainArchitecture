@@ -119,6 +119,11 @@ findings:
     measured_at: a5482776
     severity: material
 
+  - id: F8
+    statement: "The decode fix in F7 only takes effect from the base revision, because the workflow runs the validator it checks out from base, not the one in the pull request. #1001 carried the fix and still failed Session Evidence: its run at 00:37:53Z checked out the base revision e26262fb, which predates the fix, and produced the same 'Cannot decode blob bytes'. Merging #1001 as 0d0a2dd6 is what put the fix on main. That ordering is not a defect in the gate -- reading base is the security property -- but it means a validator fix can never certify the pull request that carries it, and the calibration evidence Issue #799 asks for has to come from a later pull request. Recorded here so the sequence is legible: first real run MISSING (base without the fix), merge, then the next run reads the fixed validator."
+    measured_at: "0d0a2dd6"
+    severity: informational
+
 # Canonical multi-session container (#775 seven fields, repeated). One entry,
 # one session. issue_refs is empty by design -- see F6: the tracking Issue
 # predates the policy and cannot be mapped to YES, and OD-A3 lets an entry
