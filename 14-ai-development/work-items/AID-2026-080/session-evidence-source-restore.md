@@ -53,9 +53,9 @@ Registration coordinator for the user-authorized Stage 0 work-item registration 
 
 # Actual AI input
 
-The exact task-specific user instruction for this registration turn is preserved byte-for-byte in `14-ai-development/work-items/AID-2026-080/prompt-v1.txt` (693 UTF-8 bytes; SHA-256 `4f8d445a19a48ba1a4fc36225c4cff9b88554ec7ce4185b9e114bdf2f5c3332b`).
+The task-specific user instruction for this registration turn is embedded in the metadata-bearing record `14-ai-development/work-items/AID-2026-080/prompt-v1.md` (2130 UTF-8 bytes; SHA-256 `6f74f728dfa47141ebee108c462e7e853983f1700e91e25c8f98a7b47ec07a95`).
 
-The complete effective payload, including inherited system instructions and any baseline prompts, is NOT_AVAILABLE from the platform's exposed session records. The captured file is therefore explicitly NOT_VERIFIED as a complete executed-prompt snapshot; no completeness claim is made.
+The complete effective payload, including inherited system instructions and any baseline prompts, is NOT_AVAILABLE from the platform's exposed session records. The file as a whole is not byte-identical to the original message and is explicitly NOT_VERIFIED as a complete executed-prompt snapshot; no completeness claim is made.
 
 # AI-visible output
 
