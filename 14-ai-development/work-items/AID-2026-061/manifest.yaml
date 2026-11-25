@@ -1,0 +1,77 @@
+work_item_id: AID-2026-061
+title: Make the workspace test suite and the session evidence gate required on every pull request
+class: GATE/CI/TEST
+risk: R1
+status: PR_OPEN
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+
+prompt_id: AID-2026-061-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-061/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 6bfb21ccb0fcce6aef5ce2c12c079142d381e6fa52a5390ff84f043416fa45c1
+prompt_bytes: 17378
+
+# ---------------------------------------------------------------------------
+# What this work item is allowed to change. The workflow edit and the §7
+# declaration are gate-behaviour changes and are authorized. The platform
+# branch-protection update is a separate act by a separate authority and is
+# NOT_GRANTED here, so nothing in this branch may be read as having made it.
+# ---------------------------------------------------------------------------
+
+authorization:
+  implementation_write: "GRANTED - Owner delegated merge authority for this pull request; two production files are written by this branch"
+  gate_behaviour_change: "BOUNDED - the pull_request.paths filter on rust-phase1.yml is removed and two contexts are added to the §7 declaration; no job is renamed and no new check is invented"
+  required_context_change: "NOT_GRANTED - the declaration in §7 is repository text, not the platform setting; the branch-protection PUT is a separate platform action that follows this merge"
+  branch_protection_change: "NOT_GRANTED - the protection payload is recorded in this work item but is not applied by this branch"
+  architecture_spec_change: "NOT_GRANTED - no ADR, no BMCP specification and no canonical architecture document is modified"
+  policy_effective_time_change: "NOT_GRANTED - 2026-12-01T00:00:00Z stays as recorded in Issue #799 and is not re-chosen here"
+  failing_head_experiment: "NOT_RUN_IN_THIS_BRANCH - the deliberately-failing-head experiment updates branch protection first and therefore cannot be sequenced before this merge"
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-061/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-061/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-061/session-evidence-wo01.md
+  files_to_modify:
+    - .github/workflows/rust-phase1.yml
+    - 14-ai-development/PR-GOVERNANCE-001.md
+    - 14-ai-development/work-items/INDEX.md
+
+acceptance:
+  A1: "Every pull request targeting main produces a rust-workspace-test result; the trigger no longer filters on changed paths."
+  A2: "The job id is unchanged, so the produced check context is still rust-workspace-test and the §7 declaration names a context that exists."
+  A3: "scripts/check_declared_check_contexts.py exits 0 with fourteen declared contexts, all produced by a job in .github/workflows."
+  A4: "The push trigger keeps its paths filter: the full workspace test does not run twice on every merge to main."
+  A5: "No other workflow, job name, required-check name or governance document is altered by this branch."
+  A6: "What this branch does NOT establish is stated in the same files: the context is not yet required by the platform, and a failing required check has still not been shown to block a merge."
+
+implementation:
+  status: PR_OPEN
+  pull_request: 1018
+  merge_commit_sha: NOT_MERGED
+
+review:
+  status: NOT_ASSIGNED
+  note: "Independent review has not been recorded. The declaration-count change and the trigger change were produced in one session with the GitHub identity that opened the pull request."
+
+# ---------------------------------------------------------------------------
+# issue_refs is empty by design. The linked Issue #262 predates the
+# 2026-12-01 policy effective time and carries no AI-assisted work
+# declaration, so it cannot be mapped to YES. OD-A3 permits a PR-scope
+# entry with empty issue_refs for exactly this case; see AID-2026-059 F6
+# for the same shape on the same policy.
+# ---------------------------------------------------------------------------
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+    implementing_ai_session: session-req01-r31
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-061/prompt-v1.md
+    executed_prompt_sha256: 6bfb21ccb0fcce6aef5ce2c12c079142d381e6fa52a5390ff84f043416fa45c1
+    executed_prompt_bytes: 17378
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-061/session-evidence-wo01.md
