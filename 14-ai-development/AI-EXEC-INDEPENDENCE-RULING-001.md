@@ -105,14 +105,14 @@ NR-001 审查 + Owner 评论 + 例外 + exact-Head 检查可能被误读为足�
 
 **Ruling / 裁定.** Preserve exactly MERGE / HOLD / REMEDIATE / SUPERSEDED / REJECT:
 - MERGE only if every applicable exact-Head check passes; an independent-session §5 review exists where applicable; NR-001 review exists where required; every affected authority Owner explicitly approves the exact normative contract boundary; R3 additionally has qualified independent expert review, reproducible test evidence and Acceptance Authority approval; dependencies are satisfied; no blocking finding remains; and the PR is mergeable.
-- HOLD if any required review, Owner approval, expert review, exact-Head check, reproducible evidence or dependency is missing, pending, NOT RUN, NOT VERIFIED or attributable only to the shared identity.
+- HOLD if any required review, Owner approval, expert review, exact-Head check, reproducible evidence or dependency is missing, pending, NOT RUN, NOT VERIFIED or attributable only to the shared identity〔added 2026-11-25: read this as "attributable only to the **authoring/implementing session**". After the `PR-GOVERNANCE-001` §5 amendment of 2026-11-24 (commit `2eb4e352`, PR #935) independence is a property of the reviewing session; a review carried by the shared identity but produced by another session is independent and does not trigger HOLD〕.
 - REMEDIATE for a concrete defect/evidence gap repairable on the same coherent carrier; re-review the changed exact Head.
 - SUPERSEDED only when an actual replacement fully supersedes the carrier; preserve unique evidence. It is not a shortcut around missing approval.
 - REJECT when the proposal is invalid or conflicts with accepted authority; preserve rationale and evidence.
 
 严格保留 MERGE / HOLD / REMEDIATE / SUPERSEDED / REJECT 五态：
 - MERGE 仅在所有适用 exact-Head 检查通过；适用时有独立会话 §5 审查；需要时有 NR-001 审查；每个受影响权威 Owner 明确批准准确规范契约边界；R3 另有合格独立专家审查、可复现测试和 Acceptance Authority 批准；依赖满足；无阻断 finding；PR 可合并时成立。
-- 任一必需审查、Owner 批准、专家审查、exact-Head 检查、可复现证据或依赖缺失、待定、NOT RUN、NOT VERIFIED，或仅归属于共享身份时，必须 HOLD。
+- 任一必需审查、Owner 批准、专家审查、exact-Head 检查、可复现证据或依赖缺失、待定、NOT RUN、NOT VERIFIED，或仅归属于共享身份〔2026-11-25 附注：应读作「仅归属于撰写/实现**会话**」；归属于共享身份但来自另一会话的审查是独立的，不触发 HOLD〕时，必须 HOLD。
 - REMEDIATE 用于可在同一连贯载体修复的具体缺陷/证据缺口；变更后重新审查新 exact Head。
 - SUPERSEDED 仅在真实替代项完整取代载体时使用，并保留独有证据；不得绕过批准缺失。
 - REJECT 用于提案无效或与已接受权威冲突；保留理由和证据。
@@ -125,7 +125,9 @@ Never issue or claim GitHub APPROVE as a workaround for the platform's self-appr
 
 绝不得将 GitHub APPROVE 作为平台自审禁令的变通方式。Owner 书面决定只有在归属和范围可核验时才满足 Owner 契约批准门禁，它本身不是 §5 独立性，也不能替代独立性。独立性由另一个审查会话提供，而本仓库始终可以开启这样的会话；连这一步都不可得时才 HOLD 并升级给项目 Owner/仓库管理员。
 
-**Boundaries / 边界.** No combination of same-identity COMMENT, role simulation, Owner narrative, exception entry or green CI manufactures an independent reviewer. Exception alone never changes HOLD to MERGE. / 同身份 COMMENT、角色模拟、Owner 叙述、例外登记或绿色 CI 的任何组合都不能制造独立审查者；例外本身绝不能将 HOLD 变为 MERGE。
+**Boundaries / 边界.** No combination of authoring-session COMMENT, role simulation, Owner narrative, exception entry or green CI manufactures an independent reviewer. Exception alone never changes HOLD to MERGE. / 撰写会话内的 COMMENT、角色模拟、Owner 叙述、例外登记或绿色 CI 的任何组合都不能制造独立审查者；例外本身绝不能将 HOLD 变为 MERGE。
+
+> **2026-11-25 附注（引文时效）。** 本句原写作「同身份 COMMENT / same-identity COMMENT」，即「同身份不构成独立审查」——那是 2026-11-24 修订前的 §5 判据。现行 §5（commit `2eb4e352`，PR #935，`GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`）以**审查会话**为判据：同一 GitHub 身份下、未撰写也未实现该变更、且结论取自产物本身的另一个会话，其 COMMENT **可以**构成独立审查；不能制造独立审查者的是**撰写会话内**的 COMMENT。据此本句已替换为「authoring-session COMMENT / 撰写会话内的 COMMENT」，英文句与 `AI-EXEC-INDEPENDENCE-RULING-001.en.md:104` 逐字一致。COMMENT 仍不是 APPROVE，平台 `required_pull_request_reviews` 仍按用户计数。本条其余四项（角色模拟、Owner 叙述、例外登记、绿色 CI）不变。
 
 **Effective scope / 生效范围.** All five-state decisions after adoption. Review by 2026-12-02. / 采用后适用于全部五态决策。复核期限 2026-12-02。
 
@@ -148,7 +150,7 @@ PR-GOVERNANCE-001 §5 要求显式登记例外，但未枚举字段/计数/载�
 | Rule/control | Exact clause and missing review/evidence / 准确条款与缺失控制 |
 | Risk/scope | R0–R3 and affected boundary / 风险级与影响边界 |
 | Request time | Timezone timestamp + source link / 含时区时间与来源链接 |
-| Missing resource | Independent GitHub reviewer, expert, Owner decision or test / 缺失资源 |
+| Missing resource | an independent reviewing session (any GitHub account, including the authoring one), an expert, an Owner decision or a test〔2026-11-25 替换：原「Independent GitHub reviewer」，账号级表述已按 §5 2026-11-24 修订退役〕 / 缺失资源 |
 | Attempts/source order | Recipients, requests, timestamps, responses; NR-001 first where applicable / 尝试与来源顺序 |
 | Reason | Factual unavailability; distinguish not-requested from no-response / 事实原因 |
 | Disposition | HOLD / REMEDIATE / REJECT only / 仅限三种处置 |

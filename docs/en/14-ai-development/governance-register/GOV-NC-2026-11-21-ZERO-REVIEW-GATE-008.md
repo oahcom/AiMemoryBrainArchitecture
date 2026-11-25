@@ -237,7 +237,7 @@ Pulled 2026-11-23: the most recent 45 merged PRs, calling `/pulls/{n}/reviews` f
 
 The set of reviewer identities ever seen: `{oahcom}`. The set of authors: `{oahcom}`. They are the same, so by PR-GOVERNANCE-001 §5's own definition — "a review performed through the same connected GitHub identity as the author is not independent" — **0 of 45 merges satisfy it.**
 
-> **Citation currency (added 2026-11-25).** The §5 text quoted above was retired on 2026-11-24; the same identity is no longer by itself a disqualification. **The conclusion stands; the reason has changed.** 40 of the 45 had `reviews == 0` — there was no review at all, and no version of §5 requires one to exist; the other 5 were reviewed only by the author, i.e. by the session that wrote the change, which is not independent under the current clause either. The difference is that the current clause tests the *session*, not the *identity*, so using identity as the test will miscount the next batch.
+> **Citation currency (added 2026-11-25).** The §5 text quoted above was retired on 2026-11-24; the same identity is no longer by itself a disqualification. **The conclusion stands; the reason has changed.** 40 of the 45 had `reviews == 0` — there was no review at all, and no version of §5 requires one to exist; the other 5 were reviewed only by the author, i.e. by the session that wrote the change, which is not independent under the current clause either. The difference is that the current clause tests the *session*, not the *identity*, so using identity as the test will miscount the next batch.〔Second note, 2026-11-25: the second sentence holds for the 40; for the other 5 it turns "the reviewer is `oahcom`" into "the reviewer is the authoring session", which the account data cannot verify. Those 5 should be recorded as "account-level non-independent, session-level unverified". The 40 / 5 / 0 counts are unchanged.〕
 
 ### 10.2 The platform does not require review, so this is not a bypass
 
@@ -298,8 +298,10 @@ The first three record deviations. This section records that **the deviation bec
 Ordered by cost; each is one config change or one script:
 
 1. Turn on `required_pull_request_reviews` on `main`'s branch protection, with `dismiss_stale_reviews: true`. A repository setting, not code.
-2. Or: add a workflow that reads `/pulls/{n}/reviews` and returns `HOLD` when `author == reviewer`. That maps directly to §5's definition and needs no new norm.
+2. Or: add a workflow that reads `/pulls/{n}/reviews` and returns `HOLD` when `author == reviewer`. That maps directly to §5's definition〔added 2026-11-25: the live §5 compares **sessions**; `author == reviewer` is an account comparison and would return HOLD against an independent review by another session under the same account. The correct test is "reviewing session == authoring/implementing session". §12.1 and §12.5 already read remedy 2 this way; this line is unchanged〕 and needs no new norm.
 3. Or: demote §5 from Normative to Informative and record that this repository has no conditions under which independent review can be performed. **This is the most honest and the least work** — if it cannot be enforced, it should not read as though it is.
+
+> **Added 2026-11-25 (citation currency).** Remedy 3's premise — that this repository has no conditions under which independent review can be performed — is false: a second session opened under the same GitHub account, one that did not write or implement the change and takes its conclusion from the artifact, is exactly such a condition, so remedy 3 asks the reader to record a fact that is not a fact. This is not §11.4. §11.4 rejected remedy 3 for self-reference, and §12.1 retracts that rejection ("No. Amending §5 requires independent session review, and this repository can always open such a session"); the defect here is a different one — a false premise. What survives of remedy 3 is narrower: §5 is still Normative because nobody has walked the §9 route, not because the route is unavailable. No demotion has been made, and `OWNER-DECISION-REVIEW-INDEPENDENCE-001` §9's table row 3 records it as "Available … Not done". The text of remedy 3 above is unchanged.
 
 Exactly one of the three. Keeping the status quo is the worst option: the norm says there is a requirement, the platform says there is not, and the record shows 0 of 45.
 
@@ -331,6 +333,8 @@ Ruling: `OWNER-DECISION-REVIEW-INDEPENDENCE-001`. Exception record: `EX-20261123
 | Reviewers, all history | `{oahcom}` — 1 |
 
 §5 has **never once been satisfied** in this repository, in any period. This is not a recent regression.
+
+> **Added 2026-11-25 (citation currency).** The sentence above is inferred from "reviewers == authors == `{oahcom}`", and that measurement covers the **account level** only. Under the current session-level §5 an independent review by another session under the same account does not change either set, so what the data above establishes is "no `APPROVED` review" (`{COMMENTED: 169}`, `APPROVED: 0`), not "no independent review". The session that performed a review is not returned by `/pulls/{n}/reviews`, so whether any of the 169 `COMMENTED` reviews was an independent session review cannot be determined from this data and was not re-checked in this register. §11.1's measurements and counts are unchanged.
 
 ### 11.2 Exactly one identity can write
 
