@@ -57,14 +57,12 @@ document_metadata:
 
 ## D — exact source and final Blob matrix
 
-| Target path | Original source Blob | Candidate final Blob | EN companion Blob | ZH-CN companion Blob | Eligibility |
-|---|---|---|---|---|---|
-| `03-memory-brain/memory-brain-overview.md` | `b4ed712ac0626ab127cccfd205c50a9013df01fb` | `3965c1e6c0810ac1850b75a6c08fb966610828e0` | `b08ac206f4fe900d9edf08877ab094984ea2e20a` | `4fb3e9f20f142bcd5c8cc206019d4f123fce68ea` | BLOCKED_OWNER_REVIEW |
-| `03-memory-brain/canonical-memory-store.md` | `6b37c91033fda21f072e2a3bde6f274663b1e76e` | `4d7d4db0585bb2e543881758bf27a8cbb0e323fa` | `211dd4fd068e2fc0d437c2194bfce48022da302f` | `8e22726092ca3dcc84317d191c0145c1e60e5787` | BLOCKED_OWNER_REVIEW |
-| `03-memory-brain/memory-lifecycle-manager.md` | `8b972035b449e1eab546aedc9cc5b30581600c65` | `a644e6cb31d5674614f5edab9464cc03c2d7a077` | `e7c4824e9059db137b9ccc3d5c72b0bc0b1461b6` | `bfae8e94ecd05ab17a99e58244e493317811e378` | BLOCKED_OWNER_REVIEW |
-| `03-memory-brain/forget-fence-operation-and-publication-gate.md` | `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5` | `d3ddfff9500d9138d643989e8496d99b8d9ed79e` | `bc546ae14bba0c502d1c5af63530ba1d9ddd9a5a` | `bd173a4e174b418fa23ba41f8931dc1f9a3b632e` | BLOCKED_OWNER_REVIEW |
-
-All four source bodies were fetched at the exact D source commit and their original Blob SHAs matched #1177. The original source body is preserved byte-for-byte; a GOV-DOC-002 metadata wrapper is prepended, so the candidate final Blob differs. Each source document records the source branch, source commit and original source Blob in `evidence_reference`.
+| Target path | Original source Blob | Candidate final Blob | Eligibility |
+|---|---|---|---|
+| `03-memory-brain/memory-brain-overview.md` | `b4ed712ac0626ab127cccfd205c50a9013df01fb` | `9ca153df403d09264a50add8ad78bb5a6111c7c0` | BLOCKED_OWNER_REVIEW |
+| `03-memory-brain/canonical-memory-store.md` | `6b37c91033fda21f072e2a3bde6f274663b1e76e` | `d47366d1ca04da37ff77f6edd31fe42efc93e0f9` | BLOCKED_OWNER_REVIEW |
+| `03-memory-brain/memory-lifecycle-manager.md` | `8b972035b449e1eab546aedc9cc5b30581600c65` | `453d42592942d0508b00a4b8c5ed9320b9ced3f7` | BLOCKED_OWNER_REVIEW |
+| `03-memory-brain/forget-fence-operation-and-publication-gate.md` | `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5` | `c6f343011a8be0fa0d4bae2659ecffc33d9557ac` | BLOCKED_OWNER_REVIEW |
 
 ## D — Forget Fence bilingual section set
 
