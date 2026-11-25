@@ -1,3 +1,48 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-21"
+      last_verification_note: "All figures come from the GitHub REST API and from local gate runs on 2026-11-21; the 2026-11-25 annotations added in §12.3, §14.1 and §14.2 record no new measurement and change no number."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: "docs/en/14-ai-development/governance-register/GOV-NC-2026-11-21-GATE-DEADLOCK-006.md"
+    zh-CN: "docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-21-GATE-DEADLOCK-006.md"
+---
+
 # GOV-NC-2026-11-21-GATE-DEADLOCK-006 — 门禁在 main 上自我死锁：任何 PR 都无法通过
 
 - 登记编号：GOV-NC-2026-11-21-GATE-DEADLOCK-006
@@ -305,9 +350,15 @@ Owner 裁定「批准 F-2；F-1 不列为本轮首选；F-3 不批准」，并�
 
 这不必然是违规：F-1 在本登记 §2.1 的 B 组实测中同样 `NEW=0`，且 §8 承认它技术有效。但**它是一次规范变更，按 §5 需独立审查**，而 §12.1 显示审查者是作者本人。
 
+> **〔2026-11-25 附注〕** 本句把「§12.1 表中 `author` 与唯一 `reviewer` 同为 `oahcom`」这一账号层事实，当作「这次规范变更未取得独立审查」的理由。§5 已于 2026-11-24 由 `2eb4e352`（PR #935）修订为会话层判据（见 `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`）：同一 GitHub 身份下的另一会话即可构成独立审查。`/pulls/{n}/reviews` 只返回 `user.login`，不返回会话，故「同一身份 ⇒ 同一会话」这一步在该载荷里无法核实；§12.1 的表也不含会话标识，会话层无从查证。此处应读作「账号层不独立、会话层未核实」。
+> **仍然成立的部分**：§12.1 记录该 PR 只有一次审查，状态为 `COMMENTED`。§5 明写 `COMMENT` 是技术评论、不是 `APPROVE`，这一点与判据版本无关；因此「未取得独立审批」的结论保留，依据从账号比较换成「唯一一次审查不是 `APPROVE`」。被撤销的只是账号比较那一步。
+
 **第二，解除死锁的那次合并，本身就是 007 记录的失效模式。**
 
 `author == sole reviewer == merger`，间隔 12 秒，`COMMENTED` 状态。这与 007 §1 表中六例完全同形。
+
+> **〔2026-11-25 附注〕** 本句把「`author == sole reviewer == merger`」这个账号三元组，当作「与 007 §1 六例同形、即同属自我审查」的理由。§5 已于 2026-11-24 由 `2eb4e352`（PR #935）修订为会话层判据（见 `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`）：同一 GitHub 身份下的另一会话即可构成独立审查。`/pulls/{n}/reviews` 只返回 `user.login`，不返回会话，「同一身份 ⇒ 同一会话」在该载荷里无法核实。此处应读作「账号层不独立、会话层未核实」。
+> **仍然成立的部分**：12 秒间隔与 `COMMENTED` 状态是 §12.1 表中可核的字段，不依赖身份如何定义；且 `COMMENT` 在任何版本的 §5 下都不是 `APPROVE`，故「这次合并没有 `APPROVE`」成立。不成立的是「同形 ⇒ 同属自我审查」这一步：账号相同推不出会话相同。
 
 因此出现一个必须直说的循环：
 
@@ -320,6 +371,9 @@ Owner 裁定「批准 F-2；F-1 不列为本轮首选；F-3 不批准」，并�
 `document-metadata-template.md` 的 reason 写得很具体：它的字段名、闭合枚举与 `REQUIRED` 标记被 `check_document_management.py` **逐字消费**，如果拆成双语镜像，两侧可能记录不同的枚举值。这个理由与 F-1 的语义（单文件双语源）吻合，也与 Owner「不批准拆成三份」的裁定方向一致。
 
 所以准确的记录是：**结果正确，程序未满足 §5。** 两者都要写，不能只写一个。
+
+> **〔2026-11-25 附注〕** 本句后半「程序未满足 §5」原先建立在「`author == sole reviewer == merger`」这个账号等式上。§5 已于 2026-11-24 由 `2eb4e352`（PR #935）修订为会话层判据（见 `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`）：同一 GitHub 身份下的另一会话即可构成独立审查；`/pulls/{n}/reviews` 只返回 `user.login`，不返回会话，故「同一身份 ⇒ 同一会话」无法核实。账号比较这一步应读作「账号层不独立、会话层未核实」。
+> **仍然成立的部分**：「结果正确」不动。后半的结论也保留，但依据换了——§12.1 表记录该 PR 只有一次审查，`COMMENTED`，`oahcom`，合并前 12 秒。§5 明写 `COMMENT` 是技术评论、不是 `APPROVE`，这一点与判据版本无关；「唯一一次审查不是 `APPROVE`」在任何版本的 §5 下都成立，故「程序未满足 §5」仍成立。不成立的是「同一账号 ⇒ 同一会话」。
 
 ### 12.4 对本登记结论的影响
 
@@ -446,8 +500,8 @@ This is a structural gate only; semantic parity requires independent review.
 | F-1 技术路径（对 `document-metadata-template.md`） | **接受** |
 | 模板豁免的当前治理依据 | **本轮批准**（此前无依据） |
 | #418 当时是否获得事前授权 | **否** |
-| #418 是否满足独立审查要求 | **否** |
-| #418 的合并程序是否合规 | **不合规** |
+| #418 是否满足独立审查要求 | **否**〔2026-11-25 附注：该「否」建立在 §12.1 的账号三元组上；§5 已于 2026-11-24 改为会话层判据，而账号层不独立、会话层未核实。该「否」本身仍成立，但依据是唯一一次审查为 `COMMENTED`、非 `APPROVE`，此点与判据版本无关。原文保留〕 |
+| #418 的合并程序是否合规 | **不合规**〔2026-11-25 附注：该「不合规」建立在 §12.1 的账号三元组上；§5 已于 2026-11-24 改为会话层判据，而账号层不独立、会话层未核实。该「不合规」本身仍成立，但依据是唯一一次审查为 `COMMENTED`、非 `APPROVE`，此点与判据版本无关。原文保留〕 |
 | F-1 是否成为新登记的通用通道 | **否**，仅限该模板 |
 
 裁定给出的技术理由与本登记 §12.3 第三点一致：该模板的字段名与闭合枚举被 `check_document_management.py` 逐字消费，拆镜像会导致两侧记录不同枚举值。
@@ -474,6 +528,9 @@ review → merge = 12 秒
 ```
 
 F-1 技术结果被接受，与该次合并未满足 §5 是**两个独立事实**。§12.3 的三点并列结构因此保持不变，只是第一点的表述由「不是 Owner 批准的 F-2」升级为「F-2 曾获事前批准；实际执行 F-1；Owner 事后基于机器消费约束批准 F-1 作为该模板的受限等效路径」。
+
+> **〔2026-11-25 附注〕** 上一段把「该次合并未满足 §5」建立在上面代码块的三行账号记录上——那是账号层事实，被当作审查层结论的理由。§5 已于 2026-11-24 由 `2eb4e352`（PR #935）修订为会话层判据（见 `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`）；`/pulls/{n}/reviews` 只返回 `user.login`，不返回会话，「同一身份 ⇒ 同一会话」无法核实。代码块本身是事实记录，保持原样；账号比较这一步应读作「账号层不独立、会话层未核实」。
+> **仍然成立的部分**：块内「唯一一次审查是 `COMMENTED`」在任何版本的 §5 下都不是 `APPROVE`，故「未满足 §5」的结论保留，依据换成这一条，而不是账号相等。
 
 ### 14.3 对本登记结论的影响
 

@@ -1,3 +1,48 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-21"
+      last_verification_note: "All figures come from the GitHub REST API and from local gate runs on 2026-11-21; the 2026-11-25 annotations added in 12.3, 14.1 and 14.2 record no new measurement and change no number."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "14-ai-development/governance-register/GOV-NC-2026-11-21-GATE-DEADLOCK-006.md"
+    en: null
+    zh-CN: "docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-21-GATE-DEADLOCK-006.md"
+---
+
 # GOV-NC-2026-11-21-GATE-DEADLOCK-006 — The gate deadlocks itself on main: no PR can pass
 
 - Register ID: GOV-NC-2026-11-21-GATE-DEADLOCK-006
@@ -303,9 +348,15 @@ The ruling said "F-2 is approved; F-1 is not this round's preferred fix; F-3 is 
 
 That is not necessarily a violation: F-1 also measured `NEW=0` in trial B of section 2.1, and section 8 concedes it works technically. But **it is a normative change, which section 5 requires independent review for**, and section 12.1 shows the reviewer was the author.
 
+> **〔Added 2026-11-25〕** This sentence uses the account-layer fact "the section 12.1 table shows `author` and the sole `reviewer` are both `oahcom`" as the reason for the review-layer conclusion "this normative change had no independent review". Section 5 was amended on 2026-11-24 by `2eb4e352` (PR #935) to a session-level test (see `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`): a separate session under the same GitHub identity can constitute independent review. `/pulls/{n}/reviews` returns only `user.login`, not the session, so the step "same identity implies same session" cannot be verified from that payload, and the table carries no session identifier either. Read this as "account layer not independent; session layer not verified".
+> **What survives:** the section 12.1 table records exactly one review on that PR, with state `COMMENTED`. Section 5 states that a `COMMENT` review is technical commentary, not an `APPROVE`, and that holds under any version of section 5; so the conclusion "no independent approval was obtained" stands, but on that ground rather than on the account comparison. Only the account-comparison step is withdrawn.
+
 **Second, the merge that lifted the deadlock is itself the failure mode register 007 records.**
 
 `author == sole reviewer == merger`, 12-second interval, `COMMENTED` state. Identical in shape to all six rows in 007 section 1.
+
+> **〔Added 2026-11-25〕** This sentence uses the account triple `author == sole reviewer == merger` as the reason for "identical in shape to all six rows in 007 section 1", that is, the same self-review failure mode. Section 5 was amended on 2026-11-24 by `2eb4e352` (PR #935) to a session-level test (see `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`): a separate session under the same identity can be independent. `/pulls/{n}/reviews` returns only `user.login`, not the session, so "same identity implies same session" cannot be verified from that payload. Read this as "account layer not independent; session layer not verified".
+> **What survives:** the 12-second interval and the `COMMENTED` state are fields recorded in the section 12.1 table and do not depend on how identity is defined; and a `COMMENT` is not an `APPROVE` under any version of section 5, so "this merge carried no `APPROVE`" holds. What does not survive is "same shape implies same self-review": equal accounts do not entail equal sessions.
 
 So there is a loop that has to be stated plainly:
 
@@ -318,6 +369,9 @@ So there is a loop that has to be stated plainly:
 The reason string for `document-metadata-template.md` is specific: its field names, closed enums and `REQUIRED` markers are **consumed verbatim** by `check_document_management.py`, so split mirrors could let the two languages document different enum values. That matches F-1's semantics (a single-file bilingual source) and matches the Owner's own ruling against splitting the template into three.
 
 So the accurate record is: **the outcome is right, the process did not satisfy section 5.** Both, not one.
+
+> **〔Added 2026-11-25〕** The second half of this sentence, "the process did not satisfy section 5", rested on the account equation `author == sole reviewer == merger`. Section 5 was amended on 2026-11-24 by `2eb4e352` (PR #935) to a session-level test (see `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`): a separate session under the same identity can be independent; `/pulls/{n}/reviews` returns only `user.login`, not the session, so "same identity implies same session" cannot be verified. The account comparison should be read as "account layer not independent; session layer not verified".
+> **What survives:** "the outcome is right" is untouched. The second half also stands, but on a different ground: the section 12.1 table records exactly one review — `COMMENTED`, by `oahcom`, 12 seconds before the merge. Section 5 states that a `COMMENT` review is technical commentary, not an `APPROVE`, and that is version-independent; "the only review was not an `APPROVE`" therefore holds under any version of section 5, so "the process did not satisfy section 5" still holds. What does not hold is "same account implies same session".
 
 ### 12.4 Effect on this register's conclusions
 
@@ -444,8 +498,8 @@ Two independent reasons:
 | F-1 technical path (for `document-metadata-template.md`) | **accepted** |
 | Current governance basis for the template exemption | **this ruling** (there was none before) |
 | Did #418 have prior authorisation | **no** |
-| Did #418 satisfy the independent-review requirement | **no** |
-| Was #418's merge process compliant | **no** |
+| Did #418 satisfy the independent-review requirement | **no**〔Added 2026-11-25: this "no" rests on the section 12.1 account triple; section 5 became a session-level test on 2026-11-24, and account layer not independent, session layer not verified. The "no" itself still holds, on the ground that the only review was a `COMMENTED`, not an `APPROVE`, which is version-independent. Original text preserved〕 |
+| Was #418's merge process compliant | **no**〔Added 2026-11-25: this "no" rests on the section 12.1 account triple; section 5 became a session-level test on 2026-11-24, and account layer not independent, session layer not verified. The "no" itself still holds, on the ground that the only review was a `COMMENTED`, not an `APPROVE`, which is version-independent. Original text preserved〕 |
 | Does F-1 become a general channel for new registers | **no**, this template only |
 
 The technical reason given matches section 12.3's third point: the template's field names and closed enums are consumed verbatim by `check_document_management.py`, so split mirrors could let the two languages record different enum values.
@@ -472,6 +526,9 @@ review → merge = 12 seconds
 ```
 
 F-1's technical result being accepted and that merge failing section 5 are **two independent facts**. Section 12.3's three-part structure therefore stands unchanged; only the first part is restated: F-2 was approved in advance, F-1 was what actually ran, and the Owner has now approved F-1 after the fact as a restricted equivalent for this template.
+
+> **〔Added 2026-11-25〕** The preceding paragraph grounds "that merge failing section 5" in the three-line account record in the block above — an account-layer fact used as the reason for a review-layer conclusion. Section 5 was amended on 2026-11-24 by `2eb4e352` (PR #935) to a session-level test (see `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`); `/pulls/{n}/reviews` returns only `user.login`, not the session, so "same identity implies same session" cannot be verified. The block itself is a factual record and is left as written; the account comparison should be read as "account layer not independent; session layer not verified".
+> **What survives:** "the only review was a `COMMENTED`" is not an `APPROVE` under any version of section 5, so "failing section 5" still holds — on that ground, not on account equality.
 
 ### 14.3 Effect on this register's conclusions
 

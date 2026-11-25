@@ -229,7 +229,7 @@ Which is why this document is `Draft`. Every sibling `OWNER-DECISION-*.md` in th
 
 **Ruled.**
 
-1. 008 §10.5's choice is **not available to any session**. Remedies 1 and 2 require a second write-capable identity; remedy 3 requires the review it removes.
+1. 008 §10.5's choice is **not available to any session**. Remedies 1 and 2 require a second write-capable identity; remedy 3 requires the review it removes.[Added 2026-11-25: this ruling item is withdrawn by §9.5; the original is retained. Its premise — that independence requires a second GitHub account — was amended on 2026-11-24 by `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036` (PR #935). After the amendment: remedy 1 is still unavailable (the platform counts *users* and forbids self-approval); remedy 2 is available as a rule and remedy 3 is available (§9.5). What does not change is that the choice belongs to the Owner.]
 2. The correct disposition is a **recorded exception** under `PR-GOVERNANCE-001` §5, filed as `EX-20261123-01`. No platform-blocked status is claimed: §7's precondition — a plan or visibility that cannot enforce the controls — is false as measured on `2026-11-24`, so §7 is not available as a ground (§5). **Issue #134** stays open, tracking the narrower question §5 states: whether the status-check enforcement and the visibility change were authorized.
 3. The immediate, session-executable obligation is to **record the exception**, which has been skipped on every one of the 581 merges. `EX-20261123-01` is created with this ruling and covers the interval retrospectively. Per RULING-06's counting rule — one record per distinct blocked Work Item plus one missing control, where a continuous blocked interval counts once — one record covers the interval, not 581 records.
 4. §5 stays `Normative` **for now**. It is not demoted unilaterally, because its scope is real (§2.4) and removal by edit is not executable (§4). The lawful route is §5.1's quota trigger, which requires the count that `EX-20261123-01` supplies.
@@ -250,6 +250,8 @@ Everything above is a measurement about the repository's past and present. None 
 That difference is small. It is also the only difference available from inside the repository.
 
 ## 9. Erratum: one of the three remedies was available, and was used (2026-11-25)
+
+> **Added 2026-11-25 (citation currency).** "Was used" in the title refers to §9's route being used, not to remedy 3 having been executed. On this section's own §9.2 distinction: PR #935 (`GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`, 2026-11-24) amended the test for independence but did not demote §5 to Informative. This note corrects the title's wording only; it touches no count and no measurement.
 
 `PR-GOVERNANCE-001` §5 was amended on 2026-11-24
 (`GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`, PR #935). Independence
