@@ -1175,6 +1175,36 @@ evidence.md
             "only the first line may look like a verdict",
         )
 
+    def test_present_summary_carries_the_structure_only_boundary(self):
+        # The note is the only place a reviewer learns that PRESENT means "the
+        # declared files exist and their bytes are unchanged" -- without it the
+        # verdict reads as an endorsement of the evidence itself. Only the note
+        # says so, and nothing but this test pins the sentence, so it could be
+        # deleted with the suite staying green.
+        self.make_valid_world()
+        summary = os.path.join(self.temporary_directory(), "summary.md")
+        with mock.patch.dict(os.environ, {"GITHUB_STEP_SUMMARY": summary}):
+            self.assertEqual(run_validator(), 0)
+        with open(summary, encoding="utf-8") as summary_file:
+            lines = summary_file.read().splitlines()
+
+        self.assertTrue(
+            lines[0].startswith("AI-SESSION-EVIDENCE: PRESENT"),
+            "the verdict stays the first line the workflow greps for",
+        )
+        self.assertIn("does not prove", lines[1])
+        self.assertIn("authentic", lines[1])
+        self.assertEqual(
+            [
+                line
+                for line in lines
+                if line.startswith("AI-SESSION-EVIDENCE:")
+            ],
+            [lines[0]],
+            "exactly one line may look like a verdict",
+        )
+        self.assertNotEqual(lines[0], lines[1])
+
     def test_failure_summary_has_missing_verdict(self):
         world = make_valid_world(pr_body="incomplete")
         self.install_world(world)
