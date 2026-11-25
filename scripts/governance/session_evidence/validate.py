@@ -1606,20 +1606,33 @@ def check_09_manifest_and_evidence_entries(
             evidence_path,
         )
 
-        # OD-A3-r5: canonical session_evidence entries always require
-        # strict two-way Issue attribution, whether changed or historical.
-        # Only unchanged legacy manifests retain the historical exemption.
+        # Which Issue this session's work belongs to (issue_refs) and
+        # whether AI was used on that Issue (its own declaration) are
+        # separate facts the specification keeps independent. A canonical
+        # entry may therefore name a row that is YES or LEGACY_UNDECLARED:
+        # the latter means no declaration exists because the Issue
+        # predates the policy, not that no AI was used. Attribution is
+        # granted by the explicit allow-list below, never by a status that
+        # merely fails to be NO: a new status must be added here
+        # deliberately before it gains the right to be attributed.
         if not is_legacy_manifest:
             for number in numbers:
                 row_status, row_paths = mapping[number]
 
-                if row_status != "YES":
+                if row_status not in ("YES", "LEGACY_UNDECLARED"):
                     raise ValidationError(
                         f"{location}: issue_refs Issue #{number} maps to "
-                        f"{row_status}; canonical entries require YES"
+                        f"{row_status}; evidence may be attributed only to "
+                        "an Issue that declares YES or to a pre-policy Issue "
+                        "with no declaration"
                     )
 
-                if evidence_path not in set(row_paths):
+                # A LEGACY_UNDECLARED row carries N/A by construction, so
+                # only a YES row can list and corroborate the path.
+                if (
+                    row_status == "YES"
+                    and evidence_path not in set(row_paths)
+                ):
                     raise ValidationError(
                         f"Issue #{number} path '{evidence_path}': "
                         "manifest entry is not listed in the Issue mapping"
@@ -1897,6 +1910,14 @@ def _load_context() -> ValidationContext:
     )
 
 
+SUMMARY_SCOPE_NOTE = (
+    "Scope: a PRESENT verdict proves only that the declared files exist in "
+    "the head tree and that their bytes are unchanged; it does not prove "
+    "that the evidence is authentic, complete, or produced by the model it "
+    "claims."
+)
+
+
 def _write_summary(verdict: str) -> None:
     path = os.environ.get("GITHUB_STEP_SUMMARY")
     if not path:
@@ -1905,6 +1926,11 @@ def _write_summary(verdict: str) -> None:
     try:
         with open(path, "a", encoding="utf-8") as stream:
             stream.write(verdict + "\n")
+            # Only PRESENT needs the boundary spelled out; the workflow
+            # greps for lines starting with the verdict prefix, so this
+            # note deliberately does not.
+            if verdict.startswith("AI-SESSION-EVIDENCE: PRESENT"):
+                stream.write(SUMMARY_SCOPE_NOTE + "\n")
     except OSError as exc:
         print(
             f"MISSING: cannot write GITHUB_STEP_SUMMARY: {exc}"
