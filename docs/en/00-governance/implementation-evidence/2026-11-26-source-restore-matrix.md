@@ -47,8 +47,8 @@ document_metadata:
     zh-CN: "docs/zh-CN/00-governance/implementation-evidence/2026-11-26-source-restore-matrix.md"
 ---
 
-- Source revision: a09ede9b70457b1dd0a42272b6e421557996ee8e
-- Source: [canonical evidence record](../../../../00-governance/implementation-evidence/2026-11-26-source-restore-matrix.md) (source Blob `a09ede9b70457b1dd0a42272b6e421557996ee8e`).
+- Source revision: 2ffc9c0689b5d3d99f23a21d7b28764233a38a36
+- Source: [canonical evidence record](../../../../00-governance/implementation-evidence/2026-11-26-source-restore-matrix.md) (source Blob `2ffc9c0689b5d3d99f23a21d7b28764233a38a36`).
 
 # AID-2026-11-26-SOURCE-RESTORE-02 — Source Restore Evidence Matrix
 
