@@ -180,3 +180,25 @@ session_evidence:
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-059/session-evidence-1042-1048.md
+
+  # Issues #1029 #1058 #1061 #1063 #1071 #1074 #1076: seven residuals left open
+  # after the round above. Each is a check that reported success over a fact it
+  # never read. All seven predate the 2026-12-01 policy effective time and carry
+  # no declaration of their own, so each maps to LEGACY_UNDECLARED and
+  # attribution to it is permitted.
+  - role: IMPLEMENTER
+    issue_refs:
+      - "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1029"
+      - "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1058"
+      - "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1061"
+      - "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1063"
+      - "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1071"
+      - "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1074"
+      - "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1076"
+    implementing_ai_session: session-1029-1076-residuals
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-059/prompt-1029-1076-v1.md
+    executed_prompt_sha256: 636ebb9e853c593091b293f5ea709c0936ef7bab3b7987d118c0d1847382ed94
+    executed_prompt_bytes: 9174
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-059/session-evidence-1029-1076.md
