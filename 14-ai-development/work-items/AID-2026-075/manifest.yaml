@@ -11,8 +11,15 @@ prompt_id: AID-2026-075-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-075/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 639355d3fbba48bdd49b3913b17637cece389348ca4af421a7233d1d6e2fc941
+prompt_sha256: 2c613d7d2e17f64cacbbe3e514fb436b8b7da743f4aafb64be8a03a9c92728fc
 prompt_bytes: 5621
+# The digest above was recomputed after the work item was renumbered from
+# AID-2026-074 to AID-2026-075. The number appears twice inside
+# `prompt-v1.md` itself, so the rename changed the snapshot bytes: the
+# pre-rename digest was 639355d3...fc941 at the same 5621 bytes, which is
+# how a rename can move a digest without changing a byte count. The
+# snapshot is the input that was executed and is not rewritten to fit its
+# own digest; the recorded value is the measured value.
 
 # ---------------------------------------------------------------------------
 # One change, because either half alone is worse than both (#1064, #1069).
@@ -87,7 +94,7 @@ session_evidence:
       - "#1069"
     implementing_ai_session: session-a1084
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-075/prompt-v1.md
-    executed_prompt_sha256: 639355d3fbba48bdd49b3913b17637cece389348ca4af421a7233d1d6e2fc941
+    executed_prompt_sha256: 2c613d7d2e17f64cacbbe3e514fb436b8b7da743f4aafb64be8a03a9c92728fc
     executed_prompt_bytes: 5621
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
