@@ -116,7 +116,7 @@ acceptance_criteria:
   - id: AC6
     text: "Tests exist at scripts/ci/test_gate_ratchet.py for AC1-AC5, and each is mutation-verified by the reviewer: the guard under test is deleted, the suite is re-run, and the failing test is recorded. A test that passes with its guard removed is not evidence and does not satisfy this criterion. The author does not certify this about their own suite."
   - id: AC7
-    text: "The comment inside gate_ratchet.py no longer claims a guarantee the code does not provide. It states the PASS conditions as implemented, and it names the input class that remains undetectable, if any survives the change."
+    text: "The comment inside gate_ratchet.py no longer claims a guarantee the code does not provide. It states the PASS conditions as implemented, and it names the input class that remains undetectable, if any survives the change. One class does survive, and AC7 names it rather than leaving risk_rationale's 'never ran versus ran and found nothing' sentence reading as discharged: status 0 with an empty parsed set over an empty baseline is indistinguishable from a command that does nothing, and AC4 accepts it deliberately because AID-2026-058 requires it. AC1-AC3 close every other shape of that indistinguishability, but not this one, and a reader who tests the work item against its own rationale will find it short unless the residual is written down."
   - id: AC8
     text: "Both callers are named and still pass: (a) scripts/ci/baselines/bilingual-docs.txt, 77 entries, command status 1, parsed set equal to the baseline; (b) scripts/ci/baselines/traceability.txt, 0 entries, command status 0, empty set, once AID-2026-058 lands. Neither baseline changes shape as a side effect of this work item, and no workflow file is edited to make either pass."
 
@@ -130,12 +130,17 @@ integration_reviewer: NOT_ASSIGNED
 review:
   status: CHANGES_APPLIED_AWAITING_RE_REVIEW
   prior_status: CHANGES_REQUESTED
-  report_ref: "14-ai-development/work-items/AID-2026-060/REVIEW-01-INDEPENDENT.md"
-  rounds_completed: 1
-  # Round 1 returned REQUEST-CHANGES with four blocking findings. The corrections
-  # are the author's, which is not a confirmation. APPROVED is reachable only by
-  # the reviewer who raised them.
-  approval_source: "independent reviewer confirmation; none received yet"
+  report_ref: "14-ai-development/work-items/AID-2026-060/REVIEW-02-INDEPENDENT.md"
+  prior_report_ref: "14-ai-development/work-items/AID-2026-060/REVIEW-01-INDEPENDENT.md"
+  rounds_completed: 2
+  # Round 1 returned REQUEST-CHANGES with four blocking findings; round 2
+  # returned APPROVE with none, after reproducing the defect and confirming the
+  # 058 conflict is real rather than manufactured. Two non-blocking items (N1
+  # the F7 resolution citing AC5 for a status-9 case AC5 does not assert, N2
+  # the residual indistinguishability AC4 accepts) were applied after that
+  # verdict, so it does not cover the current bytes. The corrections are the
+  # author's, which is not a confirmation.
+  approval_source: "REVIEW-02 returned APPROVE, no blocking item; N1 and N2 applied after that verdict. APPROVED is not claimed here: a verdict belongs to the artifact it read."
 
 acceptance:
   status: NOT_ASSIGNED
@@ -207,7 +212,7 @@ findings:
     raised_by: independent review round 1 (REVIEW-01 finding B4)
     measured_at: "ba293506"
     statement: "No criterion failed if only the empty-baseline case were special-cased. Measured: a 77-entry baseline, a command printing exactly the baseline set, and an exit status of 9 gives regressions=0 fixed=0 PASS exit 0. A one-line rejection of empty baselines satisfies the first version of AC1 through AC4 and leaves the status unread, which is the outcome findings[F1] explicitly says must not count as a fix."
-    resolution: "AC1 fails on any status outside {0,1} regardless of baseline content, so the special case cannot pass. Pinned by AC5, which uses a non-empty baseline and a status of 9."
+    resolution: "AC1 fails on any status outside {0,1} regardless of baseline content, so the special case cannot pass. Pinned by AC1's non-empty-baseline case, which requires a status of 9 with a full baseline to fail; AC5 pins the opposite direction (status 1 must pass). Corrected at REVIEW-02 finding N1: this sentence used to attribute the status-9 pin to AC5, which asserts status 1, so a reader would have written a test that does not exist."
   - id: F8
     severity: material
     raised_by: independent review round 1 (REVIEW-01 finding M4)

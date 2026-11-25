@@ -135,9 +135,9 @@ review:
   prior_status: CHANGES_REQUESTED
   # Latest round first. report_ref is the report a reader should open; the
   # first round is kept because the status above is only meaningful against it.
-  report_ref: "14-ai-development/work-items/AID-2026-058/REVIEW-03-INDEPENDENT.md"
-  prior_report_ref: "14-ai-development/work-items/AID-2026-058/REVIEW-02-INDEPENDENT.md"
-  rounds_completed: 3
+  report_ref: "14-ai-development/work-items/AID-2026-058/REVIEW-04-INDEPENDENT.md"
+  prior_report_ref: "14-ai-development/work-items/AID-2026-058/REVIEW-03-INDEPENDENT.md"
+  rounds_completed: 4
   # Round 3 re-measured every round-2 correction against the tree and found them
   # closed: the AC5 line numbers (499 / 513), the `grep -c` = 2 versus anchored
   # = 4 distinction, zero history hits for both input files, and the reproduced
@@ -149,8 +149,10 @@ review:
   # CHANGES_APPLIED_AWAITING_RE_REVIEW until an independent reviewer confirms
   # every blocking finding closed. The author's own conformance checks and a
   # green PR are not that confirmation. APPROVED is reachable only by that
-  # reviewer.
-  approval_source: "independent reviewer confirmation (OD-26 (a)); none received yet"
+  # reviewer. OD-26 itself is not in this file's owner_decisions, which carry
+  # OD-23; the ruling is recorded in AID-2026-060's manifest, where it is the
+  # reason that work item exists.
+  approval_source: "REVIEW-04 returned APPROVE, no blocking item; three non-blocking items (N1 first-parent distance, N2 unqualified F7, N3 OD-26 cited but not defined here) were applied after that verdict. Re-review of those three edits is outstanding."
 
 implementation:
   status: NOT_STARTED
@@ -165,8 +167,8 @@ findings:
     severity: material
     raised_by: independent re-review (second pass, OD-26)
     measured_at: "2fc4a2ff"
-    statement: "base_commit_sha is b3a65e54, whose parent is 1259f1af (#926). It is 125 commits behind 2fc4a2ff, the commit this finding is measured at; the distance grows with every merge and is not restated here. The commit that falsifies AC1 is 35f2b078, which branched from the same parent and was merged to main afterwards: measured, the four INDEX rows AC1 required to be missing do not exist at b3a65e54 (git grep anchored on the table's first column returns 0) and are introduced by 35f2b078. So AC1 was true when written and false by the time the work item was reviewed. Corrected at REVIEW-03: this finding previously read '70 commits behind' and also blamed f640ba50, which is an ancestor of the base rather than a later commit, and therefore cannot have falsified anything the prompt was written against. 35f2b078 is the only falsifier, and it is sufficient."
-    resolution: "Not re-anchored. Re-anchoring would invalidate the frozen prompt's provenance note, and the criteria now state the commit each measurement belongs to, which is what an implementer acts on. Recorded because 056 had an equivalent finding (F7) and 058 had none, so a reader could conclude 058's base was current."
+    statement: "base_commit_sha is b3a65e54, whose parent is 1259f1af (#926). It is 125 commits behind 2fc4a2ff, the commit this finding is measured at — 40 by first-parent count, which is what a reviewer measuring a linear history sees; both figures were re-derived at REVIEW-04 rather than inherited. The distance grows with every merge and is not restated here. The commit that falsifies AC1 is 35f2b078, which branched from the same parent and was merged to main afterwards: measured, the four INDEX rows AC1 required to be missing do not exist at b3a65e54 (git grep anchored on the table's first column returns 0) and are introduced by 35f2b078. So AC1 was true when written and false by the time the work item was reviewed. Corrected at REVIEW-03: this finding previously read '70 commits behind' and also blamed f640ba50, which is an ancestor of the base rather than a later commit, and therefore cannot have falsified anything the prompt was written against. 35f2b078 is the only falsifier, and it is sufficient."
+    resolution: "Not re-anchored. Re-anchoring would invalidate the frozen prompt's provenance note, and the criteria now state the commit each measurement belongs to, which is what an implementer acts on. Recorded because 056 had an equivalent finding (AID-2026-056's F7) and 058 had none, so a reader could conclude 058's base was current."
 
   - id: F1
     statement: "00-governance/requirements-registry.yaml has a .yaml extension but JSON content, and scripts/check_traceability.py parses it with json.loads. The mismatch is pre-existing and harmless while both sides agree. Recorded so that an implementer does not 'fix' the extension or rewrite the file as YAML, either of which would break the parser."
