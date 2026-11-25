@@ -12,8 +12,8 @@ security_scope: Documentation and CI evidence custody only; no runtime security 
 
 status: REGISTERED
 
-sponsor: USER-PRINCIPAL-DELEGATED (human principal via the continuous instruction in this session: "所有 owner 都可以是一个会话，你持续到收敛即可")
-accountable_owner: USER-PRINCIPAL-DELEGATED (session-eligible under the user's continuous instruction in this session: "所有 owner 都可以是一个会话，你持续到收敛即可")
+sponsor: "USER-PRINCIPAL-DELEGATED (human principal via the continuous instruction in this session: \"所有 owner 都可以是一个会话，你持续到收敛即可\")"
+accountable_owner: "USER-PRINCIPAL-DELEGATED (session-eligible under the user's continuous instruction in this session: \"所有 owner 都可以是一个会话，你持续到收敛即可\")"
 implementing_ai_session: Current ChatGPT delivery session; platform session identifier NOT_EXPOSED
 
 repository: oahcom/AiMemoryBrainArchitecture

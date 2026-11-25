@@ -306,6 +306,9 @@ The PR carries one substantive content review (id `6002557767`). The Owner there
 
 **1. That review is not independent.** Author, reviewer and merger are the same GitHub account. `PR-GOVERNANCE-001` §5 requires independent review; a self `COMMENTED` does not satisfy it. Not counted as a zero-review merge — also not recorded as independent review satisfied.
 
+> **〔Added 2026-11-25〕** This item turns "author, reviewer and merger are all `oahcom`" — an **account-layer** fact — into the reason the review is not independent. §5 was amended on 2026-11-24 by `2eb4e352` (PR #935) to a session-level test (see `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`): a separate session under the same GitHub identity suffices. `/pulls/{n}/reviews` returns only `user.login`, never a session, so "same identity ⇒ same session" cannot be verified from that payload. Read it as "account layer not independent; session layer not verified".
+> **What survives:** the item's own second ground is version-independent — that review was a `COMMENTED`, and a `COMMENTED` is not an `APPROVE` under any wording of §5. So "not recorded as independent review satisfied" stands, on that ground rather than on account equality. Only the inference from equal accounts to the same session fails.
+
 **2. Review and merge are 15 seconds apart.** The review body is 617 bytes containing a fact check and two rulings. Reading it, checking four PRs' fields and ruling in 15 seconds is possible; running any independent verification in the same window is not — and the PR's content is precisely a record about verifying before merging.
 
 **3. The check was still `failure` at merge.** `GOV-DOC-002 metadata checks` had not turned green and the merge did not wait.

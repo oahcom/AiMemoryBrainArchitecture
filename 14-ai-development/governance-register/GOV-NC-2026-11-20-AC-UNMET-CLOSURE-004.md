@@ -1,3 +1,44 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-21"
+      last_verification_note: "All figures come from the GitHub REST API and from local reads on 2026-11-21; the 2026-11-25 annotation in section 7 records no new measurement and changes no number."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+---
+
 # GOV-NC-2026-11-20-AC-UNMET-CLOSURE-004 — 验收条件未满足即关闭 Issue 登记
 
 **状态**：`OPEN` / `NOT_REMEDIATED`
@@ -239,6 +280,9 @@ $ python3 -m pytest scripts/governance/evidence/test_gate_normative_roots.py -q
 | `MERGE-AFTER-RULING-003` | PR #394 在 `reviews=0`、check `failure` 下 14 秒内合并，随后 2 秒关闭 Issue |
 
 四份登记指向同一根因：**本仓库当前不存在任何角色分离**。实现、审查、裁定、关闭由同一账号在秒级间隔内完成。
+
+> **〔2026-11-25 附注〕** 本句把「四份登记的四名角色登录名都是 `oahcom`」——一个**账号层**事实——当作「本仓库不存在任何角色分离」这一结论的依据。§5 已于 2026-11-24 由 `2eb4e352`（PR #935）修订为会话层判据（见 `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`）：同一 GitHub 身份下的另一会话即可构成独立审查。`/pulls/{n}/reviews` 只返回 `user.login`，不返回会话，故「同一身份 ⇒ 同一会话」这一步在该载荷里无法核实。此处应读作「账号层不独立、会话层未核实」。
+> **仍然成立的部分**：上文四行表格里可核的字段都不依赖身份如何定义——`SELF-AUTH-002` 的关闭者是唯一账号、PR #394 的 `reviews=0` 且 check 为 `failure`、间隔 14 秒、「秒级间隔」本身。这些足以支撑「这四次动作没有第三方参与」；它们不足以支撑「角色分离在结构上不存在」。两者的区别是「未发生」与「不可能」，而本节原文把前者写成了后者。
 
 ---
 

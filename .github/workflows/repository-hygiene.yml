@@ -122,10 +122,19 @@ jobs:
         run: python3 scripts/check_traceability.py --index-only
 
       # PR-GOVERNANCE-001 §7 declares the required check contexts on `main`.
-      # Renaming a job leaves the document claiming a context nothing produces;
-      # this holds the declaration to the tree. Exit 2 (INCOMPLETE) is a failure
-      # here too: an unreadable condition must never read as green.
-      - name: Check declared check contexts are produced by a job
+      # Two artifacts can contradict that declaration: this tree (a renamed job
+      # leaves the document claiming a context nothing produces) and the branch
+      # protection payload (a context added to protection without a document
+      # change, or removed from protection while the document still lists it).
+      # This holds the declaration to both. The payload is read through
+      # `GET /branches/main`, which needs Contents (read) -- the permission this
+      # job already has. The `/protection` endpoint needs Administration (read),
+      # which the token vocabulary cannot express, and is not used.
+      # Exit 2 (INCOMPLETE) is a failure here too: an unreadable condition, or an
+      # unreadable platform, must never read as green.
+      - name: Check declared check contexts are produced and protected
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 scripts/check_declared_check_contexts.py
 
       # Run from this directory because test_check_declared_check_contexts

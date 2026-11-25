@@ -169,17 +169,26 @@ does not independently establish that this narrative is true or complete.
 Three properties of this delivery are stated here rather than left for a reader
 to discover:
 
-1. **`main` already understates the required set.** `PR-GOVERNANCE-001` §7
+1. **`main` already understated the required set.** `PR-GOVERNANCE-001` §7
    declares twelve required contexts. The live protection payload on
    `2026-11-25` returned fifteen: the twelve plus `Session Evidence`,
    `Session Evidence self-test (base)` and `Session Evidence self-test (head)`.
    This work item does not fix that and does not claim it is fixed.
+   **Superseded, `2026-11-25` (Issue #1029):** the count in §7 is no longer
+   twelve and this paragraph is not a dated measurement of anything, so it
+   must not be read as a current count. §7 is the only carrier of the number;
+   read it, do not quote this sentence. The delta it described is closed —
+   §7 now declares sixteen and the platform requires sixteen.
 2. **A checks-cannot-block claim is still outstanding.** §7 records that the
    deliberately-failing-head experiment has not been run. This work item does not
    run it either; it prepares the condition under which the context can be made
    required without deadlocking pull requests.
-3. **Configuration drift between the declaration and branch protection has no
+3. **Configuration drift between the declaration and branch protection had no
    machine gate.** `scripts/check_declared_check_contexts.py` checks that every
-   declared context is produced by a job. It does not read branch protection, so
-   a declaration naming twelve contexts while the platform requires fifteen
-   passes every automated check in this repository.
+   declared context is produced by a job. It did not read branch protection, so
+   a declaration naming twelve contexts while the platform required fifteen
+   passed every automated check in this repository.
+   **Superseded, `2026-11-25` (Issue #1029):** that script now compares the
+   declared set to `GET /branches/main` in both directions and exits 2
+   (INCOMPLETE) when the payload cannot be read, so this gap is closed and the
+   sentence above describes the state before the change.

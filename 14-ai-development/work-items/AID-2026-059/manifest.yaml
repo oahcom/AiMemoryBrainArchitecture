@@ -50,7 +50,7 @@ dependency_refs:
 authorization:
   implementation_write: "GRANTED - Owner delegated merge authority for this PR; the four files are written by this branch"
   gate_behaviour_change: "BOUNDED by Issue #799 - the eleven checks are implemented as written; no additional mandatory condition was invented"
-  required_context_change: "NOT_GRANTED - Issue #799 withholds required-context status until the check has run on real pull requests and an Owner approves separately; this work item does not touch branch protection"
+  required_context_change: "GRANTED - by the Owner-proxy ratification in Issue #1029 (comment 7153866597, 2026-11-25T05:32Z) from the enforcement window identified there, for the three session-evidence contexts and for no others; this work item still did not change branch protection, and the grant authorises the state, not an act. Superseded value, kept as the record it was: \"NOT_GRANTED - Issue #799 withholds required-context status until the check has run on real pull requests and an Owner approves separately; this work item does not touch branch protection\""
   policy_effective_time_change: "NOT_GRANTED - 2026-12-01T00:00:00Z is recorded by the ruling in Issue #799 and is not re-chosen here"
   allowlist_change: "NOT_APPLICABLE"
   root_membership_change: "NOT_APPLICABLE"

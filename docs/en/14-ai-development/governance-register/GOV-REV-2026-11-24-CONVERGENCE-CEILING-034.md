@@ -207,10 +207,21 @@ GET /repos/oahcom/AiMemoryBrainArchitecture
 - 不主张 PUT 现在会返回 200。没有发过。
 - 不主张该把 `required_approving_review_count = 1` 删除或设置。那是所有者的动作。
 - 不主张 37 个登记中任何一个应当关闭。关闭需要审查，而审查缺席位（§2）。
+
+  > **〔2026-11-25 附注〕** 本条的括注把 §2 的结论——由 `collaborators = 1`、`pending invitations = 0` 这组账号层计数推出的「结构上无法由第二个人做」——当作「审查缺席位」的理由。§5 已于 2026-11-24 由 `2eb4e352`（PR #935）修订为会话层判据（见 `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`）：同一 GitHub 身份下、不共享作者上下文的另一会话即可构成独立审查；`/pulls/{n}/reviews` 只返回 `user.login`，不返回会话，故「同一身份 ⇒ 同一会话」在该载荷里无法核实，此处应读作「账号层不独立、会话层未核实」。**仍然成立的是本条的结论**：本文件不主张关闭 37 个登记中的任何一个，这句话不依赖 §2 的任何推论，删去括注它照样成立。**不成立的是括注给出的理由**：§9 已于 2026-11-24 撤回它——缺的是会话，不是人；席位空着是未履行，不是填不上。理由若仍要引用，应指向 §9，而不是被 §9 判错的 §2。原文保留，不改写。
 - 不主张 `Hkncbn89` 是第二个人。PR 的 author 字段可以是被授权的第三方提交者，本文件没有核验其身份性质。
 - 不指派独立审查。席位 `NOT_ASSIGNED`。
 
 **阻断链：** 第二可写身份 `ABSENT`（实测 1 collaborator / 0 invitations）→ 独立审查 `NOT_ASSIGNED` → 登记关闭 `BLOCKED` → 收敛层次二 `WAITING_OWNER`。
+
+> **〔2026-11-25 附注〕** 这条链的第一环是账号层计数 `collaborators = 1`、`invitations = 0`，它被用来支撑一个审查层结论「独立审查 `NOT_ASSIGNED`」，再把该结论一路推到关闭与收敛。四环里只有两环经得起看。
+>
+> - **第一环成立，但只作为测量。** 一个 collaborator、零邀请，重测仍是这两个数（§9.2）。
+> - **第二环推不出来。** §5 已于 2026-11-24 由 `2eb4e352`（PR #935）修订为会话层判据（见 `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`）：不共享作者上下文的另一会话即可满足 §5，无需第二个账号。故 `ABSENT` 不产生 `NOT_ASSIGNED`；`/pulls/{n}/reviews` 只返回 `user.login`、不返回会话，这一跳在载荷里也无法核实。
+> - **`NOT_ASSIGNED` 仍是真状态，但理由不同：** 不是「无法运行」，是「未运行」——没有任何人开过这样一个会话。§9.1 已把「结构上无法」判为假、把 `BLOCKED` 改判为「未被履行」；这条区分正是 §9 的全部要点。
+> - **仍成立的是第三、四环。** 无论席位为什么空着，空席位挡住关闭，关闭挡住收敛层次二。所以终点 `WAITING_OWNER` 不动。
+>
+> 原文保留；本注只拆开这条链，不重写它。
 
 ---
 
@@ -314,7 +325,18 @@ Two limits that must be stated: the "12 with no status line" figure **depends on
 
 Not that the README sentence was wrong when written. Not that the PUT would now return 200 — it was never issued. Not that `required_approving_review_count = 1` should be deleted or set; that is the owner's action. Not that any of the 37 registers should close; closure needs review, and review lacks a seat (§2). Not that `Hkncbn89` is a second person — a PR author field can be an authorised third-party committer, and its nature was not verified. No independent review is assigned; the seat is `NOT_ASSIGNED`.
 
+> **〔Added 2026-11-25〕** The parenthetical "review lacks a seat (§2)" uses §2's account-layer counts (`collaborators = 1`, `pending invitations = 0`) as the reason for a review-layer conclusion — §2's "structurally impossible for a second person to do". `PR-GOVERNANCE-001` §5 was amended on 2026-11-24 by commit `2eb4e352` (PR #935) to a session-level test (recorded in `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`): under one GitHub identity, a separate session that does not share the authoring context satisfies independence; `/pulls/{n}/reviews` returns only `user.login`, never the session, so the step "same identity ⇒ same session" is unverifiable in that payload — read this as "account layer not independent; session layer not verified". **What survives is this bullet's conclusion**: this file does not advocate closing any of the 37 registers, and that sentence does not depend on any inference in §2 — remove the parenthetical and it still holds. **What does not survive is the reason the parenthetical gives.** §9 retracted it on 2026-11-24: what is missing is a session, not a person; the seat being empty is non-performance, not impossibility. If a reason is still cited, it should point at §9, not at the §2 that §9 rules false. Original text retained, not reworded.
+
 **Blocking chain:** second write identity `ABSENT` (measured 1 collaborator / 0 invitations) → independent review `NOT_ASSIGNED` → register closure `BLOCKED` → convergence layer 2 `WAITING_OWNER`.
+
+> **〔Added 2026-11-25〕** The first link of this chain is the account-layer count (`collaborators = 1`, `invitations = 0`), used to carry a review-layer conclusion — independent review `NOT_ASSIGNED` — and that conclusion is then pushed on to closure and convergence. Only two of the four links bear inspection.
+>
+> - **Link one holds, but only as a measurement.** One collaborator, zero invitations; re-measured, it is still these two numbers (§9.2).
+> - **Link two does not follow from it.** `PR-GOVERNANCE-001` §5 was amended on 2026-11-24 by commit `2eb4e352` (PR #935) to a session-level test (recorded in `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`): a session that does not share the authoring context satisfies §5, with no second account required. So `ABSENT` does not produce `NOT_ASSIGNED`; and `/pulls/{n}/reviews` returns only `user.login`, never the session, so that step is also unverifiable in the payload.
+> - **`NOT_ASSIGNED` is nevertheless still the true state, but for a different reason:** not "cannot run" but "not run" — nobody has opened such a session. §9.1 already rules "structurally impossible" false and re-classifies `BLOCKED` as "not performed"; that distinction is the whole point of the correction.
+> - **What survives are the third and fourth links.** Whatever the reason the seat is empty, an empty seat blocks closure, and closure blocks convergence layer 2. So the terminus `WAITING_OWNER` stands.
+>
+> Original text retained; this note only takes the chain apart, it does not rewrite it.
 
 ## 8. Reproduction
 
