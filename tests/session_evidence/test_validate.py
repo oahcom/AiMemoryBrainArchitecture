@@ -237,7 +237,9 @@ class SessionEvidenceValidatorTests(unittest.TestCase):
 
     def test_multiple_issues_and_multiple_sessions(self):
         entries = [make_entry(101, "a"), make_entry(102, "b")]
-        body = f"""## Related issue(s)
+        body = f"""- Work Item ID: AID-2026-001
+
+## Related issue(s)
 
 #101, #102
 
@@ -292,9 +294,7 @@ Session evidence reference(s):
         # value was its first line only, the second path never reached a
         # check, so a declared file that does not exist passed the gate.
         missing = "14-ai-development/work-items/AID-2026-099/does-not-exist.md"
-        body = f"""## Work Item
-
-AID-2026-001
+        body = f"""- Work Item ID: AID-2026-001
 
 ## Related issue(s)
 
@@ -497,7 +497,9 @@ N/A
         # LEGACY_UNDECLARED. Naming it in issue_refs says which Issue this
         # session's work belongs to, not that AI was used on that Issue --
         # the specification keeps those two facts independent.
-        body = f"""## Related issue(s)
+        body = f"""- Work Item ID: AID-2026-001
+
+## Related issue(s)
 
 #101
 
@@ -692,7 +694,9 @@ YES
     def test_entry_cannot_attribute_evidence_to_an_issue_that_declares_no(
         self,
     ):
-        body = f"""## Related issue(s)
+        body = f"""- Work Item ID: AID-2026-001
+
+## Related issue(s)
 
 #101
 
@@ -1103,6 +1107,117 @@ YES
             "N/A",
         )
         self.assertEqual(validate.parse_related_issues(body, REPOSITORY), [101])
+
+    def test_declared_work_item_id_binds_over_a_prose_mention(self):
+        # The manifest used to be chosen by the first AID-YYYY-NNN anywhere
+        # in the body, so a sentence above the field outranked the
+        # declaration. Only AID-2026-055 has a manifest here; AID-2026-003
+        # has nothing in the tree, so resolving the prose mention fails.
+        declared = "AID-2026-055"
+        body = f"""This supersedes AID-2026-003.
+
+- Work Item ID: {declared}
+- Related issue(s): #101
+- AI-assisted work: YES
+- Session evidence reference(s): {EVIDENCE_A}
+
+| Related Issue | Issue AI-assisted work | Evidence refs for this Issue |
+| --- | --- | --- |
+| {issue_url(101)} | YES | {EVIDENCE_A} |
+"""
+        self.assertEqual(
+            validate._manifest_path_from_pr(body),
+            f"14-ai-development/work-items/{declared}/manifest.yaml",
+        )
+
+        world = make_valid_world(pr_body=body)
+        blob = make_blob(
+            f"14-ai-development/work-items/{declared}/manifest.yaml",
+            world["manifest"],
+        )
+        world["git_tree"].remove(
+            next(
+                item
+                for item in world["git_tree"]
+                if item["path"] == MANIFEST
+            )
+        )
+        world["git_tree"].append(
+            {key: value for key, value in blob.items() if key != "_raw"}
+        )
+        world["raw_by_sha"][blob["sha"]] = blob["_raw"]
+        previous = world["blob_text"]
+        world["blob_text"] = lambda repo, sha, path: (
+            world["manifest"]
+            if path == blob["path"]
+            else previous(repo, sha, path)
+        )
+        self.install_world(world)
+        result, output = self.capture_validator()
+        self.assertEqual(result, 0, output)
+
+    def test_work_item_id_none_with_no_declaration_passes_and_says_the_manifest_was_skipped(
+        self,
+    ):
+        body = f"""- Work Item ID: NONE
+- Related issue(s): #101
+- AI-assisted work: NO
+- Session evidence reference(s): N/A
+
+| Related Issue | Issue AI-assisted work | Evidence refs for this Issue |
+| --- | --- | --- |
+| {issue_url(101)} | NO | N/A |
+"""
+        world = make_valid_world(pr_body=body, issue_body=ISSUE_BODY_NO)
+        self.install_world(world)
+        result, output = self.capture_validator()
+        self.assertEqual(result, 0, output)
+        self.assertIn("AI-SESSION-EVIDENCE: PRESENT", output)
+        self.assertIn(
+            "manifest and session-evidence entry checks not applicable",
+            output,
+        )
+
+    def test_work_item_id_none_with_ai_assisted_work_yes_fails(self):
+        # NONE must not become an escape hatch from the manifest: a YES
+        # declaration owes a canonical session_evidence entry, and the
+        # manifest is where that entry is validated.
+        body = f"""- Work Item ID: NONE
+- Related issue(s): #101
+- AI-assisted work: YES
+- Session evidence reference(s): {EVIDENCE_A}
+
+| Related Issue | Issue AI-assisted work | Evidence refs for this Issue |
+| --- | --- | --- |
+| {issue_url(101)} | YES | {EVIDENCE_A} |
+"""
+        world = make_valid_world(pr_body=body)
+        self.install_world(world)
+        result, output = self.capture_validator()
+        self.assertEqual(result, 1, output)
+        self.assertIn("AI-assisted work", output)
+        self.assertIn("must name a work item", output)
+
+    def test_missing_work_item_field_is_named_as_a_missing_field(self):
+        # The issue's row 2: no declaration at all, but some other id in
+        # prose. The message must name the missing field instead of
+        # claiming an id is required when one was supplied.
+        body = f"""See AID-2026-055 for the schema.
+
+- Related issue(s): #101
+- AI-assisted work: YES
+- Session evidence reference(s): {EVIDENCE_A}
+
+| Related Issue | Issue AI-assisted work | Evidence refs for this Issue |
+| --- | --- | --- |
+| {issue_url(101)} | YES | {EVIDENCE_A} |
+"""
+        world = make_valid_world(pr_body=body)
+        self.install_world(world)
+        result, output = self.capture_validator()
+        self.assertEqual(result, 1, output)
+        self.assertIn("missing Work Item ID field", output)
+        self.assertNotIn("is required", output)
 
     def test_repository_pull_request_template_is_accepted(self):
         # The whole point: a PR body filled in exactly as the repository's own

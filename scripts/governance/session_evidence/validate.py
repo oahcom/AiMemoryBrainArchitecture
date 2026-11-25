@@ -1785,19 +1785,51 @@ def check_11_prompt_snapshot_hashes(
 # Context loading and orchestration
 # ---------------------------------------------------------------------------
 
-def _manifest_path_from_pr(body: str) -> str:
-    match = re.search(
-        r"\bAID-\d{4}-\d{3}\b",
-        body,
-    )
-    if not match:
+def _manifest_path_from_pr(body: str) -> str | None:
+    """Resolve the declared Work Item manifest path; None means NONE.
+
+    The manifest is chosen by the Work Item ID field, never by the first
+    AID-YYYY-NNN anywhere in the body: prose that mentions another work
+    item above the declaration would otherwise validate the wrong manifest.
+    """
+    value = _extract_field(body, "Work Item ID")
+
+    if value is None or not value.strip():
         raise ValidationError(
-            "PR description: Work Item ID AID-YYYY-NNN is required"
+            "PR description: missing Work Item ID field "
+            "(AID-YYYY-NNN, or NONE when the pull request has no work item)"
+        )
+
+    identifier = value.strip().upper()
+
+    if identifier == "NONE":
+        # A pull request with no work item is legitimate -- a register
+        # correction opens none -- but only when it declares no AI-assisted
+        # work: a YES declaration owes a canonical session_evidence entry,
+        # and the manifest is where that entry is validated. check_01 has
+        # already enforced that NO carries N/A references.
+        if _parse_status(
+            _extract_field(body, "AI-assisted work"),
+            "PR",
+        ) != "NO":
+            raise ValidationError(
+                "PR description: Work Item ID NONE is only valid when "
+                "AI-assisted work is NO with N/A references; a pull request "
+                "that declares AI-assisted work YES must name a work item, "
+                "because its session evidence entry is validated against "
+                "that work item's manifest"
+            )
+        return None
+
+    if not re.fullmatch(r"AID-\d{4}-\d{3}", identifier):
+        raise ValidationError(
+            f"PR description: Work Item ID {value.strip()!r} is neither "
+            "AID-YYYY-NNN nor NONE"
         )
 
     return (
         "14-ai-development/work-items/"
-        + match.group(0)
+        + identifier
         + "/manifest.yaml"
     )
 
@@ -2113,6 +2145,8 @@ def _run_checks(ctx: ValidationContext) -> str:
             manifest_path = _manifest_path_from_pr(
                 ctx.body
             )
+            # pr_status is YES here, and NONE with AI-assisted work YES is
+            # rejected by _manifest_path_from_pr, so a path always comes back.
             _check_manifest_entries(
                 ctx,
                 manifest_path,
@@ -2145,6 +2179,17 @@ def _run_checks(ctx: ValidationContext) -> str:
     manifest_path = _manifest_path_from_pr(
         ctx.body
     )
+
+    if manifest_path is None:
+        # The PR declares AI-assisted work NO with N/A references, which
+        # check_01 has already enforced, so there is no evidence reference
+        # and no session_evidence entry to validate. Nothing to read.
+        return (
+            "AI-SESSION-EVIDENCE: PRESENT "
+            "(no Work Item declared; manifest and session-evidence entry "
+            "checks not applicable)"
+        )
+
     _check_manifest_entries(
         ctx,
         manifest_path,
@@ -2153,6 +2198,8 @@ def _run_checks(ctx: ValidationContext) -> str:
     )
 
     return "AI-SESSION-EVIDENCE: PRESENT"
+
+
 def main(argv: list[str] | None = None) -> int:
     del argv
 
