@@ -128,7 +128,7 @@ The root cause of the governance failure is not in this record but in the contro
 | `required_pull_request_reviews` | `GET /branches/main/protection` | **absent** |
 | `enforce_admins` | same | `true` |
 | `allow_force_pushes` | same | `false` |
-| `required_status_checks.strict` | same | `true`, 12 contexts (read 2026-11-24; re-read `2026-11-25T02:52Z` as 16, the extra three being `Session Evidence` and its two self-test contexts) |
+| `required_status_checks.strict` | same | `true`, 12 contexts (read 2026-11-24; re-read `2026-11-25T02:52Z` as 16, the four additions being `Session Evidence`, its two self-test contexts and `rust-workspace-test`) |
 | Rulesets | `GET /rulesets` | `[]` |
 | Collaborators | `GET /collaborators` | `oahcom` only (`push: true`) |
 | `oahcom0831-design` permission | `GET /collaborators/oahcom0831-design/permission` | `read` |
@@ -169,6 +169,8 @@ The table above measures the control plane. This one measures the outcome over t
 
 D1's classification therefore changes. Not `ENFORCEMENT FAILURE` — that names a conduct defect and implies a fix in behaviour — but **`REQUIRED BUT UNSATISFIABLE BY CONSTRUCTION`**, which names a specification defect and implies a fix in the rule. The earlier wording is preserved verbatim in `AID-2026-055`'s `status_history`, so the correction is auditable rather than overwritten. What independence can be expressed here is set out in §7.2.
 
+> **This too was later split (2026-11-25, `AID-2026-055`).** As a *single* status, `REQUIRED BUT UNSATISFIABLE BY CONSTRUCTION` welded the requirement to the formulation it replaced, and a reader taking it at face value concluded that independence itself was impossible here. What is impossible is the account-level form; the session-level form has always been available and was simply never recorded. What is recorded now is the two-part reading, in `current_status_parts` (`D1-a` = satisfiable, not satisfied; `D1-b` = necessarily zero, and not the requirement), while `current_status` itself is left verbatim with #1059's annotation scoping it to the account layer — because a record that edits its own claim is not a record. The paragraph above stands as written, because it is the record of that correction, not a statement about the present.
+
 **What this does not establish.** It does not show that nobody ever reviewed the code, and it does not identify any person's intent. A `COMMENTED` review object is real review activity; what it is not is the record D1 requires. The finding is about the record, and about a control plane that was never configured to produce that record (`required_pull_request_reviews` is absent, §7).
 
 
@@ -201,7 +203,7 @@ D1's classification therefore changes. Not `ENFORCEMENT FAILURE` — that names 
 | Formal review objects (the §7.1 endpoint, extended to all 681 merged PRs) | 170, all `COMMENTED`, all authored by `oahcom` |
 | Formal review objects in state `APPROVED` | **0** |
 
-**So one sentence in §7.1 needs correcting, and D1's conclusion does not change.** §7.1 measures only the formal-review endpoint, which invites the stronger reading "nobody ever looked", and that reading is false: 406 merged PRs have conversation comments, 317 of them before the merge. The accurate state is also the harder one to argue away:
+**So one sentence in §7.1 needs correcting, and D1's conclusion does not change.** (That classification was itself split into D1-a / D1-b on 2026-11-25; see the annotation in §7.1. "Does not change" here means D1 still stands and is not waived.) §7.1 measures only the formal-review endpoint, which invites the stronger reading "nobody ever looked", and that reading is false: 406 merged PRs have conversation comments, 317 of them before the merge. The accurate state is also the harder one to argue away:
 
 > Review activity exists, and written review exists: 406 merged PRs carry a conversation comment, 317 of them written before the merge. But all 4,577 comments and all 170 review objects were written by one account, that account authored all 795 closed PRs, and GitHub does not permit it to approve its own pull requests.
 
