@@ -879,6 +879,46 @@ def summarize(
     return code
 
 
+def run_index_check(
+    root: Path,
+    stream: TextIO,
+    warning_stream: Optional[TextIO] = None,
+) -> int:
+    """Run only the INDEX/manifest half, which needs no registry.
+
+    `validate_index_and_manifests` reads `INDEX.md` and the work-item
+    directories, and nothing else. It was nevertheless unreachable in
+    practice because `run_check` called `parse_registry` first inside the
+    same `try`, so a missing registry took the whole run with it (#1071).
+
+    This entry point deliberately does not make the registry optional: the
+    registry-dependent path is unchanged and still fails loudly when the
+    file is absent. It only gives the four assertions that do not need a
+    requirement a caller, because a gate nobody runs is not a gate.
+
+    `authority_issues` is empty here by construction. It only upgrades T-05
+    from a warning to nothing when a `tracking_issue` reference matches a
+    registry requirement, so the empty set can add warnings but cannot hide
+    an error. `errors` is what `verdict` keys on, so a run of this path can
+    be green without the registry and cannot be greener than the full check
+    would be on the same tree.
+    """
+    reporter = Reporter(stream, warning_stream)
+
+    try:
+        work_item_count, _ = validate_index_and_manifests(
+            root, set(), reporter
+        )
+    except CheckFailure as exc:
+        reporter.error("cannot complete INDEX/manifest check: {}".format(exc))
+        return summarize(reporter, 0, 0)
+    except OSError as exc:
+        reporter.unknown("I/O failure: {}".format(exc))
+        return summarize(reporter, 0, 0)
+
+    return summarize(reporter, 0, work_item_count)
+
+
 def run_check(
     root: Path,
     stream: TextIO,
@@ -917,7 +957,14 @@ def run_check(
 
 
 def main() -> int:
-    return run_check(Path(os.getcwd()), sys.stdout, sys.stderr)
+    # `--index-only` exists so the INDEX/manifest assertions can run where the
+    # registry is not available. It changes which half runs, not what a missing
+    # registry means: the default path is untouched and still exits 1 when
+    # `00-governance/requirements-registry.yaml` is absent (#1071, #1064).
+    root = Path(os.getcwd())
+    if "--index-only" in sys.argv[1:]:
+        return run_index_check(root, sys.stdout, sys.stderr)
+    return run_check(root, sys.stdout, sys.stderr)
 
 
 if __name__ == "__main__":

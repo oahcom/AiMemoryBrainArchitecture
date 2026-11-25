@@ -10,7 +10,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from check_traceability import run_check
+from check_traceability import run_check, run_index_check
 
 
 AID = "AID-2026-999"
@@ -146,6 +146,19 @@ class TraceabilityTests(unittest.TestCase):
         output = io.StringIO()
         code = run_check(self.root, output)
         return code, output.getvalue()
+
+    def check_index_only(self) -> tuple[int, str]:
+        output = io.StringIO()
+        code = run_index_check(self.root, output)
+        return code, output.getvalue()
+
+    def append_index_row(self, aid: str, title: str = "Second row") -> None:
+        index = self.root / "14-ai-development/work-items/INDEX.md"
+        with index.open("a", encoding="utf-8") as handle:
+            handle.write(
+                "| [{}]({}/manifest.yaml) | {} | NOT_RECORDED | "
+                "NOT_RECORDED | VERIFIED | | | | |\n".format(aid, aid, title)
+            )
 
     def add_unindexed_manifest(
         self,
@@ -518,6 +531,63 @@ class TraceabilityTests(unittest.TestCase):
         code, output = self.check()
         self.assertEqual(code, 0, output)
         self.assertIn("PASS TRACEABILITY: 1 requirements", output)
+
+    # --- #1071 / #1064 / #1069: the INDEX half must run without a registry ---
+    #
+    # The four T-04 assertions read only INDEX.md and the work-item tree, but
+    # they were unreachable because run_check parsed the registry first inside
+    # the same try. These pin the split, and they pin the duplicate-row
+    # assertion that makes `merge=union` on INDEX.md safe: union turns a
+    # conflict into a silently duplicated row, and this is what refuses it.
+
+    def test_index_only_passes_without_a_registry(self) -> None:
+        (self.root / "00-governance/requirements-registry.yaml").unlink()
+        code, output = self.check_index_only()
+        self.assertEqual(code, 0, output)
+        self.assertIn(
+            "PASS TRACEABILITY: 0 requirements / 1 work items", output
+        )
+
+    def test_index_only_still_fails_on_a_duplicate_aid_row(self) -> None:
+        # Two rows naming one AID is the shape merge=union produces when the
+        # same ID is appended twice, when one row is edited on both sides, or
+        # when a deletion is undone by an edit to its neighbour.
+        self.append_index_row(AID)
+        code, output = self.check_index_only()
+        self.assertEqual(code, 1, output)
+        self.assertIn(
+            "ERROR T-04 duplicate INDEX entry {}".format(AID), output
+        )
+
+    def test_index_only_still_fails_on_an_id_directory_mismatch(self) -> None:
+        self.write_manifest(work_item_id="AID-2026-998")
+        code, output = self.check_index_only()
+        self.assertEqual(code, 1, output)
+        self.assertIn("ERROR T-04 manifest", output)
+
+    # The default path must keep its own behaviour: --index-only narrows what
+    # runs, it does not make the registry optional. A missing registry is
+    # still an error there, so the split cannot be read as a relaxation.
+    def test_default_path_still_requires_the_registry(self) -> None:
+        (self.root / "00-governance/requirements-registry.yaml").unlink()
+        code, output = self.check()
+        self.assertEqual(code, 1, output)
+        self.assertIn("ERROR required registry unavailable:", output)
+
+    def test_index_only_reports_the_same_duplicate_the_default_path_does(
+        self,
+    ) -> None:
+        # A duplicate row is an error on both paths. If the split ever grows a
+        # separate notion of "duplicate", the two answers can disagree and the
+        # green one wins in CI.
+        self.append_index_row(AID)
+        index_code, index_output = self.check_index_only()
+        full_code, full_output = self.check()
+        self.assertEqual(index_code, 1, index_output)
+        self.assertEqual(full_code, 1, full_output)
+        message = "T-04 duplicate INDEX entry {}".format(AID)
+        self.assertIn(message, index_output)
+        self.assertIn(message, full_output)
 
 
 if __name__ == "__main__":
