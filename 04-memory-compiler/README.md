@@ -8,11 +8,19 @@ document_metadata:
     evidence_verification:
       verification_status: Unverified
       last_verified_date: null
-      last_verification_note: "Source/mirror topology was authorized by PR #429 comment 7061562608; the later Owner decision in Issue #564 comment 7074302216 keeps this reading guide Informative / Non-Canonical. Content acceptance, bilingual semantic parity, independent review and CI remain pending."
+      last_verification_note: "R53 superseded Issue #564 comment 7074302216 for the Memory Compiler reading-guide scope: this root README is Canonical / Informative, while the EN and ZH-CN files are Non-Canonical / Informative mirrors. The historical Issue #564 comment is unchanged. Content acceptance, independent semantic review and CI remain pending."
     usage_status: Active
     modification_status: Modified
   authority:
-    canonical_status: Non-Canonical
+    canonical_status: Canonical
+    canonical_scope: "Memory Compiler reading guide: architecture document navigation and source specification index"
+    canonical_scope_id: memory-compiler/reading-guide
+    canonical_scope_keywords:
+      - reading-guide
+      - document-navigation
+      - source-specification-index
+      - bilingual-documentation
+      - architecture-reading-order
     canonical_conflict_status: None
     normative_status: Informative
   bilingual_counterpart:
@@ -51,4 +59,4 @@ E owns source ingestion/compilation orchestration, candidate generation, stage l
 
 CANDIDATE descriptions are not approved schemas. E emits neutral CandidateProposition/ExtractionIR only; it does not mint ClaimRef/ClaimRevisionRef/FactRef/FactRevisionRef or infer Fact from confidence. D owns canonical identity/revision/currentness/lifecycle and D ForgetFence; I owns authorization/PermissionEpoch, attestor authorization, retention and global Forget policy/completion. Exact B/D/I/H/Storage consumer contracts and transaction/compatibility evidence remain OPEN. No schema, DDL, public API, wire or Runtime freeze is authorized.
 
-**Source/mirror status:** this root reading guide is Informative / Non-Canonical. The EN and ZH-CN files under `docs/en` and `docs/zh-CN` are its Non-Canonical language mirrors. The normative Compiler Overview and Extraction/Normalization specifications have separate canonical root sources.
+**Source/mirror status:** this root reading guide is the sole Canonical document for the `memory-compiler/reading-guide` scope and remains Informative. The EN and ZH-CN files under `docs/en` and `docs/zh-CN` are Non-Canonical language mirrors. R53 superseded the contrary reading-guide classification in Issue #564 comment 7074302216; that historical comment remains unchanged. The normative Compiler Overview and Extraction/Normalization specifications have separate canonical root sources.
