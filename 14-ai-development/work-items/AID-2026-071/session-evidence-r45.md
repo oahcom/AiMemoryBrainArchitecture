@@ -72,8 +72,8 @@ clause text, no `assessor` / `assessed_version` / `evidence_baseline` field name
 and no three-way inequality. The four-part clause was written afterwards to
 express those five gaps. This sentence corrects an earlier version of this record
 that said the text was reproduced from that comment; the earlier wording was
-wrong, and the manifest's source description was corrected in the same pull
-request.
+wrong. The manifest's source description had already been corrected in PR #1091;
+this pull request corrects the remaining session-evidence and INDEX records.
 
 # Boundary question 5 — answered, not deferred
 
