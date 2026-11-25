@@ -1198,10 +1198,59 @@ YES
         self.assertIn("AI-assisted work", output)
         self.assertIn("must name a work item", output)
 
+    def test_absent_work_item_field_falls_back_to_the_body_and_announces_it(self):
+        # PR #1072's shape: no Work Item ID field, AI-assisted work YES, and
+        # the only AID-YYYY-NNN anywhere in the body is inside an evidence
+        # path. The old resolver found it; a mandatory field would break
+        # every body like this -- 15 of 30 sampled merged pull requests.
+        # Absence must be announced, not refused.
+        body = f"""- Related issue(s): #101
+- AI-assisted work: YES
+- Session evidence reference(s): {EVIDENCE_A}
+
+| Related Issue | Issue AI-assisted work | Evidence refs for this Issue |
+| --- | --- | --- |
+| {issue_url(101)} | YES | {EVIDENCE_A} |
+"""
+        self.assertIsNone(validate._extract_field(body, "Work Item ID"))
+        world = make_valid_world(pr_body=body)
+        self.install_world(world)
+        result, output = self.capture_validator()
+        self.assertEqual(result, 0, output)
+        self.assertIn("::notice::", output)
+        self.assertIn("missing Work Item ID field", output)
+
+    def test_absent_work_item_field_with_no_identifier_anywhere_still_fails(self):
+        # Absence is tolerated only when the body still carries an
+        # identifier. With none anywhere, there is no manifest to validate,
+        # and the message must name the missing field -- not claim an id is
+        # required when the real complaint is that nothing was declared.
+        evidence = "14-ai-development/notes/session-no-work-item.md"
+        body = f"""- Related issue(s): #101
+- AI-assisted work: YES
+- Session evidence reference(s): {evidence}
+
+| Related Issue | Issue AI-assisted work | Evidence refs for this Issue |
+| --- | --- | --- |
+| {issue_url(101)} | YES | {evidence} |
+"""
+        self.assertNotIn("AID-", body)
+        world = make_valid_world(
+            pr_body=body,
+            extra_tree=[make_blob(evidence, EVIDENCE_TEXT_A)],
+        )
+        self.install_world(world)
+        result, output = self.capture_validator()
+        self.assertEqual(result, 1, output)
+        self.assertIn("missing Work Item ID field", output)
+        self.assertNotIn("is required", output)
+
     def test_missing_work_item_field_is_named_as_a_missing_field(self):
         # The issue's row 2: no declaration at all, but some other id in
         # prose. The message must name the missing field instead of
-        # claiming an id is required when one was supplied.
+        # claiming an id is required when one was supplied. The prose id is
+        # now used, so the run fails only because AID-2026-055 has no
+        # manifest in the tree -- not because the field was absent.
         body = f"""See AID-2026-055 for the schema.
 
 - Related issue(s): #101
@@ -1218,6 +1267,8 @@ YES
         self.assertEqual(result, 1, output)
         self.assertIn("missing Work Item ID field", output)
         self.assertNotIn("is required", output)
+        self.assertIn("AID-2026-055", output)
+        self.assertIn("does not exist in PR Head Git tree", output)
 
     def test_repository_pull_request_template_is_accepted(self):
         # The whole point: a PR body filled in exactly as the repository's own
