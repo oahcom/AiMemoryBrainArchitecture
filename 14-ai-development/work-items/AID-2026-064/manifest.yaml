@@ -12,7 +12,7 @@ security_scope: >-
   None. Repository-local Git object reads, three markdown files, and one YAML manifest.
   No network, no credentials, no subprocess beyond git.
 
-status: PR_OPEN
+status: MERGED
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
 
@@ -21,13 +21,23 @@ updated_at: 2026-11-25
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
 base_commit_sha: 350be84b547d040d3a689ffe24fb75cca6bc10c7
+merge_base_commit_sha: 7a69f32b030dfbc2a0888c1b04f5f2d2e572b64c
+base_commit_sha_note: >-
+  350be84b is the commit the six blob SHAs were measured against. The branch was rebased
+  onto 7a69f32b before merge because main advanced; the two gates first run against
+  350be84b were re-run against 7a69f32b and their conclusions held. The first-pass
+  bilingual conclusion did not hold — see the correction comment on PR #1046.
 tracking_issue: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/955
 related_record: 14-ai-development/work-items/AID-2026-004/manifest.yaml
 
 implementation:
-  status: PR_OPEN
+  status: MERGED
+  branch: fix/955-bilingual-status
   pull_request: 1046
-  merge_commit_sha: NOT_MERGED
+  pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1046
+  implementation_commit_sha: f6fe073253c0a06fadef71797744226d75ece491
+  merge_commit_sha: 0bbb35f1a5a86cd9933bc987a7d900f6ba0d2ae3
+  merged_at: "2026-11-25T03:50:32Z"
 
 task_scope:
   - Re-measure all six registered blob SHAs against the current blobs and record both values
