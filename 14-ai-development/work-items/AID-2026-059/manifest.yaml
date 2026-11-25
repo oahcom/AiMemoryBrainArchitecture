@@ -11,7 +11,6 @@ status: DISPATCHED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
-implementing_ai_session: NOT_ASSIGNED
 
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
@@ -21,13 +20,18 @@ tracking_issue: "Issue #799 - Require AI session evidence in Issues and PRs, wit
 created_at: 2026-11-24
 updated_at: 2026-11-25
 
-# No prompt snapshot is frozen for this work item. The implementation was
-# produced across a session that iterated against mutation results rather than
-# against a single frozen prompt, so no prompt-v1.md exists and no sha256/bytes
-# pin is asserted. Recording a hash that was computed after the fact would
-# misrepresent it as a frozen input.
-prompt_id: NOT_FROZEN
-prompt_status: NOT_RECORDED
+# The prompt snapshot is now committed. It is the consolidated instruction set
+# for the delivered code, assembled after the session from five source prompt
+# files that are recorded by size but not committed (each embeds a whole-tree
+# snapshot). Committing it upgrades the record from a claim to a file the gate
+# can hash; it does not upgrade the provenance, which is why the entry below
+# still says NOT_VERIFIED.
+prompt_id: AID-2026-059-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-059/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 65474e7f0927d2dfeaad33814fdbd7d576635cc8a0e8d2a3a7441e3a65ab7317
+prompt_bytes: 3866
 
 dependency_refs:
   - .github/workflows/session-evidence.yml
@@ -57,7 +61,12 @@ scope:
     - scripts/governance/session_evidence/validate.py
     - tests/session_evidence/support.py
     - tests/session_evidence/test_validate.py
-  files_to_modify: []
+    - 14-ai-development/work-items/AID-2026-059/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-059/session-evidence-799.md
+  files_to_modify:
+    - scripts/governance/session_evidence/validate.py
+    - tests/session_evidence/test_validate.py
+    - 14-ai-development/work-items/INDEX.md
 
 acceptance:
   status: NOT_ASSIGNED
@@ -72,11 +81,11 @@ review:
   report_ref: ""
 
 implementation:
-  status: IN_PROGRESS
+  status: MERGED
   branch: feat/799-session-evidence-gate
-  pull_request: PENDING
-  pull_request_url: PENDING
-  implementation_commit_sha: PENDING
+  pull_request: 965
+  pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/965
+  implementation_commit_sha: ebadbe843eb69e0e3e2db84b4956d9e8e635e5a8
 
 errata: []
 
@@ -101,3 +110,31 @@ findings:
     statement: "The previously reported surviving mutant, the second PR-level 'YES requires evidence references' clause in check_02_pr_declaration_and_references, was not a test gap but unreachable code. check_01_pr_fields_and_issue_references raises the same condition first and, in this revision, the two copies carried different messages ('PR: YES requires evidence references' versus 'PR: YES requires at least one evidence path'). Because check_01 always raised first, deleting check_02's copy left the suite green and no test could have distinguished the two. The duplicate was deleted so the PR-level policy has one owner; a mutant at that location no longer exists to survive. test_yes_requires_refs was rewritten to a world whose only defect is the missing PR evidence — with check_01's guard removed the validator reports PRESENT — and it asserts the exact message rather than a nonzero exit."
     measured_at: "4d6a8255"
     severity: informational
+  - id: F6
+    statement: "The frozen contract requires every session_evidence entry to carry non-empty issue_refs, and check_09 requires every Issue named in issue_refs to map to a PR row whose status is YES. An Issue created before the policy effective time cannot map to YES: check_03 forces LEGACY_UNDECLARED with N/A. Together those two rules make a canonical entry impossible for any work item whose tracking Issue predates 2026-12-01T00:00:00Z, which is every work item that exists today. The validator already permits the resolution -- OD-A3 keeps PR-level evidence in its own scope and allows issue_refs to be empty -- and this manifest uses it: the entry below attributes its evidence at PR scope, and the Issue row stays LEGACY_UNDECLARED. Recorded rather than silently resolved because it is a gap between the frozen contract and the shipped validator, not a choice this work item is authorised to make."
+    measured_at: "ebadbe84"
+    severity: material
+  - id: F7
+    statement: "The first real pull request run returned 'MISSING: Cannot decode blob bytes: 14-ai-development/work-items/AID-2026-059/manifest.yaml'. gh_blob_bytes passed the API payload straight to base64.b64decode(..., validate=True), but the REST API wraps its base64 at 60 characters, so the content arrives containing newlines and validate=True rejects them. Consequence: every file larger than one line failed to decode, so the gate could never report PRESENT on any real pull request. The 59-test suite could not see it because support.make_blob encodes short fixtures with no wrapping -- the fixture never had the payload shape the API sends. Fixed by stripping whitespace before decoding, plus one test that wraps the payload at 60 characters, taken from the API response observed in the failing run. Reverting the fix fails that test and leaves the other 59 green, so the behaviour is pinned rather than incidentally covered. Found by the first real run, not by review: this is the calibration Issue #799 requires before required-context status is even proposed."
+    measured_at: a5482776
+    severity: material
+
+  - id: F8
+    statement: "The decode fix in F7 only takes effect from the base revision, because the workflow runs the validator it checks out from base, not the one in the pull request. #1001 carried the fix and still failed Session Evidence: its run at 00:37:53Z checked out the base revision e26262fb, which predates the fix, and produced the same 'Cannot decode blob bytes'. Merging #1001 as 0d0a2dd6 is what put the fix on main. That ordering is not a defect in the gate -- reading base is the security property -- but it means a validator fix can never certify the pull request that carries it, and the calibration evidence Issue #799 asks for has to come from a later pull request. Recorded here so the sequence is legible: first real run MISSING (base without the fix), merge, then the next run reads the fixed validator."
+    measured_at: "0d0a2dd6"
+    severity: informational
+
+# Canonical multi-session container (#775 seven fields, repeated). One entry,
+# one session. issue_refs is empty by design -- see F6: the tracking Issue
+# predates the policy and cannot be mapped to YES, and OD-A3 lets an entry
+# attribute its evidence at PR scope instead.
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+    implementing_ai_session: session-799-orchestrator
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-059/prompt-v1.md
+    executed_prompt_sha256: 65474e7f0927d2dfeaad33814fdbd7d576635cc8a0e8d2a3a7441e3a65ab7317
+    executed_prompt_bytes: 3866
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-059/session-evidence-799.md

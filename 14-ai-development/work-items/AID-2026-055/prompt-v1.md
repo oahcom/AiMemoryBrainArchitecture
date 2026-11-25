@@ -65,7 +65,7 @@ Issued by the Owner in round 20. These are rulings, not options.
 
 | ID | Question | Ruling |
 |---|---|---|
-| D1 | Formal review required? | **Yes** — at least one `Approved` review from an account that is not the PR author. **Current status: REQUIRED BUT CURRENTLY UNSATISFIABLE** — see §3. |
+| D1 | Formal review required? | **Yes** — at least one `Approved` review from an account that is not the PR author. **Current status: REQUIRED, UNSATISFIED; ENFORCEMENT FAILURE** — see §3. |
 | D2 | Code Owner review required? | **Yes**, scoped to CODEOWNERS-covered paths; must be verified as actually required, not merely that the file exists |
 | D3 | Admins may bypass? | **No** — `enforce_admins.enabled` must be true and verified by read-back |
 | D4 | How to verify? | Read the rule back from the API **and** run a zero-review negative test that GitHub refuses. Do not merge a non-compliant PR to test. |
