@@ -88,6 +88,8 @@ PUT /repos/oahcom/AiMemoryBrainArchitecture/pulls/875/merge
                 "message": "Pull Request successfully merged"}
 ```
 
+> 引文保留原样：`11 of 11` 是当时平台返回的原文，不是本文对现状的陈述。必需上下文数量此后有变化，见 `POST-DENIAL-UNAUTHORISED-MERGE-001` §7 的复读行。
+
 ### 2.3 落地提交的形态
 
 ```

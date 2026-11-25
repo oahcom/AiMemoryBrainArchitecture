@@ -30,7 +30,7 @@ prompt_bytes: 7100
 prompt_amendment_note: "This record was FROZEN at 7094 bytes / 52ec33df. PR #982 amended prompt-v1.md (the D1 acceptance cell in the table) and did not update this pin, so the pin contradicted the file it named. The values above now describe the bytes on disk. The freeze claim is withdrawn rather than restated: a pin that moves cannot also be a freeze, and re-freezing a text after the session it describes has run would date the freeze falsely."
 
 prompt_provenance_tier: T1
-prompt_provenance_note: "Frozen from the owner-proxy session that measured the live branch protection state, measured the reviews endpoints of the merges this work item is about, and read the four rulings the Owner issued in round 20. Every figure in the prompt is a value returned by the GitHub REST API in that session, not an inference from repository files."
+prompt_provenance_note: "Recorded from the owner-proxy session that measured the live branch protection state, measured the reviews endpoints of the merges this work item is about, and read the four rulings the Owner issued in round 20. Every figure in the prompt is a value returned by the GitHub REST API in that session, not an inference from repository files."
 
 dependency_refs:
   - 14-ai-development/governance-register/GOV-NC-2026-11-20-MERGE-AFTER-RULING-003.md
@@ -51,12 +51,13 @@ owner_decisions:
     ruling: "Yes. At least one review from a non-authoring reviewing session. Independence is a property of the reviewing session, not of the GitHub account (#935): this repository has one collaborator who authored every PR, and GitHub forbids an account from approving its own PR, so an account-based definition is unsatisfiable by construction rather than unmet."
     current_status: "REQUIRED BUT UNSATISFIABLE BY CONSTRUCTION"
     current_status_components:
-      - "Required: a formal Approved review from a non-author human."
+      - "Required: a review from a non-authoring reviewing session. Independence is a property of the reviewing session, not of the GitHub account (#935). The account-level form (a formal Approved object from a non-author human) is what the paragraph below measures as necessarily zero; it is recorded there as the reason the account-level form cannot be the requirement, not as the requirement."
       - "Current satisfaction: NOT SATISFIED."
       - "Unsatisfiable by construction, not enforcement failure. GET /collaborators returns [\"oahcom\"] -- one collaborator. GET /pulls?state=closed, every page, returns 795 closed PRs and user.login is oahcom for all 795. GitHub does not permit an account to approve a PR it authored, so the number of APPROVED review objects this repository can contain is not some-currently-zero: it is necessarily zero, for every PR, regardless of conduct. Reporting it as a governance measurement is reporting that a coin landed heads when the coin has one side."
       - "The finding that does carry information: of 662 merged PRs at 2026-11-24T18:47Z, 556 carry no review object at all -- the review-submission path was never walked, and a COMMENTED object was available throughout. 106 carry 170 objects, all COMMENTED, all by the authoring account. Review existed in form 106 times; in 556 merges it did not exist in any form."
       - "Third endpoint (issues/{n}/comments, POST-DENIAL-UNAUTHORISED-MERGE-001 section 7.2, issue #966), read at 2026-11-25T00:36Z over 681 merged of 795 closed: 4577 comments, all by oahcom, none by any other account; 406 merged PRs with a conversation comment, 317 of them before the merge, 232 after. Review activity is real and is not missing -- what is missing is any reviewer other than the author, in any channel."
       - "Zero-review merges since the freeze point (#875, 2026-11-24T04:54:07Z): 65 of the 70 that have merged. One of them, #946, merged after an explicit refusal naming that PR (POST-DENIAL-UNAUTHORISED-MERGE-001)."
+      - "Mechanism check, 2026-11-25T02:45Z: `GET /branches/main/protection` now lists 16 required contexts. Three are `Session Evidence`, `Session Evidence self-test (base)` and `Session Evidence self-test (head)`; a fourth, `rust-workspace-test`, was added only after #1027 removed its workflow's `pull_request.paths` filter, because a required context that is never scheduled is permanently absent rather than pending. The gap D1 named is therefore narrower than when this record was written: a session-attested required status check exists and is enforced. It does not yet satisfy D1, because what it attests is the *implementing* session -- `MANIFEST_FIELDS` in scripts/governance/session_evidence/validate.py begins with `implementing_ai_session`, `role` is free text, and no code path requires a `REVIEWER` role or a session distinct from the authoring one. A PR that declares only `role: IMPLEMENTER` passes. So the requirement is now \"REQUIRED, AND THE CARRIER EXISTS BUT DOES NOT YET ASSERT REVIEW\" rather than \"no carrier exists\"."
       - "Waiver: NOT AUTHORISED."
       - "Remediation: restate D1 as a required status check produced by a check run that asserts a non-authoring reviewing session (#935). Do NOT add required_pull_request_reviews: it requires an object this account topology cannot produce and would make every PR unmergeable, including the PR that would fix the deadlock."
     current_status_wording: "D1 is a mandatory policy requirement, and as currently written it cannot be satisfied by construction: it requires approval from an account other than the author, this repository has one collaborator who authored every PR, and GitHub forbids self-approval. That is a specification defect, not a conduct defect. The requirement is not waived, not optional, and not evidence that review is unnecessary; it must be restated in a form this repository can express, namely a required status check asserting a non-authoring reviewing session."
@@ -73,10 +74,10 @@ owner_decisions:
         evidence: "GET /collaborators -> [oahcom]; GET /pulls?state=closed all pages -> 795 closed, 795 authored by oahcom; POST-DENIAL-UNAUTHORISED-MERGE-001 sections 7.1 and 7.2; issue #982 comment 3 (Owner ruling, 2026-11-24T21:11:01Z); issue #966"
       - "The PR author's own review does not count as an independent approval."
       - "A formal review means a record in GET /pulls/{n}/reviews. It does not mean a comment, and it does not mean review_comments > 0. The two are different resources and must never be reported as one."
-      - "The only legitimate path out of this state is formally designating another real human accountable person and recording their identity, duties, approval authority and the mapping to their GitHub account. Until then D1 must not be marked executable, and no second identity may be created in order to make a PR pass."
-      - "A ChatGPT session's review, a GitHub Actions identity, or any automated actor is not a second accountable human and cannot satisfy D1."
+      - "The only legitimate path out of this state is establishing a reviewing session that is not the authoring session, and recording its identity, its scope of review, and the evidence that the review happened. Until then D1 must not be marked executable, and no second GitHub identity may be created in order to make a PR pass."
+      - "A reviewing session is not required to be a human being, and is not required to be a separate GitHub account; it is required to be a session other than the one that authored the change, whose review is recorded and can be shown to have preceded the merge. An automated actor may therefore satisfy D1 only by producing that record. What it may never do is produce the record for its own change: a session reviewing its own work is the authoring session, whatever account it runs under."
       - "No evidence in this repository establishes a second appointed maintainer, independent reviewer or integration reviewer. This records that no second accountable person is established for the governance system to rely on; it does not assert that no such person exists anywhere."
-      - "Recovery requires all four: a second human reviewer formally designated; independent approval actually executable; merge protection verified effective by a refused-merge test; and audit evidence that the control holds. Until then no PR depending on D1 may be authorised for merge."
+      - "Recovery requires all four: a non-authoring reviewing session formally designated; that review actually executable as a required status check; merge protection verified effective by a refused-merge test; and audit evidence that the control holds. Until then no PR depending on D1 may be authorised for merge."
       - "Do not manufacture a second approver by promoting a read-only account to write. Whether such an account is a distinct accountable human is a fact the repository cannot establish, and creating the appearance of independence is exactly what D1 forbids."
 
   - id: D2
@@ -106,7 +107,7 @@ owner_decisions:
 # ---------------------------------------------------------------------------
 
 deliverables:
-  - "Branch protection on main updated so required_pull_request_reviews is present, with required_approving_review_count >= 1 and require_code_owner_reviews = true if D2 is testable."
+  - "A required status check on main whose check run asserts that a non-authoring reviewing session reviewed the exact head, and which is listed in required_status_checks.contexts so that a missing or failing assertion blocks the merge. (Superseded deliverable, withdrawn 2026-11-25: "Branch protection on main updated so required_pull_request_reviews is present, with required_approving_review_count >= 1". It is withdrawn because D1's remediation forbids that write and because the object it requires is necessarily zero under this topology; keeping it as a deliverable made this manifest simultaneously forbid and certify the same write. The withdrawal is recorded here rather than deleted so the correction is auditable.)"
   - "dismiss_stale_reviews = true, so a new commit invalidates an existing approval rather than letting it stand against code it never saw."
   - "enforce_admins.enabled = true, confirmed by API read after the write."
   - "A CODEOWNERS file covering the governed roots, or a recorded finding that D2 is NOT testable because no ownership mapping is authorized by this work item."
@@ -116,11 +117,11 @@ deliverables:
 
 acceptance_criteria:
   - id: AC1
-    text: "GET /branches/main/protection returns required_pull_request_reviews with required_approving_review_count >= 1. Recorded with the raw response body, not a summary."
+    text: "GET /branches/main/protection lists the session-attestation check in required_status_checks.contexts, and a pull request whose head carries no passing attestation is refused. Recorded with the raw response body, not a summary. required_pull_request_reviews is NOT part of this criterion: it is necessarily unsatisfiable here and must not be added."
   - id: AC2
     text: "The same response shows dismiss_stale_reviews = true and enforce_admins.enabled = true. If the platform does not expose one of these, that fact is recorded rather than the field being reported as passing."
   - id: AC3
-    text: "The required-check context list is unchanged from its pre-change value of 11 contexts, and strict remains true. This work item must not weaken any existing check in order to add review."
+    text: "No existing required check is removed or weakened by this work item, and strict remains true. The list read 11 contexts when this work item was registered, 12 at 2026-11-24, and 16 at 2026-11-25T02:52Z (the additions are Session Evidence and its two self-test contexts); the criterion is that the set only grows, never shrinks."
   - id: AC4
     text: "If CODEOWNERS exists and covers a governed path, a PR touching that path is refused when the Code Owner has not approved. If CODEOWNERS is not authorized, a finding records D2 as NOT_VERIFIABLE with the reason, and D2 is not reported as satisfied."
   - id: AC5
@@ -151,11 +152,11 @@ implementation:
   merge_commit_sha: NOT_MERGED
 
 authorization:
-  branch_protection_write: "USER-PRINCIPAL-DELEGATED (limited to the four fields named in deliverables: required_pull_request_reviews, dismiss_stale_reviews, require_code_owner_reviews, enforce_admins)"
+  branch_protection_write: "USER-PRINCIPAL-DELEGATED (limited to adding a context to required_status_checks.contexts and to enforce_admins; required_pull_request_reviews is expressly NOT authorised, because D1's remediation forbids it and the object it requires cannot be produced under this topology)"
   codeowners_creation: "USER-PRINCIPAL-DELEGATED (limited to a CODEOWNERS file that makes D2 testable; the ownership mapping itself is NOT granted)"
   negative_test_execution: "USER-PRINCIPAL-DELEGATED (limited to a test that is refused; no merge may result)"
   register_write: "USER-PRINCIPAL-DELEGATED (limited to the negative-test record and the #875 instance line)"
-  required_check_change: NOT_GRANTED
+  required_check_change: "USER-PRINCIPAL-DELEGATED (limited to adding the session-attestation context to required_status_checks.contexts; removing or weakening an existing context is NOT granted)"
   frozen_count_change: NOT_GRANTED
   direct_push_vector: NOT_GRANTED
   production_authorization: NOT_GRANTED
@@ -173,7 +174,7 @@ verification:
   status: RUN
   environment: "Windows, GitHub REST API reads and writes, git. No cargo: this work order touches no Rust."
   commands:
-    - "GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection -> required_pull_request_reviews: null; required_status_checks.strict: true; contexts: 11; enforce_admins.enabled: true; allow_force_pushes.enabled: false"
+    - "GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection -> required_pull_request_reviews: absent; required_status_checks.strict: true; contexts: 11 at registration, 16 at 2026-11-25T02:52Z; enforce_admins.enabled: true; allow_force_pushes.enabled: false"
     - "GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/707/reviews -> []"
     - "GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/875/reviews -> []"
     - "GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/875 -> merged true, merge_commit_sha a8c367d, commits 3, additions 106, deletions 0"
@@ -185,7 +186,7 @@ verification:
 findings:
   - id: AID-2026-055-F1
     severity: P1
-    feedback_destination: "Delivery PR conversation. required_pull_request_reviews is absent from main's protection today, which is why both #707 and #875 merged with zero formal reviews. The absence is the whole defect: the required-check list is 11 contexts and every one of them was green on #875, so check coverage cannot substitute for review coverage. A repository can be fully check-gated and still merge unreviewed code indefinitely."
+    feedback_destination: "Delivery PR conversation. required_pull_request_reviews is absent from main's protection today, which is why both #707 and #875 merged with zero formal reviews. The absence is the whole defect: the required-check list was 11 contexts then (16 at 2026-11-25T02:52Z) and every one of them was green on #875, so check coverage cannot substitute for review coverage. A repository can be fully check-gated and still merge unreviewed code indefinitely."
   - id: AID-2026-055-F2
     severity: P1
     feedback_destination: "Delivery PR conversation. enforce_admins is already true, and it does NOT prevent a direct push to main. Conflating the two is the mistake this work item must avoid in its own write-up: the branch protection API controls merges through the PR path, while a direct push is a different vector that stays OPEN after this change."
@@ -200,7 +201,7 @@ findings:
     feedback_destination: "Delivery PR conversation. Turning on required review without a second approver available would deadlock main: every PR would be unmergeable, including the PR that fixes the deadlock. The change order matters. The negative test should be run in a way that can be reverted, and the manifest should state the revert path before the setting is written, not after."
   - id: AID-2026-055-F6
     severity: P2
-    feedback_destination: "Delivery PR conversation. The required-check list must not be disturbed. A protection PUT that omits required_status_checks replaces the whole object, and would silently drop all 11 contexts. The write must send the complete object, and AC3 exists to catch a write that quietly reduced check coverage while appearing to add review."
+    feedback_destination: "Delivery PR conversation. The required-check list must not be disturbed. A protection PUT that omits required_status_checks replaces the whole object, and would silently drop all of them (11 at registration, 16 at 2026-11-25T02:52Z). The write must send the complete object, and AC3 exists to catch a write that quietly reduced check coverage while appearing to add review."
 
 notes:
   - "The four decisions D1-D4 are the Owner's, issued in round 20. The implementer may not soften D1 to 'review recommended' or D3 to 'admins may bypass with justification'. If a decision proves unimplementable, that is a finding, not a renegotiation."
@@ -221,3 +222,13 @@ session_evidence:
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-055/session-evidence-966.md
+
+  - role: CORRECTOR
+    issue_refs:
+    implementing_ai_session: session-1013-request-changes-fix
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-055/prompt-v1.md
+    executed_prompt_sha256: 50c952342eda213fb72eb78ecc38fd0ff7674d507734502951ac0479e5c16bee
+    executed_prompt_bytes: 7100
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-055/session-evidence-1013-fix.md
