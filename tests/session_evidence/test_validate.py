@@ -276,6 +276,76 @@ Session evidence reference(s):
         self.patch_validate("gh_api", api)
         self.assertEqual(run_validator(), 0)
 
+    def test_multi_line_related_issues_are_all_parsed(self):
+        body = f"""## Related issue(s)
+
+{issue_url(101)}
+{issue_url(102)}
+"""
+        self.assertEqual(
+            validate.parse_related_issues(body, REPOSITORY),
+            [101, 102],
+        )
+
+    def test_a_second_evidence_path_is_not_silently_dropped(self):
+        # Every reference has to be validated one by one. While the field
+        # value was its first line only, the second path never reached a
+        # check, so a declared file that does not exist passed the gate.
+        missing = "14-ai-development/work-items/AID-2026-099/does-not-exist.md"
+        body = f"""## Work Item
+
+AID-2026-001
+
+## Related issue(s)
+
+#101
+
+## AI-assisted work
+
+YES
+
+## Session evidence reference(s)
+
+{EVIDENCE_A}
+{missing}
+
+## Per-Issue AI session evidence
+
+| Related Issue | Issue AI-assisted work | Evidence refs for this Issue |
+| --- | --- | --- |
+| {issue_url(101)} | YES | {EVIDENCE_A} |
+"""
+        world = make_valid_world(pr_body=body)
+        self.install_world(world)
+        result, output = self.capture_validator()
+        self.assertEqual(result, 1, output)
+        self.assertIn(missing, output)
+
+    def test_multi_line_status_field_is_rejected(self):
+        with self.assertRaises(validate.ValidationError):
+            validate._parse_status(
+                validate._extract_field(
+                    "## AI-assisted work\n\nYES\nNO\n",
+                    "AI-assisted work",
+                ),
+                "test",
+            )
+
+    def test_an_empty_field_does_not_absorb_the_next_bullet_field(self):
+        # The template stacks its fields as consecutive bullets with no
+        # heading between them. An empty field must stop at the next label,
+        # or it would read an Issue URL out of a field the author filled in
+        # for another purpose and link an Issue this slot never declared.
+        body = "\n".join(
+            [
+                "- Related issue(s):",
+                "- AI-assisted work: NO",
+                f"- Related PR(s): {issue_url(101)}",
+            ]
+        )
+        with self.assertRaises(validate.ValidationError):
+            validate.parse_related_issues(body, REPOSITORY)
+
     def test_rejects_noncanonical_paths(self):
         # Retain the original traversal and malformed-path coverage.
         paths = [
@@ -416,9 +486,70 @@ N/A
         self.assertEqual(result, 0)
         self.assertIn(expected, output)
         with open(summary, encoding="utf-8") as summary_file:
-            self.assertEqual(summary_file.read().strip(), expected)
+            # The verdict remains the first line; NOT_APPLICABLE carries no
+            # additional boundary note.
+            self.assertEqual(summary_file.read().splitlines()[0], expected)
         self.assertNotIn("skipped", output.lower())
         self.assertNotIn("neutral", output.lower())
+
+    def test_entry_may_attribute_evidence_to_a_legacy_undeclared_issue(self):
+        # A pre-policy Issue has no declaration by definition, so its row is
+        # LEGACY_UNDECLARED. Naming it in issue_refs says which Issue this
+        # session's work belongs to, not that AI was used on that Issue --
+        # the specification keeps those two facts independent.
+        body = f"""## Related issue(s)
+
+#101
+
+## AI-assisted work
+
+YES
+
+## Session evidence reference(s)
+
+{EVIDENCE_A}
+
+| Related Issue | Issue AI-assisted work | Evidence refs for this Issue |
+| --- | --- | --- |
+| {issue_url(101)} | LEGACY_UNDECLARED | N/A |
+"""
+        world = make_valid_world(
+            issue_created="2020-01-01T00:00:00Z",
+            issue_body=ISSUE_BODY_UNDECLARED,
+            pr_body=body,
+        )
+        self.install_world(world)
+        self.assertEqual(run_validator(), 0)
+
+    def test_entry_cannot_attribute_evidence_to_an_issue_that_declares_no(
+        self,
+    ):
+        body = f"""## Related issue(s)
+
+#101
+
+## AI-assisted work
+
+YES
+
+## Session evidence reference(s)
+
+{EVIDENCE_A}
+
+| Related Issue | Issue AI-assisted work | Evidence refs for this Issue |
+| --- | --- | --- |
+| {issue_url(101)} | NO | N/A |
+"""
+        world = make_valid_world(
+            pr_body=body,
+            issue_body=ISSUE_BODY_NO,
+        )
+        self.install_world(world)
+        result, output = self.capture_validator()
+        self.assertNotEqual(result, 0)
+        self.assertIn("Issue #101", output)
+        self.assertIn("maps to NO", output)
+        self.assertIn("declares YES", output)
 
     def test_post_policy_missing_declaration_is_missing_and_failed(self):
         world = make_valid_world(issue_body=ISSUE_BODY_UNDECLARED)
@@ -717,8 +848,8 @@ YES
 
     def test_evidence_state_semantics(self):
         cases = [
-            ("NOT_AVAILABLE", "", True),
-            ("NOT_RECORDED", "", True),
+            ("NOT_AVAILABLE", "", False),
+            ("NOT_RECORDED", "", False),
             ("REDACTED", "Reason: credentials removed.", True),
             ("REDACTED", "", False),
         ]
@@ -734,6 +865,30 @@ YES
                         validate._parse_evidence_region(
                             text, "Actual AI input", "test.md"
                         )
+
+    def test_each_evidence_state_requires_a_named_explanation(self):
+        # The three states are three different claims -- the platform does
+        # not provide the content, the author did not record it, or the copy
+        # was redacted -- and silence is not one of them. A bare state word
+        # must fail, and the failure must name the state it rejected.
+        for state in ("NOT_AVAILABLE", "NOT_RECORDED", "REDACTED"):
+            with self.subTest(state=state, case="explained"):
+                text = (
+                    "# Actual AI input\n"
+                    f"{state}\n"
+                    "Reason: not obtainable for this session.\n"
+                )
+                validate._parse_evidence_region(
+                    text, "Actual AI input", "test.md"
+                )
+
+            with self.subTest(state=state, case="bare"):
+                text = f"# Actual AI input\n{state}\n"
+                with self.assertRaises(validate.ValidationError) as caught:
+                    validate._parse_evidence_region(
+                        text, "Actual AI input", "test.md"
+                    )
+                self.assertIn(state, str(caught.exception))
 
     def test_rejects_duplicate_related_issues(self):
         with self.assertRaises(validate.ValidationError):
@@ -999,9 +1154,56 @@ evidence.md
             self.assertEqual(run_validator(), 0)
         with open(summary, encoding="utf-8") as summary_file:
             self.assertEqual(
-                summary_file.read().strip(),
+                summary_file.read().splitlines()[0],
                 "AI-SESSION-EVIDENCE: PRESENT",
             )
+
+    def test_job_summary_states_the_structure_only_boundary(self):
+        self.make_valid_world()
+        summary = os.path.join(self.temporary_directory(), "summary.md")
+        with mock.patch.dict(os.environ, {"GITHUB_STEP_SUMMARY": summary}):
+            self.assertEqual(run_validator(), 0)
+        with open(summary, encoding="utf-8") as summary_file:
+            lines = summary_file.read().splitlines()
+        self.assertEqual(lines[0], "AI-SESSION-EVIDENCE: PRESENT")
+        self.assertIn("bytes are unchanged", lines[1])
+        self.assertFalse(
+            any(
+                line.startswith("AI-SESSION-EVIDENCE: ")
+                for line in lines[1:]
+            ),
+            "only the first line may look like a verdict",
+        )
+
+    def test_present_summary_carries_the_structure_only_boundary(self):
+        # The note is the only place a reviewer learns that PRESENT means "the
+        # declared files exist and their bytes are unchanged" -- without it the
+        # verdict reads as an endorsement of the evidence itself. Only the note
+        # says so, and nothing but this test pins the sentence, so it could be
+        # deleted with the suite staying green.
+        self.make_valid_world()
+        summary = os.path.join(self.temporary_directory(), "summary.md")
+        with mock.patch.dict(os.environ, {"GITHUB_STEP_SUMMARY": summary}):
+            self.assertEqual(run_validator(), 0)
+        with open(summary, encoding="utf-8") as summary_file:
+            lines = summary_file.read().splitlines()
+
+        self.assertTrue(
+            lines[0].startswith("AI-SESSION-EVIDENCE: PRESENT"),
+            "the verdict stays the first line the workflow greps for",
+        )
+        self.assertIn("does not prove", lines[1])
+        self.assertIn("authentic", lines[1])
+        self.assertEqual(
+            [
+                line
+                for line in lines
+                if line.startswith("AI-SESSION-EVIDENCE:")
+            ],
+            [lines[0]],
+            "exactly one line may look like a verdict",
+        )
+        self.assertNotEqual(lines[0], lines[1])
 
     def test_failure_summary_has_missing_verdict(self):
         world = make_valid_world(pr_body="incomplete")
@@ -1011,7 +1213,7 @@ evidence.md
             self.assertNotEqual(run_validator(), 0)
         with open(summary, encoding="utf-8") as summary_file:
             self.assertEqual(
-                summary_file.read().strip(),
+                summary_file.read().splitlines()[0],
                 "AI-SESSION-EVIDENCE: MISSING",
             )
 
@@ -1108,7 +1310,7 @@ evidence.md
         self.assertNotEqual(result, 0)
         self.assertIn("MISSING:", output)
         self.assertIn("Issue #101", output)
-        self.assertIn("YES", output)
+        self.assertIn("maps to NO", output)
 
     def test_unchanged_manifest_still_requires_issue_refs_mapping(self):
         body = make_pr_body(
@@ -1130,7 +1332,7 @@ evidence.md
         self.assertNotEqual(result, 0)
         self.assertIn("MISSING:", output)
         self.assertIn("Issue #101", output)
-        self.assertIn("YES", output)
+        self.assertIn("maps to NO", output)
 
     def test_changed_legacy_manifest_must_migrate(self):
         world = make_valid_world()

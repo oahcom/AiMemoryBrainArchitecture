@@ -86,7 +86,7 @@ COMMENT 不是 APPROVE。独立性是审查会话的属性，不是 GitHub 账�
 - Post-merge readback SHA and verification:
 - Remaining work / follow-up Owner / due condition:
 
-Do not mark a check PASS unless it ran on the exact stated Head SHA. A passing check from another PR or earlier Head is not evidence for this PR. A PR merge proves repository integration only; it does not imply domain Owner acceptance, security acceptance, production readiness or deployment success.
-除非检查确实运行于上述精确 Head SHA，否则不得标记 PASS。其他 PR 或旧 Head 的成功检查不能作为本 PR 的证据。PR 合并只证明仓库集成，不代表领域 Owner 验收、安全验收、生产就绪或部署成功。
+Do not mark a check PASS unless it ran on the exact stated Head SHA. A passing check from another PR or earlier Head is not evidence for this PR. A PR merge proves repository integration only; it does not imply domain Owner acceptance, security acceptance, production readiness or deployment success. An `AI-SESSION-EVIDENCE: PRESENT` verdict from the session-evidence gate means the declared files exist in the Head tree and their bytes are unchanged; it does not mean the evidence is authentic, complete, or produced by the model it claims.
+除非检查确实运行于上述精确 Head SHA，否则不得标记 PASS。其他 PR 或旧 Head 的成功检查不能作为本 PR 的证据。PR 合并只证明仓库集成，不代表领域 Owner 验收、安全验收、生产就绪或部署成功。session-evidence 门禁的 `AI-SESSION-EVIDENCE: PRESENT` 结论只表示所声明的文件存在于 Head 树中且字节未发生变化，不代表证据真实、完整或由其所声称的模型产出。
 
 Reference / 规范依据: [PR-GOVERNANCE-001](../14-ai-development/PR-GOVERNANCE-001.md), [Issue #130](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/130), [P0 Issue #134](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/134).
