@@ -55,12 +55,12 @@ It is **not** a place to record acceptance, approval, or review conclusions. Not
 | `GOV-NC-2026-11-20-DIRECT-MAIN-001` | Direct pushes to `main` | High | `OPEN` / `NOT_REMEDIATED` | 53 commits |
 | `GOV-NC-2026-11-20-SELF-AUTH-002` | Authority chain / self-issued delegation | Critical | `OPEN` / `NOT_REMEDIATED` | 1 instrument, 7 closures |
 | `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` | Merge without review after a hold ruling | High | `OPEN` / `NOT_REMEDIATED` | 4 PRs (#390 / #394 / #395 / #402) |
-| `GOV-NC-2026-11-20-AC-UNMET-CLOSURE-004` | Issue closed with unmet acceptance criteria | High | `OPEN` / `NOT_REMEDIATED` | 1 Issue (#384), 4/10 ACs unmet |
+| `GOV-NC-2026-11-20-AC-UNMET-CLOSURE-004` | Issue closed with unmet acceptance criteria | High | `OPEN` / `NOT_REMEDIATED` | 1 Issue (#384); of its 10 ACs, 5 satisfied / 2 partially satisfied / 3 unmet (see §4 and §11.1 of that register) |
 | `GOV-NC-CONVERGENCE-2026-11-20` | Governance convergence definition and execution boundary | — | `ACTIVE` / `RECORDED_NOT_PREVENTED` | 3 levels |
 | `GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026` | Evidence domain contract conformance | High | `OPEN` / `WP-B DISPATCHED` (`AID-2026-053`); WP-A not writable | 1 entity, 2 work packages; WP-A lacks three contract type definitions |
 | `GOV-NC-2026-11-22-PROVENANCE-REFERENCE-REVALIDATION-027` | Provenance reference revalidation | High | `OPEN` / `DISPATCHED` (`AID-2026-052`) | 4 reference field groups, differing shapes |
 | `GOV-NC-2026-11-23-PROVENANCE-GRAPH-ADD-SIGNATURE-028` | `ProvenanceGraph::add` public signature change | High | `CLOSED-BY-RULING` / classification corrected | 1 public signature, 2 citation errata |
-| `GOV-NC-2026-11-23-UNREACHABLE-GUARD-030` | 017 is fixed but its guard is now dead code, and 014's fix broke 24 tests in that suite | High | `OPEN` / `MEASUREMENT_ONLY` | 1 tautological guard, 167 files out of pairing, 24 broken and unrun by CI |
+| `GOV-NC-2026-11-23-UNREACHABLE-GUARD-030` | 017 is fixed but its guard is now dead code, and 014's fix broke 24 tests in that suite | High | `OPEN` / `MEASUREMENT_ONLY` | 1 tautological guard, 167 files out of pairing; the 24 failures were a local measurement at `ef7266db` and were fixed by `aaf6da966` (#892); the suite now runs in the `GOV-DOC-001 structural checks` job on every PR (see `GOV-REV-2026-11-24-FOUR-CORRECTIONS-033` §2) |
 | `GOV-NC-2026-11-23-EXECUTION-RESTORED-029` | Execution side restored; 005's present-tense claims no longer hold | High | `OPEN` / `MEASUREMENT_ONLY` | 2 first executions, 3 refuted present-tense claims |
 | `EX-20261123-01` | §5 independent review unavailable (retrospective exception record) | High | `HOLD` / over quota, escalated to the repository administrator (Issue #134) | 0 independent reviews across 675 merged PRs; the repository's first exception record |
 | `OWNER-DECISION-REVIEW-INDEPENDENCE-001` | Remedy 3's route is genuinely open (§9's review was performed by #935); §5 itself is still Normative and the demotion was not made (§9 erratum, 2026-11-25) | High | `Draft` / explicitly not claiming Approved | All 675 PRs re-walked; 0 APPROVED; 1 writable identity |
@@ -77,7 +77,7 @@ Machine-readable evidence lives in [`evidence/`](evidence/). The JSON files are 
 | `evidence/direct-commit-filesets.json` | Per-commit file sets for the newly observed direct commits | `main @ 1a0dc911` |
 | `evidence/attribution-1491856051.json` | All 20 commits by author email `1491856051`, with PR associations | `main @ 1a0dc911` |
 | `evidence/merge-gate-evidence.json` | Gate fields for PR #390 / #394 / #395 (reviews, checks, durations) | 2026-11-21T03:00Z |
-| `evidence/number-domain-scan.json` | AID identifier occupancy across `main` and 346 branches | `main @ a7d12fe983` |
+| `evidence/number-domain-scan.json` | AID identifier occupancy across `main` and the 346 branches captured in that file (346 is the branch set inside the file, not the current branch count; branch count is a moving quantity — measured 869 refs under `refs/heads/` at 2026-11-25T01:43Z) | `main @ a7d12fe983` |
 | `evidence/issue-closures.json` | Closure comments for Issues #345–#351 | 2026-11-20T17:00Z |
 | `evidence/main-paths.json` | All 803 blob paths in `main`, used for the whitelist comparison | `main @ a7d12fe983` |
 
@@ -127,7 +127,7 @@ Filing a defect register is not a governance act. It confers no acceptance autho
 
 ## Related
 
-- [Issue #384](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/384) — bilingual gate whitelist mismatch. **Reopened**, narrowed to AC-1 / AC-4 / AC-5 / AC-9
+- [Issue #384](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/384) — bilingual gate whitelist mismatch. Closed on 2026-11-20T20:06:50Z (third closure, `state=CLOSED` / `stateReason=COMPLETED`); see `GOV-NC-2026-11-20-AC-UNMET-CLOSURE-004` §11.4
 - [Issue #400](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/400) — `EMBEDDED_BILINGUAL_SOURCES` is an unaudited exemption surface
 - [Issue #401](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/401) — AC-5 bypass detection fix task
 - [Issue #283](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/283) — platform-level required-check enforcement (`PLATFORM-RESIDUAL`)
