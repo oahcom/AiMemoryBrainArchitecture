@@ -1,10 +1,10 @@
 # Forget Fence 原子性 — 第 4 部分：JF-10 / COC Owner 决议
 
 - 文档 ID：D-FORGET-GATE-001-P4
-- 源文件版本：d3ddfff9500d9138d643989e8496d99b8d9ed79e
+- 源文件版本：DEREFERENCED — 保留历史源 Blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5`；当前仓库不存在可解析的规范性源文件。
 - 源分支：session-d-memory-brain-2026-11-16
 - 对应英文：[Part 4 — JF-10 / COC Owner Decisions](../../en/03-memory-brain/forget-fence-operation-and-publication-gate-part4.md)
-- 源规范：[D 规范源](../../../03-memory-brain/forget-fence-operation-and-publication-gate.md)（源提交 `b525e1f8fee2471a131e4a38efda99804045e424`；原始源 Blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5`）。
+- 源规范：DEREFERENCED — 原规范源路径 `03-memory-brain/forget-fence-operation-and-publication-gate.md` 在当前 main tree 中不存在；替代物：[英文对照版](../../en/03-memory-brain/forget-fence-operation-and-publication-gate-part4.md)（Blob `900c4bc93bd312a2e01f86827e8319294990f891`；仅为对照文本，不是规范性替代源）。
 
 ## Phase 3.6.2 — D Owner 接受修订版 JF-10 v2
 
