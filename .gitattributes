@@ -24,6 +24,36 @@
 *.ts   text eol=lf
 *.html text eol=lf
 
+# --- One path gets a union merge driver, and only one ----------------------
+#
+# `14-ai-development/work-items/INDEX.md` is a table with one row per work
+# item, and every registration appends a row. Two concurrent registrations
+# therefore conflict on text adjacency alone, with no semantic disagreement:
+# both rows are wanted, and nothing sorts the table. Measured on this file's
+# own history: 61 rows added, 45 inserted mid-table and 16 at the end, so the
+# conflict is not an EOF-append edge case (#1069).
+#
+# `merge=union` keeps both sides' added lines and resolves that shape with no
+# human. It is exactly wrong for prose, which is why the rule is this path and
+# not `*.md`.
+#
+# What union does NOT do, and what the resolver must know: it de-duplicates
+# identical lines and keeps BOTH variants of a disagreeing one. So an edit to a
+# row present on both sides yields two rows with one AID, and a deletion whose
+# neighbouring line was edited on the other side comes back. All three silent
+# failures end as the same AID on two lines, which is why the duplicate
+# detector has to run before this driver can be trusted:
+#
+#   .github/workflows/repository-hygiene.yml
+#     -> python3 scripts/check_traceability.py --index-only
+#        -> T-04 duplicate INDEX entry {aid}
+#
+# If that step is removed or made advisory, delete this line in the same
+# change. Without it, union converts a visible conflict into an invisible
+# duplicate row, which is strictly worse than the conflict (#1064, #1071).
+
+14-ai-development/work-items/INDEX.md merge=union
+
 # Frozen prompt artifacts are evidence, and their byte count and SHA-256 are
 # pinned in the registration record:
 #   AID-2026-049/manifest.yaml: prompt_sha256 c4be14e2…, prompt_bytes 31989
