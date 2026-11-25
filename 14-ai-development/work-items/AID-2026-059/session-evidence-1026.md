@@ -82,7 +82,7 @@ criteria are stated against them:
 
 **Verification actually run on this branch.**
 
-The branch is based on `22c44b37`; four files changed.
+The branch is based on `a1533c67`; the code change is two files, plus three work-record files (`manifest.yaml`, this document, `prompt-1026-v1.md`).
 
 ```
 python3 -m unittest tests.session_evidence.test_validate
@@ -106,19 +106,19 @@ Gate conclusions read, not assumed:
 
 ```
 python3 scripts/ci/check_line_endings.py
-    1328 files inspected, 0 violations
+    1335 files inspected, 0 violations
 
 python3 scripts/ci/check_repository_hygiene.py --base <main> --head <branch>
-    Work-item index membership directories=50 linked=50
-    Work-item manifest consistency manifests=39 in_scope=37 violations=0
-    Repository new-file admission passed: 2 new path(s) checked
+    Work-item index membership directories=51 linked=51
+    Work-item manifest consistency manifests=40 in_scope=38 violations=0
+    Repository new-file admission passed: 4 new path(s) checked
 
 python3 scripts/check_document_management.py --require-changed origin/main
     PASS (incremental): no GOV-DOC-002 violations; 216 classified, 493 unclassified
 
 BILINGUAL-MANIFEST: COMPLETE BASE_SHA..HEAD_SHA python3 scripts/check_bilingual_docs.py
     bilingual baseline: 77 frozen, 0 new gaps
-    PASS (5 changed paths inspected)
+    PASS (7 changed paths inspected)
 ```
 
 The first draft of assertion 3 used an Issue that declared YES, which made the
