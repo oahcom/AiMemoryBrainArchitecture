@@ -2014,8 +2014,20 @@ def _run_checks(ctx: ValidationContext) -> str:
     # time" cannot make an unverifiable YES pass. Widening this to skip
     # the body checks for every pre-effective PR was rejected; do not
     # retry it without a test that pins the volunteering case.
+    #
+    # The exemption is also bounded by this pull request's own opening
+    # date. A PR opened before the effective time is out of policy scope,
+    # which is the case #1026 reports. A PR opened after it must declare
+    # even when every Issue it links predates the policy, because
+    # _historical_not_applicable only inspects the Issues: unbounded, it
+    # would read "link an old Issue and stay silent" as an exemption from
+    # the declaration requirement itself, and from the effective time
+    # onwards that would be a permanent escape hatch.
+    pr_created = parse_utc_timestamp(ctx.pr["created_at"])
+
     if (
-        _historical_not_applicable(ctx)
+        pr_created < ctx.effective_at
+        and _historical_not_applicable(ctx)
         and _extract_field(ctx.body, "AI-assisted work") is None
         and _extract_field(
             ctx.body, "Session evidence reference(s)"

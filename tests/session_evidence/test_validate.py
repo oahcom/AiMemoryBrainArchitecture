@@ -534,6 +534,45 @@ YES
         self.assertEqual(result, 0)
         self.assertIn("AI-SESSION-EVIDENCE: NOT_APPLICABLE", output)
 
+    def test_pr_opened_before_the_effective_time_without_a_declaration_is_not_applicable(
+        self,
+    ):
+        # The bound admits exactly the case #1026 reports: the PR itself
+        # was opened before the policy took effect, and its Issues were
+        # too, and nothing is declared.
+        world = make_valid_world(
+            pr_created="2020-06-01T00:00:00Z",
+            issue_created="2020-01-01T00:00:00Z",
+            issue_body=ISSUE_BODY_UNDECLARED,
+            pr_body="Related issue(s): #101\n",
+        )
+        self.install_world(world)
+        result, output = self.capture_validator()
+        self.assertEqual(result, 0)
+        self.assertTrue(
+            output.startswith("AI-SESSION-EVIDENCE: NOT_APPLICABLE"),
+            output,
+        )
+
+    def test_pr_opened_after_the_effective_time_without_a_declaration_fails(
+        self,
+    ):
+        # Same silent body, same historical Issue, but the PR itself was
+        # opened after the effective time. Without the Pr-date conjunct
+        # this world returns NOT_APPLICABLE and the declaration
+        # requirement becomes opt-in by silence.
+        world = make_valid_world(
+            pr_created="2100-01-01T00:00:00Z",
+            issue_created="2020-01-01T00:00:00Z",
+            issue_body=ISSUE_BODY_UNDECLARED,
+            pr_body="Related issue(s): #101\n",
+        )
+        self.install_world(world)
+        result, output = self.capture_validator()
+        self.assertEqual(result, 1)
+        self.assertNotIn("NOT_APPLICABLE", output)
+        self.assertIn("PR: missing AI-assisted work declaration", output)
+
     def test_pre_effective_pr_with_post_effective_issue_requires_declaration(
         self,
     ):

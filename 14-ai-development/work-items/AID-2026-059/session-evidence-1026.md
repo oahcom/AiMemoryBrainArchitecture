@@ -131,6 +131,13 @@ canonical manifest entry may name a `LEGACY_UNDECLARED` row. The branch was
 rebased; the manifest entry for this session now names Issue #1026 rather than
 attributing its evidence at PR scope, because that attribution became legal.
 
+A later review added one more bound to the same guard: the exemption now also
+requires the pull request itself to have been opened before the effective time.
+Checking only the Issues was not enough, because every Issue here predates the
+policy and declares nothing, so a silent pull request was exempted and "link an
+old Issue and say nothing" would have been a permanent way out from the
+effective time onwards. The condition is now date-bounded at both ends.
+
 **What could not be verified.**
 
 - The workflow job reads the validator from the **base** revision, so the first
