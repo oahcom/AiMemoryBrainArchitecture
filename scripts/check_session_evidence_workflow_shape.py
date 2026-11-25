@@ -31,8 +31,12 @@ Parsing is regex-over-raw-text, deliberately. The repository has no YAML
 parser available (PyYAML and node `yaml` both fail to install in this tree), so
 this follows scripts/check_declared_check_contexts.py rather than adding a
 dependency. ponytail: indentation-based block scanning, not YAML semantics; a
-`ref:` inside a `run:` block scalar would read as a key. Upgrade path: swap the
-block scanner for a real parser if one ever becomes installable.
+`ref:` or `needs:` inside a `run:` block scalar whose text happens to sit at the
+key's indent would read as a key. The verdict job's `run:` bodies are indented
+ten spaces and a job-level key four, so this tree is safe; a future step that
+shells out at four-space indent would need the scanner replaced by a real
+parser. Upgrade path: swap the block scanner for a real parser if one ever
+becomes installable.
 """
 
 from __future__ import annotations
@@ -40,6 +44,7 @@ from __future__ import annotations
 import re
 import sys
 from pathlib import Path
+from typing import NamedTuple
 
 WORKFLOW_PATH = ".github/workflows/session-evidence.yml"
 
@@ -53,77 +58,104 @@ JOB_ID_RE = re.compile(r"^  ([A-Za-z_][\w-]*):\s*$")
 STEP_START_RE = re.compile(r"^(\s*)- \s*\S")
 CHECKOUT_RE = re.compile(r"^\s*(?:-\s*)?uses:\s*actions/checkout")
 REF_KEY_RE = re.compile(r"^\s*(?:-\s*)?ref:\s*\S")
-NEEDS_KEY_RE = re.compile(r"^    needs:\s*\S")
+# A job-level key is at 4-space indent. `needs:` may put its value on the same
+# line (flow form, `needs: [a, b]`) or on the following lines (block form,
+# `needs:` alone) -- both are the dependency the guard forbids, so both match.
+NEEDS_KEY_RE = re.compile(r"^    needs:(\s*\S|\s*$)")
 
 
-def job_blocks(text: str) -> dict[str, str] | None:
+class JobBlock(NamedTuple):
+    """One job's raw lines, plus the 1-based file line its first line came from."""
+
+    text: str
+    first_line: int
+
+
+class StepBlock(NamedTuple):
+    """One step's raw lines, plus the 1-based file line its first line came from."""
+
+    text: str
+    first_line: int
+
+
+def job_blocks(text: str) -> dict[str, JobBlock] | None:
     """Map job id -> that job's raw block. None if the `jobs:` map is absent."""
     lines = text.splitlines()
     start = next((i for i, line in enumerate(lines) if line.rstrip() == "jobs:"), None)
     if start is None:
         return None
 
-    blocks: dict[str, str] = {}
+    blocks: dict[str, JobBlock] = {}
     current: str | None = None
     body: list[str] = []
+    body_start = 0
 
-    for line in lines[start + 1:]:
+    for offset, line in enumerate(lines[start + 1:], start=start + 2):
         if line and not line[0].isspace() and not line.startswith("#"):
             break  # a column-0 key ends the jobs mapping
 
         match = JOB_ID_RE.match(line)
         if match:
             if current is not None:
-                blocks[current] = "\n".join(body)
+                blocks[current] = JobBlock("\n".join(body), body_start)
             current = match.group(1)
             body = []
+            body_start = offset + 1
             continue
 
         if current is not None:
             body.append(line)
 
     if current is not None:
-        blocks[current] = "\n".join(body)
+        blocks[current] = JobBlock("\n".join(body), body_start)
 
     return blocks or None
 
 
-def steps(block: str) -> list[str]:
+def steps(block: JobBlock) -> list[StepBlock]:
     """Split one job block into step blocks, one per `- ` list entry."""
-    found: list[str] = []
+    found: list[StepBlock] = []
     indent: str | None = None
     body: list[str] = []
+    body_start = 0
 
-    for line in block.splitlines():
+    for offset, line in enumerate(block.text.splitlines(), start=block.first_line):
         match = STEP_START_RE.match(line)
         if match and (indent is None or match.group(1) == indent):
             indent = match.group(1)
             if body:
-                found.append("\n".join(body))
+                found.append(StepBlock("\n".join(body), body_start))
             body = [line]
+            body_start = offset
             continue
         if body:
             body.append(line)
 
     if body:
-        found.append("\n".join(body))
+        found.append(StepBlock("\n".join(body), body_start))
     return found
 
 
-def _checkout_refs(block: str) -> list[str]:
-    """Checkout steps in this job block that declare a `ref:` key."""
+def _checkout_refs(block: JobBlock) -> list[str]:
+    """`line N: ref: ...` for each checkout step in this job that declares `ref:`.
+
+    The offender is the `ref:` line, not the step's `uses:` line: the action
+    reference is the one line in such a step that is already correct, so naming
+    it sends the reader to look for a `ref:` that is not there (#1045).
+    """
     offenders = []
     for step in steps(block):
-        if not any(CHECKOUT_RE.match(line) for line in step.splitlines()):
+        step_lines = step.text.splitlines()
+        if not any(CHECKOUT_RE.match(line) for line in step_lines):
             continue
-        if any(REF_KEY_RE.match(line) for line in step.splitlines()):
-            offenders.append(next(
-                line.strip() for line in step.splitlines() if CHECKOUT_RE.match(line)
-            ))
+        for offset, line in enumerate(step_lines, start=step.first_line):
+            if REF_KEY_RE.match(line):
+                offenders.append(f"line {offset}: {line.strip()}")
+                break
     return offenders
 
 
-def violations(blocks: dict[str, str]) -> list[str]:
+def violations(blocks: dict[str, JobBlock]) -> list[str]:
     """Every violated property, named specifically. Empty means conformant."""
     found: list[str] = []
 
@@ -145,12 +177,17 @@ def violations(blocks: dict[str, str]) -> list[str]:
             )
 
     if VERDICT_JOB in blocks:
-        if any(NEEDS_KEY_RE.match(line) for line in blocks[VERDICT_JOB].splitlines()):
-            found.append(
-                f"the {VERDICT_JOB!r} job declares `needs:`; the verdict must not "
-                "depend on another job, or a PR can suppress it by breaking that "
-                f"job (job: {VERDICT_JOB})"
-            )
+        for offset, line in enumerate(
+            blocks[VERDICT_JOB].text.splitlines(),
+            start=blocks[VERDICT_JOB].first_line,
+        ):
+            if NEEDS_KEY_RE.match(line):
+                found.append(
+                    f"the {VERDICT_JOB!r} job declares `needs:` "
+                    f"(line {offset}: {line.strip()}); the verdict must not "
+                    "depend on another job, or a PR can suppress it by breaking "
+                    f"that job (job: {VERDICT_JOB})"
+                )
 
     return found
 
