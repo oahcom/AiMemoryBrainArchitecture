@@ -2,16 +2,26 @@ use memory_event_store_sqlite::forget_fence::{ForgetFence, ForgetFenceError};
 use rusqlite::{params, Connection};
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{mpsc, Arc, Barrier};
 use std::thread;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 fn temp(name: &str) -> PathBuf {
+    // The counter, not the clock, is what makes the name unique: the Windows
+    // tick is coarse enough for two tests to read the same nanos. Unique per
+    // process only; two processes sharing a temp dir still collide -- swap in
+    // `tempfile::TempDir` if that ever matters.
+    static COUNTER: AtomicU64 = AtomicU64::new(0);
+    let seq = COUNTER.fetch_add(1, Ordering::Relaxed);
     let n = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap()
         .as_nanos();
-    std::env::temp_dir().join(format!("forget-fence-it-{name}-{}-{n}", std::process::id()))
+    std::env::temp_dir().join(format!(
+        "forget-fence-it-{name}-{}-{n}-{seq}",
+        std::process::id()
+    ))
 }
 fn schema(path: &Path) {
     let db = Connection::open(path).unwrap();
