@@ -65,7 +65,7 @@ Measured at `ac0f0dfd`:
 | embedded list | 18 entries vs the authority's 21 | imported from the authority, no copy |
 | side-by-side pairing outside `14-ai-development` | not recognised | recognised |
 | gate B violations | 81 | 77 |
-| gate A vs gate B baselines | two divergent sets, 12 apart | byte-identical, 77 = 77 |
+| gate A vs gate B baselines | two divergent sets, 12 apart | same 77 entries in the same order — but **not** byte-identical: `scripts/ci/baselines/bilingual-docs.txt` is blob `6166b186`, 6934 bytes, `scripts/bilingual-baseline.txt` is blob `b7f3dc33`, 7119 bytes. `diff` reports only a three-line comment header and a missing trailing newline; no entry differs. 77 = 77 holds at the entry level, which is the level AC2 and AC9 act on |
 | `.zh-CN.md` mirrors asked for a mirror of themselves | 3 of 4 | 0 of 64 |
 
 ---
@@ -102,7 +102,7 @@ Both are real backlog. Neither is a false positive. The prompt's sentence "the n
 
 AC6 then requires "`NORMATIVE_ROOTS` is byte-identical to its pre-change value … and the seven non-existent roots are still listed." The pre-change value no longer exists in the tree; the seven roots were removed by #910 and `08-bmcp-protocol` was added. **An implementer obeying AC6 literally would have to reintroduce a defect in order to pass.** AC6 is withdrawn, not deferred.
 
-**(F) §2's control case is still valid.** `13-engineering-decisions/technology-architecture-blueprint.md` is still `cjk=0`, still a violation, still the file a too-permissive predicate would wrongly resolve. AC4 stands unchanged.
+**(F) §2's control case is still valid.** `13-engineering-decisions/technology-architecture-blueprint.md` is still `cjk=0`, still a violation, still the file a too-permissive predicate would wrongly resolve. AC4's *requirement* stands unchanged; its *byte anchor* does not, and that is not item (F) — see AC4 in `manifest.yaml`: the prompt's 49666 matches no blob in git history, and REVIEW-01 finding M1 replaced it with 49758, the git blob size with LF.
 
 ---
 
@@ -125,7 +125,7 @@ These replace §6. Each is checkable without trusting this file.
 - **AC1′** — `python3 scripts/check_bilingual_docs_full.py` reports **11** violations, and the eleven are exactly: the prompt's nine C paths minus nothing, plus the two `08-bmcp-protocol` paths in §2(B). Set equality, not a count.
 - **AC2′** — The baseline diff is **66 removals, 0 additions**, and the 66 are exactly the paths for which `cjk >= 100 and latin >= 1000` holds in the current 77.
 - **AC3′** — Withdrawn: satisfied by #910. A regression test may assert it, but no implementer action is required.
-- **AC4** — unchanged; `technology-architecture-blueprint.md` is still a violation.
+- **AC4** — unchanged in requirement, corrected in byte anchor: `technology-architecture-blueprint.md` is still a violation. The prompt's 49666 matches no blob in git history; REVIEW-01 finding M1 replaced it with **49758**, the git blob size with LF line endings (50488 is the same blob checked out with CRLF). `manifest.yaml` AC4 is authoritative.
 - **AC5** — unchanged; both floor boundaries asserted from both sides.
 - **AC6′** — Withdrawn. Replaced by two separate assertions:
   - **AC6a** — this work item does not modify `NORMATIVE_ROOTS`. The derived-root guard from #910 still exits 0.
