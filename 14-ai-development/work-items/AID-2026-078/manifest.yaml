@@ -66,10 +66,12 @@ acceptance_criteria:
       found.
     measurement: >-
       A run over the real tree exits 0, and the printed count equals
-      `ls 14-ai-development/work-items/*/manifest.yaml | wc -l`. The count is of
-      manifest files, not `AID-*` directories: `FIX-2026-P1-T1/manifest.yaml` is a
-      committed manifest and parses today, and excluding it would need a name-based
-      exclusion rule that R7 forbids.
+      `git ls-files '14-ai-development/work-items/*/manifest.yaml' | wc -l`. Counted by file and
+      not by directory: `ls -d 14-ai-development/work-items/AID-*/ | wc -l` undercounts by
+      exactly one, because 14-ai-development/work-items/FIX-2026-P1-T1/manifest.yaml is
+      committed and carries no AID id. Excluding it by directory name would be a D3 admission
+      rule, which the R7 owner ruling at
+      14-ai-development/work-items/AID-2026-057/manifest.yaml:115 forbids writing.
   - id: AC2
     criterion: >-
       A duplicate key fails even where the default loader would accept the document, so that
@@ -159,8 +161,8 @@ implementation:
   pull_request: PENDING
   merge_commit_sha: NOT_MERGED
   note: >-
-    Registration only. The checker, its test module and the workflow step are not written. The
-    four repairs this work item depends on were made by b34c8e37 and are not this work item's.
+    The checker, its test module and one workflow step are written in this branch. The four
+    repairs this work item depends on were made by b34c8e37 and are not this work item's.
 
 review:
   status: NOT_ASSIGNED
