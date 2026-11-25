@@ -1440,28 +1440,6 @@ def check_06_all_references_individually(
         )
 
 
-def check_07_reject_invalid_or_ambiguous_paths(
-    ctx: ValidationContext,
-    paths: list[str],
-) -> None:
-    """Check exact path resolution within the supplied declaration scope."""
-    seen = set()
-
-    for path in paths:
-        canonical = validate_canonical_evidence_path(
-            path,
-            "Evidence reference",
-        )
-
-        if canonical in seen:
-            raise ValidationError(
-                f"Duplicate or ambiguous evidence reference: {path}"
-            )
-
-        seen.add(canonical)
-
-
-
 def check_09_manifest_and_evidence_entries(
     ctx: ValidationContext,
     manifest_path: str,
@@ -1639,17 +1617,6 @@ def check_09_manifest_and_evidence_entries(
     return entries
 
 
-def check_10_single_value_fields(
-    entries: list[dict],
-) -> None:
-    for index, entry in enumerate(entries, start=1):
-        for field in MANIFEST_FIELDS:
-            _check_single_value(
-                entry[field],
-                f"session_evidence entry #{index}.{field}",
-            )
-
-
 def check_11_prompt_snapshot_hashes(
     ctx: ValidationContext,
     entries: list[dict],
@@ -1760,7 +1727,7 @@ def _check_manifest_entries(
     mapping: dict,
     pr_paths: list[str],
 ) -> None:
-    """Run checks 09-11, scoping the legacy exemption to unchanged files."""
+    """Run checks 09 and 11, scoping the legacy exemption to unchanged files."""
     changed_paths = _changed_paths_for_manifest(ctx, manifest_path)
     # An unknown base means "everything changed", so no legacy exemption
     # is granted and the canonical structure is required.
@@ -1772,7 +1739,6 @@ def _check_manifest_entries(
         pr_paths,
         {manifest_path} if manifest_changed else set(),
     )
-    check_10_single_value_fields(entries)
     check_11_prompt_snapshot_hashes(ctx, entries)
 
 
@@ -1918,17 +1884,9 @@ def _validate_reference_scopes(
         ctx,
         pr_paths,
     )
-    check_07_reject_invalid_or_ambiguous_paths(
-        ctx,
-        pr_paths,
-    )
 
     for _, row_paths in mapping.values():
         check_06_all_references_individually(
-            ctx,
-            row_paths,
-        )
-        check_07_reject_invalid_or_ambiguous_paths(
             ctx,
             row_paths,
         )

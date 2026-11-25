@@ -16,7 +16,8 @@ Usage:
         --format paths \
         --command "python3 scripts/check_bilingual_docs_full.py"
 
-Exit codes: 0 ratchet holds, 1 regression or stale baseline, 2 usage/IO error.
+Exit codes: 0 ratchet holds, 1 regression, stale baseline, or a wrapped
+command that exited non-zero without reporting an item, 2 usage/IO error.
 
 ponytail: `--format schema` is now uncalled -- the only gate that used it
 (`schema-nonempty`) went green and became a hard gate, and its baseline was
@@ -100,8 +101,9 @@ def main(argv: list[str] | None = None) -> int:
         errors="replace",
     )
     # Items are printed to stdout. stderr carries interpreter warnings and
-    # tracebacks, which are not items; a crash yields zero items and is caught
-    # below as a stale baseline (fail-closed), never as a pass.
+    # tracebacks, which are not items. A command that exits non-zero without
+    # printing an item has not reported a failure set at all; that is checked
+    # below, because an empty set minus an empty baseline is otherwise a pass.
     current = normalize(proc.stdout.splitlines(), args.format)
 
     current_set, baseline_set = set(current), set(baseline)
@@ -111,6 +113,16 @@ def main(argv: list[str] | None = None) -> int:
     print(f"ratchet: {args.baseline.as_posix()}")
     print(f"ratchet: baseline={len(baseline)} current={len(current)} "
           f"regressions={len(regressions)} fixed={len(fixed)}")
+
+    if proc.returncode not in (0, 1):
+        print(f"ratchet: FAIL - the wrapped command exited {proc.returncode}; "
+              "only 0 (clean) and 1 (red) carry a comparable failure set.")
+        return 1
+
+    if proc.returncode != 0 and not current:
+        print(f"ratchet: FAIL - the wrapped command exited {proc.returncode} "
+              "without printing any item; a crash is not a clean run.")
+        return 1
 
     for item in regressions:
         print(f"::error::ratchet regression (new failure not in baseline): {item}")

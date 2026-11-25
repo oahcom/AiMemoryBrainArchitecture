@@ -872,6 +872,34 @@ YES
         self.install_world(world)
         self.assertNotEqual(run_validator(), 0)
 
+    def test_rejects_duplicate_evidence_reference_within_one_scope(self):
+        # The same path twice in one Issue row is a duplicate in that
+        # declaration scope. _parse_reference_lines is the only reachable
+        # implementation of the rule: check_06 and check_07 are handed lists
+        # this parser has already deduplicated, so they never see the pair.
+        # This test fails if the parser's duplicate check is removed.
+        body = make_pr_body(
+            refs=[EVIDENCE_A],
+            issue_refs=[EVIDENCE_A, EVIDENCE_A],
+        )
+        world = make_valid_world(pr_body=body)
+        self.install_world(world)
+        result, output = self.capture_validator()
+        self.assertNotEqual(result, 0)
+        self.assertIn("duplicate evidence references", output)
+
+    def test_check_06_rejects_duplicates_if_handed_them(self):
+        # In production _parse_reference_lines rejects a duplicate pair before
+        # check_06 runs, so no black-box input reaches this branch. It is kept
+        # as the per-scope check and is called directly here; deleting the
+        # branch makes this test fail, which is the point.
+        ctx = make_context(make_valid_world())
+        with self.assertRaises(validate.ValidationError):
+            validate.check_06_all_references_individually(
+                ctx,
+                [EVIDENCE_A, EVIDENCE_A],
+            )
+
     def test_declared_path_missing_from_head_tree(self):
         world = make_valid_world()
         absent_path = (
