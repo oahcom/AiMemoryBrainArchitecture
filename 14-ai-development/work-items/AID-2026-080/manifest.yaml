@@ -22,6 +22,7 @@ repository:
   url: "https://github.com/oahcom/AiMemoryBrainArchitecture"
   baseline_branch: "main"
   baseline_commit: "6314a65bd8be48c1a4bb0768e9960c4c808110ab"
+base_commit_sha: "6314a65bd8be48c1a4bb0768e9960c4c808110ab"
   implementation_branch: "impl/2026-11-26-normative-source-restore"
   carrier: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1220"
 
@@ -116,7 +117,7 @@ session_evidence:
 
 formal_registration:
   status: "COMPLETED_ON_CANDIDATE_BRANCH_WITH_BOUNDED_IDENTIFIER_SCAN"
-  index_entry_verified: "PENDING_READBACK"
+  index_entry_verified: true
   identifier_allocation: "AID-2026-080"
   retrospective_registration: true
   note: >-
