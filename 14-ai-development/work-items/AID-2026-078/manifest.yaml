@@ -16,14 +16,11 @@ status: DISPATCHED
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
 acceptance_authority: NOT_ASSIGNED
-implementing_ai_session: "REGISTERED_BY_MEASURING_SESSION (session identity: NOT_RECORDED)"
 
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: 8f694edf
-tracking_issue: >-
-  NONE - registered from a measurement taken in this session, and from the deferral written
-  into commit b34c8e37, which names this work rather than an issue.
+base_commit_sha: 8f694edf73cf79fab11c08e4cbf4b1a6c17256cd
+tracking_issue: "NONE - registered from a measurement taken in this session, and from the deferral written into commit b34c8e37, which names this work rather than an issue."
 
 prompt_id: AID-2026-078-PROMPT
 prompt_version: 1
