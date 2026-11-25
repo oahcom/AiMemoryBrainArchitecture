@@ -8,6 +8,10 @@ from scripts.governance.session_evidence import validate
 
 REPOSITORY = "oahcom/AiMemoryBrainArchitecture"
 HEAD_SHA = "a" * 40
+# Exists only to construct the "not yet effective" world: every fixture PR is
+# dated before 2099, so the policy is never in force for it. The production
+# value in .github/workflows/session-evidence.yml is pinned separately, by
+# ProductionEffectiveTimeBoundaryTests in test_validate.py (#1063).
 EFFECTIVE_AT = "2099-01-01T00:00:00Z"
 EVIDENCE_A = "14-ai-development/work-items/AID-2026-001/evidence/session-a.md"
 EVIDENCE_B = "14-ai-development/work-items/AID-2026-001/evidence/session-b.md"
