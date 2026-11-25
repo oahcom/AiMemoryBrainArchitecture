@@ -54,7 +54,7 @@ document_metadata:
 - 文档 ID：D-CANONICAL-STORE-001
 - 版本：1.0
 - 源分支：session-d-memory-brain-2026-11-16
-- 源文件版本：4d7d4db0585bb2e543881758bf27a8cbb0e323fa
+- 源文件版本：d47366d1ca04da37ff77f6edd31fe42efc93e0f9
 - 审查时源分支 HEAD：6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
 - 源规范：[D 规范源](../../../03-memory-brain/canonical-memory-store.md)（源提交 `b525e1f8fee2471a131e4a38efda99804045e424`；原始源 Blob `6b37c91033fda21f072e2a3bde6f274663b1e76e`）。
 - 对应英文：[Canonical Memory Store](../../en/03-memory-brain/canonical-memory-store.md)
