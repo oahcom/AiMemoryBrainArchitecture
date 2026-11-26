@@ -56,7 +56,10 @@ The structured scope snapshot is preserved in `prompt-v1.md`. It is a reconstruc
 - `audit` and `rust-workspace-test` declare explicit display names matching the protected contexts.
 - No jobs were merged, no `fetch-depth` changed, and no gate script or validator semantics were changed.
 - The work item was renumbered from provisional AID-2026-112 after collision discovery; final carrier PR is #1322.
-- Exact-head CI, merge and post-merge blob readback remain pending at this snapshot.
+- Exact-head CI: 16/16 required contexts SUCCESS on `eaf381a9af28ebf86e7ee094f60adaaacc0d97ca`.
+- Merge: PR #1322 merged at `ac301e09799bcc094e015db4e12d2e6ff53d5010`.
+- Post-merge blob readback: 15/15 changed paths match the PR-head blob SHAs; the full table is in the Canonical evidence document.
+- Issue #1212 comment id: `7194114609`; Issue remains OPEN.
 
 # Unavailable / not recorded
 
@@ -64,3 +67,12 @@ The structured scope snapshot is preserved in `prompt-v1.md`. It is a reconstruc
 - Verbatim platform prompt/transcript: `NOT_RECORDED`; `prompt-v1.md` is a reconstructed scope snapshot.
 - Independent reviewer: `NOT_ASSIGNED`.
 - Rust cache hit rate: `NOT_YET_MEASURED`; observe the next CI cycle.
+
+# Post-merge closeout
+
+- Implementation PR: #1322
+- Merge commit: `ac301e09799bcc094e015db4e12d2e6ff53d5010`
+- Required contexts: 16/16 SUCCESS.
+- Post-merge blob readback: 15/15 MATCH.
+- Issue #1212 comment: 7194114609; Issue remains OPEN.
+- Cache hit rate: NOT YET MEASURED; next CI cycle is required for observation.

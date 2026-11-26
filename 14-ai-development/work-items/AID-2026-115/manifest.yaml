@@ -1,7 +1,7 @@
 manifest_version: "1.0"
 record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
 registration_stage: "STAGE_0"
-registration_status: "CARRIER_PR_OPEN"
+registration_status: "CARRIER_PR_MERGED"
 work_item_id: "AID-2026-115"
 id_status: "PROVISIONAL"
 title: "Eliminate duplicate required Gate dispatch and cache Rust CI builds"
@@ -73,9 +73,12 @@ acceptance_criteria:
   - id: AC6
     criterion: "All 16 required contexts succeed on exact final PR head; merge is followed by main blob readback."
 implementation:
-  status: "DRAFT_PR"
+  status: "MERGED"
   branch: "ai/AID-2026-115/ops-gate-concurrency-rust-cache"
   pull_request: "1322"
+  merge_commit_sha: "ac301e09799bcc094e015db4e12d2e6ff53d5010"
+  merged_head_sha: "eaf381a9af28ebf86e7ee094f60adaaacc0d97ca"
+  merge_method: "merge"
 review:
   status: "NOT_ASSIGNED"
 acceptance:
@@ -93,3 +96,15 @@ session_evidence:
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: "14-ai-development/work-items/AID-2026-115/session-evidence.md"
+
+post_merge_verification:
+  status: VERIFIED
+  verified_at: "2026-11-26"
+  merge_commit_sha: "ac301e09799bcc094e015db4e12d2e6ff53d5010"
+  exact_head_sha: "eaf381a9af28ebf86e7ee094f60adaaacc0d97ca"
+  required_contexts_total: 16
+  required_contexts_success: 16
+  blob_readback_total: 15
+  blob_readback_match: 15
+  issue_1212_comment_id: 7194114609
+  cache_hit_rate: NOT_YET_MEASURED
