@@ -54,7 +54,7 @@ authorization:
   decision_date: "2026-11-26"
 repository:
   base_branch: main
-  base_commit_sha: 47fcd80720b742d9c5d3ae137593c59b5cc768a9
+  base_commit_sha: 81906cfc8d3cd477d26657520aa04d81466e7ce2
   branch: docs/2026-11-26-normative-approval-stack-1219
   pull_request: 1256
 session:
@@ -64,7 +64,7 @@ session:
   session_reference_reason: "The exact current ChatGPT session identifier is not exposed in this execution context; no historical session identifier was substituted."
 prompt:
   file: 14-ai-development/work-items/AID-2026-096/prompt-v1.md
-  sha256: 6f30cedb322d7c9cc1d76481ac2d1fb1c82877804dd0d5ae781d8758e96d9c4f
+  sha256: 0ebc78aefd4d29d66ee6a77cf760a590eb67c70a1e215ef384b8bc41aee128ca
   bytes: 2757
   provenance: NOT_VERIFIED
   provenance_reason: "Captured from the current user instruction; no external signature or independent transcript attestation is claimed."
