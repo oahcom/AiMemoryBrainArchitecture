@@ -22,6 +22,19 @@ HEADERS = {
     FILES[2]: ("操作", "策略/授权权威", "规范状态权威", "物理执行者", "最低完成证据/边界"),
 }
 EXPECTED_OPERATIONS = 7
+EXPECTED_OPERATION_MARKERS = {
+    FILES[0]: ("Authorization and revocation", "Retention and legal hold",
+               "Logical Forget suppression / fence", "Physical erasure",
+               "Backup expiry / deletion", "External-recipient deletion",
+               "Global Forget Completion assessment"),
+    FILES[1]: ("Authorization and revocation", "Retention and legal hold",
+               "Logical Forget suppression / fence", "Physical erasure",
+               "Backup expiry / deletion", "External-recipient deletion",
+               "Global Forget Completion assessment"),
+    FILES[2]: ("授权与撤销", "Retention 与 Legal Hold", "逻辑 Forget 抑制/围栏",
+               "物理擦除", "备份到期/删除", "外部接收方删除",
+               "Global Forget Completion 判定"),
+}
 FALSE_COMPLETION = (
     re.compile(r"\b(?:Forgotten state|D fence|canonical fence)\b.{0,100}\b(?:proves|means|confirms)\b.{0,40}\b(?:physical erasure|global completion)\b", re.I),
     re.compile(r"\bOwner\s+[DI]\b.{0,60}\b(?:may|can)\b.{0,30}\b(?:declare|claim)\b.{0,30}\bcompletion\b.{0,20}\balone\b", re.I),
@@ -72,6 +85,10 @@ def check(root: Path) -> tuple[int, list[str]]:
         row_counts.append(len(rows))
         if len(rows) != EXPECTED_OPERATIONS:
             errors.append(f"{relative}: expected {EXPECTED_OPERATIONS} operations, found {len(rows)}")
+        operation_names = [row[0] for row in rows if len(row) == 5]
+        for marker in EXPECTED_OPERATION_MARKERS[relative]:
+            if not any(marker.casefold() in name.casefold() for name in operation_names):
+                errors.append(f"{relative}: missing expected governance operation: {marker}")
         for number, cells in enumerate(rows, 1):
             if len(cells) != 5:
                 errors.append(f"{relative}: row {number} has {len(cells)} columns, expected 5")
@@ -86,8 +103,8 @@ def check(root: Path) -> tuple[int, list[str]]:
                     errors.append(f"{relative}: row {number} {label} is empty")
                 elif "NOT_ASSIGNED" in value:
                     errors.append(f"{relative}: row {number} {label} is NOT_ASSIGNED; operation remains open")
-            if policy and executor and policy.casefold() == executor.casefold():
-                errors.append(f"{relative}: row {number} collapses policy authority and physical executor into the same entry")
+            if executor and executor.casefold() in {policy.casefold(), canonical.casefold()}:
+                errors.append(f"{relative}: row {number} collapses an authority role into the physical executor entry")
         for pattern in FALSE_COMPLETION:
             match = pattern.search(text)
             if match:
