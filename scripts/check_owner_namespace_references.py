@@ -68,8 +68,8 @@ def violations(text: str) -> list[tuple[int, str, str]]:
 def mirror_signature(text: str) -> tuple[int, int, frozenset[str]]:
     """Language-neutral shape: table rows, formal Owner citations, SYS IDs."""
     table_rows = sum(1 for line in text.splitlines() if line.lstrip().startswith("|"))
-    owner_refs = len(re.findall(r"\\bOwner [A-I]\\b", text))
-    sys_ids = frozenset(re.findall(r"\\bSYS-[A-Z0-9]+(?:-[A-Z0-9]+)*\\b", text))
+    owner_refs = len(re.findall(r"\bOwner [A-I]\b", text))
+    sys_ids = frozenset(re.findall(r"\bSYS-(?:MEMORY-BRAIN|MEMORY-COMPILER|MEMORY-RUNTIME|CROSS-CUTTING)\b", text))
     return table_rows, owner_refs, sys_ids
 
 def check(root: Path) -> tuple[int, list[str]]:
