@@ -8,7 +8,7 @@ accountable_owner: Owner G
 acceptance_authority: "Owner G with dependent Owners B, D, I and Storage/Consistency; Owner A governance review"
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: 9ee89b322a160cc7ea5bcbd44ae2151850e289a0
+base_commit_sha: 9e54e6ccec0d07d11fcf36b2a85b888ded747cdc
 tracking_issue: "#1144, #1151"
 authorization:
   authorized_by: "user-authorized operator (delegated by account owner)"
