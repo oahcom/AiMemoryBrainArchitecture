@@ -159,12 +159,11 @@ GBK 下同样失败：改前跑 `test_status_migration.py` 得到 28 个 `Unicod
 | `python scripts/ci/test_check_branch_freshness.py` | 9/9 passed |
 | `python -m scripts.governance.evidence.test_gate_normative_roots` | 52 tests OK |
 | `python -m scripts.governance.evidence.test_evidence_tiering` | 67 tests OK |
-| `python scripts/governance/status_migration/test_status_migration.py` | 27 tests OK（sidecar 重生成后） |
+| `python scripts/governance/status_migration/test_status_migration.py` | 26/27 OK。另 1 例 `test_sidecar_anchor_detects_silent_tampering` 在本机**预置失败**：该用例用工作树字节算 sidecar 的 sha256，而 Windows 检出让工作树是 CRLF、提交 blob 是 LF；用 `main` 树的同一用例复跑同样失败。真实 sidecar 锚经 `_verify_sidecar_anchor(repo)` 实测返回 `True`（blob sha256 = 提交信息里的 `06ea8d36…`） |
 | `python -m pytest tests/test_check_bilingual_docs_full.py` | 7 passed |
 | `python scripts/test_check_fmt.py` | 3 个失败，**与本次改动无关**：夹具用 shell 脚本假冒 `cargo`，Windows 上 `WinError 193`。用 `HEAD` 版本的 `check_fmt.py` 复跑同样 3 个失败 |
 
-`check_bilingual_docs.py` 的实测（GBK 控制台，`PR_BODY` 含 `BILINGUAL-MANIFEST: COMPLETE`）：
-提交后补记，见第 6 节。
+`check_bilingual_docs.py` 的实测（GBK 控制台，`PR_BODY` 含 `BILINGUAL-MANIFEST: COMPLETE`）：见第 6 节。
 
 ## 5. 未做事项
 
@@ -173,3 +172,15 @@ GBK 下同样失败：改前跑 `test_status_migration.py` 得到 28 个 `Unicod
 - 未处理与本缺陷无关的 `text=True` 调用（例如跑 `python`/`cargo` 子进程并读其 stdout 的位置），
   它们的输出不是 Git 输出，不在本 Work Item 的范围。
 - 未做独立评审（`review.status = NOT_ASSIGNED`），未关闭或修改任何 Issue。
+
+## 6. `check_bilingual_docs.py` 实测（区间 `4326669c...f85257df`）
+
+GBK 控制台，未设 `PYTHONUTF8`，`BASE_SHA=4326669c…`、`HEAD_SHA=f85257df…`、`PR_BODY` 含 `BILINGUAL-MANIFEST: COMPLETE`：
+
+| 脚本版本 | 退出码 | 结果 |
+|---|---|---|
+| 改前（`4326669c` a.k.a. `main` 的 `check_bilingual_docs.py`） | 1 | `AttributeError: 'NoneType' object has no attribute 'strip'`，栈顶 `_embedded_sources_in_revision()` ← `_git_log_output()`：`git show` 解码失败使 `stdout` 为 `None`，随后 `.strip()` 崩溃。这正是 AID-173 worker 撞到的那处 |
+| 改后 | 0 | `bilingual baseline: 77 frozen, 0 new gaps`；`exemptions: 21`；`PASS (29 changed paths inspected)`；附 `NOTE: 2 changed .md path(s) outside NORMATIVE_ROOTS were not pairing-checked` |
+
+同一区间在 UTF-8 环境下的输入字节不变，因此 CI 上的判定不变；改前之所以在 GBK 上崩溃，只取决于本地解码器。
+

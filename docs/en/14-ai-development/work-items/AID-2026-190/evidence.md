@@ -129,7 +129,7 @@ Comparing rows two and three line by line: the verdict lines, the count lines an
 | `python scripts/ci/test_check_branch_freshness.py` | 9/9 passed |
 | `python -m scripts.governance.evidence.test_gate_normative_roots` | 52 tests OK |
 | `python -m scripts.governance.evidence.test_evidence_tiering` | 67 tests OK |
-| `python scripts/governance/status_migration/test_status_migration.py` | 27 tests OK (after the sidecar regeneration) |
+| `python scripts/governance/status_migration/test_status_migration.py` | 26/27 OK. The remaining case, `test_sidecar_anchor_detects_silent_tampering`, **fails on this machine before this change as well**: it hashes the working-tree bytes of the sidecar, while a Windows checkout materialises CRLF where the committed blob is LF. The same single case fails when run against the `main` tree. The real anchor was checked directly: `_verify_sidecar_anchor(repo)` returns `True` (blob SHA-256 equals the `06ea8d36…` in the commit message) |
 | `python -m pytest tests/test_check_bilingual_docs_full.py` | 7 passed |
 | `python scripts/test_check_fmt.py` | 3 failures, **unrelated to this change**: the fixture fakes `cargo` with a shell script, which Windows refuses to execute (`WinError 193`). The same three fail with the `HEAD` copy of `check_fmt.py` |
 
@@ -139,3 +139,14 @@ Comparing rows two and three line by line: the verdict lines, the count lines an
 - DM-10's stale-approval semantics and `current_bilingual_gaps()` were not touched.
 - `text=True` calls unrelated to this defect (for example reading the stdout of `python`/`cargo` subprocesses) were left alone: their output is not Git output and is outside this Work Item.
 - No independent review was performed (`review.status = NOT_ASSIGNED`); no Issue was closed or modified.
+
+## 6. `check_bilingual_docs.py` measured (range `4326669c...f85257df`)
+
+Code page 936, `PYTHONUTF8` unset, `BASE_SHA=4326669c…`, `HEAD_SHA=f85257df…`, `PR_BODY` containing `BILINGUAL-MANIFEST: COMPLETE`:
+
+| Script version | Exit | Result |
+|---|---|---|
+| before (the `check_bilingual_docs.py` of `4326669c`, i.e. `main`) | 1 | `AttributeError: 'NoneType' object has no attribute 'strip'`, raised from `_embedded_sources_in_revision()` via `_git_log_output()`: the failed `git show` decode left `stdout` as `None`, and `.strip()` crashed on it. This is the same site the AID-173 worker hit |
+| after | 0 | `bilingual baseline: 77 frozen, 0 new gaps`; `exemptions: 21`; `PASS (29 changed paths inspected)`; plus `NOTE: 2 changed .md path(s) outside NORMATIVE_ROOTS were not pairing-checked` |
+
+The bytes this gate reads over the same range are unchanged, so its verdict on CI is unchanged; what differed before was only the local decoder.
