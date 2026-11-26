@@ -15,7 +15,7 @@ document_metadata:
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "Owner-delegated direction decision, 2026-11-26"
-        - "Work Item AID-2026-087"
+        - "Work Item AID-2026-090"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -42,7 +42,8 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "06-memory-context/context-version-immutability-decision.md
+    source: "06-memory-context/context-version-immutability-decision.md"
+    zh-CN: "docs/zh-CN/06-memory-context/context-version-immutability-decision.md"
 ---
 # ContextVersion Immutability Decision
 Decision ID: CV-IMM-01
