@@ -1,0 +1,65 @@
+id_status: PROVISIONAL
+work_item_id: AID-2026-109
+title: Restore bounded I Security & Governance root and formally disposition non-restored historical documents
+class: DOC/GOVERNANCE
+risk: R2
+status: DRAFT_PR
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: "I is policy-semantics acceptance authority; no I Owner acceptance recorded"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: a7e7c64bfd6c6d709a0a7b55358f94b8535815c1
+tracking_issues: ["#1211", "#1212"]
+attribution: "user-authorized operator (delegated by account owner)"
+proxy_signature_note: "代理登记，非自然人 Owner 签署"
+source:
+  branch: session-i-security-governance-2026-11-16
+  head_sha: 8abddf814467b271344a9814613a6b7ca6a446c6
+  total_files_under_09_security_governance: 91
+  phase_record_count: 81
+  guide_classification: RECONSTRUCTED_FROM_MIRROR
+  source_branch_guide: NOT_FOUND
+  en_mirror_blob: 061c5847b3df879eeaf3c71e5eae0bfa162b276a
+  zh_cn_mirror_blob: 372d27c79dc79d09bcdb0f142c979efdba1c2b6e
+scope:
+  added:
+    - 09-security-governance/README.md
+    - 09-security-governance/security-governance-guide.md
+    - 14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md
+    - docs/en/14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md
+    - docs/zh-CN/14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md
+    - 14-ai-development/work-items/AID-2026-109/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-109/prompt-v1.md
+  not_restored_by_decision:
+    - forget-retention-backup-and-erasure-policy.md
+    - global-forget-target-inventory-and-completion-evidence.md
+    - principal-actor-and-authorization-contract.md
+    - scope-and-revocation-policy.md
+    - audit-and-exception-governance.md
+    - governance-decision-register.md
+    - threat-model-and-adversarial-test-plan.md
+    - security-and-identity-overview.md
+  excluded:
+    - "All 81 phase records"
+    - "All remaining historical I branch files"
+    - "Changes to 03/04/05, runtime, validator semantics, tests, scripts, workflows, schemas, APIs, DDL, deployment and production configuration"
+acceptance_criteria:
+  - "README Canonical/EN/ZH-CN exist and state I acceptance authority without claiming acceptance"
+  - "Guide is RECONSTRUCTED_FROM_MIRROR with source absence and exact mirror blob provenance"
+  - "Eight historical docs are NOT_RESTORED_BY_DECISION; four detailed policy contracts include eight-mirror rationale"
+  - "81 phase records classified by prefix and not restored"
+  - "AID-2026-089 and AID-2026-099 HIR-18 authority boundaries preserved"
+  - "Exact-head 16 required checks pass and post-merge blobs are verified"
+implementation:
+  branch: docs/aid-2026-109-i-governance-root
+  status: DRAFT_PR
+review:
+  status: NOT_ASSIGNED
+acceptance:
+  status: NOT_ACCEPTED
+  owner_acceptance_count: 0
+  pending:
+    - "I Owner exact-version policy-semantics acceptance"
+    - "HIR-18 implementation and replay evidence"
+    - "COC/GID sealed cryptographic evidence and Storage physical conformance (#1211)"
