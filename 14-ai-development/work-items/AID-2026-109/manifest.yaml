@@ -32,6 +32,12 @@ scope:
     - scripts/check_bilingual_docs.py (NORMATIVE_ROOTS membership only; pairing/checker logic unchanged)
     - 14-ai-development/work-items/AID-2026-109/manifest.yaml
     - 14-ai-development/work-items/AID-2026-109/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-109/session-evidence.md
+  modified:
+    - docs/en/09-security-governance/security-governance-guide.md (GOV-DOC-002 frontmatter only; body preserved)
+    - docs/zh-CN/09-security-governance/security-governance-guide.md (GOV-DOC-002 frontmatter only; body preserved)
+    - scripts/check_bilingual_docs.py (add 09-security-governance to NORMATIVE_ROOTS; pairing rules and checker logic unchanged)
+    - 14-ai-development/work-items/INDEX.md
   not_restored_by_decision:
     - forget-retention-backup-and-erasure-policy.md
     - global-forget-target-inventory-and-completion-evidence.md
@@ -44,7 +50,7 @@ scope:
   excluded:
     - "All 81 phase records"
     - "All remaining historical I branch files"
-    - "Changes to 03/04/05, runtime, validator semantics, tests, scripts, workflows, schemas, APIs, DDL, deployment and production configuration"
+    - "Changes to 03/04/05, runtime/product validator semantics, tests, workflows, schemas, APIs, DDL, deployment and production configuration"
 acceptance_criteria:
   - "README Canonical/EN/ZH-CN exist and state I acceptance authority without claiming acceptance"
   - "Guide is RECONSTRUCTED_FROM_MIRROR with source absence and exact mirror blob provenance"

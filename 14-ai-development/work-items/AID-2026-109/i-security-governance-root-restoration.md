@@ -58,7 +58,7 @@ The source branch contains 91 files under `09-security-governance/`, including 8
 
 ## 2. Guide source determination
 
-**`RECONSTRUCTED_FROM_MIRROR`, not restored.** The source branch tree was checked and contains no `09-security-governance/security-governance-guide.md`. Main already has EN mirror blob `061c5847b3df879eeaf3c71e5eae0bfa162b276a` and ZH-CN mirror blob `372d27c79dc79d09bcdb0f142c979efdba1c2b6e`. The new Canonical body is byte-identical to the EN mirror; only GOV-DOC-002 frontmatter is added. Existing mirrors are unchanged.
+**`RECONSTRUCTED_FROM_MIRROR`, not restored.** The source branch tree was checked and contains no `09-security-governance/security-governance-guide.md`. Main already has EN mirror blob `061c5847b3df879eeaf3c71e5eae0bfa162b276a` and ZH-CN mirror blob `372d27c79dc79d09bcdb0f142c979efdba1c2b6e`. The new Canonical body is byte-identical to the EN mirror; only GOV-DOC-002 frontmatter is added. Existing mirror body text is unchanged; GOV-DOC-002 frontmatter was added to both mirrors in this PR.
 
 ## 3. NOT_RESTORED_BY_DECISION
 

@@ -58,7 +58,7 @@ F4（审查第 176–193 行）、F6（214–231）和 F7（233–250）指出 I
 
 ## 2. Guide 来源判定
 
-**`RECONSTRUCTED_FROM_MIRROR`，不是 restored。** 已检查源分支 Git tree，其中不存在 `09-security-governance/security-governance-guide.md`。main 已有 EN 镜像 Blob `061c5847b3df879eeaf3c71e5eae0bfa162b276a` 和 ZH-CN 镜像 Blob `372d27c79dc79d09bcdb0f142c979efdba1c2b6e`。新建 Canonical 正文与 EN 镜像逐字节一致，只增加 GOV-DOC-002 frontmatter；现有镜像不修改。
+**`RECONSTRUCTED_FROM_MIRROR`，不是 restored。** 已检查源分支 Git tree，其中不存在 `09-security-governance/security-governance-guide.md`。main 已有 EN 镜像 Blob `061c5847b3df879eeaf3c71e5eae0bfa162b276a` 和 ZH-CN 镜像 Blob `372d27c79dc79d09bcdb0f142c979efdba1c2b6e`。新建 Canonical 正文与 EN 镜像逐字节一致，只增加 GOV-DOC-002 frontmatter；现有镜像正文不修改；本 PR 仅为两份镜像新增 GOV-DOC-002 frontmatter。
 
 ## 3. NOT_RESTORED_BY_DECISION
 
