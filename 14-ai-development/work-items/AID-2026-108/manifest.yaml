@@ -4,6 +4,7 @@ registration_stage: "STAGE_0"
 registration_status: "CORRECTION_RECORD_DRAFT"
 work_item_id: "AID-2026-108"
 followup_of: "AID-2026-108"
+bilingual_documentation_manifest_status: "COMPLETE"
 followup_records:
   - "14-ai-development/work-items/AID-2026-108/FOLLOWUP-01.md"
 id_status: "PROVISIONAL"
