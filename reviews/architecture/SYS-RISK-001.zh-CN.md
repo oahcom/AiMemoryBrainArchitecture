@@ -74,7 +74,7 @@
 - F：`05-memory-runtime/phase-3.7-f-local-lifecycle-producer-derivative-queue-recall-context-restore.md`（F 分支）。
 - G：`06-memory-context/phase-3.7-g-local-lifecycle-producer-derivative-queue-recall-context-restore.md`（G 分支）。
 - H：`08-bmcp-protocol/phase-3.8.9-h-exact-mapping-unified-1.2.13-c-submit-outcome-1.0.1.md`（H 分支）。
-- I：`09-security-governance/phase-3.8.9-i-p0-allowlists-unified-1.2.13-recoveryjoin-1.0.2.md`（I 分支）。
+- I：`09-security-governance/phase-3.8.9-i-p0-allowlists-unified-1.2.13-recoveryjoin-1.0.2.md` (not restored on main; see AID-2026-107 §10)（I 分支）。
 - Storage：`reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md`、`phase-3.8-storage-visibility-participant-and-atomic-outcome-contract.md`、`phase-3.6.15-storage-v3.2.5-protocol-bundle-exact-version-manifest.md`（Storage 分支）。
 
 **证据局限：** 上述 B/D/E/F/G/H/I/Storage 工件路径已在各自分支树中定位；但本轮并未逐行重新读取所有被引用工件的完整内容。因此，凡缺少完整规范回读或精确绑定的具体结论，均按 BLOCKED 或 NOT PROVEN 处理。这一限制是有意保留的，不得用自信措辞掩盖。
@@ -293,7 +293,7 @@ R 不替 Owner 作出这些决定。本评估只明确决策内容和所需证�
 | F | 8d5ef89ce9b1ff1471ffd1a03fe4f289addb0af3 | 05-memory-runtime/phase-3.7-f-local-lifecycle-producer-derivative-queue-recall-context-restore.md | 29e9504c75d737c2dd200ebc3306eda555f0b0ac | F-local proposal；跨 Owner 接口/实现 OPEN；IndexWatermark 是分区本地连续覆盖，不是 Forget 完成证明 |
 | G | f9ca0ddc36e17f74041506f17039f0202d13042e | 06-memory-context/phase-3.7-g-local-lifecycle-producer-derivative-queue-recall-context-restore.md | c1de241ec69834377d9b0e24aa4770a809796d4b | G-local proposal；C/G/H 交付和跨 Owner 接口 OPEN；Transport ACK 不等于 Applied |
 | H | f809be092a6c04db7982cc1bdbdd9c88787a4286 | 08-bmcp-protocol/phase-3.8.9-h-exact-mapping-unified-1.2.13-c-submit-outcome-1.0.1.md | 32bf9b0fd42abe8b58749b858b1d5c9aef39c5fd | CURRENT SUCCESSOR MAPPING CANDIDATE；exact CI rerun required；not frozen；最新测试未绑定本次读取的精确 HEAD 运行 |
-| I | 28df608b075e619563c6367a8a1c171185c1faaf | 09-security-governance/phase-3.8.10-i-p0-allowlists-unified-1.2.14-recoveryjoin-1.0.2.md | 44986f5f864bcdc1a79d34978273644d381a68c0 | I-owned P0 projection candidate；生产 Profile、Trust Roots、Key Custody、anti-rollback 和完整 P0 vectors 仍未完成；phase-3.8.9 Blob 5c0e2049513d391dfc118f4f629a5ec95de456d6（SUPERSEDED_BY）；reconciled_by: AID-2026-170 |
+| I | 28df608b075e619563c6367a8a1c171185c1faaf | 09-security-governance/phase-3.8.10-i-p0-allowlists-unified-1.2.14-recoveryjoin-1.0.2.md (not restored on main; see AID-2026-107 §10) | 44986f5f864bcdc1a79d34978273644d381a68c0 | I-owned P0 projection candidate；生产 Profile、Trust Roots、Key Custody、anti-rollback 和完整 P0 vectors 仍未完成；phase-3.8.9 Blob 5c0e2049513d391dfc118f4f629a5ec95de456d6（SUPERSEDED_BY）；reconciled_by: AID-2026-170 |
 | Storage | 17be31915b06d98d7f822e6e5270b8cde39eb0bb | reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md | 1ef47d4e5711c7db73a24d249adf1992be1f6aa4 | ADR-BLOCKED；候选选项而非已选拓扑；T1–T8 全部 OPEN |
 | Storage | 同上 | reviews/storage-consistency/phase-3.8-storage-visibility-participant-and-atomic-outcome-contract.md | 175ee7b1349cfdb79a19898b311a88391ed88010 | 逻辑事务提案；物理拓扑、跨 Owner API、读路径执行和实现证明 OPEN |
 | Storage | 同上 | reviews/storage-consistency/phase-3.6.15-storage-v3.2.5-protocol-bundle-exact-version-manifest.md | bea90697e7a61d43bed00543d636a5cdf40cf5ca | successor bundle published；NOT JOINTLY ACCEPTED / NOT FROZEN |
@@ -423,7 +423,7 @@ R-02 继续为 **Critical / BLOCKED**，阻塞 Canonical Schema/Identity Freeze�
 | D | 同一 HEAD | `03-memory-brain/forget-fence-operation-and-publication-gate.md` | `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5` | D 操作语义 DECIDED；D/E 接口 Schema、Storage 实现和跨 Owner 符合性 OPEN |
 | I | `0d071bf1ee7cc71912398c6ae57e4496e08f44ab` | `09-security-governance/forget-retention-backup-and-erasure-policy.md` | `f14cb2149ca3f817229533005ab89dbdc7f0b3a8` | 全局治理合同 CANDIDATE；D/E/F/G/H 实现及外部接收方证明 OPEN |
 | I | 同一 HEAD | `09-security-governance/global-forget-target-inventory-and-completion-evidence.md` | `9100061fa986fb6676656169de3fcf9fc1c72664` | CANDIDATE Inventory/Completion 合同；各 Owner 符合性 OPEN |
-| I | 同一 HEAD | `09-security-governance/phase-3.7-i-current-authorization-enforcement-and-restore-proof.md` | `e3b1b5d99eb36ac0b395854d8c19287d2b64b752` | I 语义执行提案；Token Schema 和符合性 OPEN |
+| I | 同一 HEAD | `09-security-governance/phase-3.7-i-current-authorization-enforcement-and-restore-proof.md` (not restored on main; see AID-2026-107 §10) | `e3b1b5d99eb36ac0b395854d8c19287d2b64b752` | I 语义执行提案；Token Schema 和符合性 OPEN |
 | Storage | `830a559bd2f4ec72608f5a51e1a0b43779f2b989` | `reviews/storage-consistency/phase-3.6.5-restore-control-highwater-and-quarantine-contract.md` | `4f656163aeba532a441eaed1d293a48e2363cb4a` | 架构合同候选；需要 I/D/A 精确审查 |
 | Storage | 同一 HEAD | `reviews/storage-consistency/phase-3.6.5-storage-restore-highwater-owner-acceptance.md` | `d3923fe42bec04d9f5233c7a810303da80b73bc2` | 仅 Storage 技术接受；I/D/A 接受和物理恢复演练仍 OPEN |
 | Storage | 同一 HEAD | `reviews/integration/phase-3.6-forget-atomicity-verification-report.md` | `9f224722a40844686d275e44a8ab6ba72fa1ddb8` | 历史验证报告明确标记 I 治理阻塞、测试阻塞/未运行、实现未验证且未声称 Global Forget；其内嵌分支快照早于当前 HEAD |
