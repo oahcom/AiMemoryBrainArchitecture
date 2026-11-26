@@ -37,6 +37,17 @@ prompt_bytes: 4303
 # principals. The deviation is disclosed in the pull request and is not claimed
 # as compliance.
 # ---------------------------------------------------------------------------
+# Superseded 2026-11-25 by AID-2026-080 / Issue #1201. The paragraph above is
+# kept because it records what was believed when it was written; the belief was
+# wrong in a way worth keeping visible. There was no top-level field requirement
+# to fail: section 5 item (2) required `implementing_ai_session` at top level
+# while the Session Evidence gate rejects every top-level `MANIFEST_FIELDS` key
+# when a `session_evidence` block exists, so 0 of 54 manifests could satisfy
+# both. The clause now requires each of the three names in exactly one place.
+# This manifest satisfies it: `sponsor` and `accountable_owner` are top level,
+# `implementing_ai_session` is inside `session_evidence[0]`, and no name appears
+# twice. Read `review.status` below as unchanged by this annotation.
+# ---------------------------------------------------------------------------
 
 authorization:
   implementation_write: "GRANTED for this document - PR-GOVERNANCE-001.md section 5 only. No file under crates/ is touched."

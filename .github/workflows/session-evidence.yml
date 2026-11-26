@@ -85,6 +85,58 @@ jobs:
           fi
           exit "$result"
 
+      # Bind the verdict to the text it judged (#1074). The validator reads
+      # `pr.body` live at run time, so a body edited after a run leaves the
+      # recorded verdict describing text that no longer exists -- and
+      # `Session Evidence` is a required context, so that stale green tick is
+      # what authorises the merge. This writes a digest of the exact body
+      # string the validator saw next to the verdict, so a later edit is
+      # detectable instead of invisible. It runs on `always()` because a
+      # MISSING verdict must be bound to its text too -- arguably more than a
+      # PRESENT one.
+      #
+      # Fail-closed: if the body cannot be fetched the step exits non-zero and
+      # the job fails; it never writes a digest it could not compute. A `null`
+      # body (an empty description) is a legitimate input that must still be
+      # judged, not an error: it digests as the empty string, i.e.
+      # e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.
+      #
+      # Recompute the digest of a merged body with this one-liner. It hashes the
+      # JSON `body` field as returned by the API, UTF-8 encoded, with `null`
+      # normalised to "" -- the same normalisation as `_load_context` in
+      # scripts/governance/session_evidence/validate.py. Parsing the JSON in
+      # python3 avoids the round-trip traps: `jq -r .body` appends a newline,
+      # `jq -j .body` does not, and shell substitution strips trailing newlines
+      # either way, so any jq-based version can digest different bytes.
+      #
+      #   curl -sS -f -H "Authorization: Bearer $TOKEN" \
+      #     "https://api.github.com/repos/OWNER/REPO/pulls/N" \
+      #   | python3 -c 'import hashlib,json,sys; print(hashlib.sha256((json.load(sys.stdin).get("body") or "").encode("utf-8")).hexdigest())'
+      - name: Bind the verdict to the body it judged
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          if ! digest=$(
+            curl -sS -f \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" \
+            | python3 -c 'import hashlib,json,sys; print(hashlib.sha256((json.load(sys.stdin).get("body") or "").encode("utf-8")).hexdigest())'
+          ); then
+            echo "::error::could not compute the PR body digest; the verdict cannot be bound to the text it judged" >&2
+            exit 1
+          fi
+          if ! printf '%s' "$digest" | grep -Eq '^[0-9a-f]{64}$'; then
+            echo "::error::PR body digest is not 64 lowercase hex characters: $digest" >&2
+            exit 1
+          fi
+          echo "AI-SESSION-EVIDENCE-BODY-SHA256: $digest" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Ensure job summary contains a verdict
         if: always()
         env:
