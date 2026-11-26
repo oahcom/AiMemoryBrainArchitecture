@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-190/evidence.md"
+        - "14-ai-development/work-items/AID-2026-192/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Verified
@@ -31,7 +31,7 @@ document_metadata:
   authority:
     canonical_status: Canonical
     canonical_scope: "Corrected counts and provenance for documentation-gaps GAP-03, the AID-2026-111 combined row and the AID-2026-112 memory-context execution fields"
-    canonical_scope_id: "ai-development/aid-2026-190-count-and-provenance-correction"
+    canonical_scope_id: "ai-development/aid-2026-192-count-and-provenance-correction"
     canonical_scope_keywords:
       - "documentation-gaps"
       - "work-item-arithmetic"
@@ -42,11 +42,11 @@ document_metadata:
     normative_status: Informative
   bilingual_counterpart:
     source: null
-    en: "docs/en/14-ai-development/work-items/AID-2026-190/evidence.md"
-    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-190/evidence.md"
+    en: "docs/en/14-ai-development/work-items/AID-2026-192/evidence.md"
+    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-192/evidence.md"
 ---
 
-# AID-2026-190 — Stale counts and an inherited assumption in the governance record
+# AID-2026-192 — Stale counts and an inherited assumption in the governance record
 
 ## Scope and attribution
 
@@ -206,7 +206,7 @@ returns INCOMPLETE (exit 2) while backlog remains"), not a finding against this 
 Documentation repair session for the governance record and two evidence work items. The session
 read the two brief files, re-derived the disputed counts from the tree, appended the two
 correction sections without editing any verdict, synchronized the mirrors, and registered the
-result as AID-2026-190. No runtime, schema, test, workflow or deployment change was made.
+result as AID-2026-192. No runtime, schema, test, workflow or deployment change was made.
 
 ## Actual AI input
 

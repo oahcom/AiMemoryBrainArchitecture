@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-190/evidence.md"
+        - "14-ai-development/work-items/AID-2026-192/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -42,7 +42,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# Prompt snapshot v1 — AID-2026-190
+# Prompt snapshot v1 — AID-2026-192
 
 **Status: structured task snapshot, not a verbatim transcript.** `prompt_status: NOT_RECORDED`.
 The dispatching session's message was not preserved byte for byte. What follows is the task

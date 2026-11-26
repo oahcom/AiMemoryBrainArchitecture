@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-190/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-192/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Verified
@@ -37,12 +37,12 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "14-ai-development/work-items/AID-2026-190/evidence.md"
-    en: "docs/en/14-ai-development/work-items/AID-2026-190/evidence.md"
+    source: "14-ai-development/work-items/AID-2026-192/evidence.md"
+    en: "docs/en/14-ai-development/work-items/AID-2026-192/evidence.md"
     zh-CN: null
 ---
 
-# AID-2026-190 — 治理记录中的过期计数与一处继承假设
+# AID-2026-192 — 治理记录中的过期计数与一处继承假设
 
 ## 范围与署名
 
@@ -141,7 +141,7 @@ DM 门禁的 exit 2 是本仓库在 GAP-02 中记录的积压状态（"该扫描
 
 ## Session role / use case
 
-治理记录与两份证据工作项的文档修复会话。会话读取两份 brief，按树重新导出争议计数，在不改动任何判定前提下追加两节订正，同步镜像，并把结果登记为 AID-2026-190。未修改 runtime、schema、测试、workflow 或部署。
+治理记录与两份证据工作项的文档修复会话。会话读取两份 brief，按树重新导出争议计数，在不改动任何判定前提下追加两节订正，同步镜像，并把结果登记为 AID-2026-192。未修改 runtime、schema、测试、workflow 或部署。
 
 ## Actual AI input
 

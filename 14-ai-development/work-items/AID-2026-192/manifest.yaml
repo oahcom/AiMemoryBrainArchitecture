@@ -1,4 +1,4 @@
-work_item_id: AID-2026-190
+work_item_id: AID-2026-192
 title: >-
   Correct a stale and an unverifiable count in the governance record: GAP-03's document and
   review totals, the arithmetic in AID-2026-111's combined row, and AID-2026-112's inherited
@@ -26,14 +26,14 @@ prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
 identifier_allocation:
   id_status: PROVISIONAL
   observed_main: 4326669caa6c43193d34219a0451b80762b712ff
-  assigned_id: AID-2026-190
+  assigned_id: AID-2026-192
   allocation_rule: >-
     The measured INDEX maximum was AID-2026-189, which is merged. A read of all pull request
-    titles and head branch names returned no AID-2026-190 and no work-item directory carried
+    titles and head branch names returned no AID-2026-192 and no work-item directory carried
     the number, so 190 is the first number outside both the merged set and the open set. INDEX
     was treated as a lower bound only; it is not the allocation source.
   recheck_rule: >-
-    Immediately before merge, re-read open pull requests and remote branches for AID-2026-190;
+    Immediately before merge, re-read open pull requests and remote branches for AID-2026-192;
     if occupied, take the next free number and update every path and reference in one push.
 scope:
   objective: >-
@@ -80,9 +80,9 @@ scope:
     - "scripts/, tests/, .github/ and the sixteen required contexts"
     - "no test was re-run, and no execution record was created, edited or deleted"
 evidence:
-  record: 14-ai-development/work-items/AID-2026-190/evidence.md
-  prompt: 14-ai-development/work-items/AID-2026-190/prompt-v1.md
-  session: 14-ai-development/work-items/AID-2026-190/session-evidence.md
+  record: 14-ai-development/work-items/AID-2026-192/evidence.md
+  prompt: 14-ai-development/work-items/AID-2026-192/prompt-v1.md
+  session: 14-ai-development/work-items/AID-2026-192/session-evidence.md
 non_goals:
   - Re-running any test suite to obtain the fields AID-2026-112 lacks
   - Promoting or demoting any predicate, flow cell, Gate A row or Gate B row
@@ -105,9 +105,9 @@ session_evidence:
     issue_refs:
       - "#1212"
     implementing_ai_session: "NOT_RECORDED"
-    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-190/prompt-v1.md"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-192/prompt-v1.md"
     executed_prompt_sha256: null
     executed_prompt_bytes: null
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_RECORDED"
-    session_evidence_ref: "14-ai-development/work-items/AID-2026-190/session-evidence.md"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-192/session-evidence.md"
