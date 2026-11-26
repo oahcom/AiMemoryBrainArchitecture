@@ -4,7 +4,7 @@ renumbering_reason: "AID-2026-088 is superseded by the delegated renumbering dec
 title: Define verifiable C/G AppliedAttestation and delivery-state projection contract
 class: ARCH/DOC
 risk: R3
-status: DISPATCHED
+status: MERGED
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: "Owner C / Owner G joint"
 acceptance_authority: "Owners C, G and H with I security review; Owner A governance review"
@@ -50,9 +50,10 @@ acceptance_criteria:
   - {id: AP-11, criterion: "EN/ZH-CN semantic parity."}
   - {id: AP-12, criterion: "Decision comments posted; all Issues remain OPEN."}
 implementation:
-  status: IMPLEMENTED_IN_BRANCH
+  status: MERGED
   branch: impl/2026-11-26-applied-evidence-contract
   pull_request: 1242
+  merge_commit_sha: 1e7f4d0a7baf06103dc3bd504293e25e53bd24c2
 review: PENDING
 acceptance: PENDING
 session_evidence:
