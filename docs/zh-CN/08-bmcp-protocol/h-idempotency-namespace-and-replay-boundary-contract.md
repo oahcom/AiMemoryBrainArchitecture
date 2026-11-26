@@ -47,8 +47,8 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
+    source: "08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md"
     en: "docs/en/08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md"
-    zh-CN: "docs/zh-CN/08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md"
 ---
 
 # H 幂等命名空间与重放边界合同
