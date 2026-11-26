@@ -2,10 +2,10 @@
 
 - 文档 ID：D-FORGET-CONTRACT-001
 - 版本：1.0
-- 源分支：session-d-memory-brain-2026-11-16
-- 源文件版本：DEREFERENCED — 保留历史源 Blob `1f0391bc49d007c44ec74165bd33d37412cc7990`；当前仓库不存在可解析的规范性源文件。
-- 审查时源分支 HEAD：6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
-- 源规范：DEREFERENCED — 原规范源路径 `03-memory-brain/forget-fence-and-completion-contract.md` 在当前 main tree 中不存在；替代物：[英文对照版](../../en/03-memory-brain/forget-fence-and-completion-contract.md)（Blob `c791895333ab6140f035f4f622d5dee9325d422d`；仅为对照文本，不是规范性替代源）。
+- 源分支：main
+- 源文件版本：AID-2026-083 已恢复规范根路径；精确 Blob 记录于 Draft PR Head。
+- 历史源分支 HEAD：6b654d5cffaeb71b01f2b0750daa0abc14eb64b3（仅作来源证据）
+- 规范源：[03-memory-brain/forget-fence-and-completion-contract.md](../../../03-memory-brain/forget-fence-and-completion-contract.md)；本文件和英文文件均为镜像。
 - 对应英文：[Canonical Forget Fence and Completion Contract](../../en/03-memory-brain/forget-fence-and-completion-contract.md)
 - Owner：Session D — Memory Brain Principal Architect
 - 状态：D Canonical Domain 语义为 DECIDED；跨模块执行和全局完成策略为 OPEN / 由 I 拥有
@@ -182,3 +182,26 @@ D 拥有的 Phase 3.6 操作级线性化、Producer Work 状态机、Fence/Permi
 Work Registration、Barrier Capture、Dependency Registration、Staging、Publish Authorization、Durable Commit、Artifact Visibility 和 Terminal Disposition 是分别带证据的阶段。Barrier Capture 负责核算 Fence 前工作，不等于发布许可。Lease 过期、Queue 删除、Retry 延迟和 DLQ 停放都不构成 Work 终结。
 
 D 只定义领域语义和可观察顺序。Storage 可以选择任何能够证明相同线性化和崩溃恢复行为的实现；本补充不批准任何数据库，也不声称已经实现。**CR-P1-01 仍为 OPEN，等待 E + Storage 联合确认和可执行证据。**
+
+## 10. 单一权威裁决——委托方向决策，2026-11-26
+
+授权人：user-authorized operator (delegated by account owner)  
+决策日期：2026-11-26  
+状态：方向已记录；D、Storage/Consistency 与 A 的精确版本验收待完成。本裁决不构成实现授权。
+
+D — Memory Brain — 是 ForgetOperation 身份/状态、Canonical Target 与传递派生血缘覆盖范围、单调 ForgetFence Generation/Cursor、Canonical Suppression 和 D 域证明的唯一逻辑权威。即使 Storage 物理持久化这些字节，Forget 也只有一个决策空间。
+
+Namespace 是已解析 Scope/分区属性，可以约束匹配，但不是独立 Fence 身份，不能替代 Typed Canonical Target Identity、精确 Memory/Version 引用、来源身份或派生血缘。Target Set 必须明确精确 Scope 覆盖范围及来源到派生物的血缘。
+
+任何 Storage 本地 Memory/Version Fence 行都只是 D 所有权威 Snapshot 的派生、可重建投影。它 MUST NOT 创建独立 Generation/Cursor、决定覆盖范围，或在没有当前 D 权威状态时授权读取/发布。Storage 仍拥有物理存储的事务持久性、原子可见性、备份/恢复、复制和防回滚机制权威；物理保管不转移逻辑权威。投影不一致时必须 Fail-closed，并从 D 协调重建。
+
+每个读取/写入/发布、Compiler、Retrieval/Index、Context、Delivery/Reconnect 和最终请求 Gate，都必须针对精确 Target/Lineage 建立当前 D Snapshot/Cursor。D 状态缺失、陈旧、损坏、回滚或 Scope 覆盖不足时必须 Fail-closed。本地 Target Suppression 不等于 Global Forget Completion；I 保留全局策略、Retention、Legal Hold、外部副本和物理擦除权威。
+
+Reviewer 判据：
+- FF-A1 PASS 当且仅当 D 是 ForgetFence Generation/Cursor 的唯一逻辑签发者/权威；否则 FAIL。
+- FF-A2 PASS 当且仅当 Storage 本地 Fence 是可重建的 D 派生投影且没有独立 Sequence/Cursor；否则 FAIL。
+- FF-A3 PASS 当且仅当 Namespace 未替代 Typed Target、Scope 和传递血缘覆盖；否则 FAIL。
+- FF-A4 PASS 当且仅当 D 状态缺失/陈旧/损坏会阻止受影响读取/发布；否则 FAIL。
+- FF-A5 PASS 当且仅当本地抑制与 I 治理的 Global Forget Completion 明确区分；否则 FAIL。
+
+仍未闭合：D 公共 Snapshot/Read API、精确 Target/Lineage Schema 验收、跨 Owner 执行顺序、Storage 物理防回滚证明及实现/一致性验证。
