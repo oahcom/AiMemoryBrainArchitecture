@@ -54,6 +54,9 @@ document_metadata:
 ## Approval identity
 - approver: user-authorized operator (delegated by account owner)
 - designation_source: account owner statement, 2026-11-26
+- designation_evidence: account owner direct instruction, 2026-11-26, verbatim: "你就是批准人"
+- designation_channel: operator session instruction
+- designation_scope: designated the delegated operator as the approver for governance documents
 - approval_event_date: 2026-11-26
 - approval_type: NEW_APPROVAL
 - decision: APPROVED_NORMATIVE
