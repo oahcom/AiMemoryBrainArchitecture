@@ -1,0 +1,66 @@
+manifest_version: "1.0"
+record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
+registration_stage: "STAGE_0"
+registration_status: "DRAFT_PR_OPEN_PENDING_EXACT_HEAD_CHECKS"
+work_item_id: "AID-2026-109"
+id_status: "PROVISIONAL"
+title: "Restore only the D canonical Memory Store normative root with source-byte and supersession evidence"
+date: "2026-11-26"
+repository:
+  name: "oahcom/AiMemoryBrainArchitecture"
+  baseline_branch: "main"
+  baseline_commit: "a7e7c64bfd6c6d709a0a7b55358f94b8535815c1"
+  implementation_branch: "docs/2026-11-26-d-canonical-memory-store-root-restore"
+  canonical_path: "03-memory-brain/canonical-memory-store.md"
+  en_path: "docs/en/03-memory-brain/canonical-memory-store.md"
+  zh_CN_path: "docs/zh-CN/03-memory-brain/canonical-memory-store.md"
+attribution:
+  actor: "user-authorized operator (delegated by account owner)"
+  date: "2026-11-26"
+  signature_status: "代理登记，非自然人 Owner 签署"
+identifier_allocation:
+  allocation_mode: "alloc_at_push"
+  observed_main: "a7e7c64bfd6c6d709a0a7b55358f94b8535815c1"
+  observed_max_id: "AID-2026-108"
+  assigned_id: "AID-2026-109"
+  id_status: "PROVISIONAL"
+scope:
+  objective: "Restore the single D normative root named by the exact-main composition review; preserve source body bytes and classify all other source-branch files as historical and undecided."
+  files_to_create:
+    - "03-memory-brain/canonical-memory-store.md"
+    - "docs/en/03-memory-brain/canonical-memory-store.md"
+    - "docs/zh-CN/03-memory-brain/canonical-memory-store.md"
+    - "14-ai-development/work-items/AID-2026-109/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-109/evidence.md"
+    - "14-ai-development/work-items/AID-2026-109/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-109/session-evidence.md"
+  files_to_modify:
+    - "14-ai-development/work-items/INDEX.md"
+  files_out_of_scope:
+    - "03-memory-brain/README.md"
+    - "All other 59 files from session-d-memory-brain-2026-11-16"
+    - "04-memory-compiler/"
+    - "05-memory-runtime/"
+    - "09-security-governance/"
+    - "runtime, validator semantics, schemas, DDL, tests, workflows, deployment"
+acceptance:
+  status: "PENDING"
+  authority: "Owner D; Storage/Consistency and affected Owners for their own boundaries"
+  owner_acceptance: "NOT_CLAIMED"
+implementation:
+  status: "DOCUMENTATION_ONLY"
+  runtime_changes: 0
+  validator_semantic_changes: 0
+  schema_changes: 0
+  test_changes: 0
+session_evidence:
+  - role: "DOCUMENTATION_RESTORATION_AND_EVIDENCE"
+    issue_refs:
+      - "#1212"
+    implementing_ai_session: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-109/prompt-v1.md"
+    executed_prompt_sha256: "d2a5cde1eb02778e528c04e7ae3272bcd61955deb85368c2fe5ebe4d8ba8c15f"
+    executed_prompt_bytes: 2753
+    executed_prompt_provenance: "RECORDED_FROM_USER_MESSAGE; session identity NOT_RECORDED"
+    session_reference_status: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-109/session-evidence.md"
