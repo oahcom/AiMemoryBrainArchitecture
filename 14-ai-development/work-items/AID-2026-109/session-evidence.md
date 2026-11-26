@@ -70,3 +70,5 @@ document_metadata:
 - Post-merge canonical/en/zh-CN report blobs and all 12 I-root mirror blobs match the expected tree entries.
 - #1211 and #1212 were not closed by this work. #1212 had a prior close/reopen event by account oahcom; current state was checked OPEN after the reopen.
 - ZH-CN mirrors contain Chinese summaries plus retained English source text; full semantic translation parity remains NOT_VERIFIED.
+
+- Closeout PR synchronization: `git fetch origin main` fetched `7629b9de5e5832fe486ee72d101c4bc5121015e6`; latest INDEX maximum was AID-2026-110 and the AID-2026-109 row was preserved/replaced with its merged status. The sync merge preserves the concurrent main additions, including AID-2026-110 and the separate 04-memory-compiler files.
