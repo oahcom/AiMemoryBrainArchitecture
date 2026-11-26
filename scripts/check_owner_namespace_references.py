@@ -48,8 +48,7 @@ PATTERNS = (
         rf"\b{CAPABILITY}\s+(?:is|acts? as)\s+(?:the\s+)?Owner\b",
         re.IGNORECASE)),
     ("BARE_LETTER_AS_OWNER", re.compile(
-        r"\b([A-I])\s+(?:owns|is accountable for|is responsible for|has authority over)\b",
-        re.IGNORECASE)),
+        r"(?<!Owner )\b([A-I])\s+(?:owns|is accountable for|is responsible for|has authority over)\b")),
 )
 
 def violations(text: str) -> list[tuple[int, str, str]]:
