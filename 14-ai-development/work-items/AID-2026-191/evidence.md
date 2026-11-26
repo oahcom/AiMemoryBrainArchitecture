@@ -50,9 +50,9 @@ document_metadata:
 ## Scope and attribution
 
 - Repository: `oahcom/AiMemoryBrainArchitecture`
-- Base branch: `main`; base commit `0c752ee6ee186e494e35aa74447f263891ca4842`, the merge base after
+- Base branch: `main`; base commit `2f4f4118bd2c2d8e43a23975f667deeb06553f3c`, the merge base after
   `origin/main` was merged into the branch before the push (the branch was created at `4326669c`,
-  the AID-2026-189 merge, and re-merged forward once).
+  the AID-2026-189 merge, and re-merged forward twice as main advanced).
 - Attribution: user-authorized operator (delegated by account owner). No natural-person Owner
   signature, acceptance or approval is asserted.
 - Predecessor in the same batch: AID-2026-189 (PR #1339), the CI unit merged immediately before
