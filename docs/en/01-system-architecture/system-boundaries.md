@@ -252,6 +252,6 @@ The following register keeps three authorities separate. A policy authority auth
 
 **Traceability rule.** Every new or materially changed governance operation MUST identify all three authority columns independently. Where a role is not assigned, record `NOT_ASSIGNED` and keep the operation open; do not infer it from the policy Owner or from the component that happens to execute a step. The register is a documentation-level baseline, not an automated check. Automated completeness and mirror-consistency enforcement is tracked separately by Issue #1237 and is not claimed to exist in this PR.
 
-## 8. Forget Fence authority boundary — 2026-11-26
+## 14. Forget Fence authority boundary — 2026-11-26
 
 The D canonical contract at [01-system-architecture/forget-fence-and-completion-contract.md](forget-fence-and-completion-contract.md) is the sole logical authority for ForgetOperation and ForgetFence target/lineage decisions. Storage/Consistency may persist and physically protect that authority, but a Storage-local Memory/Version fence is only a derived, rebuildable projection; it MUST NOT issue an independent generation/cursor or become a competing decision source. If current D authority cannot be established, affected reads and publication fail closed. Local suppression is not Global Forget Completion. This is a recorded direction decision; exact-version Owner acceptance and implementation evidence remain pending.

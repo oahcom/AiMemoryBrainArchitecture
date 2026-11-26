@@ -252,6 +252,6 @@ Brain 不是：
 
 **追溯规则。** 每项新增或发生实质变化的治理操作都 MUST 独立填写上述三类权威。若某个角色尚未分配，必须记录为 `NOT_ASSIGNED` 并保持操作开放；不得从策略 Owner 或实际执行某一步的组件推断缺失角色。本表是文档层基线，不是自动检查。自动完整性和镜像一致性检查由 Issue #1237 单独跟踪，本 PR 不声称该检查已经存在。
 
-## 8. Forget Fence 权威边界——2026-11-26
+## 14. Forget Fence 权威边界——2026-11-26
 
 D 的规范契约 [01-system-architecture/forget-fence-and-completion-contract.md](forget-fence-and-completion-contract.md) 是 ForgetOperation 及 ForgetFence Target/Lineage 决策的唯一逻辑权威。Storage/Consistency 可以持久化并从物理层保护该权威，但 Storage 本地 Memory/Version Fence 只能是派生、可重建的投影；MUST NOT 签发独立 Generation/Cursor，也不得成为竞争性的决策源。无法建立当前 D 权威状态时，受影响读取和发布必须 Fail-closed。本地抑制不等于 Global Forget Completion。本段记录方向决策；精确版本 Owner 验收和实现证据仍待完成。
