@@ -2,7 +2,7 @@
 designated_root: true
 source_hierarchy_decision: OWNER_REPLACEMENT
 replaces: "05-memory-runtime/README.md"
-source_hierarchy_decision_authority: "user-authorized operator (delegated by account owner), 2026-11-26, 代理裁决，非自然人 Owner 签署"
+authority: "user-authorized operator (delegated by account owner), 2026-11-26"
 retrieval_semantics_acceptance: F_ACCEPTS_RETRIEVAL_SEMANTICS
 document_metadata:
   domain: memory-runtime
@@ -17,7 +17,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-113/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-140/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
