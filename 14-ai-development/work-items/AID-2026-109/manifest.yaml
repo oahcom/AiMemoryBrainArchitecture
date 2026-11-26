@@ -1,0 +1,124 @@
+manifest_version: "1.0"
+record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
+registration_stage: "STAGE_0"
+registration_status: "SCOPE_CONFIRMED_REVIEW_PACKAGE_DRAFTED"
+work_item_id: "AID-2026-109"
+id_status: "PROVISIONAL"
+title: "SQLite backend implementation evidence mapping to SC/HIR and Gate A predicates"
+date: "2026-11-26"
+repository:
+  name: "oahcom/AiMemoryBrainArchitecture"
+  baseline_branch: "main"
+  baseline_commit: "a7e7c64bfd6c6d709a0a7b55358f94b8535815c1"
+identifier_allocation:
+  assigned_at: "2026-11-26"
+  observed_main: "a7e7c64bfd6c6d709a0a7b55358f94b8535815c1"
+  observed_max_registered_id: "AID-2026-108"
+  requested_id: "AID-2026-109"
+  id_status: "PROVISIONAL"
+  uniqueness_scope: "AID-2026-109 absent from main INDEX/tree, exact Issue search and branch-name search at allocation; branch created from observed main."
+  merge_time_rule: "Re-read main INDEX, work-item tree, Issues, PRs and branch names; renumber if occupied and preserve RENUMBERED_FROM."
+authority:
+  sponsor: "USER-PRINCIPAL-DELEGATED"
+  accountable_owner: "USER-PRINCIPAL-DELEGATED"
+  acceptance_authority: "NOT_ASSIGNED"
+  attribution: "user-authorized operator (delegated by account owner)"
+  signature_status: "代理登记，非自然人 Owner 签署"
+scope:
+  objective: "Map 94 supplied SQLite backend test names to SC-01..SC-18 and HIR-01..HIR-18; rejudge 72 AID-095 Gate A checkpoints and 16 EVIDENCE_REQUIRED rows without overclaiming."
+  canonical: "14-ai-development/work-items/AID-2026-109/evidence.md"
+  en: "docs/en/14-ai-development/work-items/AID-2026-109/evidence.md"
+  zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-109/evidence.md"
+  prompt: "14-ai-development/work-items/AID-2026-109/prompt-v1.md"
+  issues: ["#1211", "#1212"]
+  exclusions:
+    - "No runtime or product code changes"
+    - "No validator semantics, schemas, APIs or DDL changes"
+    - "No test or workflow changes"
+    - "No deployment or production configuration changes"
+    - "No Issue closure"
+    - "No Owner acceptance or production conformance fabricated"
+source_pins:
+  aid_095_matrix_blob: "1d162b527eacb96e2cff24eec5fcf5a66014039a"
+  aid_107_evidence_blob: "c9a0576eb743e61ced43695d0cfacad4caf7f2e7"
+  storage_contract_blob: "d571f086505b312c40b6ae2e56a868131cfffc78"
+  h_contract_blob: "f64dd8f520b98e52a7151619cb279fc0b4c38c89"
+execution_evidence:
+  sqlite_backend:
+    head: "a123ea4e414c9f74fa0c576fbd718049a7d9f917"
+    environment: "WSL2 Ubuntu 24.04; rustup stable 1.100.0; bundled SQLite"
+    command: "cargo test -p memory-storage-sqlite -p memory-event-store-sqlite --no-fail-fast"
+    exit_code: 0
+    test_binaries: 8
+    passed: 99
+    failed: 0
+    stdout_bytes: 9465
+    stdout_sha256: "a15e3862af4d6cd97a4cd8caf6f133f57e3c3636ba284bdfd5afaa9237ba2952"
+    individually_named_tests_supplied: 94
+    evidence_origin: "USER_SUPPLIED_LOCAL_EXECUTION_NOT_CI"
+  pure_rust:
+    head: "44dc21a4970192118ba434801b8ca05702ac582c"
+    command: "cargo test -p memory-domain -p memory-storage -p memory-event-store -p bmcp-protocol -p agent-integration --no-fail-fast"
+    exit_code: 0
+    test_binaries: 15
+    passed: 276
+    failed: 0
+    stdout_bytes: 47066
+    stdout_sha256: "C18EF5FC121EEB9B486000180F52BAE8385385722A369ADDAB873FCF8716D7B9"
+  windows_workspace_negative:
+    command: "cargo test --workspace"
+    exit_code: 101
+    reason: "libsqlite3-sys v0.40.0 build script cannot execute cc1; MSVC cl.exe/link.exe absent"
+    stdout_bytes: 12456
+    stdout_sha256: "93BCDC26AB0B29CEDBEC56DD11BB735C8050DB18366A3F296B45C699C072C2B2"
+rejudgment:
+  test_names_mapped: 94
+  aid_095_rows:
+    total: 72
+    pass: 0
+    partial_evidence: 23
+    unchanged: 49
+    gate_a_state: "PARTIAL / OPEN"
+  storage_evidence_required:
+    total: 8
+    pass: 0
+    partial_evidence: 6
+    unchanged: 2
+  h_idempotency_evidence_required:
+    total: 8
+    pass: 0
+    partial_evidence: 7
+    unchanged: 1
+  combined_88:
+    pass: 0
+    partial_evidence: 36
+    unchanged: 52
+    pass_claimed: false
+  sc_unresolved_no_corresponding_tests: ["SC-17", "SC-18"]
+  hir_unresolved_no_corresponding_tests: ["HIR-17"]
+  hir_18_missing_component: "I PermissionEpoch/current authorization recheck; only D Fence component has local tests"
+  d_i_anti_rollback_anchor_linkage: "NOT_EVIDENCED"
+acceptance:
+  gate_a: "PARTIAL / OPEN"
+  gate_b: "PARTIAL / OPEN (NOT VERIFIED)"
+  issue_1211: "OPEN"
+  issue_1212: "OPEN"
+  owner_acceptance: "NOT_CLAIMED"
+  implementation_conformance: "NOT_CLAIMED"
+  production_conformance: "NOT_CLAIMED"
+carrier:
+  branch: "docs/aid-2026-109-sqlite-implementation-evidence-review"
+  pull_request: "PENDING"
+  draft: true
+  merge_commit_sha: "PENDING"
+  merge_authorization: "only after all 16 required contexts succeed on exact final Head"
+review:
+  status: "NOT_ASSIGNED"
+  independent_reviewer: "NOT_ASSIGNED"
+  natural_person_owner_acceptance: "NOT_RECORDED"
+constraints:
+  runtime_changes: "NONE"
+  validator_semantic_changes: "NONE"
+  documented_only_is_pass: false
+  issue_1211_close: "NOT_AUTHORIZED"
+  issue_1212_close: "NOT_AUTHORIZED"
