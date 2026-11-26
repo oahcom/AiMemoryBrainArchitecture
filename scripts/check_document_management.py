@@ -182,7 +182,15 @@ APPROVAL_KEYS = {
     "revocation",
 }
 VERSION_KEYS = {"scheme", "value"}
-SCOPE_KEYS = {"type", "included_sections", "included_assets"}
+# `included_sections` and `included_assets` were removed from the corpus in the
+# same change that removed them here (#904, ruling 76 in #833 comment
+# 7120131295). They existed only to describe `Selected-sections` and
+# `Selected-assets`, which DM-10 never honoured; #888 removed the values and
+# left the keys, so every approved document carried two empty lists that
+# declared nothing. A document that still carries one is now an unknown-key
+# error, which is the point: the gate refuses the shape the corpus no longer
+# uses.
+SCOPE_KEYS = {"type"}
 REVOCATION_KEYS = {
     "revocation_decision_id", "revoked_date", "revoker", "revocation_reason",
     "revocation_evidence", "superseding_document",
@@ -1022,18 +1030,6 @@ def check_document(path: Path, text: str, root: Path | None = None) -> tuple[lis
             errors.append("DM-03 Approved requires approval.approval_scope.type")
         if not applicability:
             errors.append("DM-03 Approved requires approval.approval_applicability")
-
-    # The section and asset lists described the two scopes above and nothing
-    # else, so nothing reads them. An empty list is the template's placeholder
-    # and claims nothing (every approved document carries one); a non-empty list
-    # is a claim no rule verifies, so it is refused and named.
-    for field in ("included_sections", "included_assets"):
-        if scope.get(field):
-            errors.append(
-                f"DM-03 approval_scope.{field} is not honoured: only "
-                "'Full-document' is checked, so a non-empty list would claim a "
-                "boundary the gate never verifies. Remove it"
-            )
 
     # DM-04 Revoked must carry a unique revocation decision id.
     revocation = approval.get("revocation")

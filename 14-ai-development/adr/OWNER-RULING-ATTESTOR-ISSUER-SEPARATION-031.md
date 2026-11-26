@@ -13,8 +13,6 @@ document_metadata:
         value: "fd0375e5ace208a2e86ad7096b0d222c2228b309d9829bd84802daa9790e4433"
       approval_scope:
         type: Full-document
-        included_sections: []
-        included_assets: []
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "Issue #723 (one issuer string mints both attestations and decisions)"

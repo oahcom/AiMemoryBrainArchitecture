@@ -12,8 +12,6 @@ document_metadata:
         value: "7aadf01ea896884d76380010c55aeeca241fe04b"
       approval_scope:
         type: Full-document
-        included_sections: []
-        included_assets: []
       approval_applicability: Applicable-To-Current-Version
       evidence_reference:
         - "00-governance/terminology.md"

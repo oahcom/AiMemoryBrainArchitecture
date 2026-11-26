@@ -10,8 +10,6 @@ document_metadata:
       approved_version: null
       approval_scope:
         type: Full-document
-        included_sections: []
-        included_assets: []
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "00-governance/architecture-document-management-policy.md"
@@ -151,8 +149,6 @@ approval:
     value: "abc123def" # 审批时的 commit 或内容哈希
   approval_scope:
     type: Full-document  # the only value DM-10 honours
-    included_sections: []
-    included_assets: []
   evidence_reference: []
   revocation: null
 ```
@@ -355,7 +351,7 @@ Machine-checkable rules / 机器可检查规则：
 |---|---|---|
 | DM-01 | Frontmatter parses under the declared YAML subset; a node of the wrong type is an error, never a crash. Every field's declared `kind` is enforced on the document (`check_kinds()`), and every field the schema marks `required: true` must be present, reported by its full path. There is no second hand-maintained required list: `required_fields()` is derived from the schema, because the two used to disagree (`approval_scope` was required by the schema and omitted by the list). An empty `lifecycle: {approval: {}}` is not a classification. Every path-valued field is a normalised repository-relative path: a non-string, an absolute path, a `..` segment, a backslash, a repeated `./`, or an empty segment is an error, never silently rewritten | Error |
 | DM-02 | `domain`, `role` and every status value are in the closed enumerations; unknown keys are errors at every level | Error |
-| DM-03 | `Approved` has `approved_version` (scheme + value), `approval_scope.type` and `approval_applicability`. `approval_scope.type` MUST be `Full-document`; `Selected-sections` and `Selected-assets` were once published in the enumeration and never honoured — DM-10 hashed the whole body either way — so declaring one is now an error naming the value, not a narrower scope. A non-empty `included_sections` / `included_assets` is refused for the same reason: it claims a boundary no rule verifies. A scope type that requires nothing is a label, not a scope | Error |
+| DM-03 | `Approved` has `approved_version` (scheme + value), `approval_scope.type` and `approval_applicability`. `approval_scope.type` MUST be `Full-document`; `Selected-sections` and `Selected-assets` were once published in the enumeration and never honoured — DM-10 hashed the whole body either way — so declaring one is now an error naming the value, not a narrower scope. `approval_scope` admits only `type`; the `included_sections` / `included_assets` keys those scopes were declared with were removed from the schema and the corpus in the same change (#904), because with the values gone they could only ever be empty. A scope type that requires nothing is a label, not a scope | Error |
 | DM-04 | `Revoked` has `revocation.revocation_decision_id`, `revoked_date`, `revocation_reason`; the id is unique repository-wide | Error |
 | DM-05 | `Archived` has `archived_date` and `archival_reason` | Error |
 | DM-06 | `Canonical` has `canonical_scope`, keywords, and a normalized `canonical_scope_id` whose prefix equals `domain` | Error |

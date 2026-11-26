@@ -12,15 +12,13 @@ document_metadata:
         value: null
       approval_scope:
         type: Full-document
-        included_sections: []
-        included_assets: []
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference: []
       revocation: null
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-26"
-      last_verification_note: "Assembled after the session from the three issue rulings it worked to, not captured live. The digest below matches this file; nothing claims it matches the original instruction."
+      last_verification_note: "The counts quoted below were measured in this session at main 31385bc1, not copied from the issue text."
     usage_status: Active
     modification_status: Unchanged
     supersession:
@@ -45,52 +43,77 @@ document_metadata:
     zh-CN: null
 ---
 
-# AID-2026-103 prompt snapshot
+You are an author session for a governed repository. Fix issue #904: `approval_scope`
+admits exactly one value and still requires three keys.
 
-**Provenance: assembled after the session, not captured live.** This file was written when the pull
-request was being prepared, from the three issue rulings the session actually worked to. It is not a
-transcript and it is not the text the session was handed at the start. `prompt_status` is
-`RECORDED_NOT_FROZEN` and `executed_prompt_provenance` is `NOT_VERIFIED` for that reason: the
-sha256 below matches this file, and nothing claims it matches the original instruction.
+REPO: oahcom/AiMemoryBrainArchitecture
+BASE: origin/main 0b6f56c230a9993a8f65be11fabae47541828e24 (measured 2026-11-26)
 
-## What the session was asked
+## The defect
 
-Continue work on the repository's open issues, taking each to a ruling and, where the ruling calls
-for code, to a change that can be merged.
+Ruling 76 (in #833, comment 7120131295) ordered the two dead keys removed from
+`SCOPE_KEYS` AND from the corpus in the same change. #888 removed the values and
+left the keys; #833 was then closed. The result is a schema that admits one scope
+value and still demands three keys, two of which no rule reads.
 
-## The three subjects, as the session found them
+Measured at 0b6f56c2, re-measured rather than taken from the issue text (the issue
+says 99 documents; the tree has moved):
 
-**#989** — six fixtures in `scripts/test_check_document_management.py` build their "outside the
-repository" target at a fixed name under `Path(tmp).parent`, which is the shared system temp root.
-Two processes running the file at once therefore race, and the loser reports a DM-14 assertion
-against a gate that did nothing wrong. The issue's own measurement isolates the cause: three serial
-runs green, six concurrent runs with a shared `TMPDIR` red two or three times, six concurrent runs
-with a per-process `TMPDIR` green.
+| fact | value |
+| --- | --- |
+| `SCOPE_TYPES` (scripts/check_document_management.py) | {"Full-document"} |
+| `SCOPE_KEYS` | {"type", "included_sections", "included_assets"} |
+| documents whose frontmatter carries `approval_scope` | 252 |
+| of those, carrying `included_sections` | 252 |
+| of those, with a non-empty `included_sections` | 0 |
+| distinct `type` values | `Full-document` only |
+| line forms present | `included_sections: []` and `included_assets: []`, 252 each |
 
-**#988** — two claims. That the bilingual-mirror symlink branch has no case observing it, and that
-the enum-on-a-non-None-kind rule has none either because `T63`'s fixture trips the YAML parser's
-duplicate-key detector first.
+Per root: 00-governance 8, 01-system-architecture 1, 06-memory-context 1,
+07-agent-integration 6, 08-bmcp-protocol 1, 14-ai-development 156, docs 79
+(docs/en 40, docs/zh-CN 38, docs/governance 1).
 
-**#827** — an audit of the gate's error emissions. Its latest ruling narrowed the open work to five
-specific emitters, each to be bound by a case that asserts its message prefix, and moved the
-ratchet harness (`scripts/mutation_report.py`) out of scope because the file does not exist.
+## Why the corpus edit is approval-neutral
 
-## What was required of the work
+`body_hash()` hashes `body_text()`, and `body_text()` strips frontmatter before
+hashing — its own comment says "An approval binds to document content, not to the
+governance metadata." Deleting two frontmatter keys therefore cannot invalidate an
+`approved_version` pin.
 
-1. Measure before asserting. A claim that a branch is unbound is established by deleting it and
-   watching the suite stay green; a claim that it is bound is established by deleting it and
-   requiring a named case to go red.
-2. Correct the issue where the measurement contradicts it, rather than implementing the claim.
-3. Do not touch `scripts/check_document_management.py`. Every branch in scope already exists and is
-   correct; the defect is that nothing observed them.
-4. Keep the change to one test file plus its work item.
+This was verified, not assumed, on a live `content-hash` document:
+14-ai-development/adr/OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001.md, pinned at
+3375f59e78a2960c700b9800593c857f263bc3c94438358561d45ceafce2ddc0. Before the edit
+the recomputed body hash equals the pin; after removing the two lines it is still
+3375f59e78a2960c700b9800593c857f263bc3c94438358561d45ceafce2ddc0. File size fell
+16883 -> 16825 bytes, so the deletion really happened.
 
-## What the session was told not to do
+## What to implement
 
-- Not to fix `#989` by renaming the six paths with a pid or a uuid: that lowers the collision
-  probability and leaves the fixture writing into a directory it does not own.
-- Not to turn `ignore_errors=True` into `False`: on Windows a failed delete is normal, so that
-  converts a concurrency defect into a platform-dependent crash.
-- Not to add a shared-fixture helper across the suite: per-fixture ownership is what the tests
-  already do everywhere except these six sites.
-- Not to build `scripts/mutation_report.py` inside this change.
+1. `SCOPE_KEYS = {"type"}`. Any document still carrying a removed key then becomes a
+   DM-02 unknown-key error — that is the point: the gate must refuse the shape the
+   corpus no longer uses.
+2. Delete the two keys from every frontmatter that carries them, in both language
+   halves and in every root, with a script that is run and then deleted.
+3. Remove what becomes dead: the schema's two field declarations, the DM-03
+   "refused when non-empty" loop, the two template placeholders, and the DM-03 policy
+   row's sentence about them. Do not rewrite policy prose beyond that.
+4. Do not touch anything else.
+
+Order: the gate is red between the two edits locally; the committed tree must be
+green, so both land in one commit.
+
+## Verification required
+
+- `check_document_management.py` whole-tree: exits 2 by design (unclassified
+  backlog); read the verdict line, report it and the exit code.
+- `check_document_management.py --require-changed <base>`.
+- `scripts/test_check_document_management.py`, pass count before and after.
+- `grep -rc 'included_sections' --include=*.md .` must be 0 outside historical
+  records that must keep their original text; list any left alone and say why.
+- Mutation: add a test that fails if `SCOPE_KEYS` regains the keys, put them back,
+  record the verbatim `AssertionError`, restore, confirm green.
+
+## Work item
+
+AID-2026-103, class GATE/SCHEMA, risk R3, status DISPATCHED, tracking_issue #904,
+sponsor/accountable_owner USER-PRINCIPAL-DELEGATED, acceptance_authority NOT_ASSIGNED.

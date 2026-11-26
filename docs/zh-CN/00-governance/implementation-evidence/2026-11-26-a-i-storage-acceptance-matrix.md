@@ -10,8 +10,6 @@ document_metadata:
       approved_version: null
       approval_scope:
         type: Full-document
-        included_sections: []
-        included_assets: []
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "00-governance/implementation-evidence/2026-11-26-a-i-storage-acceptance-matrix.md"

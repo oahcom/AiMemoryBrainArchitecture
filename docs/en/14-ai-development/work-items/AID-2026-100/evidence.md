@@ -14,8 +14,6 @@ document_metadata:
       approved_version: null
       approval_scope:
         type: Full-document
-        included_sections: []
-        included_assets: []
       approval_applicability: Applicable-To-Current-Version
       evidence_reference: []
       revocation: null

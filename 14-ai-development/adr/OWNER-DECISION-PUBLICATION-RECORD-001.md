@@ -13,8 +13,6 @@ document_metadata:
         value: "ef65cb9682ceee41767c8bc14b0be9082e26fc73"
       approval_scope:
         type: Full-document
-        included_sections: []
-        included_assets: []
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "14-ai-development/adr/OWNER-DECISION-PUBLICATION-RECORD-001.md — the DECIDED line in this document names the decider and the date"
