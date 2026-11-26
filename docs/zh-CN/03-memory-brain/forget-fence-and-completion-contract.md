@@ -3,7 +3,7 @@
 - 文档 ID：D-FORGET-CONTRACT-001
 - 版本：1.0
 - 源分支：main
-- 源文件版本：AID-2026-083 已恢复规范根路径；精确 Blob 记录于 Draft PR Head。
+- 源文件版本：AID-2026-086 已恢复规范根路径；精确 Blob 记录于 Draft PR Head。
 - 历史源分支 HEAD：6b654d5cffaeb71b01f2b0750daa0abc14eb64b3（仅作来源证据）
 - 规范源：[03-memory-brain/forget-fence-and-completion-contract.md](../../../03-memory-brain/forget-fence-and-completion-contract.md)；本文件和英文文件均为镜像。
 - 对应英文：[Canonical Forget Fence and Completion Contract](../../en/03-memory-brain/forget-fence-and-completion-contract.md)
