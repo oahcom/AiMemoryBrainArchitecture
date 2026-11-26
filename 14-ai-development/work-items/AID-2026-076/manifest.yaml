@@ -62,10 +62,15 @@ acceptance:
   C8: "`python scripts/check_session_evidence_workflow_shape.py` exits 0 on the unmutated repository. Settled by running it with no path argument."
 
 implementation:
-  status: IMPLEMENTED_IN_BRANCH
-  pull_request: ASSIGNED_AT_OPEN
-  merge_commit_sha: NOT_MERGED
-  note: "The pull request number cannot be written into the commit that opens it, so the INDEX row carries it once a merge commits."
+  status: MERGED
+  pull_request: 1155
+  merge_commit_sha: 2733283bff2bcc744c595ec06b602aadb52c772a
+  note: >-
+    Merged 2026-11-25T14:59:20Z as 2733283bff2bcc744c595ec06b602aadb52c772a via PR #1155,
+    head 07a8d1ee. The pull request number cannot be written into the commit that opens it, so
+    this block read IMPLEMENTED_IN_BRANCH / ASSIGNED_AT_OPEN / NOT_MERGED until the carrier
+    merged; it was not refreshed when it did. Refreshed by AID-2026-090, which records the
+    prior value rather than relying on the diff.
 
 review:
   status: NOT_ASSIGNED
