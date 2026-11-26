@@ -1,5 +1,9 @@
 name: Runner admission policy
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
 on:
   pull_request:
   push:
@@ -10,6 +14,7 @@ permissions:
 
 jobs:
   audit:
+    name: audit
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
