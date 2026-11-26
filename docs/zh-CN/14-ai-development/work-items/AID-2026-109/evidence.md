@@ -325,6 +325,249 @@ AID-095 的原始 Gate A 状态列在每一行都保持 `NOT EVIDENCED`。PARTIA
 | SC-17 | **UNCHANGED** | 无对应测试 | 缺跨资源稳定 GID participant、durable prepare/vote/terminal records、单一已接受 coordinator terminal authority 与确定性恢复测试。 |
 | SC-18 | **UNCHANGED** | 无对应测试 | 缺备份/副本回滚/failover 的重复 workload 证据、声明的 RPO/RTO 与生产拓扑演练。 |
 
+## 7. HIR-05/06/08/12/14/16/17/18——八条 EVIDENCE_REQUIRED
+
+| ID | 证据判定 | 触及谓词的测试 | 缺失部分 / 不能 PASS 的原因 |
+|---|---|---|---|
+| HIR-05 | **UNCHANGED** | 无对应测试 | 缺 H-owned durable reservation ledger、tombstone retention horizon 与 replay expiry policy；SQLite Storage receipt 不是 H reservation。 |
+| HIR-06 | **PARTIAL_EVIDENCE** | file_db_interrupted_commit_keeps_version_pointer_log_and_idempotency_consistent; sqlite_publish_rejects_stale_parent_without_partial_commit; failed_payload_insert_rolls_back_event_payload_and_outbox_rows | 覆盖 Storage CAS/idempotency/rollback 局部写集；缺完整 AID-098 Owner write-set、outbox+receipt+cursor 同事务及 Owner 接受的映射。 |
+| HIR-08 | **PARTIAL_EVIDENCE** | concurrent_identical_idempotency_requests_replay_one_durable_receipt; independent_connections_serialize_conflicting_idempotency_payloads | 覆盖 SQLite 并发幂等竞争；缺 H-owned ledger namespace 竞争、明确 H winner 与 H durable admission receipt。 |
+| HIR-12 | **UNCHANGED** | 无对应测试 | 缺 H Pending duplicate 返回同一 H receipt 且不触发第二次 logical execution；E compile-intent pending 测试不是 H protocol ledger。 |
+| HIR-14 | **PARTIAL_EVIDENCE** | same_producer_key_and_digest_replay_original_receipt; same_producer_key_with_different_digest_conflicts; sqlite_idempotency_digest_mismatch_conflicts_for_commit_and_receipt_lookup | 覆盖 producer/storage key+digest replay/conflict；缺 H 完整 namespace tuple 下同键语义与 H-owned immutable receipt。 |
+| HIR-16 | **PARTIAL_EVIDENCE** | committed_payload_survives_process_crash_and_wal_recovery; abrupt_process_exit_rolls_back_entire_uncommitted_commit; restart_preserves_receipt_and_idempotent_payload_replay | 覆盖 SQLite 单资源 crash/reopen/replay；缺 H 与 Storage commit 前后跨边界 reconciliation、同 GID 查询和无重复 domain effect。 |
+| HIR-17 | **UNCHANGED** | 无对应测试 | 缺 H Attempt 与 distinct C/G DeliveryAttempt join、C evidence binding、G AppliedAttestation/Applied 独立决策集成测试。 |
+| HIR-18 | **PARTIAL_EVIDENCE** | forget_fence::tests::missing_or_corrupt_fence_fails_closed; tests::f1_forget_memory_hides_current_and_history; tests::f5_forget_memory_blocks_idempotency_replay; tests::f10_forget_survives_reopen | 仅覆盖 D Fence 侧 fail-closed；缺 I PermissionEpoch 当前授权重查、issuer/key status revalidation，以及 D/I anti-rollback anchor 联动。 |
+
+## 8. Gate A 与 Gate B 结论
+
+**Gate A：PARTIAL / OPEN——不变。**72 个 Gate A 单元中完整 PASS 谓词为零。SQLite 证据为部分单元增加了实现层证据，但没有完成任何八流程端到端谓词，也没有满足关闭 Gate A 所需的 Owner 验收与完整组合审查。
+
+原有九项关闭清单保持：
+1. main 同步与最终 PR Head 新鲜度——必须在最终 Head 核验。
+2. 跨 Owner 角色处置——代理处置与自然人 Owner 验收必须区分。
+3. 精确 Head CI——最终 PR Head 上 16 项必需上下文全部成功。
+4. 完整八流程 A–I + Storage 组合包及相关 Owner 验收。
+5. D/E/F/I 规范根 / IMPL2 处置及精确替代源 pin。
+6. Storage 物理合同与完整 SC 证据，包括 SC-17/18。
+7. H 幂等/重放与完整 HIR 证据，包括 HIR-17/18。
+8. Canonical/EN/ZH-CN 全文语义与源版本 parity。
+9. DEC-13 规范批准证据及任何未完成的自然人 Owner/联合验收。
+
+**Gate B：PARTIAL / OPEN（NOT VERIFIED）——不变。**本地 SQLite 测试不能证明部署、生产一致性、分布式/多副本一致性、运维备份/故障切换或生产 RPO/RTO。
+
+## 9. 明确未解决的实现谓词
+
+- **SC-17：**没有稳定的跨资源 GID participant 集合、durable prepare/vote/terminal 记录、单一已接受 terminal-decision authority 或 participant replay/recovery。
+- **SC-18：**没有备份/恢复、副本回滚、故障切换、可重复 RPO/RTO profile 或生产拓扑演练。
+- **HIR-17：**没有 H Attempt 到 C/G DeliveryAttempt 关联；没有 G AppliedAttestation 或独立 Applied 决策测试。
+- **HIR-18：**没有在 replay disclosure 前对 I PermissionEpoch 单调性/当前授权进行重查；D Fence 测试不能满足 I 侧谓词。
+- **D/I anti-rollback：**没有 D Fence 与 I PermissionEpoch 在 restore 期间的独立 anchor 联动；没有跨两个 authority 的 pre-Fence/pre-revocation 备份复活测试。
+- 两次本地测试均未声称为 CI 证据。
+
+## 10. 非主张与约束
+
+- 本次审查没有任何 PASS。
+- `PARTIAL_EVIDENCE` 不会把任何 Gate A 状态提升为 PASS。
+- 本证据记录 PR 未修改 runtime、validator 语义、schema、API、DDL、test、workflow、deployment 或生产配置。
+- 不声称 Owner 验收或自然人签署。
+- #1211 与 #1212 保持 OPEN；本记录不关闭任何 Issue。
+
+## 11. 署名
+
+user-authorized operator (delegated by account owner)；2026-11-26。仅记录委托证据，不伪造自然人 Owner 签署。| Test | Exact test name | SC predicates touched | HIR predicates touched | Mapping boundary |
+|---|---|---|---|---|
+| T01 | `committed_payload_survives_process_crash_and_wal_recovery` | SC-04, SC-05, SC-06 | HIR-16 | 覆盖 SQLite WAL/recovery 局部行为；不证明设备 flush、完整 checkpoint 协议或 H↔Storage 跨边界恢复。 |
+| T02 | `concurrent_appends_preserve_unique_order_and_payload_custody` | SC-01, SC-09 | 无对应测试 | 覆盖 append ordering/concurrency 局部行为；不证明 Owner write-set 完整性或分布式线性化。 |
+| T03 | `concurrent_forget_waits_for_restore_snapshot_lock` | SC-06, SC-10, SC-11, SC-12, SC-13, SC-09 | HIR-18 | 覆盖 SQLite restore lock 的并发序列化和 D Fence 一侧；缺 I 授权重查。 |
+| T04 | `crash_after_fence_commit_is_retried_without_resurrection` | SC-06, SC-10, SC-11, SC-12, SC-13 | HIR-18 | 只覆盖 D/Forget Fence 的 SQLite 局部隐藏、锁、恢复或 fail-closed；HIR-18 缺 I PermissionEpoch 当前授权重查及 D/I anti-rollback 联动。 |
+| T05 | `failed_payload_insert_rolls_back_event_payload_and_outbox_rows` | SC-01, SC-02, SC-06 | HIR-06, HIR-16 | 覆盖单资源事务回滚/崩溃切面；缺完整 Owner write-set、H↔Storage 协调和物理断电语义。 |
+| T06 | `fence_restore_purges_one_scope_from_a_store_built_database` | SC-06, SC-10, SC-11, SC-12, SC-13 | HIR-18 | 覆盖本地 scope/read/change-page fail-closed；缺全权威读路径、replica applied position、D/I currentness。 |
+| T07 | `forget_fence::tests::concurrent_forget_serializes_behind_restore_fence_lock` | SC-06, SC-10, SC-11, SC-12, SC-13, SC-09 | HIR-18 | 覆盖 SQLite restore lock 的并发序列化和 D Fence 一侧；缺 I 授权重查。 |
+| T08 | `forget_fence::tests::crash_after_fence_commit_is_retried_safely_on_restore` | SC-06, SC-10, SC-11, SC-12, SC-13 | HIR-18 | 只覆盖 D/Forget Fence 的 SQLite 局部隐藏、锁、恢复或 fail-closed；HIR-18 缺 I PermissionEpoch 当前授权重查及 D/I anti-rollback 联动。 |
+| T09 | `forget_fence::tests::malformed_scope_refuses_activation_without_partial_change` | SC-06, SC-10, SC-11, SC-12, SC-13 | HIR-18 | 覆盖本地 scope/read/change-page fail-closed；缺全权威读路径、replica applied position、D/I currentness。 |
+| T10 | `forget_fence::tests::missing_or_corrupt_fence_fails_closed` | SC-06, SC-10, SC-11, SC-12, SC-13 | HIR-18 | 只覆盖 D/Forget Fence 的 SQLite 局部隐藏、锁、恢复或 fail-closed；HIR-18 缺 I PermissionEpoch 当前授权重查及 D/I anti-rollback 联动。 |
+| T11 | `forget_fence::tests::restore_anti_resurrection_purges_only_fenced_scope_across_all_tables` | SC-06, SC-10, SC-11, SC-12, SC-13 | HIR-18 | 覆盖本地 scope/read/change-page fail-closed；缺全权威读路径、replica applied position、D/I currentness。 |
+| T12 | `live_wal_copy_fails_closed_until_checkpointed` | SC-04, SC-05, SC-06 | HIR-16 | 覆盖 SQLite WAL/recovery 局部行为；不证明设备 flush、完整 checkpoint 协议或 H↔Storage 跨边界恢复。 |
+| T13 | `malformed_scope_refuses_activation_without_partial_change` | SC-06, SC-10, SC-11, SC-12, SC-13 | HIR-18 | 覆盖本地 scope/read/change-page fail-closed；缺全权威读路径、replica applied position、D/I currentness。 |
+| T14 | `missing_or_corrupt_fence_fails_closed` | SC-06, SC-10, SC-11, SC-12, SC-13 | HIR-18 | 只覆盖 D/Forget Fence 的 SQLite 局部隐藏、锁、恢复或 fail-closed；HIR-18 缺 I PermissionEpoch 当前授权重查及 D/I anti-rollback 联动。 |
+| T15 | `ordered_read_rejects_payload_and_verified_digest_tampering` | SC-02, SC-07 | 无对应测试 | 覆盖输入校验/摘要完整性/scope 拒绝的部分；不证明完整 transaction/restore/权限谓词。 |
+| T16 | `payload::tests::duplicate_payload_append_returns_original_receipt_without_duplicate_rows` | SC-07, SC-08 | HIR-14 | 覆盖 Storage/producer receipt replay；不证明 H receipt/namespace 或 tombstone horizon。 |
+| T17 | `payload::tests::payload_append_receipt_and_ordered_read_survive_reopen` | SC-07, SC-08 | 无对应测试 | 覆盖 SQLite receipt reopen/replay；不是 H-owned receipt 或 H tombstone 证据。 |
+| T18 | `payload::tests::payload_digest_mismatch_is_rejected_before_append` | SC-02, SC-07 | 无对应测试 | 覆盖输入校验/摘要完整性/scope 拒绝的部分；不证明完整 transaction/restore/权限谓词。 |
+| T19 | `payload::tests::read_after_fails_closed_on_empty_persisted_scope_list` | SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/change-page fail-closed；缺全权威读路径、replica applied position、D/I currentness。 |
+| T20 | `payload::tests::read_after_fails_closed_on_invalid_persisted_scope_ref` | SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/change-page fail-closed；缺全权威读路径、replica applied position、D/I currentness。 |
+| T21 | `payload::tests::read_after_paginates_interleaved_scope_rows_by_visible_limit` | SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/change-page fail-closed；缺全权威读路径、replica applied position、D/I currentness。 |
+| T22 | `payload::tests::read_after_skips_non_intersecting_scopes_and_limits_visible_rows` | SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/change-page fail-closed；缺全权威读路径、replica applied position、D/I currentness。 |
+| T23 | `payload_persistence_boundary_sizes_survive_reopen` | SC-01 | 无对应测试 | 只触及 payload 持久化边界/尺寸，不证明 CAS、Owner cursor、idempotency、outbox 与 receipt 全写集。 |
+| T24 | `restart_preserves_receipt_and_idempotent_payload_replay` | SC-07, SC-08 | HIR-14 | 覆盖 SQLite receipt reopen/replay；不是 H-owned receipt 或 H tombstone 证据。 |
+| T25 | `restore_anti_resurrection_and_preserves_other_scope` | SC-06, SC-10, SC-11, SC-12, SC-13 | HIR-18 | 覆盖本地 scope/read/change-page fail-closed；缺全权威读路径、replica applied position、D/I currentness。 |
+| T26 | `tests::abrupt_exit_worker` | 无对应测试 | 无对应测试 | 辅助 worker 名称或未覆盖的语义；无对应测试。 |
+| T27 | `tests::abrupt_process_exit_rolls_back_entire_uncommitted_commit` | SC-01, SC-02, SC-06 | HIR-06, HIR-16 | 覆盖单资源事务回滚/崩溃切面；缺完整 Owner write-set、H↔Storage 协调和物理断电语义。 |
+| T28 | `tests::acceptance_persists_across_reopen_and_receipt_replay_is_stable` | SC-07, SC-08 | 无对应测试 | 覆盖 SQLite receipt reopen/replay；不是 H-owned receipt 或 H tombstone 证据。 |
+| T29 | `tests::empty_scope_and_missing_payload_identity_are_rejected` | SC-10, SC-12, SC-02, SC-07 | 无对应测试 | 覆盖输入校验/摘要完整性/scope 拒绝的部分；不证明完整 transaction/restore/权限谓词。 |
+| T30 | `tests::f1_forget_memory_hides_current_and_history` | SC-06, SC-10, SC-11, SC-12, SC-13 | HIR-18 | 只覆盖 D/Forget Fence 的 SQLite 局部隐藏、锁、恢复或 fail-closed；HIR-18 缺 I PermissionEpoch 当前授权重查及 D/I anti-rollback 联动。 |
+| T31 | `tests::f10_forget_survives_reopen` | SC-06, SC-10, SC-11, SC-12, SC-13 | HIR-18 | 只覆盖 D/Forget Fence 的 SQLite 局部隐藏、锁、恢复或 fail-closed；HIR-18 缺 I PermissionEpoch 当前授权重查及 D/I anti-rollback 联动。 |
+| T32 | `tests::f2_forget_memory_excludes_from_change_pages` | SC-06, SC-10, SC-11, SC-12, SC-13 | HIR-18 | 覆盖本地 scope/read/change-page fail-closed；缺全权威读路径、replica applied position、D/I currentness。 |
+| T33 | `tests::f3_forget_memory_rejects_new_commit` | SC-06, SC-10, SC-11, SC-12, SC-13 | HIR-18 | 只覆盖 D/Forget Fence 的 SQLite 局部隐藏、锁、恢复或 fail-closed；HIR-18 缺 I PermissionEpoch 当前授权重查及 D/I anti-rollback 联动。 |
+| T34 | `tests::f4_forget_memory_rejects_prepare_and_publish` | SC-06, SC-10, SC-11, SC-12, SC-13 | HIR-18 | 只覆盖 D/Forget Fence 的 SQLite 局部隐藏、锁、恢复或 fail-closed；HIR-18 缺 I PermissionEpoch 当前授权重查及 D/I anti-rollback 联动。 |
+| T35 | `tests::f5_forget_memory_blocks_idempotency_replay` | SC-06, SC-10, SC-11, SC-12, SC-13 | HIR-18 | 只覆盖 D/Forget Fence 的 SQLite 局部隐藏、锁、恢复或 fail-closed；HIR-18 缺 I PermissionEpoch 当前授权重查及 D/I anti-rollback 联动。 |
+| T36 | `tests::f6_forget_is_idempotent` | SC-06, SC-10, SC-11, SC-12, SC-13 | HIR-18 | 只覆盖 D/Forget Fence 的 SQLite 局部隐藏、锁、恢复或 fail-closed；HIR-18 缺 I PermissionEpoch 当前授权重查及 D/I anti-rollback 联动。 |
+| T37 | `tests::f7_forget_version_only_hides_that_version` | SC-06, SC-10, SC-11, SC-12, SC-13 | HIR-18 | 只覆盖 D/Forget Fence 的 SQLite 局部隐藏、锁、恢复或 fail-closed；HIR-18 缺 I PermissionEpoch 当前授权重查及 D/I anti-rollback 联动。 |
+| T38 | `tests::f8_forget_version_blocks_child_commit` | SC-06, SC-10, SC-11, SC-12, SC-13 | HIR-18 | 只覆盖 D/Forget Fence 的 SQLite 局部隐藏、锁、恢复或 fail-closed；HIR-18 缺 I PermissionEpoch 当前授权重查及 D/I anti-rollback 联动。 |
+| T39 | `tests::f9_forget_memory_sets_lifecycle_state` | SC-06, SC-10, SC-11, SC-12, SC-13 | HIR-18 | 只覆盖 D/Forget Fence 的 SQLite 局部隐藏、锁、恢复或 fail-closed；HIR-18 缺 I PermissionEpoch 当前授权重查及 D/I anti-rollback 联动。 |
+| T40 | `tests::file_backed_connection_applies_required_sqlite_pragmas` | 无对应测试 | 无对应测试 | 辅助 worker 名称或未覆盖的语义；无对应测试。 |
+| T41 | `tests::file_db_busy_timeout_bounds_wait_for_long_immediate_transaction` | SC-09 | 无对应测试 | 只证明 SQLite busy timeout 等待上界，不证明完整隔离 profile 或跨节点线性化。 |
+| T42 | `tests::file_db_interrupted_commit_keeps_version_pointer_log_and_idempotency_consistent` | SC-01, SC-02, SC-06 | HIR-06, HIR-16 | 覆盖单资源事务回滚/崩溃切面；缺完整 Owner write-set、H↔Storage 协调和物理断电语义。 |
+| T43 | `tests::file_db_nested_savepoint_rollback_preserves_outer_work` | SC-02 | 无对应测试 | 只覆盖单资源 savepoint rollback；不覆盖 WAL crash cut 或完整跨表原子写集。 |
+| T44 | `tests::file_db_unwinding_worker_releases_open_transaction_without_partial_state` | SC-01, SC-02, SC-06 | HIR-06, HIR-16 | 覆盖单资源事务回滚/崩溃切面；缺完整 Owner write-set、H↔Storage 协调和物理断电语义。 |
+| T45 | `tests::independent_connections_serialize_conflicting_idempotency_payloads` | SC-08, SC-09 | HIR-08, HIR-14 | 覆盖 SQLite 连接/请求并发幂等竞争；不证明 H-owned ledger 的完整 namespace 与 H admission authority。 |
+| T46 | `tests::multi_process_cas_worker` | 无对应测试 | 无对应测试 | 辅助 worker 名称或未覆盖的语义；无对应测试。 |
+| T47 | `tests::concurrent_identical_idempotency_requests_replay_one_durable_receipt` | SC-08, SC-09 | HIR-08, HIR-14 | 覆盖 SQLite 连接/请求并发幂等竞争；不证明 H-owned ledger 的完整 namespace 与 H admission authority。 |
+| T48 | `tests::pending_compile_intent_carries_the_payload_and_envelope_a_compiler_needs` | SC-15 | 无对应测试 | 覆盖 E compile-intent 数据/顺序/幂等/回填局部实现；不证明 E admission 完整原子边界。 |
+| T49 | `tests::pending_compile_intent_created_at_matches_the_acceptance_time` | SC-15 | 无对应测试 | 覆盖 E compile-intent 数据/顺序/幂等/回填局部实现；不证明 E admission 完整原子边界。 |
+| T50 | `tests::pending_compile_intent_fails_closed_when_stored_payload_is_tampered_with` | SC-15 | 无对应测试 | 覆盖 E compile-intent 数据/顺序/幂等/回填局部实现；不证明 E admission 完整原子边界。 |
+| T51 | `tests::pending_compile_intent_is_invisible_when_no_payload_was_stored` | SC-15 | 无对应测试 | 覆盖 E compile-intent 数据/顺序/幂等/回填局部实现；不证明 E admission 完整原子边界。 |
+| T52 | `tests::pending_compile_intents_fails_closed_when_stored_bytes_are_tampered` | SC-15 | 无对应测试 | 覆盖 E compile-intent 数据/顺序/幂等/回填局部实现；不证明 E admission 完整原子边界。 |
+| T53 | `tests::pending_compile_intents_is_empty_on_a_fresh_store` | SC-15 | 无对应测试 | 覆盖 E compile-intent 数据/顺序/幂等/回填局部实现；不证明 E admission 完整原子边界。 |
+| T54 | `tests::pending_compile_intents_is_idempotent_and_does_not_consume` | SC-15 | 无对应测试 | 覆盖 E compile-intent 数据/顺序/幂等/回填局部实现；不证明 E admission 完整原子边界。 |
+| T55 | `tests::pending_compile_intents_returns_accepted_events_in_insertion_order` | SC-15 | 无对应测试 | 覆盖 E compile-intent 数据/顺序/幂等/回填局部实现；不证明 E admission 完整原子边界。 |
+| T56 | `tests::same_producer_key_and_digest_replay_original_receipt` | SC-08 | HIR-02, HIR-14 | 覆盖 producer key 同 digest replay / 异 digest conflict；不覆盖 H 完整 namespace tuple、Attempt 规则或 H ledger。 |
+| T57 | `tests::same_producer_key_with_different_digest_conflicts` | SC-08 | HIR-02, HIR-14 | 覆盖 producer key 同 digest replay / 异 digest conflict；不覆盖 H 完整 namespace tuple、Attempt 规则或 H ledger。 |
+| T58 | `tests::separate_processes_serialize_competing_file_backed_cas_writers` | SC-09 | 无对应测试 | 覆盖本地多进程 CAS writers 序列化；不是多节点/多副本线性化。 |
+| T59 | `tests::sqlite_change_listing_surfaces_corrupt_scope_metadata_instead_of_silently_skipping_it` | SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/change-page fail-closed；缺全权威读路径、replica applied position、D/I currentness。 |
+| T60 | `tests::sqlite_change_pages_filter_scope_before_applying_limit` | SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/change-page fail-closed；缺全权威读路径、replica applied position、D/I currentness。 |
+| T61 | `tests::sqlite_change_pages_with_limit_two_preserve_order_without_skips_or_duplicates` | SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/change-page fail-closed；缺全权威读路径、replica applied position、D/I currentness。 |
+| T62 | `tests::sqlite_denies_fresh_cross_scope_write_without_persisting_any_commit_state` | SC-10, SC-12, SC-02, SC-07 | 无对应测试 | 覆盖输入校验/摘要完整性/scope 拒绝的部分；不证明完整 transaction/restore/权限谓词。 |
+| T63 | `tests::sqlite_does_not_replay_idempotency_key_across_memories` | 无对应测试 | 无对应测试 | 辅助 worker 名称或未覆盖的语义；无对应测试。 |
+| T64 | `tests::sqlite_does_not_replay_idempotency_receipt_before_scope_check` | SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/change-page fail-closed；缺全权威读路径、replica applied position、D/I currentness。 |
+| T65 | `tests::sqlite_filters_nested_claims_by_the_callers_scope` | SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/change-page fail-closed；缺全权威读路径、replica applied position、D/I currentness。 |
+| T66 | `tests::sqlite_hides_entire_multiscope_claim_from_partial_scope_reader` | SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/change-page fail-closed；缺全权威读路径、replica applied position、D/I currentness。 |
+| T67 | `tests::sqlite_idempotency_digest_mismatch_conflicts_for_commit_and_receipt_lookup` | 无对应测试 | 无对应测试 | 辅助 worker 名称或未覆盖的语义；无对应测试。 |
+| T68 | `tests::sqlite_multiple_preparations_reserve_unique_negative_sequences` | SC-01, SC-02, SC-03, SC-09, SC-10 | HIR-06 | 覆盖 SQLite prepare/publish/CAS 部分；缺完整 Owner write-set、H ledger 及外部/副本可见性。 |
+| T69 | `tests::sqlite_prepare_does_not_add_change_log_entries` | SC-01, SC-02, SC-03, SC-09, SC-10 | HIR-06 | 覆盖 SQLite prepare/publish/CAS 部分；缺完整 Owner write-set、H ledger 及外部/副本可见性。 |
+| T70 | `tests::sqlite_prepare_hides_version_from_read_version` | SC-01, SC-02, SC-03, SC-09, SC-10 | HIR-06 | 覆盖 SQLite prepare/publish/CAS 部分；缺完整 Owner write-set、H ledger 及外部/副本可见性。 |
+| T71 | `tests::sqlite_prepare_keeps_current_version_unchanged` | SC-01, SC-02, SC-03, SC-09, SC-10 | HIR-06 | 覆盖 SQLite prepare/publish/CAS 部分；缺完整 Owner write-set、H ledger 及外部/副本可见性。 |
+| T72 | `tests::sqlite_prepare_rejects_idempotency_digest_conflict` | SC-01, SC-02, SC-03, SC-09, SC-10 | HIR-06 | 覆盖 SQLite prepare/publish/CAS 部分；缺完整 Owner write-set、H ledger 及外部/副本可见性。 |
+| T73 | `tests::sqlite_prepare_replay_returns_same_receipt` | SC-07, SC-08, SC-01, SC-02, SC-03, SC-09, SC-10 | HIR-14, HIR-06 | 覆盖 SQLite prepare/publish/CAS 部分；缺完整 Owner write-set、H ledger 及外部/副本可见性。 |
+| T74 | `tests::sqlite_publication_state_honours_scope_and_forget_fences` | SC-06, SC-10, SC-11, SC-12, SC-13 | HIR-18 | 覆盖本地 scope/read/change-page fail-closed；缺全权威读路径、replica applied position、D/I currentness。 |
+| T75 | `tests::sqlite_publication_state_reports_prepared_hidden_then_published` | 无对应测试 | 无对应测试 | 辅助 worker 名称或未覆盖的语义；无对应测试。 |
+| T76 | `tests::sqlite_publication_state_returns_none_for_unknown_or_legacy_publication` | 无对应测试 | 无对应测试 | 辅助 worker 名称或未覆盖的语义；无对应测试。 |
+| T77 | `tests::sqlite_publish_allocates_sequence_only_at_publish_time` | SC-01, SC-02, SC-03, SC-09, SC-10 | HIR-06 | 覆盖 SQLite prepare/publish/CAS 部分；缺完整 Owner write-set、H ledger 及外部/副本可见性。 |
+| T78 | `tests::sqlite_publish_makes_prepared_version_current_and_readable` | SC-01, SC-02, SC-03, SC-09, SC-10 | HIR-06 | 覆盖 SQLite prepare/publish/CAS 部分；缺完整 Owner write-set、H ledger 及外部/副本可见性。 |
+| T79 | `tests::sqlite_publish_rejects_duplicate_publication_and_suppressed_state` | SC-01, SC-02, SC-03, SC-09, SC-10 | HIR-06 | 覆盖 SQLite prepare/publish/CAS 部分；缺完整 Owner write-set、H ledger 及外部/副本可见性。 |
+| T80 | `tests::sqlite_publish_rejects_stale_parent_without_partial_commit` | SC-01, SC-02, SC-03, SC-09, SC-10 | HIR-06 | 覆盖 SQLite prepare/publish/CAS 部分；缺完整 Owner write-set、H ledger 及外部/副本可见性。 |
+| T81 | `tests::sqlite_publish_replay_returns_original_receipt` | SC-07, SC-08, SC-01, SC-02, SC-03, SC-09, SC-10 | HIR-14, HIR-06 | 覆盖 SQLite prepare/publish/CAS 部分；缺完整 Owner write-set、H ledger 及外部/副本可见性。 |
+| T82 | `tests::sqlite_read_version_keeps_legacy_versions_visible` | 无对应测试 | 无对应测试 | 辅助 worker 名称或未覆盖的语义；无对应测试。 |
+| T83 | `tests::sqlite_rejects_claim_scope_outside_callers_scope_even_when_parent_contains_it` | SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/change-page fail-closed；缺全权威读路径、replica applied position、D/I currentness。 |
+| T84 | `tests::sqlite_rejects_claims_outside_the_parent_memory_scope` | SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/change-page fail-closed；缺全权威读路径、replica applied position、D/I currentness。 |
+| T85 | `tests::sqlite_rejects_create_outside_requested_scope` | SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/change-page fail-closed；缺全权威读路径、replica applied position、D/I currentness。 |
+| T86 | `tests::sqlite_rejects_empty_idempotency_key_or_request_digest` | SC-02, SC-07 | 无对应测试 | 覆盖输入校验/摘要完整性/scope 拒绝的部分；不证明完整 transaction/restore/权限谓词。 |
+| T87 | `tests::sqlite_rejects_invalid_memory_and_orphan_initial_version_pointer` | SC-01, SC-02, SC-03, SC-09, SC-10 | HIR-06 | 覆盖 SQLite prepare/publish/CAS 部分；缺完整 Owner write-set、H ledger 及外部/副本可见性。 |
+| T88 | `tests::sqlite_rejects_invalid_version_fields_before_writing_any_commit_state` | SC-02, SC-07 | 无对应测试 | 覆盖输入校验/摘要完整性/scope 拒绝的部分；不证明完整 transaction/restore/权限谓词。 |
+| T89 | `tests::sqlite_rejects_malformed_nested_claims_before_commit` | SC-02, SC-07 | 无对应测试 | 覆盖输入校验/摘要完整性/scope 拒绝的部分；不证明完整 transaction/restore/权限谓词。 |
+| T90 | `tests::sqlite_rejects_mixed_parent_and_foreign_claim_scopes_before_commit` | SC-10, SC-12, SC-02, SC-07 | 无对应测试 | 覆盖输入校验/摘要完整性/scope 拒绝的部分；不证明完整 transaction/restore/权限谓词。 |
+| T91 | `tests::sqlite_rejects_stale_expected_version` | SC-01, SC-02, SC-03, SC-09, SC-10 | HIR-06 | 覆盖 SQLite prepare/publish/CAS 部分；缺完整 Owner write-set、H ledger 及外部/副本可见性。 |
+| T92 | `tests::sqlite_storage_entry_points_reject_empty_and_malformed_scope_sets` | SC-06, SC-10, SC-11, SC-12, SC-13 | HIR-18 | 覆盖本地 scope/read/change-page fail-closed；缺全权威读路径、replica applied position、D/I currentness。 |
+| T93 | `tests::startup_backfills_compile_intent_for_preexisting_accepted_events` | SC-15 | 无对应测试 | 覆盖 E compile-intent 数据/顺序/幂等/回填局部实现；不证明 E admission 完整原子边界。 |
+| T94 | `tests::status_and_replay_enforce_scope` | SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/change-page fail-closed；缺全权威读路径、replica applied position、D/I currentness。 |
+
+## 5. AID-095 全部 72 个 Gate A 检查点重判
+
+本次证据审查的判定词汇：
+- **PASS**：具名测试完整覆盖检查点谓词才允许；本次没有任何一格满足。
+- **PARTIAL_EVIDENCE**：测试覆盖一个或多个谓词组成部分，但仍缺 Owner、端到端关联、跨资源、副本、安全或运维组成部分。
+- **UNCHANGED**：没有对应测试覆盖该检查点的核心谓词。
+
+AID-095 的原始 Gate A 状态列在每一行都保持 `NOT EVIDENCED`。PARTIAL_EVIDENCE 只是证据注释，不是 PASS 或 Gate A 状态升级。
+
+| 流程 | 检查点 | 原 Gate A 状态 | 证据判定 | 对应测试 | 为什么不能 PASS / 仍缺什么 |
+|---|---|---|---|---|---|
+| F1 | Issuer | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F1 | Request / response | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F1 | Identity / cursor namespace | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F1 | Idempotency scope | NOT EVIDENCED | **PARTIAL_EVIDENCE** | `tests::pending_compile_intents_returns_accepted_events_in_insertion_order`; `tests::same_producer_key_and_digest_replay_original_receipt` | 生产者 key/digest 重放与冲突有测试；缺 E producer namespace、scope-before-replay 全路径及 Owner admission 语义。 |
+| F1 | Linearization point | NOT EVIDENCED | **PARTIAL_EVIDENCE** | `tests::pending_compile_intent_created_at_matches_the_acceptance_time`; `tests::pending_compile_intent_fails_closed_when_stored_payload_is_tampered_with`; `tests::pending_compile_intent_is_invisible_when_no_payload_was_stored` | 本地 acceptance/compile-intent 持久化有片段；缺 E Accepted + envelope + digest + compiler state + outbox 同一原子边界证明。 |
+| F1 | Durable receipt | NOT EVIDENCED | **PARTIAL_EVIDENCE** | `tests::acceptance_persists_across_reopen_and_receipt_replay_is_stable`; `tests::pending_compile_intent_created_at_matches_the_acceptance_time`; `tests::pending_compile_intents_returns_accepted_events_in_insertion_order` | SQLite receipt reopen/replay 有片段；缺 E-issued receipt 全字段及其与 Accepted 事务的绑定。 |
+| F1 | Failure / Unknown | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F1 | Replay / recovery | NOT EVIDENCED | **PARTIAL_EVIDENCE** | `tests::pending_compile_intent_is_invisible_when_no_payload_was_stored`; `tests::pending_compile_intents_fails_closed_when_stored_bytes_are_tampered`; `tests::pending_compile_intents_is_empty_on_a_fresh_store`; `restart_preserves_receipt_and_idempotent_payload_replay` | 启动回填 compile intent、重开后 receipt replay 有片段；缺 E dispatcher/lease/DLQ/Unknown reconciliation。 |
+| F1 | Visibility | NOT EVIDENCED | **PARTIAL_EVIDENCE** | `tests::pending_compile_intents_is_idempotent_and_does_not_consume`; `tests::same_producer_key_with_different_digest_conflicts` | 无 payload 时 compile intent 不可见等测试；缺 E/D canonical visibility 及全路径约束。 |
+| F2 | Issuer | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F2 | Request / response | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F2 | Identity / cursor namespace | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F2 | Idempotency scope | NOT EVIDENCED | **PARTIAL_EVIDENCE** | `tests::concurrent_identical_idempotency_requests_replay_one_durable_receipt`; `tests::pending_compile_intents_returns_accepted_events_in_insertion_order`; `tests::same_producer_key_and_digest_replay_original_receipt`; `tests::sqlite_multiple_preparations_reserve_unique_negative_sequences` | 同 key/digest replay/conflict 有测试；缺 D canonical operation namespace 与 F consumer dedupe join。 |
+| F2 | Linearization point | NOT EVIDENCED | **PARTIAL_EVIDENCE** | `tests::file_db_interrupted_commit_keeps_version_pointer_log_and_idempotency_consistent`; `tests::file_db_nested_savepoint_rollback_preserves_outer_work`; `tests::sqlite_publication_state_reports_prepared_hidden_then_published`; `tests::sqlite_publish_rejects_stale_parent_without_partial_commit` | 本地 SQLite transaction/CAS/publish tests 覆盖局部 commit 边界；缺 D canonical cursor/outbox 的同一事务及 F consumption。 |
+| F2 | Durable receipt | NOT EVIDENCED | **PARTIAL_EVIDENCE** | `tests::acceptance_persists_across_reopen_and_receipt_replay_is_stable`; `tests::concurrent_identical_idempotency_requests_replay_one_durable_receipt`; `tests::pending_compile_intent_created_at_matches_the_acceptance_time` | durable receipt/reopen/replay tests 覆盖局部 receipt；缺 D-issued cursor/receipt/outbox 完整链路。 |
+| F2 | Failure / Unknown | NOT EVIDENCED | **PARTIAL_EVIDENCE** | `tests::abrupt_process_exit_rolls_back_entire_uncommitted_commit`; `tests::file_db_interrupted_commit_keeps_version_pointer_log_and_idempotency_consistent`; `tests::file_db_nested_savepoint_rollback_preserves_outer_work` | 事务回滚/中断 commit 有测试；缺 lost response 后 D/F Unknown 查询、reconcile 与无重复消费证明。 |
+| F2 | Replay / recovery | NOT EVIDENCED | **PARTIAL_EVIDENCE** | `committed_payload_survives_process_crash_and_wal_recovery`; `restart_preserves_receipt_and_idempotent_payload_replay`; `tests::acceptance_persists_across_reopen_and_receipt_replay_is_stable` | SQLite receipt replay/reopen 有测试；缺 D cursor 连续前缀、F consumer dedupe/ack/gap recovery。 |
+| F2 | Visibility | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F3 | Issuer | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F3 | Request / response | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F3 | Identity / cursor namespace | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F3 | Idempotency scope | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F3 | Linearization point | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F3 | Durable receipt | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F3 | Failure / Unknown | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F3 | Replay / recovery | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F3 | Visibility | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F4 | Issuer | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F4 | Request / response | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F4 | Identity / cursor namespace | NOT EVIDENCED | **PARTIAL_EVIDENCE** | `payload::tests::read_after_fails_closed_on_empty_persisted_scope_list`; `payload::tests::read_after_fails_closed_on_invalid_persisted_scope_ref`; `tests::f1_forget_memory_hides_current_and_history`; `tests::f7_forget_version_only_hides_that_version` | scope/fence identity tests 覆盖局部 namespace；缺 D operation+generation 与 E/F/G/H/I target ack 的完整身份链。 |
+| F4 | Idempotency scope | NOT EVIDENCED | **PARTIAL_EVIDENCE** | `tests::f5_forget_memory_blocks_idempotency_replay`; `tests::f6_forget_is_idempotent` | forget idempotent 与 fence retry 有测试；缺跨 Owner operation+target+generation digest replay。 |
+| F4 | Linearization point | NOT EVIDENCED | **PARTIAL_EVIDENCE** | `crash_after_fence_commit_is_retried_without_resurrection`; `forget_fence::tests::crash_after_fence_commit_is_retried_safely_on_restore` | Fence commit 后 crash retry 测试覆盖局部线性化；缺 D 唯一 authority 到所有域的抑制线性化。 |
+| F4 | Durable receipt | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F4 | Failure / Unknown | NOT EVIDENCED | **PARTIAL_EVIDENCE** | `forget_fence::tests::malformed_scope_refuses_activation_without_partial_change`; `forget_fence::tests::missing_or_corrupt_fence_fails_closed`; `malformed_scope_refuses_activation_without_partial_change`; `missing_or_corrupt_fence_fails_closed` | malformed/missing/corrupt fence fail-closed 测试覆盖局部拒绝；缺 offline target、外部副本和 Unknown 全面关闭。 |
+| F4 | Replay / recovery | NOT EVIDENCED | **PARTIAL_EVIDENCE** | `crash_after_fence_commit_is_retried_without_resurrection`; `forget_fence::tests::crash_after_fence_commit_is_retried_safely_on_restore`; `forget_fence::tests::restore_anti_resurrection_purges_only_fenced_scope_across_all_tables`; `restore_anti_resurrection_and_preserves_other_scope` | Fence crash/reopen/anti-resurrection 有测试；缺所有 E/F/G/H/Storage projection 的 restore/replay。 |
+| F4 | Visibility | NOT EVIDENCED | **PARTIAL_EVIDENCE** | `tests::f1_forget_memory_hides_current_and_history`; `tests::f10_forget_survives_reopen`; `tests::f2_forget_memory_excludes_from_change_pages`; `tests::f3_forget_memory_rejects_new_commit`; `tests::f4_forget_memory_rejects_prepare_and_publish`; `tests::f7_forget_version_only_hides_that_version`; `tests::f8_forget_version_blocks_child_commit`; `tests::f9_forget_memory_sets_lifecycle_state`; `tests::sqlite_filters_nested_claims_by_the_callers_scope`; `tests::sqlite_hides_entire_multiscope_claim_from_partial_scope_reader`; `tests::sqlite_idempotency_digest_mismatch_conflicts_for_commit_and_receipt_lookup`; `tests::sqlite_multiple_preparations_reserve_unique_negative_sequences`; `tests::sqlite_prepare_does_not_add_change_log_entries`; `tests::sqlite_prepare_hides_version_from_read_version`; `tests::sqlite_prepare_keeps_current_version_unchanged`; `tests::sqlite_prepare_rejects_idempotency_digest_conflict`; `tests::sqlite_prepare_replay_returns_same_receipt`; `tests::sqlite_publication_state_honours_scope_and_forget_fences`; `tests::sqlite_publication_state_reports_prepared_hidden_then_published`; `tests::sqlite_publication_state_returns_none_for_unknown_or_legacy_publication` | 本地 fence 对 read/change/prepare/publish 的隐藏有测试；缺全域读/发布、备份、缓存、replica 和 D-derived projection rebuild。 |
+| F5 | Issuer | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F5 | Request / response | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F5 | Identity / cursor namespace | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F5 | Idempotency scope | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F5 | Linearization point | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F5 | Durable receipt | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F5 | Failure / Unknown | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F5 | Replay / recovery | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F5 | Visibility | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F6 | Issuer | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F6 | Request / response | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F6 | Identity / cursor namespace | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F6 | Idempotency scope | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F6 | Linearization point | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F6 | Durable receipt | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F6 | Failure / Unknown | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F6 | Replay / recovery | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F6 | Visibility | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F7 | Issuer | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F7 | Request / response | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F7 | Identity / cursor namespace | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F7 | Idempotency scope | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F7 | Linearization point | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F7 | Durable receipt | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F7 | Failure / Unknown | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F7 | Replay / recovery | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F7 | Visibility | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F8 | Issuer | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F8 | Request / response | NOT EVIDENCED | **PARTIAL_EVIDENCE** | `failed_payload_insert_rolls_back_event_payload_and_outbox_rows`; `tests::acceptance_persists_across_reopen_and_receipt_replay_is_stable`; `tests::file_db_nested_savepoint_rollback_preserves_outer_work`; `tests::concurrent_identical_idempotency_requests_replay_one_durable_receipt` | Storage SQLite APIs 的成功/冲突/拒绝行为有局部测试；缺 SC Durable Commit Receipt 完整字段与统一 participant request/response。 |
+| F8 | Identity / cursor namespace | NOT EVIDENCED | **UNCHANGED** | 无对应测试 | 94 个测试中没有覆盖此检查点的核心谓词；缺少该 Owner 的端到端契约/执行证据（见缺口清单），不得以相邻 SQLite 行为代替。 |
+| F8 | Idempotency scope | NOT EVIDENCED | **PARTIAL_EVIDENCE** | `tests::concurrent_identical_idempotency_requests_replay_one_durable_receipt`; `tests::pending_compile_intents_returns_accepted_events_in_insertion_order`; `tests::same_producer_key_and_digest_replay_original_receipt`; `tests::sqlite_multiple_preparations_reserve_unique_negative_sequences`; `tests::sqlite_publication_state_reports_prepared_hidden_then_published`; `tests::sqlite_publish_rejects_duplicate_publication_and_suppressed_state` | 同 key/digest replay/conflict 与 CAS 并发有测试；缺 GID+participant 语义和跨资源唯一 terminal result。 |
+| F8 | Linearization point | NOT EVIDENCED | **PARTIAL_EVIDENCE** | `tests::abrupt_process_exit_rolls_back_entire_uncommitted_commit`; `tests::file_db_interrupted_commit_keeps_version_pointer_log_and_idempotency_consistent`; `tests::file_db_nested_savepoint_rollback_preserves_outer_work`; `tests::sqlite_publication_state_reports_prepared_hidden_then_published`; `tests::sqlite_publish_rejects_stale_parent_without_partial_commit` | SQLite transaction、CAS、prepare/publish 的本地 commit 边界有测试；缺 WAL durable flush/accepted COC terminal decision。 |
+| F8 | Durable receipt | NOT EVIDENCED | **PARTIAL_EVIDENCE** | `payload::tests::payload_append_receipt_and_ordered_read_survive_reopen`; `restart_preserves_receipt_and_idempotent_payload_replay`; `tests::acceptance_persists_across_reopen_and_receipt_replay_is_stable`; `tests::concurrent_identical_idempotency_requests_replay_one_durable_receipt` | receipt append/reopen/replay 测试有覆盖；缺最小 SC-07 所有字段、COMMITTED/ABORTED/UNKNOWN 与 durability profile 读回。 |
+| F8 | Failure / Unknown | NOT EVIDENCED | **PARTIAL_EVIDENCE** | `failed_payload_insert_rolls_back_event_payload_and_outbox_rows`; `tests::abrupt_process_exit_rolls_back_entire_uncommitted_commit`; `tests::file_db_interrupted_commit_keeps_version_pointer_log_and_idempotency_consistent`; `tests::file_db_nested_savepoint_rollback_preserves_outer_work`; `tests::file_db_unwinding_worker_releases_open_transaction_without_partial_state` | 回滚、crash、interrupted commit 有覆盖；缺设备级 torn-write/flush、restore activation 和跨资源 Unknown resolution。 |
+| F8 | Replay / recovery | NOT EVIDENCED | **PARTIAL_EVIDENCE** | `committed_payload_survives_process_crash_and_wal_recovery`; `live_wal_copy_fails_closed_until_checkpointed`; `restart_preserves_receipt_and_idempotent_payload_replay`; `restore_anti_resurrection_and_preserves_other_scope`; `tests::acceptance_persists_across_reopen_and_receipt_replay_is_stable` | WAL reopen、receipt replay、Fence restore 有局部覆盖；缺完整 checkpoint contiguous log、跨资源 GID participant 和 RPO/RTO。 |
+| F8 | Visibility | NOT EVIDENCED | **PARTIAL_EVIDENCE** | `payload::tests::read_after_fails_closed_on_empty_persisted_scope_list`; `payload::tests::read_after_fails_closed_on_invalid_persisted_scope_ref`; `payload::tests::read_after_paginates_interleaved_scope_rows_by_visible_limit`; `payload::tests::read_after_skips_non_intersecting_scopes_and_limits_visible_rows`; `tests::sqlite_denies_fresh_cross_scope_write_without_persisting_any_commit_state`; `tests::sqlite_does_not_replay_idempotency_key_across_memories`; `tests::sqlite_filters_nested_claims_by_the_callers_scope`; `tests::sqlite_hides_entire_multiscope_claim_from_partial_scope_reader`; `tests::sqlite_idempotency_digest_mismatch_conflicts_for_commit_and_receipt_lookup`; `tests::sqlite_multiple_preparations_reserve_unique_negative_sequences`; `tests::sqlite_prepare_does_not_add_change_log_entries`; `tests::sqlite_prepare_hides_version_from_read_version`; `tests::sqlite_prepare_keeps_current_version_unchanged`; `tests::sqlite_prepare_rejects_idempotency_digest_conflict`; `tests::sqlite_prepare_replay_returns_same_receipt`; `tests::sqlite_publication_state_honours_scope_and_forget_fences`; `tests::sqlite_publication_state_reports_prepared_hidden_then_published`; `tests::sqlite_publication_state_returns_none_for_unknown_or_legacy_publication` | prepare hidden/publish visible、scope/fence read filtering 有覆盖；缺 replica applied position、I PermissionEpoch 与 restore-before-exposure 全路径。 |
+
+## 6. Storage SC-04/05/06/10/12/13/17/18——八条 EVIDENCE_REQUIRED
+
+| ID | 证据判定 | 触及谓词的测试 | 缺失部分 / 不能 PASS 的原因 |
+|---|---|---|---|
+| SC-04 | **PARTIAL_EVIDENCE** | live_wal_copy_fails_closed_until_checkpointed; committed_payload_survives_process_crash_and_wal_recovery; file_backed_connection_applies_required_sqlite_pragmas | 缺 backend profile 下的 log framing、log-before-data、commit marker 与真实 durable flush/device barrier 证据。 |
+| SC-05 | **PARTIAL_EVIDENCE** | live_wal_copy_fails_closed_until_checkpointed; committed_payload_survives_process_crash_and_wal_recovery | 缺 checkpoint position/atomicity、连续有效 WAL 前缀重放及截断/缺口故障注入。 |
+| SC-06 | **PARTIAL_EVIDENCE** | abrupt_process_exit_rolls_back_entire_uncommitted_commit; crash_after_fence_commit_is_retried_safely_on_restore; restore_anti_resurrection_purges_only_fenced_scope_across_all_tables; missing_or_corrupt_fence_fails_closed | 缺通用 torn/partial write、所有 crash cut、restore staged-image 原子激活证明。 |
+| SC-10 | **PARTIAL_EVIDENCE** | sqlite_prepare_hides_version_from_read_version; sqlite_publication_state_reports_prepared_hidden_then_published; sqlite_publish_makes_prepared_version_current_and_readable; payload::tests::read_after_* | 缺每条权威读路径与 replica applied-position/current Fence 验证；SQLite 单库测试不能证明副本。 |
+| SC-12 | **PARTIAL_EVIDENCE** | missing_or_corrupt_fence_fails_closed; malformed_scope_refuses_activation_without_partial_change; payload::tests::read_after_fails_closed_*; tests::f1_forget_memory_* | 缺 D authority 驱动的完整 projection rebuild 及所有读取/发布路径 fail-closed 证据。 |
+| SC-13 | **PARTIAL_EVIDENCE** | restore_anti_resurrection_and_preserves_other_scope; forget_fence::tests::restore_anti_resurrection_purges_only_fenced_scope_across_all_tables; crash_after_fence_commit_is_retried_without_resurrection | 只覆盖 D Fence/anti-resurrection 局部路径；缺 I PermissionEpoch、独立 anti-rollback anchor 联动和备份 restore-before-exposure。 |
+| SC-17 | **UNCHANGED** | 无对应测试 | 缺跨资源稳定 GID participant、durable prepare/vote/terminal records、单一已接受 coordinator terminal authority 与确定性恢复测试。 |
+| SC-18 | **UNCHANGED** | 无对应测试 | 缺备份/副本回滚/failover 的重复 workload 证据、声明的 RPO/RTO 与生产拓扑演练。 |
+
 **明确仍为 EVIDENCE_REQUIRED：**SC-17 没有跨资源 GID participant/已接受协调器测试；SC-18 没有可重复的备份、副本回滚、故障切换或 RPO/RTO workload 证据。SC-04/05/06/10/12/13 只有 SQLite 本地局部证据，未解除 EVIDENCE_REQUIRED 分类。
 
 ## 7. HIR-05/06/08/12/14/16/17/18——八条 EVIDENCE_REQUIRED
@@ -340,7 +583,7 @@ AID-095 的原始 Gate A 状态列在每一行都保持 `NOT EVIDENCED`。PARTIA
 | HIR-17 | **UNCHANGED** | 无对应测试 | 缺 H Attempt 与 C/G DeliveryAttempt 的 distinct-ID join、C evidence binding、G AppliedAttestation/Applied 独立决策的集成测试。 |
 | HIR-18 | **PARTIAL_EVIDENCE** | forget_fence::tests::missing_or_corrupt_fence_fails_closed; tests::f1_forget_memory_hides_current_and_history; tests::f5_forget_memory_blocks_idempotency_replay; tests::f10_forget_survives_reopen | 仅覆盖 D Fence 侧 fail-closed；缺 I PermissionEpoch 当前授权重查、issuer/key status revalidation，以及 D/I anti-rollback anchor 联动。 |
 
-**明确仍为 EVIDENCE_REQUIRED：**HIR-17 没有 H Attempt 到 C/G DeliveryAttempt 映射或 G Applied 证据。HIR-18 只有 D Fence 侧测试；I PermissionEpoch 与当前授权重查未测试。D/I anti-rollback anchor 联动也未测试。
+**明确仍为 EVIDENCE_REQUIRED：**HIR-05、HIR-12、HIR-17 没有对应的 H-owned 测试。HIR-18 只有 D Fence 侧测试；I PermissionEpoch 与当前授权重查未测试。D/I anti-rollback anchor 联动也未测试。
 
 ## 8. Gate A 与 Gate B 结论
 

@@ -87,15 +87,15 @@ rejudgment:
   h_idempotency_evidence_required:
     total: 8
     pass: 0
-    partial_evidence: 7
-    unchanged: 1
+    partial_evidence: 5
+    unchanged: 3
   combined_88:
     pass: 0
-    partial_evidence: 36
-    unchanged: 52
+    partial_evidence: 34
+    unchanged: 54
     pass_claimed: false
   sc_unresolved_no_corresponding_tests: ["SC-17", "SC-18"]
-  hir_unresolved_no_corresponding_tests: ["HIR-17"]
+  hir_unresolved_no_corresponding_tests: ["HIR-05", "HIR-12", "HIR-17"]
   hir_18_missing_component: "I PermissionEpoch/current authorization recheck; only D Fence component has local tests"
   d_i_anti_rollback_anchor_linkage: "NOT_EVIDENCED"
 acceptance:
