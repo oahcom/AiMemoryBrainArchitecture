@@ -1,7 +1,7 @@
 manifest_version: "1.0"
 record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
 registration_stage: "STAGE_0"
-registration_status: "CARRIER_PR_PENDING"
+registration_status: "CARRIER_PR_OPEN"
 work_item_id: "AID-2026-115"
 id_status: "PROVISIONAL"
 title: "Eliminate duplicate required Gate dispatch and cache Rust CI builds"
@@ -75,7 +75,7 @@ acceptance_criteria:
 implementation:
   status: "DRAFT_PR"
   branch: "ai/AID-2026-115/ops-gate-concurrency-rust-cache"
-  pull_request: "PENDING"
+  pull_request: "1322"
 review:
   status: "NOT_ASSIGNED"
 acceptance:

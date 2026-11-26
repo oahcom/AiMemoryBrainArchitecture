@@ -44,7 +44,7 @@ document_metadata:
 - Date: 2026-11-26
 - Main baseline: `17bfc43c2b9f2f9c91cb0eb074580141e701c0b3`; INDEX blob: `4aad6150e3ddc22ce23bffa0b0f827375bb36e30`
 - Branch: `ai/AID-2026-115/ops-gate-concurrency-rust-cache`
-- Allocation: INDEX max 109; AID-2026-110 exists on main; AID-2026-111 is reserved by an open PR; AID-2026-115 selected as next collision-free ID.
+- Allocation: INDEX max 109; AID-2026-110/111/113/114 exist on main; AID-2026-112 and AID-2026-116 are occupied by open PRs; AID-2026-115 was selected as the next collision-free ID.
 - Implementing platform session identifier: NOT_RECORDED.
 - Prompt provenance: user-directed task snapshot in `prompt-v1.md`; platform prompt/session IDs unavailable.
 - Changes: eight workflow concurrency blocks, four isolated Rust caches, two explicit job names, three-language evidence.
