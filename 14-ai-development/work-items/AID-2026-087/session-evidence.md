@@ -7,7 +7,7 @@ external_evidence_reference:
   issues: ["#1144","#1151"]
 repository:
   base_branch: main
-  base_commit_sha: 9e54e6ccec0d07d11fcf36b2a85b888ded747cdc
+  base_commit_sha: c6b7d987b959c42af5072932963dae9ed55721e4
   branch: impl/2026-11-26-context-version-immutability
   pull_request: 1241
 decision_status: DIRECTION_DECIDED_OWNER_ACCEPTANCE_PENDING
