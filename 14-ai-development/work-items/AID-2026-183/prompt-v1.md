@@ -45,7 +45,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# AID-2026-084 — Bind the gate's reachable unbound error emissions with tests
+# AID-2026-183 — Bind the gate's reachable unbound error emissions with tests
 
 ## 1. The brief this session executed
 

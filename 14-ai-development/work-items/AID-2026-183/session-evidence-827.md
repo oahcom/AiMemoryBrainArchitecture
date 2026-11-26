@@ -45,7 +45,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# Session evidence — AID-2026-084 (issue #827)
+# Session evidence — AID-2026-183 (issue #827)
 
 ## Session role / use case
 
