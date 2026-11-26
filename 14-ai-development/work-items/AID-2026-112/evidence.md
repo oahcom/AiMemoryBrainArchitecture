@@ -42,6 +42,7 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
+    source: null
     en: "docs/en/14-ai-development/work-items/AID-2026-112/evidence.md"
     zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-112/evidence.md"
 ---
