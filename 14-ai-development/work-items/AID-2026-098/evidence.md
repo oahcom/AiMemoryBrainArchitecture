@@ -111,3 +111,28 @@ The required canonical path introduces top-level numbered root `10-storage-consi
 - No natural-person Owner signature or exact-version Owner acceptance was recorded.
 - No merge, Issue closure, implementation or deployment is authorized.
 - Implementing session identity is NOT_RECORDED; no identifier is invented.
+
+
+## Session role / use case
+
+Documentation author for the Storage/Consistency physical contract candidate. The work was limited to repository inspection, drafting bilingual candidate documents, Work Item registration, a draft PR and two Issue comments. No runtime or validator code was changed.
+
+## Actual AI input
+
+The exact user task is preserved in `14-ai-development/work-items/AID-2026-098/prompt-v1.md`. It requested the Storage physical contract candidate, 3 language/source documents, AID-2026-098 provisional registration, a Draft PR, comments on #1212 and #1180, and explicitly prohibited runtime/validator changes, merge and Issue closure.
+
+## AI-visible output
+
+- Read the repository baseline at `d5107f68a7f1b61f5f2f7352fadf828aae06cf1c`, including AID-2026-095 F8, AID-2026-089 and the Forget Fence contract, Storage trait, relevant implementation files, GOV-DOC-002 schema/policy, bilingual gate source and related Issues.
+- Created branch `docs/2026-11-26-storage-physical-consistency-098` and Draft PR https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1276.
+- Added Canonical, EN and ZH-CN candidate contract documents; 18 checkpoints total (10 DOCUMENTED_ONLY, 8 EVIDENCE_REQUIRED).
+- Registered AID-2026-098 as PROVISIONAL and added its INDEX row. AID-2026-097 remains reserved as instructed.
+- Added `10-storage-consistency` to `00-governance/document-scope-registry.yaml`; the validator's literal `NORMATIVE_ROOTS` remains unchanged and the mismatch is disclosed.
+- Posted comment #7187485412 on #1212 and comment #7187486337 on #1180; both Issues remained OPEN at readback.
+- Current PR Head at the time of this evidence update is tracked by the PR API; no claim of exact-Head CI success is made.
+- Forget Fence check: the candidate preserves D as sole logical authority under AID-2026-089 and flags current-main local Fence sequence code as a discrepancy requiring separate implementation disposition.
+- No merge, Issue closure, runtime change, validator change, deployment or production conformance claim.
+
+## Session identity limitation
+
+The exact ChatGPT session identifier was not exposed in the available execution context and is recorded as `NOT_RECORDED`. The prompt snapshot provenance is `NOT_VERIFIED`; the recorded SHA-256 and byte count bind the committed snapshot bytes, not the external origin of the prompt.
