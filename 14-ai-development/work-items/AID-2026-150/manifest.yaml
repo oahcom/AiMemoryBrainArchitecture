@@ -1,7 +1,7 @@
 manifest_version: "1.0"
 record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
 registration_stage: "STAGE_0"
-registration_status: "CARRIER_PR_PENDING"
+registration_status: "CARRIER_PR_OPEN"
 work_item_id: "AID-2026-150"
 id_status: "PROVISIONAL"
 title: "Restore three D Memory Brain canonical roots"
@@ -9,7 +9,7 @@ date: "2026-11-26"
 repository:
   name: "oahcom/AiMemoryBrainArchitecture"
   baseline_branch: "main"
-  baseline_commit: "17bfc43c2b9f2f9c91cb0eb074580141e701c0b3"
+  baseline_commit: "8722a37b0cd72dc550d99c0eaebe9e7556ce2f95"
 identifier_allocation:
   policy: "ACCOUNT_FIXED_RANGE"
   assigned_range_start: "AID-2026-150"
@@ -18,12 +18,14 @@ identifier_allocation:
   id_status: "PROVISIONAL"
   selection_rule: "First unused identifier in the assigned account-fixed range; never derive an identifier from INDEX maximum or max+1."
   occupancy_check:
-    observed_main: "17bfc43c2b9f2f9c91cb0eb074580141e701c0b3"
-    index_blob_sha: "4aad6150e3ddc22ce23bffa0b0f827375bb36e30"
+    observed_main: "8722a37b0cd72dc550d99c0eaebe9e7556ce2f95"
+    index_blob_sha: "956b50f234e72de82676e00fcafb512e1dabfb1e"
     exact_id_present_in_index: false
     work_item_directory_present: false
-    pull_request_present: false
-    branch_present: false
+    pull_request_present: true
+    pull_request_number: 1323
+    branch_present: true
+    branch_name: "docs/aid-150-d-roots-restore-20261126-02"
   merge_time_rule: "Recheck only whether selected ID remains unclaimed. If occupied, advance within AID-2026-150..159; if all ten are occupied, stop. Never leave the assigned range."
 authority:
   sponsor: "USER-PRINCIPAL-DELEGATED"
@@ -70,6 +72,13 @@ scope:
     - "All 11 orphan mirror pairs remain ORPHAN_MIRROR_PENDING_DECISION; metadata/provenance pairing updates do not constitute adoption or retirement."
     - "Do not add any README."
     - "No runtime/product implementation, checker logic, schema, tests, workflow, deployment, production or Issue closure."
+carrier:
+  branch: "docs/aid-150-d-roots-restore-20261126-02"
+  pull_request: 1323
+  pull_request_url: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1323"
+  merge_commit_sha: "PENDING"
+  merge_authorization: "Only after all 16 required contexts succeed on the exact final head and behind == 0."
+
 review:
   status: "NOT_ASSIGNED"
 acceptance:
