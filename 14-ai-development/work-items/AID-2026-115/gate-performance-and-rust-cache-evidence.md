@@ -17,7 +17,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-26"
-      last_verification_note: "Exact-Head CI, merge and post-merge blob readback remain pending."
+      last_verification_note: "16/16 exact-head required contexts succeeded; 15/15 post-merge blob SHAs match the merged PR head; cache hit rate remains pending next CI cycle."
     usage_status: Active
     modification_status: Unchanged
     supersession:
