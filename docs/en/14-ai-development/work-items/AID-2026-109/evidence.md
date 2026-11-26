@@ -28,21 +28,16 @@ document_metadata:
       archival_reason: null
       archival_reference: null
   authority:
-    canonical_status: Canonical
-    canonical_scope: "AID-2026-109 exact SQLite implementation test evidence mapping and Gate A/HIR/SC rejudgment"
-    canonical_scope_id: "ai-development/aid-2026-109-sqlite-evidence-rejudgment"
-    canonical_scope_keywords:
-      - sqlite
-      - implementation-evidence
-      - gate-a
-      - storage-consistency
-      - idempotency
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: null
-    en: "docs/en/14-ai-development/work-items/AID-2026-109/evidence.md"
+    source: "14-ai-development/work-items/AID-2026-109/evidence.md"
+    en: null
     zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-109/evidence.md"
 ---
 

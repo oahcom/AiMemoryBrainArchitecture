@@ -28,22 +28,17 @@ document_metadata:
       archival_reason: null
       archival_reference: null
   authority:
-    canonical_status: Canonical
-    canonical_scope: "AID-2026-109 SQLite 实现测试证据映射与 Gate A/HIR/SC 谓词重判"
-    canonical_scope_id: "ai-development/aid-2026-109-sqlite-evidence-rejudgment"
-    canonical_scope_keywords:
-      - sqlite
-      - implementation-evidence
-      - gate-a
-      - storage-consistency
-      - idempotency
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: null
+    source: "14-ai-development/work-items/AID-2026-109/evidence.md"
     en: "docs/en/14-ai-development/work-items/AID-2026-109/evidence.md"
-    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-109/evidence.md"
+    zh-CN: null
 ---
 
 # AID-2026-109 — SQLite 后端实现证据映射与谓词重判
