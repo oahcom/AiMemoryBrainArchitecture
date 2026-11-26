@@ -1,3 +1,57 @@
+---
+document_metadata:
+  domain: memory-runtime
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version:
+        scheme: git
+        value: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Applicable-To-Current-Version
+      evidence_reference:
+        - "AID-2026-082"
+        - "source branch: session-f-memory-runtime"
+        - "source commit: 1908ce4d233b20f7cafd00cb679affd01bd15174"
+        - "original source blob: b7a948f014c3ad882a35a18bfc8ce025b26ab85a"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Existing ZH-CN mirror body retained; source Blob pin already matches; semantic parity review pending."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords:
+      - runtime
+      - retrieval
+      - activation
+      - working-set
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "05-memory-runtime/runtime-overview.md"
+    en: "docs/en/05-memory-runtime/runtime-overview.md"
+    zh-CN: null
+---
 # Memory Runtime 总览
 
 - 文档 ID：F-RUNTIME-OVERVIEW-001
