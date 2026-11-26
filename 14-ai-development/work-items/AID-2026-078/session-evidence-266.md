@@ -192,26 +192,3 @@ registration is not evidence about this one.
   keep a green run from being read that way.
 - `executed_prompt_provenance` is `NOT_VERIFIED`: the prompt was written before the
   measurements above and has not been re-read against them line by line.
-
-## 7. Implementation evidence (branch `feat/078-manifest-gate`, PR #1198)
-
-The gate this work item registered was written in pull request #1198 on branch
-`feat/078-manifest-gate`, and the commands below were run there on 2026-11-26 against the
-branch working tree, with output reproduced as recorded in the job log and in the PR body.
-`python3 scripts/ci/check_manifest_parse.py` printed `Manifest parse: 55 manifests found, 55
-parsed, 0 failed.` and exited 0, with `ls 14-ai-development/work-items/*/manifest.yaml | wc -l`
-also reporting 55 and `ls -d 14-ai-development/work-items/AID-*/ | wc -l` reporting 54 — the
-one-file difference being `FIX-2026-P1-T1/manifest.yaml`, which is why AC1's measurement now
-counts manifest files rather than `AID-*` directories.
-`cd scripts/ci && python3 -m unittest test_check_manifest_parse` ran 13 tests and reported
-`OK`; `python3 scripts/ci/check_repository_hygiene.py` reported `violations=0` with
-`manifests=54 in_scope=52 excluded_by_record_type=2 unrecognized=0`; and
-`py -c "import yaml,io,glob;[yaml.safe_load(io.open(p,encoding='utf-8')) for p in glob.glob('14-ai-development/work-items/*/manifest.yaml')]"`
-exited 0. A negative test run in the same session, over a temporary tree whose single
-manifest declared `related_prs` twice, exited 1 and named that manifest's path in the
-`::error::` line. Two limits are stated rather than implied: the test that runs over the
-real tree asserts that the printed count equals the number of manifest files actually
-present, and does not pin that number, because a pinned count already disagreed with the
-tree; and the workflow step runs in the existing `repository-hygiene` job, which is not a
-required status context, so this evidence supports "runs on every pull request" and not
-"blocks a merge".
