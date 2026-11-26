@@ -43,7 +43,11 @@ document_metadata:
     zh-CN: null
 ---
 
-# AID-2026-151 prompt snapshot
+# AID-2026-188 prompt snapshot
+
+Identifier note: this work item was originally allocated AID-2026-151. That identifier was already
+allocated elsewhere, so the record was renumbered to AID-2026-188 (see issue #1331) with
+`RENUMBERED_FROM: AID-2026-151` in the manifest. The evidence recorded below is unchanged.
 
 **Provenance: assembled after the fact, not captured live.** This file records the task as it was
 handed to the recording session: register the historical Session Evidence coverage gap that `#1275`
