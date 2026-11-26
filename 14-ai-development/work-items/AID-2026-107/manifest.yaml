@@ -1,0 +1,109 @@
+work_item_id: AID-2026-107
+title: Refresh Gate A end-to-end composition checkpoint matrix after AID-2026-082/098/100
+class: DOC/GOVERNANCE / STAGE 0
+risk: R2
+risk_rationale: >-
+  Documentation-only rejudgment of an existing architecture matrix. The main risk is
+  overclaiming evidence; all 72 Gate A cells remain NOT EVIDENCED and no Gate A PASS,
+  Owner acceptance, implementation conformance or production behavior is inferred.
+status: DISPATCHED
+id_status: PROVISIONAL
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-26
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 2d52b0c81dc1b779e49516fceb69d89cdc1d9c31
+tracking_issue: "#1212 — exact-version A–I + Storage/Consistency composition review"
+
+prompt_id: AID-2026-107-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-107/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-107/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-107/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-107/evidence.md
+    - docs/en/14-ai-development/work-items/AID-2026-107/evidence.md
+    - docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md
+  files_to_modify:
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope:
+    - runtime/product implementation
+    - existing validator semantics
+    - schemas, APIs, DDL and production configuration
+    - deployment and Issue #1212 closure
+
+source_baseline:
+  main: 2d52b0c81dc1b779e49516fceb69d89cdc1d9c31
+  aid_095_matrix_blob: 1d162b527eacb96e2cff24eec5fcf5a66014039a
+  aid_098_storage_candidate_blob: d571f086505b312c40b6ae2e56a868131cfffc78
+  aid_082_manifest_blob: ffd9077928e91c010667ff412131589654c93bbe
+  aid_100_evidence_blob: ae46c7a4424778d0c8e4c5b21c6535023a9b460d
+  aid_099_h_contract_blob: a5f43d58ebee451260fc64c7e048b96401e89ef4
+  aid_099_manifest_blob: 8d87eef02b997eb0d976903d40dcac802b2d80ba
+
+rejudgment:
+  checkpoint_rows: 72
+  upgraded: 0
+  unchanged: 72
+  downgraded: 0
+  gate_a_pass: 0
+  flows_blocked_with_reason: 8
+  flows_verified_by_document: 0
+  storage_checkpoint_rows: 18
+  storage_documented_only_rows: 10
+  storage_evidence_required_rows: 8
+  evidence_required_ids: [SC-04, SC-05, SC-06, SC-10, SC-12, SC-13, SC-17, SC-18]
+  h_contract_checkpoint_rows: 18
+  h_contract_documented_only_rows: 10
+  h_contract_evidence_required_rows: 8
+  h_contract_pass_rows: 0
+  h_contract_evidence_required_ids: [HIR-05, HIR-06, HIR-08, HIR-12, HIR-14, HIR-16, HIR-17, HIR-18]
+
+carrier:
+  branch: docs/aid-2026-107-refresh-gate-a-matrix
+  pull_request: 1290
+  draft: true
+  merge_commit_sha: PENDING
+  merge_authorization: only after all 16 required contexts succeed on exact final Head
+
+review:
+  status: NOT_ASSIGNED
+  independent_reviewer: NOT_ASSIGNED
+  natural_person_owner_acceptance: NOT_RECORDED
+
+acceptance:
+  gate_a: PARTIAL / OPEN
+  gate_a_closeout_items_open: [3, 4, 5, 6, 7, 8]
+  gate_a_item_6: OPEN — contract present, evidence missing
+  gate_a_item_7: OPEN — contract present, evidence missing
+  gate_b: PARTIAL / OPEN (NOT VERIFIED)
+  issue_1212: OPEN
+  owner_acceptance: NOT_CLAIMED
+  implementation_conformance: NOT_CLAIMED
+  production_conformance: NOT_CLAIMED
+
+session_evidence:
+  - role: IMPLEMENTATION_SESSION
+    issue_refs:
+    implementing_ai_session: NOT_RECORDED
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-107/prompt-v1.md
+    executed_prompt_sha256: a9ba36262827f2fce4016c488623d10031f61b9c860276343338a264da0b7942
+    executed_prompt_bytes: 2471
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-107/evidence.md
+
+constraints:
+  runtime_changes: NONE
+  validator_semantic_changes: NONE
+  documented_only_is_pass: false
+  issue_1212_close: NOT_AUTHORIZED
