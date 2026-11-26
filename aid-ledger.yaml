@@ -5,7 +5,7 @@
 # One AID maps to exactly one work_item_id.
 
 schema: 1
-updated_at_utc: "2026-11-26T14:05:00Z"
+updated_at_utc: "2026-11-26T14:35:00Z"
 entries:
   - id: AID-2026-082
     state: MERGED
@@ -96,16 +96,16 @@ entries:
     carrier: "PR #1304 (external)"
     note: "E canonical restore batch 1; landed at 7629b9de before the L3 validator PR could take the number"
   - id: AID-2026-111
-    state: RESERVED
-    carrier: "PR #1287 (L3, branch fix/session-evidence-silent-body-fails)"
-    note: "renumbered 104 -> 106 -> 110 -> 111; every earlier target was consumed by an external merge. The carrier must rescan main immediately before pushing and report the final number"
+    state: MERGED
+    carrier: "merged on main (receipt at 591bbcd8); PR number not recorded"
+    note: "SQLite backend implementation evidence mapping; consumed the number while the L3 validator PR was rebasing"
   - id: AID-2026-112
     state: RESERVED
     carrier: "unassigned; Owner ruling 2026-11-26 permits this number for the retroactive gate-coverage work item"
     note: "scope is fixed by the Owner: record that #1275 and #1266 passed the old gate with no declaration, the exact heads and results, and the remediation state - without claiming they violated the rules in force at merge time. No carrier may take it without a skeleton reservation push."
   - id: AID-2026-113
-    state: RESERVED
-    carrier: "offered to PR #1280 (req05/827-fix) as its renumber target"
-    note: "the offer has moved 105 -> 111 -> 113 because external merges keep consuming the offered number; a number is only spent when its PR pushes"
+    state: MERGED
+    carrier: "PR #1314"
+    note: "Restore F Memory Runtime canonical roots with Owner replacement hierarchy"
   - id: AID-2026-114
     state: FREE
