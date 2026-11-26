@@ -53,7 +53,8 @@ class TraceabilityTests(unittest.TestCase):
             cwd=self.root,
             check=True,
             stdout=subprocess.PIPE,
-            text=True,
+            encoding="utf-8",
+            errors="replace",
         ).stdout.strip()
 
         (self.root / "docs/linked.md").write_text(

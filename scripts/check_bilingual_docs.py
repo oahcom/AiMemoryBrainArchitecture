@@ -177,12 +177,44 @@ BASELINE_PATH = ROOT / "scripts" / "bilingual-baseline.txt"
 CI_BASELINE_PATH = ROOT / "scripts" / "ci" / "baselines" / "bilingual-docs.txt"
 
 
+GIT_TEXT_ENCODING = "utf-8"
+
+
+class GitOutputDecodeError(RuntimeError):
+    """Git output that is not valid UTF-8, so no verdict can be read from it.
+
+    `subprocess(text=True)` decodes with the *locale* codec: UTF-8 on CI, GBK on
+    a default Windows console. The same bytes that decode on CI raised
+    UnicodeDecodeError on GBK, the reader thread died, `stdout` arrived as None,
+    and the caller read "I could not decode this" as "this file does not exist"
+    (DM-10 asserted a file absent from an approved version it had never read;
+    AID-173 crashed outright on `git show`). Decoding is therefore always
+    explicit UTF-8, and a failure raises this exception, whose message says
+    "decode" and nothing that sounds like a content finding.
+    """
+
+
+def decode_git_output(raw: bytes, what: str) -> str:
+    """Decode Git's stdout as UTF-8, never through the console's locale codec."""
+    try:
+        return raw.decode(GIT_TEXT_ENCODING)
+    except UnicodeDecodeError as exc:
+        raise GitOutputDecodeError(
+            f"git output decode failed ({GIT_TEXT_ENCODING}) while reading "
+            f"{what}: {exc}"
+        ) from None
+
+
 def _git_log_output(*args: str) -> str:
-    """Read repository history for registration provenance checks."""
+    """Read repository history for registration provenance checks.
+
+    The bytes are decoded by decode_git_output(), so a non-UTF-8 object raises
+    GitOutputDecodeError instead of arriving as None or as a crash.
+    """
     result = subprocess.run(
-        ["git", *args], cwd=ROOT, check=True, capture_output=True, text=True
+        ["git", *args], cwd=ROOT, check=True, capture_output=True
     )
-    return result.stdout.strip()
+    return decode_git_output(result.stdout, "git " + " ".join(args)).strip()
 
 
 SHALLOW_HISTORY_ERROR = (
@@ -202,7 +234,8 @@ def _require_full_git_history() -> None:
         cwd=ROOT,
         check=True,
         capture_output=True,
-        text=True,
+        encoding=GIT_TEXT_ENCODING,
+        errors="replace",
     )
     shallow = result.stdout.strip().lower()
     if shallow == "true":
@@ -423,7 +456,8 @@ def write_baseline() -> int:
             cwd=ROOT,
             check=True,
             capture_output=True,
-            text=True,
+            encoding=GIT_TEXT_ENCODING,
+            errors="replace",
         )
         dirty_status = status_result.stdout
         if dirty_status:
@@ -586,7 +620,8 @@ def changed_status() -> dict[str, str]:
     raw = subprocess.check_output(
         ["git", "diff", "--name-status", "--no-renames", f"{base}...{head}"],
         cwd=ROOT,
-        text=True,
+        encoding=GIT_TEXT_ENCODING,
+        errors="replace",
     )
     result: dict[str, str] = {}
     for line in raw.splitlines():
@@ -646,7 +681,8 @@ def _blob_at(revision: str, path: str) -> str | None:
         return subprocess.check_output(
             ["git", "rev-parse", "--verify", f"{revision}:{path}"],
             cwd=ROOT,
-            text=True,
+            encoding=GIT_TEXT_ENCODING,
+            errors="replace",
             stderr=subprocess.DEVNULL,
         ).strip() or None
     except subprocess.CalledProcessError:
@@ -789,7 +825,8 @@ def check_normative_root_departures(exception: bool) -> list[str]:
     raw = subprocess.check_output(
         ["git", "diff", "--name-status", "-M", f"{base}...{head}"],
         cwd=ROOT,
-        text=True,
+        encoding=GIT_TEXT_ENCODING,
+        errors="replace",
     )
     errors: list[str] = []
     for line in raw.splitlines():
@@ -1235,7 +1272,13 @@ def main() -> int:
 
     body = os.environ.get("PR_BODY", "")
     errors: list[str] = check_prompt_library()
-    history_errors = check_embedded_registration_history()
+    try:
+        history_errors = check_embedded_registration_history()
+    except GitOutputDecodeError as exc:
+        # A blob that cannot be decoded is not a clean history: the run is
+        # incomplete, so it must not be reported as a content verdict (1).
+        print(f"::error::{exc}")
+        return 2
     if SHALLOW_HISTORY_ERROR in history_errors:
         print(f"::error::{SHALLOW_HISTORY_ERROR}")
         return 2

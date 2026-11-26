@@ -52,7 +52,16 @@ def tracked_paths(paths_file: str | None) -> set[str]:
         result = subprocess.run(
             ["git", "ls-files", "-z"], check=True, capture_output=True
         )
-        raw = result.stdout.decode("utf-8").split("\0")
+        try:
+            raw = result.stdout.decode("utf-8").split("\0")
+        except UnicodeDecodeError as exc:
+            # Never let an undecodable path list become a set of paths that
+            # merely look absent: say which read failed, and fail closed.
+            sys.stderr.write(
+                f"::error::git output decode failed (utf-8) while reading "
+                f"git ls-files -z: {exc}\n"
+            )
+            sys.exit(2)
     return {p.strip().replace("\\", "/") for p in raw if p.strip()}
 
 
