@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "AID-2026-190/manifest.yaml"
+        - "AID-2026-191/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -30,7 +30,7 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "AID-2026-190 annotation of the live citations of the 84 09-security-governance paths that are absent from main"
+    canonical_scope: "AID-2026-191 annotation of the live citations of the 84 09-security-governance paths that are absent from main"
     canonical_scope_id: "ai-development/aid-2026-190-dangling-09-security-governance-citations"
     canonical_scope_keywords:
       - "security-governance"
@@ -40,13 +40,13 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "14-ai-development/work-items/AID-2026-190/evidence.md"
-    en: "docs/en/14-ai-development/work-items/AID-2026-190/evidence.md"
+    source: "14-ai-development/work-items/AID-2026-191/evidence.md"
+    en: "docs/en/14-ai-development/work-items/AID-2026-191/evidence.md"
     zh-CN: null
 ---
 
 
-# AID-2026-190 —— 84 个在 main 上不存在的 `09-security-governance/` 路径：标注活跃引用，不恢复任何文件
+# AID-2026-191 —— 84 个在 main 上不存在的 `09-security-governance/` 路径：标注活跃引用，不恢复任何文件
 
 **状态：DRAFT —— 仅标注。** 本工作项改动 19 份文档、共 30 行，另有 6 行连同门禁证据一并延后。
 它不在 `09-security-governance/` 下新建任何文件，不改动任何规范正文，不删除任何引用，也不把任何

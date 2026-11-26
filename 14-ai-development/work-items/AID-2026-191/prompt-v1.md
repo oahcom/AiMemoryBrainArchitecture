@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "AID-2026-190/manifest.yaml"
+        - "AID-2026-191/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -42,7 +42,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# AID-2026-190-PROMPT v1 — dispatched contract, as received
+# AID-2026-191-PROMPT v1 — dispatched contract, as received
 
 This file is a snapshot of the text the executing session was dispatched with, copied
 without editing. It is not a transcript: no assistant turn, tool call or intermediate
