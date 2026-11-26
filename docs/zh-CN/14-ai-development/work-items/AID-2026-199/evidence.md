@@ -132,15 +132,16 @@ Rule B 拿测试的路径、文件名、stem 或点分模块名去匹配拼接�
 
 ## 6. 改前改后实测
 
-下列数字均在本工作树产出。第 2-4 节的缺陷实测使用的是 `origin/main` = `2f4f4118` 的改前文件；下表
-拿本分支与它实际合并的那份 `origin/main`（`9dc98a52`）对比，因此计数不会过期。
+下列数字均在本工作树产出。第 2-4 节的缺陷实测使用的是 `origin/main` = `2f4f4118` 的改前文件。套件计数
+两侧都实测；门禁计数写成不变量并注明读取它的树，因为每当 main 上又有工作项落地，工作项计数就会变，
+而不变量不会。
 
-| 指标 | 改前（9dc98a52） | 改后 |
+| 指标 | 改前 | 改后 |
 |---|---|---|
 | `check_repository_hygiene.py` 版本 | `2026-11-27.1` | `2026-11-27.2` |
-| `Work-item index membership ... directories= / linked=` | 110 / 110，exit 0 | 带本工作项为 111 / 111（不含它则是 110 / 110：它恰好增加一个目录与一行），exit 0 |
+| `Work-item index membership ... directories= / linked=` | 两侧相等，exit 0（`9dc98a52` 上为 110 / 110） | 两侧相等，exit 0（`3b2cd3e1` 上为 114 / 114，恰比并入的 main 多一个目录与一行） |
 | `check_declared_check_contexts.py` | 16 declared、16 produced，exit 0 | 16 declared、16 produced，exit 0 |
-| `check_test_reachability.py` | 66 个测试文件、66 可达；18 个 gate 脚本、3 未接线、3 已 baseline | 完全相同 |
+| `check_test_reachability.py` | 0 不可达；18 个 gate 脚本、3 未接线、3 已 baseline（`9dc98a52` 上 66 个测试文件） | 同一不变量：0 不可达、18 / 3 / 3（`3b2cd3e1` 上 66 个测试文件） |
 | `scripts/test_check_repository_hygiene.py` | Ran 101，OK（skipped=1） | Ran 103，OK（skipped=1） |
 | `scripts/ci/test_check_test_reachability.py` | Ran 24，OK | Ran 27，OK |
 | `scripts/test_check_declared_check_contexts.py` | Ran 13，OK | Ran 16，OK |

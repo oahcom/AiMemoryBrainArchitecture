@@ -159,15 +159,16 @@ The same reading was applied one step earlier: a commented-out
 ## 6. Measured before and after
 
 All numbers were produced in this working tree. The defect measurements in sections 2-4 use the
-pre-fix files from `origin/main` = `2f4f4118`; the table below compares the branch against the
-`origin/main` it was actually merged with, `9dc98a52`, so the counts are not stale.
+pre-fix files from `origin/main` = `2f4f4118`. The suite counts below were measured on both
+sides; the gate counts are stated as invariants with the tree they were read from, because a
+work-item count moves every time another work item lands on main and an invariant does not.
 
-| Quantity | Before (9dc98a52) | After |
+| Quantity | Before | After |
 |---|---|---|
 | `check_repository_hygiene.py` version | `2026-11-27.1` | `2026-11-27.2` |
-| `Work-item index membership ... directories= / linked=` | 110 / 110, exit 0 | 111 / 111 with this work item (110 / 110 without it: the item adds exactly one directory and one row), exit 0 |
+| `Work-item index membership ... directories= / linked=` | equal sides, exit 0 (110 / 110 at `9dc98a52`) | equal sides, exit 0 (114 / 114 at `3b2cd3e1`, exactly one directory and one row more than the merged main carries) |
 | `check_declared_check_contexts.py` | 16 declared, 16 produced, exit 0 | 16 declared, 16 produced, exit 0 |
-| `check_test_reachability.py` | 66 test files, 66 reachable; 18 gate scripts, 3 unwired, 3 baselined | identical |
+| `check_test_reachability.py` | 0 unreachable; 18 gate scripts, 3 unwired, 3 baselined (66 test files at `9dc98a52`) | identical invariant: 0 unreachable, 18 / 3 / 3 (66 test files at `3b2cd3e1`) |
 | `scripts/test_check_repository_hygiene.py` | Ran 101, OK (skipped=1) | Ran 103, OK (skipped=1) |
 | `scripts/ci/test_check_test_reachability.py` | Ran 24, OK | Ran 27, OK |
 | `scripts/test_check_declared_check_contexts.py` | Ran 13, OK | Ran 16, OK |
