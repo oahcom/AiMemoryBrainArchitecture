@@ -13,8 +13,6 @@ document_metadata:
         value: "b1947c1c6203bd0386c074054c46d612f55ba7c63c3b755d70b607762da159b7"
       approval_scope:
         type: Full-document
-        included_sections: []
-        included_assets: []
       approval_applicability: Applicable-To-Current-Version
       evidence_reference:
         - "14-ai-development/adr/OWNER-DECISION-EMBEDDED-BILINGUAL-001.md — the DECIDED line in this document names the decider and the date"

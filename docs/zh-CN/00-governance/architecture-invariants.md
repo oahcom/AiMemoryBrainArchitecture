@@ -12,8 +12,6 @@ document_metadata:
         value: "88bbebd033e0b5669bafc83c71afa2831cebb4a2e3a6cfa47573cf6b3259b293"
       approval_scope:
         type: Full-document
-        included_sections: []
-        included_assets: []
       approval_applicability: Applicable-To-Current-Version
       evidence_reference:
         - "14-ai-development/work-items/AID-2026-096/approval-evidence.md"
