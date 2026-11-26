@@ -222,13 +222,13 @@ Documentation author and evidence reviewer for the AID-2026-095 Gate A matrix re
 
 ## Actual AI input
 
-The user-authorized task requested a row-by-row rejudgment of the AID-2026-095 eight-flow matrix after merged AID-2026-082, AID-2026-098 and AID-2026-100; exact evidence paths and blob SHAs for every upgrade; table-row counting of the Storage DOCUMENTED_ONLY / EVIDENCE_REQUIRED checkpoints; explicit preservation of the eight EVIDENCE_REQUIRED Storage items absent implementation evidence; canonical/EN/ZH-CN documents; Gate A/B status and remaining blockers; and a Draft PR linked to #1212. The executed prompt snapshot is `14-ai-development/work-items/AID-2026-107/prompt-v1.md`.
+The user-authorized task requested a row-by-row rejudgment of the AID-2026-095 eight-flow matrix after merged AID-2026-082, AID-2026-098 and AID-2026-100. A later user correction confirmed that 095 uses only PASS / FAIL / NOT EVIDENCED (72/72 initially NOT EVIDENCED), supplied the nine-item Gate A closeout list, and added AID-099's HIR table and expired AID-098 baseline pin. The refresh preserves those vocabularies separately and does not claim a PASS. The executed prompt snapshot is `14-ai-development/work-items/AID-2026-107/prompt-v1.md`.
 
 ## AI-visible output
 
 - Read main at the exact source baseline and then refreshed the branch to the later main head before PR validation.
 - Re-read AID-095 matrix, AID-082 checker scripts/manifest, AID-098 candidate contract and evidence, AID-100 evidence, and current System Boundaries source blobs.
-- Rejudged all 72 checkpoint rows: 21 UPGRADED to DOCUMENTED_ONLY, 51 UNCHANGED, 0 DOWNGRADED; no PASS was inferred.
-- Counted the 18 Storage checkpoint data rows directly: 10 DOCUMENTED_ONLY and 8 EVIDENCE_REQUIRED.
+- Rejudged all 72 checkpoint rows: 0 UPGRADED, 72 UNCHANGED, 0 DOWNGRADED; all 72 remain NOT EVIDENCED under the original PASS / FAIL / NOT EVIDENCED vocabulary.
+- Counted the 18 Storage checkpoint data rows directly: 10 DOCUMENTED_ONLY and 8 EVIDENCE_REQUIRED. Separately counted AID-099's 18 HIR table rows: 10 DOCUMENTED_ONLY and 8 EVIDENCE_REQUIRED; corrected its historical AID-098 unavailable pin as stale, not a current gap.
 - Created the three evidence documents, AID manifest, prompt record, INDEX row, branch and Draft PR #1290. Exact-Head CI found initial Session Evidence and GOV-DOC-002 metadata defects; they are being remediated on the branch before any merge decision.
 - No Issue #1212 comment or closure has been made yet.
