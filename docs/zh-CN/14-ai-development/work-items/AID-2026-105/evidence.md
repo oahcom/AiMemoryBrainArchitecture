@@ -49,7 +49,7 @@ document_metadata:
 
 - Work Item：`AID-2026-105`
 - ID 状态：`PROVISIONAL`
-- 证据基线：`main`，提交 `533d8646a3fb32b0a1c9d3ed40c01bce33a76b17`
+- 首次证据回读：`main` 提交 `533d8646a3fb32b0a1c9d3ed40c01bce33a76b17`；创建 PR 后同步基线：`main` 提交 `df54ed60321e2958c50e9649963608cb3cb3f3b1`。
 - 基线日期：2026-11-26
 - 归属：`user-authorized operator (delegated by account owner)`
 - 归属说明：受授权代理登记；**代理登记，非自然人 Owner 签署**
@@ -102,7 +102,7 @@ AID-2026-096 原批准 Git blob SHA-1：
 
 ### 3.2 当前 main 精确 Git blob
 
-下列每个当前 blob 均从 `main`（提交 `533d8646a3fb32b0a1c9d3ed40c01bce33a76b17`）读取：
+下列每个当前 blob 均从 `main`（提交 `df54ed60321e2958c50e9649963608cb3cb3f3b1`）读取。main 从 `533d8646a3fb32b0a1c9d3ed40c01bce33a76b17` 前进后重新读取了六个 blob，SHA 均未变化。
 
 | 路径 | 当前 main blob SHA-1 | 是否匹配 AID-096 Git blob pin |
 |---|---|---|
@@ -123,9 +123,12 @@ AID-2026-096 原批准 Git blob SHA-1：
 | DEC-13 证据 | `14-ai-development/work-items/AID-2026-093/evidence.md`，`69ce490157adb1e018e5608e7405c6ef4d233de3` | 将 DEC-13 评论 #7174867715 读回为 10 项未勾选 / 0 项已勾选，并记录 20/20 评论回读；这证明清单已登记，不证明已接受。 |
 | DEC-13 登记表 | `00-governance/implementation-evidence/2026-11-26-20-decision-acceptance-register.md`，`4810c6f8d3b5676a44288dea5782681e0745af6f` | 明确区分方向批准、Owner 接受、规范生效、实现授权、实现验证和生产符合性。 |
 | A–I / Storage 矩阵 | `00-governance/implementation-evidence/2026-11-26-a-i-storage-acceptance-matrix.md`，`a180459fa70f713de9232f372b94c8feb2c0c90d` | 记录 10 个角色的代理处置：3 ACCEPT / 7 CONDITIONAL / 0 REJECT。它明确自然人 Owner 接受数为 0，DEC-13 / Gate A 验收仍开放。 |
+| EN / ZH-CN DEC-13 登记表镜像 | `docs/en/00-governance/implementation-evidence/2026-11-26-20-decision-acceptance-register.md`，`dcae8a7cb5c6e03bf220d1d681744cc68361e87d`；`docs/zh-CN/00-governance/implementation-evidence/2026-11-26-20-decision-acceptance-register.md`，`49b3aff58991b77545ab143d12782b65e71a5a69` | 镜像文件存在不证明语义 parity 或 Owner 接受。 |
+| EN / ZH-CN A–I / Storage 矩阵镜像 | `docs/en/00-governance/implementation-evidence/2026-11-26-a-i-storage-acceptance-matrix.md`，`5e6a388be1e55a0acaa49e67006f8ad3404a1a72`；`docs/zh-CN/00-governance/implementation-evidence/2026-11-26-a-i-storage-acceptance-matrix.md`，`149f3657e980826b1b44d560b83e71f837c8ffab` | 镜像文件存在不证明语义 parity 或 Owner 接受。 |
 | AID-096 manifest | `14-ai-development/work-items/AID-2026-096/manifest.yaml`，`df16f4ad6d563f3f2a9a4596ee94a855b8431e19` | 状态为 `APPROVAL_RECORDED_OWNER_ACCEPTANCE_PENDING`；未声称 Owner / 联合接受已完成。 |
 | AID-096 session evidence | `14-ai-development/work-items/AID-2026-096/session-evidence.md`，`45a1c1aebb54a93b28c2446c9ade96d6abc84654` | 记录代理归属、prompt/session provenance 限制及非自然人签署边界。 |
 | AID-096 prompt snapshot | `14-ai-development/work-items/AID-2026-096/prompt-v1.md`，`042f0f21e7d2410f01d5aeca4cbb2d4597422f11` | 记录代理批准任务及其明确范围/排除项。 |
+| Issue #1189 决策/验收评论 | 评论 `7174316473`、`7174519803`、`7174867715`、`7185367827`、`7185429832` 和 `7186346059` | 分别记录不批准方向、D-12、DEC-13 未勾选清单、保持 OPEN 的审计、新批准事件及合并后状态；最新批准评论仍明确 Owner/联合接受待完成。 |
 | Work Item index | `14-ai-development/work-items/INDEX.md`，`02bacd620ea147bd9b2fb63868648d8b7dd55474` | AID-096 Acceptance 栏仍为 pending；AID-093 记录的是代理处置及自然人接受数为 0。 |
 
 ### 4.1 DEC-13 责任 Owner 与联合接受

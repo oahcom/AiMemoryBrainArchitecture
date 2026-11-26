@@ -50,7 +50,7 @@ document_metadata:
 
 - Work Item: `AID-2026-105`
 - ID status: `PROVISIONAL`
-- Evidence baseline: `main` at `533d8646a3fb32b0a1c9d3ed40c01bce33a76b17`
+- Initial evidence readback: `main` at `533d8646a3fb32b0a1c9d3ed40c01bce33a76b17`; synchronized base after PR creation: `main` at `df54ed60321e2958c50e9649963608cb3cb3f3b1`.
 - Baseline date: 2026-11-26
 - Attribution: `user-authorized operator (delegated by account owner)`
 - Attribution note: delegated operator record; **代理登记，非自然人 Owner 签署**
@@ -103,7 +103,7 @@ The same record lists the following approved body content hashes (the values als
 
 ### 3.2 Current main exact Git blobs
 
-Each current blob below was fetched from `main` at `533d8646a3fb32b0a1c9d3ed40c01bce33a76b17`:
+Each current blob below was fetched from `main` at `df54ed60321e2958c50e9649963608cb3cb3f3b1`. These six blob IDs were re-read after main advanced from `533d8646a3fb32b0a1c9d3ed40c01bce33a76b17`; they were unchanged.
 
 | Path | Current main blob SHA-1 | Matches AID-096 Git blob pin? |
 |---|---|---|
@@ -124,9 +124,12 @@ The current-main merge commit `533d8646a3fb32b0a1c9d3ed40c01bce33a76b17` has `44
 | DEC-13 evidence | `14-ai-development/work-items/AID-2026-093/evidence.md`, `69ce490157adb1e018e5608e7405c6ef4d233de3` | Records DEC-13 comment #7174867715 as 10 unchecked / 0 checked and 20/20 comment readbacks; this proves the checklist was recorded, not accepted. |
 | DEC-13 register | `00-governance/implementation-evidence/2026-11-26-20-decision-acceptance-register.md`, `4810c6f8d3b5676a44288dea5782681e0745af6f` | Evidence register explicitly distinguishes direction approval from Owner acceptance, normative effectiveness, implementation authorization, verification and production conformance. |
 | A–I / Storage matrix | `00-governance/implementation-evidence/2026-11-26-a-i-storage-acceptance-matrix.md`, `a180459fa70f713de9232f372b94c8feb2c0c90d` | Records role dispositions as proxy-recorded; 3 ACCEPT / 7 CONDITIONAL / 0 REJECT. It states natural-person Owner acceptance count is 0 and DEC-13 / Gate A acceptance remains open. |
+| EN / ZH-CN DEC-13 register mirrors | `docs/en/00-governance/implementation-evidence/2026-11-26-20-decision-acceptance-register.md`, `dcae8a7cb5c6e03bf220d1d681744cc68361e87d`; `docs/zh-CN/00-governance/implementation-evidence/2026-11-26-20-decision-acceptance-register.md`, `49b3aff58991b77545ab143d12782b65e71a5a69` | Mirror artifacts; their presence does not prove semantic parity or Owner acceptance. |
+| EN / ZH-CN A–I / Storage matrix mirrors | `docs/en/00-governance/implementation-evidence/2026-11-26-a-i-storage-acceptance-matrix.md`, `5e6a388be1e55a0acaa49e67006f8ad3404a1a72`; `docs/zh-CN/00-governance/implementation-evidence/2026-11-26-a-i-storage-acceptance-matrix.md`, `149f3657e980826b1b44d560b83e71f837c8ffab` | Mirror artifacts; their presence does not prove semantic parity or Owner acceptance. |
 | AID-096 manifest | `14-ai-development/work-items/AID-2026-096/manifest.yaml`, `df16f4ad6d563f3f2a9a4596ee94a855b8431e19` | Records `APPROVAL_RECORDED_OWNER_ACCEPTANCE_PENDING`; no Owner/joint acceptance is claimed. |
 | AID-096 session evidence | `14-ai-development/work-items/AID-2026-096/session-evidence.md`, `45a1c1aebb54a93b28c2446c9ade96d6abc84654` | Records proxy attribution, prompt/session provenance limits and the no-natural-person-signature boundary. |
 | AID-096 prompt snapshot | `14-ai-development/work-items/AID-2026-096/prompt-v1.md`, `042f0f21e7d2410f01d5aeca4cbb2d4597422f11` | Records the delegated approval task and its explicit scope/exclusions. |
+| Issue #1189 decision / acceptance comments | Comments `7174316473`, `7174519803`, `7174867715`, `7185367827`, `7185429832` and `7186346059` | Record the non-approval direction, D-12, DEC-13 unchecked checklist, keep-open audit, AID-096 new approval event and post-merge status. The latest approval comment expressly leaves Owner/joint acceptance pending. |
 | Work-item index | `14-ai-development/work-items/INDEX.md`, `02bacd620ea147bd9b2fb63868648d8b7dd55474` | AID-096 Acceptance cell says pending; AID-093 records proxy dispositions and zero natural-person acceptance. |
 
 ### 4.1 DEC-13 accountable and joint acceptance
