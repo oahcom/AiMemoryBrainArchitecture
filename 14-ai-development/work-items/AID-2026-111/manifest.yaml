@@ -87,7 +87,8 @@ execution_evidence:
     head: "a123ea4e414c9f74fa0c576fbd718049a7d9f917"
     environment: "WSL2 Ubuntu 24.04"
     passed: 177
-    failed: 0
+    failed: "NOT_RECORDED"
+    exit_code: "NOT_RECORDED"
     command: "NOT_RECORDED"
     test_binaries: "NOT_RECORDED"
     stdout_bytes: "NOT_RECORDED"
