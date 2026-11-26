@@ -59,8 +59,8 @@ edit to somebody else's manifest.
 
 ## Actual AI input
 
-The prompt executed is `AID-2026-187/prompt-v1.md`, 7476 bytes, SHA-256
-`0102ca64769d623c8987f51648d668a1f05cfd2f4d8524f64ac1451ad91a4c97`. It is the snapshot, not a
+The prompt executed is `AID-2026-187/prompt-v1.md`, 8274 bytes, SHA-256
+`7ddad18d00c801f497371a2b104a1f8c7bc13b2c983bc084f438a77307e9a9be`. It is the snapshot, not a
 summary of it, and it is committed beside this file.
 
 The dispatch that produced it, verbatim, was the standing instruction repeated across the preceding
