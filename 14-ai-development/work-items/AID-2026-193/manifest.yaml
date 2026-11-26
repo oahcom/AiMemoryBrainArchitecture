@@ -1,4 +1,4 @@
-work_item_id: AID-2026-191
+work_item_id: AID-2026-193
 title: >-
   Annotate the live citations of the 84 `09-security-governance/` paths that are absent
   from main, keep every path text, and defer the six citations whose bilingual
@@ -26,22 +26,23 @@ prompt_provenance: DISPATCHED_TASK_FILE
 identifier_allocation:
   id_status: PROVISIONAL
   observed_main: 0c752ee6ee186e494e35aa74447f263891ca4842
-  assigned_id: AID-2026-191
+  assigned_id: AID-2026-193
   allocation_rule: >-
     At allocation time the highest AID number observed in any pull request title, branch
     or work-item directory was AID-2026-189 (merged, PR #1339), and 190 was recorded as
     the next unused number. 190 was then claimed concurrently by another unit whose PR
-    #1343 merged into main (`2f4f4118`) while this branch was open; the add/add conflict
-    on the six work-item paths was resolved by renumbering this unit to 191 rather than by
-    reusing the number, so this work item's carrier is 191 and 190 belongs to that other
-    unit.
-  observed_occupied: [170, 172, 173, 183, 186, 188, 189, 190]
-  renumbering: { from: AID-2026-190, to: AID-2026-191, reason: "190 claimed by PR #1343 while this branch was open" }
+    #1343 merged into main (`2f4f4118`) while this branch was open, and 191 was claimed by
+    two further units (PRs #1342, #1345, #1347) during the next forward-merge. The add/add
+    conflicts on the six work-item paths were resolved by renumbering this unit upward
+    rather than by reusing a taken number: 193 was free in every PR title, branch and
+    work-item directory at the time of the second renumbering.
+  observed_occupied: [170, 172, 173, 183, 186, 188, 189, 190, 191, 192, 197]
+  renumbering: { from: AID-2026-190, to: AID-2026-193, reason: "190 and 191 were both claimed by other units while this branch was open" }
 evidence:
-  record: 14-ai-development/work-items/AID-2026-191/evidence.md
+  record: 14-ai-development/work-items/AID-2026-193/evidence.md
   mirrors:
-    - docs/en/14-ai-development/work-items/AID-2026-191/evidence.md
-    - docs/zh-CN/14-ai-development/work-items/AID-2026-191/evidence.md
+    - docs/en/14-ai-development/work-items/AID-2026-193/evidence.md
+    - docs/zh-CN/14-ai-development/work-items/AID-2026-193/evidence.md
   measurements:
     cited_path_strings_distinct: 91
     absent_from_tree: 84
@@ -88,24 +89,24 @@ session_evidence:
     issue_refs:
       - "#1212"
     implementing_ai_session: "opencode-go/deepseek-v4.1-flash"
-    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-191/prompt-v1.md"
-    executed_prompt_sha256: "05a7990f17b7eed63fd4a0541251b3842c669313e5c13867fe962eae80b51b73"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-193/prompt-v1.md"
+    executed_prompt_sha256: "d2bfa12f4028753b8d358afd5ad27f901b6c93ee16b9a4c71606ff42144a1e26"
     executed_prompt_bytes: 7395
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_RECORDED"
-    session_evidence_ref: "14-ai-development/work-items/AID-2026-191/session-evidence.md"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-193/session-evidence.md"
 
 scope:
   files_to_create:
-    - 14-ai-development/work-items/AID-2026-191/manifest.yaml
-    - 14-ai-development/work-items/AID-2026-191/evidence.md
-    - 14-ai-development/work-items/AID-2026-191/prompt-v1.md
-    - 14-ai-development/work-items/AID-2026-191/session-evidence.md
-    - docs/en/14-ai-development/work-items/AID-2026-191/evidence.md
-    - docs/zh-CN/14-ai-development/work-items/AID-2026-191/evidence.md
+    - 14-ai-development/work-items/AID-2026-193/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-193/evidence.md
+    - 14-ai-development/work-items/AID-2026-193/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-193/session-evidence.md
+    - docs/en/14-ai-development/work-items/AID-2026-193/evidence.md
+    - docs/zh-CN/14-ai-development/work-items/AID-2026-193/evidence.md
   files_to_modify:
     - 14-ai-development/work-items/INDEX.md
-    - the 19 documents listed in 14-ai-development/work-items/AID-2026-191/evidence.md section 8
+    - the 19 documents listed in 14-ai-development/work-items/AID-2026-193/evidence.md section 8
   files_out_of_scope:
     - 09-security-governance/ (no file created or edited, in any rendition)
     - 14-ai-development/work-items/AID-2026-107/evidence.md (the register this note points at)
@@ -150,6 +151,7 @@ notes:
     on the new base, so every count above is measured at 0c752ee6.
   - >-
     This unit was first registered as AID-2026-190. PR #1343 merged a different unit under
-    that number into main (`2f4f4118`) while this branch was open, producing add/add
-    conflicts on the six work-item paths. The unit was renumbered to 191 and the branch
-    was merged forward; no file of the other unit was edited, renamed or removed.
+    that number into main (`2f4f4118`) while this branch was open; the unit was renumbered
+    to 191 and merged forward. 191 was then claimed by PRs #1342, #1345 and #1347, so the
+    second forward-merge conflicted again and the unit was renumbered to 193. No file of
+    any other unit was edited, renamed or removed.

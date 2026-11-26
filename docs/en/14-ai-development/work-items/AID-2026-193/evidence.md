@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "AID-2026-191/manifest.yaml"
+        - "AID-2026-193/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -30,7 +30,7 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "AID-2026-191 annotation of the live citations of the 84 09-security-governance paths that are absent from main"
+    canonical_scope: "AID-2026-193 annotation of the live citations of the 84 09-security-governance paths that are absent from main"
     canonical_scope_id: "ai-development/aid-2026-190-dangling-09-security-governance-citations"
     canonical_scope_keywords:
       - "security-governance"
@@ -40,13 +40,13 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "14-ai-development/work-items/AID-2026-191/evidence.md"
+    source: "14-ai-development/work-items/AID-2026-193/evidence.md"
     en: null
-    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-191/evidence.md"
+    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-193/evidence.md"
 ---
 
 
-# AID-2026-191 — 84 `09-security-governance/` paths absent from main: live citations annotated, nothing restored
+# AID-2026-193 — 84 `09-security-governance/` paths absent from main: live citations annotated, nothing restored
 
 **Status: DRAFT — annotation only.** This work item edits 19 documents, 30 lines in
 total, and defers 6 further lines with the gate evidence for why. It creates no file
