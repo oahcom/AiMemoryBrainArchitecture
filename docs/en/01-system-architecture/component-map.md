@@ -127,4 +127,4 @@ The 16 logical components above are a map of responsibilities, not a mandate to 
 - Logical subsystem references use their `SYS-*` identifier (for example, `SYS-MEMORY-COMPILER`); do not cite a subsystem by a bare letter.
 - Responsibility Matrix capability/component labels and P/S participation markers are a separate taxonomy. They do not identify an accountable Owner.
 - When a sentence needs both a subsystem and an Owner, name both explicitly (for example, “SYS-MEMORY-COMPILER; accountable Owner E”). Do not infer one from the other.
-- Automated enforcement is tracked separately by AID-2026-081 / Issue #1237. Until that check is merged, this section is the manual reference rule, not evidence that a lint gate exists.
+- Automated enforcement is tracked separately by Issue #1237. Until that check is merged, this section is the manual reference rule, not evidence that a lint gate exists.
