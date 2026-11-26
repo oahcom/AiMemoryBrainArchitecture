@@ -150,7 +150,7 @@ session_evidence:
     implementing_ai_session: a944-opencode-author
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-084/prompt-v1.md
     executed_prompt_sha256: acdd40d2b2b2357ecfea7411122b146e43d4daab7fd8230bc32ba96009c86b55
-    executed_prompt_bytes: 4044
+    executed_prompt_bytes: 4775
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-084/session-evidence-944.md
