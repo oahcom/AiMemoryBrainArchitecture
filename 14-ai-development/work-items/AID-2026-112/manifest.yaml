@@ -1,0 +1,131 @@
+work_item_id: AID-2026-112
+title: Rejudge Storage/Consistency and H idempotency predicates against 552 local test passes
+class: DOC/GOVERNANCE
+risk: R2
+risk_rationale: >-
+  Documentation-only evidence adjudication. The main risk is overclaiming local
+  component tests as complete predicate or end-to-end conformance.
+status: DRAFT_PR
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-26
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 57767952f1248e2de616c5dc24ac762ecb3a5a7f
+tracking_issues: ["#1211", "#1212"]
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: 57767952f1248e2de616c5dc24ac762ecb3a5a7f
+  observed_max_registered_id: AID-2026-111
+  assigned_id: AID-2026-112
+  allocation_rule: "alloc_at_push: latest main INDEX maximum + 1, rechecked immediately before initial branch push"
+prompt_id: AID-2026-112-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-112/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
+evidence:
+  sqlite_backend:
+    command: "cargo test -p memory-storage-sqlite -p memory-event-store-sqlite --no-fail-fast"
+    head: a123ea4e414c9f74fa0c576fbd718049a7d9f917
+    exit_code: 0
+    test_binaries: 8
+    passed: 99
+    failed: 0
+    stdout_bytes: 9465
+    stdout_sha256: a15e3862af4d6cd97a4cd8caf6f133f57e3c3636ba284bdfd5afaa9237ba2952
+    supplied_test_names: 94
+    unnamed_passes: 5
+  pure_rust:
+    command: "cargo test -p memory-domain -p memory-storage -p memory-event-store -p bmcp-protocol -p agent-integration --no-fail-fast"
+    head: 44dc21a4970192118ba434801b8ca05702ac582c
+    exit_code: 0
+    test_binaries: 15
+    passed: 276
+    failed: 0
+    stdout_bytes: 47066
+    stdout_sha256: C18EF5FC121EEB9B486000180F52BAE8385385722A369ADDAB873FCF8716D7B9
+    supplied_test_names: 0
+  memory_context:
+    command: "cargo test -p memory-context --no-fail-fast"
+    head: a123ea4e414c9f74fa0c576fbd718049a7d9f917
+    exit_code: 0
+    test_binaries: 11
+    passed: 177
+    failed: 0
+    stdout_bytes: NOT_RECORDED
+    stdout_sha256: 43b2b9b6da6521db9ef53127f1e2a3aff5226c9ef3a50a78f3a65dad6a620eee
+    supplied_relevant_test_names: 23
+    unnamed_passes: 154
+  aggregate:
+    passed: 552
+    failed: 0
+    interpretation: "Arithmetic sum of three separate runs; not one unified run and not a deduplicated unique-test count."
+  execution_boundary:
+    environment: "WSL2 Ubuntu 24.04; rustup stable Rust/Cargo 1.100.0"
+    source: "Operator-supplied local execution records; not independently rerun by this agent"
+    ci: false
+    distributed_backend: false
+    multi_replica_linearizability: false
+    production_topology: false
+rejudgment:
+  sc_rows: 18
+  sc_partial_evidence: 13
+  sc_unchanged: 5
+  hir_rows: 18
+  hir_partial_evidence: 14
+  hir_unchanged: 4
+  total_predicates: 36
+  total_partial_evidence: 27
+  total_unchanged: 9
+  total_pass: 0
+  aid_095_flow_rows: 72
+  aid_095_unchanged: 72
+  aid_095_pass: 0
+  evidence_required_rows: 16
+  evidence_required_partial_evidence: 12
+  evidence_required_unchanged: 4
+  evidence_required_pass: 0
+  hir_rows_reviewed: 18
+  test_names_mapped: 117
+gate:
+  gate_a: "PARTIAL / OPEN"
+  gate_b: "PARTIAL / OPEN — NOT VERIFIED"
+  flows_blocked_with_reason: 8
+  runtime_or_validator_changes: false
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-112/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-112/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-112/evidence.md
+    - docs/en/14-ai-development/work-items/AID-2026-112/evidence.md
+    - docs/zh-CN/14-ai-development/work-items/AID-2026-112/evidence.md
+  files_to_modify:
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope:
+    - runtime
+    - validator
+    - schema
+    - API
+    - DDL
+    - CI workflow
+    - deployment
+    - IMPL2 historical file restoration
+    - closure of issues #1211 and #1212
+carrier:
+  branch: docs/aid-2026-112-552-test-evidence-rejudgment
+  pull_request: PENDING
+  draft: true
+  merge_authorization: "Only after all 16 required contexts succeed on exact final PR Head, branch freshness is rechecked, and conflicts are resolved."
+review:
+  status: NOT_ASSIGNED
+  independent_reviewer: NOT_ASSIGNED
+  natural_person_owner_acceptance: NOT_RECORDED
+acceptance:
+  gate_a: "PARTIAL / OPEN"
+  gate_b: "PARTIAL / OPEN — NOT VERIFIED"
+  issue_1211: OPEN
+  issue_1212: OPEN
