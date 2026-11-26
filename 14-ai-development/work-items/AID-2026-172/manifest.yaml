@@ -38,7 +38,7 @@ scope:
     - branch protection
 carrier:
   branch: docs/2026-11-26-aid-172-bilingual-baseline-consistency
-  pull_request: PENDING
+  pull_request: 1327
   draft: false
   merge_authorization: >-
     Only after all 16 required contexts succeed on the exact final PR head,
