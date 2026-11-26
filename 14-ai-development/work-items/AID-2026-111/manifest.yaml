@@ -115,7 +115,7 @@ acceptance:
   production_conformance: "NOT_CLAIMED"
 carrier:
   branch: "docs/aid-2026-109-sqlite-implementation-evidence-review"
-  pull_request: "PENDING"
+  pull_request: 1307
   draft: true
   merge_commit_sha: "PENDING"
   merge_authorization: "only after all 16 required contexts succeed on exact final Head"
