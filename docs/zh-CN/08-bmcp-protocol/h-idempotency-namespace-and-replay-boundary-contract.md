@@ -85,7 +85,7 @@ document_metadata:
 - 02-domain-model/phase-1-storage-trait-contract.md — Blob **22ca7cd3777e0132e25f084084610f1e90b60d21**：候选 Storage seam 规定 immutable version、current-version CAS、idempotency record 和 canonical commit sequence 属于同一可恢复边界；同 key/同 digest 可返回原回执；同 key/不同 digest 是 IdempotencyConflict。形状测试不证明后端原子性/持久性。
 - H Phase 3.8.25 — Blob **afa294bc42a8488e4569e6a8bdf5437c7a90e247**；H Phase 3.8.26 — Blob **7b73491c765091728af6f5306b9efd502cf7f30a**：重放披露前独立检查 I 当前授权和 D Fence，并精确关联 CSubmitOutcome record/sequence/payload-digest/final-boundary；resolver/verifier seam 尚未验证。
 
-**Storage / AID-2026-098 依赖：** 此 main 基线不存在 AID-2026-098 目录或 manifest，也未发现该编号的 PR。因此其精确 Storage 合同版本/blob 为 **NOT AVAILABLE ON THIS BASELINE**。本提案将 Storage 原子性与持久化细节留给 AID-2026-098，不臆造或重复定义。跨 Owner 冻结前，必须 pin 其精确路径/版本/blob 并核验 H/Storage 映射。上述 Storage Trait 只是候选 seam，不能替代 AID-2026-098。
+**Storage / AID-2026-098 依赖：** AID-2026-098 已随 PR #1283 合并进 main（merge commit cdba0b7360b81ba2693c57f0d89ad2e28832272c）；见 AID-2026-098。Storage 合同现有三份文件：10-storage-consistency/storage-physical-consistency-contract.md、docs/en/10-storage-consistency/storage-physical-consistency-contract.md、docs/zh-CN/10-storage-consistency/storage-physical-consistency-contract.md。其 18 个检查点由 10 个 DOCUMENTED_ONLY 和 8 个 EVIDENCE_REQUIRED 组成；这是候选文档，不是实现或符合性证据。这只是纠正已过期的基线可得性表述，不改变 AID-2026-099 的任何规范结论；HIR-06 对 AID-2026-098 的引用仍然成立。本提案将 Storage 原子性与持久化细节留给 AID-2026-098，不臆造或重复定义。跨 Owner 冻结前，仍须 pin 其精确路径/版本/blob 并核验 H/Storage 映射。上述 Storage Trait 只是候选 seam，不能替代 AID-2026-098。<!-- corrected_by: AID-2026-108 -->
 
 ## 3. 幂等命名空间与 Key 所有权
 
