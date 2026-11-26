@@ -50,6 +50,7 @@ scope:
     - 14-ai-development/work-items/AID-2026-078/manifest.yaml
     - 14-ai-development/work-items/AID-2026-078/prompt-v1.md
     - 14-ai-development/work-items/AID-2026-078/session-evidence-266.md
+    - 14-ai-development/work-items/AID-2026-078/session-evidence-1126.md
   files_to_modify:
     - .github/workflows/repository-hygiene.yml
     - 14-ai-development/work-items/INDEX.md
@@ -66,7 +67,12 @@ acceptance_criteria:
       found.
     measurement: >-
       A run over the real tree exits 0, and the printed count equals
-      `ls -d 14-ai-development/work-items/AID-*/ | wc -l`.
+      `git ls-files '14-ai-development/work-items/*/manifest.yaml' | wc -l`. Counted by file and
+      not by directory: `ls -d 14-ai-development/work-items/AID-*/ | wc -l` undercounts by
+      exactly one, because 14-ai-development/work-items/FIX-2026-P1-T1/manifest.yaml is
+      committed and carries no AID id. Excluding it by directory name would be a D3 admission
+      rule, which the R7 owner ruling at
+      14-ai-development/work-items/AID-2026-057/manifest.yaml:115 forbids writing.
   - id: AC2
     criterion: >-
       A duplicate key fails even where the default loader would accept the document, so that
@@ -151,13 +157,13 @@ findings:
       this rather than presenting the work as a single act.
 
 implementation:
-  status: NOT_STARTED
-  branch: PENDING
+  status: IMPLEMENTED_IN_BRANCH
+  branch: feat/078-manifest-gate
   pull_request: PENDING
   merge_commit_sha: NOT_MERGED
   note: >-
-    Registration only. The checker, its test module and the workflow step are not written. The
-    four repairs this work item depends on were made by b34c8e37 and are not this work item's.
+    The checker, its test module and one workflow step are written in this branch. The four
+    repairs this work item depends on were made by b34c8e37 and are not this work item's.
 
 review:
   status: NOT_ASSIGNED
@@ -181,3 +187,13 @@ session_evidence:
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-078/session-evidence-266.md
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1126"
+    implementing_ai_session: req05-convergence-session-identity-not-recorded
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-078/prompt-v1.md
+    executed_prompt_sha256: c2ae6f744dbfc383ef1468516bc116744a7bf38a27566685c51c63a337d4b1a2
+    executed_prompt_bytes: 7533
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-078/session-evidence-1126.md
