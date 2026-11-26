@@ -107,3 +107,11 @@ Documentation and work-item registration only. No runtime, validator semantics, 
 | ZH-CN mirror `docs/zh-CN/03-memory-brain/canonical-memory-store.md` | Prior main blob `34e0755a079f085df65c2a180cc59b6aaea7ea78` | `41dd113497a5ad8f7cc522904a1bf855e92923ef` | `b0f28b7da314e9d2f297d64d06c73cedc83b5843` | Existing translation retained; sections 14–18 split to match canonical structure; same authority-conflict notice translated. |
 
 The frontmatter SHA values above are Git blob SHAs of the exact added YAML frontmatter blocks (including delimiters). The source file's unmodified body, as a Git blob, hashes to `6b37c91033fda21f072e2a3bde6f274663b1e76e`, identical to the source branch blob.
+
+
+### 4.2 Executed prompt snapshot
+
+- Snapshot: `14-ai-development/work-items/AID-2026-109/prompt-v1.md`.
+- SHA-256: `af29bd5b61d2a3a0d659fcfbb507111d5d7220baad5a335d4a7dca8c6e0f8462`.
+- UTF-8 bytes: `2946`.
+- Provenance: user prompt captured from the initiating chat; session ID itself remains NOT_RECORDED.
