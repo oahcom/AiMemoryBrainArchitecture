@@ -35,6 +35,14 @@ The incomplete branch is the point, and it covers the credential case: an absent
 token is not a reason to skip the comparison, and an unreadable payload is not
 "no violations". A checker whose "cannot read the platform" path falls through to
 exit 0 is a false PASS, which is worse than having no checker (#1003, #1017).
+
+The produced side is read from both workflow suffixes GitHub honours, `.yml` and
+`.yaml`, and comments are stripped before the structural read (#1212). A
+`jobs:  # comment` line used to be neither the `jobs:` key nor a column-0 key, so
+the mapping was never entered and the file produced no contexts at all: the
+subset test then reported every declared name as produced by *some* other file,
+which is a silent pass, not a comparison. Reading only `*.yml` had the same
+shape one level up -- a `.yaml` workflow's jobs were invisible.
 """
 
 from __future__ import annotations
@@ -62,6 +70,45 @@ DEFAULT_API = "https://api.github.com"
 JOB_ID_RE = re.compile(r"^  ([A-Za-z_][\w-]*):\s*$")
 JOB_NAME_RE = re.compile(r"^    name:\s*(.+?)\s*$")
 FENCE_RE = re.compile(r"^```")
+
+# GitHub reads both suffixes. Globbing `*.yml` alone left a `.yaml` workflow's
+# jobs invisible to the produced side.
+WORKFLOW_GLOBS = ("*.yml", "*.yaml")
+
+
+def strip_yaml_comment(line: str) -> str:
+    """Drop a trailing YAML comment, ignoring `#` inside quotes.
+
+    A YAML comment starts at a `#` in column 0 or preceded by a space or tab, so
+    `name: "Build #7"` keeps its `#` and `jobs:  # comment` loses its comment.
+    Removing the comment is what lets the `jobs:` key and a commented job line
+    be read as the structure they are.
+    """
+    quote = None
+    for index, char in enumerate(line):
+        if quote:
+            if char == quote:
+                quote = None
+        elif char in "'\"":
+            quote = char
+        elif char == "#" and (index == 0 or line[index - 1] in " \t"):
+            return line[:index]
+    return line
+
+
+def strip_yaml_comments(text: str) -> str:
+    """Strip every line's comment, keeping the line count unchanged."""
+    return "\n".join(strip_yaml_comment(line) for line in text.splitlines())
+
+
+def workflow_files(workflows_dir: Path) -> list[Path]:
+    """Every workflow file, `.yml` and `.yaml` alike, in one sorted list."""
+    paths = [
+        path
+        for pattern in WORKFLOW_GLOBS
+        for path in workflows_dir.glob(pattern)
+    ]
+    return sorted(paths)
 
 
 def declared_contexts(doc_text: str) -> list[str] | None:
@@ -92,12 +139,16 @@ def declared_contexts(doc_text: str) -> list[str] | None:
 
 
 def produced_contexts(workflow_text: str) -> set[str]:
-    """Job ids and job display names in one workflow file."""
+    """Job ids and job display names in one workflow file.
+
+    Comments are stripped first, so a commented-out job line and a
+    `jobs:  # comment` header cannot hide or invent a context.
+    """
     found: set[str] = set()
     in_jobs = False
     current: str | None = None
 
-    for line in workflow_text.splitlines():
+    for line in strip_yaml_comments(workflow_text).splitlines():
         if not in_jobs:
             if line.rstrip() == "jobs:":
                 in_jobs = True
@@ -176,8 +227,8 @@ def main(root: Path | None = None, protection: list[str] | None = None) -> int:
         return 2
 
     workflows_dir = root / WORKFLOWS
-    workflow_files = sorted(workflows_dir.glob("*.yml"))
-    if not workflow_files:
+    workflow_files_found = workflow_files(workflows_dir)
+    if not workflow_files_found:
         print(
             f"::error::INCOMPLETE: no workflows under {WORKFLOWS}; "
             "no context can be shown to be produced",
@@ -186,7 +237,7 @@ def main(root: Path | None = None, protection: list[str] | None = None) -> int:
         return 2
 
     produced: set[str] = set()
-    for path in workflow_files:
+    for path in workflow_files_found:
         produced |= produced_contexts(path.read_text(encoding="utf-8"))
 
     unproduced = [context for context in contexts if context not in produced]

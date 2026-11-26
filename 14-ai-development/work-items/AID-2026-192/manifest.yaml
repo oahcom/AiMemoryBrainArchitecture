@@ -1,0 +1,175 @@
+work_item_id: AID-2026-192
+title: >-
+  Make the three gate helpers fail closed: index membership refuses an absent directory side
+  or index, both workflow readers cover .yaml, and a comment no longer supplies a context, a
+  discovery root or test reachability
+class: CI/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  Three helper edits plus their tests. No job is added, renamed, merged or removed; the sixteen
+  declared contexts and the sixteen produced contexts are unchanged; no required context, index
+  row or baseline entry is added or deleted. Every new failing branch fires only on an input that
+  previously produced a silent pass, and the real tree stays green at the same counts it reported
+  before the change.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 2f4f4118bd2c2d8e43a23975f667deeb06553f3c
+prompt_status: NOT_RECORDED
+prompt_provenance: DISPATCHED_TASK_FILE
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: 2f4f4118bd2c2d8e43a23975f667deeb06553f3c
+  assigned_id: AID-2026-192
+  allocation_rule: >-
+    Pull-request titles and branch names across all 300 pull requests reach AID-2026-191, and
+    AID-2026-190 and AID-2026-191 are carried by pull requests that are still open, so neither
+    number is free. AID-2026-192 appears in no pull-request title, no branch name (1048 refs
+    listed through git/matching-refs) and no path in this tree. No INDEX maximum plus one was
+    used.
+  observed_occupied: [170, 172, 173, 183, 186, 188, 189, 190, 191]
+  recheck_rule: >-
+    Immediately before merge, re-read open pull requests and remote branches for
+    AID-2026-192; if occupied, take the next free number and update every path and reference in
+    the same push.
+scope:
+  objective: >-
+    Close the three false-PASS branches the unit brief names: an index-membership check that
+    answered "no violations" when either side of the relation was absent, two workflow readers
+    that could not see a `.yaml` workflow or a `jobs:` header with a trailing comment, and a
+    reachability rule that counted a test name mentioned in a comment as executed.
+  changes:
+    - path: "scripts/ci/check_repository_hygiene.py"
+      detail: >-
+        `check_index_membership` raises `RuntimeError` -- the file's exit-2 channel -- instead of
+        returning `[]` when no work-item directory is found, and again when INDEX.md is absent
+        from the head tree. `CHECK_VERSION` moves to 2026-11-27.1 because the rule set changed.
+    - path: "scripts/check_declared_check_contexts.py"
+      detail: >-
+        Adds `strip_yaml_comment` / `strip_yaml_comments` and applies them inside
+        `produced_contexts`, so `jobs:  # comment` is read as the jobs header and a commented-out
+        job line produces nothing. Workflow discovery globs `*.yml` and `*.yaml`.
+    - path: "scripts/ci/check_test_reachability.py"
+      detail: >-
+        Workflow discovery globs `*.yml` and `*.yaml`; both branches (Rule B substring match and
+        the `discover -s` extraction) read a comment-stripped view of each workflow through the
+        existing `strip_comment` helper instead of the raw file.
+    - path: "scripts/test_check_repository_hygiene.py"
+      detail: >-
+        Adds the two fail-closed cases and a `with_index` fixture switch; the shared `commit`
+        helper now carries one work-item directory and an INDEX.md row for every directory the
+        fixture contains, because the membership check no longer passes without them.
+    - path: "scripts/test_check_declared_check_contexts.py"
+      detail: >-
+        Adds three cases: a commented `jobs:` header still produces contexts, a job named only in
+        a comment is not produced, and a `.yaml` workflow is read.
+    - path: "scripts/ci/test_check_test_reachability.py"
+      detail: >-
+        Adds three cases: a test named only in a comment is unreachable, a `discover` command in
+        a comment is not a discovery root, and a `.yaml` workflow reaches tests and wires gates.
+  untouched:
+    - "every job id and job display name, in every workflow"
+    - "the sixteen declared required contexts and the sixteen produced contexts"
+    - "scripts/ci/baselines/gate-wiring.txt (3 unwired, 3 baselined, unchanged)"
+    - "every other checker and every document outside this work item"
+    - "the judgement in each checker: no threshold was relaxed, no violation class removed"
+evidence:
+  record: 14-ai-development/work-items/AID-2026-192/evidence.md
+  mirrors:
+    - docs/en/14-ai-development/work-items/AID-2026-192/evidence.md
+    - docs/zh-CN/14-ai-development/work-items/AID-2026-192/evidence.md
+  measured_at: 2f4f4118bd2c2d8e43a23975f667deeb06553f3c
+  measurements:
+    index_membership_no_directories_before: "returns [] -> checker exit 0"
+    index_membership_no_directories_after: "RuntimeError -> checker exit 2"
+    index_membership_no_index_before: "returns [] -> checker exit 0"
+    index_membership_no_index_after: "RuntimeError -> checker exit 2"
+    produced_contexts_jobs_comment_before: 0
+    produced_contexts_jobs_comment_after: 3
+    declared_checker_yaml_only_workflow_before: "exit 2 (INCOMPLETE: no workflows under .github/workflows)"
+    declared_checker_yaml_only_workflow_after: "exit 0"
+    reachability_commented_test_name_before: "exit 0 (silent pass)"
+    reachability_commented_test_name_after: "exit 1, pkg/test_x.py named"
+    declared_contexts_before_after: "16 declared / 16 produced, unchanged"
+    index_membership_counts_before_after: "directories=106 linked=106, unchanged"
+    reachability_totals_before_after: "65 test files / 65 reachable / 18 gate scripts / 3 unwired / 3 baselined, unchanged"
+    checker_version_before: "2026-11-24.8"
+    checker_version_after: "2026-11-27.1"
+    tests_hygiene_before_after: "97 -> 99 (1 skipped both sides)"
+    tests_reachability_before_after: "24 -> 27"
+    tests_declared_before_after: "13 -> 16"
+  local_runs:
+    - command: python scripts/test_check_repository_hygiene.py
+      result: "Ran 99 tests / OK (skipped=1) / exit 0"
+    - command: python scripts/ci/test_check_test_reachability.py
+      result: "Ran 27 tests / OK / exit 0"
+    - command: (cd scripts && python -m unittest test_check_declared_check_contexts)
+      result: "Ran 16 tests / OK / exit 0"
+    - command: python scripts/ci/check_repository_hygiene.py
+      result: "directories=106 linked=106; exit 0"
+    - command: python scripts/ci/check_test_reachability.py
+      result: "65 test files / 65 reachable / exit 0"
+    - command: python -c "... check_declared_check_contexts.main(root, declared_contexts(...))"
+      result: "16 declared, all produced; exit 0 (the protected side injected, no network call)"
+  not_measured:
+    - No CI context result is claimed at any SHA in this document
+    - No merge SHA is claimed
+    - The live branch-protection payload is not read here; the protected side is injected from the declaration
+    - No claim is made about any workflow this change does not touch
+implementation:
+  status: NOT_STARTED
+  pull_request: PENDING
+  merge_commit_sha: NOT_MERGED
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#1212"
+    implementing_ai_session: "opencode-go/deepseek-v4.1-flash"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-192/prompt-v1.md"
+    executed_prompt_sha256: "473af77c05eef46cd55111c3c594e870a52b939cc97eadab1769d7d435725cbe"
+    executed_prompt_bytes: 7965
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-192/session-evidence.md"
+non_goals:
+  - Changing any required context name, count or protection entry
+  - Adding, renaming, merging or removing any job
+  - Relaxing any judgement, threshold or violation class in the three checkers
+  - Adding a gate-wiring baseline entry instead of wiring a new gate
+  - Repairing any checker this unit did not name
+notes:
+  - >-
+    The two fail-closed branches were measured against the pre-fix file taken from origin/main,
+    not asserted from reading: the old function returned `[]` for a tree with no work-item
+    directory, and the old checker printed "Repository hygiene check passed" for it.
+  - >-
+    Reverting each fix in isolation makes exactly the new tests fail and nothing else: without
+    comment stripping the declared-contexts suite fails the commented-header case, without the
+    `.yaml` glob both readers fail their `.yaml` case, and without comment stripping in Rule B
+    the commented-name case passes again. The three reverts are recorded in evidence.md.
+  - >-
+    The shared hydration fixture in scripts/test_check_repository_hygiene.py now writes one
+    work-item directory and an INDEX.md row for it by default. That is not a case being
+    weakened: the fixture trees previously relied on the very silent pass this change removes,
+    so without both sides they would have gone red on an unrelated check.
+carrier:
+  branch: fix/2026-11-27-gates-b
+  pull_request: null
+  merge_sha: null
+  merge_method: merge
+  required_contexts: "to be recorded from the pull request head; none claimed here"
+  merge_authorization: >-
+    Only after all required contexts succeed on the exact final PR head and branch freshness is
+    rechecked.
+review:
+  status: NOT_ASSIGNED
+  independent_reviewer: NOT_ASSIGNED
+  natural_person_owner_acceptance: NOT_RECORDED
+acceptance:
+  gate: PENDING_CI
