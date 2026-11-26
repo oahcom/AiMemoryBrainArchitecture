@@ -19,7 +19,7 @@ prompt_id: AID-2026-106-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-106/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: ed3345b0f9c71b3cd7d8822bc4e42424000f17d4317bc03db5edc47486fa2ba0
+prompt_sha256: 0ef830572575708a3fd2c253d507b9ce97e8c39eff4fff04a7784e6a1daffd36
 prompt_bytes: 2998
 prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST; immutable snapshot of assigned scope
 authorization:
