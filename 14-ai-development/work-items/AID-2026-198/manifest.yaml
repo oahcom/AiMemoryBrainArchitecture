@@ -138,3 +138,17 @@ session_evidence:
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_RECORDED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-198/session-evidence.md"
+carrier:
+  branch: fix/2026-11-27-side-by-side-cjk
+  pull_request: 1342
+  merge_sha: 9dc98a526703917bd28862f97f75054beacf1388
+  merge_method: merge
+  merge_parents:
+    - cff08dc353eff8c82228a5cc8d73171cd41da378
+    - 51fa2bed71ab984cd4aeca3b96d0a00f11440012
+  required_contexts: "16/16 success on head 51fa2bed71ab984cd4aeca3b96d0a00f11440012"
+  draft: false
+  merge_authorization: >-
+    Only after all 16 required contexts succeeded on the exact final PR head, branch freshness
+    was rechecked, and no conflict remained.
+  closeout_pull_request: PENDING
