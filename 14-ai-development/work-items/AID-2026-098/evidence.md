@@ -142,4 +142,4 @@ The exact ChatGPT session identifier was not exposed in the available execution 
 
 - Issue #1211 implementation-drift finding posted: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1211#issuecomment-7188271324. It distinguishes the document-layer tension from implementation behavior that remains unverified; assigns D, Storage and I the minimum call-graph, projection-rebuild and anti-rollback evidence.
 - CI scope repair: `10-storage-consistency` is listed in both the governed roots registry and the pre-existing `NORMATIVE_ROOTS`. No check predicate, validation rule or runtime code was changed.
-- Current-main rebase baseline: `fa8268fef659891efcdab9164f3e7703e19975c0`. New successor PR number is pending creation; the previous PR #1276 remains an earlier Draft carrier.
+- Current-main rebase baseline: `fa8268fef659891efcdab9164f3e7703e19975c0`. Successor Draft PR #1283 is open on `docs/2026-11-26-storage-physical-consistency-098-rebased`; previous PR #1276 remains an earlier Draft carrier.
