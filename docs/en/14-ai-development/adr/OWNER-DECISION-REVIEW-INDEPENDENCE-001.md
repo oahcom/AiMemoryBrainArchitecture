@@ -10,8 +10,6 @@ document_metadata:
       approved_version: null
       approval_scope:
         type: Full-document
-        included_sections: []
-        included_assets: []
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "Measured against the GitHub REST API on 2026-11-24: 690 PRs enumerated (`GET /repos/oahcom/AiMemoryBrainArchitecture/pulls?state=all`, every page; `GET /search/issues?q=repo:oahcom/AiMemoryBrainArchitecture+is:pr` returned `total_count: 690` the same day) with `/pulls/{n}/reviews` fetched for each, review states ever recorded = {COMMENTED: 169}, APPROVED = 0; merged PRs = 581 (`is:pr+is:merged` `total_count: 581`, cross-checked as 581 non-null `merged_at` in the same enumeration); collaborators = 1; oahcom0831-design permission = read."

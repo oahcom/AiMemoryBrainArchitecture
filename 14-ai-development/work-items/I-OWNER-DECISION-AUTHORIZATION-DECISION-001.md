@@ -13,8 +13,6 @@ document_metadata:
         value: "c9a6394d738f7cbc25d93c116a724080e6444ee3"
       approval_scope:
         type: Full-document
-        included_sections: []
-        included_assets: []
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "PR #595 / commit c9a6394d738f7cbc25d93c116a724080e6444ee3"

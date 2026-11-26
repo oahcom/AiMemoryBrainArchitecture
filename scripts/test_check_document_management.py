@@ -975,29 +975,9 @@ def run_approval_scope() -> None:
         "  the diagnostic does not say what is honoured",
     )
 
-    # (b) The lists that only described those scopes are dead. A non-empty one
-    # is a claim no rule reads; the empty placeholder every document already
-    # carries claims nothing and stays valid.
-    for field in ("included_sections", "included_assets"):
-        expect(
-            f"T87 non-empty {field} is refused by name",
-            doc(APPROVED.replace(
-                "        type: Full-document\n",
-                f"        type: Full-document\n"
-                f"        {field}:\n          - nowhere.md\n",
-            )),
-            field,
-        )
-    expect(
-        "T87 the empty placeholder the template writes is still accepted",
-        doc(APPROVED.replace(
-            "        type: Full-document\n",
-            "        type: Full-document\n"
-            "        included_sections: []\n"
-            "        included_assets: []\n",
-        )),
-        expect_clean=True,
-    )
+    # (b) The two lists those scopes were declared with are gone: #904 removed
+    # them from the schema and the corpus together, because with the values gone
+    # they could only ever be empty. `run_scope_key_removal()` binds that.
 
     # (c) Control: `Full-document` behaves exactly as before. An unchanged body
     # passes; an edited body still fails DM-10, and fails with DM-10 rather than
@@ -1029,6 +1009,58 @@ def run_approval_scope() -> None:
                f"  exit {code}, DM-10 present: "
                f"{'DM-10 content changed after approved_version' in output}")
 
+
+# --------------------------------------------------------------------------
+# 5a-2. Approval scope keys (issue #904). Ruling 76 in #833 ordered the two
+#     dead keys removed from `SCOPE_KEYS` AND from the corpus in the same
+#     change; #888 removed the values and left the keys, so every approved
+#     document carried two empty lists that declared nothing. These cases fail
+#     if either key is readmitted to the gate, which is the only thing that
+#     could let the shape back into the corpus unnoticed.
+# --------------------------------------------------------------------------
+
+def run_scope_key_removal() -> None:
+    print("approval scope keys (#904)")
+    import check_document_management as gate
+
+    def refuse(name: str, injected: str) -> None:
+        text = doc(APPROVED.replace(
+            "        type: Full-document\n",
+            f"        type: Full-document\n        {injected}\n",
+        ))
+        key = injected.split(":")[0]
+        try:
+            errors, _ = check_document(FILE, text)
+            assert errors, f"a document carrying {key} was accepted by the gate"
+            assert any("approval_scope" in e and "unknown key" in e for e in errors), \
+                f"no approval_scope unknown-key diagnostic for {key}: {errors}"
+        except AssertionError as exc:
+            record(name, False, f"  AssertionError: {exc}")
+            return
+        record(name, True)
+
+    refuse("T94 a document carrying included_sections is refused",
+           "included_sections: []")
+    refuse("T94 a document carrying included_assets is refused",
+           "included_assets: []")
+    refuse("T94 a non-empty included_sections is refused, not reinterpreted",
+           "included_sections:\n          - nowhere.md")
+
+    try:
+        assert gate.SCOPE_KEYS == {"type"}, (
+            "SCOPE_KEYS readmits "
+            f"{sorted(set(gate.SCOPE_KEYS) - {'type'})}; #904 removed those keys "
+            "from the corpus in the same change"
+        )
+    except AssertionError as exc:
+        record("T94 SCOPE_KEYS admits only 'type'", False, f"  AssertionError: {exc}")
+    else:
+        record("T94 SCOPE_KEYS admits only 'type'", True)
+
+    # Control: the shape the corpus actually uses is still accepted, so the
+    # cases above are not passing because the fixture is broken.
+    expect("T94 the corpus shape (type only) is still accepted",
+           doc(APPROVED), expect_clean=True)
 
 # --------------------------------------------------------------------------
 # 5b. DM-10 scope: an incremental run blames only the documents it touched
@@ -4408,6 +4440,7 @@ def main() -> int:
     run_repository_rules()
     run_approval_binding()
     run_approval_scope()
+    run_scope_key_removal()
     run_dm10_scope()
     run_prose_status_census()
     run_shallow_history()
