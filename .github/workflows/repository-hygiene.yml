@@ -91,6 +91,7 @@ jobs:
             scripts/governance/bilingual/test_bilingual_scripts.py \
             scripts/governance/evidence/test_evidence_tiering.py \
             scripts/governance/evidence/test_template_example_executable.py \
+            scripts/test_check_source_revision_pointers.py \
             scripts/test_precheck_delivery.py \
             tests/test_check_bilingual_docs_full.py \
             tests/test_policy_inheritance.py; do
