@@ -49,7 +49,7 @@ Attribution: `user-authorized operator (delegated by account owner)`, 2026-11-26
 
 ## 1. Exact baseline and source provenance
 
-- Main baseline fetched before branch creation: `92a759ec1a8c748fc4091015a3a3e8aa97ddc3e3`.
+- Main baseline fetched before branch creation: `92a759ec1a8c748fc4091015a3a3e8aa97ddc3e3`; latest main synchronization: `a7e7c64bfd6c6d709a0a7b55358f94b8535815c1`.
 - Source branch: `session-d-memory-brain-2026-11-16`, exact head `b525e1f8fee2471a131e4a38efda99804045e424`.
 - Source file: `03-memory-brain/canonical-memory-store.md`, source blob `6b37c91033fda21f072e2a3bde6f274663b1e76e`.
 - Main had no `03-memory-brain/` tree at the baseline. Existing EN mirror blob: `414fe03fd40fb8ad46061d2d8c7d29ba2667f252`; existing ZH-CN mirror blob: `34e0755a079f085df65c2a180cc59b6aaea7ea78`.

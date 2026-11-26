@@ -1,24 +1,33 @@
 manifest_version: "1.0"
 record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
 registration_stage: "STAGE_0"
-registration_status: "DRAFT_PR_OPEN_EVIDENCE_INVENTORY_OWNER_ACCEPTANCE_PENDING"
+registration_status: "MERGED_EVIDENCE_INVENTORY_OWNER_ACCEPTANCE_PENDING"
 work_item_id: "AID-2026-105"
 id_status: "PROVISIONAL"
-merge_queue_action: "RECHECK_AT_MERGE; AID-2026-105_CONFIRMED_FREE_AT_MAIN_2d52b0c8; AID-2026-106_ALLOCATED; RETAIN_105_UNLESS_COLLISION"
+merge_queue_action: "MERGED_PRIMARY_PR_1289; MERGE_COMMIT=69407c0781a00673852bc0dfbeef2b778d1d29fb; MAIN_AT_REGISTRATION_SYNC=92a759ec; ID_STATUS_PROVISIONAL; OWNER_ACCEPTANCE_PENDING"
 title: "Issue #1189 acceptance evidence inventory — attributable approval, exact-version parity and Owner/joint acceptance"
 date: "2026-11-26"
 repository:
   name: "oahcom/AiMemoryBrainArchitecture"
   baseline_branch: "main"
-  baseline_commit: "2d52b0c81dc1b779e49516fceb69d89cdc1d9c31"
-  previous_sync_base_commit: "df54ed60321e2958c50e9649963608cb3cb3f3b1"
+  baseline_commit: "92a759ec1a8c748fc4091015a3a3e8aa97ddc3e3"
+  latest_sync_parent: "44dc21a4970192118ba434801b8ca05702ac582c"
+  prior_sync_bases:
+    - "3866a121fecbbdf402d50bb0cb2de0277d0275f5"
+    - "8915b63e0c736d62e05ff02b72efc551f5a4ba83"
+    - "69407c0781a00673852bc0dfbeef2b778d1d29fb"
+    - "2d52b0c81dc1b779e49516fceb69d89cdc1d9c31"
+    - "df54ed60321e2958c50e9649963608cb3cb3f3b1"
   initial_evidence_readback_commit: "533d8646a3fb32b0a1c9d3ed40c01bce33a76b17"
+  merged_head_commit: "7459b3eff7c54405e95aab9519bff28c775e8af2"
+  merge_commit_sha: "69407c0781a00673852bc0dfbeef2b778d1d29fb"
+  required_contexts: "16/16 SUCCESS on merged_head_commit"
   implementation_branch: "docs/2026-11-26-aid-105-issue-1189-acceptance-evidence"
   carrier_pr: 1289
 identifier_allocation:
   assigned_at: "2026-11-26"
-  observed_main: "2d52b0c81dc1b779e49516fceb69d89cdc1d9c31"
-  observed_max_id: "AID-2026-106"
+  observed_main: "92a759ec1a8c748fc4091015a3a3e8aa97ddc3e3"
+  observed_max_id: "AID-2026-108"
   assigned_id: "AID-2026-105"
   renumbered_from: null
 authority:
@@ -54,7 +63,7 @@ acceptance:
   owner_acceptance_claimed: false
   joint_acceptance_claimed: false
   governance_approval_claimed: false
-  exact_head_ci: "PENDING"
+  exact_head_ci: "16/16 SUCCESS on 7459b3eff7c54405e95aab9519bff28c775e8af2"
 
 session_evidence:
   - role: PR

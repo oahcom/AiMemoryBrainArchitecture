@@ -6,7 +6,7 @@ id_status: "PROVISIONAL"
 title: "Restricted recovery of the D canonical-memory-store source root"
 repository: "oahcom/AiMemoryBrainArchitecture"
 base_branch: "main"
-base_commit_sha: "92a759ec1a8c748fc4091015a3a3e8aa97ddc3e3"
+base_commit_sha: "a7e7c64bfd6c6d709a0a7b55358f94b8535815c1"
 branch: "docs/2026-11-26-aid-2026-109-d-memory-brain-root-restore"
 pull_request: "PENDING"
 attribution:
