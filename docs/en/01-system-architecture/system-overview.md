@@ -1,9 +1,60 @@
+---
+document_metadata:
+  domain: architecture
+  role: guide
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      evidence_reference: []
+    evidence_verification:
+      verification_status: Unverified
+      last_verification_note: "Classified Informative because the existing EN/ZH guides explicitly state they are explanatory and do not replace Owner specifications or ADRs. Owner-authorized source/mirror topology for AID-2026-11-26-GOV-DOC-01; not a formal approval record. Pre-metadata content blob: c372dc0f8a725ccfd972887c6c8631542c94665d. Approval remains Draft; evidence verification remains Unverified."
+    usage_status: Active
+    modification_status: Modified
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "System architecture overview guide"
+    canonical_scope_id: architecture/system-overview-guide
+    canonical_scope_keywords:
+      - system-overview
+      - architecture-guide
+      - logical-components
+    canonical_conflict_status: None
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "01-system-architecture/system-overview.md"
+    en: null
+    zh-CN: "docs/zh-CN/01-system-architecture/system-overview.md"
+---
 # AI Memory Brain — System Architecture Overview
 
 - Document ID: DOC-SYS-001
 - Version: 1.0
 - Chinese counterpart: [系统架构总览](../../zh-CN/01-system-architecture/system-overview.md)
 - Status: Explanatory architecture guide; does not replace Owner specifications or ADRs
+
+## Canonical-source structure mapping (explanatory mirror)
+
+This document is an explanatory guide, not a section-by-section replacement for the canonical source at `01-system-architecture/system-overview.md`. Its nine-section reader-oriented structure intentionally regroups the source's twelve sections. This mapping records the editorial difference; the canonical source remains authoritative for complete wording and semantics.
+
+| Canonical source section | Coverage in this explanatory guide |
+|---|---|
+| 1. Product definition | 1. The project in one sentence |
+| 2. Goals | 1. The project in one sentence; 5. Three primary workflows |
+| 3. Non-goals | 2. What does the Brain own—and what does it not own? |
+| 4. Logical architecture | 3. System at a glance; 4. The six major parts; 7. A–I architecture ownership |
+| 5. Logical data paths | 3. System at a glance; 5. Three primary workflows |
+| 6. Memory and context separation | 6. Five distinctions that must remain clear |
+| 7. Observation and activation model | 4.3. Memory Runtime; 5.2. From memory to inference context |
+| 8. Context application boundary | 4.4. Memory Context; 4.5. BMCP and Agent Adapter |
+| 9. Isolation model | 2. What does the Brain own—and what does it not own?; 4.6. Security & Governance |
+| 10. Deployment and implementation neutrality | 3. System at a glance; 8. Current architecture status |
+| 11. Primary quality attributes | 8. Current architecture status |
+| 12. Open architecture questions | 8. Current architecture status |
+
+The regrouping is editorial only. It does not remove, narrow, or replace any canonical-source decision, candidate, validation item, or open question. Where this guide is shorter, consult the canonical source.
 
 ## 1. The project in one sentence
 
@@ -16,7 +67,7 @@ The central goal is continuity: Agents, models, sessions, and execution environm
 ### The Brain owns
 - Receiving memory sources such as conversations, observations, documents, and events.
 - Organizing sources into structured memories while preserving evidence and provenance.
-- Managing memory identity, versions, relationships, conflicts, lifecycle, and forgetting.
+- Managing canonical Memory identity, versions, relationships, conflicts, lifecycle and Forget Fence mechanics (Owner D); global authorization, retention/legal-hold, external-copy policy, target inventory and completion criteria belong to Owner I.
 - Retrieving and activating relevant memories according to task and environment.
 - Managing its dedicated Memory Context: add, update, remove, reorder, compact, and version changes.
 - Recording whether an Adapter applied a context version at the agreed inference boundary.
@@ -64,7 +115,9 @@ The diagram shows logical relationships. It does not mean every box must become 
 ## 4. The six major parts
 
 ### 4.1 Memory Brain — canonical memory authority
-It owns authoritative memory assets and their versions, identities, evidence, provenance, relationships, and lifecycle. It answers: What is this memory? Where did it come from? Which version is current? What evidence supports or contradicts it? Does it conflict with other memories? Is it still valid, and should it be archived or forgotten?
+Owner D owns canonical Memory identity, versions, evidence/provenance links, relationships, lifecycle, canonical Forget mechanics and Forget Fence. Owner I owns global authorization, retention/legal-hold, external-copy policy, the global Forget target inventory and global completion criteria. The Memory Brain logical area aggregates these responsibilities without transferring either Owner's authority. Global Forget Completion is jointly determined by Owner D and every relevant execution Owner under a completion-evidence contract accepted by those Owners; neither D nor I may declare it unilaterally. The contract remains pending the relevant Owners' acceptance. It answers: What is this memory? Where did it come from? Which version is current? What evidence supports or contradicts it? Does it conflict with other memories? Is it still valid, and should it be archived or forgotten?
+
+Global Forget Completion is jointly determined by Owner D and every relevant execution Owner, based on a completion-evidence contract jointly accepted by those Owners. Neither D nor I may declare global completion unilaterally. The contract remains pending the relevant Owners' acceptance; this direction is not evidence of that acceptance.
 
 ### 4.2 Memory Compiler — turning experience into memory
 It receives raw events and content, then validates, extracts, normalizes, resolves entities, links evidence, handles conflicts, and consolidates candidate memories.
@@ -168,12 +221,12 @@ Global Forget Completion Decision
 | A — Principal Integration | System integration, cross-module conflict resolution, final architecture decisions |
 | B — Domain Model | Domain objects, identity semantics, canonical model |
 | C — Agent Integration | Agent Adapter, inference boundary, final-request evidence |
-| D — Memory Brain | Canonical Memory, versions, lifecycle, Forget Fence |
+| D — Memory Brain | Canonical Memory identity, versions, lifecycle, canonical Forget mechanics and Forget Fence; D-domain completion predicate |
 | E — Memory Compiler | Ingestion, extraction, normalization, evidence, derivative production |
 | F — Memory Runtime | Retrieval, activation, working sets, cache |
 | G — Memory Context | Context Version, ChangeSet, Delivery intent |
 | H — BMCP Protocol | Protocol envelope, messages, versions, acknowledgement semantics |
-| I — Security & Governance | Identity trust, authorization, retention, Forget governance, global completion evidence |
+| I — Security & Governance | Global authorization, retention/legal-hold, external-copy policy, global target inventory and global completion criteria; policy/evidence requirements for joint completion |
 
 Cross-module collaboration does not transfer domain authority. Storage/Consistency provides durable transaction execution; it does not replace domain owners' authority over semantics.
 

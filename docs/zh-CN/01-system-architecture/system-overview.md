@@ -1,9 +1,60 @@
+---
+document_metadata:
+  domain: architecture
+  role: guide
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      evidence_reference: []
+    evidence_verification:
+      verification_status: Unverified
+      last_verification_note: "Classified Informative because the existing EN/ZH guides explicitly state they are explanatory and do not replace Owner specifications or ADRs. Owner-authorized source/mirror topology for AID-2026-11-26-GOV-DOC-01; not a formal approval record. Pre-metadata content blob: ed071263a18962ecc1d6265f2b10e883815f829d. Approval remains Draft; evidence verification remains Unverified."
+    usage_status: Active
+    modification_status: Modified
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "System architecture overview guide"
+    canonical_scope_id: architecture/system-overview-guide
+    canonical_scope_keywords:
+      - system-overview
+      - architecture-guide
+      - logical-components
+    canonical_conflict_status: None
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "01-system-architecture/system-overview.md"
+    en: "docs/en/01-system-architecture/system-overview.md"
+    zh-CN: null
+---
 # AI Memory Brain 系统架构总览
 
 - 文档 ID：DOC-SYS-001
 - 版本：1.0
 - 对应英文：[System Architecture Overview](../../en/01-system-architecture/system-overview.md)
 - 状态：架构解释文档；不替代 Owner 规范和 ADR
+
+## 规范原文结构映射（解释性镜像）
+
+本文件是解释性指南，并非规范原文 `01-system-architecture/system-overview.md` 的逐节替代。本指南为便于阅读，有意将原文十二个章节重新组织为九个章节。下表记录这一编辑结构差异；完整措辞和语义仍以规范原文为准。
+
+| 规范原文章节 | 本解释性指南中的对应内容 |
+|---|---|
+| 1. Product definition（产品定义） | 1. 一句话理解项目 |
+| 2. Goals（目标） | 1. 一句话理解项目；5. 三条主要工作流 |
+| 3. Non-goals（非目标） | 2. Brain 负责什么？不负责什么？ |
+| 4. Logical architecture（逻辑架构） | 3. 系统全景；4. 六个关键部分；7. A–I 架构责任 |
+| 5. Logical data paths（逻辑数据路径） | 3. 系统全景；5. 三条主要工作流 |
+| 6. Memory and context separation（Memory 与 Context 分离） | 6. 五组必须区分的概念 |
+| 7. Observation and activation model（观察与激活模型） | 4.3. Memory Runtime；5.2. 从记忆到推理上下文 |
+| 8. Context application boundary（Context 应用边界） | 4.4. Memory Context；4.5. BMCP 与 Agent Adapter |
+| 9. Isolation model（隔离模型） | 2. Brain 负责什么？不负责什么？；4.6. Security & Governance |
+| 10. Deployment and implementation neutrality（部署与实现中立性） | 3. 系统全景；8. 当前架构状态 |
+| 11. Primary quality attributes（主要质量属性） | 8. 当前架构状态 |
+| 12. Open architecture questions（开放架构问题） | 8. 当前架构状态 |
+
+这种重新组织仅属于编辑结构差异，不会删除、缩小或替代规范原文中的任何决策、候选项、待验证事项或开放问题。本指南内容较简略之处，请以规范原文为准。
 
 ## 1. 一句话理解项目
 
@@ -64,7 +115,9 @@ flowchart TB
 ## 4. 六个关键部分
 
 ### 4.1 Memory Brain：权威记忆
-保存系统管理的记忆资产及其版本、身份、证据、来源、关系和生命周期。它回答：这条记忆是什么、来自哪里、当前版本是什么、有什么证据、是否冲突、是否仍有效、是否应归档或遗忘？
+保存系统管理的记忆资产及其版本、身份、证据、来源、关系和生命周期。Owner D 负责 Canonical Memory 身份/生命周期、Forget Fence 与 Canonical Forget 机制及 D 域完成判定；Owner I 负责全局授权、Retention/Legal Hold、外部副本策略、全局目标清单和全局完成标准。它回答：这条记忆是什么、来自哪里、当前版本是什么、有什么证据、是否冲突、是否仍有效、是否应归档或遗忘？
+
+Global Forget Completion 必须由 Owner D 与每一位相关执行 Owner 基于这些 Owner 共同接受的完成证据契约联合判定。D 或 I 均不得单方面宣称全局完成。该契约仍待相关 Owner 接受；本方向决策不构成接受证据。
 
 ### 4.2 Memory Compiler：把经历整理成记忆
 接收原始事件和内容，执行校验、提取、规范化、实体解析、证据关联、冲突处理和巩固。
@@ -168,12 +221,12 @@ Global Forget Completion Decision
 | A — Principal Integration | 全系统集成、跨模块冲突协调和最终架构裁决 |
 | B — Domain Model | 领域对象、身份语义和规范模型 |
 | C — Agent Integration | Agent Adapter、推理边界和最终请求证据 |
-| D — Memory Brain | Canonical Memory、版本、生命周期和 Forget Fence |
+| D — Memory Brain | Canonical Memory 身份、版本、生命周期、Canonical Forget 机制与 Forget Fence；D 域完成判定 |
 | E — Memory Compiler | 接收、提取、规范化、证据和派生物生产 |
 | F — Memory Runtime | 检索、激活、工作集和缓存 |
 | G — Memory Context | Context Version、ChangeSet、Delivery 意图 |
 | H — BMCP Protocol | 协议 Envelope、消息、版本和 ACK 语义 |
-| I — Security & Governance | 身份信任、授权、保留、Forget 治理和全局完成证据 |
+| I — Security & Governance | 全局授权、Retention/Legal Hold、外部副本策略、全局目标清单和全局完成标准；组织联合完成所需的策略/证据要求 |
 
 跨模块协作不改变领域 Owner 的权威。Storage/Consistency 提供真实持久化和事务执行能力，也不能替代领域 Owner 对语义的决定。
 

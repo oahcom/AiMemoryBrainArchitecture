@@ -4,7 +4,7 @@ document_metadata:
   role: normative-standard
   lifecycle:
     approval:
-      decision_status: Approved
+      decision_status: Under-Review
       approver: NOT_RECORDED
       decision_date: NOT_RECORDED
       approved_version:
@@ -14,7 +14,7 @@ document_metadata:
         type: Full-document
         included_sections: []
         included_assets: []
-      approval_applicability: Applicable-To-Current-Version
+      approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "00-governance/architecture-invariants.md"
       revocation: null
@@ -23,7 +23,7 @@ document_metadata:
       last_verified_date: null
       last_verification_note: "Usual role: constraints every subsystem specification must obey"
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Pending-Reapproval
     supersession:
       supersedes: []
       supersession_reason: null
@@ -37,7 +37,7 @@ document_metadata:
     # claim canonical authority; see bilingual_counterpart below.
     canonical_status: Non-Canonical
     canonical_scope: "Architecture: system invariants"
-    canonical_scope_id: null
+    canonical_scope_id: "architecture/system-invariants"
     canonical_scope_keywords:
       - invariant
       - constraint
@@ -56,9 +56,9 @@ document_metadata:
 - Version: 1.1
 - Source: [Normative source specification](../../../00-governance/architecture-invariants.md)
 - Chinese counterpart: [架构不变量](../../zh-CN/00-governance/architecture-invariants.md)
-- Status: DECIDED baseline
+- Status: CANDIDATE / Pending-Reapproval — current version NOT APPROVED; I-01 through I-24 have no new formal approval.
 
-These invariants are normative constraints for all subsystem specifications and future implementations.
+These invariants are proposed constraints for all subsystem specifications and future implementations, subject to separate formal approval.
 
 | ID | Invariant |
 |---|---|
@@ -87,7 +87,9 @@ These invariants are normative constraints for all subsystem specifications and 
 | I-23 | Every architecture design or semantic architecture change must include Chinese and English documentation in the same change set, subject only to the governed temporary exception in GOV-DOC-001. |
 | I-24 | Architecture documentation acceptance requires bilingual semantic parity, stable-identifier parity, matching decision status, and traceable source revisions. |
 
-## AID-2026-014 Claim/Fact semantic invariants
+## Supplemental mirror-only section — AID-2026-014 Claim/Fact semantic invariants
+
+This section is retained as existing supplemental content in this language mirror. It has no corresponding section in the current canonical source `00-governance/architecture-invariants.md`, and therefore is not part of the canonical invariant set by virtue of appearing here. It does not amend or replace the source. Whether to promote these statements into the canonical source is a decision reserved for the relevant content Owner.
 
 - Claim and Fact are independent canonical objects.
 - Claim identity is stable across proposition-preserving revisions.
@@ -101,5 +103,7 @@ These invariants are normative constraints for all subsystem specifications and 
 ## Enforcement expectation
 
 Each subsystem specification must identify which invariants it enforces, which it relies on, and how violations are detected and handled. An implementation review must not waive an invariant implicitly; a change requires an explicit architecture decision record and impact analysis.
+
+## Bilingual documentation enforcement
 
 All architecture Owners must comply with [GOV-DOC-001 Bilingual Architecture Documentation Policy](../../../00-governance/bilingual-documentation-policy.md). A temporary STALE exception must be explicit, time-bounded, and tracked.
