@@ -250,8 +250,8 @@ Brain 不是：
 | 外部接收方删除 | Owner I 拥有外部副本策略和全局目标清单 | 每个接收方对自身删除/合规状态负责；D 只记录源 Canonical Forget 状态 | 每个外部接收方或其授权操作者 | 接收方特定的认证完成证据；D Fence 或本地删除 Receipt 不能替代接收方完成证明 |
 | Global Forget Completion 判定 | Owner I 负责全局策略和评估协调；不得因此产生单方完成权 | D 与每个相关执行 Owner 按所有受影响 Owner 接受的契约提供联合证据 | 每个相关存储、子系统和外部接收方执行者 | 所有目标清单条目完成核对，并按联合契约接受证据；D 和 I 均不得单方面宣称完成 |
 
-**追溯规则。** 每项新增或发生实质变化的治理操作都 MUST 独立填写上述三类权威。若某个角色尚未分配，必须记录为 `NOT_ASSIGNED` 并保持操作开放；不得从策略 Owner 或实际执行某一步的组件推断缺失角色。本表是文档层基线，不是自动检查。自动完整性和镜像一致性检查由 AID-2026-081 / Issue #1237 单独跟踪，本 PR 不声称该检查已经存在。
+**追溯规则。** 每项新增或发生实质变化的治理操作都 MUST 独立填写上述三类权威。若某个角色尚未分配，必须记录为 `NOT_ASSIGNED` 并保持操作开放；不得从策略 Owner 或实际执行某一步的组件推断缺失角色。本表是文档层基线，不是自动检查。自动完整性和镜像一致性检查由 Issue #1237 单独跟踪，本 PR 不声称该检查已经存在。
 
-## 8. Forget Fence 权威边界——2026-11-26
+## 14. Forget Fence 权威边界——2026-11-26
 
 D 的规范契约 [01-system-architecture/forget-fence-and-completion-contract.md](forget-fence-and-completion-contract.md) 是 ForgetOperation 及 ForgetFence Target/Lineage 决策的唯一逻辑权威。Storage/Consistency 可以持久化并从物理层保护该权威，但 Storage 本地 Memory/Version Fence 只能是派生、可重建的投影；MUST NOT 签发独立 Generation/Cursor，也不得成为竞争性的决策源。无法建立当前 D 权威状态时，受影响读取和发布必须 Fail-closed。本地抑制不等于 Global Forget Completion。本段记录方向决策；精确版本 Owner 验收和实现证据仍待完成。

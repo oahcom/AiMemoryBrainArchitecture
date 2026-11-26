@@ -26,8 +26,19 @@ prompt_id: AID-2026-083-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-092/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 9be8aebf7d595f81cc062e5c03a67fd8317aeefaf69dd635fd9031f112dc25d1
-prompt_bytes: 2455
+prompt_sha256: a459d7e523fbba4ffb8c0f6ade8d3d8c1ec6ce45b95c3f48f65b192c0413edb3
+prompt_bytes: 3772
+prompt_digest_correction: >-
+  The digest recorded at registration was 9be8aebf7d595f81cc062e5c03a67fd8317aeefaf69dd635fd9031f112dc25d1
+  at 2455 bytes. It matched no version of prompt-v1.md at any commit reachable from any ref:
+  enumerating every distinct blob at this path and at AID-2026-083/prompt-v1.md across
+  `git rev-list --all` returns exactly four (7689, 3772, 2915 and 4137 bytes), none of them 2455.
+  The pair was present from cac933cb, the commit that created this manifest, in which the file it
+  pins is already 3772 bytes. This is not the AID-2026-047 shape, where the declared digest
+  described a real earlier revision reproducible by substituting the pre-renumbering identifier;
+  here there is no such revision. Corrected by AID-2026-102, which records the prior value rather
+  than relying on the diff. prompt_id is deliberately still AID-2026-083-PROMPT: the work item was
+  renumbered at merge and the pinned bytes are the executed input, which is not rewritten.
 prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST; snapshot assembled from the assigned scope, no independent source verification claimed
 
 authorization:
