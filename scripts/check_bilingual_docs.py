@@ -595,14 +595,37 @@ BASELINE_COPIES: tuple[tuple[str, str, str], ...] = (
 BASELINE_COPY_MAX_BYTES = 1_500_000
 
 
+def _display_path(path: Path) -> str:
+    """Repository-relative name for a message; the path itself when it is outside ROOT.
+
+    Fixture tests replace ROOT with a temporary directory while the module
+    constants keep pointing at this checkout, so a message must never raise
+    merely because the two disagree.
+    """
+    try:
+        return path.relative_to(ROOT).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
 def _copy_location(relative: str) -> Path:
-    """Resolve one declared copy, honouring the module constants under test."""
-    for candidate in (CI_BASELINE_PATH, BASELINE_PATH):
+    """Resolve one declared copy, honouring the module constants under test.
+
+    A fixture may replace ROOT with a temporary directory and leave the two
+    baseline constants pointing at this checkout; the constants still name the
+    declared copies, so they are matched by suffix before the ROOT-relative
+    fallback is tried.
+    """
+    candidates = (CI_BASELINE_PATH, BASELINE_PATH)
+    for candidate in candidates:
         try:
             if candidate.relative_to(ROOT).as_posix() == relative:
                 return candidate
         except ValueError:
             continue
+    for candidate in candidates:
+        if "/" + relative in candidate.as_posix():
+            return candidate
     return ROOT / relative
 
 
@@ -688,9 +711,9 @@ def check_baseline_copies_agree() -> list[str]:
     if authority is None:
         return [
             "Required bilingual ratchet baseline is missing: "
-            f"{CI_BASELINE_PATH.relative_to(ROOT)}"
+            f"{_display_path(CI_BASELINE_PATH)}"
         ]
-    authority_label = CI_BASELINE_PATH.relative_to(ROOT).as_posix()
+    authority_label = _display_path(CI_BASELINE_PATH)
 
     errors: list[str] = []
     declared = {relative for relative, _role, _reason in BASELINE_COPIES}
