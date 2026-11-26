@@ -61,7 +61,7 @@ scope:
     - DM-10 stale-approval semantics (only the read path is changed)
 carrier:
   branch: fix/2026-11-27-git-decode-locale
-  pull_request: null
+  pull_request: 1354
   draft: false
   merge_authorization: >-
     Only after all 16 required contexts succeed on the exact final PR head,
