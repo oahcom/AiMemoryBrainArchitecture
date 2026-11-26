@@ -47,7 +47,7 @@ document_metadata:
 - Role: DOCUMENTATION_AUTHOR
 - Date: 2026-11-26
 - Repository baseline: main df54ed60321e2958c50e9649963608cb3cb3f3b1
-- Executed prompt snapshot: 14-ai-development/work-items/AID-2026-108/prompt-v1.md
+- Executed prompt snapshot: 14-ai-development/work-items/AID-2026-108/prompt-v1.txt
 - Executed prompt SHA-256: 3fad628a1257cb1d68d705f99265100ca39c1ae8dbd1723ac85c7d3f2a967c95
 - Executed prompt bytes: 2209
 - Implementing AI session identifier: NOT_RECORDED (not exposed in this execution context)
@@ -93,4 +93,18 @@ DOCUMENTATION_AUTHOR — record a historical-baseline correction and make the sp
 
 ## AI-visible output
 
-The assistant created Draft PR #1292 on branch docs/2026-11-26-aid-2026-108-baseline-correction, added the correction record in three language locations, updated the specified AID-2026-099 manifest and H contract dependency paragraph, registered AID-2026-108 in INDEX, and posted the requested factual comment on Issue #1211. The assistant explicitly withheld merge because the first CI run reported failures in Session Evidence and GOV-DOC-002; those failures are being corrected and no merge has been performed.
+The following are actual outputs created in this session.
+
+### Issue #1211 comment posted
+
+> AID-2026-098 was merged by PR #1283 as merge commit cdba0b7360b81ba2693c57f0d89ad2e28832272c. The Storage Physical Consistency Contract is now present in all three locations: 10-storage-consistency/storage-physical-consistency-contract.md; docs/en/10-storage-consistency/storage-physical-consistency-contract.md; docs/zh-CN/10-storage-consistency/storage-physical-consistency-contract.md.
+>
+> The contract records 18 checkpoints: 10 DOCUMENTED_ONLY and 8 EVIDENCE_REQUIRED. The H contract's Storage mapping can now be checked against the actual candidate contract rather than an unavailable-source placeholder.
+>
+> This does not establish implementation evidence. HIR-06's dependency reference remains valid, but implementation evidence for HIR-06, HIR-16, HIR-17 and HIR-18 is still missing. The eight evidence-required Storage checkpoints remain not evidenced. No acceptance or production conformance is implied. Issue #1211 remains open.
+
+### Draft PR created
+
+PR #1292: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1292
+
+The PR is still Draft. No merge has been performed. The first CI attempt failed on a missing Related issue(s) field and two mirror self-references; those findings are being corrected before another CI evaluation.

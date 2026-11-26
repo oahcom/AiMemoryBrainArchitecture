@@ -30,8 +30,15 @@ scope:
   zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-108/correction-record.md"
   work_item_manifest: "14-ai-development/work-items/AID-2026-108/manifest.yaml"
   issues: ["#1211"]
-  prompt: "14-ai-development/work-items/AID-2026-108/prompt-v1.md"
+  prompt: "14-ai-development/work-items/AID-2026-108/prompt-v1.txt"
   session_evidence: "14-ai-development/work-items/AID-2026-108/session-evidence.md"
+  files_to_create:
+    - "14-ai-development/work-items/AID-2026-108/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-108/correction-record.md"
+    - "14-ai-development/work-items/AID-2026-108/prompt-v1.txt"
+    - "14-ai-development/work-items/AID-2026-108/session-evidence.md"
+    - "docs/en/14-ai-development/work-items/AID-2026-108/correction-record.md"
+    - "docs/zh-CN/14-ai-development/work-items/AID-2026-108/correction-record.md"
   files_to_modify:
     - "14-ai-development/work-items/AID-2026-099/manifest.yaml"
     - "08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md"
