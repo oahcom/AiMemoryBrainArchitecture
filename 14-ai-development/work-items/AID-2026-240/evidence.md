@@ -17,7 +17,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-27"
-      last_verification_note: "Every number below was produced by running the files in this worktree at base a66bc2aa321c86987c88a98c62c4c74e447db50f: the inventory was enumerated by importing the checker and reading each candidate file, the comparator was run before and after the widening, and both unit-test suites and the ratchet were executed locally. No CI result, merge SHA or post-merge blob is claimed."
+      last_verification_note: "Every number below was produced by running the files in this worktree at base 951051313b6cac60b1a3acb069e08de6c5e796c0: the inventory was enumerated by importing the checker and reading each candidate file, the comparator was run before and after the widening, and both unit-test suites and the ratchet were executed locally. No CI result, merge SHA or post-merge blob is claimed."
     usage_status: Active
     modification_status: Modified
     supersession:

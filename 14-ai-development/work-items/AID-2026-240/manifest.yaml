@@ -23,12 +23,12 @@ attribution: user-authorized operator (delegated by account owner)
 date: 2026-11-27
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: a66bc2aa321c86987c88a98c62c4c74e447db50f
+base_commit_sha: 951051313b6cac60b1a3acb069e08de6c5e796c0
 prompt_status: NOT_RECORDED
 prompt_provenance: DISPATCHED_TASK_FILE
 identifier_allocation:
   id_status: PROVISIONAL
-  observed_main: a66bc2aa321c86987c88a98c62c4c74e447db50f
+  observed_main: 951051313b6cac60b1a3acb069e08de6c5e796c0
   assigned_id: AID-2026-240
   allocation_rule: >-
     This branch was allocated three numbers while it stayed open, because parallel

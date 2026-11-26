@@ -17,7 +17,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-27"
-      last_verification_note: "本文所有数字均由本 worktree 在基线 a66bc2aa321c86987c88a98c62c4c74e447db50f 上实跑得出：清单通过导入检查器并逐个读取候选文件枚举，比较器在扩围前后各跑一次，两套单元测试与棘轮均在本地执行。不声称任何 CI 结果、合并 SHA 或合并后 blob。"
+      last_verification_note: "本文所有数字均由本 worktree 在基线 951051313b6cac60b1a3acb069e08de6c5e796c0 上实跑得出：清单通过导入检查器并逐个读取候选文件枚举，比较器在扩围前后各跑一次，两套单元测试与棘轮均在本地执行。不声称任何 CI 结果、合并 SHA 或合并后 blob。"
     usage_status: Active
     modification_status: Modified
     supersession:
