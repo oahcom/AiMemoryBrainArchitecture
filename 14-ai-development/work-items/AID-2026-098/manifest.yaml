@@ -33,6 +33,7 @@ scope:
   registration_files:
     - "14-ai-development/work-items/AID-2026-098/manifest.yaml"
     - "14-ai-development/work-items/AID-2026-098/evidence.md"
+    - "00-governance/document-scope-registry.yaml"
     - "14-ai-development/work-items/INDEX.md"
   in_scope:
     - "Atomic write sets and physical linearization points"
