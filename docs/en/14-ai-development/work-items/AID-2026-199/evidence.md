@@ -166,9 +166,9 @@ work-item count moves every time another work item lands on main and an invarian
 | Quantity | Before | After |
 |---|---|---|
 | `check_repository_hygiene.py` version | `2026-11-27.1` | `2026-11-27.2` |
-| `Work-item index membership ... directories= / linked=` | equal sides, exit 0 (110 / 110 at `9dc98a52`) | equal sides, exit 0 (114 / 114 at `3b2cd3e1`, exactly one directory and one row more than the merged main carries) |
-| `check_declared_check_contexts.py` | 16 declared, 16 produced, exit 0 | 16 declared, 16 produced, exit 0 |
-| `check_test_reachability.py` | 0 unreachable; 18 gate scripts, 3 unwired, 3 baselined (66 test files at `9dc98a52`) | identical invariant: 0 unreachable, 18 / 3 / 3 (66 test files at `3b2cd3e1`) |
+| `Work-item index membership ... directories= / linked=` | equal sides, exit 0 (110 / 110 at `9dc98a52`) | equal sides, exit 0, and exactly one directory and one row more than the main merged in: 114 / 114 at `3b2cd3e1`, 115 / 115 at `980e54d9` |
+| `check_declared_check_contexts.py` | 16 declared, 16 produced, exit 0 | 16 declared, 16 produced, exit 0, at both merges |
+| `check_test_reachability.py` | 0 unreachable; 18 gate scripts, 3 unwired, 3 baselined (66 test files at `9dc98a52`) | identical invariant: 0 unreachable, 18 / 3 / 3, 66 test files at `3b2cd3e1` and `980e54d9` |
 | `scripts/test_check_repository_hygiene.py` | Ran 101, OK (skipped=1) | Ran 103, OK (skipped=1) |
 | `scripts/ci/test_check_test_reachability.py` | Ran 24, OK | Ran 27, OK |
 | `scripts/test_check_declared_check_contexts.py` | Ran 13, OK | Ran 16, OK |

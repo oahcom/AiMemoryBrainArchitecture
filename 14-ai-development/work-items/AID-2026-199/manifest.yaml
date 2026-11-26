@@ -89,7 +89,7 @@ evidence:
     - docs/en/14-ai-development/work-items/AID-2026-199/evidence.md
     - docs/zh-CN/14-ai-development/work-items/AID-2026-199/evidence.md
   measured_at: 2f4f4118bd2c2d8e43a23975f667deeb06553f3c
-  measured_at_note: "Defect measurements (sections 2-4) at 2f4f4118; suite counts at 9dc98a52; final gate counts at 3b2cd3e1, the merge of main 76684cb2 into this branch"
+  measured_at_note: "Defect measurements (sections 2-4) at 2f4f4118; suite counts at 9dc98a52; gate counts at each merge, named by SHA (3b2cd3e1 over main 76684cb2, 980e54d9 over main 980e54d9)"
   measurements:
     index_membership_no_directories_before: "returns [] -> checker exit 0"
     index_membership_no_directories_after: "RuntimeError -> checker exit 2"
@@ -102,7 +102,7 @@ evidence:
     reachability_commented_test_name_before: "exit 0 (silent pass)"
     reachability_commented_test_name_after: "exit 1, pkg/test_x.py named"
     declared_contexts_before_after: "16 declared / 16 produced, unchanged"
-    index_membership_counts_before_after: "both sides equal and exit 0: 110 / 110 at main 9dc98a52, 114 / 114 at 3b2cd3e1 with this work item, which adds exactly one directory and one row over the merged main"
+    index_membership_counts_before_after: "both sides equal and exit 0 in every run, with exactly one directory and one row more than the main merged in: 110 / 110 at main 9dc98a52, 114 / 114 at 3b2cd3e1, 115 / 115 at 980e54d9"
     reachability_totals_before_after: "0 unreachable on both sides; 18 gate scripts / 3 unwired / 3 baselined on both sides; 66 test files at both 9dc98a52 and 3b2cd3e1"
     checker_version_before: "2026-11-27.1 (the unqualified-run contract change, already on main)"
     checker_version_after: "2026-11-27.2 (this rule change)"
@@ -117,7 +117,7 @@ evidence:
     - command: (cd scripts && python -m unittest test_check_declared_check_contexts)
       result: "Ran 16 tests / OK / exit 0"
     - command: python scripts/ci/check_repository_hygiene.py --head-tree-only
-      result: "directories=114 linked=114 with this work item (113 / 113 on the merged main, 110 / 110 at 9dc98a52); exit 0; new-file admission reported SKIPPED, as the 2026-11-27.1 contract requires"
+      result: "directories=115 linked=115 with this work item (114 / 114 on main 980e54d9, 113 / 113 on main 76684cb2); exit 0; new-file admission reported SKIPPED, as the 2026-11-27.1 contract requires"
     - command: python scripts/ci/check_test_reachability.py
       result: "66 test files / 66 reachable / exit 0"
     - command: python -c "... check_declared_check_contexts.main(root, declared_contexts(...))"

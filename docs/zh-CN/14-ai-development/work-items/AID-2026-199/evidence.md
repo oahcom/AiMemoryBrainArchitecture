@@ -139,9 +139,9 @@ Rule B 拿测试的路径、文件名、stem 或点分模块名去匹配拼接�
 | 指标 | 改前 | 改后 |
 |---|---|---|
 | `check_repository_hygiene.py` 版本 | `2026-11-27.1` | `2026-11-27.2` |
-| `Work-item index membership ... directories= / linked=` | 两侧相等，exit 0（`9dc98a52` 上为 110 / 110） | 两侧相等，exit 0（`3b2cd3e1` 上为 114 / 114，恰比并入的 main 多一个目录与一行） |
-| `check_declared_check_contexts.py` | 16 declared、16 produced，exit 0 | 16 declared、16 produced，exit 0 |
-| `check_test_reachability.py` | 0 不可达；18 个 gate 脚本、3 未接线、3 已 baseline（`9dc98a52` 上 66 个测试文件） | 同一不变量：0 不可达、18 / 3 / 3（`3b2cd3e1` 上 66 个测试文件） |
+| `Work-item index membership ... directories= / linked=` | 两侧相等，exit 0（`9dc98a52` 上为 110 / 110） | 两侧相等，exit 0，且恰比并入的 main 多一个目录与一行：`3b2cd3e1` 上 114 / 114，`980e54d9` 上 115 / 115 |
+| `check_declared_check_contexts.py` | 16 declared、16 produced，exit 0 | 两次合并上均为 16 declared、16 produced，exit 0 |
+| `check_test_reachability.py` | 0 不可达；18 个 gate 脚本、3 未接线、3 已 baseline（`9dc98a52` 上 66 个测试文件） | 同一不变量：0 不可达、18 / 3 / 3，`3b2cd3e1` 与 `980e54d9` 上均为 66 个测试文件 |
 | `scripts/test_check_repository_hygiene.py` | Ran 101，OK（skipped=1） | Ran 103，OK（skipped=1） |
 | `scripts/ci/test_check_test_reachability.py` | Ran 24，OK | Ran 27，OK |
 | `scripts/test_check_declared_check_contexts.py` | Ran 13，OK | Ran 16，OK |
