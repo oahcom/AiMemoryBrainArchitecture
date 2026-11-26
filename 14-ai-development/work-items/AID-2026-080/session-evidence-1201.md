@@ -186,6 +186,33 @@ annotation names AID-2026-080:
   `7e9c9f3d` (satisfied afterwards at `fa6e227b`, 16 of 16 contexts green, `mergeable: True`), and
   the absence of a round-4 record (`REVIEW-04-INDEPENDENT.md`, plus the manifest and INDEX
   projections beside it).
+  Round 5 (`NEEDS REVISION`, Head `a37cd5bb`, PR #1266) closed both of round 4's items on content
+  and, more usefully, corrected two things I had wrong. It checked `32f87d46` — the Head #1240
+  actually merged at — and found 16 successful check runs there; my record had stopped at
+  `fa6e227b`, the Head I pushed the repair to, so a stronger statement was available and I had not
+  made it. It rejected the base: `a37cd5bb`'s second parent is `d5107f68` while `main` had advanced
+  to `baca092b`, 20 commits further, and that increment modifies `INDEX.md`, which this PR also
+  modifies — the section 6.1.3 revalidation-after-base-update condition, which green checks on the
+  old combination do not satisfy. And it caught a wrong number in my own review request: I had given
+  `31385bc1` as "`origin/main` at this Head", but it is an ancestor of `d5107f68` by 21 commits — it
+  was `main` when the branch was cut, not when the branch was read. Round 5 used the commit graph
+  instead of my table, which is why it found what I had not.
+  Round 5 also corrected F3's reasoning without changing its conclusion. I had written that `DM-10`
+  is the only rule constraining `modification_status` and that the policy constrains it nowhere
+  else. The normative requirement is Rule L1 (stale approval, policy `:160` EN / `:162` ZH);
+  `DM-10` is its machine check. The conclusion stands because L1 does not fire on a `Draft` with
+  `approved_version.value: null` — there is no approved version to go stale — but the description
+  of the rule's source was wrong and is now corrected in `review.round_4.non_blocking_checked`.
+  Round 5 declined to rely on the repository-wide `modification_status` counts because it had not
+  reproduced them, which is the right handling of a number it could not verify. Re-measured at
+  `6c5f0230`: 339 documents carry the field, 169 `Draft` say `Unchanged`, 136 say `Modified`. The
+  drift across `main` advances is the reason those counts carry no weight in the conclusion.
+- **Round 5 separates three conclusions that had been running together.** Round 4's two open items
+  are closed on content. F3 is answered, and the correction was to a description rather than to a
+  field value. And AID-2026-080 cannot be marked compliant: both pre-merge exact-Head deviations are
+  historical facts, and no later action satisfies a requirement that applied at merge time. The
+  honest closeout is `MERGED` with both deviations preserved. `MERGED` is not `COMPLIANT`, and it is
+  not Owner acceptance — `acceptance.status` stays `NOT_ASSIGNED`, separate from merge state.
 - **The pre-merge exact-Head review requirement was not met for either PR, and that is a
   deviation rather than an incident.** #1215 merged at `f7bc0789` after round 3 had reviewed
   `489b6048`; #1240 merged at `32f87d46` after round 4 had reviewed `7e9c9f3d`. The pattern is

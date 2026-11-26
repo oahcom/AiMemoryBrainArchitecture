@@ -99,6 +99,7 @@ scope:
     - 14-ai-development/work-items/AID-2026-080/REVIEW-AMENDMENT.md
     - 14-ai-development/work-items/AID-2026-080/REVIEW-03-INDEPENDENT.md
     - 14-ai-development/work-items/AID-2026-080/REVIEW-04-INDEPENDENT.md
+    - 14-ai-development/work-items/AID-2026-080/REVIEW-05-INDEPENDENT.md
   files_to_modify:
     - 14-ai-development/PR-GOVERNANCE-001.md
     - 14-ai-development/work-items/AID-2026-071/manifest.yaml
@@ -280,10 +281,11 @@ implementation:
     is left alone rather than force-pushed after merge.
 
 review:
-  status: "ROUND_4_NEEDS_REVISION - round 4 closed five of round 3's six findings and reproduced the measurements; its two open items are the exact-Head checks and the recording of round 4 itself"
+  status: "ROUND_5_NEEDS_REVISION - round 5 closed round 4's two open items on content and corrected two of my errors (a stale base, and an overstated description of the rule behind modification_status); its blocking item was a stale base, since resolved by merging main"
   record_ref: 14-ai-development/work-items/AID-2026-080/REVIEW-01-INDEPENDENT.md
   round_3_record_ref: 14-ai-development/work-items/AID-2026-080/REVIEW-03-INDEPENDENT.md
   round_4_record_ref: 14-ai-development/work-items/AID-2026-080/REVIEW-04-INDEPENDENT.md
+  round_5_record_ref: 14-ai-development/work-items/AID-2026-080/REVIEW-05-INDEPENDENT.md
   round_1:
     exact_head_reviewed: a538dbf289cb21fc04a03fb412c90482619187bc
     reviewer_session: 6b07448b-ac9c-83ec-9115-f056a313f972
@@ -386,7 +388,35 @@ review:
       What would remove it is a merge performed at the reviewed Head or a review performed at the
       Head that merges; neither happened here.
     non_blocking_checked:
-      - "F3 (`modification_status` on two edited drafts): checked, not silently left. `DM-10` is the only rule that constrains this field, and it fires only when `decision_status: Approved` and the body differs from `approved_version`; both files are `Draft` with `approved_version.value: null`, so no rule requires a change. The policy constrains the field nowhere else, the schema only enumerates it, and the template ships `Unchanged`. Repository-wide the field is not a change marker: at `origin/main`, 294 documents carry it, and among `Draft` documents 149 say `Unchanged` while 112 say `Modified`, so both are live conventions and neither is an error. `Unchanged` is kept and this note is the reason, rather than a field flip that would assert a meaning no rule defines."
+      - "F3 (`modification_status` on two edited drafts): checked, not silently left. Round 5 corrected this note's first version, which said `DM-10` is the only rule constraining the field and that the policy constrains it nowhere else; that was wrong. The normative requirement is Rule L1 (stale approval, policy :160 EN / :162 ZH): when content inside `approval_scope` changes after `approved_version`, `modification_status` MUST become `Pending-Reapproval` and `approval_applicability` MUST become `Not-Applicable-To-Current-Version`. `DM-10` (`scripts/check_document_management.py`) is the machine check for that rule, not the rule's source. The conclusion is unchanged because L1's trigger is not met: both files are `decision_status: Draft` with `approved_version.value: null`, so there is no approved version to go stale, and L1 says nothing about a draft edited after its last saved state. The policy also does not state anywhere that a body edit alone forces `Modified`; the schema only enumerates the four values and the template ships `Unchanged`. The repository-wide counts first written here (294 documents carrying the field, 149 `Draft` saying `Unchanged`, 112 saying `Modified`) were measured against a `main` that has since moved, were not independently reproduced by round 5, and are therefore not relied on. Re-measured at `6c5f0230` for the record: 339 documents carry the field, of which 169 `Draft` say `Unchanged` and 136 say `Modified` — both remain live conventions, and the number drifts as `main` advances, which is why it carries no weight in the conclusion. `Unchanged` is kept, and the reason is that L1 does not fire, rather than a field flip asserting a meaning no rule defines."
+  round_5:
+    exact_head_reviewed: a37cd5bb95bd26a50752231e5dbc1dc71168e884
+    pull_request: "#1266"
+    reviewer_session: 6b07448b-ac9c-83ec-9115-f056a313f972
+    verdict: NEEDS REVISION
+    blocking_items: 2
+    closed_from_round_4:
+      - "F1 (zero check runs on the reviewed Head, not mergeable): CLOSED, and strengthened. Round 5 checked `32f87d46`, the Head PR #1240 actually merged at, and found 16 successful check runs there. My record had stopped at `fa6e227b`, the Head the repair was pushed to; the stronger statement was available and had not been made."
+      - "F2 (no round-4 record): CLOSED. `REVIEW-04-INDEPENDENT.md` and `review.round_4` are the record."
+    blocking_at_verdict:
+      - "B1 (stale base): `a37cd5bb` is a merge commit whose second parent is `d5107f68`; `main` had advanced to `baca092b`, 20 commits further, and that increment modifies `INDEX.md`, which this PR also modifies. `mergeable: true` with `mergeable_state: behind` is the state section 6.1.3 says must be revalidated after a base update, and green checks on the old combination do not stand in for it."
+      - "B2 (overstated rule source): `review.round_4.non_blocking_checked` said `DM-10` is the only rule constraining `modification_status` and that the policy constrains the field nowhere else. Rule L1 (stale approval, policy :160 EN / :162 ZH) is the normative requirement; `DM-10` is its machine check. The conclusion was right, the description of its source was not."
+    errors_of_mine_this_round:
+      - "The review request named `31385bc1` as 'origin/main at this Head'. Verified false: `31385bc1` is an ancestor of `d5107f68`, 21 commits back. It was `main` when the branch was cut, not when the branch was read. The reviewer used the commit graph instead of my table, which is why it was caught."
+      - "The F3 note described `DM-10` as the rule rather than as the check for Rule L1."
+    disposition: >-
+      B1 is repaired by merging `origin/main` (`6c5f0230`) into the branch and re-running the local
+      gates and the required checks on the resulting Head, which is what section 6.1.3 asks for. B2
+      is repaired in `review.round_4.non_blocking_checked`, which now names L1 as the requirement and
+      `DM-10` as its check, keeps the conclusion, and states that the repository-wide counts are not
+      relied on. Neither repair is represented as round 5 having reviewed the repaired tree: round 5
+      read `a37cd5bb`.
+    compliance_separation:
+      - "Round 4's two open items are closed on content."
+      - "F3 is answered: no rule requires the two `Draft` files to say `Modified`; the correction was to the description of the rule's source, not to the field values."
+      - "AID-2026-080 cannot be marked compliant. Both pre-merge exact-Head deviations are historical facts and no later action satisfies a requirement that applied at merge time. `MERGED` is not `COMPLIANT`, and neither is Owner acceptance; `acceptance.status: NOT_ASSIGNED` stays separate from merge state."
+    non_blocking_checked:
+      - "Round 5 declined to rely on the 294 / 149 / 112 counts because it did not reproduce them, which is the correct handling of a number it could not verify. Re-measured here at `6c5f0230`: 339 documents carry the field, 169 `Draft` say `Unchanged`, 136 say `Modified`. The drift is the point; the counts carry no weight in the conclusion."
   note: >-
     Section 9 requires an exact-Head governance review for changes to this standard, and section
     5's closing sentence says this paragraph is exemptible only by an exception record that names
