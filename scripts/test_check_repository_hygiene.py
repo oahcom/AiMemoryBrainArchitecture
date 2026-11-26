@@ -29,7 +29,8 @@ def git(repo, *args):
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         check=True,
-        text=True,
+        encoding="utf-8",
+        errors="replace",
     ).stdout.strip()
 
 

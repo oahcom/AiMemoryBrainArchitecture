@@ -1,0 +1,88 @@
+work_item_id: AID-2026-190
+title: Decode Git output as UTF-8 in every gate that reads it, so an unreadable pin is INCOMPLETE instead of "the file did not exist"
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  Encoding and error classification only. No gate condition, threshold, baseline
+  entry or document rule changes: on a UTF-8 locale (CI) every verdict is what it
+  already was, and on a GBK console the nine false DM-10 "did not exist" verdicts
+  disappear. A read that cannot be decoded now stops the run as INCOMPLETE (2)
+  instead of becoming a content finding (1) or a crash.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 4326669caa6c43193d34219a0451b80762b712ff
+prompt_id: AID-2026-190-PROMPT
+prompt_status: NOT_RECORDED
+prompt_provenance: DISPATCHED_TASK_FILE
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-190/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-190/evidence.md
+    - 14-ai-development/work-items/AID-2026-190/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-190/session-evidence.md
+    - docs/en/14-ai-development/work-items/AID-2026-190/evidence.md
+    - docs/zh-CN/14-ai-development/work-items/AID-2026-190/evidence.md
+  files_to_modify:
+    - scripts/check_bilingual_docs.py
+    - scripts/check_bilingual_docs_full.py
+    - scripts/check_document_management.py
+    - scripts/check_fmt.py
+    - scripts/check_policy_inheritance.py
+    - scripts/check_source_revision_pointers.py
+    - scripts/check_traceability.py
+    - scripts/ci/check_branch_freshness.py
+    - scripts/governance/bilingual/check-bilingual-tiering.sh
+    - scripts/governance/evidence/check-evidence-tiering.py
+    - scripts/governance/status_migration/check_status_gates.py
+    - scripts/governance/status_migration/PR272-evidence-hardening.sha256
+    - scripts/test_check_bilingual_docs.py
+    - scripts/test_check_document_management.py
+    - scripts/test_check_fmt.py
+    - scripts/test_check_line_endings.py
+    - scripts/test_check_repository_hygiene.py
+    - scripts/test_check_traceability.py
+    - scripts/ci/test_check_branch_freshness.py
+    - scripts/governance/bilingual/test_bilingual_scripts.py
+    - scripts/governance/evidence/test_gate_normative_roots.py
+    - scripts/governance/status_migration/test_status_migration.py
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope:
+    - any gate's pass condition, threshold or baseline content
+    - .github/workflows (no job, step or required context changed)
+    - branch protection settings
+    - current_bilingual_gaps() semantics
+    - DM-10 stale-approval semantics (only the read path is changed)
+carrier:
+  branch: fix/2026-11-27-git-decode-locale
+  pull_request: null
+  draft: false
+  merge_authorization: >-
+    Only after all 16 required contexts succeed on the exact final PR head,
+    branch freshness is rechecked, and any conflicts are resolved.
+review:
+  status: NOT_ASSIGNED
+  independent_reviewer: NOT_ASSIGNED
+  natural_person_owner_acceptance: NOT_RECORDED
+acceptance:
+  gate: PENDING_CI
+# prompt_status above records the prompt *library* registration, which is
+# NOT_RECORDED. The dispatched task text itself was captured by the operator and
+# is pinned below so the digest is verifiable rather than asserted.
+session_evidence:
+  - role: "Locale-independent decoding of Git output in the gates that read it"
+    issue_refs:
+      - "#266"
+    implementing_ai_session: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-190/prompt-v1.md"
+    executed_prompt_sha256: "cd8251437464303511c9e74255d6403ea9e14da169907d6d3f4a4521c0f3507b"
+    executed_prompt_bytes: 2975
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-190/session-evidence.md"

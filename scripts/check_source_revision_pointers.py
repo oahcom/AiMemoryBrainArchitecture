@@ -30,7 +30,8 @@ def git_blob(path: str) -> str | None:
     result = subprocess.run(
         ["git", "rev-parse", f"HEAD:{path}"],
         cwd=ROOT,
-        text=True,
+        encoding="utf-8",
+        errors="replace",
         capture_output=True,
         check=False,
     )

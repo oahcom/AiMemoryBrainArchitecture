@@ -87,7 +87,8 @@ class GateRootsTest(unittest.TestCase):
         import subprocess
 
         run = lambda *args: subprocess.run(
-            args, cwd=self.root, check=True, capture_output=True, text=True
+            args, cwd=self.root, check=True, capture_output=True,
+            encoding="utf-8", errors="replace",
         )
         run("git", "init", "-q")
         run("git", "config", "user.email", "tests@example.invalid")
@@ -248,7 +249,8 @@ class GateRootsTest(unittest.TestCase):
             cwd=self.gate.ROOT,
             check=True,
             capture_output=True,
-            text=True,
+            encoding="utf-8",
+            errors="replace",
         )
 
     def test_all_21_embedded_provenance_pairs_match_full_history_snapshot(self):
@@ -361,7 +363,8 @@ class GateRootsTest(unittest.TestCase):
         repo = Path(self._tmp.name) / "paired-move-repo"
         repo.mkdir()
         run = lambda *a: subprocess.run(
-            a, cwd=repo, check=True, capture_output=True, text=True
+            a, cwd=repo, check=True, capture_output=True,
+            encoding="utf-8", errors="replace",
         )
         run("git", "init", "-q")
         run("git", "config", "user.email", "t@example.invalid")
@@ -437,7 +440,8 @@ class GateRootsTest(unittest.TestCase):
         repo = Path(self._tmp.name) / "repo"
         repo.mkdir()
         run = lambda *a: subprocess.run(a, cwd=repo, check=True,
-                                        capture_output=True, text=True)
+                                        capture_output=True,
+                                        encoding="utf-8", errors="replace")
         run("git", "init", "-q")
         run("git", "config", "user.email", "t@example.invalid")
         run("git", "config", "user.name", "t")
@@ -477,7 +481,7 @@ class GateRootsTest(unittest.TestCase):
         import subprocess
         result = subprocess.run(
             ["git", *args], cwd=repo, check=True,
-            capture_output=True, text=True,
+            capture_output=True, encoding="utf-8", errors="replace",
         )
         return result.stdout.strip()
 

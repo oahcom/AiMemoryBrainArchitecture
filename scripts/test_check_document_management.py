@@ -881,7 +881,11 @@ def run_repository_rules() -> None:
 
 def _git(root: Path, *args: str) -> str:
     out = subprocess.run(
-        ["git", "-C", str(root), *args], capture_output=True, text=True, check=True
+        ["git", "-C", str(root), *args],
+        capture_output=True,
+        encoding="utf-8",
+        errors="replace",
+        check=True,
     )
     return out.stdout.strip()
 
@@ -942,6 +946,81 @@ def run_approval_binding() -> None:
         moving = honest.replace(f'"{sha}"', '"main"')
         target.write_text(moving, encoding="utf-8")
         expect_gate("T11 mutable ref as approved_version fails", root, 1)
+
+
+# --------------------------------------------------------------------------
+# 5d. Git output decoding: locale-independent, and never a content verdict
+# --------------------------------------------------------------------------
+
+def run_git_decode_locale() -> None:
+    """T95: an undecodable read is INCOMPLETE, never "the file was absent".
+
+    Measured on a GBK console: `subprocess(text=True)` decoded git's stdout with
+    the console codec, a UTF-8 document raised UnicodeDecodeError in the reader
+    thread, `stdout` arrived as None, and DM-10 reported nine documents as
+    "did not exist at approved_version" while `git cat-file -e` says every one
+    of them exists at its pin. A decode failure and a real absence must not
+    share a message, and neither may become a crash.
+    """
+    print("git output decoding (T95, locale-independent)")
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        target = root / "00-governance" / "a.md"
+        # Git stores these bytes happily; no UTF-8 reader can decode them.
+        target.write_bytes(b"---\ndocument_metadata:\n\xff\xfe not utf-8\n---\n")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "approved version with non-UTF-8 bytes")
+        pinned = _git(root, "rev-parse", "HEAD")
+
+        target.write_text(
+            doc(APPROVED.replace('"deadbeef"', f'"{pinned}"')), encoding="utf-8"
+        )
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "record approval")
+
+        stdout, stderr = io.StringIO(), io.StringIO()
+        with redirect_stdout(stdout), redirect_stderr(stderr):
+            code = run_gate(root)
+        output = stdout.getvalue() + stderr.getvalue()
+        record(
+            "T95a an undecodable approved version is INCOMPLETE (exit 2)",
+            code == 2,
+            f"  gate returned {code}, expected 2; output {output[-600:]!r}",
+        )
+        record(
+            "T95a a decode failure is named, and absence is not asserted",
+            "decode" in output and "did not exist" not in output,
+            f"  output {output[-600:]!r}",
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "seed without the governed file")
+        before = _git(root, "rev-parse", "HEAD")
+        (root / "00-governance" / "a.md").write_text(
+            doc(APPROVED.replace('"deadbeef"', f'"{before}"')), encoding="utf-8"
+        )
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "record approval")
+        # The counterfactual: the message T95a removes must still exist for the
+        # case where it is true, or the guard became a blanket silence.
+        expect_gate(
+            "T95b a pin that genuinely lacks the file still says it did not exist",
+            root,
+            1,
+            msg=(
+                "00-governance/a.md: DM-10 00-governance/a.md did not exist at "
+                f"approved_version {before[:12]}"
+            ),
+        )
 
 
 # --------------------------------------------------------------------------
@@ -4439,6 +4518,7 @@ def main() -> int:
     run_resolver()
     run_repository_rules()
     run_approval_binding()
+    run_git_decode_locale()
     run_approval_scope()
     run_scope_key_removal()
     run_dm10_scope()
