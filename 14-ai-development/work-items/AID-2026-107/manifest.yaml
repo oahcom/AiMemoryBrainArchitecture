@@ -170,7 +170,7 @@ session_evidence:
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-107/prompt-v2.md
     executed_prompt_sha256: 382758b4d19178a29fbb110090c0a7b48f60ab7f04c619164da73e48f1fa718d
     executed_prompt_bytes: 2066
-    executed_prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
+    executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-107/evidence.md
 
