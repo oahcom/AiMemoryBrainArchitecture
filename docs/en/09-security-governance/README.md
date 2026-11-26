@@ -12,12 +12,11 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "AID-2026-109 bounded I root recovery"
-        - "main base a7e7c64bfd6c6d709a0a7b55358f94b8535815c1"
+        - "AID-2026-109 bounded I governance root; main base a7e7c64bfd6c6d709a0a7b55358f94b8535815c1"
       revocation: null
     evidence_verification:
       verification_status: Unverified
-      last_verified_date: null
+      last_verified_date: "2026-11-26"
       last_verification_note: "Informative root only; no I Owner acceptance or production conformance asserted."
     usage_status: Active
     modification_status: Modified
@@ -30,8 +29,8 @@ document_metadata:
       archival_reason: null
       archival_reference: null
   authority:
-    canonical_status: Canonical
-    canonical_scope: "Informative I security-governance root, acceptance authority and bounded recovery scope"
+    canonical_status: Non-Canonical
+    canonical_scope: "Language mirror of the informative I security-governance root"
     canonical_scope_id: "security-governance/root-index"
     canonical_scope_keywords:
       - security-governance
@@ -42,7 +41,8 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    en: "docs/en/09-security-governance/README.md"
+    source: "09-security-governance/README.md"
+    en: null
     zh-CN: "docs/zh-CN/09-security-governance/README.md"
 ---
 # Security, Identity & Governance

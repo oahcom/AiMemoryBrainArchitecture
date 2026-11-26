@@ -1,7 +1,7 @@
 ---
 document_metadata:
   domain: security-governance
-  role: architecture-guide
+  role: guide
   lifecycle:
     approval:
       decision_status: Draft
@@ -12,14 +12,14 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "RECONSTRUCTED_FROM_MIRROR: docs/en/09-security-governance/security-governance-guide.md @ 061c5847b3df879eeaf3c71e5eae0bfa162b276a"
-        - "Existing ZH-CN mirror: docs/zh-CN/09-security-governance/security-governance-guide.md @ 372d27c79dc79d09bcdb0f142c979efdba1c2b6e"
-        - "AID-2026-109: canonical root reconstructed because source branch contains no guide blob"
+        - "AID-2026-109 guide reconstruction and mirror metadata"
+        - "EN mirror original blob 061c5847b3df879eeaf3c71e5eae0bfa162b276a"
+        - "ZH-CN mirror original blob 372d27c79dc79d09bcdb0f142c979efdba1c2b6e"
       revocation: null
     evidence_verification:
       verification_status: Unverified
-      last_verified_date: null
-      last_verification_note: "Canonical body copied byte-for-byte from existing EN mirror; existing EN/ZH-CN mirrors unchanged. No I Owner acceptance or normative promotion asserted."
+      last_verified_date: "2026-11-26"
+      last_verification_note: "Canonical body copied byte-for-byte from the original EN mirror. Source branch has no canonical guide at this path. No I Owner acceptance asserted."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -43,12 +43,9 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
+    source: null
     en: "docs/en/09-security-governance/security-governance-guide.md"
     zh-CN: "docs/zh-CN/09-security-governance/security-governance-guide.md"
-  provenance:
-    classification: RECONSTRUCTED_FROM_MIRROR
-    source_branch: "session-i-security-governance-2026-11-16 @ 8abddf814467b271344a9814613a6b7ca6a446c6"
-    source_branch_guide: NOT_FOUND
 ---
 # Security, Identity & Governance — Architecture Guide
 

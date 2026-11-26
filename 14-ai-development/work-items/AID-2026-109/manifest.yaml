@@ -29,13 +29,13 @@ scope:
     - 14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md
     - docs/en/14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md
     - docs/zh-CN/14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md
-    - scripts/check_bilingual_docs.py (NORMATIVE_ROOTS membership only; pairing/checker logic unchanged)
     - 14-ai-development/work-items/AID-2026-109/manifest.yaml
     - 14-ai-development/work-items/AID-2026-109/prompt-v1.md
     - 14-ai-development/work-items/AID-2026-109/session-evidence.md
   modified:
     - docs/en/09-security-governance/security-governance-guide.md (GOV-DOC-002 frontmatter only; body preserved)
     - docs/zh-CN/09-security-governance/security-governance-guide.md (GOV-DOC-002 frontmatter only; body preserved)
+    - 00-governance/document-scope-registry.yaml (register 09-security-governance as governed)
     - scripts/check_bilingual_docs.py (add 09-security-governance to NORMATIVE_ROOTS; pairing rules and checker logic unchanged)
     - 14-ai-development/work-items/INDEX.md
   not_restored_by_decision:

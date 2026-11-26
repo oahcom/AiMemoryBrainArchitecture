@@ -1,7 +1,7 @@
 ---
 document_metadata:
   domain: security-governance
-  role: architecture-guide
+  role: guide
   lifecycle:
     approval:
       decision_status: Draft
@@ -12,13 +12,14 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "Existing main mirror original blob 372d27c79dc79d09bcdb0f142c979efdba1c2b6e"
-        - "AID-2026-109 adds GOV-DOC-002 metadata only; body text preserved"
+        - "AID-2026-109 guide reconstruction and mirror metadata"
+        - "EN mirror original blob 061c5847b3df879eeaf3c71e5eae0bfa162b276a"
+        - "ZH-CN mirror original blob 372d27c79dc79d09bcdb0f142c979efdba1c2b6e"
       revocation: null
     evidence_verification:
       verification_status: Unverified
       last_verified_date: "2026-11-26"
-      last_verification_note: "Existing mirror body preserved byte-for-byte; only GOV-DOC-002 metadata added. Candidate guide; no I Owner acceptance asserted."
+      last_verification_note: "Existing ZH-CN mirror body preserved byte-for-byte; GOV-DOC-002 frontmatter added. No I Owner acceptance asserted."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -31,16 +32,20 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: null
-    canonical_scope_id: null
-    canonical_scope_keywords: []
+    canonical_scope: "Language mirror of the informative I Security, Identity and Governance architecture guide"
+    canonical_scope_id: "security-governance/architecture-guide"
+    canonical_scope_keywords:
+      - security-governance
+      - identity
+      - authorization
+      - forget
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: null
+    source: "09-security-governance/security-governance-guide.md"
     en: "docs/en/09-security-governance/security-governance-guide.md"
-    zh-CN: "docs/zh-CN/09-security-governance/security-governance-guide.md"
+    zh-CN: null
 ---
 # 安全、身份与治理架构指南
 

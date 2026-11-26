@@ -1,7 +1,7 @@
 ---
 document_metadata:
   domain: ai-development
-  role: work-item-evidence
+  role: work-record
   lifecycle:
     approval:
       decision_status: Draft
@@ -12,12 +12,12 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "AID-2026-109 bounded I root recovery"
+        - "AID-2026-109 bounded I root recovery evidence"
         - "main base a7e7c64bfd6c6d709a0a7b55358f94b8535815c1"
       revocation: null
     evidence_verification:
       verification_status: Unverified
-      last_verified_date: null
+      last_verified_date: "2026-11-26"
       last_verification_note: "Source branch, mirrors and dispositions recorded; no I policy acceptance inferred."
     usage_status: Active
     modification_status: Modified
@@ -42,6 +42,7 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
+    source: null
     en: "docs/en/14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md"
     zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md"
 ---
