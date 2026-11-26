@@ -80,6 +80,22 @@ class GovernanceTraceabilityTests(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertTrue(any("collapses an authority role" in item for item in errors))
 
+    def test_policy_and_canonical_authority_cannot_be_collapsed(self):
+        rows = list(ROWS)
+        rows[0] = (rows[0][0], "Owner I", "Owner I", rows[0][3], rows[0][4])
+        (self.root / FILES[0]).write_text(document(FILES[0], rows), encoding="utf-8")
+        code, errors = self.run_check()
+        self.assertEqual(code, 1)
+        self.assertTrue(any("collapses policy and canonical-state authority" in item for item in errors))
+
+    def test_unassigned_prose_is_reported_as_open(self):
+        rows = list(ROWS)
+        rows[4] = (rows[4][0], rows[4][1], "Backup catalog Owner is not assigned", rows[4][3], rows[4][4])
+        (self.root / FILES[0]).write_text(document(FILES[0], rows), encoding="utf-8")
+        code, errors = self.run_check()
+        self.assertEqual(code, 1)
+        self.assertTrue(any("unassigned; operation remains open" in item for item in errors))
+
     def test_missing_mirror_fails_incomplete(self):
         (self.root / FILES[2]).unlink()
         code, errors = self.run_check()
