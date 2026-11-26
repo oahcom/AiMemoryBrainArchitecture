@@ -15,9 +15,9 @@ document_metadata:
         - "14-ai-development/work-items/AID-2026-115/manifest.yaml"
       revocation: null
     evidence_verification:
-      verification_status: Unverified
+      verification_status: Verified
       last_verified_date: "2026-11-26"
-      last_verification_note: "Exact-Head CI, merge and post-merge blob readback remain pending."
+      last_verification_note: "16/16 exact-head required contexts succeeded; 15/15 post-merge blob SHAs match the merged PR head; cache hit rate remains pending next CI cycle."
     usage_status: Active
     modification_status: Unchanged
     supersession:
@@ -108,6 +108,57 @@ Baseline was 113s with duplicate dispatch and 57s for the first-pass 16-context 
 ## PR declaration formatting
 
 The PR description's `Work Item ID` field is the standalone value `AID-2026-115`; the provisional status is in a separate section. The per-Issue mapping for historical Issue #1212 is `LEGACY_UNDECLARED` / `N/A`. This matches the Session Evidence validator's field and legacy-issue contract; no validator semantics were changed.
+
+## Post-merge verification
+
+- Implementation PR: [#1322](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1322)
+- Merge commit: `ac301e09799bcc094e015db4e12d2e6ff53d5010`
+- Merged PR head: `eaf381a9af28ebf86e7ee094f60adaaacc0d97ca`
+- Exact-head required checks: **16/16 SUCCESS**, one check-run per required context.
+- Post-merge main blob readback: **15/15 paths match** the PR-head blob SHA.
+- Issue #1212 comment: `7194114609`; Issue remains OPEN.
+- Cache hit rate: **NOT YET MEASURED**; observe the next CI cycle.
+
+### Required contexts
+
+| Required context | Conclusion |
+|---|---|
+| Rust format (hard gate) | SUCCESS |
+| Schema non-empty audit (hard gate) | SUCCESS |
+| BMCP protocol index (hard gate) | SUCCESS |
+| Rust doctests (hard gate) | SUCCESS |
+| Bilingual docs coverage (ratchet) | SUCCESS |
+| BMCP conformance suite (hard gate) | SUCCESS |
+| Rust clippy (hard gate) | SUCCESS |
+| Branch freshness vs base | SUCCESS |
+| Session Evidence | SUCCESS |
+| rust-workspace-test | SUCCESS |
+| Session Evidence self-test (head) | SUCCESS |
+| GOV-DOC-002 metadata checks | SUCCESS |
+| GOV-DOC-001 structural checks | SUCCESS |
+| Repository hygiene (hard gate) | SUCCESS |
+| Session Evidence self-test (base) | SUCCESS |
+| audit | SUCCESS |
+
+### Post-merge blob readback
+
+| Path | Main blob SHA |
+|---|---|
+| `.github/workflows/bilingual-docs.yml` | `48c3c88b3899cdf7e10a41d2dac24f8dd820b9e0` |
+| `.github/workflows/branch-freshness.yml` | `811370424c7f8d3738a8eaba8f0fd7adfe4f49a8` |
+| `.github/workflows/document-management.yml` | `4d49e5d0cd87a395e3f948130be6fe35ce982266` |
+| `.github/workflows/gates.yml` | `5844f50c14c63d82864a31503961273cc65a9c77` |
+| `.github/workflows/repository-hygiene.yml` | `a11d2a06ac5c23d5f2e51c3a5efb3b0e29c3513b` |
+| `.github/workflows/runner-admission-policy.yml` | `82938387a6c1c3acbecd193a70747af50690a731` |
+| `.github/workflows/rust-phase1.yml` | `0674e5c40ae4fb0e7fe9df92f6a0504ffbdd3ee0` |
+| `.github/workflows/session-evidence.yml` | `8fe7dfa2b02d200f273d8bba6be542cf02d9686c` |
+| `14-ai-development/work-items/INDEX.md` | `54134d33919f0c26b7a3ab66f488847a376ede00` |
+| `14-ai-development/work-items/AID-2026-115/manifest.yaml` | `6f7cba141f644cad8bbaeb0445430ea976563dd8` |
+| `14-ai-development/work-items/AID-2026-115/prompt-v1.md` | `15f98b3702f5b3e69337c98f3ca5dd55c1357ed2` |
+| `14-ai-development/work-items/AID-2026-115/session-evidence.md` | `8ecc2a8cf69a82a941ce56737134a34b425697da` |
+| `14-ai-development/work-items/AID-2026-115/gate-performance-and-rust-cache-evidence.md` | `9b4dbadc0a9f61ec0b8be5ff274f42a7549fc781` |
+| `docs/en/14-ai-development/work-items/AID-2026-115/gate-performance-and-rust-cache-evidence.md` | `ad350a1e087ca3e85bee1bcdb63a6f655e35e657` |
+| `docs/zh-CN/14-ai-development/work-items/AID-2026-115/gate-performance-and-rust-cache-evidence.md` | `009ec330f4a4d8fc8fb8f57d4094bdc562bb5dcb` |
 
 ## Verification ledger
 
