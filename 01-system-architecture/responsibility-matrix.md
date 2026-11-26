@@ -1,6 +1,37 @@
+---
+document_metadata:
+  domain: architecture
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      evidence_reference: []
+    evidence_verification:
+      verification_status: Unverified
+      last_verification_note: "Owner-authorized classification direction for AID-2026-11-26-GOV-DOC-01; not a formal approval record. Pre-metadata content blob: a4f1fa23933bce7da463c5c04eb4b59eb48c7bea. Approval remains Draft; evidence verification remains Unverified."
+    usage_status: Active
+    modification_status: Modified
+  authority:
+    canonical_status: Canonical
+    canonical_scope: "Subsystem responsibility matrix"
+    canonical_scope_id: architecture/subsystem-responsibility-matrix
+    canonical_scope_keywords:
+      - primary-owner
+      - supporting-owner
+      - responsibility
+      - capability
+    canonical_conflict_status: None
+    normative_status: Normative
+  bilingual_counterpart:
+    source: null
+    en: "docs/en/01-system-architecture/responsibility-matrix.md"
+    zh-CN: "docs/zh-CN/01-system-architecture/responsibility-matrix.md"
+---
 # Subsystem Responsibility Matrix
 
-Legend: **P** = primary owner; **S** = supporting participant; **—** = not responsible.
+Legend: **P** = primary component; **S** = supporting component; **—** = not responsible. The matrix columns are capability/component labels, not Owner A–I identities.
 
 | Capability / concern | Domain Model | Canonical Store | Lifecycle | Entity/Relation | Ingestion | Extraction | Evidence | Consolidation | Retrieval | Activation | MCM | Sync | Governance | Consistency |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -21,6 +52,29 @@ Legend: **P** = primary owner; **S** = supporting participant; **—** = not res
 | Cross-component replay, reconciliation and recovery coordination | — | S | S | S | S | S | S | S | S | S | S | S | S | P |
 | Metrics/tracing/audit correlation | — | S | S | S | S | S | S | S | S | S | S | S | S | P |
 
+## Capability-to-Owner crosswalk
+
+The capability columns above are a component taxonomy, not Owner identities. The P/S cells describe component participation only. The authoritative Owner mapping is:
+
+| Capability column | Primary Owner(s) | Supporting Owner(s) | Authority boundary |
+|---|---|---|---|
+| Domain Model | B | D, E, G | B owns domain semantics and identity meaning; persistence/lifecycle execution remains D. |
+| Canonical Store | D | B, E, F, G | D owns canonical Memory mechanics; B defines meaning; E proposes writes; F/G consume canonical state. |
+| Lifecycle | D | B, I | D owns canonical lifecycle transitions; I owns global policy constraints, authorization and retention/legal-hold policy. |
+| Entity/Relation | B | D, E | B owns identity and relation semantics; D persists canonical state; E may propose derived relations. |
+| Ingestion | E | D, I, H, C | E owns ingestion workflow; D owns canonical transaction mechanics; I authorization; H protocol; C Agent-side mapping. |
+| Extraction | E | B, D | E produces candidates; B defines domain semantics; D controls canonical acceptance. |
+| Evidence | E | B, I, D | E manages evidence/provenance production; B defines semantic references; I governs policy/authorization; D owns canonical lifecycle. |
+| Consolidation | E | B, D, I | E transforms candidates; B owns semantics; D owns canonical commit/lifecycle; I supplies policy constraints. |
+| Retrieval | F | D, B, G | F owns retrieval; D remains canonical authority; B defines semantics; G owns context boundary. |
+| Activation | F | G, C, D | F owns activation policy; G owns context version authority; C supplies Agent-boundary integration; D owns canonical state. |
+| MCM | G | F, D, C, H | G owns Memory Context semantics/version; F supplies retrieval/activation input; D canonical identity; C/H execute adapter/protocol boundaries. |
+| Sync | Joint: G (delivery intent/state), H (wire and acknowledgement semantics), C (Agent-side application) | D, F | No single Owner controls the whole path. G does not own BMCP wire semantics; H does not own context meaning; C does not choose canonical memories. |
+| Governance | I | D and every executing Owner | I owns global authorization, retention/legal hold, external-copy policy, target inventory and completion criteria; each Owner performs local enforcement; D owns canonical Forget mechanics. |
+| Consistency | Joint / contract-specific; no single primary Owner | A, B, C, D, E, F, G, H, I as applicable | Transaction, replay and recovery authority is allocated per contract. Owner A coordinates cross-owner conflicts; no blanket transfer of domain authority occurs. |
+
+Shared rows are intentionally joint; this crosswalk does not force a sole Owner where the authority is split.
+
 ## Ownership rules
 
 1. A primary owner defines the contract and state transitions for its capability.
@@ -39,3 +93,11 @@ Legend: **P** = primary owner; **S** = supporting participant; **—** = not res
 - Whether entity resolution is synchronous, asynchronous, or hybrid by event class.
 - Which consistency operations belong in a shared coordinator versus subsystem-local transactional outboxes.
 - Whether Protocol Gateway is a distinct logical subsystem or a façade over BMCP services.
+
+## Owner reference namespace and validation boundary
+
+- `P` and `S` identify primary/supporting component participation only; neither is an Owner role.
+- Capability-column names are taxonomy labels, not Owner identifiers. A capability reference does not assign accountability.
+- Formal accountability must cite `Owner A` through `Owner I` explicitly and use the Owner crosswalk above. Bare A–I letters and unqualified capability labels MUST NOT be used as Owner references.
+- Subsystem identifiers use the `SYS-*` namespace defined by the Component Map.
+- Automated detection of ambiguous references is tracked in AID-2026-081 / Issue #1237. Until its checker is merged, this is a manual documentation rule, not a claim of automated enforcement.

@@ -1,3 +1,34 @@
+---
+document_metadata:
+  domain: domain-model
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      evidence_reference: []
+    evidence_verification:
+      verification_status: Unverified
+      last_verification_note: "Owner-authorized classification direction for AID-2026-11-26-GOV-DOC-01; this is not a formal approval record. Pre-metadata content blob: 18b1234d0149ab3096093e073afc977e3f162d18. Phase 1 semantic freeze does not authorize runtime implementation or deployment. Approval remains Draft; evidence verification remains Unverified."
+    usage_status: Active
+    modification_status: Modified
+  authority:
+    canonical_status: Canonical
+    canonical_scope: "Phase 1 domain model freeze"
+    canonical_scope_id: domain-model/phase-1-domain-model-freeze
+    canonical_scope_keywords:
+      - phase-1
+      - domain-freeze
+      - domain-semantics
+      - implementation-binding
+    canonical_conflict_status: None
+    normative_status: Normative
+  bilingual_counterpart:
+    source: null
+    en: "docs/en/02-domain-model/phase-1-domain-model-freeze.md"
+    zh-CN: "docs/zh-CN/02-domain-model/phase-1-domain-model-freeze.md"
+---
 # Phase 1 Domain Model Freeze
 
 **Status:** DECIDED for Phase 1 implementation scope; global unresolved decisions remain OPEN/CANDIDATE/TO_VALIDATE as recorded by the domain-model documents.  
@@ -337,17 +368,12 @@ Phase 1 Domain Model 单元验收：
 - Physical Forget semantics：OPEN；
 - Vector/Graph technology：未进入 Phase 1。
 
-## 8. Next implementation unit
+## 8. Engineering handoff — deferred, not authorized
 
-本单元完成后，下一逻辑单元为：
+本节仅记录未来工程阶段的候选交接内容，不是当前实施指令或授权。
 
-**Rust Workspace**
-
-目标：
-
-1. 建立 Cargo workspace；
-2. 建立 `crates/memory-domain`；
-3. 将本文件冻结的核心对象转成 Rust 类型；
-4. 加入领域不变量单元测试；
-5. 不引入 Storage、SQLite、Vector DB 或模型依赖；
-6. 以本 PR 的 Domain Model 作为唯一 Phase 1 实现基线。
+- `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`（控制性实施授权边界，参见 Issue #7 与 #1197）。
+- Phase 1 的 DECIDED 仅表示本文件列明的领域语义已冻结为架构基线；不授权当前创建或扩展 Rust workspace/crate，不授权 Brain runtime、storage integration、生产实现或部署。
+- 仓库中已经存在的有限 Phase 1 Rust 类型/测试工作属于历史工作（相关有界工作见 Issue #200），不得将其解释为当前或后续工作的自动授权。
+- 未来工程阶段可重新评估 Cargo workspace、`crates/memory-domain`、Rust 类型及 DM-01..DM-10 测试；只有在工程阶段入口条件满足并取得单独、明确的 Owner 实施授权后，方可启动。
+- 本 Freeze 不冻结 crate、进程、服务或部署边界，也不构成 Storage、SQLite、Vector DB 或模型集成授权。

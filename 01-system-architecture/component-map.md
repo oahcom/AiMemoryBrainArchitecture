@@ -1,3 +1,34 @@
+---
+document_metadata:
+  domain: architecture
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      evidence_reference: []
+    evidence_verification:
+      verification_status: Unverified
+      last_verification_note: "Owner-authorized classification direction for AID-2026-11-26-GOV-DOC-01; not a formal approval record. Pre-metadata content blob: dc0226894eb056ba2f23e37a9c5ee90a7ca2c730. Approval remains Draft; evidence verification remains Unverified."
+    usage_status: Active
+    modification_status: Modified
+  authority:
+    canonical_status: Canonical
+    canonical_scope: "Logical system component map"
+    canonical_scope_id: architecture/logical-system-component-map
+    canonical_scope_keywords:
+      - subsystem
+      - owner
+      - capability
+      - component-boundary
+    canonical_conflict_status: None
+    normative_status: Normative
+  bilingual_counterpart:
+    source: null
+    en: "docs/en/01-system-architecture/component-map.md"
+    zh-CN: "docs/zh-CN/01-system-architecture/component-map.md"
+---
 # Logical System Component Map
 
 This map describes responsibility boundaries. It does not prescribe process, service, or crate boundaries.
@@ -8,7 +39,7 @@ This map describes responsibility boundaries. It does not prescribe process, ser
 
 ## Level 1 — Subsystems
 
-### A. Memory Brain — canonical memory authority
+### SYS-MEMORY-BRAIN — canonical memory authority
 
 | ID | Logical subsystem | Primary responsibility |
 |---|---|---|
@@ -17,7 +48,7 @@ This map describes responsibility boundaries. It does not prescribe process, ser
 | MB-03 | Memory Lifecycle Manager | Candidate/active/superseded/archive/retract transitions and lifecycle policy |
 | MB-04 | Entity & Relationship Manager | Entity identity, resolution, typed relations, graph consistency |
 
-### B. Memory Compiler — experience-to-memory transformation
+### SYS-MEMORY-COMPILER — experience-to-memory transformation
 
 | ID | Logical subsystem | Primary responsibility |
 |---|---|---|
@@ -26,7 +57,7 @@ This map describes responsibility boundaries. It does not prescribe process, ser
 | MC-03 | Evidence & Provenance Manager | Attach source spans, evidence, derivation lineage, and trust metadata |
 | MC-04 | Consolidation & Conflict Resolver | Deduplicate, merge, version, qualify, and preserve conflicting claims |
 
-### C. Memory Runtime — memory serving and context control
+### SYS-MEMORY-RUNTIME — memory serving and context control
 
 | ID | Logical subsystem | Primary responsibility |
 |---|---|---|
@@ -35,7 +66,7 @@ This map describes responsibility boundaries. It does not prescribe process, ser
 | MR-03 | Memory Context Manager (MCM) | Plan, edit, version, budget, and reconcile scoped memory contexts |
 | MR-04 | Context Synchronization Engine | Deliver snapshots/deltas and track adapter acknowledgements and applied versions |
 
-### D. Cross-cutting infrastructure
+### SYS-CROSS-CUTTING — cross-cutting infrastructure
 
 | ID | Logical subsystem | Primary responsibility |
 |---|---|---|
@@ -43,6 +74,19 @@ This map describes responsibility boundaries. It does not prescribe process, ser
 | XF-02 | Scope, Permission & Governance Engine | Authorization, isolation, retention, forgetting, audit policy |
 | XF-03 | Protocol Gateway & Adapter Contracts | BMCP validation, capability negotiation, telemetry and context message boundaries |
 | XF-04 | Consistency, Recovery & Observability | Idempotency, replay, reconciliation support, health, tracing, metrics, audit correlation |
+
+## Owner A–I authority crosswalk
+
+The Level-1 groups below are logical aggregations, not Owner identities and not one-to-one ownership assignments. The Owner namespace is exclusively A–I:
+
+| Logical group | Primary Owner authority | Supporting Owners | Authority boundary |
+|---|---|---|---|
+| SYS-MEMORY-BRAIN | B for domain semantics; D for canonical Memory identity, persistence/lifecycle and Forget Fence; I for global policy | E, F, G as their workflows require | Aggregate group has no single Owner. B defines domain meaning; D owns canonical mechanics; I owns authorization, retention/legal-hold, external-copy policy and global completion criteria. |
+| SYS-MEMORY-COMPILER | E | B, D, I | E owns ingestion/compilation and derivative production; B owns semantic definitions; D controls canonical acceptance/lifecycle; I controls authorization and policy. |
+| SYS-MEMORY-RUNTIME | F for retrieval/activation; G for Memory Context authority | B, D, C, H | F owns retrieval/activation; G owns context semantics/version; D remains canonical source; C applies at Agent inference boundary; H owns BMCP wire/protocol semantics. |
+| SYS-CROSS-CUTTING | I for global security/governance policy; H for BMCP protocol; C for Agent-side integration | A, B, C, D, E, F, G, H, I according to the specific contract | Storage/consistency execution is shared and contract-specific; no aggregate Owner is invented. Owner A retains cross-system integration/conflict-resolution authority. |
+
+Subsystem IDs (for example, MB-01, MC-01, MR-01, XF-01) identify logical components only. They are not Owner IDs.
 
 ## External participants
 
@@ -70,3 +114,11 @@ This map describes responsibility boundaries. It does not prescribe process, ser
 ## Architectural caution
 
 The 16 logical components above are a map of responsibilities, not a mandate to create 16 deployable units. Detailed design may merge or split implementation modules while preserving the ownership boundaries and invariants.
+
+## Owner reference namespace and citation rule
+
+- Formal accountability references use the exact form `Owner A` through `Owner I`. A bare letter (A–I) is not an Owner citation.
+- Logical subsystem references use their `SYS-*` identifier (for example, `SYS-MEMORY-COMPILER`); do not cite a subsystem by a bare letter.
+- Responsibility Matrix capability/component labels and P/S participation markers are a separate taxonomy. They do not identify an accountable Owner.
+- When a sentence needs both a subsystem and an Owner, name both explicitly (for example, “SYS-MEMORY-COMPILER; accountable Owner E”). Do not infer one from the other.
+- Automated enforcement is tracked separately by AID-2026-081 / Issue #1237. Until that check is merged, this section is the manual reference rule, not evidence that a lint gate exists.
