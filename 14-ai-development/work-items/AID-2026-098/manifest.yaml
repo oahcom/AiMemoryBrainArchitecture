@@ -70,7 +70,7 @@ acceptance:
   authority: "Storage/Consistency, D, E and G for their respective boundaries; A coordinates"
 session_evidence:
   - role: DOCUMENTATION_AUTHOR
-    issue_refs: []
+    issue_refs:
     implementing_ai_session: NOT_RECORDED
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-098/prompt-v1.md
     executed_prompt_sha256: d6eb11feefc8e33a3cd4e5fd3af1bd97d3bb32b3b482f80d19b450a8dc5814a0
