@@ -177,10 +177,11 @@ before and after.
 
 The rows above isolate the six metadata files. At the final head — which also carries this
 registration set and the `origin/main` registration merged in from the refs unit, itself numbered
-AID-2026-190 — the same gate prints **952 governed, 512 classified, 440 unclassified**: 502 from
+AID-2026-190 — the same gate prints **955 governed, 515 classified, 440 unclassified**: 502 from
 the mirror change, plus 5 governed documents added by this work item (three work-record files on
-the root side and the two evidence mirrors), plus 5 from the merge. Rule violations remain 0, the
-unclassified backlog remains 440, and the ratchet still reports
+the root side and the two evidence mirrors), plus 8 from the two merges. The absolute counts move
+with every registration another unit lands; what this work item asserts is the invariant: the
+unclassified backlog stays at 440, rule violations stay at 0, and the ratchet still reports
 `baseline=77 current=77 regressions=0 fixed=0`.
 
 ## Limits of this record
