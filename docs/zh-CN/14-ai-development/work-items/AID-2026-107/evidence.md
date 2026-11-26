@@ -241,7 +241,7 @@ H 合同位于 `08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-con
 
 8 个 HIR EVIDENCE_REQUIRED 行不能由候选 prose 满足。实现仍 NOT VERIFIED，跨 Owner 接受仍 PENDING。这是独立的 H 计数，不改变 095 矩阵的 72 个 NOT EVIDENCED 单元格。
 
-**过期 pin：** AID-099 manifest `14-ai-development/work-items/AID-2026-099/manifest.yaml` @ `d580d830114311afc10d7c82776f39e2ca1a4323` 记录 `storage_aid_2026_098_exact_pin: NOT_AVAILABLE_ON_BASELINE`，并称 AID-098 在历史基线 `d5107f68a7f1b61f5f2f7352fadf828aae06cf1c` 上不可用；H 合同 §2 也重复了该表述。这是过期的历史基线元数据，不是当前仓库缺口：AID-098 已在当前 main，候选合同 blob 已在上方固定。本刷新不改写 AID-099 历史记录。当前正确表述：“AID-2026-098 已在当前 main 可用；其合同仍为 Candidate/Draft/Unverified，不提供实现证据或跨 Owner 接受。”
+**过期 pin 的当前处理：** 用户盘点时的 AID-099 manifest 与 H 合同确有 `NOT_AVAILABLE_ON_BASELINE` 旧表述。最新 main 上 manifest blob `d580d830114311afc10d7c82776f39e2ca1a4323` 已将 `storage_aid_2026_098_exact_pin` 改为 `MERGED via PR #1283; see AID-2026-098`，并标注 `corrected_by: AID-2026-108`；H 合同 blob `f64dd8f520b98e52a7151619cb279fc0b4c38c89` §2 也明确记录 PR #1283 已合并及这是历史 baseline availability 陈述的纠正。manifest 的 `source_policy.aid_2026_098` 仍保留 baseline `d5107f68a7f1b61f5f2f7352fadf828aae06cf1c` 的历史描述，应按历史来源解释，不能当作当前不可用声明。AID-2026-108 在 INDEX 中仍为 DRAFT / PROVISIONAL；不据此推断独立接受。当前正确表述：“AID-2026-098 已经由 PR #1283 合并到 main；其 Storage 合同仍为候选文档，10 DOCUMENTED_ONLY + 8 EVIDENCE_REQUIRED，不构成实现/一致性证据；HIR-06 仍 EVIDENCE_REQUIRED。”
 
 ## 6. Gate B 处置
 
