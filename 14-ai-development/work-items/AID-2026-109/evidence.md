@@ -88,7 +88,12 @@ AID-2026-089 was merged by PR #1232 as `d914e8a1f8a1ba24c21c41a9249489d544388185
 - Canonical/EN body suffix after the conflict notice is byte-identical to the source blob. The source body Git blob SHA remains `6b37c91033fda21f072e2a3bde6f274663b1e76e`.
 - ZH-CN is a structural mirror based on the pre-existing translated mirror; headings are aligned to the 18 source sections (14 Performance, 15 Observability, 16 Failure, 17 Dependencies, 18 Open Questions) without changing the D source bytes.
 
-## 5. Scope and non-claims
+## 5. Governance scope configuration
+
+- `03-memory-brain` is added to `00-governance/document-scope-registry.yaml` as a governed root and to `scripts/check_bilingual_docs.py` `NORMATIVE_ROOTS`, as required by GOV-DOC-002 DM-14 and bilingual-root scope equality.
+- This changes only the declared scan scope; no checker algorithm or validator semantics changed. The new root contains only the recovered canonical source in this PR.
+
+## 6. Scope and non-claims
 
 Documentation and work-item registration only. No runtime, validator semantics, schema, test, workflow, 04/05 source, Storage code, or Issue state changed. No D Owner acceptance, joint acceptance, wire-schema freeze, implementation conformance, production behavior, or Gate A closure is claimed. #1212 remains OPEN. The D canonical-store root presence moves from missing to **RESTORED — CANDIDATE / INFORMATIVE**; normative approval and exact Owner acceptance remain OPEN.
 

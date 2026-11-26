@@ -27,6 +27,9 @@ scope:
     - "05-memory-runtime/**"
   evidence: "14-ai-development/work-items/AID-2026-109/evidence.md"
   exclusions: ["No runtime changes", "No validator semantic changes", "No schema/test/workflow changes", "No 04/05 changes", "No Issue closure", "No Owner acceptance fabricated"]
+  governance_scope_configuration:
+    - "00-governance/document-scope-registry.yaml: 03-memory-brain added to governed roots"
+    - "scripts/check_bilingual_docs.py: 03-memory-brain added to NORMATIVE_ROOTS; checker logic unchanged"
 source:
   branch: "session-d-memory-brain-2026-11-16"
   branch_head: "b525e1f8fee2471a131e4a38efda99804045e424"
