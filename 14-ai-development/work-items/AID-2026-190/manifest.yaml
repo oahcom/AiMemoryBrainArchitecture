@@ -1,0 +1,119 @@
+work_item_id: AID-2026-190
+title: >-
+  Classify the 07-agent-integration inference-boundary and telemetry mirror groups with GOV-DOC-002
+  metadata, and record why the remaining 07/08/13 mirrors cannot be classified without moving the
+  77-entry frozen bilingual baseline
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  Six Markdown files receive a metadata block at the top; not one body line changes (git diff
+  --numstat shows 46/45 insertions and 0 deletions per file). No checker, workflow, schema,
+  registry, baseline or branch-protection entry is touched, no canonical is created, no mirror is
+  created, and nothing under 03/04/05/09 is edited. The two documents that receive metadata on the
+  root side are classified Non-Canonical / Informative, which adds no canonical authority.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 4326669caa6c43193d34219a0451b80762b712ff
+prompt_status: NOT_RECORDED
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: 4326669caa6c43193d34219a0451b80762b712ff
+  assigned_id: AID-2026-190
+  allocation_rule: >-
+    Observed set, not INDEX maximum plus one: every AID-2026-NNN found in pull-request titles and
+    remote branch names was enumerated through the GitHub API (1,2,3,4,7,9,10,11,14,23,30,40,41,42,
+    50-58,60,62,64,66,69,72,75,77,78,80-83,89,90,92,93,95,98,100-116,140,150,172,173,174,183,186,
+    188,189), so 190 is the first number outside both observed sets.
+  recheck_rule: >-
+    Immediately before merge, re-read open pull requests and remote branches for AID-2026-190; if
+    occupied, take the next free number and update every path and reference in the same push.
+scope:
+  objective: >-
+    Give the unclassified docs/en and docs/zh-CN mirrors under 07-agent-integration,
+    08-bmcp-protocol and 13-engineering-decisions a GOV-DOC-002 metadata block where the mirror
+    group is structurally complete, and record the measured reason why the rest cannot be
+    classified in this unit.
+  changes:
+    - path: "07-agent-integration/inference-boundary-model.md"
+      detail: >-
+        Root source of a complete mirror group. Gains the metadata block only: domain
+        agent-integration, role design-specification, canonical_status Non-Canonical,
+        normative_status Informative, bilingual_counterpart listing both mirrors.
+    - path: "07-agent-integration/telemetry-model.md"
+      detail: >-
+        Same shape for the telemetry group. Both root files were unclassified before this change;
+        the 07-agent-integration bucket moves 6/8 to 8/8.
+    - path: "docs/en/07-agent-integration/inference-boundary-model.md and docs/zh-CN/07-agent-integration/inference-boundary-model.md"
+      detail: >-
+        Metadata block naming 07-agent-integration/inference-boundary-model.md as
+        bilingual_counterpart.source, plus the sibling mirror. Body bytes unchanged.
+    - path: "docs/en/07-agent-integration/telemetry-model.md and docs/zh-CN/07-agent-integration/telemetry-model.md"
+      detail: >-
+        Same shape for the telemetry group. Both docs mirrors were unclassified before; the docs
+        bucket moves 173/343 to 177/343.
+    - path: "14-ai-development/work-items/AID-2026-190/"
+      detail: >-
+        This registration set: manifest.yaml, evidence.md, prompt-v1.md, session-evidence.md.
+    - path: "docs/en/14-ai-development/work-items/AID-2026-190/evidence.md and docs/zh-CN/14-ai-development/work-items/AID-2026-190/evidence.md"
+      detail: >-
+        English and Chinese renditions of the work record, each naming the root evidence.md as its
+        bilingual_counterpart.source.
+    - path: "14-ai-development/work-items/INDEX.md"
+      detail: "One appended table row, so the registry membership check keeps 105 directories linked."
+  untouched:
+    - "the 58 frozen 13-engineering-decisions gap sources and scripts/bilingual-baseline.txt (77 entries, unchanged)"
+    - "the 16 orphan mirrors in 07/08/13, reported as ORPHAN_SKIPPED instead of classified"
+    - "00/01/02/06 (unit corpus-a) and 03/04/05/09 (out of scope for this batch)"
+    - "every checker, workflow, schema, registry and branch-protection entry"
+measurements:
+  document_management_before: "942 governed / 496 classified / 446 unclassified / 0 rule violations"
+  document_management_after: "942 governed / 502 classified / 440 unclassified / 0 rule violations"
+  buckets_after: "07-agent-integration 8/8; docs 177/343; 13-engineering-decisions 0/58"
+  bilingual_ratchet_before: "baseline=77 current=77 regressions=0 fixed=0"
+  bilingual_ratchet_after: "baseline=77 current=77 regressions=0 fixed=0"
+  bilingual_incremental_after: "PASS, 6 changed paths inspected, bilingual baseline: 77 frozen, 0 new gaps"
+  orphan_probe: >-
+    A metadata block on docs/{en,zh-CN}/08-bmcp-protocol/bmcp-guide.md produced 4 DM-12 errors
+    (source does not exist; source is not a classified governed document). Reverted, not shipped.
+  frozen_gap_probe: >-
+    A metadata block on 13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/README.md
+    made check_bilingual_docs.py FAIL with "requires all counterparts changed in this PR".
+    Reverted; the 58 stay frozen and 13-engineering-decisions stays 0/58.
+evidence:
+  record: 14-ai-development/work-items/AID-2026-190/evidence.md
+  prompt: 14-ai-development/work-items/AID-2026-190/prompt-v1.md
+  session: 14-ai-development/work-items/AID-2026-190/session-evidence.md
+non_goals:
+  - Closing any of the 58 frozen bilingual gaps or editing scripts/bilingual-baseline.txt
+  - Creating a canonical source or a mirror for any orphan pair
+  - Changing document body text, wording, tables or frontmatter of any other file
+  - Touching 00/01/02/06 or 03/04/05/09
+  - Changing any checker, workflow, schema or branch-protection entry
+  - Closing or reopening any Issue
+notes:
+  - >-
+    base_commit_sha is the branch point (4326669c). origin/main advanced to 0c752ee6 during this
+    unit (PR #1340, AID-2026-111 registration); it was merged into the branch with --no-ff before
+    the pull request, so the PR is not behind.
+  - >-
+    The two docs/en files in the changed set had the same pre-change blob id as their root source:
+    they were byte-identical copies before this change.
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#1212"
+    implementing_ai_session: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-190/prompt-v1.md"
+    executed_prompt_sha256: "b9c7940266b025691f85a098666cba9237d185b4a00da1799184f5b02fb44409"
+    executed_prompt_bytes: 8541
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-190/session-evidence.md"
