@@ -61,8 +61,8 @@ acceptance_criteria:
   - {id: HIR-18, criterion: "Replay disclosure rechecks I authorization and D Fence independently."}
 review_state:
   checkpoint_count: 18
-  documented_only: 9
-  evidence_required: 9
+  documented_only: 10
+  evidence_required: 8
   implementation: "NOT VERIFIED"
   cross_owner_acceptance: "PENDING"
   storage_aid_2026_098_exact_pin: "NOT_AVAILABLE_ON_BASELINE"
