@@ -155,7 +155,7 @@ SQLite 运行是 **Linux + bundled SQLite 本地执行**，**不是 CI**，不�
 | T20 | `payload::tests::read_after_fails_closed_on_invalid_persisted_scope_ref` | SC-02, SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/prepare/publish/visibility 或 fail-closed 片段；未证明所有权威读取路径、replica applied position 或跨域 Fence/PermissionEpoch。 |
 | T21 | `payload::tests::read_after_paginates_interleaved_scope_rows_by_visible_limit` | SC-02, SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/prepare/publish/visibility 或 fail-closed 片段；未证明所有权威读取路径、replica applied position 或跨域 Fence/PermissionEpoch。 |
 | T22 | `payload::tests::read_after_skips_non_intersecting_scopes_and_limits_visible_rows` | SC-02, SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/prepare/publish/visibility 或 fail-closed 片段；未证明所有权威读取路径、replica applied position 或跨域 Fence/PermissionEpoch。 |
-| T23 | `payload_persistence_boundary_sizes_survive_reopen` | 无对应测试 | 无对应测试 | 名称未对应到 SC/HIR 中某个完整谓词；无对应测试。 |
+| T23 | `payload_persistence_boundary_sizes_survive_reopen` | SC-01 | 无对应测试 | 仅触及 payload 持久化边界/尺寸，不证明同一事务的 CAS、Owner cursor、idempotency、outbox 与 receipt 全写集。 |
 | T24 | `restart_preserves_receipt_and_idempotent_payload_replay` | SC-08, SC-07 | HIR-02, HIR-14, HIR-05, HIR-16 | 覆盖本地 receipt 持久化/重开/重放；未覆盖 H receipt 全字段、长期 tombstone 或跨资源 crash reconciliation。 |
 | T25 | `restore_anti_resurrection_and_preserves_other_scope` | SC-06, SC-10, SC-11, SC-12, SC-13, SC-02 | HIR-18 | 覆盖本地 scope/read/prepare/publish/visibility 或 fail-closed 片段；未证明所有权威读取路径、replica applied position 或跨域 Fence/PermissionEpoch。 |
 | T26 | `tests::abrupt_exit_worker` | 无对应测试 | 无对应测试 | 辅助 worker/进程入口名称本身不声明断言；不能单独映射为通过证据。 |
