@@ -1,32 +1,24 @@
 ---
-# provenance: AUTHORED_INDEX
 document_metadata:
-  domain: "security-governance"
-  role: "guide"
+  domain: security-governance
+  role: index
   lifecycle:
     approval:
       decision_status: Draft
       approver: null
       decision_date: null
-      approved_version:
-        scheme: git
-        value: null
+      approved_version: null
       approval_scope:
         type: Full-document
-      approval_applicability: Applicable-To-Current-Version
+      approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "provenance: AUTHORED_INDEX"
-        - "directory inventory: 09-security-governance/"
-        - "source branch: session-i-security-governance-2026-11-16"
-        - "source commit: 8abddf814467b271344a9814613a6b7ca6a446c6"
-        - "authoring date: 2026-11-26"
-        - "executing operator: user-authorized operator (delegated by account owner)"
-        - "no authoritative source; this file is a newly authored index"
+        - "AID-2026-109 bounded I source-root recovery"
+        - "Source branch session-i-security-governance-2026-11-16 @ 8abddf814467b271344a9814613a6b7ca6a446c6"
       revocation: null
     evidence_verification:
       verification_status: Unverified
       last_verified_date: null
-      last_verification_note: "AUTHORED_INDEX; no authoritative source exists; this file is a newly authored navigation index. Owner review pending."
+      last_verification_note: "Navigation index only; linked contracts remain Candidate/Informative and unaccepted."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -38,49 +30,47 @@ document_metadata:
       archival_reason: null
       archival_reference: null
   authority:
-    canonical_status: Candidate
-    canonical_scope: "Newly authored navigation index for available security governance material; not a recovered root specification"
-    canonical_scope_id: "security-governance/directory-index"
+    canonical_status: Non-Canonical
+    canonical_scope: "Bounded I security-governance source-root navigation"
+    canonical_scope_id: "security-governance/root-index"
     canonical_scope_keywords:
-      - "documentation-index"
-      - "source-provenance"
-      - "governance"
+      - security-governance
+      - source-root
+      - navigation
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
     source: "09-security-governance/README.md"
-    en: null
-    zh-CN: "docs/zh-CN/09-security-governance/README.md"
 ---
 
-# Security, Identity & Governance — Directory Index
+# Security, Identity & Governance
 
-> **AUTHORED_INDEX — not a restored specification.** No authoritative source exists; this file is a newly authored index. No source documents were present directly in the root directory at the pre-creation inspection.
+This is the bounded canonical entry point for the restored I-domain source set.
 
-## Root-directory inventory
+## Scope of this recovery
 
-There were no pre-existing root-level documents in `09-security-governance/`. This README is the only root-level document added by this change.
+AID-2026-109 restores only five policy/contract documents selected against the I-root blockers in F4, F6 and F7 of the 2026-11-26 A–I + Storage composition review. It does **not** import the historical `session-i-security-governance-2026-11-16` tree wholesale. That branch contains 91 files under this domain; the other files are not restored by this work item.
 
-## Available bilingual material
+The five documents remain **Candidate / Informative**. Their presence makes the source material discoverable on main; it does not ratify Phase 3.x decisions, approve a production policy, or establish implementation/conformance evidence.
 
-| Document | EN mirror | ZH-CN mirror | Status |
-|---|---|---|---|
-| Security, Identity & Governance Architecture Guide (DOC-SEC-001) | [English guide](security-governance-guide.md), blob `061c5847b3df879eeaf3c71e5eae0bfa162b276a` | [Chinese guide](../../zh-CN/09-security-governance/security-governance-guide.md), blob `372d27c79dc79d09bcdb0f142c979efdba1c2b6e` | Candidate / Informative; I Owner exact-version acceptance pending; not a production security certification |
+## Canonical I documents
 
-These are existing mirrors, listed as navigation targets only. Neither is asserted to be an authoritative root-source blob.
+- [Global Forget Target Inventory and Completion Evidence Contract](global-forget-target-inventory-and-completion-evidence.md)
+- [Forget, Retention, Backup and Physical Erasure Policy](forget-retention-backup-and-erasure-policy.md)
+- [Principal, ActorRef and Authorization Contract](principal-actor-and-authorization-contract.md)
+- [Scope and Revocation Policy](scope-and-revocation-policy.md)
+- [Security, Identity & Governance Overview](security-and-identity-overview.md)
 
-## Governance boundaries
+## Authority boundaries that remain controlling
 
-- I owns global identity/authorization policy, delegation and revocation, retention, audit governance, backup/external-copy policy, cross-system Forget governance evaluation policy, evidence-acceptance criteria, and physical-erasure requirements.
-- D retains ownership of canonical Forget lifecycle semantics and its domain completion predicate. This index does not redefine that boundary.
-- D/E/F/G/H/C retain their respective local enforcement mechanisms and boundary-specific evidence.
-- This index does not approve policy, certify production security, establish a canonical source, or grant implementation authority.
-- Do not infer authoritative source status from an EN/ZH-CN mirror.
+- **D is the sole logical authority** for ForgetOperation identity and ForgetFence generation/cursor. I owns authorization, retention, global inventory/completion policy and physical-erasure requirements; it does not issue or advance D's Fence. See AID-2026-089.
+- **H replay disclosure independently rechecks current I authorization and current D Fence/lineage**, fail-closed. A historical receipt/signature is not current authorization. See AID-2026-099 HIR-18.
+- Storage-local Fence data, if present, is a D-derived rebuildable projection, not a second authority.
+- All five restored documents are `normative_status: Informative`, `decision_status: Draft`, and have no `approved_version`. Exact Owner acceptance and implementation evidence remain outstanding.
 
-## Missing authoritative sources and blockers
+## Evidence
 
-- No authoritative root README or root specification blob was located; this file is newly authored.
-- Additional I Owner documents have not been restored here without exact source-body/frontmatter and bilingual review.
-- I36-GOV-01..10 remain GOVERNANCE-BLOCKED pending approver, exact policy hash/version, authority, scope and effective-time evidence.
-- Exact-version I Owner review and Governance acceptance remain pending.
+Original source branch: `session-i-security-governance-2026-11-16` @ `8abddf814467b271344a9814613a6b7ca6a446c6`.
+
+Restoration and source/new blob comparisons are recorded in [AID-2026-109](../14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md).

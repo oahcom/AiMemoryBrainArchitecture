@@ -1,32 +1,24 @@
 ---
-# provenance: AUTHORED_INDEX
 document_metadata:
-  domain: "security-governance"
-  role: "guide"
+  domain: security-governance
+  role: index
   lifecycle:
     approval:
       decision_status: Draft
       approver: null
       decision_date: null
-      approved_version:
-        scheme: git
-        value: null
+      approved_version: null
       approval_scope:
         type: Full-document
-      approval_applicability: Applicable-To-Current-Version
+      approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "provenance: AUTHORED_INDEX"
-        - "directory inventory: 09-security-governance/"
-        - "source branch: session-i-security-governance-2026-11-16"
-        - "source commit: 8abddf814467b271344a9814613a6b7ca6a446c6"
-        - "authoring date: 2026-11-26"
-        - "executing operator: user-authorized operator (delegated by account owner)"
-        - "no authoritative source; this file is a newly authored index"
+        - "AID-2026-109 bounded I source-root recovery"
+        - "Source branch session-i-security-governance-2026-11-16 @ 8abddf814467b271344a9814613a6b7ca6a446c6"
       revocation: null
     evidence_verification:
       verification_status: Unverified
       last_verified_date: null
-      last_verification_note: "AUTHORED_INDEX; no authoritative source exists; this file is a newly authored navigation index. Owner review pending."
+      last_verification_note: "Chinese navigation summary only; English source text is preserved verbatim below; full semantic translation parity is NOT_VERIFIED."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -38,49 +30,76 @@ document_metadata:
       archival_reason: null
       archival_reference: null
   authority:
-    canonical_status: Candidate
-    canonical_scope: "现有安全与治理资料的新建导航索引；不是恢复的根规范"
-    canonical_scope_id: "security-governance/directory-index"
+    canonical_status: Non-Canonical
+    canonical_scope: "Bounded I security-governance source-root navigation"
+    canonical_scope_id: "security-governance/root-index"
     canonical_scope_keywords:
-      - "documentation-index"
-      - "source-provenance"
-      - "governance"
+      - security-governance
+      - source-root
+      - navigation
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
     source: "09-security-governance/README.md"
-    en: "docs/en/09-security-governance/README.md"
-    zh-CN: null
+---
+# 安全、身份与治理
+
+## 中文镜像状态
+
+本页是 I 域安全治理文档的受限导航根。此中文镜像提供导航摘要；下方英文正文为原文逐字保留，完整中文逐段译文及语义一致性尚未完成独立审核。因此本镜像仅为 Informative，不构成中文规范性政策。
+
+## 本次恢复范围
+
+AID-2026-109 仅恢复由 F4、F6、F7 缺口映射出的五份政策/契约文档，并新增本导航页。未整体迁入 2026-11-16 历史分支的其余文件。五份文档均保持 Candidate / Informative，不代表 Owner 已批准或生产实现已符合。
+
+## 权威边界
+
+- D 是 ForgetOperation identity 与 ForgetFence generation/cursor 的唯一逻辑权威；I 负责授权、保留、全局 inventory/completion 与物理擦除政策，不签发或推进 D Fence（AID-2026-089）。
+- H replay disclosure 必须独立重查当前 I authorization 与当前 D Fence/lineage；任一拒绝或未知均 fail-closed（AID-2026-099 HIR-18）。
+- Storage 本地 Fence 只能是 D 派生、可重建的 projection。
+- 精确版本 Owner acceptance、实现证据与中文镜像语义审核仍未完成。
+
+## 文档目录
+
+- [全局 Forget 目标清单与完成证据契约](global-forget-target-inventory-and-completion-evidence.md)
+- [Forget、保留、备份与擦除政策](forget-retention-backup-and-erasure-policy.md)
+- [Principal、ActorRef 与授权契约](principal-actor-and-authorization-contract.md)
+- [Scope 与撤销政策](scope-and-revocation-policy.md)
+- [安全与身份概览](security-and-identity-overview.md)
+
 ---
 
-# Security, Identity & Governance — 目录索引
+## 英文源正文（逐字保留）
 
-> **AUTHORED_INDEX — 非恢复的规范文件。** 不存在权威源；本文件为新建索引。在创建前检查中，根目录下没有现存源文档。
 
-## 根目录清单
+# Security, Identity & Governance
 
-在本次变更前，`09-security-governance/` 下没有任何既有根级文档。本次新增的 README 是该目录唯一新增的根级文档。
+This is the bounded canonical entry point for the restored I-domain source set.
 
-## 现有双语资料
+## Scope of this recovery
 
-| 文档 | EN 镜像 | ZH-CN 镜像 | 状态 |
-|---|---|---|---|
-| Security, Identity & Governance Architecture Guide (DOC-SEC-001) | [英文指南](../../en/09-security-governance/security-governance-guide.md)，blob `061c5847b3df879eeaf3c71e5eae0bfa162b276a` | [中文指南](security-governance-guide.md)，blob `372d27c79dc79d09bcdb0f142c979efdba1c2b6e` | Candidate / Informative；I Owner 精确版本验收待完成；不构成生产安全认证 |
+AID-2026-109 restores only five policy/contract documents selected against the I-root blockers in F4, F6 and F7 of the 2026-11-26 A–I + Storage composition review. It does **not** import the historical `session-i-security-governance-2026-11-16` tree wholesale. That branch contains 91 files under this domain; the other files are not restored by this work item.
 
-以上文件是现存镜像，仅作为导航目标列出。不得将其称为权威根源 blob。
+The five documents remain **Candidate / Informative**. Their presence makes the source material discoverable on main; it does not ratify Phase 3.x decisions, approve a production policy, or establish implementation/conformance evidence.
 
-## 治理边界
+## Canonical I documents
 
-- I 负责全局身份/授权策略、委派与撤销、保留策略、审计治理、备份/外部副本策略、跨系统 Forget 治理评估策略、证据验收标准及物理擦除要求。
-- D 继续拥有 canonical Forget 生命周期语义及其域完成谓词。本索引不重新定义该边界。
-- D/E/F/G/H/C 保留各自本地执行机制及边界证据的所有权。
-- 本索引不批准政策、不认证生产安全、不建立 canonical source，也不授予实施权限。
-- 不得从 EN/ZH-CN 镜像的存在推断其具有权威源地位。
+- [Global Forget Target Inventory and Completion Evidence Contract](global-forget-target-inventory-and-completion-evidence.md)
+- [Forget, Retention, Backup and Physical Erasure Policy](forget-retention-backup-and-erasure-policy.md)
+- [Principal, ActorRef and Authorization Contract](principal-actor-and-authorization-contract.md)
+- [Scope and Revocation Policy](scope-and-revocation-policy.md)
+- [Security, Identity & Governance Overview](security-and-identity-overview.md)
 
-## 缺失权威来源与阻塞
+## Authority boundaries that remain controlling
 
-- 未找到权威根 README 或根规范 blob；本文件为新建索引。
-- 未取得精确源正文/frontmatter 和双语审查前，不在此恢复其他 I Owner 文档。
-- I36-GOV-01..10 仍为 GOVERNANCE-BLOCKED，等待 approver、精确 policy hash/version、authority、scope 和 effective-time 证据。
-- I Owner 精确版本审查及 Governance 验收仍待完成。
+- **D is the sole logical authority** for ForgetOperation identity and ForgetFence generation/cursor. I owns authorization, retention, global inventory/completion policy and physical-erasure requirements; it does not issue or advance D's Fence. See AID-2026-089.
+- **H replay disclosure independently rechecks current I authorization and current D Fence/lineage**, fail-closed. A historical receipt/signature is not current authorization. See AID-2026-099 HIR-18.
+- Storage-local Fence data, if present, is a D-derived rebuildable projection, not a second authority.
+- All five restored documents are `normative_status: Informative`, `decision_status: Draft`, and have no `approved_version`. Exact Owner acceptance and implementation evidence remain outstanding.
+
+## Evidence
+
+Original source branch: `session-i-security-governance-2026-11-16` @ `8abddf814467b271344a9814613a6b7ca6a446c6`.
+
+Restoration and source/new blob comparisons are recorded in [AID-2026-109](../14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md).

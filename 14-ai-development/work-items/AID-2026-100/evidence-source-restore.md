@@ -175,7 +175,7 @@ Two additional E roots already existed on main and were not overwritten. The oth
 
 The other 10/15 F inventory entries lack existing EN/ZH-CN pairs and remain blocked. The compiler reconstruction and two authored README indexes above are not counted as F source restorations. No additional E/F candidate met the requested 鈥渆xact source blob plus existing bilingual mirror鈥?priority rule in this pass.
 
-**Accounting:** RESTORED = 14 source-backed roots (D 4 + E 5 + F 5); RECONSTRUCTED = 1 compiler-stage-contract root; AUTHORED_INDEX = 2 README indexes. These categories are separate and must not be summed into a source-restoration count.
+**Accounting:** RESTORED = 14 source-backed roots (D 4 + E 5 + F 5); RECONSTRUCTED = 1 compiler-stage-contract root; AUTHORED_INDEX = 2 README indexes at execution time. These categories are separate and must not be summed into a source-restoration count. Section 12 records that the 09-security-governance index was later yielded to main.
 
 ## 6. Validator, runtime, and governance boundaries
 
@@ -238,3 +238,29 @@ The other 10/15 F inventory entries lack existing EN/ZH-CN pairs and remain bloc
   - FAIL: Existing gates (`45777711354`), solely the GOV-DOC-001 bilingual ratchet wrapper rejecting the full-scan command's exit 2.
 - Legacy combined commit statuses: 0; Actions runs are the CI evidence.
 - No workflow definition, validator implementation/semantics, runtime code, or product code was changed. PR merge, Issue closure, deployment and Owner acceptance are not performed or implied.
+
+## 12. Reconciliation with main through `e3a134de`
+
+- `PR #1297` / `AID-2026-109` merged into main (`e3a134de`) and delivers
+  `09-security-governance/` as a restored bounded source root, including its
+  `README.md`. This branch yields those files to main: they carry no diff, and
+  this record makes no provenance claim about them.
+- `05-memory-runtime/README.md` is therefore the only AUTHORED_INDEX document
+  this PR carries.
+- The two orphan mirrors under
+  `docs/en/00-governance/implementation-evidence/2026-11-26-cross-owner-source-restore-03.md`
+  and `docs/zh-CN/00-governance/implementation-evidence/2026-11-26-cross-owner-source-restore-03.md`
+  were removed. Their `bilingual_counterpart.source` named
+  `14-ai-development/work-items/AID-2026-082/evidence.md`, which has never
+  existed on main, and no root document ever existed for them either.
+- This evidence file was re-saved from UTF-16LE (38472 bytes, `FF FE` BOM) to
+  UTF-8 without BOM. The text is unchanged apart from this section; the
+  manifest's `evidence_blob` is repinned to the new blob.
+- `approval_scope.included_sections` and `approval_scope.included_assets` were
+  removed from the 60 changed documents (120 lines) because `#1281` narrowed
+  `approval_scope` to the single key `type`.
+- The `DO_NOT_MERGE` prohibition was removed from the manifest.
+  `merge_authorization` states merge preconditions instead. Nothing in this
+  record grants merge authorization.
+- Every number quoted above is tied to the run or head it names; no CI verdict
+  is asserted for a head that was not observed.
