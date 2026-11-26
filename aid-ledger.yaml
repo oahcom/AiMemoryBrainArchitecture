@@ -5,7 +5,7 @@
 # One AID maps to exactly one work_item_id.
 
 schema: 1
-updated_at_utc: "2026-11-26T13:05:00Z"
+updated_at_utc: "2026-11-26T13:25:00Z"
 entries:
   - id: AID-2026-082
     state: MERGED
@@ -100,7 +100,9 @@ entries:
     carrier: "offered to PR #1280 (req05/827-fix) as its renumber target"
     note: "084 is held by PR #1274 and 105 landed while #1280 was idle; the offer moved from 105 to 111"
   - id: AID-2026-112
-    state: FREE
+    state: RESERVED
+    carrier: "unassigned; Owner ruling 2026-11-26 permits this number for the retroactive gate-coverage work item"
+    note: "scope is fixed by the Owner: record that #1275 and #1266 passed the old gate with no declaration, the exact heads and results, and the remediation state - without claiming they violated the rules in force at merge time. No carrier may take it without a skeleton reservation push."
   - id: AID-2026-113
     state: FREE
   - id: AID-2026-114
