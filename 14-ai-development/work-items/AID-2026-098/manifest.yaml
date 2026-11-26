@@ -73,8 +73,8 @@ session_evidence:
     issue_refs:
     implementing_ai_session: NOT_RECORDED
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-098/prompt-v1.md
-    executed_prompt_sha256: d6eb11feefc8e33a3cd4e5fd3af1bd97d3bb32b3b482f80d19b450a8dc5814a0
-    executed_prompt_bytes: 3242
+    executed_prompt_sha256: f9b83206744d38bfaa782e47d34ff11e696f2cd04c1c31b4e6fe5b0a1843cc06
+    executed_prompt_bytes: 3241
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_reason: "The available execution context does not expose a stable ChatGPT session identifier; no identifier was invented."
     session_reference_status: NOT_RECORDED
