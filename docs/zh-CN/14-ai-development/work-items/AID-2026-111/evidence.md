@@ -109,7 +109,7 @@ cargo test -p memory-domain -p memory-storage -p memory-event-store -p bmcp-prot
 | stdout SHA-256 | `C18EF5FC121EEB9B486000180F52BAE8385385722A369ADDAB873FCF8716D7B9` (this capture only) |
 | Normalised digest | `73d97ed8f536aa06cf483f84e750ddbda610d56e8f5caee501fac6f198934eee` |
 
-该运行补充纯 Rust 领域/协议/Storage trait 证据。它运行于另一个固定提交（`44dc21a4…`），SQLite 与 memory-context 则运行于 `a123ea4e…`；不得将三组描述为同一提交。所给 normalised digest 按 exit code + passed/failed 总数 + 各 harness passed 数多重集排序后计算，不含顺序、时长和进程交错。本组未提供测试名清单；计数以 harness 为准。
+该运行补充纯 Rust 领域/协议/Storage trait 证据。它运行于另一个固定提交（`44dc21a4…`），SQLite 与 memory-context 则运行于 `a123ea4e…`；不得将三组描述为同一提交。所给 normalised digest 按 exit code + passed/failed 总数 + 各 harness passed 数多重集排序后计算，不含顺序、时长和进程交错。测试名恢复情况：本证据记录中 **recovered 0 of 276**（未提供清单）；计数以 harness 为准。
 
 ### 2.3 Memory-context 组——用户提供的本地汇总执行证据
 
@@ -119,9 +119,9 @@ cargo test -p memory-domain -p memory-storage -p memory-event-store -p bmcp-prot
 - 精确命令、测试二进制数、stdout 字节数、raw stdout SHA-256、各 harness passed 多重集及测试名清单：**所给证据未记录**。
 - Normalised digest：**未提供**；仅凭汇总的 `177 passed` 无法推算。
 
-这是固定提交上的本地 Linux 执行，不是 CI，也不是 current `main`。测试名清单属于 best-effort；未提供清单时不推断测试名覆盖。
+这是固定提交上的本地 Linux 执行，不是 CI，也不是 current `main`。测试名恢复情况：本证据记录中 **recovered 0 of 177**（未提供清单）；测试名清单属于 best-effort，不推断未提供的测试名覆盖。
 
-### 2.4 明确的负面构建证据
+**Normalised digest 算法（可复现指纹）：**对 `exit code + passed/failed 总数 + 各 harness 块 passed 数多重集排序后` 计算 SHA-256。不包含测试顺序、时长、构建耗时和进程交错。上面的 SQLite 与 pure Rust digest 使用该算法；memory-context 未提供 digest。\n\n### 2.4 明确的负面构建证据
 
 Windows 主机上的 `cargo test --workspace` 因 `libsqlite3-sys v0.40.0` build script 无法执行 `cc1`（`gcc.exe: fatal error: cannot execute 'cc1'`）而 exit **101**；MSVC 同样缺少 `cl.exe`/`link.exe`。因此该 Windows 主机无法构建：`memory-storage-sqlite`、`memory-event-store-sqlite`、`memory-store`、`memory-compiler`、`memory-context`、`brain-cli`。
 
