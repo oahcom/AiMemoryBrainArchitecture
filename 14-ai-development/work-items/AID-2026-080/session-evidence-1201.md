@@ -166,8 +166,16 @@ annotation names AID-2026-080:
   context failed with `executed_prompt_sha256 mismatch in manifest entry #1`. The first repair
   re-took the pin; the reviewer refused it, correctly, because it would have recorded the amended
   document as the executed input. `prompt-v1.md` is now restored byte-for-byte and the amendment
-  lives in `REVIEW-AMENDMENT.md`. Whether that closes round 2 is round 3's decision at its own
-  Head.
+  lives in `REVIEW-AMENDMENT.md`.
+  Round 3 (`NEEDS REVISION`, Head `489b6048`) closed round 2's blocker — it compared blob SHAs and
+  found `84342823` on both sides — and found four defects that were mine: this row's sibling in
+  `INDEX.md` still carried the retaken pin `11496` / `3e0fdfc7` that round 2 had refused; the
+  manifest population was stated as 55 where the tree held 56; C8's measurement asserted the
+  snapshot path is absent from the base diff, which the renumbering makes impossible; and the
+  merge state still read `NOT_STARTED` / `PR_OPEN` after the merge. All four are repaired.
+  Round 3 also found, unasked, that PR #1215 had already merged at `f7bc0789` while the review
+  read `489b6048`. That is a real gap and it is not closed by noting that the two differ only by
+  an incoming `scripts/check_traceability.py`: no review has read the merged head as such.
 - The reproduction in §2 was performed by a second agent session given the procedure and not
   the expected values. It reproduced all four bucket counts, the 0-of-54 figure and both
   error strings. That is a reproducibility check, not an independent review: the session that
@@ -178,8 +186,8 @@ annotation names AID-2026-080:
   appears only in `01-system-architecture/data-flows.md`, its `docs/` mirrors, and
   `08-bmcp-protocol/validators/envelope_auth_validator.py` — so nothing can settle that
   requirement today. One defect per change; it is registered separately.
-- **34 of 54 manifests still fail `parse_manifest_session_entries`.** Only the 27 that fail
-  *because of this clause* are addressed here. The rest fail for reasons of their own, mostly
+- **34 of 56 manifests still fail `parse_manifest_session_entries` at `364ef4ad`.** Only the 27
+  that failed *because of this clause* at `1f5ba824` are addressed here. The rest fail for reasons of their own, mostly
   an incomplete legacy field set predating the canonical format, and this work item does not
   change that count.
 - **The clause is now satisfiable, not enforced.** Nothing reads §5 item (2) automatically.
