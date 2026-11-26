@@ -89,6 +89,39 @@ which model produced the edits, not what was asked for.
    confirming no PR title, remote branch or work-item directory carried 189.
 4. Wrote this registration set and one INDEX row, then ran the repository's own gates locally.
 
+## AI-visible output
+
+The assistant reported, and the head of this branch confirms:
+
+- `jobs.fmt` now runs three steps — `actions/checkout@v4`, `dtolnay/rust-toolchain@stable`
+  (with `components: rustfmt`) and `Verify repository formatting at this commit` — where the
+  base revision ran five; the removed pair is `Record resolved Rust toolchain version` and
+  `Cache Rust dependencies and build artifacts` (`Swatinem/rust-cache@v2`, `shared-key:
+  gates-fmt`). The three Rust jobs that do compile keep their cache and probe steps;
+- a YAML parse of both revisions shows identical `jobs` key lists in all three files:
+  `gates.yml` `['protocol-index', 'conformance', 'schema-nonempty', 'bilingual', 'clippy',
+  'doctest', 'fmt']`, `h-applied-delivery-evidence-conformance.yml`
+  `['applied-delivery-evidence']`, `publication-protocol-reference-model.yml`
+  `['publication-protocol-reference-model']` — so no job was added, renamed, merged or removed;
+- the two topic workflows carry the top-level block
+  `concurrency: {group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}, cancel-in-progress: true}`
+  at the head and no `concurrency` at all at the base revision;
+- `check_declared_check_contexts.py` returned `DECLARED CHECK CONTEXTS: PASS` — "16 declared
+  check contexts, all produced by a job in .github/workflows and all required on main";
+- `check_document_management.py --require-changed origin/main` returned
+  `PASS (incremental): no GOV-DOC-002 violations; 496 classified, 446 unclassified`, and the
+  metadata parser in that module returns a mapping, not `None` and not a `ParseError`, for
+  `evidence.md`, `prompt-v1.md` and `session-evidence.md` — all three use block-style YAML, no
+  flow mapping opens on `{`;
+- nothing under `scripts/`, `00-governance/`, `tests/` or the branch-protection payload was
+  touched; the change is three workflow files, four new work-item files and one appended
+  `INDEX.md` row.
+
+This unit was served by `opencode-go/deepseek-v4.1-flash` after both 9router routes returned
+429 on three earlier dispatches; the substitution changes which model produced the text, not
+what was asked for, and it is recorded here because the earlier attempts are otherwise
+indistinguishable from this one in the git history.
+
 ## Attribution and independence
 
 - Attribution: user-authorized operator, delegated by the account owner.
