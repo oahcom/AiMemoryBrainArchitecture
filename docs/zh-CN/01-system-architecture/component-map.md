@@ -127,4 +127,4 @@ document_metadata:
 - 逻辑子系统必须使用其 `SYS-*` 标识（例如 `SYS-MEMORY-COMPILER`）；不得用单独字母引用子系统。
 - Responsibility Matrix 的能力/组件标签及 P/S 参与标记属于独立分类，不代表负责的 Owner。
 - 同一句话需要同时引用子系统和 Owner 时，必须分别明确写出（例如“SYS-MEMORY-COMPILER；负责 Owner E”），不得相互推断。
-- 自动检查由 AID-2026-081 / Issue #1237 单独跟踪。在该检查合并前，本节只是人工引用规则，不代表 lint 门禁已经存在。
+- 自动检查由 Issue #1237 单独跟踪。在该检查合并前，本节只是人工引用规则，不代表 lint 门禁已经存在。
