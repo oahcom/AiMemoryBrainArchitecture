@@ -1,0 +1,66 @@
+work_item_id: AID-2026-090
+RENUMBERED_FROM: AID-2026-087
+renumbering_reason: "AID-2026-087 is superseded by the delegated renumbering decision; ContextVersion immutability is assigned AID-2026-090. AID-2026-086 is reserved for PR #1219 and AID-2026-089 is merged by PR #1232."
+title: Define immutable ContextVersion boundary and legal successor mutation paths
+class: ARCH/DOC
+risk: R2
+status: DISPATCHED
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: Owner G
+acceptance_authority: "Owner G with dependent Owners B, D, I and Storage/Consistency; Owner A governance review"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: d914e8a1f8a1ba24c21c41a9249489d544388185
+tracking_issue: "#1144, #1151"
+prompt_id: AID-2026-090-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-090/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 32e5a263ab34d2806110ba09500c3b750613360c20cb082eb1e69fd3cd3fe3a3
+prompt_bytes: 2034
+authorization:
+  authorized_by: "user-authorized operator (delegated by account owner)"
+  decision_date: "2026-11-26"
+  runtime_code_change: NOT_GRANTED
+  validator_change: NOT_GRANTED
+  deployment_or_production: NOT_GRANTED
+  merge: NOT_GRANTED
+scope:
+  files_to_create:
+    - 06-memory-context/context-version-immutability-decision.md
+    - docs/en/06-memory-context/context-version-immutability-decision.md
+    - docs/zh-CN/06-memory-context/context-version-immutability-decision.md
+    - 14-ai-development/work-items/AID-2026-090/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-090/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-090/session-evidence.md
+  files_to_modify:
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope: "All runtime/product code, tests, schemas, validators, workflows, deployment and production state."
+acceptance_criteria:
+  - {id: CVI-01, criterion: "Committed ContextVersion and entry snapshot are immutable."}
+  - {id: CVI-02, criterion: "Identity, parent, ordered entries and delivery-relevant snapshot fields are immutable."}
+  - {id: CVI-03, criterion: "Head advances only by append-only successor with exact expected-base/CAS."}
+  - {id: CVI-04, criterion: "Correction/removal/Forget creates successor, never edits predecessor."}
+  - {id: CVI-05, criterion: "Delivery/evidence/projections are external to ContextVersion."}
+  - {id: CVI-06, criterion: "Digest binds exact ordered committed entries and is verified on read/replay."}
+  - {id: CVI-07, criterion: "Idempotent retry replays receipt; key/digest mismatch conflicts."}
+  - {id: CVI-08, criterion: "EN/ZH-CN semantic parity."}
+implementation:
+  status: IMPLEMENTED_IN_BRANCH
+  branch: impl/2026-11-26-context-version-immutability
+  pull_request: 1241
+review: PENDING
+acceptance: PENDING
+session_evidence:
+  - role: DOCUMENTATION_AUTHOR
+    issue_refs:
+      - "#1144"
+      - "#1151"
+    implementing_ai_session: NOT_RECORDED
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-090/prompt-v1.md
+    executed_prompt_sha256: 32e5a263ab34d2806110ba09500c3b750613360c20cb082eb1e69fd3cd3fe3a3
+    executed_prompt_bytes: 2034
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-090/session-evidence.md
+    session_reference_reason: "The exact current ChatGPT session identifier is not exposed in this execution context; historical identifiers were not substituted."
