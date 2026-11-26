@@ -61,6 +61,12 @@ Attribution: user-authorized operator (delegated by account owner), 2026-11-26. 
 - Branch: `docs/2026-11-26-storage-physical-consistency-098`.
 - The ID must be rechecked against current main/INDEX/Issues/PRs/branches before any merge; renumber if occupied and preserve `RENUMBERED_FROM`.
 
+## Carrier
+
+- Draft PR: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1276.
+- Branch: `docs/2026-11-26-storage-physical-consistency-098`.
+- Initial PR head at creation: `c9f08ba9bf244ad0a92d840af9fd9cd1a419b478` (subsequent evidence/index updates may advance the head; CI must be read against the final head).
+
 ## Source evidence reviewed
 
 - `14-ai-development/work-items/AID-2026-095/manifest.yaml` and `evidence.md`: F8 is BLOCKED_WITH_REASON; nine original checkpoints are not evidenced.
