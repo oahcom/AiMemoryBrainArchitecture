@@ -51,24 +51,6 @@ document_metadata:
 ---
 # Storage Physical Consistency Contract — Candidate
 
-- Work Item: AID-2026-098 (PROVISIONAL)
-- Version: 0.1.0-draft
-- Date: 2026-11-26
-- Status: **Draft / Candidate / Informative**
-- Attribution: user-authorized operator (delegated by account owner); proxy registration only — 代理登记，非自然人 Owner 签署
-- Canonical source: [10-storage-consistency/storage-physical-consistency-contract.md](../../../10-storage-consistency/storage-physical-consistency-contract.md)
-- Chinese mirror: [ZH-CN](../../zh-CN/10-storage-consistency/storage-physical-consistency-contract.md)
-
-
-- Work Item: AID-2026-098 (PROVISIONAL)
-- Version: 0.1.0-draft
-- Date: 2026-11-26
-- Status: **Draft / Candidate / Informative**
-- Attribution: user-authorized operator (delegated by account owner); proxy registration only — 代理登记，非自然人 Owner 签署
-- Canonical source: `10-storage-consistency/storage-physical-consistency-contract.md`
-- Mirrors: [EN](../docs/en/10-storage-consistency/storage-physical-consistency-contract.md) · [ZH-CN](../docs/zh-CN/10-storage-consistency/storage-physical-consistency-contract.md)
-- Related carriers: #1211 (Storage source restoration), #1212 (A–I + Storage composition), #1125 (single Forget Fence authority), #1180 (G delivery-state projection)
-- Authority note: this document proposes a reviewable physical contract. It is not an Owner approval, a frozen backend design, a runtime specification already implemented, or production conformance evidence.
 
 ## 1. Purpose, status and vocabulary
 
