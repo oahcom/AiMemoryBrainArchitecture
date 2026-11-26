@@ -126,7 +126,9 @@ This supplements pure-Rust domain/protocol/storage trait evidence. It ran on **a
 
 This is a pinned-commit local Linux execution, not CI and not current `main`. Test-name recovery: **recovered 0 of 177** in this evidence record (no inventory was supplied); the name list is best-effort and no test-name coverage is inferred.
 
-**Normalised digest algorithm (reproducible fingerprint):** SHA-256 over `exit code + passed/failed totals + sorted multiset of each harness block’s passed count`. It excludes test order, durations, build timing, and process interleaving. The SQLite and pure-Rust digests above use this algorithm; no memory-context digest was supplied.\n\n### 2.4 Explicit negative build evidence
+**Normalised digest algorithm (reproducible fingerprint):** SHA-256 over `exit code + passed/failed totals + sorted multiset of each harness block’s passed count`. It excludes test order, durations, build timing, and process interleaving. The SQLite and pure-Rust digests above use this algorithm; no memory-context digest was supplied.
+
+### 2.4 Explicit negative build evidence
 
 On the Windows host, `cargo test --workspace` exited **101** because `libsqlite3-sys v0.40.0` build script could not execute `cc1` (`gcc.exe: fatal error: cannot execute 'cc1'`); MSVC also lacked `cl.exe`/`link.exe`. The following packages therefore could not be built on that Windows host: `memory-storage-sqlite`, `memory-event-store-sqlite`, `memory-store`, `memory-compiler`, `memory-context`, `brain-cli`.
 
