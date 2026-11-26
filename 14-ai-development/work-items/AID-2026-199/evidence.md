@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-192/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-199/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Verified
@@ -30,8 +30,8 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Canonical
-    canonical_scope: "AID-2026-192 making three gate helpers fail closed on an absent or comment-only input"
-    canonical_scope_id: "ai-development/aid-2026-192-gates-fail-closed-on-unreadable-inputs"
+    canonical_scope: "AID-2026-199 making three gate helpers fail closed on an absent or comment-only input"
+    canonical_scope_id: "ai-development/aid-2026-199-gates-fail-closed-on-unreadable-inputs"
     canonical_scope_keywords:
       - "fail-closed"
       - "index-membership"
@@ -43,11 +43,11 @@ document_metadata:
     normative_status: Informative
   bilingual_counterpart:
     source: null
-    en: "docs/en/14-ai-development/work-items/AID-2026-192/evidence.md"
-    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-192/evidence.md"
+    en: "docs/en/14-ai-development/work-items/AID-2026-199/evidence.md"
+    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-199/evidence.md"
 ---
 
-# AID-2026-192 — Three gates answered a question they could not read
+# AID-2026-199 — Three gates answered a question they could not read
 
 **Status: DRAFT — helper and test change only.** No required context, job id, job display name,
 index row or baseline entry is added, renamed or removed. Every judgement each checker already
@@ -206,3 +206,14 @@ cases that are *about* the absent sides use `with_index=False` and assert exit 2
 - No change to the sixteen declared contexts, the sixteen produced contexts, or any job name.
 - No new gate-wiring baseline entry: the three baselined unwired gates stay baselined.
 - Nothing about a checker this unit did not name.
+
+## 10. Identity
+
+This work item was first allocated AID-2026-192. Main advanced from 2f4f4118 to 9dc98a52 while
+the pull request was open, and that main carries its own AID-2026-192, plus 197 and 198. The
+branch then went \dirty\ with add/add conflicts on every AID-2026-192 path and GitHub created no
+check runs for it. Per the allocation rule the work item was renumbered to AID-2026-199 -- the
+first number outside the main tree, the open pull requests and the remote branch names -- in one
+commit that moved all three directory trees and every reference. Commit messages and the pull
+request body written before that point still say AID-2026-192; every path in this tree says
+AID-2026-199, and the prompt digest was recomputed because the snapshot carries its own path.

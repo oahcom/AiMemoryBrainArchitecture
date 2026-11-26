@@ -1,4 +1,4 @@
-work_item_id: AID-2026-192
+work_item_id: AID-2026-199
 title: >-
   Make the three gate helpers fail closed: index membership refuses an absent directory side
   or index, both workflow readers cover .yaml, and a comment no longer supplies a context, a
@@ -20,23 +20,27 @@ attribution: user-authorized operator (delegated by account owner)
 date: 2026-11-27
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: 2f4f4118bd2c2d8e43a23975f667deeb06553f3c
+base_commit_sha: 9dc98a526703917bd28862f97f75054beacf1388
 prompt_status: NOT_RECORDED
 prompt_provenance: DISPATCHED_TASK_FILE
 identifier_allocation:
   id_status: PROVISIONAL
   observed_main: 2f4f4118bd2c2d8e43a23975f667deeb06553f3c
-  assigned_id: AID-2026-192
+  assigned_id: AID-2026-199
   allocation_rule: >-
-    Pull-request titles and branch names across all 300 pull requests reach AID-2026-191, and
-    AID-2026-190 and AID-2026-191 are carried by pull requests that are still open, so neither
-    number is free. AID-2026-192 appears in no pull-request title, no branch name (1048 refs
-    listed through git/matching-refs) and no path in this tree. No INDEX maximum plus one was
-    used.
-  observed_occupied: [170, 172, 173, 183, 186, 188, 189, 190, 191]
+    First allocation was AID-2026-192: at the time, pull-request titles and branch names reached
+    AID-2026-191, 190 and 191 were carried by pull requests still open, and 192 appeared in no
+    title, no branch name (1048 refs through git/matching-refs) and no path in this tree. Before
+    this branch could be merged, main advanced to 9dc98a52 carrying its own AID-2026-192 and
+    AID-2026-197/AID-2026-198, which made the branch conflict add/add on every AID-2026-192
+    path. The recheck rule fired: this work item was renumbered to AID-2026-199, the first
+    number outside the main tree (highest 198), the open pull requests (190, 191, 192, 193, 198)
+    and the remote branch names, in one push that moved every path and reference. No INDEX
+    maximum plus one was used.
+  observed_occupied: [170, 172, 173, 183, 186, 188, 189, 190, 191, 192, 193, 197, 198]
   recheck_rule: >-
-    Immediately before merge, re-read open pull requests and remote branches for
-    AID-2026-192; if occupied, take the next free number and update every path and reference in
+    Immediately before merge, re-read open pull requests, remote branches and the main tree for
+    AID-2026-199; if occupied, take the next free number and update every path and reference in
     the same push.
 scope:
   objective: >-
@@ -80,10 +84,10 @@ scope:
     - "every other checker and every document outside this work item"
     - "the judgement in each checker: no threshold was relaxed, no violation class removed"
 evidence:
-  record: 14-ai-development/work-items/AID-2026-192/evidence.md
+  record: 14-ai-development/work-items/AID-2026-199/evidence.md
   mirrors:
-    - docs/en/14-ai-development/work-items/AID-2026-192/evidence.md
-    - docs/zh-CN/14-ai-development/work-items/AID-2026-192/evidence.md
+    - docs/en/14-ai-development/work-items/AID-2026-199/evidence.md
+    - docs/zh-CN/14-ai-development/work-items/AID-2026-199/evidence.md
   measured_at: 2f4f4118bd2c2d8e43a23975f667deeb06553f3c
   measurements:
     index_membership_no_directories_before: "returns [] -> checker exit 0"
@@ -131,12 +135,12 @@ session_evidence:
     issue_refs:
       - "#1212"
     implementing_ai_session: "opencode-go/deepseek-v4.1-flash"
-    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-192/prompt-v1.md"
-    executed_prompt_sha256: "473af77c05eef46cd55111c3c594e870a52b939cc97eadab1769d7d435725cbe"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-199/prompt-v1.md"
+    executed_prompt_sha256: "3522e9ee41f8372aabd74292e4bbccd842543d77887145facb8cb05017536b1c"
     executed_prompt_bytes: 7965
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_RECORDED"
-    session_evidence_ref: "14-ai-development/work-items/AID-2026-192/session-evidence.md"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-199/session-evidence.md"
 non_goals:
   - Changing any required context name, count or protection entry
   - Adding, renaming, merging or removing any job
@@ -144,6 +148,15 @@ non_goals:
   - Adding a gate-wiring baseline entry instead of wiring a new gate
   - Repairing any checker this unit did not name
 notes:
+  - >-
+    This work item was allocated as AID-2026-192 and renumbered to AID-2026-199 before merge.
+    Main advanced from 2f4f4118 to 9dc98a52 while the branch was in review, and that main
+    carries its own AID-2026-192 (plus 197 and 198), so the pull request went `dirty` with
+    add/add conflicts on every AID-2026-192 path and GitHub created no check runs for it. The
+    renumber moved all three directory trees and every reference in one commit; the prompt
+    snapshot digest in this manifest and in the INDEX row was recomputed because the snapshot
+    carries its own path. `observed_main` and `evidence.measured_at` still name 2f4f4118, the
+    tree every measurement in evidence.md was taken on.
   - >-
     The two fail-closed branches were measured against the pre-fix file taken from origin/main,
     not asserted from reading: the old function returned `[]` for a tree with no work-item

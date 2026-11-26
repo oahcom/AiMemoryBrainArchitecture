@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-192/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-199/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Verified
@@ -30,8 +30,8 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "AID-2026-192：让三个门禁助手在其输入缺失、仅以注释出现或使用 .yaml 后缀时 fail-closed"
-    canonical_scope_id: "ai-development/aid-2026-192-gates-fail-closed-on-unreadable-inputs"
+    canonical_scope: "AID-2026-199：让三个门禁助手在其输入缺失、仅以注释出现或使用 .yaml 后缀时 fail-closed"
+    canonical_scope_id: "ai-development/aid-2026-199-gates-fail-closed-on-unreadable-inputs"
     canonical_scope_keywords:
       - "fail-closed"
       - "index-membership"
@@ -42,12 +42,12 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "14-ai-development/work-items/AID-2026-192/evidence.md"
-    en: "docs/en/14-ai-development/work-items/AID-2026-192/evidence.md"
+    source: "14-ai-development/work-items/AID-2026-199/evidence.md"
+    en: "docs/en/14-ai-development/work-items/AID-2026-199/evidence.md"
     zh-CN: null
 ---
 
-# AID-2026-192 — 三个门禁在回答一个它读不到的问题
+# AID-2026-199 — 三个门禁在回答一个它读不到的问题
 
 **状态：DRAFT — 仅助手与测试改动。** 没有新增、改名或删除任何 required context、job id、job 显示名、索引行或 baseline 条目。每个门禁原有的判定一律保留，改动只在它的输入缺失、以 `.yaml` 结尾、或只出现在注释里时发生什么。
 
@@ -171,3 +171,11 @@ Rule B 拿测试的路径、文件名、stem 或点分模块名去匹配拼接�
 - 未改动 16 个声明上下文、16 个产出上下文或任何 job 名。
 - 未新增任何 gate-wiring baseline 条目：三个已 baseline 的未接线 gate 保持原状。
 - 未对本次未点名的任何检查作任何声称。
+\n
+## 10. 身份
+
+本工作项最初分配到 AID-2026-192。PR 挂起期间 main 从 2f4f4118 前进到 9dc98a52，而那份 main 自带
+AID-2026-192，以及 197 与 198。于是本分支变 dirty，在每条 AID-2026-192 路径上出现 add/add 冲突，
+GitHub 没有为它创建任何 check run。按分配规则，本工作项在一个提交内改号为 AID-2026-199——即 main
+树、开放 PR 与远端分支名之外的下一个号码——三棵目录树与所有引用一并迁移。此前写下的提交信息与 PR
+正文仍写作 AID-2026-192；本树内所有路径写作 AID-2026-199，prompt 摘要因快照自身带路径而重新计算。
