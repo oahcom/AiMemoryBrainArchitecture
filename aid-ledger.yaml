@@ -5,7 +5,7 @@
 # One AID maps to exactly one work_item_id.
 
 schema: 1
-updated_at_utc: "2026-11-26T10:20:00Z"
+updated_at_utc: "2026-11-26T10:15:00Z"
 entries:
   - id: AID-2026-090
     state: MERGED
@@ -34,14 +34,15 @@ entries:
     carrier: "PR #1270"
   - id: AID-2026-098
     state: RESERVED
-    carrier: "PR #1276"
+    carrier: "PR #1283"
+    note: "carrier moved from #1276 (closed, unmerged) to #1283 rebased carrier"
   - id: AID-2026-099
     state: MERGED
     carrier: "PR #1275"
   - id: AID-2026-100
     state: RESERVED
     carrier: "PR #1220"
-    note: "SOURCE-RESTORE-02; history 090 -> 094 -> 100"
+    note: "SOURCE-RESTORE-02; history 090 -> 094 -> 100; SECOND CLAIMANT: PR #1284 carries evidence-only files under the same id with no manifest - unresolved"
   - id: AID-2026-101
     state: MERGED
     carrier: "PR #1248"
@@ -67,3 +68,4 @@ entries:
     state: FREE
   - id: AID-2026-110
     state: FREE
+
