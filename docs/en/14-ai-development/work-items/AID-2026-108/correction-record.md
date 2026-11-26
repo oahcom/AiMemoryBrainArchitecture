@@ -43,7 +43,6 @@ document_metadata:
     normative_status: Informative
   bilingual_counterpart:
     source: 14-ai-development/work-items/AID-2026-108/correction-record.md
-    en: "docs/en/14-ai-development/work-items/AID-2026-108/correction-record.md"
     zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-108/correction-record.md"
 ---
 

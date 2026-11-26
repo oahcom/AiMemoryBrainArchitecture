@@ -44,7 +44,6 @@ document_metadata:
   bilingual_counterpart:
     source: 14-ai-development/work-items/AID-2026-108/correction-record.md
     en: "docs/en/14-ai-development/work-items/AID-2026-108/correction-record.md"
-    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-108/correction-record.md"
 ---
 
 # AID-2026-108 — AID-2026-099 基线可得性纠正记录

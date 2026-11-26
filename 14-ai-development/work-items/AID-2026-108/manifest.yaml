@@ -30,6 +30,8 @@ scope:
   zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-108/correction-record.md"
   work_item_manifest: "14-ai-development/work-items/AID-2026-108/manifest.yaml"
   issues: ["#1211"]
+  prompt: "14-ai-development/work-items/AID-2026-108/prompt-v1.md"
+  session_evidence: "14-ai-development/work-items/AID-2026-108/session-evidence.md"
   files_to_modify:
     - "14-ai-development/work-items/AID-2026-099/manifest.yaml"
     - "08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md"
