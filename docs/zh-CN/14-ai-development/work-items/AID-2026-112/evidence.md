@@ -92,7 +92,7 @@ document_metadata:
 | 25 | SQLite | restore_anti_resurrection_and_preserves_other_scope | SC-13, HIR-18 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 26 | SQLite | tests::abrupt_exit_worker | 无对应测试 | 测试名不对应任一 SC/HIR 谓词。 |
 | 27 | SQLite | tests::abrupt_process_exit_rolls_back_entire_uncommitted_commit | 无对应测试 | 测试名不对应任一 SC/HIR 谓词。 |
-| 28 | SQLite | tests::acceptance_persists_across_reopen_and_receipt_replay_is_stable | SC-03, SC-07, SC-08, HIR-10, HIR-14, HIR-16 | 名称只支持相关局部行为，不足以满足完整谓词。 |
+| 28 | SQLite | tests::acceptance_persists_across_reopen_and_receipt_replay_is_stable | SC-03, SC-07, SC-08, HIR-09, HIR-10, HIR-14, HIR-16 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 29 | SQLite | tests::empty_scope_and_missing_payload_identity_are_rejected | SC-02, SC-10, HIR-01 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 30 | SQLite | tests::f1_forget_memory_hides_current_and_history | SC-10 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 31 | SQLite | tests::f10_forget_survives_reopen | SC-10 | 名称只支持相关局部行为，不足以满足完整谓词。 |
@@ -106,7 +106,7 @@ document_metadata:
 | 39 | SQLite | tests::f9_forget_memory_sets_lifecycle_state | SC-10 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 40 | SQLite | tests::file_backed_connection_applies_required_sqlite_pragmas | SC-04 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 41 | SQLite | tests::file_db_busy_timeout_bounds_wait_for_long_immediate_transaction | SC-09, HIR-08 | 名称只支持相关局部行为，不足以满足完整谓词。 |
-| 42 | SQLite | tests::file_db_interrupted_commit_keeps_version_pointer_log_and_idempotency_consistent | SC-02, SC-03, SC-06, HIR-11, HIR-16 | 名称只支持相关局部行为，不足以满足完整谓词。 |
+| 42 | SQLite | tests::file_db_interrupted_commit_keeps_version_pointer_log_and_idempotency_consistent | SC-01, SC-02, SC-03, SC-06, HIR-11, HIR-16 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 43 | SQLite | tests::file_db_nested_savepoint_rollback_preserves_outer_work | SC-02 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 44 | SQLite | tests::file_db_unwinding_worker_releases_open_transaction_without_partial_state | SC-02, SC-03, SC-06, HIR-11, HIR-16 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 45 | SQLite | tests::independent_connections_serialize_conflicting_idempotency_payloads | SC-08, HIR-01, HIR-08, HIR-14 | 名称只支持相关局部行为，不足以满足完整谓词。 |
@@ -137,14 +137,14 @@ document_metadata:
 | 70 | SQLite | tests::sqlite_prepare_hides_version_from_read_version | SC-10 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 71 | SQLite | tests::sqlite_prepare_keeps_current_version_unchanged | SC-10 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 72 | SQLite | tests::sqlite_prepare_rejects_idempotency_digest_conflict | SC-08, HIR-01, HIR-08, HIR-14 | 名称只支持相关局部行为，不足以满足完整谓词。 |
-| 73 | SQLite | tests::sqlite_prepare_replay_returns_same_receipt | SC-07, SC-08, HIR-10, HIR-14 | 名称只支持相关局部行为，不足以满足完整谓词。 |
+| 73 | SQLite | tests::sqlite_prepare_replay_returns_same_receipt | SC-07, SC-08, HIR-06, HIR-10, HIR-14 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 74 | SQLite | tests::sqlite_publication_state_honours_scope_and_forget_fences | SC-13, HIR-18 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 75 | SQLite | tests::sqlite_publication_state_reports_prepared_hidden_then_published | SC-10 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 76 | SQLite | tests::sqlite_publication_state_returns_none_for_unknown_or_legacy_publication | SC-10 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 77 | SQLite | tests::sqlite_publish_allocates_sequence_only_at_publish_time | SC-10 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 78 | SQLite | tests::sqlite_publish_makes_prepared_version_current_and_readable | SC-10 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 79 | SQLite | tests::sqlite_publish_rejects_duplicate_publication_and_suppressed_state | SC-10 | 名称只支持相关局部行为，不足以满足完整谓词。 |
-| 80 | SQLite | tests::sqlite_publish_rejects_stale_parent_without_partial_commit | SC-10 | 名称只支持相关局部行为，不足以满足完整谓词。 |
+| 80 | SQLite | tests::sqlite_publish_rejects_stale_parent_without_partial_commit | SC-10, HIR-06 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 81 | SQLite | tests::sqlite_publish_replay_returns_original_receipt | SC-07, SC-08, HIR-10, HIR-14 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 82 | SQLite | tests::sqlite_read_version_keeps_legacy_versions_visible | SC-10 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 83 | SQLite | tests::sqlite_rejects_claim_scope_outside_callers_scope_even_when_parent_contains_it | SC-02, SC-10, HIR-01 | 名称只支持相关局部行为，不足以满足完整谓词。 |
