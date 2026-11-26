@@ -100,6 +100,7 @@ scope:
   files_to_create:
     - 14-ai-development/work-items/AID-2026-112/manifest.yaml
     - 14-ai-development/work-items/AID-2026-112/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-112/session-evidence.md
     - 14-ai-development/work-items/AID-2026-112/evidence.md
     - docs/en/14-ai-development/work-items/AID-2026-112/evidence.md
     - docs/zh-CN/14-ai-development/work-items/AID-2026-112/evidence.md
@@ -129,3 +130,16 @@ acceptance:
   gate_b: "PARTIAL / OPEN — NOT VERIFIED"
   issue_1211: OPEN
   issue_1212: OPEN
+
+session_evidence:
+  - role: "SC-HIR local implementation-test evidence rejudgment"
+    issue_refs:
+      - "#1211"
+      - "#1212"
+    implementing_ai_session: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-112/prompt-v1.md"
+    executed_prompt_sha256: "1101b74e2f1933166dd5f86f598034ff4ce834bb35509c5b993a64d1dfd01af9"
+    executed_prompt_bytes: 1917
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-112/session-evidence.md"
