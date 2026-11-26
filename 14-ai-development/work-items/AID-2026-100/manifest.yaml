@@ -144,8 +144,8 @@ prompt:
   prompt_file: "14-ai-development/work-items/AID-2026-100/prompt-v1.md"
   prompt_version: "v1"
   prompt_status: "HISTORICAL_TASK_INPUT_CARRIED_FORWARD"
-  prompt_sha256: "6f74f728dfa47141ebee108c462e7e853983f1700e91e25c8f98a7b47ec07a95"
-  prompt_bytes: 2130
+  prompt_sha256: "48d173be5ebcdc0170027be16a717542fc0d5301ee5ed2db20ec7fea561c99e2"
+  prompt_bytes: 2463
   prompt_provenance: "NOT_VERIFIED"
   prompt_provenance_note: >-
     The file preserves the prior task-specific user instruction that initially resulted in
@@ -182,8 +182,8 @@ session_evidence:
   - role: "IMPLEMENTER_AND_REGISTRATION_COORDINATOR"
     implementing_ai_session: "NOT_AVAILABLE"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-100/prompt-v1.md"
-    executed_prompt_sha256: "6f74f728dfa47141ebee108c462e7e853983f1700e91e25c8f98a7b47ec07a95"
-    executed_prompt_bytes: 2130
+    executed_prompt_sha256: "48d173be5ebcdc0170027be16a717542fc0d5301ee5ed2db20ec7fea561c99e2"
+    executed_prompt_bytes: 2463
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_AVAILABLE"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-100/session-evidence-source-restore.md"
