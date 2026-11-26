@@ -1,7 +1,7 @@
 ---
 document_metadata:
-  domain: bmcp-protocol
-  role: protocol-contract
+  domain: protocol
+  role: design-specification
   lifecycle:
     approval:
       decision_status: Draft
@@ -31,7 +31,7 @@ document_metadata:
       archival_reason: null
       archival_reference: null
   authority:
-    canonical_status: Mirror
+    canonical_status: Non-Canonical
     canonical_scope: "H BMCP 幂等命名空间、请求去重、持久回执、线性化与重放边界"
     canonical_scope_id: "bmcp-protocol/h-idempotency-replay-boundary"
     canonical_scope_keywords:
