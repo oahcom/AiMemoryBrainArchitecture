@@ -319,9 +319,22 @@ def git_object_type(
 # policy's own enums remain a closed set owned by the Owner.
 #
 # BLOCKED vs PENDING is the whole point: BLOCKED records a measured structural
-# obstacle (no second write-capable identity exists on the repository, so an
-# independent reviewer cannot be established). PENDING would say "not done
-# yet", which hides a condition no session can satisfy by working harder.
+# obstacle. PENDING would say "not done yet", which hides a condition no
+# session can satisfy by working harder.
+#
+# The example this comment used to give for BLOCKED -- "no second write-capable
+# identity exists on the repository, so an independent reviewer cannot be
+# established" -- is retired. PR-GOVERNANCE-001 section 5 was amended on
+# 2026-11-24 (GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036): independence
+# is a property of the reviewing session, not of the GitHub account, so the
+# absence of a second account does not make an independent reviewer
+# unestablishable. A session that did not author the change can supply it. The
+# correct state for "review not performed yet" is therefore PENDING (or, where
+# a caller distinguishes them, UNFULFILLED) -- not BLOCKED. BLOCKED remains
+# valid for an obstacle that no session can clear, and the value is kept
+# because dropping it would silently reinterpret existing registry entries.
+# This is a comment change only: the enumeration below is unchanged, and no
+# check behaviour moves.
 
 ALLOWED_INDEPENDENT_REVIEW_STATES = {
     "NOT_REQUIRED",

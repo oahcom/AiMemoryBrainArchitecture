@@ -29,7 +29,7 @@ authorization:
   document_claim_change: "BOUNDED - section 7 only: the enforced-set count, the machine-read declaration block, the failing-head sentence count, the measurement date, and one attribution paragraph per language"
   platform_state_change: "NOT_IN_SCOPE - the protection payload was changed before this document, not by it; the readback is quoted, not performed here"
   architecture_spec_change: "NOT_GRANTED - no ADR, no BMCP specification and no canonical architecture document is modified"
-  failing_head_experiment: "NOT_RUN - a required context that fails is still not shown to block a merge; the sentence that says so is kept, with its count corrected"
+  failing_head_experiment: "NOT_RUN - this work item did not run the deliberately-failing-head experiment, so the sentence that says so is kept, with its count corrected. Corrected `2026-11-25`: the NOT_RUN prefix is this work item's authorization scope, not a statement of current repository state - the experiment has since been run by PR #1038 at head `b5cf4f25`, where PUT /pulls/1038/merge returned HTTP 405 Required status check \"rust-workspace-test\" is failing and the pull request was closed unmerged, and it is recorded as passed in PR-GOVERNANCE-001.md section 7 (line 288)"
 
 scope:
   files_to_create:
