@@ -51,6 +51,7 @@ governed:
   - 06-memory-context
   - 07-agent-integration
   - 08-bmcp-protocol
+  - 10-storage-consistency
   - 13-engineering-decisions
   - 14-ai-development
 
