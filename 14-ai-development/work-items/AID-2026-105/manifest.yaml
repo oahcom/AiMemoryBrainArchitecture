@@ -1,0 +1,53 @@
+manifest_version: "1.0"
+record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
+registration_stage: "STAGE_0"
+registration_status: "PROVISIONAL_EVIDENCE_INVENTORY_OWNER_ACCEPTANCE_PENDING"
+work_item_id: "AID-2026-105"
+id_status: "PROVISIONAL"
+merge_queue_action: "RECHECK_AT_MERGE; MAIN_INDEX_MAX=AID-2026-104_AT_BASE; CURRENT_ID=AID-2026-105; RENUMBER_IF_CONCURRENT_ALLOCATION"
+title: "Issue #1189 acceptance evidence inventory — attributable approval, exact-version parity and Owner/joint acceptance"
+date: "2026-11-26"
+repository:
+  name: "oahcom/AiMemoryBrainArchitecture"
+  baseline_branch: "main"
+  baseline_commit: "533d8646a3fb32b0a1c9d3ed40c01bce33a76b17"
+  implementation_branch: "docs/2026-11-26-aid-105-issue-1189-acceptance-evidence"
+  carrier_pr: "PENDING_CREATION"
+identifier_allocation:
+  assigned_at: "2026-11-26"
+  observed_main: "533d8646a3fb32b0a1c9d3ed40c01bce33a76b17"
+  observed_max_id: "AID-2026-104"
+  assigned_id: "AID-2026-105"
+  renumbered_from: null
+authority:
+  author: "user-authorized operator (delegated by account owner)"
+  authority_scope: "Evidence inventory and documentation-only registration; no new approval or Owner acceptance"
+  attribution_note: "代理登记，非自然人 Owner 签署"
+scope:
+  in_scope:
+    - "Read Issue #1189 and current-main evidence references"
+    - "Record each Issue #1189 acceptance criterion and exact current evidence pins"
+    - "Record EVIDENCE_REQUIRED gaps and minimum closure path"
+    - "Canonical evidence inventory plus EN and ZH-CN mirrors"
+    - "Issue #1189 comment listing outstanding acceptance items"
+  out_of_scope:
+    - "New approval, approval renewal or adjudication of metadata-only blob changes"
+    - "Natural-person Owner acceptance or governance approval"
+    - "Runtime, validator, schema, test or workflow semantic changes"
+    - "Changes to canonical Design Principles or Architecture Invariants"
+    - "Issue #1189 closure"
+implementation:
+  type: "DOCUMENTATION_ONLY"
+  files:
+    - "14-ai-development/work-items/AID-2026-105/evidence.md"
+    - "docs/en/14-ai-development/work-items/AID-2026-105/evidence.md"
+    - "docs/zh-CN/14-ai-development/work-items/AID-2026-105/evidence.md"
+  runtime_changed: false
+  validator_semantics_changed: false
+acceptance:
+  status: "PENDING"
+  issue_1189_must_remain_open: true
+  owner_acceptance_claimed: false
+  joint_acceptance_claimed: false
+  governance_approval_claimed: false
+  exact_head_ci: "PENDING"
