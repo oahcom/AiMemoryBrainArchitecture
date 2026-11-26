@@ -65,3 +65,16 @@ document_metadata:
 - SHA-256: `af29bd5b61d2a3a0d659fcfbb507111d5d7220baad5a335d4a7dca8c6e0f8462`.
 - UTF-8 bytes: `2946`.
 - Provenance: user prompt copied from the initiating chat; exact AI session identifier NOT_RECORDED.
+
+
+## Session role / use case
+
+User-authorized operator (delegated by account owner), performing a documentation-only, evidence-led recovery of the one D canonical source root identified by F2/F3. This is not a natural-person Owner signature, domain approval, runtime implementation, or production acceptance.
+
+## Actual AI input
+
+The actual user instruction is preserved verbatim in `14-ai-development/work-items/AID-2026-109/prompt-v1.md` (SHA-256 `af29bd5b61d2a3a0d659fcfbb507111d5d7220baad5a335d4a7dca8c6e0f8462`, 2946 UTF-8 bytes). It requested independent derivation of the F1–F8 D-root list, restricted byte-level recovery, per-document supersession/conflict classification, GOV-DOC-002 metadata, three aligned documents, 16 exact-Head checks, merge, blob readback, and a #1212 comment. It expressly prohibited full-tree restore, runtime/validator semantic changes, 04/05 changes, and Issue closure.
+
+## AI-visible output
+
+The derived restore scope is one path: `03-memory-brain/canonical-memory-store.md`. F2 names the missing D canonical store root; F3 names the D canonical feed root and missing contiguous-watermark proof, both mapping to that same file. F4/F7 identify an existing D Fence source's Draft/Unverified/Informative and wire-schema gap, not a missing D path. The recovered §17 phrase assigning Forget Fence to I conflicts with AID-2026-089 and is explicitly marked Informative with a top-of-file authority-conflict notice. The Gate A D-root presence is recorded as RESTORED — CANDIDATE / INFORMATIVE; Owner acceptance and normative approval remain OPEN.
