@@ -17,7 +17,7 @@ document_metadata:
     evidence_verification:
       verification_status: Unverified
       last_verified_date: "2026-11-26"
-      last_verification_note: "Session identity and prompt provenance are not independently verified; unavailable identifiers are not inferred."
+      last_verification_note: "Session identity and prompt provenance are not independently verified; unavailable identifiers are not inferred. PR #1289 merge and post-merge blob readback are recorded below."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -92,4 +92,6 @@ The user instructed the operator to independently read Issue #1189 and main refe
 - Created Draft PR #1289 at `https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1289`.
 - Posted Issue #1189 gap comment #7191737277.
 - Latest observed branch Head before adding this session record: `7ae983f63bcab56a0b09bff5ea9cf8cf2e02e613`; this session-evidence addition creates a new Head and invalidates checks on the previous Head.
-- No merge has occurred. Issue #1189 remains OPEN.
+- PR #1289 merged using merge method `merge` with expected Head `7459b3eff7c54405e95aab9519bff28c775e8af2`; merge commit `69407c0781a00673852bc0dfbeef2b778d1d29fb`.
+- All 16 required contexts succeeded on that exact Head. Post-merge readback on main confirmed the AID-105 evidence, EN/ZH-CN mirrors, manifest, prompt snapshot, session evidence and INDEX blob IDs.
+- Issue #1189 remains OPEN because Owner C, joint Owner A, governance-approver acceptance and the other listed criteria remain EVIDENCE_REQUIRED.
