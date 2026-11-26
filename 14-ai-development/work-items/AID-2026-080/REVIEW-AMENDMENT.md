@@ -45,7 +45,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# Review amendment — AID-2026-079
+# Review amendment — AID-2026-080
 
 This file exists because the first attempt to record the amendment put it in the wrong place.
 
@@ -62,7 +62,7 @@ it changed the bytes the pin describes, and the required Session Evidence contex
 resulting Head with exactly that diagnostic:
 
 ```
-MISSING: path '14-ai-development/work-items/AID-2026-079/prompt-v1.md':
+MISSING: path '14-ai-development/work-items/AID-2026-080/prompt-v1.md':
 executed_prompt_sha256 mismatch in manifest entry #1
 ```
 
@@ -118,7 +118,7 @@ nested key that happens to share a name:
 | --- | --- | --- |
 | satisfy the amended clause | 48 | all but the seven below |
 | do not satisfy it | 7 | 005, 006, 008, 009, 029 (no `sponsor`, no `implementing_ai_session`); 024, 025 (none of the three) |
-| satisfy it and are accepted by `parse_manifest_session_entries` | 21 | the 20 previously conformant manifests plus AID-2026-079 |
+| satisfy it and are accepted by `parse_manifest_session_entries` | 21 | the 20 previously conformant manifests plus AID-2026-080 |
 
 The scoping is a correction, not a convenience. An unscoped "appears indented anywhere" test flags
 `AID-2026-026`, whose `scope_revision.ownership_unchanged` block restates `sponsor: NOT_ASSIGNED`

@@ -45,7 +45,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# Independent governance review — AID-2026-079, round 1
+# Independent governance review — AID-2026-080, round 1
 
 ## 1. What was reviewed, by whom, at which Head
 
@@ -59,8 +59,8 @@ document_metadata:
 | Same GitHub identity | yes, `oahcom`; §5 states identity is the carrier and independence is decided by the session |
 
 The reviewing session read, by its own calls at `a538dbf2`: `14-ai-development/PR-GOVERNANCE-001.md`,
-`AID-2026-071/manifest.yaml`, `AID-2026-075/manifest.yaml`, `INDEX.md`, `AID-2026-079/manifest.yaml`,
-`AID-2026-079/prompt-v1.md`, `AID-2026-079/session-evidence-1201.md`,
+`AID-2026-071/manifest.yaml`, `AID-2026-075/manifest.yaml`, `INDEX.md`, `AID-2026-080/manifest.yaml`,
+`AID-2026-080/prompt-v1.md`, `AID-2026-080/session-evidence-1201.md`,
 `scripts/governance/session_evidence/validate.py`, `GET /repos/.../pulls/1215`, and
 `pull/1215.diff`. The verdict below is therefore of the artifacts, not of the request.
 
@@ -315,7 +315,7 @@ block and not to any nested key that happens to share a name:
 | --- | --- | --- |
 | satisfy the amended clause | 48 | every manifest except the seven below |
 | do not satisfy it | 7 | 005, 006, 008, 009, 029 (no `sponsor`, no `implementing_ai_session`); 024, 025 (none of the three) |
-| satisfy it **and** accepted by `parse_manifest_session_entries` | 21 | the 20 previously conformant manifests plus AID-2026-079 itself |
+| satisfy it **and** accepted by `parse_manifest_session_entries` | 21 | the 20 previously conformant manifests plus AID-2026-080 itself |
 
 The scoping matters and is the reason this measurement differs from the one in the request: an
 unscoped "appears indented anywhere" test flags AID-2026-026, whose `scope_revision.ownership_unchanged`
@@ -326,7 +326,7 @@ number published from the unscoped test would have been 47 and would have been w
 ### B2 — "Record the independent exact-Head governance review and its disposition in the appropriate repository carrier"
 
 **This file is that carrier.** It is committed in the work item directory, it names the Head the
-review read, and `AID-2026-079/manifest.yaml` cites it under `review`.
+review read, and `AID-2026-080/manifest.yaml` cites it under `review`.
 
 ### B3 — "Do not claim the incomplete declared-check-context verification as PASS"
 

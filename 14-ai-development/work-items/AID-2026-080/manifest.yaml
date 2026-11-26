@@ -1,4 +1,4 @@
-work_item_id: AID-2026-079
+work_item_id: AID-2026-080
 title: Make section 5 item (2) satisfiable by removing the manifest field location requirement it should never have carried
 class: GATE/POLICY
 risk: R2
@@ -24,9 +24,27 @@ base_branch: main
 base_commit_sha: 1f5ba824aa8b2e350a8d70874b0a45720fa4a441
 tracking_issue: "#1201 - the defect report this work item answers. It is also linked from #262, whose AC2 the clause was written to serve."
 
-prompt_id: AID-2026-079-PROMPT
+prompt_id: AID-2026-080-PROMPT
 prompt_version: 1
-prompt_file: 14-ai-development/work-items/AID-2026-079/prompt-v1.md
+prompt_file: 14-ai-development/work-items/AID-2026-080/prompt-v1.md
+# ---------------------------------------------------------------------------
+# ID reassignment, 2026-11-26. This work item was registered as AID-2026-079 and
+# has been renumbered to AID-2026-080. The reason is a collision: PR #1078
+# (T92 fault injection) merged into main with a directory
+# `work-items/AID-2026-079/` of its own, and one work-item ID cannot name two
+# work items. AID-2026-077 added a gate that is supposed to catch exactly this
+# before merge; it did not fire here because the two registrations arrived on
+# different branches, which is the branch-parallel form of the same defect.
+#
+# The executed prompt snapshot keeps the old number in its title line, because
+# `prompt_sha256` pins the bytes that were executed and a renumbering is not a
+# reason to break that pin. The mapping is stated here instead: a reader who
+# finds `# AID-2026-079` inside `prompt-v1.md` is reading this work item, not
+# the T92 fault-injection one. Everything else -- the manifest id, the INDEX
+# row, the review records, the supersession annotations on 071 and 075 -- uses
+# AID-2026-080.
+# ---------------------------------------------------------------------------
+
 prompt_status: RECORDED_NOT_FROZEN
 prompt_sha256: 08f5e42efdef2c3380056fd8528cf057d6d2a7b25c366566a8599e2aff4df19a
 prompt_bytes: 9932
@@ -74,11 +92,11 @@ authorization:
 
 scope:
   files_to_create:
-    - 14-ai-development/work-items/AID-2026-079/manifest.yaml
-    - 14-ai-development/work-items/AID-2026-079/prompt-v1.md
-    - 14-ai-development/work-items/AID-2026-079/session-evidence-1201.md
-    - 14-ai-development/work-items/AID-2026-079/REVIEW-01-INDEPENDENT.md
-    - 14-ai-development/work-items/AID-2026-079/REVIEW-AMENDMENT.md
+    - 14-ai-development/work-items/AID-2026-080/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-080/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-080/session-evidence-1201.md
+    - 14-ai-development/work-items/AID-2026-080/REVIEW-01-INDEPENDENT.md
+    - 14-ai-development/work-items/AID-2026-080/REVIEW-AMENDMENT.md
   files_to_modify:
     - 14-ai-development/PR-GOVERNANCE-001.md
     - 14-ai-development/work-items/AID-2026-071/manifest.yaml
@@ -136,7 +154,7 @@ acceptance_criteria:
       annotation names this work item.
     measurement: >-
       AID-2026-071/manifest.yaml, AID-2026-075/manifest.yaml and the AID-2026-071 row of INDEX.md
-      each carry a dated superseded clause naming AID-2026-079; AID-2026-075/prompt-v1.md is
+      each carry a dated superseded clause naming AID-2026-080; AID-2026-075/prompt-v1.md is
       unmodified, and its manifest carries a `prompt_supersession` entry naming the superseded
       passage and the digest pin that no longer matches it.
   - id: C8
@@ -145,7 +163,7 @@ acceptance_criteria:
       changes it.
     measurement: >-
       `git diff --name-only` against the base does not list
-      AID-2026-079/prompt-v1.md, and its bytes hash to
+      AID-2026-080/prompt-v1.md, and its bytes hash to
       08f5e42efdef2c3380056fd8528cf057d6d2a7b25c366566a8599e2aff4df19a at 9932 bytes, equal to
       `session_evidence[0].executed_prompt_sha256` and `executed_prompt_bytes`. The Session
       Evidence context passes on the resulting Head. The amendment lives in REVIEW-AMENDMENT.md,
@@ -229,7 +247,7 @@ implementation:
 
 review:
   status: "ROUND_2_NEEDS_REVISION - the prompt-snapshot defect it found is repaired; round 3 decides at its own Head"
-  record_ref: 14-ai-development/work-items/AID-2026-079/REVIEW-01-INDEPENDENT.md
+  record_ref: 14-ai-development/work-items/AID-2026-080/REVIEW-01-INDEPENDENT.md
   round_1:
     exact_head_reviewed: a538dbf289cb21fc04a03fb412c90482619187bc
     reviewer_session: 6b07448b-ac9c-83ec-9115-f056a313f972
@@ -269,9 +287,9 @@ session_evidence:
     issue_refs:
       - "#1201"
     implementing_ai_session: req05-convergence-session-identity-not-recorded
-    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-079/prompt-v1.md
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-080/prompt-v1.md
     executed_prompt_sha256: 08f5e42efdef2c3380056fd8528cf057d6d2a7b25c366566a8599e2aff4df19a
     executed_prompt_bytes: 9932
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
-    session_evidence_ref: 14-ai-development/work-items/AID-2026-079/session-evidence-1201.md
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-080/session-evidence-1201.md

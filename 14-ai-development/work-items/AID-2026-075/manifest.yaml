@@ -18,7 +18,7 @@ accountable_owner: USER-PRINCIPAL-DELEGATED
 # principals. AID-2026-071 carries the same deviation, and the pull request that
 # introduced this work item discloses both.
 # ---------------------------------------------------------------------------
-# Superseded 2026-11-25 by AID-2026-079 / Issue #1201. The paragraph above is
+# Superseded 2026-11-25 by AID-2026-080 / Issue #1201. The paragraph above is
 # kept as written because it records what was believed when it was written, and
 # what was believed was wrong in a way that is worth keeping visible: there was
 # no top-level field requirement to fail. Section 5 item (2) required
@@ -40,7 +40,7 @@ prompt_sha256: e85f9ae067792717fbe989322dfee804091c776b2ad4317a03f2a95970ee4d83
 prompt_bytes: 4961
 prompt_supersession:
   - passage: "prompt-v1.md line 95 - \"Must: read the top-level fields, judge principal identity rather than string inequality, ...\""
-    superseded_by: "AID-2026-079 - section 5 item (2) no longer requires a top-level location"
+    superseded_by: "AID-2026-080 - section 5 item (2) no longer requires a top-level location"
     date: "2026-11-25"
     reason: >-
       The snapshot is left unmodified so its digest keeps describing bytes that exist. The
@@ -92,7 +92,7 @@ scope:
 
 acceptance:
   C1: "A named CI check for REQ-level assessment signature compliance is present and runs on the authorized pull-request scope. PASS requires the check to execute on the exact tested commit; a missing or skipped execution fails."
-  C2: "The check reads sponsor, accountable_owner and implementing_ai_session from each in-scope manifest wherever each name appears - top level or inside the session_evidence entry - and reports a manifest that omits any of the three. Placement is not a criterion: section 5 item (2) as corrected by AID-2026-079 requires each name in exactly one place, so a nested-only implementing_ai_session satisfies it. Superseded wording, kept for the diff: 'The check reads the top-level sponsor, accountable_owner and implementing_ai_session fields from each in-scope manifest. A nested-only implementing_ai_session does not satisfy the top-level field requirement.' That wording was unsatisfiable and is withdrawn."
+  C2: "The check reads sponsor, accountable_owner and implementing_ai_session from each in-scope manifest wherever each name appears - top level or inside the session_evidence entry - and reports a manifest that omits any of the three. Placement is not a criterion: section 5 item (2) as corrected by AID-2026-080 requires each name in exactly one place, so a nested-only implementing_ai_session satisfies it. Superseded wording, kept for the diff: 'The check reads the top-level sponsor, accountable_owner and implementing_ai_session fields from each in-scope manifest. A nested-only implementing_ai_session does not satisfy the top-level field requirement.' That wording was unsatisfiable and is withdrawn."
   C3: "The check evaluates principal identity rather than raw string inequality. Identical sponsor and accountable_owner principals are accepted, while identical accountable_owner and implementing_ai_session principals are reported as violations."
   C4: "The check detects missing assessor, assessed_version and evidence_baseline fields in in-scope assessment records, and reports each missing field separately."
   C5: "The check validates that assessed_version is a full 40-character commit SHA and reports invalid or incomplete values."

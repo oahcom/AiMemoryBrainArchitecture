@@ -45,7 +45,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# Session evidence — AID-2026-079
+# Session evidence — AID-2026-080
 
 ## Session role / use case
 
@@ -66,7 +66,7 @@ executable file, and why the checker that would enforce the paragraph remains un
 ## AI-visible output
 
 - Issue #1201 — the defect report, including both error strings and the full bucket table.
-- `14-ai-development/work-items/AID-2026-079/` — `manifest.yaml`, `prompt-v1.md`, this record,
+- `14-ai-development/work-items/AID-2026-080/` — `manifest.yaml`, `prompt-v1.md`, this record,
   `REVIEW-01-INDEPENDENT.md` holding the round-1 verdict verbatim and its disposition, and
   `REVIEW-AMENDMENT.md` holding the amendment that round 1 required and round 2 found in the wrong
   file.
@@ -146,7 +146,7 @@ not carried over from the accepted source.
 ## 5. The statements the correction retires
 
 Four records described the deviation; all four are annotated rather than deleted, and each
-annotation names AID-2026-079:
+annotation names AID-2026-080:
 
 - `AID-2026-071/manifest.yaml` — the `Known deviation, stated rather than repaired` block.
 - `AID-2026-075/manifest.yaml` — the same block, plus criterion **C2**, which instructed the
