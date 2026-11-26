@@ -308,7 +308,7 @@ Documentation author and evidence reviewer for the AID-2026-095 Gate A matrix re
 
 ## Actual AI input
 
-The user-authorized task requested a row-by-row rejudgment of the AID-2026-095 eight-flow matrix after merged AID-2026-082, AID-2026-098 and AID-2026-100; exact evidence paths and blob SHAs for every upgrade; table-row counting of the Storage DOCUMENTED_ONLY / EVIDENCE_REQUIRED checkpoints; explicit preservation of the eight EVIDENCE_REQUIRED Storage items absent implementation evidence; canonical/EN/ZH-CN documents; Gate A/B status and remaining blockers; and a Draft PR linked to #1212. The executed prompt snapshot is `14-ai-development/work-items/AID-2026-107/prompt-snapshot.txt`.
+The user-authorized task requested a row-by-row rejudgment of the AID-2026-095 eight-flow matrix after merged AID-2026-082, AID-2026-098 and AID-2026-100; exact evidence paths and blob SHAs for every upgrade; table-row counting of the Storage DOCUMENTED_ONLY / EVIDENCE_REQUIRED checkpoints; explicit preservation of the eight EVIDENCE_REQUIRED Storage items absent implementation evidence; canonical/EN/ZH-CN documents; Gate A/B status and remaining blockers; and a Draft PR linked to #1212. The executed prompt snapshot is `14-ai-development/work-items/AID-2026-107/prompt-v1.md`.
 
 ## AI-visible output
 

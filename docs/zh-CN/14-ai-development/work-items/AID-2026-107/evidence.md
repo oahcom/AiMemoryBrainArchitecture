@@ -308,7 +308,7 @@ user-authorized operator (delegated by account owner)；2026-11-26。仅代理�
 
 ## Actual AI input
 
-用户授权任务要求：在 AID-2026-082、098、100 合并后逐条重判 AID-2026-095 的八流程矩阵；每项升级提供精确证据路径与 blob SHA；按 Storage 表格数据行统计 DOCUMENTED_ONLY / EVIDENCE_REQUIRED；在缺少实现层证据时保留八项 EVIDENCE_REQUIRED；创建 canonical/EN/ZH-CN 文档；报告 Gate A/B、剩余缺口；创建关联 #1212 的 Draft PR。执行 prompt 快照位于 `14-ai-development/work-items/AID-2026-107/prompt-snapshot.txt`。
+用户授权任务要求：在 AID-2026-082、098、100 合并后逐条重判 AID-2026-095 的八流程矩阵；每项升级提供精确证据路径与 blob SHA；按 Storage 表格数据行统计 DOCUMENTED_ONLY / EVIDENCE_REQUIRED；在缺少实现层证据时保留八项 EVIDENCE_REQUIRED；创建 canonical/EN/ZH-CN 文档；报告 Gate A/B、剩余缺口；创建关联 #1212 的 Draft PR。执行 prompt 快照位于 `14-ai-development/work-items/AID-2026-107/prompt-v1.md`。
 
 ## AI-visible output
 
