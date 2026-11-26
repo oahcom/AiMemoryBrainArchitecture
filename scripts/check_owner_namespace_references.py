@@ -64,7 +64,7 @@ def violations(text: str) -> list[tuple[int, str, str]]:
             continue
         if line.lstrip().startswith('|'):
             cells = [cell.strip() for cell in line.strip().strip('|').split('|')]
-            if any(re.search(r'\\b(?:primary|supporting|accountable|responsible)\\s+owners?\\b', cell, re.I) for cell in cells):
+            if any(re.search(r'\b(?:primary|supporting|accountable|responsible)\s+owners?\b', cell, re.I) for cell in cells):
                 owner_columns = [index for index, cell in enumerate(cells) if 'owner' in cell.casefold()]
                 continue
             if owner_columns:
