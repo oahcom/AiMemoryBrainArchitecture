@@ -12,12 +12,12 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-192/evidence.md"
+        - "14-ai-development/work-items/AID-2026-192/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-27"
-      last_verification_note: "Counts re-derived from the tree at 4326669c by command, not asserted; the AID-2026-111 row inventory was re-tallied from its own cells; the AID-2026-112 provenance claim was compared line by line against AID-2026-111 §2.3. No historical verdict, blob pin or test result was changed or re-run."
+      last_verification_note: "Counts re-derived from the tree by command, not asserted; the AID-2026-111 row inventory was re-tallied from its own cells; the AID-2026-112 provenance claim was compared line by line against AID-2026-111 sections 2.3 and 12. No historical verdict, blob pin or test result was changed or re-run."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -29,20 +29,16 @@ document_metadata:
       archival_reason: null
       archival_reference: null
   authority:
-    canonical_status: Canonical
-    canonical_scope: "Corrected counts and provenance for documentation-gaps GAP-03, the AID-2026-111 combined row and the AID-2026-112 memory-context execution fields"
-    canonical_scope_id: "ai-development/aid-2026-192-count-and-provenance-correction"
-    canonical_scope_keywords:
-      - "documentation-gaps"
-      - "work-item-arithmetic"
-      - "provenance"
-      - "not-recorded"
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: null
-    en: "docs/en/14-ai-development/work-items/AID-2026-192/evidence.md"
+    source: "14-ai-development/work-items/AID-2026-192/evidence.md"
+    en: null
     zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-192/evidence.md"
 ---
 
@@ -52,7 +48,8 @@ document_metadata:
 
 - Repository: `oahcom/AiMemoryBrainArchitecture`; base `main` at
   `4326669caa6c43193d34219a0451b80762b712ff` (the branch was cut here).
-- Branch: `fix/2026-11-27-stale-counts-and-claims`.
+- Branch: `fix/2026-11-27-stale-counts-and-claims`; registration id `AID-2026-192`
+  (originally 190, renumbered when PR #1343 merged 190 and PR #1345 held 191).
 - Attribution: user-authorized operator (delegated by account owner). No natural-person Owner
   signature, acceptance or approval is asserted, and nothing here closes an Issue.
 - This unit edits four documents and their two mirrors, and adds this registration set plus one
@@ -172,8 +169,8 @@ All commands were run in `D:\code\wt-counts` at the base commit with `PYTHONUTF8
 | Review transcripts | recursive `.md` count under `reviews/` | **198** (196 before) |
 | AID-2026-111 row inventory | parse rows matching the three section prefixes, tally the bolded verdict | **88** rows → 23/49, 6/2, 5/3 → **0/34/54** |
 | Metadata parse | `read_metadata` from `check_document_management` on all seven edited files | `True` for every file |
-| Line endings | `python scripts/ci/check_line_endings.py` | 1635 files inspected, **0 violations** |
-| Document management | `python scripts/check_document_management.py` | `INCOMPLETE: no rule violations in 501 classified documents, but 446 governed documents are still unclassified` (exit 2) — the documented pre-existing backlog state, see GAP-02; **zero rule violations** |
+| Line endings | `python scripts/ci/check_line_endings.py` | 1641 files inspected, **0 violations** |
+| Document management | `python scripts/check_document_management.py` | `INCOMPLETE: no rule violations in 506 classified documents, but 446 governed documents are still unclassified` (exit 2) — the documented pre-existing backlog state, see GAP-02; **zero rule violations** |
 
 The DM gate's exit code 2 is the backlog state this repository records in GAP-02 ("that scan now
 returns INCOMPLETE (exit 2) while backlog remains"), not a finding against this change.

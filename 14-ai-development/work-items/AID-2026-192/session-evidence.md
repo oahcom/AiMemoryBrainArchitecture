@@ -90,9 +90,12 @@ changes which model produced the text, not what was asked for.
 4. Appended `## Provenance correction` to the three AID-2026-112 copies at the end, leaving the
    §8 table, the 552 title and every verdict untouched, and marking Exit code, Failed count and
    Test binaries `INHERITED_ASSUMPTION` with the unsourced stdout hash noted separately.
-5. Took `AID-2026-192` after confirming the INDEX maximum was 189 (merged) and that no pull
+5. Took `AID-2026-190` after confirming the INDEX maximum was 189 (merged) and that no pull
    request title, head branch or work-item directory carried 190; wrote this registration set
-   and one INDEX row.
+   and one INDEX row. While the PR was open, main merged AID-2026-190 from PR #1343 (a
+   different correction), and AID-2026-191 was already held by the open PR #1345, so the set
+   was renumbered to `AID-2026-192` with every path, manifest reference, canonical_scope_id
+   and INDEX cell updated in one commit.
 6. Ran the repository's own gates locally: metadata parse `True` on all seven edited files,
    line endings 1629 files / 0 violations, document management `INCOMPLETE` with **zero rule
    violations** (the documented backlog state, not a finding).

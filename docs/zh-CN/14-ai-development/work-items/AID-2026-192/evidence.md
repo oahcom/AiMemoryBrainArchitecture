@@ -48,7 +48,8 @@ document_metadata:
 
 - 仓库：`oahcom/AiMemoryBrainArchitecture`；基线 `main` 为
   `4326669caa6c43193d34219a0451b80762b712ff`（分支自此切出）。
-- 分支：`fix/2026-11-27-stale-counts-and-claims`。
+- 分支：`fix/2026-11-27-stale-counts-and-claims`；登记编号 `AID-2026-192`
+  （原为 190，因 PR #1343 合并了 190、PR #1345 占用 191 而重编）。
 - 署名：user-authorized operator（由账户所有者委托）。不声称自然人 Owner 签署、验收或批准，也不关闭任何 Issue。
 - 本单元修改四份文档及其两侧镜像，新增本登记集与一行 `INDEX.md`。不改代码、不改 workflow、不改 checker、不改登记表、不改任何历史判定。
 
@@ -119,8 +120,8 @@ document_metadata:
 | review 记录 | `reviews/` 下 `.md` 递归计数 | **198**（改前 196） |
 | AID-2026-111 行清单 | 按三个章节前缀解析行并统计加粗判定 | **88** 行 → 23/49、6/2、5/3 → **0/34/54** |
 | 元数据解析 | `check_document_management` 的 `read_metadata`，对七份被改文件 | 全部 `True` |
-| 行尾 | `python scripts/ci/check_line_endings.py` | 1635 个文件，**0 违规** |
-| 文档管理门禁 | `python scripts/check_document_management.py` | `INCOMPLETE: no rule violations in 501 classified documents, but 446 governed documents are still unclassified`（exit 2）——即 GAP-02 记录的既有积压状态，**零规则违规** |
+| 行尾 | `python scripts/ci/check_line_endings.py` | 1641 个文件，**0 违规** |
+| 文档管理门禁 | `python scripts/check_document_management.py` | `INCOMPLETE: no rule violations in 506 classified documents, but 446 governed documents are still unclassified`（exit 2）——即 GAP-02 记录的既有积压状态，**零规则违规** |
 
 DM 门禁的 exit 2 是本仓库在 GAP-02 中记录的积压状态（"该扫描现在返回 INCOMPLETE (exit 2)，只要积压仍在"），不是针对本次改动的发现。
 

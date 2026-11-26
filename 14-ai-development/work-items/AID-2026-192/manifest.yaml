@@ -28,13 +28,23 @@ identifier_allocation:
   observed_main: 4326669caa6c43193d34219a0451b80762b712ff
   assigned_id: AID-2026-192
   allocation_rule: >-
-    The measured INDEX maximum was AID-2026-189, which is merged. A read of all pull request
-    titles and head branch names returned no AID-2026-192 and no work-item directory carried
-    the number, so 190 is the first number outside both the merged set and the open set. INDEX
-    was treated as a lower bound only; it is not the allocation source.
+    The measured INDEX maximum at dispatch was AID-2026-189, which is merged. The first
+    allocation was AID-2026-190, but PR #1343 merged AID-2026-190 on main while this PR was
+    open, and AID-2026-191 is held by the open PR #1345. A re-read of every pull request title,
+    head branch and work-item directory on the new main left AID-2026-192 as the first free
+    number, so the registration set was renumbered to 192 with every path, reference and
+    canonical_scope_id updated in the same commit. INDEX was treated as a lower bound only; it
+    is not the allocation source.
   recheck_rule: >-
     Immediately before merge, re-read open pull requests and remote branches for AID-2026-192;
     if occupied, take the next free number and update every path and reference in one push.
+  occupancy_history:
+    - id: AID-2026-190
+      state: OCCUPIED_BY_MERGED_PR_1343
+      observed: "merged on main while this PR was open; its scope is a different correction"
+    - id: AID-2026-191
+      state: OCCUPIED_BY_OPEN_PR_1345
+      observed: "open branch fix/2026-11-27-hygiene-silent-skip"
 scope:
   objective: >-
     Make the governance record arithmetically reproducible. Three statements were false or

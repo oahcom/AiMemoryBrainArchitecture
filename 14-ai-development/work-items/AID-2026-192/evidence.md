@@ -52,7 +52,8 @@ document_metadata:
 
 - Repository: `oahcom/AiMemoryBrainArchitecture`; base `main` at
   `4326669caa6c43193d34219a0451b80762b712ff` (the branch was cut here).
-- Branch: `fix/2026-11-27-stale-counts-and-claims`.
+- Branch: `fix/2026-11-27-stale-counts-and-claims`; registration id `AID-2026-192`
+  (originally 190, renumbered when PR #1343 merged 190 and PR #1345 held 191).
 - Attribution: user-authorized operator (delegated by account owner). No natural-person Owner
   signature, acceptance or approval is asserted, and nothing here closes an Issue.
 - This unit edits four documents and their two mirrors, and adds this registration set plus one
@@ -172,8 +173,8 @@ All commands were run in `D:\code\wt-counts` at the base commit with `PYTHONUTF8
 | Review transcripts | recursive `.md` count under `reviews/` | **198** (196 before) |
 | AID-2026-111 row inventory | parse rows matching the three section prefixes, tally the bolded verdict | **88** rows → 23/49, 6/2, 5/3 → **0/34/54** |
 | Metadata parse | `read_metadata` from `check_document_management` on all seven edited files | `True` for every file |
-| Line endings | `python scripts/ci/check_line_endings.py` | 1635 files inspected, **0 violations** |
-| Document management | `python scripts/check_document_management.py` | `INCOMPLETE: no rule violations in 501 classified documents, but 446 governed documents are still unclassified` (exit 2) — the documented pre-existing backlog state, see GAP-02; **zero rule violations** |
+| Line endings | `python scripts/ci/check_line_endings.py` | 1641 files inspected, **0 violations** |
+| Document management | `python scripts/check_document_management.py` | `INCOMPLETE: no rule violations in 506 classified documents, but 446 governed documents are still unclassified` (exit 2) — the documented pre-existing backlog state, see GAP-02; **zero rule violations** |
 
 The DM gate's exit code 2 is the backlog state this repository records in GAP-02 ("that scan now
 returns INCOMPLETE (exit 2) while backlog remains"), not a finding against this change.
