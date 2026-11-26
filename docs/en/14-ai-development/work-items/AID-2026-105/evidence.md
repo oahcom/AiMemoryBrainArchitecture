@@ -29,8 +29,8 @@ document_metadata:
       archival_reason: null
       archival_reference: null
   authority:
-    canonical_status: Canonical
-    canonical_scope: "Issue #1189 acceptance evidence inventory"
+    canonical_status: Non-Canonical
+    canonical_scope: "English mirror of Issue #1189 acceptance evidence inventory"
     canonical_scope_id: "ai-development/issue-1189-acceptance-evidence"
     canonical_scope_keywords:
       - approval-provenance
@@ -41,8 +41,8 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: null
-    en: "docs/en/14-ai-development/work-items/AID-2026-105/evidence.md"
+    source: "14-ai-development/work-items/AID-2026-105/evidence.md"
+    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-105/evidence.md"
     zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-105/evidence.md"
 ---
 
