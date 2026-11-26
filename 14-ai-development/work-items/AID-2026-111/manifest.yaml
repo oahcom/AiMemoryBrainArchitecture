@@ -48,7 +48,7 @@ source_pins:
   aid_108_correction_manifest_blob: "1164fb16a65c2a252697751dce76fa9584a36165"
   storage_contract_blob: "d571f086505b312c40b6ae2e56a868131cfffc78"
   h_contract_blob: "f64dd8f520b98e52a7151619cb279fc0b4c38c89"
-latest_sync_main_commit_sha: "e47dd6f03ddd143be42645beba43c54b46921962"
+latest_sync_main_commit_sha: "248cef62410cb4a412efb2d83326a1ce32345765"
 execution_evidence:
   sqlite_backend:
     head: "a123ea4e414c9f74fa0c576fbd718049a7d9f917"
@@ -60,10 +60,18 @@ execution_evidence:
     failed: 0
     stdout_bytes: 9465
     stdout_sha256: "a15e3862af4d6cd97a4cd8caf6f133f57e3c3636ba284bdfd5afaa9237ba2952"
+    stdout_sha256_scope: "THIS_CAPTURE_ONLY"
+    normalised_digest: "92c368733aa89e426d1508a55584a5a4b8f0cc4f9b91aab6723820f6260ca086"
+    normalised_digest_algorithm: "SHA-256 over exit code + passed/failed totals + sorted multiset of per-harness passed counts; excludes ordering, durations and process interleaving"
+    harness_passed_counts: [26, 5, 2, 6, 60]
+    harness_count_rule: "Sum complete test result lines; exclude child-process rows with filtered out > 0"
+    test_name_recovery: "recovered 94 of 99; best-effort only; harness counts authoritative"
+    raw_stdout_reproducibility: "FIVE_RUNS_FIVE_DISTINCT_RAW_SHA256"
     individually_named_tests_supplied: 94
     evidence_origin: "USER_SUPPLIED_LOCAL_EXECUTION_NOT_CI"
   pure_rust:
     head: "44dc21a4970192118ba434801b8ca05702ac582c"
+    environment: "WSL2 Ubuntu 24.04; rustup stable 1.100.0"
     command: "cargo test -p memory-domain -p memory-storage -p memory-event-store -p bmcp-protocol -p agent-integration --no-fail-fast"
     exit_code: 0
     test_binaries: 15
@@ -71,12 +79,30 @@ execution_evidence:
     failed: 0
     stdout_bytes: 47066
     stdout_sha256: "C18EF5FC121EEB9B486000180F52BAE8385385722A369ADDAB873FCF8716D7B9"
+    stdout_sha256_scope: "THIS_CAPTURE_ONLY"
+    normalised_digest: "73d97ed8f536aa06cf483f84e750ddbda610d56e8f5caee501fac6f198934eee"
+    normalised_digest_algorithm: "SHA-256 over exit code + passed/failed totals + sorted multiset of per-harness passed counts; excludes ordering, durations and process interleaving"
+    test_name_inventory: "NOT_SUPPLIED; harness counts authoritative"
+  memory_context:
+    head: "a123ea4e414c9f74fa0c576fbd718049a7d9f917"
+    environment: "WSL2 Ubuntu 24.04"
+    passed: 177
+    failed: 0
+    command: "NOT_RECORDED"
+    test_binaries: "NOT_RECORDED"
+    stdout_bytes: "NOT_RECORDED"
+    stdout_sha256: "NOT_RECORDED"
+    normalised_digest: "NOT_SUPPLIED"
+    harness_passed_counts: "NOT_SUPPLIED"
+    test_name_inventory: "NOT_SUPPLIED"
+    evidence_origin: "USER_SUPPLIED_LOCAL_EXECUTION_AGGREGATE"
   windows_workspace_negative:
     command: "cargo test --workspace"
     exit_code: 101
     reason: "libsqlite3-sys v0.40.0 build script cannot execute cc1; MSVC cl.exe/link.exe absent"
     stdout_bytes: 12456
     stdout_sha256: "93BCDC26AB0B29CEDBEC56DD11BB735C8050DB18366A3F296B45C699C072C2B2"
+    stdout_sha256_scope: "THIS_CAPTURE_ONLY"
 rejudgment:
   test_names_mapped: 94
   aid_095_rows:
@@ -114,13 +140,10 @@ acceptance:
   implementation_conformance: "NOT_CLAIMED"
   production_conformance: "NOT_CLAIMED"
 carrier:
-  branch: "docs/aid-2026-111-sqlite-implementation-evidence-review"
+  branch: "docs/aid-2026-109-sqlite-implementation-evidence-review"
   pull_request: 1307
-  draft: false
-  merged_head_sha: "0463e984b961a08660e111f9f1947dfed373d78a"
-  required_contexts: 16
-  required_contexts_success: 16
-  merge_commit_sha: "e47dd6f03ddd143be42645beba43c54b46921962"
+  draft: true
+  merge_commit_sha: "PENDING"
   merge_authorization: "only after all 16 required contexts succeed on exact final Head"
 review:
   status: "NOT_ASSIGNED"
