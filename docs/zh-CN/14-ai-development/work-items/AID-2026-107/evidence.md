@@ -17,7 +17,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-26"
-      last_verification_note: "The 72 AID-2026-095 checkpoint rows remain NOT EVIDENCED; IMPL2 comparison at main a7e7c64bfd6c6d709a0a7b55358f94b8535815c1 classified 189 missing paths as 5 normative roots, 83 historical phase records and 101 undecided files; no missing path was restored."
+      last_verification_note: "The 72 AID-2026-095 checkpoint rows remain NOT EVIDENCED; IMPL2 comparison classified 189 missing paths as 5 normative roots, 83 historical phase records and 101 undecided files; PR #1299 merged after 16/16 exact-Head checks and three evidence blobs were verified equal on main."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -217,17 +217,17 @@ document_metadata:
 
 | # | Gate A 条目 | 当前状态 | 闭合条件 |
 |---|---|---|---|
-| 1 | 分支与当前 main 同步 | 在审查基线 `44dc21a4970192118ba434801b8ca05702ac582c` 上 SATISFIED；若 main 前进须重查 | 最终 Head 审查时 merge base 等于当前 main，分支不得落后。 |
+| 1 | 分支与当前 main 同步 | PR #1299 合并时 SATISFIED；审查基线 `a7e7c64bfd6c6d709a0a7b55358f94b8535815c1`，merge commit `b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c` | 最终 PR Head 合并前相对 main 为 0 behind。 |
 | 2 | 跨 Owner 角色处置（10 个角色：3 ACCEPT / 7 CONDITIONAL / 0 REJECT） | 已记录的代理处置为 SATISFIED | 7 项条件义务仍在；未声称自然人 Owner 签署。 |
-| 3 | 精确 Head CI | OPEN_PENDING_FINAL_HEAD | 全部 16 项必需上下文必须在 PR 最终 Head 成功。 |
+| 3 | 精确 Head CI | SATISFIED — 最终 Head `d40a05c9abc68b2a4a9b007805e3e1c34e4128f9` 上 16/16 SUCCESS；已合并为 `b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c` | 全部 16 项必需上下文均在精确最终 PR Head 成功；main 等于 merge commit。 |
 | 4 | 完整 A–I + Storage/Consistency 组合审查工件 | OPEN | Owner A 协调覆盖 8 条流程和 9 个检查点维度的完整精确版本包；相关 Owner 接受自身边界。 |
-| 5 | 缺失的 D/E/F/I 规范根/合同 | OPEN — IMPL2 | IMPL2 恢复或正式处置规范根并固定精确 canonical 替代来源；D/E/F/I 审查自身权威语义。AID-082 lint 不能替代。 |
+| 5 | 缺失的 D/E/F/I 规范根/合同 | OPEN — 范围已裁决；5 个规范根需由单独 PR 恢复；F/I 根需 Owner 指认 | 通过单独 Owner 审查 PR 恢复 5 个已识别 D/E 根；由 Owner 指认或明确批准替代缺失的 F/I README 根。未经 Owner 裁决，历史/未决文件不得进入 main。 |
 | 6 | Storage/Consistency 物理合同与证据 | OPEN — 合同已存在，证据缺失 | 候选合同：`10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78`（Candidate/Draft/Unverified/Informative）。SC-04/05/06/10/12/13/17/18 仍为 EVIDENCE_REQUIRED；后端、WAL/flush/torn-write、崩溃/恢复、副本可见性、fail-closed projection、防回滚、已接受 COC/GID、可重复 RPO/RTO 证据和精确版本 Owner 处置仍缺。 |
 | 7 | H 幂等命名空间 / 重放边界 | OPEN — 合同已存在，证据缺失 | 候选合同：`08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md` @ `f64dd8f520b98e52a7151619cb279fc0b4c38c89`（Candidate/Draft；跨 Owner 接受 PENDING）。HIR-05/06/08/12/14/16/17/18 仍为 EVIDENCE_REQUIRED；H/E/Storage 接受、持久 reservation、并发、重放、崩溃/恢复、Storage same-GID 和 C/G Attempt join 证据仍缺。 |
 | 8 | 全包双语语义与源修订一致 | OPEN | Owner A / 文档 Owners 验证完整精确 Head 的 Canonical/EN/ZH-CN 语义一致及所有来源 pin。 |
 | 9 | DEC-13 规范批准证据 | RECORDED — AID-2026-096 | 仅限精确六个 blob 范围；#1189 仍 OPEN，自然人 Owner / 联合验收确认仍缺。 |
 
-**Gate A：PARTIAL / OPEN。** 第 1、2、9 项已满足/记录；第 3–8 项仍 OPEN。第 6、7 项现在的准确状态是“合同已存在，证据缺失”，不是 CLOSED，也不是 PASS。
+**Gate A：PARTIAL / OPEN。** 第 1、2、3、9 项已满足/记录；第 4–8 项仍 OPEN。第 6、7 项准确状态为“合同已存在，证据缺失”，不是 CLOSED，也不是 PASS。
 
 ## 5. HIR-01…HIR-18 行计数复核与过期基线 pin
 
@@ -249,13 +249,12 @@ H 合同位于 `08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-con
 
 ## 7. Gate A 闭合前的剩余事项
 
-1. 精确 Head CI：全部 16 项必需上下文必须在 PR 最终 Head 成功，并针对该 SHA 读回。
-2. 完整八流程 A–I + Storage 组合包、来源 pin、语义一致性及相关 Owner 精确版本接受。
-3. IMPL2 恢复或治理处置 D/E/F/I 规范根，随后由领域 Owner 接受。
-4. Storage：以后端事务、崩溃、恢复、并发、副本/可见性、防回滚、COC/GID 和 RPO/RTO 证据关闭 SC-04/05/06/10/12/13/17/18。
-5. H/E/Storage：以持久 namespace reservation、并发/重放、Unknown 恢复、崩溃协调、Storage 回执 join 和 C/G Attempt 映射证据关闭 HIR-05/06/08/12/14/16/17/18。
-6. Owner A / 文档 Owners 验证完整包 Canonical/EN/ZH-CN 语义与源修订一致。
-7. Gate B 独立保持 OPEN，等待实现、一致性和运行证据。
+1. 完成 A–I + Storage 八流程组合包、来源 pin、语义一致性及相关 Owner 的精确版本接受。
+2. IMPL2：通过单独 PR 恢复已识别的 5 个 D/E 规范根；取得 Owner 对缺失 F/I README 根的指认或明确替代裁决；未经 Owner 裁决，不得导入 83 个历史记录或 101 个未决文件。
+3. Storage：以后端事务、崩溃、恢复、并发、副本/可见性、防回滚、COC/GID 和 RPO/RTO 证据关闭 SC-04/05/06/10/12/13/17/18。
+4. H/E/Storage：以持久 namespace reservation、并发/重放、Unknown 恢复、崩溃协调、Storage 回执 join 和 C/G Attempt 映射证据关闭 HIR-05/06/08/12/14/16/17/18。
+5. Owner A / 文档 Owners 验证完整包 Canonical/EN/ZH-CN 语义与源修订一致。
+6. Gate B 独立保持 OPEN，等待实现、一致性和运行证据。
 
 ## 8. 非主张与约束
 
@@ -529,3 +528,11 @@ AID-095 §2 将 `05-memory-runtime/README.md` 与 `09-security-governance/README
 Gate A 第 5 项现已从笼统的“IMPL2”占位变为可执行状态：**OPEN — 范围已裁决；识别出 5 个需由单独 PR 恢复的规范根；F/I 源根文件仍需 Owner 指认或明确批准替代文件。** 在这些规范根及 F/I 源根问题解决前，该项仍为 OPEN。本 PR 不恢复 189 个差集文件中的任何一个。
 
 **Gate A 仍为 PARTIAL / OPEN。Gate B 仍为 PARTIAL / OPEN（NOT VERIFIED）。** AID-095 的 72 个检查点仍为 0 UPGRADED / 72 UNCHANGED / 0 DOWNGRADED；8 条流程仍全部 BLOCKED_WITH_REASON。Storage SC-04/05/06/10/12/13/17/18 与 HIR-05/06/08/12/14/16/17/18 仍为 EVIDENCE_REQUIRED；checker/census 证据不能替代实现层证据。
+
+
+## 11. PR #1299 合并后验收记录
+
+- PR #1299 已从最终 Head `d40a05c9abc68b2a4a9b007805e3e1c34e4128f9` 合并，merge commit 为 `b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c`。
+- 该精确最终 Head 上 16 项必需检查全部 SUCCESS；main HEAD 等于 merge commit。
+- 合并后 Git blob 核对（PR Head = main）：Canonical `cce956d97b7a6d969bb3245fe0890905ca6d3979`；EN `101dcc3ca2a1d0c8358505a5a5cc221a5aa85cab`；ZH-CN `1b478d1114613adb3f7d3bbdcd913d403a78c36f`。
+- Gate A 清单第 3 项（精确 Head CI）现为 SATISFIED。第 4–8 项仍 OPEN；Gate A 仍为 PARTIAL / OPEN，Gate B 仍为 PARTIAL / OPEN（NOT VERIFIED）。
