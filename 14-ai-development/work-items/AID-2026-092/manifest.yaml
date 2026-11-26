@@ -11,7 +11,7 @@ risk_rationale: >-
   phase-boundary interpretation and validator-verification limits. A false approval,
   overstated freeze or invented test result would create governance risk. All unavailable
   facts remain NOT_RECORDED or BLOCKED; no normative source, validator or Runtime is changed.
-status: DISPATCHED
+status: MERGED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -119,8 +119,8 @@ findings:
 
 implementation:
   status: DOCUMENTATION_ONLY
-  pull_request: ASSIGNED_AT_OPEN
-  merge_commit_sha: NOT_MERGED
+  pull_request: 1250
+  merge_commit_sha: 587d7ca9731e50c7a4c8c9df424798f555e0a2db
   note: >-
     This work item creates evidence records only. The explicitly authorized merge integrates
     these records; it does not claim any Issue is accepted or closed.

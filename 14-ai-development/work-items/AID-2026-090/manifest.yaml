@@ -4,7 +4,7 @@ renumbering_reason: "AID-2026-087 is superseded by the delegated renumbering dec
 title: Define immutable ContextVersion boundary and legal successor mutation paths
 class: ARCH/DOC
 risk: R2
-status: DISPATCHED
+status: MERGED
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: Owner G
 acceptance_authority: "Owner G with dependent Owners B, D, I and Storage/Consistency; Owner A governance review"
@@ -46,9 +46,10 @@ acceptance_criteria:
   - {id: CVI-07, criterion: "Idempotent retry replays receipt; key/digest mismatch conflicts."}
   - {id: CVI-08, criterion: "EN/ZH-CN semantic parity."}
 implementation:
-  status: IMPLEMENTED_IN_BRANCH
+  status: MERGED
   branch: impl/2026-11-26-context-version-immutability
   pull_request: 1241
+  merge_commit_sha: 72c9e68a158a5a0a00936fc7fc0adfc1fa024b5c
 review: PENDING
 acceptance: PENDING
 session_evidence:
