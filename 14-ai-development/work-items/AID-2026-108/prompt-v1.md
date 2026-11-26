@@ -1,3 +1,51 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-108/manifest.yaml"
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-26"
+      last_verification_note: "Snapshot of the user-directed task; prompt provenance is recorded as NOT_VERIFIED."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
+---
+
+# AID-2026-108 — Prompt snapshot v1
+
+The following is the user-directed task snapshot, preserved byte-for-byte for the session evidence reference.
+
+~~~text
 ﻿审计做完了，任务换一个：**做一次小的登记纠错**（不再是只读）。
 
 ## 目标：修正 AID-2026-099 里一条已过期的钉
@@ -23,3 +71,4 @@
 硬约束：不改任何规范结论；不动 098 的内容；不伪造证据；不关 Issue。
 
 回报：纠正前/后原文对照、改动文件清单与 blob、PR 链接、16 项、merge commit SHA、#1211 评论链接。
+~~~
