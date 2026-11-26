@@ -47,7 +47,7 @@ document_metadata:
 
 - Work item: AID-2026-095
 - ID status: PROVISIONAL; temporary numeric reservation; recheck main and renumber at merge time if occupied.
-- Exact source baseline: main @ 17b05a0234d861a8bd0b78bccea799b1c11c433f
+- Exact source baseline: main @ 47fcd80720b742d9c5d3ae137593c59b5cc768a9
 - Attribution: user-authorized operator (delegated by account owner), date 2026-11-26. Any proxy disposition is 代理登记，非自然人 Owner 签署. No new Owner acceptance is recorded.
 - Purpose: falsifiable Gate A composition checklist, not implementation or production conformance.
 
@@ -67,7 +67,7 @@ Blob SHA values were read from the Git tree/content API at the exact baseline. M
 
 | Exact path | Blob SHA | Source class / limitation |
 |---|---|---|
-| 00-governance/implementation-evidence/2026-11-26-a-i-storage-acceptance-matrix.md | 05fdcc93c5dfee1f635b5ad1a1db86310a88d8f7 | Canonical work-record; traceability only; embedded baseline is stale. | undefined |
+| 00-governance/implementation-evidence/2026-11-26-a-i-storage-acceptance-matrix.md | 9c802777e9bafc421c77f8f68fcb035cdee4167d | Canonical work-record; traceability only; embedded baseline is stale. | undefined |
 | 04-memory-compiler/compiler-overview.md | 24c2fc69a8a69176071d46aac871ae16588702b7 | Canonical Normative Draft/Unverified; orchestration candidate and explicit exclusions. | undefined |
 | 04-memory-compiler/phase-1-event-store-contract.md | 17b14591d76160a7c125903b41e7dae014c3c5df | DECIDED semantics / CANDIDATE seam; dispatcher, leases and production durability excluded. | undefined |
 | 04-memory-compiler/README.md | 88f1a451830b4c7b455462edd6453543778793e4 | Canonical Informative reading guide. | undefined |

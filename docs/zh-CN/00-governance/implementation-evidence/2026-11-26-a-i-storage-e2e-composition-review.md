@@ -47,7 +47,7 @@ document_metadata:
 
 - 工作项：AID-2026-095
 - 编号状态：PROVISIONAL；临时数字预留；合并时重新核验 main，如被占用则重编号。
-- 精确来源基线：main @ 17b05a0234d861a8bd0b78bccea799b1c11c433f
+- 精确来源基线：main @ 47fcd80720b742d9c5d3ae137593c59b5cc768a9
 - 归属：user-authorized operator (delegated by account owner)，日期 2026-11-26。任何代理处置均为**代理登记，非自然人 Owner 签署**。本文不新增 Owner 接受。
 - 目的：提供可证伪的 Gate A 组合检查清单，不宣称实现或生产符合性。
 
@@ -67,7 +67,7 @@ document_metadata:
 
 | 精确路径 | Blob SHA | 来源类别 / 限制 |
 |---|---|---|
-| 00-governance/implementation-evidence/2026-11-26-a-i-storage-acceptance-matrix.md | 05fdcc93c5dfee1f635b5ad1a1db86310a88d8f7 | Canonical work-record; traceability only; embedded baseline is stale. | undefined |
+| 00-governance/implementation-evidence/2026-11-26-a-i-storage-acceptance-matrix.md | 9c802777e9bafc421c77f8f68fcb035cdee4167d | Canonical work-record; traceability only; embedded baseline is stale. | undefined |
 | 04-memory-compiler/compiler-overview.md | 24c2fc69a8a69176071d46aac871ae16588702b7 | Canonical Normative Draft/Unverified; orchestration candidate and explicit exclusions. | undefined |
 | 04-memory-compiler/phase-1-event-store-contract.md | 17b14591d76160a7c125903b41e7dae014c3c5df | DECIDED semantics / CANDIDATE seam; dispatcher, leases and production durability excluded. | undefined |
 | 04-memory-compiler/README.md | 88f1a451830b4c7b455462edd6453543778793e4 | Canonical Informative reading guide. | undefined |

@@ -6,7 +6,7 @@ id_status: "PROVISIONAL"
 title: "A-I + Storage/Consistency End-to-End Composition Review Package"
 repository: "oahcom/AiMemoryBrainArchitecture"
 base_branch: "main"
-base_commit_sha: "17b05a0234d861a8bd0b78bccea799b1c11c433f"
+base_commit_sha: "47fcd80720b742d9c5d3ae137593c59b5cc768a9"
 branch: "review/2026-11-26-a-i-storage-e2e-composition-095"
 pull_request: "DRAFT_PENDING_CREATION"
 attribution:
@@ -30,13 +30,13 @@ review_state:
   issue_1212: "OPEN"
 identifier_allocation:
   id_status: "PROVISIONAL"
-  observed_main: "17b05a0234d861a8bd0b78bccea799b1c11c433f"
+  observed_main: "47fcd80720b742d9c5d3ae137593c59b5cc768a9"
   reserved_id_094: "PR #1220 (user-provided reservation)"
   requested_id: "AID-2026-095"
   uniqueness_scope: "Exact-token Issue/PR and branch-name search returned no result at creation; full branch-content uniqueness not claimed."
   merge_time_rule: "Recheck main/tree/index/Issue/PR/branches before merge; confirm 095 or renumber to next free numeric ID. Preserve RENUMBERED_FROM. Never use non-numeric AID path."
 source_policy:
-  exact_main: "17b05a0234d861a8bd0b78bccea799b1c11c433f"
+  exact_main: "47fcd80720b742d9c5d3ae137593c59b5cc768a9"
   blob_pins: "Recorded in Canonical, EN and ZH-CN composition review documents."
   missing_roots: [03-memory-brain/canonical-memory-store.md, 05-memory-runtime/README.md, 09-security-governance/README.md, 04-memory-compiler/accepted-receipt-and-idempotency-contract.md, 04-memory-compiler/compiler-state-and-producer-admission.md]
   missing_root_owner: "IMPL2; domain Owners accept their own restored/replacement contracts."
