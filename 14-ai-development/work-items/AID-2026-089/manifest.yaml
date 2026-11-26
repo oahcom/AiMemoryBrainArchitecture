@@ -11,7 +11,7 @@ accountable_owner: NOT_ASSIGNED
 acceptance_authority: "Owner D, Storage/Consistency and Owner A"
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: 8d90843aec4583c3282a3b45da31c7d6fd734cf2
+base_commit_sha: 515b7144320fd9fcc1e1a2c3d2d2744d979b4ca8
 tracking_issue: "#1125 primary; #1211 Storage projection/recovery boundary; external workflow reference is evidence only."
 prompt_id: AID-2026-089-PROMPT
 prompt_version: 1
