@@ -65,7 +65,8 @@ authority:
   acceptance_authority: "Relevant domain Owner(s) and Owner A / Governance; NOT_RECORDED"
   independent_reviewer: "NOT_ASSIGNED"
   implementation_authorization: "DOCUMENTATION_AND_STAGE_0_REGISTRATION_ONLY"
-  merge_authorization: "NOT_GRANTED_BY_THIS_RECORD; MERGE PRECONDITIONS ARE (1) WRITTEN OWNER A AUTHORIZATION AND (2) ALL REQUIRED CHECKS GREEN ON THE EXACT HEAD; THE MERGE DECISION BELONGS TO THE REPOSITORY MERGE QUEUE AND ITS REQUIRED CHECKS"
+  merge_authorization: "CONDITIONAL; see 00-governance/decisions/2026-11-26-owner-a-conditional-merge-authorization-1220-1287.md"
+  merge_authorization_decision_id: "OA-MERGE-2026-11-26-01"
   deployment_authorization: "NOT_GRANTED"
   issue_closure_authorization: "NOT_GRANTED"
 
