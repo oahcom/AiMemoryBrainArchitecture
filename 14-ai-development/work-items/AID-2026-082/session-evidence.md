@@ -62,3 +62,10 @@ The complete raw conversation input for this implementation session was not expo
 NOT_RECORDED
 
 The platform did not provide an exportable raw transcript of the assistant-visible output in this execution context. Repository changes and their Git commit identifiers are observable artifacts, but they are not a substitute for the full transcript. No session identifier or transcript content is fabricated.
+
+## Committed prompt scope snapshot
+
+- File: `14-ai-development/work-items/AID-2026-082/prompt-v1.md`
+- SHA-256: `79bcd0738f9c0f0c5b3dcf05675629c12a7eb51bcaaff0e184ba1ec93e31b7cb`
+- UTF-8 bytes: `5831`
+- Provenance: `NOT_VERIFIED`; the committed prompt is a scope snapshot, not an independently captured complete raw session input.
