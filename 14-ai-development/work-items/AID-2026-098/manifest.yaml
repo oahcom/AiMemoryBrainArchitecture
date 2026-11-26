@@ -10,9 +10,9 @@ repository:
   name: "oahcom/AiMemoryBrainArchitecture"
   baseline_branch: "main"
   baseline_commit: "d5107f68a7f1b61f5f2f7352fadf828aae06cf1c"
-  implementation_branch: "docs/2026-11-26-storage-physical-consistency-098"
-  carrier_pr: 1276
-  pull_request: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1276"
+  implementation_branch: "docs/2026-11-26-storage-physical-consistency-098-rebased"
+  carrier_pr: 1283
+  pull_request: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1283"
 attribution:
   actor: "user-authorized operator (delegated by account owner)"
   date: "2026-11-26"
@@ -23,6 +23,9 @@ identifier_allocation:
   reserved_id_097: "E/F mirror reservation supplied by account owner; not reused"
   assigned_id: "AID-2026-098"
   id_status: "PROVISIONAL"
+  current_rebase_main: "f02ceab0e57b9a149e36025a4595861ca7517ebf"
+  observed_max_id_at_rebase: "AID-2026-099"
+  id_098_absent_from_main_at_rebase: true
   renumber_at_merge: true
   merge_time_rule: "Recheck main tree, INDEX, Issues, PRs and branches; preserve AID-2026-098 only if still free, otherwise assign the next free numeric ID and preserve RENUMBERED_FROM."
 scope:
