@@ -137,7 +137,7 @@ Rule B 拿测试的路径、文件名、stem 或点分模块名去匹配拼接�
 | 指标 | 改前 | 改后 |
 |---|---|---|
 | `check_repository_hygiene.py` 版本 | `2026-11-24.8` | `2026-11-27.1` |
-| `Work-item index membership ... directories= / linked=` | 106 / 106，exit 0 | 106 / 106，exit 0 |
+| `Work-item index membership ... directories= / linked=` | 106 / 106，exit 0 | 带本工作项为 107 / 107（不含它则是 106 / 106：它恰好增加一个目录与一行），exit 0 |
 | `check_declared_check_contexts.py` | 16 declared、16 produced，exit 0 | 16 declared、16 produced，exit 0 |
 | `check_test_reachability.py` | 65 个测试文件、65 可达；18 个 gate 脚本、3 未接线、3 已 baseline | 完全相同 |
 | `scripts/test_check_repository_hygiene.py` | Ran 97，OK（skipped=1） | Ran 99，OK（skipped=1） |

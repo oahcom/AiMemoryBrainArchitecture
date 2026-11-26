@@ -162,7 +162,7 @@ detached worktree at `origin/main` = `2f4f4118`.
 | Quantity | Before | After |
 |---|---|---|
 | `check_repository_hygiene.py` version | `2026-11-24.8` | `2026-11-27.1` |
-| `Work-item index membership ... directories= / linked=` | 106 / 106, exit 0 | 106 / 106, exit 0 |
+| `Work-item index membership ... directories= / linked=` | 106 / 106, exit 0 | 107 / 107 with this work item (106 / 106 without it: the item adds exactly one directory and one row), exit 0 |
 | `check_declared_check_contexts.py` | 16 declared, 16 produced, exit 0 | 16 declared, 16 produced, exit 0 |
 | `check_test_reachability.py` | 65 test files, 65 reachable; 18 gate scripts, 3 unwired, 3 baselined | identical |
 | `scripts/test_check_repository_hygiene.py` | Ran 97, OK (skipped=1) | Ran 99, OK (skipped=1) |

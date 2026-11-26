@@ -97,7 +97,7 @@ evidence:
     reachability_commented_test_name_before: "exit 0 (silent pass)"
     reachability_commented_test_name_after: "exit 1, pkg/test_x.py named"
     declared_contexts_before_after: "16 declared / 16 produced, unchanged"
-    index_membership_counts_before_after: "directories=106 linked=106, unchanged"
+    index_membership_counts_before_after: "directories=106 linked=106 at origin/main; directories=107 linked=107 with this work item, which adds exactly one directory and one row"
     reachability_totals_before_after: "65 test files / 65 reachable / 18 gate scripts / 3 unwired / 3 baselined, unchanged"
     checker_version_before: "2026-11-24.8"
     checker_version_after: "2026-11-27.1"
@@ -112,7 +112,7 @@ evidence:
     - command: (cd scripts && python -m unittest test_check_declared_check_contexts)
       result: "Ran 16 tests / OK / exit 0"
     - command: python scripts/ci/check_repository_hygiene.py
-      result: "directories=106 linked=106; exit 0"
+      result: "directories=107 linked=107 with this work item (106 / 106 at origin/main); exit 0"
     - command: python scripts/ci/check_test_reachability.py
       result: "65 test files / 65 reachable / exit 0"
     - command: python -c "... check_declared_check_contexts.main(root, declared_contexts(...))"
