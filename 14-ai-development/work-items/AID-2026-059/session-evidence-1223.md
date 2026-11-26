@@ -193,7 +193,7 @@ AssertionError: 0 != 1
 restored_identical= True 7cda3054233f
 ```
 
-Restoring the guard returns `Ran 13 tests in 0.048s` / `OK`. Exactly one test
+Restoring the guard returns `Ran 13 tests in 0.056s` / `OK`. Exactly one test
 goes red, and it is the one that names the defect; no other test moves.
 
 ### What was deliberately not done
@@ -216,15 +216,15 @@ goes red, and it is the one that names the defect; no other test moves.
 
 ```
 python -m unittest discover -s tests/session_evidence -p "test_*.py"
-    Ran 98 tests in 0.506s
+    Ran 98 tests in 0.448s
     OK
 
 cd scripts && python test_check_declared_check_contexts.py
-    Ran 13 tests in 0.048s
+    Ran 13 tests in 0.056s
     OK
 
 python scripts/ci/check_line_endings.py
-    Line-ending check: 1404 files inspected, 0 binary skipped, 0 violations.
+    Line-ending check: 1406 files inspected, 0 binary skipped, 0 violations.
 
 python scripts/ci/check_repository_hygiene.py
     Work-item index membership version=2026-11-24.8 directories=67 linked=67
