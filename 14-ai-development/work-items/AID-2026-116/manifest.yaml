@@ -1,0 +1,316 @@
+work_item_id: AID-2026-116
+title: Repoint three attributions that name the work item a renumbering abandoned, and repin the 33 prompt digests a frontmatter removal invalidated
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  Documentation only. Thirty-three manifest digests, thirty-three INDEX cells, four prose
+  attributions and one new work item are edited; no code, no checker, no workflow, no policy
+  status. Two distinct defects are corrected. The first is misdirection: a reference to a work
+  item that exists and is about something else reads as confirmation to anyone who follows it.
+  The second is measurement: thirty-three manifests pinned a digest that no longer described any
+  committed byte, because PR #1281 removed two frontmatter keys from their prompt snapshots and
+  repinned only its own. Both are corrected by recomputation from the committed bytes, with every
+  superseded value recorded rather than overwritten.
+status: PR_OPEN
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: a7e7c64b
+
+tracking_issue: "to be filed with the attribution sweep that produced the three hits"
+
+prompt_id: AID-2026-116-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-116/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 3b8f72e2e124b24625035c42398c0529655be4d8e8e48ddfc4b7369b89ce1c94
+prompt_bytes: 8274
+
+# ---------------------------------------------------------------------------
+# The three references below were written while the correction branch still held
+# the identifier AID-2026-090, before a fourth collision forced it to 101. The
+# number then went to the ContextVersion immutability work item, which is what
+# makes these references dangerous rather than merely stale: the target exists,
+# so nothing about the reference looks broken, and the reader who follows it finds
+# a real manifest that has never heard of the correction.
+#
+# AID-2026-101's own identifier_history already declares 090 abandoned. The three
+# sentences contradict the record that performed the correction.
+# ---------------------------------------------------------------------------
+
+findings:
+  - id: F1
+    severity: MEDIUM
+    statement: >-
+      AID-2026-047, AID-2026-072 and AID-2026-076 each end a field by crediting AID-2026-090 with
+      the correction. AID-2026-090 is the ContextVersion immutability work item, merged by PR #1241
+      at 2026-11-26T06:57:20Z, and its manifest never mentions any of the three.
+    evidence: >-
+      `grep -n "Corrected by AID-2026-090\|Refreshed by AID-2026-090"` returns exactly three lines,
+      at AID-2026-047:31, AID-2026-072:67 and AID-2026-076:72. `grep -c "AID-2026-047\|AID-2026-072\|
+      AID-2026-075\|AID-2026-076\|AID-2026-080\|AID-2026-101" AID-2026-090/manifest.yaml` returns 0.
+      The correction those three sentences describe is itemised in AID-2026-101's `corrections:`
+      block, which names all three paths as targets.
+    cause: >-
+      Timing, not substance. The correction branch held AID-2026-080, then 081, then 090, then 101.
+      Each collision surfaced only on rebase, because the INDEX half merges cleanly under
+      `merge=union` and the work-item directory is the only half that conflicts. The sentences were
+      written under 090 and were not revisited when the number was lost.
+    fix: >-
+      Name AID-2026-101 as the correcting record and keep AID-2026-090 visible as the abandoned
+      number, so a reader who already followed the wrong pointer learns why it was wrong rather
+      than being silently redirected.
+
+  - id: F2
+    severity: MEDIUM
+    statement: >-
+      AID-2026-101's identifier_history says AID-2026-090 was "taken by the ContextVersion
+      immutability work item, PR #1255". PR #1255 closed without merging. The pull request that
+      merged that work item is #1241.
+    evidence: >-
+      GET /pulls/1255 returns `state: closed`, `merged: false`, title "docs(context): correct merged
+      ContextVersion Work Item to pending AID". GET /pulls/1241 returns `merged: true`,
+      `merge_commit_sha: 72c9e68a158a5a0a00936fc7fc0adfc1fa024b5c`, `merged_at:
+      2026-11-26T06:57:20Z`, title "docs(context): define immutable ContextVersion boundary
+      (AID-2026-090)". Every other file in the tree cites #1241 for this merge -- AID-2026-090's own
+      manifest at line 51, AID-2026-085:176, AID-2026-091:100, AID-2026-093:227 -- so 101 is the
+      single outlier.
+    why_it_matters: >-
+      Closed-unmerged and merged are the substitution INDEX.md forbids by name. The work item that
+      wrote the rule about preserving prior values is the one that confused the two, in the field
+      whose only job is to record what happened to an identifier.
+    fix: >-
+      Correct the pull request number and record that #1255 closed unmerged, so the sentence says
+      which outcome occurred rather than only which pull request was involved.
+
+  - id: F3
+    severity: MEDIUM
+    statement: >-
+      The AID-2026-101 INDEX row's Prompt cell states SHA-256 2ac71e56…9b4f, which is neither the
+      manifest's prompt_sha256 (89ac65f2…94c1) nor the digest of the file it names. It is the
+      digest of the same prompt before the final renumbering, so it describes text that was never
+      executed under the number the row registers.
+    evidence: >-
+      sha256(AID-2026-101/prompt-v1.md) = 89ac65f2d58e187451b7c0a98648d0dd4352e3dac79f521b8029b0432f7e94c1
+      at 4470 bytes; manifest line 33 agrees. Substituting AID-2026-090 for AID-2026-101 in the
+      committed file reproduces 2ac71e563b9c5f01aa217ee8846446cc9bc216a83f3d2f1952ae47b0edde9b4f
+      exactly, at the same 4470 bytes. A repo-wide scan of all 43296 reachable objects finds exactly
+      one blob with that digest, dcaaf0b20a2b7a34e5cf30ec934ce765c8a89e19, and `git rev-list
+      --objects --all` attributes it to AID-2026-090/prompt-v1.md -- the path this prompt occupied
+      under its third identifier. `git rev-list --all -- AID-2026-101/prompt-v1.md` returns a single
+      blob, 5dd48bf7, whose content is the current 4470-byte text, so no 2ac71e56 version was ever
+      committed at the 101 path.
+    why_it_matters: >-
+      The same shape as AID-2026-047, and the third instance of it. The digest is of the right file
+      with the wrong identifier in it, and because the identifier has the same length the byte count
+      is unchanged, so the size check cannot see it. Here it is worse than in 047: this row is the
+      one that registers the correction whose subject is recording prior values accurately, and its
+      own prompt pin was stale from the moment it was written.
+    fix: >-
+      Correct the cell to the digest of the committed bytes and record the superseded value, the
+      substitution that reproduces it, and the blob it belongs to, so the next reader can tell a
+      renumbering artifact from a fabricated measurement.
+    how_it_was_missed: >-
+      Every digest audit run in the preceding sessions compared a manifest's prompt_sha256 against
+      the file it pins. None read the INDEX table, so a cell could drift from the manifest it
+      summarises with nothing to notice. The sweep that found this one was written for this work
+      item; it parses SHA-256 `<hex>` out of each Prompt cell and compares it both to the manifest
+      and to the file bytes, and it reports this as the only disagreement among 52 rows that state a
+      digest.
+
+  - id: F4
+    severity: HIGH
+    statement: >-
+      Thirty-two manifests pin a prompt digest that no longer describes any committed byte. PR #1281
+      removed approval_scope's two permanently-empty keys from 36 prompt snapshots and repinned only
+      its own work item's manifest, so every other manifest that pins one of those snapshots now
+      declares the digest of text that exists nowhere.
+    evidence: >-
+      Commit 44b57170 (PR #1281, merged 2026-11-26T11:18:08Z) changes 278 files, of which 36 are
+      prompt-v1.md and each loses exactly two lines: `included_sections: []` and
+      `included_assets: []`. `git show 44b57170 | grep -c "^+prompt_sha256"` returns 2 -- its own
+      manifest and AID-2026-103's. Running the digest audit at origin/main a7e7c64b reports 30
+      matching and 33 mismatching, where the same audit on ba5b26b3 reported 54 matching and 0.
+    why_it_matters: >-
+      This is the failure the gate cannot see. `scripts/governance/session_evidence/validate.py`
+      compares the digest in the session_evidence entry, and the INDEX cell is prose, so a wrong
+      top-level prompt_sha256 survives indefinitely -- the same blind spot recorded as F2 of
+      AID-2026-102. It also silently converts a correct record into a false one: a reader checking
+      "does this manifest describe its prompt" now gets "no" for 32 work items that were correct
+      this morning, and cannot tell those from the two genuine defects AID-2026-101 and -102 fixed.
+    how_found: >-
+      Incidentally. The sweep was re-run on the new base before opening this pull request, purely to
+      confirm the base had not moved under the work. It had moved, and this came out.
+    fix: >-
+      Repin all 32 to the committed bytes, repin the 33 INDEX cells that restate them, and record
+      every superseded value. No prompt file is restored: the frontmatter removal is correct, it was
+      ordered by ruling 76 and it is what DM-02 now enforces, so the snapshots should lose those
+      keys. The defect is that only one of the 37 pins moved with them.
+
+  - id: F5
+    severity: MEDIUM
+    statement: >-
+      AID-2026-106 is the same defect with the byte count unchanged, so the size check that would
+      otherwise hint at the cause is silent.
+    evidence: >-
+      Its prompt-v1.md was also stripped of the two keys by commit 2fbb53d8, and it is 2998 bytes
+      before and after. Declared 0ef83057...1daffd36, actual ed3345b0...86fa2ba0.
+    why_it_matters: >-
+      A repin that only guarded size would pass this one. It is listed separately so that a future
+      reader does not conclude from the 58-byte uniformity of the other 32 that size is a usable
+      proxy for correctness.
+
+corrections:
+  - target: "32 manifests under 14-ai-development/work-items/ (AID-2026-059, 060, 061, 062, 063, 066, 067, 068, 069, 070, 071, 072, 073, 074, 075, 076, 077, 078, 079, 080, 081, 082, 084, 085, 089, 090, 091, 092, 094, 097, 101, 102)"
+    field: prompt_sha256 / prompt_bytes
+    prior_value: >-
+      The digest and byte count each manifest declared before PR #1281 removed two frontmatter keys
+      from its prompt snapshot. All 32 old/new pairs are listed in the evidence file side by side,
+      so no superseded digest is lost.
+    new_value: >-
+      The SHA-256 and byte count of the committed prompt-v1.md, computed in this pass. Every one of
+      the 32 files shrank by exactly 58 bytes -- the two deleted lines and their newlines -- and
+      that uniformity is the evidence that one mechanical edit caused all 32 rather than 32
+      separate mistakes.
+    basis: >-
+      sha256 of the committed bytes. The prior values were read out of the manifests before the
+      edit, not reconstructed afterwards.
+  - target: 14-ai-development/work-items/AID-2026-106/manifest.yaml
+    field: prompt_sha256 / prompt_bytes
+    prior_value: "0ef830572575708a3fd2c253d507b9ce97e8c39eff4fff04a7784e6a1daffd36 at 2998 bytes"
+    new_value: >-
+      ed3345b0f9c71b3cd7d8822bc4e42424000f17d4317bc03db5edc47486fa2ba0 at 2998 bytes
+    basis: >-
+      sha256 of the committed bytes. Separated from the 32 because the byte count did not change:
+      the same two keys were removed but the surrounding text happened to be the same length, so a
+      size comparison cannot see it and only the digest can.
+  - target: 14-ai-development/work-items/INDEX.md
+    field: "33 Prompt cells whose quoted digest or byte count no longer matched the manifest"
+    prior_value: "the digest and byte count each cell quoted before the manifests were repinned"
+    new_value: "the values the repinned manifests now declare"
+    basis: >-
+      The cells restate the manifest's pin in prose, so they move with it. Only the token that
+      disagreed was touched; every explanatory sentence in those cells is byte-identical.
+  - target: 14-ai-development/work-items/INDEX.md
+    field: "row AID-2026-101, Prompt cell digest and byte count"
+    prior_value: "SHA-256 `2ac71e563b9c5f01aa217ee8846446cc9bc216a83f3d2f1952ae47b0edde9b4f`, 4470 bytes"
+    new_value: >-
+      SHA-256 `89ac65f2d58e187451b7c0a98648d0dd4352e3dac79f521b8029b0432f7e94c1`, 4470 bytes, with
+      the superseded value recorded in the same cell as the pre-renumbering digest
+    basis: >-
+      sha256 of the committed bytes, computed in this pass. The superseded value is reproduced
+      exactly by substituting AID-2026-090 for AID-2026-101 in the committed file, and the blob it
+      describes, dcaaf0b2, is the one git attributes to AID-2026-090/prompt-v1.md.
+    note: >-
+      The byte count does not change, because the two texts differ only in an identifier of equal
+      length. That is the same property that let the identical defect survive in AID-2026-047, and
+      it is why the correction states the substitution rather than only the two digests.
+    field: prompt_digest_correction (trailing attribution only)
+    prior_value: "Corrected by AID-2026-090."
+    new_value: >-
+      Corrected by AID-2026-101, the record that itemises the prior digest. This sentence was
+      written while the correcting branch still held the identifier AID-2026-090; that number went
+      to the ContextVersion immutability work item, so it names the wrong record and no longer
+      appears here as the corrector.
+    unchanged: >-
+      Everything before the attribution. The superseded digest 1f547ad7…b236, the byte count 2185,
+      the 044-to-047 substitution that reproduces it, and the committed digest 6d2c4080…0871 are
+      byte-identical to their prior values.
+  - target: 14-ai-development/work-items/AID-2026-072/manifest.yaml
+    field: implementation.note (trailing attribution only)
+    prior_value: "Refreshed by AID-2026-090, which records the prior value."
+    new_value: >-
+      Refreshed by AID-2026-101, which records the prior value. Written under the abandoned
+      identifier AID-2026-090, which belongs to the ContextVersion immutability work item.
+    unchanged: >-
+      The merge facts. PR #1082, merge commit afb0c6ceac5f4d7346c4126d2a48bc8b17ffab2e, the
+      #1057 closed-unmerged history and the head 07a8d1ee are untouched.
+  - target: 14-ai-development/work-items/AID-2026-076/manifest.yaml
+    field: implementation.note (trailing attribution only)
+    prior_value: "Refreshed by AID-2026-090, which records the prior value rather than relying on the diff."
+    new_value: >-
+      Refreshed by AID-2026-101, which records the prior value rather than relying on the diff.
+      Written under the abandoned identifier AID-2026-090, which belongs to the ContextVersion
+      immutability work item.
+    unchanged: >-
+      The merge facts. PR #1155, merge commit 2733283bff2bcc744c595ec06b602aadb52c772a,
+      merged_at 2026-11-25T14:59:20Z and head 07a8d1ee are untouched.
+  - target: 14-ai-development/work-items/AID-2026-101/manifest.yaml
+    field: identifier_history (the PR number attributed to the AID-2026-090 collision only)
+    prior_value: "AID-2026-090 (taken by the ContextVersion immutability work item, PR #1255)"
+    new_value: >-
+      AID-2026-090 (taken by the ContextVersion immutability work item, merged by PR #1241; the
+      earlier PR #1255 proposed a different correction to that work item and closed without
+      merging, so it is not the pull request that took the number)
+    basis: >-
+      GET /pulls/1241 merged=true as 72c9e68a at 2026-11-26T06:57:20Z; GET /pulls/1255 state=closed
+      merged=false. The distinction is the one INDEX.md requires refresh text to state.
+  - target: 14-ai-development/work-items/INDEX.md
+    field: "row AID-2026-101, Impl cell (the attribution clause only)"
+    prior_value: >-
+      The cell as merged, which records the correction as integrated via PR #1248 and does not name
+      the record that itemises the prior values.
+    new_value: >-
+      The same cell with the correcting record named as AID-2026-101 and the abandoned number 090
+      recorded as abandoned, so the row and the three manifests it corrected agree on who did it.
+  - target: 14-ai-development/work-items/INDEX.md
+    field: "row AID-2026-116 (new row, this work item)"
+    prior_value: "no row exists"
+    new_value: >-
+      One row registering this correction, stating that it is an existence row whose Status repeats
+      the manifest and that no acceptance is asserted.
+
+acceptance_criteria:
+  AC1: >-
+    The three attributions name AID-2026-101 and keep AID-2026-090 visible as abandoned. Settled
+    by reading the three fields and by grep returning no `by AID-2026-090` outside the historical
+    review documents under AID-2026-080/.
+  AC2: >-
+    AID-2026-101's identifier_history names #1241 as the merge of AID-2026-090 and records that
+    #1255 closed unmerged. Settled against GET /pulls/1241 and GET /pulls/1255.
+  AC3: >-
+    Every measured value in the five edited fields is byte-identical to its prior value except the
+    three identifiers and the one digest that were wrong. Settled by a diff whose only changed
+    tokens are AID-2026-090 -> AID-2026-101, PR #1255 -> PR #1241, and 2ac71e56 -> 89ac65f2.
+  AC4: >-
+    check_traceability.py --index-only and check_repository_hygiene.py both pass on the branch, the
+    manifest digest audit reports zero mismatches, and the new INDEX-cell digest sweep reports zero
+    disagreements -- including this work item's own row and pin.
+  AC5: >-
+    The INDEX-cell digest sweep is described in the evidence with the command that runs it, so the
+    next session can re-run the check that found F3 rather than only reading that it was found.
+  AC6: >-
+    All 32 repinned manifests and AID-2026-106 hash to the committed bytes of the prompt they pin,
+    and all 33 INDEX cells that restate a digest or byte count agree with them. Settled by the two
+    sweeps reporting 0 mismatches and 0 disagreements, and by the old/new table in the evidence.
+  AC7: >-
+    No prompt file is restored and no superseded digest is deleted. Settled by the diff touching no
+    prompt-v1.md under any repinned work item, and by every prior value appearing in the evidence
+    table or in the corrections block.
+
+review:
+  status: NOT_ASSIGNED
+  note: "Independent review is not recorded. The correction is verifiable by two API reads and one grep, and both are quoted above so a reader can repeat them without trusting this file."
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs: []
+    implementing_ai_session: owner-proxy-2026-11-26-104
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-116/prompt-v1.md
+    executed_prompt_sha256: 3b8f72e2e124b24625035c42398c0529655be4d8e8e48ddfc4b7369b89ce1c94
+    executed_prompt_bytes: 8274
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-116/session-evidence.md
+    note: >-
+      Canonical form, not the top-level legacy fields, because this pull request modifies this
+      manifest and check_09_manifest_and_evidence_entries rejects a legacy manifest the same pull
+      request touched. issue_refs is empty on purpose: the tracking Issue is filed by this same
+      pull request, so it cannot yet carry the evidence reference the frozen contract requires an
+      Issue row to map to YES with. The OD-A3 path permits PR-scope evidence with empty
+      issue_refs, and the Issue row is declared LEGACY_UNDECLARED with N/A for the same reason
+      AID-2026-101's was.
