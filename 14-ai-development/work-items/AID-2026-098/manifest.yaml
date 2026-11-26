@@ -1,0 +1,81 @@
+manifest_version: "1.0"
+record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
+registration_stage: "STAGE_0"
+registration_status: "SCOPE_CONFIRMED_REVIEW_PACKAGE_DRAFTED"
+work_item_id: "AID-2026-098"
+id_status: "PROVISIONAL"
+title: "Storage Physical Consistency Contract Candidate"
+date: "2026-11-26"
+repository:
+  name: "oahcom/AiMemoryBrainArchitecture"
+  baseline_branch: "main"
+  baseline_commit: "d5107f68a7f1b61f5f2f7352fadf828aae06cf1c"
+  implementation_branch: "docs/2026-11-26-storage-physical-consistency-098"
+  carrier_pr: 1276
+  pull_request: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1276"
+attribution:
+  actor: "user-authorized operator (delegated by account owner)"
+  date: "2026-11-26"
+  signature_status: "代理登记，非自然人 Owner 签署"
+identifier_allocation:
+  observed_main: "d5107f68a7f1b61f5f2f7352fadf828aae06cf1c"
+  observed_max_id: "AID-2026-096"
+  reserved_id_097: "E/F mirror reservation supplied by account owner; not reused"
+  assigned_id: "AID-2026-098"
+  id_status: "PROVISIONAL"
+  renumber_at_merge: true
+  merge_time_rule: "Recheck main tree, INDEX, Issues, PRs and branches; preserve AID-2026-098 only if still free, otherwise assign the next free numeric ID and preserve RENUMBERED_FROM."
+scope:
+  objective: "Publish a reviewable candidate physical transaction, durability, visibility, recovery and anti-rollback contract for F8 Storage Atomicity."
+  canonical: "10-storage-consistency/storage-physical-consistency-contract.md"
+  en: "docs/en/10-storage-consistency/storage-physical-consistency-contract.md"
+  zh-CN: "docs/zh-CN/10-storage-consistency/storage-physical-consistency-contract.md"
+  registration_files:
+    - "14-ai-development/work-items/AID-2026-098/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-098/evidence.md"
+    - "00-governance/document-scope-registry.yaml"
+    - "14-ai-development/work-items/INDEX.md"
+  in_scope:
+    - "Atomic write sets and physical linearization points"
+    - "WAL/log ordering, checkpoints, crash recovery and partial-write handling"
+    - "Durable receipt minimum fields and terminal/Unknown semantics"
+    - "Visibility, isolation, read-your-writes and replica freshness"
+    - "D-owned Forget Fence projection and anti-rollback boundary"
+    - "D/E/F/G/H/I versus Storage responsibility boundaries"
+    - "18 falsifiable PASS/FAIL checkpoints with evidence classification"
+    - "Canonical + EN + ZH-CN documents with GOV-DOC-002 metadata"
+    - "Comments to #1212 and #1180"
+  out_of_scope:
+    - "Runtime/product code, tests, DDL, schemas, validators, scripts or CI workflows"
+    - "Backend selection, COC/JF-10 freeze, cryptographic or quorum design approval"
+    - "Owner acceptance, normative approval, implementation, deployment or production conformance"
+    - "Merge or Issue closure"
+review_state:
+  checkpoint_count: 18
+  documented_only: 10
+  evidence_required: 8
+  evidence_required_current_result: "8 FAIL / NOT EVIDENCED"
+  gate_a: "PARTIAL / OPEN"
+  gate_b: "NOT VERIFIED"
+  owner_acceptance: "PENDING"
+  normative_approval: "NOT_CLAIMED"
+implementation:
+  status: "DOCUMENTATION ONLY"
+  runtime_changes: 0
+  validator_changes: 0
+  schema_changes: 0
+  tests_added: 0
+acceptance:
+  status: "PENDING"
+  authority: "Storage/Consistency, D, E and G for their respective boundaries; A coordinates"
+session_evidence:
+  - role: DOCUMENTATION_AUTHOR
+    issue_refs:
+    implementing_ai_session: NOT_RECORDED
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-098/prompt-v1.md
+    executed_prompt_sha256: f9b83206744d38bfaa782e47d34ff11e696f2cd04c1c31b4e6fe5b0a1843cc06
+    executed_prompt_bytes: 3241
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_reason: "The available execution context does not expose a stable ChatGPT session identifier; no identifier was invented."
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-098/evidence.md
