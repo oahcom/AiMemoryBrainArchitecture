@@ -94,7 +94,7 @@ document_metadata:
 
 ## 证据 B —— stdout 逐行差异归因
 
-所提供的 `Compare-Object` 摘要：**base 独有 8 行，fix 独有 13 行**。
+对比工具：PowerShell `Compare-Object`；交接材料未提供精确调用命令（`NOT_PROVIDED`）。所提供摘要报告：**base 独有 8 行，fix 独有 13 行**。对比报告自身的退出码、字节数和 SHA-256 均为 `NOT_PROVIDED`（交接内容是文本摘要，并非原始报告文件）。
 
 Base 独有行：
 
@@ -142,7 +142,7 @@ GOV-DOC-002: 762 governed documents, 293 classified, 469 unclassified
 
 执行方式：只读脚本遍历所有 `*.md` 文件并解析 YAML frontmatter。所提供采集记录未包含精确脚本调用命令：`NOT_PROVIDED`。退出码：`0`。
 
-报告 JSON 的 SHA-256：`DD6A4CC1440A331EE984518C6D6306A7C233B0A4324DDBE9035EF95D309F15CC`。
+报告 JSON 字节数：交接材料未提供（`NOT_PROVIDED`）。报告 JSON 的 SHA-256：`DD6A4CC1440A331EE984518C6D6306A7C233B0A4324DDBE9035EF95D309F15CC`。
 
 | 指标 | 数量 |
 |---|---:|
