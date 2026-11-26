@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-190/evidence.md"
+        - "14-ai-development/work-items/AID-2026-191/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -45,7 +45,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# Session Evidence — AID-2026-190
+# Session Evidence — AID-2026-191
 
 ## Session role / use case
 
@@ -112,7 +112,7 @@ The assistant reported, and the head of this branch confirms:
 - `current_bilingual_gaps()` returns **77** entries before and after the change — new 0, resolved 0 —
   so `scripts/bilingual-baseline.txt` and `scripts/ci/baselines/bilingual-docs.txt` are byte-unchanged;
 - the literal rule's cost is **twelve** new gaps, itemised with `cjk`/`latin`/`ratio` in section 2 of
-  `AID-2026-190/evidence.md`, each one a Chinese document whose partner is the English file;
+  `AID-2026-191/evidence.md`, each one a Chinese document whose partner is the English file;
 - over the committed tree, **103** side-by-side pairs resolve, and **0** of them are accepted only
   through the English side, which is why the repair costs nothing;
 - `python -m unittest scripts.governance.evidence.test_gate_normative_roots` → `Ran 54 tests … OK`;

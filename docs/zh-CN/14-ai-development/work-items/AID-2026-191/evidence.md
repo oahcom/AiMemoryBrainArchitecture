@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-190/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-191/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Verified
@@ -30,8 +30,8 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "AID-2026-190 对 side-by-side 双语判定项的测量与修复：原先「任一文件含 1 个汉字」的判据让英文源文件为一份未翻译的配对背书"
-    canonical_scope_id: "ai-development/aid-2026-190-side-by-side-cjk-designated-side"
+    canonical_scope: "AID-2026-191 对 side-by-side 双语判定项的测量与修复：原先「任一文件含 1 个汉字」的判据让英文源文件为一份未翻译的配对背书"
+    canonical_scope_id: "ai-development/aid-2026-191-side-by-side-cjk-designated-side"
     canonical_scope_keywords:
       - "bilingual"
       - "side-by-side"
@@ -40,12 +40,12 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "14-ai-development/work-items/AID-2026-190/evidence.md"
-    en: "docs/en/14-ai-development/work-items/AID-2026-190/evidence.md"
+    source: "14-ai-development/work-items/AID-2026-191/evidence.md"
+    en: "docs/en/14-ai-development/work-items/AID-2026-191/evidence.md"
     zh-CN: null
 ---
 
-# AID-2026-190 — 英文侧的一个汉字，为一份从未翻译的配对背了书
+# AID-2026-191 — 英文侧的一个汉字，为一份从未翻译的配对背了书
 
 **状态：DRAFT —— 先测量，再修复。** 派单要求是「先测量，后决定」：改判定、数代价、只有新增缺口不超过三个才实施。下面的测量结果是：按字面理解指令（「partner 必须含中文」）会产生十二个新缺口，而这十二个全部是把英文文件当成 partner 造成的误报——判据分不清方向。真正实施的是「只有配对中被指定承载中文的那个文件才能为配对背书」，其代价是**零**个新缺口。
 

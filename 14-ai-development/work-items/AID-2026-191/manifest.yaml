@@ -1,4 +1,4 @@
-work_item_id: AID-2026-190
+work_item_id: AID-2026-191
 title: >-
   Measure and repair the side-by-side bilingual predicate, where one CJK character on the English
   side certified a partner that was never translated
@@ -26,14 +26,20 @@ prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
 identifier_allocation:
   id_status: PROVISIONAL
   observed_main: 4326669caa6c43193d34219a0451b80762b712ff
-  assigned_id: AID-2026-190
+  assigned_id: AID-2026-191
   allocation_rule: >-
-    Highest observed number plus one. AID-2026-189 is merged; every pull request title, remote
-    branch and work-item directory observed at the time of allocation carried a number at or below
-    189, and no path or reference in the tree carried 190.
+    First free number at first allocation was 190: AID-2026-189 was merged and no pull request
+    title, remote branch or work-item directory carried 190. While this branch was in flight a
+    sibling unit merged as PR #1343 at main 2f4f4118 claiming AID-2026-190 for a different
+    subject (an append-only correction to two governance records), so the recheck rule fired: the
+    registration moved to 191, and every path and reference moved with it in the same push. The
+    renumbered directory is not a rename of the sibling unit's, which never existed on this
+    branch.
   recheck_rule: >-
-    Immediately before merge, re-read open pull requests and remote branches for AID-2026-190; if
+    Immediately before merge, re-read open pull requests and remote branches for AID-2026-191; if
     occupied, take the next free number and update every path and reference in the same push.
+  renumbered_from: AID-2026-190
+  renumber_reason: "Sibling unit merged as PR #1343 (main 2f4f4118) took AID-2026-190 while this branch was in flight."
 predecessor:
   work_item_id: null
   issues:
@@ -60,11 +66,11 @@ scope:
         `test_short_translation_on_the_chinese_side_is_accepted` (same assertions, name states the
         rule) and adds `test_stray_cjk_in_english_source_does_not_vouch_for_the_pair` and
         `test_english_copy_without_cjk_under_zh_cn_name_is_rejected`. 52 → 54 tests.
-    - path: "14-ai-development/work-items/AID-2026-190/evidence.md"
+    - path: "14-ai-development/work-items/AID-2026-191/evidence.md"
       detail: "Canonical record: both measurements, the twelve-item table, the fixture proof, the deferred items."
-    - path: "docs/en/14-ai-development/work-items/AID-2026-190/evidence.md"
+    - path: "docs/en/14-ai-development/work-items/AID-2026-191/evidence.md"
       detail: "English rendition of the canonical record."
-    - path: "docs/zh-CN/14-ai-development/work-items/AID-2026-190/evidence.md"
+    - path: "docs/zh-CN/14-ai-development/work-items/AID-2026-191/evidence.md"
       detail: "Chinese rendition of the canonical record."
     - path: "14-ai-development/work-items/INDEX.md"
       detail: "One appended registration row; no existing row edited."
@@ -102,9 +108,9 @@ deferred_to_owner:
       Closing the mirror branch is a different predicate with a different cost against the 77-entry
       baseline; it is outside a unit scoped to the side-by-side predicate.
 evidence:
-  record: 14-ai-development/work-items/AID-2026-190/evidence.md
-  prompt: 14-ai-development/work-items/AID-2026-190/prompt-v1.md
-  session: 14-ai-development/work-items/AID-2026-190/session-evidence.md
+  record: 14-ai-development/work-items/AID-2026-191/evidence.md
+  prompt: 14-ai-development/work-items/AID-2026-191/prompt-v1.md
+  session: 14-ai-development/work-items/AID-2026-191/session-evidence.md
 non_goals:
   - Deleting, creating or translating any mirror
   - Changing the 1-character CJK threshold or the 100-character _carries_chinese() threshold
@@ -122,9 +128,9 @@ session_evidence:
       - "#469"
       - "#487"
     implementing_ai_session: "NOT_RECORDED"
-    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-190/prompt-v1.md"
-    executed_prompt_sha256: "207873ffe1707ff4e6c36a0c2442e89d3661e74fff04b59fad5670c4942ea23c"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-191/prompt-v1.md"
+    executed_prompt_sha256: "8d9e1cc05882f5e9029081e788c6d5ea5c463ef67decdbac1407ab393f836af9"
     executed_prompt_bytes: 5832
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_RECORDED"
-    session_evidence_ref: "14-ai-development/work-items/AID-2026-190/session-evidence.md"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-191/session-evidence.md"
