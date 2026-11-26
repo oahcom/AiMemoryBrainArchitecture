@@ -528,9 +528,12 @@ $ python scripts/test_check_document_management.py
 ```
 # AST driver: every errors.append / problems.append / errors.extend site whose
 # first literal contains 'DM-', rendered as a template, deduped, same tree at
-# 31385bc1 and at acddc569, then diffed.
-31385bc1: emission_sites=102 distinct_templates=102
-acddc569: emission_sites=101 distinct_templates=101
+# 31385bc1 and at the corrected head, then diffed. Two independent runs of the
+# same driver agree on 99 / 98; an earlier pass of the coordinator's own driver
+# reported 102 / 101 and is withdrawn -- the delta is what matters and it is the
+# same in all three passes.
+31385bc1: emission_sites=99 distinct_templates=99
+head:     emission_sites=98 distinct_templates=98
 set difference: exactly one template removed
   DM-03 approval_scope.{} is not honoured: only 'Full-document' is checked,
   so a non-empty list would claim a boundary the gate never verifies. Remove it
@@ -554,9 +557,12 @@ Two further corrections to statements in this record:
   bindings are "bound by T94-T128" is therefore ambiguous for `T94`; no new identifier is
   invented here, and the collision is recorded rather than papered over.
 - **"Only the identifier was substituted" is not accurate.** Normalising `AID-2026-084` /
-  `AID-2026-183` to a common token and diffing against #1280's head `da53ac25` leaves three
-  differences: `prompt-v1.md` and `session-evidence-827.md` each lose the two lines
-  `included_sections: []` and `included_assets: []`, and `manifest.yaml` gains
-  `RENUMBERED_FROM` and `renumbering_reason`. The line loss is required by the gate at this
-  head (`SCOPE_KEYS = {"type"}`), not an error, but it is a content change and the record
-  should not describe the move as identifier-only.
+  `AID-2026-183` to a common token and diffing `prompt-v1.md` and `session-evidence-827.md`
+  against #1280's head `da53ac25` leaves one content difference in each: both lose the two
+  lines `included_sections: []` and `included_assets: []`. In `manifest.yaml` the differences
+  are of three kinds, and only the first belongs to the renumbering itself: the two added
+  fields `RENUMBERED_FROM` and `renumbering_reason`; the digest and byte-count repin that
+  follows from the two lost lines (`13956` -> `13898`); and the AC4 sentence corrected by this
+  section. The line loss is required by the gate at this head (`SCOPE_KEYS = {"type"}`), not
+  an error, but it is a content change and the record should not describe the move as
+  identifier-only.
