@@ -41,6 +41,9 @@ document_metadata:
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
+  bilingual_counterpart:
+    en: "docs/en/09-security-governance/global-forget-target-inventory-and-completion-evidence.md"
+    zh-CN: "docs/zh-CN/09-security-governance/global-forget-target-inventory-and-completion-evidence.md"
 ---
 # Global Forget Target Inventory and Completion Evidence Contract
 

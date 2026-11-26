@@ -42,6 +42,9 @@ document_metadata:
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
+  bilingual_counterpart:
+    en: "docs/en/09-security-governance/forget-retention-backup-and-erasure-policy.md"
+    zh-CN: "docs/zh-CN/09-security-governance/forget-retention-backup-and-erasure-policy.md"
 ---
 # Forget, Retention, Backup and Physical Erasure Policy
 

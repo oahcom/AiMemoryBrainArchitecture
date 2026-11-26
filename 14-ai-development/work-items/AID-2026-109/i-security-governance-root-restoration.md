@@ -32,7 +32,7 @@ document_metadata:
   authority:
     canonical_status: Canonical
     canonical_scope: "AID-2026-109 I security-governance source-root restoration audit"
-    canonical_scope_id: "ai-development/aid-2026-109-i-root-restoration"
+    canonical_scope_id: "security-governance/aid-2026-109-i-root-restoration"
     canonical_scope_keywords:
       - security-governance
       - source-restoration
@@ -76,13 +76,16 @@ The canonical files preserve the complete source document body byte-for-byte. Th
 
 | Restored canonical path | Source blob SHA | New full-file blob SHA | Frontmatter-only blob SHA | Disposition |
 |---|---|---|---|---|
-| `09-security-governance/global-forget-target-inventory-and-completion-evidence.md` | `9100061fa986fb6676656169de3fcf9fc1c72664` | `0d6f49a54522ad0ccd541bf4f1abf486e6b4b2cc` | `5691d1c392f796325de4b378341c9b67455ee608` | CURRENT — Candidate / Informative |
-| `09-security-governance/forget-retention-backup-and-erasure-policy.md` | `f14cb2149ca3f817229533005ab89dbdc7f0b3a8` | `92312ab9f4f31d775ea5cab5ccb44679c7a6b140` | `7ff3fe4d17677a0b4f173544a77d640ab182eb05` | CURRENT — Candidate / Informative |
-| `09-security-governance/principal-actor-and-authorization-contract.md` | `03765efac4bb1153f303ce0030f9e277d602e81d` | `505588d330778bf2c228d621a3db4cfbedaeb7be` | `ffafb5d3e777dac25164cefe8675bcec7d307307` | CURRENT — Candidate / Informative |
-| `09-security-governance/scope-and-revocation-policy.md` | `71df6aaf21bb1767cd9fe5c947581b871325e023` | `6398d21cb3c8ed77c2080412d20cd9cc23a253b0` | `b78f4f675e4f4f00e85cd24abb167f3190e9d845` | CURRENT — Candidate / Informative |
-| `09-security-governance/security-and-identity-overview.md` | `26a990e44709d8604ae515a2a63b510400fd8471` | `bbabc755216b113a1580d3a6dab8a932700eb7d1` | `0488c9bac114dfd311e5076765faf5a2f0cb39f3` | CURRENT — Candidate / Informative |
+| `09-security-governance/global-forget-target-inventory-and-completion-evidence.md` | `9100061fa986fb6676656169de3fcf9fc1c72664` | `c0ba8b2dacc115e29233268e62d5ababfc26a025` | `a0740d117603891c0a9633d093bd01cb9a92f8cf` | CURRENT — Candidate / Informative |
+| `09-security-governance/forget-retention-backup-and-erasure-policy.md` | `f14cb2149ca3f817229533005ab89dbdc7f0b3a8` | `ab2b28829100ca1f2a17d203396b910fe3979bff` | `60b666d7b6ea38a9f2d70aa47744f3d076876e02` | CURRENT — Candidate / Informative |
+| `09-security-governance/principal-actor-and-authorization-contract.md` | `03765efac4bb1153f303ce0030f9e277d602e81d` | `b8073340cb2efba990c038e0b628ee6e9d0f24da` | `d1b950f16ce89b8c23549c99bb885b0014a78dbf` | CURRENT — Candidate / Informative |
+| `09-security-governance/scope-and-revocation-policy.md` | `71df6aaf21bb1767cd9fe5c947581b871325e023` | `b4c66e90afdb57c5b60d37ad86554ccae6292e9a` | `9252258fa0a5f64e3cea75513da4e5e48d6c7847` | CURRENT — Candidate / Informative |
+| `09-security-governance/security-and-identity-overview.md` | `26a990e44709d8604ae515a2a63b510400fd8471` | `e9c71b15e19e9289bffa4d98bdfe254cc66a0b83` | `fd42af80595cf8c4ef92795f64f5beacba38e7db` | CURRENT — Candidate / Informative |
 
 README is newly authored (there is no README blob on the source branch); it is an informative index, not a recovered historical policy.
+
+The EN mirrors preserve the English source body. The ZH-CN mirrors provide translated navigation summaries and retain the English source body verbatim; full paragraph-level translation parity remains NOT_VERIFIED under GOV-DOC-001 manual control M-05. This is explicit, not a claim of completed semantic translation.
+
 
 ## 4. Replacement / authority determination
 
