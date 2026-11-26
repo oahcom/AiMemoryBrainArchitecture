@@ -85,8 +85,13 @@ acceptance_criteria:
     criterion: >-
       This work item changes nothing else.
     measurement: >-
-      Changed paths are this directory and `INDEX.md`: three new files plus one row, 318 added lines,
-      0 removed.
+      Changed paths are this directory and `INDEX.md`: three new files plus one row, 325 added lines,
+      0 removed (`git diff --numstat` against the merge base: 152 + 77 + 95 + 1). The figure 318
+      stated here earlier was wrong; corrected by the coordinating session on 2026-11-27 at head
+      `2afe24cd`. Separately, the merge timestamp `2026-11-26T13:41:46Z` was challenged in
+      independent review and is correct: `pulls/1287` reports `merged_at` =
+      `2026-11-26T13:41:46Z`, one second after the commit's own timestamp, and the record is
+      describing the merge event.
 
 findings:
   - id: F1
