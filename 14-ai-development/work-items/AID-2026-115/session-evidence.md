@@ -52,3 +52,7 @@ document_metadata:
 - Verification: pending exact PR Head; 16/16 required contexts must succeed before merge.
 - Merge/blob readback: NOT RUN at this snapshot.
 - Cache hit rate: NOT YET MEASURED; observe next CI cycle.
+
+- PR #1322 Work Item ID field is the standalone exact value `AID-2026-115`; provisional status is separated into its own section.
+- Per-Issue mapping for historical Issue #1212 is `LEGACY_UNDECLARED` / `N/A`.
+- PR #1313 (provisional AID-2026-112) was closed unmerged; replacement carrier is PR #1322 (AID-2026-115).

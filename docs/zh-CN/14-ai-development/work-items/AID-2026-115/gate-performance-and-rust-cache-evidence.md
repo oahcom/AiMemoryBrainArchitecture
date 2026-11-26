@@ -105,6 +105,10 @@ key: ${{ hashFiles('Cargo.lock') }}-${{ steps.rust-toolchain-version.outputs.ver
 
 基线为重复派发 113 秒，16 个 context 首轮 57 秒。按要求，重复派发消除且缓存预热后的规划预估约 **38 秒**。这是估算，不是实测或 SLA。缓存命中率目前 **尚未测量**，需在后续精确 Head 的 CI 中观察。
 
+## PR 声明格式
+
+PR 正文的 `Work Item ID` 字段仅填写 `AID-2026-115`；临时状态放在独立章节。历史 Issue #1212 的逐 Issue 映射为 `LEGACY_UNDECLARED` / `N/A`。该格式符合 Session Evidence validator 的字段边界和历史 Issue 合同；未修改 validator 语义。
+
 ## 验证台账
 
 实施 head、16 项精确 Head 结果、merge SHA、合并后 blob SHA 和缓存命中观察均待记录。本合并前快照不声称 CI 已成功或 PR 已合并。

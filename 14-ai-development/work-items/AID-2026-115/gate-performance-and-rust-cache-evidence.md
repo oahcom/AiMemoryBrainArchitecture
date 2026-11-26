@@ -110,6 +110,10 @@ No jobs merged; no `fetch-depth` changed; no gate/checker semantics changed; no 
 
 Baseline was 113s with duplicate dispatch and 57s for the first-pass 16-context run. Requested planning estimate after duplicate dispatch is eliminated and caches are populated: approximately **38s**. This is an estimate, not a measurement or SLA. Cache hit rate is **NOT YET MEASURED** and must be observed on subsequent exact-head CI.
 
+## PR declaration formatting
+
+The PR description's `Work Item ID` field is the standalone value `AID-2026-115`; the provisional status is in a separate section. The per-Issue mapping for historical Issue #1212 is `LEGACY_UNDECLARED` / `N/A`. This matches the Session Evidence validator's field and legacy-issue contract; no validator semantics were changed.
+
 ## Verification ledger
 
 Implementation head, all 16 exact-head results, merge SHA, post-merge blob SHAs and cache-hit observation remain pending at this pre-merge snapshot. No CI success or merge is claimed.
