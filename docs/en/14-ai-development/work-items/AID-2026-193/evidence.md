@@ -281,14 +281,15 @@ STALE=8 (unchanged), ACCURATE=16 (the 16 refreshed pins)
 ```
 
 Governed 942 -> 942. Classified 496 -> 559 (+63). Unclassified 446 -> 383 (-63).
-Those five figures are measured at corpus commit `b8c89d790d671cff402c259c588de65bf2234bff`, before this registration set
-existed. On the head this pull request ships, the same two commands report 947
-governed / 564 classified / 383 unclassified -- the five work-item documents are
-themselves governed, and all five are classified -- with the same `PASS
-(incremental)` and zero rule violations. The whole-tree run still exits 2 because
-383 governed documents elsewhere are unclassified; that backlog belongs to the
-other corpus units and to roots this unit does not own, and no rule violation is
-reported.
+Those three figures are measured at corpus commit `b8c89d790d671cff402c259c588de65bf2234bff`, before this
+registration set existed and before current main was merged in. On the head this
+pull request ships, the same two commands report 955 governed / 572 classified /
+383 unclassified -- the growth above 942/559 is main's own documents, which
+arrived with the merge -- with the same `PASS (incremental)` and zero rule
+violations. The deltas this change owns are +63 classified and -63 unclassified.
+The whole-tree run still exits 2 because 383 governed documents elsewhere are
+unclassified; that backlog belongs to the other corpus units and to roots this
+unit does not own, and no rule violation is reported.
 
 ## 8. What this change does not do
 
