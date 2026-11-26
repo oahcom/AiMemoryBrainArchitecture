@@ -1,0 +1,82 @@
+manifest_version: "1.0"
+record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
+registration_stage: "STAGE_0"
+registration_status: "CARRIER_PR_PENDING"
+work_item_id: "AID-2026-112"
+id_status: "PROVISIONAL"
+title: "Eliminate duplicate required Gate dispatch and cache Rust CI builds"
+date: "2026-11-26"
+repository:
+  name: "oahcom/AiMemoryBrainArchitecture"
+  baseline_branch: "main"
+  baseline_commit: "7629b9de5e5832fe486ee72d101c4bc5121015e6"
+identifier_allocation:
+  method: "alloc_at_push"
+  assigned_at: "2026-11-26"
+  observed_main: "7629b9de5e5832fe486ee72d101c4bc5121015e6"
+  index_sha: "7e52af2cc46e633a7743b2c2591a246a66a265ae"
+  max_index_id: "AID-2026-109"
+  occupied_after_index_max: ["AID-2026-110 (main)", "AID-2026-111 (open PR)"]
+  requested_id: "AID-2026-112"
+  id_status: "PROVISIONAL"
+  uniqueness_scope: "Re-read main INDEX, work-item directory, open PRs and branches; 110 and 111 were occupied, so 112 was allocated."
+  merge_time_rule: "Re-read main INDEX, work-item tree, Issues, PRs and branches; renumber if no longer unique."
+authority:
+  sponsor: "USER-PRINCIPAL-DELEGATED"
+  accountable_owner: "USER-PRINCIPAL-DELEGATED"
+  acceptance_authority: "NOT_ASSIGNED"
+  attribution: "user-authorized operator (delegated by account owner)"
+  signature_status: "代理执行记录，非自然人 Owner 签署"
+scope:
+  objective: "Eliminate duplicate required workflow dispatch by head SHA; add job-isolated Rust caches with Cargo.lock and resolved toolchain version in keys; explicitly pin two required job display names."
+  canonical_evidence: "14-ai-development/work-items/AID-2026-112/gate-performance-and-rust-cache-evidence.md"
+  en_evidence: "docs/en/14-ai-development/work-items/AID-2026-112/gate-performance-and-rust-cache-evidence.md"
+  zh_cn_evidence: "docs/zh-CN/14-ai-development/work-items/AID-2026-112/gate-performance-and-rust-cache-evidence.md"
+  prompt: "14-ai-development/work-items/AID-2026-112/prompt-v1.md"
+  session_evidence: "14-ai-development/work-items/AID-2026-112/session-evidence.md"
+  files_to_create:
+    - "14-ai-development/work-items/AID-2026-112/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-112/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-112/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-112/gate-performance-and-rust-cache-evidence.md"
+    - "docs/en/14-ai-development/work-items/AID-2026-112/gate-performance-and-rust-cache-evidence.md"
+    - "docs/zh-CN/14-ai-development/work-items/AID-2026-112/gate-performance-and-rust-cache-evidence.md"
+  files_to_modify:
+    - ".github/workflows/bilingual-docs.yml"
+    - ".github/workflows/branch-freshness.yml"
+    - ".github/workflows/document-management.yml"
+    - ".github/workflows/gates.yml"
+    - ".github/workflows/repository-hygiene.yml"
+    - ".github/workflows/runner-admission-policy.yml"
+    - ".github/workflows/rust-phase1.yml"
+    - ".github/workflows/session-evidence.yml"
+    - "14-ai-development/work-items/INDEX.md"
+  exclusions:
+    - "No job merges or required-context consolidation."
+    - "No fetch-depth changes."
+    - "No changes to check_declared_check_contexts.py or gate semantics."
+    - "No branch-protection required-context changes."
+    - "No closure of Issue #1212."
+    - "No runtime, schema, API, database, deployment or production changes."
+acceptance_criteria:
+  - id: AC1
+    criterion: "All eight required workflows use the head-SHA concurrency group."
+  - id: AC2
+    criterion: "Four Rust jobs use Swatinem/rust-cache@v2, distinct shared keys, Cargo.lock hash and resolved toolchain version."
+  - id: AC3
+    criterion: "audit and rust-workspace-test explicitly declare names matching protected context strings."
+  - id: AC4
+    criterion: "No jobs merged, no fetch-depth or checker semantics changed; all 16 contexts remain."
+  - id: AC5
+    criterion: "Canonical, EN and ZH-CN evidence documents have complete GOV-DOC-002 metadata."
+  - id: AC6
+    criterion: "All 16 required contexts succeed on exact final PR head; merge is followed by main blob readback."
+implementation:
+  status: "DRAFT_PR"
+  branch: "ai/AID-2026-112/ops-gate-concurrency-rust-cache"
+  pull_request: "PENDING"
+review:
+  status: "NOT_ASSIGNED"
+acceptance:
+  status: "NOT_GRANTED"
+  note: "CI optimization evidence only; no Owner acceptance or production conformance asserted."
