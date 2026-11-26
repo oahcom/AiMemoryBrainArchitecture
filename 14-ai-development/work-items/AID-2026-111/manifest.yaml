@@ -1,0 +1,174 @@
+manifest_version: "1.0"
+record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
+registration_stage: "STAGE_0"
+registration_status: "SCOPE_CONFIRMED_REVIEW_PACKAGE_DRAFTED"
+work_item_id: "AID-2026-111"
+id_status: "PROVISIONAL"
+title: "SQLite backend implementation evidence mapping to SC/HIR and Gate A predicates"
+date: "2026-11-26"
+repository:
+  name: "oahcom/AiMemoryBrainArchitecture"
+  baseline_branch: "main"
+  baseline_commit: "e3a134de856bbb58581fd688462c9c0282631270"
+identifier_allocation:
+  assigned_at: "2026-11-26"
+  observed_main: "e3a134de856bbb58581fd688462c9c0282631270"
+  observed_max_registered_id: "AID-2026-109"
+  allocation_reservations: "AID-2026-110 reserved by PR #1304; historical use in #1287"
+  requested_id: "AID-2026-109"
+  assigned_id: "AID-2026-111"
+  renumbered_from: "AID-2026-109"
+  renumbering_reason: "AID-2026-109 was occupied by a different main work item; AID-2026-110 was reserved by PR #1304 and historically used by #1287; AID-2026-111 was free at rescan."
+  id_status: "PROVISIONAL"
+  uniqueness_scope: "AID-2026-111 absent from main INDEX/tree, exact Issue search and branch-name search at allocation; branch created from observed main."
+  merge_time_rule: "Re-read main INDEX, work-item tree, Issues, PRs and branch names; renumber if occupied and preserve RENUMBERED_FROM."
+authority:
+  sponsor: "USER-PRINCIPAL-DELEGATED"
+  accountable_owner: "USER-PRINCIPAL-DELEGATED"
+  acceptance_authority: "NOT_ASSIGNED"
+  attribution: "user-authorized operator (delegated by account owner)"
+  signature_status: "代理登记，非自然人 Owner 签署"
+scope:
+  objective: "Map 94 supplied SQLite backend test names to SC-01..SC-18 and HIR-01..HIR-18; rejudge 72 AID-095 Gate A checkpoints and 16 EVIDENCE_REQUIRED rows without overclaiming."
+  canonical: "14-ai-development/work-items/AID-2026-111/evidence.md"
+  en: "docs/en/14-ai-development/work-items/AID-2026-111/evidence.md"
+  zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-111/evidence.md"
+  prompt: "14-ai-development/work-items/AID-2026-111/prompt-v1.md"
+  issues: ["#1211", "#1212"]
+  exclusions:
+    - "No runtime or product code changes"
+    - "No validator semantics, schemas, APIs or DDL changes"
+    - "No test or workflow changes"
+    - "No deployment or production configuration changes"
+    - "No Issue closure"
+    - "No Owner acceptance or production conformance fabricated"
+source_pins:
+  aid_095_matrix_blob: "1d162b527eacb96e2cff24eec5fcf5a66014039a"
+  aid_107_evidence_blob: "cce956d97b7a6d969bb3245fe0890905ca6d3979"
+  aid_108_correction_manifest_blob: "1164fb16a65c2a252697751dce76fa9584a36165"
+  storage_contract_blob: "d571f086505b312c40b6ae2e56a868131cfffc78"
+  h_contract_blob: "f64dd8f520b98e52a7151619cb279fc0b4c38c89"
+latest_sync_main_commit_sha: "d6cad634f1341a8943aa89dd5ef8bf75f6d56199"
+execution_evidence:
+  sqlite_backend:
+    head: "a123ea4e414c9f74fa0c576fbd718049a7d9f917"
+    environment: "WSL2 Ubuntu 24.04; rustup stable 1.100.0; bundled SQLite"
+    command: "cargo test -p memory-storage-sqlite -p memory-event-store-sqlite --no-fail-fast"
+    exit_code: 0
+    test_binaries: 8
+    passed: 99
+    failed: 0
+    stdout_bytes: 9465
+    stdout_sha256: "a15e3862af4d6cd97a4cd8caf6f133f57e3c3636ba284bdfd5afaa9237ba2952"
+    stdout_sha256_scope: "THIS_CAPTURE_ONLY"
+    normalised_digest: "92c368733aa89e426d1508a55584a5a4b8f0cc4f9b91aab6723820f6260ca086"
+    normalised_digest_algorithm: "SHA-256 over exit code + passed/failed totals + sorted multiset of per-harness passed counts; excludes ordering, durations and process interleaving"
+    harness_passed_counts: [26, 5, 2, 6, 60]
+    harness_count_rule: "Sum complete test result lines; exclude child-process rows with filtered out > 0"
+    test_name_recovery: "recovered 94 of 99; best-effort only; harness counts authoritative"
+    raw_stdout_reproducibility: "FIVE_RUNS_FIVE_DISTINCT_RAW_SHA256"
+    individually_named_tests_supplied: 94
+    evidence_origin: "USER_SUPPLIED_LOCAL_EXECUTION_NOT_CI"
+  pure_rust:
+    head: "44dc21a4970192118ba434801b8ca05702ac582c"
+    environment: "WSL2 Ubuntu 24.04; rustup stable 1.100.0"
+    command: "cargo test -p memory-domain -p memory-storage -p memory-event-store -p bmcp-protocol -p agent-integration --no-fail-fast"
+    exit_code: 0
+    test_binaries: 15
+    passed: 276
+    failed: 0
+    stdout_bytes: 47066
+    stdout_sha256: "C18EF5FC121EEB9B486000180F52BAE8385385722A369ADDAB873FCF8716D7B9"
+    stdout_sha256_scope: "THIS_CAPTURE_ONLY"
+    normalised_digest: "73d97ed8f536aa06cf483f84e750ddbda610d56e8f5caee501fac6f198934eee"
+    normalised_digest_algorithm: "SHA-256 over exit code + passed/failed totals + sorted multiset of per-harness passed counts; excludes ordering, durations and process interleaving"
+    test_name_inventory: "NOT_SUPPLIED; harness counts authoritative"
+  memory_context:
+    head: "a123ea4e414c9f74fa0c576fbd718049a7d9f917"
+    environment: "WSL2 Ubuntu 24.04"
+    passed: 177
+    failed: "NOT_RECORDED"
+    exit_code: "NOT_RECORDED"
+    command: "NOT_RECORDED"
+    test_binaries: "NOT_RECORDED"
+    stdout_bytes: "NOT_RECORDED"
+    stdout_sha256: "NOT_RECORDED"
+    normalised_digest: "NOT_SUPPLIED"
+    harness_passed_counts: "NOT_SUPPLIED"
+    test_name_inventory: "NOT_SUPPLIED"
+    evidence_origin: "USER_SUPPLIED_LOCAL_EXECUTION_AGGREGATE"
+  windows_workspace_negative:
+    command: "cargo test --workspace"
+    exit_code: 101
+    reason: "libsqlite3-sys v0.40.0 build script cannot execute cc1; MSVC cl.exe/link.exe absent"
+    stdout_bytes: 12456
+    stdout_sha256: "93BCDC26AB0B29CEDBEC56DD11BB735C8050DB18366A3F296B45C699C072C2B2"
+    stdout_sha256_scope: "THIS_CAPTURE_ONLY"
+rejudgment:
+  test_names_mapped: 94
+  aid_095_rows:
+    total: 72
+    pass: 0
+    partial_evidence: 23
+    unchanged: 49
+    gate_a_state: "PARTIAL / OPEN"
+  gate_a_item_5: "OPEN — scope adjudicated; 5 NORMATIVE_ROOT candidates to restore separately; 83 HISTORICAL_PHASE_RECORD and 101 UNDECIDED remain out of main without Owner ruling; F/I root identification remains open"
+  storage_evidence_required:
+    total: 8
+    pass: 0
+    partial_evidence: 6
+    unchanged: 2
+  h_idempotency_evidence_required:
+    total: 8
+    pass: 0
+    partial_evidence: 5
+    unchanged: 3
+  combined_88:
+    pass: 0
+    partial_evidence: 34
+    unchanged: 54
+    pass_claimed: false
+  sc_unresolved_no_corresponding_tests: ["SC-17", "SC-18"]
+  hir_unresolved_no_corresponding_tests: ["HIR-05", "HIR-12", "HIR-17"]
+  hir_18_missing_component: "I PermissionEpoch/current authorization recheck; only D Fence component has local tests"
+  d_i_anti_rollback_anchor_linkage: "NOT_EVIDENCED"
+acceptance:
+  gate_a: "PARTIAL / OPEN"
+  gate_b: "PARTIAL / OPEN (NOT VERIFIED)"
+  issue_1211: "OPEN"
+  issue_1212: "OPEN"
+  owner_acceptance: "NOT_CLAIMED"
+  implementation_conformance: "NOT_CLAIMED"
+  production_conformance: "NOT_CLAIMED"
+carrier:
+  branch: "docs/aid-2026-111-sqlite-implementation-evidence-review"
+  pull_request: 1307
+  draft: false
+  merge_commit_sha: "e47dd6f03ddd143be42645beba43c54b46921962"
+  merge_authorization: "merged after the exact-head review gate; integration fact only, no Owner acceptance or production conformance"
+review:
+  status: "NOT_ASSIGNED"
+  independent_reviewer: "NOT_ASSIGNED"
+  natural_person_owner_acceptance: "NOT_RECORDED"
+constraints:
+  runtime_changes: "NONE"
+  validator_semantic_changes: "NONE"
+  documented_only_is_pass: false
+  issue_1211_close: "NOT_AUTHORIZED"
+  issue_1212_close: "NOT_AUTHORIZED"
+
+prompt_id: "AID-2026-111-PROMPT"
+prompt_version: 1
+prompt_file: "14-ai-development/work-items/AID-2026-111/prompt-v1.md"
+prompt_status: "RECORDED_NOT_FROZEN"
+prompt_provenance: "USER_AUTHORIZED_DELEGATED_REQUEST"
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+    implementing_ai_session: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-111/prompt-v1.md"
+    executed_prompt_sha256: "063f5aae30e72ecd6afff94a8b63d34b81999251158543a14522c4558accac87"
+    executed_prompt_bytes: 3215
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-111/evidence.md"

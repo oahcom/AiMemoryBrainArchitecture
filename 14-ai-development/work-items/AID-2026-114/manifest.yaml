@@ -1,0 +1,123 @@
+work_item_id: AID-2026-114
+title: Make a missing AI-assisted work declaration fail instead of passing as not applicable
+
+class: GATE/TEST
+risk: R2
+risk_rationale: >-
+  One gate file and its test module. The change removes an exemption, so three pull requests that are
+  green today (#1275, #1266, #1220) turn red; that is the intended effect and it is stated in the pull
+  request body. No existing refusal is relaxed: the two tests that pinned the exemption are inverted
+  rather than deleted, and the whole suite passes.
+
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: e47dd6f03ddd143be42645beba43c54b46921962
+tracking_issue: "#1026"
+
+prompt_id: AID-2026-114-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-114/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 23edfb1fc5b3eb701156900347a3fe37f93cec7ef06830a22e2db913e6e64b84
+prompt_bytes: 3082
+prompt_provenance: >-
+  NOT_VERIFIED. Assembled while the pull request was being prepared, from the ruling quoted in the
+  task; it is not a live capture.
+
+authorization:
+  implementation_write: >-
+    GRANTED for scripts/governance/session_evidence/validate.py, tests/session_evidence/test_validate.py,
+    this work item's own directory and INDEX.md. NOT_GRANTED for any other path.
+  gate_behaviour_change: >-
+    GRANTED for one behaviour only: a pull request body with no AI-assisted work declaration must fail.
+    Every other check and every existing refusal is unchanged.
+  schema_change: NOT_GRANTED
+  platform_state_change: NOT_GRANTED
+  architecture_spec_change: NOT_GRANTED
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-114/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-114/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-114/session-evidence.md
+  files_to_modify:
+    - scripts/governance/session_evidence/validate.py
+    - tests/session_evidence/test_validate.py
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope: >-
+    Every other path. In particular .github/workflows/session-evidence.yml: the effective-time literal
+    is not moved, and scripts/check_bilingual_docs.py is not touched.
+
+acceptance_criteria:
+  - id: AC1
+    criterion: >-
+      A pull request body that carries neither declaration field fails.
+    measurement: >-
+      test_pre_effective_undeclared_pr_fails and
+      test_pr_opened_before_the_effective_time_without_a_declaration_fails assert exit 1 and the
+      message `PR: missing AI-assisted work declaration`.
+  - id: AC2
+    criterion: >-
+      A declared NO with N/A references still passes.
+    measurement: >-
+      test_declared_no_with_na_references_passes asserts exit 0.
+  - id: AC3
+    criterion: >-
+      A declared YES still requires a reference that exists in the head tree.
+    measurement: >-
+      test_declared_yes_with_a_real_path_passes asserts exit 0;
+      test_pre_effective_pr_volunteered_yes_with_missing_evidence_fails still asserts exit 1.
+  - id: AC4
+    criterion: >-
+      No other check changes and no existing refusal is relaxed.
+    measurement: >-
+      `python -m unittest discover -s tests/session_evidence -p "test_*.py"` reports `Ran 100 tests`
+      and `OK`; the only expectations that changed are the two that pinned the removed exemption.
+
+findings:
+  - id: F1
+    severity: HIGH
+    statement: >-
+      A body with neither declaration field returned NOT_APPLICABLE with exit 0, so silence passed the
+      gate while an honest YES with an unusable reference failed. The fail-open was the early return at
+      validate.py:2195-2203, not _parse_status, which already raised on None.
+    evidence: >-
+      #1275, #1266 and #1220 passed with no declaration field; #1251 and #1249 failed with YES and a
+      reference that did not resolve. Both were read from the run logs, not from the brief.
+
+implementation:
+  status: IMPLEMENTED_IN_BRANCH
+  branch: fix/session-evidence-silent-body-fails
+  pull_request: NOT_OPENED
+  merge_commit_sha: NOT_MERGED
+  note: >-
+    Two files change; 100 tests pass on the exported tree.
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    No independent review is recorded. The same session wrote the change and this manifest, so an
+    APPROVE from it would be self-review and is not claimed.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1026"
+    implementing_ai_session: session-evidence-fail-closed-session
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-114/prompt-v1.md
+    executed_prompt_sha256: 23edfb1fc5b3eb701156900347a3fe37f93cec7ef06830a22e2db913e6e64b84
+    executed_prompt_bytes: 3082
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-114/session-evidence.md
