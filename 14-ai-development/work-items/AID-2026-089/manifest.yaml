@@ -41,7 +41,6 @@ scope:
     - docs/en/01-system-architecture/system-boundaries.md
     - docs/zh-CN/01-system-architecture/system-boundaries.md
     - 14-ai-development/work-items/INDEX.md
-    - 00-governance/document-scope-registry.yaml
   files_out_of_scope: "All runtime/product code, tests, schemas, DDL, APIs, validators, scripts, CI workflows, deployment and production state."
 acceptance_criteria:
   - id: FF-01
