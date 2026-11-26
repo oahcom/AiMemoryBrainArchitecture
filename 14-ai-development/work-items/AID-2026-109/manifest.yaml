@@ -103,7 +103,8 @@ acceptance_criteria:
 implementation:
   status: DRAFT_PR
   branch: docs/aid-2026-109-i-security-root
-  pull_request: PENDING
+  pull_request: 1300
+  pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1300
 review:
   status: NOT_ASSIGNED
 acceptance:
