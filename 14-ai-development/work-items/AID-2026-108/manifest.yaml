@@ -69,6 +69,17 @@ correction:
     HIR_17: "MISSING"
     HIR_18: "MISSING"
     storage_conformance: "NOT_CLAIMED"
+session_evidence:
+  - role: DOCUMENTATION_AUTHOR
+    issue_refs:
+      - "#1211"
+    implementing_ai_session: NOT_RECORDED
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-108/prompt-v1.txt"
+    executed_prompt_sha256: "3fad628a1257cb1d68d705f99265100ca39c1ae8dbd1723ac85c7d3f2a967c95"
+    executed_prompt_bytes: 2209
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-108/session-evidence.md"
 review:
   status: "NOT_ASSIGNED"
 acceptance:
