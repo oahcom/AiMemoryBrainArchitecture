@@ -18,7 +18,7 @@ document_metadata:
       evidence_reference:
         - "AID-2026-082"
         - "source branch: session-e-memory-compiler-2026-11-16"
-        - "source commit: ee098e14747d9915de5b3efb63a3b8da50"
+        - "source commit: ee098e14747d9915de5b3efb63a8dd77f670ed"
         - "original source blob: e59f517fff161ab882aa0ddc4a5bda513964ae1a"
       revocation: null
     evidence_verification:
@@ -55,7 +55,7 @@ document_metadata:
 - 文档 ID：E-PRODUCER-ADMISSION-001
 - 版本：1.0
 - 源分支：session-e-memory-compiler-2026-11-16
-- 源文件版本：精确源 Blob `e59f517fff161ab882aa0ddc4a5bda513964ae1a`，源提交 `ee098e14747d9915de5b3efb63a3b8da50`。
+- 源文件版本：精确源 Blob `e59f517fff161ab882aa0ddc4a5bda513964ae1a`，源提交 `ee098e14747d9915de5b3efb63a8dd77f670ed`。
 - 源规范：[已恢复的规范源](../../../04-memory-compiler/compiler-state-and-producer-admission.md)（`e59f517fff161ab882aa0ddc4a5bda513964ae1a`）。
 - 对应英文：[Compiler State Machine and D Producer Admission Interface](../../en/04-memory-compiler/compiler-state-and-producer-admission.md)
 - 状态：E Lifecycle 语义为 CANDIDATE；D 语义操作为 DECIDED；可调用 API/Transport 和 Storage 原子性为 OPEN
