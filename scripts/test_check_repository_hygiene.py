@@ -1020,6 +1020,80 @@ class RepositoryHygieneTests(unittest.TestCase):
             "no directory: 14-ai-development/work-items/AID-2026-009",
             result.stderr,
         )
+
+    # #944: a link anywhere in the file used to register a directory, so a row
+    # could be commented out -- invisible to every reader -- and the check
+    # stayed green. Registration now requires a table row. Each of the three
+    # non-row carriers below is the only reference to its directory, so the
+    # directory must be reported missing; if the old whole-file rule returns,
+    # the link counts and the check passes, which is what makes these tests
+    # evidence rather than decoration.
+    def assert_membership_fails_for(self, index_text, directory):
+        self.index_fixture(index_text, ["AID-2026-001", directory])
+
+        result = self.run_checker_args()
+        # The named violation is asserted before the exit code: a mutation that
+        # restores the whole-file rule has to fail on this line, so the failure
+        # says which directory went unregistered instead of only that some
+        # count moved.
+        self.assertIn(
+            "::error::index membership violation: directory present, "
+            f"no index entry: 14-ai-development/work-items/{directory}",
+            result.stderr,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertEqual(
+            result.returncode,
+            1,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+
+    def test_index_membership_ignores_a_link_inside_an_html_comment(self):
+        self.assert_membership_fails_for(
+            "| [AID-2026-001](AID-2026-001/manifest.yaml) |\n"
+            "<!-- | [AID-2026-002](AID-2026-002/manifest.yaml) | -->\n",
+            "AID-2026-002",
+        )
+
+    def test_index_membership_ignores_a_link_in_prose(self):
+        self.assert_membership_fails_for(
+            "| [AID-2026-001](AID-2026-001/manifest.yaml) |\n"
+            "\n"
+            "The registry row for AID-2026-002 lives at "
+            "[AID-2026-002](AID-2026-002/manifest.yaml) once it is due.\n",
+            "AID-2026-002",
+        )
+
+    def test_index_membership_ignores_a_link_inside_a_fenced_code_block(self):
+        self.assert_membership_fails_for(
+            "| [AID-2026-001](AID-2026-001/manifest.yaml) |\n"
+            "\n"
+            "```\n"
+            "| [AID-2026-002](AID-2026-002/manifest.yaml) |\n"
+            "```\n",
+            "AID-2026-002",
+        )
+
+    # The control for the three above: prose, a comment and a fence around a
+    # row must not suppress the row itself. Without this, a rule that rejected
+    # every line would pass all three tests.
+    def test_index_membership_counts_a_row_among_prose_and_a_comment(self):
+        self.index_fixture(
+            "Prose before the table.\n"
+            "<!-- a comment mentioning [AID-2026-009](AID-2026-009/x.md) -->\n"
+            "| [AID-2026-001](AID-2026-001/manifest.yaml) |\n"
+            "| [AID-2026-002](AID-2026-002/manifest.yaml) |\n",
+            ["AID-2026-001", "AID-2026-002"],
+        )
+
+        result = self.run_checker_args()
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn("directories=2 linked=2", result.stdout)
+
     def manifest_consistency_fixture(self, manifest_text):
         return self.commit({
             "14-ai-development/work-items/INDEX.md":
