@@ -254,4 +254,4 @@ Brain 不是：
 
 ## 8. Forget Fence 权威边界——2026-11-26
 
-D 的规范契约 [03-memory-brain/forget-fence-and-completion-contract.md](../03-memory-brain/forget-fence-and-completion-contract.md) 是 ForgetOperation 及 ForgetFence Target/Lineage 决策的唯一逻辑权威。Storage/Consistency 可以持久化并从物理层保护该权威，但 Storage 本地 Memory/Version Fence 只能是派生、可重建的投影；MUST NOT 签发独立 Generation/Cursor，也不得成为竞争性的决策源。无法建立当前 D 权威状态时，受影响读取和发布必须 Fail-closed。本地抑制不等于 Global Forget Completion。本段记录方向决策；精确版本 Owner 验收和实现证据仍待完成。
+D 的规范契约 [03-memory-brain/forget-fence-and-completion-contract.md](forget-fence-and-completion-contract.md) 是 ForgetOperation 及 ForgetFence Target/Lineage 决策的唯一逻辑权威。Storage/Consistency 可以持久化并从物理层保护该权威，但 Storage 本地 Memory/Version Fence 只能是派生、可重建的投影；MUST NOT 签发独立 Generation/Cursor，也不得成为竞争性的决策源。无法建立当前 D 权威状态时，受影响读取和发布必须 Fail-closed。本地抑制不等于 Global Forget Completion。本段记录方向决策；精确版本 Owner 验收和实现证据仍待完成。
