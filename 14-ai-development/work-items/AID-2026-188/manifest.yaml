@@ -102,7 +102,13 @@ non_goals:
 
 carrier:
   branch: docs/2026-11-26-normative-root-03
-  pull_request: PENDING
+  pull_request: 1337
+  merge_sha: f6ef2545913754da7859abfaad5559fdc68074ce
+  merge_method: merge
+  merge_parents:
+    - 1e9341da603dec78377fed240f4d6dbabaa8838e
+    - c1a485cb23161fa38cd5fd71f4cea937ce1e6fee
+  required_contexts: "16/16 success on head c1a485cb23161fa38cd5fd71f4cea937ce1e6fee"
   draft: false
   merge_authorization: >-
     Only after all 16 required contexts succeed on the exact final PR head, branch
