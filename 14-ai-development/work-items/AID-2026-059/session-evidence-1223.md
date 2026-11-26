@@ -187,14 +187,14 @@ test suite run, the file restored and verified byte-identical afterwards
 ```
 MUTANT rc= 1
 FAIL: test_violation_when_a_context_is_declared_twice (__main__.DeclaredCheckContextsTest.test_violation_when_a_context_is_declared_twice)
-Ran 13 tests in 0.055s
+Ran 13 tests
 FAILED (failures=1)
 AssertionError: 0 != 1
 restored_identical= True 7cda3054233f
 ```
 
-Restoring the guard returns `Ran 13 tests in 0.056s` / `OK`. Exactly one test
-goes red, and it is the one that names the defect; no other test moves.
+Restoring the guard returns `Ran 13 tests` / `OK`. Exactly one test goes red,
+and it is the one that names the defect; no other test moves.
 
 ### What was deliberately not done
 
@@ -216,11 +216,11 @@ goes red, and it is the one that names the defect; no other test moves.
 
 ```
 python -m unittest discover -s tests/session_evidence -p "test_*.py"
-    Ran 98 tests in 0.448s
+    Ran 98 tests
     OK
 
 cd scripts && python test_check_declared_check_contexts.py
-    Ran 13 tests in 0.056s
+    Ran 13 tests
     OK
 
 python scripts/ci/check_line_endings.py
