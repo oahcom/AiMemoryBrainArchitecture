@@ -114,7 +114,7 @@ cargo test -p memory-domain -p memory-storage -p memory-event-store -p bmcp-prot
 | stdout SHA-256 | `C18EF5FC121EEB9B486000180F52BAE8385385722A369ADDAB873FCF8716D7B9` (this capture only) |
 | Normalised digest | `73d97ed8f536aa06cf483f84e750ddbda610d56e8f5caee501fac6f198934eee` |
 
-This supplements pure-Rust domain/protocol/storage trait evidence. It ran on **a different pinned commit** (`44dc21a4…`) from the SQLite and memory-context runs (`a123ea4e…`); do not describe the three groups as running on one commit. The supplied normalised digest is computed from exit code + passed/failed totals + the sorted multiset of per-harness passed counts, excluding ordering, durations and process interleaving. The test-name inventory was not supplied for this group; harness counts remain authoritative.
+This supplements pure-Rust domain/protocol/storage trait evidence. It ran on **a different pinned commit** (`44dc21a4…`) from the SQLite and memory-context runs (`a123ea4e…`); do not describe the three groups as running on one commit. The supplied normalised digest is computed from exit code + passed/failed totals + the sorted multiset of per-harness passed counts, excluding ordering, durations and process interleaving. Test-name recovery: **recovered 0 of 276** in this evidence record (no inventory was supplied); harness counts remain authoritative.
 
 ### 2.3 Memory-context group — supplied aggregate local execution evidence
 
@@ -124,9 +124,9 @@ This supplements pure-Rust domain/protocol/storage trait evidence. It ran on **a
 - Exact command, test-binary count, stdout byte count, raw stdout SHA-256, per-harness passed multiset, and test-name inventory: **NOT_RECORDED in the supplied evidence**.
 - Normalised digest: **NOT_SUPPLIED**; it cannot be derived from the aggregate `177 passed` count alone.
 
-This is a pinned-commit local Linux execution, not CI and not current `main`. The test-name inventory is best-effort; where no inventory was supplied, no test-name coverage is inferred.
+This is a pinned-commit local Linux execution, not CI and not current `main`. Test-name recovery: **recovered 0 of 177** in this evidence record (no inventory was supplied); the name list is best-effort and no test-name coverage is inferred.
 
-### 2.4 Explicit negative build evidence
+**Normalised digest algorithm (reproducible fingerprint):** SHA-256 over `exit code + passed/failed totals + sorted multiset of each harness block’s passed count`. It excludes test order, durations, build timing, and process interleaving. The SQLite and pure-Rust digests above use this algorithm; no memory-context digest was supplied.\n\n### 2.4 Explicit negative build evidence
 
 On the Windows host, `cargo test --workspace` exited **101** because `libsqlite3-sys v0.40.0` build script could not execute `cc1` (`gcc.exe: fatal error: cannot execute 'cc1'`); MSVC also lacked `cl.exe`/`link.exe`. The following packages therefore could not be built on that Windows host: `memory-storage-sqlite`, `memory-event-store-sqlite`, `memory-store`, `memory-compiler`, `memory-context`, `brain-cli`.
 
