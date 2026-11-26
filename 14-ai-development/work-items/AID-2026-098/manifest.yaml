@@ -49,7 +49,8 @@ scope:
     - "Canonical + EN + ZH-CN documents with GOV-DOC-002 metadata"
     - "Comments to #1212 and #1180"
   out_of_scope:
-    - "Runtime/product code, tests, DDL, schemas, validators, scripts or CI workflows"
+    - "Runtime/product code, tests, DDL, schemas, validator predicates/logic, or CI workflow changes"
+    - "Changes to parser behavior, acceptance semantics, or validation outcomes; only the existing governed-root scope declaration is aligned"
     - "Backend selection, COC/JF-10 freeze, cryptographic or quorum design approval"
     - "Owner acceptance, normative approval, implementation, deployment or production conformance"
     - "Merge or Issue closure"
@@ -65,7 +66,9 @@ review_state:
 implementation:
   status: "DOCUMENTATION ONLY"
   runtime_changes: 0
-  validator_changes: 0
+  validator_changes: 1
+  validator_semantic_changes: 0
+  governance_scope_declaration_changes: 1
   schema_changes: 0
   tests_added: 0
 acceptance:
