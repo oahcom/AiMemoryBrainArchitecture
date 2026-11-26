@@ -33,7 +33,7 @@ document_metadata:
       archival_reason: null
       archival_reference: null
   authority:
-    canonical_status: Candidate
+    canonical_status: Canonical
     canonical_scope: "D canonical ForgetFence authority and Storage projection boundary"
     canonical_scope_id: "memory-brain/forget-fence-authority"
     canonical_scope_keywords:
