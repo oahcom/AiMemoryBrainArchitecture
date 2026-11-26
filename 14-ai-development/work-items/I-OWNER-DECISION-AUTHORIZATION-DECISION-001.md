@@ -347,6 +347,8 @@ In dev-baseline, `i-owner-proxy/dev-baseline-v1` is the logical trust anchor and
 
 ## 8. Closure criteria
 
+> **Amended 2026-11-22 15:52 +0800 — see the amendment at the end of this document.** Criterion 1 below still describes the **two-state** `Pending/Issued` shape; `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001` D2 replaced it with `Absent` / `Placeholder` / `Issued`, so read criterion 1's "private Pending/Issued state" as that three-state shape. Criterion 12 below still says the assertion must be "the propagated authority `Err`"; the end-of-document amendment changes **which assertion satisfies it** — ADR-001 §4's two domain-layer assertions on `FactRevision::validate()`, not a compiler-layer `Err`, because `dm2_06` cannot reach `memory-compiler` from `crates/memory-domain/tests/phase2_acceptance.rs:606`. The obligation itself survives; only its satisfaction changed. Criteria 2–11 and 13 are unchanged.
+
 E may mark this contract implemented only when:
 
 1. `AuthorizationDecisionRef` carries the five fields in §2.1 with private Pending/Issued state and the shared `IssuerId`; only the I allowlist is accepted.
