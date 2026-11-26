@@ -5,7 +5,7 @@
 # One AID maps to exactly one work_item_id.
 
 schema: 1
-updated_at_utc: "2026-11-26T11:45:00Z"
+updated_at_utc: "2026-11-26T12:20:00Z"
 entries:
   - id: AID-2026-082
     state: MERGED
@@ -68,9 +68,9 @@ entries:
     carrier: "PR #1251"
     note: "reservation commit 844c0822 preceded content commit 5359a20a"
   - id: AID-2026-104
-    state: RESERVED
-    carrier: "PR #1281 (external, REVIEW_EACH)"
-    note: "declared in the PR body; outside the managed subset"
+    state: MERGED
+    carrier: "PR #1281"
+    note: "external REVIEW_EACH; removed approval_scope included_sections/included_assets from 275 files and from the schema; main moved to 533d8646"
   - id: AID-2026-105
     state: RESERVED
     carrier: "offered to PR #1280 (req05/827-fix) as its renumber target"
