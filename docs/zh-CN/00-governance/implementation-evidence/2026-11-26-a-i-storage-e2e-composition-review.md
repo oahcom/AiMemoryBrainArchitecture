@@ -71,36 +71,36 @@ document_metadata:
 
 | 精确路径 | Blob SHA | 来源类别 / 限制 |
 |---|---|---|
-| 00-governance/implementation-evidence/2026-11-26-a-i-storage-acceptance-matrix.md | 9c802777e9bafc421c77f8f68fcb035cdee4167d | Canonical work-record; traceability only; embedded baseline is stale. | undefined |
-| 04-memory-compiler/compiler-overview.md | 24c2fc69a8a69176071d46aac871ae16588702b7 | Canonical Normative Draft/Unverified; orchestration candidate and explicit exclusions. | undefined |
-| 04-memory-compiler/phase-1-event-store-contract.md | 17b14591d76160a7c125903b41e7dae014c3c5df | DECIDED semantics / CANDIDATE seam; dispatcher, leases and production durability excluded. | undefined |
-| 04-memory-compiler/README.md | 88f1a451830b4c7b455462edd6453543778793e4 | Canonical Informative reading guide. | undefined |
-| 14-ai-development/work-items/D-OWNER-DECISION-PARTICIPANT-ADMISSION-001.md | 2cff53b2133e26115e2d3808ae9738092602c4d3 | Owner-proxy decision; participant_admitted remains false. | undefined |
-| 14-ai-development/work-items/D-OWNER-DECISION-CANONICAL-COMMIT-001.md | 2fba6536e95e55e55617bfddefc26a11e269c5b5 | D decision; canonical store normative root absent. | undefined |
-| 01-system-architecture/forget-fence-and-completion-contract.md | 760a1d48011f2a66c23abcf825a3d067e79b8821 | Canonical Draft/Unverified/Informative; global policy and cross-module execution open. | undefined |
-| 06-memory-context/context-versioning.md | 57ea7e7298f79d769d6931b1d355c9d3b4f956d6 | G semantics; encoding/serialization candidate. | undefined |
-| 06-memory-context/context-version-immutability-decision.md | 27e9e5f092b17cf4013a533d07949eb73ac6ef4c | Draft/Unverified/Informative; G acceptance pending. | undefined |
-| 06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.md | 833815e37ac8d7505d93a0a115421dafe3eb08ad | G Normative Design Draft; implementation unverified; cross-owner acceptance required. | undefined |
-| 07-agent-integration/applied-evidence-contract.md | 273efdd1b02bd9302fc968f07c6d094da2582a6e | Draft/Unverified/Informative; C/G/H acceptance pending. | undefined |
-| 07-agent-integration/inference-boundary-model.md | e2d5cb6abd9ec40da6e3680531de5944fc8b14df | Candidate boundary model; no cross-owner freeze. | undefined |
-| 08-bmcp-protocol/owner-snapshot-namespace-and-fence-currentness-contract.md | d83cde77e98db2e74cf6827d874b0babb4157304 | H candidate; must reconcile with E/G/Storage. | undefined |
-| 08-bmcp-protocol/phase-3.8-h-rj-hw-01-typed-watermark-and-fence-binding-contract.md | e583ac2fb888aa5184eaa6525d9cc564f343785f | H phase contract; not F normative retrieval root. | undefined |
-| 08-bmcp-protocol/phase-3.8.25-h-applied-delivery-evidence-hardening-addendum.md | afa294bc42a8488e4569e6a8bdf5437c7a90e247 | H addendum; shared consumer acceptance pending. | undefined |
-| 08-bmcp-protocol/phase-3.8.26-h-applied-delivery-evidence-csubmitoutcome-join-addendum.md | 7b73491c765091728af6f5306b9efd502cf7f30a | H addendum; shared consumer acceptance pending. | undefined |
-| 02-domain-model/phase-1-storage-trait-contract.md | 22ca7cd3777e0132e25f084084610f1e90b60d21 | Candidate seam; no backend selected; no backend atomicity/durability proof. | undefined |
-| 02-domain-model/scope-and-permission-model.md | b5215ae27bd65a6c89c185b496f730b6cd52efa9 | Scope separation decided; policy and inheritance edge cases open. | undefined |
-| 14-ai-development/adr/OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001.md | 8ad9bbfa4906a6f9c30a437fd144c6c62c37577d | Proxy decision; does not establish I issuance authenticity. | undefined |
-| 14-ai-development/adr/OWNER-RULING-AUTHORIZATION-PRESENCE-GATE-025.md | 75e338aa0dbe0161fbc890977c5f4a8234a8c815 | Proxy ruling; presence gate is not authorization authenticity. | undefined |
-| crates/memory-event-store-sqlite/src/lib.rs | c68e036e5f8deb7968babc6703a4cf9341d5db40 | Implementation evidence only. | undefined |
-| crates/memory-storage-sqlite/src/lib.rs | b7eecd3ec0ec4c3ef3c27bc43fe24c29c91fb11f | Implementation evidence only. | undefined |
-| crates/memory-event-store-sqlite/src/forget_fence.rs | 5b71a25b8be24fd0f1d9cf9e22582705d646cf64 | Implementation evidence only. | undefined |
-| 06-memory-context/reference-model/g_applied_ledger.py | be24fea19ee72a1fc01350b79d5359e7820848b9 | Reference model only. | undefined |
-| 08-bmcp-protocol/schemas/bmcp.applied-delivery-evidence-1.0.0.schema.json | 0700f2077052bd153f9baa86850d9aab89491016 | Schema presence is not end-to-end acceptance. | undefined |
-| 09-security-governance/README.md | NOT_FOUND_ON_MAIN | IMPL2/I restore or disposition; I accepts policy. | undefined |
-| 03-memory-brain/canonical-memory-store.md | NOT_FOUND_ON_MAIN | IMPL2/D restore or disposition; D accepts canonical semantics. | undefined |
-| 05-memory-runtime/README.md | NOT_FOUND_ON_MAIN | IMPL2/F restore or disposition; F accepts retrieval semantics. | undefined |
-| 04-memory-compiler/accepted-receipt-and-idempotency-contract.md | NOT_FOUND_ON_MAIN | IMPL2/E restore or disposition; E supplies receipt contract. | undefined |
-| 04-memory-compiler/compiler-state-and-producer-admission.md | NOT_FOUND_ON_MAIN | IMPL2/E restore or disposition; E supplies admission contract. | undefined |
+| 00-governance/implementation-evidence/2026-11-26-a-i-storage-acceptance-matrix.md | 05fdcc93c5dfee1f635b5ad1a1db86310a88d8f7 | Canonical 工作记录；仅用于可追溯性；其内嵌基线已过期。 |
+| 04-memory-compiler/compiler-overview.md | 24c2fc69a8a69176071d46aac871ae16588702b7 | Canonical、Normative、Draft/Unverified；编排仍为候选，且明确排除若干责任。 |
+| 04-memory-compiler/phase-1-event-store-contract.md | 17b14591d76160a7c125903b41e7dae014c3c5df | 语义 DECIDED / 实现接缝 CANDIDATE；不包含派发、lease 和生产持久性证明。 |
+| 04-memory-compiler/README.md | 88f1a451830b4c7b455462edd6453543778793e4 | Canonical、Informative 阅读指南。 |
+| 14-ai-development/work-items/D-OWNER-DECISION-PARTICIPANT-ADMISSION-001.md | 2cff53b2133e26115e2d3808ae9738092602c4d3 | Owner 代理决策；participant_admitted 仍为 false。 |
+| 14-ai-development/work-items/D-OWNER-DECISION-CANONICAL-COMMIT-001.md | 2fba6536e95e55e55617bfddefc26a11e269c5b5 | D 决策记录；canonical store 规范根缺失。 |
+| 01-system-architecture/forget-fence-and-completion-contract.md | 760a1d48011f2a66c23abcf825a3d067e79b8821 | Canonical、Draft/Unverified/Informative；全局策略和跨模块执行仍开放。 |
+| 06-memory-context/context-versioning.md | 57ea7e7298f79d769d6931b1d355c9d3b4f956d6 | G 语义；编码/序列化仍为候选。 |
+| 06-memory-context/context-version-immutability-decision.md | 27e9e5f092b17cf4013a533d07949eb73ac6ef4c | Draft/Unverified/Informative；等待 G 接受。 |
+| 06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.md | 833815e37ac8d7505d93a0a115421dafe3eb08ad | G 所有的 Normative Design Draft；实现未验证，且需跨 Owner 接受。 |
+| 07-agent-integration/applied-evidence-contract.md | 273efdd1b02bd9302fc968f07c6d094da2582a6e | Draft/Unverified/Informative；等待 C/G/H 接受。 |
+| 07-agent-integration/inference-boundary-model.md | e2d5cb6abd9ec40da6e3680531de5944fc8b14df | 候选边界模型；尚无跨 Owner 冻结。 |
+| 08-bmcp-protocol/owner-snapshot-namespace-and-fence-currentness-contract.md | d83cde77e98db2e74cf6827d874b0babb4157304 | H 候选合同；必须与 E/G/Storage 对齐。 |
+| 08-bmcp-protocol/phase-3.8-h-rj-hw-01-typed-watermark-and-fence-binding-contract.md | e583ac2fb888aa5184eaa6525d9cc564f343785f | H 阶段合同；不是 F 规范检索根。 |
+| 08-bmcp-protocol/phase-3.8.25-h-applied-delivery-evidence-hardening-addendum.md | afa294bc42a8488e4569e6a8bdf5437c7a90e247 | H 补充条款；共享消费者接受仍待完成。 |
+| 08-bmcp-protocol/phase-3.8.26-h-applied-delivery-evidence-csubmitoutcome-join-addendum.md | 7b73491c765091728af6f5306b9efd502cf7f30a | H 补充条款；共享消费者接受仍待完成。 |
+| 02-domain-model/phase-1-storage-trait-contract.md | 22ca7cd3777e0132e25f084084610f1e90b60d21 | 候选接口接缝；未选择后端；不构成后端原子性/持久性证明。 |
+| 02-domain-model/scope-and-permission-model.md | b5215ae27bd65a6c89c185b496f730b6cd52efa9 | Scope 分离已决定；策略语言和继承边界仍开放。 |
+| 14-ai-development/adr/OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001.md | 8ad9bbfa4906a6f9c30a437fd144c6c62c37577d | 代理决策；不证明 I 签发的真实性。 |
+| 14-ai-development/adr/OWNER-RULING-AUTHORIZATION-PRESENCE-GATE-025.md | 75e338aa0dbe0161fbc890977c5f4a8234a8c815 | 代理裁定；存在性门禁不等于授权真实性。 |
+| crates/memory-event-store-sqlite/src/lib.rs | c68e036e5f8deb7968babc6703a4cf9341d5db40 | 仅为实现证据。 |
+| crates/memory-storage-sqlite/src/lib.rs | b7eecd3ec0ec4c3ef3c27bc43fe24c29c91fb11f | 仅为实现证据。 |
+| crates/memory-event-store-sqlite/src/forget_fence.rs | 5b71a25b8be24fd0f1d9cf9e22582705d646cf64 | 仅为实现证据。 |
+| 06-memory-context/reference-model/g_applied_ledger.py | be24fea19ee72a1fc01350b79d5359e7820848b9 | 仅为参考模型。 |
+| 08-bmcp-protocol/schemas/bmcp.applied-delivery-evidence-1.0.0.schema.json | 0700f2077052bd153f9baa86850d9aab89491016 | 存在 Schema 不等于端到端接受。 |
+| 09-security-governance/README.md | NOT_FOUND_ON_MAIN | IMPL2/I 恢复或处置；由 I 接受策略。 |
+| 03-memory-brain/canonical-memory-store.md | NOT_FOUND_ON_MAIN | IMPL2/D 恢复或处置；由 D 接受 canonical 语义。 |
+| 05-memory-runtime/README.md | NOT_FOUND_ON_MAIN | IMPL2/F 恢复或处置；由 F 接受检索语义。 |
+| 04-memory-compiler/accepted-receipt-and-idempotency-contract.md | NOT_FOUND_ON_MAIN | IMPL2/E 恢复或处置；由 E 提供回执合同。 |
+| 04-memory-compiler/compiler-state-and-producer-admission.md | NOT_FOUND_ON_MAIN | IMPL2/E 恢复或处置；由 E 提供准入合同。 |
 
 ### 当前 main 缺失的规范根
 
@@ -120,155 +120,155 @@ docs/en 下的镜像不能在没有明确源层级决策时填补缺失的 canon
 
 ### F1 — Event ingress → durable acceptance → Compiler admission
 
-- **Overall state:** BLOCKED_WITH_REASON
-- **Authority / owners:** E ingress/Compiler; I authorization; D authority boundary; Storage persistence
-- **Reason:** E Event Store is only a candidate seam; accepted-receipt and producer-admission roots are absent. Compiler overview excludes final canonical authority and production dispatch. D's decision says E AdmissionStore is not D-authoritative and publication_participant_admitted remains false.
-- **Missing / provider:** IMPL2/E restore or disposition the missing receipt/admission roots; E supplies dispatch/lease/retry contract; I supplies authorization issuer/epoch; D/Storage supply durable acceptance boundary.
+- **整体状态：** BLOCKED_WITH_REASON
+- **权威 / Owner：** E ingress/Compiler；I 授权；D 权威边界；Storage 持久化
+- **阻塞原因：** E Event Store 仅是候选实现接缝；accepted-receipt 和 producer-admission 规范根缺失。Compiler Overview 排除最终 canonical 权威与生产派发。D 决策明确 E AdmissionStore 不是 D 权威，publication_participant_admitted 仍为 false。
+- **缺失项 / 提供者：** IMPL2/E 恢复或处置缺失回执/准入规范根；E 提供派发/lease/重试合同；I 提供授权 issuer/epoch；D/Storage 提供持久接收边界。
 
-| Checkpoint | Expected contract and PASS/FAIL rule | Current result |
+| 检查点 | 合同预期与 PASS/FAIL 判据 | 当前结果 |
 |---|---|---|
-| **Issuer** | E accepts producer envelope; I is authorization authority; E AdmissionStore cannot assert D authority. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Request / response** | Producer actor, Scope refs, payload ref+digest, idempotency key, correlation/causation; return durable Accepted receipt or explicit conflict/rejection. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Identity / cursor namespace** | Event/receipt IDs stable; candidate idempotency tuple is (producer_actor_ref,idempotency_key); separate from D commit, F watermark and H cursors. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Idempotency scope** | Same producer+key+digest returns original receipt; same key/different digest conflicts; Scope authorization precedes replay. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Linearization point** | Candidate transaction stores envelope, digest, receipt, Pending state and compile-intent outbox row together. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Durable receipt** | Receipt and compile intent persist together; replay returns original receipt without duplicate intent. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Failure / Unknown** | Dispatcher/worker delivery and post-commit Unknown resolution are not fully specified. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Replay / recovery** | Startup backfills missing intent; dispatcher, leases, retries and DLQ are outside adapter. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Visibility** | Accepted is not canonical/indexed; private staging until D/I gates. | NOT EVIDENCED — FAIL for Gate A closure |
+| **Issuer** | E 接收 Producer envelope；I 是授权权威；E AdmissionStore 不得自称 D 权威。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **请求/响应** | Producer actor、Scope refs、payload ref+digest、幂等键、correlation/causation；返回持久 Accepted receipt 或明确冲突/拒绝。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **身份/游标命名空间** | Event/receipt ID 稳定；候选幂等元组为 (producer_actor_ref,idempotency_key)；与 D commit、F watermark、H cursor 分离。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **幂等范围** | 相同 producer+key+digest 返回原回执；相同 key/不同 digest 冲突；重放前先做 Scope 授权。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **线性化点** | 候选事务同时写入 envelope、digest、receipt、Pending 状态和 compile-intent outbox 行。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **持久回执** | receipt 与 compile intent 同事务持久化；重放返回原 receipt，不重复创建 intent。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **失败/Unknown** | 派发/Worker delivery 与提交后 Unknown 的核对方式尚未完整定义。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **重放/恢复** | 启动时回填缺失 intent；dispatcher、lease、retry、DLQ 不在当前 adapter 合同内。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **可见性** | Accepted 不等于 canonical/indexed；在 D/I 门禁允许前必须保持 private staging。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
 
 ### F2 — D Canonical Commit → atomic outbox / receipt → F consumer
 
-- **Overall state:** BLOCKED_WITH_REASON
-- **Authority / owners:** D canonical authority; Storage physical transaction; F consumes authoritative feed
-- **Reason:** D canonical store root is absent. Storage trait is candidate-only and disclaims backend/distributed atomicity. E compile-intent outbox is not D canonical-change outbox.
-- **Missing / provider:** IMPL2/D restores/dispositions canonical store root; D pins commit/result/cursor/outbox; Storage supplies same-transaction commit/outbox and crash evidence; F supplies consumer dedupe/ack.
+- **整体状态：** BLOCKED_WITH_REASON
+- **权威 / Owner：** D canonical 权威；Storage 物理事务；F 消费权威 feed
+- **阻塞原因：** D canonical store 规范根缺失。Storage trait 仅为候选，并明确不规定后端/分布式原子性。E compile-intent outbox 不是 D canonical-change outbox。
+- **缺失项 / 提供者：** IMPL2/D 恢复/处置 canonical store 根；D 固定 commit/result/cursor/outbox；Storage 提供同事务 commit/outbox 与崩溃证据；F 提供 consumer 去重/ack。
 
-| Checkpoint | Expected contract and PASS/FAIL rule | Current result |
+| 检查点 | 合同预期与 PASS/FAIL 判据 | 当前结果 |
 |---|---|---|
-| **Issuer** | Only D issues canonical identity/version/lifecycle/commit result; Storage cannot mint domain authority. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Request / response** | CanonicalWriteRequest binds expected version, immutable new version, Scope, authorization/Fence and idempotency; response distinguishes commit/conflict/reject/Unknown. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Identity / cursor namespace** | D commit cursor and D outbox event ID are bound; F scan watermark is separately F-owned. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Idempotency scope** | Key+request digest resolves one D receipt; changed digest conflicts; Scope checked before receipt lookup. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Linearization point** | Expected one Storage transaction: immutable version, current-version CAS, idempotency record, D sequence, outbox and receipt. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Durable receipt** | D receipt/outbox durable and queryable after restart; E compile-intent row is not this receipt. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Failure / Unknown** | CAS conflict determinate; rollback means no commit; lost response during commit remains Unknown until receipt lookup. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Replay / recovery** | F replays durable D cursor; dedupes at-least-once delivery; gaps cannot be skipped. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Visibility** | Canonical state visible only after commit and D/I/Fence checks; F projection is derivative. | NOT EVIDENCED — FAIL for Gate A closure |
+| **Issuer** | 只有 D 能签发 canonical identity/version/lifecycle/commit result；Storage 不得签发领域权威事实。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **请求/响应** | CanonicalWriteRequest 绑定 expected version、immutable new version、Scope、authorization/Fence、幂等身份；响应区分 committed/conflict/rejected/Unknown。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **身份/游标命名空间** | D commit cursor 与 D outbox event ID 绑定；F scan watermark 由 F 独立拥有。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **幂等范围** | key+request digest 解析为唯一 D receipt；digest 改变则冲突；receipt 查询前检查 Scope。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **线性化点** | 预期单一 Storage 事务包含 immutable version、current-version CAS、幂等记录、D sequence、outbox、receipt。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **持久回执** | D receipt/outbox 必须在重启后可查询；E compile-intent 行不是该回执。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **失败/Unknown** | CAS 冲突是确定结果；rollback 表示未提交；提交期间响应丢失则在查询 receipt 前保持 Unknown。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **重放/恢复** | F 从持久 D cursor 重放；at-least-once delivery 去重；不得跳过 gap。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **可见性** | canonical state 仅在 commit 和 D/I/Fence 检查后可见；F projection 只是派生视图。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
 
 ### F3 — F Retrieval / Index / Watermark / Scan Coverage
 
-- **Overall state:** BLOCKED_WITH_REASON
-- **Authority / owners:** D owns canonical feed; F owns retrieval/index/watermark
-- **Reason:** F normative root 05-memory-runtime/README.md is absent; retrieval-engine material exists only as docs mirror. D canonical feed root also absent; no source defines contiguous watermark proof.
-- **Missing / provider:** IMPL2/F restores/dispositions F root; D pins feed cursor; F specifies watermark/gap/tombstone/coverage; Storage pins durable index checkpoint.
+- **整体状态：** BLOCKED_WITH_REASON
+- **权威 / Owner：** D 拥有 canonical feed；F 拥有 retrieval/index/watermark
+- **阻塞原因：** F 规范根 05-memory-runtime/README.md 缺失；检索引擎材料仅位于 docs 镜像。D canonical feed 根也缺失；没有源定义连续 watermark 证明。
+- **缺失项 / 提供者：** IMPL2/F 恢复/处置 F 根；D 固定 feed cursor；F 规定 watermark/gap/tombstone/coverage；Storage 固定持久 index checkpoint。
 
-| Checkpoint | Expected contract and PASS/FAIL rule | Current result |
+| 检查点 | 合同预期与 PASS/FAIL 判据 | 当前结果 |
 |---|---|---|
-| **Issuer** | D issues canonical sequence; F alone issues per-index scan watermark and retrieval metadata. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Request / response** | Request binds actor, resolved Scope, query/filter, consistency and Fence/permission epochs; response separates visible/filtered/irrelevant/gap/unknown. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Identity / cursor namespace** | D cursor, F per-index watermark, shard cursor and continuation token typed and distinct. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Idempotency scope** | Index dedupe by D event/commit identity + index generation; retrieval retries do not advance scan watermark. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Linearization point** | No F source fixes atomic index mutation + contiguous watermark + coverage proof. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Durable receipt** | Per-index scan-through proof with exact D cursor and gaps must persist; shape not pinned. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Failure / Unknown** | Gap, malformed event, permission failure, stale Fence or failed shard cannot count as scanned. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Replay / recovery** | Rebuild from D cursor; contiguous prefix advances only after all prior events accounted. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Visibility** | D Fence and I authorization checked at retrieval/publication; stale index/cache suppressed. | NOT EVIDENCED — FAIL for Gate A closure |
+| **Issuer** | D 签发 canonical sequence；只有 F 签发 per-index scan watermark 和 retrieval 元数据。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **请求/响应** | 请求绑定 actor、resolved Scope、query/filter、一致性要求和 Fence/permission epochs；响应区分 visible/filtered/irrelevant/gap/unknown。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **身份/游标命名空间** | D cursor、F per-index watermark、shard cursor、continuation token 必须强类型且互相区分。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **幂等范围** | Index 按 D event/commit identity + index generation 去重；retrieval retry 不推进 scan watermark。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **线性化点** | 没有 F 源定义 index mutation、连续 watermark 与 coverage proof 的原子边界。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **持久回执** | 每索引 scan-through proof 必须持久化并绑定精确 D cursor 与 gap；其格式尚未固定。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **失败/Unknown** | gap、坏事件、权限失败、Fence 过期或 shard 失败不得计为 scanned。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **重放/恢复** | 从 D cursor 重建；只有所有前序事件都已处理/核销后才推进连续前缀。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **可见性** | 检索/发布时检查 D Fence 和 I 授权；过期 index/cache 候选必须抑制。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
 
 ### F4 — Forget Fence → E/F/G/H/Storage visibility and cleanup
 
-- **Overall state:** BLOCKED_WITH_REASON
-- **Authority / owners:** D canonical Fence issuer; I policy/completion; each derivative Owner executes; Storage projection-only
-- **Reason:** D Fence source is Draft/Unverified/Informative and not a wire schema; I global policy root absent. Cross-domain receipt schemas, linearization and production evidence not accepted.
-- **Missing / provider:** IMPL2/I restores/dispositions policy root; D pins Fence operation/inventory source; I defines auth/retention/residual policy; E/F/G/H/Storage provide per-target durable ack/replay/visibility evidence.
+- **整体状态：** BLOCKED_WITH_REASON
+- **权威 / Owner：** D canonical Fence issuer；I 策略/完成；各派生域执行；Storage 仅投影
+- **阻塞原因：** D Fence 源为 Draft/Unverified/Informative，且不是 wire schema；I 全局策略根缺失。跨域回执 schema、线性化和生产证据尚未接受。
+- **缺失项 / 提供者：** IMPL2/I 恢复/处置策略根；D 固定 Fence operation/inventory 源；I 定义授权/retention/残留例外；E/F/G/H/Storage 提供逐目标持久 ack/重放/可见性证据。
 
-| Checkpoint | Expected contract and PASS/FAIL rule | Current result |
+| 检查点 | 合同预期与 PASS/FAIL 判据 | 当前结果 |
 |---|---|---|
-| **Issuer** | D issues ForgetOperation/Fence; I issues policy/global completion; E/F/G/H own derivative acknowledgements. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Request / response** | Operation ID, target inventory/version, policy authority and expected Fence; each target returns typed per-target ack including unknown/exception. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Identity / cursor namespace** | D operation/Fence cursor; I PermissionEpoch; E/F/G/H target ack; Storage derived projection cursor are distinct. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Idempotency scope** | Stable operation ID + immutable target/policy digest; per-target ack scoped by operation+target+generation. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Linearization point** | D durable monotonic Fence commit is logical suppression point; cleanup later; I global completion separate. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Durable receipt** | D operation/Fence and per-target acks persist; only I may issue global completion receipt. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Failure / Unknown** | Unknown target, timeout, offline adapter, backup/external copy or missing inventory blocks completion; fail closed. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Replay / recovery** | Retry rechecks current Fence; restore applies Fence before exposing data; stale publication cannot re-enter. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Visibility** | D Fence suppresses canonical refs immediately; all derivative paths enforce; physical erasure is I policy. | NOT EVIDENCED — FAIL for Gate A closure |
+| **Issuer** | D 签发 ForgetOperation/Fence；I 签发策略/全局完成；E/F/G/H 各自签发派生执行 ack。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **请求/响应** | Operation ID、target inventory/version、policy authority、expected Fence；每个 target 返回 typed per-target ack，含 unknown/exception。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **身份/游标命名空间** | D operation/Fence cursor、I PermissionEpoch、E/F/G/H target ack、Storage 派生 projection cursor 各自独立。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **幂等范围** | 稳定 operation ID + 不可变 target/policy digest；逐目标 ack 绑定 operation+target+generation。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **线性化点** | D 持久单调 Fence commit 是逻辑抑制点；cleanup 随后进行；I global completion 是另一决策点。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **持久回执** | D operation/Fence 与逐目标 ack 必须持久；只有 I 可签发全局完成 receipt。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **失败/Unknown** | Unknown target、timeout、offline Adapter、backup/external copy 或 inventory 缺失均阻止完成；可见性 fail-closed。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **重放/恢复** | retry 重新检查当前 Fence；restore 先应用 Fence 再暴露数据；旧 publication 不得重新进入可见状态。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **可见性** | D Fence 立即抑制 canonical refs；所有派生路径执行门禁；物理擦除属于 I 策略。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
 
 ### F5 — C/H Applied evidence → G Applied decision
 
-- **Overall state:** BLOCKED_WITH_REASON
-- **Authority / owners:** C owns inference facts; H protocol evidence; G sole Applied issuer; I/D/Storage supply predicates
-- **Reason:** G persistence contract is Normative Design Draft with implementation unverified and cross-owner acceptance required. C Applied contract is Draft/Unverified/Informative; H schema/addenda do not prove complete same-request/same-GID predicate join.
-- **Missing / provider:** C/H/G/Storage/D/I reconcile exact join contract; G proves ledger crash/restore; Storage proves same-GID terminal; all relevant Owners accept same version.
+- **整体状态：** BLOCKED_WITH_REASON
+- **权威 / Owner：** C 拥有 inference facts；H 协议证据；G 是唯一 Applied issuer；I/D/Storage 提供谓词
+- **阻塞原因：** G 持久化合同为 Normative Design Draft，实现未验证且需跨 Owner 接受。C Applied 合同为 Draft/Unverified/Informative；H schema/addenda 不证明同一 request/GID 的完整证据 join。
+- **缺失项 / 提供者：** C/H/G/Storage/D/I 对齐精确 join 合同；G 证明账本崩溃恢复；Storage 证明 same-GID terminal；相关 Owners 接受同一版本。
 
-| Checkpoint | Expected contract and PASS/FAIL rule | Current result |
+| 检查点 | 合同预期与 PASS/FAIL 判据 | 当前结果 |
 |---|---|---|
-| **Issuer** | C issues immutable CSubmitOutcome; H issues authenticated delivery evidence; G alone issues/mutates Applied; D/I/Storage issue independent proofs. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Request / response** | G evaluates immutable Applied identity and complete evidence revision for same request/causal transaction; returns Full Applied or explicit non-applied/Unknown. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Identity / cursor namespace** | Applied ID, request ID, CSubmitOutcome, H evidence revision, COC GID/participant, I decision/epoch, D Fence and Storage receipt are distinct but joined. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Idempotency scope** | Same immutable Applied identity+evidence revision same result; changed evidence revision is explicit supersession/re-evaluation. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Linearization point** | G ledger commit is Applied decision; where JF-10 applies Storage same-GID VisibilityPointer/Receipt must be terminal first. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Durable receipt** | G decision and evidence joins persist; Storage same-GID receipt and C/H evidence resolve after crash. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Failure / Unknown** | Unknown from C/H/COC/I/D/Storage remains non-Applied; invalidated attempt cannot apply. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Replay / recovery** | Replay uses same request/evidence revision; recovery resolves GID and high-water marks; stale attempts cannot reuse authority. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Visibility** | Applied is not model comprehension; Accepted/Delivered/ACK alone cannot expose downstream result. | NOT EVIDENCED — FAIL for Gate A closure |
+| **Issuer** | C 签发不可变 CSubmitOutcome；H 签发认证 delivery evidence；只有 G 签发/修改 Applied；D/I/Storage 签发各自独立证明。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **请求/响应** | G 对同一 request/causal transaction 的不可变 Applied identity 和完整 evidence revision 求值；返回 Full Applied 或明确 non-applied/Unknown。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **身份/游标命名空间** | Applied ID、request ID、CSubmitOutcome、H evidence revision、COC GID/participant、I decision/epoch、D Fence、Storage receipt 类型独立但需精确关联。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **幂等范围** | 相同 immutable Applied identity+evidence revision 得到同一结果；证据 revision 改变必须显式 supersession/re-evaluation。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **线性化点** | G ledger commit 是 Applied 决策点；适用 JF-10 时，Storage same-GID VisibilityPointer/Receipt 必须先达到 terminal。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **持久回执** | G 决策和证据 join 持久化；Storage same-GID receipt 与 C/H evidence 在崩溃后仍可解析。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **失败/Unknown** | C/H/COC/I/D/Storage 的 Unknown 均保持 non-Applied；已失效 attempt 不得 Applied。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **重放/恢复** | 重放绑定相同 request/evidence revision；恢复解析 GID 与 high-water marks；旧 attempt 不得复用授权。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **可见性** | Applied 不等于模型理解；Accepted/Delivered/ACK 单独不能暴露下游结果。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
 
 ### F6 — I Authorization / PermissionEpoch / revocation
 
-- **Overall state:** BLOCKED_WITH_REASON
-- **Authority / owners:** I sole policy/authorization authority; every subsystem enforces
-- **Reason:** I normative root absent. Scope/Permission model leaves policy and cache/revocation guarantees open. Authorization ADRs concern type/presence and do not establish genuine I issuance, cryptographic trust, key custody or quorum.
-- **Missing / provider:** IMPL2/I restores/dispositions policy root; I supplies issuer, signed decision/attestor, PermissionEpoch, revocation/cache freshness and verifier; all domains supply negative enforcement tests.
+- **整体状态：** BLOCKED_WITH_REASON
+- **权威 / Owner：** I 是唯一策略/授权权威；所有子系统负责执行
+- **阻塞原因：** I 规范根缺失。Scope/Permission 模型仍将策略与 cache/revocation 保证列为开放项。Authorization ADR 只处理类型/存在性，不证明 I 签发真实性、密码学信任、密钥托管或 quorum。
+- **缺失项 / 提供者：** IMPL2/I 恢复/处置策略根；I 提供 issuer、signed decision/attestor、PermissionEpoch、revocation/cache freshness 与 verifier；所有域提供负向执行测试。
 
-| Checkpoint | Expected contract and PASS/FAIL rule | Current result |
+| 检查点 | 合同预期与 PASS/FAIL 判据 | 当前结果 |
 |---|---|---|
-| **Issuer** | I alone issues authorization/attestation and policy/epoch transitions; consumers validate but cannot mint. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Request / response** | Bind actor, action, resource, Scope, purpose/context and policy version; return decision ID, issuer, subject digest, issue time and epoch. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Identity / cursor namespace** | Principal, Scope, policy version, PermissionEpoch, decision ID, attestation ID and revocation cursor are distinct. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Idempotency scope** | Decision binds immutable subject digest+policy version; changed subject/policy requires new decision. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Linearization point** | Policy/grant/epoch mutation commit is currentness point; protected operation validates current epoch at its own boundary. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Durable receipt** | Decision and revocation/epoch history durable and auditable; full I ledger absent. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Failure / Unknown** | Unavailable policy service, unknown issuer, stale epoch or ambiguous decision fails closed. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Replay / recovery** | Retries re-evaluate current authorization; stale queued work cannot execute after revoke. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Visibility** | All read/write/publication/retrieval/Forget/restore boundaries enforce current I policy and Scope. | NOT EVIDENCED — FAIL for Gate A closure |
+| **Issuer** | 只有 I 能签发 authorization/attestation 和 policy/epoch 变更；消费者只能验证，不得伪造签发。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **请求/响应** | 绑定 actor、action、resource、Scope、purpose/context、policy version；返回 decision ID、issuer、subject digest、issued time、epoch。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **身份/游标命名空间** | Principal、Scope、policy version、PermissionEpoch、decision ID、attestation ID、revocation cursor 分离。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **幂等范围** | decision 绑定不可变 subject digest+policy version；subject/policy 改变必须产生新 decision。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **线性化点** | policy/grant/epoch mutation commit 是 currentness 点；受保护操作在自身边界检查当前 epoch。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **持久回执** | decision 与 revocation/epoch 历史必须持久且可审计；完整 I ledger 缺失。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **失败/Unknown** | policy service 不可用、issuer 未知、epoch 过期或 decision 含糊时，受保护操作 fail-closed。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **重放/恢复** | retry 重新评估当前授权；撤销后旧队列工作不得继续执行。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **可见性** | 所有 read/write/publication/retrieval/Forget/restore 边界都执行当前 I policy 和 Scope。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
 
 ### F7 — Global Forget inventory → per-target evidence → I completion
 
-- **Overall state:** BLOCKED_WITH_REASON
-- **Authority / owners:** I owns global policy/completion; D canonical Fence; each execution Owner owns local evidence
-- **Reason:** D explicitly leaves global completion and physical erasure to I. I root absent. D Fence is Draft/Unverified/Informative; inventory, backup/external-copy and exception policy not accepted.
-- **Missing / provider:** IMPL2/I restores/dispositions I root; I defines inventory, completion predicate, residual exceptions/backups and receipt; D/E/F/G/H/Storage supply per-target evidence.
+- **整体状态：** BLOCKED_WITH_REASON
+- **权威 / Owner：** I 拥有全局策略/完成；D canonical Fence；各执行域拥有本地证据
+- **阻塞原因：** D 明确将全局完成和物理擦除策略交给 I。I 根缺失。D Fence 为 Draft/Unverified/Informative；inventory、backup/external-copy 和 exception 策略尚未接受。
+- **缺失项 / 提供者：** IMPL2/I 恢复/处置 I 根；I 定义 inventory、完成谓词、残留例外/backup 和 receipt；D/E/F/G/H/Storage 提供逐目标证据。
 
-| Checkpoint | Expected contract and PASS/FAIL rule | Current result |
+| 检查点 | 合同预期与 PASS/FAIL 判据 | 当前结果 |
 |---|---|---|
-| **Issuer** | I defines inventory/completion and sole global completion issuer; D issues Fence; each domain issues local ack. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Request / response** | Global operation binds immutable inventory version/digest and policy; responses list every target's typed state/evidence. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Identity / cursor namespace** | I operation/policy epoch, D Fence cursor, per-owner ack IDs, Storage projection cursor and backup/external IDs distinct. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Idempotency scope** | Global op ID+inventory digest+policy version; per-target ack scoped by op+target+Fence generation. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Linearization point** | D Fence commit = logical suppression; I durable completion decision later after all target evidence/exception policy. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Durable receipt** | D Fence, per-target receipts and I completion receipt survive restart; I receipt contract absent. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Failure / Unknown** | Missing target, unknown executor, offline backup or unverified external copy blocks completion absent explicit I exception. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Replay / recovery** | Reconcile by stable operation IDs; restore reapplies Fence then cleanup; inventory changes require reevaluation. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Visibility** | Suppression immediate at D Fence; global completion does not gate initial suppression; physical copies remain I policy. | NOT EVIDENCED — FAIL for Gate A closure |
+| **Issuer** | I 定义 inventory/completion 并唯一签发全局完成；D 签发 Fence；各域签发本地 ack。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **请求/响应** | Global operation 绑定不可变 inventory version/digest 和 policy；响应逐项列出每个 target 的 typed state/evidence。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **身份/游标命名空间** | I operation/policy epoch、D Fence cursor、各域 ack ID、Storage projection cursor、backup/external IDs 独立。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **幂等范围** | Global op ID+inventory digest+policy version；逐目标 ack 绑定 op+target+Fence generation。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **线性化点** | D Fence commit = 逻辑抑制；I durable completion decision 必须在所有目标证据/例外策略通过后发生。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **持久回执** | D Fence、逐目标 receipts、I completion receipt 均须持久；I receipt 合同缺失。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **失败/Unknown** | 缺目标、executor unknown、offline backup 或未核验外部副本均阻止完成，除非 I 明确批准例外。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **重放/恢复** | 按稳定 operation ID 对账；restore 先重放 Fence 再 cleanup；inventory 变化必须重新评估。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **可见性** | D Fence 立即抑制；全局完成不应阻塞初始抑制；物理副本受 I 策略管辖。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
 
 ### F8 — Storage atomicity / durability / crash / restore
 
-- **Overall state:** BLOCKED_WITH_REASON
-- **Authority / owners:** Storage/Consistency physical guarantees; D/E/F/G/I retain logical authority
-- **Reason:** Storage trait is candidate-only, no backend selected; tests are contract-shape only and explicitly do not prove backend atomicity, crash recovery, serialization, multiprocess concurrency or durability. SQLite code is implementation evidence, not accepted proof.
-- **Missing / provider:** IMPL2 pins physical contract; Storage/Consistency specifies transaction/isolation/durability/recovery/restore and same-GID; D/E/F/G/I accept boundaries; reproducible fault-injection/crash evidence required.
+- **整体状态：** BLOCKED_WITH_REASON
+- **权威 / Owner：** Storage/Consistency 负责物理保证；D/E/F/G/I 保留逻辑权威
+- **阻塞原因：** Storage trait 仅是候选接口，未选择 backend；测试只是合同形状测试，明确不证明后端原子性、崩溃恢复、多进程序列化或持久性。SQLite 代码只是实现材料，不是已接受证明。
+- **缺失项 / 提供者：** IMPL2 固定物理合同；Storage/Consistency 规定事务/隔离/持久性/恢复/same-GID；D/E/F/G/I 接受边界；需可复现故障注入/崩溃证据。
 
-| Checkpoint | Expected contract and PASS/FAIL rule | Current result |
+| 检查点 | 合同预期与 PASS/FAIL 判据 | 当前结果 |
 |---|---|---|
-| **Issuer** | Storage attests physical commit/rollback/Unknown only; D issues canonical commit/Fence, E Accepted, G Applied, I policy/completion. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Request / response** | Typed transaction request binds participants, GID, immutable writes, CAS, receipts/outbox and Fence/epoch guards; response committed/aborted/Unknown plus proof. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Identity / cursor namespace** | Storage GID/participant, D cursor, E receipt, F watermark, G Applied ID and I epoch distinct; same-GID joins explicit. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Idempotency scope** | GID+immutable participant/request digest; duplicate prepare/commit same terminal proof; digest mismatch conflicts. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Linearization point** | Physical transaction commit (or agreed COC terminal commit); VisibilityPointer/Receipt commits atomically; logical Owner decisions remain distinct. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Durable receipt** | Prepared/terminal participant records, commit receipt, visibility pointer, outbox and recovery high-water durable. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Failure / Unknown** | Crash precommit aborts; crash during commit queries GID; Unknown stays hidden until resolved; heuristic outcomes explicit. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Replay / recovery** | Resolve prepared GIDs and high-water marks before publication; restore Fence/PermissionEpoch/watermarks before reads. | NOT EVIDENCED — FAIL for Gate A closure |
-| **Visibility** | Only atomic VisibilityPointer/PublicationReceipt after authority predicates; D Fence projection rebuildable and non-authoritative. | NOT EVIDENCED — FAIL for Gate A closure |
+| **Issuer** | Storage 只证明物理 commit/rollback/Unknown；D 签发 canonical commit/Fence，E Accepted，G Applied，I policy/completion。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **请求/响应** | typed transaction request 绑定 participants、GID、immutable writes、CAS、receipts/outbox、Fence/epoch guards；响应为 committed/aborted/Unknown 并带 proof。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **身份/游标命名空间** | Storage GID/participant、D cursor、E receipt、F watermark、G Applied ID、I epoch 分离；same-GID join 明确。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **幂等范围** | GID+immutable participant/request digest；重复 prepare/commit 返回同一 terminal proof；digest 不同则冲突。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **线性化点** | 物理 transaction commit（或约定的 COC terminal commit）；VisibilityPointer/Receipt 原子提交；逻辑 Owner 决策仍独立。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **持久回执** | Prepared/terminal participant records、commit receipt、visibility pointer、outbox、recovery high-water 均持久。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **失败/Unknown** | commit 前崩溃=abort；提交中崩溃查询 GID；Unknown 解析前保持 hidden；明确记录 heuristic outcome。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **重放/恢复** | 发布前解析 prepared GID/participant/high-water；restore 在 read 前恢复 Fence/PermissionEpoch/watermark。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
+| **可见性** | 仅在权威谓词通过后由原子 VisibilityPointer/PublicationReceipt 发布；D Fence projection 可重建且非权威。 | NOT EVIDENCED — 不满足 Gate A 关闭条件 |
 
 ## 4. 跨流程不变量
 
