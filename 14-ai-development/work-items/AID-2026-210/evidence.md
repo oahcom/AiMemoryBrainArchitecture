@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-198/evidence.md"
+        - "14-ai-development/work-items/AID-2026-210/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Verified
@@ -30,8 +30,8 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "Evidence for AID-2026-198: GOV-DOC-002 metadata for the 07-agent-integration inference-boundary and telemetry mirror groups, and the measured limit on the remaining 07/08/13 mirrors"
-    canonical_scope_id: "ai-development/aid-2026-198-mirror-frontmatter-b-evidence"
+    canonical_scope: "Evidence for AID-2026-210: GOV-DOC-002 metadata for the 07-agent-integration inference-boundary and telemetry mirror groups, and the measured limit on the remaining 07/08/13 mirrors"
+    canonical_scope_id: "ai-development/aid-2026-210-mirror-frontmatter-b-evidence"
     canonical_scope_keywords:
       - "gov-doc-002"
       - "frontmatter"
@@ -40,19 +40,19 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "14-ai-development/work-items/AID-2026-198/evidence.md"
-    en: null
-    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-198/evidence.md"
+    source: null
+    en: "docs/en/14-ai-development/work-items/AID-2026-210/evidence.md"
+    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-210/evidence.md"
 ---
 
-# AID-2026-198 — GOV-DOC-002 metadata for the 07/08/13 mirrors
+# AID-2026-210 — GOV-DOC-002 metadata for the 07/08/13 mirrors
 
 ## Scope and attribution
 
 - Repository: `oahcom/AiMemoryBrainArchitecture`
 - Base branch: `main`; branch `fix/2026-11-27-mirror-frontmatter-b`, work tree `D:\code\wt-corpus-b`
 - Base commit at branch creation: `4326669c` (full SHA in `manifest.yaml`); `origin/main` was merged in
-  again as `0c752ee6` before the pull request
+  again as `2f4f4118` (which carries the refs unit's AID-2026-190 registration) before the pull request
 - Attribution: user-authorized operator (delegated by account owner). No natural-person Owner
   signature, acceptance or approval is asserted.
 - Unit brief: `unit-corpus-b.md` — "give 07/08/13 mirrors a frontmatter block". Prohibitions carried

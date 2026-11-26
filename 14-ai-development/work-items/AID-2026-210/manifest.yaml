@@ -1,4 +1,4 @@
-work_item_id: AID-2026-198
+work_item_id: AID-2026-210
 title: >-
   Classify the 07-agent-integration inference-boundary and telemetry mirror groups with GOV-DOC-002
   metadata, and record why the remaining 07/08/13 mirrors cannot be classified without moving the
@@ -26,14 +26,14 @@ prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
 identifier_allocation:
   id_status: PROVISIONAL
   observed_main: 4326669caa6c43193d34219a0451b80762b712ff
-  assigned_id: AID-2026-198
+  assigned_id: AID-2026-210
   allocation_rule: >-
     Observed set, not INDEX maximum plus one: every AID-2026-NNN found in pull-request titles and
     remote branch names was enumerated through the GitHub API (1,2,3,4,7,9,10,11,14,23,30,40,41,42,
     50-58,60,62,64,66,69,72,75,77,78,80-83,89,90,92,93,95,98,100-116,140,150,172,173,174,183,186,
-    188,189), so 190 was the first number outside both observed sets. Competing units then consumed 190 on main (PR #1343) and held 191 and 192 in open pull requests while this branch was being prepared, so the unit was reassigned to 198, the first number free at the moment of the final push.
+    188,189), so 190 was the first number outside both observed sets. Competing units then consumed 190, 191, 192, 193, 197, 198 and 199 on main or in open pull requests while this branch was being prepared, so the unit was reassigned to 210, the first number free when the final branch was cut.
   recheck_rule: >-
-    Immediately before merge, re-read open pull requests and remote branches for AID-2026-198; if
+    Immediately before merge, re-read open pull requests and remote branches for AID-2026-210; if
     occupied, take the next free number and update every path and reference in the same push.
 scope:
   objective: >-
@@ -59,10 +59,10 @@ scope:
       detail: >-
         Same shape for the telemetry group. Both docs mirrors were unclassified before; the docs
         bucket moves 173/343 to 177/343.
-    - path: "14-ai-development/work-items/AID-2026-198/"
+    - path: "14-ai-development/work-items/AID-2026-210/"
       detail: >-
         This registration set: manifest.yaml, evidence.md, prompt-v1.md, session-evidence.md.
-    - path: "docs/en/14-ai-development/work-items/AID-2026-198/evidence.md and docs/zh-CN/14-ai-development/work-items/AID-2026-198/evidence.md"
+    - path: "docs/en/14-ai-development/work-items/AID-2026-210/evidence.md and docs/zh-CN/14-ai-development/work-items/AID-2026-210/evidence.md"
       detail: >-
         English and Chinese renditions of the work record, each naming the root evidence.md as its
         bilingual_counterpart.source.
@@ -89,9 +89,9 @@ measurements:
     made check_bilingual_docs.py FAIL with "requires all counterparts changed in this PR".
     Reverted; the 58 stay frozen and 13-engineering-decisions stays 0/58.
 evidence:
-  record: 14-ai-development/work-items/AID-2026-198/evidence.md
-  prompt: 14-ai-development/work-items/AID-2026-198/prompt-v1.md
-  session: 14-ai-development/work-items/AID-2026-198/session-evidence.md
+  record: 14-ai-development/work-items/AID-2026-210/evidence.md
+  prompt: 14-ai-development/work-items/AID-2026-210/prompt-v1.md
+  session: 14-ai-development/work-items/AID-2026-210/session-evidence.md
 non_goals:
   - Closing any of the 58 frozen bilingual gaps or editing scripts/bilingual-baseline.txt
   - Creating a canonical source or a mirror for any orphan pair
@@ -112,9 +112,9 @@ session_evidence:
     issue_refs:
       - "#1212"
     implementing_ai_session: "NOT_RECORDED"
-    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-198/prompt-v1.md"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-210/prompt-v1.md"
     executed_prompt_sha256: "661d48f677c435c2b51d38f9a0b3f1c27e8e27a08cc571dea345b47bbafb6835"
     executed_prompt_bytes: 8541
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_RECORDED"
-    session_evidence_ref: "14-ai-development/work-items/AID-2026-198/session-evidence.md"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-210/session-evidence.md"
