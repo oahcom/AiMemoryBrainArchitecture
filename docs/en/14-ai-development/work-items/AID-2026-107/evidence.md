@@ -30,19 +30,15 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "AID-2026-107 refreshed Gate A composition checkpoint matrix and Gate B status"
-    canonical_scope_id: "ai-development/aid-2026-107-gate-a-refresh"
-    canonical_scope_keywords:
-      - gate-a
-      - end-to-end
-      - composition
-      - storage-consistency
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
     source: "14-ai-development/work-items/AID-2026-107/evidence.md"
-    en: "docs/en/14-ai-development/work-items/AID-2026-107/evidence.md"
+    en: null
     zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md"
 ---
 # AID-2026-107 — Gate A composition matrix refresh
@@ -245,3 +241,21 @@ Rules: UPGRADED means only that a candidate clause now documents part of the che
 ## 7. Attribution
 
 user-authorized operator (delegated by account owner); 2026-11-26. Proxy registration and coordination only; no natural-person Owner signature is fabricated.
+
+
+## Session role / use case
+
+Documentation author and evidence reviewer for the AID-2026-095 Gate A matrix refresh. The work was limited to reading exact current-main source blobs, rejudging the 72 existing checkpoint rows, drafting the canonical and bilingual evidence documents, registering AID-2026-107 and opening Draft PR #1290. No Runtime, validator, schema, API, DDL, test, workflow semantics, deployment or production state was changed.
+
+## Actual AI input
+
+The user-authorized task requested a row-by-row rejudgment of the AID-2026-095 eight-flow matrix after merged AID-2026-082, AID-2026-098 and AID-2026-100; exact evidence paths and blob SHAs for every upgrade; table-row counting of the Storage DOCUMENTED_ONLY / EVIDENCE_REQUIRED checkpoints; explicit preservation of the eight EVIDENCE_REQUIRED Storage items absent implementation evidence; canonical/EN/ZH-CN documents; Gate A/B status and remaining blockers; and a Draft PR linked to #1212. The executed prompt snapshot is `14-ai-development/work-items/AID-2026-107/prompt-snapshot.txt`.
+
+## AI-visible output
+
+- Read main at the exact source baseline and then refreshed the branch to the later main head before PR validation.
+- Re-read AID-095 matrix, AID-082 checker scripts/manifest, AID-098 candidate contract and evidence, AID-100 evidence, and current System Boundaries source blobs.
+- Rejudged all 72 checkpoint rows: 21 UPGRADED to DOCUMENTED_ONLY, 51 UNCHANGED, 0 DOWNGRADED; no PASS was inferred.
+- Counted the 18 Storage checkpoint data rows directly: 10 DOCUMENTED_ONLY and 8 EVIDENCE_REQUIRED.
+- Created the three evidence documents, AID manifest, prompt record, INDEX row, branch and Draft PR #1290. Exact-Head CI found initial Session Evidence and GOV-DOC-002 metadata defects; they are being remediated on the branch before any merge decision.
+- No Issue #1212 comment or closure has been made yet.

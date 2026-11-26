@@ -30,20 +30,16 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "AID-2026-107 refreshed Gate A composition checkpoint matrix and Gate B status"
-    canonical_scope_id: "ai-development/aid-2026-107-gate-a-refresh"
-    canonical_scope_keywords:
-      - gate-a
-      - end-to-end
-      - composition
-      - storage-consistency
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
     source: "14-ai-development/work-items/AID-2026-107/evidence.md"
     en: "docs/en/14-ai-development/work-items/AID-2026-107/evidence.md"
-    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md"
+    zh-CN: null
 ---
 # AID-2026-107 — Gate A 组合审查矩阵刷新
 
@@ -245,3 +241,21 @@ document_metadata:
 ## 7. 署名
 
 user-authorized operator (delegated by account owner)；2026-11-26。仅代理登记与协调，不伪造自然人 Owner 签署。
+
+
+## Session role / use case
+
+本会话担任 AID-2026-095 Gate A 矩阵刷新的文档作者与证据审读者。工作仅限于读取当前 main 精确源 blob、逐条重判 72 个检查点、编写 canonical 与双语证据文档、登记 AID-2026-107 并创建 Draft PR #1290。未修改 Runtime、validator、schema、API、DDL、test、workflow 语义，也未改变部署或生产状态。
+
+## Actual AI input
+
+用户授权任务要求：在 AID-2026-082、098、100 合并后逐条重判 AID-2026-095 的八流程矩阵；每项升级提供精确证据路径与 blob SHA；按 Storage 表格数据行统计 DOCUMENTED_ONLY / EVIDENCE_REQUIRED；在缺少实现层证据时保留八项 EVIDENCE_REQUIRED；创建 canonical/EN/ZH-CN 文档；报告 Gate A/B、剩余缺口；创建关联 #1212 的 Draft PR。执行 prompt 快照位于 `14-ai-development/work-items/AID-2026-107/prompt-snapshot.txt`。
+
+## AI-visible output
+
+- 读取精确 main 源基线，并在 PR 验证前将分支刷新到较新的 main head。
+- 重新读取 AID-095 矩阵、AID-082 checker 脚本/manifest、AID-098 候选合同与 evidence、AID-100 evidence，以及当前 System Boundaries 源 blob。
+- 逐条重判全部 72 行：21 项升级为 DOCUMENTED_ONLY，51 项 UNCHANGED，0 项 DOWNGRADED；没有推断任何 PASS。
+- 直接按 Storage 表格的 18 条数据行计数：10 项 DOCUMENTED_ONLY、8 项 EVIDENCE_REQUIRED。
+- 创建三份证据文档、AID manifest、prompt 记录、INDEX 行、分支和 Draft PR #1290。精确 Head CI 首轮发现 Session Evidence 与 GOV-DOC-002 元数据缺陷；正在分支上修复，修复前不作合并决定。
+- 尚未在 #1212 发表评论或关闭该 Issue。
