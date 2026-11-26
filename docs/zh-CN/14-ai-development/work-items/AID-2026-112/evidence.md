@@ -32,7 +32,12 @@ document_metadata:
     canonical_status: Canonical
     canonical_scope: "AID-2026-112 supplemental exact-head local implementation-test evidence and conservative SC/HIR rejudgment"
     canonical_scope_id: "ai-development/aid-2026-112-sc-hir-test-evidence-rejudgment"
-    canonical_scope_keywords: [storage-consistency, h-idempotency, sqlite, memory-context, test-evidence]
+    canonical_scope_keywords:
+      - storage-consistency
+      - h-idempotency
+      - sqlite
+      - memory-context
+      - test-evidence
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
