@@ -1,3 +1,44 @@
+---
+document_metadata:
+  domain: security-governance
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: NOT_RECORDED
+      decision_date: NOT_RECORDED
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "No formal approval record exists; the report's own Status line reads DRAFT."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+---
+
 # GOV-DOC-001 v1.2 Bilingual Baseline Remediation Report
 # GOV-DOC-001 v1.2 双语基线修复交付报告
 
