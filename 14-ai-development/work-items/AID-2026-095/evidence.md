@@ -51,9 +51,9 @@ document_metadata:
 
 Attribution: user-authorized operator (delegated by account owner); 2026-11-26. Proxy registration only: 代理登记，非自然人 Owner 签署.
 
-- Exact base: 47fcd80720b742d9c5d3ae137593c59b5cc768a9 (main).
+- Exact base: 81906cfc8d3cd477d26657520aa04d81466e7ce2 (main).
 - Branch: review/2026-11-26-a-i-storage-e2e-composition-095.
-- Draft PR: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1260.
+- Draft PR: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1264.
 - Temporary numeric ID: AID-2026-095; id_status PROVISIONAL.
 - AID-2026-094 is reported reserved by PR #1220 and is not reused.
 - Scope: eight Gate A flows: Event ingress; Canonical commit/outbox; F Retrieval; Forget; C/H Applied; I Authorization; Global Forget; Storage Atomicity.

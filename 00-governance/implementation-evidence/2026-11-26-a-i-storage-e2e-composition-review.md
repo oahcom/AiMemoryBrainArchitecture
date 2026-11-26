@@ -51,7 +51,7 @@ document_metadata:
 
 - Work item: AID-2026-095
 - ID status: PROVISIONAL; temporary numeric reservation; recheck main and renumber at merge time if occupied.
-- Exact source baseline: main @ 47fcd80720b742d9c5d3ae137593c59b5cc768a9
+- Exact source baseline: main @ 81906cfc8d3cd477d26657520aa04d81466e7ce2
 - Attribution: user-authorized operator (delegated by account owner), date 2026-11-26. Any proxy disposition is 代理登记，非自然人 Owner 签署. No new Owner acceptance is recorded.
 - Purpose: falsifiable Gate A composition checklist, not implementation or production conformance.
 

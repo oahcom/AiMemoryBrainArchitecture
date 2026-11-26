@@ -51,7 +51,7 @@ document_metadata:
 
 - 工作项：AID-2026-095
 - 编号状态：PROVISIONAL；临时数字预留；合并时重新核验 main，如被占用则重编号。
-- 精确来源基线：main @ 47fcd80720b742d9c5d3ae137593c59b5cc768a9
+- 精确来源基线：main @ 81906cfc8d3cd477d26657520aa04d81466e7ce2
 - 归属：user-authorized operator (delegated by account owner)，日期 2026-11-26。任何代理处置均为**代理登记，非自然人 Owner 签署**。本文不新增 Owner 接受。
 - 目的：提供可证伪的 Gate A 组合检查清单，不宣称实现或生产符合性。
 
