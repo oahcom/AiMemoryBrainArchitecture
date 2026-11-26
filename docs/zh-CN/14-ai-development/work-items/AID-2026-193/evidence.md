@@ -17,7 +17,7 @@ document_metadata:
     evidence_verification:
       verification_status: Unverified
       last_verified_date: "2026-11-27"
-      last_verification_note: "本记录中的数字由第 2 节的命令在已提交的树上运行得出：84 条缺失路径、300 次固定字符串出现、19 份文件中 30 行已加注、6 行延后并附门禁输出。不主张任何 CI 结果、合并 SHA 或 Owner 决定。"
+      last_verification_note: "本记录中的数字由第 2 节的命令在已提交的树上运行得出：84 条缺失路径、300 次固定字符串出现、12 份文件中 21 行已加注、15 行延后并附两段门禁输出。不主张任何 CI 结果、合并 SHA 或 Owner 决定。"
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -31,7 +31,7 @@ document_metadata:
   authority:
     canonical_status: Non-Canonical
     canonical_scope: "AID-2026-193 annotation of the live citations of the 84 09-security-governance paths that are absent from main"
-    canonical_scope_id: "ai-development/aid-2026-190-dangling-09-security-governance-citations"
+    canonical_scope_id: "ai-development/aid-2026-193-dangling-09-security-governance-citations"
     canonical_scope_keywords:
       - "security-governance"
       - "dangling-reference"
@@ -48,33 +48,31 @@ document_metadata:
 
 # AID-2026-193 —— 84 个在 main 上不存在的 `09-security-governance/` 路径：标注活跃引用，不恢复任何文件
 
-**状态：DRAFT —— 仅标注。** 本工作项改动 19 份文档、共 30 行，另有 6 行连同门禁证据一并延后。
-它不在 `09-security-governance/` 下新建任何文件，不改动任何规范正文，不删除任何引用，也不把任何
-引用改成可点击链接。每一行改动都原样保留原路径文本，只追加一句括注：
+**状态：DRAFT —— 仅标注。** 本工作项改动 12 份文档、共 21 行，另有 15 行连同两段门禁输出一并
+延后。它不在 `09-security-governance/` 下新建任何文件，不改动任何规范正文，不删除任何引用，也不把
+任何引用改成可点击链接。每一行改动都原样保留原路径文本，只追加一句括注：
 `(not restored on main; see AID-2026-107 §10)`。
 
 ## 1. 为什么要留这份记录
 
-派单契约称"85 个指向不存在的 `09-security-governance/` 文档的引用"。在 `0c752ee6ee186e494e35aa74447f263891ca4842`
+派单契约称"85 个指向不存在的 `09-security-governance/` 文档的引用"。在 `5df2ee0020a0eaf2092d38f5866ebe37dab0a0d0`
 上重新实测：被引用的不同路径字符串共 91 条，其中 84 条在整棵树里都没有对应文件。
 派单所说的第 85 条来自只在根目录判存在：`09-security-governance/security-governance-guide.md`
 在根目录下不存在，但 `docs/en/` 与 `docs/zh-CN/` 下都有，且没有任何引用以根相对形式指向它，
 因此它并不悬空。91 = 84 条缺失 + 7 条存在。
 
-路径字符串指向空，本身并不构成缺陷。300 次出现中有 252 次是 AID-2026-107 第 10.4 节裁决
-登记表的行，该表的全部意义正是把这些路径登记为**不在 main 上**的候选，并逐条给出 Owner
-分支 blob 与处置。另有 12 次是 AID-2026-170 证据里逐字引用的"改前/改后"行，其上下文是被记录
-的 diff。其余 36 次分布在 23 份文档中，属于活跃引用：读者无法分辨它是 Owner 分支上的历史钉点，
-还是一份在 main 上能打开的文件。这 36 次中，本工作项对 30 次加注；另 6 次见第 5.3 节，因给它们
-加注需要同步改动并不存在的双语对偶文档而延后。
+路径指向空，本身并不构成缺陷。300 次出现中有 252 次是 AID-2026-107 第 10.4 节裁决登记表的行，
+该表的全部意义正是把这些路径登记为**不在 main 上**的候选，并逐条给出 Owner 分支 blob 与处置。
+另有 12 次是 AID-2026-170 证据里逐字引用的"改前/改后"行。其余 36 次分布在 23 份文档中，属于
+活跃引用：读者无法分辨它是 Owner 分支上的历史钉点，还是一份在 main 上能打开的文件。这 36 次中，
+本工作项对 21 次加注；另 15 次按第 5.3、5.4 节延后，各自附上拒绝该改动的门禁输出。
 
 这条注只是指针，不是处置结论。它说明文件不在 main 上，并把读者指到已经裁决过它的登记表；
 它不主张该文档多余、已被取代或已获准恢复；其中 49 行 `UNDECIDED` 仍归相应 Owner 决定。
 
 ## 2. 实测
 
-所有命令都在本 worktree 以 `PYTHONUTF8=1` 执行，基线为 `origin/main` =
-`0c752ee6ee186e494e35aa74447f263891ca4842`（`Merge pull request #1340`）。
+所有命令都在本 worktree 以 `PYTHONUTF8=1` 执行，基线为 `origin/main` = `5df2ee0020a0eaf2092d38f5866ebe37dab0a0d0`。
 
 ```
 refs   = git grep -oh "09-security-governance/[A-Za-z0-9._-]*\.md" origin/main -- "*.md" | sort -u
@@ -89,15 +87,15 @@ after  = git grep -F "not restored on main; see AID-2026-107" -- "*.md"
 | 被引用的不同 `09-security-governance/*.md` 字符串 | 91 | 91 |
 | 其中在整棵树中缺失的 | 84 | 84 |
 | 84 条缺失路径的出现次数（固定字符串，`*.md`） | 300 | 300 |
-| 带注的出现次数 | 0 | 30 |
+| 带注的出现次数 | 0 | 21 |
 | AID-2026-107 第 10.4 节登记表行（三个版本） | 252 | 252 |
 | AID-2026-170 逐字 diff 引文（三个版本 × 4 行） | 12 | 12 |
-| 连同门禁证据延后的活跃引用 | 6 | 6 |
-| 改动文件数 | 0 | 19 |
+| 延后的活跃引用：双语配对 / 元数据缺失（第 5.3 / 5.4 节） | 6 + 9 | 6 + 9 |
+| 改动文件数 | 0 | 12 |
 | 84 条中的可点击 markdown 链接数 | 0 | 0 |
 | 在 `09-security-governance/` 下新建的文件数 | 0 | 0 |
 
-300 = 252 + 12 + 30 + 6。该划分是稳定的，因为注一律追加在路径文本之后：300 条路径字符串
+300 = 252 + 12 + 21 + 15。该划分是稳定的，因为注一律追加在路径文本之后：300 条路径字符串
 仍全部可用固定字符串 grep 到，这正是将来恢复时还能从引用处找回它的原因。
 
 引用形式：36 处活跃引用全部是反引号内联代码、未加反引号的表格单元格，或列表裸行。没有一处是
@@ -109,8 +107,8 @@ markdown 链接；全树中唯一两处以链接形式出现 `09-security-govern
 ## 3. 完整清单：84 条缺失路径及其全部引用位置
 
 每一行都由上述固定字符串 grep 产出，因此同一份文档内引用两次的路径会在位置列出现两次。
-`已加注` = 该处已追加说明；`已延后` = 因第 5.3 节原因暂不加注；`登记表行` = AID-2026-107
-第 10.4 节中已记录该缺失的行；`逐字引文` = AID-2026-170 中被逐字引用的 diff 行。
+`已加注` = 该处已追加说明；`已延后` = 因第 5.3 或 5.4 节原因暂不加注；`登记表行` =
+AID-2026-107 第 10.4 节中已记录该缺失的行；`逐字引文` = AID-2026-170 中被逐字引用的 diff 行。
 
 | # | 缺失路径 | 引用数 | 引用位置 | 处置 |
 |---|---|---:|---|---|
@@ -126,7 +124,7 @@ markdown 链接；全树中唯一两处以链接形式出现 `09-security-govern
 | 10 | `09-security-governance/phase-3.6-i-commit-authorization-causal-order-contract.md` | 3 | `14-ai-development/work-items/AID-2026-107/evidence.md:443`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:440`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:440` | 登记表行 |
 | 11 | `09-security-governance/phase-3.6-identity-trust-policy-joint-closure.md` | 10 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-identity-semantics.md:10`, `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/cross-owner-canonical-semantics-matrix.md:29`, `14-ai-development/work-items/AID-2026-001/i-pre-002-identity-binding-audit.md:79`, `14-ai-development/work-items/AID-2026-107/evidence.md:444`, `docs/en/08-bmcp-protocol/phase-3.6-identity-binding-consumer-conformance-status.md:22`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:441`, `docs/governance/owner-branch-translation-inventory.md:111`, `docs/zh-CN/08-bmcp-protocol/phase-3.6-identity-binding-consumer-conformance-status.md:22`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:441`, `reviews/translation/2026-11-17-phase36-identity-applied-storage-source-audit.md:19` | 已加注 + 已延后 + 登记表行 |
 | 12 | `09-security-governance/phase-3.6-permission-epoch-and-authorization-formal-confirmation.md` | 3 | `14-ai-development/work-items/AID-2026-107/evidence.md:445`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:442`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:442` | 登记表行 |
-| 13 | `09-security-governance/phase-3.6-principal-trust-chain-authorization-revocation.md` | 5 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/cross-owner-canonical-semantics-matrix.md:30`, `14-ai-development/work-items/AID-2026-001/i-pre-002-identity-binding-audit.md:80`, `14-ai-development/work-items/AID-2026-107/evidence.md:446`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:443`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:443` | 已加注 + 已延后 + 登记表行 |
+| 13 | `09-security-governance/phase-3.6-principal-trust-chain-authorization-revocation.md` | 5 | `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/cross-owner-canonical-semantics-matrix.md:30`, `14-ai-development/work-items/AID-2026-001/i-pre-002-identity-binding-audit.md:80`, `14-ai-development/work-items/AID-2026-107/evidence.md:446`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:443`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:443` | 已延后 + 登记表行 |
 | 14 | `09-security-governance/phase-3.6-r1-r2-i-owner-gate-linearization-decision-candidate.md` | 3 | `14-ai-development/work-items/AID-2026-107/evidence.md:447`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:444`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:444` | 登记表行 |
 | 15 | `09-security-governance/phase-3.6-six-dimension-self-review.md` | 3 | `14-ai-development/work-items/AID-2026-107/evidence.md:448`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:445`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:445` | 登记表行 |
 | 16 | `09-security-governance/phase-3.6.10-i-exact-version-recovery-cutoff-review.md` | 3 | `14-ai-development/work-items/AID-2026-107/evidence.md:449`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:446`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:446` | 登记表行 |
@@ -134,7 +132,7 @@ markdown 链接；全树中唯一两处以链接形式出现 `09-security-govern
 | 18 | `09-security-governance/phase-3.6.2-i-coc-jf10-composition-boundary.md` | 3 | `14-ai-development/work-items/AID-2026-107/evidence.md:451`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:448`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:448` | 登记表行 |
 | 19 | `09-security-governance/phase-3.6.2-jf10-commit-authorization-recovery-acceptance.md` | 3 | `14-ai-development/work-items/AID-2026-107/evidence.md:452`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:449`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:449` | 登记表行 |
 | 20 | `09-security-governance/phase-3.6.2-jf10-owner-gate-ordering-correction.md` | 3 | `14-ai-development/work-items/AID-2026-107/evidence.md:453`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:450`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:450` | 登记表行 |
-| 21 | `09-security-governance/phase-3.6.2-jf10-v2-i-owner-disposition.md` | 5 | `14-ai-development/work-items/AID-2026-107/evidence.md:454`, `docs/en/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md:124`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:451`, `docs/zh-CN/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md:124`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:451` | 已加注 + 登记表行 |
+| 21 | `09-security-governance/phase-3.6.2-jf10-v2-i-owner-disposition.md` | 5 | `14-ai-development/work-items/AID-2026-107/evidence.md:454`, `docs/en/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md:124`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:451`, `docs/zh-CN/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md:124`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:451` | 已延后 + 登记表行 |
 | 22 | `09-security-governance/phase-3.6.3-i-coc-durable-protocol-authority-acceptance.md` | 3 | `14-ai-development/work-items/AID-2026-107/evidence.md:455`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:452`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:452` | 登记表行 |
 | 23 | `09-security-governance/phase-3.6.4-global-forget-evidence-reconciliation.md` | 3 | `14-ai-development/work-items/AID-2026-107/evidence.md:456`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:453`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:453` | 登记表行 |
 | 24 | `09-security-governance/phase-3.6.4-global-forget-reference-model-evidence.md` | 3 | `14-ai-development/work-items/AID-2026-107/evidence.md:457`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:454`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:454` | 登记表行 |
@@ -168,7 +166,7 @@ markdown 链接；全树中唯一两处以链接形式出现 `09-security-govern
 | 52 | `09-security-governance/phase-3.8.16-i-review-h-c-p0-nullable-coc-and-envelope-auth-boundary.md` | 3 | `14-ai-development/work-items/AID-2026-107/evidence.md:485`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:482`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:482` | 登记表行 |
 | 53 | `09-security-governance/phase-3.8.17-i-review-h-outer-envelope-authenticated-ingress-gate.md` | 3 | `14-ai-development/work-items/AID-2026-107/evidence.md:486`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:483`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:483` | 登记表行 |
 | 54 | `09-security-governance/phase-3.8.17-i-review-h-outer-envelope-authentication-trust-boundary.md` | 3 | `14-ai-development/work-items/AID-2026-107/evidence.md:487`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:484`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:484` | 登记表行 |
-| 55 | `09-security-governance/phase-3.8.18-i-exact-review-h-authenticated-ingress-envelope-trust-boundary.md` | 4 | `14-ai-development/work-items/AID-2026-001/i-pre-002-identity-binding-audit.md:81`, `14-ai-development/work-items/AID-2026-107/evidence.md:488`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:485`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:485` | 已加注 + 登记表行 |
+| 55 | `09-security-governance/phase-3.8.18-i-exact-review-h-authenticated-ingress-envelope-trust-boundary.md` | 4 | `14-ai-development/work-items/AID-2026-001/i-pre-002-identity-binding-audit.md:81`, `14-ai-development/work-items/AID-2026-107/evidence.md:488`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:485`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:485` | 已延后 + 登记表行 |
 | 56 | `09-security-governance/phase-3.8.18-i-review-c-outer-envelope-signer-p0-trust-registration.md` | 3 | `14-ai-development/work-items/AID-2026-107/evidence.md:489`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:486`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:486` | 登记表行 |
 | 57 | `09-security-governance/phase-3.8.18-i-review-h-explicit-outer-signature-profile-requirement.md` | 3 | `14-ai-development/work-items/AID-2026-107/evidence.md:490`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:487`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:487` | 登记表行 |
 | 58 | `09-security-governance/phase-3.8.19-i-exact-review-c-outer-envelope-p0-correction.md` | 3 | `14-ai-development/work-items/AID-2026-107/evidence.md:491`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:488`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:488` | 登记表行 |
@@ -199,42 +197,33 @@ markdown 链接；全树中唯一两处以链接形式出现 `09-security-govern
 | 83 | `09-security-governance/phase-3.9-i-d-forget-lifecycle-terminalization-authorization-proposal.md` | 3 | `14-ai-development/work-items/AID-2026-107/evidence.md:516`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:513`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:513` | 登记表行 |
 | 84 | `09-security-governance/threat-model-and-adversarial-test-plan.md` | 6 | `14-ai-development/work-items/AID-2026-107/evidence.md:522`, `docs/en/14-ai-development/work-items/AID-2026-107/evidence.md:519`, `docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md:519`, `prompts/I/phase-3-remediation.md:48`, `reviews/integration/phase-3-cross-module-remediation-task-pack.md:351`, `reviews/integration/phase-3-session-kickoff-prompts.md:403` | 已加注 + 登记表行 |
 
-## 4. 已加注的 30 处活跃引用
+## 4. 已加注的 21 处活跃引用
 
 | # | 引用位置 | 被引路径 | 形式 | 处置 |
 |---|---|---|---|---|
 | 1 | `prompts/I/phase-3-remediation.md:49` | `09-security-governance/audit-and-exception-governance.md` | 正文/列表 | 在路径文本之后附加说明；路径文本保持原样 |
 | 2 | `reviews/integration/phase-3-cross-module-remediation-task-pack.md:352` | `09-security-governance/audit-and-exception-governance.md` | 正文/列表 | 在路径文本之后附加说明；路径文本保持原样 |
 | 3 | `reviews/integration/phase-3-session-kickoff-prompts.md:404` | `09-security-governance/audit-and-exception-governance.md` | 正文/列表 | 在路径文本之后附加说明；路径文本保持原样 |
-| 4 | `14-ai-development/work-items/AID-2026-001/i-pre-002-identity-binding-audit.md:79` | `09-security-governance/phase-3.6-identity-trust-policy-joint-closure.md` | 正文/列表 | 在路径文本之后附加说明；路径文本保持原样 |
-| 5 | `docs/en/08-bmcp-protocol/phase-3.6-identity-binding-consumer-conformance-status.md:22` | `09-security-governance/phase-3.6-identity-trust-policy-joint-closure.md` | 表格单元格 | 在路径文本之后附加说明；路径文本保持原样 |
-| 6 | `docs/governance/owner-branch-translation-inventory.md:111` | `09-security-governance/phase-3.6-identity-trust-policy-joint-closure.md` | 表格单元格 | 在路径文本之后附加说明；路径文本保持原样 |
-| 7 | `docs/zh-CN/08-bmcp-protocol/phase-3.6-identity-binding-consumer-conformance-status.md:22` | `09-security-governance/phase-3.6-identity-trust-policy-joint-closure.md` | 表格单元格 | 在路径文本之后附加说明；路径文本保持原样 |
-| 8 | `reviews/translation/2026-11-17-phase36-identity-applied-storage-source-audit.md:19` | `09-security-governance/phase-3.6-identity-trust-policy-joint-closure.md` | 表格单元格 | 在路径文本之后附加说明；路径文本保持原样 |
-| 9 | `14-ai-development/work-items/AID-2026-001/i-pre-002-identity-binding-audit.md:80` | `09-security-governance/phase-3.6-principal-trust-chain-authorization-revocation.md` | 正文/列表 | 在路径文本之后附加说明；路径文本保持原样 |
-| 10 | `docs/en/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md:124` | `09-security-governance/phase-3.6.2-jf10-v2-i-owner-disposition.md` | 正文/列表 | 在路径文本之后附加说明；路径文本保持原样 |
-| 11 | `docs/zh-CN/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md:124` | `09-security-governance/phase-3.6.2-jf10-v2-i-owner-disposition.md` | 正文/列表 | 在路径文本之后附加说明；路径文本保持原样 |
-| 12 | `reviews/architecture/SYS-RISK-001.en.md:427` | `09-security-governance/phase-3.7-i-current-authorization-enforcement-and-restore-proof.md` | 表格单元格 | 在路径文本之后附加说明；路径文本保持原样 |
-| 13 | `reviews/architecture/SYS-RISK-001.zh-CN.md:426` | `09-security-governance/phase-3.7-i-current-authorization-enforcement-and-restore-proof.md` | 表格单元格 | 在路径文本之后附加说明；路径文本保持原样 |
-| 14 | `reviews/integration/phase-3.8-i-authorization-context-and-operation-identity-boundary.md:9` | `09-security-governance/phase-3.7-i-current-authorization-enforcement-and-restore-proof.md` | 正文/列表 | 在路径文本之后附加说明；路径文本保持原样 |
-| 15 | `reviews/integration/phase-3.8.2-callable-interface-convergence.en.md:24` | `09-security-governance/phase-3.7-i-current-authorization-enforcement-and-restore-proof.md` | 表格单元格 | 在路径文本之后附加说明；路径文本保持原样 |
-| 16 | `reviews/integration/phase-3.8.2-callable-interface-convergence.zh-CN.md:24` | `09-security-governance/phase-3.7-i-current-authorization-enforcement-and-restore-proof.md` | 表格单元格 | 在路径文本之后附加说明；路径文本保持原样 |
-| 17 | `docs/research/product-first/PRODUCT-FIRST-001-SESSION-01-MEMORY-PRODUCTS.md:93` | `09-security-governance/phase-3.8-i-commit-authorization-receipt-and-revocation-sequencer-contract.md` | 正文/列表 | 在路径文本之后附加说明；路径文本保持原样 |
-| 18 | `reviews/integration/phase-3.8-i-authorization-context-and-operation-identity-boundary.md:11` | `09-security-governance/phase-3.8-i-commit-authorization-receipt-and-revocation-sequencer-contract.md` | 正文/列表 | 在路径文本之后附加说明；路径文本保持原样 |
-| 19 | `reviews/technology-reality/TECH-REALITY-001-A-independent-review-follow-up.md:58` | `09-security-governance/phase-3.8-i-commit-authorization-receipt-and-revocation-sequencer-contract.md` | 表格单元格 | 在路径文本之后附加说明；路径文本保持原样 |
-| 20 | `reviews/architecture-feasibility/phase-3-b-to-a-protocol-and-storage-topology-review.md:67` | `09-security-governance/phase-3.8.10-i-p0-allowlists-unified-1.2.14-recoveryjoin-1.0.2.md` | 表格单元格 | 在路径文本之后附加说明；路径文本保持原样 |
-| 21 | `reviews/architecture/SYS-RISK-001.en.md:297` | `09-security-governance/phase-3.8.10-i-p0-allowlists-unified-1.2.14-recoveryjoin-1.0.2.md` | 表格单元格 | 在路径文本之后附加说明；路径文本保持原样 |
-| 22 | `reviews/architecture/SYS-RISK-001.zh-CN.md:296` | `09-security-governance/phase-3.8.10-i-p0-allowlists-unified-1.2.14-recoveryjoin-1.0.2.md` | 表格单元格 | 在路径文本之后附加说明；路径文本保持原样 |
-| 23 | `reviews/architecture-feasibility/phase-3-b-to-a-protocol-and-storage-topology-review.md:68` | `09-security-governance/phase-3.8.11-i-review-storage-serialization-anchor.md` | 表格单元格 | 在路径文本之后附加说明；路径文本保持原样 |
-| 24 | `14-ai-development/work-items/AID-2026-001/i-pre-002-identity-binding-audit.md:81` | `09-security-governance/phase-3.8.18-i-exact-review-h-authenticated-ingress-envelope-trust-boundary.md` | 正文/列表 | 在路径文本之后附加说明；路径文本保持原样 |
-| 25 | `reviews/architecture-breakthrough/integration/evidence-source-ledger.md:126` | `09-security-governance/phase-3.8.23-i-rereview-h-gateway-attestation-replay-acceptance-order.md` | 正文/列表 | 在路径文本之后附加说明；路径文本保持原样 |
-| 26 | `reviews/architecture/SYS-RISK-001.en.md:77` | `09-security-governance/phase-3.8.9-i-p0-allowlists-unified-1.2.13-recoveryjoin-1.0.2.md` | 正文/列表 | 在路径文本之后附加说明；路径文本保持原样 |
-| 27 | `reviews/architecture/SYS-RISK-001.zh-CN.md:77` | `09-security-governance/phase-3.8.9-i-p0-allowlists-unified-1.2.13-recoveryjoin-1.0.2.md` | 正文/列表 | 在路径文本之后附加说明；路径文本保持原样 |
-| 28 | `prompts/I/phase-3-remediation.md:48` | `09-security-governance/threat-model-and-adversarial-test-plan.md` | 正文/列表 | 在路径文本之后附加说明；路径文本保持原样 |
-| 29 | `reviews/integration/phase-3-cross-module-remediation-task-pack.md:351` | `09-security-governance/threat-model-and-adversarial-test-plan.md` | 正文/列表 | 在路径文本之后附加说明；路径文本保持原样 |
-| 30 | `reviews/integration/phase-3-session-kickoff-prompts.md:403` | `09-security-governance/threat-model-and-adversarial-test-plan.md` | 正文/列表 | 在路径文本之后附加说明；路径文本保持原样 |
+| 4 | `reviews/translation/2026-11-17-phase36-identity-applied-storage-source-audit.md:19` | `09-security-governance/phase-3.6-identity-trust-policy-joint-closure.md` | 表格单元格 | 在路径文本之后附加说明；路径文本保持原样 |
+| 5 | `reviews/architecture/SYS-RISK-001.en.md:427` | `09-security-governance/phase-3.7-i-current-authorization-enforcement-and-restore-proof.md` | 表格单元格 | 在路径文本之后附加说明；路径文本保持原样 |
+| 6 | `reviews/architecture/SYS-RISK-001.zh-CN.md:426` | `09-security-governance/phase-3.7-i-current-authorization-enforcement-and-restore-proof.md` | 表格单元格 | 在路径文本之后附加说明；路径文本保持原样 |
+| 7 | `reviews/integration/phase-3.8-i-authorization-context-and-operation-identity-boundary.md:9` | `09-security-governance/phase-3.7-i-current-authorization-enforcement-and-restore-proof.md` | 正文/列表 | 在路径文本之后附加说明；路径文本保持原样 |
+| 8 | `reviews/integration/phase-3.8.2-callable-interface-convergence.en.md:24` | `09-security-governance/phase-3.7-i-current-authorization-enforcement-and-restore-proof.md` | 表格单元格 | 在路径文本之后附加说明；路径文本保持原样 |
+| 9 | `reviews/integration/phase-3.8.2-callable-interface-convergence.zh-CN.md:24` | `09-security-governance/phase-3.7-i-current-authorization-enforcement-and-restore-proof.md` | 表格单元格 | 在路径文本之后附加说明；路径文本保持原样 |
+| 10 | `reviews/integration/phase-3.8-i-authorization-context-and-operation-identity-boundary.md:11` | `09-security-governance/phase-3.8-i-commit-authorization-receipt-and-revocation-sequencer-contract.md` | 正文/列表 | 在路径文本之后附加说明；路径文本保持原样 |
+| 11 | `reviews/technology-reality/TECH-REALITY-001-A-independent-review-follow-up.md:58` | `09-security-governance/phase-3.8-i-commit-authorization-receipt-and-revocation-sequencer-contract.md` | 表格单元格 | 在路径文本之后附加说明；路径文本保持原样 |
+| 12 | `reviews/architecture-feasibility/phase-3-b-to-a-protocol-and-storage-topology-review.md:67` | `09-security-governance/phase-3.8.10-i-p0-allowlists-unified-1.2.14-recoveryjoin-1.0.2.md` | 表格单元格 | 在路径文本之后附加说明；路径文本保持原样 |
+| 13 | `reviews/architecture/SYS-RISK-001.en.md:297` | `09-security-governance/phase-3.8.10-i-p0-allowlists-unified-1.2.14-recoveryjoin-1.0.2.md` | 表格单元格 | 在路径文本之后附加说明；路径文本保持原样 |
+| 14 | `reviews/architecture/SYS-RISK-001.zh-CN.md:296` | `09-security-governance/phase-3.8.10-i-p0-allowlists-unified-1.2.14-recoveryjoin-1.0.2.md` | 表格单元格 | 在路径文本之后附加说明；路径文本保持原样 |
+| 15 | `reviews/architecture-feasibility/phase-3-b-to-a-protocol-and-storage-topology-review.md:68` | `09-security-governance/phase-3.8.11-i-review-storage-serialization-anchor.md` | 表格单元格 | 在路径文本之后附加说明；路径文本保持原样 |
+| 16 | `reviews/architecture-breakthrough/integration/evidence-source-ledger.md:126` | `09-security-governance/phase-3.8.23-i-rereview-h-gateway-attestation-replay-acceptance-order.md` | 正文/列表 | 在路径文本之后附加说明；路径文本保持原样 |
+| 17 | `reviews/architecture/SYS-RISK-001.en.md:77` | `09-security-governance/phase-3.8.9-i-p0-allowlists-unified-1.2.13-recoveryjoin-1.0.2.md` | 正文/列表 | 在路径文本之后附加说明；路径文本保持原样 |
+| 18 | `reviews/architecture/SYS-RISK-001.zh-CN.md:77` | `09-security-governance/phase-3.8.9-i-p0-allowlists-unified-1.2.13-recoveryjoin-1.0.2.md` | 正文/列表 | 在路径文本之后附加说明；路径文本保持原样 |
+| 19 | `prompts/I/phase-3-remediation.md:48` | `09-security-governance/threat-model-and-adversarial-test-plan.md` | 正文/列表 | 在路径文本之后附加说明；路径文本保持原样 |
+| 20 | `reviews/integration/phase-3-cross-module-remediation-task-pack.md:351` | `09-security-governance/threat-model-and-adversarial-test-plan.md` | 正文/列表 | 在路径文本之后附加说明；路径文本保持原样 |
+| 21 | `reviews/integration/phase-3-session-kickoff-prompts.md:403` | `09-security-governance/threat-model-and-adversarial-test-plan.md` | 正文/列表 | 在路径文本之后附加说明；路径文本保持原样 |
 
-## 5. 未加注的 270 处
+## 5. 未加注的 279 处
 
 ### 5.1 登记表行（252 处）
 
@@ -252,14 +241,14 @@ blob SHA、分类（`NORMATIVE_ROOT`、`HISTORICAL_PHASE_RECORD`、`UNDECIDED`�
 （`reviews/architecture/SYS-RISK-001.{en,zh-CN}.md`）不一致，因此引文逐字保留，注加在被引的
 原文上。
 
-### 5.3 延后的活跃引用（4 份文档中的 6 行）
+### 5.3 因双语配对而延后（4 份文档中的 6 行）
 
 - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/baseline-currentness-and-owner-source-audit.md`
 - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/canonical-identity-semantics.md`
 - `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/cross-owner-canonical-semantics-matrix.md`
 - `13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-remediation/OWNER-REMEDIATION-001.md`
 
-这四份文档位于 `NORMATIVE_ROOTS` 之一 `13-engineering-decisions/` 下。
+其中位于 `13-engineering-decisions/` 的四份文档属于 `NORMATIVE_ROOTS` 之一。
 `scripts/check_bilingual_docs.py` 要求改动这类文档时，必须在同一个 PR 内同时改动其全部双语
 对偶文档。而这些对偶文档并不存在——它们正是仓库已记录为缺失的 77 组语言对之一——所以要满足该
 要求只能新建它们，那属于本单元之外的建文档决定。先实测加注这四份文件，门禁给出的正是拒绝：
@@ -272,55 +261,42 @@ blob SHA、分类（`NORMATIVE_ROOT`、`HISTORICAL_PHASE_RECORD`、`UNDECIDED`�
 Bilingual documentation gate: FAIL
 ```
 
-因此改动被回退，而不是绕过：未主张任何豁免，未凭空新建对偶文档，也未改动双语门禁本身。6 行
-保持原样、仍可 grep，并在此列出，供负责 13-engineering-decisions 镜像集的后续单元与其对偶
-文档在同一个 PR 内一并加注。
+### 5.4 因缺少文档元数据而延后（7 份文档中的 9 行）
+
+延后清单中另外七份文档没有 `document_metadata` 块。在该基线上，元数据门禁会让任何被改动却缺少
+该块的文档直接失败，于是仅加一句注就能把一项绿灯检查变成红灯：
+
+```
+FAIL: 7 error(s)
+  DM-01 missing document_metadata block: 14-ai-development/work-items/AID-2026-001/i-pre-002-identity-binding-audit.md
+  DM-01 missing document_metadata block: docs/en/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md
+  DM-01 missing document_metadata block: docs/en/08-bmcp-protocol/phase-3.6-identity-binding-consumer-conformance-status.md
+  DM-01 missing document_metadata block: docs/zh-CN/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md
+  DM-01 missing document_metadata block: docs/zh-CN/08-bmcp-protocol/phase-3.6-identity-binding-consumer-conformance-status.md
+  DM-01 missing document_metadata block: docs/governance/owner-branch-translation-inventory.md
+  DM-01 missing document_metadata block: docs/research/product-first/PRODUCT-FIRST-001-SESSION-01-MEMORY-PRODUCTS.md
+GOV-DOC-002: 955 governed documents, 509 classified, 446 unclassified
+```
+
+给这七份文件补 `document_metadata` 块，等于为仓库尚未分类的文档指定域、角色、生命周期、规范
+范围与双语对偶——那是一项治理动作，还会改变 `GOV-DOC-002` 的 `classified` 计数，超出本单元
+范围。因此这些注被回退。两组回退都用 `check_document_management.py --require-changed` 复核，
+结果为 `PASS (incremental)`。
 
 ## 6. 门禁结果
 
-本地运行，对象为标注提交 `c1de9baa9af1e245f9ebe39e955a835dbb557910`，`PYTHONUTF8=1`：
+本地运行，对象为标注提交 `@@C1@@`，`PYTHONUTF8=1`：
 
 ```
-$ python scripts/check_bilingual_docs.py
-NOTE: 18 changed .md path(s) outside NORMATIVE_ROOTS were not pairing-checked
-bilingual baseline: 77 frozen, 0 new gaps
-exemptions: 21
-Bilingual documentation and prompt-library gate: PASS (19 changed paths inspected).
-This is a structural gate only; semantic parity requires independent review.
-
-$ python scripts/check_document_management.py
-INCOMPLETE: no rule violations in 496 classified documents, but 446 governed documents are still unclassified
-GOV-DOC-002: 942 governed documents, 496 classified, 446 unclassified
-DM-10 out-of-scope stale bindings: 0
-
-$ python scripts/ci/check_line_endings.py
-Line-ending check: 1629 files inspected, 0 binary skipped, 0 violations.
-
-$ python scripts/ci/check_manifest_parse.py
-Manifest parse: 94 manifests found, 94 parsed, 0 failed.
-
-$ python scripts/ci/check_repository_hygiene.py --base <base> --head <head>
-Work-item index membership version=2026-11-24.8 directories=105 linked=105
-Work-item manifest consistency version=2026-11-24.8 manifests=93 in_scope=80 excluded_by_record_type=4 unrecognized=9 violations=0
-Repository new-file admission passed: 0 new path(s) checked.
-
-$ python scripts/check_session_evidence_workflow_shape.py
-SESSION EVIDENCE WORKFLOW SHAPE: PASS
-
-$ python scripts/check_traceability.py --index-only
-PASS TRACEABILITY: 0 requirements / 93 work items / 0 errors / 105 warnings
-
-$ python scripts/check_governance_operation_traceability.py
-GOVERNANCE OPERATION TRACEABILITY: PASS (7 operations x 3 mirrors)
+@@GATES@@
 ```
 
-`check_document_management.py` 以 `INCOMPLETE` 退出 2，原因是仍有 446 份受管文档未分类。
-这是仓库在该基线上的既有状态——在任何改动之前对未修改的树运行也得到同一行——并且它报的是
-`no rule violations`，即本次改动不得新增违规。事实如此：三条汇总行在改动前后完全一致。
+不带 `--require-changed` 时 `check_document_management.py` 以 `INCOMPLETE` 退出 2，原因是仍有
+446 份受管文档未分类；这是仓库在该基线上的既有状态，在任何改动之前对未修改的树运行也得到同一
+结论。以增量模式（PR 所采用的方式）运行时，它报 `PASS (incremental): no GOV-DOC-002 violations`。
 
 `check_bilingual_docs.py` 需要通过环境变量提供 `PR_BODY` 才能看到 manifest 标记；它报
-`77 frozen, 0 new gaps`，因为没有路径被新增、删除或改名；它把 18 个位于 `NORMATIVE_ROOTS`
-之外的改动路径归类为未做配对检查，这是这些路径的既定行为。
+`77 frozen, 0 new gaps`，因为没有路径被新增、删除或改名。
 
 ## 7. 未做的事
 
@@ -330,20 +306,13 @@ GOVERNANCE OPERATION TRACEABILITY: PASS (7 operations x 3 mirrors)
 - 未删除任何引用，未改写、缩写或别名化任何路径文本。注是追加性的，`git grep -F <path>`
   仍能找全 300 处。
 - 未把任何路径改成 markdown 链接，也未新建链接。
-- 未为延后的四份文档新建双语对偶文档，也未主张 `BILINGUAL-EXCEPTION`。
+- 未新建双语对偶文档、未主张 `BILINGUAL-EXCEPTION`，也未为未分类文档凭空补 `document_metadata`。
 - 未主张任何 CI context 结果、合并 SHA 或合并后回读；第 6 节是在所标 SHA 上的本地运行。
 - 未关闭任何 Issue，未主张任何验收决定，未改动分支保护、登记表、元数据 schema 或基线。
 - AID-2026-107 第 10.4 节中 49 行 `UNDECIDED` 仍未决。
 
 ## 8. 改动路径
 
-- `14-ai-development/work-items/AID-2026-001/i-pre-002-identity-binding-audit.md`
-- `docs/en/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md`
-- `docs/en/08-bmcp-protocol/phase-3.6-identity-binding-consumer-conformance-status.md`
-- `docs/governance/owner-branch-translation-inventory.md`
-- `docs/research/product-first/PRODUCT-FIRST-001-SESSION-01-MEMORY-PRODUCTS.md`
-- `docs/zh-CN/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md`
-- `docs/zh-CN/08-bmcp-protocol/phase-3.6-identity-binding-consumer-conformance-status.md`
 - `prompts/I/phase-3-remediation.md`
 - `reviews/architecture-breakthrough/integration/evidence-source-ledger.md`
 - `reviews/architecture-feasibility/phase-3-b-to-a-protocol-and-storage-topology-review.md`
