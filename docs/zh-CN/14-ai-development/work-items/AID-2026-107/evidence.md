@@ -1,0 +1,247 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-107/manifest.yaml"
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-26"
+      last_verification_note: "Row-by-row rejudgment of all 72 Gate A checkpoints against exact main source blobs; DOCUMENTED_ONLY is not a Gate A PASS, and no implementation or Owner acceptance is inferred."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "AID-2026-107 refreshed Gate A composition checkpoint matrix and Gate B status"
+    canonical_scope_id: "ai-development/aid-2026-107-gate-a-refresh"
+    canonical_scope_keywords:
+      - gate-a
+      - end-to-end
+      - composition
+      - storage-consistency
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "14-ai-development/work-items/AID-2026-107/evidence.md"
+    en: "docs/en/14-ai-development/work-items/AID-2026-107/evidence.md"
+    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md"
+---
+# AID-2026-107 — Gate A 组合审查矩阵刷新
+
+- 工作项：`AID-2026-107`；`id_status: PROVISIONAL`。
+- 署名：**user-authorized operator (delegated by account owner)**；日期：**2026-11-26**。仅为代理登记，不代表任何自然人 Owner 签署。
+- 精确 main 基线：`533d8646a3fb32b0a1c9d3ed40c01bce33a76b17`（从 main 分支 API 读取）。
+- 原矩阵：已合并的 AID-2026-095 / PR #1264。本刷新不修改 AID-095。
+- 后续已合并输入：AID-2026-082 / PR #1265 / merge 前缀 `71548b7b`；AID-2026-098 / PR #1283 / merge 前缀 `cdba0b73`；AID-2026-100 / PR #1284 / merge 前缀 `b1f9c51a`。
+- 关联 Issue：#1212，保持 OPEN。
+
+## 1. 执行摘要
+
+| 重判 | 数量（72 个检查点表格行） |
+|---|---:|
+| UPGRADED：NOT EVIDENCED → DOCUMENTED_ONLY | 21 |
+| UNCHANGED | 51 |
+| DOWNGRADED | 0 |
+| Gate A PASS | 0 |
+
+8 条端到端流程仍全部为 `BLOCKED_WITH_REASON`；`VERIFIED_BY_DOCUMENT` 为 0。升级仅来自 AID-2026-098 的候选文档条款，不构成实现、物理后端一致性、跨 Owner 接受或生产行为证明。
+
+## 2. 精确来源固定与范围限制
+
+| 来源 | 当前 main 精确 blob SHA | 能证明 / 不能证明 |
+|---|---|---|
+| AID-095 原矩阵 | `1d162b527eacb96e2cff24eec5fcf5a66014039a` | 8 × 9 检查点基线；原结果均为 NOT EVIDENCED。 |
+| AID-098 Storage 候选合同 | `d571f086505b312c40b6ae2e56a868131cfffc78` | 仅候选条款；18 行中 10 DOCUMENTED_ONLY、8 EVIDENCE_REQUIRED。 |
+| AID-098 EN 镜像 | `a4767d6dfab379fc84ad17ed179fd0fa05cc5368` | 语言镜像，不是独立证据。 |
+| AID-098 ZH-CN 镜像 | `860ef1bb30a28c24c83aca5de31bc0de4ca44f42` | 语言镜像，不是独立证据。 |
+| AID-082 manifest | `ffd9077928e91c010667ff412131589654c93bbe` | acceptance_authority 为 NOT_ASSIGNED；实现范围仅为只读 checker / advisory workflow。 |
+| AID-082 governance checker | `40b4c94f54ed7343a011431c6632562d8e11f525` | 检查七类操作的登记表结构、空缺/合并角色和镜像行数；不等于 Owner 语义接受。 |
+| AID-082 Owner namespace checker | `e5da67f0c6441e724d798b7d6e2def1c7c2c27a0` | 检查登记的架构入口文档引用结构；不构成 D/E/F/G/H/I 运行时命名空间证据。 |
+| System Boundaries canonical | `bf20b204688bf51a1df76968db7e52ee0dd597c1` | 标记为 Normative，但仍是 Draft/Unverified；文字声明不等于接受或执行。 |
+| System Boundaries EN | `24279093d4265e06ed91cb33832525d3b58489ac` | 仅镜像。 |
+| System Boundaries ZH-CN | `354cc859cb99783ac9947defe0e1d90a272b1939` | 仅镜像。 |
+| AID-100 evidence | `ae46c7a4424778d0c8e4c5b21c6535023a9b460d` | 完整克隆上的本地文档管理 checker / census 证据；非 CI，也非流程/Storage 实现证据。 |
+| AID-100 EN 镜像 | `425e5eaf6c99286342e20f5ecf525ee297d75e0c` | 语言镜像。 |
+| AID-100 ZH-CN 镜像 | `fda38f1355f6160db78facde996fee3345905ea1` | 语言镜像。 |
+
+### 2.1 AID-082 的证据边界
+
+两个脚本均为只读，workflow 明确为 advisory。Governance checker 要求七类治理操作具有五列登记，并拒绝空角色、角色合并和单方面完成声明。Owner namespace checker 扫描登记的架构文档集合，检查引用形状及镜像签名。AID-082 manifest 仍记载 `acceptance_authority: NOT_ASSIGNED`、`review.status: NOT_ASSIGNED`；授权范围明确排除 Runtime/product 代码、既有 validator 语义、schema、API、DDL、部署和 branch protection。因此，不能仅凭这些 checker 结果升级任何 AID-095 检查点。
+
+### 2.2 AID-098 表格行计数（不是 grep 词频）
+
+计数方式：读取 SC 检查点表格标题下的 18 条数据行，排除表头、分隔行和正文/图例：
+
+| 分类 | 数据行数 | ID |
+|---|---:|---|
+| DOCUMENTED_ONLY | 10 | SC-01、SC-02、SC-03、SC-07、SC-08、SC-09、SC-11、SC-14、SC-15、SC-16 |
+| EVIDENCE_REQUIRED | 8 | SC-04、SC-05、SC-06、SC-10、SC-12、SC-13、SC-17、SC-18 |
+
+8 条 EVIDENCE_REQUIRED 仍为 FAIL / NOT EVIDENCED。特别是 SC-04/05/06/10/12/13/17/18 仍缺实现层证据：后端 WAL/flush、checkpoint/replay、crash/torn-write/restore、replica/read visibility、fail-closed projection、anti-rollback、已接受的多资源 GID/COC，以及可重复的 RPO/RTO 证据。
+
+## 3. 全部 72 个检查点逐条重判
+
+规则：UPGRADED 仅表示候选条款现在对检查点的一部分作了文档化；刷新状态为 DOCUMENTED_ONLY，绝不等于 PASS。UNCHANGED 表示新增合并工件仍未满足该检查点的证据谓词。DOWNGRADED 需要证明此前有依据的主张发生退化；本轮未发现此类事实。
+
+### F1 — 事件入口 → 持久化接受 → Compiler 准入
+
+| 检查点 | 原状态 | 重判 | 刷新状态 | 理由 / 精确证据 |
+|---|---|---|---|---|
+| 签发者 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-15 虽标明 E 拥有 Accepted/compiler state，但没有定义完整 producer envelope、correlation/causation 与响应合同；E receipt/admission 规范根仍缺失。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 请求 / 响应 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有精确 E request/response schema，也没有可复现的 Accepted/Conflict/Rejected 回执捕获。SC-07 只是通用 Storage receipt 形状。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 身份 / 游标命名空间 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | producer/receipt identity tuple 及其与 D/F/H 命名空间的分离，尚未由已接受的 E 合同固定。SC-08 的 GID/participant 规则不是 E producer key。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 幂等范围 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-08 记录的是通用 GID replay，不是 E 的 producer+key+payload-digest 语义，也未证明 Scope-before-replay。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 线性化点 | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-01 与 §2.2 描述 E accepted envelope、digest、receipt、compiler state 和 compile-intent outbox 位于同一 E transaction。仅候选文本；没有 E 实现或 Owner 接受。 证据：`10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78`。 |
+| 持久化回执 | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-01/07 描述物理写集与 receipt 形状，§2.2 将 E Accepted 与 D canonical commit 分开。没有 E 回执实物或持久化实现证明。 证据：`10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78`。 |
+| 失败 / Unknown | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 候选文件没有提供 dispatcher/worker post-commit Unknown resolution、lease expiry 或失败证据；这些仍是 F1 明确缺口。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 重放 / 恢复 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有 E startup backfill、dispatcher retry、lease、DLQ 或 crash-replay 证据。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 可见性 | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | §2.2 与 §5 说明 E acceptance 不等于 D canonical visibility，Prepared/uncommitted data 在 Owner predicates 满足前必须隐藏。仅候选可见性规则，没有 enforcement test。 证据：`10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78`。 |
+
+### F2 — D 规范提交 → 原子 outbox / 回执 → F 消费者
+
+| 检查点 | 原状态 | 重判 | 刷新状态 | 理由 / 精确证据 |
+|---|---|---|---|---|
+| 签发者 | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-14 与 §2.2 将 canonical identity/version/cursor/outbox 语义归 D，并限制 Storage 只负责持久化。仅候选边界；D 接受和实现证明仍缺。 证据：`10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78`。 |
+| 请求 / 响应 | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-01 规定 canonical write set、expected-version CAS、幂等结果、outbox 和 receipt；SC-07 记录终态 receipt 字段。没有已接受的 D request/response 合同。 证据：`10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78`。 |
+| 身份 / 游标命名空间 | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-07/14 区分 D-issued cursor/operation references 与 Storage GID/participant/receipt identifiers。没有 F feed cursor 接受或实现证据。 证据：`10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78`。 |
+| 幂等范围 | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-08 规定相同 GID/participant/digest replay 和 digest-conflict 行为；没有证明 D 的生产幂等实现。 证据：`10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78`。 |
+| 线性化点 | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-01/03 文档化 atomic write-set 与 physical durable commit 线性化点。仅候选条款；后端 transaction 证明缺失。 证据：`10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78`。 |
+| 持久化回执 | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-01/07 文档化预期 D receipt/outbox write-set 与 Storage receipt 形状。没有 durable D receipt readback 或 restart 证据。 证据：`10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78`。 |
+| 失败 / Unknown | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-02/03 在合同层定义 abort/no-partial-write 与 Unknown 语义。WAL、crash-cut 和 lost-response reconciliation 证明仍缺。 证据：`10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78`。 |
+| 重放 / 恢复 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有 D cursor replay、F consumer deduplication/acknowledgement 或 gap-preserving recovery 证据。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 可见性 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-10 明确为 EVIDENCE_REQUIRED：没有 read-your-writes、replica applied-position 或 post-commit visibility 证明。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+
+### F3 — F 检索 / 索引 / Watermark / 扫描覆盖
+
+| 检查点 | 原状态 | 重判 | 刷新状态 | 理由 / 精确证据 |
+|---|---|---|---|---|
+| 签发者 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | AID-082 namespace lint 不证明 F retrieval authority；AID-098 SC-10 仍是 EVIDENCE_REQUIRED，F normative root 仍缺失。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 请求 / 响应 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有已接受的 F query/response 合同或可执行 filtering/consistency 结果。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 身份 / 游标命名空间 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有 D feed cursor 到 F per-index watermark/shard cursor 的绑定或 consumer acceptance。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 幂等范围 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有 F index-generation dedupe 或 retry 行为证据。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 线性化点 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有 index mutation 与 contiguous watermark 原子更新的实现证明。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 持久化回执 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有带精确 D cursor 和 gap accounting 的持久 per-index scan-through proof。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 失败 / Unknown | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有针对 gap、malformed event、stale Fence、permission failure 或 failed shard 的负向证据。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 重放 / 恢复 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有从 D cursor rebuild/replay 或 contiguous-prefix verification 证明。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 可见性 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-10/12/13 均为 EVIDENCE_REQUIRED；没有 replica/cache suppression 或当前 Fence/PermissionEpoch enforcement 证据。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+
+### F4 — Forget Fence → E/F/G/H/Storage 可见性与清理
+
+| 检查点 | 原状态 | 重判 | 刷新状态 | 理由 / 精确证据 |
+|---|---|---|---|---|
+| 签发者 | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-11 与 §6.1 指定 D 是唯一逻辑 Fence issuer，Storage 仅保存 D-derived projection。仅候选 authority boundary；没有 D/Storage acceptance 或 code-path 证明。 证据：`10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78`。 |
+| 请求 / 响应 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有跨 E/F/G/H/Storage 的 typed per-target request/response 或 durable acknowledgement 合同。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 身份 / 游标命名空间 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-11 区分 D Fence 与 Storage projection，但完整的 D operation、I epoch 和 E/F/G/H per-target acknowledgement namespace chain 尚未固定。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 幂等范围 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有跨所有 derivative Owners 的稳定 operation+target+generation digest/replay 证据。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 线性化点 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有 D durable Fence commit 或跨域 suppression linearization 证据。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 持久化回执 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有持久化 D operation/Fence receipt、逐目标 acknowledgement 或 I completion receipt。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 失败 / Unknown | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有 inventory completeness、external recipient、backup、offline target 或 Unknown fail-closed 证据。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 重放 / 恢复 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-13 仍为 EVIDENCE_REQUIRED；没有 restore-before-exposure 或 stale publication replay 证明。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 可见性 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-12/13 仍为 EVIDENCE_REQUIRED；没有跨 derivative read/publication paths 的端到端 enforcement。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+
+### F5 — C/H Applied 证据 → G Applied 决策
+
+| 检查点 | 原状态 | 重判 | 刷新状态 | 理由 / 精确证据 |
+|---|---|---|---|---|
+| 签发者 | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-16 与 §2.2 明确将 ContextVersion、delivery intent/state、Applied 归 G；Storage receipt 不等于 Applied。仅候选边界；没有 G acceptance。 证据：`10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78`。 |
+| 请求 / 响应 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有精确 same-request/same-GID CSubmitOutcome + H delivery evidence + G Applied response 合同或已接受的 consumer join。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 身份 / 游标命名空间 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有精确 C/H/G/Storage/D/I identity join、attempt chain 和 version binding 证明。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 幂等范围 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有 G ledger 对同一 identity/digest 重放及不同 digest 冲突的证据。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 线性化点 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有 G Applied durable linearization/ledger commit 证据。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 持久化回执 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-07 明确说明 Storage receipt 不能证明 Delivered/Accepted-by-Adapter/Applied；没有 G-issued receipt 捕获。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 失败 / Unknown | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有 G Applied 的 crash-cut、lost-response 或 Unknown reconciliation 证据。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 重放 / 恢复 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有 G ledger crash/restore/rebuild 证据；AID-098 SC-17 是 EVIDENCE_REQUIRED。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 可见性 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有证明所有 predicates 满足后仅 G Applied state 发生变化；Storage physical visibility 不足以证明 Applied。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+
+### F6 — I 授权 / PermissionEpoch / 撤销
+
+| 检查点 | 原状态 | 重判 | 刷新状态 | 理由 / 精确证据 |
+|---|---|---|---|---|
+| 签发者 | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | §2.2 将 authorization decision 与 PermissionEpoch 归 I；SC-07 仅把 I epoch 作为 authority observation reference。没有 issuer authenticity 或 Owner acceptance。 证据：`10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78`。 |
+| 请求 / 响应 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有已接受的 I authorization request/decision response、signature/key lifecycle 或 revocation result。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 身份 / 游标命名空间 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-07 将 PermissionEpoch 列为引用字段，但没有 I-issued epoch monotonicity、identity 或 namespace 实现证据。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 幂等范围 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有 authorization idempotency、revocation race 或 replay 证明。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 线性化点 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有 final-read/submit linearization 或 revocation barrier 证据。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 持久化回执 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有 I-issued durable authorization/revocation receipt 证据。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 失败 / Unknown | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有 unknown issuer、stale epoch、verifier unavailable 或 uncertain revocation 的 fail-closed 证明。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 重放 / 恢复 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有 key rotation、revocation replay 或 restore-time epoch reconciliation 证据。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 可见性 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-10/13 要求 visibility/restore 证据；没有所有 read/publish paths 的 authorization enforcement。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+
+### F7 — Global Forget 清单 → 逐目标证据 → I 完成
+
+| 检查点 | 原状态 | 重判 | 刷新状态 | 理由 / 精确证据 |
+|---|---|---|---|---|
+| 签发者 | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | §2.2 将 Global Forget policy/completion 归 I，并说明 D/execution Owners 各自保留自身事实。仅候选 authority boundary，没有 inventory 或 completion proof。 证据：`10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78`。 |
+| 请求 / 响应 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有精确 inventory request/response、exception model 或 target-specific terminal evidence。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 身份 / 游标命名空间 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有完整 target identity、lineage、backup/external-copy 和 per-target cursor namespace。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 幂等范围 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有 global operation+immutable inventory digest 幂等证明。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 线性化点 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有被所有相关 Owners 接受的 I completion decision linearization point。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 持久化回执 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-07 说明 Storage receipt 不能证明 Global Forget completion；证据中没有 I completion receipt。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 失败 / Unknown | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有 unknown target、exception、legal hold、offline copy 或 backup failure closure 证据。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 重放 / 恢复 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有跨 external recipients、backups 和 offline targets 的 replay/recovery 证明。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 可见性 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | 没有 physical-erasure 或 global-completion 证据；logical Fence 不等于 global completion。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+
+### F8 — Storage 原子性 / 持久性 / 崩溃 / 恢复
+
+| 检查点 | 原状态 | 重判 | 刷新状态 | 理由 / 精确证据 |
+|---|---|---|---|---|
+| 签发者 | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-11/14/15/16 文档化 Storage 非权威边界及 D/E/G/I logical issuers；双本地 Fence sequence 差异仍未由代码解决。 证据：`10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78`。 |
+| 请求 / 响应 | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-01/07 文档化 transaction participant/write-set request 与 terminal receipt 形状；没有 backend execution result。 证据：`10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78`。 |
+| 身份 / 游标命名空间 | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-07/08/14/15/16 文档化 Storage GID 与 Owner-issued identities 的区分；仅候选 namespace rules。 证据：`10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78`。 |
+| 幂等范围 | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-08 文档化相同 GID/participant/digest replay 与 digest 不同冲突；没有 multiprocess 或 backend 证据。 证据：`10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78`。 |
+| 线性化点 | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-01/03 文档化 atomic write-set 与 durable commit/accepted coordinator terminal decision；backend linearization 未证明。 证据：`10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78`。 |
+| 持久化回执 | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-07 文档化 Storage Durable Commit Receipt 最小字段及 COMMITTED/ABORTED/UNKNOWN；没有实际 receipt readback。 证据：`10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78`。 |
+| 失败 / Unknown | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-02/03 文档化 no-partial-write abort 与 Unknown；SC-04/05/06 所需 crash、flush、torn-write 证据仍缺。 证据：`10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78`。 |
+| 重放 / 恢复 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-05/06/13/17/18 均为 EVIDENCE_REQUIRED：没有 checkpoint/replay、crash-cut/restore、anti-rollback、accepted COC/GID 或 RPO/RTO 证据。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+| 可见性 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-10/12/13 均为 EVIDENCE_REQUIRED：没有 read-your-writes、replica visibility、fail-closed projection 或 restore-before-exposure 证明。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
+
+
+## 4. Gate 结论
+
+- **Gate A：PARTIAL / OPEN。** 21/72 个检查点提升为 DOCUMENTED_ONLY；50/72 仍为 NOT EVIDENCED；0/72 PASS。8/8 流程仍为 BLOCKED_WITH_REASON。
+- **Gate B：PARTIAL / OPEN（NOT VERIFIED）。** #082/#098/#100 没有提供精确版本实现/一致性、生产持久性、跨 Owner 接受或运行证据。Gate B 不可 CLOSED。
+- **Issue #1212：OPEN。** 未执行关闭，也没有关闭依据。
+
+## 5. Gate A 闭合前的剩余阻断项
+
+1. **E 入口 / Producer Admission：** E canonical receipt/admission 根文件、精确请求/响应和 producer 幂等合同、dispatcher/lease/retry/DLQ/Unknown 证据；I 授权以及 D/Storage 边界接受。
+2. **D canonical commit/outbox：** D canonical-store 规范根；D 签发 commit/cursor/receipt 与原子 D outbox 证据；Storage 后端事务/崩溃证据；F feed 消费者接受。
+3. **F retrieval/index：** F 规范根；D feed cursor 接受；连续 watermark、gap/tombstone、rebuild 和 replica visibility 证明。
+4. **Forget Fence / 派生抑制：** D 签发 Fence 的实现且不存在竞争的本地 sequence；I policy/epoch；E/F/G/H/Storage 逐目标 ack、重放和 fail-closed visibility；备份/外部副本清单。
+5. **C/H/G Applied：** 精确 same-request/same-GID join；C outcome 和 H authenticated evidence；G Applied authority/ledger crash-restore 证明；Storage physical participant 证明；所有相关 Owner 接受同一版本。
+6. **I 授权/撤销：** I 规范策略来源、issuer authenticity/key lifecycle、PermissionEpoch/revocation race 和负向执行测试。
+7. **Global Forget：** 完整 inventory 与例外策略、备份/外部接收方处理、逐目标持久回执、I 签发的 completion 证据及重放/恢复。
+8. **Storage 物理证明：** SC-04/05/06/10/12/13/17/18 实现证据、已选择/冻结的后端 profile、crash/fault-injection、多进程和 replica 测试、anti-rollback restore、已接受的 GID/COC 与 RPO/RTO 证据。
+9. **跨 Owner 精确版本接受：** A、B、C、D、E、F、G、H、I 与 Storage 分别对自己的 authority 作出 disposition；代理协调不等于自然人 Owner 签署。
+10. **Gate B 证据：** 精确实现基线、可复现 conformance suite、生产近似环境的恢复/可见性证据和接受记录。
+
+## 6. 非主张与约束
+
+- 本工作项没有修改 Runtime、validator、schema、API、DDL、test 或 workflow 语义。
+- DOCUMENTED_ONLY 行均不是 PASS 或实现证明。
+- 不推断 Owner 接受、生产一致性、部署或 Issue 关闭。
+- AID-2026-100 的 exit code 2 / INCOMPLETE 测量和 frontmatter census 不是 Gate A/B 实现证据。
+- AID-2026-082 的 advisory checker 结果不是 branch-protection enforcement 或语义 authority 接受。
+
+## 7. 署名
+
+user-authorized operator (delegated by account owner)；2026-11-26。仅代理登记与协调，不伪造自然人 Owner 签署。
