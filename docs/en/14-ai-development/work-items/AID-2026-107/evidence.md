@@ -17,7 +17,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-26"
-      last_verification_note: "Row-by-row rejudgment of all 72 Gate A checkpoints against exact main source blobs; DOCUMENTED_ONLY is not a Gate A PASS, and no implementation or Owner acceptance is inferred."
+      last_verification_note: "All 72 AID-2026-095 Gate A checkpoint cells were rejudged against exact main source blobs and remain NOT EVIDENCED; the 098/099 candidate contract rows and 082/100 checker evidence are not implementation or Owner-acceptance evidence."
     usage_status: Active
     modification_status: Unchanged
     supersession:
@@ -45,7 +45,7 @@ document_metadata:
 
 - Work item: `AID-2026-107`; `id_status: PROVISIONAL`.
 - Attribution: **user-authorized operator (delegated by account owner)**; date: **2026-11-26**. Proxy registration only; no natural-person Owner signature is represented.
-- Exact main baseline: `533d8646a3fb32b0a1c9d3ed40c01bce33a76b17` (read from the main branch API).
+- Exact main baseline: `df54ed60321e2958c50e9649963608cb3cb3f3b1` (read from the main branch API).
 - Prior matrix: AID-2026-095, merged PR #1264. This refresh does not alter AID-095.
 - Related merged inputs: AID-2026-082 / PR #1265 / merge prefix `71548b7b`; AID-2026-098 / PR #1283 / merge prefix `cdba0b73`; AID-2026-100 / PR #1284 / merge prefix `b1f9c51a`.
 - Related Issue: #1212. It remains OPEN.
@@ -54,19 +54,19 @@ document_metadata:
 
 | Rejudgment | Count (of 72 checkpoint rows) |
 |---|---:|
-| UPGRADED: NOT EVIDENCED → DOCUMENTED_ONLY | 21 |
-| UNCHANGED | 51 |
+| UPGRADED | 0 |
+| UNCHANGED | 72 |
 | DOWNGRADED | 0 |
 | Gate A PASS | 0 |
 
-All eight end-to-end flows remain `BLOCKED_WITH_REASON`; zero flows are `VERIFIED_BY_DOCUMENT`. The upgrades are documentation-only candidate clauses from AID-2026-098. They do not establish implementation, physical backend conformance, cross-owner acceptance or production behavior.
+All 72 checkpoint rows remain `NOT EVIDENCED`: 0 UPGRADED, 72 UNCHANGED, 0 DOWNGRADED. All eight end-to-end flows remain `BLOCKED_WITH_REASON`; zero flows are `VERIFIED_BY_DOCUMENT`. Candidate contract prose and governance checker/census results do not satisfy the 095 PASS predicates.
 
 ## 2. Exact source pins and scope limits
 
 | Source | Exact current-main blob SHA | What it proves / does not prove |
 |---|---|---|
 | AID-095 original matrix | `1d162b527eacb96e2cff24eec5fcf5a66014039a` | Baseline for the 8 × 9 checkpoint rows; original results are NOT EVIDENCED. |
-| AID-098 Storage candidate | `d571f086505b312c40b6ae2e56a868131cfffc78` | Candidate clauses only; 10 DOCUMENTED_ONLY and 8 EVIDENCE_REQUIRED rows. |
+| AID-098 Storage candidate | `d571f086505b312c40b6ae2e56a868131cfffc78` | Candidate/Draft/Unverified/Informative clauses only; 10 DOCUMENTED_ONLY and 8 EVIDENCE_REQUIRED rows, no PASS. |
 | AID-098 EN mirror | `a4767d6dfab379fc84ad17ed179fd0fa05cc5368` | Language mirror; not independent evidence. |
 | AID-098 ZH-CN mirror | `860ef1bb30a28c24c83aca5de31bc0de4ca44f42` | Language mirror; not independent evidence. |
 | AID-082 manifest | `ffd9077928e91c010667ff412131589654c93bbe` | Acceptance authority is NOT_ASSIGNED; implementation scope is read-only checkers/advisory workflow. |
@@ -77,6 +77,8 @@ All eight end-to-end flows remain `BLOCKED_WITH_REASON`; zero flows are `VERIFIE
 | System Boundaries ZH-CN | `354cc859cb99783ac9947defe0e1d90a272b1939` | Mirror only. |
 | AID-100 evidence | `ae46c7a4424778d0c8e4c5b21c6535023a9b460d` | Full-clone local document-management checker/census evidence; not CI and not flow/Storage implementation evidence. |
 | AID-100 EN mirror | `425e5eaf6c99286342e20f5ecf525ee297d75e0c` | Language mirror. |
+| AID-099 H idempotency candidate | `a5f43d58ebee451260fc64c7e048b96401e89ef4` | §11 has 18 data rows: 10 DOCUMENTED_ONLY + 8 EVIDENCE_REQUIRED + 0 PASS; Candidate/Draft, cross-Owner acceptance PENDING. |
+| AID-099 manifest | `8d87eef02b997eb0d976903d40dcac802b2d80ba` | Historical AID-098 unavailable pin at baseline d5107f68 is stale; see §5. |
 | AID-100 ZH-CN mirror | `fda38f1355f6160db78facde996fee3345905ea1` | Language mirror. |
 
 ### 2.1 AID-082 boundary
@@ -96,7 +98,7 @@ The eight EVIDENCE_REQUIRED rows remain FAIL / NOT EVIDENCED. In particular SC-0
 
 ## 3. Row-by-row rejudgment of all 72 checkpoints
 
-Rules: UPGRADED means only that a candidate clause now documents part of the checkpoint; refreshed state is DOCUMENTED_ONLY, never PASS. UNCHANGED means the new merged artifacts do not satisfy the checkpoint's evidence predicate. DOWNGRADED would require evidence that a previously supported claim regressed; none was found.
+Rules: the original 095 matrix uses only PASS / FAIL / NOT EVIDENCED. AID-082/098/099/100 checker or candidate-contract states must not be imported into the 095 verdict vocabulary. UPGRADED would require new evidence satisfying the 095 PASS predicate; candidate prose, read-only lint and document-management census do not. All 72 therefore remain NOT EVIDENCED (UNCHANGED); no prior PASS/FAIL regressed.
 
 ### F1 — Event ingress → durable acceptance → Compiler admission
 
@@ -106,23 +108,23 @@ Rules: UPGRADED means only that a candidate clause now documents part of the che
 | Request / response | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | No exact E request/response schema or reproducible Accepted/Conflict/Rejected receipt capture is supplied. SC-07 is only a generic Storage receipt shape. Original checkpoint: 00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md @ 1d162b527eacb96e2cff24eec5fcf5a66014039a; AID-082 / AID-100 are not implementation evidence for this proposition. |
 | Identity / cursor namespace | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | The producer/receipt identity tuple and its separation from D/F/H namespaces are not pinned by an accepted E contract. SC-08's GID/participant rule is not the E producer key. Original checkpoint: 00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md @ 1d162b527eacb96e2cff24eec5fcf5a66014039a; AID-082 / AID-100 are not implementation evidence for this proposition. |
 | Idempotency scope | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-08 documents generic GID replay, not E's producer+key+payload-digest semantics or Scope-before-replay enforcement. Original checkpoint: 00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md @ 1d162b527eacb96e2cff24eec5fcf5a66014039a; AID-082 / AID-100 are not implementation evidence for this proposition. |
-| Linearization point | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-01 and §2.2 of the candidate describe E's accepted envelope, digest, receipt, compiler state and compile-intent outbox in one E transaction. Candidate text only; no E implementation or Owner acceptance. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-01, SC-03, §2.2) |
-| Durable receipt | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-01 plus SC-07 document the physical write-set and receipt shape, while §2.2 keeps E Accepted distinct from D canonical commit. No emitted E receipt or durable implementation proof. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-01, SC-07, §2.2) |
+| Linearization point | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-01 and §2.2 of the candidate describe E's accepted envelope, digest, receipt, compiler state and compile-intent outbox in one E transaction. Candidate text only; no E implementation or Owner acceptance. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-01, SC-03, §2.2) Candidate contract text is Draft/Candidate/Informative, cross-Owner acceptance remains pending, and no implementation-level test/runtime evidence exists; therefore the 095 PASS predicate is not met. |
+| Durable receipt | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-01 plus SC-07 document the physical write-set and receipt shape, while §2.2 keeps E Accepted distinct from D canonical commit. No emitted E receipt or durable implementation proof. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-01, SC-07, §2.2) Candidate contract text is Draft/Candidate/Informative, cross-Owner acceptance remains pending, and no implementation-level test/runtime evidence exists; therefore the 095 PASS predicate is not met. |
 | Failure / Unknown | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | The candidate does not supply dispatcher/worker post-commit Unknown resolution, lease expiry, or failure evidence; these are explicit gaps in F1. Original checkpoint: 00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md @ 1d162b527eacb96e2cff24eec5fcf5a66014039a; AID-082 / AID-100 are not implementation evidence for this proposition. |
 | Replay / recovery | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | No startup backfill, dispatcher retry, lease, DLQ or crash-replay evidence is supplied for E. Original checkpoint: 00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md @ 1d162b527eacb96e2cff24eec5fcf5a66014039a; AID-082 / AID-100 are not implementation evidence for this proposition. |
-| Visibility | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | §2.2 and §5 state E acceptance is not D canonical visibility and prepared/uncommitted data remains hidden until Owner predicates. This is a candidate visibility rule, not an enforcement test. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (§2.2, §5) |
+| Visibility | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | §2.2 and §5 state E acceptance is not D canonical visibility and prepared/uncommitted data remains hidden until Owner predicates. This is a candidate visibility rule, not an enforcement test. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (§2.2, §5) Candidate contract text is Draft/Candidate/Informative, cross-Owner acceptance remains pending, and no implementation-level test/runtime evidence exists; therefore the 095 PASS predicate is not met. |
 
 ### F2 — D Canonical Commit → atomic outbox / receipt → F consumer
 
 | Checkpoint | Previous state | Rejudgment | Refreshed state | Reason / exact evidence |
 |---|---|---|---|---|
-| Issuer | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-14 and §2.2 assign canonical identity/version/cursor/outbox semantics to D and limit Storage to persistence. Candidate boundary only; D acceptance and implementation proof remain absent. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-14, §2.2) |
-| Request / response | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-01 specifies the canonical write set, expected-version CAS, idempotency result, outbox and receipt; SC-07 documents terminal receipt fields. No accepted D request/response contract. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-01, SC-07) |
-| Identity / cursor namespace | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-07 and SC-14 distinguish D-issued cursor/operation references from Storage GID/participant/receipt identifiers. No F feed cursor acceptance or implementation evidence. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-07, SC-14) |
-| Idempotency scope | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-08 specifies same GID/participant/digest replay and digest-conflict behavior; it does not prove D's production idempotency implementation. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-08) |
-| Linearization point | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-01 and SC-03 document the atomic write-set and physical durable commit as linearization point. Candidate clause only; backend transaction proof is absent. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-01, SC-03) |
-| Durable receipt | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-01 and SC-07 document the expected D receipt/outbox write-set and Storage receipt shape. No durable D receipt readback or restart evidence. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-01, SC-07) |
-| Failure / Unknown | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-02/03 define abort/no-partial-write and Unknown semantics at contract level. WAL, crash-cut and lost-response reconciliation proof remain absent. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-02, SC-03) |
+| Issuer | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-14 and §2.2 assign canonical identity/version/cursor/outbox semantics to D and limit Storage to persistence. Candidate boundary only; D acceptance and implementation proof remain absent. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-14, §2.2) Candidate contract text is Draft/Candidate/Informative, cross-Owner acceptance remains pending, and no implementation-level test/runtime evidence exists; therefore the 095 PASS predicate is not met. |
+| Request / response | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-01 specifies the canonical write set, expected-version CAS, idempotency result, outbox and receipt; SC-07 documents terminal receipt fields. No accepted D request/response contract. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-01, SC-07) Candidate contract text is Draft/Candidate/Informative, cross-Owner acceptance remains pending, and no implementation-level test/runtime evidence exists; therefore the 095 PASS predicate is not met. |
+| Identity / cursor namespace | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-07 and SC-14 distinguish D-issued cursor/operation references from Storage GID/participant/receipt identifiers. No F feed cursor acceptance or implementation evidence. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-07, SC-14) Candidate contract text is Draft/Candidate/Informative, cross-Owner acceptance remains pending, and no implementation-level test/runtime evidence exists; therefore the 095 PASS predicate is not met. |
+| Idempotency scope | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-08 specifies same GID/participant/digest replay and digest-conflict behavior; it does not prove D's production idempotency implementation. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-08) Candidate contract text is Draft/Candidate/Informative, cross-Owner acceptance remains pending, and no implementation-level test/runtime evidence exists; therefore the 095 PASS predicate is not met. |
+| Linearization point | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-01 and SC-03 document the atomic write-set and physical durable commit as linearization point. Candidate clause only; backend transaction proof is absent. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-01, SC-03) Candidate contract text is Draft/Candidate/Informative, cross-Owner acceptance remains pending, and no implementation-level test/runtime evidence exists; therefore the 095 PASS predicate is not met. |
+| Durable receipt | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-01 and SC-07 document the expected D receipt/outbox write-set and Storage receipt shape. No durable D receipt readback or restart evidence. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-01, SC-07) Candidate contract text is Draft/Candidate/Informative, cross-Owner acceptance remains pending, and no implementation-level test/runtime evidence exists; therefore the 095 PASS predicate is not met. |
+| Failure / Unknown | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-02/03 define abort/no-partial-write and Unknown semantics at contract level. WAL, crash-cut and lost-response reconciliation proof remain absent. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-02, SC-03) Candidate contract text is Draft/Candidate/Informative, cross-Owner acceptance remains pending, and no implementation-level test/runtime evidence exists; therefore the 095 PASS predicate is not met. |
 | Replay / recovery | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | No D cursor replay, F consumer deduplication/acknowledgement, or gap-preserving recovery evidence. Original checkpoint: 00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md @ 1d162b527eacb96e2cff24eec5fcf5a66014039a; AID-082 / AID-100 are not implementation evidence for this proposition. |
 | Visibility | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-10 is explicitly EVIDENCE_REQUIRED: no read-your-writes, replica applied-position or post-commit visibility proof. Original checkpoint: 00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md @ 1d162b527eacb96e2cff24eec5fcf5a66014039a; AID-082 / AID-100 are not implementation evidence for this proposition. |
 
@@ -144,7 +146,7 @@ Rules: UPGRADED means only that a candidate clause now documents part of the che
 
 | Checkpoint | Previous state | Rejudgment | Refreshed state | Reason / exact evidence |
 |---|---|---|---|---|
-| Issuer | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-11 and §6.1 state D is the sole logical Fence issuer and Storage holds only a D-derived projection. Candidate authority boundary only; no D/Storage acceptance or code-path proof. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-11, §6.1) |
+| Issuer | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-11 and §6.1 state D is the sole logical Fence issuer and Storage holds only a D-derived projection. Candidate authority boundary only; no D/Storage acceptance or code-path proof. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-11, §6.1) Candidate contract text is Draft/Candidate/Informative, cross-Owner acceptance remains pending, and no implementation-level test/runtime evidence exists; therefore the 095 PASS predicate is not met. |
 | Request / response | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | No typed per-target request/response or durable acknowledgement contract spanning E/F/G/H/Storage. Original checkpoint: 00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md @ 1d162b527eacb96e2cff24eec5fcf5a66014039a; AID-082 / AID-100 are not implementation evidence for this proposition. |
 | Identity / cursor namespace | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-11 separates D Fence from Storage projection, but the complete D operation, I epoch and per-target E/F/G/H acknowledgement namespace chain is not pinned. Original checkpoint: 00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md @ 1d162b527eacb96e2cff24eec5fcf5a66014039a; AID-082 / AID-100 are not implementation evidence for this proposition. |
 | Idempotency scope | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | No stable operation+target+generation digest/replay evidence across all derivative owners. Original checkpoint: 00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md @ 1d162b527eacb96e2cff24eec5fcf5a66014039a; AID-082 / AID-100 are not implementation evidence for this proposition. |
@@ -158,7 +160,7 @@ Rules: UPGRADED means only that a candidate clause now documents part of the che
 
 | Checkpoint | Previous state | Rejudgment | Refreshed state | Reason / exact evidence |
 |---|---|---|---|---|
-| Issuer | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-16 and §2.2 explicitly keep ContextVersion, delivery intent/state and Applied under G authority; Storage receipt is not Applied. Candidate boundary only; no G acceptance. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-16, §2.2) |
+| Issuer | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-16 and §2.2 explicitly keep ContextVersion, delivery intent/state and Applied under G authority; Storage receipt is not Applied. Candidate boundary only; no G acceptance. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-16, §2.2) Candidate contract text is Draft/Candidate/Informative, cross-Owner acceptance remains pending, and no implementation-level test/runtime evidence exists; therefore the 095 PASS predicate is not met. |
 | Request / response | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | No exact same-request/same-GID CSubmitOutcome + H delivery evidence + G Applied response contract or accepted consumer join. Original checkpoint: 00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md @ 1d162b527eacb96e2cff24eec5fcf5a66014039a; AID-082 / AID-100 are not implementation evidence for this proposition. |
 | Identity / cursor namespace | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | No exact C/H/G/Storage/D/I identity join, attempt chain and version binding proof. Original checkpoint: 00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md @ 1d162b527eacb96e2cff24eec5fcf5a66014039a; AID-082 / AID-100 are not implementation evidence for this proposition. |
 | Idempotency scope | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | No G ledger replay evidence for same identity/digest and conflicting digest. Original checkpoint: 00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md @ 1d162b527eacb96e2cff24eec5fcf5a66014039a; AID-082 / AID-100 are not implementation evidence for this proposition. |
@@ -172,7 +174,7 @@ Rules: UPGRADED means only that a candidate clause now documents part of the che
 
 | Checkpoint | Previous state | Rejudgment | Refreshed state | Reason / exact evidence |
 |---|---|---|---|---|
-| Issuer | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | §2.2 assigns authorization decisions and PermissionEpoch to I; SC-07 treats I epoch as an observed authority reference, not a Storage-issued fact. No issuer authenticity or Owner acceptance. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (§2.2, SC-07) |
+| Issuer | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | §2.2 assigns authorization decisions and PermissionEpoch to I; SC-07 treats I epoch as an observed authority reference, not a Storage-issued fact. No issuer authenticity or Owner acceptance. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (§2.2, SC-07) Candidate contract text is Draft/Candidate/Informative, cross-Owner acceptance remains pending, and no implementation-level test/runtime evidence exists; therefore the 095 PASS predicate is not met. |
 | Request / response | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | No accepted I authorization request/decision response, signature/key lifecycle or revocation result. Original checkpoint: 00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md @ 1d162b527eacb96e2cff24eec5fcf5a66014039a; AID-082 / AID-100 are not implementation evidence for this proposition. |
 | Identity / cursor namespace | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-07 names PermissionEpoch as a referenced field, but no I-issued epoch monotonicity, identity or namespace implementation evidence. Original checkpoint: 00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md @ 1d162b527eacb96e2cff24eec5fcf5a66014039a; AID-082 / AID-100 are not implementation evidence for this proposition. |
 | Idempotency scope | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | No authorization idempotency, revocation race or replay proof. Original checkpoint: 00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md @ 1d162b527eacb96e2cff24eec5fcf5a66014039a; AID-082 / AID-100 are not implementation evidence for this proposition. |
@@ -186,7 +188,7 @@ Rules: UPGRADED means only that a candidate clause now documents part of the che
 
 | Checkpoint | Previous state | Rejudgment | Refreshed state | Reason / exact evidence |
 |---|---|---|---|---|
-| Issuer | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | §2.2 assigns Global Forget policy/completion to I and states D/execution Owners retain their own facts. This is a candidate authority boundary, not an inventory or completion proof. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (§2.2) |
+| Issuer | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | §2.2 assigns Global Forget policy/completion to I and states D/execution Owners retain their own facts. This is a candidate authority boundary, not an inventory or completion proof. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (§2.2) Candidate contract text is Draft/Candidate/Informative, cross-Owner acceptance remains pending, and no implementation-level test/runtime evidence exists; therefore the 095 PASS predicate is not met. |
 | Request / response | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | No exact inventory request/response, exception model or target-specific terminal evidence. Original checkpoint: 00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md @ 1d162b527eacb96e2cff24eec5fcf5a66014039a; AID-082 / AID-100 are not implementation evidence for this proposition. |
 | Identity / cursor namespace | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | No complete target identity, lineage, backup/external-copy and per-target cursor namespace. Original checkpoint: 00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md @ 1d162b527eacb96e2cff24eec5fcf5a66014039a; AID-082 / AID-100 are not implementation evidence for this proposition. |
 | Idempotency scope | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | No global operation+immutable inventory digest idempotency proof. Original checkpoint: 00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md @ 1d162b527eacb96e2cff24eec5fcf5a66014039a; AID-082 / AID-100 are not implementation evidence for this proposition. |
@@ -200,18 +202,75 @@ Rules: UPGRADED means only that a candidate clause now documents part of the che
 
 | Checkpoint | Previous state | Rejudgment | Refreshed state | Reason / exact evidence |
 |---|---|---|---|---|
-| Issuer | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-11/14/15/16 document Storage's non-authority boundary and D/E/G/I logical issuers. The candidate also records the existing dual local Fence sequence discrepancy; no code-level resolution or Owner acceptance. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-11, SC-14, SC-15, SC-16) |
-| Request / response | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-01/07 document the transaction participant/write-set request and terminal receipt shape. No backend-specific executable request/response or receipt capture. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-01, SC-07) |
-| Identity / cursor namespace | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-07/08/14/15/16 document distinct Storage GID/participant/receipt and Owner-issued D/E/G/I identities. Candidate namespace rules only. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-07, SC-08, SC-14, SC-15, SC-16) |
-| Idempotency scope | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-08 documents same GID/participant/request-digest replay and changed-digest conflict. No multiprocess or backend evidence. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-08) |
-| Linearization point | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-01/03 document atomic write-set and durable commit/accepted coordinator terminal decision. Backend linearization remains unproven. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-01, SC-03) |
-| Durable receipt | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-07 documents minimum Storage Durable Commit Receipt fields and COMMITTED/ABORTED/UNKNOWN vocabulary. No emitted durable receipt or readback. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-07) |
-| Failure / Unknown | NOT EVIDENCED | **UPGRADED** | DOCUMENTED_ONLY | SC-02/03 document no-partial-write abort and Unknown semantics. SC-04/05/06 crash, flush and torn-write evidence is still absent. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-02, SC-03) |
+| Issuer | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-11/14/15/16 document Storage's non-authority boundary and D/E/G/I logical issuers. The candidate also records the existing dual local Fence sequence discrepancy; no code-level resolution or Owner acceptance. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-11, SC-14, SC-15, SC-16) Candidate contract text is Draft/Candidate/Informative, cross-Owner acceptance remains pending, and no implementation-level test/runtime evidence exists; therefore the 095 PASS predicate is not met. |
+| Request / response | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-01/07 document the transaction participant/write-set request and terminal receipt shape. No backend-specific executable request/response or receipt capture. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-01, SC-07) Candidate contract text is Draft/Candidate/Informative, cross-Owner acceptance remains pending, and no implementation-level test/runtime evidence exists; therefore the 095 PASS predicate is not met. |
+| Identity / cursor namespace | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-07/08/14/15/16 document distinct Storage GID/participant/receipt and Owner-issued D/E/G/I identities. Candidate namespace rules only. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-07, SC-08, SC-14, SC-15, SC-16) Candidate contract text is Draft/Candidate/Informative, cross-Owner acceptance remains pending, and no implementation-level test/runtime evidence exists; therefore the 095 PASS predicate is not met. |
+| Idempotency scope | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-08 documents same GID/participant/request-digest replay and changed-digest conflict. No multiprocess or backend evidence. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-08) Candidate contract text is Draft/Candidate/Informative, cross-Owner acceptance remains pending, and no implementation-level test/runtime evidence exists; therefore the 095 PASS predicate is not met. |
+| Linearization point | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-01/03 document atomic write-set and durable commit/accepted coordinator terminal decision. Backend linearization remains unproven. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-01, SC-03) Candidate contract text is Draft/Candidate/Informative, cross-Owner acceptance remains pending, and no implementation-level test/runtime evidence exists; therefore the 095 PASS predicate is not met. |
+| Durable receipt | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-07 documents minimum Storage Durable Commit Receipt fields and COMMITTED/ABORTED/UNKNOWN vocabulary. No emitted durable receipt or readback. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-07) Candidate contract text is Draft/Candidate/Informative, cross-Owner acceptance remains pending, and no implementation-level test/runtime evidence exists; therefore the 095 PASS predicate is not met. |
+| Failure / Unknown | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-02/03 document no-partial-write abort and Unknown semantics. SC-04/05/06 crash, flush and torn-write evidence is still absent. `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (SC-02, SC-03) Candidate contract text is Draft/Candidate/Informative, cross-Owner acceptance remains pending, and no implementation-level test/runtime evidence exists; therefore the 095 PASS predicate is not met. |
 | Replay / recovery | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-05/06/13/17/18 are EVIDENCE_REQUIRED: no checkpoint/replay, crash-cut/restore, anti-rollback, accepted COC/GID or RPO/RTO evidence. Original checkpoint: 00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md @ 1d162b527eacb96e2cff24eec5fcf5a66014039a; AID-082 / AID-100 are not implementation evidence for this proposition. |
 | Visibility | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-10/12/13 are EVIDENCE_REQUIRED: no read-your-writes, replica visibility, fail-closed projection or restore-before-exposure proof. Original checkpoint: 00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md @ 1d162b527eacb96e2cff24eec5fcf5a66014039a; AID-082 / AID-100 are not implementation evidence for this proposition. |
 
 
-## 4. Gate conclusions
+## 4. Gate A nine-item closeout checklist (refreshed)
+
+| # | Gate A item | Current state | Required closeout evidence / accountable party |
+|---|---|---|---|
+| 1 | Branch synchronized with current main | SATISFIED at reviewed base `df54ed60321e2958c50e9649963608cb3cb3f3b1`; recheck if main advances | Merge base must equal current main and branch must not be behind at final-head review. |
+| 2 | Cross-Owner role dispositions (10 roles: 3 ACCEPT / 7 CONDITIONAL / 0 REJECT) | SATISFIED as recorded proxy dispositions | The seven conditional obligations are not discharged by the dispositions themselves; exact-version evidence remains required under items 4–8. No natural-person Owner signature is claimed. |
+| 3 | Exact-head CI | OPEN_PENDING_FINAL_HEAD | Run/read back all 16 required contexts on the exact final PR Head. Earlier-head checks do not count. |
+| 4 | Complete A–I + Storage/Consistency composition review artifact | OPEN | Owner A coordinates one complete exact-version package across all eight flows and nine checkpoints, with source pins, issuer/consumer, request/response, identity/cursor/idempotency, linearization, durable receipt, failure/Unknown, replay/recovery and visibility; each relevant Owner accepts its own boundary. |
+| 5 | Missing D/E/F/I normative roots/contracts (IMPL2) | OPEN — IMPL2 | Restore or formally disposition the D/E/F/I roots and pin exact canonical replacements; D/E/F/I then review their own authority semantics. AID-082 lint is not a substitute. |
+| 6 | Storage/Consistency physical contract and evidence | OPEN — contract present, evidence missing | AID-098 candidate exists at `10-storage-consistency/storage-physical-consistency-contract.md` blob `d571f086505b312c40b6ae2e56a868131cfffc78`. Its authority is Candidate, approval Draft, verification Unverified, normative status Informative. SC-04/05/06/10/12/13/17/18 remain EVIDENCE_REQUIRED; supply selected/frozen backend, crash/fault-injection, WAL/flush/torn-write, replica visibility, fail-closed projection, restore/anti-rollback, accepted COC/GID and repeatable RPO/RTO evidence, plus Storage/Consistency and logical-Owner exact-version dispositions. |
+| 7 | H idempotency namespace / replay boundary | OPEN — contract present, evidence missing | AID-099 candidate exists at `08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md` blob `a5f43d58ebee451260fc64c7e048b96401e89ef4`. Its authority/approval remain candidate/draft and cross-Owner acceptance is PENDING. HIR-05/06/08/12/14/16/17/18 remain EVIDENCE_REQUIRED; obtain H/E/Storage reconciled exact-version acceptance and durable reservation, concurrency, retry, crash/recovery, Storage same-GID and C/G Attempt join evidence. |
+| 8 | Full-package bilingual semantic and source-revision parity | OPEN | Owner A/documentation Owners read back the complete exact-head Canonical/EN/ZH-CN package, confirm semantic parity, stable IDs, states and every source revision pin. Matrix-only parity is insufficient. |
+| 9 | DEC-13 normative approval evidence | RECORDED — AID-2026-096 | Recorded against the exact six-blob scope only. #1189 remains OPEN; natural-person Owner / joint acceptance confirmation is still missing. |
+
+**Gate A:** PARTIAL / OPEN. Items 1, 2 and 9 are satisfied/recorded; items 3–8 remain open. The refreshed states for items 6 and 7 are specifically “contract present, evidence missing”, not CLOSED and not PASS.
+
+## 5. HIR-01…HIR-18 row-count review and expired baseline pin
+
+The H contract is in `08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md` (not under the AID-099 directory), §11, blob `a5f43d58ebee451260fc64c7e048b96401e89ef4`. The following counts are by the 18 data rows in the §11 checkpoint table, excluding header, separator and explanatory prose:
+
+| Class | Rows | IDs |
+|---|---:|---|
+| DOCUMENTED_ONLY | 10 | HIR-01, HIR-02, HIR-03, HIR-04, HIR-07, HIR-09, HIR-10, HIR-11, HIR-13, HIR-15 |
+| EVIDENCE_REQUIRED | 8 | HIR-05, HIR-06, HIR-08, HIR-12, HIR-14, HIR-16, HIR-17, HIR-18 |
+| PASS | 0 | — |
+
+The 8 EVIDENCE_REQUIRED rows are not satisfied by the prose candidate. Implementation remains NOT VERIFIED and cross-Owner acceptance remains PENDING. This is a separate H contract count; it does not alter the 095 matrix's 72 NOT EVIDENCED cells.
+
+**Expired pin correction (explicit):** AID-099's manifest `14-ai-development/work-items/AID-2026-099/manifest.yaml` (blob `8d87eef02b997eb0d976903d40dcac802b2d80ba`) records `storage_aid_2026_098_exact_pin: NOT_AVAILABLE_ON_BASELINE` and says AID-098 was unavailable on its historical baseline `d5107f68a7f1b61f5f2f7352fadf828aae06cf1c`. The H contract §2 also repeats that historical statement. It is now a stale baseline assertion, not a current repository gap: AID-2026-098 is on current main, with the exact Storage candidate blob above. This refresh does not rewrite AID-099's historical record; the correct current statement is “AID-2026-098 is available on current main; its contract is Candidate/Draft/Unverified and does not supply implementation evidence or cross-Owner acceptance.”
+
+## 6. Gate B disposition
+
+**Gate B: PARTIAL / OPEN (NOT VERIFIED).** No exact-version implementation/conformance result, physical backend durability or crash/restore evidence, production-like visibility/recovery proof, or complete cross-Owner acceptance is established by AID-082, AID-098, AID-099 or AID-100. Gate B is not CLOSED.
+
+## 7. Remaining items before Gate A can close
+
+1. Exact-head CI: all 16 required contexts must succeed on the final PR Head and be read back against that exact SHA.
+2. Complete eight-flow A–I + Storage composition package: exact source pins, semantic parity, issuer/consumer boundaries, all nine checkpoint dimensions and per-Owner exact-version acceptance.
+3. IMPL2 D/E/F/I normative-root restoration or governed disposition, followed by the relevant Owners' acceptance.
+4. Storage/Consistency: close all eight SC evidence gaps with reproducible backend-level transaction, crash, restore, concurrency, replica/visibility, anti-rollback, COC/GID and RPO/RTO evidence; record exact-version dispositions.
+5. H/E/Storage: close all eight HIR evidence gaps with durable namespace reservation, concurrency/replay, Unknown recovery, crash-boundary reconciliation, Storage receipt join and C/G Attempt mapping; record exact-version dispositions.
+6. Bilingual complete-package parity: Owner A/documentation Owners verify Canonical/EN/ZH-CN semantic equivalence and current source pins.
+7. Gate B remains separately open pending implementation, conformance and operational evidence.
+
+## 8. Non-claims and constraints
+
+- All 72 AID-095 checkpoint cells remain NOT EVIDENCED; no PASS or FAIL is newly asserted.
+- All eight flows remain BLOCKED_WITH_REASON; VERIFIED_BY_DOCUMENT remains 0.
+- DOCUMENTED_ONLY is not PASS; EVIDENCE_REQUIRED is not discharged by prose.
+- AID-082's two checkers and advisory workflow are governance/namespace lint, not runtime namespace or semantic Owner acceptance evidence.
+- AID-100's full-tree checker/census evidence is document-management evidence, not A–I/Storage implementation, crash, replay or visibility evidence.
+- No Runtime/product implementation, validator semantics, schema, test or workflow was changed. No Owner acceptance, production conformance, deployment or Issue closure is inferred.
+- Issue #1212 remains OPEN.
+
+## 9. Attribution
+
+user-authorized operator (delegated by account owner); 2026-11-26. Proxy registration and coordination only; no natural-person Owner signature is fabricated.
+
 
 - **Gate A: PARTIAL / OPEN.** 22/72 checkpoints moved to DOCUMENTED_ONLY; 50/72 remain NOT EVIDENCED; 0/72 PASS. All 8/8 flows remain BLOCKED_WITH_REASON.
 - **Gate B: PARTIAL / OPEN (NOT VERIFIED).** No exact-version implementation/conformance, production durability, cross-owner acceptance or operational evidence was supplied by #082/#098/#100. Gate B cannot be CLOSED.
