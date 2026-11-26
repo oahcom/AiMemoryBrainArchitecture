@@ -9,7 +9,7 @@ document_metadata:
       decision_date: "2026-11-26"
       approved_version:
         scheme: content-hash
-        value: "7dd7717fe0fc5eeb16e3538933f884cf183e532d5da18a756d25d4af614ed6a0"
+        value: "00ccd22f14eccd0c4a8c1288049c81f76586a270eb253e539adb6f8445b61d86"
       approval_scope:
         type: Full-document
       approval_applicability: Applicable-To-Current-Version
