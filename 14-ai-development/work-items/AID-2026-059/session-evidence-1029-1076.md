@@ -286,3 +286,30 @@ the effective time were not. Criterion (b) is what this PR pins; (c) is #1063.
   criterion remained open or that a measurable difference remained; the commits
   here address exactly those remainders. They are cited as references rather
   than re-closed.
+
+## Amended 2026-11-26 (owner ruling): seven became five, and the record says which
+
+This record was written for a branch carrying seven Issues. By the time that
+branch was rebased onto `main dcf9a634`, two of the seven had landed
+independently under different commit names, so re-landing them would have
+created a second implementation of one rule. They are dropped from the branch
+and **this record keeps their analysis** rather than deleting it — the
+measurements below were taken and are still true of the commits they describe.
+
+| Issue | Status at the rebase | Where it actually landed |
+| --- | --- | --- |
+| #1029 | already on `main` | `20adc016` (#1088), plus `a64d1e6b` (#864) |
+| #1071 | already on `main` | `8f694edf` (#1090) |
+| #1074 (trigger half) | already on `main` | `2733283b` (#1155) |
+| #1058 | kept, matcher half dropped | #1085 (`a316ff69`) had fixed the matcher independently |
+| #1061, #1063, #1076, #1074 (digest half) | kept | this branch |
+
+So the branch delivers **five** Issues' worth of change, not seven, and the
+sections above that describe #1029 and #1071 are a record of work that is
+already merged elsewhere — not a claim that this branch contains it. Anyone
+checking this PR against the sections above should expect the `#1029` and
+`#1071` diffs to be **absent** and should find them on the SHAs named here.
+
+The prompt snapshot this record pins (`9174` bytes, `636ebb9e…`) is unchanged by
+the rebase and still matches the manifest's `executed_prompt_sha256`.
+
