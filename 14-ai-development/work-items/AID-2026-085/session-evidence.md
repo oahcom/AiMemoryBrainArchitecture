@@ -7,7 +7,7 @@ external_evidence_reference:
   issues: ["#1124","#1135","#1180"]
 repository:
   base_branch: main
-  base_commit_sha: 9ee89b322a160cc7ea5bcbd44ae2151850e289a0
+  base_commit_sha: 9e54e6ccec0d07d11fcf36b2a85b888ded747cdc
   branch: impl/2026-11-26-applied-evidence-contract
   pull_request: PENDING
 decision_status: DIRECTION_DECIDED_OWNER_ACCEPTANCE_PENDING
