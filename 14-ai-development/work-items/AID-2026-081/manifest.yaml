@@ -1,4 +1,4 @@
-work_item_id: AID-2026-080
+work_item_id: AID-2026-081
 title: Make the GOV-DOC-001 ratchet comment's count match its baseline, and check it
 class: GATE/TEST
 risk: R2
@@ -20,11 +20,11 @@ base_branch: main
 base_commit_sha: b978d9bb4bff9454e1b89885a8887b6eab5e02cd
 tracking_issue: "#1081"
 
-prompt_id: AID-2026-080-PROMPT
+prompt_id: AID-2026-081-PROMPT
 prompt_version: 1
-prompt_file: 14-ai-development/work-items/AID-2026-080/prompt-v1.md
+prompt_file: 14-ai-development/work-items/AID-2026-081/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: bf00af78c9c7e139a8e802c581245518751e3cce9f8e0f34a10598f5c72c7602
+prompt_sha256: 7b761550e7cf5a64a3000b908b0a838e4e316b6db69f72d50d890c475f1eb3de
 prompt_bytes: 4428
 
 authorization:
@@ -43,9 +43,9 @@ authorization:
 
 scope:
   files_to_create:
-    - 14-ai-development/work-items/AID-2026-080/manifest.yaml
-    - 14-ai-development/work-items/AID-2026-080/prompt-v1.md
-    - 14-ai-development/work-items/AID-2026-080/session-evidence-1081.md
+    - 14-ai-development/work-items/AID-2026-081/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-081/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-081/session-evidence-1081.md
   files_to_modify:
     - .github/workflows/gates.yml
     - scripts/ci/test_gate_ratchet.py
@@ -155,9 +155,9 @@ session_evidence:
     issue_refs:
       - "#1081"
     implementing_ai_session: a1081-opencode-author
-    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-080/prompt-v1.md
-    executed_prompt_sha256: bf00af78c9c7e139a8e802c581245518751e3cce9f8e0f34a10598f5c72c7602
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-081/prompt-v1.md
+    executed_prompt_sha256: 7b761550e7cf5a64a3000b908b0a838e4e316b6db69f72d50d890c475f1eb3de
     executed_prompt_bytes: 4428
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
-    session_evidence_ref: 14-ai-development/work-items/AID-2026-080/session-evidence-1081.md
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-081/session-evidence-1081.md

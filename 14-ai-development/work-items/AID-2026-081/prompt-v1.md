@@ -45,7 +45,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# AID-2026-080 — Make the ratchet comment's count match its baseline, and check it
+# AID-2026-081 — Make the ratchet comment's count match its baseline, and check it
 
 ## The gap, measured
 
