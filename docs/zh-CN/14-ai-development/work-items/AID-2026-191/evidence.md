@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-190/evidence.md"
+        - "14-ai-development/work-items/AID-2026-191/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Verified
@@ -30,8 +30,8 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "AID-2026-190 证据：为 07-agent-integration 的 inference-boundary 与 telemetry 镜像组补 GOV-DOC-002 元数据，并记录 07/08/13 其余镜像的实测边界"
-    canonical_scope_id: "ai-development/aid-2026-190-mirror-frontmatter-b-evidence"
+    canonical_scope: "AID-2026-191 证据：为 07-agent-integration 的 inference-boundary 与 telemetry 镜像组补 GOV-DOC-002 元数据，并记录 07/08/13 其余镜像的实测边界"
+    canonical_scope_id: "ai-development/aid-2026-191-mirror-frontmatter-b-evidence"
     canonical_scope_keywords:
       - "gov-doc-002"
       - "frontmatter"
@@ -40,12 +40,12 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "14-ai-development/work-items/AID-2026-190/evidence.md"
-    en: "docs/en/14-ai-development/work-items/AID-2026-190/evidence.md"
+    source: "14-ai-development/work-items/AID-2026-191/evidence.md"
+    en: "docs/en/14-ai-development/work-items/AID-2026-191/evidence.md"
     zh-CN: null
 ---
 
-# AID-2026-190 — 为 07/08/13 镜像补 GOV-DOC-002 元数据
+# AID-2026-191 — 为 07/08/13 镜像补 GOV-DOC-002 元数据
 
 ## 范围与归属
 

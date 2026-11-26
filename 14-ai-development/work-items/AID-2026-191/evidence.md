@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-190/evidence.md"
+        - "14-ai-development/work-items/AID-2026-191/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Verified
@@ -30,8 +30,8 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "Evidence for AID-2026-190: GOV-DOC-002 metadata for the 07-agent-integration inference-boundary and telemetry mirror groups, and the measured limit on the remaining 07/08/13 mirrors"
-    canonical_scope_id: "ai-development/aid-2026-190-mirror-frontmatter-b-evidence"
+    canonical_scope: "Evidence for AID-2026-191: GOV-DOC-002 metadata for the 07-agent-integration inference-boundary and telemetry mirror groups, and the measured limit on the remaining 07/08/13 mirrors"
+    canonical_scope_id: "ai-development/aid-2026-191-mirror-frontmatter-b-evidence"
     canonical_scope_keywords:
       - "gov-doc-002"
       - "frontmatter"
@@ -41,11 +41,11 @@ document_metadata:
     normative_status: Informative
   bilingual_counterpart:
     source: null
-    en: "docs/en/14-ai-development/work-items/AID-2026-190/evidence.md"
-    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-190/evidence.md"
+    en: "docs/en/14-ai-development/work-items/AID-2026-191/evidence.md"
+    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-191/evidence.md"
 ---
 
-# AID-2026-190 — GOV-DOC-002 metadata for the 07/08/13 mirrors
+# AID-2026-191 — GOV-DOC-002 metadata for the 07/08/13 mirrors
 
 ## Scope and attribution
 
