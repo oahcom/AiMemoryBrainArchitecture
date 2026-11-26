@@ -8,7 +8,7 @@ risk_rationale: >-
   registry cell is indistinguishable from a false one, so the risk of the change is a wrong
   cell, and the mitigation is that every prior value is itemised below rather than surviving
   only in the diff.
-status: DISPATCHED
+status: MERGED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -220,16 +220,25 @@ acceptance_criteria:
       counter equal on both sides.
 
 implementation:
-  status: NOT_STARTED
-  branch: PENDING
-  pull_request: PENDING
-  merge_commit_sha: NOT_MERGED
+  status: MERGED
+  branch: gov/aid-090-refresh-stale-cells
+  pull_request: 1248
+  merge_commit_sha: 6c4956688cd4bf45f08266ae54840100faccefa5
+  merged_at: "2026-11-26T08:18:17Z"
+  merged_head_sha: f1ad3996e1bc2d9c449190170ed19dc687fa1681
   note: >-
-    Registration and the correction itself. The pull request number cannot be written into the
-    commit that opens it, so implementation.status stays NOT_STARTED and merge_commit_sha stays
-    NOT_MERGED until the carrier merges; both are filled at merge, by the merge, not before it.
-    Writing MERGED here before a merge exists would be the same defect this work item corrects
-    in AID-2026-076, committed while correcting it.
+    Merged via PR #1248. This block was NOT_STARTED / NOT_MERGED / PENDING while the pull request
+    was open, on purpose: writing MERGED before a merge exists is the defect this work item
+    corrects in AID-2026-076, and committing it while correcting it would have been the same
+    error with a shorter half-life. It is refreshed here, in a follow-up commit, from what the
+    merge actually returned rather than from what the branch hoped for.
+  carrier_history: >-
+    The branch carried this correction under four identifiers before it merged, each one taken by
+    another work item while it was in review: AID-2026-080, 081, 090 and finally 101. Three pull
+    requests preceded #1248 and none of them merged: #1230 and #1239 were closed because GitHub
+    does not allow a pull request's head branch to be changed, and the branch had to be recreated
+    with the new number each time. Recorded because a reader who finds those PR numbers in this
+    branch's history should know they were renaming attempts, not withdrawn corrections.
 
 review:
   status: NOT_ASSIGNED
