@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-193/evidence.md"
+        - "14-ai-development/work-items/AID-2026-200/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -42,7 +42,7 @@ document_metadata:
 - Document ID: SYS-DATA-FLOWS-001
 - Version: 1.0
 - Source: [Normative source specification](../../../01-system-architecture/data-flows.md)
-- Source revision: 81aab0f592808999ff7668c790ef6f4dee44d0af
+- Source revision: 278f31e7eaf5c50bde9c421719880ab687448015
 - Chinese counterpart: [系统数据流](../../zh-CN/01-system-architecture/data-flows.md)
 - Status: DECIDED for ownership and semantic boundaries; CANDIDATE for scheduling/transport choices; TO_VALIDATE for quantitative targets
 

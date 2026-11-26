@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-193/evidence.md"
+        - "14-ai-development/work-items/AID-2026-200/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -42,7 +42,7 @@ document_metadata:
 - 文档 ID：SYS-QA-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../01-system-architecture/system-quality-attributes.md)
-- 源版本： c939ee0f6c7b29a6b51421fbfe3fe89d68ae9f6f
+- 源版本： afc7d19a71546c27f7fff74e1128b7774f2855ab
 - 对应英文：[System Quality Attributes](../../en/01-system-architecture/system-quality-attributes.md)
 - 状态：质量优先级和测量原则为 DECIDED；架构策略为 CANDIDATE；量化目标为 TO_VALIDATE
 

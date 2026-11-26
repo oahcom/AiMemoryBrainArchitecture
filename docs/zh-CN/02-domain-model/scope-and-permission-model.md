@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-193/evidence.md"
+        - "14-ai-development/work-items/AID-2026-200/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -42,7 +42,7 @@ document_metadata:
 - 文档 ID：DOMAIN-SCOPE-PERMISSION-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../02-domain-model/scope-and-permission-model.md)
-- 源版本： d620e3e273ea3c752d045789d82a3ec6d0e461ec
+- 源版本： 713d6d06157bfa7d4a72ac696513e0ece6ff23bd
 - 对应英文：[Scope and Permission Model](../../en/02-domain-model/scope-and-permission-model.md)
 - 状态：两者分离及隔离原则为 DECIDED；策略语言和继承边界情况为 OPEN
 - Owner：Domain Model 定义语义；Scope、Permission & Governance Engine 负责执行

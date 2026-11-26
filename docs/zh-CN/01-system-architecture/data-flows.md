@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-193/evidence.md"
+        - "14-ai-development/work-items/AID-2026-200/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -42,7 +42,7 @@ document_metadata:
 - 文档 ID：SYS-DATA-FLOWS-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../01-system-architecture/data-flows.md)
-- 源版本： 81aab0f592808999ff7668c790ef6f4dee44d0af
+- 源版本： 278f31e7eaf5c50bde9c421719880ab687448015
 - 对应英文：[System Data Flows](../../en/01-system-architecture/data-flows.md)
 - 状态：所有权和语义边界为 DECIDED；调度/传输选择为 CANDIDATE；量化目标为 TO_VALIDATE
 

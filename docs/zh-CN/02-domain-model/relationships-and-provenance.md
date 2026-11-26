@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-193/evidence.md"
+        - "14-ai-development/work-items/AID-2026-200/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -42,7 +42,7 @@ document_metadata:
 - 文档 ID：DOMAIN-REL-PROV-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../02-domain-model/relationships-and-provenance.md)
-- 源版本： 289b4731ae3ec92beaec2945f390b7ce09bb7c8d
+- 源版本： 880638d1fc1b783d912fd4fae2b6acc0ab48f6ad
 - 对应英文：[Relationships and Provenance Model](../../en/02-domain-model/relationships-and-provenance.md)
 - 状态：核心语义为 DECIDED；图表示和血缘压缩为 CANDIDATE/OPEN
 - Owner：Memory Domain Model；Evidence & Provenance 和 Entity/Relationship Manager 负责执行契约

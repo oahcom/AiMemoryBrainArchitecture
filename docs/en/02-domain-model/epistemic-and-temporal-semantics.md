@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-193/evidence.md"
+        - "14-ai-development/work-items/AID-2026-200/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -42,7 +42,7 @@ document_metadata:
 - Document ID: DOMAIN-EPISTEMIC-TEMPORAL-001
 - Version: 1.0
 - Source: [Normative source specification](../../../02-domain-model/epistemic-and-temporal-semantics.md)
-- Source revision: e71be982a895ef2dab97d0c9f717daf94848c54e
+- Source revision: 9da4341d9a15b1d3185570c70c0afe887abc7204
 - Chinese counterpart: [认知与时间语义](../../zh-CN/02-domain-model/epistemic-and-temporal-semantics.md)
 - Status: Core distinctions DECIDED; calibration and uncertain-time representation partly OPEN
 - Owner: Memory Domain Model (MB-01)

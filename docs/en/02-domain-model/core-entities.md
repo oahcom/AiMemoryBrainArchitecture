@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-193/evidence.md"
+        - "14-ai-development/work-items/AID-2026-200/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -42,7 +42,7 @@ document_metadata:
 - Document ID: DOMAIN-ENTITIES-001
 - Version: 1.0
 - Source: [Normative source specification](../../../02-domain-model/core-entities.md)
-- Source revision: ddeb677c1b259b9e05253968d23b526e7b3869dd
+- Source revision: 3b490d859f8181d3b25fdbf9892821352a7946d7
 - Chinese counterpart: [核心领域实体](../../zh-CN/02-domain-model/core-entities.md)
 - Status: DECIDED semantics unless explicitly marked otherwise
 - Owner: Memory Domain Model (MB-01)

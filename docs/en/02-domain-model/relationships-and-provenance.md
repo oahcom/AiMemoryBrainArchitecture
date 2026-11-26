@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-193/evidence.md"
+        - "14-ai-development/work-items/AID-2026-200/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -42,7 +42,7 @@ document_metadata:
 - Document ID: DOMAIN-REL-PROV-001
 - Version: 1.0
 - Source: [Normative source specification](../../../02-domain-model/relationships-and-provenance.md)
-- Source revision: 289b4731ae3ec92beaec2945f390b7ce09bb7c8d
+- Source revision: 880638d1fc1b783d912fd4fae2b6acc0ab48f6ad
 - Chinese counterpart: [关系与来源链模型](../../zh-CN/02-domain-model/relationships-and-provenance.md)
 - Status: Core semantics DECIDED; graph representation and lineage compaction CANDIDATE/OPEN
 - Owner: Memory Domain Model, with Evidence & Provenance and Entity/Relationship Managers executing the contracts

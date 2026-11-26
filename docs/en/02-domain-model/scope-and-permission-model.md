@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-193/evidence.md"
+        - "14-ai-development/work-items/AID-2026-200/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -42,7 +42,7 @@ document_metadata:
 - Document ID: DOMAIN-SCOPE-PERMISSION-001
 - Version: 1.0
 - Source: [Normative source specification](../../../02-domain-model/scope-and-permission-model.md)
-- Source revision: d620e3e273ea3c752d045789d82a3ec6d0e461ec
+- Source revision: 713d6d06157bfa7d4a72ac696513e0ece6ff23bd
 - Chinese counterpart: [Scope 与 Permission 模型](../../zh-CN/02-domain-model/scope-and-permission-model.md)
 - Status: Separation and isolation DECIDED; policy language and inheritance edge cases OPEN
 - Owner: Domain Model defines semantics; Scope, Permission & Governance Engine enforces them

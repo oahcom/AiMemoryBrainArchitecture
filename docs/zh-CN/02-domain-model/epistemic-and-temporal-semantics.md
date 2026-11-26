@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-193/evidence.md"
+        - "14-ai-development/work-items/AID-2026-200/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -42,7 +42,7 @@ document_metadata:
 - 文档 ID：DOMAIN-EPISTEMIC-TEMPORAL-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../02-domain-model/epistemic-and-temporal-semantics.md)
-- 源版本： e71be982a895ef2dab97d0c9f717daf94848c54e
+- 源版本： 9da4341d9a15b1d3185570c70c0afe887abc7204
 - 对应英文：[Epistemic and Temporal Semantics](../../en/02-domain-model/epistemic-and-temporal-semantics.md)
 - 状态：核心概念区分为 DECIDED；校准和不确定时间表示部分为 OPEN
 - Owner：Memory Domain Model（MB-01）

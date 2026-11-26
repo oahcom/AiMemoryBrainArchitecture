@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-193/evidence.md"
+        - "14-ai-development/work-items/AID-2026-200/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -42,7 +42,7 @@ document_metadata:
 - 文档 ID：DOMAIN-ENTITIES-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../02-domain-model/core-entities.md)
-- 源版本： ddeb677c1b259b9e05253968d23b526e7b3869dd
+- 源版本： 3b490d859f8181d3b25fdbf9892821352a7946d7
 - 对应英文：[Core Domain Entities](../../en/02-domain-model/core-entities.md)
 - 状态：除非另有明确标记，否则语义为 DECIDED
 - Owner：Memory Domain Model（MB-01）

@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-193/evidence.md"
+        - "14-ai-development/work-items/AID-2026-200/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -42,7 +42,7 @@ document_metadata:
 - 文档 ID：DOMAIN-LIFECYCLE-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../02-domain-model/lifecycle-model.md)
-- 源版本： 72d1936cadd5f858f63f8cc01b62639dc492f168
+- 源版本： 9b7f44b70d286ab6c675d2d345edd34029baad86
 - 对应英文：[Memory Lifecycle Model](../../en/02-domain-model/lifecycle-model.md)
 - 状态：状态词汇及其区分为 DECIDED；策略阈值和部分转换为 OPEN
 - Owner：Domain Model 定义生命周期语义；D 负责 Canonical Memory/Forget 语义及 Fence 顺序；I 负责授权与跨系统治理策略；Memory Lifecycle Manager 仅执行已获授权的 Canonical 状态转换

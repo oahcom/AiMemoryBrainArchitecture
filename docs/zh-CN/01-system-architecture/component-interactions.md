@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-193/evidence.md"
+        - "14-ai-development/work-items/AID-2026-200/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -42,7 +42,7 @@ document_metadata:
 - 文档 ID：SYS-INTERACTIONS-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../01-system-architecture/component-interactions.md)
-- 源版本： b782472896068329ba2f4bcc293afe15b92496a7
+- 源版本： 49e9c1c7142c292df9efbc200c4683bd56a292ad
 - 对应英文：[Component Interactions](../../en/01-system-architecture/component-interactions.md)
 - 状态：权威归属和主要协作为 DECIDED；编排模式和调用拓扑为 CANDIDATE；委托给 Session H 的协议细节为 OPEN
 

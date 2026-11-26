@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-193/evidence.md"
+        - "14-ai-development/work-items/AID-2026-200/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -42,7 +42,7 @@ document_metadata:
 - Document ID: SYS-INTERACTIONS-001
 - Version: 1.0
 - Source: [Normative source specification](../../../01-system-architecture/component-interactions.md)
-- Source revision: b782472896068329ba2f4bcc293afe15b92496a7
+- Source revision: 49e9c1c7142c292df9efbc200c4683bd56a292ad
 - Chinese counterpart: [组件交互](../../zh-CN/01-system-architecture/component-interactions.md)
 - Status: DECIDED for authority and primary collaboration; CANDIDATE for orchestration patterns and call topology; OPEN for protocol details delegated to Session H
 
