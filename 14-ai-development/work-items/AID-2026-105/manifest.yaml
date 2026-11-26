@@ -58,7 +58,7 @@ acceptance:
 session_evidence:
   - role: PR
     issue_refs:
-      - "1189"
+      - "#1189"
     implementing_ai_session: NOT_RECORDED
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-105/prompt-v1.md
     executed_prompt_sha256: 69f2e5c2fba34791aae302027379b8267e8e1f324805eb155e3101b05d548b03
