@@ -2,7 +2,7 @@ name: Session Evidence Gate
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 on:
   pull_request:

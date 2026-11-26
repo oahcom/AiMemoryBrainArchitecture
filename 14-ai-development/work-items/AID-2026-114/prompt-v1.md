@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-112/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-114/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -38,11 +38,11 @@ document_metadata:
     normative_status: Informative
 ---
 
-# AID-2026-112-PROMPT v1 — Gate Dispatch Deduplication and Rust Cache
+# AID-2026-114-PROMPT v1 — Gate Dispatch Deduplication and Rust Cache
 
 ## Identity
-- Work Item: AID-2026-112; Issue: #1212
-- Repository: oahcom/AiMemoryBrainArchitecture; baseline: 7629b9de5e5832fe486ee72d101c4bc5121015e6
+- Work Item: AID-2026-114; Issue: #1212
+- Repository: oahcom/AiMemoryBrainArchitecture; initial allocation baseline: 7629b9de5e5832fe486ee72d101c4bc5121015e6; current PR base: 57767952f1248e2de616c5dc24ac762ecb3a5a7f
 - Role: user-authorized operator (delegated by account owner)
 - Prompt status: RECORDED_NOT_FROZEN; platform session identifiers NOT_RECORDED.
 
@@ -51,10 +51,12 @@ Add head-SHA-scoped concurrency to all eight required workflows; add Swatinem/ru
 
 ## Authority and scope
 Authorized: branch, implement, PR to main, verify 16 contexts, merge only after all SUCCESS, read back merged blobs, comment on #1212.
+Renumbering: AID-2026-112 was already used by concurrent PRs #1309/#1313/#1316; AID-2026-113 by PR #1314. Canonical ID is AID-2026-114; the branch slug remains historical.
+
 Forbidden: merge jobs; change fetch-depth; change gate/checker semantics; alter protected contexts or branch protection; close #1212; modify runtime, schema, API, database or deployment.
 
 ## Required sequence
-1. Re-read main and allocate the next collision-free AID at push time.
+1. Re-read main and allocate the next collision-free AID at push time; correct the initial AID-2026-112 collision by renumbering to AID-2026-114 after the rescan.
 2. Add the exact concurrency group using github.workflow and PR head SHA (github.sha fallback), never github.ref.
 3. Confirm existing stable toolchain setup, record resolved rustc version, then cache with job-specific shared-key and Cargo.lock/toolchain key.
 4. Add explicit job names audit and rust-workspace-test matching the protected names.

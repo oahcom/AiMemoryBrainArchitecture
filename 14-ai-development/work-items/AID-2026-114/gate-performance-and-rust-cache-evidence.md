@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-112/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-114/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -29,30 +29,35 @@ document_metadata:
       archival_reason: null
       archival_reference: null
   authority:
-    canonical_status: Non-Canonical
-    canonical_scope: null
-    canonical_scope_id: null
-    canonical_scope_keywords: []
+    canonical_status: Canonical
+    canonical_scope: "Gate dispatch deduplication and Rust CI cache evidence"
+    canonical_scope_id: "ai-development/aid-2026-114-gate-performance-cache-evidence"
+    canonical_scope_keywords:
+      - "aid-2026-114"
+      - "ci-concurrency"
+      - "required-checks"
+      - "rust-cache"
+      - "workflow-performance"
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "14-ai-development/work-items/AID-2026-112/gate-performance-and-rust-cache-evidence.md"
-    en: null
-    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-112/gate-performance-and-rust-cache-evidence.md"
+    source: null
+    en: "docs/en/14-ai-development/work-items/AID-2026-114/gate-performance-and-rust-cache-evidence.md"
+    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-114/gate-performance-and-rust-cache-evidence.md"
 ---
 
-# AID-2026-112 — Gate Dispatch Deduplication and Rust CI Cache Evidence
+# AID-2026-114 — Gate Dispatch Deduplication and Rust CI Cache Evidence
 
 ## Purpose and authority
 
 This record documents workflow-level deduplication and job-isolated Rust build caching. It does not change required-check membership, gate commands, checker semantics, job boundaries, or runtime behavior.
 
 - Repository: `oahcom/AiMemoryBrainArchitecture`
-- Main baseline: `7629b9de5e5832fe486ee72d101c4bc5121015e6`
+- Initial allocation baseline: `7629b9de5e5832fe486ee72d101c4bc5121015e6`; current PR base after main sync: `57767952f1248e2de616c5dc24ac762ecb3a5a7f`
 - Related Issue: #1212
 - Attribution: `user-authorized operator (delegated by account owner)`; delegated execution evidence, not a natural-person Owner signature.
-- Allocation: INDEX maximum 109; AID-2026-110 is present on main and AID-2026-111 is reserved by an open PR; AID-2026-112 is the next collision-free ID and remains provisional pending merge-time recheck.
+- Allocation: INDEX maximum 109. The initial provisional AID-2026-112 collided with open PRs #1309/#1313/#1316; AID-2026-113 is occupied by open PR #1314. The rescan selected AID-2026-114. The branch slug retains the original 112 for provenance; the canonical Work Item ID is 114.
 
 ## Observed baseline
 
@@ -62,14 +67,14 @@ Task-supplied measurements: 16 required contexts across eight workflows / 16 job
 
 Eight workflows changed: `bilingual-docs.yml`, `branch-freshness.yml`, `document-management.yml`, `gates.yml`, `repository-hygiene.yml`, `runner-admission-policy.yml`, `rust-phase1.yml`, `session-evidence.yml` (all under `.github/workflows/`).
 
-Each uses this exact policy:
+Seven workflows use this exact policy with `cancel-in-progress: true`:
 
 ```yaml
 group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
 cancel-in-progress: true
 ```
 
-PR head SHA, not `github.ref`, prevents successive pushes to one branch from cancelling each other solely because they share a ref. Non-PR events fall back to `github.sha`. All eight are commit-scoped; no workflow was identified as needing an in-flight run for a superseded SHA preserved, since merge eligibility is evaluated for the current exact PR head.
+`session-evidence.yml` uses the identical group expression with `cancel-in-progress: false`. Its PR-body validator is triggered by `edited` as well as `synchronize`; multiple body revisions can share one head SHA. Letting an in-flight validation finish preserves its body-digest evidence instead of cancelling the earlier record. The other seven workflows cancel duplicate in-flight work for the same exact SHA; a different head SHA gets a different group. PR head SHA, not `github.ref`, prevents successive pushes to one branch from cancelling each other solely because they share a ref; non-PR events fall back to `github.sha`.
 
 ## Rust cache
 
@@ -107,4 +112,4 @@ Baseline was 113s with duplicate dispatch and 57s for the first-pass 16-context 
 
 ## Verification ledger
 
-Implementation head, all 16 exact-head results, merge SHA, post-merge blob SHAs and cache-hit observation remain pending at this pre-merge snapshot. No CI success or merge is claimed.
+Initial CI at Head `a9cfe51bf6ab3e9a1eff2c1c463303c5e6f0e2a4` exposed GOV-DOC-002 frontmatter defects and a missing Session Evidence per-Issue table in the PR body; those corrections are recorded in subsequent commits. All 16 exact-head contexts must be rechecked after the final correction. Merge SHA, post-merge blob SHAs and cache-hit observation remain pending. No CI success or merge is claimed.

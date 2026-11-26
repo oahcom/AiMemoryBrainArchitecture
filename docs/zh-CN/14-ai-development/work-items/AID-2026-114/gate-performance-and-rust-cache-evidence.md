@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-112/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-114/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -37,22 +37,22 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "14-ai-development/work-items/AID-2026-112/gate-performance-and-rust-cache-evidence.md"
-    en: "docs/en/14-ai-development/work-items/AID-2026-112/gate-performance-and-rust-cache-evidence.md"
+    source: "14-ai-development/work-items/AID-2026-114/gate-performance-and-rust-cache-evidence.md"
+    en: "docs/en/14-ai-development/work-items/AID-2026-114/gate-performance-and-rust-cache-evidence.md"
     zh-CN: null
 ---
 
-# AID-2026-112 — Gate 重复派发消除与 Rust CI 缓存证据
+# AID-2026-114 — Gate 重复派发消除与 Rust CI 缓存证据
 
 ## 目的与授权
 
 本文记录 workflow 级重复派发消除和按 job 隔离的 Rust 构建缓存，不改变 required-check 成员、门禁命令、检查器语义、job 边界或运行时行为。
 
 - 仓库：`oahcom/AiMemoryBrainArchitecture`
-- main 基线：`7629b9de5e5832fe486ee72d101c4bc5121015e6`
+- 初始取号基线：`7629b9de5e5832fe486ee72d101c4bc5121015e6`；main 同步后的当前 PR base：`57767952f1248e2de616c5dc24ac762ecb3a5a7f`
 - 关联 Issue：#1212
 - 署名：`user-authorized operator (delegated by account owner)`；这是代理执行证据，不代表自然人 Owner 签署。
-- 编号：INDEX 最大值 109；AID-2026-110 已在 main，AID-2026-111 已由开放 PR 占用；AID-2026-112 是下一个无冲突编号，仍须在合并时重新核对。
+- 编号：INDEX 最大值 109。最初临时编号 AID-2026-112 与开放 PR #1309/#1313/#1316 冲突；AID-2026-113 已由开放 PR #1314 占用。重扫后选定 AID-2026-114。分支名保留最初的 112 作为来源痕迹；规范 Work Item ID 为 114。
 
 ## 已观察基线
 
@@ -62,14 +62,14 @@ document_metadata:
 
 修改 8 个 workflow：`bilingual-docs.yml`、`branch-freshness.yml`、`document-management.yml`、`gates.yml`、`repository-hygiene.yml`、`runner-admission-policy.yml`、`rust-phase1.yml`、`session-evidence.yml`（均位于 `.github/workflows/`）。
 
-每个文件使用完全相同的策略：
+其中 7 个 workflow 使用以下策略，`cancel-in-progress: true`：
 
 ```yaml
 group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
 cancel-in-progress: true
 ```
 
-使用 PR head SHA 而不是 `github.ref`，避免同一分支连续 push 仅因 ref 相同而互相取消；非 PR 事件回退到 `github.sha`。8 个 workflow 均按提交隔离；合并资格只针对当前精确 PR head 评估，没有 workflow 被判定为必须保留已被新提交替代的 SHA 的在途执行。
+`session-evidence.yml` 使用相同 group 表达式，但设为 `cancel-in-progress: false`。其验证器同时响应 PR 正文 `edited` 和 head `synchronize`；正文修订可能共享同一 head SHA。保留在途执行可留下每个正文摘要对应的证据，而不是取消较早记录。其余 7 个 workflow 对同一精确 SHA 的重复在途执行可取消。使用 PR head SHA 而不是 `github.ref`，避免同一分支连续 push 仅因 ref 相同而互相取消；非 PR 事件回退到 `github.sha`。
 
 ## Rust 缓存
 
@@ -107,4 +107,4 @@ key: ${{ hashFiles('Cargo.lock') }}-${{ steps.rust-toolchain-version.outputs.ver
 
 ## 验证台账
 
-实施 head、16 项精确 Head 结果、merge SHA、合并后 blob SHA 和缓存命中观察均待记录。本合并前快照不声称 CI 已成功或 PR 已合并。
+Head `a9cfe51bf6ab3e9a1eff2c1c463303c5e6f0e2a4` 的首轮 CI 暴露 GOV-DOC-002 frontmatter 缺陷，以及 PR 正文缺少 Session Evidence 逐 Issue 表；后续提交已修复这些问题。最终修复后仍须重新核验全部 16 项精确 Head context。merge SHA、合并后 blob SHA 和缓存命中观察仍待记录。本合并前快照不声称 CI 已成功或 PR 已合并。
