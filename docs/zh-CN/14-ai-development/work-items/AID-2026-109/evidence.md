@@ -172,11 +172,11 @@ SQLite 运行是 **Linux + bundled SQLite 本地执行**，**不是 CI**，不�
 | T37 | `tests::f7_forget_version_only_hides_that_version` | SC-06, SC-10, SC-11, SC-12, SC-13 | HIR-18 | 覆盖 D/Forget Fence 的 SQLite 局部隐藏、锁、恢复或 fail-closed 片段；HIR-18 所需 I PermissionEpoch 当前授权重查与独立 D/I anti-rollback 联动未覆盖。 |
 | T38 | `tests::f8_forget_version_blocks_child_commit` | SC-06, SC-10, SC-11, SC-12, SC-13 | HIR-18 | 覆盖 D/Forget Fence 的 SQLite 局部隐藏、锁、恢复或 fail-closed 片段；HIR-18 所需 I PermissionEpoch 当前授权重查与独立 D/I anti-rollback 联动未覆盖。 |
 | T39 | `tests::f9_forget_memory_sets_lifecycle_state` | SC-06, SC-10, SC-11, SC-12, SC-13 | HIR-18 | 覆盖 D/Forget Fence 的 SQLite 局部隐藏、锁、恢复或 fail-closed 片段；HIR-18 所需 I PermissionEpoch 当前授权重查与独立 D/I anti-rollback 联动未覆盖。 |
-| T40 | `tests::file_backed_connection_applies_required_sqlite_pragmas` | SC-04 | 无对应测试 | 仅证明配置 pragma 应用，不证明底层设备 flush、WAL commit marker durable ordering。 |
-| T41 | `tests::file_db_busy_timeout_bounds_wait_for_long_immediate_transaction` | SC-08, SC-09 | HIR-08, HIR-14 | 只证明本地 busy timeout 等待上界，不构成已选定隔离 profile 或跨节点线性化证据。 |
-| T42 | `tests::file_db_interrupted_commit_keeps_version_pointer_log_and_idempotency_consistent` | SC-01, SC-02, SC-06, SC-03, SC-09, SC-10 | HIR-06, HIR-16 | 覆盖 CAS、prepare/publish 及本地可见性部分；未覆盖 Owner cursor/outbox/receipt 完整原子写集或已接受的 Storage contract。 |
-| T43 | `tests::file_db_nested_savepoint_rollback_preserves_outer_work` | SC-01, SC-02, SC-06 | HIR-06, HIR-16 | 覆盖单资源事务回滚/崩溃切面；未证明完整 Owner write-set、H↔Storage 跨边界协调或物理断电语义。 |
-| T44 | `tests::file_db_unwinding_worker_releases_open_transaction_without_partial_state` | 无对应测试 | 无对应测试 | 辅助 worker/进程入口名称本身不声明断言；不能单独映射为通过证据。 |
+| T40 | `tests::file_backed_connection_applies_required_sqlite_pragmas` | SC-04 | 无对应测试 | 仅证明 SQLite pragma 被应用，不证明底层设备 flush、WAL commit marker 或 durable ordering。 |
+| T41 | `tests::file_db_busy_timeout_bounds_wait_for_long_immediate_transaction` | SC-09 | 无对应测试 | 只证明本地 busy timeout 等待上界，不构成完整隔离 profile 或跨节点线性化证据。 |
+| T42 | `tests::file_db_interrupted_commit_keeps_version_pointer_log_and_idempotency_consistent` | SC-01, SC-02, SC-06, SC-08 | HIR-06, HIR-16 | 覆盖单资源 interrupted-commit 后 pointer/log/idempotency 一致性；缺完整 Owner write-set 与 H↔Storage 跨边界恢复。 |
+| T43 | `tests::file_db_nested_savepoint_rollback_preserves_outer_work` | SC-02 | 无对应测试 | 覆盖单资源 savepoint rollback 保留外层事务；不证明 crash/WAL 或 H protocol 谓词。 |
+| T44 | `tests::file_db_unwinding_worker_releases_open_transaction_without_partial_state` | SC-02, SC-06 | HIR-16 | 覆盖本地 unwind 时事务释放/无部分状态；不证明完整 crash-cut、H recovery 或跨资源 reconciliation。 |
 | T45 | `tests::independent_connections_serialize_conflicting_idempotency_payloads` | SC-08, SC-09 | HIR-08, HIR-14 | 覆盖 SQLite 连接/进程并发或幂等竞争的局部行为；未证明分布式/多副本或 H-owned ledger。 |
 | T46 | `tests::multi_process_cas_worker` | 无对应测试 | 无对应测试 | 辅助 worker/进程入口名称本身不声明断言；不能单独映射为通过证据。 |
 | T47 | `tests::concurrent_identical_idempotency_requests_replay_one_durable_receipt` | SC-08, SC-09, SC-07 | HIR-08, HIR-14, HIR-05, HIR-16 | 覆盖本地 receipt 持久化/重开/重放；未覆盖 H receipt 全字段、长期 tombstone 或跨资源 crash reconciliation。 |
@@ -195,11 +195,11 @@ SQLite 运行是 **Linux + bundled SQLite 本地执行**，**不是 CI**，不�
 | T60 | `tests::sqlite_change_pages_filter_scope_before_applying_limit` | SC-02, SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/prepare/publish/visibility 或 fail-closed 片段；未证明所有权威读取路径、replica applied position 或跨域 Fence/PermissionEpoch。 |
 | T61 | `tests::sqlite_change_pages_with_limit_two_preserve_order_without_skips_or_duplicates` | SC-02, SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/prepare/publish/visibility 或 fail-closed 片段；未证明所有权威读取路径、replica applied position 或跨域 Fence/PermissionEpoch。 |
 | T62 | `tests::sqlite_denies_fresh_cross_scope_write_without_persisting_any_commit_state` | SC-02, SC-10, SC-12, SC-07 | 无对应测试 | 覆盖输入校验、摘要完整性或 scope fail-closed；不证明跨资源协调、权限 epoch 或所有投影重建。 |
-| T63 | `tests::sqlite_does_not_replay_idempotency_key_across_memories` | SC-08, SC-10, SC-12 | HIR-02, HIR-14 | 覆盖 memory/scope 边界下 replay 或 status 行为；不覆盖 H 完整 namespace 或 I/D replay disclosure 授权。 |
+| T63 | `tests::sqlite_does_not_replay_idempotency_key_across_memories` | SC-08 | HIR-14 | 覆盖 key 不跨 memory scope 重放；缺 H 完整 namespace tuple 与 H-owned receipt。 |
 | T64 | `tests::sqlite_does_not_replay_idempotency_receipt_before_scope_check` | SC-07, SC-08, SC-02, SC-10, SC-12 | HIR-05, HIR-16, HIR-14 | 覆盖 memory/scope 边界下 replay 或 status 行为；不覆盖 H 完整 namespace 或 I/D replay disclosure 授权。 |
 | T65 | `tests::sqlite_filters_nested_claims_by_the_callers_scope` | SC-02, SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/prepare/publish/visibility 或 fail-closed 片段；未证明所有权威读取路径、replica applied position 或跨域 Fence/PermissionEpoch。 |
 | T66 | `tests::sqlite_hides_entire_multiscope_claim_from_partial_scope_reader` | SC-02, SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/prepare/publish/visibility 或 fail-closed 片段；未证明所有权威读取路径、replica applied position 或跨域 Fence/PermissionEpoch。 |
-| T67 | `tests::sqlite_idempotency_digest_mismatch_conflicts_for_commit_and_receipt_lookup` | SC-08, SC-07, SC-02, SC-10, SC-12 | HIR-02, HIR-14, HIR-05, HIR-16 | 覆盖输入校验、摘要完整性或 scope fail-closed；不证明跨资源协调、权限 epoch 或所有投影重建。 |
+| T67 | `tests::sqlite_idempotency_digest_mismatch_conflicts_for_commit_and_receipt_lookup` | SC-02, SC-07, SC-08 | HIR-14 | 覆盖 digest mismatch 对 commit/receipt lookup 冲突；缺 H 完整 namespace tuple 与 H-owned immutable receipt。 |
 | T68 | `tests::sqlite_multiple_preparations_reserve_unique_negative_sequences` | SC-01, SC-02, SC-03, SC-09, SC-10 | HIR-06 | 覆盖 CAS、prepare/publish 及本地可见性部分；未覆盖 Owner cursor/outbox/receipt 完整原子写集或已接受的 Storage contract。 |
 | T69 | `tests::sqlite_prepare_does_not_add_change_log_entries` | SC-01, SC-03, SC-10 | HIR-06 | 覆盖 prepare 不发布/不变更 current pointer 的部分；缺 commit 完整 write set 与外部线性化读证据。 |
 | T70 | `tests::sqlite_prepare_hides_version_from_read_version` | SC-02, SC-10, SC-12, SC-01, SC-03 | HIR-06 | 覆盖 prepare 不发布/不变更 current pointer 的部分；缺 commit 完整 write set 与外部线性化读证据。 |
@@ -207,14 +207,14 @@ SQLite 运行是 **Linux + bundled SQLite 本地执行**，**不是 CI**，不�
 | T72 | `tests::sqlite_prepare_rejects_idempotency_digest_conflict` | SC-08 | HIR-02, HIR-14 | 覆盖 key/digest 重放或冲突的 Storage/producer 层行为；未证明 H 完整 namespace tuple、tombstone horizon 或 H ledger authority。 |
 | T73 | `tests::sqlite_prepare_replay_returns_same_receipt` | SC-08, SC-07 | HIR-02, HIR-14, HIR-05, HIR-16 | 覆盖本地 receipt 持久化/重开/重放；未覆盖 H receipt 全字段、长期 tombstone 或跨资源 crash reconciliation。 |
 | T74 | `tests::sqlite_publication_state_honours_scope_and_forget_fences` | SC-06, SC-10, SC-11, SC-12, SC-13, SC-02 | HIR-18 | 覆盖本地 scope/read/prepare/publish/visibility 或 fail-closed 片段；未证明所有权威读取路径、replica applied position 或跨域 Fence/PermissionEpoch。 |
-| T75 | `tests::sqlite_publication_state_reports_prepared_hidden_then_published` | SC-02, SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/prepare/publish/visibility 或 fail-closed 片段；未证明所有权威读取路径、replica applied position 或跨域 Fence/PermissionEpoch。 |
-| T76 | `tests::sqlite_publication_state_returns_none_for_unknown_or_legacy_publication` | SC-02, SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/prepare/publish/visibility 或 fail-closed 片段；未证明所有权威读取路径、replica applied position 或跨域 Fence/PermissionEpoch。 |
+| T75 | `tests::sqlite_publication_state_reports_prepared_hidden_then_published` | SC-10, SC-12 | 无对应测试 | 覆盖本地 prepared-hidden/published visibility；缺副本 applied position 与 D/I 全域 currentness。 |
+| T76 | `tests::sqlite_publication_state_returns_none_for_unknown_or_legacy_publication` | SC-10, SC-12 | 无对应测试 | 覆盖未知/legacy publication 的本地读行为；缺全权威读路径及副本可见性证明。 |
 | T77 | `tests::sqlite_publish_allocates_sequence_only_at_publish_time` | SC-01, SC-02, SC-03, SC-09, SC-10, SC-08 | HIR-06, HIR-14 | 覆盖发布/CAS/replay 部分；缺跨资源协调、H-owned receipt 和 replica read visibility。 |
 | T78 | `tests::sqlite_publish_makes_prepared_version_current_and_readable` | SC-02, SC-10, SC-12, SC-01, SC-03, SC-08 | HIR-06, HIR-14 | 覆盖发布/CAS/replay 部分；缺跨资源协调、H-owned receipt 和 replica read visibility。 |
 | T79 | `tests::sqlite_publish_rejects_duplicate_publication_and_suppressed_state` | SC-02, SC-10, SC-12, SC-01, SC-03, SC-08 | HIR-06, HIR-14 | 覆盖发布/CAS/replay 部分；缺跨资源协调、H-owned receipt 和 replica read visibility。 |
 | T80 | `tests::sqlite_publish_rejects_stale_parent_without_partial_commit` | SC-02, SC-10, SC-12, SC-01, SC-03, SC-09, SC-08 | HIR-06, HIR-14 | 覆盖发布/CAS/replay 部分；缺跨资源协调、H-owned receipt 和 replica read visibility。 |
 | T81 | `tests::sqlite_publish_replay_returns_original_receipt` | SC-08, SC-07, SC-01, SC-02, SC-03, SC-10 | HIR-02, HIR-14, HIR-05, HIR-16, HIR-06 | 覆盖发布/CAS/replay 部分；缺跨资源协调、H-owned receipt 和 replica read visibility。 |
-| T82 | `tests::sqlite_read_version_keeps_legacy_versions_visible` | SC-02, SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/prepare/publish/visibility 或 fail-closed 片段；未证明所有权威读取路径、replica applied position 或跨域 Fence/PermissionEpoch。 |
+| T82 | `tests::sqlite_read_version_keeps_legacy_versions_visible` | SC-10 | 无对应测试 | 仅覆盖本地 legacy-version read visibility；不证明 post-commit replica visibility。 |
 | T83 | `tests::sqlite_rejects_claim_scope_outside_callers_scope_even_when_parent_contains_it` | SC-02, SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/prepare/publish/visibility 或 fail-closed 片段；未证明所有权威读取路径、replica applied position 或跨域 Fence/PermissionEpoch。 |
 | T84 | `tests::sqlite_rejects_claims_outside_the_parent_memory_scope` | SC-02, SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/prepare/publish/visibility 或 fail-closed 片段；未证明所有权威读取路径、replica applied position 或跨域 Fence/PermissionEpoch。 |
 | T85 | `tests::sqlite_rejects_create_outside_requested_scope` | SC-02, SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/prepare/publish/visibility 或 fail-closed 片段；未证明所有权威读取路径、replica applied position 或跨域 Fence/PermissionEpoch。 |
