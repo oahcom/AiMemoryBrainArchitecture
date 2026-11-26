@@ -54,49 +54,49 @@ document_metadata:
 **目的：** 关闭 Issue #1037 的两项证据类 BLOCKED；#1037 Issue 本身仍保持 OPEN。
 
 
-## Evidence provenance and execution environment
+## 证据来源与执行环境
 
-The following measurements were supplied as results of read-only local execution in a **complete clone**, not from CI. The earlier partial-clone worktree failure describes only the previous VM attempt and is superseded for these two evidence items by this complete-clone capture.
+以下测量值由用户提供，来源为**完整克隆**上的本地只读执行，**不是 CI**。此前 partial clone 上创建 worktree 失败，只描述先前 VM 的采集尝试；本次完整克隆采集结果取代其作为这两项证据的来源。
 
-- Platform: Windows
-- Python: 3.12.3
-- Environment: `PYTHONUTF8=1`, `PYTHONIOENCODING=utf-8`
-- Clone: complete history; `git cat-file -t` returned `commit` for `c6b7d987`, `cb4b36d0`, and `dc826e4e`
-- Worktrees: detached at `c6b7d987b959c42af5072932963dae9ed55721e4` and `dc826e4eae381d78a9fc4b1fcbb2cbc783ed2706`
-- Checker command, identical in both worktrees: `python scripts/check_document_management.py`
-- Scan mode: full-tree scan; no `--require-changed`
+- 平台：Windows
+- Python：3.12.3
+- 环境变量：`PYTHONUTF8=1`、`PYTHONIOENCODING=utf-8`
+- 克隆：完整历史；对 `c6b7d987`、`cb4b36d0`、`dc826e4e` 执行 `git cat-file -t` 均返回 `commit`
+- Worktree：分别 detached 于 `c6b7d987b959c42af5072932963dae9ed55721e4` 和 `dc826e4eae381d78a9fc4b1fcbb2cbc783ed2706`
+- 两个快照完全相同的 checker 命令：`python scripts/check_document_management.py`
+- 扫描模式：全树扫描，不带 `--require-changed`
 
-The exact invocation of the separate read-only census script was not included in the supplied capture record; it is therefore marked `NOT_PROVIDED` below rather than reconstructed.
+独立只读 census 脚本的精确调用命令未包含在所提供的采集记录中，因此下文将其标为 `NOT_PROVIDED`，不自行还原或猜测。
 
-## Evidence A — full-tree checker capture
+## 证据 A —— 全树 checker 采集
 
-Command (both snapshots): `python scripts/check_document_management.py`
+两个快照执行的命令：`python scripts/check_document_management.py`
 
-| Item | Baseline `c6b7d987` | Fix `dc826e4e` |
+| 项目 | Baseline `c6b7d987` | Fix `dc826e4e` |
 |---|---:|---:|
-| Exit code | `2` | `2` |
-| stdout bytes | 5443 | 5943 |
+| 退出码 | `2` | `2` |
+| stdout 字节数 | 5443 | 5943 |
 | stdout SHA-256 | `FCDDF7DE725A3676CD9AFAAA37EC897E8C6F4EBACBB49FF79814F591AC75CA8B` | `347292A4A6BD768A43DDE42FBD6DA8FAE01E1974DB3355C269B5922A1031F8DA` |
-| stderr bytes | 230 | 230 |
+| stderr 字节数 | 230 | 230 |
 | stderr SHA-256 | `EE34929E76B0FC03EE3842D206A7E9EC7695AB51CF87E34035287DC0A43CA92A` | `D4161D94B7EF4939374EAA80157553531176292BCE37BE528B9593CC77DCD926` |
-| stdout lines | 50 | 55 |
+| stdout 行数 | 50 | 55 |
 
-**stdout is not byte-identical**: 5443 vs 5943 bytes and different SHA-256 values. Both exit codes are `2`.
+**stdout 并非字节级相同**：5443 与 5943 字节，SHA-256 不同。两边退出码均为 `2`。
 
-The stderr semantic lines, as supplied (the only difference is the numbers):
+所提供结果中的 stderr 语义行如下（两边唯一差别是数字）：
 
-- Baseline: `INCOMPLETE: no rule violations in 278 classified documents, but 484 governed documents are still unclassified`
-- Fix: `INCOMPLETE: no rule violations in 293 classified documents, but 469 governed documents are still unclassified`
+- Baseline：`INCOMPLETE: no rule violations in 278 classified documents, but 484 governed documents are still unclassified`
+- Fix：`INCOMPLETE: no rule violations in 293 classified documents, but 469 governed documents are still unclassified`
 
-Interpretation: both snapshots report **no rule violations**. Exit code `2` means `INCOMPLETE` (the full-tree classification is incomplete), not failure and not PASS.
+解释：两个快照都报告**没有规则违反**。退出码 `2` 表示 `INCOMPLETE`（全树分类尚未完成），不是执行失败，也不是 PASS。
 
-The full raw stdout/stderr byte streams were measured for the byte counts and digests above, but separate downloadable raw-output files were not included in the supplied handoff. The recorded hashes are the supplied measurements; this document does not claim to attach the streams themselves.
+上表字节数与摘要来自对完整原始 stdout/stderr 字节流的测量；但交接材料没有附上可单独下载的原始输出文件。因此本文记录所提供的哈希测量值，不声称附件中包含原始字节流。
 
-## Evidence B — stdout line-difference attribution
+## 证据 B —— stdout 逐行差异归因
 
-Supplied `Compare-Object` summary: **8 base-only lines and 13 fix-only lines**.
+所提供的 `Compare-Object` 摘要：**base 独有 8 行，fix 独有 13 行**。
 
-Base-only lines:
+Base 独有行：
 
 ```text
 GOV-DOC-002: 762 governed documents, 278 classified, 484 unclassified
@@ -109,7 +109,7 @@ GOV-DOC-002: 762 governed documents, 278 classified, 484 unclassified
   adoption backlog: ... ... (+479)
 ```
 
-Fix-only lines:
+Fix 独有行：
 
 ```text
 GOV-DOC-002: 762 governed documents, 293 classified, 469 unclassified
@@ -127,33 +127,33 @@ GOV-DOC-002: 762 governed documents, 293 classified, 469 unclassified
   authority: domain-model/phase-1-domain-model-freeze -> 02-domain-model/phase-1-domain-model-freeze.md
 ```
 
-Attribution recorded in the supplied result:
+所提供结果中的归因如下：
 
-- Five new authority bindings appear in the fix output.
-- Classified documents: 278 → 293 (**+15**): `01-system-architecture` +4, `02-domain-model` +1, `docs` +10.
-- Unclassified documents: 484 → 469 (**−15**).
-- Advisory counts: body-status documents 121 → 117; distinct prose status values 139 → 135; occurrences 144 → 140.
+- Fix 输出新增 5 条 authority 绑定。
+- 已分类文档：278 → 293（**+15**）：`01-system-architecture` +4、`02-domain-model` +1、`docs` +10。
+- 未分类文档：484 → 469（**−15**）。
+- Advisory 数量同步变化：正文含 body-status 的文档 121 → 117；不同 prose status 值 139 → 135；出现次数 144 → 140。
 
-Thus the outputs are **not equivalent**; the reported differences are attributed to the classification and authority-binding changes above. The abbreviated adoption-backlog lines are preserved exactly as supplied (including ellipses); this evidence record does not expand omitted entries.
+因此两个输出**不等价**；所报告的差异归因于上述分类变化和 authority 绑定变化。adoption backlog 行按交接材料原样保留（包含省略号）；本文不会补写被省略的条目。
 
-## Evidence C — fix-commit frontmatter census
+## 证据 C —— fix commit frontmatter census
 
-Snapshot: fix commit `dc826e4eae381d78a9fc4b1fcbb2cbc783ed2706`.
+快照：fix commit `dc826e4eae381d78a9fc4b1fcbb2cbc783ed2706`。
 
-Execution: read-only script traversing all `*.md` files and parsing YAML frontmatter. Exact script invocation: `NOT_PROVIDED` in the supplied capture record. Exit code: `0`.
+执行方式：只读脚本遍历所有 `*.md` 文件并解析 YAML frontmatter。所提供采集记录未包含精确脚本调用命令：`NOT_PROVIDED`。退出码：`0`。
 
-Report JSON SHA-256: `DD6A4CC1440A331EE984518C6D6306A7C233B0A4324DDBE9035EF95D309F15CC`.
+报告 JSON 的 SHA-256：`DD6A4CC1440A331EE984518C6D6306A7C233B0A4324DDBE9035EF95D309F15CC`。
 
-| Metric | Count |
+| 指标 | 数量 |
 |---|---:|
 | `total_md` | 1020 |
 | `with_frontmatter` | 294 |
 | `no_frontmatter` | 726 |
 | `malformed_frontmatter` | 0 |
 
-`document_metadata.lifecycle.modification_status` distribution:
+`document_metadata.lifecycle.modification_status` 分布：
 
-| Value | Count |
+| 值 | 数量 |
 |---|---:|
 | `Unchanged` | 159 |
 | `Modified` | 117 |
@@ -161,15 +161,15 @@ Report JSON SHA-256: `DD6A4CC1440A331EE984518C6D6306A7C233B0A4324DDBE9035EF95D30
 | `Active-Modified` | 2 |
 | `None` | 1 |
 
-`document_metadata.authority.normative_status` distribution:
+`document_metadata.authority.normative_status` 分布：
 
-| Value | Count |
+| 值 | 数量 |
 |---|---:|
 | `Informative` | 241 |
 | `Normative` | 52 |
 | `None` | 1 |
 
-**Pending-Reapproval = 15**, comprising **12 Normative** and **3 Informative**:
+**Pending-Reapproval = 15**，其中 **Normative 12**、**Informative 3**。逐项清单：
 
 ```text
 Normative   00-governance/architecture-invariants.md
@@ -189,27 +189,26 @@ Normative   docs/zh-CN/14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md
 Informative docs/zh-CN/14-ai-development/governance-register/GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036.md
 ```
 
-Aggregation: five documents each have three mirrors (`architecture-invariants`, `design-principles`, `OWNER-DECISION-FACT-CLAIM-001`, and `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`) plus two root-only documents (`PR-GOVERNANCE-001` and `I-OWNER-DECISION-AUTHORIZATION-DECISION-001`) = 15. The three `Informative` entries are the root/EN/ZH-CN mirrors of the same governance-register record, consistent with the earlier Issue comment.
+归并关系：5 份文档各有 3 个镜像（`architecture-invariants`、`design-principles`、`OWNER-DECISION-FACT-CLAIM-001`、`GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`）加上 2 份仅存在于 root 的文档（`PR-GOVERNANCE-001`、`I-OWNER-DECISION-AUTHORIZATION-DECISION-001`），合计 15。3 条 `Informative` 记录是同一条 governance-register 记录的 root/EN/ZH-CN 镜像，与 Issue 先前评论一致。
 
-The report digest is recorded above. The complete JSON inventory itself was not attached in the supplied handoff, so no file attachment/path is claimed.
+上面记录了报告摘要的 digest。完整 JSON 原始清单未包含在交接材料中，因此本文不声称已附加该文件，也不虚构文件路径。
 
-## Evidence D — incremental-mode comparison (supplementary; not an equivalence proof)
+## 证据 D —— 增量模式对照（补充材料，不构成等价证明）
 
-Command: `python scripts/check_document_management.py --require-changed c6b7d987b959c42af5072932963dae9ed55721e4`.
+命令：`python scripts/check_document_management.py --require-changed c6b7d987b959c42af5072932963dae9ed55721e4`。
 
-| Snapshot | Exit | stdout | stderr |
+| 快照 | 退出码 | stdout | stderr |
 |---|---:|---|---|
-| `c6b7d987` | `3` | 0 bytes; SHA-256 `E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855` | `NOT_APPLICABLE: --require-changed resolved to zero changed or untracked paths; no incremental verification was performed` |
-| `dc826e4e` | `0` | 7986 bytes; SHA-256 `130A0B10EDBD11D0EFBA5D98955F399E3AFB93F3BE9A57C86770BE893B97FAAE` | 5261 bytes; SHA-256 `4E7C397CD0900538EAC8E286D0FBFA75CCC8948A36997A20A1AFD9F258F28253` |
+| `c6b7d987` | `3` | 0 字节；SHA-256 `E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855` | `NOT_APPLICABLE: --require-changed resolved to zero changed or untracked paths; no incremental verification was performed` |
+| `dc826e4e` | `0` | 7986 字节；SHA-256 `130A0B10EDBD11D0EFBA5D98955F399E3AFB93F3BE9A57C86770BE893B97FAAE` | 5261 字节；SHA-256 `4E7C397CD0900538EAC8E286D0FBFA75CCC8948A36997A20A1AFD9F258F28253` |
 
-On the baseline, `--require-changed <baseline itself>` necessarily resolves to zero changed paths. Incremental mode therefore cannot serve as the baseline/fix equivalence comparison; the full-tree scan in Evidence A is the valid comparison. The baseline stderr SHA-256 corresponds to 122 bytes of raw content, whereas fix stderr is 5261 bytes and includes Windows GBK decoding noise; these stderr streams are not comparable. Evidence D is supplementary only.
+在 baseline 上，`--require-changed <baseline 自身>` 必然解析出零个变更路径。因此增量模式不能用作 baseline/fix 等价对照；证据 A 的全树扫描才是有效对照。Baseline stderr 的 SHA-256 对应 122 字节原始内容；fix stderr 为 5261 字节，并包含 Windows GBK 解码噪声，两者不可比较。证据 D 仅作补充。
 
-## Resolution and scope
+## 解决状态与范围
 
-- `byte-for-byte output equivalence`: **RESOLVED as an evidence question**. The evidence does **not** show byte equality; it establishes that stdout differs, both exit codes are 2, both report no rule violations, and the supplied line-difference report attributes the observed changes. No claim of “output equivalent” is made.
-- `fresh metadata recount`: **RESOLVED** by the fix-commit read-only census in Evidence C.
-- Provenance: complete-clone local read-only execution, **not CI**.
-- These two evidence items for **#1037 are closed**.
-- **Issue #1037 as a whole remains OPEN**. Owner acceptance and any other outstanding acceptance work are not completed by this evidence capture.
-- No runtime, validator, or workflow semantics were changed. This PR remains Draft and is not to be merged as part of this task.
-
+- `byte-for-byte output equivalence`：作为一项证据问题，状态为 **RESOLVED**。证据并未证明字节相等；它证明 stdout 不同、两个退出码均为 2、两边均无规则违反，并由所提供的逐行差异报告归因已报告的变化。本文不声称“输出等价”。
+- `fresh metadata recount`：由证据 C 的 fix-commit census 解决，状态为 **RESOLVED**。
+- 来源：完整克隆上的本地只读执行，**不是 CI**。
+- **#1037 的这两项证据已闭合。**
+- **#1037 整体仍保持 OPEN**。Owner acceptance 及其他尚未完成的验收事项并未由本证据采集完成。
+- 未修改 runtime、validator 或 workflow 语义。本 PR 保持 Draft，本任务不执行合并。
