@@ -21,7 +21,7 @@ repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
 base_commit_sha: a7e7c64b
 
-tracking_issue: "to be filed with the attribution sweep that produced the three hits"
+tracking_issue: "#1318 - the defect report, filed with the digest counts before and after PR #1281, the 58-byte uniformity across all 32 files, and the two pull-request states that distinguish #1241 from #1255."
 
 prompt_id: AID-2026-116-PROMPT
 prompt_version: 1
@@ -291,6 +291,11 @@ acceptance_criteria:
     No prompt file is restored and no superseded digest is deleted. Settled by the diff touching no
     prompt-v1.md under any repinned work item, and by every prior value appearing in the evidence
     table or in the corrections block.
+
+implementation:
+  status: PR_OPEN
+  branch: gov/aid-116-pin-and-attribution
+  pull_request: 1321
 
 review:
   status: NOT_ASSIGNED
