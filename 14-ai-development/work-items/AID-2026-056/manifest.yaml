@@ -222,9 +222,10 @@ review:
   # leaving it to be inferred. REVIEW-05 reviewed the two edits round 4 raised
   # and returned APPROVE. After it, F6 was rewritten because its statement was
   # factually wrong: it said none of the four rulings it enumerates has an
-  # original in the repository, and three of them do, one of them 177 lines
-  # above the finding itself. That is a correction of a measured fact, not a
-  # change to any acceptance criterion, deliverable or scope decision.
+  # original in the repository, and three of them do, one of them 190 lines
+  # above where the finding now begins. That is a correction of a measured
+  # fact, not a change to any acceptance criterion, deliverable or scope
+  # decision.
   # What it does undercut is REVIEW-05's basis: REVIEW-05 reproduced the false
   # claim and relied on it. So this block records the correction and leaves the
   # status alone, and the next review round reads F6 rather than this note.
@@ -299,8 +300,8 @@ findings:
     severity: material
     raised_by: independent review session (REVIEW-01, finding M5)
     measured_at: "8e489ec1"
-    statement: "Of the four rulings this manifest and the erratum quote, exactly one has no resolvable original: `OD-22(a)`, whose only occurrence in the tree is the erratum that cites it. The other three are defined, and the earlier wording of this finding was wrong to say otherwise. Measured at 2026-11-26 on main: `OD-18` at `AID-2026-056/manifest.yaml:108` — the same file as this finding, 177 lines above it; `OD-23` at `AID-2026-058/manifest.yaml:79`; `OD-26` at `AID-2026-060/manifest.yaml:99`. So the defect is narrower than \"unverifiable against a source\": three of the four are verifiable, and the one that is not is the least consequential of them. REVIEW-04 and REVIEW-05 both asserted that no `id: OD-26` exists anywhere in the tree, and REVIEW-04 additionally named `OD-23`; both statements are false, and REVIEW-05 relied on the false one as part of its basis for APPROVE. This finding records the correction rather than deleting the record of the error, because a finding that was wrong is itself evidence about how it was reviewed."
-    resolution: "`OD-22(a)` remains unresolved and is recorded as unresolved: it should be linked by Issue comment id so a a reader can reach the thing being cited. The other three need no link — they resolve in-tree, and the earlier wording that treated all four alike was a measurement error, corrected here. Nothing about the work this item describes changes: implementation.status is still NOT_STARTED."
+    statement: "Of the four rulings this manifest and the erratum quote, exactly one has no resolvable original: `OD-22(a)`, which is quoted in six files and defined in none. The other three are defined, and the earlier wording of this finding was wrong to say otherwise. Measured at 2026-11-26 on main: `OD-18` at `AID-2026-056/manifest.yaml:108` — the same file as this finding, 190 lines above it (F6 begins at `:298`); `OD-23` at `AID-2026-058/manifest.yaml:79`; `OD-26` at `AID-2026-060/manifest.yaml:99`. So the defect is narrower than \"unverifiable against a source\": three of the four are verifiable, and the one that is not is the least consequential of them. REVIEW-04 and REVIEW-05 both asserted that no `id: OD-26` exists anywhere in the tree, and REVIEW-04 additionally named `OD-23`; both statements are false, and REVIEW-05 relied on the false one as part of its basis for APPROVE. This finding records the correction rather than deleting the record of the error, because a finding that was wrong is itself evidence about how it was reviewed."
+    resolution: "`OD-22(a)` remains unresolved and is recorded as unresolved: it should be linked by Issue comment id so a reader can reach the thing being cited. The other three need no link — they resolve in-tree, and the earlier wording that treated all four alike was a measurement error, corrected here. Nothing about the work this item describes changes: implementation.status is still NOT_STARTED."
   - id: F7
     severity: material
     raised_by: independent review session (REVIEW-01, finding M1)
