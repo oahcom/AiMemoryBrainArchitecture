@@ -34,17 +34,20 @@ document_metadata:
       archival_reason: null
       archival_reference: null
   authority:
-    canonical_status: Candidate
-    canonical_scope: null
-    canonical_scope_id: null
-    canonical_scope_keywords: []
+    canonical_status: Canonical
+    canonical_scope: "Evidence record for the two evidence-only acceptance items of Issue #1037."
+    canonical_scope_id: ai-development/aid-2026-100-issue-1037-evidence
+    canonical_scope_keywords:
+      - issue-1037
+      - checker-output-comparison
+      - frontmatter-census
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
     source: null
-    en: "14-ai-development/work-items/AID-2026-100/evidence.en.md"
-    zh-CN: "14-ai-development/work-items/AID-2026-100/evidence.zh-CN.md"
+    en: "docs/en/14-ai-development/work-items/AID-2026-100/evidence.md"
+    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-100/evidence.md"
 ---
 
 # AID-2026-100 — #1037 evidence record (Canonical)
