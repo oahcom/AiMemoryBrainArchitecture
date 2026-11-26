@@ -32,13 +32,9 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "Evidence and registration record for AID-2026-109"
-    canonical_scope_id: "ai-development/aid-2026-109-evidence"
-    canonical_scope_keywords:
-      - aid-2026-109
-      - memory-brain
-      - canonical-memory-store
-      - restoration-evidence
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative

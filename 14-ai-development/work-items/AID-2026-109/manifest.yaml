@@ -36,8 +36,8 @@ scope:
     - "14-ai-development/work-items/AID-2026-109/session-evidence.md"
   files_to_modify:
     - "14-ai-development/work-items/INDEX.md"
-    - "scripts/check_bilingual_docs.py" (NORMATIVE_ROOTS scope declaration only)
-    - "00-governance/document-scope-registry.yaml" (governed-root registration only)
+    - "scripts/check_bilingual_docs.py (NORMATIVE_ROOTS scope declaration only)"
+    - "00-governance/document-scope-registry.yaml (governed-root registration only)"
   files_out_of_scope:
     - "03-memory-brain/README.md"
     - "All other 59 files from session-d-memory-brain-2026-11-16"
@@ -61,8 +61,8 @@ session_evidence:
       - "#1212"
     implementing_ai_session: "NOT_RECORDED"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-109/prompt-v1.md"
-    executed_prompt_sha256: "d2a5cde1eb02778e528c04e7ae3272bcd61955deb85368c2fe5ebe4d8ba8c15f"
-    executed_prompt_bytes: 2753
+    executed_prompt_sha256: "4cca6280c83f9877f286f167896683dfb80836f35687d2f69fd9e7c52000c153"
+    executed_prompt_bytes: 4028
     executed_prompt_provenance: "RECORDED_FROM_USER_MESSAGE; session identity NOT_RECORDED"
     session_reference_status: "NOT_RECORDED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-109/session-evidence.md"

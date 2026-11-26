@@ -1,3 +1,49 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version:
+        scheme: content-hash
+        value: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-109/manifest.yaml"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-26"
+      last_verification_note: "Prompt body transcribed from the user assignment; session identity is not recorded."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
+---
+
 # 纠正：清单已经躺在仓库里了，不用你推导；而且只有 1 份
 
 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` §「Missing current-main normative roots」（第 103 行起）已经有一张权威表，只列 5 个路径：
@@ -27,4 +73,4 @@
 6) 三份文档（Canonical + `docs/en/` + `docs/zh-CN/`，结构一致），alloc_at_push 取号，16 项全绿自合并，在 #1212 留评论说明 Gate A 第 5 项中 D 的部分从 OPEN 变成什么。
 
 回报：blob 对照、取代性判定、分类摘要计数、PR 链接、16 项、merge SHA、#1212 评论。
-不伪造、不改正文、不动 04/05（归 #1220 与 E 会话）、不关 Issue。
+不伪造、不改正文、不动 04/05（归 #1220 与 E 会话）、不关 Issue.
