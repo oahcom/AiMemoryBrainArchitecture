@@ -13,8 +13,6 @@ document_metadata:
         value: "31c2240efa3db8d89a9c46d208548c64b3594d16640ca4191f53307b3bb654d8"
       approval_scope:
         type: Full-document
-        included_sections: []
-        included_assets: []
       approval_applicability: Applicable-To-Current-Version
       evidence_reference:
         - "Owner ruling, round 15, 2026-11-23 — placement, metadata and merge decisions for this document"

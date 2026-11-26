@@ -12,8 +12,6 @@ document_metadata:
         value: "f8be29883e1c2ca2bf0e923cf21ded35a7be322c5e61760db7116cae7e0bcda5"
       approval_scope:
         type: Full-document
-        included_sections: []
-        included_assets: []
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference: []
       revocation: null

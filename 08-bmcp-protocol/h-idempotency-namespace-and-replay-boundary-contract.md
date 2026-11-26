@@ -10,8 +10,6 @@ document_metadata:
       approved_version: null
       approval_scope:
         type: Full-document
-        included_sections: []
-        included_assets: []
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "Work Item AID-2026-099"
@@ -87,7 +85,7 @@ Read from main at **d5107f68a7f1b61f5f2f7352fadf828aae06cf1c**:
 - 02-domain-model/phase-1-storage-trait-contract.md — Blob **22ca7cd3777e0132e25f084084610f1e90b60d21**. Candidate Storage seam: immutable version, current-version CAS, idempotency record and canonical commit sequence form one recoverable boundary; same key/same digest may return original receipt; same key/different digest is IdempotencyConflict. Shape tests do not prove backend atomicity/durability.
 - H Phase 3.8.25 — Blob **afa294bc42a8488e4569e6a8bdf5437c7a90e247**; H Phase 3.8.26 — Blob **7b73491c765091728af6f5306b9efd502cf7f30a**. They require independent current I authorization and D Fence checks before replay disclosure, and exact CSubmitOutcome record/sequence/payload-digest/final-boundary joins. Resolver/verifier seams remain unverified.
 
-**Storage / AID-2026-098 dependency:** this main baseline contains no AID-2026-098 directory or manifest, and no discoverable PR with that identifier. Its exact Storage contract version/blob is therefore **NOT AVAILABLE ON THIS BASELINE**. This proposal reserves Storage atomicity and persistence details to AID-2026-098 and does not invent or duplicate them. Before cross-owner freeze, pin its exact path/version/blob and verify H/Storage mapping. The Storage Trait above is only a candidate seam, not a substitute.
+**Storage / AID-2026-098 dependency:** AID-2026-098 has since been merged into main via PR #1283 (merge commit cdba0b7360b81ba2693c57f0d89ad2e28832272c); see AID-2026-098. The Storage contract is available at 10-storage-consistency/storage-physical-consistency-contract.md, docs/en/10-storage-consistency/storage-physical-consistency-contract.md, and docs/zh-CN/10-storage-consistency/storage-physical-consistency-contract.md. Its 18 checkpoints comprise 10 DOCUMENTED_ONLY and 8 EVIDENCE_REQUIRED; this is candidate documentation, not implementation or conformance evidence. This is a correction of an outdated baseline-availability statement only: it changes no normative conclusion in AID-2026-099, and HIR-06's reference to AID-2026-098 remains valid. This proposal reserves Storage atomicity and persistence details to AID-2026-098 and does not invent or duplicate them. Before cross-owner freeze, pin its exact path/version/blob and verify H/Storage mapping. The Storage Trait above is only a candidate seam, not a substitute. <!-- corrected_by: AID-2026-108 -->
 
 ## 3. Idempotency namespace and key ownership
 

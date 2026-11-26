@@ -13,8 +13,6 @@ document_metadata:
         value: "c90365442fe29c67f015dee6533a026ea585abc0"
       approval_scope:
         type: Full-document
-        included_sections: []
-        included_assets: []
       approval_applicability: Applicable-To-Current-Version
       evidence_reference:
         - "Issue #640 (GAP-EXEC-2026-11-22-AUTHORIZATION-GATE-CONTRADICTION-024)"
