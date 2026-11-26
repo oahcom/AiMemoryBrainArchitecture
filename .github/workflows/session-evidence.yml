@@ -1,5 +1,9 @@
 name: Session Evidence Gate
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
 on:
   pull_request:
     # The validator reads the PR body live, so an `edited` event must schedule a
