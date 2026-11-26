@@ -38,7 +38,7 @@ document_metadata:
     normative_status: Informative
   bilingual_counterpart:
     source: "14-ai-development/work-items/AID-2026-112/gate-performance-and-rust-cache-evidence.md"
-    en: "docs/en/14-ai-development/work-items/AID-2026-112/gate-performance-and-rust-cache-evidence.md"
+    en: null
     zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-112/gate-performance-and-rust-cache-evidence.md"
 ---
 

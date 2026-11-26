@@ -39,7 +39,7 @@ document_metadata:
   bilingual_counterpart:
     source: "14-ai-development/work-items/AID-2026-112/gate-performance-and-rust-cache-evidence.md"
     en: "docs/en/14-ai-development/work-items/AID-2026-112/gate-performance-and-rust-cache-evidence.md"
-    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-112/gate-performance-and-rust-cache-evidence.md"
+    zh-CN: null
 ---
 
 # AID-2026-112 — Gate 重复派发消除与 Rust CI 缓存证据
