@@ -7,7 +7,7 @@ risk_rationale: >-
   Documentation-only audit and acceptance evidence. False Owner acceptance,
   incorrect inventory, or fabricated version pins would create governance risk.
   Source approvals remain UNBINDABLE where no exact-version approval event exists.
-status: DRAFT
+status: DRAFT_PR
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
 acceptance_authority: "Delegated proxy approval of this report only; source Owner acceptance remains NOT_RECORDED"
@@ -75,8 +75,8 @@ findings:
     statement: Accountable/dependent Owner exact-version acceptance is not recorded.
 implementation:
   status: DOCUMENTATION_ONLY
-  pull_request: NOT_CREATED
-  merge_commit_sha: NOT_CREATED
+  pull_request: 1291
+  merge_commit_sha: PENDING
 review:
   status: NOT_ASSIGNED
 acceptance:
