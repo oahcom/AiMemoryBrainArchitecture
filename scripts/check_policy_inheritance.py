@@ -62,7 +62,8 @@ def git_history_is_shallow(repo: Path) -> bool:
     result = subprocess.run(
         ["git", "-C", str(repo), "rev-parse", "--is-shallow-repository"],
         capture_output=True,
-        text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     if result.returncode != 0:
         raise RuntimeError(
@@ -86,7 +87,8 @@ def git(repo: Path, *args: str) -> str:
             ["git", "-C", str(repo), *args],
             check=True,
             capture_output=True,
-            text=True,
+            encoding="utf-8",
+            errors="replace",
         )
     except subprocess.CalledProcessError as exc:
         raise ValidationError(
