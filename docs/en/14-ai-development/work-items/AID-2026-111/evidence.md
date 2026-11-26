@@ -16,7 +16,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-26"
-      last_verification_note: "Test names and run metadata are recorded as user-supplied reproducible execution evidence; repository source predicates were independently read from exact main blobs. No CI, production, distributed backend or Owner acceptance is claimed."
+      last_verification_note: "Execution records are pinned local Linux captures; raw stdout hashes identify captures only, while supplied normalised digests use the documented exit/count/harness-multiset algorithm. Repository source predicates were independently read from exact main blobs. No CI, current-main, production, distributed backend or Owner acceptance is claimed."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -82,14 +82,17 @@ cargo test -p memory-storage-sqlite -p memory-event-store-sqlite --no-fail-fast
 | Test binaries | 8 |
 | Passed / failed | **99 / 0** |
 | stdout bytes | 9465 |
-| stdout SHA-256 | `a15e3862af4d6cd97a4cd8caf6f133f57e3c3636ba284bdfd5afaa9237ba2952` |
-| Named tests supplied in this record | 94 (the user supplied these names; five of the 99 passed tests are not individually named in the supplied inventory) |
+| stdout SHA-256 | `a15e3862af4d6cd97a4cd8caf6f133f57e3c3636ba284bdfd5afaa9237ba2952` (this capture only) |
+| Normalised digest | `92c368733aa89e426d1508a55584a5a4b8f0cc4f9b91aab6723820f6260ca086` |
+| Test-name recovery | recovered **94 of 99** passed tests (best-effort; interleaved libtest output can swallow `... ok` suffixes) |
 
-**Reproducibility precondition:** a complete clone containing exact commit `a123ea4e414c9f74fa0c576fbd718049a7d9f917`, WSL2 Ubuntu 24.04, rustup stable 1.100.0, the same command and compatible bundled-SQLite build dependencies. This is a user-supplied local execution record, not a CI artifact independently fetched by this work item.
+**Raw-output stability:** the same command on the same commit was run five times and produced five different raw stdout SHA-256 values. Parallel libtest completion order, duration lines, build timing, and SQLite child-process stdout interleaving make raw stdout non-deterministic. The raw SHA-256 above therefore pins this capture only; it is not a reproducible constant.
+
+**Harness count (authoritative):** sum complete `test result:` lines and exclude child-process rows with `filtered out > 0`: `26 + 5 + 2 + 6 + 60 = 99`. Do not count `test ... ok` lines. The test-name list is best-effort; harness counts, not the name inventory, are authoritative.
 
 ### 2.2 Pure Rust layer — supplementary user-supplied run
 
-- Environment: Windows host; MinGW lacks `cc1`, MSVC lacks `cl.exe`/`link.exe`.
+- Environment: WSL2 Ubuntu 24.04; rustup stable 1.100.0.
 - Exact HEAD: `44dc21a4970192118ba434801b8ca05702ac582c`.
 - Command (verbatim):
 
@@ -103,11 +106,22 @@ cargo test -p memory-domain -p memory-storage -p memory-event-store -p bmcp-prot
 | Test binaries | 15 |
 | Passed / failed | **276 / 0** |
 | stdout bytes | 47066 |
-| stdout SHA-256 | `C18EF5FC121EEB9B486000180F52BAE8385385722A369ADDAB873FCF8716D7B9` |
+| stdout SHA-256 | `C18EF5FC121EEB9B486000180F52BAE8385385722A369ADDAB873FCF8716D7B9` (this capture only) |
+| Normalised digest | `73d97ed8f536aa06cf483f84e750ddbda610d56e8f5caee501fac6f198934eee` |
 
-This supplements pure-Rust domain/protocol/storage trait evidence. It is a different commit and does not add SQLite backend evidence to the exact SQLite head.
+This supplements pure-Rust domain/protocol/storage trait evidence. It ran on **a different pinned commit** (`44dc21a4…`) from the SQLite and memory-context runs (`a123ea4e…`); do not describe the three groups as running on one commit. The supplied normalised digest is computed from exit code + passed/failed totals + the sorted multiset of per-harness passed counts, excluding ordering, durations and process interleaving. The test-name inventory was not supplied for this group; harness counts remain authoritative.
 
-### 2.3 Explicit negative build evidence
+### 2.3 Memory-context group — supplied aggregate local execution evidence
+
+- Environment: WSL2 Ubuntu 24.04.
+- Exact HEAD: `a123ea4e414c9f74fa0c576fbd718049a7d9f917` (same pinned commit as the SQLite group).
+- Passed / failed: **177 / 0**.
+- Exact command, test-binary count, stdout byte count, raw stdout SHA-256, per-harness passed multiset, and test-name inventory: **NOT_RECORDED in the supplied evidence**.
+- Normalised digest: **NOT_SUPPLIED**; it cannot be derived from the aggregate `177 passed` count alone.
+
+This is a pinned-commit local Linux execution, not CI and not current `main`. The test-name inventory is best-effort; where no inventory was supplied, no test-name coverage is inferred.
+
+### 2.4 Explicit negative build evidence
 
 On the Windows host, `cargo test --workspace` exited **101** because `libsqlite3-sys v0.40.0` build script could not execute `cc1` (`gcc.exe: fatal error: cannot execute 'cc1'`); MSVC also lacked `cl.exe`/`link.exe`. The following packages therefore could not be built on that Windows host: `memory-storage-sqlite`, `memory-event-store-sqlite`, `memory-store`, `memory-compiler`, `memory-context`, `brain-cli`.
 
@@ -115,13 +129,13 @@ On the Windows host, `cargo test --workspace` exited **101** because `libsqlite3
 |---|---|
 | Exit code | **101** |
 | stdout bytes | 12456 |
-| stdout SHA-256 | `93BCDC26AB0B29CEDBEC56DD11BB735C8050DB18366A3F296B45C699C072C2B2` |
+| stdout SHA-256 | `93BCDC26AB0B29CEDBEC56DD11BB735C8050DB18366A3F296B45C699C072C2B2` (this capture only) |
 
 This is a toolchain limitation on the Windows host, not evidence that the code or tests fail. SQLite backend evidence was therefore produced on WSL2 Linux, not Windows.
 
 ## 3. Evidence boundary — mandatory qualification for every PARTIAL_EVIDENCE
 
-The SQLite run is **Linux + bundled SQLite local execution**. It is **not CI**, not a distributed backend, not multi-replica linearizability, and not a production topology. It does not prove device/controller/filesystem power-loss semantics, production backup/failover RPO/RTO, independent cross-resource coordinator acceptance, or Owner acceptance. A passing process-crash test does not automatically prove physical power-loss durability. Any use of these results must retain the exact HEAD, command and SHA-256 above.
+All three positive test groups are **pinned-commit local Linux executions** (SQLite 99 and memory-context 177 at `a123ea4e`; pure Rust 276 at `44dc21a4`). They are **not CI**, are **not runs on current `main`**, and do not establish a distributed backend, multi-replica linearizability, or production topology. The SQLite group specifically uses bundled SQLite. It does not prove device/controller/filesystem power-loss semantics, production backup/failover RPO/RTO, independent cross-resource coordinator acceptance, or Owner acceptance. A passing process-crash test does not automatically prove physical power-loss durability. Any use of these results must retain each group’s own exact HEAD and command where recorded. Raw stdout SHA-256 values are capture-only; use the normalised digest for reproducible comparison.
 
 ## 4. Test-name-to-predicate mapping (94 supplied names)
 
