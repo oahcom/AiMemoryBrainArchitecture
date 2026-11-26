@@ -37,7 +37,7 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Candidate
-    canonical_scope: Memory Runtime architecture source: runtime-overview
+    canonical_scope: "Memory Runtime architecture source: runtime-overview"
     canonical_scope_id: memory-runtime/runtime-overview
     canonical_scope_keywords:
       - runtime
