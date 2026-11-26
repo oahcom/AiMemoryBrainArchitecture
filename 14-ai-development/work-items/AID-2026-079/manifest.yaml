@@ -1,0 +1,165 @@
+work_item_id: AID-2026-079
+title: Pin the gate's own error paths with four controlled fault-injection cases
+class: GATE/TEST
+risk: R2
+risk_rationale: >-
+  Tests only: one test module gains one function, and no production file is touched. The risk it
+  addresses is false assurance. The four cases drive scripts/check_document_management.py's own
+  failure paths by patching one seam each, and a fault-injection test that patches too much
+  produces the expected diagnostic while proving nothing; the positive assertions in each case
+  exist to refuse that shape. The residual risk is the second-order one: a case that passes but
+  no longer bites is indistinguishable from one that does, which is why the counterfactual in
+  AC1 is an acceptance criterion and not a note.
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 1f5ba824aa8b2e350a8d70874b0a45720fa4a441
+tracking_issue: "#827 - the incremental changed-path selection whose spawn-failure path T92a pins; the issue predates the body contract and carries no declaration of its own."
+
+prompt_id: AID-2026-079-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-079/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: a2d216ee647954b02a6487349716191403e67171d63a82acd7ab15c9feafc81f
+prompt_bytes: 5790
+
+authorization:
+  implementation_write: >-
+    GRANTED for scripts/test_check_document_management.py, this work item's own directory and
+    INDEX.md. NOT_GRANTED for any other path.
+  gate_behaviour_change: >-
+    NOT_GRANTED - scripts/check_document_management.py is not modified. The branch adds tests
+    that pin behaviour it already has, and the rebase kept main's restored guards (T93a-T93h)
+    untouched.
+  schema_change: NOT_GRANTED - no manifest field, serialized type or database column is added.
+  platform_state_change: >-
+    NOT_GRANTED - no required status context, workflow file or protection payload is modified.
+  architecture_spec_change: NOT_GRANTED - no ADR and no canonical document is modified.
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-079/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-079/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-079/session-evidence-827.md
+  files_to_modify:
+    - scripts/test_check_document_management.py
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope: >-
+    Every other path. In particular scripts/check_document_management.py, which is the gate under
+    test and is not edited; and the T93 guards restored by 575cf3f4, which the rebase had to
+    preserve but which are not this work item's subject.
+
+acceptance_criteria:
+  - id: AC1
+    criterion: >-
+      A git spawn failure inside the incremental changed-path selection is refused by the caller
+      with its own diagnostic, not raised as a traceback, and the case fails when that refusal is
+      removed.
+    measurement: >-
+      With the seam patched the suite is 318/318 passed; with `except OSError` in `git()`
+      neutralised it is 317/318 with exactly `[FAIL] T92a git() spawn failure is refused by the
+      caller, not raised`. Both runs on the rebased head.
+  - id: AC2
+    criterion: >-
+      A governed path that cannot be resolved while the target set is built leaves a DM-01
+      problem AND stays out of the target list.
+    measurement: >-
+      Both halves asserted in the same case, because either alone is satisfiable by a wrong
+      implementation.
+  - id: AC3
+    criterion: >-
+      A governed document that cannot be read while the verdict is decided is reported against its
+      path rather than raised.
+    measurement: >-
+      The case asserts the refusal names the path and that no traceback reaches the output.
+  - id: AC4
+    criterion: >-
+      A Path.is_file failure during collection does not stop the walk, does not change
+      collect_governed()'s result, and does not stop other paths from reaching the real
+      implementation.
+    measurement: >-
+      Four assertions in the case: the walk survives, the collected set is unchanged before and
+      after, one untargeted path is seen by the real is_file, and Path.is_file is the original
+      attribute afterwards.
+  - id: AC5
+    criterion: >-
+      Every case restores its patch in a finally, and the suite is green on the rebased tree with
+      main's restored guards present and the registered skip set unchanged.
+    measurement: >-
+      `python3 scripts/test_check_document_management.py` exits 0 with `318/318 passed` and
+      `1 skipped, 1 registered of 1 allowed`; T93a-T93h run in the same invocation.
+
+findings:
+  - id: F1
+    severity: MEDIUM
+    statement: >-
+      The gate's own failure paths were untested. The suite exercised the gate's verdicts over
+      documents, not what the gate does when its own inputs fail, so a change from "refuse with a
+      diagnostic" to "raise a traceback" would have been silent.
+    evidence: >-
+      Before this branch the file contained no case patching subprocess.run, Path.resolve or
+      Path.is_file; the four cases are the first.
+  - id: F2
+    severity: MEDIUM
+    statement: >-
+      A fault-injection case can be written so that it proves nothing: patching a seam that
+      swallows every call yields the expected diagnostic without exercising the branch under test.
+    evidence: >-
+      Each case therefore asserts that the inputs it did not target still reached the real
+      implementation, e.g. T92a asserts `git log -1 --format=%H` returns a 40-character SHA while
+      the seam is patched.
+  - id: F3
+    severity: LOW
+    statement: >-
+      The branch was authored against 29eea143 and 575cf3f4 rewrote the same file afterwards, so
+      the pull request was unmergeable on a textual conflict that is not a semantic one.
+    evidence: >-
+      One conflict region: main's run_restored_guards() against this branch's
+      run_fault_injection(). Resolved by keeping both; the diff is +282 on one file.
+  - id: F4
+    severity: LOW
+    statement: >-
+      An earlier revision of the pull request body argued that no Work Item ID could be supplied.
+      That argument was false.
+    evidence: >-
+      PR #1070 merged at c7e87f8f with the validator accepting `Work Item ID | NONE` only when
+      `AI-assisted work | NO`. This pull request is AI-assisted, so the field is required and
+      AID-2026-079 is registered here; the body now says so instead of repeating the argument.
+
+implementation:
+  status: IMPLEMENTED_IN_BRANCH
+  branch: test/T92-fault-injection
+  pull_request: 1078
+  merge_commit_sha: NOT_MERGED
+  note: >-
+    The four cases were authored on the branch before this registration; this session rebased them
+    onto 1f5ba824, registered the work item and corrected the pull request body. No assertion was
+    rewritten, and the counterfactual was re-run after the rebase.
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    No independent review is recorded. This manifest was written by the session that rebased the
+    branch, so an APPROVE from that same session would be self-review and is not claimed.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+session_evidence:
+  - role: TEST_AUTHOR
+    issue_refs:
+      - "#827"
+    implementing_ai_session: a1078-pr1078-rebase-session
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-079/prompt-v1.md
+    executed_prompt_sha256: a2d216ee647954b02a6487349716191403e67171d63a82acd7ab15c9feafc81f
+    executed_prompt_bytes: 5790
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-079/session-evidence-827.md
