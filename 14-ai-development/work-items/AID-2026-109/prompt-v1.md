@@ -1,3 +1,51 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-109/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-109/session-evidence.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Verbatim user prompt body preserved below frontmatter; snapshot hash and byte count are recorded in the manifest."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "AID-2026-109 initiating user prompt snapshot"
+    canonical_scope_id: "ai-development/aid-2026-109-prompt"
+    canonical_scope_keywords:
+      - prompt-snapshot
+      - user-instruction
+      - source-recovery
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
+---
+
 ﻿#599 新任务：D（03-memory-brain）规范根的**受限恢复**
 
 ⚠️ 不要照搬整棵树。`session-d-memory-brain-2026-11-16`（head `b525e1f8`）上有 **60** 个文件，main 上 **0** 个。整棵搬进来会把 2026-11-16 的旧结论（很多已被 AID-2026-089 等后续裁决取代）重新变成现行规范——这正是项目最怕的"双权威"。
