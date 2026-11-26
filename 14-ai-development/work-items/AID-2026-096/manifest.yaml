@@ -1,0 +1,42 @@
+manifest_version: "1.0"
+record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
+registration_stage: "STAGE_0"
+registration_status: "EVIDENCE_COMMITTED_PENDING_MERGE"
+work_item_id: "AID-2026-096"
+id_status: "PROVISIONAL"
+merge_queue_action: "CONFIRM_OR_RENUMBER_AT_MERGE"
+title: "New normative approval for Design Principles and Architecture Invariants; DEC-13 evidence"
+date: "2026-11-26"
+repository:
+  name: "oahcom/AiMemoryBrainArchitecture"
+  baseline_branch: "main"
+  baseline_commit: "47fcd80720b742d9c5d3ae137593c59b5cc768a9"
+  implementation_branch: "docs/2026-11-26-normative-approval-stack-1219"
+  carrier_pr: 1256
+authority:
+  approver: "user-authorized operator (delegated by account owner)"
+  designation_source: "account owner statement, 2026-11-26"
+  approval_event_date: "2026-11-26"
+  approval_type: "NEW_APPROVAL"
+  decision: "APPROVED_NORMATIVE"
+scope:
+  in_scope:
+    - "Six exact path/blob pairs in approval-evidence.md"
+    - "Approval metadata and historical status notes in six governance documents"
+    - "DEC-13 RECORDED in main register and A-I/Storage matrix, including EN/ZH-CN mirrors"
+    - "Issue #1189 evidence comment; Issue state unchanged"
+  out_of_scope:
+    - "P-01–P-16 implementation conformity"
+    - "Runtime code and validator semantics"
+    - "Deployment and production conformance"
+    - "Promotion of AID-2026-014 mirror-only supplemental material"
+session_evidence:
+  - role: PR
+    issue_refs: []
+    implementing_ai_session: NOT_RECORDED
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-096/prompt-v1.md
+    executed_prompt_sha256: 6f30cedb322d7c9cc1d76481ac2d1fb1c82877804dd0d5ae781d8758e96d9c4f
+    executed_prompt_bytes: 2757
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-096/session-evidence.md
