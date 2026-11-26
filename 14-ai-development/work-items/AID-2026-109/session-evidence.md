@@ -58,3 +58,15 @@ document_metadata:
 - No runtime, validator, 03/04/05, tests, scripts, workflows, schema, API, DDL, deployment or production changes.
 
 - Branch-sync recheck: `git fetch origin main` fetched `b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c`; INDEX max remained AID-2026-108 and AID-2026-109 remained absent. The branch was fast-forwarded/merged with this main before final checks.
+
+
+## Post-merge verification
+
+- PR: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1300
+- Final PR head: `c5766fb934e0e5db0ba667bda2f74452a0f39265`
+- Merge commit: `e3a134de856bbb58581fd688462c9c0282631270` (2026-11-26T13:13:24Z)
+- Exact-Head required contexts: 16/16 SUCCESS: Rust clippy (hard gate); Bilingual docs coverage (ratchet); BMCP protocol index (hard gate); Rust doctests (hard gate); BMCP conformance suite (hard gate); Repository hygiene (hard gate); Rust format (hard gate); Schema non-empty audit (hard gate); rust-workspace-test; Branch freshness vs base; GOV-DOC-002 metadata checks; Session Evidence; Session Evidence self-test (base); audit; GOV-DOC-001 structural checks; Session Evidence self-test (head).
+- Post-merge main tree readback: all five canonical restored files match the recorded new full-file blob SHAs; each source body, after the GOV-DOC-002 frontmatter separator, is byte-for-byte identical to its source-branch body.
+- Post-merge canonical/en/zh-CN report blobs and all 12 I-root mirror blobs match the expected tree entries.
+- #1211 and #1212 were not closed by this work. #1212 had a prior close/reopen event by account oahcom; current state was checked OPEN after the reopen.
+- ZH-CN mirrors contain Chinese summaries plus retained English source text; full semantic translation parity remains NOT_VERIFIED.

@@ -7,7 +7,7 @@ risk_rationale: >-
   Restoring historical policy material can create a false current-authority
   signal. All restored documents remain Draft and Informative; exact Owner
   acceptance, normative promotion and implementation conformance are not claimed.
-status: DRAFT_PR
+status: IMPLEMENTED_ACCEPTANCE_PENDING
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
 acceptance_authority: "Owner I for I policy; affected Owners for their own boundaries; no acceptance inferred"
@@ -115,9 +115,15 @@ acceptance_criteria:
   - id: AC6
     criterion: "All 16 required contexts succeed on exact final PR head before merge; post-merge blob SHAs are verified."
 implementation:
-  status: DRAFT_PR
+  status: MERGED
   branch: docs/aid-2026-109-i-security-root
   pull_request: 1300
+  merge_commit_sha: e3a134de856bbb58581fd688462c9c0282631270
+  merged_at_utc: 2026-11-26T13:13:24Z
+  final_pr_head_sha: c5766fb934e0e5db0ba667bda2f74452a0f39265
+  exact_head_required_checks: 16
+  exact_head_checks_result: SUCCESS
+  normative_acceptance: PENDING
   pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1300
 review:
   status: NOT_ASSIGNED
