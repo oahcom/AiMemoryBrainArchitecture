@@ -33,7 +33,10 @@ document_metadata:
     canonical_status: Non-Canonical
     canonical_scope: "AID-2026-109 restricted D source-root recovery evidence"
     canonical_scope_id: "ai-development/aid-2026-109-evidence"
-    canonical_scope_keywords: [d-memory-brain, source-recovery, gate-a]
+    canonical_scope_keywords:
+      - d-memory-brain
+      - source-recovery
+      - gate-a
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
