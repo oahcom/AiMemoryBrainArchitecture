@@ -120,6 +120,8 @@ hardcode any of the eight flags.
 until their authoritative issuers exist.** Because `PublicationGate::run`
 (`lib.rs:544-562`) maps `false` to `Blocked`, the immediate consequence is:
 
+> **Amended — see D8.2 below.** The clause requiring `canonical_commit_confirmed` to be reported `false` is **superseded**: D8.2 replaced that literal with a sourced read (`AdmissionPublicationAuthority::canonical_commit_confirmed`, `publication_authority.rs:56-73`, reported at `:132`), because the authoritative issuer D3 was waiting for now exists. The rule as it applies to the other two flags is unchanged — both are still unsourced, and D7.1 keeps `publication_participant_admitted` `false` and forbids building the registry. Read D3's three flags as **two unsourced flags still reported `false`** plus one now sourced.
+
 ```
 compile() becomes reachable, and returns Ok(Blocked) with disposition preserved.
 It does not return Published, and must not pretend to.
@@ -149,6 +151,8 @@ silent.
   exist.
 
 ## Consequences, stated plainly
+
+> **Amended — see D7.1 below.** The third bullet's promise of a D-side publication-participant registry is **withdrawn** by D7.1: no such registry is to be built in E until Storage signing, the COC quorum and the I terminal decision exist. The other three bullets stand.
 
 - After this decision, `brain compile` will report a **blocked publication**
   rather than a skipped stage. That is progress and it will look like a
