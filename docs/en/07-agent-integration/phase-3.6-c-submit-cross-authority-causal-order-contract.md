@@ -121,7 +121,7 @@ Exceptions: (1) COC, participant registry and operator remain undesignated/undep
 
 Decision bundle reviewed as one exact cross-owner interface set:
 - A COC architecture: `reviews/integration/phase-3.6-causal-order-coordinator-deployment-architecture.md`, branch `session-a-integration-2026-11-16`, Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`, §§12.1–12.8.
-- I JF-10 bridge disposition: `09-security-governance/phase-3.6.2-jf10-v2-i-owner-disposition.md` (not restored on main; see AID-2026-107 §10), Blob `8069ff86988396442c8d9dc3fd58653683abe2f3`, §11.2.
+- I JF-10 bridge disposition: `09-security-governance/phase-3.6.2-jf10-v2-i-owner-disposition.md`, Blob `8069ff86988396442c8d9dc3fd58653683abe2f3`, §11.2.
 - D/Storage common JF-10 v2 recovery protocol: Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0`.
 - D bridge decision: `03-memory-brain/forget-fence-operation-and-publication-gate.md`, Blob `5a56c406578fdf257509315eb3f6f3f75456116c`.
 - Storage bridge decision: `reviews/storage-consistency/forget-atomicity-storage-realization-review.md`, Blob `55c01f4512f2e3d8aac767dd004e768ae073178e`.
