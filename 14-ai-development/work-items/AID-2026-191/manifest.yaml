@@ -21,12 +21,12 @@ attribution: user-authorized operator (delegated by account owner)
 date: 2026-11-27
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: 4326669caa6c43193d34219a0451b80762b712ff
+base_commit_sha: 0c752ee6ee186e494e35aa74447f263891ca4842
 prompt_status: RECORDED
 prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
 identifier_allocation:
   id_status: PROVISIONAL
-  observed_main: 4326669caa6c43193d34219a0451b80762b712ff
+  observed_main: 0c752ee6ee186e494e35aa74447f263891ca4842
   assigned_id: AID-2026-191
   allocation_rule: >-
     Checked before writing, not taken from INDEX.md. Merged or open PR titles carried
