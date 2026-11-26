@@ -53,7 +53,7 @@ external_evidence_reference:
   issues: ["#1125", "#1211"]
 repository:
   base_branch: main
-  base_commit_sha: 8d90843aec4583c3282a3b45da31c7d6fd734cf2
+  base_commit_sha: 515b7144320fd9fcc1e1a2c3d2d2744d979b4ca8
   branch: docs/forget-fence-authority-2026-11-26
   pull_request: 1232
 decision:
@@ -110,6 +110,6 @@ The following are exact GitHub tool-result excerpts observed during this executi
 
 ```text
 {"tree":"dc14937dcf9920d871feda3f1b063997bb8b41c0","merge_commit":"b81df7d0f9ae4d70ee2c57dba70cf8dd7690a19a","branch_update":{"success":true}}
-{"head":"b81df7d0f9ae4d70ee2c57dba70cf8dd7690a19a","base":"8d90843aec4583c3282a3b45da31c7d6fd734cf2","mergeable":true,"draft":true}
+{"head":"b81df7d0f9ae4d70ee2c57dba70cf8dd7690a19a","base":"515b7144320fd9fcc1e1a2c3d2d2744d979b4ca8","mergeable":true,"draft":true}
 {"prompt_sha256":"7682d9287605c24109c6502963b0dd73f133a46b608ba495bc0a0da10292a903","prompt_bytes":4258}
 ```
