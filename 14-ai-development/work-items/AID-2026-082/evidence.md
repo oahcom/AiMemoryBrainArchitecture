@@ -319,3 +319,23 @@ Mirror columns mean path exists in current main tree, not that content is semant
 - Cross-owner source branches are not one coherent snapshot. Historical branch pins cited in I records differ from the live branch tips above.
 
 No validator semantics or runtime/product code changed. No deployment, merge or Issue closure.
+
+
+## Gate A priority pass — 2026-11-26
+
+The six Gate A root-path blockers were handled before broad E/F/H/I inventory work. Status below is exact-path and exact-blob based; a mirror is not treated as an authoritative source.
+
+| Gate A root | Source branch / source Blob | PR branch root status | EN / ZH-CN | Disposition |
+|---|---|---|---|---|
+| `03-memory-brain/canonical-memory-store.md` | D `session-d-memory-brain-2026-11-16` @ `b525e1f8fee2471a131e4a38efda99804045e424`; `6b37c91033fda21f072e2a3bde6f274663b1e76e` | Present as Draft/Candidate; root Blob `d47366d1ca04da37ff77f6edd31fe42efc93e0f9`; original source pin retained | Present; source pin retained; translated body parity review pending | DONE |
+| `04-memory-compiler/accepted-receipt-and-idempotency-contract.md` | E `session-e-memory-compiler-2026-11-16` @ `ee098e14747d9915de5b3efb63b3a8dd77f670ed`; `5ca77a5b48e69afb3bc81429baf538be7dce4d46` | Restored as Draft/Candidate; exact source Blob pinned | EN/ZH-CN existing mirrors retained and GOV-DOC-002 metadata/source pin added; semantic review pending | DONE |
+| `04-memory-compiler/compiler-state-and-producer-admission.md` | E `session-e-memory-compiler-2026-11-16` @ `ee098e14747d9915de5b3efb63b3a8dd77f670ed`; `e59f517fff161ab882aa0ddc4a5bda513964ae1a` | Restored as Draft/Candidate; exact source Blob pinned | EN/ZH-CN existing mirrors retained and GOV-DOC-002 metadata/source pin added; semantic review pending | DONE |
+| `04-memory-compiler/compiler-stage-contract.md` | No matching root-path Blob in the enumerated E/F/H/I live source trees; only existing EN/ZH-CN mirrors found on main (`6d733294232a93aa59123009d2a2801d9b83f459` / `ad386cac5636b4ba3e9b8f93ad93afcb444e8b46`) | Not created; no source Blob to pin | Existing mirrors exist, but they do not establish a canonical source Blob | BLOCKED |
+| `05-memory-runtime/README.md` | F branch tree `1908ce4d233b20f7cafd00cb679affd01bd15174` has no such path; its root README is repository-level, not a Runtime README | Not created | No matching EN/ZH-CN runtime README pair found | BLOCKED |
+| `09-security-governance/README.md` | I branch tree `8abddf814467b271344a9814613a6b7ca6a446c6` has no such path; H branch root README is repository-level, not Security Governance README | Not created | No matching EN/ZH-CN security README pair found | BLOCKED |
+
+**Batch progress:** E source set = 2/25 restored in this priority pass (23/25 remain); F previously restored `runtime-overview.md`, and 0/14 remaining F files have been restored in this pass. H/I remain at the per-file dispositions in the inventory; I36-GOV-01..10 remain GOVERNANCE-BLOCKED with no approval evidence or effective version/time.
+
+**Governance registration:** roots 03 and 04 were already present in `document-scope-registry.yaml` and `NORMATIVE_ROOTS`; 05 was already in the scope registry and is now included in `NORMATIVE_ROOTS`. Root 09 has not been created or registered because no exact I source README Blob was found.
+
+**Validation:** Exact-Head CI remains pending until the final commit SHA is read and queried. No workflow definition, validator semantics, runtime/product code, deployment, merge or Issue state was changed.
