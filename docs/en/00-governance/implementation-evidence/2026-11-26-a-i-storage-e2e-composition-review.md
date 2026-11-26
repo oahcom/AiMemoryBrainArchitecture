@@ -31,7 +31,7 @@ document_metadata:
       archival_reason: null
       archival_reference: null
   authority:
-    canonical_status: Canonical
+    canonical_status: Non-Canonical
     canonical_scope: "Exact-version A-I + Storage/Consistency end-to-end composition review"
     canonical_scope_id: "architecture/a-i-storage-e2e-composition-review"
     canonical_scope_keywords:
@@ -43,7 +43,7 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    en: "docs/en/00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md"
+    source: "00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md"
     zh-CN: "docs/zh-CN/00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md"
 ---
 
