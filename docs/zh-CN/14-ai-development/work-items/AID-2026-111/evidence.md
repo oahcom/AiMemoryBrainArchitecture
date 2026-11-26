@@ -352,17 +352,17 @@ AID-095 的原始 Gate A 状态列在每一行都保持 `NOT EVIDENCED`。PARTIA
 **Gate B：PARTIAL / OPEN（NOT VERIFIED）——不变。**本地 SQLite 测试不能证明部署、生产一致性、分布式/多副本一致性、运维备份/故障切换或生产 RPO/RTO。
 
 
-### 8.1 IMPL2 scope ruling carried forward from current AID-2026-107
+### 8.1 从当前 AID-2026-107 延续的 IMPL2 范围裁决
 
-AID-2026-107 current-main evidence blob `cce956d97b7a6d969bb3245fe0890905ca6d3979` records the file-level disposition for the 03/04/05/09 Owner-source trees: 189 missing Canonical paths are classified as **5 NORMATIVE_ROOT**, **83 HISTORICAL_PHASE_RECORD**, and **101 UNDECIDED**. The 72-row AID-095 matrix section is byte-identical to the earlier AID-107 evidence blob used when this review was drafted.
+当前 main 上 AID-2026-107 的证据 blob `cce956d97b7a6d969bb3245fe0890905ca6d3979` 记录了 03/04/05/09 Owner 源目录的逐文件处置：缺失的 189 个 Canonical 路径分类为 **5 个 NORMATIVE_ROOT**、**83 个 HISTORICAL_PHASE_RECORD** 和 **101 个 UNDECIDED**。AID-095 的 72 行矩阵部分与本次起草时使用的早期 AID-107 evidence blob 字节完全一致。
 
-Gate A item 5 is therefore actionable, not an unbounded restore request:
-- **5 NORMATIVE_ROOT** files are candidates for a separate Owner-reviewed restoration PR; this evidence PR does not restore them.
-- **83 HISTORICAL_PHASE_RECORD** and **101 UNDECIDED** files do not enter main without explicit Owner ruling. No Owner ruling means no merge for either class.
-- F and I source-root gaps remain explicit: the F runtime root and I security root artifacts still require Owner identification or an explicit replacement decision; candidate overview files are not silently substituted.
-- These classifications do not imply approval, freeze, implementation, or conformance.
+因此 Gate A 第 5 项已从无边界的恢复请求变为可执行事项：
+- **5 个 NORMATIVE_ROOT** 是单独 Owner 审查恢复 PR 的候选文件；本证据 PR 不恢复这些文件。
+- **83 个 HISTORICAL_PHASE_RECORD** 和 **101 个 UNDECIDED** 在没有明确 Owner 裁决前均不得进入 main。没有 Owner 裁决即不得合并这两类文件。
+- F 和 I 的规范根缺口仍明确存在：F runtime 根与 I security 根文件仍需 Owner 指认，或明确决定替代源；不得默默用候选 overview 文件替代。
+- 这些分类不代表批准、冻结、实现或符合性。
 
-**Gate A item 5: OPEN — scope adjudicated; 5 identified roots to restore in a separate PR; F/I source artifacts still require Owner identification or an explicit replacement decision.**
+**Gate A 第 5 项：OPEN — 范围已裁决；5 个已识别根文件需由单独 PR 恢复；F/I 源根仍需 Owner 指认或明确替代决定。**
 
 ## 9. 明确未解决的实现谓词
 
