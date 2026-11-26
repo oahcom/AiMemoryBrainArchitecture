@@ -1,0 +1,123 @@
+work_item_id: AID-2026-192
+title: >-
+  Correct a stale and an unverifiable count in the governance record: GAP-03's document and
+  review totals, the arithmetic in AID-2026-111's combined row, and AID-2026-112's inherited
+  memory-context execution fields
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  Four documents plus their mirrors, edits appended or numerical only. No verdict is changed:
+  every PASS / PARTIAL_EVIDENCE / UNCHANGED cell, the Gate A and Gate B dispositions, and every
+  referenced blob pin are untouched. The only new claims are counts that a shell command
+  reproduces from the same tree, and a provenance downgrade that removes evidence rather than
+  adding it.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 4326669caa6c43193d34219a0451b80762b712ff
+prompt_status: NOT_RECORDED
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: 4326669caa6c43193d34219a0451b80762b712ff
+  assigned_id: AID-2026-192
+  allocation_rule: >-
+    The measured INDEX maximum at dispatch was AID-2026-189, which is merged. The first
+    allocation was AID-2026-190, but PR #1343 merged AID-2026-190 on main while this PR was
+    open, and AID-2026-191 is held by the open PR #1345. A re-read of every pull request title,
+    head branch and work-item directory on the new main left AID-2026-192 as the first free
+    number, so the registration set was renumbered to 192 with every path, reference and
+    canonical_scope_id updated in the same commit. INDEX was treated as a lower bound only; it
+    is not the allocation source.
+  recheck_rule: >-
+    Immediately before merge, re-read open pull requests and remote branches for AID-2026-192;
+    if occupied, take the next free number and update every path and reference in one push.
+  occupancy_history:
+    - id: AID-2026-190
+      state: OCCUPIED_BY_MERGED_PR_1343
+      observed: "merged on main while this PR was open; its scope is a different correction"
+    - id: AID-2026-191
+      state: OCCUPIED_BY_OPEN_PR_1345
+      observed: "open branch fix/2026-11-27-hygiene-silent-skip"
+scope:
+  objective: >-
+    Make the governance record arithmetically reproducible. Three statements were false or
+    unsupported and are corrected without touching any historical judgment:
+    documentation-gaps GAP-03 carried 26 documents and 196 review files against 27 and 198;
+    AID-2026-111's combined row summed to 36/52 while its own three set rows sum to 34/54;
+    AID-2026-112 recorded exit code, failed count and test-binary count for the memory-context
+    group that AID-2026-111 records as NOT_RECORDED, with no capture cited.
+  changes:
+    - path: "docs/governance/documentation-gaps.md"
+      detail: >-
+        GAP-03: "26 of its files are architecture documents" becomes 27, and "`reviews/` (196
+        Markdown files …)" becomes 198, with an inline annotation "(verified 2026-11-27 against
+        tree `4326669c…`)" naming the registry claim and the recursive count rule. No other gap
+        entry changes.
+    - path: "14-ai-development/work-items/AID-2026-111/evidence.md"
+      detail: >-
+        Appends "## Correction" before the session-evidence sections. The §1 table, including
+        the combined row 0/36/52, is not edited. The section lists the 88 verdict-bearing rows
+        in full (72 Gate A cells in a 9 × 8 table, 8 SC rows, 8 HIR rows), sums them to
+        0/34/54, shows which of 36/52 and 34/54 the rows support, and keeps the recorded row.
+    - path: "docs/en/14-ai-development/work-items/AID-2026-111/evidence.md"
+      detail: "The same Correction section in English, same headings and tables."
+    - path: "docs/zh-CN/14-ai-development/work-items/AID-2026-111/evidence.md"
+      detail: "The same Correction section in Chinese, same headings and tables."
+    - path: "14-ai-development/work-items/AID-2026-112/evidence.md"
+      detail: >-
+        Appends "## Provenance correction". The §8 row and the title are not edited. The
+        section records what AID-2026-111 §2.3 says about the same group at the same HEAD,
+        marks Exit code, Failed count and Test binaries as INHERITED_ASSUMPTION, notes that
+        the row's stdout SHA-256 is unsourced under AID-2026-111 §2.1, and states that the
+        552 total is still the arithmetic sum of three passed counts.
+    - path: "docs/en/14-ai-development/work-items/AID-2026-112/evidence.md"
+      detail: "The same Provenance correction section in English."
+    - path: "docs/zh-CN/14-ai-development/work-items/AID-2026-112/evidence.md"
+      detail: "The same Provenance correction section in Chinese."
+  untouched:
+    - "every PASS / PARTIAL_EVIDENCE / UNCHANGED cell in AID-2026-111 §5, §6 and §7"
+    - "the AID-2026-111 §1 table, including the 0/36/52 combined row"
+    - "the AID-2026-112 §8 table, the 552 title and every SC/HIR/flow verdict"
+    - "every blob pin recorded in AID-2026-111 and AID-2026-112"
+    - "00-governance/document-scope-registry.yaml, which already carried documents: 27"
+    - "scripts/, tests/, .github/ and the sixteen required contexts"
+    - "no test was re-run, and no execution record was created, edited or deleted"
+evidence:
+  record: 14-ai-development/work-items/AID-2026-192/evidence.md
+  prompt: 14-ai-development/work-items/AID-2026-192/prompt-v1.md
+  session: 14-ai-development/work-items/AID-2026-192/session-evidence.md
+non_goals:
+  - Re-running any test suite to obtain the fields AID-2026-112 lacks
+  - Promoting or demoting any predicate, flow cell, Gate A row or Gate B row
+  - Rewriting the AID-2026-111 or AID-2026-112 narrative sections to match the new numbers
+  - Fixing the misplaced §4 table inside the zh-CN mirror of AID-2026-111, which is a
+    pre-existing layout defect and not a count or provenance claim
+  - Closing or reopening any Issue
+notes:
+  - >-
+    The brief for this unit expected 95 verdict-bearing rows in AID-2026-111. The body has 88:
+    72 + 8 + 8. No row outside those three sets carries a verdict, so the Correction section
+    states 88 and lists all of them rather than echoing an unreproducible number.
+  - >-
+    documentation-gaps.md has no docs/en or docs/zh-CN mirror: `docs/governance/` is not a
+    NORMATIVE_ROOT and the file is registered individually in `governed_files`. Its body is
+    already bilingual in blocks, and the GAP-03 row it changes is English-only, so there is no
+    second copy of these two numbers to synchronize.
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#1212"
+    implementing_ai_session: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-192/prompt-v1.md"
+    executed_prompt_sha256: "1b38e82273e3e8db8a5587e1dce14bc925b3d9d3f6baaf71f00cdbb69d0ac2f7"
+    executed_prompt_bytes: 4150
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-192/session-evidence.md"

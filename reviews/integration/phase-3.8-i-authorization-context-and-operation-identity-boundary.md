@@ -6,9 +6,9 @@
 **Integration PR / 集成 PR:** #179  
 **Current I source branch / 当前 I 来源分支:** `session-i-security-governance-2026-11-16`  
 **Current I source HEAD / 当前 I 来源 HEAD:** `029ae8f8f48992532d5c0a9397816e4d8a9220a2`  
-**Exact I source / 精确 I 来源:** `09-security-governance/phase-3.7-i-current-authorization-enforcement-and-restore-proof.md`  
+**Exact I source / 精确 I 来源:** `09-security-governance/phase-3.7-i-current-authorization-enforcement-and-restore-proof.md` (not restored on main; see AID-2026-107 §10)  
 **Exact I source Blob / 精确 I 来源 Blob:** `e3b1b5d99eb36ac0b395854d8c19287d2b64b752`  
-**Additional controlling I source / 额外控制性 I 来源:** `09-security-governance/phase-3.8-i-commit-authorization-receipt-and-revocation-sequencer-contract.md`  
+**Additional controlling I source / 额外控制性 I 来源:** `09-security-governance/phase-3.8-i-commit-authorization-receipt-and-revocation-sequencer-contract.md` (not restored on main; see AID-2026-107 §10)  
 **Exact Phase 3.8 Blob / Phase 3.8 精确 Blob:** `54bab0484bd232a5a258e65e34cc7425288b39a6`
 
 ## 1. Why this addendum exists / 补充原因
