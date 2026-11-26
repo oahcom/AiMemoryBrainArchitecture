@@ -1,0 +1,130 @@
+work_item_id: AID-2026-197
+title: >-
+  Make the two "looks like it checks, does not check" gates report what they
+  claim: a movable Source revision pointer fails, each pointer is compared to
+  its own source line, and the ratchet keeps what follows the arrow and the
+  items that wear a verdict prefix
+class: GATE/TEST
+risk: R2
+risk_rationale: >-
+  Two checker semantics change and both changes can turn a previously silent
+  pass into a failure. check_source_revision_pointers.py is not wired into any
+  workflow (it is baselined in scripts/ci/baselines/gate-wiring.txt because it
+  already exits 1 on main), so its new failures are visible only to whoever
+  runs it by hand. gate_ratchet.py does run as the required `bilingual` context,
+  and the item identity it compares becomes stricter: the part after ` -> ` is
+  kept, and a baseline entry that is a bare path now covers exactly one item
+  instead of every item on that path. Verified on this tree: the shipped
+  baseline still matches exactly (baseline=77 current=77 regressions=0 fixed=0,
+  exit 0), so no required context changes colour today.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 4326669caa6c43193d34219a0451b80762b712ff
+prompt_status: NOT_RECORDED
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: 4326669caa6c43193d34219a0451b80762b712ff
+  observed_at_merge_base: 0c752ee6ee186e494e35aa74447f263891ca4842
+  assigned_id: AID-2026-197
+  allocation_rule: >-
+    Task-assigned number band, not INDEX maximum plus one. Pull requests and
+    their head branches carry AID-2026-004 through AID-2026-189; the highest
+    number seen in either place was 189, and 183 and 186 are open. Sibling
+    workers of the same dispatch had already created AID-2026-190 scaffolds
+    visibly on 2026-11-27, so the band starts above that contended number.
+    No INDEX maximum plus one was used.
+  recheck_rule: >-
+    Immediately before push, re-read open pull requests, remote branches and
+    the sibling work trees for AID-2026-197; if occupied, take the next free
+    number and update every path and reference in the same push.
+scope:
+  objective: >-
+    Close the two gate defects recorded as DEF-gates-08 and DEF-gates-07 in the
+    `gates` defect lane, without widening any pass condition and without
+    touching a baseline file.
+  changes:
+    - path: "scripts/check_source_revision_pointers.py"
+      detail: >-
+        A revision value that is not a 40-character blob (`main`, `HEAD`, a tag
+        name, a prose sentence) is counted as NON_BLOB_REFERENCE and now also
+        enters BAD, which is what the module docstring already promised. The
+        n-th live revision record in a document is compared with the n-th live
+        `Source:` line instead of every record being compared with `links[0]`.
+        A record with no source line of its own is UNRESOLVED, not silently
+        checked against the previous record's file. `scan(root)` and an
+        optional `--root` were added so the behaviour can be exercised against
+        a fixture repository.
+    - path: "scripts/ci/gate_ratchet.py"
+      detail: >-
+        `--format paths` no longer truncates at ` -> `: the detail the wrapped
+        gate printed is part of the item. A line that starts with a verdict
+        word but still names a repository object (`OK 00-governance/a.md has no
+        counterpart`) is an item, not a summary; a line that only reports a
+        verdict or a count is still not an item. A bare-path baseline entry,
+        which is the shape gates.yml documents for `--format paths`, now covers
+        exactly one item beginning with `"<path> -> "`, so two different
+        failures on one path need two entries and the second is a regression.
+    - path: "scripts/ci/test_gate_ratchet.py"
+      detail: >-
+        Seven tests added: two failures on one path stay two items, a detail
+        change is a regression rather than a match, both details baselined
+        pass, an item wearing a verdict prefix is not dropped, the same item
+        baselined is matched, verdict and count lines are still not items, and
+        a name that merely starts with a verdict word is still an item.
+    - path: "scripts/test_check_source_revision_pointers.py"
+      detail: >-
+        New self-check: five fixture-repository tests covering per-pointer
+        pairing, the wrong pointer being blamed on its own source, a movable
+        reference failing the scan, a pointer with no source line of its own
+        being UNRESOLVED, and both language trees being scanned.
+    - path: ".github/workflows/repository-hygiene.yml"
+      detail: >-
+        The new self-check is added to the existing "Run unreachable
+        self-checks from the repository root" list, because no workflow runs
+        `unittest discover -s scripts` and a test file that nothing runs fails
+        scripts/ci/check_test_reachability.py.
+  untouched:
+    - "scripts/ci/baselines/bilingual-docs.txt and scripts/bilingual-baseline.txt (no entry added, removed or regenerated)"
+    - "scripts/ci/baselines/gate-wiring.txt (check_source_revision_pointers.py stays baselined as unwired)"
+    - "every other pass/fail condition of both scripts; no new exemption"
+    - "branch protection, the sixteen declared required contexts, every job name and count"
+    - "unrelated checkers, registries, mirrors and work items"
+evidence:
+  record: 14-ai-development/work-items/AID-2026-197/evidence.md
+  prompt: 14-ai-development/work-items/AID-2026-197/prompt-v1.md
+  session: 14-ai-development/work-items/AID-2026-197/session-evidence.md
+non_goals:
+  - Wiring check_source_revision_pointers.py into a workflow
+  - Lowering or regenerating either bilingual baseline
+  - Fixing the eight STALE pointers or the six movable references it reports
+  - Removing the uncalled `--format schema` branch of gate_ratchet.py
+  - Changing any required context name, count or protection entry
+notes:
+  - >-
+    The branch was created from 4326669c and origin/main advanced to 0c752ee6
+    before the first push; that commit was merged in with --no-ff, so the pull
+    request's merge base is 0c752ee6 while base_commit_sha records the
+    branch-creation base.
+  - >-
+    scripts/ci/baselines/gate-wiring.txt carries a comment that describes this
+    script as exiting 1 on main because of 8 STALE pointers. After this change
+    it exits 1 with BAD=14 (8 STALE plus the 6 non-blob references that used to
+    be reported and then ignored). The file is a baseline and was left
+    untouched on purpose; the count in that comment now understates the run.
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#1212"
+    implementing_ai_session: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-197/prompt-v1.md"
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-197/session-evidence.md"
