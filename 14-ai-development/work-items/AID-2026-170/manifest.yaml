@@ -1,0 +1,97 @@
+work_item_id: AID-2026-170
+title: Align SYS-RISK-001's I P0 allowlist pointer to the Owner-designated current phase-3.8.10 blob
+class: DOC/GOVERNANCE
+risk: R2
+risk_rationale: >-
+  One table cell in a non-normative review report is re-pinned. The two blobs it
+  chooses between are the same allowlist one version string apart, so the risk is
+  a mis-pinned blob or an unintended second edit, not a change of contract.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-26
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 8722a37b0cd72dc550d99c0eaebe9e7556ce2f95
+tracking_issues: ["#50"]
+identifier_allocation:
+  id_status: PROVISIONAL
+  allocated_range: AID-2026-170
+  assigned_id: AID-2026-170
+  observed_main: 8722a37b0cd72dc550d99c0eaebe9e7556ce2f95
+  allocation_rule: "Task-book ID range (AID-2026-170) only; no reading of INDEX maximum, no number outside the range."
+prompt_id: AID-2026-170-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-170/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
+owner_ruling:
+  authority: "Owner final ruling recorded in the dispatch brief (u170.md), applied here as a delegated registry correction"
+  current_artifact: 09-security-governance/phase-3.8.10-i-p0-allowlists-unified-1.2.14-recoveryjoin-1.0.2.md
+  current_blob: 44986f5f864bcdc1a79d34978273644d381a68c0
+  superseded_artifact: 09-security-governance/phase-3.8.9-i-p0-allowlists-unified-1.2.13-recoveryjoin-1.0.2.md
+  superseded_blob: 5c0e2049513d391dfc118f4f629a5ec95de456d6
+  superseded_disposition: SUPERSEDED_BY
+reconciliation:
+  changed_pointer_count: 1
+  pointers_changed:
+    - document: reviews/architecture/SYS-RISK-001.en.md
+      line: 297
+      before_blob: 5c0e2049513d391dfc118f4f629a5ec95de456d6
+      after_blob: 44986f5f864bcdc1a79d34978273644d381a68c0
+      marker_added: "reconciled_by: AID-2026-170"
+    - document: reviews/architecture/SYS-RISK-001.zh-CN.md
+      line: 296
+      before_blob: 5c0e2049513d391dfc118f4f629a5ec95de456d6
+      after_blob: 44986f5f864bcdc1a79d34978273644d381a68c0
+      marker_added: "reconciled_by: AID-2026-170"
+  root_copy_exists: false
+  root_copy_note: "Only the EN and ZH-CN renditions exist on main; there is no reviews/architecture/SYS-RISK-001.md."
+  allowlist_diff_observed: "git diff --text 5c0e2049 44986f5f => 1 file changed, 18 insertions(+), 11 deletions(-); version string 1.2.13->1.2.14 and header schema blob 8e7f6a6c->09fcd1fa, plus a new §14 (D-only high-water note); §2-§12 field lists unchanged"
+  allowlist_body_modified: false
+  other_pins_changed: 0
+  phase_3_8_9_restored: false
+scope:
+  files_created:
+    - 14-ai-development/work-items/AID-2026-170/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-170/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-170/session-evidence.md
+    - 14-ai-development/work-items/AID-2026-170/evidence.md
+    - docs/en/14-ai-development/work-items/AID-2026-170/evidence.md
+    - docs/zh-CN/14-ai-development/work-items/AID-2026-170/evidence.md
+  files_modified:
+    - reviews/architecture/SYS-RISK-001.en.md
+    - reviews/architecture/SYS-RISK-001.zh-CN.md
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope:
+    - the body of either I P0 allowlist
+    - every other pin of 5c0e2049 listed in evidence.md (listed, not changed)
+    - any restoration of phase-3.8.9
+    - runtime, validator, schema, API, DDL, CI workflow, deployment
+carrier:
+  branch: docs/2026-11-26-aid-170-sys-risk-001-p0-pin
+  pull_request: PENDING
+  draft: false
+  merge_authorization: "Only after all 16 required contexts succeed on the exact final PR Head, branch freshness is rechecked, and conflicts are resolved."
+review:
+  status: NOT_ASSIGNED
+  independent_reviewer: NOT_ASSIGNED
+  natural_person_owner_acceptance: NOT_RECORDED
+acceptance:
+  status: NOT_GRANTED
+  note: "Registration alignment only. The ruling applied is a delegated Owner ruling recorded in the dispatch brief; this work item claims no independent review and no acceptance."
+
+session_evidence:
+  - role: "SYS-RISK-001 I P0 allowlist pointer alignment"
+    issue_refs:
+      - "#50"
+    implementing_ai_session: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-170/prompt-v1.md"
+    executed_prompt_sha256: "62429f3e3aa1e3b159d1f2fe40fa7b10b094775b9891ed0e86aaa6fab0fd656a"
+    executed_prompt_bytes: 3517
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-170/session-evidence.md"
