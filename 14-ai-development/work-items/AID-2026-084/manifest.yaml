@@ -1,0 +1,163 @@
+work_item_id: AID-2026-084
+title: Bind the gate's reachable unbound error emissions with tests
+class: GATE/TEST
+risk: R2
+risk_rationale: >-
+  Tests only: scripts/test_check_document_management.py gains one function and no production
+  file changes. The risk it addresses is false assurance. Issue #827 asks, for each error
+  message the gate can emit, whether any test turns red when that emission is deleted. At
+  origin/main 31385bc1 a mechanical audit of all 99 distinct message templates found 38 that
+  nothing binds. The residual risk is the one the issue names: a message whose only test
+  proves it can be emitted by an input the gate cannot actually receive, or a test that goes
+  green because a neighbouring check happens to speak. Each case asserts on the message text
+  specifically, and each was verified by deleting the emission and watching that case -- and
+  not a different one -- fail with an AssertionError naming the message.
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: f02ceab0e57b9a149e36025a4595861ca7517ebf
+tracking_issue: "#827"
+measurement_commit_sha: 31385bc1aabc1599be2c8320be408c0d170057a8
+measurement_note: >-
+  The audit ran at 31385bc1. scripts/check_document_management.py is byte-identical between
+  31385bc1 and the branch point f02ceab0 (git diff --stat prints nothing), so every count
+  below carries over.
+
+prompt_id: AID-2026-084-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-084/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 009fbedba86a8ffbabc7826c1a477c4fd86111f3ab4d7a6caaaaaeda8e5b647a
+prompt_bytes: 13956
+
+authorization:
+  implementation_write: >-
+    GRANTED for scripts/test_check_document_management.py, this work item's own directory, and
+    14-ai-development/work-items/INDEX.md. NOT_GRANTED for any other path.
+  gate_behaviour_change: >-
+    NOT_GRANTED - scripts/check_document_management.py is not modified. The branch adds tests
+    that pin behaviour the gate already has. The change is test-only.
+  schema_change: NOT_GRANTED - no manifest field, serialized type or database column is added.
+  platform_state_change: >-
+    NOT_GRANTED for required status contexts. The tests run inside the existing
+    `Self-check the document management gate` step, so no branch-protection payload is modified.
+  architecture_spec_change: NOT_GRANTED - no ADR and no canonical document is modified.
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-084/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-084/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-084/session-evidence-827.md
+  files_to_modify:
+    - scripts/test_check_document_management.py
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope: >-
+    Every other path. In particular scripts/check_document_management.py, which this change
+    does not touch: the audit found reachable messages with no test, not wrong messages. The
+    one unreachable emission (DM-01 outside the repository root) is left in place rather than
+    deleted, because issue #827 asks for a test-binding change and not a deletion.
+
+acceptance_criteria:
+  - id: AC1
+    criterion: >-
+      The audit is reproducible from the gate's own source, with no hand-picked message list,
+      and reports its total, BOUND, UNBOUND and baseline pass count.
+    measurement: >-
+      An AST driver over scripts/check_document_management.py collects every
+      errors.append/problems.append/errors.extend site whose first argument is a literal
+      containing DM-, renders each as a template, and reports 99 distinct templates, 61 BOUND,
+      38 UNBOUND, baseline 318/318 at 31385bc1.
+  - id: AC2
+    criterion: >-
+      Every reachable UNBOUND prefix has a test that asserts on that message and fails when
+      the emission is deleted.
+    measurement: >-
+      37 of the 38 are bound by T93-T127 in run_unbound_emissions(). For each, deleting the
+      emission statement from an isolated tree makes that test fail with an AssertionError
+      naming the message, and no other test fails for that reason.
+  - id: AC3
+    criterion: >-
+      The one unreachable prefix is named with its reason, is not tested, and is not deleted.
+    measurement: >-
+      `DM-01 outside the repository root` is documented in section 4 of prompt-v1.md and in
+      the section comment of run_unbound_emissions(); the emission remains at
+      scripts/check_document_management.py:2281.
+  - id: AC4
+    criterion: The suite is green at the end, with no existing case weakened.
+    measurement: >-
+      python3 scripts/test_check_document_management.py reports 355/355 passed with the one
+      registered skip; every pre-existing case still passes.
+  - id: AC5
+    criterion: No production file changes.
+    measurement: >-
+      git diff against the base names scripts/test_check_document_management.py and this work
+      item's directory plus one INDEX.md row. scripts/check_document_management.py is unchanged.
+
+findings:
+  - id: F1
+    severity: MEDIUM
+    statement: >-
+      At origin/main 31385bc1, 38 of the 99 distinct error-message templates the gate can emit
+      are bound by no test: deleting the emission leaves the suite green at 318/318.
+    evidence: >-
+      AST extraction of every errors.append/problems.append/errors.extend site, one isolated
+      tree per template, full suite run per template. 99 templates, 61 BOUND, 38 UNBOUND.
+  - id: F2
+    severity: MEDIUM
+    statement: >-
+      The issue's figure of ten is from an older tree (main a9f7c9b849, baseline 239) and is
+      not comparable to this head. The count grew because the gate grew and because this audit
+      is mechanical rather than hand-picked.
+    evidence: >-
+      Issue #827 lists ten prefixes; this audit found 99 templates at 31385bc1, of which 38
+      are unbound. The suite is 318/318, not 239.
+  - id: F3
+    severity: LOW
+    statement: >-
+      One UNBOUND template is genuinely unreachable, not merely untested: every path reaching
+      `path.relative_to(root)` is built as `root / rel` from a resolved root, and symlinks are
+      reported rather than followed, so the ValueError branch cannot fire.
+    evidence: >-
+      collect_governed() yields `root / rel` for GOVERNED_FILES and paths under NORMATIVE_ROOTS
+      / backlog roots; main() does `root = Path(args.root).resolve()` before scanning;
+      scan_root() appends a DM-14 diagnostic for a symlinked file and does not follow it. A
+      probe that monkeypatched collect_governed to append an out-of-tree path did emit the
+      message, which shows the branch works when reached -- and that nothing in the gate reaches
+      it.
+
+implementation:
+  status: IMPLEMENTED_IN_BRANCH
+  pull_request: ASSIGNED_AT_OPEN
+  merge_commit_sha: NOT_MERGED
+  note: >-
+    One function, run_unbound_emissions(), added to the test module and called from main()
+    after run_fault_injection(). The pull request number cannot be written into the commit
+    that opens it.
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    No independent review is recorded. This manifest was written by the session that made the
+    change, so an APPROVE from that same session would be self-review and is not claimed.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#827"
+    implementing_ai_session: a827-opencode-author
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-084/prompt-v1.md
+    executed_prompt_sha256: 009fbedba86a8ffbabc7826c1a477c4fd86111f3ab4d7a6caaaaaeda8e5b647a
+    executed_prompt_bytes: 13956
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-084/session-evidence-827.md
