@@ -106,3 +106,15 @@ This correction:
 ## 5. Evidence boundary
 
 The merge metadata and current file presence were checked against GitHub. The 18-checkpoint split is the AID-2026-098 manifest's recorded accounting, not a new execution result. HIR-06 can now be reviewed against the actual Storage candidate contract; implementation evidence for HIR-06/16/17/18 is still missing.
+
+
+## 6. Residual check after correction (FOLLOWUP-01)
+
+This follow-up records the post-merge residual review against main at `44dc21a4970192118ba434801b8ca05702ac582c`:
+
+- In `14-ai-development/work-items/AID-2026-099/manifest.yaml`, the historical `source_policy.aid_2026_098` value is retained verbatim and now carries the YAML comment `SUPERSEDED by storage_aid_2026_098_exact_pin; see AID-2026-108; the baseline-only claim above is no longer true`. The corrected `review_state.storage_aid_2026_098_exact_pin` remains the active merged pin: `MERGED via PR #1283; see AID-2026-098`.
+- The exact AID-2026-098 Storage contract pin is resolved by PR #1283 / merge `cdba0b7360b81ba2693c57f0d89ad2e28832272c`; the three contract paths remain present.
+- The retention mapping is **still OPEN / NOT PINNED**. H contract §10 continues to list the exact AID-2026-098 Storage pin and retention mapping as an open decision. The Storage candidate assigns retention/global Forget policy to I, but does not define a concrete mapping from H idempotency/tombstone retention to an accepted I retention policy, nor a fixed TTL. The pin being available does not resolve that mapping.
+- No AID-2026-099 normative conclusion or checkpoint result changes. No AID-2026-098 file is modified. No implementation, conformance, Owner acceptance or retention-policy approval is claimed; no Issue is closed.
+
+See `14-ai-development/work-items/AID-2026-108/FOLLOWUP-01.md` for the exact residual review record.

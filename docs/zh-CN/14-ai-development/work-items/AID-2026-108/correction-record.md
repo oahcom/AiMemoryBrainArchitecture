@@ -106,3 +106,15 @@ EN 镜像包含相同段落。ZH-CN 镜像包含对应的原始表述：
 ## 5. 证据边界
 
 已通过 GitHub 核验合并元数据及当前文件存在性。18 个检查点的分类统计来自 AID-2026-098 manifest 的既有登记，不是本轮新执行的测试结果。现在可以对照真实的 Storage 候选合同核验 HIR-06 映射；但 HIR-06/16/17/18 的实现证据仍然缺失。
+
+
+## 6. 纠正后的残留检查（FOLLOWUP-01）
+
+本节记录基于 main `44dc21a4970192118ba434801b8ca05702ac582c` 的合并后残留复核：
+
+- `14-ai-development/work-items/AID-2026-099/manifest.yaml` 中历史字段 `source_policy.aid_2026_098` 原值保留，并在 YAML 行尾增加注释：`SUPERSEDED by storage_aid_2026_098_exact_pin; see AID-2026-108; the baseline-only claim above is no longer true`。已纠正的 `review_state.storage_aid_2026_098_exact_pin` 仍是当前有效钉：`MERGED via PR #1283; see AID-2026-098`。
+- AID-2026-098 Storage 合同精确引用已由 PR #1283 / merge `cdba0b7360b81ba2693c57f0d89ad2e28832272c` 解决；三份合同路径仍然存在。
+- retention mapping **仍为 OPEN / NOT PINNED（未钉）**。H 合同 §10 仍将 AID-2026-098 Storage 精确钉与 retention mapping 一并列为 open decision。Storage 候选合同只规定 retention/global Forget policy 由 I 负责，并未定义 H 幂等记录/tombstone 保留与已接受 I retention policy 之间的具体映射，也未规定固定 TTL。合同可引用，不代表该映射已解决。
+- 不改变 AID-2026-099 的任何规范结论或检查点结果；不修改 AID-2026-098 文件；不声称实现、符合性、Owner 接受或 retention policy 批准已成立；不关闭任何 Issue。
+
+精确残留复核记录见 `14-ai-development/work-items/AID-2026-108/FOLLOWUP-01.md`。

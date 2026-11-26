@@ -72,7 +72,7 @@ source_policy:
   g_applied_contract: "06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.md@833815e37ac8d7505d93a0a115421dafe3eb08ad"
   forget_fence_contract: "01-system-architecture/forget-fence-and-completion-contract.md@760a1d48011f2a66c23abcf825a3d067e79b8821"
   storage_trait_candidate: "02-domain-model/phase-1-storage-trait-contract.md@22ca7cd3777e0132e25f084084610f1e90b60d21"
-  aid_2026_098: "No directory/manifest or discoverable PR on baseline; exact Storage contract pin unavailable. Do not infer or duplicate its content."
+  aid_2026_098: "No directory/manifest or discoverable PR on baseline; exact Storage contract pin unavailable. Do not infer or duplicate its content." # SUPERSEDED by storage_aid_2026_098_exact_pin; see AID-2026-108; the baseline-only claim above is no longer true
 session_evidence:
   - role: DOCUMENTATION_AUTHOR
     issue_refs: ["#1212", "#1208", "#1135"]
