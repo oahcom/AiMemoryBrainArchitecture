@@ -92,8 +92,10 @@ acceptance_criteria:
   - id: AC4
     criterion: The suite is green at the end, with no existing case weakened.
     measurement: >-
-      python3 scripts/test_check_document_management.py reports 355/355 passed with the one
-      registered skip; every pre-existing case still passes.
+      python3 scripts/test_check_document_management.py reports 363/363 passed at this head
+      (`acddc569`) with the one registered skip; every pre-existing case still passes. The
+      authoring session recorded 355/355 at `31385bc1`, where the tree carried one more
+      audited template; the coordinating session re-measured at this head on 2026-11-27.
   - id: AC5
     criterion: No production file changes.
     measurement: >-

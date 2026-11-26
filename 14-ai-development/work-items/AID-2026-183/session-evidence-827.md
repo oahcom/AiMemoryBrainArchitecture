@@ -111,6 +111,8 @@ template it copied the tree, replaced exactly the statements emitting it with
 emission_sites=99 distinct_templates=99
 BASELINE rc=0 ::   318/318 passed
 TOTAL=99 BOUND=61 UNBOUND=38
+# produced against 31385bc1. At this head (acddc569) the same driver yields
+# TOTAL=98 BOUND=60 UNBOUND=38 -- see section 6.
 ```
 
 | # | Message template | Verdict |
@@ -252,7 +254,8 @@ omitted resolution field). Each case:
 Final suite:
 
 ```
-355/355 passed
+355/355 passed   # authoring session, at 31385bc1
+363/363 passed   # coordinating session, re-measured at acddc569 on 2026-11-27
 1 skipped, 1 registered of 1 allowed: T68c a real 0o000 directory is reported by path (integration)
 ```
 
@@ -506,3 +509,54 @@ python3 scripts/ci/check_manifest_parse.py               0
 - `executed_prompt_provenance` is `NOT_VERIFIED`: the prompt was written from
   the same measurements as this record but was not re-read line by line against
   the final diff.
+
+## 6. Coordinating-session measurement correction (2026-11-27)
+
+Attribution: this section was written by the **coordinating session**, not by the session
+that produced this record. It corrects values that were reproducible when written and are
+no longer reproducible at head `acddc569`. Nothing else in this record was changed, and the
+authoring session's original figures are preserved above rather than deleted.
+
+Commands and outputs, at head `acddc569` (`main` = `4326669c` at measurement time):
+
+```
+$ python scripts/test_check_document_management.py
+363/363 passed
+1 skipped, 1 registered of 1 allowed: T68c ...
+```
+
+```
+# AST driver: every errors.append / problems.append / errors.extend site whose
+# first literal contains 'DM-', rendered as a template, deduped, same tree at
+# 31385bc1 and at acddc569, then diffed.
+31385bc1: emission_sites=102 distinct_templates=102
+acddc569: emission_sites=101 distinct_templates=101
+set difference: exactly one template removed
+  DM-03 approval_scope.{} is not honoured: only 'Full-document' is checked,
+  so a non-empty list would claim a boundary the gate never verifies. Remove it
+```
+
+Three corrections follow from those two measurements:
+
+| Field | Recorded | At this head | Why |
+| --- | --- | --- | --- |
+| Suite result | `355/355 passed` | `363/363 passed` | `main` gained eight cases (`run_scope_key_removal`, DM-13 supersedes) after `31385bc1`. |
+| Audited templates | `99 distinct / 61 BOUND / 38 UNBOUND` | `98 distinct / 60 BOUND / 38 UNBOUND` | The template numbered 25 in section 2 no longer exists at this head: `SCOPE_KEYS = {"type"}` (`scripts/check_document_management.py:193`) removed the `approval_scope.{...}` emission. It was classified BOUND, so BOUND drops with it; UNBOUND is unchanged. |
+| Method ceiling | — | — | The coordinator's AST driver counts 102 sites at the base where the record's driver counted 99. That is a collector difference, not a tree difference: the set difference is exact and the removed template is unambiguous. The absolute 99/61/38 above is therefore carried from the record, and only the delta is independently established. |
+
+Two further corrections to statements in this record:
+
+- **`T94` is not unique across the suite.** `scripts/test_check_document_management.py:4525`
+  (`T94 DM-04 Revoked without revocation_decision_id is named`) shares its identifier with six
+  same-named records that arrived from #904. `grep -o '"T9[4-9]' | uniq -c` gives `T94×7`. The
+  suite still passes because `record()` keys results by name and later entries overwrite earlier
+  ones, and nothing in the repository enforces uniqueness. This record's claim that the 37
+  bindings are "bound by T94-T128" is therefore ambiguous for `T94`; no new identifier is
+  invented here, and the collision is recorded rather than papered over.
+- **"Only the identifier was substituted" is not accurate.** Normalising `AID-2026-084` /
+  `AID-2026-183` to a common token and diffing against #1280's head `da53ac25` leaves three
+  differences: `prompt-v1.md` and `session-evidence-827.md` each lose the two lines
+  `included_sections: []` and `included_assets: []`, and `manifest.yaml` gains
+  `RENUMBERED_FROM` and `renumbering_reason`. The line loss is required by the gate at this
+  head (`SCOPE_KEYS = {"type"}`), not an error, but it is a content change and the record
+  should not describe the move as identifier-only.
