@@ -89,8 +89,8 @@ acceptance_criteria:
       historical count is labeled historical and not reused as current evidence.
   - id: AC5
     criterion: >-
-      All three Issues remain OPEN, and the PR is Draft and unmerged.
-    measurement: GitHub readback of Issue and PR states.
+      All three Issues remain OPEN. This evidence-only PR may be marked Ready and merged after every required check succeeds; merge does not accept or close any Issue.
+    measurement: GitHub readback of all three Issue states, exact-Head required checks and merge result.
 
 findings:
   - id: F1
@@ -120,8 +120,8 @@ implementation:
   pull_request: ASSIGNED_AT_OPEN
   merge_commit_sha: NOT_MERGED
   note: >-
-    This work item creates evidence records only. It does not claim any Issue is accepted
-    or closed. The Draft PR must remain unmerged.
+    This work item creates evidence records only. The explicitly authorized merge integrates
+    these records; it does not claim any Issue is accepted or closed.
 
 review:
   status: NOT_ASSIGNED
