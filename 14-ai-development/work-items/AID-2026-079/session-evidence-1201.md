@@ -67,8 +67,9 @@ executable file, and why the checker that would enforce the paragraph remains un
 
 - Issue #1201 — the defect report, including both error strings and the full bucket table.
 - `14-ai-development/work-items/AID-2026-079/` — `manifest.yaml`, `prompt-v1.md`, this record,
-  and `REVIEW-01-INDEPENDENT.md` holding the independent review's verbatim verdict and its
-  disposition.
+  `REVIEW-01-INDEPENDENT.md` holding the round-1 verdict verbatim and its disposition, and
+  `REVIEW-AMENDMENT.md` holding the amendment that round 1 required and round 2 found in the wrong
+  file.
 - `14-ai-development/PR-GOVERNANCE-001.md` §5 item (2) — one clause per language.
 - `AID-2026-071/manifest.yaml`, `AID-2026-075/manifest.yaml` — superseded annotations; 075's
   C2 corrected and a `prompt_supersession` entry added.
@@ -157,12 +158,16 @@ annotation names AID-2026-079:
 
 ## Limits of this record
 
-- **The independent review is round 1 only, and it returned `ACCEPT WITH AMENDMENTS`.** It was
-  performed by a separate ChatGPT session at Head `a538dbf2` and is reproduced verbatim in
-  `REVIEW-01-INDEPENDENT.md`. Its first blocking item — the clause did not say *which*
-  `session_evidence` entry — was accepted and applied, which changed the Head. Whether the
-  amendments close the review is round 2's decision, and round 2 has its own Head. No `APPROVED`
-  status is claimed here.
+- **Two review rounds are recorded, and neither is `APPROVED`.** Round 1 (`ACCEPT WITH AMENDMENTS`,
+  Head `a538dbf2`) required the clause to say *which* `session_evidence` entry; the wording was
+  changed to constrain locations instead, and the reviewer withdrew the suggestion in round 2.
+  Round 2 (`NEEDS REVISION`, Head `f44dce07`) found a real defect that was mine: the amendment had
+  been appended to `prompt-v1.md`, whose digest pins the executed prompt, so the Session Evidence
+  context failed with `executed_prompt_sha256 mismatch in manifest entry #1`. The first repair
+  re-took the pin; the reviewer refused it, correctly, because it would have recorded the amended
+  document as the executed input. `prompt-v1.md` is now restored byte-for-byte and the amendment
+  lives in `REVIEW-AMENDMENT.md`. Whether that closes round 2 is round 3's decision at its own
+  Head.
 - The reproduction in §2 was performed by a second agent session given the procedure and not
   the expected values. It reproduced all four bucket counts, the 0-of-54 figure and both
   error strings. That is a reproducibility check, not an independent review: the session that

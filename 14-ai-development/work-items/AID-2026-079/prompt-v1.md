@@ -190,28 +190,3 @@ a diff nobody reads.
 The principal-identity half of the same paragraph; the Session Evidence gate; the 34 manifests
 that fail `parse_manifest_session_entries` for reasons unrelated to this clause; AID-2026-075's
 observer; and every path not listed in the manifest's `scope`.
-
-## Amendment after independent review
-
-Round 1 of the exact-Head governance review (separate ChatGPT session `6b07448b-ac9c-83ec-9115-f056a313f972`,
-Head `a538dbf2`) returned `ACCEPT WITH AMENDMENTS` and named one blocking textual defect: "the
-`session_evidence` entry that carries the session" does not say *which* entry, so the sentence is
-undecidable for a manifest with more than one. Measured: AID-2026-055 carries three.
-
-Applied, in both languages:
-
-- English: `each of them either at top level or inside the `session_evidence` entries and never in both places`
-- Chinese: 「每个字段或位于顶层、或位于 `session_evidence` 条目内，不得两处并存」
-
-The reference to a particular entry is removed rather than sharpened, because the constraint the
-gate enforces is about *locations*, not about which entry. Naming the entry after its own
-`implementing_ai_session` field would be self-referential for that field, would say nothing about
-`sponsor` and `accountable_owner`, and would still be undecidable for a three-entry manifest.
-
-Measured at the branch tip (55 manifests), with "inside" scoped to the `session_evidence` block:
-48 satisfy the amended clause, 7 do not (005, 006, 008, 009, 029 lack `sponsor` and
-`implementing_ai_session`; 024 and 025 lack all three), and 21 satisfy it *and* are accepted by
-`parse_manifest_session_entries`.
-
-The manifest's `prompt_sha256` and `prompt_bytes` are re-taken after this section was appended.
-The earlier pin described the bytes before the amendment and is not restated as if it still held.

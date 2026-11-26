@@ -28,13 +28,23 @@ prompt_id: AID-2026-079-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-079/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 3e0fdfc7d70c2df8397eeee42c06ed48e9e836bec30aa9a279af3dc22b929224
-prompt_bytes: 11496
-prompt_amendment_note: >-
-  The pin was re-taken after the independent review's round 1 amended the clause. The earlier pin
-  (08f5e42e, 9932 bytes) described the bytes before that amendment and is not restated as if it
-  still held. The amended passage is appended to prompt-v1.md under "Amendment after independent
-  review", so the file records both what was instructed and what the review changed.
+prompt_sha256: 08f5e42efdef2c3380056fd8528cf057d6d2a7b25c366566a8599e2aff4df19a
+prompt_bytes: 9932
+prompt_supersession:
+  - passage: >-
+      prompt-v1.md, the clause quoted under "What is being changed": the `after` form reading
+      "each of them in exactly one place - top level, or the `session_evidence` entry that carries
+      the session, and not both", and its Chinese counterpart.
+    superseded_by: "REVIEW-AMENDMENT.md - the location rule now reads 'either at top level or inside the `session_evidence` entries and never in both places'"
+    date: "2026-11-25"
+    reason: >-
+      Round 1 of the governance review found the wording undecidable for a manifest with more than
+      one `session_evidence` entry, and AID-2026-055 carries three. The snapshot is NOT edited: its
+      digest pins the bytes that were executed. The amendment is a separate artifact so that the
+      executed prompt stays the executed prompt. An earlier attempt appended the amendment to this
+      file and re-took the pin, which failed the Session Evidence check and would have recorded the
+      amended document as the executed input; that attempt is reverted and recorded in
+      REVIEW-AMENDMENT.md.
 
 # ---------------------------------------------------------------------------
 # Attribution, recorded where the change is, not only in the report that found
@@ -68,6 +78,7 @@ scope:
     - 14-ai-development/work-items/AID-2026-079/prompt-v1.md
     - 14-ai-development/work-items/AID-2026-079/session-evidence-1201.md
     - 14-ai-development/work-items/AID-2026-079/REVIEW-01-INDEPENDENT.md
+    - 14-ai-development/work-items/AID-2026-079/REVIEW-AMENDMENT.md
   files_to_modify:
     - 14-ai-development/PR-GOVERNANCE-001.md
     - 14-ai-development/work-items/AID-2026-071/manifest.yaml
@@ -128,6 +139,17 @@ acceptance_criteria:
       each carry a dated superseded clause naming AID-2026-079; AID-2026-075/prompt-v1.md is
       unmodified, and its manifest carries a `prompt_supersession` entry naming the superseded
       passage and the digest pin that no longer matches it.
+  - id: C8
+    criterion: >-
+      The executed-prompt snapshot is the snapshot that was executed, and no review amendment
+      changes it.
+    measurement: >-
+      `git diff --name-only` against the base does not list
+      AID-2026-079/prompt-v1.md, and its bytes hash to
+      08f5e42efdef2c3380056fd8528cf057d6d2a7b25c366566a8599e2aff4df19a at 9932 bytes, equal to
+      `session_evidence[0].executed_prompt_sha256` and `executed_prompt_bytes`. The Session
+      Evidence context passes on the resulting Head. The amendment lives in REVIEW-AMENDMENT.md,
+      which is not the executed prompt and says so in its first limit.
   - id: C7
     criterion: The review is at the exact Head and at the session level.
     measurement: >-
@@ -206,7 +228,7 @@ implementation:
     is updated from the review that reads that Head rather than predicted here.
 
 review:
-  status: "ROUND_1_ACCEPT_WITH_AMENDMENTS - the three blocking items are dispositioned; round 2 records its own Head"
+  status: "ROUND_2_NEEDS_REVISION - the prompt-snapshot defect it found is repaired; round 3 decides at its own Head"
   record_ref: 14-ai-development/work-items/AID-2026-079/REVIEW-01-INDEPENDENT.md
   round_1:
     exact_head_reviewed: a538dbf289cb21fc04a03fb412c90482619187bc
@@ -214,6 +236,19 @@ review:
     verdict: ACCEPT WITH AMENDMENTS
     blocking_items: 3
     disposition: "B1 applied as a location rule rather than by naming an entry, because AID-2026-055 carries three entries; B2 is REVIEW-01-INDEPENDENT.md; B3 re-run with a token and PASS."
+  round_2:
+    exact_head_reviewed: f44dce07b70d6d54d279e916a984ce15e0b53506
+    reviewer_session: 6b07448b-ac9c-83ec-9115-f056a313f972
+    verdict: NEEDS REVISION
+    blocking_items: 3
+    disposition: >-
+      B1 was withdrawn by the reviewer, which accepted the reasoning for a location rule instead of
+      a named entry. B2 closed. The blocking finding was real and was mine: the amendment had been
+      appended to prompt-v1.md, whose digest pins the executed prompt, so the Session Evidence
+      context failed with `executed_prompt_sha256 mismatch in manifest entry #1`. The first repair
+      attempt re-took the pin, which the reviewer refused, correctly: it would have recorded the
+      amended document as the executed input. The file is now restored byte-for-byte, the amendment
+      lives in REVIEW-AMENDMENT.md, and C8 pins the invariant.
   note: >-
     Section 9 requires an exact-Head governance review for changes to this standard, and section
     5's closing sentence says this paragraph is exemptible only by an exception record that names
@@ -221,8 +256,8 @@ review:
     artifacts at the Head it names through its own connector, and the verdict reproduced in
     REVIEW-01-INDEPENDENT.md is its text, not a summary of it. This is a session-level independent
     review under section 5 and is not a human review; nothing here says otherwise. The status is
-    deliberately not `APPROVED`: round 1 returned ACCEPT WITH AMENDMENTS, and whether the
-    amendments close it is round 2's decision.
+    deliberately not `APPROVED`: round 2 returned NEEDS REVISION on a defect that was mine and is
+    repaired here, and whether the repair closes it is round 3's decision at round 3's Head.
 
 acceptance:
   status: NOT_ASSIGNED
