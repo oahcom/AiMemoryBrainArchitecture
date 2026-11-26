@@ -12,12 +12,12 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-190/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-190/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-27"
-      last_verification_note: "Counts re-derived from the tree at 4326669c by command, not asserted; the AID-2026-111 row inventory was re-tallied from its own cells; the AID-2026-112 provenance claim was compared line by line against AID-2026-111 section 2.3. No historical verdict, blob pin or test result was changed or re-run."
+      last_verification_note: "Counts re-derived from the tree at 4326669c by command, not asserted; the AID-2026-111 row inventory was re-tallied from its own cells; the AID-2026-112 provenance claim was compared line by line against AID-2026-111 §2.3. No historical verdict, blob pin or test result was changed or re-run."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -29,16 +29,20 @@ document_metadata:
       archival_reason: null
       archival_reference: null
   authority:
-    canonical_status: Non-Canonical
-    canonical_scope: null
-    canonical_scope_id: null
-    canonical_scope_keywords: []
+    canonical_status: Canonical
+    canonical_scope: "Corrected counts and provenance for documentation-gaps GAP-03, the AID-2026-111 combined row and the AID-2026-112 memory-context execution fields"
+    canonical_scope_id: "ai-development/aid-2026-190-count-and-provenance-correction"
+    canonical_scope_keywords:
+      - "documentation-gaps"
+      - "work-item-arithmetic"
+      - "provenance"
+      - "not-recorded"
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "14-ai-development/work-items/AID-2026-190/evidence.md"
-    en: null
+    source: null
+    en: "docs/en/14-ai-development/work-items/AID-2026-190/evidence.md"
     zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-190/evidence.md"
 ---
 
@@ -137,7 +141,28 @@ mirror: `docs/governance/` is not a `NORMATIVE_ROOT` and the file is registered 
 `governed_files`; the GAP-03 row it changes is English-only, so there is no second copy of
 those two numbers.
 
-## 3. Verification performed
+## 3. Reconciliation with main during this PR
+
+While this PR was open, `main` advanced to `0c752ee6` with PR #1340, which appended
+**§12 "memory-context capture (2026-11-27)"** to the three AID-2026-111 copies: same HEAD
+`a123ea4e…`, same command, exit `0`, 11 test binaries, `177 / 0`, and an explicit statement that
+stdout bytes, raw stdout SHA-256, per-harness multiset, normalised digest and the test-name
+inventory remain `NOT_RECORDED`.
+
+That changed the truth value of one claim in §2.3 of this record, so the merge was not taken
+mechanically:
+
+- §12 corroborates this record's own arithmetic independently — it states 0 PASS, 34
+  PARTIAL_EVIDENCE, 54 UNCHANGED — and the appended `## Correction` now says so.
+- It does **not** vindicate AID-2026-112's §8 row on its own terms: at the time AID-2026-112 was
+  written, no capture existed and none was cited. The three fields were therefore
+  `INHERITED_ASSUMPTION` then, and the section now says exactly that, adds §12 as the later,
+  separate confirmation, and keeps the row's `43b2b9b6…` stdout hash marked `UNSUPPORTED` —
+  because §12 also records that hash as never captured.
+- The merge keeps both texts: §12 stands as written by PR #1340, the `## Correction` follows it,
+  and neither rewrites the other.
+
+## 4. Verification performed
 
 All commands were run in `D:\code\wt-counts` at the base commit with `PYTHONUTF8=1`.
 
@@ -147,13 +172,13 @@ All commands were run in `D:\code\wt-counts` at the base commit with `PYTHONUTF8
 | Review transcripts | recursive `.md` count under `reviews/` | **198** (196 before) |
 | AID-2026-111 row inventory | parse rows matching the three section prefixes, tally the bolded verdict | **88** rows → 23/49, 6/2, 5/3 → **0/34/54** |
 | Metadata parse | `read_metadata` from `check_document_management` on all seven edited files | `True` for every file |
-| Line endings | `python scripts/ci/check_line_endings.py` | 1629 files inspected, **0 violations** |
-| Document management | `python scripts/check_document_management.py` | `INCOMPLETE: no rule violations in 496 classified documents, but 446 governed documents are still unclassified` (exit 2) — the documented pre-existing backlog state, see GAP-02; **zero rule violations** |
+| Line endings | `python scripts/ci/check_line_endings.py` | 1635 files inspected, **0 violations** |
+| Document management | `python scripts/check_document_management.py` | `INCOMPLETE: no rule violations in 501 classified documents, but 446 governed documents are still unclassified` (exit 2) — the documented pre-existing backlog state, see GAP-02; **zero rule violations** |
 
 The DM gate's exit code 2 is the backlog state this repository records in GAP-02 ("that scan now
 returns INCOMPLETE (exit 2) while backlog remains"), not a finding against this change.
 
-## 4. What was deliberately not done
+## 5. What was deliberately not done
 
 - No verdict was changed: all 23/49 + 6/2 + 5/3 cells, all 72 flow cells, and the Gate A
   PARTIAL / OPEN and Gate B PARTIAL / OPEN (NOT VERIFIED) dispositions stand as recorded.
@@ -166,7 +191,7 @@ returns INCOMPLETE (exit 2) while backlog remains"), not a finding against this 
 - No Issue was closed, no branch protection or check context was touched, and nothing under
   `scripts/`, `tests/` or `.github/` changed.
 
-## 5. Non-claims
+## 6. Non-claims
 
 - This record does not claim that AID-2026-111 or AID-2026-112 misjudged any predicate; it
   corrects one total and one provenance grade.

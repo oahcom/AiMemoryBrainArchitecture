@@ -406,6 +406,28 @@ Gate A item 5 is therefore actionable, not an unbounded restore request:
 
 user-authorized operator (delegated by account owner); 2026-11-26. Delegated evidence recording only; no natural-person Owner signature is fabricated.
 
+## 12. memory-context capture (2026-11-27)
+
+Requested slot label: "2.4 memory-context capture (2026-11-27)". §2.4 above is already "Explicit negative build evidence", so this capture is appended as §12 rather than renumbering an existing section; §2.3 is left in place as the historical record of what the originally supplied aggregate package did not contain.
+
+This is a **later, separate** local capture of the memory-context group on the same pinned commit. It fills in, for that group, the values §2.3 recorded as `NOT_RECORDED`. It is not a re-run of the SQLite group or the pure-Rust group, and it does not move any group onto a different commit.
+
+| Field | Recorded value |
+|---|---|
+| Environment | WSL2 Ubuntu 24.04 |
+| Exact HEAD | `a123ea4e414c9f74fa0c576fbd718049a7d9f917` (same pinned commit as the SQLite group) |
+| Command (verbatim) | `cargo test -p memory-context --no-fail-fast` |
+| Exit code | **0** |
+| Test binaries | 11 |
+| Passed / failed | **177 / 0** |
+| Capture date | 2026-11-27 |
+
+**Counting rule (harness counts are authoritative).** Totals are the arithmetic sum of complete `test result:` lines. A `test result:` line whose `filtered out` count is greater than 0 is excluded from that sum, so filtered child-process/harness rows are not double-counted. Under this rule the 11 binaries sum to **177 passed / 0 failed** with exit code **0**.
+
+**Still not recorded in this capture:** stdout byte count, raw stdout SHA-256, per-harness passed multiset, normalised digest and test-name inventory remain **NOT_RECORDED / NOT_SUPPLIED**. The 94-name inventory in §4, and every count derived from it, is unchanged.
+
+**Effect on this record: none.** This section adds execution metadata only. It does **not** change any PASS / PARTIAL / UNCHANGED classification: the combined 88 rows remain 0 PASS / 34 PARTIAL_EVIDENCE / 54 UNCHANGED, Gate A remains PARTIAL / OPEN, Gate B remains PARTIAL / OPEN (NOT VERIFIED), Owner acceptance remains NOT_CLAIMED, and #1211/#1212 remain OPEN.
+
 ## Correction
 
 Appended 2026-11-27. This section is an arithmetic audit of §1. It changes no verdict and does not edit the §1 table: the combined row remains exactly as recorded, `36 / 52`.
@@ -462,6 +484,8 @@ Every set row is internally consistent: 23 + 49 = 72, 6 + 2 = 8, 5 + 3 = 8. The 
 - HIR-16 — PARTIAL_EVIDENCE
 - HIR-17 — UNCHANGED
 - HIR-18 — PARTIAL_EVIDENCE
+
+**§12 (appended to this record on 2026-11-27) states the same three totals — 0 PASS, 34 PARTIAL_EVIDENCE, 54 UNCHANGED — so the recorded 36 / 52 combined row is contradicted twice inside its own file: once by the rows it summarises, once by the later section.**
 
 **Correct combined total: 0 PASS / 34 PARTIAL_EVIDENCE / 54 UNCHANGED = 88 rows.** No verdict in §5, §6 or §7 is changed by this correction, no PASS is created, and the `36 / 52` combined row is left in place as the recorded value it is.
 

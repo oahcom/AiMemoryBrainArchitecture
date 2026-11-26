@@ -381,22 +381,24 @@ No runtime, validator, schema, API, DDL, workflow or deployment changes; no IMPL
 
 Appended 2026-11-27. This section corrects provenance only. It changes no verdict: the SC/HIR and 72 flow-cell judgments in §2–§7 and the Gate A / Gate B disposition in §9 stand as written.
 
-**AID-2026-111 recorded `NOT_RECORDED`.** For the memory-context group at the same exact HEAD `a123ea4e414c9f74fa0c576fbd718049a7d9f917`, AID-2026-111 §2.3 records: passed **177**; failed count and process exit code **NOT_RECORDED**; the exact command, test-binary count, stdout bytes, raw stdout SHA-256, per-harness passed multiset and test-name inventory all **NOT_RECORDED**; normalised digest **NOT_SUPPLIED**. §2.1 of that record adds that a raw stdout SHA-256 pins that one capture only and is not a reproducible constant.
+**State at the time of writing.** When this record was written, the only account of the same run was AID-2026-111 §2.3, which for the memory-context group at the same HEAD `a123ea4e414c9f74fa0c576fbd718049a7d9f917` records: passed **177**; failed count and exit code **NOT_RECORDED**; command, test-binary count, stdout bytes, raw stdout SHA-256, per-harness passed multiset and test-name inventory all **NOT_RECORDED**; normalised digest **NOT_SUPPLIED**.
 
-**This document records more.** §8 here writes the same group (same HEAD, same command) as: Exit `0`, Test binaries `11`, Passed / Failed `177 / 0`, stdout SHA-256 `43b2b9b6…`.
+**This document records more, and cited nothing.** §8 here writes the same group as Exit `0`, Test binaries `11`, Passed / Failed `177 / 0`, stdout SHA-256 `43b2b9b6…`, with no command log, stdout artifact, hash procedure or capture time supplied anywhere. The §8 caveat ("operator-supplied, not re-run in this session") states **who executed**, not **where these fields came from**. On this document's own text, the three fields were therefore `INHERITED_ASSUMPTION` at the time of writing: they contradicted the earlier account of the same run and no new capture was cited.
 
-**But no new capture is cited.** Nothing in this work item supplies a command log, stdout artifact, hash procedure or capture time for that row; §8 says only that the rows are operator-supplied and were not re-run in this session — which states **who executed**, not **where these fields came from**.
+**A later capture exists.** On 2026-11-27 AID-2026-111 appended §12, "memory-context capture (2026-11-27)": same HEAD, same command, exit `0`, 11 binaries, `177 / 0` — and it explicitly records stdout bytes, raw stdout SHA-256, per-harness multiset, normalised digest and the test-name inventory as still **NOT_RECORDED**, while stating that §2.3 is kept as the historical record and that no judgment changes.
 
-**Provenance marking.** The following three fields are marked `INHERITED_ASSUMPTION`, and are not to be read as recorded measurements:
+**Provenance after that capture.**
 
-| Field | AID-111 record | This record | Provenance status |
-|---|---|---|---|
-| Exit code | NOT_RECORDED | 0 | INHERITED_ASSUMPTION |
-| Failed count | NOT_RECORDED | 0 | INHERITED_ASSUMPTION |
-| Test binaries | NOT_RECORDED | 11 | INHERITED_ASSUMPTION |
+| Field | AID-111 §2.3 (at the time) | AID-111 §12 (2026-11-27, later) | This record | Provenance |
+|---|---|---|---|---|
+| Exit code | NOT_RECORDED | 0 | 0 | INHERITED_ASSUMPTION, confirmed by the later capture |
+| Failed count | NOT_RECORDED | 0 | 0 | INHERITED_ASSUMPTION, confirmed by the later capture |
+| Test binaries | NOT_RECORDED | 11 | 11 | INHERITED_ASSUMPTION, confirmed by the later capture |
 
-The stdout SHA-256 `43b2b9b6…` on the same row is likewise unsourced: AID-111 records that group's raw hash as NOT_RECORDED and its normalised digest as NOT_SUPPLIED. Under §2.1's rule, a raw hash is evidence only in pair with the capture it pins; without the capture it carries no verification weight.
+The values match the later capture exactly, so they are no longer unsupported numbers; but "this document cited a capture" still does not hold — it cited none, and §12 is a different, later record.
 
-**What still holds.** The passed count 177 is recorded in AID-111 §2.3; §8's 552 = 99 + 276 + 177 still holds as the arithmetic sum of three passed counts, but it is not one unified run, not a deduplicated unique-test count, and its `0 failed` and `Exit 0` are unverified. The title's "552 local test evidence" therefore reads as the sum of three passed counts and no more.
+**Still unsourced: the stdout SHA-256.** `43b2b9b6…` has no matching capture in §2.3 or §12; §12 records that group's raw stdout SHA-256 as NOT_RECORDED. Under AID-2026-111 §2.1 a raw hash is evidence only in pair with the capture it pins, so this hash stays **UNSUPPORTED** here and must not be used for verification or reproduction.
 
-**Scope.** This section does not claim that any judgment is wrong. It lowers three fields and one hash from "recorded value" to "inherited assumption"; if the corresponding capture is produced later, they may be restored to verified values as recorded.
+**What survives.** 177 is recorded in §2.3 and confirmed by §12; §8's 552 = 99 + 276 + 177 holds as the arithmetic sum of three passed counts, but it is still not one unified run and not a deduplicated unique-test count. The title's "552 local test evidence" reads as that sum and no more.
+
+**Scope.** This section claims no misjudgment and does not rewrite §8. It records three things: at the time of writing this record cited no capture; those three fields were then inherited assumptions; a later capture confirms their values while the row's stdout hash remains unsupported.

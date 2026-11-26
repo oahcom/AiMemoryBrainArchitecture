@@ -99,7 +99,17 @@ document_metadata:
 
 `docs/en/.../AID-2026-111/evidence.md`、`docs/zh-CN/.../AID-2026-111/evidence.md`、`docs/en/.../AID-2026-112/evidence.md`、`docs/zh-CN/.../AID-2026-112/evidence.md` 携带相同章节、相同标题（`## Correction`、`## Provenance correction`）与相同表格；需要翻译的镜像给出译文。`docs/governance/documentation-gaps.md` 没有镜像：`docs/governance/` 不是 `NORMATIVE_ROOT`，该文件在 `governed_files` 中单独登记，而它改动的 GAP-03 行本身只有英文，这两个数字不存在第二份副本。
 
-## 3. 已执行的验证
+## 3. 与 main 的合流核对
+
+本 PR 打开期间，`main` 推进到 `0c752ee6`（PR #1340），向 AID-2026-111 的三份副本追加了 **§12 "memory-context capture (2026-11-27)"**：同一 HEAD `a123ea4e…`、同一命令、exit `0`、11 个 test binary、`177 / 0`，并明确写出 stdout 字节数、raw stdout SHA-256、逐 harness multiset、normalised digest 与测试名清单仍为 `NOT_RECORDED`。
+
+这改变了本记录 §2.3 中一项主张的真值，因此合流不是机械照收：
+
+- §12 独立印证了本记录的算术——它同样写明 0 PASS、34 PARTIAL_EVIDENCE、54 UNCHANGED——追加的 `## Correction` 现已引用这一点。
+- 它**不**能替 AID-2026-112 §8 那一行自证：AID-2026-112 成文时没有捕获存在，也没有引用任何捕获。因此这三项在当时就是 `INHERITED_ASSUMPTION`，该节现在正是这样写，并把 §12 记为后到的、独立的确认，同时保持那一行的 `43b2b9b6…` stdout 哈希为 `UNSUPPORTED`——因为 §12 同样把该哈希记为从未捕获。
+- 合流保留两份文本：PR #1340 写入的 §12 原样保留，`## Correction` 接在其后，两者互不改写。
+
+## 4. 已执行的验证
 
 以下命令均在 `D:\code\wt-counts`、基线提交上、以 `PYTHONUTF8=1` 运行。
 
@@ -109,12 +119,12 @@ document_metadata:
 | review 记录 | `reviews/` 下 `.md` 递归计数 | **198**（改前 196） |
 | AID-2026-111 行清单 | 按三个章节前缀解析行并统计加粗判定 | **88** 行 → 23/49、6/2、5/3 → **0/34/54** |
 | 元数据解析 | `check_document_management` 的 `read_metadata`，对七份被改文件 | 全部 `True` |
-| 行尾 | `python scripts/ci/check_line_endings.py` | 1629 个文件，**0 违规** |
-| 文档管理门禁 | `python scripts/check_document_management.py` | `INCOMPLETE: no rule violations in 496 classified documents, but 446 governed documents are still unclassified`（exit 2）——即 GAP-02 记录的既有积压状态，**零规则违规** |
+| 行尾 | `python scripts/ci/check_line_endings.py` | 1635 个文件，**0 违规** |
+| 文档管理门禁 | `python scripts/check_document_management.py` | `INCOMPLETE: no rule violations in 501 classified documents, but 446 governed documents are still unclassified`（exit 2）——即 GAP-02 记录的既有积压状态，**零规则违规** |
 
 DM 门禁的 exit 2 是本仓库在 GAP-02 中记录的积压状态（"该扫描现在返回 INCOMPLETE (exit 2)，只要积压仍在"），不是针对本次改动的发现。
 
-## 4. 刻意未做
+## 5. 刻意未做
 
 - 未改任何判定：23/49 + 6/2 + 5/3 的全部单元格、72 个 flow 单元、Gate A PARTIAL / OPEN 与 Gate B PARTIAL / OPEN（NOT VERIFIED）的结论均按原样保留。
 - 未重写 AID-2026-111 §1 合计行与 AID-2026-112 §8 表格；"曾经这样写"的记录被保留，订正是追加式的。
@@ -122,7 +132,7 @@ DM 门禁的 exit 2 是本仓库在 GAP-02 中记录的积压状态（"该扫描
 - AID-2026-111 的 zh-CN 镜像中 §4 表格位置错乱是既有排版缺陷，未并入本次计数与溯源改动。
 - 未关闭任何 Issue，未触碰分支保护或 required context，`scripts/`、`tests/`、`.github/` 无改动。
 
-## 5. 非主张
+## 6. 非主张
 
 - 本记录不声称 AID-2026-111 或 AID-2026-112 错判了任何谓词；它订正一个合计与一个溯源等级。
 - 不声称 memory-context 那次运行没有通过 177 项测试——177 有记录——只声称它的 exit code、failed 数与 harness 数没有记录。
