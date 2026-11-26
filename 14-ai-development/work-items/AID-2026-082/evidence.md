@@ -314,7 +314,7 @@ Mirror columns mean path exists in current main tree, not that content is semant
 
 - **E (25 files):** most are absent from root on main. Per-file EN/ZH path state is above. Minimum: read every exact source blob body/frontmatter, reconcile source lineage against any existing main root, establish faithful EN/ZH mirrors and semantic parity, then obtain E Owner exact-version review. No overwrite of existing newer main root.
 - **F (15 files):** all source paths are absent from main root. Minimum: exact body/frontmatter readback, bilingual pair creation/alignment, watermark coverage/scanned-through proof, and F Owner exact-version review.
-- **H (112 files):** most paths absent from main; includes review/evidence documents, not all normative sources. Minimum: H authoritative core inventory, exact source readback, bilingual alignment, dependency-owner disposition and relevant ADR closure. No protocol freeze inferred.
+- **H (111 files):** most paths absent from main; includes review/evidence documents, not all normative sources. Minimum: H authoritative core inventory, exact source readback, bilingual alignment, dependency-owner disposition and relevant ADR closure. No protocol freeze inferred.
 - **I (89 files):** source paths absent from main root. Minimum: exact readback and bilingual alignment. I36-GOV-01..10 remain blocked until durable approvals name the approver, exact policy hash/version, authority, scope and effective time. This work cannot substitute for governance approval.
 - Cross-owner source branches are not one coherent snapshot. Historical branch pins cited in I records differ from the live branch tips above.
 
@@ -349,3 +349,22 @@ The six Gate A root-path blockers were handled before broad E/F/H/I inventory wo
 - Workflow definitions were read without modification. Bilingual docs and Session Evidence explicitly include `pull_request.edited`; Branch Freshness, Document Management, Repository Hygiene, Runner Admission and Gates include pull_request triggers without path filters. Specialized AID/G/H/Publication/Rust workflows have path filters and are not all applicable to documentation-only changes.
 - A PR body edit was performed, but no run was created for the exact Head. This rules out a simple missing-path explanation for the general gates. The available GitHub connector exposes read-only Actions inspection and rerun operations, but no workflow-dispatch action; rerun is inapplicable because no run exists. The evidence therefore supports: **event delivery/dispatch for this API-authored PR update did not occur or is suppressed upstream**. The exact suppression mechanism cannot be proven from repository-visible data; Actions delivery logs / token event provenance are not exposed here.
 - Compliant next trigger requires a normal GitHub UI/CLI `git push` or other owner-authorized PR event from an identity that emits the webhook. No workflow file or validator semantics was changed. No attempt was made to mark this not-ready Draft PR as Ready merely to manufacture an event.
+
+
+## E/F follow-on batches — 2026-11-26
+
+After the Gate A priority pass, restored the additional E/F files that had exact live source Blobs and existing EN/ZH-CN counterparts. Each root is Draft/Candidate/Informative; mirrors are Draft/Non-Canonical/Informative. Source Blob pins are duplicated in GOV-DOC-002 evidence_reference on all three language paths.
+
+| Owner | Root path | Exact source Blob | Result |
+|---|---|---|---|
+| E | `04-memory-compiler/consolidation-and-conflict-resolution.md` | `d16f8e2e41a6cca81ad285e5f79f075d87e64edb` | RESTORED_CANDIDATE; semantic parity pending |
+| E | `04-memory-compiler/event-ingestion-engine.md` | `9fa3db53175452bf9e6f0fce8b1540765e46905f` | RESTORED_CANDIDATE; semantic parity pending |
+| E | `04-memory-compiler/evidence-and-provenance.md` | `38bcacafa89ebe7b3eedb6f38d174e0c6a1f3963` | RESTORED_CANDIDATE; semantic parity pending |
+| F | `05-memory-runtime/activation-policy-engine.md` | `b7f5d85468f5262e472769a1991b812ac4a64f5b` | RESTORED_CANDIDATE; semantic parity pending |
+| F | `05-memory-runtime/retrieval-engine.md` | `1fbfc0ff07b66c0ff68c3cea5271261c9d7fc0af` | RESTORED_CANDIDATE; semantic parity pending |
+| F | `05-memory-runtime/runtime-scheduling.md` | `ca35d8cddd012c1ff067328ee22177f57c40ae36` | RESTORED_CANDIDATE; semantic parity pending |
+| F | `05-memory-runtime/working-set-and-cache.md` | `a934491950c876701e8ac592a0e6aaea983b44e3` | RESTORED_CANDIDATE; semantic parity pending |
+
+Progress update: E 5/25 restored in this branch; 2 additional E roots already existed on main and were intentionally not overwritten because their lineage/version must be preserved; 18 E entries still lack an EN/ZH-CN pair in main and remain blocked pending mirror creation and semantic review. F: 4/14 remaining files restored in this batch; plus the previously restored `runtime-overview.md`, for 5/15 total F roots represented. The other 10/14 F files lack an existing bilingual pair and remain blocked pending faithful EN/ZH-CN counterparts.
+
+No E/F Owner acceptance is inferred. F watermark/scanned-through proof remains outstanding. H/I per-file work remains unchanged; I36-GOV-01..10 remain GOVERNANCE-BLOCKED.
