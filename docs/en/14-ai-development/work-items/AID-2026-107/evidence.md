@@ -213,6 +213,64 @@ Rules: the original 095 matrix uses only PASS / FAIL / NOT EVIDENCED. AID-082/09
 | Visibility | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-10/12/13 are EVIDENCE_REQUIRED: no read-your-writes, replica visibility, fail-closed projection or restore-before-exposure proof. Original checkpoint: 00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md @ 1d162b527eacb96e2cff24eec5fcf5a66014039a; AID-082 / AID-100 are not implementation evidence for this proposition. |
 
 
+## 4. Gate A nine-item closeout checklist (refreshed)
+
+| # | Gate A item | Current state | Closeout condition |
+|---|---|---|---|
+| 1 | Branch synchronized with current main | SATISFIED at reviewed base `df54ed60321e2958c50e9649963608cb3cb3f3b1`; recheck if main advances | At final-head review, merge base equals current main and branch is not behind. |
+| 2 | Cross-Owner role dispositions (10 roles: 3 ACCEPT / 7 CONDITIONAL / 0 REJECT) | SATISFIED as recorded proxy dispositions | Seven conditional obligations remain; no natural-person Owner signature is claimed. |
+| 3 | Exact-head CI | OPEN_PENDING_FINAL_HEAD | All 16 required contexts succeed on the exact final PR Head. |
+| 4 | Complete A–I + Storage/Consistency composition review artifact | OPEN | Owner A coordinates the complete exact-version package across eight flows and nine checkpoint dimensions; relevant Owners accept their own boundaries. |
+| 5 | Missing D/E/F/I normative roots/contracts | OPEN — IMPL2 | IMPL2 restores or formally dispositions the roots and pins exact canonical replacements; D/E/F/I review their own authority semantics. AID-082 lint is not a substitute. |
+| 6 | Storage/Consistency physical contract and evidence | OPEN — contract present, evidence missing | Candidate: `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (Candidate/Draft/Unverified/Informative). SC-04/05/06/10/12/13/17/18 remain EVIDENCE_REQUIRED; backend, WAL/flush/torn-write, crash/restore, replica visibility, fail-closed projection, anti-rollback, accepted COC/GID and repeatable RPO/RTO evidence plus exact-version Owner dispositions are missing. |
+| 7 | H idempotency namespace / replay boundary | OPEN — contract present, evidence missing | Candidate: `08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md` @ `a5f43d58ebee451260fc64c7e048b96401e89ef4` (Candidate/Draft; cross-Owner acceptance PENDING). HIR-05/06/08/12/14/16/17/18 remain EVIDENCE_REQUIRED; H/E/Storage acceptance, durable reservation, concurrency, replay, crash/recovery, Storage same-GID and C/G Attempt-join evidence are missing. |
+| 8 | Full-package bilingual semantic and source-revision parity | OPEN | Owner A/documentation Owners verify complete exact-head Canonical/EN/ZH-CN semantic parity and every source pin. |
+| 9 | DEC-13 normative approval evidence | RECORDED — AID-2026-096 | Exact six-blob scope only; #1189 remains OPEN and natural-person Owner/joint acceptance confirmation is still missing. |
+
+**Gate A: PARTIAL / OPEN.** Items 1, 2 and 9 are satisfied/recorded; items 3–8 remain open. Items 6 and 7 are now “contract present, evidence missing”, not CLOSED and not PASS.
+
+## 5. HIR-01…HIR-18 row-count review and expired baseline pin
+
+The H contract is in `08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md` §11 (not in the AID-099 directory), blob `a5f43d58ebee451260fc64c7e048b96401e89ef4`. Counts below are by the 18 §11 data rows, excluding header, separator and prose:
+
+| Class | Rows | IDs |
+|---|---:|---|
+| DOCUMENTED_ONLY | 10 | HIR-01, HIR-02, HIR-03, HIR-04, HIR-07, HIR-09, HIR-10, HIR-11, HIR-13, HIR-15 |
+| EVIDENCE_REQUIRED | 8 | HIR-05, HIR-06, HIR-08, HIR-12, HIR-14, HIR-16, HIR-17, HIR-18 |
+| PASS | 0 | — |
+
+The eight HIR EVIDENCE_REQUIRED rows are not satisfied by candidate prose. Implementation remains NOT VERIFIED and cross-Owner acceptance PENDING. This separate H count does not alter the 095 matrix's 72 NOT EVIDENCED cells.
+
+**Expired pin:** AID-099 manifest `14-ai-development/work-items/AID-2026-099/manifest.yaml` @ `8d87eef02b997eb0d976903d40dcac802b2d80ba` records `storage_aid_2026_098_exact_pin: NOT_AVAILABLE_ON_BASELINE` and says AID-098 was unavailable at historical baseline `d5107f68a7f1b61f5f2f7352fadf828aae06cf1c`; H contract §2 repeats it. This is stale baseline metadata, not a current repository gap: AID-098 is present on current main and its candidate blob is pinned above. This refresh does not rewrite AID-099's historical record. Current wording: “AID-2026-098 is available on current main; its contract remains Candidate/Draft/Unverified and supplies neither implementation evidence nor cross-Owner acceptance.”
+
+## 6. Gate B disposition
+
+**Gate B: PARTIAL / OPEN (NOT VERIFIED).** AID-082/098/099/100 do not establish exact-version implementation conformance, physical backend durability, crash/restore, production-like visibility/recovery or complete cross-Owner acceptance. Gate B is not CLOSED.
+
+## 7. Remaining items before Gate A can close
+
+1. Exact-head CI: all 16 required contexts succeed on and are read back against the final PR Head.
+2. Complete eight-flow A–I + Storage package, source pins, semantic parity and each relevant Owner's exact-version acceptance.
+3. IMPL2 restoration or governed disposition of D/E/F/I normative roots, followed by domain Owner acceptance.
+4. Storage: close SC-04/05/06/10/12/13/17/18 with backend transaction, crash, restore, concurrency, replica/visibility, anti-rollback, COC/GID and RPO/RTO evidence.
+5. H/E/Storage: close HIR-05/06/08/12/14/16/17/18 with durable namespace reservation, concurrency/replay, Unknown recovery, crash reconciliation, Storage receipt join and C/G Attempt mapping evidence.
+6. Owner A/documentation Owners verify full-package Canonical/EN/ZH-CN semantic and source-revision parity.
+7. Gate B remains separately open pending implementation, conformance and operational evidence.
+
+## 8. Non-claims and constraints
+
+- All 72 AID-095 checkpoint cells remain NOT EVIDENCED; 0 UPGRADED, 72 UNCHANGED, 0 DOWNGRADED; 0 PASS.
+- All eight flows remain BLOCKED_WITH_REASON; VERIFIED_BY_DOCUMENT remains 0.
+- DOCUMENTED_ONLY is not PASS; prose does not discharge EVIDENCE_REQUIRED.
+- AID-082 checkers/advisory workflow are governance/namespace lint, not runtime or semantic Owner acceptance evidence.
+- AID-100 full-tree checker/census is document-management evidence, not A–I/Storage implementation, crash, replay or visibility evidence.
+- No Runtime/product implementation, validator semantics, schema, test, workflow, deployment or Issue closure was changed or inferred.
+- Issue #1212 remains OPEN.
+
+## 9. Attribution
+
+user-authorized operator (delegated by account owner); 2026-11-26. Proxy registration and coordination only; no natural-person Owner signature is fabricated.
+
 ## Session role / use case
 
 Documentation author and evidence reviewer for the AID-2026-095 Gate A matrix refresh. The work was limited to reading exact current-main source blobs, rejudging the 72 existing checkpoint rows, drafting the canonical and bilingual evidence documents, registering AID-2026-107 and opening Draft PR #1290. No Runtime, validator, schema, API, DDL, test, workflow semantics, deployment or production state was changed.
