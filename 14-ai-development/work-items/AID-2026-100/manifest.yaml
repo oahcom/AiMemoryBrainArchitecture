@@ -93,7 +93,7 @@ scope:
     - "Validator implementation or semantics changes, except the single root-inventory constant declared under declared_exceptions; only per-record manifest classification data is otherwise reconciled."
     - "PR merge, deployment, issue closure, protocol freeze or normative promotion."
     - "Any fabricated Owner approval, authoritative source blob, independent review or global-uniqueness claim."
-  current_disposition: "PARTIAL — at execution time 14 source-backed roots RESTORED, 1 compiler root RECONSTRUCTED_FROM_MIRROR and 2 directory indexes AUTHORED_INDEX; after main advanced, 2 E roots and the 09-security-governance index are supplied by main (PR #1304 / AID-2026-110 and PR #1297 / AID-2026-109), leaving 12 RESTORED roots, 1 RECONSTRUCTED root and 1 AUTHORED_INDEX document carried by this PR; no Owner acceptance claimed."
+  current_disposition: "PARTIAL — this PR carries 5 RESTORED roots (D: 03-memory-brain/memory-brain-overview.md, 03-memory-brain/memory-lifecycle-manager.md; E: 04-memory-compiler/consolidation-and-conflict-resolution.md, 04-memory-compiler/event-ingestion-engine.md, 04-memory-compiler/evidence-and-provenance.md), 1 RECONSTRUCTED_FROM_MIRROR root (04-memory-compiler/compiler-stage-contract.md), 1 AUTHORED_INDEX document (05-memory-runtime/README.md) and the new 03-memory-brain/README.md index. Main independently carries the other 9 of the original 14 RESTORED roots (2 D + 2 E + 5 F) through PR #1297 / AID-2026-109, PR #1304 / AID-2026-110 and PR #1314 / AID-2026-113; this record re-claims none of them. No Owner acceptance is claimed."
 
 baseline_and_source_evidence:
   main_reconciliation_head: "81906cfc8d3cd477d26657520aa04d81466e7ce2"
@@ -190,7 +190,7 @@ session_evidence:
     session_reference_status: "NOT_AVAILABLE"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-100/session-evidence-source-restore.md"
 evidence_file: "14-ai-development/work-items/AID-2026-100/evidence-source-restore.md"
-evidence_blob: "88313e464e52d999d052186d600a6024acf721bc"
+evidence_blob: "b51f91ae22d33d5bcfc808708acd8a092ed07460"
 
 formal_registration:
   status: "COMPLETED_ON_CANDIDATE_BRANCH_WITH_BOUNDED_IDENTIFIER_SCAN"
@@ -218,7 +218,7 @@ acceptance_criteria:
     - "DECISION-ACCEPTANCE-03 is referenced as merged PR #1219 / AID-2026-093."
     - "AID-082 manifest and evidence remain unchanged."
     - "The AID-2026-100 Owner-assigned manifest, evidence, prompt and INDEX row are committed on PR #1220."
-    - "One compiler root carries RECONSTRUCTED_FROM_MIRROR provenance and exact EN/ZH-CN mirror pins; the 05-memory-runtime README is an AUTHORED_INDEX document, not a restoration; 09-security-governance is delivered by PR #1297 and is out of this record's claims."
+    - "One compiler root carries RECONSTRUCTED_FROM_MIRROR provenance and exact EN/ZH-CN mirror pins; the 05-memory-runtime README is an AUTHORED_INDEX document, not a restoration; the 04, 05 and 09 documents that main already carries are neither overwritten nor re-claimed."
     - "RESTORED and RECONSTRUCTED counts are separate."
     - "No validator implementation, runtime code, workflow definition, Issue closure or PR merge is changed."
   stage_0_exit_status: "PENDING_FINAL_READBACK_AND_CI"

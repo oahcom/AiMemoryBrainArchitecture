@@ -175,7 +175,7 @@ Two additional E roots already existed on main and were not overwritten. Two of 
 
 The other 10/15 F inventory entries lack existing EN/ZH-CN pairs and remain blocked. The compiler reconstruction and two authored README indexes above are not counted as F source restorations. No additional E/F candidate met the requested 鈥渆xact source blob plus existing bilingual mirror鈥?priority rule in this pass.
 
-**Accounting:** at execution time RESTORED = 14 source-backed roots (D 4 + E 5 + F 5); RECONSTRUCTED = 1 compiler-stage-contract root; AUTHORED_INDEX = 2 README indexes. After main advanced, 2 of the E roots and the 09-security-governance index are supplied by main (`PR #1304` / `AID-2026-110` and `PR #1297` / `AID-2026-109`), so this PR itself carries 12 RESTORED roots, 1 RECONSTRUCTED root and 1 AUTHORED_INDEX document. These categories are separate and must not be summed into a source-restoration count.
+**Accounting:** at execution time RESTORED = 14 source-backed roots (D 4 + E 5 + F 5); RECONSTRUCTED = 1 compiler-stage-contract root; AUTHORED_INDEX = 2 README indexes. After main advanced, 9 of the 14 RESTORED roots, the 09 index and the two 09-era E roots are supplied by main (`PR #1297` / `AID-2026-109`, `PR #1304` / `AID-2026-110`, `PR #1314` / `AID-2026-113`), so this PR itself carries 5 RESTORED roots (2 D + 3 E), 1 RECONSTRUCTED root and 1 AUTHORED_INDEX document. These categories are separate and must not be summed into a source-restoration count.
 
 ## 6. Validator, runtime, and governance boundaries
 
@@ -267,5 +267,18 @@ The other 10/15 F inventory entries lack existing EN/ZH-CN pairs and remain bloc
 - The `DO_NOT_MERGE` prohibition was removed from the manifest.
   `merge_authorization` states merge preconditions instead. Nothing in this
   record grants merge authorization.
+- Main advanced again before this branch landed: `PR #1297` / `AID-2026-109`
+  delivered `09-security-governance/`, `PR #1304` / `AID-2026-110` delivered two E
+  roots, and `PR #1314` / `AID-2026-113` delivered the remaining `04-memory-compiler`
+  and `05-memory-runtime` root sets together with two of the four D roots
+  (`canonical-memory-store.md`, `forget-fence-operation-and-publication-gate.md`).
+  Those paths are taken from main and produce no diff here.
+- After that reconciliation this PR carries: two D roots
+  (`memory-brain-overview.md`, `memory-lifecycle-manager.md`), three E roots
+  (`consolidation-and-conflict-resolution.md`, `event-ingestion-engine.md`,
+  `evidence-and-provenance.md`), the reconstructed `compiler-stage-contract.md`,
+  the authored `05-memory-runtime/README.md` index, the new
+  `03-memory-brain/README.md` index and the source-restore matrix. The other nine of
+  the original fourteen RESTORED roots are supplied by main and are not re-claimed.
 - Every number quoted above is tied to the run or head it names; no CI verdict
   is asserted for a head that was not observed.
