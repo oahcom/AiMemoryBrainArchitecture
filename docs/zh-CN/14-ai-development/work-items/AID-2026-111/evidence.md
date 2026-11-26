@@ -16,7 +16,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-26"
-      last_verification_note: "94 个测试名及运行元数据按用户提供的可复现执行记录登记；谓词来自精确 main blob。未声称 CI、生产、分布式后端或 Owner 验收。"
+      last_verification_note: "运行记录是固定提交上的本地 Linux 捕获；raw stdout 哈希仅标识本次捕获，可复现指纹使用文档定义的 exit/count/harness 多重集算法。谓词来自精确 main blob。未声称 CI、current main、生产、分布式后端或 Owner 验收。"
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -82,14 +82,17 @@ cargo test -p memory-storage-sqlite -p memory-event-store-sqlite --no-fail-fast
 | 测试二进制 | 8 |
 | Passed / failed | **99 / 0** |
 | stdout 字节数 | 9465 |
-| stdout SHA-256 | `a15e3862af4d6cd97a4cd8caf6f133f57e3c3636ba284bdfd5afaa9237ba2952` |
-| 本记录中提供的具名测试 | 94（用户提供这些名称；99 个通过项中另有 5 项未在所给清单中逐名列出） |
+| stdout SHA-256 | `a15e3862af4d6cd97a4cd8caf6f133f57e3c3636ba284bdfd5afaa9237ba2952` (this capture only) |
+| Normalised digest | `92c368733aa89e426d1508a55584a5a4b8f0cc4f9b91aab6723820f6260ca086` |
+| 测试名恢复情况 | recovered **94 of 99** passed tests（尽力恢复；libtest 输出交错可能吞掉 `... ok` 后缀） |
 
-**可复现前提：**完整克隆中包含精确提交 `a123ea4e414c9f74fa0c576fbd718049a7d9f917`，使用 WSL2 Ubuntu 24.04、rustup stable 1.100.0、相同命令及兼容的 bundled-SQLite 构建依赖。这是用户提供的本地执行记录，不是本工作项独立从 CI 获取的产物。
+**Raw 输出稳定性：**同一提交、同一命令连续执行 5 次，得到 5 个不同的 raw stdout SHA-256。原因包括 libtest 并行完成顺序、时长行、构建耗时，以及 SQLite 子进程继承 stdout 后的输出交错。因此上面的 raw SHA-256 仅标识本次捕获，不是可复现常量。
+
+**Harness 计数（权威）：**按完整 `test result:` 行求和，并剔除 `filtered out > 0` 的子进程行：`26 + 5 + 2 + 6 + 60 = 99`。不得直接数 `test ... ok` 行。测试名清单仅为 best-effort；以 harness 计数为准，不以名字清单为准。
 
 ### 2.2 纯 Rust 层——补充的用户执行记录
 
-- 环境：Windows 主机；MinGW 缺少 `cc1`，MSVC 缺少 `cl.exe`/`link.exe`。
+- 环境：WSL2 Ubuntu 24.04；rustup stable 1.100.0。
 - 精确 HEAD：`44dc21a4970192118ba434801b8ca05702ac582c`。
 - 命令原文：
 
@@ -103,11 +106,22 @@ cargo test -p memory-domain -p memory-storage -p memory-event-store -p bmcp-prot
 | 测试二进制 | 15 |
 | Passed / failed | **276 / 0** |
 | stdout 字节数 | 47066 |
-| stdout SHA-256 | `C18EF5FC121EEB9B486000180F52BAE8385385722A369ADDAB873FCF8716D7B9` |
+| stdout SHA-256 | `C18EF5FC121EEB9B486000180F52BAE8385385722A369ADDAB873FCF8716D7B9` (this capture only) |
+| Normalised digest | `73d97ed8f536aa06cf483f84e750ddbda610d56e8f5caee501fac6f198934eee` |
 
-该运行补充纯 Rust 领域/协议/Storage trait 证据。它运行于另一个提交，不能为 SQLite 精确头增加后端证据。
+该运行补充纯 Rust 领域/协议/Storage trait 证据。它运行于另一个固定提交（`44dc21a4…`），SQLite 与 memory-context 则运行于 `a123ea4e…`；不得将三组描述为同一提交。所给 normalised digest 按 exit code + passed/failed 总数 + 各 harness passed 数多重集排序后计算，不含顺序、时长和进程交错。测试名恢复情况：本证据记录中 **recovered 0 of 276**（未提供清单）；计数以 harness 为准。
 
-### 2.3 明确的负面构建证据
+### 2.3 Memory-context 组——用户提供的本地汇总执行证据
+
+- 环境：WSL2 Ubuntu 24.04。
+- 精确 HEAD：`a123ea4e414c9f74fa0c576fbd718049a7d9f917`（与 SQLite 组相同的固定提交）。
+- Passed / failed：**177 / 0**。
+- 精确命令、测试二进制数、stdout 字节数、raw stdout SHA-256、各 harness passed 多重集及测试名清单：**所给证据未记录**。
+- Normalised digest：**未提供**；仅凭汇总的 `177 passed` 无法推算。
+
+这是固定提交上的本地 Linux 执行，不是 CI，也不是 current `main`。测试名恢复情况：本证据记录中 **recovered 0 of 177**（未提供清单）；测试名清单属于 best-effort，不推断未提供的测试名覆盖。
+
+**Normalised digest 算法（可复现指纹）：**对 `exit code + passed/failed 总数 + 各 harness 块 passed 数多重集排序后` 计算 SHA-256。不包含测试顺序、时长、构建耗时和进程交错。上面的 SQLite 与 pure Rust digest 使用该算法；memory-context 未提供 digest。\n\n### 2.4 明确的负面构建证据
 
 Windows 主机上的 `cargo test --workspace` 因 `libsqlite3-sys v0.40.0` build script 无法执行 `cc1`（`gcc.exe: fatal error: cannot execute 'cc1'`）而 exit **101**；MSVC 同样缺少 `cl.exe`/`link.exe`。因此该 Windows 主机无法构建：`memory-storage-sqlite`、`memory-event-store-sqlite`、`memory-store`、`memory-compiler`、`memory-context`、`brain-cli`。
 
@@ -115,13 +129,13 @@ Windows 主机上的 `cargo test --workspace` 因 `libsqlite3-sys v0.40.0` build
 |---|---|
 | Exit code | **101** |
 | stdout 字节数 | 12456 |
-| stdout SHA-256 | `93BCDC26AB0B29CEDBEC56DD11BB735C8050DB18366A3F296B45C699C072C2B2` |
+| stdout SHA-256 | `93BCDC26AB0B29CEDBEC56DD11BB735C8050DB18366A3F296B45C699C072C2B2` (this capture only) |
 
 这是 Windows 主机工具链限制，不代表代码或测试失败。因此 SQLite 后端证据是在 WSL2 Linux 上产出，而不是 Windows 本机。
 
 ## 3. 证据边界——所有 PARTIAL_EVIDENCE 必须保留的限定
 
-SQLite 运行是 **Linux + bundled SQLite 本地执行**，**不是 CI**，不是分布式后端，不是多副本线性化，也不是生产拓扑。它不证明设备/控制器/文件系统断电语义、生产备份/故障切换 RPO/RTO、独立跨资源协调器验收或 Owner 验收。进程崩溃测试通过不自动等同于物理断电持久性。引用结果时必须保留上述精确 HEAD、命令和 SHA-256。
+三组正向测试均为**固定提交上的本地 Linux 执行**（SQLite 99 与 memory-context 177 位于 `a123ea4e`；pure Rust 276 位于 `44dc21a4`）。它们**不是 CI**，也**不是 current main 上的运行**，不能证明分布式后端、多副本线性化或生产拓扑。SQLite 组具体使用 bundled SQLite。它不证明设备/控制器/文件系统断电语义、生产备份/故障切换 RPO/RTO、独立跨资源协调器验收或 Owner 验收。进程崩溃测试通过不自动等同于物理断电持久性。引用结果时必须分别保留各组自己的精确 HEAD，以及已记录的命令。Raw stdout SHA-256 仅标识本次捕获；跨次可复现比较应使用 normalised digest。
 
 ## 4. 94 个具名测试到谓词的映射
 
