@@ -11,9 +11,9 @@ repository:
   name: "oahcom/AiMemoryBrainArchitecture"
   baseline_branch: "main"
   baseline_commit: "44dc21a4970192118ba434801b8ca05702ac582c"
-  latest_sync_parent: "3866a121fecbbdf402d50bb0cb2de0277d0275f5"
-  latest_sync_parent: "8915b63e0c736d62e05ff02b72efc551f5a4ba83"
   prior_sync_bases:
+    - "3866a121fecbbdf402d50bb0cb2de0277d0275f5"
+    - "8915b63e0c736d62e05ff02b72efc551f5a4ba83"
     - "69407c0781a00673852bc0dfbeef2b778d1d29fb"
     - "2d52b0c81dc1b779e49516fceb69d89cdc1d9c31"
     - "df54ed60321e2958c50e9649963608cb3cb3f3b1"
