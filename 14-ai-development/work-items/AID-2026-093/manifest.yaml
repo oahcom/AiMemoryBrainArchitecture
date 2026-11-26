@@ -187,9 +187,9 @@ verification:
   ci:
     exact_head: "PASS_ON_HEAD_6739452da77c809befd2a1b8dade4eaf94cc91e0; 16_REQUIRED_CHECKS_SUCCESS; STALE_AFTER_MAIN_ADVANCE_TO_d914e8a1; THIS_REFRESH_CREATES_A_NEW_HEAD"
     validator_changes: "NONE"
-    last_completed_head: "6739452da77c809befd2a1b8dade4eaf94cc91e0"
-    last_completed_runs: "16/16 required check jobs SUCCESS on prior exact Head 6739452da77c809befd2a1b8dade4eaf94cc91e0; stale after main advanced 66 commits."
-    current_head_after_latest_main_refresh: "RERUN_REQUIRED"
+    last_completed_head: "422b906da281d7fcd9e43767e5fbf1d2975948e6"
+    last_completed_runs: "16/16 required check jobs SUCCESS on exact merged PR Head 422b906da281d7fcd9e43767e5fbf1d2975948e6; job-level run IDs are recorded in evidence.md section 16."
+    current_head_after_post_merge_source_refresh: "RERUN_REQUIRED"
     local_git_and_python_checks: "NOT_RUN_IN_THIS_EXECUTION"
 
 acceptance:
@@ -263,3 +263,11 @@ branch_history_normalization: "Prior one-commit normalization on 515b7144320fd9f
 latest_forget_fence_contract_blob: "760a1d48011f2a66c23abcf825a3d067e79b8821"
 latest_system_boundaries_blob: "c2aa6823b69313ba27c34625f87f29d2be356606"
 forget_fence_source_status: "D-FORGET-CONTRACT-001 exists on main as Draft/Unverified/Informative; Owner acceptance and implementation remain pending. Storage fence rows are D-derived rebuildable projections only."
+
+post_merge_main_sha: "17b05a0234d861a8bd0b78bccea799b1c11c433f"
+post_merge_commit_tree: "93260fa138bd6c0b1a3a66ebd5a6130f5c6d6cf9"
+latest_context_version_blob: "27e9e5f092b17cf4013a533d07949eb73ac6ef4c"
+latest_applied_evidence_blob: "273efdd1b02bd9302fc968f07c6d094da2582a6e"
+context_version_source_status: "ContextVersion Immutability Decision is Draft/Unverified/Informative; G acceptance pending."
+applied_evidence_source_status: "Applied Evidence Contract is Draft/Unverified/Informative; C/G/H acceptance pending."
+post_merge_source_sync_status: "FOLLOWUP_PR_REQUIRED; matrix I-09/I-10 and DEC-11 pins added in follow-up PR; no Owner acceptance inferred."
