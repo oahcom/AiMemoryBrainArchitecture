@@ -1,0 +1,163 @@
+work_item_id: AID-2026-081
+title: Make the GOV-DOC-001 ratchet comment's count match its baseline, and check it
+class: GATE/TEST
+risk: R2
+risk_rationale: >-
+  One corrected comment and one added test in an already-executed test module. No gate
+  behaviour changes: the ratchet keeps the same baseline, and it stays allowed to be red on
+  main by design. The risk addressed is false assurance rather than damage. The workflow
+  comment stated 81 while the baseline handed to the ratchet held 77, and nothing compared
+  the two, so the number could rot unobserved (issue #1081). The added test compares two
+  counts and never runs the wrapped gate, so it cannot inherit the ratchet's red state.
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: b978d9bb4bff9454e1b89885a8887b6eab5e02cd
+tracking_issue: "#1081"
+
+prompt_id: AID-2026-081-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-081/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 7b761550e7cf5a64a3000b908b0a838e4e316b6db69f72d50d890c475f1eb3de
+prompt_bytes: 4428
+
+authorization:
+  implementation_write: >-
+    GRANTED for .github/workflows/gates.yml, scripts/ci/test_gate_ratchet.py, this work
+    item's own directory, and INDEX.md. NOT_GRANTED for any other path.
+  gate_behaviour_change: >-
+    GRANTED for adding one assertion to an already-executed test module, which can turn that
+    job red. NOT_GRANTED for changing the ratchet's pass/fail semantics, its baseline, or any
+    other workflow step.
+  schema_change: NOT_GRANTED - no manifest field is added, removed or retyped.
+  platform_state_change: >-
+    NOT_GRANTED for required status contexts. The check runs inside an existing job, so no
+    branch-protection payload is modified.
+  architecture_spec_change: NOT_GRANTED - no ADR and no canonical document is modified.
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-081/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-081/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-081/session-evidence-1081.md
+  files_to_modify:
+    - .github/workflows/gates.yml
+    - scripts/ci/test_gate_ratchet.py
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope: >-
+    Every other path. In particular scripts/ci/baselines/bilingual-docs.txt, which is not
+    regenerated (77 is what it already holds); scripts/bilingual-baseline.txt, the unrelated
+    baseline this work item asserts nothing about; and the historical re-measurement tables in
+    14-ai-development/ci-gates-and-ratchets.{en,zh-CN}.md, which record what was true at their
+    own commit rather than a current claim.
+
+acceptance_criteria:
+  - id: AC1
+    criterion: >-
+      The gates.yml comment states 77 and names the baseline file it describes, so the next
+      reader can tell what the number is a count of.
+    measurement: >-
+      The comment block above `Ratchet the GOV-DOC-001 full scan` contains
+      `GOV-DOC-001 full scan: 77 normative paths` and `scripts/ci/baselines/bilingual-docs.txt`.
+  - id: AC2
+    criterion: >-
+      The stated number is checked against the artifact it describes, and the check fails when
+      the number is edited to a wrong value.
+    measurement: >-
+      With the comment edited to 81, `python3 scripts/ci/test_gate_ratchet.py` exits 1 and
+      prints `gates.yml says 81 normative paths; bilingual-docs.txt has 77 entries`.
+  - id: AC3
+    criterion: The check passes on the corrected tree even though the ratchet is red on main.
+    measurement: >-
+      The suite exits 0 on this branch; the ratchet run is not invoked by the check, and
+      `gate_ratchet.py` still reports `baseline=77 current=77` with exit 0 while the wrapped
+      scan exits non-zero.
+  - id: AC4
+    criterion: >-
+      The check distinguishes "the artifacts disagree" from "the artifacts could not be read",
+      using this repository's 0/1/2 vocabulary.
+    measurement: >-
+      Removing the baseline path makes the run exit 2 and print `INCOMPLETE`; a wrong number
+      exits 1; the corrected tree exits 0.
+  - id: AC5
+    criterion: >-
+      The check runs in CI in an existing step, not only when someone remembers to run it.
+    measurement: >-
+      The test lives in scripts/ci/test_gate_ratchet.py, which the `Self-check the ratchet
+      wrapper` step of the `bilingual` job already executes on every pull request.
+
+findings:
+  - id: F1
+    severity: MEDIUM
+    statement: >-
+      The workflow comment disagreed with both artifacts it describes: it said 81, the
+      baseline held 77 entries, and the live scan reported 77 failing paths.
+    evidence: >-
+      Measured at 1f5ba824: `wc -l scripts/ci/baselines/bilingual-docs.txt` = 77 with 77
+      non-comment entries; `check_bilingual_docs_full.py` prints `001.` through `077.` and
+      `GOV-DOC-001 full scan: FAIL`; `gate_ratchet.py` prints `baseline=77 current=77`.
+  - id: F2
+    severity: MEDIUM
+    statement: >-
+      Nothing compared the prose to the artifact. The baseline is consumed by the ratchet,
+      which checks the gate's live failure set, not the comment; a wrong comment therefore
+      survives any number of green ratchet runs.
+    evidence: >-
+      `scripts/ci/gate_ratchet.py` reads the baseline and the wrapped command's output only;
+      no script under scripts/ references `gates.yml` except the workflow-shape checks, which
+      validate step structure and not comment contents.
+  - id: F3
+    severity: LOW
+    statement: >-
+      A second baseline file with a similar name exists and is not the one this gate uses.
+      A check written against the wrong file would pass while the real defect survived.
+    evidence: >-
+      `scripts/bilingual-baseline.txt` has 79 lines, 77 non-comment entries and a comment
+      header; the ratchet step names `scripts/ci/baselines/bilingual-docs.txt`, which has 77
+      lines and no header.
+  - id: F4
+    severity: LOW
+    statement: >-
+      Two documentation tables still print `baseline=81 current=81`. They are records of a
+      measurement taken at their own commit, not claims about the current tree, and editing
+      them would falsify a historical record rather than fix a claim.
+    evidence: >-
+      `14-ai-development/ci-gates-and-ratchets.en.md` section 6.1 and its zh-CN counterpart
+      head their tables "re-measured after rebasing" and date the audit row 2026-11-22.
+
+implementation:
+  status: IMPLEMENTED_IN_BRANCH
+  pull_request: ASSIGNED_AT_OPEN
+  merge_commit_sha: NOT_MERGED
+  note: >-
+    The comment correction and the test land in this branch. The pull request number cannot
+    be written into the commit that opens it.
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    No independent review is recorded. This manifest was written by the session that made the
+    change, so an APPROVE from that same session would be self-review and is not claimed.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1081"
+    implementing_ai_session: a1081-opencode-author
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-081/prompt-v1.md
+    executed_prompt_sha256: 7b761550e7cf5a64a3000b908b0a838e4e316b6db69f72d50d890c475f1eb3de
+    executed_prompt_bytes: 4428
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-081/session-evidence-1081.md
