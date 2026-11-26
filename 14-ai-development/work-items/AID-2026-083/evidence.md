@@ -7,8 +7,13 @@ document_metadata:
       decision_status: Draft
       approver: null
       decision_date: null
-      approved_version: {scheme: git, value: null}
-      approval_scope: {type: Full-document, included_sections: [], included_assets: []}
+      approved_version:
+        scheme: git
+        value: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
       approval_applicability: Applicable-To-Current-Version
       evidence_reference: ["AID-2026-083", "PR #1220", "PR #1219", "2026-11-26 delegated authorization"]
       revocation: null

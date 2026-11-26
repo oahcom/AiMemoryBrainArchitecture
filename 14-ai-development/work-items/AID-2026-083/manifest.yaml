@@ -156,8 +156,8 @@ session_evidence:
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_AVAILABLE"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-083/session-evidence-source-restore.md"
-  evidence_file: "14-ai-development/work-items/AID-2026-083/evidence.md"
-  evidence_blob: "bfc81a9857f208ee23cf64ba63d2a4159c2a8b79"
+evidence_file: "14-ai-development/work-items/AID-2026-083/evidence.md"
+evidence_blob: "35dfe3d36963bb90fce3c2f448200feba900ee39"
 
 formal_registration:
   status: "COMPLETED_ON_CANDIDATE_BRANCH_WITH_BOUNDED_IDENTIFIER_SCAN"
