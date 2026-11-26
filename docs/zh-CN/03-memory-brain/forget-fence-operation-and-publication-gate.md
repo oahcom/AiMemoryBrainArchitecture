@@ -7,22 +7,17 @@ document_metadata:
       decision_status: Draft
       approver: null
       decision_date: null
-      approved_version:
-        scheme: git
-        value: null
+      approved_version: null
       approval_scope:
         type: Full-document
-      approval_applicability: Applicable-To-Current-Version
+      approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "AID-2026-11-26-SOURCE-RESTORE-02"
-        - "Issue #1177"
-        - "source commit: b525e1f8fee2471a131e4a38efda99804045e424"
-        - "original source blob: 4da0b61ba3656a768ea56b4a2a24e09da4e21cd5"
+        - "14-ai-development/work-items/AID-2026-150/manifest.yaml"
       revocation: null
     evidence_verification:
-      verification_status: Unverified
-      last_verified_date: null
-      last_verification_note: "Existing translated companion body preserved; semantic parity review pending."
+      verification_status: Verified
+      last_verified_date: "2026-11-26"
+      last_verification_note: "Navigation stub now identifies the restored canonical source; body update is limited to source-status/path accuracy, not a semantic translation certification."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -35,9 +30,13 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: null
-    canonical_scope_id: null
-    canonical_scope_keywords: []
+    canonical_scope: "D ForgetFence, producer admission, barrier and publication eligibility semantics"
+    canonical_scope_id: "memory-brain/forget-fence-publication-gate"
+    canonical_scope_keywords:
+      - "memory-brain"
+      - "forget-fence"
+      - "producer-admission"
+      - "publication-gate"
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
@@ -46,15 +45,14 @@ document_metadata:
     en: "docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md"
     zh-CN: null
 ---
-
 # Forget Fence Operation 与 Publication Gate（遗忘栅栏操作与发布门）
 
 - 文档 ID：D-FORGET-GATE-001
 - 版本：1.0（拆分式双语伴随文档）
 - 源分支：session-d-memory-brain-2026-11-16
-- 源文件版本：c6f343011a8be0fa0d4bae2659ecffc33d9557ac
+- 源文件版本：RESTORED — 原始源正文 Blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5` 已恢复到规范根路径；根文件带 GOV-DOC-002 metadata。
 - 英文对应：[Forget Fence Operation and Publication Gate](../../en/03-memory-brain/forget-fence-operation-and-publication-gate.md)
-- 源规范：[D 规范源](../../../03-memory-brain/forget-fence-operation-and-publication-gate.md)（源提交 `b525e1f8fee2471a131e4a38efda99804045e424`；原始源 Blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5`）。
+- 规范源：[已恢复的根级文档](../../../03-memory-brain/forget-fence-operation-and-publication-gate.md)（源正文 Blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5`；恢复文件包含 GOV-DOC-002 metadata）。本页仍是非规范导航 Stub；拆分文件族等待 Owner 处置。
 - 状态：D 语义契约为 DECIDED；E/Storage 执行、I 授权新鲜度和跨模块 Conformance 仍为 OPEN
 
 源规范较长，拆分为四个中英并行阅读部分。源文件仍是规范性来源；拆分文档完整覆盖其章节。

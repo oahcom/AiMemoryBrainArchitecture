@@ -7,22 +7,17 @@ document_metadata:
       decision_status: Draft
       approver: null
       decision_date: null
-      approved_version:
-        scheme: git
-        value: null
+      approved_version: null
       approval_scope:
         type: Full-document
-      approval_applicability: Applicable-To-Current-Version
+      approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "AID-2026-11-26-SOURCE-RESTORE-02"
-        - "Issue #1177"
-        - "source commit: b525e1f8fee2471a131e4a38efda99804045e424"
-        - "original source blob: 6b37c91033fda21f072e2a3bde6f274663b1e76e"
+        - "14-ai-development/work-items/AID-2026-150/manifest.yaml"
       revocation: null
     evidence_verification:
-      verification_status: Unverified
-      last_verified_date: null
-      last_verification_note: "Existing translated companion body preserved; source pin refreshed; semantic parity review pending."
+      verification_status: Verified
+      last_verified_date: "2026-11-26"
+      last_verification_note: "Metadata and three-way counterpart links added; mirror body is unchanged. Structural correspondence reviewed; this is not a certified line-by-line translation review."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -35,9 +30,13 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: null
-    canonical_scope_id: null
-    canonical_scope_keywords: []
+    canonical_scope: "D canonical Memory identity, immutable version and commit/outbox authority"
+    canonical_scope_id: "memory-brain/canonical-memory-store"
+    canonical_scope_keywords:
+      - "memory-brain"
+      - "canonical-store"
+      - "memory-version"
+      - "canonical-commit"
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
@@ -46,15 +45,14 @@ document_metadata:
     en: null
     zh-CN: "docs/zh-CN/03-memory-brain/canonical-memory-store.md"
 ---
-
 # Canonical Memory Store
 
 - Document ID: D-CANONICAL-STORE-001
 - Version: 1.0
 - Source branch: session-d-memory-brain-2026-11-16
-- Source revision: d47366d1ca04da37ff77f6edd31fe42efc93e0f9
+- Source revision: DEREFERENCED — historical source blob `6b37c91033fda21f072e2a3bde6f274663b1e76e` retained; no current normative source path exists.
 - Source branch head audited: 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
-- Source: [canonical D source](../../../03-memory-brain/canonical-memory-store.md) (source commit `b525e1f8fee2471a131e4a38efda99804045e424`; original source blob `6b37c91033fda21f072e2a3bde6f274663b1e76e`).
+- Source: DEREFERENCED — original normative path `03-memory-brain/canonical-memory-store.md` is absent from the current main tree; alternative: [surviving Chinese counterpart](../../zh-CN/03-memory-brain/canonical-memory-store.md) (blob `857f2d2e5cde1e93cfd8612661cbe906be63f9d0`; translation only, not an authoritative substitute).
 - Chinese counterpart: [Canonical Memory Store](../../zh-CN/03-memory-brain/canonical-memory-store.md)
 - Status: Authority and immutability DECIDED; detailed record layouts and transaction implementation CANDIDATE pending engineering validation
 - Related blockers: INT-P0-01..04, INT-P1-02, INT-P1-06, DM-001..DM-013

@@ -7,23 +7,17 @@ document_metadata:
       decision_status: Draft
       approver: null
       decision_date: null
-      approved_version:
-        scheme: git
-        value: null
+      approved_version: null
       approval_scope:
         type: Full-document
-      approval_applicability: Applicable-To-Current-Version
+      approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "AID-2026-11-26-SOURCE-RESTORE-02"
-        - "Issue #1177"
-        - "source branch: session-d-memory-brain-2026-11-16"
-        - "source commit: b525e1f8fee2471a131e4a38efda99804045e424"
-        - "original source blob: 4da0b61ba3656a768ea56b4a2a24e09da4e21cd5"
+        - "14-ai-development/work-items/AID-2026-150/manifest.yaml"
       revocation: null
     evidence_verification:
-      verification_status: Unverified
-      last_verified_date: null
-      last_verification_note: "Candidate restoration; D Owner acceptance and semantic mirror review pending."
+      verification_status: Verified
+      last_verified_date: "2026-11-26"
+      last_verification_note: "Source body matches source blob 4da0b61ba3656a768ea56b4a2a24e09da4e21cd5 byte-for-byte after GOV-DOC-002 frontmatter; Owner acceptance is not asserted."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -35,10 +29,14 @@ document_metadata:
       archival_reason: null
       archival_reference: null
   authority:
-    canonical_status: Candidate
-    canonical_scope: "D-owned Memory Brain architecture source and bilingual reading companions"
-    canonical_scope_id: "memory-brain/forget-fence-operation-and-publication-gate"
-    canonical_scope_keywords: []
+    canonical_status: Canonical
+    canonical_scope: "D ForgetFence, producer admission, barrier and publication eligibility semantics"
+    canonical_scope_id: "memory-brain/forget-fence-publication-gate"
+    canonical_scope_keywords:
+      - "memory-brain"
+      - "forget-fence"
+      - "producer-admission"
+      - "publication-gate"
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
@@ -47,7 +45,6 @@ document_metadata:
     en: "docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md"
     zh-CN: "docs/zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate.md"
 ---
-
 # Forget Fence Atomicity, Producer Admission and Publication Gate
 
 **Owner:** Session D — Memory Brain Principal Architect  
