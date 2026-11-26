@@ -80,7 +80,7 @@ session:
   session_reference_reason: "The exact current ChatGPT session identifier is not exposed in the available execution context. Historical session identifiers belong to other sessions and were not substituted."
 prompt:
   file: 14-ai-development/work-items/AID-2026-089/prompt-v1.md
-  sha256: 58dd684c5eb6e5d727bf232aed00f1c34620fc27567396cff192fe1479e0329d
+  sha256: 7682d9287605c24109c6502963b0dd73f133a46b608ba495bc0a0da10292a903
   bytes: 4258
   provenance: NOT_VERIFIED
   provenance_reason: "The committed prompt text is available, but no immutable raw-source capture proves byte-for-byte origin."
@@ -111,5 +111,5 @@ The following are exact GitHub tool-result excerpts observed during this executi
 ```text
 {"tree":"dc14937dcf9920d871feda3f1b063997bb8b41c0","merge_commit":"b81df7d0f9ae4d70ee2c57dba70cf8dd7690a19a","branch_update":{"success":true}}
 {"head":"b81df7d0f9ae4d70ee2c57dba70cf8dd7690a19a","base":"8d90843aec4583c3282a3b45da31c7d6fd734cf2","mergeable":true,"draft":true}
-{"prompt_sha256":"58dd684c5eb6e5d727bf232aed00f1c34620fc27567396cff192fe1479e0329d","prompt_bytes":4258}
+{"prompt_sha256":"7682d9287605c24109c6502963b0dd73f133a46b608ba495bc0a0da10292a903","prompt_bytes":4258}
 ```
