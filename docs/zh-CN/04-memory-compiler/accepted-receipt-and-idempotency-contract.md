@@ -1,10 +1,62 @@
+---
+document_metadata:
+  domain: memory-compiler
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version:
+        scheme: git
+        value: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Applicable-To-Current-Version
+      evidence_reference:
+        - "AID-2026-082"
+        - "source branch: session-e-memory-compiler-2026-11-16"
+        - "source commit: ee098e14747d9915de5b3efb63b3a8dd77f670ed"
+        - "original source blob: 5ca77a5b48e69afb3bc81429baf538be7dce4d46"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Exact source Blob pinned; translated body retained; semantic parity review pending."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords:
+      - bilingual-mirror
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "04-memory-compiler/accepted-receipt-and-idempotency-contract.md"
+    en: "docs/en/04-memory-compiler/accepted-receipt-and-idempotency-contract.md"
+    zh-CN: null
+---
+
 # Accepted Receipt、Compiler 完成与幂等契约
 
 - 文档 ID：E-RECEIPT-001
 - 版本：1.0
 - 源分支：session-e-memory-compiler-2026-11-16
-- 源文件版本：DEREFERENCED — 保留历史源 Blob `5ca77a5b48e69afb3bc81429baf538be7dce4d46`；当前仓库不存在可解析的规范性源文件。
-- 源规范：DEREFERENCED — 原规范源路径 `04-memory-compiler/accepted-receipt-and-idempotency-contract.md` 在当前 main tree 中不存在；替代物：[英文对照版](../../en/04-memory-compiler/accepted-receipt-and-idempotency-contract.md)（Blob `f2a4007f4b17e33de9bcd183c57ee504cfeef6cd`；仅为对照文本，不是规范性替代源）。
+- 源文件版本：精确源 Blob `5ca77a5b48e69afb3bc81429baf538be7dce4d46`，源提交 `ee098e14747d9915de5b3efb63b3a8dd77f670ed`。
+- 源规范：[已恢复的规范源](../../../04-memory-compiler/accepted-receipt-and-idempotency-contract.md)（`5ca77a5b48e69afb3bc81429baf538be7dce4d46`）。
 - 对应英文：[Accepted Receipt, Compiler Completion and Idempotency Contract](../../en/04-memory-compiler/accepted-receipt-and-idempotency-contract.md)
 - 状态：E 的 CANDIDATE 契约；Storage 实现、D Producer API、H Envelope 和 I Policy 批准仍为 OPEN
 

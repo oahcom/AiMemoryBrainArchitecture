@@ -1,11 +1,62 @@
+---
+document_metadata:
+  domain: memory-brain
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version:
+        scheme: git
+        value: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Applicable-To-Current-Version
+      evidence_reference:
+        - "AID-2026-11-26-SOURCE-RESTORE-02"
+        - "Issue #1177"
+        - "source commit: b525e1f8fee2471a131e4a38efda99804045e424"
+        - "original source blob: 6b37c91033fda21f072e2a3bde6f274663b1e76e"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Existing translated companion body preserved; source pin refreshed; semantic parity review pending."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "03-memory-brain/canonical-memory-store.md"
+    en: null
+    zh-CN: "docs/zh-CN/03-memory-brain/canonical-memory-store.md"
+---
+
 # Canonical Memory Store
 
 - Document ID: D-CANONICAL-STORE-001
 - Version: 1.0
 - Source branch: session-d-memory-brain-2026-11-16
-- Source revision: DEREFERENCED — historical source blob `6b37c91033fda21f072e2a3bde6f274663b1e76e` retained; no current normative source path exists.
+- Source revision: d47366d1ca04da37ff77f6edd31fe42efc93e0f9
 - Source branch head audited: 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
-- Source: DEREFERENCED — original normative path `03-memory-brain/canonical-memory-store.md` is absent from the current main tree; alternative: [surviving Chinese counterpart](../../zh-CN/03-memory-brain/canonical-memory-store.md) (blob `857f2d2e5cde1e93cfd8612661cbe906be63f9d0`; translation only, not an authoritative substitute).
+- Source: [canonical D source](../../../03-memory-brain/canonical-memory-store.md) (source commit `b525e1f8fee2471a131e4a38efda99804045e424`; original source blob `6b37c91033fda21f072e2a3bde6f274663b1e76e`).
 - Chinese counterpart: [Canonical Memory Store](../../zh-CN/03-memory-brain/canonical-memory-store.md)
 - Status: Authority and immutability DECIDED; detailed record layouts and transaction implementation CANDIDATE pending engineering validation
 - Related blockers: INT-P0-01..04, INT-P1-02, INT-P1-06, DM-001..DM-013

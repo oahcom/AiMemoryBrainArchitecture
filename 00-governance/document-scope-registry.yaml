@@ -47,7 +47,9 @@ governed:
   - 00-governance
   - 01-system-architecture
   - 02-domain-model
+  - 03-memory-brain
   - 04-memory-compiler
+  - 05-memory-runtime
   - 06-memory-context
   - 07-agent-integration
   - 08-bmcp-protocol

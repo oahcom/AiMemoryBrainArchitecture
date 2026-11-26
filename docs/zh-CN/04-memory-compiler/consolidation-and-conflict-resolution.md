@@ -1,3 +1,55 @@
+---
+document_metadata:
+  domain: memory-compiler
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version:
+        scheme: git
+        value: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Applicable-To-Current-Version
+      evidence_reference:
+        - "AID-2026-082"
+        - "source branch: session-e-memory-compiler-2026-11-16"
+        - "source commit: ee098e14747d9915de5b3efb63b3a8dd77f670ed"
+        - "original source blob: d16f8e2e41a6cca81ad285e5f79f075d87e64edb"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Exact source Blob pinned; translated body retained; semantic parity review pending."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords:
+      - bilingual-mirror
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "04-memory-compiler/consolidation-and-conflict-resolution.md"
+    en: "docs/en/04-memory-compiler/consolidation-and-conflict-resolution.md"
+    zh-CN: null
+---
+
 # 巩固与冲突解决
 
 - 文档 ID：E-CONSOLIDATION-001

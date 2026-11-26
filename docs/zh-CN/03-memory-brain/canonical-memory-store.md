@@ -1,11 +1,62 @@
+---
+document_metadata:
+  domain: memory-brain
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version:
+        scheme: git
+        value: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Applicable-To-Current-Version
+      evidence_reference:
+        - "AID-2026-11-26-SOURCE-RESTORE-02"
+        - "Issue #1177"
+        - "source commit: b525e1f8fee2471a131e4a38efda99804045e424"
+        - "original source blob: 6b37c91033fda21f072e2a3bde6f274663b1e76e"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Existing translated companion body preserved; source pin refreshed; semantic parity review pending."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "03-memory-brain/canonical-memory-store.md"
+    en: "docs/en/03-memory-brain/canonical-memory-store.md"
+    zh-CN: null
+---
+
 # Canonical Memory Store（权威记忆存储）
 
 - 文档 ID：D-CANONICAL-STORE-001
 - 版本：1.0
 - 源分支：session-d-memory-brain-2026-11-16
-- 源文件版本：DEREFERENCED — 保留历史源 Blob `6b37c91033fda21f072e2a3bde6f274663b1e76e`；当前仓库不存在可解析的规范性源文件。
+- 源文件版本：d47366d1ca04da37ff77f6edd31fe42efc93e0f9
 - 审查时源分支 HEAD：6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
-- 源规范：DEREFERENCED — 原规范源路径 `03-memory-brain/canonical-memory-store.md` 在当前 main tree 中不存在；替代物：[英文对照版](../../en/03-memory-brain/canonical-memory-store.md)（Blob `414fe03fd40fb8ad46061d2d8c7d29ba2667f252`；仅为对照文本，不是规范性替代源）。
+- 源规范：[D 规范源](../../../03-memory-brain/canonical-memory-store.md)（源提交 `b525e1f8fee2471a131e4a38efda99804045e424`；原始源 Blob `6b37c91033fda21f072e2a3bde6f274663b1e76e`）。
 - 对应英文：[Canonical Memory Store](../../en/03-memory-brain/canonical-memory-store.md)
 - 状态：权威性和不可变性为 DECIDED；详细记录布局和事务实现为 CANDIDATE，等待工程验证
 - 相关阻塞：INT-P0-01..04、INT-P1-02、INT-P1-06；DM-001..DM-013

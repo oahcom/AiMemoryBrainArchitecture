@@ -1,0 +1,53 @@
+work_item_id: "AID-2026-082"
+record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
+registration_status: "FORMAL_STAGE_0_REGISTERED_WITH_RECORDED_LIMITATIONS"
+title: "E/F/H/I normative-source enumeration and restoration"
+external_workflow_reference: "SOURCE-RESTORE-03 (evidence reference only; not repository ID)"
+repository:
+  name: "oahcom/AiMemoryBrainArchitecture"
+  carrier_pr: 1220
+  implementation_branch: "impl/2026-11-26-normative-source-restore"
+  baseline_head_at_registration: "7cf6b0adcd531c875e14bab0b6fa70ff75db08eb"
+authority:
+  accountable_owner: "Owner A / Governance coordination"
+  content_owners: ["E", "F", "H", "I"]
+  implementation_authority: "Human Owner delegated operator authorization for documentation restoration only"
+  acceptance_authority: "Each relevant content Owner; Owner A / Governance for repository governance"
+objective: "Enumerate E/F/H/I source-branch Markdown candidates, pin source Blobs, inspect bodies/frontmatter, establish bilingual EN/ZH-CN mirrors, add GOV-DOC-002 metadata and index registration, and record every blocked file without promoting unaccepted material."
+scope_status: "OWNER_AUTHORIZED"
+in_scope:
+  - "E: session-e-memory-compiler-2026-11-16, 25 Markdown files under 04-memory-compiler/"
+  - "F: session-f-memory-runtime, 15 Markdown files under 05-memory-runtime/"
+  - "H: session-h-bmcp-protocol, 111 Markdown files under 08-bmcp-protocol/ (tests excluded)"
+  - "I: session-i-security-governance-2026-11-16, 89 Markdown files under 09-security-governance/"
+  - "Exact source Blob pin inventory and root/EN/ZH-CN path presence observation"
+  - "Per-file restoration/blocker evidence and bilingual evidence mirrors"
+  - "GOV-DOC-002 registration and work-item INDEX"
+out_of_scope:
+  - "Owner acceptance, governance approval, or promotion to Approved/Normative"
+  - "Validator semantic changes, runtime/product code, schema implementation, deployment, merge, or Issue closure"
+registration:
+  registration_is_complete: true
+  stage_0: "REGISTERED_WITH_RECORDED_LIMITATIONS"
+  scope_confirmation: "HUMAN_OWNER_AUTHORIZED_IN_CURRENT_INSTRUCTION"
+  substantive_acceptance: "NOT_GRANTED"
+inventory:
+  enumerated_markdown_files: 240
+  body_frontmatter_readback: "INCOMPLETE — eight primary documents inspected; F runtime-overview exact source body restored; remaining listed bodies not yet read; F runtime-overview exact source body copied to candidate root"
+  bilingual_semantic_parity: "NOT_VERIFIED"
+  restored_source_files: 1
+  per_file_status: "See evidence.md; 239 files BLOCKED pending source/body/frontmatter and mirror verification; 1 F runtime-overview restored as Candidate with semantic parity pending"
+  branch_heads:
+    E: "session-e-memory-compiler-2026-11-16@ee098e14747d9915de5b3efb63b3a8dd77f670ed"
+    F: "session-f-memory-runtime@1908ce4d233b20f7cafd00cb679affd01bd15174"
+    H: "session-h-bmcp-protocol@3e8b33df18b9e6fc757ca84ff07a12faebc78e74"
+    I: "session-i-security-governance-2026-11-16@8abddf814467b271344a9814613a6b7ca6a446c6"
+constraints:
+  I36_GOV_01_to_10: "GOVERNANCE-BLOCKED; approval evidence=None; effective version/time=None"
+  candidate_status: "No file may be marked Approved or Normative by this work item"
+  validator_semantics: "UNCHANGED"
+  runtime_product_code: "UNCHANGED"
+  deployment: "NOT_AUTHORIZED"
+  merge: "NOT_AUTHORIZED"
+  issue_closure: "NOT_AUTHORIZED"
+stage_0_exit_status: "INVENTORY_COMMITTED; SOURCE_RESTORATION_PENDING"
