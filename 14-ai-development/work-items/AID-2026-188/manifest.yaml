@@ -1,0 +1,127 @@
+work_item_id: AID-2026-188
+title: >-
+  Verify that the 03-memory-brain normative root and its three canonical documents
+  are already registered, and correct the dispatch premise that asked for the
+  registration again
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  Record only. Four documents and one index row are added; no checker line, baseline
+  entry, registry value, workflow or mirror changes. The residual risk is that a later
+  reader mistakes this record for a registration, so every premise it contradicts is
+  quoted verbatim in prompt-v1.md and re-measured in evidence.md section 2.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-26
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 1e9341da603dec78377fed240f4d6dbabaa8838e
+prompt_status: NOT_RECORDED
+prompt_provenance: DISPATCHED_TASK_FILE
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: 1e9341da603dec78377fed240f4d6dbabaa8838e
+  assigned_id: AID-2026-188
+  allocation_rule: "highest number observed in any pull request title, branch or body at allocation time was AID-2026-187 (open PR #1336); 188 was the next unused number and does not appear anywhere in the tree"
+  observed_occupied: [170, 172, 173, 183, 186, 187]
+evidence:
+  record: 14-ai-development/work-items/AID-2026-188/evidence.md
+  mirrors:
+    - docs/en/14-ai-development/work-items/AID-2026-188/evidence.md
+    - docs/zh-CN/14-ai-development/work-items/AID-2026-188/evidence.md
+  measurements:
+    normative_root_count: 13
+    memory_brain_in_roots: true
+    introduced_by_commit: 6ab36b3697a0994d8de449d2b9c344f23aac0fda
+    bilingual_gaps: 77
+    baseline_entries_frozen: 77
+    baseline_entries_ratchet: 77
+    gaps_new: 0
+    gaps_gone: 0
+    baseline_copies_agree: true
+    memory_brain_canonical_documents: 3
+    memory_brain_mirrors_en: 13
+    memory_brain_mirrors_zh_cn: 13
+    memory_brain_classified: "3/3"
+    root_literals_in_python: 1
+  test_runs:
+    - command: python -m unittest discover -s scripts -p "test_check_bilingual*"
+      result: "Ran 15 tests, OK"
+    - command: python -m unittest discover -s tests -p "test_check_bilingual*"
+      result: "Ran 7 tests, OK"
+  not_measured:
+    - No CI context result is claimed at any SHA
+    - No merge SHA or post-merge blob digest is claimed
+    - "The whole-tree inventory result (77 violations) is a local run, not a CI run"
+
+# prompt_status above records that no prompt-library registration exists. The
+# dispatched contract text itself was captured by the operator and is pinned so the
+# premise stated to the worker can be read against the measurement that contradicts it.
+session_evidence:
+  - role: "VERIFICATION_RECORD_AUTHOR"
+    issue_refs:
+      - "#1212"
+    implementing_ai_session: "opencode-go/deepseek-v4.1-flash"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-188/prompt-v1.md"
+    executed_prompt_sha256: "e0741732d3bd920e93729ecbd088cccc9bed2145c0e679891733f0aa804df9d2"
+    executed_prompt_bytes: 5934
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-188/session-evidence.md"
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-188/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-188/evidence.md
+    - 14-ai-development/work-items/AID-2026-188/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-188/session-evidence.md
+    - docs/en/14-ai-development/work-items/AID-2026-188/evidence.md
+    - docs/zh-CN/14-ai-development/work-items/AID-2026-188/evidence.md
+  files_to_modify:
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope:
+    - scripts/check_bilingual_docs.py
+    - scripts/check_bilingual_docs_full.py
+    - scripts/bilingual-baseline.txt content
+    - scripts/ci/baselines/bilingual-docs.txt content
+    - 00-governance/document-scope-registry.yaml
+    - docs/en/03-memory-brain/ and docs/zh-CN/03-memory-brain/ mirrors
+    - the nine further canonical documents named in related work items
+    - .github/workflows
+    - branch protection
+
+non_goals:
+  - Re-stating the 03-memory-brain registration as a change made by this work item
+  - Ruling on whether the 77 frozen gaps are acceptable
+  - Restoring any canonical document beyond the three already present
+  - Closing #1212 or asserting Owner acceptance
+
+carrier:
+  branch: docs/2026-11-26-normative-root-03
+  pull_request: PENDING
+  draft: false
+  merge_authorization: >-
+    Only after all 16 required contexts succeed on the exact final PR head, branch
+    freshness is rechecked, and any conflicts are resolved.
+review:
+  status: NOT_ASSIGNED
+  independent_reviewer: NOT_ASSIGNED
+  natural_person_owner_acceptance: NOT_RECORDED
+acceptance:
+  gate: PENDING_CI
+notes:
+  - >-
+    The dispatched premise (13 roots, 03-memory-brain absent) is self-contradictory:
+    the set holds 13 entries precisely because the root is the fourth of them, and it
+    would hold 12 without it.
+  - >-
+    The dispatched monkeypatch observation (77 -> 77, new=0, gone=0) is the signature
+    of inserting an element a set already contains. It was reproduced and is used here
+    as evidence for the opposite conclusion to the one it was offered for.
+  - >-
+    Two prior dispatches of this unit failed on an upstream 429. Their failure mode is
+    unrelated to the premise error, but it is the reason a third attempt arrived at all.
