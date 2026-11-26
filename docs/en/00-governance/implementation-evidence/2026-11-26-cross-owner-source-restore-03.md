@@ -37,6 +37,6 @@ document_metadata:
 
 The source-branch tree enumeration found **240 Markdown files**: E 25, F 15, H 111, I 89. See [the canonical work-item evidence ledger](../../../../14-ai-development/work-items/AID-2026-082/evidence.md) for every path, source Blob SHA, main-root presence and EN/ZH-CN mirror-path observation.
 
-This is an inventory, not a restoration completion claim. Eight primary source documents were inspected; full body/frontmatter readback for the remaining files is incomplete. No source document was restored by the inventory commit. Every listed file remains blocked pending exact content review and bilingual semantic parity.
+This is an inventory, not a restoration completion claim. Eight primary source documents were inspected; full body/frontmatter readback for the remaining files is incomplete. One source document is restored as Candidate: `05-memory-runtime/runtime-overview.md`, original source Blob `b7a948f014c3ad882a35a18bfc8ce025b26ab85a`; EN/ZH-CN bodies retained, semantic parity pending. Every listed file remains blocked pending exact content review and bilingual semantic parity.
 
 I36-GOV-01..10 remain GOVERNANCE-BLOCKED. Approval evidence and effective version/time remain None. No file is Approved or Normative by this work item. Validator semantics and runtime/product code are unchanged.
