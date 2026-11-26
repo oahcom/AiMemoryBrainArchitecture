@@ -116,7 +116,7 @@ findings:
 implementation:
   status: IN_PROGRESS
   branch: docs/aid-2026-082-governance-traceability-checks
-  pull_request: "#1243"
+  pull_request: PENDING_PR_CREATION
   merge_commit_sha: NOT_MERGED
   implementation_head: PENDING_FINAL_HEAD
   implemented_files:
