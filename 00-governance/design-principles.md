@@ -4,7 +4,7 @@ document_metadata:
   role: normative-standard
   lifecycle:
     approval:
-      decision_status: Approved
+      decision_status: Under-Review
       approver: NOT_RECORDED
       decision_date: NOT_RECORDED
       approved_version:
@@ -14,7 +14,7 @@ document_metadata:
         type: Full-document
         included_sections: []
         included_assets: []
-      approval_applicability: Applicable-To-Current-Version
+      approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "00-governance/design-principles.md"
       revocation: null
@@ -23,7 +23,7 @@ document_metadata:
       last_verified_date: null
       last_verification_note: "Status is DECIDED in the document body. No formal approval record, approver identity or decision date exists in this repository; recorded as NOT_RECORDED rather than inferred."
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Pending-Reapproval
     supersession:
       supersedes: []
       supersession_reason: null
@@ -49,6 +49,8 @@ document_metadata:
 ---
 
 # Design Principles
+
+**Current version status: CANDIDATE / Pending-Reapproval — NOT APPROVED.** The recorded direction does not approve P-01 through P-16 in this version. Their DECIDED labels record design direction only; they are not evidence of formal approval. No historical approver or approval date is asserted. Resubmission requires revised exact-version evidence and a separate attributable approval decision.
 
 This document defines the principles that constrain all subsystem designs.
 

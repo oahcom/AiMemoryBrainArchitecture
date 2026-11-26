@@ -4,7 +4,7 @@ document_metadata:
   role: normative-standard
   lifecycle:
     approval:
-      decision_status: Approved
+      decision_status: Under-Review
       approver: NOT_RECORDED
       decision_date: NOT_RECORDED
       approved_version:
@@ -14,7 +14,7 @@ document_metadata:
         type: Full-document
         included_sections: []
         included_assets: []
-      approval_applicability: Applicable-To-Current-Version
+      approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "00-governance/architecture-invariants.md"
       revocation: null
@@ -23,7 +23,7 @@ document_metadata:
       last_verified_date: null
       last_verification_note: "Status is DECIDED in the document body. No formal approval record, approver identity or decision date exists in this repository; recorded as NOT_RECORDED rather than inferred."
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Pending-Reapproval
     supersession:
       supersedes: []
       supersession_reason: null
@@ -50,7 +50,9 @@ document_metadata:
 
 # Architecture Invariants
 
-These invariants are normative constraints for all subsystem specifications and future implementations.
+**Current version status: CANDIDATE / Pending-Reapproval — NOT APPROVED.** The current set of Architecture Invariants (I-01 through I-24) has not received a new formal approval. Their DECIDED labels and normative classification do not establish approval. No historical approver or approval date is asserted. Resubmission requires revised exact-version evidence and a separate attributable approval decision.
+
+These invariants are proposed normative constraints for all subsystem specifications and future implementations, subject to the separate approval decision.
 
 | ID | Invariant |
 |---|---|
