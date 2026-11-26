@@ -213,6 +213,64 @@ document_metadata:
 | 可见性 | NOT EVIDENCED | **UNCHANGED** | NOT EVIDENCED | SC-10/12/13 均为 EVIDENCE_REQUIRED：没有 read-your-writes、replica visibility、fail-closed projection 或 restore-before-exposure 证明。 基线：原矩阵 `00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md` @ `1d162b527eacb96e2cff24eec5fcf5a66014039a`；#082/#100 不构成此项实现证据。 |
 
 
+## 4. Gate A 九项闭合清单（刷新后）
+
+| # | Gate A 条目 | 当前状态 | 闭合条件 |
+|---|---|---|---|
+| 1 | 分支与当前 main 同步 | 在审查基线 `df54ed60321e2958c50e9649963608cb3cb3f3b1` 上 SATISFIED；若 main 前进须重查 | 最终 Head 审查时 merge base 等于当前 main，分支不得落后。 |
+| 2 | 跨 Owner 角色处置（10 个角色：3 ACCEPT / 7 CONDITIONAL / 0 REJECT） | 已记录的代理处置为 SATISFIED | 7 项条件义务仍在；未声称自然人 Owner 签署。 |
+| 3 | 精确 Head CI | OPEN_PENDING_FINAL_HEAD | 全部 16 项必需上下文必须在 PR 最终 Head 成功。 |
+| 4 | 完整 A–I + Storage/Consistency 组合审查工件 | OPEN | Owner A 协调覆盖 8 条流程和 9 个检查点维度的完整精确版本包；相关 Owner 接受自身边界。 |
+| 5 | 缺失的 D/E/F/I 规范根/合同 | OPEN — IMPL2 | IMPL2 恢复或正式处置规范根并固定精确 canonical 替代来源；D/E/F/I 审查自身权威语义。AID-082 lint 不能替代。 |
+| 6 | Storage/Consistency 物理合同与证据 | OPEN — 合同已存在，证据缺失 | 候选合同：`10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78`（Candidate/Draft/Unverified/Informative）。SC-04/05/06/10/12/13/17/18 仍为 EVIDENCE_REQUIRED；后端、WAL/flush/torn-write、崩溃/恢复、副本可见性、fail-closed projection、防回滚、已接受 COC/GID、可重复 RPO/RTO 证据和精确版本 Owner 处置仍缺。 |
+| 7 | H 幂等命名空间 / 重放边界 | OPEN — 合同已存在，证据缺失 | 候选合同：`08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md` @ `a5f43d58ebee451260fc64c7e048b96401e89ef4`（Candidate/Draft；跨 Owner 接受 PENDING）。HIR-05/06/08/12/14/16/17/18 仍为 EVIDENCE_REQUIRED；H/E/Storage 接受、持久 reservation、并发、重放、崩溃/恢复、Storage same-GID 和 C/G Attempt join 证据仍缺。 |
+| 8 | 全包双语语义与源修订一致 | OPEN | Owner A / 文档 Owners 验证完整精确 Head 的 Canonical/EN/ZH-CN 语义一致及所有来源 pin。 |
+| 9 | DEC-13 规范批准证据 | RECORDED — AID-2026-096 | 仅限精确六个 blob 范围；#1189 仍 OPEN，自然人 Owner / 联合验收确认仍缺。 |
+
+**Gate A：PARTIAL / OPEN。** 第 1、2、9 项已满足/记录；第 3–8 项仍 OPEN。第 6、7 项现在的准确状态是“合同已存在，证据缺失”，不是 CLOSED，也不是 PASS。
+
+## 5. HIR-01…HIR-18 行计数复核与过期基线 pin
+
+H 合同位于 `08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md` §11（不在 AID-099 目录下），blob `a5f43d58ebee451260fc64c7e048b96401e89ef4`。以下按 §11 的 18 个数据行统计，排除表头、分隔行和说明文字：
+
+| 类别 | 行数 | ID |
+|---|---:|---|
+| DOCUMENTED_ONLY | 10 | HIR-01、HIR-02、HIR-03、HIR-04、HIR-07、HIR-09、HIR-10、HIR-11、HIR-13、HIR-15 |
+| EVIDENCE_REQUIRED | 8 | HIR-05、HIR-06、HIR-08、HIR-12、HIR-14、HIR-16、HIR-17、HIR-18 |
+| PASS | 0 | — |
+
+8 个 HIR EVIDENCE_REQUIRED 行不能由候选 prose 满足。实现仍 NOT VERIFIED，跨 Owner 接受仍 PENDING。这是独立的 H 计数，不改变 095 矩阵的 72 个 NOT EVIDENCED 单元格。
+
+**过期 pin：** AID-099 manifest `14-ai-development/work-items/AID-2026-099/manifest.yaml` @ `8d87eef02b997eb0d976903d40dcac802b2d80ba` 记录 `storage_aid_2026_098_exact_pin: NOT_AVAILABLE_ON_BASELINE`，并称 AID-098 在历史基线 `d5107f68a7f1b61f5f2f7352fadf828aae06cf1c` 上不可用；H 合同 §2 也重复了该表述。这是过期的历史基线元数据，不是当前仓库缺口：AID-098 已在当前 main，候选合同 blob 已在上方固定。本刷新不改写 AID-099 历史记录。当前正确表述：“AID-2026-098 已在当前 main 可用；其合同仍为 Candidate/Draft/Unverified，不提供实现证据或跨 Owner 接受。”
+
+## 6. Gate B 处置
+
+**Gate B：PARTIAL / OPEN（NOT VERIFIED）。** AID-082/098/099/100 未建立精确版本实现一致性、物理后端持久性、崩溃/恢复、类生产可见性/恢复或完整跨 Owner 接受。Gate B 未 CLOSED。
+
+## 7. Gate A 闭合前的剩余事项
+
+1. 精确 Head CI：全部 16 项必需上下文必须在 PR 最终 Head 成功，并针对该 SHA 读回。
+2. 完整八流程 A–I + Storage 组合包、来源 pin、语义一致性及相关 Owner 精确版本接受。
+3. IMPL2 恢复或治理处置 D/E/F/I 规范根，随后由领域 Owner 接受。
+4. Storage：以后端事务、崩溃、恢复、并发、副本/可见性、防回滚、COC/GID 和 RPO/RTO 证据关闭 SC-04/05/06/10/12/13/17/18。
+5. H/E/Storage：以持久 namespace reservation、并发/重放、Unknown 恢复、崩溃协调、Storage 回执 join 和 C/G Attempt 映射证据关闭 HIR-05/06/08/12/14/16/17/18。
+6. Owner A / 文档 Owners 验证完整包 Canonical/EN/ZH-CN 语义与源修订一致。
+7. Gate B 独立保持 OPEN，等待实现、一致性和运行证据。
+
+## 8. 非主张与约束
+
+- AID-095 的 72 个检查点单元格全部保持 NOT EVIDENCED；UPGRADED 0、UNCHANGED 72、DOWNGRADED 0；PASS 0。
+- 8 条流程全部保持 BLOCKED_WITH_REASON；VERIFIED_BY_DOCUMENT 仍为 0。
+- DOCUMENTED_ONLY 不等于 PASS；prose 不会解除 EVIDENCE_REQUIRED。
+- AID-082 checker/advisory workflow 是治理/命名空间 lint，不是运行时或 Owner 语义接受证据。
+- AID-100 全树 checker/census 是文档管理证据，不是 A–I/Storage 实现、崩溃、重放或可见性证据。
+- 未修改 Runtime/product implementation、validator 语义、schema、test、workflow、部署或 Issue 状态；未推断 Owner 接受。
+- Issue #1212 保持 OPEN。
+
+## 9. 署名
+
+user-authorized operator (delegated by account owner)；2026-11-26。仅代理登记与协调；未伪造自然人 Owner 签署。
+
 ## Session role / use case
 
 本会话担任 AID-2026-095 Gate A 矩阵刷新的文档作者与证据审读者。工作仅限于读取当前 main 精确源 blob、逐条重判 72 个检查点、编写 canonical 与双语证据文档、登记 AID-2026-107 并创建 Draft PR #1290。未修改 Runtime、validator、schema、API、DDL、test、workflow 语义，也未改变部署或生产状态。
