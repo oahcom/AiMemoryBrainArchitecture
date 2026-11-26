@@ -34,7 +34,7 @@ excluded_records:
     disposition: "EXCLUDED_FROM_MANIFEST_CONSISTENCY_GATE"
     rationale: "Stage 0 source-restoration registration; its status-like fields describe registration, source inventory, evidence and per-file review states, not normal Work Item implementation lifecycle fields."
 
-  - path: "14-ai-development/work-items/AID-2026-083/manifest.yaml"
+  - path: "14-ai-development/work-items/AID-2026-090/manifest.yaml"
     record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
     disposition: "EXCLUDED_FROM_MANIFEST_CONSISTENCY_GATE"
     rationale: "Stage 0 source-restoration registration. Its status-like fields describe registration, mirror reconstruction provenance, source pins and per-file review states, not normal Work Item implementation lifecycle fields."

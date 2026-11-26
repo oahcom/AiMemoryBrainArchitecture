@@ -17,12 +17,12 @@ document_metadata:
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "AID-2026-11-26-SOURCE-RESTORE-02"
-        - "AID-2026-083"
+        - "AID-2026-090"
       revocation: null
     evidence_verification:
       verification_status: Unverified
       last_verified_date: null
-      last_verification_note: "Historical task-specific input capture. Its initial provisional AID-2026-080 allocation was superseded after the mainline collision was identified; this record is carried forward under AID-2026-083 without changing the embedded user instruction. The complete effective model payload remains NOT_VERIFIED."
+      last_verification_note: "Historical task-specific input capture. Its initial provisional AID-2026-080 allocation was superseded after the mainline collision was identified; this record is carried forward under AID-2026-090 without changing the embedded user instruction. The complete effective model payload remains NOT_VERIFIED."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -57,3 +57,6 @@ document_metadata:
 3) 提交到 PR #1220 同一分支，重新触发 Session Evidence Gate；
 4) 回报：分配到的标准 Work Item ID、改动路径、CI 最新结果、剩余阻塞。
 不合并、不部署、不关闭 Issue、不修改 validator 逻辑。
+
+
+RENUMBERED_FROM: AID-2026-083 — PR #1250 occupies AID-2026-083; coordinating authority reassigned SOURCE-RESTORE-02 to AID-2026-090.

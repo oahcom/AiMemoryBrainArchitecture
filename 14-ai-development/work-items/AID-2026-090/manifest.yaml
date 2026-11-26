@@ -2,7 +2,9 @@ manifest_version: "1.0"
 record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
 registration_stage: "STAGE_0"
 registration_status: "FORMAL_STAGE_0_REGISTERED_WITH_RECORDED_LIMITATIONS"
-work_item_id: "AID-2026-083"
+work_item_id: "AID-2026-090"
+renumbered_from: "AID-2026-083"
+renumbering_note: "AID-2026-083 was allocated to PR #1250 (Issue acceptance evidence); SOURCE-RESTORE-02 is assigned AID-2026-090 by the coordinating authority."
 identifier_status: "ALLOCATED_AFTER_MAIN_AND_TARGET_HEAD_CHECK; BRANCH_NAME_SEARCH_CLEAR; GLOBAL_BRANCH_CONTENT_SCAN_NOT_EXHAUSTIVE"
 
 title: "SOURCE-RESTORE-02 — preserve source-backed D/E/F candidates and reconstruct three Gate A roots from pinned EN mirrors"
@@ -11,7 +13,7 @@ external_workflow_references:
   - id: "AID-2026-11-26-SOURCE-RESTORE-02"
     kind: "EXTERNAL_WORKFLOW_REFERENCE"
     repository_work_item_id: false
-    note: "External workflow identifier retained only as evidence; AID-2026-083 is the repository-standard Work Item ID."
+    note: "External workflow identifier retained only as evidence; AID-2026-090 is the repository-standard Work Item ID; AID-2026-083 is reserved by PR #1250."
   - id: "PR #1220"
     kind: "CARRIER"
   - id: "PR #1219"
@@ -37,7 +39,7 @@ identifier_evidence:
     - "main @ 515b7144320fd9fcc1e1a2c3d2d2744d979b4ca8"
     - "impl/2026-11-26-normative-source-restore @ afbbbf6098bb1318093d9d3b26c4b1ccb0d2d5e9"
     - "impl/2026-11-26-decision-acceptance-matrix @ 590ddcb5f2f3a78f74dee5d33f4b3c82888d8e10"
-    - "branch-name search for AID-2026-083"
+    - "branch-name search for AID-2026-090"
   checked_result:
     main_work_item_index_max: "AID-2026-081"
     target_directory_in_main: "NOT_FOUND"
@@ -77,7 +79,7 @@ scope:
     - "Restore mainline AID-2026-080 manifest, prompt snapshot and INDEX row unchanged."
     - "Remove PR #1220's duplicate AID-2026-081 DECISION-ACCEPTANCE registration; preserve mainline AID-081 Issue #1081 identity and reference current PR #1219 / AID-086."
     - "Keep AID-2026-082 manifest and evidence unchanged."
-    - "Create AID-2026-083 Stage 0 manifest, prompt and evidence."
+    - "Create AID-2026-090 Stage 0 manifest, prompt and evidence."
     - "Reconstruct 04-memory-compiler/compiler-stage-contract.md, 05-memory-runtime/README.md and 09-security-governance/README.md from pinned EN mirrors; add exact-name EN/ZH-CN mirror pairs."
     - "Keep RESTORED and RECONSTRUCTED accounting separate."
     - "Continue E/F candidate assessment only where exact source blobs and bilingual mirrors already exist."
@@ -135,7 +137,7 @@ baseline_and_source_evidence:
       status: "Draft / Candidate / Informative"
 
 prompt:
-  prompt_file: "14-ai-development/work-items/AID-2026-083/prompt-v1.md"
+  prompt_file: "14-ai-development/work-items/AID-2026-090/prompt-v1.md"
   prompt_version: "v1"
   prompt_status: "HISTORICAL_TASK_INPUT_CARRIED_FORWARD"
   prompt_sha256: "6f74f728dfa47141ebee108c462e7e853983f1700e91e25c8f98a7b47ec07a95"
@@ -150,19 +152,19 @@ prompt:
 session_evidence:
   - role: "IMPLEMENTER_AND_REGISTRATION_COORDINATOR"
     implementing_ai_session: "NOT_AVAILABLE"
-    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-083/prompt-v1.md"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-090/prompt-v1.md"
     executed_prompt_sha256: "6f74f728dfa47141ebee108c462e7e853983f1700e91e25c8f98a7b47ec07a95"
     executed_prompt_bytes: 2130
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_AVAILABLE"
-    session_evidence_ref: "14-ai-development/work-items/AID-2026-083/session-evidence-source-restore.md"
-evidence_file: "14-ai-development/work-items/AID-2026-083/evidence.md"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-090/session-evidence-source-restore.md"
+evidence_file: "14-ai-development/work-items/AID-2026-090/evidence.md"
 evidence_blob: "35dfe3d36963bb90fce3c2f448200feba900ee39"
 
 formal_registration:
   status: "COMPLETED_ON_CANDIDATE_BRANCH_WITH_BOUNDED_IDENTIFIER_SCAN"
   index_entry_verified: true
-  identifier_allocation: "AID-2026-083"
+  identifier_allocation: "AID-2026-090"
   retrospective_registration: true
   note: >-
     This Stage 0 registration records the owner-authorized repair and candidate artifacts.

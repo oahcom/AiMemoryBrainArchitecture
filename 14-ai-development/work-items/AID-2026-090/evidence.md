@@ -15,7 +15,7 @@ document_metadata:
         included_sections: []
         included_assets: []
       approval_applicability: Applicable-To-Current-Version
-      evidence_reference: ["AID-2026-083", "PR #1220", "PR #1219", "2026-11-26 delegated authorization"]
+      evidence_reference: ["AID-2026-090", "PR #1220", "PR #1219", "2026-11-26 delegated authorization"]
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -45,7 +45,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# AID-2026-083 — SOURCE-RESTORE-02 execution evidence
+# AID-2026-090 — SOURCE-RESTORE-02 execution evidence
 
 **Attribution:** `user-authorized operator (delegated by account owner)`  
 **Date:** 2026-11-26  
@@ -62,12 +62,12 @@ This is a Stage 0 evidence record. It does not constitute Owner acceptance, sour
 | PR #1220 head before reconciliation | `afbbbf6098bb1318093d9d3b26c4b1ccb0d2d5e9` |
 | PR #1220 base at readback | `dcf9a6348ce5b0802e79f3a3f9c497109f0fb4a8` |
 | Merge base | `dcf9a6348ce5b0802e79f3a3f9c497109f0fb4a8` |
-| AID-2026-083 in current main | NOT_FOUND |
-| AID-2026-083 in PR #1220 head | NOT_FOUND |
-| Branch-name search for AID-2026-083 | NO RESULT |
+| AID-2026-090 in current main | NOT_FOUND |
+| AID-2026-090 in PR #1220 head | NOT_FOUND |
+| Branch-name search for AID-2026-090 | NO RESULT |
 | Exhaustive content scan of every active branch | NOT COMPLETED |
 
-AID-2026-083 is allocated after checking current main, the target PR head, and branch-name search results. Global branch-content uniqueness is **NOT_FULLY_VERIFIED**; no exhaustive recursive scan of every active branch is claimed.
+AID-2026-090 is allocated after checking current main, the target PR head, and branch-name search results. Global branch-content uniqueness is **NOT_FULLY_VERIFIED**; no exhaustive recursive scan of every active branch is claimed.
 
 ## 2. AID identity repair
 
@@ -76,7 +76,7 @@ AID-2026-083 is allocated after checking current main, the target PR head, and b
 - Restored the mainline manifest unchanged: `14-ai-development/work-items/AID-2026-080/manifest.yaml`, blob `c58f0b6761b7ee40cfa90a1ecc2a027a7240a490`.
 - Restored the mainline prompt snapshot unchanged: `14-ai-development/work-items/AID-2026-080/prompt-v1.md`, blob `84342823a31a47fdad048e931314b0f0d8e6ca92`.
 - Preserved the current main INDEX row for the original Issue #1201 work item, including its current merged-carrier status.
-- The SOURCE-RESTORE-02 manifest and prompt that had occupied the AID-080 path on the PR branch were moved to AID-2026-083. The old AID-080 `session-evidence-source-restore.md` path is removed after its record is carried forward under AID-2026-083.
+- The SOURCE-RESTORE-02 manifest and prompt that had occupied the AID-080 path on the PR branch were moved to AID-2026-090. The old AID-080 `session-evidence-source-restore.md` path is removed after its record is carried forward under AID-2026-090.
 
 ### AID-2026-081 — duplicate registration removed
 
@@ -92,12 +92,12 @@ AID-2026-083 is allocated after checking current main, the target PR head, and b
 - Evidence: `14-ai-development/work-items/AID-2026-082/evidence.md`, blob `56f3305e58d17403d082ae72a311c8a98d527e69`.
 - Its manifest, evidence, and registration identity are not modified by this repair. Its existing INDEX row is carried forward unchanged.
 
-### AID-2026-083 — new registration
+### AID-2026-090 — new registration
 
-- New Stage 0 registration: `14-ai-development/work-items/AID-2026-083/manifest.yaml`.
+- New Stage 0 registration: `14-ai-development/work-items/AID-2026-090/manifest.yaml`.
 - Evidence: this file.
-- Historical task-specific prompt capture: `14-ai-development/work-items/AID-2026-083/prompt-v1.md`; original input hash `6f74f728dfa47141ebee108c462e7e853983f1700e91e25c8f98a7b47ec07a95`, 2130 bytes. Complete effective prompt remains NOT_VERIFIED.
-- Session evidence: `14-ai-development/work-items/AID-2026-083/session-evidence-source-restore.md`; stable platform session identifier remains NOT_AVAILABLE.
+- Historical task-specific prompt capture: `14-ai-development/work-items/AID-2026-090/prompt-v1.md`; original input hash `6f74f728dfa47141ebee108c462e7e853983f1700e91e25c8f98a7b47ec07a95`, 2130 bytes. Complete effective prompt remains NOT_VERIFIED.
+- Session evidence: `14-ai-development/work-items/AID-2026-090/session-evidence-source-restore.md`; stable platform session identifier remains NOT_AVAILABLE.
 
 ## 3. Gate A — three RECONSTRUCTED roots
 
@@ -198,3 +198,11 @@ The other 10/15 F inventory entries lack existing EN/ZH-CN pairs and remain bloc
 - No claim that the 14 RESTORED source-backed roots are accepted by their domain Owners.
 - No claim that AID-083 is globally unique across every historical or active branch.
 - No claim that PR #1220 is merged or that any Issue is closed.
+
+
+## 9. Coordinated renumbering
+
+- `RENUMBERED_FROM: AID-2026-083`.
+- The provisional AID-2026-083 assignment is withdrawn. **AID-2026-083 is occupied by PR #1250 (Issue acceptance evidence, 16/16 checks green)** and is not available to this work item.
+- The coordinating authority assigned SOURCE-RESTORE-02 **AID-2026-090**. The current main and PR #1220 Head were checked for an AID-090 directory; neither contains one. Branch-name search for AID-090 returned no branch.
+- All active manifest paths, INDEX links, evidence references, and PR description now use AID-2026-090. AID-083 is retained only as the explicit historical renumbering source.

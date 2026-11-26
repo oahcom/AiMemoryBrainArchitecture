@@ -1,5 +1,6 @@
 ---
 # provenance: RECONSTRUCTED_FROM_MIRROR
+# RENUMBERED_FROM: AID-2026-083 — occupied by PR #1250; current work item AID-2026-090
 document_metadata:
   domain: "memory-compiler"
   role: "design-specification"
@@ -17,7 +18,7 @@ document_metadata:
         included_assets: []
       approval_applicability: Applicable-To-Current-Version
       evidence_reference:
-        - "AID-2026-083"
+        - "AID-2026-090"
         - "provenance: RECONSTRUCTED_FROM_MIRROR"
         - "EN mirror blob: 6d733294232a93aa59123009d2a2801d9b83f459"
         - "ZH-CN mirror blob: ad386cac5636b4ba3eaf8b93ad93afcb444e8b46"
