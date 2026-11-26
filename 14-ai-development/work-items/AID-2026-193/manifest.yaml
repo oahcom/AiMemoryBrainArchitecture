@@ -98,7 +98,7 @@ session_evidence:
       - "#1212"
     implementing_ai_session: "NOT_RECORDED"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-193/prompt-v1.md"
-    executed_prompt_sha256: "363f44832823ebc26b69dbb1a3ec2db816ba582aa2c6ca334dc7c1fcdf994f92"
+    executed_prompt_sha256: "26d0d03c0ebad4cc20a4dd8d3ab4a0170cacd7549aac9bd6043744dfd4329f32"
     executed_prompt_bytes: 3605
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_RECORDED"
