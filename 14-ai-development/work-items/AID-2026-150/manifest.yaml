@@ -9,7 +9,7 @@ date: "2026-11-26"
 repository:
   name: "oahcom/AiMemoryBrainArchitecture"
   baseline_branch: "main"
-  baseline_commit: "8722a37b0cd72dc550d99c0eaebe9e7556ce2f95"
+  baseline_commit: "ac301e09799bcc094e015db4e12d2e6ff53d5010"
 identifier_allocation:
   policy: "ACCOUNT_FIXED_RANGE"
   assigned_range_start: "AID-2026-150"
@@ -18,8 +18,8 @@ identifier_allocation:
   id_status: "PROVISIONAL"
   selection_rule: "First unused identifier in the assigned account-fixed range; never derive an identifier from INDEX maximum or max+1."
   occupancy_check:
-    observed_main: "8722a37b0cd72dc550d99c0eaebe9e7556ce2f95"
-    index_blob_sha: "956b50f234e72de82676e00fcafb512e1dabfb1e"
+    observed_main: "ac301e09799bcc094e015db4e12d2e6ff53d5010"
+    index_blob_sha: "54134d33919f0c26b7a3ab66f488847a376ede00"
     exact_id_present_in_index: false
     work_item_directory_present: false
     pull_request_present: true
