@@ -53,9 +53,9 @@ Registration coordinator for the user-authorized Stage 0 work-item registration 
 
 # Actual AI input
 
-The task-specific user instruction for this registration turn is embedded in the metadata-bearing record `14-ai-development/work-items/AID-PENDING-MERGE/prompt-v1.md` (2130 UTF-8 bytes; SHA-256 `6f74f728dfa47141ebee108c462e7e853983f1700e91e25c8f98a7b47ec07a95`).
+The task-specific user instruction for this registration turn is embedded in the metadata-bearing record `14-ai-development/work-items/AID-2026-094/prompt-v1.md` (2130 UTF-8 bytes; SHA-256 `6f74f728dfa47141ebee108c462e7e853983f1700e91e25c8f98a7b47ec07a95`).
 
-The complete effective payload, including inherited system instructions and any baseline prompts, is NOT_AVAILABLE from the platform's exposed session records. The file as a whole is not byte-identical to the original message and is explicitly NOT_VERIFIED as a complete executed-prompt snapshot; no completeness claim is made. The historical visible output below recorded a provisional AID-2026-080 allocation; this was later found to collide with the existing mainline Issue #1201 work item and is superseded by the owner-directed AID-PENDING-MERGE allocation.
+The complete effective payload, including inherited system instructions and any baseline prompts, is NOT_AVAILABLE from the platform's exposed session records. The file as a whole is not byte-identical to the original message and is explicitly NOT_VERIFIED as a complete executed-prompt snapshot; no completeness claim is made. The historical visible output below recorded a provisional AID-2026-080 allocation; this was later found to collide with the existing mainline Issue #1201 work item and is superseded by the owner-directed AID-2026-094 allocation.
 
 # AI-visible output
 
@@ -70,7 +70,7 @@ The work-item allocation remains bounded: main and the PR head were checked; an 
 ## 2026-11-26 owner-authorized continuation addendum
 
 - Attribution: `user-authorized operator (delegated by account owner)`; date: `2026-11-26`.
-- The previous provisional AID-2026-080 assignment is superseded because AID-080 is occupied by the existing mainline Issue #1201 work item. The SOURCE-RESTORE-02 record is carried under AID-PENDING-MERGE after withdrawing all provisional numeric allocations; the merge queue assigns the final number at merge time. Global branch-content uniqueness remains NOT_FULLY_VERIFIED.
+- The previous provisional AID-2026-080 assignment is superseded because AID-080 is occupied by the existing mainline Issue #1201 work item. The SOURCE-RESTORE-02 record is carried under AID-2026-094 after withdrawing all provisional numeric allocations; the merge queue assigns the final number at merge time. Global branch-content uniqueness remains NOT_FULLY_VERIFIED.
 - Current PR #1219 decision-acceptance registration is PR #1219（编号待合并分配）; the earlier AID-2026-081 reference is stale. Mainline AID-2026-081 remains the separate Issue #1081 work item.
 - Three Gate A root documents are reconstructed from pinned EN mirrors, separately classified as RECONSTRUCTED, not RESTORED. No authoritative root source blob is claimed.
 - No PR merge, Issue closure, validator implementation change or runtime/product code change was performed by this execution.
@@ -78,6 +78,6 @@ The work-item allocation remains bounded: main and the PR head were checked; an 
 
 ## Coordinated renumbering addendum
 
-- `RENUMBERED_FROM: AID-2026-090; prior chain: AID-2026-080 (path reuse) → AID-2026-083 → AID-2026-090 → AID-PENDING-MERGE. Final AID assigned by merge queue at merge time.`.
+- `RENUMBERED_FROM: AID-2026-090; prior chain: AID-2026-080 (path reuse) → AID-2026-083 → AID-2026-090 → AID-2026-094. Final AID assigned by merge queue at merge time.`.
 - AID-2026-083 is occupied by PR #1250 (Issue acceptance evidence); the merge queue will assign the final repository-standard AID at merge time.
-- All current repository paths and active references use AID-PENDING-MERGE. The old number remains here only as historical renumbering evidence.
+- All current repository paths and active references use AID-2026-094. The old number remains here only as historical renumbering evidence.

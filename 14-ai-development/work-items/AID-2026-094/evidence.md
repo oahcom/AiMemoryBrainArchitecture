@@ -16,7 +16,7 @@ document_metadata:
         included_assets: []
       approval_applicability: Applicable-To-Current-Version
       evidence_reference:
-        - "AID-PENDING-MERGE"
+        - "AID-2026-094"
         - "PR #1220"
         - "PR #1219"
         - "2026-11-26 delegated authorization"
@@ -53,7 +53,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# AID-PENDING-MERGE — SOURCE-RESTORE-02 execution evidence
+# AID-2026-094 — SOURCE-RESTORE-02 execution evidence
 
 **Attribution:** `user-authorized operator (delegated by account owner)`  
 **Date:** 2026-11-26  
@@ -66,16 +66,16 @@ This is a Stage 0 evidence record. It does not constitute Owner acceptance, sour
 
 | Observation | Exact value |
 |---|---|
-| Current main at reconciliation | `515b7144320fd9fcc1e1a2c3d2d2744d979b4ca8` |
+| Current main at reconciliation | `81906cfc8d3cd477d26657520aa04d81466e7ce2` |
 | PR #1220 head before reconciliation | `afbbbf6098bb1318093d9d3b26c4b1ccb0d2d5e9` |
-| PR #1220 base at readback | `dcf9a6348ce5b0802e79f3a3f9c497109f0fb4a8` |
-| Merge base | `dcf9a6348ce5b0802e79f3a3f9c497109f0fb4a8` |
-| Final numeric AID on main | NOT_ASSIGNED_BY_THIS_BRANCH; merge queue only |
-| Placeholder in PR #1220 | AID-PENDING-MERGE |
-| Final numeric AID | DEFERRED_UNTIL_MERGE_QUEUE |
+| PR #1220 base before latest-main synchronization | `17b05a0234d861a8bd0b78bccea799b1c11c433f` |
+| Latest main merge base | `81906cfc8d3cd477d26657520aa04d81466e7ce2` |
+| PR #1220 Head before provisional AID-094 update | `1c56b498122b1afebac0a38fe7ce51752ba9d9ba` |
+| Temporary numeric AID | AID-2026-094 (PROVISIONAL); merge queue may reassign at merge |
+| Final AID after merge queue | May be reassigned; record RENUMBERED_AT_MERGE |
 | Exhaustive content scan of every active branch | NOT COMPLETED |
 
-No numeric AID is allocated or reserved by this branch. The merge queue is the sole allocator at merge time. Prior provisional sequence: AID-2026-080 (path reuse) → AID-2026-083 → AID-2026-090 → AID-PENDING-MERGE. AID-090 has since been concurrently allocated on main to a separate ContextVersion work item.
+AID-2026-094 is the temporary numeric identifier for this branch, explicitly marked PROVISIONAL. The merge queue may reassign it at merge time and must record RENUMBERED_AT_MERGE. Prior renumbering chain: AID-2026-080 (path reuse) → AID-2026-083 → AID-2026-090 → AID-2026-094.
 
 ## 2. AID identity repair
 
@@ -84,15 +84,15 @@ No numeric AID is allocated or reserved by this branch. The merge queue is the s
 - Restored the mainline manifest unchanged: `14-ai-development/work-items/AID-2026-080/manifest.yaml`, blob `c58f0b6761b7ee40cfa90a1ecc2a027a7240a490`.
 - Restored the mainline prompt snapshot unchanged: `14-ai-development/work-items/AID-2026-080/prompt-v1.md`, blob `84342823a31a47fdad048e931314b0f0d8e6ca92`.
 - Preserved the current main INDEX row for the original Issue #1201 work item, including its current merged-carrier status.
-- The SOURCE-RESTORE-02 manifest and prompt that had occupied the AID-080 path on the PR branch were moved to AID-PENDING-MERGE. The old AID-080 `session-evidence-source-restore.md` path is removed after its record is carried forward under AID-PENDING-MERGE.
+- The SOURCE-RESTORE-02 manifest and prompt that had occupied the AID-080 path on the PR branch were moved to AID-2026-094. The old AID-080 `session-evidence-source-restore.md` path is removed after its record is carried forward under AID-2026-094.
 
-### AID-2026-081 — duplicate registration removed
+### AID-2026-081 — preserve the mainline Issue #1081 identity
 
 - Restored the current mainline manifest unchanged: `14-ai-development/work-items/AID-2026-081/manifest.yaml`, blob `35658907734290f1aa8d472a8e0d3f9215620a9b`. Its identity is the existing GOV-DOC-001 ratchet / Issue #1081 work item.
-- Preserved the corresponding mainline INDEX row.
-- Removed the PR #1220-side DECISION-ACCEPTANCE-03 manifest and its duplicate INDEX row. No AID-081 identity is reassigned.
+- Preserved the corresponding mainline INDEX row for Issue #1081; it is not a DECISION-ACCEPTANCE-03 registration.
+- Removed the stale association between DECISION-ACCEPTANCE-03 and AID-081. PR #1219 is the merged DECISION-ACCEPTANCE-03 carrier with repository ID AID-2026-093. No AID-081 identity is reassigned.
 
-**Important current-state correction:** the user instruction referred to PR #1219's AID-081. DECISION-ACCEPTANCE-03 is identified by its carrier **PR #1219（编号待合并分配）**, not by an AID number. PR #1219 is the carrier reference only; its current Head is intentionally not pinned in this historical registration record, and no Work Item number is asserted. The older AID-081 declaration is superseded. This evidence therefore references **PR #1219（编号待合并分配）** as the current decision-acceptance carrier and records AID-081 only as the historical stale reference. The AID-081 path in main remains Issue #1081.
+**Important current-state correction:** the user instruction referred to PR #1219's AID-081. DECISION-ACCEPTANCE-03 is identified by its carrier **PR #1219 / AID-2026-093**, not by an AID number. PR #1219 is the carrier reference only; its current Head is intentionally not pinned in this historical registration record, and no Work Item number is asserted. The old AID-081 association for DECISION-ACCEPTANCE-03 is superseded by the merged **PR #1219 / AID-2026-093**. AID-081 remains the distinct mainline Issue #1081 identity and is not deleted.
 
 ### AID-2026-082 — unchanged
 
@@ -100,12 +100,12 @@ No numeric AID is allocated or reserved by this branch. The merge queue is the s
 - Evidence: `14-ai-development/work-items/AID-2026-082/evidence.md`, blob `56f3305e58d17403d082ae72a311c8a98d527e69`.
 - Its manifest, evidence, and registration identity are not modified by this repair. Its existing INDEX row is carried forward unchanged.
 
-### AID-PENDING-MERGE — merge-queue placeholder registration
+### AID-2026-094 — provisional numeric Stage 0 registration
 
-- New Stage 0 registration: `14-ai-development/work-items/AID-PENDING-MERGE/manifest.yaml`.
+- New Stage 0 registration: `14-ai-development/work-items/AID-2026-094/manifest.yaml`.
 - Evidence: this file.
-- Historical task-specific prompt capture: `14-ai-development/work-items/AID-PENDING-MERGE/prompt-v1.md`; original input hash `6f74f728dfa47141ebee108c462e7e853983f1700e91e25c8f98a7b47ec07a95`, 2130 bytes. Complete effective prompt remains NOT_VERIFIED.
-- Session evidence: `14-ai-development/work-items/AID-PENDING-MERGE/session-evidence-source-restore.md`; stable platform session identifier remains NOT_AVAILABLE.
+- Historical task-specific prompt capture: `14-ai-development/work-items/AID-2026-094/prompt-v1.md`; original input hash `6f74f728dfa47141ebee108c462e7e853983f1700e91e25c8f98a7b47ec07a95`, 2130 bytes. Complete effective prompt remains NOT_VERIFIED.
+- Session evidence: `14-ai-development/work-items/AID-2026-094/session-evidence-source-restore.md`; stable platform session identifier remains NOT_AVAILABLE.
 
 ## 3. Gate A — one RECONSTRUCTED root
 
@@ -191,7 +191,7 @@ The other 10/15 F inventory entries lack existing EN/ZH-CN pairs and remain bloc
 
 1. PR #1220 must be synchronized with current main and exact-Head CI must be observed after the resulting PR synchronize event.
 2. The compiler reconstruction has no authoritative root-source blob; the two README indexes are newly authored without authoritative source. All remain Draft/Candidate/Informative pending domain Owner review and exact-version acceptance.
-3. DECISION-ACCEPTANCE-03 is referenced only as PR #1219（编号待合并分配）; no AID number is asserted. Substantive scope/acceptance remains pending as recorded by PR #1219.
+3. DECISION-ACCEPTANCE-03 is referenced as merged PR #1219 / AID-2026-093. Substantive Owner acceptance remains pending as recorded by PR #1219.
 4. E has 18 remaining source candidates without existing EN/ZH-CN pairs; F has 10. New source-backed restorations require exact source blobs and faithful bilingual mirrors.
 5. F watermark/scanned-through proof and E/F Owner exact-version acceptance remain pending.
 6. I36-GOV-01..10 remain GOVERNANCE-BLOCKED; no I Owner approval evidence or effective policy version/time is supplied.
@@ -203,13 +203,20 @@ The other 10/15 F inventory entries lack existing EN/ZH-CN pairs and remain bloc
 - No claim that reconstructed roots are recovered authoritative source documents.
 - No claim of Approved, Normative, production-ready, or Owner-accepted status.
 - No claim that the 14 RESTORED source-backed roots are accepted by their domain Owners.
-- AID-083 is reserved by PR #1250; SOURCE-RESTORE-02 is AID-090. No global uniqueness claim is made across every historical or active branch.
+- AID-083 is reserved by PR #1250; AID-090 is assigned to the separate ContextVersion work item; SOURCE-RESTORE-02 currently uses provisional AID-2026-094. No global uniqueness claim is made across every historical or active branch.
 - No claim that PR #1220 is merged or that any Issue is closed.
 
 
 ## 9. Coordinated renumbering
 
-- `RENUMBERED_FROM: AID-2026-090; prior chain: AID-2026-080 (path reuse) → AID-2026-083 → AID-2026-090 → AID-PENDING-MERGE`.
+- `RENUMBERED_FROM: AID-2026-090; prior chain: AID-2026-080 (path reuse) → AID-2026-083 → AID-2026-090 → AID-2026-094 (PROVISIONAL)`, with final merge-queue outcome recorded as `RENUMBERED_AT_MERGE`.
 - The provisional AID-2026-083 assignment is withdrawn. **AID-2026-083 is occupied by PR #1250 (Issue acceptance evidence, 16/16 checks green)** and is not available to this work item.
-- The prior AID-2026-090 assignment is withdrawn. SOURCE-RESTORE-02 uses the non-numeric placeholder **AID-PENDING-MERGE** until the merge queue assigns the final identifier. The current main now contains AID-2026-090 for a different ContextVersion work item (RENUMBERED_FROM AID-2026-087). This concurrent allocation confirms why no numeric identifier is to be reserved on this branch.
-- All active paths and references use AID-PENDING-MERGE. The merge queue assigns the final repository-standard AID at merge time. AID-083 is retained only as the explicit historical renumbering source.
+- The prior AID-2026-090 assignment is withdrawn. SOURCE-RESTORE-02 uses temporary numeric identifier **AID-2026-094** with `id_status: PROVISIONAL`; the merge queue may reassign it and record `RENUMBERED_AT_MERGE`. The current main now contains AID-2026-090 for a different ContextVersion work item (RENUMBERED_FROM AID-2026-087). This concurrent allocation confirms why the merge queue may reassign the provisional identifier at merge time.
+- All active paths and references use AID-2026-094. The merge queue assigns the final repository-standard AID at merge time. AID-083 is retained only as the explicit historical renumbering source.
+
+
+## 10. CI diagnosis and bounded remediation
+
+- Repository hygiene rejects non-numeric work-item manifest paths; the registration is now under `AID-2026-094/manifest.yaml` with `id_status: PROVISIONAL`.
+- The current GOV-DOC-002 run reports DM-12/DM-14 errors involving source classification and scope accounting. The manifest parser reported 65/65 manifests parsed and 0 YAML parse failures; no invalid manifest YAML is evidenced by this run.
+- The bilingual ratchet exit 2 is a pre-existing full-scan guard: `scripts/check_bilingual_docs_full.py` derives numbered top-level roots from disk and exits 2 when that set differs from NORMATIVE_ROOTS. The ratchet wrapper correctly rejects exit 2 as incomparable; this is not a coverage regression. No validator code or semantics are changed here.

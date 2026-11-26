@@ -47,9 +47,7 @@ governed:
   - 00-governance
   - 01-system-architecture
   - 02-domain-model
-  - 03-memory-brain
   - 04-memory-compiler
-  - 05-memory-runtime
   - 06-memory-context
   - 07-agent-integration
   - 08-bmcp-protocol
@@ -77,6 +75,18 @@ governed_files:
 # 排除的反面。DM-14 要求每项声明文档数，使该数字成为门禁可与文件系统核对的声明，
 # 并且门禁运行会把它报为未分类，而不是用一句理由把它藏起来。
 backlog:
+  03-memory-brain:
+    documents: 5
+    reason: "Memory Brain architecture documents remain in the migration backlog until their root and mirror classification is accepted; this entry is scanned and counted, not excluded."
+    reason_zh: "Memory Brain 架构文档仍处于迁移积压中，待根文档与镜像分类获得确认；本项仍会扫描和计数，不构成排除。"
+  05-memory-runtime:
+    documents: 6
+    reason: "Memory Runtime architecture documents remain in the migration backlog until their root and mirror classification is accepted; this entry is scanned and counted, not excluded."
+    reason_zh: "Memory Runtime 架构文档仍处于迁移积压中，待根文档与镜像分类获得确认；本项仍会扫描和计数，不构成排除。"
+  09-security-governance:
+    documents: 1
+    reason: "Security governance architecture material is registered as backlog pending a domain scope decision; the newly authored README is an Informative index, not an authority promotion."
+    reason_zh: "安全治理架构资料登记为待处理积压，等待领域范围裁定；新编写的 README 仅为 Informative 索引，不代表权威级别提升。"
   docs:
     documents: 27
     # This is backlog, not an exemption. The Markdown files under docs/ (outside
