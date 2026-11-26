@@ -55,8 +55,8 @@ document_metadata:
 - Existing main EN guide mirror blob: 061c5847b3df879eeaf3c71e5eae0bfa162b276a; ZH-CN guide mirror blob: 372d27c79dc79d09bcdb0f142c979efdba1c2b6e.
 - First AID-109 carrier PR #1300 merged as e3a134de856bbb58581fd688462c9c0282631270, importing four detailed policies plus security-and-identity-overview; later user scope correction requires removing those five Canonical docs and their ten mirrors.
 - PR #1301 was created by this operator as a draft against an older base; GitHub now records it CLOSED, merged=false. This operator did not merge it; closure actor is not asserted.
-- Correction base main: 7629b9de5e5832fe486ee72d101c4bc5121015e6 (after AID-110 merge).
-- Correction classification: guide RECONSTRUCTED_FROM_MIRROR; eight historical docs NOT_RESTORED_BY_DECISION; no phase records restored.
+- Initial correction base main: 7629b9de5e5832fe486ee72d101c4bc5121015e6 (after AID-110 merge). Main was synchronized again before final checks at e47dd6f03ddd143be42645beba43c54b46921962 (11 commits ahead of initial correction base).
+- Correction classification: guide RECONSTRUCTED_FROM_MIRROR; eight historical docs NOT_RESTORED_BY_DECISION; no phase records restored. Corrective Draft PR #1312: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1312.
 - I is the policy-semantics acceptance authority; no I Owner acceptance is recorded.
 - AID-2026-089: D sole logical ForgetOperation/Fence authority.
 - AID-2026-099 HIR-18: replay disclosure independently rechecks current I authorization and current D Fence/lineage.

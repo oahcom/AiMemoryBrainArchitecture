@@ -15,6 +15,7 @@ repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
 base_commit_sha: b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c
 correction_base_sha: 7629b9de5e5832fe486ee72d101c4bc5121015e6
+  synchronized_main_sha: e47dd6f03ddd143be42645beba43c54b46921962
 tracking_issues: ["#1211", "#1212"]
 attribution: "user-authorized operator (delegated by account owner)"
 proxy_signature_note: "代理登记，非自然人 Owner 签署"
@@ -43,7 +44,8 @@ correction_history:
   user_scope_correction: "Restore guide from existing mirror; README in three locations; disposition eight historical documents as NOT_RESTORED_BY_DECISION."
   superseded_draft_pr: 1301
   superseded_draft_pr_state: CLOSED_UNMERGED
-  correction_pr: PENDING
+  correction_pr: 1312
+  correction_pr_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1312
 scope:
   objective: "Keep only README and informative architecture guide at the I root; reconstruct guide from existing EN mirror; formally disposition eight historical documents; remove five interim Canonical docs and their ten mirrors."
   canonical_readme: 09-security-governance/README.md
@@ -99,12 +101,12 @@ scope:
       source_blob: 26a990e44709d8604ae515a2a63b510400fd8471
       interim_main_blob: e9c71b15e19e9289bffa4d98bdfe254cc66a0b83
   files_to_create:
-    - 09-security-governance/README.md
-    - docs/en/09-security-governance/README.md
-    - docs/zh-CN/09-security-governance/README.md
     - 09-security-governance/security-governance-guide.md
     - 14-ai-development/work-items/AID-2026-109/prompt-v2-scope-correction.md
   files_to_modify:
+    - 09-security-governance/README.md
+    - docs/en/09-security-governance/README.md
+    - docs/zh-CN/09-security-governance/README.md
     - docs/en/09-security-governance/security-governance-guide.md (frontmatter only; body preserved)
     - docs/zh-CN/09-security-governance/security-governance-guide.md (frontmatter only; body preserved)
     - 14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md
