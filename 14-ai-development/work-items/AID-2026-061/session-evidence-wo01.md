@@ -183,6 +183,17 @@ to discover:
    deliberately-failing-head experiment has not been run. This work item does not
    run it either; it prepares the condition under which the context can be made
    required without deadlocking pull requests.
+   **Superseded, `2026-11-25` (Issue #1029, PR #1038):** the experiment has
+   been run. PR #1038 added one always-failing `#[test]` at head `b5cf4f25`;
+   `PUT /repos/oahcom/AiMemoryBrainArchitecture/pulls/1038/merge` returned
+   HTTP 405 with `Required status check "rust-workspace-test" is failing.`
+   and the pull request was closed unmerged. `PR-GOVERNANCE-001.md:288`
+   records it as passed and dated `2026-11-25`. The boundary that record
+   states applies here too: the experiment proves the normal path on that
+   date with that payload, not that a bypass route or a renamed job behaves
+   the same, and it must be re-run after any material change to the
+   protection configuration or to the producing workflows — so this paragraph
+   is a record of the state before the change, not a current claim.
 3. **Configuration drift between the declaration and branch protection had no
    machine gate.** `scripts/check_declared_check_contexts.py` checks that every
    declared context is produced by a job. It did not read branch protection, so

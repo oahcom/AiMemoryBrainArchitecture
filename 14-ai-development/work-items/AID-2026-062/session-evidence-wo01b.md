@@ -129,6 +129,29 @@ READBACK PASS
    `check_declared_check_contexts.py` compares the declaration against the
    workflows and nothing else, so a future divergence between the two sets would
    pass every automated check in this repository.
+   **Superseded, `2026-11-25` (Issue #1029, PR #1088, merge commit
+   `20adc016`):** that script now reads `GET /branches/main`, takes
+   `protection.required_status_checks.contexts` from the payload, and compares
+   in both directions: `undeclared` is the set the platform requires but the
+   declaration omits, `unprotected` is the set the declaration names but the
+   platform does not require. Either being non-empty fails the gate with exit
+   1; a payload that cannot be read, or reads empty, exits 2 (INCOMPLETE)
+   instead of passing; exit 0 is reserved for the two sets being equal. Its
+   docstring names Issue #1029 as the defect class it closes. Measured on
+   `main` it reports 16 declared, 16 protected, PASS, exit 0 — so this gap is
+   closed and the sentence above describes the state before the change.
 3. **The unproven half stays unproven.** A required context that fails is still
    not shown to block a merge, because the deliberately-failing-head experiment
    has not been run. Correcting the count does not correct that.
+   **Superseded, `2026-11-25` (Issue #1029, PR #1038):** the experiment has
+   been run. PR #1038 added one always-failing `#[test]` at head `b5cf4f25`;
+   `PUT /repos/oahcom/AiMemoryBrainArchitecture/pulls/1038/merge` returned
+   HTTP 405 with `Required status check "rust-workspace-test" is failing.`
+   and the pull request was closed unmerged. `PR-GOVERNANCE-001.md:288`
+   records it as passed and dated `2026-11-25`. The boundary that record
+   states applies here too: the experiment proves the normal path on that
+   date with that payload, not that a bypass route or a renamed job behaves
+   the same, and it must be re-run after any material change to the
+   protection configuration or to the producing workflows — so this gap is
+   closed for that date and the sentence above describes the state before the
+   change.
