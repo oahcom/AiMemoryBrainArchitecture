@@ -90,9 +90,18 @@ The current-main `crates/memory-storage-sqlite/src/lib.rs` defines a `canonical_
 - EVIDENCE_REQUIRED: 8 (SC-04, SC-05, SC-06, SC-10, SC-12, SC-13, SC-17, SC-18); current result FAIL / NOT EVIDENCED.
 - No checkpoint result closes Gate A. No Owner acceptance is claimed.
 
+## Per-Issue AI session evidence
+
+| Related Issue | Issue AI-assisted work | Evidence refs for this Issue |
+| --- | --- | --- |
+| #1211 | YES | `14-ai-development/work-items/AID-2026-098/evidence.md` |
+| #1212 | YES | `14-ai-development/work-items/AID-2026-098/evidence.md` |
+| #1125 | YES | `14-ai-development/work-items/AID-2026-098/evidence.md` |
+| #1180 | YES | `14-ai-development/work-items/AID-2026-098/evidence.md` |
+
 ## Known documentation-gate compatibility issue
 
-The required canonical path introduces top-level numbered root `10-storage-consistency/`. Current `scripts/check_bilingual_docs.py` has a literal `NORMATIVE_ROOTS` set that does not include this root; `scripts/check_bilingual_docs_full.py` derives numbered roots from the filesystem and fails when the sets differ. The root was absent from the baseline tree. The user explicitly prohibited validator changes, so this PR does not modify either validator. The bilingual root-set check is therefore expected to fail until the repository's validator-owner process authorizes and lands a separate root-registration change. This is not silently treated as a green CI result.
+The required canonical path introduces top-level numbered root `10-storage-consistency/`. This root is now explicitly registered as governed in `00-governance/document-scope-registry.yaml`. Current `scripts/check_bilingual_docs.py` still has a literal `NORMATIVE_ROOTS` set that does not include this root; `scripts/check_bilingual_docs_full.py` derives numbered roots from the filesystem and fails when the sets differ. GOV-DOC-002 therefore also reports the declared/enforced root-set mismatch and cannot classify the canonical source for mirror parity. The root was absent from the baseline tree. The user explicitly prohibited validator changes, so this PR does not modify either validator. The bilingual root-set check is therefore expected to fail until the repository's validator-owner process authorizes and lands a separate root-registration change. This is not silently treated as a green CI result.
 
 ## Limitations
 
