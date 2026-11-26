@@ -120,7 +120,7 @@ Total: 59. No blanket supersession claim is made for these files; no individual 
 - Allocated at push: `AID-2026-109`; `id_status: PROVISIONAL`.
 - The only D normative root restored is `03-memory-brain/canonical-memory-store.md`, with its EN and ZH-CN mirrors.
 - No `03-memory-brain/README.md`; no other 59 D files.
-- No runtime, validator, schema, DDL, tests, workflow, deployment or production changes.
+- No runtime, validator predicate/logic/semantics, schema, DDL, tests, workflow, deployment or production changes. The existing bilingual root-scope declarations were extended in lockstep: `03-memory-brain` was added to `scripts/check_bilingual_docs.py:NORMATIVE_ROOTS` and `00-governance/document-scope-registry.yaml:governed`; no checker predicate or validation behavior changed.
 - No edits under `04-memory-compiler/`, `05-memory-runtime/` or `09-security-governance/`.
 - No Issue closure and no Owner acceptance.
 

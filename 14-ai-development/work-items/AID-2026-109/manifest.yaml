@@ -36,6 +36,8 @@ scope:
     - "14-ai-development/work-items/AID-2026-109/session-evidence.md"
   files_to_modify:
     - "14-ai-development/work-items/INDEX.md"
+    - "scripts/check_bilingual_docs.py" (NORMATIVE_ROOTS scope declaration only)
+    - "00-governance/document-scope-registry.yaml" (governed-root registration only)
   files_out_of_scope:
     - "03-memory-brain/README.md"
     - "All other 59 files from session-d-memory-brain-2026-11-16"

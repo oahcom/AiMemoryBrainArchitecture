@@ -11,5 +11,5 @@
 - Validation: GOV-DOC-002 and bilingual CI are pending exact final Head; no local test command is claimed as run.
 - Independent reviewer: NOT_ASSIGNED; no independent review is claimed.
 - Accountable Owner: D; Owner acceptance NOT_RECORDED.
-- No runtime/validator semantics, schemas, tests, workflows, deployment or production state changed.
+- No runtime or validator predicates/logic/semantics, schemas, DDL, tests, workflows, deployment or production state changed. The only gate-adjacent edits add the new numbered root to the existing `NORMATIVE_ROOTS` and `governed` declarations in lockstep; no validator behavior changed.
 - Issue #1212 remains OPEN; Gate A overall remains OPEN.
