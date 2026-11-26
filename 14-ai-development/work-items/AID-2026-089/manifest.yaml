@@ -5,7 +5,7 @@ title: Establish D as sole logical Forget Fence authority; Storage-local rows ar
 class: ARCH/DOC
 risk: R3
 risk_rationale: "Cross-owner Forget authority and anti-resurrection semantics affect deletion safety; this Work Item changes documentation only."
-status: DISPATCHED
+status: MERGED
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: NOT_ASSIGNED
 acceptance_authority: "Owner D, Storage/Consistency and Owner A"
@@ -65,10 +65,10 @@ acceptance_criteria:
     criterion: "Decision comments are posted to #1125 and #1211 and both Issues remain OPEN."
     measurement: "Comment IDs and post-write state readback."
 implementation:
-  status: IMPLEMENTED_IN_BRANCH
+  status: MERGED
   branch: docs/forget-fence-authority-2026-11-26
   pull_request: 1232
-  merge_commit_sha: NOT_MERGED
+  merge_commit_sha: d914e8a1f8a1ba24c21c41a9249489d544388185
 review:
   status: PENDING
   record_ref: ""
