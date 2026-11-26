@@ -7,24 +7,19 @@ document_metadata:
       decision_status: Draft
       approver: null
       decision_date: null
-      approved_version:
-        scheme: git
-        value: null
+      approved_version: null
       approval_scope:
         type: Full-document
       approval_applicability: Applicable-To-Current-Version
       evidence_reference:
-        - "AID-2026-082"
-        - "source branch: session-e-memory-compiler-2026-11-16"
-        - "source commit: ee098e14747d9915de5b3efb63b3a8dd77f670ed"
-        - "original source blob: 5ca77a5b48e69afb3bc81429baf538be7dce4d46"
+        - "14-ai-development/work-items/AID-2026-110/restore-evidence.md"
       revocation: null
     evidence_verification:
-      verification_status: Unverified
-      last_verified_date: null
-      last_verification_note: "Exact source Blob pinned; E Owner exact-version acceptance and cross-owner contract review pending."
+      verification_status: Verified
+      last_verified_date: "2026-11-26"
+      last_verification_note: "Restored from the recorded Owner source branch blob; original body preserved byte-for-byte. Owner normative acceptance is not claimed."
     usage_status: Active
-    modification_status: Modified
+    modification_status: Unchanged
     supersession:
       supersedes: []
       supersession_reason: null
@@ -34,14 +29,14 @@ document_metadata:
       archival_reason: null
       archival_reference: null
   authority:
-    canonical_status: Candidate
-    canonical_scope: "Accepted Receipt, Compiler Completion and Idempotency contract"
-    canonical_scope_id: memory-compiler/accepted-receipt-and-idempotency-contract
+    canonical_status: Canonical
+    canonical_scope: "Accepted Receipt, Compiler Completion and Idempotency Contract"
+    canonical_scope_id: "memory-compiler/accepted-receipt-idempotency"
     canonical_scope_keywords:
-      - accepted-receipt
-      - idempotency
-      - compiler-completion
-      - evidence-contract
+      - "accepted-receipt"
+      - "compiler-completion"
+      - "idempotency"
+      - "ingress-evidence"
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
@@ -50,7 +45,6 @@ document_metadata:
     en: "docs/en/04-memory-compiler/accepted-receipt-and-idempotency-contract.md"
     zh-CN: "docs/zh-CN/04-memory-compiler/accepted-receipt-and-idempotency-contract.md"
 ---
-
 # Accepted Receipt, Compiler Completion and Idempotency Contract
 
 **Status:** CANDIDATE E contract; durable Storage realization, D producer APIs, H envelope and I policy approval remain OPEN.

@@ -92,7 +92,7 @@ scope:
     - "Validator implementation or semantics changes, except the single root-inventory constant declared under declared_exceptions; only per-record manifest classification data is otherwise reconciled."
     - "PR merge, deployment, issue closure, protocol freeze or normative promotion."
     - "Any fabricated Owner approval, authoritative source blob, independent review or global-uniqueness claim."
-  current_disposition: "PARTIAL — 14 source-backed roots carried forward as RESTORED; 1 compiler root RECONSTRUCTED_FROM_MIRROR; 1 directory index AUTHORED_INDEX (05-memory-runtime); the 09-security-governance root and index come from main via PR #1297 / AID-2026-109 and are not claimed here; no Owner acceptance claimed."
+  current_disposition: "PARTIAL — at execution time 14 source-backed roots RESTORED, 1 compiler root RECONSTRUCTED_FROM_MIRROR and 2 directory indexes AUTHORED_INDEX; after main advanced, 2 E roots and the 09-security-governance index are supplied by main (PR #1304 / AID-2026-110 and PR #1297 / AID-2026-109), leaving 12 RESTORED roots, 1 RECONSTRUCTED root and 1 AUTHORED_INDEX document carried by this PR; no Owner acceptance claimed."
 
 baseline_and_source_evidence:
   main_reconciliation_head: "81906cfc8d3cd477d26657520aa04d81466e7ce2"
@@ -189,7 +189,7 @@ session_evidence:
     session_reference_status: "NOT_AVAILABLE"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-100/session-evidence-source-restore.md"
 evidence_file: "14-ai-development/work-items/AID-2026-100/evidence-source-restore.md"
-evidence_blob: "3d38cf67bc7a621222273a6f96556defea0665da"
+evidence_blob: "88313e464e52d999d052186d600a6024acf721bc"
 
 formal_registration:
   status: "COMPLETED_ON_CANDIDATE_BRANCH_WITH_BOUNDED_IDENTIFIER_SCAN"

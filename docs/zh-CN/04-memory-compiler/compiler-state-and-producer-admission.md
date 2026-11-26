@@ -7,24 +7,19 @@ document_metadata:
       decision_status: Draft
       approver: null
       decision_date: null
-      approved_version:
-        scheme: git
-        value: null
+      approved_version: null
       approval_scope:
         type: Full-document
       approval_applicability: Applicable-To-Current-Version
       evidence_reference:
-        - "AID-2026-082"
-        - "source branch: session-e-memory-compiler-2026-11-16"
-        - "source commit: ee098e14747d9915de5b3efb63b3a8dd77f670ed"
-        - "original source blob: e59f517fff161ab882aa0ddc4a5bda513964ae1a"
+        - "14-ai-development/work-items/AID-2026-110/restore-evidence.md"
       revocation: null
     evidence_verification:
-      verification_status: Unverified
-      last_verified_date: null
-      last_verification_note: "Exact source Blob pinned; translated body retained; semantic parity review pending."
+      verification_status: Verified
+      last_verified_date: "2026-11-26"
+      last_verification_note: "Existing language mirror; only GOV-DOC-002 frontmatter is added. Body bytes are preserved."
     usage_status: Active
-    modification_status: Modified
+    modification_status: Unchanged
     supersession:
       supersedes: []
       supersession_reason: null
@@ -35,10 +30,10 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: null
-    canonical_scope_id: null
+    canonical_scope: "Compiler State Machine and D Producer Admission Interface"
+    canonical_scope_id: "memory-compiler/compiler-state-producer-admission"
     canonical_scope_keywords:
-      - bilingual-mirror
+      - "compiler-state-producer-admission"
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
@@ -47,14 +42,13 @@ document_metadata:
     en: "docs/en/04-memory-compiler/compiler-state-and-producer-admission.md"
     zh-CN: null
 ---
-
 # Compiler 状态机与 D Producer Admission 接口
 
 - 文档 ID：E-PRODUCER-ADMISSION-001
 - 版本：1.0
 - 源分支：session-e-memory-compiler-2026-11-16
-- 源文件版本：精确源 Blob `e59f517fff161ab882aa0ddc4a5bda513964ae1a`，源提交 `ee098e14747d9915de5b3efb63b3a8dd77f670ed`。
-- 源规范：[已恢复的规范源](../../../04-memory-compiler/compiler-state-and-producer-admission.md)（`e59f517fff161ab882aa0ddc4a5bda513964ae1a`）。
+- 源文件版本：DEREFERENCED — 保留历史源 Blob `e59f517fff161ab882aa0ddc4a5bda513964ae1a`；当前仓库不存在可解析的规范性源文件。
+- 源规范：DEREFERENCED — 原规范源路径 `04-memory-compiler/compiler-state-and-producer-admission.md` 在当前 main tree 中不存在；替代物：[英文对照版](../../en/04-memory-compiler/compiler-state-and-producer-admission.md)（Blob `bdca52bfa74a32d3e9e9d2feaaa5ce8d0b75545f`；仅为对照文本，不是规范性替代源）。
 - 对应英文：[Compiler State Machine and D Producer Admission Interface](../../en/04-memory-compiler/compiler-state-and-producer-admission.md)
 - 状态：E Lifecycle 语义为 CANDIDATE；D 语义操作为 DECIDED；可调用 API/Transport 和 Storage 原子性为 OPEN
 

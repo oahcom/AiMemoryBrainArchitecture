@@ -7,24 +7,19 @@ document_metadata:
       decision_status: Draft
       approver: null
       decision_date: null
-      approved_version:
-        scheme: git
-        value: null
+      approved_version: null
       approval_scope:
         type: Full-document
       approval_applicability: Applicable-To-Current-Version
       evidence_reference:
-        - "AID-2026-082"
-        - "source branch: session-e-memory-compiler-2026-11-16"
-        - "source commit: ee098e14747d9915de5b3efb63b3a8dd77f670ed"
-        - "original source blob: e59f517fff161ab882aa0ddc4a5bda513964ae1a"
+        - "14-ai-development/work-items/AID-2026-110/restore-evidence.md"
       revocation: null
     evidence_verification:
-      verification_status: Unverified
-      last_verified_date: null
-      last_verification_note: "Exact source Blob pinned; E Owner exact-version acceptance and cross-owner contract review pending."
+      verification_status: Verified
+      last_verified_date: "2026-11-26"
+      last_verification_note: "Restored from the recorded Owner source branch blob; original body preserved byte-for-byte. Owner normative acceptance is not claimed."
     usage_status: Active
-    modification_status: Modified
+    modification_status: Unchanged
     supersession:
       supersedes: []
       supersession_reason: null
@@ -34,14 +29,14 @@ document_metadata:
       archival_reason: null
       archival_reference: null
   authority:
-    canonical_status: Candidate
-    canonical_scope: "Compiler state machine and D Producer Admission interface"
-    canonical_scope_id: memory-compiler/compiler-state-and-producer-admission
+    canonical_status: Canonical
+    canonical_scope: "Compiler State Machine and D Producer Admission Interface"
+    canonical_scope_id: "memory-compiler/compiler-state-producer-admission"
     canonical_scope_keywords:
-      - compiler-state
-      - producer-admission
-      - attempt-state
-      - stage-contract
+      - "compiler-state"
+      - "producer-admission"
+      - "work-item"
+      - "barrier"
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
@@ -50,7 +45,6 @@ document_metadata:
     en: "docs/en/04-memory-compiler/compiler-state-and-producer-admission.md"
     zh-CN: "docs/zh-CN/04-memory-compiler/compiler-state-and-producer-admission.md"
 ---
-
 # Compiler State Machine and D Producer Admission Interface
 
 **Status:** CANDIDATE E lifecycle/adapter contract; D semantic operation contracts and linearization are DECIDED; callable transport/API binding and Storage atomic realization remain OPEN.

@@ -7,24 +7,19 @@ document_metadata:
       decision_status: Draft
       approver: null
       decision_date: null
-      approved_version:
-        scheme: git
-        value: null
+      approved_version: null
       approval_scope:
         type: Full-document
       approval_applicability: Applicable-To-Current-Version
       evidence_reference:
-        - "AID-2026-082"
-        - "source branch: session-e-memory-compiler-2026-11-16"
-        - "source commit: ee098e14747d9915de5b3efb63b3a8dd77f670ed"
-        - "original source blob: 5ca77a5b48e69afb3bc81429baf538be7dce4d46"
+        - "14-ai-development/work-items/AID-2026-110/restore-evidence.md"
       revocation: null
     evidence_verification:
-      verification_status: Unverified
-      last_verified_date: null
-      last_verification_note: "Exact source Blob pinned; EN text matches source Blob; semantic review pending."
+      verification_status: Verified
+      last_verified_date: "2026-11-26"
+      last_verification_note: "Existing language mirror; only GOV-DOC-002 frontmatter is added. Body bytes are preserved."
     usage_status: Active
-    modification_status: Modified
+    modification_status: Unchanged
     supersession:
       supersedes: []
       supersession_reason: null
@@ -35,10 +30,10 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: null
-    canonical_scope_id: null
+    canonical_scope: "Accepted Receipt, Compiler Completion and Idempotency Contract"
+    canonical_scope_id: "memory-compiler/accepted-receipt-idempotency"
     canonical_scope_keywords:
-      - bilingual-mirror
+      - "accepted-receipt-idempotency"
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
@@ -47,14 +42,13 @@ document_metadata:
     en: null
     zh-CN: "docs/zh-CN/04-memory-compiler/accepted-receipt-and-idempotency-contract.md"
 ---
-
 # Accepted Receipt, Compiler Completion and Idempotency Contract
 
 - Document ID: E-RECEIPT-001
 - Version: 1.0
 - Source branch: session-e-memory-compiler-2026-11-16
-- Source revision: exact source blob `5ca77a5b48e69afb3bc81429baf538be7dce4d46` at `ee098e14747d9915de5b3efb63b3a8dd77f670ed`.
-- Source: [restored canonical source](../../../04-memory-compiler/accepted-receipt-and-idempotency-contract.md) (`5ca77a5b48e69afb3bc81429baf538be7dce4d46`).
+- Source revision: DEREFERENCED — historical source blob `5ca77a5b48e69afb3bc81429baf538be7dce4d46` retained; no current normative source path exists.
+- Source: DEREFERENCED — original normative path `04-memory-compiler/accepted-receipt-and-idempotency-contract.md` is absent from the current main tree; alternative: [surviving Chinese counterpart](../../zh-CN/04-memory-compiler/accepted-receipt-and-idempotency-contract.md) (blob `fa8c005a6b8c599c10e71150fb2056d5685e76fd`; translation only, not an authoritative substitute).
 - Chinese counterpart: [Accepted Receipt、Compiler 完成与幂等契约](../../zh-CN/04-memory-compiler/accepted-receipt-and-idempotency-contract.md)
 - Status: CANDIDATE E contract; Storage realization, D producer APIs, H envelope and I policy approval remain OPEN
 

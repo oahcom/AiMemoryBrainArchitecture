@@ -161,7 +161,7 @@ The following source-backed candidates are carried forward as **RESTORED** from 
 | `04-memory-compiler/event-ingestion-engine.md` | `9fa3db53175452bf9e6f0fce8b1540765e46905f` |
 | `04-memory-compiler/evidence-and-provenance.md` | `38bcacafa89ebe7b3eedb6f38d174e0c6a1f3963` |
 
-Two additional E roots already existed on main and were not overwritten. The other 18/25 inventory entries still lack an existing EN/ZH-CN pair and remain blocked.
+Two additional E roots already existed on main and were not overwritten. Two of the five roots in the table above, `accepted-receipt-and-idempotency-contract.md` and `compiler-state-and-producer-admission.md`, were later delivered independently by main through `PR #1304` / `AID-2026-110` with different content. The final tree carries main's version; this record does not overwrite them and does not claim their restoration. The other 18/25 inventory entries still lack an existing EN/ZH-CN pair and remain blocked.
 
 ### F 鈥?5 RESTORED roots (5/15 represented)
 
@@ -175,7 +175,7 @@ Two additional E roots already existed on main and were not overwritten. The oth
 
 The other 10/15 F inventory entries lack existing EN/ZH-CN pairs and remain blocked. The compiler reconstruction and two authored README indexes above are not counted as F source restorations. No additional E/F candidate met the requested 鈥渆xact source blob plus existing bilingual mirror鈥?priority rule in this pass.
 
-**Accounting:** RESTORED = 14 source-backed roots (D 4 + E 5 + F 5); RECONSTRUCTED = 1 compiler-stage-contract root; AUTHORED_INDEX = 2 README indexes at execution time. These categories are separate and must not be summed into a source-restoration count. Section 12 records that the 09-security-governance index was later yielded to main.
+**Accounting:** at execution time RESTORED = 14 source-backed roots (D 4 + E 5 + F 5); RECONSTRUCTED = 1 compiler-stage-contract root; AUTHORED_INDEX = 2 README indexes. After main advanced, 2 of the E roots and the 09-security-governance index are supplied by main (`PR #1304` / `AID-2026-110` and `PR #1297` / `AID-2026-109`), so this PR itself carries 12 RESTORED roots, 1 RECONSTRUCTED root and 1 AUTHORED_INDEX document. These categories are separate and must not be summed into a source-restoration count.
 
 ## 6. Validator, runtime, and governance boundaries
 
@@ -245,6 +245,11 @@ The other 10/15 F inventory entries lack existing EN/ZH-CN pairs and remain bloc
   `09-security-governance/` as a restored bounded source root, including its
   `README.md`. This branch yields those files to main: they carry no diff, and
   this record makes no provenance claim about them.
+- `PR #1304` / `AID-2026-110` also delivered
+  `04-memory-compiler/accepted-receipt-and-idempotency-contract.md` and
+  `04-memory-compiler/compiler-state-and-producer-admission.md` on main with different
+  content. Those two E roots are yielded to main in the same way: the final tree carries
+  main's bytes, and this record does not claim their restoration.
 - `05-memory-runtime/README.md` is therefore the only AUTHORED_INDEX document
   this PR carries.
 - The two orphan mirrors under
