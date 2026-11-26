@@ -49,10 +49,10 @@ document_metadata:
 This record documents workflow-level deduplication and job-isolated Rust build caching. It does not change required-check membership, gate commands, checker semantics, job boundaries, or runtime behavior.
 
 - Repository: `oahcom/AiMemoryBrainArchitecture`
-- Main baseline: `17bfc43c2b9f2f9c91cb0eb074580141e701c0b3`
+- Main baseline: `8722a37b0cd72dc550d99c0eaebe9e7556ce2f95`
 - Related Issue: #1212
 - Attribution: `user-authorized operator (delegated by account owner)`; delegated execution evidence, not a natural-person Owner signature.
-- Allocation at recheck: INDEX maximum AID-2026-109; AID-2026-110, AID-2026-111, AID-2026-113 and AID-2026-114 are present on main; AID-2026-112 and AID-2026-116 are occupied by open PRs. The provisional AID-2026-112 collided and was renumbered to AID-2026-115. Final carrier: PR #1322.
+- Final base recheck: INDEX maximum AID-2026-114; AID-2026-110 through AID-2026-114 are present on main, AID-2026-116 is occupied by an open PR, and AID-2026-115 remains uniquely reserved by PR #1322. The provisional AID-2026-112 collided and was renumbered to AID-2026-115. Final carrier: PR #1322.
 
 ## Observed baseline
 

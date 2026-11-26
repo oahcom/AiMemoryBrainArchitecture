@@ -9,15 +9,15 @@ date: "2026-11-26"
 repository:
   name: "oahcom/AiMemoryBrainArchitecture"
   baseline_branch: "main"
-  baseline_commit: "17bfc43c2b9f2f9c91cb0eb074580141e701c0b3"
+  baseline_commit: "8722a37b0cd72dc550d99c0eaebe9e7556ce2f95"
 identifier_allocation:
   method: "alloc_at_push"
   assigned_at: "2026-11-26"
-  observed_main: "17bfc43c2b9f2f9c91cb0eb074580141e701c0b3"
-  index_sha: "4aad6150e3ddc22ce23bffa0b0f827375bb36e30"
-  max_index_id: "AID-2026-109"
+  observed_main: "8722a37b0cd72dc550d99c0eaebe9e7556ce2f95"
+  index_sha: "956b50f234e72de82676e00fcafb512e1dabfb1e"
+  max_index_id: "AID-2026-114"
   renumbered_from: "AID-2026-112"
-  occupied_after_index_max: ["AID-2026-110 (main)", "AID-2026-111 (main)", "AID-2026-112 (open PR)", "AID-2026-113 (main)", "AID-2026-114 (main)", "AID-2026-116 (open PR)"]
+  occupied_after_index_max: ["AID-2026-110 (main)", "AID-2026-111 (main)", "AID-2026-112 (main)", "AID-2026-113 (main)", "AID-2026-114 (main)", "AID-2026-116 (open PR)"]
   requested_id: "AID-2026-115"
   id_status: "PROVISIONAL"
   uniqueness_scope: "Re-read main INDEX, work-item directories, open PRs and branches at reallocation; 110-114 and 116 were occupied, so 115 was the next collision-free identifier."
