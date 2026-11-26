@@ -1,142 +1,137 @@
 id_status: PROVISIONAL
 work_item_id: AID-2026-109
-title: Restore bounded I governance root, reconstruct guide from mirror, and formally disposition detailed historical policies
+title: Restore the bounded I Security & Governance normative source root without importing the historical branch wholesale
 class: DOC/GOVERNANCE
 risk: R2
 risk_rationale: >-
-  The initial AID-109 merge imported five historical documents. This correction
-  removes those interim imports and retains only an informative root and guide
-  reconstructed from an existing mirror. No I policy acceptance is claimed.
-status: CORRECTION_DRAFT_PR
+  Restoring historical policy material can create a false current-authority
+  signal. All restored documents remain Draft and Informative; exact Owner
+  acceptance, normative promotion and implementation conformance are not claimed.
+status: IMPLEMENTED_ACCEPTANCE_PENDING
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
-acceptance_authority: "I is the policy-semantics acceptance authority; no I Owner acceptance recorded"
+acceptance_authority: "Owner I for I policy; affected Owners for their own boundaries; no acceptance inferred"
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
 base_commit_sha: b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c
-correction_base_sha: 7629b9de5e5832fe486ee72d101c4bc5121015e6
-  synchronized_main_sha: e47dd6f03ddd143be42645beba43c54b46921962
 tracking_issues: ["#1211", "#1212"]
-attribution: "user-authorized operator (delegated by account owner)"
-proxy_signature_note: "代理登记，非自然人 Owner 签署"
 source:
   branch: session-i-security-governance-2026-11-16
   head_sha: 8abddf814467b271344a9814613a6b7ca6a446c6
-  total_files_under_09_security_governance: 91
-  phase_record_count: 81
-  phase_record_prefix_counts:
-    phase-3: 1
-    phase-3.5: 1
-    phase-3.6: 30
-    phase-3.7: 1
-    phase-3.8: 47
-    phase-3.9: 1
-  readme: NOT_FOUND
-  canonical_guide: NOT_FOUND
-  guide_classification: RECONSTRUCTED_FROM_MIRROR
-  guide_mirrors_before_correction:
-    en: 061c5847b3df879eeaf3c71e5eae0bfa162b276a
-    zh-CN: 372d27c79dc79d09bcdb0f142c979efdba1c2b6e
-correction_history:
-  initial_pr: 1300
-  initial_merge_commit: e3a134de856bbb58581fd688462c9c0282631270
-  initial_merge_effect: "Imported four detailed policy contracts and security-and-identity-overview with their mirrors."
-  user_scope_correction: "Restore guide from existing mirror; README in three locations; disposition eight historical documents as NOT_RESTORED_BY_DECISION."
-  superseded_draft_pr: 1301
-  superseded_draft_pr_state: CLOSED_UNMERGED
-  correction_pr: 1312
-  correction_pr_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1312
+  source_tree_blob_count_under_09_security_governance: 91
+  selected_source_files:
+    - path: 09-security-governance/global-forget-target-inventory-and-completion-evidence.md
+      source_blob_sha: 9100061fa986fb6676656169de3fcf9fc1c72664
+      restored_blob_sha: c0ba8b2dacc115e29233268e62d5ababfc26a025
+      frontmatter_blob_sha: a0740d117603891c0a9633d093bd01cb9a92f8cf
+      disposition: CURRENT_INFORMATIVE_CANDIDATE
+    - path: 09-security-governance/forget-retention-backup-and-erasure-policy.md
+      source_blob_sha: f14cb2149ca3f817229533005ab89dbdc7f0b3a8
+      restored_blob_sha: ab2b28829100ca1f2a17d203396b910fe3979bff
+      frontmatter_blob_sha: 60b666d7b6ea38a9f2d70aa47744f3d076876e02
+      disposition: CURRENT_INFORMATIVE_CANDIDATE
+    - path: 09-security-governance/principal-actor-and-authorization-contract.md
+      source_blob_sha: 03765efac4bb1153f303ce0030f9e277d602e81d
+      restored_blob_sha: b8073340cb2efba990c038e0b628ee6e9d0f24da
+      frontmatter_blob_sha: d1b950f16ce89b8c23549c99bb885b0014a78dbf
+      disposition: CURRENT_INFORMATIVE_CANDIDATE
+    - path: 09-security-governance/scope-and-revocation-policy.md
+      source_blob_sha: 71df6aaf21bb1767cd9fe5c947581b871325e023
+      restored_blob_sha: b4c66e90afdb57c5b60d37ad86554ccae6292e9a
+      frontmatter_blob_sha: 9252258fa0a5f64e3cea75513da4e5e48d6c7847
+      disposition: CURRENT_INFORMATIVE_CANDIDATE
+    - path: 09-security-governance/security-and-identity-overview.md
+      source_blob_sha: 26a990e44709d8604ae515a2a63b510400fd8471
+      restored_blob_sha: e9c71b15e19e9289bffa4d98bdfe254cc66a0b83
+      frontmatter_blob_sha: fd42af80595cf8c4ef92795f64f5beacba38e7db
+      disposition: CURRENT_INFORMATIVE_CANDIDATE
+  additional_new_file:
+    path: 09-security-governance/README.md
+    status: NEW_INFORMATIVE_INDEX; no source branch README blob existed
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c
+  observed_max_registered_id: AID-2026-108
+  assigned_id: AID-2026-109
+  allocation_rule: "Latest main INDEX max + 1; rechecked immediately before commit"
+authority:
+  attribution: "user-authorized operator (delegated by account owner)"
+  signature_status: "代理登记，非自然人 Owner 签署"
+  normative_approval: NOT_GRANTED
+  source_owner_acceptance: NOT_RECORDED
 scope:
-  objective: "Keep only README and informative architecture guide at the I root; reconstruct guide from existing EN mirror; formally disposition eight historical documents; remove five interim Canonical docs and their ten mirrors."
-  canonical_readme: 09-security-governance/README.md
-  en_readme: docs/en/09-security-governance/README.md
-  zh_cn_readme: docs/zh-CN/09-security-governance/README.md
-  canonical_guide: 09-security-governance/security-governance-guide.md
-  guide_classification: RECONSTRUCTED_FROM_MIRROR
+  objective: "Restore only five I policy/contract sources justified by F4/F6/F7, add a bounded README, and record exact source/new/frontmatter blob evidence."
   canonical_report: 14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md
   en_report: docs/en/14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md
   zh_cn_report: docs/zh-CN/14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md
-  prompt_v1: 14-ai-development/work-items/AID-2026-109/prompt-v1.md
-  prompt_v2_scope_correction: 14-ai-development/work-items/AID-2026-109/prompt-v2-scope-correction.md
+  prompt: 14-ai-development/work-items/AID-2026-109/prompt-v1.md
   session_evidence: 14-ai-development/work-items/AID-2026-109/session-evidence.md
-  files_to_delete:
-    - 09-security-governance/forget-retention-backup-and-erasure-policy.md
+  files_to_create:
+    - 09-security-governance/README.md
     - 09-security-governance/global-forget-target-inventory-and-completion-evidence.md
+    - 09-security-governance/forget-retention-backup-and-erasure-policy.md
     - 09-security-governance/principal-actor-and-authorization-contract.md
     - 09-security-governance/scope-and-revocation-policy.md
     - 09-security-governance/security-and-identity-overview.md
-    - docs/en/09-security-governance/forget-retention-backup-and-erasure-policy.md
-    - docs/en/09-security-governance/global-forget-target-inventory-and-completion-evidence.md
-    - docs/en/09-security-governance/principal-actor-and-authorization-contract.md
-    - docs/en/09-security-governance/scope-and-revocation-policy.md
-    - docs/en/09-security-governance/security-and-identity-overview.md
-    - docs/zh-CN/09-security-governance/forget-retention-backup-and-erasure-policy.md
-    - docs/zh-CN/09-security-governance/global-forget-target-inventory-and-completion-evidence.md
-    - docs/zh-CN/09-security-governance/principal-actor-and-authorization-contract.md
-    - docs/zh-CN/09-security-governance/scope-and-revocation-policy.md
-    - docs/zh-CN/09-security-governance/security-and-identity-overview.md
-  not_restored_by_decision:
-    - path: forget-retention-backup-and-erasure-policy.md
-      source_blob: f14cb2149ca3f817229533005ab89dbdc7f0b3a8
-      interim_main_blob: ab2b28829100ca1f2a17d203396b910fe3979bff
-    - path: global-forget-target-inventory-and-completion-evidence.md
-      source_blob: 9100061fa986fb6676656169de3fcf9fc1c72664
-      interim_main_blob: c0ba8b2dacc115e29233268e62d5ababfc26a025
-    - path: principal-actor-and-authorization-contract.md
-      source_blob: 03765efac4bb1153f303ce0030f9e277d602e81d
-      interim_main_blob: b8073340cb2efba990c038e0b628ee6e9d0f24da
-    - path: scope-and-revocation-policy.md
-      source_blob: 71df6aaf21bb1767cd9fe5c947581b871325e023
-      interim_main_blob: b4c66e90afdb57c5b60d37ad86554ccae6292e9a
-    - path: audit-and-exception-governance.md
-      source_blob: 0b5237f490066c7f95ebf4f5a5aa81edd8480bd4
-      interim_main_blob: NOT_PRESENT
-    - path: governance-decision-register.md
-      source_blob: f5fd2558c657f4ef49396a7a00cdbcd0f226f853
-      interim_main_blob: NOT_PRESENT
-    - path: threat-model-and-adversarial-test-plan.md
-      source_blob: 4227ac0e26228ca3504589efdee022b5d0802e12
-      interim_main_blob: NOT_PRESENT
-    - path: security-and-identity-overview.md
-      source_blob: 26a990e44709d8604ae515a2a63b510400fd8471
-      interim_main_blob: e9c71b15e19e9289bffa4d98bdfe254cc66a0b83
-  files_to_create:
-    - 09-security-governance/security-governance-guide.md
-    - 14-ai-development/work-items/AID-2026-109/prompt-v2-scope-correction.md
-  files_to_modify:
-    - 09-security-governance/README.md
     - docs/en/09-security-governance/README.md
     - docs/zh-CN/09-security-governance/README.md
-    - docs/en/09-security-governance/security-governance-guide.md (frontmatter only; body preserved)
-    - docs/zh-CN/09-security-governance/security-governance-guide.md (frontmatter only; body preserved)
+    - docs/en/09-security-governance/global-forget-target-inventory-and-completion-evidence.md
+    - docs/zh-CN/09-security-governance/global-forget-target-inventory-and-completion-evidence.md
+    - docs/en/09-security-governance/forget-retention-backup-and-erasure-policy.md
+    - docs/zh-CN/09-security-governance/forget-retention-backup-and-erasure-policy.md
+    - docs/en/09-security-governance/principal-actor-and-authorization-contract.md
+    - docs/zh-CN/09-security-governance/principal-actor-and-authorization-contract.md
+    - docs/en/09-security-governance/scope-and-revocation-policy.md
+    - docs/zh-CN/09-security-governance/scope-and-revocation-policy.md
+    - docs/en/09-security-governance/security-and-identity-overview.md
+    - docs/zh-CN/09-security-governance/security-and-identity-overview.md
     - 14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md
     - docs/en/14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md
     - docs/zh-CN/14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md
     - 14-ai-development/work-items/AID-2026-109/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-109/prompt-v1.md
     - 14-ai-development/work-items/AID-2026-109/session-evidence.md
-    - 14-ai-development/work-items/INDEX.md
-  unchanged_root_registration:
+  files_to_modify:
     - 00-governance/document-scope-registry.yaml
     - scripts/check_bilingual_docs.py
+    - 14-ai-development/work-items/INDEX.md
+  exclusions:
+    - "No import of the remaining historical I branch tree"
+    - "No changes to 03/04/05 domain files"
+    - "No Runtime/product code or Validator code/semantics"
+    - "No tests, scripts, workflows, schemas, APIs, DDL, deployment or production configuration"
+    - "No Issue closure"
 acceptance_criteria:
-  - "README exists in Canonical, EN and ZH-CN with matching structure and correct acceptance-authority language."
-  - "Guide Canonical is RECONSTRUCTED_FROM_MIRROR; source branch absence and original mirror blob SHAs recorded."
-  - "Four detailed policies and four other historical I docs are NOT_RESTORED_BY_DECISION."
-  - "The five interim imports and their ten mirrors are absent from final main."
-  - "All 81 phase records are classified by filename prefix and none restored."
-  - "AID-2026-089 and AID-2026-099 HIR-18 authority boundaries are explicit."
-  - "All 16 required contexts pass on exact final PR Head; post-merge blobs are verified."
-  - "Comments are posted to #1211 and #1212; both Issues remain open."
+  - id: AC1
+    criterion: "F4/F6/F7-derived I source selection is explicit; F8 is excluded as Storage/Consistency."
+  - id: AC2
+    criterion: "Five source document bodies are byte-preserved and source/new/frontmatter blob SHAs are recorded."
+  - id: AC3
+    criterion: "All restored sources are GOV-DOC-002 complete, Draft and Informative; no Owner approval is fabricated."
+  - id: AC4
+    criterion: "D remains sole logical Fence authority per AID-2026-089; HIR-18 independent I authorization and D Fence replay checks remain required."
+  - id: AC5
+    criterion: "Canonical/EN/ZH-CN audit reports have matching structure and record Gate A / #1211 boundaries."
+  - id: AC6
+    criterion: "All 16 required contexts succeed on exact final PR head before merge; post-merge blob SHAs are verified."
 implementation:
-  status: CORRECTION_DRAFT_PR
-  branch: docs/aid-2026-109-scope-correction
-  pull_request: PENDING
+  status: MERGED
+  branch: docs/aid-2026-109-i-security-root
+  pull_request: 1300
+  merge_commit_sha: e3a134de856bbb58581fd688462c9c0282631270
+  merged_at_utc: 2026-11-26T13:13:24Z
+  final_pr_head_sha: c5766fb934e0e5db0ba667bda2f74452a0f39265
+  exact_head_required_checks: 16
+  exact_head_checks_result: SUCCESS
+  normative_acceptance: PENDING
+  pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1300
 review:
   status: NOT_ASSIGNED
 acceptance:
   status: NOT_ACCEPTED
   owner_acceptance_count: 0
   pending:
-    - "I Owner exact-version policy-semantics acceptance"
-    - "HIR-18 implementation and current I authorization / D Fence replay evidence"
-    - "COC/GID sealed cryptographic evidence and Storage physical conformance under #1211"
+    - "Owner I exact-version policy acceptance"
+    - "Affected Owner acceptance for D/I/H/Storage boundary interfaces"
+    - "HIR-18 implementation and cryptographic verifier evidence"
+    - "COC/GID cryptographic sealed evidence and Storage physical conformance under #1211"

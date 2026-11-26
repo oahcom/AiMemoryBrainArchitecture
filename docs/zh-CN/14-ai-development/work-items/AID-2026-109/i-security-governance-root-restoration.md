@@ -1,7 +1,7 @@
 ---
 document_metadata:
-  domain: ai-development
-  role: work-record
+  domain: security-governance
+  role: review-report
   lifecycle:
     approval:
       decision_status: Draft
@@ -12,12 +12,13 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "AID-2026-109 scope correction; main base 7629b9de5e5832fe486ee72d101c4bc5121015e6"
+        - "AID-2026-109 — bounded I source-root restoration audit"
+        - "Source branch session-i-security-governance-2026-11-16 @ 8abddf814467b271344a9814613a6b7ca6a446c6"
       revocation: null
     evidence_verification:
       verification_status: Unverified
-      last_verified_date: "2026-11-26"
-      last_verification_note: "Records the correction to the merged AID-2026-109 scope; does not assert I Owner acceptance or production conformance."
+      last_verified_date: null
+      last_verification_note: "Audit report and source blob readback; does not assert I Owner acceptance or production conformance."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -30,114 +31,101 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "Language mirror of AID-2026-109 I root scope correction and restoration evidence"
-    canonical_scope_id: "ai-development/aid-2026-109-i-root-restoration"
+    canonical_scope: "AID-2026-109 I security-governance source-root restoration audit"
+    canonical_scope_id: "security-governance/aid-2026-109-i-root-restoration"
     canonical_scope_keywords:
       - security-governance
       - source-restoration
-      - not-restored-by-decision
+      - phase-freeze
       - gate-a
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
     source: "14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md"
-    en: "docs/en/14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md"
-    zh-CN: null
 ---
-# AID-2026-109 — I 规范根范围纠正与受限恢复证据
+# I 安全、身份与治理规范根受限恢复 — AID-2026-109
 
 **署名：** `user-authorized operator (delegated by account owner)`  
-**代理说明：** 代理登记，非自然人 Owner 签署  
 **日期：** 2026-11-26  
-**工作项：** AID-2026-109（`id_status: PROVISIONAL`）  
-**纠正基线：** `7629b9de5e5832fe486ee72d101c4bc5121015e6`
+**编号状态：** `PROVISIONAL`  
+**提交前 fetch 的最新 main：** `b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c`  
+**INDEX 编号核验：** 最大编号为 `AID-2026-108`；`AID-2026-109` 尚不存在，按规则分配下一号。  
+**历史来源：** `session-i-security-governance-2026-11-16` @ `8abddf814467b271344a9814613a6b7ca6a446c6`
 
-## 1. 本次纠正的原因
+## 1. 从 F1–F8 推导恢复范围
 
-PR #1300 将 AID-2026-109 合并为 merge commit `e3a134de856bbb58581fd688462c9c0282631270`。该临时版本恢复了五份历史 I 文档（四份详细策略契约和一份安全/身份概览）。之后用户进一步收窄范围：根据现有镜像恢复 Guide、在三个路径写 README，并对上述八份历史文档正式作出不恢复处置，而不是导入详细策略。
+当前 main 上的组合审查明确将 I 规范根缺失列为三个 Flow 的阻塞理由：
 
-本 follow-up 删除五份临时导入的 Canonical 文档及其十份 EN/ZH-CN 镜像。保留已经合入的 I 根登记：`00-governance/document-scope-registry.yaml` 与 `scripts/check_bilingual_docs.py::NORMATIVE_ROOTS`。不修改 checker 逻辑或双语配对豁免规则。
+- **F4，第 180–181 行：** “I global policy root absent”；I 需要提供授权、保留与残余例外政策。
+- **F6，第 218–219 行：** “I normative root absent”；Scope/Permission 模型尚未定义 policy 与 cache/revocation 保证；I 需提供 issuer、签名决策/attestor、PermissionEpoch、撤销与缓存新鲜度及 verifier。
+- **F7，第 237–238 行：** “I root absent”；D 明确将全局完成与物理擦除留给 I；inventory、backup/external-copy 与 exception policy 尚未接受。
 
-PR #1301 是基于较旧基线创建的另一份 Draft 尝试；GitHub 当前记录其状态为 CLOSED 且 `merged=false`。本代理没有合并该 PR。本次纠正以 AID-110 合并后的当前 main 为基线。
+F1–F3、F5 没有把 I 规范根缺失列为其主要阻塞原因。F8 是 Storage/Consistency 的物理原子性、耐久性、崩溃与恢复缺口，不属于 I 规范根缺失。
 
-## 2. 审查推导 — F4/F6/F7
+**文件名证据边界：** 审查文档明确将 `09-security-governance/README.md` 列为 `NOT_FOUND_ON_MAIN`；但 F4/F6/F7 的原因段落只写“I root”，并未逐一列出五个政策文件名。以下五份文件是本任务给定的候选文件，按 F4/F6/F7 的职责映射选取；不声称它们是 F4/F6/F7 引文逐字点名的路径。
 
-2026-11-26 A–I + Storage 组合审查在 F4、F6、F7 中指出 I 规范根缺失。精确缺失路径清单点名 `09-security-governance/README.md`；F4/F6/F7 的原因段落描述了 I 的职责，但没有逐一列出下方八个历史文件名。审查允许采取“restore or formally disposition”。
+## 2. 受限选择
 
-- **F4：** I global policy root 缺失；授权、保留和残余例外政策职责仍待落实。
-- **F6：** I normative root 缺失；Scope/Permission policy 与 cache/revocation 保证仍未明确。
-- **F7：** D 将全局完成与物理擦除政策留给 I；inventory、backup/external-copy 和 exception policy 尚未接受。
-- **排除 F8：** F8 是 Storage/Consistency 的物理原子性、耐久性、崩溃与恢复证据缺口，不是 I 规范根缺失。
+源分支在 `09-security-governance/` 下共有 91 个文件。本次只恢复选定的五份源文档，并新增一个 README 导航根；不复制审计登记册、Phase 3.x 决策记录、自审记录、测试、参考模型或历史分支的其余文件。
 
-## 3. Guide 来源
+## 3. 源 Blob / 恢复 Blob 对照
 
-**分类：`RECONSTRUCTED_FROM_MIRROR`（根据镜像重建）。**
+五份规范文件的原始正文完整逐字节保留。唯一新增前缀是 GOV-DOC-002 frontmatter；没有改写源正文。第三个 SHA 是新增 frontmatter 自身的 Git blob SHA。
 
-源分支 `session-i-security-governance-2026-11-16`（`8abddf814467b271344a9814613a6b7ca6a446c6`）中不存在 `09-security-governance/README.md`，也不存在 `09-security-governance/security-governance-guide.md`。
+| 恢复后的 Canonical 路径 | 源 Blob SHA | 新完整文件 Blob SHA | Frontmatter-only Blob SHA | 判定 |
+|---|---|---|---|---|
+| `09-security-governance/global-forget-target-inventory-and-completion-evidence.md` | `9100061fa986fb6676656169de3fcf9fc1c72664` | `c0ba8b2dacc115e29233268e62d5ababfc26a025` | `a0740d117603891c0a9633d093bd01cb9a92f8cf` | CURRENT — Candidate / Informative |
+| `09-security-governance/forget-retention-backup-and-erasure-policy.md` | `f14cb2149ca3f817229533005ab89dbdc7f0b3a8` | `ab2b28829100ca1f2a17d203396b910fe3979bff` | `60b666d7b6ea38a9f2d70aa47744f3d076876e02` | CURRENT — Candidate / Informative |
+| `09-security-governance/principal-actor-and-authorization-contract.md` | `03765efac4bb1153f303ce0030f9e277d602e81d` | `b8073340cb2efba990c038e0b628ee6e9d0f24da` | `d1b950f16ce89b8c23549c99bb885b0014a78dbf` | CURRENT — Candidate / Informative |
+| `09-security-governance/scope-and-revocation-policy.md` | `71df6aaf21bb1767cd9fe5c947581b871325e023` | `b4c66e90afdb57c5b60d37ad86554ccae6292e9a` | `9252258fa0a5f64e3cea75513da4e5e48d6c7847` | CURRENT — Candidate / Informative |
+| `09-security-governance/security-and-identity-overview.md` | `26a990e44709d8604ae515a2a63b510400fd8471` | `e9c71b15e19e9289bffa4d98bdfe254cc66a0b83` | `fd42af80595cf8c4ef92795f64f5beacba38e7db` | CURRENT — Candidate / Informative |
 
-main 原有以下 Guide 镜像：
-- EN 原完整文件 Blob：`061c5847b3df879eeaf3c71e5eae0bfa162b276a`
-- ZH-CN 原完整文件 Blob：`372d27c79dc79d09bcdb0f142c979efdba1c2b6e`
+README 是新编写的导航索引（源分支不存在 README blob），不是恢复的历史政策正文。
 
-新建 Canonical Guide 正文与 EN 镜像逐字节一致。现有 EN 与 ZH-CN Guide 正文也逐字节保持原样；只为两份镜像增加 GOV-DOC-002 frontmatter。
+## 4. 取代性与权威判定
 
-| Guide 路径 | 原始/源 Blob | 纠正 PR Blob |
+五份恢复文档均判定为 **CURRENT（当前可用的候选信息性材料）**，不代表当前规范性权威：
+
+| 文档 | 对应缺口 | 判定 |
 |---|---|---|
-| `09-security-governance/security-governance-guide.md` | 源分支：NOT_FOUND | `0c88125480f46b2bd264dd6fd8c1f92423edd531` |
-| `docs/en/09-security-governance/security-governance-guide.md` | `061c5847b3df879eeaf3c71e5eae0bfa162b276a` | `70ba84ce1ccaf1bbd316e93728a6765de553e11a` |
-| `docs/zh-CN/09-security-governance/security-governance-guide.md` | `372d27c79dc79d09bcdb0f142c979efdba1c2b6e` | `54cb0ae5cfe8278a2f22b9ebaeed2e591651cf37` |
+| global-forget-target-inventory-and-completion-evidence.md | F4 / F7 | CURRENT — Informative；I 全局 inventory、目标证据与完成政策 |
+| forget-retention-backup-and-erasure-policy.md | F4 / F7 | CURRENT — Informative；I 保留、备份、外部副本与物理擦除政策 |
+| principal-actor-and-authorization-contract.md | F6 | CURRENT — Informative；I 授权语义，B 仍拥有 ActorRef/ScopeRef 类型语义 |
+| scope-and-revocation-policy.md | F6 | CURRENT — Informative；I policy、PermissionEpoch、撤销与缓存新鲜度 |
+| security-and-identity-overview.md | F4 / F6 / F7 | CURRENT — Informative 概览；其中历史基线引用仅作为来源信息，不构成新的 main 版本 pin |
 
-Canonical Guide 与两份镜像均保持 Draft / Informative，且 `approved_version: null`。
+没有将任何候选文档标记为 `SUPERSEDED_BY`：检查未发现必须由 AID-2026-089 或 AID-2026-099 取代的权威主张。这不等于源文档已获批准。所有文件均保持 `decision_status: Draft`、`approved_version: null`、`normative_status: Informative`。本次恢复不产生任何 Owner acceptance。
 
-## 4. NOT_RESTORED_BY_DECISION 登记
+## 5. 与 AID-2026-089 及 AID-2026-099 HIR-18 对齐
 
-下表记录源分支 Blob；若此前 AID-109 临时合并曾导入该文件，也记录纠正前 main 的 Canonical 和镜像 Blob。纠正 PR 删除这些临时导入，使最终 main 状态真正符合“不恢复”。
+- **AID-2026-089：** D 是 ForgetOperation identity 与 ForgetFence generation/cursor 的唯一逻辑签发权威。恢复的 I 文档保留 I 的授权、全局完成与保留政策职责，不把 Fence 签发、lineage 权威或 canonical suppression 转交给 I 或 Storage。
+- **AID-2026-099 HIR-18：** replay disclosure 必须独立重查当前 I authorization/PermissionEpoch/issuer status，以及当前 D Fence/lineage；任一拒绝或未知均阻止披露。I 文档仅提供候选政策语义。本次恢复不声称 HIR-18 已实现、已获跨 Owner 接受、cryptographic verifier 已就绪或 runtime 已符合。
+- Storage 本地 Fence 记录仍只能是 D 派生、可重建的 projection；没有引入第二权威。
 
-| 文档 | 源分支 Blob | 纠正前 main Canonical Blob | 纠正前 EN 镜像 | 纠正前 ZH-CN 镜像 | 最终处置 |
-|---|---|---|---|---|---|
-| `forget-retention-backup-and-erasure-policy.md` | `f14cb2149ca3f817229533005ab89dbdc7f0b3a8` | `ab2b28829100ca1f2a17d203396b910fe3979bff` | `e3bd438c76fb4ba7b2af8342dbbb1ef5c4dc6e86` | `8117fc33573ef743c23a5ab0e8d9f9ea65f78fd9` | `NOT_RESTORED_BY_DECISION` |
-| `global-forget-target-inventory-and-completion-evidence.md` | `9100061fa986fb6676656169de3fcf9fc1c72664` | `c0ba8b2dacc115e29233268e62d5ababfc26a025` | `c453b8703a3dd93d5b1d0c5d3dc008d1afa53ebb` | `14d6b7c377ca9ce39c3c31372c55803d4ce0f69c` | `NOT_RESTORED_BY_DECISION` |
-| `principal-actor-and-authorization-contract.md` | `03765efac4bb1153f303ce0030f9e277d602e81d` | `b8073340cb2efba990c038e0b628ee6e9d0f24da` | `eee995574ffda289e3ad29aa1919c09806f19057` | `fc127f028bca96c3bee21d8da8e51a0b508d1fe2` | `NOT_RESTORED_BY_DECISION` |
-| `scope-and-revocation-policy.md` | `71df6aaf21bb1767cd9fe5c947581b871325e023` | `b4c66e90afdb57c5b60d37ad86554ccae6292e9a` | `8eef867241bdb25c01d2f9b7332f7e485def101f` | `887949ca54745e6c30cf8e402da5229bab861032` | `NOT_RESTORED_BY_DECISION` |
-| `audit-and-exception-governance.md` | `0b5237f490066c7f95ebf4f5a5aa81edd8480bd4` | NOT_PRESENT | NOT_PRESENT | NOT_PRESENT | `NOT_RESTORED_BY_DECISION` |
-| `governance-decision-register.md` | `f5fd2558c657f4ef49396a7a00cdbcd0f226f853` | NOT_PRESENT | NOT_PRESENT | NOT_PRESENT | `NOT_RESTORED_BY_DECISION` |
-| `threat-model-and-adversarial-test-plan.md` | `4227ac0e26228ca3504589efdee022b5d0802e12` | NOT_PRESENT | NOT_PRESENT | NOT_PRESENT | `NOT_RESTORED_BY_DECISION` |
-| `security-and-identity-overview.md` | `26a990e44709d8604ae515a2a63b510400fd8471` | `e9c71b15e19e9289bffa4d98bdfe254cc66a0b83` | `7764d0692d432979b02849fe865404ee4eed8768` | `1ba7a813a76b9b2c62e4431fe6419aaa9988a2a7` | `NOT_RESTORED_BY_DECISION` |
+## 6. Gate A 与 Issue 状态影响
 
-### 四份详细策略不恢复的理由
+此前 I source-presence 子项因 `09-security-governance/README.md` 与 I 政策根缺失而为 OPEN。本次恢复后，该子项变为：
 
-前四行是详细策略契约。若恢复四份文件，需要额外八份 EN/ZH-CN 镜像。该翻译工作量未获授权，F4/F6/F7 也没有将这些详细策略文件名逐一列为规范根必需内容。正式处置不表示其策略内容存在于最终 main 或已获 I 接受。
+**RESTORED_CANDIDATE_SOURCE_PRESENT / INFORMATIVE — I Owner 精确版本验证与 acceptance 仍为 OPEN。**
 
-另外四份历史文件也正式处置为不恢复。概览文档因已有架构指南作为唯一根级导览而删除；审计登记、决策登记和威胁模型/测试计划均属于非必需历史材料。
+这不关闭 Gate A。Gate A 仍为 PARTIAL / OPEN；Gate B 仍为 NOT VERIFIED。不声称存在自然人 Owner 签署、政策 ratification、实现 acceptance 或生产符合性。
 
-## 5. Phase 记录前缀分类
+## 7. #1211 COC / GID 加密封存证据边界
 
-源分支在 `09-security-governance/` 下有 91 个文件，其中 81 个符合 Phase 记录文件名模式。本次均不恢复。
-
-| 文件名前缀 | 数量 |
-|---|---:|
-| `phase-3` | 1 |
-| `phase-3.5` | 1 |
-| `phase-3.6` | 30 |
-| `phase-3.7` | 1 |
-| `phase-3.8` | 47 |
-| `phase-3.9` | 1 |
-| **总计** | **81** |
-
-## 6. 权威与接受边界
-
-- I 是 I policy semantics 的指定接受权威；本次纠正不声称 I 已接受任何策略。
-- **AID-2026-089：** D 仍是 ForgetOperation identity、ForgetFence generation/cursor 和 D 域完成谓词的唯一逻辑权威。I 不得签发/推进 D Fence，也不得重定义 D completion。
-- **AID-2026-099 HIR-18：** replay disclosure 必须独立重查当前 I authorization/PermissionEpoch/issuer validity 和当前 D Fence/lineage；拒绝或未知时 fail closed。
-- README 与 Guide 均为 Draft / Informative，`approved_version: null`。不声称存在 Owner acceptance、生产符合性或 HIR-18 实现。
-
-## 7. Gate A 第 5 项与 #1211
-
-Gate A 第 5 项中 I 的子项从**规范根缺失**变为**规范根已撰写、Guide 已根据镜像重建、四份详细策略契约已正式处置**。这是审查允许的“恢复或正式处置”路径，不等于“I policy semantics accepted”。Gate A 仍为 PARTIAL / OPEN；Gate B 仍 NOT VERIFIED。
-
-**COC/GID 加密封存证据未触及，仍需补齐。** 本次纠正没有恢复或验证 COC/GID 加密封存证据、签名者/密钥托管、quorum、anti-rollback、durable-log/recovery、backup/restore 或生产拓扑。#1211 仍 OPEN。
+**未触及，仍需补齐。** 本次只恢复 I 治理源文档；没有恢复或验证 Storage/Consistency 的 COC/GID 源文档、加密封存证据、签名者/密钥托管、quorum、anti-rollback、durable-log/recovery、backup/restore 或生产拓扑。#1211 仍保持 OPEN。
 
 ## 8. 变更边界
 
-本次纠正删除五份临时导入的 I Canonical 文档及其十份镜像，新增 Canonical Guide 与 README 三语版本，并更新 AID-2026-109 证据。未修改 03/04/05、Runtime、产品 validator semantics、tests、workflows、schemas、APIs、DDL、部署或生产配置。不关闭 #1211 或 #1212。
+不修改 03/04/05 域；不修改 Runtime/product code、Validator code 或 validator semantics、tests、scripts、workflows、schemas、APIs、DDL、部署或生产配置。不关闭任何 Issue。
+
+
+## 9. Merge and post-merge verification
+
+- **PR:** [#1300](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1300) — merged 2026-11-26 13:13:24Z.
+- **Final PR Head:** `c5766fb934e0e5db0ba667bda2f74452a0f39265`.
+- **Merge commit:** `e3a134de856bbb58581fd688462c9c0282631270`.
+- **Exact-Head required checks:** 16/16 SUCCESS: Rust clippy (hard gate); Bilingual docs coverage (ratchet); BMCP protocol index (hard gate); Rust doctests (hard gate); BMCP conformance suite (hard gate); Repository hygiene (hard gate); Rust format (hard gate); Schema non-empty audit (hard gate); rust-workspace-test; Branch freshness vs base; GOV-DOC-002 metadata checks; Session Evidence; Session Evidence self-test (base); audit; GOV-DOC-001 structural checks; Session Evidence self-test (head).
+- Post-merge main tree readback confirmed the five canonical restored blob SHAs and all mirror/report blobs. Each of the five restored source bodies, after its new GOV-DOC-002 frontmatter, is byte-for-byte identical to the source-branch body.
+- The canonical / EN / ZH-CN I mirrors exist. ZH-CN contains translated summaries and the verbatim English source body; full semantic translation parity remains NOT_VERIFIED.
+- #1211 and #1212 were not closed by this work. #1212's prior close/reopen history is recorded in the issue timeline; its state was OPEN at this readback.
