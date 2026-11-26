@@ -41,7 +41,7 @@ flowchart LR
 | Agent Adapter | Agent-specific telemetry mapping; validation and installation of Brain-managed context at inference assembly boundary; acknowledgement evidence | BMCP messages, capability profile, context snapshots/deltas | Select canonical memories, rewrite Brain policies, assert model comprehension |
 | Environment Adapter | Environment-specific observation/event normalization; command transport when authorized by Agent | Environment state and Agent-originated commands | Independently choose Agent actions or let Brain directly actuate environment |
 | Skill Library | Executable skills, procedures, versions, execution requirements | Agent requests; optionally memory references for lookup | Treat a memory as executable code or silently mutate Canonical Memory |
-| Storage/index/cache infrastructure | Physical persistence and derived representations under owning subsystem contracts | Authorized reads/writes and change events | Define domain truth or become competing logical authority |
+| Storage/index/cache infrastructure | Physical persistence and derived representations under owning subsystem contracts; Storage-local Forget fences are only rebuildable projections of D's canonical ForgetFence | Authorized reads/writes and change events | Define domain truth, issue a competing ForgetFence generation/cursor, or become competing logical authority |
 
 ### 3.1 Memory Brain boundary
 
@@ -196,3 +196,8 @@ Every crossing must identify: caller identity, operation, resource, Scope, Permi
 - **DECIDED:** Context application occurs at a subsequent inference boundary and requires Adapter acknowledgement.
 - **CANDIDATE:** Push-first telemetry with bounded heartbeat/reconciliation.
 - **OPEN:** Exact identity, authentication, protocol envelope, retention erasure, and Environment ingress profile.
+
+
+## 8. Forget Fence authority boundary — 2026-11-26
+
+The D canonical contract at [03-memory-brain/forget-fence-and-completion-contract.md](../03-memory-brain/forget-fence-and-completion-contract.md) is the sole logical authority for ForgetOperation and ForgetFence target/lineage decisions. Storage/Consistency may persist and physically protect that authority, but a Storage-local Memory/Version fence is only a derived, rebuildable projection; it MUST NOT issue an independent generation/cursor or become a competing decision source. If current D authority cannot be established, affected reads and publication fail closed. Local suppression is not Global Forget Completion. This is a recorded direction decision; exact-version Owner acceptance and implementation evidence remain pending.
