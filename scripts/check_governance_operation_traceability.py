@@ -101,8 +101,13 @@ def check(root: Path) -> tuple[int, list[str]]:
             ):
                 if not value:
                     errors.append(f"{relative}: row {number} {label} is empty")
-                elif "NOT_ASSIGNED" in value:
-                    errors.append(f"{relative}: row {number} {label} is NOT_ASSIGNED; operation remains open")
+                elif ("NOT_ASSIGNED" in value.upper()
+                      or re.search(r"\\bnot\\s+assigned\\b", value, re.I)
+                      or "未分配" in value
+                      or "尚未分配" in value):
+                    errors.append(f"{relative}: row {number} {label} is unassigned; operation remains open")
+            if policy and canonical and policy.casefold() == canonical.casefold():
+                errors.append(f"{relative}: row {number} collapses policy and canonical-state authority into one entry")
             if executor and executor.casefold() in {policy.casefold(), canonical.casefold()}:
                 errors.append(f"{relative}: row {number} collapses an authority role into the physical executor entry")
         for pattern in FALSE_COMPLETION:
