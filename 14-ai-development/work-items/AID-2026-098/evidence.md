@@ -94,10 +94,10 @@ The current-main `crates/memory-storage-sqlite/src/lib.rs` defines a `canonical_
 
 | Related Issue | Issue AI-assisted work | Evidence refs for this Issue |
 | --- | --- | --- |
-| #1211 | YES | `14-ai-development/work-items/AID-2026-098/evidence.md` |
-| #1212 | YES | `14-ai-development/work-items/AID-2026-098/evidence.md` |
-| #1125 | YES | `14-ai-development/work-items/AID-2026-098/evidence.md` |
-| #1180 | YES | `14-ai-development/work-items/AID-2026-098/evidence.md` |
+| #1211 | LEGACY_UNDECLARED | N/A |
+| #1212 | LEGACY_UNDECLARED | N/A |
+| #1125 | LEGACY_UNDECLARED | N/A |
+| #1180 | LEGACY_UNDECLARED | N/A |
 
 ## Known documentation-gate compatibility issue
 
