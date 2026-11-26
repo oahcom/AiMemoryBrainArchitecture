@@ -19,7 +19,7 @@ document_metadata:
       last_verified_date: "2026-11-26"
       last_verification_note: "The 099 manifest line, H contract open decision and Storage candidate text were checked on the stated main baseline; no retention mapping approval is claimed."
     usage_status: Active
-    modification_status: New
+    modification_status: Modified
     supersession:
       supersedes: []
       supersession_reason: null
