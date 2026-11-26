@@ -339,3 +339,13 @@ The six Gate A root-path blockers were handled before broad E/F/H/I inventory wo
 **Governance registration:** roots 03 and 04 were already present in `document-scope-registry.yaml` and `NORMATIVE_ROOTS`; 05 was already in the scope registry and is now included in `NORMATIVE_ROOTS`. Root 09 has not been created or registered because no exact I source README Blob was found.
 
 **Validation:** Exact-Head CI remains pending until the final commit SHA is read and queried. No workflow definition, validator semantics, runtime/product code, deployment, merge or Issue state was changed.
+
+
+## Exact-Head CI trigger diagnosis
+
+- Final candidate Head before this diagnostic note: `56db83595fae84cd481cd7bf0936407a8d91706d`; both `fetch_commit_workflow_runs` and REST `actions/runs?head_sha=56db83595fae84cd481cd7bf0936407a8d91706d` returned zero runs; combined commit status returned an empty status list.
+- Actions is enabled at repository level in practice: repository-wide Actions run listing returned 11,908 historical/current runs, and other PR #1219 workflows were queued/in progress at 2026-11-26 05:50 UTC.
+- PR #1220 branch history shows the latest runs are still on older SHA `7cf6b0adcd531c875e14bab0b6fa70ff75db08eb` (2026-11-26 02:59 UTC); no run is associated with the newer Head.
+- Workflow definitions were read without modification. Bilingual docs and Session Evidence explicitly include `pull_request.edited`; Branch Freshness, Document Management, Repository Hygiene, Runner Admission and Gates include pull_request triggers without path filters. Specialized AID/G/H/Publication/Rust workflows have path filters and are not all applicable to documentation-only changes.
+- A PR body edit was performed, but no run was created for the exact Head. This rules out a simple missing-path explanation for the general gates. The available GitHub connector exposes read-only Actions inspection and rerun operations, but no workflow-dispatch action; rerun is inapplicable because no run exists. The evidence therefore supports: **event delivery/dispatch for this API-authored PR update did not occur or is suppressed upstream**. The exact suppression mechanism cannot be proven from repository-visible data; Actions delivery logs / token event provenance are not exposed here.
+- Compliant next trigger requires a normal GitHub UI/CLI `git push` or other owner-authorized PR event from an identity that emits the webhook. No workflow file or validator semantics was changed. No attempt was made to mark this not-ready Draft PR as Ready merely to manufacture an event.
