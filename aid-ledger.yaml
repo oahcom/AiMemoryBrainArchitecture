@@ -1,13 +1,25 @@
-﻿# AID allocation ledger
+# AID allocation ledger
 # Single-writer protocol: only this branch reserves identifiers.
 # A reservation is valid only if its push succeeded; a non-fast-forward
 # push means the reservation lost the race and must be re-scanned.
 # One AID maps to exactly one work_item_id.
 
 schema: 1
-updated_at_utc: "2026-11-26T11:05:00Z"
+updated_at_utc: "2026-11-26T11:10:00Z"
 entries:
-  - id: AID-2026-082`n    state: MERGED`n    carrier: "PR #1265"`n    note: "won the collision; #1274 merged without the 082 directory"
+  - id: AID-2026-082
+    state: MERGED
+    carrier: "PR #1265"
+    note: "won the collision; #1274 merged without the 082 directory"
+  - id: AID-2026-084
+    state: MERGED
+    carrier: "PR #1280"
+  - id: AID-2026-085
+    state: MERGED
+    carrier: "PR #1271"
+  - id: AID-2026-089
+    state: MERGED
+    carrier: "PR #1232"
   - id: AID-2026-090
     state: MERGED
     carrier: "PR #1241"
@@ -20,35 +32,40 @@ entries:
   - id: AID-2026-093
     state: MERGED
     carrier: "PR #1219"
-  - id: AID-2026-094`n    state: MERGED
+  - id: AID-2026-094
+    state: MERGED
     carrier: "PR #1277"
-    note: "Issue #752 AttestorData deserialization; #1220 yielded this number"
+    note: "#1220 yielded this number"
   - id: AID-2026-095
     state: MERGED
     carrier: "PR #1264"
   - id: AID-2026-096
     state: MERGED
     carrier: "PR #1256"
-  - id: AID-2026-097`n    state: MERGED
+  - id: AID-2026-097
+    state: MERGED
     carrier: "PR #1270"
-  - id: AID-2026-098`n    state: MERGED
+  - id: AID-2026-098
+    state: MERGED
     carrier: "PR #1283"
-    note: "carrier moved from #1276 (closed, unmerged) to #1283 rebased carrier"
+    note: "carrier moved from #1276 (closed, unmerged) to the rebased #1283"
   - id: AID-2026-099
     state: MERGED
     carrier: "PR #1275"
-  - id: AID-2026-100`n    state: PARTIAL`n    carrier: "PR #1284 evidence merged; PR #1220 manifest still open"`n    note: "main holds only evidence.md under AID-2026-100; no manifest yet - #1220 must supply it"
+  - id: AID-2026-100
+    state: PARTIAL
+    carrier: "PR #1284 (evidence merged) + PR #1220 (manifest still open)"
+    note: "main holds only evidence.md under AID-2026-100; no manifest yet"
   - id: AID-2026-101
     state: MERGED
     carrier: "PR #1248"
   - id: AID-2026-102
     state: MERGED
     carrier: "PR #1279"
-    note: "Issue #1278; took the number that had been assigned to #1251"
   - id: AID-2026-103
     state: MERGED
     carrier: "PR #1251"
-    note: "six outside-the-repo fixture roots; Issues #989 #988 #827; merged as f563037a; reservation commit 844c0822 preceded content commit 5359a20a"
+    note: "reservation commit 844c0822 preceded content commit 5359a20a"
   - id: AID-2026-104
     state: FREE
   - id: AID-2026-105
@@ -63,7 +80,3 @@ entries:
     state: FREE
   - id: AID-2026-110
     state: FREE
-
-
-
-
