@@ -87,7 +87,7 @@ acceptance:
 
 session_evidence:
   - role: DOCUMENTATION_AUTHOR
-    issue_refs: []
+    issue_refs:
     implementing_ai_session: NOT_RECORDED
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-150/prompt-v1.md
     executed_prompt_sha256: 0edf786c5132f68efbeddf84f317204bc2b54d2cd8695f40c5dbe903c11599fa

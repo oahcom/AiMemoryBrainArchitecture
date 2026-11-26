@@ -32,8 +32,7 @@ document_metadata:
     canonical_status: Non-Canonical
     canonical_scope: null
     canonical_scope_id: null
-    canonical_scope_keywords:
-      - 
+    canonical_scope_keywords: []
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
