@@ -71,7 +71,7 @@ document_metadata:
 
 | 精确路径 | Blob SHA | 来源类别 / 限制 |
 |---|---|---|
-| 00-governance/implementation-evidence/2026-11-26-a-i-storage-acceptance-matrix.md | 05fdcc93c5dfee1f635b5ad1a1db86310a88d8f7 | Canonical 工作记录；仅用于可追溯性；其内嵌基线已过期。 |
+| 00-governance/implementation-evidence/2026-11-26-a-i-storage-acceptance-matrix.md | 9c802777e9bafc421c77f8f68fcb035cdee4167d | Canonical 工作记录；仅用于可追溯性；其内嵌基线已过期。 |
 | 04-memory-compiler/compiler-overview.md | 24c2fc69a8a69176071d46aac871ae16588702b7 | Canonical、Normative、Draft/Unverified；编排仍为候选，且明确排除若干责任。 |
 | 04-memory-compiler/phase-1-event-store-contract.md | 17b14591d76160a7c125903b41e7dae014c3c5df | 语义 DECIDED / 实现接缝 CANDIDATE；不包含派发、lease 和生产持久性证明。 |
 | 04-memory-compiler/README.md | 88f1a451830b4c7b455462edd6453543778793e4 | Canonical、Informative 阅读指南。 |
