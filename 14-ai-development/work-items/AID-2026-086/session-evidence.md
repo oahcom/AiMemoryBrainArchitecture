@@ -7,7 +7,7 @@ external_evidence_reference:
   issues: ["#1125", "#1211"]
 repository:
   base_branch: main
-  base_commit_sha: 9ee89b322a160cc7ea5bcbd44ae2151850e289a0
+  base_commit_sha: c6b7d987b959c42af5072932963dae9ed55721e4
   branch: docs/forget-fence-authority-2026-11-26
   pull_request: 1232
 decision:
