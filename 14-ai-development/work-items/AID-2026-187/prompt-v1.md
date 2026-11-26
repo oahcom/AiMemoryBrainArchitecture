@@ -43,7 +43,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# AID-2026-116-PROMPT v1 — Repoint three attributions that name the work item a renumbering abandoned
+# AID-2026-187-PROMPT v1 — Repoint three attributions that name the work item a renumbering abandoned
 
 ## User dispatch
 
@@ -119,7 +119,7 @@ is the record whose job was to be precise about prior values.
   `identifier_history`.
 - `14-ai-development/work-items/INDEX.md` — the `AID-2026-101` row, and the new row for this
   work item.
-- `14-ai-development/work-items/AID-2026-116/` — this work item's own files.
+- `14-ai-development/work-items/AID-2026-187/` — this work item's own files.
 
 ## Explicitly out of scope
 

@@ -73,7 +73,7 @@ implementation:
     prior value rather than relying on the diff. This sentence was written while the correcting
     branch still held the identifier AID-2026-090; that number belongs to the ContextVersion
     immutability work item, which merged as PR #1241 and never mentions this file. Corrected by
-    AID-2026-116.
+    AID-2026-187.
 
 review:
   status: NOT_ASSIGNED

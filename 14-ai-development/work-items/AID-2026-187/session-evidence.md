@@ -43,7 +43,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# Session evidence — AID-2026-116
+# Session evidence — AID-2026-187
 
 ## Session role / use case
 
@@ -59,7 +59,7 @@ edit to somebody else's manifest.
 
 ## Actual AI input
 
-The prompt executed is `AID-2026-116/prompt-v1.md`, 7476 bytes, SHA-256
+The prompt executed is `AID-2026-187/prompt-v1.md`, 7476 bytes, SHA-256
 `0102ca64769d623c8987f51648d668a1f05cfd2f4d8524f64ac1451ad91a4c97`. It is the snapshot, not a
 summary of it, and it is committed beside this file.
 

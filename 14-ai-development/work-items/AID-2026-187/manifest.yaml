@@ -1,4 +1,6 @@
-work_item_id: AID-2026-116
+work_item_id: AID-2026-187
+RENUMBERED_FROM: AID-2026-116
+renumbering_reason: "AID-2026-116 is allocated on main to the unrelated work item of the same number; this correction is reassigned to the free identifier AID-2026-187 (see issue #1331). The two AID-2026-116 occurrences inside the prompt snapshot were updated to AID-2026-187, so the prompt digest was recomputed; the superseded value is recorded here."
 title: Repoint three attributions that name the work item a renumbering abandoned, and repin the 33 prompt digests a frontmatter removal invalidated
 class: DOC/GOVERNANCE
 risk: R1
@@ -23,12 +25,15 @@ base_commit_sha: a7e7c64b
 
 tracking_issue: "#1318 - the defect report, filed with the digest counts before and after PR #1281, the 58-byte uniformity across all 32 files, and the two pull-request states that distinguish #1241 from #1255."
 
-prompt_id: AID-2026-116-PROMPT
+prompt_id: AID-2026-187-PROMPT
 prompt_version: 1
-prompt_file: 14-ai-development/work-items/AID-2026-116/prompt-v1.md
+prompt_file: 14-ai-development/work-items/AID-2026-187/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 3b8f72e2e124b24625035c42398c0529655be4d8e8e48ddfc4b7369b89ce1c94
+prompt_sha256: 7ddad18d00c801f497371a2b104a1f8c7bc13b2c983bc084f438a77307e9a9be
 prompt_bytes: 8274
+# Superseded prompt_sha256: 3b8f72e2e124b24625035c42398c0529655be4d8e8e48ddfc4b7369b89ce1c94
+# (the digest before the AID-2026-116 -> AID-2026-187 renumbering changed two identifier tokens in
+# the snapshot; byte count unchanged because the two identifiers are the same length)
 
 # ---------------------------------------------------------------------------
 # The three references below were written while the correction branch still held
@@ -258,7 +263,7 @@ corrections:
       The same cell with the correcting record named as AID-2026-101 and the abandoned number 090
       recorded as abandoned, so the row and the three manifests it corrected agree on who did it.
   - target: 14-ai-development/work-items/INDEX.md
-    field: "row AID-2026-116 (new row, this work item)"
+    field: "row AID-2026-187 (new row, this work item)"
     prior_value: "no row exists"
     new_value: >-
       One row registering this correction, stating that it is an existence row whose Status repeats
@@ -305,12 +310,12 @@ session_evidence:
   - role: IMPLEMENTER
     issue_refs: []
     implementing_ai_session: owner-proxy-2026-11-26-104
-    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-116/prompt-v1.md
-    executed_prompt_sha256: 3b8f72e2e124b24625035c42398c0529655be4d8e8e48ddfc4b7369b89ce1c94
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-187/prompt-v1.md
+    executed_prompt_sha256: 7ddad18d00c801f497371a2b104a1f8c7bc13b2c983bc084f438a77307e9a9be
     executed_prompt_bytes: 8274
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
-    session_evidence_ref: 14-ai-development/work-items/AID-2026-116/session-evidence.md
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-187/session-evidence.md
     note: >-
       Canonical form, not the top-level legacy fields, because this pull request modifies this
       manifest and check_09_manifest_and_evidence_entries rejects a legacy manifest the same pull
