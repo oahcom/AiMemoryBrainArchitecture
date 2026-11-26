@@ -20,7 +20,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-26"
-    last_verification_note: "The implementation evidence in section 1 was produced by commands run in pull request #1198 on branch feat/078-manifest-gate on 2026-11-26 and is reproduced verbatim from that run. It records what was executed and what was not claimed; it asserts no review, no acceptance and no merge."
+      last_verification_note: "Section 1 was produced by commands run in pull request #1198 on branch feat/078-manifest-gate on 2026-11-26 and is reproduced verbatim from that run. It records what was executed and what was not claimed; it asserts no review, no acceptance and no merge."
     usage_status: Active
     modification_status: Unchanged
     supersession:
@@ -38,6 +38,12 @@ document_metadata:
     canonical_scope_keywords: []
     canonical_conflict_status: None
     canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
+---
 
 # Session evidence — AID-2026-078, implementation session
 
