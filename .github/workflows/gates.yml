@@ -246,8 +246,6 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
 
-      - name: cargo test --workspace --doc
-
       - name: Record resolved Rust toolchain version
         id: rust-toolchain-version
         shell: bash
@@ -280,10 +278,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt
-
-      # `check_fmt.py`      - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
 
