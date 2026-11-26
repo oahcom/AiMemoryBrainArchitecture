@@ -44,8 +44,8 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: null
-    en: "docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md"
+    source: "03-memory-brain/forget-fence-operation-and-publication-gate.md"
+    en: null
     zh-CN: "docs/zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate.md"
 ---
 

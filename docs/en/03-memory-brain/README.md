@@ -43,8 +43,8 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: null
-    en: "docs/en/03-memory-brain/README.md"
+    source: "03-memory-brain/README.md"
+    en: null
     zh-CN: "docs/zh-CN/03-memory-brain/README.md"
 ---
 

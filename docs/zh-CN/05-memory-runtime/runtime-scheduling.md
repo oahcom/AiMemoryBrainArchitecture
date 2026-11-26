@@ -45,9 +45,9 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: null
+    source: "05-memory-runtime/runtime-scheduling.md"
     en: "docs/en/05-memory-runtime/runtime-scheduling.md"
-    zh-CN: "docs/zh-CN/05-memory-runtime/runtime-scheduling.md"
+    zh-CN: null
 ---
 
 # Memory Runtime Scheduling（记忆运行时调度）

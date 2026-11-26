@@ -51,8 +51,8 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: null
-    en: "docs/en/09-security-governance/README.md"
+    source: "09-security-governance/README.md"
+    en: null
     zh-CN: "docs/zh-CN/09-security-governance/README.md"
 ---
 

@@ -46,7 +46,7 @@ document_metadata:
     normative_status: Informative
   bilingual_counterpart:
     source: "14-ai-development/work-items/AID-2026-082/evidence.md"
-    en: "docs/en/00-governance/implementation-evidence/2026-11-26-cross-owner-source-restore-03.md"
+    en: null
     zh-CN: "docs/zh-CN/00-governance/implementation-evidence/2026-11-26-cross-owner-source-restore-03.md"
 ---
 # AID-2026-082 — E/F/H/I source restoration inventory
