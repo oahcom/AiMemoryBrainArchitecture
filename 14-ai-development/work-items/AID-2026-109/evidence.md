@@ -112,6 +112,6 @@ The frontmatter SHA values above are Git blob SHAs of the exact added YAML front
 ### 4.2 Executed prompt snapshot
 
 - Snapshot: `14-ai-development/work-items/AID-2026-109/prompt-v1.md`.
-- SHA-256: `af29bd5b61d2a3a0d659fcfbb507111d5d7220baad5a335d4a7dca8c6e0f8462`.
-- UTF-8 bytes: `2946`.
+- SHA-256: `33b4bfa744533c9dbf595e2520ff87c4c526e6e6f1c20625ed1fa6b90038af4a`.
+- UTF-8 bytes: `4416`.
 - Provenance: user prompt captured from the initiating chat; session ID itself remains NOT_RECORDED.
