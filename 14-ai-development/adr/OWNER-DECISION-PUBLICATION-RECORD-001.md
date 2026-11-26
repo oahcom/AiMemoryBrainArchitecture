@@ -1,3 +1,44 @@
+---
+document_metadata:
+  domain: ai-development
+  role: decision-record
+
+  lifecycle:
+    approval:
+      decision_status: Approved
+      approver: "Verifier acting as owner proxy, per the standing instruction that a blocking decision with no human available is to be taken and recorded rather than left open."
+      decision_date: "2026-11-22"
+      approved_version:
+        scheme: git
+        value: "ef65cb9682ceee41767c8bc14b0be9082e26fc73"
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/adr/OWNER-DECISION-PUBLICATION-RECORD-001.md — the DECIDED line in this document names the decider and the date"
+        - "ef65cb9682ceee41767c8bc14b0be9082e26fc73 — the commit that added D8, the last substantive amendment to this decision"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+    usage_status: Active
+    modification_status: Pending-Reapproval
+
+  authority:
+    canonical_status: Canonical
+    canonical_scope: "Owner ruling: what the durable publication record is, that the production PublicationAuthority is an adapter reporting those records rather than a decider, and that no flag may be computed, inferred, defaulted or hardcoded."
+    canonical_scope_id: ai-development/publication-record
+    canonical_scope_keywords:
+      - publication-record
+      - publication-authority-adapter
+      - canonical-commit
+      - publication-flags
+      - blocked-not-published
+    canonical_conflict_status: None
+    normative_status: Normative
+---
+
 # OWNER-DECISION-PUBLICATION-RECORD-001 — What the durable publication record is
 
 **Status:** DECIDED (owner-proxy decision, 2026-11-22)
