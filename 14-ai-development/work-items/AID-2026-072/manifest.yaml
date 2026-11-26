@@ -2,7 +2,7 @@ work_item_id: AID-2026-072
 title: Remove the fixture-name collision that makes cargo test --workspace fail intermittently on coarse-clock hosts
 class: TEST/ISOLATION
 risk: R1
-status: PR_OPEN
+status: MERGED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -51,9 +51,20 @@ acceptance:
   A6: "No dependency is added and no assertion about forget/restore behaviour changes."
 
 implementation:
-  status: PR_OPEN
-  pull_request: 1057
-  merge_commit_sha: NOT_MERGED
+  status: MERGED
+  pull_request: 1082
+  merge_commit_sha: afb0c6ceac5f4d7346c4126d2a48bc8b17ffab2e
+  carrier_history: >-
+    The change was first dispatched under PR #1057, which CLOSED WITHOUT MERGING on
+    2026-11-25T10:05:37Z (head fa06fdd3); that is not a merge and is not written as one. It was
+    superseded because the branch was based on a tree that did not yet contain AID-2026-069,
+    which main has since assigned to an unrelated work item, so the record was renumbered to
+    AID-2026-072 and rebased. The rebased carrier, PR #1082, merged 2026-11-25T09:41:32Z as
+    afb0c6ceac5f4d7346c4126d2a48bc8b17ffab2e and contains commit 53500171 ("fix(903):
+    renumber the work item to AID-2026-072 and correct its prompt digest"). The merge commit is
+    an ancestor of main and the specified change is present in main:
+    crates/memory-event-store-sqlite/tests/forget_fence.rs carries the per-process atomic
+    counter. Refreshed by AID-2026-081, which records the prior value.
 
 review:
   status: NOT_ASSIGNED
