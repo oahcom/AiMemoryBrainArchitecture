@@ -70,7 +70,7 @@ class GovernanceTraceabilityTests(unittest.TestCase):
         (self.root / FILES[0]).write_text(document(FILES[0], rows), encoding="utf-8")
         code, errors = self.run_check()
         self.assertEqual(code, 1)
-        self.assertTrue(any("NOT_ASSIGNED" in item for item in errors))
+        self.assertTrue(any("unassigned; operation remains open" in item for item in errors))
 
     def test_policy_and_executor_cannot_be_collapsed(self):
         rows = list(ROWS)
