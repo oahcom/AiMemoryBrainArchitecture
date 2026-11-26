@@ -1,0 +1,133 @@
+work_item_id: AID-2026-190
+title: >-
+  Append a verifiable correction to the two governance records whose pasted test
+  output and new-blob identities cannot be reproduced from the repository tree
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  Append-only record correction. Six governance files gain one `## Correction (2026-11-27)`
+  section each; no historical table, pasted output block, blob reference or
+  `verification_status` value is edited. The residual risk is that a later reader treats
+  the appended section as a rewrite of the record, so both corrections state explicitly
+  that the original declaration is left in place and that it does not hold.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 4326669caa6c43193d34219a0451b80762b712ff
+prompt_status: NOT_RECORDED
+prompt_provenance: DISPATCHED_TASK_FILE
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: 4326669caa6c43193d34219a0451b80762b712ff
+  assigned_id: AID-2026-190
+  allocation_rule: "228 AID directories on disk reach AID-2026-189; the open pull requests reach AID-2026-187; no pull request title, branch, commit or tree path anywhere in the clone contained AID-2026-190 or AID-2026-191, so 190 was taken as the next unused number"
+  observed_occupied: [170, 172, 173, 183, 186, 187, 188, 189]
+evidence:
+  record: 14-ai-development/work-items/AID-2026-190/evidence.md
+  mirrors:
+    - docs/en/14-ai-development/work-items/AID-2026-190/evidence.md
+    - docs/zh-CN/14-ai-development/work-items/AID-2026-190/evidence.md
+  measured_at: 4326669caa6c43193d34219a0451b80762b712ff
+  measurements:
+    gov_rev_files_under_04_memory_compiler: 7
+    gov_rev_reference_model_dirs_at_head: 0
+    gov_rev_case_names_in_python_at_head: 0
+    gov_rev_case_names_in_documents_at_head: 10
+    gov_rev_case_names_verified_on_unmerged_branch: 10
+    gov_rev_unmerged_branch_head: 8142b1caadd17770685d0b1f2816e584065854ac
+    gov_rev_branch_is_ancestor_of_main: false
+    aid_113_new_blob_cells: 15
+    aid_113_new_blob_shas_resolvable: 0
+    aid_113_new_blob_shas_matching_origin_main: 0
+    aid_113_new_blob_shas_matching_restore_commit: 0
+    aid_113_source_and_orphan_blobs_resolvable: 17
+    aid_113_canonical_source_blobs_equal_source_head: 5
+    aid_113_restore_commit: 9142698fae340271e44c3a097fad0cc6455666b3
+    aid_113_frontmatter_lines_added: [47, 48, 53, 47, 48]
+    aid_113_body_lines_removed_by_restore: 0
+  local_runs:
+    - command: python -m unittest discover -s . -p "test_*.py" (inside git archive of 8142b1ca 04-memory-compiler/reference-model)
+      result: "Ran 10 tests in 0.001s / OK / exit 0"
+    - command: python scripts/check_document_management.py --require-changed <base>
+      result: "PASS (incremental) — recorded on the PR head, not asserted here"
+  not_measured:
+    - No CI context result is claimed at any SHA in this document
+    - No merge SHA is claimed
+    - The ten-case run is a local run against an extracted commit tree, not a CI run
+session_evidence:
+  - role: "CORRECTION_RECORD_AUTHOR"
+    issue_refs:
+      - "#1212"
+    implementing_ai_session: "opencode-go/deepseek-v4.1-flash"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-190/prompt-v1.md"
+    executed_prompt_sha256: "ee7c6c2de36dd9b36c7333309a6fe0e97b70bde0c7ad229fe5e705ab4f619543"
+    executed_prompt_bytes: 8190
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-190/session-evidence.md"
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-190/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-190/evidence.md
+    - 14-ai-development/work-items/AID-2026-190/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-190/session-evidence.md
+    - docs/en/14-ai-development/work-items/AID-2026-190/evidence.md
+    - docs/zh-CN/14-ai-development/work-items/AID-2026-190/evidence.md
+  files_to_modify:
+    - 14-ai-development/governance-register/GOV-REV-2026-11-21-PR425-001.md
+    - docs/en/14-ai-development/governance-register/GOV-REV-2026-11-21-PR425-001.md
+    - docs/zh-CN/14-ai-development/governance-register/GOV-REV-2026-11-21-PR425-001.md
+    - 14-ai-development/work-items/AID-2026-113/restore-evidence.md
+    - docs/en/14-ai-development/work-items/AID-2026-113/restore-evidence.md
+    - docs/zh-CN/14-ai-development/work-items/AID-2026-113/restore-evidence.md
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope:
+    - 04-memory-compiler/ and every file under it
+    - 05-memory-runtime/ and every file under it
+    - scripts/ and .github/workflows/
+    - 00-governance/document-scope-registry.yaml
+    - every historical table cell in the two corrected records
+    - every verification_status, last_verified_date and last_verification_note value
+
+non_goals:
+  - Declaring either original record Verified, or re-declaring it as anything
+  - Ruling on whether the pasted output was fabricated or transcribed wrongly
+  - Restoring, deleting or rewriting any blob named in either record
+  - Closing or reopening #1212
+
+carrier:
+  branch: fix/2026-11-27-refs-fake-evidence
+  pull_request: null
+  merge_sha: null
+  merge_method: merge
+  required_contexts: "to be recorded from the pull request head; none claimed here"
+  merge_authorization: >-
+    Only after all required contexts succeed on the exact final PR head and branch
+    freshness is rechecked.
+review:
+  status: NOT_ASSIGNED
+  independent_reviewer: NOT_ASSIGNED
+  natural_person_owner_acceptance: NOT_RECORDED
+acceptance:
+  gate: PENDING_CI
+notes:
+  - >-
+    The dispatched unit text counted 13 new-blob identities; the two tables actually carry
+    15 new-blob cells (5 Canonical + 10 mirror). The correction states the measured 15 and
+    lists every one, so a reader counting them sees the same number the tables show.
+  - >-
+    The dispatched unit text said the ten cases exist in no code at all. They exist at
+    refs/heads/owner-e/gap-01-memory-compiler-contract, commit 8142b1ca, which is not an
+    ancestor of main. The correction therefore records the reachability defect and names
+    the branch, instead of asserting a fabrication the repository contradicts.
+  - >-
+    Both corrections are identical in the canonical and EN files of GOV-REV, whose three
+    bodies were already byte-identical; the AID-2026-113 correction is English in the
+    canonical and EN files and Chinese in the ZH-CN file, matching that record's own split.
