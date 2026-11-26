@@ -17,7 +17,7 @@ date: 2026-11-26
 
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: df54ed60321e2958c50e9649963608cb3cb3f3b1
+base_commit_sha: 2d52b0c81dc1b779e49516fceb69d89cdc1d9c31
 tracking_issue: "#1212 — exact-version A–I + Storage/Consistency composition review"
 
 prompt_id: AID-2026-107-PROMPT
@@ -42,7 +42,7 @@ scope:
     - deployment and Issue #1212 closure
 
 source_baseline:
-  main: df54ed60321e2958c50e9649963608cb3cb3f3b1
+  main: 2d52b0c81dc1b779e49516fceb69d89cdc1d9c31
   aid_095_matrix_blob: 1d162b527eacb96e2cff24eec5fcf5a66014039a
   aid_098_storage_candidate_blob: d571f086505b312c40b6ae2e56a868131cfffc78
   aid_082_manifest_blob: ffd9077928e91c010667ff412131589654c93bbe
