@@ -41,6 +41,7 @@ scope:
   files_to_create:
     - 14-ai-development/work-items/AID-2026-090/manifest.yaml
     - 14-ai-development/work-items/AID-2026-090/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-090/session-evidence-1244.md
   files_to_modify:
     - 14-ai-development/work-items/INDEX.md
     - 14-ai-development/work-items/AID-2026-047/manifest.yaml
@@ -240,3 +241,23 @@ acceptance:
   status: NOT_ASSIGNED
   record_ref: ""
   acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1244"
+    implementing_ai_session: owner-proxy-2026-11-26
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-090/prompt-v1.md
+    executed_prompt_sha256: 2ac71e563b9c5f01aa217ee8846446cc9bc216a83f3d2f1952ae47b0edde9b4f
+    executed_prompt_bytes: 4470
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-090/session-evidence-1244.md
+    note: >-
+      Canonical form, not the top-level legacy fields: this pull request modifies this manifest,
+      and check_09_manifest_and_evidence_entries rejects a legacy manifest that the same pull
+      request touched. The prompt_id / prompt_version / prompt_file / prompt_status /
+      prompt_sha256 / prompt_bytes fields above are a different schema - the prompt pin the
+      INDEX cell cites - and none of them is in MANIFEST_FIELDS, so they do not conflict with
+      this block. The digest and byte count are repeated here because entry #1 has to pin the
+      snapshot it executed; they are the same measurement, not a second source of truth.
