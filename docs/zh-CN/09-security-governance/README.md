@@ -52,8 +52,8 @@ document_metadata:
     normative_status: Informative
   bilingual_counterpart:
     source: null
-    en: null
-    zh-CN: null
+    en: "docs/en/09-security-governance/README.md"
+    zh-CN: "docs/zh-CN/09-security-governance/README.md"
 ---
 
 # Security, Identity & Governance — 目录索引

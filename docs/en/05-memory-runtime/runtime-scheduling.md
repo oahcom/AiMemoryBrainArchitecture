@@ -45,8 +45,8 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "05-memory-runtime/runtime-scheduling.md"
-    en: null
+    source: null
+    en: "docs/en/05-memory-runtime/runtime-scheduling.md"
     zh-CN: "docs/zh-CN/05-memory-runtime/runtime-scheduling.md"
 ---
 

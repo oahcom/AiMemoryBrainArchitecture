@@ -45,9 +45,9 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "05-memory-runtime/working-set-and-cache.md"
+    source: null
     en: "docs/en/05-memory-runtime/working-set-and-cache.md"
-    zh-CN: null
+    zh-CN: "docs/zh-CN/05-memory-runtime/working-set-and-cache.md"
 ---
 
 # Runtime Working Set 与 Cache

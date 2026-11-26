@@ -45,9 +45,9 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "05-memory-runtime/activation-policy-engine.md"
+    source: null
     en: "docs/en/05-memory-runtime/activation-policy-engine.md"
-    zh-CN: null
+    zh-CN: "docs/zh-CN/05-memory-runtime/activation-policy-engine.md"
 ---
 
 # Memory Activation Policy Engine（记忆激活策略引擎）

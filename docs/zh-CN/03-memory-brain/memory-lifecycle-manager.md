@@ -44,9 +44,9 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "03-memory-brain/memory-lifecycle-manager.md"
+    source: null
     en: "docs/en/03-memory-brain/memory-lifecycle-manager.md"
-    zh-CN: null
+    zh-CN: "docs/zh-CN/03-memory-brain/memory-lifecycle-manager.md"
 ---
 
 # Memory Lifecycle Manager（记忆生命周期管理器）

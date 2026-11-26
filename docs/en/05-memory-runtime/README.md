@@ -52,8 +52,8 @@ document_metadata:
     normative_status: Informative
   bilingual_counterpart:
     source: null
-    en: null
-    zh-CN: null
+    en: "docs/en/05-memory-runtime/README.md"
+    zh-CN: "docs/zh-CN/05-memory-runtime/README.md"
 ---
 
 # Memory Runtime — Directory Index

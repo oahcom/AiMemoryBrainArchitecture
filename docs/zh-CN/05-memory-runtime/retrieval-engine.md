@@ -45,9 +45,9 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "05-memory-runtime/retrieval-engine.md"
+    source: null
     en: "docs/en/05-memory-runtime/retrieval-engine.md"
-    zh-CN: null
+    zh-CN: "docs/zh-CN/05-memory-runtime/retrieval-engine.md"
 ---
 
 # Memory Retrieval Engine（记忆检索引擎）

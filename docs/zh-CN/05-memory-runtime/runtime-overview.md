@@ -48,9 +48,9 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "05-memory-runtime/runtime-overview.md"
+    source: null
     en: "docs/en/05-memory-runtime/runtime-overview.md"
-    zh-CN: null
+    zh-CN: "docs/zh-CN/05-memory-runtime/runtime-overview.md"
 ---
 # Memory Runtime 总览
 
