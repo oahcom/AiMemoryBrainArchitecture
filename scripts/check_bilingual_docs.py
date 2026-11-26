@@ -19,7 +19,8 @@ from pathlib import Path
 NORMATIVE_ROOTS = {
     "00-governance", "01-system-architecture", "02-domain-model",
     "04-memory-compiler", "06-memory-context", "07-agent-integration",
-    "08-bmcp-protocol", "13-engineering-decisions", "14-ai-development",
+    "08-bmcp-protocol", "10-storage-consistency", "13-engineering-decisions",
+    "14-ai-development",
 }
 ROOT = Path(__file__).resolve().parents[1]
 _missing_roots = sorted(r for r in NORMATIVE_ROOTS if not (ROOT / r).is_dir())

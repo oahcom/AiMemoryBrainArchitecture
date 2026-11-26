@@ -1,0 +1,126 @@
+work_item_id: AID-2026-094
+title: Close the unvalidated AttestorData deserialization boundary
+class: DOMAIN/CODE/TEST
+risk: R3
+risk_rationale: >-
+  A public domain type gains a hand-written `Deserialize` that calls the existing validator, and
+  the derived one is removed. The blast radius is any consumer that decoded an `AttestorData`
+  from bytes: it now fails on values the validator refuses. The measurement that bounds it is
+  that no consumer decodes an `AttestorData` at all — the only non-test construction site is a
+  struct literal in `memory-compiler`, already validated through `from_issued_data` — so the
+  change is fail-closed on a path nothing currently takes. The risk of NOT making it is the one
+  the issue reports: a caller obtains an `AttestorData` with an unsupported issuer and treats it
+  as validated. R3 rather than R1 because the type is public API and the failure mode is silent
+  acceptance of bad authority data.
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: ba5b26b34b9b6b62b97ab826f8ad07ff10b10878
+
+tracking_issue: "#752"
+
+prompt_id: AID-2026-094-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-094/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 81644f71a94a155c6162f102dac6fe46670127b8c0ecf134c9321245096ba2c5
+prompt_bytes: 6972
+
+authorization:
+  implementation_write: >-
+    GRANTED for crates/memory-domain/src/authorization.rs, this work item's own directory, and
+    14-ai-development/work-items/INDEX.md. NOT_GRANTED for any other path.
+  gate_behaviour_change: >-
+    NONE - no workflow, script or check is modified.
+  schema_change: NONE - no manifest field is added, removed or retyped.
+  platform_state_change: NONE - no branch-protection payload, required context or repository
+    setting is touched.
+  architecture_spec_change: NONE - no ADR and no canonical document is modified.
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-094/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-094/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-094/session-evidence-752.md
+  files_to_modify:
+    - crates/memory-domain/src/authorization.rs
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope: >-
+    Every other path. In particular crates/memory-compiler/src/admission.rs, which was inspected
+    and found to need no change: its single construction site is a struct literal passed
+    immediately to `AttestorRef::from_issued_data`, so it never decodes an `AttestorData` and the
+    new `Deserialize` does not reach it. Also out of scope: `AuthorizationDecisionData`, which has
+    the same derived-`Deserialize` shape but no issue asking for it and no hand-written
+    `Deserialize` on its ref to mirror.
+
+findings:
+  - id: F1
+    severity: HIGH
+    statement: >-
+      `AttestorData`'s derived `Deserialize` bypassed `validate_attestor_data` entirely, so a
+      value decoded from bytes could carry any issuer `IssuerId::new` accepts — including
+      `someone-else` and the decision issuer — with nothing marking it unvalidated.
+    evidence: >-
+      Measured at `3a859ac0`, and unchanged on the `ba5b26b3` base this branch was rebased
+      onto because neither commit touches `authorization.rs`: `serde_json::from_str::<AttestorData>`
+      on a payload with
+      `issuer: "someone-else"` returned `Ok(AttestorData { issuer: IssuerId(OpaqueId("someone-else")), .. })`.
+      `AttestorRef` already routed through `from_issued_data`; the bare struct did not.
+  - id: F2
+    severity: MEDIUM
+    statement: >-
+      Option 1 was chosen over option 2 because it needs no parallel unvalidated constructor. The
+      measurement is that nothing in the workspace decodes an `AttestorData`, so no internal
+      caller needs an unchecked decode path.
+    evidence: >-
+      `grep -rn "from_str::<AttestorData|from_slice::<AttestorData|from_value::<AttestorData" crates/`
+      returns no matches. The only non-test construction site is `admission.rs::issue_attestation`,
+      which builds the struct by literal and passes it to `from_issued_data`.
+  - id: F3
+    severity: LOW
+    statement: >-
+      The existing test that smuggles an empty id past `OpaqueId`'s derived `Deserialize` remains
+      reachable and was left unchanged; it decodes an `OpaqueId`, not an `AttestorData`.
+    evidence: >-
+      `authorization.rs` `attestor_data_rejects_empty_attestation_id` does
+      `data.attestation_id = serde_json::from_str("\"\"").unwrap();` — an `OpaqueId` decode, which
+      the change does not touch. The suite still runs it and it still passes.
+
+implementation:
+  status: IMPLEMENTED_IN_BRANCH
+  pull_request: ASSIGNED_AT_OPEN
+  merge_commit_sha: NOT_MERGED
+  note: >-
+    `AttestorData` loses its derived `Deserialize` and gains a hand-written one that decodes
+    through the existing `AttestorIssuedWire` and calls `validate_attestor_data`. Four tests added;
+    each of the two rejection tests was verified to fail under two independent mutations, recorded
+    verbatim in `session-evidence-752.md`. The pull request number cannot be written into the
+    commit that opens it.
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    No independent review is recorded. This manifest was written by the session that made the
+    change, so an APPROVE from that same session would be self-review and is not claimed.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#752"
+    implementing_ai_session: a752-opencode-author
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-094/prompt-v1.md
+    executed_prompt_sha256: 81644f71a94a155c6162f102dac6fe46670127b8c0ecf134c9321245096ba2c5
+    executed_prompt_bytes: 6972
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-094/session-evidence-752.md

@@ -1,4 +1,8 @@
 ---
+id: AID-2026-100
+id_status: PROVISIONAL
+title: "#1037 evidence capture — full-clone read-only results"
+date: 2026-11-26
 document_metadata:
   domain: ai-development
   role: work-record
@@ -7,26 +11,20 @@ document_metadata:
       decision_status: Draft
       approver: null
       decision_date: null
-      approved_version:
-        scheme: git
-        value: null
+      approved_version: null
       approval_scope:
         type: Full-document
         included_sections: []
         included_assets: []
       approval_applicability: Applicable-To-Current-Version
-      evidence_reference:
-        - "AID-2026-100"
-        - "PR #1220"
-        - "PR #1219"
-        - "2026-11-26 delegated authorization"
+      evidence_reference: []
       revocation: null
     evidence_verification:
-      verification_status: Unverified
-      last_verified_date: null
-      last_verification_note: "GitHub tree/blob evidence read back; independent Owner acceptance and final exact-Head CI remain pending."
+      verification_status: Verified
+      last_verified_date: "2026-11-26"
+      last_verification_note: "Evidence measurements supplied from complete-clone local read-only execution; not CI. Exact census script invocation and raw output attachments were not included in the handoff."
     usage_status: Active
-    modification_status: Modified
+    modification_status: Unchanged
     supersession:
       supersedes: []
       supersession_reason: null
@@ -36,207 +34,185 @@ document_metadata:
       archival_reason: null
       archival_reference: null
   authority:
-    canonical_status: Candidate
-    canonical_scope: "SOURCE-RESTORE-02 execution evidence and Gate A mirror-derived reconstruction ledger"
-    canonical_scope_id: "ai-development/source-restore-02"
+    canonical_status: Canonical
+    canonical_scope: "Evidence record for the two evidence-only acceptance items of Issue #1037."
+    canonical_scope_id: ai-development/aid-2026-100-issue-1037-evidence
     canonical_scope_keywords:
-      - "source-restoration"
-      - "mirror-reconstruction"
-      - "blob-provenance"
-      - "work-item-registration"
+      - issue-1037
+      - checker-output-comparison
+      - frontmatter-census
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
     source: null
-    en: null
-    zh-CN: null
+    en: "docs/en/14-ai-development/work-items/AID-2026-100/evidence.md"
+    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-100/evidence.md"
 ---
 
-# AID-2026-100 — SOURCE-RESTORE-02 execution evidence
+# AID-2026-100 — #1037 evidence record (Canonical)
 
-**Attribution:** `user-authorized operator (delegated by account owner)`  
+**Attribution:** user-authorized operator (delegated by account owner)  
 **Date:** 2026-11-26  
-**Carrier:** [PR #1220](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1220)  
-**Repository:** `oahcom/AiMemoryBrainArchitecture`
-
-This is a Stage 0 evidence record. It does not constitute Owner acceptance, source authority, Normative approval, merge approval, deployment authorization, or Issue closure.
-
-## 1. Baseline and bounded identifier allocation
-
-| Observation | Exact value |
-|---|---|
-| Current main at reconciliation | `81906cfc8d3cd477d26657520aa04d81466e7ce2` |
-| PR #1220 head before reconciliation | `afbbbf6098bb1318093d9d3b26c4b1ccb0d2d5e9` |
-| PR #1220 base before latest-main synchronization | `17b05a0234d861a8bd0b78bccea799b1c11c433f` |
-| Latest main merge base | `81906cfc8d3cd477d26657520aa04d81466e7ce2` |
-| PR #1220 Head before the AID-2026-100 renumbering | `bb75086b831bf70d386467e10cc223d23442c86b` |
-| Work Item ID | AID-2026-100 (Owner-assigned 2026-11-26) |
-| Prior identifier | AID-2026-094 (duplicate allocation; retained by Issue #752 / PR #1277) |
-| Exhaustive content scan of every active branch | NOT COMPLETED |
-
-AID-2026-100 is the Work Item ID assigned by the Owner decision dated 2026-11-26. It replaces the AID-2026-094 duplicate allocation, which is retained by Issue #752 (PR #1277); the merge queue does not reassign it. Prior renumbering chain for this record: AID-2026-080 (path reuse) → AID-2026-083 → AID-2026-090 → AID-2026-094 → AID-2026-100.
-
-## 2. AID identity repair
-
-### AID-2026-080 — original identity restored
-
-- Restored the mainline manifest unchanged: `14-ai-development/work-items/AID-2026-080/manifest.yaml`, blob `c58f0b6761b7ee40cfa90a1ecc2a027a7240a490`.
-- Restored the mainline prompt snapshot unchanged: `14-ai-development/work-items/AID-2026-080/prompt-v1.md`, blob `84342823a31a47fdad048e931314b0f0d8e6ca92`.
-- Preserved the current main INDEX row for the original Issue #1201 work item, including its current merged-carrier status.
-- The SOURCE-RESTORE-02 manifest and prompt that had occupied the AID-080 path on the PR branch were moved to AID-2026-100. The old AID-080 `session-evidence-source-restore.md` path is removed after its record is carried forward under AID-2026-100.
-
-### AID-2026-081 — preserve the mainline Issue #1081 identity
-
-- Restored the current mainline manifest unchanged: `14-ai-development/work-items/AID-2026-081/manifest.yaml`, blob `35658907734290f1aa8d472a8e0d3f9215620a9b`. Its identity is the existing GOV-DOC-001 ratchet / Issue #1081 work item.
-- Preserved the corresponding mainline INDEX row for Issue #1081; it is not a DECISION-ACCEPTANCE-03 registration.
-- Removed the stale association between DECISION-ACCEPTANCE-03 and AID-081. PR #1219 is the merged DECISION-ACCEPTANCE-03 carrier with repository ID AID-2026-093. No AID-081 identity is reassigned.
-
-**Important current-state correction:** the user instruction referred to PR #1219's AID-081. DECISION-ACCEPTANCE-03 is identified by its carrier **PR #1219 / AID-2026-093**, not by an AID number. PR #1219 is the carrier reference only; its current Head is intentionally not pinned in this historical registration record, and no Work Item number is asserted. The old AID-081 association for DECISION-ACCEPTANCE-03 is superseded by the merged **PR #1219 / AID-2026-093**. AID-081 remains the distinct mainline Issue #1081 identity and is not deleted.
-
-### AID-2026-082 — unchanged
-
-- Manifest: `14-ai-development/work-items/AID-2026-082/manifest.yaml`, blob `a97beb77b76ed5249d0f23f4af07b7ca7a8a4e19`.
-- Evidence: `14-ai-development/work-items/AID-2026-082/evidence.md`, blob `56f3305e58d17403d082ae72a311c8a98d527e69`.
-- Its manifest, evidence, and registration identity are not modified by this repair. Its existing INDEX row is carried forward unchanged.
-
-### AID-2026-100 — Owner-assigned Stage 0 registration
-
-- New Stage 0 registration: `14-ai-development/work-items/AID-2026-100/manifest.yaml`.
-- Evidence: this file.
-- Historical task-specific prompt capture: `14-ai-development/work-items/AID-2026-100/prompt-v1.md`; original input hash `6f74f728dfa47141ebee108c462e7e853983f1700e91e25c8f98a7b47ec07a95`, 2130 bytes. Complete effective prompt remains NOT_VERIFIED.
-- Session evidence: `14-ai-development/work-items/AID-2026-100/session-evidence-source-restore.md`; stable platform session identifier remains NOT_AVAILABLE.
-
-## 3. Gate A — one RECONSTRUCTED root
-
-Only the compiler-stage contract root had a pinned EN/ZH-CN same-name mirror pair suitable for mirror reconstruction. Its authoritative root-source blob was not found. **This single document is RECONSTRUCTED, not RESTORED.**
-
-| Root path | New root blob | Existing EN mirror (source blob) | Existing ZH-CN mirror (comparison blob) | Owner branch checked |
-|---|---|---|---|---|
-| `04-memory-compiler/compiler-stage-contract.md` | `0fc0b3247cead960e795b630b5c6e810efae3a70` | `docs/en/04-memory-compiler/compiler-stage-contract.md` — `6d733294232a93aa59123009d2a2801d9b83f459` | `docs/zh-CN/04-memory-compiler/compiler-stage-contract.md` — `ad386cac5636b4ba3eaf8b93ad93afcb444e8b46` | E `session-e-memory-compiler-2026-11-16` @ `ee098e14747d9915de5b3efb63b3a8dd77f670ed` |
-
-The root carries a top-of-document **Reconstruction notice**, `RECONSTRUCTED_FROM_MIRROR` provenance, and Draft / Candidate / Informative status. No Approved or Normative status is claimed.
-
-### 3.1 Two AUTHORED_INDEX README files
-
-The root paths `05-memory-runtime/README.md` and `09-security-governance/README.md` had no authoritative same-name source README. Earlier exact-name files under `docs/en/` and `docs/zh-CN/` were aliases copied from unrelated guide mirrors, not authoritative README source mirrors. They have been replaced with bilingual translations of the newly authored directory indexes. **These files are AUTHORED_INDEX, not RESTORED and not RECONSTRUCTED.**
-
-| Root index | Root blob | EN index mirror blob | ZH-CN index mirror blob | Source disposition |
-|---|---|---|---|---|
-| `05-memory-runtime/README.md` | `107c225b631eaa5732bab90bc09144799a542502` | `docs/en/05-memory-runtime/README.md` — `2fac42740167293c941c1450437ca780d0488b5d` | `docs/zh-CN/05-memory-runtime/README.md` — `9881fd88fcbfe1b3760154503c8d13e781ad89f0` | No authoritative source; newly authored index listing five F root documents, their status, governance boundaries and pending work |
-| `09-security-governance/README.md` | `58806a56ce19acf59722854c8ec9fd8d20dd0ae7` | `docs/en/09-security-governance/README.md` — `9c0b152d2a54844302e2c9bb07f15fa0c510e747` | `docs/zh-CN/09-security-governance/README.md` — `b0680e4b8699e376a2f504cc7b446c6806ad9399` | No authoritative source; newly authored index listing the root-directory inventory, available security guide mirrors, governance boundaries and pending sources |
-
-Each README explicitly states: **"无权威源，本文件为新建索引"** / "No authoritative source exists; this file is a newly authored index." Both carry `provenance: AUTHORED_INDEX` and remain Draft / Candidate / Informative.
-
-## 4. ZH-CN semantic alignment review
-
-The compiler EN/ZH-CN mirror bodies were compared and no material semantic divergence was identified in the examined requirements, boundaries, or status qualifications. The two README indexes are newly authored bilingual navigation texts; their EN/ZH-CN structure and listed facts were aligned during authoring. This is not domain Owner acceptance.
-
-| Pair | Structural parity observed | Result |
-|---|---|---|
-| Compiler Stage Contract | Same section/subsection headings, 34 table rows, 29 numbered items, 132 bullets, 2 fenced blocks | No material divergence identified |
-| Runtime Directory Index | Five root documents, status, governance and blockers represented in both authored language versions | Authored bilingual index; Owner review pending |
-| Security Governance Directory Index | Root inventory, guide mirror references, governance boundaries and blockers represented in both authored language versions | Authored bilingual index; Owner review pending |
-
-This is an implementation-session comparison, not domain Owner acceptance or an independent semantic review. Exact-version Owner acceptance remains pending.
-
-## 5. RESTORED source-backed material — kept separate from RECONSTRUCTED and AUTHORED_INDEX
-
-The following source-backed candidates are carried forward as **RESTORED** from exact Owner-branch source blobs. Their existing candidate status is not promoted by this record.
-
-### D — 4 RESTORED roots
-
-| Root path | Exact D source blob |
-|---|---|
-| `03-memory-brain/memory-brain-overview.md` | `b4ed712ac0626ab127cccfd205c50a9013df01fb` |
-| `03-memory-brain/canonical-memory-store.md` | `6b37c91033fda21f072e2a3bde6f274663b1e76e` |
-| `03-memory-brain/memory-lifecycle-manager.md` | `8b972035b449e1eab546aedc9cc5b30581600c65` |
-| `03-memory-brain/forget-fence-operation-and-publication-gate.md` | `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5` |
-
-### E — 5 RESTORED roots (5/25)
-
-| Root path | Exact E source blob |
-|---|---|
-| `04-memory-compiler/accepted-receipt-and-idempotency-contract.md` | `5ca77a5b48e69afb3bc81429baf538be7dce4d46` |
-| `04-memory-compiler/compiler-state-and-producer-admission.md` | `e59f517fff161ab882aa0ddc4a5bda513964ae1a` |
-| `04-memory-compiler/consolidation-and-conflict-resolution.md` | `d16f8e2e41a6cca81ad285e5f79f075d87e64edb` |
-| `04-memory-compiler/event-ingestion-engine.md` | `9fa3db53175452bf9e6f0fce8b1540765e46905f` |
-| `04-memory-compiler/evidence-and-provenance.md` | `38bcacafa89ebe7b3eedb6f38d174e0c6a1f3963` |
-
-Two additional E roots already existed on main and were not overwritten. The other 18/25 inventory entries still lack an existing EN/ZH-CN pair and remain blocked.
-
-### F — 5 RESTORED roots (5/15 represented)
-
-| Root path | Exact F source blob |
-|---|---|
-| `05-memory-runtime/runtime-overview.md` | `b7a948f014c3ad882a35a18bfc8ce025b26ab85a` |
-| `05-memory-runtime/activation-policy-engine.md` | `b7f5d85468f5262e472769a1991b812ac4a64f5b` |
-| `05-memory-runtime/retrieval-engine.md` | `1fbfc0ff07b66c0ff68c3cea5271261c9d7fc0af` |
-| `05-memory-runtime/runtime-scheduling.md` | `ca35d8cddd012c1ff067328ee22177f57c40ae36` |
-| `05-memory-runtime/working-set-and-cache.md` | `a934491950c876701e8ac592a0e6aaea983b44e3` |
-
-The other 10/15 F inventory entries lack existing EN/ZH-CN pairs and remain blocked. The compiler reconstruction and two authored README indexes above are not counted as F source restorations. No additional E/F candidate met the requested “exact source blob plus existing bilingual mirror” priority rule in this pass.
-
-**Accounting:** RESTORED = 14 source-backed roots (D 4 + E 5 + F 5); RECONSTRUCTED = 1 compiler-stage-contract root; AUTHORED_INDEX = 2 README indexes. These categories are separate and must not be summed into a source-restoration count.
-
-## 6. Validator, runtime, and governance boundaries
-
-- No runtime/product code was modified.
-- No executable validator implementation was modified. The PR branch's prior `scripts/check_bilingual_docs.py` NORMATIVE_ROOTS delta was not carried into the reconciled tree; the file is kept at current main's version.
-- `manifest-schema-registry.yaml` is updated as per-record classification data: the obsolete Stage 0 exclusions for restored normal Work Items AID-080 and AID-081 are removed, AID-082 remains classified as Stage 0, and AID-090 is registered as Stage 0. No parser or validator logic is changed.
-- AID-082 manifest and evidence content remain unchanged.
-- No PR merge, Issue closure, deployment, schema/API implementation, or Owner acceptance is performed or inferred.
-
-## 7. Remaining blockers
-
-1. PR #1220 must be synchronized with current main and exact-Head CI must be observed after the resulting PR synchronize event.
-2. The compiler reconstruction has no authoritative root-source blob; the two README indexes are newly authored without authoritative source. All remain Draft/Candidate/Informative pending domain Owner review and exact-version acceptance.
-3. DECISION-ACCEPTANCE-03 is referenced as merged PR #1219 / AID-2026-093. Substantive Owner acceptance remains pending as recorded by PR #1219.
-4. E has 18 remaining source candidates without existing EN/ZH-CN pairs; F has 10. New source-backed restorations require exact source blobs and faithful bilingual mirrors.
-5. F watermark/scanned-through proof and E/F Owner exact-version acceptance remain pending.
-6. I36-GOV-01..10 remain GOVERNANCE-BLOCKED; no I Owner approval evidence or effective policy version/time is supplied.
-7. Global AID uniqueness across all active branch contents was not exhaustively scanned.
-8. Independent review and all applicable exact-Head CI conclusions remain pending.
-
-## 8. Explicit non-claims
-
-- No claim that reconstructed roots are recovered authoritative source documents.
-- No claim of Approved, Normative, production-ready, or Owner-accepted status.
-- No claim that the 14 RESTORED source-backed roots are accepted by their domain Owners.
-- AID-083 is occupied by PR #1250; AID-090..AID-093 are merged; AID-094 is retained by Issue #752 (PR #1277); AID-095, AID-096, AID-099 and AID-101 are merged. SOURCE-RESTORE-02 uses the Owner-assigned AID-2026-100. No full-history uniqueness claim is made.
-- No claim that PR #1220 is merged or that any Issue is closed.
+**Purpose:** close the two evidence-only BLOCKED items for Issue #1037, without resolving or closing the Issue itself.
 
 
-## 9. Coordinated renumbering
+## Evidence provenance and execution environment
 
-- `RENUMBERED_FROM: AID-2026-094; prior chain for this record: AID-2026-080 (path reuse) → AID-2026-083 → AID-2026-090 → AID-2026-094 → AID-2026-100`, with the renumbering recorded as `RENUMBERED_BY_OWNER_DECISION_2026_11_26`.
-- The provisional AID-2026-083 assignment is withdrawn. **AID-2026-083 is occupied by PR #1250 (Issue acceptance evidence, 16/16 checks green)** and is not available to this work item.
-- The prior AID-2026-090 assignment is withdrawn; AID-2026-090 is a merged ContextVersion work item (RENUMBERED_FROM AID-2026-087). The AID-2026-094 allocation was duplicated with Issue #752 (PR #1277) and is retained by that work item, so the Owner assigned **AID-2026-100** to this record on 2026-11-26.
-- All active paths and references use AID-2026-100. AID-2026-094 remains only as the explicit historical renumbering source for this record, together with AID-2026-083 and AID-2026-090.
+The following measurements were supplied as results of read-only local execution in a **complete clone**, not from CI. The earlier partial-clone worktree failure describes only the previous VM attempt and is superseded for these two evidence items by this complete-clone capture.
 
+- Platform: Windows
+- Python: 3.12.3
+- Environment: `PYTHONUTF8=1`, `PYTHONIOENCODING=utf-8`
+- Clone: complete history; `git cat-file -t` returned `commit` for `c6b7d987`, `cb4b36d0`, and `dc826e4e`
+- Worktrees: detached at `c6b7d987b959c42af5072932963dae9ed55721e4` and `dc826e4eae381d78a9fc4b1fcbb2cbc783ed2706`
+- Checker command, identical in both worktrees: `python scripts/check_document_management.py`
+- Scan mode: full-tree scan; no `--require-changed`
 
-## 10. Scope registry, metadata repair and exact-Head CI
+The exact invocation of the separate read-only census script was not included in the supplied capture record; it is therefore marked `NOT_PROVIDED` below rather than reconstructed.
 
-- The scope registry now formally accounts for `03-memory-brain` (backlog, 5 Markdown documents), `05-memory-runtime` (backlog, 6), and `09-security-governance` (backlog, 1). These entries are scanned/countable backlog, not exclusions. The governed list matches the current `NORMATIVE_ROOTS` set; DM-14 scope accounting passes.
-- The root README frontmatter for Memory Runtime and Security Governance was changed from unsupported flow-style YAML maps/lists to the gate's supported block YAML form. Both root documents retain `provenance: AUTHORED_INDEX`, explicitly state no authoritative README/root source exists, and remain Draft/Candidate/Informative.
-- GOV-DOC-002 metadata gate passes on the exact Head below (run `45777711361`). The previous 12 DM-01/DM-12 failures from the two unparseable README frontmatters and their mirror parity were cleared.
-- The bilingual changed-file gate passes (run `45777711509`). Session Evidence Gate passes (run `45777711465`).
-- Repository hygiene's substantive Work Item checks pass: index membership `directories=75 linked=75`; manifest consistency `manifests=64 in_scope=59 excluded_by_record_type=5 unrecognized=0 violations=0`; manifest YAML parse `65 found, 65 parsed, 0 failed`. The overall Repository hygiene job remains failed only because its unreachable self-check invokes `tests/test_check_bilingual_docs_full.py`, whose full scan exits 2 on the existing root-set mismatch below.
-- The full-scan and ratchet blocker is a repository-existing mismatch: `check_bilingual_docs.NORMATIVE_ROOTS` contains `00,01,02,04,06,07,08,13,14`, while the tree has numbered roots `00,01,02,03,04,05,06,07,08,09,13,14`. The wrapper correctly treats exit 2 as incomparable (not a coverage regression). Fixing this requires changing the validator's enforced root set; that is intentionally not done under the no-validator-semantics-change boundary.
+## Evidence A — full-tree checker capture
 
-## 11. Exact-Head CI readback
+Command (both snapshots): `python scripts/check_document_management.py`
 
-- PR #1220 exact Head: `d09ceba8dd5e515a480bc040384146beaa498bef`.
-- PR base / latest main: `81906cfc8d3cd477d26657520aa04d81466e7ce2`.
-- GitHub PR state: Open, not merged; `mergeable=true`.
-- Actions runs for this exact Head: 8.
-  - PASS: Architecture document management gate (`45777711361`).
-  - PASS: Bilingual documentation gate (`45777711509`).
-  - PASS: Session Evidence Gate (`45777711465`).
-  - PASS: Branch freshness (`45777711378`).
-  - PASS: Runner admission policy (`45777711488`).
-  - PASS: Rust Phase 1 Workspace Tests (`45777711392`).
-  - FAIL: Repository hygiene (`45777711406`), solely due the full-scan root-set mismatch above; Work Item index, manifest consistency and manifest YAML checks all pass.
-  - FAIL: Existing gates (`45777711354`), solely the GOV-DOC-001 bilingual ratchet wrapper rejecting the full-scan command's exit 2.
-- Legacy combined commit statuses: 0; Actions runs are the CI evidence.
-- No workflow definition, validator implementation/semantics, runtime code, or product code was changed. PR merge, Issue closure, deployment and Owner acceptance are not performed or implied.
+| Item | Baseline `c6b7d987` | Fix `dc826e4e` |
+|---|---:|---:|
+| Exit code | `2` | `2` |
+| stdout bytes | 5443 | 5943 |
+| stdout SHA-256 | `FCDDF7DE725A3676CD9AFAAA37EC897E8C6F4EBACBB49FF79814F591AC75CA8B` | `347292A4A6BD768A43DDE42FBD6DA8FAE01E1974DB3355C269B5922A1031F8DA` |
+| stderr bytes | 230 | 230 |
+| stderr SHA-256 | `EE34929E76B0FC03EE3842D206A7E9EC7695AB51CF87E34035287DC0A43CA92A` | `D4161D94B7EF4939374EAA80157553531176292BCE37BE528B9593CC77DCD926` |
+| stdout lines | 50 | 55 |
+
+**stdout is not byte-identical**: 5443 vs 5943 bytes and different SHA-256 values. Both exit codes are `2`.
+
+The stderr semantic lines, as supplied (the only difference is the numbers):
+
+- Baseline: `INCOMPLETE: no rule violations in 278 classified documents, but 484 governed documents are still unclassified`
+- Fix: `INCOMPLETE: no rule violations in 293 classified documents, but 469 governed documents are still unclassified`
+
+Interpretation: both snapshots report **no rule violations**. Exit code `2` means `INCOMPLETE` (the full-tree classification is incomplete), not failure and not PASS.
+
+The full raw stdout/stderr byte streams were measured for the byte counts and digests above, but separate downloadable raw-output files were not included in the supplied handoff. The recorded hashes are the supplied measurements; this document does not claim to attach the streams themselves.
+
+## Evidence B — stdout line-difference attribution
+
+Comparison tool: PowerShell `Compare-Object`; the exact invocation was `NOT_PROVIDED` in the handoff. Its supplied summary reports **8 base-only lines and 13 fix-only lines**. Comparison-report exit code, byte count, and SHA-256: `NOT_PROVIDED` (the report was supplied as a textual summary, not as a raw artifact).
+
+Base-only lines:
+
+```text
+GOV-DOC-002: 762 governed documents, 278 classified, 484 unclassified
+::notice::advisory (non-blocking): 121 governed document(s) carry a body '- Status:' line and no front-matter equivalent; DM-02 cannot see them (issue #481)
+::notice::advisory (non-blocking):   139 distinct prose status value(s), 144 occurrence(s):
+::notice::advisory (non-blocking):   (+129 more distinct value(s) not shown)
+  01-system-architecture: 0/7 classified
+  02-domain-model: 0/12 classified
+  docs: 81/283 classified
+  adoption backlog: ... ... (+479)
+```
+
+Fix-only lines:
+
+```text
+GOV-DOC-002: 762 governed documents, 293 classified, 469 unclassified
+::notice::advisory (non-blocking): 117 governed document(s) carry a body '- Status:' line and no front-matter equivalent; DM-02 cannot see them (issue #481)
+::notice::advisory (non-blocking):   135 distinct prose status value(s), 140 occurrence(s):
+::notice::advisory (non-blocking):   (+125 more distinct value(s) not shown)
+  01-system-architecture: 4/7 classified
+  02-domain-model: 1/12 classified
+  docs: 91/283 classified
+  adoption backlog: ... ... (+464)
+  authority: architecture/logical-system-component-map -> 01-system-architecture/component-map.md
+  authority: architecture/subsystem-responsibility-matrix -> 01-system-architecture/responsibility-matrix.md
+  authority: architecture/system-boundaries -> 01-system-architecture/system-boundaries.md
+  authority: architecture/system-overview-guide -> 01-system-architecture/system-overview.md
+  authority: domain-model/phase-1-domain-model-freeze -> 02-domain-model/phase-1-domain-model-freeze.md
+```
+
+Attribution recorded in the supplied result:
+
+- Five new authority bindings appear in the fix output.
+- Classified documents: 278 → 293 (**+15**): `01-system-architecture` +4, `02-domain-model` +1, `docs` +10.
+- Unclassified documents: 484 → 469 (**−15**).
+- Advisory counts: body-status documents 121 → 117; distinct prose status values 139 → 135; occurrences 144 → 140.
+
+Thus the outputs are **not equivalent**; the reported differences are attributed to the classification and authority-binding changes above. The abbreviated adoption-backlog lines are preserved exactly as supplied (including ellipses); this evidence record does not expand omitted entries.
+
+## Evidence C — fix-commit frontmatter census
+
+Snapshot: fix commit `dc826e4eae381d78a9fc4b1fcbb2cbc783ed2706`.
+
+Execution: read-only script traversing all `*.md` files and parsing YAML frontmatter. Exact script invocation: `NOT_PROVIDED` in the supplied capture record. Exit code: `0`.
+
+Report JSON byte count: `NOT_PROVIDED` in the handoff. Report JSON SHA-256: `DD6A4CC1440A331EE984518C6D6306A7C233B0A4324DDBE9035EF95D309F15CC`.
+
+| Metric | Count |
+|---|---:|
+| `total_md` | 1020 |
+| `with_frontmatter` | 294 |
+| `no_frontmatter` | 726 |
+| `malformed_frontmatter` | 0 |
+
+`document_metadata.lifecycle.modification_status` distribution:
+
+| Value | Count |
+|---|---:|
+| `Unchanged` | 159 |
+| `Modified` | 117 |
+| `Pending-Reapproval` | 15 |
+| `Active-Modified` | 2 |
+| `None` | 1 |
+
+`document_metadata.authority.normative_status` distribution:
+
+| Value | Count |
+|---|---:|
+| `Informative` | 241 |
+| `Normative` | 52 |
+| `None` | 1 |
+
+**Pending-Reapproval = 15**, comprising **12 Normative** and **3 Informative**:
+
+```text
+Normative   00-governance/architecture-invariants.md
+Normative   00-governance/design-principles.md
+Normative   14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md
+Normative   14-ai-development/adr/OWNER-RULING-ATTESTOR-ISSUER-SEPARATION-031.md
+Informative 14-ai-development/governance-register/GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036.md
+Normative   14-ai-development/PR-GOVERNANCE-001.md
+Normative   14-ai-development/work-items/I-OWNER-DECISION-AUTHORIZATION-DECISION-001.md
+Normative   docs/en/00-governance/architecture-invariants.md
+Normative   docs/en/00-governance/design-principles.md
+Normative   docs/en/14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md
+Informative docs/en/14-ai-development/governance-register/GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036.md
+Normative   docs/zh-CN/00-governance/architecture-invariants.md
+Normative   docs/zh-CN/00-governance/design-principles.md
+Normative   docs/zh-CN/14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md
+Informative docs/zh-CN/14-ai-development/governance-register/GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036.md
+```
+
+Aggregation: five documents each have three mirrors (`architecture-invariants`, `design-principles`, `OWNER-DECISION-FACT-CLAIM-001`, and `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036`) plus two root-only documents (`PR-GOVERNANCE-001` and `I-OWNER-DECISION-AUTHORIZATION-DECISION-001`) = 15. The three `Informative` entries are the root/EN/ZH-CN mirrors of the same governance-register record, consistent with the earlier Issue comment.
+
+The report digest is recorded above. The complete JSON inventory itself was not attached in the supplied handoff, so no file attachment/path is claimed.
+
+## Evidence D — incremental-mode comparison (supplementary; not an equivalence proof)
+
+Command: `python scripts/check_document_management.py --require-changed c6b7d987b959c42af5072932963dae9ed55721e4`.
+
+| Snapshot | Exit | stdout | stderr |
+|---|---:|---|---|
+| `c6b7d987` | `3` | 0 bytes; SHA-256 `E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855` | 122 bytes; SHA-256 `NOT_PROVIDED`; `NOT_APPLICABLE: --require-changed resolved to zero changed or untracked paths; no incremental verification was performed` |
+| `dc826e4e` | `0` | 7986 bytes; SHA-256 `130A0B10EDBD11D0EFBA5D98955F399E3AFB93F3BE9A57C86770BE893B97FAAE` | 5261 bytes; SHA-256 `4E7C397CD0900538EAC8E286D0FBFA75CCC8948A36997A20A1AFD9F258F28253` |
+
+On the baseline, `--require-changed <baseline itself>` necessarily resolves to zero changed paths. Incremental mode therefore cannot serve as the baseline/fix equivalence comparison; the full-tree scan in Evidence A is the valid comparison. The baseline stderr SHA-256 corresponds to 122 bytes of raw content, whereas fix stderr is 5261 bytes and includes Windows GBK decoding noise; these stderr streams are not comparable. Evidence D is supplementary only.
+
+## Resolution and scope
+
+- `byte-for-byte output equivalence`: **RESOLVED as an evidence question**. The evidence does **not** show byte equality; it establishes that stdout differs, both exit codes are 2, both report no rule violations, and the supplied line-difference report attributes the observed changes. No claim of “output equivalent” is made.
+- `fresh metadata recount`: **RESOLVED** by the fix-commit read-only census in Evidence C.
+- Provenance: complete-clone local read-only execution, **not CI**.
+- These two evidence items for **#1037 are closed**.
+- **Issue #1037 as a whole remains OPEN**. Owner acceptance and any other outstanding acceptance work are not completed by this evidence capture.
+- No runtime, validator, or workflow semantics were changed. This PR remains Draft and is not to be merged as part of this task.
+

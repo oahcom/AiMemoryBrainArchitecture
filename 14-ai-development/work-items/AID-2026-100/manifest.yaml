@@ -85,6 +85,7 @@ scope:
     - "Author new 05-memory-runtime/README.md and 09-security-governance/README.md directory indexes with AUTHORED_INDEX provenance; explicitly state that no authoritative source exists and each is newly authored."
     - "Keep RESTORED and RECONSTRUCTED accounting separate."
     - "Continue E/F candidate assessment only where exact source blobs and bilingual mirrors already exist."
+    - "Carry the #1037 evidence record already merged to main under this directory without deleting or rewriting it, and state its relation to this registration."
   out_of_scope:
     - "Runtime/product code, schemas, DDL, APIs, migrations, test logic and production operations."
     - "Validator implementation or semantics changes; only per-record manifest classification data is reconciled."
@@ -163,8 +164,23 @@ session_evidence:
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_AVAILABLE"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-100/session-evidence-source-restore.md"
-evidence_file: "14-ai-development/work-items/AID-2026-100/evidence.md"
-evidence_blob: "8a91d4b75d5b629ecde822530e8c20037b0a8afe"
+evidence_file: "14-ai-development/work-items/AID-2026-100/evidence-source-restore.md"
+evidence_blob: "d766e3f364462ae3933cbf62339048b9fecae15d"
+
+related_evidence:
+  - path: "14-ai-development/work-items/AID-2026-100/evidence.md"
+    role: "#1037 evidence capture: full-clone read-only checker comparison and fresh frontmatter census"
+    provenance: "MERGED_IN_MAIN_BEFORE_THIS_REGISTRATION (PR #1284)"
+    blob: "87adf4a8cde8ba5c4c14596932f3488ec988a38c"
+    en_mirror: "docs/en/14-ai-development/work-items/AID-2026-100/evidence.md"
+    en_mirror_blob: "da156fe2409f17b364e9af65446bb73ab709e539"
+    zh_cn_mirror: "docs/zh-CN/14-ai-development/work-items/AID-2026-100/evidence.md"
+    zh_cn_mirror_blob: "d750ef5555916bfb82180f30a6e83b3a0766fdfc"
+    note: >-
+      This evidence record is already on main and is carried by this registration unchanged:
+      this PR does not delete, rewrite or move it. It is evidence held under the same
+      Work Item ID, not a second identity. The SOURCE-RESTORE-02 execution evidence lives in
+      evidence-source-restore.md and is pinned by evidence_file/evidence_blob above.
 
 formal_registration:
   status: "COMPLETED_ON_CANDIDATE_BRANCH_WITH_BOUNDED_IDENTIFIER_SCAN"

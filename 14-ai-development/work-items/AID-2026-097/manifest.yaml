@@ -1,0 +1,99 @@
+work_item_id: AID-2026-097
+title: Remove the live assertions that still said F-02 Requirement 2 was NOT_VERIFIED
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  Documentation edits to one report, plus this work item. No code, no gate behaviour and no platform
+  state is changed. The risk is the opposite of damage: leaving a state that has been overturned
+  still written in the present tense. The report's own section 0 calls that a false statement
+  regardless of how many places it survives in, and the re-open trigger it defines exists to catch
+  exactly this.
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 0b6f56c230a9993a8f65be11fabae47541828e24
+tracking_issue: "#283 - the residual tracker for F-02 Requirement 2. It is CLOSED as of 2026-11-25, and it predates the 2026-12-01 body contract, so it carries no AI-assisted work declaration of its own."
+
+prompt_id: AID-2026-097-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-097/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 4e3dbbd35d002403849329a14d2f5c6357f695ea835327ff56c151cde00fed56
+prompt_bytes: 4283
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST; no independent prompt-source verification claimed
+
+# ---------------------------------------------------------------------------
+# Identifier note: the delegation named AID-2026-095. On the main this branch is
+# based on, 095 and 096 are both merged Stage 0 / approval records, so this work
+# item took the next free number and recorded the reallocation in prompt-v1.md.
+# ---------------------------------------------------------------------------
+
+authorization:
+  implementation_write: >-
+    GRANTED for 00-governance/reports/bilingual-baseline-remediation-report.md, this work item's
+    own directory, and 14-ai-development/work-items/INDEX.md. NOT_GRANTED for any other path.
+  gate_behaviour_change: NOT_GRANTED - no checker, workflow or baseline is modified.
+  schema_change: NOT_GRANTED - no serialized type, database column or manifest field is introduced.
+  platform_state_change: NOT_GRANTED - no branch-protection, ruleset, workflow trigger or required
+    context is modified.
+  architecture_spec_change: NOT_GRANTED - no ADR, no BMCP specification and no canonical document is
+    modified. The edited report is a governance work record, not a normative text.
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-097/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-097/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-097/session-evidence.md
+  files_to_modify:
+    - 00-governance/reports/bilingual-baseline-remediation-report.md
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope: >-
+    Every other path. In particular: `## D7 v2.1` through `## D7 v2.10` revision notes (bound
+    snapshots per section 0, including the v2.4 note's P2 line that still says Requirement 2 stays
+    NOT_VERIFIED); the section 6.2 R6 review-statistics table and the section 6.3 R6 findings table
+    (already marked as bound snapshots not maintained); the 2026-11-20 readings in section 7.2.1;
+    and every PR state, run id and SHA the report records.
+
+acceptance:
+  C1: >-
+    No live assertion in the report still states in the present tense that F-02 Requirement 2 is
+    NOT_VERIFIED or that F-02 overall is PARTIAL. Settled by reading sections 7.2.1, 8, 9, 10 and 11
+    and finding no such sentence outside a revision note.
+  C2: >-
+    Every revision note from v2.1 to v2.10 is byte-identical to main. Settled by
+    `git diff origin/main -- <report> | grep "^-.*Revision Note"` returning nothing.
+  C3: >-
+    The bound snapshots are not rewritten. Settled by the same diff touching no line of section 6.2,
+    section 6.3 or section 7.2.1's 2026-11-20 readings.
+  C4: >-
+    A v2.11 revision note pair exists and names, per section, what was edited and what was not, and
+    states that v2.10's omission is the sole reason the revision exists.
+
+implementation:
+  status: IMPLEMENTED_IN_BRANCH
+  pull_request: ASSIGNED_AT_OPEN
+  merge_commit_sha: NOT_MERGED
+  note: >-
+    The pull request number cannot be written into the commit that opens it, so the INDEX row carries
+    the branch until a merge commit exists. The pull request is opened as a draft and is not merged.
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    No independent review is recorded. This manifest was written by the session that made the edits,
+    so an APPROVE from that session would be self-review and is not claimed.
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+    implementing_ai_session: session-283-f02-residuals
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-097/prompt-v1.md
+    executed_prompt_sha256: 4e3dbbd35d002403849329a14d2f5c6357f695ea835327ff56c151cde00fed56
+    executed_prompt_bytes: 4283
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-097/session-evidence.md
