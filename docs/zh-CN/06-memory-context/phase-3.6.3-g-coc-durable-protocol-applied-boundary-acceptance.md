@@ -1,3 +1,42 @@
+---
+document_metadata:
+  domain: memory-context
+  role: review-report
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-200/evidence.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "为原本无 front-matter 的镜像补 GOV-DOC-002 分类：仅记录 domain、role、状态与规范源路径（依据正文自述：delegated G-boundary review record; not an independent human signature）；不主张规范权威，也不证明与源语义对等。补元数据前正文 blob：0740e142c820785e4e89e9397808eb0ddf967766。"
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "06-memory-context/phase-3.6.3-g-coc-durable-protocol-applied-boundary-acceptance.md"
+    en: "docs/en/06-memory-context/phase-3.6.3-g-coc-durable-protocol-applied-boundary-acceptance.md"
+    zh-CN: null
+---
 # G Owner — 精确 COC Durable Protocol Applied-Evidence Boundary 验收
 
 - 精确 Storage protocol Blob：`4ac63ac79491e79ec0c9114ef73941c73d7bbf25`

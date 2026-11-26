@@ -15,7 +15,12 @@ from pathlib import PurePosixPath
 # 2026-11-24.8 PASSes apart. From this version the unqualified run exits 2 with
 # SKIPPED and the head-tree half must be requested with --head-tree-only, so a
 # 2026-11-27.1 PASS with no "SKIPPED" in it means admission actually ran.
-CHECK_VERSION = "2026-11-27.1"
+#
+# 2026-11-27.2 is a rule change on the head-tree half: index membership fails
+# closed when either side of the relation is absent, where it used to return no
+# violations over an empty set (AID-2026-199, #1212). The two versions are
+# separate numbers on purpose -- one changed the contract, the other the rules.
+CHECK_VERSION = "2026-11-27.2"
 
 # Repository-root-relative paths, written with a leading slash.
 PROHIBITED_PATHS = (
@@ -498,18 +503,30 @@ def check_index_membership(root, commit, head_paths):
     field combinations in work-item manifests. It does not compare INDEX.md
     Status cells with manifest lifecycle fields, and does not verify external
     PR or GitHub state.
+
+    Both sides fail closed when absent (#1212). An empty side is not a satisfied
+    relation, it is an unbound one: with no directories the summary printed
+    `directories=0 linked=N` and reported every entry missing, and with no index
+    it printed nothing at all and returned no violations. Either way, renaming
+    `work-items/` or deleting a Canonical index silenced the check, and a
+    silent pass is indistinguishable from a real one in the log. `RuntimeError`
+    is this file's "cannot be determined" channel, so `main()` turns it into
+    exit 2, the same answer the other checks give for a missing input.
     """
     directories = work_item_directories(head_paths)
     if not directories:
-        return []
+        raise RuntimeError(
+            f"no work-item directories under '{WORK_ITEMS_DIR}'; the membership "
+            "relation has no directory side to verify, so a renamed or deleted "
+            "directory must not read as a pass"
+        )
 
     if WORK_ITEMS_INDEX not in head_paths:
-        # Deliberate ceiling: membership is a relation between the tree and the
-        # index, so with no index there is no relation here to falsify. Taking
-        # the index away is a governance act of its own (it is a Canonical
-        # document) and is not a membership defect; this check does not pretend
-        # to catch it.
-        return []
+        raise RuntimeError(
+            f"the work-item index '{WORK_ITEMS_INDEX}' is absent from the tree; "
+            "the index side of the membership relation cannot be read, and its "
+            "absence is not a pass"
+        )
 
     try:
         text = run_git(

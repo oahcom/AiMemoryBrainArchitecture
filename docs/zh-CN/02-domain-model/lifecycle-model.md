@@ -1,9 +1,48 @@
+---
+document_metadata:
+  domain: domain-model
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-200/evidence.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "为原本无 front-matter 的镜像补 GOV-DOC-002 分类：仅记录 domain、role、状态与规范源路径（依据正文自述：Status: State vocabulary and separation DECIDED）；不主张规范权威，也不证明与源语义对等。补元数据前正文 blob：8c4b44727957efac94e16f68451f9a50ab98393d。"
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Normative
+  bilingual_counterpart:
+    source: "02-domain-model/lifecycle-model.md"
+    en: "docs/en/02-domain-model/lifecycle-model.md"
+    zh-CN: null
+---
 # 记忆生命周期模型
 
 - 文档 ID：DOMAIN-LIFECYCLE-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../02-domain-model/lifecycle-model.md)
-- 源版本：c1daa6225e75ea40d7f86e5ef6916b4f3849a1f8
+- 源版本： 9b7f44b70d286ab6c675d2d345edd34029baad86
 - 对应英文：[Memory Lifecycle Model](../../en/02-domain-model/lifecycle-model.md)
 - 状态：状态词汇及其区分为 DECIDED；策略阈值和部分转换为 OPEN
 - Owner：Domain Model 定义生命周期语义；D 负责 Canonical Memory/Forget 语义及 Fence 顺序；I 负责授权与跨系统治理策略；Memory Lifecycle Manager 仅执行已获授权的 Canonical 状态转换

@@ -169,20 +169,53 @@ for _source, _reason in EMBEDDED_BILINGUAL_SOURCES.items():
         sys.exit(2)
 
 BASELINE_PATH = ROOT / "scripts" / "bilingual-baseline.txt"
-# The second copy of the same frozen inventory. The `bilingual` ratchet job in
+# The single authority for the frozen inventory. The `bilingual` ratchet job in
 # .github/workflows/gates.yml feeds this file to scripts/ci/gate_ratchet.py,
-# while this gate reads BASELINE_PATH. Neither file derives from the other, and
-# nothing used to compare them: regenerating one copy alone silently changed the
-# pass condition of whichever gate read it.
+# while this gate reads BASELINE_PATH above. The two files are independent:
+# regenerating one alone silently changed the pass condition of whichever gate
+# read it, and six further files in the tree carried the same list. Every copy
+# is now declared and compared in check_baseline_copies_agree().
 CI_BASELINE_PATH = ROOT / "scripts" / "ci" / "baselines" / "bilingual-docs.txt"
 
 
+GIT_TEXT_ENCODING = "utf-8"
+
+
+class GitOutputDecodeError(RuntimeError):
+    """Git output that is not valid UTF-8, so no verdict can be read from it.
+
+    `subprocess(text=True)` decodes with the *locale* codec: UTF-8 on CI, GBK on
+    a default Windows console. The same bytes that decode on CI raised
+    UnicodeDecodeError on GBK, the reader thread died, `stdout` arrived as None,
+    and the caller read "I could not decode this" as "this file does not exist"
+    (DM-10 asserted a file absent from an approved version it had never read;
+    AID-173 crashed outright on `git show`). Decoding is therefore always
+    explicit UTF-8, and a failure raises this exception, whose message says
+    "decode" and nothing that sounds like a content finding.
+    """
+
+
+def decode_git_output(raw: bytes, what: str) -> str:
+    """Decode Git's stdout as UTF-8, never through the console's locale codec."""
+    try:
+        return raw.decode(GIT_TEXT_ENCODING)
+    except UnicodeDecodeError as exc:
+        raise GitOutputDecodeError(
+            f"git output decode failed ({GIT_TEXT_ENCODING}) while reading "
+            f"{what}: {exc}"
+        ) from None
+
+
 def _git_log_output(*args: str) -> str:
-    """Read repository history for registration provenance checks."""
+    """Read repository history for registration provenance checks.
+
+    The bytes are decoded by decode_git_output(), so a non-UTF-8 object raises
+    GitOutputDecodeError instead of arriving as None or as a crash.
+    """
     result = subprocess.run(
-        ["git", *args], cwd=ROOT, check=True, capture_output=True, text=True
+        ["git", *args], cwd=ROOT, check=True, capture_output=True
     )
-    return result.stdout.strip()
+    return decode_git_output(result.stdout, "git " + " ".join(args)).strip()
 
 
 SHALLOW_HISTORY_ERROR = (
@@ -202,7 +235,8 @@ def _require_full_git_history() -> None:
         cwd=ROOT,
         check=True,
         capture_output=True,
-        text=True,
+        encoding=GIT_TEXT_ENCODING,
+        errors="replace",
     )
     shallow = result.stdout.strip().lower()
     if shallow == "true":
@@ -423,7 +457,8 @@ def write_baseline() -> int:
             cwd=ROOT,
             check=True,
             capture_output=True,
-            text=True,
+            encoding=GIT_TEXT_ENCODING,
+            errors="replace",
         )
         dirty_status = status_result.stdout
         if dirty_status:
@@ -534,45 +569,278 @@ def read_baseline() -> set[str] | None:
     return entries
 
 
-def check_baseline_copies_agree() -> list[str]:
-    """Fail when the two frozen copies of the 77-entry inventory diverge.
+# --- Copies of the frozen inventory -------------------------------------------
+#
+# The frozen inventory has exactly one authority: `scripts/ci/baselines/
+# bilingual-docs.txt`, the file the `bilingual` ratchet in
+# .github/workflows/gates.yml feeds to scripts/ci/gate_ratchet.py. Every other
+# file in the tree that carries the same list is a copy. A copy nobody compares
+# silently becomes a second pass condition -- AID-2026-172 gated only two of the
+# files that carried the list, and by the time this check was widened one review
+# snapshot had already drifted to 81 entries (8 absent from the authority, 4
+# authority entries absent from it) with nothing red anywhere.
+#
+# So every copy is declared here with the rule it must satisfy:
+#
+#   authority   the single gate input
+#   live        must hold exactly the authority's entries
+#   superset    a register that must contain every authority entry
+#   snapshot    a dated record of one revision; must declare that revision
+#   historical  must carry BASELINE_COPY_MARKER -- it is not a gate input
+#
+# A file that carries the inventory and is not declared fails closed unless it
+# carries the marker, so a new copy cannot appear without a decision about what
+# it is. A declared copy that is not present in the tree is skipped: a file that
+# does not exist cannot disagree with anything, and this keeps the check usable
+# on fixture trees that carry only the two baselines.
+BASELINE_COPY_MARKER = "HISTORICAL — not a gate input"
 
-    `scripts/bilingual-baseline.txt` (read by this gate) and
-    `scripts/ci/baselines/bilingual-docs.txt` (read by the `bilingual`
-    ratchet) started as byte-identical entry sets, but they are independent
-    files: regenerating either one alone changes what one gate permits while
-    the other keeps enforcing the old set. Comparing them here converts that
-    silent drift into a red check.
+# The shapes a copy takes in this repository: one path per line, a numbered
+# table row, a quoted JSON-string line, or a bulleted item.
+BASELINE_COPY_ENTRY_SHAPES = (
+    re.compile(r"^(?P<entry>[0-9]{2}-[A-Za-z0-9._/-]+\.[A-Za-z0-9]+)$"),
+    re.compile(r"^\|\s*[0-9]{1,3}\s*\|\s*`(?P<entry>[^`]+)`\s*\|"),
+    re.compile(r'^"(?P<entry>[^"]+)",?$'),
+    re.compile(r"^[-*]\s+`(?P<entry>[^`]+)`$"),
+    re.compile(r"^[-*]\s+(?P<entry>[0-9]{2}-[A-Za-z0-9._/-]+\.[A-Za-z0-9]+)$"),
+    re.compile(r"^[0-9]{1,3}[.)]\s+`?(?P<entry>[0-9]{2}-[A-Za-z0-9._/-]+\.[A-Za-z0-9]+)`?$"),
+)
 
-    This adds no new pass condition to any existing gate: while the two entry
-    sets are equal -- which they are on main -- the outcome is exactly what it
-    was before. It only refuses to let the two copies disagree.
+# A dated scan record declares the revision it was taken at; that declaration is
+# what makes it a snapshot rather than a list that someone will later trust.
+BASELINE_COPY_SNAPSHOT_DECLARATION = re.compile(
+    r"^-\s*(Source revision[\s\S]{0,40}?|扫描源 Commit[\s\S]{0,20}?:)\s*`[0-9a-f]{40}`",
+    re.MULTILINE,
+)
+
+BASELINE_COPIES: tuple[tuple[str, str, str], ...] = (
+    (
+        "scripts/ci/baselines/bilingual-docs.txt",
+        "authority",
+        "the only gate input; read by the `bilingual` ratchet in gates.yml",
+    ),
+    (
+        "scripts/bilingual-baseline.txt",
+        "live",
+        "read by this gate's frozen-baseline comparison",
+    ),
+    (
+        "14-ai-development/governance-register/evidence/main-paths.json",
+        "superset",
+        "the governance register of main-branch paths: all 803 of them, of which "
+        "the 77 frozen entries are a subset; it is a register, not a list copy",
+    ),
+    (
+        "00-governance/reports/gov-doc-001-full-scan-2026-11-20.md",
+        "snapshot",
+        "83 findings at source revision 568b847c, dated 2026-11-20; a scan "
+        "record, not a gate input",
+    ),
+    (
+        "reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md",
+        "historical",
+        "81 findings at frozen base c58878f, measured 2026-11-22; marked, not a "
+        "gate input",
+    ),
+    (
+        "reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md",
+        "historical",
+        "the zh-CN side of the same 81-finding snapshot at c58878f; marked, not "
+        "a gate input",
+    ),
+)
+
+# Files larger than this are not inventory copies worth reading on every run.
+BASELINE_COPY_MAX_BYTES = 1_500_000
+
+
+def _display_path(path: Path) -> str:
+    """Repository-relative name for a message; the path itself when it is outside ROOT.
+
+    Fixture tests replace ROOT with a temporary directory while the module
+    constants keep pointing at this checkout, so a message must never raise
+    merely because the two disagree.
     """
-    frozen = read_baseline_entries(BASELINE_PATH)
-    ratchet = read_baseline_entries(CI_BASELINE_PATH)
-    errors: list[str] = []
-    if frozen is None:
-        errors.append(
-            "Required bilingual baseline is missing: "
-            f"{BASELINE_PATH.relative_to(ROOT)}"
-        )
-    if ratchet is None:
-        errors.append(
-            "Required bilingual ratchet baseline is missing: "
-            f"{CI_BASELINE_PATH.relative_to(ROOT)}"
-        )
-    if frozen is None or ratchet is None:
-        return errors
+    try:
+        return path.relative_to(ROOT).as_posix()
+    except ValueError:
+        return path.as_posix()
 
-    for path in sorted(frozen - ratchet):
-        errors.append(
-            "Bilingual baseline copies disagree; present only in "
-            f"scripts/bilingual-baseline.txt: {path}"
+
+def _copy_location(relative: str) -> Path:
+    """Resolve one declared copy, honouring the module constants under test.
+
+    A fixture may replace ROOT with a temporary directory and leave the two
+    baseline constants pointing at this checkout; the constants still name the
+    declared copies, so they are matched by suffix before the ROOT-relative
+    fallback is tried.
+    """
+    candidates = (CI_BASELINE_PATH, BASELINE_PATH)
+    for candidate in candidates:
+        try:
+            if candidate.relative_to(ROOT).as_posix() == relative:
+                return candidate
+        except ValueError:
+            continue
+    for candidate in candidates:
+        if "/" + relative in candidate.as_posix():
+            return candidate
+    return ROOT / relative
+
+
+def _copy_text(relative: str) -> str | None:
+    """Read one copy; None when the file is not present in this tree."""
+    path = _copy_location(relative)
+    if not path.is_file():
+        return None
+    return path.read_text(encoding="utf-8")
+
+
+def inventory_entries_in(text: str) -> set[str]:
+    """Read the entries a copy lists: bare lines, table rows, JSON strings, bullets."""
+    entries: set[str] = set()
+    for line in text.splitlines():
+        stripped = line.strip()
+        for shape in BASELINE_COPY_ENTRY_SHAPES:
+            match = shape.match(stripped)
+            if match:
+                entries.add(match.group("entry"))
+                break
+    return entries
+
+
+def _tracked_paths() -> list[str]:
+    """Tracked paths, or none when this tree is not a Git checkout (fixtures)."""
+    try:
+        completed = subprocess.run(
+            ["git", "ls-files", "-z"], cwd=ROOT, check=True, capture_output=True
         )
-    for path in sorted(ratchet - frozen):
+    except (OSError, subprocess.CalledProcessError):
+        return []
+    return [
+        chunk.decode("utf-8", "surrogateescape")
+        for chunk in completed.stdout.split(b"\0")
+        if chunk
+    ]
+
+
+def _undeclared_copies(authority: set[str], declared: set[str]) -> list[tuple[str, int]]:
+    """Every other tracked file that carries most of the frozen inventory."""
+    threshold = max(1, (len(authority) + 1) // 2)
+    found: list[tuple[str, int]] = []
+    for relative in sorted(_tracked_paths()):
+        if relative in declared:
+            continue
+        path = ROOT / relative
+        try:
+            if not path.is_file() or path.stat().st_size > BASELINE_COPY_MAX_BYTES:
+                continue
+            text = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        matched = len(inventory_entries_in(text) & authority)
+        if matched >= threshold:
+            found.append((relative, matched))
+    return found
+
+
+def check_baseline_copies_agree() -> list[str]:
+    """Fail when any copy of the frozen inventory diverges from the authority.
+
+    `scripts/ci/baselines/bilingual-docs.txt` is the single authority. Every
+    other file that carries the same list is compared against it by the role
+    declared in BASELINE_COPIES:
+
+    * `live` copies must hold exactly the authority's entries. Each entry that
+      is on one side and not the other is reported on its own.
+    * `superset` registers must contain every authority entry.
+    * `snapshot` records must still declare the revision they were taken at.
+    * `historical` snapshots must carry BASELINE_COPY_MARKER; their measured
+      drift against the authority is printed as a notice, not as an error,
+      because they are not gate inputs.
+    * any undeclared file that carries the inventory fails closed unless it
+      carries the marker, so a new copy cannot appear without a decision.
+
+    This adds no new pass condition to any existing gate: the authority and the
+    live copy are equal on main, so the outcome is exactly what it was before.
+    It refuses to let a copy disagree, and refuses to let a copy exist that the
+    tree has not declared.
+    """
+    authority = read_baseline_entries(CI_BASELINE_PATH)
+    if authority is None:
+        return [
+            "Required bilingual ratchet baseline is missing: "
+            f"{_display_path(CI_BASELINE_PATH)}"
+        ]
+    authority_label = _display_path(CI_BASELINE_PATH)
+
+    errors: list[str] = []
+    declared = {relative for relative, _role, _reason in BASELINE_COPIES}
+    for relative, role, _reason in BASELINE_COPIES:
+        if role == "authority":
+            continue
+        if role == "live":
+            entries = read_baseline_entries(_copy_location(relative))
+            if entries is None:
+                errors.append(f"Required bilingual baseline is missing: {relative}")
+                continue
+            for path in sorted(entries - authority):
+                errors.append(
+                    "Bilingual baseline copies disagree; present only in "
+                    f"{relative}: {path}"
+                )
+            for path in sorted(authority - entries):
+                errors.append(
+                    "Bilingual baseline copies disagree; present only in "
+                    f"{authority_label}: {path}"
+                )
+            continue
+
+        text = _copy_text(relative)
+        if text is None:
+            continue
+        entries = inventory_entries_in(text)
+        if role == "superset":
+            for path in sorted(authority - entries):
+                errors.append(
+                    f"Frozen inventory entry absent from this register: "
+                    f"{relative}: {path}"
+                )
+        elif role == "snapshot":
+            if not BASELINE_COPY_SNAPSHOT_DECLARATION.search(text):
+                errors.append(
+                    f"{relative} carries the frozen inventory but no longer "
+                    "declares the source revision it was taken at; a scan "
+                    "record without its revision is a list someone will trust"
+                )
+        elif role == "historical":
+            if BASELINE_COPY_MARKER not in text:
+                errors.append(
+                    f"{relative} carries the frozen inventory but is not marked "
+                    f"'{BASELINE_COPY_MARKER}'"
+                )
+                continue
+            print(
+                f"::notice::{relative}: '{BASELINE_COPY_MARKER}'; lists "
+                f"{len(entries)} inventory-shaped entries file-wide, "
+                f"{len(entries - authority)} of them absent from "
+                f"{authority_label}, and "
+                f"{len(authority - entries)} authority entries absent here -- "
+                "informational only, never a pass condition"
+            )
+
+    for relative, matched in _undeclared_copies(authority, declared):
+        text = (ROOT / relative).read_text(encoding="utf-8")
+        if BASELINE_COPY_MARKER in text:
+            print(
+                f"::notice::{relative}: undeclared snapshot marked "
+                f"'{BASELINE_COPY_MARKER}'; {matched} entries -- informational only"
+            )
+            continue
         errors.append(
-            "Bilingual baseline copies disagree; present only in "
-            f"scripts/ci/baselines/bilingual-docs.txt: {path}"
+            f"{relative} carries {matched} of the {len(authority)} frozen "
+            f"inventory entries but is not a declared copy; make it match "
+            f"{authority_label} or mark it '{BASELINE_COPY_MARKER}'"
         )
     return errors
 
@@ -586,7 +854,8 @@ def changed_status() -> dict[str, str]:
     raw = subprocess.check_output(
         ["git", "diff", "--name-status", "--no-renames", f"{base}...{head}"],
         cwd=ROOT,
-        text=True,
+        encoding=GIT_TEXT_ENCODING,
+        errors="replace",
     )
     result: dict[str, str] = {}
     for line in raw.splitlines():
@@ -646,7 +915,8 @@ def _blob_at(revision: str, path: str) -> str | None:
         return subprocess.check_output(
             ["git", "rev-parse", "--verify", f"{revision}:{path}"],
             cwd=ROOT,
-            text=True,
+            encoding=GIT_TEXT_ENCODING,
+            errors="replace",
             stderr=subprocess.DEVNULL,
         ).strip() or None
     except subprocess.CalledProcessError:
@@ -789,7 +1059,8 @@ def check_normative_root_departures(exception: bool) -> list[str]:
     raw = subprocess.check_output(
         ["git", "diff", "--name-status", "-M", f"{base}...{head}"],
         cwd=ROOT,
-        text=True,
+        encoding=GIT_TEXT_ENCODING,
+        errors="replace",
     )
     errors: list[str] = []
     for line in raw.splitlines():
@@ -1213,8 +1484,9 @@ def main() -> int:
         for message in copy_errors:
             print(f"::error::{message}")
         print(
-            "::error::The two bilingual baselines must hold the same entries; "
-            "shrink both copies in the same change."
+            "::error::Every copy of the frozen inventory must hold the entries of "
+            "scripts/ci/baselines/bilingual-docs.txt; shrink the copies in the "
+            "same change, and mark a snapshot that is not a gate input."
         )
         return 2
     gap_now = current_bilingual_gaps()
@@ -1235,7 +1507,13 @@ def main() -> int:
 
     body = os.environ.get("PR_BODY", "")
     errors: list[str] = check_prompt_library()
-    history_errors = check_embedded_registration_history()
+    try:
+        history_errors = check_embedded_registration_history()
+    except GitOutputDecodeError as exc:
+        # A blob that cannot be decoded is not a clean history: the run is
+        # incomplete, so it must not be reported as a content verdict (1).
+        print(f"::error::{exc}")
+        return 2
     if SHALLOW_HISTORY_ERROR in history_errors:
         print(f"::error::{SHALLOW_HISTORY_ERROR}")
         return 2

@@ -108,7 +108,7 @@ def _git_object_type(root, ref):
     """Return the git object type of ref, or None when unresolvable."""
     result = subprocess.run(
         ["git", "-C", str(root), "cat-file", "-t", ref],
-        check=False, capture_output=True, text=True)
+        check=False, capture_output=True, encoding="utf-8", errors="replace")
     return result.stdout.strip() if result.returncode == 0 else None
 
 
@@ -119,7 +119,7 @@ def _git_tree_has_file(root, subject_head, relative_path):
     result = subprocess.run(
         ["git", "-C", str(root), "ls-tree", "-r", "--name-only",
          subject_head, "--", relative_path],
-        check=False, capture_output=True, text=True)
+        check=False, capture_output=True, encoding="utf-8", errors="replace")
     if result.returncode != 0:
         raise ValueError(f"subject_head is not a resolvable commit: {subject_head}")
     return relative_path in {line.strip() for line in result.stdout.splitlines()}
@@ -161,7 +161,7 @@ def _evidence_file(value, field, root, subject_head):
     try:
         content = blob.decode("utf-8")
     except UnicodeError as error:
-        raise ValueError(f"{field} is not readable UTF-8 evidence") from error
+        raise ValueError(f"{field} blob decode failed as UTF-8 evidence") from error
     # The evidence file itself must carry real content: placeholder or
     # near-empty artifacts must not satisfy a PASS gate.
     _meaningful(content, f"{field}.content")
@@ -188,7 +188,7 @@ def _verify_sidecar_anchor(root, sidecar_path=SIDECAR_PATH):
     """
     message = subprocess.run(
         ["git", "-C", str(root), "log", "-1", "--format=%B", "--", sidecar_path],
-        check=True, capture_output=True, text=True).stdout
+        check=True, capture_output=True, encoding="utf-8", errors="replace").stdout
     match = re.search(r"\b[0-9a-f]{64}\b", message)
     if match is None:
         raise ValueError("sidecar commit message lacks a sha256 anchor")
@@ -205,10 +205,10 @@ def _verify_sidecar_anchor(root, sidecar_path=SIDECAR_PATH):
     # Also reject local edits, comparing clean-filtered Git object IDs.
     committed_blob = subprocess.run(
         ["git", "-C", str(root), "rev-parse", f"HEAD:{sidecar_path}"],
-        check=True, capture_output=True, text=True).stdout.strip()
+        check=True, capture_output=True, encoding="utf-8", errors="replace").stdout.strip()
     working_blob = subprocess.run(
         ["git", "-C", str(root), "hash-object", str(root / sidecar_path)],
-        check=True, capture_output=True, text=True).stdout.strip()
+        check=True, capture_output=True, encoding="utf-8", errors="replace").stdout.strip()
     if working_blob != committed_blob:
         raise ValueError("sidecar sha256 does not match its commit anchor")
 
@@ -220,7 +220,7 @@ def _verify_sidecar_anchor(root, sidecar_path=SIDECAR_PATH):
         recorded, relative = parts[1], parts[2]
         blob = subprocess.run(
             ["git", "-C", str(root), "hash-object", str(root / relative)],
-            check=True, capture_output=True, text=True).stdout.strip()
+            check=True, capture_output=True, encoding="utf-8", errors="replace").stdout.strip()
         if blob != recorded:
             raise ValueError("protected file does not match sidecar blob: " + relative)
     return True

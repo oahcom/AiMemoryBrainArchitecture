@@ -22,7 +22,8 @@ def git(repo: Path, *args: str) -> subprocess.CompletedProcess:
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         check=True,
-        text=True,
+        encoding="utf-8",
+        errors="replace",
     )
 
 
