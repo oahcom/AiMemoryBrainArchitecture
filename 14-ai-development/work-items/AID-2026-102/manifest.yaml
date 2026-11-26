@@ -8,7 +8,7 @@ risk_rationale: >-
   registry field asserts a measurement nobody took, so the risk of the correction is a second
   wrong value, and the mitigation is that the new value is computed from the committed bytes
   by a command quoted in the record, and the old one is kept rather than deleted.
-status: DISPATCHED
+status: MERGED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -154,15 +154,24 @@ acceptance_criteria:
       counter equal on both sides.
 
 implementation:
-  status: NOT_STARTED
-  branch: PENDING
-  pull_request: PENDING
-  merge_commit_sha: NOT_MERGED
+  status: MERGED
+  branch: gov/aid-102-digest-092
+  pull_request: 1279
+  merge_commit_sha: fa8268fef659891efcdab9164f3e7703e19975c0
+  merged_at: "2026-11-26T09:36:13Z"
+  merged_head_sha: 6072005ffe9a3f93844675c2bf2693d25f650382
   note: >-
-    Left NOT_STARTED on purpose while the pull request is open, for the reason AID-2026-101
-    states in its own implementation note: writing MERGED before a merge exists is the defect
-    being corrected, and committing it while correcting it is the same error with a shorter
-    half-life. Filled from the merge response in a follow-up commit.
+    Merged via PR #1279. The block was NOT_STARTED / NOT_MERGED / PENDING while the pull request
+    was open, on purpose: writing MERGED before a merge exists is the defect being corrected, and
+    committing it while correcting it would be the same error with a shorter half-life. Refreshed
+    here from GET /pulls/1279, not from the branch's expectation.
+  carrier_note: >-
+    PR #1279's merge commit is titled "docs(gov): refresh AID-2026-102 to MERGED from the merge
+    response (#1279)" -- the message the landing script had been given for the *previous* pull
+    request (#1272, which genuinely was a post-merge refresh). The merged content is the digest
+    correction; only the commit subject is wrong, and it is recorded here rather than amended,
+    because rewriting a merged commit's message would make the merge SHA disagree with the
+    history a reader is looking at. The content is identified by merge_commit_sha above.
 
 review:
   status: NOT_ASSIGNED
