@@ -45,7 +45,7 @@ document_metadata:
 
 - Work item: `AID-2026-107`; `id_status: PROVISIONAL`.
 - Attribution: **user-authorized operator (delegated by account owner)**; date: **2026-11-26**. Proxy registration only; no natural-person Owner signature is represented.
-- Exact main baseline: `2d52b0c81dc1b779e49516fceb69d89cdc1d9c31` (read from the main branch API).
+- Exact main baseline: `69407c0781a00673852bc0dfbeef2b778d1d29fb` (read from the main branch API).
 - Prior matrix: AID-2026-095, merged PR #1264. This refresh does not alter AID-095.
 - Related merged inputs: AID-2026-082 / PR #1265 / merge prefix `71548b7b`; AID-2026-098 / PR #1283 / merge prefix `cdba0b73`; AID-2026-100 / PR #1284 / merge prefix `b1f9c51a`.
 - Related Issue: #1212. It remains OPEN.
@@ -217,7 +217,7 @@ Rules: the original 095 matrix uses only PASS / FAIL / NOT EVIDENCED. AID-082/09
 
 | # | Gate A item | Current state | Closeout condition |
 |---|---|---|---|
-| 1 | Branch synchronized with current main | SATISFIED at reviewed base `2d52b0c81dc1b779e49516fceb69d89cdc1d9c31`; recheck if main advances | At final-head review, merge base equals current main and branch is not behind. |
+| 1 | Branch synchronized with current main | SATISFIED at reviewed base `69407c0781a00673852bc0dfbeef2b778d1d29fb`; recheck if main advances | At final-head review, merge base equals current main and branch is not behind. |
 | 2 | Cross-Owner role dispositions (10 roles: 3 ACCEPT / 7 CONDITIONAL / 0 REJECT) | SATISFIED as recorded proxy dispositions | Seven conditional obligations remain; no natural-person Owner signature is claimed. |
 | 3 | Exact-head CI | OPEN_PENDING_FINAL_HEAD | All 16 required contexts succeed on the exact final PR Head. |
 | 4 | Complete A–I + Storage/Consistency composition review artifact | OPEN | Owner A coordinates the complete exact-version package across eight flows and nine checkpoint dimensions; relevant Owners accept their own boundaries. |
