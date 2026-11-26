@@ -91,3 +91,13 @@ All 81 phase records are excluded. Prefix counts: **phase-3: 1; phase-3.5: 1; ph
 Gate A item 5's I sub-item moves from **root missing** to **root authored, guide reconstructed from mirror, four detailed policy contracts formally dispositioned**. This is not “I policy semantics accepted”. Gate A remains PARTIAL / OPEN; Gate B NOT VERIFIED.
 
 No changes to 03/04/05, runtime, validator semantics, tests, scripts, workflows, schemas, APIs, DDL, deployment or production configuration. No Issue closed.
+
+
+## 7. Existing guide mirror metadata
+
+The existing mirror bodies remain byte-for-byte unchanged. GOV-DOC-002 frontmatter was added so the three guide counterparts are all present in this PR:
+
+| Mirror | Original full-file blob | New full-file blob |
+|---|---|---|
+| `docs/en/09-security-governance/security-governance-guide.md` | `061c5847b3df879eeaf3c71e5eae0bfa162b276a` | `688dd950b844e977cef23bc28ab69255927bb181` |
+| `docs/zh-CN/09-security-governance/security-governance-guide.md` | `372d27c79dc79d09bcdb0f142c979efdba1c2b6e` | `f5aa06bbde32e1b67f81ce43796fd461a6b1e0af` |

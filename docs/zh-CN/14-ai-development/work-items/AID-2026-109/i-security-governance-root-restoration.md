@@ -91,3 +91,13 @@ F4（审查第 176–193 行）、F6（214–231）和 F7（233–250）指出 I
 Gate A 第 5 项中 I 子项从**规范根缺失**变为**规范根已撰写、指南已根据镜像重建、四份详细策略契约已正式处置**。这不等于“I policy semantics accepted”。Gate A 仍 PARTIAL / OPEN；Gate B NOT VERIFIED。
 
 未修改 03/04/05、Runtime、validator semantics、tests、scripts、workflows、schemas、APIs、DDL、部署或生产配置。不关闭任何 Issue。
+
+
+## 7. 现有 Guide 镜像元数据
+
+现有镜像正文逐字节保持不变。新增 GOV-DOC-002 frontmatter，使三份 Guide 对应文件均在本 PR 中登记：
+
+| 镜像 | 原完整文件 Blob | 新完整文件 Blob |
+|---|---|---|
+| `docs/en/09-security-governance/security-governance-guide.md` | `061c5847b3df879eeaf3c71e5eae0bfa162b276a` | `688dd950b844e977cef23bc28ab69255927bb181` |
+| `docs/zh-CN/09-security-governance/security-governance-guide.md` | `372d27c79dc79d09bcdb0f142c979efdba1c2b6e` | `f5aa06bbde32e1b67f81ce43796fd461a6b1e0af` |
