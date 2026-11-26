@@ -3,7 +3,7 @@
 - Document ID: D-FORGET-CONTRACT-001
 - Version: 1.0
 - Source branch: main
-- Source revision: canonical root restored by AID-2026-083; exact Blob is recorded on the Draft PR Head.
+- Source revision: canonical root restored by AID-2026-086; exact Blob is recorded on the Draft PR Head.
 - Historical source branch head: 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3 (provenance only)
 - Canonical source: [03-memory-brain/forget-fence-and-completion-contract.md](../../../03-memory-brain/forget-fence-and-completion-contract.md); this English file and the Chinese counterpart are mirrors.
 - Chinese counterpart: [Canonical Forget Fence 与完成契约](../../zh-CN/03-memory-brain/forget-fence-and-completion-contract.md)
