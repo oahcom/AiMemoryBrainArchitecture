@@ -1,0 +1,72 @@
+work_item_id: AID-2026-091
+RENUMBERED_FROM: AID-2026-088
+renumbering_reason: "AID-2026-088 is superseded by the delegated renumbering decision; C/G Applied evidence is assigned AID-2026-091. AID-2026-086 is reserved for PR #1219, AID-2026-089 was merged by PR #1232, and AID-2026-090 was merged by PR #1241."
+title: Define verifiable C/G AppliedAttestation and delivery-state projection contract
+class: ARCH/DOC
+risk: R3
+status: MERGED
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: "Owner C / Owner G joint"
+acceptance_authority: "Owners C, G and H with I security review; Owner A governance review"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 72c9e68a158a5a0a00936fc7fc0adfc1fa024b5c
+tracking_issue: "#1124, #1135, #1180"
+prompt_id: AID-2026-091-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-091/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 11b2d92aa94d1af88ee403def9fa2977bb7cee8c9c32ff957fbc4c06e91ac5d8
+prompt_bytes: 2058
+authorization:
+  authorized_by: "user-authorized operator (delegated by account owner)"
+  decision_date: "2026-11-26"
+  runtime_code_change: NOT_GRANTED
+  validator_change: NOT_GRANTED
+  deployment_or_production: NOT_GRANTED
+  merge: NOT_GRANTED
+scope:
+  files_to_create:
+    - 07-agent-integration/applied-evidence-contract.md
+    - docs/en/07-agent-integration/applied-evidence-contract.md
+    - docs/zh-CN/07-agent-integration/applied-evidence-contract.md
+    - 14-ai-development/work-items/AID-2026-091/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-091/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-091/session-evidence.md
+  files_to_modify:
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope: "All runtime/product code, tests, schemas, validators, workflows, deployment and production state."
+acceptance_criteria:
+  - {id: AP-01, criterion: "Applied requires final inference-boundary C/H attestation."}
+  - {id: AP-02, criterion: "Attestation binds Delivery ID and Attempt ID."}
+  - {id: AP-03, criterion: "Context/session/version/sequence/snapshot digest match DeliveryIntent."}
+  - {id: AP-04, criterion: "Agent/Adapter/instance/boundary/request identities are bound."}
+  - {id: AP-05, criterion: "Managed-region identity and digest are verified."}
+  - {id: AP-06, criterion: "Issuer authenticity and verifier evidence are independently checkable."}
+  - {id: AP-07, criterion: "Local persistence/materialization/receipt never means Applied."}
+  - {id: AP-08, criterion: "Received/Accepted distinct from Delivered/Applied; Accepted retained."}
+  - {id: AP-09, criterion: "Unknown remains pending; retries use distinct Attempt IDs."}
+  - {id: AP-10, criterion: "G Applied is projection of immutable C/H evidence, invalidated by supersession/Forget."}
+  - {id: AP-11, criterion: "EN/ZH-CN semantic parity."}
+  - {id: AP-12, criterion: "Decision comments posted; all Issues remain OPEN."}
+implementation:
+  status: MERGED
+  branch: impl/2026-11-26-applied-evidence-contract
+  pull_request: 1242
+  merge_commit_sha: 1e7f4d0a7baf06103dc3bd504293e25e53bd24c2
+review: PENDING
+acceptance: PENDING
+session_evidence:
+  - role: DOCUMENTATION_AUTHOR
+    issue_refs:
+      - "#1124"
+      - "#1135"
+      - "#1180"
+    implementing_ai_session: NOT_RECORDED
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-091/prompt-v1.md
+    executed_prompt_sha256: 11b2d92aa94d1af88ee403def9fa2977bb7cee8c9c32ff957fbc4c06e91ac5d8
+    executed_prompt_bytes: 2058
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-091/session-evidence.md
+    session_reference_reason: "The exact current ChatGPT session identifier is not exposed in this execution context; historical identifiers were not substituted."

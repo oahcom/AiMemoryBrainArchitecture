@@ -1,0 +1,274 @@
+work_item_id: AID-2026-101
+title: Refresh three stale registry cells and one false prompt digest, and record the prior value of each
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  Documentation only. Four cells in INDEX.md and three manifest fields are edited; no code, no
+  checker, no workflow and no policy status changes. The risk it addresses is that a stale
+  registry cell is indistinguishable from a false one, so the risk of the change is a wrong
+  cell, and the mitigation is that every prior value is itemised below rather than surviving
+  only in the diff.
+status: MERGED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: c6b7d987b959c42af5072932963dae9ed55721e4
+
+tracking_issue: "#1244 - opened from the measurement recorded here, so that the correction has an Issue of its own rather than borrowing the authority of the work items it corrects."
+
+prompt_id: AID-2026-101-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-101/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 89ac65f2d58e187451b7c0a98648d0dd4352e3dac79f521b8029b0432f7e94c1
+prompt_bytes: 4470
+
+authorization:
+  implementation_write: >-
+    GRANTED for INDEX.md and the three named manifests, and for this work item's own
+    directory. NOT_GRANTED for any other path.
+  gate_behaviour_change: >-
+    NONE - no workflow, script or check is modified. The absence of a freshness gate is
+    recorded as F4 and left unbuilt; building it needs a different authorization.
+  schema_change: NONE - no manifest field is added, removed or retyped.
+  architecture_spec_change: NONE - no ADR and no canonical document is modified.
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-101/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-101/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-101/session-evidence-1244.md
+  files_to_modify:
+    - 14-ai-development/work-items/INDEX.md
+    - 14-ai-development/work-items/AID-2026-047/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-072/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-076/manifest.yaml
+  files_out_of_scope: >-
+    Every other path. In particular no Rust file: the three work items whose records are
+    corrected had their code land already, and this work item corrects what their records say,
+    not what their code does.
+
+identifier_history: >-
+  This correction was prepared four times under identifiers that main assigned to other work items
+  while it was in review: AID-2026-080 (taken by PR #1215), AID-2026-081 (taken by the GOV-DOC-001
+  ratchet work item), AID-2026-090 (taken by the ContextVersion immutability work item, PR #1255)
+  and AID-2026-101 is the fourth and current number. Every collision was discovered by rebasing,
+  not by a gate, because a work-item directory is a path and two branches adding the same path
+  merge as a conflict only if the merge driver is asked -- the INDEX half merges cleanly under
+  `merge=union`, so the directory is where it surfaces. Recorded here because all four numbers
+  appear in this branch's earlier history and a reader who finds one of them should know it was
+  renaming, not a second correction. Nothing is claimed about the three work items that took the
+  earlier numbers.
+
+findings:
+  - id: F1
+    severity: HIGH
+    statement: >-
+      AID-2026-047's prompt_sha256 pins a prompt that no longer exists at the path it names.
+      The digest is the one the file had before the work item was renumbered from 044 to 047.
+    evidence: >-
+      prompt-v1.md at HEAD hashes to 6d2c4080...0871 at 2185 bytes; the manifest declares
+      1f547ad7...b236 at the same 2185 bytes. Substituting AID-2026-044 for AID-2026-047 in
+      the committed file reproduces 1f547ad7...b236 exactly, so the pinned text differs from
+      the committed text by the identifier alone. A digest audit of all 45 manifests that
+      declare one finds this as the only mismatch; AID-2026-001 looked like a second until
+      the lookup was made version-aware, because it pins prompt-v2.md while prompt-v1.md is
+      the historical file.
+  - id: F2
+    severity: HIGH
+    statement: >-
+      AID-2026-076's implementation block still describes an open carrier although its own
+      pull request merged, and INDEX repeated that description.
+    evidence: >-
+      GET /pulls/1155 returns state=closed, merged=true, merged_at=2026-11-25T14:59:20Z,
+      merge_commit_sha=2733283bff2bcc744c595ec06b602aadb52c772a, head=07a8d1ee. The merge
+      commit is an ancestor of origin/main. The manifest said IMPLEMENTED_IN_BRANCH,
+      pull_request ASSIGNED_AT_OPEN, merge_commit_sha NOT_MERGED.
+  - id: F3
+    severity: MEDIUM
+    statement: >-
+      AID-2026-072's record collapses two different facts into one open state. The pull
+      request it was dispatched under closed without merging, and a later pull request merged
+      the same change under a corrected identifier.
+    evidence: >-
+      GET /pulls/1057 returns state=closed, merged=false, closed_at=2026-11-25T10:05:37Z.
+      GET /pulls/1082 returns merged=true, merged_at=2026-11-25T09:41:32Z,
+      merge_commit_sha=afb0c6ceac5f4d7346c4126d2a48bc8b17ffab2e; commit 53500171
+      ("fix(903): renumber the work item to AID-2026-072 and correct its prompt digest") is
+      in that merge and is an ancestor of origin/main. The change itself is present in main:
+      tests/forget_fence.rs carries the per-process atomic counter the work item specified.
+  - id: F4
+    severity: MEDIUM
+    statement: >-
+      Nothing in CI reads a manifest's prompt_sha256 against the file it pins, and nothing
+      compares an INDEX Status cell to the carrier PR it names. Both defect classes are
+      therefore silent, and both were found by measurement rather than by a red build.
+    evidence: >-
+      `grep -rn prompt_sha256 scripts/` matches only
+      scripts/governance/session_evidence/validate.py, and that file reads
+      session_evidence[].executed_prompt_sha256, not the manifest's top-level prompt_sha256.
+      scripts/ci/check_repository_hygiene.py checks manifest-internal consistency (R20-01,
+      R20-02) and never resolves a PR number. This is recorded as a tracked gap, not repaired
+      here.
+  - id: F5
+    severity: LOW
+    statement: >-
+      The selection of these three rows was made by a scan, not by reading the table, and the
+      scan is stated so it can be re-run. Two earlier drafts of it were wrong and were
+      discarded.
+    evidence: >-
+      A draft that matched the word PENDING anywhere in a row flagged "Acceptance: PENDING",
+      which is a true statement about a live item, not a stale one; it was replaced by a match
+      anchored at the start of the Status cell, which leaves two rows. A draft that compared
+      merge SHAs as whole strings reported 14 correct rows as missing their SHA, because INDEX
+      writes short SHAs; the prefix comparison is the correct test. Neither discarded draft
+      produced a claim in this manifest.
+
+corrections:
+  - target: 14-ai-development/work-items/AID-2026-047/manifest.yaml
+    field: prompt_sha256
+    prior_value: 1f547ad7e81f951ca8778536dc9eec860080d18b33c1cfc809ceed4db063b236
+    new_value: 6d2c40800c1f40ba05653d23beea9b2f89db7467519bf7eebb1d48fef5770871
+    basis: >-
+      The new value is the SHA-256 of the committed prompt-v1.md bytes, computed in this pass.
+      The prompt is not rewritten to fit a digest; the digest is corrected to describe the
+      prompt. prompt_bytes is unchanged at 2185, which is consistent with the two texts
+      differing only in the identifier and is why the mismatch was not visible as a size
+      difference.
+    prior_value_preserved_by: >-
+      A prompt_digest_correction field in the same manifest, matching the precedent already set
+      by AID-2026-072.
+  - target: 14-ai-development/work-items/AID-2026-076/manifest.yaml
+    field: implementation.status / implementation.pull_request / implementation.merge_commit_sha
+    prior_value: "IMPLEMENTED_IN_BRANCH / ASSIGNED_AT_OPEN / NOT_MERGED"
+    new_value: "MERGED / 1155 / 2733283bff2bcc744c595ec06b602aadb52c772a"
+    basis: >-
+      GET /pulls/1155 and `git merge-base --is-ancestor 2733283bff2b origin/main` (exit 0).
+    note: >-
+      R20-01 requires a positive integer in pull_request when either lifecycle field is
+      PR_OPEN; 1155 is an unquoted integer and the lifecycle field is no longer PR_OPEN, so both
+      halves of that rule are satisfied. R20-02 forbids NOT_MERGED beside MERGED; the two are
+      no longer paired.
+  - target: 14-ai-development/work-items/AID-2026-072/manifest.yaml
+    field: status / implementation.status / implementation.pull_request / implementation.merge_commit_sha
+    prior_value: "PR_OPEN / PR_OPEN / 1057 / NOT_MERGED"
+    new_value: "MERGED / MERGED / 1082 / afb0c6ceac5f4d7346c4126d2a48bc8b17ffab2e"
+    basis: >-
+      GET /pulls/1082 merged=true at 2026-11-25T09:41:32Z, merge commit afb0c6ce, ancestor of
+      origin/main; the renumbering commit 53500171 is inside that merge. The superseded pull
+      request 1057 is recorded in a carrier_history field rather than deleted, because it
+      closed unmerged and that fact is not interchangeable with the merge.
+    note: >-
+      The rule requires the refresh to say which outcome occurred. Writing 1057 as merged would
+      be false; deleting it would lose that the work was once dispatched under it. Both are
+      recorded.
+  - target: 14-ai-development/work-items/INDEX.md
+    field: "row AID-2026-076, Status / Impl / Review / Accept cells"
+    prior_value: >-
+      Status "PR_OPEN - an existence row, not a registration: it repeats only what the manifest
+      states."; Impl "PR OPEN - `on: pull_request:` gains types: [opened, synchronize,
+      reopened, edited] ..."; Review "NOT_ASSIGNED"; Accept "PENDING - no acceptance decision
+      is claimed. Measured by the coordinating session: ..."
+    new_value: >-
+      Status "MERGED 2026-11-25T14:59:20Z as 2733283bff2b via PR #1155"; Impl and Accept keep
+      their measured content with the carrier stated as merged; Review unchanged.
+    basis: GET /pulls/1155.
+  - target: 14-ai-development/work-items/INDEX.md
+    field: "row AID-2026-072, Status / Impl cells"
+    prior_value: >-
+      Status "PR_OPEN - an existence row, not a registration ..."; Impl "PR OPEN - #1057 on
+      fix/903-fixture-collides-across-parallel-tests. ..."
+    new_value: >-
+      Status "MERGED 2026-11-25T09:41:32Z as afb0c6ceac5f via PR #1082; the earlier carrier
+      #1057 closed unmerged"; Impl keeps the change description with both carriers named.
+    basis: GET /pulls/1082 and GET /pulls/1057.
+  - target: 14-ai-development/work-items/INDEX.md
+    field: "row AID-2026-047, Prompt cell"
+    prior_value: "SHA-256 `1f547ad7e81f951ca8778536dc9eec860080d18b33c1cfc809ceed4db063b236`"
+    new_value: "SHA-256 `6d2c40800c1f40ba05653d23beea9b2f89db7467519bf7eebb1d48fef5770871`"
+    basis: >-
+      The digest of the committed bytes. The row's Status cell already said MERGED and is not
+      touched.
+
+acceptance_criteria:
+  - id: AC1
+    criterion: Every manifest's prompt_sha256 equals the digest of the file it pins.
+    measurement: >-
+      A version-aware audit over all manifests exits with one mismatch before the change and
+      zero after it. The audit resolves prompt_file first, then prompt-v<version>.md, then
+      prompt-v1.md, so it cannot reproduce the false positive that a hard-coded v1 produced on
+      AID-2026-001.
+  - id: AC2
+    criterion: No INDEX Status cell opens with an open/pending token while every PR it names is closed.
+    measurement: >-
+      The anchored scan returns two rows before the change and zero after it. The scan is
+      anchored at the start of the Status cell so that "Acceptance: PENDING" is not counted.
+  - id: AC3
+    criterion: Every corrected cell names which outcome occurred, and no closed-unmerged carrier is described as merged.
+    measurement: >-
+      AID-2026-072's row and manifest both say #1057 closed unmerged and #1082 merged. Read the
+      two cells; this one is not machine-checked and is not claimed to be.
+  - id: AC4
+    criterion: The repository's own gates still pass.
+    measurement: >-
+      scripts/check_traceability.py --index-only exits 0 with 0 errors;
+      scripts/ci/check_repository_hygiene.py exits 0 with violations=0 and the membership
+      counter equal on both sides.
+
+implementation:
+  status: MERGED
+  branch: gov/aid-090-refresh-stale-cells
+  pull_request: 1248
+  merge_commit_sha: 6c4956688cd4bf45f08266ae54840100faccefa5
+  merged_at: "2026-11-26T08:18:17Z"
+  merged_head_sha: f1ad3996e1bc2d9c449190170ed19dc687fa1681
+  note: >-
+    Merged via PR #1248. This block was NOT_STARTED / NOT_MERGED / PENDING while the pull request
+    was open, on purpose: writing MERGED before a merge exists is the defect this work item
+    corrects in AID-2026-076, and committing it while correcting it would have been the same
+    error with a shorter half-life. It is refreshed here, in a follow-up commit, from what the
+    merge actually returned rather than from what the branch hoped for.
+  carrier_history: >-
+    The branch carried this correction under four identifiers before it merged, each one taken by
+    another work item while it was in review: AID-2026-080, 081, 090 and finally 101. Three pull
+    requests preceded #1248 and none of them merged: #1230 and #1239 were closed because GitHub
+    does not allow a pull request's head branch to be changed, and the branch had to be recreated
+    with the new number each time. Recorded because a reader who finds those PR numbers in this
+    branch's history should know they were renaming attempts, not withdrawn corrections.
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    No independent review is recorded. This manifest was written by the session that measured
+    the defects and made the correction, so an APPROVE from that session would be self-review
+    and is not claimed. What is claimed is narrower: every corrected value is a measurement
+    with a fetch or a git command behind it, quoted above, and each is re-runnable.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1244"
+    implementing_ai_session: owner-proxy-2026-11-26
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-101/prompt-v1.md
+    executed_prompt_sha256: 89ac65f2d58e187451b7c0a98648d0dd4352e3dac79f521b8029b0432f7e94c1
+    executed_prompt_bytes: 4470
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-101/session-evidence-1244.md
+    note: >-
+      Canonical form, not the top-level legacy fields: this pull request modifies this manifest,
+      and check_09_manifest_and_evidence_entries rejects a legacy manifest that the same pull
+      request touched. The prompt_id / prompt_version / prompt_file / prompt_status /
+      prompt_sha256 / prompt_bytes fields above are a different schema - the prompt pin the
+      INDEX cell cites - and none of them is in MANIFEST_FIELDS, so they do not conflict with
+      this block. The digest and byte count are repeated here because entry #1 has to pin the
+      snapshot it executed; they are the same measurement, not a second source of truth.

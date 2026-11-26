@@ -131,6 +131,16 @@ class DeclaredCheckContextsTest(unittest.TestCase):
         self.assertIn("Rust format (hard gate)", errors.getvalue())
         self.assertIn("not a required context", errors.getvalue())
 
+    def test_violation_when_a_context_is_declared_twice(self):
+        """A duplicated line collapses into the set, so the sets still match."""
+        self.write(DOC, DOC_TEXT.replace("audit\n", "audit\naudit\n"))
+        self.write(".github/workflows/gates.yml", WORKFLOW)
+        errors = io.StringIO()
+        with redirect_stdout(io.StringIO()), redirect_stderr(errors):
+            self.assertEqual(checker.main(self.root, DECLARED), 1)
+        self.assertIn("audit", errors.getvalue())
+        self.assertIn("more than once", errors.getvalue())
+
     def test_incomplete_when_the_payload_cannot_be_read(self):
         """An unreadable platform is INCOMPLETE, never PASS and never skipped."""
         self.write(DOC, DOC_TEXT)

@@ -4,26 +4,26 @@ document_metadata:
   role: normative-standard
   lifecycle:
     approval:
-      decision_status: Under-Review
-      approver: NOT_RECORDED
-      decision_date: NOT_RECORDED
+      decision_status: Approved
+      approver: "user-authorized operator (delegated by account owner)"
+      decision_date: "2026-11-26"
       approved_version:
-        scheme: git
-        value: "a7d12fe9835d8f53403946ab08c1cae8c3f12fbf"
+        scheme: content-hash
+        value: "6b818d9b1884530bdf208507d6a7913699c8598d4c0f351f238cfaff449c0a3a"
       approval_scope:
         type: Full-document
         included_sections: []
         included_assets: []
-      approval_applicability: Not-Applicable-To-Current-Version
+      approval_applicability: Applicable-To-Current-Version
       evidence_reference:
-        - "00-governance/architecture-invariants.md"
+        - "14-ai-development/work-items/AID-2026-096/approval-evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
       last_verified_date: null
       last_verification_note: "Usual role: constraints every subsystem specification must obey"
     usage_status: Active
-    modification_status: Pending-Reapproval
+    modification_status: Unchanged
     supersession:
       supersedes: []
       supersession_reason: null
@@ -56,7 +56,9 @@ document_metadata:
 - Version: 1.1
 - Source: [Normative source specification](../../../00-governance/architecture-invariants.md)
 - Chinese counterpart: [架构不变量](../../zh-CN/00-governance/architecture-invariants.md)
-- Status: CANDIDATE / Pending-Reapproval — current version NOT APPROVED; I-01 through I-24 have no new formal approval.
+- Status: APPROVED / Normative — new approval event dated 2026-11-26. This does not certify implementation conformity with P-01 through P-16.
+
+**Historical status:** Before this new approval event on 2026-11-26, this document was marked `CANDIDATE / Pending-Reapproval — NOT APPROVED`. This records the prior state only. The present decision is a new approval, not a retroactive approval or authentication of any historical approver.
 
 These invariants are proposed constraints for all subsystem specifications and future implementations, subject to separate formal approval.
 
@@ -88,6 +90,8 @@ These invariants are proposed constraints for all subsystem specifications and f
 | I-24 | Architecture documentation acceptance requires bilingual semantic parity, stable-identifier parity, matching decision status, and traceable source revisions. |
 
 ## Supplemental mirror-only section — AID-2026-014 Claim/Fact semantic invariants
+
+> mirror-only supplemental, not part of canonical root. Retained in this EN mirror only; non-normative and not promoted. Whether any statement should be elevated is pending Owner adjudication.
 
 This section is retained as existing supplemental content in this language mirror. It has no corresponding section in the current canonical source `00-governance/architecture-invariants.md`, and therefore is not part of the canonical invariant set by virtue of appearing here. It does not amend or replace the source. Whether to promote these statements into the canonical source is a decision reserved for the relevant content Owner.
 

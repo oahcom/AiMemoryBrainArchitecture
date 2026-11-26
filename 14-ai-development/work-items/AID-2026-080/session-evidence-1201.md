@@ -158,7 +158,7 @@ annotation names AID-2026-080:
 
 ## Limits of this record
 
-- **Two review rounds are recorded, and neither is `APPROVED`.** Round 1 (`ACCEPT WITH AMENDMENTS`,
+- **Four review rounds are recorded, and none is `APPROVED`.** Round 1 (`ACCEPT WITH AMENDMENTS`,
   Head `a538dbf2`) required the clause to say *which* `session_evidence` entry; the wording was
   changed to constrain locations instead, and the reviewer withdrew the suggestion in round 2.
   Round 2 (`NEEDS REVISION`, Head `f44dce07`) found a real defect that was mine: the amendment had
@@ -166,8 +166,61 @@ annotation names AID-2026-080:
   context failed with `executed_prompt_sha256 mismatch in manifest entry #1`. The first repair
   re-took the pin; the reviewer refused it, correctly, because it would have recorded the amended
   document as the executed input. `prompt-v1.md` is now restored byte-for-byte and the amendment
-  lives in `REVIEW-AMENDMENT.md`. Whether that closes round 2 is round 3's decision at its own
-  Head.
+  lives in `REVIEW-AMENDMENT.md`.
+  Round 3 (`NEEDS REVISION`, Head `489b6048`) closed round 2's blocker — it compared blob SHAs and
+  found `84342823` on both sides — and found four defects that were mine: this row's sibling in
+  `INDEX.md` still carried the retaken pin `11496` / `3e0fdfc7` that round 2 had refused; the
+  manifest population was stated as 55 where the tree held 56; C8's measurement asserted the
+  snapshot path is absent from the base diff, which the renumbering makes impossible; and the
+  merge state still read `NOT_STARTED` / `PR_OPEN` after the merge. All four are repaired.
+  Round 3 also found, unasked, that PR #1215 had already merged at `f7bc0789` while the review
+  read `489b6048`.
+  Round 4 (`NEEDS REVISION`, Head `7e9c9f3d`) closed five of round 3's six findings, reproduced
+  the population figures from the trees itself (54 / 55 / 56 / 56 manifests; 49 conform, 22
+  parser-accepted, 7 non-conforming, naming the same seven IDs), and did what no earlier round had
+  done: it read the `489b6048 -> f7bc0789` delta directly and confirmed it is one file, 16+/3-, and
+  comment-only. Its conclusion is kept as two parts rather than one: the substantive change is
+  reviewable, and the pre-merge exact-Head requirement was not met. Its own words are the ones that
+  matter here — "A later review can document the result; it cannot rewrite that history."
+  Round 4's two open items are recorded in `review.round_4`: zero GitHub check runs on
+  `7e9c9f3d` (satisfied afterwards at `fa6e227b`, 16 of 16 contexts green, `mergeable: True`), and
+  the absence of a round-4 record (`REVIEW-04-INDEPENDENT.md`, plus the manifest and INDEX
+  projections beside it).
+  Round 5 (`NEEDS REVISION`, Head `a37cd5bb`, PR #1266) closed both of round 4's items on content
+  and, more usefully, corrected two things I had wrong. It checked `32f87d46` — the Head #1240
+  actually merged at — and found 16 successful check runs there; my record had stopped at
+  `fa6e227b`, the Head I pushed the repair to, so a stronger statement was available and I had not
+  made it. It rejected the base: `a37cd5bb`'s second parent is `d5107f68` while `main` had advanced
+  to `baca092b`, 20 commits further, and that increment modifies `INDEX.md`, which this PR also
+  modifies — the section 6.1.3 revalidation-after-base-update condition, which green checks on the
+  old combination do not satisfy. And it caught a wrong number in my own review request: I had given
+  `31385bc1` as "`origin/main` at this Head", but it is an ancestor of `d5107f68` by 21 commits — it
+  was `main` when the branch was cut, not when the branch was read. Round 5 used the commit graph
+  instead of my table, which is why it found what I had not.
+  Round 5 also corrected F3's reasoning without changing its conclusion. I had written that `DM-10`
+  is the only rule constraining `modification_status` and that the policy constrains it nowhere
+  else. The normative requirement is Rule L1 (stale approval, policy `:160` EN / `:162` ZH);
+  `DM-10` is its machine check. The conclusion stands because L1 does not fire on a `Draft` with
+  `approved_version.value: null` — there is no approved version to go stale — but the description
+  of the rule's source was wrong and is now corrected in `review.round_4.non_blocking_checked`.
+  Round 5 declined to rely on the repository-wide `modification_status` counts because it had not
+  reproduced them, which is the right handling of a number it could not verify. Re-measured at
+  `6c5f0230`: 339 documents carry the field, 169 `Draft` say `Unchanged`, 136 say `Modified`. The
+  drift across `main` advances is the reason those counts carry no weight in the conclusion.
+- **Round 5 separates three conclusions that had been running together.** Round 4's two open items
+  are closed on content. F3 is answered, and the correction was to a description rather than to a
+  field value. And AID-2026-080 cannot be marked compliant: both pre-merge exact-Head deviations are
+  historical facts, and no later action satisfies a requirement that applied at merge time. The
+  honest closeout is `MERGED` with both deviations preserved. `MERGED` is not `COMPLIANT`, and it is
+  not Owner acceptance — `acceptance.status` stays `NOT_ASSIGNED`, separate from merge state.
+- **The pre-merge exact-Head review requirement was not met for either PR, and that is a
+  deviation rather than an incident.** #1215 merged at `f7bc0789` after round 3 had reviewed
+  `489b6048`; #1240 merged at `32f87d46` after round 4 had reviewed `7e9c9f3d`. The pattern is
+  structural, not accidental: a branch that is updated after its review cannot satisfy an
+  exact-Head requirement at merge, and no after-the-fact inspection repairs the timing. Both
+  deltas are recorded as facts about the change — neither touches a path under `AID-2026-080/`
+  or `PR-GOVERNANCE-001.md` — and neither is offered as review coverage. `32f87d46` and
+  `f7bc0789` have not been read by any review as such.
 - The reproduction in §2 was performed by a second agent session given the procedure and not
   the expected values. It reproduced all four bucket counts, the 0-of-54 figure and both
   error strings. That is a reproducibility check, not an independent review: the session that
@@ -178,8 +231,8 @@ annotation names AID-2026-080:
   appears only in `01-system-architecture/data-flows.md`, its `docs/` mirrors, and
   `08-bmcp-protocol/validators/envelope_auth_validator.py` — so nothing can settle that
   requirement today. One defect per change; it is registered separately.
-- **34 of 54 manifests still fail `parse_manifest_session_entries`.** Only the 27 that fail
-  *because of this clause* are addressed here. The rest fail for reasons of their own, mostly
+- **34 of 56 manifests still fail `parse_manifest_session_entries` at `364ef4ad`.** Only the 27
+  that failed *because of this clause* at `1f5ba824` are addressed here. The rest fail for reasons of their own, mostly
   an incomplete legacy field set predating the canonical format, and this work item does not
   change that count.
 - **The clause is now satisfiable, not enforced.** Nothing reads §5 item (2) automatically.

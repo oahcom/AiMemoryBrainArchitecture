@@ -111,14 +111,24 @@ since every entry carries its own `implementing_ai_session`.
 
 ## Measurement under the amended wording
 
-55 manifests at the branch tip, with "inside" scoped to the `session_evidence` block and not to any
+**56** manifests at `364ef4ad`, with "inside" scoped to the `session_evidence` block and not to any
 nested key that happens to share a name:
 
 | result | count | ids |
 | --- | --- | --- |
-| satisfy the amended clause | 48 | all but the seven below |
+| satisfy the amended clause | 49 | all but the seven below |
 | do not satisfy it | 7 | 005, 006, 008, 009, 029 (no `sponsor`, no `implementing_ai_session`); 024, 025 (none of the three) |
-| satisfy it and are accepted by `parse_manifest_session_entries` | 21 | the 20 previously conformant manifests plus AID-2026-080 |
+| satisfy it and are accepted by `parse_manifest_session_entries` | 22 | the 21 previously conformant manifests plus AID-2026-080 |
+
+At `8d84c16e` the same measurement reads 48 of 55 satisfy, 21 accepted. Both denominators are
+counted from the tree, not carried forward: `git ls-tree -r --name-only <ref>` filtered to
+`work-items/AID-*/manifest.yaml`.
+
+An earlier revision of this table said 55 at the branch tip, with 48 satisfying and 21 accepted.
+Those numbers were the base commit's, restated as the branch tip's. Round 3 found the error: the
+tree held 56, because the renumbering to AID-2026-080 added a manifest without removing
+AID-2026-079, which PR #1078 had already put on `main`. The per-manifest verdicts never changed;
+the denominator did.
 
 The scoping is a correction, not a convenience. An unscoped "appears indented anywhere" test flags
 `AID-2026-026`, whose `scope_revision.ownership_unchanged` block restates `sponsor: NOT_ASSIGNED`

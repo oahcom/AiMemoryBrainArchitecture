@@ -97,6 +97,9 @@ scope:
     - 14-ai-development/work-items/AID-2026-080/session-evidence-1201.md
     - 14-ai-development/work-items/AID-2026-080/REVIEW-01-INDEPENDENT.md
     - 14-ai-development/work-items/AID-2026-080/REVIEW-AMENDMENT.md
+    - 14-ai-development/work-items/AID-2026-080/REVIEW-03-INDEPENDENT.md
+    - 14-ai-development/work-items/AID-2026-080/REVIEW-04-INDEPENDENT.md
+    - 14-ai-development/work-items/AID-2026-080/REVIEW-05-INDEPENDENT.md
   files_to_modify:
     - 14-ai-development/PR-GOVERNANCE-001.md
     - 14-ai-development/work-items/AID-2026-071/manifest.yaml
@@ -130,9 +133,9 @@ acceptance_criteria:
       The corrected clause is satisfiable, demonstrated by a manifest that satisfies the clause
       and is accepted by the gate.
     measurement: >-
-      `parse_manifest_session_entries` accepts 21 of 55 manifests at the branch tip (20 of 54 at
-      the base commit), and each of them carries the three names without declaring any of them in
-      both places: `sponsor` and `accountable_owner` at top level, `implementing_ai_session` inside
+      `parse_manifest_session_entries` accepts 22 of 56 manifests at `364ef4ad` (21 of 55 at
+      `8d84c16e`, 20 of 54 at `1f5ba824`), and each of them carries the three names without
+      declaring any of them in both places: `sponsor` and `accountable_owner` at top level, `implementing_ai_session` inside
       a `session_evidence` entry. The count is reported with the command that produced it, not
       asserted. Round 1 of the review required the wording to say this about *locations* rather
       than about a particular entry, because AID-2026-055 carries three.
@@ -141,8 +144,12 @@ acceptance_criteria:
     measurement: >-
       The same measurement reports the 7 manifests that name fewer than three principals - five
       carrying `accountable_owner` only (005, 006, 008, 009, 029) and two carrying none (024,
-      025) - and names them, so a future count of 55/55 conformant is a visible change rather
-      than an improvement. Under the amended wording 48 of 55 satisfy the clause.
+      025) - and names them, so a future count of 56/56 conformant is a visible change rather
+      than an improvement. Under the amended wording 49 of 56 satisfy the clause at `364ef4ad`.
+      The population is counted from `git ls-tree -r --name-only <ref>` filtered to
+      `work-items/AID-*/manifest.yaml`, not carried over from an earlier Head: round 3 found the
+      denominator stated as 55 when the tree held 56, because AID-2026-079 and AID-2026-080 both
+      exist at this Head.
   - id: C5
     criterion: Nothing executable changes.
     measurement: >-
@@ -159,15 +166,26 @@ acceptance_criteria:
       passage and the digest pin that no longer matches it.
   - id: C8
     criterion: >-
-      The executed-prompt snapshot is the snapshot that was executed, and no review amendment
-      changes it.
+      The executed-prompt snapshot is byte-identical to the snapshot the execution evidence names,
+      and no review amendment changes it.
     measurement: >-
-      `git diff --name-only` against the base does not list
-      AID-2026-080/prompt-v1.md, and its bytes hash to
+      Compare the blob, not the diff. `git rev-parse
+      489b6048:14-ai-development/work-items/AID-2026-080/prompt-v1.md` and
+      `git rev-parse a538dbf2:14-ai-development/work-items/AID-2026-079/prompt-v1.md` return the
+      same blob SHA, `84342823a31a47fdad048e931314b0f0d8e6ca92`; the bytes hash to
       08f5e42efdef2c3380056fd8528cf057d6d2a7b25c366566a8599e2aff4df19a at 9932 bytes, equal to
-      `session_evidence[0].executed_prompt_sha256` and `executed_prompt_bytes`. The Session
-      Evidence context passes on the resulting Head. The amendment lives in REVIEW-AMENDMENT.md,
-      which is not the executed prompt and says so in its first limit.
+      `session_evidence[0].executed_prompt_sha256` and `executed_prompt_bytes`, and equal to the
+      values the manifest recorded at `a538dbf2` before any amendment existed. The diff test is
+      NOT the measurement and must not be: the renumbering makes the file a path addition against
+      the base, so `git diff --name-only` lists it even though its bytes never changed. Round 3
+      found that defect in the first form of this criterion.
+      Scope limit, stated so the criterion is not read as more than it is: this proves byte
+      integrity against the recorded pin. It does not prove the file was the input the session
+      actually read - `executed_prompt_provenance` is `NOT_VERIFIED` here and was at `a538dbf2`,
+      because the session identity is `NOT_RECORDED` and no independent record of the executed
+      input exists. Byte equality to a pin is not execution provenance, and C8 does not claim it.
+      The amendment lives in REVIEW-AMENDMENT.md, which is not the executed prompt and says so in
+      its first limit.
   - id: C7
     criterion: The review is at the exact Head and at the session level.
     measurement: >-
@@ -236,18 +254,38 @@ findings:
       `session_evidence[0]` only.
 
 implementation:
-  status: NOT_STARTED
+  status: MERGED
   branch: gov/aid-079-s5-location
-  pull_request: PENDING
-  merge_commit_sha: NOT_MERGED
+  pull_request: "#1215"
+  merge_commit_sha: 19952b0a86e38d577c7d5c2bfc8c3991ffef6c0f
+  merged_head_sha: f7bc07895809d31af443b088fea869b1e6a091a6
+  merged_at_utc: "2026-11-26T05:19:54Z"
+  repair_pull_requests:
+    - pull_request: "#1240"
+      merge_commit_sha: 8d90843aec4583c3282a3b45da31c7d6fd734cf2
+      merged_head_sha: 32f87d461066aab2da2d0e973edfab31e515148d
+      merged_at_utc: "2026-11-26T06:24:13Z"
+      purpose: "Repairs the four defects round 3 found, after #1215 had already merged. It is not the implementation of this work item and carries no acceptance claim."
   note: >-
-    Registration only at the time this file was written. The paragraph edit, the three
-    annotations and the INDEX row follow on the branch named above, and the review status below
-    is updated from the review that reads that Head rather than predicted here.
+    Merged, and the merge is recorded here rather than implied. The paragraph edit, the three
+    annotations and the INDEX row are on the branch named above and are now on `main`.
+    `merged_head_sha` is the Head the merge actually consumed, `f7bc0789`, which is NOT the Head
+    round 3 reviewed: `f7bc0789` is `489b6048` plus a merge of `main` whose only incoming change
+    is `scripts/check_traceability.py`. None of this work item's nine paths differ between the
+    two, verified with `git diff --name-only 489b6048 f7bc0789`, which returns that one path.
+    Round 4 later inspected that delta directly and reached the same conclusion independently; its
+    verdict says so and also says the pre-merge requirement was not met. Neither statement is
+    review coverage of `f7bc0789`: round 3 reviewed `489b6048`, round 4 reviewed `7e9c9f3d`, and
+    no review has read `f7bc0789` as such.
+    The branch name still carries the old number. A branch name is not the identity authority and
+    is left alone rather than force-pushed after merge.
 
 review:
-  status: "ROUND_2_NEEDS_REVISION - the prompt-snapshot defect it found is repaired; round 3 decides at its own Head"
+  status: "ROUND_5_NEEDS_REVISION - round 5 closed round 4's two open items on content and corrected two of my errors (a stale base, and an overstated description of the rule behind modification_status); its blocking item was a stale base, since resolved by merging main"
   record_ref: 14-ai-development/work-items/AID-2026-080/REVIEW-01-INDEPENDENT.md
+  round_3_record_ref: 14-ai-development/work-items/AID-2026-080/REVIEW-03-INDEPENDENT.md
+  round_4_record_ref: 14-ai-development/work-items/AID-2026-080/REVIEW-04-INDEPENDENT.md
+  round_5_record_ref: 14-ai-development/work-items/AID-2026-080/REVIEW-05-INDEPENDENT.md
   round_1:
     exact_head_reviewed: a538dbf289cb21fc04a03fb412c90482619187bc
     reviewer_session: 6b07448b-ac9c-83ec-9115-f056a313f972
@@ -267,6 +305,118 @@ review:
       attempt re-took the pin, which the reviewer refused, correctly: it would have recorded the
       amended document as the executed input. The file is now restored byte-for-byte, the amendment
       lives in REVIEW-AMENDMENT.md, and C8 pins the invariant.
+  round_3:
+    exact_head_reviewed: 489b6048db5095d3bca66b1b438b6399fc05e801
+    reviewer_session: 6b07448b-ac9c-83ec-9115-f056a313f972
+    verdict: NEEDS REVISION
+    blocking_items: 6
+    closed_from_round_2:
+      - "Item 1: closed. The reviewer compared blob SHAs and found 84342823 for both the old-path snapshot at a538dbf2 and the new-path file at 489b6048, and confirmed the pin was restored rather than retaken."
+      - "Item 2: closed for 489b6048. The reviewer read _run_checks, _historical_not_applicable, _check_manifest_entries and check_11_prompt_snapshot_hashes and confirmed the NOT_APPLICABLE path still hashes the blob and checks the byte count."
+      - "Item 3: NOT closed. The review read 489b6048, and the merge consumed f7bc0789."
+    disposition: >-
+      Four findings were mine and all four were correct. F1: the INDEX row still carried the
+      retaken pin `11496` / `3e0fdfc7` that round 2 had refused, and still projected
+      ROUND_1_ACCEPT_WITH_AMENDMENTS. F2: the manifest population was stated as 55 when the tree
+      held 56, because AID-2026-079 and AID-2026-080 both exist; C3, C4 and REVIEW-AMENDMENT.md
+      were all wrong on that denominator. F3: the PR merged at f7bc0789 while the review read
+      489b6048. F4: implementation and INDEX still said NOT_STARTED / PENDING / PR_OPEN after the
+      merge. C8's measurement was also false as written: it asserted the snapshot path is absent
+      from the base diff, which the renumbering makes impossible - the file is a path addition
+      whose bytes never changed. All four are repaired in this round, and the reviewer's own
+      distinction is kept: byte equality to a pin is not execution provenance, and C8 now says so
+      instead of letting the pin imply it.
+    non_blocking_accepted:
+      - "The renumbering is legitimate and does not launder the collision."
+      - "Keeping `# AID-2026-079` inside the immutable snapshot is correct, not a traceability defect."
+      - "The Session Evidence NOT_APPLICABLE result is a genuine historical-path validation, not a bypass."
+      - "The bilingual clause correction and both non-exemption sentences are correct."
+  round_4:
+    exact_head_reviewed: 7e9c9f3d48cfd8a4cc2c736977983c53d1b3417f
+    reviewer_session: 6b07448b-ac9c-83ec-9115-f056a313f972
+    verdict: NEEDS REVISION
+    blocking_items: 2
+    integration_review:
+      delta: 489b6048db5095d3bca66b1b438b6399fc05e801 -> f7bc07895809d31af443b088fea869b1e6a091a6
+      finding: >-
+        Round 4 inspected this delta itself, which no earlier round had done. It is one file,
+        `scripts/check_traceability.py`, 16 additions and 3 deletions, and the change is
+        comment-only: it retires an example implying that a second write-capable GitHub identity is
+        required for independent review. No path under `AID-2026-080/` differs between the two
+        Heads. The reviewer's two-part conclusion is kept whole rather than split: the substantive
+        change is reviewable, and the pre-merge exact-Head requirement was not met. Its own words:
+        "A later review can document the result; it cannot rewrite that history."
+    closed_from_round_3:
+      - "Item 1 (C8 measurement): CLOSED. Blob comparison replaces the unsatisfiable path-diff test."
+      - "Item 2 (execution provenance): CLOSED. `prompt_status: RECORDED_NOT_FROZEN`, `executed_prompt_provenance: NOT_VERIFIED` and the unrecorded session identity are all preserved; the digest pin is described as byte integrity, not execution proof."
+      - "Item 3 (INDEX obsolete pin): CLOSED. The active pin is `9932` / `08f5e42e`; `11496` / `3e0fdfc7` appears only as explanation of the refused repair."
+      - "Item 4 (population): CLOSED with a method qualification. The reviewer queried the trees itself and reproduced 54 / 55 / 56 / 56 manifests and 49 conform / 22 parser-accepted / 7 non-conforming, naming the same seven IDs (005, 006, 008, 009, 024, 025, 029)."
+      - "Item 6 (merge-state projection): CLOSED. Checked against the PR #1215 API rather than against the manifest's agreement with the INDEX."
+    partially_closed_from_round_3:
+      - "Item 5 (review the final merged Head): PARTIALLY CLOSED. The delta is now inspected; the missed pre-merge review is not thereby waived, and round 4 requires the repository to record both halves."
+    open_at_verdict:
+      - "F1: zero GitHub check runs on the exact Head `7e9c9f3d`, status `pending` with `total_count: 0`, and `mergeable: false` / `dirty`."
+      - "F2: no round-4 record in the repository, and the INDEX still projected `ROUND_3_NEEDS_REVISION`."
+    disposition: >-
+      F1 was repaired after the verdict and before the merge: `origin/main` was merged twice
+      (`9ee89b32`, then `c6b7d987`), a duplicate INDEX row that the incoming main reintroduced was
+      deleted (the hygiene gate reported `T-04 duplicate INDEX entry AID-2026-080`), and the result
+      was pushed as `fa6e227b`, where all 16 required contexts report success and the PR reported
+      `mergeable: True`. F2 is this record and the INDEX update beside it. Neither repair is
+      represented as round 4 having reviewed the repaired tree: round 4 read `7e9c9f3d`, and the
+      delta from there to the Head that merged is recorded below instead.
+    merge_facts:
+      pull_request: "#1240"
+      merge_commit_sha: 8d90843aec4583c3282a3b45da31c7d6fd734cf2
+      merged_head_sha: 32f87d461066aab2da2d0e973edfab31e515148d
+      merged_at_utc: "2026-11-26T06:24:13Z"
+      head_delta_from_reviewed: >-
+        `7e9c9f3d -> 32f87d46` adds `fa6e227b` (the duplicate INDEX row removal) and a merge of
+        `main` (`dc826e4e`), which brings in AID-2026-081, the bilingual baseline remediation and
+        the ratchet test. `git diff --name-only 7e9c9f3d 32f87d46` returns no path under
+        `AID-2026-080/` and does not touch `PR-GOVERNANCE-001.md`, so the artifacts round 4 read are
+        byte-identical at the merged Head. That is a fact about the delta, and it is not review
+        coverage: no review has read `32f87d46` as such.
+    pre_merge_deviation: >-
+      The standard's pre-merge exact-Head review requirement was not met for PR #1215, and it was
+      not met for PR #1240 either. Both were merged by an actor other than the reviewing session,
+      after the branch had advanced past the Head the review named. For #1215 the advance was a
+      merge of `main`; for #1240 it was `fa6e227b` plus a merge of `main`. The recurrence is the
+      point: an exact-Head review of a branch that is then updated before merge cannot satisfy the
+      requirement, and no amount of after-the-fact inspection changes what happened at the time.
+      This is recorded as a deviation, not as compliance, and not as a request to relax section 9.
+      What would remove it is a merge performed at the reviewed Head or a review performed at the
+      Head that merges; neither happened here.
+    non_blocking_checked:
+      - "F3 (`modification_status` on two edited drafts): checked, not silently left. Round 5 corrected this note's first version, which said `DM-10` is the only rule constraining the field and that the policy constrains it nowhere else; that was wrong. The normative requirement is Rule L1 (stale approval, policy :160 EN / :162 ZH): when content inside `approval_scope` changes after `approved_version`, `modification_status` MUST become `Pending-Reapproval` and `approval_applicability` MUST become `Not-Applicable-To-Current-Version`. `DM-10` (`scripts/check_document_management.py`) is the machine check for that rule, not the rule's source. The conclusion is unchanged because L1's trigger is not met: both files are `decision_status: Draft` with `approved_version.value: null`, so there is no approved version to go stale, and L1 says nothing about a draft edited after its last saved state. The policy also does not state anywhere that a body edit alone forces `Modified`; the schema only enumerates the four values and the template ships `Unchanged`. The repository-wide counts first written here (294 documents carrying the field, 149 `Draft` saying `Unchanged`, 112 saying `Modified`) were measured against a `main` that has since moved, were not independently reproduced by round 5, and are therefore not relied on. Re-measured at `6c5f0230` for the record: 339 documents carry the field, of which 169 `Draft` say `Unchanged` and 136 say `Modified` — both remain live conventions, and the number drifts as `main` advances, which is why it carries no weight in the conclusion. `Unchanged` is kept, and the reason is that L1 does not fire, rather than a field flip asserting a meaning no rule defines."
+  round_5:
+    exact_head_reviewed: a37cd5bb95bd26a50752231e5dbc1dc71168e884
+    pull_request: "#1266"
+    reviewer_session: 6b07448b-ac9c-83ec-9115-f056a313f972
+    verdict: NEEDS REVISION
+    blocking_items: 2
+    closed_from_round_4:
+      - "F1 (zero check runs on the reviewed Head, not mergeable): CLOSED, and strengthened. Round 5 checked `32f87d46`, the Head PR #1240 actually merged at, and found 16 successful check runs there. My record had stopped at `fa6e227b`, the Head the repair was pushed to; the stronger statement was available and had not been made."
+      - "F2 (no round-4 record): CLOSED. `REVIEW-04-INDEPENDENT.md` and `review.round_4` are the record."
+    blocking_at_verdict:
+      - "B1 (stale base): `a37cd5bb` is a merge commit whose second parent is `d5107f68`; `main` had advanced to `baca092b`, 20 commits further, and that increment modifies `INDEX.md`, which this PR also modifies. `mergeable: true` with `mergeable_state: behind` is the state section 6.1.3 says must be revalidated after a base update, and green checks on the old combination do not stand in for it."
+      - "B2 (overstated rule source): `review.round_4.non_blocking_checked` said `DM-10` is the only rule constraining `modification_status` and that the policy constrains the field nowhere else. Rule L1 (stale approval, policy :160 EN / :162 ZH) is the normative requirement; `DM-10` is its machine check. The conclusion was right, the description of its source was not."
+    errors_of_mine_this_round:
+      - "The review request named `31385bc1` as 'origin/main at this Head'. Verified false: `31385bc1` is an ancestor of `d5107f68`, 21 commits back. It was `main` when the branch was cut, not when the branch was read. The reviewer used the commit graph instead of my table, which is why it was caught."
+      - "The F3 note described `DM-10` as the rule rather than as the check for Rule L1."
+    disposition: >-
+      B1 is repaired by merging `origin/main` (`6c5f0230`) into the branch and re-running the local
+      gates and the required checks on the resulting Head, which is what section 6.1.3 asks for. B2
+      is repaired in `review.round_4.non_blocking_checked`, which now names L1 as the requirement and
+      `DM-10` as its check, keeps the conclusion, and states that the repository-wide counts are not
+      relied on. Neither repair is represented as round 5 having reviewed the repaired tree: round 5
+      read `a37cd5bb`.
+    compliance_separation:
+      - "Round 4's two open items are closed on content."
+      - "F3 is answered: no rule requires the two `Draft` files to say `Modified`; the correction was to the description of the rule's source, not to the field values."
+      - "AID-2026-080 cannot be marked compliant. Both pre-merge exact-Head deviations are historical facts and no later action satisfies a requirement that applied at merge time. `MERGED` is not `COMPLIANT`, and neither is Owner acceptance; `acceptance.status: NOT_ASSIGNED` stays separate from merge state."
+    non_blocking_checked:
+      - "Round 5 declined to rely on the 294 / 149 / 112 counts because it did not reproduce them, which is the correct handling of a number it could not verify. Re-measured here at `6c5f0230`: 339 documents carry the field, 169 `Draft` say `Unchanged`, 136 say `Modified`. The drift is the point; the counts carry no weight in the conclusion."
   note: >-
     Section 9 requires an exact-Head governance review for changes to this standard, and section
     5's closing sentence says this paragraph is exemptible only by an exception record that names
@@ -274,8 +424,12 @@ review:
     artifacts at the Head it names through its own connector, and the verdict reproduced in
     REVIEW-01-INDEPENDENT.md is its text, not a summary of it. This is a session-level independent
     review under section 5 and is not a human review; nothing here says otherwise. The status is
-    deliberately not `APPROVED`: round 2 returned NEEDS REVISION on a defect that was mine and is
-    repaired here, and whether the repair closes it is round 3's decision at round 3's Head.
+    deliberately not `APPROVED`. Round 3 returned NEEDS REVISION on four defects that were mine
+    and are repaired after the merge; round 4 returned NEEDS REVISION on two more items and
+    inspected the merge delta itself. No round has read `f7bc0789` or `32f87d46` as such, and the
+    review requirement for a change to this standard is not satisfied by a review of an earlier
+    Head. That gap is stated rather than closed by argument, and `review.round_4.pre_merge_deviation`
+    states it as a deviation for both PRs rather than as a single unfortunate exception.
 
 acceptance:
   status: NOT_ASSIGNED
