@@ -42,6 +42,22 @@ FALSE_COMPLETION = (
     re.compile(r"Owner\s*[DI].{0,30}(?:可以|有权).{0,20}(?:单方面|独自).{0,20}(?:宣称|判定).{0,20}完成"),
 )
 
+UNASSIGNED_DECLARATION = re.compile(
+    r"(?:^|[;；])\s*[`*_]*\s*(?:NOT_ASSIGNED\b|未分配|尚未分配)", re.I)
+
+def is_unassigned(value: str) -> bool:
+    """True only for an explicit unassigned declaration, not incidental prose.
+
+    The register's traceability rule is "Where a role is not assigned, record
+    `NOT_ASSIGNED` and keep the operation open". The declaration is the token
+    standing on its own at the start of the cell or of a `;`-separated slot;
+    prose that merely explains why this high-level document does not name the
+    Owner (e.g. "... catalog Owner is not assigned by this high-level
+    document", "本高层文档尚未分配负责该 Catalog 的 Owner") is a statement
+    about the document, not a declaration, and must not trip the gate.
+    """
+    return bool(UNASSIGNED_DECLARATION.search(value))
+
 def table_rows(text: str, expected_header: tuple[str, ...]) -> list[list[str]] | None:
     lines = text.splitlines()
     for index, line in enumerate(lines):
@@ -101,10 +117,7 @@ def check(root: Path) -> tuple[int, list[str]]:
             ):
                 if not value:
                     errors.append(f"{relative}: row {number} {label} is empty")
-                elif ("NOT_ASSIGNED" in value.upper()
-                      or re.search(r"\bnot\s+assigned\b", value, re.I)
-                      or "未分配" in value
-                      or "尚未分配" in value):
+                elif is_unassigned(value):
                     errors.append(f"{relative}: row {number} {label} is unassigned; operation remains open")
             if policy and canonical and policy.casefold() == canonical.casefold():
                 errors.append(f"{relative}: row {number} collapses policy and canonical-state authority into one entry")

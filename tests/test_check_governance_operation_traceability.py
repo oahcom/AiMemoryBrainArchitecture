@@ -88,9 +88,14 @@ class GovernanceTraceabilityTests(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertTrue(any("collapses policy and canonical-state authority" in item for item in errors))
 
-    def test_unassigned_prose_is_reported_as_open(self):
+    def test_unassigned_declaration_only_fires_on_the_token(self):
+        prose = "The concrete backup catalog is authoritative for backup-object state; accountable catalog Owner is not assigned by this high-level document"
         rows = list(ROWS)
-        rows[4] = (rows[4][0], rows[4][1], "Backup catalog Owner is not assigned", rows[4][3], rows[4][4])
+        rows[4] = (rows[4][0], rows[4][1], prose, rows[4][3], rows[4][4])
+        (self.root / FILES[0]).write_text(document(FILES[0], rows), encoding="utf-8")
+        self.assertEqual(self.run_check(), (0, []))
+
+        rows[4] = (rows[4][0], rows[4][1], "NOT_ASSIGNED", rows[4][3], rows[4][4])
         (self.root / FILES[0]).write_text(document(FILES[0], rows), encoding="utf-8")
         code, errors = self.run_check()
         self.assertEqual(code, 1)
