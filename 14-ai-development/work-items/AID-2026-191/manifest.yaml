@@ -1,0 +1,148 @@
+work_item_id: AID-2026-191
+title: >-
+  Make the 77-entry frozen bilingual inventory have one authority: declare every
+  copy, compare all of them in check_baseline_copies_agree(), and mark the drifted
+  81-entry review snapshot as a historical record rather than a gate input
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  One standard-library checker and its unit tests, plus heading-level annotations on
+  two review snapshots and three clarifications on two guide pages. No baseline entry,
+  no NORMATIVE_ROOTS value, no workflow and no branch protection changes; the gate's
+  decision semantics for a repository whose copies agree are unchanged. The residual
+  risk is the opposite of damage: a comparator that silently covers only the copies it
+  was told about is exactly the defect being repaired, so the new discovery step fails
+  closed on any tracked file that carries most of the inventory without being declared,
+  and a real-tree test asserts that the declared set is the whole set at this head.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 2f4f4118bd2c2d8e43a23975f667deeb06553f3c
+prompt_status: NOT_RECORDED
+prompt_provenance: DISPATCHED_TASK_FILE
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: 2f4f4118bd2c2d8e43a23975f667deeb06553f3c
+  assigned_id: AID-2026-191
+  allocation_rule: >-
+    The first allocation under this branch was AID-2026-190, taken after the highest
+    number in any pull-request title, branch or body at allocation time was AID-2026-189
+    (merged, PR #1339). While this branch was open, PR #1343 merged under the title
+    "... (AID-2026-190)", so 190 became occupied after the fact; the branch was renumbered
+    to 191, which no title, branch, body or tree path had used. The 190 number is left
+    with its merged owner and is not claimed here.
+  observed_occupied: [170, 172, 173, 188, 189, 190]
+evidence:
+  record: 14-ai-development/work-items/AID-2026-191/evidence.md
+  mirrors:
+    - docs/en/14-ai-development/work-items/AID-2026-191/evidence.md
+    - docs/zh-CN/14-ai-development/work-items/AID-2026-191/evidence.md
+  measurements:
+    inventory_authority: scripts/ci/baselines/bilingual-docs.txt
+    authority_entries: 77
+    copies_enumerated: 7
+    copies_structurally_gated: 6
+    copies_equal_to_authority: 2
+    copies_superset_of_authority: 1
+    copies_marked_historical: 2
+    copies_dated_snapshot: 1
+    copies_prose_only: 1
+    drifted_snapshot_entries: 81
+    drifted_snapshot_extra: 8
+    drifted_snapshot_absent: 4
+    copy_errors_before_widening: 0
+    copy_errors_after_widening: 0
+    copy_notices_after_widening: 2
+    undeclared_inventory_copies: 0
+    bilingual_gaps: 77
+    ratchet_baseline_entries: 77
+    ratchet_result: "baseline=77 current=77 regressions=0 fixed=0 PASS"
+  test_runs:
+    - command: python -m unittest discover -s scripts -p "test_check_bilingual*"
+      result: "Ran 25 tests, OK (was 15)"
+    - command: python -m unittest discover -s tests -p "test_check_bilingual*"
+      result: "Ran 7 tests, OK"
+  not_measured:
+    - No CI context result is claimed at any SHA
+    - No merge SHA or post-merge blob digest is claimed
+    - "Both test runs and the ratchet run are local executions in this worktree"
+
+# prompt_status above records that no prompt-library registration exists. The
+# dispatched contract text itself was captured by the operator into prompt-v1.md and
+# pinned so the requirement set can be read against what was measured and changed.
+session_evidence:
+  - role: "GATE_REPAIR_AUTHOR"
+    issue_refs:
+      - "#1212"
+    implementing_ai_session: "opencode-go/deepseek-v4.1-flash"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-191/prompt-v1.md"
+    executed_prompt_sha256: "74ec91ce652d56248a5b9e56f390641b2cc9e8fb196070eafbe887b5f74f6fee"
+    executed_prompt_bytes: 4717
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-191/session-evidence.md"
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-191/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-191/evidence.md
+    - 14-ai-development/work-items/AID-2026-191/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-191/session-evidence.md
+    - docs/en/14-ai-development/work-items/AID-2026-191/evidence.md
+    - docs/zh-CN/14-ai-development/work-items/AID-2026-191/evidence.md
+  files_to_modify:
+    - scripts/check_bilingual_docs.py
+    - scripts/test_check_bilingual_docs.py
+    - 14-ai-development/ci-gates-and-ratchets.en.md
+    - 14-ai-development/ci-gates-and-ratchets.zh-CN.md
+    - reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md
+    - reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope:
+    - scripts/ci/baselines/bilingual-docs.txt content
+    - scripts/bilingual-baseline.txt content
+    - scripts/check_bilingual_docs_full.py
+    - current_bilingual_gaps()
+    - 00-governance/reports/gov-doc-001-full-scan-2026-11-20.md content
+    - 14-ai-development/governance-register/evidence/main-paths.json content
+    - .github/workflows
+    - branch protection
+
+non_goals:
+  - Changing any entry of any copy of the inventory, including the 81-entry snapshot
+  - Regenerating either baseline, or making the frozen set smaller
+  - Ruling on whether the 77 frozen gaps are acceptable
+  - Closing #1212 or asserting Owner acceptance
+
+carrier:
+  branch: fix/2026-11-27-baseline-copies
+  pull_request: PENDING
+  merge_sha: PENDING
+  merge_method: merge
+  required_contexts: "PENDING"
+review:
+  status: NOT_ASSIGNED
+  independent_reviewer: NOT_ASSIGNED
+  natural_person_owner_acceptance: NOT_RECORDED
+acceptance:
+  gate: PENDING_CI
+notes:
+  - >-
+    The dispatched premise said the drifted copy is "多 9 / 缺 5". Measured against
+    scripts/ci/baselines/bilingual-docs.txt, the 81-entry table in
+    BMCP-ARCH-001.{en,zh-CN}.md holds 8 entries the authority does not and omits 4 that
+    it holds; 73 shared, 73 + 8 = 81 = 77 - 4. The arithmetic of the premise holds, the
+    two operands do not, and the measured numbers are the ones recorded here.
+  - >-
+    "7 files" reproduces, but not as seven equal copies: two hold the 77 entries
+    exactly, one is an 803-path governance register that contains all 77, one is a
+    dated 83-finding scan record, two are the 81-finding review snapshot in both
+    languages, and one is a work-item proposal that mentions 62 of the paths in prose
+    with no list block. Only the first two can be compared entry by entry, so the gate
+    declares one role per file instead of pretending all seven are the same thing.
