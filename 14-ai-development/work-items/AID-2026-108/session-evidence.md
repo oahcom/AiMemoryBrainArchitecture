@@ -47,9 +47,9 @@ document_metadata:
 - Role: DOCUMENTATION_AUTHOR
 - Date: 2026-11-26
 - Repository baseline: main df54ed60321e2958c50e9649963608cb3cb3f3b1
-- Executed prompt snapshot: 14-ai-development/work-items/AID-2026-108/prompt-v1.txt
-- Executed prompt SHA-256: 3fad628a1257cb1d68d705f99265100ca39c1ae8dbd1723ac85c7d3f2a967c95
-- Executed prompt bytes: 2209
+- Executed prompt snapshot: 14-ai-development/work-items/AID-2026-108/prompt-v1.md
+- Executed prompt SHA-256: b6f14e7fc176e26bcf6108c779b521efe1e57469503c8b7887cdb35853d90f02
+- Executed prompt bytes: 3579
 - Implementing AI session identifier: NOT_RECORDED (not exposed in this execution context)
 - Session reference status: NOT_RECORDED
 - Prompt provenance: NOT_VERIFIED; the snapshot records the user-directed task text, but the platform session identifier is unavailable
