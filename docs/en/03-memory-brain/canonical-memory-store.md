@@ -8,9 +8,11 @@ document_metadata:
       approver: null
       decision_date: null
       approved_version: null
-      approval_scope: {type: Full-document}
+      approval_scope:
+        type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
-      evidence_reference: ["14-ai-development/work-items/AID-2026-150/manifest.yaml"]
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-150/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -18,13 +20,20 @@ document_metadata:
       last_verification_note: "Path and provenance updated; semantic mirror equivalence and Owner adoption are not certified."
     usage_status: Active
     modification_status: Modified
-    supersession: {supersedes: [], supersession_reason: null, effective_date: null}
-    archival: {archived_date: null, archival_reason: null, archival_reference: null}
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
   authority:
     canonical_status: Non-Canonical
     canonical_scope: null
     canonical_scope_id: null
-    canonical_scope_keywords: []
+    canonical_scope_keywords:
+      - 
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative

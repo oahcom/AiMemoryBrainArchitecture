@@ -8,9 +8,11 @@ document_metadata:
       approver: null
       decision_date: null
       approved_version: null
-      approval_scope: {type: Full-document}
+      approval_scope:
+        type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
-      evidence_reference: ["14-ai-development/work-items/AID-2026-150/manifest.yaml"]
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-150/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Verified
@@ -18,17 +20,30 @@ document_metadata:
       last_verification_note: "Source Git objects, path mappings, body preservation, bilingual pairing requirements and prior classification evidence checked; Owner acceptance remains unrecorded."
     usage_status: Active
     modification_status: Unchanged
-    supersession: {supersedes: [], supersession_reason: null, effective_date: null}
-    archival: {archived_date: null, archival_reason: null, archival_reference: null}
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
   authority:
     canonical_status: Canonical
     canonical_scope: "Evidence for bounded restoration of three D Memory Brain canonical roots"
     canonical_scope_id: "ai-development/aid-2026-150-d-root-restore-evidence"
-    canonical_scope_keywords: ["aid-2026-150", "memory-brain", "canonical-root-restore", "source-blob-evidence"]
+    canonical_scope_keywords:
+      - "aid-2026-150"
+      - "memory-brain"
+      - "canonical-root-restore"
+      - "source-blob-evidence"
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
-  bilingual_counterpart: {source: null, en: null, zh-CN: null}
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
 ---
 # AID-2026-150 — D Canonical Root Restore Evidence
 

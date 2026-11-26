@@ -8,9 +8,11 @@ document_metadata:
       approver: null
       decision_date: null
       approved_version: null
-      approval_scope: {type: Full-document}
+      approval_scope:
+        type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
-      evidence_reference: ["14-ai-development/work-items/AID-2026-150/manifest.yaml"]
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-150/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -18,8 +20,14 @@ document_metadata:
       last_verification_note: "User-directed task snapshot; platform session identifier unavailable."
     usage_status: Active
     modification_status: Unchanged
-    supersession: {supersedes: [], supersession_reason: null, effective_date: null}
-    archival: {archived_date: null, archival_reason: null, archival_reference: null}
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
   authority:
     canonical_status: Non-Canonical
     canonical_scope: null

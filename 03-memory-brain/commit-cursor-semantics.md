@@ -8,7 +8,8 @@ document_metadata:
       approver: null
       decision_date: null
       approved_version: null
-      approval_scope: {type: Full-document}
+      approval_scope:
+        type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "14-ai-development/work-items/AID-2026-150/manifest.yaml"
@@ -20,13 +21,22 @@ document_metadata:
       last_verification_note: "Source blob identity and body preservation are verified; exact-version Owner acceptance and normative approval remain unrecorded."
     usage_status: Active
     modification_status: Modified
-    supersession: {supersedes: [], supersession_reason: null, effective_date: null}
-    archival: {archived_date: null, archival_reason: null, archival_reference: null}
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
   authority:
     canonical_status: Canonical
     canonical_scope: "D canonical commit cursor, aggregate revision and lifecycle cursor semantics"
     canonical_scope_id: "memory-brain/canonical-commit-cursor"
-    canonical_scope_keywords: ["canonical-commit-cursor", "aggregate-revision", "lifecycle-event-cursor"]
+    canonical_scope_keywords:
+      - "canonical-commit-cursor"
+      - "aggregate-revision"
+      - "lifecycle-event-cursor"
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
