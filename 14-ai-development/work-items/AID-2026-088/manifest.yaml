@@ -44,6 +44,6 @@ acceptance_criteria:
 implementation:
   status: IMPLEMENTED_IN_BRANCH
   branch: impl/2026-11-26-applied-evidence-contract
-  pull_request: PENDING
+  pull_request: 1242
 review: PENDING
 acceptance: PENDING
