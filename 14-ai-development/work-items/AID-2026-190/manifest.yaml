@@ -1,0 +1,145 @@
+work_item_id: AID-2026-190
+title: >-
+  Annotate the live citations of the 84 `09-security-governance/` paths that are absent
+  from main, keep every path text, and defer the six citations whose bilingual
+  counterparts do not exist
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  Annotation only. 30 lines in 19 documents gain one parenthetical note; no file is
+  created, no path text is reworded and no normative body changes. The residual risk is
+  that a reader mistakes the note for a disposition, so the note names the register that
+  already adjudicated each path and evidence section 5.1 states what the register rows
+  still decide.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 0c752ee6ee186e494e35aa74447f263891ca4842
+prompt_status: NOT_RECORDED
+prompt_provenance: DISPATCHED_TASK_FILE
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: 0c752ee6ee186e494e35aa74447f263891ca4842
+  assigned_id: AID-2026-190
+  allocation_rule: >-
+    Highest AID number observed in any pull request title, branch or work-item directory
+    at allocation time was AID-2026-189 (merged, PR #1339); 190 was the next unused
+    number and does not appear anywhere in the tree at the base commit.
+  observed_occupied: [170, 172, 173, 183, 186, 188, 189]
+evidence:
+  record: 14-ai-development/work-items/AID-2026-190/evidence.md
+  mirrors:
+    - docs/en/14-ai-development/work-items/AID-2026-190/evidence.md
+    - docs/zh-CN/14-ai-development/work-items/AID-2026-190/evidence.md
+  measurements:
+    cited_path_strings_distinct: 91
+    absent_from_tree: 84
+    present_in_tree: 7
+    occurrences_total: 300
+    occurrences_register_rows: 252
+    occurrences_verbatim_quotes: 12
+    occurrences_annotated: 30
+    occurrences_deferred: 6
+    files_annotated: 19
+    annotated_lines: 30
+    files_deferred: 4
+    deferred_lines: 6
+    clickable_links_among_absent_paths: 0
+    files_created_under_09_security_governance: 0
+    paths_removed_or_reworded: 0
+  test_runs:
+    - command: python scripts/check_bilingual_docs.py   # PR_BODY carries BILINGUAL-MANIFEST: COMPLETE
+      result: "PASS (19 changed paths inspected); 77 frozen, 0 new gaps; 18 changed .md paths outside NORMATIVE_ROOTS not pairing-checked"
+    - command: python scripts/check_document_management.py
+      result: "INCOMPLETE: no rule violations in 496 classified documents, 446 still unclassified; identical before and after the change"
+    - command: python scripts/ci/check_line_endings.py
+      result: "1629 files inspected, 0 violations"
+    - command: python scripts/ci/check_manifest_parse.py
+      result: "94 manifests found, 94 parsed, 0 failed"
+    - command: python scripts/ci/check_repository_hygiene.py --base <base> --head <head>
+      result: "directories=105 linked=105; manifests=93 in_scope=80 violations=0; new-file admission passed"
+    - command: python scripts/check_session_evidence_workflow_shape.py
+      result: "PASS"
+    - command: python scripts/check_traceability.py --index-only
+      result: "PASS: 0 requirements / 93 work items / 0 errors / 105 warnings"
+    - command: python scripts/check_governance_operation_traceability.py
+      result: "PASS (7 operations x 3 mirrors)"
+  not_measured:
+    - No CI context result is claimed at any SHA
+    - No merge SHA or post-merge blob digest is claimed
+    - The gate output above is a local Windows run with PYTHONUTF8=1, not a CI run
+
+# prompt_status above records that no prompt-library registration exists. The dispatched
+# contract text itself was captured by the operator and is pinned so the premise it
+# states can be read against the measurement that corrects it.
+session_evidence:
+  - role: "ANNOTATION_RECORD_AUTHOR"
+    issue_refs:
+      - "#1212"
+    implementing_ai_session: "opencode-go/deepseek-v4.1-flash"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-190/prompt-v1.md"
+    executed_prompt_sha256: "db08cc56739ccf10caa24edb28817df3a8b63192538b9be910c09c5f80b7e3c8"
+    executed_prompt_bytes: 7395
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-190/session-evidence.md"
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-190/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-190/evidence.md
+    - 14-ai-development/work-items/AID-2026-190/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-190/session-evidence.md
+    - docs/en/14-ai-development/work-items/AID-2026-190/evidence.md
+    - docs/zh-CN/14-ai-development/work-items/AID-2026-190/evidence.md
+  files_to_modify:
+    - 14-ai-development/work-items/INDEX.md
+    - the 19 documents listed in 14-ai-development/work-items/AID-2026-190/evidence.md section 8
+  files_out_of_scope:
+    - 09-security-governance/ (no file created or edited, in any rendition)
+    - 14-ai-development/work-items/AID-2026-107/evidence.md (the register this note points at)
+    - 14-ai-development/work-items/AID-2026-170/evidence.md (verbatim quotes)
+    - 13-engineering-decisions/ (four deferred documents and their absent mirrors)
+    - scripts/ and .github/workflows
+    - branch protection
+
+non_goals:
+  - Restoring any of the 84 absent paths, or ruling that any of them is unnecessary
+  - Deciding the 49 UNDECIDED rows of AID-2026-107 section 10.4
+  - Creating the missing EN/ZH-CN counterparts of the four deferred documents
+  - Closing #1212 or asserting Owner acceptance
+
+carrier:
+  branch: fix/2026-11-27-dangling-09-refs
+  pull_request: PENDING
+  merge_method: merge
+  required_contexts: "16/16 must be green on the exact final head before any merge"
+  merge_authorization: >-
+    Only after all 16 required contexts succeed on the exact final PR head, branch
+    freshness is rechecked, and any conflicts are resolved.
+review:
+  status: NOT_ASSIGNED
+  independent_reviewer: NOT_ASSIGNED
+  natural_person_owner_acceptance: NOT_RECORDED
+acceptance:
+  gate: PENDING_CI
+notes:
+  - >-
+    The dispatched defect count (85) is a root-directory count. The 85th string,
+    09-security-governance/security-governance-guide.md, exists under docs/en and
+    docs/zh-CN and is never cited root-relatively, so the measured absent set is 84.
+  - >-
+    Six live citations were not annotated. They sit in four 13-engineering-decisions
+    documents whose EN/ZH-CN counterparts do not exist; check_bilingual_docs.py rejects a
+    change unless all counterparts change in the same PR. The rejection output is quoted
+    verbatim in evidence section 5.3, and the edits were reverted rather than exempted.
+  - >-
+    An earlier attempt on this branch was based on main at 4326669c. origin/main moved to
+    0c752ee6 (merge of PR #1340) while the worktree was open; the annotation was replayed
+    on the new base, so every count above is measured at 0c752ee6.
