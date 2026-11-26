@@ -34,7 +34,11 @@ document_metadata:
     canonical_status: Canonical
     canonical_scope: "Exact-version A-I + Storage/Consistency end-to-end composition review"
     canonical_scope_id: "architecture/a-i-storage-e2e-composition-review"
-    canonical_scope_keywords: [end-to-end, composition, storage-consistency, gate-a]
+    canonical_scope_keywords:
+      - end-to-end
+      - composition
+      - storage-consistency
+      - gate-a
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
