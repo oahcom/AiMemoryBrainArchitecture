@@ -4,26 +4,26 @@ document_metadata:
   role: normative-standard
   lifecycle:
     approval:
-      decision_status: Under-Review
-      approver: NOT_RECORDED
-      decision_date: NOT_RECORDED
+      decision_status: Approved
+      approver: "user-authorized operator (delegated by account owner)"
+      decision_date: "2026-11-26"
       approved_version:
-        scheme: git
-        value: "a7d12fe9835d8f53403946ab08c1cae8c3f12fbf"
+        scheme: content-hash
+        value: "7cd923872a16ec0b01174798614d6ccf867b20fa18edfe9c3c08b4f3e31e3e00"
       approval_scope:
         type: Full-document
         included_sections: []
         included_assets: []
-      approval_applicability: Not-Applicable-To-Current-Version
+      approval_applicability: Applicable-To-Current-Version
       evidence_reference:
-        - "00-governance/design-principles.md"
+        - "14-ai-development/work-items/AID-2026-096/approval-evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
       last_verified_date: null
       last_verification_note: "通常用于描述约束子系统设计的原则"
     usage_status: Active
-    modification_status: Pending-Reapproval
+    modification_status: Unchanged
     supersession:
       supersedes: []
       supersession_reason: null
@@ -57,7 +57,9 @@ document_metadata:
 - 源规范：[规范性原文](../../../00-governance/design-principles.md)
 - 源版本：9792e189d63fbbc3694ab891fc4aeba5143b3b1c
 - 对应英文：[Design Principles](../../en/00-governance/design-principles.md)
-- 状态：CANDIDATE / Pending-Reapproval（当前版本未获批准）；P-01 至 P-16 的 DECIDED 仅记录设计方向，不构成正式批准。
+- 状态：已批准 / Normative——批准事件日期为 2026-11-26。本批准不证明 P-01 至 P-16 的实现符合性。
+
+**此前状态（历史说明）：** 本次 2026-11-26 新批准之前，本文档标记为 `CANDIDATE / Pending-Reapproval — NOT APPROVED`。该标记仅描述此前状态。本次是新批准，不是追溯批准，也不认证任何历史批准人。
 
 本文定义约束所有子系统设计的原则。
 

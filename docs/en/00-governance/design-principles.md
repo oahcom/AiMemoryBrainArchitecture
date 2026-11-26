@@ -4,26 +4,26 @@ document_metadata:
   role: normative-standard
   lifecycle:
     approval:
-      decision_status: Under-Review
-      approver: NOT_RECORDED
-      decision_date: NOT_RECORDED
+      decision_status: Approved
+      approver: "user-authorized operator (delegated by account owner)"
+      decision_date: "2026-11-26"
       approved_version:
-        scheme: git
-        value: "a7d12fe9835d8f53403946ab08c1cae8c3f12fbf"
+        scheme: content-hash
+        value: "e467d7cf3e8feb0457843b5f4f0fd038b01608c32a9fbe35e585cc41e49c665a"
       approval_scope:
         type: Full-document
         included_sections: []
         included_assets: []
-      approval_applicability: Not-Applicable-To-Current-Version
+      approval_applicability: Applicable-To-Current-Version
       evidence_reference:
-        - "00-governance/design-principles.md"
+        - "14-ai-development/work-items/AID-2026-096/approval-evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
       last_verified_date: null
       last_verification_note: "Usual role: principles constraining subsystem design"
     usage_status: Active
-    modification_status: Pending-Reapproval
+    modification_status: Unchanged
     supersession:
       supersedes: []
       supersession_reason: null
@@ -57,7 +57,9 @@ document_metadata:
 - Source: [Normative source specification](../../../00-governance/design-principles.md)
 - Source revision: 9792e189d63fbbc3694ab891fc4aeba5143b3b1c
 - Chinese counterpart: [设计原则](../../zh-CN/00-governance/design-principles.md)
-- Status: CANDIDATE / Pending-Reapproval — current version NOT APPROVED; P-01 through P-16 remain recorded design decisions, not formally approved requirements.
+- Status: APPROVED / Normative — new approval event dated 2026-11-26. This does not certify implementation conformity with P-01 through P-16.
+
+**Historical status:** Before this new approval event on 2026-11-26, this document was marked `CANDIDATE / Pending-Reapproval — NOT APPROVED`. This records the prior state only. The present decision is a new approval, not a retroactive approval or authentication of any historical approver.
 
 This document defines the principles that constrain all subsystem designs.
 
