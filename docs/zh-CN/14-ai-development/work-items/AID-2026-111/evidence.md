@@ -496,6 +496,28 @@ user-authorized operator (delegated by account owner)；2026-11-26。仅记录�
 | T93 | `tests::startup_backfills_compile_intent_for_preexisting_accepted_events` | SC-15 | 无对应测试 | 覆盖 E compile-intent 数据/顺序/幂等/回填局部实现；不证明 E admission 完整原子边界。 |
 | T94 | `tests::status_and_replay_enforce_scope` | SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/change-page fail-closed；缺全权威读路径、replica applied position、D/I currentness。 |
 
+## 12. memory-context 采集（2026-11-27）
+
+派单口径的节名是"2.4 memory-context capture (2026-11-27)"。本文档中 2.4 已被"明确的负面构建证据"占用，因此本节作为第 12 节追加，不改动任何既有节号；§2.3 保留原样，作为"最初所给汇总口径缺了哪些字段"的历史记录。
+
+这是同一固定提交上对 memory-context 组的**另行**采集，用于补齐 §2.3 中该组标记为"未记录"的字段。它不是 SQLite 组或纯 Rust 组的重跑，也没有把任何一组挪到别的提交上。
+
+| 字段 | 记录值 |
+|---|---|
+| 环境 | WSL2 Ubuntu 24.04 |
+| 精确 HEAD | `a123ea4e414c9f74fa0c576fbd718049a7d9f917`（与 SQLite 组相同的固定提交） |
+| 命令（原文） | `cargo test -p memory-context --no-fail-fast` |
+| Exit code | **0** |
+| 测试二进制数 | 11 |
+| Passed / failed | **177 / 0** |
+| 采集日期 | 2026-11-27 |
+
+**计数口径（以 harness 计数为准）：**总数按完整的 `test result:` 整行求和；`filtered out` 计数大于 0 的 `test result:` 行不计入求和，避免把被过滤的子进程/harness 行重复计入。按此口径 11 个二进制合计 **177 passed / 0 failed**，exit code **0**。
+
+**本次采集仍未记录：**stdout 字节数、raw stdout SHA-256、各 harness passed 多重集、normalised digest 与测试名清单仍为 **未记录 / 未提供**。§4 的 94 个测试名清单及其派生的所有计数不变。
+
+**对本记录判定的影响：无。**本节只补执行元数据，**不改变任何 PASS / PARTIAL / UNCHANGED 判定**：88 行合计仍为 0 PASS、34 PARTIAL_EVIDENCE、54 UNCHANGED；Gate A 仍为 PARTIAL / OPEN，Gate B 仍为 PARTIAL / OPEN（NOT VERIFIED）；Owner acceptance 仍为 NOT_CLAIMED；#1211、#1212 仍为 OPEN。
+
 ## Session role / use case
 
 本轮担任 AID-2026-111 SQLite 实现测试证据的文档作者与证据裁决者。工作限于读取精确源谓词、映射用户提供的测试名称并记录受限的证据分类。未修改 runtime、validator、schema、test、workflow、deployment 或 production。
