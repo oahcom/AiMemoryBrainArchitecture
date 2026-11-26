@@ -45,7 +45,7 @@ document_metadata:
 
 - 工作项：`AID-2026-107`；`id_status: PROVISIONAL`。
 - 署名：**user-authorized operator (delegated by account owner)**；日期：**2026-11-26**。仅为代理登记，不代表任何自然人 Owner 签署。
-- 精确 main 基线：`df54ed60321e2958c50e9649963608cb3cb3f3b1`（从 main 分支 API 读取）。
+- 精确 main 基线：`2d52b0c81dc1b779e49516fceb69d89cdc1d9c31`（从 main 分支 API 读取）。
 - 原矩阵：已合并的 AID-2026-095 / PR #1264。本刷新不修改 AID-095。
 - 后续已合并输入：AID-2026-082 / PR #1265 / merge 前缀 `71548b7b`；AID-2026-098 / PR #1283 / merge 前缀 `cdba0b73`；AID-2026-100 / PR #1284 / merge 前缀 `b1f9c51a`。
 - 关联 Issue：#1212，保持 OPEN。
@@ -217,7 +217,7 @@ document_metadata:
 
 | # | Gate A 条目 | 当前状态 | 闭合条件 |
 |---|---|---|---|
-| 1 | 分支与当前 main 同步 | 在审查基线 `df54ed60321e2958c50e9649963608cb3cb3f3b1` 上 SATISFIED；若 main 前进须重查 | 最终 Head 审查时 merge base 等于当前 main，分支不得落后。 |
+| 1 | 分支与当前 main 同步 | 在审查基线 `2d52b0c81dc1b779e49516fceb69d89cdc1d9c31` 上 SATISFIED；若 main 前进须重查 | 最终 Head 审查时 merge base 等于当前 main，分支不得落后。 |
 | 2 | 跨 Owner 角色处置（10 个角色：3 ACCEPT / 7 CONDITIONAL / 0 REJECT） | 已记录的代理处置为 SATISFIED | 7 项条件义务仍在；未声称自然人 Owner 签署。 |
 | 3 | 精确 Head CI | OPEN_PENDING_FINAL_HEAD | 全部 16 项必需上下文必须在 PR 最终 Head 成功。 |
 | 4 | 完整 A–I + Storage/Consistency 组合审查工件 | OPEN | Owner A 协调覆盖 8 条流程和 9 个检查点维度的完整精确版本包；相关 Owner 接受自身边界。 |
