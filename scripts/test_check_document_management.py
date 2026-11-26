@@ -4020,6 +4020,287 @@ def run_restored_guards() -> None:
         and not any("must be NOT_A_KIND" in e for e in errors),
         f"  cli {output[-200:]!r}, direct {errors}",
     )
+def run_fault_injection() -> None:
+    """T92a-T92d: the gate's own error paths, reached by controlled injection.
+
+    These cases are **not** evidence that any of these failures happens
+    naturally in CI, and nothing here fabricates such a claim. Each case
+    patches exactly one seam for the duration of one call, delegates every
+    other input to the original implementation, and restores the attribute in
+    a `finally`.
+
+    Each case also asserts that the inputs it did *not* target still reached
+    the real implementation. A patch that swallowed every call would produce
+    the same diagnostic while proving nothing about the branch under test --
+    which is the failure mode these assertions exist to catch.
+    """
+    print("fault injection (T92a-T92d, controlled)")
+
+    import check_document_management as gate
+
+    def posix(path) -> str:
+        return Path(str(path)).as_posix()
+
+    def git_fixture(tmp: str) -> tuple[Path, str]:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        (root / "00-governance" / "seed.md").write_text(doc(BASE), encoding="utf-8")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "seed")
+        return root, _git(root, "rev-parse", "HEAD")
+
+    def capture(root: Path, *extra: str) -> tuple[int, str]:
+        out, err = io.StringIO(), io.StringIO()
+        with redirect_stdout(out), redirect_stderr(err):
+            code = run_gate(root, *extra)
+        return code, out.getvalue() + err.getvalue()
+
+    def _summary_counts(line: str) -> tuple[int, int]:
+        """(governed, classified) parsed from the gate's own count line."""
+        m = re.search(
+            r"GOV-DOC-002: (\d+) governed documents, (\d+) classified", line
+        )
+        assert m, f"count line not understood: {line!r}"
+        return int(m.group(1)), int(m.group(2))
+
+    # T92a: `git()` cannot start the process at all. The caller must refuse
+    # with its own diagnostic rather than let the OSError escape as a
+    # traceback, and the seam must not swallow git commands it does not target.
+    with tempfile.TemporaryDirectory() as tmp:
+        root, base = git_fixture(tmp)
+        real_run = gate.subprocess.run
+
+        def failing_run(args, *a, **k):
+            if args[:1] == ["git"] and "rev-parse" in args:
+                raise FileNotFoundError(2, "No such file or directory", "git")
+            return real_run(args, *a, **k)
+
+        gate.subprocess.run = failing_run
+        try:
+            delegated = gate.git(root, "log", "-1", "--format=%H")
+            code, text = capture(root, "--require-changed", base)
+        finally:
+            gate.subprocess.run = real_run
+
+        prefix = "ERROR: incremental changed-path selection failed:"
+        refused = [
+            line for line in text.splitlines() if line.strip().startswith(prefix)
+        ]
+        record(
+            "T92a git() spawn failure is refused by the caller, not raised",
+            code == 1
+            and len(refused) == 1
+            and "does not resolve to a commit" in refused[0]
+            and "Traceback" not in text,
+            f"  exit {code}, matching lines {refused}, output {text!r}",
+        )
+        record(
+            "T92a the seam delegates git commands it does not target",
+            isinstance(delegated, str) and len(delegated) == 40
+            and all(c in "0123456789abcdef" for c in delegated),
+            f"  `git log -1 --format=%H` returned {delegated!r} while patched",
+        )
+        record(
+            "T92a subprocess.run is restored after the case",
+            gate.subprocess.run is real_run,
+            "  the patch outlived its case",
+        )
+
+    # T92b: one governed path cannot be resolved while the set is built. It
+    # must leave a DM-01 problem AND stay out of the target list -- both sides,
+    # because either alone is satisfiable by a wrong implementation.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        victim = root / "00-governance" / "a.md"
+        victim.write_text(doc(BASE), encoding="utf-8")
+
+        baseline, _ = gate.collect_governed(root)
+        real_resolve = Path.resolve
+        targeted: list[str] = []
+
+        def failing_resolve(self, *a, **k):
+            if posix(self).endswith("00-governance/a.md"):
+                targeted.append(posix(self))
+                raise OSError(2, "No such file or directory")
+            return real_resolve(self, *a, **k)
+
+        Path.resolve = failing_resolve
+        try:
+            targets, problems = gate.collect_governed(root)
+        finally:
+            Path.resolve = real_resolve
+
+        unresolved = [p for p in problems if p.startswith("DM-01 cannot resolve ")]
+        survivors = [posix(t) for t in targets]
+        record(
+            "T92b an unresolvable governed path is reported, not silently dropped",
+            len(unresolved) == 1
+            and "00-governance/a.md" in posix(unresolved[0])
+            and "No such file or directory" in unresolved[0],
+            f"  problems {problems}",
+        )
+        record(
+            "T92b the unresolvable path does not enter the target list",
+            not any(s.endswith("00-governance/a.md") for s in survivors)
+            and len(targets) == len(baseline) - 1,
+            f"  {len(baseline)} before, {len(targets)} after: {survivors}",
+        )
+        expected = [
+            posix(b) for b in baseline if not posix(b).endswith("00-governance/a.md")
+        ]
+        record(
+            "T92b the other targets survive the failure, in the same order",
+            survivors == expected and len(expected) >= 1,
+            f"  expected {expected}, survivors {survivors}",
+        )
+        record(
+            "T92b the injection intercepted exactly one path",
+            len(targeted) == 1,
+            f"  intercepted {targeted}",
+        )
+        record(
+            "T92b Path.resolve is restored after the case",
+            Path.resolve is real_resolve,
+            "  the patch outlived its case",
+        )
+
+    # T92c: untracked enumeration fails. The two diff calls must still be
+    # delegated, or the test would be pinning the diff-failure branch instead.
+    with tempfile.TemporaryDirectory() as tmp:
+        root, base = git_fixture(tmp)
+        real_git = gate.git
+        seen: list[list[str]] = []
+
+        def failing_git(r, *args, **k):
+            seen.append(list(args))
+            if args[:1] == ("ls-files",):
+                return None
+            return real_git(r, *args, **k)
+
+        gate.git = failing_git
+        try:
+            try:
+                gate.changed_paths(root, base)
+                raised = ""
+            except ValueError as exc:
+                raised = str(exc)
+            direct_calls = list(seen)
+            code, text = capture(root, "--require-changed", base)
+        finally:
+            gate.git = real_git
+
+        record(
+            "T92c untracked enumeration failure raises the untracked diagnostic",
+            raised == "cannot enumerate untracked paths",
+            f"  raised {raised!r}",
+        )
+        record(
+            "T92c the failure is not the diff diagnostic",
+            "refusing a semantically different diff" not in raised
+            and len([c for c in direct_calls if c[:1] == ["diff"]]) == 2
+            and [c[:1] for c in direct_calls]
+                == [["rev-parse"], ["diff"], ["diff"], ["ls-files"]],
+            f"  direct calls {direct_calls}",
+        )
+        record(
+            "T92c the public path turns it into a selection error, not a traceback",
+            code == 1
+            and "ERROR: incremental changed-path selection failed: "
+                "cannot enumerate untracked paths" in text
+            and "Traceback" not in text,
+            f"  exit {code}, output {text!r}",
+        )
+        record(
+            "T92c git is restored after the case",
+            gate.git is real_git,
+            "  the patch outlived its case",
+        )
+
+    # T92d: one target stops being a regular file between collection and use.
+    # The narrow condition is the whole point: every other path must reach the
+    # real `Path.is_file()`, and `collect_governed()` must be unaffected.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        victim = root / "00-governance" / "a.md"
+        later = root / "00-governance" / "z.md"
+        victim.write_text(doc(BASE), encoding="utf-8")
+        later.write_text(doc(BASE), encoding="utf-8")
+
+        collected, _ = gate.collect_governed(root)
+        base_code, base_text = capture(root)
+        base_summary = next(
+            line for line in base_text.splitlines() if line.startswith("GOV-DOC-002:")
+        )
+        real_is_file = Path.is_file
+        intercepted: list[str] = []
+
+        def failing_is_file(self, *a, **k):
+            intercepted.append(posix(self))
+            if posix(self).endswith("00-governance/a.md"):
+                return False
+            return real_is_file(self, *a, **k)
+
+        Path.is_file = failing_is_file
+        try:
+            code, text = capture(root)
+            after, _ = gate.collect_governed(root)
+        finally:
+            Path.is_file = real_is_file
+
+        not_a_file = [
+            line.strip() for line in text.splitlines() if "DM-01 not a file:" in line
+        ]
+        accounting = [
+            line.strip() for line in text.splitlines()
+            if "DM-01 accounting:" in line
+        ]
+        summary = next(
+            line for line in text.splitlines() if line.startswith("GOV-DOC-002:")
+        )
+        record(
+            "T92d a target that is no longer a regular file is reported by path",
+            code == 1
+            and len(not_a_file) == 1
+            and "00-governance/a.md" in posix(not_a_file[0])
+            and "Traceback" not in text,
+            f"  exit {code}, lines {not_a_file}, output {text!r}",
+        )
+        # The refusal must not shrink the denominator: the accounting identity
+        # still counts the hidden file as governed, so the run cannot report a
+        # smaller, cleaner tree after one target was refused.
+        record(
+            "T92d the refusal does not shrink the governed count",
+            len(accounting) == 1
+            and "3 classified + 0 unclassified != 4 governed" in accounting[0],
+            f"  accounting {accounting}",
+        )
+        base_total, base_classified = _summary_counts(base_summary)
+        patched_total, patched_classified = _summary_counts(summary)
+        record(
+            "T92d the remaining targets are still processed after the refusal",
+            base_code == 0
+            and patched_total == base_total
+            and patched_classified == base_classified - 1,
+            f"  baseline exit {base_code} {base_summary!r}, patched {summary!r}",
+        )
+        record(
+            "T92d collect_governed() is unchanged by the injection",
+            [posix(p) for p in after] == [posix(p) for p in collected],
+            f"  {len(collected)} before, {len(after)} after",
+        )
+        record(
+            "T92d every other path reaches the real Path.is_file()",
+            len([p for p in intercepted if p.endswith("00-governance/a.md")]) == 1
+            and any(p.endswith("00-governance/z.md") for p in intercepted),
+            f"  intercepted {intercepted}",
+        )
+        record(
+            "T92d Path.is_file is restored after the case",
+            Path.is_file is real_is_file,
+            "  the patch outlived its case",
+        )
 
 
 def main() -> int:
@@ -4056,6 +4337,7 @@ def main() -> int:
     run_skip_boundary()
     run_policy_assertions()
     run_single_entry_callers()
+    run_fault_injection()
     run_schema_agreement()
     passed, total = sum(RESULTS), len(RESULTS)
     print(f"{passed}/{total} passed")
