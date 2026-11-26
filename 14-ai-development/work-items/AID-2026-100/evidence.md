@@ -202,7 +202,7 @@ Command: `python scripts/check_document_management.py --require-changed c6b7d987
 
 | Snapshot | Exit | stdout | stderr |
 |---|---:|---|---|
-| `c6b7d987` | `3` | 0 bytes; SHA-256 `E3E0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855` | 122 bytes; SHA-256 `NOT_PROVIDED`; `NOT_APPLICABLE: --require-changed resolved to zero changed or untracked paths; no incremental verification was performed` |
+| `c6b7d987` | `3` | 0 bytes; SHA-256 `E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855` | 122 bytes; SHA-256 `NOT_PROVIDED`; `NOT_APPLICABLE: --require-changed resolved to zero changed or untracked paths; no incremental verification was performed` |
 | `dc826e4e` | `0` | 7986 bytes; SHA-256 `130A0B10EDBD11D0EFBA5D98955F399E3AFB93F3BE9A57C86770BE893B97FAAE` | 5261 bytes; SHA-256 `4E7C397CD0900538EAC8E286D0FBFA75CCC8948A36997A20A1AFD9F258F28253` |
 
 On the baseline, `--require-changed <baseline itself>` necessarily resolves to zero changed paths. Incremental mode therefore cannot serve as the baseline/fix equivalence comparison; the full-tree scan in Evidence A is the valid comparison. The baseline stderr SHA-256 corresponds to 122 bytes of raw content, whereas fix stderr is 5261 bytes and includes Windows GBK decoding noise; these stderr streams are not comparable. Evidence D is supplementary only.
