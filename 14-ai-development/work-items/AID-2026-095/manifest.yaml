@@ -8,7 +8,7 @@ repository: "oahcom/AiMemoryBrainArchitecture"
 base_branch: "main"
 base_commit_sha: "47fcd80720b742d9c5d3ae137593c59b5cc768a9"
 branch: "review/2026-11-26-a-i-storage-e2e-composition-095"
-pull_request: "DRAFT_PENDING_CREATION"
+pull_request: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1260"
 attribution:
   actor: "user-authorized operator (delegated by account owner)"
   date: "2026-11-26"
