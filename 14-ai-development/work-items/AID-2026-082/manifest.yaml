@@ -33,9 +33,9 @@ registration:
   substantive_acceptance: "NOT_GRANTED"
 inventory:
   enumerated_markdown_files: 240
-  body_frontmatter_readback: "INCOMPLETE — eight primary documents inspected; remaining listed bodies not yet read"
+  body_frontmatter_readback: "INCOMPLETE — eight primary documents inspected; remaining listed bodies not yet read; F runtime-overview exact source body copied to candidate root"
   bilingual_semantic_parity: "NOT_VERIFIED"
-  restored_source_files: 0
+  restored_source_files: 1
   per_file_status: "See evidence.md; each of 240 rows is BLOCKED pending source/body/frontmatter and mirror verification"
   branch_heads:
     E: "session-e-memory-compiler-2026-11-16@ee098e14747d9915de5b3efb63b3a8dd77f670ed"
