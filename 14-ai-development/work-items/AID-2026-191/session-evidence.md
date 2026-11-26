@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-190/evidence.md"
+        - "14-ai-development/work-items/AID-2026-191/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -45,7 +45,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# Session Evidence — AID-2026-190
+# Session Evidence — AID-2026-191
 
 ## Session role / use case
 

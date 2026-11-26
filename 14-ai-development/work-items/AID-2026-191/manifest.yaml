@@ -1,4 +1,4 @@
-work_item_id: AID-2026-190
+work_item_id: AID-2026-191
 title: >-
   Stop the repository-hygiene gate reporting a pass for new-file admission it did not run, by
   refusing an unqualified invocation (exit 2, SKIPPED) and making the CI job supply --base/--head
@@ -27,14 +27,16 @@ prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
 identifier_allocation:
   id_status: PROVISIONAL
   observed_main: 4326669caa6c43193d34219a0451b80762b712ff
-  assigned_id: AID-2026-190
+  assigned_id: AID-2026-191
   allocation_rule: >-
     Checked before writing, not taken from INDEX.md. Merged or open PR titles carried
     AID-2026-170, 172, 173, 174, 183, 186, 188 and 189; the work-item tree carried 111, 112, 113,
-    114, 115, 140 and 150; the remote branch list carried no 190 and no branch naming a hygiene
-    unit. 190 is the first number outside both observed sets. No INDEX maximum plus one was used.
+    114, 115, 140 and 150. AID-2026-190 was written first and then withdrawn before the push: two
+    other units opened PRs #1342 and #1343 under 190 while this one was being written, which is the
+    collision the recheck rule exists to catch, and it was caught at the push rather than at the
+    merge. 191 is the first number outside every observed set. No INDEX maximum plus one was used.
   recheck_rule: >-
-    Immediately before merge, re-read pull requests and remote branches for AID-2026-190; if
+    Immediately before merge, re-read pull requests and remote branches for AID-2026-191; if
     occupied, take the next free number and update every path and reference in the same push.
 predecessor:
   work_item_id: AID-2026-189
@@ -69,7 +71,7 @@ scope:
         The duplicated invocation pair collapses to one step, "Check committed repository hygiene
         and new-file admission", which supplies --base/--head from the same expressions the old
         admission step used. Job id and job display name unchanged; steps 18 -> 17.
-    - path: "14-ai-development/work-items/AID-2026-190"
+    - path: "14-ai-development/work-items/AID-2026-191"
       detail: >-
         This registration set: manifest, evidence, prompt snapshot and session evidence.
     - path: "14-ai-development/work-items/INDEX.md"
@@ -98,9 +100,9 @@ decision:
     --head-tree-only is the replacement and is covered by tests, so the capability is kept rather
     than deleted.
 evidence:
-  record: 14-ai-development/work-items/AID-2026-190/evidence.md
-  prompt: 14-ai-development/work-items/AID-2026-190/prompt-v1.md
-  session: 14-ai-development/work-items/AID-2026-190/session-evidence.md
+  record: 14-ai-development/work-items/AID-2026-191/evidence.md
+  prompt: 14-ai-development/work-items/AID-2026-191/prompt-v1.md
+  session: 14-ai-development/work-items/AID-2026-191/session-evidence.md
 non_goals:
   - Changing any admission rule, allowlist entry or prohibited path
   - Changing the decision taken when --base and --head are both supplied
@@ -119,9 +121,9 @@ session_evidence:
     issue_refs:
       - "#1212"
     implementing_ai_session: "NOT_RECORDED"
-    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-190/prompt-v1.md"
-    executed_prompt_sha256: "6fda9c42a027bb12a2bde04b3015cf3663197884a5586d86c40252ed362327da"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-191/prompt-v1.md"
+    executed_prompt_sha256: "f31e98e170589600de8e5bbbe3b08f4561dbf027beaf40c68d8c9bf3635cbbce"
     executed_prompt_bytes: 4283
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_RECORDED"
-    session_evidence_ref: "14-ai-development/work-items/AID-2026-190/session-evidence.md"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-191/session-evidence.md"

@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-190/evidence.md"
+        - "14-ai-development/work-items/AID-2026-191/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Verified
@@ -30,8 +30,8 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "Evidence for AID-2026-190: the repository-hygiene gate no longer reports a pass for new-file admission it did not run"
-    canonical_scope_id: "ai-development/aid-2026-190-hygiene-silent-skip-evidence"
+    canonical_scope: "Evidence for AID-2026-191: the repository-hygiene gate no longer reports a pass for new-file admission it did not run"
+    canonical_scope_id: "ai-development/aid-2026-191-hygiene-silent-skip-evidence"
     canonical_scope_keywords:
       - "gate"
       - "hygiene"
@@ -45,7 +45,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# AID-2026-190 — the hygiene gate stops printing a pass for admission it did not run
+# AID-2026-191 — the hygiene gate stops printing a pass for admission it did not run
 
 ## Scope and attribution
 

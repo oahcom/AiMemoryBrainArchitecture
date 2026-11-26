@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-190/evidence.md"
+        - "14-ai-development/work-items/AID-2026-191/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -45,7 +45,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# Prompt snapshot — AID-2026-190
+# Prompt snapshot — AID-2026-191
 
 **Scope snapshot, not a verbatim raw capture.** This records the task as dispatched to the
 implementing session: a unit brief plus a shared brief that every unit in the batch received.
