@@ -15,7 +15,7 @@ document_metadata:
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "Delegated direction decision, 2026-11-26"
-        - "Work Item AID-2026-086"
+        - "Work Item AID-2026-089"
         - "Issues #1125 and #1211"
       revocation: null
     evidence_verification:
@@ -52,7 +52,7 @@ document_metadata:
 - Document ID: D-FORGET-CONTRACT-001
 - Version: 1.0
 - Source branch: main
-- Source revision: canonical root restored by AID-2026-086; exact Blob is recorded on the Draft PR Head.
+- Source revision: canonical root restored by AID-2026-089; exact Blob is recorded on the Draft PR Head.
 - Historical source branch head: 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3 (provenance only)
 - Canonical source: this file (`03-memory-brain/forget-fence-and-completion-contract.md`); EN/ZH-CN counterparts are mirrors under `docs/`.
 - Chinese counterpart: [Canonical Forget Fence 与完成契约](../docs/zh-CN/03-memory-brain/forget-fence-and-completion-contract.md)
