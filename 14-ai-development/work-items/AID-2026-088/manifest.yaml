@@ -8,7 +8,7 @@ accountable_owner: "Owner C / Owner G joint"
 acceptance_authority: "Owners C, G and H with I security review; Owner A governance review"
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: 9e54e6ccec0d07d11fcf36b2a85b888ded747cdc
+base_commit_sha: c6b7d987b959c42af5072932963dae9ed55721e4
 tracking_issue: "#1124, #1135, #1180"
 authorization:
   authorized_by: "user-authorized operator (delegated by account owner)"
