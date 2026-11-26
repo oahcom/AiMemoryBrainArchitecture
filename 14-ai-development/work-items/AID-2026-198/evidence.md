@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-191/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-198/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Verified
@@ -29,9 +29,9 @@ document_metadata:
       archival_reason: null
       archival_reference: null
   authority:
-    canonical_status: Non-Canonical
-    canonical_scope: "AID-2026-191 measurement and repair of the side-by-side bilingual predicate, whose 'either file carries one CJK character' test let an English source certify an untranslated partner"
-    canonical_scope_id: "ai-development/aid-2026-191-side-by-side-cjk-designated-side"
+    canonical_status: Canonical
+    canonical_scope: "AID-2026-198 measurement and repair of the side-by-side bilingual predicate, whose 'either file carries one CJK character' test let an English source certify an untranslated partner"
+    canonical_scope_id: "ai-development/aid-2026-198-side-by-side-cjk-designated-side"
     canonical_scope_keywords:
       - "bilingual"
       - "side-by-side"
@@ -40,12 +40,12 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "14-ai-development/work-items/AID-2026-191/evidence.md"
-    en: null
-    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-191/evidence.md"
+    source: null
+    en: "docs/en/14-ai-development/work-items/AID-2026-198/evidence.md"
+    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-198/evidence.md"
 ---
 
-# AID-2026-191 — One CJK character on the English side certified a pair that was never translated
+# AID-2026-198 — One CJK character on the English side certified a pair that was never translated
 
 **Status: DRAFT — measured, then repaired.** The dispatch was "measure first, decide second": change
 the predicate, count the damage, and implement only if the new gaps are three or fewer. The

@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-191/evidence.md"
+        - "14-ai-development/work-items/AID-2026-198/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -45,7 +45,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# Prompt snapshot — AID-2026-191
+# Prompt snapshot — AID-2026-198
 
 **Scope snapshot, not a verbatim raw capture.** The dispatching session supplied two files plus a
 subagent message. The unit brief is reproduced whole; the subagent message is reproduced whole; the
@@ -113,4 +113,4 @@ The instruction "the partner must contain Chinese" is direction-blind, because
 document is the named member and whose partner is the English file. The cost of the *intended*
 rule — only the file designated to hold the Chinese text may certify the pair — is zero new gaps,
 which is inside the ≤ 3 threshold. The measurement, the twelve false positives with their
-`cjk`/`latin`/`ratio`, and the zero-cost rule are in `AID-2026-191/evidence.md` §2–§3.
+`cjk`/`latin`/`ratio`, and the zero-cost rule are in `AID-2026-198/evidence.md` §2–§3.
