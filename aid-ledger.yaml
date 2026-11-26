@@ -1,11 +1,11 @@
-# AID allocation ledger
+﻿# AID allocation ledger
 # Single-writer protocol: only this branch reserves identifiers.
 # A reservation is valid only if its push succeeded; a non-fast-forward
 # push means the reservation lost the race and must be re-scanned.
 # One AID maps to exactly one work_item_id.
 
 schema: 1
-updated_at_utc: "2026-11-26T14:55:00Z"
+updated_at_utc: "2026-11-26T15:35:00Z"
 entries:
   - id: AID-2026-082
     state: MERGED
@@ -100,9 +100,9 @@ entries:
     carrier: "merged on main (receipt at 591bbcd8); PR number not recorded"
     note: "SQLite backend implementation evidence mapping; consumed the number while the L3 validator PR was rebasing"
   - id: AID-2026-112
-    state: RESERVED
-    carrier: "unassigned; Owner ruling 2026-11-26 permits this number for the retroactive gate-coverage work item"
-    note: "scope is fixed by the Owner: record that #1275 and #1266 passed the old gate with no declaration, the exact heads and results, and the remediation state - without claiming they violated the rules in force at merge time. No carrier may take it without a skeleton reservation push."
+    state: OCCUPIED_BY_OTHER
+    carrier: "already on main as 'Rejudge Storage/Consistency and H idempotency predicates against 552 local test passes'"
+    note: "the reservation was stale: main carried a different AID-2026-112 all along. The retroactive gate-coverage work item was reassigned to AID-2026-151 by the external line (PR #1329); Owner ruling 2026-11-26 (prompt 45-A) closed our work item with no replacement number and no duplicate PR."
   - id: AID-2026-113
     state: MERGED
     carrier: "PR #1314"
@@ -116,8 +116,39 @@ entries:
     carrier: "merged on main at ac301e09; PR number not recorded"
     note: "ci: deduplicate required Gate runs and cache Rust jobs - consumed the number that had been offered to #1280"
   - id: AID-2026-116
-    state: RESERVED
-    carrier: "offered to PR #1280 (req05/827-fix) as its renumber target"
-    note: "the offer has moved 105 -> 111 -> 113 -> 115 -> 116; five external merges consumed the earlier offers"
+    state: OCCUPIED_BY_OTHER
+    carrier: "PR #1321 (gov/aid-116-pin-and-attribution)"
+    note: "the offer to #1280 (req05/827-fix) has now moved 105 -> 111 -> 113 -> 115 -> 116 and lost every time; #1280 is still dirty and still double-claims 084"
+  - id: AID-2026-150
+    state: MERGED
+    carrier: "merged on main; PR number not recorded"
+    note: "external line: Restore three D Memory Brain normative roots and disposition orphan mirrors"
+  - id: AID-2026-151
+    state: IN_FLIGHT
+    carrier: "PR #1329 (external, head f8236828)"
+    note: "external line took over the retroactive Session Evidence coverage-gap record; supersedes our cancelled retroactive work item"
+  - id: AID-2026-170
+    state: MERGED
+    carrier: "merged on main"
+  - id: AID-2026-172
+    state: MERGED
+    carrier: "PR #1327"
+    note: "bilingual baseline consistency; main moved to 1e9341da"
+  - id: AID-2026-173
+    state: MERGED
+    carrier: "merged on main"
+  - id: AID-2026-183
+    state: IN_FLIGHT
+    carrier: "PR #1333 (external renumber of #1280)"
+  - id: AID-2026-186
+    state: IN_FLIGHT
+    carrier: "PR #1335 (external renumber of #1309)"
+  - id: AID-2026-187
+    state: IN_FLIGHT
+    carrier: "PR #1336 (external renumber of #1321)"
+  - id: AID-2026-188
+    state: IN_FLIGHT
+    carrier: "PR #1337 (external): records that the 03-memory-brain normative root is already registered"
   - id: AID-2026-117
     state: FREE
+    note: "do not trust this row: external numbering is already at 188 in flight. Re-scan main's work-items tree immediately before any reservation push; the next plausibly free number is >= 189."
