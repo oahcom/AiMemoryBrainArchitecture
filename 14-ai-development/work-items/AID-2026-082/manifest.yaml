@@ -22,7 +22,7 @@ prompt_id: AID-2026-082-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-082/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 2f1b98778fd839aef41b69292e6e84695f0de97394bc22e91db622846744550c
+prompt_sha256: 79bcd0738f9c0f0c5b3dcf05675629c12a7eb51bcaaff0e184ba1ec93e31b7cb
 prompt_bytes: 5831
 prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST; no independent prompt-source verification claimed
 
@@ -149,7 +149,7 @@ session_evidence:
       - "#1237"
     implementing_ai_session: NOT_RECORDED
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-082/prompt-v1.md
-    executed_prompt_sha256: 2f1b98778fd839aef41b69292e6e84695f0de97394bc22e91db622846744550c
+    executed_prompt_sha256: 79bcd0738f9c0f0c5b3dcf05675629c12a7eb51bcaaff0e184ba1ec93e31b7cb
     executed_prompt_bytes: 5831
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: NOT_RECORDED
