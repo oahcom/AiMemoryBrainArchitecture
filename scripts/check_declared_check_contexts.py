@@ -27,7 +27,8 @@ permission vocabulary cannot express; it is not used here and must not be.
 
 Exit codes follow the repository vocabulary:
     0  PASS        every declared context is produced, and the two sets are equal
-    1  VIOLATION   a declared context is produced by no job, or the sets differ
+    1  VIOLATION   a declared context is produced by no job, is listed twice, or
+                   the sets differ
     2  INCOMPLETE  a condition could not be evaluated at all
 
 The incomplete branch is the point, and it covers the credential case: an absent
@@ -200,6 +201,25 @@ def main(root: Path | None = None, protection: list[str] | None = None) -> int:
         print(
             f"DECLARED CHECK CONTEXTS: FAIL "
             f"({len(unproduced)} of {len(contexts)} unproduced)",
+            file=sys.stderr,
+        )
+        return 1
+
+    # A line listed twice is invisible to the set comparison below: the sets
+    # still match, so a copy-paste that overwrote a missing context reads as
+    # PASS. The duplication is itself the disagreement, so it fails on the list.
+    duplicates = sorted({context for context in contexts if contexts.count(context) > 1})
+    if duplicates:
+        for context in duplicates:
+            print(
+                f"::error::{DOC_PATH} declares required check context "
+                f"{context!r} more than once; the document no longer says what "
+                "its author meant it to say",
+                file=sys.stderr,
+            )
+        print(
+            f"DECLARED CHECK CONTEXTS: FAIL (declared {len(contexts)}; "
+            f"{len(duplicates)} duplicated)",
             file=sys.stderr,
         )
         return 1

@@ -4,26 +4,26 @@ document_metadata:
   role: normative-standard
   lifecycle:
     approval:
-      decision_status: Under-Review
-      approver: NOT_RECORDED
-      decision_date: NOT_RECORDED
+      decision_status: Approved
+      approver: "user-authorized operator (delegated by account owner)"
+      decision_date: "2026-11-26"
       approved_version:
-        scheme: git
-        value: "a7d12fe9835d8f53403946ab08c1cae8c3f12fbf"
+        scheme: content-hash
+        value: "6df99f23052dd5475d22d397cdee160436464dc3a95946fe6d6e12f93aea1071"
       approval_scope:
         type: Full-document
         included_sections: []
         included_assets: []
-      approval_applicability: Not-Applicable-To-Current-Version
+      approval_applicability: Applicable-To-Current-Version
       evidence_reference:
-        - "00-governance/architecture-invariants.md"
+        - "14-ai-development/work-items/AID-2026-096/approval-evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
       last_verified_date: null
       last_verification_note: "Status is DECIDED in the document body. No formal approval record, approver identity or decision date exists in this repository; recorded as NOT_RECORDED rather than inferred."
     usage_status: Active
-    modification_status: Pending-Reapproval
+    modification_status: Unchanged
     supersession:
       supersedes: []
       supersession_reason: null
@@ -50,7 +50,9 @@ document_metadata:
 
 # Architecture Invariants
 
-**Current version status: CANDIDATE / Pending-Reapproval — NOT APPROVED.** The current set of Architecture Invariants (I-01 through I-24) has not received a new formal approval. Their DECIDED labels and normative classification do not establish approval. No historical approver or approval date is asserted. Resubmission requires revised exact-version evidence and a separate attributable approval decision.
+**Current version status: APPROVED — Normative.** This document is approved as a Normative governance baseline by a new approval event dated 2026-11-26. This approval does not certify implementation conformity with P-01 through P-16.
+
+**Historical status:** Before this new approval event on 2026-11-26, this document was marked `CANDIDATE / Pending-Reapproval — NOT APPROVED`. This records the prior state only. The present decision is a new approval, not a retroactive approval or authentication of any historical approver.
 
 These invariants are proposed normative constraints for all subsystem specifications and future implementations, subject to the separate approval decision.
 
