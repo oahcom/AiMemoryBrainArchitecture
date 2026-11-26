@@ -152,7 +152,7 @@ session_evidence:
     session_reference_status: "NOT_AVAILABLE"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-094/session-evidence-source-restore.md"
 evidence_file: "14-ai-development/work-items/AID-2026-094/evidence.md"
-evidence_blob: "0cc9e65b40dce7ab0c963721847e1e02fb310438"
+evidence_blob: "7eb3e0c0d91f7a7b2e92a70073b83a81bac7a2dc"
 
 formal_registration:
   status: "COMPLETED_ON_CANDIDATE_BRANCH_WITH_BOUNDED_IDENTIFIER_SCAN"

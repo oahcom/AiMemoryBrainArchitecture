@@ -215,8 +215,28 @@ The other 10/15 F inventory entries lack existing EN/ZH-CN pairs and remain bloc
 - All active paths and references use AID-2026-094. The merge queue assigns the final repository-standard AID at merge time. AID-083 is retained only as the explicit historical renumbering source.
 
 
-## 10. CI diagnosis and bounded remediation
+## 10. Scope registry, metadata repair and exact-Head CI
 
-- Repository hygiene rejects non-numeric work-item manifest paths; the registration is now under `AID-2026-094/manifest.yaml` with `id_status: PROVISIONAL`.
-- The current GOV-DOC-002 run reports DM-12/DM-14 errors involving source classification and scope accounting. The manifest parser reported 65/65 manifests parsed and 0 YAML parse failures; no invalid manifest YAML is evidenced by this run.
-- The bilingual ratchet exit 2 is a pre-existing full-scan guard: `scripts/check_bilingual_docs_full.py` derives numbered top-level roots from disk and exits 2 when that set differs from NORMATIVE_ROOTS. The ratchet wrapper correctly rejects exit 2 as incomparable; this is not a coverage regression. No validator code or semantics are changed here.
+- The scope registry now formally accounts for `03-memory-brain` (backlog, 5 Markdown documents), `05-memory-runtime` (backlog, 6), and `09-security-governance` (backlog, 1). These entries are scanned/countable backlog, not exclusions. The governed list matches the current `NORMATIVE_ROOTS` set; DM-14 scope accounting passes.
+- The root README frontmatter for Memory Runtime and Security Governance was changed from unsupported flow-style YAML maps/lists to the gate's supported block YAML form. Both root documents retain `provenance: AUTHORED_INDEX`, explicitly state no authoritative README/root source exists, and remain Draft/Candidate/Informative.
+- GOV-DOC-002 metadata gate passes on the exact Head below (run `45777711361`). The previous 12 DM-01/DM-12 failures from the two unparseable README frontmatters and their mirror parity were cleared.
+- The bilingual changed-file gate passes (run `45777711509`). Session Evidence Gate passes (run `45777711465`).
+- Repository hygiene's substantive Work Item checks pass: index membership `directories=75 linked=75`; manifest consistency `manifests=64 in_scope=59 excluded_by_record_type=5 unrecognized=0 violations=0`; manifest YAML parse `65 found, 65 parsed, 0 failed`. The overall Repository hygiene job remains failed only because its unreachable self-check invokes `tests/test_check_bilingual_docs_full.py`, whose full scan exits 2 on the existing root-set mismatch below.
+- The full-scan and ratchet blocker is a repository-existing mismatch: `check_bilingual_docs.NORMATIVE_ROOTS` contains `00,01,02,04,06,07,08,13,14`, while the tree has numbered roots `00,01,02,03,04,05,06,07,08,09,13,14`. The wrapper correctly treats exit 2 as incomparable (not a coverage regression). Fixing this requires changing the validator's enforced root set; that is intentionally not done under the no-validator-semantics-change boundary.
+
+## 11. Exact-Head CI readback
+
+- PR #1220 exact Head: `d09ceba8dd5e515a480bc040384146beaa498bef`.
+- PR base / latest main: `81906cfc8d3cd477d26657520aa04d81466e7ce2`.
+- GitHub PR state: Open, not merged; `mergeable=true`.
+- Actions runs for this exact Head: 8.
+  - PASS: Architecture document management gate (`45777711361`).
+  - PASS: Bilingual documentation gate (`45777711509`).
+  - PASS: Session Evidence Gate (`45777711465`).
+  - PASS: Branch freshness (`45777711378`).
+  - PASS: Runner admission policy (`45777711488`).
+  - PASS: Rust Phase 1 Workspace Tests (`45777711392`).
+  - FAIL: Repository hygiene (`45777711406`), solely due the full-scan root-set mismatch above; Work Item index, manifest consistency and manifest YAML checks all pass.
+  - FAIL: Existing gates (`45777711354`), solely the GOV-DOC-001 bilingual ratchet wrapper rejecting the full-scan command's exit 2.
+- Legacy combined commit statuses: 0; Actions runs are the CI evidence.
+- No workflow definition, validator implementation/semantics, runtime code, or product code was changed. PR merge, Issue closure, deployment and Owner acceptance are not performed or implied.
