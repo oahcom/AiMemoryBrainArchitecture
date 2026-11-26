@@ -12,12 +12,13 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "AID-2026-109 source and restoration evidence record"
+        - "14-ai-development/work-items/AID-2026-109/session-evidence.md"
+        - "AID-2026-109 scope correction on 2026-11-26"
       revocation: null
     evidence_verification:
       verification_status: Unverified
-      last_verified_date: null
-      last_verification_note: "Evidence record is subject to exact-Head CI and post-merge blob readback."
+      last_verified_date: "2026-11-26"
+      last_verification_note: "Session evidence records the merged initial carrier and later user-directed scope correction."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -30,31 +31,36 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "AID-2026-109 session evidence record"
-    canonical_scope_id: "ai-development/aid-2026-109-session-evidence"
+    canonical_scope: "AID-2026-109 delegated work record"
+    canonical_scope_id: "ai-development/aid-2026-109-correction-record"
     canonical_scope_keywords:
-      - session-evidence
       - work-item
-      - i-security-governance
+      - scope-correction
+      - security-governance
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
 ---
-# AID-2026-109 session evidence
+# AID-2026-109 session evidence — scope correction
 
-- Attribution: user-authorized operator (delegated by account owner)
-- Source branch: session-i-security-governance-2026-11-16 @ 8abddf814467b271344a9814613a6b7ca6a446c6
-- `git fetch origin main` succeeded immediately before commit; fetched main: a7e7c64bfd6c6d709a0a7b55358f94b8535815c1
-- Latest fetched INDEX: 80 rows, max AID-2026-108, AID-2026-109 absent; next ID assigned AID-2026-109.
-- Source tree files under `09-security-governance/`: 91 blobs
-- Selection: five policy/contract documents only; the rest of the historical I tree was excluded.
-- Mirror coverage: canonical + EN + ZH-CN files exist for README and all five I documents. EN preserves the English body; ZH-CN has Chinese summary plus verbatim English source; full semantic translation parity is NOT_VERIFIED.
-- Source content verification: GitHub file SHA values matched the source tree SHA values for all five selected paths. The restored body bytes are appended unchanged after the new GOV-DOC-002 frontmatter.
-- Classification: all five CURRENT as informative candidate source material; none promoted to Normative; no supersession found against AID-2026-089/AID-2026-099.
-- AID-2026-089 alignment: D sole logical ForgetOperation/Fence issuer; I owns policy and global completion only.
-- AID-2026-099 HIR-18 alignment: replay disclosure must independently recheck current I authorization and D Fence; no implementation claim.
-- #1211 COC/GID crypto sealed-evidence gap: not touched, remains OPEN.
-- Gate A I source-presence sub-item: RESTORED_CANDIDATE_SOURCE_PRESENT / INFORMATIVE; exact-version Owner acceptance remains OPEN.
-- No runtime, validator, 03/04/05, tests, scripts, workflows, schema, API, DDL, deployment or production changes.
-
-- Branch-sync recheck: `git fetch origin main` fetched `b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c`; INDEX max remained AID-2026-108 and AID-2026-109 remained absent. The branch was fast-forwarded/merged with this main before final checks.
+- Attribution: user-authorized operator (delegated by account owner); proxy record, not natural-person Owner signature.
+- Source branch: session-i-security-governance-2026-11-16 @ 8abddf814467b271344a9814613a6b7ca6a446c6.
+- Source tree: 91 files under 09-security-governance; 81 phase records.
+- Prefix counts: phase-3=1; phase-3.5=1; phase-3.6=30; phase-3.7=1; phase-3.8=47; phase-3.9=1.
+- Source branch contains neither 09-security-governance/README.md nor 09-security-governance/security-governance-guide.md.
+- Existing main EN guide mirror blob: 061c5847b3df879eeaf3c71e5eae0bfa162b276a; ZH-CN guide mirror blob: 372d27c79dc79d09bcdb0f142c979efdba1c2b6e.
+- First AID-109 carrier PR #1300 merged as e3a134de856bbb58581fd688462c9c0282631270, importing four detailed policies plus security-and-identity-overview; later user scope correction requires removing those five Canonical docs and their ten mirrors.
+- PR #1301 was created by this operator as a draft against an older base; GitHub now records it CLOSED, merged=false. This operator did not merge it; closure actor is not asserted.
+- Correction base main: 7629b9de5e5832fe486ee72d101c4bc5121015e6 (after AID-110 merge).
+- Correction classification: guide RECONSTRUCTED_FROM_MIRROR; eight historical docs NOT_RESTORED_BY_DECISION; no phase records restored.
+- I is the policy-semantics acceptance authority; no I Owner acceptance is recorded.
+- AID-2026-089: D sole logical ForgetOperation/Fence authority.
+- AID-2026-099 HIR-18: replay disclosure independently rechecks current I authorization and current D Fence/lineage.
+- Gate A item 5 I sub-item: root authored, guide reconstructed, four detailed policies formally dispositioned; not “I policy semantics accepted”.
+- COC/GID sealed cryptographic evidence untouched and still required under #1211.
+- #1211/#1212 remain open; comments to be posted after correction merge.
+- No changes to 03/04/05, Runtime, product-validator semantics, tests, workflows, schemas, APIs, DDL, deployment or production configuration.

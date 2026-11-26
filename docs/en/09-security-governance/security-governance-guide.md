@@ -1,3 +1,53 @@
+---
+document_metadata:
+  domain: security-governance
+  role: guide
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "Source branch session-i-security-governance-2026-11-16 @ 8abddf814467b271344a9814613a6b7ca6a446c6 has no Canonical guide at this path"
+        - "Existing EN mirror original blob 061c5847b3df879eeaf3c71e5eae0bfa162b276a"
+        - "Existing ZH-CN mirror original blob 372d27c79dc79d09bcdb0f142c979efdba1c2b6e"
+        - "AID-2026-109 scope correction"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-26"
+      last_verification_note: "Existing EN mirror body preserved byte-for-byte; only GOV-DOC-002 frontmatter added. No I Owner acceptance asserted."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Language mirror of the informative I Security, Identity and Governance architecture guide"
+    canonical_scope_id: "security-governance/architecture-guide"
+    canonical_scope_keywords:
+      - security-governance
+      - identity
+      - authorization
+      - architecture-guide
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "09-security-governance/security-governance-guide.md"
+    en: null
+    zh-CN: "docs/zh-CN/09-security-governance/security-governance-guide.md"
+---
 # Security, Identity & Governance — Architecture Guide
 
 - Document ID: DOC-SEC-001
