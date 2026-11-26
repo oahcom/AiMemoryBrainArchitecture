@@ -218,8 +218,8 @@ session_evidence:
       - "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1223"
     implementing_ai_session: session-1223-duplicate-blindness
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-059/prompt-1223-v1.md
-    executed_prompt_sha256: a2e4f7513027fdec595879958f5c19217bf5328b90fe94d9e9459ad4b3b882a3
-    executed_prompt_bytes: 3676
+    executed_prompt_sha256: 5de7adc61dcb6659b16a4da5e35826cd635f616ad664654d327c9a1836cade95
+    executed_prompt_bytes: 3961
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-059/session-evidence-1223.md
