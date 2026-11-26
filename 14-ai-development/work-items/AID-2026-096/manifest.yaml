@@ -1,0 +1,49 @@
+manifest_version: "1.0"
+record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
+registration_stage: "STAGE_0"
+registration_status: "APPROVAL_RECORDED_OWNER_ACCEPTANCE_PENDING"
+work_item_id: "AID-2026-096"
+id_status: "FINAL"
+merge_queue_action: "ASSIGNED_AT_MERGE; MAIN_INDEX_MAX=AID-2026-095; CURRENT_ID=AID-2026-096; NO_RENUMBER"
+title: "New normative approval for Design Principles and Architecture Invariants; DEC-13 evidence"
+date: "2026-11-26"
+repository:
+  name: "oahcom/AiMemoryBrainArchitecture"
+  baseline_branch: "main"
+  baseline_commit: "81906cfc8d3cd477d26657520aa04d81466e7ce2"
+  merge_base_commit: "31385bc1aabc1599be2c8320be408c0d170057a8"
+  implementation_branch: "docs/2026-11-26-normative-approval-stack-1219"
+  carrier_pr: 1256
+identifier_allocation:
+  assigned_at: "2026-11-26"
+  observed_main: "31385bc1aabc1599be2c8320be408c0d170057a8"
+  observed_max_id: "AID-2026-095"
+  assigned_id: "AID-2026-096"
+  renumbered_from: null
+authority:
+  approver: "user-authorized operator (delegated by account owner)"
+  designation_source: "account owner statement, 2026-11-26"
+  approval_event_date: "2026-11-26"
+  approval_type: "NEW_APPROVAL"
+  decision: "APPROVED_NORMATIVE"
+scope:
+  in_scope:
+    - "Six exact path/blob pairs in approval-evidence.md"
+    - "Approval metadata and historical status notes in six governance documents"
+    - "DEC-13 RECORDED in main register and A-I/Storage matrix, including EN/ZH-CN mirrors"
+    - "Issue #1189 evidence comment; Issue state unchanged"
+  out_of_scope:
+    - "P-01–P-16 implementation conformity"
+    - "Runtime code and validator semantics"
+    - "Deployment and production conformance"
+    - "Promotion of AID-2026-014 mirror-only supplemental material"
+session_evidence:
+  - role: PR
+    issue_refs:
+    implementing_ai_session: NOT_RECORDED
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-096/prompt-v1.md
+    executed_prompt_sha256: 0ebc78aefd4d29d66ee6a77cf760a590eb67c70a1e215ef384b8bc41aee128ca
+    executed_prompt_bytes: 2757
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-096/session-evidence.md
