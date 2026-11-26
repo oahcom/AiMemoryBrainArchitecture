@@ -84,7 +84,7 @@ carrier:
     pull_request: 1290
     merge_commit_sha: 92a759ec1a8c748fc4091015a3a3e8aa97ddc3e3
   branch: docs/aid-2026-107-impl2-scope-refresh
-  pull_request: PENDING
+  pull_request: 1299
   draft: true
   merge_commit_sha: PENDING
   merge_authorization: only after all 16 required contexts succeed on exact final Head
