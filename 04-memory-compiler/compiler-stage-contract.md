@@ -1,6 +1,6 @@
 ---
 # provenance: RECONSTRUCTED_FROM_MIRROR
-# RENUMBERED_FROM: AID-2026-083 — occupied by PR #1250; current work item AID-2026-090
+# RENUMBERED_FROM: AID-2026-080 (path reuse) → AID-2026-083 → AID-2026-090 → AID-PENDING-MERGE
 document_metadata:
   domain: "memory-compiler"
   role: "design-specification"
@@ -18,7 +18,7 @@ document_metadata:
         included_assets: []
       approval_applicability: Applicable-To-Current-Version
       evidence_reference:
-        - "AID-2026-090"
+        - "AID-PENDING-MERGE"
         - "provenance: RECONSTRUCTED_FROM_MIRROR"
         - "EN mirror blob: 6d733294232a93aa59123009d2a2801d9b83f459"
         - "ZH-CN mirror blob: ad386cac5636b4ba3eaf8b93ad93afcb444e8b46"
@@ -58,7 +58,7 @@ document_metadata:
     zh-CN: "docs/zh-CN/04-memory-compiler/compiler-stage-contract.md"
 ---
 
-> **Reconstruction notice:** This root document was reconstructed on 2026-11-26 from the existing English mirror `docs/en/04-memory-compiler/compiler-stage-contract.md` (original mirror blob `6d733294232a93aa59123009d2a2801d9b83f459`). No authoritative source blob for this root path was found in the corresponding Owner branch `session-e-memory-compiler-2026-11-16` at `ee098e14747d9915de5b3efb63b3a8dd77f670ed`; the mirror blob is not an authoritative source blob. The ZH-CN counterpart `docs/zh-CN/04-memory-compiler/compiler-stage-contract.md` (blob `ad386cac5636b4ba3eaf8b93ad93afcb444e8b46`) was reviewed for semantic alignment. The mirror-specific insertion comment was omitted; substantive body text is retained. Status: **Draft / Candidate / Informative**. Executed by `user-authorized operator (delegated by account owner)`. This reconstruction does not establish Owner acceptance, approval, or Normative authority.
+> **Reconstruction notice:** This root document was reconstructed on 2026-11-26 from the exact English mirror `docs/en/04-memory-compiler/compiler-stage-contract.md` (blob `6d733294232a93aa59123009d2a2801d9b83f459`). The aligned ZH-CN mirror is `docs/zh-CN/04-memory-compiler/compiler-stage-contract.md` (blob `ad386cac5636b4ba3eaf8b93ad93afcb444e8b46`). No authoritative source blob for this root path was found; neither mirror is asserted to be authoritative. Executed by `user-authorized operator (delegated by account owner)`. Status: **Draft / Candidate / Informative**. This reconstruction does not establish approval, Owner acceptance, or Normative authority.
 
 # Memory Compiler Stage Contract
 

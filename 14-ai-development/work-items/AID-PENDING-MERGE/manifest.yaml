@@ -1,0 +1,202 @@
+manifest_version: "1.0"
+record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
+registration_stage: "STAGE_0"
+registration_status: "FORMAL_STAGE_0_REGISTERED_WITH_RECORDED_LIMITATIONS"
+work_item_id: "AID-PENDING-MERGE"
+renumbered_from: "AID-2026-090"
+renumbering_history: "AID-2026-080（初次路径复用） → AID-2026-083 → AID-2026-090 → AID-PENDING-MERGE"
+renumbering_note: "All provisional identifiers are withdrawn. The merge queue assigns the repository-standard AID only at merge time; no number is reserved on this branch."
+identifier_status: "PENDING_MERGE_QUEUE_ALLOCATION; NO_BRANCH_ID_RESERVED"
+
+title: "SOURCE-RESTORE-02 — preserve source-backed D/E/F candidates, reconstruct one Gate A root, and author two directory indexes"
+date: "2026-11-26"
+external_workflow_references:
+  - id: "AID-2026-11-26-SOURCE-RESTORE-02"
+    kind: "EXTERNAL_WORKFLOW_REFERENCE"
+    repository_work_item_id: false
+    note: "External workflow identifier retained only as evidence; AID-PENDING-MERGE is a non-numeric merge-queue placeholder; all prior provisional IDs are withdrawn."
+  - id: "PR #1220"
+    kind: "CARRIER"
+  - id: "PR #1219"
+    kind: "RELATED_DECISION_ACCEPTANCE_CARRIER"
+  - id: "PR #1219（编号待合并分配）"
+    kind: "RELATED_WORK_ITEM"
+    note: "Current PR #1219 Work Item for DECISION-ACCEPTANCE-03; the prior AID-081 reference is superseded."
+  - id: "Issues #1177, #1179, #1202, #1203"
+    kind: "RELATED_ISSUES"
+
+base_commit_sha: "515b7144320fd9fcc1e1a2c3d2d2744d979b4ca8"
+
+repository:
+  name: "oahcom/AiMemoryBrainArchitecture"
+  url: "https://github.com/oahcom/AiMemoryBrainArchitecture"
+  baseline_branch: "main"
+  baseline_commit: "515b7144320fd9fcc1e1a2c3d2d2744d979b4ca8"
+  implementation_branch: "impl/2026-11-26-normative-source-restore"
+  carrier: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1220"
+
+identifier_evidence:
+  allocation_policy: "MERGE_QUEUE_ONLY"
+  checked_main_at_transition: "72c9e68a158a5a0a00936fc7fc0adfc1fa024b5c"
+  prior_provisional_chain: "AID-2026-080 (path reuse) -> AID-2026-083 -> AID-2026-090 -> AID-PENDING-MERGE; all provisional IDs withdrawn"
+  final_identifier: "NOT_ASSIGNED_UNTIL_MERGE_QUEUE"
+  global_uniqueness: "NOT_CLAIMED; MERGE_QUEUE_IS_AUTHORITY"
+
+authority:
+  authority_basis: >-
+    Human Owner authorization asserted in the user instruction dated 2026-11-26.
+    The natural-person identity and domain Owner mapping are not independently established
+    by this record.
+  implementing_operator: "user-authorized operator (delegated by account owner)"
+  sponsor: "HUMAN_OWNER_AUTHORIZATION_ASSERTED; IDENTITY_NOT_MAPPED"
+  accountable_owner: "Owner A / Governance coordination; D/E/F/I content Owners retain domain acceptance"
+  acceptance_authority: "Relevant domain Owner(s) and Owner A / Governance; NOT_RECORDED"
+  independent_reviewer: "NOT_ASSIGNED"
+  implementation_authorization: "DOCUMENTATION_AND_STAGE_0_REGISTRATION_ONLY"
+  merge_authorization: "NOT_GRANTED"
+  deployment_authorization: "NOT_GRANTED"
+  issue_closure_authorization: "NOT_GRANTED"
+
+scope:
+  objective: >-
+    Repair AID-080 and AID-081 identity collisions in PR #1220, defer repository-standard identifier allocation for
+    SOURCE-RESTORE-02, preserve AID-082, reconstruct only the compiler-stage-contract root
+    from exact EN/ZH-CN mirror blobs, author new runtime/security directory indexes where
+    no authoritative root README source exists, and keep provenance classes and D/E/F
+    source-backed restoration accounting separate.
+  in_scope:
+    - "Restore mainline AID-2026-080 manifest, prompt snapshot and INDEX row unchanged."
+    - "Remove PR #1220's duplicate AID-2026-081 DECISION-ACCEPTANCE registration; preserve mainline AID-081 Issue #1081 identity and reference PR #1219（编号待合并分配）."
+    - "Keep AID-2026-082 manifest and evidence unchanged."
+    - "Create AID-PENDING-MERGE Stage 0 manifest, prompt and evidence."
+    - "Reconstruct only 04-memory-compiler/compiler-stage-contract.md from pinned EN/ZH-CN mirrors with RECONSTRUCTED_FROM_MIRROR provenance."
+    - "Author new 05-memory-runtime/README.md and 09-security-governance/README.md directory indexes with AUTHORED_INDEX provenance; explicitly state that no authoritative source exists and each is newly authored."
+    - "Keep RESTORED and RECONSTRUCTED accounting separate."
+    - "Continue E/F candidate assessment only where exact source blobs and bilingual mirrors already exist."
+  out_of_scope:
+    - "Runtime/product code, schemas, DDL, APIs, migrations, test logic and production operations."
+    - "Validator implementation or semantics changes; only per-record manifest classification data is reconciled."
+    - "PR merge, deployment, issue closure, protocol freeze or normative promotion."
+    - "Any fabricated Owner approval, authoritative source blob, independent review or global-uniqueness claim."
+  current_disposition: "PARTIAL — 14 source-backed roots carried forward as RESTORED; 1 compiler root RECONSTRUCTED_FROM_MIRROR; 2 directory indexes AUTHORED_INDEX; no authoritative README sources or Owner acceptance claimed."
+
+baseline_and_source_evidence:
+  main_reconciliation_head: "515b7144320fd9fcc1e1a2c3d2d2744d979b4ca8"
+  target_pr_head_before_reconciliation: "afbbbf6098bb1318093d9d3b26c4b1ccb0d2d5e9"
+  original_pr_base: "dcf9a6348ce5b0802e79f3a3f9c497109f0fb4a8"
+  d_source_branch: "session-d-memory-brain-2026-11-16"
+  d_source_commit: "b525e1f8fee2471a131e4a38efda99804045e424"
+  d_source_blobs:
+    - "memory-brain-overview.md: b4ed712ac0626ab127cccfd205c50a9013df01fb"
+    - "canonical-memory-store.md: 6b37c91033fda21f072e2a3bde6f274663b1e76e"
+    - "memory-lifecycle-manager.md: 8b972035b449e1eab546aedc9cc5b30581600c65"
+    - "forget-fence-operation-and-publication-gate.md: 4da0b61ba3656a768ea56b4a2a24e09da4e21cd5"
+  e_source_branch: "session-e-memory-compiler-2026-11-16"
+  e_source_commit: "ee098e14747d9915de5b3efb63b3a8dd77f670ed"
+  f_source_branch: "session-f-memory-runtime"
+  f_source_commit: "1908ce4d233b20f7cafd00cb679affd01bd15174"
+  i_source_branch: "session-i-security-governance-2026-11-16"
+  i_source_commit: "8abddf814467b271344a9814613a6b7ca6a446c6"
+  gate_a_reconstruction:
+    - root: "04-memory-compiler/compiler-stage-contract.md"
+      provenance: "RECONSTRUCTED_FROM_MIRROR"
+      authoritative_root_source_blob: "NOT_FOUND"
+      en_mirror: "docs/en/04-memory-compiler/compiler-stage-contract.md"
+      en_mirror_blob: "6d733294232a93aa59123009d2a2801d9b83f459"
+      zh_cn_mirror: "docs/zh-CN/04-memory-compiler/compiler-stage-contract.md"
+      zh_cn_mirror_blob: "ad386cac5636b4ba3eaf8b93ad93afcb444e8b46"
+      reconstructed_root_blob: "1f79eeb40fb234423290f97fcce934e11bdca9bf"
+      status: "Draft / Candidate / Informative"
+  authored_indexes:
+    - root: "05-memory-runtime/README.md"
+      provenance: "AUTHORED_INDEX"
+      authoritative_source: "NOT_FOUND — no authoritative root README source; newly authored index"
+      root_blob: "107c225b631eaa5732bab90bc09144799a542502"
+      en_mirror: "docs/en/05-memory-runtime/README.md"
+      en_mirror_blob: "2fac42740167293c941c1450437ca780d0488b5d"
+      zh_cn_mirror: "docs/zh-CN/05-memory-runtime/README.md"
+      zh_cn_mirror_blob: "9881fd88fcbfe1b3760154503c8d13e781ad89f0"
+      status: "Draft / Candidate / Informative"
+    - root: "09-security-governance/README.md"
+      provenance: "AUTHORED_INDEX"
+      authoritative_source: "NOT_FOUND — no authoritative root README source; newly authored index"
+      root_blob: "58806a56ce19acf59722854c8ec9fd8d20dd0ae7"
+      en_mirror: "docs/en/09-security-governance/README.md"
+      en_mirror_blob: "9c0b152d2a54844302e2c9bb07f15fa0c510e747"
+      zh_cn_mirror: "docs/zh-CN/09-security-governance/README.md"
+      zh_cn_mirror_blob: "b0680e4b8699e376a2f504cc7b446c6806ad9399"
+      status: "Draft / Candidate / Informative"
+
+prompt:
+  prompt_file: "14-ai-development/work-items/AID-PENDING-MERGE/prompt-v1.md"
+  prompt_version: "v1"
+  prompt_status: "HISTORICAL_TASK_INPUT_CARRIED_FORWARD"
+  prompt_sha256: "6f74f728dfa47141ebee108c462e7e853983f1700e91e25c8f98a7b47ec07a95"
+  prompt_bytes: 2130
+  prompt_provenance: "NOT_VERIFIED"
+  prompt_provenance_note: >-
+    The file preserves the prior task-specific user instruction that initially resulted in
+    the provisional AID-080 allocation. The current Owner instruction reallocated this
+    SOURCE-RESTORE-02 record to AID-083. The complete effective prompt payload is unavailable.
+  session_reference_status: "NOT_AVAILABLE"
+
+session_evidence:
+  - role: "IMPLEMENTER_AND_REGISTRATION_COORDINATOR"
+    implementing_ai_session: "NOT_AVAILABLE"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-PENDING-MERGE/prompt-v1.md"
+    executed_prompt_sha256: "6f74f728dfa47141ebee108c462e7e853983f1700e91e25c8f98a7b47ec07a95"
+    executed_prompt_bytes: 2130
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_AVAILABLE"
+    session_evidence_ref: "14-ai-development/work-items/AID-PENDING-MERGE/session-evidence-source-restore.md"
+evidence_file: "14-ai-development/work-items/AID-PENDING-MERGE/evidence.md"
+evidence_blob: "82d11bf45b2f41a44797c30568456ac627f706bc"
+
+formal_registration:
+  status: "COMPLETED_ON_CANDIDATE_BRANCH_WITH_BOUNDED_IDENTIFIER_SCAN"
+  index_entry_verified: true
+  identifier_allocation: "DEFERRED_TO_MERGE_QUEUE"
+  retrospective_registration: true
+  note: >-
+    This Stage 0 registration records the owner-authorized repair and candidate artifacts.
+    It does not retroactively grant domain Owner acceptance, merge, deployment or Normative approval.
+
+lifecycle:
+  current_stage: "STAGE_0"
+  stage_0: "REGISTERED_WITH_RECORDED_LIMITATIONS"
+  r1: "CI_PENDING_ON_RECONCILED_HEAD"
+  r2: "NOT_ACCEPTED"
+  implementation: "DOCUMENTATION_AND_EVIDENCE_ONLY"
+  independent_acceptance: "NOT_GRANTED"
+  merge: "NOT_AUTHORIZED"
+  deployment: "NOT_AUTHORIZED"
+
+acceptance_criteria:
+  stage_0:
+    - "AID-080 original mainline manifest, prompt and INDEX row are restored unchanged."
+    - "AID-081 duplicate Stage 0 registration is removed; mainline Issue #1081 identity is preserved."
+    - "DECISION-ACCEPTANCE-03 is referenced as PR #1219（编号待合并分配）; no provisional AID number is asserted."
+    - "AID-082 manifest and evidence remain unchanged."
+    - "AID-083 manifest, evidence, prompt and INDEX row are committed on PR #1220."
+    - "One compiler root carries RECONSTRUCTED_FROM_MIRROR provenance and exact EN/ZH-CN mirror pins; the two README files are AUTHORED_INDEX documents, not restorations."
+    - "RESTORED and RECONSTRUCTED counts are separate."
+    - "No validator implementation, runtime code, workflow definition, Issue closure or PR merge is changed."
+  stage_0_exit_status: "PENDING_FINAL_READBACK_AND_CI"
+
+open_blockers:
+  - "Exact-Head CI on the reconciled PR head is pending."
+  - "No authoritative root source blob exists for the compiler reconstruction or the two newly authored README indexes; domain Owner exact-version acceptance is pending."
+  - "PR #1219 / PR #1219（编号待合并分配） is the only current decision-acceptance reference; substantive Owner acceptance remains pending."
+  - "E has 18 remaining candidates without existing EN/ZH-CN mirror pairs."
+  - "F has 10 remaining candidates without existing EN/ZH-CN mirror pairs; watermark/scanned-through proof remains open."
+  - "I36-GOV-01..10 remain GOVERNANCE-BLOCKED; approver, exact policy hash/version, authority, scope and effective time are not recorded."
+  - "Independent review is not assigned."
+  - "AID-083 is reserved by PR #1250; SOURCE-RESTORE-02 was renumbered to AID-090. Exhaustive global AID uniqueness scan across all active branch contents is not complete."
+
+prohibitions:
+  - "DO_NOT_MERGE"
+  - "DO_NOT_CLOSE_ISSUES"
+  - "DO_NOT_DEPLOY"
+  - "DO_NOT_CHANGE_VALIDATOR_LOGIC_OR_SEMANTICS"
+  - "DO_NOT_CHANGE_RUNTIME_OR_PRODUCT_CODE"
+  - "DO_NOT_PROMOTE_RECONSTRUCTED_DOCUMENTS_TO_APPROVED_OR_NORMATIVE"

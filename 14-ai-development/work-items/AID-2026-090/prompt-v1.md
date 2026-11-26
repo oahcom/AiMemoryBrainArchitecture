@@ -15,14 +15,12 @@ document_metadata:
         included_sections: []
         included_assets: []
       approval_applicability: Not-Applicable-To-Current-Version
-      evidence_reference:
-        - "AID-2026-11-26-SOURCE-RESTORE-02"
-        - "AID-2026-090"
+      evidence_reference: []
       revocation: null
     evidence_verification:
       verification_status: Unverified
-      last_verified_date: null
-      last_verification_note: "Historical task-specific input capture. Its initial provisional AID-2026-080 allocation was superseded after the mainline collision was identified; this record is carried forward under AID-2026-090 without changing the embedded user instruction. The complete effective model payload remains NOT_VERIFIED."
+      last_verified_date: "2026-11-26"
+      last_verification_note: "Metadata classification only. Prompt provenance and current ChatGPT session identity are not independently verified; see the evidence limitations below."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -46,17 +44,8 @@ document_metadata:
     en: null
     zh-CN: null
 ---
-
-# Task-specific user instruction
-
-﻿以人类 Owner 身份授权：为本次实施正式登记仓库标准 Work Item，解除 Session Evidence Gate 的阻塞。
-
-要求：
-1) 按仓库编号规则取下一个可用 AID（先查重，不得复用或伪造已有编号），为 `SOURCE-RESTORE-02` 与 `DECISION-ACCEPTANCE-03` 建立 Stage 0 注册与 manifest，并更新 INDEX；
-2) 把外部工作流编号（`AID-2026-11-26-…`）保留为证据引用，不作为仓库标准 ID；
-3) 提交到 PR #1220 同一分支，重新触发 Session Evidence Gate；
-4) 回报：分配到的标准 Work Item ID、改动路径、CI 最新结果、剩余阻塞。
-不合并、不部署、不关闭 Issue、不修改 validator 逻辑。
-
-
-RENUMBERED_FROM: AID-2026-083 — PR #1250 occupies AID-2026-083; coordinating authority reassigned SOURCE-RESTORE-02 to AID-2026-090.
+# AID-2026-090 — ContextVersion immutability
+Authority: user-authorized operator (delegated by account owner)
+Date: 2026-11-26
+Issues: #1144, #1151
+Apply the document-only decision in the canonical and EN/ZH-CN contract files. Define immutable fields, external mutable projections, append-only successor ChangeSet and expected-base semantics, digest binding, legal corrections and violation tests. Preserve G authority and cross-owner boundaries. Do not modify code, tests, schemas, validators, workflows, deployment or production. Open a separate Draft PR, post issue decision comments, leave both Issues OPEN. Repository Work Item ID AID-2026-090; any external workflow number is evidence only.
