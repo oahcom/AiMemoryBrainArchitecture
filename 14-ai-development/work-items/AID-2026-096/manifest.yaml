@@ -10,7 +10,7 @@ date: "2026-11-26"
 repository:
   name: "oahcom/AiMemoryBrainArchitecture"
   baseline_branch: "main"
-  baseline_commit: "47fcd80720b742d9c5d3ae137593c59b5cc768a9"
+  baseline_commit: "81906cfc8d3cd477d26657520aa04d81466e7ce2"
   implementation_branch: "docs/2026-11-26-normative-approval-stack-1219"
   carrier_pr: 1256
 authority:
@@ -32,7 +32,7 @@ scope:
     - "Promotion of AID-2026-014 mirror-only supplemental material"
 session_evidence:
   - role: PR
-    issue_refs: []
+    issue_refs:
     implementing_ai_session: NOT_RECORDED
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-096/prompt-v1.md
     executed_prompt_sha256: 6f30cedb322d7c9cc1d76481ac2d1fb1c82877804dd0d5ae781d8758e96d9c4f
