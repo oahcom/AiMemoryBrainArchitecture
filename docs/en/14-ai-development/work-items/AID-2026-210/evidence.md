@@ -177,7 +177,7 @@ before and after.
 
 The rows above isolate the six metadata files. At the final head — which also carries this
 registration set and the `origin/main` registration merged in from the refs unit, itself numbered
-AID-2026-190 — the same gate prints **965 governed, 525 classified, 440 unclassified**: 502 from
+AID-2026-190 — the same gate prints **989 governed, 549 classified, 440 unclassified**: 502 from
 the mirror change, 5 more governed documents added by this work item (three work-record files on
 the root side and the two evidence mirrors), and the rest from registrations merged in from
 `main`. The absolute counts move with every registration another unit lands; what this work item
