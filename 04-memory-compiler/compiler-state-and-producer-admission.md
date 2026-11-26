@@ -18,7 +18,7 @@ document_metadata:
       evidence_reference:
         - "AID-2026-082"
         - "source branch: session-e-memory-compiler-2026-11-16"
-        - "source commit: ee098e14747d9915de5b3efb63a3b8da50"
+        - "source commit: ee098e14747d9915de5b3efb63a8dd77f670ed"
         - "original source blob: e59f517fff161ab882aa0ddc4a5bda513964ae1a"
       revocation: null
     evidence_verification:
