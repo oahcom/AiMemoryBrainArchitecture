@@ -44,10 +44,10 @@ predecessor:
   work_item_id: null
   issues:
     - 469
-    - 487
   note: >-
-    #469 introduced the "pair must carry Chinese" requirement and #487 relaxed it to "either file
-    carries one CJK character", which is where the leak came from. Neither Issue is closed or
+    #469 introduced the "pair must carry Chinese" requirement. The relaxation to "either file
+    carries one CJK character" arrived as pull request #487, not as an Issue, so it is cited here
+    as provenance rather than declared as a related Issue. Neither #469 nor #487 is closed or
     reopened here.
 scope:
   objective: >-
@@ -126,7 +126,7 @@ session_evidence:
   - role: "IMPLEMENTATION_SESSION"
     issue_refs:
       - "#469"
-      - "#487"
+      - "#1212"
     implementing_ai_session: "NOT_RECORDED"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-191/prompt-v1.md"
     executed_prompt_sha256: "8d9e1cc05882f5e9029081e788c6d5ea5c463ef67decdbac1407ab393f836af9"
