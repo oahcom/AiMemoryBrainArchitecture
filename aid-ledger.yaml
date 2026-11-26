@@ -5,7 +5,7 @@
 # One AID maps to exactly one work_item_id.
 
 schema: 1
-updated_at_utc: "2026-11-26T10:15:00Z"
+updated_at_utc: "2026-11-26T10:32:00Z"
 entries:
   - id: AID-2026-090
     state: MERGED
@@ -51,9 +51,9 @@ entries:
     carrier: "PR #1279"
     note: "Issue #1278; took the number that had been assigned to #1251"
   - id: AID-2026-103
-    state: RESERVED
+    state: MERGED
     carrier: "PR #1251"
-    note: "six outside-the-repo fixture roots; Issues #989 #988 #827"
+    note: "six outside-the-repo fixture roots; Issues #989 #988 #827; merged as f563037a; reservation commit 844c0822 preceded content commit 5359a20a"
   - id: AID-2026-104
     state: FREE
   - id: AID-2026-105
@@ -68,4 +68,5 @@ entries:
     state: FREE
   - id: AID-2026-110
     state: FREE
+
 
