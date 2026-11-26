@@ -376,3 +376,27 @@ Gate B: PARTIAL / OPEN — NOT VERIFIED (unchanged). Single-machine SQLite tests
 ## 10. Explicitly out of scope
 
 No runtime, validator, schema, API, DDL, workflow or deployment changes; no IMPL2 restoration; do not promote DOCUMENTED_ONLY or PARTIAL_EVIDENCE to PASS; do not close #1211 or #1212.
+
+## Provenance correction
+
+Appended 2026-11-27. This section corrects provenance only. It changes no verdict: the SC/HIR and 72 flow-cell judgments in §2–§7 and the Gate A / Gate B disposition in §9 stand as written.
+
+**AID-2026-111 recorded `NOT_RECORDED`.** For the memory-context group at the same exact HEAD `a123ea4e414c9f74fa0c576fbd718049a7d9f917`, AID-2026-111 §2.3 records: passed **177**; failed count and process exit code **NOT_RECORDED**; the exact command, test-binary count, stdout bytes, raw stdout SHA-256, per-harness passed multiset and test-name inventory all **NOT_RECORDED**; normalised digest **NOT_SUPPLIED**. §2.1 of that record adds that a raw stdout SHA-256 pins that one capture only and is not a reproducible constant.
+
+**This document records more.** §8 here writes the same group (same HEAD, same command) as: Exit `0`, Test binaries `11`, Passed / Failed `177 / 0`, stdout SHA-256 `43b2b9b6…`.
+
+**But no new capture is cited.** Nothing in this work item supplies a command log, stdout artifact, hash procedure or capture time for that row; §8 says only that the rows are operator-supplied and were not re-run in this session — which states **who executed**, not **where these fields came from**.
+
+**Provenance marking.** The following three fields are marked `INHERITED_ASSUMPTION`, and are not to be read as recorded measurements:
+
+| Field | AID-111 record | This record | Provenance status |
+|---|---|---|---|
+| Exit code | NOT_RECORDED | 0 | INHERITED_ASSUMPTION |
+| Failed count | NOT_RECORDED | 0 | INHERITED_ASSUMPTION |
+| Test binaries | NOT_RECORDED | 11 | INHERITED_ASSUMPTION |
+
+The stdout SHA-256 `43b2b9b6…` on the same row is likewise unsourced: AID-111 records that group's raw hash as NOT_RECORDED and its normalised digest as NOT_SUPPLIED. Under §2.1's rule, a raw hash is evidence only in pair with the capture it pins; without the capture it carries no verification weight.
+
+**What still holds.** The passed count 177 is recorded in AID-111 §2.3; §8's 552 = 99 + 276 + 177 still holds as the arithmetic sum of three passed counts, but it is not one unified run, not a deduplicated unique-test count, and its `0 failed` and `Exit 0` are unverified. The title's "552 local test evidence" therefore reads as the sum of three passed counts and no more.
+
+**Scope.** This section does not claim that any judgment is wrong. It lowers three fields and one hash from "recorded value" to "inherited assumption"; if the corresponding capture is produced later, they may be restored to verified values as recorded.

@@ -496,6 +496,65 @@ user-authorized operator (delegated by account owner)；2026-11-26。仅记录�
 | T93 | `tests::startup_backfills_compile_intent_for_preexisting_accepted_events` | SC-15 | 无对应测试 | 覆盖 E compile-intent 数据/顺序/幂等/回填局部实现；不证明 E admission 完整原子边界。 |
 | T94 | `tests::status_and_replay_enforce_scope` | SC-10, SC-12 | 无对应测试 | 覆盖本地 scope/read/change-page fail-closed；缺全权威读路径、replica applied position、D/I currentness。 |
 
+## Correction
+
+追加于 2026-11-27。本节是对 §1 的算术核对。它不改任何判定，也不修改 §1 的表格：合计行原样保留，仍为 `36 / 52`。
+
+**判定行清点。** 本记录共有 **88** 个带判断的行，分三组：§5 的 72 个 Gate A 单元（8 流程 × 9 检查点）、§6 的 8 条 `EVIDENCE_REQUIRED` SC 行、§7 的 8 条 `EVIDENCE_REQUIRED` HIR 行。文中复现不出"95"这个数：除这 88 行外，本文没有其它行带 PASS / PARTIAL_EVIDENCE / UNCHANGED 判定。
+
+**§1 中各组分项和（照录）。**
+
+| 组 | PASS | PARTIAL_EVIDENCE | UNCHANGED | 合计 |
+|---|---:|---:|---:|---:|
+| AID-095 Gate A 矩阵（8 × 9），照录 | 0 | 23 | 49 | 72 |
+| Storage SC EVIDENCE_REQUIRED，照录 | 0 | 6 | 2 | 8 |
+| H 幂等 HIR EVIDENCE_REQUIRED，照录 | 0 | 5 | 3 | 8 |
+| 上述三行的列和 | **0** | **34** | **54** | **88** |
+| §1 合计行，照录 | **0** | **36** | **52** | **88** |
+
+每个分项行自身是自洽的：23 + 49 = 72，6 + 2 = 8，5 + 3 = 8。合计行不自洽：23 + 6 + 5 = **34**，不是 36；49 + 2 + 3 = **54**，不是 52。它的合计（88）是对的；错误在于合计里有两行被从 UNCHANGED 挪成了 PARTIAL_EVIDENCE，而 §5、§6、§7 里并没有任何一行发生位移。
+
+**成立的是 34 / 54。** 三种读法一致，只有合计行不同。(a) 三个分项行相加得 0 / 34 / 54。(b) 对全部 88 个判定单元直接清点，同样得 0 / 34 / 54。(c) 本记录自己的 `AI-visible output` 一节已写作"0 PASS、34 PARTIAL_EVIDENCE、54 UNCHANGED"。因此直接指向 §5–§7 的证据支持 34 / 54，`36 / 52` 是唯一偏离值，应按"合计行的一处算术笔误"读取。
+
+**§5 的 72 个 Gate A 单元逐行判定。** `P` = PARTIAL_EVIDENCE，`U` = UNCHANGED；下表每个单元格都是 §5 印出的判定。
+
+| 检查点 | F1 | F2 | F3 | F4 | F5 | F6 | F7 | F8 | P | U |
+|---|---|---|---|---|---|---|---|---|---:|---:|
+| Issuer | U | U | U | U | U | U | U | U | 0 | 8 |
+| Request / response | U | U | U | U | U | U | U | P | 1 | 7 |
+| Identity / cursor namespace | U | U | U | P | U | U | U | U | 1 | 7 |
+| Idempotency scope | P | P | U | P | U | U | U | P | 4 | 4 |
+| Linearization point | P | P | U | P | U | U | U | P | 4 | 4 |
+| Durable receipt | P | P | U | U | U | U | U | P | 3 | 5 |
+| Failure / Unknown | U | P | U | P | U | U | U | P | 3 | 5 |
+| Replay / recovery | P | P | U | P | U | U | U | P | 4 | 4 |
+| Visibility | P | U | U | P | U | U | U | P | 3 | 5 |
+| **按流程小计** | **5 P / 4 U** | **5 P / 4 U** | **0 P / 9 U** | **6 P / 3 U** | **0 P / 9 U** | **0 P / 9 U** | **0 P / 9 U** | **7 P / 2 U** | **23** | **49** |
+
+**16 条 `EVIDENCE_REQUIRED` 逐行判定（§6、§7）。**
+
+§6 Storage SC——6 PARTIAL_EVIDENCE / 2 UNCHANGED：
+- SC-04 — PARTIAL_EVIDENCE
+- SC-05 — PARTIAL_EVIDENCE
+- SC-06 — PARTIAL_EVIDENCE
+- SC-10 — PARTIAL_EVIDENCE
+- SC-12 — PARTIAL_EVIDENCE
+- SC-13 — PARTIAL_EVIDENCE
+- SC-17 — UNCHANGED
+- SC-18 — UNCHANGED
+
+§7 H 幂等 HIR——5 PARTIAL_EVIDENCE / 3 UNCHANGED：
+- HIR-05 — UNCHANGED
+- HIR-06 — PARTIAL_EVIDENCE
+- HIR-08 — PARTIAL_EVIDENCE
+- HIR-12 — UNCHANGED
+- HIR-14 — PARTIAL_EVIDENCE
+- HIR-16 — PARTIAL_EVIDENCE
+- HIR-17 — UNCHANGED
+- HIR-18 — PARTIAL_EVIDENCE
+
+**正确合计：0 PASS / 34 PARTIAL_EVIDENCE / 54 UNCHANGED = 88 行。** 本节不改动 §5、§6、§7 的任何判定，不产生任何 PASS，并把 `36 / 52` 合计行原样留在原处，作为它确实被如此记录的取值。
+
 ## Session role / use case
 
 本轮担任 AID-2026-111 SQLite 实现测试证据的文档作者与证据裁决者。工作限于读取精确源谓词、映射用户提供的测试名称并记录受限的证据分类。未修改 runtime、validator、schema、test、workflow、deployment 或 production。

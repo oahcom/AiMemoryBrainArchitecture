@@ -400,6 +400,66 @@ Gate A item 5 is therefore actionable, not an unbounded restore request:
 ## 11. Attribution
 
 user-authorized operator (delegated by account owner); 2026-11-26. Delegated evidence recording only; no natural-person Owner signature is fabricated.
+
+## Correction
+
+Appended 2026-11-27. This section is an arithmetic audit of §1. It changes no verdict and does not edit the §1 table: the combined row remains exactly as recorded, `36 / 52`.
+
+**Row inventory.** The record carries **88** verdict-bearing rows in three sets: §5 has 72 Gate A cells (8 flows × 9 checkpoints), §6 has 8 `EVIDENCE_REQUIRED` SC rows, and §7 has 8 `EVIDENCE_REQUIRED` HIR rows. A figure of 95 does not reproduce from the body: no other row in this document carries a PASS / PARTIAL_EVIDENCE / UNCHANGED verdict.
+
+**Per-set sums, as written in §1.**
+
+| Set | PASS | PARTIAL_EVIDENCE | UNCHANGED | Total |
+|---|---:|---:|---:|---:|
+| AID-095 Gate A matrix (8 × 9), as recorded | 0 | 23 | 49 | 72 |
+| Storage SC EVIDENCE_REQUIRED, as recorded | 0 | 6 | 2 | 8 |
+| H idempotency HIR EVIDENCE_REQUIRED, as recorded | 0 | 5 | 3 | 8 |
+| Column sums of those three rows | **0** | **34** | **54** | **88** |
+| Combined row, as recorded in §1 | **0** | **36** | **52** | **88** |
+
+Every set row is internally consistent: 23 + 49 = 72, 6 + 2 = 8, 5 + 3 = 8. The combined row is not: 23 + 6 + 5 = **34**, not 36, and 49 + 2 + 3 = **54**, not 52. Its total (88) is correct; the error is that two rows were moved from UNCHANGED to PARTIAL_EVIDENCE inside the total, while no row in §5, §6 or §7 moved.
+
+**Which figure holds: 34 / 54.** Three readings agree, and only the combined row disagrees. (a) The three set rows sum to 0 / 34 / 54. (b) A direct tally of all 88 verdict cells reproduces 0 / 34 / 54. (c) The `AI-visible output` section of this same record already states "0 PASS, 34 PARTIAL_EVIDENCE and 54 UNCHANGED". A direct reference to §5–§7 therefore supports 34 / 54, and 36 / 52 is the outlier to be read as an arithmetic slip in the combined row only.
+
+**Per-row listing of the 72 Gate A cells (§5).** `P` = PARTIAL_EVIDENCE, `U` = UNCHANGED. Every cell below is the verdict printed in §5.
+
+| Checkpoint | F1 | F2 | F3 | F4 | F5 | F6 | F7 | F8 | P | U |
+|---|---|---|---|---|---|---|---|---|---:|---:|
+| Issuer | U | U | U | U | U | U | U | U | 0 | 8 |
+| Request / response | U | U | U | U | U | U | U | P | 1 | 7 |
+| Identity / cursor namespace | U | U | U | P | U | U | U | U | 1 | 7 |
+| Idempotency scope | P | P | U | P | U | U | U | P | 4 | 4 |
+| Linearization point | P | P | U | P | U | U | U | P | 4 | 4 |
+| Durable receipt | P | P | U | U | U | U | U | P | 3 | 5 |
+| Failure / Unknown | U | P | U | P | U | U | U | P | 3 | 5 |
+| Replay / recovery | P | P | U | P | U | U | U | P | 4 | 4 |
+| Visibility | P | U | U | P | U | U | U | P | 3 | 5 |
+| **Per-flow total** | **5 P / 4 U** | **5 P / 4 U** | **0 P / 9 U** | **6 P / 3 U** | **0 P / 9 U** | **0 P / 9 U** | **0 P / 9 U** | **7 P / 2 U** | **23** | **49** |
+
+**Per-row listing of the 16 `EVIDENCE_REQUIRED` rows (§6, §7).**
+
+§6, Storage SC — 6 PARTIAL_EVIDENCE / 2 UNCHANGED:
+- SC-04 — PARTIAL_EVIDENCE
+- SC-05 — PARTIAL_EVIDENCE
+- SC-06 — PARTIAL_EVIDENCE
+- SC-10 — PARTIAL_EVIDENCE
+- SC-12 — PARTIAL_EVIDENCE
+- SC-13 — PARTIAL_EVIDENCE
+- SC-17 — UNCHANGED
+- SC-18 — UNCHANGED
+
+§7, H idempotency HIR — 5 PARTIAL_EVIDENCE / 3 UNCHANGED:
+- HIR-05 — UNCHANGED
+- HIR-06 — PARTIAL_EVIDENCE
+- HIR-08 — PARTIAL_EVIDENCE
+- HIR-12 — UNCHANGED
+- HIR-14 — PARTIAL_EVIDENCE
+- HIR-16 — PARTIAL_EVIDENCE
+- HIR-17 — UNCHANGED
+- HIR-18 — PARTIAL_EVIDENCE
+
+**Correct combined total: 0 PASS / 34 PARTIAL_EVIDENCE / 54 UNCHANGED = 88 rows.** No verdict in §5, §6 or §7 is changed by this correction, no PASS is created, and the `36 / 52` combined row is left in place as the recorded value it is.
+
 ## Session role / use case
 
 Documentation author and evidence adjudicator for the SQLite implementation-test evidence supplied for AID-2026-111. The work reads exact source predicates, maps the supplied test names, and records bounded evidence classifications. No runtime, validator, schema, test, workflow, deployment or production change was made.

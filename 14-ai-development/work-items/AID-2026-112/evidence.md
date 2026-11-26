@@ -376,3 +376,27 @@ document_metadata:
 ## 10. 明确不在本 PR 内
 
 不修改 runtime、validator、schema、API、DDL、workflow 或 deployment；不恢复 IMPL2 文件；不把 DOCUMENTED_ONLY 或 PARTIAL_EVIDENCE 升级为 PASS；不关闭 #1211 或 #1212。
+
+## Provenance correction
+
+追加于 2026-11-27。本节只订正溯源等级，不改任何判定：§2–§7 的 SC/HIR 与 72 个 flow-cell 判定、§9 的 Gate A / Gate B 结论均保持原样。
+
+**AID-2026-111 原文记录的是 `NOT_RECORDED`。** 对同一精确 HEAD `a123ea4e414c9f74fa0c576fbd718049a7d9f917` 上的 memory-context 组，AID-2026-111 §2.3 记录：passed **177**；failed 数与进程 exit code **NOT_RECORDED**；确切命令、test-binary 数、stdout 字节数、raw stdout SHA-256、逐 harness passed multiset 与测试名清单均 **NOT_RECORDED**；normalised digest **NOT_SUPPLIED**。111 §2.1 另说明 raw stdout SHA-256 只钉住"那一次捕获"，不是可复现常量。
+
+**本文记录得更满。** 本文 §8 表对同一组（同一 HEAD、同一命令）写作：Exit `0`、Test binaries `11`、Passed / Failed `177 / 0`、stdout SHA-256 `43b2b9b6…`。
+
+**但没有任何新采集被引用。** 本文通篇未为这一行出示新的命令日志、stdout 工件、哈希算法或采集时间；§8 只说"以下是操作者提供的本地执行记录，本代理未在本会话重跑"——这句话说明的是**谁执行**，不是这些字段**从哪来**。
+
+**溯源标记。** 以下三项标为 `INHERITED_ASSUMPTION`，不视为已记录测量值：
+
+| 字段 | AID-111 记录 | 本文记录 | 溯源状态 |
+|---|---|---|---|
+| Exit code | NOT_RECORDED | 0 | INHERITED_ASSUMPTION |
+| Failed count | NOT_RECORDED | 0 | INHERITED_ASSUMPTION |
+| Test binaries | NOT_RECORDED | 11 | INHERITED_ASSUMPTION |
+
+同一行的 stdout SHA-256 `43b2b9b6…` 同样没有出处：111 记录该组 raw hash 为 NOT_RECORDED、normalised digest 为 NOT_SUPPLIED。按 111 §2.1 的口径，raw hash 只有与被它钉住的那次捕获成对时才构成证据；没有捕获，这个哈希不承担验证作用。
+
+**仍然成立的部分。** passed 计数 177 在 111 §2.3 中有记录；§8 的 552 = 99 + 276 + 177 作为三个 passed 计数的加法仍成立，但它不是一次统一运行、不是去重后的唯一测试数，其中 `0 failed` 与 `Exit 0` 未经验证。标题"552 项本地测试证据"因此只能读作三个 passed 计数之和。
+
+**范围。** 本节不声称任何判定错判，只把上述三项与一个哈希从"记录值"降为"继承假设"；若日后出示对应捕获，这三项可按原值恢复为已验证。
