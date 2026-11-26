@@ -1,0 +1,133 @@
+work_item_id: AID-2026-189
+title: >-
+  Remove the Rust cache from the fmt gate that can never hit, add head-SHA concurrency to the
+  two topic workflows AID-2026-115 missed, and record the two remaining CI dispatch defects
+class: CI/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  Two workflow edits plus one registration set. The fmt job loses two steps that cannot do
+  useful work because the job never compiles; the two added concurrency blocks only cancel
+  superseded runs of workflows that already existed. No job is added, renamed, merged or
+  removed, no required context is deleted, no checker semantics change, and the two defects
+  that would need such a change are recorded as DEFERRED_TO_OWNER instead of repaired.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-26
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 88b610c3aac9c169c40a205845ea6f7346b27c87
+prompt_status: RECORDED
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: 88b610c3aac9c169c40a205845ea6f7346b27c87
+  assigned_id: AID-2026-189
+  allocation_rule: >-
+    Task-assigned number band. AID-2026-170, AID-2026-172 and AID-2026-173 are merged and
+    AID-2026-183, AID-2026-186 and AID-2026-188 are open, so 189 is the first number outside
+    both observed sets. No INDEX maximum plus one was used.
+  recheck_rule: >-
+    Immediately before merge, re-read open pull requests and remote branches for
+    AID-2026-189; if occupied, take the next free number and update every path and reference
+    in the same push.
+predecessor:
+  work_item_id: AID-2026-115
+  pull_request: 1322
+  merge_commit: ac301e09799bcc094e015db4e12d2e6ff53d5010
+scope:
+  objective: >-
+    Close the three leftovers of AID-2026-115 that a worker can close without touching a
+    required context: drop the unreachable rust-cache and toolchain-probe steps from the fmt
+    job, add head-SHA concurrency to the two dual-trigger topic workflows, and record the two
+    defects that require an Owner decision.
+  changes:
+    - path: ".github/workflows/gates.yml"
+      detail: >-
+        jobs.fmt loses the steps "Record resolved Rust toolchain version" and "Cache Rust
+        dependencies and build artifacts" (Swatinem/rust-cache@v2, shared-key gates-fmt); a
+        three-line comment records why the cache is absent. Nothing else in the file changes.
+    - path: ".github/workflows/h-applied-delivery-evidence-conformance.yml"
+      detail: >-
+        Adds a top-level concurrency block keyed on
+        github.event.pull_request.head.sha || github.sha with cancel-in-progress true.
+    - path: ".github/workflows/publication-protocol-reference-model.yml"
+      detail: >-
+        Adds the same top-level concurrency block. The workflow also carries a real push
+        trigger on fix/publication-fence-admission-order.
+  untouched:
+    - "clippy, doctest and rust-workspace-test keep their rust-cache and toolchain-probe steps"
+    - "every job id and job display name, in every workflow"
+    - "scripts/check_declared_check_contexts.py"
+    - "fetch-depth of every checkout"
+    - "branch protection and the sixteen declared required contexts"
+deferred_to_owner:
+  - id: DEFERRED-1
+    title: "ready_for_review dispatches a second completed run that cancel-in-progress cannot cancel"
+    status: DEFERRED_TO_OWNER
+    affected_workflows:
+      - ".github/workflows/bilingual-docs.yml"
+      - ".github/workflows/branch-freshness.yml"
+      - ".github/workflows/document-management.yml"
+      - ".github/workflows/repository-hygiene.yml"
+    observation: "The dispatcher measured 4 of 4 workflows double-dispatching on a draft-to-ready transition for an unchanged head SHA."
+    root_cause: >-
+      ready_for_review is a new event for an unchanged SHA. The earlier run for that SHA is
+      already completed, and cancel-in-progress only cancels queued or in-progress runs in the
+      same concurrency group, so the concurrency block AID-2026-115 added cannot suppress it.
+    candidate_fixes:
+      - "Drop ready_for_review from pull_request.types in the four workflows; opened still covers a draft, synchronize covers every later push, and the ready transition adds no commit."
+      - "Add a job-level if: github.event.action != 'ready_for_review'; rejected for these four because a skipped required context does not satisfy branch protection."
+      - "Gate the dispatch on an API query for an existing completed run on the same head SHA; costs a token-scoped call and a new fail-closed branch."
+    recommendation: "Drop the trigger type. It removes work and changes no required context name."
+  - id: DEFERRED-2
+    title: "Two required contexts execute byte-identical commands, and merging the jobs would make a declared context never arrive"
+    status: DEFERRED_TO_OWNER
+    duplicated_commands:
+      - command: "cargo test --workspace --doc --no-fail-fast"
+        contexts:
+          - "Rust doctests (hard gate) / gates.yml job doctest"
+          - "rust-workspace-test / rust-phase1.yml job rust-workspace-test"
+      - command: "python3 scripts/check_fmt.py --expect \"$GITHUB_SHA\""
+        contexts:
+          - "Rust format (hard gate) / gates.yml job fmt"
+          - "rust-workspace-test / rust-phase1.yml job rust-workspace-test"
+    root_cause: >-
+      check_declared_check_contexts.py enforces one job per context in both directions. Folding
+      fmt and doctest into rust-workspace-test deletes the jobs that produce two declared
+      contexts, so the declared-to-produced half fails, repository-hygiene goes red, and branch
+      protection keeps requiring contexts nothing emits.
+    candidate_fixes:
+      - "Remove the two duplicated steps from rust-phase1.yml and keep both contexts reporting; the duplicate work disappears, at the cost of losing a second independent producer."
+      - "Retire Rust format (hard gate) and Rust doctests (hard gate) from PR-GOVERNANCE-001 section 7, the protection payload and the producing jobs in one Owner-authorized change."
+      - "Make the second producer non-identical, for example without --no-fail-fast; the divergence then becomes invisible unless the workflows are diffed."
+    recommendation: "Remove the duplicated steps from rust-phase1.yml if the duplication is judged a real cost; otherwise record it as accepted."
+evidence:
+  record: 14-ai-development/work-items/AID-2026-189/evidence.md
+  prompt: 14-ai-development/work-items/AID-2026-189/prompt-v1.md
+  session: 14-ai-development/work-items/AID-2026-189/session-evidence.md
+non_goals:
+  - Changing any required context name, count or protection entry
+  - Merging, renaming or re-scoping any job
+  - Changing check_declared_check_contexts.py or any other checker
+  - Repairing either DEFERRED_TO_OWNER item
+  - Closing or reopening any Issue
+notes:
+  - >-
+    The work tree was not clean at dispatch: the three workflow edits already existed
+    uncommitted from an earlier attempt on this branch. They were verified against the brief
+    and kept, not discarded.
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#1212"
+    implementing_ai_session: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-189/prompt-v1.md"
+    executed_prompt_sha256: "74efa69664b800939dedcc249ca5b81e153f57c9f03c9060b2777dd56f9bfaa6"
+    executed_prompt_bytes: 4306
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-189/session-evidence.md"

@@ -376,3 +376,29 @@ document_metadata:
 ## 10. 明确不在本 PR 内
 
 不修改 runtime、validator、schema、API、DDL、workflow 或 deployment；不恢复 IMPL2 文件；不把 DOCUMENTED_ONLY 或 PARTIAL_EVIDENCE 升级为 PASS；不关闭 #1211 或 #1212。
+
+## Provenance correction
+
+追加于 2026-11-27。本节只订正溯源，不改任何判定：§2–§7 的 SC/HIR 与 72 个 flow-cell 判定、§9 的 Gate A / Gate B 结论均保持原样。
+
+**成文时的状态。** 本文写成时，同轮运行的唯一记录 AID-2026-111 §2.3 对 memory-context 组（同一 HEAD `a123ea4e414c9f74fa0c576fbd718049a7d9f917`）记：passed **177**；failed 数与 exit code **NOT_RECORDED**；命令、test-binary 数、stdout 字节数、raw stdout SHA-256、逐 harness passed multiset 与测试名清单均 **NOT_RECORDED**；normalised digest **NOT_SUPPLIED**。
+
+**本文记录得更多，但当时没有引用来源。** 本文 §8 表对同一组写作 Exit `0`、Test binaries `11`、Passed / Failed `177 / 0`、stdout SHA-256 `43b2b9b6…`；通篇未出示命令日志、stdout 工件、哈希算法或采集时间。§8 的"操作者提供、本会话未重跑"说明的是**谁执行**，不是这些字段**从哪来**。因此按本文自身的文本，这三项在成文时属于 `INHERITED_ASSUMPTION`：它们与更早的同轮记录冲突，且没有新采集被引用。
+
+**后到的一次捕获。** 2026-11-27，AID-2026-111 追加 §12 "memory-context capture (2026-11-27)"：同一 HEAD、同一命令、exit `0`、11 binaries、`177 / 0`；并明确写出 stdout 字节数、raw stdout SHA-256、逐 harness multiset、normalised digest 与测试名清单仍为 **NOT_RECORDED**，同时声明 §2.3 作为历史记录保留、不改变任何判定。
+
+**合并后的溯源状态。**
+
+| 字段 | 111 §2.3（成文时） | 111 §12（2026-11-27，后到） | 本文 | 溯源 |
+|---|---|---|---|---|
+| Exit code | NOT_RECORDED | 0 | 0 | INHERITED_ASSUMPTION，其后由 §12 捕获确认 |
+| Failed count | NOT_RECORDED | 0 | 0 | INHERITED_ASSUMPTION，其后由 §12 捕获确认 |
+| Test binaries | NOT_RECORDED | 11 | 11 | INHERITED_ASSUMPTION，其后由 §12 捕获确认 |
+
+三项数值与后到捕获一致，因此它们不是无据之数；但"本文引用过一份采集"依然不成立——本文没有引用，§12 是另一份、后到的记录。
+
+**仍然没有来源的：stdout SHA-256。** 本文的 `43b2b9b6…` 在 §2.3 与 §12 中都没有对应捕获：§12 明确把 raw stdout SHA-256 列为 NOT_RECORDED。按 AID-2026-111 §2.1 的口径，raw hash 只有与被它钉住的那次捕获成对时才构成证据；因此这个哈希在本记录中保持 **UNSUPPORTED**，不得用于验证或复现。
+
+**仍然成立的部分。** passed 计数 177 在 §2.3 有记录并由 §12 确认；§8 的 552 = 99 + 276 + 177 作为三个 passed 计数的加法成立，但仍不是一次统一运行、不是去重后的唯一测试数。标题"552 项本地测试证据"只能读作三个 passed 计数之和。
+
+**范围。** 本节不声称任何判定错判，也不改写 §8。它记录三件事：本文成文时没有引用任何采集；这三项当时是继承假设；后到捕获确认了它们的数值，而同一行的 stdout 哈希仍未获支撑。

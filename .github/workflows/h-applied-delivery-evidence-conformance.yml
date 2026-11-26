@@ -1,6 +1,10 @@
 name: H Applied Delivery Evidence Conformance
 # revision: Applied Delivery Evidence message family 1.0.0; separate from Unified 1.2.15 Gateway C Provider Outcome
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
 on:
   push:
     branches:
