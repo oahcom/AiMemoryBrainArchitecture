@@ -400,8 +400,8 @@ E. 确保所有结论明确标记 DECIDED / CANDIDATE / ADR-BLOCKED / OPEN / TO_
 - 09-security-governance/principal-actor-and-authorization-contract.md
 - 09-security-governance/scope-and-revocation-policy.md
 - 09-security-governance/forget-retention-backup-and-erasure-policy.md
-- 09-security-governance/threat-model-and-adversarial-test-plan.md
-- 09-security-governance/audit-and-exception-governance.md
+- 09-security-governance/threat-model-and-adversarial-test-plan.md (not restored on main; see AID-2026-107 §10)
+- 09-security-governance/audit-and-exception-governance.md (not restored on main; see AID-2026-107 §10)
 
 【验收】
 - Identity authenticated/bound，不能由 payload 自我声明。

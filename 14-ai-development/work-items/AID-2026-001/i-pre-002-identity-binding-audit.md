@@ -76,9 +76,9 @@ PR #42 branch at audited Head:
 
 Owner I candidate branch `session-i-security-governance-2026-11-16`:
 - `09-security-governance/principal-actor-and-authorization-contract.md`, Blob `03765efac4bb1153f303ce0030f9e277d602e81d`.
-- `09-security-governance/phase-3.6-identity-trust-policy-joint-closure.md`, Blob `0cbf6bb7480db873790c454817593a9b1c5548ba`.
-- `09-security-governance/phase-3.6-principal-trust-chain-authorization-revocation.md` (candidate technical package).
-- `09-security-governance/phase-3.8.18-i-exact-review-h-authenticated-ingress-envelope-trust-boundary.md`, Blob `73145f83df234ebb9e55cc07f0a82b0db9416b68`.
+- `09-security-governance/phase-3.6-identity-trust-policy-joint-closure.md` (not restored on main; see AID-2026-107 §10), Blob `0cbf6bb7480db873790c454817593a9b1c5548ba`.
+- `09-security-governance/phase-3.6-principal-trust-chain-authorization-revocation.md` (not restored on main; see AID-2026-107 §10) (candidate technical package).
+- `09-security-governance/phase-3.8.18-i-exact-review-h-authenticated-ingress-envelope-trust-boundary.md` (not restored on main; see AID-2026-107 §10), Blob `73145f83df234ebb9e55cc07f0a82b0db9416b68`.
 
 ## 7. Status / 状态
 

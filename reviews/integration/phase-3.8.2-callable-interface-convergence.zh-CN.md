@@ -21,7 +21,7 @@
 |---|---|---|---|
 | D | `session-d-memory-brain-2026-11-16` | `03-memory-brain/phase-3.7-d-producer-class-registry-eventref-ingress-and-participant-intent.md` | `4c01713bc8793a8926ef18b625b72d132572173d` |
 | E | `session-e-memory-compiler-2026-11-16` | `04-memory-compiler/phase-3.7-e-local-lifecycle-producer-derivative-queue-recall-context-restore.md` | `4fb9e58511941f59b4d777336f8f85ad88ecccf1` |
-| I | `session-i-security-governance-2026-11-16` | `09-security-governance/phase-3.7-i-current-authorization-enforcement-and-restore-proof.md` | `e3b1b5d99eb36ac0b395854d8c19287d2b64b752` |
+| I | `session-i-security-governance-2026-11-16` | `09-security-governance/phase-3.7-i-current-authorization-enforcement-and-restore-proof.md` (not restored on main; see AID-2026-107 §10) | `e3b1b5d99eb36ac0b395854d8c19287d2b64b752` |
 | Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `reviews/storage-consistency/phase-3.7-storage-atomic-producer-registration-dependency-visibility-realization.md` | `2ab899ee37a18ae6c8f2f64dbb82ad6499842060` |
 | A 候选接口面 | `session-a-integration-2026-11-16` | `reviews/integration/phase-3.8.1-a-contract-surface-and-exact-pin-refresh.md` | `ad5450ea35f6dabc7de1ffa1ea63661f2e500064` |
 | 幂等 RFC | PR #251，`rfc/idempotency-identity-tuple-2026-11-18` | `reviews/contracts/RFC-IDE-001-idempotency-identity-tuple.en.md` | `0f42db17325ba5402b7d8000fad8ce11aeadfbc4` |
