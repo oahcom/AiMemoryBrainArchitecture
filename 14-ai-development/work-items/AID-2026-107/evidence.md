@@ -48,7 +48,7 @@ document_metadata:
 
 - Work item: `AID-2026-107`; `id_status: PROVISIONAL`.
 - Attribution: **user-authorized operator (delegated by account owner)**; date: **2026-11-26**. Proxy registration only; no natural-person Owner signature is represented.
-- Exact main baseline: `8915b63e0c736d62e05ff02b72efc551f5a4ba83` (read from the main branch API).
+- Exact main baseline: `3866a121fecbbdf402d50bb0cb2de0277d0275f5` (read from the main branch API).
 - Prior matrix: AID-2026-095, merged PR #1264. This refresh does not alter AID-095.
 - Related merged inputs: AID-2026-082 / PR #1265 / merge prefix `71548b7b`; AID-2026-098 / PR #1283 / merge prefix `cdba0b73`; AID-2026-100 / PR #1284 / merge prefix `b1f9c51a`.
 - Related Issue: #1212. It remains OPEN.
@@ -80,8 +80,8 @@ All 72 checkpoint rows remain `NOT EVIDENCED`: 0 UPGRADED, 72 UNCHANGED, 0 DOWNG
 | System Boundaries ZH-CN | `354cc859cb99783ac9947defe0e1d90a272b1939` | Mirror only. |
 | AID-100 evidence | `ae46c7a4424778d0c8e4c5b21c6535023a9b460d` | Full-clone local document-management checker/census evidence; not CI and not flow/Storage implementation evidence. |
 | AID-100 EN mirror | `425e5eaf6c99286342e20f5ecf525ee297d75e0c` | Language mirror. |
-| AID-099 H idempotency candidate | `a5f43d58ebee451260fc64c7e048b96401e89ef4` | §11 has 18 data rows: 10 DOCUMENTED_ONLY + 8 EVIDENCE_REQUIRED + 0 PASS; Candidate/Draft, cross-Owner acceptance PENDING. |
-| AID-099 manifest | `8d87eef02b997eb0d976903d40dcac802b2d80ba` | Historical AID-098 unavailable pin at baseline d5107f68 is stale; see §5. |
+| AID-099 H idempotency candidate | `f64dd8f520b98e52a7151619cb279fc0b4c38c89` | §11 has 18 data rows: 10 DOCUMENTED_ONLY + 8 EVIDENCE_REQUIRED + 0 PASS; Candidate/Draft, cross-Owner acceptance PENDING. |
+| AID-099 manifest | `d580d830114311afc10d7c82776f39e2ca1a4323` | Historical AID-098 unavailable pin at baseline d5107f68 is stale; see §5. |
 | AID-100 ZH-CN mirror | `fda38f1355f6160db78facde996fee3345905ea1` | Language mirror. |
 
 ### 2.1 AID-082 boundary
@@ -220,13 +220,13 @@ Rules: the original 095 matrix uses only PASS / FAIL / NOT EVIDENCED. AID-082/09
 
 | # | Gate A item | Current state | Closeout condition |
 |---|---|---|---|
-| 1 | Branch synchronized with current main | SATISFIED at reviewed base `8915b63e0c736d62e05ff02b72efc551f5a4ba83`; recheck if main advances | At final-head review, merge base equals current main and branch is not behind. |
+| 1 | Branch synchronized with current main | SATISFIED at reviewed base `3866a121fecbbdf402d50bb0cb2de0277d0275f5`; recheck if main advances | At final-head review, merge base equals current main and branch is not behind. |
 | 2 | Cross-Owner role dispositions (10 roles: 3 ACCEPT / 7 CONDITIONAL / 0 REJECT) | SATISFIED as recorded proxy dispositions | Seven conditional obligations remain; no natural-person Owner signature is claimed. |
 | 3 | Exact-head CI | OPEN_PENDING_FINAL_HEAD | All 16 required contexts succeed on the exact final PR Head. |
 | 4 | Complete A–I + Storage/Consistency composition review artifact | OPEN | Owner A coordinates the complete exact-version package across eight flows and nine checkpoint dimensions; relevant Owners accept their own boundaries. |
 | 5 | Missing D/E/F/I normative roots/contracts | OPEN — IMPL2 | IMPL2 restores or formally dispositions the roots and pins exact canonical replacements; D/E/F/I review their own authority semantics. AID-082 lint is not a substitute. |
 | 6 | Storage/Consistency physical contract and evidence | OPEN — contract present, evidence missing | Candidate: `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (Candidate/Draft/Unverified/Informative). SC-04/05/06/10/12/13/17/18 remain EVIDENCE_REQUIRED; backend, WAL/flush/torn-write, crash/restore, replica visibility, fail-closed projection, anti-rollback, accepted COC/GID and repeatable RPO/RTO evidence plus exact-version Owner dispositions are missing. |
-| 7 | H idempotency namespace / replay boundary | OPEN — contract present, evidence missing | Candidate: `08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md` @ `a5f43d58ebee451260fc64c7e048b96401e89ef4` (Candidate/Draft; cross-Owner acceptance PENDING). HIR-05/06/08/12/14/16/17/18 remain EVIDENCE_REQUIRED; H/E/Storage acceptance, durable reservation, concurrency, replay, crash/recovery, Storage same-GID and C/G Attempt-join evidence are missing. |
+| 7 | H idempotency namespace / replay boundary | OPEN — contract present, evidence missing | Candidate: `08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md` @ `f64dd8f520b98e52a7151619cb279fc0b4c38c89` (Candidate/Draft; cross-Owner acceptance PENDING). HIR-05/06/08/12/14/16/17/18 remain EVIDENCE_REQUIRED; H/E/Storage acceptance, durable reservation, concurrency, replay, crash/recovery, Storage same-GID and C/G Attempt-join evidence are missing. |
 | 8 | Full-package bilingual semantic and source-revision parity | OPEN | Owner A/documentation Owners verify complete exact-head Canonical/EN/ZH-CN semantic parity and every source pin. |
 | 9 | DEC-13 normative approval evidence | RECORDED — AID-2026-096 | Exact six-blob scope only; #1189 remains OPEN and natural-person Owner/joint acceptance confirmation is still missing. |
 
@@ -234,7 +234,7 @@ Rules: the original 095 matrix uses only PASS / FAIL / NOT EVIDENCED. AID-082/09
 
 ## 5. HIR-01…HIR-18 row-count review and expired baseline pin
 
-The H contract is in `08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md` §11 (not in the AID-099 directory), blob `a5f43d58ebee451260fc64c7e048b96401e89ef4`. Counts below are by the 18 §11 data rows, excluding header, separator and prose:
+The H contract is in `08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md` §11 (not in the AID-099 directory), blob `f64dd8f520b98e52a7151619cb279fc0b4c38c89`. Counts below are by the 18 §11 data rows, excluding header, separator and prose:
 
 | Class | Rows | IDs |
 |---|---:|---|
@@ -244,7 +244,7 @@ The H contract is in `08-bmcp-protocol/h-idempotency-namespace-and-replay-bounda
 
 The eight HIR EVIDENCE_REQUIRED rows are not satisfied by candidate prose. Implementation remains NOT VERIFIED and cross-Owner acceptance PENDING. This separate H count does not alter the 095 matrix's 72 NOT EVIDENCED cells.
 
-**Expired pin:** AID-099 manifest `14-ai-development/work-items/AID-2026-099/manifest.yaml` @ `8d87eef02b997eb0d976903d40dcac802b2d80ba` records `storage_aid_2026_098_exact_pin: NOT_AVAILABLE_ON_BASELINE` and says AID-098 was unavailable at historical baseline `d5107f68a7f1b61f5f2f7352fadf828aae06cf1c`; H contract §2 repeats it. This is stale baseline metadata, not a current repository gap: AID-098 is present on current main and its candidate blob is pinned above. This refresh does not rewrite AID-099's historical record. Current wording: “AID-2026-098 is available on current main; its contract remains Candidate/Draft/Unverified and supplies neither implementation evidence nor cross-Owner acceptance.”
+**Expired pin:** AID-099 manifest `14-ai-development/work-items/AID-2026-099/manifest.yaml` @ `d580d830114311afc10d7c82776f39e2ca1a4323` records `storage_aid_2026_098_exact_pin: NOT_AVAILABLE_ON_BASELINE` and says AID-098 was unavailable at historical baseline `d5107f68a7f1b61f5f2f7352fadf828aae06cf1c`; H contract §2 repeats it. This is stale baseline metadata, not a current repository gap: AID-098 is present on current main and its candidate blob is pinned above. This refresh does not rewrite AID-099's historical record. Current wording: “AID-2026-098 is available on current main; its contract remains Candidate/Draft/Unverified and supplies neither implementation evidence nor cross-Owner acceptance.”
 
 ## 6. Gate B disposition
 

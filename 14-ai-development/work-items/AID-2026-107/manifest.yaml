@@ -17,7 +17,7 @@ date: 2026-11-26
 
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: 8915b63e0c736d62e05ff02b72efc551f5a4ba83
+base_commit_sha: 3866a121fecbbdf402d50bb0cb2de0277d0275f5
 tracking_issue: "#1212 — exact-version A–I + Storage/Consistency composition review"
 
 prompt_id: AID-2026-107-PROMPT
@@ -42,13 +42,13 @@ scope:
     - deployment and Issue #1212 closure
 
 source_baseline:
-  main: 8915b63e0c736d62e05ff02b72efc551f5a4ba83
+  main: 3866a121fecbbdf402d50bb0cb2de0277d0275f5
   aid_095_matrix_blob: 1d162b527eacb96e2cff24eec5fcf5a66014039a
   aid_098_storage_candidate_blob: d571f086505b312c40b6ae2e56a868131cfffc78
   aid_082_manifest_blob: ffd9077928e91c010667ff412131589654c93bbe
   aid_100_evidence_blob: ae46c7a4424778d0c8e4c5b21c6535023a9b460d
-  aid_099_h_contract_blob: a5f43d58ebee451260fc64c7e048b96401e89ef4
-  aid_099_manifest_blob: 8d87eef02b997eb0d976903d40dcac802b2d80ba
+  aid_099_h_contract_blob: f64dd8f520b98e52a7151619cb279fc0b4c38c89
+  aid_099_manifest_blob: d580d830114311afc10d7c82776f39e2ca1a4323
 
 rejudgment:
   checkpoint_rows: 72

@@ -45,7 +45,7 @@ document_metadata:
 
 - 工作项：`AID-2026-107`；`id_status: PROVISIONAL`。
 - 署名：**user-authorized operator (delegated by account owner)**；日期：**2026-11-26**。仅为代理登记，不代表任何自然人 Owner 签署。
-- 精确 main 基线：`8915b63e0c736d62e05ff02b72efc551f5a4ba83`（从 main 分支 API 读取）。
+- 精确 main 基线：`3866a121fecbbdf402d50bb0cb2de0277d0275f5`（从 main 分支 API 读取）。
 - 原矩阵：已合并的 AID-2026-095 / PR #1264。本刷新不修改 AID-095。
 - 后续已合并输入：AID-2026-082 / PR #1265 / merge 前缀 `71548b7b`；AID-2026-098 / PR #1283 / merge 前缀 `cdba0b73`；AID-2026-100 / PR #1284 / merge 前缀 `b1f9c51a`。
 - 关联 Issue：#1212，保持 OPEN。
@@ -77,8 +77,8 @@ document_metadata:
 | System Boundaries ZH-CN | `354cc859cb99783ac9947defe0e1d90a272b1939` | 仅镜像。 |
 | AID-100 evidence | `ae46c7a4424778d0c8e4c5b21c6535023a9b460d` | 完整克隆上的本地文档管理 checker / census 证据；非 CI，也非流程/Storage 实现证据。 |
 | AID-100 EN 镜像 | `425e5eaf6c99286342e20f5ecf525ee297d75e0c` | 语言镜像。 |
-| AID-099 H idempotency candidate | `a5f43d58ebee451260fc64c7e048b96401e89ef4` | §11 有 18 行：10 DOCUMENTED_ONLY + 8 EVIDENCE_REQUIRED + 0 PASS；Candidate/Draft，跨 Owner 接受 PENDING。 |
-| AID-099 manifest | `8d87eef02b997eb0d976903d40dcac802b2d80ba` | 历史基线 d5107f68 的 AID-098 unavailable pin 已过期，详见 §5。 |
+| AID-099 H idempotency candidate | `f64dd8f520b98e52a7151619cb279fc0b4c38c89` | §11 有 18 行：10 DOCUMENTED_ONLY + 8 EVIDENCE_REQUIRED + 0 PASS；Candidate/Draft，跨 Owner 接受 PENDING。 |
+| AID-099 manifest | `d580d830114311afc10d7c82776f39e2ca1a4323` | 历史基线 d5107f68 的 AID-098 unavailable pin 已过期，详见 §5。 |
 | AID-100 ZH-CN 镜像 | `fda38f1355f6160db78facde996fee3345905ea1` | 语言镜像。 |
 
 ### 2.1 AID-082 的证据边界
@@ -217,13 +217,13 @@ document_metadata:
 
 | # | Gate A 条目 | 当前状态 | 闭合条件 |
 |---|---|---|---|
-| 1 | 分支与当前 main 同步 | 在审查基线 `8915b63e0c736d62e05ff02b72efc551f5a4ba83` 上 SATISFIED；若 main 前进须重查 | 最终 Head 审查时 merge base 等于当前 main，分支不得落后。 |
+| 1 | 分支与当前 main 同步 | 在审查基线 `3866a121fecbbdf402d50bb0cb2de0277d0275f5` 上 SATISFIED；若 main 前进须重查 | 最终 Head 审查时 merge base 等于当前 main，分支不得落后。 |
 | 2 | 跨 Owner 角色处置（10 个角色：3 ACCEPT / 7 CONDITIONAL / 0 REJECT） | 已记录的代理处置为 SATISFIED | 7 项条件义务仍在；未声称自然人 Owner 签署。 |
 | 3 | 精确 Head CI | OPEN_PENDING_FINAL_HEAD | 全部 16 项必需上下文必须在 PR 最终 Head 成功。 |
 | 4 | 完整 A–I + Storage/Consistency 组合审查工件 | OPEN | Owner A 协调覆盖 8 条流程和 9 个检查点维度的完整精确版本包；相关 Owner 接受自身边界。 |
 | 5 | 缺失的 D/E/F/I 规范根/合同 | OPEN — IMPL2 | IMPL2 恢复或正式处置规范根并固定精确 canonical 替代来源；D/E/F/I 审查自身权威语义。AID-082 lint 不能替代。 |
 | 6 | Storage/Consistency 物理合同与证据 | OPEN — 合同已存在，证据缺失 | 候选合同：`10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78`（Candidate/Draft/Unverified/Informative）。SC-04/05/06/10/12/13/17/18 仍为 EVIDENCE_REQUIRED；后端、WAL/flush/torn-write、崩溃/恢复、副本可见性、fail-closed projection、防回滚、已接受 COC/GID、可重复 RPO/RTO 证据和精确版本 Owner 处置仍缺。 |
-| 7 | H 幂等命名空间 / 重放边界 | OPEN — 合同已存在，证据缺失 | 候选合同：`08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md` @ `a5f43d58ebee451260fc64c7e048b96401e89ef4`（Candidate/Draft；跨 Owner 接受 PENDING）。HIR-05/06/08/12/14/16/17/18 仍为 EVIDENCE_REQUIRED；H/E/Storage 接受、持久 reservation、并发、重放、崩溃/恢复、Storage same-GID 和 C/G Attempt join 证据仍缺。 |
+| 7 | H 幂等命名空间 / 重放边界 | OPEN — 合同已存在，证据缺失 | 候选合同：`08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md` @ `f64dd8f520b98e52a7151619cb279fc0b4c38c89`（Candidate/Draft；跨 Owner 接受 PENDING）。HIR-05/06/08/12/14/16/17/18 仍为 EVIDENCE_REQUIRED；H/E/Storage 接受、持久 reservation、并发、重放、崩溃/恢复、Storage same-GID 和 C/G Attempt join 证据仍缺。 |
 | 8 | 全包双语语义与源修订一致 | OPEN | Owner A / 文档 Owners 验证完整精确 Head 的 Canonical/EN/ZH-CN 语义一致及所有来源 pin。 |
 | 9 | DEC-13 规范批准证据 | RECORDED — AID-2026-096 | 仅限精确六个 blob 范围；#1189 仍 OPEN，自然人 Owner / 联合验收确认仍缺。 |
 
@@ -231,7 +231,7 @@ document_metadata:
 
 ## 5. HIR-01…HIR-18 行计数复核与过期基线 pin
 
-H 合同位于 `08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md` §11（不在 AID-099 目录下），blob `a5f43d58ebee451260fc64c7e048b96401e89ef4`。以下按 §11 的 18 个数据行统计，排除表头、分隔行和说明文字：
+H 合同位于 `08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md` §11（不在 AID-099 目录下），blob `f64dd8f520b98e52a7151619cb279fc0b4c38c89`。以下按 §11 的 18 个数据行统计，排除表头、分隔行和说明文字：
 
 | 类别 | 行数 | ID |
 |---|---:|---|
@@ -241,7 +241,7 @@ H 合同位于 `08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-con
 
 8 个 HIR EVIDENCE_REQUIRED 行不能由候选 prose 满足。实现仍 NOT VERIFIED，跨 Owner 接受仍 PENDING。这是独立的 H 计数，不改变 095 矩阵的 72 个 NOT EVIDENCED 单元格。
 
-**过期 pin：** AID-099 manifest `14-ai-development/work-items/AID-2026-099/manifest.yaml` @ `8d87eef02b997eb0d976903d40dcac802b2d80ba` 记录 `storage_aid_2026_098_exact_pin: NOT_AVAILABLE_ON_BASELINE`，并称 AID-098 在历史基线 `d5107f68a7f1b61f5f2f7352fadf828aae06cf1c` 上不可用；H 合同 §2 也重复了该表述。这是过期的历史基线元数据，不是当前仓库缺口：AID-098 已在当前 main，候选合同 blob 已在上方固定。本刷新不改写 AID-099 历史记录。当前正确表述：“AID-2026-098 已在当前 main 可用；其合同仍为 Candidate/Draft/Unverified，不提供实现证据或跨 Owner 接受。”
+**过期 pin：** AID-099 manifest `14-ai-development/work-items/AID-2026-099/manifest.yaml` @ `d580d830114311afc10d7c82776f39e2ca1a4323` 记录 `storage_aid_2026_098_exact_pin: NOT_AVAILABLE_ON_BASELINE`，并称 AID-098 在历史基线 `d5107f68a7f1b61f5f2f7352fadf828aae06cf1c` 上不可用；H 合同 §2 也重复了该表述。这是过期的历史基线元数据，不是当前仓库缺口：AID-098 已在当前 main，候选合同 blob 已在上方固定。本刷新不改写 AID-099 历史记录。当前正确表述：“AID-2026-098 已在当前 main 可用；其合同仍为 Candidate/Draft/Unverified，不提供实现证据或跨 Owner 接受。”
 
 ## 6. Gate B 处置
 
