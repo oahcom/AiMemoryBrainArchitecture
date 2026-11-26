@@ -1,0 +1,156 @@
+work_item_id: AID-2026-082
+title: Add read-only automated checks for Owner namespace and governance-operation traceability
+class: GATE/CI/TEST
+risk: R2
+risk_rationale: >-
+  Two read-only documentation checks cover cross-language architecture references and
+  governance-operation authority registration. They can produce false positives or miss
+  an authority collapse if their parsing boundary is wrong. They do not change Runtime,
+  domain semantics, existing validator behavior, schemas, APIs, DDL or production state.
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 81906cfc8d3cd477d26657520aa04d81466e7ce2
+tracking_issue: "#1237 — automated Owner namespace and governance-operation traceability checks"
+
+prompt_id: AID-2026-082-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-082/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 79bcd0738f9c0f0c5b3dcf05675629c12a7eb51bcaaff0e184ba1ec93e31b7cb
+prompt_bytes: 5831
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST; no independent prompt-source verification claimed
+
+authorization:
+  implementation_write: >-
+    GRANTED only for the two new read-only documentation checker scripts, their dedicated
+    tests/fixtures, the advisory workflow, this AID directory and its INDEX row. No write
+    authority is granted for existing validator semantics, Runtime/product code, crates,
+    schemas, APIs, DDL, deployment or production configuration.
+  gate_behaviour_change: >-
+    GRANTED only to add a separate advisory workflow with two distinct check results.
+    NOT_GRANTED for adding required branch-protection contexts, changing rulesets, or
+    changing existing required-gate semantics.
+  schema_change: NOT_GRANTED
+  platform_state_change: NOT_GRANTED
+  architecture_spec_change: NOT_GRANTED
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-082/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-082/prompt-v1.md
+    - scripts/check_owner_namespace_references.py
+    - scripts/check_governance_operation_traceability.py
+    - tests/test_check_owner_namespace_references.py
+    - tests/test_check_governance_operation_traceability.py
+    - .github/workflows/architecture-governance-traceability.yml
+  files_to_modify:
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope: >-
+    All Runtime/product implementation, crates/, existing validator scripts and their
+    semantics (including scripts/check_document_management.py), schemas, API contracts,
+    DDL, storage/runtime behavior, production configuration, deployment and branch-protection
+    rules. The backup catalog Owner is not assigned by this work item.
+
+acceptance_criteria:
+  - id: C1
+    criterion: >-
+      The Owner namespace checker scans the registered canonical root, docs/en and docs/zh-CN
+      Component Map and Responsibility Matrix paths, plus the declared architecture diagrams.
+    measurement: Exact path inventory and per-path scan report at the implementation PR Head.
+  - id: C2
+    criterion: >-
+      The checker distinguishes explicit Owner A-I references, SYS-* subsystem identifiers,
+      capability labels and P/S participation markers; ambiguous unqualified bare-letter
+      accountability references fail.
+    measurement: Positive and negative fixtures, including qualified references and realistic false-positive prose.
+  - id: C3
+    criterion: >-
+      The governance traceability checker independently requires policy/authorization authority,
+      canonical-state authority, physical executor and minimum completion evidence for every
+      registered governance operation.
+    measurement: Exact row-by-row report for root and EN/ZH-CN System Boundaries.
+  - id: C4
+    criterion: >-
+      The checker rejects missing/collapsed authority roles, inferred physical completion,
+      and unilateral Global Forget Completion claims.
+    measurement: Negative fixtures for each missing role, same-role collapse, and false completion claim.
+  - id: C5
+    criterion: Both checkers detect missing or semantically divergent EN/ZH-CN counterparts.
+    measurement: Mirror-deletion and mirror-drift fixtures fail; aligned fixtures pass.
+  - id: C6
+    criterion: >-
+      A separate workflow runs the two checks with distinct named results and remains advisory;
+      it does not change required branch-protection contexts.
+    measurement: Workflow run evidence and repository protection readback; no ruleset mutation.
+  - id: C7
+    criterion: Existing validator behavior and Runtime/product behavior are unchanged.
+    measurement: Changed-path audit plus unchanged output comparison for existing governance validators.
+  - id: C8
+    criterion: Tests cover positive, negative, boundary and regression cases reproducibly.
+    measurement: Test commands and raw results recorded against the exact implementation PR Head.
+  - id: C9
+    criterion: An independent exact-Head review records each criterion and the Draft PR is not merged before acceptance.
+    measurement: Review record names exact Head; no approval or acceptance is inferred from CI.
+
+findings:
+  - id: F1
+    severity: HIGH
+    statement: >-
+      #1196's crosswalk documentation is now explicit, but its required anti-confusion lint/check
+      does not exist in PR #1221. Manual prose alone cannot prevent future ambiguous references.
+    evidence: Issue #1196 acceptance criterion 8 and delegated split comment 7183823530.
+  - id: F2
+    severity: HIGH
+    statement: >-
+      #1208's D/I authority boundary and operation register are documented, but there is no
+      automated check ensuring each operation independently names policy authority,
+      canonical-state authority and physical executor.
+    evidence: Issue #1208 acceptance criterion 6 and delegated split comment 7183824141.
+
+implementation:
+  status: IN_PROGRESS
+  branch: docs/aid-2026-082-governance-traceability-checks
+  pull_request: PENDING_PR_CREATION
+  merge_commit_sha: NOT_MERGED
+  implementation_head: PENDING_FINAL_HEAD
+  implemented_files:
+    - scripts/check_owner_namespace_references.py
+    - scripts/check_governance_operation_traceability.py
+    - tests/test_check_owner_namespace_references.py
+    - tests/test_check_governance_operation_traceability.py
+    - .github/workflows/architecture-governance-traceability.yml
+  note: >-
+    Both read-only checkers, their unit tests and a separate advisory workflow are implemented.
+    Exact-Head local/CI validation remains pending; no required context or branch-protection
+    change is authorized. Existing checker semantics, Runtime/product code, schemas, APIs, DDL
+    and production state remain unchanged.
+
+review:
+  status: NOT_ASSIGNED
+  record_ref: 14-ai-development/work-items/AID-2026-082/REVIEW-01-INDEPENDENT.md
+  note: No independent review or natural-person Owner review is claimed.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "NOT_ASSIGNED; no acceptance decision is asserted"
+
+session_evidence:
+  - role: IMPLEMENTATION_SESSION
+    issue_refs:
+      - "#1196"
+      - "#1208"
+      - "#1237"
+    implementing_ai_session: NOT_RECORDED
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-082/prompt-v1.md
+    executed_prompt_sha256: 79bcd0738f9c0f0c5b3dcf05675629c12a7eb51bcaaff0e184ba1ec93e31b7cb
+    executed_prompt_bytes: 5831
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-082/session-evidence.md
