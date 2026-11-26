@@ -118,3 +118,14 @@ README 是新编写的导航索引（源分支不存在 README blob），不是�
 ## 8. 变更边界
 
 不修改 03/04/05 域；不修改 Runtime/product code、Validator code 或 validator semantics、tests、scripts、workflows、schemas、APIs、DDL、部署或生产配置。不关闭任何 Issue。
+
+
+## 9. Merge and post-merge verification
+
+- **PR:** [#1300](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1300) — merged 2026-11-26 13:13:24Z.
+- **Final PR Head:** `c5766fb934e0e5db0ba667bda2f74452a0f39265`.
+- **Merge commit:** `e3a134de856bbb58581fd688462c9c0282631270`.
+- **Exact-Head required checks:** 16/16 SUCCESS: Rust clippy (hard gate); Bilingual docs coverage (ratchet); BMCP protocol index (hard gate); Rust doctests (hard gate); BMCP conformance suite (hard gate); Repository hygiene (hard gate); Rust format (hard gate); Schema non-empty audit (hard gate); rust-workspace-test; Branch freshness vs base; GOV-DOC-002 metadata checks; Session Evidence; Session Evidence self-test (base); audit; GOV-DOC-001 structural checks; Session Evidence self-test (head).
+- Post-merge main tree readback confirmed the five canonical restored blob SHAs and all mirror/report blobs. Each of the five restored source bodies, after its new GOV-DOC-002 frontmatter, is byte-for-byte identical to the source-branch body.
+- The canonical / EN / ZH-CN I mirrors exist. ZH-CN contains translated summaries and the verbatim English source body; full semantic translation parity remains NOT_VERIFIED.
+- #1211 and #1212 were not closed by this work. #1212's prior close/reopen history is recorded in the issue timeline; its state was OPEN at this readback.
