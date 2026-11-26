@@ -121,7 +121,9 @@ cargo test -p memory-domain -p memory-storage -p memory-event-store -p bmcp-prot
 
 这是固定提交上的本地 Linux 执行，不是 CI，也不是 current `main`。测试名恢复情况：本证据记录中 **recovered 0 of 177**（未提供清单）；测试名清单属于 best-effort，不推断未提供的测试名覆盖。
 
-**Normalised digest 算法（可复现指纹）：**对 `exit code + passed/failed 总数 + 各 harness 块 passed 数多重集排序后` 计算 SHA-256。不包含测试顺序、时长、构建耗时和进程交错。上面的 SQLite 与 pure Rust digest 使用该算法；memory-context 未提供 digest。\n\n### 2.4 明确的负面构建证据
+**Normalised digest 算法（可复现指纹）：**对 `exit code + passed/failed 总数 + 各 harness 块 passed 数多重集排序后` 计算 SHA-256。不包含测试顺序、时长、构建耗时和进程交错。上面的 SQLite 与 pure Rust digest 使用该算法；memory-context 未提供 digest。
+
+### 2.4 明确的负面构建证据
 
 Windows 主机上的 `cargo test --workspace` 因 `libsqlite3-sys v0.40.0` build script 无法执行 `cc1`（`gcc.exe: fatal error: cannot execute 'cc1'`）而 exit **101**；MSVC 同样缺少 `cl.exe`/`link.exe`。因此该 Windows 主机无法构建：`memory-storage-sqlite`、`memory-event-store-sqlite`、`memory-store`、`memory-compiler`、`memory-context`、`brain-cli`。
 
