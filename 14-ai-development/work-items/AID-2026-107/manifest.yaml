@@ -32,8 +32,8 @@ prompt_addenda:
     prompt_file: 14-ai-development/work-items/AID-2026-107/prompt-v2.md
     prompt_status: RECORDED_NOT_FROZEN
     prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
-    executed_prompt_sha256: 38e3354e706471b62abce50b3fff4bef5baf2216931b9a0948e7eb8a7751550e
-    executed_prompt_bytes: 766
+    executed_prompt_sha256: 382758b4d19178a29fbb110090c0a7b48f60ab7f04c619164da73e48f1fa718d
+    executed_prompt_bytes: 2066
 
 scope:
   files_to_create:
@@ -164,20 +164,11 @@ acceptance:
 
 session_evidence:
   - role: IMPLEMENTATION_SESSION
-    issue_refs:
-    implementing_ai_session: NOT_RECORDED
-    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-107/prompt-v1.md
-    executed_prompt_sha256: a9ba36262827f2fce4016c488623d10031f61b9c860276343338a264da0b7942
-    executed_prompt_bytes: 2471
-    executed_prompt_provenance: NOT_VERIFIED
-    session_reference_status: NOT_RECORDED
-    session_evidence_ref: 14-ai-development/work-items/AID-2026-107/evidence.md
-  - role: IMPLEMENTATION_SESSION
     issue_refs: ["#1212"]
     implementing_ai_session: NOT_RECORDED
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-107/prompt-v2.md
-    executed_prompt_sha256: 38e3354e706471b62abce50b3fff4bef5baf2216931b9a0948e7eb8a7751550e
-    executed_prompt_bytes: 766
+    executed_prompt_sha256: 382758b4d19178a29fbb110090c0a7b48f60ab7f04c619164da73e48f1fa718d
+    executed_prompt_bytes: 2066
     executed_prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
     session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-107/evidence.md
