@@ -34,9 +34,9 @@ scope:
     - 14-ai-development/work-items/AID-2026-089/prompt-v1.md
     - 14-ai-development/work-items/AID-2026-089/session-evidence.md
   files_to_modify:
-    - 03-memory-brain/forget-fence-and-completion-contract.md
-    - docs/en/03-memory-brain/forget-fence-and-completion-contract.md
-    - docs/zh-CN/03-memory-brain/forget-fence-and-completion-contract.md
+    - 01-system-architecture/forget-fence-and-completion-contract.md
+    - docs/en/01-system-architecture/forget-fence-and-completion-contract.md
+    - docs/zh-CN/01-system-architecture/forget-fence-and-completion-contract.md
     - 01-system-architecture/system-boundaries.md
     - docs/en/01-system-architecture/system-boundaries.md
     - docs/zh-CN/01-system-architecture/system-boundaries.md
