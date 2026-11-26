@@ -1,0 +1,24 @@
+# Gate-shaped scripts that no workflow runs today, and why each one stays.
+#
+# A ratchet is not a green exemption: a gate that is not listed here and not
+# wired fails immediately, and a listed gate that becomes wired fails until its
+# line is removed (scripts/ci/check_test_reachability.py).
+#
+# scripts/check_policy_inheritance.py
+#   Exits 2 bare: "the following arguments are required: --declaration". There is
+#   no declaration file in this tree (`git ls-files | grep -i declaration` is
+#   empty), so a step invoking it could not be green.
+# scripts/check_source_revision_pointers.py
+#   Exits 1 on main, not 0: 8 STALE pointers (docs/en and docs/zh-CN
+#   00-governance/design-principles.md:58, 01-system-architecture/
+#   responsibility-matrix.md:37, system-architecture-specification.md:6,
+#   system-boundaries.md:37) declare a Source revision SHA that no longer
+#   matches the source blob. It runs and it reports; wiring it as a hard step
+#   would redden a required job. Ratcheting it is a separate change.
+# scripts/governance/status_migration/check_status_gates.py
+#   Exits 2 bare: "the following arguments are required: paths". No
+#   status-migration path set is declared for it to receive.
+
+scripts/check_policy_inheritance.py
+scripts/check_source_revision_pointers.py
+scripts/governance/status_migration/check_status_gates.py
