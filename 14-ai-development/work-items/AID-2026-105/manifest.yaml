@@ -43,6 +43,8 @@ implementation:
     - "14-ai-development/work-items/AID-2026-105/evidence.md"
     - "docs/en/14-ai-development/work-items/AID-2026-105/evidence.md"
     - "docs/zh-CN/14-ai-development/work-items/AID-2026-105/evidence.md"
+    - "14-ai-development/work-items/AID-2026-105/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-105/prompt-v1.md"
   runtime_changed: false
   validator_semantics_changed: false
 acceptance:
@@ -52,3 +54,15 @@ acceptance:
   joint_acceptance_claimed: false
   governance_approval_claimed: false
   exact_head_ci: "PENDING"
+
+session_evidence:
+  - role: PR
+    issue_refs:
+      - "1189"
+    implementing_ai_session: NOT_RECORDED
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-105/prompt-v1.md
+    executed_prompt_sha256: 69f2e5c2fba34791aae302027379b8267e8e1f324805eb155e3101b05d548b03
+    executed_prompt_bytes: 3305
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-105/session-evidence.md
