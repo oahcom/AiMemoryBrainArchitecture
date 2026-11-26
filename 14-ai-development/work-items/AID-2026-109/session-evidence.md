@@ -73,7 +73,7 @@ User-authorized operator (delegated by account owner), performing a documentatio
 
 ## Actual AI input
 
-The actual user instruction is preserved verbatim in `14-ai-development/work-items/AID-2026-109/prompt-v1.md` (SHA-256 `af29bd5b61d2a3a0d659fcfbb507111d5d7220baad5a335d4a7dca8c6e0f8462`, 2946 UTF-8 bytes). It requested independent derivation of the F1–F8 D-root list, restricted byte-level recovery, per-document supersession/conflict classification, GOV-DOC-002 metadata, three aligned documents, 16 exact-Head checks, merge, blob readback, and a #1212 comment. It expressly prohibited full-tree restore, runtime/validator semantic changes, 04/05 changes, and Issue closure.
+The actual user instruction is preserved verbatim in `14-ai-development/work-items/AID-2026-109/prompt-v1.md` (SHA-256 `33b4bfa744533c9dbf595e2520ff87c4c526e6e6f1c20625ed1fa6b90038af4a`, 4416 UTF-8 bytes (including GOV-DOC-002 frontmatter; body is the verbatim user prompt).). It requested independent derivation of the F1–F8 D-root list, restricted byte-level recovery, per-document supersession/conflict classification, GOV-DOC-002 metadata, three aligned documents, 16 exact-Head checks, merge, blob readback, and a #1212 comment. It expressly prohibited full-tree restore, runtime/validator semantic changes, 04/05 changes, and Issue closure.
 
 ## AI-visible output
 
