@@ -65,7 +65,7 @@ authority:
   acceptance_authority: "Relevant domain Owner(s) and Owner A / Governance; NOT_RECORDED"
   independent_reviewer: "NOT_ASSIGNED"
   implementation_authorization: "DOCUMENTATION_AND_STAGE_0_REGISTRATION_ONLY"
-  merge_authorization: "NOT_GRANTED_BY_THIS_RECORD; THE MERGE DECISION BELONGS TO THE REPOSITORY MERGE QUEUE AND ITS REQUIRED CHECKS"
+  merge_authorization: "NOT_GRANTED_BY_THIS_RECORD; MERGE PRECONDITIONS ARE (1) WRITTEN OWNER A AUTHORIZATION AND (2) ALL REQUIRED CHECKS GREEN ON THE EXACT HEAD; THE MERGE DECISION BELONGS TO THE REPOSITORY MERGE QUEUE AND ITS REQUIRED CHECKS"
   deployment_authorization: "NOT_GRANTED"
   issue_closure_authorization: "NOT_GRANTED"
 
@@ -165,7 +165,7 @@ declared_exceptions:
 
 related_evidence:
   - path: "14-ai-development/work-items/AID-2026-100/evidence.md"
-    role: "#1037 evidence capture: full-clone read-only checker comparison and fresh frontmatter census"
+    evidence_role: "#1037 evidence capture: full-clone read-only checker comparison and fresh frontmatter census"
     provenance: "MERGED_IN_MAIN_BEFORE_THIS_REGISTRATION (PR #1284)"
     blob: "87adf4a8cde8ba5c4c14596932f3488ec988a38c"
     en_mirror: "docs/en/14-ai-development/work-items/AID-2026-100/evidence.md"
@@ -188,7 +188,7 @@ session_evidence:
     session_reference_status: "NOT_AVAILABLE"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-100/session-evidence-source-restore.md"
 evidence_file: "14-ai-development/work-items/AID-2026-100/evidence-source-restore.md"
-evidence_blob: "d766e3f364462ae3933cbf62339048b9fecae15d"
+evidence_blob: "29e947400d10a1062a507d42640250982710b8d1"
 
 formal_registration:
   status: "COMPLETED_ON_CANDIDATE_BRANCH_WITH_BOUNDED_IDENTIFIER_SCAN"
@@ -206,7 +206,7 @@ lifecycle:
   r2: "NOT_ACCEPTED"
   implementation: "DOCUMENTATION_AND_EVIDENCE_ONLY"
   independent_acceptance: "NOT_GRANTED"
-  merge: "NOT_AUTHORIZED"
+  merge: "BLOCKED_ON_PRECONDITIONS_NOT_ON_THIS_RECORD; OWNER_A_WRITTEN_AUTHORIZATION_PLUS_ALL_REQUIRED_CHECKS_GREEN_ON_THE_EXACT_HEAD"
   deployment: "NOT_AUTHORIZED"
 
 acceptance_criteria:
