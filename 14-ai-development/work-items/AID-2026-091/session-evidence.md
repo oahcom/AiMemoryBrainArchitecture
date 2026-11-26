@@ -82,7 +82,7 @@ session:
   session_reference_reason: "The exact current ChatGPT session identifier is not exposed in this execution context. Historical session identifiers belong to other sessions and were not substituted."
 prompt:
   file: 14-ai-development/work-items/AID-2026-091/prompt-v1.md
-  sha256: ad7c71fe5afbe1a13843a201da3ea5c3eca62e7304d8469cc4ea17a0acd490fc
+  sha256: 11b2d92aa94d1af88ee403def9fa2977bb7cee8c9c32ff957fbc4c06e91ac5d8
   bytes: 2058
   provenance: NOT_VERIFIED
   provenance_reason: "The committed prompt text is available, but no immutable raw-source capture proves byte-for-byte origin."
