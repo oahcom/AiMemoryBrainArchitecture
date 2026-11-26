@@ -115,7 +115,7 @@ cargo test -p memory-domain -p memory-storage -p memory-event-store -p bmcp-prot
 
 - 环境：WSL2 Ubuntu 24.04。
 - 精确 HEAD：`a123ea4e414c9f74fa0c576fbd718049a7d9f917`（与 SQLite 组相同的固定提交）。
-- Passed / failed：**177 / 0**。
+- Passed：**177**；failed 数及进程 exit code：**未记录**。
 - 精确命令、测试二进制数、stdout 字节数、raw stdout SHA-256、各 harness passed 多重集及测试名清单：**所给证据未记录**。
 - Normalised digest：**未提供**；仅凭汇总的 `177 passed` 无法推算。
 
