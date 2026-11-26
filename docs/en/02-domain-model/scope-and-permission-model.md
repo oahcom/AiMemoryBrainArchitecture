@@ -42,7 +42,7 @@ document_metadata:
 - Document ID: DOMAIN-SCOPE-PERMISSION-001
 - Version: 1.0
 - Source: [Normative source specification](../../../02-domain-model/scope-and-permission-model.md)
-- Source revision: dc53012f50a26c872b9d0f19c078cc5dc992ea0f
+- Source revision: d620e3e273ea3c752d045789d82a3ec6d0e461ec
 - Chinese counterpart: [Scope 与 Permission 模型](../../zh-CN/02-domain-model/scope-and-permission-model.md)
 - Status: Separation and isolation DECIDED; policy language and inheritance edge cases OPEN
 - Owner: Domain Model defines semantics; Scope, Permission & Governance Engine enforces them

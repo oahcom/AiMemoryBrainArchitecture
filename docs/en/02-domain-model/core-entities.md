@@ -42,7 +42,7 @@ document_metadata:
 - Document ID: DOMAIN-ENTITIES-001
 - Version: 1.0
 - Source: [Normative source specification](../../../02-domain-model/core-entities.md)
-- Source revision: c1afadee6289318f7a19d87fcba2cdb50b7131aa
+- Source revision: ddeb677c1b259b9e05253968d23b526e7b3869dd
 - Chinese counterpart: [核心领域实体](../../zh-CN/02-domain-model/core-entities.md)
 - Status: DECIDED semantics unless explicitly marked otherwise
 - Owner: Memory Domain Model (MB-01)

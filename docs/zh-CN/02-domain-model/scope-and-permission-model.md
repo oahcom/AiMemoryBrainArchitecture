@@ -42,7 +42,7 @@ document_metadata:
 - 文档 ID：DOMAIN-SCOPE-PERMISSION-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../02-domain-model/scope-and-permission-model.md)
-- 源版本： dc53012f50a26c872b9d0f19c078cc5dc992ea0f
+- 源版本： d620e3e273ea3c752d045789d82a3ec6d0e461ec
 - 对应英文：[Scope and Permission Model](../../en/02-domain-model/scope-and-permission-model.md)
 - 状态：两者分离及隔离原则为 DECIDED；策略语言和继承边界情况为 OPEN
 - Owner：Domain Model 定义语义；Scope、Permission & Governance Engine 负责执行

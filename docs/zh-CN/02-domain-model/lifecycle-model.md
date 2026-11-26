@@ -42,7 +42,7 @@ document_metadata:
 - 文档 ID：DOMAIN-LIFECYCLE-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../02-domain-model/lifecycle-model.md)
-- 源版本： 462a1e92f79540fa44a90772314e9db1d487abfb
+- 源版本： 72d1936cadd5f858f63f8cc01b62639dc492f168
 - 对应英文：[Memory Lifecycle Model](../../en/02-domain-model/lifecycle-model.md)
 - 状态：状态词汇及其区分为 DECIDED；策略阈值和部分转换为 OPEN
 - Owner：Domain Model 定义生命周期语义；D 负责 Canonical Memory/Forget 语义及 Fence 顺序；I 负责授权与跨系统治理策略；Memory Lifecycle Manager 仅执行已获授权的 Canonical 状态转换

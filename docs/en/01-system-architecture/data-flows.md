@@ -42,7 +42,7 @@ document_metadata:
 - Document ID: SYS-DATA-FLOWS-001
 - Version: 1.0
 - Source: [Normative source specification](../../../01-system-architecture/data-flows.md)
-- Source revision: 85eaed6721a58d3847c7d90812bae4e0646c5e86
+- Source revision: 81aab0f592808999ff7668c790ef6f4dee44d0af
 - Chinese counterpart: [系统数据流](../../zh-CN/01-system-architecture/data-flows.md)
 - Status: DECIDED for ownership and semantic boundaries; CANDIDATE for scheduling/transport choices; TO_VALIDATE for quantitative targets
 

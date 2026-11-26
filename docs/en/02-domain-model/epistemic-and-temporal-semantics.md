@@ -42,7 +42,7 @@ document_metadata:
 - Document ID: DOMAIN-EPISTEMIC-TEMPORAL-001
 - Version: 1.0
 - Source: [Normative source specification](../../../02-domain-model/epistemic-and-temporal-semantics.md)
-- Source revision: cf548814fb0591b41e4c852cc65adb7d60f2e7bf
+- Source revision: e71be982a895ef2dab97d0c9f717daf94848c54e
 - Chinese counterpart: [认知与时间语义](../../zh-CN/02-domain-model/epistemic-and-temporal-semantics.md)
 - Status: Core distinctions DECIDED; calibration and uncertain-time representation partly OPEN
 - Owner: Memory Domain Model (MB-01)

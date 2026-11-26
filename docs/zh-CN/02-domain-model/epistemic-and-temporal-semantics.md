@@ -42,7 +42,7 @@ document_metadata:
 - 文档 ID：DOMAIN-EPISTEMIC-TEMPORAL-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../02-domain-model/epistemic-and-temporal-semantics.md)
-- 源版本： cf548814fb0591b41e4c852cc65adb7d60f2e7bf
+- 源版本： e71be982a895ef2dab97d0c9f717daf94848c54e
 - 对应英文：[Epistemic and Temporal Semantics](../../en/02-domain-model/epistemic-and-temporal-semantics.md)
 - 状态：核心概念区分为 DECIDED；校准和不确定时间表示部分为 OPEN
 - Owner：Memory Domain Model（MB-01）

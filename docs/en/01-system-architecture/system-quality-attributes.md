@@ -42,7 +42,7 @@ document_metadata:
 - Document ID: SYS-QA-001
 - Version: 1.0
 - Source: [Normative source specification](../../../01-system-architecture/system-quality-attributes.md)
-- Source revision: b06c15eaba1bc0476eb0a241ffd21b10d184c468
+- Source revision: c939ee0f6c7b29a6b51421fbfe3fe89d68ae9f6f
 - Chinese counterpart: [系统质量属性](../../zh-CN/01-system-architecture/system-quality-attributes.md)
 - Status: DECIDED quality priorities and measurement principles; CANDIDATE architectural tactics; TO_VALIDATE quantitative targets
 

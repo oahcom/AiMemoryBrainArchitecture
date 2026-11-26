@@ -42,7 +42,7 @@ document_metadata:
 - 文档 ID：SYS-QA-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../01-system-architecture/system-quality-attributes.md)
-- 源版本： b06c15eaba1bc0476eb0a241ffd21b10d184c468
+- 源版本： c939ee0f6c7b29a6b51421fbfe3fe89d68ae9f6f
 - 对应英文：[System Quality Attributes](../../en/01-system-architecture/system-quality-attributes.md)
 - 状态：质量优先级和测量原则为 DECIDED；架构策略为 CANDIDATE；量化目标为 TO_VALIDATE
 

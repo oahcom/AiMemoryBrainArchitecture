@@ -42,7 +42,7 @@ document_metadata:
 - 文档 ID：SYS-INTERACTIONS-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../01-system-architecture/component-interactions.md)
-- 源版本： 7d64051881eb8d27959e1d4721a73e5e4997735d
+- 源版本： b782472896068329ba2f4bcc293afe15b92496a7
 - 对应英文：[Component Interactions](../../en/01-system-architecture/component-interactions.md)
 - 状态：权威归属和主要协作为 DECIDED；编排模式和调用拓扑为 CANDIDATE；委托给 Session H 的协议细节为 OPEN
 

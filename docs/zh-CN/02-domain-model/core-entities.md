@@ -42,7 +42,7 @@ document_metadata:
 - 文档 ID：DOMAIN-ENTITIES-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../02-domain-model/core-entities.md)
-- 源版本： c1afadee6289318f7a19d87fcba2cdb50b7131aa
+- 源版本： ddeb677c1b259b9e05253968d23b526e7b3869dd
 - 对应英文：[Core Domain Entities](../../en/02-domain-model/core-entities.md)
 - 状态：除非另有明确标记，否则语义为 DECIDED
 - Owner：Memory Domain Model（MB-01）
