@@ -38,21 +38,29 @@ document_metadata:
     normative_status: Informative
 ---
 
-# Session Evidence — AID-2026-115
+# Session role / use case
 
-- Role: IMPLEMENTATION_OPERATOR / delegated operator
-- Date: 2026-11-26
-- Main baseline: `8722a37b0cd72dc550d99c0eaebe9e7556ce2f95`; INDEX blob: `956b50f234e72de82676e00fcafb512e1dabfb1e`
-- Branch: `ai/AID-2026-115/ops-gate-concurrency-rust-cache`
-- Allocation: At final base recheck, INDEX max 114; AID-2026-110 through 114 exist on main; AID-2026-116 is in an open PR; AID-2026-115 remains uniquely reserved by PR #1322.
-- Implementing platform session identifier: NOT_RECORDED.
-- Prompt provenance: user-directed task snapshot in `prompt-v1.md`; platform prompt/session IDs unavailable.
-- Changes: eight workflow concurrency blocks, four isolated Rust caches, two explicit job names, three-language evidence.
-- Exclusions: no job merge, fetch-depth change, checker semantic change, required-context change or Issue closure.
-- Verification: pending exact PR Head; 16/16 required contexts must succeed before merge.
-- Merge/blob readback: NOT RUN at this snapshot.
-- Cache hit rate: NOT YET MEASURED; observe next CI cycle.
+IMPLEMENTER — user-authorized operator (delegated by account owner), implementing the bounded Gate dispatch and Rust cache change under Work Item AID-2026-115. This is delegated execution evidence, not a natural-person Owner signature.
 
-- PR #1322 Work Item ID field is the standalone exact value `AID-2026-115`; provisional status is separated into its own section.
-- Per-Issue mapping for historical Issue #1212 is `LEGACY_UNDECLARED` / `N/A`.
-- PR #1313 (provisional AID-2026-112) was closed unmerged; replacement carrier is PR #1322 (AID-2026-115).
+# Actual AI input
+
+The user supplied the task in this conversation: add head-SHA concurrency to eight required workflows; add job-isolated Rust caches to clippy, fmt, doctests and Rust workspace tests with lockfile and resolved toolchain version in the cache key; explicitly name the two implicit required jobs; preserve all 16 contexts, all fetch-depth settings and gate semantics; create Canonical/EN/ZH-CN evidence; require 16/16 exact-head checks before merge; verify merged blobs; and comment on Issue #1212.
+
+The structured scope snapshot is preserved in `prompt-v1.md`. It is a reconstructed task snapshot, not a verbatim capture of the platform prompt. The platform session identifier and raw transcript were not available; manifest provenance is therefore `NOT_VERIFIED`.
+
+# AI-visible output
+
+- Eight required workflows received head-SHA-scoped concurrency groups.
+- Seven workflows use `cancel-in-progress: true`; `session-evidence.yml` uses `false` to preserve each PR-body revision's digest-bound validation record when multiple `edited` events share one head SHA.
+- Four Rust jobs received distinct `Swatinem/rust-cache@v2` shared keys and cache keys containing `hashFiles('Cargo.lock')` plus the resolved `rustc` version.
+- `audit` and `rust-workspace-test` declare explicit display names matching the protected contexts.
+- No jobs were merged, no `fetch-depth` changed, and no gate script or validator semantics were changed.
+- The work item was renumbered from provisional AID-2026-112 after collision discovery; final carrier PR is #1322.
+- Exact-head CI, merge and post-merge blob readback remain pending at this snapshot.
+
+# Unavailable / not recorded
+
+- Implementing platform session identifier: `NOT_RECORDED`.
+- Verbatim platform prompt/transcript: `NOT_RECORDED`; `prompt-v1.md` is a reconstructed scope snapshot.
+- Independent reviewer: `NOT_ASSIGNED`.
+- Rust cache hit rate: `NOT_YET_MEASURED`; observe the next CI cycle.

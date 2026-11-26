@@ -42,7 +42,7 @@ document_metadata:
 
 ## Identity
 - Work Item: AID-2026-115; Issue: #1212
-- Repository: oahcom/AiMemoryBrainArchitecture; baseline: 7629b9de5e5832fe486ee72d101c4bc5121015e6
+- Repository: oahcom/AiMemoryBrainArchitecture; baseline: 8722a37b0cd72dc550d99c0eaebe9e7556ce2f95
 - Role: user-authorized operator (delegated by account owner)
 - Prompt status: RECORDED_NOT_FROZEN; platform session identifiers NOT_RECORDED.
 
