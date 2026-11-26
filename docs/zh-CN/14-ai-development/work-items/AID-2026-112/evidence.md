@@ -59,7 +59,7 @@ document_metadata:
 
 | # | Group | Test name | Predicate mapping | Mapping note |
 |---:|---|---|---|---|
-| 1 | SQLite | committed_payload_survives_process_crash_and_wal_recovery | SC-04, SC-05, HIR-16 | 名称只支持相关局部行为，不足以满足完整谓词。 |
+| 1 | SQLite | committed_payload_survives_process_crash_and_wal_recovery | SC-04, SC-05, HIR-11, HIR-16 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 2 | SQLite | concurrent_appends_preserve_unique_order_and_payload_custody | SC-09, HIR-08 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 3 | SQLite | concurrent_forget_waits_for_restore_snapshot_lock | SC-09, HIR-08 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 4 | SQLite | crash_after_fence_commit_is_retried_without_resurrection | SC-13, HIR-18 | 名称只支持相关局部行为，不足以满足完整谓词。 |
@@ -75,18 +75,18 @@ document_metadata:
 | 14 | SQLite | missing_or_corrupt_fence_fails_closed | SC-13, HIR-18 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 15 | SQLite | ordered_read_rejects_payload_and_verified_digest_tampering | SC-01, SC-02, SC-07, SC-08 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 16 | SQLite | payload::tests::duplicate_payload_append_returns_original_receipt_without_duplicate_rows | SC-07, SC-08, HIR-10, HIR-14 | 名称只支持相关局部行为，不足以满足完整谓词。 |
-| 17 | SQLite | payload::tests::payload_append_receipt_and_ordered_read_survive_reopen | SC-07, SC-08, HIR-10, HIR-14 | 名称只支持相关局部行为，不足以满足完整谓词。 |
+| 17 | SQLite | payload::tests::payload_append_receipt_and_ordered_read_survive_reopen | SC-07, SC-08, HIR-09, HIR-10, HIR-14 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 18 | SQLite | payload::tests::payload_digest_mismatch_is_rejected_before_append | SC-01, SC-02, SC-07, SC-08 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 19 | SQLite | payload::tests::read_after_fails_closed_on_empty_persisted_scope_list | SC-02, SC-10, HIR-01 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 20 | SQLite | payload::tests::read_after_fails_closed_on_invalid_persisted_scope_ref | SC-02, SC-10, HIR-01 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 21 | SQLite | payload::tests::read_after_paginates_interleaved_scope_rows_by_visible_limit | SC-02, SC-10, HIR-01 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 22 | SQLite | payload::tests::read_after_skips_non_intersecting_scopes_and_limits_visible_rows | SC-02, SC-10, HIR-01 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 23 | SQLite | payload_persistence_boundary_sizes_survive_reopen | SC-01, SC-02, SC-07, SC-08 | 名称只支持相关局部行为，不足以满足完整谓词。 |
-| 24 | SQLite | restart_preserves_receipt_and_idempotent_payload_replay | SC-07, SC-08, HIR-10, HIR-14 | 名称只支持相关局部行为，不足以满足完整谓词。 |
+| 24 | SQLite | restart_preserves_receipt_and_idempotent_payload_replay | SC-03, SC-07, SC-08, HIR-10, HIR-14, HIR-16 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 25 | SQLite | restore_anti_resurrection_and_preserves_other_scope | SC-13, HIR-18 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 26 | SQLite | tests::abrupt_exit_worker | 无对应测试 | 测试名不对应任一 SC/HIR 谓词。 |
 | 27 | SQLite | tests::abrupt_process_exit_rolls_back_entire_uncommitted_commit | 无对应测试 | 测试名不对应任一 SC/HIR 谓词。 |
-| 28 | SQLite | tests::acceptance_persists_across_reopen_and_receipt_replay_is_stable | SC-07, SC-08, HIR-10, HIR-14 | 名称只支持相关局部行为，不足以满足完整谓词。 |
+| 28 | SQLite | tests::acceptance_persists_across_reopen_and_receipt_replay_is_stable | SC-03, SC-07, SC-08, HIR-10, HIR-14, HIR-16 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 29 | SQLite | tests::empty_scope_and_missing_payload_identity_are_rejected | SC-02, SC-10, HIR-01 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 30 | SQLite | tests::f1_forget_memory_hides_current_and_history | SC-10 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 31 | SQLite | tests::f10_forget_survives_reopen | SC-10 | 名称只支持相关局部行为，不足以满足完整谓词。 |
@@ -105,7 +105,7 @@ document_metadata:
 | 44 | SQLite | tests::file_db_unwinding_worker_releases_open_transaction_without_partial_state | SC-02, SC-03, SC-06, HIR-11, HIR-16 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 45 | SQLite | tests::independent_connections_serialize_conflicting_idempotency_payloads | SC-08, HIR-01, HIR-08, HIR-14 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 46 | SQLite | tests::multi_process_cas_worker | 无对应测试 | 测试名不对应任一 SC/HIR 谓词。 |
-| 47 | SQLite | tests::concurrent_identical_idempotency_requests_replay_one_durable_receipt | SC-07, SC-08, HIR-10, HIR-14 | 名称只支持相关局部行为，不足以满足完整谓词。 |
+| 47 | SQLite | tests::concurrent_identical_idempotency_requests_replay_one_durable_receipt | SC-07, SC-08, HIR-08, HIR-12, HIR-14 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 48 | SQLite | tests::pending_compile_intent_carries_the_payload_and_envelope_a_compiler_needs | SC-15 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 49 | SQLite | tests::pending_compile_intent_created_at_matches_the_acceptance_time | SC-15 | 名称只支持相关局部行为，不足以满足完整谓词。 |
 | 50 | SQLite | tests::pending_compile_intent_fails_closed_when_stored_payload_is_tampered_with | SC-15 | 名称只支持相关局部行为，不足以满足完整谓词。 |
@@ -217,7 +217,7 @@ document_metadata:
 | HIR-09 | PARTIAL_EVIDENCE | payload_append_receipt_and_ordered_read_survive_reopen; acceptance_persists_across_reopen_and_receipt_replay_is_stable | Durable receipt persistence/replay only. Missing H namespace, digest, logical operation, first/current Attempt, boundary, issuer and proof-reference bindings. |
 | HIR-10 | PARTIAL_EVIDENCE | acceptance_persists_across_reopen_and_receipt_replay_is_stable; duplicate_payload_append_returns_original_receipt_without_duplicate_rows; restart_preserves_receipt_and_idempotent_payload_replay | Stable receipt replay is named. Missing append-only H receipt transition/history immutability assertions. |
 | HIR-11 | PARTIAL_EVIDENCE | abrupt_process_exit_rolls_back_entire_uncommitted_commit; committed_payload_survives_process_crash_and_wal_recovery; file_db_unwinding_worker_releases_open_transaction_without_partial_state | Selected crash/rollback outcomes are named. Missing H timeout/unavailable resolver/unverifiable evidence staying Unknown/Pending. |
-| HIR-12 | PARTIAL_EVIDENCE | concurrent_identical_idempotency_requests_replay_one_durable_receipt; pending_compile_intents_is_idempotent_and_does_not_consume | Generic duplicate replay/idempotent intent is named. Missing H-specific pending duplicate returning original H receipt without second logical execution. |
+| HIR-12 | PARTIAL_EVIDENCE | concurrent_identical_idempotency_requests_replay_one_durable_receipt | Generic duplicate replay/idempotent intent is named. Missing H-specific pending duplicate returning original H receipt without second logical execution. |
 | HIR-13 | UNCHANGED | No corresponding test | No test proves Failed only after durable authoritative terminal failure; transient/ambiguous errors are not demonstrated. |
 | HIR-14 | PARTIAL_EVIDENCE | same_producer_key_and_digest_replay_original_receipt; same_producer_key_with_different_digest_conflicts; sqlite_idempotency_digest_mismatch_conflicts_for_commit_and_receipt_lookup | Same-key/same-digest replay and changed-digest conflict are named in producer/Storage paths. Missing exact H namespace and H Duplicate/Conflict terminal receipts. |
 | HIR-15 | PARTIAL_EVIDENCE | same_producer_key_and_digest_replay_original_receipt; ledger_tracks_multiple_attempts_per_delivery; retry_increments_attempt_number_and_links_previous | Stable producer key and separately linked delivery attempts are named. Missing integrated H test proving logical key reuse plus fresh H Attempt ID per transport retry. |
