@@ -1,3 +1,34 @@
+---
+document_metadata:
+  domain: architecture
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      evidence_reference: []
+    evidence_verification:
+      verification_status: Unverified
+      last_verification_note: "Owner-authorized classification direction for AID-2026-11-26-GOV-DOC-01; not a formal approval record. Pre-metadata content blob: c5260ad379be269a4aff7a105cdfcff1b84d6940. Approval remains Draft; evidence verification remains Unverified."
+    usage_status: Active
+    modification_status: Modified
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "System boundaries and authority"
+    canonical_scope_id: architecture/system-boundaries
+    canonical_scope_keywords:
+      - authority
+      - trust-boundary
+      - ownership
+      - forget
+    canonical_conflict_status: None
+    normative_status: Normative
+  bilingual_counterpart:
+    source: "01-system-architecture/system-boundaries.md"
+    en: "docs/en/01-system-architecture/system-boundaries.md"
+    zh-CN: null
+---
 # 系统边界
 
 - 文档 ID：SYS-BOUNDARIES-001
@@ -59,7 +90,9 @@ Brain 是其管理的 Canonical Memory 和 Memory Context 的逻辑权威。内�
 - Runtime 检索并激活候选。
 - Memory Context Manager（MCM）规划、编辑、版本化并协调上下文。
 - Context Synchronization 跟踪投递和确认。
-- Governance 授权操作并执行保留/遗忘策略。
+- Owner I 拥有全局授权、Retention/Legal Hold、外部副本策略、全局 Forget 目标清单和全局完成标准。
+- Owner D 拥有 Canonical Memory 身份/生命周期、Forget Fence 与 Canonical Forget 机制，以及 D 域完成判定。
+- Global Forget Completion 必须由 D 与每一位相关执行 Owner 基于所有这些 Owner 接受的完成证据契约联合判定。D 或 I 均不得单方面宣称完成。该契约仍待 Owner 接受；本方向决策不构成接受证据。
 
 组件可以执行委托步骤，但不得宣称拥有其他组件的权威。
 
@@ -202,3 +235,19 @@ Brain 不是：
 - **DECIDED：** 上下文在后续推理边界应用，并且必须有 Adapter 确认。
 - **CANDIDATE：** Push-first 遥测加有界 Heartbeat/协调。
 - **OPEN：** 精确身份、认证、协议 Envelope、保留/擦除和 Environment Ingress Profile。
+
+## 13. 治理操作权威追溯登记表
+
+下表将三类权威明确分开：策略权威负责授权规则或例外；规范状态权威负责记录逻辑状态转换；物理执行者负责在相关存储、备份或外部接收方执行实际操作。某一列中的角色不意味着同时拥有其他列的角色。
+
+| 操作 | 策略/授权权威 | 规范状态权威 | 物理执行者 | 最低完成证据/边界 |
+|---|---|---|---|---|
+| 授权与撤销 | Owner I | Owner I 负责授权/PermissionEpoch 状态 | 每个受影响子系统在其访问边界执行 | 版本化授权或撤销记录，以及每个受影响边界的执行证据；仅有策略记录不等于已执行 |
+| Retention 与 Legal Hold | Owner I | Owner I 负责策略/保留记录；适用时 Owner D 负责对应 Memory 生命周期状态 | 每个持有受影响数据的数据保管方/存储 Owner | 明确的保留/Legal Hold 决策及每个保管方的确认；D 不因此成为策略权威 |
+| 逻辑 Forget 抑制/围栏 | Owner I 按策略授权 | Owner D 负责 Canonical Memory 状态、Forget Fence 和 D 域完成判定 | D 及每个相关下游子系统对其拥有的投影执行抑制 | Canonical Fence/状态 Receipt 加各执行者的抑制证据；Forgotten 状态不构成物理擦除证明 |
+| Canonical 或派生数据的物理擦除 | Owner I 负责授权和全局策略 | Owner D 记录 Canonical Forget 状态；每个存储 Owner 记录自身删除状态 | 实际持有每份副本的 Storage/Index/Cache 操作者 | 每个存储的删除 Receipt 及副本/缓存证据；D 的 Canonical 状态本身不能证明物理擦除 |
+| 备份到期/删除 | Owner I 制定保留策略 | 具体 Backup Catalog 对备份对象状态具有权威性；本高层文档尚未分配负责该 Catalog 的 Owner | 每个 Backup Service 的操作者 | 来自 Backup Service 的到期/删除证据；备份 Owner 和保证仍是明确的详细设计缺口（SB-02） |
+| 外部接收方删除 | Owner I 拥有外部副本策略和全局目标清单 | 每个接收方对自身删除/合规状态负责；D 只记录源 Canonical Forget 状态 | 每个外部接收方或其授权操作者 | 接收方特定的认证完成证据；D Fence 或本地删除 Receipt 不能替代接收方完成证明 |
+| Global Forget Completion 判定 | Owner I 负责全局策略和评估协调；不得因此产生单方完成权 | D 与每个相关执行 Owner 按所有受影响 Owner 接受的契约提供联合证据 | 每个相关存储、子系统和外部接收方执行者 | 所有目标清单条目完成核对，并按联合契约接受证据；D 和 I 均不得单方面宣称完成 |
+
+**追溯规则。** 每项新增或发生实质变化的治理操作都 MUST 独立填写上述三类权威。若某个角色尚未分配，必须记录为 `NOT_ASSIGNED` 并保持操作开放；不得从策略 Owner 或实际执行某一步的组件推断缺失角色。本表是文档层基线，不是自动检查。自动完整性和镜像一致性检查由 AID-2026-081 / Issue #1237 单独跟踪，本 PR 不声称该检查已经存在。

@@ -53,9 +53,9 @@ Registration coordinator for the user-authorized Stage 0 work-item registration 
 
 # Actual AI input
 
-The task-specific user instruction for this registration turn is embedded in the metadata-bearing record `14-ai-development/work-items/AID-2026-080/prompt-v1.md` (2130 UTF-8 bytes; SHA-256 `6f74f728dfa47141ebee108c462e7e853983f1700e91e25c8f98a7b47ec07a95`).
+The task-specific user instruction for this registration turn is embedded in the metadata-bearing record `14-ai-development/work-items/AID-2026-083/prompt-v1.md` (2130 UTF-8 bytes; SHA-256 `6f74f728dfa47141ebee108c462e7e853983f1700e91e25c8f98a7b47ec07a95`).
 
-The complete effective payload, including inherited system instructions and any baseline prompts, is NOT_AVAILABLE from the platform's exposed session records. The file as a whole is not byte-identical to the original message and is explicitly NOT_VERIFIED as a complete executed-prompt snapshot; no completeness claim is made.
+The complete effective payload, including inherited system instructions and any baseline prompts, is NOT_AVAILABLE from the platform's exposed session records. The file as a whole is not byte-identical to the original message and is explicitly NOT_VERIFIED as a complete executed-prompt snapshot; no completeness claim is made. The historical visible output below recorded a provisional AID-2026-080 allocation; this was later found to collide with the existing mainline Issue #1201 work item and is superseded by the owner-directed AID-2026-083 allocation.
 
 # AI-visible output
 
@@ -65,3 +65,12 @@ The user-visible response already issued in this turn was:
 
 The work-item allocation remains bounded: main and the PR head were checked; an exhaustive recursive scan of every active branch was not completed.
 
+
+
+## 2026-11-26 owner-authorized continuation addendum
+
+- Attribution: `user-authorized operator (delegated by account owner)`; date: `2026-11-26`.
+- The previous provisional AID-2026-080 assignment is superseded because AID-080 is occupied by the existing mainline Issue #1201 work item. The SOURCE-RESTORE-02 record is carried under AID-2026-083 after checking current main, the target PR head and branch-name search results. Global branch-content uniqueness remains NOT_FULLY_VERIFIED.
+- Current PR #1219 decision-acceptance registration is AID-2026-086; the earlier AID-2026-081 reference is stale. Mainline AID-2026-081 remains the separate Issue #1081 work item.
+- Three Gate A root documents are reconstructed from pinned EN mirrors, separately classified as RECONSTRUCTED, not RESTORED. No authoritative root source blob is claimed.
+- No PR merge, Issue closure, validator implementation change or runtime/product code change was performed by this execution.

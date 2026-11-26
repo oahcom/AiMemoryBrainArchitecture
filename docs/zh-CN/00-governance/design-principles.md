@@ -4,7 +4,7 @@ document_metadata:
   role: normative-standard
   lifecycle:
     approval:
-      decision_status: Approved
+      decision_status: Under-Review
       approver: NOT_RECORDED
       decision_date: NOT_RECORDED
       approved_version:
@@ -37,7 +37,7 @@ document_metadata:
     # claim canonical authority; see bilingual_counterpart below.
     canonical_status: Non-Canonical
     canonical_scope: "Architecture: design principles"
-    canonical_scope_id: null
+    canonical_scope_id: "architecture/design-principles"
     canonical_scope_keywords:
       - principle
       - design-rule
@@ -57,7 +57,7 @@ document_metadata:
 - 源规范：[规范性原文](../../../00-governance/design-principles.md)
 - 源版本：9792e189d63fbbc3694ab891fc4aeba5143b3b1c
 - 对应英文：[Design Principles](../../en/00-governance/design-principles.md)
-- 状态：DECIDED（已决议基线）
+- 状态：CANDIDATE / Pending-Reapproval（当前版本未获批准）；P-01 至 P-16 的 DECIDED 仅记录设计方向，不构成正式批准。
 
 本文定义约束所有子系统设计的原则。
 
