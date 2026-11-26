@@ -1,0 +1,137 @@
+RENUMBERED_AT_MERGE: "2026-11-26"
+RENUMBERED_FROM: AID-2026-083
+RENUMBERED_INTERMEDIATE: "AID-2026-091 was provisional and unmerged; main allocated 091 to PR #1242 before this PR's merge."
+renumbering_reason: "Current main INDEX max is AID-2026-091 (PR #1242); this Work Item receives next identifier AID-2026-092."
+work_item_id: AID-2026-092
+title: Produce version-pinned approval, phase-freeze audit and GOV-DOC-002 verification evidence for #1189, #1197 and #1037
+class: GOVERNANCE/AUDIT
+risk: R2
+risk_rationale: >-
+  This is a documentation-only evidence package, but it records approval provenance,
+  phase-boundary interpretation and validator-verification limits. A false approval,
+  overstated freeze or invented test result would create governance risk. All unavailable
+  facts remain NOT_RECORDED or BLOCKED; no normative source, validator or Runtime is changed.
+status: MERGED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 515b7144320fd9fcc1e1a2c3d2d2744d979b4ca8
+tracking_issue: "#1189; #1197; #1037"
+
+prompt_id: AID-2026-083-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-092/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 9be8aebf7d595f81cc062e5c03a67fd8317aeefaf69dd635fd9031f112dc25d1
+prompt_bytes: 2455
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST; snapshot assembled from the assigned scope, no independent source verification claimed
+
+authorization:
+  merge: GRANTED_BY_EXPLICIT_ACCOUNT_OWNER_DIRECTIVE_2026-11-26
+  implementation_write: >-
+    GRANTED only for this work item's manifest, prompt snapshot, three evidence reports,
+    and the AID INDEX row. NOT_GRANTED for changes to canonical approval metadata, Phase
+    freeze source documents, Runtime/product code, validator code/semantics, tests, scripts,
+    CI/workflows, schemas, APIs, DDL, deployment or production configuration.
+  gate_behaviour_change: NOT_GRANTED
+  schema_change: NOT_GRANTED
+  platform_state_change: NOT_GRANTED
+  architecture_spec_change: NOT_GRANTED
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-092/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-092/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-092/ISSUE-1189-approval-provenance.md
+    - 14-ai-development/work-items/AID-2026-092/ISSUE-1197-phase-freeze-audit.md
+    - 14-ai-development/work-items/AID-2026-092/ISSUE-1037-validator-and-metadata-verification.md
+  files_to_modify:
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope: >-
+    All other paths. In particular no root or mirror architecture specification, validator,
+    Runtime/product code, tests, scripts, CI/workflows, schema, API, DDL, deployment or
+    production configuration is modified.
+
+acceptance_criteria:
+  - id: AC1
+    criterion: >-
+      #1189 has an attributable, exact-version record of what is actually known. Existing
+      delegated non-approval decisions are distinguished from approval; unknown approver,
+      approval date and approval event remain NOT_RECORDED.
+    measurement: >-
+      Separate root/EN/ZH blob pins for Design Principles and Architecture Invariants,
+      exact Issue comment references, explicit decision scope, attribution and minimum
+      missing-evidence path.
+  - id: AC2
+    criterion: >-
+      #1197 has a repository-wide inventory of current Phase 1 and Phase 2 freeze/phase
+      contract documents, including declared root/language counterparts, exact version pins,
+      scope, mirror consistency and residual ambiguity.
+    measurement: >-
+      Every identified Phase 1/Phase 2 document family is listed with exact current-main
+      Git blob SHA, status, mirror relationship and gaps; semantic freeze is not treated
+      as implementation authorization.
+  - id: AC3
+    criterion: >-
+      #1037 records actual exact-Head GOV-DOC-002 execution evidence, the command, exit
+      result, output summary hash, and whether byte-identical comparison was completed.
+    measurement: >-
+      GitHub Actions run/job and exact Head are pinned; any unavailable baseline execution
+      is explicitly BLOCKED, not inferred from unchanged source code.
+  - id: AC4
+    criterion: >-
+      #1037 includes a fresh exact-fix-commit metadata recount or an explicit BLOCKED record
+      with the minimum reproducible execution conditions.
+    measurement: >-
+      Raw path list/counts and output hash are attached if measured; otherwise the prior
+      historical count is labeled historical and not reused as current evidence.
+  - id: AC5
+    criterion: >-
+      All three Issues remain OPEN. This evidence-only PR may be marked Ready and merged after every required check succeeds; merge does not accept or close any Issue.
+    measurement: GitHub readback of all three Issue states, exact-Head required checks and merge result.
+
+findings:
+  - id: F1
+    severity: HIGH
+    statement: >-
+      #1189 has no discoverable historical approving principal or approval event for the
+      current Design Principles and Architecture Invariants versions. The recorded delegated
+      decision is explicitly a non-approval.
+    evidence: "#1189 comments 7174316473 and 7174519803; current-main source/mirror pins in AC1 report."
+  - id: F2
+    severity: MEDIUM
+    statement: >-
+      #1197's Phase 1 Domain Freeze §8 is explicitly deferred, but the Phase 1 Memory Store
+      Facade still has a generic Next unit handoff without the controlling deferred-engineering
+      boundary. Several related Phase 1/Phase 2 contracts are unclassified under GOV-DOC-002.
+    evidence: "Exact source pins and section inventory in ISSUE-1197-phase-freeze-audit.md."
+  - id: F3
+    severity: HIGH
+    statement: >-
+      #1037's exact-Head incremental GOV-DOC-002 check passed, but a same-input baseline
+      stdout comparison and fresh exact-fix-commit metadata recount are not available in
+      this execution environment.
+    evidence: "Run 45765896655, job 139726593864; limitations and minimum path in ISSUE-1037 report."
+
+implementation:
+  status: DOCUMENTATION_ONLY
+  pull_request: 1250
+  merge_commit_sha: 587d7ca9731e50c7a4c8c9df424798f555e0a2db
+  note: >-
+    This work item creates evidence records only. The explicitly authorized merge integrates
+    these records; it does not claim any Issue is accepted or closed.
+
+review:
+  status: NOT_ASSIGNED
+  note: No independent review or natural-person Owner review is claimed.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "NOT_ASSIGNED; no acceptance decision is asserted"
+
+session_evidence: []

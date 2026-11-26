@@ -21,6 +21,17 @@ ROWS = (
 )
 
 def document(path: str, rows=ROWS) -> str:
+    if path == FILES[2]:
+        translations = {
+            "Authorization and revocation": "授权与撤销",
+            "Retention and legal hold": "Retention 与 Legal Hold",
+            "Logical Forget suppression / fence": "逻辑 Forget 抑制/围栏",
+            "Physical erasure": "物理擦除",
+            "Backup expiry / deletion": "备份到期/删除",
+            "External-recipient deletion": "外部接收方删除",
+            "Global Forget Completion assessment": "Global Forget Completion 判定",
+        }
+        rows = tuple((translations.get(row[0], row[0]), *row[1:]) for row in rows)
     header = "| " + " | ".join(HEADERS[path]) + " |\n"
     separator = "|---|---|---|---|---|\n"
     body = "".join("| " + " | ".join(row) + " |\n" for row in rows)
@@ -67,7 +78,7 @@ class GovernanceTraceabilityTests(unittest.TestCase):
         (self.root / FILES[0]).write_text(document(FILES[0], rows), encoding="utf-8")
         code, errors = self.run_check()
         self.assertEqual(code, 1)
-        self.assertTrue(any("collapses policy authority" in item for item in errors))
+        self.assertTrue(any("collapses an authority role" in item for item in errors))
 
     def test_missing_mirror_fails_incomplete(self):
         (self.root / FILES[2]).unlink()

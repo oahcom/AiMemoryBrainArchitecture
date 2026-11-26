@@ -259,6 +259,8 @@ Issuance is atomic: an issued reference must not escape before its record transa
 
 ### 3.3 Crate boundary
 
+> **Amended 2026-11-22 15:52 +0800 — see the amendment at the end of this document.** The phrase "reject Pending" in the second paragraph is **narrowed** by `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001` D3 and by `OWNER-RULING-AUTHORIZATION-PRESENCE-GATE-025` §1: under the three-state type the domain presence gate rejects `Absent` and must **NOT** reject `Placeholder`. "Pending" here named everything that was not issued; that set split in two, and only one half is absence. Everything else in this section — the crate boundary itself, and the rule that only the `AdmissionStore`-backed validator establishes durable authority — stands.
+
 Domain types and deterministic subject encodings belong in `memory-domain`, which remains SQLite-independent. Tables, insert/read operations and record-backed validators belong in `memory-compiler` behind `AdmissionStore`, matching D's layering. The publication authority calls validators and propagates errors; it must not write records or synthesize I decisions.
 
 The validator is **not** a `FactRevision::validate()` responsibility. Domain validation may validate candidate field syntax and reject Pending, but only the compiler's AdmissionStore-backed validator can establish durable existence and authority. Structural validation must not claim a candidate reference is issued.

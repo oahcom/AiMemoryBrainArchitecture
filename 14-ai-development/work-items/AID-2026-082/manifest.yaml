@@ -15,15 +15,15 @@ acceptance_authority: NOT_ASSIGNED
 
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: 17b05a0234d861a8bd0b78bccea799b1c11c433f
+base_commit_sha: 81906cfc8d3cd477d26657520aa04d81466e7ce2
 tracking_issue: "#1237 — automated Owner namespace and governance-operation traceability checks"
 
 prompt_id: AID-2026-082-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-082/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 4f35361bac6958d28f8d6d7c570f4f3c925711adc4be7d804594413401343504
-prompt_bytes: 5795
+prompt_sha256: 2f1b98778fd839aef41b69292e6e84695f0de97394bc22e91db622846744550c
+prompt_bytes: 5831
 prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST; no independent prompt-source verification claimed
 
 authorization:
@@ -141,4 +141,16 @@ acceptance:
   record_ref: ""
   acceptance_authority: "NOT_ASSIGNED; no acceptance decision is asserted"
 
-session_evidence: []
+session_evidence:
+  - role: IMPLEMENTATION_SESSION
+    issue_refs:
+      - "#1196"
+      - "#1208"
+      - "#1237"
+    implementing_ai_session: NOT_RECORDED
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-082/prompt-v1.md
+    executed_prompt_sha256: 2f1b98778fd839aef41b69292e6e84695f0de97394bc22e91db622846744550c
+    executed_prompt_bytes: 5831
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-082/session-evidence.md

@@ -52,6 +52,7 @@ This file is governed by GOV-DOC-002 even though `docs/` as a whole is not: the 
 | GAP-02 | Governance enforcement on direct pushes to `main` | `00-governance/architecture-document-management-policy.md` §8, `.github/workflows/document-management.yml` | PARTIAL — `--require-changed` runs on both pull requests (PR base) and direct pushes (`github.event.before`). Residual gap: the first push of a branch has no base commit, so the workflow falls back to the whole-tree scan. That scan now returns **INCOMPLETE (exit 2)** while backlog remains, so it fails loudly rather than reporting a pass it cannot justify — but it still cannot prove the *newly added* files are classified, only that a backlog exists. Closing it requires branch protection that mandates pull requests. |
 | GAP-03 | Honesty of an exclusion reason in the scope registry | `00-governance/architecture-document-management-policy.md` §2, `00-governance/document-scope-registry.yaml` | PARTIAL — the ninth review showed this was not only unproven but already violated: `docs/` was excluded as "not documentation" while 26 of its files are architecture documents (minimum-runnable architecture, canonical transaction, source-of-truth inventory), and their own `DRAFT / NON-NORMATIVE` header is a value of `lifecycle.approval.decision_status`, not a reason to be outside classification. That directory is now `backlog`: scanned, counted, and reported as unclassified. What remains unresolved is narrower: DM-14 can check that an exclusion names `not-documentation` and gives a bilingual reason, but it cannot check that the claim is true. `reviews/` (196 Markdown files, review transcripts) is the only large exclusion still resting on that basis. Closing it requires a human to defend the exclusion, which is a review duty, not a machine check. |
 | GAP-04 | A mirror can be **stale while its annotation count agrees** | `scripts/check_bilingual_docs.py` (existence), `00-governance/architecture-document-management-policy.md` §9.1 (`M-05`) | OPEN — found three times on 2026-11-25/26, and the third time is the one that names the gap. `check_bilingual_docs.py` proves both files exist and point at each other; it does not read either body. Counting annotations across the three copies catches drift in *density* — it caught `docs/zh-CN/.../OWNER-DECISION-REVIEW-INDEPENDENCE-001.md` carrying seven fewer notes than root, and later root carrying one fewer than zh. It does **not** catch a body that was rendered stale while its count stayed plausible: `GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036` had its English segment corrected on 2026-11-24 and its **Chinese segment inside `docs/en` left at the old text**, still asserting a retracted and verifiably false claim (that no document defines independence at the session level — zero hits; the real counts on `1259f1af` are 8 / 10 / 11 / 6), while the three copies sat at 2 / 4 / 2 annotations and looked consistent. Only a byte comparison of the bodies finds that, and only where the root body is itself Chinese, so the mirror is expected to be identical rather than a translation. A whole-tree check on that narrower class (root body ≥15% CJK, 25 groups) is currently clean: 25 / 25 identical. Closing this properly needs the same check as a gate rule, which means deciding that "root body is Chinese ⇒ zh mirror must be byte-identical" is a contract and not a coincidence — that is a policy decision (`M-05` territory), not a tooling change. |
+| GAP-05 | A **section can be stale while the amendment that retired it sits in the same file** | `OWNER-RULING-AUTHORIZATION-PRESENCE-GATE-025` §6 (commissioned the note), `I-OWNER-DECISION-AUTHORIZATION-DECISION-001` §3.3 (the note that was never written) | FOUND AND CLOSED 2026-11-26 (PR #1245) — the same failure as GAP-04, one level in. A file can carry a correct, complete amendment section at the end and still have the amended section's own body reading the retired way, because the amendment is appended and the body is not. §3.3 of `I-001` said domain validation "may validate candidate field syntax and **reject Pending**"; the shipped gate at `crates/memory-domain/src/lib.rs:1024` rejects `Absent` only, and `OWNER-RULING-AUTHORIZATION-PRESENCE-GATE-025` §1 forbids rejecting `Placeholder`. The ruling had already commissioned the fix on 2026-11-22 — "the clarification belongs in that document as a one-line note, in a documentation PR, not in code" — and two of the three sections it named got their note while the third did not. Annotation count could not see this: the file was internally consistent in every countable respect. See the GAP-05 detail below for the detector and its four false-positive classes. |
 
 ## GAP-04 detail / 详情
 
@@ -70,6 +71,53 @@ The boundary matters, because applying byte comparison to translated pairs would
 真正有效的，是在定义清楚的那一类文档上：**直接比正文**。根正文为中文的文档，其 `docs/zh-CN` 镜像不是译文，本应逐字节相同，出现差异就是漂移。根正文为英文的文档，zh 镜像是译文，字节差异不说明任何问题——那一类仍归 `M-05` 与人工审查。
 
 这个边界很重要：若把字节比对套到译文对上，本树会产出 42 个假阳性，而那正是真信号被埋掉的方式。
+
+## GAP-05 detail / 详情
+
+GAP-04 says a *mirror* can be stale while its annotation count agrees. GAP-05 is the same statement one level in: a *section* can be stale while the amendment that retired it sits in the same file, correct and complete.
+
+The mechanism is structural, not accidental. This repository appends amendments at the end of the document. An amendment section that names §4.3 and says what replaced it is complete as a record, and it is also the only place the change was made. If nobody goes back to §4.3 and points at it, a reader who navigates by heading — which is how these documents are read — gets the retired instruction with no signal that it lapsed. All the same properties hold: the front matter is right, the amendment is right, the closure criteria are right, the count of annotations is right. The body is wrong.
+
+GAP-04 说*镜像*可以在注记数一致的情况下陈旧。GAP-05 是同一句话往里一层：*某个章节*可以陈旧，而撤回它的那条修订就正确、完整地躺在同一个文件里。
+
+机制是结构性的，不是偶然的。本仓库把修订追加在文档末尾。一条修订写明 §4.3 被什么取代，作为记录它是完整的，同时也构成了这次改动的全部。若无人回到 §4.3 指向它，按标题导航的读者（这些文档就是这么读的）会读到已退役的指令，且没有任何信号表明它已失效。所有可数性质都成立：front matter 对、修订对、关闭判据对、注记数对。正文错。
+
+### The detector / 检测器
+
+Not a search for the retired phrasing — that phrasing is often legitimately quoted inside the amendment that retires it, and it is often paraphrased in the body. The detector works from the amendment outward:
+
+1. Split each file at its **last** amendment-ish heading (append-at-the-end is the convention here, so the last one bounds the amendment region).
+2. In that region, find paragraphs carrying a **strong** retirement verb (`is/are superseded|narrowed|replaced|retired|withdrawn|revoked`).
+3. Extract the section numbers those paragraphs name.
+4. For each, find the body heading with that number and check whether the first nine lines carry a pointer (`amended|superseded|narrowed|see the amendment|retired`).
+5. Report the named-but-unpointed ones.
+
+不是去搜退役措辞——那个措辞常常被撤回它的修订合法引用，在正文里也常常被改写。检测器从修订往外走：切、找强退役动词、抽出章节号、回到正文按号找标题、看前九行有无指针、报未带指针者。
+
+### Four false-positive classes, and why each is excluded / 四类误报，及各自为何被排除
+
+Getting this from 108 raw hits to one real finding required four exclusions. Each is a real distinction, not a regex tweak, which is why they are recorded rather than merely coded:
+
+| Class | Example | Why it is not a carrier |
+|---|---|---|
+| **Value supersession** | an amendment paragraph about a blob `5b86fe23ab7c` or a SHA being replaced | The thing superseded is a byte string, not a rule. Detected by a `12`–`40`-hex token in the paragraph; such paragraphs are skipped entirely. |
+| **Section-reference prefix** | `§4` reported when the paragraph says `§4.3` | `§4` is not retired by a statement about §4.3. A ref is dropped when a longer ref with the same prefix appears in the same paragraph. |
+| **Cited as evidence** | `§8`/`§9.1` named in "§9.1 already said otherwise" | The section is being used to *support* the amendment's claim, not being retired by it. Caught by the `stand|unchanged|still required|not touched` marker: sections named after that marker are untouched. |
+| **Change-log table** | `00-governance/architecture-document-management-policy.md` §11 | A version table lists *what each release changed*, citing §2, §4.1, §3.2 as **objects** of change. Every row is a completed edit, not a pending retirement. This one is not auto-excluded — it is the class that shows the detector's ceiling. |
+
+The fourth is the honest limit. A change-log table is indistinguishable from a retirement list by grammar alone: both say "§X changed on date D". Distinguishing them needs to know whether the cited section already carries the result, which is a semantic judgement per row. On this tree the class is one document, so the right response is to read it, not to widen the regex until it disappears.
+
+第四类是诚实的边界。变更日志表格与退役清单在语法上不可区分：两者都说「§X 在 D 日变了」。要区分，必须知道被引章节是否已承载该结果，那是逐行的语义判断。本树该类只有一份文档，正确做法是去读它，而不是把正则放宽到它消失。
+
+### What this does and does not establish / 本项确立与未确立之事
+
+Establishes: on 2026-11-26 this tree has **one** rule-level instance of the pattern, it was unannotated, and it is now annotated (`515b7144`). The same detector run against `*.rs`, `*.py`, `*.yaml` and `*.yml` — where the record is a comment block or a `prompt_supersession` key rather than a heading — found no verbatim survivor outside its own record.
+
+Does not establish: that the pattern is absent from sections **not** named by any amendment. A section can be stale because the world moved and nobody wrote an amendment at all; that is a currency failure, not a supersession failure, and it has no amendment region to search from. It stays with review.
+
+确立：截至 2026-11-26，本树有**一处**规则级的该形态，它未被加注，现已加注（`515b7144`）。同一检测器对 `*.rs`、`*.py`、`*.yaml`、`*.yml` 运行——那里的记录是注释块或 `prompt_supersession` 键而非标题——未发现任何逐字存活于自身记录之外的文本。
+
+未确立：该形态不存在于**任何修订都未指名**的章节。章节可以因为没有修订（世界变了而无人记录）而陈旧；那是时效失效，不是取代失效，而且它没有可供搜索的修订区。这一类仍归审查。
 
 ## GAP-01 detail / 详情
 
