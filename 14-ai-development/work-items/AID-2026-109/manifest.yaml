@@ -29,6 +29,7 @@ scope:
     - 14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md
     - docs/en/14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md
     - docs/zh-CN/14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md
+    - scripts/check_bilingual_docs.py (NORMATIVE_ROOTS membership only; pairing/checker logic unchanged)
     - 14-ai-development/work-items/AID-2026-109/manifest.yaml
     - 14-ai-development/work-items/AID-2026-109/prompt-v1.md
   not_restored_by_decision:
