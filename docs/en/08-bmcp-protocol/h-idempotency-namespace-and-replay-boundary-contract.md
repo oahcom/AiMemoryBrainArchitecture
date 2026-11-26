@@ -47,7 +47,7 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    en: "docs/en/08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md"
+    source: "08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md"
     zh-CN: "docs/zh-CN/08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md"
 ---
 
