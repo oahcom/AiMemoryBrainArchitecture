@@ -280,16 +280,15 @@ python scripts/check_source_revision_pointers.py
 STALE=8 (unchanged), ACCURATE=16 (the 16 refreshed pins)
 ```
 
-Governed 942 -> 942. Classified 496 -> 559 (+63). Unclassified 446 -> 383 (-63).
-Those three figures are measured at corpus commit `b8c89d790d671cff402c259c588de65bf2234bff`, before this
-registration set existed and before current main was merged in. On the head this
-pull request ships, the same two commands report 955 governed / 572 classified /
-383 unclassified -- the growth above 942/559 is main's own documents, which
-arrived with the merge -- with the same `PASS (incremental)` and zero rule
-violations. The deltas this change owns are +63 classified and -63 unclassified.
-The whole-tree run still exits 2 because 383 governed documents elsewhere are
-unclassified; that backlog belongs to the other corpus units and to roots this
-unit does not own, and no rule violation is reported.
+Governed 942 -> 942. Classified 496 -> 559 (+63). Unclassified 446 -> 383 (-63),
+measured at corpus commit `b8c89d790d671cff402c259c588de65bf2234bff`, before this
+registration set existed and before any later main merge. The deltas this change
+owns are +63 classified and -63 unclassified; the whole-tree totals on any later
+head differ from 942/559/383 only by the documents main itself added, so the
+stable statement is the delta, not the total. The whole-tree run still exits 2
+because 383 governed documents elsewhere are unclassified; that backlog belongs
+to the other corpus units and to roots this unit does not own, and no rule
+violation is reported.
 
 ## 8. What this change does not do
 
