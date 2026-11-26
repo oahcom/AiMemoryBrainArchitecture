@@ -114,13 +114,12 @@ acceptance:
   implementation_conformance: "NOT_CLAIMED"
   production_conformance: "NOT_CLAIMED"
 carrier:
-  branch: "docs/aid-2026-109-sqlite-implementation-evidence-review"
+  branch: "docs/aid-2026-111-sqlite-implementation-evidence-review"
   pull_request: 1307
   draft: false
   merged_head_sha: "0463e984b961a08660e111f9f1947dfed373d78a"
   required_contexts: 16
   required_contexts_success: 16
-  draft: true
   merge_commit_sha: "e47dd6f03ddd143be42645beba43c54b46921962"
   merge_authorization: "only after all 16 required contexts succeed on exact final Head"
 review:
