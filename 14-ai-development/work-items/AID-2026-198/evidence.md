@@ -52,7 +52,7 @@ document_metadata:
 - Repository: `oahcom/AiMemoryBrainArchitecture`
 - Base branch: `main`; branch `fix/2026-11-27-mirror-frontmatter-b`, work tree `D:\code\wt-corpus-b`
 - Base commit at branch creation: `4326669c` (full SHA in `manifest.yaml`); `origin/main` was merged in
-  again as `0c752ee6` before the pull request
+  again as `2f4f4118` (which carries the refs unit's AID-2026-190 registration) before the pull request
 - Attribution: user-authorized operator (delegated by account owner). No natural-person Owner
   signature, acceptance or approval is asserted.
 - Unit brief: `unit-corpus-b.md` — "give 07/08/13 mirrors a frontmatter block". Prohibitions carried

@@ -31,7 +31,7 @@ identifier_allocation:
     Observed set, not INDEX maximum plus one: every AID-2026-NNN found in pull-request titles and
     remote branch names was enumerated through the GitHub API (1,2,3,4,7,9,10,11,14,23,30,40,41,42,
     50-58,60,62,64,66,69,72,75,77,78,80-83,89,90,92,93,95,98,100-116,140,150,172,173,174,183,186,
-    188,189), so 190 was the first number outside both observed sets; 190 and 191 were both consumed on main or by open pull requests between branch creation and push, so this unit renumbered to 192.
+    188,189), so 190 was the first number outside both observed sets. Competing units then consumed 190 on main (PR #1343) and held 191 and 192 in open pull requests while this branch was being prepared, so the unit was reassigned to 198, the first number free at the moment of the final push.
   recheck_rule: >-
     Immediately before merge, re-read open pull requests and remote branches for AID-2026-198; if
     occupied, take the next free number and update every path and reference in the same push.
