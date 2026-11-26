@@ -1,3 +1,42 @@
+---
+document_metadata:
+  domain: domain-model
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-190/evidence.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "GOV-DOC-002 classification of a normative root that carried no front-matter: records domain, role and the status the document states in its own body (Status: DECIDED, Phase 1 SQLite persistence boundary only). Claims no canonical authority (canonical_status stays Non-Canonical) and records no Owner approval. Pre-metadata content blob: c472e00f2ef4d00bb71806efc7db72062f4efb58."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Normative
+  bilingual_counterpart:
+    source: null
+    en: "docs/en/02-domain-model/phase-1-sqlite-adapter-contract.md"
+    zh-CN: "docs/zh-CN/02-domain-model/phase-1-sqlite-adapter-contract.md"
+---
 # Phase 1 SQLite Adapter Contract
 
 Status: DECIDED — Phase 1 SQLite persistence boundary only. This is not production-readiness evidence.

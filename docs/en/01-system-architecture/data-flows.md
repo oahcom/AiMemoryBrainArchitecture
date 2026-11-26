@@ -1,9 +1,48 @@
+---
+document_metadata:
+  domain: architecture
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-190/evidence.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "GOV-DOC-002 classification of a mirror that carried no front-matter: records domain, role, status and the canonical source path only (basis, the document's own statement: Status: DECIDED for ownership and semantic boundaries). Claims no canonical authority and does not verify semantic parity with the source. Pre-metadata content blob: 6b4220fe1a1015446ab98ea6065faaaae34ba8b7."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Normative
+  bilingual_counterpart:
+    source: "01-system-architecture/data-flows.md"
+    en: null
+    zh-CN: "docs/zh-CN/01-system-architecture/data-flows.md"
+---
 # System Data Flows
 
 - Document ID: SYS-DATA-FLOWS-001
 - Version: 1.0
 - Source: [Normative source specification](../../../01-system-architecture/data-flows.md)
-- Source revision: 24bc5867749d234238e6d75aadd4119f359de9f8
+- Source revision: 85eaed6721a58d3847c7d90812bae4e0646c5e86
 - Chinese counterpart: [系统数据流](../../zh-CN/01-system-architecture/data-flows.md)
 - Status: DECIDED for ownership and semantic boundaries; CANDIDATE for scheduling/transport choices; TO_VALIDATE for quantitative targets
 

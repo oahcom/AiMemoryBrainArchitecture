@@ -1,3 +1,42 @@
+---
+document_metadata:
+  domain: memory-context
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-190/evidence.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "GOV-DOC-002 classification of a normative root that carried no front-matter: records domain, role and the status the document states in its own body (Status: G semantic decisions recorded; FREEZE BLOCKED; implementation/execution NOT VERIFIED). Claims no canonical authority (canonical_status stays Non-Canonical) and records no Owner approval. Pre-metadata content blob: aa3afa73d8a76cc6f025839c52bfbff6a983046a."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: "docs/en/06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md"
+    zh-CN: "docs/zh-CN/06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md"
+---
 # Phase 3.6 — Context Applied State, Forget and Reconciliation Contract
 
 - Owner: Session G — ContextVersion, Delivery, Applied State and Reconciliation

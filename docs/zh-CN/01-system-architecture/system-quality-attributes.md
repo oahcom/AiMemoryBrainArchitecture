@@ -1,9 +1,48 @@
+---
+document_metadata:
+  domain: architecture
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-190/evidence.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "为原本无 front-matter 的镜像补 GOV-DOC-002 分类：仅记录 domain、role、状态与规范源路径（依据正文自述：Status: DECIDED quality priorities and measurement principles）；不主张规范权威，也不证明与源语义对等。补元数据前正文 blob：1c7ea192fa653f789aafa5e04559ad259b05884d。"
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Normative
+  bilingual_counterpart:
+    source: "01-system-architecture/system-quality-attributes.md"
+    en: "docs/en/01-system-architecture/system-quality-attributes.md"
+    zh-CN: null
+---
 # 系统质量属性
 
 - 文档 ID：SYS-QA-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../01-system-architecture/system-quality-attributes.md)
-- 源版本：4350733173d29451a8ea4aa6a544de46526b4fd7
+- 源版本： b06c15eaba1bc0476eb0a241ffd21b10d184c468
 - 对应英文：[System Quality Attributes](../../en/01-system-architecture/system-quality-attributes.md)
 - 状态：质量优先级和测量原则为 DECIDED；架构策略为 CANDIDATE；量化目标为 TO_VALIDATE
 

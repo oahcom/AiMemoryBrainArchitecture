@@ -1,3 +1,42 @@
+---
+document_metadata:
+  domain: memory-context
+  role: review-report
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-190/evidence.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "GOV-DOC-002 classification of a mirror that carried no front-matter: records domain, role, status and the canonical source path only (basis, the document's own statement: delegated G-boundary review record; not an independent human signature). Claims no canonical authority and does not verify semantic parity with the source. Pre-metadata content blob: 60dc4f43cc03e720e1c2552d77ddabe9947e8e86."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "06-memory-context/phase-3.6.4-g-prepared-participant-gid-applied-acceptance.md"
+    en: null
+    zh-CN: "docs/zh-CN/06-memory-context/phase-3.6.4-g-prepared-participant-gid-applied-acceptance.md"
+---
 # G Owner — Exact JF-10 Prepared Participant Identity / GID Applied-Evidence Acceptance
 
 - Storage protocol §14 Blob: `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7`

@@ -1,9 +1,48 @@
+---
+document_metadata:
+  domain: domain-model
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-190/evidence.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "GOV-DOC-002 classification of a mirror that carried no front-matter: records domain, role, status and the canonical source path only (basis, the document's own statement: Status: Core semantics DECIDED). Claims no canonical authority and does not verify semantic parity with the source. Pre-metadata content blob: c9e352fcb3ca9914e7ed52bedfe6e475a60c306b."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Normative
+  bilingual_counterpart:
+    source: "02-domain-model/relationships-and-provenance.md"
+    en: null
+    zh-CN: "docs/zh-CN/02-domain-model/relationships-and-provenance.md"
+---
 # Relationships and Provenance Model
 
 - Document ID: DOMAIN-REL-PROV-001
 - Version: 1.0
 - Source: [Normative source specification](../../../02-domain-model/relationships-and-provenance.md)
-- Source revision: a674e21756cdbf8c07683083bfdcb58a33f48a20
+- Source revision: dfc1718c9a5b4ae8f465281d117e5b167d13df4f
 - Chinese counterpart: [关系与来源链模型](../../zh-CN/02-domain-model/relationships-and-provenance.md)
 - Status: Core semantics DECIDED; graph representation and lineage compaction CANDIDATE/OPEN
 - Owner: Memory Domain Model, with Evidence & Provenance and Entity/Relationship Managers executing the contracts
