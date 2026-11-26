@@ -36,33 +36,33 @@ document_metadata:
     canonical_scope_keywords:
       - ai-development
       - work-item-evidence
-      - aid-2026-112
+      - aid-2026-186
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "14-ai-development/work-items/AID-2026-112/evidence.md"
-    en: null
-    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-112/evidence.md"
+    source: "14-ai-development/work-items/AID-2026-186/evidence.md"
+    en: "docs/en/14-ai-development/work-items/AID-2026-186/evidence.md"
+    zh-CN: null
 ---
 
 
 
 
-# AID-2026-112
+# AID-2026-186
 
-**RENUMBERED_FROM:** AID-2026-109 → AID-2026-110 → AID-2026-111 (each identifier was occupied by concurrent work before this push). — E Canonical Restore Batch 1 Evidence
+**RENUMBERED_FROM:** AID-2026-109 → AID-2026-110 → AID-2026-111 → AID-2026-112 (each identifier was occupied by concurrent work before its push); renumbered to AID-2026-186 at merge because AID-2026-112 is occupied in main by unrelated work. — E 规范文档恢复批次 1 证据
 
-- Baseline main: `a7e7c64bfd6c6d709a0a7b55358f94b8535815c1`
-- Owner source branch: `session-e-memory-compiler-2026-11-16`
-- Recorded source branch HEAD: `ee098e14747d9915de5b3efb63b3a8dd77f670ed`
-- Scope: 18 files under `04-memory-compiler/`. Existing root `README.md`, `compiler-overview.md`, and `extraction-and-normalization.md` were not modified.
-- All 18 source files had no YAML frontmatter. GOV-DOC-002 metadata was prepended; the original source body was retained unchanged. The requested `architecture-spec` role is absent from the live schema enum, so schema-valid `design-specification` was used.
-- Authority is marked `Canonical`, normative status `Informative`, and approval `Draft`. This records canonical placement, not Owner acceptance or normative adoption.
+- main 基线：`a7e7c64bfd6c6d709a0a7b55358f94b8535815c1`
+- Owner 源分支：`session-e-memory-compiler-2026-11-16`
+- 本次操作记录的源分支 HEAD：`ee098e14747d9915de5b3efb63b3a8dd77f670ed`
+- 范围：`04-memory-compiler/` 下 18 个文件。未修改已有根目录 `README.md`、`compiler-overview.md`、`extraction-and-normalization.md`。
+- 18 份源文件均无 YAML frontmatter。已在顶部添加 GOV-DOC-002 元数据；原始正文按原字节保留。用户指定的 `architecture-spec` 不在当前 schema 枚举中，因此采用 schema 允许的 `design-specification`。
+- authority 标记为 `Canonical`，normative_status 为 `Informative`，审批状态为 `Draft`。这表示规范载体位置，不代表 Owner 接受或规范性采纳。
 
-## Blob and frontmatter digest comparison
+## Blob 与 frontmatter 摘要对照
 
-| Path | Source blob SHA | New blob SHA | Frontmatter SHA-256 |
+| 文件 | 源 blob SHA | 新 blob SHA | Frontmatter SHA-256 |
 |---|---|---|---|
 | decision-change-log.md | a5a13c33c2096fc60086e18cd4f9bef59b0b2739 | ac0cd04d9e7b4052628fa9ccfadb25651f4a1c43 | 78d6c0cf385d19f18f669f2d054fa925829571edbebea43de19c9ee46a710607 |
 | forget-fence-and-derived-registration.md | 00e37ba56596e710513c8d0568acd79141d9101b | 3ec35cae80763d007daac844357dffc6d344bb8a | b5ff9d926f9a77291eb034d119838ec4c6e637640820cc57524f81661def5dd8 |
@@ -83,12 +83,12 @@ document_metadata:
 | phase-3.8.5-e-storage-logical-serialization-topology-review.md | 14efd3d32930bec9740bfb4509e18ff6bf670090 | eaa73f4d6c3ac13616c19fab99ed8ba66ffaa75a | e58e4470e48caa783931a07abd253941131b492b817cf0130bede0b57e6fe2cb |
 | phase-3.8.6-e-review-storage-serialization-anchor.md | 19d708bc29b6115d7bccb7d320781f452ee28b78 | 7f73c5a6e13b111f016323a27f22b93c29cea582 | 569e7a579e9ee07c74203312a26059da55c458e230c7cd2f93eb0b08defe3dec |
 
-## Mirror inventory
+## 镜像盘点
 
-The baseline contains 13 files in each of the EN and ZH-CN compiler mirror directories, but none has an exact basename match among the 18 restored documents. All 18 therefore have `MIRROR_MISSING` on both language sides. No placeholder mirror was added. The bilingual pairing gate may block this pull request; no exemption is asserted.
+基线中 EN 与 ZH-CN 编译器镜像目录各有 13 个文件，但没有任何一个与本次 18 个恢复文件的 basename 精确匹配。因此 18 份文件在 EN、ZH-CN 两侧均记为 `MIRROR_MISSING`。未创建占位镜像。双语配对门禁可能因此阻断 PR；本证据不隐瞒，也不声称豁免。
 
-## Exclusions
+## 排除范围
 
-- Existing `04-memory-compiler/README.md`, `compiler-overview.md`, and `extraction-and-normalization.md` were untouched.
-- No implementation, runtime, schema, validator, workflow, or Issue closure is claimed.
-- No Owner acceptance or normative adoption is claimed.
+- 未修改已有 `04-memory-compiler/README.md`、`compiler-overview.md`、`extraction-and-normalization.md`。
+- 不声称实施、Runtime、schema、validator、workflow 或 Issue 已关闭。
+- 不声称 Owner 接受或规范性采纳。

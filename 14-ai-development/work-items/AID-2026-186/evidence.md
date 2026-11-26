@@ -31,27 +31,27 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Canonical
-    canonical_scope: Work-item evidence record for AID-2026-112.
-    canonical_scope_id: ai-development/aid-2026-112-evidence
+    canonical_scope: Work-item evidence record for AID-2026-186.
+    canonical_scope_id: ai-development/aid-2026-186-evidence
     canonical_scope_keywords:
       - ai-development
       - work-item-evidence
-      - aid-2026-112
+      - aid-2026-186
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
     source: null
-    en: "docs/en/14-ai-development/work-items/AID-2026-112/evidence.md"
-    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-112/evidence.md"
+    en: "docs/en/14-ai-development/work-items/AID-2026-186/evidence.md"
+    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-186/evidence.md"
 ---
 
 
 
 
-# AID-2026-112
+# AID-2026-186
 
-**RENUMBERED_FROM:** AID-2026-109 → AID-2026-110 → AID-2026-111 (each identifier was occupied by concurrent work before this push). — E Canonical restore batch 1 evidence
+**RENUMBERED_FROM:** AID-2026-109 → AID-2026-110 → AID-2026-111 → AID-2026-112 (each identifier was occupied by concurrent work before its push); renumbered to AID-2026-186 at merge because AID-2026-112 is occupied in main by unrelated work. — E Canonical restore batch 1 evidence
 
 - Baseline main: `a7e7c64bfd6c6d709a0a7b55358f94b8535815c1`
 - Owner source branch: `session-e-memory-compiler-2026-11-16`

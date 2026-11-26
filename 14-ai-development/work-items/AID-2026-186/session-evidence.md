@@ -36,7 +36,7 @@ document_metadata:
     canonical_scope_keywords:
       - ai-development
       - work-item-record
-      - aid-2026-112
+      - aid-2026-186
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
@@ -44,14 +44,14 @@ document_metadata:
 
 
 
-# AID-2026-112 session evidence
+# AID-2026-186 session evidence
 
 - Operator attribution: user-authorized operator (delegated by account owner)
 - Date: 2026-11-26
 - Baseline main: a7e7c64bfd6c6d709a0a7b55358f94b8535815c1
 - Source branch: session-e-memory-compiler-2026-11-16
 - Source branch HEAD supplied for this task: ee098e14747d9915de5b3efb63b3a8dd77f670ed
-- Allocation: AID-2026-112; INDEX maximum observed at allocation was 108.
+- Allocation: AID-2026-112 (INDEX maximum observed at original allocation was 108); renumbered to AID-2026-186 at merge because AID-2026-112 is occupied in main by unrelated work.
 - Prompt snapshot: prompt-v1.md (this file's companion); execution identity NOT_RECORDED.
 - Source body integrity: source blob objects were fetched by their recorded SHA and prefixed with a new GOV-DOC-002 metadata block; body bytes were concatenated unchanged.
 - Governance: no Owner acceptance, normative adoption, or Issue closure is asserted.
