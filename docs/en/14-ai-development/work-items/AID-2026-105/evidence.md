@@ -42,7 +42,7 @@ document_metadata:
     normative_status: Informative
   bilingual_counterpart:
     source: "14-ai-development/work-items/AID-2026-105/evidence.md"
-    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-105/evidence.md"
+    en: null
     zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-105/evidence.md"
 ---
 
