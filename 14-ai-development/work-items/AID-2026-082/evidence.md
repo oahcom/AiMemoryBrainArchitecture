@@ -37,7 +37,7 @@ document_metadata:
 - Carrier: PR #1220; branch `impl/2026-11-26-normative-source-restore`
 - Inventory baseline Head: `7cf6b0adcd531c875e14bab0b6fa70ff75db08eb`
 - Total enumerated Markdown files: **240** (tests excluded)
-- Restored source files in this inventory commit: **0**
+- Restored source files: **1** (F runtime-overview candidate)
 - Full body/frontmatter readback: **8 primary documents inspected; remaining listed bodies not yet read**
 - Bilingual semantic parity: **NOT VERIFIED**
 - All source documents remain Candidate/Informative or BLOCKED; none promoted.
@@ -94,7 +94,7 @@ Mirror columns mean path exists in current main tree, not that content is semant
 | F | `05-memory-runtime/phase-3.8.5-f-storage-logical-serialization-topology-impact-review.md` | `9dae404993d3006e59d2dae88a0a97a3c0998d58` | no | no | no | BLOCKED_BILINGUAL_PAIR |
 | F | `05-memory-runtime/phase-3.8.6-f-review-storage-serialization-anchor.md` | `122238146830db6188f00a9788e018a82bfb3f90` | no | no | no | BLOCKED_BILINGUAL_PAIR |
 | F | `05-memory-runtime/retrieval-engine.md` | `1fbfc0ff07b66c0ff68c3cea5271261c9d7fc0af` | no | yes | yes | BLOCKED_BODY_FRONTMATTER_PARITY_READBACK |
-| F | `05-memory-runtime/runtime-overview.md` | `b7a948f014c3ad882a35a18bfc8ce025b26ab85a` | no | yes | yes | BLOCKED_BODY_FRONTMATTER_PARITY_READBACK |
+| F | `05-memory-runtime/runtime-overview.md` | `b7a948f014c3ad882a35a18bfc8ce025b26ab85a` | yes | yes | yes | RESTORED_CANDIDATE; SEMANTIC_PARITY_PENDING |
 | F | `05-memory-runtime/runtime-scheduling.md` | `ca35d8cddd012c1ff067328ee22177f57c40ae36` | no | yes | yes | BLOCKED_BODY_FRONTMATTER_PARITY_READBACK |
 | F | `05-memory-runtime/working-set-and-cache.md` | `a934491950c876701e8ac592a0e6aaea983b44e3` | no | yes | yes | BLOCKED_BODY_FRONTMATTER_PARITY_READBACK |
 | H | `08-bmcp-protocol/adapter-capability-and-applied-attestation.md` | `74be8374a67da385a5f0f8e34c7aef2b38b72bcf` | no | yes | yes | BLOCKED_BODY_FRONTMATTER_PARITY_READBACK |
