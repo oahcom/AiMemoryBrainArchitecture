@@ -18,7 +18,7 @@ document_metadata:
       evidence_reference:
         - "AID-2026-082"
         - "source branch: session-e-memory-compiler-2026-11-16"
-        - "source commit: ee098e14747d9915de5b3efb63a8dd77f670ed"
+        - "source commit: ee098e14747d9915de5b3efb63b3a8dd77f670ed"
         - "original source blob: e59f517fff161ab882aa0ddc4a5bda513964ae1a"
       revocation: null
     evidence_verification:
@@ -55,7 +55,7 @@ document_metadata:
 - Document ID: E-PRODUCER-ADMISSION-001
 - Version: 1.0
 - Source branch: session-e-memory-compiler-2026-11-16
-- Source revision: exact source blob `e59f517fff161ab882aa0ddc4a5bda513964ae1a` at `ee098e14747d9915de5b3efb63a8dd77f670ed`.
+- Source revision: exact source blob `e59f517fff161ab882aa0ddc4a5bda513964ae1a` at `ee098e14747d9915de5b3efb63b3a8dd77f670ed`.
 - Source: [restored canonical source](../../../04-memory-compiler/compiler-state-and-producer-admission.md) (`e59f517fff161ab882aa0ddc4a5bda513964ae1a`).
 - Chinese counterpart: [Compiler 状态机与 D Producer Admission 接口](../../zh-CN/04-memory-compiler/compiler-state-and-producer-admission.md)
 - Status: E lifecycle semantics CANDIDATE; D semantic operations DECIDED; callable API/transport and Storage atomicity OPEN
