@@ -132,15 +132,16 @@ Rule B 拿测试的路径、文件名、stem 或点分模块名去匹配拼接�
 
 ## 6. 改前改后实测
 
-下列数字均在本工作树产出。"改前"一侧是在 `origin/main` = `2f4f4118` 的 detached worktree 上运行同一条命令。
+下列数字均在本工作树产出。第 2-4 节的缺陷实测使用的是 `origin/main` = `2f4f4118` 的改前文件；下表
+拿本分支与它实际合并的那份 `origin/main`（`9dc98a52`）对比，因此计数不会过期。
 
-| 指标 | 改前 | 改后 |
+| 指标 | 改前（9dc98a52） | 改后 |
 |---|---|---|
-| `check_repository_hygiene.py` 版本 | `2026-11-24.8` | `2026-11-27.2` |
-| `Work-item index membership ... directories= / linked=` | 106 / 106，exit 0 | 带本工作项为 107 / 107（不含它则是 106 / 106：它恰好增加一个目录与一行），exit 0 |
+| `check_repository_hygiene.py` 版本 | `2026-11-27.1` | `2026-11-27.2` |
+| `Work-item index membership ... directories= / linked=` | 110 / 110，exit 0 | 带本工作项为 111 / 111（不含它则是 110 / 110：它恰好增加一个目录与一行），exit 0 |
 | `check_declared_check_contexts.py` | 16 declared、16 produced，exit 0 | 16 declared、16 produced，exit 0 |
-| `check_test_reachability.py` | 65 个测试文件、65 可达；18 个 gate 脚本、3 未接线、3 已 baseline | 完全相同 |
-| `scripts/test_check_repository_hygiene.py` | Ran 97，OK（skipped=1） | Ran 99，OK（skipped=1） |
+| `check_test_reachability.py` | 66 个测试文件、66 可达；18 个 gate 脚本、3 未接线、3 已 baseline | 完全相同 |
+| `scripts/test_check_repository_hygiene.py` | Ran 101，OK（skipped=1） | Ran 103，OK（skipped=1） |
 | `scripts/ci/test_check_test_reachability.py` | Ran 24，OK | Ran 27，OK |
 | `scripts/test_check_declared_check_contexts.py` | Ran 13，OK | Ran 16，OK |
 
@@ -162,7 +163,7 @@ Rule B 拿测试的路径、文件名、stem 或点分模块名去匹配拼接�
 
 `scripts/test_check_repository_hygiene.py` 的共享 `commit()` 助手只写该用例的文件加一份空 schema registry。那些夹具既没有 work-item 目录也没有 `INDEX.md`，于是成员检查现在会对它们 fail-closed——这是正确的，但与该用例想测的东西无关。因此助手改为写一个 work-item 目录，并为夹具中每个目录写一行 `INDEX.md`，除非用例自带这些内容或传入 `with_index=False`。
 
-两个方向都验证过：不改助手时 97 个用例里有 65 个失败；而两个*关于*缺失侧的用例使用 `with_index=False` 并断言 exit 2。
+两个方向都验证过：不改助手时（合并前 97 个用例的那套夹具）97 个用例里有 65 个失败；而两个*关于*缺失侧的用例使用 `with_index=False` 并断言 exit 2。
 
 ## 9. 本记录不声称什么
 
@@ -171,7 +172,7 @@ Rule B 拿测试的路径、文件名、stem 或点分模块名去匹配拼接�
 - 未改动 16 个声明上下文、16 个产出上下文或任何 job 名。
 - 未新增任何 gate-wiring baseline 条目：三个已 baseline 的未接线 gate 保持原状。
 - 未对本次未点名的任何检查作任何声称。
-\n
+
 ## 10. 身份
 
 本工作项最初分配到 AID-2026-192。PR 挂起期间 main 从 2f4f4118 前进到 9dc98a52，而那份 main 自带

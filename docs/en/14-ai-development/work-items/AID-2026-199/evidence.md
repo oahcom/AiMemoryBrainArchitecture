@@ -158,16 +158,17 @@ The same reading was applied one step earlier: a commented-out
 
 ## 6. Measured before and after
 
-All numbers were produced in this working tree. The "before" side ran the same command against a
-detached worktree at `origin/main` = `2f4f4118`.
+All numbers were produced in this working tree. The defect measurements in sections 2-4 use the
+pre-fix files from `origin/main` = `2f4f4118`; the table below compares the branch against the
+`origin/main` it was actually merged with, `9dc98a52`, so the counts are not stale.
 
-| Quantity | Before | After |
+| Quantity | Before (9dc98a52) | After |
 |---|---|---|
-| `check_repository_hygiene.py` version | `2026-11-24.8` | `2026-11-27.2` |
-| `Work-item index membership ... directories= / linked=` | 106 / 106, exit 0 | 107 / 107 with this work item (106 / 106 without it: the item adds exactly one directory and one row), exit 0 |
+| `check_repository_hygiene.py` version | `2026-11-27.1` | `2026-11-27.2` |
+| `Work-item index membership ... directories= / linked=` | 110 / 110, exit 0 | 111 / 111 with this work item (110 / 110 without it: the item adds exactly one directory and one row), exit 0 |
 | `check_declared_check_contexts.py` | 16 declared, 16 produced, exit 0 | 16 declared, 16 produced, exit 0 |
-| `check_test_reachability.py` | 65 test files, 65 reachable; 18 gate scripts, 3 unwired, 3 baselined | identical |
-| `scripts/test_check_repository_hygiene.py` | Ran 97, OK (skipped=1) | Ran 99, OK (skipped=1) |
+| `check_test_reachability.py` | 66 test files, 66 reachable; 18 gate scripts, 3 unwired, 3 baselined | identical |
+| `scripts/test_check_repository_hygiene.py` | Ran 101, OK (skipped=1) | Ran 103, OK (skipped=1) |
 | `scripts/ci/test_check_test_reachability.py` | Ran 24, OK | Ran 27, OK |
 | `scripts/test_check_declared_check_contexts.py` | Ran 13, OK | Ran 16, OK |
 
@@ -208,7 +209,7 @@ cases that are *about* the absent sides use `with_index=False` and assert exit 2
 - No change to the sixteen declared contexts, the sixteen produced contexts, or any job name.
 - No new gate-wiring baseline entry: the three baselined unwired gates stay baselined.
 - Nothing about a checker this unit did not name.
-\n
+
 ## 10. Identity
 
 This work item was first allocated AID-2026-192. Main advanced from 2f4f4118 to 9dc98a52 while

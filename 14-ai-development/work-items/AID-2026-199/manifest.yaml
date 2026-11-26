@@ -89,6 +89,7 @@ evidence:
     - docs/en/14-ai-development/work-items/AID-2026-199/evidence.md
     - docs/zh-CN/14-ai-development/work-items/AID-2026-199/evidence.md
   measured_at: 2f4f4118bd2c2d8e43a23975f667deeb06553f3c
+  measured_at_note: "Defect measurements (sections 2-4) at 2f4f4118; suite and gate counts at 9dc98a52, the main this branch was merged with"
   measurements:
     index_membership_no_directories_before: "returns [] -> checker exit 0"
     index_membership_no_directories_after: "RuntimeError -> checker exit 2"
@@ -101,24 +102,24 @@ evidence:
     reachability_commented_test_name_before: "exit 0 (silent pass)"
     reachability_commented_test_name_after: "exit 1, pkg/test_x.py named"
     declared_contexts_before_after: "16 declared / 16 produced, unchanged"
-    index_membership_counts_before_after: "directories=106 linked=106 at origin/main; directories=107 linked=107 with this work item, which adds exactly one directory and one row"
-    reachability_totals_before_after: "65 test files / 65 reachable / 18 gate scripts / 3 unwired / 3 baselined, unchanged"
-    checker_version_before: "2026-11-24.8"
-    checker_version_after: "2026-11-27.2"
-    tests_hygiene_before_after: "97 -> 99 (1 skipped both sides)"
+    index_membership_counts_before_after: "directories=110 linked=110 at origin/main 9dc98a52; directories=111 linked=111 with this work item, which adds exactly one directory and one row"
+    reachability_totals_before_after: "66 test files / 66 reachable / 18 gate scripts / 3 unwired / 3 baselined, unchanged"
+    checker_version_before: "2026-11-27.1 (the unqualified-run contract change, already on main)"
+    checker_version_after: "2026-11-27.2 (this rule change)"
+    tests_hygiene_before_after: "101 -> 103 (1 skipped both sides)"
     tests_reachability_before_after: "24 -> 27"
     tests_declared_before_after: "13 -> 16"
   local_runs:
     - command: python scripts/test_check_repository_hygiene.py
-      result: "Ran 99 tests / OK (skipped=1) / exit 0"
+      result: "Ran 103 tests / OK (skipped=1) / exit 0"
     - command: python scripts/ci/test_check_test_reachability.py
       result: "Ran 27 tests / OK / exit 0"
     - command: (cd scripts && python -m unittest test_check_declared_check_contexts)
       result: "Ran 16 tests / OK / exit 0"
-    - command: python scripts/ci/check_repository_hygiene.py
-      result: "directories=107 linked=107 with this work item (106 / 106 at origin/main); exit 0"
+    - command: python scripts/ci/check_repository_hygiene.py --head-tree-only
+      result: "directories=111 linked=111 with this work item (110 / 110 at origin/main 9dc98a52); exit 0; new-file admission reported SKIPPED, as the 2026-11-27.1 contract requires"
     - command: python scripts/ci/check_test_reachability.py
-      result: "65 test files / 65 reachable / exit 0"
+      result: "66 test files / 66 reachable / exit 0"
     - command: python -c "... check_declared_check_contexts.main(root, declared_contexts(...))"
       result: "16 declared, all produced; exit 0 (the protected side injected, no network call)"
   not_measured:
