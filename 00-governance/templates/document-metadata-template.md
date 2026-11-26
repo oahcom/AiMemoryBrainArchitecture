@@ -46,8 +46,6 @@ document_metadata:
         value: null
       approval_scope:
         type: Full-document         # the only value DM-10 honours
-        included_sections: []
-        included_assets: []
       approval_applicability: Applicable-To-Current-Version
       evidence_reference: []
       revocation: null              # REQUIRED and non-null when decision_status: Revoked

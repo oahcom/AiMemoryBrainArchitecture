@@ -1,0 +1,110 @@
+manifest_version: "1.0"
+record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
+registration_stage: "STAGE_0"
+registration_status: "CARRIER_PR_PENDING"
+work_item_id: "AID-2026-140"
+id_status: "PROVISIONAL"
+title: "F Memory Runtime canonical-root restoration — fixed-range re-registration and metadata reconciliation"
+date: "2026-11-26"
+repository:
+  name: "oahcom/AiMemoryBrainArchitecture"
+  baseline_branch: "main"
+  baseline_commit: "0786a3b89e060266cbd249e81f4571b9dc3f51d5"
+  original_restore_merge_commit: "d6cad634f1341a8943aa89dd5ef8bf75f6d56199"
+source:
+  branch: "session-f-memory-runtime"
+  head: "1908ce4d233b20f7cafd00cb679affd01bd15174"
+original_carrier:
+  work_item_id: "AID-2026-113"
+  pull_request: 1314
+  head: "9142698fae340271e44c3a097fad0cc6455666b3"
+  merge_commit: "d6cad634f1341a8943aa89dd5ef8bf75f6d56199"
+  note: "The original five-root restoration was merged by a concurrent delegated session under an identifier outside this account's fixed range. This follow-up re-registers the work under AID-2026-140 and corrects the exact authority field and evidence pins; it does not duplicate source-body restoration."
+identifier_allocation:
+  assigned_at: "2026-11-26"
+  observed_main: "0786a3b89e060266cbd249e81f4571b9dc3f51d5"
+  index_sha: "ae3c0339a07b35bb0b65b0ea4b48396184133bcf"
+  requested_id: "AID-2026-140"
+  id_status: "PROVISIONAL"
+  reserved_range: "AID-2026-140 through AID-2026-149"
+  allocation_rule: "Select the first unoccupied identifier within the account-fixed reserved range. AID-2026-140 was checked against the current INDEX, work-item tree, Issues, PRs and branch names and was unoccupied. Do not read INDEX max+1 and do not allocate outside the reserved range."
+  renumbered_from: "AID-2026-113"
+  merge_time_rule: "Immediately before merge, recheck only the reserved range AID-2026-140 through AID-2026-149. If AID-2026-140 is occupied by a competing item, use the next free identifier within this range and update every path/reference before merging."
+authority:
+  sponsor: "USER-PRINCIPAL-DELEGATED"
+  accountable_owner: "USER-PRINCIPAL-DELEGATED"
+  acceptance_authority: "NOT_ASSIGNED"
+  attribution: "user-authorized operator (delegated by account owner)"
+  signature_status: "代理执行记录，非自然人 Owner 签署"
+source_hierarchy_decision: "OWNER_REPLACEMENT"
+replaces: "05-memory-runtime/README.md"
+designated_root: "05-memory-runtime/runtime-overview.md"
+authority_statement: "user-authorized operator (delegated by account owner), 2026-11-26"
+scope:
+  objective: "Preserve the five F Canonical roots already restored by PR #1314; re-register all current Work Item references under AID-2026-140; correct runtime-overview's exact top-level authority field; reconcile source, mirror and merged Git blob evidence. No source or mirror body changes."
+  canonical_files:
+    - "05-memory-runtime/activation-policy-engine.md"
+    - "05-memory-runtime/retrieval-engine.md"
+    - "05-memory-runtime/runtime-overview.md"
+    - "05-memory-runtime/runtime-scheduling.md"
+    - "05-memory-runtime/working-set-and-cache.md"
+  mirror_pairs:
+    - "activation-policy-engine.md"
+    - "retrieval-engine.md"
+    - "runtime-overview.md"
+    - "runtime-scheduling.md"
+    - "working-set-and-cache.md"
+  orphan_pair:
+    path_en: "docs/en/05-memory-runtime/memory-runtime-guide.md"
+    path_zh_CN: "docs/zh-CN/05-memory-runtime/memory-runtime-guide.md"
+    status: "ORPHAN_MIRROR_PENDING_DECISION"
+    action: "UNTOUCHED_PENDING_OWNER_DECISION"
+  evidence:
+    canonical: "14-ai-development/work-items/AID-2026-140/restore-evidence.md"
+    en: "docs/en/14-ai-development/work-items/AID-2026-140/restore-evidence.md"
+    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-140/restore-evidence.md"
+  files_to_create:
+    - "14-ai-development/work-items/AID-2026-140/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-140/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-140/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-140/restore-evidence.md"
+    - "docs/en/14-ai-development/work-items/AID-2026-140/restore-evidence.md"
+    - "docs/zh-CN/14-ai-development/work-items/AID-2026-140/restore-evidence.md"
+  files_to_modify:
+    - "14-ai-development/work-items/INDEX.md"
+    - "14-ai-development/work-items/AID-2026-113/manifest.yaml (mark superseded; preserve historical carrier evidence)"
+    - "05-memory-runtime/* (five roots; AID reference correction only, plus exact overview authority key)"
+    - "docs/en/05-memory-runtime/* (five existing Canonical mirrors; AID reference correction only)"
+    - "docs/zh-CN/05-memory-runtime/* (five existing Canonical mirrors; AID reference correction only)"
+  files_to_retain:
+    - "14-ai-development/work-items/AID-2026-113/manifest.yaml (historical carrier record; superseded_by AID-2026-140)"
+    - "14-ai-development/work-items/AID-2026-113/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-113/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-113/restore-evidence.md"
+    - "docs/en/14-ai-development/work-items/AID-2026-113/restore-evidence.md"
+    - "docs/zh-CN/14-ai-development/work-items/AID-2026-113/restore-evidence.md"
+  governance_updates:
+    - "00-governance/document-scope-registry.yaml already includes 05-memory-runtime from PR #1314."
+    - "scripts/check_bilingual_docs.py:NORMATIVE_ROOTS already includes 05-memory-runtime from PR #1314."
+  exclusions:
+    - "Do not create 05-memory-runtime/README.md or either README mirror."
+    - "memory-runtime-guide.md remains an orphan mirror pair and is left entirely untouched."
+    - "Do not restore any of the ten historical source-branch records listed in restore-evidence.md."
+    - "Do not restore 04-memory-compiler/compiler-stage-contract.md; PR-C is cancelled."
+    - "No source or mirror body edits, translation, runtime implementation, validator, schema, tests, workflow, deployment or production changes."
+    - "No Issue closure."
+review:
+  status: "NOT_ASSIGNED"
+acceptance:
+  status: "NOT_GRANTED"
+  note: "The five Canonical docs remain Draft and Informative. The hierarchy replacement is a delegated operator direction record, not a natural-person Owner signature or F Owner normative acceptance."
+session_evidence:
+  - role: "DOCUMENTATION_AUTHOR"
+    issue_refs:
+    implementing_ai_session: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-140/prompt-v1.md"
+    executed_prompt_sha256: "9dcbbe6a39c4a53b6dba7928dd6619e09ade2c4b5c668a4e32ad57467f007b2d"
+    executed_prompt_bytes: 3125
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-140/session-evidence.md"

@@ -17,9 +17,10 @@ from collections import Counter
 from pathlib import Path
 
 NORMATIVE_ROOTS = {
-    "00-governance", "01-system-architecture", "02-domain-model",
-    "04-memory-compiler", "06-memory-context", "07-agent-integration",
-    "08-bmcp-protocol", "13-engineering-decisions", "14-ai-development",
+    "00-governance", "01-system-architecture", "02-domain-model", "03-memory-brain",
+    "04-memory-compiler", "05-memory-runtime", "06-memory-context", "07-agent-integration",
+    "08-bmcp-protocol", "09-security-governance", "10-storage-consistency", "13-engineering-decisions",
+    "14-ai-development",
 }
 ROOT = Path(__file__).resolve().parents[1]
 _missing_roots = sorted(r for r in NORMATIVE_ROOTS if not (ROOT / r).is_dir())
@@ -168,6 +169,12 @@ for _source, _reason in EMBEDDED_BILINGUAL_SOURCES.items():
         sys.exit(2)
 
 BASELINE_PATH = ROOT / "scripts" / "bilingual-baseline.txt"
+# The second copy of the same frozen inventory. The `bilingual` ratchet job in
+# .github/workflows/gates.yml feeds this file to scripts/ci/gate_ratchet.py,
+# while this gate reads BASELINE_PATH. Neither file derives from the other, and
+# nothing used to compare them: regenerating one copy alone silently changed the
+# pass condition of whichever gate read it.
+CI_BASELINE_PATH = ROOT / "scripts" / "ci" / "baselines" / "bilingual-docs.txt"
 
 
 def _git_log_output(*args: str) -> str:
@@ -404,6 +411,31 @@ def write_baseline() -> int:
             return 2
 
         gaps = sorted(current_bilingual_gaps())
+        # "This baseline may only shrink; entries must never be added." used to
+        # be a header comment with nothing behind it, so regenerating after a
+        # regression raised the baseline and the gate went green over new gaps.
+        # The assertion is the reason the write exists; without the old set it
+        # cannot be evaluated, so a missing baseline refuses the write.
+        previous = read_baseline_entries(BASELINE_PATH)
+        if previous is None:
+            print(
+                "baseline write refused: cannot prove the new baseline only "
+                "shrinks because the current baseline is missing: "
+                f"{BASELINE_PATH.relative_to(ROOT)}",
+                file=sys.stderr,
+            )
+            return 2
+        added = sorted(set(gaps) - previous)
+        if added:
+            print(
+                "baseline write refused: the regenerated baseline would add "
+                f"{len(added)} entr{'y' if len(added) == 1 else 'ies'}; "
+                "this baseline may only shrink:",
+                file=sys.stderr,
+            )
+            for path in added:
+                print(f"  + {path}", file=sys.stderr)
+            return 2
         header = (
             "# Frozen inventory of pre-existing bilingual documentation gaps.\n"
             "# This baseline may only shrink; entries must never be added.\n"
@@ -459,15 +491,65 @@ def write_baseline() -> int:
                 )
 
 
-def read_baseline() -> set[str] | None:
-    if not BASELINE_PATH.is_file():
-        print(f"::error::Required bilingual baseline is missing: {BASELINE_PATH.relative_to(ROOT)}")
+def read_baseline_entries(path: Path) -> set[str] | None:
+    """Read one frozen-entry file; comments and blanks are not entries."""
+    if not path.is_file():
         return None
     return {
         line.strip()
-        for line in BASELINE_PATH.read_text(encoding="utf-8").splitlines()
+        for line in path.read_text(encoding="utf-8").splitlines()
         if line.strip() and not line.lstrip().startswith("#")
     }
+
+
+def read_baseline() -> set[str] | None:
+    entries = read_baseline_entries(BASELINE_PATH)
+    if entries is None:
+        print(f"::error::Required bilingual baseline is missing: {BASELINE_PATH.relative_to(ROOT)}")
+    return entries
+
+
+def check_baseline_copies_agree() -> list[str]:
+    """Fail when the two frozen copies of the 77-entry inventory diverge.
+
+    `scripts/bilingual-baseline.txt` (read by this gate) and
+    `scripts/ci/baselines/bilingual-docs.txt` (read by the `bilingual`
+    ratchet) started as byte-identical entry sets, but they are independent
+    files: regenerating either one alone changes what one gate permits while
+    the other keeps enforcing the old set. Comparing them here converts that
+    silent drift into a red check.
+
+    This adds no new pass condition to any existing gate: while the two entry
+    sets are equal -- which they are on main -- the outcome is exactly what it
+    was before. It only refuses to let the two copies disagree.
+    """
+    frozen = read_baseline_entries(BASELINE_PATH)
+    ratchet = read_baseline_entries(CI_BASELINE_PATH)
+    errors: list[str] = []
+    if frozen is None:
+        errors.append(
+            "Required bilingual baseline is missing: "
+            f"{BASELINE_PATH.relative_to(ROOT)}"
+        )
+    if ratchet is None:
+        errors.append(
+            "Required bilingual ratchet baseline is missing: "
+            f"{CI_BASELINE_PATH.relative_to(ROOT)}"
+        )
+    if frozen is None or ratchet is None:
+        return errors
+
+    for path in sorted(frozen - ratchet):
+        errors.append(
+            "Bilingual baseline copies disagree; present only in "
+            f"scripts/bilingual-baseline.txt: {path}"
+        )
+    for path in sorted(ratchet - frozen):
+        errors.append(
+            "Bilingual baseline copies disagree; present only in "
+            f"scripts/ci/baselines/bilingual-docs.txt: {path}"
+        )
+    return errors
 
 
 def changed_status() -> dict[str, str]:
@@ -1100,6 +1182,15 @@ def main() -> int:
 
     baseline = read_baseline()
     if baseline is None:
+        return 2
+    copy_errors = check_baseline_copies_agree()
+    if copy_errors:
+        for message in copy_errors:
+            print(f"::error::{message}")
+        print(
+            "::error::The two bilingual baselines must hold the same entries; "
+            "shrink both copies in the same change."
+        )
         return 2
     gap_now = current_bilingual_gaps()
     new_gaps = sorted(gap_now - baseline)

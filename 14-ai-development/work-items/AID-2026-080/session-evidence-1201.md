@@ -12,8 +12,6 @@ document_metadata:
         value: null
       approval_scope:
         type: Full-document
-        included_sections: []
-        included_assets: []
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference: []
       revocation: null
@@ -213,24 +211,43 @@ annotation names AID-2026-080:
   historical facts, and no later action satisfies a requirement that applied at merge time. The
   honest closeout is `MERGED` with both deviations preserved. `MERGED` is not `COMPLIANT`, and it is
   not Owner acceptance — `acceptance.status` stays `NOT_ASSIGNED`, separate from merge state.
-- **The pre-merge exact-Head review requirement was not met for either PR, and that is a
+  Round 6 (`RETROSPECTIVE`, Head `6f1ad214`, PR #1266) is not a sixth pre-merge review — it is the
+  record of the third failure. PR #1266 merged at `09:55:18Z`; round 6 was requested at `09:58Z`,
+  three minutes later. Round 6 therefore reviewed a Head that had already merged and says so in its
+  own first line. What it established is still worth having: B1's stale base is repaired
+  (`6f1ad214`'s second parent is exactly `f02ceab0`), B2's Rule L1 correction is right, the snapshot
+  blob `84342823` was not replaced, and the two earlier deviations survived intact. What it found is
+  that #1266 itself was merged without a recorded review of its final Head — `GET /pulls/1266/reviews`
+  returns 0 — which is a third deviation, distinct in mechanism from the first two: #1215 and #1240
+  merged after the branch advanced past the reviewed Head, while #1266 merged while a review of the
+  correct Head was still being written.
+- **Three deviations, one cause, and the cause is me.** The same session both requested the exact-Head
+  reviews and drove the merges. Requesting a review and merging are two actions by one actor, and the
+  faster one wins every time. That is not bad luck three times over; it is a structural property of
+  the arrangement, and recording it as three separate incidents would obscure that. Round 6's own
+  recommendation is the one adopted: do not repair again to pretend the timing can be fixed, record
+  the third deviation, close as `MERGED`, leave compliance and Owner acceptance unclaimed.
+- **The pre-merge exact-Head review requirement was not met for any of the three PRs, and that is a
   deviation rather than an incident.** #1215 merged at `f7bc0789` after round 3 had reviewed
-  `489b6048`; #1240 merged at `32f87d46` after round 4 had reviewed `7e9c9f3d`. The pattern is
+  `489b6048`; #1240 merged at `32f87d46` after round 4 had reviewed `7e9c9f3d`; #1266 merged at
+  `6f1ad214` with no review of that Head recorded before merge. The pattern is
   structural, not accidental: a branch that is updated after its review cannot satisfy an
   exact-Head requirement at merge, and no after-the-fact inspection repairs the timing. Both
   deltas are recorded as facts about the change — neither touches a path under `AID-2026-080/`
-  or `PR-GOVERNANCE-001.md` — and neither is offered as review coverage. `32f87d46` and
-  `f7bc0789` have not been read by any review as such.
+  or `PR-GOVERNANCE-001.md` — and neither is offered as review coverage. `32f87d46`,
+  `f7bc0789` and `6f1ad214` have not been read by any review before their merges.
 - The reproduction in §2 was performed by a second agent session given the procedure and not
   the expected values. It reproduced all four bucket counts, the 0-of-54 figure and both
   error strings. That is a reproducibility check, not an independent review: the session that
   wrote the change spawned it.
-- **The second defect in the same paragraph is not repaired.** The clause also says principal
-  identity, not string inequality, decides whether `accountable_owner` and
-  `implementing_ai_session` differ. No principal registry exists in this repository — the term
-  appears only in `01-system-architecture/data-flows.md`, its `docs/` mirrors, and
-  `08-bmcp-protocol/validators/envelope_auth_validator.py` — so nothing can settle that
-  requirement today. One defect per change; it is registered separately.
+- **The second defect in the same paragraph is not repaired, and is now registered.** The clause also
+  says principal identity, not string inequality, decides whether `accountable_owner` and
+  `implementing_ai_session` differ. No principal registry exists in this repository — the term appears
+  only in prose and in field names — so nothing can settle that requirement today. Measured: `principal`
+  occurs 0 times in `scripts/governance/session_evidence/validate.py`, and `accountable_owner` occurs
+  0 times anywhere under `scripts/`, so the gate does not even see two of the three fields the clause
+  governs. One defect per change; registered as Issue #1285 with three candidate resolutions and no
+  chosen answer, because the choice belongs to whoever owns the principal model.
 - **34 of 56 manifests still fail `parse_manifest_session_entries` at `364ef4ad`.** Only the 27
   that failed *because of this clause* at `1f5ba824` are addressed here. The rest fail for reasons of their own, mostly
   an incomplete legacy field set predating the canonical format, and this work item does not

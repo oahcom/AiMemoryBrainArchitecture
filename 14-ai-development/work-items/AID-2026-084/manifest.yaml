@@ -1,0 +1,156 @@
+work_item_id: AID-2026-084
+title: Make INDEX membership require a registry row, not any link
+class: GATE/TEST
+risk: R2
+risk_rationale: >-
+  One predicate narrowed and three tests added in an already-executed module. The gate can
+  turn red on a tree that keeps work-item directories without registry rows, which is the
+  point, and the current tree is measured to keep all of its rows, so landing it does not
+  redden the registry. No new dependency, no schema field, no workflow step. The risk
+  addressed is false assurance: the check reported membership it had not established,
+  because a row deleted from the table could still be "linked" by a link in prose or in a
+  comment (issue #944).
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: f02ceab0e57b9a149e36025a4595861ca7517ebf
+tracking_issue: "#944"
+
+prompt_id: AID-2026-084-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-084/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: acdd40d2b2b2357ecfea7411122b146e43d4daab7fd8230bc32ba96009c86b55
+prompt_bytes: 4775
+
+authorization:
+  implementation_write: >-
+    GRANTED for scripts/ci/check_repository_hygiene.py,
+    scripts/test_check_repository_hygiene.py, this work item's own directory, and
+    INDEX.md. NOT_GRANTED for any other path.
+  gate_behaviour_change: >-
+    GRANTED for narrowing index membership to table rows, and for the three tests that
+    assert it. NOT_GRANTED for changing any other rule in the checker, its exit codes, or
+    any workflow step.
+  schema_change: NOT_GRANTED - no manifest field is added, removed or retyped.
+  platform_state_change: >-
+    NOT_GRANTED for required status contexts. The check runs inside existing jobs, so no
+    branch-protection payload is modified.
+  architecture_spec_change: NOT_GRANTED - no ADR and no canonical document is modified.
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-084/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-084/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-084/session-evidence-944.md
+  files_to_modify:
+    - scripts/ci/check_repository_hygiene.py
+    - scripts/test_check_repository_hygiene.py
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope: >-
+    Every other path. In particular no other rule in the checker is touched, no existing
+    INDEX row is edited, and the 38 non-row lines that carry links are left exactly as they
+    are: they are prose and comments, and this change does not claim they are defects.
+
+acceptance_criteria:
+  - id: AC1
+    criterion: >-
+      A directory whose only repository-relative link sits inside an HTML comment is
+      reported as unregistered.
+    measurement: >-
+      With the only link wrapped in `<!-- ... -->`, the checker exits 1 and stderr carries
+      `index membership violation: directory present, no index entry:
+      14-ai-development/work-items/AID-2026-002`.
+  - id: AC2
+    criterion: A directory whose only link is in a prose line is reported as unregistered.
+    measurement: >-
+      Same assertion, with the link in a sentence below the table instead of in a comment.
+  - id: AC3
+    criterion: >-
+      A directory whose only link is inside a fenced code block is reported as
+      unregistered.
+    measurement: >-
+      Same assertion, with the link inside a ``` fence.
+  - id: AC4
+    criterion: >-
+      A real table row still registers, and the current tree still passes with every
+      directory linked.
+    measurement: >-
+      `python3 scripts/ci/check_repository_hygiene.py` on this branch prints
+      `directories=79 linked=79` and exits 0, where 79 is 78 pre-existing directories plus
+      this work item's own; no directory lost its entry, which is the constraint the change
+      had to meet.
+  - id: AC5
+    criterion: >-
+      Reverting only the production change turns the new tests red, and the failure names
+      the expectation rather than surfacing a traceback or an unrelated non-zero exit.
+    measurement: >-
+      With the whole-file regex restored, the three tests fail with `AssertionError` naming
+      `::error::index membership violation: directory present, no index entry:
+      14-ai-development/work-items/AID-2026-002` as not found.
+
+findings:
+  - id: F1
+    severity: HIGH
+    statement: >-
+      Membership accepted a link anywhere in INDEX.md, so a registry row could be removed
+      from the visible table and the gate that exists to notice that stayed green.
+    evidence: >-
+      At origin/main dc826e4e the checker printed `directories=68 linked=68` and exited 0.
+      Wrapping the `AID-2026-081` row in `<!-- ... -->` left the same output and exit 0,
+      while `grep -c '^| \[AID-2026-081\]'` returned 0.
+  - id: F2
+    severity: MEDIUM
+    statement: >-
+      The index carries many links that are not registry rows, so the two sets coincided on
+      this tree by luck rather than by construction: 207 links, 81 of them into work-item
+      directories, all 81 inside table rows today.
+    evidence: >-
+      Measured on dc826e4e: 132 lines start with `|`; 68 of them link a work-item
+      directory; 0 non-row lines link one, which is why the tree passes both before and
+      after the change.
+  - id: F3
+    severity: LOW
+    statement: >-
+      A link inside a fenced code block would have registered a directory even though no
+      markdown renderer shows it as a table, and the index carries fenced examples
+      elsewhere in the governance docs.
+    evidence: >-
+      INDEX.md has no fence today (0 occurrences of ``` and 0 of `<!--`), so the three new
+      cases are constructed in the test fixtures rather than found in the tree.
+
+implementation:
+  status: IMPLEMENTED_IN_BRANCH
+  pull_request: ASSIGNED_AT_OPEN
+  merge_commit_sha: NOT_MERGED
+  note: >-
+    The narrowed predicate and the tests land in this branch. The pull request number cannot
+    be written into the commit that opens it.
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    No independent review is recorded. This manifest was written by the session that made the
+    change, so an APPROVE from that same session would be self-review and is not claimed.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#944"
+    implementing_ai_session: a944-opencode-author
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-084/prompt-v1.md
+    executed_prompt_sha256: acdd40d2b2b2357ecfea7411122b146e43d4daab7fd8230bc32ba96009c86b55
+    executed_prompt_bytes: 4775
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-084/session-evidence-944.md

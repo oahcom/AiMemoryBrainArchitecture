@@ -1,3 +1,51 @@
+---
+document_metadata:
+  domain: memory-runtime
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-140/manifest.yaml"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-26"
+      last_verification_note: "Mirror body retained unchanged; semantic parity checked at heading and cross-reference level only."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Memory Runtime design specification: runtime-overview"
+    canonical_scope_id: "memory-runtime/runtime-overview"
+    canonical_scope_keywords:
+      - "runtime-session"
+      - "retrieval"
+      - "activation"
+      - "scheduling"
+      - "working-set"
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "05-memory-runtime/runtime-overview.md"
+    en: "docs/en/05-memory-runtime/runtime-overview.md"
+    zh-CN: null
+---
 # Memory Runtime 总览
 
 - 文档 ID：F-RUNTIME-OVERVIEW-001

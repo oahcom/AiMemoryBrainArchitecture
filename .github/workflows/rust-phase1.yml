@@ -1,5 +1,9 @@
 name: Rust Phase 1 Workspace Tests
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
 on:
   pull_request:
     branches: [main]
@@ -18,6 +22,7 @@ permissions:
 
 jobs:
   rust-workspace-test:
+    name: rust-workspace-test
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -27,6 +32,17 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
+
+      - name: Record resolved Rust toolchain version
+        id: rust-toolchain-version
+        shell: bash
+        run: echo "version=$(rustc --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Rust dependencies and build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: rust-phase1-workspace-test
+          key: ${{ hashFiles('Cargo.lock') }}-${{ steps.rust-toolchain-version.outputs.version }}
       - name: Verify repository formatting at this commit
         run: python3 scripts/check_fmt.py --expect "$GITHUB_SHA"
       - name: Test all workspace targets

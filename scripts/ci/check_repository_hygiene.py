@@ -413,6 +413,8 @@ SCHEMA_REGISTRY_FIELDS = frozenset(
     {"path", "record_type", "disposition", "rationale"}
 )
 LOCAL_LINK_RE = re.compile(r"\]\(([^)#?\s]+)")
+FENCE_RE = re.compile(r"^\s{0,3}(`{3,}|~{3,})")
+COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
 
 def work_item_directories(head_paths):
     """Names of the directories directly under work-items/, from the tree."""
@@ -426,15 +428,44 @@ def work_item_directories(head_paths):
     return names
 
 def index_entry_directories(text):
-    """First path segment of every repository-relative link in the index."""
+    """First path segment of every repository-relative link in a table row.
+
+    Only a table row registers: a line whose first non-space character is `|`,
+    after HTML comment spans are removed and outside a fenced code block. A
+    link in prose, in an `<!-- -->` comment or in a fence is not a registry
+    entry and registers nothing. Before this rule any link anywhere in the
+    file counted, so a row commented out kept the check green while the row
+    was gone from the table (#944).
+
+    What this deliberately does NOT verify: that the row is in the work-item
+    registry table, or that any cell in it says something true. A row in the
+    file's other, unrelated table counts the same, and cell contents are not
+    read at all. Two ceilings are accepted rather than handled: an `<!--` with
+    no `-->` removes nothing, so the text after it is still read, and an
+    unbalanced fence inverts the in-fence test for the rest of the file.
+    """
     names = set()
-    for target in LOCAL_LINK_RE.findall(text):
-        if target.startswith(("http://", "https://", "mailto:")):
+    in_fence = False
+    # A comment span is removed before lines are read, so a commented-out row
+    # is not a row. Newlines inside the span are kept, so removing a comment
+    # cannot splice the lines on either side into one.
+    uncommented = COMMENT_RE.sub(
+        lambda match: "\n" * match.group(0).count("\n"), text
+    )
+    for line in uncommented.splitlines():
+        if FENCE_RE.match(line):
+            in_fence = not in_fence
             continue
-        name, sep, _ = target.partition("/")
-        if sep and name not in {".", ".."}:
-            names.add(name)
+        if in_fence or not line.lstrip().startswith("|"):
+            continue
+        for target in LOCAL_LINK_RE.findall(line):
+            if target.startswith(("http://", "https://", "mailto:")):
+                continue
+            name, sep, _ = target.partition("/")
+            if sep and name not in {".", ".."}:
+                names.add(name)
     return names
+
 
 def check_index_membership(root, commit, head_paths):
     """Require one index entry per work-item directory, and the converse.

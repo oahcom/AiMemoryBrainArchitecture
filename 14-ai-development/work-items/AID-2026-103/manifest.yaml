@@ -1,0 +1,169 @@
+work_item_id: AID-2026-103
+title: Remove approval_scope's two permanently-empty keys from the schema and the corpus
+class: GATE/SCHEMA
+risk: R3
+risk_rationale: >-
+  The change touches the metadata gate and 252 governed documents at once. What makes it R3
+  rather than R2 is breadth, not semantics: a frontmatter edit applied by a script to every
+  root could silently corrupt a document if the rewrite were wrong, and the gate is red between
+  the two halves of the change. The semantics are narrow: `SCOPE_KEYS` loses two members, so
+  the gate's accepted language shrinks and nothing it used to accept on merit stops being
+  accepted. Approval neutrality is structural, not asserted — `body_hash()` hashes
+  `body_text()`, which strips frontmatter, so no `approved_version` pin can move; verified on a
+  live `content-hash` document rather than argued (see findings F3).
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 0b6f56c230a9993a8f65be11fabae47541828e24
+tracking_issue: "#904"
+
+prompt_id: AID-2026-103-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-103/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 7475b108cdf473aa037b3d3619a5a90d89be73fb9f482bab29e125a56552f970
+prompt_bytes: 4925
+
+authorization:
+  implementation_write: >-
+    GRANTED for scripts/check_document_management.py, scripts/test_check_document_management.py,
+    00-governance/architecture-document-metadata.schema.yaml,
+    00-governance/templates/document-metadata-template.md,
+    00-governance/architecture-document-management-policy.md (only the DM-03 row's sentence
+    about the two keys), every *.md frontmatter that carries the two keys, this work item's
+    directory, and 14-ai-development/work-items/INDEX.md. NOT_GRANTED for any other path.
+  gate_behaviour_change: >-
+    GRANTED for shrinking `SCOPE_KEYS` to `{"type"}` and for deleting the now-unreachable
+    non-empty check that guarded the removed keys. NOT_GRANTED for any other rule's semantics,
+    for `SCOPE_TYPES`, or for the DM-10 body-hash equivalence.
+  schema_change: >-
+    GRANTED for removing the two `approval_scope` field declarations. NOT_GRANTED for adding,
+    removing or retyping any other field.
+  platform_state_change: NOT_GRANTED - no required status context, branch protection or workflow is modified.
+  architecture_spec_change: NOT_GRANTED - no ADR and no canonical document is modified.
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-103/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-103/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-103/session-evidence-904.md
+  files_to_modify:
+    - scripts/check_document_management.py
+    - scripts/test_check_document_management.py
+    - 00-governance/architecture-document-metadata.schema.yaml
+    - 00-governance/templates/document-metadata-template.md
+    - 00-governance/architecture-document-management-policy.md
+    - 14-ai-development/work-items/INDEX.md
+    - every *.md frontmatter carrying included_sections / included_assets (252 documents)
+  files_out_of_scope: >-
+    Every other path. In particular the historical change-log rows in
+    00-governance/architecture-document-management-policy.md §11 (rows 1.11 and 1.21 record what
+    was true at their own date and are left byte-identical), and the governance-register /
+    session-evidence records under 14-ai-development and docs/ that quote the old shape as part
+    of a past measurement.
+
+acceptance_criteria:
+  - id: AC1
+    criterion: The gate refuses the shape the corpus no longer uses.
+    measurement: >-
+      `SCOPE_KEYS == {"type"}`. A synthetic approved document carrying `included_sections: []`
+      produces `DM-02 approval_scope.included_sections: unknown key (allowed: type)`.
+  - id: AC2
+    criterion: No governed document still carries either key.
+    measurement: >-
+      Re-running the same frontmatter scan reports 0 documents with `included_*` in
+      frontmatter, down from 252, and `grep -rc 'included_sections' --include=*.md` is 0 in
+      frontmatter position across all roots.
+  - id: AC3
+    criterion: No approval is invalidated by the corpus edit.
+    measurement: >-
+      On 14-ai-development/adr/OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001.md (`content-hash`,
+      pin 3375f59e...2ddc0), `body_hash()` equals the pin before and after the deletion.
+  - id: AC4
+    criterion: The removal is bound by a test that fails if the keys return.
+    measurement: >-
+      With `SCOPE_KEYS` edited back to three members, `scripts/test_check_document_management.py`
+      exits 1 and records four `[FAIL]` lines whose detail is an `AssertionError`, not a
+      traceback. Restored, the suite is 320/320.
+  - id: AC5
+    criterion: The change moves no document out of the unclassified backlog as a side effect.
+    measurement: >-
+      The whole-tree run is INCOMPLETE before and after, exit 2 both times; the classified
+      count rises 324 -> 326 only because this work item adds two classified documents, and
+      the unclassified backlog stays at 467. The incremental run over the change is exit 0.
+
+findings:
+  - id: F1
+    severity: HIGH
+    statement: >-
+      The schema admitted one scope value and still declared two keys for values it no longer
+      admitted. With `Selected-sections`/`Selected-assets` gone, the two lists could only ever
+      be empty, so the requirement was a shape with no content.
+    evidence: >-
+      At fa8268fe `SCOPE_TYPES` is `{"Full-document"}` while `SCOPE_KEYS` is
+      `{"type", "included_sections", "included_assets"}`; measured on the tree, 252 of 252
+      documents carry both keys and 0 carry a non-empty one.
+  - id: F2
+    severity: MEDIUM
+    statement: >-
+      The issue text's premise (99 documents) is stale. The measured count at fa8268fe is 252,
+      and the delta is not only growth: `docs/` now mirrors 77 of them.
+    evidence: >-
+      Frontmatter scan over the working tree: 252 documents with `approval_scope`, 252 with
+      `included_sections: []`, per root 00-governance 8 / 01-system-architecture 1 /
+      06-memory-context 1 / 07-agent-integration 6 / 08-bmcp-protocol 1 /
+      14-ai-development 156 / docs 79.
+  - id: F3
+    severity: HIGH
+    statement: >-
+      Approval neutrality is a property of the hash, not a hope. `body_text()` returns the
+      document with its frontmatter removed, and `body_hash()` hashes that, so a frontmatter
+      deletion cannot move a pin.
+    evidence: >-
+      On the live `content-hash` document named in AC3, the pin 3375f59e...2ddc0 equals
+      `body_hash()` before the edit and after removing the two lines; the file shrank
+      16883 -> 16825 bytes.
+  - id: F4
+    severity: LOW
+    statement: >-
+      Two policy change-log rows (1.11 and 1.21) describe the keys as existing. They are records
+      of a decision taken at their own date, not current claims, and are left unedited.
+    evidence: >-
+      §11 rows dated 2026-11-21 and 2026-11-24; row 1.21 records the ruling this change
+      implements, so editing it would rewrite the history of the ruling rather than the rule.
+
+implementation:
+  status: IMPLEMENTED_IN_BRANCH
+  pull_request: ASSIGNED_AT_OPEN
+  merge_commit_sha: NOT_MERGED
+  note: >-
+    The schema, the gate, the corpus, the template and the DM-03 policy row land in one commit,
+    because the tree is red between the gate edit and the corpus edit.
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    No independent review is recorded. This manifest was written by the session that made the
+    change, so an APPROVE from that same session would be self-review and is not claimed.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#904"
+    implementing_ai_session: a904-opencode-author
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-103/prompt-v1.md
+    executed_prompt_sha256: 7475b108cdf473aa037b3d3619a5a90d89be73fb9f482bab29e125a56552f970
+    executed_prompt_bytes: 4925
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-103/session-evidence-904.md
