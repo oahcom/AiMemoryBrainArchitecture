@@ -37,6 +37,7 @@ jobs:
       - name: Run Owner namespace checker
         run: python scripts/check_owner_namespace_references.py --check
       - name: Run Owner namespace unit tests
+        if: always()
         working-directory: tests
         run: python -m unittest -v test_check_owner_namespace_references.py
 
@@ -51,5 +52,6 @@ jobs:
       - name: Run governance operation traceability checker
         run: python scripts/check_governance_operation_traceability.py --check
       - name: Run governance operation traceability unit tests
+        if: always()
         working-directory: tests
         run: python -m unittest -v test_check_governance_operation_traceability.py
