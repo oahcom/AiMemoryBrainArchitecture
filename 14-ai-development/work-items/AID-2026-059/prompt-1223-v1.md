@@ -20,7 +20,7 @@ document_metadata:
     evidence_verification:
       verification_status: Unverified
       last_verified_date: "2026-11-26"
-      last_verification_note: "This file records the assignment text one agent received in a multi-agent session. It is transcribed, not captured as a platform payload: the session transport was not recorded, so the digest pinned in the manifest proves the committed file has not changed since it was pinned, not that this is the byte-exact string any model received."
+      last_verification_note: "This is the assignment text as recorded by the orchestrating session, not a captured platform payload. The session transport was not recorded, so the digest pinned in the manifest proves the committed file has not changed since it was pinned, not that this is the byte-exact string any model received."
     usage_status: Active
     modification_status: Unchanged
     supersession:
@@ -45,48 +45,55 @@ document_metadata:
     zh-CN: null
 ---
 
-# Executed prompt snapshot — Issue #1223
+# Executed prompt — AID-2026-059 / Issue #1223
 
 ## Assignment
 
-Repair the duplicate-line blindness in `scripts/check_declared_check_contexts.py`,
-with the minimum diff that works.
+Repair the duplicate-line blindness in `scripts/check_declared_check_contexts.py`.
 
-The declared-context block in `14-ai-development/PR-GOVERNANCE-001.md` is read by
-`declared_contexts()` as a list, then compared to the platform's required contexts
-after both sides are collapsed to `set()`. Set difference cannot see multiplicity,
-so a name listed twice is invisible: seventeen declared lines pass against a
-sixteen-element protected set, and the `::notice::` line reports `17` while the
-comparison used `16`.
+The checker reads a fenced block of declared CI check-context names from
+`14-ai-development/PR-GOVERNANCE-001.md` and compares it to the platform's
+required contexts. Both sides were collapsed to `set()`, so a name listed
+**twice** in the document was invisible: the sets still matched and the run
+printed PASS. Measured on unmodified `main` with one duplicate line added:
+
+```
+17 declared check contexts, all produced by a job in .github/workflows and all required on main
+DECLARED CHECK CONTEXTS: PASS
+main() rc with 17 lines / 16 protected = 0
+```
+
+Seventeen declared lines passed against a sixteen-element protected set. Both
+printed statements were individually true — the notice counted the list (17),
+the comparison used the set (16) — which is why the disagreement was invisible.
+The shape is the one #1061 and #1076 share: a check reporting success over a
+fact it never read.
 
 ## Constraints
 
-- Exit code `1`, not `2`. `2` is reserved in this file for `INCOMPLETE` — a
-  condition that could not be evaluated at all. A duplicate is a condition that
-  was read successfully and is wrong.
-- Keep the two existing set-difference directions and their message wording
-  unchanged.
-- Do not touch `fetch_protected_contexts()` or the `/branches/{branch}` endpoint.
-  Issue #1224 requires that endpoint stay as it is; the conditional
-  `--protection` form is explicitly forbidden.
-- No new dependency. `Counter` is acceptable from the standard library; the
-  current guard uses a comprehension instead, which is fine at n=16.
-- Do not change `declared_contexts()`'s return type or its `None` semantics:
-  callers depend on `None` meaning "block absent", which is `INCOMPLETE`.
+1. **Minimum diff.** One guard block plus one test. No refactor, no interface
+   with one implementation, no new configuration.
+2. **Exit code `1`, not `2`.** A duplicated line is a readable-but-wrong
+   document. `2` stays reserved for `INCOMPLETE`, where the condition could not
+   be read at all. Do not collapse the two.
+3. **Keep the existing messages.** The unproduced-context errors, the
+   set-difference errors and their wording stay byte-identical. The new failure
+   is an additional branch, not a replacement.
+4. **Do not touch `fetch_protected_contexts` or the endpoint it calls.** #1224
+   requirement 1 owns the credential question; the `/branches/{branch}` payload
+   stays as it is.
+5. **No new dependency.** Standard library only, as the file already is.
+6. **No behaviour change outside the named defect.** Existing suite counts may
+   not decrease; no existing test is weakened or deleted.
 
 ## Acceptance
 
-- A named test that fails when the guard is deleted, with `AssertionError` rather
-  than a traceback.
-- The unmodified sixteen-line block against the unmodified sixteen names still
-  returns `0`. Both directions are required; a guard that returns `1` for
-  everything would satisfy the first alone.
-- Test count for `scripts/test_check_declared_check_contexts.py` rises from 12.
-- `tests/session_evidence` does not regress.
+A named test that goes red when the guard is deleted. Deleting the new block
+must fail exactly `test_violation_when_a_context_is_declared_twice` with an
+`AssertionError`; restoring it must return the suite to green. The suite is
+`scripts/test_check_declared_check_contexts.py`, and it must go 12 → 13 tests.
+`tests/session_evidence` must stay at 98 tests passing, because nothing there
+is touched.
 
-## Provenance
-
-This is the assignment as recorded by the orchestrating session. The work was
-performed by a delegated implementation agent; the orchestrating session
-independently re-ran the mutation and the two-direction check before accepting
-it, and those measurements are in the paired session-evidence record.
+Do not amend the existing fix commit; this document records the assignment that
+produced it.

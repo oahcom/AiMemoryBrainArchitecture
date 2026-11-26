@@ -20,7 +20,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-26"
-      last_verification_note: "Every figure under 'Gate results' and 'Mutation' was produced in this session by running the commands named there against this branch. The mutation was run twice: once by the delegated implementation agent and once, independently, by the orchestrating session on a fresh copy of the tree."
+      last_verification_note: "Every figure in this record was produced by running the commands named beside it against branch fix/1223-declared-duplicate-blindness at HEAD 2425dd4. Suite counts, the mutation result and the gate verdicts are transcriptions of that output, not estimates."
     usage_status: Active
     modification_status: Unchanged
     supersession:
@@ -49,61 +49,85 @@ document_metadata:
 
 ## Session role / use case
 
-IMPLEMENTER. Repair one defect: a duplicated line in the declared-context block
-of a normative document reported `PASS`.
+IMPLEMENTER. Repair one defect in `scripts/check_declared_check_contexts.py`:
+a declared check-context line listed twice was invisible to the comparison, so
+the gate printed PASS over a document that had stopped saying what its author
+meant.
 
-The shape is the one already recorded for #1061, #1063, #1076 and #1074 — a
-check that reported success over a fact it never read. Here the unread fact is
-**multiplicity**: `set()` collapses the declared lines before they are compared,
-so a name listed twice leaves no trace in either difference set.
+The session was executed by an AI agent. This record is the agent's report
+about its own work, not a third-party attestation.
 
-The session was executed by an AI agent. This record is the agent's report about
-its own work, not a third-party attestation.
+The defect belongs to a family this work item keeps finding — a check that
+reports success over a fact it never read. #1061 (an entry the PR cited but did
+not write) and #1076 (a precondition that compared a value to itself) are the
+two earlier members. Here the unread fact is the *list*: the document was read,
+then immediately collapsed into a set, and the collapse discarded the only
+evidence that the document had changed.
 
-## The defect
+## Actual AI input
 
-`scripts/check_declared_check_contexts.py` reads the fenced block under a marker
-in `14-ai-development/PR-GOVERNANCE-001.md` as a **list** (`declared_contexts()`),
-then compares it to the platform's required contexts as a **set**:
+The operative input is the assignment transcribed in
+`14-ai-development/work-items/AID-2026-059/prompt-1223-v1.md`, pinned by digest
+at 3961 bytes /
+`5de7adc61dcb6659b16a4da5e35826cd635f616ad664654d327c9a1836cade95`. It names
+the defect, the measured before-state, six constraints (minimum diff; exit code
+1 not 2; keep existing messages; leave `fetch_protected_contexts` and its
+endpoint untouched; no new dependency; no behaviour change outside the named
+defect) and the acceptance criterion: a named test that goes red when the guard
+is deleted.
+
+## AI-visible output
+
+**The commit.** One commit, `2425dd4`, on
+`fix/1223-declared-duplicate-blindness` from `main = 9ee89b32`:
+
+```
+2425dd4 fix(1223): a duplicated declared-context line must fail, not collapse into a set
+    scripts/check_declared_check_contexts.py      +22 -1
+    scripts/test_check_declared_check_contexts.py +10
+```
+
+### The defect
+
+`main()` read the fenced block into the list `contexts`, printed a notice using
+`len(contexts)`, and then compared against the protected side as sets:
 
 ```python
-undeclared  = sorted(set(protection) - set(contexts))
+undeclared = sorted(set(protection) - set(contexts))
 unprotected = sorted(set(contexts) - set(protection))
 ```
 
-Seventeen declared lines, sixteen unique names, sixteen protected names:
+A name listed twice contributes one element to the set, so the comparison could
+not see the repetition. With one duplicate line added to the block, the run on
+unmodified `main` produced:
 
 ```
-declared lines 17, unique 16, dupes ['GOV-DOC-001 structural checks']
-::notice::17 declared check contexts, all produced by a job in .github/workflows
-         and all required on main
+17 declared check contexts, all produced by a job in .github/workflows and all required on main
 DECLARED CHECK CONTEXTS: PASS
-rc = 0
+main() rc with 17 lines / 16 protected = 0
 ```
 
-The notice reports `len(contexts)` — the **list**, 17. The comparison used the
-**set**, 16. Both statements are individually true and the file is wrong. Nothing
-in the output can tell a reader that the document lists one name twice.
+Seventeen declared lines, sixteen protected contexts, exit code 0. Both printed
+statements were individually true — the notice counted the list (17), the
+comparison used the set (16) — so no single line was wrong and the disagreement
+between them was invisible. That is the "reports success over a fact it never
+read" shape: the gate never read the list it had already parsed.
 
-## Why it matters here
+### Why it matters
 
-The block is hand-maintained prose in a normative document. The change that added
-this comparison (#1088) was itself a hand edit to that block, so a duplicated
-line is the edit shape this file actually receives.
+A duplicated line is not a formatting nit. It means the document stopped saying
+what its author meant, in one of two ways: a paste that overwrote a context
+which is now missing, or a stale leftover from a rename that was applied in one
+place and not the other. In the first case a required check has silently left
+the declared set; in the second the document claims a check that no longer
+exists under that name. Both are exactly what this gate exists to catch, and
+the set comparison was structurally unable to catch either — dropping a line or
+repeating one can only make a subset test truer.
 
-Two readings are possible when a duplicate appears, and both are defects: a
-copy-paste that overwrote a still-missing context (the author meant to add a
-seventeenth name and pasted an existing one), or a stale leftover that makes the
-document stop saying what its author believed it said. The gate is the only thing
-in the tree that could catch either, and it was the one thing that could not see
-them.
+### The fix
 
-This is strictly weaker than #1069's starting position, which the ruling on this
-Issue records: there, the duplicate was invisible to *the only detector that
-existed*, and #1090 closed it by adding a second detector. Here there is exactly
-one comparison and it is set-based, so there is no other reader at all.
-
-## The fix
+The guard is computed from the list before the collapse, quoted verbatim from
+`git show 2425dd4 -- scripts/check_declared_check_contexts.py`:
 
 ```python
     # A line listed twice is invisible to the set comparison below: the sets
@@ -126,106 +150,111 @@ one comparison and it is set-based, so there is no other reader at all.
         return 1
 ```
 
-Placement: after the "produced by a job" check and **before** the
-`if protection is None:` platform read. That ordering is deliberate and is the
-requirement recorded in the ruling on this Issue — a duplicated declaration is a
-defect in the document, so it must fail whether or not the protected side is
-reachable. Placing it after the fetch would let the same document pass on a
-machine with no network, which is the false-PASS shape this file's own docstring
-refuses.
+The exit code is `1`, not `2`. The document is readable and its content is
+wrong — one `::error::` per duplicated name, which is the VIOLATION vocabulary.
+`2` remains reserved for `INCOMPLETE`, where the condition could not be read at
+all (the credential case, the transport case). Collapsing a content error into
+"could not check" would let a wrong document report itself as unevaluated, and
+a caller that treats `2` as retryable would retry forever.
 
-Exit code `1`, not `2`. `2` is `INCOMPLETE`: a condition that could not be
-evaluated at all. This condition was evaluated and the document is wrong, which
-is `VIOLATION`. Classifying a known-wrong normative document as "could not
-evaluate" would put it in the bucket reserved for infrastructure failure and let
-it be retried instead of fixed.
+The docstring's exit-code table gained one line so the vocabulary states the
+new case: `1  VIOLATION   a declared context is produced by no job, is listed
+twice, or the sets differ`.
 
-## Mutation
+### Mutation result
 
-Run twice, independently.
+Before the fix, and after it, on the same input (one duplicate line added to the
+real 16-name block; protection side = the real 16 names):
 
-Deleting the guard block turns exactly one test red, and it is the named one:
+| | declared lines | unique | verdict | rc |
+|---|---|---|---|---|
+| baseline, pre-fix | 16 | 16 | PASS | 0 |
+| mutated, pre-fix | 17 | 16 | PASS | 0 |
+| baseline, post-fix | 16 | 16 | PASS | 0 |
+| mutated, post-fix | 17 | 16 | `FAIL (declared 17; 1 duplicated)` | 1 |
 
-```
-MUT delete duplicate guard   ran=13 rc=1 fails=1
-    FAIL test_violation_when_a_context_is_declared_twice
-```
-
-Restored:
+The post-fix mutant emits one error line naming the duplicated context:
 
 ```
-RESTORED  ran=13 rc=0 fails=0
+::error::14-ai-development/PR-GOVERNANCE-001.md declares required check context 'GOV-DOC-001 structural checks' more than once; the document no longer says what its author meant it to say
+DECLARED CHECK CONTEXTS: FAIL (declared 17; 1 duplicated)
 ```
 
-The failure is an `AssertionError`, not a traceback, so the test binds the guard
-rather than the code path around it.
-
-## Two directions, because one alone is satisfiable by a constant
-
-The ruling on this Issue requires both, and both were measured:
+Independent mutation check — the guard block deleted from the working tree, the
+test suite run, the file restored and verified byte-identical afterwards
+(`sha256` of the file before and after the mutant matched):
 
 ```
-(3) unmodified block, unmodified 16 names   -> declared 16, unique 16, rc = 0
-(2) one line duplicated                     -> declared 17, unique 16,
-                                               rc = 1
-    ::error::... declares required check context
-      'GOV-DOC-001 structural checks' more than once; the document no longer
-      says what its author meant it to say
-    DECLARED CHECK CONTEXTS: FAIL (declared 17; 1 duplicated)
+MUTANT rc= 1
+FAIL: test_violation_when_a_context_is_declared_twice (__main__.DeclaredCheckContextsTest.test_violation_when_a_context_is_declared_twice)
+Ran 13 tests in 0.055s
+FAILED (failures=1)
+AssertionError: 0 != 1
+restored_identical= True 7cda3054233f
 ```
 
-A guard that returned `1` for everything would satisfy the second alone. The
-first is what makes it a detector rather than a wall.
+Restoring the guard returns `Ran 13 tests in 0.048s` / `OK`. Exactly one test
+goes red, and it is the one that names the defect; no other test moves.
 
-## What was deliberately not done
+### What was deliberately not done
 
-- `fetch_protected_contexts()` and the `GET /branches/{branch}` endpoint are
-  untouched. #1224 records why the endpoint must stay: it needs only
-  `contents: read`, and the `/protection` variant needs Administration (read) and
-  is forbidden by this file's own docstring.
-- The two existing set-difference directions and their message wording are
-  unchanged, so no existing diagnostic was reworded.
-- No new dependency. The guard uses a comprehension over a list of sixteen; the
-  Issue's sketch used `Counter`, which is equivalent at this size and would have
-  added an import for nothing.
-- `declared_contexts()`'s return type and its `None` semantics are unchanged —
-  `None` still means "block absent", which stays `INCOMPLETE`.
+- **`fetch_protected_contexts` and the `/branches/{branch}` payload are
+  untouched.** #1224 requirement 1 owns whether the protected side is read
+  through a different endpoint or a credential. This change compares the list
+  it already had.
+- **No new dependency.** Standard library only; the file still imports
+  `json`, `os`, `re`, `sys`, `urllib.request` and `pathlib`.
+- **The two set-difference directions and their wording are unchanged.** Both
+  existing failure branches print exactly what they printed before, so no
+  existing message-based assertion moves.
+- **The duplicate check runs after the produced-context check, not before.** An
+  unproduced context is the more specific complaint; a document with both
+  problems should report the missing one first, and the ordering keeps the
+  existing first-failure behaviour stable.
 
-## Gate results
-
-Run on this branch at HEAD `2425dd4`:
+### Gate results
 
 ```
 python -m unittest discover -s tests/session_evidence -p "test_*.py"
-    Ran 98 tests ... OK                     (unrelated suite; no regression)
+    Ran 98 tests in 0.506s
+    OK
 
 cd scripts && python test_check_declared_check_contexts.py
-    Ran 13 tests ... OK                     (was 12; the guard's test is the 13th)
-
-python scripts/check_declared_check_contexts.py
-    ::notice::16 declared check contexts, all produced by a job in
-              .github/workflows and all required on main
-    DECLARED CHECK CONTEXTS: PASS
-    rc = 0
+    Ran 13 tests in 0.048s
+    OK
 
 python scripts/ci/check_line_endings.py
-    1396 files inspected, 0 binary skipped, 0 violations
+    Line-ending check: 1404 files inspected, 0 binary skipped, 0 violations.
 
 python scripts/ci/check_repository_hygiene.py
-    Work-item manifest consistency version=2026-11-24.8 manifests=55
-    in_scope=53 excluded_by_record_type=2 unrecognized=0 violations=0
-    Repository hygiene check passed
+    Work-item index membership version=2026-11-24.8 directories=67 linked=67
+    Work-item manifest consistency version=2026-11-24.8 manifests=56 in_scope=54 excluded_by_record_type=2 unrecognized=0 violations=0
+    Repository hygiene check passed (version=2026-11-24.8).
+
+python scripts/check_declared_check_contexts.py        # live, no token in this environment
+    ::error::INCOMPLETE: the branch-protection payload could not be read, so the declared set cannot be compared to it: HTTPError: HTTP Error 403: rate limit exceeded
+    rc=2
 ```
 
-The live `PASS` in the third block is **not** evidence that the fix does nothing.
-The committed block has sixteen lines and sixteen unique names, so the guard is
-correctly silent on it. The guard's behaviour is shown by the two-direction
-measurement above, which injects the duplicate into a scratch copy and restores
-the file afterwards (`git status --short` empty).
+The live run returns `2`, not `0`: the environment has no `GITHUB_TOKEN`, the
+anonymous GitHub API rate limit was already spent, and `2` is the correct
+verdict for "the condition could not be evaluated". The PASS path is not
+untested — it was verified against the real document by supplying the
+document's own 16 names as the protection side, which is the same comparison
+with the network removed:
 
-## AI-visible output
+```
+16 declared check contexts, all produced by a job in .github/workflows and all required on main
+DECLARED CHECK CONTEXTS: PASS
+rc=0
+```
 
-The commands above are the transcript. No figure in this document is an estimate:
-the test counts are `unittest`'s own summary lines, the mutation rows are
-`FAIL`/`OK` lines with the failing test named, and the duplicate detection line is
-the program's own `::error::` output.
+So `PASS` on the real block means "this 16-name document has no duplicate", not
+"the fix did nothing". The fix changed what happens to a 17-line block, and that
+case returns `1`.
+
+`python scripts/check_document_management.py` and
+`python scripts/check_bilingual_docs.py` were run and are reported separately in
+the pull request; both stop on this host because the clone is shallow
+(`git rev-parse --is-shallow-repository` → `true`), which they state in their own
+words rather than as a violation of these two documents.
