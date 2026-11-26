@@ -4,20 +4,21 @@ registration_stage: "STAGE_0"
 registration_status: "DRAFT_PR_OPEN_EVIDENCE_INVENTORY_OWNER_ACCEPTANCE_PENDING"
 work_item_id: "AID-2026-105"
 id_status: "PROVISIONAL"
-merge_queue_action: "RECHECK_AT_MERGE; MAIN_INDEX_MAX=AID-2026-104_AT_BASE; CURRENT_ID=AID-2026-105; RENUMBER_IF_CONCURRENT_ALLOCATION"
+merge_queue_action: "RECHECK_AT_MERGE; AID-2026-105_CONFIRMED_FREE_AT_MAIN_2d52b0c8; AID-2026-106_ALLOCATED; RETAIN_105_UNLESS_COLLISION"
 title: "Issue #1189 acceptance evidence inventory — attributable approval, exact-version parity and Owner/joint acceptance"
 date: "2026-11-26"
 repository:
   name: "oahcom/AiMemoryBrainArchitecture"
   baseline_branch: "main"
-  baseline_commit: "df54ed60321e2958c50e9649963608cb3cb3f3b1"
+  baseline_commit: "2d52b0c81dc1b779e49516fceb69d89cdc1d9c31"
+  previous_sync_base_commit: "df54ed60321e2958c50e9649963608cb3cb3f3b1"
   initial_evidence_readback_commit: "533d8646a3fb32b0a1c9d3ed40c01bce33a76b17"
   implementation_branch: "docs/2026-11-26-aid-105-issue-1189-acceptance-evidence"
   carrier_pr: 1289
 identifier_allocation:
   assigned_at: "2026-11-26"
-  observed_main: "df54ed60321e2958c50e9649963608cb3cb3f3b1"
-  observed_max_id: "AID-2026-104"
+  observed_main: "2d52b0c81dc1b779e49516fceb69d89cdc1d9c31"
+  observed_max_id: "AID-2026-106"
   assigned_id: "AID-2026-105"
   renumbered_from: null
 authority:

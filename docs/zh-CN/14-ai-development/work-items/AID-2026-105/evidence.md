@@ -49,7 +49,7 @@ document_metadata:
 
 - Work Item：`AID-2026-105`
 - ID 状态：`PROVISIONAL`
-- 首次证据回读：`main` 提交 `533d8646a3fb32b0a1c9d3ed40c01bce33a76b17`；创建 PR 后同步基线：`main` 提交 `df54ed60321e2958c50e9649963608cb3cb3f3b1`。
+- 首次证据回读：`main` 提交 `533d8646a3fb32b0a1c9d3ed40c01bce33a76b17`；创建 PR 后同步基线：`main` 提交 `df54ed60321e2958c50e9649963608cb3cb3f3b1`；最新同步基线：`main` 提交 `2d52b0c81dc1b779e49516fceb69d89cdc1d9c31`。
 - 基线日期：2026-11-26
 - 归属：`user-authorized operator (delegated by account owner)`
 - 归属说明：受授权代理登记；**代理登记，非自然人 Owner 签署**
@@ -102,7 +102,7 @@ AID-2026-096 原批准 Git blob SHA-1：
 
 ### 3.2 当前 main 精确 Git blob
 
-下列每个当前 blob 均从 `main`（提交 `df54ed60321e2958c50e9649963608cb3cb3f3b1`）读取。main 从 `533d8646a3fb32b0a1c9d3ed40c01bce33a76b17` 前进后重新读取了六个 blob，SHA 均未变化。
+下列每个当前 blob 均从 `main`（提交 `2d52b0c81dc1b779e49516fceb69d89cdc1d9c31`）重新读取。main 经 PR #1291（AID-2026-106）从 `df54ed60321e2958c50e9649963608cb3cb3f3b1` 前进后，六个 blob SHA 均未变化。
 
 | 路径 | 当前 main blob SHA-1 | 是否匹配 AID-096 Git blob pin |
 |---|---|---|

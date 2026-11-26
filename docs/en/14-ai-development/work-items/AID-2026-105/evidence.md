@@ -50,7 +50,7 @@ document_metadata:
 
 - Work Item: `AID-2026-105`
 - ID status: `PROVISIONAL`
-- Initial evidence readback: `main` at `533d8646a3fb32b0a1c9d3ed40c01bce33a76b17`; synchronized base after PR creation: `main` at `df54ed60321e2958c50e9649963608cb3cb3f3b1`.
+- Initial evidence readback: `main` at `533d8646a3fb32b0a1c9d3ed40c01bce33a76b17`; synchronized base after PR creation: `main` at `df54ed60321e2958c50e9649963608cb3cb3f3b1`; latest synchronization: `main` at `2d52b0c81dc1b779e49516fceb69d89cdc1d9c31`.
 - Baseline date: 2026-11-26
 - Attribution: `user-authorized operator (delegated by account owner)`
 - Attribution note: delegated operator record; **代理登记，非自然人 Owner 签署**
@@ -103,7 +103,7 @@ The same record lists the following approved body content hashes (the values als
 
 ### 3.2 Current main exact Git blobs
 
-Each current blob below was fetched from `main` at `df54ed60321e2958c50e9649963608cb3cb3f3b1`. These six blob IDs were re-read after main advanced from `533d8646a3fb32b0a1c9d3ed40c01bce33a76b17`; they were unchanged.
+Each current blob below was re-read from `main` at `2d52b0c81dc1b779e49516fceb69d89cdc1d9c31`. Main advanced from `df54ed60321e2958c50e9649963608cb3cb3f3b1` via PR #1291 (AID-2026-106); all six blob IDs remained unchanged.
 
 | Path | Current main blob SHA-1 | Matches AID-096 Git blob pin? |
 |---|---|---|

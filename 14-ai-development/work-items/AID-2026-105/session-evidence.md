@@ -53,7 +53,8 @@ authorization:
   attribution_note: "代理登记，非自然人 Owner 签署"
 repository:
   base_branch: main
-  base_commit_sha: df54ed60321e2958c50e9649963608cb3cb3f3b1
+  base_commit_sha: 2d52b0c81dc1b779e49516fceb69d89cdc1d9c31
+  previous_sync_base_commit: df54ed60321e2958c50e9649963608cb3cb3f3b1
   initial_evidence_readback_commit: 533d8646a3fb32b0a1c9d3ed40c01bce33a76b17
   branch: docs/2026-11-26-aid-105-issue-1189-acceptance-evidence
   pull_request: 1289
