@@ -7,24 +7,19 @@ document_metadata:
       decision_status: Draft
       approver: null
       decision_date: null
-      approved_version:
-        scheme: git
-        value: null
+      approved_version: null
       approval_scope:
         type: Full-document
-      approval_applicability: Applicable-To-Current-Version
+      approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "AID-2026-082"
-        - "source branch: session-f-memory-runtime"
-        - "source commit: 1908ce4d233b20f7cafd00cb679affd01bd15174"
-        - "original source blob: b7f5d85468f5262e472769a1991b812ac4a64f5b"
+        - "14-ai-development/work-items/AID-2026-113/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
-      last_verified_date: null
-      last_verification_note: "Exact source Blob pinned; EN mirror body retained; semantic review pending."
+      last_verified_date: "2026-11-26"
+      last_verification_note: "Mirror body retained unchanged; semantic parity checked at heading and cross-reference level only."
     usage_status: Active
-    modification_status: Modified
+    modification_status: Unchanged
     supersession:
       supersedes: []
       supersession_reason: null
@@ -35,10 +30,13 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: null
-    canonical_scope_id: null
+    canonical_scope: "Memory Runtime design specification: activation-policy-engine"
+    canonical_scope_id: "memory-runtime/activation-policy-engine"
     canonical_scope_keywords:
-      - bilingual-mirror
+      - "activation"
+      - "eligibility"
+      - "relevance"
+      - "recommendation"
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
@@ -47,7 +45,6 @@ document_metadata:
     en: null
     zh-CN: "docs/zh-CN/05-memory-runtime/activation-policy-engine.md"
 ---
-
 # Memory Activation Policy Engine
 
 **Owner:** Session F — MR-02  

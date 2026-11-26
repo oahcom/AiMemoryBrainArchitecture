@@ -1,5 +1,9 @@
 name: Repository hygiene
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]

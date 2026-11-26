@@ -1,5 +1,9 @@
 name: Existing gates
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
 # All jobs execute on GitHub-hosted `ubuntu-latest` runners. This workflow is
 # both a pull-request gate and a post-merge detector; it must never depend on
 # the development server or a self-hosted Actions runner.
@@ -190,6 +194,17 @@ jobs:
         with:
           components: clippy
 
+      - name: Record resolved Rust toolchain version
+        id: rust-toolchain-version
+        shell: bash
+        run: echo "version=$(rustc --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Rust dependencies and build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: gates-clippy
+          key: ${{ hashFiles('Cargo.lock') }}-${{ steps.rust-toolchain-version.outputs.version }}
+
       - name: Report the toolchain source
         shell: bash
         run: |
@@ -231,6 +246,17 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
 
+      - name: Record resolved Rust toolchain version
+        id: rust-toolchain-version
+        shell: bash
+        run: echo "version=$(rustc --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Rust dependencies and build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: gates-doctest
+          key: ${{ hashFiles('Cargo.lock') }}-${{ steps.rust-toolchain-version.outputs.version }}
+
       - name: cargo test --workspace --doc
         shell: bash
         run: |
@@ -254,6 +280,17 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
+
+      - name: Record resolved Rust toolchain version
+        id: rust-toolchain-version
+        shell: bash
+        run: echo "version=$(rustc --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Rust dependencies and build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: gates-fmt
+          key: ${{ hashFiles('Cargo.lock') }}-${{ steps.rust-toolchain-version.outputs.version }}
 
       # `check_fmt.py` never rewrites files and refuses a dirty work tree, so a
       # pass here means the committed tree is formatted, not that a checkout

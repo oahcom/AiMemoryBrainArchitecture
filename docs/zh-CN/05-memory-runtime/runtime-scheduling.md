@@ -7,24 +7,19 @@ document_metadata:
       decision_status: Draft
       approver: null
       decision_date: null
-      approved_version:
-        scheme: git
-        value: null
+      approved_version: null
       approval_scope:
         type: Full-document
-      approval_applicability: Applicable-To-Current-Version
+      approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "AID-2026-082"
-        - "source branch: session-f-memory-runtime"
-        - "source commit: 1908ce4d233b20f7cafd00cb679affd01bd15174"
-        - "original source blob: ca35d8cddd012c1ff067328ee22177f57c40ae36"
+        - "14-ai-development/work-items/AID-2026-113/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
-      last_verified_date: null
-      last_verification_note: "Exact source Blob pinned; translated body retained; semantic parity review pending."
+      last_verified_date: "2026-11-26"
+      last_verification_note: "Mirror body retained unchanged; semantic parity checked at heading and cross-reference level only."
     usage_status: Active
-    modification_status: Modified
+    modification_status: Unchanged
     supersession:
       supersedes: []
       supersession_reason: null
@@ -35,10 +30,13 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: null
-    canonical_scope_id: null
+    canonical_scope: "Memory Runtime design specification: runtime-scheduling"
+    canonical_scope_id: "memory-runtime/runtime-scheduling"
     canonical_scope_keywords:
-      - bilingual-mirror
+      - "admission"
+      - "scheduling"
+      - "cancellation"
+      - "backpressure"
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
@@ -47,7 +45,6 @@ document_metadata:
     en: "docs/en/05-memory-runtime/runtime-scheduling.md"
     zh-CN: null
 ---
-
 # Memory Runtime Scheduling（记忆运行时调度）
 
 - 文档 ID：F-SCHEDULING-001

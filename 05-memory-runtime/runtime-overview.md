@@ -1,4 +1,9 @@
 ---
+designated_root: true
+source_hierarchy_decision: OWNER_REPLACEMENT
+replaces: "05-memory-runtime/README.md"
+source_hierarchy_decision_authority: "user-authorized operator (delegated by account owner), 2026-11-26, 代理裁决，非自然人 Owner 签署"
+retrieval_semantics_acceptance: F_ACCEPTS_RETRIEVAL_SEMANTICS
 document_metadata:
   domain: memory-runtime
   role: design-specification
@@ -7,24 +12,19 @@ document_metadata:
       decision_status: Draft
       approver: null
       decision_date: null
-      approved_version:
-        scheme: git
-        value: null
+      approved_version: null
       approval_scope:
         type: Full-document
-      approval_applicability: Applicable-To-Current-Version
+      approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "AID-2026-082"
-        - "source branch: session-f-memory-runtime"
-        - "source commit: 1908ce4d233b20f7cafd00cb679affd01bd15174"
-        - "original source blob: b7a948f014c3ad882a35a18bfc8ce025b26ab85a"
+        - "14-ai-development/work-items/AID-2026-113/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
-      last_verified_date: null
-      last_verification_note: "Exact source Blob pinned; EN/ZH-CN mirror bodies retained; semantic parity and F Owner exact-version review pending."
+      last_verified_date: "2026-11-26"
+      last_verification_note: "Source blob provenance and mirror pairing were checked; semantic parity was reviewed at heading and cross-reference level only."
     usage_status: Active
-    modification_status: Modified
+    modification_status: Unchanged
     supersession:
       supersedes: []
       supersession_reason: null
@@ -34,14 +34,15 @@ document_metadata:
       archival_reason: null
       archival_reference: null
   authority:
-    canonical_status: Candidate
-    canonical_scope: "Memory Runtime architecture source: runtime-overview"
-    canonical_scope_id: memory-runtime/runtime-overview
+    canonical_status: Canonical
+    canonical_scope: "Memory Runtime design specification: runtime-overview"
+    canonical_scope_id: "memory-runtime/runtime-overview"
     canonical_scope_keywords:
-      - runtime
-      - retrieval
-      - activation
-      - working-set
+      - "runtime-session"
+      - "retrieval"
+      - "activation"
+      - "scheduling"
+      - "working-set"
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
