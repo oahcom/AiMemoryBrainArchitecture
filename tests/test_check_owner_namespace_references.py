@@ -35,15 +35,15 @@ class OwnerNamespaceTests(unittest.TestCase):
         self.assertEqual(violations(text), [])
 
     def test_owner_crosswalk_table_qualifies_bare_owner_letters(self):
-        text = "| Logical group | Primary Owner authority | Supporting Owners |\\n|---|---|---|\\n| SYS-MEMORY-BRAIN | B for semantics; D for lifecycle | E, F, G |\\n"
+        text = "| Logical group | Primary Owner authority | Supporting Owners |\n|---|---|---|\n| SYS-MEMORY-BRAIN | B for semantics; D for lifecycle | E, F, G |\n"
         self.assertEqual(violations(text), [])
 
     def test_sys_id_in_owner_crosswalk_cell_is_rejected(self):
-        text = "| Logical group | Primary Owner authority | Supporting Owners |\\n|---|---|---|\\n| SYS-MEMORY-BRAIN | SYS-MEMORY-COMPILER | E |\\n"
+        text = "| Logical group | Primary Owner authority | Supporting Owners |\n|---|---|---|\n| SYS-MEMORY-BRAIN | SYS-MEMORY-COMPILER | E |\n"
         self.assertEqual(violations(text)[0][1], "SYS_ID_AS_OWNER")
 
     def test_capability_in_owner_crosswalk_cell_is_rejected(self):
-        text = "| Logical group | Primary Owner authority | Supporting Owners |\\n|---|---|---|\\n| SYS-MEMORY-BRAIN | Canonical Store | E |\\n"
+        text = "| Logical group | Primary Owner authority | Supporting Owners |\n|---|---|---|\n| SYS-MEMORY-BRAIN | Canonical Store | E |\n"
         self.assertEqual(violations(text)[0][1], "CAPABILITY_AS_OWNER")
 
     def test_code_fence_example_is_not_treated_as_live_claim(self):
