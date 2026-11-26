@@ -7,7 +7,7 @@ renumbered_from: "AID-2026-083"
 renumbering_note: "AID-2026-083 was allocated to PR #1250 (Issue acceptance evidence); SOURCE-RESTORE-02 is assigned AID-2026-090 by the coordinating authority."
 identifier_status: "ALLOCATED_AFTER_MAIN_AND_TARGET_HEAD_CHECK; BRANCH_NAME_SEARCH_CLEAR; GLOBAL_BRANCH_CONTENT_SCAN_NOT_EXHAUSTIVE"
 
-title: "SOURCE-RESTORE-02 — preserve source-backed D/E/F candidates and reconstruct three Gate A roots from pinned EN mirrors"
+title: "SOURCE-RESTORE-02 — preserve source-backed D/E/F candidates, reconstruct one Gate A root, and author two directory indexes"
 date: "2026-11-26"
 external_workflow_references:
   - id: "AID-2026-11-26-SOURCE-RESTORE-02"
@@ -71,16 +71,18 @@ authority:
 
 scope:
   objective: >-
-    Repair AID-080 and AID-081 identity collisions in PR #1220, allocate AID-083 to
-    SOURCE-RESTORE-02, preserve AID-082, reconstruct the three Gate A root documents from
-    exact existing EN mirror blobs with explicit RECONSTRUCTED provenance, and record
-    source-backed D/E/F restoration progress separately from mirror-derived reconstruction.
+    Repair AID-080 and AID-081 identity collisions in PR #1220, allocate AID-090 to
+    SOURCE-RESTORE-02, preserve AID-082, reconstruct only the compiler-stage-contract root
+    from exact EN/ZH-CN mirror blobs, author new runtime/security directory indexes where
+    no authoritative root README source exists, and keep provenance classes and D/E/F
+    source-backed restoration accounting separate.
   in_scope:
     - "Restore mainline AID-2026-080 manifest, prompt snapshot and INDEX row unchanged."
     - "Remove PR #1220's duplicate AID-2026-081 DECISION-ACCEPTANCE registration; preserve mainline AID-081 Issue #1081 identity and reference current PR #1219 / AID-086."
     - "Keep AID-2026-082 manifest and evidence unchanged."
     - "Create AID-2026-090 Stage 0 manifest, prompt and evidence."
-    - "Reconstruct 04-memory-compiler/compiler-stage-contract.md, 05-memory-runtime/README.md and 09-security-governance/README.md from pinned EN mirrors; add exact-name EN/ZH-CN mirror pairs."
+    - "Reconstruct only 04-memory-compiler/compiler-stage-contract.md from pinned EN/ZH-CN mirrors with RECONSTRUCTED_FROM_MIRROR provenance."
+    - "Author new 05-memory-runtime/README.md and 09-security-governance/README.md directory indexes with AUTHORED_INDEX provenance; explicitly state that no authoritative source exists and each is newly authored."
     - "Keep RESTORED and RECONSTRUCTED accounting separate."
     - "Continue E/F candidate assessment only where exact source blobs and bilingual mirrors already exist."
   out_of_scope:
@@ -88,7 +90,7 @@ scope:
     - "Validator implementation or semantics changes; only per-record manifest classification data is reconciled."
     - "PR merge, deployment, issue closure, protocol freeze or normative promotion."
     - "Any fabricated Owner approval, authoritative source blob, independent review or global-uniqueness claim."
-  current_disposition: "PARTIAL — 14 source-backed roots carried forward as RESTORED; 3 Gate A roots RECONSTRUCTED from EN mirrors; no authoritative root source blobs or Owner acceptance claimed."
+  current_disposition: "PARTIAL — 14 source-backed roots carried forward as RESTORED; 1 compiler root RECONSTRUCTED_FROM_MIRROR; 2 directory indexes AUTHORED_INDEX; no authoritative README sources or Owner acceptance claimed."
 
 baseline_and_source_evidence:
   main_reconciliation_head: "515b7144320fd9fcc1e1a2c3d2d2744d979b4ca8"
@@ -115,25 +117,26 @@ baseline_and_source_evidence:
       en_mirror_blob: "6d733294232a93aa59123009d2a2801d9b83f459"
       zh_cn_mirror: "docs/zh-CN/04-memory-compiler/compiler-stage-contract.md"
       zh_cn_mirror_blob: "ad386cac5636b4ba3eaf8b93ad93afcb444e8b46"
-      reconstructed_root_blob: "ed0f75e6a9382ee47676d5a45ec47eee8fb42a7e"
+      reconstructed_root_blob: "1f79eeb40fb234423290f97fcce934e11bdca9bf"
       status: "Draft / Candidate / Informative"
+  authored_indexes:
     - root: "05-memory-runtime/README.md"
-      provenance: "RECONSTRUCTED_FROM_MIRROR"
-      authoritative_root_source_blob: "NOT_FOUND"
-      en_mirror: "docs/en/05-memory-runtime/memory-runtime-guide.md"
-      en_mirror_blob: "a45b868efe1367fb9934c17191109d8d87f48fab"
-      zh_cn_mirror: "docs/zh-CN/05-memory-runtime/memory-runtime-guide.md"
-      zh_cn_mirror_blob: "0e0df43de9c55f8e41d6ed596d50471798fb23cc"
-      reconstructed_root_blob: "6a76cdba65088610d248717027ab17c0c4d19447"
+      provenance: "AUTHORED_INDEX"
+      authoritative_source: "NOT_FOUND — no authoritative root README source; newly authored index"
+      root_blob: "107c225b631eaa5732bab90bc09144799a542502"
+      en_mirror: "docs/en/05-memory-runtime/README.md"
+      en_mirror_blob: "2fac42740167293c941c1450437ca780d0488b5d"
+      zh_cn_mirror: "docs/zh-CN/05-memory-runtime/README.md"
+      zh_cn_mirror_blob: "9881fd88fcbfe1b3760154503c8d13e781ad89f0"
       status: "Draft / Candidate / Informative"
     - root: "09-security-governance/README.md"
-      provenance: "RECONSTRUCTED_FROM_MIRROR"
-      authoritative_root_source_blob: "NOT_FOUND"
-      en_mirror: "docs/en/09-security-governance/security-governance-guide.md"
-      en_mirror_blob: "061c5847b3df879eeaf3c71e5eae0bfa162b276a"
-      zh_cn_mirror: "docs/zh-CN/09-security-governance/security-governance-guide.md"
-      zh_cn_mirror_blob: "372d27c79dc79d09bcdb0f142c979efdba1c2b6e"
-      reconstructed_root_blob: "939dd364a98d8a08dd31b53643d6658c36fe0f18"
+      provenance: "AUTHORED_INDEX"
+      authoritative_source: "NOT_FOUND — no authoritative root README source; newly authored index"
+      root_blob: "58806a56ce19acf59722854c8ec9fd8d20dd0ae7"
+      en_mirror: "docs/en/09-security-governance/README.md"
+      en_mirror_blob: "9c0b152d2a54844302e2c9bb07f15fa0c510e747"
+      zh_cn_mirror: "docs/zh-CN/09-security-governance/README.md"
+      zh_cn_mirror_blob: "b0680e4b8699e376a2f504cc7b446c6806ad9399"
       status: "Draft / Candidate / Informative"
 
 prompt:
@@ -187,20 +190,20 @@ acceptance_criteria:
     - "Current PR #1219 decision-acceptance reference is AID-086; the older AID-081 reference is explicitly marked superseded."
     - "AID-082 manifest and evidence remain unchanged."
     - "AID-083 manifest, evidence, prompt and INDEX row are committed on PR #1220."
-    - "Three Gate A roots carry RECONSTRUCTED_FROM_MIRROR provenance, exact EN/ZH-CN mirror pins and Draft/Candidate/Informative status."
+    - "One compiler root carries RECONSTRUCTED_FROM_MIRROR provenance and exact EN/ZH-CN mirror pins; the two README files are AUTHORED_INDEX documents, not restorations."
     - "RESTORED and RECONSTRUCTED counts are separate."
     - "No validator implementation, runtime code, workflow definition, Issue closure or PR merge is changed."
   stage_0_exit_status: "PENDING_FINAL_READBACK_AND_CI"
 
 open_blockers:
   - "Exact-Head CI on the reconciled PR head is pending."
-  - "No authoritative root source blob exists for the three RECONSTRUCTED Gate A documents; domain Owner exact-version acceptance is pending."
+  - "No authoritative root source blob exists for the compiler reconstruction or the two newly authored README indexes; domain Owner exact-version acceptance is pending."
   - "PR #1219 / AID-086 is the current decision-acceptance reference; substantive Owner acceptance remains pending."
   - "E has 18 remaining candidates without existing EN/ZH-CN mirror pairs."
   - "F has 10 remaining candidates without existing EN/ZH-CN mirror pairs; watermark/scanned-through proof remains open."
   - "I36-GOV-01..10 remain GOVERNANCE-BLOCKED; approver, exact policy hash/version, authority, scope and effective time are not recorded."
   - "Independent review is not assigned."
-  - "Exhaustive global AID uniqueness scan across all active branch contents is not complete."
+  - "AID-083 is reserved by PR #1250; SOURCE-RESTORE-02 was renumbered to AID-090. Exhaustive global AID uniqueness scan across all active branch contents is not complete."
 
 prohibitions:
   - "DO_NOT_MERGE"

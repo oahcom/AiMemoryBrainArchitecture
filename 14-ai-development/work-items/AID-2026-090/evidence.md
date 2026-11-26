@@ -62,12 +62,12 @@ This is a Stage 0 evidence record. It does not constitute Owner acceptance, sour
 | PR #1220 head before reconciliation | `afbbbf6098bb1318093d9d3b26c4b1ccb0d2d5e9` |
 | PR #1220 base at readback | `dcf9a6348ce5b0802e79f3a3f9c497109f0fb4a8` |
 | Merge base | `dcf9a6348ce5b0802e79f3a3f9c497109f0fb4a8` |
-| AID-2026-090 in current main | NOT_FOUND |
-| AID-2026-090 in PR #1220 head | NOT_FOUND |
+| AID-2026-090 in main at the pre-allocation check | NOT_FOUND |
+| AID-2026-090 in PR #1220 Head before allocation | NOT_FOUND |
 | Branch-name search for AID-2026-090 | NO RESULT |
 | Exhaustive content scan of every active branch | NOT COMPLETED |
 
-AID-2026-090 is allocated after checking current main, the target PR head, and branch-name search results. Global branch-content uniqueness is **NOT_FULLY_VERIFIED**; no exhaustive recursive scan of every active branch is claimed.
+AID-2026-090 was allocated after checking main and the target PR Head before allocation, plus branch-name search results. The post-allocation branch now contains the registered AID-090 files; the pre-allocation NOT_FOUND observations are historical evidence, not current-state claims. Global branch-content uniqueness is **NOT_FULLY_VERIFIED**; no exhaustive recursive scan of every active branch is claimed.
 
 ## 2. AID identity repair
 
@@ -99,41 +99,40 @@ AID-2026-090 is allocated after checking current main, the target PR head, and b
 - Historical task-specific prompt capture: `14-ai-development/work-items/AID-2026-090/prompt-v1.md`; original input hash `6f74f728dfa47141ebee108c462e7e853983f1700e91e25c8f98a7b47ec07a95`, 2130 bytes. Complete effective prompt remains NOT_VERIFIED.
 - Session evidence: `14-ai-development/work-items/AID-2026-090/session-evidence-source-restore.md`; stable platform session identifier remains NOT_AVAILABLE.
 
-## 3. Gate A — three RECONSTRUCTED roots
+## 3. Gate A — one RECONSTRUCTED root
 
-The three root paths below had no authoritative root-source blob in their enumerated Owner branch. Their bodies were reconstructed from existing EN mirror bodies. **These are RECONSTRUCTED, not RESTORED.** The EN mirror blob is evidence of the reconstruction input, not an authoritative source blob.
+Only the compiler-stage contract root had a pinned EN/ZH-CN same-name mirror pair suitable for mirror reconstruction. Its authoritative root-source blob was not found. **This single document is RECONSTRUCTED, not RESTORED.**
 
 | Root path | New root blob | Existing EN mirror (source blob) | Existing ZH-CN mirror (comparison blob) | Owner branch checked |
 |---|---|---|---|---|
-| `04-memory-compiler/compiler-stage-contract.md` | `ed0f75e6a9382ee47676d5a45ec47eee8fb42a7e` | `docs/en/04-memory-compiler/compiler-stage-contract.md` — `6d733294232a93aa59123009d2a2801d9b83f459` | `docs/zh-CN/04-memory-compiler/compiler-stage-contract.md` — `ad386cac5636b4ba3eaf8b93ad93afcb444e8b46` | E `session-e-memory-compiler-2026-11-16` @ `ee098e14747d9915de5b3efb63b3a8dd77f670ed` |
-| `05-memory-runtime/README.md` | `6a76cdba65088610d248717027ab17c0c4d19447` | `docs/en/05-memory-runtime/memory-runtime-guide.md` — `a45b868efe1367fb9934c17191109d8d87f48fab` | `docs/zh-CN/05-memory-runtime/memory-runtime-guide.md` — `0e0df43de9c55f8e41d6ed596d50471798fb23cc` | F `session-f-memory-runtime` @ `1908ce4d233b20f7cafd00cb679affd01bd15174` |
-| `09-security-governance/README.md` | `939dd364a98d8a08dd31b53643d6658c36fe0f18` | `docs/en/09-security-governance/security-governance-guide.md` — `061c5847b3df879eeaf3c71e5eae0bfa162b276a` | `docs/zh-CN/09-security-governance/security-governance-guide.md` — `372d27c79dc79d09bcdb0f142c979efdba1c2b6e` | I `session-i-security-governance-2026-11-16` @ `8abddf814467b271344a9814613a6b7ca6a446c6` |
+| `04-memory-compiler/compiler-stage-contract.md` | `1f79eeb40fb234423290f97fcce934e11bdca9bf` | `docs/en/04-memory-compiler/compiler-stage-contract.md` — `6d733294232a93aa59123009d2a2801d9b83f459` | `docs/zh-CN/04-memory-compiler/compiler-stage-contract.md` — `ad386cac5636b4ba3eaf8b93ad93afcb444e8b46` | E `session-e-memory-compiler-2026-11-16` @ `ee098e14747d9915de5b3efb63b3a8dd77f670ed` |
 
-Exact-name EN/ZH-CN mirror paths were also created or metadata-updated for the three root documents so that each root has a paired path. These mirror blobs are:
+The root carries a top-of-document **Reconstruction notice**, `RECONSTRUCTED_FROM_MIRROR` provenance, and Draft / Candidate / Informative status. No Approved or Normative status is claimed.
 
-| Pair | EN mirror blob | ZH-CN mirror blob |
-|---|---|---|
-| Compiler Stage Contract | `676630eb6ebed63c00a79d86dfb4159b093a46c0` | `b7ec5543cc5bec60057d5dee9736a3e64d56ad03` |
-| Memory Runtime README | `08b26d63c9764c9ff764bb33ef2394955e5ff151` | `18c6db7614e1c29f459fc05d59b8b04b5ebe3bb2` |
-| Security Governance README | `16e0e24c151602239cc3d1f88a4c31c130838563` | `1c093c0b531484a17280b966e8f019819245cbe2` |
+### 3.1 Two AUTHORED_INDEX README files
 
-Each reconstructed root has a top-of-document **Reconstruction notice**, status **Draft / Candidate / Informative**, and the exact provenance marker `RECONSTRUCTED_FROM_MIRROR`. No file is marked Approved or Normative. Relative links were adjusted only where the root location differs from the source mirror location.
+The root paths `05-memory-runtime/README.md` and `09-security-governance/README.md` had no authoritative same-name source README. Earlier exact-name files under `docs/en/` and `docs/zh-CN/` were aliases copied from unrelated guide mirrors, not authoritative README source mirrors. They have been replaced with bilingual translations of the newly authored directory indexes. **These files are AUTHORED_INDEX, not RESTORED and not RECONSTRUCTED.**
 
-**Metadata parser constraint:** GOV-DOC-002's current parser has a closed `document_metadata` key set and rejects unknown keys. To avoid changing validator semantics, each root records `# provenance: RECONSTRUCTED_FROM_MIRROR` in YAML frontmatter and repeats the exact provenance marker in the allowed `lifecycle.approval.evidence_reference` field. This is paired with the structured provenance records in this manifest and evidence ledger; no validator schema or parser change was made.
+| Root index | Root blob | EN index mirror blob | ZH-CN index mirror blob | Source disposition |
+|---|---|---|---|---|
+| `05-memory-runtime/README.md` | `107c225b631eaa5732bab90bc09144799a542502` | `docs/en/05-memory-runtime/README.md` — `2fac42740167293c941c1450437ca780d0488b5d` | `docs/zh-CN/05-memory-runtime/README.md` — `9881fd88fcbfe1b3760154503c8d13e781ad89f0` | No authoritative source; newly authored index listing five F root documents, their status, governance boundaries and pending work |
+| `09-security-governance/README.md` | `58806a56ce19acf59722854c8ec9fd8d20dd0ae7` | `docs/en/09-security-governance/README.md` — `9c0b152d2a54844302e2c9bb07f15fa0c510e747` | `docs/zh-CN/09-security-governance/README.md` — `b0680e4b8699e376a2f504cc7b446c6806ad9399` | No authoritative source; newly authored index listing the root-directory inventory, available security guide mirrors, governance boundaries and pending sources |
+
+Each README explicitly states: **"无权威源，本文件为新建索引"** / "No authoritative source exists; this file is a newly authored index." Both carry `provenance: AUTHORED_INDEX` and remain Draft / Candidate / Informative.
 
 ## 4. ZH-CN semantic alignment review
 
-The existing ZH-CN bodies were compared against the pinned EN bodies. The review found no material semantic divergence in the examined requirements, boundaries, or status qualifications.
+The compiler EN/ZH-CN mirror bodies were compared and no material semantic divergence was identified in the examined requirements, boundaries, or status qualifications. The two README indexes are newly authored bilingual navigation texts; their EN/ZH-CN structure and listed facts were aligned during authoring. This is not domain Owner acceptance.
 
 | Pair | Structural parity observed | Result |
 |---|---|---|
 | Compiler Stage Contract | Same section/subsection headings, 34 table rows, 29 numbered items, 132 bullets, 2 fenced blocks | No material divergence identified |
-| Memory Runtime Guide | 11 numbered sections, 9 table rows, 25 bullets, 2 fenced blocks on both sides | No material divergence identified |
-| Security Governance Guide | 12 numbered sections, 15 table rows, 30 numbered items, 33 bullets on both sides | No material divergence identified |
+| Runtime Directory Index | Five root documents, status, governance and blockers represented in both authored language versions | Authored bilingual index; Owner review pending |
+| Security Governance Directory Index | Root inventory, guide mirror references, governance boundaries and blockers represented in both authored language versions | Authored bilingual index; Owner review pending |
 
 This is an implementation-session comparison, not domain Owner acceptance or an independent semantic review. Exact-version Owner acceptance remains pending.
 
-## 5. RESTORED source-backed material — kept separate from RECONSTRUCTED
+## 5. RESTORED source-backed material — kept separate from RECONSTRUCTED and AUTHORED_INDEX
 
 The following source-backed candidates are carried forward as **RESTORED** from exact Owner-branch source blobs. Their existing candidate status is not promoted by this record.
 
@@ -168,22 +167,22 @@ Two additional E roots already existed on main and were not overwritten. The oth
 | `05-memory-runtime/runtime-scheduling.md` | `ca35d8cddd012c1ff067328ee22177f57c40ae36` |
 | `05-memory-runtime/working-set-and-cache.md` | `a934491950c876701e8ac592a0e6aaea983b44e3` |
 
-The other 10/15 F inventory entries lack existing EN/ZH-CN pairs and remain blocked. The three Gate A reconstructions above are not counted as F source restorations. No additional E/F candidate met the requested “exact source blob plus existing bilingual mirror” priority rule in this pass.
+The other 10/15 F inventory entries lack existing EN/ZH-CN pairs and remain blocked. The compiler reconstruction and two authored README indexes above are not counted as F source restorations. No additional E/F candidate met the requested “exact source blob plus existing bilingual mirror” priority rule in this pass.
 
-**Accounting:** RESTORED = 14 source-backed roots (D 4 + E 5 + F 5); RECONSTRUCTED = 3 Gate A roots. These categories are separate and must not be summed into a source-restoration count.
+**Accounting:** RESTORED = 14 source-backed roots (D 4 + E 5 + F 5); RECONSTRUCTED = 1 compiler-stage-contract root; AUTHORED_INDEX = 2 README indexes. These categories are separate and must not be summed into a source-restoration count.
 
 ## 6. Validator, runtime, and governance boundaries
 
 - No runtime/product code was modified.
 - No executable validator implementation was modified. The PR branch's prior `scripts/check_bilingual_docs.py` NORMATIVE_ROOTS delta was not carried into the reconciled tree; the file is kept at current main's version.
-- `manifest-schema-registry.yaml` is updated as per-record classification data: the obsolete Stage 0 exclusions for restored normal Work Items AID-080 and AID-081 are removed, AID-082 remains classified as Stage 0, and AID-083 is registered as Stage 0. No parser or validator logic is changed.
+- `manifest-schema-registry.yaml` is updated as per-record classification data: the obsolete Stage 0 exclusions for restored normal Work Items AID-080 and AID-081 are removed, AID-082 remains classified as Stage 0, and AID-090 is registered as Stage 0. No parser or validator logic is changed.
 - AID-082 manifest and evidence content remain unchanged.
 - No PR merge, Issue closure, deployment, schema/API implementation, or Owner acceptance is performed or inferred.
 
 ## 7. Remaining blockers
 
 1. PR #1220 must be synchronized with current main and exact-Head CI must be observed after the resulting PR synchronize event.
-2. The three reconstructed Gate A roots have no authoritative root-source blobs; they remain Draft/Candidate/Informative pending domain Owner review and exact-version acceptance.
+2. The compiler reconstruction has no authoritative root-source blob; the two README indexes are newly authored without authoritative source. All remain Draft/Candidate/Informative pending domain Owner review and exact-version acceptance.
 3. PR #1219's current decision-acceptance Work Item is AID-086. The earlier AID-081 reference is stale; its current AID-086 scope/acceptance remains pending as recorded by PR #1219.
 4. E has 18 remaining source candidates without existing EN/ZH-CN pairs; F has 10. New source-backed restorations require exact source blobs and faithful bilingual mirrors.
 5. F watermark/scanned-through proof and E/F Owner exact-version acceptance remain pending.
@@ -196,7 +195,7 @@ The other 10/15 F inventory entries lack existing EN/ZH-CN pairs and remain bloc
 - No claim that reconstructed roots are recovered authoritative source documents.
 - No claim of Approved, Normative, production-ready, or Owner-accepted status.
 - No claim that the 14 RESTORED source-backed roots are accepted by their domain Owners.
-- No claim that AID-083 is globally unique across every historical or active branch.
+- AID-083 is reserved by PR #1250; SOURCE-RESTORE-02 is AID-090. No global uniqueness claim is made across every historical or active branch.
 - No claim that PR #1220 is merged or that any Issue is closed.
 
 
