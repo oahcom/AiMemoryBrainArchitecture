@@ -11,7 +11,8 @@ repository:
   baseline_branch: "main"
   baseline_commit: "d5107f68a7f1b61f5f2f7352fadf828aae06cf1c"
   implementation_branch: "docs/2026-11-26-storage-physical-consistency-098"
-  carrier_pr: PENDING
+  carrier_pr: 1276
+  pull_request: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1276"
 attribution:
   actor: "user-authorized operator (delegated by account owner)"
   date: "2026-11-26"
