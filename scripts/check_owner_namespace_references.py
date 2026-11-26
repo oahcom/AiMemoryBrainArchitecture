@@ -54,15 +54,37 @@ PATTERNS = (
 def violations(text: str) -> list[tuple[int, str, str]]:
     found = []
     in_fence = False
+    owner_columns: list[int] = []
     for number, line in enumerate(text.splitlines(), 1):
-        if line.lstrip().startswith("```"):
+        if line.lstrip().startswith(chr(96) * 3):
             in_fence = not in_fence
+            owner_columns = []
             continue
         if in_fence:
             continue
+        if line.lstrip().startswith('|'):
+            cells = [cell.strip() for cell in line.strip().strip('|').split('|')]
+            if any('owner' in cell.casefold() for cell in cells):
+                owner_columns = [index for index, cell in enumerate(cells) if 'owner' in cell.casefold()]
+                continue
+            if owner_columns:
+                for index in owner_columns:
+                    if index >= len(cells):
+                        continue
+                    value = cells[index]
+                    if re.search(r'\bSYS-[A-Z0-9]+(?:-[A-Z0-9]+)*\b', value):
+                        found.append((number, 'SYS_ID_AS_OWNER', line.strip()))
+                        break
+                    if re.fullmatch(CAPABILITY, value, re.IGNORECASE):
+                        found.append((number, 'CAPABILITY_AS_OWNER', line.strip()))
+                        break
+                continue
+        else:
+            owner_columns = []
         for code, pattern in PATTERNS:
-            match = pattern.search(line)
-            if match:
+            if code == 'BARE_LETTER_AS_OWNER' and '|' in line:
+                continue
+            if pattern.search(line):
                 found.append((number, code, line.strip()))
                 break
     return found
