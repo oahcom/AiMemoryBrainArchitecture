@@ -4,26 +4,26 @@ document_metadata:
   role: normative-standard
   lifecycle:
     approval:
-      decision_status: Under-Review
-      approver: NOT_RECORDED
-      decision_date: NOT_RECORDED
+      decision_status: Approved
+      approver: "user-authorized operator (delegated by account owner)"
+      decision_date: "2026-11-26"
       approved_version:
-        scheme: git
-        value: "a7d12fe9835d8f53403946ab08c1cae8c3f12fbf"
+        scheme: content-hash
+        value: "88bbebd033e0b5669bafc83c71afa2831cebb4a2e3a6cfa47573cf6b3259b293"
       approval_scope:
         type: Full-document
         included_sections: []
         included_assets: []
-      approval_applicability: Not-Applicable-To-Current-Version
+      approval_applicability: Applicable-To-Current-Version
       evidence_reference:
-        - "00-governance/architecture-invariants.md"
+        - "14-ai-development/work-items/AID-2026-096/approval-evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
       last_verified_date: null
       last_verification_note: "通常用于描述所有子系统规范必须遵守的约束"
     usage_status: Active
-    modification_status: Pending-Reapproval
+    modification_status: Unchanged
     supersession:
       supersedes: []
       supersession_reason: null
@@ -56,7 +56,9 @@ document_metadata:
 - 版本：1.1
 - 源规范：[项目规范性原文](../../../00-governance/architecture-invariants.md)
 - 对应英文：[Architecture Invariants](../../en/00-governance/architecture-invariants.md)
-- 状态：CANDIDATE / Pending-Reapproval（当前版本未获批准）；I-01 至 I-24 尚无新的正式批准。
+- 状态：已批准 / Normative——批准事件日期为 2026-11-26。本批准不证明 P-01 至 P-16 的实现符合性。
+
+**此前状态（历史说明）：** 本次 2026-11-26 新批准之前，本文档标记为 `CANDIDATE / Pending-Reapproval — NOT APPROVED`。该标记仅描述此前状态。本次是新批准，不是追溯批准，也不认证任何历史批准人。
 
 以下不变量是拟议的子系统规范和未来实现约束，仍须经过单独的正式批准。
 
@@ -88,6 +90,8 @@ document_metadata:
 | I-24 | 架构文档验收必须检查双语语义一致性、稳定标识一致性、决策状态一致性以及源版本可追溯性。 |
 
 ## 镜像补充章节——AID-2026-014 Claim/Fact 语义不变量
+
+> mirror-only supplemental, not part of canonical root（仅镜像补充，不属于规范根文档）。本节原位保留，属于非规范内容；任何提升均待 Owner 裁定。
 
 本节作为既有补充内容保留在此语言镜像中。当前规范原文 `00-governance/architecture-invariants.md` 没有对应章节，因此这些内容不会仅因出现在镜像中就成为规范不变量集的一部分；本节不修改或替代规范原文。是否将这些陈述纳入规范原文，须由相关内容 Owner 决定。
 
