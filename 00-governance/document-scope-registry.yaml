@@ -65,6 +65,7 @@ governed:
 # 使例外的范围与其理由一样小。
 governed_files:
   - docs/governance/documentation-gaps.md
+  - 03-memory-brain/forget-fence-and-completion-contract.md
 
 # Backlog: architecture documents that ARE scanned and ARE counted, and simply
 # have not been classified yet. This is not a third kind of exclusion -- it is
