@@ -131,7 +131,7 @@ The initial user task is preserved in `14-ai-development/work-items/AID-2026-098
 - Posted comment #7187485412 on #1212 and comment #7187486337 on #1180; both Issues remained OPEN at readback.
 - Current PR Head at the time of this evidence update is tracked by the PR API; no claim of exact-Head CI success is made.
 - Forget Fence check: the candidate preserves D as sole logical authority under AID-2026-089 and flags current-main local Fence sequence code as a discrepancy requiring separate implementation disposition.
-- No merge, Issue closure, runtime change, validator change, deployment or production conformance claim.
+- No merge, Issue closure, runtime change, validator semantic change, deployment or production conformance claim.
 
 ## Session identity limitation
 
