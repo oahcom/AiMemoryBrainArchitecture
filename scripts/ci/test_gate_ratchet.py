@@ -11,6 +11,7 @@ crashed gate read as a clean run. Only stdout was ever inspected.
 
 from __future__ import annotations
 
+import re
 import subprocess
 import sys
 import tempfile
@@ -18,6 +19,28 @@ import unittest
 from pathlib import Path
 
 GATE = Path(__file__).resolve().parent / "gate_ratchet.py"
+
+# Relative to this file: scripts/ci/ -> repository root.
+REPO_ROOT = Path(__file__).resolve().parents[2]
+GATES_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "gates.yml"
+BILINGUAL_BASELINE = REPO_ROOT / "scripts" / "ci" / "baselines" / "bilingual-docs.txt"
+
+# The prose claim being pinned: "# GOV-DOC-001 full scan: <n> normative paths".
+STATED_COUNT = re.compile(
+    r"^[ \t]*#[ \t]*GOV-DOC-001 full scan:[ \t]*(\d+)[ \t]+normative paths",
+    re.MULTILINE,
+)
+
+
+def baseline_entries(text: str) -> list[str]:
+    """The set gate_ratchet.py builds: non-blank, non-comment, deduplicated."""
+    return sorted(
+        {
+            line.strip()
+            for line in text.splitlines()
+            if line.strip() and not line.strip().startswith("#")
+        }
+    )
 
 
 def python(*body: str) -> str:
@@ -88,5 +111,45 @@ class GateRatchetTests(unittest.TestCase):
         self.assertIn("only 0 (clean) and 1 (red)", proc.stdout)
 
 
-if __name__ == "__main__":
+class CommentedCountTests(unittest.TestCase):
+    """gates.yml states a count that nothing else compared (issue #1081).
+
+    The comment said 81 while the baseline it describes held 77 entries. This
+    compares the two numbers only: the ratchet is allowed to be red on main, so
+    the wrapped gate is never run here and no pass/fail is asserted about it.
+    """
+
+    def test_stated_count_matches_baseline_entries(self):
+        workflow = GATES_WORKFLOW.read_text(encoding="utf-8")
+        baseline = BILINGUAL_BASELINE.read_text(encoding="utf-8")
+
+        stated = STATED_COUNT.findall(workflow)
+        self.assertEqual(
+            len(stated),
+            1,
+            "gates.yml must state the GOV-DOC-001 count exactly once",
+        )
+
+        entries = baseline_entries(baseline)
+        self.assertEqual(
+            int(stated[0]),
+            len(entries),
+            f"gates.yml says {stated[0]} normative paths; "
+            f"{BILINGUAL_BASELINE.name} has {len(entries)} entries",
+        )
+
+
+def main() -> None:
+    # 0 = pass, 1 = violation, 2 = incomplete. unittest owns 0 and 1; an
+    # artifact that cannot be read must not be reported as a violation.
+    for path in (GATES_WORKFLOW, BILINGUAL_BASELINE):
+        try:
+            path.read_text(encoding="utf-8")
+        except OSError as exc:
+            print(f"INCOMPLETE: {exc}", file=sys.stderr)
+            sys.exit(2)
     unittest.main()
+
+
+if __name__ == "__main__":
+    main()
