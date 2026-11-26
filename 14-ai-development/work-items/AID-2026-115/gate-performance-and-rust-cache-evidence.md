@@ -67,14 +67,14 @@ Task-supplied measurements: 16 required contexts across eight workflows / 16 job
 
 Eight workflows changed: `bilingual-docs.yml`, `branch-freshness.yml`, `document-management.yml`, `gates.yml`, `repository-hygiene.yml`, `runner-admission-policy.yml`, `rust-phase1.yml`, `session-evidence.yml` (all under `.github/workflows/`).
 
-Each uses this exact policy:
+Seven workflows use this exact policy with `cancel-in-progress: true`:
 
 ```yaml
 group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
 cancel-in-progress: true
 ```
 
-PR head SHA, not `github.ref`, prevents successive pushes to one branch from cancelling each other solely because they share a ref. Non-PR events fall back to `github.sha`. All eight are commit-scoped; no workflow was identified as needing an in-flight run for a superseded SHA preserved, since merge eligibility is evaluated for the current exact PR head.
+`session-evidence.yml` uses the same group expression with `cancel-in-progress: false`. Its validator also runs on PR-body `edited` events; multiple body revisions can share one head SHA. Letting an in-flight validation finish preserves the body-digest evidence for each revision instead of cancelling the earlier record. The other seven workflows cancel duplicate in-flight work for the same exact SHA. PR head SHA, not `github.ref`, prevents successive pushes to one branch from cancelling each other solely because they share a ref; non-PR events fall back to `github.sha`.
 
 ## Rust cache
 

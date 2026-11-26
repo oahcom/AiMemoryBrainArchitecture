@@ -62,14 +62,14 @@ document_metadata:
 
 修改 8 个 workflow：`bilingual-docs.yml`、`branch-freshness.yml`、`document-management.yml`、`gates.yml`、`repository-hygiene.yml`、`runner-admission-policy.yml`、`rust-phase1.yml`、`session-evidence.yml`（均位于 `.github/workflows/`）。
 
-每个文件使用完全相同的策略：
+其中 7 个 workflow 使用以下策略，`cancel-in-progress: true`：
 
 ```yaml
 group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
 cancel-in-progress: true
 ```
 
-使用 PR head SHA 而不是 `github.ref`，避免同一分支连续 push 仅因 ref 相同而互相取消；非 PR 事件回退到 `github.sha`。8 个 workflow 均按提交隔离；合并资格只针对当前精确 PR head 评估，没有 workflow 被判定为必须保留已被新提交替代的 SHA 的在途执行。
+`session-evidence.yml` 使用相同 group 表达式，但设为 `cancel-in-progress: false`。其验证器也响应 PR 正文 `edited` 事件；不同正文版本可能共享同一 head SHA。允许在途验证完成，可保留每个正文摘要对应的证据，而不是取消较早记录。其余 7 个 workflow 可取消同一精确 SHA 的重复在途执行。使用 PR head SHA 而不是 `github.ref`，避免同一分支连续 push 仅因 ref 相同而互相取消；非 PR 事件回退到 `github.sha`。
 
 ## Rust 缓存
 
