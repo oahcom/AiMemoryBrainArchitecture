@@ -29,8 +29,22 @@ def git(repo, *args):
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         check=True,
-        text=True,
+        encoding="utf-8",
+        errors="replace",
     ).stdout.strip()
+
+
+def work_item_names(files):
+    """Work-item directory names a fixture carries, from its own file paths."""
+    names = set()
+    for path in files:
+        if not path.startswith("14-ai-development/work-items/"):
+            continue
+        remainder = path[len("14-ai-development/work-items/"):]
+        name, separator, _ = remainder.partition("/")
+        if separator and name:
+            names.add(name)
+    return names
 
 
 class RepositoryHygieneTests(unittest.TestCase):
@@ -46,7 +60,7 @@ class RepositoryHygieneTests(unittest.TestCase):
     def tearDown(self):
         self.tempdir.cleanup()
 
-    def commit(self, files, *, with_registry=True):
+    def commit(self, files, *, with_registry=True, with_index=True):
         files = dict(files)
         # The schema registry is a policy input the checker requires, so every
         # fixture tree carries one unless a test is specifically about its
@@ -55,6 +69,29 @@ class RepositoryHygieneTests(unittest.TestCase):
             files.setdefault(
                 "14-ai-development/work-items/manifest-schema-registry.yaml",
                 EMPTY_SCHEMA_REGISTRY,
+            )
+        # Index membership fails closed on either absent side (#1212), so a
+        # fixture tree has to carry both sides the way the real tree does: at
+        # least one work-item directory and an INDEX.md row for every directory
+        # it contains. A case that is about either side passes its own content
+        # and `setdefault` leaves it alone; a case about something else gets a
+        # self-consistent registry instead of a red on an unrelated check.
+        #
+        # The placeholders live in the same commit as whatever the case adds,
+        # and both fixture commits go through here, so they are never reported
+        # as new paths by the admission check. `with_index=False` is for the
+        # cases that are about the absent sides themselves.
+        if with_index:
+            files.setdefault(
+                "14-ai-development/work-items/AID-2026-001/manifest.yaml",
+                "work_item_id: AID-2026-001\n",
+            )
+            files.setdefault(
+                "14-ai-development/work-items/INDEX.md",
+                "".join(
+                    f"| [{name}]({name}/manifest.yaml) |\n"
+                    for name in sorted(work_item_names(files))
+                ),
             )
         for name, content in files.items():
             path = self.repo / name
@@ -90,6 +127,17 @@ class RepositoryHygieneTests(unittest.TestCase):
     def run_checker_args(self, *args):
         return subprocess.run(
             [sys.executable, str(CHECKER), *args],
+            cwd=self.repo,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+            text=True,
+        )
+
+    def run_checker_unqualified(self):
+        """Run the CLI exactly as a caller that forgot the range would."""
+        return subprocess.run(
+            [sys.executable, str(CHECKER)],
             cwd=self.repo,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -228,7 +276,7 @@ class RepositoryHygieneTests(unittest.TestCase):
             "_dm.txt": "prohibited\n",
         })
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
 
         self.assertEqual(result.returncode, 1)
         self.assertIn(
@@ -415,6 +463,75 @@ class RepositoryHygieneTests(unittest.TestCase):
             result.stderr,
         )
 
+    # #1212: an unqualified run must not be able to read as a pass. The old
+    # behaviour skipped new-file admission silently and printed the same line a
+    # full run prints, so a CI step that had lost its range stayed green while
+    # the gate name claimed a check it had not performed.
+    def test_unqualified_run_is_refused_not_reported_as_passed(self):
+        self.seed_base()
+
+        result = self.run_checker_unqualified()
+
+        self.assertEqual(
+            result.returncode,
+            2,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn(
+            "Repository new-file admission SKIPPED "
+            "(new-file admission requires --base and --head).",
+            result.stdout,
+        )
+        self.assertIn(
+            "::error::repository hygiene cannot be determined: "
+            "new-file admission requires --base and --head",
+            result.stderr,
+        )
+        self.assertNotIn("Repository hygiene check passed", result.stdout)
+
+    # #1212: the head-tree half is still a check, so it stays reachable -- but
+    # only by name, and its summary has to say which half did not run. Without
+    # this, "refuse the unqualified run" would be indistinguishable from
+    # "delete the denylist, INDEX and manifest checks".
+    def test_head_tree_only_reports_the_skipped_half(self):
+        self.seed_base()
+
+        result = self.run_checker_args("--head-tree-only")
+
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn(
+            "New-file admission SKIPPED "
+            "(new-file admission requires --base and --head).",
+            result.stdout,
+        )
+        self.assertNotIn("Repository hygiene check passed", result.stdout)
+
+    def test_head_tree_only_still_rejects_a_prohibited_path(self):
+        self.commit({"_dm.txt": "prohibited\n"})
+
+        result = self.run_checker_args("--head-tree-only")
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("prohibited committed file '/_dm.txt'", result.stderr)
+
+    def test_head_tree_only_cannot_be_combined_with_a_range(self):
+        base = self.seed_base()
+        head = self.commit({"allowed.py": "print('hello')\n"})
+
+        result = self.run_checker_args(
+            "--head-tree-only", "--base", base, "--head", head
+        )
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn(
+            "--head-tree-only cannot be combined with --base and --head",
+            result.stderr,
+        )
+
     # M12: source suffix matching is intentionally case-insensitive.
     def test_uppercase_source_suffix_is_admitted(self):
         base = self.seed_base()
@@ -467,7 +584,7 @@ class RepositoryHygieneTests(unittest.TestCase):
             "nested/_dm.txt": "nested fixture\n",
         })
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
 
         self.assertEqual(
             result.returncode,
@@ -965,7 +1082,7 @@ class RepositoryHygieneTests(unittest.TestCase):
             ["AID-2026-001", "AID-2026-002"],
         )
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
         self.assertEqual(
             result.returncode,
             0,
@@ -987,7 +1104,7 @@ class RepositoryHygieneTests(unittest.TestCase):
             ["AID-2026-001", "AID-2026-002", "AID-2026-003"],
         )
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 1, msg=result.stderr)
         self.assertIn("directories=3 linked=2", result.stdout)
         self.assertNotIn("directories=3 linked=3", result.stdout)
@@ -998,7 +1115,7 @@ class RepositoryHygieneTests(unittest.TestCase):
             ["AID-2026-001", "AID-2026-002"],
         )
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 1, msg=result.stderr)
         self.assertIn(
             "::error::index membership violation: directory present, "
@@ -1013,11 +1130,50 @@ class RepositoryHygieneTests(unittest.TestCase):
             ["AID-2026-001"],
         )
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 1, msg=result.stderr)
         self.assertIn(
             "::error::index membership violation: index entry present, "
             "no directory: 14-ai-development/work-items/AID-2026-009",
+            result.stderr,
+        )
+
+    # #1212: with either side absent the old code returned [] -- no violations
+    # over an empty set -- which is a pass that compared nothing. Deleting the
+    # Canonical index, or renaming work-items/ so no directory is found, must
+    # not be the cheapest way to silence this check, so both cases exit 2.
+    def test_index_membership_fails_closed_without_work_item_directories(self):
+        self.commit({"README.md": "no work items here\n"}, with_index=False)
+
+        result = self.run_checker_args("--head-tree-only")
+        self.assertEqual(
+            result.returncode,
+            2,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn(
+            "no work-item directories under '14-ai-development/work-items'",
+            result.stderr,
+        )
+
+    def test_index_membership_fails_closed_without_the_index(self):
+        self.commit(
+            {
+                "14-ai-development/work-items/AID-2026-001/manifest.yaml":
+                    "work_item_id: AID-2026-001\n",
+            },
+            with_index=False,
+        )
+
+        result = self.run_checker_args("--head-tree-only")
+        self.assertEqual(
+            result.returncode,
+            2,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn(
+            "the work-item index '14-ai-development/work-items/INDEX.md' is "
+            "absent from the tree",
             result.stderr,
         )
 
@@ -1031,7 +1187,7 @@ class RepositoryHygieneTests(unittest.TestCase):
     def assert_membership_fails_for(self, index_text, directory):
         self.index_fixture(index_text, ["AID-2026-001", directory])
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
         # The named violation is asserted before the exit code: a mutation that
         # restores the whole-file rule has to fail on this line, so the failure
         # says which directory went unregistered instead of only that some
@@ -1086,7 +1242,7 @@ class RepositoryHygieneTests(unittest.TestCase):
             ["AID-2026-001", "AID-2026-002"],
         )
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
         self.assertEqual(
             result.returncode,
             0,
@@ -1113,7 +1269,7 @@ class RepositoryHygieneTests(unittest.TestCase):
             "  pull_request: PENDING\n"
         )
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 1, msg=result.stderr)
         self.assertIn(
             "::error::manifest consistency violation: "
@@ -1135,10 +1291,10 @@ class RepositoryHygieneTests(unittest.TestCase):
             "  merge_commit_sha: NOT_MERGED\n"
         )
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-24.8 "
+            "Work-item manifest consistency version=2026-11-27.2 "
             "manifests=1 in_scope=1 excluded_by_record_type=0 "
             "unrecognized=0 violations=0",
             result.stdout,
@@ -1156,7 +1312,7 @@ class RepositoryHygieneTests(unittest.TestCase):
             "  merge_commit_sha: NOT_MERGED\n"
         )
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 1, msg=result.stderr)
         self.assertIn(
             "::error::manifest consistency violation: "
@@ -1178,10 +1334,10 @@ class RepositoryHygieneTests(unittest.TestCase):
             "  merge_commit_sha: NOT_MERGED\n"
         )
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-24.8 "
+            "Work-item manifest consistency version=2026-11-27.2 "
             "manifests=1 in_scope=1 excluded_by_record_type=0 "
             "unrecognized=0 violations=0",
             result.stdout,
@@ -1202,7 +1358,7 @@ class RepositoryHygieneTests(unittest.TestCase):
             "776f04fb694140f8663a87d593be1da2957673a4\n"
         )
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
         self.assertEqual(
             result.returncode,
             0,
@@ -1225,10 +1381,10 @@ class RepositoryHygieneTests(unittest.TestCase):
             "  merge_commit_sha: NOT_MERGED\n"
         )
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-24.8 "
+            "Work-item manifest consistency version=2026-11-27.2 "
             "manifests=1 in_scope=1 excluded_by_record_type=0 "
             "unrecognized=0 violations=0",
             result.stdout,
@@ -1251,7 +1407,7 @@ class RepositoryHygieneTests(unittest.TestCase):
             "  merge_commit_sha: NOT_MERGED\n"
         )
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
         self.assertEqual(
             result.returncode,
             0,
@@ -1279,7 +1435,7 @@ class RepositoryHygieneTests(unittest.TestCase):
             "  merge_commit_sha: 1a5342421a9d8314dc1ecc2d050a8f75452c3fc3\n"
         )
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
         self.assertEqual(
             result.returncode,
             0,
@@ -1296,7 +1452,7 @@ class RepositoryHygieneTests(unittest.TestCase):
             'registration_status: "PENDING_FORMAL_REGISTRATION"\n'
         )
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
         self.assertEqual(
             result.returncode,
             0,
@@ -1343,7 +1499,7 @@ class RepositoryHygieneTests(unittest.TestCase):
                 'record_type: "STAGE_0_WORK_ITEM_REGISTRATION"\n'},
         )
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
         self.assertEqual(
             result.returncode,
             0,
@@ -1369,7 +1525,7 @@ class RepositoryHygieneTests(unittest.TestCase):
             {"AID-2026-001": 'record_type: "SOMETHING_ELSE"\n'},
         )
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
             "manifests=1 in_scope=0 excluded_by_record_type=0 "
@@ -1395,7 +1551,7 @@ class RepositoryHygieneTests(unittest.TestCase):
             },
         )
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
             "manifests=2 in_scope=0 excluded_by_record_type=1 "
@@ -1426,7 +1582,7 @@ class RepositoryHygieneTests(unittest.TestCase):
             },
         )
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
             "manifests=3 in_scope=1 excluded_by_record_type=1 "
@@ -1452,7 +1608,7 @@ class RepositoryHygieneTests(unittest.TestCase):
                 'record_type: "STAGE_0_WORK_ITEM_REGISTRATION"\n'},
         )
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 2, msg=result.stdout)
         self.assertIn("registered twice", result.stderr)
 
@@ -1474,7 +1630,7 @@ class RepositoryHygieneTests(unittest.TestCase):
                 'record_type: "STAGE_0_WORK_ITEM_REGISTRATION"\n'},
         )
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 2, msg=result.stdout)
         self.assertIn("two different record_type values", result.stderr)
 
@@ -1489,7 +1645,7 @@ class RepositoryHygieneTests(unittest.TestCase):
             {"AID-2026-001": "work_item_id: AID-2026-001\nstatus: DISPATCHED\n"},
         )
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 2, msg=result.stdout)
         self.assertIn("absent from this commit", result.stderr)
 
@@ -1512,7 +1668,7 @@ class RepositoryHygieneTests(unittest.TestCase):
                 'record_type: "STAGE_0_WORK_ITEM_REGISTRATION"\n',
         })
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 2, msg=result.stdout)
         self.assertIn("does not implement", result.stderr)
 
@@ -1526,7 +1682,7 @@ class RepositoryHygieneTests(unittest.TestCase):
                 "work_item_id: AID-2026-001\nstatus: DISPATCHED\n",
         }, with_registry=False)
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 2, msg=result.stdout)
         self.assertIn("manifest-schema-registry.yaml", result.stderr)
     # The registry rule is an exact path, and "exact" has to hold in the
@@ -1560,7 +1716,7 @@ class RepositoryHygieneTests(unittest.TestCase):
                 "  merge_commit_sha: NOT_MERGED\n",
         })
 
-        result = self.run_checker_args()
+        result = self.run_checker_args("--head-tree-only")
         self.assertEqual(
             result.returncode,
             0,

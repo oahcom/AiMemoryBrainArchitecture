@@ -123,7 +123,7 @@ Current main: `e52594f181d2edb77448adcfed64a0fbdffaf3aa`; tree `7096e0bc3fdc9a39
 ## C/I gateway-attestation order reviews — exact scope distinction
 
 - C Phase 3.8.27: `07-agent-integration/phase-3.8.27-c-rereview-h-gateway-attestation-ordering.md`, Blob `3ca06dbfd7d59483e9604b7a68df924c719f60aa`.
-- I Phase 3.8.23: `09-security-governance/phase-3.8.23-i-rereview-h-gateway-attestation-replay-acceptance-order.md`, Blob `85cdbad04ae4b688338cdf2b667c21d2f02d8b96`.
+- I Phase 3.8.23: `09-security-governance/phase-3.8.23-i-rereview-h-gateway-attestation-replay-acceptance-order.md` (not restored on main; see AID-2026-107 §10), Blob `85cdbad04ae4b688338cdf2b667c21d2f02d8b96`.
 - These delegated role reviews accept C verification before H Unified 1.2.15 Gateway Attestation signing and the durable replay order. They do **not** accept the separate H Applied Delivery Evidence 1.0.0 message family.
 
 ## Storage Option A ADR status — exact supersession evidence

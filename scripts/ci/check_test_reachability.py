@@ -21,6 +21,15 @@ confusion is what let `tests/test_policy_inheritance.py` run while
 The unwired set is baselined in `scripts/ci/baselines/gate-wiring.txt` with the
 same doctrine as `scripts/ci/gate_ratchet.py`: a new unwired gate fails, and a
 baselined gate that becomes wired fails until the line is removed.
+
+Two blind spots were closed after #1212. Workflows are read from both suffixes
+GitHub honours, `.yml` and `.yaml`, so a `.yaml` workflow's `discover` root is
+not invisible. And comments are stripped from the text both branches read, so a
+test name that appears only in a comment -- and a `discover` command that only
+appears in one -- is not executed by anything. Before that, Rule B's substring
+match over the raw file made a commented-out test name enough to report the file
+reachable, while the gate branch in the same file already stripped comments: two
+answers to one question, and the permissive one won.
 """
 
 import fnmatch
@@ -35,6 +44,9 @@ RUN_KEY_RE = re.compile(r"^(?P<indent>[ ]*)(?:-\s+)?run:[ \t]*(?P<rest>.*)$")
 RUN_BLOCK_RE = re.compile(r"^[|>][+-]?\d*$")
 SHELL_SPLIT_RE = re.compile(r"[ \t\r\n;&|()<>]+")
 BASELINE = Path("scripts") / "ci" / "baselines" / "gate-wiring.txt"
+# GitHub reads both suffixes; globbing only `*.yml` made a `.yaml` workflow's
+# `discover` root and `run:` commands invisible.
+WORKFLOW_GLOBS = ("*.yml", "*.yaml")
 
 DISCOVER_RE = re.compile(
     r"\bdiscover\b"
@@ -65,15 +77,33 @@ def walk(root):
 
 
 def read_workflows(root):
-    paths = sorted(glob.glob(str(root / ".github" / "workflows" / "*.yml")))
-    return [Path(path) for path in paths]
+    pattern_dir = root / ".github" / "workflows"
+    paths = sorted(
+        glob.glob(str(pattern_dir / pattern)) for pattern in WORKFLOW_GLOBS
+    )
+    return [Path(path) for group in paths for path in group]
+
+
+def workflow_text(workflow):
+    """The workflow's text with every comment stripped, line count preserved.
+
+    Both branches read this rather than the raw file (#1212). Rule B is
+    substring matching, so a test name in a comment was reported as executed;
+    and a commented-out `discover -s ...` was a discovery root. `strip_comment`
+    is the same reading the gate branch already used, so the two branches now
+    agree on the file.
+    """
+    return "\n".join(
+        strip_comment(line)
+        for line in workflow.read_text(encoding="utf-8").splitlines()
+    )
 
 
 def discovery_rules(workflows, root, directories):
     """Resolve every `discover -s <root>` to a directory plus a filename glob."""
     rules = []
     for workflow in workflows:
-        for match in DISCOVER_RE.finditer(workflow.read_text(encoding="utf-8")):
+        for match in DISCOVER_RE.finditer(workflow_text(workflow)):
             raw_root = unquote(match.group("root"))
             pattern = unquote(match.group("pattern") or "test*.py")
 
@@ -254,7 +284,7 @@ def main(argv):
             raise OSError("no .github/workflows under %s" % root)
 
         workflows = read_workflows(root)
-        text = "\n".join(path.read_text(encoding="utf-8") for path in workflows)
+        text = "\n".join(workflow_text(workflow) for workflow in workflows)
         directories, tests, gates = walk(root)
 
         collisions = stem_collisions(tests, root)
