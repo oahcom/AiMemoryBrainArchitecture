@@ -1,11 +1,46 @@
+---
+document_metadata:
+  domain: memory-brain
+  role: reference
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope: {type: Full-document}
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: ["14-ai-development/work-items/AID-2026-150/manifest.yaml"]
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-26"
+      last_verification_note: "仅作机械路径/来源配对更新；ORPHAN_MIRROR_PENDING_DECISION 仍然有效。"
+    usage_status: Active
+    modification_status: Modified
+    supersession: {supersedes: [], supersession_reason: null, effective_date: null}
+    archival: {archived_date: null, archival_reason: null, archival_reference: null}
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
+---
 # Forget Fence Operation 与 Publication Gate（遗忘栅栏操作与发布门）
 
 - 文档 ID：D-FORGET-GATE-001
 - 版本：1.0（拆分式双语伴随文档）
 - 源分支：session-d-memory-brain-2026-11-16
-- 源文件版本：DEREFERENCED — 保留历史源 Blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5`；当前仓库不存在可解析的规范性源文件。
+- 源文件版本：AID-2026-150 已恢复规范源 `03-memory-brain/forget-fence-operation-and-publication-gate.md`；镜像状态仍为 `ORPHAN_MIRROR_PENDING_DECISION`，正式采纳或退役待 D Owner 明确裁决。
 - 英文对应：[Forget Fence Operation and Publication Gate](../../en/03-memory-brain/forget-fence-operation-and-publication-gate.md)
-- 源规范：DEREFERENCED — 原规范源路径 `03-memory-brain/forget-fence-operation-and-publication-gate.md` 在当前 main tree 中不存在；替代物：[英文对照版](../../en/03-memory-brain/forget-fence-operation-and-publication-gate.md)（Blob `9c054932994bb078e2834df8bd66f73895aa04f5`；仅为对照文本，不是规范性替代源）。
+- 源规范：[`03-memory-brain/forget-fence-operation-and-publication-gate.md`](../../../03-memory-brain/forget-fence-operation-and-publication-gate.md) 已恢复；本 ZH-CN 文档仍非权威，孤儿镜像的正式处置待 D Owner 裁决。
 - 状态：D 语义契约为 DECIDED；E/Storage 执行、I 授权新鲜度和跨模块 Conformance 仍为 OPEN
 
 源规范较长，拆分为四个中英并行阅读部分。源文件仍是规范性来源；拆分文档完整覆盖其章节。

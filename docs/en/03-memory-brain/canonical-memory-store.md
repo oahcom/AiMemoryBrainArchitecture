@@ -1,11 +1,46 @@
+---
+document_metadata:
+  domain: memory-brain
+  role: reference
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope: {type: Full-document}
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: ["14-ai-development/work-items/AID-2026-150/manifest.yaml"]
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-26"
+      last_verification_note: "Path and provenance updated; semantic mirror equivalence and Owner adoption are not certified."
+    usage_status: Active
+    modification_status: Modified
+    supersession: {supersedes: [], supersession_reason: null, effective_date: null}
+    archival: {archived_date: null, archival_reason: null, archival_reference: null}
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "03-memory-brain/canonical-memory-store.md"
+    en: "docs/en/03-memory-brain/canonical-memory-store.md"
+    zh-CN: "docs/zh-CN/03-memory-brain/canonical-memory-store.md"
+---
 # Canonical Memory Store
 
 - Document ID: D-CANONICAL-STORE-001
 - Version: 1.0
 - Source branch: session-d-memory-brain-2026-11-16
-- Source revision: DEREFERENCED — historical source blob `6b37c91033fda21f072e2a3bde6f274663b1e76e` retained; no current normative source path exists.
+- Source revision: canonical source restored at [`03-memory-brain/canonical-memory-store.md`](../../../03-memory-brain/canonical-memory-store.md) by AID-2026-150; this file remains a non-authoritative language mirror.
 - Source branch head audited: 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
-- Source: DEREFERENCED — original normative path `03-memory-brain/canonical-memory-store.md` is absent from the current main tree; alternative: [surviving Chinese counterpart](../../zh-CN/03-memory-brain/canonical-memory-store.md) (blob `857f2d2e5cde1e93cfd8612661cbe906be63f9d0`; translation only, not an authoritative substitute).
+- Canonical source: [`03-memory-brain/canonical-memory-store.md`](../../../03-memory-brain/canonical-memory-store.md); this file is a non-canonical language mirror and does not itself confer Owner approval.
 - Chinese counterpart: [Canonical Memory Store](../../zh-CN/03-memory-brain/canonical-memory-store.md)
 - Status: Authority and immutability DECIDED; detailed record layouts and transaction implementation CANDIDATE pending engineering validation
 - Related blockers: INT-P0-01..04, INT-P1-02, INT-P1-06, DM-001..DM-013

@@ -18,7 +18,7 @@ from pathlib import Path
 
 NORMATIVE_ROOTS = {
     "00-governance", "01-system-architecture", "02-domain-model",
-    "04-memory-compiler", "05-memory-runtime", "06-memory-context", "07-agent-integration",
+    "03-memory-brain", "04-memory-compiler", "05-memory-runtime", "06-memory-context", "07-agent-integration",
     "08-bmcp-protocol", "09-security-governance", "10-storage-consistency", "13-engineering-decisions",
     "14-ai-development",
 }

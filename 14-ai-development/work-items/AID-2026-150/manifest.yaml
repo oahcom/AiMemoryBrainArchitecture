@@ -1,0 +1,77 @@
+manifest_version: "1.0"
+record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
+registration_stage: "STAGE_0"
+registration_status: "CARRIER_PR_PENDING"
+work_item_id: "AID-2026-150"
+id_status: "PROVISIONAL"
+title: "Restore three D Memory Brain canonical roots"
+date: "2026-11-26"
+repository:
+  name: "oahcom/AiMemoryBrainArchitecture"
+  baseline_branch: "main"
+  baseline_commit: "17bfc43c2b9f2f9c91cb0eb074580141e701c0b3"
+identifier_allocation:
+  policy: "ACCOUNT_FIXED_RANGE"
+  assigned_range_start: "AID-2026-150"
+  assigned_range_end: "AID-2026-159"
+  selected_id: "AID-2026-150"
+  id_status: "PROVISIONAL"
+  selection_rule: "First unused identifier in the assigned account-fixed range; never derive an identifier from INDEX maximum or max+1."
+  occupancy_check:
+    observed_main: "17bfc43c2b9f2f9c91cb0eb074580141e701c0b3"
+    index_blob_sha: "4aad6150e3ddc22ce23bffa0b0f827375bb36e30"
+    exact_id_present_in_index: false
+    work_item_directory_present: false
+    pull_request_present: false
+    branch_present: false
+  merge_time_rule: "Recheck only whether selected ID remains unclaimed. If occupied, advance within AID-2026-150..159; if all ten are occupied, stop. Never leave the assigned range."
+authority:
+  sponsor: "USER-PRINCIPAL-DELEGATED"
+  accountable_owner: "USER-PRINCIPAL-DELEGATED"
+  acceptance_authority: "NOT_ASSIGNED"
+  attribution: "user-authorized operator (delegated by account owner)"
+  signature_status: "代理执行记录，非自然人 Owner 签署"
+scope:
+  objective: "Restore exactly three D canonical roots with GOV-DOC-002 metadata; preserve source bodies; make only six existing language-mirror updates required for GOV-DOC-001 pairing; preserve 57-path and 11-orphan classifications."
+  canonical_files:
+    - "03-memory-brain/canonical-memory-store.md"
+    - "03-memory-brain/commit-cursor-semantics.md"
+    - "03-memory-brain/forget-fence-operation-and-publication-gate.md"
+  en_files:
+    - "docs/en/03-memory-brain/canonical-memory-store.md"
+    - "docs/en/03-memory-brain/commit-cursor-semantics.md"
+    - "docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md"
+  zh_CN_files:
+    - "docs/zh-CN/03-memory-brain/canonical-memory-store.md"
+    - "docs/zh-CN/03-memory-brain/commit-cursor-semantics.md"
+    - "docs/zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate.md"
+  evidence:
+    canonical: "14-ai-development/work-items/AID-2026-150/restore-evidence.md"
+  files_to_create:
+    - "03-memory-brain/canonical-memory-store.md"
+    - "03-memory-brain/commit-cursor-semantics.md"
+    - "03-memory-brain/forget-fence-operation-and-publication-gate.md"
+    - "14-ai-development/work-items/AID-2026-150/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-150/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-150/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-150/restore-evidence.md"
+  files_to_modify:
+    - "14-ai-development/work-items/INDEX.md"
+    - "scripts/check_bilingual_docs.py"
+    - "00-governance/document-scope-registry.yaml"
+    - "docs/en/03-memory-brain/canonical-memory-store.md"
+    - "docs/zh-CN/03-memory-brain/canonical-memory-store.md"
+    - "docs/en/03-memory-brain/commit-cursor-semantics.md"
+    - "docs/zh-CN/03-memory-brain/commit-cursor-semantics.md"
+    - "docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md"
+    - "docs/zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate.md"
+  exclusions:
+    - "Do not restore the other 57 D source paths; preserve AID-2026-107 §10.4: 29 HISTORICAL_PHASE_RECORD and 28 UNDECIDED."
+    - "All 11 orphan mirror pairs remain ORPHAN_MIRROR_PENDING_DECISION; metadata/provenance pairing updates do not constitute adoption or retirement."
+    - "Do not add any README."
+    - "No runtime/product implementation, checker logic, schema, tests, workflow, deployment, production or Issue closure."
+review:
+  status: "NOT_ASSIGNED"
+acceptance:
+  status: "NOT_GRANTED"
+  note: "Canonical path restoration only; decision_status remains Draft and normative_status remains Informative. Owner acceptance is not claimed."

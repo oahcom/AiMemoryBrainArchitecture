@@ -1,11 +1,46 @@
+---
+document_metadata:
+  domain: memory-brain
+  role: reference
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope: {type: Full-document}
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: ["14-ai-development/work-items/AID-2026-150/manifest.yaml"]
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-26"
+      last_verification_note: "Mechanical path/provenance pairing only; ORPHAN_MIRROR_PENDING_DECISION remains in force."
+    usage_status: Active
+    modification_status: Modified
+    supersession: {supersedes: [], supersession_reason: null, effective_date: null}
+    archival: {archived_date: null, archival_reason: null, archival_reference: null}
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
+---
 # Canonical Commit and Cursor Semantics
 
 - Document ID: D-CURSOR-001
 - Version: 1.0
 - Source branch: session-d-memory-brain-2026-11-16
-- Source revision: DEREFERENCED — historical source blob `4688a0ca487bf4d853c7f0220408abe8d743d159` retained; no current normative source path exists.
+- Source revision: canonical source restored at [`03-memory-brain/commit-cursor-semantics.md`](../../../03-memory-brain/commit-cursor-semantics.md) by AID-2026-150; mirror status remains `ORPHAN_MIRROR_PENDING_DECISION`; adoption or retirement requires explicit D Owner decision.
 - Source branch head audited: 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
-- Source: DEREFERENCED — original normative path `03-memory-brain/commit-cursor-semantics.md` is absent from the current main tree; alternative: [surviving Chinese counterpart](../../zh-CN/03-memory-brain/commit-cursor-semantics.md) (blob `dd3887a46cf34e9958282fb0a495ae79c2f655e7`; translation only, not an authoritative substitute).
+- Canonical source: [`03-memory-brain/commit-cursor-semantics.md`](../../../03-memory-brain/commit-cursor-semantics.md); this EN document remains non-authoritative pending explicit D Owner disposition of the orphan mirror pair.
 - Chinese counterpart: [Canonical Commit 与 Cursor 语义](../../zh-CN/03-memory-brain/commit-cursor-semantics.md)
 - Owner: Session D — Memory Brain Principal Architect (canonical cursor authority only)
 - Status: D canonical semantics DECIDED; storage-engine implementation and E/F/G consumer conformance OPEN
