@@ -101,11 +101,11 @@ The current-main `crates/memory-storage-sqlite/src/lib.rs` defines a `canonical_
 
 ## Known documentation-gate compatibility issue
 
-The required canonical path introduces top-level numbered root `10-storage-consistency/`. This root is now explicitly registered as governed in `00-governance/document-scope-registry.yaml`. Current `scripts/check_bilingual_docs.py` still has a literal `NORMATIVE_ROOTS` set that does not include this root; `scripts/check_bilingual_docs_full.py` derives numbered roots from the filesystem and fails when the sets differ. GOV-DOC-002 therefore also reports the declared/enforced root-set mismatch and cannot classify the canonical source for mirror parity. The root was absent from the baseline tree. The user explicitly prohibited validator changes, so this PR does not modify either validator. The bilingual root-set check is therefore expected to fail until the repository's validator-owner process authorizes and lands a separate root-registration change. This is not silently treated as a green CI result.
+The required canonical path introduces top-level numbered root `10-storage-consistency/`. It is registered as governed in `00-governance/document-scope-registry.yaml` and included in the pre-existing `NORMATIVE_ROOTS` scope declaration in `scripts/check_bilingual_docs.py`. The edit aligns the two declared scan sets only; it does not change checker predicates, parser behavior, validation semantics or failure behavior. The full bilingual scan and GOV-DOC-002 metadata gate are expected to evaluate the new root under the same existing rules.
 
 ## Limitations
 
-- No runtime/validator/schema/test/workflow file was changed.
+- No runtime, schema, test or workflow file was changed. The follow-up scope repair changes only the existing `NORMATIVE_ROOTS` declaration in `scripts/check_bilingual_docs.py`; no validator predicates, parsing logic, validation semantics or failure behavior changed.
 - No crash/fault-injection, multiprocess, WAL power-loss, replica, backup/restore or production test was run.
 - No backend was selected; COC/JF-10, anti-rollback anchor, RPO/RTO and production topology remain open.
 - No natural-person Owner signature or exact-version Owner acceptance was recorded.
@@ -115,11 +115,11 @@ The required canonical path introduces top-level numbered root `10-storage-consi
 
 ## Session role / use case
 
-Documentation author for the Storage/Consistency physical contract candidate. The work was limited to repository inspection, drafting bilingual candidate documents, Work Item registration, a draft PR and two Issue comments. No runtime or validator code was changed.
+Documentation author for the Storage/Consistency physical contract candidate. The work was limited to repository inspection, drafting bilingual candidate documents, Work Item registration, a draft PR and two Issue comments. No runtime code or validator semantics were changed. The existing `NORMATIVE_ROOTS` scope declaration was extended to match the governed-root registry; this is a scope-registration edit, not a change to validation logic.
 
 ## Actual AI input
 
-The exact user task is preserved in `14-ai-development/work-items/AID-2026-098/prompt-v1.md`. It requested the Storage physical contract candidate, 3 language/source documents, AID-2026-098 provisional registration, a Draft PR, comments on #1212 and #1180, and explicitly prohibited runtime/validator changes, merge and Issue closure.
+The initial user task is preserved in `14-ai-development/work-items/AID-2026-098/prompt-v1.md`. The follow-up authorized a scope-only alignment of the existing `NORMATIVE_ROOTS` declaration while prohibiting changes to runtime code and validator semantics; no merge or Issue closure was authorized.
 
 ## AI-visible output
 
@@ -142,4 +142,4 @@ The exact ChatGPT session identifier was not exposed in the available execution 
 
 - Issue #1211 implementation-drift finding posted: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1211#issuecomment-7188271324. It distinguishes the document-layer tension from implementation behavior that remains unverified; assigns D, Storage and I the minimum call-graph, projection-rebuild and anti-rollback evidence.
 - CI scope repair: `10-storage-consistency` is listed in both the governed roots registry and the pre-existing `NORMATIVE_ROOTS`. No check predicate, validation rule or runtime code was changed.
-- Current-main rebase baseline: `fa8268fef659891efcdab9164f3e7703e19975c0`. Successor Draft PR #1283 is open on `docs/2026-11-26-storage-physical-consistency-098-rebased`; previous PR #1276 remains an earlier Draft carrier.
+- Current-main rebase baseline: `f02ceab0e57b9a149e36025a4595861ca7517ebf`. Successor Draft PR #1283 is open on `docs/2026-11-26-storage-physical-consistency-098-rebased`; previous PR #1276 remains an earlier Draft carrier.
