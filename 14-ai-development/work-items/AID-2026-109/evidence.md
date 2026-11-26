@@ -375,3 +375,16 @@ The existing nine-item closeout list remains:
 ## 11. Attribution
 
 user-authorized operator (delegated by account owner); 2026-11-26. Delegated evidence recording only; no natural-person Owner signature is fabricated.
+## Session role / use case
+
+Documentation author and evidence adjudicator for the SQLite implementation-test evidence supplied for AID-2026-109. The work reads exact source predicates, maps the supplied test names, and records bounded evidence classifications. No runtime, validator, schema, test, workflow, deployment or production change was made.
+
+## Actual AI input
+
+NOT_RECORDED
+
+The original user message was not preserved verbatim as a repository artifact. The committed `prompt-v1.md` is a structured task snapshot, not a byte-for-byte transcript of the complete user message. The 94 test names and the supplied execution metadata are preserved in this evidence record.
+
+## AI-visible output
+
+Created this Canonical evidence record and its EN and ZH-CN counterparts, mapped 94 supplied test names to SC/HIR predicates, rejudged 72 Gate A cells and 16 EVIDENCE_REQUIRED rows, and recorded 0 PASS, 34 PARTIAL_EVIDENCE and 54 UNCHANGED across the combined 88 rows. Gate A remains PARTIAL / OPEN; Gate B remains PARTIAL / OPEN (NOT VERIFIED). The exact local-run limitations and unresolved SC-17/18, HIR-05/12/17/18 and D/I anti-rollback gaps are recorded above.

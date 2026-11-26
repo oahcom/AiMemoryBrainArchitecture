@@ -622,3 +622,16 @@ AID-095 的原始 Gate A 状态列在每一行都保持 `NOT EVIDENCED`。PARTIA
 ## 11. 署名
 
 user-authorized operator (delegated by account owner)；2026-11-26。仅记录委托证据，不伪造自然人 Owner 签署。
+## Session role / use case
+
+本轮担任 AID-2026-109 SQLite 实现测试证据的文档作者与证据裁决者。工作限于读取精确源谓词、映射用户提供的测试名称并记录受限的证据分类。未修改 runtime、validator、schema、test、workflow、deployment 或 production。
+
+## Actual AI input
+
+NOT_RECORDED
+
+原始用户消息未逐字保存为仓库文件。已提交的 `prompt-v1.md` 是结构化任务快照，不是完整用户消息的逐字节副本。94 个测试名称及用户提供的执行元数据保存在本证据记录中。
+
+## AI-visible output
+
+创建了本 Canonical 证据记录及 EN、ZH-CN 镜像；将 94 个具名测试映射到 SC/HIR 谓词；重判 72 个 Gate A 单元及 16 条 EVIDENCE_REQUIRED。88 行合计为 0 PASS、34 PARTIAL_EVIDENCE、54 UNCHANGED。Gate A 仍为 PARTIAL / OPEN；Gate B 仍为 PARTIAL / OPEN（NOT VERIFIED）。本记录列明本地运行边界，以及 SC-17/18、HIR-05/12/17/18 和 D/I anti-rollback 未解决缺口。

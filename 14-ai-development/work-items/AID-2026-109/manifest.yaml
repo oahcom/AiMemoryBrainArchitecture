@@ -122,3 +122,19 @@ constraints:
   documented_only_is_pass: false
   issue_1211_close: "NOT_AUTHORIZED"
   issue_1212_close: "NOT_AUTHORIZED"
+
+prompt_id: "AID-2026-109-PROMPT"
+prompt_version: 1
+prompt_file: "14-ai-development/work-items/AID-2026-109/prompt-v1.md"
+prompt_status: "RECORDED_NOT_FROZEN"
+prompt_provenance: "USER_AUTHORIZED_DELEGATED_REQUEST"
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs: []
+    implementing_ai_session: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-109/prompt-v1.md"
+    executed_prompt_sha256: "31779b3d107a3831f2af23e48a2826967014640e908cdfb5b71a9565213a45e7"
+    executed_prompt_bytes: 1598
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-109/evidence.md"
