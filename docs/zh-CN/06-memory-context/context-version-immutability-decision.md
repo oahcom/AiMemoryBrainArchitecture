@@ -15,7 +15,7 @@ document_metadata:
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "Owner-delegated direction decision, 2026-11-26"
-        - "Work Item AID-2026-084"
+        - "Work Item AID-2026-087"
       revocation: null
     evidence_verification:
       verification_status: Unverified
