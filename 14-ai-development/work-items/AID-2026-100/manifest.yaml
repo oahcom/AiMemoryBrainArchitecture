@@ -155,17 +155,13 @@ prompt:
     is unavailable.
   session_reference_status: "NOT_AVAILABLE"
 
-session_evidence:
-  - role: "IMPLEMENTER_AND_REGISTRATION_COORDINATOR"
-    implementing_ai_session: "NOT_AVAILABLE"
-    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-100/prompt-v1.md"
-    executed_prompt_sha256: "6f74f728dfa47141ebee108c462e7e853983f1700e91e25c8f98a7b47ec07a95"
-    executed_prompt_bytes: 2130
-    executed_prompt_provenance: "NOT_VERIFIED"
-    session_reference_status: "NOT_AVAILABLE"
-    session_evidence_ref: "14-ai-development/work-items/AID-2026-100/session-evidence-source-restore.md"
-evidence_file: "14-ai-development/work-items/AID-2026-100/evidence-source-restore.md"
-evidence_blob: "d766e3f364462ae3933cbf62339048b9fecae15d"
+declared_exceptions:
+  - path: "scripts/check_bilingual_docs.py"
+    change: "NORMATIVE_ROOTS gains 03-memory-brain, 05-memory-runtime, 09-security-governance"
+    class: "ROOT_INVENTORY_CONSTANT_NOT_VALIDATOR_LOGIC"
+    why: "the checker asserts set equality against the tree and exits 2 when a listed root is absent; the three roots are introduced by this PR, so the constant cannot land separately"
+    effect: "no rule, threshold or check semantics change; the 77 pre-existing bilingual gaps stay the baseline"
+    verified: "gate_ratchet: baseline=77 current=77 regressions=0 fixed=0; ratchet PASS"
 
 related_evidence:
   - path: "14-ai-development/work-items/AID-2026-100/evidence.md"
@@ -181,6 +177,18 @@ related_evidence:
       this PR does not delete, rewrite or move it. It is evidence held under the same
       Work Item ID, not a second identity. The SOURCE-RESTORE-02 execution evidence lives in
       evidence-source-restore.md and is pinned by evidence_file/evidence_blob above.
+
+session_evidence:
+  - role: "IMPLEMENTER_AND_REGISTRATION_COORDINATOR"
+    implementing_ai_session: "NOT_AVAILABLE"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-100/prompt-v1.md"
+    executed_prompt_sha256: "6f74f728dfa47141ebee108c462e7e853983f1700e91e25c8f98a7b47ec07a95"
+    executed_prompt_bytes: 2130
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_AVAILABLE"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-100/session-evidence-source-restore.md"
+evidence_file: "14-ai-development/work-items/AID-2026-100/evidence-source-restore.md"
+evidence_blob: "d766e3f364462ae3933cbf62339048b9fecae15d"
 
 formal_registration:
   status: "COMPLETED_ON_CANDIDATE_BRANCH_WITH_BOUNDED_IDENTIFIER_SCAN"
@@ -222,14 +230,6 @@ open_blockers:
   - "I36-GOV-01..10 remain GOVERNANCE-BLOCKED; approver, exact policy hash/version, authority, scope and effective time are not recorded."
   - "Independent review is not assigned."
   - "AID-083 is occupied by PR #1250; AID-090..AID-093 are merged; AID-094 is retained by Issue #752 (PR #1277); AID-095, AID-096, AID-099 and AID-101 are merged. The AID-2026-100 exact-token scan covered main plus 986 refs and returned no hit; a full-history scan is not claimed."
-
-declared_exceptions:
-  - path: "scripts/check_bilingual_docs.py"
-    change: "NORMATIVE_ROOTS gains 03-memory-brain, 05-memory-runtime, 09-security-governance"
-    class: "ROOT_INVENTORY_CONSTANT_NOT_VALIDATOR_LOGIC"
-    why: "the checker asserts set equality against the tree and exits 2 when a listed root is absent; the three roots are introduced by this PR, so the constant cannot land separately"
-    effect: "no rule, threshold or check semantics change; the 77 pre-existing bilingual gaps stay the baseline"
-    verified: "gate_ratchet: baseline=77 current=77 regressions=0 fixed=0; ratchet PASS"
 
 prohibitions:
   - "DO_NOT_MERGE_ON_THE_AUTHORITY_OF_THIS_RECORD"
