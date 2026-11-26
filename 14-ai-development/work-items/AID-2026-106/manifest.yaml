@@ -7,7 +7,7 @@ risk_rationale: >-
   Documentation-only audit and acceptance evidence. False Owner acceptance,
   incorrect inventory, or fabricated version pins would create governance risk.
   Source approvals remain UNBINDABLE where no exact-version approval event exists.
-status: DRAFT_PR
+status: MERGED
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
 acceptance_authority: "Delegated proxy approval of this report only; source Owner acceptance remains NOT_RECORDED"
@@ -74,9 +74,12 @@ findings:
     severity: HIGH
     statement: Accountable/dependent Owner exact-version acceptance is not recorded.
 implementation:
-  status: DOCUMENTATION_ONLY
+  status: MERGED
   pull_request: 1291
-  merge_commit_sha: PENDING
+  merge_commit_sha: 2d52b0c81dc1b779e49516fceb69d89cdc1d9c31
+  merged_head_sha: a0bb69d68448089a5455caa80462325c7409eefa
+  merged_at_utc: "2026-11-26T12:26:48Z"
+  note: "Audit evidence package merged; source Owner exact-version acceptance remains NOT_RECORDED, so Issue #1197 stays OPEN."
 review:
   status: NOT_ASSIGNED
 acceptance:
