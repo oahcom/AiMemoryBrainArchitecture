@@ -1,4 +1,4 @@
-work_item_id: AID-2026-190
+work_item_id: AID-2026-193
 title: >-
   Classify the 00-governance, 01-system-architecture, 02-domain-model and 06-memory-context mirror trios
   under GOV-DOC-002, and refresh the eight Source revision pins the classification moves
@@ -25,14 +25,21 @@ prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
 identifier_allocation:
   id_status: PROVISIONAL
   observed_main: 4326669caa6c43193d34219a0451b80762b712ff
-  assigned_id: AID-2026-190
+  assigned_id: AID-2026-193
   allocation_rule: >-
-    Queried every pull request (state=all, 100 most recent) for AID-2026-190 through AID-2026-196: no title
-    and no head branch matched, while INDEX max was AID-2026-189. 190 is the first number outside both the
-    observed INDEX set and the observed pull-request set. No INDEX maximum plus one was used.
+    Queried every pull request (state=all, 100 most recent) for AID-2026-190 through AID-2026-196.
+    AID-2026-190 and AID-2026-192 were free when the branch was cut and were both taken before this
+    branch merged current main: main now carries AID-2026-190 (merged with PR #1345) and AID-2026-192 is
+    open as PR #1344. The files were renumbered to 193 in the same branch, and every path, scope id and
+    PROMPT label moved with them. No INDEX maximum plus one was used.
+  renumbered_from: AID-2026-190
+  renumber_reason: >-
+    Add/add conflicts on every AID-2026-190 path after merging origin/main, which had already registered
+    190 for a governance-record correction. The renumber is a path and label change only: no measured
+    number, blob or gate result in the evidence changed.
   recheck_rule: >-
-    Immediately before merge, re-read open pull requests and remote branches for AID-2026-190; if occupied,
-    take the next free number and update every path and reference in the same push.
+    Immediately before merge, re-read open pull requests and remote branches for AID-2026-193; if
+    occupied, take the next free number and update every path and reference in the same push.
 scope:
   objective: >-
     Make GOV-DOC-002 able to classify the 42 mirror files in four directories that carried no front-matter,
@@ -68,9 +75,9 @@ scope:
       the basis is recorded per file.
     disclosure: "evidence section 3, both language copies"
 evidence:
-  record: 14-ai-development/work-items/AID-2026-190/evidence.md
-  prompt: 14-ai-development/work-items/AID-2026-190/prompt-v1.md
-  session: 14-ai-development/work-items/AID-2026-190/session-evidence.md
+  record: 14-ai-development/work-items/AID-2026-193/evidence.md
+  prompt: 14-ai-development/work-items/AID-2026-193/prompt-v1.md
+  session: 14-ai-development/work-items/AID-2026-193/session-evidence.md
 non_goals:
   - Classifying any orphan mirror, or creating a canonical document for one
   - Claiming Canonical authority, registering a canonical_scope_id, or recording an approval
@@ -90,9 +97,9 @@ session_evidence:
     issue_refs:
       - "#1212"
     implementing_ai_session: "NOT_RECORDED"
-    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-190/prompt-v1.md"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-193/prompt-v1.md"
     executed_prompt_sha256: "363f44832823ebc26b69dbb1a3ec2db816ba582aa2c6ca334dc7c1fcdf994f92"
     executed_prompt_bytes: 3605
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_RECORDED"
-    session_evidence_ref: "14-ai-development/work-items/AID-2026-190/session-evidence.md"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-193/session-evidence.md"

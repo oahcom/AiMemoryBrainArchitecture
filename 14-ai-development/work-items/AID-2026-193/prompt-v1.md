@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-190/evidence.md"
+        - "14-ai-development/work-items/AID-2026-193/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -44,7 +44,7 @@ document_metadata:
     en: null
     zh-CN: null
 ---
-# AID-2026-190 - executed prompt snapshot (scope, not a transcript)
+# AID-2026-193 - executed prompt snapshot (scope, not a transcript)
 
 Dispatch received by the implementation session: read
 `.superpowers/sdd/2026-11-26-chatgpt-session-ops-skill/fix-brief-common.md` and
@@ -75,7 +75,7 @@ The unit scope, verbatim in substance:
    not create files.
 
 The common brief additionally requires a work item under
-`14-ai-development/work-items/AID-2026-190/` with `manifest.yaml`,
+`14-ai-development/work-items/AID-2026-193/` with `manifest.yaml`,
 `evidence.md`, `prompt-v1.md` and `session-evidence.md`, bilingual copies of the
 evidence, one row appended to `INDEX.md`, a PR body carrying the issue
 reference, `AI-assisted work: YES` and a resolvable session-evidence path, and a

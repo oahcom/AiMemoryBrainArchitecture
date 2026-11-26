@@ -12,12 +12,12 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-190/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-193/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
       last_verified_date: "2026-11-27"
-      last_verification_note: "Records the GOV-DOC-002 classification of 63 documents (21 mirror trios in 00-governance, 01-system-architecture, 02-domain-model and 06-memory-context) and the 16 Source revision pins refreshed beside them. Does not claim canonical authority, does not record an approval, and does not assert that semantic parity between a mirror and its source was reviewed."
+      last_verification_note: "记录 00-governance、01-system-architecture、02-domain-model、06-memory-context 四个目录中 63 份文档（21 组镜像三元组）的 GOV-DOC-002 分类，以及随之刷新的 16 条 Source revision 指针；不主张 Canonical 权威、不记录审批，也不声称已审查镜像与源的语义对等。"
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -30,8 +30,8 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "AID-2026-190 GOV-DOC-002 classification of the 00/01/02/06 mirror trios and the Source revision pins refreshed alongside them"
-    canonical_scope_id: "ai-development/aid-2026-190-mirror-frontmatter-a"
+    canonical_scope: "AID-2026-193：为 00/01/02/06 的镜像三元组补 GOV-DOC-002 分类，并同步刷新 Source revision 指针"
+    canonical_scope_id: "ai-development/aid-2026-193-mirror-frontmatter-a"
     canonical_scope_keywords:
       - "front-matter"
       - "bilingual-mirror"
@@ -40,30 +40,27 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "14-ai-development/work-items/AID-2026-190/evidence.md"
-    en: null
-    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-190/evidence.md"
+    source: "14-ai-development/work-items/AID-2026-193/evidence.md"
+    en: "docs/en/14-ai-development/work-items/AID-2026-193/evidence.md"
+    zh-CN: null
 ---
-# AID-2026-190 - GOV-DOC-002 front-matter for the 00/01/02/06 mirror trios
+# AID-2026-193 — 为 00/01/02/06 的镜像三元组补 GOV-DOC-002 front-matter
 
-## 1. What changed
+## 1. 改了什么
 
-The four directories assigned to this unit (`00-governance`,
-`01-system-architecture`, `02-domain-model`, `06-memory-context`) hold 43
-document pairs per language, 86 files in total. Sixty of them (30 per language)
-carried no YAML front-matter, so GOV-DOC-002 could not classify them: `.md`
-files under `docs/en/**` and `docs/zh-CN/**` are governed by
-`check_document_management.py`, but a file without front-matter is
-`_unclassified`, not compliant.
+本单元负责的四个目录（`00-governance`、`01-system-architecture`、
+`02-domain-model`、`06-memory-context`）每语言各 43 对文档、合计 86 份文件。
+其中 60 份（每语言 30 份）没有 YAML front-matter，GOV-DOC-002 无法对它们分类：
+`docs/en/**` 与 `docs/zh-CN/**` 下的 `.md` 属于受治理范围，但没有 front-matter
+的文件是 `_unclassified`，不是合规。
 
-Of those 60 files, 42 (21 pairs) have a canonical document that exists in the
-repository. This change inserts the GOV-DOC-002 block at the top of those 42
-mirror files **and** at the top of the 21 canonical documents they name, 63
-files in total, and changes nothing else in any body.
+这 60 份里有 42 份（21 对）的 Canonical 文档在仓库中真实存在。本次在 42 份镜像
+文件顶部插入 GOV-DOC-002 块，**同时**在它们指向的 21 份 Canonical 文档顶部插入
+同一块，共 63 份文件；除此之外不改动任何正文。
 
-## 2. Measured baseline, before this change
+## 2. 改动前实测
 
-Commands run in `D:\code\wt-corpus-a` at base `4326669caa6c43193d34219a0451b80762b712ff`:
+在 `D:\code\wt-corpus-a`、基线 `4326669caa6c43193d34219a0451b80762b712ff` 上执行：
 
 ```
 python scripts/check_document_management.py
@@ -71,25 +68,21 @@ GOV-DOC-002: 942 governed documents, 496 classified, 446 unclassified
 INCOMPLETE: no rule violations in 496 classified documents, but 446 governed documents are still unclassified
 
 python scripts/check_source_revision_pointers.py
-STALE=8   (8 stale pins, all pre-existing: DEF-corpus-08)
+STALE=8   （8 条 stale 指针，全部为改动前既有：DEF-corpus-08）
 ```
 
-Front-matter census of the four assigned directories, per language: 7 + 11 + 13
-+ 12 = 43 files, of which 30 lack front-matter. Nine of those 30 have no
-canonical document (orphans, section 6); the remaining 21 all name a canonical
-document that exists.
+四个目录逐语言清点：7 + 11 + 13 + 12 = 43 份，其中 30 份无 front-matter。
+这 30 份里有 9 份没有 Canonical（孤儿，见第 6 节），其余 21 份都能找到存在的
+Canonical 文档。
 
-## 3. Scope deviation, stated before the file list: the canonical side is in this change
+## 3. 范围偏离：Canonical 侧也在本次改动内
 
-The unit brief says not to change the canonical side. That constraint and DM-12
-cannot both hold, and the measurement is not a matter of interpretation.
+单元任务书写明"不改 canonical 侧"。这条约束与 DM-12 不可能同时成立，且这不是
+解释问题，是实测结果。
 
-DM-12 (`scripts/check_document_management.py`, `check_scope_and_relations`)
-requires every document under `docs/en/**` or `docs/zh-CN/**` to declare
-`bilingual_counterpart.source`, and requires that source to be an **already
-classified** governed document. A probe on one file at the base commit confirms
-three errors for a single classified mirror whose canonical and sibling are
-unclassified:
+DM-12（`scripts/check_document_management.py` 的 `check_scope_and_relations`）
+要求 `docs/en/**`、`docs/zh-CN/**` 下的每份文档声明 `bilingual_counterpart.source`，
+且该源必须是**已被分类**的受治理文档。在基线提交上对单份镜像做探针，得到三条错误：
 
 ```
 DM-12 docs/en/02-domain-model/core-entities.md: counterpart 02-domain-model/core-entities.md exists
@@ -101,44 +94,38 @@ DM-12 docs/en/02-domain-model/core-entities.md: names 02-domain-model/core-entit
 FAIL: 3 error(s)
 ```
 
-The same measurement holds for the whole corpus: of the 170 mirrors that are
-classified at the base commit, **170/170** name a classified source. There is no
-classified mirror with an unclassified source anywhere in the tree, so
-"classify the mirror only" is not an available state; it is a red gate.
+全树同构：基线提交上已分类的 170 份镜像中，**170/170** 的源都是已分类文档。
+树里不存在"源未分类却镜像已分类"的状态，所以"只补镜像"不是一个可用状态，
+而是红门禁。
 
-Three consequences were accepted, and each is disclosed rather than hidden:
+由此接受三点，全部明写而不隐藏：
 
-1. **The canonical root of each trio is classified too** (21 files). This is the
-   only way DM-12 can pass. Front-matter only; no body change.
-2. **`canonical_status` stays `Non-Canonical` on those roots.** Classifying a
-   document and designating it the unique authority for a normalised scope are
-   two different acts, and the second is an Owner decision. This change makes no
-   authority claim and registers no `canonical_scope_id`, so `resolve_canonical`
-   finds no new scope. Precedent in-tree: `06-memory-context/context-implementation-coverage.md`
-   is a classified root with `Non-Canonical` / `Informative`.
-3. **`normative_status` is transcribed, not invented.** Where the document's own
-   `Status:` line states a decided binding rule (`DECIDED ...`), the field is
-   `Normative`; where the document declares itself a candidate, a draft, a review
-   record or "not a frozen cross-owner contract", the field is `Informative`.
-   Column four of section 4 records the basis for every file, so a reviewer can
-   flip any single value without re-deriving it.
+1. **三元组中的 Canonical 根一并分类**（21 份）。这是 DM-12 能过的唯一路径，
+   只插 front-matter，不改正文。
+2. **这些根与镜像的 `canonical_status` 一律为 `Non-Canonical`。** "分类"与
+   "指定某规范化 scope 的唯一权威"是两件事，后者属 Owner 决定；本次不作权威
+   主张、不登记 `canonical_scope_id`，`resolve_canonical` 不会因此新增 scope。
+   仓内先例：`06-memory-context/context-implementation-coverage.md` 就是已分类的
+   `Non-Canonical` / `Informative` 根。
+3. **`normative_status` 是转写，不是发明。** 文档自身 `Status:` 行声明为已决定
+   的约束（`DECIDED ...`）时取 `Normative`；自述为 candidate、draft、评审记录
+   或"not a frozen cross-owner contract"时取 `Informative`。第 4 节表第 4 列
+   逐份记录依据，审查者可按单份推翻而无需重新推导。
 
-## 4. Insertion only
+## 4. 只做插入
 
-`git diff --cached --numstat` for commit `b8c89d790d671cff402c259c588de65bf2234bff`:
+提交 `b8c89d790d671cff402c259c588de65bf2234bff` 的 `git diff --cached --numstat` 合计：
 
 ```
 files 63   added lines 2473   deleted lines 16
 ```
 
-2457 of the added lines are the 39-line front-matter block, 63 x 39 = 2457. The
-16 deletions are the `Source revision` / `源版本` pins of section 5, one line
-each, in the 16 mirrors that pin their canonical blob; no prose line is deleted
-anywhere. Every file's body is byte-identical to the base commit after the
-inserted block, which is what the `pre-insertion blob` + `front-matter bytes`
-pair below lets a reader re-derive.
+新增行中 2457 行是 39 行的 front-matter 块（63 × 39 = 2457）；16 行删除是第 5 节
+的 `Source revision` / `源版本` 指针，每份 1 行，仅出现在钉住 Canonical blob 的
+16 份镜像里。没有任何一行正文散文被删除。插入块之后，每份文件的正文与基线提交
+逐字节相同——下表"插入前 blob + front-matter 字节数"即用于让读者复核这一点。
 
-| # | Path | role | normative_status | pre-insertion blob | post-insertion blob | front-matter bytes |
+| # | 路径 | role | normative_status | 插入前 blob | 插入后 blob | front-matter 字节 |
 |---|---|---|---|---|---|---|
 
 | # | Path | role | normative_status | pre-insertion blob | post-insertion blob | front-matter bytes |
@@ -207,19 +194,16 @@ pair below lets a reader re-derive.
 | 62 | `docs/zh-CN/06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.md` | design-specification | Informative | `a5b6642e0c449ea0d2cc18fef365e09b421acfa5` | `1836ca65179afdc7344bf8c7407fad5391f72e31` | 1578 |
 | 63 | `docs/zh-CN/06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.zh-CN.md` | design-specification | Informative | `4d57e90e987ec6ed679fba9047945e6a73f5d36c` | `d3885b4f4218390ec5d0bada444703104c123873` | 1590 |
 
-## 5. Source revision pins refreshed: 16 lines, DEF-corpus-08
+## 5. 刷新 Source revision 指针：16 行，DEF-corpus-08
 
-Eight pairs of mirrors pin the canonical blob in their body
-(`- Source revision: <40-hex>` / `- 源版本：<40-hex>`). Prepending front-matter to
-the canonical changes that blob, so a change that left the pins alone would
-produce exactly the defect DEF-corpus-08 records: "the same commit changed the
-canonical and both mirrors and did not change the pointer". Each pin below was
-rewritten to the new canonical blob in the same commit. This is the only edit
-outside the inserted block, it touches one line per file, and the gate
-`scripts/check_source_revision_pointers.py` reports the same 8 pre-existing
-stale pins before and after, with no new one.
+有 8 对镜像在正文里钉住 Canonical blob（`- Source revision: <40-hex>` /
+`- 源版本：<40-hex>`）。给 Canonical 插 front-matter 会改变它的 blob，若不同步
+指针，就正好复现 DEF-corpus-08 记录的缺陷："同一次提交改了 Canonical 与两侧镜像
+却没改这个指针"。下表每条都在同一提交内改为新的 Canonical blob；这是插入块之外
+唯一的改动，每份文件 1 行，且 `scripts/check_source_revision_pointers.py` 在改动
+前后都报告同样 8 条既有 stale，没有新增。
 
-| Mirror | Canonical | Pin before | Pin after |
+| 镜像 | Canonical | 改前指针 | 改后指针 |
 |---|---|---|---|
 
 | Mirror | Canonical | Pin before | Pin after |
@@ -241,15 +225,13 @@ stale pins before and after, with no new one.
 | `docs/en/02-domain-model/scope-and-permission-model.md` | `02-domain-model/scope-and-permission-model.md` | `b5215ae27bd65a6c89c185b496f730b6cd52efa9` | `dc53012f50a26c872b9d0f19c078cc5dc992ea0f` |
 | `docs/zh-CN/02-domain-model/scope-and-permission-model.md` | `02-domain-model/scope-and-permission-model.md` | `b5215ae27bd65a6c89c185b496f730b6cd52efa9` | `dc53012f50a26c872b9d0f19c078cc5dc992ea0f` |
 
-## 6. Orphans skipped: 9 rel / 18 files
+## 6. 跳过的孤儿镜像：9 rel / 18 份
 
-A mirror whose canonical document does not exist cannot be classified: DM-12
-would report a source that does not exist, and the unit brief says to skip it.
-Nine rels (18 files) are in that state in this unit's four directories. All nine
-are the ones `defects-corpus.md` section 5 lists as orphans; this change adds
-none and resolves none.
+Canonical 不存在的镜像无法分类：DM-12 会报"源不存在"，任务书也要求跳过。本单元
+四个目录里共有 9 个 rel（18 份文件）处于该状态，与 `defects-corpus.md` 第 5 节
+的孤儿清单完全一致；本次不新增、也不消除任何孤儿。
 
-| Orphan mirror rel | en + zh-CN files |
+| 孤儿镜像 rel | en + zh-CN 文件数 |
 |---|---|
 | `00-governance/aid-2026-014-r3-correction-status.md` | 2 |
 | `01-system-architecture/integration-governance-guide.md` | 2 |
@@ -261,60 +243,53 @@ none and resolves none.
 | `06-memory-context/memory-context-guide.md` | 2 |
 | `06-memory-context/phase-3.8.27-g-claim-fact-visibility-addendum.md` | 2 |
 
-## 7. Gates, run locally against the committed tree
+## 7. 门禁：全部在本地对已提交树执行
 
 ```
 python scripts/check_document_management.py --require-changed 4326669caa6c43193d34219a0451b80762b712ff
 GOV-DOC-002: 942 governed documents, 559 classified, 383 unclassified
 PASS (incremental): no GOV-DOC-002 violations; 559 classified, 383 unclassified
 
-python scripts/check_document_management.py            (whole tree)
+python scripts/check_document_management.py            （全树）
 GOV-DOC-002: 942 governed documents, 559 classified, 383 unclassified
 INCOMPLETE: no rule violations in 559 classified documents, but 383 governed documents
-are still unclassified                      (exit 2: backlog remains, no rule violation)
+are still unclassified                      （exit 2：仍有欠账，但无规则违例）
 
 python scripts/test_check_document_management.py
-326/326 passed; 1 skipped, 1 registered of 1 allowed (T68c)
+326/326 passed；1 skipped, 1 registered of 1 allowed（T68c）
 
 BASE_SHA=4326669caa6c43193d34219a0451b80762b712ff HEAD_SHA=b8c89d790d671cff402c259c588de65bf2234bff python scripts/check_bilingual_docs.py
 bilingual baseline: 77 frozen, 0 new gaps
 Bilingual documentation and prompt-library gate: PASS (63 changed paths inspected).
 
 python scripts/check_source_revision_pointers.py
-STALE=8 (unchanged), ACCURATE=16 (the 16 refreshed pins)
+STALE=8（未变），ACCURATE=16（即刷新后的 16 条）
 ```
 
-Governed 942 -> 942. Classified 496 -> 559 (+63). Unclassified 446 -> 383 (-63).
-Those five figures are measured at corpus commit `b8c89d790d671cff402c259c588de65bf2234bff`, before this registration set
-existed. On the head this pull request ships, the same two commands report 947
-governed / 564 classified / 383 unclassified -- the five work-item documents are
-themselves governed, and all five are classified -- with the same `PASS
-(incremental)` and zero rule violations. The whole-tree run still exits 2 because
-383 governed documents elsewhere are unclassified; that backlog belongs to the
-other corpus units and to roots this unit does not own, and no rule violation is
-reported.
+受治理 942 → 942；已分类 496 → 559（+63）；未分类 446 → 383（−63）。这五个数字测于语料
+提交 `b8c89d790d671cff402c259c588de65bf2234bff`（此时本登记集尚不存在）。在本 PR 的头提交上，同样两条命令报 947 受治理 /
+564 已分类 / 383 未分类——五份工作项文档本身也受治理且已分类——增量结论仍是 `PASS`
+且零规则违例。全树仍是 exit 2，因为其余目录还有 383 份未分类文档；那是其它 corpus
+单元的欠账，本次没有任何规则违例。
 
-## 8. What this change does not do
+## 8. 本次**没有**做什么
 
-- No body text is edited: no wording, no heading, no link, no table cell, except
-  the 16 single-line blob pins of section 5.
-- No file is created or deleted inside the document corpus.
-- No directory outside `00-governance`, `01-system-architecture`,
-  `02-domain-model`, `06-memory-context` is touched.
-- No orphan mirror is classified, and no canonical document is created for one.
-- No canonical authority is claimed: `canonical_status` is `Non-Canonical`
-  everywhere this change writes it, no `canonical_scope_id` is registered, and
-  no approval is recorded (`decision_status: Draft`, `evidence_verification:
-  Unverified` on every file).
-- No checker, schema, baseline, workflow, branch protection or required context
-  is changed.
-- No Issue is closed.
+- 不改正文：不改措辞、标题、链接、表格单元格；唯一例外是第 5 节 16 行 blob 指针。
+- 文档语料内不新建、不删除文件。
+- 不动 `00-governance`、`01-system-architecture`、`02-domain-model`、
+  `06-memory-context` 之外的目录。
+- 不分类任何孤儿镜像，也不为孤儿新建 Canonical。
+- 不主张 Canonical 权威：本次写入的 `canonical_status` 全为 `Non-Canonical`，
+  不登记 `canonical_scope_id`，不记录审批（全部 `decision_status: Draft`、
+  `evidence_verification: Unverified`）。
+- 不改任何 checker、schema、baseline、workflow、分支保护或 required context。
+- 不关闭任何 Issue。
 
-## 9. Reproduction
+## 9. 复现
 
 ```
 git checkout b8c89d790d671cff402c259c588de65bf2234bff
 python scripts/check_document_management.py --require-changed 4326669caa6c43193d34219a0451b80762b712ff
 git diff --numstat 4326669caa6c43193d34219a0451b80762b712ff..b8c89d790d671cff402c259c588de65bf2234bff
-git diff 4326669caa6c43193d34219a0451b80762b712ff..b8c89d790d671cff402c259c588de65bf2234bff -- <path>     # one file: removed lines = 0, or the single pin line
+git diff 4326669caa6c43193d34219a0451b80762b712ff..b8c89d790d671cff402c259c588de65bf2234bff -- <path>     # 单份文件：删除行 = 0，或仅那一行指针
 ```

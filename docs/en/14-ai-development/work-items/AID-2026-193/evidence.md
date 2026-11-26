@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-190/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-193/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -30,8 +30,8 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "AID-2026-190 GOV-DOC-002 classification of the 00/01/02/06 mirror trios and the Source revision pins refreshed alongside them"
-    canonical_scope_id: "ai-development/aid-2026-190-mirror-frontmatter-a"
+    canonical_scope: "AID-2026-193 GOV-DOC-002 classification of the 00/01/02/06 mirror trios and the Source revision pins refreshed alongside them"
+    canonical_scope_id: "ai-development/aid-2026-193-mirror-frontmatter-a"
     canonical_scope_keywords:
       - "front-matter"
       - "bilingual-mirror"
@@ -40,11 +40,11 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: null
-    en: "docs/en/14-ai-development/work-items/AID-2026-190/evidence.md"
-    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-190/evidence.md"
+    source: "14-ai-development/work-items/AID-2026-193/evidence.md"
+    en: null
+    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-193/evidence.md"
 ---
-# AID-2026-190 - GOV-DOC-002 front-matter for the 00/01/02/06 mirror trios
+# AID-2026-193 - GOV-DOC-002 front-matter for the 00/01/02/06 mirror trios
 
 ## 1. What changed
 
