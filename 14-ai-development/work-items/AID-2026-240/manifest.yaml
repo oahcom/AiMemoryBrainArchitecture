@@ -1,4 +1,4 @@
-work_item_id: AID-2026-191
+work_item_id: AID-2026-240
 title: >-
   Make the 77-entry frozen bilingual inventory have one authority: declare every
   copy, compare all of them in check_baseline_copies_agree(), and mark the drifted
@@ -23,26 +23,28 @@ attribution: user-authorized operator (delegated by account owner)
 date: 2026-11-27
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: 2f4f4118bd2c2d8e43a23975f667deeb06553f3c
+base_commit_sha: a66bc2aa321c86987c88a98c62c4c74e447db50f
 prompt_status: NOT_RECORDED
 prompt_provenance: DISPATCHED_TASK_FILE
 identifier_allocation:
   id_status: PROVISIONAL
-  observed_main: 2f4f4118bd2c2d8e43a23975f667deeb06553f3c
-  assigned_id: AID-2026-191
+  observed_main: a66bc2aa321c86987c88a98c62c4c74e447db50f
+  assigned_id: AID-2026-240
   allocation_rule: >-
-    The first allocation under this branch was AID-2026-190, taken after the highest
-    number in any pull-request title, branch or body at allocation time was AID-2026-189
-    (merged, PR #1339). While this branch was open, PR #1343 merged under the title
-    "... (AID-2026-190)", so 190 became occupied after the fact; the branch was renumbered
-    to 191, which no title, branch, body or tree path had used. The 190 number is left
-    with its merged owner and is not claimed here.
-  observed_occupied: [170, 172, 173, 188, 189, 190]
+    This branch was allocated three numbers while it stayed open, because parallel
+    repair units were allocating from the same range and each one merged first. 190 was
+    taken by PR #1343 and 191 by PR #1345 after this branch had claimed them; neither is
+    claimed here and no path under either is created or modified. At the third allocation
+    the highest number observed in any pull-request title, branch, body or tree path was
+    AID-2026-204, with 190-199 and 204 occupied; 240 was chosen well clear of the range
+    the parallel units are drawing from, and no AID-2026-2xx string above 204 existed in
+    the tree or in any branch name at that time.
+  observed_occupied: [170, 172, 173, 188, 189, 190, 191, 192, 193, 197, 198, 199, 204]
 evidence:
-  record: 14-ai-development/work-items/AID-2026-191/evidence.md
+  record: 14-ai-development/work-items/AID-2026-240/evidence.md
   mirrors:
-    - docs/en/14-ai-development/work-items/AID-2026-191/evidence.md
-    - docs/zh-CN/14-ai-development/work-items/AID-2026-191/evidence.md
+    - docs/en/14-ai-development/work-items/AID-2026-240/evidence.md
+    - docs/zh-CN/14-ai-development/work-items/AID-2026-240/evidence.md
   measurements:
     inventory_authority: scripts/ci/baselines/bilingual-docs.txt
     authority_entries: 77
@@ -81,21 +83,21 @@ session_evidence:
     issue_refs:
       - "#1212"
     implementing_ai_session: "opencode-go/deepseek-v4.1-flash"
-    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-191/prompt-v1.md"
-    executed_prompt_sha256: "74ec91ce652d56248a5b9e56f390641b2cc9e8fb196070eafbe887b5f74f6fee"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-240/prompt-v1.md"
+    executed_prompt_sha256: "0becb14207ff1b1405833a464d0bd098a0442db6ae699f67299d28420c79aba8"
     executed_prompt_bytes: 4717
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_RECORDED"
-    session_evidence_ref: "14-ai-development/work-items/AID-2026-191/session-evidence.md"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-240/session-evidence.md"
 
 scope:
   files_to_create:
-    - 14-ai-development/work-items/AID-2026-191/manifest.yaml
-    - 14-ai-development/work-items/AID-2026-191/evidence.md
-    - 14-ai-development/work-items/AID-2026-191/prompt-v1.md
-    - 14-ai-development/work-items/AID-2026-191/session-evidence.md
-    - docs/en/14-ai-development/work-items/AID-2026-191/evidence.md
-    - docs/zh-CN/14-ai-development/work-items/AID-2026-191/evidence.md
+    - 14-ai-development/work-items/AID-2026-240/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-240/evidence.md
+    - 14-ai-development/work-items/AID-2026-240/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-240/session-evidence.md
+    - docs/en/14-ai-development/work-items/AID-2026-240/evidence.md
+    - docs/zh-CN/14-ai-development/work-items/AID-2026-240/evidence.md
   files_to_modify:
     - scripts/check_bilingual_docs.py
     - scripts/test_check_bilingual_docs.py

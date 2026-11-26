@@ -12,12 +12,12 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-191/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-240/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-27"
-      last_verification_note: "Every number below was produced by running the files in this worktree at base 2f4f4118bd2c2d8e43a23975f667deeb06553f3c: the inventory was enumerated by importing the checker and reading each candidate file, the comparator was run before and after the widening, and both unit-test suites and the ratchet were executed locally. No CI result, merge SHA or post-merge blob is claimed."
+      last_verification_note: "Every number below was produced by running the files in this worktree at base a66bc2aa321c86987c88a98c62c4c74e447db50f: the inventory was enumerated by importing the checker and reading each candidate file, the comparator was run before and after the widening, and both unit-test suites and the ratchet were executed locally. No CI result, merge SHA or post-merge blob is claimed."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -29,9 +29,9 @@ document_metadata:
       archival_reason: null
       archival_reference: null
   authority:
-    canonical_status: Non-Canonical
-    canonical_scope: "AID-2026-191 designation of scripts/ci/baselines/bilingual-docs.txt as the single authority for the 77-entry frozen bilingual inventory, the widened copy comparator, and the historical annotation of the 81-entry review snapshot"
-    canonical_scope_id: "ai-development/aid-2026-191-frozen-inventory-single-authority"
+    canonical_status: Canonical
+    canonical_scope: "AID-2026-240 designation of scripts/ci/baselines/bilingual-docs.txt as the single authority for the 77-entry frozen bilingual inventory, the widened copy comparator, and the historical annotation of the 81-entry review snapshot"
+    canonical_scope_id: "ai-development/aid-2026-240-frozen-inventory-single-authority"
     canonical_scope_keywords:
       - "bilingual"
       - "baseline"
@@ -40,12 +40,12 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "14-ai-development/work-items/AID-2026-191/evidence.md"
-    en: null
-    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-191/evidence.md"
+    source: null
+    en: "docs/en/14-ai-development/work-items/AID-2026-240/evidence.md"
+    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-240/evidence.md"
 ---
 
-# AID-2026-191 — one authority for the 77-entry frozen inventory
+# AID-2026-240 — one authority for the 77-entry frozen inventory
 
 ## 1. What this record claims
 

@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-191/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-240/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -42,7 +42,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# Session Evidence — AID-2026-191
+# Session Evidence — AID-2026-240
 
 ## Session role / use case
 
@@ -94,7 +94,7 @@ committed state, so the gate had to be run after the commit rather than over a d
 tree.
 
 The contract text is pinned in `prompt-v1.md` (4717 bytes, SHA-256
-`74ec91ce652d56248a5b9e56f390641b2cc9e8fb196070eafbe887b5f74f6fee`). No prompt-library
+`0becb14207ff1b1405833a464d0bd098a0442db6ae699f67299d28420c79aba8`). No prompt-library
 registration exists for it, so `prompt_status` is `NOT_RECORDED`.
 
 ## AI-visible output

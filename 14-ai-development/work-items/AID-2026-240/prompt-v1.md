@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-191/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-240/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -42,7 +42,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# AID-2026-191 — dispatched contract snapshot (v1)
+# AID-2026-240 — dispatched contract snapshot (v1)
 
 Snapshot of the worker contract received by the executing session on 2026-11-27: the unit file's requirement text and the common fix brief's constraints, quoted verbatim. Nothing in the body was rewritten; the premise statements are reproduced as dispatched so that the divergence measured in `evidence.md` section 2 can be checked against the order that produced it.
 

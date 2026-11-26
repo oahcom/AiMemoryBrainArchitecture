@@ -12,12 +12,12 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-191/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-240/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-27"
-      last_verification_note: "本文所有数字均由本 worktree 在基线 2f4f4118bd2c2d8e43a23975f667deeb06553f3c 上实跑得出：清单通过导入检查器并逐个读取候选文件枚举，比较器在扩围前后各跑一次，两套单元测试与棘轮均在本地执行。不声称任何 CI 结果、合并 SHA 或合并后 blob。"
+      last_verification_note: "本文所有数字均由本 worktree 在基线 a66bc2aa321c86987c88a98c62c4c74e447db50f 上实跑得出：清单通过导入检查器并逐个读取候选文件枚举，比较器在扩围前后各跑一次，两套单元测试与棘轮均在本地执行。不声称任何 CI 结果、合并 SHA 或合并后 blob。"
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -30,8 +30,8 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "AID-2026-191 指定 scripts/ci/baselines/bilingual-docs.txt 为 77 条冻结双语清单的唯一权威，并扩围副本比较器、为 81 条审查快照加历史标注"
-    canonical_scope_id: "ai-development/aid-2026-191-frozen-inventory-single-authority"
+    canonical_scope: "AID-2026-240 指定 scripts/ci/baselines/bilingual-docs.txt 为 77 条冻结双语清单的唯一权威，并扩围副本比较器、为 81 条审查快照加历史标注"
+    canonical_scope_id: "ai-development/aid-2026-240-frozen-inventory-single-authority"
     canonical_scope_keywords:
       - "bilingual"
       - "baseline"
@@ -40,12 +40,12 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "14-ai-development/work-items/AID-2026-191/evidence.md"
-    en: "docs/en/14-ai-development/work-items/AID-2026-191/evidence.md"
+    source: "14-ai-development/work-items/AID-2026-240/evidence.md"
+    en: "docs/en/14-ai-development/work-items/AID-2026-240/evidence.md"
     zh-CN: null
 ---
 
-# AID-2026-191 —— 让 77 条冻结清单只有一个权威
+# AID-2026-240 —— 让 77 条冻结清单只有一个权威
 
 ## 1. 本记录声称什么
 
