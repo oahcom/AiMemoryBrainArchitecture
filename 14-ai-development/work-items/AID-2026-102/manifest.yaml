@@ -1,0 +1,179 @@
+work_item_id: AID-2026-102
+identifier_history: >-
+  AID-2026-093 (first allocation, 2026-11-26) -> AID-2026-102 (current). The first allocation was
+  made against a tree 45 commits behind main and collided: main had already registered AID-2026-093
+  for DECISION-ACCEPTANCE-03, and that manifest records its own history of the same kind
+  (081 -> 086 -> 092 -> 093), so the number was live rather than free. The collision surfaced as an
+  add/add conflict on manifest.yaml during rebase, not as a validator error, because both sides
+  created the path. Renumbering rather than reusing 093 is the only option that leaves both work
+  items with one identity each; the alternative -- two manifests claiming one ID -- is what the
+  INDEX uniqueness check exists to refuse.
+identifier_status: "ALLOCATED_2026-11-26; GLOBAL_BRANCH_CONTENT_SCAN_NOT_EXHAUSTIVE; a branch not yet opened can still claim 102"
+title: Give six DM-14 fixtures a directory they own, and bind the six emitters no case observed
+
+class: TEST
+risk: R2
+risk_rationale: >-
+  Tests only: one test module gains six cases and loses six shared-temp paths, and no production
+  file, schema, workflow or gate behaviour is touched. The risk is false assurance in both
+  directions. A fixture that writes to a shared path makes a case red for a reason unrelated to what
+  it asserts, so a mutation run reports phantom positives and a binding count inflates; and a case
+  added to bind an emitter can pass while observing a neighbouring emitter that fires on the same
+  document. Both were measured rather than argued: the concurrency differential is 4 of 6 red before
+  the change and 0 of 6 after, on one commit with only the fixture lines altered, and each of the
+  six new cases was verified by deleting the emitter it names and requiring exactly that case to go
+  red.
+
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 515b7144320fd9fcc1e1a2c3d2d2744d979b4ca8
+tracking_issue: "#989; #988; #827"
+
+prompt_id: AID-2026-102-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-102/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: "63411c53108330e92b9217791c1f153c850ee0d3c51815b82aa9458d9a41e440"
+prompt_bytes: 4393
+prompt_provenance: >-
+  NOT_VERIFIED. The snapshot was assembled while the pull request was being prepared, from the three
+  issue rulings the session worked to; it is not a live capture and its hash matches the assembled
+  file, not the original instruction. The rulings remain the primary record.
+
+authorization:
+  implementation_write: >-
+    GRANTED for scripts/test_check_document_management.py, this work item's own directory and
+    INDEX.md. NOT_GRANTED for any other path.
+  gate_behaviour_change: >-
+    NOT_GRANTED - scripts/check_document_management.py is not modified. Every branch this work item
+    binds already exists and is correct; the defect was that nothing observed them.
+  schema_change: NOT_GRANTED
+  platform_state_change: NOT_GRANTED
+  architecture_spec_change: NOT_GRANTED
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-102/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-102/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-102/session-evidence-989-988-827.md
+  files_to_modify:
+    - scripts/test_check_document_management.py
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope: >-
+    Every other path. In particular scripts/check_document_management.py, which is the gate under
+    test; and scripts/mutation_report.py, which does not exist and whose construction is a separate
+    work item (#827 AC-B and AC-C).
+
+acceptance_criteria:
+  - id: AC1
+    criterion: >-
+      No fixture in the file builds its target outside the directory the test owns.
+    measurement: >-
+      `grep -c 'Path(tmp).parent' scripts/test_check_document_management.py` is 0. Six sites
+      existed before the change and the count is now zero.
+  - id: AC2
+    criterion: >-
+      The file runs correctly with several processes sharing one system temp root, which is the
+      arrangement that fails before the change.
+    measurement: >-
+      Six concurrent runs with one shared TMPDIR: 324/324 six times, rc 0 six times, and no
+      `outside-*` entry left in that directory afterwards. The pre-change baseline on the same
+      commit is 4 of 6 red, all with `exit 0` from the gate, which is why "it passed" alone is not
+      the measurement.
+  - id: AC3
+    criterion: >-
+      The bilingual-mirror symlink branch is observed by a case that fails when the branch is
+      removed and when only its reason is reworded.
+    measurement: >-
+      Replacing the branch body with `pass` gives 323/324 with exactly T51b red; changing `real` to
+      `genuine` gives the same. The first version of the case asserted only the verdict and stayed
+      green under the wording mutation, which is why the reason is bound separately.
+  - id: AC4
+    criterion: >-
+      Each of the five emitters this work item binds is observed by a case that fails when that
+      emitter alone is removed, with no other case failing.
+    measurement: >-
+      Five deletions, each `323/324`, each with exactly its own case red and no collateral. The
+      sites are the DM-01 non-string path, the DM-12 mirror source, the DM-13 string supersedes,
+      and the two DM-14 registry-shape emissions.
+  - id: AC5
+    criterion: >-
+      A case whose name advertises a rule it does not test is corrected rather than supplemented.
+    measurement: >-
+      T63's `enum on a boolean kind` row asserts `duplicate key 'enum'`, which the YAML parser
+      produces before the schema check runs; it is renamed to `a second enum key`. The
+      enum-on-kind branch it advertised is bound by the neighbouring `neither kind nor fields` case,
+      measured by replacing that branch with `pass` and watching that case go red.
+
+findings:
+  - id: F1
+    severity: HIGH
+    statement: >-
+      Six fixtures built their "outside the repository" target at a fixed name in the shared system
+      temp root, so two runs of the file raced on one path and the loser reported a DM-14 assertion
+      against a gate that had done nothing wrong.
+    evidence: >-
+      4 of 6 concurrent runs red on 8d84c16e with no mutation applied; 0 of 6 after nesting the
+      repository one level. #989 comment 7184097261.
+  - id: F2
+    severity: MEDIUM
+    statement: >-
+      The bilingual mirror symlink branch had no case; deleting it left the suite green.
+    evidence: >-
+      318/318 with the branch body replaced by `pass`, before T51b. #988 comment 7184110940.
+  - id: F3
+    severity: MEDIUM
+    statement: >-
+      Five emitters were unobserved. Each was confirmed by deletion and then bound by a case that
+      names its own diagnostic.
+    evidence: >-
+      Five deletions, suite green each time before the cases were added; five `BOUND-EXACT`
+      results afterwards. #827 comment 7184611981.
+  - id: F4
+    severity: LOW
+    statement: >-
+      The claim in #988 that the enum-on-kind branch is unobserved is false. It is bound by a
+      neighbouring case, and the row that made it look unobserved was misnamed.
+    evidence: >-
+      Replacing that branch with `pass` turns `T63 a node with no kind and no fields reports its
+      own problem` red at 318/319.
+
+implementation:
+  status: IMPLEMENTED_IN_BRANCH
+  branch: fix/989-fixture-ownership-988-827-cases
+  pull_request: 1251
+  merge_commit_sha: NOT_MERGED
+  note: >-
+    318 to 324 cases. `git diff` is one test file plus this work item and the INDEX row. No
+    assertion of the gate's behaviour was changed, and no production file is touched.
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    No independent review is recorded. This manifest and the branch were written by the same
+    session, so an APPROVE from it would be self-review and is not claimed.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+session_evidence:
+  - role: TEST_AUTHOR
+    issue_refs:
+      - "#989"
+      - "#988"
+      - "#827"
+    implementing_ai_session: a989-fixture-ownership-988-827-session
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-102/prompt-v1.md
+    executed_prompt_sha256: "63411c53108330e92b9217791c1f153c850ee0d3c51815b82aa9458d9a41e440"
+    executed_prompt_bytes: 4393
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-102/session-evidence-989-988-827.md

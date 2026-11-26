@@ -652,7 +652,8 @@ def gate_roots():
     return list(gate.NORMATIVE_ROOTS)
 
 def _repo(tmp: str) -> Path:
-    root = Path(tmp)
+    root = Path(tmp) / "repo"
+    root.mkdir(parents=True, exist_ok=True)
     for name in gate_roots():
         (root / name).mkdir(parents=True, exist_ok=True)
     (root / "tools").mkdir(parents=True, exist_ok=True)
@@ -725,6 +726,22 @@ def run_repository_rules() -> None:
                 "    approval:\n      decision_status: Draft",
             )), encoding="utf-8")
         expect_gate("DM-13 cycle fails", root, 1)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "00-governance" / "a.md").write_text(doc(BASE.replace(
+            "    approval:\n      decision_status: Draft",
+            "    supersession:\n      supersedes: 00-governance/b.md\n"
+            "    approval:\n      decision_status: Draft",
+        )), encoding="utf-8")
+        # A string supersedes is also caught by the schema typing pass
+        # (`must be sequence, got str`), so `want=1` alone would pass with this
+        # diagnostic deleted. The `msg=` prefix is the binding.
+        expect_gate(
+            "DM-13 a supersedes value that is a string is refused",
+            root, 1,
+            msg="DM-13 00-governance/a.md: supersedes must be a list",
+        )
 
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
@@ -1781,6 +1798,42 @@ def run_bilingual_closure() -> None:
         )
         expect_gate("T20 mirror with no declared source is an error", root, 1)
 
+    # T20a/T20b: the two DM-12 sites that no case observed.
+    #
+    # Both were established by deleting the branch and watching the suite stay
+    # green (#827 AC-A). Each inputs one thing -- a mapping where a path must
+    # be, a source that names a mirror -- so the assertion names this site and
+    # not a neighbour that fires on the same document.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "00-governance" / "a.md").write_text(doc(BASE.replace(
+            "  role: design-specification\n",
+            "  role: design-specification\n"
+            "  bilingual_counterpart:\n    en:\n      nested: x\n",
+        )), encoding="utf-8")
+        # Two emitters refuse this document: the schema typing pass says
+        # `must be nullable-string`, and the path resolver says the thing
+        # below. Asserting the resolver's wording is what binds the resolver.
+        expect_gate(
+            "T20a a counterpart path that is a mapping is refused by the resolver",
+            root, 1,
+            msg="DM-01 00-governance/a.md: bilingual_counterpart.en must be a string path, got dict",
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "00-governance" / "a.md").write_text(doc(BASE.replace(
+            "  role: design-specification\n",
+            "  role: design-specification\n"
+            '  bilingual_counterpart:\n    source: "docs/en/a.md"\n',
+        )), encoding="utf-8")
+        expect_gate(
+            "T20b a source that names a mirror is refused by name",
+            root, 1,
+            msg=("DM-12 00-governance/a.md: source must be the authoritative "
+                 "file, not a mirror"),
+        )
+
 def run_schema_agreement() -> None:
     """T19: the published schema and the gate must accept the same shape.
 
@@ -2024,6 +2077,39 @@ def run_scope_registry() -> None:
             encoding="utf-8",
         )
         expect_gate("T23 exclusion without a reason is an error", root, 1)
+
+    # T23a/T23b: the two DM-14 registry-shape sites no case observed (#827 AC-A).
+    #
+    # Both are shape errors in the registry itself, so each fixture writes one
+    # malformed registry and asserts the site's own wording. `want=1` alone
+    # would not do: an empty governed list also trips "scope registry and
+    # NORMATIVE_ROOTS disagree", and a non-mapping excluded also trips "top-level
+    # directories not accounted for", so the run is red either way.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "00-governance" / "document-scope-registry.yaml").write_text(
+            registry_text([]), encoding="utf-8"
+        )
+        expect_gate(
+            "T23a a registry with an empty governed list is refused",
+            root, 1,
+            msg="DM-14 00-governance/document-scope-registry.yaml must declare a non-empty governed list",
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        base = registry_text(governed)
+        # `excluded:` with a sequence value is valid YAML that the gate parses,
+        # so the shape check is reached rather than the parser.
+        (root / "00-governance" / "document-scope-registry.yaml").write_text(
+            re.sub(r"^excluded:\n(?:  .*\n|\n)*", "excluded:\n  - tools\n", base, flags=re.M),
+            encoding="utf-8",
+        )
+        expect_gate(
+            "T23b an excluded block that is not a mapping is refused",
+            root, 1,
+            msg="DM-14 00-governance/document-scope-registry.yaml excluded must be a mapping",
+        )
 
     # Declared scope must equal enforced scope, in both directions.
     with tempfile.TemporaryDirectory() as tmp:
@@ -2817,48 +2903,63 @@ def run_scan_boundary() -> None:
     # T49: a backlog root that is itself a symlink is refused by name.
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
-        outside = Path(tmp).parent / "outside-docs-t49"
+        outside = Path(tmp) / "outside-docs-t49"
         outside.mkdir(exist_ok=True)
         for i in range(3):
             (outside / f"f{i}.md").write_text("# x\n", encoding="utf-8")
         shutil.rmtree(root / "docs")
         (root / "docs").symlink_to(outside, target_is_directory=True)
-        try:
-            code, out = run(root)
-            record("T49 symlinked backlog root is named in the diagnostic",
-                   code != 0 and "docs is a symbolic link" in out,
-                   f"  exit {code}, output {out[:200]}")
-        finally:
-            shutil.rmtree(outside, ignore_errors=True)
+        code, out = run(root)
+        record("T49 symlinked backlog root is named in the diagnostic",
+               code != 0 and "docs is a symbolic link" in out,
+               f"  exit {code}, output {out[:200]}")
 
     # T50: a symlinked directory inside a backlog root is reported by path.
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
-        outside = Path(tmp).parent / "outside-sub-t50"
+        outside = Path(tmp) / "outside-sub-t50"
         outside.mkdir(exist_ok=True)
         (outside / "external.md").write_text("# ext\n", encoding="utf-8")
         (root / "docs" / "linked").symlink_to(outside, target_is_directory=True)
-        try:
-            code, out = run(root)
-            record("T50 symlinked directory inside a backlog root is reported",
-                   code != 0 and "docs/linked is a symbolic link" in out,
-                   f"  exit {code}, output {out[:200]}")
-        finally:
-            shutil.rmtree(outside, ignore_errors=True)
+        code, out = run(root)
+        record("T50 symlinked directory inside a backlog root is reported",
+               code != 0 and "docs/linked is a symbolic link" in out,
+               f"  exit {code}, output {out[:200]}")
 
     # T51: a symlinked .md inside a backlog root is reported by path.
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
-        outside = Path(tmp).parent / "outside-file-t51.md"
+        outside = Path(tmp) / "outside-file-t51.md"
         outside.write_text("# ext\n", encoding="utf-8")
         (root / "docs" / "linked.md").symlink_to(outside)
-        try:
-            code, out = run(root)
-            record("T51 symlinked markdown file inside a backlog root is reported",
-                   code != 0 and "docs/linked.md is a symbolic link" in out,
-                   f"  exit {code}, output {out[:200]}")
-        finally:
-            outside.unlink(missing_ok=True)
+        code, out = run(root)
+        record("T51 symlinked markdown file inside a backlog root is reported",
+               code != 0 and "docs/linked.md is a symbolic link" in out,
+               f"  exit {code}, output {out[:200]}")
+
+    # T51b: a bilingual mirror directory that is a symlink is refused by name.
+    #
+    # `is_dir()` follows links, so a symlinked mirror looked present while the
+    # scanner refused to descend into it: the registry asserted the mirror
+    # existed and the run classified nothing from it. Both halves are asserted
+    # -- `docs/en` is the link, `docs/zh-CN` is a real directory -- because if
+    # the second mirror were also absent the "is missing" diagnostic would fire
+    # in the same message and this case would pass for the wrong reason.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        outside = Path(tmp) / "outside-mirror-t51b"
+        outside.mkdir()
+        (outside / "leaked.md").write_text(doc(BASE), encoding="utf-8")
+        shutil.rmtree(root / "docs" / "en")
+        (root / "docs" / "en").symlink_to(outside, target_is_directory=True)
+        (root / "docs" / "zh-CN").mkdir(parents=True, exist_ok=True)
+        code, out = run(root)
+        record("T51b symlinked bilingual mirror directory is refused by name",
+               code != 0
+               and "bilingual mirror directory docs/en is a symbolic link" in out
+               and "a mirror must be real content of this repository" in out
+               and "bilingual mirror directory docs/en is missing" not in out,
+               f"  exit {code}, output {out[:240]}")
 
     # T52: the counter and the scanner see the same files.
     #
@@ -3005,17 +3106,14 @@ def run_unified_scan() -> None:
     # governed_files() discarded what scan_root() returned for normative roots.
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
-        outside = Path(tmp).parent / "outside-norm-t58"
+        outside = Path(tmp) / "outside-norm-t58"
         outside.mkdir(exist_ok=True)
         (outside / "leak.md").write_text("# leak\n", encoding="utf-8")
         (root / "00-governance" / "linked").symlink_to(outside, target_is_directory=True)
-        try:
-            code, out = run(root)
-            record("T58 symlinked subdirectory in a normative root is reported",
-                   code != 0 and "00-governance/linked is a symbolic link" in out,
-                   f"  exit {code}, output {out[:200]}")
-        finally:
-            shutil.rmtree(outside, ignore_errors=True)
+        code, out = run(root)
+        record("T58 symlinked subdirectory in a normative root is reported",
+               code != 0 and "00-governance/linked is a symbolic link" in out,
+               f"  exit {code}, output {out[:200]}")
 
     # T59: a top-level symlink to a directory is not an accounted directory.
     #
@@ -3023,32 +3121,26 @@ def run_unified_scan() -> None:
     # "declared" -- making a registry entry true that pointed outside the repo.
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
-        outside = Path(tmp).parent / "outside-top-t59"
+        outside = Path(tmp) / "outside-top-t59"
         outside.mkdir(exist_ok=True)
         (root / "ghost").symlink_to(outside, target_is_directory=True)
-        try:
-            code, out = run(root)
-            record("T59 top-level symlink is reported and does not satisfy the registry",
-                   code != 0 and "symbolic links at the repository root" in out,
-                   f"  exit {code}, output {out[:200]}")
-        finally:
-            shutil.rmtree(outside, ignore_errors=True)
+        code, out = run(root)
+        record("T59 top-level symlink is reported and does not satisfy the registry",
+               code != 0 and "symbolic links at the repository root" in out,
+               f"  exit {code}, output {out[:200]}")
 
     # T60: a declared directory that is only a symlink counts as missing.
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
-        outside = Path(tmp).parent / "outside-decl-t60"
+        outside = Path(tmp) / "outside-decl-t60"
         outside.mkdir(exist_ok=True)
         # `tools` is declared as excluded by the fixture registry.
         shutil.rmtree(root / "tools")
         (root / "tools").symlink_to(outside, target_is_directory=True)
-        try:
-            code, out = run(root)
-            record("T60 declared directory that is only a symlink is reported",
-                   code != 0 and ("do not exist" in out or "symbolic links" in out),
-                   f"  exit {code}, output {out[:200]}")
-        finally:
-            shutil.rmtree(outside, ignore_errors=True)
+        code, out = run(root)
+        record("T60 declared directory that is only a symlink is reported",
+               code != 0 and ("do not exist" in out or "symbolic links" in out),
+               f"  exit {code}, output {out[:200]}")
 
     # T61: DM-08 names the path it was given, not a same-named key elsewhere.
     body = (
@@ -3131,7 +3223,12 @@ def run_schema_of_schema() -> None:
             "  domain:\n    kind: strng\n",
             "declares unknown kind 'strng'; legal kinds are",
         ),
-        "enum on a boolean kind": (
+        # This replacement leaves the original `enum:` list in place, so the YAML
+        # parser refuses a second `enum:` key before the schema-of-schema sees a
+        # node at all. The name says which detector answers, because a case named
+        # for the enum-on-kind rule would be cited as coverage for the branch that
+        # `neither kind nor fields` actually tests.
+        "a second enum key": (
             "  domain:\n    kind: boolean\n    enum:\n      - x\n",
             "duplicate key 'enum'",
         ),
