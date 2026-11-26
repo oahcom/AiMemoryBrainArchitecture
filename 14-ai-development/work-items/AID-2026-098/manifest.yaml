@@ -64,7 +64,7 @@ review_state:
   owner_acceptance: "PENDING"
   normative_approval: "NOT_CLAIMED"
 implementation:
-  status: "DOCUMENTATION ONLY"
+  status: "DOCUMENTATION + GOVERNANCE SCOPE CONFIGURATION ONLY"
   runtime_changes: 0
   validator_changes: 1
   validator_semantic_changes: 0
