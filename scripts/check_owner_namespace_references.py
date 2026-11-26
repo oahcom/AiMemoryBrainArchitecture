@@ -25,6 +25,9 @@ FILES = (
     "docs/en/01-system-architecture/data-flows.md",
     "docs/zh-CN/01-system-architecture/component-interactions.md",
     "docs/zh-CN/01-system-architecture/data-flows.md",
+    "01-system-architecture/system-boundaries.md",
+    "docs/en/01-system-architecture/system-boundaries.md",
+    "docs/zh-CN/01-system-architecture/system-boundaries.md",
 )
 CAPABILITIES = (
     "Domain Model", "Canonical Store", "Lifecycle", "Entity/Relation",
@@ -90,7 +93,7 @@ def check(root: Path) -> tuple[int, list[str]]:
             errors.append(f"{relative}:{line}: {code}: {excerpt}")
     # Root, EN and ZH-CN versions must preserve the same structural inventory.
     for stem in ("component-map.md", "responsibility-matrix.md",
-                 "component-interactions.md", "data-flows.md"):
+                 "component-interactions.md", "data-flows.md", "system-boundaries.md"):
         group = [
             f"01-system-architecture/{stem}",
             f"docs/en/01-system-architecture/{stem}",
