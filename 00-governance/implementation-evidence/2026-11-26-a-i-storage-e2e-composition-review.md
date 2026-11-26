@@ -71,36 +71,36 @@ Blob SHA values were read from the Git tree/content API at the exact baseline. M
 
 | Exact path | Blob SHA | Source class / limitation |
 |---|---|---|
-| 00-governance/implementation-evidence/2026-11-26-a-i-storage-acceptance-matrix.md | 9c802777e9bafc421c77f8f68fcb035cdee4167d | Canonical work-record; traceability only; embedded baseline is stale. | undefined |
-| 04-memory-compiler/compiler-overview.md | 24c2fc69a8a69176071d46aac871ae16588702b7 | Canonical Normative Draft/Unverified; orchestration candidate and explicit exclusions. | undefined |
-| 04-memory-compiler/phase-1-event-store-contract.md | 17b14591d76160a7c125903b41e7dae014c3c5df | DECIDED semantics / CANDIDATE seam; dispatcher, leases and production durability excluded. | undefined |
-| 04-memory-compiler/README.md | 88f1a451830b4c7b455462edd6453543778793e4 | Canonical Informative reading guide. | undefined |
-| 14-ai-development/work-items/D-OWNER-DECISION-PARTICIPANT-ADMISSION-001.md | 2cff53b2133e26115e2d3808ae9738092602c4d3 | Owner-proxy decision; participant_admitted remains false. | undefined |
-| 14-ai-development/work-items/D-OWNER-DECISION-CANONICAL-COMMIT-001.md | 2fba6536e95e55e55617bfddefc26a11e269c5b5 | D decision; canonical store normative root absent. | undefined |
-| 01-system-architecture/forget-fence-and-completion-contract.md | 760a1d48011f2a66c23abcf825a3d067e79b8821 | Canonical Draft/Unverified/Informative; global policy and cross-module execution open. | undefined |
-| 06-memory-context/context-versioning.md | 57ea7e7298f79d769d6931b1d355c9d3b4f956d6 | G semantics; encoding/serialization candidate. | undefined |
-| 06-memory-context/context-version-immutability-decision.md | 27e9e5f092b17cf4013a533d07949eb73ac6ef4c | Draft/Unverified/Informative; G acceptance pending. | undefined |
-| 06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.md | 833815e37ac8d7505d93a0a115421dafe3eb08ad | G Normative Design Draft; implementation unverified; cross-owner acceptance required. | undefined |
-| 07-agent-integration/applied-evidence-contract.md | 273efdd1b02bd9302fc968f07c6d094da2582a6e | Draft/Unverified/Informative; C/G/H acceptance pending. | undefined |
-| 07-agent-integration/inference-boundary-model.md | e2d5cb6abd9ec40da6e3680531de5944fc8b14df | Candidate boundary model; no cross-owner freeze. | undefined |
-| 08-bmcp-protocol/owner-snapshot-namespace-and-fence-currentness-contract.md | d83cde77e98db2e74cf6827d874b0babb4157304 | H candidate; must reconcile with E/G/Storage. | undefined |
-| 08-bmcp-protocol/phase-3.8-h-rj-hw-01-typed-watermark-and-fence-binding-contract.md | e583ac2fb888aa5184eaa6525d9cc564f343785f | H phase contract; not F normative retrieval root. | undefined |
-| 08-bmcp-protocol/phase-3.8.25-h-applied-delivery-evidence-hardening-addendum.md | afa294bc42a8488e4569e6a8bdf5437c7a90e247 | H addendum; shared consumer acceptance pending. | undefined |
-| 08-bmcp-protocol/phase-3.8.26-h-applied-delivery-evidence-csubmitoutcome-join-addendum.md | 7b73491c765091728af6f5306b9efd502cf7f30a | H addendum; shared consumer acceptance pending. | undefined |
-| 02-domain-model/phase-1-storage-trait-contract.md | 22ca7cd3777e0132e25f084084610f1e90b60d21 | Candidate seam; no backend selected; no backend atomicity/durability proof. | undefined |
-| 02-domain-model/scope-and-permission-model.md | b5215ae27bd65a6c89c185b496f730b6cd52efa9 | Scope separation decided; policy and inheritance edge cases open. | undefined |
-| 14-ai-development/adr/OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001.md | 8ad9bbfa4906a6f9c30a437fd144c6c62c37577d | Proxy decision; does not establish I issuance authenticity. | undefined |
-| 14-ai-development/adr/OWNER-RULING-AUTHORIZATION-PRESENCE-GATE-025.md | 75e338aa0dbe0161fbc890977c5f4a8234a8c815 | Proxy ruling; presence gate is not authorization authenticity. | undefined |
-| crates/memory-event-store-sqlite/src/lib.rs | c68e036e5f8deb7968babc6703a4cf9341d5db40 | Implementation evidence only. | undefined |
-| crates/memory-storage-sqlite/src/lib.rs | b7eecd3ec0ec4c3ef3c27bc43fe24c29c91fb11f | Implementation evidence only. | undefined |
-| crates/memory-event-store-sqlite/src/forget_fence.rs | 5b71a25b8be24fd0f1d9cf9e22582705d646cf64 | Implementation evidence only. | undefined |
-| 06-memory-context/reference-model/g_applied_ledger.py | be24fea19ee72a1fc01350b79d5359e7820848b9 | Reference model only. | undefined |
-| 08-bmcp-protocol/schemas/bmcp.applied-delivery-evidence-1.0.0.schema.json | 0700f2077052bd153f9baa86850d9aab89491016 | Schema presence is not end-to-end acceptance. | undefined |
-| 09-security-governance/README.md | NOT_FOUND_ON_MAIN | IMPL2/I restore or disposition; I accepts policy. | undefined |
-| 03-memory-brain/canonical-memory-store.md | NOT_FOUND_ON_MAIN | IMPL2/D restore or disposition; D accepts canonical semantics. | undefined |
-| 05-memory-runtime/README.md | NOT_FOUND_ON_MAIN | IMPL2/F restore or disposition; F accepts retrieval semantics. | undefined |
-| 04-memory-compiler/accepted-receipt-and-idempotency-contract.md | NOT_FOUND_ON_MAIN | IMPL2/E restore or disposition; E supplies receipt contract. | undefined |
-| 04-memory-compiler/compiler-state-and-producer-admission.md | NOT_FOUND_ON_MAIN | IMPL2/E restore or disposition; E supplies admission contract. | undefined |
+| 00-governance/implementation-evidence/2026-11-26-a-i-storage-acceptance-matrix.md | 9c802777e9bafc421c77f8f68fcb035cdee4167d | Canonical work-record; traceability only; embedded baseline is stale. |
+| 04-memory-compiler/compiler-overview.md | 24c2fc69a8a69176071d46aac871ae16588702b7 | Canonical Normative Draft/Unverified; orchestration candidate and explicit exclusions. |
+| 04-memory-compiler/phase-1-event-store-contract.md | 17b14591d76160a7c125903b41e7dae014c3c5df | DECIDED semantics / CANDIDATE seam; dispatcher, leases and production durability excluded. |
+| 04-memory-compiler/README.md | 88f1a451830b4c7b455462edd6453543778793e4 | Canonical Informative reading guide. |
+| 14-ai-development/work-items/D-OWNER-DECISION-PARTICIPANT-ADMISSION-001.md | 2cff53b2133e26115e2d3808ae9738092602c4d3 | Owner-proxy decision; participant_admitted remains false. |
+| 14-ai-development/work-items/D-OWNER-DECISION-CANONICAL-COMMIT-001.md | 2fba6536e95e55e55617bfddefc26a11e269c5b5 | D decision; canonical store normative root absent. |
+| 01-system-architecture/forget-fence-and-completion-contract.md | 760a1d48011f2a66c23abcf825a3d067e79b8821 | Canonical Draft/Unverified/Informative; global policy and cross-module execution open. |
+| 06-memory-context/context-versioning.md | 57ea7e7298f79d769d6931b1d355c9d3b4f956d6 | G semantics; encoding/serialization candidate. |
+| 06-memory-context/context-version-immutability-decision.md | 27e9e5f092b17cf4013a533d07949eb73ac6ef4c | Draft/Unverified/Informative; G acceptance pending. |
+| 06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.md | 833815e37ac8d7505d93a0a115421dafe3eb08ad | G Normative Design Draft; implementation unverified; cross-owner acceptance required. |
+| 07-agent-integration/applied-evidence-contract.md | 273efdd1b02bd9302fc968f07c6d094da2582a6e | Draft/Unverified/Informative; C/G/H acceptance pending. |
+| 07-agent-integration/inference-boundary-model.md | e2d5cb6abd9ec40da6e3680531de5944fc8b14df | Candidate boundary model; no cross-owner freeze. |
+| 08-bmcp-protocol/owner-snapshot-namespace-and-fence-currentness-contract.md | d83cde77e98db2e74cf6827d874b0babb4157304 | H candidate; must reconcile with E/G/Storage. |
+| 08-bmcp-protocol/phase-3.8-h-rj-hw-01-typed-watermark-and-fence-binding-contract.md | e583ac2fb888aa5184eaa6525d9cc564f343785f | H phase contract; not F normative retrieval root. |
+| 08-bmcp-protocol/phase-3.8.25-h-applied-delivery-evidence-hardening-addendum.md | afa294bc42a8488e4569e6a8bdf5437c7a90e247 | H addendum; shared consumer acceptance pending. |
+| 08-bmcp-protocol/phase-3.8.26-h-applied-delivery-evidence-csubmitoutcome-join-addendum.md | 7b73491c765091728af6f5306b9efd502cf7f30a | H addendum; shared consumer acceptance pending. |
+| 02-domain-model/phase-1-storage-trait-contract.md | 22ca7cd3777e0132e25f084084610f1e90b60d21 | Candidate seam; no backend selected; no backend atomicity/durability proof. |
+| 02-domain-model/scope-and-permission-model.md | b5215ae27bd65a6c89c185b496f730b6cd52efa9 | Scope separation decided; policy and inheritance edge cases open. |
+| 14-ai-development/adr/OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001.md | 8ad9bbfa4906a6f9c30a437fd144c6c62c37577d | Proxy decision; does not establish I issuance authenticity. |
+| 14-ai-development/adr/OWNER-RULING-AUTHORIZATION-PRESENCE-GATE-025.md | 75e338aa0dbe0161fbc890977c5f4a8234a8c815 | Proxy ruling; presence gate is not authorization authenticity. |
+| crates/memory-event-store-sqlite/src/lib.rs | c68e036e5f8deb7968babc6703a4cf9341d5db40 | Implementation evidence only. |
+| crates/memory-storage-sqlite/src/lib.rs | b7eecd3ec0ec4c3ef3c27bc43fe24c29c91fb11f | Implementation evidence only. |
+| crates/memory-event-store-sqlite/src/forget_fence.rs | 5b71a25b8be24fd0f1d9cf9e22582705d646cf64 | Implementation evidence only. |
+| 06-memory-context/reference-model/g_applied_ledger.py | be24fea19ee72a1fc01350b79d5359e7820848b9 | Reference model only. |
+| 08-bmcp-protocol/schemas/bmcp.applied-delivery-evidence-1.0.0.schema.json | 0700f2077052bd153f9baa86850d9aab89491016 | Schema presence is not end-to-end acceptance. |
+| 09-security-governance/README.md | NOT_FOUND_ON_MAIN | IMPL2/I restore or disposition; I accepts policy. |
+| 03-memory-brain/canonical-memory-store.md | NOT_FOUND_ON_MAIN | IMPL2/D restore or disposition; D accepts canonical semantics. |
+| 05-memory-runtime/README.md | NOT_FOUND_ON_MAIN | IMPL2/F restore or disposition; F accepts retrieval semantics. |
+| 04-memory-compiler/accepted-receipt-and-idempotency-contract.md | NOT_FOUND_ON_MAIN | IMPL2/E restore or disposition; E supplies receipt contract. |
+| 04-memory-compiler/compiler-state-and-producer-admission.md | NOT_FOUND_ON_MAIN | IMPL2/E restore or disposition; E supplies admission contract. |
 
 ### Missing current-main normative roots
 
