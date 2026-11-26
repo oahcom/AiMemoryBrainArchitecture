@@ -158,7 +158,7 @@ annotation names AID-2026-080:
 
 ## Limits of this record
 
-- **Two review rounds are recorded, and neither is `APPROVED`.** Round 1 (`ACCEPT WITH AMENDMENTS`,
+- **Four review rounds are recorded, and none is `APPROVED`.** Round 1 (`ACCEPT WITH AMENDMENTS`,
   Head `a538dbf2`) required the clause to say *which* `session_evidence` entry; the wording was
   changed to constrain locations instead, and the reviewer withdrew the suggestion in round 2.
   Round 2 (`NEEDS REVISION`, Head `f44dce07`) found a real defect that was mine: the amendment had
@@ -174,8 +174,26 @@ annotation names AID-2026-080:
   snapshot path is absent from the base diff, which the renumbering makes impossible; and the
   merge state still read `NOT_STARTED` / `PR_OPEN` after the merge. All four are repaired.
   Round 3 also found, unasked, that PR #1215 had already merged at `f7bc0789` while the review
-  read `489b6048`. That is a real gap and it is not closed by noting that the two differ only by
-  an incoming `scripts/check_traceability.py`: no review has read the merged head as such.
+  read `489b6048`.
+  Round 4 (`NEEDS REVISION`, Head `7e9c9f3d`) closed five of round 3's six findings, reproduced
+  the population figures from the trees itself (54 / 55 / 56 / 56 manifests; 49 conform, 22
+  parser-accepted, 7 non-conforming, naming the same seven IDs), and did what no earlier round had
+  done: it read the `489b6048 -> f7bc0789` delta directly and confirmed it is one file, 16+/3-, and
+  comment-only. Its conclusion is kept as two parts rather than one: the substantive change is
+  reviewable, and the pre-merge exact-Head requirement was not met. Its own words are the ones that
+  matter here — "A later review can document the result; it cannot rewrite that history."
+  Round 4's two open items are recorded in `review.round_4`: zero GitHub check runs on
+  `7e9c9f3d` (satisfied afterwards at `fa6e227b`, 16 of 16 contexts green, `mergeable: True`), and
+  the absence of a round-4 record (`REVIEW-04-INDEPENDENT.md`, plus the manifest and INDEX
+  projections beside it).
+- **The pre-merge exact-Head review requirement was not met for either PR, and that is a
+  deviation rather than an incident.** #1215 merged at `f7bc0789` after round 3 had reviewed
+  `489b6048`; #1240 merged at `32f87d46` after round 4 had reviewed `7e9c9f3d`. The pattern is
+  structural, not accidental: a branch that is updated after its review cannot satisfy an
+  exact-Head requirement at merge, and no after-the-fact inspection repairs the timing. Both
+  deltas are recorded as facts about the change — neither touches a path under `AID-2026-080/`
+  or `PR-GOVERNANCE-001.md` — and neither is offered as review coverage. `32f87d46` and
+  `f7bc0789` have not been read by any review as such.
 - The reproduction in §2 was performed by a second agent session given the procedure and not
   the expected values. It reproduced all four bucket counts, the 0-of-54 figure and both
   error strings. That is a reproducibility check, not an independent review: the session that
