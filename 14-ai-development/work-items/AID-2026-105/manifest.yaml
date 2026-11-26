@@ -11,13 +11,14 @@ repository:
   name: "oahcom/AiMemoryBrainArchitecture"
   baseline_branch: "main"
   baseline_commit: "8915b63e0c736d62e05ff02b72efc551f5a4ba83"
-  previous_sync_base_commit: "69407c0781a00673852bc0dfbeef2b778d1d29fb"
-  previous_sync_base_commit: "2d52b0c81dc1b779e49516fceb69d89cdc1d9c31"
+  prior_sync_bases:
+    - "69407c0781a00673852bc0dfbeef2b778d1d29fb"
+    - "2d52b0c81dc1b779e49516fceb69d89cdc1d9c31"
+    - "df54ed60321e2958c50e9649963608cb3cb3f3b1"
+  initial_evidence_readback_commit: "533d8646a3fb32b0a1c9d3ed40c01bce33a76b17"
   merged_head_commit: "7459b3eff7c54405e95aab9519bff28c775e8af2"
   merge_commit_sha: "69407c0781a00673852bc0dfbeef2b778d1d29fb"
   required_contexts: "16/16 SUCCESS on merged_head_commit"
-  previous_sync_base_commit: "df54ed60321e2958c50e9649963608cb3cb3f3b1"
-  initial_evidence_readback_commit: "533d8646a3fb32b0a1c9d3ed40c01bce33a76b17"
   implementation_branch: "docs/2026-11-26-aid-105-issue-1189-acceptance-evidence"
   carrier_pr: 1289
 identifier_allocation:
