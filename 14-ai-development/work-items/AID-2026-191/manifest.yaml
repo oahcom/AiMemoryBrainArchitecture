@@ -76,6 +76,7 @@ scope:
 measurements:
   document_management_before: "942 governed / 496 classified / 446 unclassified / 0 rule violations"
   document_management_after: "942 governed / 502 classified / 440 unclassified / 0 rule violations"
+  document_management_final_head: "952 governed / 512 classified / 440 unclassified / 0 rule violations (includes this registration set and the AID-2026-190 registration merged from main)"
   buckets_after: "07-agent-integration 8/8; docs 177/343; 13-engineering-decisions 0/58"
   bilingual_ratchet_before: "baseline=77 current=77 regressions=0 fixed=0"
   bilingual_ratchet_after: "baseline=77 current=77 regressions=0 fixed=0"
