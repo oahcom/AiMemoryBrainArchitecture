@@ -15,7 +15,7 @@ document_metadata:
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "Owner-delegated direction decision, 2026-11-26"
-        - "Work Item AID-2026-088"
+        - "Work Item AID-2026-091"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -42,7 +42,8 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "07-agent-integration/applied-evidence-contract.md
+    source: "07-agent-integration/applied-evidence-contract.md"
+    zh-CN: "docs/zh-CN/07-agent-integration/applied-evidence-contract.md"
 ---
 # C/G Applied Evidence Contract
 Decision ID: APPLIED-EVIDENCE-01
