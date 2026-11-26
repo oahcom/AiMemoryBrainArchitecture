@@ -49,7 +49,7 @@ document_metadata:
 **Attribution:** `user-authorized operator (delegated by account owner)`  
 **Date:** 2026-11-26  
 **ID status:** `PROVISIONAL`  
-**Latest main fetched immediately before commit:** `a7e7c64bfd6c6d709a0a7b55358f94b8535815c1`  
+**Latest main fetched immediately before commit:** `b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c`  
 **INDEX allocation readback:** maximum `AID-2026-108`; `AID-2026-109` absent; assigned next.  
 **Historical source:** `session-i-security-governance-2026-11-16` @ `8abddf814467b271344a9814613a6b7ca6a446c6`
 

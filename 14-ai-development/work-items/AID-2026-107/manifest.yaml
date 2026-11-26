@@ -26,10 +26,20 @@ prompt_file: 14-ai-development/work-items/AID-2026-107/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
 prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
 
+prompt_addenda:
+  - prompt_id: AID-2026-107-PROMPT-V2
+    prompt_version: 2
+    prompt_file: 14-ai-development/work-items/AID-2026-107/prompt-v2.md
+    prompt_status: RECORDED_NOT_FROZEN
+    prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
+    executed_prompt_sha256: 382758b4d19178a29fbb110090c0a7b48f60ab7f04c619164da73e48f1fa718d
+    executed_prompt_bytes: 2066
+
 scope:
   files_to_create:
     - 14-ai-development/work-items/AID-2026-107/manifest.yaml
     - 14-ai-development/work-items/AID-2026-107/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-107/prompt-v2.md
     - 14-ai-development/work-items/AID-2026-107/evidence.md
     - docs/en/14-ai-development/work-items/AID-2026-107/evidence.md
     - docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md
@@ -69,8 +79,12 @@ rejudgment:
   h_contract_evidence_required_ids: [HIR-05, HIR-06, HIR-08, HIR-12, HIR-14, HIR-16, HIR-17, HIR-18]
 
 carrier:
-  branch: docs/aid-2026-107-refresh-gate-a-matrix
-  pull_request: 1290
+  previous_carrier:
+    branch: docs/aid-2026-107-refresh-gate-a-matrix
+    pull_request: 1290
+    merge_commit_sha: 92a759ec1a8c748fc4091015a3a3e8aa97ddc3e3
+  branch: docs/aid-2026-107-impl2-scope-refresh
+  pull_request: 1299
   draft: true
   merge_commit_sha: PENDING
   merge_authorization: only after all 16 required contexts succeed on exact final Head
@@ -80,9 +94,66 @@ review:
   independent_reviewer: NOT_ASSIGNED
   natural_person_owner_acceptance: NOT_RECORDED
 
+impl2_scope_adjudication:
+  main_baseline: a7e7c64bfd6c6d709a0a7b55358f94b8535815c1
+  source_branches:
+    - directory: 03-memory-brain
+      branch: session-d-memory-brain-2026-11-16
+      tree_sha: b525e1f8fee2471a131e4a38efda99804045e424
+      main_files: 0
+      source_files: 60
+      missing_paths: 60
+      normative_root: 3
+      historical_phase_record: 29
+      undecided: 28
+    - directory: 04-memory-compiler
+      branch: session-e-memory-compiler-2026-11-16
+      tree_sha: ee098e14747d9915de5b3efb63b3a8dd77f670ed
+      main_files: 5
+      source_files: 25
+      missing_paths: 23
+      normative_root: 2
+      historical_phase_record: 7
+      undecided: 14
+    - directory: 05-memory-runtime
+      branch: session-f-memory-runtime
+      tree_sha: 1908ce4d233b20f7cafd00cb679affd01bd15174
+      main_files: 0
+      source_files: 15
+      missing_paths: 15
+      normative_root: 0
+      historical_phase_record: 5
+      undecided: 10
+    - directory: 09-security-governance
+      branch: session-i-security-governance-2026-11-16
+      tree_sha: 8abddf814467b271344a9814613a6b7ca6a446c6
+      main_files: 0
+      source_files: 91
+      missing_paths: 91
+      normative_root: 0
+      historical_phase_record: 42
+      undecided: 49
+  totals:
+    missing_paths: 189
+    normative_root: 5
+    historical_phase_record: 83
+    undecided: 101
+  normative_roots:
+    - 03-memory-brain/canonical-memory-store.md
+    - 03-memory-brain/commit-cursor-semantics.md
+    - 03-memory-brain/forget-fence-operation-and-publication-gate.md
+    - 04-memory-compiler/accepted-receipt-and-idempotency-contract.md
+    - 04-memory-compiler/compiler-state-and-producer-admission.md
+  f_i_expected_readmes_absent_from_owner_source_branches:
+    - 05-memory-runtime/README.md
+    - 09-security-governance/README.md
+  main_entry_rule: HISTORICAL_PHASE_RECORD and UNDECIDED are excluded without Owner ruling; NORMATIVE_ROOT restoration is a separate PR.
+  gate_a_item_5: OPEN — scope adjudicated; 5 roots to restore separately; F/I roots need Owner identification or explicit replacement decision.
+
 acceptance:
   gate_a: PARTIAL / OPEN
   gate_a_closeout_items_open: [3, 4, 5, 6, 7, 8]
+  gate_a_item_5: OPEN — scope adjudicated; 5 roots to restore separately; F/I roots need Owner identification or explicit replacement decision
   gate_a_item_6: OPEN — contract present, evidence missing
   gate_a_item_7: OPEN — contract present, evidence missing
   gate_b: PARTIAL / OPEN (NOT VERIFIED)
@@ -94,10 +165,11 @@ acceptance:
 session_evidence:
   - role: IMPLEMENTATION_SESSION
     issue_refs:
+      - "#1212"
     implementing_ai_session: NOT_RECORDED
-    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-107/prompt-v1.md
-    executed_prompt_sha256: a9ba36262827f2fce4016c488623d10031f61b9c860276343338a264da0b7942
-    executed_prompt_bytes: 2471
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-107/prompt-v2.md
+    executed_prompt_sha256: 382758b4d19178a29fbb110090c0a7b48f60ab7f04c619164da73e48f1fa718d
+    executed_prompt_bytes: 2066
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-107/evidence.md

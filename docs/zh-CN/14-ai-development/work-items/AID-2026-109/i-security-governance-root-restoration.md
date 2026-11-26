@@ -49,7 +49,7 @@ document_metadata:
 **署名：** `user-authorized operator (delegated by account owner)`  
 **日期：** 2026-11-26  
 **编号状态：** `PROVISIONAL`  
-**提交前 fetch 的最新 main：** `a7e7c64bfd6c6d709a0a7b55358f94b8535815c1`  
+**提交前 fetch 的最新 main：** `b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c`  
 **INDEX 编号核验：** 最大编号为 `AID-2026-108`；`AID-2026-109` 尚不存在，按规则分配下一号。  
 **历史来源：** `session-i-security-governance-2026-11-16` @ `8abddf814467b271344a9814613a6b7ca6a446c6`
 
