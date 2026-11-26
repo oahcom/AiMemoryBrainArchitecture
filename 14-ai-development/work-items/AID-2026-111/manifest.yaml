@@ -140,8 +140,8 @@ session_evidence:
     issue_refs:
     implementing_ai_session: "NOT_RECORDED"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-111/prompt-v1.md"
-    executed_prompt_sha256: "f9edbc00556d2ed306e33b9bc0a3c8ad41c51349add2b0fdd5e57a043feabe48"
-    executed_prompt_bytes: 1908
+    executed_prompt_sha256: "063f5aae30e72ecd6afff94a8b63d34b81999251158543a14522c4558accac87"
+    executed_prompt_bytes: 3215
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_RECORDED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-111/evidence.md"
