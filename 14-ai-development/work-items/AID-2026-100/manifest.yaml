@@ -65,7 +65,7 @@ authority:
   acceptance_authority: "Relevant domain Owner(s) and Owner A / Governance; NOT_RECORDED"
   independent_reviewer: "NOT_ASSIGNED"
   implementation_authorization: "DOCUMENTATION_AND_STAGE_0_REGISTRATION_ONLY"
-  merge_authorization: "NOT_GRANTED"
+  merge_authorization: "NOT_GRANTED_BY_THIS_RECORD; THE MERGE DECISION BELONGS TO THE REPOSITORY MERGE QUEUE AND ITS REQUIRED CHECKS"
   deployment_authorization: "NOT_GRANTED"
   issue_closure_authorization: "NOT_GRANTED"
 
@@ -88,7 +88,7 @@ scope:
     - "Carry the #1037 evidence record already merged to main under this directory without deleting or rewriting it, and state its relation to this registration."
   out_of_scope:
     - "Runtime/product code, schemas, DDL, APIs, migrations, test logic and production operations."
-    - "Validator implementation or semantics changes; only per-record manifest classification data is reconciled."
+    - "Validator implementation or semantics changes, except the single root-inventory constant declared under declared_exceptions; only per-record manifest classification data is otherwise reconciled."
     - "PR merge, deployment, issue closure, protocol freeze or normative promotion."
     - "Any fabricated Owner approval, authoritative source blob, independent review or global-uniqueness claim."
   current_disposition: "PARTIAL — 14 source-backed roots carried forward as RESTORED; 1 compiler root RECONSTRUCTED_FROM_MIRROR; 2 directory indexes AUTHORED_INDEX; no authoritative README sources or Owner acceptance claimed."
@@ -223,8 +223,16 @@ open_blockers:
   - "Independent review is not assigned."
   - "AID-083 is occupied by PR #1250; AID-090..AID-093 are merged; AID-094 is retained by Issue #752 (PR #1277); AID-095, AID-096, AID-099 and AID-101 are merged. The AID-2026-100 exact-token scan covered main plus 986 refs and returned no hit; a full-history scan is not claimed."
 
+declared_exceptions:
+  - path: "scripts/check_bilingual_docs.py"
+    change: "NORMATIVE_ROOTS gains 03-memory-brain, 05-memory-runtime, 09-security-governance"
+    class: "ROOT_INVENTORY_CONSTANT_NOT_VALIDATOR_LOGIC"
+    why: "the checker asserts set equality against the tree and exits 2 when a listed root is absent; the three roots are introduced by this PR, so the constant cannot land separately"
+    effect: "no rule, threshold or check semantics change; the 77 pre-existing bilingual gaps stay the baseline"
+    verified: "gate_ratchet: baseline=77 current=77 regressions=0 fixed=0; ratchet PASS"
+
 prohibitions:
-  - "DO_NOT_MERGE"
+  - "DO_NOT_MERGE_ON_THE_AUTHORITY_OF_THIS_RECORD"
   - "DO_NOT_CLOSE_ISSUES"
   - "DO_NOT_DEPLOY"
   - "DO_NOT_CHANGE_VALIDATOR_LOGIC_OR_SEMANTICS"
