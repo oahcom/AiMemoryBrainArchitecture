@@ -26,7 +26,8 @@ def git(root: Path, *args: str) -> str:
         ["git", "-C", str(root), *args],
         check=True,
         capture_output=True,
-        text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     return result.stdout.strip()
 
@@ -346,6 +347,67 @@ class WriteBaselineShrinkOnlyTests(unittest.TestCase):
             self.assertEqual(code, 2, combined)
             self.assertIn("cannot prove the new baseline only shrinks", combined)
             self.assertFalse(baseline_path.exists())
+
+
+class GitOutputDecodingTests(unittest.TestCase):
+    """Git output is decoded as UTF-8, never with the console's locale codec."""
+
+    def test_undecodable_blob_names_the_decode_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            make_repo(root)
+            # A blob Git stores happily and no UTF-8 reader can decode. On a
+            # GBK console `text=True` raised UnicodeDecodeError and `git show`
+            # returned None; the caller then crashed (AID-173) or, in DM-10,
+            # reported a file absent that it had never read.
+            stored = subprocess.run(
+                ["git", "-C", str(root), "hash-object", "-w", "--stdin"],
+                input=b"---\ndocument_metadata:\n\xff\xfe not utf-8\n---\n",
+                capture_output=True,
+                check=True,
+            ).stdout.decode("ascii").strip()
+            with patch.object(GATE, "ROOT", root):
+                with self.assertRaises(GATE.GitOutputDecodeError) as caught:
+                    GATE._git_log_output("show", stored)
+            message = str(caught.exception)
+            self.assertIn("decode", message)
+            self.assertNotIn("not exist", message)
+
+    def test_main_reports_decode_failure_as_incomplete(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            base = make_repo(root)
+            head = commit_file(root, "docs/zh-CN/00-governance/x.md")
+            baseline_path = root / "scripts" / "bilingual-baseline.txt"
+            baseline_path.parent.mkdir(parents=True, exist_ok=True)
+            baseline_path.write_text("", encoding="utf-8")
+            ratchet_path = root / "scripts" / "ci" / "baselines" / "bilingual-docs.txt"
+            ratchet_path.parent.mkdir(parents=True, exist_ok=True)
+            ratchet_path.write_text("", encoding="utf-8")
+            output, errors = io.StringIO(), io.StringIO()
+            with (
+                patch.object(GATE, "ROOT", root),
+                patch.object(GATE, "BASELINE_PATH", baseline_path),
+                patch.object(GATE, "CI_BASELINE_PATH", ratchet_path),
+                patch.object(GATE, "_require_full_git_history"),
+                patch.object(GATE, "check_prompt_library", return_value=[]),
+                patch.object(
+                    GATE,
+                    "check_embedded_registration_history",
+                    side_effect=GATE.GitOutputDecodeError(
+                        "git output decode failed (utf-8) while reading git show"
+                    ),
+                ),
+                patch.dict(os.environ, {"BASE_SHA": base, "HEAD_SHA": head}),
+                patch.object(sys, "argv", ["check_bilingual_docs.py"]),
+                contextlib.redirect_stdout(output),
+                contextlib.redirect_stderr(errors),
+            ):
+                code = GATE.main()
+            combined = output.getvalue() + errors.getvalue()
+            # Incomplete (2), not a content verdict (1), and not a traceback.
+            self.assertEqual(code, 2, combined)
+            self.assertIn("decode", combined)
 
 
 if __name__ == "__main__":

@@ -285,6 +285,54 @@ class ReachabilityTest(unittest.TestCase):
         self.assertEqual(code, 1, out + err)
         self.assertIn(gate, out)
 
+    # --- comment-blind Rule B and the .yaml suffix (#1212) ---------------
+
+    def test_test_named_only_in_a_comment_is_unreachable(self):
+        """Rule B matches substrings, so a commented name used to count."""
+        (self.root / "pkg").mkdir()
+        (self.root / "pkg" / "test_x.py").write_text("", encoding="utf-8")
+        self.workflow(
+            "jobs:\n"
+            "  a:\n"
+            "    steps:\n"
+            "      - run: echo hi\n"
+            "      # TODO: run pkg/test_x.py once the fixture exists\n"
+        )
+        code, out, err = run(self.root)
+        self.assertEqual(code, 1, out + err)
+        self.assertIn("pkg/test_x.py", out)
+        self.assertIn("1 of 1", err)
+
+    def test_discover_in_a_comment_is_not_a_discovery_root(self):
+        """The same reading applies to the discovery root, not only Rule B."""
+        (self.root / "pkg").mkdir()
+        (self.root / "pkg" / "test_x.py").write_text("", encoding="utf-8")
+        self.workflow(
+            "jobs:\n"
+            "  a:\n"
+            "    steps:\n"
+            "      - run: echo hi\n"
+            "      # - run: python3 -m unittest discover -s pkg\n"
+        )
+        code, out, err = run(self.root)
+        self.assertEqual(code, 1, out + err)
+        self.assertIn("pkg/test_x.py", out)
+
+    def test_yaml_workflow_suffix_is_read_for_both_branches(self):
+        """A `.yaml` workflow reaches tests and wires gates like a `.yml` one."""
+        gate = self.gate()
+        (self.root / "pkg").mkdir()
+        (self.root / "pkg" / "test_x.py").write_text("", encoding="utf-8")
+        self.workflow(
+            "      - run: python3 -m unittest discover -s pkg\n"
+            "      - run: python3 %s\n" % gate,
+            name="w.yaml",
+        )
+        code, out, err = run(self.root)
+        self.assertEqual(code, 0, out + err)
+        self.assertIn("0 unreachable", err)
+        self.assertIn("1 gate scripts, 0 unwired", err)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

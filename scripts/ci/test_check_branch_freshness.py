@@ -33,7 +33,12 @@ RESULTS: list[tuple[str, bool, str]] = []
 
 def git(repo: Path, *args: str) -> str:
     out = subprocess.run(
-        ["git", *args], cwd=repo, text=True, capture_output=True, check=True
+        ["git", *args],
+        cwd=repo,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        check=True,
     )
     return out.stdout.strip()
 

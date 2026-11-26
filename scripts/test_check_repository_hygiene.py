@@ -29,8 +29,22 @@ def git(repo, *args):
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         check=True,
-        text=True,
+        encoding="utf-8",
+        errors="replace",
     ).stdout.strip()
+
+
+def work_item_names(files):
+    """Work-item directory names a fixture carries, from its own file paths."""
+    names = set()
+    for path in files:
+        if not path.startswith("14-ai-development/work-items/"):
+            continue
+        remainder = path[len("14-ai-development/work-items/"):]
+        name, separator, _ = remainder.partition("/")
+        if separator and name:
+            names.add(name)
+    return names
 
 
 class RepositoryHygieneTests(unittest.TestCase):
@@ -46,7 +60,7 @@ class RepositoryHygieneTests(unittest.TestCase):
     def tearDown(self):
         self.tempdir.cleanup()
 
-    def commit(self, files, *, with_registry=True):
+    def commit(self, files, *, with_registry=True, with_index=True):
         files = dict(files)
         # The schema registry is a policy input the checker requires, so every
         # fixture tree carries one unless a test is specifically about its
@@ -55,6 +69,29 @@ class RepositoryHygieneTests(unittest.TestCase):
             files.setdefault(
                 "14-ai-development/work-items/manifest-schema-registry.yaml",
                 EMPTY_SCHEMA_REGISTRY,
+            )
+        # Index membership fails closed on either absent side (#1212), so a
+        # fixture tree has to carry both sides the way the real tree does: at
+        # least one work-item directory and an INDEX.md row for every directory
+        # it contains. A case that is about either side passes its own content
+        # and `setdefault` leaves it alone; a case about something else gets a
+        # self-consistent registry instead of a red on an unrelated check.
+        #
+        # The placeholders live in the same commit as whatever the case adds,
+        # and both fixture commits go through here, so they are never reported
+        # as new paths by the admission check. `with_index=False` is for the
+        # cases that are about the absent sides themselves.
+        if with_index:
+            files.setdefault(
+                "14-ai-development/work-items/AID-2026-001/manifest.yaml",
+                "work_item_id: AID-2026-001\n",
+            )
+            files.setdefault(
+                "14-ai-development/work-items/INDEX.md",
+                "".join(
+                    f"| [{name}]({name}/manifest.yaml) |\n"
+                    for name in sorted(work_item_names(files))
+                ),
             )
         for name, content in files.items():
             path = self.repo / name
@@ -1101,6 +1138,45 @@ class RepositoryHygieneTests(unittest.TestCase):
             result.stderr,
         )
 
+    # #1212: with either side absent the old code returned [] -- no violations
+    # over an empty set -- which is a pass that compared nothing. Deleting the
+    # Canonical index, or renaming work-items/ so no directory is found, must
+    # not be the cheapest way to silence this check, so both cases exit 2.
+    def test_index_membership_fails_closed_without_work_item_directories(self):
+        self.commit({"README.md": "no work items here\n"}, with_index=False)
+
+        result = self.run_checker_args("--head-tree-only")
+        self.assertEqual(
+            result.returncode,
+            2,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn(
+            "no work-item directories under '14-ai-development/work-items'",
+            result.stderr,
+        )
+
+    def test_index_membership_fails_closed_without_the_index(self):
+        self.commit(
+            {
+                "14-ai-development/work-items/AID-2026-001/manifest.yaml":
+                    "work_item_id: AID-2026-001\n",
+            },
+            with_index=False,
+        )
+
+        result = self.run_checker_args("--head-tree-only")
+        self.assertEqual(
+            result.returncode,
+            2,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn(
+            "the work-item index '14-ai-development/work-items/INDEX.md' is "
+            "absent from the tree",
+            result.stderr,
+        )
+
     # #944: a link anywhere in the file used to register a directory, so a row
     # could be commented out -- invisible to every reader -- and the check
     # stayed green. Registration now requires a table row. Each of the three
@@ -1218,7 +1294,7 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-27.1 "
+            "Work-item manifest consistency version=2026-11-27.2 "
             "manifests=1 in_scope=1 excluded_by_record_type=0 "
             "unrecognized=0 violations=0",
             result.stdout,
@@ -1261,7 +1337,7 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-27.1 "
+            "Work-item manifest consistency version=2026-11-27.2 "
             "manifests=1 in_scope=1 excluded_by_record_type=0 "
             "unrecognized=0 violations=0",
             result.stdout,
@@ -1308,7 +1384,7 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-27.1 "
+            "Work-item manifest consistency version=2026-11-27.2 "
             "manifests=1 in_scope=1 excluded_by_record_type=0 "
             "unrecognized=0 violations=0",
             result.stdout,

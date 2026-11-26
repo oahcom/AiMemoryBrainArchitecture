@@ -881,7 +881,11 @@ def run_repository_rules() -> None:
 
 def _git(root: Path, *args: str) -> str:
     out = subprocess.run(
-        ["git", "-C", str(root), *args], capture_output=True, text=True, check=True
+        ["git", "-C", str(root), *args],
+        capture_output=True,
+        encoding="utf-8",
+        errors="replace",
+        check=True,
     )
     return out.stdout.strip()
 
@@ -942,6 +946,81 @@ def run_approval_binding() -> None:
         moving = honest.replace(f'"{sha}"', '"main"')
         target.write_text(moving, encoding="utf-8")
         expect_gate("T11 mutable ref as approved_version fails", root, 1)
+
+
+# --------------------------------------------------------------------------
+# 5d. Git output decoding: locale-independent, and never a content verdict
+# --------------------------------------------------------------------------
+
+def run_git_decode_locale() -> None:
+    """T95: an undecodable read is INCOMPLETE, never "the file was absent".
+
+    Measured on a GBK console: `subprocess(text=True)` decoded git's stdout with
+    the console codec, a UTF-8 document raised UnicodeDecodeError in the reader
+    thread, `stdout` arrived as None, and DM-10 reported nine documents as
+    "did not exist at approved_version" while `git cat-file -e` says every one
+    of them exists at its pin. A decode failure and a real absence must not
+    share a message, and neither may become a crash.
+    """
+    print("git output decoding (T95, locale-independent)")
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        target = root / "00-governance" / "a.md"
+        # Git stores these bytes happily; no UTF-8 reader can decode them.
+        target.write_bytes(b"---\ndocument_metadata:\n\xff\xfe not utf-8\n---\n")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "approved version with non-UTF-8 bytes")
+        pinned = _git(root, "rev-parse", "HEAD")
+
+        target.write_text(
+            doc(APPROVED.replace('"deadbeef"', f'"{pinned}"')), encoding="utf-8"
+        )
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "record approval")
+
+        stdout, stderr = io.StringIO(), io.StringIO()
+        with redirect_stdout(stdout), redirect_stderr(stderr):
+            code = run_gate(root)
+        output = stdout.getvalue() + stderr.getvalue()
+        record(
+            "T95a an undecodable approved version is INCOMPLETE (exit 2)",
+            code == 2,
+            f"  gate returned {code}, expected 2; output {output[-600:]!r}",
+        )
+        record(
+            "T95a a decode failure is named, and absence is not asserted",
+            "decode" in output and "did not exist" not in output,
+            f"  output {output[-600:]!r}",
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "seed without the governed file")
+        before = _git(root, "rev-parse", "HEAD")
+        (root / "00-governance" / "a.md").write_text(
+            doc(APPROVED.replace('"deadbeef"', f'"{before}"')), encoding="utf-8"
+        )
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "record approval")
+        # The counterfactual: the message T95a removes must still exist for the
+        # case where it is true, or the guard became a blanket silence.
+        expect_gate(
+            "T95b a pin that genuinely lacks the file still says it did not exist",
+            root,
+            1,
+            msg=(
+                "00-governance/a.md: DM-10 00-governance/a.md did not exist at "
+                f"approved_version {before[:12]}"
+            ),
+        )
 
 
 # --------------------------------------------------------------------------
@@ -4432,6 +4511,483 @@ def run_fault_injection() -> None:
         )
 
 
+# --------------------------------------------------------------------------
+# 5z. Bind the gate's reachable unbound emissions (issue #827)
+#
+# Issue #827 asked one question per error message: if this statement were
+# deleted, would any test turn red? A mechanical audit at `origin/main`
+# dc826e4e extracted all 99 message literals the gate can emit, replaced each
+# emission with `None` in an isolated tree, and ran this suite. 38 came back
+# UNBOUND -- the suite stayed green with the statement gone.
+#
+# Every case below builds the input that makes one of those 38 speak and
+# asserts on that message specifically. The pattern is the emission's own
+# literal with each `{}` turned into `.+`, so deleting the statement makes the
+# case fail *and names the sentence it bound*.
+#
+# One of the 38 is deliberately not bound, and is not tested here:
+# `DM-01 outside the repository root`. Every target reaching that branch comes
+# from `collect_governed()`, which yields paths rooted at `root`, and
+# `main()` resolves `--root` before scanning; `scan_root()` skips symlinks
+# rather than following them. No document, registry or directory layout can
+# make `path.relative_to(root)` fail. It is a defensive branch, left in place
+# (issue #827 says not to delete dead code in this change) and recorded as
+# unreachable in the work item rather than bound by a fabricated test.
+# --------------------------------------------------------------------------
+
+def _bind(name: str, emitted: list[str], pattern: str) -> None:
+    """Record one case: `pattern` must match an emitted message.
+
+    Matching allows the `<rel>: ` prefix the gate puts on per-document
+    errors, so a pattern can be written exactly as the statement spells it.
+    """
+    try:
+        for line in emitted:
+            if re.search(r"(?:^|: )" + pattern + r"$", line.strip()):
+                record(name, True)
+                return
+        raise AssertionError(
+            f"no emitted message matched {pattern!r}; emitted {emitted!r}"
+        )
+    except AssertionError as exc:
+        record(name, False, f"  AssertionError: {exc}")
+
+
+def _gate_lines(root: Path, *extra: str) -> list[str]:
+    out, err = io.StringIO(), io.StringIO()
+    with redirect_stdout(out), redirect_stderr(err):
+        run_gate(root, *extra)
+    return (out.getvalue() + err.getvalue()).splitlines()
+
+
+def _write_registry(root: Path, body: str) -> None:
+    (root / "00-governance" / "document-scope-registry.yaml").write_text(
+        'registry_version: "2"\n' + body, encoding="utf-8"
+    )
+
+
+def _revoked(**fields) -> str:
+    """BASE with a Revoked decision and exactly the revocation fields given."""
+    block = "".join(f"        {key}: {value}\n" for key, value in fields.items())
+    return BASE.replace(
+        "      decision_status: Draft",
+        "      decision_status: Revoked\n      revocation:\n" + block,
+    )
+
+
+def _resolution(omit: str = "", selected: str = "00-governance/a.md") -> str:
+    """BASE carrying a Resolved conflict and a resolution block."""
+    fields = {
+        "resolution_decision_id": '"GOV-CONF-001"',
+        "resolved_date": '"2026-11-20"',
+        "selected_document": f'"{selected}"',
+    }
+    fields.pop(omit, None)
+    block = "".join(f"      {key}: {value}\n" for key, value in fields.items())
+    return BASE.replace(
+        "canonical_conflict_status: None",
+        "canonical_conflict_status: Resolved\n"
+        "    canonical_conflict_resolution:\n" + block,
+    )
+
+
+def run_unbound_emissions() -> None:
+    print("unbound emissions (issue #827)")
+
+    # --- document-level: one fixture per message -------------------------
+
+    def doc_bind(name: str, text: str, pattern: str) -> None:
+        errors, _ = check_document(FILE, text)
+        _bind(name, errors, pattern)
+
+    doc_bind(
+        "T94 DM-04 Revoked without revocation_decision_id is named",
+        doc(_revoked(revoked_date='"2026-01-01"', revocation_reason='"withdrawn"')),
+        r"DM\-04 Revoked requires revocation\.revocation_decision_id",
+    )
+    doc_bind(
+        "T95 DM-04 Revoked without revoked_date is named",
+        doc(_revoked(
+            revocation_decision_id='"GOV-REV-001"', revocation_reason='"withdrawn"')),
+        r"DM\-04 Revoked requires revocation\.revoked_date",
+    )
+    doc_bind(
+        "T96 DM-04 Revoked without revocation_reason is named",
+        doc(_revoked(
+            revocation_decision_id='"GOV-REV-001"', revoked_date='"2026-01-01"')),
+        r"DM\-04 Revoked requires revocation\.revocation_reason",
+    )
+    doc_bind(
+        "T97 DM-06 a blank keyword entry is named",
+        doc(CANONICAL.replace("      - entity", '      - ""')),
+        r"DM\-06 canonical_scope_keywords entries must be non\-empty strings",
+    )
+    for omit, rule in (
+        ("resolution_decision_id", "resolution_decision_id"),
+        ("resolved_date", "resolved_date"),
+        ("selected_document", "selected_document"),
+    ):
+        doc_bind(
+            f"T98 DM-11 a resolution without {rule} is named",
+            doc(_resolution(omit=omit)),
+            rf"DM\-11 resolution requires {rule}",
+        )
+
+    # --- repository-level ------------------------------------------------
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "00-governance" / "bad.md").write_bytes(
+            b"---\ndocument_metadata:\n  domain: \xff\xfe\n---\n"
+        )
+        _bind(
+            "T99 DM-01 a non-UTF-8 governed file is reported by path",
+            _gate_lines(root),
+            r"DM\-01 not valid UTF\-8: .+",
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "00-governance" / "a.md").write_text(
+            doc(BASE + "\n  bilingual_counterpart:\n    en:\n      - docs/en/x.md"),
+            encoding="utf-8",
+        )
+        _bind(
+            "T100 DM-01 a non-string counterpart path is named",
+            _gate_lines(root),
+            r"DM\-01 .+ bilingual_counterpart\.en must be a string path, got list",
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        for name in ("a.md", "b.md"):
+            (root / "00-governance" / name).write_text(
+                doc(_revoked(
+                    revocation_decision_id='"GOV-REV-001"',
+                    revoked_date='"2026-01-01"',
+                    revocation_reason='"withdrawn"')),
+                encoding="utf-8",
+            )
+        _bind(
+            "T101 DM-04 a reused revocation_decision_id is reported",
+            _gate_lines(root),
+            r"DM\-04 revocation_decision_id .+ reused by .+ and .+",
+        )
+
+    # DM-10: a file pinned to a commit that predates it. The commit exists, so
+    # the pin resolves; the file is absent from it, so the approval cannot be
+    # bound. Both halves matter, and only the second is this message.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        _git(root, "init", "-q")
+        _git(root, "config", "user.email", "gate@example.invalid")
+        _git(root, "config", "user.name", "gate")
+        _git(root, "add", "-A")
+        _git(root, "commit", "-q", "-m", "seed without late.md")
+        early = _git(root, "rev-parse", "HEAD")
+        (root / "00-governance" / "late.md").write_text(
+            doc(APPROVED.replace('"deadbeef"', f'"{early}"')), encoding="utf-8"
+        )
+        _bind(
+            "T102 DM-10 an approval pinned before the file existed is named",
+            _gate_lines(root),
+            r"DM\-10 .+ did not exist at approved_version .+; the approval "
+            r"cannot be bound to that version",
+        )
+
+    # DM-11 cross-document: a resolution naming a file that does not declare
+    # the scope, and one naming a file that is not the unique Canonical.
+    scope_body = BASE.replace("    canonical_conflict_status: None\n", "").replace(
+        "canonical_status: Non-Canonical",
+        'canonical_status: Candidate\n'
+        '    canonical_scope_id: "architecture/dup"\n'
+        + "    canonical_conflict_status: Resolved\n"
+        "    canonical_conflict_resolution:\n"
+        '      resolution_decision_id: "GOV-CONF-001"\n'
+        '      resolved_date: "2026-11-20"\n'
+        '      selected_document: "SEL"\n',
+    )
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "00-governance" / "a.md").write_text(
+            doc(scope_body.replace("SEL", "00-governance/b.md")), encoding="utf-8")
+        (root / "00-governance" / "b.md").write_text(doc(BASE), encoding="utf-8")
+        _bind(
+            "T103 DM-11 a resolution selecting a non-member of the scope is named",
+            _gate_lines(root),
+            r"DM\-11 scope .+ resolution selects .+, which does not declare "
+            r"this scope",
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        for name in ("a.md", "b.md"):
+            (root / "00-governance" / name).write_text(
+                doc(scope_body.replace("SEL", "00-governance/b.md")),
+                encoding="utf-8",
+            )
+        _bind(
+            "T104 DM-11 a resolution selecting a non-Canonical document is named",
+            _gate_lines(root),
+            r"DM\-11 scope .+ resolution selects .+, which is not the unique "
+            r"Canonical document \(.+\)",
+        )
+
+    # DM-12 mirror links. Each case below isolates one link defect; the
+    # surrounding group is otherwise well formed, so no neighbouring DM-12
+    # diagnostic can satisfy the case.
+    def mirror(extra: str) -> str:
+        return BASE + "\n  bilingual_counterpart:\n" + extra
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "00-governance" / "a.md").write_text(
+            doc(mirror('    en: "docs/en/nope.md"')), encoding="utf-8")
+        _bind(
+            "T105 DM-12 a counterpart that does not exist is named",
+            _gate_lines(root),
+            r"DM\-12 .+: bilingual_counterpart\.en does not exist: .+",
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "00-governance" / "a.md").write_text(doc(BASE), encoding="utf-8")
+        (root / "00-governance" / "b.md").write_text(
+            doc(mirror('    en: "00-governance/a.md"')), encoding="utf-8")
+        _bind(
+            "T106 DM-12 a counterpart outside the mirror root is named",
+            _gate_lines(root),
+            r"DM\-12 .+: bilingual_counterpart\.en must point under "
+            r"docs/en/, got .+",
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "00-governance" / "a.md").write_text(
+            doc(mirror('    en: "00-governance/a.md"')), encoding="utf-8")
+        _bind(
+            "T107 DM-12 a counterpart pointing at itself is named",
+            _gate_lines(root),
+            r"DM\-12 .+: bilingual_counterpart\.en points to itself",
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "docs" / "en").mkdir(parents=True, exist_ok=True)
+        (root / "docs" / "zh-CN").mkdir(parents=True, exist_ok=True)
+        (root / "00-governance" / "a.md").write_text(
+            doc(CANONICAL + '\n  bilingual_counterpart:\n    en: "docs/en/a.md"\n'),
+            encoding="utf-8")
+        (root / "docs" / "en" / "a.md").write_text(
+            doc(CANONICAL + '\n  bilingual_counterpart:\n'
+                            '    source: "00-governance/a.md"\n'),
+            encoding="utf-8")
+        _bind(
+            "T108 DM-12 two Canonical claims in one group are named",
+            _gate_lines(root),
+            r"DM\-12 .+: both a document and its mirror claim Canonical \(.+\)",
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "docs" / "en").mkdir(parents=True, exist_ok=True)
+        (root / "docs" / "zh-CN").mkdir(parents=True, exist_ok=True)
+        (root / "docs" / "en" / "a.md").write_text(
+            doc(mirror('    source: "docs/en/b.md"')), encoding="utf-8")
+        _bind(
+            "T109 DM-12 a mirror naming a mirror as its source is named",
+            _gate_lines(root),
+            r"DM\-12 .+: source must be the authoritative file, not a mirror "
+            r"\(.+\)",
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "docs" / "en").mkdir(parents=True, exist_ok=True)
+        (root / "docs" / "zh-CN").mkdir(parents=True, exist_ok=True)
+        (root / "00-governance" / "a.md").write_text(
+            doc(mirror('    en: "docs/en/a.md"')), encoding="utf-8")
+        (root / "docs" / "en" / "a.md").write_text(
+            doc(BASE.replace("  role: design-specification", "  role: reference")
+                + '\n  bilingual_counterpart:\n    source: "00-governance/a.md"\n'),
+            encoding="utf-8")
+        _bind(
+            "T110 DM-12 a field disagreeing across a group is named",
+            _gate_lines(root),
+            r"DM\-12 .+: role .+ disagrees with .+ \(.+\)",
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "00-governance" / "a.md").write_text(
+            doc(BASE), encoding="utf-8")
+        (root / "00-governance" / "b.md").write_text(
+            doc(BASE.replace(
+                "    approval:\n      decision_status: Draft",
+                '    bilingual_counterpart:\n      en: "docs/en/b.md"\n'
+                "    approval:\n      decision_status: Draft")), encoding="utf-8")
+        (root / "docs" / "en").mkdir(parents=True, exist_ok=True)
+        (root / "docs" / "zh-CN").mkdir(parents=True, exist_ok=True)
+        (root / "docs" / "en" / "b.md").write_text(
+            doc(mirror('    source: "00-governance/b.md"')), encoding="utf-8")
+        (root / "docs" / "en" / "a.md").write_text(
+            doc(mirror('    source: "00-governance/a.md"\n    zh-CN: "docs/en/b.md"')),
+            encoding="utf-8")
+        _bind(
+            "T111 DM-12 a link to a third party's mirror is named",
+            _gate_lines(root),
+            r"DM\-12 .+ -> .+: neither its source \(.+\) nor a sibling mirror "
+            r"of it \(.+\)",
+        )
+
+    for label, body, pattern in (
+        (
+            "T112 DM-13 a document superseding itself is named",
+            "    supersession:\n      supersedes:\n        - 00-governance/a.md\n",
+            r"DM\-13 .+: a document cannot supersede itself",
+        ),
+        (
+            "T113 DM-13 a non-list supersedes is named",
+            "    supersession:\n      supersedes: 00-governance/a.md\n",
+            r"DM\-13 .+: supersedes must be a list",
+        ),
+    ):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = _repo(tmp)
+            (root / "00-governance" / "a.md").write_text(
+                doc(BASE.replace(
+                    "    approval:\n      decision_status: Draft",
+                    body + "    approval:\n      decision_status: Draft")),
+                encoding="utf-8")
+            _bind(label, _gate_lines(root), pattern)
+
+    # DM-14 registry shape. Each fixture carries the offending key alone, so
+    # the shape error is the only one the case can be satisfied by.
+    for label, body, pattern in (
+        (
+            "T114 DM-14 a backlog entry that is not a mapping is named",
+            'governed:\n  - 00-governance\nbacklog:\n  docs: 1\n',
+            r"DM\-14 backlog 'docs' must be a mapping with a count",
+        ),
+        (
+            "T115 DM-14 a backlog entry with no reason is named",
+            "governed:\n  - 00-governance\nbacklog:\n  docs:\n    documents: 1\n"
+            '    reason_zh: "\u5c1a\u672a\u5206\u7c7b"\n',
+            r"DM\-14 backlog 'docs' has no reason",
+        ),
+        (
+            "T116 DM-14 a backlog entry with no reason_zh is named",
+            "governed:\n  - 00-governance\nbacklog:\n  docs:\n    documents: 1\n"
+            '    reason: "not classified yet"\n',
+            r"DM\-14 backlog 'docs' has no reason_zh \(GOV\-DOC\-001\)",
+        ),
+        (
+            "T117 DM-14 an excluded entry that is not a mapping is named",
+            'governed:\n  - 00-governance\nexcluded:\n  tools: 1\n',
+            r"DM\-14 excluded 'tools' must be a mapping with a reason",
+        ),
+        (
+            "T118 DM-14 an excluded entry with no reason_zh is named",
+            "governed:\n  - 00-governance\nexcluded:\n  tools:\n"
+            '    kind: not-documentation\n    reason: "not documentation"\n',
+            r"DM\-14 excluded 'tools' has no reason_zh \(GOV\-DOC\-001\)",
+        ),
+        (
+            "T119 DM-14 an excluded entry with an unknown kind is named",
+            "governed:\n  - 00-governance\nexcluded:\n  tools:\n"
+            '    kind: whatever\n    reason: "not documentation"\n'
+            '    reason_zh: "\u975e\u6587\u6863"\n',
+            r"DM\-14 excluded 'tools' must declare kind one of .+, got 'whatever'",
+        ),
+        (
+            "T120 DM-14 a backlog that is not a mapping is named",
+            "governed:\n  - 00-governance\nbacklog: 5\n",
+            r"DM\-14 .+ backlog must be a mapping",
+        ),
+        (
+            "T121 DM-14 an excluded that is not a mapping is named",
+            "governed:\n  - 00-governance\nexcluded: 5\n",
+            r"DM\-14 .+ excluded must be a mapping",
+        ),
+        (
+            "T122 DM-14 a governed_files that is not a sequence is named",
+            "governed:\n  - 00-governance\ngoverned_files: 5\n",
+            r"DM\-14 .+ governed_files must be a sequence",
+        ),
+        (
+            "T123 DM-14 an empty governed list is named",
+            "governed:\n",
+            r"DM\-14 .+ must declare a non\-empty governed list",
+        ),
+        (
+            "T124 DM-14 a governed root also declared backlog is named",
+            'governed:\n  - 00-governance\nbacklog:\n  "00-governance":\n'
+            "    documents: 1\n"
+            '    reason: "x"\n    reason_zh: "y"\n',
+            r"DM\-14 \['00\-governance'\] are both governed and backlog; pick one",
+        ),
+        (
+            "T125 DM-14 a governed root also excluded is named",
+            'governed:\n  - 00-governance\nexcluded:\n  "00-governance":\n'
+            '    kind: not-documentation\n    reason: "x"\n    reason_zh: "y"\n',
+            r"DM\-14 \['00\-governance'\] are both governed\-or\-backlog and "
+            r"excluded",
+        ),
+        (
+            "T126 DM-14 a registry disagreeing with NORMATIVE_ROOTS is named",
+            "governed:\n  - 00-governance\n",
+            r"DM\-14 scope registry and NORMATIVE_ROOTS disagree; "
+            r"declared\-only .+, enforced\-only .+",
+        ),
+    ):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = _repo(tmp)
+            _write_registry(root, body)
+            _bind(label, _gate_lines(root), pattern)
+
+    # A governed file whose top-level directory is accounted for by nothing.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "15-orphan").mkdir()
+        (root / "15-orphan" / "x.md").write_text(doc(BASE), encoding="utf-8")
+        import check_document_management as gate
+        original = gate.GOVERNED_FILES
+        gate.GOVERNED_FILES = ("15-orphan/x.md",)
+        try:
+            emitted = gate.check_scope_registry(root)
+        finally:
+            gate.GOVERNED_FILES = original
+        _bind(
+            "T127 DM-14 a governed file in an unaccounted directory is named",
+            emitted,
+            r"DM\-14 governed file 15\-orphan/x\.md sits in 15\-orphan, which is "
+            r"neither governed, backlog nor excluded: declare the directory's "
+            r"status first",
+        )
+
+    # A symlinked mirror. The registry would otherwise assert that docs/en
+    # exists while the scanner refuses to descend into it.
+    with tempfile.TemporaryDirectory() as tmp, tempfile.TemporaryDirectory() as outside:
+        root = _repo(tmp)
+        Path(outside, "a.md").write_text(doc(BASE), encoding="utf-8")
+        target = root / "docs" / "en"
+        shutil.rmtree(target)
+        try:
+            target.symlink_to(Path(outside), target_is_directory=True)
+        except (OSError, NotImplementedError):
+            record(
+                "T128 DM-14 a symlinked mirror directory is named", False,
+                "  symlinks unavailable on this platform; the case could not run",
+            )
+        else:
+            _bind(
+                "T128 DM-14 a symlinked mirror directory is named",
+                _gate_lines(root),
+                r"DM\-14 bilingual mirror directory docs/en is a symbolic link; "
+                r"a mirror must be real content of this repository",
+            )
+
+
 def main() -> int:
     print("check_document_management self-check")
     run_parser()
@@ -4439,6 +4995,7 @@ def main() -> int:
     run_resolver()
     run_repository_rules()
     run_approval_binding()
+    run_git_decode_locale()
     run_approval_scope()
     run_scope_key_removal()
     run_dm10_scope()
@@ -4468,6 +5025,7 @@ def main() -> int:
     run_policy_assertions()
     run_single_entry_callers()
     run_fault_injection()
+    run_unbound_emissions()
     run_schema_agreement()
     passed, total = sum(RESULTS), len(RESULTS)
     print(f"{passed}/{total} passed")
