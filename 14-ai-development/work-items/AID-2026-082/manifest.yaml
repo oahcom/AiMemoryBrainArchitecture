@@ -1,0 +1,82 @@
+work_item_id: AID-2026-082
+title: Define immutable ContextVersion boundary and legal successor mutation path
+class: ARCH/DOC
+risk: R3
+risk_rationale: "Context history integrity and Forget/recovery correctness are cross-cutting; this Work Item changes documentation only."
+status: DISPATCHED
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: NOT_ASSIGNED
+acceptance_authority: NOT_ASSIGNED
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 364ef4ad6deeedbd5d383b5855973061503387f8
+tracking_issue: "#1144 durable history dependency / #1151 snapshot hash claim; external numbers are evidence references."
+prompt_id: AID-2026-082-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-082/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 35e81019bb5ab92123c294a403ce7bc92af780f5b1c3aa1ddbaba2171a596dd6
+prompt_bytes: 3186
+authorization:
+  authorized_by: "user-authorized operator (delegated by account owner)"
+  decision_date: "2026-11-26"
+  implementation_write: "GRANTED only for Context versioning documentation, bilingual decision addenda, this Work Item directory and INDEX.md."
+  runtime_code_change: NOT_GRANTED
+  validator_change: NOT_GRANTED
+  schema_change: NOT_GRANTED
+  deployment_or_production: NOT_GRANTED
+  merge: NOT_GRANTED
+scope:
+  files_to_create:
+    - docs/en/06-memory-context/context-version-immutability-decision.md
+    - docs/zh-CN/06-memory-context/context-version-immutability-decision.md
+    - 14-ai-development/work-items/AID-2026-082/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-082/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-082/session-evidence.md
+  files_to_modify:
+    - 06-memory-context/context-versioning.md
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope: "Every other path, especially crates/**, src/**, tests/**, schemas/**, scripts/**, validators, workflows, Cargo files and deployment."
+acceptance_criteria:
+  - id: AC1
+    criterion: "Committed ContextVersion and ContextEntryVersion content cannot be changed in place."
+    measurement: "CV-I1 PASS/FAIL text and immutable field boundary are present in EN/ZH-CN."
+  - id: AC2
+    criterion: "Every semantic mutation creates a successor version through a new immutable ChangeSet."
+    measurement: "CV-I2 and legal mutation path are explicit."
+  - id: AC3
+    criterion: "Head advances atomically with successor version and durable commit/idempotency receipt."
+    measurement: "CV-I3 distinguishes mutable head pointer from immutable version."
+  - id: AC4
+    criterion: "Stale base and conflicting reuse of ChangeSet identity are rejected."
+    measurement: "CV-I4 and idempotency conflict rule are explicit."
+  - id: AC5
+    criterion: "I-authorized erasure is separate from silent in-place mutation."
+    measurement: "CV-I5 defines purge/tombstone boundary."
+  - id: AC6
+    criterion: "The #1151 claim and FNV-1a digest-strength limitation are distinguished using current-main source evidence."
+    measurement: "CV-I6 cites current source behavior and keeps #1151 OPEN."
+implementation:
+  status: IMPLEMENTED_IN_BRANCH
+  branch: docs/context-version-immutability-2026-11-26
+  pull_request: 1233
+  merge_commit_sha: NOT_MERGED
+review:
+  status: NOT_ASSIGNED
+  record_ref: ""
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: NOT_ASSIGNED
+session_evidence:
+  - role: DOCUMENTATION_AUTHOR
+    issue_refs:
+      - "#1144"
+      - "#1151"
+    implementing_ai_session: NOT_RECORDED
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-082/prompt-v1.md
+    executed_prompt_sha256: 35e81019bb5ab92123c294a403ce7bc92af780f5b1c3aa1ddbaba2171a596dd6
+    executed_prompt_bytes: 3186
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-082/session-evidence.md

@@ -511,3 +511,16 @@ Applied is an immutable historical observation, not a permanent authorization le
 - Repeated ACKs do not create a new Applied record or alter the current pointer.
 - Context head advances once per successfully committed ChangeSet. A stale BaseVersion returns conflict and requires re-read/re-plan; no implicit merge.
 - The G head/version visibility transition for canonical-derived artifacts remains gated by D's dependency registration and PublishDerivedIfFenceCurrent semantics. **CV-48** — The physical transaction/recoverable realization is governed by §13.3 as a subordinate constraint: the ordering is normative and DECIDED, while the physical realization remains an implementation-conformance gate that D and Storage/Consistency MUST specify and independently prove before public visibility is enabled. Until that proof exists, stage privately and do not publish/send. §13.3 controls this relationship; this subsection does not restate it as an open normative choice.
+
+
+## 15. ContextVersion immutability boundary and legal successor path — delegated direction, 2026-11-26
+
+Authority: user-authorized operator (delegated by account owner). Direction recorded; G and A exact-version acceptance pending. This does not authorize Runtime implementation.
+
+A committed ContextVersion is an immutable historical aggregate: its identity, sequence, parent, snapshot reference/hash/profile, exact committed ContextEntryVersion set, source/provenance refs, Scope and commit metadata cannot be rewritten. A committed ContextEntryVersion and its content are immutable under that revision. ContextChangeSet is an immutable mutation request; changing its payload requires a new ChangeSet identity. The current head pointer may advance only in the same atomic commit that accepts a new ChangeSet and records its immutable commit/idempotency receipt.
+
+The only ordinary mutation path is a new ChangeSet against an exact base, followed by Scope/authorization/current-head validation, trusted snapshot commitment calculation/verification, and atomic persistence of the successor ContextVersion, entry revisions, receipt/idempotency result and head advancement. A stale base is rejected; rebase creates a new ChangeSet. Corrections, reorder, replacement, removal, invalidation, supersession, rollback and Forget all create a successor version, never an in-place edit. I-authorized retention/erasure may separately purge payload with a non-reconstructive tombstone/audit proof; this is not silent mutation of a retained version.
+
+A violation is any same-ID/sequence content or metadata change, same-entry-revision content change, head advancement without an accepted ChangeSet/receipt, acceptance of a stale base, in-place update/delete outside I-authorized erasure, or acceptance of a mismatched snapshot commitment. Reviewer criteria CV-I1..CV-I6 are in the bilingual decision addenda.
+
+Evidence qualification: #1144 remains OPEN because restart-safe durable history/head/idempotency is not proven. On main, #1151's missing-recomputation claim is not reproduced: commit_change_set computes snapshot_hash(staged) and rejects mismatch; snapshot_hash sorts by entry ID and serializes full entries. stable_digest is FNV-1a 64-bit, non-cryptographic; digest-strength is a separate decision. Both Issues remain OPEN.
