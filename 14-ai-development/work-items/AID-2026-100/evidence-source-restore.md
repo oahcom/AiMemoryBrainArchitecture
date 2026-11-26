@@ -273,6 +273,11 @@ The other 10/15 F inventory entries lack existing EN/ZH-CN pairs and remain bloc
   and `05-memory-runtime` root sets together with two of the four D roots
   (`canonical-memory-store.md`, `forget-fence-operation-and-publication-gate.md`).
   Those paths are taken from main and produce no diff here.
+- Owner A ruled that the four `04-memory-compiler` roots and the
+  `2026-11-26-source-restore-matrix.md` record (with its EN/ZH-CN mirrors) are outside
+  the scope authorized by `OA-MERGE-2026-11-26-01`; they are excluded from PR #1220 and
+  are to be restored by the external restoration line under a new AID. Their bytes stay
+  reachable at commit `cae1b31e`; no history is rewritten and no claim is made here.
 - After that reconciliation this PR carries: two D roots
   (`memory-brain-overview.md`, `memory-lifecycle-manager.md`), three E roots
   (`consolidation-and-conflict-resolution.md`, `event-ingestion-engine.md`,

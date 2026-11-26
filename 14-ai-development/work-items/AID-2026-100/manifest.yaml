@@ -67,6 +67,7 @@ authority:
   implementation_authorization: "DOCUMENTATION_AND_STAGE_0_REGISTRATION_ONLY"
   merge_authorization: "CONDITIONAL; see 00-governance/decisions/2026-11-26-owner-a-conditional-merge-authorization-1220-1287.md"
   merge_authorization_decision_id: "OA-MERGE-2026-11-26-01"
+
   deployment_authorization: "NOT_GRANTED"
   issue_closure_authorization: "NOT_GRANTED"
 
@@ -82,7 +83,7 @@ scope:
     - "Remove PR #1220's duplicate AID-2026-081 DECISION-ACCEPTANCE registration; preserve mainline AID-081 Issue #1081 identity and reference PR #1219 / AID-2026-093."
     - "Keep AID-2026-082 manifest and evidence unchanged."
     - "Create the AID-2026-100 Stage 0 manifest, prompt and evidence."
-    - "Reconstruct only 04-memory-compiler/compiler-stage-contract.md from pinned EN/ZH-CN mirrors with RECONSTRUCTED_FROM_MIRROR provenance."
+    - "Carry the 03-memory-brain roots main does not hold (memory-brain-overview.md, memory-lifecycle-manager.md) and the new 03-memory-brain/README.md index."
     - "Author the new 05-memory-runtime/README.md directory index with AUTHORED_INDEX provenance; explicitly state that no authoritative source exists and that it is newly authored."
     - "Do not claim the 09-security-governance root or index: main delivers them through PR #1297 / AID-2026-109, and this registration neither authors nor re-labels them."
     - "Keep RESTORED and RECONSTRUCTED accounting separate."
@@ -91,9 +92,10 @@ scope:
   out_of_scope:
     - "Runtime/product code, schemas, DDL, APIs, migrations, test logic and production operations."
     - "Validator implementation or semantics changes, except the single root-inventory constant declared under declared_exceptions; only per-record manifest classification data is otherwise reconciled."
+    - "The four 04-memory-compiler roots (compiler-stage-contract.md, consolidation-and-conflict-resolution.md, event-ingestion-engine.md, evidence-and-provenance.md) and the 00-governance/implementation-evidence/2026-11-26-source-restore-matrix.md record with its EN/ZH-CN mirrors. Owner A's scope ruling on OA-MERGE-2026-11-26-01 removed them: carrying them would be a material change to the authorized scope. They remain reachable at commit cae1b31e."
     - "PR merge, deployment, issue closure, protocol freeze or normative promotion."
     - "Any fabricated Owner approval, authoritative source blob, independent review or global-uniqueness claim."
-  current_disposition: "PARTIAL — this PR carries 5 RESTORED roots (D: 03-memory-brain/memory-brain-overview.md, 03-memory-brain/memory-lifecycle-manager.md; E: 04-memory-compiler/consolidation-and-conflict-resolution.md, 04-memory-compiler/event-ingestion-engine.md, 04-memory-compiler/evidence-and-provenance.md), 1 RECONSTRUCTED_FROM_MIRROR root (04-memory-compiler/compiler-stage-contract.md), 1 AUTHORED_INDEX document (05-memory-runtime/README.md) and the new 03-memory-brain/README.md index. Main independently carries the other 9 of the original 14 RESTORED roots (2 D + 2 E + 5 F) through PR #1297 / AID-2026-109, PR #1304 / AID-2026-110 and PR #1314 / AID-2026-113; this record re-claims none of them. No Owner acceptance is claimed."
+  current_disposition: "PARTIAL — this PR carries two RESTORED D roots (03-memory-brain/memory-brain-overview.md, 03-memory-brain/memory-lifecycle-manager.md), the new 03-memory-brain/README.md index and the AUTHORED_INDEX document 05-memory-runtime/README.md. Main independently carries the rest of the original inventory through PR #1297 / AID-2026-109, PR #1304 / AID-2026-110 and PR #1314 / AID-2026-113, and this record re-claims none of it. The four 04-memory-compiler roots and the source-restore matrix were removed from this PR by Owner A's scope ruling on OA-MERGE-2026-11-26-01. No Owner acceptance is claimed."
 
 baseline_and_source_evidence:
   main_reconciliation_head: "81906cfc8d3cd477d26657520aa04d81466e7ce2"
@@ -115,13 +117,14 @@ baseline_and_source_evidence:
   gate_a_reconstruction:
     - root: "04-memory-compiler/compiler-stage-contract.md"
       provenance: "RECONSTRUCTED_FROM_MIRROR"
-      authoritative_root_source_blob: "NOT_FOUND"
+      disposition: "REMOVED_FROM_PR_SCOPE_BY_OWNER_RULING_ON_OA_MERGE_2026_11_26_01"
+      note: "The reconstruction was produced at commit cae1b31e and is retained there; this PR no longer carries it and makes no claim about it."
       en_mirror: "docs/en/04-memory-compiler/compiler-stage-contract.md"
       en_mirror_blob: "6d733294232a93aa59123009d2a2801d9b83f459"
       zh_cn_mirror: "docs/zh-CN/04-memory-compiler/compiler-stage-contract.md"
       zh_cn_mirror_blob: "ad386cac5636b4ba3eaf8b93ad93afcb444e8b46"
       reconstructed_root_blob: "1f79eeb40fb234423290f97fcce934e11bdca9bf"
-      status: "Draft / Candidate / Informative"
+
   authored_indexes:
     - root: "05-memory-runtime/README.md"
       provenance: "AUTHORED_INDEX"
@@ -190,7 +193,7 @@ session_evidence:
     session_reference_status: "NOT_AVAILABLE"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-100/session-evidence-source-restore.md"
 evidence_file: "14-ai-development/work-items/AID-2026-100/evidence-source-restore.md"
-evidence_blob: "b51f91ae22d33d5bcfc808708acd8a092ed07460"
+evidence_blob: "935da5214f9d9660fe5bbf3d1b647f1917719b8d"
 
 formal_registration:
   status: "COMPLETED_ON_CANDIDATE_BRANCH_WITH_BOUNDED_IDENTIFIER_SCAN"
@@ -218,7 +221,7 @@ acceptance_criteria:
     - "DECISION-ACCEPTANCE-03 is referenced as merged PR #1219 / AID-2026-093."
     - "AID-082 manifest and evidence remain unchanged."
     - "The AID-2026-100 Owner-assigned manifest, evidence, prompt and INDEX row are committed on PR #1220."
-    - "One compiler root carries RECONSTRUCTED_FROM_MIRROR provenance and exact EN/ZH-CN mirror pins; the 05-memory-runtime README is an AUTHORED_INDEX document, not a restoration; the 04, 05 and 09 documents that main already carries are neither overwritten nor re-claimed."
+    - "The 05-memory-runtime README is an AUTHORED_INDEX document, not a restoration; the 03, 04, 05 and 09 documents that main already carries are neither overwritten nor re-claimed; the four 04-memory-compiler roots and the source-restore matrix are absent from this PR."
     - "RESTORED and RECONSTRUCTED counts are separate."
     - "No validator implementation, runtime code, workflow definition, Issue closure or PR merge is changed."
   stage_0_exit_status: "PENDING_FINAL_READBACK_AND_CI"
@@ -239,3 +242,5 @@ prohibitions:
   - "DO_NOT_CHANGE_VALIDATOR_LOGIC_OR_SEMANTICS"
   - "DO_NOT_CHANGE_RUNTIME_OR_PRODUCT_CODE"
   - "DO_NOT_PROMOTE_RECONSTRUCTED_DOCUMENTS_TO_APPROVED_OR_NORMATIVE"
+
+disposition: "EXCLUDED_FROM_PR_1220; the four 04-memory-compiler root documents (compiler-stage-contract.md, consolidation-and-conflict-resolution.md, event-ingestion-engine.md, evidence-and-provenance.md) and the three source-restore-matrix files are to be restored by the external restoration line under a new AID; other 04-memory-compiler, 05-memory-runtime, and 09-security-governance documents are supplied by already-merged external PRs and are not claimed or duplicated by this PR."
