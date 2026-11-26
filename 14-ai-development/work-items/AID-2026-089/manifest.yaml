@@ -41,6 +41,7 @@ scope:
     - docs/en/01-system-architecture/system-boundaries.md
     - docs/zh-CN/01-system-architecture/system-boundaries.md
     - 14-ai-development/work-items/INDEX.md
+    - 00-governance/document-scope-registry.yaml
   files_out_of_scope: "All runtime/product code, tests, schemas, DDL, APIs, validators, scripts, CI workflows, deployment and production state."
 acceptance_criteria:
   - id: FF-01
@@ -78,7 +79,9 @@ acceptance:
   acceptance_authority: "Owner D, Storage/Consistency and Owner A"
 session_evidence:
   - role: DOCUMENTATION_AUTHOR
-    issue_refs: ["#1125", "#1211"]
+    issue_refs:
+      - "#1125"
+      - "#1211"
     implementing_ai_session: NOT_RECORDED
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-089/prompt-v1.md
     executed_prompt_sha256: 58dd684c5eb6e5d727bf232aed00f1c34620fc27567396cff192fe1479e0329d
