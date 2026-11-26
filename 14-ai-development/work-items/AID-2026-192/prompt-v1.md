@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-191/evidence.md"
+        - "14-ai-development/work-items/AID-2026-192/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -44,7 +44,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# AID-2026-191 prompt v1
+# AID-2026-192 prompt v1
 
 Dispatched worker prompt, recorded verbatim in the order the implementing session received it.
 This is the scope snapshot, not a transcript of the model stream.

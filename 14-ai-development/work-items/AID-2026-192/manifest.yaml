@@ -1,4 +1,4 @@
-work_item_id: AID-2026-191
+work_item_id: AID-2026-192
 title: >-
   Classify the 07-agent-integration inference-boundary and telemetry mirror groups with GOV-DOC-002
   metadata, and record why the remaining 07/08/13 mirrors cannot be classified without moving the
@@ -26,14 +26,14 @@ prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
 identifier_allocation:
   id_status: PROVISIONAL
   observed_main: 4326669caa6c43193d34219a0451b80762b712ff
-  assigned_id: AID-2026-191
+  assigned_id: AID-2026-192
   allocation_rule: >-
     Observed set, not INDEX maximum plus one: every AID-2026-NNN found in pull-request titles and
     remote branch names was enumerated through the GitHub API (1,2,3,4,7,9,10,11,14,23,30,40,41,42,
     50-58,60,62,64,66,69,72,75,77,78,80-83,89,90,92,93,95,98,100-116,140,150,172,173,174,183,186,
-    188,189), so 190 is the first number outside both observed sets.
+    188,189), so 190 was the first number outside both observed sets; 190 and 191 were both consumed on main or by open pull requests between branch creation and push, so this unit renumbered to 192.
   recheck_rule: >-
-    Immediately before merge, re-read open pull requests and remote branches for AID-2026-191; if
+    Immediately before merge, re-read open pull requests and remote branches for AID-2026-192; if
     occupied, take the next free number and update every path and reference in the same push.
 scope:
   objective: >-
@@ -59,10 +59,10 @@ scope:
       detail: >-
         Same shape for the telemetry group. Both docs mirrors were unclassified before; the docs
         bucket moves 173/343 to 177/343.
-    - path: "14-ai-development/work-items/AID-2026-191/"
+    - path: "14-ai-development/work-items/AID-2026-192/"
       detail: >-
         This registration set: manifest.yaml, evidence.md, prompt-v1.md, session-evidence.md.
-    - path: "docs/en/14-ai-development/work-items/AID-2026-191/evidence.md and docs/zh-CN/14-ai-development/work-items/AID-2026-191/evidence.md"
+    - path: "docs/en/14-ai-development/work-items/AID-2026-192/evidence.md and docs/zh-CN/14-ai-development/work-items/AID-2026-192/evidence.md"
       detail: >-
         English and Chinese renditions of the work record, each naming the root evidence.md as its
         bilingual_counterpart.source.
@@ -89,9 +89,9 @@ measurements:
     made check_bilingual_docs.py FAIL with "requires all counterparts changed in this PR".
     Reverted; the 58 stay frozen and 13-engineering-decisions stays 0/58.
 evidence:
-  record: 14-ai-development/work-items/AID-2026-191/evidence.md
-  prompt: 14-ai-development/work-items/AID-2026-191/prompt-v1.md
-  session: 14-ai-development/work-items/AID-2026-191/session-evidence.md
+  record: 14-ai-development/work-items/AID-2026-192/evidence.md
+  prompt: 14-ai-development/work-items/AID-2026-192/prompt-v1.md
+  session: 14-ai-development/work-items/AID-2026-192/session-evidence.md
 non_goals:
   - Closing any of the 58 frozen bilingual gaps or editing scripts/bilingual-baseline.txt
   - Creating a canonical source or a mirror for any orphan pair
@@ -112,9 +112,9 @@ session_evidence:
     issue_refs:
       - "#1212"
     implementing_ai_session: "NOT_RECORDED"
-    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-191/prompt-v1.md"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-192/prompt-v1.md"
     executed_prompt_sha256: "b9c7940266b025691f85a098666cba9237d185b4a00da1799184f5b02fb44409"
     executed_prompt_bytes: 8541
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_RECORDED"
-    session_evidence_ref: "14-ai-development/work-items/AID-2026-191/session-evidence.md"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-192/session-evidence.md"

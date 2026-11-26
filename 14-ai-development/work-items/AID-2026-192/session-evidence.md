@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-191/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-192/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -40,7 +40,7 @@ document_metadata:
     normative_status: Informative
 ---
 
-# Session Evidence — AID-2026-191
+# Session Evidence — AID-2026-192
 
 ## Session role / use case
 
