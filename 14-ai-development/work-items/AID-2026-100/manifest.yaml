@@ -149,8 +149,8 @@ prompt:
   prompt_file: "14-ai-development/work-items/AID-2026-100/prompt-v1.md"
   prompt_version: "v1"
   prompt_status: "HISTORICAL_TASK_INPUT_CARRIED_FORWARD"
-  prompt_sha256: "48d173be5ebcdc0170027be16a717542fc0d5301ee5ed2db20ec7fea561c99e2"
-  prompt_bytes: 2463
+  prompt_sha256: "08e766246d62ea602a571059e5d5fa9a7c8f094a071fb98518d38de5965518e5"
+  prompt_bytes: 2405
   prompt_provenance: "NOT_VERIFIED"
   prompt_provenance_note: >-
     The file preserves the prior task-specific user instruction that initially resulted in
@@ -158,6 +158,11 @@ prompt:
     provisional identifiers used at that time (AID-2026-080 and AID-PENDING-MERGE); the
     current repository Work Item ID is AID-2026-100. The complete effective prompt payload
     is unavailable.
+    The digest and byte count above are computed over the current bytes. #1281 narrowed
+    approval_scope to `type` and removed the two permanently-empty keys from every governed
+    document, including this snapshot's frontmatter (58 bytes). The pre-#1281 digest was
+    48d173be5ebcdc0170027be16a717542fc0d5301ee5ed2db20ec7fea561c99e2 at 2463 bytes; the
+    prompt text itself is unchanged.
   session_reference_status: "NOT_AVAILABLE"
 
 declared_exceptions:
@@ -187,8 +192,8 @@ session_evidence:
   - role: "IMPLEMENTER_AND_REGISTRATION_COORDINATOR"
     implementing_ai_session: "NOT_AVAILABLE"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-100/prompt-v1.md"
-    executed_prompt_sha256: "48d173be5ebcdc0170027be16a717542fc0d5301ee5ed2db20ec7fea561c99e2"
-    executed_prompt_bytes: 2463
+    executed_prompt_sha256: "08e766246d62ea602a571059e5d5fa9a7c8f094a071fb98518d38de5965518e5"
+    executed_prompt_bytes: 2405
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_AVAILABLE"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-100/session-evidence-source-restore.md"

@@ -51,7 +51,7 @@ Registration coordinator for the user-authorized Stage 0 work-item registration 
 
 # Actual AI input
 
-The task-specific user instruction for this registration turn is embedded in the metadata-bearing record `14-ai-development/work-items/AID-2026-100/prompt-v1.md` (2463 UTF-8 bytes; SHA-256 `48d173be5ebcdc0170027be16a717542fc0d5301ee5ed2db20ec7fea561c99e2`).
+The task-specific user instruction for this registration turn is embedded in the metadata-bearing record `14-ai-development/work-items/AID-2026-100/prompt-v1.md` (2405 UTF-8 bytes; SHA-256 `08e766246d62ea602a571059e5d5fa9a7c8f094a071fb98518d38de5965518e5`).
 
 The complete effective payload, including inherited system instructions and any baseline prompts, is NOT_AVAILABLE from the platform's exposed session records. The file as a whole is not byte-identical to the original message and is explicitly NOT_VERIFIED as a complete executed-prompt snapshot; no completeness claim is made. The historical visible output below recorded a provisional AID-2026-080 allocation; this was later found to collide with the existing mainline Issue #1201 work item and is superseded by the Owner-assigned AID-2026-100 allocation.
 
