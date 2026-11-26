@@ -232,7 +232,6 @@ open_blockers:
   - "AID-083 is occupied by PR #1250; AID-090..AID-093 are merged; AID-094 is retained by Issue #752 (PR #1277); AID-095, AID-096, AID-099 and AID-101 are merged. The AID-2026-100 exact-token scan covered main plus 986 refs and returned no hit; a full-history scan is not claimed."
 
 prohibitions:
-  - "DO_NOT_MERGE_ON_THE_AUTHORITY_OF_THIS_RECORD"
   - "DO_NOT_CLOSE_ISSUES"
   - "DO_NOT_DEPLOY"
   - "DO_NOT_CHANGE_VALIDATOR_LOGIC_OR_SEMANTICS"
