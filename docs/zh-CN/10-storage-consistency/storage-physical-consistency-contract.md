@@ -60,16 +60,6 @@ document_metadata:
 - English mirror：[EN](../../en/10-storage-consistency/storage-physical-consistency-contract.md)
 
 
-- 工作项：AID-2026-098（PROVISIONAL）
-- 版本：0.1.0-draft
-- 日期：2026-11-26
-- 状态：**Draft / Candidate / Informative（草案 / 候选 / 参考性）**
-- 归属：user-authorized operator (delegated by account owner)；代理登记，非自然人 Owner 签署
-- Canonical 源文件：`10-storage-consistency/storage-physical-consistency-contract.md`
-- 镜像：[EN](../docs/en/10-storage-consistency/storage-physical-consistency-contract.md) · [ZH-CN](../docs/zh-CN/10-storage-consistency/storage-physical-consistency-contract.md)
-- 关联载体：#1211（Storage 源规范恢复）、#1212（A–I + Storage 组合审查）、#1125（Forget Fence 单一权威）、#1180（G 交付状态投影）
-- 权威声明：本文提出可审查的物理合同，不构成 Owner 批准、已冻结的后端设计、已实现的运行时规范或生产符合性证据。
-
 ## 1. 目的、状态与术语
 
 本候选规范补齐 AID-2026-095 所识别 F8 Storage Atomicity 缺口的**文档合同形状**，并不关闭 F8。其目的在于把物理事务、持久性、可见性、恢复与防回滚义务写成可证伪的检查条件。
