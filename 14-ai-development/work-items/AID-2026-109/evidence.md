@@ -88,3 +88,14 @@ AID-2026-089 was merged by PR #1232 as `d914e8a1f8a1ba24c21c41a9249489d544388185
 ## 5. Scope and non-claims
 
 Documentation and work-item registration only. No runtime, validator semantics, schema, test, workflow, 04/05 source, Storage code, or Issue state changed. No D Owner acceptance, joint acceptance, wire-schema freeze, implementation conformance, production behavior, or Gate A closure is claimed. #1212 remains OPEN. The D canonical-store root presence moves from missing to **RESTORED — CANDIDATE / INFORMATIVE**; normative approval and exact Owner acceptance remain OPEN.
+
+
+### 4.1 Exact blob and metadata comparison
+
+| File | Source / prior-main blob SHA | New blob SHA | Added frontmatter blob SHA | Body treatment |
+|---|---|---|---|---|
+| Canonical `03-memory-brain/canonical-memory-store.md` | Source branch blob `6b37c91033fda21f072e2a3bde6f274663b1e76e` | `1583a80211b7fa37c1d9b98d90b971810f18248f` | `1ed6b54072d5dbe2fbc9da7c969cda1a2867ed3c` | Original source bytes are the exact suffix after the mandatory conflict notice; unmodified source body blob readback reproduced the source SHA exactly. |
+| EN mirror `docs/en/03-memory-brain/canonical-memory-store.md` | Prior main blob `414fe03fd40fb8ad46061d2d8c7d29ba2667f252` | `53b092af95f7e9cf36e4e9ddafa93e76f9a5f13e` | `088a9e882671f1f2c957ee1f7183c4f3d18b12f6` | Rebuilt from the exact canonical source body plus the same conflict notice to align section structure. |
+| ZH-CN mirror `docs/zh-CN/03-memory-brain/canonical-memory-store.md` | Prior main blob `34e0755a079f085df65c2a180cc59b6aaea7ea78` | `41dd113497a5ad8f7cc522904a1bf855e92923ef` | `b0f28b7da314e9d2f297d64d06c73cedc83b5843` | Existing translation retained; sections 14–18 split to match canonical structure; same authority-conflict notice translated. |
+
+The frontmatter SHA values above are Git blob SHAs of the exact added YAML frontmatter blocks (including delimiters). The source file's unmodified body, as a Git blob, hashes to `6b37c91033fda21f072e2a3bde6f274663b1e76e`, identical to the source branch blob.
