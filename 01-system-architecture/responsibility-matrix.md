@@ -100,4 +100,4 @@ Shared rows are intentionally joint; this crosswalk does not force a sole Owner 
 - Capability-column names are taxonomy labels, not Owner identifiers. A capability reference does not assign accountability.
 - Formal accountability must cite `Owner A` through `Owner I` explicitly and use the Owner crosswalk above. Bare A–I letters and unqualified capability labels MUST NOT be used as Owner references.
 - Subsystem identifiers use the `SYS-*` namespace defined by the Component Map.
-- Automated detection of ambiguous references is tracked in AID-2026-081 / Issue #1237. Until its checker is merged, this is a manual documentation rule, not a claim of automated enforcement.
+- Automated detection of ambiguous references is tracked in Issue #1237. Until its checker is merged, this is a manual documentation rule, not a claim of automated enforcement.
