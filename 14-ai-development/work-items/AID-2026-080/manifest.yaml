@@ -100,6 +100,7 @@ scope:
     - 14-ai-development/work-items/AID-2026-080/REVIEW-03-INDEPENDENT.md
     - 14-ai-development/work-items/AID-2026-080/REVIEW-04-INDEPENDENT.md
     - 14-ai-development/work-items/AID-2026-080/REVIEW-05-INDEPENDENT.md
+    - 14-ai-development/work-items/AID-2026-080/REVIEW-06-INDEPENDENT.md
   files_to_modify:
     - 14-ai-development/PR-GOVERNANCE-001.md
     - 14-ai-development/work-items/AID-2026-071/manifest.yaml
@@ -281,11 +282,12 @@ implementation:
     is left alone rather than force-pushed after merge.
 
 review:
-  status: "ROUND_5_NEEDS_REVISION - round 5 closed round 4's two open items on content and corrected two of my errors (a stale base, and an overstated description of the rule behind modification_status); its blocking item was a stale base, since resolved by merging main"
+  status: "ROUND_6_RETROSPECTIVE - round 5's B1 and B2 are closed on substance; round 6 is a retrospective review of a Head that had already merged, and it records a third pre-merge exact-Head deviation rather than an approval"
   record_ref: 14-ai-development/work-items/AID-2026-080/REVIEW-01-INDEPENDENT.md
   round_3_record_ref: 14-ai-development/work-items/AID-2026-080/REVIEW-03-INDEPENDENT.md
   round_4_record_ref: 14-ai-development/work-items/AID-2026-080/REVIEW-04-INDEPENDENT.md
   round_5_record_ref: 14-ai-development/work-items/AID-2026-080/REVIEW-05-INDEPENDENT.md
+  round_6_record_ref: 14-ai-development/work-items/AID-2026-080/REVIEW-06-INDEPENDENT.md
   round_1:
     exact_head_reviewed: a538dbf289cb21fc04a03fb412c90482619187bc
     reviewer_session: 6b07448b-ac9c-83ec-9115-f056a313f972
@@ -431,6 +433,49 @@ review:
     Head. That gap is stated rather than closed by argument, and `review.round_4.pre_merge_deviation`
     states it as a deviation for both PRs rather than as a single unfortunate exception.
 
+  round_6:
+    exact_head_reviewed: 6f1ad2148409a330ad5b1eb6f3e753682d880a2d
+    pull_request: "#1266"
+    reviewer_session: 6b07448b-ac9c-83ec-9115-f056a313f972
+    verdict: RETROSPECTIVE_REVIEW_NOT_A_PREMERGE_APPROVAL
+    timing:
+      review_requested_utc: "2026-11-26T09:58Z"
+      pr_merged_utc: "2026-11-26T09:55:18Z"
+      finding: >-
+        The PR merged three minutes before the review was requested. Round 6 says so in its own
+        first line rather than presenting itself as an approval, and that timing is the round's
+        finding.
+    closed_from_round_5:
+      - "B1 (stale base): CLOSED. `6f1ad214`'s second parent is exactly `f02ceab0`, the base the PR merged against; the stale-base condition is gone and the 16 exact-Head checks passed."
+      - "B2 (Rule L1 versus DM-10): CLOSED. Round 6 verified the correction is conceptually right: L1 is the normative stale-approval requirement, DM-10 its machine check, the two files are Draft with no approved version, and no separate rule says a body edit alone forces `Modified`. Keeping `Unchanged` is supported, and the corrected note does not lean on the drifting counts."
+    new_finding:
+      id: D3
+      severity: BLOCKING_PROCESS_DEVIATION
+      statement: >-
+        PR #1266 was merged without a recorded review of its final exact Head. Verified
+        independently: `GET /pulls/1266/reviews` returns 0, the merge is at `09:55:18Z`, the merge
+        commit is `4c8a3e1d` with parents `f02ceab0` and `6f1ad214`, and at `6f1ad214` the manifest
+        and INDEX still projected round 5 because round 6 did not exist yet.
+      distinct_from: >-
+        This is the third instance, not a repeat of the first two. #1215 and #1240 merged after the
+        branch advanced past the reviewed Head; #1266 merged while a review of the correct Head was
+        still being written. The mechanism differs and the outcome is identical, because the same
+        session both requested the reviews and drove the merges.
+    disposition: >-
+      Round 6's own recommendation is adopted: do not repair again in order to pretend the timing
+      can be fixed. The third deviation is recorded, the work item closes as `MERGED`, and
+      compliance and Owner acceptance are left unclaimed. The base is named as `f02ceab0` — the base
+      the PR actually merged against — rather than letting the earlier `6c5f0230` repair reference
+      stand as the only description of the final candidate.
+    deviations_recorded:
+      - "#1215 merged at `f7bc0789` after round 3 read `489b6048`."
+      - "#1240 merged at `32f87d46` after round 4 read `7e9c9f3d`."
+      - "#1266 merged at `6f1ad214` without a recorded review of that final Head before merge."
+    structural_cause: >-
+      A session that both authors the change and drives the merge cannot satisfy a requirement that
+      the merge wait for an independent review of the exact Head. Requesting the review and merging
+      are two actions by one actor, and the faster one wins. Recording this as a deviation is
+      honest; recording it as a process that works would not be.
 acceptance:
   status: NOT_ASSIGNED
   record_ref: ""
