@@ -120,7 +120,7 @@ This supplements pure-Rust domain/protocol/storage trait evidence. It ran on **a
 
 - Environment: WSL2 Ubuntu 24.04.
 - Exact HEAD: `a123ea4e414c9f74fa0c576fbd718049a7d9f917` (same pinned commit as the SQLite group).
-- Passed / failed: **177 / 0**.
+- Passed: **177**; failed count and process exit code: **NOT_RECORDED**.
 - Exact command, test-binary count, stdout byte count, raw stdout SHA-256, per-harness passed multiset, and test-name inventory: **NOT_RECORDED in the supplied evidence**.
 - Normalised digest: **NOT_SUPPLIED**; it cannot be derived from the aggregate `177 passed` count alone.
 
