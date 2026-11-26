@@ -270,3 +270,54 @@ G 接受 recovery-cutoff batch 和 pre-batch participant reconciliation，作为
 历史 Applied 只有在当时依据证据谓词有效提交时才保持不可变；当前使用必须独立根据当前 I/D/Context/session/capability 状态重新计算。
 
 例外：(1) 尚未证明 G validator/Applied persistence 实现消费全部 recovery-batch 证据；(2) 相同 identity/digest 重放、冲突隔离和 restore 行为需要可执行测试；(3) G-CO/Applied race suites 仍为 SPECIFIED / NOT RUN；(4) 不声称实现或生产通过。本决议仅适用于上述精确 A/COC Blob 配对。
+
+## Phase 3.6 — C/G Applied 证据包与验收裁决，2026-11-26
+
+授权人：user-authorized operator (delegated by account owner)。方向已记录；G/C/H/I/D 对精确版本的验收仍待完成。本裁决不授权实现或 Wire 冻结。
+
+### 逻辑证据包：C-G-APPLIED-EVIDENCE/1.0
+
+不可变证据包必须绑定一次精确应用尝试和请求：
+
+| 分组 | 必需字段/证明 |
+|---|---|
+| Context 身份 | context_id；精确 context_version；context_session_id |
+| Delivery 身份 | delivery_id；delivery_attempt_id；稳定 Retry/Attempt 关联 |
+| Runtime 身份 | agent_instance_ref；adapter_ref；adapter_instance_ref；runtime_instance_ref；runtime_session_ref |
+| 请求边界 | inference_request_id；final_request_boundary_id；final_request_boundary_type；submission_observed_at；adapter_capability_epoch |
+| Managed Region | managed_region_id；managed_region_revision；managed_region_inventory_digest；managed_region_coverage=COMPLETE；digest_profile；期望 managed_region_digest；观测 managed_region_digest |
+| C 证据 | 不可变 FINAL_REQUEST_SUBMITTED 引用与 APPLIED_CONTEXT_OBSERVED 引用；C Outcome Record 引用、序号和 Payload Digest |
+| H 完整性 | Evidence Schema Version；Issuer/Sender Authority/Subject；Audience；message_id 与 nonce；签名序列 Namespace/Sequence；Signature Profile；Key ID/Version；Payload Digest；Signature；integrity_proof_ref |
+| 当前权威 | I 授权决策引用和 PermissionEpoch；覆盖全部来源血缘的 D 当前 ForgetFenceCursor/Generation |
+| G 记录 | 不可变 AppliedRecord ID；精确 Context/Delivery/Attempt/Request/Boundary 元组；C/H 证据引用和 Digest；验证结果；记录时间 |
+
+Managed Region Digest Profile MUST 使用版本化规范序列化，对精确 Managed Region 字节计算 SHA-256。Inventory Digest MUST 绑定精确、有序的 Entry/Revision 清单。期望和观测 Region Digest MUST 相同。Partial、Bypassed、Unknown 或不可验证 Region 不属于 Tier-1 Full Applied。
+
+现有 H Schema 08-bmcp-protocol/schemas/bmcp.applied-delivery-evidence-1.0.0.schema.json 仅作为候选 Envelope 映射参考，不代表 H Wire/Schema 已冻结。H 负责映射 FINAL_REQUEST_SUBMITTED、APPLIED_CONTEXT_OBSERVED、身份、覆盖率、Digest 和签名字段；本 Work Item 不修改 Schema，也不决定 H 所有的 Wire 字段名。
+
+### 证据来源与落点
+
+1. C 在自己的 Outcome Record 中产生不可变的最终边界事实：精确不可变请求已提交，以及精确 Managed Region 已在该边界被观测到。这是两种不同证据，必须共享相同 Request/Boundary 身份。
+2. H 认证传输/Adapter 身份，并在其不可变 Protocol Evidence Archive 中保存或引用已签名协议 Envelope。Issuer/Audience/Message/Nonce/Signing Sequence/Key Version/Signature/Integrity Proof 和 Capability 证据由 H 拥有。
+3. G 的 Durable Applied Ledger 保存仅追加的 AppliedRecord，并保存指向 C/H Artifact 的不透明不可变引用和 Digest，按完整 Delivery Attempt/Request 身份索引。Storage 可以提供物理持久化，但不能签发 C 事实、H 签名或 G Applied 状态。物理 URI/Backend 由相应 Owner 定义且仍为 OPEN；本决议不虚构 URI Scheme。
+
+### G 投影与状态权威
+
+G MUST NOT 新增 Accepted 生命周期状态。G 将权威 C/H Accepted 证据引用作为 Attempt 元数据保存，并绑定稳定 DeliveryId + DeliveryAttemptId。Accepted 不等于 Applied。G Delivered 不等于 C Accepted。Stored、本地文件持久化、Received 或 Materialized 均不等于 Applied。
+
+只有在以下条件全部成立时，G 才能提交 AppliedRecord：所有身份字段匹配同一 Attempt 和最终请求；两种 C 证据均存在且因果顺序正确；H Envelope 完整性和 Capability 有效；Coverage 为 COMPLETE 且期望/观测 Digest 相同；当前 I 授权/PermissionEpoch 与 D ForgetFence 有效；并且提交前不存在已线性化的 Supersession/撤销/Fence。顺序不明确时必须保持 Unknown/Pending，不得成为 Full Applied。同一 Attempt 和同一 Evidence Digest 的重放必须幂等；同一身份但 Digest 不同必须 Conflict/Quarantine。
+
+Applied 只证明精确 Managed Region 在检查过的权威状态下存在于精确提交的请求中，不证明模型注意、理解、回忆、使用或行为遵循。
+
+### Reviewer 可核验判据
+
+- CG-A1 PASS 当且仅当所有身份字段绑定同一 DeliveryId + AttemptId + InferenceRequestId + BoundaryId；否则 FAIL。
+- CG-A2 PASS 当且仅当 C 的 FINAL_REQUEST_SUBMITTED 和 APPLIED_CONTEXT_OBSERVED 两种 Artifact 均存在并绑定同一精确请求；否则 FAIL。
+- CG-A3 PASS 当且仅当 Coverage 为 COMPLETE，且期望/观测 SHA-256 Region Digest 与 Inventory Commitment 匹配；否则 FAIL。
+- CG-A4 PASS 当且仅当 H 验证 Issuer、Audience、Message、Nonce、Sequence、Key Version、Signature 和 Payload Integrity；否则 FAIL。
+- CG-A5 PASS 当且仅当 G 保存仅追加的不可变 AppliedRecord，引用精确 C/H Artifact，且同一 Attempt 重放幂等；否则 FAIL。
+- CG-A6 PASS 当且仅当最终边界检查当前 I PermissionEpoch 与 D ForgetFence，且顺序不明确时保持 Unknown；否则 FAIL。
+- CG-A7 PASS 当且仅当 G 不新增 Accepted 状态，并在稳定 Attempt 上保存 C/H Accepted 证据引用；否则 FAIL。
+- CG-A8 PASS 当且仅当本地持久化/物化不能单独产生 G Applied，且不声称模型理解；否则 FAIL。
+
+仍未闭合：H 精确 Wire 映射/签名配置/URI；C/G/H 联合验收；G Durable Ledger/重启证明；#1124 完整身份绑定；#1135 本地 Adapter 结果分离；Transition/Retry/Unknown 测试；实现和生产 Conformance。

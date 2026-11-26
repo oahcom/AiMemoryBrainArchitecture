@@ -246,3 +246,18 @@ Acceptance scenarios：
 - **CANDIDATE：**正常同步使用 Deltas；bootstrap/recovery 使用 snapshots。
 - **DECIDED：**Unknown base 要求 rejection 或 reconciliation。
 - **OPEN：**Wire acknowledgements 和 Adapter conformance 属于 Session H；context authority 仍属于 Session G。
+
+## 17. C Applied 证据生产义务——委托方向决策，2026-11-26
+
+C 拥有 Agent 推理组装边界观测到的事实，不拥有 G 最终 Applied 投影。C 必须为 Full Applied 候选产生两份不同的不可变证据：(1) FINAL_REQUEST_SUBMITTED，证明精确不可变请求跨越最终 Submit 边界；(2) APPLIED_CONTEXT_OBSERVED，证明精确、完整的 Brain-managed Region 存在于该请求中。两份证据必须绑定相同的 context_id、精确 context_version、context_session_id、delivery_id、delivery_attempt_id、Agent/Adapter/Runtime 身份、inference_request_id、final_request_boundary_id/type、adapter_capability_epoch 和 managed_region_id/revision。
+
+证据必须携带版本化规范 Managed Region Digest Profile、期望和观测 SHA-256 Digest、精确 Inventory Digest，以及 COMPLETE Coverage。本地文件写入、缓存 Template 更新、Queue 入队、传输 Receipt 或 Accepted 结果都不能替代这两种最终边界证明。现有 H Schema 1.0.0 仅是候选 Envelope 映射；H 保留 Wire 和签名权威。
+
+C 输出不可变 Outcome Record 引用和 Payload Digest；H 对其进行认证/封装；G 将精确 C/H 引用保存在稳定 DeliveryAttempt 上，并且只有在所有谓词、当前 I PermissionEpoch 和 D ForgetFence 检查通过后，才提交 G AppliedRecord。C 不宣布 G Applied，任何证据都不能证明模型理解。
+
+PASS/FAIL：
+- CG-A1..CG-A3 PASS 当且仅当完整身份、两种证据和精确完整 Region 的 SHA-256 Commitment 均存在且匹配；否则 FAIL。
+- CG-A4 PASS 当且仅当 C 证据不可变、因果顺序正确并绑定唯一最终请求边界；否则 FAIL。
+- CG-A8 PASS 当且仅当本地持久化/物化不能单独被报告为推理边界 Applied；否则 FAIL。
+
+方向由 user-authorized operator (delegated by account owner) 于 2026-11-26 记录。C、G、H 保留精确版本验收权；不授予实现或 Wire 冻结授权。

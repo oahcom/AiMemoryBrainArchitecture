@@ -246,3 +246,18 @@ Acceptance scenarios:
 - **CANDIDATE:** Deltas for normal sync; snapshots for bootstrap/recovery.
 - **DECIDED:** Unknown base requires rejection or reconciliation.
 - **OPEN:** Wire acknowledgements and Adapter conformance belong to Session H; context authority remains Session G.
+
+## 17. C Applied evidence producer obligation — delegated direction, 2026-11-26
+
+C owns facts observed at the Agent inference assembly boundary, not G's final Applied projection. C must produce two distinct immutable evidence artifacts for a Full Applied candidate: (1) FINAL_REQUEST_SUBMITTED, proving the exact immutable request crossed the final submit boundary; and (2) APPLIED_CONTEXT_OBSERVED, proving the exact complete Brain-managed region was present in that request. Both artifacts bind the same context_id, exact context_version, context_session_id, delivery_id, delivery_attempt_id, agent/adapter/runtime identities, inference_request_id, final_request_boundary_id/type, adapter_capability_epoch and managed_region_id/revision.
+
+Evidence carries a versioned canonical managed-region digest profile, expected and observed SHA-256 digests, exact inventory digest, and COMPLETE coverage. A local file write, cached template update, queue insertion, transport receipt or Accepted result is not either final-boundary proof. Existing H schema 1.0.0 is only a candidate envelope mapping; H retains wire and signature authority.
+
+C emits immutable outcome-record refs and payload digests; H authenticates/envelopes them; G stores exact C/H refs on its stable DeliveryAttempt and alone commits the G AppliedRecord after all predicates, current I PermissionEpoch and D ForgetFence checks. C does not declare G Applied and no evidence proves model comprehension or behavior.
+
+PASS/FAIL:
+- CG-A1..CG-A3 PASS iff complete identity, both evidence kinds and exact complete-region SHA-256 commitments are present and match; otherwise FAIL.
+- CG-A4 PASS iff C evidence is immutable, causally ordered and tied to a unique final request boundary; otherwise FAIL.
+- CG-A8 PASS iff local persistence/materialization alone cannot be reported as inference-boundary Applied; otherwise FAIL.
+
+Direction recorded by user-authorized operator (delegated by account owner), 2026-11-26. C, G and H retain exact-version acceptance authority; no implementation or wire-freeze authorization is granted.

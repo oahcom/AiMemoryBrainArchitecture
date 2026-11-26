@@ -272,3 +272,54 @@ G accepts the recovery-cutoff batch and pre-batch participant reconciliation as 
 Historical Applied remains immutable only if it was validly committed under the evidence predicate at that time; current-use is independently recomputed against current I/D/Context/session/capability state.
 
 Exceptions: (1) G validator/Applied persistence implementation has not been shown consuming all recovery-batch evidence; (2) same-identity/digest replay, conflict quarantine and restore behavior require executable tests; (3) G-CO/Applied race suites remain SPECIFIED / NOT RUN; (4) no implementation or production pass is claimed. This decision applies only to the exact A/COC Blob pair above.
+
+## Phase 3.6 — C/G Applied evidence bundle and acceptance decision, 2026-11-26
+
+Authority: user-authorized operator (delegated by account owner). Direction recorded; G/C/H/I/D exact-version acceptance remains pending. No implementation or wire-freeze authorization.
+
+### Logical evidence bundle: C-G-APPLIED-EVIDENCE/1.0
+
+The immutable bundle binds one exact application attempt and request:
+
+| Group | Required fields / proof |
+|---|---|
+| Context identity | context_id; exact context_version; context_session_id |
+| Delivery identity | delivery_id; delivery_attempt_id; stable retry/attempt association |
+| Runtime identity | agent_instance_ref; adapter_ref; adapter_instance_ref; runtime_instance_ref; runtime_session_ref |
+| Request boundary | inference_request_id; final_request_boundary_id; final_request_boundary_type; submission_observed_at; adapter_capability_epoch |
+| Managed region | managed_region_id; managed_region_revision; managed_region_inventory_digest; managed_region_coverage=COMPLETE; digest_profile; expected managed_region_digest; observed managed_region_digest |
+| C evidence | immutable FINAL_REQUEST_SUBMITTED ref and APPLIED_CONTEXT_OBSERVED ref; C outcome record ref, sequence and payload digest |
+| H integrity | evidence schema version; issuer/sender authority/subject; audience; message_id and nonce; signing sequence namespace/sequence; signature profile; key id/version; payload digest; signature; integrity_proof_ref |
+| Current authority | I authorization-decision ref and PermissionEpoch; D current ForgetFenceCursor/generation for all represented source lineage |
+| G record | immutable AppliedRecord ID; exact context/delivery/attempt/request/boundary tuple; C/H evidence refs and digests; validation result; recorded_at |
+
+The managed-region digest profile MUST be SHA-256 over a versioned canonical serialization of the exact managed-region bytes. The inventory digest MUST bind the exact ordered entry/revision inventory. Expected and observed region digests MUST match. Partial, bypassed, unknown or unverifiable region is not Tier-1 Full Applied.
+
+The existing H schema at 08-bmcp-protocol/schemas/bmcp.applied-delivery-evidence-1.0.0.schema.json is a candidate mapping reference, not a declaration that H wire/schema freeze has occurred. H owns the mapping of FINAL_REQUEST_SUBMITTED, APPLIED_CONTEXT_OBSERVED, identity, coverage, digest and signature fields; this Work Item does not modify the schema or decide H-owned wire field names.
+
+### Evidence origin and landing
+
+1. C produces immutable final-boundary facts in its C outcome record: the exact final immutable request was submitted, and the exact managed region was observed at that boundary. These are distinct evidence kinds and share the same request/boundary identity.
+2. H authenticates transport/Adapter identity and stores or references the signed protocol envelope in its immutable protocol evidence archive. H owns issuer/audience/message/nonce/signing sequence/key version/signature/integrity proof and capability evidence.
+3. G's durable Applied Ledger stores an append-only AppliedRecord and opaque immutable refs/digests to C/H artifacts, keyed by complete delivery attempt/request identity. Storage may provide physical persistence but does not issue C facts, H signatures or G Applied status. Physical URI/backend remains owner-defined and OPEN; no URI scheme is invented.
+
+### G projection and state ownership
+
+G MUST NOT add an Accepted lifecycle state. It stores authoritative C/H Accepted evidence ref as attempt metadata bound to stable DeliveryId + DeliveryAttemptId. Accepted is not Applied. G Delivered is not C Accepted. Stored, local file persistence, Received or Materialized is not Applied.
+
+G commits AppliedRecord only if all identity fields match the same attempt and final request; both C evidence kinds exist and are causally ordered; H envelope integrity/capability are valid; coverage is COMPLETE and expected/observed digests match; current I authorization/PermissionEpoch and D ForgetFence are valid; and no supersession/revocation/fence linearized before submission. Ambiguous ordering remains Unknown/pending, never Full Applied. Same attempt plus same evidence digest is idempotent; same identity with changed digest is conflict/quarantine.
+
+Applied proves only that the exact managed region was present in the exact submitted request under the checked authority vector. It does not prove model attention, comprehension, recall, use or behavioral compliance.
+
+### Reviewer-verifiable criteria
+
+- CG-A1 PASS iff every identity field is bound to the same DeliveryId + AttemptId + InferenceRequestId + BoundaryId; otherwise FAIL.
+- CG-A2 PASS iff C FINAL_REQUEST_SUBMITTED and APPLIED_CONTEXT_OBSERVED artifacts both exist and bind the same exact request; otherwise FAIL.
+- CG-A3 PASS iff coverage is COMPLETE and expected/observed SHA-256 region digests plus inventory commitment match; otherwise FAIL.
+- CG-A4 PASS iff H verifies issuer, audience, message, nonce, sequence, key version, signature and payload integrity; otherwise FAIL.
+- CG-A5 PASS iff G stores an immutable append-only AppliedRecord referencing exact C/H artifacts and same-attempt replay is idempotent; otherwise FAIL.
+- CG-A6 PASS iff current I PermissionEpoch and D ForgetFence are checked at the final boundary and ambiguous ordering stays Unknown; otherwise FAIL.
+- CG-A7 PASS iff G adds no Accepted state and stores C/H Accepted evidence reference on the stable attempt; otherwise FAIL.
+- CG-A8 PASS iff local persistence/materialization alone cannot produce G Applied and no model-comprehension claim is made; otherwise FAIL.
+
+Open: H exact wire mapping/signature profile and URI; C/G/H joint acceptance; G durable ledger/restart proof; #1124 full identity binding; #1135 local adapter result separation; transition/retry/unknown tests; implementation and production conformance.

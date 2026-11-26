@@ -1,0 +1,93 @@
+work_item_id: AID-2026-083
+title: Define C/G Applied evidence bundle, evidence landing and G projection
+class: ARCH/DOC
+risk: R3
+risk_rationale: "Inference-boundary evidence and Applied attribution are security and audit critical; this Work Item changes documentation only."
+status: DISPATCHED
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: NOT_ASSIGNED
+acceptance_authority: NOT_ASSIGNED
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 364ef4ad6deeedbd5d383b5855973061503387f8
+tracking_issue: "#1124 identity binding / #1135 local persistence bypass / #1180 G-C-H state projection; external numbers are evidence references."
+prompt_id: AID-2026-083-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-083/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: de09446c4868ebe43d9f6185825934a5da76d9374428a4d422ed7b77e342b199
+prompt_bytes: 4137
+authorization:
+  authorized_by: "user-authorized operator (delegated by account owner)"
+  decision_date: "2026-11-26"
+  implementation_write: "GRANTED only for G/C architecture documents and EN/ZH-CN mirrors, this Work Item directory and INDEX.md."
+  runtime_code_change: NOT_GRANTED
+  test_code_change: NOT_GRANTED
+  h_schema_or_wire_change: NOT_GRANTED
+  validator_change: NOT_GRANTED
+  deployment_or_production: NOT_GRANTED
+  merge: NOT_GRANTED
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-083/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-083/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-083/session-evidence.md
+  files_to_modify:
+    - 06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md
+    - docs/en/06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md
+    - docs/zh-CN/06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md
+    - 07-agent-integration/inference-boundary-model.md
+    - docs/en/07-agent-integration/inference-boundary-model.md
+    - docs/zh-CN/07-agent-integration/inference-boundary-model.md
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope: "Every other path, especially crates/**, src/**, tests/**, 08-bmcp-protocol/schemas/**, scripts/**, validators, workflows, Cargo files and deployment."
+acceptance_criteria:
+  - id: AC1
+    criterion: "Applied evidence binds the complete context, session, delivery, attempt, agent, adapter, runtime, request and boundary identity."
+    measurement: "CG-A1 PASS/FAIL and exact field table are present in G/C EN/ZH-CN documents."
+  - id: AC2
+    criterion: "C produces distinct immutable FINAL_REQUEST_SUBMITTED and APPLIED_CONTEXT_OBSERVED evidence."
+    measurement: "CG-A2 and C producer obligation are explicit."
+  - id: AC3
+    criterion: "Complete managed-region coverage and matching SHA-256 commitments are required."
+    measurement: "CG-A3 specifies canonical profile, expected/observed digest and inventory digest."
+  - id: AC4
+    criterion: "H signed envelope integrity and current key/capability evidence are required."
+    measurement: "CG-A4 specifies issuer, audience, message, nonce, sequence, key version, signature and payload."
+  - id: AC5
+    criterion: "G stores an immutable AppliedRecord referencing exact C/H artifacts and stable attempt."
+    measurement: "CG-A5 and logical evidence landing points are explicit."
+  - id: AC6
+    criterion: "Current I PermissionEpoch and D ForgetFence are checked; ambiguous ordering remains Unknown."
+    measurement: "CG-A6 is explicit."
+  - id: AC7
+    criterion: "G does not add Accepted state and records authoritative C/H Accepted evidence on the stable attempt."
+    measurement: "CG-A7 matches the existing #1180 decision."
+  - id: AC8
+    criterion: "Local persistence/materialization alone cannot produce G Applied."
+    measurement: "CG-A8 preserves #1135 boundary."
+implementation:
+  status: IMPLEMENTED_IN_BRANCH
+  branch: docs/cg-applied-evidence-2026-11-26
+  pull_request: 1234
+  merge_commit_sha: NOT_MERGED
+review:
+  status: NOT_ASSIGNED
+  record_ref: ""
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: NOT_ASSIGNED
+session_evidence:
+  - role: DOCUMENTATION_AUTHOR
+    issue_refs:
+      - "#1124"
+      - "#1135"
+      - "#1180"
+    implementing_ai_session: NOT_RECORDED
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-083/prompt-v1.md
+    executed_prompt_sha256: de09446c4868ebe43d9f6185825934a5da76d9374428a4d422ed7b77e342b199
+    executed_prompt_bytes: 4137
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-083/session-evidence.md
