@@ -4,7 +4,7 @@ document_metadata:
   role: normative-standard
   lifecycle:
     approval:
-      decision_status: Approved
+      decision_status: Under-Review
       approver: NOT_RECORDED
       decision_date: NOT_RECORDED
       approved_version:
@@ -37,7 +37,7 @@ document_metadata:
     # claim canonical authority; see bilingual_counterpart below.
     canonical_status: Non-Canonical
     canonical_scope: "Architecture: design principles"
-    canonical_scope_id: null
+    canonical_scope_id: "architecture/design-principles"
     canonical_scope_keywords:
       - principle
       - design-rule
@@ -57,7 +57,7 @@ document_metadata:
 - Source: [Normative source specification](../../../00-governance/design-principles.md)
 - Source revision: 9792e189d63fbbc3694ab891fc4aeba5143b3b1c
 - Chinese counterpart: [设计原则](../../zh-CN/00-governance/design-principles.md)
-- Status: DECIDED baseline
+- Status: CANDIDATE / Pending-Reapproval — current version NOT APPROVED; P-01 through P-16 remain recorded design decisions, not formally approved requirements.
 
 This document defines the principles that constrain all subsystem designs.
 

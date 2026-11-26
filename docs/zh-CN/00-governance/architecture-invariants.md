@@ -4,7 +4,7 @@ document_metadata:
   role: normative-standard
   lifecycle:
     approval:
-      decision_status: Approved
+      decision_status: Under-Review
       approver: NOT_RECORDED
       decision_date: NOT_RECORDED
       approved_version:
@@ -14,7 +14,7 @@ document_metadata:
         type: Full-document
         included_sections: []
         included_assets: []
-      approval_applicability: Applicable-To-Current-Version
+      approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "00-governance/architecture-invariants.md"
       revocation: null
@@ -23,7 +23,7 @@ document_metadata:
       last_verified_date: null
       last_verification_note: "通常用于描述所有子系统规范必须遵守的约束"
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Pending-Reapproval
     supersession:
       supersedes: []
       supersession_reason: null
@@ -37,7 +37,7 @@ document_metadata:
     # claim canonical authority; see bilingual_counterpart below.
     canonical_status: Non-Canonical
     canonical_scope: "Architecture: system invariants"
-    canonical_scope_id: null
+    canonical_scope_id: "architecture/system-invariants"
     canonical_scope_keywords:
       - invariant
       - constraint
@@ -56,9 +56,9 @@ document_metadata:
 - 版本：1.1
 - 源规范：[项目规范性原文](../../../00-governance/architecture-invariants.md)
 - 对应英文：[Architecture Invariants](../../en/00-governance/architecture-invariants.md)
-- 状态：DECIDED（已决议基线）
+- 状态：CANDIDATE / Pending-Reapproval（当前版本未获批准）；I-01 至 I-24 尚无新的正式批准。
 
-以下不变量是所有子系统规范和未来实现必须遵守的规范约束。
+以下不变量是拟议的子系统规范和未来实现约束，仍须经过单独的正式批准。
 
 | ID | 架构不变量 |
 |---|---|
@@ -87,7 +87,9 @@ document_metadata:
 | I-23 | 每一项架构设计或改变架构语义的修改，都必须在同一个变更集中提供中文和英文文档；只有符合 GOV-DOC-001 的受治理临时例外才可暂缓。 |
 | I-24 | 架构文档验收必须检查双语语义一致性、稳定标识一致性、决策状态一致性以及源版本可追溯性。 |
 
-## AID-2026-014 Claim/Fact 语义不变量
+## 镜像补充章节——AID-2026-014 Claim/Fact 语义不变量
+
+本节作为既有补充内容保留在此语言镜像中。当前规范原文 `00-governance/architecture-invariants.md` 没有对应章节，因此这些内容不会仅因出现在镜像中就成为规范不变量集的一部分；本节不修改或替代规范原文。是否将这些陈述纳入规范原文，须由相关内容 Owner 决定。
 
 - Claim 与 Fact 是独立的规范对象。
 - 保持命题身份的 Revision 之间必须保持稳定 Claim 身份。
@@ -102,4 +104,6 @@ document_metadata:
 
 每份子系统规范都必须说明自己负责执行哪些不变量、依赖哪些不变量，以及如何发现和处理违反不变量的情况。实现审查不得隐式豁免任何不变量；如需变更，必须提供明确的 ADR 和影响分析。
 
-所有架构 Owner 必须遵守[ GOV-DOC-001 架构双语文档规范 ](../../../00-governance/bilingual-documentation-policy.md)。任何临时 STALE 例外都必须明确登记、设置期限并持续跟踪。
+## 双语文档执行要求
+
+所有架构 Owner 必须遵守 [GOV-DOC-001 架构双语文档规范](../../../00-governance/bilingual-documentation-policy.md)。任何临时 STALE 例外都必须明确登记、设置期限并持续跟踪。

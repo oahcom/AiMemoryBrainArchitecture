@@ -1,3 +1,34 @@
+---
+document_metadata:
+  domain: architecture
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      evidence_reference: []
+    evidence_verification:
+      verification_status: Unverified
+      last_verification_note: "Owner-authorized classification direction for AID-2026-11-26-GOV-DOC-01; not a formal approval record. Pre-metadata content blob: b3297c43b1ce4e2ae7efd28410ce02880e9b41d1. Approval remains Draft; evidence verification remains Unverified."
+    usage_status: Active
+    modification_status: Modified
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "System boundaries and authority"
+    canonical_scope_id: architecture/system-boundaries
+    canonical_scope_keywords:
+      - authority
+      - trust-boundary
+      - ownership
+      - forget
+    canonical_conflict_status: None
+    normative_status: Normative
+  bilingual_counterpart:
+    source: "01-system-architecture/system-boundaries.md"
+    en: null
+    zh-CN: "docs/zh-CN/01-system-architecture/system-boundaries.md"
+---
 # System Boundaries
 
 - Document ID: SYS-BOUNDARIES-001
@@ -59,7 +90,9 @@ Brain is the logical authority for its managed Canonical Memory and Memory Conte
 - Runtime retrieves and activates candidates.
 - Memory Context Manager (MCM) plans, edits, versions, and reconciles contexts.
 - Context Synchronization tracks deliveries and acknowledgements.
-- Governance authorizes operations and enforces retention/forgetting policy.
+- Owner I owns global authorization, retention/legal-hold, external-copy policy, the global Forget target inventory and global completion criteria.
+- Owner D owns canonical Memory identity/lifecycle, Forget Fence and canonical Forget mechanics, plus the D-domain completion predicate.
+- Global Forget Completion is jointly determined by D and every relevant execution Owner under a completion-evidence contract accepted by all those Owners. Neither D nor I may declare it unilaterally. The contract remains pending Owner acceptance; this direction does not constitute acceptance evidence.
 
 A component may execute a delegated step but cannot claim another component's authority.
 
@@ -202,3 +235,19 @@ Every crossing must identify: caller identity, operation, resource, Scope, Permi
 - **DECIDED:** Context application occurs at a subsequent inference boundary and requires Adapter acknowledgement.
 - **CANDIDATE:** Push-first telemetry with bounded heartbeat/reconciliation.
 - **OPEN:** Exact identity, authentication, protocol envelope, retention erasure, and Environment ingress profile.
+
+## 13. Governance-operation authority traceability register
+
+The following register keeps three authorities separate. A policy authority authorizes the rule or exception; a canonical-state authority records the logical state transition; a physical executor performs work on the relevant store, backup or external recipient. A role in one column does not imply the roles in another.
+
+| Operation | Policy / authorization authority | Canonical-state authority | Physical executor | Minimum completion evidence / boundary |
+|---|---|---|---|---|
+| Authorization and revocation | Owner I | Owner I for authorization / PermissionEpoch state | Each affected subsystem at its access boundary | Versioned authorization or revocation record plus enforcement evidence from each affected boundary; a policy record alone is not proof of enforcement |
+| Retention and legal hold | Owner I | Owner I for policy/hold record; Owner D for the resulting Memory lifecycle state where applicable | Each data custodian / storage owner holding affected data | Explicit hold/retention decision and per-custodian acknowledgement; D does not become the policy authority |
+| Logical Forget suppression / fence | Owner I authorizes under policy | Owner D for canonical Memory state, Forget Fence and D-domain completion predicate | D and each relevant downstream subsystem apply suppression to their owned projections | Canonical fence/state receipt plus per-executor suppression evidence; a Forgotten state is not physical-erasure proof |
+| Physical erasure of canonical or derived data | Owner I for authorization and global policy | Owner D records canonical Forget state; each store owner records its own deletion state | The storage/index/cache operator that physically holds each copy | Per-store deletion receipt and evidence for replicas/caches; D's canonical state alone does not prove physical erasure |
+| Backup expiry / deletion | Owner I sets retention policy | The concrete backup catalog is authoritative for backup-object state; accountable catalog Owner is not assigned by this high-level document | The operator of each backup service | Expiry/deletion evidence from the backup service; the backup Owner and guarantee remain an explicit detailed-design gap (SB-02) |
+| External-recipient deletion | Owner I owns external-copy policy and the global target inventory | Each recipient is authoritative for its own deletion/compliance state; D records only the originating canonical Forget state | Each external recipient or its authorized operator | Recipient-specific authenticated completion evidence; a D fence or local deletion receipt cannot stand in for recipient completion |
+| Global Forget Completion assessment | Owner I owns global policy and assessment coordination; no unilateral completion authority is created | Joint evidence from D and every relevant execution Owner under a contract accepted by all affected Owners | Every relevant storage, subsystem and external recipient executor | All required target inventory entries reconciled and evidence accepted under the joint contract; neither D nor I may declare completion alone |
+
+**Traceability rule.** Every new or materially changed governance operation MUST identify all three authority columns independently. Where a role is not assigned, record `NOT_ASSIGNED` and keep the operation open; do not infer it from the policy Owner or from the component that happens to execute a step. The register is a documentation-level baseline, not an automated check. Automated completeness and mirror-consistency enforcement is tracked separately by AID-2026-081 / Issue #1237 and is not claimed to exist in this PR.
