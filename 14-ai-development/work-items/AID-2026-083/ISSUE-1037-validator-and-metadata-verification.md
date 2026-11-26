@@ -68,18 +68,18 @@ The workflow selected `PR_BASE=c6b7d987b959c42af5072932963dae9ed55721e4`. The co
 
 ## 2. Captured checker output summary and hash
 
-The exact extracted summary block from that job log is:
+The following six selected summary lines are copied verbatim from the job log (they are selected lines, not the complete stdout):
 
 ```text
 GOV-DOC-002: 762 governed documents, 293 classified, 469 unclassified
 DM-10 out-of-scope stale bindings: 0
-117 governed document(s) carry a body '- Status:' line and no front-matter equivalent (advisory)
-02-domain-model: 1/12 classified
-04-memory-compiler: 3/5 classified
+##[notice]advisory (non-blocking): 117 governed document(s) carry a body '- Status:' line and no front-matter equivalent; DM-02 cannot see them (issue #481)
+  02-domain-model: 1/12 classified
+  04-memory-compiler: 3/5 classified
 PASS (incremental): no GOV-DOC-002 violations; 293 classified, 469 unclassified
 ```
 
-Output-summary object hash: Git blob SHA-1 `7744f16df1f71a1a43e38f3a6813668410d3579e`. This is the Git blob hash of the extracted 5,910-character summary block captured from the job log, not a SHA-256 digest of the entire runner log.
+Selected-output object hash: Git blob SHA-1 `73ebf7144ee7458a08bde5d36a3a9bef42e54324`, calculated over exactly the six UTF-8 lines above including the trailing LF. This is a Git blob SHA-1, not a SHA-256 digest of the entire runner log.
 
 The incremental verdict means files outside the changed set were not required to be classified. It is not a whole-tree classification PASS.
 
