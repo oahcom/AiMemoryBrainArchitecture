@@ -1,3 +1,51 @@
+---
+document_metadata:
+  domain: memory-brain
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "Delegated direction decision, 2026-11-26"
+        - "Work Item AID-2026-086"
+        - "Issues #1125 and #1211"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Candidate source restored in Draft PR; exact-version D/Storage/A acceptance and normative approval pending."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "D canonical ForgetFence authority and Storage projection boundary"
+    canonical_scope_id: "memory-brain/forget-fence-authority"
+    canonical_scope_keywords:
+      - forget-fence
+      - canonical-suppression
+      - storage-projection
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "03-memory-brain/forget-fence-and-completion-contract.md"
+---
 # Canonical Forget Fence and Completion Contract
 
 - Document ID: D-FORGET-CONTRACT-001
