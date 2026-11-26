@@ -48,7 +48,7 @@ source_pins:
   aid_108_correction_manifest_blob: "1164fb16a65c2a252697751dce76fa9584a36165"
   storage_contract_blob: "d571f086505b312c40b6ae2e56a868131cfffc78"
   h_contract_blob: "f64dd8f520b98e52a7151619cb279fc0b4c38c89"
-latest_sync_main_commit_sha: "248cef62410cb4a412efb2d83326a1ce32345765"
+latest_sync_main_commit_sha: "57767952f1248e2de616c5dc24ac762ecb3a5a7f"
 execution_evidence:
   sqlite_backend:
     head: "a123ea4e414c9f74fa0c576fbd718049a7d9f917"
@@ -141,11 +141,17 @@ acceptance:
   implementation_conformance: "NOT_CLAIMED"
   production_conformance: "NOT_CLAIMED"
 carrier:
-  branch: "docs/aid-2026-109-sqlite-implementation-evidence-review"
+  branch: "docs/aid-2026-111-sqlite-implementation-evidence-review"
   pull_request: 1307
-  draft: true
-  merge_commit_sha: "PENDING"
-  merge_authorization: "only after all 16 required contexts succeed on exact final Head"
+  draft: false
+  merge_commit_sha: "e47dd6f03ddd143be42645beba43c54b46921962"
+  merge_authorization: "merged after the exact-head review gate; integration fact only, no Owner acceptance or production conformance"
+evidence_correction_followup:
+  branch: "docs/aid-2026-111-fingerprint-correction-r2"
+  pull_request: 1317
+  status: "OPEN"
+  base_commit: "57767952f1248e2de616c5dc24ac762ecb3a5a7f"
+  exact_head: "PENDING_FINAL_HEAD_VERIFICATION"
 review:
   status: "NOT_ASSIGNED"
   independent_reviewer: "NOT_ASSIGNED"
