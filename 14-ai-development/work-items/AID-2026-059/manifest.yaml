@@ -197,8 +197,8 @@ session_evidence:
       - "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1076"
     implementing_ai_session: session-1029-1076-residuals
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-059/prompt-1029-1076-v1.md
-    executed_prompt_sha256: 636ebb9e853c593091b293f5ea709c0936ef7bab3b7987d118c0d1847382ed94
-    executed_prompt_bytes: 9174
+    executed_prompt_sha256: f0a315582ba51212758d82c6dfacedaaa676575f2b0ffcec4170fbded05f229e
+    executed_prompt_bytes: 9166
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-059/session-evidence-1029-1076.md

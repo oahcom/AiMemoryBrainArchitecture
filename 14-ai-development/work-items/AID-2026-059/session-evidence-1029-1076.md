@@ -27,10 +27,10 @@ document_metadata:
       supersedes: []
       supersession_reason: null
       effective_date: null
-      archival:
-        archived_date: null
-        archival_reason: null
-        archival_reference: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
   authority:
     canonical_status: Non-Canonical
     canonical_scope: null
