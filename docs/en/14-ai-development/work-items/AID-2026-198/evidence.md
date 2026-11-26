@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-190/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-198/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -30,8 +30,8 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "AID-2026-190 locale-independent Git output decoding in the documentation and bilingual gates"
-    canonical_scope_id: "ai-development/aid-2026-190-git-output-decode-locale"
+    canonical_scope: "AID-2026-198 locale-independent Git output decoding in the documentation and bilingual gates"
+    canonical_scope_id: "ai-development/aid-2026-198-git-output-decode-locale"
     canonical_scope_keywords:
       - git-output-decoding
       - locale
@@ -42,13 +42,13 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "14-ai-development/work-items/AID-2026-190/evidence.md"
+    source: "14-ai-development/work-items/AID-2026-198/evidence.md"
     en: null
-    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-190/evidence.md"
+    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-198/evidence.md"
 ---
-# AID-2026-190 — Gates that read Git output treated a decode failure as a content finding
+# AID-2026-198 — Gates that read Git output treated a decode failure as a content finding
 
-- Work item: AID-2026-190; id_status: PROVISIONAL.
+- Work item: AID-2026-198; id_status: PROVISIONAL.
 - Attribution: user-authorized operator (delegated by account owner); date: 2026-11-27.
 - base_commit_sha: `4326669caa6c43193d34219a0451b80762b712ff` (the `origin/main` the branch was cut from).
 - Conclusion first: `subprocess(text=True)` decodes Git output with the console's locale codec. On a GBK console the decode failed, `stdout` became `None`, and the caller read "I could not decode this" as "this does not exist". After the change the GBK console and a UTF-8 environment reach the same verdict.

@@ -1,4 +1,4 @@
-work_item_id: AID-2026-190
+work_item_id: AID-2026-198
 title: Decode Git output as UTF-8 in every gate that reads it, so an unreadable pin is INCOMPLETE instead of "the file did not exist"
 class: GATE/TEST
 risk: R1
@@ -18,17 +18,17 @@ date: 2026-11-27
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
 base_commit_sha: 4326669caa6c43193d34219a0451b80762b712ff
-prompt_id: AID-2026-190-PROMPT
+prompt_id: AID-2026-198-PROMPT
 prompt_status: NOT_RECORDED
 prompt_provenance: DISPATCHED_TASK_FILE
 scope:
   files_to_create:
-    - 14-ai-development/work-items/AID-2026-190/manifest.yaml
-    - 14-ai-development/work-items/AID-2026-190/evidence.md
-    - 14-ai-development/work-items/AID-2026-190/prompt-v1.md
-    - 14-ai-development/work-items/AID-2026-190/session-evidence.md
-    - docs/en/14-ai-development/work-items/AID-2026-190/evidence.md
-    - docs/zh-CN/14-ai-development/work-items/AID-2026-190/evidence.md
+    - 14-ai-development/work-items/AID-2026-198/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-198/evidence.md
+    - 14-ai-development/work-items/AID-2026-198/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-198/session-evidence.md
+    - docs/en/14-ai-development/work-items/AID-2026-198/evidence.md
+    - docs/zh-CN/14-ai-development/work-items/AID-2026-198/evidence.md
   files_to_modify:
     - scripts/check_bilingual_docs.py
     - scripts/check_bilingual_docs_full.py
@@ -80,9 +80,9 @@ session_evidence:
     issue_refs:
       - "#266"
     implementing_ai_session: "NOT_RECORDED"
-    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-190/prompt-v1.md"
-    executed_prompt_sha256: "cd8251437464303511c9e74255d6403ea9e14da169907d6d3f4a4521c0f3507b"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-198/prompt-v1.md"
+    executed_prompt_sha256: "8a48d0c0b5f2286fb95fb556d4180f24c26835aa734bd791f175ec263528328e"
     executed_prompt_bytes: 2975
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_RECORDED"
-    session_evidence_ref: "14-ai-development/work-items/AID-2026-190/session-evidence.md"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-198/session-evidence.md"

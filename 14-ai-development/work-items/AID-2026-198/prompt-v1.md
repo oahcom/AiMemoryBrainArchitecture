@@ -12,12 +12,12 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-190/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-198/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
       last_verified_date: "2026-11-27"
-      last_verification_note: "Verbatim capture of the dispatched task text for AID-2026-190; the manifest pins its byte count and SHA-256."
+      last_verification_note: "Verbatim capture of the dispatched task text for AID-2026-198; the manifest pins its byte count and SHA-256."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -41,11 +41,11 @@ document_metadata:
     en: null
     zh-CN: null
 ---
-# AID-2026-190-PROMPT v1
+# AID-2026-198-PROMPT v1
 
 Attribution: user-authorized operator (delegated by account owner)
 Date: 2026-11-27
-Work item ID: AID-2026-190 (PROVISIONAL; assigned number range only)
+Work item ID: AID-2026-198 (PROVISIONAL; assigned number range only)
 
 The dispatched task text, as received by the executing session:
 

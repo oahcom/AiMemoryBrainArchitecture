@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-190/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-198/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -30,8 +30,8 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "AID-2026-190 locale-independent Git output decoding in the documentation and bilingual gates"
-    canonical_scope_id: "ai-development/aid-2026-190-git-output-decode-locale"
+    canonical_scope: "AID-2026-198 locale-independent Git output decoding in the documentation and bilingual gates"
+    canonical_scope_id: "ai-development/aid-2026-198-git-output-decode-locale"
     canonical_scope_keywords:
       - git-output-decoding
       - locale
@@ -42,13 +42,13 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "14-ai-development/work-items/AID-2026-190/evidence.md"
-    en: "docs/en/14-ai-development/work-items/AID-2026-190/evidence.md"
+    source: "14-ai-development/work-items/AID-2026-198/evidence.md"
+    en: "docs/en/14-ai-development/work-items/AID-2026-198/evidence.md"
     zh-CN: null
 ---
-# AID-2026-190 — 读 Git 输出的门禁把"解码失败"当成"内容断言失败"
+# AID-2026-198 — 读 Git 输出的门禁把"解码失败"当成"内容断言失败"
 
-- Work item: AID-2026-190；id_status: PROVISIONAL。
+- Work item: AID-2026-198；id_status: PROVISIONAL。
 - Attribution: user-authorized operator (delegated by account owner)；date: 2026-11-27。
 - base_commit_sha: `4326669caa6c43193d34219a0451b80762b712ff`（建分支时的 `origin/main`）。
 - 结论先行：`subprocess(text=True)` 用控制台 locale 解码 Git 输出；GBK 控制台上解码失败，`stdout` 变成 `None`，调用方把"没读懂"当成"不存在"。改后 GBK 控制台与 UTF-8 环境给出同一个判定。
