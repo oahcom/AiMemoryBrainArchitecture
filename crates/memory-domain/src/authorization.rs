@@ -299,7 +299,13 @@ impl<'de> serde::Deserialize<'de> for AuthorizationDecisionRef {
 /// Distinct from `AuthorizationDecisionData` on purpose: an attestation answers
 /// "who attested this subject", an authorization decision answers "what did I
 /// decide about this subject". Neither substitutes for the other.
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
+///
+/// Construction by struct literal is unvalidated — that is what
+/// [`AttestorRef::from_issued_data`] is for. **Deserialization is validated**:
+/// `Deserialize` routes through [`validate_attestor_data`], so a value decoded
+/// from bytes cannot carry an unsupported issuer, an empty id, a non-hex digest
+/// or a non-RFC-3339 timestamp. There is deliberately no unvalidated decode path.
+#[derive(serde::Serialize, Clone, Debug, Eq, PartialEq)]
 pub struct AttestorData {
     pub attestation_id: OpaqueId,
     pub issuer: IssuerId,
@@ -365,6 +371,25 @@ fn validate_attestor_data(data: &AttestorData) -> Result<(), DomainError> {
         return Err(DomainError::InvalidCanonicalCommitField("issued_at"));
     }
     Ok(())
+}
+
+impl<'de> serde::Deserialize<'de> for AttestorData {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        use serde::de::Error;
+
+        let wire = AttestorIssuedWire::deserialize(deserializer)?;
+        let data = AttestorData {
+            attestation_id: wire.attestation_id,
+            issuer: IssuerId::new(wire.issuer)
+                .map_err(|error| Error::custom(format!("invalid issuer: {error:?}")))?,
+            subject_digest: wire.subject_digest,
+            issued_at: wire.issued_at,
+        };
+
+        validate_attestor_data(&data)
+            .map_err(|error| Error::custom(format!("invalid attestor data: {error:?}")))?;
+        Ok(data)
+    }
 }
 
 impl serde::Serialize for AttestorRef {
@@ -513,6 +538,79 @@ mod tests {
             Err(DomainError::InvalidCanonicalCommitField("issued_at"))
         );
     }
+
+    /// A bare `AttestorData` decoded from bytes must not carry an issuer the
+    /// validator would refuse. Before the hand-written `Deserialize` this
+    /// returned `Ok` and the caller had no way to tell.
+    #[test]
+    fn attestor_data_deserialize_rejects_unsupported_issuer() {
+        let json = format!(
+            r#"{{"attestation_id":"attestation-domain-test","issuer":"someone-else","subject_digest":"{}","issued_at":"2026-11-22T00:00:00Z"}}"#,
+            "a".repeat(64)
+        );
+
+        assert_eq!(
+            serde_json::from_str::<AttestorData>(&json).map_err(|error| error.to_string()),
+            Err("invalid attestor data: InvalidCanonicalCommitField(\"issuer\")".to_owned())
+        );
+    }
+
+    #[test]
+    fn attestor_data_deserialize_rejects_empty_attestation_id() {
+        let json = format!(
+            r#"{{"attestation_id":"","issuer":"{I_DEV_BASELINE_ATTESTOR}","subject_digest":"{}","issued_at":"2026-11-22T00:00:00Z"}}"#,
+            "a".repeat(64)
+        );
+
+        assert_eq!(
+            serde_json::from_str::<AttestorData>(&json).map_err(|error| error.to_string()),
+            Err("invalid attestor data: EmptyId".to_owned())
+        );
+    }
+
+    #[test]
+    fn attestor_data_valid_value_round_trips_through_json() {
+        let data = valid_attestor_data();
+        let wire = serde_json::to_string(&data).unwrap();
+
+        assert_eq!(
+            wire,
+            format!(
+                r#"{{"attestation_id":"attestation-domain-test","issuer":"{I_DEV_BASELINE_ATTESTOR}","subject_digest":"{}","issued_at":"2026-11-22T00:00:00Z"}}"#,
+                "a".repeat(64)
+            )
+        );
+        assert_eq!(serde_json::from_str::<AttestorData>(&wire).unwrap(), data);
+    }
+
+    #[test]
+    fn attestor_ref_keeps_both_wire_forms() {
+        // Pending stays the legacy unit value (§2.4): JSON `null`.
+        let pending_wire = serde_json::to_string(&AttestorRef::pending_i()).unwrap();
+        assert_eq!(pending_wire, "null");
+        assert!(serde_json::from_str::<AttestorRef>("null")
+            .unwrap()
+            .is_pending());
+
+        // Issued stays a flat four-field object, and decoding it still validates.
+        let issued = AttestorRef::from_issued_data(valid_attestor_data()).unwrap();
+        let issued_wire = serde_json::to_string(&issued).unwrap();
+        assert!(
+            issued_wire.starts_with("{\"attestation_id\""),
+            "got {issued_wire}"
+        );
+        assert_eq!(
+            serde_json::from_str::<AttestorRef>(&issued_wire).unwrap(),
+            issued
+        );
+
+        let bad_issuer = format!(
+            r#"{{"attestation_id":"a","issuer":"someone-else","subject_digest":"{}","issued_at":"2026-11-22T00:00:00Z"}}"#,
+            "a".repeat(64)
+        );
+        assert!(serde_json::from_str::<AttestorRef>(&bad_issuer).is_err());
+    }
+
     #[test]
     fn attestor_ref_distinguishes_pending_from_issued() {
         let pending = AttestorRef::pending_i();
