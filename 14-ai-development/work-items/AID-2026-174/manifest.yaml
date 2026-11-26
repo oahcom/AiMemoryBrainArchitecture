@@ -85,10 +85,14 @@ acceptance_criteria:
     criterion: >-
       This work item changes nothing else.
     measurement: >-
-      Changed paths are this directory and `INDEX.md`: three new files plus one row, 325 added lines,
-      0 removed (`git diff --numstat` against the merge base: 152 + 77 + 95 + 1). The figure 318
-      stated here earlier was wrong; corrected by the coordinating session on 2026-11-27 at head
-      `2afe24cd`. Separately, the merge timestamp `2026-11-26T13:41:46Z` was challenged in
+      Changed paths are this directory and `INDEX.md`: three new files plus one row, 0 removed.
+      The inserted-line total is not quoted as a constant here, because this sentence lives in the
+      very diff it would count: at `2afe24cd`, before the correction commit that carries it, the
+      total was 152 + 77 + 95 + 1 = 325; that commit adds five more lines to this file, so the
+      total at any later head must be measured with `git diff --numstat` against the merge base
+      rather than read from this sentence. The figure 318 stated here earlier was wrong at every
+      head where it appeared; corrected by the coordinating session on 2026-11-27. Separately, the
+      merge timestamp `2026-11-26T13:41:46Z` was challenged in
       independent review and is correct: `pulls/1287` reports `merged_at` =
       `2026-11-26T13:41:46Z`, one second after the commit's own timestamp, and the record is
       describing the merge event.
