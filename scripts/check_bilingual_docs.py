@@ -324,17 +324,42 @@ def _has_any_chinese(source: str) -> bool:
     return any(1 for ch in text if "\u4e00" <= ch <= "\u9fff")
 
 
-def _side_by_side_bilingual(source: str) -> bool:
-    """True when `source` has a side-by-side partner and the pair carries Chinese.
+def _chinese_side(source: str, partner: str) -> str | None:
+    """Return the member of a pair that is designated to hold the Chinese text.
 
-    One CJK character anywhere in either file is enough: a short but genuine
-    translation must not be rejected for being brief. The >=100 threshold in
+    A `.zh-CN.md` member is the Chinese side wherever it appears. When neither
+    member carries a language suffix, the plain `.md` root file is the Chinese
+    side: that is the Shape 3 arrangement, where the root document holds the
+    Chinese original and the `.en.md` sibling holds the English rendering.
+    """
+    for candidate in (source, partner):
+        if candidate.endswith(".zh-CN.md"):
+            return candidate
+    for candidate in (source, partner):
+        if candidate.endswith(".md") and not candidate.endswith(".en.md"):
+            return candidate
+    return None
+
+
+def _side_by_side_bilingual(source: str) -> bool:
+    """True when the pair's Chinese-designated file actually carries Chinese.
+
+    One CJK character in that file is enough: a short but genuine translation
+    must not be rejected for being brief. The >=100 threshold in
     _carries_chinese() stays for the embedded-bilingual shape only.
+
+    Only the designated side is read. Checking "either file" let an English
+    source with a stray CJK character vouch for a partner that was never
+    translated, so a copy of the English text under a `.zh-CN.md` name passed
+    the gate. The English side is expected to hold no CJK; it never counts.
     """
     partner = side_by_side_partner(source)
     if partner is None:
         return False
-    return _has_any_chinese(source) or _has_any_chinese(partner)
+    chinese_side = _chinese_side(source, partner)
+    if chinese_side is None:
+        return False
+    return _has_any_chinese(chinese_side)
 
 
 def current_bilingual_gaps() -> set[str]:
