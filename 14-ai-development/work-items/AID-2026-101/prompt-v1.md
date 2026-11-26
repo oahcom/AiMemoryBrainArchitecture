@@ -45,7 +45,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# AID-2026-090-PROMPT v1 — Refresh three stale registry cells and one false prompt digest
+# AID-2026-101-PROMPT v1 — Refresh three stale registry cells and one false prompt digest
 
 ## User dispatch
 
@@ -74,7 +74,7 @@ value of every cell it changes.
 - `14-ai-development/work-items/AID-2026-072/manifest.yaml` — the lifecycle fields that
   assert the carrier is still open.
 - `14-ai-development/work-items/AID-2026-076/manifest.yaml` — the `implementation` block.
-- `14-ai-development/work-items/AID-2026-090/` — this work item's own files.
+- `14-ai-development/work-items/AID-2026-101/` — this work item's own files.
 
 ## Explicitly out of scope
 

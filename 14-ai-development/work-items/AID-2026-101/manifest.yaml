@@ -1,4 +1,4 @@
-work_item_id: AID-2026-090
+work_item_id: AID-2026-101
 title: Refresh three stale registry cells and one false prompt digest, and record the prior value of each
 class: DOC/GOVERNANCE
 risk: R1
@@ -20,11 +20,11 @@ base_commit_sha: c6b7d987b959c42af5072932963dae9ed55721e4
 
 tracking_issue: "#1244 - opened from the measurement recorded here, so that the correction has an Issue of its own rather than borrowing the authority of the work items it corrects."
 
-prompt_id: AID-2026-090-PROMPT
+prompt_id: AID-2026-101-PROMPT
 prompt_version: 1
-prompt_file: 14-ai-development/work-items/AID-2026-090/prompt-v1.md
+prompt_file: 14-ai-development/work-items/AID-2026-101/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 2ac71e563b9c5f01aa217ee8846446cc9bc216a83f3d2f1952ae47b0edde9b4f
+prompt_sha256: 89ac65f2d58e187451b7c0a98648d0dd4352e3dac79f521b8029b0432f7e94c1
 prompt_bytes: 4470
 
 authorization:
@@ -39,9 +39,9 @@ authorization:
 
 scope:
   files_to_create:
-    - 14-ai-development/work-items/AID-2026-090/manifest.yaml
-    - 14-ai-development/work-items/AID-2026-090/prompt-v1.md
-    - 14-ai-development/work-items/AID-2026-090/session-evidence-1244.md
+    - 14-ai-development/work-items/AID-2026-101/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-101/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-101/session-evidence-1244.md
   files_to_modify:
     - 14-ai-development/work-items/INDEX.md
     - 14-ai-development/work-items/AID-2026-047/manifest.yaml
@@ -53,14 +53,16 @@ scope:
     not what their code does.
 
 identifier_history: >-
-  This correction was prepared twice under identifiers that main assigned to other work items while
-  it was in review: AID-2026-080 (taken by PR #1215) and AID-2026-081 (taken by the GOV-DOC-001
-  ratchet work item). Both collisions were discovered by rebasing, not by a gate, because a
-  work-item directory is a path and two branches adding the same path merge as a conflict only if
-  the merge driver is asked -- the INDEX half merges cleanly under `merge=union`, so the directory
-  is where it surfaces. Recorded here because the numbers 080 and 081 appear in this branch's
-  earlier history and a reader who finds one of them should know it was renaming, not a second
-  correction. Nothing is claimed about those two work items.
+  This correction was prepared four times under identifiers that main assigned to other work items
+  while it was in review: AID-2026-080 (taken by PR #1215), AID-2026-081 (taken by the GOV-DOC-001
+  ratchet work item), AID-2026-090 (taken by the ContextVersion immutability work item, PR #1255)
+  and AID-2026-101 is the fourth and current number. Every collision was discovered by rebasing,
+  not by a gate, because a work-item directory is a path and two branches adding the same path
+  merge as a conflict only if the merge driver is asked -- the INDEX half merges cleanly under
+  `merge=union`, so the directory is where it surfaces. Recorded here because all four numbers
+  appear in this branch's earlier history and a reader who finds one of them should know it was
+  renaming, not a second correction. Nothing is claimed about the three work items that took the
+  earlier numbers.
 
 findings:
   - id: F1
@@ -247,12 +249,12 @@ session_evidence:
     issue_refs:
       - "#1244"
     implementing_ai_session: owner-proxy-2026-11-26
-    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-090/prompt-v1.md
-    executed_prompt_sha256: 2ac71e563b9c5f01aa217ee8846446cc9bc216a83f3d2f1952ae47b0edde9b4f
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-101/prompt-v1.md
+    executed_prompt_sha256: 89ac65f2d58e187451b7c0a98648d0dd4352e3dac79f521b8029b0432f7e94c1
     executed_prompt_bytes: 4470
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
-    session_evidence_ref: 14-ai-development/work-items/AID-2026-090/session-evidence-1244.md
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-101/session-evidence-1244.md
     note: >-
       Canonical form, not the top-level legacy fields: this pull request modifies this manifest,
       and check_09_manifest_and_evidence_entries rejects a legacy manifest that the same pull

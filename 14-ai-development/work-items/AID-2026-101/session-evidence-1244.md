@@ -45,7 +45,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# Session evidence — AID-2026-090
+# Session evidence — AID-2026-101
 
 ## Session role / use case
 
@@ -71,7 +71,7 @@ fields and one new work-item directory, with no Rust file, no checker and no wor
 and why F4, the freshness gate the audit shows is missing, is described rather than written.
 
 `prompt-v1.md` in this directory is the instruction this change was carried out against,
-pinned at `2ac71e563b9c5f01aa217ee8846446cc9bc216a83f3d2f1952ae47b0edde9b4f`, 4470 bytes,
+pinned at `89ac65f2d58e187451b7c0a98648d0dd4352e3dac79f521b8029b0432f7e94c1`, 4470 bytes,
 computed from the committed bytes rather than composed.
 
 `executed_prompt_provenance` is `NOT_VERIFIED`: the digest proves the committed file has not
@@ -90,7 +90,7 @@ changed since it was pinned, not that it is byte-for-byte what the session read.
 
 - Issue #1244 — the defect report: the three stale cells, the false digest, and the commands
   behind each.
-- `14-ai-development/work-items/AID-2026-090/` — `manifest.yaml` with `findings` F1–F5 and a
+- `14-ai-development/work-items/AID-2026-101/` — `manifest.yaml` with `findings` F1–F5 and a
   `corrections:` table giving the prior value of every changed cell, `prompt-v1.md`, and this
   record.
 - `14-ai-development/work-items/INDEX.md` — three refreshed rows, one new row for this work
