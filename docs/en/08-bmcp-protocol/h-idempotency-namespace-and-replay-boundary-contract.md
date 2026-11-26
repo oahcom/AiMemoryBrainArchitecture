@@ -31,7 +31,7 @@ document_metadata:
       archival_reason: null
       archival_reference: null
   authority:
-    canonical_status: Canonical
+    canonical_status: Mirror
     canonical_scope: "H BMCP idempotency namespace, request deduplication, durable receipt, linearization and replay boundary"
     canonical_scope_id: "bmcp-protocol/h-idempotency-replay-boundary"
     canonical_scope_keywords:
