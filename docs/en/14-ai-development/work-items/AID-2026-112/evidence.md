@@ -29,7 +29,7 @@ document_metadata:
       archival_reason: null
       archival_reference: null
   authority:
-    canonical_status: Canonical
+    canonical_status: Non-Canonical
     canonical_scope: "AID-2026-112 supplemental exact-head local implementation-test evidence and conservative SC/HIR rejudgment"
     canonical_scope_id: "ai-development/aid-2026-112-sc-hir-test-evidence-rejudgment"
     canonical_scope_keywords:
@@ -42,7 +42,8 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    en: "docs/en/14-ai-development/work-items/AID-2026-112/evidence.md"
+    source: "14-ai-development/work-items/AID-2026-112/evidence.md"
+    en: null
     zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-112/evidence.md"
 ---
 # AID-2026-112 — SC/HIR predicate rejudgment against 552 local test passes
