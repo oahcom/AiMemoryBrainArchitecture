@@ -309,10 +309,39 @@ reports `PASS (incremental)`.
 
 ## 6. Gate results
 
-Local runs on the annotation commit `@@C1@@`, `PYTHONUTF8=1`:
+Local runs on the annotation commit `d2df7d8fc288b1744fb47e1a1f17b73d8437c885`, `PYTHONUTF8=1`:
 
 ```
-@@GATES@@
+$ python scripts/check_bilingual_docs.py
+NOTE: 14 changed .md path(s) outside NORMATIVE_ROOTS were not pairing-checked
+bilingual baseline: 77 frozen, 0 new gaps
+exemptions: 21
+Bilingual documentation and prompt-library gate: PASS (19 changed paths inspected).
+This is a structural gate only; semantic parity requires independent review.
+
+$ python scripts/check_document_management.py --require-changed <base>
+GOV-DOC-002: 965 governed documents, 519 classified, 446 unclassified
+PASS (incremental): no GOV-DOC-002 violations; 519 classified, 446 unclassified
+
+$ python scripts/ci/check_line_endings.py
+Line-ending check: 1658 files inspected, 0 binary skipped, 0 violations.
+
+$ python scripts/ci/check_manifest_parse.py
+Manifest parse: 99 manifests found, 99 parsed, 0 failed.
+
+$ python scripts/ci/check_repository_hygiene.py --base <base> --head <head>
+Work-item manifest consistency version=2026-11-27.1 manifests=98 in_scope=85 excluded_by_record_type=4 unrecognized=9 violations=0
+Repository new-file admission version=2026-11-27.1 base=cff08dc353eff8c82228a5cc8d73171cd41da378 head=9784013e259b3070e99b44091bcee80a13fdd825 merge_base=cff08dc353eff8c82228a5cc8d73171cd41da378
+Repository new-file admission passed: 6 new path(s) checked.
+
+$ python scripts/check_session_evidence_workflow_shape.py
+SESSION EVIDENCE WORKFLOW SHAPE: PASS
+
+$ python scripts/check_traceability.py --index-only
+PASS TRACEABILITY: 0 requirements / 98 work items / 0 errors / 105 warnings
+
+$ python scripts/check_governance_operation_traceability.py
+GOVERNANCE OPERATION TRACEABILITY: PASS (7 operations x 3 mirrors)
 ```
 
 `check_document_management.py` exits 2 with `INCOMPLETE` when run without
