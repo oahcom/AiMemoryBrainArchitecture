@@ -1,0 +1,273 @@
+manifest_version: "1.0"
+RENUMBERED_AT_MERGE: "2026-11-26"
+RENUMBERED_FROM: AID-2026-092
+RENUMBERED_HISTORY: "AID-2026-081 (original) -> AID-2026-086 (relinquished after PR #1232) -> AID-2026-092 (provisional; main allocated to PR #1250) -> AID-2026-093 (current)"
+record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
+registration_stage: "STAGE_0"
+registration_status: "SCOPE_CONFIRMED_EVIDENCE_SYNCHRONIZED_OWNER_ACCEPTANCE_PENDING"
+work_item_id: "AID-2026-093"
+identifier_status: "REASSIGNED_AFTER_THIRD_MAINLINE_COLLISION; CURRENT_ID_AID-2026-093; AID-086_REUSED_BY_MAIN_AID-089_PR_1232; PROVISIONAL_AID-092_OCCUPIED_BY_PR_1250; GLOBAL_BRANCH_CONTENT_SCAN_NOT_EXHAUSTIVE"
+
+title: "DECISION-ACCEPTANCE-03 — DEC-01..DEC-20 acceptance register and A–I / Storage matrix"
+date: "2026-11-26"
+external_workflow_references:
+  - id: "AID-2026-11-26-DECISION-ACCEPTANCE-03"
+    kind: "EXTERNAL_WORKFLOW_REFERENCE"
+    repository_work_item_id: false
+    note: "External workflow AID retained only as an evidence reference; AID-2026-093 is the current repository-standard Work Item ID."
+  - id: "PR #1219"
+    kind: "CARRIER"
+  - id: "PR #1220"
+    kind: "STAGE_0_ALLOCATION_SOURCE"
+  - id: "Issues #1191, #1128, #1103, #1104, #1170, #1174, #1179, #1177, #1184, #1209, #1180, #1212, #1189, #1196, #1208, #1202, #1203, #1197, #1037, #1049"
+    kind: "SOURCE_ACCEPTANCE_RECORDS"
+
+base_commit_sha: "587d7ca9731e50c7a4c8c9df424798f555e0a2db"
+
+repository:
+  name: "oahcom/AiMemoryBrainArchitecture"
+  url: "https://github.com/oahcom/AiMemoryBrainArchitecture"
+  baseline_branch: "main"
+  baseline_commit: "587d7ca9731e50c7a4c8c9df424798f555e0a2db"
+  implementation_branch: "impl/2026-11-26-decision-acceptance-matrix"
+  carrier: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1219"
+  stage_0_allocation_carrier: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1220"
+
+authority:
+  authority_basis: "User-confirmed Work Item assignment and scope in the current instruction."
+  implementing_operator: "USER-AUTHORIZED DELEGATED OPERATOR (ChatGPT)"
+  accountable_owner: "Owner A — coordination"
+  content_owners:
+    - "Owner B"
+    - "Owner D"
+    - "Owner E"
+    - "Owner F"
+    - "Owner G"
+    - "Owner H"
+    - "Owner I"
+  acceptance_authority: "Owner A jointly with the relevant content Owner(s); no acceptance is inferred by this registration or evidence synchronization."
+  independent_reviewer: "NOT_ASSIGNED"
+  implementation_authorization: "NOT_GRANTED"
+  decision_acceptance_authorization: "NOT_GRANTED"
+  merge_authorization: "GRANTED_BY_CURRENT_USER_TASK_PENDING_REQUIRED_CHECKS_AND_BRANCH_PROTECTION"
+  deployment_authorization: "NOT_GRANTED"
+  issue_closure_authorization: "NOT_GRANTED"
+
+scope:
+  objective: "Register and evidence-track the DEC-01..DEC-20 acceptance register and the A–I / Storage system matrix, covering 18 unique decision directions."
+  scope_status: "CONFIRMED_BY_USER"
+  in_scope:
+    - "DEC-01..DEC-20 registration rows, representing 18 unique directions."
+    - "A–I / Storage system matrix, including the individually enumerated I-01..I-24 invariant rows."
+    - "The 20 source Issue acceptance comments and their exact GitHub comment IDs."
+    - "Readback evidence for all 20 comments and confirmation that all acceptance checklist boxes remain unchecked."
+    - "EN and ZH-CN document consistency evidence, with structural and semantic verification status kept distinct."
+    - "Work Item manifest, evidence record and INDEX registration row."
+  out_of_scope:
+    - "No Owner acceptance, decision ratification, normative approval or implementation authorization is granted."
+    - "No source Issue is closed and no checklist is checked by this Work Item registration."
+    - "No product/runtime code, schema, migration, tests, CI workflow or validator logic is modified."
+    - "No deployment or production-conformance claim is made; merge is separately authorized only after all required checks succeed and branch protection permits it."
+  unique_direction_accounting:
+    registered_dec_rows: 20
+    unique_directions: 18
+    shared_direction_groups:
+      - "DEC-16 / DEC-17: I and H sub-registrations of one file-by-file normative-source restoration direction."
+      - "DEC-19 / DEC-20: sequential Stage 1 and Stage 2 registrations of one binding-force governance direction; Stage 2 depends on Stage 1 and separate authorization."
+
+source_records:
+  register: "00-governance/implementation-evidence/2026-11-26-20-decision-acceptance-register.md"
+  system_matrix: "00-governance/implementation-evidence/2026-11-26-a-i-storage-acceptance-matrix.md"
+  evidence_record: "14-ai-development/work-items/AID-2026-093/evidence.md"
+  source_issue_comments:
+    - issue: 1191
+      dec: "DEC-01"
+      comment_id: 7174847701
+    - issue: 1128
+      dec: "DEC-02"
+      comment_id: 7174848562
+    - issue: 1103
+      dec: "DEC-03"
+      comment_id: 7174849776
+    - issue: 1104
+      dec: "DEC-04"
+      comment_id: 7174851046
+    - issue: 1170
+      dec: "DEC-05"
+      comment_id: 7174851977
+    - issue: 1174
+      dec: "DEC-06"
+      comment_id: 7174852944
+    - issue: 1179
+      dec: "DEC-07, DEC-09"
+      comment_id: 7174853922
+    - issue: 1177
+      dec: "DEC-08"
+      comment_id: 7174854969
+    - issue: 1184
+      dec: "DEC-08, DEC-09"
+      comment_id: 7174856082
+    - issue: 1209
+      dec: "DEC-10"
+      comment_id: 7174856917
+    - issue: 1180
+      dec: "DEC-11"
+      comment_id: 7174865981
+    - issue: 1212
+      dec: "DEC-08, DEC-12"
+      comment_id: 7174866924
+    - issue: 1189
+      dec: "DEC-13"
+      comment_id: 7174867715
+    - issue: 1196
+      dec: "DEC-14"
+      comment_id: 7174868513
+    - issue: 1208
+      dec: "DEC-15"
+      comment_id: 7174869624
+    - issue: 1202
+      dec: "DEC-16"
+      comment_id: 7174870329
+    - issue: 1203
+      dec: "DEC-17"
+      comment_id: 7174871193
+    - issue: 1197
+      dec: "DEC-18"
+      comment_id: 7174871890
+    - issue: 1037
+      dec: "DEC-19"
+      comment_id: 7174872690
+    - issue: 1049
+      dec: "DEC-20"
+      comment_id: 7174873458
+
+verification:
+  issue_comment_readback:
+    expected: 20
+    found: 20
+    status: "PASS"
+    acceptance_checklists: "ALL_UNCHECKED"
+    checked_boxes_found: 0
+  direction_coverage:
+    registered_dec_rows: 20
+    unique_directions: 18
+    status: "PASS_AS_REGISTER_COVERAGE_ONLY"
+  invariant_owner_mapping:
+    expected_rows: 24
+    owner_confirmed_rows: 24
+    verifiable_rows: 24
+    blocked_with_reason_rows: 0
+    authority_owner: "OWNER_CONFIRMED responsibility mapping by delegated operator; not domain-owner acceptance"
+    dependent_owners: "OWNER_CONFIRMED responsibility mapping by delegated operator; not domain-owner acceptance"
+    status: "24_VERIFIABLE_0_BLOCKED_WITH_REASON"
+  dec12_staged_closure:
+    status: "OWNER_CONFIRMED_GATE_A_PENDING"
+    review_gate: "Gate A exact-version review-artifact and cross-owner acceptance criteria documented"
+    production_gate: "Gate B separately requires integrated implementation and production conformance evidence"
+    pending_decision_owner: "Owner C, coordinated by Owner A"
+    owner_confirmation: "I confirm that the Architecture Review workflow may be marked CLOSED once Gate A's exact-version review-artifact and cross-Owner acceptance criteria are met, even if implementation or Production Integration/Conformance rows remain BLOCKED / NOT VERIFIED; such review closure does not constitute, imply, or waive the separate Gate B production acceptance."
+    confirmation_attribution: "user-authorized operator (delegated by account owner)"
+    confirmation_date: "2026-11-26"
+    gate_a_status: "PENDING_CONDITIONAL_DISCHARGE_COMPOSITION_PACKAGE_SOURCE_PINS_AND_BILINGUAL_PARITY"
+    delegated_proxy_dispositions:
+      recorded_by: "user-authorized operator (delegated by account owner)"
+      recorded_date: "2026-11-26"
+      attribution: "Proxy-recorded; not a natural-person Owner signature"
+      roles: 10
+      accept: 3
+      conditional: 7
+      reject: 0
+      covered_roles: "Owner A, Owner B, Owner C, Owner D, Owner E, Owner F, Owner G, Owner H, Owner I, Storage/Consistency"
+    issue_1212: "MUST_REMAIN_OPEN_UNTIL_GATE_A_COMPLETE"
+  bilingual:
+    en_canonical_mirror: "BODY_EQUALITY_PREVIOUSLY_READ_BACK"
+    zh_cn: "STRUCTURAL_ROW_COUNT_PREVIOUSLY_READ_BACK; SEMANTIC_PARITY_REQUIRES_REVIEW"
+    exact_head_ci: "PASS_ON_HEAD_6739452da77c809befd2a1b8dade4eaf94cc91e0; 16_REQUIRED_CHECKS_SUCCESS; STALE_AFTER_MAIN_ADVANCE_TO_d914e8a1; FRESH_EXACT_HEAD_RERUN_REQUIRED"
+    status: "PARTIAL_PENDING_EXACT_HEAD_CI_AND_SEMANTIC_REVIEW"
+  ci:
+    exact_head: "PASS_ON_HEAD_6739452da77c809befd2a1b8dade4eaf94cc91e0; 16_REQUIRED_CHECKS_SUCCESS; STALE_AFTER_MAIN_ADVANCE_TO_d914e8a1; THIS_REFRESH_CREATES_A_NEW_HEAD"
+    validator_changes: "NONE"
+    last_completed_head: "422b906da281d7fcd9e43767e5fbf1d2975948e6"
+    last_completed_runs: "16/16 required check jobs SUCCESS on exact merged PR Head 422b906da281d7fcd9e43767e5fbf1d2975948e6; job-level run IDs are recorded in evidence.md section 16."
+    current_head_after_post_merge_source_refresh: "RERUN_REQUIRED"
+    local_git_and_python_checks: "NOT_RUN_IN_THIS_EXECUTION"
+
+acceptance:
+  status: "NOT_ACCEPTED"
+  owner_acceptance_count: 0
+  delegated_proxy_disposition_count: 10
+  delegated_proxy_accept_count: 3
+  delegated_proxy_conditional_count: 7
+  delegated_proxy_reject_count: 0
+  criteria:
+    - "20/20 source Issue comments are readable by exact comment ID."
+    - "All 18 unique decision directions are represented without collapsing the 20 DEC trace rows."
+    - "EN and ZH-CN counterparts are consistent; mechanical checks and semantic review are recorded separately."
+    - "All unaccepted acceptance checklist items remain unchecked."
+    - "Owner A and relevant content Owner(s) jointly accept the exact reviewed versions."
+  outstanding:
+    - "Owner A and relevant content Owner(s) have not yet recorded joint acceptance."
+    - "A fresh exact-head 16-check rerun is required after the latest-main refresh to d914e8a1; the preceding Head 6739452da77c809befd2a1b8dade4eaf94cc91e0 had 16/16 required checks SUCCESS but is now stale."
+    - "ZH-CN semantic parity review is not claimed complete."
+    - "DEC-12 is OWNER_CONFIRMED_GATE_A_PENDING: staged Gate A/Gate B rule confirmed 2026-11-26; ten delegated proxy role dispositions recorded (3 ACCEPT / 7 CONDITIONAL / 0 REJECT); seven conditions and exact-version review artifacts remain OPEN; #1212 stays OPEN."
+    - "DEC-20 remains BLOCKED pending DEC-19 completion and a separate explicit authorization."
+    - "I-01..I-24 responsibility mappings are OWNER_CONFIRMED by delegated operator: 24 VERIFIABLE / 0 BLOCKED_WITH_REASON; exact-version domain-owner acceptance and seven CONDITIONAL role reservations remain OPEN."
+    - "No implementation, normative effectiveness or production conformance is claimed."
+
+lifecycle:
+  current_stage: "STAGE_0_EVIDENCE_AND_REVIEW"
+  stage_0: "SCOPE_CONFIRMED_EVIDENCE_SYNCHRONIZED"
+  owner_acceptance: "PENDING"
+  implementation: "NOT_AUTHORIZED"
+  merge: "AUTHORIZED_BY_CURRENT_USER_TASK_PENDING_EXACT_HEAD_REQUIRED_CHECKS"
+  deployment: "NOT_AUTHORIZED"
+
+identifier_evidence:
+  allocation_source: "AID-2026-081 is mainline GOV-DOC-001; AID-2026-089 is PR #1232; AID-2026-090 is PR #1241; AID-2026-091 is PR #1242; AID-2026-092 is PR #1250; AID-2026-093 is the next identifier allocated to PR #1219 from current main INDEX. Full branch-content uniqueness is not exhaustively verified."
+  target_branch_index_row: "AID-2026-093 added alongside mainline AID-2026-081, AID-2026-089, AID-2026-090, AID-2026-091 and AID-2026-092; previous IDs AID-2026-081, AID-2026-086 and provisional AID-2026-092 are preserved in renumber history."
+  global_uniqueness: "NOT_FULLY_VERIFIED; AID-2026-093 checked against current main tree/index, exact-token Issue/PR search and branch-name search; full branch-content scan not exhaustive."
+  limitation: "The prior allocation scan did not recursively inspect every active branch; no exhaustive global uniqueness claim is made."
+
+
+# 2026-11-26 delegated cross-Owner disposition reconciliation
+# All ten roles have proxy-recorded dispositions (3 ACCEPT / 7 CONDITIONAL / 0 REJECT).
+# These are not natural-person signatures; owner_acceptance_count remains 0.
+# Gate A remains PARTIAL / OPEN until all conditions and exact-version artifacts are discharged.
+
+# Branch synchronization record
+branch_head_after_main_sync: "2077710a7ce15a5e945359d59bbc5a6d75ddf946"
+main_head_at_sync: "6c0171169e291f8ad9b746cc9fecb1fb2599d387"
+branch_sync_result: "80 commits ahead / 0 behind at sync; subsequent documentation-only commits followed"
+
+
+# Identifier collision reconciliation (2026-11-26)
+# AID-2026-081 was occupied by a separate mainline GOV-DOC-001 ratchet work item.
+# This DECISION-ACCEPTANCE-03 work item is reassigned to AID-2026-093.
+# AID-2026-093 is not claimed globally unique: branch-content scan was not exhaustive.
+
+
+# Current-main reconciliation after PR #1221 (2026-11-26)
+latest_main_sha: "d914e8a1f8a1ba24c21c41a9249489d544388185"
+latest_invariant_source_blob: "a5a51937133d43585d970cad02dcfd20925078d9"
+prior_invariant_source_blob: "50566d16ee57c7ee34f8f089a1dea41260ee37b6"
+source_reconciliation: "24 invariant statements remain text-identical; metadata and policy binding-force classification updated from PR #1221; body/metadata-policy tension remains OPEN under DEC-13."
+row_disposition_rendering: "Canonical and EN I-01..I-24 tables corrected: 24/24 rows now show explicit role dispositions; no undefined placeholders remain. No role decision changed."
+branch_sync_baseline: "GitHub compare on normalized Head 9b7f0fa843eddac3675c5f8374dc736e3af64098 confirmed 1 ahead / 0 behind with merge base d914e8a1f8a1ba24c21c41a9249489d544388185; the final evidence correction commit is also a direct child of this main SHA. No tree content dropped."
+operator_attribution: "user-authorized operator (delegated by account owner); proxy registration, not a natural-person Owner signature."
+
+latest_main_merge_sha: "d914e8a1f8a1ba24c21c41a9249489d544388185"
+latest_main_merge_source: "Latest main d914e8a1f8a1ba24c21c41a9249489d544388185; 66 commits advanced since previous baseline 515b7144320fd9fcc1e1a2c3d2d2744d979b4ca8, including PR #1232 / AID-2026-089 D Forget Fence authority and Storage projection direction; full current-main tree is the new parent."
+
+branch_history_normalization: "Prior one-commit normalization on 515b7144320fd9fcc1e1a2c3d2d2744d979b4ca8 was invalidated by 66 new main commits. Current branch is rebuilt directly on d914e8a1f8a1ba24c21c41a9249489d544388185 with an expected-old-Head lease; no branch-protection bypass."
+
+latest_forget_fence_contract_blob: "760a1d48011f2a66c23abcf825a3d067e79b8821"
+latest_system_boundaries_blob: "c2aa6823b69313ba27c34625f87f29d2be356606"
+forget_fence_source_status: "D-FORGET-CONTRACT-001 exists on main as Draft/Unverified/Informative; Owner acceptance and implementation remain pending. Storage fence rows are D-derived rebuildable projections only."
+
+post_merge_main_sha: "17b05a0234d861a8bd0b78bccea799b1c11c433f"
+post_merge_commit_tree: "93260fa138bd6c0b1a3a66ebd5a6130f5c6d6cf9"
+latest_context_version_blob: "27e9e5f092b17cf4013a533d07949eb73ac6ef4c"
+latest_applied_evidence_blob: "273efdd1b02bd9302fc968f07c6d094da2582a6e"
+context_version_source_status: "ContextVersion Immutability Decision is Draft/Unverified/Informative; G acceptance pending."
+applied_evidence_source_status: "Applied Evidence Contract is Draft/Unverified/Informative; C/G/H acceptance pending."
+post_merge_source_sync_status: "FOLLOWUP_PR_REQUIRED; matrix I-09/I-10 and DEC-11 pins added in follow-up PR; no Owner acceptance inferred."
