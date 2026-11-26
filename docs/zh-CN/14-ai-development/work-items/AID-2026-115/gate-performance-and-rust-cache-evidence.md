@@ -49,7 +49,7 @@ document_metadata:
 本文记录 workflow 级重复派发消除和按 job 隔离的 Rust 构建缓存，不改变 required-check 成员、门禁命令、检查器语义、job 边界或运行时行为。
 
 - 仓库：`oahcom/AiMemoryBrainArchitecture`
-- main 基线：`6e85d847af3473eb3b94d919b40d8eac347cc3db`
+- main 基线：`17bfc43c2b9f2f9c91cb0eb074580141e701c0b3`
 - 关联 Issue：#1212
 - 署名：`user-authorized operator (delegated by account owner)`；这是代理执行证据，不代表自然人 Owner 签署。
 - 编号：INDEX 最大值 109；AID-2026-110 已在 main，AID-2026-111 已由开放 PR 占用；AID-2026-115 是下一个无冲突编号，仍须在合并时重新核对。

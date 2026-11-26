@@ -31,9 +31,9 @@ document_metadata:
   authority:
     canonical_status: Canonical
     canonical_scope: "Gate dispatch deduplication and Rust CI cache evidence"
-    canonical_scope_id: "ai-development/aid-2026-112-gate-performance-cache-evidence"
+    canonical_scope_id: "ai-development/aid-2026-115-gate-performance-cache-evidence"
     canonical_scope_keywords:
-      - "aid-2026-112"
+      - "aid-2026-115"
       - "ci-concurrency"
       - "required-checks"
       - "rust-cache"
@@ -54,7 +54,7 @@ document_metadata:
 This record documents workflow-level deduplication and job-isolated Rust build caching. It does not change required-check membership, gate commands, checker semantics, job boundaries, or runtime behavior.
 
 - Repository: `oahcom/AiMemoryBrainArchitecture`
-- Main baseline: `6e85d847af3473eb3b94d919b40d8eac347cc3db`
+- Main baseline: `17bfc43c2b9f2f9c91cb0eb074580141e701c0b3`
 - Related Issue: #1212
 - Attribution: `user-authorized operator (delegated by account owner)`; delegated execution evidence, not a natural-person Owner signature.
 - Allocation: INDEX maximum 109; AID-2026-110 is present on main and AID-2026-111 is reserved by an open PR; AID-2026-115 is the next collision-free ID and remains provisional pending merge-time recheck.

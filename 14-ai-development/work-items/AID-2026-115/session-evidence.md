@@ -42,7 +42,7 @@ document_metadata:
 
 - Role: IMPLEMENTATION_OPERATOR / delegated operator
 - Date: 2026-11-26
-- Main baseline: `6e85d847af3473eb3b94d919b40d8eac347cc3db`; INDEX blob: `7eadae702bc7d170cdc252209cd63b763e43b788`
+- Main baseline: `17bfc43c2b9f2f9c91cb0eb074580141e701c0b3`; INDEX blob: `4aad6150e3ddc22ce23bffa0b0f827375bb36e30`
 - Branch: `ai/AID-2026-115/ops-gate-concurrency-rust-cache`
 - Allocation: INDEX max 109; AID-2026-110 exists on main; AID-2026-111 is reserved by an open PR; AID-2026-115 selected as next collision-free ID.
 - Implementing platform session identifier: NOT_RECORDED.

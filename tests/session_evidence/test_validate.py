@@ -546,9 +546,10 @@ YES
         self.install_world(world)
         self.assertEqual(run_validator(), 0)
 
-    def test_pre_effective_undeclared_pr_is_not_applicable(self):
-        # Issue #1026: with no declaration at all, the historical guard
-        # used to be unreachable because check_01 ran first and raised.
+    def test_pre_effective_undeclared_pr_fails(self):
+        # #1026 exempted a silent pre-effective PR. That exemption was the
+        # fail-open hole: a body carrying neither field was read as "no AI
+        # work". #1275, #1266 and #1220 passed that way.
         world = make_valid_world(
             issue_created="2020-01-01T00:00:00Z",
             issue_body=ISSUE_BODY_UNDECLARED,
@@ -556,15 +557,15 @@ YES
         )
         self.install_world(world)
         result, output = self.capture_validator()
-        self.assertEqual(result, 0)
-        self.assertIn("AI-SESSION-EVIDENCE: NOT_APPLICABLE", output)
+        self.assertEqual(result, 1)
+        self.assertIn("PR: missing AI-assisted work declaration", output)
+        self.assertNotIn("NOT_APPLICABLE", output)
 
-    def test_pr_opened_before_the_effective_time_without_a_declaration_is_not_applicable(
+    def test_pr_opened_before_the_effective_time_without_a_declaration_fails(
         self,
     ):
-        # The bound admits exactly the case #1026 reports: the PR itself
-        # was opened before the policy took effect, and its Issues were
-        # too, and nothing is declared.
+        # The PR's own opening date no longer buys silence. It used to:
+        # this world returned NOT_APPLICABLE with exit 0.
         world = make_valid_world(
             pr_created="2020-06-01T00:00:00Z",
             issue_created="2020-01-01T00:00:00Z",
@@ -573,11 +574,31 @@ YES
         )
         self.install_world(world)
         result, output = self.capture_validator()
-        self.assertEqual(result, 0)
-        self.assertTrue(
-            output.startswith("AI-SESSION-EVIDENCE: NOT_APPLICABLE"),
-            output,
+        self.assertEqual(result, 1)
+        self.assertIn("PR: missing AI-assisted work declaration", output)
+
+    def test_declared_no_with_na_references_passes(self):
+        # NO is a declaration, not silence: it passes with N/A references.
+        world = make_valid_world(
+            pr_created="2020-06-01T00:00:00Z",
+            issue_created="2020-01-01T00:00:00Z",
+            issue_body=ISSUE_BODY_UNDECLARED,
+            pr_body=make_pr_body(
+                status="NO",
+                refs=[],
+                issue_status="LEGACY_UNDECLARED",
+                issue_refs=[],
+            ),
         )
+        self.install_world(world)
+        result, output = self.capture_validator()
+        self.assertEqual(result, 0, output)
+
+    def test_declared_yes_with_a_real_path_passes(self):
+        world = make_valid_world()
+        self.install_world(world)
+        result, output = self.capture_validator()
+        self.assertEqual(result, 0, output)
 
     def test_pr_opened_after_the_effective_time_without_a_declaration_fails(
         self,
@@ -1923,12 +1944,15 @@ class ProductionEffectiveTimeBoundaryTests(unittest.TestCase):
         # every PR, so pin the shape too.
         validate.parse_utc_timestamp(found)
 
-    def test_verdict_flips_at_the_production_effective_time(self):
+    def test_silent_pr_fails_on_both_sides_of_the_production_effective_time(
+        self,
+    ):
         # Worlds are anchored on the pinned boundary, not on whatever the
-        # workflow currently says: a PR opened the day before it must be
-        # exempt, one opened the day after must declare. The validator reads
-        # its boundary from the workflow, so moving that literal moves the
-        # verdict and this test fails -- which is the point (#1063).
+        # workflow currently says. Before the fail-open hole was closed the
+        # day-before world was exempt; it is not any more, because the
+        # declaration is required unconditionally. What the literal still
+        # decides is the Issue-side historical status, so the test keeps
+        # pinning the boundary while asserting the new verdict.
         boundary = validate.parse_utc_timestamp(PINNED_EFFECTIVE_AT)
         before = (boundary - timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
         after = (boundary + timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -1966,19 +1990,15 @@ class ProductionEffectiveTimeBoundaryTests(unittest.TestCase):
         result, output = run_at(before)
         self.assertEqual(
             result,
-            0,
+            1,
             msg=(
-                f"a PR opened {before} is before the effective time and must "
-                "be exempt, but AI_SESSION_EVIDENCE_EFFECTIVE_AT_UTC is "
-                f"{read_production_effective_time()!r} (pinned to "
-                f"{PINNED_EFFECTIVE_AT!r}); verdict was {output.strip()!r}"
+                f"a silent PR opened {before} must now fail: the declaration "
+                "is required on both sides of the boundary; verdict was "
+                f"{output.strip()!r}"
             ),
         )
-        self.assertIn(
-            "AI-SESSION-EVIDENCE: NOT_APPLICABLE "
-            f"(linked issue #101 predates {read_production_effective_time()})",
-            output,
-        )
+        self.assertIn("PR: missing AI-assisted work declaration", output)
+        self.assertNotIn("NOT_APPLICABLE", output)
 
         result, output = run_at(after)
         self.assertNotEqual(
