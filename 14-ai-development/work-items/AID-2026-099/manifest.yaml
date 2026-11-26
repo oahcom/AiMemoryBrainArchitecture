@@ -1,0 +1,85 @@
+manifest_version: "1.0"
+record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
+registration_stage: "STAGE_0"
+registration_status: "SCOPE_CONFIRMED_REVIEW_PACKAGE_DRAFTED"
+work_item_id: "AID-2026-099"
+id_status: "PROVISIONAL"
+title: "H Idempotency Namespace and Replay Boundary Candidate Contract"
+date: "2026-11-26"
+repository:
+  name: "oahcom/AiMemoryBrainArchitecture"
+  baseline_branch: "main"
+  baseline_commit: "d5107f68a7f1b61f5f2f7352fadf828aae06cf1c"
+  implementation_branch: "docs/2026-11-26-h-idempotency-replay-contract-099"
+identifier_allocation:
+  assigned_at: "2026-11-26"
+  observed_main: "d5107f68a7f1b61f5f2f7352fadf828aae06cf1c"
+  observed_max_registered_id: "AID-2026-096"
+  requested_id: "AID-2026-099"
+  id_status: "PROVISIONAL"
+  uniqueness_scope: "AID-2026-099 absent from current-main INDEX/tree at allocation; reservation remains provisional until merge-time recheck."
+  merge_time_rule: "Re-read main INDEX, work-item tree, Issues, PRs and branch names; confirm AID-2026-099 or renumber per repository allocation rule. Preserve RENUMBERED_FROM if changed."
+authority:
+  sponsor: "USER-PRINCIPAL-DELEGATED"
+  accountable_owner: "Owner H; cross-owner acceptance by C/G/D/I/Storage as applicable"
+  acceptance_authority: "Owner H with C/G/D/I/Storage exact-version dispositions"
+  attribution: "user-authorized operator (delegated by account owner)"
+  signature_status: "代理登记，非自然人 Owner 签署"
+scope:
+  objective: "Draft an auditable H idempotency namespace, linearization, durable receipt, failure, retry, replay and recovery candidate contract."
+  canonical: "08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md"
+  en: "docs/en/08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md"
+  zh-CN: "docs/zh-CN/08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md"
+  work_item_manifest: "14-ai-development/work-items/AID-2026-099/manifest.yaml"
+  prompt: "14-ai-development/work-items/AID-2026-099/prompt-v1.md"
+  session_evidence: "14-ai-development/work-items/AID-2026-099/session-evidence.md"
+  issues: ["#1212", "#1208", "#1135"]
+  exclusions:
+    - "No runtime or product code changes"
+    - "No validator, schema, tests or workflow changes"
+    - "No deployment or production changes"
+    - "No merge and no Issue closure"
+    - "No Owner acceptance or implementation evidence fabricated"
+acceptance_criteria:
+  - {id: HIR-01, criterion: "Full idempotency namespace tuple is explicit and collision-isolated."}
+  - {id: HIR-02, criterion: "Producer creates one stable key per logical operation across retries."}
+  - {id: HIR-03, criterion: "Agent, Session and Attempt scoping are explicitly distinguished."}
+  - {id: HIR-04, criterion: "Namespace tuple encoding is unambiguous and versioned."}
+  - {id: HIR-05, criterion: "Deduplication window and tombstone retention are specified without inventing a TTL."}
+  - {id: HIR-06, criterion: "Storage atomicity is delegated to exact AID-2026-098 contract."}
+  - {id: HIR-07, criterion: "H admission and Storage domain-effect linearization points are distinct."}
+  - {id: HIR-08, criterion: "Concurrent duplicate reservation has one winner and durable receipt."}
+  - {id: HIR-09, criterion: "Receipt minimum identity, digest, issuer and evidence fields are listed."}
+  - {id: HIR-10, criterion: "Receipt identity is immutable and transitions append-only."}
+  - {id: HIR-11, criterion: "Unknown/Pending are fail-closed and not inferred as success/failure."}
+  - {id: HIR-12, criterion: "Pending duplicate cannot trigger a second logical side effect."}
+  - {id: HIR-13, criterion: "Failed requires durable authoritative terminal failure."}
+  - {id: HIR-14, criterion: "Same key/same digest and same key/different digest are distinct."}
+  - {id: HIR-15, criterion: "Retry reuses logical key but creates a new Attempt ID."}
+  - {id: HIR-16, criterion: "Crash recovery reconciles Storage receipt without repeating effects."}
+  - {id: HIR-17, criterion: "H Attempt joins C/G DeliveryAttempt without claiming Applied."}
+  - {id: HIR-18, criterion: "Replay disclosure rechecks I authorization and D Fence independently."}
+review_state:
+  checkpoint_count: 18
+  documented_only: 9
+  evidence_required: 9
+  implementation: "NOT VERIFIED"
+  cross_owner_acceptance: "PENDING"
+  storage_aid_2026_098_exact_pin: "NOT_AVAILABLE_ON_BASELINE"
+source_policy:
+  exact_main: "d5107f68a7f1b61f5f2f7352fadf828aae06cf1c"
+  applied_contract: "07-agent-integration/applied-evidence-contract.md@273efdd1b02bd9302fc968f07c6d094da2582a6e"
+  g_applied_contract: "06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.md@833815e37ac8d7505d93a0a115421dafe3eb08ad"
+  forget_fence_contract: "01-system-architecture/forget-fence-and-completion-contract.md@760a1d48011f2a66c23abcf825a3d067e79b8821"
+  storage_trait_candidate: "02-domain-model/phase-1-storage-trait-contract.md@22ca7cd3777e0132e25f084084610f1e90b60d21"
+  aid_2026_098: "No directory/manifest or discoverable PR on baseline; exact Storage contract pin unavailable. Do not infer or duplicate its content."
+session_evidence:
+  - role: DOCUMENTATION_AUTHOR
+    issue_refs: ["#1212", "#1208", "#1135"]
+    implementing_ai_session: NOT_RECORDED
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-099/prompt-v1.md"
+    executed_prompt_sha256: "ac8f6ae7f3672d7b8f934f79c3839bb4418d3f18ddb37c3a16fc51f3513b1853"
+    executed_prompt_bytes: 1100
+    executed_prompt_provenance: "RECORDED_SNAPSHOT; SESSION_ID_NOT_AVAILABLE"
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-099/session-evidence.md"
