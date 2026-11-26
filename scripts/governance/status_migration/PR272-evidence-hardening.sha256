@@ -1,2 +1,2 @@
-git-blob-sha1 4f81673abde37614a8ac734352f0a0ce474f4210  scripts/governance/status_migration/check_status_gates.py
-git-blob-sha1 3634226ac96e70f039f2e0e9274272b69ab870fa  scripts/governance/status_migration/test_status_migration.py
+git-blob-sha1 061d057f33e98cc1260774d12a964156dd77e21f  scripts/governance/status_migration/check_status_gates.py
+git-blob-sha1 06a7b55174b2fea03452d7802499eceb0f075638  scripts/governance/status_migration/test_status_migration.py
