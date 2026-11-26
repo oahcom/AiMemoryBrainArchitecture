@@ -150,7 +150,7 @@ session_evidence:
     session_reference_status: "NOT_AVAILABLE"
     session_evidence_ref: "14-ai-development/work-items/AID-PENDING-MERGE/session-evidence-source-restore.md"
 evidence_file: "14-ai-development/work-items/AID-PENDING-MERGE/evidence.md"
-evidence_blob: "82d11bf45b2f41a44797c30568456ac627f706bc"
+evidence_blob: "48c7fcf45415d7109752dcf94849137c915a59d9"
 
 formal_registration:
   status: "COMPLETED_ON_CANDIDATE_BRANCH_WITH_BOUNDED_IDENTIFIER_SCAN"

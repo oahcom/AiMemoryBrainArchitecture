@@ -15,7 +15,11 @@ document_metadata:
         included_sections: []
         included_assets: []
       approval_applicability: Applicable-To-Current-Version
-      evidence_reference: ["AID-PENDING-MERGE", "PR #1220", "PR #1219", "2026-11-26 delegated authorization"]
+      evidence_reference:
+        - "AID-PENDING-MERGE"
+        - "PR #1220"
+        - "PR #1219"
+        - "2026-11-26 delegated authorization"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -35,7 +39,11 @@ document_metadata:
     canonical_status: Candidate
     canonical_scope: "SOURCE-RESTORE-02 execution evidence and Gate A mirror-derived reconstruction ledger"
     canonical_scope_id: "ai-development/source-restore-02"
-    canonical_scope_keywords: ["source-restoration", "mirror-reconstruction", "blob-provenance", "work-item-registration"]
+    canonical_scope_keywords:
+      - "source-restoration"
+      - "mirror-reconstruction"
+      - "blob-provenance"
+      - "work-item-registration"
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
@@ -105,7 +113,7 @@ Only the compiler-stage contract root had a pinned EN/ZH-CN same-name mirror pai
 
 | Root path | New root blob | Existing EN mirror (source blob) | Existing ZH-CN mirror (comparison blob) | Owner branch checked |
 |---|---|---|---|---|
-| `04-memory-compiler/compiler-stage-contract.md` | `1f79eeb40fb234423290f97fcce934e11bdca9bf` | `docs/en/04-memory-compiler/compiler-stage-contract.md` — `6d733294232a93aa59123009d2a2801d9b83f459` | `docs/zh-CN/04-memory-compiler/compiler-stage-contract.md` — `ad386cac5636b4ba3eaf8b93ad93afcb444e8b46` | E `session-e-memory-compiler-2026-11-16` @ `ee098e14747d9915de5b3efb63b3a8dd77f670ed` |
+| `04-memory-compiler/compiler-stage-contract.md` | `0fc0b3247cead960e795b630b5c6e810efae3a70` | `docs/en/04-memory-compiler/compiler-stage-contract.md` — `6d733294232a93aa59123009d2a2801d9b83f459` | `docs/zh-CN/04-memory-compiler/compiler-stage-contract.md` — `ad386cac5636b4ba3eaf8b93ad93afcb444e8b46` | E `session-e-memory-compiler-2026-11-16` @ `ee098e14747d9915de5b3efb63b3a8dd77f670ed` |
 
 The root carries a top-of-document **Reconstruction notice**, `RECONSTRUCTED_FROM_MIRROR` provenance, and Draft / Candidate / Informative status. No Approved or Normative status is claimed.
 

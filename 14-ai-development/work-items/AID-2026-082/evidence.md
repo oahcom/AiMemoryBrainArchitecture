@@ -7,10 +7,18 @@ document_metadata:
       decision_status: Draft
       approver: null
       decision_date: null
-      approved_version: {scheme: git, value: null}
-      approval_scope: {type: Full-document, included_sections: [], included_assets: []}
+      approved_version:
+        scheme: git
+        value: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
       approval_applicability: Applicable-To-Current-Version
-      evidence_reference: ["AID-2026-082", "PR #1220", "delegated Owner authorization"]
+      evidence_reference:
+        - "AID-2026-082"
+        - "PR #1220"
+        - "delegated Owner authorization"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -22,7 +30,10 @@ document_metadata:
     canonical_status: Candidate
     canonical_scope: "E/F/H/I source enumeration evidence"
     canonical_scope_id: "ai-development/source-restore-03"
-    canonical_scope_keywords: [source-blob-pin, bilingual-mirror, owner-review]
+    canonical_scope_keywords:
+      - source-blob-pin
+      - bilingual-mirror
+      - owner-review
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative

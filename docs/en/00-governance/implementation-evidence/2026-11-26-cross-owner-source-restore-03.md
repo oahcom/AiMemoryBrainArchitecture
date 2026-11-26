@@ -7,10 +7,17 @@ document_metadata:
       decision_status: Draft
       approver: null
       decision_date: null
-      approved_version: {scheme: git, value: null}
-      approval_scope: {type: Full-document, included_sections: [], included_assets: []}
+      approved_version:
+        scheme: git
+        value: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
       approval_applicability: Applicable-To-Current-Version
-      evidence_reference: ["AID-2026-082", "PR #1220"]
+      evidence_reference:
+        - "AID-2026-082"
+        - "PR #1220"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -18,13 +25,22 @@ document_metadata:
       last_verification_note: "Enumeration committed; full source body/frontmatter and semantic mirror verification remain incomplete."
     usage_status: Active
     modification_status: Modified
-    supersession: {supersedes: [], supersession_reason: null, effective_date: null}
-    archival: {archived_date: null, archival_reason: null, archival_reference: null}
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
   authority:
     canonical_status: Candidate
     canonical_scope: "Evidence record for E/F/H/I source restoration"
     canonical_scope_id: "ai-development/source-restore-03"
-    canonical_scope_keywords: [source-inventory, source-blob-pin, bilingual-mirror]
+    canonical_scope_keywords:
+      - source-inventory
+      - source-blob-pin
+      - bilingual-mirror
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative

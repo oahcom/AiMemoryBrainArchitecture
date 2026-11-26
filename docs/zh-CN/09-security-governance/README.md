@@ -8,8 +8,13 @@ document_metadata:
       decision_status: Draft
       approver: null
       decision_date: null
-      approved_version: {scheme: git, value: null}
-      approval_scope: {type: Full-document, included_sections: [], included_assets: []}
+      approved_version:
+        scheme: git
+        value: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
       approval_applicability: Applicable-To-Current-Version
       evidence_reference:
         - "provenance: AUTHORED_INDEX"
@@ -38,7 +43,10 @@ document_metadata:
     canonical_status: Candidate
     canonical_scope: "现有安全与治理资料的新建导航索引；不是恢复的根规范"
     canonical_scope_id: "security-governance/directory-index"
-    canonical_scope_keywords: ["documentation-index", "source-provenance", "governance"]
+    canonical_scope_keywords:
+      - "documentation-index"
+      - "source-provenance"
+      - "governance"
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
