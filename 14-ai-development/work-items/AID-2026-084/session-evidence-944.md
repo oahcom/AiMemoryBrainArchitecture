@@ -20,7 +20,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-26"
-      last_verification_note: "Every count, exit code and failure line below was produced by a command run against this branch, on 2026-11-26. The defect measurements were taken at origin/main dc826e4e; the branch was rebuilt on baca092b when main moved, and section 5 states both bases."
+      last_verification_note: "Every count, exit code and failure line below was produced by a command run against this branch, on 2026-11-26. The defect measurements were taken at origin/main dc826e4e; the branch was rebuilt on f02ceab0 when main moved, and section 5 lists every base it passed through."
     usage_status: Active
     modification_status: Unchanged
     supersession:
@@ -238,14 +238,19 @@ current base rather than merged into it: the index is declared `merge=union` in
 the moved base produced `T-04 duplicate INDEX entry AID-2026-080` (and later
 `AID-2026-101`), which is the failure mode that file's own comment describes.
 Rebuilding the single commit on the new base keeps one row per work item. On
-`baca092be10eaa531be4fe19b54d644fbd56e92c`:
+`f02ceab0e57b9a149e36025a4595861ca7517ebf`:
 
 ```
 python3 scripts/ci/check_repository_hygiene.py
-directories=78 linked=78, exit 0
+directories=79 linked=79, exit 0
 python3 scripts/test_check_repository_hygiene.py
 Ran 97 tests, OK (skipped=1)
 ```
+
+The base moved four times while this branch was open (`dc826e4e` → `64bce132`
+→ `3a859ac0` → `d5107f68` → `baca092b` → `f02ceab0`). Each time the single
+commit was re-cut on the new base rather than merged, and each time the two
+counts stayed equal.
 
 The `dc826e4e` figures above stay as measured; they are the state the defect
 was reported against, not a claim about the current tree.

@@ -82,7 +82,7 @@ acceptance_criteria:
       directory linked.
     measurement: >-
       `python3 scripts/ci/check_repository_hygiene.py` on this branch prints
-      `directories=78 linked=78` and exits 0, where 78 is 77 pre-existing directories plus
+      `directories=79 linked=79` and exits 0, where 79 is 78 pre-existing directories plus
       this work item's own; no directory lost its entry, which is the constraint the change
       had to meet.
   - id: AC5
