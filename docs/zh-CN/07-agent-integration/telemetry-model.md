@@ -1,3 +1,48 @@
+---
+document_metadata:
+  domain: agent-integration
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "登记为非规范信息性文档；本文只记录遥测语义，不主张 Runtime 实现或审批。"
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Agent telemetry model semantic boundaries"
+    canonical_scope_id: null
+    canonical_scope_keywords:
+      - agent-telemetry
+      - task-state
+      - observation
+      - agent-integration
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "07-agent-integration/telemetry-model.md"
+---
+
 # Agent Telemetry Model（Agent 遥测模型）
 
 **状态：**语义边界 DECIDED；字段 profiles CANDIDATE；运行限制 TO_VALIDATE  
