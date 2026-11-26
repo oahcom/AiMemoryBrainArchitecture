@@ -44,67 +44,98 @@ document_metadata:
 
 # Session Evidence — AID-2026-188
 
-## 1. What was asked
+## Session role / use case
 
-A dispatched worker contract asked for `"03-memory-brain"` to be added to `NORMATIVE_ROOTS`, for a possible second root list to be synchronised, for both frozen baselines to be left untouched, for the bilingual gate and the AID-2026-172 unit tests to stay green, for the three canonical documents to be registered in `00-governance/document-scope-registry.yaml`, and for a work item plus one `INDEX.md` row to be created and shipped as a pull request.
+Verification worker inside a dispatched repair contract. The assistant was dispatched to
+add `"03-memory-brain"` to `NORMATIVE_ROOTS`, synchronise any second root inventory,
+register three canonical documents in the document scope registry, leave both frozen
+baselines untouched, keep the bilingual gate and the AID-2026-172 unit tests green, and
+publish a work item with one `INDEX.md` row as a pull request.
 
-The contract was received as text by this session; the full text is pinned verbatim in `prompt-v1.md` (5934 bytes, SHA-256 `e0741732d3bd920e93729ecbd088cccc9bed2145c0e679891733f0aa804df9d2`). No prompt-library registration exists for it, so `prompt_status` is `NOT_RECORDED`.
+The first three of those goals describe a state that was already present at the stated
+base. The assistant therefore measured the state before editing, made no change to any
+checker, baseline, registry or mirror, and published the measurement itself as the work
+item. The role it performed was verification and premise correction, not repair.
 
-## 2. What was actually found before any edit
+## Actual AI input
 
-The first three items of the contract describe a change that was already present at the stated base. Instead of making the edit, the session measured the state and stopped:
+The dispatched contract instructed the assistant to:
 
-- `NORMATIVE_ROOTS` holds 13 entries and contains `03-memory-brain` (`scripts/check_bilingual_docs.py:20`), attributed by `git blame` to `6ab36b3697a0994d8de449d2b9c344f23aac0fda`.
-- `current_bilingual_gaps()` = 77, both baselines = 77, `new = 0`, `gone = 0`, `check_baseline_copies_agree()` = `[]`.
-- `03-memory-brain/` holds 3 canonical documents; `docs/en/03-memory-brain/` and `docs/zh-CN/03-memory-brain/` hold 13 mirrors each.
-- `check_document_management.py` reports `03-memory-brain: 3/3 classified`, so the three documents are governed and metadata-complete.
-- `check_bilingual_docs_full.py` imports the constant and asserts equality with a tree-derived set; it holds no second literal.
-- `00-governance/document-scope-registry.yaml` declares `03-memory-brain` as a governed root at line 50 and has no `documents:` key at all.
+- work only in the existing worktree `D:\code\wt-norm03` on branch
+  `docs/2026-11-26-normative-root-03`, create no worktree, and never delete another
+  session's files;
+- treat `NORMATIVE_ROOTS` as holding 13 entries that do not include `03-memory-brain`,
+  and add that root in the existing format and ordering;
+- look for a second root inventory such as `check_bilingual_docs_full.py` and
+  synchronise it, or record that only one definition exists;
+- change neither baseline's contents and never regenerate them, then run the herald
+  gate with `PYTHONUTF8=1` and confirm exit 0 with 77 entries;
+- run the AID-2026-172 unit tests, which add 15 cases including
+  `check_baseline_copies_agree()` and the baseline write refusal, and must stay green;
+- register the three canonical documents in `00-governance/document-scope-registry.yaml`
+  in the existing format, adding three entries if `documents:` is exact-equality;
+- create a new work item with a block-style YAML metadata block so that
+  `read_metadata()` returns a mapping, allocate a number from
+  `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls?state=all&per_page=100`, and avoid
+  numbers that appeared in any PR title or branch;
+- open a pull request containing `Related issue(s): #1212`, `AI-assisted work: YES` and a
+  session evidence reference, merge with the `merge` method only after 16 of 16 required
+  contexts are green on the exact head with branch behind == 0, and verify blobs after
+  the merge;
+- make no change to baseline contents, no change to checker decision semantics beyond one
+  root entry, no restoration of the other ten canonical documents, no mirror deletion,
+  no Issue closure and no force push.
 
-The measurement is recorded in `evidence.md` section 2 as a premise-versus-state table, and section 6 lists the edits refused with the reason for each.
+The environment constraints stated with the contract were that `PYTHONUTF8=1` is required
+on this host because the GBK console codepage breaks decoding of captured `git` output,
+and that an initial `mergeable_state=dirty` produces zero pull-request check runs, so
+`git merge --no-ff origin/main` must precede the push rather than a wait.
 
-## 3. What this session changed
+The contract text is pinned verbatim in `prompt-v1.md` (5934 bytes, SHA-256
+`e0741732d3bd920e93729ecbd088cccc9bed2145c0e679891733f0aa804df9d2`). No prompt-library
+registration exists for it, so `prompt_status` is `NOT_RECORDED`.
 
-Six files created, one row appended:
+## AI-visible output
 
-```
-14-ai-development/work-items/AID-2026-188/manifest.yaml
-14-ai-development/work-items/AID-2026-188/evidence.md
-14-ai-development/work-items/AID-2026-188/prompt-v1.md
-14-ai-development/work-items/AID-2026-188/session-evidence.md
-docs/en/14-ai-development/work-items/AID-2026-188/evidence.md
-docs/zh-CN/14-ai-development/work-items/AID-2026-188/evidence.md
-14-ai-development/work-items/INDEX.md        (one appended row)
-```
+The assistant reported, and the repository confirms on the head of this branch:
 
-No file under `scripts/`, `00-governance/`, `.github/`, `03-memory-brain/` or `docs/*/03-memory-brain/` was modified. `git diff --stat` against `origin/main` is the check that this stayed true.
+- the first three goals were already satisfied at base: `NORMATIVE_ROOTS` holds 13
+  entries including `03-memory-brain` (`scripts/check_bilingual_docs.py:20`, attributed
+  by `git blame` to `6ab36b3697a0994d8de449d2b9c344f23aac0fda`); the measured tuple is
+  `13 True 77 77 0 0 []` for root count, membership, gaps, baseline, new, gone and copy
+  agreement; `memory-brain gaps` is empty;
+- `check_bilingual_docs_full.py` holds no second literal: it imports `NORMATIVE_ROOTS`,
+  derives `_DERIVED_ROOTS` from the tree and exits 2 when the two disagree, so only one
+  definition exists and nothing needed synchronising;
+- the registry already declares `03-memory-brain` as a governed root at line 50 and has
+  no `documents:` key at all; `check_document_management.py` reports
+  `03-memory-brain: 3/3 classified`, so per-file registration was neither owed nor
+  expressible through `governed_files:`, which means "file outside a governed directory";
+- no file under `scripts/`, `00-governance/`, `.github/`, `03-memory-brain/` or
+  `docs/*/03-memory-brain/` was modified; the change is six new work-item files and one
+  appended `INDEX.md` row;
+- local gate runs used `PYTHONUTF8=1` and passed: bilingual gate `PASS (7 changed paths
+  inspected)`, `check_document_management.py --require-changed 1e9341da`
+  `PASS (incremental)`, repository hygiene `new-file admission passed: 6 new path(s)`,
+  line endings `0 violations`, manifest parse `93 parsed, 0 failed`, session evidence
+  workflow shape `PASS`, governance operation traceability `PASS (7 x 3 mirrors)`,
+  traceability `0 errors`;
+- unit tests: `Ran 15 tests ... OK` in `scripts/` and `Ran 7 tests ... OK` in `tests/`.
 
-## 4. Environment
+The assistant made three incremental corrections to the pull-request body, each because
+the Session Evidence context rejected the previous text: the linked Issue #1212 had to be
+declared `LEGACY_UNDECLARED` with `N/A`, the session evidence reference had to be the full
+repo-relative path rather than the dispatched short form, and once the path resolved the
+validator required this document to carry the `Session role / use case`,
+`Actual AI input` and `AI-visible output` sections it now has. Each correction is a
+statement about the body text or this document, not about the repository content.
 
-- Host: Windows, PowerShell console codepage GBK.
-- `PYTHONUTF8=1` was set for every command. Without it, captured `git` and `python` output fails to decode non-ASCII paths and the gate reports a decoding failure unrelated to the tree. This is a locale artefact of the host, recorded in `evidence.md` section 8 and not fixed here.
-- Working tree: `D:\code\wt-norm03`, branch `docs/2026-11-26-normative-root-03`, which was 17 commits behind `origin/main` at the start. `origin/main` was merged with `--no-ff` before any work, so every measurement above is against `1e9341da603dec78377fed240f4d6dbabaa8838e`.
-- The branch was clean at the start (`git status --short` empty), so nothing of another session's work was touched.
+## Session reference status
 
-## 5. Commands whose output is quoted
+NOT_RECORDED
 
-```
-git fetch origin main ; git status --short
-git rev-list --left-right --count origin/main...HEAD
-git merge --no-ff origin/main
-git blame -L 19,24 --porcelain scripts/check_bilingual_docs.py
-python -c "<import gate module; print root count, membership, gap count, baseline count, new, gone, copy agreement>"
-python scripts/check_bilingual_docs_full.py
-python scripts/check_document_management.py
-python -m unittest discover -s scripts -p "test_check_bilingual*"
-python -m unittest discover -s tests -p "test_check_bilingual*"
-```
-
-The one-line `python -c` form is reproduced in `evidence.md` section 9 so the 13 / True / 77 / 77 / 0 / 0 / `[]` tuple can be regenerated rather than trusted.
-
-## 6. What is not evidenced
-
-- No CI context result at any SHA. The pull-request carrier is not yet known when this file is written.
-- No merge SHA, no post-merge blob digest, no review approval, no Owner acceptance.
-- No platform session identifier: `session_reference_status` is `NOT_RECORDED` and `implementing_ai_session` names the model that executed the contract, not an authenticated account.
-- The prompt snapshot is a verbatim capture of received text with provenance `NOT_VERIFIED`; it is not a signed artefact from the dispatching system.
+No platform session identifier is available to this session, so `implementing_ai_session`
+names the executing model (`opencode-go/deepseek-v4.1-flash`) rather than an authenticated
+account, and the prompt snapshot carries `executed_prompt_provenance: NOT_VERIFIED`. The
+artifact is a verbatim capture of the text as received, not a signed artefact from the
+dispatching system.

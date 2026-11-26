@@ -194,7 +194,7 @@ Should not: that the registration is *sufficient*, that the 77 gaps are acceptab
 
 ## 7. Bilingual counterparts
 
-`docs/en/14-ai-development/work-items/AID-2026-188/evidence.md` carries the same body with `canonical_status: Non-Canonical` and `source` pointing at this file. `docs/zh-CN/14-ai-development/work-items/AID-2026-188/evidence.md` carries the Chinese translation of the same sections. Both are mirrors of this document, not independent authorities, and neither claims semantic parity beyond a full rendering of sections 1-8.
+`docs/en/14-ai-development/work-items/AID-2026-188/evidence.md` carries the same body with `canonical_status: Non-Canonical` and `source` pointing at this file. `docs/zh-CN/14-ai-development/work-items/AID-2026-188/evidence.md` carries the Chinese translation of the same sections. Both are mirrors of this document, not independent authorities, and neither claims semantic parity beyond a full rendering of sections 1-11.
 
 ## 8. Environment note (locale artefact, not a defect)
 
@@ -219,3 +219,46 @@ python -m unittest discover -s tests -p "test_check_bilingual*"     # -> Ran 7 t
 - `git blame` was run on a full clone at the stated base; a shallow clone would misreport the boundary commit as the origin of the literal.
 - No CI context, merge SHA or blob digest is claimed. AID-2026-188 is `DISPATCHED` / `PROVISIONAL` and its carrier is whatever pull request this record ships in.
 - The dispatch is quoted verbatim in `prompt-v1.md`, including its two premise statements, so the disagreement is checkable rather than paraphrased.
+
+## 11. Session role, input and output
+
+The Session Evidence gate requires three parts from every evidence document a pull-request
+body cites. Sections 1-10 state the measurement and its limits; this section states what
+the executing session was, what it was told, and what it produced.
+
+### Session role / use case
+
+Verification worker inside a dispatched repair contract. The contract asked for
+`"03-memory-brain"` to be added to `NORMATIVE_ROOTS`, for the three canonical documents to
+be registered in the document scope registry, and for both frozen baselines to be left
+alone. The root was already the fourth entry of the set and the three documents were
+already `3/3 classified`, so the session measured the state, changed no checker, baseline,
+registry or mirror, and published the measurement as this record instead of a zero-byte
+edit.
+
+### Actual AI input
+
+The dispatched contract instructed the session to work only in the existing worktree on
+`docs/2026-11-26-normative-root-03`, to add the root in the existing format and ordering,
+to look for a second root inventory and synchronise it or record that only one definition
+exists, to change neither baseline and never regenerate them, to keep the AID-2026-172 unit
+tests green, to register the three documents in the registry, to create a work item with a
+block-style metadata block and one `INDEX.md` row, to take a number from the pull-request
+list, and to merge only after 16 of 16 required contexts passed on the exact head with
+branch behind equal to 0. It also stated the host constraint that `PYTHONUTF8=1` is
+required because the GBK console codepage breaks decoding of captured `git` output. The
+contract text is pinned verbatim in `prompt-v1.md` (5934 bytes, SHA-256
+`e0741732d3bd920e93729ecbd088cccc9bed2145c0e679891733f0aa804df9d2`).
+
+### AI-visible output
+
+The session reported the measured tuple `13 True 77 77 0 0 []` (root count, membership,
+gaps, frozen baseline, new, gone, copy agreement), an empty `memory-brain gaps` set, the
+`3/3 classified` count for the root, the absence of any second root literal, and the
+absence of a `documents:` key in the registry. It reported local gate runs at
+`1e9341da` with `PYTHONUTF8=1`: bilingual gate PASS on 7 changed paths, incremental
+`GOV-DOC-002` PASS, repository hygiene new-file admission passed for 6 new paths, line
+endings 0 violations, manifest parse 93 parsed and 0 failed, session evidence workflow
+shape PASS, governance operation traceability PASS, traceability 0 errors, and unit tests
+`Ran 15 tests ... OK` plus `Ran 7 tests ... OK`. It made no claim about a CI result that
+had not been observed on the head under test.

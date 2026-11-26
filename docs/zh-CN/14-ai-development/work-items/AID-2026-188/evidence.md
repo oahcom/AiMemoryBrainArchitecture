@@ -194,7 +194,7 @@ OK
 
 ## 7. 双语对应件
 
-`docs/en/14-ai-development/work-items/AID-2026-188/evidence.md` 携带同一正文，`canonical_status: Non-Canonical` 且 `source` 指向本文件。`docs/zh-CN/14-ai-development/work-items/AID-2026-188/evidence.md`（本文件）携带同一批章节的中文译文。两者都是本文件的镜像，不是独立权威，除完整呈现第 1-8 节外不主张超出该范围的语义对等。
+`docs/en/14-ai-development/work-items/AID-2026-188/evidence.md` 携带同一正文，`canonical_status: Non-Canonical` 且 `source` 指向本文件。`docs/zh-CN/14-ai-development/work-items/AID-2026-188/evidence.md`（本文件）携带同一批章节的中文译文。两者都是本文件的镜像，不是独立权威，除完整呈现第 1-11 节外不主张超出该范围的语义对等。
 
 ## 8. 环境说明（locale 工件，不是缺陷）
 
@@ -219,3 +219,35 @@ python -m unittest discover -s tests -p "test_check_bilingual*"     # -> Ran 7 t
 - `git blame` 在所述基线上的完整克隆中执行；浅克隆会把浅边界提交误报成字面量的来源。
 - 本文不主张任何 CI 上下文、合并 SHA 或 blob 摘要。AID-2026-188 为 `DISPATCHED` / `PROVISIONAL`，其载体是本记录所在的 pull request。
 - 派发原文逐字保存在 `prompt-v1.md`，包括其中两处前提陈述，因此分歧可被核验而不必依赖转述。
+
+## 11. 会话角色、输入与输出
+
+Session Evidence 门禁要求 pull request 正文引用的证据文档携带三个部分。第 1-10 节陈述测量
+及其限制；本节陈述执行会话是什么、被告知了什么、产出了什么。
+
+### Session role / use case
+
+会话角色 / 用例：一次派发修复契约中的核验 worker。该契约要求把 `"03-memory-brain"` 加入
+`NORMATIVE_ROOTS`、把三份 canonical 文档登记进文档范围登记表，并保持两份冻结基线不变。
+该根早已是集合的第四项，三份文档早已是 `3/3 classified`，因此本会话测量了现状，未改动任何
+检查器、基线、登记表或镜像，并以本记录代替零字节编辑提交结果。
+
+### Actual AI input
+
+实际 AI 输入：派发契约要求：只在既有工作树 `docs/2026-11-26-normative-root-03` 上工作；按现有格式与排序
+加入该根；检查是否存在第二份根清单，有则同步、没有则记录"仅一处定义"；不改动也不重新生成
+任一份基线；保持 AID-2026-172 的单测全绿；把三份文档登记进登记表；以块式元数据块新建工作项并
+追加一行 `INDEX.md`；从 pull request 列表取号；只在 16/16 必需上下文于精确 head 上通过且
+behind 为 0 后合并。契约同时声明主机约束：因为 GBK 控制台代码页会破坏捕获的 `git` 输出解码，
+必须使用 `PYTHONUTF8=1`。契约原文逐字保存在 `prompt-v1.md`（5934 字节，SHA-256
+`e0741732d3bd920e93729ecbd088cccc9bed2145c0e679891733f0aa804df9d2`）。
+
+### AI-visible output
+
+AI 可见输出：本会话报告了测量元组 `13 True 77 77 0 0 []`（根数量、成员资格、缺口数、冻结基线数、新增、
+消解、副本一致性），`memory-brain gaps` 为空集，该根为 `3/3 classified`，不存在第二份根
+字面量，登记表不存在 `documents:` 键。本地在 `1e9341da` 上以 `PYTHONUTF8=1` 运行：双语门禁
+对 7 条变更路径 PASS，`GOV-DOC-002` 增量 PASS，仓库卫生新文件准入 6 条通过，行尾 0 违规，
+清单解析 93 解析 0 失败，session evidence 工作流形状 PASS，治理操作可追溯 PASS，可追溯性 0
+错误，单测 `Ran 15 tests ... OK` 与 `Ran 7 tests ... OK`。未对未在被测 head 上观测到的 CI
+结果作任何声明。
