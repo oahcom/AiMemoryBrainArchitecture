@@ -82,7 +82,7 @@ if WORK_ITEMS_INDEX not in head_paths:
 | 完全没有 work-item 目录（`work-items/` 被改名后就是这个形状） | 返回 `[]`；检查器打印 `Repository hygiene check passed` 并 exit 0 | `RuntimeError` → `::error::repository hygiene cannot be determined: no work-item directories under '14-ai-development/work-items' ...` → exit 2 |
 | 目录存在，但 head 树里没有 `INDEX.md` | 返回 `[]`；exit 0 | `RuntimeError` → `::error::... the work-item index '14-ai-development/work-items/INDEX.md' is absent from the tree ...` → exit 2 |
 
-`RuntimeError` 是本文件既有的"无法判定"通道，`main()` 早已把它转成 exit 2——即本文件其它检查在输入缺失时给出的同一个答案。没有引入新退出码，也没有新增消息通道。`CHECK_VERSION` 从 `2026-11-24.8` 升到 `2026-11-27.1`，因为引用版本号的人引用的是规则集，而规则集变了。
+`RuntimeError` 是本文件既有的"无法判定"通道，`main()` 早已把它转成 exit 2——即本文件其它检查在输入缺失时给出的同一个答案。没有引入新退出码，也没有新增消息通道。`CHECK_VERSION` 升到 `2026-11-27.2`，因为引用版本号的人引用的是规则集，而规则集变了。`2026-11-27.1` 是 main 上另一处改动（无参数运行现在 exit 2，头树那一半必须用 `--head-tree-only` 请求）；两者分开正是本次另取一个号、而不是复用它。
 
 ## 3. 缺陷二 — 一段注释吃掉了一个 workflow
 
@@ -123,7 +123,7 @@ Rule B 拿测试的路径、文件名、stem 或点分模块名去匹配拼接�
 
 | 文件 | 改动 |
 |---|---|
-| `scripts/ci/check_repository_hygiene.py` | 两处 `return []` 改为 `RuntimeError`；`CHECK_VERSION` → `2026-11-27.1`；docstring 写明 fail-closed 规则，以及为何空的一侧不是被满足的关系 |
+| `scripts/ci/check_repository_hygiene.py` | 两处 `return []` 改为 `RuntimeError`；`CHECK_VERSION` → `2026-11-27.2`；docstring 写明 fail-closed 规则，以及为何空的一侧不是被满足的关系 |
 | `scripts/check_declared_check_contexts.py` | 新增 `strip_yaml_comment` / `strip_yaml_comments`，在 `produced_contexts` 内部应用；`WORKFLOW_GLOBS = ("*.yml", "*.yaml")` 与 `workflow_files()` |
 | `scripts/ci/check_test_reachability.py` | `read_workflows` 使用 `WORKFLOW_GLOBS`；新增 `workflow_text()`（剥注释），供 `discovery_rules` 与 Rule B 文本共用 |
 | `scripts/test_check_repository_hygiene.py` | `with_index` 夹具开关、两个 fail-closed 用例，以及让每个夹具都带上关系两侧的 `commit()` 助手 |
@@ -136,7 +136,7 @@ Rule B 拿测试的路径、文件名、stem 或点分模块名去匹配拼接�
 
 | 指标 | 改前 | 改后 |
 |---|---|---|
-| `check_repository_hygiene.py` 版本 | `2026-11-24.8` | `2026-11-27.1` |
+| `check_repository_hygiene.py` 版本 | `2026-11-24.8` | `2026-11-27.2` |
 | `Work-item index membership ... directories= / linked=` | 106 / 106，exit 0 | 带本工作项为 107 / 107（不含它则是 106 / 106：它恰好增加一个目录与一行），exit 0 |
 | `check_declared_check_contexts.py` | 16 declared、16 produced，exit 0 | 16 declared、16 produced，exit 0 |
 | `check_test_reachability.py` | 65 个测试文件、65 可达；18 个 gate 脚本、3 未接线、3 已 baseline | 完全相同 |

@@ -82,7 +82,7 @@ item 结构、元数据、PR 正文、合并纪律）与 `unit-gates-b.md`（三
 2. 缺陷实测：`produced_contexts` 对 `jobs:  # comment` 夹具返回 0 个 context（改后 3 个）；
    只含 `.yaml` workflow 的树 exit 2（改后 0）；注释中的测试名使 Rule B 报 exit 0（改后
    exit 1）；`check_index_membership` 对无目录树返回 `[]`（改后抛 `RuntimeError`）。
-3. 修改后同一批命令的输出：`version=2026-11-27.1 directories=106 linked=106`、declared 16 /
+3. 修改后同一批命令的输出：`version=2026-11-27.2 directories=106 linked=106`、declared 16 /
    produced 16、`65 test files, 65 reachable`、套件 `99 / 27 / 16` 全绿。
 4. 回退验证：单独回退每处修复，失败的恰好是对应的新用例（详见 `evidence.md` §7）。
 5. 首轮全量跑测试时 97 个用例中 65 个失败，全部是同一原因——共享夹具缺少成员关系两侧，

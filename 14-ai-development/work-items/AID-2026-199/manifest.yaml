@@ -53,7 +53,7 @@ scope:
       detail: >-
         `check_index_membership` raises `RuntimeError` -- the file's exit-2 channel -- instead of
         returning `[]` when no work-item directory is found, and again when INDEX.md is absent
-        from the head tree. `CHECK_VERSION` moves to 2026-11-27.1 because the rule set changed.
+        from the head tree. `CHECK_VERSION` moves to 2026-11-27.2 because the rule set changed.
     - path: "scripts/check_declared_check_contexts.py"
       detail: >-
         Adds `strip_yaml_comment` / `strip_yaml_comments` and applies them inside
@@ -104,7 +104,7 @@ evidence:
     index_membership_counts_before_after: "directories=106 linked=106 at origin/main; directories=107 linked=107 with this work item, which adds exactly one directory and one row"
     reachability_totals_before_after: "65 test files / 65 reachable / 18 gate scripts / 3 unwired / 3 baselined, unchanged"
     checker_version_before: "2026-11-24.8"
-    checker_version_after: "2026-11-27.1"
+    checker_version_after: "2026-11-27.2"
     tests_hygiene_before_after: "97 -> 99 (1 skipped both sides)"
     tests_reachability_before_after: "24 -> 27"
     tests_declared_before_after: "13 -> 16"

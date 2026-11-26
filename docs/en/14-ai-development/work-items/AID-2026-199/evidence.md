@@ -90,9 +90,11 @@ file, on a tree whose only path is `README.md`:
 
 `RuntimeError` is this file's existing "cannot be determined" channel, which `main()` already
 turns into exit 2 — the same answer the other checks in the file give a missing input. No new
-exit code and no new message channel were introduced. `CHECK_VERSION` moves from
-`2026-11-24.8` to `2026-11-27.1`, because a reader who cites a version string is citing a rule
-set, and this rule set changed.
+exit code and no new message channel were introduced. `CHECK_VERSION` moves to `2026-11-27.2`,
+because a reader who cites a version string is citing a rule set, and this rule set changed.
+`2026-11-27.1` is a different change already on main (the unqualified run now exits 2 and the
+head-tree half must be requested with `--head-tree-only`); keeping the two apart is why this
+one takes the next number rather than reusing that one.
 
 ## 3. Defect 2 — a comment ate a workflow
 
@@ -147,7 +149,7 @@ The same reading was applied one step earlier: a commented-out
 
 | File | Change |
 |---|---|
-| `scripts/ci/check_repository_hygiene.py` | Two `return []` branches become `RuntimeError`; `CHECK_VERSION` → `2026-11-27.1`; docstring states the fail-closed rule and why an empty side is not a satisfied relation |
+| `scripts/ci/check_repository_hygiene.py` | Two `return []` branches become `RuntimeError`; `CHECK_VERSION` → `2026-11-27.2`; docstring states the fail-closed rule and why an empty side is not a satisfied relation |
 | `scripts/check_declared_check_contexts.py` | `strip_yaml_comment` / `strip_yaml_comments`, applied inside `produced_contexts`; `WORKFLOW_GLOBS = ("*.yml", "*.yaml")` with a `workflow_files()` helper |
 | `scripts/ci/check_test_reachability.py` | `WORKFLOW_GLOBS` in `read_workflows`; new `workflow_text()` (comment-stripped) used by both `discovery_rules` and the Rule B text |
 | `scripts/test_check_repository_hygiene.py` | `with_index` fixture switch, two fail-closed cases, and a `commit()` helper that gives every fixture both sides of the membership relation |
@@ -161,7 +163,7 @@ detached worktree at `origin/main` = `2f4f4118`.
 
 | Quantity | Before | After |
 |---|---|---|
-| `check_repository_hygiene.py` version | `2026-11-24.8` | `2026-11-27.1` |
+| `check_repository_hygiene.py` version | `2026-11-24.8` | `2026-11-27.2` |
 | `Work-item index membership ... directories= / linked=` | 106 / 106, exit 0 | 107 / 107 with this work item (106 / 106 without it: the item adds exactly one directory and one row), exit 0 |
 | `check_declared_check_contexts.py` | 16 declared, 16 produced, exit 0 | 16 declared, 16 produced, exit 0 |
 | `check_test_reachability.py` | 65 test files, 65 reachable; 18 gate scripts, 3 unwired, 3 baselined | identical |
