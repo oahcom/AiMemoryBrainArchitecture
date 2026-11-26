@@ -15,7 +15,7 @@ acceptance_authority: NOT_ASSIGNED
 
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: dc826e4eae381d78a9fc4b1fcbb2cbc783ed2706
+base_commit_sha: 17b05a0234d861a8bd0b78bccea799b1c11c433f
 tracking_issue: "#1237 — automated Owner namespace and governance-operation traceability checks"
 
 prompt_id: AID-2026-082-PROMPT
@@ -114,13 +114,22 @@ findings:
     evidence: Issue #1208 acceptance criterion 6 and delegated split comment 7183824141.
 
 implementation:
-  status: NOT_STARTED
+  status: IN_PROGRESS
   branch: docs/aid-2026-082-governance-traceability-checks
   pull_request: "#1243"
   merge_commit_sha: NOT_MERGED
+  implementation_head: PENDING_FINAL_HEAD
+  implemented_files:
+    - scripts/check_owner_namespace_references.py
+    - scripts/check_governance_operation_traceability.py
+    - tests/test_check_owner_namespace_references.py
+    - tests/test_check_governance_operation_traceability.py
+    - .github/workflows/architecture-governance-traceability.yml
   note: >-
-    This PR registers the authorized scope only. The checker scripts, tests and workflow have
-    not yet been implemented or run.
+    Both read-only checkers, their unit tests and a separate advisory workflow are implemented.
+    Exact-Head local/CI validation remains pending; no required context or branch-protection
+    change is authorized. Existing checker semantics, Runtime/product code, schemas, APIs, DDL
+    and production state remain unchanged.
 
 review:
   status: NOT_ASSIGNED
