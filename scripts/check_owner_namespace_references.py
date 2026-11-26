@@ -19,6 +19,12 @@ FILES = (
     "docs/en/01-system-architecture/responsibility-matrix.md",
     "docs/zh-CN/01-system-architecture/component-map.md",
     "docs/zh-CN/01-system-architecture/responsibility-matrix.md",
+    "01-system-architecture/component-interactions.md",
+    "01-system-architecture/data-flows.md",
+    "docs/en/01-system-architecture/component-interactions.md",
+    "docs/en/01-system-architecture/data-flows.md",
+    "docs/zh-CN/01-system-architecture/component-interactions.md",
+    "docs/zh-CN/01-system-architecture/data-flows.md",
 )
 CAPABILITIES = (
     "Domain Model", "Canonical Store", "Lifecycle", "Entity/Relation",
@@ -45,9 +51,12 @@ PATTERNS = (
 
 def violations(text: str) -> list[tuple[int, str, str]]:
     found = []
+    in_fence = False
     for number, line in enumerate(text.splitlines(), 1):
-        # Markdown code fences are examples, not live accountability claims.
         if line.lstrip().startswith("```"):
+            in_fence = not in_fence
+            continue
+        if in_fence:
             continue
         for code, pattern in PATTERNS:
             match = pattern.search(line)
@@ -56,8 +65,16 @@ def violations(text: str) -> list[tuple[int, str, str]]:
                 break
     return found
 
+def mirror_signature(text: str) -> tuple[int, int, frozenset[str]]:
+    """Language-neutral shape: table rows, formal Owner citations, SYS IDs."""
+    table_rows = sum(1 for line in text.splitlines() if line.lstrip().startswith("|"))
+    owner_refs = len(re.findall(r"\\bOwner [A-I]\\b", text))
+    sys_ids = frozenset(re.findall(r"\\bSYS-[A-Z0-9]+(?:-[A-Z0-9]+)*\\b", text))
+    return table_rows, owner_refs, sys_ids
+
 def check(root: Path) -> tuple[int, list[str]]:
     errors: list[str] = []
+    contents: dict[str, str] = {}
     for relative in FILES:
         path = root / relative
         if not path.is_file():
@@ -68,8 +85,26 @@ def check(root: Path) -> tuple[int, list[str]]:
         except (OSError, UnicodeError) as exc:
             errors.append(f"INCOMPLETE cannot read {relative}: {exc}")
             continue
+        contents[relative] = text
         for line, code, excerpt in violations(text):
             errors.append(f"{relative}:{line}: {code}: {excerpt}")
+    # Root, EN and ZH-CN versions must preserve the same structural inventory.
+    for stem in ("component-map.md", "responsibility-matrix.md",
+                 "component-interactions.md", "data-flows.md"):
+        group = [
+            f"01-system-architecture/{stem}",
+            f"docs/en/01-system-architecture/{stem}",
+            f"docs/zh-CN/01-system-architecture/{stem}",
+        ]
+        if all(path in contents for path in group):
+            signatures = [mirror_signature(contents[path]) for path in group]
+            # Table/Owner counts are stable across translations. SYS identifiers
+            # are checked as a set only for the Component Map, where they are
+            # the subsystem namespace itself.
+            if len({(sig[0], sig[1]) for sig in signatures}) != 1:
+                errors.append(f"bilingual structural drift for {stem}: table/Owner signature differs")
+            if stem == "component-map.md" and len({sig[2] for sig in signatures}) != 1:
+                errors.append("bilingual SYS-* subsystem inventory drift in component-map.md")
     return (2 if any(x.startswith("INCOMPLETE") for x in errors) else 1 if errors else 0, errors)
 
 def main(argv: list[str] | None = None) -> int:
