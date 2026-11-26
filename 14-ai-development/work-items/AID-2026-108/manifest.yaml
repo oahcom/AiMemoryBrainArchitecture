@@ -55,6 +55,7 @@ correction:
   normative_effect: "NONE"
   hir_06_reference: "REMAINS_VALID"
   implementation_evidence:
+    HIR_06: "MISSING"
     HIR_16: "MISSING"
     HIR_17: "MISSING"
     HIR_18: "MISSING"

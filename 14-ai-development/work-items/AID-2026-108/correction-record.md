@@ -100,10 +100,10 @@ This correction:
 - does not change any AID-2026-099 normative conclusion or checkpoint result;
 - does not alter HIR-06, whose reference to AID-2026-098 remains valid;
 - does not change any AID-2026-098 file or content;
-- does not claim that HIR-16, HIR-17 or HIR-18 implementation evidence exists;
+- does not claim that HIR-06, HIR-16, HIR-17 or HIR-18 implementation evidence exists;
 - does not claim Storage implementation or conformance;
 - does not close Issue #1211 or any other Issue.
 
 ## 5. Evidence boundary
 
-The merge metadata and current file presence were checked against GitHub. The 18-checkpoint split is the AID-2026-098 manifest's recorded accounting, not a new execution result. HIR-06 can now be reviewed against the actual Storage candidate contract; HIR-16/17/18 still require their own implementation evidence.
+The merge metadata and current file presence were checked against GitHub. The 18-checkpoint split is the AID-2026-098 manifest's recorded accounting, not a new execution result. HIR-06 can now be reviewed against the actual Storage candidate contract; implementation evidence for HIR-06/16/17/18 is still missing.
