@@ -1,6 +1,6 @@
 ---
 document_metadata:
-  domain: architecture
+  domain: ai-development
   role: decision-record
   lifecycle:
     approval:
@@ -35,7 +35,7 @@ document_metadata:
   authority:
     canonical_status: Non-Canonical
     canonical_scope: "Owner A conditional merge authorization OA-MERGE-2026-11-26-01"
-    canonical_scope_id: "governance/owner-a-conditional-merge-authorization-1220-1287"
+    canonical_scope_id: "ai-development/aid-2026-100/owner-decision-merge-authorization"
     canonical_scope_keywords:
       - merge-authorization
       - pr-1220
@@ -45,8 +45,9 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    en: "docs/en/00-governance/decisions/2026-11-26-owner-a-conditional-merge-authorization-1220-1287.md"
-    zh-CN: "docs/zh-CN/00-governance/decisions/2026-11-26-owner-a-conditional-merge-authorization-1220-1287.md"
+    source: null
+    en: null
+    zh-CN: null
 ---
 
 # Owner A Conditional Merge Authorization — PR #1287 and #1220

@@ -65,7 +65,7 @@ authority:
   acceptance_authority: "Relevant domain Owner(s) and Owner A / Governance; NOT_RECORDED"
   independent_reviewer: "NOT_ASSIGNED"
   implementation_authorization: "DOCUMENTATION_AND_STAGE_0_REGISTRATION_ONLY"
-  merge_authorization: "CONDITIONAL; see 00-governance/decisions/2026-11-26-owner-a-conditional-merge-authorization-1220-1287.md"
+  merge_authorization: "CONDITIONAL; see 14-ai-development/work-items/AID-2026-100/owner-decision-merge-authorization.md"
   merge_authorization_decision_id: "OA-MERGE-2026-11-26-01"
 
   deployment_authorization: "NOT_GRANTED"

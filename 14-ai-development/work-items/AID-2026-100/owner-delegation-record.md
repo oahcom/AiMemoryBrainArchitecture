@@ -1,6 +1,6 @@
 ---
 document_metadata:
-  domain: architecture
+  domain: ai-development
   role: decision-record
   lifecycle:
     approval:
@@ -14,12 +14,13 @@ document_metadata:
         type: Full-document
       approval_applicability: Applicable-To-Current-Version
       evidence_reference:
-        - "00-governance/decisions/2026-11-26-owner-a-delegation-2026-11-26.md"
+        - "OA-DELEGATE-2026-11-26-01"
+        - "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1220#issuecomment-7193523076"
       revocation: null
     evidence_verification:
       verification_status: Unverified
       last_verified_date: null
-      last_verification_note: "English mirror of an Owner A delegation record."
+      last_verification_note: "Delegation record as published by Owner A; it grants no authority beyond the named scope."
     usage_status: Active
     modification_status: Unchanged
     supersession:
@@ -32,19 +33,20 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "English mirror of Owner A delegation OA-DELEGATE-2026-11-26-01"
-    canonical_scope_id: "governance/owner-a-delegation-2026-11-26/en"
+    canonical_scope: "Owner A delegation record OA-DELEGATE-2026-11-26-01"
+    canonical_scope_id: "ai-development/aid-2026-100/owner-delegation-record"
     canonical_scope_keywords:
       - delegation
       - owner-a
-      - mirror
+      - merge-authorization
+      - pr-1220
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: "00-governance/decisions/2026-11-26-owner-a-delegation-2026-11-26.md"
+    source: null
     en: null
-    zh-CN: "docs/zh-CN/00-governance/decisions/2026-11-26-owner-a-delegation-2026-11-26.md"
+    zh-CN: null
 ---
 
 # Owner A Delegation Record — Conditional Merge Authorization
