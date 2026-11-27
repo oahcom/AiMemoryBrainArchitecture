@@ -49,7 +49,7 @@ scope:
     - scripts/test_check_document_management.py
   files_to_create:
     - 14-ai-development/work-items/AID-2026-282/manifest.yaml
-    - 14-ai-development/work-items/AID-2026-282/evidence.md
+    - 14-ai-development/work-items/AID-2026-282/session-evidence.md
   files_out_of_scope:
     - scripts/check_document_management.py
     - 14-ai-development/work-items/AID-2026-079/manifest.yaml
@@ -62,9 +62,10 @@ scope:
     not an implementation-file change.
 
 evidence:
-  primary_record: 14-ai-development/work-items/AID-2026-282/evidence.md
+  primary_record: 14-ai-development/work-items/AID-2026-282/session-evidence.md
   branch: fix/2026-11-27-aid282-symlink-false-pass
   commit: e0c8a5ec
+  documentation_commit: 980438a8
   diff_summary: "1 file changed, 48 insertions(+), 30 deletions(-)"
   changed_file: scripts/test_check_document_management.py
   symlink_available:
@@ -87,26 +88,23 @@ evidence:
 
 documentation:
   - path: 14-ai-development/README.md
-    relationship: >-
-      Existing AI-development governance entry point; provides the surrounding
-      work-item and session-traceability context.
+    relationship: reference
   - path: 14-ai-development/work-items/INDEX.md
-    relationship: >-
-      Existing work-item registry; receives the AID-2026-282 traceability row.
+    relationship: reference
 
 session_evidence:
   - role: IMPLEMENTATION
+    issue_refs:
+      - "#1268"
+    implementing_ai_session: chatgpt-session-ops
     prompt_id: AID-2026-282-PROMPT
     prompt_version: 1
     executed_prompt_sha256: ebb1233cc7b133b836d2aff9512b295f3dbfd98e298b8b6d3659c379f66bd4e9
     executed_prompt_bytes: 5456
     executed_prompt_provenance: USER_SUPPLIED_MEASURED
-    issue_refs:
-      - "#1268"
-    implementing_session: chatgpt-session-ops
     implementing_account_id: acct3
     implementing_session_id: 6b090a3d-57a0-83ec-9060-eca41f4e6178
-    session_evidence_ref: 14-ai-development/work-items/AID-2026-282/evidence.md
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-282/session-evidence.md
     session_reference_status: RECORDED
     prompt_addenda:
       - prompt_version: 2
@@ -125,7 +123,32 @@ session_evidence:
           the AID-2026-282 handoff.
 
 implementation:
-  status: IMPLEMENTED_IN_BRANCH
+  status: IMPLEMENTED
+  summary: >-
+    Implemented and committed the symlink-unavailable skip-accounting repair.
+    T36, T37, T41 and T42 now record registered skips when symlink creation is
+    unavailable, and the affected early returns no longer suppress subsequent
+    boundary cases. The implementation is on
+    fix/2026-11-27-aid282-symlink-false-pass. Code commit e0c8a5ec contains
+    the test-module change; documentation commit 980438a8 records the
+    implementation evidence, manifest and INDEX entry.
   branch: fix/2026-11-27-aid282-symlink-false-pass
-  commit: e0c8a5ec
+  commits:
+    - e0c8a5ec
+    - 980438a8
+  files_changed:
+    - scripts/test_check_document_management.py
+    - 14-ai-development/work-items/AID-2026-282/session-evidence.md
+    - 14-ai-development/work-items/AID-2026-282/manifest.yaml
+    - 14-ai-development/work-items/INDEX.md
+  tests:
+    - command: "scripts/test_check_document_management.py (symlink creation available)"
+      result: "371/371 passed; 1 skipped, 1 registered of 5 allowed"
+      exit_code: 0
+    - command: "scripts/test_check_document_management.py (Path.symlink_to injected to raise OSError(1314, ...))"
+      result: "367/367 passed; 5 skipped, 5 registered of 5 allowed"
+      exit_code: 0
+    - command: "check_line_endings.py"
+      result: "1765 files, 0 violations"
+      exit_code: 0
   pull_request: PENDING
