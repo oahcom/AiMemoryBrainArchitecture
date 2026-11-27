@@ -52,7 +52,7 @@ session_evidence:
   - role: IMPLEMENTATION_SESSION
     issue_refs:
       - "#1268"
-    implementing_ai_session: "GPT-6 implementation session; conversation 6b090a00-c1b0-83ec-ad26-9668c882a144"
+    implementing_ai_session: "6b090a00-c1b0-83ec-ad26-9668c882a144"
     session_evidence_ref: 14-ai-development/work-items/AID-2026-290/session-evidence.md
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-290/prompt-v1.md
     executed_prompt_sha256: "f588b712f1133ec58f2ed949b226ae73e6bf0622841da8be3e7838249cc1b895"
