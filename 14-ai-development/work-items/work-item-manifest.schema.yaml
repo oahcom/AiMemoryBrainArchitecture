@@ -1,7 +1,7 @@
 # Work-item manifest schema (AID-2026-251)
 # Normative structure for newly authored and migrated Work Item manifests.
-# The checker is deliberately read-only: legacy records are reported, not rewritten.
-schema_version: "1"
+# Legacy findings are ratcheted against a pinned baseline tree.
+schema_version: "2"
 required_top_level_keys:
   - work_item_id
   - title
@@ -27,15 +27,20 @@ fields:
   documentation:
     kind: sequence
     required: true
+    min_items: 1
     item_required_keys:
       - path
       - relationship
+    path_kind: repository-relative-path
+    path_must_exist_in_git_tree: true
     relationship_enum:
       - normative
       - design
       - implementation
       - evidence
       - reference
+      - code
+      - schema
   session_evidence:
     kind: sequence
     required: true
@@ -44,7 +49,7 @@ fields:
       - issue_refs
       - implementing_ai_session
       - session_evidence_ref
-    session_evidence_ref_suffix: "session-evidence.md"
+    session_evidence_ref_pattern: "session-evidence*.md"
   implementation:
     kind: mapping
     required: true

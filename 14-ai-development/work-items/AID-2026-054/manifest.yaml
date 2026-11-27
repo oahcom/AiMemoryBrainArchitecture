@@ -140,3 +140,15 @@ findings:
 notes:
   - "The floor of 100 CJK / 1000 Latin is calibrated, not preferred. All 86 accepted pairs clear it by a factor of at least four, and a Chinese-only or English-only document fails it. The number matters less than the fact that it is two-sided."
   - "13-engineering-decisions/technology-architecture-blueprint.md is 0 CJK in 49666 bytes. It is the only file in its root that is genuinely single-language, and it is the control that proves the predicate is not simply accepting everything."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-054/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/adr/OWNER-DECISION-EMBEDDED-BILINGUAL-001.md"
+    relationship: reference
+  - path: "14-ai-development/governance-register/GOV-NC-2026-11-21-EMBEDDED-ROOT-015.md"
+    relationship: reference
+  - path: "14-ai-development/governance-register/GOV-NC-2026-11-21-PAIRING-RESIDUAL-013.md"
+    relationship: reference
+  - path: "00-governance/bilingual-documentation-policy.md"
+    relationship: reference

@@ -179,3 +179,15 @@ constraints:
   validator_semantic_changes: NONE
   documented_only_is_pass: false
   issue_1212_close: NOT_AUTHORIZED
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-107/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-107/prompt-v2.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-107/evidence.md"
+    relationship: reference
+  - path: "docs/en/14-ai-development/work-items/AID-2026-107/evidence.md"
+    relationship: reference
+  - path: "docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md"
+    relationship: reference
