@@ -87,3 +87,15 @@ review:
   status: PENDING_INDEPENDENT_REVIEW
   reviewer: NOT_RECORDED
   note: "Independent exact-Head review is required; no self-review is claimed."
+
+rework:
+  date: "2026-11-27"
+  defect: "The previous checker validated four Issue #262 comments instead of the four assessment-document bodies required by AC2 §5(3)."
+  acceptance_object_before: "Four Issue #262 comments"
+  acceptance_object_after:
+    - "reviews/architecture/SYS-RISK-001.en.md"
+    - "reviews/architecture/SYS-RISK-001.zh-CN.md"
+    - "reviews/complexity/architecture-complexity-assessment.en.md"
+    - "reviews/complexity/architecture-complexity-assessment.zh-CN.md"
+  gate_behaviour_change: "The existing required Schema non-empty audit job validates the four assessment documents in the checked-out tree rather than the four Issue comments; no required context or job name changes."
+  retrospective_boundary: "Three signature fields were attached on 2026-11-27 and do not satisfy the contemporaneity requirement; Owner adjudication remains required."
