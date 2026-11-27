@@ -9,6 +9,10 @@
 - Scope: A–I, Storage, cross-owner protocols, governance and production-operability implications.
 - Evidence rule: Owner branch artifacts are candidate evidence only; branch existence is not approval, adoption, implementation or proof.
 - Language: English; paired Chinese document: [SYS-RISK-001.zh-CN.md](SYS-RISK-001.zh-CN.md).
+- assessor: R — Principal System-wide Architecture Risk Assessment
+- assessed_version: `b372b62c640a2b656e54b6db62a4ee67d7d8c001`
+- evidence_baseline: `main@b372b62c640a2b656e54b6db62a4ee67d7d8c001:reviews/architecture/SYS-RISK-001.en.md`
+- signature_attached: 2026-11-27 by the AID-2026-250 rework — retrospective attachment, not a contemporaneous signature
 
 ## 1. Executive disposition
 
