@@ -44,7 +44,9 @@ document_metadata:
 
 # AID-2026-255 session evidence
 
-## Dispatch
+## Session role
+
+Implementation session for the AID-2026-255 delta on PR #1454, answering Issue #1350.
 
 - Carrier ruling: Owner A ruled that `AID-2026-268` / PR #1392 is the implementation carrier already on `main`, and that `AID-2026-255` / PR #1395 may only contribute sibling-key association tests plus ratchet-negative and independent-review evidence.
 - Implementation session: S6-B (acct4). Input: the landed `scripts/ci/check_manifest_blob_pins.py` and `scripts/ci/test_check_manifest_blob_pins.py` reproduced verbatim, plus four required mutation cases.
