@@ -1,0 +1,46 @@
+work_item_id: AID-2026-251
+title: "Define and baseline the Work Item manifest schema"
+class: GATE/TEST
+risk: R1
+risk_rationale: "Adds a declarative YAML contract and a read-only inventory checker; existing manifests are reported but not migrated or rewritten."
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: f18adc9fa1d06837433a09498f5297bf13b35756
+scope:
+  objective: "Define required Work Item manifest fields, documentation references, session evidence and implementation structure; measure existing manifests without migration."
+  files_changed:
+    - "14-ai-development/work-items/work-item-manifest.schema.yaml"
+    - "scripts/ci/check_work_item_manifest_schema.py"
+    - ".github/workflows/gates.yml"
+    - "14-ai-development/work-items/AID-2026-251/"
+evidence: "14-ai-development/work-items/AID-2026-251/evidence.md"
+documentation:
+  - path: "14-ai-development/work-items/work-item-manifest.schema.yaml"
+    relationship: normative
+  - path: "scripts/ci/check_work_item_manifest_schema.py"
+    relationship: implementation
+  - path: "14-ai-development/work-items/AID-2026-251/evidence.md"
+    relationship: evidence
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#266"
+    implementing_ai_session: "ChatGPT GPT-6"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-251/session-evidence.md"
+implementation:
+  status: IN_PROGRESS
+  summary: "Schema and read-only checker are introduced; legacy manifests remain unchanged."
+  files_changed:
+    - "14-ai-development/work-items/work-item-manifest.schema.yaml"
+    - "scripts/ci/check_work_item_manifest_schema.py"
+    - ".github/workflows/gates.yml"
+  tests:
+    - "CI work-item-manifest-schema job runs the read-only checker."
