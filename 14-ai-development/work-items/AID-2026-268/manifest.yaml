@@ -52,6 +52,7 @@ scope:
 session_evidence:
   - role: implementation
     issue_refs:
+      - "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1350"
     implementing_ai_session: S6-B
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-268/prompt-snapshot.md
     executed_prompt_sha256: 3f2b5476fecd1b05a09917b24eea527949716d797e2dd5ffa3f0dffdc3e5c077
