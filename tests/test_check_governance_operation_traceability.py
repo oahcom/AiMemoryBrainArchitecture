@@ -90,7 +90,7 @@ class GovernanceTraceabilityTests(unittest.TestCase):
     def test_unilateral_global_completion_claim_is_rejected(self):
         path = self.root / FILES[0]
         path.write_text(
-            path.read_text(encoding="utf-8") + "\\nOwner D may declare completion alone.\\n",
+            path.read_text(encoding="utf-8") + "\nOwner D may declare completion alone.\n",
             encoding="utf-8",
         )
         code, errors = self.run_check()
