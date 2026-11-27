@@ -1,6 +1,7 @@
 ---
 document_metadata:
   domain: protocol
+  steward: "Architecture Governance"
   role: work-record
 
   lifecycle:
