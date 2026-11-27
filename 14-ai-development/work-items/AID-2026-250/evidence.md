@@ -72,8 +72,21 @@ The metadata is a retrospective attachment derived from the author/session and b
 ## Checker evidence
 - Checker: `scripts/ci/check_req_assessment_signatures.py`
 - Tests: `scripts/ci/test_check_req_assessment_signatures.py`
-- Exact PR Head checker execution: PENDING CI.
-- Actual checker stdout: PENDING; no unexecuted result is represented as PASS.
+- Exact PR Head: `d0b137e0c28a91d5f0a1568e2a6ca64346baf4ad`.
+- Workflow run: `45943429973` (Existing gates); required job: `Schema non-empty audit (hard gate)`, job ID `140323094623`.
+- Checkout log explicitly records `ref: d0b137e0c28a91d5f0a1568e2a6ca64346baf4ad`; the checker did not run against the synthetic PR merge ref.
+- Checker stdout:
+```text
+PASS comment 7011312621: assessor, assessed_version, evidence_baseline
+PASS comment 7014315135: assessor, assessed_version, evidence_baseline
+PASS comment 7143927480: assessor, assessed_version, evidence_baseline
+PASS comment 7149369280: assessor, assessed_version, evidence_baseline
+SUMMARY comments=4 failures=0
+```
+- Regression tests: `Ran 8 tests in 0.002s`; `OK`.
+- Job URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/45943429973/job/140323094623
+- The run also passed the schema non-empty audit: `OK: 32 schemas; 5599 registered constraints; no unregistered or stale entries.`
+- This is an exact-head CI observation. Post-merge blob verification remains pending.
 
 ## Integration
 The checker and tests run in the existing required `Schema non-empty audit (hard gate)` job. The workflow adds only `issues: read` permission for the four GET requests. No new job, required context, branch-protection mutation, Issue #262 body change, or Issue closure is in scope.
