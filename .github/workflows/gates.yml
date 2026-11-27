@@ -365,20 +365,30 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           set -euo pipefail
-          python scripts/ci/check_prompt_commit_trace.py --commit "$BASE_SHA" --base "$BASE_SHA" --emit-baseline "$RUNNER_TEMP/main-baseline.json" > "$RUNNER_TEMP/main-snapshot.json"
-          python scripts/ci/check_prompt_commit_trace.py --commit "$HEAD_SHA" --base "$BASE_SHA" --emit-baseline "$RUNNER_TEMP/pr-snapshot.json" > "$RUNNER_TEMP/pr-snapshot.json.out"
-          {
-            echo "## Prompt-to-commit trace snapshot"
-            echo
-            echo "Base: $BASE_SHA"
-            echo "PR head: $HEAD_SHA"
-            echo
-            echo '### Main baseline candidate'
-            cat "$RUNNER_TEMP/main-baseline.json"
-            echo
-            echo '### PR head matrix and status counts'
-            cat "$RUNNER_TEMP/pr-snapshot.json"
-          } >> "$GITHUB_STEP_SUMMARY"
+          python scripts/ci/check_prompt_commit_trace.py --commit "$BASE_SHA" --base "$BASE_SHA" --emit-baseline "$RUNNER_TEMP/main-baseline.json" > "$RUNNER_TEMP/main-baseline.stdout.json"
+          python scripts/ci/check_prompt_commit_trace.py --commit "$HEAD_SHA" --base "$BASE_SHA" --emit-baseline "$RUNNER_TEMP/pr-snapshot.json" > "$RUNNER_TEMP/pr-snapshot.stdout.json"
+          python scripts/ci/check_prompt_commit_trace.py --commit "$BASE_SHA" --base "$BASE_SHA" --json > "$RUNNER_TEMP/main-summary.json"
+          python scripts/ci/check_prompt_commit_trace.py --commit "$HEAD_SHA" --base "$BASE_SHA" --json > "$RUNNER_TEMP/pr-summary.json"
+          python - "$RUNNER_TEMP/main-summary.json" "$RUNNER_TEMP/pr-summary.json" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, os, sys
+          for label, path in (("Main baseline", sys.argv[1]), ("PR head", sys.argv[2])):
+              data = json.load(open(path, encoding="utf-8"))
+              print(f"## {label}: prompt-to-commit trace")
+              print(f"Commit: {data['manifests'][0]['manifest'] if False else 'see pinned commit below'}")
+              print(f"Manifest count: {data['manifest_count']}")
+              print("### Five primary states")
+              for name, count in data["primary_status"].items():
+                  print(f"- {name}: {count}")
+              print("### 3×4 prompt × commit matrix")
+              for prompt, commits in data["matrix"].items():
+                  for commit, count in commits.items():
+                      print(f"- {prompt} × {commit}: {count}")
+              if label == "PR head":
+                  row = next((x for x in data["manifests"] if x["work_item_id"] == "AID-2026-047"), None)
+                  print("AID-2026-047: " + json.dumps(row, sort_keys=True))
+              print()
+          print(f"BASE_SHA: {os.environ.get('BASE_SHA', 'see workflow env')}")
+          PY
       - name: Upload immutable snapshot artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -386,6 +396,8 @@ jobs:
           path: |
             ${{ runner.temp }}/main-baseline.json
             ${{ runner.temp }}/pr-snapshot.json
+            ${{ runner.temp }}/main-summary.json
+            ${{ runner.temp }}/pr-summary.json
           if-no-files-found: error
       - name: Enforce committed baseline ratchet
         shell: bash

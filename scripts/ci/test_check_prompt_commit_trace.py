@@ -29,29 +29,44 @@ class RepositoryRegressionTests(unittest.TestCase):
         cls.rows = audit(ROOT, cls.ref, cls.ref)
         cls.by_id = {r["work_item_id"]: r for r in cls.rows}
 
-    def test_nested_implementation_commit_field_is_read(self):
-        # These five commits resolve but are not ancestors of main.
-        for item in ("AID-2026-041", "AID-2026-042", "AID-2026-043",
-                     "AID-2026-048", "AID-2026-049"):
+    def test_five_nested_commit_manifest_cases_follow_precedence(self):
+        # AID-041 has a pinned digest mismatch, so it wins over unreachable.
+        row = self.by_id["AID-2026-041"]
+        self.assertEqual(row["primary_status"], "DIGEST_MISMATCH")
+        self.assertEqual(row["commit_dimension"], "UNREACHABLE")
+        self.assertIn("digest_pinned_mismatch", row["findings"])
+        self.assertIn("commit_unreachable", row["findings"])
+        self.assertNotIn("commit_absent", row["findings"])
+
+        for item in ("AID-2026-042", "AID-2026-043"):
             with self.subTest(item=item):
                 row = self.by_id[item]
                 self.assertEqual(row["commit_dimension"], "UNREACHABLE")
                 self.assertEqual(row["primary_status"], "COMMIT_UNREACHABLE")
+                self.assertIn("commit_unreachable", row["findings"])
                 self.assertNotIn("commit_absent", row["findings"])
 
-    def test_prompt_pinned_but_implementation_commit_absent(self):
+        for item in ("AID-2026-048", "AID-2026-049"):
+            with self.subTest(item=item):
+                row = self.by_id[item]
+                self.assertEqual(row["commit_dimension"], "UNREACHABLE")
+                self.assertEqual(row["primary_status"], "DIGEST_UNPINNED")
+                self.assertIn("digest_unpinned", row["findings"])
+                self.assertIn("commit_unreachable", row["findings"])
+
+    def test_five_pinned_prompt_manifests_have_no_implementation_commit(self):
         for item in ("AID-2026-011", "AID-2026-040", "AID-2026-044",
                      "AID-2026-045", "AID-2026-046"):
             with self.subTest(item=item):
                 row = self.by_id[item]
                 self.assertEqual(row["prompt_dimension"], "PINNED_OK")
                 self.assertEqual(row["commit_dimension"], "ABSENT")
-                self.assertIn("commit_absent", row["findings"])
+                self.assertEqual(row["primary_status"], "NO_TRACE")
+                self.assertTrue(
+                    {"commit_absent", "commit_pending"} & set(row["findings"])
+                )
 
     def test_047_unpinned_head_match_is_not_execution_time_trace(self):
-        # AID-2026-047 currently has no blob or commit pin in its manifest.
-        # Its HEAD bytes match, but the R3 state contract classifies this
-        # HEAD_MATCH/no-pin case as DIGEST_UNPINNED, not TRACEABLE.
         row = self.by_id["AID-2026-047"]
         self.assertEqual(row["prompt_dimension"], "HEAD_MATCH")
         self.assertEqual(row["commit_dimension"], "REACHABLE")

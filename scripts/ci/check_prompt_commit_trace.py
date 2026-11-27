@@ -246,7 +246,7 @@ def main():
                         "manifests": {row["work_item_id"]: {
                             "primary_status": row["primary_status"],
                             "findings": row["findings"]} for row in result["manifests"]}}
-            args.emit_baseline.write_text(json.dumps(snapshot, sort_keys=True, indent=2) + "\\n")
+            args.emit_baseline.write_text(json.dumps(snapshot, sort_keys=True, indent=2) + "\n")
             print(json.dumps(snapshot, sort_keys=True, indent=2))
             return 0
         if not args.baseline or not args.baseline.is_file():
