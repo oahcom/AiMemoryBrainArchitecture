@@ -354,21 +354,44 @@ jobs:
           python-version: "3.13"
       - name: Install pinned YAML parser
         run: python -m pip install PyYAML==6.0.2
+      - name: Resolve current main comparison base
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          BASE_SHA="$(git rev-parse FETCH_HEAD)"
+          echo "BASE_SHA=$BASE_SHA" >> "$GITHUB_ENV"
+          echo "GITHUB_BASE_SHA=$BASE_SHA" >> "$GITHUB_ENV"
       - name: Run prompt-to-commit trace regression tests
-        env:
-          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
         run: python -m unittest scripts.ci.test_check_prompt_commit_trace -v
       - name: Generate auditable main and PR snapshots
         shell: bash
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           set -euo pipefail
           python scripts/ci/check_prompt_commit_trace.py --commit "$BASE_SHA" --base "$BASE_SHA" --emit-baseline "$RUNNER_TEMP/main-baseline.json" > "$RUNNER_TEMP/main-baseline.stdout.json"
           python scripts/ci/check_prompt_commit_trace.py --commit "$HEAD_SHA" --base "$BASE_SHA" --emit-baseline "$RUNNER_TEMP/pr-snapshot.json" > "$RUNNER_TEMP/pr-snapshot.stdout.json"
-          python scripts/ci/check_prompt_commit_trace.py --commit "$BASE_SHA" --base "$BASE_SHA" --json > "$RUNNER_TEMP/main-summary.json"
-          python scripts/ci/check_prompt_commit_trace.py --commit "$HEAD_SHA" --base "$BASE_SHA" --json > "$RUNNER_TEMP/pr-summary.json"
+          python - "$RUNNER_TEMP/main-baseline.json" "$RUNNER_TEMP/pr-snapshot.json" "$RUNNER_TEMP/baseline-seed.json" <<'PY'
+          import json, sys
+          main = json.load(open(sys.argv[1], encoding="utf-8"))
+          pr = json.load(open(sys.argv[2], encoding="utf-8"))
+          seeded = sorted(set(pr["manifests"]) - set(main["manifests"]))
+          for work_item_id in seeded:
+              main["manifests"][work_item_id] = pr["manifests"][work_item_id]
+          main["seeded_work_items"] = {
+              work_item_id: {
+                  "observed_in_pr_head": pr["commit"],
+                  "reason": "Initial ratchet seed for the newly registered work item; this records its current NO_TRACE state without claiming traceability."
+              }
+              for work_item_id in seeded
+          }
+          with open(sys.argv[3], "w", encoding="utf-8") as handle:
+              json.dump(main, handle, sort_keys=True, indent=2)
+              handle.write("\n")
+          PY
+          python scripts/ci/check_prompt_commit_trace.py --commit "$BASE_SHA" --base "$BASE_SHA" --baseline "$RUNNER_TEMP/baseline-seed.json" --json > "$RUNNER_TEMP/main-summary.json"
+          python scripts/ci/check_prompt_commit_trace.py --commit "$HEAD_SHA" --base "$BASE_SHA" --baseline "$RUNNER_TEMP/baseline-seed.json" --json > "$RUNNER_TEMP/pr-summary.json"
           python - "$RUNNER_TEMP/main-summary.json" "$RUNNER_TEMP/pr-summary.json" <<'PY' >> "$GITHUB_STEP_SUMMARY"
           import json, os, sys
           for label, path in (("Main baseline", sys.argv[1]), ("PR head", sys.argv[2])):
@@ -402,7 +425,6 @@ jobs:
       - name: Enforce committed baseline ratchet
         shell: bash
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           set -euo pipefail
