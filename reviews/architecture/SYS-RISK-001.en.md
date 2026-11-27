@@ -4,9 +4,6 @@
 - Review date: 2026-11-17
 - Repository: `oahcom/AiMemoryBrainArchitecture`
 - Main baseline: `b372b62c640a2b656e54b6db62a4ee67d7d8c001`
-- assessor: R — Principal System-wide Architecture Risk Assessment (historical source; original session identity not recorded)
-- assessed_version: `b372b62c640a2b656e54b6db62a4ee67d7d8c001`
-- evidence_baseline: `main@b372b62c640a2b656e54b6db62a4ee67d7d8c001` (historical baseline named by source report; not a claim of contemporaneous session signature)
 - Review branch: `review/session-1-system-wide-risk-2026-11-17`
 - Status: **PRELIMINARY SYSTEM-WIDE RISK ASSESSMENT — NOT AN ARCHITECTURE APPROVAL**
 - Scope: A–I, Storage, cross-owner protocols, governance and production-operability implications.
