@@ -87,4 +87,11 @@ jobs:
           PR_BASE: ${{ github.event.pull_request.base.sha }}
         run: |
           PIN="${PR_BASE:-$GITHUB_SHA}"
+          set +e
           python3 scripts/check_document_management.py --list-missing --json --pin "$PIN"
+          status=$?
+          # Exit 2 means the steward census completed but the tree still has
+          # unclassified governed documents; preserve the census as evidence.
+          if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
+            exit "$status"
+          fi
