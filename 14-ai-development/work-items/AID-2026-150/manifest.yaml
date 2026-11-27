@@ -117,3 +117,12 @@ post_merge_correction:
     - "carrier.merge_commit_sha: PENDING"
   corrected_values:
     - "PR #1320 merged; see implementation/carrier above"
+blob_pins:
+  - pin_id: "scope-fence-conflict-source"
+    field_path: "scope.fence_conflict.source_blob"
+    locator: "03-memory-brain/forget-fence-operation-and-publication-gate.md"
+    algorithm: "git-blob-sha1"
+    expected: "4da0b61ba3656a768ea56b4a2a24e09da4e21cd5"
+    scope:
+      kind: "commit"
+      commit_sha: "b525e1f8fee2471a131e4a38efda99804045e424"
