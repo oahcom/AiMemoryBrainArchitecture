@@ -6,7 +6,7 @@ risk_rationale: >-
   The change corrects test accounting and prevents unavailable platform
   capabilities from being recorded as successful test execution.
   Production gate behavior is unchanged.
-status: IN_PROGRESS
+status: MERGED
 id_status: PROVISIONAL
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -16,6 +16,9 @@ date: "2026-11-26"
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
 base_commit_sha: "af2660d55a93278157fa6668aba338daf81e127c"
+pull_request: 1408
+pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1408
+merge_commit_sha: 7ecf2a8e7d1e40a13f6af6d4335a6766a222194f
 
 scope:
   objective: >-
