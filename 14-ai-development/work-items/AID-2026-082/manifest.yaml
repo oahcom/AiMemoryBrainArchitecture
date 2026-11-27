@@ -7,7 +7,7 @@ risk_rationale: >-
   governance-operation authority registration. They can produce false positives or miss
   an authority collapse if their parsing boundary is wrong. They do not change Runtime,
   domain semantics, existing validator behavior, schemas, APIs, DDL or production state.
-status: DISPATCHED
+status: MERGED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -114,11 +114,11 @@ findings:
     evidence: Issue #1208 acceptance criterion 6 and delegated split comment 7183824141.
 
 implementation:
-  status: IN_PROGRESS
+  status: IMPLEMENTED
   branch: docs/aid-2026-082-governance-traceability-checks
   pull_request: "#1265"
-  merge_commit_sha: NOT_MERGED
-  implementation_head: PENDING_FINAL_HEAD
+  merge_commit_sha: 71548b7b9d8efae4ee605a0fb4c9d1d97236138c
+  implementation_head: 42340236a23eb6f297becfabdb3b89f13fda0640
   implemented_files:
     - scripts/check_owner_namespace_references.py
     - scripts/check_governance_operation_traceability.py
@@ -126,15 +126,21 @@ implementation:
     - tests/test_check_governance_operation_traceability.py
     - .github/workflows/architecture-governance-traceability.yml
   note: >-
-    Both read-only checkers, their unit tests and a separate advisory workflow are implemented.
-    Exact-Head local/CI validation remains pending; no required context or branch-protection
-    change is authorized. Existing checker semantics, Runtime/product code, schemas, APIs, DDL
-    and production state remain unchanged.
+    Both read-only checkers, their unit tests and a separate advisory workflow are implemented
+    and merged: PR #1265, merge commit 71548b7b9d8efae4ee605a0fb4c9d1d97236138c, implementation
+    head 42340236a23eb6f297becfabdb3b89f13fda0640. `implementation.status` stays IMPLEMENTED
+    because MERGED is not in the AID-2026-251 implementation vocabulary; the merge is carried by
+    merge_commit_sha and the top-level status. Exact-Head CI evidence was not recorded here and
+    is not claimed. No required context or branch-protection change is authorized. Existing
+    checker semantics, Runtime/product code, schemas, APIs, DDL and production state remain
+    unchanged.
 
 review:
   status: NOT_ASSIGNED
-  record_ref: 14-ai-development/work-items/AID-2026-082/REVIEW-01-INDEPENDENT.md
-  note: No independent review or natural-person Owner review is claimed.
+  record_ref: ""
+  note: No independent review or natural-person Owner review is claimed; the previously
+    declared record_ref (REVIEW-01-INDEPENDENT.md) never existed in the tree and is
+    removed rather than left dangling.
 
 acceptance:
   status: NOT_ASSIGNED
