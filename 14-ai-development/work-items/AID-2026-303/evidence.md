@@ -134,11 +134,10 @@ No source line is fabricated for either guide.
 
 ## 4. Expected scan result after repair
 
-The expected result is derived from the supplied baseline and the twelve
-specified repairs:
+The measured result after applying the twelve specified repairs is:
 
 ```text
-POINTERS=54
+POINTERS=52
 ACCURATE=28
 STALE=0
 UNRESOLVED=0
@@ -148,8 +147,9 @@ NON_BLOB_REFERENCE=2
 BAD=2
 ```
 
-The scanner is expected to return exit 1 because the two guide records remain
-non-Blob references.
+POINTERS is 52 rather than 54 because the scanner's NON_BLOB_REFERENCE branch executes `continue` and does not increment POINTERS; converting the four repairable NON_BLOB records into valid Blob pointers adds four to the original 48.
+
+The scanner returns exit 1 because the two guide records remain non-Blob references.
 
 This is intentional. The CI wrapper compares the complete failure set with
 the two-item baseline. The wrapper returns exit 0 only when the failure set

@@ -50,17 +50,13 @@ scope:
     - 14-ai-development/work-items/AID-2026-303/session-evidence.md
 evidence: "14-ai-development/work-items/AID-2026-303/evidence.md"
 documentation:
-  - path: "scripts/check_source_revision_pointers.py"
-    relationship: implementation
-  - path: "scripts/ci/gate_ratchet.py"
-    relationship: implementation
-  - path: "scripts/ci/baselines/source-revision-pointers.txt"
+  - path: "00-governance/design-principles.md"
+    relationship: normative
+  - path: "01-system-architecture/system-boundaries.md"
+    relationship: design
+  - path: "docs/governance/translation-status.md"
     relationship: reference
-  - path: ".github/workflows/repository-hygiene.yml"
-    relationship: implementation
-  - path: "14-ai-development/work-items/AID-2026-303/evidence.md"
-    relationship: evidence
-  - path: "14-ai-development/work-items/AID-2026-303/session-evidence.md"
+  - path: "14-ai-development/work-items/INDEX.md"
     relationship: evidence
 session_evidence:
   - role: "IMPLEMENTATION_SESSION"
@@ -92,6 +88,9 @@ implementation:
     - scripts/ci/baselines/gate-wiring.txt
     - scripts/ci/baselines/source-revision-pointers.txt
     - 14-ai-development/work-items/INDEX.md
+    - 14-ai-development/work-items/AID-2026-303/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-303/evidence.md
+    - 14-ai-development/work-items/AID-2026-303/session-evidence.md
   tests:
     - "python3 scripts/test_check_source_revision_pointers.py"
     - "python3 scripts/check_source_revision_pointers.py"
