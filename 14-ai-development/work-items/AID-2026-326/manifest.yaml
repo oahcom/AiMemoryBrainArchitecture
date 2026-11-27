@@ -46,14 +46,14 @@ documentation:
 
 session_evidence:
   - role: DECISION_RECORDING
-    issue_refs:
-      - "#1210"
+    issue_refs: []
     implementing_ai_session: "NOT_RECORDED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-326/session-evidence.md"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-326/prompt-v1.md"
-    executed_prompt_sha256: "3e522faeddd574725e8a7a11d4f9a908aa9dd057df7592aa98954c3bca5917f4"
-    executed_prompt_bytes: 1704
-    executed_prompt_provenance: "SCOPE_SNAPSHOT_NOT_VERBATIM"
+    executed_prompt_sha256: "63ac5dad68ff74de6e127301814f5c0d503345003294626d47a4b13d205e09ac"
+    executed_prompt_bytes: 3205
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_RECORDED"
 
 implementation:
   status: IMPLEMENTED
