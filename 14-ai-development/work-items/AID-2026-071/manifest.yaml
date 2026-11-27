@@ -11,8 +11,8 @@ prompt_id: AID-2026-071-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-071/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 8080149aa3a0a9ec3f68071b25e62d856f4f55d9e36acfab245d0903ff631af5
-prompt_bytes: 4245
+prompt_sha256: 49e5c97e2f113e5a45b2cddc53b13ead4d453ffd7c43e3ae67426a9d71fe458b
+prompt_bytes: 4282
 
 # ---------------------------------------------------------------------------
 # WO-AC2, registered against Issue #262 AC2.
@@ -95,8 +95,8 @@ session_evidence:
       - "#262"
     implementing_ai_session: session-r45-coordinator
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-071/prompt-v1.md
-    executed_prompt_sha256: 4c735edd42b80f43d04c26fdbbcc8e29662d96456394fbf5417a8386d88609c7
-    executed_prompt_bytes: 4303
+    executed_prompt_sha256: 49e5c97e2f113e5a45b2cddc53b13ead4d453ffd7c43e3ae67426a9d71fe458b
+    executed_prompt_bytes: 4282
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-071/session-evidence-r45.md
