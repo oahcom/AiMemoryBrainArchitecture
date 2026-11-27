@@ -536,5 +536,3 @@ Gate A 第 5 项现已从笼统的“IMPL2”占位变为可执行状态：**OPE
 - 该精确最终 Head 上 16 项必需检查全部 SUCCESS；PR #1299 的 merge commit 是当前 main 的祖先。
 - 合并后 Git blob 核对（PR Head = main）：Canonical `cce956d97b7a6d969bb3245fe0890905ca6d3979`；EN `101dcc3ca2a1d0c8358505a5a5cc221a5aa85cab`；ZH-CN `1b478d1114613adb3f7d3bbdcd913d403a78c36f`。
 - Gate A 清单第 3 项（精确 Head CI）现为 SATISFIED。第 4–8 项仍 OPEN；Gate A 仍为 PARTIAL / OPEN，Gate B 仍为 PARTIAL / OPEN（NOT VERIFIED）。
-
-[executed on device: VM-0-9-ubuntu (3a8ee5f7-b4d2-46f3-9a7d-69e3147618fd)]

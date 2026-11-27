@@ -539,5 +539,3 @@ Gate A item 5 is now executable rather than an undifferentiated “IMPL2” plac
 - All 16 required contexts are SUCCESS on that exact final Head; the PR #1299 merge commit is an ancestor of current main.
 - Post-merge Git blob equality (PR Head = main): Canonical `cce956d97b7a6d969bb3245fe0890905ca6d3979`; EN `101dcc3ca2a1d0c8358505a5a5cc221a5aa85cab`; ZH-CN `1b478d1114613adb3f7d3bbdcd913d403a78c36f`.
 - Gate A checklist item 3 (exact-head CI) is now SATISFIED. Items 4–8 remain OPEN; Gate A remains PARTIAL / OPEN and Gate B remains PARTIAL / OPEN (NOT VERIFIED).
-
-[executed on device: VM-0-9-ubuntu (3a8ee5f7-b4d2-46f3-9a7d-69e3147618fd)]
