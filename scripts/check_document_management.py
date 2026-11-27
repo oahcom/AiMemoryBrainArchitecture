@@ -2297,7 +2297,12 @@ def main() -> int:
         help="require metadata on every governed file changed since REF "
              "(incremental: does NOT claim the whole tree is classified)",
     )
+    parser.add_argument("--list-missing", action="store_true")
+    parser.add_argument("--json", action="store_true")
+    parser.add_argument("--pin", default=None)
     args = parser.parse_args()
+    if args.json and not args.list_missing:
+        parser.error("--json requires --list-missing")
 
     # Two different verdicts, and they must not be confused:
     #   --require-changed REF  incremental. The backlog may stay, it may not
@@ -2399,7 +2404,7 @@ def main() -> int:
             continue
         file_errors, meta = check_document(path, text, root)
         errors.extend(f"{rel}: {err}" for err in file_errors)
-        if (rel in newly_added and meta is not None
+        if (rel in required and meta is not None
                 and not str(meta.get("steward") or "").strip()):
             errors.append(
                 f"{rel}: DM-15 new governed document must declare a non-empty steward"
@@ -2457,6 +2462,17 @@ def main() -> int:
         rel for rel, meta in docs.items()
         if not str(meta.get("steward") or "").strip()
     )
+    present = len(docs) - len(steward_missing)
+    if args.list_missing:
+        if args.json:
+            pin = args.pin or git(root, "rev-parse", "HEAD") or "UNRESOLVED"
+            print(json.dumps({
+                "pin": pin, "governed": total, "classified": len(docs),
+                "present": present, "missing": steward_missing,
+            }, ensure_ascii=False, sort_keys=True))
+        else:
+            for rel in steward_missing:
+                print(rel)
     print(
         f"DM-15 steward adoption baseline: {len(steward_missing)} classified "
         f"document(s) missing steward"

@@ -5098,8 +5098,9 @@ def run_steward_assignment() -> None:
         _git(root, "add", "-A")
         _git(root, "commit", "-q", "-m", "modify legacy")
         expect_gate(
-            "DM-15 legacy document modification remains non-blocking",
-            root, 0, "--require-changed", base,
+            "DM-15 modified legacy document without steward fails",
+            root, 1, "--require-changed", base,
+            msg="00-governance/legacy.md: DM-15",
         )
 
 
