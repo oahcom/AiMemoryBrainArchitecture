@@ -133,7 +133,7 @@ session_evidence:
     issue_refs:
     implementing_ai_session: session-799-orchestrator
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-059/prompt-v1.md
-    executed_prompt_sha256: 848d82e049b1ae6b895c0a9c61ab93028505a79e695c96ef86109522d3ded5f
+    executed_prompt_sha256: 848d82e049b1ae6b8956c0a9c61ab93028505a79e695c96ef86109522d3ded5f
     executed_prompt_bytes: 3845
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
