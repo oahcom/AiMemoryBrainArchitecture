@@ -1,6 +1,53 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  steward: "user-authorized operator (delegated by account owner)"
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "每条以 2026-11-27 的 GitHub API 与 git 实测为准；无直接证据的条目记 NOT_VERIFIED / NOT_RECORDED，不以转述替代。"
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "14-ai-development/reports/2026-11-27-wb-line01-closeout.md"
+    en: "docs/en/14-ai-development/reports/2026-11-27-wb-line01-closeout.md"
+    zh-CN: null
+---
+
+
 # LINE 01 — AI 大脑架构项目开发基线 Closeout
 
 - Record type: development-baseline closeout (WB convergence order, PROMPT-01)
+- Built on main: `a7cf5256e975ff25fd2f75b3b5051b16d8d77d36`（push 时最新 main；重基后再核对一次，见 §0）
+- Path: `14-ai-development/reports/2026-11-27-wb-line01-closeout.md`（按 Addendum 第 2 条迁至此路径，避开 line 03 的碰撞点）
 - Status: **PARTIAL** — 见 §9 NOT_VERIFIED 与 §10 遗留
 - 署名性质: 代理登记，非自然人 Owner 签署（见 `ATTRIBUTION.md`）
 - 记录时间: 2026-11-27T04:45Z 前后（各条目自带精确时刻）
@@ -197,12 +244,14 @@ $ git rev-list --count HEAD → 2782 ; .git/shallow 不存在
 
 ## 6. 本分支产出文件
 
-| 路径 | blob SHA | bytes |
-|---|---|---|
-| `ATTRIBUTION.md` | `b97b8497c5a66df881bd8624a60e200084c6b3a3` | 2581 |
-| `LINE-01-CLOSEOUT-2026-11-27.md`（本文件） | 见提交后回读（§11） | — |
+| 路径 | blob SHA | bytes | 治理状态 |
+|---|---|---|---|
+| `ATTRIBUTION.md`（仓库根） | `b97b8497c5a66df881bd8624a60e200084c6b3a3` | 2581 | 根目录不在 `document-scope-registry.yaml` 的 `governed:` 内 → 无元数据/配对要求 |
+| `14-ai-development/reports/2026-11-27-wb-line01-closeout.md`（本文件） | 见 §11 回读 | — | `14-ai-development` 受治理 → 带 `document_metadata`，并有 EN / ZH-CN 镜像 |
+| `docs/en/14-ai-development/reports/2026-11-27-wb-line01-closeout.md` | 见 §11 | — | EN 镜像 |
+| `docs/zh-CN/14-ai-development/reports/2026-11-27-wb-line01-closeout.md` | 见 §11 | — | ZH-CN 镜像 |
 
-两者置于仓库根目录：根目录不在 `00-governance/document-scope-registry.yaml` 的 `governed:` 列表内（`governed:` 为 00–14 各受治理根），因此不触发 GOV-DOC-002 元数据要求与 EN/ZH-CN 配对要求；实测见 §7。
+路径按 Addendum 第 2 条迁至 `14-ai-development/reports/`，与 line 03 的产出路径不重合；`INDEX.md` 与 `aid-ledger` 未被触碰（Addendum 第 1 条）。
 
 ---
 
@@ -255,7 +304,9 @@ $ git rev-list --count HEAD → 2782 ; .git/shallow 不存在
 ## 11. 提交与验证回读
 
 分支：`closeout/line01-dev-baseline`，base `a588cd9914949c2c9db7b2c5704d906fd3f05b70`。
-push 前重基：2026-11-27T12:52:59+08 观测到 main 已推进到 `242cf101c8b79007ad2fb8d9c89681224577188d`（较 `a588cd99` 多 75 个提交），遂重基到 `242cf101…`；重基未改动本记录任何内容。
+push 前两次重基，均未改动本记录内容：
+1. 2026-11-27T12:52:59+08 观测到 main 为 `242cf101c8b79007ad2fb8d9c89681224577188d`（较 `a588cd99` 多 75 个提交），重基至该 SHA；
+2. push 前再次核对，main 已为 `a7cf5256e975ff25fd2f75b3b5051b16d8d77d36`（较 `242cf101` 多 139 个提交），最终重基至该 SHA，**本记录绑定 `c2b346de`**。
 
 | commit | 内容 |
 |---|---|
@@ -278,6 +329,6 @@ push 前重基：2026-11-27T12:52:59+08 观测到 main 已推进到 `242cf101c8b
 ```
 $ git rev-parse HEAD:ATTRIBUTION.md
 b97b8497c5a66df881bd8624a60e200084c6b3a3
-$ git rev-parse HEAD:LINE-01-CLOSEOUT-2026-11-27.md
-921cde5923019ab3dd7bee24be6359492dd23a70   # 本节修改前的版本；最终 blob 见 §6 与提交
+$ git rev-parse HEAD:14-ai-development/reports/2026-11-27-wb-line01-closeout.md
+<见 PR 描述中的最终回读>
 ```
