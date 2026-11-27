@@ -1,0 +1,89 @@
+work_item_id: AID-2026-250
+title: "Enforce version-pinned assessor metadata on the four REQ-01 assessment comments"
+class: GATE/CI/TEST
+risk: R2
+risk_rationale: "The checker is read-only and blocks the required gate when any of the four primary Issue #262 assessment comments lacks its source-pinned assessor metadata."
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 386d8f57b02d8e3c511ff0e3980b9ce0af8b3028
+scope:
+  objective: "Append assessor, assessed_version and evidence_baseline to the four primary REQ-01 assessment comments on Issue #262 and enforce their completeness through the existing required Schema non-empty audit (hard gate) job."
+  records_changed:
+    - issue: "#262"
+      comment_id: 7011312621
+      record: "Initial architecture internal technical risk assessment"
+    - issue: "#262"
+      comment_id: 7014315135
+      record: "Supplemental clarification to the initial technical risk assessment"
+    - issue: "#262"
+      comment_id: 7143927480
+      record: "Round 26 consolidated REQ-01 assessment"
+    - issue: "#262"
+      comment_id: 7149369280
+      record: "Round 29 final investigation assessment"
+  files_changed:
+    - scripts/ci/check_req_assessment_signatures.py
+    - scripts/ci/test_check_req_assessment_signatures.py
+    - .github/workflows/gates.yml
+    - 14-ai-development/work-items/AID-2026-250/
+    - 14-ai-development/work-items/INDEX.md
+authorization:
+  implementation_write: "GRANTED for append-only metadata blocks on the four listed Issue #262 comments, the read-only checker, tests, existing required workflow step and Work Item evidence."
+  gate_behaviour_change: "GRANTED for failing the existing required Schema non-empty audit (hard gate) job on missing/invalid assessor metadata in any of the four scoped Issue #262 comments."
+  required_context_change: "NOT_REQUESTED - reuse the existing required Schema non-empty audit job; no new context."
+  branch_protection_change: "NOT_AUTHORIZED - no branch protection mutation."
+  normative_specification_change: "NOT_IN_SCOPE."
+acceptance:
+  C1: "All four identified Issue #262 assessment comments contain a non-empty assessor field matching the source authoring session."
+  C2: "All four identified comments contain assessed_version as the exact historical 40-character source commit SHA."
+  C3: "All four identified comments contain evidence_baseline equal to the recorded main@source commit."
+  C4: "The checker retrieves exactly the four scoped comment IDs through GitHub GET API and fails closed on missing comments or fields."
+  C5: "The checker uses GET only and never mutates Issue comments or repository content."
+  C6: "Tests cover valid comments, each missing field, malformed/wrong SHA, wrong assessor, wrong baseline, missing comment, and deterministic output."
+  C7: "The checker runs in the existing required Schema non-empty audit (hard gate) job; no new job/context."
+  C8: "Actual checker output is recorded from CI on the exact PR Head."
+  C9: "Historical author/session and baseline are transcribed from the original comment; the later metadata append is explicitly retrospective and does not claim a contemporaneous signature."
+  C10: "Issue #262 remains open and its body is unchanged; only the four identified comment bodies receive an append-only metadata block."
+evidence: "14-ai-development/work-items/AID-2026-250/evidence.md"
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-250/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-250/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-250/session-evidence.md"
+    relationship: evidence
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#262"
+    implementing_ai_session: NOT_RECORDED
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-250/prompt-v1.md"
+    executed_prompt_sha256: a7690f776cf6b40c9e2e240a4b7aeec94e6674e95dd5d1e95488323f904ee15d
+    executed_prompt_bytes: 2934
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-250/session-evidence.md"
+implementation:
+  status: IN_PROGRESS
+  summary: "Four Issue #262 assessment comments received append-only metadata; the read-only GitHub API checker and tests run in the existing required Schema non-empty audit job."
+  files_changed:
+    - scripts/ci/check_req_assessment_signatures.py
+    - scripts/ci/test_check_req_assessment_signatures.py
+    - .github/workflows/gates.yml
+  tests:
+    - "python -m unittest scripts.ci.test_check_req_assessment_signatures"
+    - "python scripts/ci/check_req_assessment_signatures.py"
+  pull_request: 1388
+  merge_commit_sha: NOT_MERGED
+review:
+  status: PENDING_INDEPENDENT_REVIEW
+  reviewer: NOT_RECORDED
+  note: "Independent exact-Head review is required; no self-review is claimed."
