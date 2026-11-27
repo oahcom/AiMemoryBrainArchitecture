@@ -1,3 +1,50 @@
+---
+document_metadata:
+  steward: "user-authorized operator (delegated by account owner)"
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-326/evidence.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-28"
+      last_verification_note: "This prompt is a scope snapshot, not a verbatim platform payload; provenance remains unverified."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Preserves the bounded task prompt snapshot for AID-2026-326; it does not establish repository-wide requirements."
+    canonical_scope_id: "ai-development/aid-2026-326-prompt"
+    canonical_scope_keywords:
+      - "AID-2026-326"
+      - "d10-cursor-authority"
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
+---
+
 # AID-2026-326 Prompt v1
 
 Record the final Owner D-10 decision from Issue #1210 (comment 7174534633) in the canonical `01-system-architecture/system-boundaries.md` and its EN/ZH-CN mirrors. The decision is final; do not reopen or reinterpret it.
