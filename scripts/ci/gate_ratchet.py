@@ -17,22 +17,15 @@ Usage:
         --command "python3 scripts/check_bilingual_docs_full.py"
 
 An *item* is the whole line the wrapped gate printed for it, minus its
-`NNN. ` prefix: the part after ` -> ` is part of the item, not decoration. A
-line that only reports the run's verdict or a count is not an item, but a
-verdict word in front of a path (`OK <path> has no counterpart`) does not make
-one a summary.
+`NNN. ` prefix: the part after ` -> ` is part of the item, not decoration.
 
-Exit codes: 0 ratchet holds, 1 regression, stale baseline, or a wrapped
-command that exited non-zero without reporting an item, 2 usage/IO error.
-
-ponytail: `--format schema` is now uncalled -- the only gate that used it
-(`schema-nonempty`) went green and became a hard gate, and its baseline was
-deleted. The branch costs three lines; delete it, and the `--format` flag with
-it, whenever this file is next touched for another reason.
+Exit codes: 0 ratchet holds, 1 regression or stale baseline, 2 usage,
+IO, or malformed-baseline/output error.
 """
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import subprocess
 import sys
@@ -40,9 +33,6 @@ from pathlib import Path
 
 NUMBERED_PREFIX = re.compile(r"^\d{3,4}\.\s+")
 
-# Lines that report a verdict or a count rather than an offending item. The
-# boundary keeps an item whose name merely starts with a verdict word
-# ("OK_STATUS") out of the summary set.
 SUMMARY_RE = re.compile(
     r"^(?:PASS|FAIL|OK|FAILED|NO TESTS)(?![A-Za-z0-9_])"
     r"|^Ran\s"
@@ -50,13 +40,36 @@ SUMMARY_RE = re.compile(
     r"|^runner admission:"
 )
 
-# A token that names a repository object. A "summary" line that still names
-# one is not a summary: it is an offending item wearing a verdict prefix.
-# `OK 00-governance/a.md has no counterpart` used to be dropped whole by the
-# prefix filter, so a real failure never reached the comparison.
 ITEM_TOKEN_RE = re.compile(
     r"\S*/\S*|\b[\w.-]+\.(?:md|py|ya?ml|rs|toml|json|txt)\b"
 )
+
+BLOB_PIN_FORMAT = "manifest-blob-pin-v2"
+BLOB_PIN_FIELDS = (
+    "kind",
+    "manifest",
+    "pin_id",
+    "field",
+    "scope",
+    "locator",
+)
+BLOB_PIN_FORBIDDEN_KINDS = {"SCOPE_UNRESOLVABLE", "UNRESOLVED", "INCOMPLETE"}
+
+# The optional suffix is deliberately discarded. It may contain declared
+# values, actual values, or human-readable diagnostics; none is identity.
+BLOB_PIN_LINE_RE = re.compile(
+    r"^(?P<kind>MISMATCH|PATH_MISSING|UNCLASSIFIED|NO_SCOPE)"
+    r" manifest=(?P<manifest>\S+)"
+    r" pin_id=(?P<pin_id>\S+)"
+    r" field=(?P<field>\S+)"
+    r" scope=(?P<scope>\S+)"
+    r" locator=(?P<locator>\S+)"
+    r"(?:\s+.*)?$"
+)
+
+
+class RatchetFormatError(ValueError):
+    """The baseline or wrapped output violates its selected format."""
 
 
 def is_summary(line: str) -> bool:
@@ -64,26 +77,56 @@ def is_summary(line: str) -> bool:
 
 
 def normalize(lines: list[str], fmt: str) -> list[str]:
-    """Reduce raw gate output to the stable set of offending items.
-
-    The item keeps everything the gate printed for it, including what follows
-    ` -> `. Truncating at the arrow merged two different failures on the same
-    path into one item, which is exactly the information a ratchet exists to
-    compare.
-    """
+    """Reduce raw gate output to the stable set of offending items."""
     items: set[str] = set()
     for raw in lines:
         line = raw.strip()
         if not line:
             continue
+        if fmt == BLOB_PIN_FORMAT:
+            if line.startswith("::error::"):
+                line = line[len("::error::"):]
+
+            if is_blob_pin_identity_line(line):
+                match = BLOB_PIN_LINE_RE.fullmatch(line)
+                if not match:
+                    raise RatchetFormatError(
+                        f"malformed manifest blob pin identity line: {raw!r}"
+                    )
+                items.add("\0".join(
+                    match.group(field) for field in BLOB_PIN_FIELDS
+                ))
+            continue
+        if fmt == "schema" and is_blob_pin_identity_line(line):
+            raise RatchetFormatError(
+                "--format schema rejects manifest blob pin identity lines; "
+                "use --format manifest-blob-pin-v2"
+            )
         if is_summary(line):
             continue
         if fmt == "paths":
-            # Bilingual scanner: "042. some/path.md -> target expression"
             line = NUMBERED_PREFIX.sub("", line)
-        # fmt == "schema": already one item per line, keep verbatim.
+        # fmt == "schema": one item per line, kept verbatim.
         items.add(line)
     return sorted(items)
+
+
+def is_blob_pin_identity_line(line: str) -> bool:
+    if line.startswith("::error::"):
+        line = line[len("::error::"):]
+    return bool(re.match(
+        r"^(?:MISMATCH|PATH_MISSING|UNCLASSIFIED|NO_SCOPE)(?:\s|$)",
+        line,
+    ))
+
+
+def _json_object_no_duplicate_keys(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise RatchetFormatError(f"duplicate JSON key: {key!r}")
+        result[key] = value
+    return result
 
 
 def read_baseline(path: Path) -> list[str]:
@@ -94,22 +137,102 @@ def read_baseline(path: Path) -> list[str]:
         stripped = line.strip()
         if not stripped or stripped.startswith("#"):
             continue
+        if is_blob_pin_identity_line(stripped):
+            raise RatchetFormatError(
+                "blob pin identity baseline cannot be read with --format schema"
+            )
         entries.append(stripped)
     return sorted(set(entries))
+
+
+def read_blob_pin_baseline(path: Path) -> list[str]:
+    if not path.is_file():
+        raise SystemExit(f"gate_ratchet: baseline not found: {path}")
+
+    lines = path.read_text(encoding="utf-8").splitlines()
+    if not lines:
+        raise RatchetFormatError("manifest blob pin baseline is empty")
+
+    parsed = []
+    for line_number, line in enumerate(lines, 1):
+        try:
+            value = json.loads(
+                line,
+                object_pairs_hook=_json_object_no_duplicate_keys,
+            )
+        except (json.JSONDecodeError, RatchetFormatError) as exc:
+            raise RatchetFormatError(
+                f"invalid JSONL baseline line {line_number}: {exc}"
+            ) from exc
+
+        if not isinstance(value, dict):
+            raise RatchetFormatError(
+                f"baseline line {line_number} must be a JSON object"
+            )
+
+        if line_number == 1:
+            if list(value.keys()) != ["format", "identity_fields"]:
+                raise RatchetFormatError(
+                    "baseline header keys/order must be "
+                    '["format", "identity_fields"]'
+                )
+            if value != {
+                "format": BLOB_PIN_FORMAT,
+                "identity_fields": list(BLOB_PIN_FIELDS),
+            }:
+                raise RatchetFormatError(
+                    "baseline header does not declare the required "
+                    "manifest-blob-pin-v2 identity fields"
+                )
+            continue
+
+        if list(value.keys()) != list(BLOB_PIN_FIELDS):
+            raise RatchetFormatError(
+                f"baseline line {line_number} keys/order must be "
+                f"{list(BLOB_PIN_FIELDS)!r}"
+            )
+        if any(not isinstance(value[field], str) or not value[field]
+               for field in BLOB_PIN_FIELDS):
+            raise RatchetFormatError(
+                f"baseline line {line_number} has a missing or invalid identity field"
+            )
+        if value["kind"] in BLOB_PIN_FORBIDDEN_KINDS:
+            raise RatchetFormatError(
+                f"baseline line {line_number} has non-ratchetable kind "
+                f"{value['kind']!r}"
+            )
+
+        parsed.append(tuple(value[field] for field in BLOB_PIN_FIELDS))
+
+    if not parsed:
+        return []
+
+    if len(parsed) != len(set(parsed)):
+        raise RatchetFormatError("manifest blob pin baseline contains duplicate identities")
+    if parsed != sorted(parsed):
+        raise RatchetFormatError(
+            "manifest blob pin baseline identities are not lexicographically sorted"
+        )
+
+    return [identity_key(identity) for identity in parsed]
+
+
+def identity_key(identity: tuple[str, ...]) -> str:
+    return "\0".join(identity)
+
+
+def identity_display(key: str) -> str:
+    values = key.split("\0")
+    return "MISMATCH " + " ".join(
+        f"{field}={value}" for field, value in zip(BLOB_PIN_FIELDS, values)
+    )
 
 
 def compare(baseline: list[str], current: list[str]) -> tuple[list[str], list[str]]:
     """Pair items with baseline entries; return (regressions, fixed).
 
-    A baseline entry may be a bare path -- the shape `gates.yml` documents for
-    `--format paths` (`sed -E 's/ -> .*$//'`), which is what every entry in the
-    shipped baseline is. Such an entry stands for one item that begins with
-    `"<path> -> "`.
-
-    One item, not all of them: two different failures on the same path now need
-    two baseline entries, so the second one is a regression. Covering every
-    item of a path with that path's single entry is the same silent merge the
-    arrow truncation used to perform.
+    A paths baseline entry may be a bare path. It stands for one item that
+    begins with "<path> -> ". Only one item is covered by one such entry.
     """
     unused = list(baseline)
     regressions: list[str] = []
@@ -133,13 +256,21 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--command", required=True)
     parser.add_argument(
         "--format",
-        choices=("schema", "paths"),
+        choices=("schema", "paths", BLOB_PIN_FORMAT),
         default="schema",
         help="output shape of the wrapped gate",
     )
     args = parser.parse_args(argv)
 
-    baseline = read_baseline(args.baseline)
+    try:
+        baseline = (
+            read_blob_pin_baseline(args.baseline)
+            if args.format == BLOB_PIN_FORMAT
+            else read_baseline(args.baseline)
+        )
+    except (OSError, UnicodeError, RatchetFormatError) as exc:
+        print(f"::error::gate_ratchet: {exc}")
+        return 2
 
     proc = subprocess.run(
         args.command,
@@ -149,11 +280,11 @@ def main(argv: list[str] | None = None) -> int:
         encoding="utf-8",
         errors="replace",
     )
-    # Items are printed to stdout. stderr carries interpreter warnings and
-    # tracebacks, which are not items. A command that exits non-zero without
-    # printing an item has not reported a failure set at all; that is checked
-    # below, because an empty set minus an empty baseline is otherwise a pass.
-    current = normalize(proc.stdout.splitlines(), args.format)
+    try:
+        current = normalize(proc.stdout.splitlines(), args.format)
+    except RatchetFormatError as exc:
+        print(f"::error::gate_ratchet: {exc}")
+        return 2
 
     regressions, fixed = compare(baseline, current)
     print(f"ratchet: {args.baseline.as_posix()}")
@@ -171,9 +302,11 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     for item in regressions:
-        print(f"::error::ratchet regression (new failure not in baseline): {item}")
+        shown = identity_display(item) if args.format == BLOB_PIN_FORMAT else item
+        print(f"::error::ratchet regression (new failure not in baseline): {shown}")
     for item in fixed:
-        print(f"::error::ratchet baseline is stale (no longer failing): {item}")
+        shown = identity_display(item) if args.format == BLOB_PIN_FORMAT else item
+        print(f"::error::ratchet baseline is stale (no longer failing): {shown}")
 
     if regressions or fixed:
         if regressions:
