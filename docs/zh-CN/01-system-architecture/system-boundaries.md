@@ -31,6 +31,7 @@ document_metadata:
     source: "01-system-architecture/system-boundaries.md"
     en: "docs/en/01-system-architecture/system-boundaries.md"
     zh-CN: null
+  steward: "Architecture Governance"
 ---
 # 系统边界
 
