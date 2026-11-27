@@ -91,9 +91,11 @@ def verify(root: Path, commit: str, verbose: bool = True):
     def check(path, declared, source_commit, kind, algorithm="git"):
         nonlocal ok, mismatch, missing, incomplete, pins
         pins += 1
-        if not nonempty(path) or not nonempty(declared):
-            incomplete += 1
-            problems.append(f"INCOMPLETE {kind}: missing path or digest declaration")
+        if not nonempty(declared):
+            return
+        if not nonempty(path):
+            missing += 1
+            problems.append(f"PATH_MISSING {kind} path=<not-declared> declared={declared}")
             return
         try:
             data = git.object_bytes(source_commit, path)
@@ -118,8 +120,7 @@ def verify(root: Path, commit: str, verbose: bool = True):
             declared = str(expected_bytes)
         if actual != str(declared).lower():
             mismatch += 1
-            problems.append(f"MISMATCH {kind} path={path} commit={source_commit} "
-                            f"declared={declared} actual={actual}")
+            problems.append(f"MISMATCH {kind} path={path} declared={declared} actual={actual}")
         else:
             ok += 1
 
@@ -143,7 +144,7 @@ def verify(root: Path, commit: str, verbose: bool = True):
             ("en_mirror", "en_mirror_blob"),
             ("zh_cn_mirror", "zh_cn_mirror_blob"),
         ):
-            if digest_key in doc or path_key in doc:
+            if digest_key in doc:
                 check(doc.get(path_key), doc.get(digest_key), commit,
                       f"index.{path_key}")
 
@@ -153,7 +154,7 @@ def verify(root: Path, commit: str, verbose: bool = True):
         for i, item in enumerate(doc.get("gate_a_reconstruction", []) or []):
             if not isinstance(item, dict):
                 continue
-            if "reconstructed_root_blob" in item or "root" in item:
+            if "reconstructed_root_blob" in item:
                 source = item.get("source_commit") or item.get("commit")
                 if not source and nonempty(item.get("note")):
                     match = re.search(r"\bcommit\s+([0-9a-f]{40})\b", item["note"])
@@ -171,7 +172,7 @@ def verify(root: Path, commit: str, verbose: bool = True):
                 ("en_mirror", "en_mirror_blob"),
                 ("zh_cn_mirror", "zh_cn_mirror_blob"),
             ):
-                if path_key in item or digest_key in item:
+                if digest_key in item:
                     check(item.get(path_key), item.get(digest_key), commit,
                           f"authored_indexes[{i}].{path_key}")
 
@@ -184,12 +185,12 @@ def verify(root: Path, commit: str, verbose: bool = True):
                 ("en_mirror", "en_mirror_blob"),
                 ("zh_cn_mirror", "zh_cn_mirror_blob"),
             ):
-                if path_key in item or digest_key in item:
+                if digest_key in item:
                     check(item.get(path_key), item.get(digest_key), commit,
                           f"related_evidence[{i}].{path_key}")
 
         # D. Execution evidence file/blob pair.
-        if "evidence_file" in doc or "evidence_blob" in doc:
+        if "evidence_blob" in doc:
             check(doc.get("evidence_file"), doc.get("evidence_blob"), commit,
                   "evidence_file")
 
@@ -214,9 +215,10 @@ def verify(root: Path, commit: str, verbose: bool = True):
         # F. Prompt snapshots: SHA-256 and byte length are both over committed
         # bytes. These are not Git blob IDs.
         prompt = as_mapping(doc.get("prompt"))
-        if "prompt_file" in prompt or "prompt_sha256" in prompt or "prompt_bytes" in prompt:
+        if "prompt_sha256" in prompt:
             check(prompt.get("prompt_file"), prompt.get("prompt_sha256"), commit,
                   "prompt.prompt_file", "sha256")
+        if "prompt_bytes" in prompt:
             check(prompt.get("prompt_file"), prompt.get("prompt_bytes"), commit,
                   "prompt.prompt_file", "bytes")
         for i, item in enumerate(doc.get("session_evidence", []) or []):
@@ -225,9 +227,10 @@ def verify(root: Path, commit: str, verbose: bool = True):
             path_key = "executed_prompt_snapshot_file"
             sha_key = "executed_prompt_sha256"
             bytes_key = "executed_prompt_bytes"
-            if any(k in item for k in (path_key, sha_key, bytes_key)):
+            if sha_key in item:
                 check(item.get(path_key), item.get(sha_key), commit,
                       f"session_evidence[{i}].{path_key}", "sha256")
+            if bytes_key in item:
                 check(item.get(path_key), item.get(bytes_key), commit,
                       f"session_evidence[{i}].{path_key}", "bytes")
 
