@@ -1,0 +1,161 @@
+name: Work-item uniqueness
+
+# HARD GATE DESIGN: this check is intended to be green on main today and
+# must remain green. It is deliberately independent of T-04 in
+# check_traceability.py.
+#
+# SERIALIZATION:
+#
+# 1. GitHub Actions, not the checker, enforces the workflow-wide concurrency
+#    group below. Every PR check and every main-push recheck uses the same
+#    repository/workflow group. Different PRs therefore cannot execute this
+#    workflow's critical section simultaneously.
+#
+# 2. cancel-in-progress: false is essential. A newer PR run must not cancel
+#    an older run while it is checking the target. GitHub permits only one
+#    running and one pending execution per concurrency group; a newer pending
+#    execution can replace an older pending execution. Therefore this is
+#    execution serialization, not a durable FIFO queue and not proof that
+#    every PR receives a completed check.
+#
+# 3. The checker resolves origin/main when it executes, not the base SHA
+#    captured when the PR was opened. The candidate is the exact PR head SHA.
+#
+# 4. pull_request does not fire merely because main advances. The push-to-main
+#    event therefore rechecks every currently open PR head against the newly
+#    advanced main. This closes the ordinary stale-base recheck gap, subject
+#    to the platform limitations described below.
+#
+# 5. This repository has no verified merge queue, strict up-to-date
+#    requirement, or required status context for this new job. None is
+#    claimed here. The workflow alone cannot prevent an administrator or
+#    another merge path from merging a PR while its check is pending or
+#    skipped. The repository owner must enable an enforceable platform-side
+#    merge barrier before claiming an unconditional merge-time guarantee.
+#
+# PLATFORM DEPENDENCIES NOT CURRENTLY VERIFIED/ENABLED:
+#
+# - Add "Work-item uniqueness" as a required branch-protection status check.
+# - Enable strict up-to-date protection, or preferably enable a merge queue
+#   that runs this check against the actual merge candidate.
+# - Verify that all merge methods and privileged bypass paths honor that
+#   protection.
+#
+# Until those settings are independently verified, a merge can race between
+# a successful check and the platform's merge operation. The workflow-level
+# lock does not lock GitHub's merge operation. This is an explicitly
+# acknowledged residual window, not a property this YAML can eliminate.
+
+concurrency:
+  group: ${{ github.workflow }}-repository-global
+  cancel-in-progress: false
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+      - edited
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  work-item-uniqueness:
+    name: Work-item uniqueness
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout candidate and full Git history
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Fetch the latest target branch
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin \
+            refs/heads/main:refs/remotes/origin/main
+          git rev-parse --verify 'refs/remotes/origin/main^{commit}'
+
+      - name: Check the exact pull-request head against latest main
+        if: github.event_name == 'pull_request'
+        env:
+          CANDIDATE_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          python3 scripts/check_work_item_uniqueness.py \
+            --target origin/main \
+            --candidate "$CANDIDATE_SHA"
+
+      - name: Recheck every open PR after main advances
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          count=0
+          failures=0
+
+          while IFS=$'\t' read -r pr_number head_sha; do
+            [ -n "$pr_number" ] || continue
+            count=$((count + 1))
+
+            echo "Checking PR #${pr_number}, exact head ${head_sha}"
+
+            fetch_ref="refs/remotes/work-item-uniqueness/pr-${pr_number}"
+            if ! git fetch --no-tags origin \
+              "refs/pull/${pr_number}/head:${fetch_ref}"; then
+              echo "INCOMPLETE: cannot fetch current head of PR #${pr_number}"
+              failures=$((failures + 1))
+              continue
+            fi
+
+            fetched_sha="$(git rev-parse --verify "${fetch_ref}^{commit}")"
+            if [ "$fetched_sha" != "$head_sha" ]; then
+              echo "INCOMPLETE: PR #${pr_number} changed head during enumeration"
+              failures=$((failures + 1))
+              continue
+            fi
+
+            if ! python3 scripts/check_work_item_uniqueness.py \
+              --target origin/main \
+              --candidate "$head_sha"; then
+              failures=$((failures + 1))
+            fi
+          done < <(
+            gh api --paginate \
+              "repos/${GITHUB_REPOSITORY}/pulls?state=open&base=main&per_page=100" \
+              --jq '.[] | [.number, .head.sha] | @tsv'
+          )
+
+          echo "OPEN_PULL_REQUESTS_CHECKED=${count}"
+          echo "FAILED_OR_INCOMPLETE=${failures}"
+
+          if [ "$failures" -ne 0 ]; then
+            echo "FAIL: at least one open PR failed or could not be checked"
+            exit 1
+          fi
+
+          echo "PASS: all enumerated open PR heads passed against latest main"
+
+      - name: Explain manual-dispatch behavior
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          set -euo pipefail
+          python3 scripts/check_work_item_uniqueness.py \
+            --target origin/main \
+            --candidate HEAD

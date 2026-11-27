@@ -1,15 +1,24 @@
 work_item_id: AID-2026-261
 title: >-
-  Serialized, merge-time work-item uniqueness gate: judge the merge candidate
-  against the latest target branch, not the branch's own base (Issue #1341,
-  defect #1331)
+  Implement serialized merge-time work-item directory uniqueness against the
+  latest target branch, while allowing incremental files in existing work items
+  (Issue #1341, defect #1331)
 class: GATE/TEST
 risk: R1
 risk_rationale: >-
-  One standard-library checker, its unit tests and a workflow job. No work-item
-  content is renumbered and no existing gate decision changes; the only new
-  rejection is a newly introduced work-item directory whose ID is already
-  occupied on the latest target branch.
+  This change introduces a standard-library Python checker, isolated Git
+  repository unit tests, and a GitHub Actions workflow. The checker is
+  read-only and compares Git commit trees rather than relying on mutable
+  working-tree contents. It does not duplicate the existing traceability
+  checks for INDEX parsing, manifest existence, directory identity, or
+  intra-tree duplicate INDEX entries. The merge-base identifies candidate
+  additions, while the latest target tree determines occupancy. Existing
+  work-item directories remain eligible for incremental file additions.
+  Workflow-level serialization reduces simultaneous stale-target decisions,
+  and main-push rechecks detect target advancement. A platform-side required
+  status check and strict up-to-date protection or merge queue are still
+  necessary to eliminate the final check-to-merge race. Those platform
+  settings have not been verified or enabled by this implementation.
 status: DISPATCHED
 id_status: PROVISIONAL
 sponsor: USER-PRINCIPAL-DELEGATED
@@ -20,26 +29,157 @@ date: 2026-11-27
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
 base_commit_sha: a7a252eb670b31066a0ffea35dc28cbe6ef5b836
-scope:
-  files_to_create:
-    - 14-ai-development/work-items/AID-2026-261/manifest.yaml
-  files_to_modify:
-    - 14-ai-development/work-items/INDEX.md
-  files_out_of_scope:
-    - any existing work-item directory
-    - branch protection
+prompt_status: NOT_RECORDED
+prompt_provenance: DISPATCHED_TASK_FILE
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: a7a252eb670b31066a0ffea35dc28cbe6ef5b836
+  assigned_id: AID-2026-261
+  allocation_rule: >-
+    The operator allocated AID-2026-261 for Issue #1341. The identifier is
+    reserved in the existing work-item tree before implementation so parallel
+    implementation units cannot independently allocate it. The identifier is
+    provisional until the repository's normal acceptance and registration
+    process is complete.
+  issue_refs:
+    - "#1341"
+    - "#1331"
 evidence:
   record: 14-ai-development/work-items/AID-2026-261/evidence.md
-documentation: []
+  measurements:
+    base_commit: a7a252eb670b31066a0ffea35dc28cbe6ef5b836
+    base_work_item_directories: 120
+    base_manifests: 110
+    base_index_records: 109
+    branch_work_item_directories_before_implementation: 121
+    branch_manifests_before_implementation: 111
+    branch_index_records_before_implementation: 110
+    checker_test_count: "<FILL:test_count>"
+    checker_test_output: "<FILL:test_output_summary>"
+    work_item_directories_at_verification: "<FILL:workitem_dirs>"
+    manifests_at_verification: "<FILL:manifest_count>"
+    positive_checker_output: "<FILL:checker_output_positive>"
+    negative_checker_output: "<FILL:checker_output_negative>"
+    race_checker_output: "<FILL:checker_output_race>"
+    implementation_head_sha: "<FILL:head_sha>"
+    pull_request: "<FILL:pr_number>"
+    run_date: "<FILL:run_date>"
+  test_runs:
+    - command: >-
+        python -m unittest discover -s tests
+        -p "test_check_work_item_uniqueness.py" -v
+      result: "<FILL:test_output_summary>"
+    - command: >-
+        python scripts/check_work_item_uniqueness.py
+        --target origin/main --candidate HEAD
+      result: "PASS locally; exit 0; see evidence.md"
+  not_measured:
+    - No merge SHA is claimed.
+    - No post-merge CI result is claimed.
+    - No branch-protection update is claimed.
+    - No merge queue activation is claimed.
+    - No strict up-to-date protection activation is claimed.
+    - No claim is made that the new job is already a required status context.
 session_evidence:
-  - role: "GATE_REPAIR_AUTHOR"
+  - role: "GATE_IMPLEMENTATION_AUTHOR"
     issue_refs:
       - "#1341"
       - "#1331"
-    implementing_ai_session: "PENDING"
+    implementing_ai_session: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "NOT_RECORDED"
+    executed_prompt_sha256: "<FILL:prompt_sha256>"
+    executed_prompt_bytes: "<FILL:prompt_bytes>"
+    executed_prompt_provenance: "DISPATCHED_TASK_TEXT"
+    session_reference_status: "NOT_RECORDED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-261/session-evidence.md"
+scope:
+  files_to_create:
+    - scripts/check_work_item_uniqueness.py
+    - tests/test_check_work_item_uniqueness.py
+    - .github/workflows/work-item-uniqueness.yml
+    - 14-ai-development/work-items/AID-2026-261/evidence.md
+    - 14-ai-development/work-items/AID-2026-261/session-evidence.md
+  files_to_modify:
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope:
+    - scripts/check_traceability.py
+    - scripts/ci/check_work_item_manifest_schema.py
+    - scripts/check_declared_check_contexts.py
+    - 14-ai-development/PR-GOVERNANCE-001.md
+    - .gitattributes
+    - branch protection settings
+    - merge queue settings
+non_goals:
+  - Replacing or duplicating check_traceability.py T-04.
+  - Rejecting incremental files in an existing work-item directory.
+  - Changing the manifest schema.
+  - Claiming platform-side merge serialization is enabled.
+  - Modifying the existing declared-check-contexts inventory.
+  - Closing Issue #1341 or asserting Owner acceptance.
+carrier:
+  branch: fix/2026-11-27-aid261-workitem-uniqueness-gate
+  pull_request: "<FILL:pr_number>"
+  merge_sha: PENDING
+  merge_method: PENDING
+  required_contexts: "PENDING_PLATFORM_VERIFICATION"
+review:
+  status: NOT_ASSIGNED
+  independent_reviewer: NOT_ASSIGNED
+  natural_person_owner_acceptance: NOT_RECORDED
+acceptance:
+  gate: PENDING_CI
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-261/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-261/session-evidence.md
+    relationship: evidence
 implementation:
-  status: NOT_STARTED
-  summary: "Number reservation skeleton only; the gate implementation is produced by the dispatched ChatGPT session and lands in a later commit on this branch."
-  files_changed: []
-  tests: []
+  status: IMPLEMENTED
+  summary: >-
+    Added a read-only Git-tree checker for candidate-introduced work-item
+    directories, isolated standard-library Git repository tests, and a
+    workflow for serialized checks and main-push rechecks. Platform-side
+    required status and merge serialization remain unverified.
+  files_changed:
+    - scripts/check_work_item_uniqueness.py
+    - tests/test_check_work_item_uniqueness.py
+    - .github/workflows/work-item-uniqueness.yml
+    - 14-ai-development/work-items/AID-2026-261/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-261/evidence.md
+    - 14-ai-development/work-items/AID-2026-261/session-evidence.md
+    - 14-ai-development/work-items/INDEX.md
+  tests:
+    - >-
+      python -m unittest discover -s tests
+      -p "test_check_work_item_uniqueness.py" -v
+    - >-
+      python scripts/check_work_item_uniqueness.py
+      --target origin/main --candidate HEAD
+    - >-
+      python scripts/check_traceability.py --index-only
+    - >-
+      python scripts/check_document_management.py --require-changed origin/main
+    - python scripts/ci/audit_runner_admission.py
+    - >-
+      python scripts/ci/check_repository_hygiene.py
+      --base <base_sha> --head <head_sha>
+notes:
+  - >-
+    The checker uses the unique merge-base to determine which work-item
+    directories were introduced by the candidate. It then compares those
+    introduced identifiers with the current target tree. This distinction
+    permits modifications beneath directories already present at the
+    candidate's merge-base while rejecting a candidate that independently
+    introduces an identifier occupied by a newer target.
+  - >-
+    The workflow-wide concurrency group is repository-wide for this workflow,
+    unlike the repository's existing per-head-SHA concurrency convention.
+    cancel-in-progress is false to avoid cancellation of an active decision.
+    GitHub Actions concurrency is not a FIFO queue: pending runs can be
+    replaced. A required platform status check and strict protection or merge
+    queue are therefore still necessary for an unconditional merge guarantee.
+  - >-
+    The main-push audit enumerates open PRs and checks their exact current
+    heads. A PR head that changes during enumeration is treated as incomplete,
+    not silently accepted. This audit is supplementary and does not itself
+    establish a required PR status context.
