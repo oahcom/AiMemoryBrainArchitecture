@@ -1,6 +1,7 @@
 # 架构复杂度评估与预算 / Architecture Complexity Assessment and Budget（中文）
 
 - 评估角色：X — 首席架构复杂度评估负责人
+- assessor: X — 首席架构复杂度评估负责人
 - 仓库：`oahcom/AiMemoryBrainArchitecture`
 - 精确基线：`main@b372b62c640a2b656e54b6db62a4ee67d7d8c001`
 - assessed_version: `b372b62c640a2b656e54b6db62a4ee67d7d8c001`
