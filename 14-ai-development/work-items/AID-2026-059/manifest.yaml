@@ -223,3 +223,15 @@ session_evidence:
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-059/session-evidence-1223.md
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-059/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-059/session-evidence-799.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-059/prompt-1015.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-059/session-evidence-1015.md"
+    relationship: reference

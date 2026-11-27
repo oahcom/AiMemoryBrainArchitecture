@@ -48,3 +48,15 @@ bilingual_status: "COMPLETE — all three source-aligned English counterparts ar
 acceptance_blocker: none for R1
 acceptance_authority: project owner; adoption recorded in Issue #218 comment #6971736655; merged at 53aae842c390eac6d54f937af6cd2744dbe8d09d
 verification_summary: escape-scanner zero residue on 4 fixed files (19 literal occurrences replaced); git diff --check clean; runtime/test suites NOT RUN (documentation-only change set)
+
+documentation:
+  - path: "14-ai-development/ai-development-standard.md"
+    relationship: reference
+  - path: "14-ai-development/iteration-lifecycle.md"
+    relationship: reference
+  - path: "14-ai-development/PR-GOVERNANCE-001.md"
+    relationship: reference
+  - path: "14-ai-development/prompt-authoring-standard.md"
+    relationship: reference
+  - path: "14-ai-development/prompts/global/chatgpt-session-contract-v1.md"
+    relationship: reference

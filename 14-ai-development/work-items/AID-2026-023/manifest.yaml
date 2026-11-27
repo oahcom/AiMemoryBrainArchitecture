@@ -230,3 +230,15 @@ execution_constraints:
     After producing the proposed manifest and prompt snapshot, stop. Do not
     begin substantive R2 design until the required registration merge and
     exact read-back evidence are supplied in this same session.
+
+documentation:
+  - path: "00-governance/architecture-invariants.md"
+    relationship: reference
+  - path: "02-domain-model/epistemic-and-temporal-semantics.md"
+    relationship: reference
+  - path: "02-domain-model/lifecycle-model.md"
+    relationship: reference
+  - path: "02-domain-model/scope-and-permission-model.md"
+    relationship: reference
+  - path: "reviews/architecture-breakthrough/forget-formal-verification/forget-invariants.md"
+    relationship: reference

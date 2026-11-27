@@ -105,3 +105,7 @@ owner_acceptance:
   note: >-
     Registration does not imply ADR acceptance or REQ-04 acceptance.
     R3 review verdict and conformance test results are separate evidence.
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-014/prompt-v1.md"
+    relationship: reference

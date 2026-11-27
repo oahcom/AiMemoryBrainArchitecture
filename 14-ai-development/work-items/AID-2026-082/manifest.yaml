@@ -7,7 +7,7 @@ risk_rationale: >-
   governance-operation authority registration. They can produce false positives or miss
   an authority collapse if their parsing boundary is wrong. They do not change Runtime,
   domain semantics, existing validator behavior, schemas, APIs, DDL or production state.
-status: DISPATCHED
+status: MERGED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -114,10 +114,11 @@ findings:
     evidence: Issue #1208 acceptance criterion 6 and delegated split comment 7183824141.
 
 implementation:
-  status: IN_PROGRESS
+  status: IMPLEMENTED
   branch: docs/aid-2026-082-governance-traceability-checks
   pull_request: "#1265"
-  merge_commit_sha: NOT_MERGED
+  merge_commit_sha: 71548b7b9d8efae4ee605a0fb4c9d1d97236138c
+  merged_at: "2026-11-26T10:18:04Z"
   implementation_head: PENDING_FINAL_HEAD
   implemented_files:
     - scripts/check_owner_namespace_references.py
@@ -154,3 +155,21 @@ session_evidence:
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-082/session-evidence.md
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-082/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-082/session-evidence.md"
+    relationship: reference
+
+post_merge_correction:
+  date: "2026-11-27"
+  basis: "GitHub API GET /pulls/1265 returned merged=true; the merge commit is reachable from origin/main. This block records the correction so the original value stays auditable."
+  original_values:
+    - "implementation.status: IN_PROGRESS"
+    - "implementation.merge_commit_sha: NOT_MERGED"
+    - "status: DISPATCHED"
+  corrected_values:
+    - "PR #1265 merged; see implementation/carrier above"
