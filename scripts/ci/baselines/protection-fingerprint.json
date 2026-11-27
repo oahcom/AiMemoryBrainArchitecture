@@ -1,0 +1,34 @@
+{
+  "schema_version": 2,
+  "repository": "oahcom/AiMemoryBrainArchitecture",
+  "branch": "main",
+  "protection": {
+    "enabled": true,
+    "contexts": [
+      "GOV-DOC-001 structural checks",
+      "Branch freshness vs base",
+      "audit",
+      "GOV-DOC-002 metadata checks",
+      "BMCP protocol index (hard gate)",
+      "BMCP conformance suite (hard gate)",
+      "Schema non-empty audit (hard gate)",
+      "Bilingual docs coverage (ratchet)",
+      "Rust clippy (hard gate)",
+      "Repository hygiene (hard gate)",
+      "Rust format (hard gate)",
+      "Rust doctests (hard gate)",
+      "Session Evidence",
+      "Session Evidence self-test (base)",
+      "Session Evidence self-test (head)",
+      "rust-workspace-test"
+    ],
+    "enforcement_level": "everyone"
+  },
+  "experiment": {
+    "pr": 1038,
+    "head": "b5cf4f2578de0e9aa2ba3e7e86a110ce1d8f69d9",
+    "run": 138943464904,
+    "date": "2026-11-25",
+    "result": "HTTP 405: Required status check \"rust-workspace-test\" is failing; PR closed unmerged"
+  }
+}

@@ -280,6 +280,7 @@ Session Evidence
 Session Evidence self-test (base)
 Session Evidence self-test (head)
 rust-workspace-test
+Protection fingerprint
 ```
 
 - **Pull-request reviews — not enforced.** `required_pull_request_reviews` is absent from the protection payload (the key is not present, not `null`). This is not an unset flag waiting to be flipped: the repository has one write identity, so `author == merger == approver` at the account layer, and requiring an approving review would deadlock every PR. `required_conversation_resolution` is also `{enabled: false}`. No PR body, workflow comment, label or AI self-review may be read as a review gate this repository does not have; §6.1 remains a process requirement only.

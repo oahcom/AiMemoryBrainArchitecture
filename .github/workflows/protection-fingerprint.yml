@@ -1,0 +1,37 @@
+name: Protection fingerprint
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 3 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  protection-fingerprint:
+    name: Protection fingerprint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Self-test protection fingerprint ratchet
+        run: |
+          set -euo pipefail
+          cd scripts/ci
+          python3 -m unittest -v test_check_protection_fingerprint
+
+      - name: Check live branch protection fingerprint
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          python3 scripts/ci/check_protection_fingerprint.py \
+            --repo oahcom/AiMemoryBrainArchitecture \
+            --branch main \
+            --fingerprint scripts/ci/baselines/protection-fingerprint.json
