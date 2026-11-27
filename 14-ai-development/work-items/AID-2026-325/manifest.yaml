@@ -147,9 +147,9 @@ implementation:
     INDEX.md row. Records the already merged PR #1325 implementation.
     Does not change code, tests, canonical clauses, schemas, or CI gates.
     No CI success or merge for this documentation work item is claimed.
-  pull_request: PR_NUMBER_PLACEHOLDER
+  pull_request: 1456
   merge_commit: ""
-  implementation_commit: ""
+  implementation_commit: "8d1ebd84ceeeb81dd84a02ed4dad4ddbb87ac78f"
   ci_status: NOT_CLAIMED
   files_changed:
     - 14-ai-development/work-items/AID-2026-325/manifest.yaml
