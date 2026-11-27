@@ -31,6 +31,14 @@ canonical_scope_keywords:
   - blob pin
   - sibling key
   - mutation test
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-255/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-255/session-evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-255/ratchet-negative.log
+    relationship: evidence
+evidence: 14-ai-development/work-items/AID-2026-255/evidence.md
 scope:
   files_to_create:
     - 14-ai-development/work-items/AID-2026-255/manifest.yaml
