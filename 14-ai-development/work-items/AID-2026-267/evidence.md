@@ -48,7 +48,7 @@ document_metadata:
 
 - Repository: `oahcom/AiMemoryBrainArchitecture`
 - Issue: #134 (remains OPEN)
-- Original PR base: `a7a252eb670b31066a0ffea35dc28cbe6ef5b836`; refresh target: `6f597e2dd8b6e879bf7539aa16b88a39504d9c49`
+- Original PR base: `a7a252eb670b31066a0ffea35dc28cbe6ef5b836`; refresh target: `242cf101c8b79007ad2fb8d9c89681224577188d`
 - Branch: `fix/aid-267-required-declared-produced-r2`
 - Work Item: `AID-2026-267`, provisional allocation
 - Attribution: `user-authorized operator (delegated by account owner)`

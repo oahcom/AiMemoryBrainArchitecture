@@ -100,7 +100,7 @@ The follow-up task supplied independent L3 review ID `6083410132` and required:
 4. Added `scripts/run_declared_check_contexts_mutation_tests.py` to run each targeted test first against the original checker (must pass) and then against a mutated temporary copy (must fail).
 5. Wired both scripts into the existing Repository hygiene hard-gate job; no `|| true` or `continue-on-error`.
 6. Fixed the three new governed document records to declare `document_metadata.steward: USER-PRINCIPAL-DELEGATED`.
-7. Refreshed base target observed during amendment work: `6f597e2dd8b6e879bf7539aa16b88a39504d9c49`. A merge commit and final exact-head gate verification remain pending.
+7. Refreshed base target observed during amendment work: `242cf101c8b79007ad2fb8d9c89681224577188d`. A merge commit and final exact-head gate verification remain pending.
 
 Attribution: user-authorized operator (delegated by account owner), 2026-11-27.
 代理裁决，非自然人 Owner 签署。
