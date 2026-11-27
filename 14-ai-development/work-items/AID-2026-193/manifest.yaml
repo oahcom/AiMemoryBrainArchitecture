@@ -11,7 +11,7 @@ risk_rationale: >-
   that a reader mistakes the note for a disposition, so the note names the register that
   already adjudicated each path and evidence section 5.1 states what the register rows
   still decide.
-status: DISPATCHED
+status: MERGED
 id_status: PROVISIONAL
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED

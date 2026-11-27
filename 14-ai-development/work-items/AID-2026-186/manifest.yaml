@@ -1,0 +1,65 @@
+manifest_version: "1.0"
+record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
+registration_stage: "STAGE_0"
+registration_status: "CORRECTION_RECORD_DRAFT"
+work_item_id: "AID-2026-186"
+id_status: "PROVISIONAL"
+title: "Restore 18 E-domain Memory Compiler canonical source documents"
+date: "2026-11-26"
+repository:
+  name: "oahcom/AiMemoryBrainArchitecture"
+  baseline_branch: "main"
+  baseline_commit: "a7e7c64bfd6c6d709a0a7b55358f94b8535815c1"
+identifier_allocation:
+  assigned_at: "2026-11-26"
+  observed_main: "a7e7c64bfd6c6d709a0a7b55358f94b8535815c1"
+  requested_id: "AID-2026-186"
+  id_status: "PROVISIONAL"
+  uniqueness_scope: "AID-2026-112 was max+1 from INDEX maximum 108 at original allocation; renumbered to AID-2026-186 at merge because AID-2026-112 is occupied in main by unrelated work; reservation remains provisional until merge-time recheck."
+  renumbered_from: ["AID-2026-109", "AID-2026-110", "AID-2026-111", "AID-2026-112"]
+  merge_time_rule: "Re-read main INDEX, work-item tree, Issues, PRs and branch names; confirm AID-2026-186 or renumber."
+authority:
+  sponsor: "USER-PRINCIPAL-DELEGATED"
+  accountable_owner: "USER-PRINCIPAL-DELEGATED"
+  acceptance_authority: "NOT_ASSIGNED"
+  attribution: "user-authorized operator (delegated by account owner)"
+  signature_status: "代理登记，非自然人 Owner 签署"
+scope:
+  objective: "Restore 18 E-domain Memory Compiler source documents with schema-valid GOV-DOC-002 metadata while preserving source bodies byte-for-byte."
+  canonical: "14-ai-development/work-items/AID-2026-186/evidence.md"
+  en: "docs/en/14-ai-development/work-items/AID-2026-186/evidence.md"
+  zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-186/evidence.md"
+  work_item_manifest: "14-ai-development/work-items/AID-2026-186/manifest.yaml"
+  issues: ["#1212"]
+  prompt: "14-ai-development/work-items/AID-2026-186/prompt-v1.md"
+  session_evidence: "14-ai-development/work-items/AID-2026-186/session-evidence.md"
+  files_to_create:
+    - "14-ai-development/work-items/AID-2026-186/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-186/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-186/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-186/evidence.md"
+    - "docs/en/14-ai-development/work-items/AID-2026-186/evidence.md"
+    - "docs/zh-CN/14-ai-development/work-items/AID-2026-186/evidence.md"
+    - "14-ai-development/work-items/INDEX.md"
+  exclusions:
+    - "No placeholder EN or ZH-CN mirrors for the 18 restored canonical files"
+    - "No modification to existing 04-memory-compiler README.md, compiler-overview.md, or extraction-and-normalization.md"
+    - "No runtime, implementation, schema, validator, test, workflow, or deployment changes"
+    - "No Issue closure"
+review:
+  status: "NOT_ASSIGNED"
+acceptance:
+  status: "NOT_GRANTED"
+  note: "Documentation restoration only; Owner acceptance and normative adoption are not asserted."
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1212"
+    implementing_ai_session: NOT_RECORDED
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-186/prompt-v1-original.source.txt"
+    executed_prompt_sha256: "a421889d3654e49e2247b7207faef0113c188c0e28c7dd0caeea91127c21d67e"
+    executed_prompt_bytes: 2285
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-186/session-evidence.md"
