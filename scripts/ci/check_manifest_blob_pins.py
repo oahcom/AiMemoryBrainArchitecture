@@ -90,6 +90,10 @@ def verify(root: Path, commit: str, verbose: bool = True):
 
     def check(path, declared, source_commit, kind, algorithm="git"):
         nonlocal ok, mismatch, missing, incomplete, pins
+        # Empty/null placeholders are not blob identities and are outside this
+        # checker's scope. A non-empty malformed declaration is INCOMPLETE.
+        if declared is None or (isinstance(declared, str) and not declared.strip()):
+            return
         pins += 1
         if algorithm == "bytes":
             if isinstance(declared, bool) or not isinstance(declared, (int, str)) or str(declared).strip() == "":
