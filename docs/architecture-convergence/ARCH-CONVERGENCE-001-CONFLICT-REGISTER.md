@@ -44,7 +44,7 @@ document_metadata:
 # ARCH-CONVERGENCE-001 — Conflict Register
 # ARCH-CONVERGENCE-001 — 架构冲突登记册
 
-- Status: **DRAFT / OPEN REGISTER / NON-NORMATIVE — 1/16 RECONCILED (6.25%); 15 remain OPEN/BLOCKED/CANDIDATE under their accountable Owners**
+- Status: **DRAFT / OPEN REGISTER / NON-NORMATIVE — 2/16 RECONCILED (12.5%); 14 remain OPEN/BLOCKED/CANDIDATE under their accountable Owners**
 - Baseline: `main@e52594f181d2edb77448adcfed64a0fbdffaf3aa`
 - Rule: Conflicts remain visible until the authority owning the affected contract resolves them. This register does not decide Owner semantics.
 
@@ -57,7 +57,7 @@ document_metadata:
 | CF-003 | H path name `08-protocols/` vs Owner path `08-bmcp-protocol/` | README vs H branch tree | Broken references and duplicate/ambiguous protocol root | H + A | OPEN — H confirms canonical path; update portal map under governance |
 | CF-004 | I path name `10-security-and-governance/` vs actual Owner contracts under `09-security-governance/` | README, I branch tree; I tree contains both directory names | Ambiguous source of truth and potential duplicate contract copies | I + A | OPEN — identify canonical directory and disposition of alternate path |
 | CF-005 | Storage source root absent; Storage artifacts in review namespace | Storage branch tree has 122 blobs but no `09-storage-and-index/`; L1 ADR is under `reviews/storage-consistency/` | Storage contract and ADR authority are hard to discover | Storage + D | OPEN — publish a canonical Storage source index and exact L1/L4 status |
-| CF-006 | Fact/Claim canonical semantics conflict | Main I-04/P-04 distinction vs Domain Overview §5; B ADR-001 says ADR-BLOCKED; D Store also blocks persistence | Identity, revision, evidence, schema and consumer contracts cannot be frozen | B + Architecture Governance; D/E/F/G/H consulted | ADR-BLOCKED — explicit governance decision required |
+| CF-006 | Fact/Claim canonical semantics conflict | Approved OWNER-DECISION-FACT-CLAIM-001.md (blob 2225dcb469db37dbebe8d8bab202f3ea4f8b600b; approved version 003fa0063e1e359bc91de8c2950366f757bd1210) selects separate Fact attestation / Claim proposition and I1 stable Claim identity with immutable revisions | Semantic/identity conflict is resolved; schema, DDL, API, wire and runtime implementation remain explicitly unfrozen | B + Architecture Governance; D/E/F/G/H consulted | RECONCILED — SEMANTIC/IDENTITY DECISION ONLY; downstream schema/consumer acceptance remains outside this bounded closure |
 | CF-007 | D/Storage logical topology vs physical realization | Storage L1 ADR selects Option A; L4 physical engine/deployment OPEN; D record/transaction implementation CANDIDATE | Canonical atomicity cannot be claimed physically | D + Storage | OPEN — exact row ownership, engine/profile, crash/failover/restore evidence |
 | CF-008 | Forget local suppression vs global completion | D separates suppression, cleanup and physical erasure; I inventory contract CANDIDATE; D/I/Storage Phase 3.9 PRs #66/#68/#71 remain Draft | A DELETE/ACK cannot prove global Forget terminality | D + I + E/F/G/H/Storage | P0 OPEN — closed-world inventory, barriers, evidence joins and restore proof |
 | CF-009 | H branch tree-integrity incident pins do not reconcile | PR #90/#91 cite H `0277a8b...` (7-path incident) and restored `4e65a2...`; fetched live H branch is `6608cde...` (216 blobs) | Cannot infer which H schema/validator/test set is exact current baseline | H + A; C consulted | OPEN — exact commit ancestry, branch ref, tree digest and restoration record |
@@ -130,5 +130,14 @@ This review applies each row's existing closure condition literally. It does not
 
 - RECONCILED: 1/16 (6.25%), CF-010 only and only for tree currentness.
 - Unresolved: 15/16. The accountable Owners and missing evidence are listed above.
-- No additional item met its own closure condition in the evidence inspected for this review; therefore no new status was changed to RECONCILED.
+- CF-006 meets its own bounded closure condition because an approved Owner-delegated semantic/identity decision is present on main. Its downstream schema/consumer implementation remains explicitly unfrozen and is not included in this reconciliation.
 - The pre-existing CF-010 evidence is retained as recorded in §1. This review does not claim a fresh shell command/output for it; no unexecuted command is represented as measured output.
+
+
+### CF-006 reproducible evidence anchor
+
+- GitHub API: GET /repos/oahcom/AiMemoryBrainArchitecture/contents/14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md?ref=main
+- Observed blob SHA: 2225dcb469db37dbebe8d8bab202f3ea4f8b600b
+- Metadata: decision_status=Approved; approved_version=003fa0063e1e359bc91de8c2950366f757bd1210
+- Authority evidence: GET /repos/oahcom/AiMemoryBrainArchitecture/issues/comments/7042461592; comment authored by repository Owner (OWNER association), establishing the delegation instrument.
+- Bounded result: Fact/Claim semantic and identity decision reconciled. Schema, DDL, public API, BMCP wire and runtime implementation remain outside this closure.
