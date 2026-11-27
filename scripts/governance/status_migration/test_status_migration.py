@@ -17,6 +17,7 @@ EVIDENCE_ARTIFACT = "Verified evidence artifact for the attested subject work.\n
 def git(root, *args):
     return subprocess.run(
         ["git", "-C", str(root), *args], check=True,
+        encoding="utf-8", errors="replace",
         capture_output=True, text=True).stdout.strip()
 
 
@@ -53,6 +54,8 @@ def evidence_for(gate, head, path):
         "independent_review": {
             "reviewer": "reviewer-one",
             "implementer": "implementer-two",
+            "reviewer_session": "session-reviewer-one",
+            "implementer_session": "session-implementer-two",
             "reviewed_head": head,
             "report": path,
             "findings_disposition": "all findings dispositioned",
@@ -230,7 +233,7 @@ class StatusMigrationTests(unittest.TestCase):
         finally:
             directory.cleanup()
 
-    def test_identity_alias_normalization_rejects_same_person(self):
+    def test_identity_alias_normalization_does_not_decide_independence(self):
         directory, root, head = make_repo({})
         try:
             data = manifest_for("REVIEWED", head, 2)
@@ -242,10 +245,82 @@ class StatusMigrationTests(unittest.TestCase):
             path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
             git(root, "add", ".")
             git(root, "commit", "-qm", "alias collision fixture")
-            with self.assertRaisesRegex(ValueError, "different identities"):
+            # One account carrying two sessions is the expected case: the
+            # account comparison is diagnostic and must not fail the gate.
+            self.assertEqual(check(path)["result"], "PASS")
+        finally:
+            directory.cleanup()
+
+    def test_one_account_with_two_sessions_is_independent(self):
+        directory, root, head = make_repo({})
+        try:
+            data = manifest_for("REVIEWED", head, 2)
+            review = data["lifecycle"]["gates"]["independent_review"]["evidence"]
+            review["reviewer"] = "req05-session-a"
+            review["implementer"] = "req05-session-a"
+            review["reviewer_session"] = "req05-review"
+            review["implementer_session"] = "req05-impl"
+            path = root / "manifest.yaml"
+            path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+            git(root, "add", ".")
+            git(root, "commit", "-qm", "same account, two sessions")
+            self.assertEqual(check(path)["result"], "PASS")
+        finally:
+            directory.cleanup()
+
+    def test_two_accounts_sharing_one_session_is_not_independent(self):
+        directory, root, head = make_repo({})
+        try:
+            data = manifest_for("REVIEWED", head, 2)
+            review = data["lifecycle"]["gates"]["independent_review"]["evidence"]
+            review["reviewer"] = "reviewer-alice"
+            review["implementer"] = "implementer-bob"
+            review["reviewer_session"] = "req05-shared"
+            review["implementer_session"] = "req05-shared"
+            path = root / "manifest.yaml"
+            path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+            git(root, "add", ".")
+            git(root, "commit", "-qm", "two accounts, one session")
+            with self.assertRaisesRegex(ValueError, "reviewer_session and implementer_session"):
                 check(path)
         finally:
             directory.cleanup()
+
+    def test_identical_account_and_session_is_not_independent(self):
+        directory, root, head = make_repo({})
+        try:
+            data = manifest_for("REVIEWED", head, 2)
+            review = data["lifecycle"]["gates"]["independent_review"]["evidence"]
+            review["reviewer"] = "req05-session-a"
+            review["implementer"] = "req05-session-a"
+            review["reviewer_session"] = "req05-one"
+            review["implementer_session"] = "req05-one"
+            path = root / "manifest.yaml"
+            path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+            git(root, "add", ".")
+            git(root, "commit", "-qm", "identical account and session")
+            with self.assertRaisesRegex(ValueError, "different sessions"):
+                check(path)
+        finally:
+            directory.cleanup()
+
+    def test_missing_session_field_is_rejected(self):
+        for field in ("reviewer_session", "implementer_session"):
+            with self.subTest(field=field):
+                directory, root, head = make_repo({})
+                try:
+                    data = manifest_for("REVIEWED", head, 2)
+                    review = data["lifecycle"]["gates"]["independent_review"]["evidence"]
+                    del review[field]
+                    path = root / "manifest.yaml"
+                    path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+                    git(root, "add", ".")
+                    git(root, "commit", "-qm", f"missing {field}")
+                    with self.assertRaisesRegex(
+                            ValueError, f"independent_review.{field}"):
+                        check(path)
+                finally:
+                    directory.cleanup()
 
     def test_untrusted_external_and_traversal_references_are_rejected(self):
         directory, root, head = make_repo({})
@@ -413,7 +488,7 @@ class StatusMigrationTests(unittest.TestCase):
                 blob = git(root, "hash-object", str(protected))
                 sidecar.write_text(
                     f"git-blob-sha1 {blob}  scripts/governance/protected.py\n",
-                    encoding="utf-8")
+                    encoding="utf-8", newline="\n")
                 digest = hashlib.sha256(sidecar.read_bytes()).hexdigest()
                 git(root, "add", ".")
                 git(root, "commit", "-qm", f"anchor {digest}")
@@ -430,7 +505,7 @@ class StatusMigrationTests(unittest.TestCase):
             blob = git(root, "hash-object", str(protected))
             sidecar.write_text(
                 f"git-blob-sha1 {blob}  scripts/governance/protected.py\n",
-                encoding="utf-8")
+                encoding="utf-8", newline="\n")
             with self.assertRaisesRegex(ValueError, "does not match its commit anchor"):
                 _verify_sidecar_anchor(root, sidecar_rel)
             # Only a fresh commit carrying the new anchor restores validity.

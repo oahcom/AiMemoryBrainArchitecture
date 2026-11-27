@@ -1,14 +1,55 @@
+---
+document_metadata:
+  domain: memory-brain
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-150/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-242/evidence.md"
+        - "Source branch session-d-memory-brain-2026-11-16 @ b525e1f8fee2471a131e4a38efda99804045e424"
+        - "AID-2026-089 / PR #1232 — D-only logical Fence authority"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Historical source restored; §17 Fence-owner wording is explicitly superseded by AID-2026-089. Candidate only; no D Owner acceptance, cross-owner acceptance, implementation or production conformance is asserted."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "D canonical Memory identity, immutable version, lifecycle and canonical commit/change-feed semantics (historical candidate; Fence boundary controlled by AID-2026-089)"
+    canonical_scope_id: "memory-brain/canonical-memory-store"
+    canonical_scope_keywords:
+      - canonical-memory-store
+      - memory-version
+      - canonical-commit-cursor
+      - index-watermark
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "03-memory-brain/canonical-memory-store.md"
+    en: "docs/en/03-memory-brain/canonical-memory-store.md"
+---
 # Canonical Memory Store（权威记忆存储）
 
-- 文档 ID：D-CANONICAL-STORE-001
-- 版本：1.0
-- 源分支：session-d-memory-brain-2026-11-16
-- 源文件版本：DEREFERENCED — 保留历史源 Blob `6b37c91033fda21f072e2a3bde6f274663b1e76e`；当前仓库不存在可解析的规范性源文件。
-- 审查时源分支 HEAD：6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
-- 源规范：DEREFERENCED — 原规范源路径 `03-memory-brain/canonical-memory-store.md` 在当前 main tree 中不存在；替代物：[英文对照版](../../en/03-memory-brain/canonical-memory-store.md)（Blob `414fe03fd40fb8ad46061d2d8c7d29ba2667f252`；仅为对照文本，不是规范性替代源）。
-- 对应英文：[Canonical Memory Store](../../en/03-memory-brain/canonical-memory-store.md)
-- 状态：权威性和不可变性为 DECIDED；详细记录布局和事务实现为 CANDIDATE，等待工程验证
-- 相关阻塞：INT-P0-01..04、INT-P1-02、INT-P1-06；DM-001..DM-013
+> **恢复／权威冲突声明——仅供参考，不具规范效力。** 本历史源文件除本声明及 GOV-DOC-002 元数据外，按原始字节保留。其 §17 依赖句将“Forget Fence”归于 I。该表述与 AID-2026-089 冲突；AID-2026-089 已由 PR #1232 合并（合并提交 `d914e8a1f8a1ba24c21c41a9249489d544388185`）：D 是 ForgetOperation 身份／状态及 ForgetFence Generation／Cursor 的唯一逻辑签发权威；Storage 本地 Fence 行只能是源自 D、可重建的投影；I 负责授权、全局政策及 Global Forget Completion。该边界以 AID-2026-089 为准。不得将 §17 解读为 I 拥有 Fence 签发权，或 Storage 拥有独立 Fence 权威。本恢复文件仍是 Draft／Informative 候选文件，不是已批准的规范性合同。
 
 ## 1. 目的
 
@@ -100,13 +141,15 @@ Canonical Transaction 边界包含 Identity/Version 行、Current Pointer、Comm
 
 在物化 Query Candidate 之前执行 Scope Filter。Evidence ContentRef 解引用需要独立授权。基于 Name 的查询在没有 Scope/Permission 检查时不能返回身份。Read 和 Projection Consumer 必须检查 Forget Fence/Suppression。Cache/Index 命名空间包含 Principal/Scope/Environment 和 Policy/Grant Revision；过期 Grant 必须使 Cache 失效或绕过 Cache。Memory 文本是不可信数据（INT-P0-04）。
 
-## 14. 性能与可观测性
+## 14. 性能考量
 
 **CANDIDATE：** 采用追加式 Version 加紧凑 Current Projection；周期性 Snapshot 可以加速历史折叠，但仍属于派生数据。测量写放大、Snapshot 大小、CAS 竞争、Outbox 滞后、历史查询成本、Scope Filter 开销和重建吞吐。限制历史分页；除非明确请求，不加载 Evidence Payload。
 
+## 15. 可观测性
+
 记录 Commit Sequence、Parent/Result Version、Request Digest、Actor/Scope ID、Correlation/Causation、Idempotency Key Hash、事务耗时、CAS Conflict、Outbox Age、Consumer Watermark 和 Projection Rebuild 状态。绝不记录已遗忘原文或受保护 Evidence。
 
-## 15. 故障场景
+## 16. 故障场景
 
 - Commit 前崩溃：没有可见 Version；可以重试。
 - Commit 后、响应前崩溃：Idempotency Record 返回原 Receipt。
@@ -116,9 +159,11 @@ Canonical Transaction 边界包含 Identity/Version 行、Current Pointer、Comm
 - 受治理 Forget 后历史 Payload 缺失：返回明确的 Forgotten/Unavailable 结果，不得伪造内容。
 - 授权服务故障：受保护读写 Fail-closed。
 
-## 16. 依赖与开放问题
+## 17. 依赖
 
 依赖 B 的类型语义；Lifecycle Manager 的状态转换；E 的提案契约；F 的读取/Projection 语义；G 固定的 MemoryVersion 引用；H 的 ActorRef/Wire 身份；I 的授权、Forget Fence、Retention 和 Erasure Policy；Storage/Consistency 的事务、备份和恢复实现。
+
+## 18. 开放问题
 
 - OPEN：INT-P0-01 ADR 必须在 Schema Freeze 前解决 Fact/Claim。
 - CANDIDATE：稳定 Claim ID + 不可变 ClaimRevision；需与 E/F/G 确认。

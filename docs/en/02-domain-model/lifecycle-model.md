@@ -1,9 +1,48 @@
+---
+document_metadata:
+  domain: domain-model
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-200/evidence.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "GOV-DOC-002 classification of a mirror that carried no front-matter: records domain, role, status and the canonical source path only (basis, the document's own statement: Status: State vocabulary and separation DECIDED). Claims no canonical authority and does not verify semantic parity with the source. Pre-metadata content blob: 532e74e99f2a6640f5fd6461f3935a08553586ec."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Normative
+  bilingual_counterpart:
+    source: "02-domain-model/lifecycle-model.md"
+    en: null
+    zh-CN: "docs/zh-CN/02-domain-model/lifecycle-model.md"
+---
 # Memory Lifecycle Model
 
 - Document ID: DOMAIN-LIFECYCLE-001
 - Version: 1.0
 - Source: [Normative source specification](../../../02-domain-model/lifecycle-model.md)
-- Source revision: c1daa6225e75ea40d7f86e5ef6916b4f3849a1f8
+- Source revision: 9b7f44b70d286ab6c675d2d345edd34029baad86
 - Chinese counterpart: [记忆生命周期模型](../../zh-CN/02-domain-model/lifecycle-model.md)
 - Status: State vocabulary and separation DECIDED; policy thresholds and selected transitions OPEN
 - Owner: Domain Model defines semantics; Memory Lifecycle Manager executes canonical transitions

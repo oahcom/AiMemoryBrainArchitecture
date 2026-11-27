@@ -1,3 +1,49 @@
+---
+document_metadata:
+  domain: agent-integration
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Classified as Non-Canonical Informative; the document records telemetry semantics and asserts no Runtime implementation or approval."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Agent telemetry model semantic boundaries"
+    canonical_scope_id: null
+    canonical_scope_keywords:
+      - agent-telemetry
+      - task-state
+      - observation
+      - agent-integration
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    en: "docs/en/07-agent-integration/telemetry-model.md"
+    zh-CN: "docs/zh-CN/07-agent-integration/telemetry-model.md"
+---
+
 # Agent Telemetry Model
 
 **Status:** DECIDED semantic boundaries; CANDIDATE field profiles; TO_VALIDATE operational limits  

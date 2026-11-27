@@ -1,3 +1,42 @@
+---
+document_metadata:
+  domain: memory-context
+  role: review-report
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-200/evidence.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "GOV-DOC-002 classification of a normative root that carried no front-matter: records domain, role and the status the document states in its own body (delegated G-role technical review; not an independent human G Owner signature). Claims no canonical authority (canonical_status stays Non-Canonical) and records no Owner approval. Pre-metadata content blob: 1894860c76336f8739d354b72beed3992cffd17e."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: "docs/en/06-memory-context/phase-3.8.18-g-exact-review-h-unified-1.2.14-csubmitoutcome-1.0.1-fullpath.md"
+    zh-CN: "docs/zh-CN/06-memory-context/phase-3.8.18-g-exact-review-h-unified-1.2.14-csubmitoutcome-1.0.1-fullpath.md"
+---
 # Phase 3.8.18 — G Exact Review of H Unified 1.2.14 × CSubmitOutcome 1.0.1 Full-Path Mapping
 # Phase 3.8.18 — G 对 H Unified 1.2.14 × CSubmitOutcome 1.0.1 Full-Path Mapping 的精确复审
 
