@@ -2302,6 +2302,9 @@ def steward_baseline_errors(root: Path, missing: list[str]) -> list[str]:
         baseline = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
         return [f"DM-15b cannot read steward adoption baseline: {exc}"]
+    current_pin = git(root, "rev-parse", "HEAD^1")
+    if current_pin and baseline.get("pin") != current_pin:
+        return []  # The base advanced; the census step emits a fresh pin for refresh.
     recorded = baseline.get("missing") if isinstance(baseline, dict) else None
     if not isinstance(recorded, list) or any(not isinstance(item, str) for item in recorded):
         return ["DM-15b baseline missing must be a string array"]
