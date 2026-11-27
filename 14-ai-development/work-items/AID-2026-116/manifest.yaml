@@ -307,7 +307,7 @@ review:
 
 session_evidence:
   - role: IMPLEMENTER
-    issue_refs: []
+    issue_refs:
     implementing_ai_session: owner-proxy-2026-11-26-104
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-116/prompt-v1.md
     executed_prompt_sha256: 6fd626bfd4674e3e98f107baa93b4f2ef1061eac36c80c66a7778714ab5b725e
