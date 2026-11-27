@@ -116,9 +116,42 @@ This is direct evidence that the required GOV-DOC-001 context goes red for a rea
 
 The initial Session Evidence failure was corrected in the PR body: because #1237 predates the effective date and has no Issue-level AI-assisted declaration, its mapping is `LEGACY_UNDECLARED` / `N/A`; the PR-level declaration remains `AI-assisted work: YES`. The manifest records the exact prompt snapshot as `NOT_RECORDED` / `NOT_VERIFIED`, with a missing snapshot path and zero-byte sentinel; no prompt hash or verbatim capture is claimed.
 
-## Current merge state
+## Main synchronization and 16 required contexts
 
-All evidence above is historical to the stated Head/run IDs. The current main advanced after branch creation; the branch must include the latest main and rerun the full 16 required contexts before merge. No merge SHA or post-merge blob identity is claimed yet.
+The implementation branch was updated with the then-current `main` using a GitHub merge commit:
+- Main included: `a588cd9914949c2c9db7b2c5704d906fd3f05b70`
+- Branch synchronization commit: `11fe4d081cbe1a77e445db660a00151128855981`
+- GitHub compare result: `ahead=16, behind=0`.
+
+At synchronized Head `11fe4d081cbe1a77e445db660a00151128855981`, the required contexts returned 16/16 `completed/success`:
+1. GOV-DOC-001 structural checks
+2. Branch freshness vs base
+3. audit
+4. GOV-DOC-002 metadata checks
+5. BMCP protocol index (hard gate)
+6. BMCP conformance suite (hard gate)
+7. Schema non-empty audit (hard gate)
+8. Bilingual docs coverage (ratchet)
+9. Rust clippy (hard gate)
+10. Repository hygiene (hard gate)
+11. Rust format (hard gate)
+12. Rust doctests (hard gate)
+13. Session Evidence
+14. Session Evidence self-test (base)
+15. Session Evidence self-test (head)
+16. rust-workspace-test
+
+Run links for this synchronized Head:
+- Bilingual documentation / GOV-DOC-001: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/45940575457
+- Existing gates (audit, BMCP, Rust and schema contexts): https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/45940575421
+- Repository hygiene / reachability: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/45940575491
+- GOV-DOC-002: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/45940575594
+- Branch freshness: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/45940575573
+- Session Evidence: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/45940575661
+- Rust workspace: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/45940575545
+- Runner admission policy: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/45940575731
+
+The synchronized-Head check runs above predate this evidence/manifest/index status-refresh commit; the new resulting Head must complete its own 16-context run before merge. No merge SHA or post-merge blob identity is claimed yet.
 
 ## Session record
 
