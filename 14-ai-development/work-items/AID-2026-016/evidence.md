@@ -18,7 +18,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-27"
-      last_verification_note: "Verification covers the recorded implementation changes, named tests, and reported repository gates at HEAD 731d9d08; independent review, natural-person acceptance, merge, and Issue closure remain unverified."
+      last_verification_note: "Verification covers the integrated implementation, named regression tests, mutation results, and reported repository gates at HEAD d07a64faf121c61e50c189b327a20dd08e81ce9d; independent acceptance and merge remain outstanding."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -31,7 +31,7 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "Implementation and test evidence for AID-2026-016 ContextEntryVersion content hash integrity."
+    canonical_scope: "Implementation and verification evidence for ContextEntryVersion content hash integrity."
     canonical_scope_id: "ai-development/aid-2026-016-evidence"
     canonical_scope_keywords:
       - "context-content-integrity"
@@ -71,36 +71,29 @@ Consequently, a non-empty but incorrect or stale digest could pass this validati
 
 The original `commit_change_set()` path compared the overall `snapshot_hash`. That comparison did not independently establish that each entry's declared `content_hash` matched its own rendered content.
 
-The production implementation at the previously observed line 272 generated the SHA-256-prefixed content hash inline:
+The original production implementation generated the SHA-256-prefixed content hash inline:
 
 `format!("sha256:{}", sha256_hex(...))`
 
-This established the production prefix convention but did not provide a shared public single-source helper for generation and validation.
+The first implementation segment established `content_hash_for()` as the shared generation and validation source of truth.
 
-The available line-level evidence identifies the original inline production expression at line 272. Exact original line numbers for the validation and ChangeSet implementations were not supplied as verified facts and are therefore not asserted here.
-
-## 3. Implementation changes
+## 3. First implementation segment
 
 ### 3.1 `crates/memory-context/src/lib.rs`
 
-Changes: +43 / -7.
-
 - Added `pub fn content_hash_for(rendered_content: &str) -> String`.
-- The helper returns a deterministic `sha256:<hex>` value.
-- The helper is the single source of truth for generating the content hash.
-- Replaced the original inline production-side `format!("sha256:{}", sha256_hex(...))` expression with a call to `content_hash_for()`.
+- The helper returns deterministic `sha256:<hex>` values.
+- Replaced the original inline production-side hash expression with a call to `content_hash_for()`.
 - Added `ContextError::ContentHashMismatch { entry_id: OpaqueId, declared: String, actual: String }`.
-- Updated `ContextEntryVersion::validate()` to recalculate the content hash from `rendered_content` and reject a mismatch after the rendered-byte validation.
-- Updated `validate_edit_entry()` on the `ContextEntry` path to recalculate and compare the content hash.
-- Added documentation to `snapshot_hash()` explaining that its entry set is based on validated `content_hash` values.
-- Kept the existing FNV-1a 64 snapshot hash algorithm unchanged.
-- Updated four inline-test fixture locations that previously used placeholder or fabricated hashes to use real values from `content_hash_for()`.
+- Updated `ContextEntryVersion::validate()` to recalculate the hash from `rendered_content` and reject mismatches after rendered-byte validation.
+- Updated `validate_edit_entry()` to recalculate and compare the declared hash on the ContextEntry edit path.
+- Documented the validated-entry content hash precondition of `snapshot_hash()`.
+- Preserved the FNV-1a 64 snapshot hash algorithm.
+- Replaced placeholder hashes in inline test fixtures with real `content_hash_for()` results.
 
 ### 3.2 `crates/memory-context/tests/content_hash_integrity.rs`
 
-Changes: new file, 89 lines.
-
-Added six integration tests:
+The first segment added six integration tests:
 
 1. `content_hash_is_sha256_prefixed_and_deterministic`
 2. `content_hash_covers_exact_utf8_bytes`
@@ -109,143 +102,209 @@ Added six integration tests:
 5. `validate_rejects_stale_hash_after_content_edit`
 6. `snapshot_hash_changes_when_entry_content_hash_changes`
 
-### 3.3 Change summary
+## 4. Post-review correction
 
-| Item | Result |
+Independent review used mutation testing to verify that the regression tests actually detect removal of the required integrity checks.
+
+The review identified two gaps: removal of the edit-entry comparison and removal of the empty-hash check did not produce failing tests before correction.
+
+### 4.1 Mutation verification matrix
+
+| Mutation | Before correction | After correction | Result |
+|---|---|---|---|
+| V1: Delete `ContextEntryVersion::validate()` hash comparison | 2 red | 2 red | PASS |
+| V2: Delete `validate_edit_entry()` hash comparison | 0 red | 1 red | PASS |
+| V3: Delete empty content hash validation | 0 red | 1 red | PASS |
+| V4: Change `sha256:` to `sha256x:` | 2 red | 2 red | PASS |
+
+After correction, all four mutation cases produced failing tests (4/4 red).
+
+The additional regression tests were:
+
+- `change_set_validate_rejects_edit_entry_with_wrong_content_hash`
+- `validate_rejects_empty_content_hash`
+
+The complete final eight-test inventory is:
+
+1. `pr433_tests::update_entry_recomputes_rendered_bytes_and_content_hash`
+2. `change_set_validate_rejects_edit_entry_with_wrong_content_hash`
+3. `commit_rejects_entry_with_wrong_content_hash`
+4. `content_hash_covers_exact_utf8_bytes`
+5. `content_hash_does_not_normalize_unicode`
+6. `content_hash_is_sha256_prefixed_and_deterministic`
+7. `snapshot_hash_changes_when_entry_content_hash_changes`
+8. `validate_rejects_empty_content_hash`
+
+### 4.2 Cross-crate content hash contract correction
+
+The independent probe identified a producer-side contract mismatch in `crates/brain-cli/src/main.rs`.
+
+The original brain-cli implementation used its local `sha256_hex` helper to generate a bare 64-character hexadecimal `content_hash` without the required `sha256:` prefix.
+
+The generated value was propagated through `build_context` and rejected by the new validation with `ContentHashMismatch`.
+
+The correction replaced the producer's content hash generation with:
+
+`memory_context::content_hash_for(&rendered_content)`
+
+The local `sha256_hex` helper remains in place for its other uses and has an explanatory comment clarifying that it is not the canonical content_hash producer.
+
+The affected production file is:
+
+`crates/brain-cli/src/main.rs`
+
+The second implementation segment also extended `crates/memory-context/tests/content_hash_integrity.rs` with two additional tests and three assertion extensions.
+
+## 5. Final implementation summary
+
+| File | Final change evidence |
 |---|---|
-| Existing files modified | 1 |
-| New files added | 1 |
-| Total files changed | 2 |
-| Insertions | +125 |
-| Deletions | -7 |
-| New integration tests | 6 |
-| Implementation HEAD | `731d9d08` |
+| `crates/memory-context/src/lib.rs` | First segment +43/-7; final integrated numstat +36/-7 |
+| `crates/memory-context/tests/content_hash_integrity.rs` | Initial 89 lines; final 192 lines; eight tests |
+| `crates/brain-cli/src/main.rs` | +4/-4 |
+| Total implementation files | 3 |
 
-## 4. Issue acceptance requirement mapping
+Final integration branch:
+
+`fix/2026-11-27-aid-016-context-content-hash`
+
+Final HEAD:
+
+`d07a64faf121c61e50c189b327a20dd08e81ce9d`
+
+Base commit:
+
+`46dac1b1e198c8d88daff5a34faf759ecb075869`
+
+## 6. Issue acceptance requirement mapping
 
 | Issue #1145 requirement | Implementation location | Test evidence | Result |
 |---|---|---|---|
-| Recalculate the canonical digest from exact UTF-8 rendered content | `content_hash_for()` and `ContextEntryVersion::validate()` in `crates/memory-context/src/lib.rs` | `content_hash_covers_exact_utf8_bytes` | IMPLEMENTED |
-| Compare the calculated digest against the declared content hash | `ContextEntryVersion::validate()` | `commit_rejects_entry_with_wrong_content_hash`; `validate_rejects_stale_hash_after_content_edit` | IMPLEMENTED |
-| Establish the SHA-256 prefix and deterministic generation contract | `content_hash_for()` | `content_hash_is_sha256_prefixed_and_deterministic` | IMPLEMENTED |
-| Preserve Unicode distinctions without implicit normalization | Exact string-to-UTF-8-byte hashing through `content_hash_for()` | `content_hash_does_not_normalize_unicode` | IMPLEMENTED |
-| Reject incorrect content hashes before ChangeSet operations take effect | Validation and `ContextError::ContentHashMismatch` | `commit_rejects_entry_with_wrong_content_hash` | IMPLEMENTED |
-| Apply the same content-hash verification to the ContextEntry edit path | `validate_edit_entry()` | Validation coverage in `crates/memory-context/src/lib.rs` | IMPLEMENTED |
-| Base snapshot-level hashing on validated entry content hashes | `snapshot_hash()` documentation and existing validated-entry data path | `snapshot_hash_changes_when_entry_content_hash_changes` | IMPLEMENTED |
-| Cover stale hashes after content modification | `ContextEntryVersion::validate()` | `validate_rejects_stale_hash_after_content_edit` | IMPLEMENTED |
-| Cover empty declared hashes and adversarial byte-length cases | Existing validation plus the new hashing and validation test coverage | Exact individual empty-hash and byte-length test mapping: NOT_MEASURED | PARTIALLY_MEASURED |
+| Recalculate the digest from exact UTF-8 rendered content | `content_hash_for()` and `ContextEntryVersion::validate()` | `content_hash_covers_exact_utf8_bytes` | IMPLEMENTED |
+| Compare calculated digest with declared content hash | `ContextEntryVersion::validate()` | `commit_rejects_entry_with_wrong_content_hash` | IMPLEMENTED |
+| Establish deterministic SHA-256-prefixed generation | `content_hash_for()` | `content_hash_is_sha256_prefixed_and_deterministic` | IMPLEMENTED |
+| Preserve Unicode distinctions without implicit normalization | `content_hash_for()` | `content_hash_does_not_normalize_unicode` | IMPLEMENTED |
+| Reject incorrect hashes before ChangeSet operations take effect | Validation and `ContextError::ContentHashMismatch` | `commit_rejects_entry_with_wrong_content_hash` | IMPLEMENTED |
+| Verify ContextEntry edit-path hashes | `validate_edit_entry()` | `change_set_validate_rejects_edit_entry_with_wrong_content_hash` | IMPLEMENTED |
+| Reject empty content hashes | Content hash validation | `validate_rejects_empty_content_hash` | IMPLEMENTED |
+| Verify snapshot hash changes when entry content hashes change | `snapshot_hash()` | `snapshot_hash_changes_when_entry_content_hash_changes` | IMPLEMENTED |
+| Verify rendered-byte and content-hash recomputation on update | Existing update path | `pr433_tests::update_entry_recomputes_rendered_bytes_and_content_hash` | IMPLEMENTED |
+| Ensure stale content cannot retain a valid declared hash | `ContextEntryVersion::validate()` | `validate_rejects_stale_hash_after_content_edit` | IMPLEMENTED |
+| Ensure the CLI producer emits the canonical hash representation | `crates/brain-cli/src/main.rs` | Brain CLI test suite and cross-crate probe | IMPLEMENTED |
+| Verify empty hashes and adversarial Unicode byte behavior | Validation and exact-byte hashing | `validate_rejects_empty_content_hash`; `content_hash_covers_exact_utf8_bytes`; `content_hash_does_not_normalize_unicode` | IMPLEMENTED |
 
-The final row distinguishes the Issue's requested adversarial categories from the specifically named six new integration tests. The supplied evidence does not identify a separate new test name for every empty-hash or rendered-byte-length case. No additional test coverage is claimed beyond the verified test inventory.
+## 7. Final verification results
 
-## 5. Verification and gate results
+All commands below were reported against final integrated HEAD `d07a64faf121c61e50c189b327a20dd08e81ce9d`.
 
-All commands below were executed against implementation HEAD `731d9d08`.
-
-| Gate | Command | Exit code | Observed result |
+| Gate | Command | Exit code | Result |
 |---|---|---:|---|
-| Memory context tests | `cargo test -p memory-context --no-fail-fast` | 0 | 85 / 10 / 6 / 9 / 19 / 8 / 1 / 2 / 8 / 14 / 21 / 0; 0 failed |
-| Agent integration tests | `cargo test -p agent-integration --no-fail-fast` | 0 | 36 / 2 / 19 / 6 / 0; 0 failed |
-| Brain CLI tests | `cargo test -p brain-cli --no-fail-fast` | 0 | All OK; 0 failed |
-| Clippy | `cargo clippy -p memory-context --all-targets -- -D warnings` | 0 | Finished dev profile |
+| Memory context tests | `cargo test -p memory-context --no-fail-fast` | 0 | 185 passed; 0 failed |
+| Brain CLI tests | `cargo test -p brain-cli --no-fail-fast` | 0 | 24 passed; 0 failed |
+| Agent integration tests | `cargo test -p agent-integration --no-fail-fast` | 0 | 63 passed; 0 failed |
+| Clippy | `cargo clippy -p memory-context -p brain-cli --all-targets -- -D warnings` | 0 | Finished; no warnings |
 | Cargo formatting | `cargo fmt --all -- --check` | 0 | Empty output |
-| Repository formatting and integrity check | `python scripts/check_fmt.py` | 0 | `FMT_RESULT=PASS`; `CHECK_RESULT=PASS`; `WORKTREE_RESULT=CLEAN`; `CHECKED_COMMIT_SHA=731d9d08` |
+| Manifest parsing | `python scripts/ci/check_manifest_parse.py` | 0 | 124 manifests; 0 failed |
+| Document management | `python scripts/check_document_management.py --require-changed origin/main` | 0 | PASS (incremental); 700 classified / 370 unclassified |
+| Traceability | `python scripts/check_traceability.py --index-only` | 0 | PASS; 0 errors / 115 warnings |
 
-The reported test counts are preserved as observed package-output sequences. They are not converted into inferred aggregate counts.
+### 7.1 Test totals
 
-### Formatting correction record
+| Suite | Passed | Failed |
+|---|---:|---:|
+| memory-context | 185 | 0 |
+| brain-cli | 24 | 0 |
+| agent-integration | 63 | 0 |
+| Total | 272 | 0 |
 
-The first `cargo fmt --all -- --check` execution exited with code 1 because of import-use line wrapping in the new integration test file.
+The package-output sequences were:
 
-The issue was returned to the implementing ChatGPT session. A formatting correction was supplied as an EDIT block and mechanically applied by the execution party.
+- memory-context: `85/10/8/9/19/8/1/2/8/14/21/0`
+- brain-cli: `1/2/3/4/1/3/1/2/4/3`
+- agent-integration: `36/2/19/6/0`
 
-The correction introduced no semantic changes.
+## 8. Authority and scope boundaries
 
-The subsequent formatting check exited with code 0. The repository formatting and integrity check also passed.
-
-## 6. Authority and scope boundaries
-
-This implementation addresses the content integrity defect recorded by Issue #1145.
+This implementation addresses the content integrity defect recorded in Issue #1145.
 
 It does not:
 
 - Select or authorize an encryption algorithm.
 - Modify encryption policy.
-- Change the authority of G ContextVersion.
-- Change the authority of C/H reasoning-boundary evidence.
+- Change G ContextVersion authority.
+- Change C/H reasoning-boundary evidence authority.
 - Change the FNV-1a 64 snapshot hash algorithm.
-- Change the snapshot hash calculation semantics.
+- Change snapshot hash semantics.
 - Authorize DDL changes.
-- Establish independent review or natural-person acceptance.
+- Establish natural-person owner acceptance.
 - Close Issue #1145.
 
-The snapshot hash algorithm remains FNV-1a 64. The change documents and relies on validated entry content hashes; it does not replace the snapshot algorithm with SHA-256.
+The snapshot hash continues to use FNV-1a 64. The implementation ensures that entry content hashes are validated before they contribute to snapshot-level integrity.
 
 No bilingual documentation mirrors were created. The work-item directory is within the established bilingual-pairing exemption prefix.
 
-## 7. Reproducibility
+## 9. Reproducibility
 
 Repository:
 
 `oahcom/AiMemoryBrainArchitecture`
 
-Implementation branch:
+Integration branch:
 
-`fix/2026-11-27-aid-241-context-content-hash`
+`fix/2026-11-27-aid-016-context-content-hash`
 
-Implementation HEAD:
+Base:
 
-`731d9d08`
+`46dac1b1e198c8d88daff5a34faf759ecb075869`
 
-Observed base:
+Final HEAD:
 
-`origin/main = a588cd99`
+`d07a64faf121c61e50c189b327a20dd08e81ce9d`
 
-The base SHA is recorded as the supplied short SHA. Its full 40-character form was not supplied and is not fabricated.
-
-The following commands reproduce the reported verification gates when executed against the implementation commit in the corresponding repository environment:
+The following commands reproduce the reported verification gates:
 
 ```bash
 cargo test -p memory-context --no-fail-fast
-cargo test -p agent-integration --no-fail-fast
 cargo test -p brain-cli --no-fail-fast
-cargo clippy -p memory-context --all-targets -- -D warnings
+cargo test -p agent-integration --no-fail-fast
+cargo clippy -p memory-context -p brain-cli --all-targets -- -D warnings
 cargo fmt --all -- --check
-python scripts/check_fmt.py
+python scripts/ci/check_manifest_parse.py
+python scripts/check_document_management.py --require-changed origin/main
+python scripts/check_traceability.py --index-only
 ```
 
-The new integration test file can be run independently with:
+The integration tests can be run independently with:
 
 ```bash
 cargo test -p memory-context --test content_hash_integrity
 ```
 
-The implementation-session reference is:
-
-`ChatGPT 6b08f8b6-4298-83ec-945c-91fafb7bf422 (acct1)`
-
-The executed prompt snapshot source is:
-
-`D:\code\chatgpt-session-ops\prompts\27-aid241-context-entry-content-hash.md`
-
-The final `prompt-v1.md` consists of its GOV-DOC-002 frontmatter followed by the source prompt as a byte-for-byte body copy. The final file's measured SHA-256 digest and byte count, including the frontmatter, are recorded in the manifest's `executed_prompt_sha256` and `executed_prompt_bytes` fields.
-
-## 8. Evidence status
+## 10. Evidence and acceptance status
 
 | Evidence item | Status |
 |---|---|
-| Implementation source changes | RECORDED |
-| Six new integration tests | RECORDED |
-| Three package test commands | PASSED |
+| First implementation segment | RECORDED |
+| Second implementation segment | RECORDED |
+| Final integrated source changes | RECORDED |
+| Eight content hash integration tests | RECORDED |
+| Mutation verification V1–V4 | PASS; 4/4 red |
+| Cross-crate brain-cli contract probe | RECORDED |
+| memory-context test suite | PASSED |
+| brain-cli test suite | PASSED |
+| agent-integration test suite | PASSED |
 | Clippy | PASSED |
-| Cargo formatting check | PASSED |
-| Repository formatting and integrity check | PASSED |
-| Implementing AI session reference | RECORDED |
-| Five successful API deliveries | RECORDED |
-| Prompt snapshot SHA-256 | NOT_MEASURED |
-| Prompt snapshot byte count | NOT_MEASURED |
-| Independent reviewer | NOT_ASSIGNED |
+| Cargo formatting | PASSED |
+| Manifest parser | PASSED |
+| Document management | PASSED |
+| Traceability | PASSED |
+| First implementing AI session | RECORDED |
+| Second implementing AI session | RECORDED |
+| prompt-v1 SHA-256 and byte count | RECORDED |
+| prompt-v2 SHA-256 and byte count | PENDING_MEASUREMENT |
+| Independent mutation review | FAIL_THEN_FIXED |
 | Natural-person owner acceptance | NOT_RECORDED |
 | Merge | PENDING |
-| Issue #1145 closure | OPEN |
+| Issue #1145 | OPEN |
 
-This evidence record documents the implementation and its reported technical verification. It does not substitute for independent review, acceptance authority, or repository merge authorization.
+This evidence record documents both implementation segments and their reported verification. It does not substitute for natural-person acceptance, merge authorization, or closure of Issue #1145.

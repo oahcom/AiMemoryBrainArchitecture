@@ -2,101 +2,167 @@ work_item_id: AID-2026-016
 title: "Verify ContextEntryVersion Content Hash Against Rendered Content"
 class: IMPL/TEST
 risk: R1
-risk_rationale: "The change enforces integrity validation of rendered ContextEntryVersion content before ChangeSet operations take effect. It does not change encryption policy, ContextVersion authority, reasoning-boundary evidence authority, or the snapshot hash algorithm."
+risk_rationale: "The implementation enforces content integrity across ContextEntryVersion validation, ChangeSet edit and commit paths, and brain-cli content hash generation. It prevents inconsistent declared hashes from passing validation without changing ContextVersion authority, reasoning-boundary evidence authority, or the snapshot hash algorithm."
 status: DISPATCHED
 id_status: PROVISIONAL
 sponsor: NOT_RECORDED
 accountable_owner: NOT_ASSIGNED
 acceptance_authority: NOT_RECORDED
 attribution:
-  implementation: "ChatGPT session 6b08f8b6-4298-83ec-945c-91fafb7bf422 (acct1)"
-  execution: "Execution party mechanically applied implementation EDIT blocks, ran tests, and performed formatting and validation."
-  code_authorship: "All implementation code was produced by the implementing ChatGPT session."
+  implementation:
+    - "ChatGPT 6b08f8b6-4298-83ec-945c-91fafb7bf422 (acct1)"
+    - "ChatGPT 6b090ebe-5e34-83ec-9b3b-c3ceb3bce830 (acct2)"
+  execution: "Execution party mechanically applied EDIT blocks, created prompt snapshots, executed tests, and performed repository validation."
+  code_authorship: "Both implementation segments were produced by their respective ChatGPT implementation sessions."
 date: 2026-11-27
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: a588cd99
+base_commit_sha: 46dac1b1e198c8d88daff5a34faf759ecb075869
 prompt_status: RECORDED
 prompt_provenance: NOT_VERIFIED
 
 identifier_allocation:
-  observed_main: a588cd99
+  observed_main: 46dac1b1e198c8d88daff5a34faf759ecb075869
   assigned_id: AID-2026-016
-  allocation_rule: "Enumerate AID-2026-NNN identifiers in open PR titles and remote branches, then select the first unoccupied identifier. This round observed 240, 251, and 280 as occupied."
+  allocation_rule: "Identifier allocation was established by the existing AID-2026-016 registration. Recheck open PR titles and remote branches before merge."
   allocation_verification: PENDING_PRE_MERGE
 
 scope:
-  objective: "Validate ContextEntryVersion content_hash against the exact UTF-8 bytes of rendered_content during validation, and reject mismatches before any ChangeSet operation takes effect."
+  objective: "Verify that every declared ContextEntryVersion content_hash matches the SHA-256 digest of the exact rendered UTF-8 content, enforce the same integrity contract across edit and commit paths, and ensure producers emit the canonical content hash representation."
   changes:
-    - "Introduce content_hash_for(rendered_content: &str) -> String as the single source of truth for generating sha256:-prefixed content hashes."
-    - "Recalculate and compare content_hash in ContextEntryVersion::validate()."
-    - "Recalculate and compare content_hash in validate_edit_entry() for the ContextEntry path."
-    - "Introduce ContextError::ContentHashMismatch with entry_id, declared, and actual values."
-    - "Update inline test fixtures to use actual content_hash_for() results."
-    - "Add six integration tests covering deterministic hashing, exact UTF-8 bytes, Unicode normalization differences, incorrect hashes, stale hashes, and snapshot hash changes."
-    - "Document the existing snapshot_hash() coverage of validated entry content hashes without changing its algorithm."
+    - "crates/memory-context/src/lib.rs: add public content_hash_for(rendered_content: &str) -> String returning sha256:<hex> as the single source of truth."
+    - "crates/memory-context/src/lib.rs: replace the production inline SHA-256 content hash generation with content_hash_for()."
+    - "crates/memory-context/src/lib.rs: add ContextError::ContentHashMismatch { entry_id, declared, actual }."
+    - "crates/memory-context/src/lib.rs: recalculate and compare content_hash in ContextEntryVersion::validate()."
+    - "crates/memory-context/src/lib.rs: recalculate and compare content_hash in validate_edit_entry()."
+    - "crates/memory-context/src/lib.rs: document the validated-entry content hash precondition of snapshot_hash() without changing FNV-1a 64."
+    - "crates/memory-context/src/lib.rs: replace placeholder inline test hashes with actual content_hash_for() results."
+    - "crates/memory-context/tests/content_hash_integrity.rs: add the initial six integration tests for deterministic SHA-256 generation, exact UTF-8 bytes, Unicode normalization distinctions, incorrect hashes, stale hashes, and snapshot hash changes."
+    - "crates/memory-context/tests/content_hash_integrity.rs: add two regression tests covering edit-entry hash rejection and empty content hash rejection."
+    - "crates/memory-context/tests/content_hash_integrity.rs: add three assertion extensions covering the commit and edit-entry hash paths."
+    - "crates/brain-cli/src/main.rs: replace local bare-hex content_hash generation with memory_context::content_hash_for(&rendered_content), preserving the canonical sha256: prefix."
+    - "crates/brain-cli/src/main.rs: retain local sha256_hex for non-content_hash purposes and document that distinction."
   untouched:
     - "Encryption algorithm selection and encryption policy."
-    - "ContextVersion authority in domain G."
-    - "Reasoning-boundary evidence authority in domains C/H."
+    - "G ContextVersion authority."
+    - "C/H reasoning-boundary evidence authority."
     - "FNV-1a 64 snapshot_hash() algorithm."
-    - "Snapshot hash semantics and calculation."
-    - "Documentation bilingual mirror structure."
+    - "Snapshot hash semantics."
+    - "DDL and database schema."
+    - "Bilingual documentation mirrors."
 
 measurements:
-  implementation_files_changed: "2"
-  implementation_insertions: "+125"
-  implementation_deletions: "-7"
-  integration_tests_added: "6"
-  memory_context_tests: "85 / 10 / 6 / 9 / 19 / 8 / 1 / 2 / 8 / 14 / 21 / 0; 0 failed; exit code 0"
-  agent_integration_tests: "36 / 2 / 19 / 6 / 0; 0 failed; exit code 0"
-  brain_cli_tests: "All passed; 0 failed; exit code 0"
-  clippy: "cargo clippy -p memory-context --all-targets -- -D warnings; Finished dev profile; exit code 0"
+  integration_branch: "fix/2026-11-27-aid-016-context-content-hash"
+  implementation_head: "d07a64faf121c61e50c189b327a20dd08e81ce9d"
+  base_commit: "46dac1b1e198c8d88daff5a34faf759ecb075869"
+  changed_files_total: 3
+  memory_context_lib_initial_changes: "+43 -7"
+  memory_context_lib_final_numstat: "+36 -7"
+  content_hash_integrity_initial_lines: 89
+  content_hash_integrity_final_lines: 192
+  content_hash_integrity_initial_tests: 6
+  content_hash_integrity_final_tests: 8
+  brain_cli_main_changes: "+4 -4"
+  final_numstat_evidence_md: "251 0"
+  final_numstat_manifest_yaml: "117 0"
+  final_numstat_prompt_v1_md: "155 0"
+  final_numstat_session_evidence_md: "136 0"
+  final_numstat_index_md: "1 0"
+  final_numstat_brain_cli_main: "3 1"
+  final_numstat_memory_context_lib: "36 7"
+  final_numstat_content_hash_integrity: "192 0"
+  memory_context_tests: "85/10/8/9/19/8/1/2/8/14/21/0 ok; 185 passed; 0 failed; exit code 0"
+  brain_cli_tests: "1/2/3/4/1/3/1/2/4/3 ok; 24 passed; 0 failed; exit code 0"
+  agent_integration_tests: "36/2/19/6/0 ok; 63 passed; 0 failed; exit code 0"
+  total_tests_passed: 272
+  total_tests_failed: 0
+  content_hash_integrity_test_inventory:
+    - "pr433_tests::update_entry_recomputes_rendered_bytes_and_content_hash"
+    - "change_set_validate_rejects_edit_entry_with_wrong_content_hash"
+    - "commit_rejects_entry_with_wrong_content_hash"
+    - "content_hash_covers_exact_utf8_bytes"
+    - "content_hash_does_not_normalize_unicode"
+    - "content_hash_is_sha256_prefixed_and_deterministic"
+    - "snapshot_hash_changes_when_entry_content_hash_changes"
+    - "validate_rejects_empty_content_hash"
+  mutation_verification:
+    V1_context_entry_version_hash_comparison:
+      mutation: "Delete the ContextEntryVersion::validate() hash comparison."
+      before_correction: "2 red"
+      after_correction: "2 red"
+      result: "PASS"
+    V2_edit_entry_hash_comparison:
+      mutation: "Delete the validate_edit_entry() hash comparison."
+      before_correction: "0 red"
+      after_correction: "1 red: change_set_validate_rejects_edit_entry_with_wrong_content_hash"
+      result: "PASS"
+    V3_empty_hash_validation:
+      mutation: "Delete the empty content hash check."
+      before_correction: "0 red"
+      after_correction: "1 red: validate_rejects_empty_content_hash"
+      result: "PASS"
+    V4_sha256_prefix:
+      mutation: "Change sha256: to sha256x:."
+      before_correction: "2 red"
+      after_correction: "2 red"
+      result: "PASS"
+    corrected_mutation_cases_red: "4/4"
+  brain_cli_contract_probe: "The original brain-cli producer emitted bare 64-character hexadecimal content_hash values without the sha256: prefix. The values passed through build_context and were rejected by the new validation with ContentHashMismatch. The producer was corrected to call memory_context::content_hash_for(&rendered_content)."
+  clippy: "cargo clippy -p memory-context -p brain-cli --all-targets -- -D warnings; Finished; no warnings; exit code 0"
   cargo_fmt: "cargo fmt --all -- --check; empty output; exit code 0"
-  python_fmt_check: "FMT_RESULT=PASS; CHECK_RESULT=PASS; WORKTREE_RESULT=CLEAN; CHECKED_COMMIT_SHA=731d9d08; exit code 0"
-  initial_fmt_failure: "Exit code 1 due to import-use line wrapping in the new integration test file; corrected through a returned EDIT block without semantic changes."
-  implementation_head: "731d9d08"
-  test_failures: 0
+  manifest_parse: "python scripts/ci/check_manifest_parse.py; 124 manifests; 0 failed; exit code 0"
+  document_management: "python scripts/check_document_management.py --require-changed origin/main; PASS (incremental); 700 classified / 370 unclassified; exit code 0"
+  traceability: "python scripts/check_traceability.py --index-only; PASS; 0 errors / 115 warnings; exit code 0"
+  prompt_v1_sha256: "0aeeb697cfd88b1f972724a46c6385c978069ce3e44e37330ed26dc56d5f80dc"
+  prompt_v1_bytes: 9998
+  prompt_v2_sha256: 9394cc50b1053dcee0cdeb177ccd998f4b0e54388020ff8d590fbbf2783da69e
+  prompt_v2_bytes: 47050
 
 evidence:
   record: "14-ai-development/work-items/AID-2026-016/evidence.md"
-  prompt: "14-ai-development/work-items/AID-2026-016/prompt-v1.md"
+  prompt:
+    - "14-ai-development/work-items/AID-2026-016/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-016/prompt-v2.md"
   session: "14-ai-development/work-items/AID-2026-016/session-evidence.md"
 
 non_goals:
-  - "Selecting or authorizing a cryptographic algorithm."
-  - "Changing encryption behavior."
-  - "Changing the FNV-1a 64 snapshot hash implementation."
-  - "Changing ContextVersion ownership or authority."
-  - "Changing reasoning-boundary evidence ownership or authority."
+  - "Selecting or authorizing an encryption algorithm."
+  - "Changing encryption policy."
+  - "Changing G ContextVersion authority."
+  - "Changing C/H reasoning-boundary evidence authority."
+  - "Changing FNV-1a 64 snapshot hash implementation."
   - "Changing snapshot hash semantics."
+  - "Authorizing DDL changes."
   - "Creating bilingual documentation mirrors."
-  - "Claiming that Issue #1145 has been closed or accepted."
+  - "Claiming Issue #1145 is closed or accepted."
 
 notes:
-  - "The observed base commit is the short SHA a588cd99. Its full 40-character SHA was not supplied and is intentionally not fabricated."
-  - "The implementation HEAD observed by the execution party is 731d9d08."
-  - "The executed prompt snapshot source is D:\\code\\chatgpt-session-ops\\prompts\\27-aid241-context-entry-content-hash.md."
-  - "prompt-v1.md consists of the GOV-DOC-002 frontmatter followed by the source prompt as a byte-for-byte body copy. executed_prompt_sha256 and executed_prompt_bytes record the measured digest and byte count of the final file, including its frontmatter."
-  - "The prompt provenance remains NOT_VERIFIED until its byte-level provenance has been verified."
-  - "The implementation session made five deliveries. All five SEND operations returned HTTP 200."
-  - "The first delivery produced the initial patch. EDIT 7 had an indentation mismatch and EDIT 11 had a non-unique FIND match; both were returned to the implementing session for correction."
-  - "Subsequent deliveries addressed the missing EDIT material, test failures, and formatting correction. No semantic change was made by the final formatting correction."
-  - "The initial formatting failure and subsequent successful formatting check are both recorded as execution evidence."
-  - "The work item identifier remains provisional until allocation is rechecked against remote branches and open PR titles."
-  - "Issue #1145 remains the originating issue and is not represented as closed or accepted by this work item."
+  - "The first implementation segment was produced by ChatGPT session 6b08f8b6-4298-83ec-945c-91fafb7bf422 (acct1), with five successful API deliveries, each returning SEND -> 200."
+  - "The first prompt snapshot is prompt-v1.md. Its final-file SHA-256 is 0aeeb697cfd88b1f972724a46c6385c978069ce3e44e37330ed26dc56d5f80dc and its measured byte count is 9998."
+  - "The second implementation segment was produced by a newly created ChatGPT session 6b090ebe-5e34-83ec-9b3b-c3ceb3bce830 (acct2), with two successful API deliveries, each returning SEND -> 200."
+  - "The second prompt snapshot is prompt-v2.md. Its body is copied byte-for-byte from prompts/29b-aid252-fix-blockers-with-source.md after adding the GOV-DOC-002 frontmatter. Its final SHA-256 and byte count must be measured after assembly."
+  - "An independent review used mutation tests to identify missing regression coverage for the edit-entry hash comparison and empty content hash validation. The implementation was returned for correction, and all four specified mutation cases subsequently produced red tests."
+  - "The second segment also repaired a cross-crate contract mismatch: brain-cli had emitted bare hexadecimal content_hash values without the sha256: prefix. A probe demonstrated rejection by the new validation after build_context propagation. The producer now calls memory_context::content_hash_for(&rendered_content)."
+  - "The local brain-cli sha256_hex helper remains for non-content_hash uses and is documented accordingly."
+  - "A concurrent implementation session had reset the previous branch. The work was therefore continued on the integration branch fix/2026-11-27-aid-016-context-content-hash."
+  - "The final integration branch contains both implementation segments, with HEAD d07a64faf121c61e50c189b327a20dd08e81ce9d."
+  - "The final verification measurements apply to the integrated HEAD, not merely the first implementation commit."
+  - "Prompt provenance remains NOT_VERIFIED where upstream byte-level source verification was not performed."
+  - "Issue #1145 remains OPEN. This manifest does not constitute independent approval, natural-person acceptance, or merge authorization."
 
 carrier:
-  branch: "fix/2026-11-27-aid-241-context-content-hash"
-  head_commit: "731d9d08"
+  branch: "fix/2026-11-27-aid-016-context-content-hash"
+  head_commit: "d07a64faf121c61e50c189b327a20dd08e81ce9d"
   pull_request: PENDING
   draft: false
-  merge_authorization: "No merge authorization is granted by this manifest. Merge remains subject to independent review, acceptance authority, and the applicable repository gates."
+  merge_authorization: "No merge authorization is granted by this manifest. Merge remains subject to the required independent review, acceptance authority, and repository gates."
 
 review:
   status: NOT_ASSIGNED
   independent_reviewer: NOT_ASSIGNED
+  independent_review: FAIL_THEN_FIXED
   natural_person_owner_acceptance: NOT_RECORDED
+  review_notes: "Independent mutation review identified two zero-red gaps before correction. Both were repaired; the four specified mutation cases were subsequently re-run and all four produced red tests."
 
 acceptance:
   gate: PENDING_CI
@@ -105,13 +171,23 @@ acceptance:
   acceptance_status: NOT_RECORDED
 
 session_evidence:
-  role: "Implementing AI session; implementation author."
-  issue_refs:
-    - "#1145"
-  implementing_ai_session: "ChatGPT 6b08f8b6-4298-83ec-945c-91fafb7bf422 (acct1)"
-  executed_prompt_snapshot_file: "prompt-v1.md"
-  executed_prompt_sha256: "0aeeb697cfd88b1f972724a46c6385c978069ce3e44e37330ed26dc56d5f80dc"
-  executed_prompt_bytes: 9998
-  executed_prompt_provenance: NOT_VERIFIED
-  session_reference_status: RECORDED
-  session_evidence_ref: "14-ai-development/work-items/AID-2026-016/session-evidence.md"
+  - role: "First implementation segment; implementing AI session and code author."
+    issue_refs:
+      - "#1145"
+    implementing_ai_session: "ChatGPT 6b08f8b6-4298-83ec-945c-91fafb7bf422 (acct1)"
+    executed_prompt_snapshot_file: "prompt-v1.md"
+    executed_prompt_sha256: "0aeeb697cfd88b1f972724a46c6385c978069ce3e44e37330ed26dc56d5f80dc"
+    executed_prompt_bytes: 9998
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-016/session-evidence.md"
+  - role: "Second implementation segment; implementing AI session and code author."
+    issue_refs:
+      - "#1145"
+    implementing_ai_session: "ChatGPT 6b090ebe-5e34-83ec-9b3b-c3ceb3bce830 (acct2)"
+    executed_prompt_snapshot_file: "prompt-v2.md"
+    executed_prompt_sha256: "9394cc50b1053dcee0cdeb177ccd998f4b0e54388020ff8d590fbbf2783da69e"
+    executed_prompt_bytes: "47050"
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-016/session-evidence.md"
