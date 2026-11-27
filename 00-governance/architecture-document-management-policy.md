@@ -44,7 +44,7 @@ document_metadata:
 # Architecture Document Management Policy / 架构文档管理条例
 
 - Policy ID: GOV-DOC-002
-- Version: 1.22
+- Version: 1.24
 - Status: **NORMATIVE — PARTIALLY MACHINE-CHECKED** (see §9.1 for exactly which rules a machine can prove)
 - Owner: A — Principal Integration / Architecture Governance
 - Relation to GOV-DOC-001: **SUPPLEMENTARY — does not weaken, replace or waive GOV-DOC-001**
@@ -116,6 +116,34 @@ architecture, domain-model, memory-brain, memory-compiler, memory-runtime,
 memory-context, agent-integration, protocol, security-governance,
 storage-index, consistency-recovery, testing-acceptance, ai-development
 ```
+
+### DM-15 — Document stewardship / 文档归属责任
+
+Every newly added governed Markdown document MUST declare a non-empty top-level
+document_metadata.steward identifying the accountable role or team that maintains
+the document and receives maintenance questions. This is a responsibility assignment,
+not an approval or authorship claim. The checker enforces it for newly added governed
+documents in incremental runs and prints the number of already-classified documents
+that still lack a steward as an adoption baseline. Existing documents are not
+retroactively blocked. The baseline closes only when a whole-tree census reports
+zero classified governed documents missing a non-empty steward; until then, the
+count remains visible and non-blocking.
+
+每份新增加的受治理 Markdown 文档 MUST 在顶层声明非空的
+document_metadata.steward，标明负责维护该文档并接收维护问题的责任角色或团队。
+该字段表示维护责任，不代表审批或作者身份。检查器在增量运行中强制检查新增加的
+受治理文档，并打印现有已分类文档中尚未填写 steward 的数量作为迁移基线。既有文档
+不会被追溯性阻断。只有当全树统计显示缺少非空 steward 的已分类受治理文档为零时，
+迁移基线才算收口；在此之前，该数量持续可见但不阻断合并。
+
+The field is named steward, not owner. The policy already uses “Consumer owners”
+for external consumers in M-08; reusing owner for document maintenance would conflate
+two different responsibility domains. Steward means document-maintenance
+accountability; M-08 continues to mean downstream-consumer accountability.
+
+字段命名为 steward 而非 owner。M-08 已使用 “Consumer owners” 指外部消费者；
+将 owner 再用于文档维护会混淆两个不同责任域。steward 专指文档维护责任，
+M-08 则继续表示下游消费者责任。
 
 ### 3.2 Independence constraint / 独立性约束
 
@@ -363,12 +391,13 @@ Machine-checkable rules / 机器可检查规则：
 | DM-12 | A mirror group is consistent: every declared counterpart exists, is classified, points into the language directory named by its field, belongs to the same source, and the source lists every mirror that names it. A source that declares no mirrors at all is a failure, not a skipped check. `domain`/`role`/`normative_status` agree, and only one document in the group is `Canonical` | Error |
 | DM-13 | `supersedes` targets exist, are not self-references, and form no cycle | Error |
 | DM-14 | The declared scope equals the enforced scope. Every top-level directory — hidden ones included, with `.git` as the sole structural exception — must be **governed**, **backlog**, or **excluded**. Excluded requires `kind: not-documentation` plus `reason` and `reason_zh`; backlog requires a document count that DM-14 compares to the disk and a bilingual reason, and is scanned like a governed root. No directory may be in two states, every named directory must exist, the declared roots must equal `NORMATIVE_ROOTS` in both directions, and `governed_files` must equal the gate's list with each entry proven to be a regular file *inside* the repository (a symlink, or a file reached through a symlinked parent, is an error — the registry check and the scanner must agree). A new top-level directory is therefore a governance decision, not a silent widening of the ungoverned surface; `.git` and `target/` are structurally exempt because they are VCS and build state present in some working copies and absent in others, so declaring them would describe a machine rather than the repository | Error |
+| DM-15 | Every newly added governed Markdown document declares a non-empty top-level steward. Existing documents remain non-blocking and are counted in the adoption baseline; closure requires a whole-tree count of zero missing stewards | Error for newly added documents; legacy census is advisory |
 
 ### 9.1 Verified versus unverified / 已验证与未验证
 
 | Rule | Machine-verified | Left to reviewers |
 |---|---|---|
-| DM-01..DM-09, DM-11..DM-14 | Full | — |
+| DM-01..DM-09, DM-11..DM-15 | Full | — |
 | DM-10 | Full (body hash, commit id pinned) | — |
 | DM-10 scope vocabulary | `approval_scope.type` is exactly `Full-document`; a narrower scope is not declarable because the hash covers the whole body either way | Whether whole-document approval matches what the approver meant (M-04) |
 | Body hash normalisation | CRLF/CR normalised to LF (checkout setting must not invalidate every approval); trailing spaces/tabs per line ignored; leading/trailing blank lines ignored; everything else, including leading spaces on a non-blank line, is compared byte-for-byte. Only these three equivalences apply: any other character, including Unicode line/paragraph separators, changes the hash | Whether that equivalence is too coarse for a given document |
@@ -455,3 +484,5 @@ Amendments require a `decision-record` role document, bilingual, approved by the
 | 1.21 | 2026-11-24 | `approval_scope.type` published three values and honoured one. Measured on the repository: 73 (now 81) declarations, every one `Full-document`; zero documents that are `Approved` and declare a narrower scope. And the two narrow values were not honoured in either direction — `Selected-sections` produced exactly the `DM-10` verdict `Full-document` produced for an edit *outside* the declared sections, and `included_sections: ['a title that appears in no document']` was accepted silently on an unchanged body. The declared scope was a sentence, not a boundary. No section identity exists to implement one, so the values are removed from the enumeration rather than reinterpreted: declaring `Selected-sections` or `Selected-assets` is now a `DM-03` error that names the value and says only `Full-document` is honoured. The now-dead `included_sections` / `included_assets` are refused when non-empty — every approved document already carries the empty placeholder the template writes, and an empty list claims nothing, so the 81 existing declarations keep their verdicts byte for byte. `Full-document` behaviour is unchanged: same body hash, same `DM-10`, proven by a control case. Ruled in `#833`. |
 | 1.22 | 2026-11-25 | `Pending-Reapproval` was a one-way state with no owner of its exit: `check_approval_binding()` has four exits and none of them fails because a document has sat in the state for a long time. Measured at `a3a62021`: 11 documents carry `modification_status: Pending-Reapproval`, all `decision_status: Approved` and all `usage_status: Active`, four of them `Canonical` + `Normative`. The state is not made drainable — `#481` already ruled that a blocker nobody can clear in one change gets disabled, not obeyed, and a documentation backlog must not become a merge blockade. Instead §4.3.1 states the missing semantics: the state may persist indefinitely, it is not a failure state, and the original assertion that an `Active` document in it “continues to bind” is superseded: binding force is determined solely by `normative_status`; `Pending-Reapproval` itself does not confer or extend binding force, and `usage_status: Active` does not make Informative content binding. 中文：原 1.22 关于 Active 文档在该状态下“继续具有约束力”的表述现已更正；约束力仅由 `normative_status` 决定，`Pending-Reapproval` 本身不赋予或延续约束力，`usage_status: Active` 也不会使 Informative 内容具有约束力。 `L1` says what invalidates an approval; it never said who restores it or by when, and the answer is that nobody is obliged to. The four `Canonical` documents are named there and their current state is explicitly accepted rather than re-approved: recomputing `approved_version` hashes would assert consent that cannot be verified. No gate, check, deadline or queue report is added. Ruled in `#996`. |
 | 1.23 | 2026-11-25 | Corrected §4.3.1 so binding force is determined by `normative_status`, not `usage_status`; `Active` does not make Informative content binding, and `Pending-Reapproval` does not change Normative/Informative classification. Clarified both languages and the rationale. Updated the historical 1.22 entry to preserve its original persistence decision while explicitly marking the Active-based binding assertion as superseded. The English and Chinese policy clauses and changelog clarification now state the same rule. Documentation-only; no schema, checker, or CI logic changed. Direction recorded in #1037 (Owner-specified decision date 2026-11-26; registered during the 2026-11-25 session). |
+
+| 1.24 | 2026-11-27 | Added DM-15 document stewardship. The schema declares an optional top-level steward for legacy compatibility; incremental checks require a non-empty steward only for newly added governed documents and print the repository-wide missing-steward adoption count. The migration closes only when a whole-tree census reports zero classified governed documents missing a steward. The field is named steward rather than owner because M-08 uses “Consumer owners” for downstream consumers. |

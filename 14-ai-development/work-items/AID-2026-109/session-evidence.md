@@ -72,3 +72,24 @@ document_metadata:
 - ZH-CN mirrors contain Chinese summaries plus retained English source text; full semantic translation parity remains NOT_VERIFIED.
 
 - Closeout PR synchronization: `git fetch origin main` fetched `7629b9de5e5832fe486ee72d101c4bc5121015e6`; latest INDEX maximum was AID-2026-110 and the AID-2026-109 row was preserved/replaced with its merged status. The sync merge preserves the concurrent main additions, including AID-2026-110 and the separate 04-memory-compiler files.
+
+
+## Session role / use case
+
+- Role: CORRECTOR for PR #1334's Session Evidence declaration and canonical AID-2026-109 evidence registration.
+- Attribution: user-authorized operator (delegated by account owner).
+- Date: 2026-11-27.
+- Use case: record the AI-assisted correction session for the existing AID-2026-109 scope-correction carrier; this is additive evidence, not a new work-item registration.
+
+## Actual AI input
+
+- The user assigned W5 to add the canonical session_evidence manifest entry and the three required sections to this file, correct PR #1334's Related issue(s) and AI-assisted declaration, synchronize with current main, pass the exact 16 required contexts, merge using the merge method, verify post-merge blobs, and comment on Issue #1332.
+- The user explicitly prohibited using reserved IDs 241–259, renumbering AID-2026-109, squash/rebase/force-push merges, branch-protection changes, Issue closure, and fabricated SHA or gate claims.
+- The user subsequently required all repository operations to use GitHub connector/API only, with no local work directory.
+
+## AI-visible output
+
+- Inspected PR #1334, its exact head, the current main reference, the AID-2026-109 manifest and session-evidence file, and GitHub Actions check runs through GitHub API reads.
+- Prepared this session record, a structured prompt snapshot, and the matching manifest session_evidence entry.
+- Updated the PR description to declare the real Issue #1332, AI-assisted work, and this evidence path.
+- No production code, runtime service, branch-protection setting, or Issue state was changed.
