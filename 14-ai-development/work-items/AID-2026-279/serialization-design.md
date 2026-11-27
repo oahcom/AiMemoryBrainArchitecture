@@ -71,15 +71,25 @@ maps each to the tree pair it actually means:
 
 | Event | `--base` | `--head` |
 |---|---|---|
-| `pull_request` | `github.event.pull_request.base.sha` | `github.event.pull_request.head.sha` |
-| `merge_group` (`checks_requested`) | `github.event.merge_group.base_sha` | `github.event.merge_group.head_sha` |
+| `pull_request` | refreshed `origin/main` SHA (not `event.pull_request.base.sha`) | `github.event.pull_request.head.sha` |
+| `merge_group` (`checks_requested`) | refreshed `origin/main` SHA | `github.event.merge_group.head_sha` |
 | `push` (main) | `github.event.before` | `github.event.after` |
 
-The step is a single `case` on `github.event_name`; an empty ref, the all-zero
-`before` of a first push, or an unknown event exits 2 before the checker runs.
-There is no fallback to `github.sha`, because `github.sha` on a `pull_request`
-event is the synthetic merge commit, which would hide exactly the conflict the
-gate exists to find.
+The target branch is refreshed with
+`git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main` in a step
+immediately before the decision step, and the SHA that fetch resolved is the
+only value the checker ever receives as `--base`. The step writes `base_sha` and
+`head_sha` to `$GITHUB_OUTPUT` so the pair used for the verdict is auditable
+from the run log. A failed fetch, an unresolvable `origin/main`, or a value that
+is not 40 hex characters exits 2 (INCOMPLETE) — there is no fallback to
+`github.event.pull_request.base.sha`, because a stale target is exactly the
+failure the gate exists to catch. (Semantics absorbed from #1422 / AID-2026-262,
+per the Owner ruling that #1413 is the single carrier of work-item uniqueness.)
+
+An empty ref, the all-zero `before` of a first push, or an unknown event also
+exits 2 before the checker runs. There is no fallback to `github.sha`, because
+`github.sha` on a `pull_request` event is the synthetic merge commit, which would
+hide exactly the conflict the gate exists to find.
 
 Both events call the same checker with the same semantics. The checker does not
 know which event produced its arguments, so a `merge_group` run and a
@@ -120,6 +130,11 @@ the merge base from the decision entirely.
 * No `continue-on-error`: a violation must fail the merge group.
 * `fetch-depth: 0` already present, so `--base`/`--head` are always resolvable
   locally; an unresolvable ref is exit 2, never a pass.
+* The refresh contract itself is asserted by
+  `scripts/ci/test_work_item_uniqueness.py` (`WorkflowRefreshContractTests`):
+  step order, the exact fetch refspec, `exit 2` on failure, the `$GITHUB_OUTPUT`
+  keys, and the absence of `pull_request.base.sha` in the decision step. A later
+  edit cannot quietly re-point `--base` at the stale event SHA.
 
 ## Why the merge queue is the serialization point
 

@@ -14,6 +14,7 @@ import unittest
 from pathlib import Path
 
 SCRIPT = Path(__file__).with_name("check_work_item_uniqueness.py")
+WORKFLOW = Path(__file__).resolve().parents[2] / ".github/workflows/document-management.yml"
 ITEM = "14-ai-development/work-items/AID-2026-279"
 OTHER = "14-ai-development/work-items/AID-2026-280"
 REGISTRY = "14-ai-development/work-items/registry/work-item-claims.yaml"
@@ -288,6 +289,45 @@ class WorkItemUniquenessTests(unittest.TestCase):
             result = invoke(repo, "--base", base, "--head", head)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertIn("new_ids=1", result.stdout)
+
+
+class WorkflowRefreshContractTests(unittest.TestCase):
+    """The refresh lives in the workflow: the checker cannot fetch for you.
+
+    A stale target is the failure mode, so the step order and the SHA that is
+    actually handed to the checker are part of the contract, not a detail.
+    """
+
+    def setUp(self):
+        self.text = WORKFLOW.read_text(encoding="utf-8")
+
+    def test_job_display_name_is_the_required_context(self):
+        self.assertIn("name: GOV-DOC-002 metadata checks", self.text)
+
+    def test_refresh_step_precedes_the_decision(self):
+        self.assertLess(
+            self.text.index("id: uniqueness-target"),
+            self.text.index("check_work_item_uniqueness.py"),
+        )
+
+    def test_refresh_fetches_the_target_and_fails_closed(self):
+        step = self.text[
+            self.text.index("id: uniqueness-target"):
+            self.text.index("check_work_item_uniqueness.py")
+        ]
+        self.assertIn("git fetch", step)
+        self.assertIn("+refs/heads/main:refs/remotes/origin/main", step)
+        self.assertIn("exit 2", step)
+        self.assertIn("base_sha=$BASE_SHA", step)
+        self.assertIn("head_sha=$HEAD_SHA", step)
+        self.assertIn('>> "$GITHUB_OUTPUT"', step)
+
+    def test_decision_reads_the_refreshed_sha_not_the_event_base(self):
+        start = self.text.index("name: Enforce work-item uniqueness")
+        enforce = self.text[start:self.text.index("name: Validate document metadata")]
+        self.assertIn("steps.uniqueness-target.outputs.base_sha", enforce)
+        self.assertIn("steps.uniqueness-target.outputs.head_sha", enforce)
+        self.assertNotIn("pull_request.base.sha", enforce)
 
 
 if __name__ == "__main__":

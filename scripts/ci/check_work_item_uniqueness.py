@@ -5,8 +5,11 @@ Both trees are read independently and completely:
 
   * ``--head`` is the candidate tree (the pull request head, the merge-group
     head, or ``github.event.after``).
-  * ``--base`` is the latest target-branch tree (the pull request base, the
-    merge-group base, or ``github.event.before``).
+  * ``--base`` is the latest target-branch tree. CI refreshes ``origin/main``
+    immediately before calling this and passes the refreshed SHA; the event's
+    ``pull_request.base.sha`` is not used, because a stale target is exactly the
+    failure this gate exists to catch. A ref that is not a full 40-hex commit
+    SHA is INCOMPLETE.
 
 Nothing about occupancy is inferred from a merge base. The previous version
 asked ``merge-base(base, head)`` what the candidate had "introduced"; once the

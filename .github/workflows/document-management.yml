@@ -40,35 +40,71 @@ jobs:
 
       # AID-2026-279: the same checker runs for all three event kinds, against
       # the tree pair that event actually means:
-      #   pull_request -> base.sha / head.sha
-      #   merge_group  -> merge_group.base_sha / merge_group.head_sha (merge-time
-      #                   re-evaluation: the queue head is replayed on the new base)
+      #   pull_request -> refreshed origin/main / head.sha
+      #   merge_group  -> refreshed origin/main / merge_group.head_sha
+      #                   (merge-time re-evaluation: the queue head is replayed
+      #                    on the new base)
       #   push         -> event.before / event.after
-      # Occupancy is read from the target tree itself, never from a merge base,
-      # so a stale pull_request base cannot let a second claim through. No paths
-      # filter and no continue-on-error: the check is a required context.
-      - name: Enforce work-item uniqueness against the current target base
+      # Occupancy is read from the target tree itself, never from a merge base.
+      # A pull_request base can be hours stale, and a stale target IS the failure
+      # mode: two branches each see a base without the id and each pass. So the
+      # target branch is fetched here, immediately before the decision, and the
+      # SHA that fetch produced is the only --base the checker ever sees. A failed
+      # fetch or an unusable SHA is INCOMPLETE (2); pull_request.base.sha is never
+      # used as a fallback. (Semantics absorbed from #1422 / AID-2026-262.)
+      # No paths filter and no continue-on-error: the check is a required context.
+      - name: Refresh the target branch immediately before the uniqueness decision
+        id: uniqueness-target
         env:
           EVENT_NAME: ${{ github.event_name }}
-          PR_BASE: ${{ github.event.pull_request.base.sha }}
           PR_HEAD: ${{ github.event.pull_request.head.sha }}
-          MG_BASE: ${{ github.event.merge_group.base_sha }}
           MG_HEAD: ${{ github.event.merge_group.head_sha }}
           PUSH_BEFORE: ${{ github.event.before }}
           PUSH_AFTER: ${{ github.event.after }}
         run: |
-          set -u
+          set -uo pipefail
           case "$EVENT_NAME" in
-            pull_request) BASE="$PR_BASE"; HEAD="$PR_HEAD" ;;
-            merge_group) BASE="$MG_BASE"; HEAD="$MG_HEAD" ;;
-            push) BASE="$PUSH_BEFORE"; HEAD="$PUSH_AFTER" ;;
+            pull_request) HEAD_SHA="$PR_HEAD" ;;
+            merge_group) HEAD_SHA="$MG_HEAD" ;;
+            push) HEAD_SHA="$PUSH_AFTER" ;;
             *) echo "::error::work-item uniqueness does not support event $EVENT_NAME"; exit 2 ;;
           esac
-          if [ -z "$BASE" ] || [ -z "$HEAD" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ]; then
-            echo "::error::work-item uniqueness has no usable base/head for $EVENT_NAME"
+          if [ "$EVENT_NAME" = "push" ]; then
+            BASE_SHA="$PUSH_BEFORE"
+          else
+            if ! git fetch --no-tags --quiet origin +refs/heads/main:refs/remotes/origin/main; then
+              echo "::error::cannot refresh origin/main; the uniqueness verdict is INCOMPLETE"
+              exit 2
+            fi
+            if ! BASE_SHA="$(git rev-parse --verify 'refs/remotes/origin/main^{commit}')"; then
+              echo "::error::cannot resolve the refreshed origin/main; the uniqueness verdict is INCOMPLETE"
+              exit 2
+            fi
+          fi
+          if ! [[ "$BASE_SHA" =~ ^[0-9a-fA-F]{40}$ ]] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            echo "::error::work-item uniqueness has no usable target base for $EVENT_NAME"
             exit 2
           fi
-          python3 scripts/ci/check_work_item_uniqueness.py --base "$BASE" --head "$HEAD"
+          if ! [[ "$HEAD_SHA" =~ ^[0-9a-fA-F]{40}$ ]]; then
+            echo "::error::work-item uniqueness has no usable candidate head for $EVENT_NAME"
+            exit 2
+          fi
+          {
+            echo "base_sha=$BASE_SHA"
+            echo "head_sha=$HEAD_SHA"
+          } >> "$GITHUB_OUTPUT"
+          echo "Uniqueness target (refreshed): $BASE_SHA"
+          echo "Uniqueness candidate: $HEAD_SHA"
+
+      - name: Enforce work-item uniqueness against the refreshed target base
+        env:
+          LATEST_TARGET_SHA: ${{ steps.uniqueness-target.outputs.base_sha }}
+          EXACT_CANDIDATE_SHA: ${{ steps.uniqueness-target.outputs.head_sha }}
+        run: |
+          set -euo pipefail
+          python3 scripts/ci/check_work_item_uniqueness.py \
+            --base "$LATEST_TARGET_SHA" \
+            --head "$EXACT_CANDIDATE_SHA"
 
       # Every governed file added or modified here must carry metadata. The
       # backlog stays unclassified; it may not grow. Both event kinds are
