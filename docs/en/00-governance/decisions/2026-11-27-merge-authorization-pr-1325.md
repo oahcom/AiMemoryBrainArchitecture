@@ -9,7 +9,7 @@ document_metadata:
       decision_date: "2026-11-27"
       approved_version:
         scheme: content-hash
-        value: "db3745d513da7b5e0d2e13eb6bd4d9e20ce54f5ff563b8bf013b5d5814f4b0a8"
+        value: "94ebd5f30999f5cd5fc39bec9a10dadb904f137a4c3457ab9c9f390a1459a36c"
       approval_scope:
         type: Full-document
       approval_applicability: Applicable-To-Current-Version
@@ -155,9 +155,10 @@ A readback item that cannot be produced is reported as `NOT_RECORDED`, not infer
 - **Stale measurement.** Every technical value in section 4 was measured before the branch
   refresh. Treating it as current after a refresh is the specific error this section exists to
   prevent.
-- **Measurement channel unavailable.** At publication time the GitHub API quota for this
-  workspace was exhausted (HTTP 403), so the section 4 values could not be re-measured here.
-  They are reported as previously measured, not as freshly verified.
+- **Measurement not repeated at publication.** The section 4 values were taken by W1 before this
+  record was published. An early API read in the publication session was refused with HTTP 403
+  (rate limit) and a later read in the same session succeeded; PR #1325's head was nevertheless
+  not re-measured, so every value here is previously measured, not freshly verified.
 
 ## 8. Audit fields
 
