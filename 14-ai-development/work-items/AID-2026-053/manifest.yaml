@@ -121,3 +121,11 @@ findings:
 notes:
   - "The four non-contract EvidenceKind values are removed, not remapped. Message is not mapped to source_span on name similarity: register 026 §5.4 forbids it, and the two mean different things even though both are about utterances."
   - "Existing fixtures that construct EvidenceKind::Document or EvidenceAvailability::Available are valid under both the old and the new spelling of the variant identifier; only the serialized form changes, so those fixtures are edited only where they assert a string literal."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-053/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/adr/OWNER-DECISION-EVIDENCE-CONTRACT-001.md"
+    relationship: reference
+  - path: "14-ai-development/governance-register/GOV-NC-2026-11-22-EVIDENCE-CONTRACT-026.md"
+    relationship: reference

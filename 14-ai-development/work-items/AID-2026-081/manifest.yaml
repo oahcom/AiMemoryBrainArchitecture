@@ -161,3 +161,13 @@ session_evidence:
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-081/session-evidence-1081.md
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-081/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-081/session-evidence-1081.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference
+  - path: "14-ai-development/ci-gates-and-ratchets.en.md"
+    relationship: reference

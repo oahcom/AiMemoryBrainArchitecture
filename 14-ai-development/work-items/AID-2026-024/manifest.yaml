@@ -412,3 +412,7 @@ final_registration_disposition:
   product_value: "NOT_DEMONSTRATED"
   performance_readiness: "NOT_MEASURED"
   coordinator_action_required: true
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-024/prompt-v2.md"
+    relationship: reference

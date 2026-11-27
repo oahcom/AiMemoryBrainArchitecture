@@ -350,3 +350,15 @@ session_evidence:
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-056/session-evidence-266-round5.md
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-056/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/adr/OWNER-DECISION-EMBEDDED-BILINGUAL-001.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/GAP-26-SEVEN-NORMATIVE-ROOTS-DO-NOT-EXIST.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/GAP-28-TWO-CHECKS-ONE-BASELINE.md"
+    relationship: reference
+  - path: "00-governance/bilingual-documentation-policy.md"
+    relationship: reference
