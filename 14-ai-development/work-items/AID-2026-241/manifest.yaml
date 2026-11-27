@@ -1,72 +1,161 @@
 work_item_id: AID-2026-241
+title: >-
+  Correct M-02 claims, align Security Governance status descriptions, and register
+  unresolved source revision pointer and verification-scope debt
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  Documentation and metadata registration only. No source revision checker logic is changed,
+  no workflow is modified, no required context is added, and no claim is made that unresolved
+  translation pointers are accurate. Existing validation semantics are preserved.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
 base_commit_sha: 788fbc011877a14976fc0a974ffe2e013dd9991b
-
-title: "Document management claims, canonical status consistency, and source revision pointer debt"
-
+prompt_status: NOT_RECORDED
+prompt_provenance: DISPATCHED_TASK_FILE
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: 788fbc011877a14976fc0a974ffe2e013dd9991b
+  assigned_id: AID-2026-241
+  allocation_rule: >-
+    The work-item identifier was explicitly assigned by the task instructions. No allocation
+    or availability claim beyond that assignment is made.
+  observed_occupied: []
+  recheck_rule: >-
+    Recheck the main tree, open pull requests and remote branch names immediately before merge.
+    If the identifier is occupied, stop and obtain a new authorized identifier before proceeding.
 scope:
-  objective: >
-    Correct demonstrably inaccurate document-management claims and
-    canonical-status descriptions without weakening validation logic.
-    Preserve honest source-revision semantics and explicitly register
-    unresolved pointer and verification-status debt.
-  in_scope:
-    - scripts/check_document_management.py
-    - docs/en/09-security-governance/README.md
-    - docs/zh-CN/09-security-governance/README.md
-    - 14-ai-development/work-items/AID-2026-241/evidence.md
-    - docs/en/00-governance/design-principles.md
-    - docs/zh-CN/00-governance/design-principles.md
-    - docs/en/01-system-architecture/responsibility-matrix.md
-    - docs/zh-CN/01-system-architecture/responsibility-matrix.md
-    - docs/en/01-system-architecture/system-architecture-specification.md
-    - docs/zh-CN/01-system-architecture/system-architecture-specification.md
-    - docs/en/01-system-architecture/system-boundaries.md
-    - docs/zh-CN/01-system-architecture/system-boundaries.md
-    - docs/en/01-system-architecture/forget-fence-and-completion-contract.md
-    - docs/zh-CN/01-system-architecture/forget-fence-and-completion-contract.md
-    - docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md
-    - docs/zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate.md
-    - docs/en/03-memory-brain/memory-brain-guide.md
-    - docs/zh-CN/03-memory-brain/memory-brain-guide.md
-    - 14-ai-development/work-items/AID-2026-113/restore-evidence.md
-    - TODO_AID_2026_113_EN_MIRROR_PATH
-    - TODO_AID_2026_113_ZH_MIRROR_PATH
-  out_of_scope:
-    - Changing source revision pointer checker logic
-    - Connecting the pointer checker to any workflow
-    - Declaring unsynchronized translations synchronized
-    - Inventing or inferring blob identities
-    - Changing unrelated governance decisions
-    - TODO_OUT_OF_SCOPE_DETAILS
-
-declared_exceptions:
-  - "The source revision pointer checker remains unwired."
-  - "Eight stale EN/ZH mirror pointers remain explicitly registered as debt."
-  - "Six non-blob source revision references remain explicitly registered as debt."
-  - "AID-2026-113 requires synchronized correction of verification status and Correction wording."
-  - TODO_ADDITIONAL_EXCEPTIONS
-
-prohibitions:
-  - "Do not relax source revision pointer validation."
-  - "Do not fabricate blob identities."
-  - "Do not equate source-body blobs with canonical-root blobs."
-  - "Do not claim translation synchronization without evidence."
-  - "Do not claim an approval exists merely because a record has Approved status."
-  - "Do not modify policy tables independently of their generating source."
-  - "Do not claim repository operations were performed without execution evidence."
-  - TODO_ADDITIONAL_PROHIBITIONS
-
-status: TODO_STATUS
-owner: TODO_OWNER
-created_at: TODO_CREATED_AT
-updated_at: TODO_UPDATED_AT
-verification_status: TODO_VERIFICATION_STATUS
-acceptance_criteria:
-  - TODO_ACCEPTANCE_CRITERION_1
-  - TODO_ACCEPTANCE_CRITERION_2
-  - TODO_ACCEPTANCE_CRITERION_3
-verification:
-  commands:
-    - TODO_VERIFICATION_COMMAND_1
-    - TODO_VERIFICATION_COMMAND_2
-  results: TODO_VERIFICATION_RESULTS
+  objective: >-
+    Correct inaccurate document-management claims and canonical-status descriptions, preserve
+    honest source-revision provenance, and document the limited verification coverage of
+    AID-2026-113 without weakening checkers or claiming unperformed validation.
+  changes:
+    - path: "scripts/check_document_management.py"
+      detail: >-
+        Corrects the two M-02 descriptive strings to state the actual checks: decision_status
+        enumeration, approved_version and approval_scope binding for Approved, and DM-10 body
+        hash binding. Explicitly states that approver and decision_date are not required and
+        that the gate does not verify that any approval exists. No decision logic is changed.
+    - path: "docs/en/09-security-governance/README.md"
+      detail: >-
+        Aligns the five documents' status description with canonical_status: Canonical in
+        their respective frontmatter and states that each frontmatter is the sole authority.
+        The README is explicitly informational, not normative.
+    - path: "docs/zh-CN/09-security-governance/README.md"
+      detail: >-
+        Provides the semantically equivalent Chinese status, authority and disclaimer wording.
+        The misplaced English paragraph is replaced with Chinese wording.
+    - path: "05-memory-runtime/README.md"
+      detail: "Adds an index-only navigation line; it does not assert normative status."
+    - path: "docs/en/05-memory-runtime/README.md"
+      detail: "Adds the equivalent English navigation line."
+    - path: "docs/zh-CN/05-memory-runtime/README.md"
+      detail: "Adds the equivalent Chinese navigation line."
+    - path: "14-ai-development/work-items/AID-2026-113/restore-evidence.md"
+      detail: >-
+        Retains verification_status: Verified and narrows last_verification_note to exclude
+        the unverified new-blob identity columns.
+    - path: "docs/en/14-ai-development/work-items/AID-2026-113/restore-evidence.md"
+      detail: "Applies the equivalent English verification-scope clarification."
+    - path: "docs/zh-CN/14-ai-development/work-items/AID-2026-113/restore-evidence.md"
+      detail: "Applies the equivalent Chinese verification-scope clarification."
+    - path: "14-ai-development/work-items/AID-2026-241/evidence.md"
+      detail: "Records the supplied baseline measurements, adjudications, scope and limitations."
+    - path: "14-ai-development/work-items/AID-2026-241/evidence-05-index.md"
+      detail: "Records the work-record role comparison, indexing adjudication and deletion-proof observations."
+    - path: "14-ai-development/work-items/AID-2026-241/session-evidence.md"
+      detail: "Records the AI session role, actual input and AI-visible output."
+    - path: "14-ai-development/work-items/INDEX.md"
+      detail: "Adds the AID-2026-241 work-item registry row."
+  untouched:
+    - "scripts/check_source_revision_pointers.py and its strict failure semantics"
+    - "all workflow files, including repository-hygiene.yml"
+    - "scripts/ci/baselines/source-revision-pointers.txt (not introduced)"
+    - "scripts/ci/baselines/gate-wiring.txt"
+    - "all 14 source revision pointer declarations identified as debt"
+    - "all policy tables generated from MANUAL_CONTROLS"
+evidence:
+  record: 14-ai-development/work-items/AID-2026-241/evidence.md
+  mirrors: []
+  measured_at: ce3d7cb8
+  measured_at_note: >-
+    Working-tree measurements supplied for branch HEAD ce3d7cb8. No CI result, merge SHA,
+    post-merge result or main-branch verification is claimed.
+  measurements:
+    document_management_require_changed: "exit 1; DM-01 missing document_metadata block in evidence.md and evidence-05-index.md"
+    bilingual_docs: "exit 1; only reported reason is missing BILINGUAL-MANIFEST: COMPLETE or approved exception for changed 05-memory-runtime/README.md"
+    bilingual_baseline: "77 frozen, 0 new gaps"
+    source_revision_pointers: "50 pointers; 16 accurate; 8 stale; 26 dereferenced; 0 bad dereferences; 6 non-blob references; 14 BAD; exit 1"
+    branch_head: "ce3d7cb8"
+    base_commit: "788fbc011877a14976fc0a974ffe2e013dd9991b"
+  local_runs:
+    - command: "python scripts/check_document_management.py --require-changed origin/main"
+      result: "Exit 1; DM-01 missing document_metadata blocks in the two AID-2026-241 evidence records."
+    - command: "python scripts/check_bilingual_docs.py"
+      result: "Exit 1; missing BILINGUAL-MANIFEST: COMPLETE or fully documented approved exception for 05-memory-runtime/README.md; 77 frozen, 0 new gaps."
+    - command: "python scripts/check_source_revision_pointers.py"
+      result: "POINTERS=50 ACCURATE=16 STALE=8 DEREFERENCED=26 BAD_DEREFERENCE=0 NON_BLOB_REFERENCE=6 BAD=14; exit 1."
+  not_measured:
+    - "No CI result is claimed."
+    - "No PR check result is claimed."
+    - "No merge SHA is claimed."
+    - "No post-merge verification is claimed."
+    - "No workflow integration or required-context change is claimed."
+implementation:
+  status: NOT_STARTED
+  pull_request: PENDING
+  merge_commit_sha: NOT_MERGED
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#1212"
+    implementing_ai_session: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "NOT_RECORDED"
+    executed_prompt_sha256: "NOT_RECORDED"
+    executed_prompt_bytes: 0
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "RECORDED_IN_SESSION_EVIDENCE_FILE"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-241/session-evidence.md"
+non_goals:
+  - "Changing source revision pointer checker logic"
+  - "Connecting source revision pointer checking to any workflow"
+  - "Adding a source revision pointer baseline or ratchet"
+  - "Declaring unsynchronized translations synchronized"
+  - "Inventing or inferring blob identities"
+  - "Changing unrelated governance decisions"
+  - "Claiming CI, PR, merge or post-merge success without evidence"
+notes:
+  - >-
+    The source revision pointer checker reports 14 BAD findings in the supplied working tree.
+    The adjudication is to preserve its strict behavior and leave it unwired. The eight stale
+    mirror pointers and six non-blob references remain explicit unresolved debt; no declared
+    revision is rewritten to manufacture synchronization provenance.
+  - >-
+    AID-2026-113 retains verification_status: Verified. Its last_verification_note is narrowed
+    to exclude the two tables' new-blob identity columns, whose status remains
+    NEW_BLOB_IDENTITIES_NOT_VERIFIABLE.
+  - >-
+    The three 05-memory-runtime README files receive equivalent navigation-only additions.
+    They are not asserted to be normative documents by those additions.
+carrier:
+  branch: NOT_RECORDED
+  pull_request: null
+  merge_sha: null
+  merge_method: NOT_RECORDED
+  required_contexts: "NOT_RECORDED; no required-context claim is made"
+  merge_authorization: >-
+    Only after all required contexts succeed on the exact final PR head and branch freshness
+    is rechecked. No merge authorization is asserted by this manifest.
+review:
+  status: NOT_ASSIGNED
+  independent_reviewer: NOT_ASSIGNED
+  natural_person_owner_acceptance: NOT_RECORDED
+acceptance:
+  gate: PENDING
