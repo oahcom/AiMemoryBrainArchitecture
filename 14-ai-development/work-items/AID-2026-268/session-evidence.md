@@ -53,7 +53,7 @@ Implement Issue #1350 blob-pin integrity verification through GitHub API only, w
 
 ## Actual AI input
 
-The user supplied the complete S6-B implementation contract for Issue #1350, including field classes, Git-blob and prompt-hash semantics, exit codes, workflow placement, negative fixtures, evidence requirements, ownership restrictions, and merge constraints.
+The actual user input included the following instructions (verbatim excerpts): “你是实现会话 S6-B。唯一任务：把 Issue #1350 落成 blob-pin 完整性校验”；“只能走 GitHub API：读树、读 blob、建分支、写文件、开 PR、合并”；“跨 commit pin：在声明的那个 commit 上解析；该 commit 取不到 → INCOMPLETE，不是 PASS”；“退出码 0 PASS / 1 VIOLATION / 2 INCOMPLETE”。 The recorded prompt excerpt is in prompt-snapshot.md; it is not a byte-for-byte export of the full chat input, so the manifest marks provenance NOT_VERIFIED.
 
 ## AI-visible output
 
