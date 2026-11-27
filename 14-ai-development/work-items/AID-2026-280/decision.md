@@ -53,7 +53,7 @@ document_metadata:
 
 AC8 remains in REQ-04 for now because its text remains in the canonical Issue body and no effective, authorized scope change has been established. AID-2026-260 contains an EXIT-2 exclusion paragraph, but its own metadata marks it Unverified, Draft, Informative, and explicitly not a natural-person Owner signature. Issue #305 states that a session may not appoint itself or treat transcription of operational instructions as a constitutive delegation instrument. Thus the proxy scope statement cannot discharge AC1's OWNER_ACTION or lawfully change the Issue acceptance boundary.
 
-AID-2026-254 does not satisfy AC8. Its declared root/domain fan-out is a reproducible scope-dispersion proxy, not direct measurement of elapsed attention time, human session/context transitions, reorientation cost, cognitive load, or Agent context-window/token cost. Its own evidence expressly disclaims several of those measurements. Keep it intact as an optional observation; do not represent it as an AC8 pass.
+AID-2026-254 does not satisfy AC8. Its own evidence.md:111 says verbatim: “Thresholds are proposed for AC8 review; Issue #265 remains open and unchanged.” The AID-2026-254 row in INDEX.md independently labels the acceptance state “PENDING — thresholds are proposed for AC8 review; Issue #265 remains OPEN.” Its own carrier therefore declares proposal/review-pending status, not acceptance. Separately, its declared root/domain fan-out is a reproducible scope-dispersion proxy, not direct measurement of elapsed attention time, human session/context transitions, reorientation cost, cognitive load, or Agent context-window/token cost. Keep it intact as an optional observation; do not represent it as an AC8 pass.
 
 ## Q1 — Can AC1 scope confirmation exclude an AC listed by the Issue?
 
@@ -65,7 +65,7 @@ AID-2026-254 does not satisfy AC8. Its declared root/domain fan-out is a reprodu
 
 For an exclusion to be a legitimate scope decision rather than post-hoc deletion, all of the following are required:
 1. The Issue's own text or a higher valid governance instrument authorizes the exclusion route.
-2. The decision is made by the authority actually empowered to confirm scope; a proxy record must point to an independently effective delegation instrument. A session cannot appoint itself.
+2. The decision is made by the authority actually empowered to confirm scope; a proxy record must point to an independently effective delegation instrument. A session cannot appoint itself. The contemporaneous AC8 ABSENT decision comment #7193586920:51 states: “本轮协调会话按 #305 / `7042461592` §1(2) 可代行 Owner 职责，但**代行的边界是「把决定执行到位」，不是「替它决定范围」**。范围边界是 REQ-04 自己的验收定义，改它就是改需求。” This is direct evidence that operational delegation does not authorize changing REQ-04's acceptance scope.
 3. The canonical Issue body is amended so the acceptance list and exclusion statement agree; a comment alone is not a body amendment.
 4. The exclusion states a reason, exact excluded dimension, boundary, and effective date/ref.
 5. It provides an explicit alternative disposition: a separate work-item carrier, an explicitly out-of-scope observation, or a named residual decision path. “Not required” must not erase where the topic went.
@@ -106,7 +106,7 @@ Concrete follow-up required before AC8 can be marked satisfied:
 4. **Record Agent context cost separately:** context-window/token usage and reset/handoff counts only where reliable platform telemetry exists; otherwise mark NOT_MEASURED, never infer from path count.
 5. **Provide a reproducible read-only command** (proposed interface, not implemented): `python3 scripts/measure_attention_context_cost.py --ref <commit> --cohort <N> --session-ledger <path> --format json`. Output must include cohort definition, missing-data counts, per-unit distributions, and exact source refs.
 6. **Set thresholds from a declared baseline:** retain root fan-out ≤3 as an operational scope proxy only; derive human transition/reorientation soft threshold at the baseline p75 and hard threshold at p95 (or a separately approved absolute cap), publish sample size and confidence/limitations, and define split/escalation handling. Agent token thresholds must be separate.
-7. **Evidence and review:** capture at least one reproducible cohort, independently recompute it from committed evidence, document limitations, and obtain the authority required to accept AC8. Until then AC8 remains [ ] PARTIAL.
+7. **Evidence and review:** capture at least one reproducible cohort, independently recompute it from committed evidence, document limitations, and obtain the authority required to accept AC8. Until then AC8 remains [ ] ABSENT.
 
 ## Q5 — Single ruling
 
@@ -119,7 +119,7 @@ AID-2026-254 remains unchanged as an informative, optional fan-out measurement a
 **AC8 (proposed canonical body line):**
 
 ```text
-- [ ] Attention and context-switching costs are considered. / 考虑注意力和上下文切换成本。 — **PARTIAL**：AID-2026-254 的 declared root/domain fan-out 仅为 manifest scope-dispersion 代理指标，不直接测量耗时、人工上下文切换/重定向成本、认知负荷或 Agent context-window/token 成本；AC8 仍在 REQ-04 范围内，须补充分单位、可复算的实际测量与基线阈值，并经授权验收。carrier: AID-2026-254（可选代理观测，非 AC8 验收载体）；直接测量 carrier: NO_CARRIER_FOUND
+- [ ] Attention and context-switching costs are considered. / 考虑注意力和上下文切换成本。 — **ABSENT**：AID-2026-254 的 declared root/domain fan-out 是可复算的 scope-dispersion 代理指标，但不测量注意力耗时、人工上下文切换/重定向成本、认知负荷或 Agent context-window/token 成本；按 comment #7193586920 的 ABSENT 判据，该代理指标未记录 AC8 所要求的成本维度本身。AC8 仍在 REQ-04 范围内，须补充分单位、可复算的实际测量与基线阈值，并经授权验收。carrier: AID-2026-254（已复算的可选代理观测，非 AC8 验收载体）；直接测量 carrier: NO_CARRIER_FOUND
 ```
 
 **AC1 (retain as canonical body line):**
@@ -134,12 +134,16 @@ Use [ ] for both: AC8 is not satisfied and AC1 remains an Owner action. Do not u
 
 | ID | Existing carrier / location | Required correction or disposition |
 |---|---|---|
-| C1 | Issue #265 body AC8 line vs comment 7209840981 | **Do not treat the comment's proposed [x] line as an Issue-body edit.** New adjudication comment records the [ ] PARTIAL line; canonical body remains unchanged pending authorized body update. |
-| C2 | Comment 7209840981 AC8 line | The [x] marker is semantically wrong for an excluded or unsatisfied criterion. Replace in any future canonical body transcription with [ ] PARTIAL (line above); do not edit the historical comment. |
+| C1 | Issue #265 body AC8 line vs comment 7209840981 | **Do not treat the comment's proposed [x] line as an Issue-body edit.** The canonical body remains [ ] ABSENT; this decision records the same [ ] ABSENT status and does not claim a body edit. |
+| C2 | Comment 7209840981 AC8 line | The [x] marker is semantically wrong for an excluded or unsatisfied criterion. Replace in any future canonical body transcription with [ ] ABSENT (line above); do not edit the historical comment. |
 | C3 | Issue #265 AC1 line vs AID-260 “resolves AC1” claim | Keep AC1 [ ] OWNER_ACTION. AID-260's statement that it resolves AC1 must be qualified as a proxy proposal, not effective scope confirmation, until a valid delegation/Owner act exists. |
-| C4 | AID-254 manifest line 2/objective and evidence.md:56,61 | Preserve the measurement and its disclaimer. Clarify its title/objective as “declared root/domain fan-out proxy for work-scope dispersion”; do not claim it measures cognitive load or actual context-switch cost. This correction belongs to the AID-254 maintainers, not this work item's file scope. |
+| C4 | AID-254 manifest line 2/objective and evidence.md:56,61 | Preserve the measurement and its disclaimer. Clarify its title/objective as “declared root/domain fan-out proxy for work-scope dispersion”; do not claim it measures cognitive load or actual context-switch cost. Its own evidence.md:111 says “Thresholds are proposed for AC8 review; Issue #265 remains open and unchanged,” and INDEX acceptance cell says “PENDING — thresholds are proposed for AC8 review; Issue #265 remains OPEN.” Preserve these as explicit pending/non-acceptance statements. The independent rerun confirms all 15 §2 output lines; arithmetic is not disputed. This correction belongs to the AID-254 maintainers, not this work item's file scope. |
 | C5 | AID-260 scope-confirmation.md:69 | The sentence “no AID-2026-261 cost-measurement carrier is required” is unsupported and names an ID occupied by an unrelated governance-traceability item. Replace with “No AC8 direct-measurement carrier has been assigned; AID-2026-261 is unrelated.” |
 | C6 | AID-260 scope-confirmation.md:86 | The issue-ready exclusion line is malformed (leading § and enclosing backticks). If retained as a proposal, rewrite as a plain blockquote beginning `>` and remove the enclosing backticks; it is not adopted by this B ruling. |
+
+### Additional EXIT-2 completion-condition finding (S4)
+
+AID-2026-260/scope-confirmation.md:92, blob `e6425787d2ae3c8aa3e2eb21e1adf7cc1542611a`, states as step 1: “1. Merge this AID-2026-260 scope carrier and publish the AC1/AC8 issue update.” The carrier was merged, but the prescribed Issue update was never published in the canonical #265 body: AC1 remains [ ] OWNER_ACTION and AC8 remains [ ] ABSENT. This is a separate incomplete condition in EXIT-2's own sequencing, in addition to the authority defect. Accordingly, C1/C3 remain unresolved in the canonical Issue body; EXIT-2 has not completed its own stated sequence.
 
 ## Explicit Issue-body disposition
 
