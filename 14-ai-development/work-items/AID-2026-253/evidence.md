@@ -62,7 +62,7 @@ document_metadata:
 
 ## CF closure evaluation
 
-Only the pre-existing CF-010 limited status is retained. No other closure condition is promoted because the required accountable-owner decision, source correction, exact version pin, executable acceptance evidence, or restore/conformance evidence is absent from the evidence inspected for this work.
+Only CF-006 and CF-010 meet their own bounded closure conditions. CF-006 is supported by an approved Owner-delegated semantic/identity decision on main; downstream schema/consumer freeze is explicitly excluded. The other 14 rows remain unresolved because their own closure evidence is absent.
 
 | CF | Prior status | Resulting status | Closure condition not met / evidence still missing |
 |---|---|---|---|
@@ -71,7 +71,7 @@ Only the pre-existing CF-010 limited status is retained. No other closure condit
 | CF-003 | OPEN | OPEN | H Owner's explicit canonical-path confirmation and governance portal-map update. |
 | CF-004 | OPEN | OPEN | I Owner's canonical-directory decision and disposition of the alternate directory/copies. |
 | CF-005 | OPEN | OPEN | Storage canonical source index, exact L1/L4 status pins and owner acceptance. |
-| CF-006 | ADR-BLOCKED | ADR-BLOCKED | Explicit governance decision resolving the Fact/Claim conflict and exact downstream schema/consumer acceptance. |
+| CF-006 | ADR-BLOCKED | RECONCILED — SEMANTIC/IDENTITY DECISION ONLY | Main contains approved OWNER-DECISION-FACT-CLAIM-001.md, blob 2225dcb469db37dbebe8d8bab202f3ea4f8b600b, approved version 003fa0063e1e359bc91de8c2950366f757bd1210; Issue #305 comment 7042461592 is the Owner delegation instrument. The decision resolves separate Fact attestation / Claim proposition and I1 stable Claim identity with immutable revisions. Schema, DDL, API, wire and runtime implementation are expressly not frozen and remain outside this bounded closure. |
 | CF-007 | OPEN | OPEN | D/Storage row ownership, selected engine/profile and crash/failover/restore evidence. |
 | CF-008 | P0 OPEN | P0 OPEN | Closed-world target inventory, barrier semantics, evidence joins and restore proof accepted by D/I/Storage. |
 | CF-009 | OPEN | OPEN | Exact H commit ancestry, branch ref, tree digest and restoration record tying incident and restored tree. |
@@ -85,8 +85,8 @@ Only the pre-existing CF-010 limited status is retained. No other closure condit
 
 ### Reconciliation count
 
-- RECONCILED: 1/16 (6.25%), limited to CF-010 tree currentness.
-- Unresolved: 15/16.
+- RECONCILED: 2/16 (12.5%): CF-006 semantic/identity decision only and CF-010 tree currentness only.
+- Unresolved: 14/16.
 - Register status therefore remains DRAFT / OPEN REGISTER / NON-NORMATIVE.
 - No newly satisfied closure condition was found; consequently no new RECONCILED command/output is claimed. The existing CF-010 status is retained exactly within its stated scope, not widened.
 
@@ -99,6 +99,8 @@ Four decision records are added under the existing ADR directory:
 3. Cedar PDP — DEFER production adoption pending I-owned fail-closed wrapper vectors, revocation tests and explicit I approval.
 4. Tantivy — DEFER — NOT REJECTED; reopen only on measured failure of LIKE/FTS5 thresholds or a requirement they cannot satisfy.
 
+AC4 disposition: SATISFIED for the consideration criterion only. Four explicit, reasoned dispositions with reopen triggers exist; none selects a production implementation.
+
 Each record states a concrete reopen trigger and authority boundary. These are delegated proxy dispositions, not natural-person Owner signatures and not production approvals.
 
 ## GitHub-observed evidence and limits
@@ -107,3 +109,21 @@ Each record states a concrete reopen trigger and authority boundary. These are d
 - The Issue #265 body explicitly says AC3 is PARTIAL with only CF-010 reconciled and AC4 is PARTIAL; its body was not changed.
 - The current register's closure conditions were evaluated literally. No evidence was invented for absent Owner decisions, implementation acceptance, CI runs, or restore tests.
 - Branch protection state and the repository's complete 16 required-context list are not exposed by the GitHub connector actions available in this session. They must not be represented as verified.
+
+
+### CF-006 command and output
+
+Command/API readback:
+GET /repos/oahcom/AiMemoryBrainArchitecture/contents/14-ai-development/adr/OWNER-DECISION-FACT-CLAIM-001.md?ref=main
+
+Observed:
+- blob SHA: 2225dcb469db37dbebe8d8bab202f3ea4f8b600b
+- decision_status: Approved
+- approved_version: 003fa0063e1e359bc91de8c2950366f757bd1210
+
+Authority readback:
+GET /repos/oahcom/AiMemoryBrainArchitecture/issues/comments/7042461592
+- author association: OWNER
+- effect: Owner delegation instrument for acceptance_authority
+
+Bounded reconciliation: semantic and identity decision only; downstream schema, DDL, API, wire and runtime implementation remain unfrozen.
