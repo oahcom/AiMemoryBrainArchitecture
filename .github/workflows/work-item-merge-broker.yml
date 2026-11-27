@@ -1,0 +1,206 @@
+name: Work-item merge broker
+
+# AID-2026-262 / issue #1341, Option (d) as selected in #1331.
+#
+# A work-item id is allocated on a branch, so two branches can introduce the
+# same `14-ai-development/work-items/AID-2026-NNN/` directory and only discover
+# it at merge time as an add/add conflict no reviewer can resolve mechanically.
+# Branch-local validation cannot see a sibling claim: the base it reads is its
+# own, not the branch the merge will land on. This workflow moves the decision
+# to the merge boundary, which is the only point that sees both.
+#
+# BROKER_SERIALIZATION_UNPROVEN
+#   This workflow serialises *its own* runs (`concurrency` below) and re-reads
+#   main before every merge. It cannot make itself the only path into `main`:
+#   that requires branch protection to require this check, and changing branch
+#   protection is out of scope for this change (AID-2026-262 declares
+#   `branch protection` out of scope). Until a rule requires this context and
+#   forbids the other merge paths, a merge that bypasses the broker is still
+#   possible, so the concurrency-uniqueness guarantee is NOT established by
+#   this file alone. Do not read a green run here as proof of serialization.
+#
+#   What the run does establish: every pull request it merges was judged against
+#   the main it was merged into, with the head SHA pinned in the merge call, and
+#   two broker runs cannot overlap. See AID-2026-262/evidence.md for the split
+#   between what was measured and what remains unproven.
+#
+# `pull_request` (not `pull_request_target`): the label is applied by a
+# maintainer, the token is the pull request's own, and no untrusted head code is
+# executed -- the broker checks out `main` and only reads the head as a git
+# object. A fork pull request gets a read-only token on this event, so it cannot
+# be merged by this path; that is a known limitation, recorded in the evidence.
+
+on:
+  pull_request:
+    types: [labeled]
+  workflow_dispatch:
+
+concurrency:
+  group: main-work-item-merge-broker
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  broker:
+    name: Serialized work-item merge broker
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.label.name == 'merge-ready'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout main with full history
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Self-check the broker and the uniqueness gate
+        run: |
+          python3 scripts/ci/test_work_item_uniqueness.py
+          python3 scripts/ci/test_work_item_merge_broker.py
+
+      - name: Merge every ready pull request, one at a time
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          BROKER_LABEL: merge-ready
+        run: |
+          set -uo pipefail
+
+          git config user.name "work-item-merge-broker"
+          git config user.email "work-item-merge-broker@users.noreply.github.com"
+
+          label="${BROKER_LABEL:-merge-ready}"
+          merged=0
+          failed=0
+          rejected=0
+
+          # The triggering event is used for one thing only: deciding to run.
+          # The candidate list is re-enumerated here, so a run that starts late
+          # sees the pull requests that exist now, not the ones that existed
+          # when the label was applied.
+          prs=$(gh pr list --repo "$REPO" --state open --label "$label" \
+                  --limit 100 --json number --jq 'sort_by(.number) | .[].number')
+
+          if [ -z "${prs}" ]; then
+            echo "no open pull request carries the '${label}' label"
+            exit 0
+          fi
+
+          for pr in ${prs}; do
+            echo "::group::PR #${pr}"
+
+            # Re-read every fact for this pull request. Nothing is carried over
+            # from the previous iteration or from the triggering event.
+            git fetch --quiet origin main
+            git fetch --quiet origin "+refs/pull/${pr}/head:refs/remotes/broker/pr-${pr}" || {
+              echo "::warning::PR #${pr}: cannot fetch refs/pull/${pr}/head; skipping"
+              failed=$((failed + 1)); echo "::endgroup::"; continue; }
+
+            base_sha=$(git rev-parse origin/main)
+            head_sha=$(git rev-parse "refs/remotes/broker/pr-${pr}")
+
+            meta=$(gh pr view "${pr}" --repo "$REPO" \
+                     --json headRefOid,isDraft,baseRefName \
+                     --jq '[.headRefOid, .isDraft, .baseRefName] | @tsv') || {
+              echo "::warning::PR #${pr}: cannot read pull request metadata; skipping"
+              failed=$((failed + 1)); echo "::endgroup::"; continue; }
+            api_head=$(printf '%s' "${meta}" | cut -f1)
+            is_draft=$(printf '%s' "${meta}" | cut -f2)
+            base_ref=$(printf '%s' "${meta}" | cut -f3)
+
+            if [ "${is_draft}" = "true" ]; then
+              echo "skip: draft"; echo "::endgroup::"; continue
+            fi
+            if [ "${base_ref}" != "main" ]; then
+              echo "skip: base is '${base_ref}', not main"; echo "::endgroup::"; continue
+            fi
+            if [ "${api_head}" != "${head_sha}" ]; then
+              echo "::warning::PR #${pr}: head moved while reading (${api_head} != ${head_sha}); next run will judge the new head"
+              echo "::endgroup::"; continue
+            fi
+
+            pr_base=$(git merge-base "${base_sha}" "${head_sha}") || {
+              echo "::error::PR #${pr}: no merge base with main; cannot decide"
+              failed=$((failed + 1)); echo "::endgroup::"; continue; }
+
+            # The merge candidate, computed against the main that exists now --
+            # not refs/pull/N/merge, which GitHub may have built against an
+            # older base, and not the branch's own base.
+            if ! tree=$(git merge-tree --write-tree --no-messages "${base_sha}" "${head_sha}"); then
+              echo "REJECT PR #${pr}: the merge candidate conflicts with ${base_sha}; nothing to judge"
+              rejected=$((rejected + 1)); echo "::endgroup::"; continue
+            fi
+
+            echo "base=${base_sha} head=${head_sha} pr_base=${pr_base} candidate=${tree}"
+
+            rc=0
+            python3 scripts/ci/check_work_item_uniqueness.py \
+              --base "${base_sha}" --head "${head_sha}" || rc=$?
+            if [ "${rc}" -eq 1 ]; then
+              echo "REJECT PR #${pr}: work-item uniqueness"
+              rejected=$((rejected + 1)); echo "::endgroup::"; continue
+            fi
+            if [ "${rc}" -ne 0 ]; then
+              echo "::error::PR #${pr}: the uniqueness gate could not be evaluated (exit ${rc}); not merging"
+              failed=$((failed + 1)); echo "::endgroup::"; continue
+            fi
+
+            # Required contexts, read from the branch itself. The /protection
+            # endpoint needs Administration (read), which a workflow token does
+            # not have; when it is unreadable, every check run on the head must
+            # be green instead, and an empty result is a refusal, not a pass.
+            runs=$(gh api "repos/${REPO}/commits/${head_sha}/check-runs?per_page=100" --paginate \
+                     --jq '.check_runs[] | "\(.name)\t\(.conclusion)"' 2>/dev/null) || {
+              echo "::error::PR #${pr}: cannot read check runs for ${head_sha}; not merging"
+              failed=$((failed + 1)); echo "::endgroup::"; continue; }
+
+            if [ -z "${runs}" ]; then
+              echo "::error::PR #${pr}: no check run exists on ${head_sha}; a head that was never tested is not ready"
+              failed=$((failed + 1)); echo "::endgroup::"; continue
+            fi
+
+            required=$(gh api "repos/${REPO}/branches/main/protection" \
+                         --jq '.required_status_checks.contexts[]?' 2>/dev/null || true)
+
+            bad=""
+            if [ -n "${required}" ]; then
+              while IFS= read -r ctx; do
+                [ -z "${ctx}" ] && continue
+                printf '%s\n' "${runs}" \
+                  | awk -F'\t' -v c="${ctx}" '$1==c && $2=="success"{ok=1} END{exit ok?0:1}' \
+                  || bad="${bad} ${ctx}"
+              done <<< "${required}"
+            else
+              echo "note: required contexts unreadable; requiring every check run to be green"
+              bad=$(printf '%s\n' "${runs}" | awk -F'\t' \
+                      '$2!="success" && $2!="neutral" && $2!="skipped"{printf " %s(%s)", $1, $2}')
+            fi
+
+            if [ -n "${bad}" ]; then
+              echo "REJECT PR #${pr}: checks not satisfied:${bad}"
+              rejected=$((rejected + 1)); echo "::endgroup::"; continue
+            fi
+
+            # The merge names the exact head that was judged. If the branch
+            # moves between the checks above and this call, GitHub rejects the
+            # merge instead of merging a head nobody evaluated.
+            if out=$(gh api -X PUT "repos/${REPO}/pulls/${pr}/merge" \
+                       -f sha="${head_sha}" -f merge_method=merge 2>&1); then
+              echo "MERGED PR #${pr} at ${head_sha}: ${out}"
+              merged=$((merged + 1))
+            else
+              echo "::error::PR #${pr}: merge refused: ${out}"
+              failed=$((failed + 1))
+            fi
+            echo "::endgroup::"
+          done
+
+          echo "broker run finished: merged=${merged} rejected=${rejected} failed=${failed}"
+          if [ "${failed}" -ne 0 ]; then
+            exit 1
+          fi

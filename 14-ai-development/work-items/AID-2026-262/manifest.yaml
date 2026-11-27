@@ -1,0 +1,126 @@
+work_item_id: AID-2026-262
+title: "Serialized merge broker for work-item uniqueness at the merge boundary"
+class: GATE/TEST
+risk: R1
+risk_rationale: "Adds one GitHub Actions workflow and one test file. It reuses the already-merged uniqueness checker instead of adding a second copy, adds no required context, changes no branch-protection setting, and merges nothing by itself until a pull request carries the merge-ready label. The residual risk is the one the evidence records rather than hides: the broker cannot make itself the only path into main, so the serialization row stays NOT ACQUIRED and the workflow, the work-item evidence and the pull-request body all say BROKER_SERIALIZATION_UNPROVEN."
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 386d8f57b02d8e3c511ff0e3980b9ce0af8b3028
+prompt_status: RECORDED_NOT_FROZEN
+prompt_provenance: DISPATCHED_TASK_FILE
+approval_scope:
+  type: Full-document
+evidence_reference:
+  - "14-ai-development/work-items/AID-2026-262/evidence.md"
+supersession:
+  supersedes: []
+  supersession_reason: null
+  effective_date: null
+archival:
+  archived_date: null
+  archival_reason: null
+  archival_reference: null
+canonical_scope_keywords:
+  - "work-item-uniqueness"
+  - "merge-broker"
+  - "serialization"
+  - "merge-boundary"
+scope:
+  objective: "Put the work-item uniqueness decision at the merge boundary: serialise broker runs, re-enumerate ready pull requests, judge each candidate against the main it will land on, and merge only the exact head that was judged."
+  deviation: >-
+    The dispatching instruction asked for a new judgement script. main already
+    carries scripts/ci/check_work_item_uniqueness.py (AID-2026-279, PR #1372)
+    with that contract, wired into the required GOV-DOC-002 job. A second
+    checker would reproduce the duplicate-identity defect this issue reports and
+    overwriting the merged file would break the wired caller, so the broker calls
+    the merged checker and adds the missing serialization half instead.
+  files_changed:
+    - ".github/workflows/work-item-merge-broker.yml"
+    - "scripts/ci/test_work_item_merge_broker.py"
+    - "14-ai-development/work-items/AID-2026-262/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-262/evidence.md"
+    - "14-ai-development/work-items/AID-2026-262/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-262/prompt-v1.md"
+    - "14-ai-development/work-items/INDEX.md"
+  files_out_of_scope:
+    - "scripts/ci/check_work_item_uniqueness.py and its tests (owned by AID-2026-279)"
+    - "branch protection, rulesets, required contexts"
+    - "any existing work-item directory"
+    - "merging, closing, or editing any Issue"
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-262/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-262/session-evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-262/prompt-v1.md"
+    relationship: reference
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#1331"
+      - "#1341"
+    implementing_ai_session: "9router-hermes/IMPL-B"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-262/prompt-v1.md"
+    executed_prompt_sha256: "8dc58c52f3cbb609fdb7795f778ce67f0663e20a645fa2e74e0855e07aae7199"
+    executed_prompt_bytes: 5549
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-262/session-evidence.md"
+implementation:
+  status: IMPLEMENTED
+  summary: "Serialized merge broker workflow: labeled/workflow_dispatch trigger, one non-cancelling concurrency group, re-enumeration of open merge-ready pull requests, per-candidate re-read of main/head/check-runs, merge candidate computed with git merge-tree, merged checker invoked with the latest main and the head, merge pinned to the judged head SHA. Eleven tests: seven structural assertions on the workflow and four composition tests against the merged checker."
+  files_changed:
+    - ".github/workflows/work-item-merge-broker.yml"
+    - "scripts/ci/test_work_item_merge_broker.py"
+    - "14-ai-development/work-items/AID-2026-262/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-262/evidence.md"
+    - "14-ai-development/work-items/AID-2026-262/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-262/prompt-v1.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests:
+    - "python scripts/ci/test_work_item_merge_broker.py -- 11 tests, OK (local, Windows, Python 3.12.3)."
+    - "python scripts/ci/check_work_item_uniqueness.py --base HEAD --head HEAD -- PASS introduced=0 occupied=0."
+    - "No live broker run is claimed: the REST quota was exhausted before a pull request could be created."
+serialization:
+  status: BROKER_SERIALIZATION_UNPROVEN
+  mechanism: "concurrency group main-work-item-merge-broker with cancel-in-progress: false; origin/main re-read at the top of every iteration; merge call pinned to the judged head SHA."
+  missing: "No platform rule restricts main to this path. A required context produced by this workflow plus a ban on direct pushes, or a merge queue, would close the gap; both are Owner actions outside this work item."
+acceptance:
+  gate: PENDING_CI
+  rows:
+    contract: ACQUIRED
+    serialization: NOT_ACQUIRED
+    positive_test: ACQUIRED
+    negative_test: ACQUIRED
+    additive_test: ACQUIRED
+    race_test: PARTIAL
+    exact_head_test: PARTIAL
+    regression_evidence: PARTIAL
+review:
+  status: NOT_ASSIGNED
+  independent_reviewer: NOT_ASSIGNED
+  natural_person_owner_acceptance: NOT_RECORDED
+carrier:
+  branch: work-item/aid-2026-262-merge-broker
+  pull_request: PENDING
+  merge_sha: PENDING
+  merge_method: merge
+notes:
+  - >-
+    Issue #1341's checker half was merged by AID-2026-279 as PR #1372 while this
+    branch was being prepared. The duplicate was avoided rather than merged: no
+    second checker and no rewrite of the merged one.
+  - >-
+    AID-2026-279 states the same serialization gap from the other side: the
+    /protection endpoint returned HTTP 403 to that session, so strict and
+    enforce_admins are unasserted there. This work item records the same boundary
+    and does not convert a 2026-11-25 document reading into a 2026-11-27
+    measurement.
