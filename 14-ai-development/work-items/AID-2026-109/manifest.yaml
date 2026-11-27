@@ -135,3 +135,17 @@ acceptance:
     - "Affected Owner acceptance for D/I/H/Storage boundary interfaces"
     - "HIR-18 implementation and cryptographic verifier evidence"
     - "COC/GID cryptographic sealed evidence and Storage physical conformance under #1211"
+
+
+# Canonical session evidence registration for the W5 correction session.
+session_evidence:
+  - role: CORRECTOR
+    issue_refs:
+      - "#1332"
+    implementing_ai_session: NOT_RECORDED
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-109/prompt-v3-w5-session-evidence.md
+    executed_prompt_sha256: 4aa204111a2d9c2781063bc0113c2b05994bae267079a32a03f2d53e77bd7c3b
+    executed_prompt_bytes: 2122
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-109/session-evidence.md
