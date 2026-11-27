@@ -80,8 +80,8 @@ session_evidence:
     issue_refs:
     implementing_ai_session: session-1029-declared-vs-protected
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-074/prompt-v1.md
-    executed_prompt_sha256: 78044dfbc68873766fc6773768099a2a7b5b08d67594ca5bf09decbeb991a915
-    executed_prompt_bytes: 3967
+    executed_prompt_sha256: b5c8c5470850be9e58f23f55a31ee0dd7b2d6e560f7b12486c2a968f41f802fe
+    executed_prompt_bytes: 3909
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-074/session-evidence-1029.md
