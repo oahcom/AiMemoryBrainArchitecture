@@ -393,5 +393,22 @@ class BlobPinsTest(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertIn("INCOMPLETE", err)
 
+    def test_unlocated_blob_cannot_borrow_same_digest_from_another_field(self):
+        data = b"shared digest must not confer a locator\n"
+        digest = self.blob_sha(data)
+        commit_tree(self.root, {
+            "file.md": data,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                ("root: file.md\n"
+                 f"root_blob: \"{digest}\"\n"
+                 f"unregistered_source_blob: \"{digest}\"\n"),
+        })
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 1, out + err)
+        self.assertIn("pins=2", out)
+        self.assertIn("ok=1", out)
+        self.assertIn("INCOMPLETE UNRESOLVED(missing field locator)", out)
+        self.assertIn("field=manifest.unregistered_source_blob", out)
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
