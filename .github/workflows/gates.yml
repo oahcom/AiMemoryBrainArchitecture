@@ -436,6 +436,41 @@ jobs:
               print()
           print(f"BASE_SHA: {os.environ.get('BASE_SHA', 'see workflow env')}")
           PY
+      - name: Reproduce the historical #1453 false-new-manifest failure
+        shell: bash
+        run: |
+          set -euo pipefail
+          REGRESSION_HEAD=bdb4b0d4
+          REGRESSION_BASE=460f437e
+          git cat-file -e "$REGRESSION_HEAD^{commit}"
+          git cat-file -e "$REGRESSION_BASE^{commit}"
+          git show "$REGRESSION_BASE:14-ai-development/work-items/AID-2026-291/baseline.json" > "$RUNNER_TEMP/historical-committed-baseline.json"
+          python scripts/ci/check_prompt_commit_trace.py \
+            --commit "$REGRESSION_BASE" --base "$REGRESSION_BASE" \
+            --emit-baseline "$RUNNER_TEMP/historical-base-snapshot.json" \
+            > "$RUNNER_TEMP/historical-base-snapshot.stdout.json"
+          set +e
+          python scripts/ci/check_prompt_commit_trace.py \
+            --commit "$REGRESSION_HEAD" --base "$REGRESSION_BASE" \
+            --baseline "$RUNNER_TEMP/historical-committed-baseline.json" \
+            --base-snapshot "$RUNNER_TEMP/historical-base-snapshot.json" \
+            > "$RUNNER_TEMP/historical-ratchet.stdout.txt" 2>&1
+          rc=$?
+          set -e
+          cat "$RUNNER_TEMP/historical-ratchet.stdout.txt"
+          if grep -Fq "RATCHET NEW_NON_TRACEABLE AID-2026-265" "$RUNNER_TEMP/historical-ratchet.stdout.txt"; then
+            echo "::error::AID-2026-265 was incorrectly classified as new"
+            exit 1
+          fi
+          if grep -Fq "RATCHET NEW_NON_TRACEABLE AID-2026-291" "$RUNNER_TEMP/historical-ratchet.stdout.txt"; then
+            echo "::error::base-existing AID-2026-291 NO_TRACE was incorrectly classified as new"
+            exit 1
+          fi
+          if [ "$rc" -ne 0 ]; then
+            echo "::error::historical ratchet invocation exited $rc"
+            exit "$rc"
+          fi
+          echo "HISTORICAL_RATCHET_REGRESSION: PASS"
       - name: Upload immutable snapshot artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -457,4 +492,4 @@ jobs:
             echo "::error::Committed prompt-commit-trace baseline is missing; review and commit the main-baseline artifact before merge."
             exit 1
           }
-          python scripts/ci/check_prompt_commit_trace.py --commit "$HEAD_SHA" --base "$BASE_SHA" --baseline 14-ai-development/work-items/AID-2026-291/baseline.json
+          python scripts/ci/check_prompt_commit_trace.py --commit "$HEAD_SHA" --base "$BASE_SHA" --baseline 14-ai-development/work-items/AID-2026-291/baseline.json --base-snapshot "$RUNNER_TEMP/main-baseline.json"
