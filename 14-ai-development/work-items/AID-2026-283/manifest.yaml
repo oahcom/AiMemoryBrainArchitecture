@@ -1,57 +1,69 @@
 work_item_id: AID-2026-283
+title: "Derive work-item claims from candidate history so Update-branch cannot erase them"
+class: GATE/TEST
+risk: R2
+risk_rationale: "Changes the decision rule inside an existing required checker and adds three regression tests. No job, required context, workflow or branch-protection change; the contract correction can reject candidates that the current rule accepted."
+status: IMPLEMENTED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
 base_commit_sha: af2660d55a93278157fa6668aba338daf81e127c
-schema_version: "1.0"
-
-work_item:
-  id: AID-2026-283
-  title: "Work-item uniqueness gate bypassed by Update-branch"
-  type: defect
-  status: in_progress
-  priority: critical
-
-ownership:
-  repository: oahcom/AiMemoryBrainArchitecture
-  owning_issue: 1403
-  issue_refs:
-    - "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1403"
-  related_issues:
-    - 1341
-    - 1369
-
-implementation:
-  branch: fix/aid-283-update-branch-uniqueness
-  pull_request: 1428
-  base: main
-  target_files:
-    - scripts/ci/check_work_item_uniqueness.py
-    - scripts/ci/test_work_item_uniqueness.py
-  required_context:
-    - "GOV-DOC-002 metadata checks"
-
-contract:
-  claim_definition:
-    - "The work-item directory exists in candidate HEAD."
-    - "At least one non-merge commit in base..head first introduces the directory relative to its first parent."
-  update_branch_resistant: true
-  merge_commits_create_claims: false
-  additive_existing_directory_allowed: true
-  deleted_candidate_directory_is_claim: false
-
-acceptance:
-  expected_test_count: 8
-  expected_new_tests: 3
-  existing_exit_codes_preserved: true
-  mutation_testing_required: true
-
+prompt_status: RECORDED_NOT_FROZEN
+prompt_provenance: DISPATCHED_TASK_FILE
+approval_scope:
+  type: Full-document
+evidence_reference:
+  - "AID-2026-283/evidence.md"
+supersession:
+  supersedes: []
+  supersession_reason: null
+  effective_date: null
+archival:
+  archived_date: null
+  archival_reason: null
+  archival_reference: null
+canonical_scope_keywords:
+  - "work-item-uniqueness"
+  - "update-branch-bypass"
+  - "claim-history"
 scope:
-  retrospective_duplicate_remediation: false
-  historical_id_renumbering: false
-  governance_rearchitecture: false
-
-evidence:
-  executed_prompt_sha256: "86b544386edb4833fb5ad5488d40a04207ac01c3980545ac3d82738b3e95e695"
-  executed_prompt_bytes: "4126"
-  id_reassignment: "280 -> 283; AID-2026-280 is already registered on main by #265 (INDEX.md). prompt-v1.md left byte-exact so its digest stays valid."
-  test_results: pending
-  mutation_results: pending
-  merge_commit: pending
+  objective: "A work-item claim is a candidate-side non-merge commit that first introduces the directory relative to its first parent and that still exists in candidate HEAD; merge commits create no claim, so an Update-branch cannot erase or manufacture one."
+  files_changed:
+  - "scripts/ci/check_work_item_uniqueness.py"
+  - "scripts/ci/test_work_item_uniqueness.py"
+  - "14-ai-development/work-items/AID-2026-283/manifest.yaml"
+  - "14-ai-development/work-items/AID-2026-283/evidence.md"
+  - "14-ai-development/work-items/AID-2026-283/session-evidence.md"
+  - "14-ai-development/work-items/AID-2026-283/prompt-v1.md"
+  - "14-ai-development/work-items/INDEX.md"
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#1403"
+    implementing_ai_session: "ChatGPT-GPT-6-S6-A"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-283/prompt-v1.md"
+    executed_prompt_sha256: "86b544386edb4833fb5ad5488d40a04207ac01c3980545ac3d82738b3e95e695"
+    executed_prompt_bytes: 4126
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-283/session-evidence.md"
+implementation:
+  status: IMPLEMENTED
+  summary: "introduced_dirs() walks non-merge commits in base..candidate and diffs each against its first parent; directories already present in that parent are additive, and only directories still present in candidate HEAD remain claims. The merge-base computation is removed from check(). Deterministic tests cover the pre-existing five cases plus Update-branch preservation, Update-branch rejection and two-candidate replay."
+  files_changed:
+    - "scripts/ci/check_work_item_uniqueness.py"
+    - "scripts/ci/test_work_item_uniqueness.py"
+    - "14-ai-development/work-items/AID-2026-283/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-283/evidence.md"
+    - "14-ai-development/work-items/AID-2026-283/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-283/prompt-v1.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests:
+    - "python3 scripts/ci/test_work_item_uniqueness.py — 8 cases; invoked by the existing GOV-DOC-002 job on pull_request and push."
+    - "Mutation evidence: disabling occupancy, returning 0 on violation, removing the first-parent existence check, or restoring the merge-base algorithm each turns the suite red."
