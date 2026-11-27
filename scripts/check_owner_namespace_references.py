@@ -69,8 +69,8 @@ def violations(text: str) -> list[tuple[int, str, str]]:
             if any(re.search(r'\b(?:primary|supporting|accountable|responsible)\s+owners?\b', cell, re.I) for cell in cells):
                 owner_columns = [index for index, cell in enumerate(cells) if 'owner' in cell.casefold()]
                 owner_crosswalk = (
-                    any(re.search(r'\\blogical group\\b', cell, re.I) for cell in cells)
-                    and any(re.search(r'\\bprimary owner authority\\b', cell, re.I) for cell in cells)
+                    any(re.search(r'\blogical group\b', cell, re.I) for cell in cells)
+                    and any(re.search(r'\bprimary owner authority\b', cell, re.I) for cell in cells)
                 )
                 continue
             if owner_columns:
@@ -83,6 +83,13 @@ def violations(text: str) -> list[tuple[int, str, str]]:
                         break
                     if re.fullmatch(CAPABILITY, value, re.IGNORECASE):
                         found.append((number, 'CAPABILITY_AS_OWNER', line.strip()))
+                        break
+                    row_has_sys = any(
+                        re.search(r'\bSYS-[A-Z0-9]+(?:-[A-Z0-9]+)*\b', cell)
+                        for cell in cells
+                    )
+                    if row_has_sys and not owner_crosswalk and re.fullmatch(r'[A-I]', value):
+                        found.append((number, 'BARE_LETTER_AS_OWNER', line.strip()))
                         break
                 continue
         else:
