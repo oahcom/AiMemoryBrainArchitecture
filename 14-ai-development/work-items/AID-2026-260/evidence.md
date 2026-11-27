@@ -54,7 +54,7 @@ document_metadata:
 ## Executed prompt snapshot
 
 - File: `14-ai-development/work-items/AID-2026-260/prompt-v1.md`
-- SHA-256: `a7ece5dcf0f34d47930f77d6ccbbc4cdf30d249be71fbb02f59d49e7c2fb50a5`
+- SHA-256: `ef6ed3526df796da122e9c0dc168f2c370da1c3b359aca12938fa69f08352fcf`
 - Bytes: 3057
 - Provenance: `NOT_VERIFIED`; structured scope snapshot, not a byte-for-byte transcript.
 
