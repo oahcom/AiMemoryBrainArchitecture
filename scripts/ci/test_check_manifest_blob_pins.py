@@ -262,6 +262,30 @@ class BlobPinsTest(unittest.TestCase):
         self.assertEqual(code, 0, out + err)
         self.assertIn("pins=1 ok=1", out)
 
+    def test_owner_ruling_pointer_pins_use_artifact_not_pointer_document(self):
+        old = b"superseded artifact\\n"
+        current = b"current artifact\\n"
+        old_sha, current_sha = self.blob_sha(old), self.blob_sha(current)
+        commit_tree(self.root, {
+            "old.md": old,
+            "current.md": current,
+            "pointer.md": b"pointer metadata\\n",
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                ("owner_ruling:\\n"
+                 "  superseded_artifact: old.md\\n"
+                 f"  superseded_blob: {old_sha}\\n"
+                 "  current_artifact: current.md\\n"
+                 f"  current_blob: {current_sha}\\n"
+                 "reconciliation:\\n"
+                 "  pointers_changed:\\n"
+                 "    - document: pointer.md\\n"
+                 f"      before_blob: {old_sha}\\n"
+                 f"      after_blob: {current_sha}\\n"),
+        })
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 0, out + err)
+        self.assertIn("pins=4 ok=4 mismatch=0", out)
+
     def test_empty_tree_is_incomplete(self):
         code, out, err = self.run_gate()
         self.assertEqual(code, 2)

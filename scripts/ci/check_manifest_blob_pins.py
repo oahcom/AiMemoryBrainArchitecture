@@ -25,7 +25,23 @@ PIN_FIELD_REGISTRY = (
     ("reconstructed_root_blob", "root", "entry source_commit/commit", "Git blob SHA-1"),
     ("related_evidence[].blob", "related_evidence[].path", "candidate commit", "Git blob SHA-1"),
     ("evidence_blob", "evidence_file", "candidate commit", "Git blob SHA-1"),
-    ("d_source_blobs[]", "inline <path>: <sha>", "d_source_commit", "Git blob SHA-1"),
+    ("d_source_blobs[]", "inline <path>: <sha>; unique basename search in source commit when path is basename-only", "d_source_commit", "Git blob SHA-1"),
+    ("baseline_and_source_evidence.d_source_blobs[]", "same as d_source_blobs[]", "baseline_and_source_evidence.d_source_commit", "Git blob SHA-1"),
+    ("prompt_file_blob_sha", "prompt_file", "prompt_file_commit_sha", "Git blob SHA-1"),
+    ("execution_boundary_extension.owner_contracts.sha256_or_blob_sha", "path", "commit_before_manifest_update", "Git blob SHA-1"),
+    ("added_conformance_cases.blob_sha", "test_matrix_path", "test_matrix_commit_before_manifest_update", "Git blob SHA-1"),
+    ("joined_contract_updated.blob_sha", "path", "commit_before_manifest_update", "Git blob SHA-1"),
+    ("reference_model_validation.*.git_blob_sha", "sibling file", "candidate commit", "Git blob SHA-1"),
+    ("dev_baseline_integration.model_blob/tests_blob", "reference-model/r3_contract_model.py / test_r3_contract.py", "target_commit", "Git blob SHA-1"),
+    ("mainline_integration.forget_model_blob/forget_tests_blob", "reference-model/forget_model.py / test_forget_model.py", "merged_main_head", "Git blob SHA-1"),
+    ("mainline_integration.reference_model_readme_blob_before_append", "reference-model/README.md", "pre_update_branch_head", "Git blob SHA-1"),
+    ("measurement_basis.model_blob_sha256_lf/tests_blob_sha256_lf", "model/test file", "mainline integration commit", "SHA-256(bytes)"),
+    ("measurement_basis.model_blob_bytes_lf/tests_blob_bytes_lf", "model/test file", "mainline integration commit", "byte length"),
+    ("current_main_blobs.*", "per-field path mapping required; otherwise UNRESOLVED", "observed_main_head", "Git blob SHA-1"),
+    ("source_baseline.*_blob / source_pins.*_blob / *_source_blob", "no path in declaration", "no declared locator", "UNRESOLVED; never treated as PASS"),
+    ("owner_ruling.current_blob/superseded_blob", "current_artifact/superseded_artifact", "candidate commit", "Git blob SHA-1"),
+    ("reconciliation.pointers_changed[].before_blob/after_blob", "owner_ruling.superseded_artifact/current_artifact", "candidate commit", "Git blob SHA-1"),
+    ("renumbering.previous_prompt_sha256", "previous_prompt_file", "candidate commit", "SHA-256(bytes); unresolved if absent"),
     ("prompt.prompt_sha256", "prompt.prompt_file", "candidate commit", "SHA-256(bytes)"),
     ("prompt.prompt_bytes", "prompt.prompt_file", "candidate commit", "byte length"),
     ("session_evidence[].executed_prompt_sha256/bytes", "executed_prompt_snapshot_file", "candidate commit", "SHA-256(bytes)/byte length"),
@@ -39,6 +55,22 @@ PIN_FIELD_REGISTRY = (
     ("source.selected_source_files[].restored_blob_sha", "path", "candidate commit", "Git blob SHA-1"),
     ("source.selected_source_files[].frontmatter_blob_sha", "frontmatter_path/frontmatter_file", "declared source commit/candidate", "Git blob SHA-1; unresolved without locator"),
     ("source.files[].blob", "source.files[].path", "source.head", "Git blob SHA-1"),
+    ("prompt_file_blob_sha", "prompt_file", "prompt_file_commit_sha", "Git blob SHA-1"),
+    ("execution_boundary_extension.owner_contracts.sha256_or_blob_sha", "path", "commit_before_manifest_update", "Git blob SHA-1"),
+    ("added_conformance_cases.blob_sha", "test_matrix_path", "test_matrix_commit_before_manifest_update", "Git blob SHA-1"),
+    ("joined_contract_updated.blob_sha", "path", "commit_before_manifest_update", "Git blob SHA-1"),
+    ("reference_model_validation.*.git_blob_sha", "sibling file", "candidate commit", "Git blob SHA-1"),
+    ("current_main_blobs.*", "explicit per-key path or unique workflow blob-OID path", "observed_main_head", "Git blob SHA-1"),
+    ("dev_baseline_integration.model_blob/tests_blob", "r3_contract_model.py/test_r3_contract.py", "target_commit", "Git blob SHA-1"),
+    ("mainline_integration.forget_model_blob/forget_tests_blob", "forget_model.py/test_forget_model.py", "merged_main_head", "Git blob SHA-1"),
+    ("mainline_integration.reference_model_readme_blob_before_append", "reference-model/README.md", "pre_update_branch_head", "Git blob SHA-1"),
+    ("measurement_basis.*_blob_sha256_lf/*_blob_bytes_lf", "model/test source file", "merged_main_head", "SHA-256(bytes)/byte length"),
+    ("owner_ruling.current_blob/superseded_blob", "current_artifact/superseded_artifact", "candidate commit", "Git blob SHA-1"),
+    ("reconciliation.pointers_changed[].before_blob/after_blob", "owner_ruling.superseded_artifact/current_artifact", "candidate commit", "Git blob SHA-1"),
+    ("renumbering.current_prompt_sha256", "renumbering.current_prompt_file or top-level prompt_file", "candidate commit", "SHA-256(bytes)"),
+    ("renumbering.previous_prompt_sha256", "previous_prompt_file (absent in AID-2026-241)", "candidate commit", "UNRESOLVED without locator"),
+    ("source_baseline.*_blob/source_pins.*_blob/latest_*_source_blob", "no declared path", "no declared locator", "UNRESOLVED; not PASS"),
+    ("prompt_original_payload_sha256/instruction_sha256", "no declared committed file", "no declared locator", "UNRESOLVED; not PASS"),
 )
 
 class Incomplete(Exception):
@@ -77,6 +109,25 @@ class Git:
         if not HEX40.fullmatch(resolved):
             raise Incomplete(f"UNRESOLVED(commit did not resolve uniquely): {field}={commit}")
         return resolved
+
+    def paths_by_basename(self, commit: str, basename: str, field: str):
+        resolved = self.resolve_commit(commit, field)
+        names = self.run("ls-tree", "-r", "--name-only", resolved).decode("utf-8").splitlines()
+        return [name for name in names if PurePosixPath(name).name == basename]
+
+    def paths_by_blob_oid(self, commit: str, blob_oid: str, field: str):
+        resolved = self.resolve_commit(commit, field)
+        lines = self.run("ls-tree", "-r", resolved).decode("utf-8").splitlines()
+        matches = []
+        for line in lines:
+            try:
+                metadata, path = line.split("\t", 1)
+                mode, object_type, oid = metadata.split()
+            except ValueError:
+                continue
+            if object_type == "blob" and oid == blob_oid:
+                matches.append(path)
+        return matches
 
     def object_bytes(self, commit: str, path: str, field: str) -> bytes:
         resolved = self.resolve_commit(commit, field)
@@ -264,7 +315,25 @@ def verify(root: Path, commit: str, verbose: bool = True):
                         problems.append(f"INCOMPLETE manifest={manifest_path}: malformed d_source_blobs[{i}]")
                         continue
                     path, digest = entry.rsplit(":", 1)
-                    check(path.strip(), digest.strip(), d_source_commit, f"d_source_blobs[{i}]")
+                    path_value = path.strip()
+                    if "/" not in path_value:
+                        try:
+                            matches = git.paths_by_basename(d_source_commit, path_value, f"d_source_blobs[{i}]")
+                        except Incomplete as exc:
+                            incomplete += 1
+                            pins += 1
+                            problems.append(f"INCOMPLETE d_source_blobs[{i}]: {exc}")
+                            continue
+                        if len(matches) != 1:
+                            incomplete += 1
+                            pins += 1
+                            problems.append(
+                                f"INCOMPLETE UNRESOLVED(d_source basename locator): "
+                                f"manifest={manifest_path} basename={path_value!r} matches={matches!r}"
+                            )
+                            continue
+                        path_value = matches[0]
+                    check(path_value, digest.strip(), d_source_commit, f"d_source_blobs[{i}]")
 
         prompt = as_mapping(doc.get("prompt"))
         pair(prompt, "prompt_file", "prompt_sha256", commit, "prompt.prompt_file", "sha256")
@@ -342,8 +411,16 @@ def verify(root: Path, commit: str, verbose: bool = True):
 
         source = as_mapping(doc.get("source"))
         if "source_blob_sha" in source:
-            pair(source, "path", "source_blob_sha", source.get("head_sha") or source.get("head"),
-                 "source.source_blob_sha")
+            if nonempty(source.get("path")):
+                pair(source, "path", "source_blob_sha", source.get("head_sha") or source.get("head"),
+                     "source.source_blob_sha")
+            else:
+                pins += 1
+                incomplete += 1
+                problems.append(
+                    f"INCOMPLETE UNRESOLVED(source.source_blob_sha): "
+                    f"manifest={manifest_path} no sibling path locator"
+                )
             mark(source, "source_blob_sha")
         selected = source.get("selected_source_files", [])
         if selected:
@@ -387,6 +464,113 @@ def verify(root: Path, commit: str, verbose: bool = True):
                         continue
                     pair(item, "path", "blob", source.get("head") or source.get("head_sha"), f"source.files[{i}]")
                     mark(item, "blob")
+
+        owner_ruling = as_mapping(doc.get("owner_ruling"))
+        if "current_blob" in owner_ruling:
+            pair(owner_ruling, "current_artifact", "current_blob", commit, "owner_ruling.current_blob")
+            mark(owner_ruling, "current_blob")
+        if "superseded_blob" in owner_ruling:
+            pair(owner_ruling, "superseded_artifact", "superseded_blob", commit, "owner_ruling.superseded_blob")
+            mark(owner_ruling, "superseded_blob")
+        reconciliation = as_mapping(doc.get("reconciliation"))
+        for i, item in enumerate(reconciliation.get("pointers_changed", []) or []):
+            if not isinstance(item, dict):
+                continue
+            if "before_blob" in item:
+                # The document field names the pointer document, not the blob target.
+                check(owner_ruling.get("superseded_artifact"), item.get("before_blob"), commit,
+                      f"reconciliation.pointers_changed[{i}].before_blob.target")
+                mark(item, "before_blob")
+            if "after_blob" in item:
+                check(owner_ruling.get("current_artifact"), item.get("after_blob"), commit,
+                      f"reconciliation.pointers_changed[{i}].after_blob.target")
+                mark(item, "after_blob")
+
+        # AID-2026-001's older reconciliation records contain explicit
+        # blob identities whose locators are recorded in the same manifest section.
+        if doc.get("work_item_id") == "AID-2026-001":
+            post_merge = as_mapping(doc.get("post_merge_manifest_validation"))
+            observed_head = post_merge.get("observed_main_head") or commit
+            current_blobs = as_mapping(doc.get("current_main_blobs"))
+            current_paths = {
+                "forget_model_py": "14-ai-development/work-items/AID-2026-001/reference-model/forget_model.py",
+                "test_forget_model_py": "14-ai-development/work-items/AID-2026-001/reference-model/test_forget_model.py",
+                "readme_md": "14-ai-development/work-items/AID-2026-001/reference-model/README.md",
+            }
+            for key, value in current_blobs.items():
+                if key in current_paths:
+                    check(current_paths[key], value, observed_head, f"current_main_blobs.{key}")
+                elif key == "workflow_yml":
+                    try:
+                        matches = [p for p in git.paths_by_blob_oid(observed_head, value, f"current_main_blobs.{key}")
+                                   if p.startswith(".github/workflows/") and p.endswith((".yml", ".yaml"))]
+                    except Incomplete as exc:
+                        matches = []
+                        problems.append(f"INCOMPLETE current_main_blobs.{key}: {exc}")
+                        incomplete += 1
+                        pins += 1
+                    if len(matches) == 1:
+                        check(matches[0], value, observed_head, f"current_main_blobs.{key}")
+                    elif not any(f"current_main_blobs.{key}" in p for p in problems):
+                        incomplete += 1
+                        pins += 1
+                        problems.append(
+                            f"INCOMPLETE UNRESOLVED(current_main_blobs.{key}): "
+                            f"expected one workflow path, found {matches!r}"
+                        )
+                else:
+                    pins += 1
+                    incomplete += 1
+                    problems.append(f"INCOMPLETE UNRESOLVED(current_main_blobs.{key}): no path mapping")
+                mark(current_blobs, key)
+
+            dev = as_mapping(doc.get("dev_baseline_integration"))
+            for key, path_value in (
+                ("model_blob", "14-ai-development/work-items/AID-2026-001/reference-model/r3_contract_model.py"),
+                ("tests_blob", "14-ai-development/work-items/AID-2026-001/reference-model/test_r3_contract.py"),
+            ):
+                if key in dev:
+                    check(path_value, dev.get(key), dev.get("target_commit"),
+                          f"dev_baseline_integration.{key}")
+                    mark(dev, key)
+
+            integration = as_mapping(doc.get("mainline_integration"))
+            merged_head = integration.get("merged_main_head") or integration.get("merge_commit")
+            for key, path_value in (
+                ("forget_model_blob", "14-ai-development/work-items/AID-2026-001/reference-model/forget_model.py"),
+                ("forget_tests_blob", "14-ai-development/work-items/AID-2026-001/reference-model/test_forget_model.py"),
+            ):
+                if key in integration:
+                    check(path_value, integration.get(key), merged_head,
+                          f"mainline_integration.{key}")
+                    mark(integration, key)
+            readme_before = "reference_model_readme_blob_before_append"
+            if readme_before in integration:
+                check("14-ai-development/work-items/AID-2026-001/reference-model/README.md",
+                      integration.get(readme_before),
+                      integration.get("pre_update_branch_head") or merged_head,
+                      f"mainline_integration.{readme_before}")
+                mark(integration, readme_before)
+
+            measurement = as_mapping(integration.get("measurement_basis"))
+            model_path = "14-ai-development/work-items/AID-2026-001/reference-model/r3_contract_model.py"
+            tests_path = "14-ai-development/work-items/AID-2026-001/reference-model/test_r3_contract.py"
+            measurement_commit = merged_head or commit
+            for key, path_value, algorithm in (
+                ("model_blob_sha256_lf", model_path, "sha256"),
+                ("tests_blob_sha256_lf", tests_path, "sha256"),
+                ("model_blob_bytes_lf", model_path, "bytes"),
+                ("tests_blob_bytes_lf", tests_path, "bytes"),
+            ):
+                if key in measurement:
+                    check(path_value, measurement.get(key), measurement_commit,
+                          f"measurement_basis.{key}", algorithm)
+                    mark(measurement, key)
+            # CRLF values are measurements of a rendered Windows working copy,
+            # not Git tree blobs; retain them as evidence, not blob pins.
+            for key in ("model_blob_sha256_crlf", "tests_blob_sha256_crlf"):
+                if key in measurement:
+                    mark(measurement, key)
 
         renumbering = as_mapping(doc.get("renumbering"))
         if "current_prompt_sha256" in renumbering:
@@ -456,12 +640,22 @@ def verify(root: Path, commit: str, verbose: bool = True):
                         selected_path = next((candidate for candidate in preferred_paths
                                                if candidate in node and nonempty(node.get(candidate))), None)
                         commit_keys = (
-                            "source_commit_sha", "translation_commit_sha", "source_commit",
-                            "commit", "head_sha", "head", "base_commit", "base_commit_sha",
-                            "baseline_commit", "reverification_commit_sha"
+                            "source_commit_sha", "translation_commit_sha", "prompt_file_commit_sha",
+                            "source_commit", "commit", "head_sha", "head", "base_commit",
+                            "base_commit_sha", "baseline_commit", "reverification_commit_sha",
+                            "commit_before_manifest_update", "test_matrix_commit_before_manifest_update"
                         )
                         source_ref = next((node.get(candidate) for candidate in commit_keys
-                                           if nonempty(node.get(candidate))), commit)
+                                           if nonempty(node.get(candidate))), None)
+                        if source_ref is None:
+                            source_ref = next((value for name, value in node.items()
+                                               if isinstance(name, str) and
+                                               ("_commit_" in name or name.endswith("_commit"))
+                                               and nonempty(value)), commit)
+                        if where.startswith("manifest.source_baseline."):
+                            source_ref = as_mapping(doc.get("source_baseline")).get("main") or source_ref
+                        elif where.startswith("manifest.source_pins."):
+                            source_ref = doc.get("latest_sync_main_commit_sha") or source_ref
                         locator_key = selected_path or (path_keys[0] if len(path_keys) == 1 else None)
                         if locator_key and nonempty(node.get(locator_key)):
                             path_value = node[locator_key]

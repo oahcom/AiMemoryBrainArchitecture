@@ -61,7 +61,7 @@ The observed repository main at implementation start was `af2660d55a93278157fa66
 | `d_source_blobs[]` | inline `<path>: <sha>`; `d_source_commit` | Git blob SHA-1 | Existing D-source manifests |
 | `prompt.prompt_sha256`, `prompt.prompt_bytes` | `prompt.prompt_file`; candidate commit | SHA-256(bytes), byte length | Nested prompt manifests |
 | `session_evidence[].executed_prompt_sha256/bytes` | `executed_prompt_snapshot_file`; candidate commit | SHA-256(bytes), byte length | Session-evidence entries |
-| **top-level `prompt_sha256`** | explicit `prompt_file`, else sibling `prompt-v{prompt_version}.md); candidate commit | SHA-256(bytes) | `14-ai-development/work-items/AID-2026-001/manifest.yaml:43-45` |
+| **top-level `prompt_sha256`** | explicit `prompt_file`, else sibling `prompt-v{prompt_version}.md); candidate commit | SHA-256(bytes) | `14-ai-development/work-items/AID-2026-001/manifest.yaml:34` |
 | `source_translation_pairs[].source_blob_sha` | `source_path`; `source_commit_sha` | Git blob SHA-1 | `AID-2026-004/manifest.yaml:22-35` |
 | `source_translation_pairs[].translation_blob_sha` | `translation_path`; `translation_commit_sha` | Git blob SHA-1 | `AID-2026-004/manifest.yaml:22-35` |
 | `source_translation_pairs[].translation_sha256` | `translation_path`; `translation_commit_sha` | SHA-256(bytes) | `AID-2026-004/manifest.yaml:22-35` |
@@ -99,3 +99,33 @@ The baseline is not widened speculatively. Any newly discovered failure emitted 
 ## Regression scope
 
 The existing required Repository hygiene job remains the carrier. Traceability, hygiene, bilingual, line-ending, and test-reachability checks remain in their existing workflow/job topology. No branch protection or required context is changed.
+
+
+## Additional discovered declaration shapes and explicit dispositions
+
+| Manifest field pattern | Locator | Algorithm | Definition location |
+|---|---|---|---|
+| `baseline_and_source_evidence.d_source_blobs[]` | Inline basename/path; basename-only entries are resolved only when exactly one matching path exists in the declared `d_source_commit` tree | Git blob SHA-1 | `AID-2026-100/manifest.yaml:105-116` |
+| `baseline_and_source_evidence.gate_a_reconstruction[].reconstructed_root_blob` | `root`; `source_commit`/`source_commit_sha`/`commit` or `main_reconciliation_head` | Git blob SHA-1 | `AID-2026-100/manifest.yaml:117+` |
+| `prompt_file_blob_sha` | `prompt_file`; `prompt_file_commit_sha` | Git blob SHA-1 | `AID-2026-003/manifest.yaml:42-48`; `AID-2026-042/manifest.yaml:31-36`; AID-043..046 corresponding prompt blocks |
+| `execution_boundary_extension.owner_contracts.sha256_or_blob_sha` | sibling `path`; `commit_before_manifest_update` | Git blob SHA-1 (40-hex declaration) | `AID-2026-001/manifest.yaml:360-363` |
+| `added_conformance_cases.blob_sha` | `test_matrix_path`; `test_matrix_commit_before_manifest_update` | Git blob SHA-1 | `AID-2026-001/manifest.yaml:370-374` |
+| `joined_contract_updated.blob_sha` | sibling `path`; `commit_before_manifest_update` | Git blob SHA-1 | `AID-2026-001/manifest.yaml:377-380` |
+| `reference_model_validation.{model,tests,execution_record}.git_blob_sha` | sibling `file`; candidate commit | Git blob SHA-1 | `AID-2026-001/manifest.yaml:390-408` |
+| `current_main_blobs.{forget_model_py,test_forget_model_py,readme_md,workflow_yml}` | Explicit work-item file mapping; workflow is resolved only by unique matching blob OID under `.github/workflows/` | Git blob SHA-1 | `AID-2026-001/manifest.yaml:500-504` |
+| `dev_baseline_integration.{model_blob,tests_blob}` | `reference-model/r3_contract_model.py`, `reference-model/test_r3_contract.py`; `target_commit` | Git blob SHA-1 | `AID-2026-001/manifest.yaml:540-547` |
+| `mainline_integration.{forget_model_blob,forget_tests_blob}` | `reference-model/forget_model.py`, `reference-model/test_forget_model.py`; `merged_main_head` | Git blob SHA-1 | `AID-2026-001/manifest.yaml:580-585` |
+| `mainline_integration.reference_model_readme_blob_before_append` | `reference-model/README.md`; `pre_update_branch_head` | Git blob SHA-1 | `AID-2026-001/manifest.yaml:584-585` |
+| `measurement_basis.{model,tests}_blob_sha256_lf` and `*_blob_bytes_lf` | Corresponding R3 model/test source files; `merged_main_head` | SHA-256(bytes), byte length | `AID-2026-001/manifest.yaml:590-600` |
+| `owner_ruling.current_blob/superseded_blob` | `current_artifact/superseded_artifact`; candidate commit | Git blob SHA-1 | `AID-2026-170/manifest.yaml:34-36` |
+| `reconciliation.pointers_changed[].before_blob/after_blob` | The referenced artifact paths in `owner_ruling`, not the pointer document | Git blob SHA-1 | `AID-2026-170/manifest.yaml:40-49` |
+| `renumbering.current_prompt_sha256` | `current_prompt_file` or top-level `prompt_file`; candidate commit | SHA-256(bytes) | `AID-2026-241/manifest.yaml:230-231` |
+| `renumbering.previous_prompt_sha256` | `previous_prompt_file` (not declared in AID-241) | SHA-256(bytes); UNRESOLVED | `AID-2026-241/manifest.yaml:230` |
+| `source_baseline.*_blob`, `source_pins.*_blob`, `latest_*_source_blob` | No path is declared | UNRESOLVED; not PASS | `AID-2026-107/manifest.yaml:54-61`; `AID-2026-111/manifest.yaml:46-52`; `AID-2026-093/manifest.yaml:252-271` |
+| `prompt_original_payload_sha256`, `instruction_sha256` | No committed file locator is declared | UNRESOLVED; not PASS | `AID-2026-023/manifest.yaml` and `AID-2026-003/manifest.yaml:78-81` |
+
+The generic discovery rule is intentionally narrow and fail-closed: scalar fields ending in `_blob`, `_blob_sha`, `_blob_sha256`, or `_sha256` (except execution-only `stdout_sha256`) are either resolved through a sibling locator and declared commit, or emitted as `INCOMPLETE UNRESOLVED`. A mapping-valued field such as `verification.checks.*_and_blob` is not a digest. Commit-reference fields (for example `traceability_exclusions[].sha`, `head_sha`, `merge_commit_sha`) are not blob identities.
+
+The AID-001 CRLF measurement fields `model_blob_sha256_crlf` and `tests_blob_sha256_crlf` are explicitly excluded from repository-blob checking: they describe a Windows-rendered working copy, while the paired `*_lf` fields describe canonical Git bytes. Execution capture `stdout_sha256` is likewise not a repository file pin. These exclusions are field-specific and documented, not wildcard allowlists.
+
+Per-record unresolved declarations remain emitted as `INCOMPLETE UNRESOLVED(...)` and are included in the ratchet denominator; the checker returns violation status, not PASS. Infrastructure inability to resolve the target commit or enumerate manifests remains exit status 2.
