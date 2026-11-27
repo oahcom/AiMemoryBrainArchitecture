@@ -59,7 +59,7 @@ All four reports identify historical baseline `b372b62c640a2b656e54b6db62a4ee67d
 - Exact PR Head execution and output: PENDING CI; no unexecuted result is represented as PASS.
 
 ## Integration
-Reuse the existing `work-item-manifest-schema` job. No new job/context, branch-protection mutation, Issue body change, or Issue closure.
+Reuse the existing `Schema non-empty audit (hard gate)` job. No new job/context, branch-protection mutation, Issue body change, or Issue closure.
 
 ## Base synchronization
 - A merge commit incorporated latest observed main `a588cd9914949c2c9db7b2c5704d906fd3f05b70` into the work branch before exact-Head verification: `8a6fe56b0a2a10018a6dbda1c546d7002eb3a64a`.
