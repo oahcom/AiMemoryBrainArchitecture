@@ -1,3 +1,51 @@
+---
+document_metadata:
+  steward: "Architecture Governance"
+  domain: ai-development
+  role: work-record
+
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version:
+        scheme: git
+        value: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: null
+
+    usage_status: Active
+    modification_status: Unchanged
+
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+---
+
 # WB LINE 03 Closeout — Validator / Repository / MCP / Local Environment
 
 **Status:** `PARTIAL` — every item carries direct evidence; six items remain `UNVERIFIED`, `NOT_REPRODUCED` or `NOT_VERIFIED` and are listed explicitly in §5.
