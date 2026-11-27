@@ -341,6 +341,18 @@ class BlobPinsTest(unittest.TestCase):
         self.assertEqual(code, 1, out + err)
         self.assertIn("no dedicated prompt_original_payload_file locator", out)
 
+    def test_identical_incomplete_fields_in_two_manifests_keep_distinct_provenance(self):
+        candidate = commit_tree(self.root, {
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                "prompt_sha256: NOT_VERIFIED\\n",
+            "14-ai-development/work-items/AID-2026-901/manifest.yaml":
+                "prompt_sha256: NOT_VERIFIED\\n",
+        })
+        code, out, err = self.run_gate(candidate)
+        self.assertEqual(code, 1, out + err)
+        self.assertIn("manifest=14-ai-development/work-items/AID-2026-900/manifest.yaml", out)
+        self.assertIn("manifest=14-ai-development/work-items/AID-2026-901/manifest.yaml", out)
+
     def test_empty_tree_is_incomplete(self):
         code, out, err = self.run_gate()
         self.assertEqual(code, 2)

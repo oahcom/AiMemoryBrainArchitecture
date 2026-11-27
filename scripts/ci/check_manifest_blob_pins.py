@@ -173,16 +173,16 @@ def verify(root: Path, commit: str, verbose: bool = True):
         if algorithm == "bytes":
             if isinstance(declared, bool) or not isinstance(declared, (int, str)) or not str(declared).strip():
                 incomplete += 1
-                problems.append(f"INCOMPLETE {kind}: invalid byte-count declaration {declared!r}")
+                problems.append(f"INCOMPLETE manifest={manifest_path} {kind}: invalid byte-count declaration {declared!r}")
                 return
         elif algorithm == "sha256":
             if not isinstance(declared, str) or not HEX64.fullmatch(declared):
                 incomplete += 1
-                problems.append(f"INCOMPLETE {kind}: invalid SHA-256 declaration {declared!r}")
+                problems.append(f"INCOMPLETE manifest={manifest_path} {kind}: invalid SHA-256 declaration {declared!r}")
                 return
         elif not isinstance(declared, str) or not HEX40.fullmatch(declared):
             incomplete += 1
-            problems.append(f"INCOMPLETE {kind}: invalid Git blob SHA-1 declaration {declared!r}")
+            problems.append(f"INCOMPLETE manifest={manifest_path} {kind}: invalid Git blob SHA-1 declaration {declared!r}")
             return
         if not nonempty(path):
             missing += 1
@@ -201,7 +201,7 @@ def verify(root: Path, commit: str, verbose: bool = True):
             return
         except Incomplete as exc:
             incomplete += 1
-            problems.append(f"INCOMPLETE {kind} path={path}: {exc}")
+            problems.append(f"INCOMPLETE manifest={manifest_path} {kind} path={path}: {exc}")
             return
         if algorithm == "sha256":
             actual = hashlib.sha256(data).hexdigest()
@@ -210,7 +210,7 @@ def verify(root: Path, commit: str, verbose: bool = True):
                 expected = int(declared)
             except (TypeError, ValueError):
                 incomplete += 1
-                problems.append(f"INCOMPLETE {kind} path={path}: invalid byte count {declared!r}")
+                problems.append(f"INCOMPLETE manifest={manifest_path} {kind} path={path}: invalid byte count {declared!r}")
                 return
             actual = str(len(data))
             declared = str(expected)
@@ -233,7 +233,7 @@ def verify(root: Path, commit: str, verbose: bool = True):
         if not isinstance(declared, str) or not HEX40.fullmatch(declared):
             pins += 1
             incomplete += 1
-            problems.append(f"INCOMPLETE {kind}: invalid Git blob SHA-1 declaration {declared!r}")
+            problems.append(f"INCOMPLETE manifest={manifest_path} {kind}: invalid Git blob SHA-1 declaration {declared!r}")
             return
         for source_commit in source_commits:
             if not nonempty(source_commit):
@@ -250,14 +250,14 @@ def verify(root: Path, commit: str, verbose: bool = True):
                 incomplete += 1
                 problems.append(
                     f"INCOMPLETE UNRESOLVED({kind} blob locator ambiguous): "
-                    f"commit={source_commit} blob={declared} paths={matches!r}"
+                    f"manifest={manifest_path} commit={source_commit} blob={declared} paths={matches!r}"
                 )
                 return
         pins += 1
         incomplete += 1
         problems.append(
             f"INCOMPLETE UNRESOLVED({kind} blob locator): "
-            f"blob={declared} not found in declared commit tree(s)"
+            f"manifest={manifest_path} blob={declared} not found in declared commit tree(s)"
         )
 
     handled = set()
