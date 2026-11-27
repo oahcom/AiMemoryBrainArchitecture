@@ -129,20 +129,17 @@ baseline_and_source_evidence:
     - root: "05-memory-runtime/README.md"
       provenance: "AUTHORED_INDEX"
       authoritative_source: "NOT_FOUND — no authoritative root README source; newly authored index"
-      root_blob: "107c225b631eaa5732bab90bc09144799a542502"
+      root_blob: "216760a45c54386b95c2c985f7bf188d7479f776"
       en_mirror: "docs/en/05-memory-runtime/README.md"
-      en_mirror_blob: "2fac42740167293c941c1450437ca780d0488b5d"
+      en_mirror_blob: "8808e9b298c78c2c4c64a9675b27e973c0e996bc"
       zh_cn_mirror: "docs/zh-CN/05-memory-runtime/README.md"
-      zh_cn_mirror_blob: "9881fd88fcbfe1b3760154503c8d13e781ad89f0"
+      zh_cn_mirror_blob: "c945394cf4aa667874938d64fc1c2b551d3ad5a9"
       status: "Draft / Candidate / Informative"
     - root: "09-security-governance/README.md"
       provenance: "SUPERSEDED_BY_MAIN"
       authoritative_source: "main now carries a restored bounded security-governance root from AID-2026-109 (PR #1297); this registration no longer authors this file and makes no provenance claim about it"
-      root_blob: "1046665b0990183b689ed6db88edc9ba1089c83e"
       en_mirror: "docs/en/09-security-governance/README.md"
-      en_mirror_blob: "7c8b434c7161c47c5e35e0ffcadc736981996c4a"
       zh_cn_mirror: "docs/zh-CN/09-security-governance/README.md"
-      zh_cn_mirror_blob: "772025aa9da8afe706af6f607ae47e35c5020522"
       status: "Draft / Candidate / Informative"
 
 prompt:
@@ -177,11 +174,11 @@ related_evidence:
   - path: "14-ai-development/work-items/AID-2026-100/evidence.md"
     evidence_role: "#1037 evidence capture: full-clone read-only checker comparison and fresh frontmatter census"
     provenance: "MERGED_IN_MAIN_BEFORE_THIS_REGISTRATION (PR #1284)"
-    blob: "87adf4a8cde8ba5c4c14596932f3488ec988a38c"
+    blob: "ae46c7a4424778d0c8e4c5b21c6535023a9b460d"
     en_mirror: "docs/en/14-ai-development/work-items/AID-2026-100/evidence.md"
-    en_mirror_blob: "da156fe2409f17b364e9af65446bb73ab709e539"
+    en_mirror_blob: "425e5eaf6c99286342e20f5ecf525ee297d75e0c"
     zh_cn_mirror: "docs/zh-CN/14-ai-development/work-items/AID-2026-100/evidence.md"
-    zh_cn_mirror_blob: "d750ef5555916bfb82180f30a6e83b3a0766fdfc"
+    zh_cn_mirror_blob: "fda38f1355f6160db78facde996fee3345905ea1"
     note: >-
       This evidence record is already on main and is carried by this registration unchanged:
       this PR does not delete, rewrite or move it. It is evidence held under the same
