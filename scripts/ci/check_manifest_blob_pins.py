@@ -161,6 +161,20 @@ def verify(root: Path, commit: str, verbose: bool = True):
                 check(item.get("root"), item.get("reconstructed_root_blob"), source,
                       f"gate_a_reconstruction[{i}].root")
 
+        # B2. authored_indexes[] uses the same root and mirror pin shape
+        # as the top-level index fields, but is a list in AID-2026-100-style records.
+        for i, item in enumerate(doc.get("authored_indexes", []) or []):
+            if not isinstance(item, dict):
+                continue
+            for path_key, digest_key in (
+                ("root", "root_blob"),
+                ("en_mirror", "en_mirror_blob"),
+                ("zh_cn_mirror", "zh_cn_mirror_blob"),
+            ):
+                if path_key in item or digest_key in item:
+                    check(item.get(path_key), item.get(digest_key), commit,
+                          f"authored_indexes[{i}].{path_key}")
+
         # C. related_evidence[].path/blob and language mirrors.
         for i, item in enumerate(doc.get("related_evidence", []) or []):
             if not isinstance(item, dict):
