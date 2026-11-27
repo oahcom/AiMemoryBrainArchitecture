@@ -38,7 +38,7 @@ document_metadata:
 - 文档 ID：SYS-BOUNDARIES-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../01-system-architecture/system-boundaries.md)
-- 源版本：dc0e15e7f872dbbebc64545f92b398ef15700786
+- 源版本：025b00bbbd253882ee019a834f817ece772ca59d
 - 对应英文：[System Boundaries](../../en/01-system-architecture/system-boundaries.md)
 - 状态：明确标记的部分为 DECIDED；CANDIDATE/OPEN 项仍不具规范约束力
 
