@@ -46,7 +46,7 @@ document_metadata:
 
 - Document ID: AI-DEV-CAPACITY-ALIGNMENT-RULING-001
 - Source: [Canonical bilingual source](AI-DEV-CAPACITY-ALIGNMENT-RULING-001.md)
-- Source Blob: `e2e931db93f2c019eba6fc21fc2e441218f2e061`
+- Source Blob: `94af67380ada6260cd52454bf44a5a97eb60c1ef`
 - Translation status: DRAFT — semantically equivalent rendering; the Chinese source remains authoritative
 - Version: 1.0
 - Status: PROPOSED — pending adoption by the Project Owner or an explicitly authorized governance authority; this record does not assert adoption
