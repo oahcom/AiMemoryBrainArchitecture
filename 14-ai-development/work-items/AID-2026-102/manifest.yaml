@@ -1,0 +1,207 @@
+work_item_id: AID-2026-102
+title: Correct the AID-2026-092 prompt digest, which matched no version of its own file
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  Documentation only. Two fields of one manifest and one INDEX cell are edited; no code, no
+  checker, no workflow and no policy status changes. The defect being corrected is that a
+  registry field asserts a measurement nobody took, so the risk of the correction is a second
+  wrong value, and the mitigation is that the new value is computed from the committed bytes
+  by a command quoted in the record, and the old one is kept rather than deleted.
+status: MERGED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: d5107f68a7f1b61f5f2f7352fadf828aae06cf1c
+
+tracking_issue: "#1278 - the defect report, filed with the blob enumeration that shows no 2455-byte version has ever existed at either path."
+
+prompt_id: AID-2026-102-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-102/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: df3c53282d858ecc7302ba86b4fb419bf6a31c8030d30cee256b64840b4e4e7a
+prompt_bytes: 4470
+
+authorization:
+  implementation_write: >-
+    GRANTED for INDEX.md and AID-2026-092/manifest.yaml, and for this work item's own
+    directory. NOT_GRANTED for any other path.
+  gate_behaviour_change: >-
+    NONE - no workflow, script or check is modified. The missing gate over the top-level
+    prompt_sha256 field is finding F4 of AID-2026-101 and is still unbuilt here, for the same
+    reason: building it is code.
+  schema_change: >-
+    ONE field added, prompt_digest_correction, following the precedent AID-2026-072 set and
+    AID-2026-101 reused. No field is removed or retyped.
+  architecture_spec_change: NONE - no ADR and no canonical document is modified.
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-102/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-102/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-102/session-evidence-1278.md
+  files_to_modify:
+    - 14-ai-development/work-items/INDEX.md
+    - 14-ai-development/work-items/AID-2026-092/manifest.yaml
+  files_out_of_scope: >-
+    Every other path. In particular no Rust file, and no manifest other than 092: this work
+    item corrects one field of one record, and widening it would repeat the mistake of treating
+    a measured defect as a licence for a general sweep.
+
+findings:
+  - id: F1
+    severity: HIGH
+    statement: >-
+      AID-2026-092's prompt_sha256 and prompt_bytes describe a 2455-byte text that has never
+      existed at the path it names, at any commit reachable from any ref.
+    evidence: >-
+      The committed prompt-v1.md is 3772 bytes, SHA-256 a459d7e523fb...edb3. Enumerating every
+      distinct blob at AID-2026-083/prompt-v1.md and AID-2026-092/prompt-v1.md across
+      git rev-list --all returns exactly four: 7689 / 0c0ce002db72, 3772 / a459d7e523fb,
+      2915 / 9614ddf7013e and 4137 / 7ce260dfb8f1. None is 2455 bytes and none hashes to
+      9be8aebf. The declared pair was written by cac933cb, the commit that created the
+      manifest, and in that same commit the file it pins is already 3772 bytes.
+    differs_from_047: >-
+      AID-2026-047's digest was stale, not invented: substituting AID-2026-044 for AID-2026-047
+      in the committed file reproduced the declared digest exactly at the same byte count, so a
+      real earlier revision existed. Here no revision matches, which is why the correction says
+      "matched no version" instead of "described the pre-renumbering text". Recording the two as
+      the same defect would be a false generalisation from the first instance.
+  - id: F2
+    severity: MEDIUM
+    statement: >-
+      Nothing in CI reads the top-level prompt_sha256 against the file it pins, so the false
+      value was invisible for the life of the manifest.
+    evidence: >-
+      grep -rn prompt_sha256 scripts/ matches only scripts/governance/session_evidence/validate.py,
+      and that file reads session_evidence[].executed_prompt_sha256, not the manifest's top-level
+      field. The INDEX prompt cell quotes the top-level field, so the only consumer is a reader.
+    disposition: >-
+      Recorded, not repaired. This is finding F4 of AID-2026-101 restated with a second instance
+      behind it. Repairing it means writing a checker, which the standing constraint forbids.
+  - id: F3
+    severity: LOW
+    statement: >-
+      prompt_id still reads AID-2026-083-PROMPT while the directory and the file are AID-2026-092.
+    evidence: >-
+      The prompt's own title line reads "# AID-2026-083 — Issue acceptance evidence for #1189,
+      #1197 and #1037", and the manifest's prompt_id agrees with it. The work item was renumbered
+      083 to 092 at merge, and the pinned bytes were not rewritten to match, which is correct:
+      the snapshot is the executed input and renumbering it would make the pin describe text that
+      was never executed. Only the digest was wrong, and only the digest is corrected.
+    disposition: >-
+      No change. The mismatch is the correct behaviour, and it is stated here so that a later
+      reader does not "fix" it.
+
+corrections:
+  - target: 14-ai-development/work-items/AID-2026-092/manifest.yaml
+    field: prompt_sha256
+    prior_value: 9be8aebf7d595f81cc062e5c03a67fd8317aeefaf69dd635fd9031f112dc25d1
+    new_value: a459d7e523fbba4ffb8c0f6ade8d3d8c1ec6ce45b95c3f48f65b192c0413edb3
+    basis: >-
+      python3 -c "import hashlib;b=open('14-ai-development/work-items/AID-2026-092/prompt-v1.md','rb').read();print(len(b),hashlib.sha256(b).hexdigest())"
+      run on main d5107f68.
+  - target: 14-ai-development/work-items/AID-2026-092/manifest.yaml
+    field: prompt_bytes
+    prior_value: 2455
+    new_value: 3772
+    basis: the same command; the length of the committed bytes.
+  - target: 14-ai-development/work-items/AID-2026-092/manifest.yaml
+    field: prompt_digest_correction
+    prior_value: "(field absent)"
+    new_value: >-
+      a note recording that 2455 / 9be8aebf matched no version of the file at any commit, that
+      the value was present from cac933cb onward, and that AID-2026-102 corrected it.
+    basis: >-
+      The precedent AID-2026-072 set and AID-2026-101 reused: the prior value must survive
+      somewhere other than the diff, because a diff is not readable after the branch is deleted.
+  - target: 14-ai-development/work-items/INDEX.md
+    field: AID-2026-092 prompt cell
+    prior_value: >-
+      `AID-2026-083-PROMPT` v1 — ... 2455 bytes, SHA-256 `9be8aebf...`
+    new_value: >-
+      `AID-2026-083-PROMPT` v1 — ... 3772 bytes, SHA-256 `a459d7e5...`, with the superseded
+      pair and the fact that it matched nothing stated in the cell.
+    basis: the cell quotes the manifest; correcting one and not the other would create the same
+      disagreement in a second place.
+
+acceptance_criteria:
+  - id: AC1
+    criterion: AID-2026-092's prompt_sha256 and prompt_bytes equal the digest and size of the committed prompt-v1.md.
+    measurement: >-
+      The same one-liner quoted under corrections[0] is re-run and compared to the manifest. Not
+      machine-checked by CI, because no gate reads this field -- that is F2.
+  - id: AC2
+    criterion: The superseded pair survives outside the diff.
+    measurement: >-
+      Read prompt_digest_correction in AID-2026-092/manifest.yaml. It names 2455 / 9be8aebf and
+      says the pair matched no version, rather than claiming it described an earlier revision.
+  - id: AC3
+    criterion: A version-aware audit over every manifest that declares a digest reports zero mismatches.
+    measurement: >-
+      The audit that found this defect re-run on the merged tree. It reported 1 mismatch before
+      the change and 0 after it, over 53 manifests that declare a digest.
+  - id: AC4
+    criterion: The repository's own gates still pass.
+    measurement: >-
+      scripts/check_traceability.py --index-only exits 0 with 0 errors;
+      scripts/ci/check_repository_hygiene.py exits 0 with violations=0 and the membership
+      counter equal on both sides.
+
+implementation:
+  status: MERGED
+  branch: gov/aid-102-digest-092
+  pull_request: 1279
+  merge_commit_sha: fa8268fef659891efcdab9164f3e7703e19975c0
+  merged_at: "2026-11-26T09:36:13Z"
+  merged_head_sha: 6072005ffe9a3f93844675c2bf2693d25f650382
+  note: >-
+    Merged via PR #1279. The block was NOT_STARTED / NOT_MERGED / PENDING while the pull request
+    was open, on purpose: writing MERGED before a merge exists is the defect being corrected, and
+    committing it while correcting it would be the same error with a shorter half-life. Refreshed
+    here from GET /pulls/1279, not from the branch's expectation.
+  carrier_note: >-
+    PR #1279's merge commit is titled "docs(gov): refresh AID-2026-102 to MERGED from the merge
+    response (#1279)" -- the message the landing script had been given for the *previous* pull
+    request (#1272, which genuinely was a post-merge refresh). The merged content is the digest
+    correction; only the commit subject is wrong, and it is recorded here rather than amended,
+    because rewriting a merged commit's message would make the merge SHA disagree with the
+    history a reader is looking at. The content is identified by merge_commit_sha above.
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    No independent review is recorded. This manifest was written by the session that measured the
+    defect and made the correction, so an APPROVE from that session would be self-review and is
+    not claimed. What is claimed is narrower: the corrected value is a measurement with a quoted
+    command behind it, and the claim that no matching version exists is a blob enumeration over
+    every ref rather than an inference from one commit.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1278"
+    implementing_ai_session: owner-proxy-2026-11-26
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-102/prompt-v1.md
+    executed_prompt_sha256: df3c53282d858ecc7302ba86b4fb419bf6a31c8030d30cee256b64840b4e4e7a
+    executed_prompt_bytes: 4470
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-102/session-evidence-1278.md
+    note: >-
+      Canonical form, because this pull request modifies this manifest and
+      check_09_manifest_and_evidence_entries rejects a legacy manifest the same pull request
+      touched. The top-level prompt_id / prompt_version / prompt_file / prompt_status /
+      prompt_sha256 / prompt_bytes fields above are a different schema -- the prompt pin the
+      INDEX cell cites -- and none is in MANIFEST_FIELDS, so they do not conflict with this
+      block.

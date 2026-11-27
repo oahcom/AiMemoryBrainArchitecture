@@ -1,3 +1,42 @@
+---
+document_metadata:
+  domain: ai-development
+  role: decision-record
+
+  lifecycle:
+    approval:
+      decision_status: Approved
+      approver: "Verifier acting as owner proxy, per the standing instruction that a blocking decision with no human available is to be taken and recorded rather than left open."
+      decision_date: "2026-11-22"
+      approved_version:
+        scheme: git
+        value: "ef65cb9682ceee41767c8bc14b0be9082e26fc73"
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/adr/OWNER-DECISION-PUBLICATION-RECORD-001.md — the DECIDED line in this document names the decider and the date"
+        - "ef65cb9682ceee41767c8bc14b0be9082e26fc73 — the commit that added D8, the last substantive amendment to this decision"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+    usage_status: Active
+    modification_status: Pending-Reapproval
+
+  authority:
+    canonical_status: Canonical
+    canonical_scope: "Owner ruling: what the durable publication record is, that the production PublicationAuthority is an adapter reporting those records rather than a decider, and that no flag may be computed, inferred, defaulted or hardcoded."
+    canonical_scope_id: ai-development/publication-record
+    canonical_scope_keywords:
+      - publication-record
+      - publication-authority-adapter
+      - canonical-commit
+      - publication-flags
+      - blocked-not-published
+    canonical_conflict_status: None
+    normative_status: Normative
+---
+
 # OWNER-DECISION-PUBLICATION-RECORD-001 — What the durable publication record is
 
 **Status:** DECIDED (owner-proxy decision, 2026-11-22)
@@ -120,6 +159,8 @@ hardcode any of the eight flags.
 until their authoritative issuers exist.** Because `PublicationGate::run`
 (`lib.rs:544-562`) maps `false` to `Blocked`, the immediate consequence is:
 
+> **Amended — see D8.2 below.** The clause requiring `canonical_commit_confirmed` to be reported `false` is **superseded**: D8.2 replaced that literal with a sourced read (`AdmissionPublicationAuthority::canonical_commit_confirmed`, `publication_authority.rs:56-73`, reported at `:132`), because the authoritative issuer D3 was waiting for now exists. The rule as it applies to the other two flags is unchanged — both are still unsourced, and D7.1 keeps `publication_participant_admitted` `false` and forbids building the registry. Read D3's three flags as **two unsourced flags still reported `false`** plus one now sourced.
+
 ```
 compile() becomes reachable, and returns Ok(Blocked) with disposition preserved.
 It does not return Published, and must not pretend to.
@@ -149,6 +190,8 @@ silent.
   exist.
 
 ## Consequences, stated plainly
+
+> **Amended — see D7.1 below.** The third bullet's promise of a D-side publication-participant registry is **withdrawn** by D7.1: no such registry is to be built in E until Storage signing, the COC quorum and the I terminal decision exist. The other three bullets stand.
 
 - After this decision, `brain compile` will report a **blocked publication**
   rather than a skipped stage. That is progress and it will look like a

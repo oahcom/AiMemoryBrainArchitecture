@@ -4,26 +4,24 @@ document_metadata:
   role: normative-standard
   lifecycle:
     approval:
-      decision_status: Under-Review
-      approver: NOT_RECORDED
-      decision_date: NOT_RECORDED
+      decision_status: Approved
+      approver: "user-authorized operator (delegated by account owner)"
+      decision_date: "2026-11-26"
       approved_version:
-        scheme: git
-        value: "a7d12fe9835d8f53403946ab08c1cae8c3f12fbf"
+        scheme: content-hash
+        value: "273f048d8dd3401ec62e2c177fa00787ab6f6cb855e190b471b3a0c7f3b81523"
       approval_scope:
         type: Full-document
-        included_sections: []
-        included_assets: []
-      approval_applicability: Not-Applicable-To-Current-Version
+      approval_applicability: Applicable-To-Current-Version
       evidence_reference:
-        - "00-governance/design-principles.md"
+        - "14-ai-development/work-items/AID-2026-096/approval-evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
       last_verified_date: null
       last_verification_note: "Status is DECIDED in the document body. No formal approval record, approver identity or decision date exists in this repository; recorded as NOT_RECORDED rather than inferred."
     usage_status: Active
-    modification_status: Pending-Reapproval
+    modification_status: Unchanged
     supersession:
       supersedes: []
       supersession_reason: null
@@ -50,7 +48,9 @@ document_metadata:
 
 # Design Principles
 
-**Current version status: CANDIDATE / Pending-Reapproval — NOT APPROVED.** The recorded direction does not approve P-01 through P-16 in this version. Their DECIDED labels record design direction only; they are not evidence of formal approval. No historical approver or approval date is asserted. Resubmission requires revised exact-version evidence and a separate attributable approval decision.
+**Current version status: APPROVED — Normative.** This document is approved as a Normative governance baseline by a new approval event dated 2026-11-26. This approval does not certify implementation conformity with P-01 through P-16.
+
+**Historical status:** Before this new approval event on 2026-11-26, this document was marked `CANDIDATE / Pending-Reapproval — NOT APPROVED`. This records the prior state only. The present decision is a new approval, not a retroactive approval or authentication of any historical approver.
 
 This document defines the principles that constrain all subsystem designs.
 

@@ -582,7 +582,9 @@ Issue #7 当前根据 Owner 阶段关闭裁决为 CLOSED / not_planned；正文�
 
 精确命令 `python3 scripts/check_bilingual_docs_full.py --source-revision c58878fce24528a0842b4f8887c93ddbf465b566` 返回 **467 个范围内 Markdown / 112 个豁免 / 81 条 violations / 退出码 1**。这是路径对应关系清点，不是语义翻译审查。81 条按如下类别划分：
 
-### 81 条 GOV-DOC-001 冻结快照逐路径分类
+### HISTORICAL — not a gate input：81 条 GOV-DOC-001 冻结快照逐路径分类
+
+> HISTORICAL — not a gate input。本表是冻结基线 `c58878fce24528a0842b4f8887c93ddbf465b566` 上实测的 81 条清单；其中 8 条不在权威副本 `scripts/ci/baselines/bilingual-docs.txt` 内，权威副本中的 4 条本表未列。唯一权威是该文件（77 条），不是本表。
 
 以下每个源文件均存在于冻结基线 `c58878fce24528a0842b4f8887c93ddbf465b566`，因此 81 条均为 Stage A 基线既有项。前 77 条属于 NORMATIVE_ROOTS 镜像缺项（预期的 `docs/en/<source>` 与 `docs/zh-CN/<source>` 两个路径均缺失）；最后 4 条属于 Phase-0 报告配对缺项（缺少 side-by-side `.en.md`/`.zh-CN.md` Pair 或所需的 `docs/en/14-ai-development` 镜像）。Owner 标签是按路径/领域作的路由分类，不构成新的 Canonical Owner 指派。全部排除在 #453 范围之外；处置方式为按 Owner 划分范围进行待办积压分诊，不进行批量清理。
 

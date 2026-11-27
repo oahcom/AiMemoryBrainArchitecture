@@ -1,0 +1,67 @@
+manifest_version: "1.0"
+record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
+registration_stage: "STAGE_0"
+registration_status: "CARRIER_PR_PENDING"
+work_item_id: "AID-2026-110"
+id_status: "PROVISIONAL"
+title: "Restore two review-named E Memory Compiler canonical roots"
+date: "2026-11-26"
+repository:
+  name: "oahcom/AiMemoryBrainArchitecture"
+  baseline_branch: "main"
+  baseline_commit: "e3a134de856bbb58581fd688462c9c0282631270"
+identifier_allocation:
+  assigned_at: "2026-11-26"
+  observed_main: "e3a134de856bbb58581fd688462c9c0282631270"
+  index_sha: "1d6b50a646ca3fc73b3192f7040a45df9d4ee94a"
+  max_index_id: "AID-2026-109"
+  requested_id: "AID-2026-110"
+  id_status: "PROVISIONAL"
+  uniqueness_scope: "At commit-time reallocation, latest main INDEX maximum was AID-2026-109; AID-2026-110 was selected as max+1."
+  merge_time_rule: "Re-read main INDEX, work-item tree, Issues, PRs and branch names; renumber if the identifier is no longer unique."
+authority:
+  sponsor: "USER-PRINCIPAL-DELEGATED"
+  accountable_owner: "USER-PRINCIPAL-DELEGATED"
+  acceptance_authority: "NOT_ASSIGNED"
+  attribution: "user-authorized operator (delegated by account owner)"
+  signature_status: "代理执行记录，非自然人 Owner 签署"
+scope:
+  objective: "Restore exactly two review-named E Memory Compiler roots with GOV-DOC-002 metadata; preserve their source bodies; verify and register existing EN/ZH-CN mirrors; disposition the other 16 candidate paths as historical records not restored."
+  canonical_files:
+    - "04-memory-compiler/accepted-receipt-and-idempotency-contract.md"
+    - "04-memory-compiler/compiler-state-and-producer-admission.md"
+  en_files:
+    - "docs/en/04-memory-compiler/accepted-receipt-and-idempotency-contract.md"
+    - "docs/en/04-memory-compiler/compiler-state-and-producer-admission.md"
+  zh_CN_files:
+    - "docs/zh-CN/04-memory-compiler/accepted-receipt-and-idempotency-contract.md"
+    - "docs/zh-CN/04-memory-compiler/compiler-state-and-producer-admission.md"
+  evidence:
+    canonical: "14-ai-development/work-items/AID-2026-110/restore-evidence.md"
+    en: "docs/en/14-ai-development/work-items/AID-2026-110/restore-evidence.md"
+    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-110/restore-evidence.md"
+  files_to_create:
+    - "14-ai-development/work-items/AID-2026-110/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-110/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-110/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-110/restore-evidence.md"
+    - "docs/en/14-ai-development/work-items/AID-2026-110/restore-evidence.md"
+    - "docs/zh-CN/14-ai-development/work-items/AID-2026-110/restore-evidence.md"
+  files_to_modify:
+    - "14-ai-development/work-items/INDEX.md"
+    - "04-memory-compiler/accepted-receipt-and-idempotency-contract.md"
+    - "04-memory-compiler/compiler-state-and-producer-admission.md"
+    - "docs/en/04-memory-compiler/accepted-receipt-and-idempotency-contract.md"
+    - "docs/zh-CN/04-memory-compiler/accepted-receipt-and-idempotency-contract.md"
+    - "docs/en/04-memory-compiler/compiler-state-and-producer-admission.md"
+    - "docs/zh-CN/04-memory-compiler/compiler-state-and-producer-admission.md"
+  exclusions:
+    - "Do not restore the other 16 candidate paths; classify each as HISTORICAL_PHASE_RECORD."
+    - "No changes to 03-memory-brain, 05-memory-runtime, 09-security-governance or unrelated roots."
+    - "No runtime, implementation, validator, schema, tests, workflow, deployment or production changes."
+    - "No Issue closure."
+review:
+  status: "NOT_ASSIGNED"
+acceptance:
+  status: "NOT_GRANTED"
+  note: "Canonical path restoration and evidence only; decision_status remains Draft and normative_status remains Informative."

@@ -41,7 +41,11 @@ from pathlib import Path
 # disagree about which directories are governed. Duplicating the list is
 # how 08-protocols silently stopped existing.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from check_bilingual_docs import NORMATIVE_ROOTS as _BILINGUAL_ROOTS  # noqa: E402
+from check_bilingual_docs import (  # noqa: E402
+    GitOutputDecodeError,
+    NORMATIVE_ROOTS as _BILINGUAL_ROOTS,
+    decode_git_output,
+)
 
 NORMATIVE_ROOTS = tuple(sorted(_BILINGUAL_ROOTS)) + (
     # Bilingual mirrors. Counted so mirror drift is visible instead of falling
@@ -111,7 +115,7 @@ MANUAL_CONTROLS = (
      "Overlap is a claim about meaning. The gate proves the ids are unique and only one document per group is `Canonical`; whether two *different* ids cover the same subject is not derivable from metadata",
      "Reviewer"),
     ("M-02", "Whether an `Approved` decision is real",
-     "The gate proves a decision record exists, names an approver and binds to a commit. It cannot prove a person with that authority actually decided",
+     "The gate validates the `decision_status` enumeration; for `Approved` it requires `approved_version`, `approval_scope` and `approval_applicability`, and DM-10 binds the body hash to `approved_version`. It does not require `approver` or `decision_date` to be present, and does not verify that any approval exists",
      "Approver, then reviewer"),
     ("M-03", "Whether `evidence_verification` evidence supports the decision",
      "The gate proves a verification status and a reference exist. Whether the reference supports the claim is an argument, not a field",
@@ -182,7 +186,15 @@ APPROVAL_KEYS = {
     "revocation",
 }
 VERSION_KEYS = {"scheme", "value"}
-SCOPE_KEYS = {"type", "included_sections", "included_assets"}
+# `included_sections` and `included_assets` were removed from the corpus in the
+# same change that removed them here (#904, ruling 76 in #833 comment
+# 7120131295). They existed only to describe `Selected-sections` and
+# `Selected-assets`, which DM-10 never honoured; #888 removed the values and
+# left the keys, so every approved document carried two empty lists that
+# declared nothing. A document that still carries one is now an unknown-key
+# error, which is the point: the gate refuses the shape the corpus no longer
+# uses.
+SCOPE_KEYS = {"type"}
 REVOCATION_KEYS = {
     "revocation_decision_id", "revoked_date", "revoker", "revocation_reason",
     "revocation_evidence", "superseding_document",
@@ -1023,18 +1035,6 @@ def check_document(path: Path, text: str, root: Path | None = None) -> tuple[lis
         if not applicability:
             errors.append("DM-03 Approved requires approval.approval_applicability")
 
-    # The section and asset lists described the two scopes above and nothing
-    # else, so nothing reads them. An empty list is the template's placeholder
-    # and claims nothing (every approved document carries one); a non-empty list
-    # is a claim no rule verifies, so it is refused and named.
-    for field in ("included_sections", "included_assets"):
-        if scope.get(field):
-            errors.append(
-                f"DM-03 approval_scope.{field} is not honoured: only "
-                "'Full-document' is checked, so a non-empty list would claim a "
-                "boundary the gate never verifies. Remove it"
-            )
-
     # DM-04 Revoked must carry a unique revocation decision id.
     revocation = approval.get("revocation")
     if revocation is not None:
@@ -1197,17 +1197,26 @@ def git(root: Path, *args: str, nul: bool = False, raw: bool = False) -> str | N
     are not split into fragments. raw=True returns stdout untouched: stripping
     a `git show` result would be a second, undeclared normalisation applied
     before the body hash ever sees the text.
+
+    stdout is captured as bytes and decoded as UTF-8 by decode_git_output().
+    `subprocess(text=True)` decoded with the console's *locale* codec instead:
+    on a GBK console a UTF-8 document raised UnicodeDecodeError, `stdout`
+    arrived as None, and DM-10 asserted the file "did not exist at
+    approved_version" -- a claim about history that was never read. An
+    undecodable read raises GitOutputDecodeError, which says "decode" and is
+    reported as INCOMPLETE (exit 2), never as a content verdict.
     """
     try:
         out = subprocess.run(
             ["git", "-C", str(root), *args],
-            capture_output=True, text=True, check=False,
+            capture_output=True, check=False,
         )
     except OSError:
         return None
     if out.returncode != 0:
         return None
-    return out.stdout if (nul or raw) else out.stdout.strip()
+    text = decode_git_output(out.stdout, "git " + " ".join(args))
+    return text if (nul or raw) else text.strip()
 
 
 SHALLOW_HISTORY_ERROR = (
@@ -1279,7 +1288,14 @@ def check_approval_binding(root: Path, rel: str, text: str, meta: dict,
                 "not a branch, tag or abbreviated reference"
             )
             return errors, notes, unanswerable
-        commit = git(root, "rev-parse", "--verify", "--quiet", f"{value}^{{commit}}")
+        commit = None
+        try:
+            commit = git(
+                root, "rev-parse", "--verify", "--quiet", f"{value}^{{commit}}"
+            )
+        except GitOutputDecodeError as exc:
+            unanswerable.append(f"DM-10 {rel}: {exc}")
+            return errors, notes, unanswerable
         if not commit:
             # "Absent from this clone" and "never existed" are indistinguishable
             # on truncated history. Only the second is a policy violation, so
@@ -1291,13 +1307,46 @@ def check_approval_binding(root: Path, rel: str, text: str, meta: dict,
                     f"DM-10 approved_version {value!r} is not a commit in this repository"
                 )
             return errors, notes, unanswerable
-        historical = git(root, "show", f"{commit}:{rel}", raw=True)
-        if historical is None:
-            errors.append(
-                f"DM-10 {rel} did not exist at approved_version {value[:12]}; "
-                "the approval cannot be bound to that version"
-            )
+        historical = None
+        try:
+            historical = git(root, "show", f"{commit}:{rel}", raw=True)
+        except GitOutputDecodeError as exc:
+            unanswerable.append(f"DM-10 {rel}: {exc}")
             return errors, notes, unanswerable
+        if historical is None or historical == "":
+            # A read that produced nothing is not evidence that the file was
+            # never there: "absent" is assertable only when the object is
+            # genuinely absent from that commit. An object that exists but
+            # yields no readable text is a decode/read failure, and it must
+            # not wear the message a real absence wears.
+            try:
+                size = git(root, "cat-file", "-s", f"{commit}:{rel}")
+            except GitOutputDecodeError as exc:
+                unanswerable.append(f"DM-10 {rel}: {exc}")
+                return errors, notes, unanswerable
+            if size is None:
+                if historical is None:
+                    errors.append(
+                        f"DM-10 {rel} did not exist at approved_version {value[:12]}; "
+                        "the approval cannot be bound to that version"
+                    )
+                    return errors, notes, unanswerable
+                unanswerable.append(
+                    f"DM-10 {rel}: git show returned empty output for "
+                    f"{value[:12]}:{rel} and git cat-file cannot size it; the "
+                    "approved version could not be read"
+                )
+                return errors, notes, unanswerable
+            if historical is None or size != "0":
+                unanswerable.append(
+                    f"DM-10 {rel}: git show produced "
+                    f"{'no' if historical is None else 'empty'} output for "
+                    f"{value[:12]}:{rel} although the blob exists ({size} bytes); "
+                    "a decode or read failure is not evidence that the file was absent"
+                )
+                return errors, notes, unanswerable
+            # An empty file is a real, readable version: hash its empty text.
+            historical = ""
         stale = body_hash(historical) != current
 
     if not stale:
@@ -2233,6 +2282,10 @@ def main() -> int:
         all_changed, required = (
             changed_paths(root, args.require_changed) if incremental else (set(), set())
         )
+    except GitOutputDecodeError as exc:
+        # Paths we cannot read are not paths that did not change: incomplete, 2.
+        print(f"::error::{exc}", file=sys.stderr)
+        return 2
     except ValueError as exc:
         if shallow:
             # The REF may exist upstream and simply lie below this clone's
@@ -2258,7 +2311,11 @@ def main() -> int:
     # renames out of the governed set) is a real, passed increment. It must not
     # borrow the ordinary PASS wording, or the vacuous case would be invisible.
     deletions_only = incremental and bool(all_changed) and not required
-    is_git = git(root, "rev-parse", "--git-dir") is not None
+    try:
+        is_git = git(root, "rev-parse", "--git-dir") is not None
+    except GitOutputDecodeError as exc:
+        print(f"::error::{exc}", file=sys.stderr)
+        return 2
 
     # Problems the walk itself found -- symlinks, unreadable roots -- are
     # errors of the run, not warnings. They arrive with the file list so that

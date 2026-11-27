@@ -1,0 +1,210 @@
+work_item_id: AID-2026-085
+title: Make an unwired gate fail instead of merging green
+class: GATE/TEST
+risk: R2
+risk_rationale: >-
+  One existing required gate gains a second rule, one baseline file, and one added step inside
+  an existing job. No new required status context is created, so no branch-protection payload
+  moves. The risk addressed is false assurance: a gate-shaped script could be added with no
+  workflow invoking it and every gate stayed green, because check_test_reachability.py only
+  asked that question about test_*.py. The one step this work item adds
+  (scripts/check_source_revision_pointers.py) exits 0 on main, measured from this worktree, so
+  it cannot redden the board. The two gates that cannot be wired today are baselined rather
+  than deleted, and the baseline fails when it goes stale.
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 587d7ca9731e50c7a4c8c9df424798f555e0a2db
+tracking_issue: "#925"
+
+prompt_id: AID-2026-085-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-085/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 17a8cd7583b88aaa348024bf445c9c3bbb86e463c38e49495df9d07edbb3f35e
+prompt_bytes: 7689
+
+authorization:
+  implementation_write: >-
+    GRANTED for scripts/ci/check_test_reachability.py, scripts/ci/test_check_test_reachability.py,
+    scripts/ci/baselines/gate-wiring.txt, this work item's own directory, and
+    14-ai-development/work-items/INDEX.md. NOT_GRANTED for any other path, including
+    .github/workflows/repository-hygiene.yml: the assignment authorized adding a step there, but
+    the step it named (check_source_revision_pointers.py) exits 1 on main, so wiring it would
+    redden a required job. No workflow file is touched.
+  gate_behaviour_change: >-
+    GRANTED for extending the existing test-reachability gate with the symmetric rule for
+    gate-shaped scripts, and for adding one baseline file it consumes. NOT_GRANTED for adding
+    or editing any workflow step, job, workflow or required status context.
+  schema_change: NOT_GRANTED - no manifest field is added, removed or retyped.
+  platform_state_change: >-
+    NOT_GRANTED for required status contexts. The new step runs inside the existing
+    repository-hygiene job, whose context is already required, so no branch-protection payload
+    is modified.
+  architecture_spec_change: NOT_GRANTED - no ADR and no canonical document is modified.
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-085/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-085/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-085/session-evidence-925.md
+    - scripts/ci/baselines/gate-wiring.txt
+  files_to_modify:
+    - scripts/ci/check_test_reachability.py
+    - scripts/ci/test_check_test_reachability.py
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope: >-
+    Every other path. In particular all three baselined gates are neither edited nor deleted:
+    scripts/check_policy_inheritance.py and
+    scripts/governance/status_migration/check_status_gates.py take a required argument that no
+    artifact in this tree supplies, and scripts/check_source_revision_pointers.py reports eight
+    stale pointers on main. The eight pointers themselves are a docs/ defect and are not fixed
+    here. No workflow file is changed, and no other baseline is touched.
+
+acceptance_criteria:
+  - id: AC1
+    criterion: >-
+      A gate-shaped script named only in a comment is reported unwired.
+    measurement: >-
+      test_gate_referenced_only_in_a_comment_is_unwired: the workflow names the gate in a YAML
+      comment and in a shell comment inside a `run: |` block; the checker exits 1 and prints the
+      gate's path.
+  - id: AC2
+    criterion: >-
+      A gate whose own test is wired, but whose gate is not, is reported unwired.
+    measurement: >-
+      test_gate_whose_test_is_wired_but_gate_is_not: the workflow runs
+      tests/test_policy_inheritance.py; the checker exits 1, prints
+      scripts/check_policy_inheritance.py and does not print the test path.
+  - id: AC3
+    criterion: A gate invoked directly in a `run:` block is reported wired.
+    measurement: >-
+      test_gate_invoked_in_a_run_block_is_wired and
+      test_gate_in_a_block_scalar_run_is_wired_by_basename both exit 0 and print
+      `1 gate scripts, 0 unwired`.
+  - id: AC4
+    criterion: >-
+      A gate that is neither wired nor baselined fails the checker and the message names it.
+    measurement: >-
+      test_new_unwired_gate_fails_and_names_the_script: exit 1, the path appears on stdout and
+      the error names scripts/ci/baselines/gate-wiring.txt.
+  - id: AC5
+    criterion: A gate that is baselined and unwired is tolerated.
+    measurement: >-
+      test_baselined_unwired_gate_is_tolerated: exit 0 and `1 gate scripts, 1 unwired, 1
+      baselined`.
+  - id: AC6
+    criterion: >-
+      An unreadable baseline is INCOMPLETE (exit 2), never PASS (exit 0).
+    measurement: >-
+      test_unreadable_baseline_is_incomplete_not_pass: exit 2 and `gate-wiring baseline not
+      found` on stderr.
+  - id: AC7
+    criterion: >-
+      Both rules are mutation-verified: removing the guard makes the named test fail with an
+      AssertionError, not a traceback, and restoring it makes the suite green again.
+    measurement: >-
+      Wiring rule removed (`wired[relative] = True`): test_gate_referenced_only_in_a_comment_is_unwired
+      fails `AssertionError: 0 != 1`. Comment stripping removed (`blocks.append(rest)`): the same
+      test fails `AssertionError: 0 != 1`. Baseline exemption removed
+      (`new_unwired = list(unwired)`): test_baselined_unwired_gate_is_tolerated fails
+      `AssertionError: 1 != 0`. Restored: 24 tests, OK, exit 0.
+  - id: AC8
+    criterion: >-
+      Every baselined gate carries its own stated reason in the baseline file, and none is
+      deleted.
+    measurement: >-
+      scripts/ci/baselines/gate-wiring.txt lists three paths, each preceded by a comment block
+      naming its measured exit code. check_policy_inheritance.py and check_status_gates.py exit
+      2 with `the following arguments are required`; `git ls-files | grep -i declaration` is
+      empty. check_source_revision_pointers.py exits 1 with STALE=8.
+  - id: AC9
+    criterion: The existing repository-hygiene job is unchanged, so no required context moves.
+    measurement: >-
+      `git diff 587d7ca9 --stat -- .github/` is empty on this branch.
+
+findings:
+  - id: F1
+    severity: HIGH
+    statement: >-
+      Issue #925 and the assignment both state that check_source_revision_pointers.py exits 0
+      on main and can be wired now. It exits 1, so wiring it as a hard step would redden a
+      required job.
+    evidence: >-
+      Clean detached worktree at 587d7ca9: `python3 scripts/check_source_revision_pointers.py`
+      prints `STALE=8 ... BAD=8` and exits 1; the same at dc826e4e. One case checked by hand:
+      docs/en/00-governance/design-principles.md:58 declares 9792e189… while
+      `git rev-parse HEAD:00-governance/design-principles.md` is 0a67b5b2….
+  - id: F1b
+    severity: MEDIUM
+    statement: >-
+      Issue #925 also lists check_traceability.py as unwired; it is wired.
+    evidence: >-
+      At 587d7ca9, repository-hygiene.yml:136 runs
+      `python3 scripts/check_traceability.py --index-only`.
+  - id: F2
+    severity: MEDIUM
+    statement: >-
+      The existing gate's docstring understates its own coverage: it says 57 test files while
+      the gate reports 63.
+    evidence: >-
+      `python3 scripts/ci/check_test_reachability.py` prints
+      `Test reachability: 63 test files, 63 reachable, 0 unreachable`; `git ls-files | grep -E
+      '(^|/)test_[^/]*\.py$' | wc -l` is 63. The docstring is corrected by this change.
+  - id: F3
+    severity: LOW
+    statement: >-
+      A gate can be wired as a quoted argument to a wrapper, so tokenising naively would report
+      it unwired.
+    evidence: >-
+      gates.yml:171 passes `--command "python3 scripts/check_bilingual_docs_full.py"` to
+      gate_ratchet.py. Quotes are stripped per token, which is why
+      scripts/check_bilingual_docs_full.py is reported wired.
+  - id: F4
+    severity: LOW
+    statement: >-
+      The work item was first written as AID-2026-083 and renumbered to AID-2026-085 after the
+      assignment measured a collision on 083.
+    evidence: >-
+      AID-2026-083 was claimed by branch docs/aid-2026-083-issue-acceptance-evidence and appears
+      as RENUMBERED_FROM in AID-2026-092/manifest.yaml; 082 is claimed by PRs #1243 and #1220 and
+      086-090 by #1219/#1241/#1242/#1232/#1248. `git ls-tree origin/main
+      14-ai-development/work-items/` lists neither an AID-2026-083 nor an AID-2026-085 directory.
+      prompt_sha256 and prompt_bytes were recomputed from the renamed prompt-v1.md bytes, not
+      carried over from the 083 draft.
+
+implementation:
+  status: IMPLEMENTED_IN_BRANCH
+  pull_request: ASSIGNED_AT_OPEN
+  merge_commit_sha: NOT_MERGED
+  note: >-
+    The rule, the baseline, the wired step and the tests land in this branch. The pull request
+    number cannot be written into the commit that opens it.
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    No independent review is recorded. This manifest was written by the session that made the
+    change, so an APPROVE from that same session would be self-review and is not claimed.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#925"
+    implementing_ai_session: a925-opencode-author
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-085/prompt-v1.md
+    executed_prompt_sha256: 17a8cd7583b88aaa348024bf445c9c3bbb86e463c38e49495df9d07edbb3f35e
+    executed_prompt_bytes: 7689
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-085/session-evidence-925.md

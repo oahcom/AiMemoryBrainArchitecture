@@ -87,7 +87,8 @@ class GateRootsTest(unittest.TestCase):
         import subprocess
 
         run = lambda *args: subprocess.run(
-            args, cwd=self.root, check=True, capture_output=True, text=True
+            args, cwd=self.root, check=True, capture_output=True,
+            encoding="utf-8", errors="replace",
         )
         run("git", "init", "-q")
         run("git", "config", "user.email", "tests@example.invalid")
@@ -248,7 +249,8 @@ class GateRootsTest(unittest.TestCase):
             cwd=self.gate.ROOT,
             check=True,
             capture_output=True,
-            text=True,
+            encoding="utf-8",
+            errors="replace",
         )
 
     def test_all_21_embedded_provenance_pairs_match_full_history_snapshot(self):
@@ -361,7 +363,8 @@ class GateRootsTest(unittest.TestCase):
         repo = Path(self._tmp.name) / "paired-move-repo"
         repo.mkdir()
         run = lambda *a: subprocess.run(
-            a, cwd=repo, check=True, capture_output=True, text=True
+            a, cwd=repo, check=True, capture_output=True,
+            encoding="utf-8", errors="replace",
         )
         run("git", "init", "-q")
         run("git", "config", "user.email", "t@example.invalid")
@@ -437,7 +440,8 @@ class GateRootsTest(unittest.TestCase):
         repo = Path(self._tmp.name) / "repo"
         repo.mkdir()
         run = lambda *a: subprocess.run(a, cwd=repo, check=True,
-                                        capture_output=True, text=True)
+                                        capture_output=True,
+                                        encoding="utf-8", errors="replace")
         run("git", "init", "-q")
         run("git", "config", "user.email", "t@example.invalid")
         run("git", "config", "user.name", "t")
@@ -477,7 +481,7 @@ class GateRootsTest(unittest.TestCase):
         import subprocess
         result = subprocess.run(
             ["git", *args], cwd=repo, check=True,
-            capture_output=True, text=True,
+            capture_output=True, encoding="utf-8", errors="replace",
         )
         return result.stdout.strip()
 
@@ -646,12 +650,37 @@ class GateRootsTest(unittest.TestCase):
         (self.root / chinese).unlink()
         self.assertIn(english, self.inventory_02())
 
-    def test_issue_469_short_translation_is_accepted(self):
+    def test_short_translation_on_the_chinese_side_is_accepted(self):
+        # Issue #469: brevity must not be punished. The designated Chinese side
+        # is read, and one CJK character there is enough.
         self.write("02-domain-model/zz-probe-short.md", "English source.\n")
         self.write("02-domain-model/zz-probe-short.zh-CN.md", "中文翻译。\n")
         gaps = self.inventory_02()
         self.assertNotIn("02-domain-model/zz-probe-short.md", gaps)
         self.assertNotIn("02-domain-model/zz-probe-short.zh-CN.md", gaps)
+
+    def test_stray_cjk_in_english_source_does_not_vouch_for_the_pair(self):
+        # The English source carries two CJK characters and the `.zh-CN.md`
+        # member is a verbatim copy of the English text. Reading "either file"
+        # accepted the pair; only the Chinese-designated side may count.
+        self.write(
+            "02-domain-model/zz-probe-stray.md",
+            "English source naming 方案 and 编排 in passing.\n",
+        )
+        self.write(
+            "02-domain-model/zz-probe-stray.zh-CN.md",
+            "English source naming the plan and the orchestration in passing.\n",
+        )
+        gaps = self.inventory_02()
+        self.assertIn("02-domain-model/zz-probe-stray.md", gaps)
+        self.assertIn("02-domain-model/zz-probe-stray.zh-CN.md", gaps)
+
+    def test_english_copy_without_cjk_under_zh_cn_name_is_rejected(self):
+        self.write("02-domain-model/zz-probe-copy.md", "Plain English source.\n")
+        self.write("02-domain-model/zz-probe-copy.zh-CN.md", "Plain English copy.\n")
+        gaps = self.inventory_02()
+        self.assertIn("02-domain-model/zz-probe-copy.md", gaps)
+        self.assertIn("02-domain-model/zz-probe-copy.zh-CN.md", gaps)
 
     def test_issue_461_n6_pair_without_chinese_is_rejected(self):
         self.write("02-domain-model/zz-probe-fake.md", "English source.\n")

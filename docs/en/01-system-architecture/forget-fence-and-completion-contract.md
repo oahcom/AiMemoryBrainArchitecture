@@ -1,12 +1,58 @@
+---
+document_metadata:
+  domain: memory-brain
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "Delegated direction decision, 2026-11-26"
+        - "Work Item AID-2026-089"
+        - "Issues #1125 and #1211"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Candidate source restored in Draft PR; exact-version D/Storage/A acceptance and normative approval pending."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "D canonical ForgetFence authority and Storage projection boundary"
+    canonical_scope_id: "memory-brain/forget-fence-authority"
+    canonical_scope_keywords:
+      - forget-fence
+      - canonical-suppression
+      - storage-projection
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "01-system-architecture/forget-fence-and-completion-contract.md"
+---
 # Canonical Forget Fence and Completion Contract
 
 - Document ID: D-FORGET-CONTRACT-001
 - Version: 1.0
-- Source branch: session-d-memory-brain-2026-11-16
-- Source revision: DEREFERENCED — historical source blob `1f0391bc49d007c44ec74165bd33d37412cc7990` retained; no current normative source path exists.
-- Source branch head audited: 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
-- Source: DEREFERENCED — original normative path `03-memory-brain/forget-fence-and-completion-contract.md` is absent from the current main tree; alternative: [surviving Chinese counterpart](../../zh-CN/03-memory-brain/forget-fence-and-completion-contract.md) (blob `38b7d0f4399f782611d9ab50f9ecdf21aa2c4f6c`; translation only, not an authoritative substitute).
-- Chinese counterpart: [Canonical Forget Fence 与完成契约](../../zh-CN/03-memory-brain/forget-fence-and-completion-contract.md)
+- Source branch: main
+- Source revision: canonical root restored by AID-2026-089; exact Blob is recorded on the Draft PR Head.
+- Historical source branch head: 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3 (provenance only)
+- Canonical source: [01-system-architecture/forget-fence-and-completion-contract.md](../../../01-system-architecture/forget-fence-and-completion-contract.md); this English file and the Chinese counterpart are mirrors.
+- Chinese counterpart: [Canonical Forget Fence 与完成契约](../../zh-CN/01-system-architecture/forget-fence-and-completion-contract.md)
 - Owner: Session D — Memory Brain Principal Architect
 - Status: D canonical-domain semantics DECIDED; cross-module execution and global completion policy OPEN / I-owned
 - Related: D-REV-P1-001, D-REV-P1-003, INT-P0-02, INT-P0-03, INT-P1-03, INT-P1-06
@@ -182,3 +228,26 @@ The unique safety invariant is: no derivative may become retrievable, deliverabl
 Work Registration, Barrier Capture, Dependency Registration, Staging, Publish Authorization, Durable Commit, Artifact Visibility and Terminal Disposition are separate evidence-bearing stages. Barrier capture accounts for pre-fence work; it is not publication permission. Lease expiry, queue deletion, retry delay and DLQ parking do not terminalize work.
 
 D defines domain semantics and observable ordering only. Storage may choose any realization that proves the same linearization and crash-recovery behavior; this addendum does not approve a database or claim implementation. **CR-P1-01 remains OPEN pending E + Storage joint confirmation and executable evidence.**
+
+## 10. Single-authority resolution — delegated direction, 2026-11-26
+
+Authority: user-authorized operator (delegated by account owner)  
+Decision date: 2026-11-26  
+Status: direction recorded; D, Storage/Consistency and A exact-version acceptance pending. No implementation authorization.
+
+D — Memory Brain — is the sole logical authority for ForgetOperation identity/state, canonical target and transitive lineage coverage, the monotonic ForgetFence generation/cursor, canonical suppression and the D-domain proof. There is one Forget decision space even if Storage physically persists the bytes.
+
+Namespace is a resolved Scope/partition attribute. It may constrain matching but is not an independent fence identity and cannot replace typed canonical target identity, exact Memory/Version refs, source identity or derived lineage. The target set must state exact Scope coverage and source-to-derived lineage.
+
+Any Storage-local Memory/Version fence row is a derived, rebuildable projection of the D-owned authoritative snapshot. It MUST NOT issue its own generation/cursor, decide coverage or authorize reads/publication without current D authority. Storage retains physical transaction durability, atomic visibility, backup/restore, recovery, replication and anti-rollback authority for the physical store; physical custody does not transfer logical authority. Projection mismatch fails closed and is reconciled from D.
+
+Every read/write/publication, Compiler, Retrieval/Index, Context, Delivery/reconnect and final-request gate must establish a current D snapshot/cursor for the exact target/lineage. Missing, stale, corrupt, rolled-back or insufficiently scoped D state fails closed. Local target suppression is not Global Forget Completion; I retains global policy, retention, legal-hold, external-copy and physical-erasure authority.
+
+Reviewer criteria:
+- FF-A1 PASS iff D is the only logical issuer/authority of ForgetFence generation/cursor; otherwise FAIL.
+- FF-A2 PASS iff Storage-local fences are rebuildable D-derived projections with no independent sequence/cursor; otherwise FAIL.
+- FF-A3 PASS iff namespace does not replace typed target, Scope and transitive lineage coverage; otherwise FAIL.
+- FF-A4 PASS iff missing/stale/corrupt D state blocks affected reads/publication; otherwise FAIL.
+- FF-A5 PASS iff local suppression is distinct from I-governed Global Forget Completion; otherwise FAIL.
+
+Open: D public snapshot/read API, exact target/lineage schema acceptance, cross-owner execution order, Storage physical anti-rollback proof and implementation/conformance.

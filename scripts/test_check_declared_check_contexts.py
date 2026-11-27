@@ -131,6 +131,16 @@ class DeclaredCheckContextsTest(unittest.TestCase):
         self.assertIn("Rust format (hard gate)", errors.getvalue())
         self.assertIn("not a required context", errors.getvalue())
 
+    def test_violation_when_a_context_is_declared_twice(self):
+        """A duplicated line collapses into the set, so the sets still match."""
+        self.write(DOC, DOC_TEXT.replace("audit\n", "audit\naudit\n"))
+        self.write(".github/workflows/gates.yml", WORKFLOW)
+        errors = io.StringIO()
+        with redirect_stdout(io.StringIO()), redirect_stderr(errors):
+            self.assertEqual(checker.main(self.root, DECLARED), 1)
+        self.assertIn("audit", errors.getvalue())
+        self.assertIn("more than once", errors.getvalue())
+
     def test_incomplete_when_the_payload_cannot_be_read(self):
         """An unreadable platform is INCOMPLETE, never PASS and never skipped."""
         self.write(DOC, DOC_TEXT)
@@ -149,6 +159,41 @@ class DeclaredCheckContextsTest(unittest.TestCase):
         self.write(DOC, DOC_TEXT)
         self.write(".github/workflows/gates.yml", WORKFLOW)
         self.assertEqual(self.run_checker(protection=[]), 2)
+
+    # #1212: `jobs:  # comment` is not the string `jobs:`, and it is not a
+    # column-0 key either, so the old reader never entered the jobs mapping and
+    # the file produced an empty set. The subset test then could not fail. The
+    # header is read through its comment now: both contexts must still be found.
+    def test_jobs_header_with_a_trailing_comment_still_produces_contexts(self):
+        commented = WORKFLOW.replace(
+            "jobs:\n", "jobs:  # the required gate jobs\n"
+        )
+        self.write(DOC, DOC_TEXT)
+        self.write(".github/workflows/gates.yml", commented)
+        self.assertIn("Rust format (hard gate)", checker.produced_contexts(commented))
+        self.assertIn("audit", checker.produced_contexts(commented))
+        self.assertEqual(self.run_checker(), 0)
+
+    # The converse: a job that exists only in a comment is not produced, so a
+    # declaration that leans on it must fail. Comment stripping must not turn
+    # commented text into structure.
+    def test_a_job_named_only_in_a_comment_is_not_produced(self):
+        commented = WORKFLOW.replace("  audit:\n", "  # audit:\n")
+        self.write(DOC, DOC_TEXT)
+        self.write(".github/workflows/gates.yml", commented)
+        errors = io.StringIO()
+        with redirect_stdout(io.StringIO()), redirect_stderr(errors):
+            self.assertEqual(checker.main(self.root, DECLARED), 1)
+        self.assertIn("'audit'", errors.getvalue())
+        self.assertIn("no job in", errors.getvalue())
+
+    # #1212: only `*.yml` was globbed, so a `.yaml` workflow's jobs were
+    # invisible and the produced side read as empty for that file. GitHub
+    # honours both suffixes, and so must the checker.
+    def test_yaml_workflow_suffix_is_read(self):
+        self.write(DOC, DOC_TEXT)
+        self.write(".github/workflows/gates.yaml", WORKFLOW)
+        self.assertEqual(self.run_checker(), 0)
 
     def test_the_repository_itself_passes(self):
         """The real tree, against its own declaration. No network.

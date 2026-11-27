@@ -12,8 +12,6 @@ document_metadata:
         value: "003fa0063e1e359bc91de8c2950366f757bd1210"
       approval_scope:
         type: Full-document
-        included_sections: []
-        included_assets: []
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "Issue #305 comment 7042461592"

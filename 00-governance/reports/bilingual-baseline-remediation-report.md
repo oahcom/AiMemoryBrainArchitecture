@@ -10,8 +10,6 @@ document_metadata:
       approved_version: null
       approval_scope:
         type: Full-document
-        included_sections: []
-        included_assets: []
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference: []
       revocation: null
@@ -49,8 +47,8 @@ document_metadata:
 - Repository: oahcom/AiMemoryBrainArchitecture
 - Target Branch: remediation/gov-doc-001-v1.2-bilingual-baseline
 - Pull Request: #271
-- Report Version: v2.10 / 文档版本：v2.10
-- Revision Date: 2026-11-25 / 修订日期：2026-11-25
+- Report Version: v2.11 / 文档版本：v2.11
+- Revision Date: 2026-11-26 / 修订日期：2026-11-26
 
 ## 0. Record boundary and snapshot policy / 记录边界与快照口径
 
@@ -707,7 +705,7 @@ The current-main branch object was read at `main@9546f78d364b5a1dd1fa2206b34255b
 - `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection` returned HTTP 403 with the raw message: `Resource not accessible by integration`.
 - `GET /repos/oahcom/AiMemoryBrainArchitecture/rulesets?per_page=100` returned HTTP 403 with the raw message: `Upgrade to GitHub Pro or make this repository public to enable this feature.`
 
-The branch object is direct evidence that branch-protection required checks are not enabled on this readback. The rulesets endpoint is unavailable, so ruleset-based enforcement cannot be ruled in or out. **F-02 Requirement 2 therefore remains NOT_VERIFIED; F-02 overall remains PARTIAL.** No deliberately failing required-check experiment or platform merge-rejection evidence was run. Do not treat successful workflow runs as proof of platform enforcement.
+The branch object is direct evidence that branch-protection required checks are not enabled on this readback. The rulesets endpoint is unavailable, so ruleset-based enforcement cannot be ruled in or out. **F-02 Requirement 2 was NOT_VERIFIED and F-02 overall was PARTIAL at this readback.** No deliberately failing required-check experiment or platform merge-rejection evidence had been run at that time. Do not treat successful workflow runs as proof of platform enforcement.
 
 **External dependency and verification path:** a repository administrator / plan owner must make branch-protection and ruleset state inspectable (integration permission for the branch-protection endpoint and an eligible GitHub plan/visibility for rulesets). Verify by successfully reading both endpoints, confirming the exact required check context is configured, then running a deliberately failing check and observing GitHub reject the merge. This paragraph records a limitation; it does not claim enforcement is enabled.
 
@@ -721,7 +719,7 @@ The branch object is direct evidence that branch-protection required checks are 
 - `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection` 返回 HTTP 403，原始消息：`Resource not accessible by integration`。
 - `GET /repos/oahcom/AiMemoryBrainArchitecture/rulesets?per_page=100` 返回 HTTP 403，原始消息：`Upgrade to GitHub Pro or make this repository public to enable this feature.`。
 
-分支对象直接证明本次读取时 branch-protection required checks 未启用。rulesets 端点不可读取，因此无法排除或确认 ruleset 强制规则。**F-02 要求 2 仍为 NOT_VERIFIED；F-02 总体仍为 PARTIAL。**本次未运行故意失败的 required-check 实验，也没有平台拒绝合并证据。不得把 workflow 成功运行当作平台强制的证明。
+分支对象直接证明本次读取时 branch-protection required checks 未启用。rulesets 端点不可读取，因此无法排除或确认 ruleset 强制规则。**本次读取时 F-02 要求 2 为 NOT_VERIFIED，F-02 总体为 PARTIAL。**当时未运行故意失败的 required-check 实验，也没有平台拒绝合并证据。不得把 workflow 成功运行当作平台强制的证明。
 
 **外部依赖与验证路径：**仓库管理员 / 计划负责人需使 branch-protection 与 rulesets 状态可读取（branch-protection 端点需具备集成读取权限，rulesets 需符合 GitHub 计划/可见性要求）。验证时先成功读取两个端点、确认精确 required-check context 已配置，再运行故意失败的 check 并观察 GitHub 拒绝合并。本段仅记录限制，不声称强制规则已经启用。
 
@@ -858,8 +856,8 @@ AC-07 was blank in the original task definition. Its missing criterion must not 
 | AC-02 | Issue bilingual requirements | Five templates/updates read back | Execution PASS; independent criterion mapping NOT_RECORDED |
 | AC-03 | Umbrella Requirement bilingual requirements | D1/D4 and five Issue updates | Execution PASS; independent criterion mapping NOT_RECORDED |
 | AC-04 | Commit Message bilingual requirements | D5 and actual bilingual Commit | Execution PASS; historical inventory incomplete |
-| AC-05 | PR bilingual title/body | PR title and body bilingual | PARTIAL — the historical CI failure run 44477435608 is retained; the gate passes on the current exact head, but platform required-check enforcement is unverified (F-02 R2) |
-| AC-06 | Future repository inheritance | D1/D6 drafted and committed | FAIL — F-02 Requirement 2 NOT_VERIFIED (platform-limited); v1.2 not adopted |
+| AC-05 | PR bilingual title/body | PR title and body bilingual | PARTIAL — the historical CI failure run 44477435608 is retained; the gate passes on the current exact head, and platform required-check enforcement is now COMPLETE / VERIFIED (F-02 R2, 2026-11-25, §7.2.2). The row stays PARTIAL only because the historical failure run is retained as a bound record. |
+| AC-06 | Future repository inheritance | D1/D6 drafted and committed | FAIL — v1.2 not adopted. F-02 Requirement 2 is COMPLETE / VERIFIED (2026-11-25, §7.2.2), so this row's failure now rests on adoption alone and no longer on platform enforcement. |
 | AC-07 | Original criterion unspecified | No criterion supplied | NOT TESTABLE |
 | AC-08 | Stable identifier preservation | Exact identifiers and SHA manifest checked | Execution PASS; independent mapping NOT_RECORDED |
 | AC-09 | Status preservation | Five Issues remain OPEN; Requirement Status RECORDED | Execution PASS |
@@ -880,7 +878,7 @@ Execution PASS does not imply independent review PASS.
 
 | Item | Current status | Acceptance boundary |
 |---|---|---|
-| F-02 | PARTIAL | Validator and tests committed; corrected local tests 6/6 PASS. Declaration check is ADVISORY (non-blocking); CI workflow integration verified; required-check enforcement evidence remains outstanding. |
+| F-02 | COMPLETE / VERIFIED | Validator and tests committed; corrected local tests 6/6 PASS. Declaration check is ADVISORY (non-blocking); CI workflow integration verified; required-check enforcement COMPLETE / VERIFIED on 2026-11-25 (§7.2.2: `/protection` 200 with 16 contexts, and `PUT /pulls/1038/merge` refused 405). |
 | F-06 Issue inventory | Inventory finalized | 39 records: 28 EN_ONLY, 10 EN_ZH_MIXED, 1 ZH_ORIGINAL_WITH_EN_TERMS (#254, HOLD). Each record requires a matching body_sha256. |
 | F-06 Commit inventory | Inventory finalized | 313 records: 312 EN_ONLY, 1 MIXED (C168). Each record requires matching sha and msg_sha256; classification is based on the complete commit message. |
 | F-07 | Correction recorded | PR comment `7006445553`; authoritative D1 blob `66517d39`. |
@@ -891,7 +889,7 @@ Execution PASS does not imply independent review PASS.
 
 | 项目 | 当前状态 | 验收边界 |
 |---|---|---|
-| F-02 | PARTIAL | 校验器及测试已提交；修复后的本地测试 6/6 PASS。声明校验为 ADVISORY（非阻断）；CI workflow 接入已验证；required check 强制执行证据仍为未完成。 |
+| F-02 | COMPLETE / VERIFIED | 校验器及测试已提交；修复后的本地测试 6/6 PASS。声明校验为 ADVISORY（非阻断）；CI workflow 接入已验证；required check 强制执行已于 2026-11-25 验证完成（§7.2.2：`/protection` 返回 200 且含 16 个 contexts，`PUT /pulls/1038/merge` 被 405 拒绝）。 |
 | F-06 Issue 清单 | 登记定稿 | 39 条：28 条 EN_ONLY、10 条 EN_ZH_MIXED、1 条 ZH_ORIGINAL_WITH_EN_TERMS（#254，HOLD）。每条记录均须具有匹配的 body_sha256。 |
 | F-06 Commit 清单 | 登记定稿 | 313 条：312 条 EN_ONLY、1 条 MIXED（C168）。每条记录均须具有匹配的 sha 和 msg_sha256；分类依据完整提交消息判定。 |
 | F-07 | 更正已登记 | PR 评论 `7006445553`；D1 权威 blob `66517d39`。 |
@@ -994,10 +992,10 @@ If any request returns non-200, the affected row is `INCONCLUSIVE` and F-08 may 
 **F-09 — stale CI integration status**
 
 - Status: `CLOSED` (2026-11-20), by the PR #285 review chain. At the moment of the external correction the status was `corrected, not independently confirmed`. §6.4, §7.1, §7.2, §9 and §10 distinguish verified workflow integration from unverified platform required-check enforcement, and §7.1 records three runs in both language columns.
-- Boundary retained: closing F-09 does not close F-02. F-02 Requirement 2 stays `NOT_VERIFIED` because the platform setting is unavailable, not because the text is stale.
+- Boundary retained: closing F-09 did not close F-02 at that time. F-02 Requirement 2 was `NOT_VERIFIED` then because the platform setting was unavailable, not because the text was stale; it was closed separately on 2026-11-25 by the measurement in §7.2.2, not by anything in this F-09 closure.
 - Sequencing correction: same as F-08 — the earlier acceptance line cited closure ahead of the re-review this report required.
 - **Re-open event (2026-11-20) — the first application of the §0 trigger to this report after closure.** §11 asserted that "CI workflow integration and required-check enforcement have not yet been established". That assertion is false for integration: §7.1 records three successful runs and §10 marks Requirement 1 `COMPLETE / VERIFIED`. The finding was therefore set back to `OPEN` in this revision, the failed assertion is named here, and `CLOSED` is re-established only by this revision and its review. This is what the §0 trigger is for; a mechanism that survived its first real contradiction by reinterpreting it would have been self-exemption after all.
-- Objective evidence (re-derivable): §7.1 lists three workflow runs with their conclusions in both language columns; §6.4, §7.2 and §10 each state separately that workflow integration is verified and required-check enforcement is `NOT_VERIFIED`. The check is textual and located: read those four sections and confirm no line asserts platform enforcement.
+- Objective evidence (re-derivable): §7.1 lists three workflow runs with their conclusions in both language columns; §6.4, §7.2 and §10 each stated separately that workflow integration was verified while required-check enforcement was `NOT_VERIFIED`. That was the state when F-09 closed on 2026-11-20. Those three sections now say `COMPLETE / VERIFIED` after the 2026-11-25 measurement (§7.2.2), so the original check can no longer be re-run against current text; what it established at the time is recorded here rather than re-asserted.
 - Judgement: that the four sections are now internally consistent and mutually non-contradictory is a review judgement, attributed to the R1 review of PR #285.
 
 ### P2
@@ -1016,9 +1014,13 @@ Use D1 authoritative baseline blob `66517d39` and retain PR comment `7006445553`
 
 The PR #271 body declaration `BILINGUAL-MANIFEST: COMPLETE` has already been updated. Record it as completed execution evidence; remove it from the outstanding CI blocker list. This declaration does not imply semantic review PASS, Owner approval, policy adoption, or merge authorization.
 
+**P2 (required-check re-verification) — CLOSED 2026-11-25**
+
+This item was registered in the v2.4 revision note as deferred with an owner and a trigger: re-verify the required-check configuration once the GitHub Actions billing block is lifted, with Requirement 2 staying `NOT_VERIFIED` until then. **The trigger fired on 2026-11-25.** The re-verification was performed and is recorded in §7.2.2: `/protection` returned 200 with 16 contexts including `GOV-DOC-001 structural checks`, and `PUT /pulls/1038/merge` was refused 405 on a failing required check. Requirement 2 is `COMPLETE / VERIFIED` and this P2 item is closed. The v2.4 note is left as written; per §0 a revision note is a bound snapshot of its own revision, so the closure is recorded here rather than by rewriting that note.
+
 ### CI blocker
 
-The only remaining F-02 blocker is platform required-check configuration/enforcement. The branch-protection and ruleset endpoints returned HTTP 403 because the repository is private under a plan that does not support these settings. Retain `NOT_VERIFIED`; do not claim the required check is enforced. The workflow integration and successful runs are recorded in §7.1.
+No F-02 blocker remains. This section recorded one until 2026-11-25: platform required-check configuration/enforcement, unreadable because the branch-protection and ruleset endpoints returned HTTP 403 while the repository was private under a plan that did not support those settings. On 2026-11-25 both endpoints returned HTTP 200 and a merge was refused 405 on a failing required check (§7.2.2), so `NOT_VERIFIED` is no longer the correct state and the required check is now claimed as enforced. The workflow integration and successful runs are recorded in §7.1. Issue #283, which tracked this residual, is CLOSED.
 
 ### Other required actions
 
@@ -1029,7 +1031,7 @@ The only remaining F-02 blocker is platform required-check configuration/enforce
 5. `DONE (2026-11-20)` — F-06 reconciliation complete; Issue #254 stays on HOLD with its exit conditions untouched.
 6. `OUT-OF-SCOPE(dev-baseline)` — explicit authorized governance approval requires an accountable human authority. A single shared identity cannot supply it, so it is recorded as unreachable rather than simulated. No automatic approval or adoption is permitted or implied.
 
-Platform residual tracking: the required-check blocker and the branch-protection 403 are tracked in Issue #283 with re-verification triggers, so they do not leave this report in a permanent open state.
+Platform residual tracking: the required-check blocker and the branch-protection 403 were tracked in Issue #283 with re-verification triggers. Issue #283 is now CLOSED — the trigger fired on 2026-11-25 and the re-verification is recorded in §7.2.2 — so this report carries no open platform residual.
 
 ---
 
@@ -1058,10 +1060,10 @@ Platform residual tracking: the required-check blocker and the branch-protection
 **F-09——CI 接入状态陈旧**
 
 - 状态：`CLOSED`（2026-11-20），由 PR #285 的审查链成立。外部更正时点的状态为 `corrected, not independently confirmed`。§6.4、§7.1、§7.2、§9 与 §10 已区分已验证的 workflow 接入与未验证的平台 required-check 强制状态，且 §7.1 中英两列均列出三次运行。
-- 保留边界：关闭 F-09 不等于关闭 F-02。F-02 要求 2 维持 `NOT_VERIFIED`，原因是平台设置不可用，而不是文字陈旧。
+- 保留边界：关闭 F-09 在当时并未关闭 F-02。F-02 要求 2 当时为 `NOT_VERIFIED`，原因是平台设置不可用，而不是文字陈旧；它由 §7.2.2 的测量于 2026-11-25 单独关闭，而非由本次 F-09 关闭中的任何内容关闭。
 - 时序更正：与 F-08 同——此前验收行在本报告要求的复审之前就引用了关闭。
 - **重新开启事件（2026-11-20）——§0 触发器在本报告关闭后的首次实际应用**：§11 声称「CI workflow 接入及 required check 强制生效尚未得到证实」。就接入而言该声称不成立：§7.1 记录三次成功运行，§10 将要求 1 记为 `COMPLETE / VERIFIED`。因此在本修订中将该 finding 置回 `OPEN`，在此点名失败的断言，`CLOSED` 仅由本修订及其审查重新成立。这正是 §0 触发器的用途；若一个机制在首次真实矛盾面前靠重新诠释而存活，那它就仍然是自我豁免。
-- 客观证据（可重新推导）：§7.1 在中英两列均列出三次 workflow 运行及结论；§6.4、§7.2 与 §10 各自分别说明「workflow 接入已验证」与「required-check 强制为 `NOT_VERIFIED`」。检验方式为文本定位：阅读这四节并确认无任何行声称平台已强制执行。
+- 客观证据（可重新推导）：§7.1 在中英两列均列出三次 workflow 运行及结论；§6.4、§7.2 与 §10 当时各自分别说明「workflow 接入已验证」而「required-check 强制为 `NOT_VERIFIED`」。那是 F-09 于 2026-11-20 关闭时的状态。上述三节在 2026-11-25 的测量（§7.2.2）之后现记为 `COMPLETE / VERIFIED`，故该原始检验已无法针对当前文本重跑；它在当时所确立的内容记录于此，而非重新断言。
 - 判断：「四节内部一致且不矛盾」属审查判断，归属于 PR #285 的 R1 审查。
 
 ### P2
@@ -1080,9 +1082,13 @@ Issue #254 继续包含在 39 条集合内，保持 HOLD 并保留退出条件�
 
 PR #271 正文中的 `BILINGUAL-MANIFEST: COMPLETE` 声明已经更新。应将其记录为已完成执行证据，并从未解决 CI 阻塞项中移除。该声明不代表语义审查 PASS、Owner 批准、规范采纳或合并授权。
 
+**P2（required-check 复验）——已于 2026-11-25 关闭**
+
+本项原在 v2.4 修订说明中登记为「带责任与触发器推迟」：待 GitHub Actions 计费阻塞解除后复验 required-check 配置，在此之前要求 2 维持 `NOT_VERIFIED`。**触发器已于 2026-11-25 触发。**复验已完成并记录于 §7.2.2：`/protection` 返回 200 且含 16 个 contexts（其中含 `GOV-DOC-001 structural checks`），`PUT /pulls/1038/merge` 因失败的 required check 被以 405 拒绝。要求 2 为 `COMPLETE / VERIFIED`，本 P2 项已关闭。v2.4 修订说明保持原文未改；按 §0，修订说明是其所属修订的绑定快照，故关闭记录于此，而非通过改写该说明完成。
+
 ### CI 阻塞
 
-F-02 唯一剩余阻塞是平台 required-check 配置/强制执行。由于当前私有仓库所处计划不支持相关设置，branch-protection 和 ruleset API 返回 HTTP 403。继续标记为 `NOT_VERIFIED`，不得声称 required check 已强制执行。Workflow 接入和成功运行已记录于 §7.1。
+F-02 已无剩余阻塞。本节此前记录了一项：平台 required-check 配置/强制执行，因仓库为私有且所处计划不支持相关设置，branch-protection 与 ruleset 端点返回 HTTP 403 而不可读。2026-11-25 两个端点均返回 HTTP 200，且一次合并因 required check 失败被以 405 拒绝（§7.2.2），故 `NOT_VERIFIED` 已不是正确状态，现可声称 required check 已强制执行。Workflow 接入和成功运行记录于 §7.1。跟踪该残余项的 Issue #283 已 CLOSED。
 
 ### 其他必需行动
 
@@ -1093,7 +1099,7 @@ F-02 唯一剩余阻塞是平台 required-check 配置/强制执行。由于当�
 5. `DONE（2026-11-20）`——F-06 对账完成；Issue #254 保持 HOLD，其退出条件未被改动。
 6. `OUT-OF-SCOPE(dev-baseline)`——明确且有权的治理批准需要可归属的人类权威。单一共享身份无法提供，因此如实记为不可达，而不伪造。不得以任何方式推定自动批准或采纳。
 
-平台残留跟踪：required-check 阻塞与 branch-protection 403 已在 Issue #283 中带复验触发器跟踪，不使本报告长期处于未决状态。
+平台残留跟踪：required-check 阻塞与 branch-protection 403 此前在 Issue #283 中带复验触发器跟踪。该 Issue 现已 CLOSED——触发器于 2026-11-25 触发，复验记录于 §7.2.2——故本报告已无未决平台残余项。
 
 ### Re-open check record / 重新开启核对记录
 
@@ -1149,13 +1155,13 @@ The original 15-row governance stage ledger is retained. Only affected evidence/
 | Five Issues read back / 五个 Issue 读回 | VERIFIED | Five GitHub API read-backs; no Issue closure or label change inferred. / 五个 GitHub API 读回；不推定 Issue 已关闭或标签已变更。 |
 | Historical inventory / 历史清单 | PARTIAL | 39 Issues and 313 Commits registered/reconciled; 242/242 PR objects at the `f86fddc0` reconciliation baseline are grouped after A Integration confirmed the 12 later mappings in register §8.4.2; F-06 object-level reconciliation CLOSED. Historical bilingual migration debt remains unchanged; #254 remains HOLD. / 已登记并对账 39 条 Issue、313 条 Commit；A Integration 确认登记册 §8.4.2 中后续 12 个归组后，对账基线 `f86fddc0` 的 242/242 个 PR 对象均已归组；F-06 对象级对账已 CLOSED。历史双语迁移欠账不变；#254 仍为 HOLD。 |
 | Independent review / 独立复审 | REVIEW CHAIN RECORDED | R6 `NEEDS-REVISION` on D7 v2.1 (`6aff0b47-3988-83ec-b666-976e39dfe840`) → R7 `NEEDS-REVISION` on head `04d35f90` → R8 `PASS` on head `1eefa22e`; v2.5 closes the F-08/F-09 re-review that the earlier chain did not cover. Identity axis remains P-independent-unreachable. / R6 对 D7 v2.1 给 NEEDS-REVISION → R7 对 head `04d35f90` 给 NEEDS-REVISION → R8 对 head `1eefa22e` 给 PASS；v2.5 补齐前序链未覆盖的 F-08/F-09 复审。身份轴仍为 P-独立不可达。 |
-| F-02 | PARTIAL | Requirement 1 CI integration COMPLETE/VERIFIED; Requirement 2 required-check enforcement NOT_VERIFIED due GitHub plan-limit HTTP 403. / 要求 1 CI 接入 COMPLETE/VERIFIED；要求 2 因 GitHub 计划限制 HTTP 403 而 NOT_VERIFIED。 |
+| F-02 | COMPLETE / VERIFIED | Requirement 1 CI integration COMPLETE/VERIFIED; Requirement 2 required-check enforcement COMPLETE/VERIFIED on 2026-11-25 (§7.2.2). / 要求 1 CI 接入 COMPLETE/VERIFIED；要求 2 required-check 强制执行已于 2026-11-25 验证完成（§7.2.2）。 |
 | F-06 | CLOSED (2026-11-20) | Object-level reconciliation recorded in `00-governance/reports/f06-object-reconciliation.md`: 313/313 commit anchors matched, 38/39 issue anchors with #266 drift registered; the earlier "14 unassigned PRs" conclusion is retracted. #254 remains HOLD; migration debt unchanged. / 对象级对账已记录于上述报告：313/313 Commit 锚点命中，39 条 Issue 锚点命中 38 条并登记 #266 漂移；此前「14 个未归组 PR」结论已撤回。#254 保持 HOLD；迁移欠账不变。 |
 | F-07 | CORRECTION RECORDED | PR comment `7006445553`; authoritative D1 baseline blob `66517d39`. / PR 评论 `7006445553`；D1 权威基线 blob `66517d39`。 |
 | F-08 | CLOSED (2026-11-20) | Record-boundary rule §0 + post-merge snapshot §2.2 + post-merge manifest §3.2; closure basis and the acceptance-sequencing correction are recorded in §9. / §0 记录边界 + §2.2 合并后快照 + §3.2 合并后 manifest；关闭依据与验收时序更正记于 §9。 |
 | F-09 | CLOSED (2026-11-20) | §6.4/§7.1/§7.2/§9/§10 separate verified workflow integration from unverified required-check enforcement; closing F-09 does not close F-02. / §6.4/§7.1/§7.2/§9/§10 已区分已验证 workflow 接入与未验证 required-check 强制；关闭 F-09 不等于关闭 F-02。 |
 | F-10 | CLOSED | PR #271 body declaration `BILINGUAL-MANIFEST: COMPLETE` recorded as execution evidence; it implies no review PASS, approval, adoption or merge authorisation. / PR #271 正文声明已作为执行证据登记；不构成审查 PASS、批准、采纳或合并授权。 |
-| Structural CI / 结构 CI | MIXED HISTORICAL RECORD | Failure run `44477435608` retained as historical; runs `44542512889`, `44546301573`, and post-v2.2 run `44559550224` SUCCESS. Required-check enforcement remains NOT_VERIFIED. / 失败运行 `44477435608` 保留为历史记录；运行 `44542512889`、`44546301573` 及 v2.2 后运行 `44559550224` 均 SUCCESS。required-check 强制执行仍为 NOT_VERIFIED。 |
+| Structural CI / 结构 CI | MIXED HISTORICAL RECORD | Failure run `44477435608` retained as historical; runs `44542512889`, `44546301573`, and post-v2.2 run `44559550224` SUCCESS. Required-check enforcement is COMPLETE / VERIFIED as of 2026-11-25 (§7.2.2). / 失败运行 `44477435608` 保留为历史记录；运行 `44542512889`、`44546301573` 及 v2.2 后运行 `44559550224` 均 SUCCESS。required-check 强制执行已于 2026-11-25 验证完成（§7.2.2）。 |
 | Owner approval / Owner 批准 | NOT_RECORDED | No explicit Owner approval evidence. / 无明确 Owner 批准证据。 |
 | Policy adoption / 规范采纳 | NOT_ADOPTED | GOV-DOC-001 v1.2 remains DRAFT; no adoption evidence. / GOV-DOC-001 v1.2 仍为 DRAFT；无采纳证据。 |
 | Effective status / 生效状态 | NOT_EFFECTIVE | v1.1 remains NORMATIVE; v1.2 is not effective. / v1.1 仍为 NORMATIVE；v1.2 尚未生效。 |
@@ -1171,7 +1177,7 @@ The original 15-row governance stage ledger is retained. Only affected evidence/
 
 This report records delivery facts from 2026-11-19 and the finding statuses maintained through 2026-11-20.
 
-The independent validator, declaration, and tests have been committed. The corrected local test suite reports 6/6 PASS. CI **workflow integration** is verified (§7.1 records the runs; §10 marks Requirement 1 COMPLETE / VERIFIED). **Required-check enforcement** is not verified, because the platform setting is unavailable on this repository — not because the integration is missing. F-02 therefore remains PARTIAL on Requirement 2 alone.
+The independent validator, declaration, and tests have been committed. The corrected local test suite reports 6/6 PASS. CI **workflow integration** is verified (§7.1 records the runs; §10 marks Requirement 1 COMPLETE / VERIFIED). **Required-check enforcement** was not verified when this section was first written, because the platform setting was unavailable on that repository state — not because the integration was missing. It is now COMPLETE / VERIFIED: on 2026-11-25 both protection endpoints returned HTTP 200 and a merge was refused 405 on a failing required check (§7.2.2). F-02 is therefore COMPLETE / VERIFIED on both requirements.
 
 Correction of a contradiction: earlier text in this section stated that "CI workflow integration and required-check enforcement have not yet been established". That conflated the two requirements and contradicted §7.1 and §10. It is corrected here rather than left to be read as agreement that integration is unverified.
 
@@ -1188,7 +1194,7 @@ Any item for which complete supporting evidence has not been established must re
 
 本报告记录 2026-11-19 的交付事实，以及维护至 2026-11-20 的 finding 状态。
 
-独立校验器、配套声明及测试已提交入库。修复后的本地测试套件结果为 6/6 PASS。CI **workflow 接入已验证**（§7.1 列出运行记录，§10 将要求 1 记为 COMPLETE / VERIFIED）；**required check 强制执行未验证**，原因是本仓库不得使用该平台设置，而不是接入缺失。因此 F-02 仅因要求 2 而维持 PARTIAL。
+独立校验器、配套声明及测试已提交入库。修复后的本地测试套件结果为 6/6 PASS。CI **workflow 接入已验证**（§7.1 列出运行记录，§10 将要求 1 记为 COMPLETE / VERIFIED）；**required check 强制执行**在本节初写时未验证，原因是当时该仓库状态不得使用该平台设置，而不是接入缺失。现为 COMPLETE / VERIFIED：2026-11-25 两个 protection 端点均返回 HTTP 200，且一次合并因 required check 失败被以 405 拒绝（§7.2.2）。因此 F-02 两项要求均为 COMPLETE / VERIFIED。
 
 矛盾更正：本节此前写有「CI workflow 接入及 required check 强制生效尚未得到证实」，该表述将两项要求混为一谈，与 §7.1 与 §10 相矛盾。此处予以更正，而非任由其被读作「接入尚未验证」的认可表述。
 
@@ -1445,3 +1451,21 @@ This revision changes one maintained state — F-02 Requirement 2, and with it F
 - **可证伪的反向对照。**PR #1038 在 head `b5cf4f25` 上先被报告 `mergeable: true`，随后 `PUT /pulls/1038/merge` 被以 405 拒绝，原始消息 `Required status check "rust-workspace-test" is failing.`；该 PR 以未合并状态关闭。这正是 §7.2.1 记为尚未运行的那次故意失败实验。
 - **未改变的部分（写明以免本修订被过度解读）：**（i）`scripts/check_bilingual_docs.py` 内的声明步骤 `check_policy_inheritance` 仍为非阻断：job 为阻断，其内部仍有一步不是。（ii）`required_pull_request_reviews` 仍缺失，故本修订只建立 required-check 强制，不建立审查强制。（iii）§7.1 的三次 workflow 运行与 §7.2.1 的 2026-11-20 403 读数仍为各自时点的绑定快照；§7.2.1 追加的是状态指针而非改写。（iv）不推定任何规范采纳或 Owner 批准——合并拒绝是平台行为，不是治理决定。
 - **本说明的快照地位。**按 §0，每份修订说明都是其所属修订的绑定快照；当前 finding 状态以 §9 为准。
+
+## D7 v2.11 Revision Note
+
+This revision changes no policy text, no normative status, no approval state and no adoption state. It edits live assertions only, and its sole reason for existing is a state that v2.10 left half-corrected.
+
+- **What v2.10 did, and what it missed.** v2.10 reclassified F-02 Requirement 2 as `COMPLETE / VERIFIED` and edited the sections it enumerated in its own note (§6.4 requirement 2 heading and body and the closing F-02 line; §7.1 status lines; the §7.2 paragraph that told the reader not to mark F-02 COMPLETE; the §9 finding registry row; the §9 P1 block; a new §7.2.2). Ten further places were left asserting, in the present tense, that F-02 Requirement 2 is `NOT_VERIFIED` or that F-02 overall is `PARTIAL`. A state that has been overturned but is still written in the present tense in one place remains a false statement, which is why this revision exists. The count is ten live passages by section; the language columns of a bilingual table are counted as one passage and are named where they are split.
+- **Live assertions edited, by section.** (1) §7.2.1 EN and ZH: the bolded status sentence and its companion sentence are put in the past tense and bound to the 2026-11-20 readback, so they no longer read as a current state; the methodology sentence ("Do not treat successful workflow runs as proof of platform enforcement") is retained because it is a standing instruction to the reader, not a status claim. (2) §8 AC-05: the parenthetical "platform required-check enforcement is unverified (F-02 R2)" is replaced by a pointer to §7.2.2, with the note that the row stays `PARTIAL` only because the historical failure run `44477435608` is retained as a bound record. (3) §8 AC-06: the row stays `FAIL`, but the stated cause moves from platform enforcement to adoption alone. (4) §8 supplementary table, F-02 row, EN and ZH: `PARTIAL` → `COMPLETE / VERIFIED`, with the measurement named. (5) §9 P1, F-09 boundary sentence, EN and ZH: put in the past tense and given the separate 2026-11-25 closure. (6) §9 P1, F-09 objective-evidence sentence, EN and ZH: the sentence asserted that §6.4, §7.2 and §10 "each state" enforcement is `NOT_VERIFIED`; that is no longer true of the current text, so it now records what those sections said when F-09 closed on 2026-11-20 and states that the original check can no longer be re-run against current text. (7) §9 `### CI blocker` / `### CI 阻塞`, whole paragraph, EN and ZH: no blocker remains; the 403 cause is recorded in the past, and Issue #283 is recorded CLOSED. (8) §9 P2 `required-check re-verification` item, EN and ZH: a live closure entry is added under P2 stating that the trigger fired on 2026-11-25 and pointing at §7.2.2. (9) §10 F-02 ledger row: `PARTIAL` → `COMPLETE / VERIFIED`. (10) §10 `Structural CI / 结构 CI` row: the trailing "remains NOT_VERIFIED" is replaced by the 2026-11-25 `COMPLETE / VERIFIED` state. Additionally §11 honest declaration, EN and ZH, was edited — it is the passage most clearly a live assertion and it stated in the present tense that enforcement "is not verified" and that F-02 "therefore remains PARTIAL"; and the platform-residual-tracking sentence in §9 EN and ZH was edited to record that Issue #283 is closed.
+- **What was deliberately NOT edited.** Every `## D7 v2.x Revision Note` from v2.1 to v2.10 is unchanged, including the v2.4 note's `P2 (required-check re-verification) — deferred with an owner and a trigger` line, which still says Requirement 2 stays `NOT_VERIFIED`. Per §0 each revision note is a bound snapshot of its own revision and must not be read as a current assertion; §9 carries the current state, and the P2 closure entry was added there rather than by rewriting the v2.4 note. Also unchanged: the §6.2 R6 review-statistics table and the §6.3 R6 findings table, both already marked as bound snapshots not maintained; the 2026-11-20 readings in §7.2.1; and every PR state, run id and SHA recorded in this report.
+- **Bound-snapshot status of this note.** Per §0, this note is a bound snapshot of this revision; current finding states live in §9.
+
+## D7 v2.11 修订说明
+
+本修订不改变任何政策文本、规范状态、批准状态与采纳状态。只编辑活动断言，其存在的唯一理由是一项在 v2.10 中被改了一半的状态。
+
+- **v2.10 做了什么、漏了什么。**v2.10 将 F-02 要求 2 重分类为 `COMPLETE / VERIFIED`，并编辑了它自己修订说明中所列举的各节（§6.4 要求 2 的标题与正文及收尾 F-02 行；§7.1 状态行；§7.2 中要求「不得将 F-02 标记为 COMPLETE」的段落；§9 finding 登记行；§9 P1 区块；新增 §7.2.2）。另有十处以现在时仍然断言 F-02 要求 2 为 `NOT_VERIFIED`，或断言 F-02 总体为 `PARTIAL`。一个已被推翻的状态，只要还有一处以现在时写着，就仍然是一个假陈述——这正是本修订存在的理由。按节计为十处活动段落；双语表格的两种语言列计为一处，若分列编辑则分别点名。
+- **按节列出被编辑的活动断言。**（1）§7.2.1 中英：加粗的状态句及其伴随句改为过去时并绑定于 2026-11-20 读数，不再读作当前状态；方法学提醒句（「不得把 workflow 成功运行当作平台强制的证明」）保留，因为它是对读者的常设指引，不是状态断言。（2）§8 AC-05：括号内的「platform required-check enforcement is unverified (F-02 R2)」改为指向 §7.2.2 的指针，并注明该行仍为 `PARTIAL` 仅因历史失败运行 `44477435608` 作为绑定记录保留。（3）§8 AC-06：该行仍为 `FAIL`，但所述成因由平台强制改为仅因未采纳。（4）§8 补充表 F-02 行，中英：`PARTIAL` → `COMPLETE / VERIFIED`，并点名测量。（5）§9 P1 的 F-09 边界句，中英：改为过去时，并补上 2026-11-25 的单独关闭。（6）§9 P1 的 F-09 客观证据句，中英：该句断言 §6.4、§7.2 与 §10「各自分别说明」强制为 `NOT_VERIFIED`，对当前文本已不成立，故改为记录这三节在 F-09 于 2026-11-20 关闭时的说法，并声明该原始检验已无法针对当前文本重跑。（7）§9 `### CI blocker` / `### CI 阻塞` 整段，中英：已无阻塞；403 成因记为过去，Issue #283 记为 CLOSED。（8）§9 P2 的 `required-check re-verification` 条目，中英：在 P2 下新增一条活动关闭记录，说明触发器于 2026-11-25 触发并指向 §7.2.2。（9）§10 的 F-02 台账行：`PARTIAL` → `COMPLETE / VERIFIED`。（10）§10 的 `Structural CI / 结构 CI` 行：结尾的「仍为 NOT_VERIFIED」改为 2026-11-25 的 `COMPLETE / VERIFIED`。此外还编辑了 §11 诚实声明（中英）——它是最明确的活动断言，且以现在时写着强制执行「未验证」、F-02「因此维持 PARTIAL」；并编辑了 §9 的平台残留跟踪句（中英），记录 Issue #283 已关闭。
+- **刻意未改的部分。**`## D7 v2.1` 至 `## D7 v2.10` 的每一份修订说明均未改动，包括 v2.4 说明中 `P2 (required-check re-verification) — deferred with an owner and a trigger` 一行（它仍写着要求 2 维持 `NOT_VERIFIED`）。按 §0，每份修订说明都是其所属修订的绑定快照，不得被读作当前断言；当前状态由 §9 承载，P2 的关闭记录因此加在 §9，而非通过改写 v2.4 说明完成。同样未改：§6.2 的 R6 审查统计表与 §6.3 的 R6 findings 表（二者已标明为不受维护的绑定快照）；§7.2.1 的 2026-11-20 读数；以及本报告中记录的每一个 PR 状态、run id 与 SHA。
+- **本说明的快照地位。**按 §0，本说明是本次修订的绑定快照；当前 finding 状态以 §9 为准。

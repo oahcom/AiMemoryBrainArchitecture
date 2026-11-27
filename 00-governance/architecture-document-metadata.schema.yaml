@@ -132,17 +132,6 @@ fields:
                 # 指名拒绝这两个值，而不是接受一个没有规则读取的范围。
                 enum:
                   - Full-document
-              # Declared because every approved document carries an empty list.
-              # A non-empty list is a DM-03 error: it would claim a boundary
-              # DM-10 does not check.
-              # 声明它们是因为所有已批准文档都带一个空列表。非空列表会被 DM-03
-              # 拒绝：它声明了一个 DM-10 并不检查的边界。
-              included_sections:
-                kind: sequence
-                items: string
-              included_assets:
-                kind: sequence
-                items: string
           approval_applicability:
             kind: string
             enum:

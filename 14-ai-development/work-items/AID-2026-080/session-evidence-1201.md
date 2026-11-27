@@ -12,8 +12,6 @@ document_metadata:
         value: null
       approval_scope:
         type: Full-document
-        included_sections: []
-        included_assets: []
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference: []
       revocation: null
@@ -158,7 +156,7 @@ annotation names AID-2026-080:
 
 ## Limits of this record
 
-- **Two review rounds are recorded, and neither is `APPROVED`.** Round 1 (`ACCEPT WITH AMENDMENTS`,
+- **Four review rounds are recorded, and none is `APPROVED`.** Round 1 (`ACCEPT WITH AMENDMENTS`,
   Head `a538dbf2`) required the clause to say *which* `session_evidence` entry; the wording was
   changed to constrain locations instead, and the reviewer withdrew the suggestion in round 2.
   Round 2 (`NEEDS REVISION`, Head `f44dce07`) found a real defect that was mine: the amendment had
@@ -174,18 +172,82 @@ annotation names AID-2026-080:
   snapshot path is absent from the base diff, which the renumbering makes impossible; and the
   merge state still read `NOT_STARTED` / `PR_OPEN` after the merge. All four are repaired.
   Round 3 also found, unasked, that PR #1215 had already merged at `f7bc0789` while the review
-  read `489b6048`. That is a real gap and it is not closed by noting that the two differ only by
-  an incoming `scripts/check_traceability.py`: no review has read the merged head as such.
+  read `489b6048`.
+  Round 4 (`NEEDS REVISION`, Head `7e9c9f3d`) closed five of round 3's six findings, reproduced
+  the population figures from the trees itself (54 / 55 / 56 / 56 manifests; 49 conform, 22
+  parser-accepted, 7 non-conforming, naming the same seven IDs), and did what no earlier round had
+  done: it read the `489b6048 -> f7bc0789` delta directly and confirmed it is one file, 16+/3-, and
+  comment-only. Its conclusion is kept as two parts rather than one: the substantive change is
+  reviewable, and the pre-merge exact-Head requirement was not met. Its own words are the ones that
+  matter here — "A later review can document the result; it cannot rewrite that history."
+  Round 4's two open items are recorded in `review.round_4`: zero GitHub check runs on
+  `7e9c9f3d` (satisfied afterwards at `fa6e227b`, 16 of 16 contexts green, `mergeable: True`), and
+  the absence of a round-4 record (`REVIEW-04-INDEPENDENT.md`, plus the manifest and INDEX
+  projections beside it).
+  Round 5 (`NEEDS REVISION`, Head `a37cd5bb`, PR #1266) closed both of round 4's items on content
+  and, more usefully, corrected two things I had wrong. It checked `32f87d46` — the Head #1240
+  actually merged at — and found 16 successful check runs there; my record had stopped at
+  `fa6e227b`, the Head I pushed the repair to, so a stronger statement was available and I had not
+  made it. It rejected the base: `a37cd5bb`'s second parent is `d5107f68` while `main` had advanced
+  to `baca092b`, 20 commits further, and that increment modifies `INDEX.md`, which this PR also
+  modifies — the section 6.1.3 revalidation-after-base-update condition, which green checks on the
+  old combination do not satisfy. And it caught a wrong number in my own review request: I had given
+  `31385bc1` as "`origin/main` at this Head", but it is an ancestor of `d5107f68` by 21 commits — it
+  was `main` when the branch was cut, not when the branch was read. Round 5 used the commit graph
+  instead of my table, which is why it found what I had not.
+  Round 5 also corrected F3's reasoning without changing its conclusion. I had written that `DM-10`
+  is the only rule constraining `modification_status` and that the policy constrains it nowhere
+  else. The normative requirement is Rule L1 (stale approval, policy `:160` EN / `:162` ZH);
+  `DM-10` is its machine check. The conclusion stands because L1 does not fire on a `Draft` with
+  `approved_version.value: null` — there is no approved version to go stale — but the description
+  of the rule's source was wrong and is now corrected in `review.round_4.non_blocking_checked`.
+  Round 5 declined to rely on the repository-wide `modification_status` counts because it had not
+  reproduced them, which is the right handling of a number it could not verify. Re-measured at
+  `6c5f0230`: 339 documents carry the field, 169 `Draft` say `Unchanged`, 136 say `Modified`. The
+  drift across `main` advances is the reason those counts carry no weight in the conclusion.
+- **Round 5 separates three conclusions that had been running together.** Round 4's two open items
+  are closed on content. F3 is answered, and the correction was to a description rather than to a
+  field value. And AID-2026-080 cannot be marked compliant: both pre-merge exact-Head deviations are
+  historical facts, and no later action satisfies a requirement that applied at merge time. The
+  honest closeout is `MERGED` with both deviations preserved. `MERGED` is not `COMPLIANT`, and it is
+  not Owner acceptance — `acceptance.status` stays `NOT_ASSIGNED`, separate from merge state.
+  Round 6 (`RETROSPECTIVE`, Head `6f1ad214`, PR #1266) is not a sixth pre-merge review — it is the
+  record of the third failure. PR #1266 merged at `09:55:18Z`; round 6 was requested at `09:58Z`,
+  three minutes later. Round 6 therefore reviewed a Head that had already merged and says so in its
+  own first line. What it established is still worth having: B1's stale base is repaired
+  (`6f1ad214`'s second parent is exactly `f02ceab0`), B2's Rule L1 correction is right, the snapshot
+  blob `84342823` was not replaced, and the two earlier deviations survived intact. What it found is
+  that #1266 itself was merged without a recorded review of its final Head — `GET /pulls/1266/reviews`
+  returns 0 — which is a third deviation, distinct in mechanism from the first two: #1215 and #1240
+  merged after the branch advanced past the reviewed Head, while #1266 merged while a review of the
+  correct Head was still being written.
+- **Three deviations, one cause, and the cause is me.** The same session both requested the exact-Head
+  reviews and drove the merges. Requesting a review and merging are two actions by one actor, and the
+  faster one wins every time. That is not bad luck three times over; it is a structural property of
+  the arrangement, and recording it as three separate incidents would obscure that. Round 6's own
+  recommendation is the one adopted: do not repair again to pretend the timing can be fixed, record
+  the third deviation, close as `MERGED`, leave compliance and Owner acceptance unclaimed.
+- **The pre-merge exact-Head review requirement was not met for any of the three PRs, and that is a
+  deviation rather than an incident.** #1215 merged at `f7bc0789` after round 3 had reviewed
+  `489b6048`; #1240 merged at `32f87d46` after round 4 had reviewed `7e9c9f3d`; #1266 merged at
+  `6f1ad214` with no review of that Head recorded before merge. The pattern is
+  structural, not accidental: a branch that is updated after its review cannot satisfy an
+  exact-Head requirement at merge, and no after-the-fact inspection repairs the timing. Both
+  deltas are recorded as facts about the change — neither touches a path under `AID-2026-080/`
+  or `PR-GOVERNANCE-001.md` — and neither is offered as review coverage. `32f87d46`,
+  `f7bc0789` and `6f1ad214` have not been read by any review before their merges.
 - The reproduction in §2 was performed by a second agent session given the procedure and not
   the expected values. It reproduced all four bucket counts, the 0-of-54 figure and both
   error strings. That is a reproducibility check, not an independent review: the session that
   wrote the change spawned it.
-- **The second defect in the same paragraph is not repaired.** The clause also says principal
-  identity, not string inequality, decides whether `accountable_owner` and
-  `implementing_ai_session` differ. No principal registry exists in this repository — the term
-  appears only in `01-system-architecture/data-flows.md`, its `docs/` mirrors, and
-  `08-bmcp-protocol/validators/envelope_auth_validator.py` — so nothing can settle that
-  requirement today. One defect per change; it is registered separately.
+- **The second defect in the same paragraph is not repaired, and is now registered.** The clause also
+  says principal identity, not string inequality, decides whether `accountable_owner` and
+  `implementing_ai_session` differ. No principal registry exists in this repository — the term appears
+  only in prose and in field names — so nothing can settle that requirement today. Measured: `principal`
+  occurs 0 times in `scripts/governance/session_evidence/validate.py`, and `accountable_owner` occurs
+  0 times anywhere under `scripts/`, so the gate does not even see two of the three fields the clause
+  governs. One defect per change; registered as Issue #1285 with three candidate resolutions and no
+  chosen answer, because the choice belongs to whoever owns the principal model.
 - **34 of 56 manifests still fail `parse_manifest_session_entries` at `364ef4ad`.** Only the 27
   that failed *because of this clause* at `1f5ba824` are addressed here. The rest fail for reasons of their own, mostly
   an incomplete legacy field set predating the canonical format, and this work item does not

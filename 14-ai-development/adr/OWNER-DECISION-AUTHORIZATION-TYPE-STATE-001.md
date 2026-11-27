@@ -13,8 +13,6 @@ document_metadata:
         value: "3375f59e78a2960c700b9800593c857f263bc3c94438358561d45ceafce2ddc0"
       approval_scope:
         type: Full-document
-        included_sections: []
-        included_assets: []
       approval_applicability: Applicable-To-Current-Version
       evidence_reference:
         - "Issue #751 comment 7097692424 — owner ruling that the five DECIDED records must agree with their own bodies"

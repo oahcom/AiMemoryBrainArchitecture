@@ -13,8 +13,6 @@ document_metadata:
         value: "c9a6394d738f7cbc25d93c116a724080e6444ee3"
       approval_scope:
         type: Full-document
-        included_sections: []
-        included_assets: []
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "PR #595 / commit c9a6394d738f7cbc25d93c116a724080e6444ee3"
@@ -259,6 +257,8 @@ Issuance is atomic: an issued reference must not escape before its record transa
 
 ### 3.3 Crate boundary
 
+> **Amended 2026-11-22 15:52 +0800 — see the amendment at the end of this document.** The phrase "reject Pending" in the second paragraph is **narrowed** by `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001` D3 and by `OWNER-RULING-AUTHORIZATION-PRESENCE-GATE-025` §1: under the three-state type the domain presence gate rejects `Absent` and must **NOT** reject `Placeholder`. "Pending" here named everything that was not issued; that set split in two, and only one half is absence. Everything else in this section — the crate boundary itself, and the rule that only the `AdmissionStore`-backed validator establishes durable authority — stands.
+
 Domain types and deterministic subject encodings belong in `memory-domain`, which remains SQLite-independent. Tables, insert/read operations and record-backed validators belong in `memory-compiler` behind `AdmissionStore`, matching D's layering. The publication authority calls validators and propagates errors; it must not write records or synthesize I decisions.
 
 The validator is **not** a `FactRevision::validate()` responsibility. Domain validation may validate candidate field syntax and reject Pending, but only the compiler's AdmissionStore-backed validator can establish durable existence and authority. Structural validation must not claim a candidate reference is issued.
@@ -344,6 +344,8 @@ In dev-baseline, `i-owner-proxy/dev-baseline-v1` is the logical trust anchor and
 **Production replacement path:** before production security claims or externally exposed publication, replace the dev-baseline issuer with a governed I identity and signed decision/attestation envelopes; define canonical signing bytes, algorithms, key custody/rotation/revocation and trust-root distribution; store and verify signatures in the same append-only lifecycle; reject empty signatures outside dev-baseline; and add tests for invalid signatures, revoked keys, replay, tampering, issuer rollover and decision-kind downgrade. This requires a separate explicit production decision.
 
 ## 8. Closure criteria
+
+> **Amended 2026-11-22 15:52 +0800 — see the amendment at the end of this document.** Criterion 1 below still describes the **two-state** `Pending/Issued` shape; `OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001` D2 replaced it with `Absent` / `Placeholder` / `Issued`, so read criterion 1's "private Pending/Issued state" as that three-state shape. Criterion 12 below still says the assertion must be "the propagated authority `Err`"; the end-of-document amendment changes **which assertion satisfies it** — ADR-001 §4's two domain-layer assertions on `FactRevision::validate()`, not a compiler-layer `Err`, because `dm2_06` cannot reach `memory-compiler` from `crates/memory-domain/tests/phase2_acceptance.rs:606`. The obligation itself survives; only its satisfaction changed. Criteria 2–11 and 13 are unchanged.
 
 E may mark this contract implemented only when:
 

@@ -1,5 +1,9 @@
 name: Repository hygiene
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
@@ -23,8 +27,22 @@ jobs:
       - name: Self-check the gate
         run: python3 scripts/test_check_repository_hygiene.py
 
-      - name: Check committed repository hygiene
-        run: python3 scripts/ci/check_repository_hygiene.py
+      # One invocation, not two. This job used to run the script here with no
+      # --base/--head and again below with them. The first run silently skipped
+      # new-file admission and printed the same line a full run prints, so the
+      # step name claimed a check it had not performed; deleting the second
+      # step would have left the gate green with admission gone (#1212). The
+      # script now refuses an unqualified run (exit 2, SKIPPED), and the range
+      # is supplied here, where the head-tree checks and new-file admission
+      # then run together in this one step.
+      - name: Check committed repository hygiene and new-file admission
+        env:
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: |
+          python3 scripts/ci/check_repository_hygiene.py \
+            --base "$BASE_SHA" \
+            --head "$HEAD_SHA"
 
       # Every committed manifest, not the one AID-2026-001 names. The other
       # strict-parse job hard-codes a single path in both its `paths:` filter
@@ -39,15 +57,6 @@ jobs:
           python3 -c "import yaml" || python3 -m pip install --quiet --disable-pip-version-check PyYAML==6.0.2
           (cd scripts/ci && python3 -m unittest test_check_manifest_parse)
           python3 scripts/ci/check_manifest_parse.py
-
-      - name: Check new-file admission
-        env:
-          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
-          HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
-        run: |
-          python3 scripts/ci/check_repository_hygiene.py \
-            --base "$BASE_SHA" \
-            --head "$HEAD_SHA"
 
       - name: Self-check the line-ending gate
         run: python3 scripts/test_check_line_endings.py
@@ -82,6 +91,7 @@ jobs:
             scripts/governance/bilingual/test_bilingual_scripts.py \
             scripts/governance/evidence/test_evidence_tiering.py \
             scripts/governance/evidence/test_template_example_executable.py \
+            scripts/test_check_source_revision_pointers.py \
             scripts/test_precheck_delivery.py \
             tests/test_check_bilingual_docs_full.py \
             tests/test_policy_inheritance.py; do

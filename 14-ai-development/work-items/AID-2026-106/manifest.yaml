@@ -1,0 +1,90 @@
+id_status: PROVISIONAL
+work_item_id: AID-2026-106
+title: Complete the Phase 1/2 phase-freeze audit and exact-version acceptance evidence for Issue #1197
+class: GOVERNANCE/AUDIT
+risk: R2
+risk_rationale: >-
+  Documentation-only audit and acceptance evidence. False Owner acceptance,
+  incorrect inventory, or fabricated version pins would create governance risk.
+  Source approvals remain UNBINDABLE where no exact-version approval event exists.
+status: MERGED
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: "Delegated proxy approval of this report only; source Owner acceptance remains NOT_RECORDED"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 533d8646a3fb32b0a1c9d3ed40c01bce33a76b17
+tracking_issue: "#1197"
+prompt_id: AID-2026-106-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-106/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 0ef830572575708a3fd2c253d507b9ce97e8c39eff4fff04a7784e6a1daffd36
+prompt_bytes: 2998
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST; immutable snapshot of assigned scope
+authorization:
+  merge: GRANTED_BY_EXPLICIT_ACCOUNT_OWNER_DIRECTIVE_2026-11-26; only after exact-Head 16/16 required checks succeed and mergeability is re-read
+  implementation_write: >-
+    Only this manifest, prompt, canonical audit report, docs/en and docs/zh-CN
+    mirrors, and AID INDEX row. No source freeze documents, Runtime/product code,
+    Validator code/semantics, tests, scripts, workflows, schemas, APIs, DDL,
+    deployment, or production configuration.
+  gate_behaviour_change: NOT_GRANTED
+  schema_change: NOT_GRANTED
+  platform_state_change: NOT_GRANTED
+  architecture_spec_change: NOT_GRANTED
+  issue_close: NOT_GRANTED unless every #1197 acceptance criterion is evidenced
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-106/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-106/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-106/ISSUE-1197-phase-freeze-audit.md
+    - docs/en/14-ai-development/work-items/AID-2026-106/ISSUE-1197-phase-freeze-audit.md
+    - docs/zh-CN/14-ai-development/work-items/AID-2026-106/ISSUE-1197-phase-freeze-audit.md
+  files_to_modify:
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope: "All source Phase 1/2 freeze documents, Phase 3.6/3.8 contracts, and all runtime/validator/product/CI/platform changes."
+acceptance_criteria:
+  - id: AC1
+    criterion: Full Phase 1/2 inventory at current main; each path has exact blob, existence, approved_version, and binding result.
+    measurement: 19 paths, six families, recursive tree pins, UNBINDABLE reasons.
+  - id: AC2
+    criterion: List each exact-version acceptance requirement, evidence, and missing item without claiming natural-person Owner acceptance.
+    measurement: Acceptance matrix and Issue comment readback.
+  - id: AC3
+    criterion: Canonical/EN/ZH-CN reports have matching structure and complete GOV-DOC-002 metadata; Approved binds to actual body content hash.
+    measurement: Metadata and body-hash readback at final PR Head.
+  - id: AC4
+    criterion: Comment on #1197 with audit and remaining items; keep open unless all criteria are evidenced.
+    measurement: Comment URL and Issue state.
+  - id: AC5
+    criterion: Draft PR; explicit merge only after exact-Head 16/16 required checks and clean mergeability.
+    measurement: PR, checks, merge SHA, post-merge blob verification.
+findings:
+  - id: F1
+    severity: HIGH
+    statement: All 19 source paths exist but none has Owner approval bound to its exact current blob; source approved_version is UNBINDABLE.
+  - id: F2
+    severity: HIGH
+    statement: Memory Store Facade retains an unqualified Next unit handoff without explicit #7/deferred-binding reference.
+  - id: F3
+    severity: MEDIUM
+    statement: Five families lack GOV-DOC-002 frontmatter; Domain Freeze files remain Draft.
+  - id: F4
+    severity: HIGH
+    statement: Accountable/dependent Owner exact-version acceptance is not recorded.
+implementation:
+  status: MERGED
+  pull_request: 1291
+  merge_commit_sha: 2d52b0c81dc1b779e49516fceb69d89cdc1d9c31
+  merged_head_sha: a0bb69d68448089a5455caa80462325c7409eefa
+  merged_at_utc: "2026-11-26T12:26:48Z"
+  note: "Audit evidence package merged; source Owner exact-version acceptance remains NOT_RECORDED, so Issue #1197 stays OPEN."
+review:
+  status: NOT_ASSIGNED
+acceptance:
+  status: DELEGATED_PROXY_APPROVAL_OF_AUDIT_REPORT_ONLY
+  record_ref: AID-2026-106/ISSUE-1197-phase-freeze-audit.md
+  acceptance_authority: "user-authorized operator (delegated by account owner); 代理登记，非自然人 Owner 签署"
+  source_owner_acceptance: NOT_RECORDED
+session_evidence: []

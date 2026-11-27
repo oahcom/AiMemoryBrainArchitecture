@@ -10,8 +10,6 @@ document_metadata:
       approved_version: null
       approval_scope:
         type: Full-document
-        included_sections: []
-        included_assets: []
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference: []
       revocation: null
@@ -249,7 +247,14 @@ runner，因此从未执行过。clippy 曾是这个 Job 的独立价值。
 
 | 文件 | 项数 | 含义 |
 |---|---|---|
-| `scripts/ci/baselines/bilingual-docs.txt` | 77 | 缺少 `en` / `zh-CN` 对应件的规范路径 |
+| `scripts/ci/baselines/bilingual-docs.txt` | 77 | 缺少 `en` / `zh-CN` 对应件的规范路径；本清单的唯一权威 |
+
+该文件是唯一权威。其他任何承载同一份清单的文件都是副本，`check_bilingual_docs.py` 的
+`check_baseline_copies_agree()` 会逐份比对：`scripts/bilingual-baseline.txt` 必须持有相同条目，
+治理登记表必须包含这些条目，带日期的快照则必须标注
+`HISTORICAL — not a gate input`。既不等于权威、又未标注的副本一律判红，第二个通过条件因此
+无法悄悄出现。`81` 是历史值：它是 `c58878f` 上 81 条审查快照的条目数
+（`reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md`），从来不是本基线今天的条目数。
 
 仅在失败集合确实发生变化时重新生成基线：
 
@@ -321,7 +326,7 @@ python3 scripts/ci/gate_ratchet.py \
 | `check_protocol_index.py` | 退出 0 —— `missing=0 extra=0 duplicate_types=0 invalid_rows=0`，`PASS` |
 | 两组依赖齐备的 conformance | 退出 0 —— `Ran 585 tests`，`OK (skipped=27)` |
 | `test_nonempty_audit.py` | 退出 1 —— 5506 个未登记约束（GAP-09，现已关闭） |
-| `check_bilingual_docs_full.py` | 退出 1 —— 81 个未覆盖路径（GAP-08） |
+| `check_bilingual_docs_full.py` | 退出 1 —— 81 个未覆盖路径（GAP-08；2026-11-22 的全扫 81 条，是历史值，不是基线条目数 —— 见 §4） |
 | `cargo fmt --all --check` | 退出 0 |
 | `cargo clippy --workspace --all-targets -- -D warnings` | 退出 0 |
 | `cargo test --workspace` | 退出 0 |
@@ -339,7 +344,7 @@ python3 scripts/ci/gate_ratchet.py \
 | 命令 | 结果 |
 |---|---|
 | `python3 08-bmcp-protocol/schemas/test_nonempty_audit.py` | 退出 0 —— `OK: 32 schemas; 5599 registered constraints; no unregistered or stale entries.` |
-| `gate_ratchet.py --baseline .../bilingual-docs.txt` | 退出 0 —— `baseline=81 current=81 regressions=0 fixed=0`，`PASS` |
+| `gate_ratchet.py --baseline .../bilingual-docs.txt` | 退出 0 —— `baseline=81 current=81 regressions=0 fixed=0`，`PASS`（81 是该基线在 2026-11-22 的条目数；权威副本今天是 77，见 §4） |
 | `audit_runner_admission.py`（rebase 当时） | 退出 0 —— `7 self-hosted job(s) audited, 0 violation(s)` |
 | `cargo test --workspace --all-targets`（在 `main` 上） | `passed=546 failed=0 ignored=1` |
 | `cargo test --workspace`（在 `main` 上） | `passed=551 failed=0 ignored=1` |
@@ -424,7 +429,7 @@ node 22）上以 `bash --noprofile --norc -e -o pipefail` 执行，并按 runner
 | `conformance` | venv 依赖安装（真实脚本） | 退出 0，`using venv at /tmp/rt/gates-venv`，venv 满足 `jsonschema`/`rfc8785`/`cryptography` |
 | `conformance` | 通过该 venv 跑完整套件 | 退出 0，`Ran 585 tests`，`OK (skipped=27)` |
 | `schema-nonempty` | 硬门禁审计 | 退出 0，`OK: 32 schemas; 5599 registered constraints` |
-| `bilingual` | 棘轮 | 退出 0，`baseline=81 current=81 regressions=0 fixed=0` |
+| `bilingual` | 棘轮 | 退出 0，`baseline=81 current=81 regressions=0 fixed=0`（2026-11-22 的条目数；权威副本今天是 77，见 §4） |
 | `clippy` | 磁盘预检 | 在 721G 可用的主机上退出 0（拒绝路径见 §7.5） |
 | `clippy` | 工具链存在性 | 退出 0，`cargo 1.95.0`、`rustc 1.95.0`、`clippy 0.1.95` |
 | `clippy` | `cargo clippy --workspace --all-targets -- -D warnings` | 退出 0 |
