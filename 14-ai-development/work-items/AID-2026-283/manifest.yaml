@@ -20,7 +20,7 @@ ownership:
 
 implementation:
   branch: fix/aid-283-update-branch-uniqueness
-  pull_request: __PR__
+  pull_request: 1428
   base: main
   target_files:
     - scripts/ci/check_work_item_uniqueness.py

@@ -182,25 +182,28 @@ Every mutation turns the suite red; the restored checker is green.
 
 ## 9. Delivery
 
+Head SHA is the reviewed implementation commit; the evidence backfill that follows it is
+documentation-only and changes no code, test or gate input.
+
 Branch:
 
 fix/aid-283-update-branch-uniqueness
 
 PR:
 
-__PR_URL__
+https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1428
 
 Head SHA:
 
-__HEAD_SHA__
+0d1bf052f0a2edc9bd825175ce7fa270d48633b1
 
 Base SHA:
 
-__BASE_SHA__
+7ecf2a8e7d1e40a13f6af6d4335a6766a222194f
 
 Merge SHA:
 
-__MERGE_SHA__
+pending
 
 ## 10. Prompt integrity
 
