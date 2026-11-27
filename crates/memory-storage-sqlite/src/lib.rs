@@ -165,6 +165,20 @@ impl SqliteMemoryStorage {
         }
     }
 
+    fn scope_allowed_complete(
+        stored_json: &str,
+        requested: &[ScopeRef],
+    ) -> Result<(), StorageError> {
+        Self::validate_scope_set(requested)?;
+        let stored: Vec<ScopeRef> = Self::decode(stored_json)?;
+        Self::validate_scope_set(&stored)?;
+        if scope_set_contains_all(requested, &stored) {
+            Ok(())
+        } else {
+            Err(StorageError::ScopeMismatch)
+        }
+    }
+
     fn is_fenced(
         connection: &Connection,
         target_kind: &str,
@@ -259,9 +273,9 @@ impl SqliteMemoryStorage {
 
         match row {
             Some((scope_json, version_json)) => {
-                Self::scope_allowed(&scope_json, scope)?;
+                Self::scope_allowed_complete(&scope_json, scope)?;
                 let stored_scopes: Vec<ScopeRef> = Self::decode(&scope_json)?;
-                let mut version: MemoryVersion = Self::decode(&version_json)?;
+                let version: MemoryVersion = Self::decode(&version_json)?;
 
                 version
                     .validate()
@@ -274,13 +288,6 @@ impl SqliteMemoryStorage {
                 {
                     return Err(StorageError::InvalidSchema);
                 }
-
-                // A Claim is an indivisible disclosure unit: if any of its ScopeRefs
-                // is outside the caller-visible set, hide the entire Claim rather
-                // than returning a partial or existence-revealing projection.
-                version
-                    .claims
-                    .retain(|claim| scope_set_contains_all(scope, &claim.scope_refs));
 
                 Ok(Some(version))
             }
@@ -336,7 +343,7 @@ impl MemoryStorage for SqliteMemoryStorage {
         let Some((scope_json, memory_json)) = row else {
             return Ok(None);
         };
-        Self::scope_allowed(&scope_json, scope)?;
+        Self::scope_allowed_complete(&scope_json, scope)?;
         // A forgotten memory is invisible on every read path, not only on version reads.
         if Self::is_fenced(&self.connection, "Memory", memory_id.as_str())? {
             return Ok(None);
@@ -367,7 +374,7 @@ impl MemoryStorage for SqliteMemoryStorage {
         let Some((scope_json, current)) = row else {
             return Ok(None);
         };
-        Self::scope_allowed(&scope_json, scope)?;
+        Self::scope_allowed_complete(&scope_json, scope)?;
         let Some(current) = current else {
             return Ok(None);
         };
@@ -1234,7 +1241,7 @@ impl MemoryStorage for SqliteMemoryStorage {
         for row in rows {
             let (sequence, memory_id, version_id, scope_json) =
                 row.map_err(|_| StorageError::TransactionUnavailable)?;
-            match Self::scope_allowed(&scope_json, scope) {
+            match Self::scope_allowed_complete(&scope_json, scope) {
                 Ok(()) => {
                     records.push(ChangeRecord {
                         commit_sequence: CommitSequence(sequence as u64),
@@ -2412,7 +2419,7 @@ mod tests {
     }
 
     #[test]
-    fn sqlite_filters_nested_claims_by_the_callers_scope() {
+    fn sqlite_partial_scope_readers_cannot_read_multiscope_memory_version() {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         let first_scope = scope();
         let second_scope = ScopeRef {
@@ -2445,27 +2452,38 @@ mod tests {
             )
             .unwrap();
 
-        let first_reader = store
-            .read_current(&id("m1"), &[first_scope])
-            .unwrap()
-            .unwrap();
         assert!(
-            first_reader.claims.is_empty(),
-            "scope s1 must not receive the s2-only Claim"
+            matches!(
+                store.read_current(&id("m1"), std::slice::from_ref(&first_scope)),
+                Err(StorageError::ScopeMismatch)
+            ),
+            "a partial reader must not receive a canonical MemoryVersion"
         );
 
-        let second_reader = store
-            .read_current(&id("m1"), std::slice::from_ref(&second_scope))
-            .unwrap()
-            .unwrap();
-        assert_eq!(second_reader.claims.len(), 1);
-        assert_eq!(second_reader.claims[0].claim_id, id("claim-s2"));
+        assert!(
+            matches!(
+                store.read_version(
+                    &id("m1"),
+                    &id("v-multi-scope"),
+                    std::slice::from_ref(&second_scope)
+                ),
+                Err(StorageError::ScopeMismatch)
+            ),
+            "read_version must enforce complete Scope authorization too"
+        );
+
+        let full_scope = [first_scope, second_scope];
+        let full_reader = store.read_current(&id("m1"), &full_scope).unwrap().unwrap();
+        assert_eq!(full_reader.claims.len(), 1);
+        assert_eq!(full_reader.claims[0].claim_id, id("claim-s2"));
 
         let historical = store
-            .read_version(&id("m1"), &id("v-multi-scope"), &[second_scope])
+            .read_version(&id("m1"), &id("v-multi-scope"), &full_scope)
             .unwrap()
             .unwrap();
         assert_eq!(historical.claims.len(), 1);
+        assert_eq!(historical.claims[0].claim_id, id("claim-s2"));
+        assert_eq!(historical, full_reader);
     }
 
     #[test]
@@ -2936,7 +2954,7 @@ mod tests {
     }
 
     #[test]
-    fn sqlite_rejects_claim_scope_outside_callers_scope_even_when_parent_contains_it() {
+    fn sqlite_rejects_claim_scope_outside_commit_scope_and_requires_complete_read_scope() {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
         let first_scope = scope();
         let second_scope = ScopeRef {
@@ -2954,13 +2972,13 @@ mod tests {
             .unwrap();
 
         let mut new_version = version("v-unauthorized-claim-scope", 1, None);
-        new_version.claims = vec![claim_in_scope("claim-s2", second_scope)];
+        new_version.claims = vec![claim_in_scope("claim-s2", second_scope.clone())];
         assert_eq!(
             store.commit_version(
                 CommitRequest {
                     memory_id: id("m1"),
                     expected_current_version: None,
-                    new_version,
+                    new_version: new_version.clone(),
                     idempotency_key: "unauthorized-claim-scope".into(),
                     request_digest: "unauthorized-claim-scope-digest".into(),
                 },
@@ -2970,8 +2988,7 @@ mod tests {
         );
         assert!(store
             .read_current(&id("m1"), std::slice::from_ref(&first_scope))
-            .unwrap()
-            .is_none());
+            .is_err_and(|error| error == StorageError::ScopeMismatch));
         assert_eq!(
             store
                 .resolve_idempotency(
@@ -2982,11 +2999,43 @@ mod tests {
                 .unwrap(),
             None
         );
+
         assert!(store
-            .list_changes(None, &[first_scope], 10)
+            .list_changes(None, std::slice::from_ref(&first_scope), 10)
             .unwrap()
             .records
             .is_empty());
+
+        // The rejected partial-Scope commit did not persist a version.
+        // A complete-Scope commit is allowed and stores the canonical Claim.
+        store
+            .commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: new_version.clone(),
+                    idempotency_key: "authorized-multiscope-claim".into(),
+                    request_digest: "authorized-multiscope-claim-digest".into(),
+                },
+                &[first_scope.clone(), second_scope.clone()],
+            )
+            .unwrap();
+
+        assert!(
+            matches!(
+                store.read_current(&id("m1"), std::slice::from_ref(&first_scope)),
+                Err(StorageError::ScopeMismatch)
+            ),
+            "a partial reader must not receive the canonical version"
+        );
+
+        let full_reader = store
+            .read_current(&id("m1"), &[first_scope, second_scope])
+            .unwrap()
+            .unwrap();
+        assert_eq!(full_reader, new_version);
+        assert_eq!(full_reader.claims.len(), 1);
+        assert_eq!(full_reader.claims[0].claim_id, id("claim-s2"));
     }
 
     #[test]
@@ -3024,20 +3073,182 @@ mod tests {
             )
             .unwrap();
 
-        let partial_reader = store
-            .read_current(&id("m1"), std::slice::from_ref(&first_scope))
-            .unwrap()
-            .unwrap();
         assert!(
-            partial_reader.claims.is_empty(),
-            "partial scope access must not disclose a partial Claim"
+            matches!(
+                store.read_current(&id("m1"), std::slice::from_ref(&first_scope)),
+                Err(StorageError::ScopeMismatch)
+            ),
+            "partial scope access must not return a canonical MemoryVersion"
         );
         let full_reader = store
-            .read_current(&id("m1"), &[first_scope, second_scope])
+            .read_current(&id("m1"), &[first_scope.clone(), second_scope.clone()])
             .unwrap()
             .unwrap();
         assert_eq!(full_reader.claims.len(), 1);
         assert_eq!(full_reader.claims[0].claim_id, id("claim-both"));
+    }
+
+    #[test]
+    fn sqlite_partial_scope_cannot_read_memory_scope_membership() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        let first_scope = scope();
+        let second_scope = ScopeRef {
+            scope_id: id("s2"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:s2".into(),
+        };
+        let mut multi_scope_memory = memory();
+        multi_scope_memory.scope_refs = vec![first_scope.clone(), second_scope.clone()];
+
+        store
+            .create_memory(
+                multi_scope_memory.clone(),
+                &[first_scope.clone(), second_scope.clone()],
+            )
+            .unwrap();
+
+        assert!(
+            matches!(
+                store.read_memory(&id("m1"), std::slice::from_ref(&first_scope)),
+                Err(StorageError::ScopeMismatch)
+            ),
+            "a partial reader must not receive the canonical Memory"
+        );
+
+        let full_reader = store
+            .read_memory(&id("m1"), &[first_scope, second_scope])
+            .unwrap()
+            .unwrap();
+        assert_eq!(full_reader, multi_scope_memory);
+    }
+
+    #[test]
+    fn sqlite_partial_scope_cannot_read_hidden_claim_dependencies_or_digest() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        let first_scope = scope();
+        let second_scope = ScopeRef {
+            scope_id: id("s2"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:s2".into(),
+        };
+        let mut multi_scope_memory = memory();
+        multi_scope_memory.scope_refs = vec![first_scope.clone(), second_scope.clone()];
+        store
+            .create_memory(
+                multi_scope_memory,
+                &[first_scope.clone(), second_scope.clone()],
+            )
+            .unwrap();
+
+        let mut new_version = version("v-hidden-dependencies", 1, None);
+        new_version.claims = vec![
+            claim_in_scope("claim-a", first_scope.clone()),
+            claim_in_scope("claim-b", second_scope.clone()),
+        ];
+        new_version.entity_refs = vec![id("entity-a"), id("entity-b")];
+        new_version.relation_refs = vec![id("relation-a"), id("relation-b")];
+        new_version.source_refs = vec![id("source-a"), id("source-b")];
+        new_version.provenance_refs = vec![id("provenance-a"), id("provenance-b")];
+        new_version.content_digest = "full-canonical-version-digest".into();
+
+        store
+            .commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: new_version.clone(),
+                    idempotency_key: "hidden-dependencies".into(),
+                    request_digest: "hidden-dependencies-request".into(),
+                },
+                &[first_scope.clone(), second_scope.clone()],
+            )
+            .unwrap();
+
+        assert!(
+            matches!(
+                store.read_current(&id("m1"), std::slice::from_ref(&first_scope)),
+                Err(StorageError::ScopeMismatch)
+            ),
+            "partial readers must receive neither hidden references nor the full digest"
+        );
+
+        let full_reader = store
+            .read_current(&id("m1"), &[first_scope, second_scope])
+            .unwrap()
+            .unwrap();
+
+        assert_eq!(full_reader, new_version);
+        assert_eq!(
+            full_reader.entity_refs,
+            vec![id("entity-a"), id("entity-b")]
+        );
+        assert_eq!(
+            full_reader.relation_refs,
+            vec![id("relation-a"), id("relation-b")]
+        );
+        assert_eq!(
+            full_reader.source_refs,
+            vec![id("source-a"), id("source-b")]
+        );
+        assert_eq!(
+            full_reader.provenance_refs,
+            vec![id("provenance-a"), id("provenance-b")]
+        );
+        assert_eq!(full_reader.content_digest, "full-canonical-version-digest");
+    }
+
+    #[test]
+    fn sqlite_canonical_version_identity_never_returns_different_partial_content() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        let first_scope = scope();
+        let second_scope = ScopeRef {
+            scope_id: id("s2"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:s2".into(),
+        };
+        let mut multi_scope_memory = memory();
+        multi_scope_memory.scope_refs = vec![first_scope.clone(), second_scope.clone()];
+        store
+            .create_memory(
+                multi_scope_memory,
+                &[first_scope.clone(), second_scope.clone()],
+            )
+            .unwrap();
+
+        let mut new_version = version("v-canonical-identity", 1, None);
+        new_version.claims = vec![
+            claim_in_scope("claim-a", first_scope.clone()),
+            claim_in_scope("claim-b", second_scope.clone()),
+        ];
+        new_version.content_digest = "canonical-content-digest".into();
+
+        store
+            .commit_version(
+                CommitRequest {
+                    memory_id: id("m1"),
+                    expected_current_version: None,
+                    new_version: new_version.clone(),
+                    idempotency_key: "canonical-identity".into(),
+                    request_digest: "canonical-identity-request".into(),
+                },
+                &[first_scope.clone(), second_scope.clone()],
+            )
+            .unwrap();
+
+        let partial_result = store.read_current(&id("m1"), std::slice::from_ref(&first_scope));
+        assert!(
+            matches!(partial_result, Err(StorageError::ScopeMismatch)),
+            "a partial reader must not receive the canonical version identity"
+        );
+
+        let full_reader = store
+            .read_current(&id("m1"), &[first_scope, second_scope])
+            .unwrap()
+            .unwrap();
+        assert_eq!(full_reader.memory_version_id, new_version.memory_version_id);
+        assert_eq!(full_reader.content_digest, new_version.content_digest);
+        assert_eq!(full_reader.claims, new_version.claims);
+        assert_eq!(full_reader, new_version);
     }
 
     #[test]

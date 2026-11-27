@@ -1,0 +1,86 @@
+work_item_id: AID-2026-281
+title: "Require complete-Scope authorization for canonical SQLite Memory reads"
+class: SECURITY/IMPLEMENTATION
+risk: R1
+risk_rationale: "Closes a cross-Scope disclosure and canonical-identity defect in the SQLite Memory read adapter. The change fails closed unless the caller covers every Scope attached to the stored Memory; it does not introduce a new public authorization capability or alter Event storage."
+status: IMPLEMENTED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: a588cd9914949c2c9db7b2c5704d906fd3f05b70
+prompt_status: RECORDED_NOT_FROZEN
+prompt_provenance: THREE_DISPATCHED_TASK_FILES_CAPTURED_BY_METADATA
+approval_scope:
+  type: Full-document
+evidence: "14-ai-development/work-items/AID-2026-281/evidence.md"
+evidence_reference:
+  - "14-ai-development/work-items/AID-2026-281/evidence.md"
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-281/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-281/session-evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-281/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference
+supersession:
+  supersedes: []
+  supersession_reason: null
+  effective_date: null
+archival:
+  archived_date: null
+  archival_reason: null
+  archival_reference: null
+canonical_scope_keywords:
+  - "memory-read-authorization-boundary"
+  - "complete-scope-read"
+  - "canonical-memory-version"
+  - "cross-scope-disclosure"
+scope:
+  objective: "Prevent partial-Scope callers from receiving canonical Memory or MemoryVersion objects whose complete stored Scope membership and aggregate content are not authorized. Preserve canonical stored objects and require complete Scope coverage on the SQLite Memory read and change-feed paths."
+  files_changed:
+    - "crates/memory-storage-sqlite/src/lib.rs"
+    - "14-ai-development/work-items/AID-2026-281/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-281/evidence.md"
+    - "14-ai-development/work-items/AID-2026-281/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-281/prompt-v1.md"
+    - "14-ai-development/work-items/INDEX.md"
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#1128"
+      - "#1129"
+      - "#1136"
+      - "#1138"
+      - "#1139"
+    implementing_ai_session: "ChatGPT-GPT-6; conversation 6b090b5d-f3d0-83e8-96c7-d293f2a475bd"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-281/prompt-v1.md"
+    executed_prompt_provenance: "COMPOSITE_TASK_CAPTURE; NOT_A_BYTE_FOR_BYTE_PLATFORM_TRANSCRIPT"
+    session_reference_status: "RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-281/session-evidence.md"
+implementation:
+  status: IMPLEMENTED
+  summary: "Adds complete-Scope authorization for canonical SQLite MemoryVersion, Memory, current-version and change-feed reads. Removes in-place Claim filtering from canonical MemoryVersion reads. Partial-Scope callers receive ScopeMismatch; complete-Scope callers receive the unchanged canonical object. Adds regression coverage for hidden Claim dependencies and digest, Scope membership, canonical identity, and rejected partial-Scope commits."
+  files_changed:
+    - "crates/memory-storage-sqlite/src/lib.rs"
+    - "14-ai-development/work-items/AID-2026-281/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-281/evidence.md"
+    - "14-ai-development/work-items/AID-2026-281/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-281/prompt-v1.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests:
+    - "cargo fmt --all — completed on the implementing machine."
+    - "cargo test -p memory-storage-sqlite — observed: 63 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out."
+    - "cargo test -p memory-store — passed on the implementing machine; test-binary totals: 15, 6, 3, 2, 2, 0."
+    - "cargo test -p memory-context — passed on the implementing machine; test-binary totals: 85, 10, 9, 19, 8, 1, 2, 8, 14, 21, 0."
+    - "cargo test -p brain-cli — passed on the implementing machine; test-binary totals: 1, 2, 3, 4, 1, 3, 1, 2, 4, 3."
+    - "Focused SQLite regression tests for #1128, #1129 and #1139 were each run individually and passed; exact commands and observed output are recorded in evidence.md."
+    - "cargo test -p memory-event-store-sqlite — NOT RUN after this change."
+    - "GitHub Actions and required PR checks — NOT RUN / no result claimed by this local evidence."
