@@ -1,0 +1,138 @@
+work_item_id: AID-2026-324
+title: "Make symlink-unavailable skips fail closed across boundary tests"
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  This change narrows test-only symlink skip eligibility to recognized
+  platform capability or policy errors, makes skip reasons exact, and
+  strengthens negative and forced-unavailability verification. Production
+  checker behavior is unchanged.
+status: IMPLEMENTED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: "Owner acceptance not recorded"
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "cd1722e753a429247d91f990caa2defac565e308"
+pull_request: null
+pull_request_url: null
+merge_commit_sha: null
+
+scope:
+  objective: >-
+    Make symlink-boundary skip paths fail closed for unclassified creation
+    errors across the governed-root, scan-boundary and unbound-emission
+    tests; enforce exact skip-reason matching; require negative harnesses
+    to prove the expected diagnostic as well as main() failure; require
+    exact once-only forced-unavailability accounting; and keep the full
+    self-check running to its final summary when a runner raises.
+  findings:
+    F1:
+      - Only recognized symlink capability/policy errors may become skips.
+      - Windows winerror is authoritative when present; errno fallback is
+        forbidden for Windows errors with a winerror.
+      - ENOSPC, EIO, EEXIST, ENOENT, sharing violations and unclassified
+        errors must propagate.
+    F2:
+      - Skip reasons must match ALLOWED_SKIPS byte-for-byte/string-for-string.
+      - No whitespace normalization is permitted.
+    F3:
+      - Negative harnesses must assert the expected UNEXPECTED_SKIPS
+        diagnostic before asserting main() returns 1.
+      - Harness-level failures must produce a nonzero process exit.
+    F5:
+      - Every forced-unavailable case must occur exactly once in SKIPPED.
+      - No such case may occur in RESULTS_BY_NAME.
+    harness_exit:
+      - verify_skip_registry.py must return nonzero if any sub-harness
+        fails; it must not report success with process exit 0 on failure.
+    issue_1438:
+      - T49, T50, T51, T51b, T58, T59, T60 and T128 must treat recognized
+        symlink capability/policy failures as registered skips using the
+        same exact reason as the existing symlink skip cases.
+      - Unclassified symlink creation errors must remain failures.
+      - >-
+        Every runner in main() must have a section-level exception boundary:
+        a raised Exception is reported as [FAIL], recorded as one failed
+        result, and must not prevent later runners or the final summary.
+      - The full-suite forced-unavailability regression must exercise both
+        os.symlink and pathlib.Path.symlink_to in a child process and verify
+        the final summary, skip accounting and successful process exit.
+  non_claims:
+    - F4 cross-invocation duplicate accounting is not fixed.
+    - Issue #1268 and its merged invariant are not reopened.
+    - Production scripts/check_document_management.py is unchanged.
+    - No claim is made that symlink behavior on every filesystem is identical.
+    - When symlink creation is unavailable, skipped T49/T50/T51/T51b/T58/T59/T60/T128
+      cases do not prove their original symlink-specific assertions.
+    - The full-suite forced-unavailability regression proves skip accounting
+      and suite completion under injected unavailability; it does not prove
+      the skipped symlink-specific behaviors.
+    - No claim is made that an unavailable-platform run substitutes for a
+      symlink-capable run of those assertions.
+  constraints:
+    - Only scripts/test_check_document_management.py,
+      verify_skip_registry.py, verify_symlink_unavailable.py,
+      verify_full_suite_symlink_unavailable.py and this work-item
+      documentation/index entry are in scope.
+    - Preserve the existing ALLOWED_SKIPS registrations and exact reason;
+      register each newly skippable symlink case with that same reason.
+    - Preserve successful symlink-capable execution and the T68c skip.
+    - No production checker changes.
+    - No third-party dependencies.
+    - No F4 remediation or unrelated refactoring.
+
+evidence: 14-ai-development/work-items/AID-2026-324/evidence.md
+
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-324/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-324/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-324/session-evidence.md
+    relationship: evidence
+
+session_evidence:
+  - role: IMPLEMENTATION_SESSION
+    issue_refs:
+      - "#1439"
+      - "#1438"
+    implementing_ai_session: 6b092c22-63d0-83ec-97e9-5bbe0ce3dac8
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-324/session-evidence.md
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-324/prompt-v1.md
+    executed_prompt_sha256: "cd5109c0cfa40f38762c97b8a7db1c7ac5e4ee8f5349acab661f90e3349efb69"
+    executed_prompt_bytes: 6270
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: "RECORDED"
+
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    Implementation patches cover Issue #1439's F1, F2, F3, F5 and
+    skip-registry harness process exit, plus Issue #1438's symlink-unavailable
+    handling for T49/T50/T51/T51b/T58/T59/T60/T128, section-level runner
+    exception isolation and full-suite forced-unavailability regression.
+    Operator execution evidence for Issue #1438 remains pending and will be
+    appended to evidence.md after the operator supplies the actual output.
+  files_changed:
+    - scripts/test_check_document_management.py
+    - verify_skip_registry.py
+    - verify_symlink_unavailable.py
+    - verify_full_suite_symlink_unavailable.py
+    - 14-ai-development/work-items/AID-2026-324/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-324/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-324/evidence.md
+    - 14-ai-development/work-items/AID-2026-324/session-evidence.md
+    - 14-ai-development/work-items/INDEX.md
+  tests:
+    - "python scripts/test_check_document_management.py"
+    - "python verify_skip_registry.py"
+    - "python verify_symlink_unavailable.py"
+    - "python verify_full_suite_symlink_unavailable.py"
+    - "ENOSPC must propagate from run_symlink_boundary()"
+    - "Windows winerror classification must reject winerror 32 and accept 5, 50, 1314"
+    - "Skip-reason whitespace drift must enter UNEXPECTED_SKIPS"
+    - "Each forced-unavailable name must occur exactly once in SKIPPED and not in RESULTS_BY_NAME"
