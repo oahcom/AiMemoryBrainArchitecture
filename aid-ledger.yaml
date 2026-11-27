@@ -5,7 +5,7 @@
 # One AID maps to exactly one work_item_id.
 
 schema: 1
-updated_at_utc: "2026-11-27T05:30:00Z"
+updated_at_utc: "2026-11-27T09:40:00Z"
 entries:
   - id: AID-2026-082
     state: MERGED
@@ -240,3 +240,7 @@ entries:
   - id: AID-2026-117
     state: FREE
     note: "do not trust this row: external numbering is already at 188 in flight. Re-scan main's work-items tree immediately before any reservation push; the next plausibly free number is >= 189."
+  - id: AID-2026-284
+    state: RESERVED
+    carrier: "branch fix/aid268-negative-assertion"
+    note: "2026-11-27: main work-items tree carries only AID-2026-280 and AID-2026-290 above 279; 281/282/283 are held by fix/2026-11-27-aid281-session-evidence-body-digest-reader, fix/2026-11-27-aid282-symlink-false-pass and fix/aid-283-update-branch-uniqueness, 289 by fix/289-post-merge-remediation. 284 scanned free on the main work-items tree and on all origin refs. Scope: make the manifest blob-pin negative sample able to fail the job, and bind the scan to the merge candidate's real target base (#1349/#1350)."
