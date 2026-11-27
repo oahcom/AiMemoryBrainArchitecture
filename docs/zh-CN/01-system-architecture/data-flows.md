@@ -1,9 +1,48 @@
+---
+document_metadata:
+  domain: architecture
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-200/evidence.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "为原本无 front-matter 的镜像补 GOV-DOC-002 分类：仅记录 domain、role、状态与规范源路径（依据正文自述：Status: DECIDED for ownership and semantic boundaries）；不主张规范权威，也不证明与源语义对等。补元数据前正文 blob：2e52428e085f29f1692b06f9f963e98efd5b5533。"
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Normative
+  bilingual_counterpart:
+    source: "01-system-architecture/data-flows.md"
+    en: "docs/en/01-system-architecture/data-flows.md"
+    zh-CN: null
+---
 # 系统数据流
 
 - 文档 ID：SYS-DATA-FLOWS-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../01-system-architecture/data-flows.md)
-- 源版本：24bc5867749d234238e6d75aadd4119f359de9f8
+- 源版本： 278f31e7eaf5c50bde9c421719880ab687448015
 - 对应英文：[System Data Flows](../../en/01-system-architecture/data-flows.md)
 - 状态：所有权和语义边界为 DECIDED；调度/传输选择为 CANDIDATE；量化目标为 TO_VALIDATE
 

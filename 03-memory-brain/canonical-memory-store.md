@@ -12,7 +12,8 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-109/evidence.md"
+        - "14-ai-development/work-items/AID-2026-150/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-242/evidence.md"
         - "Source branch session-d-memory-brain-2026-11-16 @ b525e1f8fee2471a131e4a38efda99804045e424"
         - "AID-2026-089 / PR #1232 — D-only logical Fence authority"
       revocation: null

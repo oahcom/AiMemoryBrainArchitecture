@@ -8,7 +8,19 @@ import sys
 from pathlib import PurePosixPath
 
 
-CHECK_VERSION = "2026-11-24.8"
+# Version note: 2026-11-27.1 is not a rule change -- the allowlist below is
+# unchanged -- but it is a contract change and it has to be distinguishable in
+# a log. A run that omits --base/--head used to print the same "passed" line as
+# a run that performed new-file admission; a reader cannot tell the two
+# 2026-11-24.8 PASSes apart. From this version the unqualified run exits 2 with
+# SKIPPED and the head-tree half must be requested with --head-tree-only, so a
+# 2026-11-27.1 PASS with no "SKIPPED" in it means admission actually ran.
+#
+# 2026-11-27.2 is a rule change on the head-tree half: index membership fails
+# closed when either side of the relation is absent, where it used to return no
+# violations over an empty set (AID-2026-199, #1212). The two versions are
+# separate numbers on purpose -- one changed the contract, the other the rules.
+CHECK_VERSION = "2026-11-27.2"
 
 # Repository-root-relative paths, written with a leading slash.
 PROHIBITED_PATHS = (
@@ -491,18 +503,30 @@ def check_index_membership(root, commit, head_paths):
     field combinations in work-item manifests. It does not compare INDEX.md
     Status cells with manifest lifecycle fields, and does not verify external
     PR or GitHub state.
+
+    Both sides fail closed when absent (#1212). An empty side is not a satisfied
+    relation, it is an unbound one: with no directories the summary printed
+    `directories=0 linked=N` and reported every entry missing, and with no index
+    it printed nothing at all and returned no violations. Either way, renaming
+    `work-items/` or deleting a Canonical index silenced the check, and a
+    silent pass is indistinguishable from a real one in the log. `RuntimeError`
+    is this file's "cannot be determined" channel, so `main()` turns it into
+    exit 2, the same answer the other checks give for a missing input.
     """
     directories = work_item_directories(head_paths)
     if not directories:
-        return []
+        raise RuntimeError(
+            f"no work-item directories under '{WORK_ITEMS_DIR}'; the membership "
+            "relation has no directory side to verify, so a renamed or deleted "
+            "directory must not read as a pass"
+        )
 
     if WORK_ITEMS_INDEX not in head_paths:
-        # Deliberate ceiling: membership is a relation between the tree and the
-        # index, so with no index there is no relation here to falsify. Taking
-        # the index away is a governance act of its own (it is a Canonical
-        # document) and is not a membership defect; this check does not pretend
-        # to catch it.
-        return []
+        raise RuntimeError(
+            f"the work-item index '{WORK_ITEMS_INDEX}' is absent from the tree; "
+            "the index side of the membership relation cannot be read, and its "
+            "absence is not a pass"
+        )
 
     try:
         text = run_git(
@@ -918,16 +942,54 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--base", help="full base commit SHA")
     parser.add_argument("--head", help="full final head commit SHA")
+    # The head-tree half -- prohibited paths, INDEX membership, manifest
+    # consistency -- is real work that needs no range. New-file admission is
+    # the half that cannot run without one. Before this option existed the two
+    # were indistinguishable from the outside: a caller that omitted
+    # --base/--head received the same "passed" line as a run that had performed
+    # admission, so a CI step that had degraded to the head-tree half stayed
+    # green (repository-hygiene.yml ran this script twice, once without a
+    # range). The weaker half is no longer the default: it has to be named,
+    # and an unqualified run is refused rather than downgraded.
+    parser.add_argument(
+        "--head-tree-only",
+        action="store_true",
+        help=(
+            "run only the checks that need no --base/--head; new-file "
+            "admission is reported SKIPPED, never reported as passed"
+        ),
+    )
     args = parser.parse_args()
 
     if bool(args.base) != bool(args.head):
         parser.error("--base and --head must be supplied together")
+
+    if args.head_tree_only and (args.base or args.head):
+        parser.error(
+            "--head-tree-only cannot be combined with --base and --head"
+        )
 
     return args
 
 
 def main():
     args = parse_args()
+
+    # Refuse an unqualified run before touching the repository. The most this
+    # script can say without a range is "admission did not run", and a check
+    # that did not run must not report success. Exit 2 is the INCOMPLETE code
+    # this script already uses when a condition cannot be determined, so a
+    # caller that forgot the range fails closed instead of reading green.
+    if not (args.base and args.head) and not args.head_tree_only:
+        print(
+            "Repository new-file admission SKIPPED "
+            "(new-file admission requires --base and --head)."
+        )
+        error(
+            "repository hygiene cannot be determined: "
+            "new-file admission requires --base and --head"
+        )
+        return 2
 
     try:
         root = repository_root()
@@ -973,8 +1035,10 @@ def main():
         return 2
 
     print(
-        "Repository hygiene check passed "
-        f"(version={CHECK_VERSION})."
+        "Repository hygiene head-tree checks complete "
+        f"(version={CHECK_VERSION}). "
+        "New-file admission SKIPPED "
+        "(new-file admission requires --base and --head)."
     )
     return 0
 

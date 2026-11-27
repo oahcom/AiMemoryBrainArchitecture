@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-109/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-242/manifest.yaml"
         - "00-governance/implementation-evidence/2026-11-26-a-i-storage-e2e-composition-review.md"
       revocation: null
     evidence_verification:
@@ -31,8 +31,8 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "AID-2026-109 restricted D source-root recovery evidence"
-    canonical_scope_id: "ai-development/aid-2026-109-evidence"
+    canonical_scope: "AID-2026-242 restricted D source-root recovery evidence"
+    canonical_scope_id: "ai-development/aid-2026-242-evidence"
     canonical_scope_keywords:
       - d-memory-brain
       - source-recovery
@@ -46,13 +46,13 @@ document_metadata:
     zh-CN: null
 ---
 
-# AID-2026-109 — Restricted D normative-root recovery evidence
+# AID-2026-242 — Restricted D normative-root recovery evidence
 
-Attribution: `user-authorized operator (delegated by account owner)`, 2026-11-26. Proxy registration only: **代理登记，非自然人 Owner 签署**.
+Attribution: `user-authorized operator (delegated by account owner)`, 2026-11-27. Proxy registration only: **代理登记，非自然人 Owner 签署**.
 
 ## 1. Exact baseline and source provenance
 
-- Main baseline fetched before branch creation: `92a759ec1a8c748fc4091015a3a3e8aa97ddc3e3`; latest main synchronization: `b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c`.
+- Main baseline fetched before branch creation: `92a759ec1a8c748fc4091015a3a3e8aa97ddc3e3`; latest main synchronization before this task: `b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c`; current fetched main: `788fbc011877a14976fc0a974ffe2e013dd9991b`.
 - Source branch: `session-d-memory-brain-2026-11-16`, exact head `b525e1f8fee2471a131e4a38efda99804045e424`.
 - Source file: `03-memory-brain/canonical-memory-store.md`, source blob `6b37c91033fda21f072e2a3bde6f274663b1e76e`.
 - Main had no `03-memory-brain/` tree at the baseline. Existing EN mirror blob: `414fe03fd40fb8ad46061d2d8c7d29ba2667f252`; existing ZH-CN mirror blob: `34e0755a079f085df65c2a180cc59b6aaea7ea78`.
@@ -90,12 +90,12 @@ AID-2026-089 was merged by PR #1232 as `d914e8a1f8a1ba24c21c41a9249489d544388185
 
 ## 5. Governance scope configuration
 
-- `03-memory-brain` is added to `00-governance/document-scope-registry.yaml` as a governed root and to `scripts/check_bilingual_docs.py` `NORMATIVE_ROOTS`, as required by GOV-DOC-002 DM-14 and bilingual-root scope equality.
-- This changes only the declared scan scope; no checker algorithm or validator semantics changed. The new root contains only the recovered canonical source in this PR.
+- At the fetched main baseline `788fbc011877a14976fc0a974ffe2e013dd9991b`, both `03-memory-brain` and `09-security-governance` are already present in `00-governance/document-scope-registry.yaml` and `scripts/check_bilingual_docs.py` `NORMATIVE_ROOTS`.
+- The branch intended to add `03-memory-brain` and `09-security-governance`; those additions are already satisfied on main. The final merge retains the complete main checker implementation, including UTF-8 Git-output decoding, full-history checks and designated-Chinese-side pairing. No checker algorithm or validator behavior is regressed.
 
 ## 6. Scope and non-claims
 
-Documentation and work-item registration only. No runtime, validator semantics, schema, test, workflow, 04/05 source, Storage code, or Issue state changed. No D Owner acceptance, joint acceptance, wire-schema freeze, implementation conformance, production behavior, or Gate A closure is claimed. #1212 remains OPEN. The D canonical-store root presence moves from missing to **RESTORED — CANDIDATE / INFORMATIVE**; normative approval and exact Owner acceptance remain OPEN.
+Documentation and work-item registration only. At fetched main `788fbc011877a14976fc0a974ffe2e013dd9991b`, the D canonical-store path is already present with `canonical_status: Canonical`; this PR does not claim a new path creation. It applies the permanent AID-2026-089 authority-conflict notice, changes the canonical status to **Candidate / Informative**, and restores the EN/ZH-CN mirror content from the historical source. No runtime, validator semantics, schema, test, workflow, 04/05 source, Storage code, or Issue state changed. No D Owner acceptance, joint acceptance, wire-schema freeze, implementation conformance, production behavior, or Gate A closure is claimed. #1212 remains OPEN.
 
 
 ### 4.1 Exact blob and metadata comparison
@@ -109,9 +109,19 @@ Documentation and work-item registration only. No runtime, validator semantics, 
 The frontmatter SHA values above are Git blob SHAs of the exact added YAML frontmatter blocks (including delimiters). The source file's unmodified body, as a Git blob, hashes to `6b37c91033fda21f072e2a3bde6f274663b1e76e`, identical to the source branch blob.
 
 
-### 4.2 Executed prompt snapshot
+### 4.2 Executed prompt snapshots
 
-- Snapshot: `14-ai-development/work-items/AID-2026-109/prompt-v1.md`.
-- SHA-256: `33b4bfa744533c9dbf595e2520ff87c4c526e6e6f1c20625ed1fa6b90038af4a`.
-- UTF-8 bytes: `4416`.
-- Provenance: user prompt captured from the initiating chat; session ID itself remains NOT_RECORDED.
+- Original prompt-v1 digest before renumbering/path normalization: `33b4bfa744533c9dbf595e2520ff87c4c526e6e6f1c20625ed1fa6b90038af4a`, 4416 UTF-8 bytes.
+- Normalized prompt-v1: `14-ai-development/work-items/AID-2026-242/prompt-v1.md`; SHA-256 `c9d765fce7debe0364cb20acbc706af421e88ba6bad4bb7253793b03798a89a1`; UTF-8 bytes `4422`.
+- Current W4 prompt-v2: `14-ai-development/work-items/AID-2026-242/prompt-v2.md`; SHA-256 `4bd120dac05ef592acb87b7b6fb5929ca6ccf8617a7fda8be179f39730d1b5fb`; UTF-8 bytes `3501`.
+- Session identifiers remain NOT_RECORDED; prompt-v2 was captured from the current user instruction in this conversation.
+
+
+## 7. Renumbering and current-main reconciliation (2026-11-27)
+
+- The original D work-item ID `AID-2026-109` collided with the distinct I Security & Governance work item already on main (`AID-2026-109`, PR #1300). Main's I directory and its `manifest.yaml`, `prompt-v1.md`, `session-evidence.md`, and report are preserved unchanged at that ID.
+- This D work item is assigned `AID-2026-242` by the current task. Its four original files were moved to `14-ai-development/work-items/AID-2026-242/`; internal work-item paths, identifiers and prompt digest were updated.
+- Original prompt-v1 digest before path normalization: `33b4bfa744533c9dbf595e2520ff87c4c526e6e6f1c20625ed1fa6b90038af4a` (4416 UTF-8 bytes). The normalized prompt-v1 digest is `c9d765fce7debe0364cb20acbc706af421e88ba6bad4bb7253793b03798a89a1` (4422 bytes); the current W4 prompt-v2 digest is `4bd120dac05ef592acb87b7b6fb5929ca6ccf8617a7fda8be179f39730d1b5fb` (3501 bytes). Both are recorded in the AID-242 manifest.
+- The fetched main at `788fbc011877a14976fc0a974ffe2e013dd9991b` already contains `03-memory-brain/canonical-memory-store.md`, with AID-150 provenance and `canonical_status: Canonical`; this PR therefore does not claim that the path is absent at the current baseline. Its substantive correction is the permanent AID-2026-089 authority-conflict notice, demotion to `Candidate` / `Informative`, and restoration of the EN/ZH-CN mirrors from the historical source.
+- Main already registers `03-memory-brain` and `09-security-governance` in both the GOV-DOC-002 governed-root registry and the bilingual checker's `NORMATIVE_ROOTS`. The branch's two root additions are therefore already satisfied; the current main checker implementation is retained in full, including UTF-8 Git-output decoding, full-history checks and designated-Chinese-side pairing.
+- Attribution for this delegated continuation: `user-authorized operator (delegated by account owner)`, 2026-11-27. This is not a natural-person Owner signature or domain acceptance.

@@ -45,7 +45,11 @@ GUARDED_CODE_INFIX = "/src/"
 
 def git(*args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        ["git", *args], cwd=REPO_ROOT, text=True, capture_output=True
+        ["git", *args],
+        cwd=REPO_ROOT,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
     )
 
 

@@ -1,0 +1,129 @@
+work_item_id: AID-2026-191
+title: >-
+  Stop the repository-hygiene gate reporting a pass for new-file admission it did not run, by
+  refusing an unqualified invocation (exit 2, SKIPPED) and making the CI job supply --base/--head
+  in its one remaining invocation
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  One checker's command-line contract and one required job's step list. The admission rules, the
+  allowlist, the denylist, the INDEX-membership rule and the manifest-consistency rule are not
+  touched, no job is added, renamed or removed, no required context name changes, and the change
+  makes a gate stricter rather than weaker: the only path that used to print a pass without
+  performing admission now exits 2. The blast radius is a caller that omitted the range, and there
+  is exactly one such caller in the tree (the step this change rewrites).
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 2f4f4118bd2c2d8e43a23975f667deeb06553f3c
+prompt_status: RECORDED
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: 2f4f4118bd2c2d8e43a23975f667deeb06553f3c
+  assigned_id: AID-2026-191
+  allocation_rule: >-
+    Checked before writing, not taken from INDEX.md. Merged or open PR titles carried
+    AID-2026-170, 172, 173, 174, 183, 186, 188 and 189; the work-item tree carried 111, 112, 113,
+    114, 115, 140 and 150. AID-2026-190 was written first and then withdrawn before the push: two
+    other units opened PRs #1342 and #1343 under 190 while this one was being written, which is the
+    collision the recheck rule exists to catch, and it was caught at the push rather than at the
+    merge. 191 is the first number outside every observed set. No INDEX maximum plus one was used.
+  recheck_rule: >-
+    Immediately before merge, re-read pull requests and remote branches for AID-2026-191; if
+    occupied, take the next free number and update every path and reference in the same push.
+predecessor:
+  work_item_id: AID-2026-189
+  pull_request: 1339
+  merge_commit: 4326669caa6c43193d34219a0451b80762b712ff
+scope:
+  objective: >-
+    Close the defect where check_repository_hygiene.py skipped new-file admission without a
+    --base/--head pair and still printed the same "passed" line a full run prints, while CI ran
+    that same script twice, once with the range and once without.
+  changes:
+    - path: "scripts/ci/check_repository_hygiene.py"
+      detail: >-
+        An unqualified invocation now prints "Repository new-file admission SKIPPED (new-file
+        admission requires --base and --head).", emits the existing INCOMPLETE error annotation
+        and exits 2 before any repository work. The head-tree half (prohibited paths, INDEX
+        membership, manifest consistency) stays reachable but must be requested by name with the
+        new --head-tree-only flag, whose summary says "New-file admission SKIPPED" instead of
+        claiming a pass. --head-tree-only combined with --base/--head is refused. CHECK_VERSION
+        moves 2026-11-24.8 -> 2026-11-27.1 with a comment recording that this is a contract change
+        rather than an allowlist change, so a reader can tell an old silent-skip PASS from a new
+        one.
+    - path: "scripts/test_check_repository_hygiene.py"
+      detail: >-
+        Four tests added: unqualified run exits 2 with the SKIPPED line and never prints the old
+        pass line; --head-tree-only exits 0 and reports the skipped half; --head-tree-only still
+        rejects a prohibited path with exit 1; --head-tree-only plus a range exits 2. The 27
+        existing head-tree-only call sites now name the mode explicitly instead of relying on the
+        removed default, and the three manifest-consistency assertions carry the new version.
+    - path: ".github/workflows/repository-hygiene.yml"
+      detail: >-
+        The duplicated invocation pair collapses to one step, "Check committed repository hygiene
+        and new-file admission", which supplies --base/--head from the same expressions the old
+        admission step used. Job id and job display name unchanged; steps 18 -> 17.
+    - path: "14-ai-development/work-items/AID-2026-191"
+      detail: >-
+        This registration set: manifest, evidence, prompt snapshot and session evidence.
+    - path: "14-ai-development/work-items/INDEX.md"
+      detail: "One appended row."
+  untouched:
+    - "is_allowed_new_path, the allowlist, ROOT_SCRATCH_PREFIXES and every admission rule"
+    - "check_new_paths and the decision logic taken when --base and --head are both present"
+    - "check_prohibited_head_paths, check_index_membership, check_work_item_manifest_consistency"
+    - "every job id, job display name and the sixteen declared required contexts"
+    - "scripts/ci/check_test_reachability.py and every other checker"
+decision:
+  question: >-
+    Refuse the unqualified run in the script, or leave the script alone and only pass --base/--head
+    in CI?
+  chosen: refuse in the script
+  reason: >-
+    Supplying the range in CI fixes the one caller that exists today and leaves the script able to
+    print a pass for admission it did not run for every other caller: the 27 self-tests, a local
+    operator running the gate before a push, and any step added later by a copy of the old line.
+    The defect is the script's output contract, not the workflow's env block. Refusing at the
+    source is also the smaller change in behaviour terms: the only invocation that changes result
+    is the one that was lying.
+  cost_accepted: >-
+    The head-tree-only mode gains a flag, and the 27 tests that used the implicit default name it.
+    Exit 2 without a range means a bare local invocation no longer validates the denylist alone;
+    --head-tree-only is the replacement and is covered by tests, so the capability is kept rather
+    than deleted.
+evidence:
+  record: 14-ai-development/work-items/AID-2026-191/evidence.md
+  prompt: 14-ai-development/work-items/AID-2026-191/prompt-v1.md
+  session: 14-ai-development/work-items/AID-2026-191/session-evidence.md
+non_goals:
+  - Changing any admission rule, allowlist entry or prohibited path
+  - Changing the decision taken when --base and --head are both supplied
+  - Adding, renaming, merging or removing a job, or touching a required context
+  - Changing branch protection
+  - Closing or reopening any Issue
+  - Creating a docs/en and docs/zh-CN evidence pair for this work item
+notes:
+  - >-
+    The docs pair is deliberately absent. 14-ai-development/work-items/ is in
+    check_bilingual_docs.py PAIR_EXEMPT_PREFIXES, and AID-2026-189, the CI unit merged immediately
+    before this one, shipped without one; bilingual_counterpart is null in every metadata block
+    here for the same reason, and no document claims a translation that does not exist.
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#1212"
+    implementing_ai_session: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-191/prompt-v1.md"
+    executed_prompt_sha256: "f31e98e170589600de8e5bbbe3b08f4561dbf027beaf40c68d8c9bf3635cbbce"
+    executed_prompt_bytes: 4283
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-191/session-evidence.md"

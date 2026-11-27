@@ -1,0 +1,110 @@
+manifest_version: "1.0"
+record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
+registration_stage: "STAGE_0"
+registration_status: "CARRIER_PR_OPEN"
+work_item_id: "AID-2026-150"
+id_status: "PROVISIONAL"
+title: "Restore three D Memory Brain normative roots and disposition orphan mirrors"
+date: "2026-11-26"
+repository:
+  name: "oahcom/AiMemoryBrainArchitecture"
+  baseline_branch: "main"
+  baseline_commit: "248cef62410cb4a412efb2d83326a1ce32345765"
+  refreshed_base_commit: "ac301e09799bcc094e015db4e12d2e6ff53d5010"
+identifier_allocation:
+  policy: "ACCOUNT_FIXED_RANGE"
+  assigned_range: "AID-2026-150..AID-2026-159"
+  assigned_id: "AID-2026-150"
+  selection: "First available number in the assigned account range"
+  availability_observation: "No matching AID-2026-150 Issue or PR carrier found at the stated main baseline"
+  forbidden_method: "INDEX max+1"
+  overflow_rule: "If 150-159 are all occupied, stop; never allocate outside the assigned range"
+source:
+  branch: "session-d-memory-brain-2026-11-16"
+  head: "b525e1f8fee2471a131e4a38efda99804045e424"
+  tree: "258f53ab74a6618493a15e6a0d190467997bec43"
+  files:
+    - path: "03-memory-brain/canonical-memory-store.md"
+      blob: "6b37c91033fda21f072e2a3bde6f274663b1e76e"
+    - path: "03-memory-brain/commit-cursor-semantics.md"
+      blob: "4688a0ca487bf4d853c7f0220408abe8d743d159"
+    - path: "03-memory-brain/forget-fence-operation-and-publication-gate.md"
+      blob: "4da0b61ba3656a768ea56b4a2a24e09da4e21cd5"
+authority:
+  sponsor: "USER-PRINCIPAL-DELEGATED"
+  accountable_owner: "USER-PRINCIPAL-DELEGATED"
+  acceptance_authority: "NOT_ASSIGNED"
+  attribution: "user-authorized operator (delegated by account owner)"
+  signature_status: "代理执行记录，非自然人 Owner 签署"
+scope:
+  objective: "Restore exactly three D NORMATIVE_ROOT files with GOV-DOC-002 metadata; preserve source bodies; classify 57 other D paths as 29 HISTORICAL_PHASE_RECORD and 28 UNDECIDED; classify 11 existing mirror pairs as ORPHAN_MIRROR_PENDING_DECISION."
+  canonical_files:
+    - "03-memory-brain/canonical-memory-store.md"
+    - "03-memory-brain/commit-cursor-semantics.md"
+    - "03-memory-brain/forget-fence-operation-and-publication-gate.md"
+  existing_linked_mirrors:
+    - "docs/en/03-memory-brain/canonical-memory-store.md"
+    - "docs/zh-CN/03-memory-brain/canonical-memory-store.md"
+    - "docs/en/03-memory-brain/commit-cursor-semantics.md"
+    - "docs/zh-CN/03-memory-brain/commit-cursor-semantics.md"
+  deferred_classification:
+    total: 57
+    historical_phase_record: 29
+    undecided: 28
+  orphan_mirror_pairs:
+    count: 11
+    status: "ORPHAN_MIRROR_PENDING_DECISION"
+  fence_conflict:
+    source_blob: "4da0b61ba3656a768ea56b4a2a24e09da4e21cd5"
+    disposition: "Restore full source at canonical root; update the dereference stub pair with metadata and source-status correction; preserve Parts 1-4 untouched; do not concatenate"
+    conflict_status: "Root source selection resolved; semantic disposition of the non-canonical stub/split mirror family remains pending Owner decision"
+  evidence:
+    canonical: "14-ai-development/work-items/AID-2026-150/restore-evidence.md"
+    en: "docs/en/14-ai-development/work-items/AID-2026-150/restore-evidence.md"
+    zh-CN: "docs/zh-CN/14-ai-development/work-items/AID-2026-150/restore-evidence.md"
+  files_to_create:
+    - "03-memory-brain/canonical-memory-store.md"
+    - "03-memory-brain/commit-cursor-semantics.md"
+    - "03-memory-brain/forget-fence-operation-and-publication-gate.md"
+    - "14-ai-development/work-items/AID-2026-150/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-150/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-150/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-150/restore-evidence.md"
+    - "docs/en/14-ai-development/work-items/AID-2026-150/restore-evidence.md"
+    - "docs/zh-CN/14-ai-development/work-items/AID-2026-150/restore-evidence.md"
+  files_to_modify:
+    - "14-ai-development/work-items/INDEX.md"
+    - "scripts/check_bilingual_docs.py"
+    - "docs/en/03-memory-brain/canonical-memory-store.md"
+    - "docs/zh-CN/03-memory-brain/canonical-memory-store.md"
+    - "docs/en/03-memory-brain/commit-cursor-semantics.md"
+    - "docs/zh-CN/03-memory-brain/commit-cursor-semantics.md"
+    - "00-governance/document-scope-registry.yaml"
+    - "docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md"
+    - "docs/zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate.md"
+  exclusions:
+    - "Do not restore the other 57 D source paths."
+    - "Do not delete or concatenate the 11 orphan mirror pairs; classify them as ORPHAN_MIRROR_PENDING_DECISION. The Fence navigation stub pair receives metadata and a source-status correction only; Parts 1-4 remain untouched."
+    - "Do not create or modify any README."
+    - "Do not modify validator logic, schemas, tests, workflows, deployment or production; the only checker change is adding 03-memory-brain to the existing NORMATIVE_ROOTS scope list."
+    - "Do not close or reopen Issue #1212."
+review:
+  status: "NOT_ASSIGNED"
+acceptance:
+  status: "NOT_GRANTED"
+  note: "Canonical path restoration only; decision_status remains Draft and normative_status remains Informative."
+carrier:
+  branch: "docs/aid-2026-150-restore-d-normative-roots"
+  pull_request: "1320"
+  pull_request_url: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1320"
+  merge_commit_sha: "PENDING"
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+    implementing_ai_session: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-150/prompt-v1.md"
+    executed_prompt_sha256: "f79ee4b9e021b5cc72b60a7c846af0e878226b323b6b0d60db86829b2ca877d0"
+    executed_prompt_bytes: 3815
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-150/session-evidence.md"

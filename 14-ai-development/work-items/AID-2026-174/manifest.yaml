@@ -1,0 +1,161 @@
+work_item_id: AID-2026-174
+title: Record the historical Session Evidence coverage gap that #1275 and #1266 passed through
+
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  A documentation record and one index row. It changes no gate, no workflow and no schema, and it edits
+  no pull request that already merged. The only way this work item could cause harm is by asserting
+  something the repository does not support, so every fact it states is a SHA, a timestamp, a check
+  count or a body field read back from the repository rather than recalled.
+
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 1e9341da603dec78377fed240f4d6dbabaa8838e
+tracking_issue: "#1026"
+
+prompt_id: AID-2026-174-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-174/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 924d57a2286276b156cb2c89bcbf55d2a7c3cfec68a060bdcf8d73d73ca26645
+prompt_bytes: 3170
+prompt_provenance: >-
+  NOT_VERIFIED. Assembled after the fact from the pull request records this work item cites; it is not
+  a live capture.
+
+authorization:
+  implementation_write: >-
+    GRANTED for this work item's own directory and 14-ai-development/work-items/INDEX.md.
+    NOT_GRANTED for any other path, and NOT_GRANTED for any edit to #1275 or #1266 (body, labels,
+    state) or to any merged record.
+  gate_behaviour_change: NOT_GRANTED - this work item records behaviour, it does not change it.
+  schema_change: NOT_GRANTED
+  platform_state_change: NOT_GRANTED - no required status context, branch protection or workflow is modified.
+  architecture_spec_change: NOT_GRANTED - no ADR and no canonical document is modified.
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-174/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-174/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-174/session-evidence.md
+  files_to_modify:
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope: >-
+    Every other path. In particular scripts/check_bilingual_docs.py (its NORMATIVE_ROOTS belong to the
+    bilingual-root work), .github/workflows/session-evidence.yml (the effective-time literal is not
+    moved), scripts/governance/session_evidence/validate.py (the exemption was already removed by
+    #1287), pull request #1220, and the two recorded pull requests themselves.
+
+acceptance_criteria:
+  - id: AC1
+    criterion: >-
+      Both pull requests are named with facts a reader can check without trusting this record.
+    measurement: >-
+      #1275: head 3c5ed22e, merge baca092b, 24 checks green. #1266: head 6f1ad214, merge 4c8a3e1d,
+      16 checks green. Both readable from the repository's merge commits and the pull request records.
+  - id: AC2
+    criterion: >-
+      The record states the verdict those pull requests received and that it was correct at the time.
+    measurement: >-
+      `Session Evidence` concluded SUCCESS for both, and both bodies carried neither declaration field.
+      The record says both were compliant under the gate then in force and that PASS was the correct
+      verdict; it does not say either bypassed, evaded or disabled anything.
+  - id: AC3
+    criterion: >-
+      The record names the mechanism, not a person or a pull request, as the gap.
+    measurement: >-
+      The early return at `scripts/governance/session_evidence/validate.py:2195-2203` on the tree of
+      that period is quoted as the cause: pre-effective-time PR, historical-only Issues, both
+      declaration fields absent.
+  - id: AC4
+    criterion: >-
+      The record states the disposal and the post-fix behaviour without claiming a rewrite.
+    measurement: >-
+      Exemption removed by #1287 (merge 17bfc43c, 2026-11-26T13:41:46Z; validate.py blob c27b41cf).
+      Re-running the current gate on either body reports `MISSING: PR: missing AI-assisted work
+      declaration`. Neither pull request is re-opened, re-labelled or edited.
+  - id: AC5
+    criterion: >-
+      This work item changes nothing else.
+    measurement: >-
+      Changed paths are this directory and `INDEX.md`: three new files plus one row, 0 removed.
+      The inserted-line total is not quoted as a constant here, because this sentence lives in the
+      very diff it would count: at `2afe24cd`, before the correction commit that carries it, the
+      total was 152 + 77 + 95 + 1 = 325; that commit adds five more lines to this file, so the
+      total at any later head must be measured with `git diff --numstat` against the merge base
+      rather than read from this sentence. The figure 318 stated here earlier was wrong at every
+      head where it appeared; corrected by the coordinating session on 2026-11-27. Separately, the
+      merge timestamp `2026-11-26T13:41:46Z` was challenged in
+      independent review and is correct: `pulls/1287` reports `merged_at` =
+      `2026-11-26T13:41:46Z`, one second after the commit's own timestamp, and the record is
+      describing the merge event.
+
+findings:
+  - id: F1
+    severity: MEDIUM
+    statement: >-
+      The gate's historical path returned a passing NOT_APPLICABLE for a pull request that declared
+      nothing, whenever the pull request predated the effective time and linked only historical Issues.
+      Two merged pull requests fell into that window, so the gap is in the gate's coverage, not in
+      either pull request.
+    evidence: >-
+      #1275 (head 3c5ed22e, merge baca092b) and #1266 (head 6f1ad214, merge 4c8a3e1d) both concluded
+      SUCCESS with `Session Evidence` SUCCESS, and both bodies carry neither `AI-assisted work` nor
+      `Session evidence reference(s)`.
+  - id: F2
+    severity: HIGH
+    statement: >-
+      Under the gate in force at their merge time, both pull requests were compliant and PASS was the
+      correct verdict. Recording the gap is not a finding against either one: the code returned
+      NOT_APPLICABLE on its own, and #1266's body described that outcome accurately at the time.
+    evidence: >-
+      #1266 body: "The Session Evidence context returns NOT_APPLICABLE on this branch, which is a
+      genuine historical-path validation, not a bypass". The early return at validate.py:2195-2203 is
+      the code path that produced the verdict.
+  - id: F3
+    severity: MEDIUM
+    statement: >-
+      A merged record cannot be repaired by editing it. The only honest disposal is forward-looking:
+      remove the exemption so the same body fails from now on, and record the window as history.
+    evidence: >-
+      #1287 removed the early return (merge 17bfc43c, 2026-11-26T13:41:46Z, validate.py blob
+      c27b41cf). The same two bodies now report `MISSING: PR: missing AI-assisted work declaration`
+      instead of NOT_APPLICABLE; neither pull request was re-opened, re-labelled or edited.
+
+implementation:
+  status: IMPLEMENTED_IN_BRANCH
+  branch: docs/aid-174-retroactive-gate-gap
+  pull_request: ASSIGNED_AT_OPEN
+  merge_commit_sha: NOT_MERGED
+  note: >-
+    Three documents and one index row. No executable path changes, and no gate result changes.
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    No independent review is recorded. The same session wrote the record and this manifest, so an
+    APPROVE from it would be self-review and is not claimed.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1026"
+    implementing_ai_session: session-evidence-coverage-gap-record-session
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-174/prompt-v1.md
+    executed_prompt_sha256: 924d57a2286276b156cb2c89bcbf55d2a7c3cfec68a060bdcf8d73d73ca26645
+    executed_prompt_bytes: 3170
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-174/session-evidence.md

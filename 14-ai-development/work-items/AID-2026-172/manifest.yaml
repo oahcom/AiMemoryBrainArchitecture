@@ -1,0 +1,65 @@
+work_item_id: AID-2026-172
+title: Compare the two frozen 77-entry bilingual baselines and enforce the shrink-only write rule
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  One comparison inside an existing gate, one refusal inside an existing writer,
+  and unit tests. No document pairing rule, baseline entry, or existing gate
+  outcome changes while the two copies agree, which they do on main.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-26
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 8722a37b0cd72dc550d99c0eaebe9e7556ce2f95
+prompt_id: AID-2026-172-PROMPT
+prompt_status: NOT_RECORDED
+prompt_provenance: DISPATCHED_TASK_FILE
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-172/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-172/evidence.md
+    - docs/en/14-ai-development/work-items/AID-2026-172/evidence.md
+    - docs/zh-CN/14-ai-development/work-items/AID-2026-172/evidence.md
+  files_to_modify:
+    - scripts/check_bilingual_docs.py
+    - scripts/test_check_bilingual_docs.py
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope:
+    - scripts/bilingual-baseline.txt content
+    - scripts/ci/baselines/bilingual-docs.txt content
+    - scripts/ci/gate_ratchet.py semantics
+    - current_bilingual_gaps() semantics
+    - .github/workflows (no new job, no new required context)
+    - branch protection
+carrier:
+  branch: docs/2026-11-26-aid-172-bilingual-baseline-consistency
+  pull_request: 1327
+  draft: false
+  merge_authorization: >-
+    Only after all 16 required contexts succeed on the exact final PR head,
+    branch freshness is rechecked, and any conflicts are resolved.
+review:
+  status: NOT_ASSIGNED
+  independent_reviewer: NOT_ASSIGNED
+  natural_person_owner_acceptance: NOT_RECORDED
+acceptance:
+  gate: PENDING_CI
+# prompt_status above records the prompt *library* registration, which is
+# NOT_RECORDED. The dispatched task text itself was captured by the operator and
+# is pinned below so the digest is verifiable rather than asserted.
+session_evidence:
+  - role: "Bilingual baseline copy-consistency check and shrink-only write assertion"
+    issue_refs:
+      - "#266"
+    implementing_ai_session: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-172/prompt-v1.md"
+    executed_prompt_sha256: "5ddef333aca30da79f3df7ee52d052ec2a6425a19b270377194725ac9d7397f2"
+    executed_prompt_bytes: 3263
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-172/session-evidence.md"

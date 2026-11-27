@@ -1,5 +1,9 @@
 name: Branch freshness
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
 # #719: a PR's diff is computed from merge-base(base, head) to head, so a stale
 # branch shows changes it did not make and hides changes main made that it
 # re-implements. The diff cannot report its own staleness; the commit graph can.

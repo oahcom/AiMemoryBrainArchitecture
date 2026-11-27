@@ -1,68 +1,137 @@
-record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
-registration_stage: "STAGE_0"
-registration_status: "DRAFT_RESTRICTED_SOURCE_RECOVERY"
-work_item_id: "AID-2026-109"
-id_status: "PROVISIONAL"
-title: "Restricted recovery of the D canonical-memory-store source root"
-repository: "oahcom/AiMemoryBrainArchitecture"
-base_branch: "main"
-base_commit_sha: "b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c"
-branch: "docs/2026-11-26-aid-2026-109-d-memory-brain-root-restore"
-pull_request: "PENDING"
-attribution:
-  actor: "user-authorized operator (delegated by account owner)"
-  date: "2026-11-26"
-  signature_status: "代理登记，非自然人 Owner 签署"
-scope:
-  objective: "Restore only the D canonical-memory-store root explicitly implicated by F2/F3; classify its AID-2026-089 conflict without promoting it to normative authority."
-  restored_paths:
-    - "03-memory-brain/canonical-memory-store.md"
-    - "docs/en/03-memory-brain/canonical-memory-store.md"
-    - "docs/zh-CN/03-memory-brain/canonical-memory-store.md"
-  excluded_paths:
-    - "03-memory-brain/commit-cursor-semantics.md"
-    - "03-memory-brain/forget-fence-and-completion-contract.md"
-    - "03-memory-brain/forget-fence-operation-and-publication-gate.md"
-    - "04-memory-compiler/**"
-    - "05-memory-runtime/**"
-  evidence: "14-ai-development/work-items/AID-2026-109/evidence.md"
-  exclusions: ["No runtime changes", "No validator semantic changes", "No schema/test/workflow changes", "No 04/05 changes", "No Issue closure", "No Owner acceptance fabricated"]
-  governance_scope_configuration:
-    - "00-governance/document-scope-registry.yaml: 03-memory-brain added to governed roots"
-    - "scripts/check_bilingual_docs.py: 03-memory-brain added to NORMATIVE_ROOTS; checker logic unchanged"
+id_status: PROVISIONAL
+work_item_id: AID-2026-109
+title: Restore the bounded I Security & Governance normative source root without importing the historical branch wholesale
+class: DOC/GOVERNANCE
+risk: R2
+risk_rationale: >-
+  Restoring historical policy material can create a false current-authority
+  signal. All restored documents remain Draft and Informative; exact Owner
+  acceptance, normative promotion and implementation conformance are not claimed.
+status: IMPLEMENTED_ACCEPTANCE_PENDING
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: "Owner I for I policy; affected Owners for their own boundaries; no acceptance inferred"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c
+tracking_issues: ["#1211", "#1212"]
 source:
-  branch: "session-d-memory-brain-2026-11-16"
-  branch_head: "b525e1f8fee2471a131e4a38efda99804045e424"
-  source_path: "03-memory-brain/canonical-memory-store.md"
-  source_blob_sha: "6b37c91033fda21f072e2a3bde6f274663b1e76e"
-  main_en_mirror_before: "414fe03fd40fb8ad46061d2d8c7d29ba2667f252"
-  main_zh_mirror_before: "34e0755a079f085df65c2a180cc59b6aaea7ea78"
-  exact_body_preserved_after_notice: true
-  fence_conflict: "Section 17 I-for-Forget-Fence wording; AID-2026-089 controls; informative-only notice added"
-classification:
-  canonical_memory_store: "CONFLICTS_WITH AID-2026-089 (section 17 wording only); canonical_status Candidate; normative_status Informative"
-  gate_a_d_root: "RESTORED_CANDIDATE_INFORMATIVE; Owner acceptance and normative approval OPEN"
-  gate_a: "PARTIAL / OPEN"
-  gate_b: "NOT VERIFIED"
-  issue_1212: "OPEN"
+  branch: session-i-security-governance-2026-11-16
+  head_sha: 8abddf814467b271344a9814613a6b7ca6a446c6
+  source_tree_blob_count_under_09_security_governance: 91
+  selected_source_files:
+    - path: 09-security-governance/global-forget-target-inventory-and-completion-evidence.md
+      source_blob_sha: 9100061fa986fb6676656169de3fcf9fc1c72664
+      restored_blob_sha: c0ba8b2dacc115e29233268e62d5ababfc26a025
+      frontmatter_blob_sha: a0740d117603891c0a9633d093bd01cb9a92f8cf
+      disposition: CURRENT_INFORMATIVE_CANDIDATE
+    - path: 09-security-governance/forget-retention-backup-and-erasure-policy.md
+      source_blob_sha: f14cb2149ca3f817229533005ab89dbdc7f0b3a8
+      restored_blob_sha: ab2b28829100ca1f2a17d203396b910fe3979bff
+      frontmatter_blob_sha: 60b666d7b6ea38a9f2d70aa47744f3d076876e02
+      disposition: CURRENT_INFORMATIVE_CANDIDATE
+    - path: 09-security-governance/principal-actor-and-authorization-contract.md
+      source_blob_sha: 03765efac4bb1153f303ce0030f9e277d602e81d
+      restored_blob_sha: b8073340cb2efba990c038e0b628ee6e9d0f24da
+      frontmatter_blob_sha: d1b950f16ce89b8c23549c99bb885b0014a78dbf
+      disposition: CURRENT_INFORMATIVE_CANDIDATE
+    - path: 09-security-governance/scope-and-revocation-policy.md
+      source_blob_sha: 71df6aaf21bb1767cd9fe5c947581b871325e023
+      restored_blob_sha: b4c66e90afdb57c5b60d37ad86554ccae6292e9a
+      frontmatter_blob_sha: 9252258fa0a5f64e3cea75513da4e5e48d6c7847
+      disposition: CURRENT_INFORMATIVE_CANDIDATE
+    - path: 09-security-governance/security-and-identity-overview.md
+      source_blob_sha: 26a990e44709d8604ae515a2a63b510400fd8471
+      restored_blob_sha: e9c71b15e19e9289bffa4d98bdfe254cc66a0b83
+      frontmatter_blob_sha: fd42af80595cf8c4ef92795f64f5beacba38e7db
+      disposition: CURRENT_INFORMATIVE_CANDIDATE
+  additional_new_file:
+    path: 09-security-governance/README.md
+    status: NEW_INFORMATIVE_INDEX; no source branch README blob existed
 identifier_allocation:
-  id_status: "PROVISIONAL"
-  observed_main: "92a759ec1a8c748fc4091015a3a3e8aa97ddc3e3"
-  latest_sync_main: "b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c"
-  observed_max_id: "AID-2026-108"
-  requested_id: "AID-2026-109"
-  uniqueness_scope: "Main INDEX maximum +1 and open PR/branch search checked at branch creation; no AID-2026-109 claim found."
-  merge_time_rule: "Re-fetch main and INDEX before merge; if ID collision, renumber to next free ID and preserve the prior reservation trail."
-
-
-session_evidence:
-  - role: IMPLEMENTATION_SESSION
-    issue_refs:
-      - "#1212"
-    implementing_ai_session: NOT_RECORDED
-    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-109/prompt-v1.md
-    executed_prompt_sha256: 33b4bfa744533c9dbf595e2520ff87c4c526e6e6f1c20625ed1fa6b90038af4a
-    executed_prompt_bytes: 4416
-    executed_prompt_provenance: NOT_VERIFIED
-    session_reference_status: NOT_RECORDED
-    session_evidence_ref: 14-ai-development/work-items/AID-2026-109/session-evidence.md
+  id_status: PROVISIONAL
+  observed_main: b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c
+  observed_max_registered_id: AID-2026-108
+  assigned_id: AID-2026-109
+  allocation_rule: "Latest main INDEX max + 1; rechecked immediately before commit"
+authority:
+  attribution: "user-authorized operator (delegated by account owner)"
+  signature_status: "代理登记，非自然人 Owner 签署"
+  normative_approval: NOT_GRANTED
+  source_owner_acceptance: NOT_RECORDED
+scope:
+  objective: "Restore only five I policy/contract sources justified by F4/F6/F7, add a bounded README, and record exact source/new/frontmatter blob evidence."
+  canonical_report: 14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md
+  en_report: docs/en/14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md
+  zh_cn_report: docs/zh-CN/14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md
+  prompt: 14-ai-development/work-items/AID-2026-109/prompt-v1.md
+  session_evidence: 14-ai-development/work-items/AID-2026-109/session-evidence.md
+  files_to_create:
+    - 09-security-governance/README.md
+    - 09-security-governance/global-forget-target-inventory-and-completion-evidence.md
+    - 09-security-governance/forget-retention-backup-and-erasure-policy.md
+    - 09-security-governance/principal-actor-and-authorization-contract.md
+    - 09-security-governance/scope-and-revocation-policy.md
+    - 09-security-governance/security-and-identity-overview.md
+    - docs/en/09-security-governance/README.md
+    - docs/zh-CN/09-security-governance/README.md
+    - docs/en/09-security-governance/global-forget-target-inventory-and-completion-evidence.md
+    - docs/zh-CN/09-security-governance/global-forget-target-inventory-and-completion-evidence.md
+    - docs/en/09-security-governance/forget-retention-backup-and-erasure-policy.md
+    - docs/zh-CN/09-security-governance/forget-retention-backup-and-erasure-policy.md
+    - docs/en/09-security-governance/principal-actor-and-authorization-contract.md
+    - docs/zh-CN/09-security-governance/principal-actor-and-authorization-contract.md
+    - docs/en/09-security-governance/scope-and-revocation-policy.md
+    - docs/zh-CN/09-security-governance/scope-and-revocation-policy.md
+    - docs/en/09-security-governance/security-and-identity-overview.md
+    - docs/zh-CN/09-security-governance/security-and-identity-overview.md
+    - 14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md
+    - docs/en/14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md
+    - docs/zh-CN/14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md
+    - 14-ai-development/work-items/AID-2026-109/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-109/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-109/session-evidence.md
+  files_to_modify:
+    - 00-governance/document-scope-registry.yaml
+    - scripts/check_bilingual_docs.py
+    - 14-ai-development/work-items/INDEX.md
+  exclusions:
+    - "No import of the remaining historical I branch tree"
+    - "No changes to 03/04/05 domain files"
+    - "No Runtime/product code or Validator code/semantics"
+    - "No tests, scripts, workflows, schemas, APIs, DDL, deployment or production configuration"
+    - "No Issue closure"
+acceptance_criteria:
+  - id: AC1
+    criterion: "F4/F6/F7-derived I source selection is explicit; F8 is excluded as Storage/Consistency."
+  - id: AC2
+    criterion: "Five source document bodies are byte-preserved and source/new/frontmatter blob SHAs are recorded."
+  - id: AC3
+    criterion: "All restored sources are GOV-DOC-002 complete, Draft and Informative; no Owner approval is fabricated."
+  - id: AC4
+    criterion: "D remains sole logical Fence authority per AID-2026-089; HIR-18 independent I authorization and D Fence replay checks remain required."
+  - id: AC5
+    criterion: "Canonical/EN/ZH-CN audit reports have matching structure and record Gate A / #1211 boundaries."
+  - id: AC6
+    criterion: "All 16 required contexts succeed on exact final PR head before merge; post-merge blob SHAs are verified."
+implementation:
+  status: MERGED
+  branch: docs/aid-2026-109-i-security-root
+  pull_request: 1300
+  merge_commit_sha: e3a134de856bbb58581fd688462c9c0282631270
+  merged_at_utc: 2026-11-26T13:13:24Z
+  final_pr_head_sha: c5766fb934e0e5db0ba667bda2f74452a0f39265
+  exact_head_required_checks: 16
+  exact_head_checks_result: SUCCESS
+  normative_acceptance: PENDING
+  pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1300
+review:
+  status: NOT_ASSIGNED
+acceptance:
+  status: NOT_ACCEPTED
+  owner_acceptance_count: 0
+  pending:
+    - "Owner I exact-version policy acceptance"
+    - "Affected Owner acceptance for D/I/H/Storage boundary interfaces"
+    - "HIR-18 implementation and cryptographic verifier evidence"
+    - "COC/GID cryptographic sealed evidence and Storage physical conformance under #1211"
