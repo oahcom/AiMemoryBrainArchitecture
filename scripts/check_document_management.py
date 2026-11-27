@@ -901,7 +901,10 @@ def check_schema_keys(loaded: dict) -> list[str]:
     walk(loaded.get("fields"), "")
     return problems
 
-def check_kinds(node, spec: dict, errors: list[str], where: str = "") -> None:
+def check_kinds(
+    node, spec: dict, errors: list[str], where: str = "",
+    deferred_required: frozenset[str] = frozenset(),
+) -> None:
     """Enforce the schema's declared kind for every present field.
 
     Without this, the schema is a description of the gate rather than a
@@ -925,7 +928,7 @@ def check_kinds(node, spec: dict, errors: list[str], where: str = "") -> None:
             # made `approval_scope: required true` unenforceable while
             # REQUIRED_FIELDS never listed it -- the schema and the gate
             # disagreed and neither noticed.
-            if sub.get("required") is True:
+            if sub.get("required") is True and f"{where}{name}" not in deferred_required:
                 errors.append(f"DM-01 missing required field: {where}{name}")
             continue
         path = f"{where}{name}"
@@ -936,7 +939,7 @@ def check_kinds(node, spec: dict, errors: list[str], where: str = "") -> None:
             )
             continue
         if isinstance(value, dict):
-            check_kinds(value, sub, errors, path + ".")
+            check_kinds(value, sub, errors, path + ".", deferred_required)
         elif isinstance(value, list):
             item_kind = sub.get("items")
             if item_kind is not None:
@@ -995,7 +998,9 @@ def check_document(path: Path, text: str, root: Path | None = None) -> tuple[lis
     # declares `mapping` is a type error, not merely a missing leaf that DM-03
     # happens to tolerate; an absent field the schema marks required is equally
     # an error, not an optional omission.
-    check_kinds(meta, schema(root), errors)
+    # Steward is schema-required for new/changed documents, while DM-15b tracks
+    # the grandfathered classified corpus against its committed census.
+    check_kinds(meta, schema(root), errors, deferred_required=frozenset({"steward"}))
     lifecycle = as_map(meta.get("lifecycle"), "lifecycle", errors)
     authority = as_map(meta.get("authority"), "authority", errors)
     errors += unknown_keys(lifecycle, LIFECYCLE_KEYS, "lifecycle")
