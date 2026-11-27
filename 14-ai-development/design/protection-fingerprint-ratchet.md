@@ -51,7 +51,7 @@ The source of truth is:
 
 The endpoint response is the protection object itself. It is not wrapped in a `protection` property, and it does not contain the summary endpoint's `protection.enabled` property.
 
-The implementation must therefore read fields directly from the response root. It must not require or synthesize either of these structures:
+The implementation reads fields directly from the response root. It must not require or synthesize either of these structures:
 
 - `payload.protection`
 - `payload.protection.enabled`
@@ -71,7 +71,7 @@ The live response calibrated on 2026-11-27 returned HTTP 200 and contained:
 
 The `required_pull_request_reviews` key was absent from that response.
 
-A request without `GITHUB_TOKEN` is incomplete. HTTP 403 and HTTP 404—including insufficient permission and non-administrator-token cases—are also incomplete outcomes. The checker must report the HTTP status and return exit code `2`. It must never turn an authorization or not-found response into a passing result.
+A request without `GITHUB_TOKEN` is incomplete. HTTP 403 and HTTP 404—including insufficient permission and non-administrator-token cases—are also incomplete outcomes. The checker reports the HTTP status and returns exit code `2`. It must never turn an authorization or not-found response into a passing result.
 
 ## 3. Schema version 3 fingerprint
 
@@ -94,7 +94,7 @@ The schema version is `3`. The fingerprint has exactly 12 top-level fields:
 
 The `contexts` value is normalized as a sorted set for comparison. API response ordering does not affect the fingerprint. Duplicate or empty context names make the payload incomplete.
 
-For the ten boolean values, the relevant source object and its `enabled` property must both exist and have the expected type. `strict` must exist as a boolean under `required_status_checks`.
+For the boolean values, the relevant source object and its `enabled` property must exist and have the expected type. `strict` must exist as a boolean under `required_status_checks`.
 
 ### 3.1 Required pull-request reviews: presence is data
 
@@ -104,7 +104,7 @@ For the ten boolean values, the relevant source object and its `enabled` propert
 2. If the key is present, its value must be an object and the object is recorded.
 3. If the key is present with `null` or a non-object value, the live payload is incomplete.
 
-Absence is not treated as a missing required field. It is an explicit state of the endpoint and must be stored in the baseline as JSON `null`.
+Absence is not treated as a missing required field. It is an explicit state of the endpoint and is stored in the baseline as JSON `null`.
 
 When present, the object is retained as a JSON-compatible object and serialized with stable key ordering. This records `required_approving_review_count` and other returned review-policy properties rather than reducing the object to a single boolean.
 
@@ -264,11 +264,31 @@ python -m unittest -v test_check_protection_fingerprint
 
 Tests inject a `payload_fetcher` and cover field-level direction rules, absent/present review-object semantics, incomplete data, HTTP failures, CLI write requirements, and deterministic baseline writing.
 
-The workflow is:
+The scheduled workflow is:
 
 `.github/workflows/protection-fingerprint.yml`
 
-It performs recurring checks using the repository's configured token permissions. A missing or insufficient credential must result in a failing incomplete outcome, not a pass.
+It runs on pushes to `main`, on its daily schedule, and through manual dispatch. It does not run on `pull_request` events.
+
+The workflow uses `secrets.GITHUB_TOKEN` as its API credential. That token may not have the Administration read permission required by the complete branch-protection endpoint. In that case, the API can return HTTP 403 and the checker correctly exits `2`.
+
+### 7.1 Why this gate is not enforced on pull requests
+
+The owner has decided that this gate is not a pull-request enforcement check. This is an explicit operating boundary, not an indication that the checker is optional or that its fail-closed behavior should be weakened.
+
+Three deployment choices have different costs:
+
+1. **Run on pull requests and make the check required using a manually provisioned PAT.** The PAT would need the necessary Administration read permission and secure provisioning, rotation, and ownership. This creates an additional long-lived credential dependency in the PR merge path.
+2. **Run on pull requests using the default `GITHUB_TOKEN` and fall back to the summary branch endpoint.** The summary endpoint does not expose the complete set of fields fingerprinted by schema v3. Such a fallback would silently reduce the coverage and assurance of the check.
+3. **Run the complete-endpoint check only on the daily schedule, main pushes, and manual dispatch.** This accepts a low-frequency detection interval for a low-frequency configuration surface and avoids making PR mergeability depend on an additional privileged credential.
+
+The selected policy is the third choice. Branch protection is expected to change infrequently, and daily observation is considered sufficient for this control. The complete endpoint and schema-v3 fingerprint remain intact; there is no summary-endpoint fallback.
+
+The workflow deliberately has no `pull_request` trigger and its job is not a required status check. It therefore does not block any pull request.
+
+An HTTP 403 from `/protection` when using `secrets.GITHUB_TOKEN` is an expected possible credential-provisioning state: the token lacks Administration read access. It indicates that the scheduled workflow could not obtain the required evidence. It does not, by itself, establish that branch protection has drifted or been weakened. In particular, **a red workflow caused by HTTP 403 is not proof of configuration drift**.
+
+The workflow writes this distinction to `$GITHUB_STEP_SUMMARY` on each run. The checker itself remains fail-closed: it returns `INCOMPLETE` with exit code `2` for HTTP 403, rather than converting an authorization failure into a pass. The operational decision not to make this workflow a required PR check does not change the checker's evidence contract.
 
 ## 8. Declared check context versus platform-required contexts
 
@@ -280,7 +300,7 @@ Its `declared-check-contexts` list contains 17 entries, including:
 
 `Protection fingerprint`
 
-The live platform `required_status_checks.contexts` set currently contains 16 entries. `Protection fingerprint` is not yet configured as a required platform status check.
+The live platform `required_status_checks.contexts` set currently contains 16 entries. `Protection fingerprint` is not configured as a required platform status check and is intentionally not being made required under the owner decision in section 7.1.
 
 These counts describe different contracts:
 
@@ -289,9 +309,7 @@ These counts describe different contracts:
 
 `check_declared_check_contexts.py` enforces inclusion: every declared context must be produced by a workflow job. It does not require the declaration to equal the platform-required set.
 
-Therefore, the declaration may contain 17 entries while platform branch protection currently requires 16. The presence of `Protection fingerprint` in the declaration does not mean GitHub already enforces it as a required status check.
-
-The checker must not claim that it is self-enforced by branch protection until a live read confirms that `Protection fingerprint` appears in the platform's required contexts.
+Therefore, the declaration may contain 17 entries while platform branch protection currently requires 16. The presence of `Protection fingerprint` in the declaration does not mean GitHub enforces it as a required status check. Its declaration records the workflow's check context and producer contract; it does not opt the check into PR merge enforcement.
 
 ## 9. Boundary with Repository hygiene
 
@@ -331,17 +349,19 @@ A context name that remains unchanged while its producing GitHub App identity ch
 
 ### 10.4 Self-enforcement gap
 
-A repository-controlled workflow cannot guarantee that GitHub continues requiring its own check.
+The protection fingerprint workflow is intentionally not a required PR check. Its declaration in the 17-entry context inventory does not make it platform-required.
 
-At the calibrated state, the declared inventory contains 17 contexts, while the platform requires 16. `Protection fingerprint` is not yet platform-required. This is an explicit enforcement gap.
+The scheduled workflow provides recurring observation while it remains enabled and executable. It does not eliminate the risk that the workflow, schedule, permissions, or platform access is disabled or removed.
 
-The scheduled workflow provides recurring observation while it remains enabled and executable. It does not eliminate the risk that the workflow, schedule, permissions, or platform requirement is disabled or removed.
+The daily schedule also creates a detection interval: a protection change may not be observed until the next successful scheduled run. This interval is an accepted consequence of the owner decision not to introduce a privileged PAT into the PR merge path.
 
 ### 10.5 API and credential availability
 
 API outages, rate limits, permission changes, token scope changes, HTTP 403, HTTP 404, transport errors, and response-shape changes can prevent a complete comparison.
 
 All such conditions must fail closed with exit code `2`. In particular, an authorization failure must never be interpreted as proof that the configuration is unchanged.
+
+A 403 caused by the default workflow token lacking Administration read access is an expected credential limitation under the current deployment. It is not evidence of configuration drift, and the workflow is not a required check.
 
 ### 10.6 Baseline governance
 
@@ -369,4 +389,6 @@ The implementation is acceptable when:
 14. It writes deterministic, byte-identical baseline output for repeated writes of the same payload and metadata.
 15. Its offline tests use an injected payload fetcher and perform no network requests.
 16. Its tests detect mutations that remove loosening detection, remove the tightening notice, or allow HTTP 403 to pass.
-17. Documentation distinguishes the 17 declared contexts from the 16 currently platform-required contexts and does not claim that `Protection fingerprint` is already required by branch protection.
+17. The workflow has no `pull_request` trigger and is not a required status check.
+18. The workflow records the expected meaning of HTTP 403 in the job summary.
+19. Documentation distinguishes the 17 declared contexts from the 16 currently platform-required contexts and does not claim that `Protection fingerprint` is required by branch protection.

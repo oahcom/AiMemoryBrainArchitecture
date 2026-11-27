@@ -1,12 +1,12 @@
 name: Protection fingerprint
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
   push:
-    branches: [main]
+    branches:
+      - main
   schedule:
     - cron: "0 3 * * *"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -15,23 +15,28 @@ jobs:
   protection-fingerprint:
     name: Protection fingerprint
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Self-test protection fingerprint ratchet
-        run: |
-          set -euo pipefail
-          cd scripts/ci
-          python3 -m unittest -v test_check_protection_fingerprint
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
 
-      - name: Check live branch protection fingerprint
+      - name: Run offline tests
+        working-directory: scripts/ci
+        run: python3 -m unittest -v test_check_protection_fingerprint
+
+      - name: Explain credential provisioning status
+        shell: bash
+        run: |
+          echo "HTTP 403 on /protection means GITHUB_TOKEN lacks Administration read; it is a credential provisioning state, not configuration drift. This workflow is not a required check and blocks no pull request." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Check live protection fingerprint
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          set -euo pipefail
           python3 scripts/ci/check_protection_fingerprint.py \
-            --repo oahcom/AiMemoryBrainArchitecture \
-            --branch main \
-            --fingerprint scripts/ci/baselines/protection-fingerprint.json
+            --repo "${GITHUB_REPOSITORY}" \
+            --branch main
