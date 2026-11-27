@@ -64,7 +64,7 @@ session_evidence:
     session_reference_status: "NOT_RECORDED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-261/session-evidence.md"
 implementation:
-  status: IMPLEMENTED_PENDING_CI
+  status: IMPLEMENTED
   summary: >-
     Added both --check invocations and both unittest modules to the existing
     GOV-DOC-001 structural-check job; removed the duplicate advisory workflow;
@@ -78,13 +78,13 @@ implementation:
     - "tests/test_check_governance_operation_traceability.py"
 tests:
   required_context: "GOV-DOC-001 structural checks"
-  execution_evidence: "PENDING_GITHUB_ACTIONS"
+  execution_evidence: "PR #1383 exact pre-finalization Head 11fe4d081cbe1a77e445db660a00151128855981: GOV-DOC-001 and both suites passed; all 16 required contexts success in run set 45940575421/45940575457/45940575491/45940575573/45940575594/45940575661/45940575731."
 review:
   status: NOT_ASSIGNED
   independent_reviewer: NOT_ASSIGNED
   natural_person_owner_acceptance: NOT_RECORDED
 acceptance:
-  gate: PENDING_CI
+  gate: PENDING_OWNER_ACCEPTANCE
 
 # The exact prompt payload was available in the conversation but was not snapshotted
 # verbatim at dispatch time. The absent path and zero digest/bytes are sentinels only;
