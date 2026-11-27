@@ -175,7 +175,9 @@ def verify(root: Path, commit: str, verbose: bool = True):
 
         # B2. authored_indexes[] uses the same root and mirror pin shape
         # as the top-level index fields, but is a list in AID-2026-100-style records.
-        for i, item in enumerate(doc.get("authored_indexes", []) or []):
+        source_evidence = as_mapping(doc.get("baseline_and_source_evidence"))
+        authored_indexes = source_evidence.get("authored_indexes", doc.get("authored_indexes", []))
+        for i, item in enumerate(authored_indexes or []):
             if not isinstance(item, dict):
                 continue
             for path_key, digest_key in (
