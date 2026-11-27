@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 from scripts.ci.check_prompt_commit_trace import (
-    ROOT, audit, classify_primary, is_ancestor, resolve_commit, summarize,
+    ROOT, audit, classify_primary, is_ancestor, ratchet_violations, resolve_commit, summarize,
 )
 
 
@@ -31,6 +31,31 @@ class BaselinePinAncestryTests(unittest.TestCase):
         self.assertTrue(is_ancestor(ROOT, parent, head))
         self.assertFalse(is_ancestor(ROOT, head, parent))
         self.assertFalse(is_ancestor(ROOT, "", head))
+
+
+class RatchetBaseInventoryTests(unittest.TestCase):
+    def test_manifest_present_at_base_but_absent_from_committed_baseline_is_not_new(self):
+        row = {"work_item_id": "AID-2026-265", "primary_status": "NO_TRACE",
+               "findings": ["digest_absent", "commit_absent"]}
+        self.assertEqual(
+            ratchet_violations({"manifests": [row]}, {"manifests": {}}, {"AID-2026-265"}),
+            [],
+        )
+
+    def test_manifest_removed_from_main_is_not_a_ratchet_violation(self):
+        baseline = {"manifests": {"AID-2026-265": {
+            "primary_status": "NO_TRACE", "findings": ["digest_absent"]}}}
+        self.assertEqual(
+            ratchet_violations({"manifests": []}, baseline, {"AID-2026-265"}),
+            [],
+        )
+
+    def test_genuinely_new_non_traceable_manifest_still_fails(self):
+        row = {"work_item_id": "AID-2026-999", "primary_status": "NO_TRACE", "findings": []}
+        self.assertEqual(
+            ratchet_violations({"manifests": [row]}, {"manifests": {}}, set()),
+            ["NEW_NON_TRACEABLE AID-2026-999 NO_TRACE"],
+        )
 
 
 class RepositoryRegressionTests(unittest.TestCase):
