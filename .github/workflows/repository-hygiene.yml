@@ -58,6 +58,37 @@ jobs:
           (cd scripts/ci && python3 -m unittest test_check_manifest_parse)
           python3 scripts/ci/check_manifest_parse.py
 
+      - name: Measure manifest blob-pin baseline and negative sample
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          BASE_SHA="$(git rev-parse origin/main)"
+          echo "Current main scan SHA: $BASE_SHA"
+          git fetch --no-tags origin refs/pull/1220/head:refs/remotes/origin/pr/1220
+          test "$(git rev-parse 9a2063ae1fa5d905b3817cd4eddba065a06daa73^{commit})" = "9a2063ae1fa5d905b3817cd4eddba065a06daa73"
+          set +e
+          python3 scripts/ci/check_manifest_blob_pins.py --commit "$BASE_SHA"
+          base_status=$?
+          python3 scripts/ci/check_manifest_blob_pins.py --commit 9a2063ae1fa5d905b3817cd4eddba065a06daa73
+          negative_status=$?
+          python3 scripts/ci/check_manifest_blob_pins.py --commit HEAD
+          candidate_status=$?
+          set -e
+          if [ "$base_status" -gt 1 ] || [ "$negative_status" -gt 1 ] || [ "$candidate_status" -gt 1 ]; then
+            echo "INCOMPLETE: at least one requested scan could not be completed"
+            exit 2
+          fi
+
+      - name: Ratchet manifest blob pins
+        run: |
+          python3 scripts/ci/gate_ratchet.py \
+            --baseline scripts/ci/baselines/manifest-blob-pins.txt \
+            --format schema \
+            --command "python3 scripts/ci/check_manifest_blob_pins.py --commit HEAD | sed -n '/^MISMATCH /p; /^PATH_MISSING /p; /^INCOMPLETE /p'"
+
+      - name: Self-check manifest blob pin verification
+        run: python3 scripts/ci/test_check_manifest_blob_pins.py
+
       - name: Self-check the line-ending gate
         run: python3 scripts/test_check_line_endings.py
 
