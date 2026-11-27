@@ -88,6 +88,79 @@ class WorkItemUniquenessTests(unittest.TestCase):
             self.assertEqual(fresh_second.returncode, 1, fresh_second.stdout + fresh_second.stderr)
             self.assertIn("VIOLATION", fresh_second.stdout)
 
+    def test_update_branch_preserves_unoccupied_candidate_claim(self):
+        with tempfile.TemporaryDirectory() as temp:
+            repo, old_base = init_repo(Path(temp))
+            git(repo, "branch", "-m", "main")
+            git(repo, "checkout", "-b", "candidate")
+            head = commit_file(
+                repo, "14-ai-development/work-items/AID-2026-900/a.txt",
+                "candidate\n", "candidate claim")
+            git(repo, "checkout", "main")
+            latest = commit_file(repo, "unrelated.txt", "update\n",
+                                 "unrelated base update")
+            git(repo, "checkout", "candidate")
+            git(repo, "merge", "--no-ff", "main", "-m", "Update branch")
+            updated_head = git(repo, "rev-parse", "HEAD")
+            result = invoke(repo, latest, updated_head)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertIn("introduced=1 occupied=0", result.stdout)
+
+    def test_update_branch_does_not_erase_occupied_claim(self):
+        with tempfile.TemporaryDirectory() as temp:
+            repo, old_base = init_repo(Path(temp))
+            git(repo, "branch", "-m", "main")
+            git(repo, "checkout", "-b", "candidate-a")
+            commit_file(repo, "14-ai-development/work-items/AID-2026-900/a.txt",
+                        "A\n", "candidate A claim")
+            git(repo, "checkout", "main")
+            latest = commit_file(
+                repo, "14-ai-development/work-items/AID-2026-900/a.txt",
+                "A\n", "merge candidate A into base")
+            git(repo, "checkout", "-b", "candidate-b", old_base)
+            head_b = commit_file(
+                repo, "14-ai-development/work-items/AID-2026-900/b.txt",
+                "B\n", "candidate B claim")
+            first = invoke(repo, old_base, head_b)
+            self.assertEqual(first.returncode, 0, first.stdout + first.stderr)
+            git(repo, "merge", "--no-ff", "main", "-m", "Update branch")
+            updated_head = git(repo, "rev-parse", "HEAD")
+            result = invoke(repo, latest, updated_head)
+            self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+            self.assertIn("introduced=1 occupied=1", result.stdout)
+            self.assertIn("VIOLATION", result.stdout)
+
+    def test_two_candidates_same_id_second_rejected_after_update(self):
+        with tempfile.TemporaryDirectory() as temp:
+            repo, old_base = init_repo(Path(temp))
+            git(repo, "branch", "-m", "main")
+            git(repo, "checkout", "-b", "candidate-a")
+            head_a = commit_file(
+                repo, "14-ai-development/work-items/AID-2026-902/a.txt",
+                "A\n", "candidate A")
+            git(repo, "checkout", "-b", "candidate-b", old_base)
+            head_b = commit_file(
+                repo, "14-ai-development/work-items/AID-2026-902/b.txt",
+                "B\n", "candidate B")
+            first = invoke(repo, old_base, head_a)
+            second = invoke(repo, old_base, head_b)
+            self.assertEqual(first.returncode, 0, first.stdout + first.stderr)
+            self.assertEqual(second.returncode, 0, second.stdout + second.stderr)
+            git(repo, "checkout", "main")
+            git(repo, "merge", "--no-ff", "candidate-a", "-m", "Merge candidate A")
+            latest = git(repo, "rev-parse", "HEAD")
+            git(repo, "checkout", "candidate-b")
+            git(repo, "merge", "--no-ff", "main", "-m", "Update branch")
+            updated_head = git(repo, "rev-parse", "HEAD")
+            result = invoke(repo, latest, updated_head)
+            self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+            self.assertIn("introduced=1 occupied=1", result.stdout)
+            self.assertIn("VIOLATION", result.stdout)
+            files = git(repo, "ls-tree", "-r", "--name-only",
+                        updated_head).splitlines()
+            self.assertIn("14-ai-development/work-items/AID-2026-902/a.txt", files)
+            self.assertIn("14-ai-development/work-items/AID-2026-902/b.txt", files)
+
     def test_missing_base_is_incomplete(self):
         with tempfile.TemporaryDirectory() as temp:
             repo, _ = init_repo(Path(temp))

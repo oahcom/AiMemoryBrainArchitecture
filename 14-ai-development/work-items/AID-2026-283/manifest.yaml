@@ -1,0 +1,57 @@
+work_item_id: AID-2026-283
+base_commit_sha: af2660d55a93278157fa6668aba338daf81e127c
+schema_version: "1.0"
+
+work_item:
+  id: AID-2026-283
+  title: "Work-item uniqueness gate bypassed by Update-branch"
+  type: defect
+  status: in_progress
+  priority: critical
+
+ownership:
+  repository: oahcom/AiMemoryBrainArchitecture
+  owning_issue: 1403
+  issue_refs:
+    - "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1403"
+  related_issues:
+    - 1341
+    - 1369
+
+implementation:
+  branch: fix/aid-283-update-branch-uniqueness
+  pull_request: __PR__
+  base: main
+  target_files:
+    - scripts/ci/check_work_item_uniqueness.py
+    - scripts/ci/test_work_item_uniqueness.py
+  required_context:
+    - "GOV-DOC-002 metadata checks"
+
+contract:
+  claim_definition:
+    - "The work-item directory exists in candidate HEAD."
+    - "At least one non-merge commit in base..head first introduces the directory relative to its first parent."
+  update_branch_resistant: true
+  merge_commits_create_claims: false
+  additive_existing_directory_allowed: true
+  deleted_candidate_directory_is_claim: false
+
+acceptance:
+  expected_test_count: 8
+  expected_new_tests: 3
+  existing_exit_codes_preserved: true
+  mutation_testing_required: true
+
+scope:
+  retrospective_duplicate_remediation: false
+  historical_id_renumbering: false
+  governance_rearchitecture: false
+
+evidence:
+  executed_prompt_sha256: "86b544386edb4833fb5ad5488d40a04207ac01c3980545ac3d82738b3e95e695"
+  executed_prompt_bytes: "4126"
+  id_reassignment: "280 -> 283; AID-2026-280 is already registered on main by #265 (INDEX.md). prompt-v1.md left byte-exact so its digest stays valid."
+  test_results: pending
+  mutation_results: pending
+  merge_commit: pending

@@ -51,28 +51,35 @@ def exists(commit: str, path: str) -> bool:
         raise Incomplete(f"cannot inspect {path} on {commit}: {listing.stderr.strip()}")
     return bool(listing.stdout.strip())
 
-def introduced_dirs(merge_base: str, candidate: str) -> list[str]:
-    names = git("diff", "--diff-filter=A", "--name-only", "--no-renames",
-                merge_base, candidate, "--", ROOT).splitlines()
+def introduced_dirs(base: str, candidate: str) -> list[str]:
+    """Find surviving claims introduced by candidate-side non-merge commits."""
+    commits = git("rev-list", "--no-merges", f"{base}..{candidate}").splitlines()
     result = set()
-    for name in names:
-        match = PATTERN.match(name)
-        if not match:
-            continue
-        directory = f"{ROOT}/{match.group(1)}"
-        if not exists(merge_base, directory):
-            result.add(directory)
-    return sorted(result)
+    for commit in commits:
+        parents = git("rev-list", "--parents", "-n", "1", commit).split()
+        parent = parents[1] if len(parents) > 1 else None
+        if parent:
+            names = git("diff-tree", "--no-commit-id", "--name-only",
+                        "--diff-filter=A", "--no-renames", "-r",
+                        parent, commit, "--", ROOT).splitlines()
+        else:
+            names = git("diff-tree", "--root", "--no-commit-id", "--name-only",
+                        "--diff-filter=A", "--no-renames", "-r",
+                        commit, "--", ROOT).splitlines()
+        for name in names:
+            match = PATTERN.match(name)
+            if not match:
+                continue
+            directory = f"{ROOT}/{match.group(1)}"
+            if parent is None or not exists(parent, directory):
+                result.add(directory)
+    return sorted(path for path in result if exists(candidate, path))
 
 def check(base_ref: str, head_ref: str) -> int:
     try:
         base = resolve_commit(base_ref, "base")
         head = resolve_commit(head_ref, "candidate")
-        merge_base = git("merge-base", base, head)
-        if not merge_base:
-            raise Incomplete("Git returned an empty merge-base")
-        git("cat-file", "-e", f"{merge_base}^{{commit}}")
-        introduced = introduced_dirs(merge_base, head)
+        introduced = introduced_dirs(base, head)
         occupied = [path for path in introduced if exists(base, path)]
     except Incomplete as exc:
         print(f"WORK-ITEM UNIQUENESS: INCOMPLETE ({exc})")
