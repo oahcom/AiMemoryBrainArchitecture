@@ -56,6 +56,47 @@ class GovernanceTraceabilityTests(unittest.TestCase):
         code, errors = self.run_check()
         self.assertEqual((code, errors), (0, []))
 
+    def _assert_positive_operation_fixture(self, row_index, expected_name):
+        self.assertIn(expected_name, ROWS[row_index][0])
+        self.assertNotEqual(ROWS[row_index][1].casefold(), ROWS[row_index][2].casefold())
+        self.assertNotIn(ROWS[row_index][3].casefold(), {
+            ROWS[row_index][1].casefold(), ROWS[row_index][2].casefold()
+        })
+        self.assertEqual(self.run_check(), (0, []))
+
+    def test_forget_operation_with_three_distinct_roles_is_accepted(self):
+        self._assert_positive_operation_fixture(2, "Logical Forget")
+
+    def test_retention_and_legal_hold_operation_is_accepted(self):
+        self._assert_positive_operation_fixture(1, "Retention and legal hold")
+
+    def test_physical_erasure_operation_is_accepted(self):
+        self._assert_positive_operation_fixture(3, "Physical erasure")
+
+    def test_backup_expiry_operation_is_accepted(self):
+        self._assert_positive_operation_fixture(4, "Backup expiry")
+
+    def test_external_recipient_completion_evidence_is_accepted(self):
+        self._assert_positive_operation_fixture(5, "External-recipient deletion")
+
+    def test_executor_cannot_stand_in_for_canonical_authority(self):
+        rows = list(ROWS)
+        rows[0] = (rows[0][0], "Owner I", "Owner D canonical record", "Owner D canonical record", rows[0][4])
+        (self.root / FILES[0]).write_text(document(FILES[0], rows), encoding="utf-8")
+        code, errors = self.run_check()
+        self.assertEqual(code, 1)
+        self.assertTrue(any("collapses an authority role into the physical executor entry" in item for item in errors))
+
+    def test_unilateral_global_completion_claim_is_rejected(self):
+        path = self.root / FILES[0]
+        path.write_text(
+            path.read_text(encoding="utf-8") + "\\nOwner D may declare completion alone.\\n",
+            encoding="utf-8",
+        )
+        code, errors = self.run_check()
+        self.assertEqual(code, 1)
+        self.assertTrue(any("false/unilateral completion assertion" in item for item in errors))
+
     def test_missing_physical_executor_fails(self):
         rows = list(ROWS)
         rows[2] = rows[2][:3] + ("",) + rows[2][4:]
