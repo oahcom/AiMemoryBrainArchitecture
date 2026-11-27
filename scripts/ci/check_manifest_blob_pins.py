@@ -43,14 +43,17 @@ class Git:
         return p.stdout
 
     def object_bytes(self, commit: str, path: str) -> bytes:
-        if not HEX40.fullmatch(commit):
+        if not isinstance(commit, str) or not re.fullmatch(r"[0-9a-fA-F]{7,40}", commit):
             raise Incomplete(f"invalid or absent source commit for {path}: {commit!r}")
-        # A missing commit is INCOMPLETE; a path absent from an available commit is a violation.
+        # Git accepts abbreviated object IDs in historical manifest notes.
+        # Resolve once to a full commit; an unavailable/ambiguous prefix is INCOMPLETE.
         try:
-            self.run("cat-file", "-e", f"{commit}^{{commit}}")
+            resolved = self.run("rev-parse", "--verify", f"{commit}^{{commit}}").decode().strip()
         except Incomplete as exc:
             raise Incomplete(f"source commit unavailable for {path}: {commit}") from exc
-        spec = f"{commit}:{path}"
+        if not HEX40.fullmatch(resolved):
+            raise Incomplete(f"source commit did not resolve uniquely for {path}: {commit}")
+        spec = f"{resolved}:{path}"
         p = subprocess.run(["git", "cat-file", "blob", spec], cwd=self.root,
                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
         if p.returncode:
