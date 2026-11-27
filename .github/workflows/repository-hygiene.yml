@@ -58,6 +58,15 @@ jobs:
           (cd scripts/ci && python3 -m unittest test_check_manifest_parse)
           python3 scripts/ci/check_manifest_parse.py
 
+      # Every declared manifest blob pin is resolved against committed bytes.
+      # This remains a step in the existing required Repository hygiene job;
+      # fetch-depth: 0 above is required for explicitly pinned source commits.
+      - name: Check manifest blob pins
+        run: python3 scripts/ci/check_manifest_blob_pins.py
+
+      - name: Self-check manifest blob pin verification
+        run: python3 scripts/ci/test_check_manifest_blob_pins.py
+
       - name: Self-check the line-ending gate
         run: python3 scripts/test_check_line_endings.py
 
