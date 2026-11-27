@@ -1,7 +1,7 @@
 work_item_id: AID-2026-241
 title: >-
-  Correct M-02 claims, align Security Governance status descriptions, and register
-  unresolved source revision pointer and verification-scope debt
+  Add memory-runtime navigation entries, narrow AID-2026-113 verification coverage,
+  and register the work item and unresolved source-revision debt
 class: DOC/GOVERNANCE
 risk: R1
 risk_rationale: >-
@@ -33,25 +33,12 @@ identifier_allocation:
     If the identifier is occupied, stop and obtain a new authorized identifier before proceeding.
 scope:
   objective: >-
-    Correct inaccurate document-management claims and canonical-status descriptions, preserve
-    honest source-revision provenance, and document the limited verification coverage of
-    AID-2026-113 without weakening checkers or claiming unperformed validation.
+    Register the actual branch changes: equivalent navigation-only entries in the three
+    memory-runtime README files, a narrower verification-scope note for AID-2026-113, and
+    work-item evidence and index records. Preserve honest source-revision provenance and
+    unresolved pointer debt without weakening checkers or claiming unperformed validation.
   changes:
-    - path: "scripts/check_document_management.py"
-      detail: >-
-        Corrects the two M-02 descriptive strings to state the actual checks: decision_status
-        enumeration, approved_version and approval_scope binding for Approved, and DM-10 body
-        hash binding. Explicitly states that approver and decision_date are not required and
-        that the gate does not verify that any approval exists. No decision logic is changed.
-    - path: "docs/en/09-security-governance/README.md"
-      detail: >-
-        Aligns the five documents' status description with canonical_status: Canonical in
-        their respective frontmatter and states that each frontmatter is the sole authority.
-        The README is explicitly informational, not normative.
-    - path: "docs/zh-CN/09-security-governance/README.md"
-      detail: >-
-        Provides the semantically equivalent Chinese status, authority and disclaimer wording.
-        The misplaced English paragraph is replaced with Chinese wording.
+
     - path: "05-memory-runtime/README.md"
       detail: "Adds an index-only navigation line; it does not assert normative status."
     - path: "docs/en/05-memory-runtime/README.md"
@@ -84,14 +71,15 @@ scope:
 evidence:
   record: 14-ai-development/work-items/AID-2026-241/evidence.md
   mirrors: []
-  measured_at: ce3d7cb8
+  measured_at: 40195e8b
   measured_at_note: >-
-    Working-tree measurements supplied for branch HEAD ce3d7cb8. No CI result, merge SHA,
-    post-merge result or main-branch verification is claimed.
+    Final local measurements were run on the merged tree with origin/main at 40195e8b.
+    These are local command results only: no CI result or independently recorded merge SHA
+    is claimed by this evidence record.
   measurements:
-    document_management_require_changed: "exit 1; DM-01 missing document_metadata block in evidence.md and evidence-05-index.md"
-    bilingual_docs: "exit 1; only reported reason is missing BILINGUAL-MANIFEST: COMPLETE or approved exception for changed 05-memory-runtime/README.md"
-    bilingual_baseline: "77 frozen, 0 new gaps"
+    document_management_require_changed: "exit 0; PASS (incremental): no GOV-DOC-002 violations; 657 classified, 371 unclassified"
+    bilingual_docs: "exit 0; PASS (11 changed paths inspected); baseline 77 frozen, 0 new gaps; BASE_SHA=origin/main, HEAD_SHA=HEAD, PR body contains BILINGUAL-MANIFEST: COMPLETE"
+    repository_hygiene_head_tree_only: "exit 0; directories=121 linked=121; manifests=110 in_scope=96 excluded_by_record_type=5 unrecognized=9 violations=0"
     source_revision_pointers: "50 pointers; 16 accurate; 8 stale; 26 dereferenced; 0 bad dereferences; 6 non-blob references; 14 BAD; exit 1"
     branch_head: "ce3d7cb8"
     base_commit: "788fbc011877a14976fc0a974ffe2e013dd9991b"

@@ -63,27 +63,23 @@ document_metadata:
 - The pointer checker remains unwired. Its 14 BAD results remain registered debt.
 - These figures describe the supplied working-tree measurements only. They do not assert CI success, merge, or post-merge verification.
 
-## 2. RC-1 — M-02 文案对齐
+## 2. RC-1 — M-02 文案裁决及分支归属
 
-修改 `scripts/check_document_management.py` 中 M-02 的两段描述，使其只声明实际执行的检查：
+M-02 的实际校验范围仍应准确理解为：
 
-- `decision_status` 枚举值；
-- `decision_status` 为 `Approved` 时的 `approved_version` 与 `approval_scope` 绑定；
-- DM-10 正文哈希绑定。
+- 校验 `decision_status` 是否属于允许的枚举值；
+- 当 `decision_status` 为 `Approved` 时，校验 `approved_version` 与 `approval_scope` 的绑定；
+- 校验 DM-10 正文哈希绑定。
 
-文案明确说明：校验不要求 `approver` 或 `decision_date` 存在，也不验证任何批准是否实际发生。
+该门禁不要求 `approver` 或 `decision_date` 存在，也不验证任何批准是否真实发生。
 
-未修改 `MANUAL_CONTROLS` 元组结构、判定逻辑或 policy 第 9.2 节生成机制。
+本分支与 `origin/main` 合并时，发现上述 M-02 文案对齐已由其他载体先行进入 main。冲突三方合并中，main 侧已有等价且更完整的表述，本分支已整份采用 main 侧内容。因此，本分支不携带 `scripts/check_document_management.py` 的 M-02 文案修改，不将该项列为本分支实际变更，也不重复主张其实现。
 
-## 3. RC-2 — Security Governance README
+## 3. RC-2 — Security Governance README 裁决及分支归属
 
-英文与中文 README 的状态描述统一为五份文档各自 frontmatter 声明的 `canonical_status: Canonical`。
+五份 Security Governance 文档各自 frontmatter 中的 `canonical_status: Canonical` 是其状态的唯一权威来源；README 仅作导读，不构成规范来源。文档的存在本身不代表 Phase 3.x 决策获批、不代表生产策略获批，也不构成实现或符合性证据。
 
-每份文档自己的 frontmatter 是其 `canonical_status` 的唯一权威来源；README 仅为导读，不是规范来源。
-
-免责声明保留：这些文档的存在不代表 Phase 3.x 决策获批，不代表生产策略获批，也不构成实现或符合性证据；中文说明同时明确不代表 Owner 已批准或生产实现已符合。
-
-中文 README 中原有的英文 Candidate / Informative 段落已以语义一致的中文表述替换。
+本分支与 `origin/main` 合并时，发现英文及中文 README 的上述状态对齐已由其他载体先行进入 main。冲突三方合并中，main 侧已有等价且更完整的表述，本分支已整份采用 main 侧内容。因此，本分支不携带 `docs/en/09-security-governance/README.md` 或 `docs/zh-CN/09-security-governance/README.md` 的修改，不将这两份文件列为本分支实际变更，也不重复主张其实现。
 
 ## 4. Source revision pointer debt
 
