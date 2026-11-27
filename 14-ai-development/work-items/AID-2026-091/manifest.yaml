@@ -16,8 +16,8 @@ prompt_id: AID-2026-091-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-091/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 11b2d92aa94d1af88ee403def9fa2977bb7cee8c9c32ff957fbc4c06e91ac5d8
-prompt_bytes: 2058
+prompt_sha256: a531954b26c831a555486684e9130eedd1bcd57152ac55ed89ea3010dc9e88ac
+prompt_bytes: 2000
 authorization:
   authorized_by: "user-authorized operator (delegated by account owner)"
   decision_date: "2026-11-26"

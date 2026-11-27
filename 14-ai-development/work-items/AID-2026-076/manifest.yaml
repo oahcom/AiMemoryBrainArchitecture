@@ -11,8 +11,8 @@ prompt_id: AID-2026-076-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-076/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 06ee5615ab9fc696afa769183141d637ec5287776b60cc0b06afd117a024f6b2
-prompt_bytes: 5525
+prompt_sha256: 6974846995878c7d76dac9f7fad320bc26613e598d48b68f023564dd66a424c0
+prompt_bytes: 5467
 
 # ---------------------------------------------------------------------------
 # Issue #1074. `Session Evidence` is a required context and its verdict is
@@ -69,8 +69,11 @@ implementation:
     Merged 2026-11-25T14:59:20Z as 2733283bff2bcc744c595ec06b602aadb52c772a via PR #1155,
     head 07a8d1ee. The pull request number cannot be written into the commit that opens it, so
     this block read IMPLEMENTED_IN_BRANCH / ASSIGNED_AT_OPEN / NOT_MERGED until the carrier
-    merged; it was not refreshed when it did. Refreshed by AID-2026-090, which records the
-    prior value rather than relying on the diff.
+    merged; it was not refreshed when it did. Refreshed by AID-2026-101, which records the
+    prior value rather than relying on the diff. This sentence was written while the correcting
+    branch still held the identifier AID-2026-090; that number belongs to the ContextVersion
+    immutability work item, which merged as PR #1241 and never mentions this file. Corrected by
+    AID-2026-116.
 
 review:
   status: NOT_ASSIGNED
