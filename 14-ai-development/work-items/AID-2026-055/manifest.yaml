@@ -25,8 +25,8 @@ prompt_id: AID-2026-055-PROMPT
 prompt_version: v1
 prompt_file: 14-ai-development/work-items/AID-2026-055/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 50c952342eda213fb72eb78ecc38fd0ff7674d507734502951ac0479e5c16bee
-prompt_bytes: 7100
+prompt_sha256: 89a23d620ce9b3bdbd539bcd67205fb0896a2a6c9207776c993e2e7e5c353885
+prompt_bytes: 7137
 prompt_amendment_note: "This record was FROZEN at 7094 bytes / 52ec33df. PR #982 amended prompt-v1.md (the D1 acceptance cell in the table) and did not update this pin, so the pin contradicted the file it named. The values above now describe the bytes on disk. The freeze claim is withdrawn rather than restated: a pin that moves cannot also be a freeze, and re-freezing a text after the session it describes has run would date the freeze falsely."
 prompt_currency_note: "The pinned bytes are the pre-split input and are deliberately left intact; the superseded passages are enumerated in the D1 block under `prompt_supersession`, which is the field an implementer should read before acting on the snapshot."
 
@@ -267,8 +267,8 @@ session_evidence:
     issue_refs:
     implementing_ai_session: session-966-ownerproxy
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-055/prompt-v1.md
-    executed_prompt_sha256: 50c952342eda213fb72eb78ecc38fd0ff7674d507734502951ac0479e5c16bee
-    executed_prompt_bytes: 7100
+    executed_prompt_sha256: 89a23d620ce9b3bdbd539bcd67205fb0896a2a6c9207776c993e2e7e5c353885
+    executed_prompt_bytes: 7137
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-055/session-evidence-966.md
@@ -277,8 +277,8 @@ session_evidence:
     issue_refs:
     implementing_ai_session: session-1013-request-changes-fix
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-055/prompt-v1.md
-    executed_prompt_sha256: 50c952342eda213fb72eb78ecc38fd0ff7674d507734502951ac0479e5c16bee
-    executed_prompt_bytes: 7100
+    executed_prompt_sha256: 89a23d620ce9b3bdbd539bcd67205fb0896a2a6c9207776c993e2e7e5c353885
+    executed_prompt_bytes: 7137
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-055/session-evidence-1013-fix.md
@@ -287,8 +287,8 @@ session_evidence:
     issue_refs:
     implementing_ai_session: session-1012-d1-split
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-055/prompt-v1.md
-    executed_prompt_sha256: 50c952342eda213fb72eb78ecc38fd0ff7674d507734502951ac0479e5c16bee
-    executed_prompt_bytes: 7100
+    executed_prompt_sha256: 89a23d620ce9b3bdbd539bcd67205fb0896a2a6c9207776c993e2e7e5c353885
+    executed_prompt_bytes: 7137
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-055/session-evidence-1012-d1-split.md
