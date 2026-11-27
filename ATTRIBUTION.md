@@ -20,7 +20,7 @@ Authority:
 | W2 | Historical blob-pin re-verification | PR #1220 / AID-2026-100 pins | user-authorized operator (delegated by account owner) | `14-ai-development/reports/2026-11-27-wb-line01-closeout.md` §4 | recorded in that document's §4 table | opencode delegated-operator session (LINE 01) | 2026-11-27T04:24:37Z |
 | W3 | Evidence-registration verification | PR #1248 / #1249 / #1281 / AID-2026-096 | user-authorized operator (delegated by account owner) | `14-ai-development/reports/2026-11-27-wb-line01-closeout.md` §5 | recorded in that document's §5 table | opencode delegated-operator session (LINE 01) | 2026-11-27T04:30:00Z |
 | W4 | Attribution record | `ATTRIBUTION.md` (this file) | user-authorized operator (delegated by account owner) | this file; blob SHA recorded in `14-ai-development/reports/2026-11-27-wb-line01-closeout.md` §6 | see closeout §6 | opencode delegated-operator session (LINE 01) | 2026-11-27T04:45:00Z |
-| W5 | Closeout record | `14-ai-development/reports/2026-11-27-wb-line01-closeout.md` | user-authorized operator (delegated by account owner) | repository root | see the commit that adds this file | opencode delegated-operator session (LINE 01) | 2026-11-27T04:45:00Z |
+| W5 | Closeout record | `14-ai-development/reports/2026-11-27-wb-line01-closeout.md` | user-authorized operator (delegated by account owner) | `14-ai-development/reports/2026-11-27-wb-line01-closeout.md` | see the commit that adds this file | opencode delegated-operator session (LINE 01) | 2026-11-27T04:45:00Z |
 
 ## Explicit non-claims
 

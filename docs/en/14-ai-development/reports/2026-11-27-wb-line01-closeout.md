@@ -17,7 +17,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-27"
-      last_verification_note: "Every row rests on GitHub API and git measurements taken on 2026-11-27; rows without direct evidence are marked NOT_VERIFIED / NOT_RECORDED rather than filled from paraphrase."
+      last_verification_note: "Every row rests on GitHub API and git measurements taken on 2026-11-27; rows without direct evidence are marked NOT_VERIFIED / NOT_RECORDED rather than filled from paraphrase. In the correction commit the commit counts, the ATTRIBUTION blob/byte count, the #1329 head and all four gates were re-measured and replaced (commands and raw output in §11)."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -45,7 +45,7 @@ document_metadata:
 # LINE 01 — AI Brain Architecture development-baseline closeout
 
 - Record type: development-baseline closeout (WB convergence order, PROMPT-01)
-- Built on main: `a7cf5256e975ff25fd2f75b3b5051b16d8d77d36` (newest main at push time; re-checked after rebase, see §0)
+- SHA binding (single sentence): Built on `a588cd9914949c2c9db7b2c5704d906fd3f05b70`; rebased onto `a7cf5256e975ff25fd2f75b3b5051b16d8d77d36` before push; final PR head `e44649a7f1a49660f3d486abd90906c3c3db73a2` (the correction commit sits after that head; its SHA is in §11 and in the PR #1411 body).
 - Path: `14-ai-development/reports/2026-11-27-wb-line01-closeout.md` (moved here under Addendum item 2 to avoid the line-03 collision points)
 - Status: **PARTIAL** — see §9 NOT_VERIFIED and §10 residual work
 - Signature nature: proxy registration, not a natural-person Owner signature (see `ATTRIBUTION.md`)
@@ -79,8 +79,8 @@ Branch: `closeout/line01-dev-baseline`, created in a separate worktree (`D:\code
 
 | # | Item | Original state | Measured state | Action | exact SHA | blob SHA | Verification command | Raw result | Residual gap |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | Remote main identity | Order baseline `788fbc…` | `788fbc…` is the #1220 merge commit; main was `f18adc9f`→`bc741bdc`→`386d8f57`→`a588cd99` between 11:36 and 12:31 | recorded, not rewritten | `a588cd99…` | — | `git ls-remote origin main` | `a588cd99…	refs/heads/main` | main keeps moving; this record is bound to `a588cd99` and rebased to `242cf101` |
-| 2 | Local checkout identity | patrol ledger treated `2afe24cd` as main | `2afe24cd` is #1329's head and **already an ancestor of main** (`git merge-base --is-ancestor 2afe24cd HEAD` → exit 0); local HEAD measured `d9b3ec9b`→`55f52606`→`731d9d08`, **none an ancestor of main** | recorded as a ledger correction; no branch reset | `2afe24cd` / `d9b3ec9b` / `55f52606` / `731d9d08` | — | `git merge-base --is-ancestor HEAD origin/main` | `ANCESTOR_EXIT=1` (1 for both `bc741bdc` and `386d8f57`) | no `patrol.log` in the tree (`git ls-files \| grep patrol` → empty) → `NOT_RECORDED` |
+| 1 | Remote main identity | Order baseline `788fbc…` | `788fbc…` is the #1220 merge commit; main was `f18adc9f`→`bc741bdc`→`386d8f57`→`a588cd99` between 11:36 and 12:31 | recorded, not rewritten | `a588cd99…` | — | `git ls-remote origin main` | `a588cd99…	refs/heads/main` | main keeps moving; this record is built on `a588cd99` and rebased onto `a7cf5256` (single binding sentence in the header) |
+| 2 | Local checkout identity | patrol ledger treated `2afe24cd` as main | `2afe24cd` is an **earlier head on #1329's own branch `docs/aid-151-retroactive-gate-gap`**, 78 commits behind that PR's merged head `11fde79a8f07fac5176f67a2fdc633411570e87e` (`git rev-list --count 2afe24cd..11fde79a` = 78; GitHub compare `ahead_by=78 / behind_by=0`), and **already an ancestor of main** (`git merge-base --is-ancestor 2afe24cd HEAD` → exit 0); local HEAD measured `d9b3ec9b`→`55f52606`→`731d9d08`, **none an ancestor of main** | recorded as a ledger correction; no branch reset | `2afe24cd` / `d9b3ec9b` / `55f52606` / `731d9d08` | — | `git merge-base --is-ancestor HEAD origin/main` | `ANCESTOR_EXIT=1` (1 for both `bc741bdc` and `386d8f57`) | no `patrol.log` in the tree (`git ls-files \| grep patrol` → empty) → `NOT_RECORDED` |
 | 3 | Full open-PR inventory | unknown | 11 open PRs, each read for state/draft/head/base/mergeable_state/merge_commit/check-runs | recorded | see §2 | — | `GET /pulls?state=open` + `GET /pulls/{n}` + `GET /commits/{head}/check-runs` | `OPEN_PR_COUNT= 11` | per-check required mapping `NOT_RECORDED` |
 | 4 | #262 six body locations | correction pending | E1–E6 **all already present** (9/9 programmatic assertions True) | six edits not re-applied; only the AC2 chain sentence added | see §3 | — | `python w1_verify262.py` | `ALL_ANCHORS= True` | none |
 | 5 | #262 AC2 citation chain | body cited only `7156638485` | correction ruling `7157542128` cited 0 times | **one sentence added** (§3) | issue body sha256 `3071cc37…` | — | `PATCH /issues/262` + readback | `MATCHES_PLANNED= True` | none |
@@ -88,9 +88,9 @@ Branch: `closeout/line01-dev-baseline`, created in a separate worktree (`D:\code
 | 7 | #266 | supplementary list unverified | body 4/5, no NOT_RECOVERED | recorded only | body sha256 `7af6dc97…` | — | `GET /issues/266` | `state=open reopened` | architecture acceptance out of scope |
 | 8 | #1220 twelve blob pins | 6 known mismatch groups | **9 mismatches + 1 absent path** (see §4) | recomputed; merged manifests untouched | `a588cd99` | see §4 | `git rev-parse HEAD:<path>` | see §4 table | merged manifests left as-is (Amendment 2) |
 | 9 | canonical session_evidence | unknown | present and enforced | recorded | — | `c27b41cf…` (validate.py), `393be84e…` (schema) | `git rev-parse HEAD:<path>` | see §5(a) | none |
-| 10 | AID-2026-096 evidence | reported as "deleted then restored" | `evidence.md` **never existed** in main history | recorded as never-present | — | see §5(b) | `git log --all --diff-filter=D` | empty output (2782 commits, not shallow) | restoration trail `NOT_RECORDED` |
+| 10 | AID-2026-096 evidence | reported as "deleted then restored" | `evidence.md` **never existed** in main history | recorded as never-present | — | see §5(b) | `git log --all --diff-filter=D` | empty output (`git rev-list --count` measured: **2829** at `a588cd99`, **3060** at `e44649a7`; not shallow) | restoration trail `NOT_RECORDED` |
 | 11 | Work Item ID field | unknown | 096 manifest `work_item_id: AID-2026-096` / `id_status: FINAL`; #1249 uses `NONE` lawfully | recorded, unchanged | — | `df16f4ad…` | `git show HEAD:…/AID-2026-096/manifest.yaml` | see §5(c) | none |
-| 12 | ATTRIBUTION.md | absent on main | created | new file | this branch | `33436d85…` | `git hash-object` | `33436d85743fcdee4ebbcc170af8bc9cc9626295` | items requiring natural-person signature are excluded |
+| 12 | ATTRIBUTION.md | absent on main | created | new file | this branch | `e169ea6d…` | `git hash-object` | `e169ea6df14110bb8947905217c77ce1a81daae4` (2738 bytes) | items requiring natural-person signature are excluded |
 | 13 | This closeout | absent | created | new file | this branch | see §11 | `git hash-object` | see §11 | — |
 
 ---
@@ -229,7 +229,7 @@ $ git rev-parse HEAD:14-ai-development/work-items/AID-2026-096/evidence.md
 fatal: path '...' does not exist in 'HEAD'
 $ git log --all --diff-filter=D -- '*AID-2026-096/*'      →  (empty)
 $ git log --all --oneline -- '.../AID-2026-096/evidence.md' →  (empty)
-$ git rev-list --count HEAD → 2782 ; .git/shallow absent
+$ git rev-list --count a588cd99 → 2829 ; git rev-list --count e44649a7 → 3060 ; .git/shallow absent
 ```
 
 Conclusion: the path **never existed** in main history, so no verifiable "deleted then restored" trail exists. Recorded as `NOT_RECORDED / never-present`, not as deleted-and-restored.
@@ -245,7 +245,7 @@ Conclusion: the path **never existed** in main history, so no verifiable "delete
 
 | Path | blob SHA | bytes | Governance status |
 |---|---|---|---|
-| `ATTRIBUTION.md` (repository root) | `33436d85743fcdee4ebbcc170af8bc9cc9626295` | 2581 | root is not in `document-scope-registry.yaml` `governed:` → no metadata/pairing requirement |
+| `ATTRIBUTION.md` (repository root) | `e169ea6df14110bb8947905217c77ce1a81daae4` | 2738 | root is not in `document-scope-registry.yaml` `governed:` → no metadata/pairing requirement |
 | `14-ai-development/reports/2026-11-27-wb-line01-closeout.md` (this file) | see §11 readback | — | `14-ai-development` is governed → carries `document_metadata` and EN / ZH-CN mirrors |
 | `docs/en/14-ai-development/reports/2026-11-27-wb-line01-closeout.md` | see §11 | — | EN mirror |
 | `docs/zh-CN/14-ai-development/reports/2026-11-27-wb-line01-closeout.md` | see §11 | — | ZH-CN mirror |
@@ -273,6 +273,7 @@ See §11 "Commits and verification readback".
 | fabricate natural-person signature | not performed (`ATTRIBUTION.md` states proxy nature) |
 | modify merged #1220 manifest/evidence | not performed |
 | reset the original work branch to main | not performed (separate worktree + new branch) |
+| architecture-acceptance assertion phrasing | measured with `git grep -i` on that English phrasing: **0 hits** in this PR's 4 changed paths; **4 pre-existing occurrences** elsewhere on main (3 files, including `reviews/architecture/SYS-RISK-001.en.md:803` and `:804`), none of them in this PR's changed files. The `ATTRIBUTION.md` sentence stating that the file does not constitute architecture acceptance is a negative non-claim, not an assertion. This row scopes the claim to this PR's changed files, not to the whole tree |
 
 ---
 
@@ -302,35 +303,48 @@ See §11 "Commits and verification readback".
 
 ## 11. Commits and verification readback
 
-Branch: `closeout/line01-dev-baseline`, base `a588cd9914949c2c9db7b2c5704d906fd3f05b70`.
-Two rebases before push, neither changing this record's content:
-1. at 2026-11-27T12:52:59+08 main was `242cf101c8b79007ad2fb8d9c89681224577188d` (75 commits ahead of `a588cd99`), and the branch was rebased onto it;
-2. re-checked immediately before push, main was `a7cf5256e975ff25fd2f75b3b5051b16d8d77d36` (139 commits ahead of `242cf101`), and the branch was rebased onto that SHA, which **this record is bound to**.
+Branch: `closeout/line01-dev-baseline`. **Single binding sentence**: Built on `a588cd9914949c2c9db7b2c5704d906fd3f05b70`; rebased onto `a7cf5256e975ff25fd2f75b3b5051b16d8d77d36` before push; final PR head `e44649a7f1a49660f3d486abd90906c3c3db73a2` (the correction commit sits after that head; its SHA is in the PR #1411 body).
+
+Two rebases before push, neither changing this record's content (counts measured with `git rev-list --count`):
+1. at 2026-11-27T12:52:59+08 main was `242cf101c8b79007ad2fb8d9c89681224577188d` (**75** commits ahead of `a588cd99`: `git rev-list --count a588cd99..242cf101` = 75), and the branch was rebased onto it;
+2. re-checked immediately before push, main was `a7cf5256e975ff25fd2f75b3b5051b16d8d77d36` (**149** commits ahead of `242cf101`: `git rev-list --count 242cf101..a7cf5256` = 149), and the branch was rebased onto that SHA.
+
+Commits actually on this branch (`git log --format='%H %s' origin/main..HEAD`, oldest first):
 
 | commit | content |
 |---|---|
-| `85c31fb2` | adds `ATTRIBUTION.md` (blob `33436d85743fcdee4ebbcc170af8bc9cc9626295`) and this file |
-| `fbe38095` (pre-amend `b3ce2466`; pre-rebase `bc3ab59b` / `b3ce2466`) | readback commit touching §11 only |
+| `7716d7ef29e20fd3e31f3ef2ed87c3197641ff39` | first version of the LINE 01 development-baseline closeout and attribution record |
+| `c1571f66e009567b8e5c49bf6b280a6005abd1e6` | record commit SHAs and the raw §11 gate output |
+| `e4638ea4c7bc767e6de0c38fe8c0ea5908942be1` | move the record to `14-ai-development/reports/` with EN / ZH-CN mirrors |
+| `35e00031b7a831a898d3be6839b2dd7e38882cd4` | correct the ATTRIBUTION.md blob pin to the committed value |
+| `9ff288082641723a5a64b745ae8520429b36f60d` | correct ATTRIBUTION section references and evidence path |
+| `ac01a88497b1fa4948452ab5438c3dd2bfaaed00` | align the short ATTRIBUTION blob reference |
+| `e44649a7f1a49660f3d486abd90906c3c3db73a2` | record the concurrent Issue #262 annotation observed after the write |
+| `565c1199c302d7f45c6813bb10d61b2404704408` | concurrent commit (another session): register this record as Work Item AID-2026-312 (three new work-item files; its manifest forbids touching `INDEX.md`) |
+| `e25648ef45336b3dbd6f3e165c7add801ebe875a` | concurrent commit (another session): add the `document_metadata` and `INDEX.md` row AID-2026-312 required (T-04 / DM-01) |
+| this correction commit (SHA in the PR #1411 body) | numbers, #1329 head, gate table and §11 readback corrected |
 
-### Gates and tests (raw output)
+### Gates and tests (raw output, re-run at the correction commit)
 
 | Command | exit | Raw result |
 |---|---|---|
-| `python scripts/check_document_management.py --root .` | **2** | `GOV-DOC-002: 1035 governed documents, 664 classified, 371 unclassified` — pre-existing whole-tree gap, not introduced here |
-| `python scripts/check_document_management.py --require-changed a588cd99…` | **0** | `PASS (incremental): no GOV-DOC-002 violations; 664 classified, 371 unclassified` / `Incremental verdict only: files outside the changed set were not required to be classified.` |
-| `python scripts/check_traceability.py --index-only` | **0** | `PASS TRACEABILITY: 0 requirements / 114 work items / 0 errors / 108 warnings` |
-| `python scripts/ci/check_repository_hygiene.py --base a588cd99… --head bc3ab59b…` | **0** | `Work-item index membership … directories=125 linked=125`; `manifests=114 … violations=0`; `Repository new-file admission passed: 2 new path(s) checked.` |
+| `python scripts/check_document_management.py --require-changed a7cf5256…` | **0** | `PASS (incremental): no GOV-DOC-002 violations; 695 classified, 370 unclassified` / `Incremental verdict only: files outside the changed set were not required to be classified.` |
+| `BASE_SHA=a7cf5256… HEAD_SHA=$(git rev-parse HEAD) python scripts/check_bilingual_docs.py` (`PR_BODY` was set to the PR #1411 body verbatim, including `BILINGUAL-MANIFEST: COMPLETE`) | **0** | `bilingual baseline: 77 frozen, 0 new gaps` / `Bilingual documentation and prompt-library gate: PASS (8 changed paths inspected).` |
+| `python scripts/check_traceability.py --index-only` | **0** | `PASS TRACEABILITY: 0 requirements / 121 work items / 0 errors / 112 warnings` |
+| `python scripts/ci/check_repository_hygiene.py --base a7cf5256… --head $(git rev-parse HEAD)` | **0** | `Work-item index membership version=2026-11-27.2 directories=132 linked=132`; `Work-item manifest consistency … manifests=121 in_scope=107 excluded_by_record_type=5 unrecognized=9 violations=0`; `Repository new-file admission passed: 7 new path(s) checked.` |
 
 Not run: Rust workspace / clippy / fmt / doctests (no Rust files changed); BMCP suite; `scripts/test_check_document_management.py` (the process exited with `-1073741510` locally and its output was unreadable, so its verdict is not used).
 
 ### Readback
 
 ```
-$ git rev-parse HEAD:ATTRIBUTION.md
-33436d85743fcdee4ebbcc170af8bc9cc9626295
-$ git rev-parse HEAD:14-ai-development/reports/2026-11-27-wb-line01-closeout.md
-<see final readback in the PR description>
+$ git rev-parse e44649a7:14-ai-development/reports/2026-11-27-wb-line01-closeout.md
+f58cdd0c4fe45ba334df27af3cbdcdf26032da4c
+$ git hash-object ATTRIBUTION.md
+e169ea6df14110bb8947905217c77ce1a81daae4        # 2738 bytes
 ```
+
+The three document blobs after this correction (root record / EN / ZH-CN) and the correction commit SHA are recorded in the PR #1411 body: this file's own blob cannot be embedded in itself, since writing it changes it.
 
 ---
 
