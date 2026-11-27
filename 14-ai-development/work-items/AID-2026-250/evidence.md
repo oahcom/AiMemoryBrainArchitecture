@@ -131,3 +131,38 @@ Commit `fdc36af7db20b00c2f15df9d9dd74dd999491531` changes the I P0 allowlist row
 - It is not verified that R/X correspond to any particular natural person's identity.
 - The `reviews` scope is recorded as `not-documentation` in `document-scope-registry.yaml`; these assessment files therefore do not require GOV-DOC frontmatter. No frontmatter was added.
 - Live `main` fetched for this rework was `46dac1b1e198c8d88daff5a34faf759ecb075869`; the prompt's local observation `a7cf5256` did not match this API-fetched head. The branch was created from the fetched head, not the local observation.
+
+### Exact-head CI mutation output
+
+Workflow run: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/45947446221/job/140335286252
+Head tested: `afca74bcc20ffd17609d2c6e716079ece8f84860`
+Required job: `Schema non-empty audit (hard gate)` — SUCCESS.
+
+The first mutation attempt exposed a shell issue: GitHub's default `bash -e` exited on the expected checker exit 1 before the script could record it. The workflow step was corrected with `set +e`; this successful run is the corrected implementation. Verbatim relevant output:
+
+```text
+PASS reviews/architecture/SYS-RISK-001.en.md: assessor, assessed_version, evidence_baseline
+PASS reviews/architecture/SYS-RISK-001.zh-CN.md: assessor, assessed_version, evidence_baseline
+PASS reviews/complexity/architecture-complexity-assessment.en.md: assessor, assessed_version, evidence_baseline
+PASS reviews/complexity/architecture-complexity-assessment.zh-CN.md: assessor, assessed_version, evidence_baseline
+SUMMARY files=4 failures=0
+........
+----------------------------------------------------------------------
+Ran 8 tests in 0.013s
+
+OK
+baseline_exit=0
+mutation file=reviews/architecture/SYS-RISK-001.en.md field=assessor exit=1
+mutation file=reviews/architecture/SYS-RISK-001.en.md field=assessed_version exit=1
+mutation file=reviews/architecture/SYS-RISK-001.en.md field=evidence_baseline exit=1
+mutation file=reviews/architecture/SYS-RISK-001.zh-CN.md field=assessor exit=1
+mutation file=reviews/architecture/SYS-RISK-001.zh-CN.md field=assessed_version exit=1
+mutation file=reviews/architecture/SYS-RISK-001.zh-CN.md field=evidence_baseline exit=1
+mutation file=reviews/complexity/architecture-complexity-assessment.en.md field=assessor exit=1
+mutation file=reviews/complexity/architecture-complexity-assessment.en.md field=assessed_version exit=1
+mutation file=reviews/complexity/architecture-complexity-assessment.en.md field=evidence_baseline exit=1
+mutation file=reviews/complexity/architecture-complexity-assessment.zh-CN.md field=assessor exit=1
+mutation file=reviews/complexity/architecture-complexity-assessment.zh-CN.md field=assessed_version exit=1
+mutation file=reviews/complexity/architecture-complexity-assessment.zh-CN.md field=evidence_baseline exit=1
+MUTATION OK: 12 of 12 deletions rejected
+```
