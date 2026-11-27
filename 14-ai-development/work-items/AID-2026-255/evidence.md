@@ -52,7 +52,7 @@ second implementation. Its authorized delta is:
 
 - four sibling-key association mutation tests appended to
   `scripts/ci/test_check_manifest_blob_pins.py`;
-- `ratchet-negative.log`, recording the ratchet's negative contract against the
+- `ratchet-negative.md`, recording the ratchet's negative contract against the
   landed baseline;
 - `independent-review.md`, recording the independent review and its dispositions.
 
@@ -83,7 +83,7 @@ Ran 12 tests in 22.579s
 OK
 ```
 
-The ratchet is exercised in `ratchet-negative.log`: control, regression and stale
+The ratchet is exercised in `ratchet-negative.md`: control, regression and stale
 baseline cases, run against the landed checker at the commit that carries this
 delta.
 
