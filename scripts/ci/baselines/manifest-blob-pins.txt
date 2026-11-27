@@ -1,7 +1,7 @@
 # AID-2026-268 manifest blob-pin baseline
 # Measured against main a588cd9914949c2c9db7b2c5704d906fd3f05b70.
-# 83 pre-existing mismatches: 40 prompt SHA-256 pins, 40 prompt byte-count pins,
-# and 3 AID-2026-100 related-evidence Git blob IDs.
+# 87 pre-existing mismatches: 40 prompt SHA-256 pins, 40 prompt byte-count pins,
+# 3 AID-2026-100 related-evidence pins, and 4 nested authored-index mirror pins.
 # These legacy records belong to other work items and are not modified here.
 # gate_ratchet requires every entry to remain failing; a fixed entry is stale/red.
 MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-059/prompt-v1.md declared=65474e7f0927d2dfeaad33814fdbd7d576635cc8a0e8d2a3a7441e3a65ab7317 actual=4881d6292e96154d5f7364816ae3e9977365e09b88e8475f4dd9d655e3e34a8c
