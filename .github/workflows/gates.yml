@@ -314,3 +314,58 @@ jobs:
         run: python -m pip install PyYAML==6.0.2
       - name: Validate all Work Item manifests without migration
         run: python scripts/ci/check_work_item_manifest_schema.py
+  prompt-commit-trace:
+    name: Prompt-to-commit trace (ratchet)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install pinned YAML parser
+        run: python -m pip install PyYAML==6.0.2
+      - name: Generate auditable main and PR snapshots
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          python scripts/ci/check_prompt_commit_trace.py --commit "$BASE_SHA" --base "$BASE_SHA" --emit-baseline "$RUNNER_TEMP/main-baseline.json" > "$RUNNER_TEMP/main-snapshot.json"
+          python scripts/ci/check_prompt_commit_trace.py --commit "$HEAD_SHA" --base "$BASE_SHA" --emit-baseline "$RUNNER_TEMP/pr-snapshot.json" > "$RUNNER_TEMP/pr-snapshot.json.out"
+          {
+            echo "## Prompt-to-commit trace snapshot"
+            echo
+            echo "Base: $BASE_SHA"
+            echo "PR head: $HEAD_SHA"
+            echo
+            echo '### Main baseline candidate'
+            cat "$RUNNER_TEMP/main-baseline.json"
+            echo
+            echo '### PR head matrix and status counts'
+            cat "$RUNNER_TEMP/pr-snapshot.json"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload immutable snapshot artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: prompt-commit-trace-snapshots
+          path: |
+            ${{ runner.temp }}/main-baseline.json
+            ${{ runner.temp }}/pr-snapshot.json
+          if-no-files-found: error
+      - name: Enforce committed baseline ratchet
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test -s 14-ai-development/reports/prompt-commit-trace-baseline.json || {
+            echo "::error::Committed prompt-commit-trace baseline is missing; review and commit the main-baseline artifact before merge."
+            exit 1
+          }
+          python scripts/ci/check_prompt_commit_trace.py --commit "$HEAD_SHA" --base "$BASE_SHA" --baseline 14-ai-development/reports/prompt-commit-trace-baseline.json
