@@ -19,7 +19,7 @@ document_metadata:
       last_verified_date: "2026-11-27"
       last_verification_note: "Proxy scope determination for REQ-04 AC1; not a natural-person Owner signature."
     usage_status: Active
-    modification_status: New
+    modification_status: Active-Modified
     supersession:
       supersedes: []
       supersession_reason: null
