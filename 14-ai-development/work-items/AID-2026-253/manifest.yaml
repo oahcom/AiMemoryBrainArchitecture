@@ -36,3 +36,38 @@ evidence:
   session: "14-ai-development/work-items/AID-2026-253/session-evidence.md"
   issue: "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/265"
   register: "docs/architecture-convergence/ARCH-CONVERGENCE-001-CONFLICT-REGISTER.md"
+documentation:
+  - path: "docs/architecture-convergence/ARCH-CONVERGENCE-001-CONFLICT-REGISTER.md"
+    relationship: normative
+  - path: "14-ai-development/adr/ARCH-DECISION-SQLITE-PROFILE-001.md"
+    relationship: design
+  - path: "14-ai-development/adr/ARCH-DECISION-POSTGRESQL-PROFILE-001.md"
+    relationship: design
+  - path: "14-ai-development/adr/ARCH-DECISION-CEDAR-PDP-001.md"
+    relationship: design
+  - path: "14-ai-development/adr/ARCH-DECISION-TANTIVY-SEARCH-001.md"
+    relationship: design
+  - path: "14-ai-development/work-items/AID-2026-253/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-253/session-evidence.md"
+    relationship: evidence
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#265"
+    implementing_ai_session: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-253/session-evidence.md"
+implementation:
+  status: IMPLEMENTED
+  summary: "Recorded CF closure outcomes and four proxy mature-implementation dispositions; no production adoption or Owner authority transfer."
+  files_changed:
+    - "docs/architecture-convergence/ARCH-CONVERGENCE-001-CONFLICT-REGISTER.md"
+    - "14-ai-development/adr/ARCH-DECISION-SQLITE-PROFILE-001.md"
+    - "14-ai-development/adr/ARCH-DECISION-POSTGRESQL-PROFILE-001.md"
+    - "14-ai-development/adr/ARCH-DECISION-CEDAR-PDP-001.md"
+    - "14-ai-development/adr/ARCH-DECISION-TANTIVY-SEARCH-001.md"
+    - "14-ai-development/work-items/AID-2026-253/evidence.md"
+    - "14-ai-development/work-items/AID-2026-253/session-evidence.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests:
+    - "GitHub Actions governance and repository checks; exact-head results recorded by PR #1374."
