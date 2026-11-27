@@ -15,7 +15,7 @@ repository:
 base_branch: main
 base_commit_sha: 386d8f57b02d8e3c511ff0e3980b9ce0af8b3028
 scope:
-  objective: "Add assessor, assessed_version and evidence_baseline to the four established REQ-01 reports and enforce field completeness through the existing required required Schema non-empty audit (hard gate) job."
+  objective: "Add assessor, assessed_version and evidence_baseline to the four established REQ-01 reports and enforce field completeness through the existing required Schema non-empty audit (hard gate) job."
   files_changed:
     - reviews/architecture/SYS-RISK-001.en.md
     - reviews/architecture/SYS-RISK-001.zh-CN.md
