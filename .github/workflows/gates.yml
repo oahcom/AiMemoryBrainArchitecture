@@ -346,11 +346,6 @@ jobs:
         run: python3 scripts/test_check_document_management_sequence_mapping.py
       - name: Test AC4 fixtures and AID-2026-251 compliance
         run: python3 scripts/test_check_work_item_manifest_schema.py
-      - name: Prepare immutable legacy baseline descriptor
-        shell: bash
-        run: |
-          set -euo pipefail
-          printf '%s\n' '{"baseline_tree":"46dac1b1e198c8d88daff5a34faf759ecb075869","cohort_tree":"e47dd6f0"}' > "14-ai-development/reports/work-item-manifest-ac4-baseline.json"
       - name: Enforce manifest schema and legacy ratchet
         run: python scripts/ci/check_work_item_manifest_schema.py --tree HEAD --baseline "14-ai-development/reports/work-item-manifest-ac4-baseline.json"
       - name: Report all four historical cohort migration batches
