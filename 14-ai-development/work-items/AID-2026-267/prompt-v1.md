@@ -1,3 +1,46 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "AID-2026-267/evidence.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "Structured prompt scope snapshot; not a byte-for-byte raw chat capture."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Structured scope snapshot for AID-2026-267"
+    canonical_scope_id: "ai-development/aid-2026-267-prompt"
+    canonical_scope_keywords:
+      - "issue-134"
+      - "gate-contract"
+      - "implementation-scope"
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+---
+
 # AID-2026-267 — Prompt snapshot
 
 Prompt status: RECORDED_NOT_FROZEN
