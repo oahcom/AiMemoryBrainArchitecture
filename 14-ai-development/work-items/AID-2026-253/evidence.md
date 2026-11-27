@@ -75,7 +75,7 @@ Only CF-006 and CF-010 meet their own bounded closure conditions. CF-006 is supp
 | CF-007 | OPEN | OPEN | D/Storage row ownership, selected engine/profile and crash/failover/restore evidence. |
 | CF-008 | P0 OPEN | P0 OPEN | Closed-world target inventory, barrier semantics, evidence joins and restore proof accepted by D/I/Storage. |
 | CF-009 | OPEN | OPEN | Exact H commit ancestry, branch ref, tree digest and restoration record tying incident and restored tree. |
-| CF-010 | RECONCILED FOR TREE CURRENTNESS | RECONCILED FOR TREE CURRENTNESS | Existing closure is limited to source-tree currentness. It does not close Provider Outcome 19/19, exact tested commit pinning or end-to-end C/Brain proof. |
+| CF-010 | RECONCILED FOR TREE CURRENTNESS | RECONCILED FOR TREE CURRENTNESS | Freshly re-read live C branch session-c-agent-integration-2026-11-16 at 3e7640cbe8a3d5c1dc95b6a0b887a1c41f62916c; tree db46a6d75cad94040cd5d5be236ce0c68e0964b8 has 160 entries / 138 blobs, truncated=false; compare from incident a5dff993e5c2928a28deb777c41023cfe923366f returned ahead=11, behind=0, merge-base=incident. This reconciles tree currentness only, not Provider Outcome 19/19 or end-to-end C/Brain proof. |
 | CF-011 | P0 OPEN | P0 OPEN | Exact COutcomeRecord/final-boundary field mapping, identity, persistence and crash-recovery acceptance by G/C/H/I/D/Storage. |
 | CF-012 | OPEN | OPEN | One exact compatible C/H/Storage bundle manifest and a successful schema-only CI trigger on that exact bundle. |
 | CF-013 | CANDIDATE | CANDIDATE | I-owned Cedar wrapper vectors, revocation tests, fail-closed error tests and explicit I Owner approval. |
@@ -141,3 +141,20 @@ Bounded reconciliation: semantic and identity decision only; downstream schema, 
 - PR #1366 remains an overlapping AID-2026-253/W10 PR. Its head d94c5a1d716eac2039ed96f24d32d2c4e072c62d compares with current main 386d8f57b02d8e3c511ff0e3980b9ce0af8b3028 as ahead_by=8, behind_by=99; its file set includes unrelated AID-2026-109, AID-2026-251 and CI changes. Its branch was not overwritten.
 - Issue #265 remains OPEN and its body was not modified. No Issue comment was posted because the required merge has not occurred.
 - Post-merge blob verification and merge SHA: NOT APPLICABLE — no merge to main.
+
+
+### CF-010 command and output
+
+GET /repos/oahcom/AiMemoryBrainArchitecture/branches/session-c-agent-integration-2026-11-16
+- commit.sha = 3e7640cbe8a3d5c1dc95b6a0b887a1c41f62916c
+- commit.commit.tree.sha = db46a6d75cad94040cd5d5be236ce0c68e0964b8
+
+GET /repos/oahcom/AiMemoryBrainArchitecture/git/trees/db46a6d75cad94040cd5d5be236ce0c68e0964b8?recursive=1
+- truncated=false
+- tree.length=160
+- blob count=138
+
+Compare incident a5dff993e5c2928a28deb777c41023cfe923366f to live C branch head 3e7640cbe8a3d5c1dc95b6a0b887a1c41f62916c
+- ahead_by=11
+- behind_by=0
+- merge_base=incident commit
