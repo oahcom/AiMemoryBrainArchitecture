@@ -77,6 +77,7 @@ The root README and its EN/ZH-CN mirrors now state that each of the five linked 
 - `docs/en/09-security-governance/README.md` — matching English mirror corrected.
 - `docs/zh-CN/09-security-governance/README.md` — Chinese summary and mirrored English section corrected.
 - `scripts/test_check_document_management.py` — two feature tests added: `M-02 does not require approver or decision_date`; `09-security-governance README matches five Canonical frontmatters`.
+- `14-ai-development/work-items/AID-2026-211/prompt-v1.md` — structured scope snapshot of the received task, explicitly not claimed as a verbatim raw transcript; manifest hash and byte count are bound to this exact file.
 
 ## Tests and gate evidence
 
