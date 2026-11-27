@@ -5,7 +5,7 @@
 # One AID maps to exactly one work_item_id.
 
 schema: 1
-updated_at_utc: "2026-11-27T06:35:00Z"
+updated_at_utc: "2026-11-27T06:47:50Z"
 entries:
   - id: AID-2026-082
     state: MERGED
@@ -248,3 +248,11 @@ entries:
     state: RESERVED
     carrier: "Issue #1341 (serialize the work-item uniqueness gate at merge time) / branch fix/aid279-merge-time-serialization"
     note: "2026-11-27: main work-items tree above 279 carries AID-2026-280 and AID-2026-290; ledger holds 281/282/283/284 and 289; 285 scanned free on the main tree and on all 18 open PR head trees. Scope: close the two residual #1341 acceptance rows - make scripts/ci/test_work_item_uniqueness.py runnable without python3 and make the merge-time base the latest target branch rather than the event base."
+  - id: AID-2026-312
+    state: RESERVED
+    carrier: "PR #1411 branch closeout/line01-dev-baseline (head e44649a7f1a49660f3d486abd90906c3c3db73a2)"
+    note: "2026-11-27 scan (fetch of origin at main 5670357db7a836d4f26838dbaf99494af41e2b65): main 14-ai-development/work-items max = AID-2026-290; aid-ledger max = AID-2026-285; all 1110 origin branch head trees and all 19 open PR head trees max = AID-2026-311 (PR #1432 branch fix/1341-claim-identity-aid-311); 301 (PR #1426), 302 (PR #1430) also held. 312/313 free on main, on every origin ref and in this ledger. Scope: register the Line-01 dev-baseline closeout as a work item (manifest + prompt-v1 + session-evidence), keep PR #1411 at AI-assisted work: YES with a real evidence path, no merge."
+  - id: AID-2026-313
+    state: RESERVED
+    carrier: "new branch fix/ssrf-6to4-unwrap from origin/main (Draft PR, independent work item)"
+    note: "2026-11-27 scan (fetch of origin at main 5670357db7a836d4f26838dbaf99494af41e2b65): main 14-ai-development/work-items max = AID-2026-290; aid-ledger max = AID-2026-285; all 1110 origin branch head trees and all 19 open PR head trees max = AID-2026-311 (PR #1432 branch fix/1341-claim-identity-aid-311); 301 (PR #1426), 302 (PR #1430) also held. 312/313 free on main, on every origin ref and in this ledger. Scope: scripts/mcp_connector.py::assert_safe_url must unwrap IPv6 6to4 (2002::/16), Teredo (2001::/32) and IPv4-mapped (::ffff:0:0/96) and apply the existing rejection set to the embedded IPv4; positive and negative tests; no other SSRF policy change."
