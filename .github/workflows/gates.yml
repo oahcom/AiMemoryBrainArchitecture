@@ -414,8 +414,8 @@ jobs:
               json.dump(main, handle, sort_keys=True, indent=2)
               handle.write("\n")
           PY
-          python scripts/ci/check_prompt_commit_trace.py --commit "$BASE_SHA" --base "$BASE_SHA" --baseline "$RUNNER_TEMP/baseline-seed.json" --json > "$RUNNER_TEMP/main-summary.json"
-          python scripts/ci/check_prompt_commit_trace.py --commit "$HEAD_SHA" --base "$BASE_SHA" --baseline "$RUNNER_TEMP/baseline-seed.json" --json > "$RUNNER_TEMP/pr-summary.json"
+          python scripts/ci/check_prompt_commit_trace.py --commit "$BASE_SHA" --base "$BASE_SHA" --baseline "$RUNNER_TEMP/baseline-seed.json" --base-snapshot "$RUNNER_TEMP/main-baseline.json" --json > "$RUNNER_TEMP/main-summary.json"
+          python scripts/ci/check_prompt_commit_trace.py --commit "$HEAD_SHA" --base "$BASE_SHA" --baseline "$RUNNER_TEMP/baseline-seed.json" --base-snapshot "$RUNNER_TEMP/main-baseline.json" --json > "$RUNNER_TEMP/pr-summary.json"
           python - "$RUNNER_TEMP/main-summary.json" "$RUNNER_TEMP/pr-summary.json" <<'PY' >> "$GITHUB_STEP_SUMMARY"
           import json, os, sys
           for label, path in (("Main baseline", sys.argv[1]), ("PR head", sys.argv[2])):
