@@ -34,6 +34,8 @@ canonical_scope_keywords:
 documentation:
   - path: 14-ai-development/work-items/AID-2026-255/evidence.md
     relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-255/prompt-v1.md
+    relationship: reference
   - path: 14-ai-development/work-items/AID-2026-255/session-evidence.md
     relationship: evidence
   - path: 14-ai-development/work-items/AID-2026-255/ratchet-negative.md
@@ -44,6 +46,7 @@ scope:
     - 14-ai-development/work-items/AID-2026-255/manifest.yaml
     - 14-ai-development/work-items/AID-2026-255/evidence.md
     - 14-ai-development/work-items/AID-2026-255/session-evidence.md
+    - 14-ai-development/work-items/AID-2026-255/prompt-v1.md
     - 14-ai-development/work-items/AID-2026-255/independent-review.md
     - 14-ai-development/work-items/AID-2026-255/ratchet-negative.md
   files_to_modify:
@@ -59,6 +62,11 @@ session_evidence:
     issue_refs:
       - "#1350"
     implementing_ai_session: S6-B
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-255/prompt-v1.md
+    executed_prompt_sha256: a43c26babaa030d1af079da62a0bd88addbc80917389a924e576cec74f101a0e
+    executed_prompt_bytes: 20417
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-255/session-evidence.md
 acceptance:
   required:
