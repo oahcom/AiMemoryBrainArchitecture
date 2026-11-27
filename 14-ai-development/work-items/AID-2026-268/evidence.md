@@ -56,11 +56,11 @@ Implement blob-pin integrity checking in the existing required Repository hygien
 
 Repository hygiene workflow run: `45939439751`; job `140310147849`; exact workflow checkout merge candidate `b2a2b37cbc5bdd74d7fd5511a5e91dd2662f517e`. The base SHA was `386d8f57b02d8e3c511ff0e3980b9ce0af8b3028` and the PR head was scanned separately.
 
-- Main raw summary: `main=6f597e2dd8b6e879bf7539aa16b88a39504d9c49 manifests=117 pins=184 ok=101 mismatch=83 path_missing=0 incomplete=0`
-- #1220 raw summary: `main=9a2063ae1fa5d905b3817cd4eddba065a06daa73 manifests=108 pins=162 ok=79 mismatch=83 path_missing=0 incomplete=0`
-- Candidate raw summary: `main=4db8bd5307f3aa75e672c75763f00a0c11bbba52 manifests=118 pins=186 ok=103 mismatch=83 path_missing=0 incomplete=0`
+- Main raw summary: `main=242cf101c8b79007ad2fb8d9c89681224577188d manifests=118 pins=192 ok=101 mismatch=89 path_missing=2 incomplete=0`
+- #1220 raw summary: `main=9a2063ae1fa5d905b3817cd4eddba065a06daa73 manifests=108 pins=168 ok=82 mismatch=86 path_missing=0 incomplete=0`
+- Candidate raw summary: `main=56546e629fc26ab73c9907a4e5096ff5c5ac87e2 manifests=119 pins=194 ok=103 mismatch=89 path_missing=2 incomplete=0`
 
-The 83 baseline entries are 40 historical prompt SHA-256 mismatches, 40 prompt byte-count mismatches, and 3 AID-2026-100 related-evidence Git blob mismatches. Four authored-index mirror mismatches from the earlier baseline were repaired on main and retired from the baseline. No missing paths or incomplete commit lookups were observed in these scans. The current-main baseline file contains all 83 raw mismatch lines; the ratchet will reject any new item and any item that stops failing.
+The 91 baseline entries are 40 historical prompt SHA-256 mismatches, 40 prompt byte-count mismatches, 6 AID-2026-100 authored-index Git blob mismatches, 3 AID-2026-100 related-evidence Git blob mismatches, and 2 AID-2026-261 prompt snapshot paths missing from the declared source commit. These are other work items and are not modified here. No missing paths or incomplete commit lookups were observed in these scans. The current-main baseline file contains all 83 raw mismatch lines; the ratchet will reject any new item and any item that stops failing.
 
 ### First 10 main mismatch lines (raw)
 
