@@ -39,8 +39,7 @@ documentation:
 session_evidence:
   - role: "DELEGATED_REQ04_AC1_SCOPE_CONFIRMATION"
     issue_refs:
-      - 265
-      - 305
+      - "#265"
     implementing_ai_session: "NOT_EXPOSED_BY_PLATFORM"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-284/prompt-v1.md"
     executed_prompt_sha256: "78f8b768118bf9362377d9ea0c0312d436dc4629b34aaf7c47a33491d054a951"
