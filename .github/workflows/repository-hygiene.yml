@@ -168,7 +168,13 @@ jobs:
         run: |
           set -euo pipefail
           cd scripts
-          python3 -m unittest test_check_declared_check_contexts
+          python3 -m unittest -v test_check_declared_check_contexts
+
+      - name: Probe declared-check-contexts exit contracts
+        run: python3 scripts/probe_declared_check_contexts.py
+
+      - name: Mutation-test declared-check-contexts invariants
+        run: python3 scripts/run_declared_check_contexts_mutation_tests.py
 
       # PR #1014 split session-evidence.yml into three jobs to fix a defect that
       # survived 18 consecutive failing runs. Nothing stops it being collapsed
