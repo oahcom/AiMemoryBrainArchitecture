@@ -1,0 +1,220 @@
+work_item_id: AID-2026-262
+title: >-
+  Extend the required document-management gate to enforce serialized,
+  merge-time uniqueness across work-item directory, manifest and INDEX identities
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  Extends the already-required GOV-DOC-002 metadata-check job and its landed
+  uniqueness checker. The change expands identity detection, fixes the test
+  harness interpreter selection, refreshes main immediately before the
+  uniqueness decision, and serializes executions of the required job.
+  It does not add a second independent workflow or change branch protection.
+  The shared Actions concurrency group prevents simultaneous executions of
+  this job, while strict up-to-date protection requires a stale PR branch to
+  update before merge. GitHub concurrency is not FIFO and is not an atomic
+  merge transaction; the required check must succeed on the current PR head.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: "2026-11-27"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 386d8f57b02d8e3c511ff0e3980b9ce0af8b3028
+prompt_status: NOT_RECORDED
+prompt_provenance: DISPATCHED_TASK_FILE
+
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: 386d8f57b02d8e3c511ff0e3980b9ce0af8b3028
+  assigned_id: AID-2026-262
+  allocation_rule: >-
+    AID-2026-242 was the initial reservation for issue #1341. That identifier
+    was subsequently occupied on main by the unrelated D canonical store root
+    restoration, merged through PR #1297 at 044dee41. The aid-ledger correction
+    at commit 79c622cc ("correct 241/242 carriers and reserve 260/262")
+    records the earlier 242 reservation as invalid and reserves AID-2026-262
+    for issue #1341. The supplied measurement reports 262 free on main and
+    on the known branches at allocation time. This reservation is provenance,
+    not a global lock enforced by GitHub branch protection.
+  reservation:
+    branch: aid-ledger
+    commit: 79c622cc
+    state: RESERVED
+  superseded_reservation:
+    assigned_id: AID-2026-242
+    state: INVALIDATED
+    reason: >-
+      AID-2026-242 was occupied on main by unrelated work merged through
+      PR #1297 at 044dee41.
+  observed_occupied:
+    highest_main_id: AID-2026-279
+    main_work_item_directories: 114
+    open_pull_request_ids:
+      - AID-2026-253
+      - AID-2026-256
+      - AID-2026-261
+      - AID-2026-267
+      - AID-2026-268
+      - AID-2026-280
+
+evidence:
+  record: 14-ai-development/work-items/AID-2026-262/evidence.md
+  measurements:
+    observed_main: 386d8f57b02d8e3c511ff0e3980b9ce0af8b3028
+    landed_checker_path: scripts/ci/check_work_item_uniqueness.py
+    landed_checker_file_bytes: 4318
+    landed_harness_path: scripts/ci/test_work_item_uniqueness.py
+    landed_harness_file_bytes: 4796
+    landed_harness_failure_count: 5
+    landed_harness_test_count: 5
+    landed_harness_return_code: 9009
+    earlier_checker_path: scripts/check_work_item_uniqueness.py
+    earlier_checker_file_bytes: 11366
+    earlier_test_path: scripts/test_check_work_item_uniqueness.py
+    earlier_test_file_bytes: 15514
+    earlier_workflow_path: .github/workflows/work-item-uniqueness.yml
+    earlier_workflow_file_bytes: 2406
+    earlier_checker_tests_passed: 13
+    earlier_checker_tests_total: 13
+    earlier_real_tree_base: f18adc9fa1d06837433a09498f5297bf13b35756
+    earlier_real_tree_head: d674e67e2483378dfb03d11bd6859792a86763fb
+    earlier_real_tree_result: >-
+      PASS; introduced_directories=0; occupied_identities=121; violations=0
+    strict_up_to_date_protection: true
+    required_status_contexts: 16
+    merge_queue: absent
+    auto_merge: false
+  current_change_results:
+    checker_tests: "PASS (13/13; local run at c805544a21ba530ef8304bb3eacd8657ad83eb73)"
+    workflow_run: NOT_RUN
+    repository_hygiene_after_change: "PASS (local run at c805544a21ba530ef8304bb3eacd8657ad83eb73)"
+    traceability_after_change: "PASS (local run at c805544a21ba530ef8304bb3eacd8657ad83eb73)"
+    test_reachability_after_change: "PASS (local run at c805544a21ba530ef8304bb3eacd8657ad83eb73)"
+    line_endings_after_change: "PASS (local run at c805544a21ba530ef8304bb3eacd8657ad83eb73)"
+
+session_evidence:
+  - role: GATE_EXTENSION_AUTHOR
+    issue_refs:
+      - "#1341"
+      - "#1331"
+      - "#1372"
+    conversation_id: 6b08fe17-b398-83ec-a434-e4ca74ace0de
+    implementing_ai_session: "NOT_RECORDED"
+    session_reference_status: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-262/prompt-v1.md"
+    executed_prompt_sha256: "0ca180231330ac8b88fed072fa5a9c013540a0ad2eeede156806809b526981cf"
+    executed_prompt_bytes: 8577
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-262/session-evidence.md"
+
+scope:
+  files_to_modify:
+    - scripts/ci/check_work_item_uniqueness.py
+    - scripts/ci/test_work_item_uniqueness.py
+    - .github/workflows/document-management.yml
+    - 14-ai-development/work-items/INDEX.md
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-262/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-262/evidence.md
+    - 14-ai-development/work-items/AID-2026-262/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-262/session-evidence.md
+  files_to_delete:
+    - scripts/check_work_item_uniqueness.py
+    - scripts/test_check_work_item_uniqueness.py
+    - .github/workflows/work-item-uniqueness.yml
+  files_out_of_scope:
+    - 14-ai-development/work-items/AID-2026-279
+    - 14-ai-development/work-items/AID-2026-242
+    - .github/workflows/gates.yml
+    - .github/workflows/repository-hygiene.yml
+    - .github/workflows/branch-freshness.yml
+    - 14-ai-development/PR-GOVERNANCE-001.md
+    - .gitattributes
+    - scripts/check_traceability.py
+    - scripts/ci/check_repository_hygiene.py
+    - Main branch protection configuration
+
+non_goals:
+  - Rewriting AID-2026-279 or its historical evidence.
+  - Retroactively renumbering existing work items or repairing collisions handled by #1332.
+  - Reserving every identity claimed by an open PR or branch.
+  - Automatically renaming or modifying work-item directories.
+  - Replacing traceability or repository-hygiene checks.
+  - Claiming GitHub Actions success, merge, independent review or Owner acceptance without evidence.
+  - Claiming GitHub concurrency is FIFO or an atomic merge transaction.
+
+mechanism:
+  authoritative_checker: scripts/ci/check_work_item_uniqueness.py
+  required_job: GOV-DOC-002 metadata checks
+  identity_sources:
+    - Work-item directory names
+    - Top-level manifest.yaml work_item_id
+    - Top-level manifest.yaml legacy aid
+    - INDEX.md registrations
+  target_refresh_step: Refresh target branch immediately before uniqueness decision
+  target_ref: refs/remotes/origin/main
+  candidate_ref: exact pull_request.head.sha
+  serialized_job_concurrency_group: document-management-gov-doc-002-serialized
+  cancel_in_progress: false
+  branch_freshness_dependency: "strict: true"
+  exit_codes:
+    pass: 0
+    violation: 1
+    incomplete: 2
+
+carrier:
+  branch: feat/1341-workitem-uniqueness-gate
+  pull_request: NOT_CREATED
+  merge_sha: NOT_RECORDED
+  merge_method: merge
+  required_contexts: "16 existing contexts; uniqueness is within GOV-DOC-002 metadata checks"
+
+review:
+  status: NOT_ASSIGNED
+  independent_reviewer: NOT_ASSIGNED
+  natural_person_owner_acceptance: NOT_RECORDED
+
+acceptance:
+  gate: NOT_RUN
+
+notes:
+  - >-
+    Issue #1341 was previously claimed at:
+    https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1341#issuecomment-7209107958
+  - >-
+    AID-2026-242 was initially reserved for #1341 but became occupied on main
+    through unrelated PR #1297. The aid-ledger correction at 79c622cc
+    invalidated that reservation and assigned AID-2026-262.
+  - >-
+    AID-2026-279 is the competing implementation that landed through PR #1372.
+    Its record and evidence remain historical and unchanged. This work item
+    extends the landed scripts/ci checker and required document-management job.
+  - >-
+    The supplied test result for the landed harness is five failures with
+    return code 9009 because its subprocess launcher hardcodes python3.
+    The proposed correction uses sys.executable.
+  - >-
+    The earlier branch's 13/13 result and real-tree PASS apply only to its
+    separate checker and are not evidence that the landed checker extension
+    or the corrected landed harness passes.
+  - >-
+    The uniqueness decision is placed inside the existing required
+    GOV-DOC-002 metadata-check context. No new branch-protection context
+    is requested.
+  - >-
+    A static job-level concurrency group serializes executions of this
+    required job across PRs. GitHub concurrency is not FIFO; a superseded
+    pending run has no success and cannot be counted as a passing result.
+  - >-
+    Strict up-to-date protection is measured true. A PR whose branch is
+    behind main must update before merge; the uniqueness job then refreshes
+    origin/main and checks the exact current PR head.
+  - >-
+    No GitHub Actions run, independent review, merge or natural-person
+    Owner acceptance is claimed. The checker tests passed locally (13/13),
+    and repository hygiene, traceability, test reachability and line-ending
+    checks passed locally at c805544a21ba530ef8304bb3eacd8657ad83eb73.
