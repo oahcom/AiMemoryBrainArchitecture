@@ -128,9 +128,9 @@ evidence:
     - The live branch-protection payload is not read here; the protected side is injected from the declaration
     - No claim is made about any workflow this change does not touch
 implementation:
-  status: NOT_STARTED
-  pull_request: PENDING
-  merge_commit_sha: NOT_MERGED
+  status: MERGED
+  pull_request: 1353
+  merge_commit_sha: a66bc2aa321c86987c88a98c62c4c74e447db50f
 session_evidence:
   - role: "IMPLEMENTATION_SESSION"
     issue_refs:

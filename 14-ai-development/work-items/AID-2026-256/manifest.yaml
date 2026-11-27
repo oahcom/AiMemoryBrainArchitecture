@@ -29,11 +29,12 @@ scope:
   objective: "Correct the registration layer only: set the INDEX status cell prefix to MERGED for 19 work items whose carrier PR is already merged, and set the top-level manifest status field to MERGED where such a field exists. No other field is rewritten."
   canonical_evidence: "14-ai-development/work-items/AID-2026-256/evidence.md"
   prompt: "14-ai-development/work-items/AID-2026-256/prompt-v1.md"
-  session_evidence: "NOT_RECORDED"
+  session_evidence: "14-ai-development/work-items/AID-2026-256/session-evidence.md"
   files_to_create:
     - "14-ai-development/work-items/AID-2026-256/manifest.yaml"
     - "14-ai-development/work-items/AID-2026-256/prompt-v1.md"
     - "14-ai-development/work-items/AID-2026-256/evidence.md"
+    - "14-ai-development/work-items/AID-2026-256/session-evidence.md"
   files_to_modify:
     - "14-ai-development/work-items/INDEX.md"
     - "14-ai-development/work-items/AID-2026-107/manifest.yaml"
@@ -68,7 +69,7 @@ acceptance_criteria:
 implementation:
   status: "DRAFT_PR"
   branch: "work-item/aid-2026-256-governance-registration-reconciliation"
-  pull_request: "PENDING"
+  pull_request: 1380
   merge_commit_sha: "PENDING"
 review:
   status: "NOT_ASSIGNED"
@@ -80,10 +81,11 @@ session_evidence:
     issue_refs: []
     implementing_ai_session: NOT_RECORDED
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-256/prompt-v1.md"
-    executed_prompt_sha256: NOT_VERIFIED
+    executed_prompt_sha256: "d01f67bcd609da00eb91cd82b8cd046b6c2097a8ad88cdb2f1b8cf37d8ee3b0e"
+    executed_prompt_bytes: 1742
     executed_prompt_provenance: NOT_VERIFIED
-    session_reference_status: NOT_RECORDED
-    session_evidence_ref: NOT_RECORDED
+    session_reference_status: RECORDED
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-256/session-evidence.md"
 prohibitions:
   - "No claim of Owner acceptance."
   - "No change to checker semantics, required contexts or branch protection."
