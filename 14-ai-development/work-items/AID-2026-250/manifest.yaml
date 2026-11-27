@@ -1,0 +1,64 @@
+work_item_id: AID-2026-250
+title: "Enforce version-pinned assessor metadata on the four REQ-01 assessment reports"
+class: GATE/CI/TEST
+risk: R2
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+  base_branch: main
+  base_commit_sha: 386d8f57b02d8e3c511ff0e3980b9ce0af8b3028
+scope:
+  objective: "Add assessor, assessed_version and evidence_baseline to the four established REQ-01 reports and enforce field completeness through the existing required work-item-manifest-schema job."
+  files_changed:
+    - reviews/architecture/SYS-RISK-001.en.md
+    - reviews/architecture/SYS-RISK-001.zh-CN.md
+    - reviews/complexity/architecture-complexity-assessment.en.md
+    - reviews/complexity/architecture-complexity-assessment.zh-CN.md
+    - scripts/ci/check_req_assessment_signatures.py
+    - scripts/ci/test_check_req_assessment_signatures.py
+    - .github/workflows/gates.yml
+    - 14-ai-development/work-items/AID-2026-250/
+    - 14-ai-development/work-items/INDEX.md
+authorization:
+  implementation_write: "GRANTED for the listed reports, read-only checker, tests, existing workflow step and Work Item evidence."
+  gate_behaviour_change: "GRANTED for failing the existing work-item-manifest-schema job on missing/invalid assessor metadata in the four scoped reports."
+  required_context_change: "NOT_REQUESTED - reuse the existing required job; no new context."
+  branch_protection_change: "NOT_AUTHORIZED - no branch protection mutation."
+  normative_specification_change: "NOT_IN_SCOPE."
+acceptance:
+  C1: "All four reports contain a non-empty Assessor field."
+  C2: "All four reports contain assessed_version as exactly 40 hexadecimal characters."
+  C3: "All four reports contain a non-empty evidence_baseline."
+  C4: "The checker enumerates exactly the four scoped reports and fails closed on missing files or fields."
+  C5: "The checker is read-only and does not rewrite assessment content."
+  C6: "Tests cover valid records, missing fields, malformed SHA, missing files and deterministic output."
+  C7: "The checker runs in the existing work-item-manifest-schema job; no new job/context."
+  C8: "Actual checker output is recorded from CI on the exact PR Head."
+  C9: "Historical baseline and provenance limits are disclosed; no contemporaneous signature is fabricated."
+  C10: "Issue #262 remains open and its body is unchanged."
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#262"
+    implementing_ai_session: "ChatGPT GPT-6; session identifier not exposed"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-250/prompt-v1.md"
+    executed_prompt_sha256: NOT_VERIFIED
+    executed_prompt_bytes: 0
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-250/session-evidence.md"
+implementation:
+  status: IN_PROGRESS
+  summary: "Four assessment reports updated; checker, tests and CI integration in progress."
+  pull_request: NOT_OPENED
+  merge_commit_sha: NOT_MERGED
+review:
+  status: PENDING_INDEPENDENT_REVIEW
+  reviewer: NOT_RECORDED
+  note: "Independent exact-Head review is required; no self-review is claimed."
