@@ -5006,10 +5006,11 @@ def run_steward_assignment() -> None:
         missing.write_text(doc(BASE), encoding="utf-8")
         _git(root, "add", "-A")
         _git(root, "commit", "-q", "-m", "add document without steward")
-        code, output = run_gate(root, "--require-changed", base)
-        record("DM-15 new document without steward fails",
-               code == 1 and "new governed document must declare a non-empty steward" in output,
-               f"  exit {code}: {output[-400:]}")
+        expect_gate(
+            "DM-15 new document without steward fails",
+            root, 1, "--require-changed", base,
+            msg="00-governance/new-without-steward.md: DM-15",
+        )
 
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
@@ -5020,13 +5021,16 @@ def run_steward_assignment() -> None:
         _git(root, "commit", "-q", "-m", "seed")
         base = _git(root, "rev-parse", "HEAD")
         valid = root / "00-governance" / "new-with-steward.md"
-        valid.write_text(doc('  steward: "Architecture Governance"\n' + BASE.strip("\n")),
-                         encoding="utf-8")
+        valid.write_text(
+            doc('  steward: "Architecture Governance"\\n' + BASE.strip("\\n")),
+            encoding="utf-8",
+        )
         _git(root, "add", "-A")
         _git(root, "commit", "-q", "-m", "add document with steward")
-        code, output = run_gate(root, "--require-changed", base)
-        record("DM-15 new document with steward passes", code == 0,
-               f"  exit {code}: {output[-400:]}")
+        expect_gate(
+            "DM-15 new document with steward passes",
+            root, 0, "--require-changed", base,
+        )
 
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
@@ -5038,12 +5042,14 @@ def run_steward_assignment() -> None:
         _git(root, "add", "-A")
         _git(root, "commit", "-q", "-m", "seed legacy")
         base = _git(root, "rev-parse", "HEAD")
-        legacy.write_text(doc(BASE + "\n# revised prose"), encoding="utf-8")
+        legacy.write_text(doc(BASE + "\\n# revised prose"), encoding="utf-8")
         _git(root, "add", "-A")
         _git(root, "commit", "-q", "-m", "modify legacy")
-        code, output = run_gate(root, "--require-changed", base)
-        record("DM-15 legacy document modification remains non-blocking",
-               code == 0, f"  exit {code}: {output[-400:]}")
+        expect_gate(
+            "DM-15 legacy document modification remains non-blocking",
+            root, 0, "--require-changed", base,
+        )
+
 
 
 def run_m02_optional_approval_identity_fields() -> None:
