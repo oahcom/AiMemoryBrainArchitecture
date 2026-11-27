@@ -15,7 +15,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-241/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-281/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Verified
@@ -44,7 +44,7 @@ document_metadata:
     en: null
     zh-CN: null
 ---
-# AID-2026-241 — 05-memory-runtime 入口角色调和证据
+# AID-2026-281 — 05-memory-runtime 入口角色调和证据
 
 ## 文件角色对照
 

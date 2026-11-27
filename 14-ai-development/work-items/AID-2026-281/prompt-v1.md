@@ -13,7 +13,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-241/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-281/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -57,7 +57,7 @@ document_metadata:
 ```
 新建文件 `|CREATE`，正文直接跟在头后（不需要 `---NEW---` 标记）。
 
-# 本轮任务：补齐 AID-2026-241 的注册材料，让 `check_document_management.py --require-changed` 与 `check_bilingual_docs.py` 转绿
+# 本轮任务：补齐 AID-2026-281 的注册材料，让 `check_document_management.py --require-changed` 与 `check_bilingual_docs.py` 转绿
 
 ## 已实测的事实（直接用，不要改数字）
 
@@ -73,20 +73,20 @@ document_metadata:
   - `docs/en/14-ai-development/work-items/AID-2026-113/restore-evidence.md` 1/1
   - `docs/zh-CN/14-ai-development/work-items/AID-2026-113/restore-evidence.md` 1/1
 - `check_document_management.py --require-changed origin/main` 现在 **exit 1**，两条错误：
-  - `DM-01 missing document_metadata block: 14-ai-development/work-items/AID-2026-241/evidence.md`
-  - `DM-01 missing document_metadata block: 14-ai-development/work-items/AID-2026-241/evidence-05-index.md`
+  - `DM-01 missing document_metadata block: 14-ai-development/work-items/AID-2026-281/evidence.md`
+  - `DM-01 missing document_metadata block: 14-ai-development/work-items/AID-2026-281/evidence-05-index.md`
 - `check_bilingual_docs.py` 现在 **exit 1**，唯一原因：`Normative source files changed but PR body lacks 'BILINGUAL-MANIFEST: COMPLETE' or a fully documented 'BILINGUAL-EXCEPTION: APPROVED': 05-memory-runtime/README.md`。基线 `77 frozen, 0 new gaps`。
 - `check_source_revision_pointers.py`：`POINTERS=50 ACCURATE=16 STALE=8 DEREFERENCED=26 BAD_DEREFERENCE=0 NON_BLOB_REFERENCE=6 BAD=14`，**本轮不改它，不接线**。
 - 已生效的裁决：指针 14 条登记为债不改；AID-113 保留 `Verified` 但 note 收窄；05 README 降为索引。
 
 ## 要交付的块
 
-### 1. `14-ai-development/work-items/AID-2026-241/evidence.md`（整份重写，含 frontmatter）
+### 1. `14-ai-development/work-items/AID-2026-281/evidence.md`（整份重写，含 frontmatter）
 
 我先前已生成一份无 frontmatter 的骨架，内容如下（用 `---OLD---` 整份替换，或直接给 CREATE 覆盖；两者选一，注意 CREATE 遇已存在文件会被拒，所以请用 REPLACE + 完整 OLD 段）。骨架正文：
 
 ```
-# AID-2026-241 — Evidence and declared exceptions
+# AID-2026-281 — Evidence and declared exceptions
 
 ## 1. 基线
 
@@ -134,7 +134,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-241/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-281/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Verified
@@ -167,11 +167,11 @@ document_metadata:
 
 **硬要求**：`approval_scope`、`evidence_reference`、`supersession`、`archival` 必须是块式 YAML（不得出现 `{` 开头的流式写法，解析器会 ParseError）。
 
-### 2. `14-ai-development/work-items/AID-2026-241/evidence-05-index.md`（整份替换，同上 frontmatter 形状，`role: work-record`）
+### 2. `14-ai-development/work-items/AID-2026-281/evidence-05-index.md`（整份替换，同上 frontmatter 形状，`role: work-record`）
 
 正文用你上一轮给的那份（角色对照表 + 裁决 + 未删除证明），把 `TODO_SECTION_COUNT_ROOT` / `TODO_SECTION_COUNT_OVERVIEW` 换成 `TODO`（执行方实测填）。
 
-### 3. `14-ai-development/work-items/AID-2026-241/manifest.yaml`（整份替换，去掉全部 TODO）
+### 3. `14-ai-development/work-items/AID-2026-281/manifest.yaml`（整份替换，去掉全部 TODO）
 
 按下面这份**真实通过门禁的同仓样例**的键集与粒度写，字段值换成本工作项：
 
@@ -368,7 +368,7 @@ acceptance:
 
 ```
 
-### 4. `14-ai-development/work-items/AID-2026-241/session-evidence.md`（CREATE）
+### 4. `14-ai-development/work-items/AID-2026-281/session-evidence.md`（CREATE）
 
 三节必备：`# Session role / use case`、`# Actual AI input`、`# AI-visible output`，同样 frontmatter 形状（`role: work-record`）。
 
@@ -378,7 +378,7 @@ acceptance:
 ```
 | Work Item ID | Title | Owner | Class/Risk | Status | Prompt | Implementation | Review | Acceptance |
 ```
-在表体最后一行之后追加一行 AID-2026-241。表体最后一行现在是：
+在表体最后一行之后追加一行 AID-2026-281。表体最后一行现在是：
 
 ```
 | [AID-2026-192](AID-2026-192/manifest.yaml) | Correct a stale count pair and an addition error in the governance record, and grade three inherited execution fields | USER-PRINCIPAL-DELEGATED | DOC/GOVERNANCE / R1 | DRAFT - PR PENDING; `id_status: PROVISIONAL`; GAP-03 26/196 to 27/198 with a tree-pin annotation; AID-2026-111 `## Correction` keeps the recorded 0/36/52 and establishes 0/34/54 over 88 rows; AID-2026-112 `## Provenance correction` marks Exit code / Failed count / Test binaries `INHERITED_ASSUMPTION`; no verdict, blob pin or test changed | `AID-2026-192-PROMPT` - `prompt_status: NOT_RECORDED`; structured snapshot only, no live capture claimed | DOCUMENTATION ONLY - canonical + EN + ZH-CN for both work items; no runtime/validator/schema/test/workflow changes; DM gate INCOMPLETE with zero rule violations (pre-existing backlog) | NOT_ASSIGNED - independent exact-Head review not recorded | PENDING - no Owner acceptance asserted; #1211/#1212 remain OPEN |
@@ -391,6 +391,6 @@ acceptance:
 单独给一个 ```text 代码块（不是 `===FILE` 块），内容是完整 PR 正文，必须含：
 - `Related issue(s): #1212`
 - `AI-assisted work: YES`
-- `Session evidence reference(s): 14-ai-development/work-items/AID-2026-241/session-evidence.md`
+- `Session evidence reference(s): 14-ai-development/work-items/AID-2026-281/session-evidence.md`
 - `BILINGUAL-MANIFEST: COMPLETE`
 - 以及一段说明：`05-memory-runtime/README.md` 只加了一行导读，EN/ZH 两侧同步加了等价行，语义一致。

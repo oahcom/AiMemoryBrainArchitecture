@@ -15,7 +15,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-241/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-281/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Verified
@@ -61,7 +61,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-241/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-281/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Verified
@@ -93,7 +93,7 @@ document_metadata:
 
 # Session role / use case
 
-本会话承担 AID-2026-241 的文档编辑与证据整理辅助角色。用户提供了仓库基线、实测门禁结果、既有裁决及目标文件要求。AI 的职责限于依据已提供事实生成可逐字套用的编辑材料，不代表仓库操作执行者、独立审查者或 Owner。
+本会话承担 AID-2026-281 的文档编辑与证据整理辅助角色。用户提供了仓库基线、实测门禁结果、既有裁决及目标文件要求。AI 的职责限于依据已提供事实生成可逐字套用的编辑材料，不代表仓库操作执行者、独立审查者或 Owner。
 
 # Actual AI input
 
@@ -104,14 +104,14 @@ document_metadata:
 - `check_document_management.py --require-changed origin/main` 的两条 DM-01 缺少 `document_metadata` 错误。
 - `check_bilingual_docs.py` 的唯一失败原因、`77 frozen, 0 new gaps` 基线数据。
 - `check_source_revision_pointers.py` 的完整计数及不接线裁决。
-- AID-2026-241 的目标 frontmatter 形状、注册材料键集、INDEX 末行和 PR 正文要求。
+- AID-2026-281 的目标 frontmatter 形状、注册材料键集、INDEX 末行和 PR 正文要求。
 - 已生效的 AID-2026-113 验证范围裁决。
 
 # AI-visible output
 
 AI 提供了编辑块草案，包括：
 
-- 为 AID-2026-241 的证据记录补充 work-record frontmatter；
+- 为 AID-2026-281 的证据记录补充 work-record frontmatter；
 - 为 manifest 登记目标、变更范围、实测门禁结果、例外和禁止事项；
 - 为 session evidence 记录输入、角色和可见输出；
 - 为 INDEX 提供追加登记行；

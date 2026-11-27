@@ -1,4 +1,4 @@
-work_item_id: AID-2026-241
+work_item_id: AID-2026-281
 title: >-
   Add memory-runtime navigation entries, narrow AID-2026-113 verification coverage,
   and register the work item and unresolved source-revision debt
@@ -23,7 +23,7 @@ prompt_provenance: DISPATCHED_TASK_FILE
 identifier_allocation:
   id_status: PROVISIONAL
   observed_main: 788fbc011877a14976fc0a974ffe2e013dd9991b
-  assigned_id: AID-2026-241
+  assigned_id: AID-2026-281
   allocation_rule: >-
     The work-item identifier was explicitly assigned by the task instructions. No allocation
     or availability claim beyond that assignment is made.
@@ -53,14 +53,14 @@ scope:
       detail: "Applies the equivalent English verification-scope clarification."
     - path: "docs/zh-CN/14-ai-development/work-items/AID-2026-113/restore-evidence.md"
       detail: "Applies the equivalent Chinese verification-scope clarification."
-    - path: "14-ai-development/work-items/AID-2026-241/evidence.md"
+    - path: "14-ai-development/work-items/AID-2026-281/evidence.md"
       detail: "Records the supplied baseline measurements, adjudications, scope and limitations."
-    - path: "14-ai-development/work-items/AID-2026-241/evidence-05-index.md"
+    - path: "14-ai-development/work-items/AID-2026-281/evidence-05-index.md"
       detail: "Records the work-record role comparison, indexing adjudication and deletion-proof observations."
-    - path: "14-ai-development/work-items/AID-2026-241/session-evidence.md"
+    - path: "14-ai-development/work-items/AID-2026-281/session-evidence.md"
       detail: "Records the AI session role, actual input and AI-visible output."
     - path: "14-ai-development/work-items/INDEX.md"
-      detail: "Adds the AID-2026-241 work-item registry row."
+      detail: "Adds the AID-2026-281 work-item registry row."
   untouched:
     - "scripts/check_source_revision_pointers.py and its strict failure semantics"
     - "all workflow files, including repository-hygiene.yml"
@@ -69,7 +69,7 @@ scope:
     - "all 14 source revision pointer declarations identified as debt"
     - "all policy tables generated from MANUAL_CONTROLS"
 evidence:
-  record: 14-ai-development/work-items/AID-2026-241/evidence.md
+  record: 14-ai-development/work-items/AID-2026-281/evidence.md
   mirrors: []
   measured_at: 40195e8b
   measured_at_note: >-
@@ -85,7 +85,7 @@ evidence:
     base_commit: "788fbc011877a14976fc0a974ffe2e013dd9991b"
   local_runs:
     - command: "python scripts/check_document_management.py --require-changed origin/main"
-      result: "Exit 1; DM-01 missing document_metadata blocks in the two AID-2026-241 evidence records."
+      result: "Exit 1; DM-01 missing document_metadata blocks in the two AID-2026-281 evidence records."
     - command: "python scripts/check_bilingual_docs.py"
       result: "Exit 1; missing BILINGUAL-MANIFEST: COMPLETE or fully documented approved exception for 05-memory-runtime/README.md; 77 frozen, 0 new gaps."
     - command: "python scripts/check_source_revision_pointers.py"
@@ -105,12 +105,12 @@ session_evidence:
     issue_refs:
       - "#1212"
     implementing_ai_session: "NOT_RECORDED"
-    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-241/prompt-v1.md"
-    executed_prompt_sha256: "73140b81602bc33b2719165606ff5678b981cd8e865c306049af1d22589b0db2"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-281/prompt-v1.md"
+    executed_prompt_sha256: "75bdd87dce126f849e973d2968be1aca41264b9514faca88c3d73767ed5420ac"
     executed_prompt_bytes: 20296
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "RECORDED"
-    session_evidence_ref: "14-ai-development/work-items/AID-2026-241/session-evidence.md"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-281/session-evidence.md"
 non_goals:
   - "Changing source revision pointer checker logic"
   - "Connecting source revision pointer checking to any workflow"
