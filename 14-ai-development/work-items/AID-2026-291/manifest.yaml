@@ -16,7 +16,7 @@ date: "2026-11-27"
 repository:
   name: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: "7fc4ddabe1ea3b216b4536c0f5cb0a0c84306f19"
+base_commit_sha: "5e30d49776a2ce75069227a41470fa7e4ae00b2e"
 scope:
   objective: >-
     Audit prompt-to-implementation traceability using independently verified
@@ -37,6 +37,8 @@ documentation:
     relationship: implementation
   - path: 14-ai-development/work-items/AID-2026-291/evidence.md
     relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-291/baseline.json
+    relationship: evidence
 session_evidence:
   - role: IMPLEMENTATION_SESSION
     issue_refs:
@@ -52,8 +54,8 @@ implementation:
   status: IN_PROGRESS
   summary: >-
     Checker, regression tests and the Actions ratchet are present on the PR
-    branch. The Actions-generated main baseline is being captured and will be
-    committed as an evidence artifact before the ratchet can pass.
+    branch. The 133-entry baseline is an exact Actions-generated snapshot pinned
+    to main commit 5e30d49776a2ce75069227a41470fa7e4ae00b2e; final ratchet validation is pending.
   files_changed:
     - scripts/ci/check_prompt_commit_trace.py
     - scripts/ci/test_check_prompt_commit_trace.py
@@ -63,6 +65,7 @@ implementation:
     - 14-ai-development/work-items/AID-2026-291/evidence.md
     - 14-ai-development/work-items/AID-2026-291/session-evidence.md
     - 14-ai-development/work-items/AID-2026-291/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-291/baseline.json
   tests:
     - "python -m unittest scripts.ci.test_check_prompt_commit_trace -v"
     - "Actions Prompt-to-commit trace (ratchet) job"
