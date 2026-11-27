@@ -1,0 +1,70 @@
+work_item_id: AID-2026-326
+title: "Record the final Owner D-10 tenant/shard CanonicalCommitCursor decision in System Boundaries"
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: "Documentation-only recording of an already-final Owner decision. R1 because it updates the system-level authority boundary; no executable behavior changes."
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: "Owner D-10 decision is final in Issue #1210; this Work Item records it only. Formal document approval remains Draft/Unverified; no additional acceptance is claimed."
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-28"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "31c1e5d83e7dad326dbd4b69d4a8e19534718ff1"
+
+scope:
+  included:
+    - "Record the final Owner D-10 cursor partitioning and cross-shard transaction semantics in the canonical System Boundaries source."
+    - "Synchronize the English and Chinese mirrors and pin both to the updated canonical source blob."
+    - "Create evidence, prompt, and session records and register this Work Item in INDEX."
+    - "Explicitly preserve the open implementation boundary for multi-shard transaction representation and F/G consistent-snapshot semantics."
+  excluded:
+    - "Reopen, reinterpret, or replace the final Owner decision in Issue #1210."
+    - "Edit detailed D/F/G consumer documents; their reconciliation is follow-up work."
+    - "Define a wire schema for multi-shard transaction cursor entries or a consistent snapshot/cut protocol."
+    - "Implement code, runtime, API, schema, DDL, tests, workflows, branch protection, or deployment behavior."
+    - "Edit Issue #1210 or any PR body."
+    - "Claim formal approval of the System Boundaries document or downstream consumer acceptance."
+
+evidence: "14-ai-development/work-items/AID-2026-326/evidence.md"
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-326/prompt-v1.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-326/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-326/session-evidence.md"
+    relationship: evidence
+  - path: "01-system-architecture/system-boundaries.md"
+    relationship: normative
+  - path: "docs/en/01-system-architecture/system-boundaries.md"
+    relationship: reference
+  - path: "docs/zh-CN/01-system-architecture/system-boundaries.md"
+    relationship: reference
+
+session_evidence:
+  - role: DECISION_RECORDING
+    issue_refs:
+      - "#1210"
+    implementing_ai_session: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-326/session-evidence.md"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-326/prompt-v1.md"
+    executed_prompt_sha256: "3e522faeddd574725e8a7a11d4f9a908aa9dd057df7592aa98954c3bca5917f4"
+    executed_prompt_bytes: 1704
+    executed_prompt_provenance: "SCOPE_SNAPSHOT_NOT_VERBATIM"
+
+implementation:
+  status: IMPLEMENTED
+  summary: "Documentation-only branch change records final Owner D-10 semantics in the canonical System Boundaries source and its EN/ZH-CN mirrors. No executable behavior changed. Independent review and PR checks remain pending."
+  files_changed:
+    - "01-system-architecture/system-boundaries.md"
+    - "docs/en/01-system-architecture/system-boundaries.md"
+    - "docs/zh-CN/01-system-architecture/system-boundaries.md"
+    - "14-ai-development/work-items/AID-2026-326/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-326/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-326/evidence.md"
+    - "14-ai-development/work-items/AID-2026-326/session-evidence.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests: []
