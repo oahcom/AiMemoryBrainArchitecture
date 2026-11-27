@@ -1,0 +1,206 @@
+work_item_id: AID-2026-322
+title: Repair execution prompt pins that no longer describe committed snapshot bytes
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  Documentation-only data repair. Forty executed-prompt SHA-256 and byte-count
+  pairs in 34 existing manifests are corrected against their committed prompt
+  snapshot blobs. No prompt snapshot, runtime source, checker, workflow, schema,
+  branch protection, or policy is changed.
+status: PR_OPEN
+
+id_status: PROVISIONAL
+acceptance_authority: "Owner acceptance not recorded"
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 229c0a6b51f4c761ed969337f6ddf7d0bbbb7d0c
+
+evidence: 14-ai-development/work-items/AID-2026-322/evidence.md
+
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-322/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-322/session-evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-322/prompt-v1.md
+    relationship: reference
+
+tracking_issue: "#1318"
+
+created_at: "2026-11-27"
+updated_at: "2026-11-27"
+
+prompt_id: AID-2026-322-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-322/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+
+authorization:
+  implementation_write: "GRANTED - the delegated implementation is limited to the 40 measured executed_prompt_sha256 and executed_prompt_bytes corrections, the four AID-2026-322 work-item records, and one INDEX row."
+  gate_behaviour_change: "NOT_GRANTED - no checker, validator, test, workflow, or required context is changed."
+  schema_change: "NOT_GRANTED - no schema or manifest structure is changed."
+  policy_change: "NOT_GRANTED - no governance policy or enforcement rule is changed."
+  approval_scope_change: "NOT_GRANTED - approval_scope.included_sections and approval_scope.included_assets are not restored or introduced."
+  historical_record_change: "NOT_GRANTED - the three exceptional execution entries and the already-corrected attribution sentences remain untouched."
+
+scope:
+  invariant: "A declared prompt pin must describe a committed byte."
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-322/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-322/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-322/evidence.md
+    - 14-ai-development/work-items/AID-2026-322/session-evidence.md
+  files_to_modify:
+    - 14-ai-development/work-items/INDEX.md
+    - 14-ai-development/work-items/AID-2026-059/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-061/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-062/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-063/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-064/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-066/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-067/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-068/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-069/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-070/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-071/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-072/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-073/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-074/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-075/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-076/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-077/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-078/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-079/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-080/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-081/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-082/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-084/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-085/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-089/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-090/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-091/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-094/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-096/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-097/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-098/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-099/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-101/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-102/manifest.yaml
+  files_out_of_scope:
+    - All prompt snapshot files
+    - All source code and tests
+    - All CI workflows and validators
+    - All schemas and policy documents
+    - AID-2026-186/manifest.yaml
+    - AID-2026-241/manifest.yaml
+    - AID-2026-261/manifest.yaml
+    - Historical attribution corrections already completed in commit 27bfa597
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED; no Owner acceptance decision is asserted by this manifest."
+  AC1: "Exactly 40 executed_prompt_sha256 and executed_prompt_bytes pairs in 34 existing manifests are updated to the operator-measured SHA-256 and byte count of their referenced committed prompt snapshots."
+  AC2: "Every superseded digest and byte count is retained in evidence.md alongside its replacement. No historical value is silently discarded."
+  AC3: "The two AID-2026-078 entries are independently targeted by their distinct issue_refs and session-evidence references."
+  AC4: "AID-2026-186, AID-2026-241 and AID-2026-261 remain unchanged. Their distinct provenance and committed-byte limitations are explicitly recorded as findings."
+  AC5: "The three already-corrected attribution sentences are not re-edited. The current INDEX contains no stale digest cells requiring historical repair."
+  AC6: "No prompt snapshot is modified, no approval_scope.included_sections or approval_scope.included_assets key is restored, and no checker, workflow, schema or policy change is introduced."
+  AC7: "The AID-2026-322 directory contains exactly manifest.yaml, prompt-v1.md, evidence.md and session-evidence.md. INDEX.md receives exactly one new row."
+
+findings:
+  - id: F1
+    severity: informational
+    statement: >-
+      AID-2026-186[0] declares a digest and byte count for the LF rendering of
+      prompt-v1-original.source.txt, whereas the committed artifact is CRLF.
+      executed_prompt_provenance is NOT_VERIFIED. The committed CRLF bytes
+      remain the artifact, but the historical executed input cannot be
+      established from the available evidence. No repin is made.
+  - id: F2
+    severity: informational
+    statement: >-
+      AID-2026-241[0] has the same line-ending distinction for
+      prompt-v1-original.source.txt, with a 147-byte difference. The
+      committed CRLF artifact is preserved. NOT_VERIFIED provenance does
+      not establish that the LF rendering was or was not the executed input.
+      No repin is made.
+  - id: F3
+    severity: material
+    statement: >-
+      AID-2026-261[0] references a prompt-v1.md that is not committed and
+      declares an all-zero digest and zero bytes. No committed byte sequence
+      exists to which the declaration can be repinned. This entry remains
+      unchanged pending a separately authorized provenance and snapshot
+      decision.
+  - id: F4
+    severity: informational
+    statement: >-
+      The attribution corrections previously associated with AID-2026-090
+      are already present in main through commit 27bfa597. AID-2026-072 and
+      AID-2026-076 identify AID-2026-101, and AID-2026-047 identifies
+      AID-2026-116. They are not changed again.
+  - id: F5
+    severity: informational
+    statement: >-
+      The historical 33 INDEX digest cells are not present as stale values
+      on the selected baseline. The measured current INDEX has no occurrences
+      of the stale AID-2026-101 digests. No historical INDEX cells are
+      fabricated or rewritten.
+  - id: F6
+    severity: material
+    statement: >-
+      The top-level prompt_sha256 and prompt_bytes shape is distinct from
+      session_evidence.executed_prompt_sha256 and executed_prompt_bytes.
+      The measured top-level shape has 64 matches and zero mismatches.
+      This work item repairs only the latter shape and does not introduce
+      a checker for either shape.
+
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    Forty measured executed-prompt pin pairs across 34 manifests are
+    repinned to their committed snapshot bytes. Three exceptional entries
+    remain unchanged and are recorded as findings. One AID-2026-322 INDEX
+    row and three governance records accompany the operator-supplied prompt.
+    No production code, checker, workflow, schema or policy is changed.
+  files_changed:
+    - 14-ai-development/work-items/AID-2026-322/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-322/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-322/evidence.md
+    - 14-ai-development/work-items/AID-2026-322/session-evidence.md
+    - 14-ai-development/work-items/INDEX.md
+  tests:
+    - "python scripts/ci/check_work_item_manifest_schema.py"
+    - "python scripts/ci/check_manifest_parse.py"
+    - "python scripts/check_traceability.py --index-only"
+    - "python scripts/check_document_management.py --require-changed origin/main"
+    - "python scripts/ci/check_test_reachability.py"
+    - "python scripts/ci/check_repository_hygiene.py --base 229c0a6b51f4c761ed969337f6ddf7d0bbbb7d0c --head <candidate head>"
+    - "python audit1318.py"
+
+  merge_commit_sha: NOT_MERGED
+  pull_request: 1457
+
+review:
+  status: NOT_ASSIGNED
+  report_ref: ""
+  note: "Independent exact-Head review has not been recorded. No independent review or acceptance is claimed."
+
+session_evidence:
+  - role: IMPLEMENTATION_SESSION
+    issue_refs:
+      - "#1318"
+    implementing_ai_session: "9router-hermes-aid-322-2026-11-27"
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-322/prompt-v1.md
+    executed_prompt_sha256: "bf8932c9c13705598303b7e2d622c927f08a21b2e67d650068c1d9976f21caf8"
+    executed_prompt_bytes: 45724
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: "RECORDED"
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-322/session-evidence.md
