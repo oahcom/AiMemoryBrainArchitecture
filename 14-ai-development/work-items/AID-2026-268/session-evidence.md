@@ -6,6 +6,15 @@ document_metadata:
   lifecycle:
     approval:
       decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-268/manifest.yaml"
+      revocation: null
     evidence_verification:
       verification_status: Unverified
       last_verified_date: "2026-11-27"
