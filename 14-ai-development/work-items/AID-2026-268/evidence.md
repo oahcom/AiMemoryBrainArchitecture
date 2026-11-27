@@ -56,9 +56,9 @@ Implement blob-pin integrity checking in the existing required Repository hygien
 
 Repository hygiene workflow run: `45939439751`; job `140310147849`; exact workflow checkout merge candidate `b2a2b37cbc5bdd74d7fd5511a5e91dd2662f517e`. The base SHA was `386d8f57b02d8e3c511ff0e3980b9ce0af8b3028` and the PR head was scanned separately.
 
-- Main raw summary: `main=386d8f57b02d8e3c511ff0e3980b9ce0af8b3028 manifests=115 pins=178 ok=95 mismatch=83 path_missing=0 incomplete=0`
+- Main raw summary: `main=a588cd9914949c2c9db7b2c5704d906fd3f05b70 manifests=115 pins=178 ok=95 mismatch=83 path_missing=0 incomplete=0`
 - #1220 raw summary: `main=9a2063ae1fa5d905b3817cd4eddba065a06daa73 manifests=108 pins=162 ok=79 mismatch=83 path_missing=0 incomplete=0`
-- Candidate raw summary: `main=8fff15af8c3e4d0138d2fdafd42fa038ee17467b manifests=116 pins=180 ok=97 mismatch=83 path_missing=0 incomplete=0`
+- Candidate raw summary: `main=2c722a8f1ff2180245f8dce65d4c5ce63295b550 manifests=116 pins=180 ok=97 mismatch=83 path_missing=0 incomplete=0`
 
 The 83 baseline entries are 40 historical prompt SHA-256 mismatches, 40 prompt byte-count mismatches, and 3 AID-2026-100 related-evidence Git blob mismatches. No missing paths or incomplete commit lookups were observed in these scans. The current-main baseline file contains all 83 raw mismatch lines; the ratchet will reject any new item and any item that stops failing.
 
