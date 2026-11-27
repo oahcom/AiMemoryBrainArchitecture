@@ -51,7 +51,7 @@ document_metadata:
 **Attribution:** user-authorized operator (delegated by account owner)
 **Date:** 2026-11-27
 **Issue:** none — this is a pre-existing defect on `main` with no tracking issue yet
-**Base observed at implementation start:** f64a3f8bd004135e9873aeafc40e50ef10e10a9c (`origin/main`; the defect was also re-confirmed on the earlier bases `b4c1b11d`, `f20fff10`, `7fc4ddab`, `cbdaf783`, `a7cf5256` and `756e1e25`, before main advanced each time)
+**Base observed at implementation start:** 5e30d49776a2ce75069227a41470fa7e4ae00b2e (`origin/main`; the defect was also re-confirmed on the earlier bases `f64a3f8b`, `b4c1b11d`, `f20fff10`, `7fc4ddab`, `cbdaf783`, `a7cf5256` and `756e1e25`, `b4c1b11d`, `f20fff10`, `7fc4ddab`, `cbdaf783`, `a7cf5256` and `756e1e25`, `f20fff10`, `7fc4ddab`, `cbdaf783`, `a7cf5256` and `756e1e25`, before main advanced each time)
 
 ## The defect
 
@@ -126,7 +126,7 @@ defect can be introduced again without anything turning red.
 
 ## Measurements
 
-Measured on `origin/main` = `f64a3f8b` against this branch's final tree.
+Measured on `origin/main` = `5e30d497` against this branch's final tree.
 
 | Measurement | Before | After |
 |---|---|---|
@@ -135,16 +135,16 @@ Measured on `origin/main` = `f64a3f8b` against this branch's final tree.
 | Lines beginning with `erification` | 1 (the continuation line) | 0 |
 | Standalone truncated token (`erification_status` not preceded by `v`) | 1 | 0 |
 | Control characters outside TAB/LF/CR (whole file) | none (`0x0B` count 0, CR count 0) | none |
-| Table lines (lines beginning with a pipe character) | 205 | 206 (this work item's own row added; the joined continuation line was never a table line, so the repair alone does not change the count) |
-| File bytes | 217086 | 217839 |
-| File LF count | 325 | 325 (one line removed by the join, one added by this work item's row) |
+| Table lines (lines beginning with a pipe character) | 206 | 207 (this work item's own row added; the joined continuation line was never a table line, so the repair alone does not change the count) |
+| File bytes | 218375 | 219128 |
+| File LF count | 326 | 326 (one line removed by the join, one added by this work item's row) |
 
 ## Same class of defect found while measuring, deliberately not repaired
 
 | Row | Line | Pipe separators | Shape |
 |---|---|---|---|
-| `AID-2026-071` | 94 | 9 | 8 cells, does not end in a pipe |
-| `P2-T2-MEMORY-SCHEMA` | 277 | 7 | 7 cells in a 9-column table |
+| `AID-2026-071` | 95 | 9 | 8 cells, does not end in a pipe |
+| `P2-T2-MEMORY-SCHEMA` | 278 | 7 | 7 cells in a 9-column table |
 
 Both are pre-existing and out of scope here: repairing them would widen a
 single-purpose change and collide with concurrent INDEX edits. They are recorded
@@ -166,9 +166,9 @@ own blast radius; this work item records the proposal and changes nothing in
 ```
 python scripts/check_traceability.py --index-only
 python scripts/check_document_management.py
-python scripts/ci/check_repository_hygiene.py --base f64a3f8bd004135e9873aeafc40e50ef10e10a9c --head <head>
-python scripts/ci/check_work_item_uniqueness.py --base f64a3f8bd004135e9873aeafc40e50ef10e10a9c --head <head>
-BASE_SHA=f64a3f8bd004135e9873aeafc40e50ef10e10a9c HEAD_SHA=<head> python scripts/check_bilingual_docs.py
+python scripts/ci/check_repository_hygiene.py --base 5e30d49776a2ce75069227a41470fa7e4ae00b2e --head <head>
+python scripts/ci/check_work_item_uniqueness.py --base 5e30d49776a2ce75069227a41470fa7e4ae00b2e --head <head>
+BASE_SHA=5e30d49776a2ce75069227a41470fa7e4ae00b2e HEAD_SHA=<head> python scripts/check_bilingual_docs.py
 ```
 
 Raw output is summarised in `session-evidence.md`. No merge, squash, force-push
