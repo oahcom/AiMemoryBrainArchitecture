@@ -134,3 +134,11 @@ The frontmatter SHA values above are Git blob SHAs of the exact current YAML fro
 - `BASE_SHA=788fbc011877a14976fc0a974ffe2e013dd9991b HEAD_SHA=2a0bbb23dc4837864efab85b4031481550d81ba5 PR_BODY='... BILINGUAL-MANIFEST: COMPLETE' python3 scripts/check_bilingual_docs.py`: `bilingual baseline: 77 frozen, 0 new gaps`; `Bilingual documentation and prompt-library gate: PASS (9 changed paths inspected)`; exit 0.
 - `python3 scripts/check_document_management.py --require-changed 788fbc011877a14976fc0a974ffe2e013dd9991b`: `PASS (incremental): no GOV-DOC-002 violations`; exit 0. The global inventory still reports 371 unclassified documents, which are outside this incremental verdict and this work item's scope.
 - The full non-incremental `check_document_management.py` reports `INCOMPLETE` for the repository-wide 371-document backlog (exit 2); this is not a violation in the changed set.
+
+
+## 9. Final branch synchronization (2026-11-27)
+
+- After the initial merge of main `788fbc011877a14976fc0a974ffe2e013dd9991b`, main advanced by nine commits to `f18adc9fa1d06837433a09498f5297bf13b35756` through AID-2026-211 closeout. The changed paths were unrelated to this work item except the shared `INDEX.md`; that file auto-merged and both the AID-2026-211 row and AID-2026-242 row were retained.
+- A second real `git merge --no-ff origin/main` completed without conflicts. Merge commit: `51ac5e254293242c1112f97579608bd89a66fb51`; behind count after merge: `0`.
+- The AID-2026-109 I work item remains unchanged; AID-2026-242 remains absent from `origin/main` and is carried only by this PR.
+- Final local validation against base `f18adc9fa1d06837433a09498f5297bf13b35756` and head `51ac5e254293242c1112f97579608bd89a66fb51`: 27 bilingual checker tests passed; bilingual gate PASS with 9 changed paths and 0 new gaps; GOV-DOC-002 incremental check PASS with no violations.

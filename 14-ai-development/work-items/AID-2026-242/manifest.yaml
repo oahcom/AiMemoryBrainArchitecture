@@ -7,7 +7,7 @@ title: "Restricted recovery of the D canonical-memory-store source root"
 repository: "oahcom/AiMemoryBrainArchitecture"
 base_branch: "main"
 base_commit_sha: "b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c"
-latest_sync_main_commit: "788fbc011877a14976fc0a974ffe2e013dd9991b"
+latest_sync_main_commit: "f18adc9fa1d06837433a09498f5297bf13b35756"
 branch: "docs/2026-11-26-aid-2026-109-d-memory-brain-root-restore"
 pull_request: "1297"
 attribution:
@@ -49,7 +49,7 @@ classification:
 identifier_allocation:
   id_status: "PROVISIONAL"
   observed_main: "92a759ec1a8c748fc4091015a3a3e8aa97ddc3e3"
-  latest_sync_main: "788fbc011877a14976fc0a974ffe2e013dd9991b"
+  latest_sync_main: "f18adc9fa1d06837433a09498f5297bf13b35756"
   observed_max_id: "AID-2026-240"
   originally_requested_id: "AID-2026-109"
   requested_id: "AID-2026-242"

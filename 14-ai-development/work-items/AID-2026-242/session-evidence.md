@@ -51,7 +51,7 @@ document_metadata:
 - Attribution: `user-authorized operator (delegated by account owner)`, 2026-11-27. 代理登记，非自然人 Owner 签署.
 - Session ID: NOT_RECORDED.
 - Original branch: `docs/2026-11-26-aid-2026-109-d-memory-brain-root-restore`; original head: `e476fef38b998cf35e75043fb030fa1fb2053d26`.
-- Original base: `b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c`; current fetched main: `788fbc011877a14976fc0a974ffe2e013dd9991b`.
+- Original base: `b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c`; current fetched main at initial reconciliation: `788fbc011877a14976fc0a974ffe2e013dd9991b`; latest fetched main: `f18adc9fa1d06837433a09498f5297bf13b35756`.
 - Original D ID `AID-2026-109` collided with the main I Security & Governance work item (PR #1300); D work item reassigned to `AID-2026-242`. Main's I work item at AID-2026-109 is retained.
 - Source branch/head: `session-d-memory-brain-2026-11-16` @ `b525e1f8fee2471a131e4a38efda99804045e424`.
 - Exact source blob: `6b37c91033fda21f072e2a3bde6f274663b1e76e`.
@@ -79,4 +79,6 @@ The original D scope remains one path: `03-memory-brain/canonical-memory-store.m
 - `python3 scripts/test_check_bilingual_docs.py`: 27 tests, `OK`, exit 0.
 - `BASE_SHA=788fbc011877a14976fc0a974ffe2e013dd9991b HEAD_SHA=2a0bbb23dc4837864efab85b4031481550d81ba5 PR_BODY='... BILINGUAL-MANIFEST: COMPLETE' python3 scripts/check_bilingual_docs.py`: PASS, 9 changed paths inspected, 0 new gaps, exit 0.
 - `python3 scripts/check_document_management.py --require-changed 788fbc011877a14976fc0a974ffe2e013dd9991b`: PASS (incremental), no GOV-DOC-002 violations, exit 0.
-- GitHub exact-Head CI contexts, branch protection, behind count, final merge SHA and merged blob readback remain pending; no check or merge result is asserted.
+- Second sync merge: `51ac5e254293242c1112f97579608bd89a66fb51` (parents include prior W4 head and `origin/main` `f18adc9fa1d06837433a09498f5297bf13b35756`); behind count is 0.
+- Final validation against base `f18adc9fa1d06837433a09498f5297bf13b35756` and head `51ac5e254293242c1112f97579608bd89a66fb51`: 27 bilingual checker tests passed; bilingual checker PASS (9 changed paths, 0 new gaps); GOV-DOC-002 incremental check PASS (no violations).
+- GitHub exact-Head CI contexts, branch protection, final PR merge SHA and merged blob readback remain pending; no GitHub check or PR merge result is asserted.
