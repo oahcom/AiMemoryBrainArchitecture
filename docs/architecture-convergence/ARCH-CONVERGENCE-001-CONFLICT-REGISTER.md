@@ -114,7 +114,7 @@ This review applies each row's existing closure condition literally. It does not
 | CF-003 | OPEN | OPEN | H must confirm the canonical path and A must update the governance portal map. Missing: H confirmation and committed portal-map correction. |
 | CF-004 | OPEN | OPEN | I must identify the canonical directory and disposition alternate copies. Missing: explicit I decision and disposition/readback for the alternate directory. |
 | CF-005 | OPEN | OPEN | Storage must publish a canonical source index and exact L1/L4 status. Missing: accepted index and exact source/version/status pins. |
-| CF-006 | ADR-BLOCKED | ADR-BLOCKED | Governance must decide the Fact/Claim conflict; B/D/E/F/G/H/I downstream mapping and schema/consumer acceptance remain missing. |
+| CF-006 | ADR-BLOCKED | RECONCILED — SEMANTIC/IDENTITY DECISION ONLY | Approved OWNER-DECISION-FACT-CLAIM-001.md on main, blob 2225dcb469db37dbebe8d8bab202f3ea4f8b600b, approved version 003fa0063e1e359bc91de8c2950366f757bd1210; Owner delegation instrument is Issue #305 comment 7042461592. Schema, DDL, API, wire and runtime implementation remain expressly unfrozen. |
 | CF-007 | OPEN | OPEN | D and Storage must settle row ownership, physical engine/profile and supply crash/failover/restore evidence. Missing: accepted topology and executable recovery evidence. |
 | CF-008 | P0 OPEN | P0 OPEN | D/I/Storage must supply closed-world inventory, barriers, evidence joins and restore proof. Missing: accepted inventory and end-to-end Forget/restore evidence. |
 | CF-009 | OPEN | OPEN | H and A must pin exact ancestry, live branch ref, tree digest and restoration record. Missing: complete reproducible incident-to-restoration chain. |
@@ -128,8 +128,8 @@ This review applies each row's existing closure condition literally. It does not
 
 ### W10 reconciliation accounting
 
-- RECONCILED: 1/16 (6.25%), CF-010 only and only for tree currentness.
-- Unresolved: 15/16. The accountable Owners and missing evidence are listed above.
+- RECONCILED: 2/16 (12.5%): CF-006 semantic/identity decision only; CF-010 tree currentness only.
+- Unresolved: 14/16. The accountable Owners and missing evidence are listed above.
 - CF-006 meets its own bounded closure condition because an approved Owner-delegated semantic/identity decision is present on main. Its downstream schema/consumer implementation remains explicitly unfrozen and is not included in this reconciliation.
 - The pre-existing CF-010 evidence is retained as recorded in §1. This review does not claim a fresh shell command/output for it; no unexecuted command is represented as measured output.
 
