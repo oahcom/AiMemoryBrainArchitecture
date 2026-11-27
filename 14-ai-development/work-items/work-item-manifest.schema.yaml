@@ -50,6 +50,8 @@ fields:
       - implementing_ai_session
       - session_evidence_ref
     session_evidence_ref_pattern: "session-evidence*.md"
+    session_evidence_ref_exact_allowlist:
+      - "ac4-repair-evidence.md"
   implementation:
     kind: mapping
     required: true

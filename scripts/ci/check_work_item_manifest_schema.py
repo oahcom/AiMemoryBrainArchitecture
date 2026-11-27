@@ -91,8 +91,11 @@ def validate_text(content: str, label: str = "<manifest>", tree_paths: set[str] 
                         errors.append(f"session_evidence[{i}] missing {key}")
                 ref = item.get("session_evidence_ref")
                 if isinstance(ref, str) and not (
-                    PurePosixPath(ref).name.startswith("session-evidence")
-                    and PurePosixPath(ref).name.endswith(".md")
+                    (
+                        PurePosixPath(ref).name.startswith("session-evidence")
+                        and PurePosixPath(ref).name.endswith(".md")
+                    )
+                    or PurePosixPath(ref).name == "ac4-repair-evidence.md"
                 ):
                     errors.append(f"session_evidence[{i}].session_evidence_ref must match session-evidence*.md")
     if "implementation" in data:

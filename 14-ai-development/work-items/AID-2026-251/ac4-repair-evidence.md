@@ -51,7 +51,7 @@ document_metadata:
 
 ## Scope and carrier
 
-This is an incremental repair to AID-2026-251, not a new Work Item. No AID-2026-291 directory or other new Work Item identifier is created. The existing AID-2026-251 manifest is not rewritten; this file records only this repair's changes and measured results.
+This is an incremental repair to AID-2026-251, not a new Work Item. No AID-2026-291 directory or other new Work Item identifier is created. The existing AID-2026-251 manifest's historical fields are not rewritten. One new session_evidence entry and two documentation references are appended for this incremental repair; this file records only this repair's changes and measured results.
 
 - Repository: `oahcom/AiMemoryBrainArchitecture`
 - Branch creation main: `31b305d7c8665d0496cea00d2b0acb6626bde072`; rebase/merge integration main: `46dac1b1e198c8d88daff5a34faf759ecb075869`
@@ -78,7 +78,7 @@ A dedicated regression script, `scripts/test_check_document_management_sequence_
 - Paths must be repository-relative and must exist in the selected Git tree (`git ls-tree -r --name-only`).
 - The `.md` suffix restriction is removed. `.py`, `.yaml`, and other real repository paths are accepted.
 - Relationships include `code` and `schema` in addition to the prior values.
-- Session evidence names accept `session-evidence*.md`.
+- Session evidence names accept `session-evidence*.md`; the user-mandated incremental carrier file `ac4-repair-evidence.md` is the sole exact-name exception.
 - The checker separates AC4 documentation findings from other schema findings, pins a legacy baseline tree, rejects newly introduced violations with exit 1, and allows only reductions against the pinned legacy finding set.
 - The existing `work-item-manifest-schema` workflow job is replaced in place and runs the parser regression, AC4 fixture tests, the checker, and the cohort batch report. The baseline descriptor is generated in `$RUNNER_TEMP` so no new repository baseline file is admitted; checkout uses full history so the pinned baseline commit is resolvable.
 
