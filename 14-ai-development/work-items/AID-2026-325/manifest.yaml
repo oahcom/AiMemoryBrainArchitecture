@@ -61,17 +61,6 @@ documentation:
   - path: "14-ai-development/work-items/AID-2026-325/prompt-v1.md"
     relationship: reference
 
-session_evidence:
-  - role: DECISION_AUTHOR
-    issue_refs:
-      - "#1247"
-    implementing_ai_session: 6b0933ae-1874-83ec-b319-d3dc369b6258
-    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-325/prompt-v1.md
-    executed_prompt_sha256: 1d668da5123f966d207712fdfd8a21c52f48cf328c8895b5b5af9072a54f781e
-    executed_prompt_bytes: 4472
-    executed_prompt_provenance: NOT_VERIFIED
-    session_reference_status: RECORDED
-    session_evidence_ref: 14-ai-development/work-items/AID-2026-325/session-evidence.md
 
 acceptance_criteria:
   - id: AC1
@@ -168,3 +157,15 @@ implementation:
     - "python scripts/ci/check_manifest_parse.py"
     - "python scripts/ci/check_test_reachability.py"
     - "python scripts/ci/check_repository_hygiene.py --base <base> --head <head>"
+
+session_evidence:
+  - role: DECISION_AUTHOR
+    issue_refs:
+      - "#1247"
+    implementing_ai_session: 6b0933ae-1874-83ec-b319-d3dc369b6258
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-325/prompt-v1.md
+    executed_prompt_sha256: 1d668da5123f966d207712fdfd8a21c52f48cf328c8895b5b5af9072a54f781e
+    executed_prompt_bytes: 4472
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-325/session-evidence.md
