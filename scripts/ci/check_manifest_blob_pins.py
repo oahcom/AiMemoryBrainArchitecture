@@ -191,10 +191,6 @@ def verify(root: Path, commit: str, verbose: bool = True):
         try:
             resolved_commit = git.resolve_commit(source_commit, kind)
             data = git.object_bytes(resolved_commit, path, kind)
-            if algorithm == "git":
-                resolved_locators.setdefault(str(declared).lower(), set()).add(
-                    (resolved_commit, PurePosixPath(path).as_posix())
-                )
         except Violation as exc:
             missing += 1
             problems.append(f"{exc}; declared={declared}")
@@ -261,7 +257,6 @@ def verify(root: Path, commit: str, verbose: bool = True):
         )
 
     handled = set()
-    resolved_locators = {}
     def mark(mapping, key):
         handled.add((id(mapping), key))
 
@@ -784,18 +779,15 @@ def verify(root: Path, commit: str, verbose: bool = True):
                             check(path_value, value, source_ref,
                                   f"discovered.{where}.{key_text}", algorithm)
                         else:
-                            matching = resolved_locators.get(str(value).lower(), set())
-                            if len(matching) == 1 and key_text.endswith("_blob"):
-                                matched_commit, matched_path = next(iter(matching))
-                                check(matched_path, value, matched_commit,
-                                      f"discovered.{where}.{key_text}")
-                            else:
-                                pins += 1
-                                incomplete += 1
-                                problems.append(
-                                    f"INCOMPLETE UNRESOLVED(unregistered digest field): "
-                                    f"manifest={manifest_path} field={where}.{key_text} value={value!r}"
-                                )
+                            # A digest is not a locator: a verified locator from
+                            # another field must never authorize this declaration.
+                            # Only this field handler may supply its path and commit.
+                            pins += 1
+                            incomplete += 1
+                            problems.append(
+                                f"INCOMPLETE UNRESOLVED(missing field locator): "
+                                f"manifest={manifest_path} field={where}.{key_text} value={value!r}"
+                            )
                         mark(node, key)
                     discover_unregistered(value, f"{where}.{key_text}")
             elif isinstance(node, list):
