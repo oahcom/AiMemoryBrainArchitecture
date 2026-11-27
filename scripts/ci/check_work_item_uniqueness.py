@@ -155,15 +155,11 @@ def claim_commits(
                 ROOT,
             ).splitlines()
 
-        for name in added:
-            match = PATTERN.match(name)
-            if not match:
-                continue
+        added_ids = {
+            match.group(1) for name in added if (match := PATTERN.match(name))
+        }
 
-            item_id = match.group(1)
-            if item_id not in claims:
-                continue
-
+        for item_id in sorted(added_ids & candidate_ids):
             directory = f"{ROOT}/{item_id}"
 
             if parent is None or not exists(parent, directory):
