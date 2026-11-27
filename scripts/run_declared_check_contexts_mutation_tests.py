@@ -32,6 +32,9 @@ def execute(label, method, original_source, mutated_source):
             raise SystemExit(f"{label}: baseline test did not pass")
 
         (scripts / CHECKER.name).write_text(mutated_source, encoding="utf-8")
+        # Source mutations can preserve byte length and filesystem timestamp
+        # granularity; remove the baseline bytecode so Python cannot reuse it.
+        shutil.rmtree(scripts / "__pycache__", ignore_errors=True)
         after = subprocess.run(command, cwd=scripts, text=True, capture_output=True)
         print(f"=== {label}: MUTATED (must fail) ===")
         print(f"$ {' '.join(command)}")
