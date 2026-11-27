@@ -419,6 +419,7 @@ jobs:
           path: |
             ${{ runner.temp }}/main-baseline.json
             ${{ runner.temp }}/pr-snapshot.json
+            ${{ runner.temp }}/baseline-seed.json
             ${{ runner.temp }}/main-summary.json
             ${{ runner.temp }}/pr-summary.json
           if-no-files-found: error

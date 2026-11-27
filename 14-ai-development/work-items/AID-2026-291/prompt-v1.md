@@ -17,7 +17,6 @@ document_metadata:
     evidence_verification:
       verification_status: Unverified
       last_verified_date: null
-      last_verified_note: null
       last_verification_note: "Snapshot bytes are pinned in the adjacent manifest; provenance is recorded as NOT_VERIFIED."
     usage_status: Active
     modification_status: Active-Modified
