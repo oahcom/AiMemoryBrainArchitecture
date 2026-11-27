@@ -62,7 +62,7 @@ Each comment received an append-only metadata block containing the source author
 
 # AI-visible output
 
-Current repository base at initial branch creation: `386d8f57b02d8e3c511ff0e3980b9ce0af8b3028`. Branch: `w7/aid-250`. PR: #1388. The checker retrieves the four comment IDs using GitHub GET API and validates the exact source-session and baseline values. It runs inside the existing required `Schema non-empty audit (hard gate)` job, with `issues: read` permission only; no new job or required context is introduced.
+Initial repository base: `386d8f57b02d8e3c511ff0e3980b9ce0af8b3028`. Latest main synchronized into the branch: `756e1e25d735f526254fc3241b47880fef527b24` via merge commit `b6680b461c0f096d342b7b9855f84b3c0283146f`. Branch: `w7/aid-250`. PR: #1388. The checker retrieves the four comment IDs using GitHub GET API and validates the exact source-session and baseline values. It runs inside the existing required `Schema non-empty audit (hard gate)` job, with `issues: read` permission only; no new job or required context is introduced.
 
 The PR description contains:
 - `Related issue(s): #262`
