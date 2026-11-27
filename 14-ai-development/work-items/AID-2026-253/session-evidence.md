@@ -56,7 +56,7 @@ The user instructed the session to use work-item AID-2026-253 only; evaluate CF-
 
 1. Read Issue #265 through GitHub and retrieved the current conflict register from main.
 2. Resolved user-designated baseline 4fa75e78 to 4fa75e7809a9319db2ab04489cc8f2f9e17fbd79. GitHub compare reported main ahead by 77 commits and behind by 0 relative to that baseline; created the work branch from main.
-3. Evaluated all 16 closure conditions. Retained only CF-010's pre-existing limited RECONCILED FOR TREE CURRENTNESS status; kept the other 15 unresolved and documented the missing evidence for each.
+3. Evaluated all 16 closure conditions. Reconciled CF-006 for its approved semantic/identity decision only and retained CF-010's pre-existing limited RECONCILED FOR TREE CURRENTNESS status; kept the other 14 unresolved and documented the missing evidence for each.
 4. Authored four ADR-shaped proxy decision records: SQLite DEFER, PostgreSQL DEFER, Cedar PDP DEFER, and Tantivy DEFER — NOT REJECTED. Each has a reason, explicit reopening trigger and authority boundary.
 5. Added a structured prompt scope snapshot at 14-ai-development/work-items/AID-2026-253/prompt-v1.md (not a verbatim transcript), SHA-256 3f0bf9304d5a7d2168f24b5fe5b6fcc227725b676e8cba776d5f777e70982b71, 2902 UTF-8 bytes, and bound it in the canonical session_evidence manifest entry. Added this Work Item's evidence and session evidence. No merge, branch-protection state or Issue comment is claimed unless separately read back from GitHub.
 
