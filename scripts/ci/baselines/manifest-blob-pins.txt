@@ -94,5 +94,35 @@ MISMATCH authored_indexes[0].en_mirror path=docs/en/05-memory-runtime/README.md 
 MISMATCH authored_indexes[0].zh_cn_mirror path=docs/zh-CN/05-memory-runtime/README.md declared=9881fd88fcbfe1b3760154503c8d13e781ad89f0 actual=a5c9e3d9406c31020c1943d03561a7f381a03829
 MISMATCH authored_indexes[1].en_mirror path=docs/en/09-security-governance/README.md declared=7c8b434c7161c47c5e35e0ffcadc736981996c4a actual=d5b9495f2a2461a66546291091a942bef778e9ed
 MISMATCH authored_indexes[1].zh_cn_mirror path=docs/zh-CN/09-security-governance/README.md declared=772025aa9da8afe706af6f607ae47e35c5020522 actual=3d9be0a60a6c53e450d606222ff666add553ce96
-PATH_MISSING path=14-ai-development/work-items/AID-2026-261/prompt-v1.md; declared=0
-PATH_MISSING path=14-ai-development/work-items/AID-2026-261/prompt-v1.md; declared=0000000000000000000000000000000000000000000000000000000000000000
+# Exact new failures from AID-2026-301 field discovery; retained as visible debt, never treated as PASS.
+# AID-093: declared source blob OID absent from its explicitly named candidate commit trees; follow up in AID-2026-093.
+# AID-023/AID-026: original-payload SHA has no dedicated file locator; follow up in those owning work items.
+# AID-241: previous prompt SHA has no previous_prompt_file locator; follow up in AID-2026-241.
+# AID-109: five frontmatter blob OIDs absent from the declared source tree; follow up in AID-2026-109.
+# AID-003/AID-004/AID-064: NOT_VERIFIED is not a digest; owners must supply authoritative bytes/locators or remove invalid declarations.
+# AID-100/AID-170/AID-261: referenced paths are absent in candidate tree; owning work items must restore paths or declare historical commits.
+INCOMPLETE UNRESOLVED(prior_invariant_source_blob blob locator): manifest=14-ai-development/work-items/AID-2026-093/manifest.yaml blob=50566d16ee57c7ee34f8f089a1dea41260ee37b6 not found in declared commit tree(s)
+INCOMPLETE UNRESOLVED(prompt_original_payload_sha256): manifest=14-ai-development/work-items/AID-2026-023/manifest.yaml no dedicated prompt_original_payload_file locator
+INCOMPLETE UNRESOLVED(prompt_original_payload_sha256): manifest=14-ai-development/work-items/AID-2026-026/manifest.yaml no dedicated prompt_original_payload_file locator
+INCOMPLETE UNRESOLVED(renumbering.previous_prompt_sha256): manifest=14-ai-development/work-items/AID-2026-241/manifest.yaml no previous_prompt_file locator
+INCOMPLETE UNRESOLVED(source.selected_source_files[0].frontmatter_blob_sha blob locator): manifest=14-ai-development/work-items/AID-2026-109/manifest.yaml blob=a0740d117603891c0a9633d093bd01cb9a92f8cf not found in declared commit tree(s)
+INCOMPLETE UNRESOLVED(source.selected_source_files[1].frontmatter_blob_sha blob locator): manifest=14-ai-development/work-items/AID-2026-109/manifest.yaml blob=60b666d7b6ea38a9f2d70aa47744f3d076876e02 not found in declared commit tree(s)
+INCOMPLETE UNRESOLVED(source.selected_source_files[2].frontmatter_blob_sha blob locator): manifest=14-ai-development/work-items/AID-2026-109/manifest.yaml blob=d1b950f16ce89b8c23549c99bb885b0014a78dbf not found in declared commit tree(s)
+INCOMPLETE UNRESOLVED(source.selected_source_files[3].frontmatter_blob_sha blob locator): manifest=14-ai-development/work-items/AID-2026-109/manifest.yaml blob=9252258fa0a5f64e3cea75513da4e5e48d6c7847 not found in declared commit tree(s)
+INCOMPLETE UNRESOLVED(source.selected_source_files[4].frontmatter_blob_sha blob locator): manifest=14-ai-development/work-items/AID-2026-109/manifest.yaml blob=fd42af80595cf8c4ef92795f64f5beacba38e7db not found in declared commit tree(s)
+INCOMPLETE manifest=14-ai-development/work-items/AID-2026-003/manifest.yaml discovered.manifest.policy_unification_ruling.instruction_sha256: invalid SHA-256 declaration 'NOT_VERIFIED'
+INCOMPLETE manifest=14-ai-development/work-items/AID-2026-003/manifest.yaml prompt_sha256(top-level): invalid SHA-256 declaration 'NOT_VERIFIED'
+INCOMPLETE manifest=14-ai-development/work-items/AID-2026-004/manifest.yaml prompt_sha256(top-level): invalid SHA-256 declaration 'NOT_VERIFIED'
+INCOMPLETE manifest=14-ai-development/work-items/AID-2026-004/manifest.yaml source_translation_pairs[0].translation_path: invalid SHA-256 declaration 'NOT_VERIFIED'
+INCOMPLETE manifest=14-ai-development/work-items/AID-2026-004/manifest.yaml source_translation_pairs[1].translation_path: invalid SHA-256 declaration 'NOT_VERIFIED'
+INCOMPLETE manifest=14-ai-development/work-items/AID-2026-004/manifest.yaml source_translation_pairs[2].translation_path: invalid SHA-256 declaration 'NOT_VERIFIED'
+INCOMPLETE manifest=14-ai-development/work-items/AID-2026-064/manifest.yaml prompt_sha256(top-level): invalid SHA-256 declaration 'NOT_VERIFIED'
+PATH_MISSING gate_a_reconstruction[0].root path=04-memory-compiler/compiler-stage-contract.md; declared=1f79eeb40fb234423290f97fcce934e11bdca9bf
+PATH_MISSING owner_ruling.current_blob path=09-security-governance/phase-3.8.10-i-p0-allowlists-unified-1.2.14-recoveryjoin-1.0.2.md; declared=44986f5f864bcdc1a79d34978273644d381a68c0
+PATH_MISSING owner_ruling.superseded_blob path=09-security-governance/phase-3.8.9-i-p0-allowlists-unified-1.2.13-recoveryjoin-1.0.2.md; declared=5c0e2049513d391dfc118f4f629a5ec95de456d6
+PATH_MISSING reconciliation.pointers_changed[0].after_blob.target path=09-security-governance/phase-3.8.10-i-p0-allowlists-unified-1.2.14-recoveryjoin-1.0.2.md; declared=44986f5f864bcdc1a79d34978273644d381a68c0
+PATH_MISSING reconciliation.pointers_changed[0].before_blob.target path=09-security-governance/phase-3.8.9-i-p0-allowlists-unified-1.2.13-recoveryjoin-1.0.2.md; declared=5c0e2049513d391dfc118f4f629a5ec95de456d6
+PATH_MISSING reconciliation.pointers_changed[1].after_blob.target path=09-security-governance/phase-3.8.10-i-p0-allowlists-unified-1.2.14-recoveryjoin-1.0.2.md; declared=44986f5f864bcdc1a79d34978273644d381a68c0
+PATH_MISSING reconciliation.pointers_changed[1].before_blob.target path=09-security-governance/phase-3.8.9-i-p0-allowlists-unified-1.2.13-recoveryjoin-1.0.2.md; declared=5c0e2049513d391dfc118f4f629a5ec95de456d6
+PATH_MISSING session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-261/prompt-v1.md; declared=0
+PATH_MISSING session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-261/prompt-v1.md; declared=0000000000000000000000000000000000000000000000000000000000000000

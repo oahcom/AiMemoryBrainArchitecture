@@ -17,7 +17,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-26"
-      last_verification_note: "Source and mirror blob identities, Owner replacement ruling, and bounded language correspondence observations recorded."
+      last_verification_note: "Verified coverage is limited to the existing source and mirror identity columns, the Owner replacement ruling, and bounded language correspondence observations. The new-blob identity columns in the two tables are explicitly excluded because their identities are not verifiable."
     usage_status: Active
     modification_status: Unchanged
     supersession:

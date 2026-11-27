@@ -140,3 +140,50 @@ AID-001's `reference_model_validation.model/tests.git_blob_sha` use the declared
 
 
 Every `INCOMPLETE` diagnostic includes the owning manifest path. This prevents identical sentinels in different work items from collapsing into one ratchet entry. The fixture suite includes two manifests with the same invalid top-level `prompt_sha256` and asserts that both distinct manifest-qualified failures are emitted.
+
+## Historical references versus candidate-tree references
+
+The checker uses a closed locator rule, not a repository-wide history search:
+
+- `session_evidence[].executed_prompt_commit_sha` explicitly binds the paired `executed_prompt_snapshot_file`, `executed_prompt_sha256`, and `executed_prompt_bytes` to that historical commit.
+- Top-level `prompt_commit_sha` explicitly binds `prompt_file` (or the `prompt_version`-derived sibling path) to a historical commit.
+- If neither field is declared, the pin is a candidate-tree pin and is checked against the exact `--commit` tree. A historical match elsewhere in Git history does not override this choice.
+- An explicitly supplied but unavailable commit is `UNRESOLVED(commit unavailable)`; it never falls back to the candidate tree.
+- A declared commit plus path whose path is absent is `MISSING`; a present path with different bytes is `MISMATCH`.
+
+This default is deliberately candidate-tree, not history-search. The 40/40 historical SHA-256 matches supplied by the coordinator establish that historical versions exist, but do not identify a commit/path locator inside the corresponding manifests. Treating any historical match as VERIFIED would make arbitrary stale or incorrect digests pass. The manifests currently mark the affected prompt provenance `NOT_VERIFIED` and do not declare `executed_prompt_commit_sha`; therefore they remain candidate-tree MISMATCH until the owning work items explicitly add the historical commit locator or correct the digest. The external `pin_history.json` mapping is not committed evidence and was not available to this implementation session for per-record binding.
+
+`PATH_MISSING` is the checker’s existing diagnostic spelling for the `MISSING` state; it is not a fifth semantic state. `INCOMPLETE UNRESOLVED(reason)` remains separate from MISSING because the target cannot be established.
+## Coordinator's 40/40 historical SHA-256 finding — disposition
+
+The coordinator reports that all 40 declared SHA-256 values match some historical version of their named paths. This is accepted as evidence that those historical byte sequences existed, not as a locator authorization. The mapping file `D:\\code\\.tmp\\pin_history.json` was not available as a committed artifact or in this implementation session, and the affected manifests do not carry the corresponding per-record commit locator. No history-wide search or auto-selection of the matching commit is implemented.
+
+Two explicit historical locator keys are now supported:
+
+- `session_evidence[].executed_prompt_commit_sha` binds the sibling `executed_prompt_snapshot_file` and its SHA-256/byte-count declarations to that exact commit.
+- top-level `prompt_commit_sha` binds `prompt_file`, or the `prompt_version`-derived sibling prompt path, to that exact commit.
+
+When either explicit key is absent, the pin is evaluated against the candidate tree selected by `--commit`. A matching digest in any other commit does not change the result. An explicit unavailable commit is UNRESOLVED and does not fall back. The fixture tests cover both the positive historical-commit case and the negative no-commit/candidate-tree case.
+
+## Exact baseline additions and follow-up ownership
+
+The exact-head scan produced 25 new ratchet lines. Each was added verbatim, with no wildcard. The two old AID-261 baseline lines lacking the `session_evidence[0].executed_prompt_snapshot_file` field prefix were removed because the checker now emits the path-qualified form.
+
+| Exact failure group | Disposition | Reason and follow-up owner |
+|---|---|---|
+| AID-093 `prior_invariant_source_blob` (1) | Exact baseline | The OID is absent from the explicitly recorded commit trees; do not search unrelated history. Follow up in AID-2026-093 to record its source commit/path. |
+| AID-023/AID-026 `prompt_original_payload_sha256` (2) | Exact baseline | No dedicated original-payload file locator is declared. Follow up in AID-2026-023 and AID-2026-026 to add the exact file/commit or remove the unsupported pin. |
+| AID-241 `renumbering.previous_prompt_sha256` (1) | Exact baseline | `previous_prompt_file` is absent; no inference from another evidence record is allowed. Follow up in AID-2026-241. |
+| AID-109 `frontmatter_blob_sha` (5) | Exact baseline | Each declared OID is absent from the declared source commit tree. Follow up in AID-2026-109 with exact frontmatter path and commit locators. |
+| AID-003 `instruction_sha256` and top-level `prompt_sha256` (2) | Exact baseline | Both values are `NOT_VERIFIED`, not SHA-256 digests. Follow up in AID-2026-003 to replace with measured digests or remove the declarations. |
+| AID-004 top-level `prompt_sha256` and three translation SHA-256 fields (4) | Exact baseline | Values are `NOT_VERIFIED`; these are invalid declarations, not digest mismatches. Follow up in AID-2026-004. |
+| AID-064 top-level `prompt_sha256` (1) | Exact baseline | Value is `NOT_VERIFIED`. Follow up in AID-2026-064. |
+| AID-100 `gate_a_reconstruction[0].root` (1) | Exact baseline | Declared path is absent from the candidate tree; follow up in AID-2026-100 to restore it or declare the historical commit. |
+| AID-170 owner ruling/pointer targets (6) | Exact baseline | Two artifact paths are absent in the candidate tree; four pointer target checks inherit those absent paths. Follow up in AID-2026-170 with exact commit/path locators. |
+| AID-261 prompt snapshot zero/zero pins (2) | Exact baseline | The declared prompt path is absent; follow up in AID-2026-261 to correct or remove the invalid session evidence. |
+
+The baseline contains 114 exact failure entries after this change (89 existing mismatches, 2 existing missing paths replaced by their new path-qualified forms, plus 25 exact newly discovered failures less the two stale entries). Baseline entries remain failures and do not become VERIFIED.
+
+## Historical state semantics
+
+`VERIFIED` means a resolved commit/path's bytes match the declared algorithm. `MISMATCH` means the path resolves but the digest differs. `MISSING` means the declared path does not exist in the declared commit tree (the current stable output token is `PATH_MISSING`). `UNRESOLVED(reason)` means no valid commit/path can be established. The four states are disjoint; an unavailable commit is never converted into MISSING or silently retried against another tree.

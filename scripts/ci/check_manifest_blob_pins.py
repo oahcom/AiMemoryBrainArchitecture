@@ -44,8 +44,8 @@ PIN_FIELD_REGISTRY = (
     ("renumbering.previous_prompt_sha256", "previous_prompt_file", "candidate commit", "SHA-256(bytes); unresolved if absent"),
     ("prompt.prompt_sha256", "prompt.prompt_file", "candidate commit", "SHA-256(bytes)"),
     ("prompt.prompt_bytes", "prompt.prompt_file", "candidate commit", "byte length"),
-    ("session_evidence[].executed_prompt_sha256/bytes", "executed_prompt_snapshot_file", "candidate commit", "SHA-256(bytes)/byte length"),
-    ("prompt_sha256 (top-level)", "prompt_file or prompt-v{prompt_version}.md", "candidate commit", "SHA-256(bytes)"),
+    ("session_evidence[].executed_prompt_sha256/bytes", "executed_prompt_snapshot_file", "executed_prompt_commit_sha when explicitly declared; otherwise candidate commit", "SHA-256(bytes)/byte length"),
+    ("prompt_sha256 (top-level)", "prompt_file or prompt-v{prompt_version}.md", "prompt_commit_sha when explicitly declared; otherwise candidate commit", "SHA-256(bytes)"),
     ("source_translation_pairs[].source_blob_sha", "source_path", "source_commit_sha", "Git blob SHA-1"),
     ("source_translation_pairs[].translation_blob_sha", "translation_path", "translation_commit_sha", "Git blob SHA-1"),
     ("source_translation_pairs[].translation_sha256", "translation_path", "translation_commit_sha", "SHA-256(bytes)"),
@@ -380,10 +380,11 @@ def verify(root: Path, commit: str, verbose: bool = True):
                 incomplete += 1
                 problems.append(f"INCOMPLETE manifest={manifest_path}: session_evidence[{i}] is not a mapping")
                 continue
-            pair(item, "executed_prompt_snapshot_file", "executed_prompt_sha256", commit,
+            prompt_source_commit = item.get("executed_prompt_commit_sha") or commit
+            pair(item, "executed_prompt_snapshot_file", "executed_prompt_sha256", prompt_source_commit,
                  f"session_evidence[{i}].executed_prompt_snapshot_file", "sha256")
             mark(item, "executed_prompt_sha256")
-            pair(item, "executed_prompt_snapshot_file", "executed_prompt_bytes", commit,
+            pair(item, "executed_prompt_snapshot_file", "executed_prompt_bytes", prompt_source_commit,
                  f"session_evidence[{i}].executed_prompt_snapshot_file", "bytes")
             mark(item, "executed_prompt_bytes")
 
@@ -394,7 +395,8 @@ def verify(root: Path, commit: str, verbose: bool = True):
                 prompt_file = (str(PurePosixPath(manifest_path).parent / f"prompt-{version}.md")
                                if isinstance(version, str) and re.fullmatch(r"v[0-9]+", version)
                                else None)
-            check(prompt_file, doc.get("prompt_sha256"), commit, "prompt_sha256(top-level)", "sha256")
+            check(prompt_file, doc.get("prompt_sha256"), doc.get("prompt_commit_sha") or commit,
+                  "prompt_sha256(top-level)", "sha256")
             mark(doc, "prompt_sha256")
 
         pairs = doc.get("source_translation_pairs", []) or []
