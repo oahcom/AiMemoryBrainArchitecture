@@ -282,8 +282,6 @@ Each gate is the repository's own script, run from the branch worktree with the 
 | 3.3 | Bilingual documentation gate (`bilingual-docs.yml` / `Bilingual docs coverage (ratchet)`) | **FAIL** — structural, explained |
 | 3.4 | Repository hygiene (`repository-hygiene.yml`) | PASS |
 
-<!-- GATES_PLACEHOLDER -->
-
 **Raw output, as executed.** The four commands below were run from the branch worktree against commit `5417d49c` — the commit that introduces this file. The only difference between `5417d49c` and the file you are reading is the text of this section, which no gate reads; the same four commands re-run at the PR head give the same four exit codes (§3.5).
 
 ### 3.1 GOV-DOC-002 metadata checks — PASS
