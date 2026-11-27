@@ -1,6 +1,6 @@
 # Architecture Complexity Assessment and Budget (English)
 
-- Assessor: X — Principal Architecture Complexity Assessment
+- assessor: X — Principal Architecture Complexity Assessment
 - Repository: `oahcom/AiMemoryBrainArchitecture`
 - Exact baseline: `main@b372b62c640a2b656e54b6db62a4ee67d7d8c001`
 - assessed_version: `b372b62c640a2b656e54b6db62a4ee67d7d8c001`
