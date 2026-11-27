@@ -62,10 +62,10 @@ implementation:
   merged_at: "2026-11-27T08:14:31Z"
   summary: >-
     PR #1427 merged the read-only checker, 11 named manifest assertions, the
-    Actions ratchet, and the exact 133-entry baseline snapshot. The 16 required
-    contexts and the additional trace ratchet passed on the validated PR head.
-    A post-merge push exposed strict equality between the baseline pin and
-    current main; a follow-up changes this to a fail-closed ancestor check.
+    Actions ratchet, and the exact 134-entry baseline snapshot pinned to main
+    cd1722e753a429247d91f990caa2defac565e308. PR #1427 passed all 16 required
+    contexts and the additional trace ratchet; follow-up PR #1459 refreshes the
+    snapshot and makes historical baseline pins ancestor-valid as main advances.
   files_changed:
     - scripts/ci/check_prompt_commit_trace.py
     - scripts/ci/test_check_prompt_commit_trace.py

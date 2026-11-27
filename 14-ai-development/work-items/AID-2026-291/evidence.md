@@ -53,7 +53,7 @@ document_metadata:
 - Assigned issue: #265 (AC6)
 - Branch: `feat/aid-290-prompt-commit-trace`
 - PR: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1427
-- Current main/base SHA used by the final Actions scan: `5e30d49776a2ce75069227a41470fa7e4ae00b2e`
+- Current main/base SHA used by the refreshed Actions scan: `cd1722e753a429247d91f990caa2defac565e308`
 - Branch synchronization merge commit: `57ff99cf3986d2effea75460a206e8754e3561a2`
 - Validated PR head for the final Actions run: `96d2a57f6993bd9ccde507948624d193965c461c`
 - Existing AID-2026-290 for Issue #1268 is preserved; this work item and its index row use AID-2026-291 only.
@@ -61,23 +61,23 @@ document_metadata:
 ## Actions run and baseline artifact
 
 - Final Existing gates run: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/45963335255
-- Final metrics artifact: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/45963335255/artifacts/15181278161
-- The committed `baseline.json` is the byte-for-byte `baseline-seed.json` from Actions run https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/45962312050 (artifact 15181835100), generated against the same main SHA.
-- Baseline file size: 19,335 bytes.
-- Git blob SHA: `c7b982a64a8e75a6ed301161e6fd3e74a2704305`.
-- SHA-256: `fdec7294cbe8ddb169d0529d65f21ecf357e8846c8c7652989a825dda46e2188`.
-- Baseline JSON `commit` and `source_commit`: `5e30d49776a2ce75069227a41470fa7e4ae00b2e`.
-- Baseline entries: 133 (132 manifests in the measured main snapshot plus the initial AID-2026-291 seed). The seed records AID-2026-291 as `NO_TRACE`; it does not assert traceability.
+- Refreshed baseline artifact: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/45965243581/artifacts/15182930247
+- The Actions artifact's `baseline-seed.json` is the exact content committed as `14-ai-development/work-items/AID-2026-291/baseline.json` in the follow-up PR.
+- Baseline file size: 19,227 bytes.
+- Git blob SHA: `747efbeebb9d736f855af066fb7ae6996f257127`.
+- SHA-256: `0f3ea2aad7bb3925729ba7ec4c16c49413dbae9bc30cb0140f244ccdc618e37a`.
+- Baseline JSON `commit` and `source_commit`: `cd1722e753a429247d91f990caa2defac565e308`.
+- Baseline entries: 134, exactly the 134 manifests in the measured main snapshot. AID-2026-291 is already present in main; the artifact's `seeded_work_items` object is empty.
 - The checker fails closed if the baseline file is absent or malformed; the follow-up ratchet correction requires the baseline `commit` pin to resolve and be an ancestor of the current comparison base, preserving the immutable snapshot pin as main advances.
 - Repository hygiene initially rejected the new JSON path because its allowlist is exact. The allowlist was extended only for `14-ai-development/work-items/AID-2026-291/baseline.json`, with a dedicated admission test. No unrelated gate job or branch-protection setting was changed.
 
 ## Five primary states
 
-Actions measured the main snapshot at 132 manifests and the PR snapshot at 133 manifests.
+Actions measured both the refreshed main snapshot and the follow-up PR snapshot at 134 manifests.
 
 | Primary status | Main snapshot | PR snapshot |
 |---|---:|---:|
-| `NO_TRACE` | 124 | 125 |
+| `NO_TRACE` | 126 | 126 |
 | `DIGEST_UNPINNED` | 5 | 5 |
 | `DIGEST_MISMATCH` | 1 | 1 |
 | `COMMIT_UNREACHABLE` | 2 | 2 |
@@ -89,7 +89,7 @@ Actions measured the main snapshot at 132 manifests and the PR snapshot at 133 m
 
 | Prompt dimension | Commit ABSENT | Commit REACHABLE | Commit UNREACHABLE |
 |---|---:|---:|---:|
-| `ABSENT` | 66 | 1 | 0 |
+| `ABSENT` | 68 | 1 | 0 |
 | `HEAD_MATCH` | 50 | 3 | 2 |
 | `PINNED_OK` | 6 | 0 | 2 |
 | `UNPINNED_MISMATCH` | 1 | 0 | 1 |
@@ -98,7 +98,7 @@ Actions measured the main snapshot at 132 manifests and the PR snapshot at 133 m
 
 | Prompt dimension | Commit ABSENT | Commit REACHABLE | Commit UNREACHABLE |
 |---|---:|---:|---:|
-| `ABSENT` | 67 | 1 | 0 |
+| `ABSENT` | 68 | 1 | 0 |
 | `HEAD_MATCH` | 50 | 3 | 2 |
 | `PINNED_OK` | 6 | 0 | 2 |
 | `UNPINNED_MISMATCH` | 1 | 0 | 1 |
@@ -106,7 +106,7 @@ Actions measured the main snapshot at 132 manifests and the PR snapshot at 133 m
 The PR job log's primary and matrix lines (verbatim):
 
 ```text
-PRIMARY NO_TRACE=125
+PRIMARY NO_TRACE=126
 PRIMARY DIGEST_UNPINNED=5
 PRIMARY DIGEST_MISMATCH=1
 PRIMARY COMMIT_UNREACHABLE=2
@@ -122,8 +122,8 @@ MATRIX UNPINNED_MISMATCH x UNREACHABLE=1
 MATRIX UNPINNED_MISMATCH x ABSENT=1
 MATRIX ABSENT x REACHABLE=1
 MATRIX ABSENT x UNREACHABLE=0
-MATRIX ABSENT x ABSENT=67
-BASE_SHA: 5e30d49776a2ce75069227a41470fa7e4ae00b2e
+MATRIX ABSENT x ABSENT=68
+BASE_SHA: cd1722e753a429247d91f990caa2defac565e308
 ```
 
 ## Eleven named manifest assertions
@@ -198,7 +198,7 @@ The unrelated Issue #1268 work item was preserved: `AID-2026-290/manifest.yaml` 
 
 ## Post-merge ratchet correction
 
-The push-triggered Existing gates run on merge commit `93532c4899cc130ae4cc6a6c26b39f1499c26f6d` was run at https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/45964155877. All ordinary hard-gate jobs passed, but the non-required `Prompt-to-commit trace (ratchet)` job failed closed because it required the historical baseline pin `5e30d49776a2ce75069227a41470fa7e4ae00b2e` to equal the new main SHA `93532c4899cc130ae4cc6a6c26b39f1499c26f6d`. This exposed a baseline-age bug, not a trace classification regression. The follow-up change now accepts the immutable baseline pin only when it resolves and is an ancestor of the current comparison base; it retains the exact pin, continues to fail closed for missing/non-ancestor pins, and uses the pre-push main SHA for push events. The follow-up PR's exact-head checks are the final gate before the #265 comment.
+The push-triggered Existing gates run on merge commit `93532c4899cc130ae4cc6a6c26b39f1499c26f6d` was run at https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/45964155877. All ordinary hard-gate jobs passed, but the non-required `Prompt-to-commit trace (ratchet)` job failed closed because it required the historical baseline pin `5e30d49776a2ce75069227a41470fa7e4ae00b2e` to equal the new main SHA `93532c4899cc130ae4cc6a6c26b39f1499c26f6d`. This exposed a baseline-age bug, not a trace classification regression. The follow-up change now accepts the immutable baseline pin only when it resolves and is an ancestor of the current comparison base; it retains the exact pin, continues to fail closed for missing/non-ancestor pins, and uses the pre-push main SHA for push events. The refreshed baseline is committed in this follow-up PR; its exact-head ratchet and 16 required contexts must pass before the #265 comment.
 
 ## Required-context interpretation
 
