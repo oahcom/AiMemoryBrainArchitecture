@@ -87,8 +87,8 @@ session_evidence:
     issue_refs:
     implementing_ai_session: session-903-fixture-collision
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-072/prompt-v1.md
-    executed_prompt_sha256: 1c8f58cff7d248f7bd3a7b87aff836a2f497e57512e64376c1aa778085b67ea7
-    executed_prompt_bytes: 8623
+    executed_prompt_sha256: 5e29f0695537e19bbf2e64ee4bf4fe85d03e732126f5d7dec92b2cacacc67a8f
+    executed_prompt_bytes: 8565
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-072/session-evidence-903.md
