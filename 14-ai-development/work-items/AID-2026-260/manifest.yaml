@@ -1,0 +1,50 @@
+work_item_id: AID-2026-260
+title: >-
+  Verify every declared manifest blob identity against the bytes committed in the
+  merge candidate: a checker that resolves each declared path, recomputes the digest
+  from committed bytes, and fails on a missing path or a mismatched value
+class: GATE/TEST
+risk: R1
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: f18adc9fa1d06837433a09498f5297bf13b35756
+prompt_status: PENDING
+prompt_provenance: PENDING
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: f18adc9fa1d06837433a09498f5297bf13b35756
+  assigned_id: AID-2026-260
+  allocation_rule: >-
+    SKELETON COMMIT ONLY. This record is pushed before any implementation so the
+    number is visible in the tree and cannot be claimed twice. 240, 241, 251, 252
+    and 253 were observed occupied when this number was allocated; 241 is carried
+    by the branch req05/aid-082-session-independence (PR #1325) and no path under
+    it is created or modified here.
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-260/manifest.yaml
+  files_to_modify: []
+carrier:
+  branch: fix/2026-11-27-aid260-manifest-blob-pins
+  pull_request: PENDING
+  merge_sha: PENDING
+  merge_method: merge
+  required_contexts: PENDING
+review:
+  status: NOT_ASSIGNED
+  independent_reviewer: NOT_ASSIGNED
+  natural_person_owner_acceptance: NOT_RECORDED
+acceptance:
+  gate: PENDING_CI
+notes:
+  - >-
+    Skeleton registration. Scope, evidence, session evidence and the full manifest
+    are written by the implementing session; this file exists so the identifier is
+    visible in the tree first.
