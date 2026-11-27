@@ -206,19 +206,19 @@ session_evidence:
     issue_refs:
       - "#1247"
     implementing_ai_session: req05-convergence-session-identity-not-recorded
-    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-241/prompt-v1-original.txt
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-241/prompt-v1-original.md
     executed_prompt_sha256: 5c8f02062568720bb9132b27bdb3d6a4c9ac9fbb603d0c42a4818f6c2105002a
     executed_prompt_bytes: 6983
-    executed_prompt_provenance: NOT_VERIFIED
-    session_reference_status: RECORDED
+    executed_prompt_provenance: NOT_AVAILABLE
+    session_reference_status: NOT_AVAILABLE
     session_evidence_ref: 14-ai-development/work-items/AID-2026-241/evidence.md
   - role: IMPLEMENTER
     issue_refs:
       - "#1247"
     implementing_ai_session: w3-session-2026-11-27-not-independently-verified
-    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-241/prompt-w3-v1.txt
-    executed_prompt_sha256: b9b277a45796548565415400f6089263b70a3f3a51ae8f3dbebe4db6c4d3752b
-    executed_prompt_bytes: 1433
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-241/prompt-w3-v1.md
+    executed_prompt_sha256: 14b79d7666a954102ffccc7239f82ae516dd145304e4f034842c6936d57f0352
+    executed_prompt_bytes: 2613
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-241/session-evidence.md
