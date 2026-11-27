@@ -1,0 +1,15 @@
+schema_version: 1
+claims:
+  - work_item_id: AID-2026-279
+    status: MERGED
+    pull_request: 1372
+    repository: oahcom/AiMemoryBrainArchitecture
+    head_sha: 82daefb85cbac63a5cb8c6aef5ca56922f54b05d
+    merge_commit_sha: 386d8f57b02d8e3c511ff0e3980b9ce0af8b3028
+    claimed_at: "2026-11-27T03:41:00Z"
+    updated_at: "2026-11-27T04:17:27Z"
+    owner_work_item: AID-2026-279
+    evidence:
+      - "14-ai-development/work-items/AID-2026-279/manifest.yaml"
+      - "14-ai-development/work-items/AID-2026-279/evidence.md"
+      - "14-ai-development/work-items/AID-2026-279/session-evidence.md"

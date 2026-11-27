@@ -20,7 +20,11 @@ from pathlib import PurePosixPath
 # closed when either side of the relation is absent, where it used to return no
 # violations over an empty set (AID-2026-199, #1212). The two versions are
 # separate numbers on purpose -- one changed the contract, the other the rules.
-CHECK_VERSION = "2026-11-27.2"
+#
+# 2026-11-27.3 admits one more exact new-file path: the work-item claim ledger
+# under work-items/registry/ (AID-2026-279). It is a single anchored path, not a
+# directory-wide .yaml widening.
+CHECK_VERSION = "2026-11-27.3"
 
 # Repository-root-relative paths, written with a leading slash.
 PROHIBITED_PATHS = (
@@ -90,6 +94,14 @@ FULL_SHA_RE = re.compile(r"[0-9a-fA-F]{40}\Z")
 # which is a rule nobody would remember to edit.
 WORK_ITEM_MANIFEST_RE = re.compile(
     r"14-ai-development/work-items/AID-\d{4}-\d{3}/manifest\.yaml"
+)
+
+# AID-2026-279: the single authoritative work-item claim ledger. One exact
+# nested path; the registry directory exists to hold this file and nothing that
+# is unanchored. Widening it to registry/*.yaml would make the directory a
+# fragment store, which is what the manifest-schema-registry comment forbids.
+WORK_ITEM_CLAIMS_REGISTRY_RE = re.compile(
+    r"14-ai-development/work-items/registry/work-item-claims\.yaml"
 )
 
 # The schema registry is the one file directly under work-items/ that is not a
@@ -295,6 +307,9 @@ def is_allowed_new_path(path):
         return True
 
     if MANIFEST_SCHEMA_REGISTRY_RE.fullmatch(path):
+        return True
+
+    if WORK_ITEM_CLAIMS_REGISTRY_RE.fullmatch(path):
         return True
 
     if WORK_ITEM_MANIFEST_SCHEMA_RE.fullmatch(path):

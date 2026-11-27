@@ -7,6 +7,8 @@ concurrency:
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+  merge_group:
+    types: [checks_requested]
   push:
     branches: [main]
 
@@ -29,22 +31,44 @@ jobs:
         run: python3 scripts/test_check_document_management.py
 
       - name: Self-test work-item uniqueness gate
-        run: python3 scripts/ci/test_work_item_uniqueness.py
+        run: |
+          python3 scripts/ci/test_work_item_uniqueness.py
+          python3 scripts/ci/test_work_item_registry.py
 
+      - name: Validate the work-item claim registry
+        run: python3 scripts/ci/check_work_item_registry.py
+
+      # AID-2026-279: the same checker runs for all three event kinds, against
+      # the tree pair that event actually means:
+      #   pull_request -> base.sha / head.sha
+      #   merge_group  -> merge_group.base_sha / merge_group.head_sha (merge-time
+      #                   re-evaluation: the queue head is replayed on the new base)
+      #   push         -> event.before / event.after
+      # Occupancy is read from the target tree itself, never from a merge base,
+      # so a stale pull_request base cannot let a second claim through. No paths
+      # filter and no continue-on-error: the check is a required context.
       - name: Enforce work-item uniqueness against the current target base
         env:
+          EVENT_NAME: ${{ github.event_name }}
           PR_BASE: ${{ github.event.pull_request.base.sha }}
           PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          MG_BASE: ${{ github.event.merge_group.base_sha }}
+          MG_HEAD: ${{ github.event.merge_group.head_sha }}
           PUSH_BEFORE: ${{ github.event.before }}
-          CANDIDATE_SHA: ${{ github.sha }}
+          PUSH_AFTER: ${{ github.event.after }}
         run: |
-          if [ -n "$PR_BASE" ] && [ -n "$PR_HEAD" ]; then
-            python3 scripts/ci/check_work_item_uniqueness.py --base "$PR_BASE" --head "$PR_HEAD"
-          elif [ -n "$PUSH_BEFORE" ] && [ "$PUSH_BEFORE" != "0000000000000000000000000000000000000000" ]; then
-            python3 scripts/ci/check_work_item_uniqueness.py --base "$PUSH_BEFORE" --head "$CANDIDATE_SHA"
-          else
-            python3 scripts/ci/check_work_item_uniqueness.py
+          set -u
+          case "$EVENT_NAME" in
+            pull_request) BASE="$PR_BASE"; HEAD="$PR_HEAD" ;;
+            merge_group) BASE="$MG_BASE"; HEAD="$MG_HEAD" ;;
+            push) BASE="$PUSH_BEFORE"; HEAD="$PUSH_AFTER" ;;
+            *) echo "::error::work-item uniqueness does not support event $EVENT_NAME"; exit 2 ;;
+          esac
+          if [ -z "$BASE" ] || [ -z "$HEAD" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ]; then
+            echo "::error::work-item uniqueness has no usable base/head for $EVENT_NAME"
+            exit 2
           fi
+          python3 scripts/ci/check_work_item_uniqueness.py --base "$BASE" --head "$HEAD"
 
       # Every governed file added or modified here must carry metadata. The
       # backlog stays unclassified; it may not grow. Both event kinds are
