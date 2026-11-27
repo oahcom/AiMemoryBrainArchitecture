@@ -64,6 +64,23 @@ class BlobPinsTest(unittest.TestCase):
         self.assertIn("pins=1 ok=1 mismatch=0 path_missing=0 incomplete=0", out)
         self.assertNotIn("MISMATCH", out)
 
+    def test_nested_authored_index_mirror_pin_is_checked(self):
+        data = b"authored mirror bytes\\n"
+        wrong = "0" * 40
+        commit_tree(self.root, {
+            "docs/en/05-memory-runtime/README.md": data,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                ("baseline_and_source_evidence:\\n"
+                 "  authored_indexes:\\n"
+                 "    - en_mirror: docs/en/05-memory-runtime/README.md\\n"
+                 f"      en_mirror_blob: \\\"{wrong}\\\"\\n"),
+        })
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 1, out + err)
+        self.assertIn("MISMATCH authored_indexes[0].en_mirror", out)
+        self.assertIn(f"declared={wrong}", out)
+        self.assertIn(f"actual={self.blob_sha(data)}", out)
+
     def test_changed_byte_is_rejected_with_declared_and_actual_digest(self):
         data = b"committed bytes\n"
         wrong = "0" * 40
