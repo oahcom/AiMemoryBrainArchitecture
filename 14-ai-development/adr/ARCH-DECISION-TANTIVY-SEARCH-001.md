@@ -1,15 +1,14 @@
 ---
 document_metadata:
+  steward: "Architecture Governance"
   domain: ai-development
   role: decision-record
   lifecycle:
     approval:
-      decision_status: Approved
-      approver: "user-authorized operator (delegated by account owner); proxy decision only"
-      decision_date: "2026-11-27"
-      approved_version:
-        scheme: git
-        value: "PENDING_MERGE_COMMIT"
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
       approval_scope:
         type: Full-document
       approval_applicability: Applicable-To-Current-Version
