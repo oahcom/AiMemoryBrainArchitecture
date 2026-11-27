@@ -44,8 +44,8 @@ session_evidence:
     implementing_ai_session: "ChatGPT GPT-6"
     session_evidence_ref: 14-ai-development/work-items/AID-2026-291/session-evidence.md
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-291/prompt-v1.md
-    executed_prompt_sha256: "44dd20aa96c6830843fc0f45e5a51ba583761cd3f927f8ff1360d429f1126d81"
-    executed_prompt_bytes: 2966
+    executed_prompt_sha256: "84bfb5e23685fa18e890dc22d12737e309969d3782e49732657900e57f6f2c16"
+    executed_prompt_bytes: 2997
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
 implementation:

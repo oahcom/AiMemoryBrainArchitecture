@@ -374,7 +374,7 @@ jobs:
           for label, path in (("Main baseline", sys.argv[1]), ("PR head", sys.argv[2])):
               data = json.load(open(path, encoding="utf-8"))
               print(f"## {label}: prompt-to-commit trace")
-              print(f"Commit: {data['manifests'][0]['manifest'] if False else 'see pinned commit below'}")
+              print(f"Commit: {os.environ['BASE_SHA'] if label == 'Main baseline' else os.environ['HEAD_SHA']}")
               print(f"Manifest count: {data['manifest_count']}")
               print("### Five primary states")
               for name, count in data["primary_status"].items():
