@@ -90,7 +90,7 @@ Branch: `closeout/line01-dev-baseline`, created in a separate worktree (`D:\code
 | 9 | canonical session_evidence | unknown | present and enforced | recorded | — | `c27b41cf…` (validate.py), `393be84e…` (schema) | `git rev-parse HEAD:<path>` | see §5(a) | none |
 | 10 | AID-2026-096 evidence | reported as "deleted then restored" | `evidence.md` **never existed** in main history | recorded as never-present | — | see §5(b) | `git log --all --diff-filter=D` | empty output (2782 commits, not shallow) | restoration trail `NOT_RECORDED` |
 | 11 | Work Item ID field | unknown | 096 manifest `work_item_id: AID-2026-096` / `id_status: FINAL`; #1249 uses `NONE` lawfully | recorded, unchanged | — | `df16f4ad…` | `git show HEAD:…/AID-2026-096/manifest.yaml` | see §5(c) | none |
-| 12 | ATTRIBUTION.md | absent on main | created | new file | this branch | `b97b8497…` | `git hash-object` | `33436d85743fcdee4ebbcc170af8bc9cc9626295` | items requiring natural-person signature are excluded |
+| 12 | ATTRIBUTION.md | absent on main | created | new file | this branch | `33436d85…` | `git hash-object` | `33436d85743fcdee4ebbcc170af8bc9cc9626295` | items requiring natural-person signature are excluded |
 | 13 | This closeout | absent | created | new file | this branch | see §11 | `git hash-object` | see §11 | — |
 
 ---

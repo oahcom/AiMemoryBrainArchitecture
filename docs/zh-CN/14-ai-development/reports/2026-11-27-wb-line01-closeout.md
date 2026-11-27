@@ -91,7 +91,7 @@ document_metadata:
 | 9 | canonical session_evidence | 未知 | 存在且强制 | 记录 | — | `c27b41cf…`（validate.py）、`393be84e…`（schema） | `git rev-parse HEAD:<path>` | 见 §5(a) | 无 |
 | 10 | AID-2026-096 evidence | 传闻「删除后恢复」 | main 全历史**从未存在** `evidence.md` | 记为 never-present | — | 见 §5(b) | `git log --all --diff-filter=D` | 空输出（2782 commits，非 shallow） | 恢复轨迹 `NOT_RECORDED` |
 | 11 | Work Item ID 字段 | 未知 | 096 manifest `work_item_id: AID-2026-096` / `id_status: FINAL`；#1249 用 `NONE` 合法 | 记录，不改 | — | `df16f4ad…` | `git show HEAD:…/AID-2026-096/manifest.yaml` | 见 §5(c) | 无 |
-| 12 | ATTRIBUTION.md | main 上不存在 | 已创建 | 新建 | 本分支提交 | `b97b8497…` | `git hash-object` | `33436d85743fcdee4ebbcc170af8bc9cc9626295` | 需自然人签署的事项不在本文件内 |
+| 12 | ATTRIBUTION.md | main 上不存在 | 已创建 | 新建 | 本分支提交 | `33436d85…` | `git hash-object` | `33436d85743fcdee4ebbcc170af8bc9cc9626295` | 需自然人签署的事项不在本文件内 |
 | 13 | 本 closeout | 不存在 | 已创建 | 新建 | 本分支提交 | 见 §6 | `git hash-object` | 见 §6 | — |
 
 ---
