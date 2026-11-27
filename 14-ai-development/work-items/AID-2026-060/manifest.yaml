@@ -88,8 +88,8 @@ prompt_id: AID-2026-060-PROMPT
 prompt_version: v1
 prompt_file: 14-ai-development/work-items/AID-2026-060/prompt-v1.md
 prompt_status: FROZEN
-prompt_sha256: f9a01079c017cfbd1487ea09f3efe148c564d646b24ca55d5226967bb51ec5e9
-prompt_bytes: 7797
+prompt_sha256: 7a9793427868e7f41c1244243bdcb8b933c02b9e9a69255ffcbeb1af395ad605
+prompt_bytes: 7739
 
 prompt_provenance_tier: T1
 prompt_provenance_note: "Frozen from the REQ-05 session that reproduced the empty-baseline pass at b80e5a40 by running gate_ratchet.py with an empty baseline and a command exiting 9 (regressions=0 fixed=0 PASS exit 0), and reproduced the fail-closed behaviour of the non-empty case on the same tree (fixed=77 FAIL). The quoting of the file's own comment is verbatim, not paraphrased. The session that wrote this prompt is not an independent reviewer of it."
