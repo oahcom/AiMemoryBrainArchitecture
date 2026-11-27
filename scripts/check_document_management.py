@@ -2285,6 +2285,30 @@ def added_paths(root: Path, ref: str) -> set[str]:
     added.update(p for p in untracked.split("\0") if p)
     return added
 
+STEWARD_BASELINE = "14-ai-development/reports/steward-adoption-baseline.json"
+
+
+def steward_baseline_errors(root: Path, missing: list[str]) -> list[str]:
+    """DM-15b: the committed census must match the measured missing set."""
+    path = root / STEWARD_BASELINE
+    if not path.is_file():
+        return []  # Bootstrap commit: the first Actions census creates this file.
+    try:
+        baseline = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        return [f"DM-15b cannot read steward adoption baseline: {exc}"]
+    recorded = baseline.get("missing") if isinstance(baseline, dict) else None
+    if not isinstance(recorded, list) or any(not isinstance(item, str) for item in recorded):
+        return ["DM-15b baseline missing must be a string array"]
+    if sorted(recorded) != sorted(missing):
+        return [
+            "DM-15b steward adoption baseline is stale: "
+            f"recorded {len(recorded)} missing path(s), measured {len(missing)}; "
+            "refresh the baseline in this change"
+        ]
+    return []
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", default=".", help="repository root")
@@ -2462,6 +2486,7 @@ def main() -> int:
         rel for rel, meta in docs.items()
         if not str(meta.get("steward") or "").strip()
     )
+    errors.extend(steward_baseline_errors(root, steward_missing))
     present = len(docs) - len(steward_missing)
     if args.list_missing:
         if args.json:

@@ -81,3 +81,10 @@ jobs:
               exit "$status"
             }
           fi
+
+      - name: Emit steward adoption census (baseline evidence)
+        env:
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          PIN="${PR_BASE:-$GITHUB_SHA}"
+          python3 scripts/check_document_management.py --list-missing --json --pin "$PIN"

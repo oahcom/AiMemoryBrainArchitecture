@@ -34,6 +34,7 @@ from check_document_management import (  # noqa: E402
     read_metadata,
     rel_path,
     resolve_canonical,
+    steward_baseline_errors,
 )
 
 FILE = Path("synthetic.md")
@@ -5041,6 +5042,27 @@ def run_unbound_emissions() -> None:
 
 
 
+def run_steward_baseline_ratchet() -> None:
+    """DM-15b: a changed census cannot leave the committed missing list stale."""
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        record("DM-15b absent baseline is bootstrap-safe",
+               steward_baseline_errors(root, ["a.md"]) == [])
+        baseline = root / "14-ai-development/reports/steward-adoption-baseline.json"
+        baseline.parent.mkdir(parents=True)
+        baseline.write_text(
+            '{"pin":"base","governed":2,"classified":2,"present":1,"missing":["a.md"]}',
+            encoding="utf-8",
+        )
+        record("DM-15b matching baseline passes",
+               steward_baseline_errors(root, ["a.md"]) == [])
+        record("DM-15b baseline not synchronized after reduction fails",
+               bool(steward_baseline_errors(root, [])))
+        record("DM-15b new missing path fails",
+               bool(steward_baseline_errors(root, ["a.md", "b.md"])))
+
+
+
 def run_steward_assignment() -> None:
     """DM-15: newly added governed documents need a steward; legacy files remain
     an adoption baseline and are not retroactively blocked.
@@ -5223,6 +5245,7 @@ def main() -> int:
     run_manual_controls()
     run_m02_optional_approval_identity_fields()
     run_steward_assignment()
+    run_steward_baseline_ratchet()
     run_security_readme_canonical_status()
     run_count_vocabulary()
     run_skip_boundary()
