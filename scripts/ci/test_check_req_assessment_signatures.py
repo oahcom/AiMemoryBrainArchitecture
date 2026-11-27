@@ -1,72 +1,87 @@
-import tempfile
 import unittest
-from pathlib import Path
 
-from scripts.ci.check_req_assessment_signatures import RECORDS, inspect
+from scripts.ci.check_req_assessment_signatures import COMMENT_IDS, EXPECTED, inspect
 
 
-class SignatureCheckerTests(unittest.TestCase):
-    def populate(self, root: Path, overrides=None):
-        overrides = overrides or {}
-        valid = (
-            "assessor: R — historical assessor; session identity not recorded\n"
-            + "assessed_version: " + "a" * 40 + "\n"
-            + "evidence_baseline: main@" + "a" * 40 + "\n"
-        )
-        for relative in RECORDS:
-            path = root / relative
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(overrides.get(relative, valid), encoding="utf-8")
+def valid_record(comment_id):
+    expected = EXPECTED[comment_id]
+    return {
+        "id": comment_id,
+        "body": (
+            f"- assessor: `REQ-01 Risk Assessment Owner — ChatGPT session {expected['assessor_session']}`\n"
+            f"- assessed_version: `{expected['assessed_version']}`\n"
+            f"- evidence_baseline: `main@{expected['assessed_version']}`\n"
+        ),
+    }
 
-    def test_valid_four_reports(self):
-        with tempfile.TemporaryDirectory() as temporary:
-            self.populate(Path(temporary))
-            findings = inspect(Path(temporary))
-            self.assertEqual(4, sum(item.startswith("PASS ") for item in findings))
-            self.assertFalse(any(item.startswith("FAIL ") for item in findings))
+
+class SignatureCommentCheckerTests(unittest.TestCase):
+    def fetch_all(self, overrides=None):
+        records = {comment_id: valid_record(comment_id) for comment_id in COMMENT_IDS}
+        records.update(overrides or {})
+        return lambda comment_id: records[comment_id]
+
+    def test_all_four_historical_comments_pass(self):
+        findings = inspect(self.fetch_all())
+        self.assertEqual(4, sum(item.startswith("PASS ") for item in findings))
+        self.assertFalse(any(item.startswith("FAIL ") for item in findings))
 
     def test_each_missing_field_fails(self):
-        samples = {
-            "assessor": "assessed_version: " + "a" * 40 + "\nevidence_baseline: base\n",
-            "assessed_version": "assessor: R\nevidence_baseline: base\n",
-            "evidence_baseline": "assessor: R\nassessed_version: " + "a" * 40 + "\n",
-        }
-        for name, body in samples.items():
-            with self.subTest(name=name), tempfile.TemporaryDirectory() as temporary:
-                root = Path(temporary)
-                self.populate(root, {RECORDS[0]: body})
-                self.assertTrue(
-                    any(f"missing or empty {name}" in item for item in inspect(root))
+        for name in ("assessor", "assessed_version", "evidence_baseline"):
+            with self.subTest(field=name):
+                record = valid_record(COMMENT_IDS[0])
+                record["body"] = "\n".join(
+                    line for line in record["body"].splitlines()
+                    if not line.startswith(f"- {name}:")
                 )
+                findings = inspect(self.fetch_all({COMMENT_IDS[0]: record}))
+                self.assertTrue(any(f"missing or empty {name}" in item for item in findings))
 
-    def test_invalid_sha_fails(self):
-        for value in ("abc", "g" * 40):
-            with self.subTest(value=value), tempfile.TemporaryDirectory() as temporary:
-                root = Path(temporary)
-                body = (
-                    "assessor: R\n"
-                    f"assessed_version: {value}\n"
-                    "evidence_baseline: main@base\n"
+    def test_invalid_or_wrong_assessed_version_fails(self):
+        for value in ("abc", "g" * 40, "a" * 40):
+            with self.subTest(value=value):
+                record = valid_record(COMMENT_IDS[0])
+                record["body"] = (
+                    f"- assessor: `REQ-01 Risk Assessment Owner — ChatGPT session {EXPECTED[COMMENT_IDS[0]]['assessor_session']}`\n"
+                    f"- assessed_version: `{value}`\n"
+                    f"- evidence_baseline: `main@{EXPECTED[COMMENT_IDS[0]]['assessed_version']}`\n"
                 )
-                self.populate(root, {RECORDS[0]: body})
-                self.assertTrue(
-                    any("full 40-character hexadecimal" in item for item in inspect(root))
-                )
+                findings = inspect(self.fetch_all({COMMENT_IDS[0]: record}))
+                self.assertTrue(any(item.startswith("FAIL ") and "assessed_version" in item for item in findings))
 
-    def test_missing_file_fails(self):
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            self.populate(root)
-            (root / RECORDS[0]).unlink()
-            self.assertTrue(
-                any("file missing" in item for item in inspect(root))
-            )
+    def test_wrong_assessor_session_fails(self):
+        record = valid_record(COMMENT_IDS[0])
+        record["body"] = record["body"].replace(
+            EXPECTED[COMMENT_IDS[0]]["assessor_session"], "unknown-session"
+        )
+        findings = inspect(self.fetch_all({COMMENT_IDS[0]: record}))
+        self.assertTrue(any("assessor does not identify" in item for item in findings))
 
-    def test_deterministic_output(self):
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            self.populate(root)
-            self.assertEqual(inspect(root), inspect(root))
+    def test_wrong_evidence_baseline_fails(self):
+        record = valid_record(COMMENT_IDS[0])
+        record["body"] = record["body"].replace(
+            f"main@{EXPECTED[COMMENT_IDS[0]]['assessed_version']}", "main@"+("a"*40)
+        )
+        findings = inspect(self.fetch_all({COMMENT_IDS[0]: record}))
+        self.assertTrue(any("evidence_baseline differs" in item for item in findings))
+
+    def test_missing_comment_fails_closed(self):
+        def missing(comment_id):
+            if comment_id == COMMENT_IDS[0]:
+                raise FileNotFoundError("404")
+            return valid_record(comment_id)
+        findings = inspect(missing)
+        self.assertTrue(any("unable to read record" in item for item in findings))
+
+    def test_wrong_returned_comment_id_fails(self):
+        record = valid_record(COMMENT_IDS[0])
+        record["id"] = -1
+        findings = inspect(self.fetch_all({COMMENT_IDS[0]: record}))
+        self.assertTrue(any("different comment id" in item for item in findings))
+
+    def test_output_is_deterministic(self):
+        fetcher = self.fetch_all()
+        self.assertEqual(inspect(fetcher), inspect(fetcher))
 
 
 if __name__ == "__main__":
