@@ -15,7 +15,7 @@ attribution: "user-authorized operator (delegated by account owner)"
 date: "2026-11-26"
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: "__BASE_COMMIT_FULL_SHA__"
+base_commit_sha: "a7cf5256e975ff25fd2f75b3b5051b16d8d77d36"
 
 scope:
   objective: >-
@@ -55,8 +55,8 @@ session_evidence:
     implementing_ai_session: "GPT-6 implementation session; conversation 6b090a00-c1b0-83ec-ad26-9668c882a144"
     session_evidence_ref: 14-ai-development/work-items/AID-2026-290/session-evidence.md
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-290/prompt-v1.md
-    executed_prompt_sha256: "__PROMPT_SHA256__"
-    executed_prompt_bytes: __PROMPT_BYTES__
+    executed_prompt_sha256: "f588b712f1133ec58f2ed949b226ae73e6bf0622841da8be3e7838249cc1b895"
+    executed_prompt_bytes: 4843
     executed_prompt_provenance: NOT_VERIFIED
 
 implementation:
