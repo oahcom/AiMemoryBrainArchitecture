@@ -1,0 +1,69 @@
+work_item_id: AID-2026-279
+title: "Enforce serialized merge-time uniqueness of work-item directories"
+class: GATE/TEST
+risk: R1
+risk_rationale: "Adds a standard-library Git-object gate and deterministic tests in the existing required GOV-DOC-002 job; no branch protection, job topology, or required context is changed."
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 40195e8bf96b9cc6aa254066b9b72968f29ac361
+prompt_status: RECORDED_NOT_FROZEN
+prompt_provenance: DISPATCHED_TASK_FILE
+approval_scope:
+  type: Full-document
+evidence_reference:
+  - "AID-2026-279/evidence.md"
+supersession:
+  supersedes: []
+  supersession_reason: null
+  effective_date: null
+archival:
+  archived_date: null
+  archival_reason: null
+  archival_reference: null
+canonical_scope_keywords:
+  - "work-item-uniqueness"
+  - "merge-time-gate"
+  - "branch-serialization"
+scope:
+  objective: "Reject a candidate newly introducing an AID work-item directory already occupied on the latest target branch; accept additive files beneath an existing work-item directory."
+  files_changed:
+    - "scripts/ci/check_work_item_uniqueness.py"
+    - "scripts/ci/test_work_item_uniqueness.py"
+    - ".github/workflows/document-management.yml"
+    - "14-ai-development/work-items/AID-2026-279/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-279/evidence.md"
+    - "14-ai-development/work-items/AID-2026-279/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-279/prompt-v1.md"
+    - "14-ai-development/work-items/INDEX.md"
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#1341"
+    implementing_ai_session: "ChatGPT-GPT-6-S6-A"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-279/prompt-v1.md"
+    executed_prompt_provenance: "USER_PROVIDED_IN_CONVERSATION"
+    session_reference_status: "RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-279/session-evidence.md"
+implementation:
+  status: IMPLEMENTED
+  summary: "Checker compares candidate-side directory introduction since merge-base with occupancy on the supplied latest target base. Deterministic tests cover pass, violation, additive content, incomplete input, and concurrent-claim replay."
+  files_changed:
+    - "scripts/ci/check_work_item_uniqueness.py"
+    - "scripts/ci/test_work_item_uniqueness.py"
+    - ".github/workflows/document-management.yml"
+    - "14-ai-development/work-items/AID-2026-279/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-279/evidence.md"
+    - "14-ai-development/work-items/AID-2026-279/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-279/prompt-v1.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests:
+    - "python3 scripts/ci/test_work_item_uniqueness.py — invoked by GOV-DOC-002 on PR and main push."
+    - "Execution output is emitted by the required GitHub Actions job; no local execution is claimed."
