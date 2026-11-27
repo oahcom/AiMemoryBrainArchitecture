@@ -1,5 +1,5 @@
 # AID-2026-268 manifest blob-pin baseline
-# Measured against main 386d8f57b02d8e3c511ff0e3980b9ce0af8b3028.
+# Measured against main a588cd9914949c2c9db7b2c5704d906fd3f05b70.
 # 83 pre-existing mismatches: 40 prompt SHA-256 pins, 40 prompt byte-count pins,
 # and 3 AID-2026-100 related-evidence Git blob IDs.
 # These legacy records belong to other work items and are not modified here.
