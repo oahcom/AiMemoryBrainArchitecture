@@ -20,8 +20,7 @@ evidence:
   decision_record_zh: "docs/zh-CN/13-engineering-decisions/REQ04-MATURE-IMPLEMENTATION-DISPOSITIONS-001.md"
 session_evidence:
   - role: "ARCHITECTURE_GOVERNANCE_EVIDENCE_WORKER"
-    issue_refs:
-      - "#265"
+    issue_refs: []
     implementing_ai_session: "ChatGPT GPT-6"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-253/prompt-v1.md"
     executed_prompt_sha256: "82ebbf1e4a3c0a8f7c809b0f3200feaf5add03bc88ee2e9a9ddac3785ed8a5d3"
