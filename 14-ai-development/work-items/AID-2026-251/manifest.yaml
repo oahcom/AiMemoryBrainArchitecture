@@ -45,7 +45,7 @@ session_evidence:
     session_reference_status: "NOT_RECORDED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-251/session-evidence.md"
   - role: "AC4_REPAIR_SESSION"
-    issue_refs: []
+    issue_refs:
     implementing_ai_session: "ChatGPT-GPT-6"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-251/prompt-v2.md"
     executed_prompt_sha256: "148a7b8200c06a7d6e754d5f79ca8d40ffb2756c80ff1467bbc31f95a25284d7"
