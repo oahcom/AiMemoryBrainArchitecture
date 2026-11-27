@@ -348,3 +348,9 @@ final_disposition:
   implementation: "NOT_AUTHORIZED"
   production_deployment: "NOT_AUTHORIZED"
   merge: "NOT_AUTHORIZED"
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-025/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference

@@ -65,3 +65,15 @@ review:
 acceptance:
   status: "NOT_GRANTED"
   note: "Canonical path restoration and evidence only; decision_status remains Draft and normative_status remains Informative."
+
+documentation:
+  - path: "04-memory-compiler/accepted-receipt-and-idempotency-contract.md"
+    relationship: reference
+  - path: "04-memory-compiler/compiler-state-and-producer-admission.md"
+    relationship: reference
+  - path: "docs/en/04-memory-compiler/accepted-receipt-and-idempotency-contract.md"
+    relationship: reference
+  - path: "docs/en/04-memory-compiler/compiler-state-and-producer-admission.md"
+    relationship: reference
+  - path: "docs/zh-CN/04-memory-compiler/accepted-receipt-and-idempotency-contract.md"
+    relationship: reference

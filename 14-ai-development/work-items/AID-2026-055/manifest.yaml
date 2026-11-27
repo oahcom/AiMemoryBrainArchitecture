@@ -292,3 +292,15 @@ session_evidence:
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-055/session-evidence-1012-d1-split.md
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-055/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/governance-register/GOV-NC-2026-11-20-MERGE-AFTER-RULING-003.md"
+    relationship: reference
+  - path: "14-ai-development/governance-register/GOV-NC-2026-11-24-MERGE-FORM-DEVIATION-031.md"
+    relationship: reference
+  - path: "14-ai-development/PR-GOVERNANCE-001.md"
+    relationship: reference
+  - path: "14-ai-development/adr/OWNER-DECISION-EVENT-TIMESTAMP-PROVENANCE-001.md"
+    relationship: reference

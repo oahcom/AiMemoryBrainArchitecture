@@ -85,3 +85,15 @@ session_evidence:
     session_reference_reason: "The available execution context does not expose a stable ChatGPT session identifier; no identifier was invented."
     session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-098/evidence.md
+
+documentation:
+  - path: "10-storage-consistency/storage-physical-consistency-contract.md"
+    relationship: reference
+  - path: "docs/en/10-storage-consistency/storage-physical-consistency-contract.md"
+    relationship: reference
+  - path: "docs/zh-CN/10-storage-consistency/storage-physical-consistency-contract.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-098/evidence.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference
