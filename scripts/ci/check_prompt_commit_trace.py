@@ -211,15 +211,21 @@ def summarize(rows):
             "matrix": matrix, "findings": fc, "manifests": rows}
 
 
-def ratchet_violations(result, baseline):
+def ratchet_violations(result, baseline, base_manifest_ids):
+    """Use --base for additions and the committed snapshot only for regressions."""
     old = baseline.get("manifests", {})
+    base_manifest_ids = set(base_manifest_ids)
     violations = []
     for row in result["manifests"]:
         ident = row["work_item_id"]
         prior = old.get(ident)
-        if prior is None:
+        if ident not in base_manifest_ids:
             if row["primary_status"] != "TRACEABLE":
                 violations.append(f"NEW_NON_TRACEABLE {ident} {row['primary_status']}")
+            continue
+        # Existing at --base but missing from the older committed baseline:
+        # there is no prior accepted state to compare, but it is not new.
+        if prior is None:
             continue
         if SEVERITY[row["primary_status"]] > SEVERITY[prior["primary_status"]]:
             violations.append(f"REGRESSION {ident} {prior['primary_status']} -> {row['primary_status']}")
@@ -239,7 +245,9 @@ def main():
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--emit-baseline", type=Path, help="write a reviewed baseline snapshot")
     ap.add_argument("--baseline", type=Path,
-                    help="required ratchet baseline; absence is a hard error")
+                    help="required committed ratchet baseline; absence is a hard error")
+    ap.add_argument("--base-snapshot", type=Path,
+                    help="manifest snapshot generated from the exact --base commit")
     args = ap.parse_args()
     try:
         ref = resolve_commit(args.root, args.commit)
@@ -259,15 +267,24 @@ def main():
         baseline = json.loads(args.baseline.read_text())
         if baseline.get("schema_version") != 1 or not isinstance(baseline.get("manifests"), dict):
             raise RuntimeError("invalid prompt-commit-trace baseline schema")
+        if not args.base_snapshot or not args.base_snapshot.is_file():
+            raise RuntimeError("required --base-snapshot is missing: " + str(args.base_snapshot))
+        base_snapshot = json.loads(args.base_snapshot.read_text())
+        if base_snapshot.get("schema_version") != 1 or not isinstance(base_snapshot.get("manifests"), dict):
+            raise RuntimeError("invalid --base-snapshot schema")
         baseline_commit = baseline.get("commit")
         baseline_sha = resolve_commit(args.root, baseline_commit)
         expected_commit = resolve_commit(args.root, args.base)
+        snapshot_commit = resolve_commit(args.root, base_snapshot.get("commit"))
+        if not snapshot_commit or snapshot_commit != expected_commit:
+            raise RuntimeError("base snapshot commit does not match --base: "
+                               + str(base_snapshot.get("commit")) + " != " + str(expected_commit))
         if (not HEX40.fullmatch(str(baseline_commit or ""))
                 or not baseline_sha or not expected_commit
                 or not is_ancestor(args.root, baseline_sha, expected_commit)):
             raise RuntimeError("baseline commit pin is not an ancestor of comparison base: "
                                + str(baseline_commit) + " !<= " + str(expected_commit))
-        violations = ratchet_violations(result, baseline)
+        violations = ratchet_violations(result, baseline, base_snapshot['manifests'].keys())
         if args.json:
             result["ratchet_violations"] = violations
             print(json.dumps(result, sort_keys=True, indent=2))
