@@ -35,6 +35,7 @@ from check_document_management import (  # noqa: E402
     read_metadata,
     rel_path,
     resolve_canonical,
+    steward_baseline_errors,
 )
 
 FILE = Path("synthetic.md")
