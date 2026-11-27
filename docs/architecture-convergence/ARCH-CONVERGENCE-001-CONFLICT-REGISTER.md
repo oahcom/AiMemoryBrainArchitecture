@@ -1,3 +1,48 @@
+---
+document_metadata:
+  domain: architecture
+  role: review-report
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-253/evidence.md"
+        - "AID-2026-253 delegated reassessment"
+      revocation: null
+    evidence_verification:
+      verification_status: Verified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "Status ratio and two bounded reconciliations were rechecked against live main and live Owner branch refs by AID-2026-253; remaining closure evidence is listed per row."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
+---
+
 # ARCH-CONVERGENCE-001 — Conflict Register
 # ARCH-CONVERGENCE-001 — 架构冲突登记册
 

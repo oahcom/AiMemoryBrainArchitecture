@@ -40,7 +40,7 @@ document_metadata:
     normative_status: Informative
   bilingual_counterpart:
     source: "13-engineering-decisions/REQ04-MATURE-IMPLEMENTATION-DISPOSITIONS-001.md"
-    en: "docs/en/13-engineering-decisions/REQ04-MATURE-IMPLEMENTATION-DISPOSITIONS-001.md"
+    en: null
     zh-CN: "docs/zh-CN/13-engineering-decisions/REQ04-MATURE-IMPLEMENTATION-DISPOSITIONS-001.md"
 ---
 

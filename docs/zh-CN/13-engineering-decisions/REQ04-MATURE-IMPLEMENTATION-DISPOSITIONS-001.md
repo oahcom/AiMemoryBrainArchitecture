@@ -41,7 +41,7 @@ document_metadata:
   bilingual_counterpart:
     source: "13-engineering-decisions/REQ04-MATURE-IMPLEMENTATION-DISPOSITIONS-001.md"
     en: "docs/en/13-engineering-decisions/REQ04-MATURE-IMPLEMENTATION-DISPOSITIONS-001.md"
-    zh-CN: "docs/zh-CN/13-engineering-decisions/REQ04-MATURE-IMPLEMENTATION-DISPOSITIONS-001.md"
+    zh-CN: null
 ---
 
 # REQ-04 — 成熟实现处置记录
