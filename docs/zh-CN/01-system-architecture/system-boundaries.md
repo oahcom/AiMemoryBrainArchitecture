@@ -22,6 +22,9 @@ document_metadata:
       - trust-boundary
       - ownership
       - forget
+      - cursor
+      - tenant
+      - shard
     canonical_conflict_status: None
     normative_status: Normative
   bilingual_counterpart:
@@ -34,7 +37,7 @@ document_metadata:
 - 文档 ID：SYS-BOUNDARIES-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../01-system-architecture/system-boundaries.md)
-- 源版本：ad9ea5ce00e74dba89d325601677270a50f30926
+- 源版本：a3c686291cb323559016f83330852d4df9b82ea9
 - 对应英文：[System Boundaries](../../en/01-system-architecture/system-boundaries.md)
 - 状态：明确标记的部分为 DECIDED；CANDIDATE/OPEN 项仍不具规范约束力
 
@@ -255,3 +258,31 @@ Brain 不是：
 ## 14. Forget Fence 权威边界——2026-11-26
 
 D 的规范契约 [01-system-architecture/forget-fence-and-completion-contract.md](forget-fence-and-completion-contract.md) 是 ForgetOperation 及 ForgetFence Target/Lineage 决策的唯一逻辑权威。Storage/Consistency 可以持久化并从物理层保护该权威，但 Storage 本地 Memory/Version Fence 只能是派生、可重建的投影；MUST NOT 签发独立 Generation/Cursor，也不得成为竞争性的决策源。无法建立当前 D 权威状态时，受影响读取和发布必须 Fail-closed。本地抑制不等于 Global Forget Completion。本段记录方向决策；精确版本 Owner 验收和实现证据仍待完成。
+
+## 15. 规范提交游标权威
+
+**决策状态：** 已决定——Owner 已于 2026-11-27 在 [Issue #1210](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1210#issuecomment-7174534633) 记录该决议。本节仅记录该决议；不表示下游 D/F/G 规范或运行时实现已经同步或获批。
+
+### 15.1 权威与分区边界
+
+- 每个部署对应一个逻辑 Brain authority。
+- Tenant 与 shard 是该 authority 内部的分区边界。
+- \`CanonicalCommitCursor\` 在该 authority 内按 tenant 和 shard 分区；不同 shard 之间不存在全序。
+- Authority identity 与 epoch/incarnation 必须显式成为游标身份的一部分。不同 authority 的游标不可比较。
+- Aggregate revision 与 lifecycle cursor 属于独立游标域，不得替代 \`CanonicalCommitCursor\`，也不得与其比较。
+
+### 15.2 跨 shard 事务
+
+- 一个跨 shard 事务对每个参与的 shard 各产生一个 \`CanonicalCommitCursor\` 条目。
+- 事务具有原子性：所有参与 shard 的条目要么全部提交，要么全部不提交。
+- 该原子性不意味着 shard 之间存在全序。
+
+### 15.3 Authority fence 范围
+
+- \`ForgetFence\`、\`ProducerRegistrationHighWater\` 及类似 fence 均按 authority 归属。
+- 它们必须携带 authority identity，避免将一个 shard 的 fence 误认为覆盖另一个 shard。
+
+### 15.4 尚待明确的实现边界
+
+本决议没有定义跨 shard 事务游标条目的序列化表示，也没有定义 F/G 消费者使用的一致快照/一致切面协议。这些细节仍须由相应 D/F/G 契约明确；不得从单一标量游标中自行推导。
+
