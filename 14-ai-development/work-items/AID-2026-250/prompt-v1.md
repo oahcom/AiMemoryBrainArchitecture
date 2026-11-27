@@ -42,7 +42,6 @@ document_metadata:
     en: null
     zh-CN: null
 ---
-
 # AID-2026-250 — implementation prompt
 
 Repository: oahcom/AiMemoryBrainArchitecture
@@ -50,4 +49,19 @@ Base: main@386d8f57b02d8e3c511ff0e3980b9ce0af8b3028
 Branch: w7/aid-250
 Issue: #262
 
-Add assessor, assessed_version and evidence_baseline metadata to SYS-RISK-001 EN/ZH-CN and architecture-complexity-assessment EN/ZH-CN. Preserve each report's historical baseline and disclose provenance limits; do not fabricate a contemporaneous session signature. Add a deterministic read-only checker and tests under scripts/ci/. Run it in the existing required Schema non-empty audit (hard gate) job, without creating a new job or required context. Do not modify Issue #262 body or close it.
+The four in-scope assessment records are the primary REQ-01 risk assessment comments on Issue #262:
+- comment 7011312621 — initial architecture internal technical risk assessment
+- comment 7014315135 — supplemental clarification to that assessment
+- comment 7143927480 — Round 26 consolidated assessment
+- comment 7149369280 — Round 29 final investigation assessment
+
+Append three metadata fields to each existing comment body without rewriting its historical assessment content:
+- assessor: the original authoring session/principal recorded by that comment
+- assessed_version: the full 40-character commit the assessment evaluated
+- evidence_baseline: the full main@commit snapshot from which the assessment evidence was taken
+
+Preserve the historical nature of the records and explicitly disclose that the metadata attachment is retrospective; do not claim a contemporaneous signature, risk acceptance, or approval.
+
+Add a deterministic, read-only checker under scripts/ci/ that retrieves exactly those four GitHub Issue comments through GET API calls and fails closed if any record or field is missing, if the assessed_version is not a full SHA, or if the values differ from the historical source baseline. Add unit tests with a mocked API reader.
+
+Run the checker and tests inside the existing required Schema non-empty audit (hard gate) job. Add only the minimum issues:read permission needed for GET; do not create a new job or required context. Do not change Issue #262 body or close the Issue.
