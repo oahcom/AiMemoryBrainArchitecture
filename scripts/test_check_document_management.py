@@ -50,6 +50,14 @@ UNEXPECTED_SKIPS: list[str] = []
 ALLOWED_SKIPS = {
     "T68c a real 0o000 directory is reported by path (integration)":
         "running as root: mode bits cannot deny access",
+    "T36 directory symlink is rejected as a governed root":
+        "symlink creation unavailable on this platform",
+    "T37 governed_files does not descend into a symlinked root":
+        "symlink creation unavailable on this platform",
+    "T41 symlinked governed file is rejected":
+        "symlink creation unavailable on this platform",
+    "T42 governed file reached through a symlinked parent is rejected":
+        "symlink creation unavailable on this platform",
 }
 
 
@@ -2850,141 +2858,185 @@ def run_schema_fail_closed() -> None:
 def run_symlink_boundary() -> None:
     """P1-02: a directory symlink must not silently extend the governed set.
 
-    DM-14 asks every top-level directory to be declared. `Path.is_dir()`
-    follows symlinks, so an `external-docs -> /outside` link looks like a
-    directory the registry must name. The gate must refuse to treat a symlink
-    as a governed root, because scanning through it would read files that are
-    not in this repository.
+    DM-14 asks every top-level directory to be declared. Path.is_dir()
+    follows symlinks, so an external directory symlink must not become
+    a governed root or cause files outside the repository to be scanned.
     """
     print("symlink boundary")
     import check_document_management as gate
 
+    # T36/T37 share one directory symlink prerequisite, but remain
+    # independently accounted-for test cases.
     with tempfile.TemporaryDirectory() as tmp, tempfile.TemporaryDirectory() as outside:
         root = _repo(tmp)
         victim = Path(outside) / "leaked.md"
         victim.write_text(doc(BASE), encoding="utf-8")
         link = root / "15-linked"
+
+        directory_symlink_created = True
         try:
             link.symlink_to(Path(outside), target_is_directory=True)
         except (OSError, NotImplementedError):
-            record("T36 directory symlink is rejected as a governed root", True,
-                   "  (symlinks unavailable on this platform; skipped)")
-            return
+            directory_symlink_created = False
 
-        (root / "00-governance" / "document-scope-registry.yaml").write_text(
-            registry_text(ENFORCED_ROOTS + ["15-linked"]), encoding="utf-8"
-        )
-        errors = gate.check_scope_registry(root)
-        record(
-            "T36 directory symlink is rejected as a governed root",
-            any("symbolic link" in e or "symlink" in e for e in errors),
-            f"  got {errors}",
-        )
+        if not directory_symlink_created:
+            skip(
+                "T36 directory symlink is rejected as a governed root",
+                "symlink creation unavailable on this platform",
+            )
+        else:
+            (root / "00-governance" / "document-scope-registry.yaml").write_text(
+                registry_text(ENFORCED_ROOTS + ["15-linked"]),
+                encoding="utf-8",
+            )
+            errors = gate.check_scope_registry(root)
+            record(
+                "T36 directory symlink is rejected as a governed root",
+                any("symbolic link" in e or "symlink" in e for e in errors),
+                f"  got {errors}",
+            )
 
-        # And it must not be scanned even if someone names it.
-        scanned = {p.name for p in gate.governed_files(root)}
-        record("T37 governed_files does not descend into a symlinked root",
-               "leaked.md" not in scanned,
-               f"  scanned {sorted(scanned)}")
+        if not directory_symlink_created:
+            skip(
+                "T37 governed_files does not descend into a symlinked root",
+                "symlink creation unavailable on this platform",
+            )
+        else:
+            scanned = {p.name for p in gate.governed_files(root)}
+            record(
+                "T37 governed_files does not descend into a symlinked root",
+                "leaked.md" not in scanned,
+                f"  scanned {sorted(scanned)}",
+            )
 
-    # R1-01: a governed FILE that is a symlink. The registry check used
-    # `is_file()`, which follows links, so it passed; the scanner skipped
-    # symlinks, so the file was never scanned. Declared and enforced sets
-    # disagreed, and the gate reported zero governed documents.
+    # R1-01: a governed FILE that is a symlink.
+    # Every declared target must be linked before the assertion is meaningful.
     with tempfile.TemporaryDirectory() as tmp, tempfile.TemporaryDirectory() as outside:
         root = _repo(tmp)
         victim = Path(outside) / "gaps.md"
         victim.write_text(doc(BASE), encoding="utf-8")
+
+        file_symlinks_created = True
         for rel in gate.GOVERNED_FILES:
             target = root / rel
             target.unlink()
             try:
                 target.symlink_to(victim)
             except (OSError, NotImplementedError):
-                record("T41 symlinked governed file is rejected", True,
-                       "  (symlinks unavailable; skipped)")
-                return
-        errors = gate.check_scope_registry(root)
-        record("T41 symlinked governed file is rejected",
-               any("not a regular file inside the repository" in e for e in errors),
-               f"  got {errors}")
+                file_symlinks_created = False
+                break
+
+        if not file_symlinks_created:
+            skip(
+                "T41 symlinked governed file is rejected",
+                "symlink creation unavailable on this platform",
+            )
+        else:
+            errors = gate.check_scope_registry(root)
+            record(
+                "T41 symlinked governed file is rejected",
+                any(
+                    "not a regular file inside the repository" in e
+                    for e in errors
+                ),
+                f"  got {errors}",
+            )
 
     # R1-01b: the file is regular, but its PARENT is a link out of the repo.
-    # `is_symlink()` on the final component cannot see this; containment is
-    # proven on the resolved path instead.
     with tempfile.TemporaryDirectory() as tmp, tempfile.TemporaryDirectory() as outside:
         root = _repo(tmp)
         victim_dir = Path(outside) / "governance"
         victim_dir.mkdir()
-        (victim_dir / "documentation-gaps.md").write_text(doc(BASE), encoding="utf-8")
+        (victim_dir / "documentation-gaps.md").write_text(
+            doc(BASE), encoding="utf-8"
+        )
         parent = root / "docs" / "governance"
         import shutil
         shutil.rmtree(parent)
+
+        parent_symlink_created = True
         try:
             parent.symlink_to(victim_dir, target_is_directory=True)
         except (OSError, NotImplementedError):
-            record("T42 governed file reached through a symlinked parent is rejected",
-                   True, "  (symlinks unavailable; skipped)")
-            return
-        errors = gate.check_scope_registry(root)
-        record("T42 governed file reached through a symlinked parent is rejected",
-               any("not a regular file inside the repository" in e for e in errors),
-               f"  got {errors}")
+            parent_symlink_created = False
 
-    # R1-02: a hidden top-level directory. Excluding dot-directories from the
-    # on-disk set meant `.new-architecture/` was neither governed, excluded,
-    # reported, nor scanned.
+        if not parent_symlink_created:
+            skip(
+                "T42 governed file reached through a symlinked parent is rejected",
+                "symlink creation unavailable on this platform",
+            )
+        else:
+            errors = gate.check_scope_registry(root)
+            record(
+                "T42 governed file reached through a symlinked parent is rejected",
+                any(
+                    "not a regular file inside the repository" in e
+                    for e in errors
+                ),
+                f"  got {errors}",
+            )
+
+    # R1-02: a hidden top-level directory.
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
         hidden = root / ".new-architecture"
         hidden.mkdir()
         (hidden / "design.md").write_text(doc(BASE), encoding="utf-8")
         errors = gate.check_scope_registry(root)
-        record("T43 hidden top-level directory must be accounted for",
-               any(".new-architecture" in e for e in errors),
-               f"  got {errors}")
+        record(
+            "T43 hidden top-level directory must be accounted for",
+            any(".new-architecture" in e for e in errors),
+            f"  got {errors}",
+        )
 
-    # `.git` is the one structural exception: present in every clone, absent in
-    # every export, so requiring it in a tracked file would describe the working
-    # copy rather than the repository.
+    # .git is the one structural exception.
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
         (root / ".git").mkdir()
         errors = gate.check_scope_registry(root)
-        record("T44 .git is structurally exempt from the registry",
-               not any(".git" in e for e in errors),
-               f"  got {errors}")
+        record(
+            "T44 .git is structurally exempt from the registry",
+            not any(".git" in e for e in errors),
+            f"  got {errors}",
+        )
 
-    # Backlog must be a number, not a sentence: a declared count that disagrees
-    # with the disk is how "26 documents remain" quietly becomes false.
+    # Backlog must be a number, not a sentence.
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
         (root / "00-governance" / "document-scope-registry.yaml").write_text(
-            registry_text(ENFORCED_ROOTS, backlog={"docs": 99}), encoding="utf-8"
+            registry_text(ENFORCED_ROOTS, backlog={"docs": 99}),
+            encoding="utf-8",
         )
         errors = gate.check_scope_registry(root)
-        record("T45 backlog count disagreeing with the disk is an error",
-               any("declares 99 documents" in e for e in errors),
-               f"  got {errors}")
+        record(
+            "T45 backlog count disagreeing with the disk is an error",
+            any("declares 99 documents" in e for e in errors),
+            f"  got {errors}",
+        )
 
     # And it must be a count, not free text.
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
         (root / "00-governance" / "document-scope-registry.yaml").write_text(
-            registry_text(ENFORCED_ROOTS, backlog={"docs": "many"}), encoding="utf-8"
+            registry_text(ENFORCED_ROOTS, backlog={"docs": "many"}),
+            encoding="utf-8",
         )
         errors = gate.check_scope_registry(root)
-        record("T46 backlog count that is not an integer is an error",
-               any("non-negative integer" in e for e in errors),
-               f"  got {errors}")
+        record(
+            "T46 backlog count that is not an integer is an error",
+            any("non-negative integer" in e for e in errors),
+            f"  got {errors}",
+        )
 
-    # A backlog directory is scanned. Otherwise declaring it would be the same
-    # silent exclusion the registry exists to prevent, under a friendlier name.
+    # A backlog directory is scanned.
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
         scanned = {p.name for p in gate.governed_files(root)}
-        record("T47 backlog documents are actually scanned",
-               "backlog.md" in scanned, f"  scanned {sorted(scanned)}")
+        record(
+            "T47 backlog documents are actually scanned",
+            "backlog.md" in scanned,
+            f"  scanned {sorted(scanned)}",
+        )
 
 
 def run_scan_boundary() -> None:
