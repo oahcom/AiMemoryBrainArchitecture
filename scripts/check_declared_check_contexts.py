@@ -220,41 +220,9 @@ def main(root: Path | None = None, protection: list[str] | None = None) -> int:
     for path in workflow_files_found:
         produced |= produced_contexts(path.read_text(encoding="utf-8"))
 
-    unproduced = [context for context in contexts if context not in produced]
-
-    if unproduced:
-        for context in unproduced:
-            print(
-                f"::error::{DOC_PATH} declares required check context "
-                f"{context!r}, but no job in {WORKFLOWS} produces it",
-                file=sys.stderr,
-            )
-        print(
-            f"DECLARED CHECK CONTEXTS: FAIL "
-            f"({len(unproduced)} of {len(contexts)} unproduced)",
-            file=sys.stderr,
-        )
-        return 1
-
-    # A line listed twice is invisible to the set comparison below: the sets
-    # still match, so a copy-paste that overwrote a missing context reads as
-    # PASS. The duplication is itself the disagreement, so it fails on the list.
-    duplicates = sorted({context for context in contexts if contexts.count(context) > 1})
-    if duplicates:
-        for context in duplicates:
-            print(
-                f"::error::{DOC_PATH} declares required check context "
-                f"{context!r} more than once; the document no longer says what "
-                "its author meant it to say",
-                file=sys.stderr,
-            )
-        print(
-            f"DECLARED CHECK CONTEXTS: FAIL (declared {len(contexts)}; "
-            f"{len(duplicates)} duplicated)",
-            file=sys.stderr,
-        )
-        return 1
-
+    # Read and validate the required side before classifying any local
+    # declaration/workflow disagreement. If the platform input is unavailable,
+    # INCOMPLETE (2) takes precedence over a simultaneous local VIOLATION (1).
     if protection is None:
         try:
             protection = fetch_protected_contexts()
@@ -292,6 +260,41 @@ def main(root: Path | None = None, protection: list[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 2
+
+    unproduced = [context for context in contexts if context not in produced]
+
+    if unproduced:
+        for context in unproduced:
+            print(
+                f"::error::{DOC_PATH} declares required check context "
+                f"{context!r}, but no job in {WORKFLOWS} produces it",
+                file=sys.stderr,
+            )
+        print(
+            f"DECLARED CHECK CONTEXTS: FAIL "
+            f"({len(unproduced)} of {len(contexts)} unproduced)",
+            file=sys.stderr,
+        )
+        return 1
+
+    # A line listed twice is invisible to the set comparison below: the sets
+    # still match, so a copy-paste that overwrote a missing context reads as
+    # PASS. The duplication is itself the disagreement, so it fails on the list.
+    duplicates = sorted({context for context in contexts if contexts.count(context) > 1})
+    if duplicates:
+        for context in duplicates:
+            print(
+                f"::error::{DOC_PATH} declares required check context "
+                f"{context!r} more than once; the document no longer says what "
+                "its author meant it to say",
+                file=sys.stderr,
+            )
+        print(
+            f"DECLARED CHECK CONTEXTS: FAIL (declared {len(contexts)}; "
+            f"{len(duplicates)} duplicated)",
+            file=sys.stderr,
+        )
+        return 1
 
     required_not_declared = sorted(set(protection) - set(contexts))
     declared_not_produced = sorted(set(contexts) - produced)
