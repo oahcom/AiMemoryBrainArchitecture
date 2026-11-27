@@ -65,6 +65,9 @@ jobs:
         env:
           BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
         run: |
+          set -euo pipefail
+          git fetch --no-tags origin refs/pull/1220/head:refs/remotes/origin/pr/1220
+          test "$(git rev-parse 9a2063ae1fa5d905b3817cd4eddba065a06daa73^{commit})" = "9a2063ae1fa5d905b3817cd4eddba065a06daa73"
           set +e
           python3 scripts/ci/check_manifest_blob_pins.py --commit "$BASE_SHA"
           base_status=$?
