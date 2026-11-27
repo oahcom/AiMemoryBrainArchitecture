@@ -207,7 +207,9 @@ def verify(root: Path, commit: str, verbose: bool = True):
                 problems.append(f"INCOMPLETE manifest={manifest_path}: gate_a_reconstruction[{i}] is not a mapping")
                 continue
             if "reconstructed_root_blob" in item:
-                source_commit = item.get("source_commit") or item.get("commit")
+                source_commit = (item.get("source_commit") or item.get("source_commit_sha")
+                                 or item.get("commit") or item.get("commit_sha")
+                                 or source_evidence.get("main_reconciliation_head"))
                 if not source_commit and nonempty(item.get("note")):
                     match = re.search(r"\bcommit\s+([0-9a-f]{40})\b", item["note"])
                     source_commit = match.group(1) if match else None
@@ -245,8 +247,13 @@ def verify(root: Path, commit: str, verbose: bool = True):
             pair(doc, "evidence_file", "evidence_blob", commit, "evidence_file")
             mark(doc, "evidence_blob")
 
-        if "d_source_blobs" in doc:
-            entries = doc.get("d_source_blobs")
+        d_source_entries = doc.get("d_source_blobs")
+        d_source_commit = doc.get("d_source_commit")
+        if d_source_entries is None:
+            d_source_entries = source_evidence.get("d_source_blobs")
+            d_source_commit = d_source_commit or source_evidence.get("d_source_commit")
+        if d_source_entries is not None:
+            entries = d_source_entries
             if not isinstance(entries, list):
                 incomplete += 1
                 problems.append(f"INCOMPLETE manifest={manifest_path}: d_source_blobs is not a list")
@@ -257,7 +264,7 @@ def verify(root: Path, commit: str, verbose: bool = True):
                         problems.append(f"INCOMPLETE manifest={manifest_path}: malformed d_source_blobs[{i}]")
                         continue
                     path, digest = entry.rsplit(":", 1)
-                    check(path.strip(), digest.strip(), doc.get("d_source_commit"), f"d_source_blobs[{i}]")
+                    check(path.strip(), digest.strip(), d_source_commit, f"d_source_blobs[{i}]")
 
         prompt = as_mapping(doc.get("prompt"))
         pair(prompt, "prompt_file", "prompt_sha256", commit, "prompt.prompt_file", "sha256")
@@ -334,6 +341,10 @@ def verify(root: Path, commit: str, verbose: bool = True):
                     mark(item, "sha")
 
         source = as_mapping(doc.get("source"))
+        if "source_blob_sha" in source:
+            pair(source, "path", "source_blob_sha", source.get("head_sha") or source.get("head"),
+                 "source.source_blob_sha")
+            mark(source, "source_blob_sha")
         selected = source.get("selected_source_files", [])
         if selected:
             if not isinstance(selected, list):
@@ -377,6 +388,26 @@ def verify(root: Path, commit: str, verbose: bool = True):
                     pair(item, "path", "blob", source.get("head") or source.get("head_sha"), f"source.files[{i}]")
                     mark(item, "blob")
 
+        renumbering = as_mapping(doc.get("renumbering"))
+        if "current_prompt_sha256" in renumbering:
+            current_prompt_file = renumbering.get("current_prompt_file") or doc.get("prompt_file")
+            check(current_prompt_file, renumbering.get("current_prompt_sha256"), commit,
+                  "renumbering.current_prompt_sha256", "sha256")
+            mark(renumbering, "current_prompt_sha256")
+        if "previous_prompt_sha256" in renumbering:
+            previous_prompt_file = renumbering.get("previous_prompt_file")
+            if nonempty(previous_prompt_file):
+                check(previous_prompt_file, renumbering.get("previous_prompt_sha256"), commit,
+                      "renumbering.previous_prompt_sha256", "sha256")
+            else:
+                pins += 1
+                incomplete += 1
+                problems.append(
+                    f"INCOMPLETE UNRESOLVED(renumbering.previous_prompt_sha256): "
+                    f"manifest={manifest_path} no previous_prompt_file locator"
+                )
+            mark(renumbering, "previous_prompt_sha256")
+
         def discover_unregistered(node, where):
             nonlocal incomplete, pins
             if isinstance(node, dict):
@@ -398,10 +429,32 @@ def verify(root: Path, commit: str, verbose: bool = True):
                             if isinstance(candidate, str) and (
                                 candidate in {"path", "file", "prompt_file", "snapshot_file",
                                               "source_path", "translation_path", "frontmatter_path",
-                                              "frontmatter_file"}
+                                              "frontmatter_file", "document", "artifact",
+                                              "current_artifact", "superseded_artifact"}
                                 or candidate.endswith("_path") or candidate.endswith("_file")
+                                or candidate.endswith("_artifact")
                             )
                         ]
+                        base_name = key_text
+                        for suffix in ("_blob_sha256", "_blob_sha", "_blob", "_sha256"):
+                            if base_name.endswith(suffix):
+                                base_name = base_name[:-len(suffix)]
+                                break
+                        preferred_paths = [
+                            base_name + "_path", base_name + "_file", base_name + "_artifact"
+                        ]
+                        if key_text == "current_blob":
+                            preferred_paths = ["current_artifact"]
+                        elif key_text == "superseded_blob":
+                            preferred_paths = ["superseded_artifact"]
+                        elif key_text in {"before_blob", "after_blob"}:
+                            preferred_paths = ["document"]
+                        elif key_text == "current_prompt_sha256":
+                            preferred_paths = ["current_prompt_file", "prompt_file"]
+                        elif key_text == "previous_prompt_sha256":
+                            preferred_paths = ["previous_prompt_file"]
+                        selected_path = next((candidate for candidate in preferred_paths
+                                               if candidate in node and nonempty(node.get(candidate))), None)
                         commit_keys = (
                             "source_commit_sha", "translation_commit_sha", "source_commit",
                             "commit", "head_sha", "head", "base_commit", "base_commit_sha",
@@ -409,8 +462,9 @@ def verify(root: Path, commit: str, verbose: bool = True):
                         )
                         source_ref = next((node.get(candidate) for candidate in commit_keys
                                            if nonempty(node.get(candidate))), commit)
-                        if len(path_keys) == 1 and nonempty(node.get(path_keys[0])):
-                            path_value = node[path_keys[0]]
+                        locator_key = selected_path or (path_keys[0] if len(path_keys) == 1 else None)
+                        if locator_key and nonempty(node.get(locator_key)):
+                            path_value = node[locator_key]
                             algorithm = ("sha256" if key_text.endswith("_sha256")
                                          and not key_text.endswith("_blob_sha256") else "git")
                             check(path_value, value, source_ref,
@@ -440,7 +494,10 @@ def verify(root: Path, commit: str, verbose: bool = True):
               f"mismatch={mismatch} path_missing={missing} incomplete={incomplete}")
         for problem in problems:
             print(problem)
-    return 2 if incomplete else (1 if mismatch or missing else 0)
+    # Per-record INCOMPLETE/UNRESOLVED declarations are ratcheted as failures:
+    # they are never counted in ok, but an exact baseline line can be retained
+    # without turning the entire scan into an un-ratchetable infrastructure error.
+    return 1 if incomplete or mismatch or missing else 0
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)

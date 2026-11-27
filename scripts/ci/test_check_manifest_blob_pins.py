@@ -111,7 +111,7 @@ class BlobPinsTest(unittest.TestCase):
                 f"source_blobs:\n  - path: source.md\n    sha: {'1' * 40}\nbase_commit: {'f' * 40}\n",
         })
         code, out, err = self.run_gate()
-        self.assertEqual(code, 2, out + err)
+        self.assertEqual(code, 1, out + err)
         self.assertIn("UNRESOLVED(commit unavailable)", out)
         print(out.strip())
 
@@ -170,7 +170,7 @@ class BlobPinsTest(unittest.TestCase):
             "file.md": data,
         })
         code, out, err = self.run_gate(candidate)
-        self.assertEqual(code, 2, out + err)
+        self.assertEqual(code, 1, out + err)
         self.assertIn("UNRESOLVED(source.selected_source_files[0].frontmatter_blob_sha)", out)
 
     def test_source_files_blob_shape_is_checked(self):
@@ -193,7 +193,7 @@ class BlobPinsTest(unittest.TestCase):
                 f"unregistered_evidence_blob_sha: {'a' * 40}\n",
         })
         code, out, err = self.run_gate()
-        self.assertEqual(code, 2, out + err)
+        self.assertEqual(code, 1, out + err)
         self.assertIn("UNRESOLVED(unregistered digest field)", out)
 
     def test_missing_source_translation_commit_is_incomplete(self):
@@ -205,7 +205,7 @@ class BlobPinsTest(unittest.TestCase):
                  "    source_commit_sha: NOT_RECORDED\n"),
         })
         code, out, err = self.run_gate()
-        self.assertEqual(code, 2, out + err)
+        self.assertEqual(code, 1, out + err)
         self.assertIn("UNRESOLVED(commit locator)", out)
 
     def test_generic_blob_field_uses_sibling_path_and_source_commit(self):
@@ -244,9 +244,23 @@ class BlobPinsTest(unittest.TestCase):
                 "root: README.md\\nroot_blob: ''\\n",
         })
         code, out, err = self.run_gate()
-        self.assertEqual(code, 2, out + err)
+        self.assertEqual(code, 1, out + err)
         self.assertIn("pins=1", out)
         self.assertIn("invalid Git blob SHA-1 declaration", out)
+
+    def test_nested_d_source_blobs_use_nested_source_commit(self):
+        data = b"nested D source\\n"
+        source = commit_tree(self.root, {"nested.md": data})
+        candidate = commit_tree(self.root, {
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                ("baseline_and_source_evidence:\\n"
+                 f"  d_source_commit: {source}\\n"
+                 "  d_source_blobs:\\n"
+                 f"    - 'nested.md: {self.blob_sha(data)}'\\n"),
+        })
+        code, out, err = self.run_gate(candidate)
+        self.assertEqual(code, 0, out + err)
+        self.assertIn("pins=1 ok=1", out)
 
     def test_empty_tree_is_incomplete(self):
         code, out, err = self.run_gate()
