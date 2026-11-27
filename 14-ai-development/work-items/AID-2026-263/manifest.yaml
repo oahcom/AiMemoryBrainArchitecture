@@ -87,7 +87,7 @@ session_evidence:
       - "#1341"
     implementing_ai_session: "9router-hermes/IMPL-B"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-263/prompt-v1.md"
-    executed_prompt_sha256: "8dc58c52f3cbb609fdb7795f778ce67f0663e20a645fa2e74e0855e07aae7199"
+    executed_prompt_sha256: "236453cc265a131f8a177244de0f8b9669b4ce4269b71fd68f5d8cba2960a297"
     executed_prompt_bytes: 5549
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "RECORDED"
