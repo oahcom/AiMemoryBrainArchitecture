@@ -70,6 +70,8 @@ session_evidence:
       - "#134"
     implementing_ai_session: "NOT_RECORDED"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-267/prompt-v1.md"
+    executed_prompt_sha256: "47e69847765b7c40e01e142177fed3c0fff40e9d12077838cc01a614fb6f22a7"
+    executed_prompt_bytes: 2728
     executed_prompt_provenance: "STRUCTURED_SCOPE_SNAPSHOT"
     session_reference_status: "RECORDED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-267/session-evidence.md"
