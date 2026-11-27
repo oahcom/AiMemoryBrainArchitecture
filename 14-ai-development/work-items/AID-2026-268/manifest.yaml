@@ -1,0 +1,78 @@
+work_item_id: AID-2026-268
+title: Verify manifest blob pins against committed Git object bytes
+class: GATE/CI/TEST
+risk: R2
+risk_rationale: >-
+  Adds a standard-library Git-object verifier and isolated unit tests, then
+  invokes them inside the existing required Repository hygiene job. It does
+  not alter branch protection, create a workflow/job, or change unrelated
+  manifests. The checker fails closed when a declared source commit cannot
+  be read and verifies Git blob IDs, prompt SHA-256 values, and prompt byte
+  counts against committed bytes.
+status: IMPLEMENTATION_IN_PROGRESS
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 6f597e2dd8b6e879bf7539aa16b88a39504d9c49
+approval_scope:
+  type: Full-document
+evidence_reference:
+  record: 14-ai-development/work-items/AID-2026-268/evidence.md
+  session: 14-ai-development/work-items/AID-2026-268/session-evidence.md
+supersession:
+  status: NONE
+archival:
+  status: ACTIVE
+canonical_scope_keywords:
+  - manifest
+  - blob pin
+  - committed bytes
+  - integrity
+scope:
+  files_to_create:
+    - scripts/ci/check_manifest_blob_pins.py
+    - scripts/ci/test_check_manifest_blob_pins.py
+    - scripts/ci/baselines/manifest-blob-pins.txt
+    - 14-ai-development/work-items/AID-2026-268/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-268/evidence.md
+    - 14-ai-development/work-items/AID-2026-268/session-evidence.md
+    - 14-ai-development/work-items/AID-2026-268/prompt-snapshot.md
+  files_to_modify:
+    - .github/workflows/repository-hygiene.yml
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope:
+    - scripts/ci/check_work_item_uniqueness.py
+    - .github/workflows/document-management.yml
+    - branch protection
+session_evidence:
+  - role: implementation
+    issue_refs:
+    implementing_ai_session: S6-B
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-268/prompt-snapshot.md
+    executed_prompt_sha256: 3f2b5476fecd1b05a09917b24eea527949716d797e2dd5ffa3f0dffdc3e5c077
+    executed_prompt_bytes: 3165
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-268/session-evidence.md
+acceptance:
+  required:
+    - Every enumerated Git blob pin is recomputed from committed bytes.
+    - Missing paths and mismatched digests fail with declared and actual values where available.
+    - Explicit cross-commit pins resolve only at their declared source commit; unavailable commits exit 2.
+    - Prompt SHA-256 and byte-count pins are both verified.
+    - The existing Repository hygiene required context remains the carrier.
+    - Positive, mismatch, missing-path, cross-commit and prompt tests pass.
+  status: PENDING_CI
+review:
+  independent_reviewer: NOT_ASSIGNED
+  status: NOT_RECORDED
+carrier:
+  branch: fix/aid-268-manifest-blob-pins
+  pull_request: PENDING
+  merge_method: merge
+  merge_sha: PENDING
