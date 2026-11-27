@@ -86,6 +86,62 @@ A cache-busted GET to `/branches/main/protection` returned HTTP 403 “Resource 
 
 No Issue #265 body PATCH was made. Therefore there is no before/after body SHA-256 pair to report. The canonical body remains the fetched body with AC1 [ ] OWNER_ACTION and AC8 [ ] ABSENT. The proposed corrected lines in decision.md are not yet applied. The one Issue comment (if posted) will explicitly say it is not a body edit.
 
+## Round-two supplemental evidence (M1–M5)
+
+### S0 — Delegation boundary, contemporaneous source
+
+Comment #7193586920, line 51, states verbatim:
+
+> 本轮协调会话按 #305 / `7042461592` §1(2) 可代行 Owner 职责，但**代行的边界是「把决定执行到位」，不是「替它决定范围」**。范围边界是 REQ-04 自己的验收定义，改它就是改需求。
+
+This is the same AC8 ABSENT decision comment that records EXIT-1 / EXIT-2. It directly limits operational delegation: execution of a decision is not authority to redefine the requirement's scope.
+
+### S1 — EXIT-1 arithmetic independently reproduced
+
+The user supplied an independent local rerun of:
+
+```text
+python3 scripts/measure_attention_context_cost.py --ref a7a252eb670b31066a0ffea35dc28cbe6ef5b836 --limit 10
+```
+
+The reported output matches all 15 lines of AID-2026-254/evidence.md §2, including:
+- `mean_roots_per_work_item=2.90 (29/10)`
+- `max_roots_per_work_item=5`
+- `distribution=1:1, 2:2, 3:5, 4:1, 5:1`
+
+**Finding:** EXIT-1's reproducibility/arithmetic is accepted and is not disputed by S8. The unresolved issue is construct validity (what the metric measures) and who can designate it as an AC8 acceptance measure.
+
+### S2 — AID-254 itself labels the thresholds pending
+
+AID-2026-254/evidence.md:111, blob `02567b538a87e52361a78cb3eaea1fe00d79cee9`, states verbatim:
+
+> Thresholds are proposed for AC8 review; Issue #265 remains open and unchanged.
+
+The AID-2026-254 row in INDEX.md, blob `38dd20dc6acd2bcd676e6bd029405e29c82e80ca`, has acceptance cell:
+
+> PENDING — thresholds are proposed for AC8 review; Issue #265 remains OPEN.
+
+These are explicit source-carrier statements of proposal/pending status, not acceptance. They independently support Q4/Q5 beyond the measurement's construct limitations.
+
+### S4 — EXIT-2's own required Issue update was not completed
+
+AID-2026-260/scope-confirmation.md:92, blob `e6425787d2ae3c8aa3e2eb21e1adf7cc1542611a`, states:
+
+> 1. Merge this AID-2026-260 scope carrier and publish the AC1/AC8 issue update.
+
+The scope carrier was merged, but the canonical #265 body was not updated. Fresh body read still has AC1 `[ ] OWNER_ACTION` and AC8 `[ ] ABSENT`. This is an independent incomplete step under EXIT-2's own sequence.
+
+### M5 — AC8 status remains ABSENT
+
+S8 chooses **ABSENT**, not PARTIAL. The reason is the criterion in contemporaneous comment #7193586920: the fan-out metric is a proxy for declared scope dispersion and does not record the attention/context-switching cost dimension itself. The independent rerun confirms its arithmetic but does not change the construct measured. Thus there is no evidentiary basis to transition AC8 from ABSENT to PARTIAL.
+
+### Updated PR gate and merge observations
+
+- The prior head was `b2b97862479f3a1279d20b879bddec1431e56adf`; round-two documentation commit is `f8f55becbad934703768946d2a86065d2b2a87b4`.
+- Branch protection endpoint read: HTTP 403, `Resource not accessible by integration`; record as `protection read = 403 NOT_READABLE`. This is not evidence that protection is disabled.
+- No strict/enforce_admins values are claimed. Merge success/failure must be determined from the merge API response.
+- This evidence will be amended after syncing the current main, running checks on the final head, merging, and reading back all six main-branch file blobs.
+
 ## Post-merge file verification
 
 Not applicable unless a PR is merged. No merge is claimed in this evidence file. Post-merge blob SHAs must be appended only after a real merge and fresh API readback.
