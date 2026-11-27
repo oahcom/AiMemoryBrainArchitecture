@@ -61,8 +61,11 @@ def audit(root, ref):
         head_match = bool(head_bytes is not None and HEX64.fullmatch(str(digest or "")) and hashlib.sha256(head_bytes).hexdigest() == digest.lower())
         if real(digest) and not head_match: findings.append("digest_head_mismatch")
         pinned_bytes = blob(root, pcommit, pfile) if pin and real(pfile) else None
-        pinned_ok = bool(pinned_bytes is not None and HEX64.fullmatch(str(digest or "")) and
-                          hashlib.sha256(pinned_bytes).hexdigest() == digest.lower())
+        pinned_blob = (git(root, "rev-parse", "--verify", f"{pcommit}:{pfile}", check=False).decode().strip()
+                       if pinned_bytes is not None else "")
+        pinned_ok = bool(pinned_bytes is not None and pinned_blob == str(pblob).lower() and
+                         HEX64.fullmatch(str(digest or "")) and
+                         hashlib.sha256(pinned_bytes).hexdigest() == digest.lower())
         if pin and not pinned_ok: findings.append("digest_pinned_mismatch")
         if not real(impl):
             findings.append("commit_absent" if impl is None else "commit_pending")
@@ -74,7 +77,11 @@ def audit(root, ref):
             else:
                 target = doc.get("merge_commit_sha") or doc.get("base_commit_sha") or ref
                 target_sha = git(root, "rev-parse", "--verify", str(target) + "^{commit}", check=False).decode().strip()
-                ancestor = bool(HEX40.fullmatch(target_sha) and git(root, "merge-base", "--is-ancestor", resolved, target_sha, check=False) == b"")
+                ancestor = False
+                if HEX40.fullmatch(target_sha):
+                    probe = subprocess.run(["git", "merge-base", "--is-ancestor", resolved, target_sha],
+                                           cwd=root, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    ancestor = probe.returncode == 0
                 cdim = "REACHABLE" if ancestor else "UNREACHABLE"
                 if not ancestor: findings.append("commit_unreachable")
         pdim = "PINNED_OK" if pin and pinned_ok else ("HEAD_MATCH" if not pin and head_match else ("UNPINNED_MISMATCH" if real(digest) else "ABSENT"))
