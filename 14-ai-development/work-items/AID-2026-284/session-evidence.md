@@ -1,3 +1,47 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-284/evidence.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "Session record; implementing session identifier is not exposed by platform."
+    usage_status: Active
+    modification_status: Active-Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  steward: "user-authorized operator (delegated by account owner)"
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "AI session evidence for AID-2026-284"
+    canonical_scope_id: "ai-development/aid-2026-284-session-evidence"
+    canonical_scope_keywords:
+      - "req-04"
+      - "aid-2026-284"
+      - "session-evidence"
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+---
+
 # Session Evidence — AID-2026-284
 
 ## Session role / use case
