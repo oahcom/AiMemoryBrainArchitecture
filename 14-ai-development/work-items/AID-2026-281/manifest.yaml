@@ -37,6 +37,10 @@ session_evidence:
   - role: IMPLEMENTATION_SESSION
     issue_refs:
       - "#1246"
+    prompt_id: AID-2026-281-PROMPT
+    prompt_version: 1
+    executed_prompt_sha256: 6907cc7a0e5ad4c1f43e4978be3589673a61f46654ec3101172b0589df884575
+    executed_prompt_bytes: 4817
     implementing_ai_session: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-281/session-evidence.md
 implementation:
