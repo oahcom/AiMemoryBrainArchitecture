@@ -110,3 +110,9 @@ acceptance:
 
 independent_reviewer: NOT_ASSIGNED
 integration_reviewer: NOT_ASSIGNED
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-064/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-064/session-evidence-955.md"
+    relationship: reference

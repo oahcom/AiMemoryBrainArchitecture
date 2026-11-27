@@ -205,3 +205,13 @@ session_evidence:
       prompt_sha256 / prompt_bytes fields above are a different schema -- the prompt pin the
       INDEX cell cites -- and none is in MANIFEST_FIELDS, so they do not conflict with this
       block.
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-102/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-102/session-evidence-1278.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-092/prompt-v1.md"
+    relationship: reference

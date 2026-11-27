@@ -88,3 +88,15 @@ acceptance:
   acceptance_authority: "user-authorized operator (delegated by account owner); 代理登记，非自然人 Owner 签署"
   source_owner_acceptance: NOT_RECORDED
 session_evidence: []
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-106/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-106/ISSUE-1197-phase-freeze-audit.md"
+    relationship: reference
+  - path: "docs/en/14-ai-development/work-items/AID-2026-106/ISSUE-1197-phase-freeze-audit.md"
+    relationship: reference
+  - path: "docs/zh-CN/14-ai-development/work-items/AID-2026-106/ISSUE-1197-phase-freeze-audit.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference

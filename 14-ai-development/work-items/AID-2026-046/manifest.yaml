@@ -126,3 +126,7 @@ findings:
   - id: F-BMCP-KEY-STATUS-NEGATIVE-001
     severity: P2
     feedback_destination: "PR #616; close after verify_key_status=False is tested and exact-head suite evidence is recorded."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-046/prompt-v1.md"
+    relationship: reference

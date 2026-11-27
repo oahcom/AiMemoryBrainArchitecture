@@ -80,3 +80,9 @@ session_evidence:
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-069/session-evidence-r45.md
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-069/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-069/session-evidence-r45.md"
+    relationship: reference

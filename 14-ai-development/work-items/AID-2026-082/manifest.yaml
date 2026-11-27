@@ -156,6 +156,14 @@ session_evidence:
     session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-082/session-evidence.md
 
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-082/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-082/session-evidence.md"
+    relationship: reference
+
 post_merge_correction:
   date: "2026-11-27"
   basis: "GitHub API GET /pulls/1265 returned merged=true; the merge commit is reachable from origin/main. This block records the correction so the original value stays auditable."
