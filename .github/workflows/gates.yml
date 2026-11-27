@@ -149,6 +149,10 @@ jobs:
         run: |
           set -euo pipefail
           python3 08-bmcp-protocol/schemas/test_nonempty_audit.py
+      - name: Enforce REQ-01 assessment signature attachment (required gate)
+        run: python3 scripts/ci/check_req_assessment_signatures.py
+      - name: Test REQ-01 assessment signature checker
+        run: python3 -m unittest scripts.ci.test_check_req_assessment_signatures
 
   bilingual:
     name: Bilingual docs coverage (ratchet)
@@ -305,7 +309,3 @@ jobs:
         run: python -m pip install PyYAML==6.0.2
       - name: Validate all Work Item manifests without migration
         run: python scripts/ci/check_work_item_manifest_schema.py
-      - name: Enforce REQ-01 assessment signature attachment
-        run: python scripts/ci/check_req_assessment_signatures.py
-      - name: Test REQ-01 assessment signature checker
-        run: python -m unittest scripts.ci.test_check_req_assessment_signatures
