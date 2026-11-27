@@ -59,6 +59,7 @@ on:
 
 permissions:
   contents: read
+  issues: read
 
 jobs:
   protocol-index:
@@ -134,6 +135,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       # HARD GATE, not a ratchet. GAP-09 is closed: `6897e53c` registered all
       # 5599 constraints across the 32 schemas, and this audit now exits 0 on
@@ -149,6 +152,12 @@ jobs:
         run: |
           set -euo pipefail
           python3 08-bmcp-protocol/schemas/test_nonempty_audit.py
+      - name: Enforce REQ-01 assessment signature attachment (required gate)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 scripts/ci/check_req_assessment_signatures.py
+      - name: Test REQ-01 assessment signature checker
+        run: python3 -m unittest scripts.ci.test_check_req_assessment_signatures
 
   bilingual:
     name: Bilingual docs coverage (ratchet)
