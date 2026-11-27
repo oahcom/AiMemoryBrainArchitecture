@@ -254,4 +254,30 @@ $ git rev-list --count HEAD → 2782 ; .git/shallow 不存在
 
 ## 11. 提交与验证回读
 
-（本节在提交后由执行者回读填入，未填即为未完成。）
+分支：`closeout/line01-dev-baseline`，base `a588cd9914949c2c9db7b2c5704d906fd3f05b70`。
+push 前重基：2026-11-27T12:52:59+08 观测到 main 已推进到 `242cf101c8b79007ad2fb8d9c89681224577188d`（较 `a588cd99` 多 75 个提交），遂重基到 `242cf101…`；重基未改动本记录任何内容。
+
+| commit | 内容 |
+|---|---|
+| `85c31fb2` | 新增 `ATTRIBUTION.md`（blob `b97b8497c5a66df881bd8624a60e200084c6b3a3`）与本文件 |
+| `fbe38095`（amend 前 `b3ce2466`；重基前分别为 `bc3ab59b` / `b3ce2466`） | 本节回读提交（只改 §11，不触碰其他字节） |
+
+### 门禁与测试（原始输出）
+
+| 命令 | exit | 原始结果 |
+|---|---|---|
+| `python scripts/check_document_management.py --root .` | **2** | `GOV-DOC-002: 1035 governed documents, 664 classified, 371 unclassified` — 全树既存缺口，非本次改动引入 |
+| `python scripts/check_document_management.py --require-changed a588cd99…` | **0** | `PASS (incremental): no GOV-DOC-002 violations; 664 classified, 371 unclassified` / `Incremental verdict only: files outside the changed set were not required to be classified.` |
+| `python scripts/check_traceability.py --index-only` | **0** | `PASS TRACEABILITY: 0 requirements / 114 work items / 0 errors / 108 warnings` |
+| `python scripts/ci/check_repository_hygiene.py --base a588cd99… --head bc3ab59b…` | **0** | `Work-item index membership … directories=125 linked=125`；`manifests=114 … violations=0`；`Repository new-file admission passed: 2 new path(s) checked.` |
+
+未运行：Rust workspace / clippy / fmt / doctests（本次改动不含 Rust 文件）；BMCP 套件；`scripts/test_check_document_management.py`（本机启动后进程以 `-1073741510` 退出，输出不可判读，未采信其结论）。
+
+### 回读
+
+```
+$ git rev-parse HEAD:ATTRIBUTION.md
+b97b8497c5a66df881bd8624a60e200084c6b3a3
+$ git rev-parse HEAD:LINE-01-CLOSEOUT-2026-11-27.md
+921cde5923019ab3dd7bee24be6359492dd23a70   # 本节修改前的版本；最终 blob 见 §6 与提交
+```
