@@ -175,7 +175,7 @@ session_evidence:
     issue_refs:
       - "#1145"
     implementing_ai_session: "ChatGPT 6b08f8b6-4298-83ec-945c-91fafb7bf422 (acct1)"
-    executed_prompt_snapshot_file: "prompt-v1.md"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-016/prompt-v1.md"
     executed_prompt_sha256: "0aeeb697cfd88b1f972724a46c6385c978069ce3e44e37330ed26dc56d5f80dc"
     executed_prompt_bytes: 9998
     executed_prompt_provenance: NOT_VERIFIED
@@ -185,7 +185,7 @@ session_evidence:
     issue_refs:
       - "#1145"
     implementing_ai_session: "ChatGPT 6b090ebe-5e34-83ec-9b3b-c3ceb3bce830 (acct2)"
-    executed_prompt_snapshot_file: "prompt-v2.md"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-016/prompt-v2.md"
     executed_prompt_sha256: "9394cc50b1053dcee0cdeb177ccd998f4b0e54388020ff8d590fbbf2783da69e"
     executed_prompt_bytes: "47050"
     executed_prompt_provenance: NOT_VERIFIED
