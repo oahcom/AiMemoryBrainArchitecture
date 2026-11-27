@@ -90,3 +90,44 @@ SUMMARY comments=4 failures=0
 
 ## Integration
 The checker and tests run in the existing required `Schema non-empty audit (hard gate)` job. The workflow adds only `issues: read` permission for the four GET requests. No new job, required context, branch-protection mutation, Issue #262 body change, or Issue closure is in scope.
+
+
+## Rework — signature moved into the four assessment documents
+
+### Defect and original carrier timestamps
+
+The prior checker validated four Issue #262 comments rather than the four assessment-document bodies named by AC2 §5(3). The four document bodies had zero hits for the required lowercase `assessor`, `assessed_version`, and `evidence_baseline` fields (the complexity EN document had one pre-existing `- Assessor: X — ...` role line, which is not the required field). The comment metadata was appended retrospectively: #7011312621 created 2026-11-19T14:01:37Z / updated 2026-11-27T04:54:03Z; #7014315135 created 2026-11-19T15:54:06Z / updated 2026-11-27T04:54:07Z; #7143927480 created 2026-11-24T20:41:32Z / updated 2026-11-27T05:03:43Z; #7149369280 created 2026-11-25T01:15:47Z / updated 2026-11-27T04:54:14Z. The earlier checker therefore tested a different carrier and did not establish the three fields in the four document bodies.
+
+### Four document field locations
+
+The supplied anchors were present exactly on live main and were used. Four lines were inserted after each anchor, preserving the prior text. English/Chinese pairs use identical line positions:
+- `reviews/architecture/SYS-RISK-001.en.md:12-15` — assessor, assessed_version, evidence_baseline, signature_attached.
+- `reviews/architecture/SYS-RISK-001.zh-CN.md:12-15` — same four fields.
+- `reviews/complexity/architecture-complexity-assessment.en.md:10-13` — same four fields.
+- `reviews/complexity/architecture-complexity-assessment.zh-CN.md:10-13` — same four fields.
+
+The assessed version is the full declared baseline `b372b62c640a2b656e54b6db62a4ee67d7d8c001`. Each evidence_baseline is `main@b372b62c640a2b656e54b6db62a4ee67d7d8c001:` followed by that exact document path. The assessor values reuse the existing R/X role declaration.
+
+### Checker and gate semantics
+
+`scripts/ci/check_req_assessment_signatures.py` now reads the four document paths from the current checkout tree, not Issue comments. It has no `GITHUB_TOKEN`, HTTP client, or network access. `--root` selects an alternate checkout root for mutation tests; the default resolves the repository root from the script's own path. Missing/empty files and absent, duplicate, malformed, or mismatched fields fail closed. Output order is the fixed four-file order and is deterministic.
+
+The checker and its tests remain in the existing `Schema non-empty audit (hard gate)` job. The workflow removes `GITHUB_TOKEN` and `issues: read`; no other workflow use of that permission was present.
+
+### Mutation verification
+
+The workflow mutation step checks the baseline tree, then independently deletes each of the three fields from each of the four files (12 mutations), requiring baseline exit 0 and every mutation exit 1. It recreates both document directories before each mutation so unrelated missing files cannot create false-positive failures. The exact PR-head run URL and verbatim stdout are recorded in the CI addendum below after the workflow run completes.
+
+### Historical comments and scope
+
+The four historical Issue #262 comment bodies and their appended metadata were not modified by this rework. This rework adds no comment metadata and does not rewrite any comment.
+
+### Baseline-diff boundary and honest limitations
+
+Commit `fdc36af7db20b00c2f15df9d9dd74dd999491531` changes the I P0 allowlist row in both SYS-RISK-001 language versions from the phase-3.8.9 / 1.2.13 artifact and Blob to the phase-3.8.10 / 1.2.14 successor artifact and Blob, retaining the superseded Blob and reconciliation provenance. Commit `c1de9baa9af1e245f9ebe39e955a835dbb557910` adds three explicit “not restored on main; see AID-2026-107 §10” status annotations to I-path references in each language version. These are reference/pin/status annotations, not changes to the assessment conclusions. The assessed_version remains the documents' own declared baseline; it is not a claim that the later annotation bytes existed at that baseline.
+
+- The three fields are a **2026-11-27 retrospective attachment**, not a contemporaneous signature; the `signature_attached` line says so.
+- Therefore the contemporaneity test in §5(3), which prohibits retrospective signing against the baseline, remains **not satisfied** and is an Owner adjudication item. This rework does one limited thing: it puts the three fields in the literal AC2 document-body carriers and points the checker at those carriers. It does not claim contemporaneous-signature acceptance.
+- It is not verified that R/X correspond to any particular natural person's identity.
+- The `reviews` scope is recorded as `not-documentation` in `document-scope-registry.yaml`; these assessment files therefore do not require GOV-DOC frontmatter. No frontmatter was added.
+- Live `main` fetched for this rework was `46dac1b1e198c8d88daff5a34faf759ecb075869`; the prompt's local observation `a7cf5256` did not match this API-fetched head. The branch was created from the fetched head, not the local observation.
