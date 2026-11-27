@@ -194,7 +194,7 @@ class BlobPinsTest(unittest.TestCase):
         })
         code, out, err = self.run_gate()
         self.assertEqual(code, 1, out + err)
-        self.assertIn("UNRESOLVED(unregistered digest field)", out)
+        self.assertIn("UNRESOLVED(missing field locator)", out)
 
     def test_missing_source_translation_commit_is_incomplete(self):
         commit_tree(self.root, {
