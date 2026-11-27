@@ -85,3 +85,10 @@ Manifests with no top-level status field (6, deliberately untouched): AID-2026-0
 - python scripts/check_document_management.py --root . → INCOMPLETE: no rule violations in 654 classified documents, but 371 governed documents are still unclassified (the 371 backlog predates this change; exit 1 is the pre-existing INCOMPLETE state).
 - git diff --stat → 14 files, 32 insertions / 32 deletions.
 - Full before/after text is recoverable from the commit diff; no note text was deleted.
+
+## Post-merge backfill (2026-11-27)
+
+- Carrier PR #1380 merged as `46dac1b1e198c8d88daff5a34faf759ecb075869` at 2026-11-27T05:27:58Z, from exact head `b1c0ab0e` with 17/17 required contexts SUCCESS and `mergeStateStatus=CLEAN`.
+- This backfill changes exactly two fields: `implementation.status` DRAFT_PR to MERGED, and `implementation.merge_commit_sha` PENDING to the merge commit above. No other field, file or claim is changed.
+- Readback on the base commit of this PR: the AID-2026-256 INDEX row exists exactly once; the 13 manifest top-level `status` fields and the 19 INDEX Status prefixes landed by #1380 all read back as MERGED.
+- Residual, deliberately not rewritten here: `registration_status: CARRIER_PR_DRAFT` still names the registration-stage label of the carrier PR; `review.status: NOT_ASSIGNED` and `acceptance.status: NOT_GRANTED` remain, because a merged carrier is not an acceptance.

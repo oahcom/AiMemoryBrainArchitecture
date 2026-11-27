@@ -1,0 +1,88 @@
+work_item_id: AID-2026-290
+title: "Correct symlink boundary skip accounting for T36, T37, T41 and T42"
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  The change corrects test accounting and prevents unavailable platform
+  capabilities from being recorded as successful test execution.
+  Production gate behavior is unchanged.
+status: MERGED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: "Owner acceptance not recorded"
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-26"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "af2660d55a93278157fa6668aba338daf81e127c"
+pull_request: 1408
+pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1408
+merge_commit_sha: 7ecf2a8e7d1e40a13f6af6d4335a6766a222194f
+
+scope:
+  objective: >-
+    Correct all four symlink boundary cases so unavailable symlink
+    creation produces exactly one registered skip per case and never
+    produces a corresponding test result.
+  affected_cases:
+    - T36
+    - T37
+    - T41
+    - T42
+  skip_reason: "symlink creation unavailable on this platform"
+  constraints:
+    - Preserve the four existing ALLOWED_SKIPS entries.
+    - Preserve successful symlink-capable execution.
+    - Keep T36 and T37 independently accounted for.
+    - Keep T41 and T42 independently accounted for.
+    - No changes to check_document_management.py.
+    - No changes to T68c.
+    - No changes to Issue #1269.
+    - No third-party dependencies.
+
+evidence: 14-ai-development/work-items/AID-2026-290/evidence.md
+
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-290/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-290/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-290/session-evidence.md
+    relationship: evidence
+
+session_evidence:
+  - role: IMPLEMENTATION_SESSION
+    issue_refs:
+      - "#1268"
+    implementing_ai_session: "6b090a00-c1b0-83ec-ad26-9668c882a144"
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-290/session-evidence.md
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-290/prompt-v1.md
+    executed_prompt_sha256: "f588b712f1133ec58f2ed949b226ae73e6bf0622841da8be3e7838249cc1b895"
+    executed_prompt_bytes: 4843
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: "RECORDED"
+
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    The initial skip conversion was found by operator execution to double-record
+    all four cases. The corrected implementation uses independent success flags
+    and mutually exclusive skip/assertion branches. Operator execution on the
+    corrected tree: forced-unavailability PASS with four registered skips and
+    zero recorded results, normal path 371/371 passed, and both skip-registry
+    negatives exit 1.
+  files_changed:
+    - scripts/test_check_document_management.py
+    - 14-ai-development/work-items/AID-2026-290/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-290/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-290/evidence.md
+    - 14-ai-development/work-items/AID-2026-290/session-evidence.md
+    - 14-ai-development/work-items/INDEX.md
+  tests:
+    - "python scripts/test_check_document_management.py"
+    - "python verify_symlink_unavailable.py"
+    - "Verify each of T36/T37/T41/T42 appears only in SKIPPED when symlink creation fails"
+    - "Verify no skipped case appears in RESULTS_BY_NAME"
+    - "Verify mismatched skip reason produces UNEXPECTED_SKIPS"
+    - "Verify mismatched skip name produces UNEXPECTED_SKIPS"
