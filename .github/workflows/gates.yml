@@ -392,8 +392,8 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           set -euo pipefail
-          test -s 14-ai-development/reports/prompt-commit-trace-baseline.json || {
+          test -s 14-ai-development/work-items/AID-2026-291/baseline.json || {
             echo "::error::Committed prompt-commit-trace baseline is missing; review and commit the main-baseline artifact before merge."
             exit 1
           }
-          python scripts/ci/check_prompt_commit_trace.py --commit "$HEAD_SHA" --base "$BASE_SHA" --baseline 14-ai-development/reports/prompt-commit-trace-baseline.json
+          python scripts/ci/check_prompt_commit_trace.py --commit "$HEAD_SHA" --base "$BASE_SHA" --baseline 14-ai-development/work-items/AID-2026-291/baseline.json
