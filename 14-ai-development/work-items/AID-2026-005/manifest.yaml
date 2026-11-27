@@ -67,3 +67,9 @@ lifecycle:
     closeout:
       status: NOT_RECORDED
   markers: {}
+
+documentation:
+  - path: "14-ai-development/AI-EXEC-INDEPENDENCE-RULING-001.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference

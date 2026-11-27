@@ -89,3 +89,15 @@ session_evidence:
     session_reference_reason: "The exact current ChatGPT session identifier is not exposed in the available execution context; historical identifiers were not substituted."
     session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-089/session-evidence.md
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-089/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-089/session-evidence.md"
+    relationship: reference
+  - path: "01-system-architecture/forget-fence-and-completion-contract.md"
+    relationship: reference
+  - path: "docs/en/01-system-architecture/forget-fence-and-completion-contract.md"
+    relationship: reference
+  - path: "docs/zh-CN/01-system-architecture/forget-fence-and-completion-contract.md"
+    relationship: reference

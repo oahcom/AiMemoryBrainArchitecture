@@ -173,3 +173,7 @@ lifecycle:
     closeout:
       status: PENDING
   markers: {}
+
+documentation:
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference

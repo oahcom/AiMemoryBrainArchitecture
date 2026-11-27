@@ -178,6 +178,16 @@ class RepositoryHygieneTests(unittest.TestCase):
 
         self.assert_admission_passes(base, head)
 
+    def test_work_item_manifest_ac4_baseline_report_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/reports/work-item-manifest-ac4-baseline.json": (
+                '{"baseline_tree":"0000000000000000000000000000000000000000"}\\n'
+            ),
+        })
+
+        self.assert_admission_passes(base, head)
+
     def test_new_allowed_configuration_file_passes(self):
         base = self.seed_base()
         head = self.commit({

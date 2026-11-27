@@ -107,3 +107,9 @@ findings:
   - id: AID-2026-051-F3
     severity: P1
     feedback_destination: "Delivery PR conversation. Closing condition 16 requires independent acceptance evidence. A session that writes the tests cannot supply independence for its own work. Writing the nine tests therefore advances the register without closing it, and the register must stay OPEN after merge. Marking it closed on the strength of this delivery alone would be the exact self-authorization the repository's rulings prohibit."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-051/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/governance-register/GOV-NC-2026-11-22-ENUM-BOUNDARY-021.md"
+    relationship: reference

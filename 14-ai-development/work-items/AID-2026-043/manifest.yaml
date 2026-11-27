@@ -111,3 +111,13 @@ findings:
   - id: F-DM2-03-ACCEPTANCE-001
     severity: P2
     feedback_destination: "Delivery PR conversation; verify all 10 reachable CI vectors, unreachable-field evidence, qualifier no-fallback behavior and exact-head verification before closure."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-043/prompt-v1.md"
+    relationship: reference
+  - path: "02-domain-model/domain-model-overview.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/GAP-10-IMPLEMENTATION-FRONTIER.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/GAP-10-IMPLEMENTATION-FRONTIER.zh-CN.md"
+    relationship: reference
