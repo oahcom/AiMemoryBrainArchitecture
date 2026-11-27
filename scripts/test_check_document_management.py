@@ -5020,7 +5020,7 @@ def run_steward_assignment() -> None:
         _git(root, "commit", "-q", "-m", "seed")
         base = _git(root, "rev-parse", "HEAD")
         valid = root / "00-governance" / "new-with-steward.md"
-        valid.write_text(doc('  steward: "Architecture Governance"\\n' + BASE.strip("\\n")),
+        valid.write_text(doc('  steward: "Architecture Governance"\n' + BASE.strip("\n")),
                          encoding="utf-8")
         _git(root, "add", "-A")
         _git(root, "commit", "-q", "-m", "add document with steward")
@@ -5038,7 +5038,7 @@ def run_steward_assignment() -> None:
         _git(root, "add", "-A")
         _git(root, "commit", "-q", "-m", "seed legacy")
         base = _git(root, "rev-parse", "HEAD")
-        legacy.write_text(doc(BASE + "\\n# revised prose"), encoding="utf-8")
+        legacy.write_text(doc(BASE + "\n# revised prose"), encoding="utf-8")
         _git(root, "add", "-A")
         _git(root, "commit", "-q", "-m", "modify legacy")
         code, output = run_gate(root, "--require-changed", base)

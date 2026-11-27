@@ -3,13 +3,13 @@
 
 Validates the four-dimension metadata block declared at the top of governed
 Markdown files. Rules are listed in
-00-governance/architecture-document-management-policy.md 9 (DM-01 .. DM-14).
+00-governance/architecture-document-management-policy.md 9 (DM-01 .. DM-15).
 
 Trust boundary: the metadata parser is fail-closed. Any input that is not in
 the documented YAML subset is an error, never a silently skipped line. If the
 parse result cannot be trusted, no downstream rule result can be either.
 
-Checked mechanically (DM-01 .. DM-14). NOT checked mechanically, and printed on
+Checked mechanically (DM-01 .. DM-15). NOT checked mechanically, and printed on
 every run as `manual controls (policy 9.2)`: the ten items M-01 .. M-10, from
 whether a scope is genuinely non-overlapping to whether an exclusion reason is
 honest. `MANUAL_CONTROLS` below is the single authority: policy section 9.2 is
