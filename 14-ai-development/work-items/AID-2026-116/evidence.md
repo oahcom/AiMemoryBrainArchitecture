@@ -42,7 +42,7 @@ The prompt snapshot `prompt-v1.md` received the required DM-15 steward metadata:
 
 `steward: \"user-authorized operator (delegated by account owner)\"`
 
-**因 DM-15 补 steward 重算。** The top-level manifest `prompt_sha256` and `prompt_bytes` were recomputed from the resulting file bytes, without changing any of the 33 digest correction records or their target/attribution conclusions.
+**因 DM-15 补 steward 重算。** The top-level manifest `prompt_sha256` / `prompt_bytes` and `session_evidence[0].executed_prompt_sha256` / `executed_prompt_bytes` were recomputed from the resulting file bytes, without changing any of the 33 digest correction records or their target/attribution conclusions.
 
 - Previous prompt SHA-256: `3b8f72e2e124b24625035c42398c0529655be4d8e8e48ddfc4b7369b89ce1c94`
 - Previous prompt bytes: `8274`

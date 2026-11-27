@@ -310,8 +310,8 @@ session_evidence:
     issue_refs: []
     implementing_ai_session: owner-proxy-2026-11-26-104
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-116/prompt-v1.md
-    executed_prompt_sha256: 3b8f72e2e124b24625035c42398c0529655be4d8e8e48ddfc4b7369b89ce1c94
-    executed_prompt_bytes: 8274
+    executed_prompt_sha256: 6fd626bfd4674e3e98f107baa93b4f2ef1061eac36c80c66a7778714ab5b725e
+    executed_prompt_bytes: 8341
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-116/session-evidence.md
