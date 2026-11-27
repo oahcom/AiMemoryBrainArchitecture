@@ -51,3 +51,15 @@ review:
 acceptance:
   status: "NOT_GRANTED"
   note: "Documentation restoration only; Owner acceptance and normative adoption are not asserted."
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1212"
+    implementing_ai_session: NOT_RECORDED
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-186/prompt-v1.md"
+    executed_prompt_sha256: "398fa6ac6976c7d78bf154616ab6cd55f035acbc"
+    executed_prompt_bytes: 1694
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-186/session-evidence.md"
