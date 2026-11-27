@@ -316,6 +316,31 @@ class BlobPinsTest(unittest.TestCase):
         self.assertEqual(code, 0, out + err)
         self.assertIn("pins=2 ok=2", out)
 
+    def test_source_path_branch_head_blob_sha_shape(self):
+        data = b"source path pin\\n"
+        source = commit_tree(self.root, {"source.md": data})
+        candidate = commit_tree(self.root, {
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                ("source:\\n"
+                 f"  branch_head: {source}\\n"
+                 "  source_path: source.md\\n"
+                 f"  source_blob_sha: {self.blob_sha(data)}\\n"),
+        })
+        code, out, err = self.run_gate(candidate)
+        self.assertEqual(code, 0, out + err)
+        self.assertIn("pins=1 ok=1", out)
+
+    def test_prompt_original_payload_without_dedicated_file_is_unresolved(self):
+        commit_tree(self.root, {
+            "14-ai-development/work-items/AID-2026-900/prompt-v2.md": b"ordinary prompt file\\n",
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                ("prompt_file: 14-ai-development/work-items/AID-2026-900/prompt-v2.md\\n"
+                 f"prompt_original_payload_sha256: {'a' * 64}\\n"),
+        })
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 1, out + err)
+        self.assertIn("no dedicated prompt_original_payload_file locator", out)
+
     def test_empty_tree_is_incomplete(self):
         code, out, err = self.run_gate()
         self.assertEqual(code, 2)

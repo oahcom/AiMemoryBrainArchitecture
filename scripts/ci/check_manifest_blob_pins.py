@@ -55,6 +55,7 @@ PIN_FIELD_REGISTRY = (
     ("source.selected_source_files[].restored_blob_sha", "path", "candidate commit", "Git blob SHA-1"),
     ("source.selected_source_files[].frontmatter_blob_sha", "frontmatter_path/frontmatter_file or unique blob-OID path in source tree", "source.head_sha", "Git blob SHA-1; UNRESOLVED if no unique locator"),
     ("source.files[].blob", "source.files[].path", "source.head", "Git blob SHA-1"),
+    ("source.source_blob_sha", "source_path", "branch_head", "Git blob SHA-1"),
     ("prompt_file_blob_sha", "prompt_file", "prompt_file_commit_sha", "Git blob SHA-1"),
     ("execution_boundary_extension.owner_contracts.sha256_or_blob_sha", "path", "commit_before_manifest_update", "Git blob SHA-1"),
     ("added_conformance_cases.blob_sha", "test_matrix_path", "test_matrix_commit_before_manifest_update", "Git blob SHA-1"),
@@ -445,9 +446,12 @@ def verify(root: Path, commit: str, verbose: bool = True):
 
         source = as_mapping(doc.get("source"))
         if "source_blob_sha" in source:
-            source_locator_commit = source.get("head_sha") or source.get("head")
-            if nonempty(source.get("path")):
-                pair(source, "path", "source_blob_sha", source_locator_commit, "source.source_blob_sha")
+            source_locator_commit = (source.get("branch_head") or source.get("head_sha")
+                                     or source.get("head"))
+            source_path = source.get("source_path") or source.get("path")
+            if nonempty(source_path):
+                pair(source, "source_path" if "source_path" in source else "path",
+                     "source_blob_sha", source_locator_commit, "source.source_blob_sha")
             elif nonempty(source_locator_commit):
                 check_blob_oid(source_locator_commit, source.get("source_blob_sha"), "source.source_blob_sha")
             else:
@@ -693,6 +697,18 @@ def verify(root: Path, commit: str, verbose: bool = True):
                     scalar_digest = isinstance(value, (str, int)) and not isinstance(value, bool)
                     if (digest_shaped and scalar_digest and not commit_reference
                             and (id(node), key) not in handled):
+                        if key_text == "prompt_original_payload_sha256" and not nonempty(
+                            node.get("prompt_original_payload_file")
+                        ):
+                            pins += 1
+                            incomplete += 1
+                            problems.append(
+                                f"INCOMPLETE UNRESOLVED(prompt_original_payload_sha256): "
+                                f"manifest={manifest_path} no dedicated prompt_original_payload_file locator"
+                            )
+                            mark(node, key)
+                            discover_unregistered(value, f"{where}.{key_text}")
+                            continue
                         path_keys = [
                             candidate for candidate in node
                             if isinstance(candidate, str) and (
