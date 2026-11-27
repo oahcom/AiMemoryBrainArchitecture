@@ -22,6 +22,13 @@ The properties, each a real failure mode:
      validator reads the PR body live, so without `edited` a body edit after a
      green run leaves a verdict describing text that no longer exists (#1074).
      GitHub's default set is `opened, synchronize, reopened`, which omits it.
+  5. The `validate` job contains exactly one step named
+     `Bind the verdict to the body it judged`. Its condition must be
+     `if: always()` or `if: ${{ always() }}`, it must write
+     `AI-SESSION-EVIDENCE-BODY-SHA256: $digest` to `$GITHUB_STEP_SUMMARY`,
+     and it must validate 64 lowercase hexadecimal characters. This is a
+     raw-text shape check: it does not execute the shell or prove that
+     `$digest` was computed from the live PR body's `body` field.
 
 Exit codes follow the repository vocabulary:
     0  PASS        the workflow has the three-job shape and the `edited` trigger
@@ -83,7 +90,9 @@ BODY_DIGEST_STEP_NAME = "Bind the verdict to the body it judged"
 BODY_DIGEST_NAME_RE = re.compile(
     r"^\s*-\s*name:\s*['\"]?Bind the verdict to the body it judged['\"]?\s*$"
 )
-BODY_DIGEST_ALWAYS_RE = re.compile(r"^\s*if:\s*always\(\)\s*(?:#.*)?$")
+BODY_DIGEST_ALWAYS_RE = re.compile(
+    r"^\s*if:\s*(?:always\(\)|\$\{\{\s*always\(\)\s*\}\})\s*(?:#.*)?$"
+)
 BODY_DIGEST_WRITE_RE = re.compile(
     r'^\s*echo\s+"AI-SESSION-EVIDENCE-BODY-SHA256:\s*\$digest"'
     r'\s*>>\s*"\$GITHUB_STEP_SUMMARY"\s*$'
@@ -353,7 +362,7 @@ def _body_digest_violations(blocks: dict[str, JobBlock]) -> list[str]:
     step = matching[0]
     lines = step.text.splitlines()
 
-    # Issue #1246 mutation 2: changing `if: always()` to `if: success()` must fail.
+    # Issue #1246 mutation 2: the digest step must run even after a failed verdict.
     always_line = next(
         (
             step.first_line + index
@@ -365,8 +374,9 @@ def _body_digest_violations(blocks: dict[str, JobBlock]) -> list[str]:
     if not any(BODY_DIGEST_ALWAYS_RE.match(line) for line in lines):
         found.append(
             f"PR body digest mutation 2: {BODY_DIGEST_STEP_NAME!r} must use "
-            f"`if: always()` (line {always_line}); a success-only condition "
-            "can suppress the digest after a failed verdict"
+            "`if: always()` or `if: ${{ always() }}` "
+            f"(line {always_line}); a success-only or other condition can "
+            "suppress the digest after a failed verdict"
         )
 
     # Issue #1246 mutation 3: replacing the digest write with generic PRESENT must fail.

@@ -1,5 +1,6 @@
 ---
 document_metadata:
+  steward: "user-authorized operator (delegated by account owner)"
   domain: ai-development
   role: work-record
   lifecycle:
@@ -29,7 +30,7 @@ document_metadata:
 
 **Repository:** `oahcom/AiMemoryBrainArchitecture`
 
-**Baseline:** `6f597e2dd8b6e879bf7539aa16b88a39504d9c49`
+**Baseline:** `cb5b3dcd23ff86e10a354bb27b668dce19e95f62`
 
 **Carrier:** `PLACEHOLDER_PR`
 
@@ -107,3 +108,10 @@ This evidence records the intended implementation and its deterministic acceptan
 It does not assert that the tests have been executed, that the carrier has merged, that required contexts have passed, or that Owner acceptance has been granted.
 
 Those claims require exact-head readback and independent verification.
+
+## 8. Static-gate scope limitation
+
+This guard proves that the named digest step exists and has the required textual shape: an always-run condition, the expected summary key, and a 64-character lowercase-hex validation pattern.
+It does not execute the shell or prove that `$digest` is computed from the live PR body's `body` field.
+A constant 64-character value can therefore satisfy this static shape check.
+Runtime digest provenance and correctness are outside this guard's acceptance claim.

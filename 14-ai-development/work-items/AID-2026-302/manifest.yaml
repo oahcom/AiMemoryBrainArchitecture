@@ -20,7 +20,9 @@ renumbering_reason: >-
   kept for reference; only identifiers changed, no implementation text did.
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: 6f597e2dd8b6e879bf7539aa16b88a39504d9c49
+base_commit_sha: cb5b3dcd23ff86e10a354bb27b668dce19e95f62
+prompt_status: RECORDED_NOT_FROZEN
+prompt_file: 14-ai-development/work-items/AID-2026-302/prompt-v1.md
 scope:
   objective: >-
     Make the existing Repository hygiene hard gate reject removal or weakening
@@ -34,10 +36,15 @@ scope:
   carrier: PLACEHOLDER_PR
 evidence:
   record: 14-ai-development/work-items/AID-2026-302/evidence.md
+  primary_record: 14-ai-development/work-items/AID-2026-302/evidence.md
   session: 14-ai-development/work-items/AID-2026-302/session-evidence.md
 documentation:
   - path: 14-ai-development/work-items/AID-2026-302/evidence.md
     relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-302/session-evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-302/prompt-v1.md
+    relationship: reference
 session_evidence:
   - role: IMPLEMENTATION_SESSION
     issue_refs:
@@ -48,8 +55,9 @@ session_evidence:
     executed_prompt_bytes: 4817
     implementing_ai_session: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-302/session-evidence.md
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-302/prompt-v1.md
 implementation:
-  status: IN_PROGRESS
+  status: IMPLEMENTED
   summary: >-
     Extend the existing workflow shape checker with independent PR-body digest
     step, always-condition, summary-write and hexadecimal-validation assertions.

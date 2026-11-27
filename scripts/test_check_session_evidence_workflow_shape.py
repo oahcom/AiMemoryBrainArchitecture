@@ -334,6 +334,39 @@ jobs:
         self.assertIn("always()", message)
         self.assertIn("line", message)
 
+    def test_body_digest_expression_always_condition_passes(self):
+        mutated = WORKFLOW.replace(
+            "        if: always()\n        run: |\n",
+            "        if: ${{ always() }}\n        run: |\n",
+            1,
+        )
+        self.assertNotEqual(mutated, WORKFLOW)
+        self.write(mutated)
+        code, message = self.run_checker()
+        self.assertEqual(code, 0, message)
+        self.assertNotIn("mutation 2", message)
+
+    def test_body_digest_rejects_non_always_expressions(self):
+        for condition in (
+            "success()",
+            "failure()",
+            "${{ success() }}",
+            "${{ failure() }}",
+        ):
+            with self.subTest(condition=condition):
+                mutated = WORKFLOW.replace(
+                    "        if: always()\n        run: |\n",
+                    f"        if: {condition}\n        run: |\n",
+                    1,
+                )
+                self.assertNotEqual(mutated, WORKFLOW)
+                self.write(mutated)
+                code, message = self.run_checker()
+                self.assertEqual(code, 1)
+                self.assertIn("mutation 2", message)
+                self.assertIn("always()", message)
+                self.assertIn("line", message)
+
     def test_body_digest_write_is_required(self):
         mutated = WORKFLOW.replace(
             'echo "AI-SESSION-EVIDENCE-BODY-SHA256: $digest" >> "$GITHUB_STEP_SUMMARY"',
