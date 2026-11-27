@@ -1,0 +1,231 @@
+work_item_id: AID-2026-241
+title: Make the independent-review gate test the session, not the GitHub account
+class: GATE/POLICY
+risk: R2
+risk_rationale: >-
+  One criterion inside one arm of one checker, plus two required evidence fields and four
+  tests. No workflow, no required context, no branch protection, no schema registry, no
+  clause change. The risk is not damage but asymmetry that has been silent since 2026-11-24:
+  PR-GOVERNANCE-001 section 5 was amended to say independence is a session property, and the
+  executable that decides it still compares account strings. Measured at 9ee89b32, the gate
+  fails the case section 5 declares lawful and passes the case section 5 forbids. Nothing
+  caught it because the checker is referenced by no workflow and by no other script. The risk
+  that matters is that a fix makes the string look like proof: a session value is written by
+  whoever writes the manifest, so the corrected check must be described as verifying a
+  declaration, not an event, and the code comment is part of the deliverable rather than
+  commentary on it.
+status: DISPATCHED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 8d90843aec4583c3282a3b45da31c7d6fd734cf2
+tracking_issue: "#1247 - the defect report this work item answers, carrying both discriminating cases and their exact output."
+
+prompt_id: AID-2026-241-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-241/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: 2bcdadfaa7a7ed85e6080058e3eefbacd77cc0347037089c3d814adfe0b4927d
+prompt_bytes: 7105
+
+authorization:
+  implementation_write: >-
+    GRANTED for scripts/governance/status_migration/check_status_gates.py,
+    scripts/governance/status_migration/test_status_migration.py, this work item's own
+    directory, and one INDEX.md row. NOT_GRANTED for any other path.
+  gate_behaviour_change: >-
+    GRANTED for the independent_review arm of check_status_gates.py only - the criterion it
+    applies and the evidence it requires. NOT_GRANTED for any other arm, for its status
+    vocabulary, for its subject_head binding, or for its fail-closed sidecar check.
+  schema_change: >-
+    GRANTED for two required evidence fields inside lifecycle.gates.independent_review.evidence
+    (reviewer_session, implementer_session). NOT_GRANTED for any top-level manifest field, any
+    session_evidence field, or manifest-schema-registry.yaml, which does not describe this
+    block.
+  platform_state_change: >-
+    NOT_GRANTED - no required status context is added and no branch-protection payload is
+    modified. The checker stays unwired, deliberately: see scope.files_out_of_scope.
+  architecture_spec_change: >-
+    NOT_GRANTED - no ADR, no BMCP specification, and no clause of PR-GOVERNANCE-001.md is
+    modified. Section 5 is correct as written; the executable is what disagrees with it.
+
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-241/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-241/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-241/session-evidence-1247.md
+  files_to_modify:
+    - scripts/governance/status_migration/check_status_gates.py
+    - scripts/governance/status_migration/test_status_migration.py
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope: >-
+    Every other path. In particular: .github/workflows/, because wiring a checker that fails
+    55 of 57 manifests into a required context would block every merge and wiring it as
+    non-required would produce a permanently red job that teaches readers to skip it - that is
+    a decision with its own blast radius and its own work item. #1154's corpus migration,
+    because 53 of the 55 failures are status vocabulary and lifecycle blocks, not independence.
+    scripts/governance/session_evidence/validate.py, which decides a different question and is
+    correct. PR-GOVERNANCE-001.md, whose section 5 already says what this work item makes the
+    code say. And every existing manifest: none carries a
+    lifecycle.gates.independent_review record (measured 0 of 57), so the new required fields
+    break nothing that exists.
+
+acceptance_criteria:
+  - id: C1
+    criterion: >-
+      The gate decides independence by session, and the same-account case that section 5
+      declares lawful passes.
+    measurement: >-
+      A REVIEWED manifest whose independent_review evidence carries one identity string for
+      reviewer and implementer but two distinct session values exits 0 with
+      `"result": "PASS"`. At the base commit the same manifest exits 1 with
+      `REVIEWED reviewer and implementer must be different identities`.
+  - id: C2
+    criterion: >-
+      The gate fails the case section 5 forbids, and the failure names the session fields
+      rather than the identity fields.
+    measurement: >-
+      A manifest whose two session values normalize to the same token exits 1, and the error
+      string contains the name of a session field.
+  - id: C3
+    criterion: The two new evidence fields are required, and their absence is reported by name.
+    measurement: >-
+      Removing reviewer_session from an otherwise passing manifest exits 1 and the error names
+      reviewer_session.
+  - id: C4
+    criterion: >-
+      The identity comparison survives as a diagnostic and cannot change the verdict for a
+      same-account pair.
+    measurement: >-
+      `_identity`, `reviewer`, `implementer` and `review_identity_aliases` are still present and
+      reachable, and C1's same-account manifest passes with them present.
+  - id: C5
+    criterion: >-
+      The code states the limit of what a session string proves, at the point where the
+      comparison is made.
+    measurement: >-
+      A comment adjacent to the session comparison says the check verifies that the manifest
+      declares two sessions and does not verify that two sessions existed. The reviewer reads it
+      and says whether it overclaims.
+  - id: C6
+    criterion: No other gate arm, no status vocabulary and no subject_head binding changes.
+    measurement: >-
+      `git diff` against the base touches only the four named paths, and the existing
+      test_status_migration suite passes unchanged except for the four added cases.
+  - id: C7
+    criterion: The checker remains unwired and the corpus failure count is unchanged.
+    measurement: >-
+      `grep -rn check_status_gates .github/workflows/ scripts/ci/` still returns nothing, and
+      running the checker over all 57 manifests still reports the same 2 pass / 55 fail.
+
+findings:
+  - id: F1
+    severity: HIGH
+    statement: >-
+      The independent_review gate compares GitHub identity strings, while PR-GOVERNANCE-001
+      section 5 defines independence as a session property and explicitly permits two sessions
+      to share one identity. The gate therefore fails the lawful case and passes the forbidden
+      one.
+    evidence: >-
+      check_status_gates.py:275-277 compares _identity(reviewer) with _identity(implementer).
+      Measured at 9ee89b32 with two manifests differing only in those two values and otherwise
+      identical, all six gate records present, evidence bound to real committed blobs: the
+      two-sessions-one-identity manifest returned
+      `{"result": "FAIL", "error": "REVIEWED reviewer and implementer must be different identities"}`,
+      and the one-session-two-identities manifest returned `{"result": "PASS", ...}`.
+  - id: F2
+    severity: HIGH
+    statement: >-
+      The clause was amended and the executable was not, in the same repository, with the
+      register recording the amendment as applied.
+    evidence: >-
+      GOV-REV-2026-11-24-INDEPENDENCE-IS-SESSION-LEVEL-036 records six clause sites changed on
+      2026-11-24 and quotes the retired wording verbatim, including "even if the session adopts
+      a different role". PR-GOVERNANCE-001.md:136-138 now reads "Independence is a property of
+      the reviewing session, not of the GitHub account that carries it." The checker's
+      comparison is the retired wording, expressed as code.
+  - id: F3
+    severity: MEDIUM
+    statement: >-
+      Nothing could have caught the disagreement, because the checker is referenced by no
+      workflow and no other script, so its behaviour is exercised only when a session chooses
+      to run it.
+    evidence: >-
+      `grep -rn check_status_gates .github/workflows/ scripts/ci/` returns no match at 9ee89b32.
+      The only other reference is its own test module.
+  - id: F4
+    severity: MEDIUM
+    statement: >-
+      The defect is currently latent rather than active, and the measurement should say so: no
+      manifest on main carries a lifecycle.gates.independent_review record, so no merged review
+      has been judged by the wrong criterion.
+    evidence: >-
+      Measured over all 57 manifests at 9ee89b32: `lifecycle.gates.independent_review` present
+      in 0. The corpus-wide checker run reports 2 pass / 55 fail, and every failure is a status
+      or lifecycle defect, so no manifest reaches the independent_review arm at all.
+  - id: F5
+    severity: MEDIUM
+    statement: >-
+      A session string cannot prove that two contexts existed, and any fix that reads as if it
+      could would replace one false assurance with another.
+    evidence: >-
+      implementing_ai_session is a writer-chosen string; the session_evidence contract already
+      labels its provenance NOT_VERIFIED and its reference status RECORDED, and no in-repo
+      mechanism relates a session string to a process. The corrected check must therefore be
+      described as verifying a declaration.
+
+implementation:
+  status: IMPLEMENTED_IN_BRANCH
+  branch: req05/aid-082-session-independence
+  pull_request: "#1325"
+  merge_commit_sha: NOT_MERGED
+  note: >-
+    Registration only at the time this file was written. The prompt snapshot is the executed
+    input and its digest pins those bytes; an amendment, if one is needed, goes in a separate
+    artifact rather than into the snapshot.
+
+review:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  note: >-
+    Section 9 requires an exact-Head governance review for changes to this standard, and this
+    work item changes an executable that decides a governance gate. No review has been performed
+    at this Head and none is asserted here.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
+
+session_evidence:
+  - role: MEASURER
+    issue_refs:
+      - "#1247"
+    implementing_ai_session: req05-convergence-session-identity-not-recorded
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-241/prompt-v1-original.source.txt
+    executed_prompt_sha256: 5c8f02062568720bb9132b27bdb3d6a4c9ac9fbb603d0c42a4818f6c2105002a
+    executed_prompt_bytes: 6983
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-241/evidence.md
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1247"
+    implementing_ai_session: w3-session-2026-11-27-not-independently-verified
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-241/prompt-w3-v1.md
+    executed_prompt_sha256: 76cdb77e334fcd507f7b6adf546eed33a4043898b38aafc14be1d2c3b2dc6569
+    executed_prompt_bytes: 2680
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-241/session-evidence.md
+
+renumbering:
+  previous_work_item_id: AID-2026-082
+  assigned_work_item_id: AID-2026-241
+  prompt_digest_recalculation: "Recomputed after renumbering, path updates, and required steward metadata; each digest covers the corresponding prompt file bytes only."
+  previous_prompt_sha256: 5c8f02062568720bb9132b27bdb3d6a4c9ac9fbb603d0c42a4818f6c2105002a
+  current_prompt_sha256: 2bcdadfaa7a7ed85e6080058e3eefbacd77cc0347037089c3d814adfe0b4927d
