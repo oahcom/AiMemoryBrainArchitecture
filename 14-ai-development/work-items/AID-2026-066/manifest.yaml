@@ -11,8 +11,8 @@ prompt_id: AID-2026-066-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-066/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 1ae516e747ae3417d9a34cc5fc870128da2efbd603d4d958fceaf18a3791c6ae
-prompt_bytes: 5921
+prompt_sha256: d6afe924427aebf974c86a742bee679a3ca6cc247d58d691297ede9002619c6c
+prompt_bytes: 5863
 
 # ---------------------------------------------------------------------------
 # WO-04 of the REQ-01 repair queue, registered against Issue #262 AC7. AC7 is

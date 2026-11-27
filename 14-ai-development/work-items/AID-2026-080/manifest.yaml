@@ -46,8 +46,8 @@ prompt_file: 14-ai-development/work-items/AID-2026-080/prompt-v1.md
 # ---------------------------------------------------------------------------
 
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 08f5e42efdef2c3380056fd8528cf057d6d2a7b25c366566a8599e2aff4df19a
-prompt_bytes: 9932
+prompt_sha256: c071d0ee5978785a09ff5c9b902e5c3959f4bf7f611e7e35ab36d4c40996c2b8
+prompt_bytes: 9874
 prompt_supersession:
   - passage: >-
       prompt-v1.md, the clause quoted under "What is being changed": the `after` form reading
