@@ -33,6 +33,10 @@ documentation:
     relationship: implementation
   - path: scripts/ci/test_check_prompt_commit_trace.py
     relationship: reference
+  - path: scripts/ci/check_repository_hygiene.py
+    relationship: implementation
+  - path: scripts/test_check_repository_hygiene.py
+    relationship: reference
   - path: .github/workflows/gates.yml
     relationship: implementation
   - path: 14-ai-development/work-items/AID-2026-291/evidence.md
@@ -54,8 +58,9 @@ implementation:
   status: IN_PROGRESS
   summary: >-
     Checker, regression tests and the Actions ratchet are present on the PR
-    branch. The 133-entry baseline is an exact Actions-generated snapshot pinned
-    to main commit 5e30d49776a2ce75069227a41470fa7e4ae00b2e; final ratchet validation is pending.
+    branch. The exact 133-entry Actions snapshot is committed as baseline.json,
+    pinned to main 5e30d49776a2ce75069227a41470fa7e4ae00b2e. The trace ratchet
+    and all 16 required contexts passed on the validated PR head.
   files_changed:
     - scripts/ci/check_prompt_commit_trace.py
     - scripts/ci/test_check_prompt_commit_trace.py
@@ -66,6 +71,8 @@ implementation:
     - 14-ai-development/work-items/AID-2026-291/session-evidence.md
     - 14-ai-development/work-items/AID-2026-291/prompt-v1.md
     - 14-ai-development/work-items/AID-2026-291/baseline.json
+    - scripts/ci/check_repository_hygiene.py
+    - scripts/test_check_repository_hygiene.py
   tests:
     - "python -m unittest scripts.ci.test_check_prompt_commit_trace -v"
     - "Actions Prompt-to-commit trace (ratchet) job"

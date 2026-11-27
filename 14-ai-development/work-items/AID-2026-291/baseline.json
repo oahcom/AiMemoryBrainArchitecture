@@ -926,7 +926,7 @@
   "schema_version": 1,
   "seeded_work_items": {
     "AID-2026-291": {
-      "observed_in_pr_head": "57ff99cf3986d2effea75460a206e8754e3561a2",
+      "observed_in_pr_head": "96d2a57f6993bd9ccde507948624d193965c461c",
       "reason": "Initial ratchet seed for the newly registered work item; this records its current NO_TRACE state without claiming traceability."
     }
   },
