@@ -148,6 +148,202 @@ class BlobPinsTest(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertIn("INCOMPLETE", err)
 
+    def test_neighbouring_digest_key_does_not_verify_target_pair(self):
+        """Kills a resolver that reads pair A's digest from pair B's sibling key."""
+        data_a = b"pair A committed bytes\n"
+        data_b = b"pair B committed bytes\n"
+        digest_a = self.blob_sha(data_a)
+        digest_b = self.blob_sha(data_b)
+        wrong = "0" * 40
+        manifest = (
+            "work_item_id: AID-2026-900\n"
+            "baseline_and_source_evidence:\n"
+            "  authored_indexes:\n"
+            "    - root: pair-a.md\n"
+            f"      root_blob: \"{wrong}\"\n"
+            "      en_mirror: pair-b.md\n"
+            f"      en_mirror_blob: \"{digest_a}\"\n"
+        )
+        commit_tree(self.root, {
+            "pair-a.md": data_a,
+            "pair-b.md": data_b,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml": manifest,
+        })
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 1, out + err)
+        self.assertIn("pins=2 ok=0 mismatch=2 path_missing=0 incomplete=0", out)
+        self.assertIn(
+            f"MISMATCH authored_indexes[0].root path=pair-a.md "
+            f"declared={wrong} actual={digest_a}",
+            out,
+        )
+        self.assertIn(
+            f"MISMATCH authored_indexes[0].en_mirror path=pair-b.md "
+            f"declared={digest_a} actual={digest_b}",
+            out,
+        )
+
+    def test_path_key_identity_uses_en_mirror_path_not_neighbour_file(self):
+        """Kills a resolver that pairs en_mirror_blob with another sibling path."""
+        data_x = b"en mirror file X\n"
+        data_y = b"neighbour file Y\n"
+        digest_x = self.blob_sha(data_x)
+        digest_y = self.blob_sha(data_y)
+        manifest = (
+            "work_item_id: AID-2026-900\n"
+            "baseline_and_source_evidence:\n"
+            "  authored_indexes:\n"
+            "    - en_mirror: file-x.md\n"
+            f"      en_mirror_blob: \"{digest_y}\"\n"
+        )
+        commit_tree(self.root, {
+            "file-x.md": data_x,
+            "file-y.md": data_y,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml": manifest,
+        })
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 1, out + err)
+        self.assertIn("pins=1 ok=0 mismatch=1 path_missing=0 incomplete=0", out)
+        self.assertIn(
+            f"MISMATCH authored_indexes[0].en_mirror path=file-x.md "
+            f"declared={digest_y} actual={digest_x}",
+            out,
+        )
+        self.assertNotIn("path=file-y.md", out)
+
+    def test_cross_identity_isolation_reports_only_the_wrong_pin(self):
+        """Kills a resolver that reuses one identity's digest while checking another."""
+        data_a = b"correct identity A\n"
+        data_b = b"wrong identity B\n"
+        digest_a = self.blob_sha(data_a)
+        wrong = "0" * 40
+        manifest = (
+            "work_item_id: AID-2026-900\n"
+            "baseline_and_source_evidence:\n"
+            "  authored_indexes:\n"
+            "    - root: identity-a.md\n"
+            f"      root_blob: \"{digest_a}\"\n"
+            "    - root: identity-b.md\n"
+            f"      root_blob: \"{wrong}\"\n"
+        )
+        commit_tree(self.root, {
+            "identity-a.md": data_a,
+            "identity-b.md": data_b,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml": manifest,
+        })
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 1, out + err)
+        self.assertIn("pins=2 ok=1 mismatch=1 path_missing=0 incomplete=0", out)
+        self.assertIn(
+            f"MISMATCH authored_indexes[1].root path=identity-b.md "
+            f"declared={wrong} actual={self.blob_sha(data_b)}",
+            out,
+        )
+        self.assertNotIn("MISMATCH authored_indexes[0].root", out)
+
+    def test_every_enumerated_path_digest_pair_is_validated(self):
+        """Kills omissions or path/digest mis-associations in the checker's enumerated families."""
+        reconstructed_data = b"historical reconstructed bytes\n"
+        source_data = b"historical D source bytes\n"
+        source_commit = commit_tree(self.root, {
+            "historical/reconstructed.md": reconstructed_data,
+            "historical/source.md": source_data,
+        })
+
+        files = {
+            "top-root.md": b"top root\n",
+            "top-en.md": b"top english mirror\n",
+            "top-zh.md": b"top chinese mirror\n",
+            "auth-root.md": b"authored root\n",
+            "auth-en.md": b"authored english mirror\n",
+            "auth-zh.md": b"authored chinese mirror\n",
+            "related-path.md": b"related evidence\n",
+            "related-en.md": b"related english mirror\n",
+            "related-zh.md": b"related chinese mirror\n",
+            "execution-evidence.md": b"execution evidence\n",
+            "prompt.md": b"prompt snapshot\n",
+            "session-prompt.md": b"session prompt snapshot\n",
+        }
+
+        def sha(name):
+            return self.blob_sha(files[name])
+
+        prompt_data = files["prompt.md"]
+        session_data = files["session-prompt.md"]
+        document = {
+            "work_item_id": "AID-2026-900",
+            "root": "top-root.md",
+            "root_blob": sha("top-root.md"),
+            "en_mirror": "top-en.md",
+            "en_mirror_blob": sha("top-en.md"),
+            "zh_cn_mirror": "top-zh.md",
+            "zh_cn_mirror_blob": sha("top-zh.md"),
+            "baseline_and_source_evidence": {
+                "authored_indexes": [
+                    {
+                        "root": "auth-root.md",
+                        "root_blob": sha("auth-root.md"),
+                        "en_mirror": "auth-en.md",
+                        "en_mirror_blob": sha("auth-en.md"),
+                        "zh_cn_mirror": "auth-zh.md",
+                        "zh_cn_mirror_blob": sha("auth-zh.md"),
+                    }
+                ]
+            },
+            "related_evidence": [
+                {
+                    "path": "related-path.md",
+                    "blob": sha("related-path.md"),
+                    "en_mirror": "related-en.md",
+                    "en_mirror_blob": sha("related-en.md"),
+                    "zh_cn_mirror": "related-zh.md",
+                    "zh_cn_mirror_blob": sha("related-zh.md"),
+                }
+            ],
+            "gate_a_reconstruction": [
+                {
+                    "root": "historical/reconstructed.md",
+                    "reconstructed_root_blob": self.blob_sha(reconstructed_data),
+                    "source_commit": source_commit,
+                }
+            ],
+            "evidence_file": "execution-evidence.md",
+            "evidence_blob": sha("execution-evidence.md"),
+            "d_source_commit": source_commit,
+            "d_source_blobs": [
+                "historical/source.md: " + self.blob_sha(source_data)
+            ],
+            "prompt": {
+                "prompt_file": "prompt.md",
+                "prompt_sha256": hashlib.sha256(prompt_data).hexdigest(),
+                "prompt_bytes": len(prompt_data),
+            },
+            "session_evidence": [
+                {
+                    "executed_prompt_snapshot_file": "session-prompt.md",
+                    "executed_prompt_sha256": hashlib.sha256(session_data).hexdigest(),
+                    "executed_prompt_bytes": len(session_data),
+                }
+            ],
+        }
+        candidate_files = dict(files)
+        candidate_files[
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml"
+        ] = yaml.safe_dump(document, sort_keys=False)
+        commit_tree(self.root, candidate_files)
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 0, out + err)
+        self.assertIn(
+            "pins=16 ok=16 mismatch=0 path_missing=0 incomplete=0",
+            out,
+        )
+        self.assertNotIn("MISMATCH", out)
+        self.assertNotIn("INCOMPLETE", out)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
