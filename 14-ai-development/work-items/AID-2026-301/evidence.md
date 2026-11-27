@@ -70,6 +70,7 @@ The observed repository main at implementation start was `af2660d55a93278157fa66
 | `source.selected_source_files[].restored_blob_sha` | `path`; candidate commit | Git blob SHA-1 | `AID-2026-109/manifest.yaml:22-46` |
 | `source.selected_source_files[].frontmatter_blob_sha` | requires `frontmatter_path` or `frontmatter_file` | Git blob SHA-1 | `AID-2026-109/manifest.yaml:22-46`; absent locator is explicitly UNRESOLVED |
 | `source.files[].blob` | `source.files[].path`; `source.head` | Git blob SHA-1 | `AID-2026-150/manifest.yaml:26-32` |
+| `source.source_blob_sha` | `source_path`; `branch_head` | Git blob SHA-1 | `AID-2026-242/manifest.yaml:78-84` |
 
 The executable registry is `PIN_FIELD_REGISTRY` in `scripts/ci/check_manifest_blob_pins.py`. In addition to the named handlers, recursive discovery rejects unregistered blob/digest-shaped fields with `INCOMPLETE UNRESOLVED(unregistered digest field)`; commit identifiers are not treated as blob identities.
 
@@ -125,6 +126,8 @@ The existing required Repository hygiene job remains the carrier. Traceability, 
 | `prompt_original_payload_sha256`, `instruction_sha256` | No committed file locator is declared | UNRESOLVED; not PASS | `AID-2026-023/manifest.yaml` and `AID-2026-003/manifest.yaml:78-81` |
 
 The generic discovery rule is intentionally narrow and fail-closed: scalar fields ending in `_blob`, `_blob_sha`, `_blob_sha256`, or `_sha256` (except execution-only `stdout_sha256`) are either resolved through a sibling locator and declared commit, or emitted as `INCOMPLETE UNRESOLVED`. A mapping-valued field such as `verification.checks.*_and_blob` is not a digest. Commit-reference fields (for example `traceability_exclusions[].sha`, `head_sha`, `merge_commit_sha`) are not blob identities.
+
+The `prompt_original_payload_sha256` fields in AID-023/AID-026 have no dedicated `prompt_original_payload_file` locator; they are reported as `INCOMPLETE UNRESOLVED`, never compared to the ordinary `prompt_file` as though it were the original payload. The AID-109 `frontmatter_blob_sha` fields are looked up by exact blob OID in the declared source tree; the five observed OIDs are absent there, so each remains explicitly unresolved.
 
 The AID-001 CRLF measurement fields `model_blob_sha256_crlf` and `tests_blob_sha256_crlf` are explicitly excluded from repository-blob checking: they describe a Windows-rendered working copy, while the paired `*_lf` fields describe canonical Git bytes. Execution capture `stdout_sha256` is likewise not a repository file pin. These exclusions are field-specific and documented, not wildcard allowlists.
 
