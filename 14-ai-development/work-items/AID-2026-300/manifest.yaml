@@ -1,4 +1,4 @@
-work_item_id: AID-2026-261
+work_item_id: AID-2026-300
 title: >-
   Implement serialized merge-time work-item directory uniqueness against the
   latest target branch, while allowing incremental files in existing work items
@@ -28,29 +28,42 @@ attribution: user-authorized operator (delegated by account owner)
 date: 2026-11-27
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: a7a252eb670b31066a0ffea35dc28cbe6ef5b836
+base_commit_sha: a7cf5256e975ff25fd2f75b3b5051b16d8d77d36
 prompt_status: NOT_RECORDED
 prompt_provenance: DISPATCHED_TASK_FILE
 identifier_allocation:
   id_status: PROVISIONAL
-  observed_main: a7a252eb670b31066a0ffea35dc28cbe6ef5b836
-  assigned_id: AID-2026-261
+  observed_main: a7cf5256e975ff25fd2f75b3b5051b16d8d77d36
+  assigned_id: AID-2026-300
   allocation_rule: >-
-    The operator allocated AID-2026-261 for Issue #1341. The identifier is
-    reserved in the existing work-item tree before implementation so parallel
-    implementation units cannot independently allocate it. The identifier is
-    provisional until the repository's normal acceptance and registration
-    process is complete.
+    The operator initially reserved AID-2026-261 in commit
+    9cf756312e321016e84d9b408476af595a6e5742 at 2026-11-27
+    12:03:36 +0800 (04:03:36Z). A different work item subsequently
+    introduced AID-2026-261 on main in commit
+    8cfd80240b099f6ce4cc660c963064323f78da64 at 2026-11-27
+    12:26:24 +0800 (04:26:24Z), titled
+    "docs(aid-2026-261): register Issue #1237 blocking gate work".
+    Although the reservation commit was earlier, the other work item
+    merged first. Under this work item's merge-time/latest-target
+    allocation contract, the identifier occupied on main is authoritative,
+    so this work item relinquishes AID-2026-261. The replacement identifier
+    AID-2026-300 was checked against the union of all 1098 refs/remotes/origin/*
+    refs: 135 distinct AID-2026 identifiers were present and the maximum
+    was 281. AID-2026-300 was absent from that union, the observed main tree,
+    and the open PR titles, bodies, and file lists. The open PR head branches
+    had no AID-2026-282 through AID-2026-340 occupancy. AID-2026-300 was
+    selected outside the concurrent allocation range in accordance with the
+    allocation rationale recorded for AID-2026-240.
   issue_refs:
     - "#1341"
     - "#1331"
 evidence:
-  record: 14-ai-development/work-items/AID-2026-261/evidence.md
+  record: 14-ai-development/work-items/AID-2026-300/evidence.md
   measurements:
-    base_commit: a7a252eb670b31066a0ffea35dc28cbe6ef5b836
-    base_work_item_directories: 120
-    base_manifests: 110
-    base_index_records: 109
+    base_commit: a7cf5256e975ff25fd2f75b3b5051b16d8d77d36
+    base_work_item_directories: 131
+    base_manifests: 121
+    base_index_records: 120
     branch_work_item_directories_before_implementation: 121
     branch_manifests_before_implementation: 111
     branch_index_records_before_implementation: 110
@@ -58,11 +71,11 @@ evidence:
     checker_test_output: "Ran 7 tests in 13.697s; OK (exit 0)"
     work_item_directories_at_verification: "121"
     manifests_at_verification: "111"
-    positive_checker_output: "candidate=331faf31d115014097c1dc669061724284b5ca3c target=a588cd9914949c2c9db7b2c5704d906fd3f05b70 merge_base=a7a252eb670b31066a0ffea35dc28cbe6ef5b836; CANDIDATE_NEW_DIRECTORIES=1 TARGET_OCCUPIED_NEW_DIRECTORIES=0 ACCEPTED_NEW_DIRECTORIES=1 EXISTING_DIRECTORIES=109 BAD=0; PASS new work-item directory AID-2026-261: target is unoccupied; PASS WORK ITEM UNIQUENESS; exit 0"
-    negative_checker_output: "temp repo neg261: candidate=1407392f276e1c2cafde40cdb73885fc6bf97d0c target=8b6bfdc7694d518b9e69fe48f82f11dfddc76c14 merge_base=a36dc1b80e4715498cb976fedf3a68c3a782a274; CANDIDATE_NEW_DIRECTORIES=1 TARGET_OCCUPIED_NEW_DIRECTORIES=1 ACCEPTED_NEW_DIRECTORIES=0 EXISTING_DIRECTORIES=1 BAD=1; ERROR WU-01 duplicate work-item directory AID-2026-261: candidate introduces this ID, but the latest target already contains it; exit 1"
-    race_checker_output: "temp repo race261: step 1 (PR A against unoccupied main) TARGET_OCCUPIED_NEW_DIRECTORIES=0 BAD=0 PASS WORK ITEM UNIQUENESS exit 0; after main was advanced to PR A head, step 2 (PR B) TARGET_OCCUPIED_NEW_DIRECTORIES=1 BAD=1 ERROR WU-01 duplicate work-item directory AID-2026-262: candidate introduces this ID, but the latest target already contains it; exit 1"
+    positive_checker_output: "candidate=331faf31d115014097c1dc669061724284b5ca3c target=a588cd9914949c2c9db7b2c5704d906fd3f05b70 merge_base=a7a252eb670b31066a0ffea35dc28cbe6ef5b836; CANDIDATE_NEW_DIRECTORIES=1 TARGET_OCCUPIED_NEW_DIRECTORIES=0 ACCEPTED_NEW_DIRECTORIES=1 EXISTING_DIRECTORIES=109 BAD=0; PASS new work-item directory AID-2026-300: target is unoccupied; PASS WORK ITEM UNIQUENESS; exit 0"
+    negative_checker_output: "temp repo neg300: candidate=1407392f276e1c2cafde40cdb73885fc6bf97d0c target=8b6bfdc7694d518b9e69fe48f82f11dfddc76c14 merge_base=a36dc1b80e4715498cb976fedf3a68c3a782a274; CANDIDATE_NEW_DIRECTORIES=1 TARGET_OCCUPIED_NEW_DIRECTORIES=1 ACCEPTED_NEW_DIRECTORIES=0 EXISTING_DIRECTORIES=1 BAD=1; ERROR WU-01 duplicate work-item directory AID-2026-300: candidate introduces this ID, but the latest target already contains it; exit 1"
+    race_checker_output: "temp repo race300: step 1 (PR A against unoccupied main) TARGET_OCCUPIED_NEW_DIRECTORIES=0 BAD=0 PASS WORK ITEM UNIQUENESS exit 0; after main was advanced to PR A head, step 2 (PR B) TARGET_OCCUPIED_NEW_DIRECTORIES=1 BAD=1 ERROR WU-01 duplicate work-item directory AID-2026-301: candidate introduces this ID, but the latest target already contains it; exit 1"
     implementation_head_sha: "331faf31d115014097c1dc669061724284b5ca3c"
-    pull_request: "1397"
+    pull_request: "<FILL:pr_number>"
     run_date: "2026-11-27T04:40:03Z"
   test_runs:
     - command: >-
@@ -80,25 +93,15 @@ evidence:
     - No merge queue activation is claimed.
     - No strict up-to-date protection activation is claimed.
     - No claim is made that the new job is already a required status context.
-session_evidence:
-  - role: "GATE_IMPLEMENTATION_AUTHOR"
-    issue_refs:
-      - "#1341"
-      - "#1331"
-    implementing_ai_session: "NOT_RECORDED"
-    executed_prompt_snapshot_file: "NOT_RECORDED"
-    executed_prompt_sha256: "220fe601aa989bac81921a5f0d09f37ac6aca2db11d4bc9a4787710412d143ff"
-    executed_prompt_bytes: "35619"
-    executed_prompt_provenance: "DISPATCHED_TASK_TEXT"
-    session_reference_status: "NOT_RECORDED"
-    session_evidence_ref: "14-ai-development/work-items/AID-2026-261/session-evidence.md"
 scope:
   files_to_create:
     - scripts/check_work_item_uniqueness.py
     - tests/test_check_work_item_uniqueness.py
     - .github/workflows/work-item-uniqueness.yml
-    - 14-ai-development/work-items/AID-2026-261/evidence.md
-    - 14-ai-development/work-items/AID-2026-261/session-evidence.md
+    - 14-ai-development/work-items/AID-2026-300/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-300/evidence.md
+    - 14-ai-development/work-items/AID-2026-300/session-evidence.md
+    - 14-ai-development/work-items/AID-2026-300/prompt-v1.md
   files_to_modify:
     - 14-ai-development/work-items/INDEX.md
   files_out_of_scope:
@@ -117,8 +120,8 @@ non_goals:
   - Modifying the existing declared-check-contexts inventory.
   - Closing Issue #1341 or asserting Owner acceptance.
 carrier:
-  branch: fix/2026-11-27-aid261-workitem-uniqueness-gate
-  pull_request: "1397"
+  branch: fix/2026-11-27-aid300-workitem-uniqueness-gate
+  pull_request: "<FILL:pr_number>"
   merge_sha: PENDING
   merge_method: PENDING
   required_contexts: "PENDING_PLATFORM_VERIFICATION"
@@ -129,9 +132,11 @@ review:
 acceptance:
   gate: PENDING_CI
 documentation:
-  - path: 14-ai-development/work-items/AID-2026-261/evidence.md
+  - path: 14-ai-development/work-items/AID-2026-300/evidence.md
     relationship: evidence
-  - path: 14-ai-development/work-items/AID-2026-261/session-evidence.md
+  - path: 14-ai-development/work-items/AID-2026-300/session-evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-300/prompt-v1.md
     relationship: evidence
 implementation:
   status: IMPLEMENTED
@@ -144,9 +149,10 @@ implementation:
     - scripts/check_work_item_uniqueness.py
     - tests/test_check_work_item_uniqueness.py
     - .github/workflows/work-item-uniqueness.yml
-    - 14-ai-development/work-items/AID-2026-261/manifest.yaml
-    - 14-ai-development/work-items/AID-2026-261/evidence.md
-    - 14-ai-development/work-items/AID-2026-261/session-evidence.md
+    - 14-ai-development/work-items/AID-2026-300/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-300/evidence.md
+    - 14-ai-development/work-items/AID-2026-300/session-evidence.md
+    - 14-ai-development/work-items/AID-2026-300/prompt-v1.md
     - 14-ai-development/work-items/INDEX.md
   tests:
     - >-

@@ -116,13 +116,13 @@ class WorkItemUniquenessTests(unittest.TestCase):
         self.repo.checkout("main")
         self.repo.branch("pr-new", self.base)
         self.repo.checkout("pr-new")
-        self.repo.add_work_item("AID-2026-261")
+        self.repo.add_work_item("AID-2026-300")
         candidate = self.repo.commit("introduce unused ID")
 
         code, output = self.repo.run_checker("main", candidate)
 
         self.assertEqual(code, 0, output)
-        self.assertIn("PASS new work-item directory AID-2026-261", output)
+        self.assertIn("PASS new work-item directory AID-2026-300", output)
         self.assertIn("TARGET_OCCUPIED_NEW_DIRECTORIES=0", output)
         self.assertIn(f"candidate={candidate}", output)
 
@@ -131,22 +131,22 @@ class WorkItemUniquenessTests(unittest.TestCase):
         self.repo.branch("pr-b", self.base)
 
         self.repo.checkout("pr-a")
-        self.repo.add_work_item("AID-2026-261")
+        self.repo.add_work_item("AID-2026-300")
         self.repo.commit("PR A introduces ID")
 
         self.repo.checkout("pr-b")
-        self.repo.add_work_item("AID-2026-261")
+        self.repo.add_work_item("AID-2026-300")
         candidate = self.repo.commit("PR B introduces same ID")
 
         self.repo.checkout("main")
-        self.repo.add_work_item("AID-2026-261")
+        self.repo.add_work_item("AID-2026-300")
         self.repo.commit("target occupies ID")
 
         code, output = self.repo.run_checker("main", candidate)
 
         self.assertEqual(code, 1, output)
         self.assertIn(
-            "ERROR WU-01 duplicate work-item directory AID-2026-261",
+            "ERROR WU-01 duplicate work-item directory AID-2026-300",
             output,
         )
         self.assertIn("TARGET_OCCUPIED_NEW_DIRECTORIES=1", output)
@@ -174,7 +174,7 @@ class WorkItemUniquenessTests(unittest.TestCase):
     def test_same_candidate_ref_changes_result_with_latest_target(self) -> None:
         self.repo.branch("pr-fixed", self.base)
         self.repo.checkout("pr-fixed")
-        self.repo.add_work_item("AID-2026-261")
+        self.repo.add_work_item("AID-2026-300")
         candidate = self.repo.commit("candidate introduces ID")
 
         self.repo.checkout("main")
@@ -187,7 +187,7 @@ class WorkItemUniquenessTests(unittest.TestCase):
         )
         self.assertEqual(code_before, 0, output_before)
 
-        self.repo.add_work_item("AID-2026-261")
+        self.repo.add_work_item("AID-2026-300")
         self.repo.commit("target advances and occupies ID")
 
         code_after, output_after = self.repo.run_checker(
@@ -196,7 +196,7 @@ class WorkItemUniquenessTests(unittest.TestCase):
         )
         self.assertEqual(code_after, 1, output_after)
         self.assertIn(
-            "ERROR WU-01 duplicate work-item directory AID-2026-261",
+            "ERROR WU-01 duplicate work-item directory AID-2026-300",
             output_after,
         )
 
@@ -210,11 +210,11 @@ class WorkItemUniquenessTests(unittest.TestCase):
         self.repo.branch("pr-b", self.base)
 
         self.repo.checkout("pr-a")
-        self.repo.add_work_item("AID-2026-262")
+        self.repo.add_work_item("AID-2026-301")
         candidate_a = self.repo.commit("PR A introduces shared ID")
 
         self.repo.checkout("pr-b")
-        self.repo.add_work_item("AID-2026-262")
+        self.repo.add_work_item("AID-2026-301")
         candidate_b = self.repo.commit("PR B introduces shared ID")
 
         self.repo.checkout("main")
@@ -227,7 +227,7 @@ class WorkItemUniquenessTests(unittest.TestCase):
         code_b, output_b = self.repo.run_checker("main", candidate_b)
         self.assertEqual(code_b, 1, output_b)
         self.assertIn(
-            "ERROR WU-01 duplicate work-item directory AID-2026-262",
+            "ERROR WU-01 duplicate work-item directory AID-2026-301",
             output_b,
         )
         self.assertIn("BAD=1", output_b)

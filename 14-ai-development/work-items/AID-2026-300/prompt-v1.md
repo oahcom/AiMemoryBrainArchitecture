@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-261/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-300/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -42,9 +42,9 @@ document_metadata:
     zh-CN: null
 ---
 
-# AID-2026-261 — dispatched contract snapshot (v1)
+# AID-2026-300 — dispatched contract snapshot (v1)
 
-本文件是投递给实现会话的提示词正文快照，由执行方逐字落盘；正文未经会话改写。
+本文件是投递给实现会话的提示词正文快照，由执行方逐字落盘；正文未经会话改写。正文中的 `AID-2026-261` 是投递时使用的编号，后因该编号在合并时刻已被 main 占用，本工作项改号为 `AID-2026-300`。
 
 # 任务：实现 Option (d) —— 串行化、合并时刻的 work-item 唯一性门禁（Issue #1341 / AID-2026-261）
 

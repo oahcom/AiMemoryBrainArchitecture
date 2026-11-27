@@ -12,12 +12,12 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-261/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-300/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
       last_verified_date: "2026-11-27"
-      last_verification_note: "The recorded local results are supplied by the operator. They are not CI results, merge results, or post-merge verification. The unit-test suite had four failures caused by inconsistent output-key casing before this correction; corrected tests must be rerun before claiming the suite passes."
+      last_verification_note: "The recorded local results are supplied by the operator. They are not CI results, merge results, or post-merge verification. The earlier four test failures were caused by inconsistent output-key casing; the corrected seven-test suite was subsequently reported passing. The identifier has since been reassigned from AID-2026-261 to AID-2026-300 because the former was occupied on main at merge time."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -30,8 +30,8 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Canonical
-    canonical_scope: "AID-2026-261 implementation and verification record for cross-tree work-item directory uniqueness at merge time"
-    canonical_scope_id: "ai-development/aid-2026-261-merge-time-work-item-uniqueness"
+    canonical_scope: "AID-2026-300 implementation and verification record for cross-tree work-item directory uniqueness at merge time"
+    canonical_scope_id: "ai-development/aid-2026-300-merge-time-work-item-uniqueness"
     canonical_scope_keywords:
       - "work-item-uniqueness"
       - "merge-time"
@@ -45,7 +45,7 @@ document_metadata:
     en: null
     zh-CN: null
 ---
-# AID-2026-261 — Merge-time work-item directory uniqueness
+# AID-2026-300 — Merge-time work-item directory uniqueness
 
 ## 1. Contract
 
@@ -125,11 +125,11 @@ must not be claimed.
 | Evidence | Proof method | Reproduction command | Expected output / acceptance condition |
 |---|---|---|---|
 | Contract | Checker distinguishes candidate-introduced directories from directories already present at merge-base. | `python -m unittest discover -s tests -p "test_check_work_item_uniqueness.py" -v` | New-directory uniqueness and existing-directory incremental acceptance; `Ran 7 tests in 13.697s; OK (exit 0)` |
-| Serialization | Workflow-wide concurrency group serializes workflow executions; each execution resolves latest target. Platform merge enforcement remains an explicit dependency. | Inspect `.github/workflows/work-item-uniqueness.yml`; `git show HEAD:.github/workflows/work-item-uniqueness.yml` | Shared concurrency group; `cancel-in-progress: false`; platform merge barrier separately verified |
-| Positive | Candidate introduces an identifier absent from target and passes. | `python scripts/check_work_item_uniqueness.py --target origin/main --candidate HEAD` | Exit 0; `PASS new work-item directory AID-2026-261`; `candidate=331faf31d115014097c1dc669061724284b5ca3c target=a588cd9914949c2c9db7b2c5704d906fd3f05b70 merge_base=a7a252eb670b31066a0ffea35dc28cbe6ef5b836; CANDIDATE_NEW_DIRECTORIES=1 TARGET_OCCUPIED_NEW_DIRECTORIES=0 ACCEPTED_NEW_DIRECTORIES=1 EXISTING_DIRECTORIES=109 BAD=0; PASS new work-item directory AID-2026-261: target is unoccupied; PASS WORK ITEM UNIQUENESS; exit 0` |
-| Negative | Candidate introduces an identifier already present in latest target and fails in the checker itself. | `python -m unittest discover -s tests -p "test_check_work_item_uniqueness.py" -v` | Negative fixture exits 1; explicit `ERROR WU-01 duplicate work-item directory AID-2026-261`; `temp repo neg261: candidate=1407392f276e1c2cafde40cdb73885fc6bf97d0c target=8b6bfdc7694d518b9e69fe48f82f11dfddc76c14 merge_base=a36dc1b80e4715498cb976fedf3a68c3a782a274; CANDIDATE_NEW_DIRECTORIES=1 TARGET_OCCUPIED_NEW_DIRECTORIES=1 ACCEPTED_NEW_DIRECTORIES=0 EXISTING_DIRECTORIES=1 BAD=1; ERROR WU-01 duplicate work-item directory AID-2026-261: candidate introduces this ID, but the latest target already contains it; exit 1` |
+| Serialization | Workflow-wide concurrency group serializes workflow executions; each execution resolves latest target. Platform merge enforcement remains an explicit dependency. | Inspect `.github/workflows/work-item-uniqueness.yml`; `git show HEAD:.github/workflows/work-item-uniqueness.yml` | Shared concurrency group; `cancel-in-progress: false`; the main-push audit rechecks open PR heads against the advanced target. The platform merge barrier remains a separately unverified dependency. |
+| Positive | Candidate introduces an identifier absent from target and passes. | `python scripts/check_work_item_uniqueness.py --target origin/main --candidate HEAD` | Exit 0; `PASS new work-item directory AID-2026-300`; `candidate=331faf31d115014097c1dc669061724284b5ca3c target=a588cd9914949c2c9db7b2c5704d906fd3f05b70 merge_base=a7a252eb670b31066a0ffea35dc28cbe6ef5b836; CANDIDATE_NEW_DIRECTORIES=1 TARGET_OCCUPIED_NEW_DIRECTORIES=0 ACCEPTED_NEW_DIRECTORIES=1 EXISTING_DIRECTORIES=109 BAD=0; PASS new work-item directory AID-2026-300: target is unoccupied; PASS WORK ITEM UNIQUENESS; exit 0` |
+| Negative | Candidate introduces an identifier already present in latest target and fails in the checker itself. | `python -m unittest discover -s tests -p "test_check_work_item_uniqueness.py" -v` | Negative fixture exits 1; explicit `ERROR WU-01 duplicate work-item directory AID-2026-300`; `temp repo neg300: candidate=1407392f276e1c2cafde40cdb73885fc6bf97d0c target=8b6bfdc7694d518b9e69fe48f82f11dfddc76c14 merge_base=a36dc1b80e4715498cb976fedf3a68c3a782a274; CANDIDATE_NEW_DIRECTORIES=1 TARGET_OCCUPIED_NEW_DIRECTORIES=1 ACCEPTED_NEW_DIRECTORIES=0 EXISTING_DIRECTORIES=1 BAD=1; ERROR WU-01 duplicate work-item directory AID-2026-300: candidate introduces this ID, but the latest target already contains it; exit 1` |
 | Incremental | Candidate adds a file beneath an identifier already present at merge-base. | `python -m unittest discover -s tests -p "test_check_work_item_uniqueness.py" -v` | Exit 0; `PASS existing work-item directory AID-2026-100`; no duplicate error |
-| Race | Two candidate refs independently introduce the same identifier from the same target; first passes, then target advances, second fails. | `python -m unittest discover -s tests -p "test_check_work_item_uniqueness.py" -v` | First decision exit 0; second exit 1; `ERROR WU-01 duplicate work-item directory AID-2026-262`; `temp repo race261: step 1 (PR A against unoccupied main) TARGET_OCCUPIED_NEW_DIRECTORIES=0 BAD=0 PASS WORK ITEM UNIQUENESS exit 0; after main was advanced to PR A head, step 2 (PR B) TARGET_OCCUPIED_NEW_DIRECTORIES=1 BAD=1 ERROR WU-01 duplicate work-item directory AID-2026-262: candidate introduces this ID, but the latest target already contains it; exit 1` |
+| Race | Two candidate refs independently introduce the same identifier from the same target; first passes, then target advances, second fails. | `python -m unittest discover -s tests -p "test_check_work_item_uniqueness.py" -v` | First decision exit 0; second exit 1; `ERROR WU-01 duplicate work-item directory AID-2026-301`; `temp repo race300: step 1 (PR A against unoccupied main) TARGET_OCCUPIED_NEW_DIRECTORIES=0 BAD=0 PASS WORK ITEM UNIQUENESS exit 0; after main was advanced to PR A head, step 2 (PR B) TARGET_OCCUPIED_NEW_DIRECTORIES=1 BAD=1 ERROR WU-01 duplicate work-item directory AID-2026-301: candidate introduces this ID, but the latest target already contains it; exit 1` |
 | Exact head | Same candidate ref is checked against two target states; first is unoccupied, second is occupied. | `python -m unittest discover -s tests -p "test_check_work_item_uniqueness.py" -v` | Candidate SHA remains identical; target SHA changes; result changes from exit 0 to exit 1 |
 | Regression | Existing traceability, document management, runner admission, repository hygiene and uniqueness checks are run independently. | `python scripts/check_work_item_uniqueness.py --target origin/main --candidate HEAD`<br>`python scripts/check_traceability.py --index-only`<br>`python scripts/check_document_management.py --require-changed origin/main`<br>`python scripts/ci/audit_runner_admission.py`<br>`python scripts/ci/check_repository_hygiene.py --base <base_sha> --head <head_sha>` | Supplied local results: uniqueness exit 0; traceability PASS; document management PASS; runner admission 29 jobs audited, 0 violations. Repository hygiene must be run with actual base/head SHAs; no pass is claimed until its output and exit code are recorded. |
 
