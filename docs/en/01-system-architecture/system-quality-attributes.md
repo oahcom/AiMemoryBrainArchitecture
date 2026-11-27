@@ -1,9 +1,48 @@
+---
+document_metadata:
+  domain: architecture
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-200/evidence.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "GOV-DOC-002 classification of a mirror that carried no front-matter: records domain, role, status and the canonical source path only (basis, the document's own statement: Status: DECIDED quality priorities and measurement principles). Claims no canonical authority and does not verify semantic parity with the source. Pre-metadata content blob: ec86ed6f84a6636973c58fbe4573619c9a2674c9."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Normative
+  bilingual_counterpart:
+    source: "01-system-architecture/system-quality-attributes.md"
+    en: null
+    zh-CN: "docs/zh-CN/01-system-architecture/system-quality-attributes.md"
+---
 # System Quality Attributes
 
 - Document ID: SYS-QA-001
 - Version: 1.0
 - Source: [Normative source specification](../../../01-system-architecture/system-quality-attributes.md)
-- Source revision: 4350733173d29451a8ea4aa6a544de46526b4fd7
+- Source revision: afc7d19a71546c27f7fff74e1128b7774f2855ab
 - Chinese counterpart: [系统质量属性](../../zh-CN/01-system-architecture/system-quality-attributes.md)
 - Status: DECIDED quality priorities and measurement principles; CANDIDATE architectural tactics; TO_VALIDATE quantitative targets
 

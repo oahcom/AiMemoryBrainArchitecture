@@ -1,9 +1,48 @@
+---
+document_metadata:
+  domain: domain-model
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-200/evidence.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "为原本无 front-matter 的镜像补 GOV-DOC-002 分类：仅记录 domain、role、状态与规范源路径（依据正文自述：Status: Separation and isolation DECIDED）；不主张规范权威，也不证明与源语义对等。补元数据前正文 blob：dff51599324a0edbca2bee52d4d9f9b6ffa117c2。"
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Normative
+  bilingual_counterpart:
+    source: "02-domain-model/scope-and-permission-model.md"
+    en: "docs/en/02-domain-model/scope-and-permission-model.md"
+    zh-CN: null
+---
 # Scope 与 Permission 模型
 
 - 文档 ID：DOMAIN-SCOPE-PERMISSION-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../02-domain-model/scope-and-permission-model.md)
-- 源版本：b5215ae27bd65a6c89c185b496f730b6cd52efa9
+- 源版本： 713d6d06157bfa7d4a72ac696513e0ece6ff23bd
 - 对应英文：[Scope and Permission Model](../../en/02-domain-model/scope-and-permission-model.md)
 - 状态：两者分离及隔离原则为 DECIDED；策略语言和继承边界情况为 OPEN
 - Owner：Domain Model 定义语义；Scope、Permission & Governance Engine 负责执行

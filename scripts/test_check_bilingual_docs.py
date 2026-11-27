@@ -26,7 +26,8 @@ def git(root: Path, *args: str) -> str:
         ["git", "-C", str(root), *args],
         check=True,
         capture_output=True,
-        text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     return result.stdout.strip()
 
@@ -295,6 +296,192 @@ class BaselineCopyConsistencyTests(unittest.TestCase):
             self.assertIn("ratchet baseline is missing", errors[0])
 
 
+class BaselineCopyRegistryTests(unittest.TestCase):
+    """Every copy of the frozen inventory is declared, marked, or red."""
+
+    COPIES = {relative: role for relative, role, _why in GATE.BASELINE_COPIES}
+    BMCP_EN = "reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md"
+    BMCP_ZH = "reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md"
+    REGISTER = "14-ai-development/governance-register/evidence/main-paths.json"
+    SNAPSHOT = "00-governance/reports/gov-doc-001-full-scan-2026-11-20.md"
+
+    def _write(self, root: Path, relative: str, text: str) -> None:
+        path = root / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
+
+    def _tree(
+        self,
+        root: Path,
+        authority: tuple[str, ...],
+        live: tuple[str, ...] | None = None,
+    ) -> None:
+        """Write the two baselines plus every declared copy that a test needs."""
+        frozen = root / "scripts" / "bilingual-baseline.txt"
+        frozen.parent.mkdir(parents=True, exist_ok=True)
+        entries = authority if live is None else live
+        frozen.write_text("".join(f"{entry}\n" for entry in entries), encoding="utf-8")
+        ratchet = root / "scripts" / "ci" / "baselines" / "bilingual-docs.txt"
+        ratchet.parent.mkdir(parents=True, exist_ok=True)
+        ratchet.write_text("".join(f"{entry}\n" for entry in authority), encoding="utf-8")
+
+    def _check(self, root: Path) -> tuple[list[str], str]:
+        output = io.StringIO()
+        with (
+            patch.object(GATE, "ROOT", root),
+            patch.object(GATE, "BASELINE_PATH", root / "scripts" / "bilingual-baseline.txt"),
+            patch.object(
+                GATE,
+                "CI_BASELINE_PATH",
+                root / "scripts" / "ci" / "baselines" / "bilingual-docs.txt",
+            ),
+            contextlib.redirect_stdout(output),
+        ):
+            errors = GATE.check_baseline_copies_agree()
+        return errors, output.getvalue()
+
+    def test_registry_declares_every_role(self) -> None:
+        """The registry names one authority, one live copy, and the rest."""
+        roles = [role for _relative, role, _why in GATE.BASELINE_COPIES]
+        self.assertEqual(roles.count("authority"), 1, roles)
+        self.assertEqual(
+            [relative for relative, role, _w in GATE.BASELINE_COPIES if role == "authority"],
+            ["scripts/ci/baselines/bilingual-docs.txt"],
+        )
+        self.assertIn("live", roles)
+        self.assertEqual(len(set(self.COPIES)), len(GATE.BASELINE_COPIES))
+
+    def test_all_declared_copies_agreeing_passes(self) -> None:
+        entries = ("a/x.md", "b/y.md")
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._tree(root, entries)
+            self._write(
+                root,
+                self.BMCP_EN,
+                "| 01 | `a/x.md` |\n"
+                f"> {GATE.BASELINE_COPY_MARKER}\n",
+            )
+            self._write(
+                root,
+                self.BMCP_ZH,
+                "| 01 | `a/x.md` |\n"
+                f"> {GATE.BASELINE_COPY_MARKER}\n",
+            )
+            self._write(root, self.REGISTER, '[\n"a/x.md",\n"b/y.md",\n"c/z.md"\n]\n')
+            self._write(
+                root,
+                self.SNAPSHOT,
+                "- Source revision / 扫描源 Commit: "
+                "`568b847ce39f30071f35355ee0fb6f2300e00708`\n"
+                "| 1 | `a/x.md` |\n",
+            )
+            errors, output = self._check(root)
+            self.assertEqual(errors, [])
+            self.assertNotIn("::error::", output)
+
+    def test_historical_snapshot_without_marker_fails(self) -> None:
+        """The drifted 81-entry snapshot must carry the marker, not just exist."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._tree(root, ("a/x.md",))
+            self._write(root, self.BMCP_EN, "| 01 | `a/x.md` |\n")
+            errors, _output = self._check(root)
+            self.assertEqual(len(errors), 1, errors)
+            self.assertIn(self.BMCP_EN, errors[0])
+            self.assertIn(GATE.BASELINE_COPY_MARKER, errors[0])
+
+    def test_historical_snapshot_drift_is_a_notice_not_an_error(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._tree(root, ("a/x.md", "b/y.md"))
+            self._write(
+                root,
+                self.BMCP_EN,
+                f"> {GATE.BASELINE_COPY_MARKER}\n"
+                "| 01 | `a/x.md` |\n| 02 | `c/z.md` |\n",
+            )
+            errors, output = self._check(root)
+            self.assertEqual(errors, [])
+            self.assertIn("::notice::", output)
+            self.assertIn("informational only", output)
+            self.assertIn(self.BMCP_EN, output)
+
+    def test_register_missing_a_frozen_entry_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._tree(root, ("a/x.md", "b/y.md"))
+            self._write(root, self.REGISTER, '[\n"a/x.md"\n]\n')
+            errors, _output = self._check(root)
+            self.assertEqual(len(errors), 1, errors)
+            self.assertIn("b/y.md", errors[0])
+            self.assertIn(self.REGISTER, errors[0])
+
+    def test_snapshot_without_revision_declaration_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._tree(root, ("a/x.md",))
+            self._write(root, self.SNAPSHOT, "| 1 | `a/x.md` |\n")
+            errors, _output = self._check(root)
+            self.assertEqual(len(errors), 1, errors)
+            self.assertIn(self.SNAPSHOT, errors[0])
+            self.assertIn("source revision", errors[0])
+
+    def test_undeclared_copy_of_the_inventory_fails(self) -> None:
+        """A new copy that nobody declared is red even when it mostly agrees."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            make_repo(root)
+            self._tree(root, ("a/x.md",))
+            self._write(root, "notes/inventory.md", "- `a/x.md`\n- `b/drift.md`\n")
+            git(root, "add", "-A")
+            git(root, "commit", "-q", "-m", "undeclared copy")
+            errors, _output = self._check(root)
+            self.assertEqual(len(errors), 1, errors)
+            self.assertIn("notes/inventory.md", errors[0])
+            self.assertIn("not a declared copy", errors[0])
+
+    def test_marked_undeclared_snapshot_is_a_notice(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            make_repo(root)
+            self._tree(root, ("a/x.md",))
+            self._write(
+                root,
+                "notes/inventory.md",
+                f"> {GATE.BASELINE_COPY_MARKER}\n- `a/x.md`\n- `b/drift.md`\n",
+            )
+            git(root, "add", "-A")
+            git(root, "commit", "-q", "-m", "marked snapshot")
+            errors, output = self._check(root)
+            self.assertEqual(errors, [])
+            self.assertIn("notes/inventory.md", output)
+
+    def test_this_repository_has_no_undeclared_inventory_copy(self) -> None:
+        """The real tree keeps exactly the copies the registry declares."""
+        authority = GATE.read_baseline_entries(GATE.CI_BASELINE_PATH)
+        self.assertIsNotNone(authority)
+        declared = {relative for relative, _role, _why in GATE.BASELINE_COPIES}
+        self.assertEqual(GATE._undeclared_copies(authority, declared), [])
+
+    def test_entry_shapes_are_read_from_every_copy_format(self) -> None:
+        text = (
+            "00-governance/a.md\n"
+            "| 07 | `06-memory-context/b.md` | note |\n"
+            '  "13-engineering-decisions/c.md",\n'
+            "- `13-engineering-decisions/d.md`\n"
+        )
+        self.assertEqual(
+            GATE.inventory_entries_in(text),
+            {
+                "00-governance/a.md",
+                "06-memory-context/b.md",
+                "13-engineering-decisions/c.md",
+                "13-engineering-decisions/d.md",
+            },
+        )
+
+
 class WriteBaselineShrinkOnlyTests(unittest.TestCase):
     """`--write-baseline` must refuse to raise the frozen inventory."""
 
@@ -346,6 +533,67 @@ class WriteBaselineShrinkOnlyTests(unittest.TestCase):
             self.assertEqual(code, 2, combined)
             self.assertIn("cannot prove the new baseline only shrinks", combined)
             self.assertFalse(baseline_path.exists())
+
+
+class GitOutputDecodingTests(unittest.TestCase):
+    """Git output is decoded as UTF-8, never with the console's locale codec."""
+
+    def test_undecodable_blob_names_the_decode_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            make_repo(root)
+            # A blob Git stores happily and no UTF-8 reader can decode. On a
+            # GBK console `text=True` raised UnicodeDecodeError and `git show`
+            # returned None; the caller then crashed (AID-173) or, in DM-10,
+            # reported a file absent that it had never read.
+            stored = subprocess.run(
+                ["git", "-C", str(root), "hash-object", "-w", "--stdin"],
+                input=b"---\ndocument_metadata:\n\xff\xfe not utf-8\n---\n",
+                capture_output=True,
+                check=True,
+            ).stdout.decode("ascii").strip()
+            with patch.object(GATE, "ROOT", root):
+                with self.assertRaises(GATE.GitOutputDecodeError) as caught:
+                    GATE._git_log_output("show", stored)
+            message = str(caught.exception)
+            self.assertIn("decode", message)
+            self.assertNotIn("not exist", message)
+
+    def test_main_reports_decode_failure_as_incomplete(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            base = make_repo(root)
+            head = commit_file(root, "docs/zh-CN/00-governance/x.md")
+            baseline_path = root / "scripts" / "bilingual-baseline.txt"
+            baseline_path.parent.mkdir(parents=True, exist_ok=True)
+            baseline_path.write_text("", encoding="utf-8")
+            ratchet_path = root / "scripts" / "ci" / "baselines" / "bilingual-docs.txt"
+            ratchet_path.parent.mkdir(parents=True, exist_ok=True)
+            ratchet_path.write_text("", encoding="utf-8")
+            output, errors = io.StringIO(), io.StringIO()
+            with (
+                patch.object(GATE, "ROOT", root),
+                patch.object(GATE, "BASELINE_PATH", baseline_path),
+                patch.object(GATE, "CI_BASELINE_PATH", ratchet_path),
+                patch.object(GATE, "_require_full_git_history"),
+                patch.object(GATE, "check_prompt_library", return_value=[]),
+                patch.object(
+                    GATE,
+                    "check_embedded_registration_history",
+                    side_effect=GATE.GitOutputDecodeError(
+                        "git output decode failed (utf-8) while reading git show"
+                    ),
+                ),
+                patch.dict(os.environ, {"BASE_SHA": base, "HEAD_SHA": head}),
+                patch.object(sys, "argv", ["check_bilingual_docs.py"]),
+                contextlib.redirect_stdout(output),
+                contextlib.redirect_stderr(errors),
+            ):
+                code = GATE.main()
+            combined = output.getvalue() + errors.getvalue()
+            # Incomplete (2), not a content verdict (1), and not a traceback.
+            self.assertEqual(code, 2, combined)
+            self.assertIn("decode", combined)
 
 
 if __name__ == "__main__":

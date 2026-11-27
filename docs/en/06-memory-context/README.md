@@ -1,3 +1,42 @@
+---
+document_metadata:
+  domain: memory-context
+  role: index
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-200/evidence.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "GOV-DOC-002 classification of a mirror that carried no front-matter: records domain, role, status and the canonical source path only (basis, the document's own statement: Publication status: candidate architecture and historical review evidence). Claims no canonical authority and does not verify semantic parity with the source. Pre-metadata content blob: 684490d1c4e2c3aeb0236a9083abf9a144f2744c."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "06-memory-context/README.md"
+    en: null
+    zh-CN: "docs/zh-CN/06-memory-context/README.md"
+---
 # Session G — Memory Context package
 
 **Publication status:** candidate architecture and historical review evidence; not a frozen cross-owner contract.

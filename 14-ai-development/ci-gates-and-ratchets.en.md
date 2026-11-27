@@ -305,7 +305,17 @@ Baselines are files under `scripts/ci/baselines/`, one failing item per line,
 
 | File | Items | Meaning |
 |---|---|---|
-| `scripts/ci/baselines/bilingual-docs.txt` | 77 | normative paths with no `en` / `zh-CN` counterpart |
+| `scripts/ci/baselines/bilingual-docs.txt` | 77 | normative paths with no `en` / `zh-CN` counterpart; the single authority for this inventory |
+
+That file is the only authority. Every other file that carries the same list is a
+copy, and `check_bilingual_docs.py`'s `check_baseline_copies_agree()` compares all
+of them: `scripts/bilingual-baseline.txt` must hold the same entries, the
+governance register must contain them, and a dated snapshot must instead be marked
+`HISTORICAL — not a gate input`. A copy that is neither equal to the authority nor
+marked fails the check, so no second pass condition can appear silently. `81` is a
+historical value: it is the count of the 81-finding review snapshot at
+`c58878f` (`reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md`), never the
+count of this baseline today.
 
 Regenerate a baseline only when the failure set legitimately changed:
 
@@ -397,7 +407,7 @@ Recorded on `6de4e38c` (the commit this work started from):
 | `check_protocol_index.py` | exit 0 — `missing=0 extra=0 duplicate_types=0 invalid_rows=0`, `PASS` |
 | conformance with both dependency sets | exit 0 — `Ran 585 tests`, `OK (skipped=27)` |
 | `test_nonempty_audit.py` | exit 1 — 5506 unregistered constraints (GAP-09, since closed) |
-| `check_bilingual_docs_full.py` | exit 1 — 81 uncovered paths (GAP-08) |
+| `check_bilingual_docs_full.py` | exit 1 — 81 uncovered paths (GAP-08; the 81-finding full-scan count of 2026-11-22, a historical number, not a baseline count — §4) |
 | `cargo fmt --all --check` | exit 0 |
 | `cargo clippy --workspace --all-targets -- -D warnings` | exit 0 |
 | `cargo test --workspace` | exit 0 |
@@ -417,7 +427,7 @@ Re-measured after rebasing:
 | Command | Result |
 |---|---|
 | `python3 08-bmcp-protocol/schemas/test_nonempty_audit.py` | exit 0 — `OK: 32 schemas; 5599 registered constraints; no unregistered or stale entries.` |
-| `gate_ratchet.py --baseline .../bilingual-docs.txt` | exit 0 — `baseline=81 current=81 regressions=0 fixed=0`, `PASS` |
+| `gate_ratchet.py --baseline .../bilingual-docs.txt` | exit 0 — `baseline=81 current=81 regressions=0 fixed=0`, `PASS` (81 was the baseline's count on 2026-11-22; the authority holds 77 today, §4) |
 | `audit_runner_admission.py` (at rebase time) | exit 0 — `7 self-hosted job(s) audited, 0 violation(s)` |
 | `cargo test --workspace --all-targets` (on `main`) | `passed=546 failed=0 ignored=1` |
 | `cargo test --workspace` (on `main`) | `passed=551 failed=0 ignored=1` |
@@ -513,7 +523,7 @@ cargo 1.95.0, node 22), with `RUNNER_TEMP` set as the runner sets it. Results:
 | `conformance` | venv dependency install (the real script) | exit 0, `using venv at /tmp/rt/gates-venv`, venv satisfies `jsonschema`/`rfc8785`/`cryptography` |
 | `conformance` | full suite, run through that venv | exit 0, `Ran 585 tests`, `OK (skipped=27)` |
 | `schema-nonempty` | hard gate audit | exit 0, `OK: 32 schemas; 5599 registered constraints` |
-| `bilingual` | ratchet | exit 0, `baseline=81 current=81 regressions=0 fixed=0` |
+| `bilingual` | ratchet | exit 0, `baseline=81 current=81 regressions=0 fixed=0` (the 2026-11-22 count; the authority holds 77 today, §4) |
 | `clippy` | disk preflight | exit 0 on a host with 721G free (see §7.5 for the refusal path) |
 | `clippy` | toolchain presence | exit 0, `cargo 1.95.0`, `rustc 1.95.0`, `clippy 0.1.95` |
 | `clippy` | `cargo clippy --workspace --all-targets -- -D warnings` | exit 0 |

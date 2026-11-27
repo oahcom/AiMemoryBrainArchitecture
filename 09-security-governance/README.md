@@ -18,7 +18,7 @@ document_metadata:
     evidence_verification:
       verification_status: Unverified
       last_verified_date: null
-      last_verification_note: "Navigation index only; linked contracts remain Candidate/Informative and unaccepted."
+      last_verification_note: "Navigation index only; each of the five linked contracts declares canonical_status: Canonical in its own frontmatter; normative_status remains Informative."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -53,7 +53,7 @@ This is the bounded canonical entry point for the restored I-domain source set.
 
 AID-2026-109 restores only five policy/contract documents selected against the I-root blockers in F4, F6 and F7 of the 2026-11-26 A–I + Storage composition review. It does **not** import the historical `session-i-security-governance-2026-11-16` tree wholesale. That branch contains 91 files under this domain; the other files are not restored by this work item.
 
-The five documents remain **Candidate / Informative**. Their presence makes the source material discoverable on main; it does not ratify Phase 3.x decisions, approve a production policy, or establish implementation/conformance evidence.
+Each of the five documents declares `canonical_status: Canonical` in its own frontmatter. That field is authoritative; this README is a guide, not a normative source. Their `normative_status: Informative` and `decision_status: Draft` remain as recorded. Their presence does not ratify Phase 3.x decisions, approve a production policy, or establish implementation/conformance evidence.
 
 ## Canonical I documents
 

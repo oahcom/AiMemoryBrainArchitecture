@@ -281,16 +281,9 @@ jobs:
         with:
           components: rustfmt
 
-      - name: Record resolved Rust toolchain version
-        id: rust-toolchain-version
-        shell: bash
-        run: echo "version=$(rustc --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
-
-      - name: Cache Rust dependencies and build artifacts
-        uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: gates-fmt
-          key: ${{ hashFiles('Cargo.lock') }}-${{ steps.rust-toolchain-version.outputs.version }}
+      # No rust-cache here on purpose: this job only runs `cargo fmt --all
+      # -- --check` and never compiles, so a dependency/build cache can never
+      # hit and only costs a cache round-trip on every pull request.
 
       # `check_fmt.py` never rewrites files and refuses a dirty work tree, so a
       # pass here means the committed tree is formatted, not that a checkout
@@ -298,3 +291,17 @@ jobs:
       - name: Verify repository formatting at this commit
         shell: bash
         run: python3 scripts/check_fmt.py --expect "$GITHUB_SHA"
+
+  work-item-manifest-schema:
+    name: Work Item manifest schema (read-only baseline)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install the repository's pinned YAML parser
+        run: python -m pip install PyYAML==6.0.2
+      - name: Validate all Work Item manifests without migration
+        run: python scripts/ci/check_work_item_manifest_schema.py

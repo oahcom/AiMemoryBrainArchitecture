@@ -21,7 +21,7 @@ class Tests(unittest.TestCase):
             subprocess.run(["git","-C",str(root),"config","user.name","Test"],check=True)
             (root/"docs").mkdir(); (root/"docs"/"new.md").write_text("# new\n",encoding="utf-8")
             (root/"known.md").write_text("# known\n",encoding="utf-8")
-            known_sha=subprocess.run(["git","-C",str(root),"hash-object",str((root/"known.md").as_posix())],capture_output=True,text=True).stdout.strip()
+            known_sha=subprocess.run(["git","-C",str(root),"hash-object",str((root/"known.md").as_posix())],capture_output=True,encoding="utf-8",errors="replace").stdout.strip()
             mapping=root/"mapping.yaml"; mapping.write_text("tier1:\n  files:\n    - path: known.md\n      blob_sha: %s\ntier2:\n  files: []\ntier3_per_file:\n  files: []\ndirectory_rules:\n  rules:\n    - directory: docs/\n      tier: UNKNOWN\n"%known_sha,encoding="utf-8")
             subprocess.run(["git","-C",str(root),"add","."],check=True); subprocess.run(["git","-C",str(root),"commit","-qm","fixture"],check=True)
             r=self.run_cmd([BASH,TIERING,mapping],env={**os.environ,"REPO_ROOT":str(root)})
@@ -60,9 +60,9 @@ class Tests(unittest.TestCase):
             p.write_text(content,encoding="utf-8",newline="\n")
         subprocess.run(["git","-C",str(root),"add","."],check=True)
         subprocess.run(["git","-C",str(root),"commit","-qm","fixture"],check=True)
-        return subprocess.run(["git","-C",str(root),"rev-parse","HEAD"],capture_output=True,text=True).stdout.strip()
+        return subprocess.run(["git","-C",str(root),"rev-parse","HEAD"],capture_output=True,encoding="utf-8",errors="replace").stdout.strip()
     def blob_sha(self,root,path):
-        return subprocess.run(["git","-C",str(root),"rev-parse",f"HEAD:{path}"],capture_output=True,text=True).stdout.strip()
+        return subprocess.run(["git","-C",str(root),"rev-parse",f"HEAD:{path}"],capture_output=True,encoding="utf-8",errors="replace").stdout.strip()
     def test_tiering_blob_sha_drift_fails(self):
         # A registered blob_sha that no longer matches the file content at the
         # declared baseline MUST fail the check (exit 1), not pass silently.
@@ -124,7 +124,7 @@ class Tests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             root=Path(d)
             self.make_repo(root,{"docs/a.md":"# a\n"})
-            base=subprocess.run(["git","-C",str(root),"rev-parse","HEAD"],capture_output=True,text=True).stdout.strip()
+            base=subprocess.run(["git","-C",str(root),"rev-parse","HEAD"],capture_output=True,encoding="utf-8",errors="replace").stdout.strip()
             (root/"docs"/"b.md").write_text("# added later\n",encoding="utf-8",newline="\n")
             subprocess.run(["git","-C",str(root),"add","."],check=True)
             subprocess.run(["git","-C",str(root),"commit","-qm","add b"],check=True)

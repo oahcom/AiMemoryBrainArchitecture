@@ -1,0 +1,105 @@
+work_item_id: AID-2026-200
+title: >-
+  Classify the 00-governance, 01-system-architecture, 02-domain-model and 06-memory-context mirror trios
+  under GOV-DOC-002, and refresh the eight Source revision pins the classification moves
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  Front-matter insertions plus sixteen single-line blob pins. No body prose is edited, no file is created
+  or deleted in the corpus, no checker, schema, baseline, workflow or required context changes, and no
+  canonical authority is claimed: every written canonical_status is Non-Canonical and no canonical_scope_id
+  is registered. The one scope departure from the unit dispatch, classifying the canonical root of each
+  trio, is forced by DM-12 and is measured and disclosed in evidence section 3.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 4326669caa6c43193d34219a0451b80762b712ff
+prompt_status: RECORDED
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: 5964c7b95c4b29c7d30c8bce8c00b4ae4e948080
+  assigned_id: AID-2026-200
+  allocation_rule: >-
+    Queried open pull requests, all recent pull requests and remote branches. AID-2026-190 and AID-2026-193
+    were free when this branch was cut and were both registered on main before this branch could merge it
+    (190 by PR #1345, 193 by the 09-security-governance citation annotation); AID-2026-192 is PR #1344 and
+    AID-2026-199 is PR #1353. 200 is the first number outside every observed set. No INDEX maximum plus one
+    was used.
+  renumbered_from: [AID-2026-190, AID-2026-193]
+  renumber_reason: >-
+    Add/add conflicts on every path after merging origin/main, which had registered the number first. Each
+    renumber is a path and label change only: no measured number, blob or gate result in the evidence
+    changed, and the Source revision pins were re-pinned again in the same commit.
+  recheck_rule: >-
+    Immediately before merge, re-read open pull requests and remote branches for AID-2026-200; if occupied,
+    take the next free number and update every path and reference in the same push.
+scope:
+  objective: >-
+    Make GOV-DOC-002 able to classify the 42 mirror files in four directories that carried no front-matter,
+    without touching a single body line, and keep DM-12 green while doing it.
+  changes:
+    - path: "01-system-architecture/{component-interactions,data-flows,system-quality-attributes}.md"
+      detail: "Three trios: canonical root, docs/en mirror, docs/zh-CN mirror. Front-matter inserted at the top of each."
+    - path: "02-domain-model/{core-entities,domain-model-overview,epistemic-and-temporal-semantics,lifecycle-model,phase-1-memory-store,phase-1-sqlite-adapter-contract,phase-1-storage-trait-contract,relationships-and-provenance,scope-and-permission-model}.md"
+      detail: "Nine trios, same shape."
+    - path: "06-memory-context/{README,phase-3.6-applied-forget-reconciliation-contract,phase-3.6.2...,phase-3.6.3...,phase-3.6.4...,phase-3.6.5...,phase-3.8.18...,phase-3.8.22...,phase-3.8.22....zh-CN}.md"
+      detail: "Nine trios, same shape. README is role index; the four phase-3.6.x acceptance records and the phase-3.8.18 review are role review-report."
+    - path: "16 mirrors that pin their canonical blob"
+      detail: "One line per file: the Source revision / 源版本 40-hex value is re-pinned to the new canonical blob, because inserting front-matter into the canonical moves it (DEF-corpus-08)."
+  untouched:
+    - "every body line of every file, other than the sixteen pins"
+    - "every orphan mirror (9 rel, 18 files)"
+    - "every directory outside the four assigned ones"
+    - "scripts/, .github/, .governance/, 00-governance/architecture-document-metadata.schema.yaml"
+    - "branch protection and the sixteen declared required contexts"
+  scope_deviation:
+    id: DEVIATION-1
+    dispatched_constraint: "the unit brief says not to change the canonical side"
+    why_impossible: >-
+      DM-12 requires bilingual_counterpart.source to be an already classified governed document, and requires
+      the counterpart file itself to carry metadata. A classified mirror whose canonical and sibling are
+      unclassified produces two DM-12 errors; the probe in evidence section 3 shows three. Of the 170 mirrors
+      already classified at the base commit, 170 name a classified source: there is no green state in which a
+      mirror is classified and its source is not.
+    what_was_done_instead: >-
+      The canonical root of each trio received the same front-matter block. canonical_status stays
+      Non-Canonical everywhere, no canonical_scope_id is registered and no approval is recorded, so no
+      authority is claimed; the normative_status value is transcribed from the document's own Status line and
+      the basis is recorded per file.
+    disclosure: "evidence section 3, both language copies"
+evidence:
+  record: 14-ai-development/work-items/AID-2026-200/evidence.md
+  prompt: 14-ai-development/work-items/AID-2026-200/prompt-v1.md
+  session: 14-ai-development/work-items/AID-2026-200/session-evidence.md
+non_goals:
+  - Classifying any orphan mirror, or creating a canonical document for one
+  - Claiming Canonical authority, registering a canonical_scope_id, or recording an approval
+  - Editing body prose, headings, links or table cells
+  - Changing any checker, schema, baseline, workflow or required context
+  - Closing or reopening any Issue
+notes:
+  - >-
+    The whole-tree gate still exits 2 after this change, because 383 governed documents elsewhere are
+    unclassified. That backlog is the other corpus units' assignment; this change reports zero rule
+    violations, and the incremental verdict over the base commit is PASS.
+  - >-
+    Nine rels in the four assigned directories are orphans (canonical absent). They are listed as
+    ORPHAN_SKIPPED and deliberately left unclassified, matching defects-corpus.md section 5.
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#1212"
+    implementing_ai_session: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-200/prompt-v1.md"
+    executed_prompt_sha256: "2e05b027e04c452984b4c3f78962a730dc0d1f91a299c200063038b7b796168f"
+    executed_prompt_bytes: 3605
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-200/session-evidence.md"

@@ -1,0 +1,154 @@
+work_item_id: AID-2026-198
+title: >-
+  Measure and repair the side-by-side bilingual predicate, where one CJK character on the English
+  side certified a partner that was never translated
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  One predicate function plus its two callers in a single checker, two regression tests, one
+  registration set and one appended INDEX row. The measured cost over the committed tree is zero
+  new gaps and zero resolved gaps, so neither frozen baseline entry moves and the shrink-only
+  baseline write is not invoked. No workflow, required context, branch protection, registry value
+  or mirror is touched; the twelve pairs the literal rule would have flagged are left untouched and
+  itemised instead.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 4326669caa6c43193d34219a0451b80762b712ff
+prompt_status: RECORDED
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: 4326669caa6c43193d34219a0451b80762b712ff
+  assigned_id: AID-2026-198
+  allocation_rule: >-
+    Lowest free number at each push, because the batch allocates concurrently. 190 was free at
+    first allocation (AID-2026-189 merged, no pull request, branch or directory carrying 190); it
+    was taken by PR #1343 at main 2f4f4118 while this branch was in flight, so the recheck rule
+    fired and the registration moved to 191. 191 was then taken the same way by PR #1345 at main
+    5df2ee00, so the registration moved to 198; 192 (#1344) and 197 (#1348) are also occupied by
+    open pull requests at the time of this allocation. Every path and reference moved with the
+    number in the same push. Neither the 190 nor the 191 directory on main belongs to this unit.
+  recheck_rule: >-
+    Immediately before merge, re-read open pull requests and remote branches for AID-2026-198; if
+    occupied, take the next free number and update every path and reference in the same push.
+  renumbered_from:
+    - AID-2026-190
+    - AID-2026-191
+  renumber_reason: >-
+    Two concurrent claims landed on main during this branch's life: PR #1343 took AID-2026-190 and
+    PR #1345 took AID-2026-191. Neither pull request is this unit's.
+predecessor:
+  work_item_id: null
+  issues:
+    - 469
+  note: >-
+    #469 introduced the "pair must carry Chinese" requirement. The relaxation to "either file
+    carries one CJK character" arrived as pull request #487, not as an Issue, so it is cited here
+    as provenance rather than declared as a related Issue. Neither #469 nor #487 is closed or
+    reopened here.
+scope:
+  objective: >-
+    Remove the source-file half of the side-by-side CJK disjunction so that only the file designated
+    to hold the Chinese text can certify a pair, without moving any baseline entry.
+  changes:
+    - path: "scripts/check_bilingual_docs.py"
+      detail: >-
+        Adds `_chinese_side(source, partner)`, which names the `.zh-CN.md` member of a pair or the
+        plain root `.md` when neither member carries a language suffix, and rewrites
+        `_side_by_side_bilingual()` to read only that file. `_has_any_chinese()`,
+        `_carries_chinese()`, `PARTIAL_SIDE_BY_SIDE_PAIRS` and the mirror branch are unchanged.
+    - path: "scripts/governance/evidence/test_gate_normative_roots.py"
+      detail: >-
+        Renames `test_issue_469_short_translation_is_accepted` to
+        `test_short_translation_on_the_chinese_side_is_accepted` (same assertions, name states the
+        rule) and adds `test_stray_cjk_in_english_source_does_not_vouch_for_the_pair` and
+        `test_english_copy_without_cjk_under_zh_cn_name_is_rejected`. 52 → 54 tests.
+    - path: "14-ai-development/work-items/AID-2026-198/evidence.md"
+      detail: "Canonical record: both measurements, the twelve-item table, the fixture proof, the deferred items."
+    - path: "docs/en/14-ai-development/work-items/AID-2026-198/evidence.md"
+      detail: "English rendition of the canonical record."
+    - path: "docs/zh-CN/14-ai-development/work-items/AID-2026-198/evidence.md"
+      detail: "Chinese rendition of the canonical record."
+    - path: "14-ai-development/work-items/INDEX.md"
+      detail: "One appended registration row; no existing row edited."
+  measurements:
+    gaps_before: 77
+    gaps_after: 77
+    new_gaps: 0
+    resolved_gaps: 0
+    literal_rule_new_gaps: 12
+    side_by_side_pairs_resolved: 103
+    pairs_accepted_only_through_the_english_side: 0
+    tests_before: 52
+    tests_after: 54
+  untouched:
+    - "scripts/bilingual-baseline.txt and scripts/ci/baselines/bilingual-docs.txt"
+    - "_carries_chinese() and its 100-character threshold"
+    - "PARTIAL_SIDE_BY_SIDE_PAIRS and the docs/en + docs/zh-CN mirror branch"
+    - "every file listed in evidence.md section 2"
+    - "every workflow, required check context and branch-protection entry"
+deferred_to_owner:
+  - id: DEFERRED-1
+    title: "The side-by-side floor is still one CJK character; a 100-character floor is AID-2026-054's scope"
+    status: DEFERRED_TO_OWNER
+    measured_cost: "Applying the existing 100-CJK threshold to the designated side instead of one character: gaps 77 -> 77, new 0, resolved 0."
+    reason: >-
+      This unit was explicitly told not to change the 100-character threshold in
+      _carries_chinese(), and OWNER-DECISION-EMBEDDED-BILINGUAL-001 section 4 assigns the floor to
+      AID-2026-054. Landing 054 will rewrite the same function, so the two changes must not be
+      merged blind.
+  - id: DEFERRED-2
+    title: "The docs/en + docs/zh-CN mirror branch pairs files without reading either one"
+    status: DEFERRED_TO_OWNER
+    example: "docs/en/06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.zh-CN.md — 0 CJK, 1073 latin characters, accepted because its docs/zh-CN siblings exist."
+    reason: >-
+      Closing the mirror branch is a different predicate with a different cost against the 77-entry
+      baseline; it is outside a unit scoped to the side-by-side predicate.
+evidence:
+  record: 14-ai-development/work-items/AID-2026-198/evidence.md
+  prompt: 14-ai-development/work-items/AID-2026-198/prompt-v1.md
+  session: 14-ai-development/work-items/AID-2026-198/session-evidence.md
+non_goals:
+  - Deleting, creating or translating any mirror
+  - Changing the 1-character CJK threshold or the 100-character _carries_chinese() threshold
+  - Adding, removing or reordering any baseline entry
+  - Closing or reopening Issue #469 or #487
+  - Touching any workflow, required check context or branch-protection entry
+notes:
+  - >-
+    The literal rule named in the dispatch ("the partner must contain Chinese") was measured first
+    and costs twelve new gaps; all twelve are false positives of a direction-blind predicate, and
+    the evidence records each one with cjk/latin/ratio rather than silently reframing the rule.
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#469"
+      - "#1212"
+    implementing_ai_session: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-198/prompt-v1.md"
+    executed_prompt_sha256: "ba73d4c4322830ad08e84255bd2cd6898ea61f1c1fee7fb8a837f3d53c2a29bf"
+    executed_prompt_bytes: 5832
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-198/session-evidence.md"
+carrier:
+  branch: fix/2026-11-27-side-by-side-cjk
+  pull_request: 1342
+  merge_sha: 9dc98a526703917bd28862f97f75054beacf1388
+  merge_method: merge
+  merge_parents:
+    - cff08dc353eff8c82228a5cc8d73171cd41da378
+    - 51fa2bed71ab984cd4aeca3b96d0a00f11440012
+  required_contexts: "16/16 success on head 51fa2bed71ab984cd4aeca3b96d0a00f11440012"
+  draft: false
+  merge_authorization: >-
+    Only after all 16 required contexts succeeded on the exact final PR head, branch freshness
+    was rechecked, and no conflict remained.
+  closeout_pull_request: PENDING

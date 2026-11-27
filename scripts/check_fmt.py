@@ -148,7 +148,8 @@ def get_head_sha(root: Path) -> str:
             cwd=str(root),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True,
+            encoding="utf-8",
+            errors="replace",
             check=False,
             timeout=15,
         )
@@ -262,7 +263,8 @@ def require_clean_worktree(root: Path) -> None:
             cwd=str(root),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True,
+            encoding="utf-8",
+            errors="replace",
             check=False,
             timeout=15,
         )
