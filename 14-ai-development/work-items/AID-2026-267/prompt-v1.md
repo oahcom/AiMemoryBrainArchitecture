@@ -66,4 +66,8 @@ scripts/check_declared_check_contexts.py.
   read, is None, or lacks the required field.
 - Test injected payloads, including a required-only context and unavailable
   payload; do not depend on live branch state for probes.
-- Keep the existing workflow invocation hard-failing; no warn-only or 
+- Keep the existing workflow invocation hard-failing; no warn-only or || true.
+- Do not add a snapshot, secret, scheduled task, new workflow job, or change
+  branch protection.
+- Open a PR related to #134, include Session Evidence fields, and stop before
+  merge for independent review.
