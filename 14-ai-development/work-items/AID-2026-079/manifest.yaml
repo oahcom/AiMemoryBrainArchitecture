@@ -25,8 +25,8 @@ prompt_id: AID-2026-079-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-079/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 674d82bb987c0fe6c1948943644c3e4aacb84d6080e7d32950cfd41483529169
-prompt_bytes: 5769
+prompt_sha256: af8ad57de5eddf104c3d1ff4eb40e377e352c8ab62e98f86d422139b3b5e03a8
+prompt_bytes: 5732
 
 authorization:
   implementation_write: >-
@@ -177,8 +177,8 @@ session_evidence:
       - "#827"
     implementing_ai_session: a1078-pr1078-rebase-session
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-079/prompt-v1.md
-    executed_prompt_sha256: 674d82bb987c0fe6c1948943644c3e4aacb84d6080e7d32950cfd41483529169
-    executed_prompt_bytes: 5769
+    executed_prompt_sha256: a2d216ee647954b02a6487349716191403e67171d63a82acd7ab15c9feafc81f
+    executed_prompt_bytes: 5790
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-079/session-evidence-827.md

@@ -11,8 +11,8 @@ prompt_id: AID-2026-074-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-074/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: fbf544d0ab7a88b55e75d49cbdf50c07d12898f4efb0169cc348482021ac227e
-prompt_bytes: 3946
+prompt_sha256: b5c8c5470850be9e58f23f55a31ee0dd7b2d6e560f7b12486c2a968f41f802fe
+prompt_bytes: 3909
 
 # ---------------------------------------------------------------------------
 # Issue #1029's second clause, the one #1033 did not touch.
@@ -80,8 +80,8 @@ session_evidence:
     issue_refs:
     implementing_ai_session: session-1029-declared-vs-protected
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-074/prompt-v1.md
-    executed_prompt_sha256: fbf544d0ab7a88b55e75d49cbdf50c07d12898f4efb0169cc348482021ac227e
-    executed_prompt_bytes: 3946
+    executed_prompt_sha256: 78044dfbc68873766fc6773768099a2a7b5b08d67594ca5bf09decbeb991a915
+    executed_prompt_bytes: 3967
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-074/session-evidence-1029.md

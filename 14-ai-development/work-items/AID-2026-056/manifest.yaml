@@ -83,8 +83,8 @@ prompt_id: AID-2026-056-PROMPT
 prompt_version: v1
 prompt_file: 14-ai-development/work-items/AID-2026-056/prompt-v1.md
 prompt_status: FROZEN
-prompt_sha256: fb56b8d7858a27fdedb217c41fa44f94b54a87dfe7f3549e5813827263453138
-prompt_bytes: 10151
+prompt_sha256: 325f567c669b046f4b0ccfd58515ad01c4b83377179fdb744502f6c1dc56d2e4
+prompt_bytes: 10114
 
 prompt_provenance_tier: T1
 prompt_provenance_note: "Frozen from the REQ-05 session that split the 81-entry baseline by calling the repository's own side_by_side_partner() and counting CJK/latin characters per file at main d40d4e09, enumerated the three mirror-of-mirror paths from counterpart()'s own return values, and produced the predicted 9 by re-running the split with the intended predicate against the current violation list. The prediction is stated so the implementer can falsify it; the session that wrote this prompt is not an independent reviewer of it."
@@ -320,8 +320,8 @@ session_evidence:
     issue_refs:
     implementing_ai_session: session-266-056-wording
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-056/prompt-v1.md
-    executed_prompt_sha256: fb56b8d7858a27fdedb217c41fa44f94b54a87dfe7f3549e5813827263453138
-    executed_prompt_bytes: 10151
+    executed_prompt_sha256: 325f567c669b046f4b0ccfd58515ad01c4b83377179fdb744502f6c1dc56d2e4
+    executed_prompt_bytes: 10114
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-056/session-evidence-266.md
@@ -332,8 +332,8 @@ session_evidence:
     issue_refs:
     implementing_ai_session: session-266-056-round4
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-056/prompt-v1.md
-    executed_prompt_sha256: fb56b8d7858a27fdedb217c41fa44f94b54a87dfe7f3549e5813827263453138
-    executed_prompt_bytes: 10151
+    executed_prompt_sha256: 325f567c669b046f4b0ccfd58515ad01c4b83377179fdb744502f6c1dc56d2e4
+    executed_prompt_bytes: 10114
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-056/session-evidence-266-round4.md
@@ -345,8 +345,8 @@ session_evidence:
     issue_refs:
     implementing_ai_session: session-266-056-round5
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-056/prompt-v1.md
-    executed_prompt_sha256: fb56b8d7858a27fdedb217c41fa44f94b54a87dfe7f3549e5813827263453138
-    executed_prompt_bytes: 10151
+    executed_prompt_sha256: 325f567c669b046f4b0ccfd58515ad01c4b83377179fdb744502f6c1dc56d2e4
+    executed_prompt_bytes: 10114
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-056/session-evidence-266-round5.md

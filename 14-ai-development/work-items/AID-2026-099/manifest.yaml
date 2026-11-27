@@ -78,8 +78,8 @@ session_evidence:
     issue_refs: ["#1212", "#1208", "#1135"]
     implementing_ai_session: NOT_RECORDED
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-099/prompt-v1.md"
-    executed_prompt_sha256: "1b57fd6eede6d411ced293726f9605e2b0c6166ab59a2bd0a0987647aa1eaa8d"
-    executed_prompt_bytes: 2397
+    executed_prompt_sha256: "eed5a5b7cee82bc4893ed57a93d11957b86926700befa91661da40fe8c645c73"
+    executed_prompt_bytes: 2418
     executed_prompt_provenance: "RECORDED_SNAPSHOT; SESSION_ID_NOT_AVAILABLE"
     session_reference_status: NOT_RECORDED
     session_evidence_ref: "14-ai-development/work-items/AID-2026-099/session-evidence.md"

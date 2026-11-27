@@ -16,8 +16,8 @@ prompt_id: AID-2026-090-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-090/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 9d3ab096afdce7f54433b01a4fd03accddc52ed8c4832b527ee548003da3d63a
-prompt_bytes: 2013
+prompt_sha256: 79288220c2196f5af81e0e5a62bf2264b6874b8814614757e08c61764b808d6c
+prompt_bytes: 1976
 authorization:
   authorized_by: "user-authorized operator (delegated by account owner)"
   decision_date: "2026-11-26"
@@ -59,8 +59,8 @@ session_evidence:
       - "#1151"
     implementing_ai_session: NOT_RECORDED
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-090/prompt-v1.md
-    executed_prompt_sha256: 9d3ab096afdce7f54433b01a4fd03accddc52ed8c4832b527ee548003da3d63a
-    executed_prompt_bytes: 2013
+    executed_prompt_sha256: 32e5a263ab34d2806110ba09500c3b750613360c20cb082eb1e69fd3cd3fe3a3
+    executed_prompt_bytes: 2034
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-090/session-evidence.md

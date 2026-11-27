@@ -11,8 +11,8 @@ prompt_id: AID-2026-067-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-067/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: b6121c1f50924edd9a9240701bf64eaf52b576dc8b0e52dc80c8f016dcb971d3
-prompt_bytes: 5240
+prompt_sha256: c73aa6e35fddb745b7925d6b350fb661d538beb3e5f9b975c89d1e1bc4906ab5
+prompt_bytes: 5203
 
 # ---------------------------------------------------------------------------
 # WO-05 of the REQ-01 repair queue, registered against Issue #262 AC7.
@@ -74,8 +74,8 @@ session_evidence:
       - "#262"
     implementing_ai_session: session-r44-reg-b
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-067/prompt-v1.md
-    executed_prompt_sha256: b6121c1f50924edd9a9240701bf64eaf52b576dc8b0e52dc80c8f016dcb971d3
-    executed_prompt_bytes: 5240
+    executed_prompt_sha256: 07b49d7fa41ec6a5e9025dd3440e9f181654c8903288aa0d430d9324df5ac0da
+    executed_prompt_bytes: 5261
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-067/session-evidence-r44.md
