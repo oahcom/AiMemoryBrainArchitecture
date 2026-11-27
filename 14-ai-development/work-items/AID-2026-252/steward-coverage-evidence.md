@@ -58,3 +58,11 @@ The branch contains the initial schema/checker/test/workflow mechanism commits. 
 - The latest GOV-DOC-002 Actions census before prompt-pin reconciliation reported 526 classified documents missing steward, 1137 governed documents, 767 classified documents, and 370 unclassified documents.
 - For modified prompt snapshots that are declared by work-item manifests, the corresponding SHA-256 and byte-count declarations have been refreshed in the affected manifests. This preserves the prompt-snapshot identity check rather than waiving it.
 - The shrink-only manifest-blob-pins baseline reconciliation and final required-context verification remain pending direct Actions readback.
+
+## R5 reconciliation — current main and gate evidence
+
+- Latest merged main pin used for this census: 6482901cbc55e98d4a53f2203e6864b34a888b26
+- Actions census after merging current main and adding the work-items index steward: governed=1144, classified=774, present=249, missing=525.
+- The latest DM-15/GOV-DOC-002 lines are recorded by Architecture document management gate run 45966438510 (job 140396112780); changed-file validation succeeded.
+- Cumulative steward assignments in this branch: 128 files (127 work-item files in AID-2026-001 through AID-2026-099 plus the modified work-items index).
+- Repository hygiene was reconciled using its observed output: 76 stale manifest-blob-pin baseline entries removed and the one new AID-2026-059 prompt SHA mismatch corrected; no failure was added to the ratchet.

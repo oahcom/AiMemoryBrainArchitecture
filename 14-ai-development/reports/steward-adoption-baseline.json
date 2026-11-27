@@ -1,6 +1,6 @@
 {
-  "classified": 767,
-  "governed": 1137,
+  "classified": 774,
+  "governed": 1144,
   "missing": [
     "00-governance/architecture-document-management-policy.md",
     "00-governance/architecture-invariants.md",
@@ -280,7 +280,6 @@
     "14-ai-development/work-items/GAP-32-DISPATCH-LANDED-TOOLS-ABSENT.md",
     "14-ai-development/work-items/GAP-BASELINE-001.md",
     "14-ai-development/work-items/I-OWNER-DECISION-AUTHORIZATION-DECISION-001.md",
-    "14-ai-development/work-items/INDEX.md",
     "docs/en/00-governance/architecture-invariants.md",
     "docs/en/00-governance/design-principles.md",
     "docs/en/00-governance/implementation-evidence/2026-11-26-20-decision-acceptance-register.md",
@@ -529,6 +528,6 @@
     "docs/zh-CN/14-ai-development/work-items/AID-2026-210/evidence.md",
     "docs/zh-CN/14-ai-development/work-items/AID-2026-240/evidence.md"
   ],
-  "pin": "5e30d49776a2ce75069227a41470fa7e4ae00b2e",
-  "present": 241
+  "pin": "6482901cbc55e98d4a53f2203e6864b34a888b26",
+  "present": 249
 }
