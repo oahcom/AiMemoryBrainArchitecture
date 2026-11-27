@@ -65,6 +65,16 @@ def resolve_commit(root, value):
     return resolved if HEX40.fullmatch(resolved) else None
 
 
+def is_ancestor(root, ancestor, descendant):
+    """Return whether ancestor is reachable from descendant."""
+    if not ancestor or not descendant:
+        return False
+    probe = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", ancestor, descendant],
+        cwd=root, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    return probe.returncode == 0
+
+
 def read_git_blob(root, oid):
     if not real(oid) or not re.fullmatch(r"[0-9a-fA-F]{40}", str(oid)):
         return None
@@ -167,12 +177,7 @@ def audit(root, ref, base):
             else:
                 target = merge_target if real(merge_target) else base_sha
                 target_sha = resolve_commit(root, target)
-                ancestor = False
-                if target_sha:
-                    probe = subprocess.run(
-                        ["git", "merge-base", "--is-ancestor", impl_sha, target_sha],
-                        cwd=root, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                    ancestor = probe.returncode == 0
+                ancestor = is_ancestor(root, impl_sha, target_sha)
                 cdim = "REACHABLE" if ancestor else "UNREACHABLE"
                 if not ancestor:
                     findings.append("commit_unreachable")
@@ -255,10 +260,13 @@ def main():
         if baseline.get("schema_version") != 1 or not isinstance(baseline.get("manifests"), dict):
             raise RuntimeError("invalid prompt-commit-trace baseline schema")
         baseline_commit = baseline.get("commit")
+        baseline_sha = resolve_commit(args.root, baseline_commit)
         expected_commit = resolve_commit(args.root, args.base)
-        if not HEX40.fullmatch(str(baseline_commit or "")) or baseline_commit != expected_commit:
-            raise RuntimeError("baseline commit pin does not match comparison base: "
-                               + str(baseline_commit) + " != " + str(expected_commit))
+        if (not HEX40.fullmatch(str(baseline_commit or ""))
+                or not baseline_sha or not expected_commit
+                or not is_ancestor(args.root, baseline_sha, expected_commit)):
+            raise RuntimeError("baseline commit pin is not an ancestor of comparison base: "
+                               + str(baseline_commit) + " !<= " + str(expected_commit))
         violations = ratchet_violations(result, baseline)
         if args.json:
             result["ratchet_violations"] = violations
