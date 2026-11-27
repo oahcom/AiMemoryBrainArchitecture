@@ -96,6 +96,7 @@ MISMATCH authored_indexes[1].root path=09-security-governance/README.md declared
 # AID-109: five frontmatter blob OIDs absent from the declared source tree; follow up in AID-2026-109.
 # AID-003/AID-004/AID-064: NOT_VERIFIED is not a digest; owners must supply authoritative bytes/locators or remove invalid declarations.
 # AID-100/AID-170/AID-261: referenced paths are absent in candidate tree; owning work items must restore paths or declare historical commits.
+# AID-150: fence_conflict.source_blob is a bare blob OID without a path or commit locator; retained as exact baseline debt.
 INCOMPLETE UNRESOLVED(prior_invariant_source_blob blob locator): manifest=14-ai-development/work-items/AID-2026-093/manifest.yaml blob=50566d16ee57c7ee34f8f089a1dea41260ee37b6 not found in declared commit tree(s)
 INCOMPLETE UNRESOLVED(prompt_original_payload_sha256): manifest=14-ai-development/work-items/AID-2026-023/manifest.yaml no dedicated prompt_original_payload_file locator
 INCOMPLETE UNRESOLVED(prompt_original_payload_sha256): manifest=14-ai-development/work-items/AID-2026-026/manifest.yaml no dedicated prompt_original_payload_file locator
@@ -105,6 +106,7 @@ INCOMPLETE UNRESOLVED(source.selected_source_files[1].frontmatter_blob_sha blob 
 INCOMPLETE UNRESOLVED(source.selected_source_files[2].frontmatter_blob_sha blob locator): manifest=14-ai-development/work-items/AID-2026-109/manifest.yaml blob=d1b950f16ce89b8c23549c99bb885b0014a78dbf not found in declared commit tree(s)
 INCOMPLETE UNRESOLVED(source.selected_source_files[3].frontmatter_blob_sha blob locator): manifest=14-ai-development/work-items/AID-2026-109/manifest.yaml blob=9252258fa0a5f64e3cea75513da4e5e48d6c7847 not found in declared commit tree(s)
 INCOMPLETE UNRESOLVED(source.selected_source_files[4].frontmatter_blob_sha blob locator): manifest=14-ai-development/work-items/AID-2026-109/manifest.yaml blob=fd42af80595cf8c4ef92795f64f5beacba38e7db not found in declared commit tree(s)
+INCOMPLETE UNRESOLVED(missing field locator): manifest=14-ai-development/work-items/AID-2026-150/manifest.yaml field=manifest.scope.fence_conflict.source_blob value='4da0b61ba3656a768ea56b4a2a24e09da4e21cd5'
 INCOMPLETE manifest=14-ai-development/work-items/AID-2026-003/manifest.yaml discovered.manifest.policy_unification_ruling.instruction_sha256: invalid SHA-256 declaration 'NOT_VERIFIED'
 INCOMPLETE manifest=14-ai-development/work-items/AID-2026-003/manifest.yaml prompt_sha256(top-level): invalid SHA-256 declaration 'NOT_VERIFIED'
 INCOMPLETE manifest=14-ai-development/work-items/AID-2026-004/manifest.yaml prompt_sha256(top-level): invalid SHA-256 declaration 'NOT_VERIFIED'

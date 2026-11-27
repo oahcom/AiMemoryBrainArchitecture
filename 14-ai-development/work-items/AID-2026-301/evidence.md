@@ -167,7 +167,7 @@ When either explicit key is absent, the pin is evaluated against the candidate t
 
 ## Exact baseline additions and follow-up ownership
 
-The exact-head scan produced 25 new ratchet lines. Each was added verbatim, with no wildcard. The two old AID-261 baseline lines lacking the `session_evidence[0].executed_prompt_snapshot_file` field prefix were removed because the checker now emits the path-qualified form.
+The exact-head scan produced 25 new ratchet lines attributable to this PR's field discovery. Each was added verbatim, with no wildcard. The two old AID-261 baseline lines lacking the `session_evidence[0].executed_prompt_snapshot_file` field prefix were removed because the checker now emits the path-qualified form. Rebase onto the newer main additionally exposed one failure from the subsequently added AID-2026-150 `fence_conflict.source_blob` field; this was recorded separately as an exact baseline debt, not as a failure discovered by this PR.
 
 | Exact failure group | Disposition | Reason and follow-up owner |
 |---|---|---|
@@ -181,8 +181,9 @@ The exact-head scan produced 25 new ratchet lines. Each was added verbatim, with
 | AID-100 `gate_a_reconstruction[0].root` (1) | Exact baseline | Declared path is absent from the candidate tree; follow up in AID-2026-100 to restore it or declare the historical commit. |
 | AID-170 owner ruling/pointer targets (6) | Exact baseline | Two artifact paths are absent in the candidate tree; four pointer target checks inherit those absent paths. Follow up in AID-2026-170 with exact commit/path locators. |
 | AID-261 prompt snapshot zero/zero pins (2) | Exact baseline | The declared prompt path is absent; follow up in AID-2026-261 to correct or remove the invalid session evidence. |
+| AID-150 `fence_conflict.source_blob` (1) | Exact baseline | `source_blob` is a bare blob OID without a path or commit locator; no locator inference is permitted. Follow up in AID-2026-150. |
 
-The baseline contains 114 exact failure entries after this change (89 existing mismatches, 2 existing missing paths replaced by their new path-qualified forms, plus 25 exact newly discovered failures less the two stale entries). Baseline entries remain failures and do not become VERIFIED.
+The baseline contains 115 exact failure entries after this change (89 existing mismatches, 2 existing missing paths replaced by their new path-qualified forms, plus 25 exact newly discovered failures less the two stale entries, plus 1 exact failure from the AID-2026-150 field added to main after this PR's branch point). Baseline entries remain failures and do not become VERIFIED.
 
 ## Historical state semantics
 
