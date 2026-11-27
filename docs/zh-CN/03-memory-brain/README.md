@@ -1,3 +1,49 @@
+---
+document_metadata:
+  domain: memory-brain
+  role: index
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "03-memory-brain/README.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Bilingual mirror of a candidate root restored by AID-2026-100; content acceptance and semantic parity review remain pending."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Bilingual mirror of 03-memory-brain/README.md"
+    canonical_scope_id: "mirror/03-memory-brain/README"
+    canonical_scope_keywords:
+      - mirror
+      - candidate
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "03-memory-brain/README.md"
+    en: "docs/en/03-memory-brain/README.md"
+    zh-CN: null
+---
+
 # Memory Brain — 阅读指南
 
 - 文档 ID：D-READING-GUIDE-001

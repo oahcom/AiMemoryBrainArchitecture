@@ -42,6 +42,24 @@ class OwnerNamespaceTests(unittest.TestCase):
         ))
         self.assertEqual(violations(text), [])
 
+    def test_bare_a_as_owner_identity_is_rejected(self):
+        self.assertEqual(violations("A owns subsystem boundaries."), [
+            (1, "BARE_LETTER_AS_OWNER", "A owns subsystem boundaries.")
+        ])
+
+    def test_explicit_sys_and_owner_a_references_are_accepted(self):
+        self.assertEqual(violations("SYS-A is the subsystem identifier; Owner A owns its governance boundary."), [])
+
+    def test_sys_and_unqualified_owner_letter_in_same_table_are_rejected(self):
+        text = chr(10).join((
+            "| Subsystem | Primary Owner |",
+            "|---|---|",
+            "| SYS-A | A |",
+        ))
+        self.assertEqual(violations(text), [
+            (3, "BARE_LETTER_AS_OWNER", "| SYS-A | A |")
+        ])
+
     def test_sys_id_in_owner_crosswalk_cell_is_rejected(self):
         text = chr(10).join((
             "| Logical group | Primary Owner authority | Supporting Owners |",

@@ -582,7 +582,9 @@ Issue #7 is currently CLOSED / not_planned under the Owner phase-closure ruling;
 
 The exact command `python3 scripts/check_bilingual_docs_full.py --source-revision c58878fce24528a0842b4f8887c93ddbf465b566` returned **467 in-scope Markdown / 112 exempt / 81 violations / exit 1**. This is a path-counterpart inventory, not semantic translation review. The 81 findings classify as follows:
 
-### Path-by-path classification of the 81 frozen GOV-DOC-001 findings
+### HISTORICAL — not a gate input: path-by-path classification of the 81 frozen GOV-DOC-001 findings
+
+> HISTORICAL — not a gate input. This is the 81-finding inventory measured at frozen base `c58878fce24528a0842b4f8887c93ddbf465b566`; it holds 8 entries the authority `scripts/ci/baselines/bilingual-docs.txt` does not and omits 4 that the authority holds. The single authority is that file (77 entries), not this table.
 
 Every listed source exists at frozen base `c58878fce24528a0842b4f8887c93ddbf465b566`; all 81 findings are therefore pre-existing at Stage A base. The first 77 are NORMATIVE_ROOTS mirror-pair failures (both expected `docs/en/<source>` and `docs/zh-CN/<source>` paths are absent). The final four are Phase-0 report pairing failures (no side-by-side `.en.md`/`.zh-CN.md` pair or required `docs/en/14-ai-development` mirror). Owner labels below are routing classifications from path/domain, not a new assignment of canonical ownership. All are excluded from #453; disposition is owner-scoped backlog triage, no bulk cleanup.
 

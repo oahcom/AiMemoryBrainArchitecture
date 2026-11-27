@@ -52,7 +52,8 @@ REQUIRED = {"VERIFIED": 1, "REVIEWED": 2, "INTEGRATION_READY": 3,
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 EVIDENCE_FIELDS = {
     "verified": ("commands", "environment", "tested_head", "expected_result", "actual_result", "logs"),
-    "independent_review": ("reviewer", "implementer", "reviewed_head", "report", "findings_disposition"),
+    "independent_review": ("reviewer", "implementer", "reviewer_session", "implementer_session",
+                           "reviewed_head", "report", "findings_disposition"),
     "integration": ("compatibility_result", "registry_updates", "integration_report"),
     "owner_acceptance": ("authority", "decision", "decision_record"),
     "merge": ("target_branch", "merge_commit", "merge_record"),
@@ -108,7 +109,7 @@ def _git_object_type(root, ref):
     """Return the git object type of ref, or None when unresolvable."""
     result = subprocess.run(
         ["git", "-C", str(root), "cat-file", "-t", ref],
-        check=False, capture_output=True, text=True)
+        check=False, capture_output=True, encoding="utf-8", errors="replace")
     return result.stdout.strip() if result.returncode == 0 else None
 
 
@@ -119,7 +120,7 @@ def _git_tree_has_file(root, subject_head, relative_path):
     result = subprocess.run(
         ["git", "-C", str(root), "ls-tree", "-r", "--name-only",
          subject_head, "--", relative_path],
-        check=False, capture_output=True, text=True)
+        check=False, capture_output=True, encoding="utf-8", errors="replace")
     if result.returncode != 0:
         raise ValueError(f"subject_head is not a resolvable commit: {subject_head}")
     return relative_path in {line.strip() for line in result.stdout.splitlines()}
@@ -161,7 +162,7 @@ def _evidence_file(value, field, root, subject_head):
     try:
         content = blob.decode("utf-8")
     except UnicodeError as error:
-        raise ValueError(f"{field} is not readable UTF-8 evidence") from error
+        raise ValueError(f"{field} blob decode failed as UTF-8 evidence") from error
     # The evidence file itself must carry real content: placeholder or
     # near-empty artifacts must not satisfy a PASS gate.
     _meaningful(content, f"{field}.content")
@@ -188,7 +189,7 @@ def _verify_sidecar_anchor(root, sidecar_path=SIDECAR_PATH):
     """
     message = subprocess.run(
         ["git", "-C", str(root), "log", "-1", "--format=%B", "--", sidecar_path],
-        check=True, capture_output=True, text=True).stdout
+        check=True, capture_output=True, encoding="utf-8", errors="replace").stdout
     match = re.search(r"\b[0-9a-f]{64}\b", message)
     if match is None:
         raise ValueError("sidecar commit message lacks a sha256 anchor")
@@ -205,10 +206,10 @@ def _verify_sidecar_anchor(root, sidecar_path=SIDECAR_PATH):
     # Also reject local edits, comparing clean-filtered Git object IDs.
     committed_blob = subprocess.run(
         ["git", "-C", str(root), "rev-parse", f"HEAD:{sidecar_path}"],
-        check=True, capture_output=True, text=True).stdout.strip()
+        check=True, capture_output=True, encoding="utf-8", errors="replace").stdout.strip()
     working_blob = subprocess.run(
         ["git", "-C", str(root), "hash-object", str(root / sidecar_path)],
-        check=True, capture_output=True, text=True).stdout.strip()
+        check=True, capture_output=True, encoding="utf-8", errors="replace").stdout.strip()
     if working_blob != committed_blob:
         raise ValueError("sidecar sha256 does not match its commit anchor")
 
@@ -220,7 +221,7 @@ def _verify_sidecar_anchor(root, sidecar_path=SIDECAR_PATH):
         recorded, relative = parts[1], parts[2]
         blob = subprocess.run(
             ["git", "-C", str(root), "hash-object", str(root / relative)],
-            check=True, capture_output=True, text=True).stdout.strip()
+            check=True, capture_output=True, encoding="utf-8", errors="replace").stdout.strip()
         if blob != recorded:
             raise ValueError("protected file does not match sidecar blob: " + relative)
     return True
@@ -232,6 +233,16 @@ def _identity_token(value):
     normalized = re.sub(r"^(?:https?://)?(?:www\.)?github\.com/", "", normalized)
     normalized = normalized.lstrip("@")
     return re.sub(r"[^a-z0-9]", "", normalized)
+
+
+def _session_token(value):
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError("review sessions must be non-empty strings")
+    normalized = unicodedata.normalize("NFKC", value).strip().casefold()
+    token = re.sub(r"[^a-z0-9]", "", normalized)
+    if not token:
+        raise ValueError("review sessions must be non-empty strings")
+    return token
 
 
 def _identity(value, aliases):
@@ -274,8 +285,20 @@ def _validate_evidence(name, evidence, data, lifecycle, root, subject_head):
             raise ValueError(f"{name}.{head_field} does not match manifest subject_head")
     if name == "independent_review":
         aliases = _normalized_aliases(data.get("review_identity_aliases", {}))
-        if _identity(evidence["reviewer"], aliases) == _identity(evidence["implementer"], aliases):
-            raise ValueError("REVIEWED reviewer and implementer must be different identities")
+        # Diagnostic only, never the verdict: independence is decided by the
+        # reviewing session, so two sessions on one GitHub account are the
+        # expected case and must pass.  Kept because the alias table is part of
+        # the manifest contract and must still be validated when present.
+        _same_account = (_identity(evidence["reviewer"], aliases)
+                         == _identity(evidence["implementer"], aliases))
+        # The check verifies that the manifest DECLARES two sessions.  It does
+        # not and cannot verify that two sessions existed: a session value is a
+        # string the writer chooses, and no artifact in this repository can
+        # corroborate it.
+        if _session_token(evidence["reviewer_session"]) == _session_token(
+                evidence["implementer_session"]):
+            raise ValueError(
+                "REVIEWED reviewer_session and implementer_session must be different sessions")
     for field in PATH_FIELDS[name]:
         target = _evidence_file(evidence[field], f"{name}.{field}", root, subject_head)
         # Optional independent content digest: when the manifest records a

@@ -111,6 +111,114 @@ class GateRatchetTests(unittest.TestCase):
         self.assertIn("only 0 (clean) and 1 (red)", proc.stdout)
 
 
+class ItemFidelityTests(unittest.TestCase):
+    """The normalizer must not throw away what distinguishes two failures.
+
+    Both defects pinned here are silent: the run still produced a set and the
+    set still compared equal, so nothing downstream could notice that two
+    different failures had become one item, or that one had vanished.
+    """
+
+    def test_two_failures_on_one_path_stay_two_items(self):
+        """`042. a.md -> x` and `042. a.md -> y` are different items."""
+        proc = run_gate(
+            "a.md\n",
+            python(
+                "print('a.md -> missing docs/en/a.md')",
+                "print('a.md -> missing docs/zh-CN/a.md')",
+                "import sys",
+                "sys.exit(1)",
+            ),
+        )
+        # The baseline lists the path once, so exactly one of the two items is
+        # covered; the other is a new failure. Before the fix both collapsed
+        # into `a.md` and the pair passed.
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        self.assertEqual(
+            proc.stdout.count("::error::ratchet regression"), 1, proc.stdout
+        )
+        self.assertIn("a.md -> missing docs/zh-CN/a.md", proc.stdout)
+
+    def test_a_detail_change_is_a_regression_not_a_match(self):
+        """An item differing only after `-> ` must not match on the path."""
+        proc = run_gate(
+            "a.md -> missing docs/en/a.md\n",
+            python(
+                "print('a.md -> missing docs/zh-CN/a.md')",
+                "import sys",
+                "sys.exit(1)",
+            ),
+        )
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        self.assertIn("ratchet regression", proc.stdout)
+        self.assertIn("a.md -> missing docs/zh-CN/a.md", proc.stdout)
+
+    def test_both_details_recorded_in_the_baseline_pass(self):
+        proc = run_gate(
+            "a.md -> x\na.md -> y\n",
+            python("print('a.md -> x')", "print('a.md -> y')", "import sys",
+                   "sys.exit(1)"),
+        )
+        self.assertEqual(proc.returncode, 0, proc.stdout)
+        self.assertIn("baseline=2 current=2 regressions=0 fixed=0", proc.stdout)
+
+    def test_item_wearing_a_verdict_prefix_is_not_dropped(self):
+        """`OK <path> ...` is an item, not a summary line."""
+        proc = run_gate(
+            "# nothing baselined\n",
+            python(
+                "print('OK 00-governance/a.md has no counterpart')",
+                "import sys",
+                "sys.exit(1)",
+            ),
+        )
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        self.assertIn("ratchet regression", proc.stdout)
+        self.assertIn("OK 00-governance/a.md has no counterpart", proc.stdout)
+
+    def test_baselined_item_wearing_a_verdict_prefix_is_matched(self):
+        proc = run_gate(
+            "OK 00-governance/a.md has no counterpart\n",
+            python(
+                "print('OK 00-governance/a.md has no counterpart')",
+                "import sys",
+                "sys.exit(1)",
+            ),
+        )
+        self.assertEqual(proc.returncode, 0, proc.stdout)
+        self.assertIn("PASS", proc.stdout)
+
+    def test_verdict_and_count_lines_are_still_not_items(self):
+        """The filter that made summaries silent still works."""
+        proc = run_gate(
+            "# nothing baselined\n",
+            python(
+                "print('PASS')",
+                "print('OK')",
+                "print('FAILED (failures=2)')",
+                "print('Ran 12 tests in 0.031s')",
+                "print('GOV-DOC-001 full scan: 914 in-scope Markdown files; "
+                "377 exempt; 77 violations.')",
+                "import sys",
+                "sys.exit(1)",
+            ),
+        )
+        # Every line above is a verdict or a count, so the run reported no
+        # item: a red command with no items is a crash, not a clean run.
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        self.assertIn("baseline=0 current=0", proc.stdout)
+        self.assertIn("without printing any item", proc.stdout)
+
+    def test_a_name_that_starts_with_a_verdict_word_is_still_an_item(self):
+        proc = run_gate(
+            "# nothing baselined\n",
+            python("print('OK_STATUS')", "import sys", "sys.exit(1)"),
+        )
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        self.assertIn("ratchet regression", proc.stdout)
+        self.assertIn("OK_STATUS", proc.stdout)
+
+
 class CommentedCountTests(unittest.TestCase):
     """gates.yml states a count that nothing else compared (issue #1081).
 

@@ -1,0 +1,51 @@
+---
+document_metadata:
+  steward: "user-authorized operator (delegated by account owner)"
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "Implementation evidence; no acceptance decision is asserted."
+    usage_status: Active
+    modification_status: Unchanged
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "AI session evidence for AID-2026-252"
+    canonical_scope_id: "ai-development/aid-2026-252-session-evidence"
+    canonical_scope_keywords:
+      - "document-stewardship"
+      - "metadata-schema"
+      - "governance-gate"
+    canonical_conflict_status: None
+    normative_status: Informative
+---
+
+# Session Evidence — AID-2026-252
+
+## Session role / use case
+
+Authorized delegated implementation operator carrying out W9 for Issue #266 AC3. The task adds a machine-enforced document-maintenance responsibility field while preserving compatibility with the existing governed corpus.
+
+## Actual AI input
+
+The user assigned Work Item AID-2026-252 and required a schema field other than owner, an actual checker implementation (not schema-only), one of two explicit rollout strategies with a deterministic closure condition, a PR tied to real Issue #266, all 16 required contexts green, merge-commit-only integration, post-merge blob verification, and a comment on #266 without changing or closing the Issue. The user also required block-style YAML metadata, PR Session Evidence declarations, delegated-operator attribution and date 2026-11-27, and preservation of concurrent work.
+
+## AI-visible output
+
+1. Fetched the live repository state. The actual main HEAD was f18adc9fa1d06837433a09498f5297bf13b35756, not the supplied older 788fbc01; all work was based on the fetched head.
+2. Confirmed AID-2026-252 had no manifest on main and created a dedicated branch from the fetched main.
+3. Selected strategy (b): new governed documents must supply a non-empty steward; legacy omissions are reported as a non-blocking census. The closure threshold is zero missing stewards across all classified governed documents.
+4. Final exact-head test, CI, merge and blob verification results are to be recorded only after direct readback. No natural-person Owner signature or acceptance is represented.
+
+## Additional execution record
+
+- Initial PR #1363 had zero Actions workflow runs within the required recovery window. It was commented and closed; the branch was rebuilt with a two-parent merge commit, retaining the change tree and merging the observed main.
+- Replacement PR #1365 was opened from the rebuilt branch. The PR-level AI declaration is YES; because Issue #266 predates the Issue-level declaration policy, its mapping row is LEGACY_UNDECLARED / N/A.
+- The first GOV-DOC-002 self-check exposed an incorrect test-helper return-value assumption. The test was corrected to use the suite's expect_gate helper; the corrected self-check passed 372/372.
+- The first Session Evidence validation identified the missing canonical manifest session_evidence entry. A prompt snapshot was added with its byte count and SHA-256, and the manifest now uses the canonical session_evidence structure. The final Session Evidence Gate passed; its Issue-level result is NOT_APPLICABLE because #266 predates the policy effective date.
+- Final head f3e4a2eb884d28005850d154e0da2cd653386c31 produced 16/16 successful required contexts. GOV-DOC-002 printed a legacy adoption baseline of 641 missing stewards and an incremental PASS with 645 classified and 371 unclassified documents.
+- The branch is behind main by zero commits. However, branch-protection GET endpoints returned HTTP 403 "Resource not accessible by integration", so strict=true and enforce_admins=true cannot be verified. The merge is therefore deliberately not attempted. No Issue #266 comment or post-merge blob verification is claimed.
