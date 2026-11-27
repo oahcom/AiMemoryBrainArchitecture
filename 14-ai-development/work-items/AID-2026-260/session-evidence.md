@@ -28,6 +28,7 @@ document_metadata:
       archived_date: null
       archival_reason: null
       archival_reference: null
+  steward: "user-authorized operator (delegated by account owner)"
   authority:
     canonical_status: Non-Canonical
     canonical_scope: "AI session evidence for AID-2026-260"
