@@ -1,0 +1,20 @@
+work_item_id: AID-2026-330
+title: "Manifest pin type system: PIN / SENTINEL / UNVERIFIABLE_HISTORICAL (Stage 1, mechanism only)"
+class: GATE/CI/TEST
+risk: R2
+risk_rationale: "Extends the committed-byte manifest pin checker with an explicit pin_type and adds an UNTYPED ratchet. No corpus or historical declaration is rewritten in this stage; the change surface is one checker, its tests, one baseline, one existing required workflow job and one work item."
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: "Owner acceptance not recorded"
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "cb5b3dcd23ff86e10a354bb27b668dce19e95f62"
+
+# Skeleton commit only: this file claims AID-2026-330 in the tree before any
+# other artifact lands (numbering discipline). The full manifest -- scope,
+# evidence, documentation references, session evidence and implementation
+# block -- is written in the next commit of the same branch.
