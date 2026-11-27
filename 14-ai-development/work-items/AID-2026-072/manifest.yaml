@@ -92,3 +92,11 @@ session_evidence:
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-072/session-evidence-903.md
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-072/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-072/session-evidence-903.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference

@@ -287,3 +287,13 @@ findings:
     measured_at: "ba293506"
     statement: "No test module path appeared anywhere in the manifest or the prompt, so AC5 was not checkable. The repository convention for a script under scripts/ci/ is a sibling scripts/ci/test_*.py, of which there are three."
     resolution: "scripts/ci/test_gate_ratchet.py is named in AC6. It was named in scope.files_to_create when this finding was written; c6602739 (#1031) has since created it, so it is now named in scope.files_to_modify instead."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-060/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-060/REVIEW-05-INDEPENDENT.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-060/REVIEW-04-INDEPENDENT.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-060/REVIEW-01-INDEPENDENT.md"
+    relationship: reference

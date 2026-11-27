@@ -316,3 +316,9 @@ execution_constraints:
     Do not begin substantive R2 design until coordination supplies the merged
     registration PR URL, exact merge SHA, and read-back Blob SHAs for both
     files. Continue this same session only after those artifacts are verified.
+
+documentation:
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-026/prompt-v2.md"
+    relationship: reference

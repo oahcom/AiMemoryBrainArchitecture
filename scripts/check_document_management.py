@@ -422,10 +422,42 @@ def _parse_seq(tokens, pos: int, indent: int):
         if body.startswith("- "):
             raise ParseError(f"line {lineno}: nested sequences are not supported")
         if not body.startswith(("'", '"')) and SEQ_MAPPING_RE.match(body):
-            raise ParseError(
-                f"line {lineno}: sequence item looks like a mapping "
-                f"({body!r}); mappings inside sequences are not supported"
-            )
+            # Support one flat mapping per sequence item. Nested mappings and
+            # nested sequences remain deliberately outside this YAML subset.
+            item = {}
+            key, _, raw_rest = body.partition(":")
+            key, rest = key.strip(), raw_rest.strip()
+            if not KEY_RE.match(key):
+                raise ParseError(f"line {lineno}: invalid sequence mapping key {key!r}")
+            if rest and not raw_rest.startswith(" "):
+                raise ParseError(f"line {lineno}: mapping ':' must be followed by a space: {body!r}")
+            item[key] = _scalar(rest, lineno) if rest else None
+            pos += 1
+            child_indent = indent + 2
+            while pos < len(tokens) and tokens[pos][1] == child_indent:
+                child_line, _, child_text = tokens[pos]
+                if child_text.startswith("- ") or child_text == "-" or ":" not in child_text:
+                    raise ParseError(
+                        f"line {child_line}: sequence mapping entries must be flat 'key: value' pairs"
+                    )
+                child_key, _, child_raw_rest = child_text.partition(":")
+                child_key, child_rest = child_key.strip(), child_raw_rest.strip()
+                if not KEY_RE.match(child_key):
+                    raise ParseError(f"line {child_line}: invalid sequence mapping key {child_key!r}")
+                if child_key in item:
+                    raise ParseError(f"line {child_line}: duplicate key {child_key!r}")
+                if child_rest and not child_raw_rest.startswith(" "):
+                    raise ParseError(
+                        f"line {child_line}: mapping ':' must be followed by a space: {child_text!r}"
+                    )
+                item[child_key] = _scalar(child_rest, child_line) if child_rest else None
+                pos += 1
+            if pos < len(tokens) and tokens[pos][1] > indent and tokens[pos][1] != child_indent:
+                raise ParseError(
+                    f"line {tokens[pos][0]}: nested mappings inside sequence items are not supported"
+                )
+            items.append(item)
+            continue
         items.append(_scalar(body, lineno))
         pos += 1
     return items, pos
