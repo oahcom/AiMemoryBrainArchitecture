@@ -163,8 +163,7 @@ documentation:
 session_evidence:
   - role: "Authoring session for the delegated §5(3) retrospective exception record"
     issue_refs:
-      - 262
-      - 305
+      - "#262"
     implementing_ai_session: "AID-2026-285 authoring session"
     session_evidence_ref: 14-ai-development/work-items/AID-2026-285/session-evidence.md
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-285/prompt-v1.md"
