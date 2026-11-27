@@ -79,13 +79,21 @@ MISMATCH session_evidence[4].executed_prompt_snapshot_file path=14-ai-developmen
 
 ## Field enumeration
 
-The checker implementation contains explicit branches for:
-- top-level `root/root_blob`, `en_mirror/en_mirror_blob`, and `zh_cn_mirror/zh_cn_mirror_blob`;
-- `gate_a_reconstruction[].root/reconstructed_root_blob`, resolved against the entry's explicit source commit or a commit SHA explicitly named in its note;
-- `related_evidence[].path/blob` and its EN/ZH-CN mirror pairs;
-- top-level `evidence_file/evidence_blob`;
-- `d_source_blobs[]` entries, resolved against `d_source_commit`;
-- `prompt.prompt_file` with `prompt_sha256/prompt_bytes`;
-- `session_evidence[].executed_prompt_snapshot_file` with `executed_prompt_sha256/executed_prompt_bytes`.
+The following branches are in `scripts/ci/check_manifest_blob_pins.py` (line numbers are 1-based in the measured source):
+
+| Class | Manifest declaration | Commit used | Code location |
+|---|---|---|---|
+| Top-level index root | `root` / `root_blob` | Candidate tree | lines 151–160 |
+| Top-level language mirrors | `en_mirror` / `en_mirror_blob`; `zh_cn_mirror` / `zh_cn_mirror_blob` | Candidate tree | lines 151–160 |
+| Authored index roots/mirrors | `authored_indexes[].root`, `en_mirror`, `zh_cn_mirror` and paired `*_blob` fields | Candidate tree | lines 177–188 |
+| Reconstructed root | `gate_a_reconstruction[].root` / `reconstructed_root_blob` | Entry `source_commit`/`commit`, or the commit SHA explicitly named in its note | lines 164–176 |
+| Related evidence | `related_evidence[].path` / `blob` | Candidate tree | lines 190–202 |
+| Related evidence mirrors | `related_evidence[].en_mirror` / `.en_mirror_blob`; `.zh_cn_mirror` / `.zh_cn_mirror_blob` | Candidate tree | lines 190–202 |
+| Execution evidence | `evidence_file` / `evidence_blob` | Candidate tree | lines 203–207 |
+| Cross-commit source blobs | `d_source_blobs[]` entries `<path>: <sha1>` | `d_source_commit` | lines 208–225 |
+| Top-level prompt snapshot | `prompt.prompt_file` / `prompt_sha256` / `prompt_bytes` | Candidate tree | lines 226–234 |
+| Session prompt snapshots | `session_evidence[].executed_prompt_snapshot_file` / `executed_prompt_sha256` / `executed_prompt_bytes` | Candidate tree | lines 235–250 |
+
+Git source-commit resolution and committed blob-byte reads are implemented at lines 45–61. Git blob SHA-1 is recomputed from the Git object header plus committed bytes at lines 64–66. All digest/byte-count comparisons and missing-path handling are centralized in `check()` at lines 91–136. Exit-code selection is at line 253 (0 PASS, 1 VIOLATION, 2 INCOMPLETE).
 
 Non-blob metadata such as timestamps, counts, and status values is deliberately ignored.
