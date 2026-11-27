@@ -78,7 +78,7 @@ implementation:
     - "tests/test_check_governance_operation_traceability.py"
 tests:
   required_context: "GOV-DOC-001 structural checks"
-  execution_evidence: "PR #1383 exact pre-finalization Head 11fe4d081cbe1a77e445db660a00151128855981: GOV-DOC-001 and both suites passed; all 16 required contexts success in run set 45940575421/45940575457/45940575491/45940575573/45940575594/45940575661/45940575731."
+  execution_evidence: "PR #1383 synchronized Head 81680b0f61d79ebc9a3fa2f54c19db94d66b94d9: GOV-DOC-001 and both suites passed; all 16 required contexts success in run set 45941445883/45941445902/45941445918/45941445932/45941445933/45941445940/45941446418."
 review:
   status: NOT_ASSIGNED
   independent_reviewer: NOT_ASSIGNED
