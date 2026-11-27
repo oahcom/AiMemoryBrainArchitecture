@@ -98,4 +98,3 @@ An incomplete checker execution is not treated as a successful rejection. A fals
 The proof used an offline clone, replaced the checker with a test double that prints nothing and exits 0, extracted the pre-fix `run:` step from base `7fc4ddab` and the delivered `run:` step from the working tree using PyYAML and the step name, and executed both extracted steps.
 
 Measured output:
-

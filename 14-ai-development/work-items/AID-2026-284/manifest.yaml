@@ -7,7 +7,7 @@ risk_rationale: >-
   that is incorrectly accepted and binds the base scan to the appropriate
   event commit. It preserves the existing required job and does not modify
   the baseline or branch protection.
-status: DRAFT
+status: DRAFT_PR
 id_status: PROVISIONAL
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -17,6 +17,8 @@ date: "2026-11-27"
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
 base_commit_sha: "7fc4ddabe1ea3b216b4536c0f5cb0a0c84306f19"
+pull_request: 1449
+pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1449
 
 scope:
   objective: >-
@@ -106,6 +108,6 @@ implementation:
     baseline_unchanged: PASS
     local_gate_ratchet: NOT_REPRODUCED
     github_actions: PENDING
-    pull_request: NOT_OPENED
+    pull_request: OPEN
     independent_review: PENDING
     owner_acceptance: PENDING

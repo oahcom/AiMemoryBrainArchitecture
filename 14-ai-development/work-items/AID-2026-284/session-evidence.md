@@ -81,4 +81,3 @@ The offline workflow-step proof extracted the pre-fix and delivered workflow ste
 The offline base-selection proof used a fixture with an event-time base without a pin and an advanced merge-candidate first parent containing the pin. The old logic returned verdict exit 0; the new logic returned verdict exit 1.
 
 The baseline unchanged check was executed:
-
