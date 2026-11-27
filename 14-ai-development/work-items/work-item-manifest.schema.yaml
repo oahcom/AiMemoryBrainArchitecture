@@ -1,0 +1,63 @@
+# Work-item manifest schema (AID-2026-251)
+# Normative structure for newly authored and migrated Work Item manifests.
+# The checker is deliberately read-only: legacy records are reported, not rewritten.
+schema_version: "1"
+required_top_level_keys:
+  - work_item_id
+  - title
+  - class
+  - risk
+  - risk_rationale
+  - status
+  - id_status
+  - sponsor
+  - accountable_owner
+  - acceptance_authority
+  - attribution
+  - date
+  - repository
+  - base_branch
+  - base_commit_sha
+  - scope
+  - evidence
+  - documentation
+  - session_evidence
+  - implementation
+fields:
+  documentation:
+    kind: sequence
+    required: true
+    item_required_keys:
+      - path
+      - relationship
+    relationship_enum:
+      - normative
+      - design
+      - implementation
+      - evidence
+      - reference
+  session_evidence:
+    kind: sequence
+    required: true
+    item_required_keys:
+      - role
+      - issue_refs
+      - implementing_ai_session
+      - session_evidence_ref
+    session_evidence_ref_suffix: "session-evidence.md"
+  implementation:
+    kind: mapping
+    required: true
+    required_keys:
+      - status
+      - summary
+      - files_changed
+      - tests
+    status_enum:
+      - NOT_STARTED
+      - IN_PROGRESS
+      - IMPLEMENTED
+      - BLOCKED
+      - NOT_APPLICABLE
+    files_changed_kind: sequence
+    tests_kind: sequence
