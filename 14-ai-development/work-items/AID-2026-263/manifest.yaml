@@ -16,6 +16,24 @@ base_branch: main
 base_commit_sha: 386d8f57b02d8e3c511ff0e3980b9ce0af8b3028
 prompt_status: RECORDED_NOT_FROZEN
 prompt_provenance: DISPATCHED_TASK_FILE
+identifier_allocation:
+  assigned_at: "2026-11-27"
+  observed_main: "242cf101c8b79007ad2fb8d9c89681224577188d"
+  assigned_id: "AID-2026-263"
+  renumbered_from: "AID-2026-262"
+  allocation_rule: >-
+    AID-2026-262 was a local, unpublished placeholder: it existed only as a
+    worktree commit in D:\code\_aimb\wt-a262, and no ref pointed at it. AIDSCAN's
+    five-scope scan (2829 commits of main history, 2349 ref tips deduplicated to
+    1317 unique trees, 21 ledger versions, 280 worktrees) judged that occupation
+    non-authoritative, and aid-ledger reserved AID-2026-263 for issue #1341 in
+    branch ledger/2026-11-27-aid-263 (commit 384a3057, message "cancel 262,
+    reserve 263 for #1341"). The scan was re-verified here: git grep over all
+    2495 local refs for "AID-2026-263" under 14-ai-development/work-items returns
+    no hit, and git log -S"AID-2026-263" over all history returns no commit.
+    AID-2026-261 is not reused either: main holds it as an Owner namespace and
+    governance-operation traceability work item (PR #1383, 242cf101), so the same
+    number is claimed by a different work item there.
 approval_scope:
   type: Full-document
 evidence_reference:
@@ -109,7 +127,7 @@ review:
   independent_reviewer: NOT_ASSIGNED
   natural_person_owner_acceptance: NOT_RECORDED
 carrier:
-  branch: work-item/aid-2026-262-merge-broker
+  branch: work-item/aid-2026-263-merge-broker
   pull_request: PENDING
   merge_sha: PENDING
   merge_method: merge
