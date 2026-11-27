@@ -57,7 +57,7 @@ class Git:
         p = subprocess.run(["git", "cat-file", "blob", spec], cwd=self.root,
                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
         if p.returncode:
-            raise Violation(f"PATH_MISSING commit={commit} path={path}")
+            raise Violation(f"PATH_MISSING path={path}")
         return p.stdout
 
 
