@@ -34,7 +34,7 @@ Implementation session for Issue #1246: extend the existing session-evidence wor
 
 The executed task prompt is recorded in `prompt-v1.md`, identified as `AID-2026-302-PROMPT` version 1. Its payload digest and byte count are recorded in the work-item manifest.
 
-## AI-visible output and implementation
+## AI-visible output
 
 The implementation extends `scripts/check_session_evidence_workflow_shape.py` and its unittest module. It does not add a workflow or required context and does not modify the inspected workflow.
 
