@@ -1,0 +1,131 @@
+work_item_id: AID-2026-282
+title: Correct symlink-unavailable test accounting and preserve subsequent boundary cases
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  The change is confined to the self-check test module. It does not modify the
+  production document-management checker, CI workflow topology, branch
+  protection, schemas, or runtime behavior. It replaces false passes with
+  explicitly registered skips when the platform cannot create symlinks, and
+  prevents an early return from suppressing later independent test cases.
+  The residual risk is bounded to test coverage accounting and is made visible
+  through the registered-skip boundary and the two-platform verification.
+status: DISPATCHED
+id_status: PROVISIONAL
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: NOT_ASSIGNED
+acceptance_authority: NOT_ASSIGNED
+
+attribution:
+  work_type: AI_ASSISTED
+  implementing_session: chatgpt-session-ops
+  implementing_account_id: acct3
+  implementing_session_id: 6b090a3d-57a0-83ec-9060-eca41f4e6178
+  natural_person_author: NOT_ASSERTED
+  execution_and_measurement: USER_SUPPLIED
+  note: >-
+    The implementation was produced by the ChatGPT session delivered through
+    chatgpt-session-ops under account identifier acct3. The implementing
+    session is identified by the supplied session UUID. GPT-6 is the model
+    identity, not the implementing-session identity, and is therefore not
+    used as the implementing_ai value.
+
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 6f597e2dd8b6e879bf7539aa16b88a39504d9c49
+
+identifier_allocation:
+  status: PROVISIONAL
+  allocation_basis: >-
+    The identifier was selected after scanning origin/main and git branch -r.
+    AID-2026-281 was already occupied by #1246; AID-2026-282 was empty at the
+    time of allocation. The identifier remains PROVISIONAL pending the
+    repository's formal registration and acceptance process.
+
+scope:
+  files_to_modify:
+    - scripts/test_check_document_management.py
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-282/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-282/evidence.md
+  files_out_of_scope:
+    - scripts/check_document_management.py
+    - 14-ai-development/work-items/AID-2026-079/manifest.yaml
+    - AID-2026-079 manifest metrics, including the historical 318/319 figures
+    - CI workflow definitions and required status-check configuration
+    - Runtime, schema, and architecture behavior
+  registry_update: >-
+    Add the AID-2026-282 existence/registration trace row to
+    14-ai-development/work-items/INDEX.md. This is a registry update and is
+    not an implementation-file change.
+
+evidence:
+  primary_record: 14-ai-development/work-items/AID-2026-282/evidence.md
+  branch: fix/2026-11-27-aid282-symlink-false-pass
+  commit: e0c8a5ec
+  diff_summary: "1 file changed, 48 insertions(+), 30 deletions(-)"
+  changed_file: scripts/test_check_document_management.py
+  symlink_available:
+    result: "371/371 passed"
+    skipped: "1 skipped, 1 registered of 5 allowed"
+    exit_code: 0
+  symlink_unavailable:
+    injection: "pathlib.Path.symlink_to raises OSError(1314, ...)"
+    result: "367/367 passed"
+    skipped: "5 skipped, 5 registered of 5 allowed"
+    exit_code: 0
+  line_endings:
+    command: check_line_endings.py
+    result: "1765 files, 0 violations"
+    exit_code: 0
+  repository_residue:
+    formal_test_added: false
+    injection_script_location: "C:\\tmp\\opencode\\inject_symlink.py"
+    injection_script_in_repository: false
+
+documentation:
+  - path: 14-ai-development/README.md
+    relationship: >-
+      Existing AI-development governance entry point; provides the surrounding
+      work-item and session-traceability context.
+  - path: 14-ai-development/work-items/INDEX.md
+    relationship: >-
+      Existing work-item registry; receives the AID-2026-282 traceability row.
+
+session_evidence:
+  - role: IMPLEMENTATION
+    prompt_id: AID-2026-282-PROMPT
+    prompt_version: 1
+    executed_prompt_sha256: ebb1233cc7b133b836d2aff9512b295f3dbfd98e298b8b6d3659c379f66bd4e9
+    executed_prompt_bytes: 5456
+    executed_prompt_provenance: USER_SUPPLIED_MEASURED
+    issue_refs:
+      - "#1268"
+    implementing_session: chatgpt-session-ops
+    implementing_account_id: acct3
+    implementing_session_id: 6b090a3d-57a0-83ec-9060-eca41f4e6178
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-282/evidence.md
+    session_reference_status: RECORDED
+    prompt_addenda:
+      - prompt_version: 2
+        executed_prompt_sha256: ccf0cd7bf14eee1b411480a746d34e6fb9261a17f166d00f27b3a97a766f74b6
+        executed_prompt_bytes: 3151
+        note: >-
+          Replaced the unusable hand-written unified-diff hunk instructions
+          with anchor-based literal replacement instructions to correct
+          the patch that could not be applied.
+      - prompt_version: 3
+        executed_prompt_sha256: 631437902fbe2d5cd95a2f70a945e78646d3573791777862e66973b90e3be211
+        executed_prompt_bytes: 4315
+        note: >-
+          Supplied the delivery-record requirements and the measured
+          implementation, verification, and repository evidence for
+          the AID-2026-282 handoff.
+
+implementation:
+  status: IMPLEMENTED_IN_BRANCH
+  branch: fix/2026-11-27-aid282-symlink-false-pass
+  commit: e0c8a5ec
+  pull_request: PENDING
