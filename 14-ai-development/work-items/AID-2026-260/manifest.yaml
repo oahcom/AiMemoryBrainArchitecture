@@ -28,6 +28,7 @@ scope:
     - "14-ai-development/work-items/AID-2026-260/session-evidence.md"
     - "14-ai-development/work-items/AID-2026-260/evidence.md"
     - "14-ai-development/work-items/AID-2026-260/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-260/prompt-v1.md"
 evidence: "14-ai-development/work-items/AID-2026-260/evidence.md"
 documentation:
   - path: "14-ai-development/work-items/AID-2026-260/scope-confirmation.md"
@@ -36,11 +37,17 @@ documentation:
     relationship: evidence
   - path: "14-ai-development/work-items/AID-2026-260/evidence.md"
     relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-260/prompt-v1.md"
+    relationship: reference
 session_evidence:
   - role: "DELEGATED_SCOPE_DETERMINATION_SESSION"
-    issue_refs:
-      - "#265"
+    issue_refs: []
     implementing_ai_session: "NOT_EXPOSED_BY_PLATFORM"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-260/prompt-v1.md"
+    executed_prompt_sha256: "6f62995f27704149fb26ae1f129476b6370e634ef62217f4ec734ac95a35eedd"
+    executed_prompt_bytes: 1742
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "RECORDED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-260/session-evidence.md"
 implementation:
   status: NOT_APPLICABLE
