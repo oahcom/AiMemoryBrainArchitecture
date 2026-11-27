@@ -28,6 +28,7 @@ document_metadata:
       archived_date: null
       archival_reason: null
       archival_reference: null
+  steward: "user-authorized operator (delegated by account owner)"
   authority:
     canonical_status: Non-Canonical
     canonical_scope: "Proxy scope determination for REQ-04 Issue #265"
