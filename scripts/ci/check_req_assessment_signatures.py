@@ -18,10 +18,10 @@ SHA40 = re.compile(r"^[0-9a-fA-F]{40}$")
 
 def field(text: str, name: str) -> str | None:
     match = re.search(
-        rf"(?im)^\\s*(?:[-*]\\s*)?{re.escape(name)}\\s*:\\s*(.*?)\\s*$",
+        rf"(?im)^\s*(?:[-*]\s*)?{re.escape(name)}\s*:\s*(.*?)\s*$",
         text,
     )
-    return match.group(1).strip().strip("\\x60'\\\"") if match else None
+    return match.group(1).strip().strip(chr(96) + "'\"") if match else None
 
 
 def inspect(root: Path = ROOT) -> list[str]:
