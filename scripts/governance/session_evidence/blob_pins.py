@@ -40,11 +40,39 @@ from __future__ import annotations
 import hashlib
 import re
 from dataclasses import dataclass
+from enum import Enum
 from typing import Callable, Optional
 
 
 class BlobPinError(ValueError):
     """Raised when a declared blob pin cannot be verified."""
+
+
+class BlobPinErrorReason(str, Enum):
+    YAML_PARSE = "yaml_parse"
+    MISSING_SIBLING_PATH = "missing_sibling_path"
+    INVALID_PATH = "invalid_path"
+    INVALID_DIGEST = "invalid_digest"
+    INVALID_SOURCE_COMMIT = "invalid_source_commit"
+    MISSING_SOURCE_COMMIT = "missing_source_commit"
+    INVALID_SOURCE_LIST_ITEM = "invalid_source_list_item"
+    DUPLICATE_OR_INVALID_STRUCTURE = "duplicate_or_invalid_structure"
+
+
+@dataclass(frozen=True)
+class BlobPinDiagnostic:
+    location: str
+    reason: BlobPinErrorReason
+    message: str
+
+
+class _LocatedStr(str):
+    """A parsed scalar carrying its parser-observed source line."""
+
+    def __new__(cls, value: str, line: Optional[int] = None):
+        instance = super().__new__(cls, value)
+        instance.line = line
+        return instance
 
 
 @dataclass(frozen=True)
@@ -56,6 +84,7 @@ class BlobPin:
     algorithm: str
     location: str
     source_commit: Optional[str] = None
+    line: Optional[int] = None
 
 
 # Explicit bindings take precedence over suffix-derived bindings.
@@ -181,7 +210,7 @@ def _flow_quoted_end(text: str, index: int) -> int:
     )
 
 
-def _parse_flow_node(text: str, index: int):
+def _parse_flow_node(text: str, index: int, line=None):
     """Parse one flow node: a collection, a quoted or a plain scalar."""
     index = _flow_skip_space(text, index)
 
@@ -193,14 +222,14 @@ def _parse_flow_node(text: str, index: int):
     char = text[index]
 
     if char == "[":
-        return _parse_flow_sequence(text, index)
+        return _parse_flow_sequence(text, index, line)
 
     if char == "{":
-        return _parse_flow_mapping(text, index)
+        return _parse_flow_mapping(text, index, line)
 
     if char in ("'", '"'):
         end = _flow_quoted_end(text, index)
-        return _scalar(text[index:end]), end
+        return _scalar(text[index:end], line), end
 
     start = index
 
@@ -222,10 +251,10 @@ def _parse_flow_node(text: str, index: int):
     if not raw:
         raise BlobPinError(f"empty YAML flow scalar: {text!r}")
 
-    return _scalar(raw), index
+    return _scalar(raw, line), index
 
 
-def _parse_flow_sequence(text: str, index: int):
+def _parse_flow_sequence(text: str, index: int, line=None):
     result = []
     index += 1
 
@@ -240,7 +269,7 @@ def _parse_flow_sequence(text: str, index: int):
         if text[index] == "]":
             return result, index + 1
 
-        item, index = _parse_flow_node(text, index)
+        item, index = _parse_flow_node(text, index, line)
         result.append(item)
         index = _flow_skip_space(text, index)
 
@@ -261,7 +290,7 @@ def _parse_flow_sequence(text: str, index: int):
         )
 
 
-def _parse_flow_mapping(text: str, index: int):
+def _parse_flow_mapping(text: str, index: int, line=None):
     result = {}
     index += 1
 
@@ -276,9 +305,9 @@ def _parse_flow_mapping(text: str, index: int):
         if text[index] == "}":
             return result, index + 1
 
-        key, index = _parse_flow_key(text, index)
+        key, index = _parse_flow_key(text, index, line)
         index = _flow_skip_space(text, index)
-        value, index = _parse_flow_node(text, index)
+        value, index = _parse_flow_node(text, index, line)
 
         if key in result:
             raise BlobPinError(
@@ -305,7 +334,7 @@ def _parse_flow_mapping(text: str, index: int):
         )
 
 
-def _parse_flow_key(text: str, index: int):
+def _parse_flow_key(text: str, index: int, line=None):
     index = _flow_skip_space(text, index)
 
     if index >= len(text):
@@ -315,7 +344,7 @@ def _parse_flow_key(text: str, index: int):
 
     if text[index] in ("'", '"'):
         end = _flow_quoted_end(text, index)
-        key = _scalar(text[index:end])
+        key = _scalar(text[index:end], line)
         index = _flow_skip_space(text, end)
 
         if index >= len(text) or text[index] != ":":
@@ -345,7 +374,7 @@ def _parse_flow_key(text: str, index: int):
     return key, index + 1
 
 
-def _parse_flow_collection(value: str):
+def _parse_flow_collection(value: str, line=None):
     """Parse a YAML flow collection with a tokenizer and recursive descent.
 
     Standard library only: no third-party YAML runtime is imported. Nested
@@ -353,7 +382,7 @@ def _parse_flow_collection(value: str):
     supported. Malformed input, duplicate keys and illegal separators fail
     closed; a flow collection is never downgraded to an ordinary string.
     """
-    node, index = _parse_flow_node(value, 0)
+    node, index = _parse_flow_node(value, 0, line)
 
     if _flow_skip_space(value, index) != len(value):
         raise BlobPinError(
@@ -368,12 +397,12 @@ def _parse_flow_collection(value: str):
     return node
 
 
-def _scalar(value: str):
+def _scalar(value: str, line=None):
     """Parse a YAML scalar while preserving embedded colons."""
     value = value.strip()
 
     if not value:
-        return ""
+        return _LocatedStr("", line)
 
     if value in ("null", "Null", "NULL", "~"):
         return None
@@ -416,7 +445,7 @@ def _scalar(value: str):
                 result.append(char)
                 index += 1
 
-        return "".join(result)
+        return _LocatedStr("".join(result), line)
 
     if value.startswith("'"):
         if len(value) < 2 or not value.endswith("'"):
@@ -425,10 +454,10 @@ def _scalar(value: str):
             )
 
         # YAML single quotes escape an apostrophe by doubling it.
-        return value[1:-1].replace("''", "'")
+        return _LocatedStr(value[1:-1].replace("''", "'"), line)
 
     if value.startswith(("[", "{")):
-        return _parse_flow_collection(value)
+        return _parse_flow_collection(value, line)
 
     if re.fullmatch(r"-?[0-9]+", value):
         try:
@@ -437,7 +466,7 @@ def _scalar(value: str):
             pass
 
     # Crucially, an unquoted "path: sha" remains one scalar here.
-    return value
+    return _LocatedStr(value, line)
 
 
 def _prepare_lines(source: str):
@@ -540,7 +569,7 @@ def _parse_mapping(
             continue
 
         if value_text:
-            result[key] = _scalar(value_text)
+            result[key] = _scalar(value_text, line_number)
             continue
 
         if (
@@ -600,7 +629,7 @@ def _parse_sequence(lines, index: int, indent: int):
             initial = {}
 
             if value_text:
-                initial[key] = _scalar(value_text)
+                initial[key] = _scalar(value_text, line_number)
             elif (
                 index < len(lines)
                 and lines[index][0] > indent + 1
@@ -640,7 +669,7 @@ def _parse_sequence(lines, index: int, indent: int):
         # This is the critical fix:
         # parse the entire remainder as one scalar. Do not split on ':'.
         # _scalar removes the outer YAML quotes exactly once.
-        result.append(_scalar(remainder))
+        result.append(_scalar(remainder, line_number))
 
     return result, index
 
@@ -796,6 +825,7 @@ def _parse_source_list_item(
         algorithm="sha1",
         location=location,
         source_commit=source_commit,
+        line=getattr(value, "line", None),
     )
 
 
@@ -896,6 +926,7 @@ def enumerate_blob_pins(source: str) -> list[BlobPin]:
                     algorithm=algorithm,
                     location=key_location,
                     source_commit=local_commit,
+                    line=getattr(digest, "line", None),
                 )
             )
 
@@ -914,6 +945,120 @@ def enumerate_blob_pins(source: str) -> list[BlobPin]:
 
     visit(document)
     return pins
+
+
+def enumerate_blob_pins_with_errors(
+    source: str,
+) -> tuple[list[BlobPin], list[BlobPinDiagnostic]]:
+    """Enumerate every complete pin while retaining independent field errors.
+
+    The legacy enumerate_blob_pins() remains fail-fast. This diagnostic
+    variant parses the document once and isolates binding errors at the
+    declaration field, so a malformed sibling declaration cannot discard
+    otherwise complete pins in the same manifest.
+    """
+    pins: list[BlobPin] = []
+    errors: list[BlobPinDiagnostic] = []
+
+    try:
+        document = _parse_yaml_subset(source)
+    except BlobPinError as exc:
+        return [], [
+            BlobPinDiagnostic(
+                location="$",
+                reason=BlobPinErrorReason.YAML_PARSE,
+                message=str(exc),
+            )
+        ]
+
+    def record(location, reason, exc):
+        errors.append(
+            BlobPinDiagnostic(
+                location=location,
+                reason=reason,
+                message=str(exc),
+            )
+        )
+
+    def visit(value, location="$", inherited_commit=None):
+        if isinstance(value, list):
+            for index, item in enumerate(value):
+                item_location = f"{location}[{index}]"
+                if location.endswith(".d_source_blobs"):
+                    try:
+                        pins.append(
+                            _parse_source_list_item(
+                                item, item_location, inherited_commit
+                            )
+                        )
+                    except BlobPinError as exc:
+                        reason = (
+                            BlobPinErrorReason.MISSING_SOURCE_COMMIT
+                            if "no sibling d_source_commit" in str(exc)
+                            else BlobPinErrorReason.INVALID_SOURCE_LIST_ITEM
+                        )
+                        record(item_location, reason, exc)
+                else:
+                    visit(item, item_location, inherited_commit)
+            return
+
+        if not isinstance(value, dict):
+            return
+
+        local_commit = value.get("d_source_commit", inherited_commit)
+        for key in value:
+            binding = _digest_binding(key)
+            if binding is None:
+                continue
+
+            path_key, algorithm = binding
+            key_location = _location(location, key)
+            path_location = _location(location, path_key)
+            try:
+                if path_key not in value:
+                    raise BlobPinError(
+                        f"{key_location}: no sibling path {path_key!r}"
+                    )
+                path = _normalise_path(value[path_key], path_location)
+                digest = value[key]
+                if not _valid_digest(digest, algorithm):
+                    expected = (
+                        "40 hexadecimal Git blob SHA-1 characters"
+                        if algorithm == "sha1"
+                        else "64 hexadecimal SHA-256 characters"
+                    )
+                    raise BlobPinError(
+                        f"{key_location}: invalid digest; expected {expected}"
+                    )
+                pins.append(
+                    BlobPin(
+                        path=path,
+                        digest=digest.lower(),
+                        algorithm=algorithm,
+                        location=key_location,
+                        source_commit=local_commit,
+                        line=getattr(digest, "line", None),
+                    )
+                )
+            except BlobPinError as exc:
+                message = str(exc)
+                if "no sibling path" in message:
+                    reason = BlobPinErrorReason.MISSING_SIBLING_PATH
+                elif "invalid digest" in message:
+                    reason = BlobPinErrorReason.INVALID_DIGEST
+                else:
+                    reason = BlobPinErrorReason.INVALID_PATH
+                record(key_location, reason, exc)
+
+        for key, child in value.items():
+            if key == "d_source_commit":
+                continue
+            child_location = _location(location, key)
+            child_commit = local_commit if key == "d_source_blobs" else None
+            visit(child, child_location, child_commit)
+
+    visit(document)
+    return pins, errors
 
 
 def _validate_tree_entry(
