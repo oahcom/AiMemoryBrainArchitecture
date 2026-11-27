@@ -42,7 +42,6 @@ document_metadata:
     en: null
     zh-CN: null
 ---
-
 # Session role / use case
 
 Role: implementation and repository governance operator.
@@ -50,17 +49,34 @@ Use case: implement the REQ-01 assessment signature attachment gate for Issue #2
 
 # Actual AI input
 
-The user authorized GitHub-connector implementation on `w7/aid-250`: add assessor metadata to four REQ-01 reports, implement a read-only checker and tests under `scripts/ci/`, reuse the existing workflow job, create a blocking Work Item, open a PR, verify 16 required contexts, merge with a merge commit, verify blobs, and comment on #262 without editing or closing it.
+The user instructed this session to add `assessor`, `assessed_version`, and `evidence_baseline` to the four REQ-01 assessment bodies, add a blocking read-only checker under `scripts/ci/`, wire it into an existing required workflow job, create the blocking Work Item, verify all 16 required contexts, merge with a merge commit, verify blobs, and comment on Issue #262 without changing the Issue body or closing it.
+
+## The four assessment bodies identified and updated
+
+- #7011312621 — initial architecture internal technical risk assessment.
+- #7014315135 — supplemental clarification to that assessment.
+- #7143927480 — Round 26 consolidated assessment.
+- #7149369280 — Round 29 final investigation assessment.
+
+Each comment received an append-only metadata block containing the source authoring session, the full 40-character assessed version, and the matching evidence baseline. The original report content was not rewritten. The attachment is explicitly retrospective and does not claim a contemporaneous signature or risk acceptance.
 
 # AI-visible output
 
-Initial branch base: `386d8f57b02d8e3c511ff0e3980b9ce0af8b3028`. Before CI validation, latest observed main `242cf101c8b79007ad2fb8d9c89681224577188d` was incorporated by a normal two-parent merge commit `83500c919e19f1ad02df617d7cf07a5aa08f6453`; PR #1388 targets main at that base. The four report paths are the SYS-RISK-001 EN/ZH-CN pair and architecture-complexity-assessment EN/ZH-CN pair. Historical provenance limitations are disclosed; no missing session UUID or human identity is invented.
+Current repository base at initial branch creation: `386d8f57b02d8e3c511ff0e3980b9ce0af8b3028`. Branch: `w7/aid-250`. PR: #1388. The checker retrieves the four comment IDs using GitHub GET API and validates the exact source-session and baseline values. It runs inside the existing required `Schema non-empty audit (hard gate)` job, with `issues: read` permission only; no new job or required context is introduced.
 
-Verification state at the time this evidence snapshot was written: PR-head checker and tests PENDING; exact-head required checks PENDING; independent exact-Head review PENDING; merge NOT PERFORMED. The first Session Evidence workflow run failed because the PR description lacked the required per-Issue mapping table at that run's evaluation time. The PR description was subsequently amended to include the exact three-column mapping table (`Related Issue`, `Issue AI-assisted work`, `Evidence refs for this Issue`) with `LEGACY_UNDECLARED | N/A`, because Issue #262 has no historical AI declaration; a fresh exact-head run is required to validate the amended body. Issue #262 remains OPEN and its body is unchanged.
+The PR description contains:
+- `Related issue(s): #262`
+- `AI-assisted work: YES`
+- `Session evidence reference(s): 14-ai-development/work-items/AID-2026-250/session-evidence.md`
+- A per-Issue mapping row `#262 | LEGACY_UNDECLARED | N/A`, because the historical Issue has no AI declaration.
+
+# Verification and disposition
+
+- Comment metadata updates: completed for all four IDs; the source bodies were preserved and metadata was appended.
+- Checker and unit tests: pending exact PR Head CI.
+- Exact-head 16 required contexts: pending.
+- Merge: not performed.
+- Issue #262: remains OPEN; body unchanged.
 
 署名：user-authorized operator (delegated by account owner)
 日期：2026-11-27
-
-- PR #1388 description now contains the required per-Issue mapping row: `#262 | LEGACY_UNDECLARED | N/A`.
-- The PR body was edited after the first Session Evidence failure; the failed run evaluated the earlier body and must not be treated as evidence against the corrected body.
-- At this snapshot, the required checks are not yet all green. No merge has been attempted.
