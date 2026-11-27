@@ -232,7 +232,8 @@ def main():
     ap.add_argument("--base", default="origin/main",
                     help="ancestor comparison target when manifest has no implementation.merge_commit_sha")
     ap.add_argument("--json", action="store_true")
-    ap.add_argument("--baseline", type=Path, required=True,
+    ap.add_argument("--emit-baseline", type=Path, help="write a reviewed baseline snapshot")
+    ap.add_argument("--baseline", type=Path,
                     help="required ratchet baseline; absence is a hard error")
     args = ap.parse_args()
     try:
@@ -240,6 +241,16 @@ def main():
         if not ref:
             raise RuntimeError("cannot resolve audit commit: " + args.commit)
         result = summarize(audit(args.root, ref, args.base))
+        if args.emit_baseline:
+            snapshot = {"schema_version": 1, "source_commit": ref,
+                        "manifests": {row["work_item_id"]: {
+                            "primary_status": row["primary_status"],
+                            "findings": row["findings"]} for row in result["manifests"]}}
+            args.emit_baseline.write_text(json.dumps(snapshot, sort_keys=True, indent=2) + "\\n")
+            print(json.dumps(snapshot, sort_keys=True, indent=2))
+            return 0
+        if not args.baseline or not args.baseline.is_file():
+            raise RuntimeError("required ratchet baseline is missing: " + str(args.baseline))
         baseline = json.loads(args.baseline.read_text())
         if baseline.get("schema_version") != 1 or not isinstance(baseline.get("manifests"), dict):
             raise RuntimeError("invalid prompt-commit-trace baseline schema")
