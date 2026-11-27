@@ -68,3 +68,7 @@ The user subsequently required all repository operations to use GitHub connector
 The session read Issue #265 and confirmed AC8 was marked ABSENT in its body; read the current main tree and the ten newest AID manifests at base `a7a252eb670b31066a0ffea35dc28cbe6ef5b836`; and computed distinct root fan-out as 29 total roots across ten Work Items, mean 2.90, maximum 5, with two items above the proposed soft budget of 3 and none above the hard cap of 5. The cohort and per-item values are recorded in `evidence.md`.
 
 The session authored `scripts/measure_attention_context_cost.py` as a standard-library-only, read-only Git-object reader. No local CLI execution is claimed: the measurement was recomputed from GitHub API tree and manifest-blob responses using the same extraction rule. No Owner acceptance, independent review, CI result, merge SHA, or post-merge blob verification is claimed by this session record unless separately recorded after those events.
+
+## Integration refresh
+
+Before final gate evaluation, the branch was merged with the then-current `main` at `044dee41cd95a0cbb27bd2556bcb2229d273dcad` using a two-parent merge commit. The GitHub compare endpoint confirmed `behind_by=0` after that merge. The measurement baseline intentionally remains `a7a252eb670b31066a0ffea35dc28cbe6ef5b836`; later mainline changes do not retroactively alter the measured cohort.
