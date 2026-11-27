@@ -55,10 +55,12 @@ def violations(text: str) -> list[tuple[int, str, str]]:
     found = []
     in_fence = False
     owner_columns: list[int] = []
+    owner_crosswalk = False
     for number, line in enumerate(text.splitlines(), 1):
         if line.lstrip().startswith(chr(96) * 3):
             in_fence = not in_fence
             owner_columns = []
+            owner_crosswalk = False
             continue
         if in_fence:
             continue
@@ -66,6 +68,10 @@ def violations(text: str) -> list[tuple[int, str, str]]:
             cells = [cell.strip() for cell in line.strip().strip('|').split('|')]
             if any(re.search(r'\b(?:primary|supporting|accountable|responsible)\s+owners?\b', cell, re.I) for cell in cells):
                 owner_columns = [index for index, cell in enumerate(cells) if 'owner' in cell.casefold()]
+                owner_crosswalk = (
+                    any(re.search(r'\\blogical group\\b', cell, re.I) for cell in cells)
+                    and any(re.search(r'\\bprimary owner authority\\b', cell, re.I) for cell in cells)
+                )
                 continue
             if owner_columns:
                 for index in owner_columns:
@@ -81,6 +87,7 @@ def violations(text: str) -> list[tuple[int, str, str]]:
                 continue
         else:
             owner_columns = []
+            owner_crosswalk = False
         for code, pattern in PATTERNS:
             if code == 'BARE_LETTER_AS_OWNER' and '|' in line:
                 continue
