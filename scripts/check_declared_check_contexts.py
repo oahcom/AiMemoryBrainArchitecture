@@ -1,48 +1,28 @@
 #!/usr/bin/env python3
-"""Verify that the required check contexts PR-GOVERNANCE-001 declares are real.
+"""Verify required ⊆ declared ⊆ produced for the governed check contexts.
 
-The document declares a set of GitHub check contexts as the required set on
-`main`. Two different artifacts can disagree with that declaration, and they
-disagree in opposite directions:
+The checker compares three independently sourced sets:
 
-  declared -> produced    every declared name is produced by a job in this tree.
-                          A renamed job makes the document claim a context that
-                          no longer exists. That is the defect class #864 records.
-  declared -> protected   every declared name is required on the platform, and
-                          every required name is declared. A context added to
-                          branch protection without a document change leaves the
-                          document under-declaring; a context removed from
-                          protection while the document still lists it leaves
-                          merges gated by a check that no longer blocks. Neither
-                          is visible to the produced test, which is a subset
-                          test -- dropping a line can only make it truer. That is
-                          the defect class #1029 records.
+  required   live main branch protection payload:
+             GET /repos/{owner}/{repo}/branches/{branch}
+             .protection.required_status_checks.contexts
+  declared   the fenced context list in PR-GOVERNANCE-001.md §7
+  produced   job ids and job display names from every .yml/.yaml workflow
 
-The protected side is read from `GET /repos/{owner}/{repo}/branches/{branch}`,
-whose `protection.required_status_checks.contexts` needs only Contents (read) --
-`GITHUB_TOKEN`'s default, and no credential at all on a public repository. The
-separate `/protection` endpoint needs Administration (read), which the token
-permission vocabulary cannot express; it is not used here and must not be.
-`GITHUB_TOKEN` is sent when present, only to raise the anonymous rate limit.
+The contract is inclusion, not equality. Extra documented contexts are
+permitted; every platform-required context must be documented, and every
+documented context must be produced by a workflow job. No protected-context
+snapshot is committed. The Administration-only /protection endpoint is not
+used.
 
-Exit codes follow the repository vocabulary:
+Exit codes:
     0  PASS        required ⊆ declared ⊆ produced
-    1  VIOLATION   a declared context is produced by no job, is listed twice, or
-                   the sets differ
-    2  INCOMPLETE  a condition could not be evaluated at all
+    1  VIOLATION   a required context is undocumented, a declared context is
+                   unproduced, or the declaration contains duplicates
+    2  INCOMPLETE  a required input cannot be read or evaluated
 
-The incomplete branch is the point, and it covers the credential case: an absent
-token is not a reason to skip the comparison, and an unreadable payload is not
-"no violations". A checker whose "cannot read the platform" path falls through to
-exit 0 is a false PASS, which is worse than having no checker (#1003, #1017).
-
-The produced side is read from both workflow suffixes GitHub honours, `.yml` and
-`.yaml`, and comments are stripped before the structural read (#1212). A
-`jobs:  # comment` line used to be neither the `jobs:` key nor a column-0 key, so
-the mapping was never entered and the file produced no contexts at all: the
-subset test then reported every declared name as produced by *some* other file,
-which is a silent pass, not a comparison. Reading only `*.yml` had the same
-shape one level up -- a `.yaml` workflow's jobs were invisible.
+An unreadable platform payload is INCOMPLETE, never PASS and never a repository
+VIOLATION. A network failure must not be mistaken for an empty required set.
 """
 
 from __future__ import annotations
