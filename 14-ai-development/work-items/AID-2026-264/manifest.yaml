@@ -68,6 +68,7 @@ documentation:
 session_evidence:
   - role: "IMPLEMENTER"
     issue_refs:
+      - "#1247"
     implementing_ai_session: "GOVREC-2026-11-27"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-264/prompt-v1.md"
     executed_prompt_sha256: "9770b64cab9539291cec21310edaba7b216d8044dc03cfd4a455573d9ebfc33e"
@@ -102,9 +103,13 @@ review:
 acceptance:
   gate: PENDING_OWNER_ACCEPTANCE
 
-# issue_refs is deliberately empty. The validator requires every issue_refs entry to be a
-# linked Issue in the PR body; this pull request links no Issue, and inventing one to fill the
-# field would be an unverifiable claim. OD-A3 permits a PR-scope entry with empty issue_refs.
+# issue_refs names Issue #1247, the Issue PR #1325 implements and the record's merge
+# authorization is about. It is the only Issue this pull request links, and the Session
+# Evidence mapping row for it is LEGACY_UNDECLARED / N/A: the Issue predates the policy and
+# carries no AI-assisted work declaration of its own, so claiming YES for it would be a
+# false attribution. Linking PR #1325 instead was rejected: its body declares YES with a
+# reference to AID-2026-241, which has no manifest in this tree, so that row could not be
+# corroborated.
 #
 # executed_prompt_sha256 and executed_prompt_bytes are the real digest and byte count of
 # prompt-v1.md as committed. executed_prompt_provenance is NOT_VERIFIED because the chat
