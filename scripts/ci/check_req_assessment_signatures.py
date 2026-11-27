@@ -26,7 +26,7 @@ def inspect(root: Path = ROOT) -> list[str]:
             out.append(f"FAIL {rel}: file missing")
             continue
         body = path.read_text(encoding="utf-8")
-        vals = {k: field(body, k) for k in ("Assessor", "assessed_version", "evidence_baseline")}
+        vals = {k: field(body, k) for k in ("assessor", "assessed_version", "evidence_baseline")}
         bad = False
         for k, v in vals.items():
             if not v:
@@ -37,7 +37,7 @@ def inspect(root: Path = ROOT) -> list[str]:
             out.append(f"FAIL {rel}: assessed_version must be a full 40-character hexadecimal commit")
             bad = True
         if not bad:
-            out.append(f"PASS {rel}: Assessor, assessed_version, evidence_baseline")
+            out.append(f"PASS {rel}: assessor, assessed_version, evidence_baseline")
     return out
 
 def main() -> int:
