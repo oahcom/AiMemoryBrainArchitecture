@@ -280,48 +280,72 @@ def main(root: Path | None = None, protection: list[str] | None = None) -> int:
             protection = fetch_protected_contexts()
         except Exception as error:  # noqa: BLE001 - every failure is INCOMPLETE
             print(
-                "::error::INCOMPLETE: the branch-protection payload could not be "
-                "read, so the declared set cannot be compared to it: "
+                "::error::INCOMPLETE: input "
+                f"{REPO_SLUG}/branches/{BRANCH}.protection.required_status_checks.contexts "
+                "could not be read: "
                 f"{type(error).__name__}: {error}",
                 file=sys.stderr,
             )
             return 2
 
-    if not protection:
+    if protection is None:
         print(
-            "::error::INCOMPLETE: the branch-protection payload reports no "
-            "required contexts; an empty protected set cannot be compared",
+            "::error::INCOMPLETE: input "
+            f"{REPO_SLUG}/branches/{BRANCH}.protection.required_status_checks.contexts "
+            "returned None; the required set is unavailable",
+            file=sys.stderr,
+        )
+        return 2
+    if not isinstance(protection, list) or not protection:
+        print(
+            "::error::INCOMPLETE: input "
+            f"{REPO_SLUG}/branches/{BRANCH}.protection.required_status_checks.contexts "
+            "is missing, empty, or not a list of required context strings",
+            file=sys.stderr,
+        )
+        return 2
+    if not all(isinstance(context, str) for context in protection):
+        print(
+            "::error::INCOMPLETE: input "
+            f"{REPO_SLUG}/branches/{BRANCH}.protection.required_status_checks.contexts "
+            "contains a non-string context",
             file=sys.stderr,
         )
         return 2
 
-    undeclared = sorted(set(protection) - set(contexts))
-    unprotected = sorted(set(contexts) - set(protection))
+    required_not_declared = sorted(set(protection) - set(contexts))
+    declared_not_produced = sorted(set(contexts) - produced)
 
-    if undeclared or unprotected:
-        for context in unprotected:
-            print(
-                f"::error::{DOC_PATH} declares {context!r}, but it is not a "
-                f"required context on {BRANCH}",
-                file=sys.stderr,
-            )
-        for context in undeclared:
-            print(
-                f"::error::{BRANCH} requires {context!r}, but {DOC_PATH} does not "
-                "declare it",
-                file=sys.stderr,
-            )
+    print(
+        f"CONTEXT COUNTS: declared={len(contexts)} required={len(protection)} "
+        f"produced={len(produced)}",
+        file=sys.stderr,
+    )
+    print(f"required_not_declared={required_not_declared}", file=sys.stderr)
+    print(f"declared_not_produced={declared_not_produced}", file=sys.stderr)
+
+    violated = False
+    for context in required_not_declared:
         print(
-            f"DECLARED CHECK CONTEXTS: FAIL (declared {len(contexts)}, protected "
-            f"{len(protection)}; {len(unprotected)} declared-not-protected, "
-            f"{len(undeclared)} protected-not-declared)",
+            f"::error::{BRANCH} requires {context!r}, but {DOC_PATH} does not "
+            "declare it",
             file=sys.stderr,
         )
+        violated = True
+    for context in declared_not_produced:
+        print(
+            f"::error::{DOC_PATH} declares required check context "
+            f"{context!r}, but no job in {WORKFLOWS} produces it",
+            file=sys.stderr,
+        )
+        violated = True
+
+    if violated:
+        print("DECLARED CHECK CONTEXTS: VIOLATION", file=sys.stderr)
         return 1
 
     print(
-        f"::notice::{len(contexts)} declared check contexts, all produced by "
-        f"a job in {WORKFLOWS} and all required on {BRANCH}",
+        f"::notice::{len(contexts)} declared, {len(protection)} required, all produced",
         file=sys.stderr,
     )
     print("DECLARED CHECK CONTEXTS: PASS", file=sys.stderr)
