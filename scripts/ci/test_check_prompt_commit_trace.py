@@ -1,4 +1,5 @@
 """Regression tests for the prompt-to-commit trace checker."""
+import os
 import subprocess
 import unittest
 from pathlib import Path
@@ -22,10 +23,10 @@ class PrimaryDecisionOrderTests(unittest.TestCase):
 class RepositoryRegressionTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.ref = resolve_commit(ROOT, "origin/main")
+        cls.ref = resolve_commit(ROOT, os.environ.get("GITHUB_BASE_SHA", "origin/main"))
         if not cls.ref:
             raise unittest.SkipTest("origin/main unavailable; CI must checkout full history")
-        cls.rows = audit(ROOT, cls.ref, "origin/main")
+        cls.rows = audit(ROOT, cls.ref, cls.ref)
         cls.by_id = {r["work_item_id"]: r for r in cls.rows}
 
     def test_nested_implementation_commit_field_is_read(self):

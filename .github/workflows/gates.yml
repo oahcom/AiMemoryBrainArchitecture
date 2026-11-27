@@ -355,6 +355,8 @@ jobs:
       - name: Install pinned YAML parser
         run: python -m pip install PyYAML==6.0.2
       - name: Run prompt-to-commit trace regression tests
+        env:
+          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
         run: python -m unittest scripts.ci.test_check_prompt_commit_trace -v
       - name: Generate auditable main and PR snapshots
         shell: bash
