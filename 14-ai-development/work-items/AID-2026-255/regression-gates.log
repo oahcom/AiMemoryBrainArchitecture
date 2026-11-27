@@ -1,0 +1,27 @@
+﻿# regression gates at head f1319b32ad23a050f9f6092f10cb26e6478676cc (base 242cf101c8b79007ad2fb8d9c89681224577188d)
+# 2026-11-27T12:53:58.2839011+08:00
+
+## python scripts/ci/check_manifest_parse.py
+This checks YAML parseability and duplicate keys only. It does not validate field values, field semantics, status validity, or cross-field consistency.
+Manifest parse: 115 manifests found, 115 parsed, 0 failed.
+EXIT=0
+
+## python scripts/ci/gate_ratchet.py --baseline scripts/ci/baselines/manifest-blob-pins.txt --format paths --command "python scripts/ci/check_manifest_blob_pins.py"
+ratchet: scripts/ci/baselines/manifest-blob-pins.txt
+ratchet: baseline=12 current=12 regressions=0 fixed=0
+ratchet: PASS - failure set matches the baseline exactly.
+EXIT=0
+
+## python scripts/ci/check_repository_hygiene.py --base 242cf101c8b79007ad2fb8d9c89681224577188d --head f1319b32ad23a050f9f6092f10cb26e6478676cc
+Work-item manifest consistency unrecognized shape: 14-ai-development/work-items/AID-2026-140/manifest.yaml
+Work-item manifest consistency unrecognized shape: 14-ai-development/work-items/AID-2026-150/manifest.yaml
+Work-item index membership version=2026-11-27.2 directories=125 linked=125
+Work-item manifest consistency version=2026-11-27.2 manifests=114 in_scope=100 excluded_by_record_type=5 unrecognized=9 violations=0
+Repository new-file admission version=2026-11-27.2 base=242cf101c8b79007ad2fb8d9c89681224577188d head=f1319b32ad23a050f9f6092f10cb26e6478676cc merge_base=10d33b3f6c012e1c0d5649a5279cadb6d27b1a2f
+Repository new-file admission passed: 8 new path(s) checked.
+EXIT=0
+
+## python scripts/check_traceability.py (pre-existing failure: registry absent on main)
+FAIL TRACEABILITY: 0 requirements / 0 work items / 1 errors / 0 warnings
+ERROR required registry unavailable: cannot read registry: [Errno 2] No such file or directory: 'D:\\code\\_wt-blobpins\\00-governance\\requirements-registry.yaml'
+EXIT=1
