@@ -171,6 +171,7 @@ session_evidence:
     executed_prompt_sha256: "e3645b0c6b5b30dc974b0fc71a0824771e655aafa3a23174881e272b42ed6396"
     executed_prompt_bytes: 5752
     executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "RECORDED"
 
 implementation:
   status: NOT_STARTED
