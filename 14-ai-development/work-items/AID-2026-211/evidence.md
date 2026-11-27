@@ -47,7 +47,9 @@ document_metadata:
 
 - Repository: `oahcom/AiMemoryBrainArchitecture`
 - Base: `main` at `788fbc011877a14976fc0a974ffe2e013dd9991b`
-- Branch: `fix/2026-11-27-simple-gate-rc-1-2`
+- Implementation branch (first attempt): `fix/2026-11-27-simple-gate-rc-1-2`
+- Final PR branch: `fix/2026-11-27-simple-gate-rc-1-2-r3`
+- Final PR: #1360; superseded attempts #1358 and #1359 were commented and closed.
 - Work Item: `AID-2026-211` (`id_status: PROVISIONAL`; allocated after checking the 100-entry all-state PR listing and current remote branch names)
 - Attribution: `user-authorized operator (delegated by account owner)`
 - Date: `2026-11-27`
@@ -83,7 +85,7 @@ Baseline self-check on the unchanged base: `367/367 passed`. After adding the tw
 - `M-02 does not require approver or decision_date` — PASS.
 - `09-security-governance README matches five Canonical frontmatters` — PASS.
 
-Additional exact-head local results: GOV-DOC-002 incremental `--require-changed` — PASS (641 classified, 371 unclassified; 0 rule violations in the changed set); bilingual structural gate with `PR_BODY=BILINGUAL-MANIFEST: COMPLETE` — PASS (10 changed Markdown paths inspected, baseline 77 frozen / 0 new gaps); repository hygiene — PASS (119 work-item directories / 119 index links, 3 new paths admitted, 0 violations); line endings — 1715 files inspected, 0 violations. The bilingual gate explicitly reports that it is structural only; semantic parity is not claimed. The 16 required PR contexts are not yet available before PR creation and will be reported only from GitHub's exact-head results.
+Additional exact-head local results: GOV-DOC-002 incremental `--require-changed` — PASS (641 classified, 371 unclassified; 0 rule violations in the changed set); bilingual structural gate with `PR_BODY=BILINGUAL-MANIFEST: COMPLETE` — PASS (10 changed Markdown paths inspected, baseline 77 frozen / 0 new gaps); repository hygiene — PASS (119 work-item directories / 119 index links, 3 new paths admitted, 0 violations); line endings — 1715 files inspected, 0 violations. The bilingual gate explicitly reports that it is structural only; semantic parity is not claimed. The final PR sequence is recorded without treating the connector's incomplete Actions listing as authoritative: #1358's authenticated Actions listing contained eight workflows (seven success, one Session Evidence failure); its log said `MISSING: PR description: missing per-Issue mapping table`. The Session Evidence validator also requires an Issue-specific mapping row. Issue #1212 is historical and has no AI declaration, so the corrected row in #1360 is `| #1212 | LEGACY_UNDECLARED | N/A |`; the PR-level AI declaration and session evidence reference remain YES and fully populated. #1358 and #1359 were commented and closed as superseded; #1360 is the final active PR. The final branch head is a real two-parent merge commit, pushed through Git without force. The 16 required contexts must be read from the final head after this evidence update and are not inferred from earlier attempts.
 
 The DM-side test constructs a document containing both optional fields and then removes `approver` and `decision_date`; `check_document()` returns zero errors. Its docstring quotes the revised M-02 description. The README-side test rejects the old Candidate/Informative wording in all three README group members and compares all five source frontmatters against the README declaration, while checking that the non-approval/non-conformance disclaimer remains.
 
